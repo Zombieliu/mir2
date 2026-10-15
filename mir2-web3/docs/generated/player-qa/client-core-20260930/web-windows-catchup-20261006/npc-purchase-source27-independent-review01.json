@@ -1,0 +1,88 @@
+{
+  "owner": "Root",
+  "kind": "Source27 independent actual finite review recorded from read-only reviewers",
+  "generatedAtUtc": "2026-10-07T10:01:45.708Z",
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source27-rust03-snapshot.json",
+    "bytes": 270006,
+    "sha256": "3ca86f673734bc26cb366d7904e904b24758aa4f5e571766051f29d6f2d72720"
+  },
+  "finiteResult": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source27-finite-result01.json",
+    "bytes": 126574,
+    "sha256": "518ff5be07be58aad2e16cf8325b6b274aa93ae65246e4ca0daf0c31bd628994"
+  },
+  "sourceReviewer": "/root/source24_buy_chain_review",
+  "actualResultReviewer": "/root/source24_actual_result_review",
+  "sourceOnlyAccepted": true,
+  "finiteCpuAccepted": true,
+  "confirmedBlockers": 0,
+  "actualResults": {
+    "simulation": {
+      "executions": 131,
+      "uniqueNames": 130
+    },
+    "gateway": {
+      "executions": 16,
+      "uniqueNames": 16
+    },
+    "total": {
+      "successfulSelectedExecutions": 147,
+      "uniqueNamedTests": 146,
+      "newDistinctExecuted": 37
+    },
+    "retainedFailedCalls": 2,
+    "preparedUnexecutedConfigs": 5
+  },
+  "inputProof": {
+    "sourceCount": 884,
+    "uniqueRegular": true,
+    "rehashDrift": 0,
+    "old881Changed": 7,
+    "oldProtected": 874,
+    "added": 3,
+    "links": 0
+  },
+  "guardProof": {
+    "actualCalls": 8,
+    "nonceFilesPerCall": 5,
+    "strictSerial": true,
+    "actualCMinimumBytes": "53687091200",
+    "sampleEndToChildStartActualMs": [
+      74,
+      83,
+      74,
+      74,
+      89,
+      79,
+      91,
+      78
+    ],
+    "allPolicyBExitedDisposed": true,
+    "originalGuardSourceProbePolicyUnchanged": true
+  },
+  "review": "Independent actual reader directly checked final6 stdout/outer/config refs and new declarations,8 actual guard nonce5 files/probes/PolicyB/serial intervals. Source reader independently accepted initial local API schema/auth/checkpoint protections and both exact repair-only frozen graphs, inverse reconstruction of prior test bytes. Root independently rehashed884 inputs after all8 runs. Final artifact reader also verified identical126574-byte repo/QA result copies,171 pin references across103 unique paths and117 policy path/hash references, no prepared-config execution evidence, all37 new declarations matched actual ok, and explicit remaining local-only/build/player limitations.",
+  "limitations": [
+    "Durable actual Gateway owner/Hosted/RPC routes with selected-owner accepted capability, original-ID readonly query and single-attempt mutation/no Unknown fallback.",
+    "Shared-zone NPC Used stock ownership/reservation is not established by personal NPC checkpoints; do not advertise global stock atomicity.",
+    "Strict versioned client wire/ABI and Native/Web actual dispatcher/receiver plus actual authoritative complete-snapshot revision witness; client opt-in flag is not acceptance.",
+    "Cold source/process restart and concurrent owner lifecycle acceptance beyond bounded same-source new Session/independent File checks.",
+    "Matching production bundle after final integrated source; real resource/WASM initialization, login/combat/save/relogin/mobile/frontend acceptance."
+  ],
+  "latestBuiltPackageContainsSource27": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false,
+  "finalArtifactReferenceReviewAccepted": true,
+  "finalArtifactReferenceAudit": {
+    "referencePins": 171,
+    "uniquePaths": 103,
+    "policyPathHashReferences": 117,
+    "allMatches": true,
+    "reviewer": "/root/source24_buy_chain_review"
+  }
+}

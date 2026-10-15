@@ -1,0 +1,129 @@
+{
+  "kind": "Source68 storage tooltip actual validated closure",
+  "sourceFiles": [
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-inventory-window.tsx",
+      "bytes": 54347,
+      "sha256": "f4bfe9bb40389a77af768b82f4dc8d932f0b713a9530887074f596107dc31248"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+      "bytes": 754565,
+      "sha256": "4101f291dac7c7bb51cc2e311eb02728c7c85b3e553cae6b62b253ba2ecd428b"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/page.tsx",
+      "bytes": 1095004,
+      "sha256": "cd6c2af7ab11405919423f1bcb4bda700a102ff4b42fffac1cd0a23237a774a1"
+    }
+  ],
+  "node": {
+    "passed": 257,
+    "failed": 0,
+    "skipped": 0,
+    "proof": "web-source68-node-actual03.json",
+    "historicalFailedRuns": [
+      "web-source68-node-failed01.json",
+      "web-source68-node-failed02.json"
+    ]
+  },
+  "stage5CustomGroups": 506,
+  "strictNext": {
+    "actualExecuted": true,
+    "proof": "web-source68-next-actual01.json",
+    "elapsedMs": 60838,
+    "typeScriptPassed": true
+  },
+  "thin": {
+    "actualExecuted": true,
+    "proof": "web-source68-thin-actual01.json",
+    "bytes": 284883997,
+    "capInclusive": 377487360,
+    "ordinaryFiles": 4066,
+    "directoriesIncludingRoot": 513,
+    "links": 0,
+    "originalDependencyWarnings": 59
+  },
+  "live": {
+    "proof": "web-source68-storage-tooltip-live01.json",
+    "hoverDisplay": "8/8",
+    "focusDisplay": "8/8",
+    "rawDurabilityPreserved": 8000,
+    "bagAfterNormalTakeBackSaveRelogin": 5,
+    "storageAfterNormalTakeBackSaveRelogin": 0,
+    "goldAfterNormalSaveRelogin": 180
+  },
+  "initialPortRejected": {
+    "port": 19206,
+    "reason": "Actual normal WS handshake403",
+    "proof": "web-source68-web-port-failed01.json"
+  },
+  "runtime": {
+    "origin": "http://127.0.0.1:19205/",
+    "originalCallerStarted": true,
+    "actualLoginAndStartGamePassed": true,
+    "active": true
+  },
+  "remaining": [
+    "Warehouse original map missing116 frames; Source69 actual original export accepted, new manifest and package pending",
+    "Shared Storage owner takeover remains open",
+    "Full mobile and cross platform parity remains open",
+    "Human frontend acceptance remains open"
+  ],
+  "overallPercentage": null,
+  "candidateAccepted": false,
+  "humanAccepted": false,
+  "goalComplete": false,
+  "evidence": [
+    {
+      "file": "web-source68-storage-relogin01.png",
+      "bytes": 116254,
+      "sha256": "1db73d56c5582e9b2847a2d9c1e244846e161f561645652f229a36a34f047c03"
+    },
+    {
+      "file": "web-source68-storage-tooltip-hover01.png",
+      "bytes": 116721,
+      "sha256": "fec956fc552d1655a49dcec8465a3c91ea8b2017b53647dd953a88d7c319fb32"
+    },
+    {
+      "file": "web-source68-storage-tooltip-focus01.png",
+      "bytes": 117101,
+      "sha256": "18637c7a74f146d5dee1833e889e5f8c6695e0323f637f8afd44da3cf649f16a"
+    },
+    {
+      "file": "web-source68-next-actual01.json",
+      "bytes": 2319,
+      "sha256": "73deeeb28164896d88b2ba4fe3f40a901bb64be6934dbdcb7cf4fbbdabca83ce"
+    },
+    {
+      "file": "web-source68-thin-actual01.json",
+      "bytes": 2671,
+      "sha256": "df32fa39a5db674fdd60c94d74f0a28fbaaf7dea088bd035ead7380faad7a616"
+    },
+    {
+      "file": "web-source68-web-port-failed01.json",
+      "bytes": 922,
+      "sha256": "1b641e3b32f9bbb6b202dcecdf5db2457b6837f5ce12ff675fca404add9e9d70"
+    },
+    {
+      "file": "web-source68-storage-tooltip-live01.json",
+      "bytes": 1741,
+      "sha256": "5e67f4013922bac62a4db57a1961265a043768cf051430c12a01e66f8d9fc27f"
+    },
+    {
+      "file": "web-source68-node-actual03.json",
+      "bytes": 2781,
+      "sha256": "bb4f373299b54fa03f5e0c9ee2b6a9f8b1c9b4a60d574c1dbea291a52b6995dd"
+    },
+    {
+      "file": "web-source68-node-failed02.json",
+      "bytes": 2834,
+      "sha256": "c225c0cd9959962e92c84cc68b722bb827a461539b7d729af6fe98b35ccd5f9c"
+    },
+    {
+      "file": "web-source68-node-failed01.json",
+      "bytes": 3861,
+      "sha256": "a2549548e5cb7817b2d1a4d4c6ce4a90f5652addcaa275a6a83ce06b50f7466b"
+    }
+  ]
+}

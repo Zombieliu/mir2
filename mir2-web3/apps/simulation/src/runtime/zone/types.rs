@@ -56,6 +56,16 @@ pub struct ZoneMapMetadata {
     pub map_dark_light: u8,
     pub music: u16,
     pub weather: u16,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub fight: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub no_fight: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub no_experience: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub no_group: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub no_pets: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -66,15 +76,25 @@ pub struct ZoneNpcTeleportDestination {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneNpcTeleportConfig {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub pet_save: bool,
+    #[serde(default = "zone_default_max_boss_tames")]
+    pub max_boss_tames: u32,
     pub enabled: bool,
     pub cost: u32,
     pub maps: BTreeMap<String, ZoneMapMetadata>,
     pub destinations: Vec<ZoneNpcTeleportDestination>,
 }
 
+fn zone_default_max_boss_tames() -> u32 {
+    1
+}
+
 impl ZoneNpcTeleportConfig {
     pub fn disabled(cost: u32) -> Self {
         Self {
+            pet_save: false,
+            max_boss_tames: 1,
             enabled: false,
             cost,
             maps: BTreeMap::new(),
@@ -137,6 +157,8 @@ pub struct ZoneChatProfile {
     pub free_server_shout: bool,
     #[serde(default)]
     pub attack_mode: u8,
+    #[serde(default, skip_serializing_if = "zone_byte_is_zero")]
+    pub pet_mode: u8,
     #[serde(default)]
     pub pk_points: i32,
     #[serde(default)]
@@ -156,10 +178,15 @@ impl Default for ZoneChatProfile {
             free_map_shout: false,
             free_server_shout: false,
             attack_mode: 0,
+            pet_mode: 0,
             pk_points: 0,
             in_safe_zone: false,
         }
     }
+}
+
+fn zone_byte_is_zero(value: &u8) -> bool {
+    *value == 0
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -186,6 +213,9 @@ pub struct ZoneChatItem {
 /// back to the legacy trusted scalar so existing callers keep working.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct ZonePlayerCombatStats {
+    /// Trusted current ItemDropRatePercent, never a client command field.
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub item_drop_rate_percent: i32,
     pub min_dc: i32,
     pub max_dc: i32,
     pub min_mc: i32,
@@ -202,11 +232,74 @@ pub struct ZonePlayerCombatStats {
     /// +10% on a landed crit). Zero for a player with no crit gear.
     pub critical_rate: i32,
     pub critical_damage: i32,
+    /// Full trusted session projection, including current equipment and buffs.
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub attack_bonus: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub damage_reduction_percent: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub energy_shield_percent: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub energy_shield_hp_gain: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub reflect: i32,
     /// Crystal `Luck` stat. Biases the physical attack-power roll
     /// (`MapObject.GetAttackPower`): positive Luck can force the `MaxDC` end,
     /// negative Luck the `MinDC` end. Zero (the default) leaves the roll uniform,
     /// so a player with no Luck gear is unaffected.
     pub luck: i32,
+    /// Crystal PoisonResist, supplied by the authoritative equipment/stat projection.
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub poison_resist: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub poison_attack: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub poison_recovery: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub magic_resist: i32,
+    /// Trusted GM state; never decoded from a client movement/combat packet.
+    #[serde(default, skip_serializing_if = "zone_flag_is_false")]
+    pub gm_never_die: bool,
+    /// Trusted learned passive identity; None differs from learnt level zero.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fatal_sword_level: Option<u8>,
+    #[serde(default, skip_serializing_if = "zone_hair_is_zero")]
+    pub mental_state: u8,
+    #[serde(default, skip_serializing_if = "zone_hair_is_zero")]
+    pub mental_state_level: u8,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meditation_level: Option<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mp_eater_level: Option<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hemorrhage_level: Option<u8>,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub max_mp: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub attack_speed: i32,
+    /// Source-limited learned identities, projected by the authenticated session.
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub five_class_learned_mask: u64,
+}
+
+fn zone_poison_is_zero(value: &u16) -> bool {
+    *value == 0
+}
+
+fn zone_hair_is_zero(value: &u8) -> bool {
+    *value == 0
+}
+
+fn zone_generation_is_zero(value: &u64) -> bool {
+    *value == 0
+}
+
+pub(super) fn zone_flag_is_false(value: &bool) -> bool {
+    !*value
+}
+
+pub(super) fn zone_stat_is_zero(value: &i32) -> bool {
+    *value == 0
 }
 
 impl ZonePlayerCombatStats {
@@ -324,6 +417,9 @@ impl ZoneMonsterRespawnPolicy {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneMonsterSpawn {
+    /// Server-authored original drop-table roll. None preserves explicit/custom loot.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub crystal_drop_seed: Option<u64>,
     pub object_id: u32,
     pub name: String,
     pub name_colour_argb: i32,
@@ -402,7 +498,49 @@ impl ZoneMonsterDefense {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ZoneMentorBankAttribution {
+    pub pupil: crate::Stage5FriendIdentity,
+    pub teacher: crate::Stage5FriendIdentity,
+    pub relationship_epoch: u64,
+}
+
+/// Server-issued causal death receipt. It is never a client gameplay packet.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ZoneOwnedPetPlayerKillReceipt {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub direct_player: bool,
+    pub zone_key: ZoneKey,
+    pub sequence: u64,
+    pub at_ms: u64,
+    pub owner_session_id: SessionId,
+    pub owner_account_id: String,
+    pub owner_character_index: i32,
+    pub owner_object_id: u32,
+    pub owner_life_generation: u64,
+    pub owner_online_identity: String,
+    pub pet_object_id: u32,
+    pub pet_incarnation: u64,
+    pub victim_session_id: SessionId,
+    pub victim_object_id: u32,
+    pub victim_life_generation: u64,
+    pub victim_name: String,
+    pub protected_by_law: bool,
+    pub unlawful: bool,
+    #[serde(default)]
+    pub curse_roll: u8,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneMonsterKillAward {
+    /// Gateway fixes this server-only namespace before first durable delivery.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_receipt_key: Option<String>,
+    /// Immutable server selection; legacy envelopes never infer a later Guild.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub experience_selection: Option<super::ZoneExperienceSelection>,
+    /// Source-captured server authority; absence never infers a later teacher.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mentor_bank: Option<ZoneMentorBankAttribution>,
     pub monster_object_id: u32,
     /// Authoritative time of this monster incarnation's death. Crystal reuses
     /// a spawn's object id after respawn, so the object id alone cannot be an
@@ -414,6 +552,21 @@ pub struct ZoneMonsterKillAward {
     pub drops: Vec<GroundDropSnapshot>,
     #[serde(default)]
     pub boss_audit: Option<ZoneBossRewardAudit>,
+}
+
+/// Trusted personal-session projection of equipment and cosmetic state only.
+/// Position, life, poison, visibility and transformation remain Zone-owned.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ZonePlayerAppearance {
+    pub hair: u8,
+    pub light: u8,
+    pub weapon: i16,
+    pub weapon_effect: i16,
+    pub armour: i16,
+    pub wing_effect: u8,
+    pub mount_type: i16,
+    pub riding_mount: bool,
+    pub fishing: bool,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -455,6 +608,11 @@ pub enum ZoneCommand {
         session_id: SessionId,
         stats: ZonePlayerCombatStats,
     },
+    /// Server-only relationship projection used to attribute deferred XP.
+    UpdateMentorBank {
+        session_id: SessionId,
+        attribution: Option<ZoneMentorBankAttribution>,
+    },
     /// Trusted server-to-zone admission update. This command is an internal
     /// API and must never be constructed from raw client JSON.
     SyncPlayerCombatState {
@@ -471,6 +629,19 @@ pub enum ZoneCommand {
         hp: i32,
         max_hp: i32,
         mp: i32,
+    },
+    /// Trusted owner/session lifecycle mirror. Unlike ordinary pool changes,
+    /// explicit Revive can clear Dead; no client packet exposes this command.
+    SyncPlayerAppearance {
+        session_id: SessionId,
+        appearance: ZonePlayerAppearance,
+    },
+    SyncPlayerVitalsAndLife {
+        session_id: SessionId,
+        hp: i32,
+        max_hp: i32,
+        mp: i32,
+        dead: bool,
     },
     Chat {
         session_id: SessionId,
@@ -559,6 +730,13 @@ pub enum ZoneCommand {
         level: u8,
         attack_type: u8,
         damage: i32,
+        now_ms: u64,
+    },
+    /// Trusted learned-skill preparation. Flame's ten-second charge is owned
+    /// by the shared world, independently of active spell/action clocks.
+    PreparePlayerFlamingSword {
+        session_id: SessionId,
+        level: u8,
         now_ms: u64,
     },
     PlayerCastMagic {
@@ -688,6 +866,11 @@ impl ZoneCommand {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ZoneOutbound {
+    /// Exact, server-stamped owner pools. This is separate from damage/death
+    /// settlement and must retain its identity until final transport delivery.
+    OwnerHealthChanged {
+        change: super::ZoneOwnerHealthChange,
+    },
     ToSession {
         session_id: SessionId,
         packets: Vec<ServerPacket>,
@@ -728,14 +911,212 @@ pub enum ZoneOutbound {
         session_id: SessionId,
         award: ZoneMonsterKillAward,
     },
+    /// Server-only envelope. No client packet accepts this proof; the manager
+    /// validates its typed online Node identity again at live delivery.
+    OwnedMonsterKillAward {
+        session_id: SessionId,
+        source: ZoneKey,
+        online_owner: String,
+        award: ZoneMonsterKillAward,
+    },
+    MagicPractice {
+        receipt: ZoneMagicPracticeReceipt,
+    },
+    /// Trusted evidence stamped by the single Zone writer after the gameplay
+    /// action named in `receipt.kind` has committed. The gateway owns replay
+    /// suppression and the session bridge; packets never carry this data.
+    JourneyEvent {
+        receipt: ZoneJourneyEventReceipt,
+    },
+    FiveClassMagicPractice {
+        receipt: super::five_class_receipts::ZoneFiveClassPracticeReceipt,
+    },
+    PlayerManaChanged {
+        session_id: SessionId,
+        settlement: ZoneManaSettlement,
+    },
+    OwnedPetPlayerKill {
+        receipt: ZoneOwnedPetPlayerKillReceipt,
+    },
     PlayerDamaged {
         session_id: SessionId,
         damage: i32,
+        settlement: Option<ZoneVitalSettlement>,
     },
     PlayerHealed {
         session_id: SessionId,
         amount: i32,
+        settlement: Option<ZoneVitalSettlement>,
     },
+}
+
+/// The bounded set whose Crystal delayed primary hit invokes LevelMagic.
+/// Other spells cannot enter this trusted owner bridge.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ZoneMagicPracticeSpell {
+    #[default]
+    SoulFireBall,
+    FireBall,
+    GreatFireBall,
+    StraightShot,
+    DoubleShot,
+    DoubleShotSecond,
+    FatalSword,
+}
+
+impl ZoneMagicPracticeSpell {
+    pub fn from_spell(spell: Spell) -> Option<Self> {
+        match spell {
+            Spell::SoulFireBall => Some(Self::SoulFireBall),
+            Spell::FireBall => Some(Self::FireBall),
+            Spell::GreatFireBall => Some(Self::GreatFireBall),
+            Spell::StraightShot => Some(Self::StraightShot),
+            Spell::DoubleShot => Some(Self::DoubleShot),
+            Spell::FatalSword => Some(Self::FatalSword),
+            _ => None,
+        }
+    }
+
+    pub fn spell(self) -> Spell {
+        match self {
+            Self::SoulFireBall => Spell::SoulFireBall,
+            Self::FireBall => Spell::FireBall,
+            Self::GreatFireBall => Spell::GreatFireBall,
+            Self::StraightShot => Spell::StraightShot,
+            Self::DoubleShot | Self::DoubleShotSecond => Spell::DoubleShot,
+            Self::FatalSword => Spell::FatalSword,
+        }
+    }
+
+    pub fn skill_key(self) -> &'static str {
+        match self {
+            Self::SoulFireBall => "soulfireball",
+            Self::FireBall => "fireball",
+            Self::GreatFireBall => "greatfireball",
+            Self::StraightShot => "straightshot",
+            Self::DoubleShot | Self::DoubleShotSecond => "doubleshot",
+            Self::FatalSword => "fatalsword",
+        }
+    }
+}
+
+/// Owner-bound evidence of one positive, resolved primary magic hit. The cast
+/// timestamp is unique within an online incarnation because accepted casts
+/// obey the authoritative spell cooldown. This is never a launch reward.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneMagicPracticeReceipt {
+    /// Old internal SoulFireBall checkpoints had no spell field.
+    #[serde(default)]
+    pub spell: ZoneMagicPracticeSpell,
+    pub session_id: SessionId,
+    pub account_id: String,
+    pub character_index: i32,
+    pub object_id: u32,
+    pub life_generation: u64,
+    pub zone_key: ZoneKey,
+    pub cast_at_ms: u64,
+    pub target_object_id: u32,
+    pub target_location: Point,
+    pub damage: i32,
+}
+
+/// Physical actions the newcomer journey recognizes. Keeping the technique
+/// typed prevents a client packet's raw spell byte from becoming quest input.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ZoneJourneyPhysicalTechnique {
+    Normal,
+    Fencing,
+    Slaying,
+    Thrusting,
+    HalfMoon,
+    DoubleSlash,
+}
+
+/// A narrowly scoped, server-owned gameplay outcome for the V2 journey bridge.
+///
+/// This deliberately does not share `ZoneMagicPracticeReceipt`: LevelMagic
+/// progression has a different Crystal contract and must remain isolated from
+/// quest evidence.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ZoneJourneyEventKind {
+    PhysicalDamage {
+        technique: ZoneJourneyPhysicalTechnique,
+    },
+    RangedDamage,
+    StraightShotDamage,
+    DoubleShotDamage,
+    LightningDamage,
+    FireWallDamage,
+    PoisoningApplied,
+    /// A self-cast Healing action accepted by the Zone. `full_hp_exercise` is
+    /// descriptive evidence only; the session bridge decides whether the
+    /// currently accepted V2 node may use it.
+    HealingAccepted {
+        full_hp_exercise: bool,
+    },
+    SummonSkeletonSpawn,
+    SummonSkeletonDamage,
+}
+
+/// Owner-bound receipt for a committed V2 journey action. `source_action_at_ms`
+/// identifies the accepted attack/cast that caused a delayed result, while
+/// `committed_at_ms` and `event_sequence` order actual Zone mutations.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneJourneyEventReceipt {
+    pub kind: ZoneJourneyEventKind,
+    pub session_id: SessionId,
+    pub account_id: String,
+    pub character_index: i32,
+    pub object_id: u32,
+    pub life_generation: u64,
+    pub zone_key: ZoneKey,
+    pub source_action_at_ms: u64,
+    pub committed_at_ms: u64,
+    pub event_sequence: u64,
+    /// The attacking/casting object. This is the skeleton object for owned
+    /// skeleton damage and the player object for all player actions.
+    pub source_object_id: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_object_id: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_location: Option<Point>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effect_object_id: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub damage: Option<i32>,
+    /// True only when the Zone has committed the item-consuming effect. It is
+    /// currently used for Poisoning, whose material debit is authoritative.
+    pub material_consumed: bool,
+}
+
+/// A receipt stamped by the single Zone writer at the HP mutation, before a
+/// later action can revive the same actor. `None` on old outbound producers is
+/// retained only for legacy compatibility, never used by native Zone damage.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneVitalSettlement {
+    pub object_id: u32,
+    pub life_generation: u64,
+    pub receipt_sequence: u64,
+    pub hp_before: i32,
+    pub hp_after: i32,
+    pub death_transition: bool,
+}
+
+/// Exact same-life mana mutation; independent ordering from HP receipts.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneManaSettlement {
+    pub object_id: u32,
+    pub life_generation: u64,
+    pub receipt_sequence: u64,
+    pub mp_before: i32,
+    pub mp_after: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -767,6 +1148,8 @@ pub(crate) struct ZoneGroundDrop {
     pub drop_generation: u64,
     #[serde(default)]
     pub payload_digest: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_owner: Option<NativeGroundOwner>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -775,6 +1158,35 @@ pub(crate) struct ZoneGroundDropClaim {
     pub drop: GroundDropSnapshot,
     #[serde(default)]
     pub ticket: Option<GroundDropClaimTicket>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub custody: Option<ZoneGroundDropCustody>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct NativeGroundOwner {
+    pub owner: super::online_identity::OnlineOwner,
+    pub source: ZoneKey,
+    pub born_at_ms: u64,
+    pub expires_at_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub(crate) struct ZoneGroundDropCustody {
+    pub source: ZoneKey,
+    pub object_id: u32,
+    pub drop_generation: u64,
+    pub payload_digest: String,
+    pub owner_expires_at_ms: Option<u64>,
+    pub native_owner: Option<NativeGroundOwner>,
+    pub object_expires_at_ms: Option<u64>,
+}
+impl ZoneGroundDropCustody {
+    pub fn matches(&self, key: &ZoneKey, ticket: &GroundDropClaimTicket) -> bool {
+        &self.source == key
+            && self.object_id == ticket.object_id
+            && self.drop_generation == ticket.drop_generation
+            && self.payload_digest == ticket.payload_digest
+    }
 }
 
 /// Authoritative internal capability for a ground-drop claim. This type is
@@ -791,8 +1203,33 @@ pub struct GroundDropClaimTicket {
     pub drop: GroundDropSnapshot,
 }
 
+/// Transient spawned-player ownership, separate from combat life_generation.
+/// Same-map fresh Join revokes old references; death/revive does not replace
+/// the spawned object. Cross-map online identity is a manager-level follow-up.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) struct ZoneExperienceOwner {
+    pub session_id: SessionId,
+    pub account_id: String,
+    pub character_index: i32,
+    pub object_id: u32,
+    pub expires_at_ms: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub online_owner: Option<super::online_identity::OnlineOwner>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZoneNativeMonster {
+    /// Server-authored original drop-table roll. None preserves explicit/custom loot.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub crystal_drop_seed: Option<u64>,
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub incarnation: u64,
+    #[serde(default, skip_serializing_if = "zone_poison_is_zero")]
+    pub entity_poison: u16,
+    /// Zone-owned special behavior state. Omitting absent state preserves the
+    /// canonical bytes of older checkpoints until the first shared update.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub special_ai: Option<super::runtime::special_ai::ZoneSpecialMonsterState>,
     pub name: String,
     pub ai: u8,
     /// Retained authoritative relationship supplied by the spawn producer.
@@ -824,6 +1261,10 @@ pub(crate) struct ZoneNativeMonster {
     pub next_ai_ready_at_ms: u64,
     pub next_attack_ready_at_ms: u64,
     pub control_until_ms: u64,
+    /// Trusted Assassin Trap-only clock. Cold recovery revokes this online lease;
+    /// omitted for all original monsters/control sources and old checkpoints.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assassin_trap_control_until_ms: Option<u64>,
     pub control_poison: u16,
     /// Crystal Hallucination suppresses a monster's normal player targeting
     /// without freezing its movement or making it invulnerable.
@@ -838,6 +1279,10 @@ pub(crate) struct ZoneNativeMonster {
     pub damage_poison_expires_at_ms: u64,
     pub damage_poison_owner_session_id: Option<SessionId>,
     pub damage_poison_owner_object_id: u32,
+    /// Crystal EXPOwner is retained until strictly after its five-second
+    /// deadline. Omitted legacy state never infers a claimant from a target.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub experience_owner: Option<ZoneExperienceOwner>,
     /// Authoritative damage credited to player sessions for Boss ownership.
     /// Summon and damage-over-time attacks use their owning player's session.
     #[serde(default)]
@@ -888,7 +1333,10 @@ impl ZoneNativeMonster {
         let max_hp = spawn.max_hp.max(1);
         let hp = spawn.hp.clamp(0, max_hp);
         let template = crystal_monster_by_name(&spawn.name);
-        Self {
+        let mut monster = Self {
+            incarnation: 0,
+            entity_poison: 0,
+            special_ai: None,
             name: spawn.name.clone(),
             ai: spawn.ai,
             disposition: spawn.disposition,
@@ -923,10 +1371,12 @@ impl ZoneNativeMonster {
             position: spawn.position.clone(),
             direction: spawn.direction,
             dead: hp == 0,
+            crystal_drop_seed: spawn.crystal_drop_seed,
             drops: spawn.drops.clone(),
             next_ai_ready_at_ms: 0,
             next_attack_ready_at_ms: 0,
             control_until_ms: 0,
+            assassin_trap_control_until_ms: None,
             control_poison: 0,
             hallucination_until_ms: 0,
             revelation_until_ms: 0,
@@ -936,9 +1386,12 @@ impl ZoneNativeMonster {
             damage_poison_expires_at_ms: 0,
             damage_poison_owner_session_id: None,
             damage_poison_owner_object_id: 0,
+            experience_owner: None,
             damage_contributions: BTreeMap::new(),
             buffs: BTreeMap::new(),
-        }
+        };
+        super::runtime::visibility_ai::initialize_monster_visibility(&mut monster);
+        monster
     }
 }
 
@@ -968,6 +1421,10 @@ fn normalize_zone_monster_attack_speed_ms(value: u64) -> u64 {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZonePlayer {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub experience_profile: Option<super::ZoneExperienceProfile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mentor_bank: Option<ZoneMentorBankAttribution>,
     pub session_id: SessionId,
     pub account_id: String,
     pub character_index: i32,
@@ -982,6 +1439,9 @@ pub(crate) struct ZonePlayer {
     pub mp: i32,
     pub position: Point,
     pub direction: MirDirection,
+    // Omit the legacy default to preserve existing checkpoint commitments.
+    #[serde(default, skip_serializing_if = "zone_hair_is_zero")]
+    pub hair: u8,
     pub light: u8,
     pub weapon: i16,
     pub weapon_effect: i16,
@@ -989,7 +1449,26 @@ pub(crate) struct ZonePlayer {
     pub poison: u16,
     pub native_status_poison: u16,
     pub native_status_poison_expires_at_ms: Option<u64>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub native_status_poison_deadlines: BTreeMap<u16, u64>,
     pub dead: bool,
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub life_generation: u64,
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub vital_receipt_sequence: u64,
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub mana_receipt_sequence: u64,
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub five_class_practice_sequence: u64,
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub owner_health_sequence: u64,
+    /// Command-local notifications are never replayed by a cold checkpoint.
+    #[serde(skip)]
+    pub pending_owner_health_changes: Vec<super::owner_health::PendingOwnerHealthChange>,
+    /// Monotonic owner-local ordering for Zone journey receipts. Kept separate
+    /// from vital settlements because only the Zone event bridge consumes it.
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub journey_event_sequence: u64,
     pub hidden: bool,
     pub sneaking: bool,
     pub effect: u8,
@@ -999,6 +1478,12 @@ pub(crate) struct ZonePlayer {
     pub fishing: bool,
     pub transform_type: i16,
     pub level_effects: u16,
+    #[serde(default, skip_serializing_if = "zone_word_is_zero")]
+    pub element_orb_effect: u32,
+    #[serde(default, skip_serializing_if = "zone_word_is_zero")]
+    pub element_orb_level: u32,
+    #[serde(default, skip_serializing_if = "zone_word_is_zero")]
+    pub element_orb_max: u32,
     pub visible_object_ids: BTreeSet<u32>,
     pub movement_actions: VecDeque<ZoneMovementAction>,
     pub last_seen_move_seq: u64,
@@ -1009,7 +1494,17 @@ pub(crate) struct ZonePlayer {
     pub next_spell_ready_at_ms: u64,
     pub magic_ready_at_ms: BTreeMap<u8, u64>,
     #[serde(default)]
+    pub flaming_sword_armed: bool,
+    #[serde(default, skip_serializing_if = "zone_flag_is_false")]
+    pub fatal_sword_armed: bool,
+    #[serde(default)]
+    pub flaming_sword_ready_at_ms: u64,
+    #[serde(default)]
     pub last_damaged_at_ms: u64,
+    /// Crystal's ordinary monster-hit presentation window, independent of
+    /// damage settlement and the player's action/movement deadlines.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_struck_ready_at_ms: Option<u64>,
     #[serde(default)]
     pub last_regen_at_ms: u64,
     pub chat_profile: ZoneChatProfile,
@@ -1035,10 +1530,90 @@ pub(crate) struct ZoneReincarnationOffer {
 }
 
 impl ZonePlayer {
+    pub(super) fn appearance(&self) -> ZonePlayerAppearance {
+        ZonePlayerAppearance {
+            hair: self.hair,
+            light: self.light,
+            weapon: self.weapon,
+            weapon_effect: self.weapon_effect,
+            armour: self.armour,
+            wing_effect: self.wing_effect,
+            mount_type: self.mount_type,
+            riding_mount: self.riding_mount,
+            fishing: self.fishing,
+        }
+    }
+
+    pub(super) fn apply_appearance(&mut self, appearance: ZonePlayerAppearance) {
+        self.hair = appearance.hair;
+        self.light = appearance.light;
+        self.weapon = appearance.weapon;
+        self.weapon_effect = appearance.weapon_effect;
+        self.armour = appearance.armour;
+        self.wing_effect = appearance.wing_effect;
+        self.mount_type = appearance.mount_type;
+        self.riding_mount = appearance.riding_mount;
+        self.fishing = appearance.fishing;
+    }
+
+    pub(super) fn vital_settlement(&mut self, hp_before: i32) -> ZoneVitalSettlement {
+        self.vital_receipt_sequence = self
+            .vital_receipt_sequence
+            .checked_add(1)
+            .expect("Zone player vital receipt sequence exhausted");
+        ZoneVitalSettlement {
+            object_id: self.object_id,
+            life_generation: self.life_generation,
+            receipt_sequence: self.vital_receipt_sequence,
+            hp_before,
+            hp_after: self.hp,
+            death_transition: hp_before > 0 && self.hp == 0,
+        }
+    }
+
+    pub(super) fn mana_settlement(&mut self, mp_before: i32) -> ZoneManaSettlement {
+        self.mana_receipt_sequence = self
+            .mana_receipt_sequence
+            .checked_add(1)
+            .expect("Zone player mana receipt sequence exhausted");
+        ZoneManaSettlement {
+            object_id: self.object_id,
+            life_generation: self.life_generation,
+            receipt_sequence: self.mana_receipt_sequence,
+            mp_before,
+            mp_after: self.mp,
+        }
+    }
+
+    pub(super) fn clear_status_poisons(&mut self) {
+        self.poison = 0;
+        self.native_status_poison = 0;
+        self.native_status_poison_deadlines.clear();
+        self.native_status_poison_expires_at_ms = None;
+    }
+
+    pub(super) fn active_status_poison(&self, now_ms: u64) -> u16 {
+        (0..16).fold(0, |active, shift| {
+            let bit = 1_u16 << shift;
+            let deadline = self
+                .native_status_poison_deadlines
+                .get(&bit)
+                .copied()
+                .or(self.native_status_poison_expires_at_ms);
+            if self.native_status_poison & bit != 0 && deadline.is_some_and(|d| now_ms < d) {
+                active | bit
+            } else {
+                active
+            }
+        })
+    }
+
     pub fn from_join(join: ZoneJoin, object_id: u32) -> Self {
         Self {
             session_id: join.session_id,
             account_id: join.account_id,
+            mentor_bank: None,
+            experience_profile: None,
             character_index: join.character_index,
             object_id,
             name: join.name,
@@ -1051,6 +1626,7 @@ impl ZonePlayer {
             mp: join.mp.max(0),
             position: join.position,
             direction: join.direction,
+            hair: 0,
             light: 0,
             weapon: -1,
             weapon_effect: 0,
@@ -1058,7 +1634,15 @@ impl ZonePlayer {
             poison: 0,
             native_status_poison: 0,
             native_status_poison_expires_at_ms: None,
-            dead: false,
+            native_status_poison_deadlines: BTreeMap::new(),
+            dead: join.hp <= 0,
+            life_generation: 0,
+            vital_receipt_sequence: 0,
+            mana_receipt_sequence: 0,
+            five_class_practice_sequence: 0,
+            owner_health_sequence: 0,
+            pending_owner_health_changes: Vec::new(),
+            journey_event_sequence: 0,
             hidden: false,
             sneaking: false,
             effect: 0,
@@ -1066,8 +1650,11 @@ impl ZonePlayer {
             mount_type: -1,
             riding_mount: false,
             fishing: false,
-            transform_type: 0,
+            transform_type: -1,
             level_effects: 0,
+            element_orb_effect: 0,
+            element_orb_level: 0,
+            element_orb_max: 0,
             visible_object_ids: BTreeSet::new(),
             movement_actions: VecDeque::new(),
             last_seen_move_seq: 0,
@@ -1077,7 +1664,11 @@ impl ZonePlayer {
             next_attack_ready_at_ms: 0,
             next_spell_ready_at_ms: 0,
             magic_ready_at_ms: BTreeMap::new(),
+            flaming_sword_armed: false,
+            fatal_sword_armed: false,
+            flaming_sword_ready_at_ms: 0,
             last_damaged_at_ms: 0,
+            native_struck_ready_at_ms: None,
             last_regen_at_ms: 0,
             chat_profile: join.chat_profile,
             combat_stats: join.combat_stats,
@@ -1091,6 +1682,33 @@ impl ZonePlayer {
 #[cfg(test)]
 mod combat_state_tests {
     use super::*;
+
+    #[test]
+    fn poison_resistance_preserves_legacy_zero_encoding_and_round_trips_nonzero() {
+        let legacy = serde_json::to_value(ZonePlayerCombatStats::default()).unwrap();
+        assert!(legacy.get("poison_resist").is_none());
+        assert!(legacy.get("magic_resist").is_none());
+        let decoded: ZonePlayerCombatStats = serde_json::from_value(legacy.clone()).unwrap();
+        assert_eq!(decoded.poison_resist, 0);
+        assert_eq!(serde_json::to_value(decoded).unwrap(), legacy);
+        let resistant = ZonePlayerCombatStats {
+            poison_resist: 7,
+            magic_resist: 2,
+            ..Default::default()
+        };
+        let bytes = serde_json::to_vec(&resistant).unwrap();
+        assert_eq!(
+            serde_json::from_slice::<ZonePlayerCombatStats>(&bytes).unwrap(),
+            resistant
+        );
+        let replay = super::super::replay::ZoneReplayCombatStats {
+            poison_resist: 7,
+            magic_resist: 2,
+            ..Default::default()
+        };
+        assert_eq!(ZonePlayerCombatStats::from(replay).poison_resist, 7);
+        assert_eq!(ZonePlayerCombatStats::from(replay).magic_resist, 2);
+    }
 
     #[test]
     fn old_host_defaults_missing_mount_attack_capability_to_denied() {
@@ -1161,4 +1779,8 @@ mod combat_state_tests {
             );
         }
     }
+}
+
+fn zone_word_is_zero(value: &u32) -> bool {
+    *value == 0
 }

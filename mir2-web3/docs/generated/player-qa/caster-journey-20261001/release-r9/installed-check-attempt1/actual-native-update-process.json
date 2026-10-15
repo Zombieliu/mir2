@@ -1,0 +1,12 @@
+{
+  "source": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "candidate": "WN-CANDIDATE-20261001-invited-09",
+  "startedUtc": "2026-10-01T18:35:15.8677754+00:00",
+  "complete": true,
+  "success": false,
+  "pid": 44988,
+  "phase": "native-https-r8-to-r9",
+  "gameStarted": false,
+  "error": "Actual native HTTPS verification failed; inspect retained log",
+  "finishedUtc": "2026-10-01T19:12:15.4350855+00:00"
+}

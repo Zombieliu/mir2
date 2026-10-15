@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "bytes": 22786,
+      "path": "apps/simulation/tests/shared_monster_ownership.rs",
+      "sha256": "57e4149452d05527475b452b9f2ee510a2d13cb62f4d20915474f406952fae4e"
+    },
+    {
+      "bytes": 85562,
+      "path": "apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "sha256": "6a9bae840c653b149a22267a506a102b1fd8263b6aaae9a983e452e172602733"
+    }
+  ],
+  "reason": "Approved three adjacent-test adaptations; raw failures preserved in adjacent-same-map-attempt-01.log and simulation-checkpoint-attempt-01.log",
+  "baselineHead": "57729ba8c1473ca920a8ea8b3d6e11105d9d4d93"
+}

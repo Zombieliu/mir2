@@ -1,0 +1,14 @@
+Candidate release configuration tests passed (endpoints, profiles, daylight, map coverage, actor allowlist)
+Candidate actor closure guards passed (valid frame, duplicate, escaping path, missing image, missing library)
+PET_GUILD_CLOSURE_SELFTEST=passed (6219 PNG, 22 metadata, 15 Pet frame sets, 11 sounds; mutation rejection checks passed)
+VERIFY_ADS_SELFTEST=passed
+MULTILINGUAL_FONT_PATH_SCAN=passed (8 additional full-font pins; glyf only; source mutation, injected/adjacent paths and SFNT range boundaries checked)
+EXE contains machine/CI absolute source path or non-basename PDB reference in section '.rdata' (ASCII): n:\n  Chi
+At C:\Users\Administrator\.codex\worktrees\capacity-transport\mir2-player-journey\mir2-web3\apps\game-client\platform-w
+indows\scripts\verify-windows-candidate.ps1:483 char:17
++ ...             throw "EXE contains machine/CI absolute source path or no ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (EXE contains ma...CII): n:\n  Chi:String) [], RuntimeException
+    + FullyQualifiedErrorId : EXE contains machine/CI absolute source path or non-basename PDB reference in section '. 
+   rdata' (ASCII): n:\n  Chi
+ 

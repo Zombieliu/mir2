@@ -1,0 +1,42 @@
+{
+  "owner": "Root",
+  "kind": "Source72 actual original six-script Node result",
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\root-approved01\\source72-final-source-snapshot01.json",
+    "bytes": 30486653,
+    "sha256": "54d7971f517a34a58675b9c1606eda65d5957ec2d8353a44329e7fab075dc9b1"
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\root-approved01\\node01-config.json",
+    "bytes": 5526,
+    "sha256": "70545e05631292cba768c5b6f6014873ca0e3b62ec4f19e931b2c8cb085e6938"
+  },
+  "originalCallerBytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "outer": {
+    "exitCode": 0,
+    "builderPid": 87884,
+    "elapsedMs": 19413,
+    "exited": true,
+    "disposed": true
+  },
+  "metrics": {
+    "tests": 278,
+    "pass": 278,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "storageTests": 43,
+  "sceneTests": 10,
+  "separateCustomAdapterGroups": 506,
+  "stderrBytes": 0,
+  "newFiniteDiagnosticTestsPassed": 4,
+  "preAndPostGuardsPassed": true,
+  "actualNodePass": true,
+  "productionBuildAccepted": false,
+  "uiOperated": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

@@ -1,0 +1,46 @@
+{
+  "owner": "Root",
+  "kind": "ordinary saved logout then exact owned Source76 Web closure before Source77 replacement",
+  "ordinaryLogoutProof": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\browser-qa01\\source76-ordinary-logout01.json",
+    "bytes": 659,
+    "sha256": "a4e5af396bc1d1269d0f7998de9c35dc615abc4162c3a6e126312125de30e53c"
+  },
+  "acceptedStartConfig": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/web-start02-config.json",
+    "bytes": 3057,
+    "sha256": "f38f7b3211610466ca93bbeb126d37f5de3cf912ba4d5e5833970263463b5542"
+  },
+  "acceptedRuntimeSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/source76-runtime-snapshot01.json",
+    "bytes": 1553727,
+    "sha256": "6b96fd2bfa8c0ed7e5da483fe577496468b45b61ddcd59ba2ef115c13e3f5ea2"
+  },
+  "exactChild": 74428,
+  "exactParent": 93216,
+  "loopbackPort": 19205,
+  "literalServerArgumentVerified": true,
+  "uniqueListenerVerified": true,
+  "onlyLiteralChildStopped": true,
+  "originalOuter": {
+    "owner": "Root",
+    "exitCode": -1,
+    "builderPid": 74428,
+    "kind": "Root approved original Source76 independent Thin Web ordinary gameplay QA start",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 4256343,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/web-start02-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "expectedControlledStopExit": true,
+  "originalPostGuardReturned": true,
+  "source65GatewayUnchanged": true,
+  "privateConfigRead": false,
+  "goalComplete": false
+}

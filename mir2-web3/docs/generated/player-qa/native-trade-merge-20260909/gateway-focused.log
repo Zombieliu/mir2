@@ -1,0 +1,344 @@
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7569:25
+     |
+7569 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `tree_queen_ai::TreeQueenRoot::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\tree_queen_ai.rs:39:5
+   |
+39 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `tree_queen_ai::TreeQueenRoot::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `ZoneCombatEntityRef` is more private than the item `EvilMirState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:11:5
+   |
+11 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `EvilMirPendingSource::source`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:20:5
+   |
+20 |     pub source: ZoneCombatEntityRef,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirPendingSource::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:15:5
+   |
+15 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:42:5
+   |
+42 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:44:5
+   |
+44 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:12:5
+   |
+12 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:38:5
+   |
+38 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:41:5
+   |
+41 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedMapSpell::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:60:5
+   |
+60 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedMapSpell::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:14:5
+   |
+14 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:28:5
+   |
+28 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:30:5
+   |
+30 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HellState::explosion_source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:14:5
+   |
+14 |     pub explosion_source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HellState::explosion_source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `SpiderAiState::parent_ref`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:40:5
+   |
+40 |     pub parent_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `SpiderAiState::parent_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::source`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:52:5
+   |
+52 |     pub source: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::target`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:54:5
+   |
+54 |     pub target: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::target` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `scoped_to_account` and `scoped_to_accounts` are never used
+   --> apps\simulation\src\config.rs:225:8
+    |
+109 | impl AccountStore {
+    | ----------------- methods in this implementation
+...
+225 |     fn scoped_to_account(&self, account_id: &str) -> Self {
+    |        ^^^^^^^^^^^^^^^^^
+...
+229 |     fn scoped_to_accounts(&self, account_ids: &[&str]) -> Self {
+    |        ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:767:5
+    |
+760 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+767 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: method `socketed_count` is never used
+   --> apps\simulation\src\runtime\equipment.rs:303:19
+    |
+119 | impl EquipmentState {
+    | ------------------- method in this implementation
+...
+303 |     pub(super) fn socketed_count(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:308:15
+    |
+308 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:313:15
+    |
+313 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1813:15
+     |
+1813 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+   --> apps\simulation\src\runtime\quests.rs:814:15
+    |
+814 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+    |               ^^^^^^^^^^^^^^
+
+warning: function `default_save_for_character` is never used
+  --> apps\simulation\src\runtime\save.rs:76:15
+   |
+76 | pub(super) fn default_save_for_character(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:818:15
+    |
+818 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `game_shop_buy_product` is never used
+    --> apps\simulation\src\runtime\stage5.rs:4258:8
+     |
+3188 | impl SimulationSession {
+     | ---------------------- method in this implementation
+...
+4258 |     fn game_shop_buy_product(
+     |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hell_can_move` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:68:15
+   |
+68 | pub(super) fn hell_can_move(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^
+
+warning: function `hell_can_regen` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:74:15
+   |
+74 | pub(super) fn hell_can_regen(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^^
+
+warning: `mir2-simulation` (lib) generated 33 warnings
+   Compiling mir2-gateway v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\gateway)
+warning: variable does not need to be mutable
+    --> apps\gateway\src\routing.rs:3655:13
+     |
+3655 |         let mut current_player_heals = Vec::new();
+     |             ----^^^^^^^^^^^^^^^^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `mir2-gateway` (lib test) generated 1 warning (run `cargo fix --lib -p mir2-gateway --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 46s
+     Running unittests src\lib.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\mir2_gateway-7f3d593ba68ee25b.exe)
+
+running 2 tests
+test routing::tests::trade_item_edit_tests::shared_trade_move_and_merge_refresh_only_partner_and_preserve_quantity ... ok
+test routing::tests::trade_item_edit_tests::shared_trade_peer_preparation_rejects_move_and_merge_with_exact_ack ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 712 filtered out; finished in 16.74s

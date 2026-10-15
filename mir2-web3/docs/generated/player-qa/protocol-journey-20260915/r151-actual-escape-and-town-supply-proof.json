@@ -1,0 +1,6626 @@
+[
+  {
+    "class": "Wizard",
+    "source": "Wizard.2026-09-17T11-23-36-928Z.trace.jsonl",
+    "sourceSha256": "165539105FC984AE8A548B721185A751742B8D58B98220E90B361ADC4E1F6827",
+    "routeCompleted": false,
+    "visualAccepted": false,
+    "selected": [
+      {
+        "sequence": 7395,
+        "at": "2026-09-17T11:38:55.266Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 214,
+            "y": 204,
+            "dead": false
+          },
+          "hp": 43,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 451705,
+              "name": "RedBoar",
+              "x": 204,
+              "y": 200,
+              "hp": 293,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 453501,
+              "name": "BlackBoar",
+              "x": 215,
+              "y": 193,
+              "hp": 280,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 453504,
+              "name": "BlackBoar",
+              "x": 213,
+              "y": 204,
+              "hp": 261,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 455303,
+              "name": "BlackMaggot",
+              "x": 214,
+              "y": 205,
+              "hp": 141,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 455307,
+              "name": "BlackMaggot",
+              "x": 215,
+              "y": 194,
+              "hp": 200,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7400,
+        "at": "2026-09-17T11:38:55.767Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 214,
+            "y": 204,
+            "dead": false
+          },
+          "hp": 24,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 451705,
+              "name": "RedBoar",
+              "x": 204,
+              "y": 200,
+              "hp": 293,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 453501,
+              "name": "BlackBoar",
+              "x": 215,
+              "y": 193,
+              "hp": 280,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 453504,
+              "name": "BlackBoar",
+              "x": 213,
+              "y": 204,
+              "hp": 261,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 455303,
+              "name": "BlackMaggot",
+              "x": 214,
+              "y": 205,
+              "hp": 141,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 455307,
+              "name": "BlackMaggot",
+              "x": 215,
+              "y": 194,
+              "hp": 200,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7403,
+        "at": "2026-09-17T11:38:56.367Z",
+        "direction": "diagnostic",
+        "type": "emergencyEscapeAttempt",
+        "diagnostic": {
+          "type": "emergencyEscapeAttempt",
+          "reason": "criticalPackPressure",
+          "hpRatio": 0.22857142857142856,
+          "threshold": 0.65,
+          "from": {
+            "x": 214,
+            "y": 204
+          }
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 214,
+            "y": 204,
+            "dead": false
+          },
+          "hp": 24,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 451705,
+              "name": "RedBoar",
+              "x": 204,
+              "y": 200,
+              "hp": 293,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 453501,
+              "name": "BlackBoar",
+              "x": 215,
+              "y": 193,
+              "hp": 280,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 453504,
+              "name": "BlackBoar",
+              "x": 213,
+              "y": 204,
+              "hp": 261,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 455303,
+              "name": "BlackMaggot",
+              "x": 214,
+              "y": 205,
+              "hp": 141,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 455307,
+              "name": "BlackMaggot",
+              "x": 215,
+              "y": 194,
+              "hp": 200,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7423,
+        "at": "2026-09-17T11:38:56.717Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 24,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7424,
+        "at": "2026-09-17T11:38:56.739Z",
+        "direction": "diagnostic",
+        "type": "emergencyEscapeSuccess",
+        "diagnostic": {
+          "type": "emergencyEscapeSuccess",
+          "reason": "criticalPackPressure",
+          "hpRatio": 0.22857142857142856,
+          "from": {
+            "x": 214,
+            "y": 204
+          },
+          "to": {
+            "x": 306,
+            "y": 212
+          }
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 24,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7428,
+        "at": "2026-09-17T11:38:57.058Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 24,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7430,
+        "at": "2026-09-17T11:38:57.392Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 24,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7436,
+        "at": "2026-09-17T11:38:57.592Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 34,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7443,
+        "at": "2026-09-17T11:38:59.909Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 54,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7450,
+        "at": "2026-09-17T11:39:03.104Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 58,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7453,
+        "at": "2026-09-17T11:39:03.439Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 58,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7461,
+        "at": "2026-09-17T11:39:06.313Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 88,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7462,
+        "at": "2026-09-17T11:39:06.387Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "D711",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\d711.map.gz",
+          "width": 400,
+          "height": 400,
+          "desiredDistance": 0,
+          "start": {
+            "x": 306,
+            "y": 212
+          },
+          "target": {
+            "x": 205,
+            "y": 197
+          },
+          "rejected": [],
+          "obstacleCount": 12
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 88,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7465,
+        "at": "2026-09-17T11:39:06.515Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 92,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7468,
+        "at": "2026-09-17T11:39:07.330Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "D711",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\d711.map.gz",
+          "width": 400,
+          "height": 400,
+          "desiredDistance": 0,
+          "start": {
+            "x": 306,
+            "y": 212
+          },
+          "target": {
+            "x": 205,
+            "y": 197
+          },
+          "rejected": [],
+          "obstacleCount": 12
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 92,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7471,
+        "at": "2026-09-17T11:39:07.398Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 92,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7472,
+        "at": "2026-09-17T11:39:08.236Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "D711",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\d711.map.gz",
+          "width": 400,
+          "height": 400,
+          "desiredDistance": 0,
+          "start": {
+            "x": 306,
+            "y": 212
+          },
+          "target": {
+            "x": 205,
+            "y": 197
+          },
+          "rejected": [],
+          "obstacleCount": 12
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 92,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7475,
+        "at": "2026-09-17T11:39:08.350Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 92,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7478,
+        "at": "2026-09-17T11:39:09.198Z",
+        "direction": "diagnostic",
+        "type": "livingExpeditionNoWalkPathRetry",
+        "diagnostic": {
+          "type": "livingExpeditionNoWalkPathRetry",
+          "questId": 113,
+          "hp": 92,
+          "maxHp": 105,
+          "mapFileName": "D711"
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 92,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7479,
+        "at": "2026-09-17T11:39:09.246Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "D711",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\d711.map.gz",
+          "width": 400,
+          "height": 400,
+          "desiredDistance": 0,
+          "start": {
+            "x": 306,
+            "y": 212
+          },
+          "target": {
+            "x": 205,
+            "y": 197
+          },
+          "rejected": [],
+          "obstacleCount": 12
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 92,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7482,
+        "at": "2026-09-17T11:39:09.313Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 92,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7483,
+        "at": "2026-09-17T11:39:10.151Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "D711",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\d711.map.gz",
+          "width": 400,
+          "height": 400,
+          "desiredDistance": 0,
+          "start": {
+            "x": 306,
+            "y": 212
+          },
+          "target": {
+            "x": 205,
+            "y": 197
+          },
+          "rejected": [],
+          "obstacleCount": 12
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 92,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7486,
+        "at": "2026-09-17T11:39:10.221Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 96,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7489,
+        "at": "2026-09-17T11:39:11.051Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "D711",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\d711.map.gz",
+          "width": 400,
+          "height": 400,
+          "desiredDistance": 0,
+          "start": {
+            "x": 306,
+            "y": 212
+          },
+          "target": {
+            "x": 205,
+            "y": 197
+          },
+          "rejected": [],
+          "obstacleCount": 12
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 96,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7492,
+        "at": "2026-09-17T11:39:11.196Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "D711",
+          "owner": {
+            "name": "JWdebac6d4",
+            "class": "Wizard",
+            "level": 26,
+            "x": 306,
+            "y": 212,
+            "dead": false
+          },
+          "hp": 96,
+          "mp": 161,
+          "gold": 260,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 72
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 73
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 9,
+              "uniqueId": 8
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 6,
+              "uniqueId": 10
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 14
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 17
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 2,
+              "uniqueId": 74
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 75
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 1,
+              "uniqueId": 15
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 3,
+              "uniqueId": 21
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 1,
+              "uniqueId": 22
+            },
+            {
+              "name": "(HP)DrugMedium",
+              "quantity": 5,
+              "uniqueId": 23
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 4,
+              "uniqueId": 76
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 5,
+              "uniqueId": 3
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 15,
+              "uniqueId": 0
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 3,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 2,
+              "uniqueId": 2
+            }
+          ],
+          "monsters": [
+            {
+              "id": 456115,
+              "name": "WedgeMoth",
+              "x": 298,
+              "y": 205,
+              "hp": 220,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 7493,
+        "at": "2026-09-17T11:39:12.076Z",
+        "direction": "sent",
+        "type": "logOut",
+        "publicEvent": {
+          "type": "logOut"
+        }
+      },
+      {
+        "sequence": 7494,
+        "at": "2026-09-17T11:39:12.806Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "LogOutSuccess",
+        "publicEvent": {}
+      }
+    ]
+  },
+  {
+    "class": "Taoist",
+    "source": "Taoist.2026-09-17T11-23-36-942Z.trace.jsonl",
+    "sourceSha256": "0C8561BEE5F70BFC6C094F7B9F8BF67F4B96DEBAF35A71025CA74791049B1C63",
+    "routeCompleted": false,
+    "visualAccepted": false,
+    "selected": [
+      {
+        "sequence": 16682,
+        "at": "2026-09-17T12:01:58.215Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "GainedGold",
+        "publicEvent": {}
+      },
+      {
+        "sequence": 16683,
+        "at": "2026-09-17T12:01:58.295Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 72,
+          "gold": 430,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 13,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16690,
+        "at": "2026-09-17T12:01:58.875Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "GainedGold",
+        "publicEvent": {}
+      },
+      {
+        "sequence": 16691,
+        "at": "2026-09-17T12:01:58.951Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 72,
+          "gold": 642,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 13,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16695,
+        "at": "2026-09-17T12:01:59.553Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "GainedGold",
+        "publicEvent": {}
+      },
+      {
+        "sequence": 16696,
+        "at": "2026-09-17T12:01:59.631Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 72,
+          "gold": 905,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 13,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16700,
+        "at": "2026-09-17T12:02:00.220Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "GainedGold",
+        "publicEvent": {}
+      },
+      {
+        "sequence": 16701,
+        "at": "2026-09-17T12:02:00.297Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 72,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 13,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16702,
+        "at": "2026-09-17T12:02:00.329Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "0",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+          "width": 700,
+          "height": 700,
+          "desiredDistance": 1,
+          "start": {
+            "x": 293,
+            "y": 604
+          },
+          "target": {
+            "x": 291,
+            "y": 610
+          },
+          "rejected": [],
+          "obstacleCount": 108
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 72,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 13,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16706,
+        "at": "2026-09-17T12:02:00.452Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 72,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 13,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16719,
+        "at": "2026-09-17T12:02:01.222Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "0",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+          "width": 700,
+          "height": 700,
+          "desiredDistance": 1,
+          "start": {
+            "x": 293,
+            "y": 604
+          },
+          "target": {
+            "x": 291,
+            "y": 610
+          },
+          "rejected": [],
+          "obstacleCount": 108
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 72,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 13,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16723,
+        "at": "2026-09-17T12:02:01.298Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 72,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 13,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16726,
+        "at": "2026-09-17T12:02:02.071Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "0",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+          "width": 700,
+          "height": 700,
+          "desiredDistance": 1,
+          "start": {
+            "x": 293,
+            "y": 604
+          },
+          "target": {
+            "x": 291,
+            "y": 610
+          },
+          "rejected": [],
+          "obstacleCount": 108
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 72,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 13,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16729,
+        "at": "2026-09-17T12:02:02.154Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 72,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 13,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16734,
+        "at": "2026-09-17T12:02:02.917Z",
+        "direction": "diagnostic",
+        "type": "supplyServiceBlockerCombat",
+        "diagnostic": {
+          "type": "supplyServiceBlockerCombat",
+          "objectId": 206644,
+          "name": "Scarecrow",
+          "attempt": 1
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 72,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 13,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16735,
+        "at": "2026-09-17T12:02:02.918Z",
+        "direction": "sent",
+        "type": "magic",
+        "publicEvent": {
+          "type": "magic",
+          "objectId": 1000,
+          "spell": "SoulFireBall",
+          "targetId": 206644
+        }
+      },
+      {
+        "sequence": 16738,
+        "at": "2026-09-17T12:02:03.148Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "Magic",
+        "publicEvent": {
+          "spell": "SoulFireBall",
+          "targetId": 206644
+        }
+      },
+      {
+        "sequence": 16742,
+        "at": "2026-09-17T12:02:03.221Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 68,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 7,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16757,
+        "at": "2026-09-17T12:02:05.308Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 68,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 606,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 7,
+              "disposition": "hostile",
+              "dead": false
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16758,
+        "at": "2026-09-17T12:02:05.324Z",
+        "direction": "sent",
+        "type": "magic",
+        "publicEvent": {
+          "type": "magic",
+          "objectId": 1000,
+          "spell": "SoulFireBall",
+          "targetId": 206644
+        }
+      },
+      {
+        "sequence": 16761,
+        "at": "2026-09-17T12:02:05.627Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "Magic",
+        "publicEvent": {
+          "spell": "SoulFireBall",
+          "targetId": 206644
+        }
+      },
+      {
+        "sequence": 16765,
+        "at": "2026-09-17T12:02:05.704Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 64,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 11,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16766,
+        "at": "2026-09-17T12:02:05.741Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "0",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+          "width": 700,
+          "height": 700,
+          "desiredDistance": 1,
+          "start": {
+            "x": 293,
+            "y": 604
+          },
+          "target": {
+            "x": 291,
+            "y": 610
+          },
+          "rejected": [],
+          "obstacleCount": 106
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 64,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 11,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16772,
+        "at": "2026-09-17T12:02:05.877Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectDied",
+        "publicEvent": {
+          "objectId": 206644
+        }
+      },
+      {
+        "sequence": 16776,
+        "at": "2026-09-17T12:02:05.950Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 64,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 11,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16782,
+        "at": "2026-09-17T12:02:06.729Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "0",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+          "width": 700,
+          "height": 700,
+          "desiredDistance": 1,
+          "start": {
+            "x": 293,
+            "y": 604
+          },
+          "target": {
+            "x": 291,
+            "y": 610
+          },
+          "rejected": [],
+          "obstacleCount": 106
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 64,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 11,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16785,
+        "at": "2026-09-17T12:02:06.822Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 64,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 11,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16788,
+        "at": "2026-09-17T12:02:07.623Z",
+        "direction": "diagnostic",
+        "type": "navigationReplan",
+        "diagnostic": {
+          "type": "navigationReplan",
+          "mapId": "0",
+          "mapSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+          "width": 700,
+          "height": 700,
+          "desiredDistance": 1,
+          "start": {
+            "x": 293,
+            "y": 604
+          },
+          "target": {
+            "x": 291,
+            "y": 610
+          },
+          "rejected": [],
+          "obstacleCount": 106
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 64,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 11,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16791,
+        "at": "2026-09-17T12:02:07.698Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 64,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 11,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16793,
+        "at": "2026-09-17T12:02:08.472Z",
+        "direction": "diagnostic",
+        "type": "supplyServiceBlockerCombat",
+        "diagnostic": {
+          "type": "supplyServiceBlockerCombat",
+          "objectId": 206641,
+          "name": "Scarecrow",
+          "attempt": 2
+        },
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 64,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 11,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 20,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16794,
+        "at": "2026-09-17T12:02:08.472Z",
+        "direction": "sent",
+        "type": "magic",
+        "publicEvent": {
+          "type": "magic",
+          "objectId": 1000,
+          "spell": "SoulFireBall",
+          "targetId": 206641
+        }
+      },
+      {
+        "sequence": 16799,
+        "at": "2026-09-17T12:02:08.702Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "Magic",
+        "publicEvent": {
+          "spell": "SoulFireBall",
+          "targetId": 206641
+        }
+      },
+      {
+        "sequence": 16803,
+        "at": "2026-09-17T12:02:08.773Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 60,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 10,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 7,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16818,
+        "at": "2026-09-17T12:02:10.840Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 60,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 10,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 7,
+              "disposition": "hostile",
+              "dead": false
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16819,
+        "at": "2026-09-17T12:02:10.858Z",
+        "direction": "sent",
+        "type": "magic",
+        "publicEvent": {
+          "type": "magic",
+          "objectId": 1000,
+          "spell": "SoulFireBall",
+          "targetId": 206641
+        }
+      },
+      {
+        "sequence": 16822,
+        "at": "2026-09-17T12:02:11.139Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "Magic",
+        "publicEvent": {
+          "spell": "SoulFireBall",
+          "targetId": 206641
+        }
+      },
+      {
+        "sequence": 16826,
+        "at": "2026-09-17T12:02:11.210Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 604,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 56,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 9,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16834,
+        "at": "2026-09-17T12:02:11.706Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectDied",
+        "publicEvent": {
+          "objectId": 206641
+        }
+      },
+      {
+        "sequence": 16840,
+        "at": "2026-09-17T12:02:11.780Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 293,
+            "y": 605,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 56,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 9,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16870,
+        "at": "2026-09-17T12:02:14.863Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 292,
+            "y": 610,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 56,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 9,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16874,
+        "at": "2026-09-17T12:02:15.956Z",
+        "direction": "sent",
+        "type": "buyItem",
+        "publicEvent": {
+          "type": "buyItem",
+          "itemIndex": 47120387,
+          "count": 1,
+          "panelType": 0
+        }
+      },
+      {
+        "sequence": 16875,
+        "at": "2026-09-17T12:02:16.029Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 292,
+            "y": 610,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 56,
+          "gold": 1164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "Amulet",
+              "quantity": 9,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16878,
+        "at": "2026-09-17T12:02:16.550Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "LoseGold",
+        "publicEvent": {}
+      },
+      {
+        "sequence": 16880,
+        "at": "2026-09-17T12:02:16.624Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "state": {
+          "ownerId": 1000,
+          "map": "0",
+          "owner": {
+            "name": "JT3f4a4e1f",
+            "class": "Taoist",
+            "level": 26,
+            "x": 292,
+            "y": 610,
+            "dead": false
+          },
+          "hp": 191,
+          "mp": 56,
+          "gold": 164,
+          "pending": false,
+          "supplies": [
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 12,
+              "uniqueId": 7
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 7,
+              "uniqueId": 9
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 13,
+              "uniqueId": 175
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 20,
+              "uniqueId": 4
+            },
+            {
+              "name": "RandomTeleport",
+              "quantity": 4,
+              "uniqueId": 178
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "quantity": 19,
+              "uniqueId": 185
+            },
+            {
+              "name": "Amulet",
+              "quantity": 12,
+              "uniqueId": 1
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 184
+            },
+            {
+              "name": "(MP)DrugSmall",
+              "quantity": 8,
+              "uniqueId": 0
+            },
+            {
+              "name": "Amulet",
+              "quantity": 29,
+              "uniqueId": 188
+            },
+            {
+              "name": "Amulet",
+              "quantity": 46,
+              "uniqueId": 189
+            },
+            {
+              "name": "TownTeleport",
+              "quantity": 1,
+              "uniqueId": 190
+            },
+            {
+              "name": "Amulet",
+              "quantity": 9,
+              "uniqueId": 187
+            }
+          ],
+          "monsters": [
+            {
+              "id": 206641,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            },
+            {
+              "id": 206644,
+              "name": "Scarecrow",
+              "x": 293,
+              "y": 605,
+              "hp": 0,
+              "disposition": "hostile",
+              "dead": true
+            }
+          ]
+        }
+      },
+      {
+        "sequence": 16881,
+        "at": "2026-09-17T12:02:16.663Z",
+        "direction": "sent",
+        "type": "logOut",
+        "publicEvent": {
+          "type": "logOut"
+        }
+      },
+      {
+        "sequence": 16882,
+        "at": "2026-09-17T12:02:17.442Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "LogOutSuccess",
+        "publicEvent": {}
+      }
+    ]
+  }
+]

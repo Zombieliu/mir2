@@ -1,0 +1,10 @@
+2026-10-01 10:59:55.393   Renaming uninstaller.
+2026-10-01 10:59:55.394   Deleting uninstall key left over from previous non administrative install.
+2026-10-01 10:59:55.394   Creating new uninstall key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall\{DC4E7701-25AD-4E48-9970-5C1983CBC77F}_is1
+2026-10-01 10:59:55.394   Writing uninstall key values.
+2026-10-01 10:59:55.394   Detected previous administrative 64-bit install? No
+2026-10-01 10:59:55.394   Detected previous administrative 32-bit install? No
+2026-10-01 10:59:55.516   Installation process succeeded.
+2026-10-01 10:59:55.516   Need to restart Windows? No
+2026-10-01 10:59:55.519   Deinitializing Setup.
+2026-10-01 10:59:55.522   Log closed.

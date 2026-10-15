@@ -1,0 +1,354 @@
+{
+  "schema": "mir2.five-class-candidate-checks.v1",
+  "createdUtc": "2026-10-11T09:23:44.728059+00:00",
+  "scope": "Source Assassin/Archer skills, books, equipment and assets through level 50; existing three classes retained",
+  "checks": [
+    {
+      "run": "game-data-tests02",
+      "resultSha256": "346b0d9e67aae460366fd4e71a8bda859f6c93dea89681f45505769cf3bff81a",
+      "cargoLogSha256": "4d84f19719ba6e19c91ea712427f4c73239a82ecc9e14913d4496daf6c544523",
+      "sourceSnapshotSha256": "9ae1db9af30f8df388883af34e2c722ef7edd88a5dc05d72b5a1d041a9ef1286",
+      "testGroups": [
+        {
+          "passed": 67,
+          "failed": 0,
+          "ignored": 1
+        },
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "filter": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-game-data",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--",
+        "--test-threads=1"
+      ],
+      "sourceDrift": []
+    },
+    {
+      "run": "simulation-five-test08",
+      "resultSha256": "cd04275a0a822722b9b2d9ccec2f270a1d2bb1316565fdae1753d07d91ac5628",
+      "cargoLogSha256": "a03fcc6018bb0b1cea6e950a9a588f1a24e65efd531601c136ad24fb738894b3",
+      "sourceSnapshotSha256": "6b22f36e8a63e03ad87dd284b5a5a27f808adbac56a49660fb69fe0f7186f42a",
+      "testGroups": [
+        {
+          "passed": 118,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "filter": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "sourceDrift": []
+    },
+    {
+      "run": "gateway-five-test01",
+      "resultSha256": "381e77cf97aaf824b7c23d108e5fe5fd28932b9e0080671f2784cba8783ec6f0",
+      "cargoLogSha256": "51cc824e353cedfc144f4e8d99899f6cb75253409749a92e8bafd57a14ad6c3e",
+      "sourceSnapshotSha256": "336e0dc4e9d2b03c80f3bb12acacd983918dfcbd81fe992c50ca719bbd388a28",
+      "testGroups": [
+        {
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "filter": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "sourceDrift": []
+    },
+    {
+      "run": "simulation-native-entity-test02",
+      "resultSha256": "27db41c3726dba6319ada5683f3b1caeece1fe4a895c7cdab540a51c2c118ea6",
+      "cargoLogSha256": "bc48eb0c326ca69220110b7adc82f063fec83e6f16740ea7c1062c4486789513",
+      "sourceSnapshotSha256": "87d239ea619a12f360d5ea3e690887a0290f5b717ff9df849c7d7e1d4c5569a8",
+      "testGroups": [
+        {
+          "passed": 22,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "filter": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "native_entity_",
+        "--",
+        "--test-threads=1"
+      ],
+      "sourceDrift": []
+    },
+    {
+      "run": "simulation-pvp-regression-test01",
+      "resultSha256": "b9e262166fb4b0fefcd8ec52968f481a630dbef404046cf17839389178ce8954",
+      "cargoLogSha256": "98598de82be0e45baf5095a47ff769519f50ef5a5cd5db984363ef6221fa2d6f",
+      "sourceSnapshotSha256": "73104b06847f26c5dad7f78fddcfe117cba6f9666152a5469cc90ba1d4c3299f",
+      "testGroups": [
+        {
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "filter": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "runtime::zone::runtime::pvp_tests::",
+        "--",
+        "--test-threads=1"
+      ],
+      "sourceDrift": []
+    },
+    {
+      "run": "native-runtime-animation-test03",
+      "resultSha256": "78093923ad372b8c1b5595686b95c6653f06388fad34d5031ff1f35449a2dfa4",
+      "cargoLogSha256": "39ac020f757553701be03d72cdbd8ce640f13ce43401278bd7c809811dda4ab3",
+      "sourceSnapshotSha256": "46fd9dd99ffd0d7bdeb748ab1d56bd2a2973e40f05305d414f0917000e3482b4",
+      "testGroups": [
+        {
+          "passed": 28,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "filter": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-bevy-runtime",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--manifest-path",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\five-class-completion\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\Cargo.toml",
+        "--lib",
+        "entity_animation::tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "sourceDrift": []
+    },
+    {
+      "run": "native-client-audio-test04",
+      "resultSha256": "1f28d54d12562f2aafea4710007f6b1c032b4e1d067825ab4bfc6820ac9fc969",
+      "cargoLogSha256": "b5f6c9f66ced39f7120f189febe28c9359dbcc40536565809aae2f7cc5f512fd",
+      "sourceSnapshotSha256": "2f93d448790c582f778af4bdabd8c49ba5e4ee7d5aa55784aa6579ac8a32cee2",
+      "testGroups": [
+        {
+          "passed": 26,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "filter": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-client-bevy",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--manifest-path",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\five-class-completion\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\Cargo.toml",
+        "--features",
+        "native-ui",
+        "--lib",
+        "audio::tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "sourceDrift": []
+    },
+    {
+      "run": "native-client-supplies-test01",
+      "resultSha256": "f6dc10cd6da3822b50acb51fc99e71c900c807ffbc3b057621bc32dbe70a49ab",
+      "cargoLogSha256": "928c24ced86e97147ad31e01341de0d560fb203f18429734356b4b810e725495",
+      "sourceSnapshotSha256": "68fb3987bf261e6fd700310dc7dd8e3b8b8f636334b9c5b0cd21534ad67eb765",
+      "testGroups": [
+        {
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "filter": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-client-bevy",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--manifest-path",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\five-class-completion\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\Cargo.toml",
+        "--features",
+        "native-ui",
+        "--lib",
+        "quest_supplies::",
+        "--",
+        "--test-threads=1"
+      ],
+      "sourceDrift": []
+    },
+    {
+      "run": "native-platform-five-test09",
+      "resultSha256": "116c839af58bfbedcec1c5e400369934f596ff3bf8cdc1f398318db7c9e1f501",
+      "cargoLogSha256": "4952731376c188743a7a894d104429a5a3117ac6bd9954b44d25ec0c0e380105",
+      "sourceSnapshotSha256": "1eedebe7282f99f12690693fdf661f5f6c3cdb17f64620c7865ee6d2a283b758",
+      "testGroups": [
+        {
+          "passed": 32,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "filter": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--manifest-path",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\five-class-completion\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\Cargo.toml",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "sourceDrift": []
+    },
+    {
+      "run": "updater-five-class-test01",
+      "resultSha256": "da031f70d9986fed085a08781fdf8448a7ed574cdf1e405cdefb4793cd7aaa28",
+      "cargoLogSha256": "43c317bf947102454a710b142b2d82889d2e2769cd699c40a129c61b6393b475",
+      "sourceSnapshotSha256": "cde5ba999eed4d0a1a033155a2c334b12559ea1809eea57427788f23ee3c802b",
+      "testGroups": [
+        {
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "filter": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-windows-updater",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--manifest-path",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\five-class-completion\\mir2-player-journey\\mir2-web3\\apps\\game-client\\windows-updater\\Cargo.toml",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "sourceDrift": []
+    },
+    {
+      "run": "updater-five-class-regression01",
+      "resultSha256": "7b0ae145b8fbeab145793200682a04a306370d1b3395c818c45ab610c19a07f1",
+      "cargoLogSha256": "bd76d4192c25fbd96ab90193bcf6572831eddebf1d15c5020c5bd4e0c8cd2159",
+      "sourceSnapshotSha256": "0092ae716dda4659aec8ec668ecf6eb3bd36bd1a3d64dfa239e01adff20d03cd",
+      "testGroups": [
+        {
+          "passed": 81,
+          "failed": 0,
+          "ignored": 4
+        }
+      ],
+      "filter": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-windows-updater",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--manifest-path",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\five-class-completion\\mir2-player-journey\\mir2-web3\\apps\\game-client\\windows-updater\\Cargo.toml",
+        "--lib",
+        "--",
+        "--test-threads=1"
+      ],
+      "sourceDrift": []
+    }
+  ],
+  "aggregateAcceptance": false,
+  "nativeInteractiveAcceptance": false,
+  "linuxReleaseAcceptance": false,
+  "published": false,
+  "notes": [
+    "The 3 all_mode_shared_ tests overlap the full 7 pvp_tests suite and are not summed again.",
+    "Audio orb and runtime five_class focused repeats overlap larger suites and are not summed again.",
+    "Original ignored game-data benchmark is excluded.",
+    "Original failed and zero-test runs remain in their local raw evidence directories; no baseline execution is inferred from static comparison.",
+    "All entries in this index precede integration of the deployed R24 Source 87fd85a0d5a819e5b38c90d192421f9239f65678; fresh checks are required for the merged Source. The focused updater tests overlap its complete library tests."
+  ],
+  "updatedUtc": "2026-10-11T11:55:07.806122+00:00"
+}

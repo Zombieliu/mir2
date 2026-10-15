@@ -1,0 +1,208 @@
+{
+  "owner": "Root",
+  "kind": "Root Source75 source review02 with actual stale adjacent fixture repairs",
+  "workerManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\worker-delivery01\\source75-worker-manifest01.json",
+    "bytes": 4140,
+    "sha256": "67951bb19f95fa187c8d80024e13410a5645eae0c77772bf3454a9aeac08bf85"
+  },
+  "baseCommit": "dadbb704124f545e6fa93329553792d2e458f90b",
+  "codeFiles": 9,
+  "old43TestBodiesBytePreserved": true,
+  "newTests": 7,
+  "testsExecuted": false,
+  "rootSourceReviewed": true,
+  "independentReadonlySourceReviewed": true,
+  "frontendOnly": true,
+  "runtimeAbiUnchanged": true,
+  "noAdditionalRuntimeReadClockOrSendCalls": true,
+  "existingReadyAndOwnerAdmissionPreserved": true,
+  "prepareProjectionFromSuccessfulPublicationOnly": true,
+  "withdrawClearsMailboxBeforePublishingNullProjection": true,
+  "maskOnlySharedUiCanvas": true,
+  "pointerEventsAndPointerHandlersUnchanged": true,
+  "armingActiveRetirementUnmasked": true,
+  "desktopGeometryMatchedRustSource": true,
+  "touchMask": false,
+  "touchOverlapOpen": true,
+  "reactSkillReviewed": "vercel:react-best-practices",
+  "mainTsconfig": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "foreignWorkPreserved": true,
+  "code": [
+    {
+      "relative": "lib/bevy-storage-ui.ts",
+      "originalSha256": "b4080270c6261b65e4825d8088f68f1e5d4610b22f3c465250d5cf747f9e0ece",
+      "originalBytes": 24602,
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-storage-ui.ts",
+        "bytes": 25522,
+        "sha256": "8e0fe50a1bf69f43e4a5ee3ff24dfeee4676646c1d1716c15d0a5d0c4032be2e"
+      },
+      "isolated": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\lib\\bevy-storage-ui.ts",
+        "bytes": 25522,
+        "sha256": "8e0fe50a1bf69f43e4a5ee3ff24dfeee4676646c1d1716c15d0a5d0c4032be2e"
+      }
+    },
+    {
+      "relative": "lib/use-bevy-storage-ui.ts",
+      "originalSha256": "0db0e32baa41a722637fb0d83f467dd138415d4787fa6c7e4387fffb01f62407",
+      "originalBytes": 3671,
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\use-bevy-storage-ui.ts",
+        "bytes": 4173,
+        "sha256": "edab7e5803a8e68054922ea4d0bc18ff9d34a56e03d2fbfd7753b82f608eec33"
+      },
+      "isolated": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\lib\\use-bevy-storage-ui.ts",
+        "bytes": 4173,
+        "sha256": "edab7e5803a8e68054922ea4d0bc18ff9d34a56e03d2fbfd7753b82f608eec33"
+      }
+    },
+    {
+      "relative": "lib/bevy-storage-presentation.ts",
+      "originalSha256": null,
+      "originalBytes": null,
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-storage-presentation.ts",
+        "bytes": 1515,
+        "sha256": "121e37a049f3d98568a0a7abd17f46cfb02c7bd1e89f84bbe8e2c7bf0d572bf2"
+      },
+      "isolated": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\lib\\bevy-storage-presentation.ts",
+        "bytes": 1515,
+        "sha256": "121e37a049f3d98568a0a7abd17f46cfb02c7bd1e89f84bbe8e2c7bf0d572bf2"
+      }
+    },
+    {
+      "relative": "app/page.tsx",
+      "originalSha256": "4b595c55d8d496ca0ae0a88596969569c3c21cf320d8f482c85e1293e32fef49",
+      "originalBytes": 1098052,
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+        "bytes": 1098126,
+        "sha256": "1b38babb739c0eda629bc4330cc3dd4bece4d5d637be356f88e9b0535f227031"
+      },
+      "isolated": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\app\\page.tsx",
+        "bytes": 1098126,
+        "sha256": "1b38babb739c0eda629bc4330cc3dd4bece4d5d637be356f88e9b0535f227031"
+      }
+    },
+    {
+      "relative": "app/original-client-shell.tsx",
+      "originalSha256": "b6a0c83c964cf73c3cd7f4ae8f1f0e7550ff12ce9980ac1c2117232c26934e1c",
+      "originalBytes": 334681,
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+        "bytes": 334911,
+        "sha256": "a5caa3bda3c2aa53815cc5901092975d0d0f39370d5a266fd58020625ad3ca08"
+      },
+      "isolated": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+        "bytes": 334911,
+        "sha256": "a5caa3bda3c2aa53815cc5901092975d0d0f39370d5a266fd58020625ad3ca08"
+      }
+    },
+    {
+      "relative": "app/components/original-client-shell-types.ts",
+      "originalSha256": "55b7cdb51cb4e4f144b2cadd26b8bc68b48c7b34821754cf6f55244d1e93d81c",
+      "originalBytes": 18732,
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+        "bytes": 18839,
+        "sha256": "b0f78fca5b8dcd9aca096de52c7b6fb9c9ca5f263185d4ef25be2be63c43d070"
+      },
+      "isolated": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+        "bytes": 18839,
+        "sha256": "b0f78fca5b8dcd9aca096de52c7b6fb9c9ca5f263185d4ef25be2be63c43d070"
+      }
+    },
+    {
+      "relative": "scripts/test-bevy-storage-ui.mjs",
+      "originalSha256": "0b41f3a8db888e6902aff0def94b7900e031df189aadfcb923fbb1f39fb08ce5",
+      "originalBytes": 65929,
+      "main": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-storage-ui.mjs",
+        "bytes": 79082,
+        "sha256": "f2636187a1c2273c55330b11a62dbb14175b9c0f51b50259a82591bdd9d73e1c"
+      },
+      "isolated": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\test-bevy-storage-ui.mjs",
+        "bytes": 79082,
+        "sha256": "f2636187a1c2273c55330b11a62dbb14175b9c0f51b50259a82591bdd9d73e1c"
+      }
+    }
+  ],
+  "acceptedForFocusedOriginalCaller": true,
+  "productAcceptance": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "priorReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-code-review01.json",
+    "bytes": 6617,
+    "sha256": "69a74534f073dadbf6d165972b6c21cc1ac80f2d62f03eae8c4eaa74811d02fb"
+  },
+  "preservedNodeFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-node-failed01.json",
+    "bytes": 2863,
+    "sha256": "764fbc0f6ba441232bd8a66d86069f5ba8a637fc81a028f6012be86d8fff82fb"
+  },
+  "adjacentWorker": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\worker-delivery01\\adjacent-tests-manifest01.json",
+    "bytes": 2142,
+    "sha256": "7f8f89694077c7e510067b4f8e121df6af43d03adbf09c8d83a05fc661145460"
+  },
+  "adjacentTestChanges": {
+    "hud": "extract actual fishing cancel/retire, supply no-held refs; update two exact existing Shell regex prefixes to require current added Hero/belt/repair cancellation and dependency order, retain all original call/dependency suffixes",
+    "npcShop": "add exactly the actual pure belt dependency; all 25 tests and224 assertions byte-unchanged"
+  },
+  "original43StorageTestsBytePreserved": true,
+  "otherProductCodeUnchangedSinceNode01": true,
+  "testsExecutedForThisSnapshot": false,
+  "adjacentCode": [
+    {
+      "relative": "scripts/test-bevy-hud-ui.mjs",
+      "originalSha256": "ac4045c4e23967b69df0468de131a83eef2d0ed026a19cbba73c0c2e8e358f74",
+      "originalBytes": 11905,
+      "outputSha256": "bd988d4396f008a75ade835e0df3181e2581dfd2513456010e9dfdfc45a65adc",
+      "outputBytes": 12469,
+      "originalTests": 4,
+      "outputTests": 4,
+      "originalAssertOccurrences": 47,
+      "outputAssertOccurrences": 48,
+      "mainPath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-hud-ui.mjs",
+      "isolatedPath": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\test-bevy-hud-ui.mjs",
+      "reviewedPath": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\adjacent-root-review01\\test-bevy-hud-ui.mjs",
+      "finalPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\test-bevy-hud-ui.mjs",
+        "bytes": 12702,
+        "sha256": "a433f69baa31b24071450d141d47af65c752f658e543a22f8cdbde632355712f"
+      }
+    },
+    {
+      "relative": "scripts/test-bevy-npc-shop-ui.mjs",
+      "originalSha256": "afc2ede23b9965f3c923c0e21711f89cd09ba6b1400bec6241d23a92b4310f41",
+      "originalBytes": 32995,
+      "outputSha256": "4fb4bcf100a8741fb53761971bfb6408faf5802feb50e858f21ce3dceb010729",
+      "outputBytes": 33073,
+      "originalTests": 25,
+      "outputTests": 25,
+      "originalAssertOccurrences": 224,
+      "outputAssertOccurrences": 224,
+      "mainPath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-ui.mjs",
+      "isolatedPath": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-ui.mjs",
+      "reviewedPath": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\adjacent-root-review01\\test-bevy-npc-shop-ui.mjs",
+      "finalPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-ui.mjs",
+        "bytes": 33073,
+        "sha256": "4fb4bcf100a8741fb53761971bfb6408faf5802feb50e858f21ce3dceb010729"
+      }
+    }
+  ]
+}

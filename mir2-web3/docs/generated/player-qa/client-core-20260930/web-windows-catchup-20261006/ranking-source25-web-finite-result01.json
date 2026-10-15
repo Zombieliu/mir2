@@ -1,0 +1,163 @@
+{
+  "owner": "Root",
+  "generatedAtUtc": "2026-10-07T06:10:00.470Z",
+  "kind": "Source25 Web final finite CPU and strict code-only TypeScript actual result",
+  "parentCommit": "6562c474a67cf1c377a600ae254997be744879b4",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-node05-snapshot.json",
+    "bytes": 9776006,
+    "sha256": "fdc38f594ad5211628aebd64f16ff987804d0de56946856360260eefb6d8eed4"
+  },
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-node05-source-review.json",
+    "bytes": 4162,
+    "sha256": "fc317e17fe8e63d0f7494fcaf7a9b8c935216c00d72980787e8ca96b161fc302"
+  },
+  "jobs": [
+    {
+      "name": "node04",
+      "config": {
+        "name": "node04",
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-node04.config.json",
+        "bytes": 4808,
+        "sha256": "063830d3d2e3b8f96c9f9145004ffeec4b5cb9f63cb988e83c0638d7c9ff53be"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-node04.outer.json",
+        "bytes": 556,
+        "sha256": "adedaffcb5ab2d27f95b42cd0fcdcf74c87d9afd17887760156720f033ef0bf8"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-node04.stdout.log",
+        "bytes": 23505,
+        "sha256": "a96c9f1ffa6e1453181e1df73657008d0a2d68a5104c5e3fe8121a119f1201ff"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-node04.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "actualOuter": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 123548,
+        "kind": "Source25 Ranking node04 final checked slot typing original code-only runner; prepared not execution",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 15088,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-node04.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      }
+    },
+    {
+      "name": "tsc04",
+      "config": {
+        "name": "tsc04",
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-tsc04.config.json",
+        "bytes": 4452,
+        "sha256": "637b31f58a9d3f6a508ab42c3287931f2eb51b58fa7acd4a0fc96cdc8b472021"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-tsc04.outer.json",
+        "bytes": 554,
+        "sha256": "1e37f0812428f01f211ead651dce1e6048c343e5e068081a13224db24d5fca87"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-tsc04.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-tsc04.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "actualOuter": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 128224,
+        "kind": "Source25 Ranking tsc04 final checked slot typing original code-only runner; prepared not execution",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 15164,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-ranking-source25-tsc04.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      }
+    }
+  ],
+  "toolReturns": [
+    {
+      "key": "source25RankingNode04Latest",
+      "chunkId": "358d44",
+      "exitCode": 0
+    },
+    {
+      "key": "source25RankingTsc04Latest",
+      "chunkId": "df92e6",
+      "exitCode": 0
+    }
+  ],
+  "finite": {
+    "originalNodeScripts": 11,
+    "nodeTests": 220,
+    "nodePassed": 220,
+    "nodeFailed": 0,
+    "nodeSkipped": 0,
+    "stage5InternalGroups": 440,
+    "stage5PreviousGroups": 392,
+    "stage5AddedGroups": 48,
+    "stage5CountQualification": "440 internal groups are contained in one Node file-level test; never add440to220.",
+    "combatDeclarations": 23,
+    "storageDeclarations": 67,
+    "storageOriginalBaseDeclarations": 65,
+    "storagePriorSource24PearlDeclarations": 2,
+    "strictCodeOnlyTscExitCode": 0,
+    "tscIncremental": false,
+    "tscStrict": true
+  },
+  "previousFailures": [
+    {
+      "name": "stage5-01",
+      "exitCode": 1,
+      "reason": "Old parityPageFixture missing actual Inspector modal ref; retained actual error, not passed."
+    },
+    {
+      "name": "node02",
+      "exitCode": 1,
+      "nodeTests": 220,
+      "nodePassed": 211,
+      "nodeFailed": 9,
+      "reason": "Combat exact tail/modal ref and Storage real Rankingcontroller dependencies; original assertions maintained by reviewed repair."
+    },
+    {
+      "name": "tsc03",
+      "exitCode": 2,
+      "reason": "TS7053 original UI slot labels typedstring, own-key checked indexnarrowing fixed."
+    }
+  ],
+  "sourceRepairsQualification": "All product files/tests frozen; old Stage5 scope supplies newmodalref and fullactualInspect tail; required old AST offsets shiftone, oldguardpredicates preserved. Combat original5guards retained in6tail and controllerStorage uses real modules; actual row33 replacesremoved syntheticfallback but original33assertion unchanged. Typefix has ownkey refusal, no index default. Independent source review restored exact prior bytes after reversing each bounded repair.",
+  "limitations": [
+    "27456regularinput leaves,24891inherited dependencies via declared node_modules junction plus1externalQATSCconfig. No newlinks/privateenv/helper.",
+    "Optional PUI admission result canonical strict; finite Core response is stub, no WASM API/instance execution.",
+    "Legacy name/nonHero response correlation has no nonce or independent ACK; unknown sends/closed-display replies do not authorize retries.",
+    "Backend query tests/static candidate package not accepted by this Web-only record.",
+    "No UI/server/renderer/headless/HTTP/socket/network gameplay, save/relogin or mobile/human acceptance."
+  ],
+  "finiteCpuAccepted": true,
+  "strictTypeCheckAccepted": true,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

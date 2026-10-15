@@ -1,0 +1,264 @@
+{
+  "owner": "Root",
+  "kind": "Source73 public mandatory Bag plus Storage resource gap",
+  "sharedBagSkinContract": 17,
+  "sharedStorageSkinContract": 16,
+  "sharedMandatorySkinUnion": 30,
+  "canonicalStorageSkinsLocalAndHashMatched": 16,
+  "missingBagOnlyPhysicalInputs": 14,
+  "missingBagOnlyPhysicalBytes": 52132,
+  "mainGenuinePngPins": [
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/737.png",
+      "bytes": 1299,
+      "sha256": "b549fb2c436146e7cb05477166affaf978a907b3cbf68251c6cf8dca30e298c4"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/196.png",
+      "bytes": 37519,
+      "sha256": "987ace9aa582868ff589dd923c64109e8d883549c9b80fe72ed7afd981a0cb3b"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/738.png",
+      "bytes": 1222,
+      "sha256": "a55bf1c23ff817bb9c06c8d5262f8e2a9f1f2a2d0508b452ca1f085138e6b69e"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/198.png",
+      "bytes": 2634,
+      "sha256": "457b71198068acc1a60b297d03f4e237d5bc8171e5b82b2671c150c1d91ea3b2"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/197.png",
+      "bytes": 2588,
+      "sha256": "946cea551adef762383635f2e5532f6af7c2cb2a2e41a0ec6a08a77293fcbd22"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/169.png",
+      "bytes": 1477,
+      "sha256": "e827a0dc935e47496a6ac2a6bcb4277fc25c68dfa03966f327b0f507289fe537"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Prguse2/360.png",
+      "bytes": 681,
+      "sha256": "4e481bca194a082812caa01c6e4fdee387c016cf520b68b5fbb5fa2635d04675"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/739.png",
+      "bytes": 1286,
+      "sha256": "fe5a67f44d738da1f7a9e44d01f0f6040d492c76e1474cc73442a7c6bbfb4cb1"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/168.png",
+      "bytes": 2533,
+      "sha256": "e0f02ec512d206486d8d0bd9f8fafbf99935cebe492487cb2ad2523247f9bd19"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Prguse2/361.png",
+      "bytes": 684,
+      "sha256": "2a25918cd9b5acde7b9acc5b67fd0fddb537cd018dc7e2695436ab0bf7095238"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Prguse2/367.png",
+      "bytes": 455,
+      "sha256": "745b4a58bbeecee797c4dd75139c97ac1081617c1eddc406e77c249133311aac"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Prguse2/362.png",
+      "bytes": 686,
+      "sha256": "98614f07962fedc5722113a213ea0c6b89695680dc8cc91f708e5eb65f24fed2"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Prguse2/366.png",
+      "bytes": 355,
+      "sha256": "d7c78c85bd84f5b3cc1ae5df1fcfe0e9dee2ad621b6d77fb4c832a7d21521a45"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Prguse2/368.png",
+      "bytes": 320,
+      "sha256": "fc54148b220854916c22f45eff733f24b8ed5fa1c6f562eadc358d4f98276586"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Prguse/24.png",
+      "bytes": 120,
+      "sha256": "91d62745a6fade1d2503363d9c29c9c2b00b60e4a21b43fb2bba8c13ec413323"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/UI_32bit/471.png",
+      "bytes": 165,
+      "sha256": "a00321a6af8ec61f672e9b1f2555c1f4f66c5ade96147e1824f76c09877d2192"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/UI_32bit/470.png",
+      "bytes": 159,
+      "sha256": "97ee73897bf18db4106c07fddd6a1daf91d274890196c3c6fa19b7dbd9aa7bd9"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Prguse/586.png",
+      "bytes": 61324,
+      "sha256": "af68c4fb8aa9208749cef451a6519a8b3147a221e2113142dc5e6356c7dd02be"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/0.png",
+      "bytes": 840,
+      "sha256": "3a09e29c731a7a01fc7c66e458f3030a220c8d0e426d2abc6f026a043d10647f"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/746.png",
+      "bytes": 1311,
+      "sha256": "3cf6104ac32fdbe4d28e4300d9856365fd330b6c61b826bbf037f46ca7588222"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/744.png",
+      "bytes": 1280,
+      "sha256": "f23598018c5d592d1c3e654cb6044ffaaeb27d736b3fad92702476953e0f1196"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/743.png",
+      "bytes": 2677,
+      "sha256": "0af770b4e2f2af6a2f9d60e7bd98f5c5fa6081aa8165027cee05418a436efa72"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/745.png",
+      "bytes": 2673,
+      "sha256": "ab5669753587e3f37396ddb8a4d7307b5447abf39c7dec37a6bbf76bc67ced41"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/485.png",
+      "bytes": 1567,
+      "sha256": "d409c51360c6d7208e852aad677a44edb4dff0a8d30708fb75ceb9920aefdbce"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/483.png",
+      "bytes": 1593,
+      "sha256": "5aa40ec0ad805dfc25231ba052e936c7c434c75d6a2af76c0bc4c4963e154fbf"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Prguse/2443.png",
+      "bytes": 61812,
+      "sha256": "53715fce027146d34a46da83ee4671b2a2eb1b0ce394fc84f688483300c0437c"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/113.png",
+      "bytes": 1547,
+      "sha256": "e1a0b22610144a0a2f1e4dfda6c8198abdef21c1a04aa7eb02b1adb4b5016b48"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/484.png",
+      "bytes": 2021,
+      "sha256": "6aacce00217a8d5e4a5e479b0e5cd5b5a30016cd8707d1a96ff59997abfe0e94"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/114.png",
+      "bytes": 1970,
+      "sha256": "55161a08bff2314daee55472407ec1cc26dd94629f3b72630133054d9e0c6fb3"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/115.png",
+      "bytes": 1520,
+      "sha256": "dd3ea4dfe347586d2541cf89f9355bf6c2ff5235f36100a6098a445ae4a3717a"
+    }
+  ],
+  "physicalGap": [
+    {
+      "path": "original-ui/Title/196.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/Title/197.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/Title/737.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/Title/169.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/Title/168.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/Title/738.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/Title/198.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/Title/739.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/Prguse2/366.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/Prguse2/367.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/Prguse2/368.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/Prguse/24.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/UI_32bit/471.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    },
+    {
+      "path": "original-ui/UI_32bit/470.png",
+      "strictInput": "absent",
+      "actualPackage": "absent"
+    }
+  ],
+  "actualObserved404": [
+    {
+      "path": "original-ui/UI_32bit/470.png",
+      "status": 404
+    },
+    {
+      "path": "original-ui/UI_32bit/471.png",
+      "status": 404
+    }
+  ],
+  "ui32SelectorAlreadyAllowedBeforeFix": true,
+  "other12ResponsesObserved200FromCurrentServer": true,
+  "causality": "Actual 404s are compatible with storage_ui_host.rs any Failed skin load setting the assets-failed error; the exact private handle state was not read.",
+  "loadGateSource": "apps/game-client/runtime/src/storage_ui_host.rs:245-280",
+  "notYetProven": [
+    "shared storage owner handoff",
+    "HUD active and complete tree ready gate",
+    "native pointer handoff",
+    "shared cancel"
+  ],
+  "source74ProposedScope": {
+    "fixedMandatoryGenuinePngInputs": 14,
+    "selectorAdditions": 14,
+    "hardcodedCurrentAccountItems": false,
+    "productCodeChangedAtThisCheckpoint": false
+  },
+  "productGlobalsRead": false,
+  "activeProductLogsRead": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

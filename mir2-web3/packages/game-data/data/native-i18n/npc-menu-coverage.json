@@ -1,0 +1,14 @@
+{
+  "sourceLabels": 607,
+  "translatedLabels": 607,
+  "missing": [],
+  "methods": {
+    "reviewed-menu": 260,
+    "reviewed-skill-level-template": 90,
+    "existing-display-name-or-label": 197,
+    "reviewed-numbered-menu": 13,
+    "existing-map-display-name": 23,
+    "reviewed-level-range": 20,
+    "reviewed-tax-percentage": 4
+  }
+}

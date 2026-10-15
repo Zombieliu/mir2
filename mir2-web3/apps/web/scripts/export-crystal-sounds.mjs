@@ -2,6 +2,7 @@ import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { FIVE_CLASS_SKILL_SOUNDS } from "./asset-pipeline/five-class-skill-source.mjs";
 
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "..");
 const REPO_ROOT = path.resolve(WORKSPACE_ROOT, "..", "..");
@@ -60,6 +61,11 @@ export const DIRECT_CRYSTAL_SOUND_ENTRIES = [
   { id: 20611, fileName: "M61-1.wav" },
   { id: 20760, fileName: "M76-0.wav" },
   { id: 20791, fileName: "M79-1.wav" },
+  { id: 21210, fileName: "M121-0.wav" },
+  { id: 21212, fileName: "M121-2.wav" },
+  { id: 21215, fileName: "M121-5.wav" },
+  ...FIVE_CLASS_SKILL_SOUNDS.filter((entry) => ![21210, 21212, 21215].includes(entry.id))
+    .map(({ id, fileName }) => ({ id, fileName })),
 ];
 
 // Only auto-run when invoked directly (node scripts/export-crystal-sounds.mjs ...). When the
@@ -105,10 +111,13 @@ async function main() {
 }
 
 // Core export: read SoundList.lst, index the source wavs, copy each referenced clip into
-// outputDir, and write the sound index json (to both indexPath and docPath). Returns the
+// outputDir, write the public sound index to indexPath and isolated Source diagnostics
+// to docPath. Returns the
 // summary so callers (CLI + tests) can react. Pure wrt globals except the filesystem writes it
-// is given, which makes it safe to exercise against temp dirs.
-export async function runCrystalSoundExport({ clientRoot, outputDir, indexPath, docPath, strict = false }) {
+// is given, which makes it safe to exercise against temp dirs. copySoundIds limits
+// physical copies for a bounded Source audit; the index still describes every
+// real Source entry. The default continues to copy all resolved sounds.
+export async function runCrystalSoundExport({ clientRoot, outputDir, indexPath, docPath, strict = false, copySoundIds = null }) {
   const resolvedClientRoot = path.resolve(clientRoot);
   const soundDir =
     path.basename(resolvedClientRoot).toLowerCase() === "sound"
@@ -128,10 +137,20 @@ export async function runCrystalSoundExport({ clientRoot, outputDir, indexPath, 
     parseSoundList(await readFile(soundListPath, "utf8")),
     DIRECT_CRYSTAL_SOUND_ENTRIES,
   );
+  const copyIds = copySoundIds === null ? null : new Set(copySoundIds);
+  if (copyIds) {
+    const entryIds = new Set(entries.map((entry) => entry.id));
+    for (const id of copyIds) {
+      if (!Number.isSafeInteger(id) || id <= 0 || !entryIds.has(id)) {
+        throw new Error(`Bounded sound export contains an invalid or unindexed Source id: ${id}`);
+      }
+    }
+  }
   const sounds = {};
   const missing = [];
   const fallbackSounds = [];
   let copiedCount = 0;
+  let copiedSoundCount = 0;
   let fallbackCount = 0;
 
   await mkdir(outputDir, { recursive: true });
@@ -156,9 +175,12 @@ export async function runCrystalSoundExport({ clientRoot, outputDir, indexPath, 
       continue;
     }
 
-    const outputPath = path.join(outputDir, entry.fileName);
-    await mkdir(path.dirname(outputPath), { recursive: true });
-    await copyFile(sourcePath, outputPath);
+    if (!copyIds || copyIds.has(entry.id)) {
+      const outputPath = path.join(outputDir, entry.fileName);
+      await mkdir(path.dirname(outputPath), { recursive: true });
+      await copyFile(sourcePath, outputPath);
+      copiedSoundCount += 1;
+    }
     copiedCount += 1;
     sounds[String(entry.id)] = {
       fileName: entry.fileName,
@@ -185,11 +207,18 @@ export async function runCrystalSoundExport({ clientRoot, outputDir, indexPath, 
     }
   }
 
+  // A public index travels in the installer. Its provenance is a stable Source
+  // layout, never the developer's machine path. Absolute locations belong only
+  // in the isolated QA report below, which is not a Candidate payload.
+  const sourceClientRoot = path.basename(resolvedClientRoot).toLowerCase() === "sound"
+    ? path.dirname(resolvedClientRoot) : resolvedClientRoot;
+  const sourceLayout = /(?:^|\/)Build\/Client\/Debug$/i.test(sourceClientRoot.replaceAll("\\", "/"))
+    ? "Build/Client/Debug" : "Client";
   const summary = {
     generatedAt: new Date().toISOString(),
-    clientRoot: resolvedClientRoot,
-    soundDir,
-    soundListPath,
+    clientRoot: sourceLayout,
+    soundDir: `${sourceLayout}/Sound`,
+    soundListPath: `${sourceLayout}/Sound/SoundList.lst`,
     soundListEntryCount: entries.length,
     exportedSoundCount: copiedCount,
     fallbackSoundCount: fallbackCount,
@@ -204,10 +233,10 @@ export async function runCrystalSoundExport({ clientRoot, outputDir, indexPath, 
   await writeFile(indexPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
   if (docPath) {
     await mkdir(path.dirname(docPath), { recursive: true });
-    await writeFile(docPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+    await writeFile(docPath, `${JSON.stringify({ ...summary, clientRoot: resolvedClientRoot, soundDir, soundListPath }, null, 2)}\n`, "utf8");
   }
 
-  return { summary, strict };
+  return { summary, strict, copiedSoundCount };
 }
 
 export function indexSourceWavs(soundDir) {

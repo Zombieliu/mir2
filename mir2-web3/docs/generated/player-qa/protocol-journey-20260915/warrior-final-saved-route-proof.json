@@ -1,0 +1,44 @@
+{
+  "sourceTrace": "C:\\mir2-protocol-journey-20260911\\Warrior.2026-09-15T20-40-55-574Z.trace.jsonl",
+  "character": {
+    "name": "JWa3693f66",
+    "index": 8,
+    "accountId": "jpa3693f66"
+  },
+  "requiredIdCount": 55,
+  "report": {
+    "completed": true,
+    "error": null,
+    "finishedAt": "2026-09-15T20:40:58.773Z",
+    "finalEvidence": "completed-with-public-LogOutSuccess"
+  },
+  "saved": {
+    "revision": 7447,
+    "level": 30,
+    "map": "0",
+    "x": 334,
+    "y": 270,
+    "hp": 419,
+    "mp": 116,
+    "mandatoryCompleted": 55,
+    "milestoneCompleted": 4
+  },
+  "final": {
+    "level": 30,
+    "map": "0",
+    "x": 334,
+    "y": 270,
+    "hp": 419,
+    "mp": 116,
+    "ownerId": 1000,
+    "name": "JWa3693f66",
+    "className": "Warrior",
+    "dead": false,
+    "mandatoryCompleted": 55,
+    "milestoneCompleted": 4
+  },
+  "mismatches": [],
+  "mandatoryDenominator": 55,
+  "milestoneDenominator": 4,
+  "note": "Selected final owner snapshot is sequence 651 before outbound logOut sequence 652; received LogOutSuccess is sequence 653. Post-logout empty snapshot sequence 654 is ignored."
+}

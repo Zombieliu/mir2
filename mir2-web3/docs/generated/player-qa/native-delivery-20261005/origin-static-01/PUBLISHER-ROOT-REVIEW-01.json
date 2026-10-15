@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "reviewedPublisherSHA256": {
+    "origin-r17-append.py": "10693760a24973f896caa3f5ac6b1f59e02a32f6e9977cea0dbaa65adbaa0811",
+    "test_origin_r17_append.py": "4ddffa5d88b603a653f5e3135cdba6ec66ce1264ae55b4a4aea4f8e755c8cb18"
+  },
+  "localTests": 31,
+  "localTestsLogSha256": "6df6f916b8acffda7149097934f5902e86504e0b8b4f9c4462854dc6fe50585f",
+  "cmsReceiptSha256": "f88f248c69f3d4b9bf3624dec171fc23fd2640e093d339f07e4c65a465c158ec",
+  "allRemoteCommandsPreparedOnly": true,
+  "credentialsIncluded": false
+}

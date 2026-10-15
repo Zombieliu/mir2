@@ -1,0 +1,20 @@
+
+running 1 test
+test routing::tests::shared_in_process_runtime_routes_magic_through_shared_zone ... FAILED
+
+failures:
+
+---- routing::tests::shared_in_process_runtime_routes_magic_through_shared_zone stdout ----
+
+thread 'routing::tests::shared_in_process_runtime_routes_magic_through_shared_zone' (50956) panicked at apps\gateway\src\routing.rs:26017:9:
+assertion failed: launch_packets.iter().any(|packet|
+        matches!(packet, ServerPacket::Magic { spell, target_id, .. } if
+            *spell == Spell::Healing && *target_id == target.object_id))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    routing::tests::shared_in_process_runtime_routes_magic_through_shared_zone
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 791 filtered out; finished in 2.37s
+

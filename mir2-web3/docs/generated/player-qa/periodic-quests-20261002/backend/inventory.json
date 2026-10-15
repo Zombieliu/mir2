@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "files": [
+    {
+      "file": "guild-experience-checkpoint-regression-featured.log",
+      "bytes": 39660,
+      "sha256": "d550c9608e941209bd564f0b3f0e47f208bfeb414f0f6772fbcb2a978ea7363c"
+    },
+    {
+      "file": "guild-experience-checkpoint-regression.log",
+      "bytes": 37422,
+      "sha256": "dc57f29a9ca4e2d727abaed75d889b6fd2cf5bffc81052822985e9b84846a23c"
+    },
+    {
+      "file": "imported-quest-endpoints-regression.log",
+      "bytes": 37669,
+      "sha256": "b497f8adb545cdede06f0cc0bad4aef7e550fa6b4c928ef1ebb68085ba359cb2"
+    },
+    {
+      "file": "imported-quest-packets-regression.log",
+      "bytes": 37819,
+      "sha256": "3f212d461cc4f33290d65c2e4cc43ceccd1f84c0aaf3a780d54c7ce2b08f5136"
+    },
+    {
+      "file": "periodic-content-tests-attempt1.log",
+      "bytes": 1540,
+      "sha256": "3c2337668b621e1480f84f39c1813ed2dcbcf153c546ac69536371054a7721e0"
+    },
+    {
+      "file": "periodic-integration-attempt-1.log",
+      "bytes": 35764,
+      "sha256": "2608a87ea94303c1d9975b397465be56b6a033167d6f9b7a955be8cf4c0a807f"
+    },
+    {
+      "file": "periodic-integration-attempt-2.log",
+      "bytes": 30855,
+      "sha256": "adf8b70813e2cbd4a1870302f28f1f4ba183fae100c925daa98e6741424a5dc4"
+    },
+    {
+      "file": "periodic-rules-test-attempt1.log",
+      "bytes": 9706,
+      "sha256": "4cef9a431fd6f4f3bd5533d415feea1f19d365faee31e46e9f5d5c09fcdea72c"
+    },
+    {
+      "file": "periodic-rules-test-attempt2.log",
+      "bytes": 38638,
+      "sha256": "e8ddbee3e8948e6af7342ac4283756fdd2097d27147db22552f39b3f24b0eec5"
+    },
+    {
+      "file": "quest-recurrence-regression.log",
+      "bytes": 38683,
+      "sha256": "8c95d840269223f688710acc5c4eaeb3dc4f82d30a78aa804c643c96fda166e5"
+    }
+  ]
+}

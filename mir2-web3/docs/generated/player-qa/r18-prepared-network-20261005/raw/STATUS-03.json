@@ -1,0 +1,727 @@
+{
+  "generatedUtc": "2026-10-04T16:46:42.442316+00:00",
+  "root": "/home/ubuntu/mir2-playtest-preflight-20260929/r18-dense-20261004-161010",
+  "wrapperFinished": true,
+  "phaseReceipts": [
+    {
+      "phase": "bootstrap",
+      "classes": [
+        {
+          "className": "Warrior",
+          "status": "completed",
+          "error": null,
+          "cases": [],
+          "deathStatus": null,
+          "deadActions": null,
+          "freshLoad": null,
+          "genericPersistence": "passed"
+        },
+        {
+          "className": "Wizard",
+          "status": "completed",
+          "error": null,
+          "cases": [],
+          "deathStatus": null,
+          "deadActions": null,
+          "freshLoad": null,
+          "genericPersistence": "passed"
+        },
+        {
+          "className": "Taoist",
+          "status": "completed",
+          "error": null,
+          "cases": [],
+          "deathStatus": null,
+          "deadActions": null,
+          "freshLoad": null,
+          "genericPersistence": "passed"
+        }
+      ]
+    },
+    {
+      "phase": "death",
+      "classes": [
+        {
+          "className": "Warrior",
+          "status": "inconclusive",
+          "error": null,
+          "cases": [],
+          "deathStatus": "inconclusive",
+          "deadActions": null,
+          "freshLoad": "not-applicable",
+          "genericPersistence": null
+        },
+        {
+          "className": "Wizard",
+          "status": "completed",
+          "error": null,
+          "cases": [],
+          "deathStatus": "passed",
+          "deadActions": "passed",
+          "freshLoad": "passed",
+          "genericPersistence": null
+        },
+        {
+          "className": "Taoist",
+          "status": "completed",
+          "error": null,
+          "cases": [],
+          "deathStatus": "passed",
+          "deadActions": "passed",
+          "freshLoad": "passed",
+          "genericPersistence": null
+        }
+      ]
+    },
+    {
+      "phase": "dense",
+      "classes": [
+        {
+          "className": "Warrior",
+          "status": "inconclusive",
+          "error": null,
+          "cases": [
+            {
+              "kind": "attackEscape",
+              "trial": 1,
+              "status": "inconclusive"
+            },
+            {
+              "kind": "castEscape",
+              "trial": null,
+              "status": "not-applicable"
+            },
+            {
+              "kind": "heldStop",
+              "trial": 1,
+              "status": "inconclusive"
+            },
+            {
+              "kind": "prematureRecast",
+              "trial": null,
+              "status": "not-applicable"
+            }
+          ],
+          "deathStatus": null,
+          "deadActions": null,
+          "freshLoad": null,
+          "genericPersistence": "passed"
+        },
+        {
+          "className": "Wizard",
+          "status": "inconclusive",
+          "error": null,
+          "cases": [
+            {
+              "kind": "attackEscape",
+              "trial": 1,
+              "status": "inconclusive"
+            },
+            {
+              "kind": "castEscape",
+              "trial": 1,
+              "status": "inconclusive"
+            },
+            {
+              "kind": "heldStop",
+              "trial": 1,
+              "status": "inconclusive"
+            },
+            {
+              "kind": "prematureRecast",
+              "trial": 1,
+              "status": "inconclusive"
+            }
+          ],
+          "deathStatus": null,
+          "deadActions": null,
+          "freshLoad": null,
+          "genericPersistence": "passed"
+        },
+        {
+          "className": "Taoist",
+          "status": "inconclusive",
+          "error": null,
+          "cases": [
+            {
+              "kind": "attackEscape",
+              "trial": 1,
+              "status": "inconclusive"
+            },
+            {
+              "kind": "castEscape",
+              "trial": 1,
+              "status": "inconclusive"
+            },
+            {
+              "kind": "heldStop",
+              "trial": 1,
+              "status": "inconclusive"
+            },
+            {
+              "kind": "prematureRecast",
+              "trial": 1,
+              "status": "inconclusive"
+            }
+          ],
+          "deathStatus": null,
+          "deadActions": null,
+          "freshLoad": null,
+          "genericPersistence": "passed"
+        }
+      ]
+    },
+    {
+      "phase": "purchases",
+      "classes": [
+        {
+          "className": "Warrior",
+          "status": "completed",
+          "error": null,
+          "cases": [],
+          "deathStatus": null,
+          "deadActions": null,
+          "freshLoad": null,
+          "genericPersistence": "passed"
+        },
+        {
+          "className": "Wizard",
+          "status": "completed",
+          "error": null,
+          "cases": [],
+          "deathStatus": null,
+          "deadActions": null,
+          "freshLoad": null,
+          "genericPersistence": "passed"
+        },
+        {
+          "className": "Taoist",
+          "status": "completed",
+          "error": null,
+          "cases": [],
+          "deathStatus": null,
+          "deadActions": null,
+          "freshLoad": null,
+          "genericPersistence": "passed"
+        }
+      ]
+    }
+  ],
+  "traces": [
+    {
+      "file": "bootstrap-receipts/Taoist-bootstrap-relogin.jsonl",
+      "bytes": 1168347,
+      "lastSequence": 672,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131329683,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "bootstrap-receipts/Taoist.jsonl",
+      "bytes": 1616044,
+      "lastSequence": 699,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131324534,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "bootstrap-receipts/Warrior-bootstrap-relogin.jsonl",
+      "bytes": 1168218,
+      "lastSequence": 672,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131307891,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "bootstrap-receipts/Warrior.jsonl",
+      "bytes": 1665030,
+      "lastSequence": 737,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131302684,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "bootstrap-receipts/Wizard-bootstrap-relogin.jsonl",
+      "bytes": 1168227,
+      "lastSequence": 672,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131318824,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "bootstrap-receipts/Wizard.jsonl",
+      "bytes": 1615924,
+      "lastSequence": 699,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131313831,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "death-receipts/Taoist-alive-relogin.jsonl",
+      "bytes": 1235449,
+      "lastSequence": 671,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791132193581,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "death-receipts/Taoist-fresh-load.jsonl",
+      "bytes": 1968190,
+      "lastSequence": 705,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791132187448,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "death-receipts/Taoist.jsonl",
+      "bytes": 11096370,
+      "lastSequence": 1524,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791132176175,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "death-receipts/Warrior.jsonl",
+      "bytes": 34513365,
+      "lastSequence": 3640,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791132066822,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "death-receipts/Wizard-alive-relogin.jsonl",
+      "bytes": 1235234,
+      "lastSequence": 671,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791132118706,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "death-receipts/Wizard-fresh-load.jsonl",
+      "bytes": 2016301,
+      "lastSequence": 742,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791132112940,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "death-receipts/Wizard.jsonl",
+      "bytes": 6881750,
+      "lastSequence": 1125,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791132101570,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "dense-receipts/Taoist-dense-relogin.jsonl",
+      "bytes": 1229078,
+      "lastSequence": 661,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131881600,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "dense-receipts/Taoist.jsonl",
+      "bytes": 32102131,
+      "lastSequence": 4474,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131877842,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "dense-receipts/Warrior-dense-relogin.jsonl",
+      "bytes": 1245279,
+      "lastSequence": 666,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131622565,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "dense-receipts/Warrior.jsonl",
+      "bytes": 11436898,
+      "lastSequence": 2059,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131619050,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "dense-receipts/Wizard-dense-relogin.jsonl",
+      "bytes": 1213668,
+      "lastSequence": 650,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131752145,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "dense-receipts/Wizard.jsonl",
+      "bytes": 30775958,
+      "lastSequence": 4267,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131748311,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "purchases-receipts/Taoist-purchases-relogin.jsonl",
+      "bytes": 1150316,
+      "lastSequence": 591,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131553411,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "purchases-receipts/Taoist.jsonl",
+      "bytes": 7644642,
+      "lastSequence": 1352,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131547647,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "purchases-receipts/Warrior-purchases-relogin.jsonl",
+      "bytes": 1234732,
+      "lastSequence": 660,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131361357,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "purchases-receipts/Warrior.jsonl",
+      "bytes": 2789335,
+      "lastSequence": 813,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131355604,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "purchases-receipts/Wizard-purchases-relogin.jsonl",
+      "bytes": 1150053,
+      "lastSequence": 591,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131457350,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    },
+    {
+      "file": "purchases-receipts/Wizard.jsonl",
+      "bytes": 7663642,
+      "lastSequence": 1351,
+      "lastType": "worldSnapshot",
+      "lastPacket": null,
+      "lastMs": 1791131451508,
+      "state": {
+        "map": "",
+        "x": null,
+        "y": null,
+        "hp": null,
+        "mp": null,
+        "dead": false
+      }
+    }
+  ],
+  "wrapperPid": 2710562,
+  "wrapperExitCode": 0,
+  "wrapperProcExists": false,
+  "completedStages": [
+    {
+      "phase": "bootstrap",
+      "classes": [
+        {
+          "className": "Warrior",
+          "status": "completed",
+          "normalLogoutConfirmed": true
+        },
+        {
+          "className": "Wizard",
+          "status": "completed",
+          "normalLogoutConfirmed": true
+        },
+        {
+          "className": "Taoist",
+          "status": "completed",
+          "normalLogoutConfirmed": true
+        }
+      ],
+      "executionError": null,
+      "ownedGatewayNormalExitCode": 0,
+      "normalLogoutConfirmed": true
+    },
+    {
+      "phase": "death",
+      "classes": [
+        {
+          "className": "Warrior",
+          "status": "inconclusive",
+          "normalLogoutConfirmed": true
+        },
+        {
+          "className": "Wizard",
+          "status": "completed",
+          "normalLogoutConfirmed": true
+        },
+        {
+          "className": "Taoist",
+          "status": "completed",
+          "normalLogoutConfirmed": true
+        }
+      ],
+      "executionError": null,
+      "ownedGatewayNormalExitCode": 0,
+      "normalLogoutConfirmed": true
+    },
+    {
+      "phase": "dense",
+      "classes": [
+        {
+          "className": "Warrior",
+          "status": "inconclusive",
+          "normalLogoutConfirmed": true
+        },
+        {
+          "className": "Wizard",
+          "status": "inconclusive",
+          "normalLogoutConfirmed": true
+        },
+        {
+          "className": "Taoist",
+          "status": "inconclusive",
+          "normalLogoutConfirmed": true
+        }
+      ],
+      "executionError": null,
+      "ownedGatewayNormalExitCode": 0,
+      "normalLogoutConfirmed": true
+    },
+    {
+      "phase": "purchases",
+      "classes": [
+        {
+          "className": "Warrior",
+          "status": "completed",
+          "normalLogoutConfirmed": true
+        },
+        {
+          "className": "Wizard",
+          "status": "completed",
+          "normalLogoutConfirmed": true
+        },
+        {
+          "className": "Taoist",
+          "status": "completed",
+          "normalLogoutConfirmed": true
+        }
+      ],
+      "executionError": null,
+      "ownedGatewayNormalExitCode": 0,
+      "normalLogoutConfirmed": true
+    }
+  ],
+  "publicDriverStdout": [
+    {
+      "file": "bootstrap.driver.stdout.log",
+      "tail": "{\"className\":\"Warrior\",\"phase\":\"bootstrap\",\"status\":\"completed\",\"cleanupErrors\":0}\n{\"className\":\"Wizard\",\"phase\":\"bootstrap\",\"status\":\"completed\",\"cleanupErrors\":0}\n{\"className\":\"Taoist\",\"phase\":\"bootstrap\",\"status\":\"completed\",\"cleanupErrors\":0}\n"
+    },
+    {
+      "file": "death.driver.stdout.log",
+      "tail": "{\"className\":\"Warrior\",\"phase\":\"death\",\"status\":\"inconclusive\",\"cleanupErrors\":0}\n{\"className\":\"Wizard\",\"phase\":\"death\",\"status\":\"completed\",\"cleanupErrors\":0}\n{\"className\":\"Taoist\",\"phase\":\"death\",\"status\":\"completed\",\"cleanupErrors\":0}\n"
+    },
+    {
+      "file": "dense.driver.stdout.log",
+      "tail": "{\"className\":\"Warrior\",\"phase\":\"dense\",\"status\":\"inconclusive\",\"cleanupErrors\":0}\n{\"className\":\"Wizard\",\"phase\":\"dense\",\"status\":\"inconclusive\",\"cleanupErrors\":0}\n{\"className\":\"Taoist\",\"phase\":\"dense\",\"status\":\"inconclusive\",\"cleanupErrors\":0}\n"
+    },
+    {
+      "file": "purchases.driver.stdout.log",
+      "tail": "{\"className\":\"Warrior\",\"phase\":\"purchases\",\"status\":\"completed\",\"cleanupErrors\":0}\n{\"className\":\"Wizard\",\"phase\":\"purchases\",\"status\":\"completed\",\"cleanupErrors\":0}\n{\"className\":\"Taoist\",\"phase\":\"purchases\",\"status\":\"completed\",\"cleanupErrors\":0}\n"
+    }
+  ]
+}

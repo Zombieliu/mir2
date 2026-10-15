@@ -10,7 +10,9 @@ use super::crystal_compat::{
     CRYSTAL_BIND_DONT_TRADE, CRYSTAL_BIND_DONT_UPGRADE, CRYSTAL_BIND_UNABLE_TO_DISASSEMBLE,
     CRYSTAL_BIND_UNABLE_TO_RENT,
 };
-use super::equipment::{equipment_slot_unique_id, item_state_from_equipment_state};
+use super::equipment::{
+    equipment_slot_index, item_state_from_equipment_state, user_item_from_equipment_state,
+};
 use super::inventory::{
     add_minutes_to_binary_datetime, binary_datetime_ticks, current_binary_datetime,
     future_binary_datetime, inventory_container_and_slot_for_index,
@@ -164,18 +166,28 @@ fn return_matching_rented_items(
                     && trigger.should_return(item.rental_expiry_binary_datetime)
             })
             .filter_map(|(index, item)| {
-                let unique_id = equipment_slot_unique_id(item.slot)?;
+                // DeleteItem addresses the instance advertised by UserInformation,
+                // not its equipment slot. Only old saves without exact identity
+                // use the protocol slot as their legacy UID fallback.
+                let wire_item = user_item_from_equipment_state(item)?;
+                let legacy_slot = u8::try_from(equipment_slot_index(item.slot)?).ok()?;
                 let item_state = item_state_from_equipment_state(
                     item.clone(),
                     crate::config::ItemContainer::Bag1,
-                    0,
+                    legacy_slot,
                 );
-                Some((index, unique_id, item_state))
+                Some((
+                    index,
+                    item.slot,
+                    wire_item.unique_id,
+                    wire_item.count,
+                    item_state,
+                ))
             })
             .collect::<Vec<_>>()
     };
 
-    for (index, unique_id, item) in equipment_candidates.into_iter().rev() {
+    for (index, slot, unique_id, count, item) in equipment_candidates.into_iter().rev() {
         let Some(returned_item) = returned_rental_item(item) else {
             continue;
         };
@@ -183,20 +195,25 @@ fn return_matching_rented_items(
             continue;
         }
         let mut inventory = world.resource_mut::<InventoryResource>();
-        if index < inventory.equipment_items.len()
-            && equipment_slot_unique_id(inventory.equipment_items[index].slot) == Some(unique_id)
+        let matches_instance = |item: &super::equipment::EquipmentState| {
+            item.slot == slot
+                && user_item_from_equipment_state(item)
+                    .is_some_and(|wire| wire.unique_id == unique_id)
+        };
+        if inventory
+            .equipment_items
+            .get(index)
+            .is_some_and(matches_instance)
         {
             inventory.equipment_items.remove(index);
-        } else if let Some(current_index) = inventory
-            .equipment_items
-            .iter()
-            .position(|item| equipment_slot_unique_id(item.slot) == Some(unique_id))
+        } else if let Some(current_index) =
+            inventory.equipment_items.iter().position(matches_instance)
         {
             inventory.equipment_items.remove(current_index);
         }
         packets.push(ServerPacket::DeleteItem {
             unique_id,
-            count: 1,
+            count: count.max(1),
         });
         returned.push(returned_item);
     }

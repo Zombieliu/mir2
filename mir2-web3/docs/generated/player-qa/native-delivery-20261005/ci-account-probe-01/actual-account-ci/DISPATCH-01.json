@@ -1,0 +1,22 @@
+{
+  "head": "0250695126be552009d81a8e0b951ba85746a70d",
+  "command": [
+    "gh",
+    "workflow",
+    "run",
+    "web-assets-r2-release.yml",
+    "--repo",
+    "Zombieliu/mir2",
+    "--ref",
+    "codex/crowded-combat-control-20261003",
+    "-f",
+    "native_delivery_operation=probe"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 2.243246400001226,
+  "selectedWorkflowSha256": "b5f868f0636960b131244835888823ed4ee284f249e78a428166219a19ce2931",
+  "onlyReadOnlyProbeRequested": true,
+  "oldWebFlagsRequested": false,
+  "productionDeploymentRequested": false,
+  "credentialsExported": false
+}

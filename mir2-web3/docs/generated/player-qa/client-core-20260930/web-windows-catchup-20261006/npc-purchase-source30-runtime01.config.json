@@ -1,0 +1,83 @@
+{
+  "owner": "Root",
+  "repo": "E:\\mir2-player-journey\\mir2-web3",
+  "kind": "Source30 finite pure Native runtime01",
+  "args": [
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "apps/game-client/runtime/Cargo.toml",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--lib",
+    "native_npc_economy",
+    "--",
+    "--test-threads=1"
+  ],
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-rust02-snapshot.json",
+    "bytes": 266901,
+    "sha256": "c9670d2491273a3c4d354c020ff854c8e5feba7903638fb4933c2255d9309a16"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-rust02-review.json",
+    "bytes": 1754,
+    "sha256": "94121f6ae85b19487adaf8bd590c256322c487d73e90d6eadf549d7b2f99a781"
+  },
+  "guard": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.exe",
+    "bytes": 37376,
+    "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e"
+  },
+  "policy": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-runtime01.policy.json",
+    "bytes": 2341,
+    "sha256": "b4c283c57eae70930f015b569025ab81d85cf32e664240c3a4a06eee042c0954"
+  },
+  "roots": {
+    "cargoHome": "C:/Users/Administrator/.cargo",
+    "rustupHome": "C:/Users/Administrator/.rustup",
+    "toolchainBin": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin",
+    "system32": "C:/Windows/System32"
+  },
+  "target": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+  "receiptRoot": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-runtime01-cargo-receipts",
+  "environment": {
+    "SystemRoot": "C:/Windows",
+    "windir": "C:/Windows",
+    "SystemDrive": "C:",
+    "ComSpec": "C:/Windows/System32/cmd.exe",
+    "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+    "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+    "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+    "USERPROFILE": "C:/Users/Administrator",
+    "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+    "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+    "NUMBER_OF_PROCESSORS": "1",
+    "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+    "CARGO_HOME": "C:/Users/Administrator/.cargo",
+    "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+    "RUSTUP_TOOLCHAIN": "1.95.0",
+    "CARGO_TARGET_DIR": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_BUILD_JOBS": "1",
+    "CARGO_NET_OFFLINE": "true",
+    "RUST_MIN_STACK": "67108864",
+    "QA_CARGO_GUARD_POLICY": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-runtime01.policy.json",
+    "QA_CARGO_GUARD_POLICY_SHA256": "b4c283c57eae70930f015b569025ab81d85cf32e664240c3a4a06eee042c0954"
+  },
+  "stdoutPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-runtime01.stdout.log",
+  "stderrPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-runtime01.stderr.log",
+  "outerPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-runtime01.outer.json",
+  "finiteMemoryOnly": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "stage": "Source30 Rust02 prepared only; original immutable CargoGuard, actual GetVolume C>=50GiB, freshness2000ms PolicyB unchanged",
+  "fileFixturesOnly": false
+}

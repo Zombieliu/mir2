@@ -1,0 +1,554 @@
+{
+  "owner": "Root",
+  "kind": "Six actual original renderer wasm-bindgen and Binaryen static CLI conversions",
+  "generatedAtUtc": "2026-10-08T14:52:37.660Z",
+  "cargo": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-renderer-cargo-actual01.json",
+    "bytes": 22126,
+    "sha256": "4da54a07d4c5ca7882f5c33d9fb1c0c4440da0737655e2dbb6ef9be43897188c"
+  },
+  "calls": [
+    {
+      "backend": "webgpu",
+      "stage": "bindgen",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgpu-bindgen01.config03.json",
+        "bytes": 3719,
+        "sha256": "58284700bf4cd2448f3e5e24d31b8cb49e5fb2532b8b7120f4b1d7c161e9fb39"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgpu-bindgen01-source.json",
+        "bytes": 359912,
+        "sha256": "1d213c2fdeb642702a4003006a957c7a8d7b6641049882572e3e265d1f13fe59"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgpu-bindgen01-review02.json",
+        "bytes": 2005,
+        "sha256": "68c6cbd8fa1adad3baeac92938117a07afe8287d9a91a33e7d90b96896fb981a"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgpu-bindgen01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgpu-bindgen01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgpu-bindgen01.outer.json",
+        "bytes": 522,
+        "sha256": "d4ca3547711f4db2ad28df61cb018e4ac5b6a0f9457a7432df366675de0a991c"
+      },
+      "outerValue": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 183764,
+        "kind": "Source45 webgpu original wasm-bindgen CLI over actual new raw",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 3328,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgpu-bindgen01.config03.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outputPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgpu\\mir2_bevy_runtime.d.ts",
+          "bytes": 22740,
+          "sha256": "863943b7ca77e5bc54370a5171167d6550648f3b215d730ee026a4aa8985363d"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgpu\\mir2_bevy_runtime.js",
+          "bytes": 141118,
+          "sha256": "923be5a35378a65dd302727523614673de2a9614b483ed550f92ebee3a80886a"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgpu\\mir2_bevy_runtime_bg.wasm",
+          "bytes": 33282955,
+          "sha256": "374b82d0d1b8f1b6e07f2c40d0774afedc3c4e5f722b53b713bb901694fba161"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgpu\\mir2_bevy_runtime_bg.wasm.d.ts",
+          "bytes": 11202,
+          "sha256": "aae2f43e44478a07dcb7b38683e25d66fead8b3dcfae97d22c71bc84f50938b1"
+        }
+      ],
+      "heroExportWrapperText": [
+        {
+          "name": "getMir2HeroUiAbiVersion",
+          "present": true
+        },
+        {
+          "name": "pushMir2HeroVerifiedOwnerFrame",
+          "present": true
+        },
+        {
+          "name": "getMir2HeroSourceWitnessVersion",
+          "present": true
+        },
+        {
+          "name": "setMir2HeroUiControlWithWitness",
+          "present": true
+        },
+        {
+          "name": "setMir2HeroUiIntentSink",
+          "present": true
+        }
+      ],
+      "qualification": "Wrapper text present only; getters/Module metadata/World/Ready not executed."
+    },
+    {
+      "backend": "webgpu",
+      "stage": "opt",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgpu-opt01.config01.json",
+        "bytes": 3238,
+        "sha256": "12aea675fe2063f93cb05487d756fcae72349411573bc3ce4d067578f9cb9cde"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgpu-opt01-source.json",
+        "bytes": 365064,
+        "sha256": "15a735995addae6248ad7c31460cc8202cfc158b25876df8e4f35d3b70d383e2"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgpu-opt01-review.json",
+        "bytes": 1318,
+        "sha256": "9dae6ce786a75b4aa24281f967d10a5354e8931a53e74984403b7558c377e64e"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgpu-opt01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgpu-opt01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgpu-opt01.outer.json",
+        "bytes": 516,
+        "sha256": "0944777ef1e63ce4bf083390d1d05d08ac39ea131280953f377d7568a61eca5c"
+      },
+      "outerValue": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 188772,
+        "kind": "Source45 webgpu original Binaryen131 -O1 static conversion",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 76243,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgpu-opt01.config01.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "inputPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\raw-webgpu.wasm",
+          "bytes": 55626898,
+          "sha256": "dec9257ce580137c1c8874d85331f367dc012beb9f48e8b0765878b2355a439b"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgpu\\mir2_bevy_runtime.d.ts",
+          "bytes": 22740,
+          "sha256": "863943b7ca77e5bc54370a5171167d6550648f3b215d730ee026a4aa8985363d"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgpu\\mir2_bevy_runtime.js",
+          "bytes": 141118,
+          "sha256": "923be5a35378a65dd302727523614673de2a9614b483ed550f92ebee3a80886a"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgpu\\mir2_bevy_runtime_bg.wasm",
+          "bytes": 33282955,
+          "sha256": "374b82d0d1b8f1b6e07f2c40d0774afedc3c4e5f722b53b713bb901694fba161"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgpu\\mir2_bevy_runtime_bg.wasm.d.ts",
+          "bytes": 11202,
+          "sha256": "aae2f43e44478a07dcb7b38683e25d66fead8b3dcfae97d22c71bc84f50938b1"
+        }
+      ],
+      "outputPins": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/web-renderer-source45-static01/optimized/webgpu/mir2_bevy_runtime_bg.wasm",
+          "bytes": 31467818,
+          "sha256": "b389d7ba3c84a42147f87d8580ee91bd1625e85ba48e8d68d165ab0c49257681"
+        }
+      ],
+      "wasmByteBudget": 32505856,
+      "wasmByteBudgetPass": true,
+      "defaultGzipVerified": false,
+      "metadataAbiNameVerified": false
+    },
+    {
+      "backend": "webgl2",
+      "stage": "bindgen",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-bindgen01.config01.json",
+        "bytes": 3722,
+        "sha256": "6243c91dfbe593ea1fde8acaa3a168d68cfe16569a35a374e380f5d3b6854b53"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-bindgen01-source.json",
+        "bytes": 359809,
+        "sha256": "901b5b0d1fa286fdbc2b396536c2533c3caa78f6fdaebd108435769e7ee01087"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-bindgen01-review.json",
+        "bytes": 1222,
+        "sha256": "26170dee44183ee89d74264044a3da9c652b2b8bd62b814e43aa305a8bc8b60b"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-bindgen01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-bindgen01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-bindgen01.outer.json",
+        "bytes": 527,
+        "sha256": "3b7626d16bb1c2dad6b07490c6e1b031c80ccdcc0aaadee86ffd615e0c2536a2"
+      },
+      "outerValue": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 182524,
+        "kind": "Source45 webgl2 original static bindgen CLI over actual new inputs",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 2090,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-bindgen01.config01.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outputPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2\\mir2_bevy_runtime.d.ts",
+          "bytes": 12717,
+          "sha256": "cfc8adf01fa51053ed34b88518e92a252389935b2c7fd50f81c3557929727107"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2\\mir2_bevy_runtime.js",
+          "bytes": 117176,
+          "sha256": "5d68d37a06424f94d660b928e9525bb316bb159640177c6d759b57ab530d5944"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2\\mir2_bevy_runtime_bg.wasm",
+          "bytes": 19130720,
+          "sha256": "123990d1b5e8886327aabe7156a1847fc673ae13ff7c3c22edbd88c3324e9889"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2\\mir2_bevy_runtime_bg.wasm.d.ts",
+          "bytes": 6056,
+          "sha256": "470c0238d591f1e760cf06a4d6776603dc00fdb0f25d0418959ddfcb46734fd8"
+        }
+      ],
+      "qualification": "Lean WebGL2 static conversion only; no shared Hero/Quest or WASM API/init claim."
+    },
+    {
+      "backend": "webgl2",
+      "stage": "opt",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-opt01.config01.json",
+        "bytes": 3242,
+        "sha256": "6ef0e14740b95bf1592b15e39bf1b680da9b2d06ffd0821bbcddb81ba19ae9e8"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-opt01-source.json",
+        "bytes": 364564,
+        "sha256": "77ad7160f92965e3a2bb94a9e41504a9a647617c849e845ce613da3b0dd687a7"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-opt01-review.json",
+        "bytes": 1278,
+        "sha256": "113d2b7db2714deda0151222f43a02e123889dd3faaa5a6950e924e35d731495"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-opt01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-opt01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-opt01.outer.json",
+        "bytes": 520,
+        "sha256": "13e6fed6cb0c2a67fb6209d6fc1eaf6182b2201e7c7b09c0b0f4aaacbd135c48"
+      },
+      "outerValue": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 165744,
+        "kind": "Source45 webgl2 original static opt CLI over actual new inputs",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 42138,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-opt01.config01.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "inputPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\raw-webgl2.wasm",
+          "bytes": 36250740,
+          "sha256": "f36dd9718d0b55445a0a9271eb51c01585b5fa4d04b96d1e015b003b2628327c"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2\\mir2_bevy_runtime.d.ts",
+          "bytes": 12717,
+          "sha256": "cfc8adf01fa51053ed34b88518e92a252389935b2c7fd50f81c3557929727107"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2\\mir2_bevy_runtime.js",
+          "bytes": 117176,
+          "sha256": "5d68d37a06424f94d660b928e9525bb316bb159640177c6d759b57ab530d5944"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2\\mir2_bevy_runtime_bg.wasm",
+          "bytes": 19130720,
+          "sha256": "123990d1b5e8886327aabe7156a1847fc673ae13ff7c3c22edbd88c3324e9889"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2\\mir2_bevy_runtime_bg.wasm.d.ts",
+          "bytes": 6056,
+          "sha256": "470c0238d591f1e760cf06a4d6776603dc00fdb0f25d0418959ddfcb46734fd8"
+        }
+      ],
+      "outputPins": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/web-renderer-source45-static01/optimized/webgl2/mir2_bevy_runtime_bg.wasm",
+          "bytes": 17745325,
+          "sha256": "b4633d36f677ed04318dbfe4ded0953cddeb54b27e65c2fb290b9c08060f2f6e"
+        }
+      ],
+      "wasmByteBudget": 32505856,
+      "wasmByteBudgetPass": true,
+      "defaultGzipVerified": false,
+      "metadataAbiNameVerified": false
+    },
+    {
+      "backend": "webgl2-shared",
+      "stage": "bindgen",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-shared-bindgen01.config01.json",
+        "bytes": 3792,
+        "sha256": "1af09e0f5c52fa5638be05e986c0448120477b352e7a31f70dac8368d36669b0"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-shared-bindgen01-source.json",
+        "bytes": 359978,
+        "sha256": "93275c9e47c1ff517ea2ca0406e68d865c9268e9ab6e0e5d9fd0394847a34ae9"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-shared-bindgen01-review.json",
+        "bytes": 1236,
+        "sha256": "bedadf595da987833c2c3d7012a7ae99ec21fd0f590f749ae1d75c1cfceea2c0"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-shared-bindgen01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-shared-bindgen01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-shared-bindgen01.outer.json",
+        "bytes": 541,
+        "sha256": "4a685d1f8b3261f1383341b60ccdf259832b05488ee17a45e9f4ef129c45ed6c"
+      },
+      "outerValue": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 182800,
+        "kind": "Source45 webgl2-shared original static bindgen CLI over actual new inputs",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 3458,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-shared-bindgen01.config01.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outputPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2-shared\\mir2_bevy_runtime.d.ts",
+          "bytes": 22504,
+          "sha256": "239d5757506ff7026ffef782abcb7e6049c6e6f18a83be7ad6886c98fee8a3d9"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2-shared\\mir2_bevy_runtime.js",
+          "bytes": 139092,
+          "sha256": "45709c5b99443caf5efcd9609899a4e4b8fe60d9723e1e72317bd7b87416c6bd"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2-shared\\mir2_bevy_runtime_bg.wasm",
+          "bytes": 34302504,
+          "sha256": "ff05bac71c169d589c6d39e514fbe4399a394e24bc1fc9329554f71b36899de3"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2-shared\\mir2_bevy_runtime_bg.wasm.d.ts",
+          "bytes": 10966,
+          "sha256": "3d2394ddad09e23cdfd250a1ba0fe9b468bfd279274c0a0d3e807a629aed8e95"
+        }
+      ],
+      "heroExportWrapperText": [
+        {
+          "name": "getMir2HeroUiAbiVersion",
+          "present": true
+        },
+        {
+          "name": "pushMir2HeroVerifiedOwnerFrame",
+          "present": true
+        },
+        {
+          "name": "getMir2HeroSourceWitnessVersion",
+          "present": true
+        },
+        {
+          "name": "setMir2HeroUiControlWithWitness",
+          "present": true
+        },
+        {
+          "name": "setMir2HeroUiIntentSink",
+          "present": true
+        }
+      ],
+      "qualification": "Wrapper text only; getters/Module metadata/World/Ready not executed."
+    },
+    {
+      "backend": "webgl2-shared",
+      "stage": "opt",
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-shared-opt01.config01.json",
+        "bytes": 3312,
+        "sha256": "f8de65c4be1e72f35a09e4600ce07f1cf04cd5ace591b8539f9fb159943f6c58"
+      },
+      "source": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-shared-opt01-source.json",
+        "bytes": 365350,
+        "sha256": "0d212bcad7cf769a87b210ec78f4128cf21ca2fee95fab2c2afc9cdd877b6599"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-webgl2-shared-opt01-review.json",
+        "bytes": 1292,
+        "sha256": "6970200cfb3834089c4e43acf7c1e6565b1fe85cf58b0bd0ee74e707cce0ba1f"
+      },
+      "stdout": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-shared-opt01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-shared-opt01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outer": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-shared-opt01.outer.json",
+        "bytes": 534,
+        "sha256": "c2e9871b85091b587755fc92d84ca03a26751901c34f8fd92800fc97ceb2efe3"
+      },
+      "outerValue": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 190132,
+        "kind": "Source45 webgl2-shared original static opt CLI over actual new inputs",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 79771,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source45-webgl2-shared-opt01.config01.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "inputPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\raw-webgl2-shared.wasm",
+          "bytes": 57157607,
+          "sha256": "7d4577e6296d299867db76d0538346dd2fc8ec4d53b1cb658ace98bceaacf5a9"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2-shared\\mir2_bevy_runtime.d.ts",
+          "bytes": 22504,
+          "sha256": "239d5757506ff7026ffef782abcb7e6049c6e6f18a83be7ad6886c98fee8a3d9"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2-shared\\mir2_bevy_runtime.js",
+          "bytes": 139092,
+          "sha256": "45709c5b99443caf5efcd9609899a4e4b8fe60d9723e1e72317bd7b87416c6bd"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2-shared\\mir2_bevy_runtime_bg.wasm",
+          "bytes": 34302504,
+          "sha256": "ff05bac71c169d589c6d39e514fbe4399a394e24bc1fc9329554f71b36899de3"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\web-renderer-source45-static01\\bindgen\\webgl2-shared\\mir2_bevy_runtime_bg.wasm.d.ts",
+          "bytes": 10966,
+          "sha256": "3d2394ddad09e23cdfd250a1ba0fe9b468bfd279274c0a0d3e807a629aed8e95"
+        }
+      ],
+      "outputPins": [
+        {
+          "path": "C:/mir2-cross-platform-storage-20261002/web-renderer-source45-static01/optimized/webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "bytes": 32429102,
+          "sha256": "a67e58f4723b9f1d6d33d87ab28c614a8b15cb86480fc49e51f68d72a1ce592e"
+        }
+      ],
+      "wasmByteBudget": 32505856,
+      "wasmByteBudgetPass": true,
+      "defaultGzipVerified": false,
+      "metadataAbiNameVerified": false
+    }
+  ],
+  "preflightFailureRetained": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-gpu-bindgen-preflight-failure01.json",
+    "bytes": 1737,
+    "sha256": "edde20d2eeb99caf6f712fb8c2f8d6ca82fba35bd2ee329dd4386d38c17c0415"
+  },
+  "metadataVerified": false,
+  "normalizedAbiVerified": false,
+  "nameVerified": false,
+  "defaultGzipVerified": false,
+  "initVerified": false,
+  "publicFilesReplaced": false,
+  "fullProductionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "qualification": "Actual tool outputs and byte budgets only. Shared wrapper text checked without invoking any getter or WASM API. Full original metadata/API/init/publication gates remain pending and unchanged."
+}

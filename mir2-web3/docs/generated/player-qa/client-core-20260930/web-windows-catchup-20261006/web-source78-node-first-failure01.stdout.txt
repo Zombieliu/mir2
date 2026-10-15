@@ -1,0 +1,879 @@
+TAP version 13
+# Subtest: actual Shell UI-down dragged out and released never reaches the world helper
+ok 1 - actual Shell UI-down dragged out and released never reaches the world helper
+  ---
+  duration_ms: 3.6243
+  type: 'test'
+  ...
+# Subtest: actual Shell outside-world down/click and hold work while compatibility mouse cannot duplicate
+ok 2 - actual Shell outside-world down/click and hold work while compatibility mouse cannot duplicate
+  ---
+  duration_ms: 2.0864
+  type: 'test'
+  ...
+# Subtest: actual Shell lost layout cancels an outstanding world pulse and never releases it as a click
+ok 3 - actual Shell lost layout cancels an outstanding world pulse and never releases it as a click
+  ---
+  duration_ms: 1.1071
+  type: 'test'
+  ...
+# Subtest: actual Shell touch down requests compatibility without granting a world or Bevy gesture
+ok 4 - actual Shell touch down requests compatibility without granting a world or Bevy gesture
+  ---
+  duration_ms: 0.6218
+  type: 'test'
+  ...
+# Subtest: actual Shell wide touch uses the Bag lease, swallows second finger and never emits world input
+ok 5 - actual Shell wide touch uses the Bag lease, swallows second finger and never emits world input
+  ---
+  duration_ms: 0.7798
+  type: 'test'
+  ...
+# Subtest: fixed stage UI canvas keeps Bag touch lease, second-finger exclusion, and world-canvas isolation
+ok 6 - fixed stage UI canvas keeps Bag touch lease, second-finger exclusion, and world-canvas isolation
+  ---
+  duration_ms: 0.5532
+  type: 'test'
+  ...
+# Subtest: opt-in primary canvas retains mouse world origin and blur quarantine without stale click
+ok 7 - opt-in primary canvas retains mouse world origin and blur quarantine without stale click
+  ---
+  duration_ms: 0.5166
+  type: 'test'
+  ...
+# Subtest: actual Shell terminal pointercancel immediately frees its pointerId for the next real gesture
+ok 8 - actual Shell terminal pointercancel immediately frees its pointerId for the next real gesture
+  ---
+  duration_ms: 1.216
+  type: 'test'
+  ...
+# Subtest: actual Shell retired proactive cancel cannot clear the next pointer lease
+ok 9 - actual Shell retired proactive cancel cannot clear the next pointer lease
+  ---
+  duration_ms: 0.6869
+  type: 'test'
+  ...
+# Subtest: actual Shell blur without old up accepts a new down with the reused touch pointerId
+ok 10 - actual Shell blur without old up accepts a new down with the reused touch pointerId
+  ---
+  duration_ms: 0.6613
+  type: 'test'
+  ...
+# Subtest: actual Page compatibility interaction stays latched across tabs, resets on close, and is opt-in only
+ok 11 - actual Page compatibility interaction stays latched across tabs, resets on close, and is opt-in only
+  ---
+  duration_ms: 113.3079
+  type: 'test'
+  ...
+# Subtest: actual Page touch Quest switch closes foreground Bag before opening the retained Quest view
+ok 12 - actual Page touch Quest switch closes foreground Bag before opening the retained Quest view
+  ---
+  duration_ms: 79.0593
+  type: 'test'
+  ...
+# Subtest: actual root JSX lost capture traverses Mail Spells Bag Character owners exactly once and preserves successor lease
+ok 13 - actual root JSX lost capture traverses Mail Spells Bag Character owners exactly once and preserves successor lease
+  ---
+  duration_ms: 3.3271
+  type: 'test'
+  ...
+# Subtest: actual Shell skill DOM up and cancel retire the old Quest pointer before yielding new DOM gestures
+ok 14 - actual Shell skill DOM up and cancel retire the old Quest pointer before yielding new DOM gestures
+  ---
+  duration_ms: 0.6681
+  type: 'test'
+  ...
+# Subtest: actual Shell skill DOM terminals reach existing Bag Mail Spells and Character canvas leases
+ok 15 - actual Shell skill DOM terminals reach existing Bag Mail Spells and Character canvas leases
+  ---
+  duration_ms: 1.9328
+  type: 'test'
+  ...
+# Subtest: actual Shell new skill DOM down cannot borrow a canvas router or create a world gesture
+ok 16 - actual Shell new skill DOM down cannot borrow a canvas router or create a world gesture
+  ---
+  duration_ms: 0.8086
+  type: 'test'
+  ...
+# Subtest: ABI/model validation keeps UID0, exact capacities, duplicate and source authority boundaries
+ok 17 - ABI/model validation keeps UID0, exact capacities, duplicate and source authority boundaries
+  ---
+  duration_ms: 3.1383
+  type: 'test'
+  ...
+# Subtest: two-phase ownership waits through several slow frames for exact enabled echo
+ok 18 - two-phase ownership waits through several slow frames for exact enabled echo
+  ---
+  duration_ms: 1.1407
+  type: 'test'
+  ...
+# Subtest: old owner/model/sequence intents are refused without upgrading their token
+ok 19 - old owner/model/sequence intents are refused without upgrading their token
+  ---
+  duration_ms: 1.0221
+  type: 'test'
+  ...
+# Subtest: an advancing renderer with an unapplied handoff cannot strand React input in transition
+ok 20 - an advancing renderer with an unapplied handoff cannot strand React input in transition
+  ---
+  duration_ms: 1.1022
+  type: 'test'
+  ...
+# Subtest: frame watchdog checks synchronously at sink/send, then a new frame can restore ownership
+ok 21 - frame watchdog checks synchronously at sink/send, then a new frame can restore ownership
+  ---
+  duration_ms: 0.4922
+  type: 'test'
+  ...
+# Subtest: missing ABI, invalid layout, touch, focus/visibility eligibility and invalid models keep React
+ok 22 - missing ABI, invalid layout, touch, focus/visibility eligibility and invalid models keep React
+  ---
+  duration_ms: 1.0669
+  type: 'test'
+  ...
+# Subtest: wide touch geometry alone enters ABI1 while portrait, letterbox and short stages stay compatible
+ok 23 - wide touch geometry alone enters ABI1 while portrait, letterbox and short stages stay compatible
+  ---
+  duration_ms: 0.9038
+  type: 'test'
+  ...
+# Subtest: session, resize and restart invalidate prior callbacks while pending flags survive handoff
+ok 24 - session, resize and restart invalidate prior callbacks while pending flags survive handoff
+  ---
+  duration_ms: 1.2979
+  type: 'test'
+  ...
+# Subtest: pointer down origin survives crossing the bag, including same-frame pulse
+ok 25 - pointer down origin survives crossing the bag, including same-frame pulse
+  ---
+  duration_ms: 0.7382
+  type: 'test'
+  ...
+# Subtest: Belt-capable production router sends only strict pointer fields and retains local drop geometry
+ok 26 - Belt-capable production router sends only strict pointer fields and retains local drop geometry
+  ---
+  duration_ms: 1.8096
+  type: 'test'
+  ...
+# Subtest: blur or owner handoff permits a fresh reused pointerId even when the old up never arrives
+ok 27 - blur or owner handoff permits a fresh reused pointerId even when the old up never arrives
+  ---
+  duration_ms: 2.4421
+  type: 'test'
+  ...
+# Subtest: NPC server-attested alias gate preserves ordinary Bag and validates each listed carried root exactly once
+ok 28 - NPC server-attested alias gate preserves ordinary Bag and validates each listed carried root exactly once
+  ---
+  duration_ms: 0.5326
+  type: 'test'
+  ...
+# Subtest: independent capability is exact, old bundle and lean retain compatibility
+ok 29 - independent capability is exact, old bundle and lean retain compatibility
+  ---
+  duration_ms: 31.5091
+  type: 'test'
+  ...
+# Subtest: HUD geometry chooses owner before movement, foreground priority and crossing drags
+ok 30 - HUD geometry chooses owner before movement, foreground priority and crossing drags
+  ---
+  duration_ms: 1.268
+  type: 'test'
+  ...
+# Subtest: hook ready loss/null/throw/HMR withdraws captured runtime using last valid snapshot
+ok 31 - hook ready loss/null/throw/HMR withdraws captured runtime using last valid snapshot
+  ---
+  duration_ms: 26.6722
+  type: 'test'
+  ...
+# Subtest: actual shell handler keeps uncovered HUD available with Bag/Quest open and preserves foreground/world routes
+ok 32 - actual shell handler keeps uncovered HUD available with Bag/Quest open and preserves foreground/world routes
+  ---
+  duration_ms: 131.2734
+  type: 'test'
+  ...
+# Subtest: independent NPC ABI requires seven hooks and compiled startup without extending old capabilities
+ok 33 - independent NPC ABI requires seven hooks and compiled startup without extending old capabilities
+  ---
+  duration_ms: 14.4222
+  type: 'test'
+  ...
+# Subtest: whole ordinary directory handoff preserves typed raw models and all twenty-three player fields
+ok 34 - whole ordinary directory handoff preserves typed raw models and all twenty-three player fields
+  ---
+  duration_ms: 5.1289
+  type: 'test'
+  ...
+# Subtest: off-page Pearl finite panel and unmarked catalogs preserve whole legacy while marked missing raw remains explicit
+ok 35 - off-page Pearl finite panel and unmarked catalogs preserve whole legacy while marked missing raw remains explicit
+  ---
+  duration_ms: 9.84
+  type: 'test'
+  ...
+# Subtest: prepare and arming use two actual echoes before sole ownership and synchronous input blocking
+ok 36 - prepare and arming use two actual echoes before sole ownership and synchronous input blocking
+  ---
+  duration_ms: 5.505
+  type: 'test'
+  ...
+# Subtest: status full-u64 and every applied clock identity or control mismatch rejects final input
+ok 37 - status full-u64 and every applied clock identity or control mismatch rejects final input
+  ---
+  duration_ms: 105.0371
+  type: 'test'
+  ...
+# Subtest: missing player raw fields malformed Core and unsafe DTOs do not fabricate a prepared surface
+ok 38 - missing player raw fields malformed Core and unsafe DTOs do not fabricate a prepared surface
+  ---
+  duration_ms: 12.3938
+  type: 'test'
+  ...
+# Subtest: whole 584px notice and current status clip are required while narrow touch falls back
+ok 39 - whole 584px notice and current status clip are required while narrow touch falls back
+  ---
+  duration_ms: 33.0571
+  type: 'test'
+  ...
+# Subtest: runtime intents require actual ordered pointer provenance and exact nested DTOs
+ok 40 - runtime intents require actual ordered pointer provenance and exact nested DTOs
+  ---
+  duration_ms: 7.2942
+  type: 'test'
+  ...
+# Subtest: false and throw retain common locals without replaying a callback sequence
+ok 41 - false and throw retain common locals without replaying a callback sequence
+  ---
+  duration_ms: 13.0981
+  type: 'test'
+  ...
+# Subtest: live owner raw model service catalog player or presentation mutation fences admitted proof synchronously
+ok 42 - live owner raw model service catalog player or presentation mutation fences admitted proof synchronously
+  ---
+  duration_ms: 72.8563
+  type: 'test'
+  ...
+# Subtest: readonly transport feedback changes its publication without inventing model change history or Buy ACK
+ok 43 - readonly transport feedback changes its publication without inventing model change history or Buy ACK
+  ---
+  duration_ms: 19.1289
+  type: 'test'
+  ...
+# Subtest: deferred Close retires after accepted synchronous callback rather than withdrawing inside it
+ok 44 - deferred Close retires after accepted synchronous callback rather than withdrawing inside it
+  ---
+  duration_ms: 6.9284
+  type: 'test'
+  ...
+# Subtest: synchronous callback reentry or current source replacement cannot accept old proof
+ok 45 - synchronous callback reentry or current source replacement cannot accept old proof
+  ---
+  duration_ms: 52.5194
+  type: 'test'
+  ...
+# Subtest: same-runtime HMR allocates above actual prior run and stale cleanup cannot clear new host
+ok 46 - same-runtime HMR allocates above actual prior run and stale cleanup cannot clear new host
+  ---
+  duration_ms: 49.9565
+  type: 'test'
+  ...
+# Subtest: stopped frames and permanent run exhaustion fail closed without replacing a Core
+ok 47 - stopped frames and permanent run exhaustion fail closed without replacing a Core
+  ---
+  duration_ms: 12.9778
+  type: 'test'
+  ...
+# Subtest: world origin never becomes shop and quarantined old nonce cannot clear a new lease
+ok 48 - world origin never becomes shop and quarantined old nonce cannot clear a new lease
+  ---
+  duration_ms: 9.1474
+  type: 'test'
+  ...
+# Subtest: readStatus is readonly and cannot read input Core or attach another producer
+ok 49 - readStatus is readonly and cannot read input Core or attach another producer
+  ---
+  duration_ms: 3.2287
+  type: 'test'
+  ...
+# Subtest: only current synchronous sink may finish after expected preentry feedback changes
+ok 50 - only current synchronous sink may finish after expected preentry feedback changes
+  ---
+  duration_ms: 5.3468
+  type: 'test'
+  ...
+# Subtest: callback withdraw and unmount stop clean up only after the synchronous Last checkpoint
+ok 51 - callback withdraw and unmount stop clean up only after the synchronous Last checkpoint
+  ---
+  duration_ms: 8.9978
+  type: 'test'
+  ...
+# Subtest: a refused current Up RPC restores its exact Down lease and cannot manufacture an admitted intent
+ok 52 - a refused current Up RPC restores its exact Down lease and cannot manufacture an admitted intent
+  ---
+  duration_ms: 5.2396
+  type: 'test'
+  ...
+# Subtest: actual intent decoder rejects unknown unsafe and noncanonical precision fields
+ok 53 - actual intent decoder rejects unknown unsafe and noncanonical precision fields
+  ---
+  duration_ms: 6.1153
+  type: 'test'
+  ...
+# Subtest: pure final UI claimCurrent is only the current claimed Buy callback and rejects deferred stop or withdrawal
+ok 54 - pure final UI claimCurrent is only the current claimed Buy callback and rejects deferred stop or withdrawal
+  ---
+  duration_ms: 16.2723
+  type: 'test'
+  ...
+# Subtest: actual Router exact one-time terminal cancel retires a refused Host Up and permits the next manual Down
+ok 55 - actual Router exact one-time terminal cancel retires a refused Host Up and permits the next manual Down
+  ---
+  duration_ms: 5.3178
+  type: 'test'
+  ...
+# Subtest: actual terminal recovery refuses newer live lease and quarantined old Up without advancing or clearing it
+ok 56 - actual terminal recovery refuses newer live lease and quarantined old Up without advancing or clearing it
+  ---
+  duration_ms: 3.1075
+  type: 'test'
+  ...
+# Subtest: NPC host alone admits current attested grid aliases and withdraws malformed or ambiguous listed roots
+ok 57 - NPC host alone admits current attested grid aliases and withdraws malformed or ambiguous listed roots
+  ---
+  duration_ms: 3.4616
+  type: 'test'
+  ...
+# Subtest: independent exact capabilities and small touch stage preserve compatibility
+ok 58 - independent exact capabilities and small touch stage preserve compatibility
+  ---
+  duration_ms: 2.4897
+  type: 'test'
+  ...
+# Subtest: host captures raw null/zero/localized metadata and strict pointer DTO
+ok 59 - host captures raw null/zero/localized metadata and strict pointer DTO
+  ---
+  duration_ms: 1.4788
+  type: 'test'
+  ...
+# Subtest: request must belong to burned controller run and exact revision; no replay
+ok 60 - request must belong to burned controller run and exact revision; no replay
+  ---
+  duration_ms: 0.9924
+  type: 'test'
+  ...
+# Subtest: transport proof requires exact unique local row and explicit spell throughout reorder
+ok 61 - transport proof requires exact unique local row and explicit spell throughout reorder
+  ---
+  duration_ms: 0.7327
+  type: 'test'
+  ...
+# Subtest: same complete ACK snapshot is retained before a later ACK-less coalesced model
+ok 62 - same complete ACK snapshot is retained before a later ACK-less coalesced model
+  ---
+  duration_ms: 0.7796
+  type: 'test'
+  ...
+# Subtest: HMR same-runtime replacement and late old cleanup cannot claim new sink or old ACK
+ok 63 - HMR same-runtime replacement and late old cleanup cannot claim new sink or old ACK
+  ---
+  duration_ms: 0.5932
+  type: 'test'
+  ...
+# Subtest: crossing and wrong terminal pointer cannot save, owner drift revokes proof
+ok 64 - crossing and wrong terminal pointer cannot save, owner drift revokes proof
+  ---
+  duration_ms: 0.4922
+  type: 'test'
+  ...
+# Subtest: failed setup burns a fresh run and unsent/settled requests cannot replay
+ok 65 - failed setup burns a fresh run and unsent/settled requests cannot replay
+  ---
+  duration_ms: 1.0763
+  type: 'test'
+  ...
+# Subtest: actual cast observations use explicit spell, local owner and milliseconds, never snapshot serial
+ok 66 - actual cast observations use explicit spell, local owner and milliseconds, never snapshot serial
+  ---
+  duration_ms: 1.0178
+  type: 'test'
+  ...
+# Subtest: metadata validates actual sparse frames rather than count or names
+ok 67 - metadata validates actual sparse frames rather than count or names
+  ---
+  duration_ms: 1.5763
+  type: 'test'
+  ...
+# Subtest: current-owner nonarray learned capture withdraws through later timer ticks and valid capture recovers
+ok 68 - current-owner nonarray learned capture withdraws through later timer ticks and valid capture recovers
+  ---
+  duration_ms: 0.8372
+  type: 'test'
+  ...
+# Subtest: current-owner oversize learned capture withdraws through later timer ticks and valid capture recovers
+ok 69 - current-owner oversize learned capture withdraws through later timer ticks and valid capture recovers
+  ---
+  duration_ms: 0.6611
+  type: 'test'
+  ...
+# Subtest: bad current capture preserves pending send-time tuple and request highwater without replay
+ok 70 - bad current capture preserves pending send-time tuple and request highwater without replay
+  ---
+  duration_ms: 0.595
+  type: 'test'
+  ...
+# Subtest: real host empty baseline with null metadata requires fresh exact runtime echo
+ok 71 - real host empty baseline with null metadata requires fresh exact runtime echo
+  ---
+  duration_ms: 1.0621
+  type: 'test'
+  ...
+# Subtest: real host empty baseline with empty metadata requires fresh exact runtime echo
+ok 72 - real host empty baseline with empty metadata requires fresh exact runtime echo
+  ---
+  duration_ms: 0.5306
+  type: 'test'
+  ...
+# Subtest: empty learned baseline preserves captured owner and diagnoses ownerRevision drift without retagging
+ok 73 - empty learned baseline preserves captured owner and diagnoses ownerRevision drift without retagging
+  ---
+  duration_ms: 0.4702
+  type: 'test'
+  ...
+# Subtest: finite diagnostics reuse the original two status reads, calls and clock with observer optional or throwing
+ok 74 - finite diagnostics reuse the original two status reads, calls and clock with observer optional or throwing
+  ---
+  duration_ms: 0.6817
+  type: 'test'
+  ...
+# Subtest: diagnostic withdrawal and stop preserve send-time pending tuple and burned once claim
+ok 75 - diagnostic withdrawal and stop preserve send-time pending tuple and burned once claim
+  ---
+  duration_ms: 1.1037
+  type: 'test'
+  ...
+# Subtest: status diagnostics expose only the first finite refusal and never raw status or error
+ok 76 - status diagnostics expose only the first finite refusal and never raw status or error
+  ---
+  duration_ms: 1.3001
+  type: 'test'
+  ...
+# Subtest: input and lifecycle diagnostics remain observational and sanitize auxiliary reasons
+ok 77 - input and lifecycle diagnostics remain observational and sanitize auxiliary reasons
+  ---
+  duration_ms: 0.8993
+  type: 'test'
+  ...
+# Subtest: early host refusals retain old short circuit runtime calls and withdrawal output
+ok 78 - early host refusals retain old short circuit runtime calls and withdrawal output
+  ---
+  duration_ms: 1.0728
+  type: 'test'
+  ...
+# Subtest: storage source projection preserves Bag2 physical slots, UID0 and binary expiry without deriving identity
+ok 79 - storage source projection preserves Bag2 physical slots, UID0 and binary expiry without deriving identity
+  ---
+  duration_ms: 1.6181
+  type: 'test'
+  ...
+# Subtest: Source35 storage controller safe expiry preserves custody and unsafe numeric dates fail closed
+ok 80 - Source35 storage controller safe expiry preserves custody and unsafe numeric dates fail closed
+  ---
+  duration_ms: 1.3997
+  type: 'test'
+  ...
+# Subtest: Source35 exact storage expiry text survives projection publication and applied owner handoff
+ok 81 - Source35 exact storage expiry text survives projection publication and applied owner handoff
+  ---
+  duration_ms: 1.9551
+  type: 'test'
+  ...
+# Subtest: Source35 malformed dates and unsafe direct host numbers withdraw an active storage owner
+ok 82 - Source35 malformed dates and unsafe direct host numbers withdraw an active storage owner
+  ---
+  duration_ms: 2.9335
+  type: 'test'
+  ...
+# Subtest: storage source projection rejects duplicate cells/UIDs, cross-pane UID collisions and invalid accessible inputs
+ok 83 - storage source projection rejects duplicate cells/UIDs, cross-pane UID collisions and invalid accessible inputs
+  ---
+  duration_ms: 0.3026
+  type: 'test'
+  ...
+# Subtest: independent ABI1 requires compiled/startup and every storage function; missing capability keeps fallback
+ok 84 - independent ABI1 requires compiled/startup and every storage function; missing capability keeps fallback
+  ---
+  duration_ms: 0.3652
+  type: 'test'
+  ...
+# Subtest: prepare then arming never accepts input; exact enabled echo establishes one owner revision
+ok 85 - prepare then arming never accepts input; exact enabled echo establishes one owner revision
+  ---
+  duration_ms: 0.2798
+  type: 'test'
+  ...
+# Subtest: every applied revision and identity must match before an intent can reach Page
+ok 86 - every applied revision and identity must match before an intent can reach Page
+  ---
+  duration_ms: 1.1635
+  type: 'test'
+  ...
+# Subtest: unapplied arming timeout releases transition despite advancing renderer frames
+ok 87 - unapplied arming timeout releases transition despite advancing renderer frames
+  ---
+  duration_ms: 0.7733
+  type: 'test'
+  ...
+# Subtest: false or throwing Page sink retains the admitted proof but never replays its sequence
+ok 88 - false or throwing Page sink retains the admitted proof but never replays its sequence
+  ---
+  duration_ms: 0.6084
+  type: 'test'
+  ...
+# Subtest: successful dispatch claims exactly once and replacement intent cannot authorize an older DTO
+ok 89 - successful dispatch claims exactly once and replacement intent cannot authorize an older DTO
+  ---
+  duration_ms: 0.3904
+  type: 'test'
+  ...
+# Subtest: live model, service, session, owner and layout changes invalidate admitted proof before polling
+ok 90 - live model, service, session, owner and layout changes invalidate admitted proof before polling
+  ---
+  duration_ms: 1.4609
+  type: 'test'
+  ...
+# Subtest: own transport reservations do not pretend to replace the model; handoff preserves pending data
+ok 91 - own transport reservations do not pretend to replace the model; handoff preserves pending data
+  ---
+  duration_ms: 0.286
+  type: 'test'
+  ...
+# Subtest: stopped renderer frame expires synchronously at final allows/claim
+ok 92 - stopped renderer frame expires synchronously at final allows/claim
+  ---
+  duration_ms: 0.1952
+  type: 'test'
+  ...
+# Subtest: invalid layout/model and rejected snapshot setters keep React rather than exposing an input owner
+ok 93 - invalid layout/model and rejected snapshot setters keep React rather than exposing an input owner
+  ---
+  duration_ms: 0.3204
+  type: 'test'
+  ...
+# Subtest: storage pointer origin stays fixed across both panes and world crossings
+ok 94 - storage pointer origin stays fixed across both panes and world crossings
+  ---
+  duration_ms: 0.341
+  type: 'test'
+  ...
+# Subtest: quarantined old terminal retains its identity and cannot clear a distinct new pointer lease
+ok 95 - quarantined old terminal retains its identity and cannot clear a distinct new pointer lease
+  ---
+  duration_ms: 0.3119
+  type: 'test'
+  ...
+# Subtest: stale cancel/blur clean only the old renderer epoch and preserve a newly admitted proof
+ok 96 - stale cancel/blur clean only the old renderer epoch and preserve a newly admitted proof
+  ---
+  duration_ms: 0.5932
+  type: 'test'
+  ...
+# Subtest: same-runtime HMR replacement owns sink and snapshot; old stop/withdraw cannot retire it
+ok 97 - same-runtime HMR replacement owns sink and snapshot; old stop/withdraw cannot retire it
+  ---
+  duration_ms: 20.5839
+  type: 'test'
+  ...
+# Subtest: intent parser preserves physical UID0 while rejecting malformed identities and grid directions
+ok 98 - intent parser preserves physical UID0 while rejecting malformed identities and grid directions
+  ---
+  duration_ms: 0.2847
+  type: 'test'
+  ...
+# Subtest: late startup attaches the independent sink and capability withdrawal retires the accepted surface
+ok 99 - late startup attaches the independent sink and capability withdrawal retires the accepted surface
+  ---
+  duration_ms: 0.2077
+  type: 'test'
+  ...
+# Subtest: admitted renderer tuple is frozen before callback and cannot be rewritten for a final claim
+ok 100 - admitted renderer tuple is frozen before callback and cannot be rewritten for a final claim
+  ---
+  duration_ms: 0.4369
+  type: 'test'
+  ...
+# Subtest: the common bag pane and storage pane both accept same-container moves with exact source identities
+ok 101 - the common bag pane and storage pane both accept same-container moves with exact source identities
+  ---
+  duration_ms: 0.2893
+  type: 'test'
+  ...
+# Subtest: desktop and touch admission use their declared geometry thresholds without claiming actual device layout
+ok 102 - desktop and touch admission use their declared geometry thresholds without claiming actual device layout
+  ---
+  duration_ms: 0.2121
+  type: 'test'
+  ...
+# Subtest: actual Shell storage routing holds combat only for UI origin and preserves a crossing world gesture
+ok 103 - actual Shell storage routing holds combat only for UI origin and preserves a crossing world gesture
+  ---
+  duration_ms: 34.8136
+  type: 'test'
+  ...
+# Subtest: actual Shell old cancellation cannot release a synchronously established replacement UI lease/token
+ok 104 - actual Shell old cancellation cannot release a synchronously established replacement UI lease/token
+  ---
+  duration_ms: 36.8711
+  type: 'test'
+  ...
+# Subtest: actual Shell old cancel or up cannot clear a synchronously established replacement world hold
+ok 105 - actual Shell old cancel or up cannot clear a synchronously established replacement world hold
+  ---
+  duration_ms: 53.5596
+  type: 'test'
+  ...
+# Subtest: Source67 actual compatibility interaction withdraws shared storage before retaining its React owner
+ok 106 - Source67 actual compatibility interaction withdraws shared storage before retaining its React owner
+  ---
+  duration_ms: 0.8567
+  type: 'test'
+  ...
+# Subtest: Source67 repeated actual storage compatibility interaction is idempotent with or without a requested host
+ok 107 - Source67 repeated actual storage compatibility interaction is idempotent with or without a requested host
+  ---
+  duration_ms: 0.3294
+  type: 'test'
+  ...
+# Subtest: Source67 actual pure Bag interaction keeps the original requested/open/compatibility gates
+ok 108 - Source67 actual pure Bag interaction keeps the original requested/open/compatibility gates
+  ---
+  duration_ms: 0.3093
+  type: 'test'
+  ...
+# Subtest: Source67 actual service close and NPCStorage reopen restore a fresh shared handoff without reusing proof
+ok 109 - Source67 actual service close and NPCStorage reopen restore a fresh shared handoff without reusing proof
+  ---
+  duration_ms: 0.5238
+  type: 'test'
+  ...
+# Subtest: Source67 actual leased storage page changes preserve ownership and avoid another shared openBag
+ok 110 - Source67 actual leased storage page changes preserve ownership and avoid another shared openBag
+  ---
+  duration_ms: 0.3529
+  type: 'test'
+  ...
+# Subtest: Source71 actual Page reader records the first eligible gate without evaluating later gates
+ok 111 - Source71 actual Page reader records the first eligible gate without evaluating later gates
+  ---
+  duration_ms: 1.5325
+  type: 'test'
+  ...
+# Subtest: Source71 actual tick ABI refusal precedes its reader and adds no runtime diagnostic reads
+ok 112 - Source71 actual tick ABI refusal precedes its reader and adds no runtime diagnostic reads
+  ---
+  duration_ms: 0.1739
+  type: 'test'
+  ...
+# Subtest: Source71 actual host input failures retain the first reason and exclude diagnostics from the wire snapshot
+ok 113 - Source71 actual host input failures retain the first reason and exclude diagnostics from the wire snapshot
+  ---
+  duration_ms: 0.3683
+  type: 'test'
+  ...
+# Subtest: Source71 actual host status failures and enabled handoff preserve their original admission gates
+ok 114 - Source71 actual host status failures and enabled handoff preserve their original admission gates
+  ---
+  duration_ms: 3.6724
+  type: 'test'
+  ...
+# Subtest: Source71 actual hook deduplicates diagnostic state and compatibility retires the prepare reason
+ok 115 - Source71 actual hook deduplicates diagnostic state and compatibility retires the prepare reason
+  ---
+  duration_ms: 0.9918
+  type: 'test'
+  ...
+# Subtest: Source71 actual hook ignores retired callbacks and cleanup cannot overwrite the replacement state
+ok 116 - Source71 actual hook ignores retired callbacks and cleanup cannot overwrite the replacement state
+  ---
+  duration_ms: 0.66
+  type: 'test'
+  ...
+# Subtest: Source71 actual main diagnostic attribute serializes only owner phase and finite reason
+ok 117 - Source71 actual main diagnostic attribute serializes only owner phase and finite reason
+  ---
+  duration_ms: 29.1865
+  type: 'test'
+  ...
+# Subtest: Source72 ready false classifies the exact asset failure while keeping React ownership and calls
+ok 118 - Source72 ready false classifies the exact asset failure while keeping React ownership and calls
+  ---
+  duration_ms: 0.4793
+  type: 'test'
+  ...
+# Subtest: Source72 ready false classifies the exact presentation mismatch without changing admission
+ok 119 - Source72 ready false classifies the exact presentation mismatch without changing admission
+  ---
+  duration_ms: 0.2398
+  type: 'test'
+  ...
+# Subtest: Source72 ready false classifies missing icon metadata without an ownership handoff
+ok 120 - Source72 ready false classifies missing icon metadata without an ownership handoff
+  ---
+  duration_ms: 0.1864
+  type: 'test'
+  ...
+# Subtest: Source72 ready false emits only a finite reason for unknown renderer detail
+ok 121 - Source72 ready false emits only a finite reason for unknown renderer detail
+  ---
+  duration_ms: 0.2078
+  type: 'test'
+  ...
+# Subtest: Source75 successful disabled prepare projects only presentation and releases at arming active close and withdraw
+ok 122 - Source75 successful disabled prepare projects only presentation and releases at arming active close and withdraw
+  ---
+  duration_ms: 0.2736
+  type: 'test'
+  ...
+# Subtest: Source75 projection follows the last successful snapshot rather than requested geometry or failure reason
+ok 123 - Source75 projection follows the last successful snapshot rather than requested geometry or failure reason
+  ---
+  duration_ms: 0.3006
+  type: 'test'
+  ...
+# Subtest: Source75 prepare projection adds no runtime reader clock owner or intent calls
+ok 124 - Source75 prepare projection adds no runtime reader clock owner or intent calls
+  ---
+  duration_ms: 0.2413
+  type: 'test'
+  ...
+# Subtest: Source75 actual hook deduplicates geometry and retires masks before requested runtime or generation changes
+ok 125 - Source75 actual hook deduplicates geometry and retires masks before requested runtime or generation changes
+  ---
+  duration_ms: 0.4052
+  type: 'test'
+  ...
+# Subtest: Source75 actual SVG has exactly native desktop header and clipped pane holes while retaining exterior HUD pixels
+ok 126 - Source75 actual SVG has exactly native desktop header and clipped pane holes while retaining exterior HUD pixels
+  ---
+  duration_ms: 0.7004
+  type: 'test'
+  ...
+# Subtest: Source75 touch invalid presentation and every non-UI canvas stay unmasked
+ok 127 - Source75 touch invalid presentation and every non-UI canvas stay unmasked
+  ---
+  duration_ms: 0.152
+  type: 'test'
+  ...
+# Subtest: Source75 actual Page and Shell mask only UI canvas pixels while React InventoryWindow remains mounted in prepare
+ok 128 - Source75 actual Page and Shell mask only UI canvas pixels while React InventoryWindow remains mounted in prepare
+  ---
+  duration_ms: 3.2429
+  type: 'test'
+  ...
+# file:///C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/prepared-input01/mir2-web3/apps/web/scripts/test-spells-page-gate.mjs:6
+# function loadMailUi(){const compile=(url,require)=>{const m={exports:{}};new Function('exports','module','require',ts.transpileModule(readFileSync(url,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(m.exports,m,require);return m.exports;};const packets=compile(new URL('../lib/extended-server-packets.ts',import.meta.url),()=>{throw Error('unexpected packet import');});return compile(new URL('../lib/bevy-mail-ui.ts',import.meta.url),id=>{assert.equal(id,'./extended-server-packets');return packets;});}const mailUi=loadMailUi();
+#                                                                                                                                                                                                                                                                                                                                                                                                   ^
+# Error: unexpected packet import
+#     at file:///C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/prepared-input01/mir2-web3/apps/web/scripts/test-spells-page-gate.mjs:6:387
+#     at eval (eval at compile (file:///C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/prepared-input01/mir2-web3/apps/web/scripts/test-spells-page-gate.mjs:6:74), <anonymous>:36:31)
+#     at compile (file:///C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/prepared-input01/mir2-web3/apps/web/scripts/test-spells-page-gate.mjs:6:252)
+#     at loadMailUi (file:///C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/prepared-input01/mir2-web3/apps/web/scripts/test-spells-page-gate.mjs:6:307)
+#     at file:///C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/prepared-input01/mir2-web3/apps/web/scripts/test-spells-page-gate.mjs:6:571
+#     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+#     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26)
+#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+# Node.js v22.18.0
+# Subtest: scripts\\test-spells-page-gate.mjs
+not ok 7 - scripts\\test-spells-page-gate.mjs
+  ---
+  duration_ms: 669.9407
+  type: 'test'
+  location: 'C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\test-spells-page-gate.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: actual Page detaches complete raw snapshot after connection/session guard, before coalescing
+not ok 130 - actual Page detaches complete raw snapshot after connection/session guard, before coalescing
+  ---
+  duration_ms: 24.8667
+  type: 'test'
+  location: 'C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\test-spells-raw-ingress.mjs:8:1'
+  failureType: 'testCodeFailure'
+  error: 'combatBaselineSourceRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    Object.captureSpellsGatewayEvent (eval at load (file:///C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/prepared-input01/mir2-web3/apps/web/scripts/test-spells-raw-ingress.mjs:7:206), <anonymous>:31:9)
+    TestContext.<anonymous> (file:///C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/prepared-input01/mir2-web3/apps/web/scripts/test-spells-raw-ingress.mjs:11:79)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: actual sendRaw checks proof after synchronous mir2:action and directly before socket send
+not ok 131 - actual sendRaw checks proof after synchronous mir2:action and directly before socket send
+  ---
+  duration_ms: 34.6833
+  type: 'test'
+  location: 'C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\test-spells-raw-ingress.mjs:21:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'outcomeUnknown'
+    - 'definitelyUnsent'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'definitelyUnsent'
+  actual: 'outcomeUnknown'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/prepared-input01/mir2-web3/apps/web/scripts/test-spells-raw-ingress.mjs:21:164)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: hook captures runtime, complete pre-runtime baseline and aborts metadata on cleanup
+ok 132 - hook captures runtime, complete pre-runtime baseline and aborts metadata on cleanup
+  ---
+  duration_ms: 68.3951
+  type: 'test'
+  ...
+# Subtest: unrequested hook does not create controller or install a sink
+ok 133 - unrequested hook does not create controller or install a sink
+  ---
+  duration_ms: 15.1159
+  type: 'test'
+  ...
+# Subtest: hook diagnostic dedupes finite values on existing lifecycle and ignores retired callbacks
+ok 134 - hook diagnostic dedupes finite values on existing lifecycle and ignores retired callbacks
+  ---
+  duration_ms: 19.4253
+  type: 'test'
+  ...
+# Subtest: unrequested and absent runtime diagnostics require no host or runtime read
+ok 135 - unrequested and absent runtime diagnostics require no host or runtime read
+  ---
+  duration_ms: 24.1773
+  type: 'test'
+  ...
+# Subtest: hook diagnostic uses the existing callback lifecycle without new polling or runtime access
+ok 136 - hook diagnostic uses the existing callback lifecycle without new polling or runtime access
+  ---
+  duration_ms: 0.5405
+  type: 'test'
+  ...
+1..136
+# tests 136
+# suites 0
+# pass 133
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1142.6948

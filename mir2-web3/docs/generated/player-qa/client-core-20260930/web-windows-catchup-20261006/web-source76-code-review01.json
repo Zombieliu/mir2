@@ -1,0 +1,70 @@
+{
+  "owner": "Root",
+  "kind": "source76 finite static shared panel packaging source review",
+  "approvedAsInput": true,
+  "workerFinalPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/worker-shop-assets01/source76-final-assets-manifest01.json",
+    "bytes": 26699,
+    "sha256": "ec3023f83b136629688c40a99f82d113e0600412bb90cc4a1849281fb60ed242"
+  },
+  "codeRows": [
+    {
+      "relativePath": "apps/web/scripts/lib/portable-next-standalone.mjs",
+      "sourcePath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+        "bytes": 40949,
+        "sha256": "953ae698da31781fc3a02a0b1e80d923349898f0005a1908891573825e32e0c6"
+      },
+      "destinationPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+        "bytes": 40949,
+        "sha256": "953ae698da31781fc3a02a0b1e80d923349898f0005a1908891573825e32e0c6"
+      }
+    },
+    {
+      "relativePath": "apps/web/scripts/test-portable-next-standalone.mjs",
+      "sourcePath": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+        "bytes": 76389,
+        "sha256": "b5b4a8967eef8d8c50d2c57f80a9573ce3bb0d8b824089eee8c160b4b6b07835"
+      },
+      "destinationPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source76-shop-character-20261012-01\\prepared-input01\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+        "bytes": 76389,
+        "sha256": "b5b4a8967eef8d8c50d2c57f80a9573ce3bb0d8b824089eee8c160b4b6b07835"
+      }
+    }
+  ],
+  "legacy27TextBytePrefixPreserved": true,
+  "selectorChangesOnlyFiniteFallbackSet": true,
+  "fallbackUniquePaths": 151,
+  "canonicalStaticUnion": 148,
+  "additionalCanonicalPaths": 118,
+  "additionalBytes": 534684,
+  "generatedControls": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/prepared-input01/mir2-web3/apps/web/tsconfig.source73-build03.json",
+      "bytes": 5911,
+      "sha256": "2870ce62dbcb7ec87700f122d7f61511f8410804de684138658abab00125af2d"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/prepared-input01/mir2-web3/apps/web/next-env.d.ts",
+      "bytes": 294,
+      "sha256": "6615abfc29b0182216f07996188fd9c5293345392e0fa3692a67cd398e1f7be0"
+    }
+  ],
+  "compilerOptionsUnchanged": true,
+  "mainTsconfigPin": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "noCargo": true,
+  "noRustAbiChange": true,
+  "noOldNextOutputCopied": true,
+  "noDynamicAccountHardcoding": true,
+  "productsExecuted": false,
+  "runtimeAcceptance": false
+}

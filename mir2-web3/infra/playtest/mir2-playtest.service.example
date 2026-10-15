@@ -1,0 +1,55 @@
+# Reviewed template only. Replace REQUIRED_FULL_SOURCE_REVISION with the
+# authenticated artifact's full 40-character source revision before installing.
+[Unit]
+Description=Mir2 isolated player playtest Gateway
+After=network-online.target postgresql.service mir2-playtest-redis.service
+Wants=network-online.target
+Requires=mir2-playtest-redis.service
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=mir2-playtest
+Group=mir2-playtest
+EnvironmentFile=/etc/mir2-playtest/gateway.env
+# Never connect this test realm to the existing production Zone/validators.
+UnsetEnvironment=MIR2_GATE15_VALIDATOR_URLS MIR2_ZONE_HOST_TOKEN
+UnsetEnvironment=MIR2_ZONE_HOST_ADDR MIR2_ZONE_HOST_ADDRS MIR2_ZONE_HOST_ACTIVE_ADDRS
+UnsetEnvironment=MIR2_GATEWAY_ZONE_LEASE_DATABASE_URL MIR2_ZONE_OWNER_LEASE_BACKEND MIR2_ZONE_TOPOLOGY_FILE MIR2_ZONE_TOPOLOGY_JSON
+UnsetEnvironment=MIR2_RUNTIME_ENV MIR2_DEPLOYMENT_ENV
+UnsetEnvironment=MIR2_ALLOW_DEV_PASSKEY_SECRET MIR2_ALLOW_DEV_IDENTITY_SECRETS MIR2_GATEWAY_ALLOW_UNSAFE_LOCAL_PLAYER_COMMANDS
+# Sentinel configuration takes precedence over the Redis URL. Keep all such
+# manager-inherited production routes and credentials out of this process.
+UnsetEnvironment=MIR2_GATEWAY_REDIS_SENTINEL_ADDRS MIR2_GATEWAY_REDIS_SENTINEL_MASTER CRYSTAL_CLIENT_ROOT
+UnsetEnvironment=MIR2_GATEWAY_OPERATOR_TOKEN MIR2_GATEWAY_ADMIN_OPERATOR_TOKEN ADMIN_API_BASE_URL MIR2_GAMEPLAY_EVENT_REDPANDA_URL
+WorkingDirectory=/var/lib/mir2-playtest/state
+ExecStart=/opt/mir2-playtest/releases/REQUIRED_FULL_SOURCE_REVISION/mir2-gateway
+Restart=on-failure
+RestartSec=10
+KillSignal=SIGINT
+TimeoutStopSec=60
+UMask=0077
+LimitNOFILE=4096
+MemoryAccounting=true
+MemoryHigh=1400M
+MemoryMax=1600M
+MemorySwapMax=0
+CPUWeight=25
+IOWeight=25
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/lib/mir2-playtest/state /var/lib/mir2-playtest/recovery
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mir2-playtest
+
+[Install]
+WantedBy=multi-user.target

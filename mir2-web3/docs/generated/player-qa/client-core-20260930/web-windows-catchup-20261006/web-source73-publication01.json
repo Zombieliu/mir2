@@ -1,0 +1,48 @@
+{
+  "owner": "Root",
+  "kind": "Source73 code QA publication with preserved transport retries",
+  "branch": "codex/windows-player-journey",
+  "commit": "dabe442ff1cd98f607190013540738cc97910315",
+  "parent": "5baddb909fab90f61efda28a5448701409997b97",
+  "files": 39,
+  "exactOwnedLeaves": 32,
+  "docsPrefixOnly": 7,
+  "foreignBodiesExcluded": true,
+  "pushExitCode": 0,
+  "remoteIndependentlyVerified": true,
+  "remoteHead": "dabe442ff1cd98f607190013540738cc97910315",
+  "priorFailures": [
+    {
+      "exitCode": 1,
+      "reason": "GitHub SSH timeout and broken pipe"
+    },
+    {
+      "exitCode": 1,
+      "reason": "GitHub connection reset by peer"
+    },
+    {
+      "exitCode": 1,
+      "reason": "GitHub closed SSH connection"
+    },
+    {
+      "exitCode": 1,
+      "reason": "GitHub ssh443 closed connection"
+    }
+  ],
+  "successfulPush": {
+    "force": false,
+    "standardGitPush": true,
+    "sshEndpoint": "ssh.github.com:443",
+    "existingGithubHostKeyVerificationPreserved": true,
+    "packWindow": 0,
+    "packDepth": 0,
+    "compression": 1,
+    "thin": false,
+    "objects": 55,
+    "bytesReportedMiB": 12.11
+  },
+  "actualBuildAndUiEvidenceCommitted": true,
+  "candidateAccepted": false,
+  "wholeParityPercentage": null,
+  "goalComplete": false
+}

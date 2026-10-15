@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { currentSocialItem, sameSocialItem, validSocialItem, validSocialItemSlot, type SocialItemSlot } from "../../lib/social-item-window-model";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
+import { OriginalItemTooltip } from "./original-client-item-tooltip";
+import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-tooltip";
+import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
 
 type TranslateFn = (
   key: string,
@@ -16,6 +20,11 @@ type TranslateFn = (
 export type TradeItemSlot = {
   /** Stable id for React keys (item unique id / slot index). */
   id: string | number;
+  /** Actual trade-array position. Display IDs never supply this identity. */
+  slot?: number;
+  uniqueId?: number;
+  /** Authentic received item/template metadata; presentation never supplies an action identity. */
+  tooltipSource?: Readonly<Record<string, unknown>>;
   name?: string;
   /** Icon index into `/original-ui/Items/<icon>.png`. */
   icon?: number;
@@ -43,7 +52,8 @@ export type TradeSummary = {
   /** Whether the *partner* has pressed confirm. */
   confirmed?: boolean;
   /** Optional partner item slots, mirroring Crystal's GuestTrade 5x2 grid. */
-  partnerItems?: TradeItemSlot[];
+  partnerItems?: Array<TradeItemSlot | null>;
+  partnerItemsKnown?: boolean;
   /**
    * Currency the partner's offered amount is denominated in: `"gold"`
    * (default) or a city reputation token key (`"feitian"`, `"bichon"`).
@@ -64,7 +74,17 @@ export type TradeWindowProps = {
   /** Whether the viewer has already pressed confirm. */
   myConfirmed?: boolean;
   /** Optional viewer item slots, mirroring Crystal's Trade 5x2 grid. */
-  myItems?: TradeItemSlot[];
+  myItems?: Array<TradeItemSlot | null>;
+  onReadItemTooltip?: (item: TradeItemSlot) => CrystalTooltipDocument | null;
+  inventoryItems?: readonly SocialItemSlot[];
+  /** Only current, genuinely empty physical bag cells supplied by the host. */
+  emptyInventorySlots?: readonly number[];
+  itemsReady?: boolean;
+  itemActionPending?: boolean;
+  /** Host-owned owner/session/source lease; changes retire the selection. */
+  itemSourceKey?: string;
+  onDepositItem?: (from: number, to: number, uniqueId: number) => void;
+  onRetrieveItem?: (from: number, to: number, uniqueId: number) => void;
   /** Total gold the viewer can still offer (caps the gold input). */
   availableGold?: number;
   /** Accept an incoming `requested` trade invite. */
@@ -90,6 +110,14 @@ export function TradeWindow({
   myItemCount,
   myConfirmed,
   myItems,
+  onReadItemTooltip,
+  inventoryItems,
+  emptyInventorySlots,
+  itemsReady,
+  itemActionPending,
+  itemSourceKey,
+  onDepositItem,
+  onRetrieveItem,
   availableGold,
   onAccept,
   onConfirm,
@@ -108,23 +136,58 @@ export function TradeWindow({
   const partnerGoldValue = trade?.partnerGold ?? 0;
   const myItemsList = myItems ?? [];
   const partnerItemsList = trade?.partnerItems ?? [];
-  const myItemsCount = myItems ? myItems.length : myItemCount ?? 0;
-  const partnerItemsCount = trade?.partnerItems ? trade.partnerItems.length : trade?.partnerItemCount ?? 0;
+  const myItemsCount = myItems ? myItems.filter(item => item !== null).length : myItemCount ?? 0;
+  const partnerItemsCount = trade?.partnerItems ? trade.partnerItems.filter(item => item !== null).length : trade?.partnerItemCount ?? 0;
 
   const myTotal = myGoldValue + sumValue(myItemsList);
   const partnerTotal = partnerGoldValue + sumValue(partnerItemsList);
 
   const [goldDraft, setGoldDraft] = useState("");
+  const [itemSelection, setItemSelection] = useState<{ source: "bag" | "offer"; item: SocialItemSlot; key: string } | null>(null);
+  const ownSlots = tradeGridSlots(myItemsList);
+  const offerItems = ownSlots.flatMap((item, slot) => {
+    const candidate = item && { slot, uniqueId: item.uniqueId, name: item.name, icon: item.icon, count: item.count };
+    return candidate && validSocialItem(candidate, TRADE_SLOT_COUNT) ? [candidate] : [];
+  });
+  const bagItems = inventoryItems ?? [];
+  const emptySlots = emptyInventorySlots ?? [];
+  const itemEditing = itemsReady === true && itemActionPending !== true && state === "open" && Boolean(partner)
+    && !selfConfirmed && !partnerConfirmed && Boolean(itemSourceKey)
+    && inventoryItems !== undefined && emptyInventorySlots !== undefined
+    && myItems?.length === TRADE_SLOT_COUNT
+    && Array.from(myItems).every((item, slot) => item === null || validSocialItem(item, TRADE_SLOT_COUNT) && item.slot === slot)
+    && ownSlots.filter(Boolean).length === offerItems.length
+    && new Set(offerItems.map(item => item.uniqueId)).size === offerItems.length
+    && bagItems.every(item => validSocialItem(item, 256)) && new Set(bagItems.map(item => item.slot)).size === bagItems.length
+    && new Set(bagItems.map(item => item.uniqueId)).size === bagItems.length
+    && emptySlots.every(slot => validSocialItemSlot(slot, 256) && !bagItems.some(item => item.slot === slot))
+    && new Set(emptySlots).size === emptySlots.length;
+  const selectableBag = bagItems.filter(item => !offerItems.some(offer => offer.uniqueId === item.uniqueId));
+  const selectedItem = itemSelection;
+  const selection = itemEditing && selectedItem !== null && selectedItem.key === itemSourceKey
+    && currentSocialItem(selectedItem.source === "bag" ? selectableBag : offerItems, selectedItem.item)
+    ? selectedItem : null;
+  useEffect(() => { setItemSelection(null); }, [partner, itemSourceKey, itemActionPending, itemsReady]);
+  useEffect(() => { if (itemSelection && !selection) setItemSelection(null); }, [itemSelection, selection]);
+
+  const placeInOffer = (slot: number) => {
+    if (!itemEditing || !validSocialItemSlot(slot, TRADE_SLOT_COUNT)) return;
+    const item = offerItems.find(row => row.slot === slot);
+    if (item) { setItemSelection({ source: "offer", item, key: itemSourceKey! }); return; }
+    if (selection?.source !== "bag" || !onDepositItem || ownSlots[slot] !== null) return;
+    onDepositItem(selection.item.slot, slot, selection.item.uniqueId);
+    setItemSelection(null);
+  };
 
   // Editing gold is only allowed before locking; the input commits on submit.
-  const goldLocked = selfConfirmed || !onSetGold || !partner;
+  const goldLocked = selfConfirmed || itemActionPending === true || !onSetGold || !partner;
 
   return (
     <section
       aria-label={t("ui.trade", [], "Trade")}
       data-trade-state={state}
       data-trade-partner={partner}
-      style={style.window}
+      style={{ ...style.window, ...(inventoryItems && emptyInventorySlots ? { height: 604 } : null) }}
     >
       <img style={style.frame} src={FRAME.frame} alt="" draggable={false} />
       <img style={style.title} src={FRAME.title} alt="" draggable={false} />
@@ -151,11 +214,16 @@ export function TradeWindow({
         accent="#caa64a"
         total={myTotal}
         t={t}
+        onItemClick={itemsReady === true ? placeInOffer : undefined}
+        itemDisabled={!itemEditing}
+        selectedSlot={selection?.source === "offer" ? selection.item.slot : undefined}
+        onReadItemTooltip={onReadItemTooltip}
       >
         <form
           style={style.goldEditRow}
           onSubmit={(event) => {
             event.preventDefault();
+            if (goldLocked) return;
             const amount = Number.parseInt(goldDraft, 10);
             if (Number.isFinite(amount) && amount >= 0) {
               const capped = typeof availableGold === "number" ? Math.min(amount, availableGold) : amount;
@@ -195,10 +263,11 @@ export function TradeWindow({
         accent="#9c8d6f"
         total={partnerTotal}
         t={t}
+        onReadItemTooltip={onReadItemTooltip}
       />
 
       <div style={style.status}>
-        {bothConfirmed
+        {trade?.partnerItemsKnown === false ? t("ui.tradeItemDetailsUnavailable", [], "Partner item details are unavailable. Wait for an authoritative update.") : bothConfirmed
           ? t("ui.tradeBothConfirmed", [], "Both sides confirmed. Completing trade...")
           : selfConfirmed
             ? t("ui.tradeWaitingPartner", [], "Waiting for partner to confirm.")
@@ -220,13 +289,13 @@ export function TradeWindow({
         ) : (
           <button
             type="button"
-            disabled={!onConfirm || !partner}
+            disabled={!onConfirm || !partner || itemActionPending === true || !selfConfirmed && trade?.partnerItemsKnown === false}
             aria-pressed={selfConfirmed}
             style={{
               ...style.actionButton,
               ...style.actionButtonPrimary,
               ...(selfConfirmed ? style.actionButtonLocked : null),
-              ...(!onConfirm || !partner ? style.actionButtonDisabled : null),
+              ...(!onConfirm || !partner || itemActionPending === true || !selfConfirmed && trade?.partnerItemsKnown === false ? style.actionButtonDisabled : null),
             }}
             onClick={() => onConfirm?.()}
           >
@@ -242,6 +311,35 @@ export function TradeWindow({
           {requested ? t("ui.tradeDecline", [], "Decline") : t("ui.cancel", [], "Cancel")}
         </button>
       </div>
+      {inventoryItems && emptyInventorySlots ? (
+        <div style={style.itemPicker} aria-label={t("ui.tradeBagItems", [], "Trade bag items")}>
+          <div style={style.sideMeta} aria-live="polite">{itemActionPending
+            ? t("ui.itemActionPending", [], "Waiting for item update...")
+            : !itemEditing ? t("ui.itemDataUnavailable", [], "Item actions unavailable")
+            : selection?.source === "offer" ? t("ui.tradeRetrieveHint", [], "Choose an empty bag slot to retrieve the item.")
+            : t("ui.tradeDepositHint", [], "Choose a bag item, then an empty offer slot.")}</div>
+          <div style={style.pickerCells}>
+            {selectableBag.map(item => (
+              <button type="button" key={`bag-${item.slot}-${item.uniqueId}`} disabled={!itemEditing || !onDepositItem}
+                aria-pressed={selection?.source === "bag" && sameSocialItem(selection.item, item)}
+                title={`${item.name} ×${item.count} (${item.slot + 1})`} style={style.pickerButton}
+                onClick={() => setItemSelection({ source: "bag", item, key: itemSourceKey! })}>
+                {item.icon !== undefined ? <img style={style.cellIcon} src={iconPath(item.icon)} alt="" draggable={false} /> : null}
+                {item.name} ×{item.count}
+              </button>
+            ))}
+            {emptySlots.map(slot => (
+              <button type="button" key={`empty-bag-${slot}`} style={style.pickerButton}
+                disabled={!itemEditing || selection?.source !== "offer" || !onRetrieveItem}
+                onClick={() => { if (itemEditing && selection?.source === "offer" && onRetrieveItem) {
+                  onRetrieveItem(selection.item.slot, slot, selection.item.uniqueId); setItemSelection(null);
+                } }}>
+                {t("ui.emptyBagSlot", [slot + 1], `Empty bag ${slot + 1}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -257,17 +355,25 @@ function TradeSide({
   total,
   t,
   children,
+  onItemClick,
+  itemDisabled,
+  selectedSlot,
+  onReadItemTooltip,
 }: {
   top: number;
   title: string;
   gold: number;
-  items: TradeItemSlot[];
+  items: Array<TradeItemSlot | null>;
   itemCount: number;
   confirmed: boolean;
   accent: string;
   total: number;
   t: TranslateFn;
   children?: ReactNode;
+  onItemClick?: (slot: number) => void;
+  itemDisabled?: boolean;
+  selectedSlot?: number;
+  onReadItemTooltip?: (item: TradeItemSlot) => CrystalTooltipDocument | null;
 }) {
   return (
     <div style={{ ...style.side, top }}>
@@ -277,7 +383,7 @@ function TradeSide({
           {confirmed ? t("ui.tradeLocked", [], "Locked") : t("ui.tradeOpenState", [], "Open")}
         </span>
       </div>
-      <ItemGrid items={items} t={t} />
+      <ItemGrid items={items} t={t} onItemClick={onItemClick} disabled={itemDisabled} selectedSlot={selectedSlot} onReadItemTooltip={onReadItemTooltip} />
       <div style={style.sideRow}>
         <span style={style.sideLabel}>{t("ui.gold", [], "Gold")}</span>
         <span style={style.sideValue}>{formatNumber(gold)}</span>
@@ -293,25 +399,44 @@ function TradeSide({
   );
 }
 
-function ItemGrid({ items, t }: { items: TradeItemSlot[]; t: TranslateFn }) {
+function ItemGrid({ items, t, onItemClick, disabled, selectedSlot, onReadItemTooltip }: {
+  items: Array<TradeItemSlot | null>; t: TranslateFn; onItemClick?: (slot: number) => void; disabled?: boolean; selectedSlot?: number;
+  onReadItemTooltip?: (item: TradeItemSlot) => CrystalTooltipDocument | null;
+}) {
+  const slots = tradeGridSlots(items);
+  const [activeSlot, setActiveSlot] = useState<number | null>(null);
   return (
     <div style={style.grid} role="list" aria-label={t("ui.tradeItems", [], "Items")}>
       {Array.from({ length: TRADE_SLOT_COUNT }).map((_, index) => {
-        const item = items[index];
+        const item = slots[index];
+        const document = activeSlot === index && item ? onReadItemTooltip?.(item) : null;
+        const info = item?.tooltipSource?.info as Readonly<Record<string, unknown>> | undefined;
+        const content = <>{item && typeof item.icon === "number" ? (
+          <img style={style.cellIcon} src={iconPath(item.icon)} alt="" draggable={false} />
+        ) : item ? <span style={style.cellText}>{(item.name ?? "?").slice(0, 3)}</span> : null}
+          {item && item.count && item.count > 1 ? <span style={style.cellCount}>{item.count}</span> : null}
+          {document ? <OriginalCrystalItemTooltip document={document} align={index % 5 > 2 ? "left" : "right"} /> : item?.tooltipSource ? <OriginalItemTooltip t={t} name={item.name ?? t("ui.unknownItem", [], "Unknown item")} quantity={item.count}
+            description={typeof info?.tooltip === "string" && info.tooltip.length <= 8192 ? info.tooltip : undefined}
+            weight={typeof info?.weight === "number" && Number.isInteger(info.weight) && info.weight >= 0 && info.weight <= 255 ? info.weight : undefined}
+            align={index % 5 > 2 ? "left" : "right"} /> : null}</>;
+        if (onItemClick) return <button type="button" className="trade-item-card" key={`own-${index}`} data-trade-slot={index}
+          title={item?.name} aria-label={item?.name ?? t("ui.emptyTradeSlot", [index + 1], `Empty offer ${index + 1}`)}
+          aria-pressed={selectedSlot === index} disabled={disabled}
+          onMouseEnter={() => setActiveSlot(index)} onMouseLeave={() => setActiveSlot(null)} onFocus={() => setActiveSlot(index)} onBlur={() => setActiveSlot(null)}
+          style={{ ...style.cell, padding: 0, ...(selectedSlot === index ? { borderColor: "#f4dcaf" } : null) }}
+          onClick={() => onItemClick(index)}>{content}</button>;
         return (
           <div
             key={item ? `item-${item.id}` : `empty-${index}`}
             role="listitem"
+            className="trade-item-card"
+            tabIndex={item?.tooltipSource ? 0 : undefined}
             data-trade-slot={index}
             title={item?.name}
             style={style.cell}
+            onMouseEnter={() => setActiveSlot(index)} onMouseLeave={() => setActiveSlot(null)} onFocus={() => setActiveSlot(index)} onBlur={() => setActiveSlot(null)}
           >
-            {item && typeof item.icon === "number" ? (
-              <img style={style.cellIcon} src={iconPath(item.icon)} alt="" draggable={false} />
-            ) : item ? (
-              <span style={style.cellText}>{(item.name ?? "?").slice(0, 3)}</span>
-            ) : null}
-            {item && item.count && item.count > 1 ? <span style={style.cellCount}>{item.count}</span> : null}
+            {content}
           </div>
         );
       })}
@@ -319,8 +444,19 @@ function ItemGrid({ items, t }: { items: TradeItemSlot[]; t: TranslateFn }) {
   );
 }
 
-function sumValue(items: TradeItemSlot[]): number {
-  return items.reduce((sum, item) => sum + (typeof item.value === "number" ? item.value : 0), 0);
+function tradeGridSlots(items: Array<TradeItemSlot | null>): Array<TradeItemSlot | null> {
+  const slots: Array<TradeItemSlot | null> = Array(TRADE_SLOT_COUNT).fill(null);
+  for (let index = 0; index < items.length; index++) {
+    const item = items[index];
+    if (!item) continue;
+    const slot = item.slot ?? index;
+    if (validSocialItemSlot(slot, TRADE_SLOT_COUNT) && slots[slot] === null) slots[slot] = item;
+  }
+  return slots;
+}
+
+function sumValue(items: Array<TradeItemSlot | null>): number {
+  return items.reduce((sum, item) => sum + (typeof item?.value === "number" ? item.value : 0), 0);
 }
 
 function iconPath(icon: number) {
@@ -332,6 +468,11 @@ function formatNumber(value: number) {
 }
 
 const style: Record<string, CSSProperties> = {
+  itemPicker: { position: "absolute", left: 0, top: 448, width: FRAME.width, maxHeight: 156,
+    overflowY: "auto", padding: 8, boxSizing: "border-box", border: "1px solid #9c8d6f", background: "rgba(20,13,7,0.96)" },
+  pickerCells: { display: "flex", flexWrap: "wrap", gap: 4, marginTop: 4 },
+  pickerButton: { display: "flex", alignItems: "center", gap: 3, minHeight: 28, maxWidth: 136,
+    border: "1px solid #9c8d6f", background: "#24180c", color: "#f0eee8", fontSize: 10, fontFamily: "inherit" },
   window: {
     position: "absolute",
     left: 356,

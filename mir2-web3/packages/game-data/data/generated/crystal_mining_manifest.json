@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "crystal_db_version": 117,
+  "crystal_db_custom_version": 0,
+  "source_map_count": 464,
+  "source_db_sha256": "829121f4d762ea4427325a767e326a9c04794eb51450ada8a72a0b857705f075",
+  "source_mines_sha256": "4b9ca19d06832da42abfc2c9cdcbfed746825c3c28ff8149c8a7ffc7d579d1c9",
+  "maps": [
+    {
+      "map_index": 47,
+      "map_file_name": "D401",
+      "map_title": "DeadMineEntrance",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 48,
+      "map_file_name": "D411",
+      "map_title": "B1ofMine",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 49,
+      "map_file_name": "D413",
+      "map_title": "B1ofMine",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 50,
+      "map_file_name": "D402",
+      "map_title": "EastofDeadMine",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 51,
+      "map_file_name": "D414",
+      "map_title": "B1ofMine",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 52,
+      "map_file_name": "D404",
+      "map_title": "B2ofDeadMine",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 53,
+      "map_file_name": "D416",
+      "map_title": "OverPass",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 54,
+      "map_file_name": "D403",
+      "map_title": "1FofDeadMine",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 55,
+      "map_file_name": "D412",
+      "map_title": "OverPass",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 56,
+      "map_file_name": "D405",
+      "map_title": "OreStoragePlace",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 57,
+      "map_file_name": "D415",
+      "map_title": "OverPass",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 58,
+      "map_file_name": "D406",
+      "map_title": "SouthofDeadMine",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 104,
+      "map_file_name": "SG001",
+      "map_title": "TrollMine_1F",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 105,
+      "map_file_name": "SG002",
+      "map_title": "TrollMine_2F",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 106,
+      "map_file_name": "SG003",
+      "map_title": "TrollMine_3F",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 107,
+      "map_file_name": "SG004",
+      "map_title": "TrollMine_4F",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 116,
+      "map_file_name": "D2031",
+      "map_title": "MineralMine_1F",
+      "mine_index": 2,
+      "mine_zones": []
+    },
+    {
+      "map_index": 117,
+      "map_file_name": "D2032",
+      "map_title": "MineralMine_2F",
+      "mine_index": 2,
+      "mine_zones": []
+    },
+    {
+      "map_index": 118,
+      "map_file_name": "D2033",
+      "map_title": "MineralMine_3F",
+      "mine_index": 2,
+      "mine_zones": []
+    },
+    {
+      "map_index": 119,
+      "map_file_name": "D2034",
+      "map_title": "MineralMine_4F",
+      "mine_index": 2,
+      "mine_zones": []
+    },
+    {
+      "map_index": 149,
+      "map_file_name": "D421",
+      "map_title": "S_ValleyDeadMine",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 150,
+      "map_file_name": "D422",
+      "map_title": "S_ValleyDeadMine",
+      "mine_index": 1,
+      "mine_zones": []
+    },
+    {
+      "map_index": 151,
+      "map_file_name": "D4221",
+      "map_title": "S_ValleyDeadMine",
+      "mine_index": 1,
+      "mine_zones": []
+    }
+  ],
+  "mine_sets": [
+    {
+      "mine_index": 1,
+      "name": "BichonMines",
+      "spot_regen_rate_minutes": 5,
+      "max_stones": 80,
+      "hit_rate": 25,
+      "drop_rate": 10,
+      "total_slots": 120,
+      "drops": [
+        {
+          "item_name": "GoldOre",
+          "min_slot": 1,
+          "max_slot": 2,
+          "min_dura": 3,
+          "max_dura": 16,
+          "bonus_chance": 20,
+          "max_bonus_dura": 10
+        },
+        {
+          "item_name": "SilverOre",
+          "min_slot": 3,
+          "max_slot": 20,
+          "min_dura": 3,
+          "max_dura": 16,
+          "bonus_chance": 20,
+          "max_bonus_dura": 10
+        },
+        {
+          "item_name": "CopperOre",
+          "min_slot": 21,
+          "max_slot": 45,
+          "min_dura": 3,
+          "max_dura": 16,
+          "bonus_chance": 20,
+          "max_bonus_dura": 10
+        },
+        {
+          "item_name": "BlackIronOre",
+          "min_slot": 46,
+          "max_slot": 56,
+          "min_dura": 3,
+          "max_dura": 16,
+          "bonus_chance": 20,
+          "max_bonus_dura": 10
+        }
+      ]
+    },
+    {
+      "mine_index": 2,
+      "name": "MineralMines",
+      "spot_regen_rate_minutes": 5,
+      "max_stones": 80,
+      "hit_rate": 25,
+      "drop_rate": 10,
+      "total_slots": 100,
+      "drops": [
+        {
+          "item_name": "PlatinumOre",
+          "min_slot": 1,
+          "max_slot": 2,
+          "min_dura": 3,
+          "max_dura": 16,
+          "bonus_chance": 20,
+          "max_bonus_dura": 10
+        },
+        {
+          "item_name": "RubyOre",
+          "min_slot": 3,
+          "max_slot": 20,
+          "min_dura": 3,
+          "max_dura": 16,
+          "bonus_chance": 20,
+          "max_bonus_dura": 10
+        },
+        {
+          "item_name": "NephriteOre",
+          "min_slot": 21,
+          "max_slot": 45,
+          "min_dura": 3,
+          "max_dura": 16,
+          "bonus_chance": 20,
+          "max_bonus_dura": 10
+        },
+        {
+          "item_name": "AmethystOre",
+          "min_slot": 46,
+          "max_slot": 56,
+          "min_dura": 3,
+          "max_dura": 16,
+          "bonus_chance": 20,
+          "max_bonus_dura": 10
+        }
+      ]
+    }
+  ]
+}

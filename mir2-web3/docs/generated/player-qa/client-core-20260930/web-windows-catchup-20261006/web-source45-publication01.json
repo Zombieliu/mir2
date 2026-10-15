@@ -1,0 +1,270 @@
+{
+  "owner": "Root",
+  "kind": "Actual Source45 scoped Git commit push and independent remote ref verification",
+  "commit": "429fe0eb2a860da30f6327702b29395df62c3afc",
+  "parent": "ad6f915a693e1322b69afeed926f36318caefdb4",
+  "branch": "codex/windows-player-journey",
+  "remote": "git@github.com:Zombieliu/mir2.git",
+  "commitResult": {
+    "chunk_id": "ca91de",
+    "wall_time_seconds": 0.4497694,
+    "exit_code": 0,
+    "original_token_count": 438,
+    "output": "[codex/windows-player-journey 429fe0eb2a] test(hero): verify shared success chains and renderer build checkpoint\n 18 files changed, 5967 insertions(+)\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-publication01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-actual-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-default-quest-actual01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-delivery-input-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-hero-success-tests-independent-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-hero-success-tests-source01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-raw-evidence01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-renderer-cargo-actual01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-renderer-static-actual01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-stage5-actual01.json\n"
+  },
+  "postCommit": {
+    "chunk_id": "cd2cae",
+    "wall_time_seconds": 0.1243524,
+    "exit_code": 0,
+    "original_token_count": 39,
+    "output": "429fe0eb2a860da30f6327702b29395df62c3afc\nad6f915a693e1322b69afeed926f36318caefdb4\ntest(hero): verify shared success chains and renderer build checkpoint\n"
+  },
+  "indexAfter": {
+    "chunk_id": "7783c2",
+    "wall_time_seconds": 0.1128888,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "scopedNames": {
+    "key": "names",
+    "chunk_id": "b73e87",
+    "wall_time_seconds": 0.2131552,
+    "exit_code": 0,
+    "original_token_count": 416,
+    "output": "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs\nmir2-web3/docs/AGENT-ORCHESTRATION.md\nmir2-web3/docs/AGENT-TASK-QUEUE.md\nmir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\nmir2-web3/docs/FRONTEND-1TO1-GAPS.md\nmir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md\nmir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-publication01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-actual-review01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-default-quest-actual01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-delivery-input-review01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-finite-result01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-hero-success-tests-independent-review01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-hero-success-tests-source01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-raw-evidence01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-renderer-cargo-actual01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-renderer-static-actual01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-stage5-actual01.json\n"
+  },
+  "scopedNumstat": {
+    "key": "staged",
+    "chunk_id": "641728",
+    "wall_time_seconds": 0.2487603,
+    "exit_code": 0,
+    "original_token_count": 442,
+    "output": "281\t0\tmir2-web3/apps/web/scripts/test-stage5-adapters.mjs\n10\t0\tmir2-web3/docs/AGENT-ORCHESTRATION.md\n10\t0\tmir2-web3/docs/AGENT-TASK-QUEUE.md\n10\t0\tmir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\n10\t0\tmir2-web3/docs/FRONTEND-1TO1-GAPS.md\n10\t0\tmir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md\n10\t0\tmir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md\n332\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-publication01.json\n1066\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-actual-review01.json\n63\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-default-quest-actual01.json\n1993\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-delivery-input-review01.json\n260\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-finite-result01.json\n128\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-hero-success-tests-independent-review01.json\n144\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-hero-success-tests-source01.json\n574\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-raw-evidence01.json\n449\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-renderer-cargo-actual01.json\n554\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-renderer-static-actual01.json\n63\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-stage5-actual01.json\n"
+  },
+  "scopedWhitespace": {
+    "key": "whitespace",
+    "chunk_id": "514ea9",
+    "wall_time_seconds": 0.2088732,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "unrelatedChangesPreserved": {
+    "key": "remaining",
+    "chunk_id": "ddb50b",
+    "wall_time_seconds": 0.2957557,
+    "exit_code": 0,
+    "original_token_count": 326,
+    "output": "warning: in the working copy of 'mir2-web3/Cargo.lock', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction_tests.rs', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'mir2-web3/apps/web/tsconfig.json', CRLF will be replaced by LF the next time Git touches it\n10\t0\tmir2-web3/Cargo.lock\n1\t0\tmir2-web3/Cargo.toml\n1\t0\tmir2-web3/apps/simulation/Cargo.toml\n10\t0\tmir2-web3/apps/simulation/src/config.rs\n3\t0\tmir2-web3/apps/simulation/src/lib.rs\n27\t9\tmir2-web3/apps/simulation/src/runtime/inventory.rs\n4\t0\tmir2-web3/apps/simulation/src/runtime/mod.rs\n3\t0\tmir2-web3/apps/simulation/src/runtime/npc.rs\n3\t3\tmir2-web3/apps/simulation/src/runtime/npc_purchase_transaction.rs\n3\t0\tmir2-web3/apps/simulation/src/runtime/npc_purchase_transaction_tests.rs\n5\t0\tmir2-web3/apps/simulation/src/runtime/resources.rs\n11\t2\tmir2-web3/apps/simulation/src/runtime/save.rs\n3\t0\tmir2-web3/apps/simulation/src/runtime/session.rs\n6\t0\tmir2-web3/apps/simulation/src/user_item_uid.rs\n9\t1\tmir2-web3/apps/web/tsconfig.json\n28\t0\tmir2-web3/docs/AGENT-TASK-QUEUE.md\n20\t0\tmir2-web3/docs/BACKEND-1TO1-PROGRESS.md\n20\t0\tmir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\n20\t0\tmir2-web3/docs/CRYSTAL-SERVER-PARITY.md\n"
+  },
+  "push": {
+    "chunk_id": "8068cc",
+    "wall_time_seconds": 7.0770712,
+    "exit_code": 0,
+    "original_token_count": 25,
+    "output": "To github.com:Zombieliu/mir2.git\n   ad6f915a69..429fe0eb2a  HEAD -> codex/windows-player-journey\n"
+  },
+  "remoteVerification": {
+    "chunk_id": "e5386c",
+    "wall_time_seconds": 7.7037534,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "429fe0eb2a860da30f6327702b29395df62c3afc\trefs/heads/codex/windows-player-journey\n"
+  },
+  "remoteVerified": true,
+  "scopedFiles": 18,
+  "newPullRequestCreated": false,
+  "wasmApiUsed": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsedForAuthorizedGitPublication": true,
+  "fullWebPackagePublished": false,
+  "playerVerified": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "goalStatus": "active",
+  "qualification": "Git source checkpoint publication only; actual compiled static artifacts remain unpublished and full WASM metadata/API/init/build/player gates remain pending.",
+  "generatedAtUtc": "2026-10-08T15:04:24.799Z",
+  "evidence": {
+    "finite": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-finite-result01.json",
+      "bytes": 10803,
+      "sha256": "a1e81dc2628cab527adb5ea5b8045bae6cbd2d6dc9744edbd67cd32b7e17554f"
+    },
+    "raw": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-raw-evidence01.json",
+      "bytes": 165383,
+      "sha256": "a11c0901c6a0ca1b1a6613b3a9ec6e1759eac773ac68053841b6c0d3080f61fe"
+    },
+    "cargo": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-renderer-cargo-actual01.json",
+      "bytes": 22126,
+      "sha256": "4da54a07d4c5ca7882f5c33d9fb1c0c4440da0737655e2dbb6ef9be43897188c"
+    },
+    "staticCli": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-renderer-static-actual01.json",
+      "bytes": 25542,
+      "sha256": "72f947ebcc0893e17551e7e5aaa4918fcd4172b0a93f766f86e2455382bf22f7"
+    },
+    "independentActualReview": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-actual-review01.json",
+      "bytes": 50690,
+      "sha256": "5d4cc74a2f7c890769a6f60676cf84b4479b4b835cbfea4b671c2bbb3620d7ac"
+    },
+    "deliveryReview": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-delivery-input-review01.json",
+      "bytes": 94999,
+      "sha256": "8bfc5362d40d0f6953f5f06f224d97255235aa92218b3cda06737644eb9bbe8a"
+    },
+    "scopedRepoQaPins": [
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source45-finite-result01.json",
+        "bytes": 10803,
+        "sha256": "a1e81dc2628cab527adb5ea5b8045bae6cbd2d6dc9744edbd67cd32b7e17554f"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source45-renderer-cargo-actual01.json",
+        "bytes": 22126,
+        "sha256": "4da54a07d4c5ca7882f5c33d9fb1c0c4440da0737655e2dbb6ef9be43897188c"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source45-renderer-static-actual01.json",
+        "bytes": 25542,
+        "sha256": "72f947ebcc0893e17551e7e5aaa4918fcd4172b0a93f766f86e2455382bf22f7"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source45-default-quest-actual01.json",
+        "bytes": 7370,
+        "sha256": "a5dd78cffbea1ec6076cec0143820466187bdda8010be022fb9ed8db756a2a7f"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source45-stage5-actual01.json",
+        "bytes": 2976,
+        "sha256": "c36a59203130e15ad9dd97eb3e337355329d3ac21e768a3ecc39ca78d7662b4d"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source45-raw-evidence01.json",
+        "bytes": 165383,
+        "sha256": "a11c0901c6a0ca1b1a6613b3a9ec6e1759eac773ac68053841b6c0d3080f61fe"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source45-delivery-input-review01.json",
+        "bytes": 94999,
+        "sha256": "8bfc5362d40d0f6953f5f06f224d97255235aa92218b3cda06737644eb9bbe8a"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source45-actual-review01.json",
+        "bytes": 50690,
+        "sha256": "5d4cc74a2f7c890769a6f60676cf84b4479b4b835cbfea4b671c2bbb3620d7ac"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source45-hero-success-tests-source01.json",
+        "bytes": 6350,
+        "sha256": "efd07dc39264bae700ba2b501e4252da9932436e36aeb77aa518c44a897b9ad3"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source45-hero-success-tests-independent-review01.json",
+        "bytes": 6771,
+        "sha256": "82872aac93b4c4c5fa748cc0de6fceb9456ebdb391c5fce366a857c341c3dd22"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-hero-source44-publication01.json",
+        "bytes": 16978,
+        "sha256": "8fb149a7d481e0239ae278a57d4eb6be39166b5a36711898f730fbb9702c3d97"
+      }
+    ],
+    "ownDocPrefixes": [
+      {
+        "name": "AGENT-ORCHESTRATION.md",
+        "base": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+          "bytes": 306662,
+          "sha256": "e8e4a3b2f29532a66ca88e2cec1980f4bcbaa12cc69fcd3e59b1d9bae33381fe"
+        },
+        "current": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+          "bytes": 309127,
+          "sha256": "281f18c72eeb378547139a6dd53e8aa5954603293384b0c781f302a348282cf0"
+        },
+        "unchangedBody": true,
+        "ownInsertedLines": 10
+      },
+      {
+        "name": "AGENT-TASK-QUEUE.md",
+        "base": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+          "bytes": 930059,
+          "sha256": "07d5288953ae63f843c8e7cba637a687898e4548a823c959980c28a18686087e"
+        },
+        "current": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+          "bytes": 932524,
+          "sha256": "5466e8dc884cd0071a365c191cac0a285a2789a6941537fc6fc70f0e9b298445"
+        },
+        "unchangedBody": true,
+        "ownInsertedLines": 10
+      },
+      {
+        "name": "CRYSTAL-1TO1-ROADMAP.md",
+        "base": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+          "bytes": 1049249,
+          "sha256": "7479c5caaa19dd274c8459b0ad53423edd6b1c403f9ce6492284f78f8a74131f"
+        },
+        "current": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+          "bytes": 1051714,
+          "sha256": "fc598432326b2f16baf24beb5b9365a614f468b06f8be8ec2c4c7d22511ad648"
+        },
+        "unchangedBody": true,
+        "ownInsertedLines": 10
+      },
+      {
+        "name": "FRONTEND-1TO1-GAPS.md",
+        "base": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+          "bytes": 666307,
+          "sha256": "5c0232e616562359b3c83396ef54a425da1b1193759a3cc9df2cc0dead3875f2"
+        },
+        "current": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+          "bytes": 668772,
+          "sha256": "2dfdb017d74e5a4d02c74e826f473caae1908e90b2331888bd7a91dbeca58472"
+        },
+        "unchangedBody": true,
+        "ownInsertedLines": 10
+      },
+      {
+        "name": "NATIVE-WINDOWS-PLAYER-QA.md",
+        "base": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\NATIVE-WINDOWS-PLAYER-QA.md",
+          "bytes": 80659,
+          "sha256": "0395be1a31821cb6e73a296d6e7af8d2fbd789475b962a8ce0f4c6d43e057c20"
+        },
+        "current": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\NATIVE-WINDOWS-PLAYER-QA.md",
+          "bytes": 83124,
+          "sha256": "3102205c317932ad8302b46d266c1b281ae1735b363880cc96315f19d84c3093"
+        },
+        "unchangedBody": true,
+        "ownInsertedLines": 10
+      },
+      {
+        "name": "PLAYER-QA-PLAYTHROUGH.md",
+        "base": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\PLAYER-QA-PLAYTHROUGH.md",
+          "bytes": 61635,
+          "sha256": "4ac3cb8322c16f562bcacc7eb63d0af9b651c76a7097f9b6d084f178ab49fcab"
+        },
+        "current": {
+          "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\PLAYER-QA-PLAYTHROUGH.md",
+          "bytes": 64100,
+          "sha256": "70a420b4002e517f87794e0b9f2f673664758ae19dc335d15fa6aecbad666516"
+        },
+        "unchangedBody": true,
+        "ownInsertedLines": 10
+      }
+    ]
+  }
+}

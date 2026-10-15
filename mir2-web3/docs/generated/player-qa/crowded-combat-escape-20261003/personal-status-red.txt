@@ -1,0 +1,31 @@
+Full retained log: C:/mir2-build/crowded-personal-status-red-20261003.log
+SHA256: 0f99c3e1d8091fb52186ce7ea5732f2841733bdd96d75757422d2f9002a30f2c
+
+running 3 tests
+test runtime::combat::player_status_admission_tests::crowded_personal_dazed_permits_escape_but_blocks_attack_and_cast ... FAILED
+test runtime::combat::player_status_admission_tests::crowded_personal_real_control_is_finite_and_still_blocks_escape ... ok
+test runtime::combat::player_status_admission_tests::crowded_personal_stun_permits_escape_and_melee_but_blocks_cast ... FAILED
+---- runtime::combat::player_status_admission_tests::crowded_personal_dazed_permits_escape_but_blocks_attack_and_cast stdout ----
+---- runtime::combat::player_status_admission_tests::crowded_personal_stun_permits_escape_and_melee_but_blocks_cast stdout ----
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 2036 filtered out; finished in 0.00s
+
+Failure details:
+---- runtime::combat::player_status_admission_tests::crowded_personal_dazed_permits_escape_but_blocks_attack_and_cast stdout ----
+
+thread 'runtime::combat::player_status_admission_tests::crowded_personal_dazed_permits_escape_but_blocks_attack_and_cast' (50436) panicked at apps\simulation\src\runtime\player_status_admission_tests.rs:26:5:
+assertion failed: !crystal_player_movement_blocked_by_status(&world)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- runtime::combat::player_status_admission_tests::crowded_personal_stun_permits_escape_and_melee_but_blocks_cast stdout ----
+
+thread 'runtime::combat::player_status_admission_tests::crowded_personal_stun_permits_escape_and_melee_but_blocks_cast' (52716) panicked at apps\simulation\src\runtime\player_status_admission_tests.rs:18:5:
+assertion failed: !crystal_player_movement_blocked_by_status(&world)
+
+
+failures:
+    runtime::combat::player_status_admission_tests::crowded_personal_dazed_permits_escape_but_blocks_attack_and_cast
+    runtime::combat::player_status_admission_tests::crowded_personal_stun_permits_escape_and_melee_but_blocks_cast
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 2036 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p mir2-simulation --lib`

@@ -1,0 +1,10 @@
+{
+  "schema": "mir2.native.delta-phase-log-addendum.v1",
+  "originalArchiveSHA256": "a2f79c91479272cb541dfd7daac64607bbf4177f915f5d81b337c02acce0c92f",
+  "originalArchiveUnchanged": true,
+  "path": "results/delta-and-fallback/.update/last-run.jsonl",
+  "bytes": 2220,
+  "sha256": "f40d8e177b88ec7fb541cb228d9180623b76409f2ba2c136aa6834fe24d111f7",
+  "reason": "The original41-member archive used an optional delta path; actual directory is delta-and-fallback. This additive archive retains the complete observed delta/fallback phase log.",
+  "originalCommandResultsChanged": false
+}

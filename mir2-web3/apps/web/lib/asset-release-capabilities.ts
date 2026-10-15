@@ -29,9 +29,12 @@ declare global {
 }
 
 let pendingCapabilities: Promise<AssetReleaseCapabilities> | null = null;
+let capabilitiesReadGeneration = 0;
 
 export function setAssetReleaseCapabilities(value: unknown): AssetReleaseCapabilities {
   const normalized = normalizeAssetReleaseCapabilities(value);
+  // An explicitly accepted release retires older in-flight publications.
+  capabilitiesReadGeneration += 1;
   if (typeof window !== "undefined") {
     window.__mir2AssetReleaseCapabilities = normalized;
   }
@@ -40,13 +43,19 @@ export function setAssetReleaseCapabilities(value: unknown): AssetReleaseCapabil
 
 export async function loadAssetReleaseCapabilities(
   fetcher: typeof fetch = fetch,
+  options: { fresh?: boolean; signal?: AbortSignal } = {},
 ): Promise<AssetReleaseCapabilities> {
-  if (typeof window !== "undefined" && window.__mir2AssetReleaseCapabilities) {
+  const fresh = options.fresh === true;
+  if (!fresh && typeof window !== "undefined" && window.__mir2AssetReleaseCapabilities) {
     return window.__mir2AssetReleaseCapabilities;
   }
-  if (pendingCapabilities) return pendingCapabilities;
+  if (!fresh && pendingCapabilities) return pendingCapabilities;
 
-  pendingCapabilities = fetcher("/api/asset-manifest", { cache: "force-cache" })
+  const generation = ++capabilitiesReadGeneration;
+  const pending: Promise<AssetReleaseCapabilities> = fetcher("/api/asset-manifest", {
+    cache: fresh ? "no-cache" : "force-cache",
+    ...(options.signal ? { signal: options.signal } : {}),
+  })
     .then(async (response) => {
       if (!response.ok) {
         throw new Error(`asset manifest returned ${response.status}`);
@@ -55,16 +64,23 @@ export async function loadAssetReleaseCapabilities(
         version?: unknown;
         capabilities?: unknown;
       };
-      return setAssetReleaseCapabilities({
+      if (options.signal?.aborted) return normalizeAssetReleaseCapabilities(null);
+      const normalized = normalizeAssetReleaseCapabilities({
         releaseId: manifest.version,
         ...(isRecord(manifest.capabilities) ? manifest.capabilities : {}),
       });
+      // Fresh reads bypass both old memory and the default pending Promise.
+      // A slower old read may resolve for its caller, but cannot publish over
+      // a newer release or revive a cancelled request.
+      if (generation === capabilitiesReadGeneration) setAssetReleaseCapabilities(normalized);
+      return normalized;
     })
     .catch(() => normalizeAssetReleaseCapabilities(null))
     .finally(() => {
-      pendingCapabilities = null;
+      if (!fresh && pendingCapabilities === pending) pendingCapabilities = null;
     });
-  return pendingCapabilities;
+  if (!fresh) pendingCapabilities = pending;
+  return pending;
 }
 
 export function normalizeAssetReleaseCapabilities(value: unknown): AssetReleaseCapabilities {

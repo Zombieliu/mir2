@@ -1,0 +1,18 @@
+
+running 1 test
+mir2-gateway web listening on http://127.0.0.1:49710
+test routing::tests::crowded_fixture_transport_tests::crowded_fixture_normal_websocket_three_class_attack_escape_cohort ... Warrior: qualification="inconclusive", attackEscape="inconclusive", quiet=null (prepared geometry; native acceptance false)
+mir2-gateway web listening on http://127.0.0.1:59700
+
+thread 'routing::tests::crowded_fixture_transport_tests::crowded_fixture_normal_websocket_three_class_attack_escape_cohort' (82748) panicked at apps\gateway\src\routing\tests\crowded_fixture_transport_tests.rs:349:9:
+protocol runner or normal logout failed; retain artifacts
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    routing::tests::crowded_fixture_transport_tests::crowded_fixture_normal_websocket_three_class_attack_escape_cohort
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 920 filtered out; finished in 98.84s
+

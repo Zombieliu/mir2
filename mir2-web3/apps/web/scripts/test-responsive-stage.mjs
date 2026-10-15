@@ -213,6 +213,11 @@ assert.equal(wideViewportLayout.tileLeftOrigin, 799);
 
 const regularTouchControls = calculateMir2TouchControlMetrics(iphoneGame.cssHeight);
 assert.equal(regularTouchControls.actionSize, 44);
+assert.equal(regularTouchControls.panelSize, 44);
+for (const height of [320, 359.3, 360]) {
+  assert.equal(calculateMir2TouchControlMetrics(height).panelSize, 40);
+}
+assert.equal(calculateMir2TouchControlMetrics(wideMobile.cssHeight).panelSize, 44);
 
 const desktop = {
   cssWidth: 1440,

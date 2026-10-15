@@ -1,0 +1,793 @@
+{
+  "schema": "mir2.classic-map-implementation-receipt.v1",
+  "createdAt": "2026-10-04T03:31:36.822Z",
+  "projectRoot": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3",
+  "branch": "codex/classic-map-closure-20261004",
+  "sourceHead": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "sourceCommittedByThisAgent": false,
+  "phase": "candidate-resource-default-for-all-admitted-maps",
+  "completeClassicWorld": false,
+  "runtimeGameplayAccepted": false,
+  "writeSet": [
+    {
+      "path": "apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs",
+      "bytes": 21642,
+      "sha256": "518cc0a335ac8448c225e39d040778064c1437fc6545146d33de231bde5fdb4f",
+      "kind": "modified"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "bytes": 29113,
+      "sha256": "dc10d0895e0665687e328f080eca6c73656233d4aea849326a391c8c637e346e",
+      "kind": "modified"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "bytes": 112076,
+      "sha256": "4bc5c460343c1bfc2f58cfd91615a8fa10d822017ccf8135c8341c20efec2f90",
+      "kind": "modified"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/test-candidate-map-coverage.mjs",
+      "bytes": 7066,
+      "sha256": "431e9e17fa1a096aeb713f203408fac83332fae2f6a5d80c5870157423447919",
+      "kind": "new"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1",
+      "bytes": 5530,
+      "sha256": "57271b00b70e44eefcd254530b77fd36a63bfdfb8b0367714c32aca10135cae2",
+      "kind": "new"
+    },
+    {
+      "path": "apps/web/scripts/quest-agent/test-route-manifest.mjs",
+      "bytes": 13091,
+      "sha256": "c9ed876aae33f9b3e4ac6baa77670a6ddaf4bcda5f49030af7f6704167228749",
+      "kind": "modified"
+    },
+    {
+      "path": "docs/CLASSIC-MAP-CLOSURE-20261004.md",
+      "bytes": 8110,
+      "sha256": "7c25feb565c4146c3d966f3c6d81f01933b4bb0c78801b089ac4231c4e057b8e",
+      "kind": "new"
+    }
+  ],
+  "sourceDiff": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/source-diff.patch",
+    "bytes": 50727,
+    "sha256": "932625b3fb0b1a703371c83f943b627b243323cbb5ba2b4096911564744d63f9",
+    "numstat": [
+      "92\t9\tmir2-web3/apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs",
+      "90\t17\tmir2-web3/apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "5\t5\tmir2-web3/apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "1\t1\tmir2-web3/apps/web/scripts/quest-agent/test-route-manifest.mjs",
+      "101\t0\tmir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-coverage.mjs",
+      "76\t0\tmir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1",
+      "150\t0\tmir2-web3/docs/CLASSIC-MAP-CLOSURE-20261004.md"
+    ]
+  },
+  "scope": {
+    "schema": "mir2.windows.candidate-map-scope.v1",
+    "mode": "profile",
+    "profileId": "platinum_176",
+    "profileVersion": 26,
+    "profileSha256": "328ecec1474f9bde809b6a57508cb9dd9d3b0be82c136fb4dabcd8bba85b66cd",
+    "profileMapCount": 164,
+    "expectedMaps": [
+      "0",
+      "0100",
+      "0101",
+      "0102",
+      "0103",
+      "0104",
+      "01041",
+      "0105",
+      "0106",
+      "0107",
+      "0108",
+      "0109",
+      "0110",
+      "0111",
+      "0112",
+      "0115",
+      "0116",
+      "0117",
+      "0120",
+      "0121",
+      "0122",
+      "0123",
+      "0124",
+      "0125",
+      "0127",
+      "0128",
+      "0129",
+      "0130",
+      "0131",
+      "0132",
+      "0136",
+      "0137",
+      "0138",
+      "0140",
+      "0141",
+      "0142",
+      "0143",
+      "0144",
+      "0145",
+      "0146",
+      "0148",
+      "0149",
+      "0150",
+      "0151",
+      "0152",
+      "0153",
+      "0154",
+      "0155",
+      "0156",
+      "0157",
+      "0158",
+      "0159",
+      "0160",
+      "1",
+      "1001",
+      "1002",
+      "1003",
+      "1006",
+      "11",
+      "12",
+      "2",
+      "3",
+      "4",
+      "5",
+      "b354",
+      "bonguk1",
+      "d001",
+      "d002",
+      "d003",
+      "d011",
+      "d012",
+      "d021",
+      "d022",
+      "d023",
+      "d024",
+      "d10011",
+      "d1002",
+      "d10031",
+      "d1004",
+      "d10051",
+      "d10052",
+      "d10053",
+      "d10054",
+      "d10061",
+      "d10062",
+      "d2031",
+      "d2041",
+      "d2042",
+      "d2061",
+      "d2062",
+      "d2070",
+      "d2071",
+      "d2072",
+      "d2073",
+      "d2074",
+      "d2075",
+      "d401",
+      "d402",
+      "d403",
+      "d404",
+      "d405",
+      "d406",
+      "d411",
+      "d413",
+      "d414",
+      "d415",
+      "d416",
+      "d421",
+      "d422",
+      "d501",
+      "d502",
+      "d503",
+      "d504",
+      "d505",
+      "d5061",
+      "d5068",
+      "d5071",
+      "d5072",
+      "d5073",
+      "d5074",
+      "d515",
+      "d601",
+      "d602",
+      "d603",
+      "d604",
+      "d605",
+      "d606",
+      "d607",
+      "d608",
+      "d609",
+      "d610",
+      "d611",
+      "d612",
+      "d613",
+      "d614",
+      "d615",
+      "d618",
+      "d701",
+      "d710",
+      "d710a",
+      "d711",
+      "d711a",
+      "d712",
+      "d712a",
+      "d713",
+      "d713a",
+      "d714",
+      "d715",
+      "dm001",
+      "hell00",
+      "r01",
+      "r02",
+      "r03",
+      "r04",
+      "r05",
+      "r06",
+      "r07",
+      "r08",
+      "r09",
+      "r10",
+      "r11",
+      "r12",
+      "rck",
+      "whitevillage"
+    ],
+    "expectedMapsSha256": "a547742ebf4894847f63c4e0259d82e23ab8e4392c0099c33587d7d7fac58413",
+    "completeClassicWorld": false
+  },
+  "topology": {
+    "schema": "mir2.windows.candidate-map-topology.v1",
+    "expectedMapCount": 164,
+    "unreachableMaps": [],
+    "conditionalEntries": [
+      {
+        "map": "5",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "b354",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d10061",
+        "conditions": [
+          {
+            "from": "D10051",
+            "to": "D10061",
+            "kind": "map-movement",
+            "needHole": false,
+            "needMove": true,
+            "portals": [
+              {
+                "source": {
+                  "x": 178,
+                  "y": 53
+                },
+                "destination": {
+                  "x": 20,
+                  "y": 25
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "map": "d2061",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2062",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2070",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2071",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2072",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2073",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2074",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2075",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d710a",
+        "conditions": [
+          {
+            "from": "D715",
+            "to": "D710A",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "MongchonProvince/StoneTemple/Stone",
+            "targetSequence": [
+              "@stonetomba"
+            ],
+            "requiredItems": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "itemCosts": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "goldCost": 0,
+            "minimumGoldExclusive": null
+          }
+        ]
+      },
+      {
+        "map": "d711a",
+        "conditions": [
+          {
+            "from": "D715",
+            "to": "D710A",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "MongchonProvince/StoneTemple/Stone",
+            "targetSequence": [
+              "@stonetomba"
+            ],
+            "requiredItems": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "itemCosts": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "goldCost": 0,
+            "minimumGoldExclusive": null
+          }
+        ]
+      },
+      {
+        "map": "d712a",
+        "conditions": [
+          {
+            "from": "D715",
+            "to": "D710A",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "MongchonProvince/StoneTemple/Stone",
+            "targetSequence": [
+              "@stonetomba"
+            ],
+            "requiredItems": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "itemCosts": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "goldCost": 0,
+            "minimumGoldExclusive": null
+          }
+        ]
+      },
+      {
+        "map": "d713a",
+        "conditions": [
+          {
+            "from": "D715",
+            "to": "D710A",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "MongchonProvince/StoneTemple/Stone",
+            "targetSequence": [
+              "@stonetomba"
+            ],
+            "requiredItems": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "itemCosts": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "goldCost": 0,
+            "minimumGoldExclusive": null
+          }
+        ]
+      },
+      {
+        "map": "whitevillage",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "WhiteVillage",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove1"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 10000,
+            "minimumGoldExclusive": 10000
+          }
+        ]
+      }
+    ],
+    "excludedClassicMaps": [
+      "d10012",
+      "d10013",
+      "d10032",
+      "d5062",
+      "d5063",
+      "d5064",
+      "d5065",
+      "d5066",
+      "d5067",
+      "d5069",
+      "d511",
+      "d512",
+      "d513",
+      "d514",
+      "d716",
+      "d71601",
+      "d71602",
+      "d71603",
+      "d71604",
+      "d71605",
+      "d71606",
+      "d71607",
+      "d71608",
+      "d71609",
+      "d71610",
+      "d71611",
+      "d71612",
+      "d71613",
+      "d71614",
+      "d71615",
+      "d71616",
+      "d71617",
+      "d71618",
+      "d71619",
+      "d71620",
+      "d71621",
+      "d71622",
+      "d71623",
+      "d71624",
+      "d71625",
+      "d71650",
+      "d71651",
+      "d71652",
+      "d71653",
+      "d717"
+    ],
+    "sourceOrphanRooms": [
+      {
+        "map": "d71653",
+        "includedInExpectedScope": false,
+        "reason": "source-has-no-imported-entry",
+        "outgoingMapIndices": [
+          209
+        ]
+      }
+    ],
+    "runtimeGameplayAccepted": false
+  },
+  "inputs": {
+    "fullPackRoot": "F:/mir2-r2-fullcrystal/20260730-fullcrystal-f71b89aa-gzip1/generated/crystal-packs/full",
+    "fullIndexSha256": "77a9050818df502f65a7b151976ee7d66bd01e94d87680cf0760b925dd10dbee",
+    "lockedCacheRoot": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/web",
+    "trackedPublicUnchanged": true,
+    "processLocalTempRoot": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation",
+    "systemEnvironmentChanged": false
+  },
+  "actualResources": {
+    "nativeRoot": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/native-keyed-map-profile-164",
+    "atlasRoot": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/native-keyed-map-atlas-profile-164",
+    "nativeManifestSha256": "cabe0b8789be7b9fe8791c1abbe7361807fa7d4654e9b3d8dea6ad149072ce74",
+    "atlasManifestSha256": "4d21069b64cd6c6cbb67c9aa6fec1387944bd4cd73e7c96f9467ea6c0821d511",
+    "nativeGeneration": {
+      "ok": true,
+      "mapCount": 164,
+      "referenceCount": 53918,
+      "emittedEntryCount": 52211,
+      "keyedEntryCount": 51135,
+      "additiveEntryCount": 1076,
+      "fullPackEntryCount": 41447,
+      "noDrawReferenceCount": 530,
+      "missingSourceCount": 1177,
+      "removedArtifacts": 0,
+      "imageBytes": 249747060,
+      "manifestHash": "cabe0b8789be7b9fe8791c1abbe7361807fa7d4654e9b3d8dea6ad149072ce74",
+      "manifestPath": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\native-keyed-map-profile-164\\manifest.json",
+      "releaseManifestPath": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\native-keyed-map-profile-164\\manifest.cabe0b8789be7b9fe8791c1abbe7361807fa7d4654e9b3d8dea6ad149072ce74.json"
+    },
+    "completedAtlas": {
+      "addedFrames": 11900,
+      "addedPages": 396,
+      "manifestSha256": "4d21069b64cd6c6cbb67c9aa6fec1387944bd4cd73e7c96f9467ea6c0821d511",
+      "stats": {
+        "libraryCount": 13,
+        "atlasPageCount": 535,
+        "sourceCount": 16623,
+        "imageBytes": 146617283,
+        "maxPageBytes": 475728,
+        "maxPagePixels": 262144
+      }
+    },
+    "atlasStats": {
+      "libraryCount": 13,
+      "atlasPageCount": 535,
+      "sourceCount": 16623,
+      "imageBytes": 146617283,
+      "maxPageBytes": 475728,
+      "maxPagePixels": 262144
+    },
+    "coverage": {
+      "passed": true,
+      "mapCount": 164,
+      "referenceCount": 69386,
+      "packagedReferenceCount": 67554,
+      "blockingReferenceCount": 0,
+      "omittedMaps": [],
+      "unexpectedMaps": [],
+      "missingByReason": {
+        "source-out-of-range": 1283,
+        "source-no-draw": 549
+      }
+    }
+  },
+  "verification": {
+    "nodeFocused": {
+      "passed": 8,
+      "failed": 0
+    },
+    "nodeFocusedAndAdjacent": {
+      "passed": 60,
+      "failed": 0,
+      "log": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/focused-and-adjacent-tests-passed.log"
+    },
+    "powershellConfigurationAndScopeFixtures": "passed",
+    "powershellActualGeneratedNativeAndCoverageGuards": {
+      "mapCount": 164,
+      "drawableMissing": 0,
+      "atlasFrameCount": 16623,
+      "sourceOmissions": {
+        "source-out-of-range": 1283,
+        "source-no-draw": 549
+      }
+    },
+    "powershellSyntax": "passed for profile, package, scope test",
+    "gitDiffCheck": "passed",
+    "existingRouteVersionAssertion": {
+      "old": 25,
+      "current": 26,
+      "unchangedBaselineFailed": true,
+      "baselineLog": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/route-manifest-baseline-6032.log"
+    }
+  },
+  "retainedGuards": [
+    "CMS and Authenticode signing gates",
+    "ADS and reparse guards",
+    "path containment",
+    "source no-draw and out-of-range classification",
+    "source missing budget",
+    "PNG hash and geometry",
+    "one-pixel atlas gutters",
+    "262144 pixel atlas page budget"
+  ],
+  "performed": {
+    "windowsBuild": false,
+    "windowsPackage": false,
+    "signatureOrStore": false,
+    "publishOrUpload": false,
+    "runtimeOrProfileEdit": false,
+    "globalLedgerEdit": false,
+    "commit": false
+  },
+  "remaining": [
+    "Integrate reviewed seven-file source change in root-owned round",
+    "Stage exact 164 resources and measure signed package/update deltas before publication",
+    "Ordinary Gateway three-class travel, collision, combat, drops, save and reconnect acceptance",
+    "Add excluded 45 classic maps and Monster/049 in separately owned next round",
+    "Resolve original D71653 entry policy; do not invent an entrance or claim complete-world acceptance"
+  ]
+}

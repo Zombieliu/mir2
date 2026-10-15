@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "profile": "newcomer-v2",
+  "checkedAt": "2026-09-17T19:11:47.904Z",
+  "denominator": 78,
+  "completedUnits": 12,
+  "allClassesCompleted": false,
+  "measuredTime": false,
+  "visualAccepted": false,
+  "globalParityPercent": null,
+  "classes": [
+    {
+      "className": "Warrior",
+      "name": "JW1afa9aab",
+      "runId": "2026-09-17T19-01-12-342Z",
+      "status": "paused",
+      "level": 8,
+      "completedUnits": 4,
+      "snapshotCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004
+      ],
+      "savedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004
+      ],
+      "verifiedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004
+      ],
+      "logoutCommitted": true,
+      "transformMatches": true,
+      "saveRevision": 43,
+      "ordinaryStartedAt": "2026-09-17T17:57:15.577Z",
+      "ordinaryElapsedMs": 4064350,
+      "pause": {
+        "reason": "awaitingServerFlag",
+        "questId": 2110005,
+        "message": "bichonSafeArrival lacked an authoritative practice receipt",
+        "at": "2026-09-17T19:04:59.927Z"
+      },
+      "actionTimingScope": "latest-resume-trace-only",
+      "firstOwnedAttackMs": 3840614,
+      "firstOwnedStruckMs": 3844196,
+      "firstLearnedSkillMs": null,
+      "completed": false,
+      "visualAccepted": false
+    },
+    {
+      "className": "Wizard",
+      "name": "JWe9994c9a",
+      "runId": "2026-09-17T19-01-22-521Z",
+      "status": "paused",
+      "level": 8,
+      "completedUnits": 4,
+      "snapshotCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004
+      ],
+      "savedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004
+      ],
+      "verifiedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004
+      ],
+      "logoutCommitted": true,
+      "transformMatches": true,
+      "saveRevision": 53,
+      "ordinaryStartedAt": "2026-09-17T17:58:00.449Z",
+      "ordinaryElapsedMs": 3959589,
+      "pause": {
+        "reason": "awaitingServerFlag",
+        "questId": 2110005,
+        "message": "bichonSafeArrival lacked an authoritative practice receipt",
+        "at": "2026-09-17T19:04:00.038Z"
+      },
+      "actionTimingScope": "latest-resume-trace-only",
+      "firstOwnedAttackMs": null,
+      "firstOwnedStruckMs": 3819443,
+      "firstLearnedSkillMs": null,
+      "completed": false,
+      "visualAccepted": false
+    },
+    {
+      "className": "Taoist",
+      "name": "JT1c61008c",
+      "runId": "2026-09-17T19-01-32-729Z",
+      "status": "paused",
+      "level": 8,
+      "completedUnits": 4,
+      "snapshotCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004
+      ],
+      "savedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004
+      ],
+      "verifiedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004
+      ],
+      "logoutCommitted": true,
+      "transformMatches": true,
+      "saveRevision": 26,
+      "ordinaryStartedAt": "2026-09-17T17:58:10.644Z",
+      "ordinaryElapsedMs": 3978011,
+      "pause": {
+        "reason": "awaitingServerFlag",
+        "questId": 2110005,
+        "message": "bichonSafeArrival lacked an authoritative practice receipt",
+        "at": "2026-09-17T19:04:28.655Z"
+      },
+      "actionTimingScope": "latest-resume-trace-only",
+      "firstOwnedAttackMs": 3838958,
+      "firstOwnedStruckMs": 3839163,
+      "firstLearnedSkillMs": null,
+      "completed": false,
+      "visualAccepted": false
+    }
+  ]
+}

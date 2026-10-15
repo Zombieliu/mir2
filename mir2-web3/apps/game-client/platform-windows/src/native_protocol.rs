@@ -32,7 +32,160 @@ fn valid_protocol_slot(slot: i32) -> bool {
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum NativeOutboundCommand {
+    DepositRefineItem {
+        from: i32,
+        to: i32,
+    },
+    RetrieveRefineItem {
+        from: i32,
+        to: i32,
+    },
+    RefineCancel,
+    RefineItem {
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+    },
+    CheckRefine {
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+    },
+    AllowMentor,
+    AddMentor {
+        name: String,
+    },
+    CancelMentor,
+    MentorReply {
+        #[serde(rename = "acceptInvite")]
+        accept_invite: bool,
+    },
+    ChangeMarriage,
+    MarriageRequest,
+    MarriageReply {
+        #[serde(rename = "acceptInvite")]
+        accept_invite: bool,
+    },
+    DivorceRequest,
+    DivorceReply {
+        #[serde(rename = "acceptInvite")]
+        accept_invite: bool,
+    },
+
+    EquipSlotItem {
+        grid: String,
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+        to: i32,
+        #[serde(rename = "gridTo")]
+        grid_to: String,
+        #[serde(rename = "toUniqueId")]
+        to_unique_id: u64,
+    },
+    RemoveSlotItem {
+        grid: String,
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+        to: i32,
+        #[serde(rename = "gridTo")]
+        grid_to: String,
+        #[serde(rename = "fromUniqueId")]
+        from_unique_id: u64,
+    },
+    FishingCast {
+        #[serde(rename = "castOut")]
+        cast_out: bool,
+    },
+    FishingChangeAutocast {
+        #[serde(rename = "autoCast")]
+        auto_cast: bool,
+    },
+    IntelligentCreaturePickup {
+        #[serde(rename = "mouseMode")]
+        mouse_mode: bool,
+        location: mir2_protocol::Point,
+    },
+    RequestIntelligentCreatureUpdates {
+        update: bool,
+    },
+    UpdateIntelligentCreature {
+        creature: mir2_protocol::ClientIntelligentCreature,
+        #[serde(rename = "summonMe")]
+        summon_me: bool,
+        #[serde(rename = "unsummonMe")]
+        unsummon_me: bool,
+        #[serde(rename = "releaseMe")]
+        release_me: bool,
+    },
+
+    RefreshFriends,
+    RemoveFriend {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+    },
+    AddMemo {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        memo: String,
+    },
+    AddFriend {
+        name: String,
+        blocked: bool,
+    },
+    Observe {
+        name: String,
+    },
+    GetRanking {
+        #[serde(rename = "rankType")]
+        rank_type: u8,
+        #[serde(rename = "rankIndex")]
+        rank_index: i32,
+        #[serde(rename = "onlineOnly")]
+        online_only: bool,
+    },
+    Inspect {
+        #[serde(rename = "objectId")]
+        object_id: u32,
+        ranking: bool,
+        hero: bool,
+    },
     ClientVersion,
+    BillingStatus {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    BillingCheckout {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "offerId")]
+        offer_id: String,
+        #[serde(rename = "orderRequestId")]
+        order_request_id: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    BillingBuyMonthlyCard {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "orderRequestId")]
+        order_request_id: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    BillingActivateMonthlyCard {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "itemUniqueId")]
+        item_unique_id: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    MonthlyCardStatus,
+    RedeemMonthlyCard {
+        code: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
     ClientCapabilities {
         capabilities: Vec<String>,
     },
@@ -156,8 +309,36 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "questIndex")]
         quest_index: i32,
     },
+    ShareQuest {
+        #[serde(rename = "questIndex")]
+        quest_index: i32,
+    },
     LogOut,
     Disconnect,
+    ChangeHero {
+        #[serde(rename = "listIndex")]
+        list_index: i32,
+    },
+    SetHeroBehaviour {
+        behaviour: u8,
+    },
+    SetAutoPotValue {
+        stat: u8,
+        value: u32,
+    },
+    SetAutoPotItem {
+        grid: String,
+        #[serde(rename = "itemIndex")]
+        item_index: i32,
+    },
+    TransferHeroItem {
+        from: i32,
+        to: i32,
+    },
+    TakeBackHeroItem {
+        from: i32,
+        to: i32,
+    },
     TownRevive,
     UseItem {
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -183,6 +364,13 @@ pub enum NativeOutboundCommand {
     },
     DropItem {
         key: String,
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+        count: u16,
+        #[serde(rename = "heroInventory")]
+        hero_inventory: bool,
+    },
+    DeleteItem {
         #[serde(rename = "uniqueId")]
         unique_id: u64,
         count: u16,
@@ -224,6 +412,20 @@ pub enum NativeOutboundCommand {
     Chat {
         message: String,
     },
+    ChangeAMode {
+        mode: u8,
+    },
+    ChangePMode {
+        mode: u8,
+    },
+    MagicKey {
+        #[serde(rename = "requestId")]
+        request_id: u64,
+        spell: String,
+        key: u8,
+        #[serde(rename = "oldKey")]
+        old_key: u8,
+    },
     Magic {
         #[serde(rename = "objectId", default)]
         object_id: u32,
@@ -258,6 +460,17 @@ pub enum NativeOutboundCommand {
         quantity: u8,
         #[serde(rename = "priceType")]
         price_type: i32,
+    },
+    GameShopGift {
+        #[serde(rename = "requestId")]
+        request_id: String,
+        #[serde(rename = "gIndex")]
+        g_index: i32,
+        quantity: u8,
+        #[serde(rename = "priceType")]
+        price_type: i32,
+        #[serde(rename = "recipientName")]
+        recipient_name: String,
     },
     SellItem {
         #[serde(rename = "uniqueId")]
@@ -303,6 +516,11 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "mailId")]
         mail_id: u64,
     },
+    LockMail {
+        #[serde(rename = "mailId")]
+        mail_id: u64,
+        lock: bool,
+    },
     CollectParcel {
         #[serde(rename = "mailId")]
         mail_id: u64,
@@ -310,6 +528,17 @@ pub enum NativeOutboundCommand {
     DeleteMail {
         #[serde(rename = "mailId")]
         mail_id: u64,
+    },
+    MailCost {
+        gold: u32,
+        #[serde(rename = "itemsIdx")]
+        items_idx: [u64; 5],
+        stamped: bool,
+    },
+    MailLockedItem {
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+        locked: bool,
     },
     SendMail {
         name: String,
@@ -333,6 +562,13 @@ pub enum NativeOutboundCommand {
     GroupInvite {
         #[serde(rename = "acceptInvite")]
         accept_invite: bool,
+    },
+    GuildBuffUpdate {
+        action: u8,
+        id: i32,
+    },
+    GuildNameReturn {
+        name: String,
     },
     RequestGuildInfo {
         #[serde(rename = "infoType")]
@@ -442,7 +678,41 @@ impl NativeOutboundCommand {
 
     pub fn command_type(&self) -> &'static str {
         match self {
+            Self::DepositRefineItem { .. } => "depositRefineItem",
+            Self::RetrieveRefineItem { .. } => "retrieveRefineItem",
+            Self::RefineCancel => "refineCancel",
+            Self::RefineItem { .. } => "refineItem",
+            Self::CheckRefine { .. } => "checkRefine",
+            Self::AllowMentor => "allowMentor",
+            Self::AddMentor { .. } => "addMentor",
+            Self::CancelMentor => "cancelMentor",
+            Self::MentorReply { .. } => "mentorReply",
+            Self::ChangeMarriage => "changeMarriage",
+            Self::MarriageRequest => "marriageRequest",
+            Self::MarriageReply { .. } => "marriageReply",
+            Self::DivorceRequest => "divorceRequest",
+            Self::DivorceReply { .. } => "divorceReply",
+            Self::EquipSlotItem { .. } => "equipSlotItem",
+            Self::RemoveSlotItem { .. } => "removeSlotItem",
+            Self::FishingCast { .. } => "fishingCast",
+            Self::FishingChangeAutocast { .. } => "fishingChangeAutocast",
+            Self::IntelligentCreaturePickup { .. } => "intelligentCreaturePickup",
+            Self::RequestIntelligentCreatureUpdates { .. } => "requestIntelligentCreatureUpdates",
+            Self::UpdateIntelligentCreature { .. } => "updateIntelligentCreature",
+            Self::GetRanking { .. } => "getRanking",
+            Self::RefreshFriends => "refreshFriends",
+            Self::RemoveFriend { .. } => "removeFriend",
+            Self::AddMemo { .. } => "addMemo",
+            Self::AddFriend { .. } => "addFriend",
+            Self::Observe { .. } => "observe",
+            Self::Inspect { .. } => "inspect",
             Self::ClientVersion => "clientVersion",
+            Self::BillingStatus { .. } => "billingStatus",
+            Self::BillingCheckout { .. } => "billingCheckout",
+            Self::BillingBuyMonthlyCard { .. } => "billingBuyMonthlyCard",
+            Self::BillingActivateMonthlyCard { .. } => "billingActivateMonthlyCard",
+            Self::MonthlyCardStatus => "monthlyCardStatus",
+            Self::RedeemMonthlyCard { .. } => "redeemMonthlyCard",
             Self::ClientCapabilities { .. } => "clientCapabilities",
             Self::ResumeSession { .. } => "resumeSession",
             Self::Login { .. } => "login",
@@ -465,11 +735,19 @@ impl NativeOutboundCommand {
             Self::AcceptQuest { .. } => "acceptQuest",
             Self::FinishQuest { .. } => "finishQuest",
             Self::AbandonQuest { .. } => "abandonQuest",
+            Self::ShareQuest { .. } => "shareQuest",
+            Self::ChangeHero { .. } => "changeHero",
+            Self::SetHeroBehaviour { .. } => "setHeroBehaviour",
+            Self::SetAutoPotValue { .. } => "setAutoPotValue",
+            Self::SetAutoPotItem { .. } => "setAutoPotItem",
+            Self::TransferHeroItem { .. } => "transferHeroItem",
+            Self::TakeBackHeroItem { .. } => "takeBackHeroItem",
             Self::TownRevive => "townRevive",
             Self::UseItem { .. } => "useItem",
             Self::EquipItem { .. } => "equipItem",
             Self::RemoveItem { .. } => "removeItem",
             Self::DropItem { .. } => "dropItem",
+            Self::DeleteItem { .. } => "deleteItem",
             Self::RequestMapInfo { .. } => "requestMapInfo",
             Self::SearchMap { .. } => "searchMap",
             Self::TeleportToNpc { .. } => "teleportToNpc",
@@ -479,10 +757,14 @@ impl NativeOutboundCommand {
             Self::Chat { .. } => "chat",
             Self::LogOut => "logOut",
             Self::Disconnect => "disconnect",
+            Self::ChangeAMode { .. } => "changeAMode",
+            Self::ChangePMode { .. } => "changePMode",
+            Self::MagicKey { .. } => "magicKey",
             Self::Magic { .. } => "magic",
             Self::SpellToggle { .. } => "spellToggle",
             Self::BuyItem { .. } => "buyItem",
             Self::GameShopBuy { .. } => "gameShopBuy",
+            Self::GameShopGift { .. } => "gameShopGift",
             Self::SellItem { .. } => "sellItem",
             Self::RepairItem { .. } => "repairItem",
             Self::SpecialRepairItem { .. } => "specialRepairItem",
@@ -492,13 +774,18 @@ impl NativeOutboundCommand {
             Self::SetStoragePassword { .. } => "setStoragePassword",
             Self::RemoveStoragePassword { .. } => "removeStoragePassword",
             Self::ReadMail { .. } => "readMail",
+            Self::LockMail { .. } => "lockMail",
             Self::CollectParcel { .. } => "collectParcel",
             Self::DeleteMail { .. } => "deleteMail",
+            Self::MailCost { .. } => "mailCost",
+            Self::MailLockedItem { .. } => "mailLockedItem",
             Self::SendMail { .. } => "sendMail",
             Self::SwitchGroup { .. } => "switchGroup",
             Self::AddMember { .. } => "addMember",
             Self::DelMember { .. } => "delMember",
             Self::GroupInvite { .. } => "groupInvite",
+            Self::GuildBuffUpdate { .. } => "guildBuffUpdate",
+            Self::GuildNameReturn { .. } => "guildNameReturn",
             Self::RequestGuildInfo { .. } => "requestGuildInfo",
             Self::GuildStorageGoldChange { .. } => "guildStorageGoldChange",
             Self::GuildStorageItemChange { .. } => "guildStorageItemChange",
@@ -533,6 +820,7 @@ pub struct LoginCharacter {
     pub level: Option<i64>,
     pub class: Option<String>,
     pub gender: Option<String>,
+    pub last_access_binary_datetime: Option<i64>,
     pub raw: Value,
 }
 
@@ -630,6 +918,7 @@ pub struct Disconnect {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ErrorEvent {
+    pub code: Option<String>,
     pub message: Option<String>,
     pub packet: Option<String>,
     pub payload: Value,
@@ -744,6 +1033,8 @@ pub enum PacketEvent {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum InboundEvent {
+    Billing(mir2_client_bevy::native_billing::BillingReply),
+    MonthlyCard(mir2_client_bevy::native_monthly_card::MonthlyCardReply),
     Packet(PacketEvent),
     Error(ErrorEvent),
     ResumeCredential(ResumeCredentialEvent),
@@ -802,21 +1093,41 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
         .map(str::to_owned);
 
     match event_type.as_str() {
+        "billing" => serde_json::from_value(payload)
+            .map(InboundEvent::Billing)
+            .map_err(|_| ParseInboundError::InvalidJson("invalid billing response".into())),
+        "monthlyCard" => serde_json::from_value(payload)
+            .map(InboundEvent::MonthlyCard)
+            .map_err(|error| {
+                ParseInboundError::InvalidJson(format!("invalid monthly card response: {error}"))
+            }),
         "packet" => parse_packet(packet.as_deref(), payload),
-        "error" => Ok(InboundEvent::Error(ErrorEvent {
-            message: payload
-                .get("message")
+        "error" => {
+            // The public Gateway sends flat error envelopes. Keep the older
+            // nested shape readable, without hiding the authoritative reason.
+            let code = value
+                .get("code")
+                .or_else(|| payload.get("code"))
                 .and_then(Value::as_str)
-                .map(str::to_owned)
-                .or_else(|| {
-                    payload
-                        .get("error")
-                        .and_then(Value::as_str)
-                        .map(str::to_owned)
-                }),
-            packet: packet.clone(),
-            payload,
-        })),
+                .map(str::to_owned);
+            let message = [
+                value.get("message"),
+                value.get("error"),
+                payload.get("message"),
+                payload.get("error"),
+            ]
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .find(|message| !message.trim().is_empty())
+            .map(str::to_owned);
+            Ok(InboundEvent::Error(ErrorEvent {
+                code,
+                message,
+                packet: packet.clone(),
+                payload,
+            }))
+        }
         "worldSnapshot" => Ok(InboundEvent::Packet(PacketEvent::WorldSnapshot(
             WorldSnapshot { payload },
         ))),
@@ -901,8 +1212,9 @@ fn parse_packet(packet: Option<&str>, payload: Value) -> Result<InboundEvent, Pa
                     .and_then(Value::as_str)
                     .map(str::to_owned),
                 expiry: payload
-                    .get("expiry")
+                    .get("expiryBinaryDatetime")
                     .cloned()
+                    .or_else(|| payload.get("expiry").cloned())
                     .or_else(|| payload.get("expiryDate").cloned()),
                 payload,
             },
@@ -1213,6 +1525,8 @@ fn parse_login_character(value: &Value) -> LoginCharacter {
             .get("gender")
             .and_then(Value::as_str)
             .map(str::to_owned),
+        last_access_binary_datetime: coerce_i64(value.get("lastAccessBinaryDatetime"))
+            .or_else(|| coerce_i64(value.get("last_access_binary_datetime"))),
         raw: value.clone(),
     }
 }
@@ -1239,6 +1553,27 @@ fn coerce_u64(value: Option<&Value>) -> Option<u64> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn ranking_and_inspect_use_ordinary_exact_wire_commands() {
+        assert_eq!(
+            super::NativeOutboundCommand::GetRanking {
+                rank_type: 3,
+                rank_index: 17,
+                online_only: true
+            }
+            .to_wire_json(),
+            serde_json::json!({"type":"getRanking","rankType":3,"rankIndex":17,"onlineOnly":true})
+        );
+        assert_eq!(
+            super::NativeOutboundCommand::Inspect {
+                object_id: 42,
+                ranking: true,
+                hero: false
+            }
+            .to_wire_json(),
+            serde_json::json!({"type":"inspect","objectId":42,"ranking":true,"hero":false})
+        );
+    }
     use super::*;
 
     fn assert_serialized(command: NativeOutboundCommand, expected: Value) {
@@ -1246,6 +1581,69 @@ mod tests {
             serde_json::to_value(command).expect("serialize command"),
             expected
         );
+    }
+
+    #[test]
+    fn billing_commands_use_only_server_owned_account_and_offer_identity() {
+        assert_serialized(
+            NativeOutboundCommand::BillingStatus {
+                character_index: 7,
+                request_id: 11,
+            },
+            serde_json::json!({"type":"billingStatus","characterIndex":7,"requestId":11}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::BillingCheckout {
+                character_index: 7,
+                offer_id: "small".into(),
+                order_request_id: "native-stable-order".into(),
+                request_id: 12,
+            },
+            serde_json::json!({"type":"billingCheckout","characterIndex":7,"offerId":"small","orderRequestId":"native-stable-order","requestId":12}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::BillingBuyMonthlyCard {
+                character_index: 7,
+                order_request_id: "native-stable-month".into(),
+                request_id: 13,
+            },
+            serde_json::json!({"type":"billingBuyMonthlyCard","characterIndex":7,"orderRequestId":"native-stable-month","requestId":13}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::BillingActivateMonthlyCard {
+                character_index: 7,
+                item_unique_id: "18446744073709551615".into(),
+                request_id: 14,
+            },
+            serde_json::json!({"type":"billingActivateMonthlyCard","characterIndex":7,"itemUniqueId":"18446744073709551615","requestId":14}),
+        );
+    }
+
+    #[test]
+    fn billing_response_is_typed_and_never_logs_the_checkout_url() {
+        let parsed = parse_inbound_value(serde_json::json!({"type":"billing","payload":{
+            "operation":"checkout","requestId":12,"characterIndex":7,
+            "checkoutUrl":"https://checkout.stripe.com/c/pay/cs_test_opaque#private",
+            "replayed":true
+        }}))
+        .unwrap();
+        let debug = format!("{parsed:?}");
+        assert!(!debug.contains("cs_test_opaque"));
+        assert!(!debug.contains("private"));
+        let InboundEvent::Billing(reply) = parsed else {
+            panic!("missing typed billing response");
+        };
+        assert_eq!(reply.request_id, 12);
+        assert_eq!(reply.character_index, 7);
+        assert_eq!(
+            reply.operation,
+            mir2_client_bevy::native_billing::BillingOperation::Checkout
+        );
+        let error = parse_inbound_value(serde_json::json!({"type":"billing","payload":{
+            "operation":"https://checkout.stripe.com/c/pay/private","requestId":12,"characterIndex":7
+        }})).unwrap_err().to_string();
+        assert!(!error.contains("checkout.stripe.com"));
+        assert!(!error.contains("private"));
     }
 
     #[test]
@@ -1347,6 +1745,26 @@ mod tests {
                 to: 3,
             },
             json!({"type":"takeBackItemV2","requestId":"st-0000000000000002","from":9,"to":3}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::MailCost {
+                gold: 100,
+                items_idx: [11, 22, 0, 0, 0],
+                stamped: true,
+            },
+            json!({
+                "type":"mailCost",
+                "gold":100,
+                "itemsIdx":[11,22,0,0,0],
+                "stamped":true
+            }),
+        );
+        assert_serialized(
+            NativeOutboundCommand::MailLockedItem {
+                unique_id: 22,
+                locked: false,
+            },
+            json!({"type":"mailLockedItem","uniqueId":22,"locked":false}),
         );
         assert_serialized(
             NativeOutboundCommand::SendMail {
@@ -1468,8 +1886,12 @@ mod tests {
             json!({"type":"abandonQuest","requestId":"qs-0000000000000003","questIndex":77}),
         );
         assert_serialized(
+            NativeOutboundCommand::ShareQuest { quest_index: 77 },
+            json!({"type":"shareQuest","questIndex":77}),
+        );
+        assert_serialized(
             NativeOutboundCommand::Magic {
-                object_id: 0,
+                object_id: 1000,
                 spell: "FireBall".into(),
                 direction: "down".into(),
                 target_id: 2001,
@@ -1479,7 +1901,7 @@ mod tests {
             },
             json!({
                 "type":"magic",
-                "objectId":0,
+                "objectId":1000,
                 "spell":"FireBall",
                 "direction":"down",
                 "targetId":2001,
@@ -1528,10 +1950,10 @@ mod tests {
         assert_serialized(
             NativeOutboundCommand::RemoveItem {
                 unique_id: 42,
-                grid: "equipment".into(),
-                to: -1,
+                grid: "inventory".into(),
+                to: 0,
             },
-            json!({"type":"removeItem","uniqueId":42,"grid":"equipment","to":-1}),
+            json!({"type":"removeItem","uniqueId":42,"grid":"inventory","to":0}),
         );
         assert_serialized(
             NativeOutboundCommand::DropItem {
@@ -1545,6 +1967,19 @@ mod tests {
                 "key":"small-hp-drug",
                 "uniqueId":7001,
                 "count":3,
+                "heroInventory":false
+            }),
+        );
+        assert_serialized(
+            NativeOutboundCommand::DeleteItem {
+                unique_id: 7001,
+                count: 2,
+                hero_inventory: false,
+            },
+            json!({
+                "type":"deleteItem",
+                "uniqueId":7001,
+                "count":2,
                 "heroInventory":false
             }),
         );
@@ -1627,6 +2062,38 @@ mod tests {
             malformed,
             InboundEvent::GameShopReceipt(receipt) if !receipt.is_valid()
         ));
+    }
+
+    #[test]
+    fn game_shop_gift_wire_is_distinct_and_receipt_keeps_exact_recipient() {
+        let command = NativeOutboundCommand::GameShopGift {
+            request_id: "gs-1".into(),
+            g_index: 31,
+            quantity: 1,
+            price_type: 0,
+            recipient_name: "Friend_1".into(),
+        };
+        assert_eq!(command.command_type(), "gameShopGift");
+        assert_serialized(
+            command,
+            json!({"type":"gameShopGift", "requestId":"gs-1",
+            "gIndex":31, "quantity":1, "priceType":0, "recipientName":"Friend_1"}),
+        );
+        let gift = parse_inbound_value(json!({
+            "type":"gameShopReceipt", "protocol":"nativeGameShopGiftReceiptV1",
+            "requestId":"gs-1", "success":true, "gIndex":31,
+            "quantity":1, "priceType":0, "recipientName":"Friend_1", "mailId":7
+        }))
+        .unwrap();
+        assert!(matches!(gift, InboundEvent::GameShopReceipt(receipt)
+            if receipt.is_valid() && receipt.recipient_name.as_deref() == Some("Friend_1")));
+        let wrong = parse_inbound_value(json!({
+            "type":"gameShopReceipt", "protocol":"nativeGameShopReceiptV1",
+            "requestId":"gs-1", "success":true, "gIndex":31,
+            "quantity":1, "priceType":0, "recipientName":"Friend_1", "mailId":7
+        }))
+        .unwrap();
+        assert!(matches!(wrong, InboundEvent::GameShopReceipt(receipt) if !receipt.is_valid()));
     }
 
     #[test]
@@ -1917,7 +2384,7 @@ mod tests {
             "packet":"LoginSuccess",
             "payload":{
                 "characters":[
-                    {"index":0,"name":"Scion","level":1,"class":"Warrior","gender":"Male"},
+                    {"index":0,"name":"Scion","level":1,"class":"Warrior","gender":"Male","lastAccessBinaryDatetime":"-8584918932854775808"},
                     {"index":1,"name":"Ranger","level":2,"class":"Archer","gender":"Female"}
                 ]
             }
@@ -1928,6 +2395,10 @@ mod tests {
                 assert_eq!(login.characters.len(), 2);
                 assert_eq!(login.characters[0].index, Some(0));
                 assert_eq!(login.characters[0].name.as_deref(), Some("Scion"));
+                assert_eq!(
+                    login.characters[0].last_access_binary_datetime,
+                    Some(-8584918932854775808)
+                );
                 assert_eq!(login.characters[1].name.as_deref(), Some("Ranger"));
             }
             other => panic!("expected login success, got: {other:?}"),
@@ -1968,6 +2439,28 @@ mod tests {
     }
 
     #[test]
+    fn inbound_flat_gateway_error_preserves_code_and_prefers_canonical_message() {
+        let InboundEvent::Error(error) = parse_inbound_event(
+            r#"{"type":"error","code":"authRateLimited","message":"public reason","payload":{"message":"legacy reason"}}"#,
+        ).unwrap() else { panic!("expected error envelope") };
+        assert_eq!(error.code.as_deref(), Some("authRateLimited"));
+        assert_eq!(error.message.as_deref(), Some("public reason"));
+    }
+
+    #[test]
+    fn inbound_gateway_error_uses_legacy_reason_when_flat_message_is_empty_or_invalid() {
+        for raw in [
+            r#"{"type":"error","message":"","payload":{"error":"legacy reason"}}"#,
+            r#"{"type":"error","message":false,"payload":{"message":"legacy reason"}}"#,
+        ] {
+            let InboundEvent::Error(error) = parse_inbound_event(raw).unwrap() else {
+                panic!("expected error envelope")
+            };
+            assert_eq!(error.message.as_deref(), Some("legacy reason"));
+        }
+    }
+
+    #[test]
     fn inbound_change_password_results_preserve_authoritative_codes() {
         let result = parse_inbound_event(
             r#"{
@@ -1982,6 +2475,19 @@ mod tests {
                 assert_eq!(result.result, Some(5));
             }
             other => panic!("expected change password result, got: {other:?}"),
+        }
+
+        let canonical = parse_inbound_event(
+            r#"{"type":"packet","packet":"ChangePasswordBanned","payload":{"reason":"manual review","expiryBinaryDatetime":630822816000000001}}"#,
+        ).expect("parse canonical gateway expiry without floating-point conversion");
+        match canonical {
+            InboundEvent::Packet(PacketEvent::ChangePasswordBanned(banned)) => {
+                assert_eq!(
+                    banned.expiry.as_ref().and_then(Value::as_i64),
+                    Some(630822816000000001)
+                );
+            }
+            other => panic!("expected canonical change password banned result, got: {other:?}"),
         }
 
         let banned = parse_inbound_event(
@@ -2206,5 +2712,25 @@ mod tests {
 
         let malformed = parse_inbound_event("{not json");
         assert!(malformed.is_err());
+    }
+
+    #[test]
+    fn monthly_card_wire_keeps_request_correlation_and_redacts_vouchers() {
+        let code = format!("MC1-{}", "A".repeat(43));
+        let command = NativeOutboundCommand::RedeemMonthlyCard {
+            code: code.clone(),
+            request_id: 7,
+        };
+        let wire = serde_json::to_value(&command).unwrap();
+        assert_eq!(wire["type"], "redeemMonthlyCard");
+        assert_eq!(wire["requestId"], 7);
+        assert_eq!(wire["code"], code);
+        assert!(!format!("{command:?}").contains(&code));
+        let event = parse_inbound_event(r#"{"type":"monthlyCard","payload":{"operation":"redeem","requestId":7,"replayed":false,"status":{"required":true,"active":true,"expiresAtMs":9999,"serverNowMs":1,"remainingMs":9998,"canEnterGame":true}}}"#).unwrap();
+        let InboundEvent::MonthlyCard(reply) = event else {
+            panic!("monthly card reply missing");
+        };
+        assert_eq!(reply.request_id, Some(7));
+        assert!(reply.status.unwrap().can_enter_game);
     }
 }

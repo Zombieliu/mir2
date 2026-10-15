@@ -1,0 +1,1446 @@
+{
+  "schema": 1,
+  "status": "design-only",
+  "runtimeEnabled": false,
+  "proposedProfile": "newcomer-v2",
+  "maxLevel": 30,
+  "classes": [
+    "Warrior",
+    "Wizard",
+    "Taoist"
+  ],
+  "timing": {
+    "coreMinutes": 90,
+    "recoveryAndLearningAllowanceMinutes": 30,
+    "totalTargetMinutes": 120,
+    "measured": false,
+    "firstCombatTargetMinutes": 3,
+    "firstSkillTargetMinutes": 10,
+    "includes": [
+      "required travel",
+      "loading",
+      "acceptance and turn-in",
+      "shopping",
+      "skill learning",
+      "inventory handling",
+      "death and recovery"
+    ],
+    "excludesWithSeparateReporting": [
+      "user pause",
+      "maintenance",
+      "bug repair waiting"
+    ]
+  },
+  "counting": {
+    "mainQuestsPerClass": 22,
+    "growthClaimsPerClass": 4,
+    "ordinaryCompletionsPerClass": 26,
+    "threeClassFunctionalDenominator": 78,
+    "mandatoryKillCount": 38,
+    "skillsAndVisualChecksSeparate": true
+  },
+  "experience": {
+    "curve": "packages/game-data/data/content_profiles/platinum_176.json",
+    "fixedMainTotal": 7296900,
+    "monsterExperienceAdditional": true,
+    "repeatablesRequired": false
+  },
+  "chapters": [
+    {
+      "id": "first-adventure",
+      "title": "初次出战",
+      "minLevel": 1,
+      "exitLevel": 8,
+      "nodeOrders": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "coreMinutes": 8,
+      "fixedExperience": 3700
+    },
+    {
+      "id": "independent-trip",
+      "title": "独立出行",
+      "minLevel": 8,
+      "exitLevel": 16,
+      "nodeOrders": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "coreMinutes": 12,
+      "fixedExperience": 113200
+    },
+    {
+      "id": "cave-rescue",
+      "title": "洞穴救援",
+      "minLevel": 16,
+      "exitLevel": 20,
+      "nodeOrders": [
+        9,
+        10,
+        11,
+        12
+      ],
+      "coreMinutes": 15,
+      "fixedExperience": 340000
+    },
+    {
+      "id": "mine-defence",
+      "title": "矿口防线",
+      "minLevel": 20,
+      "exitLevel": 25,
+      "nodeOrders": [
+        13,
+        14,
+        15,
+        16
+      ],
+      "coreMinutes": 15,
+      "fixedExperience": 1440000
+    },
+    {
+      "id": "wooma-scout",
+      "title": "沃玛侦察",
+      "minLevel": 25,
+      "exitLevel": 27,
+      "nodeOrders": [
+        17,
+        18,
+        19
+      ],
+      "coreMinutes": 18,
+      "fixedExperience": 1200000
+    },
+    {
+      "id": "expedition-finish",
+      "title": "完成远征",
+      "minLevel": 27,
+      "exitLevel": 30,
+      "nodeOrders": [
+        20,
+        21,
+        22
+      ],
+      "coreMinutes": 22,
+      "fixedExperience": 4200000
+    }
+  ],
+  "nodes": [
+    {
+      "order": 1,
+      "questId": 2110001,
+      "title": "领取巡村装备",
+      "minLevel": 1,
+      "guaranteedExitLevel": 2,
+      "requiredQuestId": 0,
+      "acceptEndpoint": "npc:Jane",
+      "finishEndpoint": "npc:Jane",
+      "objectiveMaps": [
+        "0"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "serverEvent",
+          "name": "initialNpcReport",
+          "description": "完成普通首次NPC交接"
+        }
+      ],
+      "rewards": {
+        "experience": 100,
+        "gold": 100,
+        "fixedItems": {
+          "common": [
+            {
+              "name": "WoodenSword",
+              "count": 1
+            },
+            {
+              "name": "(HP)DrugSmall",
+              "count": 10
+            }
+          ],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [
+              {
+                "name": "(MP)DrugSmall",
+                "count": 10
+              }
+            ],
+            "Taoist": [
+              {
+                "name": "(MP)DrugSmall",
+                "count": 10
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "order": 2,
+      "questId": 2110002,
+      "title": "装备你的武器",
+      "minLevel": 2,
+      "guaranteedExitLevel": 3,
+      "requiredQuestId": 2110001,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "0"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "serverEvent",
+          "name": "eligibleWeaponEquipped",
+          "description": "装备当前等级可用武器"
+        }
+      ],
+      "rewards": {
+        "experience": 200,
+        "gold": 100,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      }
+    },
+    {
+      "order": 3,
+      "questId": 2110003,
+      "title": "村外的动静",
+      "minLevel": 3,
+      "guaranteedExitLevel": 7,
+      "requiredQuestId": 2110002,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "0"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "Scarecrow",
+          "count": 2
+        },
+        {
+          "type": "kill",
+          "monster": "RakingCat",
+          "count": 2
+        }
+      ],
+      "rewards": {
+        "experience": 2200,
+        "gold": 150,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [
+              {
+                "name": "Fencing",
+                "count": 1
+              }
+            ],
+            "Wizard": [
+              {
+                "name": "FireBall",
+                "count": 1
+              },
+              {
+                "name": "(MP)DrugSmall",
+                "count": 20
+              }
+            ],
+            "Taoist": [
+              {
+                "name": "Healing",
+                "count": 1
+              },
+              {
+                "name": "(MP)DrugSmall",
+                "count": 10
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "order": 4,
+      "questId": 2110004,
+      "title": "第一项职业本领",
+      "minLevel": 7,
+      "guaranteedExitLevel": 8,
+      "requiredQuestId": 2110003,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "0"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "Oma",
+          "count": 2
+        },
+        {
+          "type": "classPractice",
+          "requirements": {
+            "Warrior": [
+              "Fencing learned",
+              "normal attack landed with Fencing learned"
+            ],
+            "Wizard": [
+              "FireBall learned",
+              "FireBall damage committed"
+            ],
+            "Taoist": [
+              "Healing learned",
+              "Healing cast accepted on self"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "experience": 1200,
+        "gold": 150,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      }
+    },
+    {
+      "order": 5,
+      "questId": 2110005,
+      "title": "抵达比奇",
+      "minLevel": 8,
+      "guaranteedExitLevel": 9,
+      "requiredQuestId": 2110004,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "0"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "serverEvent",
+          "name": "bichonSafeArrival",
+          "description": "经正常线路抵达比奇安全区"
+        }
+      ],
+      "rewards": {
+        "experience": 1700,
+        "gold": 200,
+        "fixedItems": {
+          "common": [
+            {
+              "name": "TownTeleport",
+              "count": 1
+            }
+          ],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": [
+              {
+                "name": "SpiritSword",
+                "count": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "order": 6,
+      "questId": 2110006,
+      "title": "做好一次补给",
+      "minLevel": 9,
+      "guaranteedExitLevel": 11,
+      "requiredQuestId": 2110005,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "0"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "serverEvent",
+          "name": "ordinaryBasicPotionBought",
+          "description": "向合法NPC成功购买1份基础药"
+        }
+      ],
+      "rewards": {
+        "experience": 8500,
+        "gold": 300,
+        "fixedItems": {
+          "common": [
+            {
+              "name": "(HP)DrugSmall",
+              "count": 10
+            },
+            {
+              "name": "RandomTeleport",
+              "count": 2
+            }
+          ],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [
+              {
+                "name": "(MP)DrugSmall",
+                "count": 20
+              }
+            ],
+            "Taoist": [
+              {
+                "name": "(MP)DrugSmall",
+                "count": 20
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "order": 7,
+      "questId": 2110007,
+      "title": "森林护路",
+      "minLevel": 11,
+      "guaranteedExitLevel": 15,
+      "requiredQuestId": 2110006,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "0"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "ForestYeti",
+          "count": 4
+        }
+      ],
+      "rewards": {
+        "experience": 63000,
+        "gold": 500,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": [
+              {
+                "name": "Poisoning",
+                "count": 1
+              },
+              {
+                "name": "GreenPoison",
+                "count": 20
+              },
+              {
+                "name": "RedPoison",
+                "count": 20
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "order": 8,
+      "questId": 2110008,
+      "title": "交出第一份战报",
+      "minLevel": 15,
+      "guaranteedExitLevel": 16,
+      "requiredQuestId": 2110007,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "npc:Board",
+      "objectiveMaps": [
+        "0"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "Oma",
+          "count": 2
+        },
+        {
+          "type": "classPractice",
+          "requirements": {
+            "Warrior": [
+              "Slaying learned",
+              "normal attack landed with Slaying learned"
+            ],
+            "Wizard": [
+              "GreatFireBall learned",
+              "GreatFireBall damage committed"
+            ],
+            "Taoist": [
+              "SpiritSword learned",
+              "normal attack landed with SpiritSword learned"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "experience": 40000,
+        "gold": 500,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      },
+      "requiredCompletionIds": [
+        2120015
+      ]
+    },
+    {
+      "order": 9,
+      "questId": 2110009,
+      "title": "洞穴救援请求",
+      "minLevel": 16,
+      "guaranteedExitLevel": 16,
+      "requiredQuestId": 2110008,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "D001"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "serverEvent",
+          "name": "omaCaveEntryReached",
+          "description": "通过合法入口到达已认证检查点"
+        }
+      ],
+      "rewards": {
+        "experience": 0,
+        "gold": 500,
+        "fixedItems": {
+          "common": [
+            {
+              "name": "(HP)DrugSmall",
+              "count": 10
+            },
+            {
+              "name": "TownTeleport",
+              "count": 1
+            }
+          ],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [
+              {
+                "name": "(MP)DrugSmall",
+                "count": 20
+              }
+            ],
+            "Taoist": [
+              {
+                "name": "(MP)DrugSmall",
+                "count": 20
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "order": 10,
+      "questId": 2110010,
+      "title": "清开救援通路",
+      "minLevel": 16,
+      "guaranteedExitLevel": 18,
+      "requiredQuestId": 2110009,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "D001"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "Skeleton",
+          "count": 4
+        }
+      ],
+      "rewards": {
+        "experience": 120000,
+        "gold": 1000,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      }
+    },
+    {
+      "order": 11,
+      "questId": 2110011,
+      "title": "用新本领推进",
+      "minLevel": 18,
+      "guaranteedExitLevel": 19,
+      "requiredQuestId": 2110010,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "D001"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "Skeleton",
+          "count": 3
+        },
+        {
+          "type": "classPractice",
+          "requirements": {
+            "Warrior": [
+              "Slaying learned",
+              "normal attack landed with Slaying learned"
+            ],
+            "Wizard": [
+              "GreatFireBall damage committed"
+            ],
+            "Taoist": [
+              "SoulFireBall learned",
+              "SoulFireBall damage committed with material consumption"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "experience": 100000,
+        "gold": 1000,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": [
+              {
+                "name": "SummonSkeleton",
+                "count": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "order": 12,
+      "questId": 2110012,
+      "title": "带回救援战报",
+      "minLevel": 19,
+      "guaranteedExitLevel": 20,
+      "requiredQuestId": 2110011,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "npc:Board",
+      "objectiveMaps": [
+        "D001"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "Skeleton",
+          "count": 1
+        },
+        {
+          "type": "classPractice",
+          "requirements": {
+            "Warrior": [
+              "normal attack landed with Slaying learned"
+            ],
+            "Wizard": [
+              "GreatFireBall damage committed"
+            ],
+            "Taoist": [
+              "SummonSkeleton learned",
+              "owned skeleton exists in authoritative Zone",
+              "owned skeleton damage committed"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "experience": 120000,
+        "gold": 500,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      }
+    },
+    {
+      "order": 13,
+      "questId": 2110013,
+      "title": "矿工的急报",
+      "minLevel": 20,
+      "guaranteedExitLevel": 21,
+      "requiredQuestId": 2110012,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "D401"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "serverEvent",
+          "name": "deadMineEntryReached",
+          "description": "通过合法入口到达已认证检查点"
+        }
+      ],
+      "rewards": {
+        "experience": 140000,
+        "gold": 500,
+        "fixedItems": {
+          "common": [
+            {
+              "name": "(HP)DrugSmall",
+              "count": 10
+            },
+            {
+              "name": "TownTeleport",
+              "count": 2
+            },
+            {
+              "name": "RandomTeleport",
+              "count": 1
+            }
+          ],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [
+              {
+                "name": "(MP)DrugSmall",
+                "count": 20
+              }
+            ],
+            "Taoist": [
+              {
+                "name": "(MP)DrugSmall",
+                "count": 10
+              },
+              {
+                "name": "Amulet",
+                "count": 100
+              },
+              {
+                "name": "GreenPoison",
+                "count": 30
+              },
+              {
+                "name": "RedPoison",
+                "count": 30
+              }
+            ]
+          }
+        }
+      },
+      "requiredCompletionIds": [
+        2120020
+      ]
+    },
+    {
+      "order": 14,
+      "questId": 2110014,
+      "title": "清理矿口",
+      "minLevel": 21,
+      "guaranteedExitLevel": 22,
+      "requiredQuestId": 2110013,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "D401"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "Zombie2",
+          "count": 3
+        },
+        {
+          "type": "kill",
+          "monster": "Zombie3",
+          "count": 2
+        }
+      ],
+      "rewards": {
+        "experience": 250000,
+        "gold": 1500,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [
+              {
+                "name": "Thrusting",
+                "count": 1
+              }
+            ],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      }
+    },
+    {
+      "order": 15,
+      "questId": 2110015,
+      "title": "换一种打法",
+      "minLevel": 22,
+      "guaranteedExitLevel": 24,
+      "requiredQuestId": 2110014,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "D401"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "Zombie2",
+          "count": 1
+        },
+        {
+          "type": "classPractice",
+          "requirements": {
+            "Warrior": [
+              "Thrusting learned",
+              "Thrusting attack damage committed"
+            ],
+            "Wizard": [
+              "spell damage followed by legal reposition"
+            ],
+            "Taoist": [
+              "Poisoning learned",
+              "owned poison effect committed with material consumption"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "experience": 650000,
+        "gold": 1500,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [
+              {
+                "name": "FireWall",
+                "count": 1
+              }
+            ],
+            "Taoist": []
+          }
+        }
+      }
+    },
+    {
+      "order": 16,
+      "questId": 2110016,
+      "title": "守住矿口",
+      "minLevel": 24,
+      "guaranteedExitLevel": 25,
+      "requiredQuestId": 2110015,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "npc:Board",
+      "objectiveMaps": [
+        "D401"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "Zombie3",
+          "count": 3
+        },
+        {
+          "type": "classPractice",
+          "requirements": {
+            "Warrior": [
+              "Thrusting attack damage committed"
+            ],
+            "Wizard": [
+              "FireWall learned",
+              "owned FireWall damage committed"
+            ],
+            "Taoist": [
+              "owned skeleton damage committed",
+              "SoulFireBall damage committed"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "experience": 400000,
+        "gold": 1500,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      }
+    },
+    {
+      "order": 17,
+      "questId": 2110017,
+      "title": "领取远征通行",
+      "minLevel": 25,
+      "guaranteedExitLevel": 26,
+      "requiredQuestId": 2110016,
+      "acceptEndpoint": "npc:Board",
+      "finishEndpoint": "npc:Board",
+      "objectiveMaps": [
+        "0"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "serverEvent",
+          "name": "eligibleClassArmourEquipped",
+          "description": "装备25级奖励或更强的适用护甲"
+        },
+        {
+          "type": "serverEvent",
+          "name": "expeditionNpcReport",
+          "description": "完成普通远征准备交接"
+        }
+      ],
+      "rewards": {
+        "experience": 500000,
+        "gold": 1500,
+        "fixedItems": {
+          "common": [
+            {
+              "name": "(HP)DrugSmall",
+              "count": 10
+            },
+            {
+              "name": "TownTeleport",
+              "count": 2
+            },
+            {
+              "name": "RandomTeleport",
+              "count": 1
+            }
+          ],
+          "byClass": {
+            "Warrior": [
+              {
+                "name": "HalfMoon",
+                "count": 1
+              }
+            ],
+            "Wizard": [
+              {
+                "name": "Lightning",
+                "count": 1
+              },
+              {
+                "name": "(MP)DrugSmall",
+                "count": 10
+              }
+            ],
+            "Taoist": [
+              {
+                "name": "(MP)DrugSmall",
+                "count": 10
+              },
+              {
+                "name": "Amulet",
+                "count": 100
+              }
+            ]
+          }
+        }
+      },
+      "requiredCompletionIds": [
+        2120025
+      ]
+    },
+    {
+      "order": 18,
+      "questId": 2110018,
+      "title": "沃玛入口侦察",
+      "minLevel": 26,
+      "guaranteedExitLevel": 26,
+      "requiredQuestId": 2110017,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "D021"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "serverEvent",
+          "name": "woomaEntranceReached",
+          "description": "经合法地图线路到达已认证入口"
+        },
+        {
+          "type": "classPractice",
+          "requirements": {
+            "Warrior": [
+              "HalfMoon learned",
+              "level-eligible weapon equipped"
+            ],
+            "Wizard": [
+              "Lightning learned",
+              "level-eligible weapon equipped"
+            ],
+            "Taoist": [
+              "SummonSkeleton learned",
+              "level-eligible weapon equipped",
+              "usable spell materials equipped"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "experience": 0,
+        "gold": 1500,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      }
+    },
+    {
+      "order": 19,
+      "questId": 2110019,
+      "title": "清理前哨威胁",
+      "minLevel": 26,
+      "guaranteedExitLevel": 27,
+      "requiredQuestId": 2110018,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "D022"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "Dung",
+          "count": 3
+        }
+      ],
+      "rewards": {
+        "experience": 700000,
+        "gold": 3500,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      }
+    },
+    {
+      "order": 20,
+      "questId": 2110020,
+      "title": "击退沃玛士兵",
+      "minLevel": 27,
+      "guaranteedExitLevel": 28,
+      "requiredQuestId": 2110019,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "D022"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "WoomaSoldier",
+          "count": 3
+        }
+      ],
+      "rewards": {
+        "experience": 1000000,
+        "gold": 2500,
+        "fixedItems": {
+          "common": [
+            {
+              "name": "(HP)DrugSmall",
+              "count": 10
+            }
+          ],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      }
+    },
+    {
+      "order": 21,
+      "questId": 2110021,
+      "title": "完成职业远征",
+      "minLevel": 28,
+      "guaranteedExitLevel": 29,
+      "requiredQuestId": 2110020,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "diary",
+      "objectiveMaps": [
+        "D022"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "kill",
+          "monster": "WoomaFighter",
+          "count": 3
+        },
+        {
+          "type": "classPractice",
+          "requirements": {
+            "Warrior": [
+              "HalfMoon attack damage committed",
+              "Thrusting attack damage committed"
+            ],
+            "Wizard": [
+              "Lightning damage committed",
+              "owned FireWall damage committed",
+              "legal reposition between attacks"
+            ],
+            "Taoist": [
+              "owned skeleton damage committed",
+              "SoulFireBall damage committed",
+              "owned poison effect committed"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "experience": 1400000,
+        "gold": 3500,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      }
+    },
+    {
+      "order": 22,
+      "questId": 2110022,
+      "title": "选择下一段冒险",
+      "minLevel": 29,
+      "guaranteedExitLevel": 30,
+      "requiredQuestId": 2110021,
+      "acceptEndpoint": "diary",
+      "finishEndpoint": "npc:Board",
+      "objectiveMaps": [
+        "0"
+      ],
+      "regionCertification": "pending",
+      "objectives": [
+        {
+          "type": "serverEvent",
+          "name": "expeditionFinalReport",
+          "description": "正常返程并完成远征战报交付"
+        }
+      ],
+      "rewards": {
+        "experience": 1800000,
+        "gold": 2500,
+        "fixedItems": {
+          "common": [],
+          "byClass": {
+            "Warrior": [],
+            "Wizard": [],
+            "Taoist": []
+          }
+        }
+      }
+    }
+  ],
+  "growthRewards": [
+    {
+      "questId": 2120015,
+      "level": 15,
+      "afterNode": 7,
+      "endpoint": "diary",
+      "experience": 0,
+      "gold": 5000,
+      "byClass": {
+        "Warrior": [
+          {
+            "name": "SharpSword",
+            "count": 1
+          },
+          {
+            "name": "Slaying",
+            "count": 1
+          }
+        ],
+        "Wizard": [
+          {
+            "name": "SharpTrident",
+            "count": 1
+          },
+          {
+            "name": "GreatFireBall",
+            "count": 1
+          }
+        ],
+        "Taoist": [
+          {
+            "name": "SharpScimitar",
+            "count": 1
+          },
+          {
+            "name": "SoulFireBall",
+            "count": 1
+          },
+          {
+            "name": "Amulet",
+            "count": 100
+          }
+        ]
+      }
+    },
+    {
+      "questId": 2120020,
+      "level": 20,
+      "afterNode": 12,
+      "endpoint": "npc:Board",
+      "experience": 0,
+      "gold": 10000,
+      "byClass": {
+        "Warrior": [
+          {
+            "name": "MartialSabre",
+            "count": 1
+          }
+        ],
+        "Wizard": [
+          {
+            "name": "SpearWithHook",
+            "count": 1
+          }
+        ],
+        "Taoist": [
+          {
+            "name": "KeenKrissSword",
+            "count": 1
+          }
+        ]
+      }
+    },
+    {
+      "questId": 2120025,
+      "level": 25,
+      "afterNode": 16,
+      "endpoint": "npc:Board",
+      "experience": 0,
+      "gold": 15000,
+      "byClass": {
+        "Warrior": [
+          {
+            "maleItem": "ThickArmour(M)",
+            "femaleItem": "ThickArmour(F)",
+            "count": 1
+          },
+          {
+            "name": "SolidGreatAxe",
+            "count": 1
+          }
+        ],
+        "Wizard": [
+          {
+            "maleItem": "FireMagicRobe(M)",
+            "femaleItem": "FireMagicRobe(F)",
+            "count": 1
+          },
+          {
+            "name": "SolidBronzeStaff",
+            "count": 1
+          }
+        ],
+        "Taoist": [
+          {
+            "maleItem": "TaoArmour(M)",
+            "femaleItem": "TaoArmour(F)",
+            "count": 1
+          },
+          {
+            "name": "SolidSerpentSword",
+            "count": 1
+          }
+        ]
+      }
+    },
+    {
+      "questId": 2120030,
+      "level": 30,
+      "afterNode": 22,
+      "endpoint": "npc:Board",
+      "experience": 0,
+      "gold": 25000,
+      "byClass": {
+        "Warrior": [],
+        "Wizard": [],
+        "Taoist": []
+      }
+    }
+  ],
+  "events": {
+    "authority": "server-committed ordinary actions only",
+    "bridgeImplemented": false,
+    "allowedFor": "accepted current V2 quest owned by actor",
+    "existingStateConditions": [
+      "eligible equipment",
+      "known skill"
+    ],
+    "actionConditionsDoNotCountBeforeAcceptance": true,
+    "clientCompletionBooleansAllowed": false,
+    "failedActionsDoNotCount": true,
+    "replaysDoNotDuplicate": true,
+    "existingKillItemFlagPresentation": true
+  },
+  "compatibility": {
+    "crystalDefaultUnchanged": true,
+    "v1CurrentRoutesUnchanged": true,
+    "newIds": true,
+    "oldCharactersEnabled": false,
+    "oldCharacterTransitionRequires": [
+      "version eligibility",
+      "growth reward deduplication across V1 and V2",
+      "remaining experience audit"
+    ],
+    "existingV1EvidenceIsNotV2Acceptance": true
+  },
+  "graduation": {
+    "presentation": "three optional goals from real implemented content",
+    "choices": [
+      "next class equipment",
+      "next eligible class skill",
+      "difficulty-labelled challenge"
+    ],
+    "dailyAndWeeklyRequired": false,
+    "goalChoiceDoesNotGateMainCompletion": true
+  },
+  "sources": [
+    "config/quest-guidance/newcomer-journey-v1.json",
+    "packages/game-data/data/generated/crystal_respawn_manifest.json",
+    "packages/game-data/data/generated/crystal_monster_manifest.json",
+    "packages/game-data/data/generated/crystal_magic_manifest.json",
+    "packages/game-data/data/generated/crystal_item_manifest.json"
+  ],
+  "skills": {
+    "Warrior": [
+      {
+        "spell": "Fencing",
+        "level": 7
+      },
+      {
+        "spell": "Slaying",
+        "level": 15
+      },
+      {
+        "spell": "Thrusting",
+        "level": 22
+      },
+      {
+        "spell": "HalfMoon",
+        "level": 26
+      }
+    ],
+    "Wizard": [
+      {
+        "spell": "FireBall",
+        "level": 7
+      },
+      {
+        "spell": "GreatFireBall",
+        "level": 15
+      },
+      {
+        "spell": "FireWall",
+        "level": 24
+      },
+      {
+        "spell": "Lightning",
+        "level": 26
+      }
+    ],
+    "Taoist": [
+      {
+        "spell": "Healing",
+        "level": 7
+      },
+      {
+        "spell": "SpiritSword",
+        "level": 9
+      },
+      {
+        "spell": "Poisoning",
+        "level": 14
+      },
+      {
+        "spell": "SoulFireBall",
+        "level": 18
+      },
+      {
+        "spell": "SummonSkeleton",
+        "level": 19
+      }
+    ]
+  }
+}

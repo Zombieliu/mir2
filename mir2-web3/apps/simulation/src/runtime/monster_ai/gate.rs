@@ -164,10 +164,10 @@ mod tests {
         world.insert_resource(MapRuntimeResource::new(
             &config,
             bounds,
-            BTreeSet::new(),
+            BTreeSet::new().into(),
             BTreeSet::new(),
             DoorRegistry::default(),
-            BTreeMap::new(),
+            BTreeMap::new().into(),
         ));
         world
     }

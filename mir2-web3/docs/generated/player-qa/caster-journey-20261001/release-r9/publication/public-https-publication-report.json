@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.r9.public-https-publication.v1",
+  "passed": true,
+  "sourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "candidate": "WN-CANDIDATE-20261001-invited-09",
+  "sequence": 5,
+  "discoveryUrl": "https://165.154.65.136.sslip.io/client-updates/latest.json",
+  "standardCertificateValidation": true,
+  "exactLocallyVerifiedSignedBytes": true,
+  "checks": [
+    {
+      "name": "latest.json",
+      "bytes": 1157,
+      "sha256": "BEBFB5193DE19DD4107C1E5CC4BAC89C092B83094D86FE49F4A10DD3A291E487",
+      "httpStatus": 200,
+      "cacheControl": "no-store"
+    },
+    {
+      "name": "latest.p7s",
+      "bytes": 1614,
+      "sha256": "58507D93FDB2E2D903D01DB8072CBB6C4221FE5C6691B6DBD4388B5129E2E919",
+      "httpStatus": 200,
+      "cacheControl": "no-store"
+    }
+  ],
+  "gameServicesChanged": false,
+  "timestampUtc": "2026-10-01T18:59:45.827019+00:00"
+}

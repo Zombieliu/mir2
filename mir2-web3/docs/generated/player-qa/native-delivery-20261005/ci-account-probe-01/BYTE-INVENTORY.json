@@ -1,0 +1,337 @@
+{
+  "schema": "mir2.native-account-ci-probe-proof.v1",
+  "files": [
+    {
+      "path": "worker/BASELINE-cloudflare_read_authority_probe.py",
+      "size": 11578,
+      "sha256": "1ce602ca8e1e1dc69c6745dec0ebce68237b040aa40ea11830b6aec9cdcf02dd"
+    },
+    {
+      "path": "worker/BASELINE-test_cloudflare_read_authority_probe.py",
+      "size": 25137,
+      "sha256": "c9f830c69b2f552e526d0f26c251027d7a443e2504423e90289a11807fc758d5"
+    },
+    {
+      "path": "worker/COMMANDS.json",
+      "size": 1330,
+      "sha256": "b5370ef19bc48e403c36139b3c3b7966db4fb234083b17ad5395351503ddd91e"
+    },
+    {
+      "path": "worker/DOCS-BINDINGS.json",
+      "size": 1284,
+      "sha256": "64ffe439aa67e5e64c89e5a4920dd87239cb88c235836dc05a024aede07dd3bb"
+    },
+    {
+      "path": "worker/ORIGINAL-FREEZE-BINDING.json",
+      "size": 454,
+      "sha256": "2b7318455fd354410e5da724ae69104ea6242a4094c4d901fa4ea2a497dcface"
+    },
+    {
+      "path": "worker/README.md",
+      "size": 3114,
+      "sha256": "ddbc9a7df8cdb04276bebd2336d7dd036961113f372660fc15d95e6f1cfb63ea"
+    },
+    {
+      "path": "worker/RED01-cloudflare_read_authority_probe.py",
+      "size": 11578,
+      "sha256": "1ce602ca8e1e1dc69c6745dec0ebce68237b040aa40ea11830b6aec9cdcf02dd"
+    },
+    {
+      "path": "worker/RED01-test_cloudflare_read_authority_probe.py",
+      "size": 26693,
+      "sha256": "258495419be6acda64d1c559dcf511e8e6d4aad7739cdc2f5b39e9b0dd88913d"
+    },
+    {
+      "path": "worker/RUN-01-RED.json",
+      "size": 751,
+      "sha256": "8ca04cd3cbd3c260980be735b165c4d2af4dc8dfa47775afcc44ad94c046d022"
+    },
+    {
+      "path": "worker/RUN-02-GREEN.json",
+      "size": 753,
+      "sha256": "37dcaad58869cc00190822f797760dfef2b32a23fcb64120052056d3e7024689"
+    },
+    {
+      "path": "worker/SOURCE-AND-TEST.patch",
+      "size": 2854,
+      "sha256": "f2673f63644c9110f540ed49077e9abd48c5ca95f93eb616b6787f63893a8b1e"
+    },
+    {
+      "path": "worker/SOURCE-BINDINGS.json",
+      "size": 3248,
+      "sha256": "e31d4a4a71a19b7f405b7e73363c70d90804a69a6121c64bfe67f14d88a9d8d6"
+    },
+    {
+      "path": "worker/TEST-RECEIPT-1791153742646789500.json",
+      "size": 3550,
+      "sha256": "0f92d171e39ed032b04c23dfd3ce3487b19420d24ff4684af5a32f21cb189405"
+    },
+    {
+      "path": "worker/TEST-RECEIPT-1791153782846518900.json",
+      "size": 3549,
+      "sha256": "d890b436341b308125ddae8040cf9350b8de64395d7e214da1c60884528e8547"
+    },
+    {
+      "path": "worker/cloudflare_read_authority_probe.py",
+      "size": 11612,
+      "sha256": "a1294fd9a4c6a7978ab9ad8fd2874f7f393697eb1a8746f5d3d4cb8185ec9faa"
+    },
+    {
+      "path": "worker/fixtures/account-case-_ezmu14d/REPORT.json",
+      "size": 629,
+      "sha256": "b4ef6f021d24c87a9d4d5b01c91657963c9f8298f30ced9f5c219bf15e9ec0b0"
+    },
+    {
+      "path": "worker/fixtures/account-case-mj0evm9k/REPORT.json",
+      "size": 666,
+      "sha256": "73c49557c678dc8277b4869c7f42ab14b7aaece9621fd5ccb8de5ad578beb29e"
+    },
+    {
+      "path": "worker/fixtures/cli-http-401-6wgfuyw2/REPORT.json",
+      "size": 623,
+      "sha256": "9a67ba43a0fc76b7ccfb5de7a54fbea7d9f41118b292e40379e7ea933f2035ae"
+    },
+    {
+      "path": "worker/fixtures/cli-http-401-vm4xs5dx/REPORT.json",
+      "size": 660,
+      "sha256": "30a1b78a8281dc54608b40c72b002dbdf6a2cde96d248af64a331c063e4aaedf"
+    },
+    {
+      "path": "worker/fixtures/cli-http-403-fexiz1zn/REPORT.json",
+      "size": 660,
+      "sha256": "f72c236a5eda59c593adedeac112d975fdaddd4dc835bef09f76b27f655e3060"
+    },
+    {
+      "path": "worker/fixtures/cli-http-403-x2n0s1p0/REPORT.json",
+      "size": 623,
+      "sha256": "838fceb55ec92e3fe32bb096a3565063b602580d6d9b629e3e4be49c476ef69e"
+    },
+    {
+      "path": "worker/fixtures/empty-account-61ycnc05/REPORT.json",
+      "size": 665,
+      "sha256": "9a24bf29d19da4506f77a64a60e5bafe6deee52feb1dadd27416a54576f6b3f4"
+    },
+    {
+      "path": "worker/fixtures/empty-account-ei43wq27/REPORT.json",
+      "size": 628,
+      "sha256": "d3eaaede7ddcfafd86380656a9faf35ab16d529e7b3728dac359372df14680ec"
+    },
+    {
+      "path": "worker/fixtures/empty-token-dst9cz2i/REPORT.json",
+      "size": 663,
+      "sha256": "7a765560cee5982c3ed9f9f77e2ac31f71712214866c2f2e3715e820fbca7873"
+    },
+    {
+      "path": "worker/fixtures/empty-token-ipe9622u/REPORT.json",
+      "size": 626,
+      "sha256": "98cebe21dce878578c93e3653ed4103f71b687054190313904ac02c036b8ca4a"
+    },
+    {
+      "path": "worker/fixtures/existing-file-88hzexmi/REPORT.json",
+      "size": 23,
+      "sha256": "aae0bf86697f7d6d4b6c7dddb5c8888d21aa5fbd3c06b20b5f412e5c026ab181"
+    },
+    {
+      "path": "worker/fixtures/existing-file-w4wwjgkh/REPORT.json",
+      "size": 23,
+      "sha256": "aae0bf86697f7d6d4b6c7dddb5c8888d21aa5fbd3c06b20b5f412e5c026ab181"
+    },
+    {
+      "path": "worker/fixtures/missing-account-bz17dwdc/REPORT.json",
+      "size": 665,
+      "sha256": "9a24bf29d19da4506f77a64a60e5bafe6deee52feb1dadd27416a54576f6b3f4"
+    },
+    {
+      "path": "worker/fixtures/missing-account-vvkdcslo/REPORT.json",
+      "size": 628,
+      "sha256": "d3eaaede7ddcfafd86380656a9faf35ab16d529e7b3728dac359372df14680ec"
+    },
+    {
+      "path": "worker/fixtures/missing-token-eqssz109/REPORT.json",
+      "size": 663,
+      "sha256": "7a765560cee5982c3ed9f9f77e2ac31f71712214866c2f2e3715e820fbca7873"
+    },
+    {
+      "path": "worker/fixtures/missing-token-t66s8si5/REPORT.json",
+      "size": 626,
+      "sha256": "98cebe21dce878578c93e3653ed4103f71b687054190313904ac02c036b8ca4a"
+    },
+    {
+      "path": "worker/fixtures/receipt-directory-3o3wwv2_/preserved-original.json",
+      "size": 22,
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326"
+    },
+    {
+      "path": "worker/fixtures/receipt-directory-e4rmlk4_/preserved-original.json",
+      "size": 22,
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326"
+    },
+    {
+      "path": "worker/fixtures/receipt-hardlink-djpm_eei/REPORT.json",
+      "size": 22,
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326"
+    },
+    {
+      "path": "worker/fixtures/receipt-hardlink-djpm_eei/preserved-original.json",
+      "size": 22,
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326"
+    },
+    {
+      "path": "worker/fixtures/receipt-hardlink-vf1je6e6/REPORT.json",
+      "size": 22,
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326"
+    },
+    {
+      "path": "worker/fixtures/receipt-hardlink-vf1je6e6/preserved-original.json",
+      "size": 22,
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326"
+    },
+    {
+      "path": "worker/fixtures/receipt-symlink-9l097ken/preserved-original.json",
+      "size": 22,
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326"
+    },
+    {
+      "path": "worker/fixtures/receipt-symlink-gwrysw9_/preserved-original.json",
+      "size": 22,
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326"
+    },
+    {
+      "path": "worker/fixtures/success-06r_ixif/REPORT.json",
+      "size": 644,
+      "sha256": "1bd7bdadff38a4bf4d77a900f57e5af3d54cc81b8193a2d2646df95b5164cc13"
+    },
+    {
+      "path": "worker/fixtures/success-onv8fem0/REPORT.json",
+      "size": 607,
+      "sha256": "258807ee212370dbc12497cd45c2b4820382c0f874ec9a3143c103183b75b883"
+    },
+    {
+      "path": "worker/fixtures/wrong-account-1gu7fa6e/REPORT.json",
+      "size": 629,
+      "sha256": "b4ef6f021d24c87a9d4d5b01c91657963c9f8298f30ced9f5c219bf15e9ec0b0"
+    },
+    {
+      "path": "worker/fixtures/wrong-account-a2qwr9cp/REPORT.json",
+      "size": 666,
+      "sha256": "73c49557c678dc8277b4869c7f42ab14b7aaece9621fd5ccb8de5ad578beb29e"
+    },
+    {
+      "path": "worker/local-tests-01-red.log",
+      "size": 5871,
+      "sha256": "e950eca4c1ddbe174967a60402df3c61567205003f5e3a978ecd93d6da179012"
+    },
+    {
+      "path": "worker/local-tests-02-green.log",
+      "size": 4980,
+      "sha256": "9646b6b1f959706af7639450d49567d4a057046e257a5ad297e198b09858758e"
+    },
+    {
+      "path": "worker/test_cloudflare_read_authority_probe.py",
+      "size": 26693,
+      "sha256": "258495419be6acda64d1c559dcf511e8e6d4aad7739cdc2f5b39e9b0dd88913d"
+    },
+    {
+      "path": "worker/FROZEN-RECEIPT.json",
+      "size": 12712,
+      "sha256": "50e062ae6a94b3e78fa29d1a409f2ab8b1bc51378240811935e027afb0e09a14"
+    },
+    {
+      "path": "root/cloudflare_read_authority_probe.py",
+      "size": 11612,
+      "sha256": "a1294fd9a4c6a7978ab9ad8fd2874f7f393697eb1a8746f5d3d4cb8185ec9faa"
+    },
+    {
+      "path": "root/ROOT-REVIEW.json",
+      "size": 635,
+      "sha256": "92043db2ab496c6c17f242841aa7c81199247a57ef76a618e7a4a516336eee77"
+    },
+    {
+      "path": "root/root-tests-01.log",
+      "size": 4978,
+      "sha256": "248f6a3b0f711b49a08d6edef7f1e76ee91a507cce6a17dc445965f52bd11504"
+    },
+    {
+      "path": "root/store-proof.py",
+      "size": 4160,
+      "sha256": "7cc729881ed7de846e921d6b3b66739de623e2410068d1baff08194d36923ca4"
+    },
+    {
+      "path": "root/TEST-RECEIPT-1791154508638092700.json",
+      "size": 3515,
+      "sha256": "492ed5556e15e565ace02d86acaa4ff154e16fe9d89e71c9b35ecd8dd95931e1"
+    },
+    {
+      "path": "root/test_cloudflare_read_authority_probe.py",
+      "size": 26693,
+      "sha256": "258495419be6acda64d1c559dcf511e8e6d4aad7739cdc2f5b39e9b0dd88913d"
+    },
+    {
+      "path": "root/USER-ENDPOINT-CI-JOBS.json",
+      "size": 2013,
+      "sha256": "47f1969c4739aa6ff1ef51e157fb952a7a94ff457cd6477bf55d4e7275c78c73"
+    },
+    {
+      "path": "previous-user-endpoint/DISPATCH-01.json",
+      "size": 697,
+      "sha256": "bacfff3efd45e2b38969ce6d484a7425193b330ddec47124c8ffe6f92fe44ac7"
+    },
+    {
+      "path": "previous-user-endpoint/dispatch-01.log",
+      "size": 59,
+      "sha256": "3291855220ec90f1d3af06ef691e567b741797f16228429067e9e701fefa67e8"
+    },
+    {
+      "path": "previous-user-endpoint/dispatch-probe.py",
+      "size": 1953,
+      "sha256": "cb915dfe2032fa205af2940145bb52a45bf582a0a93867fe6f511ab33a656683"
+    },
+    {
+      "path": "previous-user-endpoint/push-01.json",
+      "size": 622,
+      "sha256": "291cfe01976fa72ec9e8d9c2bc1b1ba1fae4eec7fb0abc5e63ce7c9d0a57e070"
+    },
+    {
+      "path": "previous-user-endpoint/push-01.log",
+      "size": 140,
+      "sha256": "8ee4fadbd6c0282999344981b07da1d867d493b270cbd5a300eda299a8a610f3"
+    },
+    {
+      "path": "previous-user-endpoint/REMOTE-CONFIRMATION-01.json",
+      "size": 133,
+      "sha256": "2ba96e013815a12d10765c346d5627073d60830558b0a9142448856718da2937"
+    },
+    {
+      "path": "previous-user-endpoint/remote-ref-01.log",
+      "size": 90,
+      "sha256": "42ea608b1f831f025d1604ddf5cc296d916213dd8d0dc91b0fce6b7deccd7651"
+    },
+    {
+      "path": "previous-user-endpoint/receipt.json",
+      "size": 623,
+      "sha256": "9a67ba43a0fc76b7ccfb5de7a54fbea7d9f41118b292e40379e7ea933f2035ae"
+    }
+  ],
+  "fixtureLinksMetadataOnly": [
+    {
+      "path": "fixtures/receipt-parent-link-1e53r_bq/linked-parent",
+      "target": "\\\\?\\C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01\\fixtures\\receipt-parent-link-1e53r_bq\\real-parent",
+      "type": "symlink-fixture"
+    },
+    {
+      "path": "fixtures/receipt-parent-link-qyp5rjvd/linked-parent",
+      "target": "\\\\?\\C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01\\fixtures\\receipt-parent-link-qyp5rjvd\\real-parent",
+      "type": "symlink-fixture"
+    },
+    {
+      "path": "fixtures/receipt-symlink-9l097ken/REPORT.json",
+      "target": "\\\\?\\C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01\\fixtures\\receipt-symlink-9l097ken\\preserved-original.json",
+      "type": "symlink-fixture"
+    },
+    {
+      "path": "fixtures/receipt-symlink-gwrysw9_/REPORT.json",
+      "target": "\\\\?\\C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01\\fixtures\\receipt-symlink-gwrysw9_\\preserved-original.json",
+      "type": "symlink-fixture"
+    }
+  ]
+}

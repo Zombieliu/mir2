@@ -1,0 +1,28 @@
+{
+  "command": [
+    "cargo",
+    "+1.95.0",
+    "test",
+    "--offline",
+    "--locked",
+    "--jobs",
+    "2",
+    "--manifest-path",
+    "apps/game-client/client-bevy/Cargo.toml",
+    "--features",
+    "native-ui",
+    "--lib",
+    "guild_"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3",
+  "target": "C:/mir2-build/gateway-tests-r51",
+  "jobs": 2,
+  "startedUtc": "2026-10-04T19:02:20.660832+00:00",
+  "elapsedSeconds": 71.81368039999506,
+  "exitCode": 0,
+  "logSha256": "54b32ac8a6493bc4ac11f14d623ed0306c87286fee5eefce7c075c27315e0614",
+  "isolatedFaultReceiptDir": "C:\\mir2-playtest-releases\\20261004-native-r18\\guild-rank-native-root-review-01",
+  "privateFixtureContentsExported": false,
+  "networkOrNativeAcceptance": false,
+  "overlapsWorkerChecks": true
+}

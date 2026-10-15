@@ -1,0 +1,285 @@
+{
+  "schema": 1,
+  "files": [
+    {
+      "path": "catalog-validation.log",
+      "size": 367,
+      "sha256": "d4e4cf304df2f18c30b4c305e07f69c75261a46534e060040ca0eaf0c85b75e6"
+    },
+    {
+      "path": "game/game-en-character-stats.png",
+      "size": 171120,
+      "sha256": "dbb63ed2d19165e25e362179d87e832fb21649266000e45761ea3f3df715f5b2"
+    },
+    {
+      "path": "game/game-en-help-detail.png",
+      "size": 551291,
+      "sha256": "d89fc69eeef337be3e7106a7b4af5b2cb64146f7f3812b6ea828ae79c52c4fcd"
+    },
+    {
+      "path": "game/game-en-help.png",
+      "size": 713267,
+      "sha256": "8af3673ff546941f16923b3b6b9d9a4483d86cc2659a2d8e9365f12b31f327c1"
+    },
+    {
+      "path": "game/game-en-options-shop-bag.png",
+      "size": 163559,
+      "sha256": "9c30af40d27eedb3632534b30451f97ef679f988781c940b09ad5dfb4038c881"
+    },
+    {
+      "path": "game/game-i18n-report.json",
+      "size": 145835,
+      "sha256": "7bcc8e5d48c8a858624ebfe61cdbbeda75ef0b3c9a8fe90a6a64b9ecb57fcc77"
+    },
+    {
+      "path": "game/game-pt-BR-character-stats.png",
+      "size": 176920,
+      "sha256": "03590b0d823d2b0094fca44a653d8dd29782f6ecd30e33146db9f197b22781c9"
+    },
+    {
+      "path": "game/game-pt-BR-help-detail.png",
+      "size": 425004,
+      "sha256": "1149c8e05731c4d63542bed1c8daf824611b6828ef2e6903fc0bcb3ae4a8b0cd"
+    },
+    {
+      "path": "game/game-pt-BR-help.png",
+      "size": 713446,
+      "sha256": "4f0d2202c3afc2fc1ad32c39907c6e3d08f356ef62313a52a48ea04bd90d4ccf"
+    },
+    {
+      "path": "game/game-pt-BR-options-shop-bag.png",
+      "size": 169826,
+      "sha256": "b7b91fc1e411e55dcffcbe334d8274f2a64af688b8a1ddb4416efdd620f38151"
+    },
+    {
+      "path": "game/game-zh-TW-character-stats.png",
+      "size": 169422,
+      "sha256": "f15be2e0d003dbdfcd900c1ff0ad73a490d0237d0948e1f897fdd2d6261eff3d"
+    },
+    {
+      "path": "game/game-zh-TW-help-detail.png",
+      "size": 423093,
+      "sha256": "cfaadb6798851e8728ef7625d394690db91f756476aa4d7b9362facf8cbe5bfc"
+    },
+    {
+      "path": "game/game-zh-TW-help.png",
+      "size": 715458,
+      "sha256": "ad3b261c3df48086b995bc40b372e0e215d76785036bb46e997306ac94fbc966"
+    },
+    {
+      "path": "game/game-zh-TW-options-shop-bag.png",
+      "size": 166150,
+      "sha256": "51fd7bbeb3217a2c3e52e10932cbd77abc4eba1882c6c69e8915aa996ad40b89"
+    },
+    {
+      "path": "packer-selftest.log",
+      "size": 433,
+      "sha256": "6beacb56daabb521542daf00bf8431e8944c330acda207eeb3a4c98a70f63746"
+    },
+    {
+      "path": "quest/en-detail-bottom.png",
+      "size": 345371,
+      "sha256": "485934443566dc434b84dbadac0d6704a8d450869c56a8ed35342c864ad430ab"
+    },
+    {
+      "path": "quest/en-detail-top.png",
+      "size": 343261,
+      "sha256": "669d86a36931388fd1e9174b1443c668e0c150d1ea8e76d69cb834d0e7bfefc0"
+    },
+    {
+      "path": "quest/en-npc-menu-bottom.png",
+      "size": 75413,
+      "sha256": "b10849d47668a20560d4d41f01f18d1f13accc23927fe1587f25063320b41f08"
+    },
+    {
+      "path": "quest/en-npc-menu-top.png",
+      "size": 88204,
+      "sha256": "6e8fd1e9ffe568385146aa479310b3e30bce00f5a598cd97c1d6ff1f6c84e626"
+    },
+    {
+      "path": "quest/en-npc-player-name.png",
+      "size": 85324,
+      "sha256": "d74bfefddadd4c0454df159f94e14a62e00a5402de04ab20d87ed4db3514d1a6"
+    },
+    {
+      "path": "quest/en-tracker-bottom.png",
+      "size": 70688,
+      "sha256": "251846998299fb2fa2214ffed5984ae79dd43dfe07ff01f629be971b6010933a"
+    },
+    {
+      "path": "quest/en-tracker-top.png",
+      "size": 70688,
+      "sha256": "251846998299fb2fa2214ffed5984ae79dd43dfe07ff01f629be971b6010933a"
+    },
+    {
+      "path": "quest/pt-BR-detail-bottom.png",
+      "size": 346548,
+      "sha256": "0c5a82540fd971933f8ffe3cf8bd86ecfe27a1c88f1de4393130f86f6dd25ad9"
+    },
+    {
+      "path": "quest/pt-BR-detail-top.png",
+      "size": 343418,
+      "sha256": "600f20d2d0db3873d503a3fda4da451299b5d49fd8a2cd29b2cf7521ef17808d"
+    },
+    {
+      "path": "quest/pt-BR-npc-menu-bottom.png",
+      "size": 78363,
+      "sha256": "1e47f403bca4ae9cc27aa9e59f92936702c45c09847e24fdc91d5fe7110feddc"
+    },
+    {
+      "path": "quest/pt-BR-npc-menu-top.png",
+      "size": 93910,
+      "sha256": "387954120fd7b7f340a4353c5d28b9722c8dc87904060c4b5dcd5952cffe0add"
+    },
+    {
+      "path": "quest/pt-BR-npc-player-name.png",
+      "size": 85894,
+      "sha256": "d46b3514b3b0edfb08eb9b5872dcdc6b440eda4344656760c1b7031e79d1b250"
+    },
+    {
+      "path": "quest/pt-BR-tracker-bottom.png",
+      "size": 78792,
+      "sha256": "6f146da5418ac7492a802c5bec2c5dbc3e3e211cf1677259f065d634892bcc8f"
+    },
+    {
+      "path": "quest/pt-BR-tracker-top.png",
+      "size": 78792,
+      "sha256": "6f146da5418ac7492a802c5bec2c5dbc3e3e211cf1677259f065d634892bcc8f"
+    },
+    {
+      "path": "quest/quest-i18n-layouts.json",
+      "size": 110117,
+      "sha256": "6417248133937d7b286fe50a7618c9b1301610ea195128936a5f6c72ac0aea6b"
+    },
+    {
+      "path": "quest/zh-TW-detail-bottom.png",
+      "size": 356916,
+      "sha256": "9ae019c0db19d1d9cf701d255469060b2f53458f5866cfdcc87b69ef2980a9e6"
+    },
+    {
+      "path": "quest/zh-TW-detail-top.png",
+      "size": 346391,
+      "sha256": "79a665303fe9e9eac86242a5b6a87fa317c008d0465ee76052d714363039ac5c"
+    },
+    {
+      "path": "quest/zh-TW-npc-menu-bottom.png",
+      "size": 76860,
+      "sha256": "362b7bafac3aebb084ad814d4c0bccc5eb1f65749583aecccefc190ca3c4d3ab"
+    },
+    {
+      "path": "quest/zh-TW-npc-menu-top.png",
+      "size": 88673,
+      "sha256": "26640c8f2eeaa26fddd1379397b195aba839ced562c0c29f2dad7d72fe1ec455"
+    },
+    {
+      "path": "quest/zh-TW-npc-player-name.png",
+      "size": 84793,
+      "sha256": "b98747feaa285999eeb60f1291461ac7976bdd91704f5bc7cd4e3d6d9558352c"
+    },
+    {
+      "path": "quest/zh-TW-tracker-bottom.png",
+      "size": 69419,
+      "sha256": "6cf5f6ed994862f590270b6866a3d3b1fbfe9996da9cdf046db03eddf95f5bc2"
+    },
+    {
+      "path": "quest/zh-TW-tracker-top.png",
+      "size": 69419,
+      "sha256": "6cf5f6ed994862f590270b6866a3d3b1fbfe9996da9cdf046db03eddf95f5bc2"
+    },
+    {
+      "path": "shared-tests.log",
+      "size": 122150,
+      "sha256": "dacbc4311f29f507a3af25a9ab5014dcb642467f1b20ea649a469fcbbf15d56b"
+    },
+    {
+      "path": "shell/panel-pt-BR-keyboard.png",
+      "size": 158418,
+      "sha256": "839d276d1fcd8c711afe7eab02b93819c382e4b0b84e4f627b540a9fc403e5f8"
+    },
+    {
+      "path": "shell/panel-pt-BR-ranking.png",
+      "size": 72759,
+      "sha256": "f1f1d2b0f93db74abd173627417c0c4631e7b78829864f74672248eb197a0b7e"
+    },
+    {
+      "path": "shell/shell-en-create.png",
+      "size": 1823117,
+      "sha256": "f24290d67778037e7ec4df4590ca23d881c29fe7aac47d06e4ccd7741d95b6b2"
+    },
+    {
+      "path": "shell/shell-en-login.png",
+      "size": 2495301,
+      "sha256": "c90ea929ee21ab4fa91d5fd80a19b3f49522733df07387d6fc28cfe1b975f2c2"
+    },
+    {
+      "path": "shell/shell-en-registration.png",
+      "size": 1747744,
+      "sha256": "32e00a720d8e2edda8552d23bdb3bd9fb3fbd9bcca572702c4c065c196b8ee34"
+    },
+    {
+      "path": "shell/shell-en-select.png",
+      "size": 336241,
+      "sha256": "b1d6db745dbbaa5450aa9b2a495f959d70a01a16a6d14f14fbe390f3db307e0d"
+    },
+    {
+      "path": "shell/shell-i18n-report.json",
+      "size": 113717,
+      "sha256": "be3975c1a59bc96228bed890ac5da698fe6e1179958ac94d722b78bef0639aea"
+    },
+    {
+      "path": "shell/shell-pt-BR-create.png",
+      "size": 1824923,
+      "sha256": "af2729c5e927f895aea333893685ad6cc544b547899c09be70f048e720087d6c"
+    },
+    {
+      "path": "shell/shell-pt-BR-login.png",
+      "size": 2494845,
+      "sha256": "8bd40785c8a6efd0c937883e7b02fbe27740123f9414b21311d63f6cf031e430"
+    },
+    {
+      "path": "shell/shell-pt-BR-registration.png",
+      "size": 1746948,
+      "sha256": "011b2a734344c548a645931a6e4dd77f5cf60e432541c38c1a99cc829123a442"
+    },
+    {
+      "path": "shell/shell-pt-BR-select.png",
+      "size": 338994,
+      "sha256": "f2ddb323503a28e9265eae2c4433107192cd6ecdd7de00400b59303274f737f1"
+    },
+    {
+      "path": "shell/shell-zh-TW-create.png",
+      "size": 1817134,
+      "sha256": "c9192357160b85d7a6d60853817e22d5e39491002d149b3ae8bc26a5564662b2"
+    },
+    {
+      "path": "shell/shell-zh-TW-login.png",
+      "size": 2496524,
+      "sha256": "a3abf98681408838424ab4f5a443a7c65f3615000bdc2c6fe794a3ee40f8c81f"
+    },
+    {
+      "path": "shell/shell-zh-TW-registration.png",
+      "size": 1747624,
+      "sha256": "99ea6cecac83a3d0d720b4325f8c4cf3816c6ab3c2217473b44e41ea0d297074"
+    },
+    {
+      "path": "shell/shell-zh-TW-select.png",
+      "size": 339925,
+      "sha256": "ee19eb16691d0d4f7f74228f48b8bbc3875cf207d7e76243117aea67b71c5aed"
+    },
+    {
+      "path": "tooling-tests.log",
+      "size": 3074,
+      "sha256": "b271b042ac01387d280db02ec90259fa56d275aeabd2cf10d1f944c81db79f0d"
+    },
+    {
+      "path": "verifier-selftest.log",
+      "size": 414,
+      "sha256": "656ba3f30fa43ecc616f7210fd058e2b830f382a0846fed16afc3af994bc0bab"
+    },
+    {
+      "path": "windows-tests.log",
+      "size": 75288,
+      "sha256": "2fdcf51a079198397014aea76f0a313c5b9b2e17fafc2a888fac6481d808d509"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+running 6 tests
+test native_monthly_card::tests::monthly_card_clipboard_and_input_are_bounded_and_private ... ok
+test native_monthly_card::tests::monthly_card_late_receipt_cannot_settle_a_different_request ... ok
+test native_monthly_card::tests::monthly_card_unknown_result_keeps_the_code_for_safe_retry ... ok
+test native_monthly_card::tests::monthly_card_unsolicited_status_does_not_settle_an_inflight_redemption ... ok
+test native_shell_ui::i18n_visual_tests::monthly_card_nine_language_modal_renders_offscreen ... ignored, explicit monthly card nine-language offline GPU fixture; owned output and real asset root required
+test native_shell_ui::tests::monthly_card_modal_is_localized_in_all_nine_languages_and_preserves_the_code ... ok
+test result: ok. 5 passed; 0 failed; 1 ignored; 0 measured; 1248 filtered out; finished in 0.08s

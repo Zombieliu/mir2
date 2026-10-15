@@ -1,0 +1,630 @@
+{
+  "complete": true,
+  "guildCases": [
+    "uncommitted IME with caret/underline",
+    "committed opaque name with caret"
+  ],
+  "kind": "offline_production_guild_name_and_sabuk_npc_gpu_fixture",
+  "layoutFailures": [],
+  "limits": [
+    "Controlled server-dialog presentation fixtures do not grant guild or castle authority",
+    "Offscreen glyph/caret checks do not validate OS-specific IME windows or live account/NPC flows"
+  ],
+  "liveAcceptance": false,
+  "locales": [
+    "zh-TW",
+    "en",
+    "pt-BR",
+    "ru",
+    "hi",
+    "id",
+    "vi",
+    "th",
+    "ar"
+  ],
+  "npcPages": [
+    "registrar-status",
+    "officer-status",
+    "manage",
+    "repairs",
+    "archers"
+  ],
+  "passed": true,
+  "playerSaveModified": false,
+  "serverConnected": false,
+  "systemFonts": false,
+  "viewport": [
+    1024,
+    768
+  ],
+  "windowCreated": false,
+  "fullReportSha256": "31642ad165d144ca58e15fa2ae0467f5d105e6f4992410294a48a14c4d16e804",
+  "fullReportPath": "C:\\mir2-sabuk-assets\\visual-guild-npc-04\\sabuk-guild-i18n-layouts.json",
+  "screenshotCount": 146,
+  "captureFileHashes": [
+    {
+      "file": "guild-ar-committed.png",
+      "sha256": "11d2df3900f14083aec11fa0d02b4ca77df4bfc31338580d00501930741d6bcc"
+    },
+    {
+      "file": "guild-ar-ime.png",
+      "sha256": "b2fe0e72bf21875d6e4d6727df8281fa3df78a63a182beaaae5dd06e99405a7e"
+    },
+    {
+      "file": "guild-en-committed.png",
+      "sha256": "76474237421ea44285b168247245aa0dd7005e19912aa21522e6ffe4b80cc112"
+    },
+    {
+      "file": "guild-en-ime.png",
+      "sha256": "7bd36c79a76e5b1410191cbd1c0b90027849b0bef23d148c2f2cd72f2e44fd32"
+    },
+    {
+      "file": "guild-hi-committed.png",
+      "sha256": "bac83fa7b2fead422123d609e24aef76d86663731c8796fe9bd58858dcca8e3e"
+    },
+    {
+      "file": "guild-hi-ime.png",
+      "sha256": "8f31b985a59ce4533496648577da1f8f602a17162d709d28fc5f99ba3966ca71"
+    },
+    {
+      "file": "guild-id-committed.png",
+      "sha256": "a3f2c6357ac8745aa7c484d8612f5955d50c0b798348611abca7abd36d74e646"
+    },
+    {
+      "file": "guild-id-ime.png",
+      "sha256": "0fa5336ef70a88bb0641481276d80e297eb8587c983a55e5a0118020fda97940"
+    },
+    {
+      "file": "guild-pt-BR-committed.png",
+      "sha256": "9a86afe1c9667574511bcfd52b9f0049e5bf8870e7fb2d94fbb92b1544a4058f"
+    },
+    {
+      "file": "guild-pt-BR-ime.png",
+      "sha256": "c9fcbfb0981d6a1443e0bd9c65843307d0c3e239cad6a35bf54ceb54c5033cd9"
+    },
+    {
+      "file": "guild-ru-committed.png",
+      "sha256": "1a3ab76beecf89d7d315c06c3a980cba618b85578d0981b6924e8b20e4c08b2b"
+    },
+    {
+      "file": "guild-ru-ime.png",
+      "sha256": "6f5eee1c118bcc61afd5f414ed49129becfcaac7b21ea0a84238e834290e020c"
+    },
+    {
+      "file": "guild-th-committed.png",
+      "sha256": "09bca0e904c5fcab6e38f21c56b2af69d0f27023f8f22513e59a1e5cbf9e6ede"
+    },
+    {
+      "file": "guild-th-ime.png",
+      "sha256": "5a83b2138783c1e0cb74ca45b99f08102637efe595b5c15b044d6f03e9a19b4c"
+    },
+    {
+      "file": "guild-vi-committed.png",
+      "sha256": "2875173fdb5cc729014cda5f1215ce083265aa387238e13903665e361c0fa583"
+    },
+    {
+      "file": "guild-vi-ime.png",
+      "sha256": "a1980f91b785c53ab83a39e1c3ad367899bdb8e1f88d9329a5d6bde8c54a806d"
+    },
+    {
+      "file": "guild-zh-TW-committed.png",
+      "sha256": "2d9bd303ecfbc8c8eca5f746a91d7ed5e317e683eb597d0ba6f1f3c139a70d3e"
+    },
+    {
+      "file": "guild-zh-TW-ime.png",
+      "sha256": "5aaf774ce1e20b823c27f42a83b4b0263acb842d2573d80f26c41fdfefa65686"
+    },
+    {
+      "file": "sabuk-ar-archers-page-0.png",
+      "sha256": "f8d1e191f68fcc45ecb908a3b394cc681a61896ea9dc7450276b5688dde5feb1"
+    },
+    {
+      "file": "sabuk-ar-archers-page-1.png",
+      "sha256": "9ff6c3dbbea63f68a0087ec6683504b40384ee18dca2791f5c7e1db287b955f7"
+    },
+    {
+      "file": "sabuk-ar-archers-page-2.png",
+      "sha256": "8837d985b2ff04c7083aae1acaa1cc564f86feb843f73fddc398d870fa9ffe5c"
+    },
+    {
+      "file": "sabuk-ar-archers-page-3.png",
+      "sha256": "d1199089ce53788600fb7ac8c1b77b7282414ef1304b79589651a0e9b6cb0729"
+    },
+    {
+      "file": "sabuk-ar-archers-page-4.png",
+      "sha256": "394dbda5a99878959ddea15021e03e61394d04b4e15e4bda93e593941014c0e1"
+    },
+    {
+      "file": "sabuk-ar-archers-page-5.png",
+      "sha256": "1d0df6e6f2d415c0f80ed44c555b0bd2b50c4a4f5ae730c8694f97434079a66c"
+    },
+    {
+      "file": "sabuk-ar-manage-page-0.png",
+      "sha256": "f8d1e191f68fcc45ecb908a3b394cc681a61896ea9dc7450276b5688dde5feb1"
+    },
+    {
+      "file": "sabuk-ar-manage-page-1.png",
+      "sha256": "b8b217f665601c28489ddbf74275ba131748ad7cc404ed6abced19b6f4d40938"
+    },
+    {
+      "file": "sabuk-ar-manage-page-2.png",
+      "sha256": "176ef1b56fad79525eeab655784caf0e19ff15235a0cc288ff0388b592837f08"
+    },
+    {
+      "file": "sabuk-ar-officer-status-page-0.png",
+      "sha256": "9f343d2042d14eff5878ef5b1a9010f3f4cfbb2433043c322a6b463ac12daa4e"
+    },
+    {
+      "file": "sabuk-ar-registrar-status-page-0.png",
+      "sha256": "9ce21ecc9965f012acff773394849ca88bb33b314f868ca0c92313d104202ed8"
+    },
+    {
+      "file": "sabuk-ar-repairs-page-0.png",
+      "sha256": "f8d1e191f68fcc45ecb908a3b394cc681a61896ea9dc7450276b5688dde5feb1"
+    },
+    {
+      "file": "sabuk-ar-repairs-page-1.png",
+      "sha256": "9336c7c4130e3bcfaab737bc231c0d6536423ae97bf42ada7b683e3ddc8447dd"
+    },
+    {
+      "file": "sabuk-ar-repairs-page-2.png",
+      "sha256": "2b605f2565c688a4e99e9e54cdb494b3526464a034c8557cc03d13824c4dbfce"
+    },
+    {
+      "file": "sabuk-en-archers-page-0.png",
+      "sha256": "f583a625cec1182b68876e55e7d4196d8ccbf81cc78ed936877bd294c0c3fe51"
+    },
+    {
+      "file": "sabuk-en-archers-page-1.png",
+      "sha256": "21e8ab295c6d9588ebcb0469bda7feb976c7ee7934d35f38d4731597d58dcb51"
+    },
+    {
+      "file": "sabuk-en-archers-page-2.png",
+      "sha256": "733b2d7a3f7524aed357962991acd037fae112289c4e0c8380306a42cceb9172"
+    },
+    {
+      "file": "sabuk-en-archers-page-3.png",
+      "sha256": "001e47e1ba54bbe36f001af9f4a4d34ffef86a60fa6d6d081a6e9ca10f770c44"
+    },
+    {
+      "file": "sabuk-en-archers-page-4.png",
+      "sha256": "24f16c2b19773040af9b980a582c0fd000d6d4a55e233d463a799485bf5e0f73"
+    },
+    {
+      "file": "sabuk-en-archers-page-5.png",
+      "sha256": "e19576f54cef4a7b3bf298f56fad4fbde0a2297d9962121ae674376bbbd806c8"
+    },
+    {
+      "file": "sabuk-en-manage-page-0.png",
+      "sha256": "56c6fc59b6dc6950319a7543ec04cf21c8ca4570d1ce7df2477044d3aa0574bb"
+    },
+    {
+      "file": "sabuk-en-manage-page-1.png",
+      "sha256": "2cfbc055e32610c493851d2ae3d1ea412d9dccdcc365f0046b13937dd3057af3"
+    },
+    {
+      "file": "sabuk-en-manage-page-2.png",
+      "sha256": "e19576f54cef4a7b3bf298f56fad4fbde0a2297d9962121ae674376bbbd806c8"
+    },
+    {
+      "file": "sabuk-en-officer-status-page-0.png",
+      "sha256": "760af7c9ed8b056cc8ec5167ec00c380d3f3e91aa96582d12dad5b494068b933"
+    },
+    {
+      "file": "sabuk-en-registrar-status-page-0.png",
+      "sha256": "52bc79f513a125d0c2a8a830909fa5307d48387a19233321d50047c62008d7e4"
+    },
+    {
+      "file": "sabuk-en-repairs-page-0.png",
+      "sha256": "c78d726678e07c0dbf978f6b1aebaf45109d6440a03097e0ed77ea992045cf7f"
+    },
+    {
+      "file": "sabuk-en-repairs-page-1.png",
+      "sha256": "34430496a6b225eb6f5f0f8376d85cba38a7a91d886882d8b8d46c4be71125de"
+    },
+    {
+      "file": "sabuk-en-repairs-page-2.png",
+      "sha256": "b13497df9c80960c9d4d1fd4a8a69fcff2e1d46b9e117e7d83af520c717c6d58"
+    },
+    {
+      "file": "sabuk-hi-archers-page-0.png",
+      "sha256": "2a03229edab64d6e463971d16383c09d1f1dc89fac77ca396b577a5baacfae91"
+    },
+    {
+      "file": "sabuk-hi-archers-page-1.png",
+      "sha256": "32adfe1ea199ea750943c9ccc2057e58f3c03fae53c248a778d5afe56d98bf9a"
+    },
+    {
+      "file": "sabuk-hi-archers-page-2.png",
+      "sha256": "08d42c1ebe3d54a5d45cffa72b52723379e9ed38d3a06bea44fe7da858019844"
+    },
+    {
+      "file": "sabuk-hi-archers-page-3.png",
+      "sha256": "abb51f8ca6c334774854efd1b142668e38018037f49723db292108b11895af0c"
+    },
+    {
+      "file": "sabuk-hi-archers-page-4.png",
+      "sha256": "8f81f3c83b6ccd975c63fa71ffd6ecfb23679c03fab39f4e014923a291981ac7"
+    },
+    {
+      "file": "sabuk-hi-archers-page-5.png",
+      "sha256": "f37a56bfa0ed18928cc317c2f7e2e78d3d5559cde847f12c472e250f0c1fe307"
+    },
+    {
+      "file": "sabuk-hi-manage-page-0.png",
+      "sha256": "2a03229edab64d6e463971d16383c09d1f1dc89fac77ca396b577a5baacfae91"
+    },
+    {
+      "file": "sabuk-hi-manage-page-1.png",
+      "sha256": "26ac82cb87a323cf09258a70890feb96caa26139ef4c4f7a52e2b40230ef682d"
+    },
+    {
+      "file": "sabuk-hi-manage-page-2.png",
+      "sha256": "9c578d31c7136f7f41b3b93a1f152c1aa2ec299c36d575e49cdc6f3b8d1641ab"
+    },
+    {
+      "file": "sabuk-hi-officer-status-page-0.png",
+      "sha256": "03e08f44fd13fe3259f4499270d9ac0729791b63c84a36b43f82c7d14c7aba6e"
+    },
+    {
+      "file": "sabuk-hi-officer-status-page-1.png",
+      "sha256": "3bda58690e776ca9f157cb72a3b7acd4ca8a87fbb54b57a0742b7391e211f23c"
+    },
+    {
+      "file": "sabuk-hi-registrar-status-page-0.png",
+      "sha256": "60d7010249e2fb291d4d00a97e9fdf35058c2c48aab0c391a43d28bb6a589c67"
+    },
+    {
+      "file": "sabuk-hi-repairs-page-0.png",
+      "sha256": "2a03229edab64d6e463971d16383c09d1f1dc89fac77ca396b577a5baacfae91"
+    },
+    {
+      "file": "sabuk-hi-repairs-page-1.png",
+      "sha256": "905627003bbcea48f68355a761161ceaa2e310749ee75e5d0c268b04dbecac0a"
+    },
+    {
+      "file": "sabuk-hi-repairs-page-2.png",
+      "sha256": "0ed2f14e82f2e1e5f52f3dc1bfbfa0c07bdfc8d5f9b0b02cf3b69a2e1af05282"
+    },
+    {
+      "file": "sabuk-id-archers-page-0.png",
+      "sha256": "968d4b286b6496a1de35acf152da9107654f255ac093ca822b52b917f8e34973"
+    },
+    {
+      "file": "sabuk-id-archers-page-1.png",
+      "sha256": "bfe08172169f997156b37fbb2b4db1405cebdfebc35af7684a62758339128d83"
+    },
+    {
+      "file": "sabuk-id-archers-page-2.png",
+      "sha256": "4fe3900eae3c6995245128aa160f796d511dd08ebb855caba72803fc3cb13cf9"
+    },
+    {
+      "file": "sabuk-id-archers-page-3.png",
+      "sha256": "5de7c098edd0cc05055da559a437d303bac6dd2cba0f1d8c3de03f64103970c7"
+    },
+    {
+      "file": "sabuk-id-archers-page-4.png",
+      "sha256": "481de438bb437ea562739a5bada9debf5ecfd872270ad65e33745236341ce71a"
+    },
+    {
+      "file": "sabuk-id-archers-page-5.png",
+      "sha256": "04381a1a2a1bc6dcbea5578e1f07ec9dd6cadd67f38fb904beae971f99cf39d7"
+    },
+    {
+      "file": "sabuk-id-manage-page-0.png",
+      "sha256": "968d4b286b6496a1de35acf152da9107654f255ac093ca822b52b917f8e34973"
+    },
+    {
+      "file": "sabuk-id-manage-page-1.png",
+      "sha256": "34c26a12b146568217bb94aa5298236fec723e3fc9010c0d873730cc35a8c606"
+    },
+    {
+      "file": "sabuk-id-manage-page-2.png",
+      "sha256": "04381a1a2a1bc6dcbea5578e1f07ec9dd6cadd67f38fb904beae971f99cf39d7"
+    },
+    {
+      "file": "sabuk-id-officer-status-page-0.png",
+      "sha256": "614b7f132c986f2f3dd87045551e6741f57035bbd26b040e6e6f725434558579"
+    },
+    {
+      "file": "sabuk-id-registrar-status-page-0.png",
+      "sha256": "4f534e7937ecc18f5b23ef68f7f96810f06e923625f4020d5d35c24644d35867"
+    },
+    {
+      "file": "sabuk-id-repairs-page-0.png",
+      "sha256": "968d4b286b6496a1de35acf152da9107654f255ac093ca822b52b917f8e34973"
+    },
+    {
+      "file": "sabuk-id-repairs-page-1.png",
+      "sha256": "8c550900411bd55303c23e1ce3a043cbcf7af719dd4d8c1c28c776a884eacf27"
+    },
+    {
+      "file": "sabuk-id-repairs-page-2.png",
+      "sha256": "a4d056e7b351518913378babc9316b34cd9b3753283a1d93fd6fe1a36a43c0ef"
+    },
+    {
+      "file": "sabuk-pt-BR-archers-page-0.png",
+      "sha256": "5d8ac3d24a7b06f3776065b5740f4488875ca575b4e8ba2bfd04d1322f03a1fb"
+    },
+    {
+      "file": "sabuk-pt-BR-archers-page-1.png",
+      "sha256": "61306558ec2277646f607d6cb0511d22a62cf8066255972ed69ccf0ccd41f7cc"
+    },
+    {
+      "file": "sabuk-pt-BR-archers-page-2.png",
+      "sha256": "322075cd42bd4805c145c06ba27a7c0cc8a635923df07babe60ac43306d855bd"
+    },
+    {
+      "file": "sabuk-pt-BR-archers-page-3.png",
+      "sha256": "a9585f28823a4e6b15a325fd27bf1be1469389614aedf12e2226615ef596ff22"
+    },
+    {
+      "file": "sabuk-pt-BR-archers-page-4.png",
+      "sha256": "0eee8f6843d1d2ad932f14630d8fd2e89d8677817fa8d4bf5623f0f48034d581"
+    },
+    {
+      "file": "sabuk-pt-BR-archers-page-5.png",
+      "sha256": "db1e1ab89ead8233a431660f5fafd4b278200f3ca9761c25f3fafc20b30de31b"
+    },
+    {
+      "file": "sabuk-pt-BR-manage-page-0.png",
+      "sha256": "c06f327c14f6558db6cce1cc7f0d896c2ec56d504fed9517b047b581cd569d61"
+    },
+    {
+      "file": "sabuk-pt-BR-manage-page-1.png",
+      "sha256": "c1428875f71c2c53d3714d99f94fc53378f1681da829d833b27f4bb80ae200db"
+    },
+    {
+      "file": "sabuk-pt-BR-manage-page-2.png",
+      "sha256": "db1e1ab89ead8233a431660f5fafd4b278200f3ca9761c25f3fafc20b30de31b"
+    },
+    {
+      "file": "sabuk-pt-BR-officer-status-page-0.png",
+      "sha256": "d21908961b6c0b5d3e9aa167e4448691cc2a75dbd3f28dcbf49eb727c76b1f8a"
+    },
+    {
+      "file": "sabuk-pt-BR-registrar-status-page-0.png",
+      "sha256": "2f2eebe293b1a1a2b34799af03c429a05cd1f6826d161db5cbbd2defeb7a581a"
+    },
+    {
+      "file": "sabuk-pt-BR-repairs-page-0.png",
+      "sha256": "d9a1633315c40f34927e289b5ea4713a5718214222d5357d637272d8a1f87c31"
+    },
+    {
+      "file": "sabuk-pt-BR-repairs-page-1.png",
+      "sha256": "0c00d92b5e0deae1a5e6457da56cc277e30815f76826f232777e1d0d8e11ceac"
+    },
+    {
+      "file": "sabuk-pt-BR-repairs-page-2.png",
+      "sha256": "405b555653d4d619b7e2d85bdaddb78c2246c9c1399104543682d8264f13d2ef"
+    },
+    {
+      "file": "sabuk-ru-archers-page-0.png",
+      "sha256": "37bf18f30f8c06b2e97fe265d6653a5a2c3c9b8ffdd56dc442304afbe5dda03a"
+    },
+    {
+      "file": "sabuk-ru-archers-page-1.png",
+      "sha256": "231fac2b3585018638bd0abb0b766fa530e45c6d11dd94d1bbc74fe0af8e761e"
+    },
+    {
+      "file": "sabuk-ru-archers-page-2.png",
+      "sha256": "e0944a98d82740069da618764e46881dacec97751d17d6e23b678026323949ab"
+    },
+    {
+      "file": "sabuk-ru-archers-page-3.png",
+      "sha256": "f8e1d75ea5c0e5508f378f8c56cba1674516271d3dc07d03575c48ac09f5ce67"
+    },
+    {
+      "file": "sabuk-ru-archers-page-4.png",
+      "sha256": "177f660e7da265180b2b83425cdf0b131a633ff8e28f032a12fd421f0c321caa"
+    },
+    {
+      "file": "sabuk-ru-archers-page-5.png",
+      "sha256": "dbe293e48b5c212a834e126a7e4c271134c5c69630bbaedebea467cd32fe690b"
+    },
+    {
+      "file": "sabuk-ru-manage-page-0.png",
+      "sha256": "37bf18f30f8c06b2e97fe265d6653a5a2c3c9b8ffdd56dc442304afbe5dda03a"
+    },
+    {
+      "file": "sabuk-ru-manage-page-1.png",
+      "sha256": "fc3418e467e4a14a0bc9ac358b6bd270c9758cf37cdb7fe03b44d7da5945bd96"
+    },
+    {
+      "file": "sabuk-ru-manage-page-2.png",
+      "sha256": "77d0aa324c6ee85e08d930b1174ba7093dccd167eb940345884539ed79d8da98"
+    },
+    {
+      "file": "sabuk-ru-officer-status-page-0.png",
+      "sha256": "ee606c9a7c59c5eb2aade390fe5c1f54a0427354de532e10ebfb23e6baf2622a"
+    },
+    {
+      "file": "sabuk-ru-registrar-status-page-0.png",
+      "sha256": "07b77f369637ffa5a79271aad3ba35f328bec8d0c58f130f878ce9c9e24ad029"
+    },
+    {
+      "file": "sabuk-ru-repairs-page-0.png",
+      "sha256": "37bf18f30f8c06b2e97fe265d6653a5a2c3c9b8ffdd56dc442304afbe5dda03a"
+    },
+    {
+      "file": "sabuk-ru-repairs-page-1.png",
+      "sha256": "9ddd864b862be91f4e2682d47537067fcd5329892edac0d70df5c791d72a0f68"
+    },
+    {
+      "file": "sabuk-ru-repairs-page-2.png",
+      "sha256": "4d7fc574cccc50807fc03a2dc09bb791c1eb1ef65cd08c301762e2d91a274cd0"
+    },
+    {
+      "file": "sabuk-th-archers-page-0.png",
+      "sha256": "195cbbf904218b89ed5d989f82d43f1776e83491d0319d6a87423964e0d40219"
+    },
+    {
+      "file": "sabuk-th-archers-page-1.png",
+      "sha256": "2aeb17c695cebc591b6e419c025e0f060530909b2c369f87a9e1c8f37fb35537"
+    },
+    {
+      "file": "sabuk-th-archers-page-2.png",
+      "sha256": "99e728faaddd3a64cbba87263bfa866bf4731325ef50d3f5c122580c8bdfe1c9"
+    },
+    {
+      "file": "sabuk-th-archers-page-3.png",
+      "sha256": "6d955ba004714fa512026c13e6e09c514e9b399caf0c9fef4bd87d6a1caa2d94"
+    },
+    {
+      "file": "sabuk-th-archers-page-4.png",
+      "sha256": "43e94aebbdc2fb60d961c6aa295ade5c7a9be824e91bf74744dd24a9675084a9"
+    },
+    {
+      "file": "sabuk-th-archers-page-5.png",
+      "sha256": "de07284201ab2afb54e205281bc8c5ec29944a74eb3d285f5d990debb65978ec"
+    },
+    {
+      "file": "sabuk-th-manage-page-0.png",
+      "sha256": "195cbbf904218b89ed5d989f82d43f1776e83491d0319d6a87423964e0d40219"
+    },
+    {
+      "file": "sabuk-th-manage-page-1.png",
+      "sha256": "9392be146fe20ec5e01bd744260bcfff1741fb060694b2401cfe418e856396c3"
+    },
+    {
+      "file": "sabuk-th-manage-page-2.png",
+      "sha256": "28a7d34a2496c9e563525ca35d1ff19a50e934c501005b46afd4ac1fb9e06b30"
+    },
+    {
+      "file": "sabuk-th-officer-status-page-0.png",
+      "sha256": "d3769163244746e63ad6b4402cf01a4933aef8e2af5e3c76a7c4c5ef722aa9d2"
+    },
+    {
+      "file": "sabuk-th-officer-status-page-1.png",
+      "sha256": "0a81a7dd1c9c61486966c8238a7e852361ea3465c74160d2479412d0605a8009"
+    },
+    {
+      "file": "sabuk-th-registrar-status-page-0.png",
+      "sha256": "23ae70d987ee079ac3595cabd150432a7a19b83c33d7ddb7fce87c6b175d50f1"
+    },
+    {
+      "file": "sabuk-th-repairs-page-0.png",
+      "sha256": "195cbbf904218b89ed5d989f82d43f1776e83491d0319d6a87423964e0d40219"
+    },
+    {
+      "file": "sabuk-th-repairs-page-1.png",
+      "sha256": "87e0298b4c9b2e876a8c79489ef6095e79e8ea2d490bc4c22bd34fc45ddf3995"
+    },
+    {
+      "file": "sabuk-th-repairs-page-2.png",
+      "sha256": "b732b13808f017769559c0a44adacbd14591d4070c08d049537fa804a2ad4c42"
+    },
+    {
+      "file": "sabuk-vi-archers-page-0.png",
+      "sha256": "43e0204bbc251fb1fe9e8a653777acb26106f27a7067025d686e3ff4334ea99d"
+    },
+    {
+      "file": "sabuk-vi-archers-page-1.png",
+      "sha256": "330df4570095bc51ba224d3cae631ad2fc6af33ff76949931fe6b90205ac6f0b"
+    },
+    {
+      "file": "sabuk-vi-archers-page-2.png",
+      "sha256": "33ff2ba8cd9ff9c6e89a9087c6c14728c2574f16c7f5cbba2f07ae7dbfeb4ecd"
+    },
+    {
+      "file": "sabuk-vi-archers-page-3.png",
+      "sha256": "5f812c09c10a80aa36bc62d7b86c0292e26294792f11e9026771773a04407f6d"
+    },
+    {
+      "file": "sabuk-vi-archers-page-4.png",
+      "sha256": "8a60d89122de7c6a4dadf04f6e28ad16f39901d4664501e8c4123128dc0bde1b"
+    },
+    {
+      "file": "sabuk-vi-archers-page-5.png",
+      "sha256": "d7720ceee56684b9d82c379c30dc55fb27b0db8d72ea43d390d40806acbbeae9"
+    },
+    {
+      "file": "sabuk-vi-manage-page-0.png",
+      "sha256": "43e0204bbc251fb1fe9e8a653777acb26106f27a7067025d686e3ff4334ea99d"
+    },
+    {
+      "file": "sabuk-vi-manage-page-1.png",
+      "sha256": "e74d65652da0f2c0a5cefa2d7b0a74cc6968941a169e2d158160bb0729171174"
+    },
+    {
+      "file": "sabuk-vi-manage-page-2.png",
+      "sha256": "e02a463d469d5ddeffd9b3d3c4bf1167563c85433a0941bd2888bab98b24483c"
+    },
+    {
+      "file": "sabuk-vi-officer-status-page-0.png",
+      "sha256": "8e1650d5e848847af4d2c156012bd7777af3e85af8e9e61c973818506f1fc6e9"
+    },
+    {
+      "file": "sabuk-vi-registrar-status-page-0.png",
+      "sha256": "ec7f5e19a37051f2f01566575e0468bc4b2c77984bca947764d6e443ce2053c9"
+    },
+    {
+      "file": "sabuk-vi-repairs-page-0.png",
+      "sha256": "43e0204bbc251fb1fe9e8a653777acb26106f27a7067025d686e3ff4334ea99d"
+    },
+    {
+      "file": "sabuk-vi-repairs-page-1.png",
+      "sha256": "491cb98e873221ca830410da6b26a0daf79e42297b27a3f4e253b0b4004a383a"
+    },
+    {
+      "file": "sabuk-vi-repairs-page-2.png",
+      "sha256": "71f97d495f08786a75b548404b92d19a764ad1359256d008dd40e1e458efa052"
+    },
+    {
+      "file": "sabuk-zh-TW-archers-page-0.png",
+      "sha256": "77c5e38133326b63fc0d816806bf687d8db8b78b7f8eb212e5ac1b8f17492b20"
+    },
+    {
+      "file": "sabuk-zh-TW-archers-page-1.png",
+      "sha256": "c1eb5046a709ba9aa421562c6201de5191995532363ecb913a50aaee73ed26c0"
+    },
+    {
+      "file": "sabuk-zh-TW-archers-page-2.png",
+      "sha256": "531d643a739cee4cdbb497ee9171f18400e842efe6fd04ad2b3bc5210d60d6c4"
+    },
+    {
+      "file": "sabuk-zh-TW-archers-page-3.png",
+      "sha256": "cd21370ec8a09baa1a9ab37a73b9d58ff92b7c67e1d0128fac8c743cd6b3b2de"
+    },
+    {
+      "file": "sabuk-zh-TW-archers-page-4.png",
+      "sha256": "02b3f2239c895d566e996e676fb00b07ad3b27bcd790ede3766c5bb9a2c66d79"
+    },
+    {
+      "file": "sabuk-zh-TW-archers-page-5.png",
+      "sha256": "900cb66eec0f7825ea652c2d483b5b03400e92964a9f77e46dd97dfcfab04bf0"
+    },
+    {
+      "file": "sabuk-zh-TW-manage-page-0.png",
+      "sha256": "67e5332a83eefaf925d46575bba4fe73c9bdf8e786ab39b20c0230b55da7a842"
+    },
+    {
+      "file": "sabuk-zh-TW-manage-page-1.png",
+      "sha256": "52454a75637ec65a05f01f5216ff03a9d7a2edf335cd94696e13fc52735eabe7"
+    },
+    {
+      "file": "sabuk-zh-TW-manage-page-2.png",
+      "sha256": "900cb66eec0f7825ea652c2d483b5b03400e92964a9f77e46dd97dfcfab04bf0"
+    },
+    {
+      "file": "sabuk-zh-TW-officer-status-page-0.png",
+      "sha256": "c89d971c06bbde6dd636dbe56ed7ee325522549aefbd82b2cdbf99448480da11"
+    },
+    {
+      "file": "sabuk-zh-TW-registrar-status-page-0.png",
+      "sha256": "de32b8815810cf357172230520844de32e8a38d7394778012a8acac25f3f3dcc"
+    },
+    {
+      "file": "sabuk-zh-TW-repairs-page-0.png",
+      "sha256": "cc386b2c5dd02171ad9808dac88136ec6b4f023c8bda4a11cd9f221199e7d6fb"
+    },
+    {
+      "file": "sabuk-zh-TW-repairs-page-1.png",
+      "sha256": "e86a8f85e2d382ff7defb0ddfb0356a92872f09e56e5b32abc0b405da0438897"
+    },
+    {
+      "file": "sabuk-zh-TW-repairs-page-2.png",
+      "sha256": "56da0874be2c89c136958bdfa95c75a7f4366cf50749e2ff82e783d182d06424"
+    }
+  ]
+}

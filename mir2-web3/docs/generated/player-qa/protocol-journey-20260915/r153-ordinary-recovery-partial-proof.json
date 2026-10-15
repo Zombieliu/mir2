@@ -1,0 +1,808 @@
+[
+  {
+    "class": "Wizard",
+    "source": "Wizard.2026-09-17T12-18-15-467Z.trace.jsonl",
+    "sourceCapturedBytes": 77564482,
+    "sourceCapturedSha256": "F9BD15F86DDB42F380EC929281077FF6F87686CB16DDBEC0FB91848E8D669E67",
+    "lastCapturedAt": "2026-09-17T13:58:45.327Z",
+    "routeCompleted": false,
+    "visualAccepted": false,
+    "q113CreditSnapshots": [
+      {
+        "sequence": 543,
+        "at": "2026-09-17T12:18:17.733Z",
+        "ownerId": 1000,
+        "name": "JWdebac6d4",
+        "class": "Wizard",
+        "level": 26,
+        "map": "D711",
+        "x": 306,
+        "y": 212,
+        "hp": 96,
+        "mp": 161,
+        "gold": 260,
+        "supplies": {
+          "(HP)DrugSmall": 71,
+          "(MP)DrugSmall": 3,
+          "(HP)DrugMedium": 6,
+          "RandomTeleport": 3,
+          "TownTeleport": 2
+        },
+        "objective": {
+          "current": 1,
+          "objective": "Defeat 3 BlackMaggot.\nDefeat 3 WedgeMoth.",
+          "objectives": [
+            {
+              "current": 1,
+              "done": false,
+              "label": "Kill BlackMaggot",
+              "required": 3
+            },
+            {
+              "current": 0,
+              "done": false,
+              "label": "Kill WedgeMoth",
+              "required": 3
+            }
+          ],
+          "progressLabel": "Progress 1/6",
+          "questId": 113,
+          "required": 6,
+          "rewardPreview": "EXP 544444, Gold 12500",
+          "stage": "inProgress",
+          "summary": "Hello. There are to many Insects in",
+          "title": "Insomnia",
+          "tracker": "Defeat 3 BlackMaggot."
+        }
+      },
+      {
+        "sequence": 11462,
+        "at": "2026-09-17T12:46:44.051Z",
+        "ownerId": 1000,
+        "name": "JWdebac6d4",
+        "class": "Wizard",
+        "level": 26,
+        "map": "D711",
+        "x": 205,
+        "y": 198,
+        "hp": 105,
+        "mp": 136,
+        "gold": 133,
+        "supplies": {
+          "(HP)DrugSmall": 68,
+          "(HP)DrugMedium": 6,
+          "(MP)DrugSmall": 5,
+          "Venison": 4,
+          "RandomTeleport": 4,
+          "TownTeleport": 2
+        },
+        "objective": {
+          "current": 2,
+          "objective": "Defeat 3 BlackMaggot.\nDefeat 3 WedgeMoth.",
+          "objectives": [
+            {
+              "current": 2,
+              "done": false,
+              "label": "Kill BlackMaggot",
+              "required": 3
+            },
+            {
+              "current": 0,
+              "done": false,
+              "label": "Kill WedgeMoth",
+              "required": 3
+            }
+          ],
+          "progressLabel": "Progress 2/6",
+          "questId": 113,
+          "required": 6,
+          "rewardPreview": "EXP 544444, Gold 12500",
+          "stage": "inProgress",
+          "summary": "Hello. There are to many Insects in",
+          "title": "Insomnia",
+          "tracker": "Defeat 3 BlackMaggot."
+        }
+      },
+      {
+        "sequence": 11671,
+        "at": "2026-09-17T12:47:06.420Z",
+        "ownerId": 1000,
+        "name": "JWdebac6d4",
+        "class": "Wizard",
+        "level": 26,
+        "map": "D711",
+        "x": 198,
+        "y": 201,
+        "hp": 105,
+        "mp": 146,
+        "gold": 133,
+        "supplies": {
+          "(HP)DrugSmall": 68,
+          "(HP)DrugMedium": 6,
+          "(MP)DrugSmall": 3,
+          "Venison": 4,
+          "RandomTeleport": 4,
+          "TownTeleport": 2
+        },
+        "objective": {
+          "current": 3,
+          "objective": "Defeat 3 BlackMaggot.\nDefeat 3 WedgeMoth.",
+          "objectives": [
+            {
+              "current": 3,
+              "done": true,
+              "label": "Kill BlackMaggot",
+              "required": 3
+            },
+            {
+              "current": 0,
+              "done": false,
+              "label": "Kill WedgeMoth",
+              "required": 3
+            }
+          ],
+          "progressLabel": "Progress 3/6",
+          "questId": 113,
+          "required": 6,
+          "rewardPreview": "EXP 544444, Gold 12500",
+          "stage": "inProgress",
+          "summary": "Hello. There are to many Insects in",
+          "title": "Insomnia",
+          "tracker": "Defeat 3 BlackMaggot."
+        }
+      },
+      {
+        "sequence": 33287,
+        "at": "2026-09-17T13:40:34.048Z",
+        "ownerId": 1000,
+        "name": "JWdebac6d4",
+        "class": "Wizard",
+        "level": 26,
+        "map": "D711",
+        "x": 230,
+        "y": 207,
+        "hp": 105,
+        "mp": 107,
+        "gold": 102,
+        "supplies": {
+          "(HP)DrugSmall": 78,
+          "(HP)DrugMedium": 6,
+          "(MP)DrugSmall": 6,
+          "Venison": 2,
+          "RandomTeleport": 4,
+          "TownTeleport": 2
+        },
+        "objective": {
+          "current": 4,
+          "objective": "Defeat 3 BlackMaggot.\nDefeat 3 WedgeMoth.",
+          "objectives": [
+            {
+              "current": 3,
+              "done": true,
+              "label": "Kill BlackMaggot",
+              "required": 3
+            },
+            {
+              "current": 1,
+              "done": false,
+              "label": "Kill WedgeMoth",
+              "required": 3
+            }
+          ],
+          "progressLabel": "Progress 4/6",
+          "questId": 113,
+          "required": 6,
+          "rewardPreview": "EXP 544444, Gold 12500",
+          "stage": "inProgress",
+          "summary": "Hello. There are to many Insects in",
+          "title": "Insomnia",
+          "tracker": "Defeat 3 BlackMaggot."
+        }
+      },
+      {
+        "sequence": 34716,
+        "at": "2026-09-17T13:42:32.048Z",
+        "ownerId": 1000,
+        "name": "JWdebac6d4",
+        "class": "Wizard",
+        "level": 26,
+        "map": "D711",
+        "x": 298,
+        "y": 198,
+        "hp": 105,
+        "mp": 144,
+        "gold": 102,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "(HP)DrugMedium": 6,
+          "(MP)DrugSmall": 2,
+          "Venison": 2,
+          "RandomTeleport": 3,
+          "TownTeleport": 2
+        },
+        "objective": {
+          "current": 5,
+          "objective": "Defeat 3 BlackMaggot.\nDefeat 3 WedgeMoth.",
+          "objectives": [
+            {
+              "current": 3,
+              "done": true,
+              "label": "Kill BlackMaggot",
+              "required": 3
+            },
+            {
+              "current": 2,
+              "done": false,
+              "label": "Kill WedgeMoth",
+              "required": 3
+            }
+          ],
+          "progressLabel": "Progress 5/6",
+          "questId": 113,
+          "required": 6,
+          "rewardPreview": "EXP 544444, Gold 12500",
+          "stage": "inProgress",
+          "summary": "Hello. There are to many Insects in",
+          "title": "Insomnia",
+          "tracker": "Defeat 3 BlackMaggot."
+        }
+      }
+    ],
+    "ordinaryTownShopReceipts": [],
+    "firstFullDepartureSuppliesSnapshot": null,
+    "latestOwnerSnapshot": {
+      "sequence": 40893,
+      "at": "2026-09-17T13:56:42.855Z",
+      "ownerId": 1000,
+      "name": "JWdebac6d4",
+      "class": "Wizard",
+      "level": 26,
+      "map": "0",
+      "x": 287,
+      "y": 607,
+      "hp": 105,
+      "mp": 134,
+      "gold": 172,
+      "supplies": {
+        "(HP)DrugSmall": 75,
+        "(HP)DrugMedium": 6,
+        "(MP)DrugSmall": 12,
+        "RandomTeleport": 4,
+        "Venison": 1,
+        "TownTeleport": 2
+      },
+      "objective": {
+        "current": 5,
+        "objective": "Defeat 3 BlackMaggot.\nDefeat 3 WedgeMoth.",
+        "objectives": [
+          {
+            "current": 3,
+            "done": true,
+            "label": "Kill BlackMaggot",
+            "required": 3
+          },
+          {
+            "current": 2,
+            "done": false,
+            "label": "Kill WedgeMoth",
+            "required": 3
+          }
+        ],
+        "progressLabel": "Progress 5/6",
+        "questId": 113,
+        "required": 6,
+        "rewardPreview": "EXP 544444, Gold 12500",
+        "stage": "inProgress",
+        "summary": "Hello. There are to many Insects in",
+        "title": "Insomnia",
+        "tracker": "Defeat 3 BlackMaggot."
+      }
+    }
+  },
+  {
+    "class": "Taoist",
+    "source": "Taoist.2026-09-17T13-21-01-374Z.trace.jsonl",
+    "sourceCapturedBytes": 46613862,
+    "sourceCapturedSha256": "E9AD15B6A4835D41B3A23E5653CA443182089860374BFC11226EBC9108EAB9C0",
+    "lastCapturedAt": "2026-09-17T13:58:46.126Z",
+    "routeCompleted": false,
+    "visualAccepted": false,
+    "q113CreditSnapshots": [
+      {
+        "sequence": 614,
+        "at": "2026-09-17T13:21:05.547Z",
+        "ownerId": 1000,
+        "name": "JT3f4a4e1f",
+        "class": "Taoist",
+        "level": 26,
+        "map": "0",
+        "x": 296,
+        "y": 590,
+        "hp": 191,
+        "mp": 52,
+        "gold": 564,
+        "supplies": {
+          "(HP)DrugSmall": 80,
+          "RandomTeleport": 4,
+          "Amulet": 100,
+          "Venison": 5,
+          "(MP)DrugSmall": 5,
+          "TownTeleport": 1
+        },
+        "objective": {
+          "current": 3,
+          "objective": "Defeat 3 BlackMaggot.\nDefeat 3 WedgeMoth.",
+          "objectives": [
+            {
+              "current": 3,
+              "done": true,
+              "label": "Kill BlackMaggot",
+              "required": 3
+            },
+            {
+              "current": 0,
+              "done": false,
+              "label": "Kill WedgeMoth",
+              "required": 3
+            }
+          ],
+          "progressLabel": "Progress 3/6",
+          "questId": 113,
+          "required": 6,
+          "rewardPreview": "EXP 544444, Gold 12500",
+          "stage": "inProgress",
+          "summary": "Hello. There are to many Insects in",
+          "title": "Insomnia",
+          "tracker": "Defeat 3 BlackMaggot."
+        }
+      }
+    ],
+    "ordinaryTownShopReceipts": [
+      {
+        "sequence": 1044,
+        "at": "2026-09-17T13:21:40.423Z",
+        "direction": "sent",
+        "type": "sellItem",
+        "publicEvent": {
+          "uniqueId": 11,
+          "count": 1
+        }
+      },
+      {
+        "sequence": 1048,
+        "at": "2026-09-17T13:21:41.574Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "SellItem",
+        "publicEvent": {
+          "count": 1,
+          "success": true,
+          "uniqueId": 11
+        }
+      },
+      {
+        "sequence": 1049,
+        "at": "2026-09-17T13:21:41.574Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "GainedGold",
+        "publicEvent": {
+          "gold": 273
+        }
+      },
+      {
+        "sequence": 1051,
+        "at": "2026-09-17T13:21:41.714Z",
+        "direction": "sent",
+        "type": "sellItem",
+        "publicEvent": {
+          "uniqueId": 12,
+          "count": 1
+        }
+      },
+      {
+        "sequence": 1056,
+        "at": "2026-09-17T13:21:42.591Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "SellItem",
+        "publicEvent": {
+          "count": 1,
+          "success": true,
+          "uniqueId": 12
+        }
+      },
+      {
+        "sequence": 1057,
+        "at": "2026-09-17T13:21:42.592Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "GainedGold",
+        "publicEvent": {
+          "gold": 230
+        }
+      },
+      {
+        "sequence": 1156,
+        "at": "2026-09-17T13:21:51.508Z",
+        "direction": "sent",
+        "type": "buyItem",
+        "publicEvent": {
+          "itemIndex": 47120387,
+          "count": 1,
+          "panelType": 0
+        }
+      },
+      {
+        "sequence": 1160,
+        "at": "2026-09-17T13:21:52.293Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "LoseGold",
+        "publicEvent": {
+          "gold": 1000
+        }
+      },
+      {
+        "sequence": 1198,
+        "at": "2026-09-17T13:21:58.561Z",
+        "direction": "sent",
+        "type": "buyItem",
+        "publicEvent": {
+          "itemIndex": 43188227,
+          "count": 1,
+          "panelType": 0
+        }
+      },
+      {
+        "sequence": 1200,
+        "at": "2026-09-17T13:21:59.291Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "LoseGold",
+        "publicEvent": {
+          "gold": 40
+        }
+      },
+      {
+        "sequence": 1203,
+        "at": "2026-09-17T13:21:59.390Z",
+        "direction": "sent",
+        "type": "buyItem",
+        "publicEvent": {
+          "itemIndex": 46661648,
+          "count": 1,
+          "panelType": 0
+        }
+      },
+      {
+        "sequence": 1206,
+        "at": "2026-09-17T13:22:00.080Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "LoseGold",
+        "publicEvent": {
+          "gold": 25
+        }
+      },
+      {
+        "sequence": 1449,
+        "at": "2026-09-17T13:23:21.654Z",
+        "direction": "sent",
+        "type": "sellItem",
+        "publicEvent": {
+          "uniqueId": 13,
+          "count": 1
+        }
+      },
+      {
+        "sequence": 1454,
+        "at": "2026-09-17T13:23:22.383Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "SellItem",
+        "publicEvent": {
+          "count": 1,
+          "success": true,
+          "uniqueId": 13
+        }
+      },
+      {
+        "sequence": 1455,
+        "at": "2026-09-17T13:23:22.383Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "GainedGold",
+        "publicEvent": {
+          "gold": 240
+        }
+      },
+      {
+        "sequence": 1457,
+        "at": "2026-09-17T13:23:22.491Z",
+        "direction": "sent",
+        "type": "sellItem",
+        "publicEvent": {
+          "uniqueId": 14,
+          "count": 1
+        }
+      },
+      {
+        "sequence": 1460,
+        "at": "2026-09-17T13:23:23.164Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "SellItem",
+        "publicEvent": {
+          "count": 1,
+          "success": true,
+          "uniqueId": 14
+        }
+      },
+      {
+        "sequence": 1461,
+        "at": "2026-09-17T13:23:23.164Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "GainedGold",
+        "publicEvent": {
+          "gold": 265
+        }
+      },
+      {
+        "sequence": 1570,
+        "at": "2026-09-17T13:23:34.457Z",
+        "direction": "sent",
+        "type": "buyItem",
+        "publicEvent": {
+          "itemIndex": 43188227,
+          "count": 9,
+          "panelType": 0
+        }
+      },
+      {
+        "sequence": 1572,
+        "at": "2026-09-17T13:23:35.217Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "LoseGold",
+        "publicEvent": {
+          "gold": 360
+        }
+      },
+      {
+        "sequence": 1575,
+        "at": "2026-09-17T13:23:35.380Z",
+        "direction": "sent",
+        "type": "buyItem",
+        "publicEvent": {
+          "itemIndex": 46661648,
+          "count": 4,
+          "panelType": 0
+        }
+      },
+      {
+        "sequence": 1576,
+        "at": "2026-09-17T13:23:36.098Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "LoseGold",
+        "publicEvent": {
+          "gold": 100
+        }
+      },
+      {
+        "sequence": 7271,
+        "at": "2026-09-17T13:36:14.256Z",
+        "direction": "sent",
+        "type": "sellItem",
+        "publicEvent": {
+          "uniqueId": 15,
+          "count": 1
+        }
+      },
+      {
+        "sequence": 7276,
+        "at": "2026-09-17T13:36:14.934Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "SellItem",
+        "publicEvent": {
+          "count": 1,
+          "success": true,
+          "uniqueId": 15
+        }
+      },
+      {
+        "sequence": 7277,
+        "at": "2026-09-17T13:36:14.934Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "GainedGold",
+        "publicEvent": {
+          "gold": 265
+        }
+      },
+      {
+        "sequence": 7279,
+        "at": "2026-09-17T13:36:15.038Z",
+        "direction": "sent",
+        "type": "sellItem",
+        "publicEvent": {
+          "uniqueId": 17,
+          "count": 1
+        }
+      },
+      {
+        "sequence": 7282,
+        "at": "2026-09-17T13:36:15.727Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "SellItem",
+        "publicEvent": {
+          "count": 1,
+          "success": true,
+          "uniqueId": 17
+        }
+      },
+      {
+        "sequence": 7283,
+        "at": "2026-09-17T13:36:15.727Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "GainedGold",
+        "publicEvent": {
+          "gold": 259
+        }
+      },
+      {
+        "sequence": 7285,
+        "at": "2026-09-17T13:36:15.830Z",
+        "direction": "sent",
+        "type": "sellItem",
+        "publicEvent": {
+          "uniqueId": 18,
+          "count": 1
+        }
+      },
+      {
+        "sequence": 7287,
+        "at": "2026-09-17T13:36:16.557Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "SellItem",
+        "publicEvent": {
+          "count": 1,
+          "success": true,
+          "uniqueId": 18
+        }
+      },
+      {
+        "sequence": 7288,
+        "at": "2026-09-17T13:36:16.557Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "GainedGold",
+        "publicEvent": {
+          "gold": 255
+        }
+      },
+      {
+        "sequence": 7431,
+        "at": "2026-09-17T13:36:30.699Z",
+        "direction": "sent",
+        "type": "buyItem",
+        "publicEvent": {
+          "itemIndex": 46661648,
+          "count": 17,
+          "panelType": 0
+        }
+      },
+      {
+        "sequence": 7436,
+        "at": "2026-09-17T13:36:31.543Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "LoseGold",
+        "publicEvent": {
+          "gold": 425
+        }
+      }
+    ],
+    "firstFullDepartureSuppliesSnapshot": {
+      "sequence": 1578,
+      "at": "2026-09-17T13:23:36.219Z",
+      "ownerId": 1000,
+      "name": "JT3f4a4e1f",
+      "class": "Taoist",
+      "level": 26,
+      "map": "0",
+      "x": 287,
+      "y": 609,
+      "hp": 191,
+      "mp": 152,
+      "gold": 47,
+      "supplies": {
+        "(HP)DrugSmall": 80,
+        "RandomTeleport": 4,
+        "Amulet": 100,
+        "Venison": 3,
+        "TownTeleport": 2,
+        "(MP)DrugSmall": 12
+      },
+      "objective": {
+        "current": 3,
+        "objective": "Defeat 3 BlackMaggot.\nDefeat 3 WedgeMoth.",
+        "objectives": [
+          {
+            "current": 3,
+            "done": true,
+            "label": "Kill BlackMaggot",
+            "required": 3
+          },
+          {
+            "current": 0,
+            "done": false,
+            "label": "Kill WedgeMoth",
+            "required": 3
+          }
+        ],
+        "progressLabel": "Progress 3/6",
+        "questId": 113,
+        "required": 6,
+        "rewardPreview": "EXP 544444, Gold 12500",
+        "stage": "inProgress",
+        "summary": "Hello. There are to many Insects in",
+        "title": "Insomnia",
+        "tracker": "Defeat 3 BlackMaggot."
+      }
+    },
+    "latestOwnerSnapshot": {
+      "sequence": 16895,
+      "at": "2026-09-17T13:58:41.077Z",
+      "ownerId": 1000,
+      "name": "JT3f4a4e1f",
+      "class": "Taoist",
+      "level": 26,
+      "map": "0",
+      "x": 281,
+      "y": 609,
+      "hp": 191,
+      "mp": 68,
+      "gold": 42,
+      "supplies": {
+        "(HP)DrugSmall": 80,
+        "RandomTeleport": 4,
+        "(MP)DrugSmall": 7,
+        "Amulet": 100,
+        "TownTeleport": 1
+      },
+      "objective": {
+        "current": 3,
+        "objective": "Defeat 3 BlackMaggot.\nDefeat 3 WedgeMoth.",
+        "objectives": [
+          {
+            "current": 3,
+            "done": true,
+            "label": "Kill BlackMaggot",
+            "required": 3
+          },
+          {
+            "current": 0,
+            "done": false,
+            "label": "Kill WedgeMoth",
+            "required": 3
+          }
+        ],
+        "progressLabel": "Progress 3/6",
+        "questId": 113,
+        "required": 6,
+        "rewardPreview": "EXP 544444, Gold 12500",
+        "stage": "inProgress",
+        "summary": "Hello. There are to many Insects in",
+        "title": "Insomnia",
+        "tracker": "Defeat 3 BlackMaggot."
+      }
+    }
+  }
+]

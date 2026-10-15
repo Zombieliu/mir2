@@ -49,6 +49,8 @@ export type GroupWindowProps = {
   onToggleAllowInvites?: (allow: boolean) => void;
   /** Transfer party leadership to the selected member. */
   onPromoteLeader?: (name: string) => void;
+  incomingInvite?: Readonly<{ name: string; epoch: number }> | null;
+  onReplyInvite?: (epoch: number, acceptInvite: boolean) => void;
   onClose: () => void;
 };
 
@@ -77,6 +79,8 @@ export function GroupWindow({
   onToggleLootMode,
   onToggleAllowInvites,
   onPromoteLeader,
+  incomingInvite,
+  onReplyInvite,
   onClose,
 }: GroupWindowProps) {
   const [selectedName, setSelectedName] = useState<string | null>(null);
@@ -151,7 +155,42 @@ export function GroupWindow({
         </button>
       </div>
 
-      <div style={style.list} aria-label={t("ui.group", [], "Party")}>
+      {incomingInvite ? (
+        <div
+          role="group"
+          aria-label={t("ui.groupInvite", [], "Invitation")}
+          aria-live="polite"
+          data-group-invite-name={incomingInvite.name}
+          data-group-invite-epoch={incomingInvite.epoch}
+          style={style.incomingInvite}
+        >
+          <div style={style.incomingMessage}>
+            {t("client.DoYouWantGroupWithPlayer", [incomingInvite.name], `Do you want to group with ${incomingInvite.name}?`)}
+          </div>
+          <div style={style.incomingActions}>
+            <button
+              type="button"
+              data-group-invite-reply="accept"
+              disabled={!onReplyInvite}
+              onClick={() => onReplyInvite?.(incomingInvite.epoch, true)}
+              style={{ ...style.actionButton, ...style.replyButton, ...(!onReplyInvite ? style.actionButtonDisabled : null) }}
+            >
+              {t("ui.questAccept", [], "Accept")}
+            </button>
+            <button
+              type="button"
+              data-group-invite-reply="decline"
+              disabled={!onReplyInvite}
+              onClick={() => onReplyInvite?.(incomingInvite.epoch, false)}
+              style={{ ...style.actionButton, ...style.replyButton, ...(!onReplyInvite ? style.actionButtonDisabled : null) }}
+            >
+              {t("ui.cancel", [], "Decline")}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <div style={{ ...style.list, ...(incomingInvite ? style.listWithInvite : null) }} aria-label={t("ui.group", [], "Party")}>
         {!hasGroup ? (
           <div style={style.empty}>{t("ui.groupNone", [], "You are not in a party.")}</div>
         ) : (
@@ -410,6 +449,17 @@ const style: Record<string, CSSProperties> = {
     background: "rgba(11, 8, 5, 0.45)",
     padding: 3,
   },
+  listWithInvite: { top: 184, height: 52 },
+  incomingInvite: {
+    position: "absolute", left: 12, top: 66, width: 240, height: 112,
+    boxSizing: "border-box", display: "flex", flexDirection: "column", gap: 8,
+    border: "1px solid rgba(214, 180, 110, 0.7)",
+    background: "linear-gradient(180deg, rgba(95, 53, 24, 0.95), rgba(28, 17, 9, 0.95))",
+    padding: 8,
+  },
+  incomingMessage: { flex: 1, overflowY: "auto", overflowWrap: "anywhere", color: "#f8e6bb", lineHeight: "16px" },
+  incomingActions: { display: "flex", gap: 6 },
+  replyButton: { flex: 1, minHeight: 44, touchAction: "manipulation" },
   empty: { color: "#cbb38a", padding: "10px 4px", fontSize: 11 },
   row: {
     display: "flex",

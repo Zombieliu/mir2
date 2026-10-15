@@ -1,0 +1,77 @@
+{
+  "baseCommit": "893197f314b228390362f3f061e3ef29fa197fcb",
+  "apiVersion": "2026-09-30.endive",
+  "credentialMode": "sandbox",
+  "keyIncluded": false,
+  "providerStartedUtc": "2026-10-09T15:46:06.0547534Z",
+  "providerCompletedUtc": "2026-10-09T15:46:08.6931094Z",
+  "readHttp200": [
+    "checkout_sessions",
+    "payment_intents",
+    "charges",
+    "webhook_endpoints"
+  ],
+  "originalFailure": {
+    "errorType": "invalid_request_error",
+    "http": 400,
+    "parameter": "payment_method_types",
+    "message": "The `payment_method_types` parameter is no longer supported when creating a Checkout Session. Payment methods are now managed from your Dashboard settings (https://dashboard.stripe.com/settings/payment_methods). For migration guidance, see https://docs.stripe.com/payments/payment-methods/dynamic-payment-methods."
+  },
+  "checkout": {
+    "cardOnly": true,
+    "paid": false,
+    "finalStatus": "expired",
+    "createHttp": 200,
+    "expireHttp": 200,
+    "requestParameter": "allowed_payment_method_types[0]"
+  },
+  "webhookProbe": {
+    "permanentCallback": false,
+    "signingSecretIncluded": false,
+    "createHttp": 200,
+    "deleteHttp": 200,
+    "deleted": true
+  },
+  "pricing": {
+    "enabled": false,
+    "creditsPerDollar": 100,
+    "dollarTiers": [
+      1,
+      5,
+      10,
+      20
+    ],
+    "currency": "usd",
+    "monthlyCardCredits": 1000,
+    "privateConfigurationOnly": true,
+    "monthlyCardDays": 30
+  },
+  "tests": {
+    "ignored": 0,
+    "filtered": 997,
+    "failed": 0,
+    "logSha256": "afd737821c26b831c643a58791ac4f19bbeea4ada83b0ad080006f0005dd8977",
+    "log": "gateway01.log",
+    "command": "cargo +1.95.0 test -p mir2-gateway --lib billing --locked --offline -j2 -- --test-threads=1",
+    "passed": 36
+  },
+  "sourceFiles": [
+    {
+      "path": "mir2-web3/apps/gateway/src/stripe_billing.rs",
+      "windowsSha256": "198027b9def8bdf5c0d5c147a6c7335c0dcabdec5852ac085585e8decc5b7fc7",
+      "gitBlob": "29b15c0053fcab41b077b147d4bead042741ceb0"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/stripe_billing_tests.rs",
+      "windowsSha256": "3563b305322d79b732c776498d88ce7ac1163e690d57df394322284de48f98ec",
+      "gitBlob": "44905df0af247b71b8ea3c68ea7994d45f3501e6"
+    }
+  ],
+  "limitations": [
+    "No charge or completed payment",
+    "No game-wallet settlement acceptance from these probes",
+    "No permanent webhook registration",
+    "No public deployment, feed, installer or save change",
+    "New-source Linux CI not yet asserted"
+  ]
+}

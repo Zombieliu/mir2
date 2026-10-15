@@ -1,0 +1,932 @@
+{
+  "schemaVersion": "mir2.whole-game-completeness-audit.v1",
+  "auditDate": "2026-09-08",
+  "scope": "Whole Crystal game, backend, content, Web, Windows, operations and release",
+  "method": "read-only source and artifact audit; static inventory recomputation; no fresh whole-game live run",
+  "implementationHead": "58eab9a4a6684b2d2d11d2c533049b64995e7458",
+  "implementationBranch": "codex/windows-player-journey",
+  "dirtyAtStart": true,
+  "gitStatusRecordsAtStart": 76,
+  "crystalRevision": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "globalParityPercent": null,
+  "inventoryComplete": false,
+  "accepted": false,
+  "visualAccepted": false,
+  "domains": [
+    {
+      "id": "G01",
+      "area": "账号、选角、登录重连",
+      "implemented": "Web/Windows 有完整壳层与服务端鉴权；最新重复 StartGame 修复已构建",
+      "gap": "最新 Windows 登录→进图→退出→重进仍缺实机复验；不能把修复记录当通过",
+      "priority": "P0-体验门",
+      "evidence": [
+        "S19",
+        "S24",
+        "S25"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G02",
+      "area": "移动、奔跑、寻路、相机",
+      "implemented": "Zone 意图、速度、碰撞、AOI；客户端预测及真实时钟修复",
+      "gap": "用户拉回/相机漂移为有效失败观察；需同版长按、高延迟、拥挤碰撞连续验证",
+      "priority": "P0-体验门",
+      "evidence": [
+        "S20",
+        "S21",
+        "S05"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G03",
+      "area": "地图、建筑、跨图、小地图",
+      "implemented": "463 非空地图名与移动数据已导入；两端有地图 UI",
+      "gap": "Windows 地图素材未全量闭合，keyed 缺源仍允许；跨图旧失败未正式关闭",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S12",
+        "S13",
+        "S18",
+        "S47",
+        "S48"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G04",
+      "area": "地图规则、门、危险地面、活动",
+      "implemented": "环境参数、危险地面、6 个类型化地图坐标事件已有实现",
+      "gap": "18 个通用事件只导入未执行；完整门/墙/活动状态机及时间边界待覆盖",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S10",
+        "S02"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G05",
+      "area": "五职业、经验、等级成长",
+      "implemented": "5 职业及经验升级、基础属性、角色创建链路存在",
+      "gap": "完整等级曲线、职业限制、技能学习/升级与长期成长旅程无统一对照证据",
+      "priority": "P1-待核验",
+      "evidence": [
+        "S02",
+        "S05"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G06",
+      "area": "技能、法术、资源消耗",
+      "implemented": "109 技能模板；个人与 Zone 有多类技能、治疗、召唤实现",
+      "gap": "技能×等级×目标×成功/失败×时序×视觉完整矩阵缺失；两执行路径需分别核对",
+      "priority": "P1-部分",
+      "evidence": [
+        "S02",
+        "S05"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G07",
+      "area": "Buff、毒、控制、状态恢复",
+      "implemented": "59 Buff 定义；Zone 有中毒、控制、治疗、地面法术",
+      "gap": "叠加、驱散、免疫、死亡/跨图/断线与剩余时间完整语义待验",
+      "priority": "P1-待核验",
+      "evidence": [
+        "S02",
+        "S05"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G08",
+      "area": "普攻、远程、命中与受击",
+      "implemented": "共享伤害、攻击模式、安全区、动作回包及血条已接入",
+      "gap": "自身攻击 ID 仅修选定回包；异步受击身份及全装备方向动画仍待闭合",
+      "priority": "P1-部分",
+      "evidence": [
+        "S05",
+        "S22"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G09",
+      "area": "普通怪物 AI",
+      "implemented": "个人模拟有大量专属处理；共享 Zone 有追击、攻击、控制、召唤",
+      "gap": "共享路径没有整体使用个人专属 AI，不能把个人测试扩展成线上行为完成",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S05",
+        "S06"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G10",
+      "area": "Boss、特殊怪、阶段机制",
+      "implemented": "个人沃玛教主等专用状态机存在",
+      "gap": "沃玛教主被围传送/分阶段狂暴未见共享 tick 接入；Boss 全目录待迁入/验证",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S05",
+        "S07",
+        "S08"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G11",
+      "area": "死亡、尸体、收割、复活刷新",
+      "implemented": "Zone 已拥有墙钟刷新、尸体/收割门及 checkpoint",
+      "gap": "全怪/全地图/归属与恢复组合未逐一对照；不能沿用旧“尚无共享刷新”结论",
+      "priority": "P1-待核验",
+      "evidence": [
+        "S02",
+        "S05",
+        "S06"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G12",
+      "area": "掉落、抢拾、归属、奖励",
+      "implemented": "完整 UserItem、claim ticket、Slice A–D 原子结算已有边界证据",
+      "gap": "不能外推全部掉落生产者、死亡规则与当前部署崩溃闭环；需保留先前修复成果",
+      "priority": "P1-待核验",
+      "evidence": [
+        "S02",
+        "S23"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G13",
+      "area": "背包、药品、装备、仓库",
+      "implemented": "常规 use/equip/remove/drop/delete/split/merge 与保存存在",
+      "gap": "Windows 原版拖拽/双击/锁定仍有替代操作；全容器、腰带优先规则未闭合",
+      "priority": "P1-部分",
+      "evidence": [
+        "S16",
+        "S18"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G14",
+      "area": "实例词条、耐久、绑定、嵌套物品",
+      "implemented": "核心数据可保存丰富实例与图标信息",
+      "gap": "跨市场/精炼出现降为模板再生成的实际缺陷，不能声明全系统物品保真",
+      "priority": "P0-资产正确性",
+      "evidence": [
+        "S03",
+        "S04"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G15",
+      "area": "任务、任务道具、奖励、成长线",
+      "implemented": "154 任务、个人领取/交付/选择奖励与新手多段测试存在",
+      "gap": "全任务分支、日常/限制、职业全旅程、失败/重登待逐项验证",
+      "priority": "P1-部分",
+      "evidence": [
+        "S02",
+        "S09"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G16",
+      "area": "NPC 脚本语言与世界服务",
+      "implemented": "634 脚本已导入；大量条件/动作有解释器",
+      "gap": "实例移动、邮件构造、定时器、移除技能/Buff 等源语法未在对应分派覆盖",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S09",
+        "S41"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G17",
+      "area": "NPC 商店、修理、商城、个人仓库",
+      "implemented": "两端已有窗口、购买/售卖/修理/回执与部分权限实现",
+      "gap": "服务距离、断线、容量、重复回包、过期 NPC 及全商品限制待整体验证",
+      "priority": "P1-待核验",
+      "evidence": [
+        "S16",
+        "S17",
+        "S18"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G18",
+      "area": "制作、配方、觉醒、镶嵌等加工",
+      "implemented": "79 配方及后端多类加工 handler；Web 接收结果",
+      "gap": "Windows 缺完整发起入口；Web 部分结果只记日志，不能据此算操作闭环",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S03",
+        "S16",
+        "S17"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G19",
+      "area": "武器精炼与材料价值",
+      "implemented": "有存入/取回/取消/概率模型",
+      "gap": "完整物品被存成 key，取回固定数量 1；材料耐久/词条按模板代替",
+      "priority": "P0-资产正确性",
+      "evidence": [
+        "S03"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G20",
+      "area": "采矿、钓鱼、采集",
+      "implemented": "个人采矿/钓鱼逻辑及部分测试存在",
+      "gap": "全世界 MineZones 为空，矿区分布未导入；Windows 钓鱼菜单禁用",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S04",
+        "S14",
+        "S44"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G21",
+      "area": "双人交易",
+      "implemented": "共享邀请/配对、金币即时保管、一次性完成与恢复已改进",
+      "gap": "双方物品格只读；精确物品保管、编辑解锁、容量失败保留报价未完成",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S02",
+        "S15",
+        "S40"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G22",
+      "area": "市场、拍卖、寄售",
+      "implemented": "普通包有搜索/购买/取回；Web 有部分入口",
+      "gap": "个人 Stage5 列表、完整物品丢失、固定价语义；完整全服市场/竞价待实现",
+      "priority": "P0-资产正确性",
+      "evidence": [
+        "S03",
+        "S04",
+        "S17",
+        "S35"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G23",
+      "area": "邮件、租借、异步资产交付",
+      "implemented": "邮件载体、领取、共享租借入口及部分幂等机制存在",
+      "gap": "全在线/离线/跨区/到期/重放/满包组合与 Native 操作入口未闭合",
+      "priority": "P1-部分",
+      "evidence": [
+        "S02",
+        "S16"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G24",
+      "area": "组队、聊天、协作奖励",
+      "implemented": "真实共享聊天、组队归属与奖励路径，历史两人远程证据",
+      "gap": "全组队邀请/退出/跨图/掉线/队长变更及多人连续体验仍待验证",
+      "priority": "P1-待核验",
+      "evidence": [
+        "S02",
+        "S28",
+        "S29"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G25",
+      "area": "行会、行会仓库、权限",
+      "implemented": "有成员/公告/权限/仓库/聊天的状态与 packet handler",
+      "gap": "普通改成员/接受邀请仍修改个人 guild；完整共享行会权威与跨成员一致性未找到",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S03",
+        "S04"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G26",
+      "area": "PK、行会战、领地、攻城",
+      "implemented": "Zone 玩家伤害/安全区/模式已实现；本地领地字段与操作存在",
+      "gap": "完整战争调度、城防、积分、胜负结算共享状态机未找到",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S05",
+        "S36",
+        "S37"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G27",
+      "area": "好友、黑名单、师徒、婚姻、排行",
+      "implemented": "Web 多数有真实窗口及发包回调；部分后端状态存在",
+      "gap": "Windows 对应菜单禁用；全服在线名单、关系生命周期还需跨账号验证",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S14",
+        "S16",
+        "S17"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G28",
+      "area": "英雄、战斗随从、召唤",
+      "implemented": "个人英雄装备/技能/AI；Zone 部分召唤物有战斗",
+      "gap": "共享个人 tick 禁英雄战斗且未找到 Zone 对应英雄战斗，不能视为在线英雄完成",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S05",
+        "S06",
+        "S04"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G29",
+      "area": "智能宠物、坐骑、跟随与拾取",
+      "implemented": "部分拾取/维护、坐骑三格跑及骑乘呈现存在",
+      "gap": "Windows 智能生物/坐骑入口禁用；完整控制、装备、跨图、死亡恢复未闭合",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S05",
+        "S14",
+        "S16"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G30",
+      "area": "HUD、窗口、名字、提示、键位、设置",
+      "implemented": "大量原版位图、背包/任务/地图/设置窗口已实现",
+      "gap": "33 项用户观察清单仍保留；8 项菜单禁用；音量条等交互仍为替代行为",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S14",
+        "S18"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G31",
+      "area": "人物、怪物、NPC 动作与特效",
+      "implemented": "703 库动作元数据；Native 有组合图层及多种效果代码",
+      "gap": "实体图集仅 8 个 Monster 库；其他非玩家帧不走原图 fallback；缺动作降级",
+      "priority": "P1-实缺",
+      "evidence": [
+        "S11",
+        "S43",
+        "S45"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G32",
+      "area": "光照、遮挡、环境动画、声音",
+      "implemented": "Native 有光照/环境帧与选定精确音效；Web 有独立模块",
+      "gap": "黑色光照反馈未关闭；声音包仅 49 文件；全图/全动作声画时序及真实 DPI 待验",
+      "priority": "P1-部分",
+      "evidence": [
+        "S18",
+        "S21",
+        "S49"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G33",
+      "area": "存档、数据库、恢复、迁移",
+      "implemented": "Argon2id、PostgreSQL、事务/outbox、恢复日志、旧版迁移与故障测试存在",
+      "gap": "历史成果须保留；当前全部经济生产者及最新版本故障/备份恢复证据仍未统一",
+      "priority": "P1-待核验",
+      "evidence": [
+        "S02",
+        "S23",
+        "S25",
+        "S28",
+        "S29"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G34",
+      "area": "安全、GM、权限、审计",
+      "implemented": "生产 debug 命令拒绝、账号生命周期鉴权、管理认证/限流、Passkey fail-closed",
+      "gap": "本次仅抽查关键边界，不能宣称安全漏洞清零；运营全流程/配置与依赖安全需专项门",
+      "priority": "P1-待核验",
+      "evidence": [
+        "S24",
+        "S25",
+        "S26",
+        "S27"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G35",
+      "area": "多人容量、HA、监控运维",
+      "implemented": "历史 500 人混合玩法与故障恢复通过；有遥测、队列、部署/验收脚本",
+      "gap": "1000 人报告延迟/吞吐失败；3000 人缺合格硬件/最终报告；长期耐久与当前重验待做",
+      "priority": "P1-实缺/验收",
+      "evidence": [
+        "S28",
+        "S29",
+        "S30",
+        "S31",
+        "S42"
+      ],
+      "complete": false
+    },
+    {
+      "id": "G36",
+      "area": "打包、更新、兼容性、发布验收",
+      "implemented": "有 CI、Windows 包及多次可运行开发 EXE",
+      "gap": "最新修复包与历史 Candidate 非同一版本；正式签名/资源授权/同状态原版对比/DPI/soak/人工门开放",
+      "priority": "P1-待核验",
+      "evidence": [
+        "S18",
+        "S19",
+        "S33"
+      ],
+      "complete": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "F01",
+      "priority": "P0",
+      "title": "寄售与取回丢失物品实例",
+      "type": "source-confirmed",
+      "sources": [
+        "S03",
+        "S04",
+        "S35"
+      ],
+      "acceptance": "两个普通账号交易自定义词条/耐久/绑定/堆叠物品；寄售、购买、取消、重登后全字段与总量守恒；失败/重试无重复；市场列表来自共享权威。"
+    },
+    {
+      "id": "F02",
+      "priority": "P0",
+      "title": "精炼存取降为模板并重建数量 1",
+      "type": "source-confirmed",
+      "sources": [
+        "S03"
+      ],
+      "acceptance": "带独立 UID/纯度/耐久/附加属性的材料存入→取回/取消不变；真实材料参与原版概率公式；满包/失败不丢物。"
+    },
+    {
+      "id": "F03",
+      "priority": "P1",
+      "title": "共享怪物专属 AI 与英雄战斗不完整",
+      "type": "source-confirmed-sample",
+      "sources": [
+        "S05",
+        "S06",
+        "S07",
+        "S08"
+      ],
+      "acceptance": "逐族映射真实 Zone 执行器；至少两观察者验证 Boss 各阶段、英雄追击/施法/死亡/跨图/恢复；对照 Crystal 时间和行为轨迹。"
+    },
+    {
+      "id": "F04",
+      "priority": "P1",
+      "title": "行会、市场、攻城仍有个人状态模拟",
+      "type": "source-confirmed-path",
+      "sources": [
+        "S03",
+        "S04",
+        "S36",
+        "S37"
+      ],
+      "acceptance": "普通客户端完成跨账号邀请/权限/仓库/战争/结算；共享权威、跨进程恢复、在线离线一致；不依赖 QA Stage5 命令。"
+    },
+    {
+      "id": "F05",
+      "priority": "P1",
+      "title": "Windows 全怪物与全地图素材未接通",
+      "type": "source-and-package-confirmed",
+      "sources": [
+        "S11",
+        "S12",
+        "S13",
+        "S43",
+        "S47",
+        "S48"
+      ],
+      "acceptance": "按实际地图/刷怪/装备生成必需帧集合，缺图显式失败；全库寻址接入；多地图完整帧/动画/遮挡验证，不以 starter 通过代替。"
+    },
+    {
+      "id": "F06",
+      "priority": "P1",
+      "title": "NPC 全语言、事件和矿区导入有实际缺口",
+      "type": "source-confirmed",
+      "sources": [
+        "S04",
+        "S09",
+        "S10",
+        "S41",
+        "S44"
+      ],
+      "acceptance": "所有源语法候选有明确解释器或处理说明；定时/实例/邮件等普通脚本路径可执行；18 通用事件及真实 MineZones 加入运行时。"
+    },
+    {
+      "id": "F07",
+      "priority": "P1",
+      "title": "Windows 八项菜单禁用，交易物品格只读",
+      "type": "source-confirmed",
+      "sources": [
+        "S14",
+        "S15",
+        "S16"
+      ],
+      "acceptance": "每项菜单和物品格都由真实用户输入触发命令、收到权威回执并显示结果；同版两人交易存取/合并/解锁与取消完整。"
+    },
+    {
+      "id": "F08",
+      "priority": "P1",
+      "title": "Web 也存在只有结果处理或缺操作回调的功能",
+      "type": "source-confirmed",
+      "sources": [
+        "S17"
+      ],
+      "acceptance": "市场上架/竞价、交易物品编辑、制作精炼与攻城每条普通入口贯通；日志提示不计作可用操作。"
+    },
+    {
+      "id": "F09",
+      "priority": "P0-体验门",
+      "title": "最新 Windows 基础旅程尚未复验通过",
+      "type": "user-observation-plus-fix-awaiting-live",
+      "sources": [
+        "S19",
+        "S20",
+        "S21",
+        "S22"
+      ],
+      "acceptance": "同一个当前 EXE 与 Gateway 完成登录、反复进图、持续右键奔跑、反向/碰撞、挥砍受击、拾取、跨图与重登；日志/视频匹配版本。"
+    },
+    {
+      "id": "F10",
+      "priority": "P1",
+      "title": "时序、RNG 与全技能语义未完成对照",
+      "type": "source-and-evidence-gap",
+      "sources": [
+        "S01",
+        "S05"
+      ],
+      "acceptance": "每个技能/AI/掉落明确随机分布及抽样顺序、计时边界、拒绝包和恢复规则；原版与实现可复放比较，禁止从函数数量推断完成。"
+    },
+    {
+      "id": "F11",
+      "priority": "P1",
+      "title": "规模与故障恢复证据有历史成果，但更高目标未通过",
+      "type": "historical-artifact-confirmed",
+      "sources": [
+        "S28",
+        "S29",
+        "S30",
+        "S31"
+      ],
+      "acceptance": "保留 500 人历史基线；在指定资源与同一新版本重验混合行为、1000/3000 目标、经济对账及故障；持续时间和硬件均符合 profile。"
+    },
+    {
+      "id": "F12",
+      "priority": "P1",
+      "title": "完整语义分母与统一发布证据未闭合",
+      "type": "audit-governance-and-release-gap",
+      "sources": [
+        "S01",
+        "S18",
+        "S33",
+        "S39"
+      ],
+      "acceptance": "语义目录独立审核闭合；每条绑定代码/普通入口/测试/原版轨迹/实机证据；同一发布版本完成包、签名、资源授权、DPI、稳定性和人工验收。"
+    }
+  ],
+  "evidenceSources": [
+    {
+      "id": "S01",
+      "title": "全局语义完成标准",
+      "path": "docs/CRYSTAL-SEMANTIC-PARITY-LEDGER.md",
+      "line": 28
+    },
+    {
+      "id": "S02",
+      "title": "最新后端状态及掉落 Slice D",
+      "path": "docs/BACKEND-1TO1-PROGRESS.md",
+      "line": 756
+    },
+    {
+      "id": "S03",
+      "title": "普通市场/精炼/行会协议路径",
+      "path": "apps/simulation/src/runtime/packets.rs",
+      "line": 3872
+    },
+    {
+      "id": "S04",
+      "title": "个人 Stage5 系统与市场数据结构",
+      "path": "apps/simulation/src/config.rs",
+      "line": 6063
+    },
+    {
+      "id": "S05",
+      "title": "共享 Zone 怪物与战斗调度",
+      "path": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 9360
+    },
+    {
+      "id": "S06",
+      "title": "共享模式个人 tick 明确排除 AI/英雄战斗",
+      "path": "apps/simulation/src/runtime/monster_ai/mod.rs",
+      "line": 638
+    },
+    {
+      "id": "S07",
+      "title": "个人沃玛教主专属 AI",
+      "path": "apps/simulation/src/runtime/monster_ai/wooma_taurus.rs",
+      "line": 15
+    },
+    {
+      "id": "S08",
+      "title": "Crystal 沃玛教主",
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/WoomaTaurus.cs",
+      "line": 18
+    },
+    {
+      "id": "S09",
+      "title": "NPC 解释器",
+      "path": "apps/simulation/src/runtime/npc_script.rs",
+      "line": 1133
+    },
+    {
+      "id": "S10",
+      "title": "地图事件可执行边界",
+      "path": "packages/game-data/data/generated/crystal_map_event_manifest.json",
+      "line": 726
+    },
+    {
+      "id": "S11",
+      "title": "原生实体资源选择",
+      "path": "apps/game-client/platform-windows/src/atlas.rs",
+      "line": 845
+    },
+    {
+      "id": "S12",
+      "title": "原生地图帧选择",
+      "path": "apps/game-client/platform-windows/src/map_parser.rs",
+      "line": 1211
+    },
+    {
+      "id": "S13",
+      "title": "原生地图打包默认范围",
+      "path": "apps/web/scripts/build-native-keyed-map-pack.mjs",
+      "line": 44
+    },
+    {
+      "id": "S14",
+      "title": "原生八项菜单禁用",
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "line": 8477
+    },
+    {
+      "id": "S15",
+      "title": "交易格子呈现与交互边界",
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "line": 349
+    },
+    {
+      "id": "S16",
+      "title": "原生操作协议枚举",
+      "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+      "line": 32
+    },
+    {
+      "id": "S17",
+      "title": "Web 窗口实际挂载与 callbacks",
+      "path": "apps/web/app/page.tsx",
+      "line": 14220
+    },
+    {
+      "id": "S18",
+      "title": "Windows 33 项用户反馈清单",
+      "path": "docs/generated/player-qa/windows-visual-parity/VIS-03-USER-OBSERVED-UI-RENDER-BACKLOG-20260829.md",
+      "line": 385
+    },
+    {
+      "id": "S19",
+      "title": "最新重复进入世界修复验收",
+      "path": "docs/generated/player-qa/windows-reenter-world-20260908/README.md",
+      "line": 13
+    },
+    {
+      "id": "S20",
+      "title": "最新持续奔跑修复验收",
+      "path": "docs/generated/player-qa/windows-run-clock-20260908/README.md",
+      "line": 16
+    },
+    {
+      "id": "S21",
+      "title": "最新人物相机修复验收",
+      "path": "docs/generated/player-qa/windows-self-camera-20260908/README.md",
+      "line": 11
+    },
+    {
+      "id": "S22",
+      "title": "最新自身攻击身份修复",
+      "path": "docs/generated/player-qa/windows-owner-swing-20260908/README.md",
+      "line": 1
+    },
+    {
+      "id": "S23",
+      "title": "持久化恢复日志",
+      "path": "apps/gateway/src/save_recovery.rs",
+      "line": 230
+    },
+    {
+      "id": "S24",
+      "title": "生产命令安全边界",
+      "path": "apps/simulation/src/world_runtime.rs",
+      "line": 124
+    },
+    {
+      "id": "S25",
+      "title": "Argon2id 密码及钱包隔离",
+      "path": "apps/simulation/src/runtime/save.rs",
+      "line": 990
+    },
+    {
+      "id": "S26",
+      "title": "管理接口认证与限流",
+      "path": "apps/admin-api/src/lib.rs",
+      "line": 4359
+    },
+    {
+      "id": "S27",
+      "title": "Passkey 缺密钥默认拒绝",
+      "path": "apps/gateway/src/auth.rs",
+      "line": 263
+    },
+    {
+      "id": "S28",
+      "title": "500 人 30 分钟历史验收",
+      "path": "docs/generated/regional/gate18.json",
+      "line": 1
+    },
+    {
+      "id": "S29",
+      "title": "500 人 1 小时与故障恢复历史验收",
+      "path": "docs/generated/regional/gate19.json",
+      "line": 1
+    },
+    {
+      "id": "S30",
+      "title": "1000 人负载未通过报告",
+      "path": "docs/generated/regional/gate20-load.json",
+      "line": 1
+    },
+    {
+      "id": "S31",
+      "title": "3000 人硬件门未通过",
+      "path": "docs/generated/regional/gate21-resource-attestation.json",
+      "line": 1
+    },
+    {
+      "id": "S32",
+      "title": "Home Node 本地门与真实 Beta 边界",
+      "path": "docs/generated/home-node/gate25-local/gate25-local-acceptance.json",
+      "line": 1
+    },
+    {
+      "id": "S33",
+      "title": "发布及验收当前门",
+      "path": "docs/AGENT-ORCHESTRATION.md",
+      "line": 185
+    },
+    {
+      "id": "S34",
+      "title": "Android 能力边界",
+      "path": "apps/game-client/platform-android/README.md",
+      "line": 49
+    },
+    {
+      "id": "S35",
+      "title": "Crystal 原版市场实现",
+      "path": "E:/mir2/Crystal/Server/MirObjects/PlayerObject.cs",
+      "line": 8252
+    },
+    {
+      "id": "S36",
+      "title": "Crystal 攻城状态机",
+      "path": "E:/mir2/Crystal/Server/MirObjects/ConquestObject.cs",
+      "line": 508
+    },
+    {
+      "id": "S37",
+      "title": "本地攻城状态",
+      "path": "apps/simulation/src/runtime/stage5.rs",
+      "line": 5000
+    },
+    {
+      "id": "S38",
+      "title": "旧前端统计不能代表当前完整度",
+      "path": "docs/FRONTEND-COMPLETENESS-AUDIT.md",
+      "line": 1
+    },
+    {
+      "id": "S39",
+      "title": "部分视觉分母，尚未完整",
+      "path": "docs/generated/player-qa/windows-visual-parity/phase-a-denominator.json",
+      "line": 1
+    },
+    {
+      "id": "S40",
+      "title": "最新交易金币保管证据",
+      "path": "docs/generated/player-qa/native-ui-parity-20260908-trade-gold/README.md",
+      "line": 1
+    },
+    {
+      "id": "S41",
+      "title": "Crystal NPC 脚本语法",
+      "path": "E:/mir2/Crystal/Server/MirObjects/NPC/NPCSegment.cs",
+      "line": 102
+    },
+    {
+      "id": "S42",
+      "title": "正式容量标准",
+      "path": "docs/REGIONAL-ACCEPTANCE.md",
+      "line": 1
+    },
+    {
+      "id": "S43",
+      "title": "当前实体图集清单",
+      "path": "apps/web/public/bevy-entity-atlases/manifest.json",
+      "line": 1
+    },
+    {
+      "id": "S44",
+      "title": "矿区导入丢弃位置",
+      "path": "packages/tooling/scripts/generate-crystal-respawn-manifest.mjs",
+      "line": 397
+    },
+    {
+      "id": "S45",
+      "title": "原生动作回退规则",
+      "path": "apps/game-client/platform-windows/src/frame_sets.rs",
+      "line": 51
+    },
+    {
+      "id": "S46",
+      "title": "完整内容配置含义",
+      "path": "apps/gateway/src/main.rs",
+      "line": 31
+    },
+    {
+      "id": "S47",
+      "title": "安装包 keyed 地图清单",
+      "path": "C:/mir2-ground-label-20260908/mir2-assets/generated/native-map-keyed/manifest.json",
+      "line": 1
+    },
+    {
+      "id": "S48",
+      "title": "安装包普通地图图集",
+      "path": "C:/mir2-ground-label-20260908/mir2-assets/generated/map-atlas/manifest.json",
+      "line": 1
+    },
+    {
+      "id": "S49",
+      "title": "Windows 打包资源范围",
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "line": 768
+    }
+  ],
+  "limits": [
+    "Domain count is not semantic denominator.",
+    "Findings are not an exhaustive defect count.",
+    "Absence of full-domain validation is not absence of implementation.",
+    "Prior test and cluster results were read, not rerun.",
+    "Imported manifest timestamps vary; not a fresh original DB import.",
+    "No production pentest or current cluster acceptance was performed."
+  ]
+}

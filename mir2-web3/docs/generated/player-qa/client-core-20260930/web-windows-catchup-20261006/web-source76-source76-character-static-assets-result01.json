@@ -1,0 +1,36 @@
+{
+  "owner": "Root",
+  "package": "Source76 actual independent Thin",
+  "normalCharacterHotkey": true,
+  "initialCharacterCompat": 1,
+  "Stats1Compat": 0,
+  "Stats2Compat": 0,
+  "emptySpellsCompat": {
+    "characterCompatibilityWindows": 0,
+    "spellsCompatibilityWindows": 0
+  },
+  "characterReturnCompat": 1,
+  "normalEscapeCloses": {
+    "character": 0,
+    "spells": 0
+  },
+  "Stats1Visible": {
+    "health": "24/24",
+    "mana": "18/18",
+    "AC": "2-2",
+    "DC": "2-4"
+  },
+  "Stats2Visible": {
+    "bagWeight": "10/51",
+    "armourWeight": "5/15",
+    "handWeight": "4/12"
+  },
+  "minimapOverlapObserved": true,
+  "minimapOrdinarilyCollapsedToReadStats": true,
+  "allCharacterEquipmentAccepted": false,
+  "nonemptySpellsAndSkillBindingAccepted": false,
+  "equipmentMutation": false,
+  "mobileAccepted": false,
+  "goalComplete": false,
+  "noPrivateRuntimeReads": true
+}

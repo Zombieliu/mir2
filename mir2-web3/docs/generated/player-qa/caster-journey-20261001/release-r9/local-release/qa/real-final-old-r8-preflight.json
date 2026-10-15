@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "source": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "candidateVersion": "WN-CANDIDATE-20261001-invited-08",
+  "files": 123031,
+  "bytes": 741004154,
+  "aggregateSHA256": "5980BF3EA27A18B6D48806FB4D5963A462BE8E2CD6D7BD04A08813C29B3D4495",
+  "bundle": "C:\\mir2-playtest-releases\\20261001-native-r8\\updater\\bundle",
+  "engineSHA256": "61BEDB22789626F08DE6826D4F46F128AE284661B877A0B7988E3F6E0E83D5C4",
+  "helperSHA256": "1D568C927D292CC2E6F01B563C8067FD7797D6CF6491ABA6919D44A1937BDD94",
+  "outputAbsent": true,
+  "configAbsent": true,
+  "receiptAbsent": true,
+  "newSourcePending": true,
+  "testsStarted": false,
+  "gameLaunched": false,
+  "finishedUtc": "2026-10-01T17:25:58.263019+00:00"
+}

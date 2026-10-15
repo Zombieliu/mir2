@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "sourceRound": "Source66",
+  "purpose": "Warehouse visible NPC interaction strict Web build",
+  "rootAccepted": true,
+  "actualExitCode": 0,
+  "childPid": 55876,
+  "elapsedMs": 34921,
+  "childExited": true,
+  "childDisposed": true,
+  "originalCallerExitCode": 0,
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383"
+  },
+  "command": "node node_modules/next/dist/bin/next build --webpack",
+  "cwd": "E:/mir2-player-journey/work/web-source66-visible-npc-same-drive01/mir2-web3/apps/web",
+  "nextVersion": "16.2.11",
+  "compiled": true,
+  "strictTypeScriptPassed": true,
+  "compileSeconds": 9.5,
+  "typeScriptSeconds": 12.4,
+  "staticPages": 13,
+  "ignoredBuildErrors": false,
+  "prePostSourcePinsMatched": true,
+  "sourceInputCount": 19585,
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/preparation02/source66-same-drive-source-snapshot02.json",
+    "bytes": 14496041,
+    "sha256": "b93fbf0741b65378f981848618cbb440214c2542fa4623d85df15fe1c9cd425b"
+  },
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/same-drive-source-review02.json",
+    "bytes": 6351,
+    "sha256": "5e2d683037dd99a63a1bd0b8eca6741046ae3fe6d9ef823737cfff1c3bfd9404"
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/next-build02-config.json",
+    "bytes": 5120,
+    "sha256": "d8c5ab7e1fdda1ebb936bd5750cbb1b2e355b8568a43d4cf1e0acf4cb18c4628"
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/next-build02/stdout.log",
+    "bytes": 2023,
+    "sha256": "76fa39e362bc923a8b077fe38872efc858b9bb1dcf38ee28ca16de701cb5e5d9"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/next-build02/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "warningCount": 0,
+  "warningKind": "No stderr diagnostics in actual same-drive build",
+  "legacyAssetRowsBefore": 8,
+  "legacyAssetRowsAfter": 8,
+  "removedAssetRows": 0,
+  "distBasename": ".next-web-windows-catchup-source64-20261011-01",
+  "mainTsconfigPreserved": true,
+  "isolatedNextEnvPreserved": true,
+  "testCounts": {
+    "passed": 208,
+    "failed": 0
+  },
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "storageLiveAccepted": false,
+  "candidate100": false,
+  "humanFrontendAccepted": false,
+  "goalComplete": false,
+  "kind": "Actual original strict Next in same-drive isolated unchanged Source66 sources",
+  "CStrictBuildAndMalformedClosurePreserved": true,
+  "CClosureEvidence": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/thin-preparation01/nft-out-of-scope-blocker01.json",
+    "bytes": 16903357,
+    "sha256": "0599dd526a1166c095364ed924ebe6f53b43e5e1d3a12d163be2b45d7b80712d"
+  },
+  "node208CarriedWithIdenticalProductAndTestInputs": true
+}

@@ -1,0 +1,170 @@
+{
+  "owner": "Root",
+  "tabId": "1",
+  "browserId": "2",
+  "url": "http://127.0.0.1:19205/",
+  "readOnlyDomObservations": true,
+  "productGlobalsRead": false,
+  "wasmGlobalsRead": false,
+  "viewportOverride": false,
+  "cacheCleared": false,
+  "forcedFocus": false,
+  "networkDomainsEnabled": false,
+  "privateCredentialsCaptured": false,
+  "stages": [
+    {
+      "stage": "ordinary-first-Access-immediate",
+      "observedAt": "2026-10-11T23:53:07.454Z",
+      "dom": {
+        "canvas": {
+          "className": "shared-quest-ui-visible",
+          "maskImage": "none",
+          "pointerEvents": "auto",
+          "rect": {
+            "height": 483,
+            "width": 644,
+            "x": 1,
+            "y": 173
+          },
+          "visibility": "visible",
+          "webkitMaskImage": ""
+        },
+        "loginPasswordVisible": false,
+        "reactCandleButtonCount": 0,
+        "storage": {
+          "owner": "bevy",
+          "phase": "active",
+          "reason": null
+        }
+      }
+    },
+    {
+      "stage": "native-Candle-Cancel-empty-target",
+      "observedAt": "2026-10-11T23:54:12.425Z",
+      "dom": {
+        "maskImage": "none",
+        "reactCandleButtonCount": 0,
+        "storage": {
+          "owner": "bevy",
+          "phase": "active",
+          "reason": null
+        }
+      }
+    },
+    {
+      "stage": "native-Store",
+      "observedAt": "2026-10-11T23:54:24.701Z",
+      "actions": [
+        "Canvas Candle slot2",
+        "Canvas Storage slot0"
+      ],
+      "inventoryAndStorageFromScreenshot": true
+    },
+    {
+      "stage": "stored-relogin-NPC-locator-deadline",
+      "observedAt": "2026-10-11T23:57:09.587Z",
+      "ordinaryNpcLocatorUnavailableWithinToolDeadline": true,
+      "noRepeatClickBeforeFreshObservation": true
+    },
+    {
+      "stage": "stored-relogin-fast-Access",
+      "observedAt": "2026-10-11T23:57:30.827Z",
+      "dom": {
+        "canvas": {
+          "maskImage": "url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%20768%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20fill%3D%22white%22%20fill-rule%3D%22evenodd%22%20d%3D%22M0%200H1024V768H0Z%20M147%2024H877V62H147Z%20M147%2072H465V418H147Z%20M489%2072H877V418H489Z%22%2F%3E%3C%2Fsvg%3E\")",
+          "pointerEvents": "auto",
+          "visibility": "visible",
+          "webkitMaskImage": ""
+        },
+        "loginPasswordVisible": false,
+        "reactCandleButtonCount": 0,
+        "storage": {
+          "owner": "react",
+          "phase": "prepare",
+          "reason": "statusUnavailable"
+        }
+      }
+    },
+    {
+      "stage": "stored-relogin-native-active",
+      "observedAt": "2026-10-11T23:58:07.489Z",
+      "dom": {
+        "canvas": {
+          "className": "shared-quest-ui-visible",
+          "maskImage": "none",
+          "pointerEvents": "auto",
+          "rect": {
+            "height": 483,
+            "width": 644,
+            "x": 1,
+            "y": 173
+          },
+          "visibility": "visible",
+          "webkitMaskImage": ""
+        },
+        "reactCancelButtonCount": 0,
+        "reactTakeBackButtonCount": 0,
+        "storage": {
+          "owner": "bevy",
+          "phase": "active",
+          "reason": null
+        }
+      }
+    },
+    {
+      "stage": "native-TakeBack",
+      "observedAt": "2026-10-11T23:58:38.664Z",
+      "actions": [
+        "Canvas Storage slot0",
+        "Canvas Bag empty slot2"
+      ],
+      "inventoryAndStorageFromScreenshot": true
+    },
+    {
+      "stage": "restored-relogin-fast-Access",
+      "observedAt": "2026-10-12T00:01:45.339Z",
+      "dom": {
+        "canvas": {
+          "maskImage": "url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%20768%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20fill%3D%22white%22%20fill-rule%3D%22evenodd%22%20d%3D%22M0%200H1024V768H0Z%20M147%2024H877V62H147Z%20M147%2072H465V418H147Z%20M489%2072H877V418H489Z%22%2F%3E%3C%2Fsvg%3E\")",
+          "pointerEvents": "auto",
+          "visibility": "visible",
+          "webkitMaskImage": ""
+        },
+        "storage": {
+          "owner": "react",
+          "phase": "prepare",
+          "reason": "controlsNotReady"
+        }
+      }
+    },
+    {
+      "stage": "restored-relogin-native-active",
+      "observedAt": "2026-10-12T00:03:00.242Z",
+      "dom": {
+        "canvas": {
+          "className": "shared-quest-ui-visible",
+          "maskImage": "none",
+          "pointerEvents": "auto",
+          "rect": {
+            "height": 483,
+            "width": 644,
+            "x": 1,
+            "y": 173
+          },
+          "visibility": "visible",
+          "webkitMaskImage": ""
+        },
+        "loginPasswordVisible": false,
+        "reactCancelButtonCount": 0,
+        "reactTakeBackButtonCount": 0,
+        "storage": {
+          "owner": "bevy",
+          "phase": "active",
+          "reason": null
+        }
+      }
+    }
+  ],
+  "candidateAccepted": false,
+  "goalComplete": false
+}

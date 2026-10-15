@@ -1,0 +1,182 @@
+{
+  "schema": "mir2.r16.sabuk-release.v1",
+  "passed": true,
+  "completedUtc": "2026-10-03T08:39:15.022104+00:00",
+  "candidate": "WN-CANDIDATE-20261003-invited-16",
+  "sequence": 11,
+  "gameSourceRevision": "5ec7e7227833e5caacc31957902ca3b9f9fd4d0a",
+  "deliverySourceRevision": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+  "sourcePushed": true,
+  "selectedMode": "Classic(3)/Request(0)",
+  "siegeTime": "18:00-18:30 UTC+08:00 daily",
+  "gatewayDeployed": true,
+  "legacyAutomaticUpdatePublished": true,
+  "cdnR2Promoted": false,
+  "ci": {
+    "url": "https://github.com/Zombieliu/mir2/actions/runs/37104864228",
+    "passed": true,
+    "isolatedPostgresConquestCasPassed": 1,
+    "simulationConquestPassed": 95,
+    "domainPassed": 29,
+    "gatewayConquestPassed": 13,
+    "liveTcpWebSocketFlowPassed": 1
+  },
+  "server": {
+    "binarySha256": "7a8b7305d7f5b748d81e502683a4f5d6580cfecbe5bf87cf8462b930224f690f",
+    "previousRevision": "dfe21643b83e4fe4c484c3c72ae9495059d1777c",
+    "pid": "2563610",
+    "normalShutdownExitCode": 0,
+    "conquestClockErrors": 0,
+    "defenseCount": 16,
+    "sharedClockLeaseObserved": true,
+    "backupDirectory": "/var/backups/mir2-playtest-before-5ec7e7227833e5caacc31957902ca3b9f9fd4d0a",
+    "databaseDumpSha256": "04ec91898081c5ecb78083c046b95f342f17d3d92309b4dad7187d71b90146e4",
+    "capacity": {
+      "maxWsConnections": 66,
+      "maxActiveSessions": 51,
+      "maxReconnectLeases": 51,
+      "maxLoginInFlight": 2,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "configurationHashesUnchanged": true,
+    "originalRealmPidUnchanged": "3855184"
+  },
+  "publicHttpChecksPassed": 19,
+  "installerDownloadChecksPassed": 3,
+  "bootstrapInstaller": {
+    "sha256": "9D142E9E79B76ED3AA069ECD40EF3742BAC2A7A7EF7112A8B7976A3D3B9A4CEE",
+    "sizeBytes": 27481889,
+    "publicAuthenticode": "NotSigned",
+    "path": "C:\\mir2-playtest-releases\\20261003-native-r16\\bootstrap-01\\artifacts\\Numeron-Legend-of-Rebirth-20261003-r16-Bootstrap.exe",
+    "url": "https://165.154.65.136.sslip.io/client-updates/releases/bootstrap-WN-CANDIDATE-20261003-invited-16/Numeron-Legend-of-Rebirth-20261003-r16-Bootstrap.exe",
+    "includesMicrosoftRuntime": true,
+    "payloadAlreadyIncluded": false,
+    "published": true,
+    "tlsVerified": true,
+    "rangeVerified": true,
+    "completeHttpBodyHashVerified": true
+  },
+  "fullOfflineInstaller": {
+    "path": "C:\\mir2-playtest-releases\\20261003-native-r16\\Numeron-Legend-of-Rebirth-20261003-r16-Setup.exe",
+    "sha256": "01EAD082F999C494CB56E0C7E4731E1CF9C266E0A98F2638A9677A27F37FE5F5",
+    "publicAuthenticode": "NotSigned",
+    "sizeBytes": 617787960,
+    "published": false
+  },
+  "updaterEngineSha256": "FB3505D6D84D997CDBCEF17F986A39B930C3FCE5D108CA9831D90C5F69B16734",
+  "mapCoverage": {
+    "count": 32,
+    "newMaps": [
+      "0122",
+      "0150",
+      "0151",
+      "0152",
+      "0153",
+      "0154",
+      "0155"
+    ],
+    "wholeWorldClaimed": false
+  },
+  "installedUserClientTouched": false,
+  "installedUserClientAcceptance": false,
+  "actualR15ToR16InstalledUpdateProven": false,
+  "freshBootstrapInstalledProven": false,
+  "humanSiegeGameplayAccepted": false,
+  "wholeGameParityAccepted": false,
+  "publicAuthenticodeTrusted": false,
+  "deferredLocalReason": "User requested preserving F:/mir2/Mir2Invite while another game holds files",
+  "retainedFailedAttempts": {
+    "privateOldUpdater": "Detected before upload/publish/install; replaced by frozen 4c60 delivery build",
+    "firstSharePublish": "Refused group-writable SFTP input; only the exact private SHA-verified upload was restricted to 0600 before successful retry"
+  },
+  "proofRoot": "C:\\mir2-playtest-releases\\20261003-native-r16",
+  "proofs": [
+    {
+      "relativePath": "gateway-apply-01.log",
+      "sizeBytes": 2016,
+      "sha256": "3b364342c19bbbc30406cad36132e10c68c6aefe3bc7698aeedf37f9345a9e72"
+    },
+    {
+      "relativePath": "read-live-conquest-01.log",
+      "sizeBytes": 573,
+      "sha256": "641c8450551d4b9daeaebb6cf5c7f789c3c92fe0210fac965d9b8247fd0ad060"
+    },
+    {
+      "relativePath": "PUBLIC-TLS-PUBLICATION-VERIFICATION-01.json",
+      "sizeBytes": 9719,
+      "sha256": "f3dd74c586be51bf8616600576f4d36168e6ed217daf91fbd018fc99a08487bd"
+    },
+    {
+      "relativePath": "SIGNED-R16-RESOURCE-INPUTS-01.json",
+      "sizeBytes": 1499,
+      "sha256": "571aa0708beb3ad56cfcb8b685517bc00e3bd2e8539466ab48538ae3306797c6"
+    },
+    {
+      "relativePath": "updater-delivery-02/UPDATER-BUNDLE-VERIFICATION.json",
+      "sizeBytes": 592,
+      "sha256": "e20a8ef71b974b09918141f7569abd3fbbeb7d2ba9bc7440fd15b3d71f6353b5"
+    },
+    {
+      "relativePath": "installer-delivery-02/BUILD-FULL-INSTALLER.json",
+      "sizeBytes": 1513,
+      "sha256": "fc5f9816b6e62dee2af67183d40f7bc7ac6280bf693d9ec5655ed9d79b38ff83"
+    },
+    {
+      "relativePath": "bootstrap-01/BUILD-BOOTSTRAP.json",
+      "sizeBytes": 1783,
+      "sha256": "0503be362f1f77cb2d0e3e3b07bd54b7cf31ec4d6e1d2f2505cdc5f236b95523"
+    },
+    {
+      "relativePath": "bootstrap-01/canonical-verifier-source-closure.json",
+      "sizeBytes": 2745,
+      "sha256": "456fdc27f9020d8939c37f3d6b3f54d546a6f0cbd30bd9c3a422c3a3533012ce"
+    },
+    {
+      "relativePath": "SHARE-PUBLIC-VERIFICATION-01.json",
+      "sizeBytes": 1110,
+      "sha256": "004472462013bb94e5006a3dc7e803748b96a326aadc7e2d7dfd4f3274b748fa"
+    },
+    {
+      "relativePath": "share-publish-02.log",
+      "sizeBytes": 477,
+      "sha256": "480fedcc239a4e1fd25c1e1054afc27b2e439fcdcfe89f8665ad5ac9ebe68a77"
+    },
+    {
+      "relativePath": "server-ci/operator-verification.json",
+      "sizeBytes": 550,
+      "sha256": "830ed4364ebef062affec8a7d2f00a694309b5ebc148be5794b5a7a299839422"
+    },
+    {
+      "relativePath": "deployment/LOCAL-PREPARATION-01.json",
+      "sizeBytes": 1061,
+      "sha256": "54b57820fe10beac54fa7f162f05b3ab195b0d9bb735fec90f72107c7c08bb8d"
+    },
+    {
+      "relativePath": "deployment/apply-01.log",
+      "sizeBytes": 3469,
+      "sha256": "cf6904911f052613b700adb940f3f9e5db5ed85f2fe7b3005d9cfb236505b554"
+    },
+    {
+      "relativePath": "UNPUBLISHED-OLDER-UPDATER-01.json",
+      "sizeBytes": 762,
+      "sha256": "ad879b6ffb73f11dc67ec5e1de99089f3a44385b1c79b1b6bc62b2d4828cb3cb"
+    },
+    {
+      "relativePath": "share-publish-01.log",
+      "sizeBytes": 25,
+      "sha256": "a9a3a7175a0b611b0631ccf048de6976a1510c52e0bb9ffbe00ff5cfef7500b1"
+    },
+    {
+      "relativePath": "share-restrict-upload-01.log",
+      "sizeBytes": 49,
+      "sha256": "ec75eb045620a5a4b106b2dcac339af35d15c895dfed6c7ccd7b00a1417331b2"
+    }
+  ]
+}

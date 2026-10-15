@@ -1,0 +1,235 @@
+{
+  "source": "Wizard.2026-09-17T12-18-15-467Z.trace.jsonl",
+  "sourceCapturedBytes": 100353780,
+  "sourceCapturedSha256": "DE3B96F94CF4AD2A939F7399857D3A02484590F6EEC18DF673A109033357483A",
+  "lastCapturedAt": "2026-09-17T14:33:13.987Z",
+  "definition": {
+    "questId": 113,
+    "rewards": {
+      "gold": 12500,
+      "experience": 544444,
+      "credit": 0,
+      "fixedItems": [],
+      "selectableItems": [],
+      "profileOverrides": []
+    }
+  },
+  "readySnapshot": {
+    "sequence": 45595,
+    "at": "2026-09-17T14:08:39.768Z",
+    "ownerId": 1000,
+    "name": "JWdebac6d4",
+    "class": "Wizard",
+    "level": 26,
+    "map": "D711",
+    "x": 216,
+    "y": 177,
+    "hp": 105,
+    "mp": 129,
+    "gold": 172,
+    "playerExperience": 73650,
+    "quest": {
+      "current": 6,
+      "objective": "Return to the quest NPC and hand in the task.",
+      "objectives": [
+        {
+          "current": 3,
+          "done": true,
+          "label": "Kill BlackMaggot",
+          "required": 3
+        },
+        {
+          "current": 3,
+          "done": true,
+          "label": "Kill WedgeMoth",
+          "required": 3
+        }
+      ],
+      "progressLabel": "Ready to turn in.",
+      "questId": 113,
+      "required": 6,
+      "rewardPreview": "EXP 544444, Gold 12500",
+      "stage": "readyToTurnIn",
+      "summary": "Hello. There are to many Insects in",
+      "title": "Insomnia",
+      "tracker": "Return to NPC 0."
+    }
+  },
+  "finishRequest": {
+    "sequence": 45596,
+    "at": "2026-09-17T14:08:39.789Z",
+    "type": "finishQuest",
+    "questIndex": 113,
+    "selectedItemIndex": -1
+  },
+  "beforeFinish": {
+    "ownerId": 1000,
+    "name": "JWdebac6d4",
+    "class": "Wizard",
+    "level": 26,
+    "map": "D711",
+    "x": 216,
+    "y": 177,
+    "hp": 105,
+    "mp": 129,
+    "gold": 172,
+    "playerExperience": 73650,
+    "quest": {
+      "current": 6,
+      "objective": "Return to the quest NPC and hand in the task.",
+      "objectives": [
+        {
+          "current": 3,
+          "done": true,
+          "label": "Kill BlackMaggot",
+          "required": 3
+        },
+        {
+          "current": 3,
+          "done": true,
+          "label": "Kill WedgeMoth",
+          "required": 3
+        }
+      ],
+      "progressLabel": "Ready to turn in.",
+      "questId": 113,
+      "required": 6,
+      "rewardPreview": "EXP 544444, Gold 12500",
+      "stage": "readyToTurnIn",
+      "summary": "Hello. There are to many Insects in",
+      "title": "Insomnia",
+      "tracker": "Return to NPC 0."
+    }
+  },
+  "finishReceipts": [
+    {
+      "sequence": 45597,
+      "at": "2026-09-17T14:08:40.442Z",
+      "packet": "ChangeQuest",
+      "publicEvent": {
+        "completed": true,
+        "current": null,
+        "descriptionLines": [],
+        "id": 113,
+        "new": false,
+        "objectives": [],
+        "questId": 113,
+        "questState": 2,
+        "required": null,
+        "state": 2,
+        "taken": false,
+        "taskList": [],
+        "trackQuest": false
+      }
+    },
+    {
+      "sequence": 45598,
+      "at": "2026-09-17T14:08:40.442Z",
+      "packet": "CompleteQuest",
+      "publicEvent": {
+        "completedQuests": [
+          1,
+          2,
+          3,
+          5,
+          6,
+          10,
+          11,
+          12,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          35,
+          33,
+          29,
+          30,
+          36,
+          37,
+          49,
+          39,
+          2100015,
+          40,
+          41,
+          42,
+          51,
+          52,
+          53,
+          54,
+          60,
+          61,
+          65,
+          2100020,
+          62,
+          50,
+          83,
+          86,
+          87,
+          88,
+          97,
+          98,
+          99,
+          102,
+          103,
+          2100025,
+          110,
+          111,
+          112,
+          89,
+          113
+        ]
+      }
+    }
+  ],
+  "completedSnapshot": {
+    "sequence": 45599,
+    "at": "2026-09-17T14:08:40.521Z",
+    "ownerId": 1000,
+    "name": "JWdebac6d4",
+    "class": "Wizard",
+    "level": 26,
+    "map": "D711",
+    "x": 216,
+    "y": 177,
+    "hp": 105,
+    "mp": 129,
+    "gold": 12672,
+    "playerExperience": 618094,
+    "quest": {
+      "current": 6,
+      "objective": "Quest completed.",
+      "objectives": [
+        {
+          "current": 3,
+          "done": true,
+          "label": "Kill BlackMaggot",
+          "required": 3
+        },
+        {
+          "current": 3,
+          "done": true,
+          "label": "Kill WedgeMoth",
+          "required": 3
+        }
+      ],
+      "progressLabel": "Completed.",
+      "questId": 113,
+      "required": 6,
+      "rewardPreview": "EXP 544444, Gold 12500",
+      "stage": "completed",
+      "summary": "Hello. There are to many Insects in",
+      "title": "Insomnia",
+      "tracker": "Insomnia completed."
+    }
+  },
+  "observedRewardGold": 12500,
+  "observedRewardExperience": 544444,
+  "mandatoryCompleted": 47,
+  "milestonesCompleted": 3,
+  "aggregateCompleted": 158,
+  "aggregateRequired": 177,
+  "routeCompleted": false,
+  "visualAccepted": false
+}

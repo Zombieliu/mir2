@@ -1,0 +1,176 @@
+{
+  "schema": "mir2.original-health-evidence-archive.v1",
+  "parent": "937ac636c7118565f53e0ed90f280f166e63b12c",
+  "originalEvidenceBytesRetained": true,
+  "rootProof": "ROOT-FINAL-05.json",
+  "files": [
+    {
+      "file": "BASELINE-SOURCE-05.json",
+      "bytes": 744093,
+      "sha256": "75afa9e3474a87900a1ff60b3d059d3623dd1ea79dc904083c2eccd171ffee2b"
+    },
+    {
+      "file": "README.md",
+      "bytes": 3358,
+      "sha256": "74506e055c5915481b1c8e9108ea42be1b04a691fdc27d05d6b6c2c73c978c5a"
+    },
+    {
+      "file": "ROOT-FINAL-05.json",
+      "bytes": 21726,
+      "sha256": "f9075155a9343297c1306d5b4de41be31e2e35aef7424a76b05da8d02134ade6"
+    },
+    {
+      "file": "evidence-builder.py",
+      "bytes": 8520,
+      "sha256": "4b501f6bd5fac5952592028c938657ff811e12509dead18d6179b4c7a82264c7"
+    },
+    {
+      "file": "health-zero-authority-root-05-01-session-red.log",
+      "bytes": 36977,
+      "sha256": "ddd6e7f8c6a8f164ce09ea226c5547cead4cfd7895f2eed393cfb7cb533edda0"
+    },
+    {
+      "file": "health-zero-authority-root-05-02-session-green.log",
+      "bytes": 31127,
+      "sha256": "252c59e190f68fa7b545b51956e0c6b125e6484eb69081fa97f73fa4d57df10d"
+    },
+    {
+      "file": "health-zero-authority-root-05-03-source-math-red.log",
+      "bytes": 40484,
+      "sha256": "c57b834684b43c827115b4600dcb707a2446b0ccc3c47e557dfb9e94176c5596"
+    },
+    {
+      "file": "health-zero-authority-root-05-04-source-math-green.log",
+      "bytes": 38948,
+      "sha256": "80d103674ba1740c84f24a0465669cbe9bc7557c2ed37843033901d7199a214c"
+    },
+    {
+      "file": "health-zero-authority-root-05-05-session-harvest-green.log",
+      "bytes": 31195,
+      "sha256": "7cae7c24556e16e2f30e7ff5406cf3da92cd12767c3472da143a52943d7768aa"
+    },
+    {
+      "file": "health-zero-authority-root-05-06-source-math-final.log",
+      "bytes": 38948,
+      "sha256": "8832c513092576a0d06f2c9cdae8f360b425c0b9d7dec6c3a258df1bc6315c82"
+    },
+    {
+      "file": "health-zero-authority-root-05-07-zone-death-authority.log",
+      "bytes": 38924,
+      "sha256": "c270b05f00667e646025c2cd0cf3b5fb15177cfc257f5ef9c2a224687b9aefc3"
+    },
+    {
+      "file": "health-zero-authority-root-05-08-zone-revival.log",
+      "bytes": 38178,
+      "sha256": "3e176d0312b357518d3e435372785e2060259ac7ea64df4279957e21d5179c11"
+    },
+    {
+      "file": "health-zero-authority-root-05-09-zone-special-ai.log",
+      "bytes": 38178,
+      "sha256": "5c48ad5cc17435adcd715bff4d1c6a1c1186614458f55c6d82b720f64a90c1e4"
+    },
+    {
+      "file": "health-zero-authority-root-05-10-personal-revelation.log",
+      "bytes": 38275,
+      "sha256": "6e76c2a644052df149c05b95cc0f27b916d020c948ae10bd98d87c71d94b6733"
+    },
+    {
+      "file": "health-zero-authority-root-05-11-real-zone-revival.log",
+      "bytes": 87753,
+      "sha256": "baa25f6ec7a2d1000e19809187dbf6f98c55fa6fa430d88c7e5347fb7fd746f7"
+    },
+    {
+      "file": "health-zero-authority-root-05-12-real-zone-special-ai.log",
+      "bytes": 32556,
+      "sha256": "2ef0e283431b84a728ae9e1cc32f95f9a2e26359280885da0c77a148b7cd250a"
+    },
+    {
+      "file": "health-zero-authority-root-05-13-personal-monster-mirror.log",
+      "bytes": 31327,
+      "sha256": "4dc3648b088727080b7dc4efce8eabc6cf7edf8016f5dd0574643ab01244c9fe"
+    },
+    {
+      "file": "health-zero-authority-root-05-14-shared-player-settlement.log",
+      "bytes": 32434,
+      "sha256": "0430231ac14325f90c15022dd0a224f66eb8ca9b2ae698061aaccb4ca34ce70f"
+    },
+    {
+      "file": "health-zero-authority-root-05-15-gateway-party.log",
+      "bytes": 39377,
+      "sha256": "165e2d8dd15a6c88fd97b6bfa6c904d91de81e5619bd779dda9b40c42a69f1f1"
+    },
+    {
+      "file": "health-zero-authority-root-05-16-gateway-low-health-transport.log",
+      "bytes": 32504,
+      "sha256": "7fa236f0a354456c5d322fb5e6606bfbfa525c72211b5df44d4282cc4eb1b03f"
+    },
+    {
+      "file": "health-zero-authority-root-05-17-gateway-monster-projection.log",
+      "bytes": 31872,
+      "sha256": "62ddd70ee09adc0afb2881a2b305b398437af02138d11703312f53f0c8e9ddc5"
+    },
+    {
+      "file": "health-zero-authority-root-05-18-baseline-zone-revival.log",
+      "bytes": 11044,
+      "sha256": "b9a2b7ae8b538e8e9f06d90e4dec9f982b5dfe1497cba42b0693e0d1f1bc4626"
+    },
+    {
+      "file": "health-zero-authority-root-05-19-baseline-zone-special-ai.log",
+      "bytes": 11044,
+      "sha256": "b9a2b7ae8b538e8e9f06d90e4dec9f982b5dfe1497cba42b0693e0d1f1bc4626"
+    },
+    {
+      "file": "health-zero-authority-root-05-20-baseline-player-settlement.log",
+      "bytes": 11044,
+      "sha256": "b9a2b7ae8b538e8e9f06d90e4dec9f982b5dfe1497cba42b0693e0d1f1bc4626"
+    },
+    {
+      "file": "health-zero-authority-root-05-21-baseline-zone-revival-retry.log",
+      "bytes": 87709,
+      "sha256": "a831b8faf3bc6a2400c4cb1bf5505ee86b4d6cf7fa5e0f307aa4e5129a390d74"
+    },
+    {
+      "file": "health-zero-authority-root-05-22-baseline-zone-special-ai-retry.log",
+      "bytes": 32521,
+      "sha256": "d0289121a7c76efc976e26fcb1179df48765959ec9e6b2f6f9c0cdb32d81244e"
+    },
+    {
+      "file": "health-zero-authority-root-05-23-baseline-player-settlement-retry.log",
+      "bytes": 32399,
+      "sha256": "21c364a9e106227f5f580b527798e2c7e7d30cc6fa696db6f44d4db8e133ef74"
+    },
+    {
+      "file": "health-zero-authority-root-05-24-added-format.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "health-zero-authority-root-05-live-observation.json",
+      "bytes": 823,
+      "sha256": "3f9b635e1c158e9f169242b6d3109bd40643ca202fe94426104773ebfee3fdf7"
+    },
+    {
+      "file": "r22-gateway-preflight-root-20261008-0839-01.log",
+      "bytes": 146,
+      "sha256": "654638ac219b50c27e71c783dbe5f8c9bed7a25f6ebaa50908a01346f9b0aac1"
+    },
+    {
+      "file": "read-only-review-root-recorded.txt",
+      "bytes": 1008,
+      "sha256": "5d6ab551de21ea69280944a89b54dec4d55ac90a323e95aa77f11aa8c51a0afe"
+    },
+    {
+      "file": "source-vectors.cs",
+      "bytes": 1166,
+      "sha256": "9c5e84a7843e99ff5c1efba838e398eed28b744550ccc3100681547d1cf0374e"
+    },
+    {
+      "file": "source-vectors.csv",
+      "bytes": 383,
+      "sha256": "ceec2bdca56b4ba49ee02ef62ec9940dbaff15af60768518bde3cdb6bbb81b57"
+    }
+  ],
+  "archiveSelfHashExcluded": true,
+  "humanAccepted": false,
+  "deployed": false
+}

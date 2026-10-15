@@ -1,0 +1,60 @@
+{
+  "recordedAtUtc": "2026-10-15T16:19:22.173784+00:00",
+  "sourceBaseCommit": "56ee8627937387782547df9f1270245c18ba42fc",
+  "fixture": "mir2-web3/apps/gateway/tests/vertical_slice_gateway_persistence.rs",
+  "fixtureSha256": "3e5bad3cf784f9124c5062b8621813a7651df044aec1700d0dfb09464bc2cfe6",
+  "changes": "Test-only wall-clock action scheduling and accepted-owner receipt observation; production simulation/gateway code unchanged.",
+  "command": "MIR2_QA_NATURAL_MOVEMENT_DELAY_MS=10 cargo +1.95.0 test --locked --manifest-path mir2-web3/apps/gateway/Cargo.toml --test vertical_slice_gateway_persistence -- --test-threads=1",
+  "before": {
+    "log": "gateway-vertical-persistence-final01.txt",
+    "passed": 3,
+    "failed": 2,
+    "ignored": 0,
+    "durationSeconds": 376.67,
+    "logSha256": "17527be629333e277ec0f0a31165d6d5db673beb3edb584ee4a2424715c38384"
+  },
+  "after": {
+    "log": "gateway-vertical-persistence-final02.txt",
+    "passed": 5,
+    "failed": 0,
+    "ignored": 0,
+    "durationSeconds": 194.4,
+    "logSha256": "7752468da811f31690b65036073fc6f67f16714c45e332b6495dd3086e1b7625"
+  },
+  "focusedStarter": {
+    "log": "gateway-starter-action-timing02.txt",
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "durationSeconds": 17.56,
+    "logSha256": "e702967e350c8a54e90b10055b633fe6dedaaece3f79a55509b43d9f5dfc891c"
+  },
+  "boundsPreserved": {
+    "attackAttempts": 80,
+    "starterAttempts": 600,
+    "harvestPasses": 54,
+    "acceptedNoDamageSwings": 12
+  },
+  "allOriginalEndStateAssertionsPreserved": true,
+  "newAssertions": [
+    "accepted owner ObjectAttack receipt"
+  ],
+  "coreRelease": {
+    "sourceSha256": "46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620",
+    "verification": "node mir2-web3/apps/web/scripts/build-client-core.mjs --verify",
+    "exitCode": 0,
+    "wasmBytes": [
+      250070,
+      262089,
+      165835
+    ],
+    "recompiled": false
+  },
+  "format": {
+    "command": "rustfmt +1.89.0 --check mir2-web3/apps/gateway/tests/vertical_slice_gateway_persistence.rs",
+    "exitCode": 0
+  },
+  "remoteQualification": "Final commit CI/merge status remains authoritative on PR255; parent56ee CI results are not retagged to this fixture revision.",
+  "deployed": false,
+  "candidate100": false
+}

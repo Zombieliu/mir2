@@ -451,12 +451,16 @@ pub fn run_gate11_acceptance() -> Result<Gate11AcceptanceEvidence, String> {
     let replicated_drop_snapshot = session.world_snapshot();
     let replicated_drop = replicated_drop_snapshot
         .ground_drops
-        .into_iter()
+        .iter()
         .find(|drop| drop.name == replicated_item.name)
+        .cloned()
         .ok_or_else(|| {
             format!(
-                "target-Zone replicated drop {} is missing: playerHp={:?}, packets={:?}",
-                replicated_item.name, replicated_drop_snapshot.player_hp, replicated_drop_packets
+                "target-Zone replicated drop {} is missing: playerHp={:?}, packets={:?}, map={:?}, self={:?}, ground={:?}",
+                replicated_item.name, replicated_drop_snapshot.player_hp, replicated_drop_packets,
+                replicated_drop_snapshot.map_file_name,
+                replicated_drop_snapshot.entities.iter().find(|e| e.kind == WorldEntityKind::SelfPlayer),
+                replicated_drop_snapshot.ground_drops
             )
         })?;
     session.transfer_map(&format!(

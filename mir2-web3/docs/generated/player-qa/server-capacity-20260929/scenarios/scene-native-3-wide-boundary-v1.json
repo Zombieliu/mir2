@@ -1,0 +1,92 @@
+{
+  "mapFileName": "0",
+  "anchors": [
+    {
+      "x": 274,
+      "y": 561
+    },
+    {
+      "x": 290,
+      "y": 561
+    },
+    {
+      "x": 282,
+      "y": 561
+    }
+  ],
+  "patrolSpan": 4,
+  "generated": {
+    "staticOnly": true,
+    "accepted": false,
+    "purpose": "Three ordinary 5x5 patrols: keep the original AOI edge pair and add a bridge for real nearby chat and movement observations",
+    "originalTwoSceneSha256": "64b49b25f154a42cf916be60062b7152adfafb834ce42dee6c66261b992a2ac0",
+    "routeProofs": [
+      {
+        "origin": {
+          "x": 275,
+          "y": 560
+        },
+        "footprintCells": 75,
+        "routeCells": [
+          2,
+          16,
+          8
+        ]
+      },
+      {
+        "origin": {
+          "x": 293,
+          "y": 616
+        },
+        "footprintCells": 75,
+        "routeCells": [
+          59,
+          59,
+          59
+        ]
+      }
+    ],
+    "pairGeometry": [
+      {
+        "actors": [
+          0,
+          1
+        ],
+        "minimum": 12,
+        "maximum": 20,
+        "patrolPointPairs": 64,
+        "withinChat8": 0,
+        "withinMovement6": 0
+      },
+      {
+        "actors": [
+          0,
+          2
+        ],
+        "minimum": 4,
+        "maximum": 12,
+        "patrolPointPairs": 64,
+        "withinChat8": 43,
+        "withinMovement6": 21
+      },
+      {
+        "actors": [
+          1,
+          2
+        ],
+        "minimum": 4,
+        "maximum": 12,
+        "patrolPointPairs": 64,
+        "withinChat8": 43,
+        "withinMovement6": 21
+      }
+    ],
+    "collisionSha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5",
+    "driverSha256": "3b0304d3f08eac672b5e8e1722eb48ef845f3c738b3636434e903a55bc91915e",
+    "limitations": [
+      "No measurement gates changed; the prior two-actor failed report is retained.",
+      "Static geometric eligibility is not a promise of live chat evidence: patrol phase and real dynamic occupancy remain authoritative.",
+      "No combat, registration burst, sustained capacity or native rendering acceptance."
+    ]
+  }
+}

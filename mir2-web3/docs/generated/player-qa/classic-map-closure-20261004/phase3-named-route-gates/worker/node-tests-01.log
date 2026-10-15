@@ -1,0 +1,208 @@
+TAP version 13
+# Subtest: actual v27 data binds208 runtime maps, all76 main directed hops and correct nested Boss DropPaths
+ok 1 - actual v27 data binds208 runtime maps, all76 main directed hops and correct nested Boss DropPaths
+  ---
+  duration_ms: 1.0825
+  type: 'test'
+  ...
+# Subtest: legacy compatibility fails closed on changedraw source proof
+ok 2 - legacy compatibility fails closed on changedraw source proof
+  ---
+  duration_ms: 0.258
+  type: 'test'
+  ...
+# Subtest: legacy compatibility fails closed on changedparsed source proof
+ok 3 - legacy compatibility fails closed on changedparsed source proof
+  ---
+  duration_ms: 0.1078
+  type: 'test'
+  ...
+# Subtest: legacy compatibility fails closed on changedpath source proof
+ok 4 - legacy compatibility fails closed on changedpath source proof
+  ---
+  duration_ms: 0.07
+  type: 'test'
+  ...
+# Subtest: legacy compatibility fails closed on changedkey source proof
+ok 5 - legacy compatibility fails closed on changedkey source proof
+  ---
+  duration_ms: 0.0756
+  type: 'test'
+  ...
+# Subtest: legacy compatibility fails closed on changedcondition source proof
+ok 6 - legacy compatibility fails closed on changedcondition source proof
+  ---
+  duration_ms: 0.0722
+  type: 'test'
+  ...
+# Subtest: only declared normal endpoints, finite deadlines and natural kill budgets are accepted
+ok 7 - only declared normal endpoints, finite deadlines and natural kill budgets are accepted
+  ---
+  duration_ms: 0.3448
+  type: 'test'
+  ...
+# Subtest: paired revision, exact actual data hashes and unchanged QA configuration are mandatory
+ok 8 - paired revision, exact actual data hashes and unchanged QA configuration are mandatory
+  ---
+  duration_ms: 0.284
+  type: 'test'
+  ...
+# Subtest: ordinary command allowlist excludes admin/public raw warp paths
+ok 9 - ordinary command allowlist excludes admin/public raw warp paths
+  ---
+  duration_ms: 0.2849
+  type: 'test'
+  ...
+# Subtest: transport redacts nested credentials without changing actual sent login payload
+ok 10 - transport redacts nested credentials without changing actual sent login payload
+  ---
+  duration_ms: 10.7176
+  type: 'test'
+  ...
+# Subtest: prepared hop controller requires fresh live transfer, actual map packet and exact landing
+ok 11 - prepared hop controller requires fresh live transfer, actual map packet and exact landing
+  ---
+  duration_ms: 1.0554
+  type: 'test'
+  ...
+# Subtest: NPC matching rejects template-only, stale, wrong-kind/id/position and unexposed link
+ok 12 - NPC matching rejects template-only, stale, wrong-kind/id/position and unexposed link
+  ---
+  duration_ms: 0.238
+  type: 'test'
+  ...
+# Subtest: unpicked or prepared/vendor book cannot be credited as a naturally acquired use
+ok 13 - unpicked or prepared/vendor book cannot be credited as a naturally acquired use
+  ---
+  duration_ms: 0.175
+  type: 'test'
+  ...
+# Subtest: complete synthetic receipt structure is accepted only in its bounded lane, never fresh levels/whole world/native
+ok 14 - complete synthetic receipt structure is accepted only in its bounded lane, never fresh levels/whole world/native
+  ---
+  duration_ms: 4.8887
+  type: 'test'
+  ...
+# Subtest: transition-implied source position remains pending instead of claiming direct source authority
+ok 15 - transition-implied source position remains pending instead of claiming direct source authority
+  ---
+  duration_ms: 2.4458
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectssource-hash false acceptance
+ok 16 - receipt verifier rejectssource-hash false acceptance
+  ---
+  duration_ms: 1.9841
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsstatic-hop false acceptance
+ok 17 - receipt verifier rejectsstatic-hop false acceptance
+  ---
+  duration_ms: 1.9222
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsstale-hop false acceptance
+ok 18 - receipt verifier rejectsstale-hop false acceptance
+  ---
+  duration_ms: 1.8628
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsduplicate-hop false acceptance
+ok 19 - receipt verifier rejectsduplicate-hop false acceptance
+  ---
+  duration_ms: 2.1888
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectswrong-position false acceptance
+ok 20 - receipt verifier rejectswrong-position false acceptance
+  ---
+  duration_ms: 2.3587
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsno-intent false acceptance
+ok 21 - receipt verifier rejectsno-intent false acceptance
+  ---
+  duration_ms: 1.8867
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsmissing-save false acceptance
+ok 22 - receipt verifier rejectsmissing-save false acceptance
+  ---
+  duration_ms: 2.3692
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectswrong-save-count false acceptance
+ok 23 - receipt verifier rejectswrong-save-count false acceptance
+  ---
+  duration_ms: 4.0464
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsfresh-level false acceptance
+ok 24 - receipt verifier rejectsfresh-level false acceptance
+  ---
+  duration_ms: 1.6809
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsvisual false acceptance
+ok 25 - receipt verifier rejectsvisual false acceptance
+  ---
+  duration_ms: 1.7733
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectswhole-world false acceptance
+ok 26 - receipt verifier rejectswhole-world false acceptance
+  ---
+  duration_ms: 1.6177
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsdeadline false acceptance
+ok 27 - receipt verifier rejectsdeadline false acceptance
+  ---
+  duration_ms: 2.1349
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsd71653 false acceptance
+ok 28 - receipt verifier rejectsd71653 false acceptance
+  ---
+  duration_ms: 1.7426
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsteleport false acceptance
+ok 29 - receipt verifier rejectsteleport false acceptance
+  ---
+  duration_ms: 2.1621
+  type: 'test'
+  ...
+# Subtest: receipt verifier rejectsother-player false acceptance
+ok 30 - receipt verifier rejectsother-player false acceptance
+  ---
+  duration_ms: 2.1519
+  type: 'test'
+  ...
+# Subtest: source spawn identity and no-drop outcomes stay separate; no target item is a retained result
+ok 31 - source spawn identity and no-drop outcomes stay separate; no target item is a retained result
+  ---
+  duration_ms: 3.5134
+  type: 'test'
+  ...
+# Subtest: omitting no-drop, missing ObjectDied, pretending absence is killed, death removal and bigger kill budget are rejected
+ok 32 - omitting no-drop, missing ObjectDied, pretending absence is killed, death removal and bigger kill budget are rejected
+  ---
+  duration_ms: 11.2219
+  type: 'test'
+  ...
+# Subtest: three-class aggregation needs independent accounts and one exact pair and cannot imply complete classic world
+ok 33 - three-class aggregation needs independent accounts and one exact pair and cannot imply complete classic world
+  ---
+  duration_ms: 2.5492
+  type: 'test'
+  ...
+1..33
+# tests 33
+# suites 0
+# pass 33
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 372.2402

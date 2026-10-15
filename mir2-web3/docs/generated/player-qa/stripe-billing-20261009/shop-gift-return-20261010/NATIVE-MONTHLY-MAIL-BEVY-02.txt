@@ -1,0 +1,848 @@
+   Compiling mir2-client-bevy v0.1.0 (C:\Users\Administrator\.codex\worktrees\classic-gateway-budget-20261008\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:210:21
+    |
+210 |                     (32. / 3.),
+    |                     ^        ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+210 -                     (32. / 3.),
+210 +                     32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:414:29
+    |
+414 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+414 -                             (32. / 3.),
+414 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:421:29
+    |
+421 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+421 -                             (32. / 3.),
+421 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:476:25
+    |
+476 |                         (32. / 3.),
+    |                         ^        ^
+    |
+help: remove these parentheses
+    |
+476 -                         (32. / 3.),
+476 +                         32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:695:33
+    |
+695 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+695 -                                 (32. / 3.),
+695 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:702:33
+    |
+702 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+702 -                                 (32. / 3.),
+702 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:715:33
+    |
+715 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+715 -                                 (32. / 3.),
+715 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:727:33
+    |
+727 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+727 -                                 (32. / 3.),
+727 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:831:29
+    |
+831 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+831 -                             (32. / 3.),
+831 +                             32. / 3. ,
+    |
+
+warning: unused imports: `GAME_SHOP_QUANTITY_MAX` and `GAME_SHOP_QUANTITY_MIN`
+  --> src\crystal_ui\overlays.rs:50:58
+   |
+50 |     GameShopModel, GameShopPaymentType, GameShopRequest, GAME_SHOP_QUANTITY_MAX,
+   |                                                          ^^^^^^^^^^^^^^^^^^^^^^
+51 |     GAME_SHOP_QUANTITY_MIN,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `item_icon_path`
+  --> src\crystal_ui\overlays.rs:53:51
+   |
+53 | use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
+   |                                                   ^^^^^^^^^^^^^^
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> src\crystal_ui\overlays.rs:76:5
+   |
+76 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `GAME_SHOP_CELL_SIZE`, `GAME_SHOP_COLUMN_STEP`, `GAME_SHOP_GRID_ORIGIN`, `GAME_SHOP_PAGE_COLUMNS`, `GAME_SHOP_ROW_STEP`, and `SKILL_ROW_SIZE`
+   --> src\crystal_ui\overlays.rs:116:5
+    |
+116 |     GAME_SHOP_CELL_SIZE, GAME_SHOP_COLUMN_STEP, GAME_SHOP_GRID_ORIGIN, GAME_SHOP_PAGE_COLUMNS,
+    |     ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+117 |     GAME_SHOP_PAGE_SIZE as CRYSTAL_GAME_SHOP_PAGE_SIZE, GAME_SHOP_PANEL_SIZE, GAME_SHOP_ROW_STEP,
+    |                                                                               ^^^^^^^^^^^^^^^^^^
+...
+124 |     SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE, SKILL_ROW_STEP_Y,
+    |                                         ^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> src\crystal_ui\social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unnecessary parentheses around `if` condition
+    --> src\crystal_ui\overlays.rs:7902:8
+     |
+7902 |     if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |        ^
+7903 |         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                  ^
+     |
+help: remove these parentheses
+     |
+7902 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+7903 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:121:9
+    |
+121 |     let mut draft = draft("abcd");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:172:9
+    |
+172 |     let mut draft = draft("letter body");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:189:9
+    |
+189 |     let mut draft = draft(&message);
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:1189:5
+     |
+1189 |     mut pending: ResMut<PendingOperations>,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:7031:17
+     |
+7031 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:7032:28
+     |
+7032 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:7032:28
+     |
+7032 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> src\crystal_ui\overlays.rs:7463:18
+     |
+7463 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:8160:25
+     |
+8160 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:8161:36
+     |
+8161 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> src\crystal_ui\overlays.rs:8141:5
+     |
+8141 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:8161:36
+     |
+8161 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+     --> src\crystal_ui\overlays.rs:11625:9
+      |
+11625 |         skill_binding,
+      |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+     --> src\crystal_ui\overlays.rs:11626:9
+      |
+11626 |         skill_persistence,
+      |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: unused variable: `inventory`
+     --> src\crystal_ui\overlays.rs:15946:5
+      |
+15946 |     inventory: &InventoryModel,
+      |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_inventory`
+
+warning: unused variable: `state`
+     --> src\crystal_ui\overlays.rs:15947:5
+      |
+15947 |     state: &NativePlayerUiState,
+      |     ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `compose_ui`
+     --> src\crystal_ui\overlays.rs:15948:5
+      |
+15948 |     compose_ui: &MailComposeUi,
+      |     ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_compose_ui`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_parcel_tests.rs:254:9
+    |
+254 |     let mut state = NativePlayerUiState::default();
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `nearby`
+    --> src\quest_ui.rs:2075:5
+     |
+2075 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `overlays::OverlayInventory` is more private than the item `render_order`
+    --> src\crystal_ui\hero_cross_inventory.rs:290:1
+     |
+ 290 | / pub fn render_order(
+ 291 | |     mut commands: Commands,
+ 292 | |     state: Res<NativePlayerUiState>,
+ 293 | |     panels: Query<Entity, With<OverlayInventory>>,
+ 294 | | ) {
+     | |_^ function `render_order` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayInventory` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3136:1
+     |
+3136 | struct OverlayInventory;
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_dialog::render::render`
+    --> src\crystal_ui\hero_dialog_render.rs:234:1
+     |
+ 234 | / pub fn render(
+ 235 | |     mut commands: Commands,
+ 236 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 237 | |     old: Query<Entity, With<HeroRoot>>,
+...    |
+ 242 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+ 243 | | ) {
+     | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3133:1
+     |
+3133 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::CrystalCharacterWingMaterials` is more private than the item `hero_dialog::render::render`
+   --> src\crystal_ui\hero_dialog_render.rs:234:1
+    |
+234 | / pub fn render(
+235 | |     mut commands: Commands,
+236 | |     roots: Query<Entity, With<OverlayRoot>>,
+237 | |     old: Query<Entity, With<HeroRoot>>,
+...   |
+242 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+243 | | ) {
+    | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+    |
+note: but type `overlays::CrystalCharacterWingMaterials` is only usable at visibility `pub(self)`
+   --> src\crystal_ui\overlays.rs:206:1
+    |
+206 | struct CrystalCharacterWingMaterials([Handle<CrystalAdditiveUiMaterial>; 4]);
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `skill_bars::host::render`
+    --> src\crystal_ui\skill_bars_host.rs:131:1
+     |
+ 131 | / pub fn render(
+ 132 | |     mut commands: Commands,
+ 133 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 134 | |     old: Query<Entity, With<SkillBarRoot>>,
+...    |
+ 138 | |     assets: Option<Res<AssetServer>>,
+ 139 | | ) {
+     | |_^ function `skill_bars::host::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3133:1
+     |
+3133 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::render`
+    --> src\crystal_ui\hero_buff_hud.rs:121:1
+     |
+ 121 | / pub fn render(
+ 122 | |     mut commands: Commands,
+ 123 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 124 | |     old: Query<Entity, With<HeroBuffRoot>>,
+...    |
+ 127 | |     assets: Option<Res<AssetServer>>,
+ 128 | | ) {
+     | |_^ function `hero_buff_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3133:1
+     |
+3133 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::hint`
+    --> src\crystal_ui\hero_buff_hud.rs:213:1
+     |
+ 213 | / pub fn hint(
+ 214 | |     mut commands: Commands,
+ 215 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 216 | |     old: Query<(Entity, &ComputedNode), With<HeroBuffHint>>,
+...    |
+ 219 | |     shell: Res<NativeShellModel>,
+ 220 | | ) {
+     | |_^ function `hero_buff_hud::hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3133:1
+     |
+3133 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `overlays::status_hud::render`
+    --> src\crystal_ui\status_hud.rs:407:1
+     |
+ 407 | / pub fn render(
+ 408 | |     mut commands: Commands,
+ 409 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 410 | |     old: Query<Entity, With<StatusRoot>>,
+...    |
+ 414 | |     assets: Option<Res<AssetServer>>,
+ 415 | | ) {
+     | |_^ function `overlays::status_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3133:1
+     |
+3133 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `render_hint`
+    --> src\crystal_ui\status_hud.rs:685:1
+     |
+ 685 | / pub fn render_hint(
+ 686 | |     mut commands: Commands,
+ 687 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 688 | |     old: Query<(Entity, &ComputedNode), With<StatusHint>>,
+...    |
+ 691 | |     shell: Res<NativeShellModel>,
+ 692 | | ) {
+     | |_^ function `render_hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3133:1
+     |
+3133 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayButton` is more private than the item `press_real_button`
+    --> src\crystal_ui\npc_shop_layout_tests.rs:107:1
+     |
+ 107 | pub(crate) fn press_real_button(app: &mut App, action: OverlayButton) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function `press_real_button` is reachable at visibility `pub(crate)`
+     |
+note: but type `overlays::OverlayButton` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3311:1
+     |
+3311 | enum OverlayButton {
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: multiple variants are never constructed
+    --> src\crystal_ui\overlays.rs:3340:5
+     |
+3311 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+3340 |     OptionsMusicVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3341 |     OptionsMusicVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3342 |     OptionsSoundVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3343 |     OptionsSoundVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3344 |     ToggleInventory,
+3345 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+3346 |     ToggleShop,
+     |     ^^^^^^^^^^
+3347 |     ToggleNpcShop,
+     |     ^^^^^^^^^^^^^
+3348 |     ToggleStorage,
+     |     ^^^^^^^^^^^^^
+...
+3351 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+3356 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+3375 |     GroupInviteNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3376 |     GroupInviteNameSubmit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3379 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+3383 |     GuildRecruitNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3387 |     GuildCancelNoticeEdit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+3388 |     SelectGuildMember(u8),
+     |     ^^^^^^^^^^^^^^^^^
+3389 |     GuildKickMember(u8),
+3390 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+3393 |     GuildAssignNextRank,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3402 |     GuildRankNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+...
+3461 |     MailRecipientFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+3462 |     MailMessageFocus,
+     |     ^^^^^^^^^^^^^^^^
+3463 |     MailGoldInc,
+     |     ^^^^^^^^^^^
+3464 |     MailGoldFocus,
+3465 |     MailGoldDec,
+     |     ^^^^^^^^^^^
+3466 |     AddMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^
+3467 |     RemoveMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^^^^
+...
+3504 |     GameShopQuantityInc,
+     |     ^^^^^^^^^^^^^^^^^^^
+3505 |     GameShopQuantityDec,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3518 |     StorageRemovePassword,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `overlay_compact_item_button` is never used
+     --> src\crystal_ui\overlays.rs:13737:4
+      |
+13737 | fn overlay_compact_item_button(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `overlay_clickable_text_at` is never used
+     --> src\crystal_ui\overlays.rs:15361:4
+      |
+15361 | fn overlay_clickable_text_at(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_chat_draft` is never used
+     --> src\crystal_ui\overlays.rs:15598:4
+      |
+15598 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+      |    ^^^^^^^^^^^^^^^^^
+
+warning: function `render_mail_compose` is never used
+     --> src\crystal_ui\overlays.rs:16119:4
+      |
+16119 | fn render_mail_compose(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> src\crystal_ui\mail_editor.rs:13:18
+   |
+13 | pub(super) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> src\native_shell_ui.rs:40:7
+   |
+40 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: constant `AUX_CHANGE_PASSWORD_PANEL` is never used
+  --> src\native_shell_ui.rs:50:7
+   |
+50 | const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> src\native_shell_ui.rs:384:5
+    |
+373 | pub(crate) enum NativeShellButton {
+    |                 ----------------- variants in this enum
+...
+384 |     CycleClass,
+    |     ^^^^^^^^^^
+385 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+393 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+394 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_field` is never used
+    --> src\native_shell_ui.rs:2279:4
+     |
+2279 | fn spawn_aux_field(
+     |    ^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> src\native_shell_ui.rs:2399:4
+     |
+2399 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> src\native_shell_ui.rs:2435:4
+     |
+2435 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> src\native_shell_ui.rs:2531:4
+     |
+2531 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> src\quest_ui.rs:75:7
+   |
+75 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter`, `QuestHelp`, `QuestPagePrevious`, and `QuestPageNext` are never constructed
+    --> src\quest_ui.rs:1314:5
+     |
+1266 | enum QuestUiButton {
+     |      ------------- variants in this enum
+...
+1314 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1317 |     QuestHelp,
+     |     ^^^^^^^^^
+1318 |     QuestPagePrevious,
+     |     ^^^^^^^^^^^^^^^^^
+1319 |     QuestPageNext,
+     |     ^^^^^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `wrap_guidance_hint` is never used
+    --> src\quest_ui.rs:4952:4
+     |
+4952 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+    --> src\quest_ui.rs:6742:4
+     |
+6742 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> src\quest_ui.rs:6982:4
+     |
+6982 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:7030:9
+     |
+7030 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:7031:9
+     |
+7031 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:7032:9
+     |
+7032 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:8159:17
+     |
+8159 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:8160:17
+     |
+8160 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:8161:17
+     |
+8161 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src\crystal_ui\mail_parcel_tests.rs:111:5
+    |
+111 |     drop(compose);
+    |     ^^^^^-------^
+    |          |
+    |          argument has type `&overlays::MailComposeUi`
+    |
+    = note: `#[warn(dropping_references)]` on by default
+help: use `let _ = ...` to ignore the expression or result
+    |
+111 -     drop(compose);
+111 +     let _ = compose;
+    |
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src\crystal_ui\mail_parcel_tests.rs:112:5
+    |
+112 |     drop(state);
+    |     ^^^^^-----^
+    |          |
+    |          argument has type `&overlays::NativePlayerUiState`
+    |
+help: use `let _ = ...` to ignore the expression or result
+    |
+112 -     drop(state);
+112 +     let _ = state;
+    |
+
+warning: `mir2-client-bevy` (lib test) generated 70 warnings (run `cargo fix --lib -p mir2-client-bevy --tests` to apply 40 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 35.71s
+     Running unittests src\lib.rs (C:/mir2-build/p1-native-20261007\debug\deps\mir2_client_bevy-60be2b571f402480.exe)
+
+running 94 tests
+test crystal_ui::hud::tests::hud_session_reset_restores_new_scene_belt_and_mail_defaults ... ok
+test crystal_ui::hud::tests::new_mail_indicator_uses_source_geometry_and_blink_contract ... ok
+test crystal_ui::overlays::mail_compose_drag::tests::scaled_batch_release_clamping_modality_and_session_reset ... ok
+test crystal_ui::overlays::mail_compose_drag::tests::source_children_exclude_drag_and_recipient_label_is_not_control ... ok
+test crystal_ui::overlays::mail_compose_input_tests::compose_enter_keeps_multiline_without_text_payload_or_accidental_send ... ok
+test crystal_ui::overlays::mail_compose_input_tests::compose_gold_accepts_digits_backspace_and_rejects_overflow_without_wallet_mutation ... ok
+test crystal_ui::overlays::mail_compose_input_tests::compose_recipient_uses_server_twenty_scalar_limit ... ok
+test crystal_ui::overlays::mail_compose_tests::letter_renderer_follows_the_movable_source_window_position ... ok
+test crystal_ui::overlays::mail_compose_tests::letter_renderer_uses_source_root_full_multiline_text_and_visible_focus ... ok
+test crystal_ui::overlays::mail_compose_tests::mail_body_utf16_budget_matches_with_and_without_native_editor ... ok
+test crystal_ui::overlays::mail_compose_tests::mail_body_wheel_ignores_pending_send_and_focus_loss ... ok
+test crystal_ui::overlays::mail_compose_tests::parcel_to_letter_or_reply_never_sends_hidden_gold_or_items_and_keeps_parcel_draft ... ok
+test crystal_ui::overlays::mail_compose_tests::queued_friend_inspect_and_bond_letter_request_uses_the_safe_letter_transition ... ok
+test crystal_ui::overlays::mail_compose_tests::recipient_cancel_and_letter_send_keep_input_isolated_and_draft_authoritative ... ok
+test crystal_ui::overlays::mail_compose_tests::scaled_mail_body_wheel_routes_letter_and_parcel_without_leaking_past_guards ... ok
+test crystal_ui::overlays::mail_compose_tests::submitted_letter_body_is_frozen_until_the_uncorrelated_send_receipt ... ok
+test crystal_ui::overlays::mail_compose_tests::write_recipient_prompt_confirms_exact_recipient_and_consumes_covered_parcel_action ... ok
+test crystal_ui::overlays::mail_delete_tests::attachment_confirm_rechecks_identity_contents_and_lock_before_queueing ... ok
+test crystal_ui::overlays::mail_delete_tests::attachment_delete_opens_a_confirm_but_plain_mail_stays_direct_and_locked_mail_rejects ... ok
+test crystal_ui::overlays::mail_delete_tests::mail_status_retry_preserves_authority_and_claim_pending_protection ... ok
+test crystal_ui::overlays::mail_delete_tests::no_escape_close_and_session_reset_clear_the_prompt_without_sending ... ok
+test crystal_ui::overlays::mail_delete_tests::rendered_warning_uses_a_modal_source_frame_and_blocks_pointer_input ... ok
+test crystal_ui::overlays::mail_delete_tests::unacknowledged_mail_status_commands_deduplicate_only_until_queue_drain ... ok
+test crystal_ui::overlays::mail_delete_tests::yes_and_enter_consume_the_close_frame_and_silent_rejection_allows_reconfirm ... ok
+test crystal_ui::overlays::mail_editor::tests::home_end_arrows_and_shift_use_captured_visual_layout_and_scroll_to_caret ... ok
+test crystal_ui::overlays::mail_editor::tests::host_clipboard_cut_and_paste_share_selection_and_utf16_budget ... ok
+test crystal_ui::overlays::mail_editor::tests::ime_preedit_is_presentation_only_and_uses_real_authoritative_caret_layout ... ok
+test crystal_ui::overlays::mail_editor::tests::pointer_hit_test_uses_uneven_shaped_stops_and_selection_extends ... ok
+test crystal_ui::overlays::mail_editor::tests::preedit_display_layout_rewraps_candidate_and_scroll_without_mutating_draft ... ok
+test crystal_ui::overlays::mail_editor::tests::retained_letter_draft_keeps_selection_through_a_transient_modal ... ok
+test crystal_ui::overlays::mail_editor::tests::unicode_selection_delete_and_ctrl_a_keep_grapheme_boundaries ... ok
+test crystal_ui::overlays::mail_editor::tests::wheel_uses_shaped_extent_clamps_and_preserves_caret_and_selection ... ok
+test crystal_ui::overlays::mail_editor::tests::wrapped_boundary_keeps_the_chosen_downward_line_and_scroll_affinity ... ok
+test crystal_ui::overlays::mail_feedback_tests::feedback_modal_renders_source_frame_message_and_ok_above_mail_layers ... ok
+test crystal_ui::overlays::mail_feedback_tests::local_validation_and_feedback_close_consume_covered_mail_actions ... ok
+test crystal_ui::overlays::mail_feedback_tests::result_receipts_close_only_successful_source_surfaces_and_keep_rejected_draft ... ok
+test crystal_ui::overlays::mail_list::tests::list_uses_original_rows_and_hides_unavailable_reply_and_list_claim ... ok
+test crystal_ui::overlays::mail_list::tests::row_preview_uses_message_not_subject_and_updates_lock_marker ... ok
+test crystal_ui::overlays::mail_parcel::tests::cost_response_is_ignored_when_the_draft_changed_in_flight ... ok
+test crystal_ui::overlays::mail_parcel::tests::local_close_keeps_an_unanswered_cost_request_reserved ... ok
+test crystal_ui::overlays::mail_parcel::tests::refresh_drops_replaced_attachment_and_releases_only_its_exact_identity ... ok
+test crystal_ui::overlays::mail_parcel::tests::rejected_postage_is_unavailable_and_does_not_retry_every_frame ... ok
+test crystal_ui::overlays::mail_parcel::tests::slots_follow_source_cover_and_use_live_identities ... ok
+test crystal_ui::overlays::mail_parcel::tests::timed_out_cost_reserves_its_fingerprint_until_the_delayed_reply_arrives ... ok
+test crystal_ui::overlays::mail_parcel_tests::open_parcel_uses_recipient_prompt_without_overwriting_a_saved_draft ... ok
+test crystal_ui::overlays::mail_parcel_tests::parcel_lock_is_exact_and_local_cancel_recovers_if_echoes_are_dropped ... ok
+test crystal_ui::overlays::mail_parcel_tests::parcel_locked_bag_item_is_dimmed_and_cannot_start_a_drag ... ok
+test crystal_ui::overlays::mail_parcel_tests::parcel_renderer_uses_independent_source_frame_cells_and_bag_offset ... ok
+test crystal_ui::overlays::mail_parcel_tests::parcel_selected_uid_blocks_the_overlay_action_chain ... ok
+test crystal_ui::overlays::mail_parcel_tests::quote_is_invalidated_by_live_attachment_pricing_changes ... ok
+test crystal_ui::overlays::mail_parcel_tests::quote_singleflight_ignores_stale_cost_and_requires_current_live_ids ... ok
+test crystal_ui::overlays::mail_reader_drag::tests::child_controls_never_start_a_drag_but_source_notcontrol_labels_do ... ok
+test crystal_ui::overlays::mail_reader_drag::tests::readers_keep_separate_positions_clamp_and_cancel_stale_identity ... ok
+test crystal_ui::overlays::mail_reader_drag::tests::scaled_pointer_batch_moves_before_release_and_focus_loss_cancels ... ok
+test crystal_ui::overlays::mail_reader_tests::escape_closes_reader_and_session_reset_clears_it ... ok
+test crystal_ui::overlays::mail_reader_tests::exact_id_and_kind_refreshes_reject_stale_reader_actions ... ok
+test crystal_ui::overlays::mail_reader_tests::monthly_card_mail_renders_original_icon_hint_and_missing_date_placeholder ... ok
+test crystal_ui::overlays::mail_reader_tests::opens_unread_once_but_reopens_already_read_without_status_send ... ok
+test crystal_ui::overlays::mail_reader_tests::production_refresh_closes_removed_or_retyped_reader_before_input ... ok
+test crystal_ui::overlays::mail_reader_tests::reader_actions_keep_source_guards_and_status_queue_dedup ... ok
+test crystal_ui::overlays::mail_reader_tests::reply_prefills_only_authorized_sender_and_reader_close_consumes_frame ... ok
+test crystal_ui::overlays::mail_reader_tests::source_reader_geometry_body_and_attachment_metadata_are_bounded ... ok
+test crystal_ui::overlays::mail_text_adapter::tests::target_binds_kind_recipient_draft_epoch_editor_and_session ... ok
+test crystal_ui::overlays::mail_text_adapter::tests::target_cancels_while_mail_body_is_covered_or_send_is_pending ... ok
+test crystal_ui::overlays::tests::hud_mail_bigmap_minimap_actions_are_exhaustively_handled ... ok
+test crystal_ui::overlays::tests::mail_claim_and_delete_disabled_states ... ok
+test crystal_ui::overlays::tests::mail_open_blocks_world_click_and_uses_reducer ... ok
+test crystal_ui::overlays::tests::mail_panel_cache_keeps_children_until_mail_inputs_change ... ok
+test crystal_ui::overlays::tests::minimap_toggle_retains_state_and_mail_bigmap_esc_behavior ... ok
+test crystal_ui::overlays::tests::overlay_buttons_mail_flow_generates_intents ... ok
+test crystal_ui::overlays::text_input::tests::covered_or_new_session_mail_target_rejects_late_ime_commit ... ok
+test crystal_ui::overlays::text_input::tests::mail_ime_preedit_never_mutates_draft_and_exact_commit_is_once ... ok
+test crystal_ui::panel_layouts::tests::known_rects_do_not_escape_explicit_mail_panel ... ok
+test mail::tests::full_mailbox_keeps_appended_receipt_without_evicting_real_mail ... ok
+test mail::tests::mail_claim_and_delete_rules ... ok
+test mail::tests::mail_dates_follow_source_format_and_leave_unknown_values_blank ... ok
+test mail::tests::mail_deserialization_is_backward_compatible_and_bounded ... ok
+test mail::tests::mail_pages_are_ten_rows_and_clamp_after_refresh_delete ... ok
+test mail::tests::mailbox_limits_real_messages_and_feedback_independently ... ok
+test mail::tests::missing_mail_date_has_a_visible_placeholder_without_inventing_a_timestamp ... ok
+test mail::tests::monthly_card_mail_display_uses_exact_identity_and_does_not_rewrite_letters ... ok
+test mail::tests::monthly_card_mail_keeps_wrong_quantity_and_opaque_shop_text_unchanged ... ok
+test mail::tests::monthly_card_mail_localizes_actual_source_purchase_and_gift_templates_in_all_languages ... ok
+test mail::tests::serde_roundtrip ... ok
+test mail::tests::stale_mail_selection_fails_closed ... ok
+test mail::tests::user_item_metadata_roundtrips_without_string_loss ... ok
+test mail_service::tests::inbox_reserves_one_cost_after_full_fifo_without_reordering ... ok
+test mail_service::tests::reserved_cost_keeps_inbox_nonempty_until_popped_or_cleared ... ok
+test mail_service::tests::serializes_source_packet_events_with_stable_camel_case_fields ... ok
+test native_shell::tests::registration_email_validation_matches_crystals_shared_pattern ... ok
+test native_shell_ui::tests::registration_invalid_email_never_queues_even_when_a_raw_intent_bypasses_the_button ... ok
+test pending_operations::native_ui_tests::dangerous_intent_queue_blocks_double_press_and_distinct_mail_ids ... ok
+test pending_operations::tests::mail_refresh_releases_only_proven_read_claim_and_delete_keys ... ok
+test pending_operations::tests::mail_result_releases_success_and_failure_without_refresh_guessing ... ok
+
+test result: ok. 94 passed; 0 failed; 0 ignored; 0 measured; 1217 filtered out; finished in 0.47s
+

@@ -1,0 +1,41 @@
+Diff in \\?\C:\Users\Administrator\.codex\worktrees\classic-gateway-budget-20261008\mir2-player-journey\mir2-web3\apps\game-client\platform-windows\src\gameplay_bridge.rs:1045:
+         // Read typed life/HP authority before a display-only health overlay
+         // approximates the self entity's fields. Actual Revived/new-life
+         // packets still take precedence over an older personal snapshot.
+-        let snapshot_player = payload
+-            .get("entities")
+-            .and_then(Value::as_array)
+-            .and_then(|entities| {
+-                entities.iter().find(|entity| {
+-                    entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+-                        || (player_object_id.is_some()
+-                            && entity.get("objectId").and_then(value_u32) == player_object_id)
+-                })
+-            });
++        let snapshot_player =
++            payload
++                .get("entities")
++                .and_then(Value::as_array)
++                .and_then(|entities| {
++                    entities.iter().find(|entity| {
++                        entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
++                            || (player_object_id.is_some()
++                                && entity.get("objectId").and_then(value_u32) == player_object_id)
++                    })
++                });
+         let snapshot_dead = snapshot_player
+             .and_then(|player| player.get("dead"))
+             .and_then(Value::as_bool);
+Diff in \\?\C:\Users\Administrator\.codex\worktrees\classic-gateway-budget-20261008\mir2-player-journey\mir2-web3\apps\game-client\platform-windows\src\health_zero_authority_tests.rs:353:
+         adapter.apply_authoritative_overlay(&mut newer_dead);
+         assert_eq!(newer_dead["playerHp"], json!(0), "{lifecycle}");
+         assert_eq!(newer_dead["entities"][0]["hp"], json!(0), "{lifecycle}");
+-        assert_eq!(newer_dead["entities"][0]["dead"], json!(true), "{lifecycle}");
++        assert_eq!(
++            newer_dead["entities"][0]["dead"],
++            json!(true),
++            "{lifecycle}"
++        );
+     }
+ }
+ 

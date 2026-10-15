@@ -1,0 +1,1633 @@
+   Compiling mir2-game-data v0.1.0 (C:\Users\Administrator\.codex\worktrees\capacity-transport\mir2-player-journey\mir2-web3\packages\game-data)
+   Compiling mir2-client-bevy v0.1.0 (C:\Users\Administrator\.codex\worktrees\capacity-transport\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:210:21
+    |
+210 |                     (32. / 3.),
+    |                     ^        ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+210 -                     (32. / 3.),
+210 +                     32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:414:29
+    |
+414 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+414 -                             (32. / 3.),
+414 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:421:29
+    |
+421 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+421 -                             (32. / 3.),
+421 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:476:25
+    |
+476 |                         (32. / 3.),
+    |                         ^        ^
+    |
+help: remove these parentheses
+    |
+476 -                         (32. / 3.),
+476 +                         32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:695:33
+    |
+695 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+695 -                                 (32. / 3.),
+695 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:702:33
+    |
+702 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+702 -                                 (32. / 3.),
+702 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:715:33
+    |
+715 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+715 -                                 (32. / 3.),
+715 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:727:33
+    |
+727 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+727 -                                 (32. / 3.),
+727 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:831:29
+    |
+831 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+831 -                             (32. / 3.),
+831 +                             32. / 3. ,
+    |
+
+warning: unused imports: `GAME_SHOP_QUANTITY_MAX` and `GAME_SHOP_QUANTITY_MIN`
+  --> src\crystal_ui\overlays.rs:46:58
+   |
+46 |     GameShopModel, GameShopPaymentType, GameShopRequest, GAME_SHOP_QUANTITY_MAX,
+   |                                                          ^^^^^^^^^^^^^^^^^^^^^^
+47 |     GAME_SHOP_QUANTITY_MIN,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `item_icon_path`
+  --> src\crystal_ui\overlays.rs:49:51
+   |
+49 | use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
+   |                                                   ^^^^^^^^^^^^^^
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> src\crystal_ui\overlays.rs:72:5
+   |
+72 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `GAME_SHOP_CELL_SIZE`, `GAME_SHOP_COLUMN_STEP`, `GAME_SHOP_GRID_ORIGIN`, `GAME_SHOP_PAGE_COLUMNS`, `GAME_SHOP_ROW_STEP`, and `SKILL_ROW_SIZE`
+   --> src\crystal_ui\overlays.rs:114:5
+    |
+114 |     GAME_SHOP_CELL_SIZE, GAME_SHOP_COLUMN_STEP, GAME_SHOP_GRID_ORIGIN, GAME_SHOP_PAGE_COLUMNS,
+    |     ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+115 |     GAME_SHOP_PAGE_SIZE as CRYSTAL_GAME_SHOP_PAGE_SIZE, GAME_SHOP_PANEL_SIZE, GAME_SHOP_ROW_STEP,
+    |                                                                               ^^^^^^^^^^^^^^^^^^
+...
+122 |     SKILL_PAGE_SIZE, SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE,
+    |                                                          ^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> src\crystal_ui\social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unnecessary parentheses around `if` condition
+    --> src\crystal_ui\overlays.rs:7628:8
+     |
+7628 |     if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |        ^
+7629 |         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                  ^
+     |
+help: remove these parentheses
+     |
+7628 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+7629 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:110:9
+    |
+110 |     let mut draft = draft("abcd");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:155:9
+    |
+155 |     let mut draft = draft("letter body");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:172:9
+    |
+172 |     let mut draft = draft(&message);
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:1180:5
+     |
+1180 |     mut pending: ResMut<PendingOperations>,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:6761:17
+     |
+6761 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:6762:28
+     |
+6762 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:6762:28
+     |
+6762 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> src\crystal_ui\overlays.rs:7197:18
+     |
+7197 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:7881:25
+     |
+7881 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:7882:36
+     |
+7882 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> src\crystal_ui\overlays.rs:7866:5
+     |
+7866 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:7882:36
+     |
+7882 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+     --> src\crystal_ui\overlays.rs:11248:9
+      |
+11248 |         skill_binding,
+      |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+     --> src\crystal_ui\overlays.rs:11249:9
+      |
+11249 |         skill_persistence,
+      |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: unused variable: `inventory`
+     --> src\crystal_ui\overlays.rs:15367:5
+      |
+15367 |     inventory: &InventoryModel,
+      |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_inventory`
+
+warning: unused variable: `state`
+     --> src\crystal_ui\overlays.rs:15368:5
+      |
+15368 |     state: &NativePlayerUiState,
+      |     ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `compose_ui`
+     --> src\crystal_ui\overlays.rs:15369:5
+      |
+15369 |     compose_ui: &MailComposeUi,
+      |     ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_compose_ui`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_parcel_tests.rs:212:9
+    |
+212 |     let mut state = NativePlayerUiState::default();
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `nearby`
+    --> src\quest_ui.rs:1915:5
+     |
+1915 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `overlays::OverlayInventory` is more private than the item `render_order`
+    --> src\crystal_ui\hero_cross_inventory.rs:290:1
+     |
+ 290 | / pub fn render_order(
+ 291 | |     mut commands: Commands,
+ 292 | |     state: Res<NativePlayerUiState>,
+ 293 | |     panels: Query<Entity, With<OverlayInventory>>,
+ 294 | | ) {
+     | |_^ function `render_order` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayInventory` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2987:1
+     |
+2987 | struct OverlayInventory;
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_dialog::render::render`
+    --> src\crystal_ui\hero_dialog_render.rs:234:1
+     |
+ 234 | / pub fn render(
+ 235 | |     mut commands: Commands,
+ 236 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 237 | |     old: Query<Entity, With<HeroRoot>>,
+...    |
+ 242 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+ 243 | | ) {
+     | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::CrystalCharacterWingMaterials` is more private than the item `hero_dialog::render::render`
+   --> src\crystal_ui\hero_dialog_render.rs:234:1
+    |
+234 | / pub fn render(
+235 | |     mut commands: Commands,
+236 | |     roots: Query<Entity, With<OverlayRoot>>,
+237 | |     old: Query<Entity, With<HeroRoot>>,
+...   |
+242 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+243 | | ) {
+    | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+    |
+note: but type `overlays::CrystalCharacterWingMaterials` is only usable at visibility `pub(self)`
+   --> src\crystal_ui\overlays.rs:202:1
+    |
+202 | struct CrystalCharacterWingMaterials([Handle<CrystalAdditiveUiMaterial>; 4]);
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `skill_bars::host::render`
+    --> src\crystal_ui\skill_bars_host.rs:131:1
+     |
+ 131 | / pub fn render(
+ 132 | |     mut commands: Commands,
+ 133 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 134 | |     old: Query<Entity, With<SkillBarRoot>>,
+...    |
+ 138 | |     assets: Option<Res<AssetServer>>,
+ 139 | | ) {
+     | |_^ function `skill_bars::host::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::render`
+    --> src\crystal_ui\hero_buff_hud.rs:121:1
+     |
+ 121 | / pub fn render(
+ 122 | |     mut commands: Commands,
+ 123 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 124 | |     old: Query<Entity, With<HeroBuffRoot>>,
+...    |
+ 127 | |     assets: Option<Res<AssetServer>>,
+ 128 | | ) {
+     | |_^ function `hero_buff_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::hint`
+    --> src\crystal_ui\hero_buff_hud.rs:213:1
+     |
+ 213 | / pub fn hint(
+ 214 | |     mut commands: Commands,
+ 215 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 216 | |     old: Query<(Entity, &ComputedNode), With<HeroBuffHint>>,
+...    |
+ 219 | |     shell: Res<NativeShellModel>,
+ 220 | | ) {
+     | |_^ function `hero_buff_hud::hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `overlays::status_hud::render`
+    --> src\crystal_ui\status_hud.rs:407:1
+     |
+ 407 | / pub fn render(
+ 408 | |     mut commands: Commands,
+ 409 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 410 | |     old: Query<Entity, With<StatusRoot>>,
+...    |
+ 414 | |     assets: Option<Res<AssetServer>>,
+ 415 | | ) {
+     | |_^ function `overlays::status_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `render_hint`
+    --> src\crystal_ui\status_hud.rs:685:1
+     |
+ 685 | / pub fn render_hint(
+ 686 | |     mut commands: Commands,
+ 687 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 688 | |     old: Query<(Entity, &ComputedNode), With<StatusHint>>,
+...    |
+ 691 | |     shell: Res<NativeShellModel>,
+ 692 | | ) {
+     | |_^ function `render_hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayButton` is more private than the item `press_real_button`
+    --> src\crystal_ui\npc_shop_layout_tests.rs:107:1
+     |
+ 107 | pub(crate) fn press_real_button(app: &mut App, action: OverlayButton) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function `press_real_button` is reachable at visibility `pub(crate)`
+     |
+note: but type `overlays::OverlayButton` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3162:1
+     |
+3162 | enum OverlayButton {
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: multiple variants are never constructed
+    --> src\crystal_ui\overlays.rs:3191:5
+     |
+3162 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+3191 |     OptionsMusicVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3192 |     OptionsMusicVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3193 |     OptionsSoundVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3194 |     OptionsSoundVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3195 |     ToggleInventory,
+3196 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+3197 |     ToggleShop,
+     |     ^^^^^^^^^^
+3198 |     ToggleNpcShop,
+     |     ^^^^^^^^^^^^^
+3199 |     ToggleStorage,
+     |     ^^^^^^^^^^^^^
+...
+3202 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+3207 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+3226 |     GroupInviteNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3227 |     GroupInviteNameSubmit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3230 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+3234 |     GuildRecruitNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3238 |     GuildCancelNoticeEdit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+3239 |     SelectGuildMember(u8),
+     |     ^^^^^^^^^^^^^^^^^
+3240 |     GuildKickMember(u8),
+3241 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+3244 |     GuildAssignNextRank,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3253 |     GuildRankNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+...
+3312 |     MailRecipientFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+3313 |     MailMessageFocus,
+     |     ^^^^^^^^^^^^^^^^
+3314 |     MailGoldInc,
+     |     ^^^^^^^^^^^
+3315 |     MailGoldFocus,
+3316 |     MailGoldDec,
+     |     ^^^^^^^^^^^
+3317 |     AddMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^
+3318 |     RemoveMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^^^^
+...
+3355 |     GameShopQuantityInc,
+     |     ^^^^^^^^^^^^^^^^^^^
+3356 |     GameShopQuantityDec,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3368 |     StorageRemovePassword,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `overlay_compact_item_button` is never used
+     --> src\crystal_ui\overlays.rs:13204:4
+      |
+13204 | fn overlay_compact_item_button(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `overlay_clickable_text_at` is never used
+     --> src\crystal_ui\overlays.rs:14816:4
+      |
+14816 | fn overlay_clickable_text_at(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_chat_draft` is never used
+     --> src\crystal_ui\overlays.rs:15023:4
+      |
+15023 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+      |    ^^^^^^^^^^^^^^^^^
+
+warning: function `render_mail_compose` is never used
+     --> src\crystal_ui\overlays.rs:15508:4
+      |
+15508 | fn render_mail_compose(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> src\crystal_ui\mail_editor.rs:11:18
+   |
+11 | pub(super) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> src\native_shell_ui.rs:40:7
+   |
+40 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: constant `AUX_CHANGE_PASSWORD_PANEL` is never used
+  --> src\native_shell_ui.rs:50:7
+   |
+50 | const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> src\native_shell_ui.rs:379:5
+    |
+373 | pub(crate) enum NativeShellButton {
+    |                 ----------------- variants in this enum
+...
+379 |     CycleClass,
+    |     ^^^^^^^^^^
+380 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+388 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+389 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_field` is never used
+    --> src\native_shell_ui.rs:2186:4
+     |
+2186 | fn spawn_aux_field(
+     |    ^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> src\native_shell_ui.rs:2306:4
+     |
+2306 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> src\native_shell_ui.rs:2342:4
+     |
+2342 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> src\native_shell_ui.rs:2379:4
+     |
+2379 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> src\quest_ui.rs:73:7
+   |
+73 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter`, `QuestHelp`, `QuestPagePrevious`, and `QuestPageNext` are never constructed
+    --> src\quest_ui.rs:1174:5
+     |
+1130 | enum QuestUiButton {
+     |      ------------- variants in this enum
+...
+1174 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1177 |     QuestHelp,
+     |     ^^^^^^^^^
+1178 |     QuestPagePrevious,
+     |     ^^^^^^^^^^^^^^^^^
+1179 |     QuestPageNext,
+     |     ^^^^^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `wrap_guidance_hint` is never used
+    --> src\quest_ui.rs:4501:4
+     |
+4501 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+    --> src\quest_ui.rs:6165:4
+     |
+6165 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> src\quest_ui.rs:6375:4
+     |
+6375 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:6760:9
+     |
+6760 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:6761:9
+     |
+6761 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:6762:9
+     |
+6762 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:7880:17
+     |
+7880 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:7881:17
+     |
+7881 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:7882:17
+     |
+7882 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src\crystal_ui\mail_parcel_tests.rs:104:5
+    |
+104 |     drop(compose);
+    |     ^^^^^-------^
+    |          |
+    |          argument has type `&overlays::MailComposeUi`
+    |
+    = note: `#[warn(dropping_references)]` on by default
+help: use `let _ = ...` to ignore the expression or result
+    |
+104 -     drop(compose);
+104 +     let _ = compose;
+    |
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src\crystal_ui\mail_parcel_tests.rs:105:5
+    |
+105 |     drop(state);
+    |     ^^^^^-----^
+    |          |
+    |          argument has type `&overlays::NativePlayerUiState`
+    |
+help: use `let _ = ...` to ignore the expression or result
+    |
+105 -     drop(state);
+105 +     let _ = state;
+    |
+
+warning: `mir2-client-bevy` (lib test) generated 70 warnings (run `cargo fix --lib -p mir2-client-bevy --tests` to apply 40 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 31.48s
+     Running unittests src\lib.rs (C:/mir2-build/client-bevy-r29-tests\debug\deps\mir2_client_bevy-4c1babf0437d187a.exe)
+
+running 1 test
+test quest_ui::periodic_quest_ui_tests::visual::periodic_nine_locale_diary_details_and_steward_widgets_offscreen ... FAILED
+
+failures:
+
+---- quest_ui::periodic_quest_ui_tests::visual::periodic_nine_locale_diary_details_and_steward_widgets_offscreen stdout ----
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: th
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+ICU4X data error: No segmentation model for language: ja
+
+thread 'quest_ui::periodic_quest_ui_tests::visual::periodic_nine_locale_diary_details_and_steward_widgets_offscreen' (56256) panicked at src\periodic_quest_ui_tests.rs:466:9:
+periodic widget layout failures: [Object {"image": String("zh-TW-diary-daily"), "locale": String("zh-TW"), "row": Object {"font": String("Family(\"Noto Sans TC\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(28.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("zh-TW-diary-daily"), "locale": String("zh-TW"), "row": Object {"font": String("Family(\"Noto Sans TC\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(28.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("zh-TW-diary-weekly"), "locale": String("zh-TW"), "row": Object {"font": String("Family(\"Noto Sans TC\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(28.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("zh-TW-diary-weekly"), "locale": String("zh-TW"), "row": Object {"font": String("Family(\"Noto Sans TC\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(28.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("en-diary-daily"), "locale": String("en"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("en-diary-daily"), "locale": String("en"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("en-diary-weekly"), "locale": String("en"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("en-diary-weekly"), "locale": String("en"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("pt-BR-diary-daily"), "locale": String("pt-BR"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("pt-BR-diary-daily"), "locale": String("pt-BR"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("pt-BR-diary-weekly"), "locale": String("pt-BR"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("pt-BR-diary-weekly"), "locale": String("pt-BR"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("ru-diary-daily"), "locale": String("ru"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("ru-diary-daily"), "locale": String("ru"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("ru-diary-weekly"), "locale": String("ru"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("ru-diary-weekly"), "locale": String("ru"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("hi-diary-daily"), "locale": String("hi"), "row": Object {"font": String("Family(\"Noto Sans Devanagari\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("hi-diary-daily"), "locale": String("hi"), "row": Object {"font": String("Family(\"Noto Sans Devanagari\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("hi-diary-weekly"), "locale": String("hi"), "row": Object {"font": String("Family(\"Noto Sans Devanagari\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("hi-diary-weekly"), "locale": String("hi"), "row": Object {"font": String("Family(\"Noto Sans Devanagari\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("id-diary-daily"), "locale": String("id"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("id-diary-daily"), "locale": String("id"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("id-diary-weekly"), "locale": String("id"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("id-diary-weekly"), "locale": String("id"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("vi-diary-daily"), "locale": String("vi"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("vi-diary-daily"), "locale": String("vi"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("vi-diary-weekly"), "locale": String("vi"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("vi-diary-weekly"), "locale": String("vi"), "row": Object {"font": String("Family(\"Noto Sans\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("th-diary-daily"), "locale": String("th"), "row": Object {"font": String("Family(\"Noto Sans Thai\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("th-diary-daily"), "locale": String("th"), "row": Object {"font": String("Family(\"Noto Sans Thai\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("th-diary-weekly"), "locale": String("th"), "row": Object {"font": String("Family(\"Noto Sans Thai\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("th-diary-weekly"), "locale": String("th"), "row": Object {"font": String("Family(\"Noto Sans Thai\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("ar-diary-daily"), "locale": String("ar"), "row": Object {"font": String("Family(\"Noto Sans Arabic\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("ar-diary-daily"), "locale": String("ar"), "row": Object {"font": String("Family(\"Noto Sans Arabic\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}, Object {"image": String("ar-diary-weekly"), "locale": String("ar"), "row": Object {"font": String("Family(\"Noto Sans Arabic\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(43.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("主线 0")}}, Object {"image": String("ar-diary-weekly"), "locale": String("ar"), "row": Object {"font": String("Family(\"Noto Sans Arabic\")"), "glyphs": Number(4), "layoutExceedsNode": Bool(false), "layoutSize": Array [Number(25.0), Number(12.0)], "missingGlyphs": Number(1), "nodeOutsideViewport": Bool(false), "rect": Array [Number(235.0), Number(83.0), Number(86.0), Number(12.0)], "text": String("支线 0")}}]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    quest_ui::periodic_quest_ui_tests::visual::periodic_nine_locale_diary_details_and_steward_widgets_offscreen
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1217 filtered out; finished in 22.83s
+
+error: test failed, to rerun pass `--lib`

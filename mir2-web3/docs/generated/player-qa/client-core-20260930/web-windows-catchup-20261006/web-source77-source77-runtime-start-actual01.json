@@ -1,0 +1,40 @@
+{
+  "owner": "Root",
+  "kind": "actual Source77 independent package runtime and public loopback identity",
+  "originalCaller": "unchanged4569B",
+  "originalCallerOpen": true,
+  "outerNotReadWhileActive": true,
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\web-start01-config.json",
+    "bytes": 3487,
+    "sha256": "0783e526c0ac4feba8f46bcae9d42c039bc22413a4fe85ed93f46d562ef8a5d6"
+  },
+  "runtimeSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-runtime-snapshot01.json",
+    "bytes": 2805082,
+    "sha256": "aa98c1b4af9b1b0f7baf6b512a720aa27293af8f86859e3ca3b30977f9c94935"
+  },
+  "runtime": {
+    "files": 5260,
+    "bytes": 313459797,
+    "copyHashDifferences": 0
+  },
+  "identity": {
+    "child": 99956,
+    "parent": 101196,
+    "port": 19205,
+    "uniqueLoopbackListener": true,
+    "source77FixedServerArgumentVerified": true,
+    "originalParentPresent": true
+  },
+  "previousOwnedWebClosure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source76-owned-web-closure01.json",
+    "bytes": 1877,
+    "sha256": "1f003ab9410e74ca57953e1fdeaf40862c264d64ec1b1471115ac327a880ea11"
+  },
+  "activeLogsRead": false,
+  "gatewayChanged": false,
+  "browserProofSeparate": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

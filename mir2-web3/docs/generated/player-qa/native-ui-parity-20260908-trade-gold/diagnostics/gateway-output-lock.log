@@ -1,0 +1,116 @@
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7338:25
+     |
+7338 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: methods `scoped_to_account` and `scoped_to_accounts` are never used
+   --> apps\simulation\src\config.rs:225:8
+    |
+109 | impl AccountStore {
+    | ----------------- methods in this implementation
+...
+225 |     fn scoped_to_account(&self, account_id: &str) -> Self {
+    |        ^^^^^^^^^^^^^^^^^
+...
+229 |     fn scoped_to_accounts(&self, account_ids: &[&str]) -> Self {
+    |        ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:734:5
+    |
+727 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+734 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: method `socketed_count` is never used
+   --> apps\simulation\src\runtime\equipment.rs:303:19
+    |
+119 | impl EquipmentState {
+    | ------------------- method in this implementation
+...
+303 |     pub(super) fn socketed_count(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:308:15
+    |
+308 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:313:15
+    |
+313 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1813:15
+     |
+1813 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+   --> apps\simulation\src\runtime\quests.rs:814:15
+    |
+814 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+    |               ^^^^^^^^^^^^^^
+
+warning: function `default_save_for_character` is never used
+  --> apps\simulation\src\runtime\save.rs:76:15
+   |
+76 | pub(super) fn default_save_for_character(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:817:15
+    |
+817 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `game_shop_buy_product` is never used
+    --> apps\simulation\src\runtime\stage5.rs:4257:8
+     |
+3187 | impl SimulationSession {
+     | ---------------------- method in this implementation
+...
+4257 |     fn game_shop_buy_product(
+     |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-simulation` (lib) generated 14 warnings
+   Compiling mir2-gateway v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\gateway)
+error: linking with `link.exe` failed: exit code: 1104
+  |
+  = note: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe" "/NOLOGO" "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-trade-invitation-gateway-20260908\\debug\\deps\\rustc0vPY45\\symbols.o" "<17 object files omitted>" "kernel32.lib" "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-trade-invitation-gateway-20260908\\debug\\deps/{librmp_serde-0d3ce33e90c53060,librmp-f6a2a30ad0a54d51}.rlib" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libtest-*,libgetopts-*,librustc_std_workspace_std-*}.rlib" "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-trade-invitation-gateway-20260908\\debug\\deps/{libaxum-035ce05217a39588,libserde_path_to_error-12abf836caeabbb6,libmatchit-b5a0ea3385911c39,libtokio_tungstenite-457c7cf23b11c6f0,libtungstenite-ef2c9f5f6bbca209,libdata_encoding-0b108279fcd9c508,librand-ba8b9d66251a94e4,librand_chacha-7237fdc485d195de,librand_core-16211cf893d0e982,libgetrandom-77007357f08652a9,libsha1-8f5940fee56debbe,libaxum_core-f80fdf0fd6a819c1,libmime-7a517e56b77e967c,libquinn-d1af709027d61a0c,libquinn_udp-d8c3ed9cdf2de989,libquinn_proto-2fda338fa151ddfe,liblru_slab-c2cdeab671d3fda2,librand_pcg-84350c7280bd657c,librustc_hash-52958e4c0c71bfbf,libdubhe_network_core-a4eb9221aaf52acd,libtar-ec58598207fd8c5d,libfiletime-85765dbf156eb33e,libkeyring-8939e5c4adec9c57,libwindows_sys-cd0154d8ba8a7cbb,libwindows_targets-2a5e80822e09618b,libed25519_consensus-c8635bcd2c5d35e2,libhex-2ca2018e511b827b,libthiserror-74d92dc629e7c1ca,libsha2-94680e65f8df68b5,libopaque_debug-ec4925c8c9f8cf6f,libblock_buffer-82ee7e8c521b4e39,libcurve25519_dalek_ng-1324163a2de0cf88,libsubtle_ng-e870cdbfb8891703,libdigest-ae89b16f7c4b7bd9,libsemver-481482d645778d8b,librand-630f61c6d2a0fd12,librand_chacha-66d32fc7b344c403,libppv_lite86-da965bb406002d05,libzerocopy-b31e388c9537b183,libr2d2_postgres-0ec3d3fc63249357,libr2d2-954031c5c1c77be1,libscheduled_thread_pool-69307e0149dfec27,libjsonwebtoken-7f45e18d0dc44277,libpem-28c5c62678758380,libsimple_asn1-89cd43e6773ff15e,libtime-d82e47848eaaa0ff,libpowerfmt-119a7ab256d3cacc,libnum_conv-b27b860876ec7db3,libderanged-b2010adf7fc2bda0,libtime_core-16a6aea7db7dbb81,libnum_bigint-113764ef441c0389,libnum_integer-dd9af79478e24e9b,libnum_traits-d70ac9f21ae19082,libmir2_simulation-790580e876a08ac6,liblibc-131a5d3c277884d2,libflate2-07c8e2ef33901161,libminiz_oxide-739bc7aa5db5edb6,libsimd_adler32-093b2ad9023dbb59,libcrc32fast-ea035c1bf4fa99e2,libargon2-f96041b15c8f4901,libcpufeatures-95ef586b4e523627,libblake2-5d4bf149ace09054,libdigest-23c0d7dcdf31450a,libblock_buffer-b4e5d3ee2d3cafa7,libcrypto_common-a9978ce0e87f8cdc,libgeneric_array-2622af79c38965ba,libpassword_hash-9cdafeaeaddb2537,libbase64ct-d1798f4c2b9b5f4b,libbevy_ecs-886f87b0d65b0917,libslotmap-c680ef3e7893e51f,libbevy_tasks-3bbfa39074de7cbd,libasync_channel-4e7d432d4899ccab,libevent_listener_strategy-93abafc557123a43,libevent_listener-2343bedb7fed0145,libasync_executor-0b95e56ab94bf548,libfastrand-567746df1835a74d,libasync_task-56adc48566378ea6,libconcurrent_queue-caa0fa897b5342b9,libcrossbeam_utils-9100cb115f3a5c79,libfutures_lite-b68498ca5e8d0a7d,libfutures_io-fbd59803bdb77bb7,libparking-e185233966567fab,libfixedbitset-5714b5fcc113a4c5,libbumpalo-3e87503a7eb67120,libbevy_reflect-e3c28d2299d6795d,liberased_serde-a2886804b0edccf5,libtypeid-a02e59dc727942ee,libdowncast_rs-fb442b10803c5a2f,libderive_more-7fa711e88aab803f,libthiserror-1f7b9a963d2d7add,libindexmap-19c762140c8573a2,libhashbrown-b9f8c7261dbd3a70,libbevy_utils-dc1cd7bd158b7d71,libthread_local-5a69a7f0d7945af3,libdisqualified-2d0babd9bb37a670,libbevy_ptr-2e7407f566f26ac9,libnonmax-067c184bdac3163a,libbevy_platform-c8719b7d53b7862d,libhashbrown-11af23a1b525b981,libequivalent-44a37e51a2069595,libfoldhash-ffcb86fbc899565d,librand_core-e6bc9eb66b9c539c,libpostgres-2c19988db3a0282b,libtokio_postgres-31fcdfd20a61933a,libphf-beea30353d04bf2d,libphf_shared-f5f10c383306697d,libsiphasher-6bd510951356e683,libwhoami-fc9ddbb343b8d914,libparking_lot-11e95c0f8b2b82e9,libparking_lot_core-36ff128ab98f45c5,liblock_api-ddd9750e1cd0a465,libscopeguard-30c9e81fa6cbc700,libpostgres_types-6c7144587307dd77,libpostgres_protocol-ced3b8275847b7b7,libstringprep-d77c2cbf438a281e,libunicode_properties-50d4f4a9ad04c95c,libunicode_normalization-6445da6942a0e651,libtinyvec-6d4e0be4dbf0b17d,libtinyvec_macros-71d587a9c45cb34a,libunicode_bidi-f4cee12117ec53db,librand-24b13982c1eabe01,libgetrandom-6bf22b25e7bb92c7,libchacha20-f8abd51f77500777,librand_core-c5b2e7b2a123aecb,libmd5-b529165f1ddae498,libbyteorder-49c652f095dc67ba,libfallible_iterator-51d0fd76e1a7d7e5,libmir2_game_data-4aa41f3997da8001,libmir2_protocol-68a4874f09239c7d,libhmac-5ba997b1dad32c06,libsha2-7be842e191581230,libcpufeatures-715898ebc34d4b83,libdigest-b71f6ad8e4ba89c7,libctutils-6fe089c420546556,libcmov-6bb9833d93af455c,libconst_oid-4f1331c0b5ae329f,libcrypto_common-2f86cf66d4a8e9cf,libblock_buffer-e48894762ba13702,libhybrid_array-7eed73dda7eb2fd5,libtypenum-c896264cf64bef34,libreqwest-70f9b6ca1ee42b60,libserde_urlencoded-d4883c6ea7128cc3,libryu-c61f885947b08139,libhyper_rustls-4ede9bf980c80271,libwebpki_roots-3203c3f25ec0b11a,libtokio_rustls-ff7d68765bccdec9,librustls-aab4fd23e9e7347f,libsubtle-fa230f0478b93f45,libwebpki-c334b6f4306855cc,libring-cbc4501d6da6557e,libgetrandom-32332fe6ddc48bf0,libuntrusted-1f75b7d160b9fc22,libcfg_if-588656f7c5dc0f8a,librustls_pki_types-5786d1344b582b56,libzeroize-fded912cb1779960,libserde_json-535fc95fbc663f23,libmemchr-4bf8cd7482d31cd5,libzmij-f0ed6f645f4d18ce,libserde-379e901eb905fe3f,libserde_core-1b6ae5e7ab54bc4c,libtower_http-2e0cd2dbeb683267,libbitflags-6d1870f2ceec34f8,libtower-fd28e8f29608f300,libtower_layer-c1bcf02b7eddddd7,libhyper_util-0e554a5b73b6ddec,libbase64-bba4e396c38ed133,libipnet-1759f57606e87a76,libtower_service-2840b9eae92c8854,libtracing-593a3a30cfc7da11,libtracing_core-fb7517c00a0187c7,libonce_cell-9b51bbe2249eab14,libhyper-15527a37db5c4d9c,libwant-e05fa63d62002371,libtry_lock-37b01d7c8cdfcee0,libhttparse-8d7b7c4f70e1fdce,libatomic_waker-aa4acd71742054aa,libhttpdate-3fc1576cc5736fe7,libfutures_channel-0dde3da23234e6a9,libfutures_util-b0ab9a1cd2670378,libslab-2702e1f8bb5effe7,libfutures_task-b0867aa96a808816,libtokio_util-46f37c0be8b2d791,libfutures_sink-9f29883b8ae92e68,libtokio-f9a93aae2568b7d0,libsocket2-16581b559437047f,libmio-be171d405f21c5c6,libwindows_sys-32b2f740e3915aeb,libwindows_link-b81352b8ebf1cee5,libhttp_body_util-28360b55c54fce26,libpin_project_lite-de97378b82622625,libhttp_body-f58b152b9d70d97e,liblog-7facd7e2846facd4,liburl-1cc4b7770d087b6d,libidna-8264f160578f5484,libidna_adapter-503756224490a467,libicu_properties-0d29011cfe5f1f76,libicu_properties_data-0c409ab9af895d7a,libicu_normalizer-8106111f134b8b38,libsmallvec-dfcec9a3d4b1c76f,libicu_normalizer_data-73fc99d7873c85e0,libicu_collections-720d30de24c7cc68,libutf8_iter-fad7690374fb548b,libpotential_utf-a2c9b0f81577df61,libicu_provider-3158483ca19a4cc7,libicu_locale_core-e2dd4fc56244fd46,libtinystr-a4801f9185715d42,liblitemap-093e6ea4766c9495,libwriteable-bba1cdb1900af6ad,libzerovec-cd6ae3229c6fdd83,libzerotrie-346b9d64bbd2ace7,libyoke-b13204b0aa07b86f,libstable_deref_trait-1866d860f442c352,libzerofrom-862422dfcdd898e5,libform_urlencoded-f875a2f81a21f107,libpercent_encoding-196bd9ee3e0dc238,libhttp-95b59b6e48652682,libitoa-c843a8d8c8e7aa9d,libbytes-599f7820d1b2e5f5,libsync_wrapper-d0b9a55fdcc5889a,libfutures_core-e5e050921c53ac61}.rlib" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libstd-*,libpanic_unwind-*,libcfg_if-*,libwindows_link-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libunwind-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "kernel32.lib" "C:\\Users\\Administrator\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows_x86_64_msvc-0.53.1\\lib\\windows.0.53.0.lib" "Kernel32.lib" "kernel32.lib" "legacy_stdio_definitions.lib" "secur32.lib" "advapi32.lib" "kernel32.lib" "bcrypt.lib" "advapi32.lib" "kernel32.lib" "kernel32.lib" "kernel32.lib" "ntdll.lib" "userenv.lib" "ws2_32.lib" "dbghelp.lib" "/defaultlib:msvcrt" "/NXCOMPAT" "/LIBPATH:C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-trade-invitation-gateway-20260908\\debug\\build\\ring-afd886338518d643\\out" "/LIBPATH:C:\\Users\\Administrator\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\windows_x86_64_msvc-0.53.1\\lib" "/OUT:C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-trade-invitation-gateway-20260908\\debug\\deps\\mir2_gateway-27e05063d68d510f.exe" "/OPT:REF,NOICF" "/DEBUG" "/PDBALTPATH:%_PDB%" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\intrinsic.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\liballoc.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libcore.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libstd.natvis"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: LINK : fatal error LNK1104: 无法打开文件“C:\Users\Administrator\AppData\Local\Temp\mir2-trade-invitation-gateway-20260908\debug\deps\mir2_gateway-27e05063d68d510f.exe”
+
+
+error: could not compile `mir2-gateway` (lib test) due to 1 previous error

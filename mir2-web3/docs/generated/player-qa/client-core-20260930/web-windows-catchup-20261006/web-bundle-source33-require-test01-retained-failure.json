@@ -1,0 +1,58 @@
+{
+  "owner": "Root",
+  "kind": "Source33 requirement filter also selected original stale-package success test; original failure retained",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-require-npc-test01.config.json",
+    "bytes": 4650,
+    "sha256": "fb9d753f95ed36cdd4b65081e84700d380428abd1dfc57680f2c456a7da87ab6"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-web01-snapshot.json",
+    "bytes": 6178031,
+    "sha256": "5d5e2452511307ec0d8dee05168b2c02605ce53ba5f194304614cb51e82923e5"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 1,
+    "builderPid": 150036,
+    "kind": "Source33 require-npc-test01 original finite CLI current inputs",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 225,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-require-npc-test01.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-require-npc-test01.stdout.log",
+    "bytes": 1103,
+    "sha256": "d909c924ab53c93a63b8c454524be1dabada089d499a7d0eacd33a869812431a"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-require-npc-test01.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outerPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-require-npc-test01.outer.json",
+    "bytes": 535,
+    "sha256": "62adf36912e1b1daaabee4b1ceea188141d155bb4770d4b5ec8252ac7446c958"
+  },
+  "selected": 2,
+  "actualPassed": 1,
+  "actualFailed": 1,
+  "actualSkipped": 0,
+  "cause": "Name filter without also matched clean source/package copy supports both prebuilt switches without Rust. That original package test fails because actual published Source25 dual manifest has no new NPC bundle. Full current source/package suite remains pending; no assertions changed. New requirement case passed.",
+  "next": "Run only exact new builder rejects name; do not count initial run as all passing or full package acceptance.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

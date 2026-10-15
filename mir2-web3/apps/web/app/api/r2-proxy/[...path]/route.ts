@@ -15,11 +15,17 @@ const PROXY_BASE = process.env.MIR2_R2_PROXY_BASE?.replace(/\/+$/, "");
 
 export async function GET(_request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
   if (!PROXY_BASE) {
-    return new Response("r2-proxy disabled (set MIR2_R2_PROXY_BASE)", { status: 404 });
+    return new Response("r2-proxy disabled (set MIR2_R2_PROXY_BASE)", {
+      status: 404,
+      headers: { "cache-control": "no-store" },
+    });
   }
   const { path } = await context.params;
   if (!Array.isArray(path) || path.length === 0) {
-    return new Response("bad asset path", { status: 400 });
+    return new Response("bad asset path", {
+      status: 400,
+      headers: { "cache-control": "no-store" },
+    });
   }
 
   const target = `${PROXY_BASE}/${path.map((segment) => encodeURIComponent(segment)).join("/")}`;
@@ -29,11 +35,17 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ pa
     // No Referer/Origin is sent by a server-side fetch — that is the whole point.
     upstream = await fetch(target, { headers: { Accept: "*/*" }, cache: "no-store" });
   } catch {
-    return new Response(null, { status: 502 });
+    return new Response(null, {
+      status: 502,
+      headers: { "cache-control": "no-store" },
+    });
   }
 
   if (!upstream.ok || !upstream.body) {
-    return new Response(null, { status: upstream.status || 502 });
+    return new Response(null, {
+      status: upstream.status || 502,
+      headers: { "cache-control": "no-store" },
+    });
   }
 
   const headers = new Headers();

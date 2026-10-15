@@ -1,0 +1,3 @@
+Error on line 198 in C:\mir2-playtest-releases\20260930-multilingual\installer-build\Mir2-Invite.iss: Column 16:
+Unknown identifier 'GetTempFileName'.
+Compile aborted.

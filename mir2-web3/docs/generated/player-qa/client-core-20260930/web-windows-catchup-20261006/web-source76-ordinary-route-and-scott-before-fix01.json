@@ -1,0 +1,54 @@
+{
+  "kind": "source76 actual ordinary warehouse exit and ground walking Scott route",
+  "start": {
+    "map": "0140",
+    "x": 2,
+    "y": 10
+  },
+  "exitObserved": {
+    "map": "0",
+    "x": 306,
+    "y": 628
+  },
+  "settledPositions": [
+    {
+      "x": 301,
+      "y": 628
+    },
+    {
+      "x": 301,
+      "y": 627
+    },
+    {
+      "x": 292,
+      "y": 627
+    },
+    {
+      "x": 290,
+      "y": 627
+    },
+    {
+      "x": 290,
+      "y": 618
+    },
+    {
+      "x": 290,
+      "y": 611
+    }
+  ],
+  "interaction": "ordinary Merchant_Scott then visible View link",
+  "shop": {
+    "compatibilityShopCount": 1,
+    "host": {
+      "active": false,
+      "blocksInput": false,
+      "errorPresent": true,
+      "transitioning": false
+    }
+  },
+  "visibleGold": 180,
+  "candleVisiblePrice": 10,
+  "bought": false,
+  "debugOrAdminUsed": false,
+  "rawNetworkObserved": false
+}

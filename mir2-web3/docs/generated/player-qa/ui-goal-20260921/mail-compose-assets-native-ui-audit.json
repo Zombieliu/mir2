@@ -1,0 +1,690 @@
+{
+  "scannedFiles": 164,
+  "libraries": [
+    "Prguse",
+    "Prguse2",
+    "Title",
+    "ChrSel",
+    "BuffIcon",
+    "GuildSkill",
+    "MagIcon",
+    "MagIcon2",
+    "MapLinkIcon"
+  ],
+  "requiredFrames": 2478,
+  "verifiedFrames": 2396,
+  "sourceHashes": {
+    "Prguse": "584b67694a420a29c98f51b04cdf681acf1ed071c15c57014fdfd59c762a3c96",
+    "Prguse2": "510ebc77315089075fc472c9ef745be2e16c6dece970c307d6859ce074cce861",
+    "Title": "bd3e9485548e9b3cb5d4cb261c9a01a07752fb41fcea7f5d8569e602feaed648",
+    "ChrSel": "4be898a0dae083802959ee4b1d2c093320fbc0a46ec68b30ac5fc856744a8197",
+    "BuffIcon": "326be33f0ebe2e25777f47959cae84ad191ba19cefe7d8e685006f8761f8dfb8",
+    "GuildSkill": "31f1897c00258270ea2b3c9404e93650d952c35c0278f57acf6de8c6636cbf5b",
+    "MagIcon": "5f49bf35158f680852a66833ec3c706ad045448ef1526d1f7fdd116807de3030",
+    "MagIcon2": "0875fc38fa58a101f09346374479de712661f672ef39e6c0ea9679d59aad2a4e",
+    "MapLinkIcon": "094f5c6d55e28bc00f74d973022b4e4f2b6e6808e52c1fdf2d0c8148950a1d71"
+  },
+  "issues": [],
+  "sourceEmpty": [
+    {
+      "key": "Prguse/530",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/531",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/532",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/533",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/603",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/606",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/607",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/608",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/609",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1310",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1311",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1312",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1313",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1314",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1315",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1316",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1317",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1318",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1319",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1320",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1321",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1322",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1323",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1324",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1325",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1330",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1331",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1332",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1333",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1334",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1335",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1336",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1337",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1338",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1339",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1354",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1364",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1365",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1378",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1380",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1381",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1382",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1383",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1384",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1385",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1420",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1421",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1424",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1425",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1430",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1431",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1432",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1433",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1434",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1435",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1436",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1437",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1438",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1439",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1440",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1441",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1442",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1443",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1444",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1445",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1450",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1451",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1452",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1453",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1454",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1455",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1456",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1457",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1458",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1459",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1460",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1461",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1462",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1463",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1464",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/1465",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "zero-dimension-source",
+      "exportedPng": "invalid-legacy-png"
+    },
+    {
+      "key": "Prguse/2447",
+      "origins": [
+        "manifest"
+      ],
+      "kind": "absent-source-slot",
+      "exportedPng": "absent"
+    }
+  ],
+  "limitations": [
+    "Preview animation base-plus-frame arithmetic, server-selected icons, computed skill indexes and service-mode-selected titles are not inferred unless expressed in a supported literal/spec/array/range form. Configured UI-library ranges are fully checked.",
+    "This verifies assets, not native interaction or visual parity."
+  ]
+}

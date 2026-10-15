@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "native-ui-parity-20260908-trade-gold",
+  "implementationParentCommit": "58eab9a4a6684b2d2d11d2c533049b64995e7458",
+  "implementation": "Uncommitted working-tree source, bound by implementation-hashes.json",
+  "accepted": false,
+  "visualAccepted": false,
+  "globalParityPercent": null,
+  "sourceHashes": "source-hashes.json",
+  "implementationHashes": "implementation-hashes.json",
+  "toolchain": "1.95.0",
+  "environment": {
+    "locked": true,
+    "offline": true,
+    "jobs": 2,
+    "rustTestThreads": 1,
+    "incremental": false,
+    "devDebug": 0,
+    "testDebug": 0,
+    "targets": "Isolated directories under the Windows temporary directory on C:"
+  },
+  "suites": [
+    {
+      "name": "Simulation library",
+      "command": "cargo +1.95.0 test --locked --offline -j 2 -p mir2-simulation --features test-support --lib",
+      "passed": 1491,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 784.98,
+      "log": "simulation-tests.log"
+    },
+    {
+      "name": "Simulation integration bulk",
+      "command": "cargo +1.95.0 test --locked --offline -j 2 -p mir2-simulation --features test-support --test big_map --test character_wings --test crystal_map_events --test crystal_map_hazards --test great_fox_spirit_recall --test hero_ai --test item_stack_images --test login_notice --test mail_status_transactions --test map_coordinate_events --test map_event_binding_e1 --test native_startup_contract --test ordinary_candidate_loop --test platinum_176_combat_milestones --test platinum_176_party_boss --test platinum_176_progression --test quest_agent_respawns --test quest_agent_special_scripts --test quest_icons --test ranking --test replica_recovery_config --test save_failure_propagation --test security_lifecycle --test shared_trade_completion --test shared_trade_gold --test shared_zone --test social_economy_integration --test storage_request_id --test user_item_uid_file --test vertical_slice --test yin_devil_node --test zone_replay",
+      "passed": 373,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 1313.89,
+      "targets": {
+        "big_map": {
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 3.61
+        },
+        "character_wings": {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 7.25
+        },
+        "crystal_map_events": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 0.0
+        },
+        "crystal_map_hazards": {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 0.09
+        },
+        "great_fox_spirit_recall": {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 1.36
+        },
+        "hero_ai": {
+          "passed": 28,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 18.34
+        },
+        "item_stack_images": {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 11.78
+        },
+        "login_notice": {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 47.8
+        },
+        "mail_status_transactions": {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 3.56
+        },
+        "map_coordinate_events": {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 114.54
+        },
+        "map_event_binding_e1": {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 0.26
+        },
+        "native_startup_contract": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 0.54
+        },
+        "ordinary_candidate_loop": {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 3.95
+        },
+        "platinum_176_combat_milestones": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 60.18
+        },
+        "platinum_176_party_boss": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 0.09
+        },
+        "platinum_176_progression": {
+          "passed": 10,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 33.8
+        },
+        "quest_agent_respawns": {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 0.31
+        },
+        "quest_agent_special_scripts": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 6.1
+        },
+        "quest_icons": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 10.79
+        },
+        "ranking": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 0.49
+        },
+        "replica_recovery_config": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 0.08
+        },
+        "save_failure_propagation": {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 2.08
+        },
+        "security_lifecycle": {
+          "passed": 20,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 35.35
+        },
+        "shared_trade_completion": {
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 10.4
+        },
+        "shared_trade_gold": {
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 12.52
+        },
+        "shared_zone": {
+          "passed": 204,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 3.88
+        },
+        "social_economy_integration": {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 5.81
+        },
+        "storage_request_id": {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 1.32
+        },
+        "user_item_uid_file": {
+          "passed": 17,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 5.45
+        },
+        "vertical_slice": {
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 877.99
+        },
+        "yin_devil_node": {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 1.4
+        },
+        "zone_replay": {
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 32.77
+        }
+      },
+      "log": "simulation-integration-tests.log"
+    },
+    {
+      "name": "Simulation final gold suite",
+      "command": "cargo +1.95.0 test --locked --offline -j 2 -p mir2-simulation --features test-support --test shared_trade_gold",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 15.09,
+      "log": "simulation-gold-tests.log"
+    },
+    {
+      "name": "Gateway full initial run",
+      "command": "cargo +1.95.0 test --locked --offline -j 2 -p mir2-gateway --lib -- --test-threads=1",
+      "exitCode": 101,
+      "passed": 694,
+      "failed": 1,
+      "ignored": 1,
+      "seconds": 888.77,
+      "log": "gateway-full-initial.log"
+    },
+    {
+      "name": "Gateway final gold suite",
+      "command": "cargo +1.95.0 test --locked --offline -j 2 -p mir2-gateway --lib trade_gold_tests -- --test-threads=1",
+      "exitCode": 0,
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 74.45,
+      "log": "gateway-gold-tests.log"
+    }
+  ],
+  "resolvedCoverage": {
+    "simulationUnitPassed": 1491,
+    "simulationIntegrationUniquePassed": 374,
+    "simulationIntegrationExplanation": "Bulk run contained gold12; final gold13 rerun includes one additional cumulative overflow case. All32 integration targets passed. Nested user_item_uid_file child output is not double-counted.",
+    "gatewayPassed": 695,
+    "gatewayIgnored": 1,
+    "gatewayUnresolvedFailures": 0,
+    "gatewayExplanation": "Initial full run had one fixture assertion failure. Only that test fixture changed: explicitly receive the queued legitimate TradeGold(11) before testing rejected item edits. Final ten-case rerun passes. Production code is unchanged between full run and rerun. This is combined resolved coverage, not a claim that the initial full command exited successfully.",
+    "initialGatewayFailedTest": "routing::tests::trade_gold_tests::peer_preparation_rejects_item_retrieval_and_deposit_without_changing_accepted_offer",
+    "ignoredGatewayTest": "channel_identity::tests::postgres_store_is_shared_across_gateway_instances",
+    "ignoredReason": "Requires MIR2_CHANNEL_IDENTITY_TEST_DATABASE_URL"
+  },
+  "review": {
+    "independentBoundedReviewCompleted": true,
+    "unresolvedP0": 0,
+    "unresolvedP1": 0,
+    "notes": "Review found stale peer confirmation on raw item edits; final gate and regression cover failure ACKs and original-offer settlement."
+  },
+  "checks": {
+    "formatExitCode": 0,
+    "diffCheckExitCode": 0,
+    "implementationHashesVerified": 13,
+    "sourceHashesVerified": 3
+  },
+  "limitations": [
+    "Prepared editing/retained item custody/confirmation-ticket separation remain open; prepared unlock still cancels/refunds.",
+    "Source capacity rejection retains offers; Candidate admission still cancels/refunds.",
+    "Native item cells remain read-only. Invitation throttle/error chats and empty zero-held orphan trade cleanup are not closed by this positive-gold recovery leaf.",
+    "No native UI/Windows host rerun or screenshots in this backend-only leaf; prior UI results are historical, not re-claimed.",
+    "No package, interactive launch, production rollout, live-store write or human acceptance. All33 backlog IDs remain open."
+  ],
+  "diagnostics": [
+    "Initial output executable was locked (LNK1104); dependency copies into fresh C: temporary targets avoided changing existing running binaries.",
+    "Initial gateway52 trade subset passed before final item-edit gate; archived as diagnostic history.",
+    "Archived logs normalize trailing whitespace and final blank lines only; raw originals remain in the temporary directory."
+  ]
+}

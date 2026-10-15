@@ -1,0 +1,1851 @@
+{
+  "source": "Taoist.2026-09-17T13-21-01-374Z.trace.jsonl",
+  "sourceCapturedBytes": 81428681,
+  "sourceCapturedSha256": "CF42C29C1B39F0AB15F7A2CDD7A306379C49F2E80D9997DAEA2F5DFF48079D4D",
+  "lastCapturedAt": "2026-09-17T14:23:31.538Z",
+  "logout": 26111,
+  "lastOwner": {
+    "ownerId": 1000,
+    "name": "JT3f4a4e1f",
+    "class": "Taoist",
+    "level": 26,
+    "map": "0",
+    "x": 287,
+    "y": 607,
+    "hp": 191,
+    "mp": 72,
+    "gold": 926,
+    "supplies": [
+      {
+        "uniqueId": 7,
+        "name": "(HP)DrugSmall",
+        "quantity": 3,
+        "sellValue": 20
+      },
+      {
+        "uniqueId": 9,
+        "name": "(HP)DrugSmall",
+        "quantity": 7,
+        "sellValue": 20
+      },
+      {
+        "uniqueId": 175,
+        "name": "(HP)DrugSmall",
+        "quantity": 13,
+        "sellValue": 20
+      },
+      {
+        "uniqueId": 4,
+        "name": "(HP)DrugSmall",
+        "quantity": 20,
+        "sellValue": 20
+      },
+      {
+        "uniqueId": 178,
+        "name": "RandomTeleport",
+        "quantity": 4,
+        "sellValue": 50
+      },
+      {
+        "uniqueId": 185,
+        "name": "(HP)DrugSmall",
+        "quantity": 19,
+        "sellValue": 20
+      },
+      {
+        "uniqueId": 13,
+        "name": "(MP)DrugSmall",
+        "quantity": 3,
+        "sellValue": 20
+      },
+      {
+        "uniqueId": 14,
+        "name": "Venison",
+        "quantity": 1,
+        "sellValue": 249
+      },
+      {
+        "uniqueId": 15,
+        "name": "Venison",
+        "quantity": 1,
+        "sellValue": 226
+      },
+      {
+        "uniqueId": 1,
+        "name": "Amulet",
+        "quantity": 11,
+        "sellValue": 12
+      },
+      {
+        "uniqueId": 189,
+        "name": "Amulet",
+        "quantity": 46,
+        "sellValue": 12
+      },
+      {
+        "uniqueId": 195,
+        "name": "(HP)DrugSmall",
+        "quantity": 14,
+        "sellValue": 20
+      },
+      {
+        "uniqueId": 2,
+        "name": "TownTeleport",
+        "quantity": 1,
+        "sellValue": 500
+      },
+      {
+        "uniqueId": 0,
+        "name": "(MP)DrugSmall",
+        "quantity": 8,
+        "sellValue": 20
+      },
+      {
+        "uniqueId": 196,
+        "name": "Amulet",
+        "quantity": 27,
+        "sellValue": 12
+      },
+      {
+        "uniqueId": 188,
+        "name": "Amulet",
+        "quantity": 16
+      }
+    ],
+    "q113": [
+      {
+        "current": 3,
+        "done": true,
+        "label": "Kill BlackMaggot",
+        "required": 3
+      },
+      {
+        "current": 1,
+        "done": false,
+        "label": "Kill WedgeMoth",
+        "required": 3
+      }
+    ]
+  },
+  "selected": [
+    {
+      "sequence": 24588,
+      "at": "2026-09-17T14:18:01.153Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "publicEvent": {
+        "uniqueId": 14,
+        "count": 1
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 77,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 4,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 232
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 262
+          },
+          {
+            "uniqueId": 16,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 209
+          },
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24591,
+      "at": "2026-09-17T14:18:01.734Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "publicEvent": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 14
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 77,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 4,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 232
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 262
+          },
+          {
+            "uniqueId": 16,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 209
+          },
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24592,
+      "at": "2026-09-17T14:18:01.734Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "publicEvent": {
+        "gold": 232
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 77,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 4,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 232
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 262
+          },
+          {
+            "uniqueId": 16,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 209
+          },
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24597,
+      "at": "2026-09-17T14:18:01.847Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "publicEvent": {
+        "uniqueId": 15,
+        "count": 1
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 309,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 3,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 262
+          },
+          {
+            "uniqueId": 16,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 209
+          },
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24599,
+      "at": "2026-09-17T14:18:02.356Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "publicEvent": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 15
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 309,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 3,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 262
+          },
+          {
+            "uniqueId": 16,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 209
+          },
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24600,
+      "at": "2026-09-17T14:18:02.356Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "publicEvent": {
+        "gold": 262
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 309,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 3,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 262
+          },
+          {
+            "uniqueId": 16,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 209
+          },
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24602,
+      "at": "2026-09-17T14:18:02.450Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "publicEvent": {
+        "uniqueId": 16,
+        "count": 1
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 571,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 2,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 16,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 209
+          },
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24607,
+      "at": "2026-09-17T14:18:02.965Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "publicEvent": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 16
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 571,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 2,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 16,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 209
+          },
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24608,
+      "at": "2026-09-17T14:18:02.965Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "publicEvent": {
+        "gold": 209
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 571,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 2,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 16,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 209
+          },
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24610,
+      "at": "2026-09-17T14:18:03.048Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "publicEvent": {
+        "uniqueId": 17,
+        "count": 1
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 780,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 1,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24614,
+      "at": "2026-09-17T14:18:03.567Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "publicEvent": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 17
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 780,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 1,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24615,
+      "at": "2026-09-17T14:18:03.567Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "publicEvent": {
+        "gold": 256
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 780,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Venison": 1,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 17,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 256
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 24664,
+      "at": "2026-09-17T14:18:07.823Z",
+      "direction": "sent",
+      "type": "buyItem",
+      "publicEvent": {
+        "itemIndex": 43188227,
+        "count": 9,
+        "panelType": 0
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 287,
+        "y": 607,
+        "gold": 1036,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": []
+      }
+    },
+    {
+      "sequence": 24667,
+      "at": "2026-09-17T14:18:08.406Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "LoseGold",
+      "publicEvent": {
+        "gold": 360
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 287,
+        "y": 607,
+        "gold": 1036,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 3,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": []
+      }
+    },
+    {
+      "sequence": 24670,
+      "at": "2026-09-17T14:18:08.516Z",
+      "direction": "sent",
+      "type": "buyItem",
+      "publicEvent": {
+        "itemIndex": 46661648,
+        "count": 27,
+        "panelType": 0
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 287,
+        "y": 607,
+        "gold": 676,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 12,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": []
+      }
+    },
+    {
+      "sequence": 24675,
+      "at": "2026-09-17T14:18:09.011Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "LoseGold",
+      "publicEvent": {
+        "gold": 675
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 287,
+        "y": 607,
+        "gold": 676,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 12,
+          "Amulet": 69,
+          "TownTeleport": 1
+        },
+        "venison": []
+      }
+    },
+    {
+      "sequence": 25610,
+      "at": "2026-09-17T14:22:37.011Z",
+      "direction": "diagnostic",
+      "type": "safeSupplyFunding",
+      "publicEvent": {
+        "method": "DeerVenison",
+        "collected": 7,
+        "hunts": 7
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 244,
+        "y": 614,
+        "gold": 1,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 12,
+          "Venison": 7,
+          "Amulet": 96,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 1,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 265
+          },
+          {
+            "uniqueId": 197,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 253
+          },
+          {
+            "uniqueId": 10,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 228
+          },
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26034,
+      "at": "2026-09-17T14:23:21.533Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "publicEvent": {
+        "uniqueId": 1,
+        "count": 1
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 1,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 7,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 1,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 265
+          },
+          {
+            "uniqueId": 197,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 253
+          },
+          {
+            "uniqueId": 10,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 228
+          },
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26039,
+      "at": "2026-09-17T14:23:22.247Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "publicEvent": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 1
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 1,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 7,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 1,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 265
+          },
+          {
+            "uniqueId": 197,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 253
+          },
+          {
+            "uniqueId": 10,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 228
+          },
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26040,
+      "at": "2026-09-17T14:23:22.247Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "publicEvent": {
+        "gold": 265
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 1,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 7,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 1,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 265
+          },
+          {
+            "uniqueId": 197,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 253
+          },
+          {
+            "uniqueId": 10,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 228
+          },
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26042,
+      "at": "2026-09-17T14:23:22.364Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "publicEvent": {
+        "uniqueId": 197,
+        "count": 1
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 266,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 6,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 197,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 253
+          },
+          {
+            "uniqueId": 10,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 228
+          },
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26045,
+      "at": "2026-09-17T14:23:23.208Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "publicEvent": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 197
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 266,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 6,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 197,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 253
+          },
+          {
+            "uniqueId": 10,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 228
+          },
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26046,
+      "at": "2026-09-17T14:23:23.208Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "publicEvent": {
+        "gold": 253
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 266,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 6,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 197,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 253
+          },
+          {
+            "uniqueId": 10,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 228
+          },
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26048,
+      "at": "2026-09-17T14:23:23.332Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "publicEvent": {
+        "uniqueId": 10,
+        "count": 1
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 519,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 5,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 10,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 228
+          },
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26050,
+      "at": "2026-09-17T14:23:23.851Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "publicEvent": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 10
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 519,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 5,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 10,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 228
+          },
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26051,
+      "at": "2026-09-17T14:23:23.851Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "publicEvent": {
+        "gold": 228
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 519,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 5,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 10,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 228
+          },
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26055,
+      "at": "2026-09-17T14:23:23.980Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "publicEvent": {
+        "uniqueId": 11,
+        "count": 1
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 747,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 4,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26057,
+      "at": "2026-09-17T14:23:24.560Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "publicEvent": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 11
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 747,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 4,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26058,
+      "at": "2026-09-17T14:23:24.560Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "publicEvent": {
+        "gold": 213
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 747,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 4,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 11,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 213
+          },
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26060,
+      "at": "2026-09-17T14:23:24.673Z",
+      "direction": "sent",
+      "type": "sellItem",
+      "publicEvent": {
+        "uniqueId": 12,
+        "count": 1
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 960,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 3,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26063,
+      "at": "2026-09-17T14:23:25.226Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "SellItem",
+      "publicEvent": {
+        "count": 1,
+        "success": true,
+        "uniqueId": 12
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 960,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 3,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26064,
+      "at": "2026-09-17T14:23:25.226Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "GainedGold",
+      "publicEvent": {
+        "gold": 241
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 291,
+        "y": 604,
+        "gold": 960,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 3,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 12,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 241
+          },
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26103,
+      "at": "2026-09-17T14:23:29.770Z",
+      "direction": "sent",
+      "type": "buyItem",
+      "publicEvent": {
+        "itemIndex": 46661648,
+        "count": 11,
+        "panelType": 0
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 287,
+        "y": 607,
+        "gold": 1201,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 2,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26107,
+      "at": "2026-09-17T14:23:30.427Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "LoseGold",
+      "publicEvent": {
+        "gold": 275
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 287,
+        "y": 607,
+        "gold": 1201,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 2,
+          "Amulet": 89,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26110,
+      "at": "2026-09-17T14:23:30.557Z",
+      "direction": "sent",
+      "type": "logOut",
+      "publicEvent": {},
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 287,
+        "y": 607,
+        "gold": 926,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 2,
+          "Amulet": 100,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 26111,
+      "at": "2026-09-17T14:23:31.538Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "LogOutSuccess",
+      "publicEvent": {
+        "characters": [
+          {
+            "class": "Taoist",
+            "gender": "Male",
+            "index": 10,
+            "lastAccessBinaryDatetime": "5250938536534520241",
+            "level": 26,
+            "name": "JT3f4a4e1f"
+          }
+        ]
+      },
+      "state": {
+        "ownerId": 1000,
+        "map": "0",
+        "x": 287,
+        "y": 607,
+        "gold": 926,
+        "supplies": {
+          "(HP)DrugSmall": 76,
+          "RandomTeleport": 4,
+          "(MP)DrugSmall": 11,
+          "Venison": 2,
+          "Amulet": 100,
+          "TownTeleport": 1
+        },
+        "venison": [
+          {
+            "uniqueId": 14,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 249
+          },
+          {
+            "uniqueId": 15,
+            "name": "Venison",
+            "quantity": 1,
+            "sellValue": 226
+          }
+        ]
+      }
+    }
+  ],
+  "report": {
+    "completed": false,
+    "error": "needsFunds: unable to restock supplies to TownTeleport 2",
+    "finishedAt": "2026-09-17T14:23:30.556Z"
+  },
+  "routeCompleted": false,
+  "visualAccepted": false
+}

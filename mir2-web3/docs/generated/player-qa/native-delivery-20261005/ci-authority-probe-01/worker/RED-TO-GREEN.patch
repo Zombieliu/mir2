@@ -1,0 +1,43 @@
+--- C:\mir2-playtest-releases\20261004-native-r18\native-ci-auth-probe-worker-01\RED02-PROBE.py
++++ C:\mir2-playtest-releases\20261004-native-r18\native-ci-auth-probe-worker-01\cloudflare_read_authority_probe.py
+@@ -123,7 +123,7 @@
+                 try:
+                     connection.close()
+                 except BaseException:
+-                    pass
++                    raise SafeFailure(Code.NETWORK_ERROR, status) from None
+ 
+ 
+ def decode_json(body):
+@@ -263,7 +263,9 @@
+             except BaseException:
+                 pass
+     try:
+-        (sys.stdout if output is None else output).write(canonical(result).decode('ascii'))
++        target = sys.stdout if output is None else output
++        target.write(canonical(result).decode('ascii'))
++        target.flush()
+     except BaseException:
+         return 2
+     return 0 if result['passed'] is True and result['receipt_status'] == 'written' else 2
+--- C:\mir2-playtest-releases\20261004-native-r18\native-ci-auth-probe-worker-01\RED02-TESTS.py
++++ C:\mir2-playtest-releases\20261004-native-r18\native-ci-auth-probe-worker-01\test_cloudflare_read_authority_probe.py
+@@ -364,6 +364,18 @@
+         self.assertTrue(first.closed)
+         self.safe(result)
+ 
++    def test_bucket_close_failure_keeps_active_but_denies_readable_success(self):
++        first = FakeConnection(FakeResponse(ACTIVE))
++        second = FakeConnection(FakeResponse(READABLE), close_failure=True)
++        result, calls = self.fake_https([first, second])
++        self.assertFalse(result['passed'])
++        self.assertEqual(result['result'], 'network_error')
++        self.assertEqual(result['bucket_http_status'], 200)
++        self.assertEqual(calls, 2)
++        self.assertTrue(result['token_active'])
++        self.assertFalse(result['bucket_readable'])
++        self.safe(result)
++
+     def test_real_transport_refuses_any_other_path_before_connection(self):
+         with patch.object(P.http.client, 'HTTPSConnection') as factory:
+             with self.assertRaises(P.SafeFailure):

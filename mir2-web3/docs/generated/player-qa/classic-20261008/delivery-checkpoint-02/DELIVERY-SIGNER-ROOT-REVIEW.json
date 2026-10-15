@@ -1,0 +1,19 @@
+{
+  "schema": "mir2.r22.delivery-signer-root-review.v1",
+  "passed": true,
+  "recipeSha256": "49BB133AAB18F94C4BA696213790892B90299D357CAA1BEE9A653819637FEE87",
+  "originalSha256": "F976933C93BE36E5D9880FF7B5C381197A0A88A2C1C006ECA50698A9167E43C6",
+  "inverseByteRecovery": true,
+  "preservedFunctions": [
+    "Sha",
+    "NoLinks",
+    "Bytes",
+    "Save",
+    "CheckCertificate",
+    "CheckCms"
+  ],
+  "wholeSignerExecuted": false,
+  "privateKeyAccessed": false,
+  "sourceGuardsReviewed": true,
+  "nativeReconstructionPreserved": true
+}

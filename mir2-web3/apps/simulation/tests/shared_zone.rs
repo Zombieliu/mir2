@@ -10,9 +10,9 @@ use mir2_protocol::{
 use mir2_simulation::{
     GroundDropClaimTicket, GroundDropLootSnapshot, GroundDropSnapshot, SessionId, SimulationConfig,
     SimulationSession, WorldEntityDisposition, WorldEntityKind, ZoneCollision, ZoneCommand,
-    ZoneJoin, ZoneKey, ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterRespawnPolicy,
-    ZoneMonsterSpawn, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
-    ZonePlayerCombatStats, ZoneRuntime,
+    ZoneFiveClassPracticeSpell, ZoneJoin, ZoneKey, ZoneMapMetadata, ZoneMonsterDefense,
+    ZoneMonsterRespawnPolicy, ZoneMonsterSpawn, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination,
+    ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
 };
 
 fn session(value: &str) -> SessionId {
@@ -57,6 +57,16 @@ fn join_archer(session_id: &str, object_id: u32, name: &str, x: i32, y: i32) -> 
     let mut value = join(session_id, object_id, name, x, y);
     value.class = MirClass::Archer;
     value
+}
+
+// Trusted class/learned identity normally projected by the authenticated session.
+// A legacy Warrior damage scalar cannot admit an Assassin/Archer spell.
+fn with_learned_magic(mut player: ZoneJoin, spell: Spell) -> ZoneJoin {
+    let identity = ZoneFiveClassPracticeSpell::from_spell(spell).expect("five-class fixture skill");
+    player.class = identity.class();
+    player.level = 50;
+    player.combat_stats.five_class_learned_mask |= identity.learned_bit();
+    player
 }
 
 fn join_with_profile(
@@ -179,6 +189,14 @@ fn zone_player_transform(
 
 fn enabled_npc_teleport_config(object_id: u32) -> ZoneNpcTeleportConfig {
     let map = ZoneMapMetadata {
+        no_pets: false,
+
+        no_group: false,
+
+        fight: false,
+        no_fight: false,
+        no_experience: false,
+
         map_index: 1,
         file_name: "0".to_string(),
         title: "BichonProvince".to_string(),
@@ -190,6 +208,9 @@ fn enabled_npc_teleport_config(object_id: u32) -> ZoneNpcTeleportConfig {
         weather: 0,
     };
     ZoneNpcTeleportConfig {
+        pet_save: false,
+        max_boss_tames: 1,
+
         enabled: true,
         cost: 3_000,
         maps: BTreeMap::from([("0".to_string(), map)]),
@@ -596,6 +617,229 @@ fn interaction_boundary_cancels_queued_movement_without_moving_the_player() {
     )));
 }
 
+fn buffer_reverse_walk_before_combat(zone: &mut ZoneRuntime, owner: &SessionId) -> u64 {
+    zone.handle(ZoneCommand::Walk {
+        session_id: owner.clone(),
+        direction: MirDirection::Right,
+        seq: 1,
+        now_ms: 10,
+    });
+    assert_eq!(zone.player_position(owner), Some(Point { x: 331, y: 270 }));
+    zone.handle(ZoneCommand::Walk {
+        session_id: owner.clone(),
+        direction: MirDirection::Left,
+        seq: 2,
+        now_ms: 11,
+    });
+    assert_eq!(zone.player_position(owner), Some(Point { x: 331, y: 270 }));
+    zone.next_pending_movement_deadline_ms()
+        .expect("the reverse step must wait for the first walk's cooldown")
+}
+
+fn assert_combat_clears_only_older_movement(
+    zone: &mut ZoneRuntime,
+    owner: &SessionId,
+    launch: &[ZoneOutbound],
+    old_deadline: u64,
+    combat_action_delay: u64,
+) {
+    assert!(
+        has_packet(launch, owner, |packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location }
+                if location.position == (Point { x: 331, y: 270 })
+        )),
+        "accepted combat cancels the buffered step with an owner correction"
+    );
+    assert_eq!(zone.next_pending_movement_deadline_ms(), None);
+    let stale_tick = zone.tick_pending_movement(old_deadline);
+    assert!(
+        stale_tick.is_empty(),
+        "the old walk must not execute after combat"
+    );
+    assert_eq!(zone.player_position(owner), Some(Point { x: 331, y: 270 }));
+
+    // Clearing the old step must not disable a fresh player input after the
+    // attack. It still observes the original movement cadence.
+    zone.handle(ZoneCommand::Walk {
+        session_id: owner.clone(),
+        direction: MirDirection::Left,
+        seq: 3,
+        now_ms: old_deadline.saturating_add(1),
+    });
+    let next_ready = old_deadline + combat_action_delay;
+    assert_eq!(zone.player_position(owner), Some(Point { x: 331, y: 270 }));
+    assert_eq!(zone.next_pending_movement_deadline_ms(), Some(next_ready));
+    assert!(zone.tick_pending_movement(next_ready - 1).is_empty());
+    zone.tick_pending_movement(next_ready);
+    assert_eq!(zone.player_position(owner), Some(Point { x: 330, y: 270 }));
+}
+
+#[test]
+fn accepted_melee_and_materialized_attack_cancel_only_pre_attack_movement() {
+    for materialized in [false, true] {
+        let mut zone = zone();
+        let owner = session("combat-movement-owner");
+        zone.handle(ZoneCommand::Join(join(
+            "combat-movement-owner",
+            101,
+            "Owner",
+            330,
+            270,
+        )));
+        admit_melee(&mut zone, &owner);
+        let old_deadline = buffer_reverse_walk_before_combat(&mut zone, &owner);
+        let monster = native_monster_spawn(9_100, 332, 270);
+        if !materialized {
+            zone.handle(ZoneCommand::SpawnMonster {
+                session_id: owner.clone(),
+                monster: monster.clone(),
+                now_ms: 11,
+            });
+        }
+        let launch = zone.handle(if materialized {
+            ZoneCommand::PlayerAttackMaterializedObject {
+                session_id: owner.clone(),
+                object_id: 9_100,
+                monster: Some(monster),
+                direction: MirDirection::Right,
+                spell: Spell::None as u8,
+                level: 0,
+                attack_type: 0,
+                damage: 1,
+                now_ms: old_deadline,
+            }
+        } else {
+            ZoneCommand::PlayerAttackObject {
+                session_id: owner.clone(),
+                object_id: 9_100,
+                direction: MirDirection::Right,
+                spell: Spell::None as u8,
+                level: 0,
+                attack_type: 0,
+                damage: 1,
+                now_ms: old_deadline,
+            }
+        });
+        assert!(
+            has_packet(&launch, &owner, |packet| matches!(
+                packet, ServerPacket::ObjectAttack { info } if info.object_id == 101
+            )),
+            "materialized={materialized}"
+        );
+        assert_combat_clears_only_older_movement(&mut zone, &owner, &launch, old_deadline, 550);
+    }
+}
+
+#[test]
+fn accepted_range_and_magic_cancel_pre_attack_movement() {
+    for ranged in [false, true] {
+        let mut zone = zone();
+        let owner = session("combat-movement-owner");
+        let mut joining = join("combat-movement-owner", 101, "Owner", 330, 270);
+        if ranged {
+            joining.class = MirClass::Archer;
+        }
+        zone.handle(ZoneCommand::Join(joining));
+        if ranged {
+            admit_archer_range(&mut zone, &owner);
+        }
+        let old_deadline = buffer_reverse_walk_before_combat(&mut zone, &owner);
+        zone.handle(ZoneCommand::SpawnMonster {
+            session_id: owner.clone(),
+            monster: native_monster_spawn(9_100, 335, 270),
+            now_ms: 11,
+        });
+        let launch = zone.handle(if ranged {
+            ZoneCommand::PlayerRangeAttackObject {
+                session_id: owner.clone(),
+                object_id: 9_100,
+                direction: MirDirection::Right,
+                target: Point { x: 335, y: 270 },
+                spell: Spell::Focus,
+                level: 0,
+                attack_type: 0,
+                damage: 1,
+                now_ms: old_deadline,
+            }
+        } else {
+            ZoneCommand::PlayerCastMagic {
+                session_id: owner.clone(),
+                object_id: 9_100,
+                spell: Spell::FireBall,
+                direction: MirDirection::Right,
+                target: Point { x: 335, y: 270 },
+                cast: true,
+                level: 0,
+                damage: 1,
+                mp_cost: 0,
+                cooldown_ms: 500,
+                now_ms: old_deadline,
+            }
+        });
+        assert!(
+            has_packet(&launch, &owner, |packet| match packet {
+                ServerPacket::ObjectRangeAttack { info } => ranged && info.object_id == 101,
+                ServerPacket::ObjectMagic { object_id, .. } => !ranged && *object_id == 101,
+                _ => false,
+            }),
+            "ranged={ranged}"
+        );
+        assert_combat_clears_only_older_movement(
+            &mut zone,
+            &owner,
+            &launch,
+            old_deadline,
+            if ranged { 550 } else { 600 },
+        );
+    }
+}
+
+#[test]
+fn rejected_attack_discards_prior_movement_without_shortening_action_time() {
+    let mut zone = zone();
+    let owner = session("combat-movement-owner");
+    zone.handle(ZoneCommand::Join(join(
+        "combat-movement-owner",
+        101,
+        "Owner",
+        330,
+        270,
+    )));
+    admit_melee(&mut zone, &owner);
+    let old_deadline = buffer_reverse_walk_before_combat(&mut zone, &owner);
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: owner.clone(),
+        monster: native_monster_spawn(9_100, 335, 270),
+        now_ms: 11,
+    });
+    let rejected = zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: owner.clone(),
+        object_id: 9_100,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 1,
+        now_ms: 12,
+    });
+    assert!(!has_packet(&rejected, &owner, |packet| matches!(
+        packet,
+        ServerPacket::ObjectAttack { .. }
+    )));
+    assert!(has_packet(&rejected, &owner, |packet| matches!(
+        packet, ServerPacket::UserLocation { location }
+            if location.position == (Point { x: 331, y: 270 })
+    )));
+    assert_eq!(zone.next_pending_movement_deadline_ms(), None);
+    assert_eq!(
+        zone.player_magic_cooldown_remaining_ms(&owner, Spell::FireBall, 12),
+        Some(old_deadline - 12)
+    );
+    assert!(zone.tick_pending_movement(old_deadline).is_empty());
+    assert_eq!(zone.player_position(&owner), Some(Point { x: 331, y: 270 }));
+}
+
 #[test]
 fn npc_teleport_rejections_preserve_transform_for_missing_ineligible_low_gold_and_occupied_front() {
     for (requested_object_id, available_gold, occupy_front) in [
@@ -707,11 +951,22 @@ fn npc_teleport_rejections_preserve_transform_for_missing_ineligible_low_gold_an
         ZoneKey::for_map("0"),
         ZoneCollision::unbounded(),
         ZoneNpcTeleportConfig {
+            pet_save: false,
+            max_boss_tames: 1,
+
             enabled: true,
             cost: 3_000,
             maps: BTreeMap::from([(
                 "0".to_string(),
                 ZoneMapMetadata {
+                    no_pets: false,
+
+                    no_group: false,
+
+                    fight: false,
+                    no_fight: false,
+                    no_experience: false,
+
                     map_index: 1,
                     file_name: "0".to_string(),
                     title: "BichonProvince".to_string(),
@@ -807,6 +1062,7 @@ fn gold_drop(
 
 fn native_monster_spawn(object_id: u32, x: i32, y: i32) -> ZoneMonsterSpawn {
     ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id,
         name: "Field Wasp".to_string(),
         name_colour_argb: -1,
@@ -1478,6 +1734,37 @@ fn mounted_player_walk_uses_the_same_crystal_server_delay() {
         Some(Point { x: 362, y: 250 }),
         "unmounted player should step once its 600ms cadence elapses"
     );
+
+    for who in [&rider, &walker] {
+        let outbounds = zone.handle(ZoneCommand::Run {
+            session_id: who.clone(),
+            direction: MirDirection::Right,
+            seq: 3,
+            now_ms: 800,
+        });
+        assert!(
+            outbounds.is_empty(),
+            "run input may queue early but cannot advance the authoritative clock"
+        );
+    }
+    assert!(zone.tick(1_199).is_empty());
+    assert_eq!(zone.player_position(&rider), Some(Point { x: 322, y: 250 }));
+    assert_eq!(
+        zone.player_position(&walker),
+        Some(Point { x: 362, y: 250 })
+    );
+
+    zone.tick(1_200);
+    assert_eq!(
+        zone.player_position(&rider),
+        Some(Point { x: 325, y: 250 }),
+        "mounted run travels three cells only after the same 600ms cadence"
+    );
+    assert_eq!(
+        zone.player_position(&walker),
+        Some(Point { x: 364, y: 250 }),
+        "ordinary run travels two cells after the same 600ms cadence"
+    );
 }
 
 #[test]
@@ -1520,7 +1807,7 @@ fn run_received_inside_grace_survives_late_zone_tick() {
 }
 
 #[test]
-fn ready_pending_run_is_consumed_before_followup_direction_replaces_it() {
+fn ready_pending_run_is_consumed_at_real_arrival_before_followup_is_queued() {
     let mut zone = zone();
     let first = session("first");
     let second = session("second");
@@ -1541,13 +1828,12 @@ fn ready_pending_run_is_consumed_before_followup_direction_replaces_it() {
         now_ms: 400,
     });
     assert!(
-        has_packet(&run_outbounds, &second, |packet| matches!(
-            packet,
-            ServerPacket::ObjectRun { movement }
-                if movement.object_id == 101 && movement.position == (Point { x: 333, y: 270 })
-        )),
-        "buffered run should be consumed as soon as it arrives near the ready edge: {run_outbounds:?}"
+        run_outbounds.is_empty(),
+        "early run may be buffered but must not fast-forward the Zone clock: {run_outbounds:?}"
     );
+    assert_eq!(zone.player_position(&first), Some(Point { x: 331, y: 270 }));
+    assert!(zone.tick(599).is_empty());
+    assert_eq!(zone.player_position(&first), Some(Point { x: 331, y: 270 }));
 
     let reverse_outbounds = zone.handle(ZoneCommand::Walk {
         session_id: first.clone(),
@@ -1556,30 +1842,34 @@ fn ready_pending_run_is_consumed_before_followup_direction_replaces_it() {
         now_ms: 700,
     });
 
+    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
+    assert!(
+        has_packet(&reverse_outbounds, &second, |packet| matches!(
+            packet,
+            ServerPacket::ObjectRun { movement }
+                if movement.object_id == 101
+                    && movement.position == (Point { x: 333, y: 270 })
+        )),
+        "arrival after the real ready time must consume the older run before queuing reverse: {reverse_outbounds:?}"
+    );
+
+    assert!(zone.tick(1_299).is_empty());
+    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
+    let left_outbounds = zone.tick(1_300);
     assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
     assert!(
-        has_packet(&reverse_outbounds, &first, |packet| matches!(
+        has_packet(&left_outbounds, &first, |packet| matches!(
             packet,
             ServerPacket::UserLocation { location }
                 if location.position == (Point { x: 332, y: 270 })
                     && location.direction == MirDirection::Left
         )),
-        "follow-up reverse walk should also be acknowledged from the same buffered chain: {reverse_outbounds:?}"
-    );
-
-    let left_outbounds = zone.tick(1_000);
-    assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
-    assert!(
-        !has_packet(&left_outbounds, &first, |packet| matches!(
-            packet,
-            ServerPacket::UserLocation { .. }
-        )),
-        "buffered chain should not leave a delayed correction packet behind: {left_outbounds:?}"
+        "reverse must wait for the run's real 600ms cadence: {left_outbounds:?}"
     );
 }
 
 #[test]
-fn buffered_walk_run_reverse_chain_returns_immediate_location_acks() {
+fn buffered_walk_run_reverse_chain_waits_for_real_ready_ticks() {
     let mut zone = zone();
     let first = session("first");
     let second = session("second");
@@ -1600,16 +1890,15 @@ fn buffered_walk_run_reverse_chain_returns_immediate_location_acks() {
         seq: 2,
         now_ms: 400,
     });
-    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
+    assert_eq!(zone.player_position(&first), Some(Point { x: 331, y: 270 }));
     assert!(
-        has_packet(&run_outbounds, &first, |packet| matches!(
-            packet,
-            ServerPacket::UserLocation { location }
-                if location.position == (Point { x: 333, y: 270 })
-        )),
-        "buffered run should acknowledge immediately instead of waiting for a socket tick: {run_outbounds:?}"
+        run_outbounds.is_empty(),
+        "early run must be queued without an immediate location ACK: {run_outbounds:?}"
     );
-    assert!(has_packet(&run_outbounds, &second, |packet| matches!(
+    assert!(zone.tick(599).is_empty());
+    let run_tick = zone.tick(600);
+    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
+    assert!(has_packet(&run_tick, &second, |packet| matches!(
         packet,
         ServerPacket::ObjectRun { movement }
             if movement.object_id == 101 && movement.position == (Point { x: 333, y: 270 })
@@ -1621,17 +1910,15 @@ fn buffered_walk_run_reverse_chain_returns_immediate_location_acks() {
         seq: 3,
         now_ms: 700,
     });
-    assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
+    assert_eq!(zone.player_position(&first), Some(Point { x: 333, y: 270 }));
     assert!(
-        has_packet(&reverse_outbounds, &first, |packet| matches!(
-            packet,
-            ServerPacket::UserLocation { location }
-                if location.position == (Point { x: 332, y: 270 })
-                    && location.direction == MirDirection::Left
-        )),
-        "buffered reverse walk should acknowledge immediately after a run: {reverse_outbounds:?}"
+        reverse_outbounds.is_empty(),
+        "reverse must remain buffered until the run's 600ms cadence expires: {reverse_outbounds:?}"
     );
-    assert!(has_packet(&reverse_outbounds, &second, |packet| matches!(
+    assert!(zone.tick(1_199).is_empty());
+    let reverse_tick = zone.tick(1_200);
+    assert_eq!(zone.player_position(&first), Some(Point { x: 332, y: 270 }));
+    assert!(has_packet(&reverse_tick, &second, |packet| matches!(
         packet,
         ServerPacket::ObjectWalk { movement }
             if movement.object_id == 101
@@ -3049,7 +3336,7 @@ fn retained_zone_object_mana_updates_for_late_joiner() {
 }
 
 #[test]
-fn retained_zone_object_zero_health_marks_dead_for_late_joiner() {
+fn retained_zone_object_zero_health_keeps_live_for_late_joiner() {
     let mut zone = zone();
     let first = session("first");
     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
@@ -3060,7 +3347,7 @@ fn retained_zone_object_zero_health_marks_dead_for_late_joiner() {
         now_ms: 0,
     });
     zone.handle(ZoneCommand::BroadcastPackets {
-        session_id: first,
+        session_id: first.clone(),
         owner_local_object_id: 1001,
         packets: vec![ServerPacket::ObjectHealth {
             info: ObjectHealthInfo {
@@ -3077,7 +3364,57 @@ fn retained_zone_object_zero_health_marks_dead_for_late_joiner() {
 
     assert!(has_packet(&outbounds, &second, |packet| matches!(
         packet,
-        ServerPacket::ObjectMonster { info } if info.object_id == 5001 && info.dead
+        ServerPacket::ObjectMonster { info } if info.object_id == 5001 && !info.dead
+    )));
+    assert!(has_packet(&outbounds, &second, |packet| matches!(
+        packet,
+        ServerPacket::ObjectHealth { info } if info.object_id == 5001 && info.percent == 0
+    )));
+    let walking = zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: first.clone(),
+        owner_local_object_id: 1001,
+        packets: vec![ServerPacket::ObjectWalk {
+            movement: ObjectMovement {
+                object_id: 5001,
+                position: Point { x: 333, y: 271 },
+                direction: MirDirection::Right,
+            },
+        }],
+        now_ms: 200,
+    });
+    assert!(has_packet(&walking, &second, |packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement }
+            if movement.object_id == 5001 && movement.position == (Point { x: 333, y: 271 })
+    )));
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: first,
+        owner_local_object_id: 1001,
+        packets: vec![
+            ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
+                    object_id: 5001,
+                    location: Point { x: 333, y: 271 },
+                    direction: MirDirection::Right,
+                    kind: 0,
+                },
+            },
+            ServerPacket::ObjectHealth {
+                info: ObjectHealthInfo {
+                    object_id: 5001,
+                    percent: 100,
+                    expire: 5,
+                },
+            },
+        ],
+        now_ms: 300,
+    });
+    let third = session("third");
+    let dead = zone.handle(ZoneCommand::Join(join("third", 103, "Late", 334, 270)));
+    assert!(has_packet(&dead, &third, |packet| matches!(
+        packet,
+        ServerPacket::ObjectMonster { info }
+            if info.object_id == 5001 && info.dead && info.location == (Point { x: 333, y: 271 })
     )));
 }
 
@@ -3289,7 +3626,7 @@ fn retained_zone_object_health_does_not_increase_from_stale_runtime_packet() {
 }
 
 #[test]
-fn zero_health_before_retained_spawn_marks_late_spawn_dead() {
+fn zero_health_before_retained_spawn_keeps_late_spawn_live() {
     let mut zone = zone();
     let first = session("first");
     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
@@ -3306,7 +3643,7 @@ fn zero_health_before_retained_spawn_marks_late_spawn_dead() {
         now_ms: 100,
     });
     zone.handle(ZoneCommand::BroadcastPackets {
-        session_id: first,
+        session_id: first.clone(),
         owner_local_object_id: 1001,
         packets: vec![monster_spawn_packet(5001, 1001, 331, 270)],
         now_ms: 200,
@@ -3318,8 +3655,45 @@ fn zero_health_before_retained_spawn_marks_late_spawn_dead() {
         packet,
         ServerPacket::ObjectMonster { info }
             if info.object_id == 5001
-                && info.dead
+                && !info.dead
                 && info.location == (Point { x: 331, y: 270 })
+    )));
+    zone.handle(ZoneCommand::BroadcastPackets {
+        session_id: first,
+        owner_local_object_id: 1001,
+        packets: vec![
+            ServerPacket::ObjectDied {
+                info: ObjectDiedInfo {
+                    object_id: 5002,
+                    location: Point { x: 333, y: 271 },
+                    direction: MirDirection::Left,
+                    kind: 0,
+                },
+            },
+            ServerPacket::ObjectHealth {
+                info: ObjectHealthInfo {
+                    object_id: 5002,
+                    percent: 0,
+                    expire: 5,
+                },
+            },
+            monster_spawn_packet(5002, 1001, 331, 270),
+            ServerPacket::ObjectWalk {
+                movement: ObjectMovement {
+                    object_id: 5002,
+                    position: Point { x: 335, y: 271 },
+                    direction: MirDirection::Right,
+                },
+            },
+        ],
+        now_ms: 300,
+    });
+    let third = session("third");
+    let outbounds = zone.handle(ZoneCommand::Join(join("third", 103, "Late", 334, 270)));
+    assert!(has_packet(&outbounds, &third, |packet| matches!(
+        packet,
+        ServerPacket::ObjectMonster { info }
+            if info.object_id == 5002 && info.dead && info.location == (Point { x: 333, y: 271 })
     )));
 }
 
@@ -4004,7 +4378,8 @@ fn later_joiners_receive_player_hidden_dead_and_effect_state() {
     assert!(has_packet(&hidden_outbounds, &second, |packet| matches!(
         packet,
         ServerPacket::ObjectPlayer { info }
-            if info.object_id == 101 && info.hidden && info.dead && info.effect == 12
+            // Death clears the previous effect in authoritative Zone state.
+            if info.object_id == 101 && info.hidden && info.dead && info.effect == 0
     )));
 
     zone.handle(ZoneCommand::BroadcastPackets {
@@ -4561,8 +4936,20 @@ fn zone_native_monster_combat_kill_and_drop_are_authoritative() {
                 && award.experience == 6
                 && award.drops.iter().any(|drop| drop.object_id == 9200
                     && drop.owner_object_id == Some(101)
-                    && drop.ownership_remaining_ticks == Some(100))
+                    && drop.ownership_remaining_ticks == Some(200))
     )));
+    // MonsterObject.Drop/DropGold:1155/1183 protects Source drops for one
+    // minute. Legacy tick metadata is independent of the wall-clock lease.
+    let checkpoint: serde_json::Value = serde_json::from_slice(
+        &zone
+            .checkpoint_bytes()
+            .expect("kill/drop ownership checkpoint"),
+    )
+    .expect("kill/drop checkpoint JSON");
+    assert_eq!(
+        checkpoint["ground_drops"]["9200"]["owner_expires_at_ms"].as_u64(),
+        Some(620 + 60_000)
+    );
     let corpse = zone
         .native_monster_snapshots()
         .into_iter()
@@ -5041,6 +5428,9 @@ fn zone_wall_clock_respawn_waits_for_every_crystal_harvest_ai() {
         let object_id = 9_200 + offset as u32;
         let mut spawn =
             native_neutral_monster_spawn(object_id, &format!("HarvestAI{ai}"), ai, 331, 270);
+        if ai == 5 {
+            spawn.disposition = Some(WorldEntityDisposition::Hostile);
+        }
         spawn.drops.clear();
         spawn.respawn = Some(fixed_wall_clock_respawn(100));
         zone.handle(ZoneCommand::SpawnMonster {
@@ -5048,6 +5438,10 @@ fn zone_wall_clock_respawn_waits_for_every_crystal_harvest_ai() {
             monster: spawn,
             now_ms: 0,
         });
+        if ai == 5 {
+            // Cannibal plants must emerge before they can be killed/harvested.
+            zone.tick(1);
+        }
         zone.handle(ZoneCommand::PlayerAttackObject {
             session_id: first.clone(),
             object_id,
@@ -5058,7 +5452,13 @@ fn zone_wall_clock_respawn_waits_for_every_crystal_harvest_ai() {
             damage: 99,
             now_ms: 10,
         });
-        zone.tick(10);
+        let death = zone.tick(10);
+        assert!(
+            has_packet(&death, &first, |packet| matches!(
+                packet, ServerPacket::ObjectDied { info } if info.object_id == object_id
+            )),
+            "AI {ai} must actually die before testing corpse retention"
+        );
         assert!(
             !has_packet(&zone.tick(110), &first, |packet| matches!(
                 packet,
@@ -5190,6 +5590,7 @@ fn zone_neutral_harvestable_monster_accepts_only_adjacent_melee() {
         session_id: materialized_attacker.clone(),
         object_id: 9_151,
         monster: Some(ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 9_151,
             ..deer
         }),
@@ -5235,7 +5636,9 @@ fn zone_native_player_range_attack_damages_monster_authoritatively() {
         level: 3,
         attack_type: 0,
         damage: 8,
-        now_ms: 10,
+        // The Source distance/focus roll misses at 10 (95 >= 90);
+        // server tick12 rolls0, so this is a real hit, not an accuracy bypass.
+        now_ms: 12,
     });
 
     assert!(has_packet(&launch, &first, |packet| matches!(
@@ -5264,7 +5667,18 @@ fn zone_native_player_range_attack_damages_monster_authoritatively() {
         )));
     }
 
-    let struck = zone.tick(10);
+    // HumanObject.RangeAttack:2822: 550ms plus 50ms per tile.
+    let before_hit = zone.tick(811);
+    assert_eq!(damage_indicator_for(&before_hit, 9100), None);
+    assert_eq!(
+        zone.native_monster_snapshots()
+            .into_iter()
+            .find(|m| m.object_id == 9100)
+            .unwrap()
+            .hp,
+        20
+    );
+    let struck = zone.tick(812);
     for target in [&first, &second] {
         assert!(has_packet(&struck, target, |packet| matches!(
             packet,
@@ -5355,6 +5769,25 @@ fn zone_native_player_range_attack_respects_attack_action_window() {
         )));
     }
 
+    // HumanObject.AttackSpeed:1400 - min(level*14,370) - speed*60.
+    // Level7/speed0 is1302ms, independent of the550ms action deadline.
+    let before_ready = zone.handle(ZoneCommand::PlayerRangeAttackObject {
+        session_id: first.clone(),
+        object_id: 9100,
+        direction: MirDirection::Right,
+        target: authoritative_target.clone(),
+        spell: Spell::Focus,
+        level: 1,
+        attack_type: 0,
+        damage: 1,
+        now_ms: 1_311,
+    });
+    for target in [&first, &second] {
+        assert!(!has_packet(&before_ready, target, |packet| matches!(
+            packet,
+            ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
+        )));
+    }
     let ready = zone.handle(ZoneCommand::PlayerRangeAttackObject {
         session_id: first.clone(),
         object_id: 9100,
@@ -5364,7 +5797,7 @@ fn zone_native_player_range_attack_respects_attack_action_window() {
         level: 1,
         attack_type: 0,
         damage: 1,
-        now_ms: 610,
+        now_ms: 1_312,
     });
     assert!(has_packet(&ready, &second, |packet| matches!(
         packet,
@@ -5469,7 +5902,7 @@ fn zone_range_attack_requires_trusted_admission_and_enforces_nine_tile_boundary(
             packet,
             ServerPacket::RangeAttack { .. } | ServerPacket::ObjectRangeAttack { .. }
         )));
-        let _ = zone.tick(10);
+        let _ = zone.tick(1_010);
         assert_eq!(
             zone.native_monster_snapshots()
                 .into_iter()
@@ -5511,7 +5944,9 @@ fn zone_range_attack_requires_trusted_admission_and_enforces_nine_tile_boundary(
             level: 0,
             attack_type: 0,
             damage: 999,
-            now_ms: 10,
+            // Distance9 Source accuracy is1%, regardless of the
+            // agility accuracy stat. The real server roll at12 is0.
+            now_ms: 12,
         });
         assert_eq!(
             has_packet(&launch, &attacker, |packet| matches!(
@@ -5521,7 +5956,18 @@ fn zone_range_attack_requires_trusted_admission_and_enforces_nine_tile_boundary(
             allowed,
             "distance {distance} must follow the authoritative 9-tile boundary"
         );
-        let tick = zone.tick(10);
+        let due = 12 + 550 + u64::try_from(distance).unwrap() * 50;
+        let before = zone.tick(due - 1);
+        assert_eq!(damage_indicator_for(&before, 9_100), None);
+        assert_eq!(
+            zone.native_monster_snapshots()
+                .into_iter()
+                .find(|m| m.object_id == 9_100)
+                .unwrap()
+                .hp,
+            20
+        );
+        let tick = zone.tick(due);
         assert_eq!(
             damage_indicator_for(&tick, 9_100),
             allowed.then_some(4),
@@ -6378,6 +6824,56 @@ fn zone_native_player_magic_damages_monster_and_projects_authoritatively() {
 }
 
 #[test]
+fn zone_native_player_magic_retargets_one_stale_monster_step_but_rejects_two() {
+    let mut zone = zone();
+    let caster = session("caster");
+    zone.handle(ZoneCommand::Join(join("caster", 101, "Mage", 330, 270)));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: caster.clone(),
+        monster: native_neutral_monster_spawn(9100, "Royal_Guard", 1, 334, 270),
+        now_ms: 0,
+    });
+
+    let accepted = zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: caster.clone(),
+        object_id: 9100,
+        spell: Spell::FireBall,
+        direction: MirDirection::Right,
+        target: Point { x: 333, y: 270 },
+        cast: true,
+        level: 2,
+        damage: 9,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    assert!(has_packet(&accepted, &caster, |packet| matches!(
+        packet,
+        ServerPacket::Magic { target_id: 9100, target, .. }
+            if target == &(Point { x: 334, y: 270 })
+    )));
+    assert_eq!(damage_indicator_for(&zone.tick(20), 9100), Some(9));
+
+    let rejected = zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: caster.clone(),
+        object_id: 9100,
+        spell: Spell::FireBall,
+        direction: MirDirection::Right,
+        target: Point { x: 332, y: 270 },
+        cast: true,
+        level: 2,
+        damage: 9,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 1000,
+    });
+    assert!(!has_packet(&rejected, &caster, |packet| matches!(
+        packet,
+        ServerPacket::Magic { .. } | ServerPacket::ObjectMagic { .. }
+    )));
+}
+
+#[test]
 fn zone_native_player_magic_subtracts_monster_magic_armour() {
     // A monster with authoritative MAC must mitigate incoming attack-magic with
     // Random(MinMAC,MaxMAC) — mirroring how the physical path subtracts AC. Here
@@ -6719,8 +7215,39 @@ fn zone_native_player_fire_bounce_chains_projectiles_and_damage() {
         pending_hits[0]["fire_bounce"]["remaining_bounces"].as_u64(),
         Some(3)
     );
-    let mut zone = ZoneRuntime::restore_checkpoint(&checkpoint_bytes)
+    let mut cold = ZoneRuntime::restore_checkpoint(&checkpoint_bytes)
         .expect("restore FireBounce pending-hop checkpoint");
+    // checkpoint.rs clears online authority on public cold decode. Crystal
+    // HumanObject:5817-5829/5942-5953 continues the live caster's ActionList;
+    // checkpoint bytes cannot mint that Node after cold recovery.
+    let cold_before = cold.native_monster_snapshots();
+    let cold_tick = cold.tick(1_120);
+    for target_session in [&first, &second] {
+        assert!(!has_packet(&cold_tick, target_session, |packet| matches!(
+            packet,
+            ServerPacket::ObjectProjectile { .. }
+                | ServerPacket::ObjectStruck { .. }
+                | ServerPacket::DamageIndicator { .. }
+                | ServerPacket::ObjectHealth { .. }
+        )));
+    }
+    assert!(!cold_tick.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::MonsterKillAward { .. } | ZoneOutbound::OwnedMonsterKillAward { .. }
+    )));
+    assert_eq!(
+        cold.native_monster_snapshots()
+            .iter()
+            .map(|m| (m.object_id, m.hp))
+            .collect::<Vec<_>>(),
+        cold_before
+            .iter()
+            .map(|m| (m.object_id, m.hp))
+            .collect::<Vec<_>>(),
+    );
+    // The retained live Zone still owns this caster and its pending hop.
+    let before_second = zone.tick(1_119);
+    assert_eq!(damage_indicator_for(&before_second, 9101), None);
 
     let second_bounce = zone.tick(1_120);
     for target_session in [&first, &second] {
@@ -7183,7 +7710,10 @@ fn zone_native_player_poison_cloud_spawns_ground_spell_and_poisons_monsters() {
     let target = Point { x: 334, y: 270 };
 
     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 324, 270)));
-    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 326, 270)));
+    // The observer is adjacent to both monsters, keeping their real AI in
+    // attack range instead of walking the outside monster into the cloud
+    // during the explicit pre-impact tick.
+    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 335, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: native_monster_spawn(9100, target.x, target.y),
@@ -7229,7 +7759,16 @@ fn zone_native_player_poison_cloud_spawns_ground_spell_and_poisons_monsters() {
         )));
     }
 
-    let tick = zone.tick(520);
+    // HumanObject.PoisonCloud:4557:500ms plus50ms per tile.
+    let before_cloud = zone.tick(1_019);
+    assert!(!has_packet(
+        &before_cloud,
+        &first,
+        |packet| matches!(packet,
+        ServerPacket::ObjectSpell { info } if info.spell == Spell::PoisonCloud)
+    ));
+    assert_eq!(damage_indicator_for(&before_cloud, 9100), None);
+    let tick = zone.tick(1_020);
     for target_session in [&first, &second] {
         assert!(has_packet(&tick, target_session, |packet| matches!(
             packet,
@@ -7262,8 +7801,13 @@ fn zone_native_player_trap_spawns_object_and_roots_lower_level_monster() {
     let second = session("second");
     let target = Point { x: 334, y: 270 };
 
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
-    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 332, 270)));
+    zone.handle(ZoneCommand::Join(with_learned_magic(
+        join("first", 101, "Scout", 330, 270),
+        Spell::Trap,
+    )));
+    // Keep the target adjacent to this observer during the pre-impact tick;
+    // its ordinary AI attacks in place, preserving the captured trap tile.
+    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 333, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: native_monster_spawn(9100, target.x, target.y),
@@ -7304,6 +7848,14 @@ fn zone_native_player_trap_spawns_object_and_roots_lower_level_monster() {
         )));
     }
 
+    // HumanObject.Trap:5275 applies after500ms, never on launch.
+    let before_trap = zone.tick(519);
+    assert!(!has_packet(&before_trap, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectSpell { .. }
+    )));
+    // Map:2079-2089 leaves SpellObject.Direction at its default Up;
+    // SpellObject.GetInfo:542-548 leaves Param false for ordinary Trap.
     let spell_tick = zone.tick(520);
     for target_session in [&first, &second] {
         assert!(has_packet(&spell_tick, target_session, |packet| matches!(
@@ -7311,8 +7863,8 @@ fn zone_native_player_trap_spawns_object_and_roots_lower_level_monster() {
             ServerPacket::ObjectSpell { info }
                 if info.spell == Spell::Trap
                     && info.location == target
-                    && info.direction == MirDirection::Right
-                    && info.param
+                    && info.direction == MirDirection::Up
+                    && !info.param
         )));
         assert!(!has_packet(&spell_tick, target_session, |packet| matches!(
             packet,
@@ -7441,7 +7993,23 @@ fn zone_native_player_explosive_trap_spawns_front_row_and_detonates_once() {
     zone.handle(ZoneCommand::Join(join(
         "first", 101, "Scout", origin.x, origin.y,
     )));
-    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 332, 267)));
+    // SpellObject shows untriggered traps only to IsFriendlyTarget.
+    let mut caster = join("first", 101, "Scout", origin.x, origin.y);
+    caster.chat_profile.attack_mode = 1;
+    zone.handle(ZoneCommand::UpdateChatProfile {
+        session_id: first.clone(),
+        profile: caster.chat_profile,
+    });
+    zone.handle(ZoneCommand::Join(join_with_profile(
+        "second",
+        102,
+        "Blade",
+        332,
+        267,
+        |profile| {
+            profile.group_members = vec!["Scout".to_string()];
+        },
+    )));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: native_monster_spawn(9100, front.x, front.y),
@@ -7491,21 +8059,65 @@ fn zone_native_player_explosive_trap_spawns_front_row_and_detonates_once() {
         )));
     }
 
+    let before_trap = zone.tick(519);
+    assert!(!has_packet(&before_trap, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectSpell { .. }
+    )));
     let tick = zone.tick(520);
     for target_session in [&first, &second] {
         let trap_locations = packets_for(&tick, target_session)
             .into_iter()
             .filter_map(|packet| match packet {
-                ServerPacket::ObjectSpell { info } if info.spell == Spell::ExplosiveTrap => {
+                ServerPacket::ObjectSpell { info }
+                    if info.spell == Spell::ExplosiveTrap && !info.param =>
+                {
                     Some((info.location, info.direction, info.param))
                 }
                 _ => None,
             })
             .collect::<Vec<_>>();
+        // Map:1948-1957 leaves Direction at Up. SpellObject:194-201/411-415
+        // broadcasts each same-ID Param=true update separately from placement.
         assert_eq!(trap_locations.len(), 3);
-        assert!(trap_locations.contains(&(front.clone(), MirDirection::Right, false)));
-        assert!(trap_locations.contains(&(upper_side.clone(), MirDirection::Right, false)));
-        assert!(trap_locations.contains(&(lower_side.clone(), MirDirection::Right, false)));
+        assert!(trap_locations.contains(&(front.clone(), MirDirection::Up, false)));
+        assert!(trap_locations.contains(&(upper_side.clone(), MirDirection::Up, false)));
+        assert!(trap_locations.contains(&(lower_side.clone(), MirDirection::Up, false)));
+        let trap_packets = packets_for(&tick, target_session)
+            .into_iter()
+            .filter_map(|packet| match packet {
+                ServerPacket::ObjectSpell { info } if info.spell == Spell::ExplosiveTrap => {
+                    Some(info)
+                }
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(trap_packets.len(), 5);
+        let placements = trap_packets
+            .iter()
+            .filter(|info| !info.param)
+            .map(|info| (info.object_id, (info.location.x, info.location.y)))
+            .collect::<BTreeMap<_, _>>();
+        assert_eq!(placements.len(), 3);
+        let detonations = trap_packets
+            .iter()
+            .filter(|info| info.param)
+            .collect::<Vec<_>>();
+        assert_eq!(detonations.len(), 2);
+        assert_eq!(
+            detonations
+                .iter()
+                .map(|info| (info.location.x, info.location.y))
+                .collect::<BTreeSet<_>>(),
+            BTreeSet::from([(front.x, front.y), (upper_side.x, upper_side.y)])
+        );
+        for info in detonations {
+            assert_eq!(
+                placements.get(&info.object_id),
+                Some(&(info.location.x, info.location.y))
+            );
+            assert_eq!(info.direction, MirDirection::Up);
+        }
         assert!(has_packet(&tick, target_session, |packet| matches!(
             packet,
             ServerPacket::ObjectHealth { info }
@@ -7538,11 +8150,25 @@ fn zone_native_player_poison_shot_ticks_green_damage_and_awards_kill() {
     let first = session("first");
     let second = session("second");
 
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(with_learned_magic(
+        join("first", 101, "Scout", 330, 270),
+        Spell::PoisonShot,
+    )));
     zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 332, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
-        monster: native_neutral_monster_spawn(9100, "Royal_Guard", 1, 334, 270),
+        // Source raw18, MAC13: direct5; green poison is18/25 +2 +1 =3.
+        monster: native_monster_spawn_with_defense(
+            9100,
+            334,
+            270,
+            20,
+            ZoneMonsterDefense {
+                min_mac: 13,
+                max_mac: 13,
+                ..Default::default()
+            },
+        ),
         now_ms: 0,
     });
 
@@ -7560,15 +8186,22 @@ fn zone_native_player_poison_shot_ticks_green_damage_and_awards_kill() {
         now_ms: 20,
     });
 
+    // HumanObject.SpecialArrowShot:5700-5703 delays all impact effects.
+    assert!(!has_packet(&launch, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned { .. } | ServerPacket::AddBuff { .. }
+    )));
+    let before_hit = zone.tick(719);
+    assert_eq!(damage_indicator_for(&before_hit, 9100), None);
+    let direct_hit = zone.tick(720);
     for target in [&first, &second] {
-        assert!(has_packet(&launch, target, |packet| matches!(
+        assert!(has_packet(&direct_hit, target, |packet| matches!(
             packet,
             ServerPacket::ObjectPoisoned { object_id, poison }
                 if *object_id == 9100 && *poison == 1
         )));
     }
 
-    let direct_hit = zone.tick(20);
     for target in [&first, &second] {
         assert!(has_packet(&direct_hit, target, |packet| matches!(
             packet,
@@ -7577,7 +8210,22 @@ fn zone_native_player_poison_shot_ticks_green_damage_and_awards_kill() {
         )));
     }
 
-    let poison_tick = zone.tick(2_020);
+    // ProcessPoison starts with TickTime zero: the impact update also ticks
+    // green3 immediately, following direct5 (75% then60%), then every2000ms.
+    assert_eq!(damage_indicator_for(&direct_hit, 9100), Some(5));
+    assert!(has_packet(&direct_hit, &first, |packet| matches!(
+        packet,
+        ServerPacket::DamageIndicator {
+            object_id: 9100,
+            damage: 3,
+            ..
+        }
+    )));
+    assert!(has_packet(&direct_hit, &first, |packet| matches!(packet,
+        ServerPacket::ObjectHealth { info } if info.object_id == 9100 && info.percent == 60)));
+    let before_poison = zone.tick(2_719);
+    assert_eq!(damage_indicator_for(&before_poison, 9100), None);
+    let poison_tick = zone.tick(2_720);
     for target in [&first, &second] {
         assert!(has_packet(&poison_tick, target, |packet| matches!(
             packet,
@@ -7587,7 +8235,7 @@ fn zone_native_player_poison_shot_ticks_green_damage_and_awards_kill() {
         assert!(has_packet(&poison_tick, target, |packet| matches!(
             packet,
             ServerPacket::ObjectHealth { info }
-                if info.object_id == 9100 && info.percent == 60
+                if info.object_id == 9100 && info.percent == 45
         )));
         assert!(!has_packet(&poison_tick, target, |packet| matches!(
             packet,
@@ -7595,10 +8243,12 @@ fn zone_native_player_poison_shot_ticks_green_damage_and_awards_kill() {
         )));
     }
 
-    for now_ms in [4_020, 6_020, 8_020] {
+    for now_ms in [4_720, 6_720] {
         zone.tick(now_ms);
     }
-    let killed = zone.tick(10_020);
+    let before_kill = zone.tick(8_719);
+    assert_eq!(damage_indicator_for(&before_kill, 9100), None);
+    let killed = zone.tick(8_720);
     for target in [&first, &second] {
         assert!(has_packet(&killed, target, |packet| matches!(
             packet,
@@ -7622,11 +8272,24 @@ fn zone_native_player_poison_shot_applies_visible_arrow_buff() {
     let first = session("first");
     let second = session("second");
 
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(with_learned_magic(
+        join("first", 101, "Scout", 330, 270),
+        Spell::PoisonShot,
+    )));
     zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 332, 270)));
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
-        monster: native_monster_spawn(9100, 334, 270),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            334,
+            270,
+            20,
+            ZoneMonsterDefense {
+                min_mac: 13,
+                max_mac: 13,
+                ..Default::default()
+            },
+        ),
         now_ms: 0,
     });
 
@@ -7644,8 +8307,18 @@ fn zone_native_player_poison_shot_applies_visible_arrow_buff() {
         now_ms: 20,
     });
 
+    assert!(!has_packet(&launch, &first, |packet| matches!(
+        packet,
+        ServerPacket::AddBuff { .. }
+    )));
+    let before_hit = zone.tick(719);
+    assert!(!has_packet(&before_hit, &first, |packet| matches!(
+        packet,
+        ServerPacket::AddBuff { .. }
+    )));
+    let impact = zone.tick(720);
     for target in [&first, &second] {
-        assert!(has_packet(&launch, target, |packet| matches!(
+        assert!(has_packet(&impact, target, |packet| matches!(
             packet,
             ServerPacket::AddBuff { buff }
                 if buff.object_id == 101
@@ -7676,7 +8349,10 @@ fn zone_native_player_cripple_shot_consumes_poison_buff_and_spreads_green_poison
     let first = session("first");
     let second = session("second");
 
-    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    let mut archer = with_learned_magic(join("first", 101, "Scout", 330, 270), Spell::CrippleShot);
+    // Raw25 in Trick Shot (55%) gives13; MAC8 gives direct5 and green3.
+    archer.combat_stats.mental_state = 1;
+    zone.handle(ZoneCommand::Join(archer));
     zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 332, 270)));
     zone.handle(ZoneCommand::BroadcastPackets {
         session_id: first.clone(),
@@ -7697,7 +8373,17 @@ fn zone_native_player_cripple_shot_consumes_poison_buff_and_spreads_green_poison
     });
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
-        monster: native_monster_spawn(9100, 334, 270),
+        monster: native_monster_spawn_with_defense(
+            9100,
+            334,
+            270,
+            20,
+            ZoneMonsterDefense {
+                min_mac: 8,
+                max_mac: 8,
+                ..Default::default()
+            },
+        ),
         now_ms: 0,
     });
     zone.handle(ZoneCommand::SpawnMonster {
@@ -7725,29 +8411,36 @@ fn zone_native_player_cripple_shot_consumes_poison_buff_and_spreads_green_poison
         now_ms: 20,
     });
 
+    assert!(!has_packet(&launch, &first, |packet| matches!(
+        packet,
+        ServerPacket::RemoveBuff { .. } | ServerPacket::ObjectPoisoned { .. }
+    )));
+    let before_hit = zone.tick(719);
+    assert_eq!(damage_indicator_for(&before_hit, 9100), None);
+    let impact = zone.tick(720);
     for target in [&first, &second] {
-        assert!(has_packet(&launch, target, |packet| matches!(
+        assert!(has_packet(&impact, target, |packet| matches!(
             packet,
             ServerPacket::RemoveBuff { object_id, buff_type }
                 if *object_id == 101 && *buff_type == 17
         )));
-        assert!(has_packet(&launch, target, |packet| matches!(
+        assert!(has_packet(&impact, target, |packet| matches!(
             packet,
             ServerPacket::ObjectPoisoned { object_id, poison }
                 if *object_id == 9100 && *poison == 1
         )));
-        assert!(has_packet(&launch, target, |packet| matches!(
+        assert!(has_packet(&impact, target, |packet| matches!(
             packet,
             ServerPacket::ObjectPoisoned { object_id, poison }
                 if *object_id == 9101 && *poison == 1
         )));
-        assert!(!has_packet(&launch, target, |packet| matches!(
+        assert!(!has_packet(&impact, target, |packet| matches!(
             packet,
             ServerPacket::ObjectPoisoned { object_id, .. } if *object_id == 9102
         )));
     }
 
-    let poison_tick = zone.tick(2_020);
+    let poison_tick = zone.tick(2_720);
     for target in [&first, &second] {
         assert!(has_packet(&poison_tick, target, |packet| matches!(
             packet,
@@ -7765,7 +8458,12 @@ fn zone_native_player_vampire_shot_heals_owner_through_zone_authority() {
     let mut zone = zone();
     let first = session("first");
     let second = session("second");
-    let mut first_join = join("first", 101, "Scout", 330, 270);
+    let mut first_join =
+        with_learned_magic(join("first", 101, "Scout", 330, 270), Spell::VampireShot);
+    // Source level1 raw16 (MC4 + catalog12);16*(1+1)/4 =8 healing.
+    first_join.combat_stats.min_mc = 4;
+    first_join.combat_stats.max_mc = 4;
+    first_join.combat_stats.luck = 10;
     first_join.hp = 20;
     first_join.max_hp = 60;
 
@@ -7784,22 +8482,34 @@ fn zone_native_player_vampire_shot_heals_owner_through_zone_authority() {
         direction: MirDirection::Right,
         target: Point { x: 334, y: 270 },
         cast: true,
-        level: 3,
+        level: 1,
         damage: 8,
         mp_cost: 0,
         cooldown_ms: 500,
         now_ms: 20,
     });
 
+    assert!(!has_packet(&launch, &first, |packet| matches!(
+        packet,
+        ServerPacket::AddBuff { .. } | ServerPacket::RemoveBuff { .. }
+    )));
+    let before_hit = zone.tick(719);
+    assert_eq!(damage_indicator_for(&before_hit, 9100), None);
+    let impact = zone.tick(720);
     for target in [&first, &second] {
-        assert!(has_packet(&launch, target, |packet| matches!(
+        assert!(has_packet(&impact, target, |packet| matches!(
             packet,
             ServerPacket::AddBuff { buff }
                 if buff.object_id == 101 && buff.buff_type == 16 && buff.visible
         )));
     }
 
-    let resolved = zone.tick(20);
+    // HumanObject:6614/6641 accumulates VampAmount; Process uses Time>VampTime.
+    let before_heal = zone.tick(1_720);
+    assert!(!before_heal
+        .iter()
+        .any(|outbound| matches!(outbound, ZoneOutbound::PlayerHealed { .. })));
+    let resolved = zone.tick(1_721);
     for target in [&first, &second] {
         assert!(has_packet(&resolved, target, |packet| matches!(
             packet,
@@ -7809,7 +8519,7 @@ fn zone_native_player_vampire_shot_heals_owner_through_zone_authority() {
     }
     assert!(resolved.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerHealed { session_id, amount }
+        ZoneOutbound::PlayerHealed { session_id, amount, .. }
             if session_id == &first && *amount == 8
     )));
 }
@@ -7819,7 +8529,10 @@ fn zone_native_player_cripple_shot_consumes_vampire_buff_and_heals_owner() {
     let mut zone = zone();
     let first = session("first");
     let second = session("second");
-    let mut first_join = join("first", 101, "Scout", 330, 270);
+    let mut first_join =
+        with_learned_magic(join("first", 101, "Scout", 330, 270), Spell::CrippleShot);
+    // Source level1 raw20 in MentalState2 (80%) gives16;16*2/4 =8.
+    first_join.combat_stats.mental_state = 2;
     first_join.hp = 20;
     first_join.max_hp = 60;
 
@@ -7844,7 +8557,7 @@ fn zone_native_player_cripple_shot_consumes_vampire_buff_and_heals_owner() {
     });
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
-        monster: native_monster_spawn(9100, 334, 270),
+        monster: native_monster_spawn_with_defense(9100, 334, 270, 100, Default::default()),
         now_ms: 0,
     });
 
@@ -7855,22 +8568,34 @@ fn zone_native_player_cripple_shot_consumes_vampire_buff_and_heals_owner() {
         direction: MirDirection::Right,
         target: Point { x: 334, y: 270 },
         cast: true,
-        level: 3,
+        level: 1,
         damage: 8,
         mp_cost: 0,
         cooldown_ms: 500,
         now_ms: 20,
     });
 
+    assert!(!has_packet(&launch, &first, |packet| matches!(
+        packet,
+        ServerPacket::AddBuff { .. } | ServerPacket::RemoveBuff { .. }
+    )));
+    let before_hit = zone.tick(719);
+    assert_eq!(damage_indicator_for(&before_hit, 9100), None);
+    let impact = zone.tick(720);
     for target in [&first, &second] {
-        assert!(has_packet(&launch, target, |packet| matches!(
+        assert!(has_packet(&impact, target, |packet| matches!(
             packet,
             ServerPacket::RemoveBuff { object_id, buff_type }
                 if *object_id == 101 && *buff_type == 16
         )));
     }
 
-    let resolved = zone.tick(20);
+    // HumanObject:6614/6641 accumulates VampAmount; Process uses Time>VampTime.
+    let before_heal = zone.tick(1_720);
+    assert!(!before_heal
+        .iter()
+        .any(|outbound| matches!(outbound, ZoneOutbound::PlayerHealed { .. })));
+    let resolved = zone.tick(1_721);
     for target in [&first, &second] {
         assert!(has_packet(&resolved, target, |packet| matches!(
             packet,
@@ -7880,7 +8605,7 @@ fn zone_native_player_cripple_shot_consumes_vampire_buff_and_heals_owner() {
     }
     assert!(resolved.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerHealed { session_id, amount }
+        ZoneOutbound::PlayerHealed { session_id, amount, .. }
             if session_id == &first && *amount == 8
     )));
 }
@@ -7968,7 +8693,8 @@ fn zone_native_player_magic_spends_mana_and_enforces_cooldown() {
         damage: 1,
         mp_cost: 4,
         cooldown_ms: 500,
-        now_ms: 600,
+        // HumanObject.Magic also reserves a global 1800 ms SpellTime.
+        now_ms: 1_820,
     });
     assert!(has_packet(&second_launch, &first, |packet| matches!(
         packet,
@@ -7982,7 +8708,7 @@ fn zone_native_player_magic_spends_mana_and_enforces_cooldown() {
                 if info.object_id == 101 && info.percent == 2
         )));
     }
-    let _ = zone.tick(600);
+    let _ = zone.tick(1_820);
 
     let mp_reject = zone.handle(ZoneCommand::PlayerCastMagic {
         session_id: first.clone(),
@@ -7995,7 +8721,8 @@ fn zone_native_player_magic_spends_mana_and_enforces_cooldown() {
         damage: 1,
         mp_cost: 3,
         cooldown_ms: 500,
-        now_ms: 1200,
+        // Both spell clocks are ready, so this rejection isolates insufficient MP.
+        now_ms: 3_620,
     });
     assert!(has_packet(&mp_reject, &first, |packet| matches!(
         packet,
@@ -8084,6 +8811,36 @@ fn zone_native_player_magic_respects_spell_action_window_across_spells() {
         )));
     }
 
+    // Crystal HumanObject.Magic reserves SpellTime = cast time + 1800 ms,
+    // independently of this fixture's one-millisecond per-spell cooldown.
+    let mp_before_boundary = zone.player_vitals(&first).unwrap().2;
+    let before_deadline = zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: first.clone(),
+        object_id: 9100,
+        spell: Spell::ThunderBolt,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 1,
+        damage: 1,
+        mp_cost: 1,
+        cooldown_ms: 1,
+        now_ms: 1_819,
+    });
+    assert!(has_packet(&before_deadline, &first, |packet| matches!(
+        packet,
+        ServerPacket::UserLocation { .. }
+    )));
+    for target in [&first, &second] {
+        assert!(!has_packet(&before_deadline, target, |packet| matches!(
+            packet,
+            ServerPacket::Magic { .. }
+                | ServerPacket::ObjectMagic { .. }
+                | ServerPacket::ObjectMana { .. }
+        )));
+    }
+    assert_eq!(zone.player_vitals(&first).unwrap().2, mp_before_boundary);
+
     let ready = zone.handle(ZoneCommand::PlayerCastMagic {
         session_id: first.clone(),
         object_id: 9100,
@@ -8095,7 +8852,7 @@ fn zone_native_player_magic_respects_spell_action_window_across_spells() {
         damage: 1,
         mp_cost: 1,
         cooldown_ms: 1,
-        now_ms: 320,
+        now_ms: 1_820,
     });
     assert!(has_packet(&ready, &first, |packet| matches!(
         packet,
@@ -8111,6 +8868,10 @@ fn zone_native_player_magic_respects_spell_action_window_across_spells() {
             ..
         } if *object_id == 101 && *spell == Spell::ThunderBolt && *target_id == 9100
     )));
+    assert_eq!(
+        zone.player_vitals(&first).unwrap().2,
+        mp_before_boundary - 1
+    );
 }
 
 #[test]
@@ -8356,7 +9117,7 @@ fn zone_native_player_magic_shield_adds_zone_buff_and_mitigates_hits() {
     )));
     assert!(mitigated_hit.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerDamaged { session_id, damage }
+        ZoneOutbound::PlayerDamaged { session_id, damage, .. }
             if session_id == &first && *damage == 4
     )));
 }
@@ -8416,7 +9177,7 @@ fn zone_native_player_healing_self_schedules_zone_heal() {
     )));
     assert!(healed.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerHealed { session_id, amount } if session_id == &first && *amount > 0
+        ZoneOutbound::PlayerHealed { session_id, amount, .. } if session_id == &first && *amount > 0
     )));
 }
 
@@ -8474,11 +9235,11 @@ fn zone_native_player_mass_healing_schedules_area_zone_heal() {
     )));
     assert!(healed.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerHealed { session_id, amount } if session_id == &first && *amount >= 18
+        ZoneOutbound::PlayerHealed { session_id, amount, .. } if session_id == &first && *amount >= 18
     )));
     assert!(healed.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerHealed { session_id, amount } if session_id == &second && *amount >= 18
+        ZoneOutbound::PlayerHealed { session_id, amount, .. } if session_id == &second && *amount >= 18
     )));
 }
 
@@ -8540,11 +9301,11 @@ fn zone_native_player_healing_circle_spawns_spell_and_heals_in_zone() {
     )));
     assert!(delayed.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerHealed { session_id, amount } if session_id == &first && *amount == 25
+        ZoneOutbound::PlayerHealed { session_id, amount, .. } if session_id == &first && *amount == 25
     )));
     assert!(delayed.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerHealed { session_id, amount } if session_id == &second && *amount == 25
+        ZoneOutbound::PlayerHealed { session_id, amount, .. } if session_id == &second && *amount == 25
     )));
 }
 
@@ -8701,7 +9462,7 @@ fn zone_native_player_summon_skeleton_recalls_existing_owned_summon_without_resp
         damage: 0,
         mp_cost: 7,
         cooldown_ms: 1_000,
-        now_ms: 1_200,
+        now_ms: 1_810,
     });
 
     assert!(has_packet(&recall, &first, |packet| matches!(
@@ -8730,7 +9491,8 @@ fn zone_native_player_summon_skeleton_recalls_existing_owned_summon_without_resp
                 && movement.position == (Point { x: 334, y: 270 })
     )));
 
-    let later = zone.tick(2_000);
+    // Check beyond a full 500 ms materialization delay after the legal recall.
+    let later = zone.tick(2_400);
     assert!(!has_packet(&later, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectMonster { info } if info.name == "BoneFamiliar"
@@ -8773,11 +9535,21 @@ fn zone_native_summon_attacks_hostile_monster_for_owner_without_hitting_players(
 
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
-        monster: native_monster_spawn(9100, 332, 270),
+        monster: native_monster_spawn_with_defense(9100, 332, 270, 100, Default::default()),
         now_ms: 520,
     });
 
-    let attack = zone.tick(1_110);
+    // MonsterObject.Spawned:736 locks a newly born pet for2000ms;
+    // CanAttack:656-660 is strict >. This tick also lets the wild monster
+    // actually acquire the owner/pet as Target before the pet may retaliate.
+    let before_attack = zone.tick(2_510);
+    assert!(!has_packet(
+        &before_attack,
+        &first,
+        |packet| matches!(packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == summon_object_id)
+    ));
+    let attack = zone.tick(2_511);
     assert!(has_packet(&attack, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectAttack { info }
@@ -8789,22 +9561,25 @@ fn zone_native_summon_attacks_hostile_monster_for_owner_without_hitting_players(
         .iter()
         .any(|outbound| matches!(outbound, ZoneOutbound::PlayerDamaged { .. })));
 
-    let struck = zone.tick(1_710);
+    // MonsterObject.Attack:2171 queues the real bite after300ms.
+    let before_hit = zone.tick(2_810);
+    assert_eq!(damage_indicator_for(&before_hit, 9100), None);
+    let struck = zone.tick(2_811);
     assert!(has_packet(&struck, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectStruck { info }
             if info.object_id == 9100 && info.attacker_id == summon_object_id
     )));
-    assert!(has_packet(&struck, &first, |packet| matches!(
-        packet,
-        ServerPacket::DamageIndicator {
-            damage, object_id, ..
-        } if *object_id == 9100 && *damage == 1
-    )));
+    let damage = damage_indicator_for(&struck, 9100)
+        .expect("summon's hit should show authoritative monster damage");
+    assert!(
+        (12..=23).contains(&damage),
+        "BoneFamiliar Crystal DC range: {damage}"
+    );
     assert!(has_packet(&struck, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectHealth { info }
-            if info.object_id == 9100 && info.percent == 95
+            if info.object_id == 9100 && i32::from(info.percent) == 100 - damage
     )));
     assert!(!struck
         .iter()
@@ -8864,14 +9639,28 @@ fn zone_native_holy_deva_uses_ranged_summon_attack_against_hostile_monster() {
         now_ms: 1_520,
     });
 
-    let attack = zone.tick(2_110);
-    assert!(has_packet(&attack, &first, |packet| matches!(
-        packet,
-        ServerPacket::ObjectRangeAttack { info }
-            if info.object_id == summon_object_id
-                && info.target_id == 2_000_000
-                && info.target == (Point { x: 337, y: 270 })
-    )));
+    // One update at the exact newborn deadline establishes the wild
+    // monster's real Target and moves it337->336, while Deva is still locked.
+    // A second earlier AI update would legally move that target another tile.
+    let early_action = zone.tick(3_510);
+    assert!(!has_packet(
+        &early_action,
+        &first,
+        |packet| matches!(packet,ServerPacket::ObjectRangeAttack{info}if info.object_id==summon_object_id)
+    ));
+    // MonsterObject.Spawned/CanAttack: strictly after1510+2000.
+    let attack = zone.tick(3_511);
+    assert!(
+        has_packet(&attack, &first, |packet| matches!(
+            packet,
+            ServerPacket::ObjectRangeAttack { info }
+                if info.object_id == summon_object_id
+                    && info.target_id == 2_000_000
+                    && info.target == (Point { x: 336, y: 270 })
+        )),
+        "Deva launch receipts: {:?}",
+        packets_for(&attack, &first)
+    );
     assert!(!has_packet(&attack, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectWalk { movement } if movement.object_id == summon_object_id
@@ -8880,7 +9669,10 @@ fn zone_native_holy_deva_uses_ranged_summon_attack_against_hostile_monster() {
         .iter()
         .any(|outbound| matches!(outbound, ZoneOutbound::PlayerDamaged { .. })));
 
-    let struck = zone.tick(2_610);
+    // HolyDeva.Attack:42 uses RangeDamage +500ms.
+    let before_hit = zone.tick(4_010);
+    assert_eq!(damage_indicator_for(&before_hit, 2_000_000), None);
+    let struck = zone.tick(4_011);
     assert!(has_packet(&struck, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectStruck { info }
@@ -8951,7 +9743,23 @@ fn zone_native_summon_shinsu_spawns_owned_pet_and_attacks_hostile_monster() {
         now_ms: 520,
     });
 
-    let attack = zone.tick(1_110);
+    // The first search update establishes a real hostile Target; the Shinsu
+    // still cannot act at Spawned's exact510+2000 deadline (MonsterObject:736).
+    let before_show = zone.tick(2_510);
+    assert!(!has_packet(&before_show, &first, |packet| matches!(packet,
+        ServerPacket::ObjectShow { object_id } if *object_id == summon_object_id)));
+    let shown = zone.tick(2_511);
+    assert!(has_packet(&shown, &first, |packet| matches!(packet,
+        ServerPacket::ObjectShow { object_id } if *object_id == summon_object_id)));
+    // Shinsu.ProcessAI:32-36 sets a second1000ms strict action lock.
+    let before_attack = zone.tick(3_511);
+    assert!(!has_packet(
+        &before_attack,
+        &first,
+        |packet| matches!(packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == summon_object_id)
+    ));
+    let attack = zone.tick(3_512);
     assert!(has_packet(&attack, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectAttack { info }
@@ -8959,7 +9767,10 @@ fn zone_native_summon_shinsu_spawns_owned_pet_and_attacks_hostile_monster() {
                 && info.location == (Point { x: 331, y: 270 })
                 && info.direction == MirDirection::Right
     )));
-    let struck = zone.tick(1_710);
+    // MonsterObject.LineAttack:3635:500ms +50ms for the first cell.
+    let before_hit = zone.tick(4_061);
+    assert_eq!(damage_indicator_for(&before_hit, 9100), None);
+    let struck = zone.tick(4_062);
     assert!(has_packet(&struck, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectStruck { info }
@@ -9018,7 +9829,7 @@ fn zone_native_pet_enhancer_buffs_owned_summon_and_increases_damage() {
         damage: 0,
         mp_cost: 0,
         cooldown_ms: 1,
-        now_ms: 600,
+        now_ms: 1_810,
     });
     assert!(has_packet(&enhanced, &first, |packet| matches!(
         packet,
@@ -9041,16 +9852,35 @@ fn zone_native_pet_enhancer_buffs_owned_summon_and_increases_damage() {
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: native_monster_spawn(9100, 332, 270),
-        now_ms: 620,
+        now_ms: 1_820,
     });
 
-    let attack = zone.tick(1_110);
+    // The first search update establishes a real hostile Target; the Shinsu
+    // still cannot act at Spawned's exact510+2000 deadline (MonsterObject:736).
+    let before_show = zone.tick(2_510);
+    assert!(!has_packet(&before_show, &first, |packet| matches!(packet,
+        ServerPacket::ObjectShow { object_id } if *object_id == summon_object_id)));
+    let shown = zone.tick(2_511);
+    assert!(has_packet(&shown, &first, |packet| matches!(packet,
+        ServerPacket::ObjectShow { object_id } if *object_id == summon_object_id)));
+    // Shinsu.ProcessAI:32-36 sets a second1000ms strict action lock.
+    let before_attack = zone.tick(3_511);
+    assert!(!has_packet(
+        &before_attack,
+        &first,
+        |packet| matches!(packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == summon_object_id)
+    ));
+    let attack = zone.tick(3_512);
     assert!(has_packet(&attack, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectAttack { info }
             if info.object_id == summon_object_id && info.direction == MirDirection::Right
     )));
-    let struck = zone.tick(1_710);
+    // MonsterObject.LineAttack:3635:500ms +50ms for the first cell.
+    let before_hit = zone.tick(4_061);
+    assert_eq!(damage_indicator_for(&before_hit, 9100), None);
+    let struck = zone.tick(4_062);
     assert!(has_packet(&struck, &first, |packet| matches!(
         packet,
         ServerPacket::DamageIndicator {
@@ -9202,11 +10032,22 @@ fn zone_native_vampire_spider_hit_bleeds_target_and_heals_owner() {
         })
         .expect("SummonVampire should spawn before resolving its melee hit");
 
-    assert!(has_packet(&spawned, &first, |packet| matches!(
+    assert!(!has_packet(&spawned, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectAttack { info } if info.object_id == summon_object_id
     )));
-    let struck = zone.tick(1_810);
+    let (struck_at, struck) = wait_for_shared_pet_packet(
+        &mut zone,
+        &first,
+        1_310,
+        6_210,
+        |packet| matches!(packet, ServerPacket::ObjectAttack { info } if info.object_id==summon_object_id),
+    );
+    // Crystal VampireSpider.Attack settles its bite in this same update.
+    assert!(has_packet(&struck, &first, |packet| matches!(
+        packet, ServerPacket::ObjectStruck { info }
+            if info.object_id == 9100 && info.attacker_id == summon_object_id
+    )));
     assert!(has_packet(&struck, &first, |packet| matches!(
         packet,
         ServerPacket::DamageIndicator {
@@ -9218,9 +10059,10 @@ fn zone_native_vampire_spider_hit_bleeds_target_and_heals_owner() {
         ServerPacket::ObjectEffect { info }
             if info.object_id == 9100 && info.effect == 18 && info.effect_type == 0
     )));
-    assert!(struck.iter().any(|outbound| matches!(
+    let healed = zone.tick(struck_at + 1_001);
+    assert!(healed.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerHealed { session_id, amount }
+        ZoneOutbound::PlayerHealed { session_id, amount, .. }
             if session_id == &first && *amount > 0
     )));
     assert!(!struck
@@ -9236,10 +10078,14 @@ fn zone_native_vampire_spider_explodes_on_expiry_and_vampires_nearby_target() {
     archer.class = MirClass::Archer;
     archer.hp = 30;
     zone.handle(ZoneCommand::Join(archer));
-
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: native_monster_spawn_with_defense(9100, 334, 270, 100, Default::default()),
+        now_ms: 0,
+    });
     zone.handle(ZoneCommand::PlayerCastMagic {
         session_id: first.clone(),
-        object_id: 0,
+        object_id: 9100,
         spell: Spell::SummonVampire,
         direction: MirDirection::Right,
         target: Point { x: 334, y: 270 },
@@ -9251,45 +10097,183 @@ fn zone_native_vampire_spider_explodes_on_expiry_and_vampires_nearby_target() {
         now_ms: 10,
     });
     let spawned = zone.tick(1_210);
-    let (summon_object_id, summon_position) = packets_for(&spawned, &first)
+    let summon_object_id = packets_for(&spawned, &first)
         .into_iter()
         .find_map(|packet| match packet {
             ServerPacket::ObjectMonster { info } if info.name == "VampireSpider" => {
-                Some((info.object_id, info.location))
+                Some(info.object_id)
             }
             _ => None,
         })
-        .expect("SummonVampire should spawn on the ground target");
-    zone.handle(ZoneCommand::SpawnMonster {
-        session_id: first.clone(),
-        monster: native_monster_spawn(9100, summon_position.x + 1, summon_position.y),
-        now_ms: 19_000,
-    });
+        .expect("SummonVampire must create the real owned spider");
 
-    let exploded = zone.tick(19_210);
-    assert!(has_packet(&exploded, &first, |packet| matches!(
-        packet,
-        ServerPacket::ObjectDied { info } if info.object_id == summon_object_id
-    )));
-    assert!(has_packet(&exploded, &first, |packet| matches!(
-        packet,
-        ServerPacket::DamageIndicator {
-            object_id, damage, ..
-        } if *object_id == 9100 && *damage > 0
-    )));
-    assert!(has_packet(&exploded, &first, |packet| matches!(
-        packet,
-        ServerPacket::ObjectEffect { info }
-            if info.object_id == 9100 && info.effect == 18 && info.effect_type == 0
-    )));
-    assert!(exploded.iter().any(|outbound| matches!(
-        outbound,
-        ZoneOutbound::PlayerHealed { session_id, amount }
-            if session_id == &first && *amount > 0
-    )));
-    assert!(!exploded
+    // Keep the positive vampire proof on the real live bite. VampireSpider:169,
+    // 179-184 schedules MasterVampire only while Master still exists.
+    let (struck_at, struck) = wait_for_shared_pet_packet(
+        &mut zone,
+        &first,
+        1_310,
+        6_210,
+        |packet| matches!(packet, ServerPacket::ObjectAttack { info } if info.object_id == summon_object_id),
+    );
+    assert!(has_packet(&struck, &first, |packet| matches!(packet,
+        ServerPacket::ObjectStruck { info } if info.object_id == 9100 && info.attacker_id == summon_object_id)));
+    assert!(has_packet(&struck, &first, |packet| matches!(packet,
+        ServerPacket::DamageIndicator { object_id: 9100, damage, .. } if *damage > 0)));
+    assert!(has_packet(&struck, &first, |packet| matches!(packet,
+        ServerPacket::ObjectEffect { info } if info.object_id == 9100 && info.effect == 18 && info.effect_type == 0)));
+    assert!(!struck
         .iter()
         .any(|outbound| matches!(outbound, ZoneOutbound::PlayerDamaged { .. })));
+
+    // Stop further live bites using the ordinary server-side PetMode projection,
+    // so an old legitimate heal pool cannot be mistaken for an expiry effect.
+    let mut profile = mir2_simulation::ZoneChatProfile::default();
+    profile.pet_mode = 3;
+    zone.handle(ZoneCommand::UpdateChatProfile {
+        session_id: first.clone(),
+        profile,
+    });
+    let bite_damage = damage_indicator_for(&struck, 9100).expect("actual settled live bite");
+    let vampire_amount = bite_damage * 3 / 4;
+    assert!(vampire_amount > 2 && vampire_amount <= 10);
+    assert_eq!(
+        zone.player_vitals(&first).expect("owner after live bite").0,
+        30
+    );
+    // This update also reaches the ordinary3000ms regen deadline. For maxHP60
+    // it legitimately heals2 (60*3/100+1), but Time==VampTime cannot drain the
+    // distinct live-bite pool yet (HumanObject:619-631).
+    let before_heal = zone.tick(struck_at + 1_000);
+    let regen_receipts = before_heal
+        .iter()
+        .filter_map(|outbound| match outbound {
+            ZoneOutbound::PlayerHealed {
+                session_id, amount, ..
+            } => Some((session_id.clone(), *amount)),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        regen_receipts,
+        vec![(first.clone(), 2)],
+        "only natural regeneration at exact VampTime"
+    );
+    assert_eq!(
+        zone.player_vitals(&first)
+            .expect("owner after natural regen")
+            .0,
+        32
+    );
+    let healed = zone.tick(struck_at + 1_001);
+    let vampire_receipts = healed
+        .iter()
+        .filter_map(|outbound| match outbound {
+            ZoneOutbound::PlayerHealed {
+                session_id, amount, ..
+            } => Some((session_id.clone(), *amount)),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        vampire_receipts,
+        vec![(first.clone(), vampire_amount)],
+        "live bite drains only strictly after VampTime"
+    );
+    assert_eq!(
+        zone.player_vitals(&first)
+            .expect("owner after MasterVampire")
+            .0,
+        32 + vampire_amount
+    );
+    let drained = zone.tick(struck_at + 1_502);
+    assert!(!drained
+        .iter()
+        .any(|outbound| matches!(outbound, ZoneOutbound::PlayerHealed { .. })));
+
+    let summon_position = zone
+        .native_monster_snapshots()
+        .into_iter()
+        .find(|m| m.object_id == summon_object_id)
+        .expect("live spider before expiry")
+        .position;
+    let owner_position = zone.player_position(&first).expect("online owner");
+    assert!(
+        owner_position
+            .x
+            .abs_diff(summon_position.x)
+            .max(owner_position.y.abs_diff(summon_position.y))
+            > 1,
+        "the owner is outside the death burst, not protected by a fabricated permission"
+    );
+    let victim = session("burst-victim");
+    zone.handle(ZoneCommand::Join(join(
+        "burst-victim",
+        103,
+        "Nearby",
+        summon_position.x,
+        summon_position.y + 1,
+    )));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: first.clone(),
+        monster: native_monster_spawn(9101, summon_position.x + 1, summon_position.y),
+        now_ms: 18_700,
+    });
+
+    // The first archer delay completes at710; AliveTime=710+15000+2*1500.
+    // VampireSpider.Process:33 tests strict Time>AliveTime.
+    let at_expiry = zone.tick(18_710);
+    assert!(!has_packet(&at_expiry, &first, |packet| matches!(packet,
+        ServerPacket::ObjectDied { info } if info.object_id == summon_object_id)));
+    assert!(
+        !zone
+            .native_monster_snapshots()
+            .into_iter()
+            .find(|m| m.object_id == summon_object_id)
+            .unwrap()
+            .dead
+    );
+    let wild_before = zone
+        .native_monster_snapshots()
+        .into_iter()
+        .filter(|m| [9100, 9101].contains(&m.object_id))
+        .map(|m| (m.object_id, m.hp))
+        .collect::<Vec<_>>();
+
+    // VampireSpider.Die:75 calls base.Die first; MonsterObject:1000 clears
+    // Master. PlayerObject.IsAttackTarget:4714 then permits this wild burst,
+    // but ordinary wild monsters are excluded (MonsterObject:2537-2539), and
+    // VampireSpider:103 cannot schedule new MasterVampire after Master=null.
+    let exploded = zone.tick(18_711);
+    assert!(has_packet(&exploded, &first, |packet| matches!(packet,
+        ServerPacket::ObjectDied { info } if info.object_id == summon_object_id)));
+    assert!(has_packet(&exploded, &victim, |packet| matches!(
+        packet,
+        ServerPacket::DamageIndicator {
+            object_id: 103,
+            damage: 20,
+            ..
+        }
+    )));
+    assert!(exploded.iter().any(|outbound| matches!(outbound,
+        ZoneOutbound::PlayerDamaged { session_id, damage: 20, .. } if session_id == &victim)));
+    assert!(!exploded.iter().any(|outbound| matches!(outbound,
+        ZoneOutbound::PlayerDamaged { session_id, .. } if session_id == &first)));
+    assert_eq!(
+        zone.native_monster_snapshots()
+            .into_iter()
+            .filter(|m| [9100, 9101].contains(&m.object_id))
+            .map(|m| (m.object_id, m.hp))
+            .collect::<Vec<_>>(),
+        wild_before
+    );
+    assert!(!exploded
+        .iter()
+        .any(|outbound| matches!(outbound, ZoneOutbound::PlayerHealed { .. })));
+    let after_burst = zone.tick(19_712);
+    assert!(!after_burst
+        .iter()
+        .any(|outbound| matches!(outbound, ZoneOutbound::PlayerHealed { .. })));
 }
 
 #[test]
@@ -9332,7 +10316,7 @@ fn zone_native_archer_summon_toad_uses_ranged_pet_attack() {
         })
         .expect("SummonToad should spawn an owned SpittingToad after projectile delay");
 
-    assert!(has_packet(&spawned_and_attack, &first, |packet| matches!(
+    assert!(!has_packet(&spawned_and_attack, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectRangeAttack { info }
             if info.object_id == summon_object_id && info.target_id == 9100
@@ -9341,6 +10325,13 @@ fn zone_native_archer_summon_toad_uses_ranged_pet_attack() {
         packet,
         ServerPacket::ObjectWalk { movement } if movement.object_id == summon_object_id
     )));
+    wait_for_shared_pet_packet(
+        &mut zone,
+        &first,
+        1_510,
+        7_410,
+        |packet| matches!(packet, ServerPacket::ObjectRangeAttack { info } if info.object_id==summon_object_id&&info.target_id==9100),
+    );
 }
 
 #[test]
@@ -9386,11 +10377,18 @@ fn zone_native_archer_summon_snakes_spawns_static_totem_profile() {
         packet,
         ServerPacket::ObjectWalk { movement } if movement.object_id == totem_object_id
     )));
-    assert!(has_packet(&spawned, &first, |packet| matches!(
+    assert!(!has_packet(&spawned, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectAttack { info } if info.object_id == totem_object_id
     )));
-    let snake_object_id = packets_for(&spawned, &first)
+    let (snake_at, spawned_snake) = wait_for_shared_pet_packet(
+        &mut zone,
+        &first,
+        1_410,
+        6_310,
+        |packet| matches!(packet, ServerPacket::ObjectMonster{info}if info.name=="CharmedSnake"&&info.master_object_id==totem_object_id),
+    );
+    let snake_object_id = packets_for(&spawned_snake, &first)
         .into_iter()
         .find_map(|packet| match packet {
             ServerPacket::ObjectMonster { info }
@@ -9404,12 +10402,24 @@ fn zone_native_archer_summon_snakes_spawns_static_totem_profile() {
         })
         .expect("SnakeTotem should spawn a CharmedSnake minion");
 
-    let attack = zone.tick(1_910);
+    let (attack_at, attack) = wait_for_shared_pet_packet(
+        &mut zone,
+        &first,
+        snake_at + 1,
+        snake_at + 10_000,
+        |packet| matches!(packet, ServerPacket::ObjectAttack{info}if info.object_id==snake_object_id),
+    );
     assert!(has_packet(&attack, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectAttack { info } if info.object_id == snake_object_id
     )));
-    let struck = zone.tick(2_510);
+    let (_, struck) = wait_for_shared_pet_packet(
+        &mut zone,
+        &first,
+        attack_at + 1,
+        attack_at + 2_000,
+        |packet| matches!(packet,ServerPacket::ObjectStruck{info}if info.object_id==9100&&info.attacker_id==snake_object_id),
+    );
     assert!(has_packet(&struck, &first, |packet| matches!(
     packet,
     ServerPacket::ObjectStruck { info }
@@ -9448,7 +10458,14 @@ fn zone_native_charmed_snake_hit_applies_paralysis_poison() {
         now_ms: 10,
     });
 
-    let spawned = zone.tick(1_310);
+    zone.tick(1_310);
+    let (snake_at, spawned) = wait_for_shared_pet_packet(
+        &mut zone,
+        &first,
+        1_410,
+        6_310,
+        |packet| matches!(packet,ServerPacket::ObjectMonster{info}if info.name=="CharmedSnake"),
+    );
     let snake_object_id = packets_for(&spawned, &first)
         .into_iter()
         .find_map(|packet| match packet {
@@ -9459,12 +10476,24 @@ fn zone_native_charmed_snake_hit_applies_paralysis_poison() {
         })
         .expect("SnakeTotem should spawn a CharmedSnake minion");
 
-    let attack = zone.tick(1_910);
+    let (attack_at, attack) = wait_for_shared_pet_packet(
+        &mut zone,
+        &first,
+        snake_at + 1,
+        snake_at + 10_000,
+        |packet| matches!(packet,ServerPacket::ObjectAttack{info}if info.object_id==snake_object_id),
+    );
     assert!(has_packet(&attack, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectAttack { info } if info.object_id == snake_object_id
     )));
-    let struck = zone.tick(2_510);
+    let (_, struck) = wait_for_shared_pet_packet(
+        &mut zone,
+        &first,
+        attack_at + 1,
+        attack_at + 2_000,
+        |packet| matches!(packet,ServerPacket::ObjectStruck{info}if info.object_id==9100&&info.attacker_id==snake_object_id),
+    );
     assert!(has_packet(&struck, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectStruck { info }
@@ -9473,7 +10502,7 @@ fn zone_native_charmed_snake_hit_applies_paralysis_poison() {
     assert!(has_packet(&struck, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectPoisoned { object_id, poison }
-            if *object_id == 9100 && (*poison & 256) != 0
+            if *object_id == 9100 && (*poison & 32) != 0
     )));
 }
 
@@ -9509,7 +10538,7 @@ fn zone_native_snake_totem_caps_minions_and_respawns_after_minion_expiry() {
     });
 
     let mut snake_ids = BTreeSet::new();
-    for now_ms in [1_310, 1_910, 2_510, 3_110] {
+    for now_ms in [1_310, 4_310, 7_310, 10_310, 13_310] {
         let outbounds = zone.tick(now_ms);
         for packet in packets_for(&outbounds, &first) {
             if let ServerPacket::ObjectMonster { info } = packet {
@@ -9529,7 +10558,7 @@ fn zone_native_snake_totem_caps_minions_and_respawns_after_minion_expiry() {
         .iter()
         .next()
         .expect("SnakeTotem should have spawned a first minion");
-    let expired = zone.tick(15_310);
+    let expired = zone.tick(18_310);
     assert!(has_packet(&expired, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectDied { info } if info.object_id == first_snake_id
@@ -9590,7 +10619,14 @@ fn zone_native_snake_totem_self_destruct_kills_owned_minions() {
             _ => None,
         })
         .expect("SummonSnakes should spawn a SnakeTotem");
-    let snake_object_id = packets_for(&spawned, &first)
+    let (snake_at, spawned_snake) = wait_for_shared_pet_packet(
+        &mut zone,
+        &first,
+        1_410,
+        6_310,
+        |packet| matches!(packet,ServerPacket::ObjectMonster{info}if info.name=="CharmedSnake"),
+    );
+    let snake_object_id = packets_for(&spawned_snake, &first)
         .into_iter()
         .find_map(|packet| match packet {
             ServerPacket::ObjectMonster { info } if info.name == "CharmedSnake" => {
@@ -9605,7 +10641,7 @@ fn zone_native_snake_totem_self_destruct_kills_owned_minions() {
         position: Point { x: 400, y: 270 },
         direction: MirDirection::Right,
     });
-    let died = zone.tick(1_910);
+    let died = zone.tick(snake_at + 1);
     assert!(has_packet(&died, &second, |packet| matches!(
         packet,
         ServerPacket::ObjectDied { info } if info.object_id == totem_object_id
@@ -9654,7 +10690,7 @@ fn zone_native_archer_stonetrap_spawns_static_trap_and_expires() {
         .into_iter()
         .find_map(|packet| match packet {
             ServerPacket::ObjectMonster { info }
-                if info.name == "StoneTrap"
+                if info.name == "StoneTrap(Robin)"
                     && info.master_object_id == 101
                     && info.extra
                     && info.location == (Point { x: 332, y: 270 }) =>
@@ -9669,7 +10705,30 @@ fn zone_native_archer_stonetrap_spawns_static_trap_and_expires() {
         ServerPacket::ObjectAttack { info } if info.object_id == trap_object_id
     )));
 
-    let expired = zone.tick(11_111);
+    let at_deadline = zone.tick(10_610);
+    assert!(!has_packet(
+        &at_deadline,
+        &first,
+        |packet| matches!(packet,ServerPacket::ObjectDied{info}if info.object_id==trap_object_id)
+    ));
+    let died = zone.tick(10_611);
+    assert!(has_packet(
+        &died,
+        &first,
+        |packet| matches!(packet,ServerPacket::ObjectDied{info}if info.object_id==trap_object_id)
+    ));
+    assert!(!has_packet(
+        &died,
+        &first,
+        |packet| matches!(packet,ServerPacket::ObjectRemove{object_id}if *object_id==trap_object_id)
+    ));
+    let before_removal = zone.tick(190_610);
+    assert!(!has_packet(
+        &before_removal,
+        &first,
+        |packet| matches!(packet,ServerPacket::ObjectRemove{object_id}if *object_id==trap_object_id)
+    ));
+    let expired = zone.tick(190_611);
     assert!(has_packet(&expired, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectRemove { object_id } if *object_id == trap_object_id
@@ -9701,16 +10760,18 @@ fn zone_native_stonetrap_draws_hostile_monster_aggro_without_player_damage() {
     let trap_object_id = packets_for(&spawned, &first)
         .into_iter()
         .find_map(|packet| match packet {
-            ServerPacket::ObjectMonster { info } if info.name == "StoneTrap" => {
+            ServerPacket::ObjectMonster { info } if info.name == "StoneTrap(Robin)" => {
                 Some(info.object_id)
             }
             _ => None,
         })
         .expect("StoneTrap should exist before aggro test");
 
+    let mut attacker = native_monster_spawn(9100, 334, 270);
+    attacker.name = "Ancient_WoomaGuardian".into();
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
-        monster: native_monster_spawn(9100, 334, 270),
+        monster: attacker,
         now_ms: 1_120,
     });
 
@@ -9721,7 +10782,12 @@ fn zone_native_stonetrap_draws_hostile_monster_aggro_without_player_damage() {
             if movement.object_id == 9100
                 && movement.position == (Point { x: 333, y: 270 })
     )));
-    let attacked = zone.tick(2_320);
+    let at_cooldown = zone.tick(2_520);
+    assert!(!has_packet(&at_cooldown, &first, |packet| matches!(
+        packet, ServerPacket::ObjectAttack { info } if info.object_id == 9100
+    )));
+    // Crystal CanAttack requires strictly later than the move's AttackTime.
+    let attacked = zone.tick(2_521);
     assert!(has_packet(&attacked, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectAttack { info }
@@ -9730,11 +10796,22 @@ fn zone_native_stonetrap_draws_hostile_monster_aggro_without_player_damage() {
     assert!(!attacked
         .iter()
         .any(|outbound| matches!(outbound, ZoneOutbound::PlayerDamaged { .. })));
-    let later = zone.tick(2_920);
-    assert!(!has_packet(&later, &first, |packet| matches!(
+    let later = zone.tick(2_821);
+    assert!(has_packet(&later, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectStruck { info } if info.object_id == trap_object_id
     )));
+    let died = zone.tick(10_611);
+    assert!(has_packet(
+        &died,
+        &first,
+        |packet| matches!(packet,ServerPacket::ObjectDied{info}if info.object_id==trap_object_id)
+    ));
+    assert!(!has_packet(
+        &died,
+        &first,
+        |packet| matches!(packet,ServerPacket::ObjectRemove{object_id}if *object_id==trap_object_id)
+    ));
 }
 
 #[test]
@@ -9929,7 +11006,7 @@ fn zone_native_monster_tick_attacks_adjacent_player_with_delayed_hit() {
     )));
     assert!(hit.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerDamaged { session_id, damage }
+        ZoneOutbound::PlayerDamaged { session_id, damage, .. }
             if session_id == &first && *damage == 7
     )));
 }
@@ -9976,7 +11053,7 @@ fn conquest_archer_guard_ignores_defender_guild_and_attacks_enemy_guild() {
     )));
     assert!(outbounds.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerDamaged { session_id, damage }
+        ZoneOutbound::PlayerDamaged { session_id, damage, .. }
             if session_id == &attacker && *damage > 0
     )));
 }
@@ -10004,7 +11081,7 @@ fn zone_native_monster_paralysis_blocks_movement_until_status_expires() {
     assert!(has_packet(&hit, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectPoisoned { object_id, poison }
-            if *object_id == 101 && *poison == 256
+            if *object_id == 101 && *poison == 32
     )));
 
     zone.handle(ZoneCommand::Walk {
@@ -10144,7 +11221,7 @@ fn zone_native_ranged_monster_attacks_without_chasing_when_target_not_adjacent()
     )));
     assert!(hit.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerDamaged { session_id, damage }
+        ZoneOutbound::PlayerDamaged { session_id, damage, .. }
             if session_id == &first && *damage > 0
     )));
 }
@@ -10209,7 +11286,7 @@ fn zone_native_player_defence_buff_mitigates_monster_damage_until_expiry() {
     )));
     assert!(unmitigated_hit.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerDamaged { session_id, damage }
+        ZoneOutbound::PlayerDamaged { session_id, damage, .. }
             if session_id == &first && *damage == 7
     )));
 }
@@ -12130,7 +13207,7 @@ fn zone_native_monster_melee_damage_is_data_driven_from_crystal_stats() {
     let hit = zone.tick(600);
     assert!(hit.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerDamaged { session_id, damage }
+        ZoneOutbound::PlayerDamaged { session_id, damage, .. }
             if session_id == &first && (6..=8).contains(damage)
     )));
 }
@@ -12512,7 +13589,7 @@ fn level50_warrior_melee_skills_keep_crystal_range_shapes_and_hit_timing() {
     });
     assert_eq!(
         damage_indicator_for(&half_moon_zone.tick(20), 9_100),
-        Some(60)
+        Some(100)
     );
     let half_moon_impact = half_moon_zone.tick(320);
     assert_eq!(damage_indicator_for(&half_moon_impact, 9_101), Some(60));
@@ -12936,7 +14013,7 @@ fn level50_wizard_relocation_clone_and_self_buffs_are_zone_authoritative() {
         damage: 0,
         mp_cost: 0,
         cooldown_ms: 500,
-        now_ms: 1_000,
+        now_ms: 1_820,
     });
     assert!(has_packet(&recast, &wizard, |packet| matches!(
         packet,
@@ -13155,7 +14232,7 @@ fn level50_wizard_vampirism_damages_and_heals_through_shared_authority() {
     assert_eq!(vampirism_zone.player_vitals(&wizard), Some((50, 60, 100)));
     assert!(impact.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerHealed { session_id, amount }
+        ZoneOutbound::PlayerHealed { session_id, amount, .. }
             if session_id == &wizard && *amount == 30
     )));
 }
@@ -13291,7 +14368,7 @@ fn level50_taoist_support_spells_apply_to_shared_friendly_targets() {
     assert_eq!(healing_zone.player_vitals(&friend), Some((60, 60, 100)));
     assert!(healed.iter().any(|outbound| matches!(
         outbound,
-        ZoneOutbound::PlayerHealed { session_id, amount }
+        ZoneOutbound::PlayerHealed { session_id, amount, .. }
             if session_id == &friend && *amount == 40
     )));
 }
@@ -13519,7 +14596,7 @@ fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
     taoist_join.level = 50;
     purification_zone.handle(ZoneCommand::Join(taoist_join));
 
-    let poisoned = purification_zone.handle(ZoneCommand::PlayerCastMagicWithItem {
+    let poison_cast = purification_zone.handle(ZoneCommand::PlayerCastMagicWithItem {
         session_id: poisoner.clone(),
         object_id: 102,
         spell: Spell::Poisoning,
@@ -13533,6 +14610,16 @@ fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
         item_param: 1,
         now_ms: 20,
     });
+    assert!(!has_packet(&poison_cast, &friend, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned { object_id: 102, poison } if *poison != 0
+    )));
+    let before_poison = purification_zone.tick(519);
+    assert!(!has_packet(&before_poison, &friend, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned { object_id: 102, poison } if *poison != 0
+    )));
+    let poisoned = purification_zone.tick(520);
     assert!(has_packet(&poisoned, &friend, |packet| matches!(
         packet,
         ServerPacket::ObjectPoisoned { object_id: 102, poison } if *poison != 0
@@ -13553,10 +14640,10 @@ fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
                 values: Vec::new(),
             },
         }],
-        now_ms: 25,
+        now_ms: 521,
     });
 
-    let purified = purification_zone.handle(ZoneCommand::PlayerCastMagic {
+    let purification_cast = purification_zone.handle(ZoneCommand::PlayerCastMagic {
         session_id: taoist.clone(),
         object_id: 102,
         spell: Spell::Purification,
@@ -13567,8 +14654,34 @@ fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
         damage: 0,
         mp_cost: 0,
         cooldown_ms: 500,
-        now_ms: 40,
+        now_ms: 540,
     });
+    assert!(!has_packet(&purification_cast, &friend, |packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned {
+            object_id: 102,
+            poison: 0
+        } | ServerPacket::RemoveBuff {
+            object_id: 102,
+            buff_type: 12
+        }
+    )));
+    let before_purification = purification_zone.tick(1_039);
+    assert!(!has_packet(
+        &before_purification,
+        &friend,
+        |packet| matches!(
+            packet,
+            ServerPacket::ObjectPoisoned {
+                object_id: 102,
+                poison: 0
+            } | ServerPacket::RemoveBuff {
+                object_id: 102,
+                buff_type: 12
+            }
+        )
+    ));
+    let purified = purification_zone.tick(1_040);
     assert!(has_packet(&purified, &friend, |packet| matches!(
         packet,
         ServerPacket::ObjectPoisoned {
@@ -13593,4 +14706,125 @@ fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
         ServerPacket::ObjectPlayer { info }
             if info.object_id == 102 && info.poison == 0 && !info.buffs.contains(&12)
     )));
+}
+
+// Source SearchTime and spawn ActionTime are independent; advance real Zone
+// ticks until the expected pet action, with a finite deadline and no state edits.
+fn wait_for_shared_pet_packet(
+    zone: &mut ZoneRuntime,
+    owner: &SessionId,
+    start: u64,
+    end: u64,
+    predicate: impl Fn(&ServerPacket) -> bool,
+) -> (u64, Vec<ZoneOutbound>) {
+    for now in (start..=end).step_by(100) {
+        let out = zone.tick(now);
+        if has_packet(&out, owner, |packet| predicate(packet)) {
+            return (now, out);
+        }
+    }
+    panic!(
+        "shared pet action missing between {start} and {end}; state={}",
+        String::from_utf8(zone.checkpoint_bytes().unwrap()).unwrap()
+    );
+}
+
+#[test]
+fn harvest_corpse_timeout_preserves_scheduled_respawn_and_checkpoint_due() {
+    // Long-delay replacement only; early respawn with an old corpse remains open.
+    let mut zone = ZoneRuntime::new(ZoneKey::for_map("0"));
+    let owner = session("first");
+    let object_id = 9_109;
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    admit_melee(&mut zone, &owner);
+    let mut spawn = native_neutral_monster_spawn(object_id, "Deer", 2, 331, 270);
+    spawn.drops.clear();
+    spawn.respawn = Some(fixed_wall_clock_respawn(300_000));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: owner.clone(),
+        monster: spawn.clone(),
+        now_ms: 0,
+    });
+    zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: owner.clone(),
+        object_id,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 99,
+        now_ms: 10,
+    });
+    assert!(has_packet(
+        &zone.tick(10),
+        &owner,
+        |packet| matches!(packet, ServerPacket::ObjectDied { info } if info.object_id == object_id)
+    ));
+    let mut recovered = ZoneRuntime::restore_checkpoint(&zone.checkpoint_bytes().unwrap()).unwrap();
+    assert_eq!(zone.tick(180_009), recovered.tick(180_009));
+    assert!(
+        zone.retains_object_id(object_id),
+        "corpse lasts the entire 180-second lifetime"
+    );
+    let expired = zone.tick(180_010);
+    assert_eq!(expired, recovered.tick(180_010));
+    assert!(has_packet(
+        &expired,
+        &owner,
+        |packet| matches!(packet, ServerPacket::ObjectRemove { object_id: id } if *id == object_id)
+    ));
+    assert!(!zone.retains_object_id(object_id));
+    assert!(
+        zone.native_monster_snapshots()
+            .iter()
+            .any(|m| m.object_id == object_id && m.dead),
+        "expiry retains the dead native respawn slot"
+    );
+    // Recovery must accept the scheduled slot without an AOI corpse body.
+    let mut recovered = ZoneRuntime::restore_checkpoint(&zone.checkpoint_bytes().unwrap()).unwrap();
+    let sync = ZoneCommand::SyncNativeMonsters {
+        session_id: owner.clone(),
+        monsters: vec![spawn],
+        now_ms: 180_011,
+    };
+    let out = zone.handle(sync.clone());
+    assert_eq!(out, recovered.handle(sync));
+    assert!(
+        !zone.retains_object_id(object_id),
+        "personal sync cannot resurrect the removed corpse"
+    );
+    assert!(zone
+        .native_monster_snapshots()
+        .iter()
+        .any(|m| m.object_id == object_id && m.dead));
+    assert!(!has_packet(
+        &out,
+        &owner,
+        |packet| matches!(packet, ServerPacket::ObjectRevived { info } if info.object_id == object_id)
+    ));
+    assert_eq!(zone.tick(300_009), recovered.tick(300_009));
+    assert!(zone
+        .native_monster_snapshots()
+        .iter()
+        .any(|m| m.object_id == object_id && m.dead));
+    let due = zone.tick(300_010);
+    assert_eq!(due, recovered.tick(300_010));
+    assert!(
+        has_packet(
+            &due,
+            &owner,
+            |packet| matches!(packet, ServerPacket::ObjectRevived { info } if info.object_id == object_id)
+        ),
+        "due remains death-time + 300 seconds, not corpse expiry or recovery + 300 seconds"
+    );
+    assert!(zone.retains_object_id(object_id));
+    assert!(zone
+        .native_monster_snapshots()
+        .iter()
+        .any(|m| m.object_id == object_id && !m.dead));
+    assert!(!has_packet(
+        &zone.tick(300_010),
+        &owner,
+        |packet| matches!(packet, ServerPacket::ObjectRevived { info } if info.object_id == object_id)
+    ));
 }

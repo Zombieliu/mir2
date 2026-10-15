@@ -270,8 +270,9 @@ pub fn preview_frames(base_index: u16) -> Option<&'static [PreviewFrame; PREVIEW
     }
 }
 
-/// Only Wizard preview overlays contain visible source pixels. Crystal issues
-/// the `+560` draw for every class; other ranges are transparent 4x1 frames.
+/// Wizard overlays contain the full animated glow. Crystal selection also
+/// issues `+560` for other classes; those 4x1 placeholder frames can contain a
+/// single colored pixel and are not reproduced as effect layers here.
 pub fn preview_overlay_frames(
     base_index: u16,
 ) -> Option<(u16, &'static [PreviewFrame; PREVIEW_FRAME_COUNT])> {

@@ -1,0 +1,45 @@
+{
+  "abiVersion": 1,
+  "version": "aaa71a815a0dac1f5809586cab98286dc8a9af333500c612d212068cb55a3091",
+  "sourceSha256": "46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620",
+  "files": {
+    "mir2_platform_web.js": {
+      "bytes": 24393,
+      "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+    },
+    "mir2_platform_web_bg.wasm": {
+      "bytes": 250070,
+      "sha256": "87e88fbfcd6136a7f941a448691e48f6ff57d0273863f915aaba2f046a1e10cf"
+    }
+  },
+  "presentation": {
+    "abiVersion": 1,
+    "version": "b166ab3fa16c5b0cdc57da0d7c88042a0ca83be8459a7716b88fdbcaf07f149e",
+    "sourceSha256": "46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620",
+    "files": {
+      "mir2_platform_web.js": {
+        "bytes": 24721,
+        "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+      },
+      "mir2_platform_web_bg.wasm": {
+        "bytes": 262089,
+        "sha256": "2113ddf7bf1e2127495436ffe74b699c081bde81e0960a5a5e690d64fd912935"
+      }
+    }
+  },
+  "npcPurchase": {
+    "abiVersion": 1,
+    "version": "87086c5b9349deb15c0af54495b91e91b163b758e05c62cfedbe57f052827e57",
+    "sourceSha256": "46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620",
+    "files": {
+      "mir2_platform_web.js": {
+        "bytes": 8332,
+        "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+      },
+      "mir2_platform_web_bg.wasm": {
+        "bytes": 165835,
+        "sha256": "64ead432045ccc4d7d1719329c75eaab36f2889f0e24d1a3986cfbd397fb12e3"
+      }
+    }
+  }
+}

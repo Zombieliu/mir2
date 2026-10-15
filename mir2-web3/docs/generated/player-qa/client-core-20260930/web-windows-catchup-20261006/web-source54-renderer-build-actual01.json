@@ -1,0 +1,219 @@
+{
+  "owner": "Root",
+  "kind": "Actual original Source54 complete renderer build and exact data promotion",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\root-approved01\\source54-isolated-snapshot02.json",
+    "bytes": 429955,
+    "sha256": "13a197af632a28fc8f4d16c7f1ab34ff2720f7f5e0d4458de7686dce8fac772e"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 58216,
+    "kind": "Source54 original complete three renderer production build after schedule fix",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 450799,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\root-approved02\\bevy-full-build01-config02.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "version": "bevy-201eff554f63b9a8",
+  "packages": [
+    {
+      "packageId": "webgpu",
+      "tool": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+        "bytes": 10061312,
+        "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+      },
+      "input": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\preparation\\mir2-web3\\apps\\web\\public\\.bevy-runtime-staging-58216-1791682506434-753617e8406f\\bevy-runtime\\pkg-webgpu\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 33283732,
+        "sha256": "88a84ae196c62e73a12bb06eecd7d9e885fd4d86d7ac6c47153f6e932b165147"
+      },
+      "output": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\preparation\\mir2-web3\\apps\\web\\public\\.bevy-runtime-staging-58216-1791682506434-753617e8406f\\bevy-runtime\\pkg-webgpu\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 31468368,
+        "sha256": "d332b69f1ed7177651b0cbe78d296b4187fc9f3ee4c8653c93118dcfd9d3fef9"
+      },
+      "budget": {
+        "wasmBytes": 31468368,
+        "gzipBytes": 6172547,
+        "jsBytes": 141118
+      },
+      "version": {
+        "pid": 58800,
+        "status": 0,
+        "signal": null,
+        "stdout": "wasm-opt version 131 (version_131)\r\n",
+        "stderr": ""
+      },
+      "optimization": {
+        "pid": 55564,
+        "status": 0,
+        "signal": null,
+        "stdout": "",
+        "stderr": ""
+      },
+      "metadataMatched": true,
+      "rendererInstantiated": false
+    },
+    {
+      "packageId": "webgl2",
+      "tool": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+        "bytes": 10061312,
+        "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+      },
+      "input": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\preparation\\mir2-web3\\apps\\web\\public\\.bevy-runtime-staging-58216-1791682506434-753617e8406f\\bevy-runtime\\pkg-webgl2\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 19136635,
+        "sha256": "923812de8063142e12cdb0b85c622d04f53fda5f883cb29cf568ec13e7302ea5"
+      },
+      "output": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\preparation\\mir2-web3\\apps\\web\\public\\.bevy-runtime-staging-58216-1791682506434-753617e8406f\\bevy-runtime\\pkg-webgl2\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 17749698,
+        "sha256": "8a65a056cf5f83c7f3900edfe3fae4ebd631c1d148a669f5254191565225b2fa"
+      },
+      "budget": {
+        "wasmBytes": 17749698,
+        "gzipBytes": 4224411,
+        "jsBytes": 117176
+      },
+      "version": {
+        "pid": 58944,
+        "status": 0,
+        "signal": null,
+        "stdout": "wasm-opt version 131 (version_131)\r\n",
+        "stderr": ""
+      },
+      "optimization": {
+        "pid": 58108,
+        "status": 0,
+        "signal": null,
+        "stdout": "",
+        "stderr": ""
+      },
+      "metadataMatched": true,
+      "rendererInstantiated": false
+    },
+    {
+      "packageId": "webgl2-shared",
+      "tool": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+        "bytes": 10061312,
+        "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+      },
+      "input": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\preparation\\mir2-web3\\apps\\web\\public\\.bevy-runtime-staging-58216-1791682506434-753617e8406f\\bevy-runtime\\pkg-webgl2-shared\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 34302756,
+        "sha256": "1775b267e3012c47826b8525cffab67445c51001cf567adb6f4dcb3cd93beca9"
+      },
+      "output": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\preparation\\mir2-web3\\apps\\web\\public\\.bevy-runtime-staging-58216-1791682506434-753617e8406f\\bevy-runtime\\pkg-webgl2-shared\\mir2_bevy_runtime_bg.wasm",
+        "bytes": 32429266,
+        "sha256": "08314d1b0099b8a04daa4b0ed992a2589e7e57eec0e6ae763b28a6100d625bef"
+      },
+      "budget": {
+        "wasmBytes": 32429266,
+        "gzipBytes": 6515126,
+        "jsBytes": 139092
+      },
+      "version": {
+        "pid": 59932,
+        "status": 0,
+        "signal": null,
+        "stdout": "wasm-opt version 131 (version_131)\r\n",
+        "stderr": ""
+      },
+      "optimization": {
+        "pid": 56432,
+        "status": 0,
+        "signal": null,
+        "stdout": "",
+        "stderr": ""
+      },
+      "metadataMatched": true,
+      "rendererInstantiated": false
+    }
+  ],
+  "actualCargoCalls": [
+    {
+      "childPid": 54572,
+      "childStartedUtc": "/Date(1791682776244)/",
+      "childStartMs": 912.2273,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "exitBits": "0",
+      "completedUtc": "/Date(1791682892792)/",
+      "completionMs": 117461.42970000001,
+      "postChildPolicy": "B",
+      "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+    },
+    {
+      "childPid": 37784,
+      "childStartedUtc": "/Date(1791682508316)/",
+      "childStartMs": 882.5070000000001,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "exitBits": "0",
+      "completedUtc": "/Date(1791682623991)/",
+      "completionMs": 116557.72330000001,
+      "postChildPolicy": "B",
+      "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+    },
+    {
+      "childPid": 55352,
+      "childStartedUtc": "/Date(1791682507348)/",
+      "childStartMs": 891.3046,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "exitBits": "0",
+      "completedUtc": "/Date(1791682507384)/",
+      "completionMs": 926.5899000000001,
+      "postChildPolicy": "B",
+      "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+    },
+    {
+      "childPid": 59744,
+      "childStartedUtc": "/Date(1791682683921)/",
+      "childStartMs": 927.2916,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "exitBits": "0",
+      "completedUtc": "/Date(1791682734461)/",
+      "completionMs": 51467.6331,
+      "postChildPolicy": "B",
+      "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+    }
+  ],
+  "originalCaps": {
+    "wasmInclusive": 32505856,
+    "jsInclusive": 204800,
+    "defaultGzipInclusive": 7340032
+  },
+  "sourceInputsMatchedBeforeAndAfter": 616,
+  "originalBuilderValidatedMetadataNameAndNormalizedAbi": true,
+  "primaryPromotion": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\root-approved02\\primary-publication01.json",
+    "bytes": 9878,
+    "sha256": "cb91ca78c993fbb88c0cccbefbb25bf27678138ab5bb45530bc53f3f6bb73d00"
+  },
+  "protectedOlderLeavesMatched": 257,
+  "gameplayVerified": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

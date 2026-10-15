@@ -1,0 +1,17 @@
+{
+  "source": "715078944ac7a84a61b6d64901b80568a8e8d63b",
+  "candidateVersion": "WN-CANDIDATE-20261001-invited-09",
+  "startedUtc": "2026-10-01T16:09:07.7717178+00:00",
+  "complete": true,
+  "success": false,
+  "pid": 111552,
+  "phase": "package-client",
+  "buildReused": true,
+  "attempt": 3,
+  "previousAttemptReceipt": "C:\\mir2-playtest-releases\\20261001-native-r9\\build-package-process-attempt2.json",
+  "publicPublished": false,
+  "buildCompletedUtc": "2026-10-01T15:32:10.1824542+00:00",
+  "exeSha256": "D20A3B8CEE886F27F22A489AF2FD9B5F49848B0861420EE8E6C2960C0134B214",
+  "error": "ADS enumeration unavailable for C:\\Users\\Administrator\\.codex\\worktrees\\native-shop-lifecycle-r9\\mir2-player-journey\\mir2-web3\\dist\\.r9.staging-4f00443c798c4d198a76d3c21e3d7ac8\\mir2-assets\\generated\\native-map-keyed\\manifest.00c973d4ce3f48b514e63d4d2bf12966c15e32f20bd954ac8fbe45ea11f784ad.json: 系统找不到指定的路径。",
+  "finishedUtc": "2026-10-01T16:14:12.3850696+00:00"
+}

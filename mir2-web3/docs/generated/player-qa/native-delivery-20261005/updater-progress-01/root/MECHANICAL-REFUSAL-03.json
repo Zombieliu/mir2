@@ -1,0 +1,7 @@
+{
+  "passed": false,
+  "boundary": "before repository or selected-source writes",
+  "assertion": "tracked root Cargo.lock raw equals LF Git blob",
+  "cause": "clean text:auto root checkout uses CRLF",
+  "originalHelperSha256": "af1f20bc87f3cbe5576b5317b9f13657e737285f9c47041590922f5edc390fcb"
+}

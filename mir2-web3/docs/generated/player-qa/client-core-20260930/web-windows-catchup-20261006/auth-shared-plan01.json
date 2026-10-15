@@ -1,0 +1,274 @@
+{
+  "schema": "w0-auth-shared-plan01",
+  "generatedAt": "2026-10-06T11:28:50.4892915Z",
+  "reviewMode": "source-only bounded exploration; no product writes or execution",
+  "fixedBaselines": {
+    "windowsNative": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+    "webParent": "f1cf96324c7da62e57d5fd0fa4146be010adbba5"
+  },
+  "safeguards": {
+    "buildExecuted": false,
+    "productCodeExecuted": false,
+    "didNotRead": [
+      "accounts.json",
+      "*.env",
+      "credentials",
+      "tokens",
+      "private environment"
+    ],
+    "testsExecuted": false,
+    "networkOrUIUsed": false
+  },
+  "nativeContracts": {
+    "changePassword": {
+      "wire": "platform-windows/shell_bridge.rs:247-256 emits NativeOutboundCommand::ChangePassword(account_id,current_password,new_password); native protocol response shapes are in native_protocol.rs:760-773, 1097-1105",
+      "source": "mir2-web3/apps/game-client/client-bevy/src/native_shell.rs",
+      "rules": [
+        "account id 3-15 ASCII alphanumeric",
+        "current, new and confirm password 5-15 ASCII alphanumeric; new equals confirmation",
+        "single in-flight request; sent marker prevents duplicate forwarding",
+        "result 0 disabled/reset to login; 1 invalid account; 2 old password invalid; 3 new password invalid; 4 account absent; 5 old password incorrect and old field cleared/refocused; 6 success/reset to login; other code error",
+        "banned response clears form/pending and returns to login with reason and optional expiry"
+      ],
+      "lines": "295-317,1120-1144,1418-1474"
+    },
+    "registrationUi": "native_shell_ui.rs:71-79,302-317,1538+ contains the eight complete form fields and only enables submit for a valid idle form; change_password.rs:70-103 shares native validation and disables submit/cancel while pending.",
+    "registration": {
+      "webNativeCall": "native_shell_ui.rs:302-317 creates full-field intent; platform-windows/shell_bridge.rs:211-233 forwards every supported profile field to NativeOutboundCommand::NewAccount",
+      "source": "mir2-web3/apps/game-client/client-bevy/src/native_shell.rs",
+      "rules": [
+        "account id 3-15 ASCII alphanumeric; password and confirmation 5-15 ASCII alphanumeric and equal",
+        "user name <=20 Unicode scalar values; secret question and answer <=30 each; empty allowed by these length checks",
+        "email <=50 Unicode scalar values; empty accepted; otherwise exact Crystal unanchored IsMatch regex `\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*`; source parser preserves unanchored matching semantics.",
+        "birth date empty maps to 0; otherwise exact valid YYYY-MM-DD year 1-9999 converted to .NET DateTime binary ticks",
+        "one request at a time: pending duplicate rejected; NewAccount command is created only after validation and birthDateBinary consistency check"
+      ],
+      "lines": "130-172,216-219,287-316,325-360,423-453,1006-1024",
+      "resultSemantics": "platform-windows/gateway.rs:5756-5766 maps NewAccount result 8 to created, 7 to already-exists, other/absent to distinct failure; client-bevy/native_shell.rs:1306-1318 clears pending on success/failure."
+    },
+    "safeKey": {
+      "source": "mir2-web3/apps/game-client/client-bevy/src/native_shell.rs",
+      "rules": [
+        "36-symbol A-Z and 0-9 permutation; SplitMix64-driven Fisher-Yates is in Rust",
+        "Native opens with host seed from SystemTime nanoseconds; reseed advances SplitMix64",
+        "select Account or Password focus; selected symbol appended lower-case to chosen field, account cap 24 chars/password cap 32 chars; Delete pops one character",
+        "Random reseeds/reorders 36-key board; Enter calls normal begin_login",
+        "login gate is pending check plus nonempty account/password; no registration-style ASCII/length rule on login"
+      ],
+      "lines": "47-88,220-285,945-958,1146-1213",
+      "nativeUi": "native_shell_ui.rs:546-577 opens via Crystal login button; 728-744 dispatches focus/key/delete/random/enter; 1062+ renders SafeKey; lines 1250+ render controls"
+    }
+  },
+  "currentCore": {
+    "crate": "mir2-client-core",
+    "constraints": [
+      "client-core is platform-neutral, no-dependency, forbid(unsafe_code); it already has pure state/rules modules for quest, mail compose/parcel, equipment pending, NPC purchase attempts, motion and reconciliation, but no auth/login registration or SafeKey module.",
+      "client-bevy already depends on client-core, so native_shell can delegate without a new dependency; NativeShellModel and form lifecycle currently live in client-bevy/native_shell.rs.",
+      "platform-web depends on client-core and uses serde/serde_json/wasm-bindgen; current wasm-bindgen API has global client_core_abi_version=1 plus optional per-feature ABI exports for independent capabilities.",
+      "Web runtime lazily imports immutable `/client-core/<manifest.version>/mir2_platform_web.js`, initializes the associated WASM once, checks global ABI then offers sync calls after load (client-core-runtime.ts:358-429; Page useEffect loads at 2514)."
+    ],
+    "sourcePins": [
+      "mir2-web3/apps/game-client/client-core/Cargo.toml",
+      "mir2-web3/apps/game-client/client-core/src/lib.rs"
+    ],
+    "currentManifest": {
+      "version": "c4952ff102f1fe1a35cc48b456e68adb33ede425f657d75fa25e6b811e6f979e",
+      "sources": [
+        "platform-web/src/lib.rs:18-20,153-163",
+        "apps/web/lib/client-core-runtime.ts:123-138,358-429",
+        "apps/web/scripts/lib/client-core-release-files.mjs: verifyClientCoreManifest exact schema and wasm <262144/JS <=204800"
+      ],
+      "coreWasmBytes": 259539,
+      "generatedJsBytes": 19003,
+      "generatedJsLimitBytes": 204800,
+      "coreWasmHardLimitBytes": 262144,
+      "abiVersion": 1,
+      "coreWasmHeadroomBytes": 2605,
+      "manifestFileKeysExact": "abiVersion,version,sourceSha256,files; files keys exact and immutable output URLs content addressed"
+    },
+    "suggestedFeatureAbi": "Keep global ABI 1 if the old ABI contract remains intact; add a separately versioned optional `auth_ui_abi_version`/`AuthUiBridge` following equipment/mail feature patterns, and fail closed for registration/change-password/SafeKey if capability is unavailable. Do not increase byte budget to make new logic fit without explicit review."
+  },
+  "webAndGateway": {
+    "pageOwner": {
+      "authOwner": "This physical connection guard is available for pre-auth UI. Existing `currentSocialReplyOwner` requires a game/active player world, so do not reuse it for Login/Register/ChangePassword.",
+      "newLease": "For any new pre-auth dialog/request, bind one pending operation to `{socket identity, connectionGeneration, auth surface/form epoch, operation kind}`; invalidate on socket close/replacement or dialog close/remount; because server packets carry no request ID, keep at most one outstanding instance per response kind per socket and only project a response into matching current UI. Do not reuse `activeReconnectAuthRef` for new registration/change-password secrets.",
+      "socket": "Page connectGateway increments equipmentConnectionGenerationRef and stores the socket (page.tsx:6830-6858); listeners capture that physical socket plus generation (6916-6920); central handleGatewayEvent rejects non-current generation or socket (11252-11254)."
+    },
+    "existingWeb": {
+      "currentRoutes": "client-login-runtime.ts:35-99 sends Login and NewAccount; NewAccount currently sends accountId/password only and fills birthDateBinary=0, userName=accountId, secretQuestion/secretAnswer/emailAddress empty.",
+      "ui": "original-client-overlays.tsx:158-206,221-280 exposes only account id/password on LoginOverlay; New Account calls onCreateAccount using those two fields. The button using ORIGINAL_UI.login.buttons.changePassword is labeled ui.quickEnter and invokes onQuickEnter (line 268-270); no ChangePassword compose form or outbound changePassword path is present. Page has inbound ChangePassword and ChangePasswordBanned log handlers only (page.tsx:13917-13935). SafeKey has no web flow.",
+      "result": "Page handles NewAccount packet result (page.tsx:11450-11457), but does not hold a native-equivalent per-request pending form lease or full NewAccount registration draft; password-change result is appended to logs only.",
+      "knownResultDifferences": [
+        "NewAccount: Page treats only result 8 as success and labels every other result disabled; Native distinguishes result 7 already-exists, other codes and absent result (Windows gateway 5756-5766).",
+        "ChangePassword: Page page.tsx:13918-13925 marks result 1 as success; Native maps result 6 as success and result 0-5/other distinctly at native_shell.rs:1418-1459. Gateway web serializer at web.rs:10025-10029 passes result through unchanged. This is a confirmed result-projection mismatch to resolve before claiming parity.",
+        "ChangePasswordBanned: Page logs the reason but omits expiryBinaryDatetime; Native displays optional expiry at native_shell.rs:1462-1474."
+      ],
+      "resultProjection": "Page handles NewAccount packet result (page.tsx:11450-11457), but does not hold a native-equivalent pending form lease or full registration draft. It reports all non-8 result codes as disabled. Password-change result is log-only and has a success-code mismatch; banned response omits expiry."
+    },
+    "existingGateway": {
+      "BrowserCommand": "gateway/src/web.rs:1574-1616 already defines camelCase Login, NewAccount (all registration fields, optional/default profile extras), ChangePassword(accountId,currentPassword,newPassword).",
+      "mapping": "gateway/src/web.rs:7720-7767 maps each command to existing ClientPacket; packet serialization gives NewAccount result, ChangePassword result and ChangePasswordBanned with reason/expiry at 10020-10040.",
+      "security": "gateway/src/web.rs:5691-5705 invokes auth_security_context_for_action then enforce_auth_rate_limits before dispatch; context at 6950-6969 distinguishes Login, Registration, PasswordChange. Current limits: Login pair 8/15min, peer/device 30/15min, account 50/15min; Registration peer/device 5/hour, account 3/hour; ChangePassword pair 5/hour, device 10/hour, account 20/hour. Keep this flow and existing Gateway/Simulation authority.",
+      "newAccount": "Native maps result 8 to AccountCreated, 7 to already exists, other/absent to explicit failure, then clears register pending (platform-windows/gateway.rs:5756-5766; client-bevy/native_shell.rs:1306-1318). Gateway command/security routes are existing."
+    }
+  },
+  "plan": [
+    {
+      "phase": 1,
+      "boundedWriteSet": [
+        "apps/game-client/client-core/src/auth_ui.rs (new pure module) and lib.rs export",
+        "client-bevy native_shell.rs delegate validation/SafeKey transitions while keeping existing form fields, UI and pending/result semantics"
+      ],
+      "goal": "Define exact shared Rust contracts and explicit char-count/ASCII/date/email semantics; deterministic SafeKey state accepts a host-supplied seed and owns permutation/append/delete/focus/enter gate; no JS clone and no Gateway changes."
+    },
+    {
+      "phase": 2,
+      "boundedWriteSet": [
+        "platform-web/src/auth_ui.rs JSON/wasm-bindgen wrapper plus per-feature ABI export",
+        "apps/web/lib/client-core-runtime.ts typed lazy bridge and Page auth request lease primitives"
+      ],
+      "goal": "Expose bounded input/output and use already loaded ClientCore; respect exact manifest schema, ABI and immutable output identity; test actual WASM entrypoint and byte budget; do not let validation become gateway authority."
+    },
+    {
+      "phase": 3,
+      "boundedWriteSet": [
+        "apps/web/app/components/original-client-overlays.tsx registration/change-password/SafeKey surfaces",
+        "apps/web/app/original-client-shell.tsx props",
+        "apps/web/app/page.tsx full registration state, password-change request/result reducer, SafeKey intents and generation-bound request lease",
+        "bounded Core/Page source harness tests"
+      ],
+      "goal": "Wire full native registration fields; native-style pending/result/banned messages; SafeKey target/edit behavior and Enter normal login. Maintain standard Gateway auth, no bypass/default demo path, no StartGame coupling."
+    }
+  ],
+  "finiteValidation": {
+    "newArtifacts": "Any shared Rust change invalidates current Core source fingerprint/version and needs new platform-web WASM, glue, generated manifest and immutable URL, then Next/Thin downstream rebuilds as applicable; no artifact regeneration is authorized or performed here.",
+    "feasible": true,
+    "existing": [
+      "client-core pure Rust unit tests can exhaust field boundary tables and fixed-seed SafeKey transitions without UI.",
+      "client-bevy native_shell and platform-windows shell_bridge already contain registration/change-password pending/result/forwarding tests to preserve via delegation.",
+      "platform-web crate can cover JSON validation and ABI response contracts.",
+      "apps/web/scripts/test-client-core-runtime.mjs reads actual generated glue/WASM, instantiates the byte buffer under Node and calls exports; extend for auth feature.",
+      "build-client-core.mjs and test-client-core-build.mjs verify immutable fingerprint/manifest/artifact hashes and hard WASM/JS budgets.",
+      "strict TSC and finite Page auth lease/props source tests can validate Web wiring without browser."
+    ],
+    "notProven": [
+      "No product tests/builds or WASM instance executed during this review.",
+      "No UI/browser/account/backend live request verification.",
+      "No conclusion about production network policy or exact user-facing localization beyond the source contracts.",
+      "Auth feature size feasibility under 2,605 bytes of current WASM headroom is unknown; preserve cap and measure in authorized build step, optimize or split only after Root review."
+    ]
+  },
+  "evidencePins": [
+    {
+      "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell.rs",
+      "gitBlobSha1": "4016e47b9861333b6a37cf0ee3858bc9f67d86a7"
+    },
+    {
+      "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "gitBlobSha1": "cf72b886feb6d6b49e9b708fef22c3307c5566e6"
+    },
+    {
+      "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/change_password.rs",
+      "gitBlobSha1": "d19d9d763d5f8cb1de76bbcebb0a9655aab2639b"
+    },
+    {
+      "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "gitBlobSha1": "3cb5bf70fdfdadd0f698d14e1767e585b3fc38ec"
+    },
+    {
+      "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+      "path": "mir2-web3/apps/game-client/platform-windows/src/shell_bridge.rs",
+      "gitBlobSha1": "08ee61a382f2441c8f2a721b3d6ee5c1e1b0143a"
+    },
+    {
+      "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "gitBlobSha1": "7cb66dbfbe481aea1dbd77f1f399da242f656d05"
+    },
+    {
+      "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_protocol.rs",
+      "gitBlobSha1": "5c55e2a5ea5d49f7697c19e65c655229178a0e19"
+    },
+    {
+      "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+      "path": "mir2-web3/apps/game-client/client-core/Cargo.toml",
+      "gitBlobSha1": "f8e8fb2dee1ab4f55ec4c29cb8e1cb6c3f2897cf"
+    },
+    {
+      "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+      "path": "mir2-web3/apps/game-client/client-core/src/lib.rs",
+      "gitBlobSha1": "771105a7285dc80d7ee021ad01214b4c4235c828"
+    },
+    {
+      "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+      "path": "mir2-web3/apps/game-client/platform-web/Cargo.toml",
+      "gitBlobSha1": "dc653c964f95cae8d2ae57332351667bae4a3d51"
+    },
+    {
+      "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+      "path": "mir2-web3/apps/game-client/platform-web/src/lib.rs",
+      "gitBlobSha1": "8ef12f5fb22ccb4ec0863a9807de5af59c731185"
+    },
+    {
+      "baseline": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "gitBlobSha1": "719a8819dfec6ebb0c7a04fae102adb8cc5a0304"
+    },
+    {
+      "baseline": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+      "path": "mir2-web3/apps/web/lib/client-login-runtime.ts",
+      "gitBlobSha1": "8b3017361a5b65a6e514cac904d0b3b63852e3a8"
+    },
+    {
+      "baseline": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+      "path": "mir2-web3/apps/web/lib/client-core-runtime.ts",
+      "gitBlobSha1": "8dad83d3ec2b1d3a1255c2bcbaebdebd24efbf2b"
+    },
+    {
+      "baseline": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+      "path": "mir2-web3/apps/web/lib/generated/client_core_runtime.json",
+      "gitBlobSha1": "0305145c31d5c7f834e25710b13799258fc1c0ab"
+    },
+    {
+      "baseline": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "gitBlobSha1": "33c4999b6d64cf91c7f219cd94fd98d5eef573a5"
+    },
+    {
+      "baseline": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+      "path": "mir2-web3/apps/web/app/components/original-client-overlays.tsx",
+      "gitBlobSha1": "d7d76e8484edd7cdd0341035fe505d848a502aee"
+    },
+    {
+      "baseline": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+      "path": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "gitBlobSha1": "ef3fc29873d0a299c4aa749a9e8e7e9caa49593e"
+    },
+    {
+      "baseline": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+      "path": "mir2-web3/apps/web/scripts/build-client-core.mjs",
+      "gitBlobSha1": "016269469199d1f0a184e3e089517fcc22be044d"
+    },
+    {
+      "baseline": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+      "path": "mir2-web3/apps/web/scripts/lib/client-core-release-files.mjs",
+      "gitBlobSha1": "e014b46b9311cf058158bee2285d449de04ca0d7"
+    },
+    {
+      "baseline": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+      "path": "mir2-web3/apps/web/scripts/test-client-core-runtime.mjs",
+      "gitBlobSha1": "a4c85022dd17bb38e2f6f3e197fc9c89845b3ffd"
+    },
+    {
+      "baseline": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+      "path": "mir2-web3/apps/web/scripts/test-client-core-build.mjs",
+      "gitBlobSha1": "3bc1e1b59b0cbf856921e87d5cf6dc787698790c"
+    }
+  ],
+  "summary": "The existing Gateway supports full NewAccount and ChangePassword commands and returns response packets under authentication rate limits. Shared source work should live in dependency-free client-core, be reused by client-bevy NativeShell and exposed to Web only through platform-web/WASM. The current Web shell is incomplete for full registration, password change and SafeKey; Core has no auth module. Main constraints are preserving the Gateway auth/rate-limit authority, generation-bound pre-auth request handling, preserving Native pending/result semantics, and the tight current WASM byte budget. Unknowns remain explicit."
+}

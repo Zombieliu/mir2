@@ -1,0 +1,105 @@
+{
+  "artifact": "wizard-r142-q89-completed-proof",
+  "generatedAt": "2026-09-16T01:15:52.9408461Z",
+  "trace": "C:\\mir2-protocol-journey-20260911\\Wizard.2026-09-16T01-00-26-324Z.trace.jsonl",
+  "boundedCutoff": {
+    "sequence": 6540,
+    "traceBytes": 12967373,
+    "sha256": "D4A68E63413ED47E63916B92B031030DEAED1BA51485014EC3DC2FA8C49762AC",
+    "activeTrace": true
+  },
+  "finalPriest": {
+    "objectDiedSequence": 2893,
+    "at": "2026-09-16T01:05:35.004Z",
+    "objectId": 340704,
+    "name": "CursedPriest",
+    "location": {
+      "x": 250,
+      "y": 236
+    }
+  },
+  "readySnapshot": {
+    "sequence": 2898,
+    "at": "2026-09-16T01:05:35.09Z",
+    "map": "D2031",
+    "stage": "readyToTurnIn",
+    "objectives": [
+      "CursedPriest 3/3",
+      "ShiZombie 3/3",
+      "CursedZombie 3/3"
+    ]
+  },
+  "finishRequest": {
+    "sequence": 3473,
+    "at": "2026-09-16T01:07:05.912Z",
+    "type": "finishQuest",
+    "questIndex": 89,
+    "selectedItemIndex": -1
+  },
+  "finishReceipt": {
+    "changeQuestSequence": 3476,
+    "completeQuestSequence": 3477,
+    "questId": 89,
+    "completed": true,
+    "completedQuestsIncludesQ89": true
+  },
+  "rewardLevelSnapshot": {
+    "sequence": 3478,
+    "at": "2026-09-16T01:07:06.781Z",
+    "goldBefore": 129,
+    "goldAfter": 6729,
+    "goldDelta": 6600,
+    "levelBefore": 25,
+    "levelAfter": 26,
+    "xpBefore": 431040,
+    "xpAfter": 69502,
+    "hp": 105,
+    "q89Stage": "completed",
+    "fixedOrSelectableItemObserved": false
+  },
+  "finishNpc": {
+    "name": "LeadTrainer_Harry",
+    "objectId": 834,
+    "mapFileName": "1002",
+    "position": {
+      "x": 11,
+      "y": 8
+    }
+  },
+  "randomTeleportAudit": {
+    "ordinaryRandomTeleportUseObserved": false,
+    "useItemPackets": [
+      {
+        "uniqueId": 20,
+        "sequence": 2089
+      },
+      {
+        "uniqueId": 20,
+        "sequence": 2182
+      },
+      {
+        "uniqueId": 20,
+        "sequence": 2298
+      },
+      {
+        "uniqueId": 20,
+        "sequence": 2381
+      },
+      {
+        "uniqueId": 20,
+        "sequence": 2561
+      },
+      {
+        "uniqueId": 20,
+        "sequence": 2654
+      },
+      {
+        "uniqueId": 20,
+        "sequence": 2836
+      }
+    ],
+    "interpretation": "No RandomTeleport UseItem packet appeared in this trace; no route-causality claim is made."
+  },
+  "aggregateBoundary": "Wizard q89 completion establishes mandatory 46/55 for this class; milestones remain 3/4",
+  "sensitiveDataExcluded": true
+}

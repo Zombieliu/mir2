@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "source": "Source61–67",
+  "capturedAt": "2026-10-11T12:43:11.858Z",
+  "deliveryCommit": "4a474ec31f96d555a42e914088ef09a9416d8d36",
+  "parentCommit": "8b0515b47738435762a696f108acd7d0d11e8b37",
+  "branch": "codex/windows-player-journey",
+  "scope": {
+    "files": 88,
+    "ownedSource": 13,
+    "ownedDocumentPrefixes": 7,
+    "publicQaEvidence": 68,
+    "eachDocumentAddedLines": 16,
+    "documentDeletions": 0,
+    "foreignBodiesByteIdentical": true,
+    "userMainTsconfigByteIdentical": true,
+    "privateConfigOrBuildProductsIncluded": false
+  },
+  "git": {
+    "commitExitCode": 0,
+    "localCommitVerified": true,
+    "automaticGcReportedUnreadableObject": true,
+    "automaticGcRepairClaimed": false,
+    "firstTwoPushesSshDisconnected": true,
+    "commandScopedSshKeepaliveRetryExitCode": 0,
+    "forcePushUsed": false,
+    "remoteVerifiedCommit": "4a474ec31f96d555a42e914088ef09a9416d8d36",
+    "globalSshOrGitConfigurationChanged": false
+  },
+  "functionalEvidence": [
+    "web-source65-purchase-relogin01.json",
+    "web-source67-storage-roundtrip-relogin01.json"
+  ],
+  "validation": {
+    "nodeTests": 256,
+    "nodePass": 256,
+    "nodeFail": 0,
+    "nodeSkipped": 0,
+    "gatewayRegressionPass": 18,
+    "itemTooltipWirePass": 3,
+    "strictNextPassed": true,
+    "completeThinPassed": true,
+    "thinDependencyWarnings": 59,
+    "normalPurchaseSaveReloginPassed": true,
+    "normalStorageBothSaveReloginCheckpointsPassed": true
+  },
+  "open": [
+    "shared shop character and storage panel takeover",
+    "real map rendering and complete asset coverage",
+    "warehouse tooltip units",
+    "mobile device acceptance",
+    "complete multi-platform parity and human frontend acceptance"
+  ],
+  "acceptance": {
+    "playableLocalURL": "http://127.0.0.1:19205/",
+    "candidate100": false,
+    "overallPercentage": null,
+    "humanFrontendAccepted": false,
+    "goalComplete": false
+  }
+}

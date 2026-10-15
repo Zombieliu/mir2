@@ -1,0 +1,41 @@
+{
+  "owner": "Root",
+  "originalCallerClosed": true,
+  "originalPostguardPassed": true,
+  "actualOuter": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 76008,
+    "kind": "Root approved original Source75 portable27 on actual Next output",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 2332,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source75-storage-prepare-paint-20261012-01/root-approved01/portable-tests01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "actualTAP": {
+    "tests": 27,
+    "pass": 27,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "configPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\portable-tests01-config.json",
+    "bytes": 4366,
+    "sha256": "ffd5b048a49507e6b60eac043fa57f5621e2c546c3a2a27d8b9af8588373aefb"
+  },
+  "snapshotPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-full-snapshot01.json",
+    "bytes": 44325719,
+    "sha256": "eb5e312c90dcf548eb107d32a3c94f6f9539c995b2ecfbd0682d750f7d53e019"
+  },
+  "candidateAccepted": false,
+  "goalComplete": false
+}

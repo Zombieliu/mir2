@@ -1,0 +1,47 @@
+{
+  "schema": "mir2.p3a.source-baseline.v1",
+  "revision": "57729ba8c1473ca920a8ea8b3d6e11105d9d4d93",
+  "files": [
+    {
+      "file": "apps/simulation/src/runtime/zone/mod.rs",
+      "sha256": "13dd169ffcb2144b07e41957e066926beacfa93ceb717888199ded7686677916",
+      "bytes": 1412
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/types.rs",
+      "sha256": "3c16e1a6b7aa191735cf5b7da0398f154c52599e4ce7df0639465669f25a4e39",
+      "bytes": 49833
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/manager.rs",
+      "sha256": "523fea1cdcaaa720c4bd6c2adad0b4a386e0e5b8b3f2ee4d8452b48790c677a3",
+      "bytes": 31808
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "sha256": "f6f010a983e80f86b52bc67843c1b9fa06380ceaa158a9dcf6db4690669530b0",
+      "bytes": 17639
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "d0598c4ce418a26f696ec4efc07dfd1d0db3f1e5a6202f86cdbcc73a703390c3",
+      "bytes": 670420
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "sha256": "c8991352d5efbb536e2d0373e1d044f92daffe783cf1ea6135c52bc2e7a8269f",
+      "bytes": 77688
+    },
+    {
+      "file": "apps/simulation/src/runtime/drops.rs",
+      "sha256": "9b47435fc671c0c60467ff53d4d6518fb9d243ad056612a1e05eb038ac0c6be5",
+      "bytes": 173251
+    },
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f",
+      "bytes": 1203142
+    }
+  ],
+  "createdAt": "2026-10-04T12:26:26.3343957Z"
+}

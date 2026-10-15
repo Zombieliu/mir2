@@ -1,0 +1,104 @@
+{
+  "owner": "Root",
+  "kind": "Source46 actual scoped commit and independently verified Git publication",
+  "generatedAtUtc": "2026-10-08T15:50:16.974Z",
+  "commit": "22d814ad2ae5e45cf177f3505e0ed0f993b47195",
+  "parent": "429fe0eb2a860da30f6327702b29395df62c3afc",
+  "branch": "codex/windows-player-journey",
+  "files": 14,
+  "productCodeFilesChanged": 0,
+  "ownDocPrefixLines": 48,
+  "gitCommit": {
+    "chunk_id": "5398e6",
+    "wall_time_seconds": 0.3776305,
+    "exit_code": 0,
+    "original_token_count": 328,
+    "output": "[codex/windows-player-journey 22d814ad2a] docs(qa): record current native build and web delivery boundary\n 14 files changed, 3258 insertions(+)\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-publication01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-full-package-readonly-plan01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-native-actual-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-native-actual01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-native-raw-evidence01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-old-native-preservation01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-original-builder-guard-route-review01.json\n"
+  },
+  "gitPushStart": {
+    "chunk_id": "4e1006",
+    "wall_time_seconds": 10.0032414,
+    "session_id": 63484,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "gitPushCompletion": {
+    "chunk_id": "976921",
+    "wall_time_seconds": 0.0000087,
+    "exit_code": 0,
+    "original_token_count": 25,
+    "output": "To github.com:Zombieliu/mir2.git\n   429fe0eb2a..22d814ad2a  HEAD -> codex/windows-player-journey\n"
+  },
+  "independentRemoteCheck": {
+    "status": "fulfilled",
+    "value": {
+      "chunk_id": "e3491e",
+      "wall_time_seconds": 5.2988225,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "22d814ad2ae5e45cf177f3505e0ed0f993b47195\trefs/heads/codex/windows-player-journey\n"
+    }
+  },
+  "remoteShaVerified": true,
+  "indexEmpty": true,
+  "nativeBuildCompleted": true,
+  "newNativeTests": 0,
+  "fullWebPackageProduced": false,
+  "playableVerified": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalStatus": "active",
+  "qualification": "Scoped documentation and actual Native build evidence publication. No new full Web package, player validation, or goal completion claim.",
+  "evidencePins": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source46-finite-result01.json",
+      "bytes": 5664,
+      "sha256": "16412da4820830dc3f7675fee090703cc53814f8ed50fb5f90cc1159d273a680"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source46-native-actual01.json",
+      "bytes": 7924,
+      "sha256": "07b54c1309ae12192b9e32962c765ab9b5030fd79c0bce6599fc3171af3e2855"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source46-native-raw-evidence01.json",
+      "bytes": 115665,
+      "sha256": "e36efd93f1384b749892bc674ef9ed297dcfa843b1a21ee2f9dbc07677c14bda"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source46-old-native-preservation01.json",
+      "bytes": 1194,
+      "sha256": "68967b96e3d4b935ab7b2d9f3481f2b6d320f427e09b161f72d7e5f674ba870c"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source46-full-package-readonly-plan01.json",
+      "bytes": 71089,
+      "sha256": "90af6719d33b62c2b0999b8537a75cd870fd7ca9be0280caccfa1aa30fa84b40"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source46-original-builder-guard-route-review01.json",
+      "bytes": 22729,
+      "sha256": "4bc5122a85080dc87d44cfffb656d36a5ddde266de8f1d00e2d01017eea9d9db"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source46-native-actual-review01.json",
+      "bytes": 30274,
+      "sha256": "355c90c8e00d5be632d158773542ff4effc071520fa9e1b278816811491671a6"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source45-publication01.json",
+      "bytes": 17884,
+      "sha256": "2062d75db4b0fa381780dffe8cd9388d783f8cb72d217f8c3010775aff2145e7"
+    }
+  ],
+  "nativeExe": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\native-source46-delivery01\\source46-mir2-platform-windows.exe",
+    "bytes": 106106368,
+    "sha256": "fff975b5e969b2a46216ee0015cd8df1dfa082c012ab4b7eab7684525f18e73e"
+  },
+  "originalUserTsconfig": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  }
+}

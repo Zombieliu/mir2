@@ -1,0 +1,474 @@
+{
+  "schema": "mir2.updater.read-handle.benchmark-distributions.v1",
+  "recordedUtc": "2026-10-05T07:21:10.166610+00:00",
+  "actualCommands": 12,
+  "passedExactSelectedBenchmarks": 12,
+  "failures": 0,
+  "scope": "Ordinary Windows release library APIs, immutable 8 KiB warm fixture, not install/HTTPS/shipped EXE",
+  "allRoundsRetained": true,
+  "noFastestOnlySelection": true,
+  "sourceFixtureBeforeAfterUnchanged": true,
+  "classes": [
+    {
+      "operation": "matches",
+      "class": "valid",
+      "callsPerMeasurement": 1024,
+      "roundPairs": 6,
+      "perRound": [
+        {
+          "round": 1,
+          "originalNs": 204891500,
+          "checkedHandleNs": 165068200,
+          "elapsedRatio": 0.8056371298955789,
+          "elapsedChangePercent": -19.43628701044211,
+          "originalUsPerCall": 200.08935546875,
+          "checkedHandleUsPerCall": 161.1994140625
+        },
+        {
+          "round": 2,
+          "originalNs": 200804700,
+          "checkedHandleNs": 161395400,
+          "elapsedRatio": 0.803743139478309,
+          "elapsedChangePercent": -19.6256860521691,
+          "originalUsPerCall": 196.09833984375,
+          "checkedHandleUsPerCall": 157.6126953125
+        },
+        {
+          "round": 3,
+          "originalNs": 202717000,
+          "checkedHandleNs": 165761000,
+          "elapsedRatio": 0.8176965918003917,
+          "elapsedChangePercent": -18.230340819960833,
+          "originalUsPerCall": 197.9658203125,
+          "checkedHandleUsPerCall": 161.8759765625
+        },
+        {
+          "round": 4,
+          "originalNs": 204362200,
+          "checkedHandleNs": 164335800,
+          "elapsedRatio": 0.8041399045420337,
+          "elapsedChangePercent": -19.586009545796635,
+          "originalUsPerCall": 199.5724609375,
+          "checkedHandleUsPerCall": 160.4841796875
+        },
+        {
+          "round": 5,
+          "originalNs": 238857000,
+          "checkedHandleNs": 160085400,
+          "elapsedRatio": 0.6702143960612417,
+          "elapsedChangePercent": -32.97856039387583,
+          "originalUsPerCall": 233.2587890625,
+          "checkedHandleUsPerCall": 156.3333984375
+        },
+        {
+          "round": 6,
+          "originalNs": 221712700,
+          "checkedHandleNs": 160911300,
+          "elapsedRatio": 0.7257649200970445,
+          "elapsedChangePercent": -27.423507990295548,
+          "originalUsPerCall": 216.51630859375,
+          "checkedHandleUsPerCall": 157.13994140625
+        }
+      ],
+      "originalDistributionMs": [
+        204.8915,
+        200.8047,
+        202.717,
+        204.3622,
+        238.857,
+        221.7127
+      ],
+      "checkedHandleDistributionMs": [
+        165.0682,
+        161.3954,
+        165.761,
+        164.3358,
+        160.0854,
+        160.9113
+      ],
+      "originalMedianMs": 204.62685,
+      "checkedHandleMedianMs": 162.8656,
+      "originalMinMaxMs": [
+        200.8047,
+        238.857
+      ],
+      "checkedHandleMinMaxMs": [
+        160.0854,
+        165.761
+      ],
+      "pairedMedianElapsedRatio": 0.8039415220101713,
+      "pairedMedianElapsedChangePercent": -19.605847798982868,
+      "ratioOfDistributionMedians": 0.7959151010730019,
+      "comparisonSign": "negative elapsed change means less measured time; positive means more"
+    },
+    {
+      "operation": "matches",
+      "class": "same-size-corrupt",
+      "callsPerMeasurement": 1024,
+      "roundPairs": 6,
+      "perRound": [
+        {
+          "round": 1,
+          "originalNs": 203177200,
+          "checkedHandleNs": 164616700,
+          "elapsedRatio": 0.8102124647844344,
+          "elapsedChangePercent": -18.978753521556555,
+          "originalUsPerCall": 198.415234375,
+          "checkedHandleUsPerCall": 160.75849609375
+        },
+        {
+          "round": 2,
+          "originalNs": 205732200,
+          "checkedHandleNs": 162689100,
+          "elapsedRatio": 0.7907809278275351,
+          "elapsedChangePercent": -20.921907217246492,
+          "originalUsPerCall": 200.9103515625,
+          "checkedHandleUsPerCall": 158.87607421875
+        },
+        {
+          "round": 3,
+          "originalNs": 207237300,
+          "checkedHandleNs": 168919600,
+          "elapsedRatio": 0.8151023005993612,
+          "elapsedChangePercent": -18.489769940063884,
+          "originalUsPerCall": 202.38017578125,
+          "checkedHandleUsPerCall": 164.960546875
+        },
+        {
+          "round": 4,
+          "originalNs": 205489500,
+          "checkedHandleNs": 162819700,
+          "elapsedRatio": 0.7923504607291371,
+          "elapsedChangePercent": -20.764953927086292,
+          "originalUsPerCall": 200.67333984375,
+          "checkedHandleUsPerCall": 159.00361328125
+        },
+        {
+          "round": 5,
+          "originalNs": 207411900,
+          "checkedHandleNs": 165796900,
+          "elapsedRatio": 0.7993605959928046,
+          "elapsedChangePercent": -20.063940400719538,
+          "originalUsPerCall": 202.55068359375,
+          "checkedHandleUsPerCall": 161.91103515625
+        },
+        {
+          "round": 6,
+          "originalNs": 205312100,
+          "checkedHandleNs": 167291100,
+          "elapsedRatio": 0.8148136422548891,
+          "elapsedChangePercent": -18.518635774511093,
+          "originalUsPerCall": 200.50009765625,
+          "checkedHandleUsPerCall": 163.37021484375
+        }
+      ],
+      "originalDistributionMs": [
+        203.1772,
+        205.7322,
+        207.2373,
+        205.4895,
+        207.4119,
+        205.3121
+      ],
+      "checkedHandleDistributionMs": [
+        164.6167,
+        162.6891,
+        168.9196,
+        162.8197,
+        165.7969,
+        167.2911
+      ],
+      "originalMedianMs": 205.61085,
+      "checkedHandleMedianMs": 165.2068,
+      "originalMinMaxMs": [
+        203.1772,
+        207.4119
+      ],
+      "checkedHandleMinMaxMs": [
+        162.6891,
+        168.9196
+      ],
+      "pairedMedianElapsedRatio": 0.8047865303886195,
+      "pairedMedianElapsedChangePercent": -19.521346961138047,
+      "ratioOfDistributionMedians": 0.8034926172427185,
+      "comparisonSign": "negative elapsed change means less measured time; positive means more"
+    },
+    {
+      "operation": "matches",
+      "class": "size-mismatch",
+      "callsPerMeasurement": 1024,
+      "roundPairs": 6,
+      "perRound": [
+        {
+          "round": 1,
+          "originalNs": 88217100,
+          "checkedHandleNs": 130269100,
+          "elapsedRatio": 1.4766876263218809,
+          "elapsedChangePercent": 47.66876263218809,
+          "originalUsPerCall": 86.14951171875,
+          "checkedHandleUsPerCall": 127.21591796875
+        },
+        {
+          "round": 2,
+          "originalNs": 94215200,
+          "checkedHandleNs": 131540500,
+          "elapsedRatio": 1.3961706815885335,
+          "elapsedChangePercent": 39.61706815885335,
+          "originalUsPerCall": 92.00703125,
+          "checkedHandleUsPerCall": 128.45751953125
+        },
+        {
+          "round": 3,
+          "originalNs": 94851200,
+          "checkedHandleNs": 131045000,
+          "elapsedRatio": 1.3815850511116359,
+          "elapsedChangePercent": 38.158505111163585,
+          "originalUsPerCall": 92.628125,
+          "checkedHandleUsPerCall": 127.9736328125
+        },
+        {
+          "round": 4,
+          "originalNs": 88833400,
+          "checkedHandleNs": 129501600,
+          "elapsedRatio": 1.4578030335436896,
+          "elapsedChangePercent": 45.780303354368954,
+          "originalUsPerCall": 86.7513671875,
+          "checkedHandleUsPerCall": 126.46640625
+        },
+        {
+          "round": 5,
+          "originalNs": 90370900,
+          "checkedHandleNs": 134599900,
+          "elapsedRatio": 1.4894163939940843,
+          "elapsedChangePercent": 48.94163939940843,
+          "originalUsPerCall": 88.25283203125,
+          "checkedHandleUsPerCall": 131.44521484375
+        },
+        {
+          "round": 6,
+          "originalNs": 92840600,
+          "checkedHandleNs": 131208400,
+          "elapsedRatio": 1.413265317113418,
+          "elapsedChangePercent": 41.326531711341794,
+          "originalUsPerCall": 90.6646484375,
+          "checkedHandleUsPerCall": 128.133203125
+        }
+      ],
+      "originalDistributionMs": [
+        88.2171,
+        94.2152,
+        94.8512,
+        88.8334,
+        90.3709,
+        92.8406
+      ],
+      "checkedHandleDistributionMs": [
+        130.2691,
+        131.5405,
+        131.045,
+        129.5016,
+        134.5999,
+        131.2084
+      ],
+      "originalMedianMs": 91.60575,
+      "checkedHandleMedianMs": 131.1267,
+      "originalMinMaxMs": [
+        88.2171,
+        94.8512
+      ],
+      "checkedHandleMinMaxMs": [
+        129.5016,
+        134.5999
+      ],
+      "pairedMedianElapsedRatio": 1.4355341753285538,
+      "pairedMedianElapsedChangePercent": 43.55341753285538,
+      "ratioOfDistributionMedians": 1.4314243374460665,
+      "comparisonSign": "negative elapsed change means less measured time; positive means more"
+    },
+    {
+      "operation": "matches",
+      "class": "missing",
+      "callsPerMeasurement": 1024,
+      "roundPairs": 6,
+      "perRound": [
+        {
+          "round": 1,
+          "originalNs": 75657400,
+          "checkedHandleNs": 79214800,
+          "elapsedRatio": 1.0470198552950538,
+          "elapsedChangePercent": 4.701985529505381,
+          "originalUsPerCall": 73.8841796875,
+          "checkedHandleUsPerCall": 77.358203125
+        },
+        {
+          "round": 2,
+          "originalNs": 78732900,
+          "checkedHandleNs": 77022800,
+          "elapsedRatio": 0.9782797280425337,
+          "elapsedChangePercent": -2.1720271957466286,
+          "originalUsPerCall": 76.88759765625,
+          "checkedHandleUsPerCall": 75.217578125
+        },
+        {
+          "round": 3,
+          "originalNs": 78081100,
+          "checkedHandleNs": 75828600,
+          "elapsedRatio": 0.9711517896136197,
+          "elapsedChangePercent": -2.88482103863803,
+          "originalUsPerCall": 76.25107421875,
+          "checkedHandleUsPerCall": 74.0513671875
+        },
+        {
+          "round": 4,
+          "originalNs": 78679200,
+          "checkedHandleNs": 76109800,
+          "elapsedRatio": 0.9673433385189478,
+          "elapsedChangePercent": -3.2656661481052174,
+          "originalUsPerCall": 76.83515625,
+          "checkedHandleUsPerCall": 74.3259765625
+        },
+        {
+          "round": 5,
+          "originalNs": 76667100,
+          "checkedHandleNs": 74129000,
+          "elapsedRatio": 0.966894534943933,
+          "elapsedChangePercent": -3.310546505606704,
+          "originalUsPerCall": 74.87021484375,
+          "checkedHandleUsPerCall": 72.3916015625
+        },
+        {
+          "round": 6,
+          "originalNs": 79719200,
+          "checkedHandleNs": 74841500,
+          "elapsedRatio": 0.9388139870947024,
+          "elapsedChangePercent": -6.118601290529757,
+          "originalUsPerCall": 77.85078125,
+          "checkedHandleUsPerCall": 73.08740234375
+        }
+      ],
+      "originalDistributionMs": [
+        75.6574,
+        78.7329,
+        78.0811,
+        78.6792,
+        76.6671,
+        79.7192
+      ],
+      "checkedHandleDistributionMs": [
+        79.2148,
+        77.0228,
+        75.8286,
+        76.1098,
+        74.129,
+        74.8415
+      ],
+      "originalMedianMs": 78.38015,
+      "checkedHandleMedianMs": 75.9692,
+      "originalMinMaxMs": [
+        75.6574,
+        79.7192
+      ],
+      "checkedHandleMinMaxMs": [
+        74.129,
+        79.2148
+      ],
+      "pairedMedianElapsedRatio": 0.9692475640662838,
+      "pairedMedianElapsedChangePercent": -3.075243593371624,
+      "ratioOfDistributionMedians": 0.9692402987235926,
+      "comparisonSign": "negative elapsed change means less measured time; positive means more"
+    },
+    {
+      "operation": "digest_file",
+      "class": "valid",
+      "callsPerMeasurement": 1024,
+      "roundPairs": 6,
+      "perRound": [
+        {
+          "round": 1,
+          "originalNs": 113850400,
+          "checkedHandleNs": 162565600,
+          "elapsedRatio": 1.4278878247243751,
+          "elapsedChangePercent": 42.78878247243752,
+          "originalUsPerCall": 111.18203125,
+          "checkedHandleUsPerCall": 158.75546875
+        },
+        {
+          "round": 2,
+          "originalNs": 112392300,
+          "checkedHandleNs": 160914800,
+          "elapsedRatio": 1.4317244152846769,
+          "elapsedChangePercent": 43.17244152846769,
+          "originalUsPerCall": 109.75810546875,
+          "checkedHandleUsPerCall": 157.143359375
+        },
+        {
+          "round": 3,
+          "originalNs": 116733100,
+          "checkedHandleNs": 158962000,
+          "elapsedRatio": 1.3617560057944147,
+          "elapsedChangePercent": 36.17560057944147,
+          "originalUsPerCall": 113.99716796875,
+          "checkedHandleUsPerCall": 155.236328125
+        },
+        {
+          "round": 4,
+          "originalNs": 112254500,
+          "checkedHandleNs": 163588700,
+          "elapsedRatio": 1.457301934443608,
+          "elapsedChangePercent": 45.7301934443608,
+          "originalUsPerCall": 109.62353515625,
+          "checkedHandleUsPerCall": 159.75458984375
+        },
+        {
+          "round": 5,
+          "originalNs": 115365000,
+          "checkedHandleNs": 167735300,
+          "elapsedRatio": 1.4539531053612447,
+          "elapsedChangePercent": 45.39531053612447,
+          "originalUsPerCall": 112.6611328125,
+          "checkedHandleUsPerCall": 163.80400390625
+        },
+        {
+          "round": 6,
+          "originalNs": 113432300,
+          "checkedHandleNs": 171548700,
+          "elapsedRatio": 1.5123443675214203,
+          "elapsedChangePercent": 51.23443675214203,
+          "originalUsPerCall": 110.77373046875,
+          "checkedHandleUsPerCall": 167.52802734375
+        }
+      ],
+      "originalDistributionMs": [
+        113.8504,
+        112.3923,
+        116.7331,
+        112.2545,
+        115.365,
+        113.4323
+      ],
+      "checkedHandleDistributionMs": [
+        162.5656,
+        160.9148,
+        158.962,
+        163.5887,
+        167.7353,
+        171.5487
+      ],
+      "originalMedianMs": 113.64135,
+      "checkedHandleMedianMs": 163.07715,
+      "originalMinMaxMs": [
+        112.2545,
+        116.7331
+      ],
+      "checkedHandleMinMaxMs": [
+        158.962,
+        171.5487
+      ],
+      "pairedMedianElapsedRatio": 1.4428387603229607,
+      "pairedMedianElapsedChangePercent": 44.28387603229608,
+      "ratioOfDistributionMedians": 1.4350159515000482,
+      "comparisonSign": "negative elapsed change means less measured time; positive means more"
+    }
+  ],
+  "interpretation": "Mixed outcome: matching valid/corrupt 8 KiB content takes less time; direct digest and early size mismatch take more. Missing-path effect is small. This does not establish total updater or first-install improvement. No extrapolation to 125965 files or user hardware."
+}

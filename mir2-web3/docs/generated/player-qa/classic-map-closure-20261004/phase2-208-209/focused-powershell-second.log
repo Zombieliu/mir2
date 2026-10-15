@@ -1,0 +1,2 @@
+Candidate release configuration tests passed (endpoints, profiles, daylight, 209-map profile coverage, explicit legacy/custom coverage, actor allowlist)
+Candidate map scope fixtures passed (208 runtime/209 native, exact 15 explicit, source-only named proof, 049 requirement, omitted maps, identities and acceptance boundaries); expectedSha=b3fc689ed59c7293917ffe4f5df7080a19018779cdd59155c8ac80ef20e8df69

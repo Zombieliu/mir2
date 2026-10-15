@@ -1,0 +1,1176 @@
+{
+  "schemaVersion": 1,
+  "auditId": "w0-combined-matrix-review01",
+  "reviewedAtUtc": "2026-10-06T11:06:05.823Z",
+  "auditedWebHead": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "inputs": [
+    {
+      "file": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-f01-f06-source-audit01.json",
+      "bytes": 386299,
+      "sha256": "cd927d7c567103bf3a0862b5bd35f12d1dc12391dd023e075c8f215d79f3eb2b",
+      "recordCount": 141
+    },
+    {
+      "file": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-f07-f11-source-audit01.json",
+      "bytes": 340013,
+      "sha256": "3ee34d757542f8db89a8f24c27020fc6fd0a6bf25058280e5f19a144e1752f8b",
+      "recordCount": 176
+    }
+  ],
+  "scope": {
+    "recordCount": 317,
+    "uniqueIds": 317,
+    "families": "F01–F11 bounded frozen-source records",
+    "completeDenominator": false,
+    "percentageReported": false,
+    "mutableSpouseWorkerFilesRead": false,
+    "repositoryEdits": 0,
+    "productOrTestExecutions": 0,
+    "buildExecutions": 0,
+    "uiOrNetworkOperations": 0,
+    "gitOperations": "read-only fixed-revision show",
+    "artifactWrite": "exclusive create only"
+  },
+  "conclusion": {
+    "usableAs": "bounded repair inventory with explicit unknowns and the listed matrix corrections",
+    "completeReachabilityMatrixAccepted": false,
+    "productionP0P1NewlyConfirmed": [],
+    "matrixCorrectionsRequired": [
+      "MATRIX.PET.WIRE",
+      "MATRIX.GUILD.ITEM.PRIMARY.ANCHOR",
+      "MATRIX.TRADE.REQUEST.ANCHOR",
+      "MATRIX.TRADE.ITEM.PRIMARY.ANCHOR",
+      "MATRIX.PRIMARY.EXISTS.NOT.ACTION",
+      "MATRIX.FINITE.SCOPE",
+      "MATRIX.HP.RANK.WORDING",
+      "MATRIX.PIN.PROVENANCE",
+      "MATRIX.GUILD.CREATE.UNKNOWN"
+    ],
+    "livePlayerAcceptance": "unknown / not executed",
+    "source09BuildRecertification": "not performed; historical reported builds are compiled feature evidence, not proof of row gestures or results"
+  },
+  "structuralValidation": {
+    "rows": 317,
+    "ids": 317,
+    "firstWebLineMismatches": [],
+    "firstNativePinMismatches": [],
+    "pinDifferences": [
+      {
+        "path": "apps/web/lib/bevy-character-ui.ts",
+        "gitBytes": 16047,
+        "gitSha256": "b8ac47330af76402a35502c1f5c91ab8699d0cfba8c034d67633e102008d2019",
+        "auditPin": {
+          "bytes": 16241,
+          "sha256": "f3e468850240cd7147b22d6a9257d740c906494b5cd2cb6643893edb32e70e61"
+        },
+        "onlyLineEndings": true
+      },
+      {
+        "path": "apps/game-client/runtime/src/quest_ui_host.rs",
+        "gitBytes": 120498,
+        "gitSha256": "24a1b6e8f50786cfb32db309c7fed7b145ca70929d9025b677fa505d581b2f18",
+        "auditPin": {
+          "bytes": 123409,
+          "sha256": "083ae140f32c75476889bd7bba0f636961108256f204753eeb5f1ec07f85f759"
+        },
+        "onlyLineEndings": true
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+        "gitBytes": 511036,
+        "gitSha256": "c926ca690b14814747270315868b490685d07f6cd5ac6721c3b6da629319718a",
+        "auditPin": {
+          "bytes": 522828,
+          "sha256": "ea45cbde1817652aa6f050a06d34215bca758a67c7a434417bb661cff80ee92d"
+        },
+        "onlyLineEndings": true
+      },
+      {
+        "path": "apps/web/lib/bevy-hud-ui.ts",
+        "gitBytes": 10409,
+        "gitSha256": "1645bbd690c50a637fb5039bceb620687673bf5aa1f93b95dd12d759b7f75e20",
+        "auditPin": {
+          "bytes": 10527,
+          "sha256": "26eb1dae0e88e9d6616271553a956802cddce1e87f7290295d88823650a5a46b"
+        },
+        "onlyLineEndings": true
+      }
+    ],
+    "statusCounts": {
+      "legacy": 179,
+      "open": 27,
+      "common limitation": 8,
+      "shared": 103
+    },
+    "secondWebLineMismatches": [],
+    "secondNativeBlobMismatches": [],
+    "reviewedCurrentSourceFiles": 54,
+    "firstNativePinScope": "all native baseline anchor objects with a blobSha1 were checked against the cached fixed baseline sources",
+    "secondNativePinScope": "all176 primary Native blob references checked; missing six cache entries read via fixed git show",
+    "primaryCurrentLineScope": "all141 first-audit entryOrConsumer lines and all176 second-audit Web primary lines verified in fixed git sources",
+    "semanticAnchorQualification": "A line/pin match proves provenance only, not player reachability or successful action."
+  },
+  "findings": [
+    {
+      "id": "MATRIX.PET.WIRE",
+      "severity": "P1 matrix-data correction",
+      "productionBlocker": false,
+      "rowIds": [
+        "F11.PET.SUMMON",
+        "F11.PET.DISMISS",
+        "F11.PET.RELEASE",
+        "F11.PET.RENAME",
+        "F11.PET.MODE",
+        "F11.PET.FILTER",
+        "F11.PET.GRADE"
+      ],
+      "finding": "Seven pet wire fields use a local/generic IntelligentCreatureAction or IntelligentCreaturePickup label instead of the actual ClientPacket::UpdateIntelligentCreature full-record packet.",
+      "correction": "Use UpdateIntelligentCreature {creature,summon_me,unsummon_me,release_me}; for summon/dismiss/release preserve the exact true flag, and for rename/mode/filter/grade all three flags are false. Filter/grade edits are local drafts until SaveOptions. Open/Close RequestIntelligentCreatureUpdates labels are correct.",
+      "evidence": [
+        {
+          "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+          "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+          "line": 205,
+          "endLine": 222,
+          "blobSha1": "7199f76d83635650a71fb7f0f26a64832b367f80",
+          "excerpt": "    fn update(\n        &mut self,\n        creature: ClientIntelligentCreature,\n        summon_me: bool,\n        unsummon_me: bool,\n        release_me: bool,\n    ) -> Option<ClientPacket> {\n        if self.pending.is_some() {\n            return None;\n        }\n        let packet = ClientPacket::UpdateIntelligentCreature {\n            creature,\n            summon_me,\n            unsummon_me,\n            release_me,\n        };\n        self.pending = Some(packet.clone());\n        Some(packet)"
+        },
+        {
+          "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+          "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+          "line": 317,
+          "endLine": 321,
+          "blobSha1": "7199f76d83635650a71fb7f0f26a64832b367f80",
+          "excerpt": "            CreatureAction::Summon if self.summoned.is_none() => {\n                self.update(pet, true, false, false)\n            }\n            CreatureAction::Dismiss if self.summoned == Some(pet.pet_type) => {\n                self.update(pet, false, true, false)"
+        },
+        {
+          "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+          "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+          "line": 341,
+          "endLine": 370,
+          "blobSha1": "7199f76d83635650a71fb7f0f26a64832b367f80",
+          "excerpt": "            CreatureAction::ToggleMode => {\n                if pet.pet_mode == 0 && pet.creature_rules.semi_auto_pickup_enabled {\n                    pet.pet_mode = 1;\n                } else if pet.pet_mode == 1 && pet.creature_rules.auto_pickup_enabled {\n                    pet.pet_mode = 0;\n                } else {\n                    return None;\n                }\n                self.update(pet, false, false, false)\n            }\n            CreatureAction::Options => {\n                if self.options.is_none() {\n                    self.options = Some(pet);\n                }\n                None\n            }\n            CreatureAction::SaveOptions => {\n                let draft = self.options.clone()?;\n                let mut actual = self\n                    .creatures\n                    .iter()\n                    .find(|c| c.pet_type == draft.pet_type)?\n                    .clone();\n                actual.filter = draft.filter;\n                actual.pickup_grade = draft.pickup_grade;\n                let result = self.update(actual, false, false, false);\n                if result.is_some() {\n                    self.options = None;\n                }\n                result"
+        },
+        {
+          "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+          "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+          "line": 396,
+          "endLine": 413,
+          "blobSha1": "7199f76d83635650a71fb7f0f26a64832b367f80",
+          "excerpt": "                pet.custom_name = input.text;\n                let packet = self.update(pet, false, false, false);\n                if packet.is_some() {\n                    self.input = None;\n                    self.rename_enabled = false;\n                }\n                packet\n            }\n            InputPurpose::Release => {\n                self.input = None;\n                if !input.text.eq_ignore_ascii_case(&pet.custom_name) {\n                    self.system_message = Some(\"Verification Failed!!\".into());\n                    return None;\n                }\n                if self.summoned == Some(pet.pet_type) {\n                    return None;\n                }\n                self.update(pet, false, false, true)"
+        },
+        {
+          "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+          "path": "apps/web/lib/creature-player-ui.ts",
+          "bytes": 15615,
+          "sha256": "c321ac4622c3a167fd2bd88c0089bba64fb225f7c88f25352dc4ded81af09364",
+          "line": 27,
+          "endLine": 33,
+          "excerpt": "  | { kind: \"options\"; filter: CreatureItemFilter; pickupGrade: number }\n  | { kind: \"slot\"; slotIndex: number }\n)>;\nexport type CreaturePlayerCommand = Readonly<{\n  type: \"updateIntelligentCreature\"; creature: CreaturePlayerRecord;\n  summonMe: boolean; unsummonMe: boolean; releaseMe: boolean;\n}>;"
+        },
+        {
+          "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+          "path": "apps/web/lib/creature-player-ui.ts",
+          "bytes": 15615,
+          "sha256": "c321ac4622c3a167fd2bd88c0089bba64fb225f7c88f25352dc4ded81af09364",
+          "line": 157,
+          "endLine": 157,
+          "excerpt": "  return Object.freeze({ type: \"updateIntelligentCreature\", creature, summonMe, unsummonMe, releaseMe });"
+        },
+        {
+          "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+          "path": "apps/web/app/components/original-client-hero-pet-window.tsx",
+          "bytes": 33563,
+          "sha256": "82f1b128f2a3409e0fee27f40186caec7209ebe9f4ddb22302c1a9d443b880d7",
+          "line": 479,
+          "endLine": 493,
+          "excerpt": "              ? { kind: \"options\", petType: petEditor.petType, filter: petEditor.filter, pickupGrade: petEditor.grade }\n              : petEditor.kind === \"rename\" ? { kind: \"rename\", petType: petEditor.petType, text: petEditor.text }\n                : { kind: \"release\", petType: petEditor.petType, confirmationName: petEditor.text }, petEditor.source)}\n            onClick={() => {\n              const captured = petEditor;\n              if (!captured || !creaturePlayerSourceCurrent(captured.source, creatureSource)) return;\n              const intent: CreaturePlayerIntent = captured.kind === \"options\"\n                ? { kind: \"options\", petType: captured.petType, filter: captured.filter, pickupGrade: captured.grade }\n                : captured.kind === \"rename\" ? { kind: \"rename\", petType: captured.petType, text: captured.text }\n                  : { kind: \"release\", petType: captured.petType, confirmationName: captured.text };\n              if (!creaturePlayerCommand(intent, captured.source) || petActionPending || !onPetAction) return;\n              submitPetAction(intent, captured.source); setPetEditor(null);\n            }}>{petEditor.kind === \"options\" ? t(\"ui.save\", [], \"Save\") : t(\"ui.confirm\", [], \"Confirm\")}</button>\n        </div>\n      </div> : null}"
+        }
+      ],
+      "originalFields": [
+        {
+          "id": "F11.PET.SUMMON",
+          "wire": "IntelligentCreatureAction summon"
+        },
+        {
+          "id": "F11.PET.DISMISS",
+          "wire": "IntelligentCreatureAction dismiss"
+        },
+        {
+          "id": "F11.PET.RELEASE",
+          "wire": "IntelligentCreatureAction release"
+        },
+        {
+          "id": "F11.PET.RENAME",
+          "wire": "IntelligentCreatureAction rename"
+        },
+        {
+          "id": "F11.PET.MODE",
+          "wire": "IntelligentCreatureAction mode"
+        },
+        {
+          "id": "F11.PET.FILTER",
+          "wire": "IntelligentCreaturePickup"
+        },
+        {
+          "id": "F11.PET.GRADE",
+          "wire": "IntelligentCreaturePickup grade"
+        }
+      ]
+    },
+    {
+      "id": "MATRIX.GUILD.ITEM.PRIMARY.ANCHOR",
+      "severity": "P1 reachability-evidence correction",
+      "productionBlocker": false,
+      "rowIds": [
+        "F11.GUILD.STORAGE_STORE",
+        "F11.GUILD.STORAGE_RETRIEVE"
+      ],
+      "finding": "guild_storage.rs:165 declares GuildGoldAction. It is the wrong Native primary anchor for guild item deposit/retrieve. Page readSocialItemSurface is a read projection rather than an action claim.",
+      "correction": "Retain item rows as candidate behavior records, mark the unclosed Native item control/hit-test chain unknown, and add the actual outgoing bridge plus specific Web callbacks/send path. Do not infer reachability from this gold enum.",
+      "evidence": [
+        {
+          "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+          "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+          "line": 164,
+          "endLine": 175,
+          "blobSha1": "c17e5d948711ee8d495cdca4f5a9ea91a2d0e639",
+          "excerpt": "#[derive(Debug, Clone, Copy, PartialEq, Eq)]\npub enum GuildGoldAction {\n    Deposit,\n    Withdraw,\n}\n\nimpl GuildGoldAction {\n    pub fn change_type(self) -> u8 {\n        match self {\n            Self::Deposit => 0,\n            Self::Withdraw => 1,\n        }"
+        },
+        {
+          "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+          "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+          "line": 3087,
+          "endLine": 3104,
+          "blobSha1": "8a7fc1687243808da0ab13fed4267859db70345f",
+          "excerpt": "            NativePlayerUiIntent::GuildStorageItemChange {\n                change_type,\n                from,\n                to,\n            } => {\n                let Some(command) =\n                    NativeOutboundCommand::guild_storage_item_change(change_type, from, to)\n                else {\n                    continue;\n                };\n                command\n            }\n            NativePlayerUiIntent::GetRanking {\n                rank_type,\n                rank_index,\n                online_only,\n            } => NativeOutboundCommand::GetRanking {\n                rank_type,"
+        },
+        {
+          "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+          "path": "apps/web/app/page.tsx",
+          "bytes": 886081,
+          "sha256": "cf927ebbc63f89894c78b62fed5f99ce0d219201acf06cef85ca5610c37e62e2",
+          "line": 10819,
+          "endLine": 10831,
+          "excerpt": "  function submitSocialItem(kind: SocialWindowOperationKind, from: number, to: number, uniqueId: number, capturedSourceKey: string) {\n    const surface = kind.startsWith(\"guild\") ? \"guild\" : \"trade\", source = readSocialItemSurface(surface);\n    const characterIndex = socialCharacterIndexRef.current.current;\n    if (!source || source.sourceKey !== capturedSourceKey || characterIndex === null) return;\n    const proof = socialItemOperationsRef.current.reserve({ owner: source.owner, surface, localSourceKey: capturedSourceKey,\n      kind, from, to, uniqueId, ownCharacterIndex: characterIndex, beforeSnapshotRevision: worldSnapshotVersionRef.current });\n    if (!proof) return;\n    try {\n      if (!socialItemProofCurrent(proof) || !send(socialWindowItemCommand(proof), {socialItemProof: proof})) socialItemOperationsRef.current.cancelDefinitelyUnsent(proof);\n    } catch (error) {\n      socialItemOperationsRef.current.cancelDefinitelyUnsent(proof);\n      socialItemOperationsRef.current.outcomeUnknown(proof);\n      console.error(\"[mir2] social item send outcome is unknown\", error);"
+        },
+        {
+          "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+          "path": "apps/web/app/page.tsx",
+          "bytes": 886081,
+          "sha256": "cf927ebbc63f89894c78b62fed5f99ce0d219201acf06cef85ca5610c37e62e2",
+          "line": 17856,
+          "endLine": 17858,
+          "excerpt": "        onDepositItem: (from, to, uid) => submitSocialItem(\"guild0\", from, to, uid, socialGuildRender?.sourceKey ?? \"\"),\n        onRetrieveItem: (from, to, uid) => submitSocialItem(\"guild1\", from, to, uid, socialGuildRender?.sourceKey ?? \"\"),\n        onMoveItem: (from, to, uid) => submitSocialItem(\"guild2\", from, to, uid, socialGuildRender?.sourceKey ?? \"\"), playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}"
+        }
+      ]
+    },
+    {
+      "id": "MATRIX.TRADE.REQUEST.ANCHOR",
+      "severity": "P1 action-evidence correction",
+      "productionBlocker": false,
+      "rowIds": [
+        "F11.TRADE.REQUEST"
+      ],
+      "finding": "The Web primary anchor TradeWindow onAccept prop at line91 corresponds to reply/accept, not the outgoing TradeRequest behavior.",
+      "correction": "Replace or supplement with actual shortcut/action callback at fixed Page:8882 and :17740. The wrong audit anchor is not evidence of a missing implementation.",
+      "evidence": [
+        {
+          "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+          "path": "apps/web/app/components/original-client-trade-window.tsx",
+          "bytes": 25653,
+          "sha256": "50faa4a038c11af9d8b0ecc2af4bd2a9054ca0a6533c82e016cd73fcd0c4dfcb",
+          "line": 89,
+          "endLine": 94,
+          "excerpt": "  availableGold?: number;\n  /** Accept an incoming `requested` trade invite. */\n  onAccept?: () => void;\n  /** Lock in the viewer's side of an `open` trade. */\n  onConfirm?: () => void;\n  /** Cancel / decline the trade entirely. */"
+        },
+        {
+          "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+          "path": "apps/web/app/page.tsx",
+          "bytes": 886081,
+          "sha256": "cf927ebbc63f89894c78b62fed5f99ce0d219201acf06cef85ca5610c37e62e2",
+          "line": 8882,
+          "endLine": 8882,
+          "excerpt": "    if (functionId === \"Trade\") { send({ type: \"tradeRequest\" }); return true; }"
+        },
+        {
+          "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+          "path": "apps/web/app/page.tsx",
+          "bytes": 886081,
+          "sha256": "cf927ebbc63f89894c78b62fed5f99ce0d219201acf06cef85ca5610c37e62e2",
+          "line": 17740,
+          "endLine": 17740,
+          "excerpt": "      onRequestTrade={() => send({ type: \"tradeRequest\" })}"
+        },
+        {
+          "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 9136,
+          "endLine": 9142,
+          "blobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22",
+          "excerpt": "            OverlayButton::TradeRequest => {\n                // The inviter receives no request acknowledgement; refusal can\n                // be only a chat line. Never leave an unresolvable pending key.\n                intents.push_transient_unique(NativePlayerUiIntent::TradeRequest);\n            }\n            OverlayButton::TradeAccept(_)\n            | OverlayButton::TradeDecline(_)"
+        }
+      ]
+    },
+    {
+      "id": "MATRIX.TRADE.ITEM.PRIMARY.ANCHOR",
+      "severity": "needs evidence-chain completion",
+      "productionBlocker": false,
+      "rowIds": [
+        "F11.TRADE.ITEM_STORE",
+        "F11.TRADE.ITEM_RETRIEVE"
+      ],
+      "finding": "trade_dialog.rs:19 is TradeSide, not the deposit/retrieve interaction. Both Web primary anchors are readSocialItemSurface, not the UI action or final sender.",
+      "correction": "Use actual trade_item_input control/hit-test and outgoing gameplay bridge plus Page submitSocialItem and specific callback capture. The bridge and Web callbacks were located; the complete baseline item UI chain is not recertified here.",
+      "evidence": [
+        {
+          "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+          "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+          "line": 18,
+          "endLine": 29,
+          "blobSha1": "6775779c2384f70d993e0f2b7e9444c4def8b8b4",
+          "excerpt": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Component)]\npub enum TradeSide {\n    Own,\n    Guest,\n}\nimpl TradeSide {\n    fn index(self) -> usize {\n        if self == Self::Own {\n            0\n        } else {\n            1\n        }"
+        },
+        {
+          "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+          "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+          "line": 3133,
+          "endLine": 3142,
+          "blobSha1": "8a7fc1687243808da0ab13fed4267859db70345f",
+          "excerpt": "                NativeOutboundCommand::TradeGold { amount }\n            }\n            NativePlayerUiIntent::TradeDepositItem { from, to } => {\n                NativeOutboundCommand::DepositTradeItem { from, to }\n            }\n            NativePlayerUiIntent::TradeRetrieveItem { from, to } => {\n                NativeOutboundCommand::RetrieveTradeItem { from, to }\n            }\n            NativePlayerUiIntent::TradeConfirm { locked } => {\n                NativeOutboundCommand::TradeConfirm { locked }"
+        },
+        {
+          "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+          "path": "apps/web/app/page.tsx",
+          "bytes": 886081,
+          "sha256": "cf927ebbc63f89894c78b62fed5f99ce0d219201acf06cef85ca5610c37e62e2",
+          "line": 10819,
+          "endLine": 10831,
+          "excerpt": "  function submitSocialItem(kind: SocialWindowOperationKind, from: number, to: number, uniqueId: number, capturedSourceKey: string) {\n    const surface = kind.startsWith(\"guild\") ? \"guild\" : \"trade\", source = readSocialItemSurface(surface);\n    const characterIndex = socialCharacterIndexRef.current.current;\n    if (!source || source.sourceKey !== capturedSourceKey || characterIndex === null) return;\n    const proof = socialItemOperationsRef.current.reserve({ owner: source.owner, surface, localSourceKey: capturedSourceKey,\n      kind, from, to, uniqueId, ownCharacterIndex: characterIndex, beforeSnapshotRevision: worldSnapshotVersionRef.current });\n    if (!proof) return;\n    try {\n      if (!socialItemProofCurrent(proof) || !send(socialWindowItemCommand(proof), {socialItemProof: proof})) socialItemOperationsRef.current.cancelDefinitelyUnsent(proof);\n    } catch (error) {\n      socialItemOperationsRef.current.cancelDefinitelyUnsent(proof);\n      socialItemOperationsRef.current.outcomeUnknown(proof);\n      console.error(\"[mir2] social item send outcome is unknown\", error);"
+        },
+        {
+          "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+          "path": "apps/web/app/page.tsx",
+          "bytes": 886081,
+          "sha256": "cf927ebbc63f89894c78b62fed5f99ce0d219201acf06cef85ca5610c37e62e2",
+          "line": 17873,
+          "endLine": 17874,
+          "excerpt": "        onDepositItem: (from, to, uid) => submitSocialItem(\"depositTrade\", from, to, uid, socialTradeRender?.sourceKey ?? \"\"),\n        onRetrieveItem: (from, to, uid) => submitSocialItem(\"retrieveTrade\", from, to, uid, socialTradeRender?.sourceKey ?? \"\"), onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}"
+        }
+      ]
+    },
+    {
+      "id": "MATRIX.PRIMARY.EXISTS.NOT.ACTION",
+      "severity": "needs reachability re-review",
+      "productionBlocker": false,
+      "rowIds": [
+        "F03.npc.input",
+        "F04.hud.navigate.character",
+        "F04.hud.navigate.bag",
+        "F04.hud.navigate.quest",
+        "F04.hud.navigate.menu",
+        "F05.bag.tooltip-shared",
+        "F06.skills.page",
+        "F06.skills.pagination",
+        "F06.skills.select",
+        "F06.skills.clear",
+        "F06.skills.target-lock",
+        "F06.feedback.names",
+        "F09.NPC.OPEN",
+        "F09.CASH.OPEN",
+        "F09.CASH.FILTER_CLASS",
+        "F09.CASH.FILTER_SECTION",
+        "F09.CASH.FILTER_CATEGORY",
+        "F09.CASH.SEARCH",
+        "F09.CASH.CONFIRM",
+        "F09.CASH.TOOLTIP",
+        "F11.PET.OPEN",
+        "F11.PET.CLOSE",
+        "F11.PET.RENAME",
+        "F11.PET.MODE",
+        "F11.PET.FILTER",
+        "F11.PET.GRADE"
+      ],
+      "finding": "Selected primary anchors are imports, props, models/state declarations, ABI resource fields or generic transport classes. These accurately exist at the recorded lines but do not individually prove a Native control-to-host route or a Web gesture-to-final-claim route.",
+      "correction": "Keep shared/legacy as an implementation-category hint, not completed acceptance. Add separate control, host/consumer, dispatch and wire anchors where relevant; otherwise expose reachabilityChain:unknown. In particular do not use the blanket registered Native control/host phrase for model-only anchors.",
+      "examples": [
+        {
+          "id": "F03.npc.input",
+          "reason": "Native quest_ui.rs:66 is an NpcDialogModel import; input outbound was already marked unknown in the raw audit."
+        },
+        {
+          "id": "F05.bag.tooltip-shared",
+          "reason": "Runtime item_tooltip_query.rs:12 is an algorithm import; compiled readonly getter does not identify which shared Bag/Character renderer actually calls and paints the document."
+        },
+        {
+          "ids": [
+            "F06.skills.page",
+            "F06.skills.pagination",
+            "F06.skills.select",
+            "F06.skills.clear"
+          ],
+          "reason": "SpellsHost class declaration establishes transport existence, not distinct Rust controls and their pointer/actions."
+        },
+        {
+          "id": "F06.feedback.names",
+          "reason": "Native tracker_targets_monster import is insufficient; actual NameView OR hovered OR live quest-target consumer is entity_overlays.rs:983–993.",
+          "supplement": {
+            "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+            "path": "apps/game-client/platform-windows/src/entity_overlays.rs",
+            "line": 983,
+            "endLine": 993,
+            "blobSha1": "08c362fea873f2963769d3b5f25916fb963c8632",
+            "excerpt": "                let hovered = if is_self {\n                    self_hovered\n                } else {\n                    object_id\n                        .as_deref()\n                        .is_some_and(|object_id| hovered_object_id == Some(object_id))\n                };\n                let quest_target = kind == \"monster\"\n                    && !dead\n                    && quest_tracker.is_some_and(|tracker| tracker_targets_monster(tracker, name));\n                let show_name = visibility.name_view || hovered || quest_target;"
+          }
+        },
+        {
+          "ids": [
+            "F09.CASH.FILTER_CLASS",
+            "F09.CASH.FILTER_SECTION",
+            "F09.CASH.FILTER_CATEGORY",
+            "F09.CASH.SEARCH"
+          ],
+          "reason": "Native model fields and React useState fields need the actual widgets/action arms and filter consumer; they are not standalone reachability proof."
+        },
+        {
+          "ids": [
+            "F11.PET.OPEN",
+            "F11.PET.CLOSE"
+          ],
+          "reason": "onClose declaration is weak but actual f1cf Page update-request effect exists at2865/2867; add that route instead of inferring from props.",
+          "supplements": [
+            {
+              "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+              "path": "apps/web/app/page.tsx",
+              "bytes": 886081,
+              "sha256": "cf927ebbc63f89894c78b62fed5f99ce0d219201acf06cef85ca5610c37e62e2",
+              "line": 2861,
+              "endLine": 2869,
+              "excerpt": "  // When the hero/pet window opens, ask the server to start streaming intelligent\n  // creature updates (ClientPacket::RequestIntelligentCreatureUpdates { update }).\n  useEffect(() => {\n    if (!showHeroPet) return;\n    send({ type: \"requestIntelligentCreatureUpdates\", update: true }, { quiet: true });\n    return () => {\n      send({ type: \"requestIntelligentCreatureUpdates\", update: false }, { quiet: true });\n    };\n    // `send` is a stable hoisted closure over refs; intentionally excluded."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "MATRIX.FINITE.SCOPE",
+      "severity": "needs evidence-scope correction",
+      "productionBlocker": false,
+      "rowIds": [
+        "F11.PET.RENAME",
+        "F11.PET.MODE",
+        "F11.PET.FILTER",
+        "F11.PET.GRADE",
+        "F11.RANKING.PREVIOUS",
+        "F11.RANKING.NEXT",
+        "F05.bag.merge",
+        "F05.bag.split",
+        "F05.bag.drop-confirm"
+      ],
+      "finding": "A named pure parser or generic owner/proof fixture is related evidence, not verification of every row using it. The pet carrier parser tests exact i64 recovery/unsafe identity; it does not test Rename/Mode/SaveOptions controls. Ranking adapter offset validation is not the +/-1 button, clamp, serialization or response journey. Generic custody tests are not item-operation success tests.",
+      "correction": "Record the exact covered aspect and mark row gesture/send/result or live-player verification unknown. Existing finite disclaimers should be preserved. Do not convert a named fixture into actual action completion.",
+      "exactPetFinite": {
+        "path": "apps/web/scripts/test-stage5-adapters.mjs",
+        "line": 2551,
+        "name": "Raw creature parser rescues only actual three-field carrier times and never unsafe identity",
+        "coverageAspect": "Named finite source/fixture or pure-model regression relevant to this path; not evidence of a live end-to-end player action. No tests executed in this audit."
+      }
+    },
+    {
+      "id": "MATRIX.HP.RANK.WORDING",
+      "severity": "semantic wording correction",
+      "productionBlocker": false,
+      "rowIds": [
+        "F10.OPTIONS.HP_VIEW",
+        "F11.RANKING.PREVIOUS",
+        "F11.RANKING.NEXT"
+      ],
+      "finding": "HPView is compact-versus-alternate HUD four-label presentation, not world health-bar visibility. Ranking previous/next are +/-1 row offsets with20 visible rows and clamp0..count-20, not20-row page jumps.",
+      "correction": "Name these precise behaviors and retain their separate setting/consumer or request/result context.",
+      "evidence": [
+        {
+          "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+          "path": "apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+          "line": 1032,
+          "endLine": 1061,
+          "blobSha1": "2fe37a933b807d77fda78d3878107330115e9a5b",
+          "excerpt": "    let hp_view = state\n        .as_deref()\n        .map(|state| state.core.options.hp_view)\n        .unwrap_or(true);\n    let compact_hp_display = if in_game && hp_view {\n        Display::Flex\n    } else {\n        Display::None\n    };\n    let compact_mp_display = if in_game && hp_view && !crystal_hp_only(&model) {\n        Display::Flex\n    } else {\n        Display::None\n    };\n    let alternate_display = if in_game && !hp_view {\n        Display::Flex\n    } else {\n        Display::None\n    };\n    for mut node in nodes.p0().iter_mut() {\n        node.display = compact_hp_display;\n    }\n    for mut node in nodes.p1().iter_mut() {\n        node.display = compact_mp_display;\n    }\n    for mut node in nodes.p2().iter_mut() {\n        node.display = alternate_display;\n    }\n    for mut node in nodes.p3().iter_mut() {\n        node.display = alternate_display;"
+        },
+        {
+          "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+          "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog.rs",
+          "line": 121,
+          "endLine": 122,
+          "blobSha1": "9dd47580b6b7b0d45f97eb07c25da6029d1b1d01",
+          "excerpt": "            RankingAction::Previous => self.move_rows(-1, now_ms),\n            RankingAction::Next => self.move_rows(1, now_ms),"
+        },
+        {
+          "revision": "f1cf96324c7da62e57d5fd0fa4146be010adbba5",
+          "path": "apps/web/app/page.tsx",
+          "bytes": 886081,
+          "sha256": "cf927ebbc63f89894c78b62fed5f99ce0d219201acf06cef85ca5610c37e62e2",
+          "line": 9249,
+          "endLine": 9254,
+          "excerpt": "  function moveRankingRows(direction: number) {\n    const query = rankingQueriesRef.current.desired;\n    const page = worldRef.current.rankings[rankingPageKey(query.rankType, query.onlineOnly)];\n    if (rankingQueriesRef.current.pending || !page || page.rankIndex !== query.rankIndex || !Number.isSafeInteger(page.count)) return;\n    const rankIndex = Math.max(0, Math.min(Math.max(0, page.count - 20), query.rankIndex + Math.sign(direction)));\n    if (rankIndex !== query.rankIndex) issueRankingRequest({...query, rankIndex});"
+        }
+      ]
+    },
+    {
+      "id": "MATRIX.PIN.PROVENANCE",
+      "severity": "byte-provenance clarification",
+      "productionBlocker": false,
+      "rowIds": [
+        "F06.character.equipment",
+        "F06.feedback.names",
+        "F04.hud.hp-view"
+      ],
+      "finding": "Four source pins represent checkout CRLF bytes rather than Git f1cf LF blob bytes. Fixed Git contents and the frozen audit source caches match after CRLF normalization; no semantic source drift was found.",
+      "correction": "Keep original checkout hashes for historical Source09 build inputs. Add the Git blob/text pin alongside them for a fixed-HEAD audit; do not silently replace build-input evidence with normalized content.",
+      "differences": [
+        {
+          "path": "apps/web/lib/bevy-character-ui.ts",
+          "gitBytes": 16047,
+          "gitSha256": "b8ac47330af76402a35502c1f5c91ab8699d0cfba8c034d67633e102008d2019",
+          "auditPin": {
+            "bytes": 16241,
+            "sha256": "f3e468850240cd7147b22d6a9257d740c906494b5cd2cb6643893edb32e70e61"
+          },
+          "onlyLineEndings": true
+        },
+        {
+          "path": "apps/game-client/runtime/src/quest_ui_host.rs",
+          "gitBytes": 120498,
+          "gitSha256": "24a1b6e8f50786cfb32db309c7fed7b145ca70929d9025b677fa505d581b2f18",
+          "auditPin": {
+            "bytes": 123409,
+            "sha256": "083ae140f32c75476889bd7bba0f636961108256f204753eeb5f1ec07f85f759"
+          },
+          "onlyLineEndings": true
+        },
+        {
+          "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+          "gitBytes": 511036,
+          "gitSha256": "c926ca690b14814747270315868b490685d07f6cd5ac6721c3b6da629319718a",
+          "auditPin": {
+            "bytes": 522828,
+            "sha256": "ea45cbde1817652aa6f050a06d34215bca758a67c7a434417bb661cff80ee92d"
+          },
+          "onlyLineEndings": true
+        },
+        {
+          "path": "apps/web/lib/bevy-hud-ui.ts",
+          "gitBytes": 10409,
+          "gitSha256": "1645bbd690c50a637fb5039bceb620687673bf5aa1f93b95dd12d759b7f75e20",
+          "auditPin": {
+            "bytes": 10527,
+            "sha256": "26eb1dae0e88e9d6616271553a956802cddce1e87f7290295d88823650a5a46b"
+          },
+          "onlyLineEndings": true
+        }
+      ]
+    },
+    {
+      "id": "MATRIX.GUILD.CREATE.UNKNOWN",
+      "severity": "unclosed frontend reachability",
+      "productionBlocker": false,
+      "rowIds": [
+        "F11.GUILD.CREATE_RANK"
+      ],
+      "finding": "The row is correctly common limitation for backend type4, but the Web onSaveRank prop does not establish a separately reachable create-rank control. The raw audit already lists this in unknownAndExcludedScopes.",
+      "correction": "Preserve both dimensions: backend maintenance unavailable and Web create-control reachability unknown. Neither the callback nor common limitation closes this frontend subquestion."
+    }
+  ],
+  "overlapGroups": [
+    {
+      "id": "ALIAS.HPVIEW",
+      "rows": [
+        "F04.hud.hp-view",
+        "F10.OPTIONS.HP_VIEW"
+      ],
+      "relationship": "setting and consumer of the same HPView presentation flow",
+      "mergeRule": "Canonical end-to-end operation; retain both source-evidence roles."
+    },
+    {
+      "id": "ALIAS.NAMEVIEW",
+      "rows": [
+        "F06.feedback.names",
+        "F10.OPTIONS.NAME_VIEW"
+      ],
+      "relationship": "setting and its name consumer/hover/quest exception",
+      "mergeRule": "One setting-consumer flow with explicit exception subcases; not two completed features."
+    },
+    {
+      "id": "ALIAS.NEWMOVE",
+      "rows": [
+        "F02.world.newmove",
+        "F10.OPTIONS.NEW_MOVE"
+      ],
+      "relationship": "setting and right-click movement consumer",
+      "mergeRule": "Canonical NewMove flow with path-retirement check; preserve movement gesture independently."
+    },
+    {
+      "id": "ENTRY.QUEST",
+      "rows": [
+        "F03.quest.open",
+        "F04.hud.navigate.quest"
+      ],
+      "relationship": "same opened window via generic open/close versus HUD entry",
+      "mergeRule": "Link entry aliases; preserve input-route assertions."
+    },
+    {
+      "id": "ENTRY.CHARACTER",
+      "rows": [
+        "F04.hud.navigate.character",
+        "F06.character.equipment"
+      ],
+      "relationship": "HUD entry versus equipment page rendering/action family",
+      "mergeRule": "Entry is a precondition/alias, not a second completed equipment capability. Do not erase equipment actions."
+    },
+    {
+      "id": "ENTRY.BAG",
+      "rows": [
+        "F04.hud.navigate.bag",
+        "F05.bag.page.bag1",
+        "F05.bag.page.bag2",
+        "F05.bag.page.quest"
+      ],
+      "relationship": "entry versus distinct bag page behaviors",
+      "mergeRule": "Link entry; retain each real page/slot consumer."
+    },
+    {
+      "id": "ENTRY.SKILLS",
+      "rows": [
+        "F04.hud.navigate.skills",
+        "F06.skills.page"
+      ],
+      "relationship": "HUD skills entry versus skill window page",
+      "mergeRule": "Same page reached by a different input route; preserve route evidence."
+    },
+    {
+      "id": "CORE.PICKUP.OBJECT",
+      "rows": [
+        "F02.world.pick-object",
+        "F03.world.PickUpObject"
+      ],
+      "relationship": "shared outgoing pickup primitive; world click and Quest button have different captured authorities",
+      "mergeRule": "Do not double-count backend pickup support; retain both UI behaviors and stale-source tests. These are not exact gesture duplicates."
+    },
+    {
+      "id": "CORE.PICKUP.TILE",
+      "rows": [
+        "F02.world.pick-tile",
+        "F03.world.PickUpTile"
+      ],
+      "relationship": "shared outgoing tile pickup primitive with distinct entry/proof",
+      "mergeRule": "Link backend primitive; retain Quest-specific control and ordinary world lifecycle."
+    },
+    {
+      "id": "CORE.ATTACK",
+      "rows": [
+        "F02.world.target-monster",
+        "F03.world.AttackTarget",
+        "F03.world.AttackQuestTarget",
+        "F06.combat.melee"
+      ],
+      "relationship": "overlapping target/attack reducer and outbound family, distinct world/Quest/normal combat contexts",
+      "mergeRule": "Do not count four independent backend implementations. Retain quest-specific authority and each player gesture."
+    },
+    {
+      "id": "DEPENDENCY.SKILLBAR",
+      "rows": [
+        "F10.OPTIONS.SKILL_BAR",
+        "F06.skillbar.cast",
+        "F06.skillbar.drag",
+        "F06.skillbar.cooldown"
+      ],
+      "relationship": "visibility setting plus distinct skill-bar consumer actions",
+      "mergeRule": "Dependency links only; casting, dragging, cooldown are not duplicates."
+    },
+    {
+      "id": "DEPENDENCY.ITEM.CUSTODY",
+      "rows": [
+        "F05.item.custody-lifecycle"
+      ],
+      "families": [
+        "F07",
+        "F08",
+        "F09",
+        "F11"
+      ],
+      "relationship": "cross-window owner/item flight barrier is reused by mail/storage/shop/trade/guild/hero item actions",
+      "mergeRule": "Record once as safety dependency, with per-action checks. Do not count reused guards as extra player features."
+    },
+    {
+      "id": "DISTINCT.NOT.MERGED",
+      "rows": [
+        "F05.bag.tooltip-shared",
+        "F05.bag.tooltip-compat",
+        "F05.belt.tooltip"
+      ],
+      "relationship": "different renderer/entry consumers; a complete document getter does not make every tooltip consumer complete",
+      "mergeRule": "Keep distinct open gaps. Similarly retain ordinary character vs Hero viewer/custody and arbitrary map route vs Quest route; do not merge by shared wire alone."
+    }
+  ],
+  "commonLimitReview": {
+    "incorrectlyCountedAsWebOpenConfirmed": [],
+    "retainedCommonRows": [
+      "F01.select.credits",
+      "F06.skillbar.refresh",
+      "F11.GUILD.NOTICE",
+      "F11.GUILD.KICK",
+      "F11.GUILD.MEMBER_RANK",
+      "F11.GUILD.RANK_NAME",
+      "F11.GUILD.CREATE_RANK",
+      "F11.GUILD.RANK_PERMISSIONS"
+    ],
+    "fixedHeadChecks": [
+      {
+        "path": "apps/gateway/src/shared_guilds.rs",
+        "lines": [
+          20,
+          21,
+          102,
+          103,
+          323
+        ],
+        "finding": "guild maintenance interception accepts recruit type0 and unavailable fallback covers remaining recorded maintenance paths"
+      },
+      {
+        "path": "apps/simulation/src/runtime/packets.rs",
+        "lines": [
+          9175,
+          9190
+        ],
+        "finding": "Inspect packet branch yields no result; ranking Web missing callback/mapping is a separate frontend omission"
+      }
+    ],
+    "distinction": "Keep baseline client noop (Credits/Refresh) distinct from common service limitation. Ranking Inspect remains a Web open row plus an independent common backend limitation, not two Web gaps. Guild create control remains unknown independently of type4 backend limitation."
+  },
+  "retainedRequiredActions": {
+    "questAbandon": [
+      "F03.quest.abandon",
+      "F03.quest.abandon-confirm",
+      "F03.quest.abandon-cancel"
+    ],
+    "questShare": "F03.quest.share",
+    "questNine": [
+      {
+        "id": "F03.world.ToggleSupplies",
+        "nativeAction": "ToggleSupplies"
+      },
+      {
+        "id": "F03.world.SelectSupplyVendor",
+        "nativeAction": "SelectSupplyVendor"
+      },
+      {
+        "id": "F03.world.ShowSupplyInventory",
+        "nativeAction": "ShowSupplyInventory"
+      },
+      {
+        "id": "F03.world.OpenDestinationMap",
+        "nativeAction": "OpenDestinationMap"
+      },
+      {
+        "id": "F03.world.NavigateQuestRoute",
+        "nativeAction": "NavigateQuestRoute"
+      },
+      {
+        "id": "F03.world.AttackTarget",
+        "nativeAction": "AttackTarget"
+      },
+      {
+        "id": "F03.world.AttackQuestTarget",
+        "nativeAction": "AttackQuestTarget"
+      },
+      {
+        "id": "F03.world.PickUpObject",
+        "nativeAction": "PickUpObject"
+      },
+      {
+        "id": "F03.world.PickUpTile",
+        "nativeAction": "PickUpTile"
+      }
+    ],
+    "inputLifecycle": [
+      "F02.world.lifecycle",
+      "F03.input.lifecycle",
+      "F03.quest.route-retirement",
+      "F05.item.custody-lifecycle",
+      "F06.skillbar.cast"
+    ]
+  },
+  "finiteEvidence": {
+    "scope": "Source declarations/pure fixtures only; no execution in this review",
+    "knownFiniteNotLiveBehavior": true,
+    "specificity": "Row knownFinite means the named test covers an explicitly described aspect only. Parser/adapter/generic-owner assertions do not certify UI gestures, real ACKs, persistence, purchases, item movement or successful requests.",
+    "source09": "Rust input presence and compilation, including thin ABI0 versus shared ABI1, do not compile React or prove all consumer paths. Reported aggregate finite counts are not row acceptance counts."
+  },
+  "unknowns": [
+    {
+      "area": "F01",
+      "detail": "Native registration field-by-field validation and all auth error/banned/password limits were not exhaustively compared; no new auth correctness finding inferred."
+    },
+    {
+      "area": "F02",
+      "detail": "World-map NPC scrolling/search/teleport, all camera/light/effect layers, doors/occupancy/transitions and all fishing equipment/reel paths were not exhaustively closed. Fishing world-click gap is cross-family; consolidate with other audit owner."
+    },
+    {
+      "area": "F03",
+      "detail": "Every guided-diary/graduation/help/compact reward-paging variant and all nine-action live server journeys still require bounded follow-up; listed shared handlers and required abandon/share were retained."
+    },
+    {
+      "area": "F04",
+      "detail": "Every chat prefix/filter color/history range/settings draft/persistence and trade-request composition was not exhaustively checked. Native Chat protocol serialization and Web send were located; input-host closure and real recipients remain unknown."
+    },
+    {
+      "area": "F05",
+      "detail": "Complete Native top-level Mir2Client→Overlay plugin installation, every item context operation, reverse Belt drag, expanded capacities, body slots, stack sizes, restrictions and special-item services remain unexhausted. Shared GPU/GL2 full tooltip does not close compatibility tooltip gaps."
+    },
+    {
+      "area": "F06",
+      "detail": "13 Native combat-mode binding/consumer registration chains were not reopened completely in this bounded pass. Native reducer combat_mode_keys.rs16–86 and actual ChangeAMode/ChangePMode protocol were read; current Source09 mode host/proof wiring is carried prior reviewed source, not counted as 13 newly completed rows."
+    },
+    {
+      "area": "F06",
+      "detail": "Ordinary-player Stats1/Stats2 React/lean compatibility data fallback, every learned spell/toggle/target rule, full hit/health expiration/color/animation and hero controls were not exhaustively compared; Hero belongs to separate social/hero audit."
+    },
+    {
+      "scope": "Old44 denominator",
+      "detail": "No authoritative complete recoverable 44-action list was found in the bounded docs/source evidence inspected. This artifact does not freeze 176 as a replacement denominator and does not report a percent."
+    },
+    {
+      "scope": "Market / territory",
+      "detail": "No parity completion inferred from Web widgets; excluded unless a baseline registered Native action is independently established."
+    },
+    {
+      "scope": "Friend reply beyond actual Add/Remove/Memo/Mail/Whisper/blocked paths",
+      "detail": "No separately pinned ordinary incoming friend-answer action established; packet/enum names alone do not establish a reachable control."
+    },
+    {
+      "scope": "Ranking thumb dragging and exact list page geometry",
+      "detail": "Native ranking thumb action165 exists; exact Web equivalent was not audited. Listed previous/next queries are not a claim of thumb parity."
+    },
+    {
+      "scope": "Guild rank creation Web control and warehouse exact pointer gestures",
+      "detail": "Native type4 control and current source/permission-gated warehouse projection recorded. Independent Web create control and live drag/swap gestures remain unknown; common service limits noted."
+    },
+    {
+      "scope": "HeroPet independent summary actions and pet world pickup shortcuts",
+      "detail": "Do not infer baseline complete Hero summon/AI/Recall or world pickup shortcut parity from extra summary props. Explicit creature dialog actions only are listed."
+    },
+    {
+      "scope": "Hero unsupported drop/split/combine/manualcast/Recall",
+      "detail": "Not added as a Web omission merely from packet names; actual baseline Hero host reachability was not established. Supported UID-safe actions, magic key17..24/0, four character pages and independent belt are preserved."
+    },
+    {
+      "scope": "Marriage typed-name form",
+      "detail": "Current Web requires a typed nonempty name while actual MarriageRequest faces a player and ignores the form name; exact input behavior remains a player verification item."
+    },
+    {
+      "scope": "All live player actions",
+      "detail": "Pending human UI acceptance for focus/touch/keyboard/modal reentrance, layout/assets, successful service results, negative stale-source behavior and reconnection. No UI execution was performed."
+    },
+    {
+      "scope": "Baseline registration-to-controls chain",
+      "detail": "Model/enum/import-only primary anchors and carried plugin registration need per-behavior closure; not all317 chains recertified."
+    },
+    {
+      "scope": "13 combat modes and reused entry routes",
+      "detail": "Do not expand, collapse or count into a complete denominator in this review. Existing input families and the nine Quest controls remain distinct where their authorities/gestures differ."
+    },
+    {
+      "scope": "Mutable spouse fix",
+      "detail": "Page/Bonds/Extra worker changes after f1cf were deliberately excluded. This review cannot approve that implementation or its tests; use a later frozen pin."
+    },
+    {
+      "scope": "Production blockers",
+      "detail": "This is an independent matrix/evidence review, not a full new product audit. No newly confirmed product P0/P1 was established; matrix corrections are not assertions that the corresponding product behavior is absent."
+    }
+  ],
+  "sourcePins": {
+    "gitHeadCurrent": {
+      "apps/web/app/components/original-client-overlays.tsx": {
+        "bytes": 42451,
+        "sha256": "3fb7251183d6a4385b0d3b59b52d797ae95573e5d91583ef86b82c8d188c82f6"
+      },
+      "apps/web/lib/client-login-runtime.ts": {
+        "bytes": 2874,
+        "sha256": "146595b274877dda9386edaa4b9015dd252fa5fa6af3eee2a6948d4fdf366cd8"
+      },
+      "apps/web/app/original-client-shell.tsx": {
+        "bytes": 273327,
+        "sha256": "f76b3cd0abbdfe0e6bfa172eb62d1104589fd17689f1ee1df4ae0f17e11a7aa2"
+      },
+      "apps/web/app/components/original-client-map-panels.tsx": {
+        "bytes": 29362,
+        "sha256": "1db9910c588c80bf47d64de4bf0b435f00406e4f6c34d340941e27fbcb900a44"
+      },
+      "apps/web/app/components/original-client-game-ui-scene.tsx": {
+        "bytes": 29358,
+        "sha256": "108868f4b004d7b9bf9286a8174084ac15fa28d4c802bf9ddf9a4c1c9644978e"
+      },
+      "apps/web/app/components/original-client-panels.tsx": {
+        "bytes": 25390,
+        "sha256": "73820baef8b48222c137643472f1f5946655daa58e9285d4b2cd4acae3ab1679"
+      },
+      "apps/web/app/components/original-client-inventory-window.tsx": {
+        "bytes": 49202,
+        "sha256": "671d5b4f8a50cd216244f441ac01218be9f1bed4ad9687b3ae381f293df00a1c"
+      },
+      "apps/web/app/components/original-client-inventory-action-panels.tsx": {
+        "bytes": 18970,
+        "sha256": "34306176414bc2ea8029dfccc835a52acc780339249a97705455177c1f413d2e"
+      },
+      "apps/web/lib/bevy-character-ui.ts": {
+        "bytes": 16047,
+        "sha256": "b8ac47330af76402a35502c1f5c91ab8699d0cfba8c034d67633e102008d2019"
+      },
+      "apps/web/lib/bevy-spells-ui.ts": {
+        "bytes": 19788,
+        "sha256": "c3f3154862728b7ff48ef958beb562323938e2b7c518f73b321ce2f443abd108"
+      },
+      "apps/web/lib/bevy-combat-input.ts": {
+        "bytes": 18042,
+        "sha256": "6aaedb26ba02f5105096ee716de5a1a7a6837344f867464e7f4f4e34db700e53"
+      },
+      "apps/web/app/components/original-client-skill-bars.tsx": {
+        "bytes": 14981,
+        "sha256": "85e529d04cdff7626fed0d310fc0578f30a164e8d317dfad707bf8c80c642886"
+      },
+      "apps/web/app/components/original-client-game-shop.tsx": {
+        "bytes": 42670,
+        "sha256": "f6c3e7d7641d6d30bb433831dde6728664be8a8b180fabc237bd9d51357be3bd"
+      },
+      "apps/web/app/components/original-client-options-window.tsx": {
+        "bytes": 8399,
+        "sha256": "36d6ff3b3a9c2002de82491aafb4e08c794f79fcff256bd0c3d179fc5a247b0c"
+      },
+      "apps/web/app/components/original-client-help-window.tsx": {
+        "bytes": 8604,
+        "sha256": "29d01b0ce7d18e66ecfdb6883ccf1de74a76a0ac646bab3a92fdf7ea97912fb2"
+      },
+      "apps/web/app/components/original-client-hotkey-window.tsx": {
+        "bytes": 10022,
+        "sha256": "38a91c59a7e987552614ffcdafbc130b2cf7fc459df39b708997e4f988faf530"
+      },
+      "apps/web/app/components/original-client-friends-window.tsx": {
+        "bytes": 18919,
+        "sha256": "fb409c37c65a18ff400606d7b4dbc417837db2731f7be5142ab6005be321bb29"
+      },
+      "apps/web/app/components/original-client-bonds-window.tsx": {
+        "bytes": 24802,
+        "sha256": "cf59a1b2f6269aec6e4e0d3c5d84e7eaa7d347884338353ae63cfd6c242fb4fe"
+      },
+      "apps/web/app/components/original-client-group-window.tsx": {
+        "bytes": 19457,
+        "sha256": "a27aa5aba7b8394bbfb345c80f73c2721cddf0a18f93d3fb5ecfa9e2b1e3845f"
+      },
+      "apps/web/app/components/original-client-hero-management-window.tsx": {
+        "bytes": 32998,
+        "sha256": "07b7f6a01d3bf9b6073b4ac80c9f3e805475958b37a5fb6531c3358bb59a5097"
+      },
+      "apps/web/lib/hero-player-ui.ts": {
+        "bytes": 36667,
+        "sha256": "cfdd9107a10768b93d75a8e25df155be28cf59a7dee8a2008a7b2b180192e847"
+      },
+      "apps/web/app/page.tsx": {
+        "bytes": 886081,
+        "sha256": "cf927ebbc63f89894c78b62fed5f99ce0d219201acf06cef85ca5610c37e62e2"
+      },
+      "apps/web/app/components/original-client-hero-pet-window.tsx": {
+        "bytes": 33563,
+        "sha256": "82f1b128f2a3409e0fee27f40186caec7209ebe9f4ddb22302c1a9d443b880d7"
+      },
+      "apps/web/lib/creature-player-ui.ts": {
+        "bytes": 15615,
+        "sha256": "c321ac4622c3a167fd2bd88c0089bba64fb225f7c88f25352dc4ded81af09364"
+      },
+      "apps/web/app/components/original-client-trade-window.tsx": {
+        "bytes": 25653,
+        "sha256": "50faa4a038c11af9d8b0ecc2af4bd2a9054ca0a6533c82e016cd73fcd0c4dfcb"
+      },
+      "apps/web/app/components/original-client-guild-window.tsx": {
+        "bytes": 61811,
+        "sha256": "309ae2f30b6055d36b8bd7f937114ab842d1b6306018f64bf77533abf0b2f0f7"
+      },
+      "apps/web/app/components/original-client-ranking-window.tsx": {
+        "bytes": 16217,
+        "sha256": "2d2051197740dae6a2de92810b9748b1cbab02c71c97160c32a943b3014cb626"
+      },
+      "apps/web/lib/crystal-shortcut-actions.ts": {
+        "bytes": 2034,
+        "sha256": "792162eaa84a497f2a2ad5fd93a131d93c704d6cbc6210a82f9b26b7d4fbf111"
+      },
+      "apps/web/lib/bevy-quest-ui.ts": {
+        "bytes": 14845,
+        "sha256": "5d331f501c944f735274e3f17e9128c1bd1d260df5ed47502ac7a4f223b9adc8"
+      },
+      "apps/web/lib/use-bevy-quest-ui.ts": {
+        "bytes": 24747,
+        "sha256": "5da7ad6d50c4755e4ac1578d1d61eabadd58b42e24c1d479855da8c3a66f0c21"
+      },
+      "apps/web/app/components/original-client-quest-log-window.tsx": {
+        "bytes": 43477,
+        "sha256": "3cffb75f1917d36017fdb61f42551a187e62e45f1738d581f9f6e7f5c0758b8f"
+      },
+      "apps/web/lib/bevy-bag-ui.ts": {
+        "bytes": 22524,
+        "sha256": "6397631c911c2257d441b7a44e4014b3e5bc49f158022241f117bb2f6695a699"
+      },
+      "apps/web/lib/shared-combat-mode-keys.ts": {
+        "bytes": 9861,
+        "sha256": "2106b0d5fad13bd01b61b10091b39626e2d79e8c4412401e84ea111f46fd3c4e"
+      },
+      "apps/web/lib/bevy-quest-world-actions.ts": {
+        "bytes": 3820,
+        "sha256": "89b3337514980e5b924a80acad2d87a02709d19674e2926250633a9f9d4c9a2a"
+      },
+      "apps/web/lib/bevy-quest-world-controls.ts": {
+        "bytes": 2846,
+        "sha256": "c779c1b7dff93849cf78494686f1d6f91005acf39dd92199308ac410693a1a9f"
+      },
+      "apps/web/lib/quest-action-policy.ts": {
+        "bytes": 5467,
+        "sha256": "5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570"
+      },
+      "apps/web/lib/quest-route-execution.ts": {
+        "bytes": 1933,
+        "sha256": "7c021d0a9f0d8759cde20ac67b4b2821278eca3b561663675d0a14bbd60e6d92"
+      },
+      "apps/web/app/components/original-client-chat-settings-window.tsx": {
+        "bytes": 10082,
+        "sha256": "c7c8529c45d60ef6fd257cec0a8a9aa88c7e25c43af50e36897ebb4602c64374"
+      },
+      "apps/web/lib/crystal-chat-history.ts": {
+        "bytes": 8669,
+        "sha256": "92df5264fcd3ba190b35cec851e2d4bf3e7ff2c11c34e2e8a06cf138fdf63fcd"
+      },
+      "apps/web/lib/shared-character-stats.ts": {
+        "bytes": 1945,
+        "sha256": "0b2b2005ab79b0bacde21aaa42153cf62577b9466a1d85dc65bbdca7f444e510"
+      },
+      "apps/web/lib/shared-skill-bar.ts": {
+        "bytes": 4705,
+        "sha256": "c04614e8ab726fe30dccb9b5c7e1b47d110dd17e9c817e0bca3b1fa26ea0fb3e"
+      },
+      "apps/game-client/runtime/src/quest_ui_host.rs": {
+        "bytes": 120498,
+        "sha256": "24a1b6e8f50786cfb32db309c7fed7b145ca70929d9025b677fa505d581b2f18"
+      },
+      "apps/game-client/runtime/src/hud_ui_host.rs": {
+        "bytes": 20782,
+        "sha256": "3f0f4a4953b2672ce8549d1022a87c09c41eec5860dd235934610c63d8f28c10"
+      },
+      "apps/game-client/runtime/src/combat_modes_host.rs": {
+        "bytes": 21337,
+        "sha256": "14a9cc0ffd6a28d5d901dbef30bcc695ca07ed8d76f66f520677db5a702f8334"
+      },
+      "apps/game-client/runtime/src/item_tooltip_query.rs": {
+        "bytes": 63868,
+        "sha256": "94f4693d0a6030780d40a30065f44347e217606339eb8eb029912da0160d79a1"
+      },
+      "apps/game-client/client-bevy/src/quest_ui.rs": {
+        "bytes": 511036,
+        "sha256": "c926ca690b14814747270315868b490685d07f6cd5ac6721c3b6da629319718a"
+      },
+      "apps/game-client/client-bevy/src/crystal_ui/hud_portable.rs": {
+        "bytes": 6932,
+        "sha256": "dd91221007d2c164952a99b8d2efdedb96d69ce1c4802d6dc47f46ee7f1190d2"
+      },
+      "apps/web/lib/bevy-hud-ui.ts": {
+        "bytes": 10409,
+        "sha256": "1645bbd690c50a637fb5039bceb620687673bf5aa1f93b95dd12d759b7f75e20"
+      },
+      "apps/web/app/components/original-client-character-window.tsx": {
+        "bytes": 18199,
+        "sha256": "99698fc6a6e5a447ff4088d17adac72edcb195e8b1094e566d02d77b20304881"
+      },
+      "apps/web/lib/bevy-bag-model.ts": {
+        "bytes": 16947,
+        "sha256": "f78c0df26834e0e168670f61fb60719859c3dc2fd57b2971901f171549e849fa"
+      },
+      "apps/web/lib/bevy-character-model.ts": {
+        "bytes": 2052,
+        "sha256": "3e3b767f3af3f5921a39be9edddd8be7481bbd91f7d04d0628d85fec6a6fd5cc"
+      },
+      "apps/web/lib/player-ui-preferences.ts": {
+        "bytes": 11462,
+        "sha256": "30b7ab0306c2c186f825eb37e8c43335a80b51ea54373d9a36c19d7cffbefbe9"
+      },
+      "apps/game-client/client-bevy/src/quest_supplies.rs": {
+        "bytes": 30592,
+        "sha256": "8761ea24c787bf8866f1a83d079d0e468d8493087ad0c05f09415662993a450e"
+      },
+      "apps/web/app/components/original-client-item-tooltip.tsx": {
+        "bytes": 11108,
+        "sha256": "5f1bccfacdf8f47fa0ad4c893351c54b6b9d8ff0f449ab821a1a3ed9a2b22302"
+      }
+    },
+    "historicalSource09": {
+      "inputs": 405,
+      "sha256": "a6df3325ae47cada0aacb6245f8175db701e00a187f3b50f94a924b20dde19ae",
+      "docPath": "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "docLine": 33,
+      "claimedClosed": [
+        "Native09",
+        "renderer07",
+        "Next02 strict TSC +13 static pages",
+        "Thin03 build-only"
+      ],
+      "finiteAggregates": {
+        "Stage5": 260,
+        "Adjacent": 216,
+        "Cross": 114
+      },
+      "limits": "Build-only/source/finite fixtures; real Windows/Web player comparison, live ACKs, save/relogin and public delivery not accepted; 44 dependency warnings remain unexplained per current goal doc"
+    },
+    "normalizedPinDifferences": [
+      {
+        "path": "apps/web/lib/bevy-character-ui.ts",
+        "gitBytes": 16047,
+        "gitSha256": "b8ac47330af76402a35502c1f5c91ab8699d0cfba8c034d67633e102008d2019",
+        "auditPin": {
+          "bytes": 16241,
+          "sha256": "f3e468850240cd7147b22d6a9257d740c906494b5cd2cb6643893edb32e70e61"
+        },
+        "onlyLineEndings": true
+      },
+      {
+        "path": "apps/game-client/runtime/src/quest_ui_host.rs",
+        "gitBytes": 120498,
+        "gitSha256": "24a1b6e8f50786cfb32db309c7fed7b145ca70929d9025b677fa505d581b2f18",
+        "auditPin": {
+          "bytes": 123409,
+          "sha256": "083ae140f32c75476889bd7bba0f636961108256f204753eeb5f1ec07f85f759"
+        },
+        "onlyLineEndings": true
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+        "gitBytes": 511036,
+        "gitSha256": "c926ca690b14814747270315868b490685d07f6cd5ac6721c3b6da629319718a",
+        "auditPin": {
+          "bytes": 522828,
+          "sha256": "ea45cbde1817652aa6f050a06d34215bca758a67c7a434417bb661cff80ee92d"
+        },
+        "onlyLineEndings": true
+      },
+      {
+        "path": "apps/web/lib/bevy-hud-ui.ts",
+        "gitBytes": 10409,
+        "gitSha256": "1645bbd690c50a637fb5039bceb620687673bf5aa1f93b95dd12d759b7f75e20",
+        "auditPin": {
+          "bytes": 10527,
+          "sha256": "26eb1dae0e88e9d6616271553a956802cddce1e87f7290295d88823650a5a46b"
+        },
+        "onlyLineEndings": true
+      }
+    ]
+  },
+  "release": {
+    "rawAuditsModified": false,
+    "repositoryModified": false,
+    "scopeFrozen": true
+  }
+}

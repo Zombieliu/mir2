@@ -1,0 +1,35 @@
+Full retained log: C:/mir2-build/crowded-native-sequence-red-20261003.log
+SHA256: b16592e374ae1dffc739d310c6fcb94c91333f5cd5736baaed6510c9ad99d594
+
+running 3 tests
+test entity_presentation::tests::synthetic_prediction_sequence_collision_ack_keeps_original_motion_window ... ok
+test entity_presentation::tests::synthetic_prediction_sequence_collision_cannot_drop_next_real_death ... FAILED
+test entity_presentation::tests::synthetic_prediction_sequence_collision_cannot_drop_next_real_spell ... FAILED
+---- entity_presentation::tests::synthetic_prediction_sequence_collision_cannot_drop_next_real_death stdout ----
+---- entity_presentation::tests::synthetic_prediction_sequence_collision_cannot_drop_next_real_spell stdout ----
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 859 filtered out; finished in 0.01s
+
+Failure details:
+---- entity_presentation::tests::synthetic_prediction_sequence_collision_cannot_drop_next_real_death stdout ----
+
+thread 'entity_presentation::tests::synthetic_prediction_sequence_collision_cannot_drop_next_real_death' (28252) panicked at src\entity_presentation.rs:2420:9:
+assertion `left == right` failed: a source Death must retain its life barrier
+  left: []
+ right: [Die]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- entity_presentation::tests::synthetic_prediction_sequence_collision_cannot_drop_next_real_spell stdout ----
+
+thread 'entity_presentation::tests::synthetic_prediction_sequence_collision_cannot_drop_next_real_spell' (36048) panicked at src\entity_presentation.rs:2439:9:
+assertion `left == right` failed: a source cast must retain its FIFO barrier
+  left: []
+ right: [Spell]
+
+
+failures:
+    entity_presentation::tests::synthetic_prediction_sequence_collision_cannot_drop_next_real_death
+    entity_presentation::tests::synthetic_prediction_sequence_collision_cannot_drop_next_real_spell
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 859 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--bin mir2-platform-windows`

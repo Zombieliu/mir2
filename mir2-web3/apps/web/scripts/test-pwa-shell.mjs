@@ -51,7 +51,7 @@ assert.match(layoutSource, /manifest:\s*"\/manifest\.webmanifest"/);
 assert.match(layoutSource, /appleWebApp:\s*\{/);
 assert.match(layoutSource, /"apple-mobile-web-app-capable":\s*"yes"/);
 assert.match(layoutSource, /viewportFit:\s*"cover"/);
-assert.match(layoutSource, /<PwaGameShell\s*\/>/);
+assert.match(layoutSource, /<PwaGameShellCapture>\s*\{children\}\s*<\/PwaGameShellCapture>/);
 
 const shellSource = readFileSync(path.join(webRoot, "app", "components", "pwa-game-shell.tsx"), "utf8");
 for (const contract of [

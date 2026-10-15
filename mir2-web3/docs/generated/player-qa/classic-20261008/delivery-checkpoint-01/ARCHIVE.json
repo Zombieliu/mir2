@@ -1,0 +1,48 @@
+{
+  "schema": "mir2.classic.delivery-checkpoint-archive.v1",
+  "gameSource": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "serverSource": "a41dfe72d7e5858f11169adf88673dc44ed24200",
+  "windowsCi": 37712122111,
+  "linuxCi": 37716453313,
+  "files": [
+    {
+      "name": "WINDOWS-PICKUP-VERIFICATION.json",
+      "bytes": 1588,
+      "sha256": "8c68205333f8effbf8b87eee785e4878349d8156c884c592762749427b34b7df"
+    },
+    {
+      "name": "WINDOWS-ARTIFACT-DOWNLOAD-VERIFICATION.json",
+      "bytes": 657,
+      "sha256": "16a3aed7cb9d1c735a51c25fa121eace7aef98883d8f5030121a2d634e87bf43"
+    },
+    {
+      "name": "LINUX-ARTIFACT-VERIFICATION.json",
+      "bytes": 599,
+      "sha256": "6c9c4bb1624e528a6dded358c871f6af0a7b1250d76280122a280e733d3428a1"
+    },
+    {
+      "name": "R20-ORDINARY-CLIENT-READY.json",
+      "bytes": 2004,
+      "sha256": "e058cd5724d7733a2600ba855101b66fa6cc71fff696a677b2f9a07861f88b01"
+    },
+    {
+      "name": "LOCAL-VERIFIED-SUBJECT-RETRY.json",
+      "bytes": 959,
+      "sha256": "554ad364d67fae402adf5e8c21f83df70c05b3abe8b6948955646c1a581102ef"
+    },
+    {
+      "name": "R22-PACKAGE-ATTEMPT-01.log",
+      "bytes": 4149,
+      "sha256": "270dcbc3ac449e202fb68ec53d1417c781900e2bcd434310f2d3b13dece80ee7"
+    },
+    {
+      "name": "PRIVATE-SERVER-STAGE-VERIFY-01.log",
+      "bytes": 1056,
+      "sha256": "06482c32a9cc58cd1615c75608d829cc8f2006cd41e14d0495733e1d74330a70"
+    }
+  ],
+  "fullParityComplete": false,
+  "publicR22Promoted": false,
+  "failureLogsRetained": true,
+  "stageLogNote": "The historical field serviceCommandsExecuted=false means no service mutation; read-only systemctl show was performed. The original log bytes are retained."
+}

@@ -1,0 +1,9 @@
+
+running 4 tests
+test runtime::zone::runtime::safe_zone_profile_tests::rejected_walk_and_turn_preserve_existing_safe_profile ... ok
+test runtime::zone::runtime::safe_zone_profile_tests::real_map_zero_accepted_walk_enters_and_run_leaves_manifest_safe_area ... ok
+test runtime::zone::runtime::safe_zone_profile_tests::unknown_map_keeps_trusted_safe_profile ... ok
+test runtime::zone::runtime::safe_zone_profile_tests::real_damage_admission_blocks_after_entering_safe_area_then_allows_after_leaving ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1856 filtered out; finished in 0.08s
+

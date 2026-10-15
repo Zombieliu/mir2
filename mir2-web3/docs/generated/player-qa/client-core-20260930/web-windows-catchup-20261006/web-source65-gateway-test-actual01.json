@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "source": "Source65 generation02",
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/gateway-npc-purchase-test05-config05.json",
+    "bytes": 5686,
+    "sha256": "061bb5d5f9a939fec368db035534c2bf3903567a6db890a0130f89ab1087e68e"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/preparation02/source65-isolated-snapshot02.json",
+    "bytes": 520326,
+    "sha256": "d0ceb7f922b5ffdffa0c4474ff48da42c9395f7547bba25f333153b1d74ed3c5"
+  },
+  "sourceCount": 922,
+  "onlySource62Delta": "apps/gateway/src/web.rs",
+  "rootReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/source-review03.json",
+    "bytes": 4930,
+    "sha256": "4fd92b42070da89956d9cf142d685333a194003ea9e2bb37ec24751deb57c0fb"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 65232,
+    "kind": "Source65 generation02 Root accepted gateway-npc-purchase-test05",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 95084,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/gateway-npc-purchase-test05-config05.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "guardAfter": {
+    "childPid": 65840,
+    "childStartedUtc": "/Date(1791709054833)/",
+    "childStartMs": 979.6427,
+    "completed": true,
+    "exited": true,
+    "disposed": true,
+    "exitCode": 0,
+    "exitBits": "0",
+    "completedUtc": "/Date(1791709148898)/",
+    "completionMs": 95043.4495,
+    "postChildPolicy": "B",
+    "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+  },
+  "guard": {
+    "decision": "FORWARD",
+    "thresholdBytes": "53687091200",
+    "remainingBytes": "163351212032",
+    "freshnessMs": "2000",
+    "probeTimeoutMs": "15000",
+    "postChildPolicy": "B",
+    "unchanged": true
+  },
+  "counts": {
+    "passed": 18,
+    "failed": 0,
+    "ignored": 0,
+    "filtered": 896
+  },
+  "tests": [
+    {
+      "name": "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_complete_owner_pair_finishes_actual_gold_once",
+      "status": "ok"
+    },
+    {
+      "name": "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_encode_failure_publishes_nothing",
+      "status": "ok"
+    },
+    {
+      "name": "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_missing_pair_keeps_failure_and_receipt_first",
+      "status": "ok"
+    },
+    {
+      "name": "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_packet_free_control_and_replay_emit_only_original_frame",
+      "status": "ok"
+    },
+    {
+      "name": "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_send_failure_stops_before_later_messages",
+      "status": "ok"
+    },
+    {
+      "name": "web::tests::npc_purchase_goods_selector_is_canonical_before_any_number_conversion",
+      "status": "ok"
+    },
+    {
+      "name": "web::tests::npc_purchase_reader_raw_envelope_cannot_fallback_to_generic_buy_item",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_actual_local_and_hosted_purchase_replay_preserve_receipt_checkpoint_and_authority",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_hosted_rpc_adapter_uses_real_file_owner_and_leaves_unlogged_shadow_untouched",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_in_process_begin_quote_and_query_use_actual_file_and_read_only_original_id",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_lease_handoff_refuses_stale_debit_and_recovers_exact_original_operation",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_library_host_dispatch_fences_auth_version_lease_and_records_only_replay_checkpoint",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_mutation_classification_blocks_generic_tcp_fallback_before_any_endpoint_access",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_accepts_only_actual_begin_and_idempotent_owner_pair",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_actual_purchase_original_query_and_replay_are_lossless",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_snapshot_projection_keeps_original_turn_and_known_receipt_on_size_failure",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_owner_defaults_and_missing_lease_authority_refuse_without_generic_execution",
+      "status": "ok"
+    },
+    {
+      "name": "zone_rpc::npc_purchase_owner_route_tests::durable_real_receipt_wire_roundtrips_and_refuses_mismatched_action_pair_and_packet_count",
+      "status": "ok"
+    }
+  ],
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383"
+  },
+  "normalFileFixture": true,
+  "previousFixtureFailurePreserved": true,
+  "qaAdminOrActiveAccountsRead": false,
+  "uiOperated": false,
+  "productionAccepted": false,
+  "goalComplete": false
+}

@@ -1,0 +1,433 @@
+{
+  "schema": "mir2.p5a.raw-source-snapshots.v1",
+  "archive": "raw/SOURCE-SNAPSHOTS-01.tar.gz",
+  "files": [
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/client-bevy/Cargo.lock",
+      "bytes": 128340,
+      "sha256": "a5c40ca04605b8a70bb65bb9a4acd6947371bf21ef39253de7cfb58d0bc37e00"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+      "bytes": 1331,
+      "sha256": "a17a3b2e205a2fc33ab90b95741869953802dfd341d425a47128c6443e4afd1f"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "bytes": 44873,
+      "sha256": "8c4a4ab275d29c0a35aa723f3a9877ecc372b16158cd645373e6eaf82b2e2993"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 869302,
+      "sha256": "b4e776c016acffd97950bd5adebd3cbd75ce885b092ec073c63232716d90698a"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/client-bevy/src/social.rs",
+      "bytes": 76619,
+      "sha256": "efe22789c06888d1d65d29be68896e579fcbaffc40829f9d3618a7b54ca56ead"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+      "bytes": 154909,
+      "sha256": "1400d1340f2b6582a8ad44d07f455997e8ec4aa9a7279a11b39e1456ef7b1745"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+      "bytes": 2062,
+      "sha256": "d22a6037b05a4baff1694fca1a796c1f49ab990fb496f65ec8e083a6b2d97a20"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 342390,
+      "sha256": "8466f4595778f58caab6decf0aa7e609336e2709a015b420f6a0859794dc4ea3"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/runtime/Cargo.lock",
+      "bytes": 130978,
+      "sha256": "d741dd43b1dcf79ccb8cc29602847d0f169abae1856d8c48216b3bda0389f612"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/runtime/Cargo.toml",
+      "bytes": 939,
+      "sha256": "a3fd5f94fe8a8eb89b333fda307b0c3cad59e03b1e3f80e3a158252c3242a621"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 420158,
+      "sha256": "0e43a30835e76d2ec1dcb29bf12ca4565d04822a9ef916178ce0518156fbb2e1"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 66253,
+      "sha256": "3b7d5784174e19bfddf8b880b358ef668e92230305ff932e4f918b5745bbbbb7"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1203142,
+      "sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/gateway/src/shared_guilds.rs",
+      "bytes": 19369,
+      "sha256": "b51a93a339fae841813a67cb3782218ed75e9003869e5c2e2723d622a99afe22"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/gateway/tests/shared_guild_rank_management.rs",
+      "bytes": 16260,
+      "sha256": "7a8cfe15c24149a99145401ff46d1904e33757ab5c23ae175ec0e677c48ef60e"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs",
+      "bytes": 3246,
+      "sha256": "1e3beec2699b3ae5c8b7a9d87af0bc4df20c3cb926f88387ff14e054764f0a26"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 40196,
+      "sha256": "a2ed1cc11013cd1763d7e885557f4739d1caca31a1897abc9f26f6e3ff050356"
+    },
+    {
+      "path": "baseline-source/mir2-web3/apps/simulation/tests/shared_guild_rank_management.rs",
+      "bytes": 9539,
+      "sha256": "be8e42a9fd37bf2accc6f150c76f92fea2742123d80a8e4904107fc92d530291"
+    },
+    {
+      "path": "baseline-source/mir2-web3/Cargo.lock",
+      "bytes": 250332,
+      "sha256": "989f23b1cdb6133b889295a682332062c0b65255d394e905b74127b06c8bfe04"
+    },
+    {
+      "path": "baseline-source/mir2-web3/Cargo.toml",
+      "bytes": 263,
+      "sha256": "4db8dd249acdef1753b6c93fc407783318b10c3749422441b6b5f7836a60cc27"
+    },
+    {
+      "path": "baseline-source/mir2-web3/docs/SHARED-GUILD-RANK-RENAME-20261004.md",
+      "bytes": 11197,
+      "sha256": "0d808c7af661e56066c9c492154beaa67fec2b566b36023b0b696d5c1af28c06"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "bytes": 44950,
+      "sha256": "389f34ef22da0d9a0c299f906d3b7bc39b85b3be5f1bb4165cd23a41c4fd22af"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "bytes": 8416,
+      "sha256": "1a655d91ffd17c14700016082111582e697c44343fed533fee9ffd97650ae7a7"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 869302,
+      "sha256": "b4e776c016acffd97950bd5adebd3cbd75ce885b092ec073c63232716d90698a"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/game-client/client-bevy/src/social.rs",
+      "bytes": 76712,
+      "sha256": "2e8c486734b50588ab6f262ed17781841cefe71cae7a2556e1a281fa95ffe5a6"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/game-client/client-bevy/src/social_guild_rank_tests.rs",
+      "bytes": 5948,
+      "sha256": "48d6d5b13e2b02fd2245b6244803c2791474365b9f75eac00a7a67e54e0ea8c0"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 342390,
+      "sha256": "8466f4595778f58caab6decf0aa7e609336e2709a015b420f6a0859794dc4ea3"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 420158,
+      "sha256": "0e43a30835e76d2ec1dcb29bf12ca4565d04822a9ef916178ce0518156fbb2e1"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 66253,
+      "sha256": "3b7d5784174e19bfddf8b880b358ef668e92230305ff932e4f918b5745bbbbb7"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1203142,
+      "sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/gateway/src/shared_guilds.rs",
+      "bytes": 19369,
+      "sha256": "b51a93a339fae841813a67cb3782218ed75e9003869e5c2e2723d622a99afe22"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs",
+      "bytes": 3246,
+      "sha256": "1e3beec2699b3ae5c8b7a9d87af0bc4df20c3cb926f88387ff14e054764f0a26"
+    },
+    {
+      "path": "client-red-01-source/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 40196,
+      "sha256": "a2ed1cc11013cd1763d7e885557f4739d1caca31a1897abc9f26f6e3ff050356"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "bytes": 47087,
+      "sha256": "6e5b77d643fcbfe634e07f1e527837a2aeae99d08ae3dcd36af75c613fb69523"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "bytes": 11430,
+      "sha256": "f6cfce87e57efc1c4c67f933be7480e3b9eda7bde36559c1879574e3bde32f8a"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 871132,
+      "sha256": "95cfba1b0ddfd119c6d3115a0c3bddc0b4c05378153b146cd7245833b7a4d31b"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/game-client/client-bevy/src/social.rs",
+      "bytes": 84216,
+      "sha256": "a5a129355d7d21b16ad500c3a32feda647783726ed7d41ac1f7f6f14d11cb39a"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/game-client/client-bevy/src/social_guild_rank_tests.rs",
+      "bytes": 6584,
+      "sha256": "83a85627899c3d63f7fe50431512477ed5d0f6fd76d92a90241bbe1abe598d12"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 345089,
+      "sha256": "0d6b1a8bea8c5235e970f2a0ae7546cded1471d679e21670b8e8b5571d3b4a03"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/game-client/platform-windows/src/guild_rank_wire_tests.rs",
+      "bytes": 6409,
+      "sha256": "156c5d2100180b1081355efba921930bde4baf88790da026d7da2183789c5f9a"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 420158,
+      "sha256": "0e43a30835e76d2ec1dcb29bf12ca4565d04822a9ef916178ce0518156fbb2e1"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 66253,
+      "sha256": "3b7d5784174e19bfddf8b880b358ef668e92230305ff932e4f918b5745bbbbb7"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1203142,
+      "sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/gateway/src/shared_guilds.rs",
+      "bytes": 19369,
+      "sha256": "b51a93a339fae841813a67cb3782218ed75e9003869e5c2e2723d622a99afe22"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/gateway/tests/shared_guild_rank_terminal.rs",
+      "bytes": 8655,
+      "sha256": "9a2365897db54dbd7cff3163134e01d70f48175b24494297ab1a28f514f1f5df"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs",
+      "bytes": 3246,
+      "sha256": "1e3beec2699b3ae5c8b7a9d87af0bc4df20c3cb926f88387ff14e054764f0a26"
+    },
+    {
+      "path": "client-red-02-source/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 40196,
+      "sha256": "a2ed1cc11013cd1763d7e885557f4739d1caca31a1897abc9f26f6e3ff050356"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "bytes": 44950,
+      "sha256": "389f34ef22da0d9a0c299f906d3b7bc39b85b3be5f1bb4165cd23a41c4fd22af"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "bytes": 8416,
+      "sha256": "1a655d91ffd17c14700016082111582e697c44343fed533fee9ffd97650ae7a7"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 869302,
+      "sha256": "b4e776c016acffd97950bd5adebd3cbd75ce885b092ec073c63232716d90698a"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/game-client/client-bevy/src/social.rs",
+      "bytes": 76712,
+      "sha256": "2e8c486734b50588ab6f262ed17781841cefe71cae7a2556e1a281fa95ffe5a6"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/game-client/client-bevy/src/social_guild_rank_tests.rs",
+      "bytes": 5948,
+      "sha256": "48d6d5b13e2b02fd2245b6244803c2791474365b9f75eac00a7a67e54e0ea8c0"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 342390,
+      "sha256": "8466f4595778f58caab6decf0aa7e609336e2709a015b420f6a0859794dc4ea3"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 420158,
+      "sha256": "0e43a30835e76d2ec1dcb29bf12ca4565d04822a9ef916178ce0518156fbb2e1"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 66253,
+      "sha256": "3b7d5784174e19bfddf8b880b358ef668e92230305ff932e4f918b5745bbbbb7"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1203142,
+      "sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/gateway/src/shared_guilds.rs",
+      "bytes": 19369,
+      "sha256": "b51a93a339fae841813a67cb3782218ed75e9003869e5c2e2723d622a99afe22"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/gateway/tests/shared_guild_rank_terminal.rs",
+      "bytes": 8655,
+      "sha256": "9a2365897db54dbd7cff3163134e01d70f48175b24494297ab1a28f514f1f5df"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs",
+      "bytes": 3246,
+      "sha256": "1e3beec2699b3ae5c8b7a9d87af0bc4df20c3cb926f88387ff14e054764f0a26"
+    },
+    {
+      "path": "gateway-red-01-source/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 40196,
+      "sha256": "a2ed1cc11013cd1763d7e885557f4739d1caca31a1897abc9f26f6e3ff050356"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "bytes": 47087,
+      "sha256": "6e5b77d643fcbfe634e07f1e527837a2aeae99d08ae3dcd36af75c613fb69523"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "bytes": 8416,
+      "sha256": "1a655d91ffd17c14700016082111582e697c44343fed533fee9ffd97650ae7a7"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 871132,
+      "sha256": "95cfba1b0ddfd119c6d3115a0c3bddc0b4c05378153b146cd7245833b7a4d31b"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/game-client/client-bevy/src/social.rs",
+      "bytes": 84216,
+      "sha256": "a5a129355d7d21b16ad500c3a32feda647783726ed7d41ac1f7f6f14d11cb39a"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/game-client/client-bevy/src/social_guild_rank_tests.rs",
+      "bytes": 5948,
+      "sha256": "48d6d5b13e2b02fd2245b6244803c2791474365b9f75eac00a7a67e54e0ea8c0"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 342467,
+      "sha256": "71cf87e2bf8066a992b996950fe8bdce363ddb62af88038753fa7ebc78863243"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/game-client/platform-windows/src/guild_rank_wire_tests.rs",
+      "bytes": 6409,
+      "sha256": "156c5d2100180b1081355efba921930bde4baf88790da026d7da2183789c5f9a"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 420158,
+      "sha256": "0e43a30835e76d2ec1dcb29bf12ca4565d04822a9ef916178ce0518156fbb2e1"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 66253,
+      "sha256": "3b7d5784174e19bfddf8b880b358ef668e92230305ff932e4f918b5745bbbbb7"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1203142,
+      "sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/gateway/src/shared_guilds.rs",
+      "bytes": 19369,
+      "sha256": "b51a93a339fae841813a67cb3782218ed75e9003869e5c2e2723d622a99afe22"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/gateway/tests/shared_guild_rank_terminal.rs",
+      "bytes": 8655,
+      "sha256": "9a2365897db54dbd7cff3163134e01d70f48175b24494297ab1a28f514f1f5df"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs",
+      "bytes": 3246,
+      "sha256": "1e3beec2699b3ae5c8b7a9d87af0bc4df20c3cb926f88387ff14e054764f0a26"
+    },
+    {
+      "path": "wire-red-01-source/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 40196,
+      "sha256": "a2ed1cc11013cd1763d7e885557f4739d1caca31a1897abc9f26f6e3ff050356"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "bytes": 47220,
+      "sha256": "4d6827123d69c0ab53147da08760d4791780995b587abb0f893a2773427e1035"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "bytes": 11430,
+      "sha256": "f6cfce87e57efc1c4c67f933be7480e3b9eda7bde36559c1879574e3bde32f8a"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 871132,
+      "sha256": "95cfba1b0ddfd119c6d3115a0c3bddc0b4c05378153b146cd7245833b7a4d31b"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/game-client/client-bevy/src/social.rs",
+      "bytes": 84624,
+      "sha256": "d52c2cdcbff00d6989db3b20ab337ee747fb695f1a642e60397bdfaabd910f9f"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/game-client/client-bevy/src/social_guild_rank_tests.rs",
+      "bytes": 6584,
+      "sha256": "83a85627899c3d63f7fe50431512477ed5d0f6fd76d92a90241bbe1abe598d12"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 345112,
+      "sha256": "252e57a62575060ed145b0a62698c77351c43d673616193a475dc64a9e0857b9"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/game-client/platform-windows/src/guild_rank_wire_tests.rs",
+      "bytes": 6409,
+      "sha256": "156c5d2100180b1081355efba921930bde4baf88790da026d7da2183789c5f9a"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 420209,
+      "sha256": "4fc14a8b85a863b8c2ee81687cba0d7a0ff7b73b4a942182fc6ba54647446619"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs",
+      "bytes": 5396,
+      "sha256": "3233ebf2cd92fe2833ef6bea296e533c51d75140dab6608fbcaa024c6d6cc38a"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1203720,
+      "sha256": "a173a5f57db5b0d0b0d4027de69d4e881d94ad35080d01da4821a2156aca7950"
+    },
+    {
+      "path": "final-source/mir2-web3/apps/gateway/tests/shared_guild_rank_terminal.rs",
+      "bytes": 9064,
+      "sha256": "4a7847e1df3acea39bb85bf1a7956f09b60f7b8dcee5b287afeb765ed2fbbd0a"
+    }
+  ],
+  "allMembersIndividuallyReverified": true,
+  "privateStoresOrKeysIncluded": false
+}

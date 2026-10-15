@@ -10,6 +10,8 @@
  * consumers only need one import path.
  */
 
+import type { QuestRewardsPresentation } from "../quest-reward-presentation";
+
 // ---------------------------------------------------------------------------
 // Re-exports from scene-types (subset used by WorldState)
 // ---------------------------------------------------------------------------
@@ -82,6 +84,8 @@ export type WorldEntity = {
   direction?: string;
   classKey?: "warrior" | "wizard" | "taoist" | "assassin" | "archer";
   genderKey?: "male" | "female";
+  hair?: number;
+  wingEffect?: number;
   level?: number;
   hp?: number;
   maxHp?: number;
@@ -186,16 +190,36 @@ export type WorldItem = {
   name: string;
   icon: number;
   uniqueId: number;
+  /** Original nonnegative safe-integer server instance ID; absent for display-only slot aliases. */
+  authoritativeUniqueId?: number;
+  /** Exact owner snapshot identity when it cannot enter the older numeric API. */
+  exactUniqueId?: string;
   slot: number;
   container: ItemContainer;
   quantity: number;
   description: string;
   durabilityCurrent?: number;
   durabilityMax?: number;
+  equipSlot?: EquipmentSlot | null;
+  attack?: number;
+  defence?: number;
+  grade?: string;
+  addedAttack?: number;
+  addedDefence?: number;
+  /** Original Crystal tooltip input; never a substitute for authoritativeUniqueId. */
+  tooltipSource?: unknown;
+  stateImage?: number;
 };
 
 export type EquipmentItem = {
   slot: EquipmentSlot;
+  key?: string;
+  uniqueId?: number;
+  /** Original nonnegative safe-integer server instance ID, independent of the equipment slot. */
+  authoritativeUniqueId?: number;
+  /** Exact owner snapshot identity; numeric-only mutations remain unavailable. */
+  exactUniqueId?: string;
+  quantity?: number;
   name: string;
   icon: number;
   shape?: number;
@@ -204,6 +228,13 @@ export type EquipmentItem = {
   durabilityMax: number;
   attack: number;
   defence: number;
+  grade?: string;
+  addedAttack?: number;
+  addedDefence?: number;
+  addedLuck?: number;
+  socketSlots?: number;
+  tooltipSource?: unknown;
+  stateImage?: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -212,6 +243,8 @@ export type EquipmentItem = {
 
 export type QuestEntry = {
   questId: number;
+  acceptNpcIndex?: number;
+  finishNpcIndex?: number;
   title: string;
   summary: string;
   objective: string;
@@ -223,13 +256,7 @@ export type QuestEntry = {
   rewardPreview: string;
   descriptionLines?: string[];
   objectives?: Array<{ label: string; current?: number; required?: number; done?: boolean }>;
-  rewards?: {
-    gold?: number;
-    experience?: number;
-    credit?: number;
-    items?: Array<{ name: string; icon?: number; count?: number; selectable?: boolean }>;
-    selectItems?: Array<{ name: string; icon?: number; count?: number; selectable?: boolean }>;
-  };
+  rewards?: QuestRewardsPresentation;
   timeLimit?: string;
 };
 
@@ -239,7 +266,7 @@ export type NpcDialog = {
   title: string;
   body: string[];
   footer: string;
-  links: Array<{ text: string; target: string }>;
+  links: Array<{ text: string; target: string; enabled?: boolean }>;
   input?: { target: string; prompt: string } | null;
 };
 
@@ -250,6 +277,8 @@ export type KnownSkill = {
   spell?: string | null;
   castKind?: "passive" | "toggle" | "self" | "target" | "ground" | "direction";
   offensive?: boolean;
+  level?: number;
+  experience?: number;
   hotkey?: number;
   delayMs?: number;
   castTimeMs?: number;
@@ -308,6 +337,7 @@ export type RankingState = {
 
 export type Stage5SystemsState = {
   group?: {
+    allowGroup?: boolean;
     members?: string[];
     memberInfos?: Array<{
       name: string;
@@ -363,6 +393,8 @@ export type Stage5SystemsState = {
     craftedItems?: string[];
   };
   appearance?: { hair?: number };
+  attackMode?: number;
+  petMode?: number;
   nameLists?: string[];
   intelligentCreatures?: Array<Record<string, unknown>>;
 };
@@ -378,6 +410,12 @@ export type Stage5SystemsState = {
  * is a drop-in. `clientTimeMs` is additive and optional — stamped by the
  * snapshot emitter so Bevy can detect stale pushes.
  */
+/** Server attestation for ordinary Gold Trade capacity; never reconstructed from a display item. */
+export type NpcGoldTradeCapacity = {
+  rosterValid: boolean;
+  freshCompatibleUniqueIds: readonly (number | string)[];
+};
+
 export type WorldState = {
   connected: boolean;
   mapTitle: string | null;
@@ -389,6 +427,8 @@ export type WorldState = {
   playerMaxHp?: number;
   playerMp?: number;
   playerMaxMp?: number;
+  playerCrystalStats?: Array<{ stat: number; value: number }> | null;
+  playerWeights?: { bag: number; wear: number; hand: number } | null;
   playerPkPoints: number;
   playerExperience: number;
   playerMaxExperience: number;
@@ -400,13 +440,15 @@ export type WorldState = {
   maxWeight: number;
   freeBagSlots: number;
   maxBagSlots: number;
+  inventoryCapacity: number;
+  npcGoldTradeCapacity?: NpcGoldTradeCapacity | null;
   storageSize: number;
   hasExpandedStorage: boolean;
   hasStoragePassword: boolean;
   requireStoragePassword: boolean;
   storageSessionUnlocked: boolean;
-  storagePasswordLastSetBinaryDatetime: number;
-  expandedStorageExpiryTimeBinaryDatetime: number;
+  storagePasswordLastSetBinaryDatetime: number | string;
+  expandedStorageExpiryTimeBinaryDatetime: number | string;
   worldTick: number;
   selectedObjectId: string | null;
   miniMapIndex: number | null;
@@ -469,6 +511,7 @@ export const DEFAULT_WORLD_STATE: WorldState = {
   maxWeight: 0,
   freeBagSlots: 0,
   maxBagSlots: 0,
+  inventoryCapacity: 46,
   storageSize: 80,
   hasExpandedStorage: false,
   hasStoragePassword: false,

@@ -1,0 +1,388 @@
+{
+  "actualEnvironmentRead": false,
+  "authenticatedNetworkRequests": 0,
+  "ciDispatch": false,
+  "codeFrozen": true,
+  "createdUnix": 1791154193,
+  "credentialsUsedOrPrinted": false,
+  "evidenceFiles": [
+    {
+      "nlink": 1,
+      "path": "BASELINE-cloudflare_read_authority_probe.py",
+      "sha256": "1ce602ca8e1e1dc69c6745dec0ebce68237b040aa40ea11830b6aec9cdcf02dd",
+      "size": 11578,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "BASELINE-test_cloudflare_read_authority_probe.py",
+      "sha256": "c9f830c69b2f552e526d0f26c251027d7a443e2504423e90289a11807fc758d5",
+      "size": 25137,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "COMMANDS.json",
+      "sha256": "b5370ef19bc48e403c36139b3c3b7966db4fb234083b17ad5395351503ddd91e",
+      "size": 1330,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "DOCS-BINDINGS.json",
+      "sha256": "64ffe439aa67e5e64c89e5a4920dd87239cb88c235836dc05a024aede07dd3bb",
+      "size": 1284,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "ORIGINAL-FREEZE-BINDING.json",
+      "sha256": "2b7318455fd354410e5da724ae69104ea6242a4094c4d901fa4ea2a497dcface",
+      "size": 454,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "README.md",
+      "sha256": "ddbc9a7df8cdb04276bebd2336d7dd036961113f372660fc15d95e6f1cfb63ea",
+      "size": 3114,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "RED01-cloudflare_read_authority_probe.py",
+      "sha256": "1ce602ca8e1e1dc69c6745dec0ebce68237b040aa40ea11830b6aec9cdcf02dd",
+      "size": 11578,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "RED01-test_cloudflare_read_authority_probe.py",
+      "sha256": "258495419be6acda64d1c559dcf511e8e6d4aad7739cdc2f5b39e9b0dd88913d",
+      "size": 26693,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "RUN-01-RED.json",
+      "sha256": "8ca04cd3cbd3c260980be735b165c4d2af4dc8dfa47775afcc44ad94c046d022",
+      "size": 751,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "RUN-02-GREEN.json",
+      "sha256": "37dcaad58869cc00190822f797760dfef2b32a23fcb64120052056d3e7024689",
+      "size": 753,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "SOURCE-AND-TEST.patch",
+      "sha256": "f2673f63644c9110f540ed49077e9abd48c5ca95f93eb616b6787f63893a8b1e",
+      "size": 2854,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "SOURCE-BINDINGS.json",
+      "sha256": "e31d4a4a71a19b7f405b7e73363c70d90804a69a6121c64bfe67f14d88a9d8d6",
+      "size": 3248,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "TEST-RECEIPT-1791153742646789500.json",
+      "sha256": "0f92d171e39ed032b04c23dfd3ce3487b19420d24ff4684af5a32f21cb189405",
+      "size": 3550,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "TEST-RECEIPT-1791153782846518900.json",
+      "sha256": "d890b436341b308125ddae8040cf9350b8de64395d7e214da1c60884528e8547",
+      "size": 3549,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "cloudflare_read_authority_probe.py",
+      "sha256": "a1294fd9a4c6a7978ab9ad8fd2874f7f393697eb1a8746f5d3d4cb8185ec9faa",
+      "size": 11612,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/account-case-_ezmu14d/REPORT.json",
+      "sha256": "b4ef6f021d24c87a9d4d5b01c91657963c9f8298f30ced9f5c219bf15e9ec0b0",
+      "size": 629,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/account-case-mj0evm9k/REPORT.json",
+      "sha256": "73c49557c678dc8277b4869c7f42ab14b7aaece9621fd5ccb8de5ad578beb29e",
+      "size": 666,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/cli-http-401-6wgfuyw2/REPORT.json",
+      "sha256": "9a67ba43a0fc76b7ccfb5de7a54fbea7d9f41118b292e40379e7ea933f2035ae",
+      "size": 623,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/cli-http-401-vm4xs5dx/REPORT.json",
+      "sha256": "30a1b78a8281dc54608b40c72b002dbdf6a2cde96d248af64a331c063e4aaedf",
+      "size": 660,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/cli-http-403-fexiz1zn/REPORT.json",
+      "sha256": "f72c236a5eda59c593adedeac112d975fdaddd4dc835bef09f76b27f655e3060",
+      "size": 660,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/cli-http-403-x2n0s1p0/REPORT.json",
+      "sha256": "838fceb55ec92e3fe32bb096a3565063b602580d6d9b629e3e4be49c476ef69e",
+      "size": 623,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/empty-account-61ycnc05/REPORT.json",
+      "sha256": "9a24bf29d19da4506f77a64a60e5bafe6deee52feb1dadd27416a54576f6b3f4",
+      "size": 665,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/empty-account-ei43wq27/REPORT.json",
+      "sha256": "d3eaaede7ddcfafd86380656a9faf35ab16d529e7b3728dac359372df14680ec",
+      "size": 628,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/empty-token-dst9cz2i/REPORT.json",
+      "sha256": "7a765560cee5982c3ed9f9f77e2ac31f71712214866c2f2e3715e820fbca7873",
+      "size": 663,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/empty-token-ipe9622u/REPORT.json",
+      "sha256": "98cebe21dce878578c93e3653ed4103f71b687054190313904ac02c036b8ca4a",
+      "size": 626,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/existing-file-88hzexmi/REPORT.json",
+      "sha256": "aae0bf86697f7d6d4b6c7dddb5c8888d21aa5fbd3c06b20b5f412e5c026ab181",
+      "size": 23,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/existing-file-w4wwjgkh/REPORT.json",
+      "sha256": "aae0bf86697f7d6d4b6c7dddb5c8888d21aa5fbd3c06b20b5f412e5c026ab181",
+      "size": 23,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/missing-account-bz17dwdc/REPORT.json",
+      "sha256": "9a24bf29d19da4506f77a64a60e5bafe6deee52feb1dadd27416a54576f6b3f4",
+      "size": 665,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/missing-account-vvkdcslo/REPORT.json",
+      "sha256": "d3eaaede7ddcfafd86380656a9faf35ab16d529e7b3728dac359372df14680ec",
+      "size": 628,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/missing-token-eqssz109/REPORT.json",
+      "sha256": "7a765560cee5982c3ed9f9f77e2ac31f71712214866c2f2e3715e820fbca7873",
+      "size": 663,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/missing-token-t66s8si5/REPORT.json",
+      "sha256": "98cebe21dce878578c93e3653ed4103f71b687054190313904ac02c036b8ca4a",
+      "size": 626,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/receipt-directory-3o3wwv2_/preserved-original.json",
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326",
+      "size": 22,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/receipt-directory-e4rmlk4_/preserved-original.json",
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326",
+      "size": 22,
+      "type": "regular"
+    },
+    {
+      "nlink": 2,
+      "path": "fixtures/receipt-hardlink-djpm_eei/REPORT.json",
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326",
+      "size": 22,
+      "type": "regular"
+    },
+    {
+      "nlink": 2,
+      "path": "fixtures/receipt-hardlink-djpm_eei/preserved-original.json",
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326",
+      "size": 22,
+      "type": "regular"
+    },
+    {
+      "nlink": 2,
+      "path": "fixtures/receipt-hardlink-vf1je6e6/REPORT.json",
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326",
+      "size": 22,
+      "type": "regular"
+    },
+    {
+      "nlink": 2,
+      "path": "fixtures/receipt-hardlink-vf1je6e6/preserved-original.json",
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326",
+      "size": 22,
+      "type": "regular"
+    },
+    {
+      "path": "fixtures/receipt-parent-link-1e53r_bq/linked-parent",
+      "target": "\\\\?\\C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01\\fixtures\\receipt-parent-link-1e53r_bq\\real-parent",
+      "type": "symlink-fixture"
+    },
+    {
+      "path": "fixtures/receipt-parent-link-qyp5rjvd/linked-parent",
+      "target": "\\\\?\\C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01\\fixtures\\receipt-parent-link-qyp5rjvd\\real-parent",
+      "type": "symlink-fixture"
+    },
+    {
+      "path": "fixtures/receipt-symlink-9l097ken/REPORT.json",
+      "target": "\\\\?\\C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01\\fixtures\\receipt-symlink-9l097ken\\preserved-original.json",
+      "type": "symlink-fixture"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/receipt-symlink-9l097ken/preserved-original.json",
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326",
+      "size": 22,
+      "type": "regular"
+    },
+    {
+      "path": "fixtures/receipt-symlink-gwrysw9_/REPORT.json",
+      "target": "\\\\?\\C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01\\fixtures\\receipt-symlink-gwrysw9_\\preserved-original.json",
+      "type": "symlink-fixture"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/receipt-symlink-gwrysw9_/preserved-original.json",
+      "sha256": "1ec6e06365cac0846122028cc01cf56bee53fd0fb814f810d674c1d055c80326",
+      "size": 22,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/success-06r_ixif/REPORT.json",
+      "sha256": "1bd7bdadff38a4bf4d77a900f57e5af3d54cc81b8193a2d2646df95b5164cc13",
+      "size": 644,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/success-onv8fem0/REPORT.json",
+      "sha256": "258807ee212370dbc12497cd45c2b4820382c0f874ec9a3143c103183b75b883",
+      "size": 607,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/wrong-account-1gu7fa6e/REPORT.json",
+      "sha256": "b4ef6f021d24c87a9d4d5b01c91657963c9f8298f30ced9f5c219bf15e9ec0b0",
+      "size": 629,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "fixtures/wrong-account-a2qwr9cp/REPORT.json",
+      "sha256": "73c49557c678dc8277b4869c7f42ab14b7aaece9621fd5ccb8de5ad578beb29e",
+      "size": 666,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "local-tests-01-red.log",
+      "sha256": "e950eca4c1ddbe174967a60402df3c61567205003f5e3a978ecd93d6da179012",
+      "size": 5871,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "local-tests-02-green.log",
+      "sha256": "9646b6b1f959706af7639450d49567d4a057046e257a5ad297e198b09858758e",
+      "size": 4980,
+      "type": "regular"
+    },
+    {
+      "nlink": 1,
+      "path": "test_cloudflare_read_authority_probe.py",
+      "sha256": "258495419be6acda64d1c559dcf511e8e6d4aad7739cdc2f5b39e9b0dd88913d",
+      "size": 26693,
+      "type": "regular"
+    }
+  ],
+  "evidenceManifestSha256": "03d9792f17e003a9a8a4ab4bf7dc0c13f335ac36c8d858dfccff8a7b117995bc",
+  "finalTests": {
+    "errors": 0,
+    "failures": 0,
+    "passes": 32,
+    "rawReceipt": "TEST-RECEIPT-1791153782846518900.json",
+    "run": 32,
+    "skipped": 0
+  },
+  "mechanicalPreparationFailures": 0,
+  "officialDocumentationOnlyBrowsing": true,
+  "openGates": [
+    "root review and workflow integration",
+    "actual opaque account-token verification and bucket-read receipt",
+    "R2 write authority",
+    "Worker edit authority",
+    "deployment authority"
+  ],
+  "original65ManifestObjectsAndReceiptUnchanged": true,
+  "originalFreezeReceiptSha256": "c3252223ee9d5eca55e36ef9d6781d0fa1c3607f0e316fb0ec03e5930702cb5b",
+  "originalProbeSourceSha256": "1ce602ca8e1e1dc69c6745dec0ebce68237b040aa40ea11830b6aec9cdcf02dd",
+  "originalProbeTestSha256": "c9f830c69b2f552e526d0f26c251027d7a443e2504423e90289a11807fc758d5",
+  "patchSha256": "f2673f63644c9110f540ed49077e9abd48c5ca95f93eb616b6787f63893a8b1e",
+  "redTests": {
+    "errors": 0,
+    "failures": 1,
+    "passes": 31,
+    "rawReceipt": "TEST-RECEIPT-1791153742646789500.json",
+    "run": 32,
+    "skipped": 0
+  },
+  "repositoryOrWorkflowChanges": false,
+  "schema": "mir2.cloudflare.account-probe-freeze.v1",
+  "serviceOrDeploymentChanges": false,
+  "sourceSha256": "a1294fd9a4c6a7978ab9ad8fd2874f7f393697eb1a8746f5d3d4cb8185ec9faa",
+  "testSha256": "258495419be6acda64d1c559dcf511e8e6d4aad7739cdc2f5b39e9b0dd88913d"
+}

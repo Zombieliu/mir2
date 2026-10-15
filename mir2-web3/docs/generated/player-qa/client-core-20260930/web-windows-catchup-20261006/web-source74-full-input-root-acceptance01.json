@@ -1,0 +1,57 @@
+{
+  "owner": "Root",
+  "kind": "Source74 independent whole-input acceptance",
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\standalone-preparation01\\full-source-snapshot01.json",
+    "bytes": 75654375,
+    "sha256": "0fcb5f772f50625011fbd97738527fe44ba96114f698723496dc6a47993771bc"
+  },
+  "strictInput": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\source74-strict-final-snapshot02.json",
+    "bytes": 41214575,
+    "sha256": "d4a8eb4a471b7667ba0032cb0684a74c36f8df1eb65a9f0f79912774dc6daac4"
+  },
+  "actualNextOutput": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\source74-next-output-manifest02.json",
+    "bytes": 13949140,
+    "sha256": "bc3c6fa91175df29d593ae665cb48a92454241be2df08ac181670391b5c208dc"
+  },
+  "actualNextProof": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\source74-next-actual02.json",
+    "bytes": 4284,
+    "sha256": "b8e64919f6bd39d0a5b5f329bf457f0ffc279433a6ca55ff838e3886818ae5bd"
+  },
+  "ordinarySupplementControl": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\standalone-preparation03\\full-source-snapshot01.json",
+    "bytes": 75824066,
+    "sha256": "3e51721c2b684acbb4cfb6a608f135b997ba51094c1adaf77c6ac4cfc4806b52"
+  },
+  "counts": {
+    "inputs": 71060,
+    "internalFiles": 71058,
+    "externalReferences": 2,
+    "directoriesIncludingRoot": 6023,
+    "strictInputs": 36760,
+    "actualNextOutputs": 21039,
+    "ordinaryDependencySupplement": 13261,
+    "wholeBytes": 2449944745
+  },
+  "verification": {
+    "metadataExactUnion": true,
+    "allFilesActuallyHashed": true,
+    "physicalMembershipExact": true,
+    "hashDifferences": 0,
+    "membershipDifferences": 0,
+    "links": 0,
+    "special": 0,
+    "actualNextOutputsPreserved": true
+  },
+  "sourceRoles": "Ordinary supplement is dependency data only; actual Source74 strict output remains the unique production compiled output",
+  "accepted": true,
+  "readyToExecute": true,
+  "executed": false,
+  "noProductExecutionInDataRuntime": true,
+  "wholeParityPercentage": null,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

@@ -1,0 +1,360 @@
+{
+  "schemaVersion": 1,
+  "id": "tooltip-source21-action-chain-review01",
+  "generatedAtUtc": "2026-10-06T20:49:52.508Z",
+  "parentCommit": "463d6f1ce42fefdd4244cbd801f92715e29674a1",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "finiteResult": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/tooltip-source21-finite-result01.json",
+    "bytes": 46941,
+    "sha256": "a8a65221b3510ef9f6586e5301a6327848407caeccf7d29fe947755c902b367d"
+  },
+  "products": [
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/item_tooltip.rs",
+      "bytes": 72929,
+      "sha256": "b1eaee082e6b4f570302d9ed2e5a929faa4b51f60e67c4c20b42e0bd57746552",
+      "relativePath": "apps/game-client/client-core/src/item_tooltip.rs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/item_tooltip_types.rs",
+      "bytes": 5441,
+      "sha256": "046a7d721dda11ed62c0ac579a9772ad37732e510c3131cb333e5581833b1963",
+      "relativePath": "apps/game-client/client-core/src/item_tooltip_types.rs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/item_names.rs",
+      "bytes": 10185,
+      "sha256": "797c07b2d38ba868e4eda0f812aaad74f4ca54fbf70fd19a3d4110a1cadea160",
+      "relativePath": "apps/game-client/client-core/src/item_names.rs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-core/src/lib.rs",
+      "bytes": 696,
+      "sha256": "4d793f736cd35e6fdb2d8d781e42d0bfa1602b7a5a315406f43c36d2dea03a41",
+      "relativePath": "apps/game-client/client-core/src/lib.rs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/item_tooltip.rs",
+      "bytes": 52649,
+      "sha256": "b88ceec0182e90bb628f60551c23f2a80b220bf460090908fb465746315c5eb1",
+      "relativePath": "apps/game-client/platform-web/src/item_tooltip.rs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/lib.rs",
+      "bytes": 1118,
+      "sha256": "5cb2b92df29a4a6ae03471264df6932f25c9d65413c57eb094ed5b153c7aa6ff",
+      "relativePath": "apps/game-client/platform-web/src/lib.rs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/item_tooltip.rs",
+      "bytes": 14498,
+      "sha256": "1a06feb416dd1b8c11ba763b2faf97f7473dbb48865e1718afed3bd9f4d63efe",
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/item_tooltip.rs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/client-bevy/src/player_text.rs",
+      "bytes": 29080,
+      "sha256": "3935f1cb83801f69ed4c64ea7b211fe419d126a2e9ae3b207451b8e09ae6f22a",
+      "relativePath": "apps/game-client/client-bevy/src/player_text.rs"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/client-presentation-runtime.ts",
+      "bytes": 17745,
+      "sha256": "6ad3af7c17cc2fa939589847f662b4fdfc5e955af29479513d56ebb6516b552c",
+      "relativePath": "apps/web/lib/client-presentation-runtime.ts"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/client-core-runtime.ts",
+      "bytes": 39371,
+      "sha256": "258c74e1f137e2c64d73525a7ec15528d62c765e366ce325735fe0877aedef80",
+      "relativePath": "apps/web/lib/client-core-runtime.ts"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/shared-item-tooltip.ts",
+      "bytes": 9853,
+      "sha256": "1b16e87691cfdb957312da101b3868f1def693f1844146624700edd531b2cc02",
+      "relativePath": "apps/web/lib/shared-item-tooltip.ts"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/original-client-shell.tsx",
+      "bytes": 285426,
+      "sha256": "a8a16772a9bb8feafd94b63b0a274e92200db6a5aaf026f56a419d39e9891817",
+      "relativePath": "apps/web/app/original-client-shell.tsx"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+      "bytes": 17971,
+      "sha256": "b7a619f3eaea35258311b781c721895956fbd0aeba85fd6144f55bb3778a2a91",
+      "relativePath": "apps/web/app/components/original-client-shell-types.ts"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-game-ui-scene.tsx",
+      "bytes": 34768,
+      "sha256": "6edb8a1eb68d9f0e82991af69d215f665d3679853f617c13c4be3c189c99610a",
+      "relativePath": "apps/web/app/components/original-client-game-ui-scene.tsx"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-inventory-window.tsx",
+      "bytes": 52326,
+      "sha256": "eccc2e4ce17b7b6f46b8395e4c0aa4e064ce4a8a0dcfff23f5c5625f4e520ebc",
+      "relativePath": "apps/web/app/components/original-client-inventory-window.tsx"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-panels.tsx",
+      "bytes": 37961,
+      "sha256": "a50886bd25d968427b186893d191a8a7130c9a614b6ab9b64dcea68912de82de",
+      "relativePath": "apps/web/app/components/original-client-panels.tsx"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-character-window.tsx",
+      "bytes": 19510,
+      "sha256": "d4f18bf5710d2def95e48da8a992468f7ea499ddd878e0a19e57072674454a12",
+      "relativePath": "apps/web/app/components/original-client-character-window.tsx"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/page.tsx",
+      "bytes": 944772,
+      "sha256": "5c5392efb4cc36657b61645208fef68151a88547b351d62f567b65ae3c3ed245",
+      "relativePath": "apps/web/app/page.tsx"
+    }
+  ],
+  "reviewer": "/root/w2b_final_source_review",
+  "readOnly": true,
+  "executionsByReviewer": 0,
+  "conclusion": "Accepted frozen pure formatter/optional PUI/read-only actual DOM host source candidate. Two original raw tooltip records can close at source-candidate level only; no wire, gameplay or player acceptance is implied.",
+  "originalRecords": [
+    "F05.bag.tooltip-compat",
+    "F05.belt.tooltip"
+  ],
+  "nativeEvidence": [
+    {
+      "id": "F05.bag.tooltip-compat",
+      "baseline": {
+        "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+        "primarySourceAnchor": {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 12647,
+          "excerpt": "if let Some(document) = crystal_item_tooltip_document_from_source_with_options(",
+          "blobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22",
+          "role": "source declaration/action/consumer candidate; see qualification"
+        },
+        "controlChainStatus": "source anchored candidate; full registered-control → host → outbound chain not certified by matrix",
+        "controlChainClosed": false,
+        "outbound": {
+          "kind": "local presentation/state or observed server feedback; no new wire implied"
+        },
+        "registrationEvidence": {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 3875,
+          "excerpt": "impl Plugin for Mir2CrystalOverlayPlugin {",
+          "blobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22"
+        },
+        "sourceChainQualification": "Overlay plugin build and reachable control/consumer were inspected; full root Mir2Client plugin installation is a carried baseline dependency, not re-opened this bounded pass."
+      },
+      "qualification": "Original fixed Native registration/consumer evidence retained unchanged. Source21 actual Native item tooltip adapter delegates the formatter and preserves its four public APIs, default ShiftClick options and original12 named tests."
+    },
+    {
+      "id": "F05.belt.tooltip",
+      "baseline": {
+        "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+        "primarySourceAnchor": {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+          "line": 1165,
+          "excerpt": ".insert(CrystalItemHint(crystal_item_tooltip_document(",
+          "blobSha1": "2fe37a933b807d77fda78d3878107330115e9a5b",
+          "role": "source declaration/action/consumer candidate; see qualification"
+        },
+        "controlChainStatus": "source anchored candidate; full registered-control → host → outbound chain not certified by matrix",
+        "controlChainClosed": false,
+        "outbound": {
+          "kind": "local presentation/state or observed server feedback; no new wire implied"
+        },
+        "registrationEvidence": {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 3875,
+          "excerpt": "impl Plugin for Mir2CrystalOverlayPlugin {",
+          "blobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22"
+        },
+        "sourceChainQualification": "Overlay plugin build and reachable control/consumer were inspected; full root Mir2Client plugin installation is a carried baseline dependency, not re-opened this bounded pass."
+      },
+      "qualification": "Original fixed Native registration/consumer evidence retained unchanged. Source21 actual Native item tooltip adapter delegates the formatter and preserves its four public APIs, default ShiftClick options and original12 named tests."
+    }
+  ],
+  "sharedCore": {
+    "formatter": {
+      "path": "apps/game-client/client-core/src/item_tooltip.rs",
+      "anchors": [
+        137,
+        169
+      ]
+    },
+    "dto": {
+      "path": "apps/game-client/client-core/src/item_tooltip_types.rs"
+    },
+    "names": {
+      "path": "apps/game-client/client-core/src/item_names.rs"
+    },
+    "nativeAdapter": {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/item_tooltip.rs",
+      "anchors": [
+        15,
+        24
+      ]
+    },
+    "documentContract": "Owned neutral DTO and read-only document, 11 sections/10 colours, UID0, signed item indexes, raw count/dura/unit sale, original/real/resolved/sockets/unknown viewer; .NET ticks retained as canonical i64 strings with exact formatter clock, no new dependencies."
+  },
+  "webEvidence": [
+    {
+      "path": "apps/game-client/platform-web/src/item_tooltip.rs",
+      "anchors": [
+        29,
+        79
+      ],
+      "role": "Optional renderer-free PUI ABI1 instance formatter; bounded duplicate/presence/date/ID validation, DOM MoreActions hint, unknown partial data retained"
+    },
+    {
+      "path": "apps/web/lib/client-presentation-runtime.ts",
+      "anchors": [
+        230
+      ],
+      "role": "Capability getter custody and ABI1 optional reader; missing capability leaves ordinary Core interfaces available"
+    },
+    {
+      "path": "apps/web/lib/client-core-runtime.ts",
+      "anchors": [
+        503
+      ],
+      "role": "Actual Core facade forwards read to presentation module"
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "anchors": [
+        9613,
+        9710,
+        18529,
+        18530
+      ],
+      "role": "Actual owned Bag/Belt/Equipment reader leases with useLayoutEffect commit and owner/socket/source/window/tab/epoch guards before and after Core call; exact raw carrier cloned, no catalog or UID inference"
+    },
+    {
+      "path": "apps/web/app/components/original-client-inventory-window.tsx",
+      "anchors": [
+        125,
+        766,
+        828
+      ],
+      "role": "Actual Bag card hover/focus/touch document and original basic fallback; existing repair capture remains"
+    },
+    {
+      "path": "apps/web/app/components/original-client-panels.tsx",
+      "anchors": [
+        484,
+        544,
+        608,
+        631
+      ],
+      "role": "Actual Belt cards and active-only1000ms readonly refresh; blur/visibility/cancel/resize/pagehide/unmount source and successor cleanup"
+    },
+    {
+      "path": "apps/web/app/components/original-client-character-window.tsx",
+      "anchors": [
+        157,
+        267,
+        281
+      ],
+      "role": "Actual equipment cards consume captured equipment reader"
+    },
+    {
+      "path": "apps/web/app/components/original-client-game-ui-scene.tsx",
+      "anchors": [
+        470,
+        715,
+        740
+      ],
+      "role": "Actual Belt/Bag/Character mounts pass exact callback props"
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "anchors": [
+        16148,
+        16160
+      ],
+      "role": "Actual movement-only source signature includes sellValue to preserve price-only updates",
+      "qualification": "Current itemIdentity declaration and actual sellValue projection line verified directly by Root and finite group5323; readonly source anchors do not establish UI execution."
+    }
+  ],
+  "finiteFixtureGroups": [
+    {
+      "line": 5099,
+      "name": "PUI optional item formatter preserves capability independence exact clock cache and ABI getter custody"
+    },
+    {
+      "line": 5126,
+      "name": "Shared item clock uses exact canonical i64 ticks and bounded caches while signed catalog indexes remain real"
+    },
+    {
+      "line": 5141,
+      "name": "Core actual item reader facade proxies only presentation and leaves missing optional capabilities usable"
+    },
+    {
+      "line": 5149,
+      "name": "Page owned instance request preserves UID zero signed index unit sale value count and independent raw carrier"
+    },
+    {
+      "line": 5165,
+      "name": "Page actual owned readers bind displayed Bag Belt Equipment objects and commit source before any format read"
+    },
+    {
+      "line": 5184,
+      "name": "Page actual owned readers reject physical owner source visibility and reentrant changes before and after Core"
+    },
+    {
+      "line": 5244,
+      "name": "Actual Bag Belt Equipment tooltip events are read only and active timer cleans stale source and successor safely"
+    },
+    {
+      "line": 5289,
+      "name": "Three actual tooltip mounts carry exact reader props document and original fallback without raw bulk actions"
+    },
+    {
+      "line": 5323,
+      "name": "Actual movement snapshot item projection keeps sale value changes out of confirmed movement fast path"
+    }
+  ],
+  "matrixQualification": {
+    "priorMatrix": "feature-matrix06.json",
+    "changedRows": 2,
+    "other315WholeRowsPreserved": true,
+    "originalOrderedIdsAndAuditAndNativePreserved": true,
+    "currentSourceCategories": {
+      "shared": 103,
+      "legacy": 202,
+      "open": 4,
+      "common limitation": 8
+    },
+    "all317PlayerRows": "not-run",
+    "classification": "DOM host remains legacy presentation even though formatter and optional PUI reader are shared Rust. Shared-controller category is not enlarged by formatter extraction.",
+    "sourceCandidateClosedOnly": true,
+    "overallPercentage": null
+  },
+  "nextWork": [
+    "F05.belt.move-from-bag",
+    "F02.world.fishing-click",
+    "F09.NPC.PEARL",
+    "F11.RANKING.INSPECT"
+  ],
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-tooltip-source21-node03-source-review.json",
+    "bytes": 11878,
+    "sha256": "d01e20ca5d72480adf126da90b2245674f234676b2015671c75347efba14f510"
+  },
+  "limitations": "Source AST and finite memory fixtures do not establish committed browser UI, actual Native events, services, compiled WASM execution, gameplay, save/relogin or mobile acceptance.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

@@ -1,0 +1,214 @@
+{
+  "kind": "selected original ordinary trace receipts",
+  "sourceTrace": "taoist/Taoist.2026-10-01T07-23-40-716Z.trace.jsonl",
+  "rawTraceSha256": "4e70b149cc6d834725d2bec684e11f017b8442199405e0a9dad6e2d8a17615f4",
+  "sequenceSelection": [
+    2781,
+    2782,
+    2784,
+    2785,
+    2787,
+    2800,
+    2808
+  ],
+  "sanitized": true,
+  "events": [
+    {
+      "at": "2026-10-01T07:28:43.305Z",
+      "sequence": 2781,
+      "direction": "received",
+      "type": "worldSnapshot",
+      "payload": {
+        "mapFileName": "D001",
+        "playerObjectId": 1000,
+        "playerHp": 72,
+        "playerMaxHp": 113,
+        "playerMp": 87,
+        "playerMaxMp": 102,
+        "owner": {
+          "x": 157,
+          "y": 308,
+          "poison": null,
+          "dead": false
+        },
+        "knownSkills": [
+          {
+            "spell": "Healing",
+            "level": 0,
+            "mpCost": 6,
+            "cooldownRemainingMs": 0,
+            "cooldownRemainingTicks": 0
+          },
+          {
+            "spell": "SpiritSword",
+            "level": 0,
+            "mpCost": 0,
+            "cooldownRemainingMs": null,
+            "cooldownRemainingTicks": 0
+          },
+          {
+            "spell": "SoulFireBall",
+            "level": 0,
+            "mpCost": 3,
+            "cooldownRemainingMs": 0,
+            "cooldownRemainingTicks": 0
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-01T07:28:43.316Z",
+      "sequence": 2782,
+      "direction": "sent",
+      "type": "magic",
+      "command": {
+        "spell": "Healing",
+        "objectId": 1000,
+        "targetId": 1000
+      }
+    },
+    {
+      "at": "2026-10-01T07:28:43.396Z",
+      "sequence": 2784,
+      "direction": "received",
+      "type": "packet",
+      "packet": "Magic",
+      "payload": {
+        "cast": true,
+        "level": 0,
+        "secondaryTargetIds": [],
+        "spell": "Healing",
+        "target": {
+          "x": 157,
+          "y": 308
+        },
+        "targetId": 1000
+      }
+    },
+    {
+      "at": "2026-10-01T07:28:43.396Z",
+      "sequence": 2785,
+      "direction": "received",
+      "type": "packet",
+      "packet": "ObjectMagic",
+      "payload": {
+        "cast": true,
+        "direction": "Up",
+        "level": 0,
+        "location": {
+          "x": 157,
+          "y": 308
+        },
+        "objectId": 1000,
+        "secondaryTargetIds": [],
+        "selfBroadcast": false,
+        "spell": "Healing",
+        "target": {
+          "x": 157,
+          "y": 308
+        },
+        "targetId": 1000
+      }
+    },
+    {
+      "at": "2026-10-01T07:28:43.396Z",
+      "sequence": 2787,
+      "direction": "received",
+      "type": "packet",
+      "packet": "ObjectEffect",
+      "payload": {
+        "delayTime": 0,
+        "effect": 3,
+        "effectType": 0,
+        "objectId": 1000,
+        "time": 0
+      }
+    },
+    {
+      "at": "2026-10-01T07:28:43.934Z",
+      "sequence": 2800,
+      "direction": "received",
+      "type": "worldSnapshot",
+      "payload": {
+        "mapFileName": "D001",
+        "playerObjectId": 1000,
+        "playerHp": 98,
+        "playerMaxHp": 113,
+        "playerMp": 84,
+        "playerMaxMp": 102,
+        "owner": {
+          "x": 157,
+          "y": 308,
+          "poison": null,
+          "dead": false
+        },
+        "knownSkills": [
+          {
+            "spell": "Healing",
+            "level": 0,
+            "mpCost": 6,
+            "cooldownRemainingMs": 1244,
+            "cooldownRemainingTicks": 2
+          },
+          {
+            "spell": "SpiritSword",
+            "level": 0,
+            "mpCost": 0,
+            "cooldownRemainingMs": null,
+            "cooldownRemainingTicks": 0
+          },
+          {
+            "spell": "SoulFireBall",
+            "level": 0,
+            "mpCost": 3,
+            "cooldownRemainingMs": 1244,
+            "cooldownRemainingTicks": 2
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-01T07:28:44.184Z",
+      "sequence": 2808,
+      "direction": "received",
+      "type": "worldSnapshot",
+      "payload": {
+        "mapFileName": "D001",
+        "playerObjectId": 1000,
+        "playerHp": 113,
+        "playerMaxHp": 113,
+        "playerMp": 84,
+        "playerMaxMp": 102,
+        "owner": {
+          "x": 157,
+          "y": 308,
+          "poison": null,
+          "dead": false
+        },
+        "knownSkills": [
+          {
+            "spell": "Healing",
+            "level": 0,
+            "mpCost": 6,
+            "cooldownRemainingMs": 993,
+            "cooldownRemainingTicks": 1
+          },
+          {
+            "spell": "SpiritSword",
+            "level": 0,
+            "mpCost": 0,
+            "cooldownRemainingMs": null,
+            "cooldownRemainingTicks": 0
+          },
+          {
+            "spell": "SoulFireBall",
+            "level": 0,
+            "mpCost": 3,
+            "cooldownRemainingMs": 993,
+            "cooldownRemainingTicks": 1
+          }
+        ]
+      }
+    }
+  ]
+}

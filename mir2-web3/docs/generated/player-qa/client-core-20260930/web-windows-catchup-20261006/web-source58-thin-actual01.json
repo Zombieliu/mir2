@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source58 actual full Thin and exact runtime copy",
+  "observedAtUtc": "2026-10-11T03:43:00.672Z",
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/root-approved01/thin-build01-config02.json",
+    "bytes": 5723,
+    "sha256": "c06f2161029e57e3ec21979d08d05754bcc94e5dd2be49b610c627522880a7fa"
+  },
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/thin-preparation01/full-snapshot.json",
+    "bytes": 14832299,
+    "sha256": "3e4e124727739cea5e26400f943582ba71e253bd193cb9d1aeb17af29a345764"
+  },
+  "actualOuter": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 34652,
+    "kind": "Source58 original full Thin after current fresh completed Next",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 21835,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/root-approved01/thin-build01-config02.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "fullInputHash": {
+    "declared": 55325,
+    "rootMatched": 55325,
+    "originalCallerPrePostMatched": true
+  },
+  "package": {
+    "exists": true,
+    "bytes": 374002557,
+    "files": 7331,
+    "directories": 778,
+    "links": 0
+  },
+  "capBytes": 377487360,
+  "headroomBytes": 3484803,
+  "renderer": "bevy-cbaf32383ce0ff77",
+  "warningCount": 59,
+  "warningCodes": {
+    "Error": 59
+  },
+  "jsonCompactionFiles": 231,
+  "copy": {
+    "root": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/web-runtime01",
+    "files": 7331,
+    "directories": 778,
+    "links": 0,
+    "hashDifferences": 0,
+    "snapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/web-start01/runtime-snapshot.json",
+      "bytes": 2238654,
+      "sha256": "7e23f9273cebefed634df59f5be7c1ce0da7975b02c9fa489e1b97dfb150e3c4"
+    }
+  },
+  "preExecutionRefusal": {
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/root-approved01/thin-build01-config01.json",
+      "bytes": 5252,
+      "sha256": "a8c4e1b9855c900aba880a7a1804b8585b264c314b30f1861303f9c82a34c997"
+    },
+    "reason": "Original caller rejected nonliteral backslash report argument before builder start; exact equivalent path separator normalized only",
+    "builderExecuted": false
+  },
+  "uiAcceptancePending": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

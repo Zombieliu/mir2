@@ -1,0 +1,384 @@
+   Compiling mir2-protocol v0.1.0 (C:\Users\Administrator\.codex\worktrees\npc-map-go\mir2-player-journey\mir2-web3\packages\protocol)
+   Compiling mir2-client-core v0.1.0 (C:\Users\Administrator\.codex\worktrees\npc-map-go\mir2-player-journey\mir2-web3\apps\game-client\client-core)
+   Compiling mir2-ui-core v0.1.0 (C:\Users\Administrator\.codex\worktrees\npc-map-go\mir2-player-journey\mir2-web3\apps\game-client\ui-core)
+   Compiling mir2-game-data v0.1.0 (C:\Users\Administrator\.codex\worktrees\npc-map-go\mir2-player-journey\mir2-web3\packages\game-data)
+   Compiling mir2-client-bevy v0.1.0 (C:\Users\Administrator\.codex\worktrees\npc-map-go\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:210:21
+    |
+210 |                     (32. / 3.),
+    |                     ^        ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+210 -                     (32. / 3.),
+210 +                     32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:414:29
+    |
+414 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+414 -                             (32. / 3.),
+414 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:421:29
+    |
+421 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+421 -                             (32. / 3.),
+421 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:476:25
+    |
+476 |                         (32. / 3.),
+    |                         ^        ^
+    |
+help: remove these parentheses
+    |
+476 -                         (32. / 3.),
+476 +                         32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:695:33
+    |
+695 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+695 -                                 (32. / 3.),
+695 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:702:33
+    |
+702 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+702 -                                 (32. / 3.),
+702 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:715:33
+    |
+715 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+715 -                                 (32. / 3.),
+715 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:727:33
+    |
+727 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+727 -                                 (32. / 3.),
+727 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:831:29
+    |
+831 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+831 -                             (32. / 3.),
+831 +                             32. / 3. ,
+    |
+
+warning: unused imports: `GAME_SHOP_QUANTITY_MAX` and `GAME_SHOP_QUANTITY_MIN`
+  --> src\crystal_ui\overlays.rs:46:58
+   |
+46 |     GameShopModel, GameShopPaymentType, GameShopRequest, GAME_SHOP_QUANTITY_MAX,
+   |                                                          ^^^^^^^^^^^^^^^^^^^^^^
+47 |     GAME_SHOP_QUANTITY_MIN,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `item_icon_path`
+  --> src\crystal_ui\overlays.rs:49:51
+   |
+49 | use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
+   |                                                   ^^^^^^^^^^^^^^
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> src\crystal_ui\overlays.rs:72:5
+   |
+72 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `GAME_SHOP_CELL_SIZE`, `GAME_SHOP_COLUMN_STEP`, `GAME_SHOP_GRID_ORIGIN`, `GAME_SHOP_PAGE_COLUMNS`, `GAME_SHOP_ROW_STEP`, and `SKILL_ROW_SIZE`
+   --> src\crystal_ui\overlays.rs:114:5
+    |
+114 |     GAME_SHOP_CELL_SIZE, GAME_SHOP_COLUMN_STEP, GAME_SHOP_GRID_ORIGIN, GAME_SHOP_PAGE_COLUMNS,
+    |     ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+115 |     GAME_SHOP_PAGE_SIZE as CRYSTAL_GAME_SHOP_PAGE_SIZE, GAME_SHOP_PANEL_SIZE, GAME_SHOP_ROW_STEP,
+    |                                                                               ^^^^^^^^^^^^^^^^^^
+...
+122 |     SKILL_PAGE_SIZE, SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE,
+    |                                                          ^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> src\crystal_ui\social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unnecessary parentheses around `if` condition
+    --> src\crystal_ui\overlays.rs:7658:8
+     |
+7658 |     if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |        ^
+7659 |         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                  ^
+     |
+help: remove these parentheses
+     |
+7658 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+7659 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+error[E0559]: variant `overlays::OverlayButton::SelectBigMapNpc` has no field named `object_id`
+     --> src\crystal_ui\overlays.rs:12907:62
+      |
+ 3360 |     SelectBigMapNpc(u32),
+      |     --------------- `overlays::OverlayButton::SelectBigMapNpc` defined here
+...
+12907 |         row.insert((Button, OverlayButton::SelectBigMapNpc { object_id }));
+      |                                                              ^^^^^^^^^ field does not exist
+      |
+help: `overlays::OverlayButton::SelectBigMapNpc` is a tuple variant, use the appropriate syntax
+      |
+12907 -         row.insert((Button, OverlayButton::SelectBigMapNpc { object_id }));
+12907 +         row.insert((Button, OverlayButton::SelectBigMapNpc(/* u32 */)));
+      |
+
+error[E0559]: variant `overlays::OverlayButton::SelectBigMapNpc` has no field named `object_id`
+    --> src\crystal_ui\big_map_npc_navigation_tests.rs:37:72
+     |
+  37 |     let row = button_entity(&mut app, OverlayButton::SelectBigMapNpc { object_id: 2 });
+     |                                                                        ^^^^^^^^^ field does not exist
+     |
+    ::: src\crystal_ui\overlays.rs:3360:5
+     |
+3360 |     SelectBigMapNpc(u32),
+     |     --------------- `overlays::OverlayButton::SelectBigMapNpc` defined here
+     |
+help: `overlays::OverlayButton::SelectBigMapNpc` is a tuple variant, use the appropriate syntax
+     |
+  37 -     let row = button_entity(&mut app, OverlayButton::SelectBigMapNpc { object_id: 2 });
+  37 +     let row = button_entity(&mut app, OverlayButton::SelectBigMapNpc(/* u32 */));
+     |
+
+error[E0559]: variant `overlays::OverlayButton::SelectBigMapNpc` has no field named `object_id`
+    --> src\crystal_ui\big_map_npc_navigation_tests.rs:41:77
+     |
+  41 |     let selected = button_entity(&mut app, OverlayButton::SelectBigMapNpc { object_id: 2 });
+     |                                                                             ^^^^^^^^^ field does not exist
+     |
+    ::: src\crystal_ui\overlays.rs:3360:5
+     |
+3360 |     SelectBigMapNpc(u32),
+     |     --------------- `overlays::OverlayButton::SelectBigMapNpc` defined here
+     |
+help: `overlays::OverlayButton::SelectBigMapNpc` is a tuple variant, use the appropriate syntax
+     |
+  41 -     let selected = button_entity(&mut app, OverlayButton::SelectBigMapNpc { object_id: 2 });
+  41 +     let selected = button_entity(&mut app, OverlayButton::SelectBigMapNpc(/* u32 */));
+     |
+
+error[E0559]: variant `overlays::OverlayButton::SelectBigMapNpc` has no field named `object_id`
+    --> src\crystal_ui\big_map_npc_navigation_tests.rs:42:74
+     |
+  42 |     let other = button_entity(&mut app, OverlayButton::SelectBigMapNpc { object_id: 1 });
+     |                                                                          ^^^^^^^^^ field does not exist
+     |
+    ::: src\crystal_ui\overlays.rs:3360:5
+     |
+3360 |     SelectBigMapNpc(u32),
+     |     --------------- `overlays::OverlayButton::SelectBigMapNpc` defined here
+     |
+help: `overlays::OverlayButton::SelectBigMapNpc` is a tuple variant, use the appropriate syntax
+     |
+  42 -     let other = button_entity(&mut app, OverlayButton::SelectBigMapNpc { object_id: 1 });
+  42 +     let other = button_entity(&mut app, OverlayButton::SelectBigMapNpc(/* u32 */));
+     |
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:110:9
+    |
+110 |     let mut draft = draft("abcd");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:155:9
+    |
+155 |     let mut draft = draft("letter body");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:172:9
+    |
+172 |     let mut draft = draft(&message);
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:1180:5
+     |
+1180 |     mut pending: ResMut<PendingOperations>,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:6790:17
+     |
+6790 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:6791:28
+     |
+6791 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:6791:28
+     |
+6791 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> src\crystal_ui\overlays.rs:7227:18
+     |
+7227 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:7912:25
+     |
+7912 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:7913:36
+     |
+7913 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> src\crystal_ui\overlays.rs:7896:5
+     |
+7896 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:7913:36
+     |
+7913 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+     --> src\crystal_ui\overlays.rs:11303:9
+      |
+11303 |         skill_binding,
+      |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+     --> src\crystal_ui\overlays.rs:11304:9
+      |
+11304 |         skill_persistence,
+      |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: unused variable: `inventory`
+     --> src\crystal_ui\overlays.rs:15462:5
+      |
+15462 |     inventory: &InventoryModel,
+      |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_inventory`
+
+warning: unused variable: `state`
+     --> src\crystal_ui\overlays.rs:15463:5
+      |
+15463 |     state: &NativePlayerUiState,
+      |     ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `compose_ui`
+     --> src\crystal_ui\overlays.rs:15464:5
+      |
+15464 |     compose_ui: &MailComposeUi,
+      |     ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_compose_ui`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_parcel_tests.rs:212:9
+    |
+212 |     let mut state = NativePlayerUiState::default();
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `nearby`
+    --> src\quest_ui.rs:1961:5
+     |
+1961 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+For more information about this error, try `rustc --explain E0559`.
+warning: `mir2-client-bevy` (lib test) generated 34 warnings
+error: could not compile `mir2-client-bevy` (lib test) due to 4 previous errors; 34 warnings emitted

@@ -1,0 +1,16 @@
+2026-10-06T12:39:24.1268942Z test monthly_card_authentication_remains_available_but_world_entry_is_gated ... ok
+2026-10-06T12:39:24.1293497Z test monthly_card_calendar_boundary_and_renewal_are_account_wide ... ok
+2026-10-06T12:39:24.1341785Z test monthly_card_concurrent_redeem_is_once_and_codes_cannot_cross_accounts ... ok
+2026-10-06T12:39:24.1416653Z test monthly_card_durable_restart_keeps_expiry_and_single_use_receipt ... ok
+2026-10-06T12:39:24.1449515Z test monthly_card_expired_subscription_renews_from_now_and_unused_code_expires ... ok
+2026-10-06T12:39:24.1488762Z test monthly_card_failed_durable_write_rolls_back_credit_and_receipt ... ok
+2026-10-06T12:39:24.1492952Z test monthly_card_free_mode_and_legacy_accounts_do_not_get_implicit_paid_access ... ok
+2026-10-06T12:39:24.1518599Z test monthly_card_issue_and_redeem_retries_do_not_duplicate_credit ... ok
+2026-10-06T12:39:24.1532707Z test monthly_card_unused_codes_have_no_implicit_expiration_and_key_rotation_preserves_redemption ... ok
+2026-10-06T12:39:24.1533689Z test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.51s
+2026-10-06T12:40:13.0334596Z test monthly_card_postgres_independent_writers_and_restart_are_once ... ok
+2026-10-06T12:40:13.0336278Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.86s
+2026-10-06T12:43:28.1284871Z test web::tests::monthly_card_tests::monthly_card_expired_resume_discards_the_lease_and_capacity ... ok
+2026-10-06T12:43:30.6375262Z test web::tests::monthly_card_tests::monthly_card_real_http_websocket_expiry_save_and_reentry ... ok
+2026-10-06T12:43:30.6376361Z test web::tests::monthly_card_tests::monthly_card_requests_do_not_accept_client_authority_or_log_codes ... ok
+2026-10-06T12:43:30.6377334Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 916 filtered out; finished in 3.52s

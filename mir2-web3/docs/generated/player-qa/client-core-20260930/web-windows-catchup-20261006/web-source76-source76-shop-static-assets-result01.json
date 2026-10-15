@@ -1,0 +1,20 @@
+{
+  "owner": "Root",
+  "package": "Source76 actual independent Thin on localhost19205",
+  "ordinaryReloginPosition": "Bichon Province 290,611",
+  "goldBefore": 180,
+  "ordinaryScottView": true,
+  "settledHost": {
+    "active": false,
+    "blocksInput": false,
+    "errorPresent": true,
+    "transitioning": false
+  },
+  "compatBuyButtons": 2,
+  "staticBackgroundNowPainted": true,
+  "sharedShopTakeoverAccepted": false,
+  "purchaseAttempted": false,
+  "knownObservation": "RandomTeleport and several adjacent catalog icons show broken images in compatibility UI; canonical static skin copy alone does not satisfy the host.",
+  "noQaAdminTeleportOrRuntimeGlobals": true,
+  "goalComplete": false
+}

@@ -1,0 +1,38 @@
+{
+  "owner": "Root",
+  "normalAltXSaveLogout": true,
+  "passwordVisibleAfterLogout": true,
+  "noLoginScreenshot": true,
+  "onlyOwnedChildStopped": 99652,
+  "ownedOriginalParent": 100340,
+  "identity": {
+    "owner": "Root",
+    "childPid": 99652,
+    "parentPid": 100340,
+    "localAddress": "127.0.0.1",
+    "localPort": 19205,
+    "uniqueListener": true,
+    "exactNodeAndSource78ServerVerified": true,
+    "originalCallerParentVerified": true,
+    "prohibitedPidsUntouched": true,
+    "activeLogsAndOuterUnread": true
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": -1,
+    "builderPid": 99652,
+    "kind": "Root approved original Source78 independent Thin Web ordinary Spells diagnostic QA start",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 1504978,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/root-approved01/web-start01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "postSourceToolGuardReturned": true,
+  "goalComplete": false
+}

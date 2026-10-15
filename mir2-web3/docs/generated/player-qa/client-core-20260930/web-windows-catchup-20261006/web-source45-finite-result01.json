@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source45 default Quest entry and Hero success regressions plus fresh renderer release/static conversion checkpoint",
+  "generatedAtUtc": "2026-10-08T14:56:20.436Z",
+  "parentCommit": "ad6f915a693e1322b69afeed926f36318caefdb4",
+  "windowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "goalStatus": "active",
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalComplete": false,
+  "implementationRecords": {
+    "completed": 309,
+    "total": 317,
+    "percentage": 97.47634069400631,
+    "includesLegacy": true,
+    "notPlayableCompletion": true
+  },
+  "sharedClassification": {
+    "shared": 103,
+    "legacy": 206,
+    "common": 8,
+    "total": 317,
+    "percentage": 32.49211356466877,
+    "notPlayerAcceptance": true
+  },
+  "matrix": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix11.json",
+    "bytes": 3228933,
+    "sha256": "1b533c6fba3af282d58be119cc591f004ee579b7d50e86b186a65249c100f6b1"
+  },
+  "changes": {
+    "file": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+      "bytes": 738080,
+      "sha256": "8353102c15461c62f540ca630a5783e58e6113672dc3e33e937fcabf4e1b2629"
+    },
+    "newLogicalGroups": 7,
+    "positiveScenarios": 11,
+    "allOriginal494BytesRecoveredAfterRemovingInsertion": true,
+    "productSourcesChangedThisRound": false
+  },
+  "tests": {
+    "defaultAndQuest": {
+      "actual": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-default-quest-actual01.json",
+        "bytes": 7370,
+        "sha256": "a5dd78cffbea1ec6076cec0143820466187bdda8010be022fb9ed8db756a2a7f"
+      },
+      "tapPassed": 48,
+      "tapFailed": 0,
+      "acceptedInterval": "Earlier Source45 original four scripts; old Stage5 inventory pin superseded, these four do not load it."
+    },
+    "heroSuccess": {
+      "actual": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-stage5-actual01.json",
+        "bytes": 2976,
+        "sha256": "c36a59203130e15ad9dd97eb3e337355329d3ac21e768a3ecc39ca78d7662b4d"
+      },
+      "tapFilePassed": 1,
+      "tapFileFailed": 0,
+      "logicalGroups": 501,
+      "priorGroups": 494,
+      "newGroups": 7,
+      "positiveScenarios": 11
+    },
+    "newRustTestsRun": 0,
+    "newNativeTestsRun": 0,
+    "newTypeScriptRun": false,
+    "inheritedTypeScript": {
+      "actualReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-hero-source44-actual-review01.json",
+        "bytes": 83857,
+        "sha256": "7e7ab96de266af70bb1dd2813889d930bd042bcbde601fdca5acc6fa94f119a6"
+      },
+      "acceptedOnlyBecauseAllDeclaredTSInputsUnchanged": true
+    },
+    "qualification": "49 TAP executions in two genuine intervals; 501 Stage5 logic groups separate from its single file TAP. Supplied result snapshots pass actual authority/Page receivers, not a live server. No full latest checkout or backend test claim."
+  },
+  "rendererBuilds": {
+    "cargo": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-renderer-cargo-actual01.json",
+      "bytes": 22126,
+      "sha256": "4da54a07d4c5ca7882f5c33d9fb1c0c4440da0737655e2dbb6ef9be43897188c"
+    },
+    "staticCli": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-renderer-static-actual01.json",
+      "bytes": 25542,
+      "sha256": "72f947ebcc0893e17551e7e5aaa4918fcd4172b0a93f766f86e2455382bf22f7"
+    },
+    "sourceSnapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-web-renderer-source45-rust01-snapshot.json",
+      "bytes": 710778,
+      "sha256": "17ed681c08fa65f9b9f018518ab044cd98a254b37cfe401f248c652b6aa31e59"
+    },
+    "declaredInputs": 917,
+    "copies": 909,
+    "externalReferences": 8,
+    "cargoCalls": 3,
+    "staticCliCalls": 6,
+    "allExitZero": true,
+    "allCargoActualPolicyBClosed": true,
+    "strictCargoSerial": true,
+    "guardMinimumBytes": 53687091200,
+    "guardFreshMaxMs": 2000,
+    "probeTimeoutMs": 15000,
+    "actualMinimumCBytes": 198441242624,
+    "actualFreshnessUpperMaxMs": 77,
+    "byteBudget": 32505856,
+    "jsByteBudget": 204800,
+    "outputs": [
+      {
+        "backend": "webgpu",
+        "output": {
+          "path": "C:/mir2-cross-platform-storage-20261002/web-renderer-source45-static01/optimized/webgpu/mir2_bevy_runtime_bg.wasm",
+          "bytes": 31467818,
+          "sha256": "b389d7ba3c84a42147f87d8580ee91bd1625e85ba48e8d68d165ab0c49257681"
+        },
+        "headroomBytes": 1038038,
+        "byteBudgetPass": true
+      },
+      {
+        "backend": "webgl2",
+        "output": {
+          "path": "C:/mir2-cross-platform-storage-20261002/web-renderer-source45-static01/optimized/webgl2/mir2_bevy_runtime_bg.wasm",
+          "bytes": 17745325,
+          "sha256": "b4633d36f677ed04318dbfe4ded0953cddeb54b27e65c2fb290b9c08060f2f6e"
+        },
+        "headroomBytes": 14760531,
+        "byteBudgetPass": true
+      },
+      {
+        "backend": "webgl2-shared",
+        "output": {
+          "path": "C:/mir2-cross-platform-storage-20261002/web-renderer-source45-static01/optimized/webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "bytes": 32429102,
+          "sha256": "a67e58f4723b9f1d6d33d87ab28c614a8b15cb86480fc49e51f68d72a1ce592e"
+        },
+        "headroomBytes": 76754,
+        "byteBudgetPass": true
+      }
+    ],
+    "sharedHeroJsWrappersPresentAsText": [
+      "webgpu",
+      "webgl2-shared"
+    ],
+    "leanWebgl2HasNoSharedHeroCapabilityClaim": true,
+    "unpublished": true,
+    "metadataVerified": false,
+    "normalizedAbiVerified": false,
+    "nameVerified": false,
+    "defaultGzipVerified": false,
+    "initVerified": false,
+    "fullOriginalProductionBuildAccepted": false,
+    "publicFilesReplaced": false
+  },
+  "sourceIntervals": {
+    "rustAll917FinalRehashMatched": true,
+    "webAll17136FinalRehashMatched": true,
+    "web": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-stage5-01-source.json",
+      "bytes": 5965630,
+      "sha256": "61c9d932aab9943e91c35e986a7ac47e4d693b504d84dfc895a1d8eb2d1eafbb"
+    },
+    "currentOwnedSourcePins": [
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\hero_ui_host.rs",
+        "bytes": 101634,
+        "sha256": "c6fb5573e7b60ae28fda739c367075f7e151662bfe04eed76b201bfe02f42fc6"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_hero_ui.rs",
+        "bytes": 48418,
+        "sha256": "4a06df4ced85c5e63365c775eac2018f4b5a3c3e214acad7c7163a0bf39a4542"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-hero-ui.ts",
+        "bytes": 27141,
+        "sha256": "892dd87dd857486b504d7a02274a5f36770d83105256f9ff073f819f742b22e1"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-hero-host.ts",
+        "bytes": 37310,
+        "sha256": "62fe12c38fbe739f6f2b1ac29ad71ffaa9d1dbb47261518dbbf8fa0d85fb5122"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\use-bevy-hero-ui.ts",
+        "bytes": 3206,
+        "sha256": "1b9546cb6380b836e0cec2c666c41522ace852b1d75c2f459cd26cc3002e12c4"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+        "bytes": 1057610,
+        "sha256": "aee83fbdd2e463bfb78b32a97e354a96b39d532769317e576bb442fa13512ef6"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+        "bytes": 331360,
+        "sha256": "9e014ad2578dc6105462bcee2c73d7748ba7cab9650946c934da476a676a52bb"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+        "bytes": 18732,
+        "sha256": "55b7cdb51cb4e4f144b2cadd26b8bc68b48c7b34821754cf6f55244d1e93d81c"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+        "bytes": 738080,
+        "sha256": "8353102c15461c62f540ca630a5783e58e6113672dc3e33e937fcabf4e1b2629"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-npc-shop-surface-integration.mjs",
+        "bytes": 57445,
+        "sha256": "985a9f9d8316218caea52ee5b59486195fbec5876a8735f3fcc700094556b628"
+      }
+    ],
+    "tsconfigPreserved": {
+      "path": "apps/web/tsconfig.json",
+      "bytes": 4932,
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+    },
+    "foreignBackendAndDocBodiesPreservedAndExcluded": true
+  },
+  "rawEvidence": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-raw-evidence01.json",
+    "bytes": 165383,
+    "sha256": "a11c0901c6a0ca1b1a6613b3a9ec6e1759eac773ac68053841b6c0d3080f61fe"
+  },
+  "independentSourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-hero-success-tests-independent-review01.json",
+    "bytes": 6771,
+    "sha256": "82872aac93b4c4c5fa748cc0de6fceb9456ebdb391c5fce366a857c341c3dd22"
+  },
+  "priorActualPublication": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-hero-source44-publication01.json",
+    "bytes": 16978,
+    "sha256": "8fb149a7d481e0239ae278a57d4eb6be39166b5a36711898f730fbb9702c3d97"
+  },
+  "delivery": {
+    "lastCompleteWebPackage": "Source25 Next08/Thin08",
+    "lastCompleteWebContainsThroughSource": 25,
+    "source45FullWebPackageProduced": false,
+    "source45WindowsExeProduced": false,
+    "corePuiNpcCurrentSourceMatch": "pending separate review",
+    "remaining": [
+      "Full original renderer metadata/name/normalizedABI/defaultgzip/init gates",
+      "Core/PUI/NPC exact source matching and required fresh builds",
+      "Windows EXE update where sources changed",
+      "Full Next/Thin artifact with latest runtime files",
+      "Login/Quest/battle/save/relogin and mobile/player acceptance"
+    ],
+    "playableVerified": false,
+    "playableDate": null
+  },
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "wasmApiUsed": false,
+  "networkUsed": false,
+  "qualification": "Fresh renderer compilation and static conversions are actual progress. They do not establish full release acceptance, real Ready, player flow or a trustworthy overall playable percentage."
+}

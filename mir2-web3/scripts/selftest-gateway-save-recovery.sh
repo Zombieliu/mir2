@@ -98,6 +98,45 @@ wait_for_file() {
   fail "$label"
 }
 
+wait_for_process_group_exit() {
+  # wait(1) only reaps the Bash leader. A signalled Python child may still be
+  # running its finally/fsync cleanup after that leader has exited. Wait for all
+  # live members, but not zombies, before asserting the on-disk result.
+  /usr/bin/python3 -I - "$1" "${2:-10}" <<'PY'
+import os
+import sys
+import time
+
+group_id = int(sys.argv[1])
+timeout = float(sys.argv[2])
+if group_id <= 1 or not 0 < timeout <= 10:
+    raise SystemExit("invalid fixture process-group wait bound")
+deadline = time.monotonic() + timeout
+while True:
+    live_members = []
+    with os.scandir("/proc") as entries:
+        for entry in entries:
+            if not entry.name.isdigit():
+                continue
+            try:
+                with open(f"/proc/{entry.name}/stat", "rb") as process_stat:
+                    raw = process_stat.read()
+            except (FileNotFoundError, ProcessLookupError):
+                continue
+            fields = raw[raw.rfind(b") ") + 2:].split()
+            if len(fields) < 3:
+                raise SystemExit("could not inspect fixture process-group state")
+            if int(fields[2]) == group_id and fields[0] not in {b"Z", b"X"}:
+                live_members.append(entry.name)
+    if not live_members:
+        break
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise SystemExit("fixture process group did not exit within its deadline")
+    time.sleep(min(0.025, remaining))
+PY
+}
+
 sha256_file() {
   if command -v sha256sum >/dev/null 2>&1; then
     sha256sum "$1" | awk '{print $1}'
@@ -1258,6 +1297,105 @@ case "$platform" in
     [ -x /usr/bin/setsid ] ||
       fail "Linux security gate requires /usr/bin/setsid for SIGKILL fixtures"
 
+    # Exercise the actual wait helper against a delayed child, an unreaped
+    # zombie, and a still-running group. A timeout must remain a gate failure.
+    declare -f wait_for_process_group_exit > "$test_tmp/wait-group-function.sh"
+    if ! /usr/bin/python3 -I - "$test_tmp" \
+      > "$test_tmp/wait-group-selftest.log" 2>&1 <<'PY'
+import os
+import pathlib
+import signal
+import subprocess
+import sys
+import time
+
+root = pathlib.Path(sys.argv[1])
+helper = root / "wait-group-function.sh"
+
+
+def wait_group(group_id, timeout):
+    return subprocess.run(
+        ["bash", "-c", 'source "$1"; wait_for_process_group_exit "$2" "$3"',
+         "fixture-wait", str(helper), str(group_id), str(timeout)],
+        capture_output=True, text=True, timeout=3,
+    )
+
+
+def eventually(predicate):
+    deadline = time.monotonic() + 3
+    while not predicate():
+        if time.monotonic() >= deadline:
+            raise AssertionError("process-group fixture did not become ready")
+        time.sleep(0.005)
+
+
+def terminate_fixture(process):
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    process.wait(timeout=3)
+
+
+worker = root / "delayed-cleanup.py"
+worker.write_text("""import pathlib, signal, sys, time
+root = pathlib.Path(sys.argv[1])
+def interrupted(signum, frame):
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    time.sleep(0.25)
+    (root / 'cleanup-complete').write_text('complete')
+    raise SystemExit(1)
+signal.signal(signal.SIGTERM, interrupted)
+(root / 'cleanup-ready').write_text('ready')
+while True:
+    signal.pause()
+""")
+leader = subprocess.Popen(
+    ["bash", "-c", '/usr/bin/python3 -I "$1" "$2" & wait',
+     "delayed-cleanup", str(worker), str(root)], start_new_session=True,
+)
+try:
+    eventually(lambda: (root / "cleanup-ready").is_file())
+    os.killpg(leader.pid, signal.SIGTERM)
+    leader.wait(timeout=3)
+    result = wait_group(leader.pid, 2)
+    assert result.returncode == 0, result.stderr
+    assert (root / "cleanup-complete").is_file(), "live child cleanup was not awaited"
+finally:
+    terminate_fixture(leader)
+
+zombie_pid = os.fork()
+if zombie_pid == 0:
+    os.setsid()
+    os._exit(0)
+try:
+    def is_zombie():
+        raw = pathlib.Path(f"/proc/{zombie_pid}/stat").read_bytes()
+        return raw[raw.rfind(b") ") + 2:].split()[0] == b"Z"
+    eventually(is_zombie)
+    result = wait_group(zombie_pid, 0.2)
+    assert result.returncode == 0, "an exited zombie must not cause timeout"
+finally:
+    os.waitpid(zombie_pid, 0)
+
+live = subprocess.Popen(["sleep", "30"], start_new_session=True)
+try:
+    started = time.monotonic()
+    result = wait_group(live.pid, 0.15)
+    elapsed = time.monotonic() - started
+    assert result.returncode != 0, "live group timeout must fail closed"
+    assert "within its deadline" in result.stderr, result.stderr
+    assert 0.14 <= elapsed < 2, "process-group wait must be bounded"
+    assert live.poll() is None, "wait helper must not kill a live process"
+finally:
+    terminate_fixture(live)
+print("PASS: process-group wait observes cleanup, ignores zombies and fails on timeout")
+PY
+    then
+      cat "$test_tmp/wait-group-selftest.log" >&2
+      fail "Linux process-group wait regression failed"
+    fi
+
     publisher_fixture_uid="$(id -u)"
     foreign_fixture_uid=$((publisher_fixture_uid + 1))
     run_success "explicit publisher UID boundary rejected the effective publisher" \
@@ -1676,6 +1814,8 @@ SH
         "$residue_kind TERM residue fixture was not ready"
       kill -TERM -- "-$residue_term_pid"
       wait "$residue_term_pid" 2>/dev/null || true
+      wait_for_process_group_exit "$residue_term_pid" ||
+        fail "$residue_kind TERM fixture did not finish within 10 seconds"
       if find "$residue_term_root" -mindepth 1 -maxdepth 1 -print -quit |
         grep -q .; then
         fail "$residue_kind TERM did not clean its private transaction"

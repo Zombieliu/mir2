@@ -1,0 +1,85 @@
+{
+  "kind": "Source41 actual scoped Git publication",
+  "generatedAtUtc": "2026-10-08 08:35:27 UTC",
+  "branch": "codex/windows-player-journey",
+  "commit": "1ff247c37bb9c420cfff6b5e7c280691fe949c02",
+  "parent": "8e64c987849137b56a67fda4b64f18b0645917eb",
+  "title": "Connect Web Hero raw ingress with retained runtime custody",
+  "commitActual": {
+    "chunk_id": "42da4d",
+    "wall_time_seconds": 0.3897362,
+    "exit_code": 0,
+    "original_token_count": 310,
+    "output": "[codex/windows-player-journey 1ff247c37b] Connect Web Hero raw ingress with retained runtime custody\n 20 files changed, 5385 insertions(+), 28 deletions(-)\n create mode 100644 mir2-web3/apps/web/lib/bevy-hero-ui.ts\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-publication01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-actual-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-finite-result02.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-historical-failures01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-late-foreign-qualification01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-raw-evidence01.json\n"
+  },
+  "pushInitial": {
+    "chunk_id": "9631ca",
+    "wall_time_seconds": 10.0041946,
+    "session_id": 95757,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "pushCompletion": {
+    "chunk_id": "c55c19",
+    "wall_time_seconds": 0.0000073,
+    "exit_code": 0,
+    "original_token_count": 25,
+    "output": "To github.com:Zombieliu/mir2.git\n   8e64c98784..1ff247c37b  HEAD -> codex/windows-player-journey\n"
+  },
+  "remoteQueryActual": {
+    "chunk_id": "a3247d",
+    "wall_time_seconds": 5.4313158,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "1ff247c37bb9c420cfff6b5e7c280691fe949c02\trefs/heads/codex/windows-player-journey\n"
+  },
+  "trackedStatusActual": {
+    "chunk_id": "785885",
+    "wall_time_seconds": 0.2456005,
+    "exit_code": 0,
+    "original_token_count": 149,
+    "output": " M mir2-web3/Cargo.lock\n M mir2-web3/Cargo.toml\n M mir2-web3/apps/simulation/Cargo.toml\n M mir2-web3/apps/simulation/src/config.rs\n M mir2-web3/apps/simulation/src/lib.rs\n M mir2-web3/apps/simulation/src/runtime/mod.rs\n M mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction.rs\n M mir2-web3/apps/simulation/src/runtime/resources.rs\n M mir2-web3/apps/simulation/src/runtime/save.rs\n M mir2-web3/apps/web/tsconfig.json\n M mir2-web3/docs/AGENT-TASK-QUEUE.md\n M mir2-web3/docs/BACKEND-1TO1-PROGRESS.md\n M mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\n M mir2-web3/docs/CRYSTAL-SERVER-PARITY.md\n"
+  },
+  "indexAfterCommitActual": {
+    "chunk_id": "25f6bb",
+    "wall_time_seconds": 0.1883123,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "independentRemoteMatches": true,
+  "forceUsed": false,
+  "persistentRemoteOrSshChanged": false,
+  "validation": {
+    "rustExecutions": 92,
+    "rustNormalizedFunctions": 79,
+    "webTapTests": 184,
+    "stage5LogicalGroups": 457,
+    "typeScriptDiagnostics": 0,
+    "qualification": "All original finite runs passed against their execution-time source freezes; late foreign manufacturing changes remain outside this commit and were not revalidated as a whole checkout. Tests are not player acceptance."
+  },
+  "lineEndings": "The tested working-tree Page source retains its frozen byte hash; Git reported CRLF normalization to LF on index. Exact HEAD byte identity to that test source is not asserted.",
+  "qualification": "Actual scoped code commit and nonforced push only. No new complete Web package, GUI, WASM API/instance, matching Ready, player acceptance or whole-goal completion.",
+  "goalStatus": "active",
+  "goalComplete": false,
+  "result": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-finite-result02.json",
+    "bytes": 115834,
+    "sha256": "3c3acb87ef52cb1224b167bf160224e6b17c030fbf3476fe762d788b6b8b200b"
+  },
+  "actualReview": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-actual-review01.json",
+    "bytes": 6889,
+    "sha256": "bf985fe105de437e687095f245c8652093c56336f52a4b89e1f88fcfe0fd9fd4"
+  },
+  "lateForeignQualification": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-late-foreign-qualification01.json",
+    "bytes": 5401,
+    "sha256": "ceb9b534d507375cb92aa7ef609ace0d3501fa71ea3ecbbf8e8a5e7497ea1e88"
+  },
+  "userTsconfig": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  }
+}
