@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Five-class R26 packaging correction, 2026-10-12: the actual package attempt
+> correctly rejected a three-class coverage identity. Two Node invocations now
+> propagate the selected profile; its real bytes and route sources are checked.
+> Original D71653/208+209/resource/CI gates and global default are retained.
+> Actual Node15/0/0 and original PowerShell scope tests pass, including wrong-
+> profile rejection in both directions. Original RED is preserved. New clean
+> Source, genuine V2 build, fresh guarded package and paired publication remain
+> pending; no human acceptance. [Exact evidence](FIVE-CLASS-R26-MAP-PROFILE-20261012.md).
+
+
 > NPC spawn/P4 task changes integrated with actually published activities, 2026-10-12:
 > original32a7 and livebad3737 histories and account schema9 are both preserved.
 > Merged790 distinct local checks pass (439unit+225integration+97Gateway+29website);

@@ -20,6 +20,22 @@ $report = [pscustomobject]@{
         unreachableMaps = @('d71653'); unreachableRuntimeMaps = @(); resourceOnlyRooms = @($proof.rooms) }
 }
 Assert-CandidateMapCoverageScope -Report $report -ScopeMode profile -ExpectedMapNames $scope.expectedMaps | Out-Null
+$classicProfilePath = $script:CandidateContentProfilePath
+try {
+    $script:CandidateContentProfilePath = Join-Path (Split-Path -Parent $classicProfilePath) 'platinum_fiveclass.json'
+    $fiveProfile = Get-Content -LiteralPath $script:CandidateContentProfilePath -Raw | ConvertFrom-Json
+    $fiveScope = Resolve-CandidateMapScope
+    if ($fiveScope.profileId -cne 'platinum_fiveclass' -or $fiveScope.profileVersion -ne $fiveProfile.version -or
+        $fiveScope.profileSha256 -cne (Get-FileHash -LiteralPath $script:CandidateContentProfilePath -Algorithm SHA256).Hash.ToLowerInvariant() -or
+        ($fiveScope.expectedMaps -join ',') -cne ($scope.expectedMaps -join ',') -or $fiveScope.profileSha256 -ceq $scope.profileSha256) {
+        throw 'Five-class map scope must retain the same map set with its own exact profile identity'
+    }
+    $fiveReport = Copy-Report $report
+    $fiveReport.scope = $fiveScope
+    Assert-CandidateMapCoverageScope -Report $fiveReport -ScopeMode profile -ExpectedMapNames $fiveScope.expectedMaps | Out-Null
+    Assert-Rejected { Assert-CandidateMapCoverageScope -Report $report -ScopeMode profile -ExpectedMapNames $fiveScope.expectedMaps } 'classic report used for five-class maps'
+} finally { $script:CandidateContentProfilePath = $classicProfilePath }
+Assert-Rejected { Assert-CandidateMapCoverageScope -Report $fiveReport -ScopeMode profile -ExpectedMapNames $scope.expectedMaps } 'five-class report used for classic maps'
 $missing = Copy-Report $report
 $missing.mapNames = @($missing.mapNames | Where-Object { $_ -cne 'd10054' })
 Assert-Rejected { Assert-CandidateMapCoverageScope -Report $missing -ScopeMode profile } 'omitted classic side branch'

@@ -4,8 +4,9 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { resolveCandidateMapScope, compareCandidateMapScope, describeCandidateMapTopology, proveCandidateResourceOnlyRooms } from './audit-candidate-map-coverage.mjs';
+import { resolveCandidateMapScope, compareCandidateMapScope, describeCandidateMapTopology, proveCandidateResourceOnlyRooms, loadCandidateMapProfileSources } from './audit-candidate-map-coverage.mjs';
 import { loadCrystalQuestRouteSources } from '../../../web/scripts/quest-agent/route-manifest.mjs';
 
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..');
@@ -148,4 +149,68 @@ test('CLI fails omitted scope before any atlas completion or asset read', t => {
   assert.deepEqual(rejected.omittedMaps, ['d10054']);
   assert.equal(rejected.scope.expectedMaps.length, 209);
   assert.equal(fs.existsSync(completion), false);
+});
+
+test('five-class terrain binds its own bytes and route profile while retaining original room proof', async () => {
+  const selected = await loadCandidateMapProfileSources('platinum_fiveclass');
+  const fiveProfile = selected.sources.contentProfile;
+  const fiveScope = resolveCandidateMapScope({ profile: fiveProfile, profileBytes: selected.profileBytes });
+  assert.equal(fiveScope.profileId, 'platinum_fiveclass');
+  assert.equal(fiveScope.profileVersion, fiveProfile.version);
+  assert.equal(fiveScope.profileSha256, createHash('sha256').update(selected.profileBytes).digest('hex'));
+  assert.notEqual(fiveScope.profileSha256, scope.profileSha256);
+  assert.deepEqual(fiveScope.expectedMaps, scope.expectedMaps);
+  assert.deepEqual(fiveProfile.mapWhitelist, profile.mapWhitelist);
+  assert.deepEqual(fiveScope.resourceOnlyMaps, ['d71653']);
+  assert.deepEqual(describeCandidateMapTopology(selected.sources, fiveScope.expectedMaps).unreachableRuntimeMaps, []);
+  assert.equal((await loadCrystalQuestRouteSources()).contentProfile.profileId, 'platinum_176');
+  assert.throws(() => resolveCandidateMapScope({ profile: fiveProfile, profileBytes }), /bytes do not match/);
+  const withEntry = structuredClone(selected.sources);
+  withEntry.respawnManifest.maps.find(map => map.map_file_name === '0').movements.push({ map_index: 235 });
+  assert.throws(() => proveCandidateResourceOnlyRooms(fiveProfile, withEntry), /original no-entry source proof/);
+});
+
+test('CLI explicit five-class omission reports the selected identity before atlas completion', t => {
+  const parent = path.resolve(process.env.MIR2_MAP_TEST_OUTPUT_ROOT ?? os.tmpdir());
+  fs.mkdirSync(parent, { recursive: true });
+  const fixture = fs.mkdtempSync(path.join(parent, 'fiveclass-map-scope-'));
+  if (!process.env.MIR2_MAP_TEST_OUTPUT_ROOT) t.after(() => {
+    const relative = path.relative(parent, path.resolve(fixture));
+    assert.ok(!relative.startsWith('..') && !path.isAbsolute(relative) && path.basename(fixture).startsWith('fiveclass-map-scope-'));
+    fs.rmSync(fixture, { recursive: true, force: true });
+  });
+  const manifest = path.join(fixture, 'manifest.json'), receipt = path.join(fixture, 'rejected.json');
+  const completion = path.join(fixture, 'must-not-be-created');
+  fs.writeFileSync(manifest, JSON.stringify({ mapFileNames: scope.expectedMaps.filter(name => name !== 'd10054') }));
+  const result = spawnSync(process.execPath, [fileURLToPath(new URL('./audit-candidate-map-coverage.mjs', import.meta.url)),
+    '--contentProfile', 'platinum_fiveclass', '--manifest', manifest, '--output', receipt, '--completeAtlasRoot', completion], { encoding: 'utf8' });
+  assert.equal(result.status, 1, result.stderr);
+  const rejected = JSON.parse(fs.readFileSync(receipt));
+  const actualBytes = fs.readFileSync(path.join(project, 'packages/game-data/data/content_profiles/platinum_fiveclass.json'));
+  assert.equal(rejected.scope.profileId, 'platinum_fiveclass');
+  assert.equal(rejected.scope.profileVersion, JSON.parse(actualBytes).version);
+  assert.equal(rejected.scope.profileSha256, createHash('sha256').update(actualBytes).digest('hex'));
+  assert.deepEqual(rejected.omittedMaps, ['d10054']);
+  assert.equal(rejected.passed, false);
+  assert.equal(fs.existsSync(completion), false);
+});
+
+test('CLI refuses missing and unsupported selected profiles without falling back to classic', t => {
+  const parent = path.resolve(process.env.MIR2_MAP_TEST_OUTPUT_ROOT ?? os.tmpdir());
+  fs.mkdirSync(parent, { recursive: true });
+  const fixture = fs.mkdtempSync(path.join(parent, 'fiveclass-map-profile-'));
+  if (!process.env.MIR2_MAP_TEST_OUTPUT_ROOT) t.after(() => {
+    const relative = path.relative(parent, path.resolve(fixture));
+    assert.ok(!relative.startsWith('..') && !path.isAbsolute(relative) && path.basename(fixture).startsWith('fiveclass-map-profile-'));
+    fs.rmSync(fixture, { recursive: true, force: true });
+  });
+  const manifest = path.join(fixture, 'manifest.json'), completion = path.join(fixture, 'must-not-be-created');
+  fs.writeFileSync(manifest, JSON.stringify({ mapFileNames: scope.expectedMaps }));
+  for (const selected of [[], ['later-world'], ['../platinum_fiveclass']]) {
+    const result = spawnSync(process.execPath, [fileURLToPath(new URL('./audit-candidate-map-coverage.mjs', import.meta.url)),
+      '--manifest', manifest, '--completeAtlasRoot', completion, '--contentProfile', ...selected], { encoding: 'utf8' });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /Content profile must be platinum_176 or platinum_fiveclass/);
+    assert.equal(fs.existsSync(completion), false);
+  }
 });
