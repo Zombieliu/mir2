@@ -1,5 +1,16 @@
 # 远程分支、玩家客户端与充值代码集成（2026-10-15，北京时间）
 
+## Gateway 空场等待：保留真实刷新与任务强断言（2026-10-16，北京时间）
+
+上一提交 `5491d0c8` 的 Home、Desktop、四平台 Developer Environment/真实 Compose、完整 Web Handoff 和 Cross-platform 均通过；Candidate Linux 通过，Windows 的 native 1138、vertical slice 13、ordinary loop 2、security 21、shared Zone 209 均通过，最后 Gateway 为 4/5。失败现场是原版 Q4 已击杀 11 只鹿、持有 4 份鹿肉后，完整普通行走覆盖中暂时没有合格活鹿，不能以当前视野或个人 tick 数保证五分钟世界刷新已经发生。
+
+本次仅在该测试的完整覆盖仍为空时，按真实地图规则等待并继续普通 Walk 搜索。西侧 Deer 规则 48 的 5 分钟、零随机延时，加 30 秒调度余量，给出 330 秒上限；记录角色真实生死/HP、位置、范围内外可见数量和等待结果。原 30 杀、120 任务尝试、80 战斗、600 starter、54 Harvest 和 12 次接受但无伤预算不变，任务 Ready、实物材料、奖励、保存及密码重登断言全部保留。
+
+实际完整 target **5 passed / 0 failed / 0 ignored，537.79s**。本轮 Q4 确实在第 11 杀、2 份材料后进入空场分支，角色 HP 30/30；真实等待 **180.222 秒** 后重新发现范围内活鹿，未超时，随后第 18 杀集齐 5 份鹿肉，完成交付、奖励、保存和重登。观察证明等待后的目标恢复，不把未追踪的单个生成事件当成证据。构建和执行命令、fixture/log SHA、前序 CI 边界见[持久空场等待收据](generated/player-qa/recharge-readiness-20261015/gateway-natural-respawn-20261016.json)。Rust 1.89 格式和 diff 检查通过；首次同名二进制链接锁定改用独立输出名构建，没有终止或修改其他进程。
+
+没有改生产刷新、墙钟、HP、掉落概率或 RNG；既有随机掉落的有限击杀预算仍不构成数学保证。最终新 SHA CI 与合入结果以 [PR #255](https://github.com/Zombieliu/mir2/pull/255) 为准。Core 指纹输入不含本测试和文档；旧动作调度收据保留其原 SHA，不覆写成新结果。未部署服务器或发布 R2，仍为 `Candidate100=false`。下方记录保留为历史。
+
+
 ## 最后 Gateway 功能门禁：真实动作时钟与完整任务链（2026-10-16，北京时间）
 
 Gateway persistence 本地完整 target 已为 **5 passed / 0 failed / 0 ignored，194.40s**；此前同配置 baseline 为 3/5，失败在 starter 任务和原版 Q4 鹿肉收集，旧日志保留。修复限定 `apps/gateway/tests/vertical_slice_gateway_persistence.rs`：Attack/Harvest 自带方向，测试移除紧邻它们的 Turn，并以真实墙钟等待 Warrior swing 600ms、独立 action 550ms 与 Harvest 350ms。拒绝包不消耗“12 次接受但无伤”的统计，80/600/54 总尝试预算不变；原 Ready、实物掉落、金币拾取、原版奖励、存档和密码重登强断言保留，新增 owner ObjectAttack 接受收据断言。先行 starter exact 1/1、Rust 1.89 单文件格式检查均通过；生产冷却、伤害、装备及任务实现未改。命令、fixture SHA 和前后日志 SHA 见[持久 Gateway 收据](generated/player-qa/recharge-readiness-20261015/gateway-action-timing-20261016.json)。

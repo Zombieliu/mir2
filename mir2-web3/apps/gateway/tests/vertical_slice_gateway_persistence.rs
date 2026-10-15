@@ -1042,6 +1042,118 @@ fn harvest_corpse(
     packets
 }
 
+fn search_monster_field(
+    session: &mut GatewaySession,
+    monster_name: &str,
+    field_centers: &[Point],
+    excluded_object_ids: &BTreeSet<u32>,
+    hunt_bounds: Option<HuntBounds>,
+    active_field_center: &mut Option<Point>,
+    packets: &mut Vec<ServerPacket>,
+    deadline: Option<Instant>,
+) -> Option<WorldEntitySnapshot> {
+    if deadline.is_some_and(|deadline| Instant::now() >= deadline) {
+        return None;
+    }
+    if let Some(monster) =
+        nearest_alive_monster(session, monster_name, excluded_object_ids, hunt_bounds)
+    {
+        return Some(monster);
+    }
+    // Keep the same collision-aware ordinary Walk coverage on first search
+    // and on retries. A static grid covers spawn slots, not a promise that
+    // timid live Deer remain inside the northern hunt boundary forever.
+    for search_point in field_search_points_nearest_first(session, field_centers, hunt_bounds) {
+        if deadline.is_some_and(|deadline| Instant::now() >= deadline) {
+            return None;
+        }
+        if !try_walk_within(session, &search_point, 8) {
+            continue;
+        }
+        for _ in 0..8 {
+            if deadline.is_some_and(|deadline| Instant::now() >= deadline) {
+                return None;
+            }
+            packets.extend(session.tick());
+            if let Some(monster) =
+                nearest_alive_monster(session, monster_name, excluded_object_ids, hunt_bounds)
+            {
+                *active_field_center = Some(search_point);
+                return Some(monster);
+            }
+        }
+    }
+    None
+}
+
+fn field_respawn_wait_budget(
+    session: &GatewaySession,
+    monster_name: &str,
+    field_centers: &[Point],
+) -> Duration {
+    let map = session
+        .world_snapshot()
+        .map_file_name
+        .expect("entered hunt map");
+    let rules = mir2_game_data::crystal_map_respawns_by_file_name(&map)
+        .expect("original hunt map has a real respawn manifest");
+    let maximum_minutes = rules
+        .respawns
+        .iter()
+        .filter(|rule| {
+            rule.monster_name == monster_name
+                && field_centers
+                    .iter()
+                    .any(|center| center.x == rule.location.x && center.y == rule.location.y)
+        })
+        .map(|rule| u64::from(rule.delay_minutes) + u64::from(rule.random_delay_minutes))
+        .max()
+        .expect("hunt centers must identify an actual monster respawn rule");
+    // Western Deer rule 48 is five minutes with zero jitter. Mirror the
+    // Source minimum minute and allow only 30s for cadence/coverage scheduling;
+    // do not replace the Zone's wall-clock due time with personal tick counts.
+    Duration::from_secs(maximum_minutes.max(1).saturating_mul(60).saturating_add(30))
+}
+
+fn field_search_diagnostics(
+    session: &GatewaySession,
+    monster_name: &str,
+    hunt_bounds: Option<HuntBounds>,
+    packets: &[ServerPacket],
+) -> String {
+    let snapshot = session.world_snapshot();
+    let inside = |entity: &WorldEntitySnapshot| {
+        hunt_bounds.is_none_or(|bounds| {
+            bounds.contains(&Point {
+                x: entity.x,
+                y: entity.y,
+            })
+        })
+    };
+    let matching = snapshot
+        .entities
+        .iter()
+        .filter(|entity| entity.kind == WorldEntityKind::Monster && entity.name == monster_name)
+        .collect::<Vec<_>>();
+    let live_inside = matching
+        .iter()
+        .filter(|entity| inside(entity) && !entity.dead && entity.hp.is_none_or(|hp| hp > 0))
+        .count();
+    let dead_inside = matching
+        .iter()
+        .filter(|entity| inside(entity) && (entity.dead || entity.hp.is_some_and(|hp| hp <= 0)))
+        .count();
+    let live_outside = matching
+        .iter()
+        .filter(|entity| !inside(entity) && !entity.dead && entity.hp.is_none_or(|hp| hp > 0))
+        .map(|entity| (entity.object_id, entity.hp, entity.x, entity.y))
+        .collect::<Vec<_>>();
+    format!("{}; bounds={:?}, visible-in-bounds live={live_inside} dead={dead_inside}, visible-live-outside-count={} sample={:?}",
+        combat_diagnostics(session, monster_name, packets),
+        hunt_bounds.map(|bounds| (bounds.min_x, bounds.max_x, bounds.min_y, bounds.max_y)),
+        live_outside.len(), &live_outside[..live_outside.len().min(4)])
+}
+
 fn progress_original_item_quest(
     session: &mut GatewaySession,
     quest_id: i32,
@@ -1105,36 +1217,61 @@ fn progress_original_item_quest(
                 nearest_alive_monster(session, monster_name, &excluded_object_ids, hunt_bounds);
         }
         if monster.is_none() {
-            // Crystal respawn positions are scattered across each rule's
-            // spread, while Gateway AOI is smaller than a 50-tile field. Scan
-            // a coverage grid through ordinary Walk packets instead of
-            // assuming a live monster must sit near the rule's center.
-            for search_point in
-                field_search_points_nearest_first(session, field_centers, hunt_bounds)
-            {
-                if !try_walk_within(session, &search_point, 8) {
-                    continue;
-                }
-                for _ in 0..8 {
-                    packets.extend(session.tick());
-                    monster = nearest_alive_monster(
-                        session,
-                        monster_name,
-                        &excluded_object_ids,
-                        hunt_bounds,
-                    );
-                    if monster.is_some() {
-                        active_field_center = Some(search_point);
-                        break;
-                    }
-                }
-                if monster.is_some() {
+            monster = search_monster_field(
+                session,
+                monster_name,
+                field_centers,
+                &excluded_object_ids,
+                hunt_bounds,
+                &mut active_field_center,
+                &mut packets,
+                None,
+            );
+        }
+        if monster.is_none() && harvest {
+            let budget = field_respawn_wait_budget(session, monster_name, field_centers);
+            let waiting_since = Instant::now();
+            let deadline = waiting_since + budget;
+            eprintln!("gateway original q{quest_id}: complete coverage empty after {confirmed_player_kills}/{maximum_kills} kills, attempt={attempts}; waiting up to {}s for natural respawn; {}",
+                budget.as_secs(), field_search_diagnostics(session, monster_name, hunt_bounds, &packets));
+            while monster.is_none() && Instant::now() < deadline {
+                packets.extend(wait_for_client_action(
+                    session,
+                    deadline
+                        .saturating_duration_since(Instant::now())
+                        .min(Duration::from_millis(300)),
+                ));
+                if player(session).dead {
                     break;
                 }
+                if quest_stage(session, quest_id).is_some_and(|stage| {
+                    matches!(stage, QuestStage::ReadyToTurnIn | QuestStage::Completed)
+                }) {
+                    break;
+                }
+                monster = search_monster_field(
+                    session,
+                    monster_name,
+                    field_centers,
+                    &excluded_object_ids,
+                    hunt_bounds,
+                    &mut active_field_center,
+                    &mut packets,
+                    Some(deadline),
+                );
             }
+            eprintln!("gateway original q{quest_id}: natural respawn wait ended after {}ms, timed-out={}, found={:?}; {}",
+                waiting_since.elapsed().as_millis(), Instant::now() >= deadline, monster.as_ref().map(|monster| monster.object_id),
+                field_search_diagnostics(session, monster_name, hunt_bounds, &packets));
+        }
+        if quest_stage(session, quest_id)
+            .is_some_and(|stage| matches!(stage, QuestStage::ReadyToTurnIn | QuestStage::Completed))
+        {
+            break;
         }
         let monster = monster.unwrap_or_else(|| {
-            panic!("ordinary Gateway should expose {monster_name} near {field_centers:?}")
+            panic!("ordinary Gateway should expose {monster_name} near {field_centers:?}: confirmed-kills={confirmed_player_kills}/{maximum_kills}, attempt={attempts}, {}",
+                field_search_diagnostics(session, monster_name, hunt_bounds, &packets))
         });
         let experience_before = newcomer_cumulative_experience(session);
         let (combat_packets, corpse_position) =
