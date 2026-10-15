@@ -440,7 +440,10 @@ fn source_handoff_preserves_one_admission_and_rejects_a_stale_complete_postgres_
     assert!(checkpoint.durable.revision > admitted.save.revision);
     assert_eq!(checkpoint.source_tick, source.current_tick());
     assert_eq!(mail(&checkpoint.durable), delivered_mail);
-    let mut target = select(&scoped, &actor);
+    assert_eq!(checkpoint.account_id, actor.account_id);
+    // The target continues a server-authenticated admission without performing
+    // any password/passkey login or changing the SQL account row/version.
+    let mut target = InProcessWorldRuntime::new(open(&scoped));
     unchanged(&prepared, &durable(&mut observer, &actor));
     assert!(target
         .restore_active_character_checkpoint(&checkpoint.runtime)
@@ -520,7 +523,7 @@ fn source_handoff_preserves_one_admission_and_rejects_a_stale_complete_postgres_
         fresh.durable.default_npc_events,
         old.durable.default_npc_events
     );
-    let mut fresh_target = select(&scoped, &actor);
+    let mut fresh_target = InProcessWorldRuntime::new(open(&scoped));
     unchanged(&fresh_row, &durable(&mut observer, &actor));
     assert_resume(&mut fresh_target, &actor, &fresh);
     unchanged(&fresh_row, &durable(&mut observer, &actor));
