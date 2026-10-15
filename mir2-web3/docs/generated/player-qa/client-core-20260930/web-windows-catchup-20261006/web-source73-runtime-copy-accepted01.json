@@ -1,0 +1,27 @@
+{
+  "owner": "Root",
+  "kind": "Source73 independent runtime copy acceptance",
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/runtime-preparation01/runtime-snapshot01.json",
+    "bytes": 3621648,
+    "sha256": "458cc89933ae6ec26bf76da85726c5902aad0efe98992c08d4927924ca73645d"
+  },
+  "sourceThin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/thin-build-actual01.json",
+    "bytes": 2863,
+    "sha256": "559fc4da40f3f569d221531186ce1abfdb6fff3a280bb6ef98c39de8d8efda78"
+  },
+  "hashCompared": 4419,
+  "hashDifferences": 0,
+  "physicalMemberDifferences": 0,
+  "counts": {
+    "files": 4419,
+    "bytes": 315382564,
+    "directoriesIncludingRoot": 752
+  },
+  "accepted": true,
+  "runtimeStarted": false,
+  "uiTested": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

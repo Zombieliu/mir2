@@ -1,0 +1,73 @@
+{
+  "owner": "root",
+  "source": 64,
+  "observedAt": "2026-10-11T07:49:20.124Z",
+  "kind": "Actual original strict Next webpack build",
+  "sourceCount": 19585,
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/preparation/source64-source-snapshot01.json",
+    "bytes": 6768964,
+    "sha256": "52215cd0b76389d8326e7e52c4f4118fd7c9754a5cd0cb19b1d4e8814606f435"
+  },
+  "rootReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/root-approved01/source64-source-review01.json",
+    "bytes": 9513,
+    "sha256": "91618c9b0baabe90a0341a4a9931b29f8d491d69681dbf8d1f1c565c377742ac"
+  },
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+    "unchanged": true
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/root-approved01/next-build01-config.json",
+    "bytes": 4736,
+    "sha256": "b9d29f33dedad07d55e2ddd3d83327f66f9e830614718bbcd58094e9112e7cde"
+  },
+  "actual": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 64160,
+    "kind": "Source64 pending original strict Next webpack build",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 101425,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/root-approved01/next-build01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "strictTypeConfig": "tsconfig.source64-build01.json",
+  "typescriptSeconds": 11.9,
+  "staticPages": 13,
+  "userMainTypeConfigPreserved": true,
+  "fullSourceVerifiedBeforeAfter": true,
+  "originalControlPinsVerifiedBeforeAfter": true,
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/next-build01/stdout.log",
+    "bytes": 2024,
+    "sha256": "2ce6625046ae7d3ee9ec432f3b65c14eb7b0864dbd9f0c3519970bedffab9ee0"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/next-build01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outer": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/next-build01/outer.json",
+    "bytes": 512,
+    "sha256": "4fb5d82364cba2c2062a1c4b4a50394a25663b8a057fbe5b5c35319f2a9f4b48"
+  },
+  "nextBuildAccepted": true,
+  "thinPackageAccepted": false,
+  "limits": [
+    "Strict build is not actual browser/server purchase success",
+    "No new Rust or native build; current Source62 Gateway remains unchanged"
+  ],
+  "overallPercentage": null,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

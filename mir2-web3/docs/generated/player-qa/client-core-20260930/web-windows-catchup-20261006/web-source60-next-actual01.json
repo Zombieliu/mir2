@@ -1,0 +1,48 @@
+{
+  "source": "Source60",
+  "observedAt": "2026-10-11T04:40:05.097Z",
+  "callerExitCode": 0,
+  "owner": "Root",
+  "exitCode": 0,
+  "builderPid": 56508,
+  "kind": "Source60 original strict Next after bag-belt arbitration fix",
+  "exited": true,
+  "disposed": true,
+  "elapsedMs": 106998,
+  "configPath": "C:/mir2-cross-platform-storage-20261002/web-source60-bag-belt-arbitration-20261011-01/root-approved01/next-build01-config01.json",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "productionBuildAccepted": true,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\root-approved01\\next-build01-config01.json",
+    "bytes": 4839,
+    "sha256": "5f230e43a3d5c64f9448cbe7922cdfe09d8297bb1efc561479cbba2b141a3ed2"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\preparation\\source-snapshot.json",
+    "bytes": 6601070,
+    "sha256": "40610736392b150613c43c858cb71caa440b92623a7839647a27d15f67cce50c"
+  },
+  "inputCount": 19582,
+  "sourcePrePostCheckedByOriginalCaller": true,
+  "strictTypeScriptSeconds": 12,
+  "staticPages": 13,
+  "nextEnv": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\next-env.d.ts",
+    "bytes": 294,
+    "sha256": "40824cd3a3e08da08bc3d162a53b262423d70d0e68f58697709a68da8d064c69"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\next-build01\\stdout.log",
+    "bytes": 2024,
+    "sha256": "9f061133e3f61ee86ae8cd5ed6d91ecff0e3c9196c276b44d7983b603fe2327d"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source60-bag-belt-arbitration-20261011-01\\next-build01\\stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

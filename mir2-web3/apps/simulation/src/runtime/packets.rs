@@ -113,6 +113,12 @@ use super::quests::{
 use super::quests::quest_recurrence::{
     quest_completion_is_permanent, refresh_quest_recurrence,
 };
+use super::ranking_inspect::{
+    project_ranking_inspect, ranking_inspect_equipment_projection, ranking_inspect_live_facts,
+    resolve_ranking_inspect_target, saved_ranking_inspect_facts, RankingInspectIdentity,
+    RankingInspectOnlineProjection, RankingInspectSource,
+};
+use super::RankingInspectPresence;
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
     get_rented_items_impl, item_rental_fee_impl, item_rental_lock_fee_impl,
@@ -131,6 +137,12 @@ use super::resources::{
 };
 use super::save::*;
 use super::session::SimulationSession;
+use super::npc_gold_buy_outcome::{finish_npc_gold_buy_processing, NpcGoldBuyRequest,
+    NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingOutcome, NpcGoldBuyProcessingError,
+    NpcGoldBuyProcessingExecution};
+use super::npc_purchase_outcome::{finish_npc_purchase_processing, NpcPurchaseRequest,
+    NpcPurchaseBeforeExecution, NpcPurchaseProcessingOutcome, NpcPurchaseProcessingError,
+    NpcPurchaseProcessingExecution};
 use super::skills::{
     assign_magic_key, cast_skill_with_context, skill_key_for_crystal_spell, SkillCastContext,
 };
@@ -6875,6 +6887,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         free_bag_slots: free_bag_slots(resources),
         max_bag_slots: crate::config::crystal_bag_slot_capacity(resources.inventory_capacity),
         inventory_capacity: resources.inventory_capacity,
+        npc_gold_trade_capacity: Some(npc_gold_trade_capacity_evidence(resources)),
         storage_size: resources.storage_size,
         has_expanded_storage: resources.has_expanded_storage,
         has_storage_password: resources.storage_has_password,
@@ -6937,6 +6950,8 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         hero_stats:hero_stats.snapshot(),
         hero_vitals,
         hero_weights:crate::config::HeroWeightsSnapshot {bag:hero_stats.bag,wear:hero_stats.wear,hand:hero_stats.hand},
+        hero_max_experience: stage5.stage5_systems.hero.as_ref().map(|hero| mir2_game_data::crystal_hero_settings().max_experience(hero.level)),
+        native_npc_shop: super::npc_purchase_snapshot::current_shop(world),
         storage_items: resources
             .storage_items
             .iter()
@@ -8104,6 +8119,7 @@ pub(super) fn collect_world_entities(
                 .flatten(),
             dazed: self_marker.is_some().then_some(self_dazed).flatten(),
             fishing: self_marker.is_some().then_some(self_fishing).flatten(),
+            transform_type: None,
             disposition,
             sprite,
             quest_ids,
@@ -8963,7 +8979,159 @@ fn stage5_get_ranking_packet(
     }]
 }
 
+/// Observer mode is disabled until its separate authoritative lifecycle exists.
+/// A disabled server policy determines the final permission without inventing a
+/// missing persisted personal AllowObserve flag.
+const RANKING_INSPECT_SERVER_ALLOWS_OBSERVE: bool = false;
+
+fn ranking_inspect_requester_identity(world: &World) -> Option<RankingInspectIdentity> {
+    let session = world.resource::<SessionResource>();
+    let account_id = active_session_mutating_account_id(session)?;
+    let character = session.selected_character.as_ref()?;
+    session.active_save_revision()?;
+    session.ranking_inspect_generation()?;
+    if !is_in_world(world) { return None; }
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let store = config.account_store.lock().ok()?;
+    let identity = RankingInspectIdentity {
+        account_id, character_index: character.index, name: character.name.clone(),
+    };
+    ranking_inspect_requester_matches_store(&store, &identity).then_some(identity)
+}
+
+fn ranking_inspect_requester_matches_store(
+    store: &crate::config::AccountStore,
+    identity: &RankingInspectIdentity,
+) -> bool {
+    let Some(account) = store.accounts.get(&identity.account_id) else { return false; };
+    let mut characters = account.characters.iter()
+        .filter(|character| character.index == identity.character_index);
+    characters.next().is_some_and(|character| character.name == identity.name)
+        && characters.next().is_none()
+}
+
+/// A server-created, single-use query snapshot. It is not serialized to clients.
+pub struct RankingInspectRequest {
+    requester: RankingInspectIdentity,
+    requester_entity: Entity,
+    requester_save_revision: u64,
+    requester_game_generation: u64,
+    target: RankingInspectIdentity,
+    player_id: u32,
+    store: crate::config::AccountStore,
+}
+
+impl RankingInspectRequest {
+    pub fn target_identity(&self) -> &RankingInspectIdentity { &self.target }
+}
+
+impl std::fmt::Debug for RankingInspectRequest {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.debug_struct("RankingInspectRequest")
+            .field("player_id", &self.player_id).finish_non_exhaustive()
+    }
+}
+
 impl SimulationSession {
+    pub fn prepare_ranking_inspect(&self, player_id: u32) -> Option<RankingInspectRequest> {
+        i32::try_from(player_id).ok()?;
+        let requester = ranking_inspect_requester_identity(self.app.world())?;
+        let requester_entity = player_entity(self.app.world())?;
+        let requester_save_revision = self.app.world().resource::<SessionResource>().active_save_revision()?;
+        let requester_game_generation = self.app.world().resource::<SessionResource>().ranking_inspect_generation()?;
+        let config = &self.app.world().resource::<RuntimeConfigResource>().config;
+        let store = config.ranking_inspect_authority_snapshot().ok()?;
+        if !ranking_inspect_requester_matches_store(&store, &requester) { return None; }
+        let target = resolve_ranking_inspect_target(&store, player_id).ok()?.identity();
+        Some(RankingInspectRequest {
+            requester, requester_entity, requester_save_revision, requester_game_generation, target, player_id, store,
+        })
+    }
+
+    /// Export exact current personal equipment only after an active Game owner
+    /// is proved. The gateway supplies its separate current Zone/life fence.
+    pub fn active_ranking_inspect_projection(&self) -> Option<RankingInspectOnlineProjection> {
+        let world = self.app.world();
+        let identity = ranking_inspect_requester_identity(world)?;
+        let player_id = u32::try_from(identity.character_index).ok()?;
+        let character = world.resource::<SessionResource>().selected_character.as_ref()?;
+        let systems = &world.resource::<Stage5SystemsResource>().stage5_systems;
+        let config = &world.resource::<RuntimeConfigResource>().config;
+        let store = config.account_store.lock().ok()?;
+        let target = resolve_ranking_inspect_target(&store, player_id).ok()?;
+        if target.identity() != identity { return None; }
+        let facts = ranking_inspect_live_facts(
+            &store, &target, systems.appearance.hair,
+            systems.relationship.partner_identity.as_ref(),
+            world.resource::<GmRuntimeResource>().allow_observe,
+            RANKING_INSPECT_SERVER_ALLOWS_OBSERVE,
+        ).ok()?;
+        let guild = facts.guild?;
+        let info = mir2_protocol::PlayerInspectInfo {
+            name: character.name.clone(), guild_name: guild.name, guild_rank: guild.rank,
+            equipment: ranking_inspect_equipment_projection(
+                &world.resource::<InventoryResource>().equipment_items,
+            ).ok()?,
+            class: character.class, gender: character.gender, level: character.level,
+            hair: systems.appearance.hair, lover_name: facts.lover_name?,
+            allow_observe: RANKING_INSPECT_SERVER_ALLOWS_OBSERVE
+                && world.resource::<GmRuntimeResource>().allow_observe,
+            is_hero: false,
+        };
+        Some(RankingInspectOnlineProjection {
+            identity, info, partner_identity: systems.relationship.partner_identity.clone(),
+        })
+    }
+
+    pub fn complete_ranking_inspect(
+        &self,
+        request: RankingInspectRequest,
+        presence: RankingInspectPresence,
+    ) -> Vec<ServerPacket> {
+        if ranking_inspect_requester_identity(self.app.world()).as_ref() != Some(&request.requester) {
+            return Vec::new();
+        }
+        if player_entity(self.app.world()) != Some(request.requester_entity)
+            || self.app.world().resource::<SessionResource>().active_save_revision()
+                != Some(request.requester_save_revision)
+            || self.app.world().resource::<SessionResource>().ranking_inspect_generation()
+                != Some(request.requester_game_generation)
+        { return Vec::new(); }
+        let Ok(target) = resolve_ranking_inspect_target(&request.store, request.player_id) else {
+            return Vec::new();
+        };
+        if target.identity() != request.target { return Vec::new(); }
+        let result = match &presence {
+            RankingInspectPresence::Unknown => return Vec::new(),
+            RankingInspectPresence::Online(projection) => {
+                let Some(projection) = projection else { return Vec::new(); };
+                let Ok(facts) = ranking_inspect_live_facts(
+                    &request.store, &target, projection.info.hair,
+                    projection.partner_identity.as_ref(), projection.info.allow_observe,
+                    RANKING_INSPECT_SERVER_ALLOWS_OBSERVE,
+                ) else { return Vec::new(); };
+                let Some(guild) = facts.guild else { return Vec::new(); };
+                let Some(lover_name) = facts.lover_name else { return Vec::new(); };
+                let mut projection = projection.clone();
+                projection.info.guild_name = guild.name;
+                projection.info.guild_rank = guild.rank;
+                projection.info.lover_name = lover_name;
+                projection.info.allow_observe = RANKING_INSPECT_SERVER_ALLOWS_OBSERVE
+                    && projection.info.allow_observe;
+                project_ranking_inspect(
+                    &target, RankingInspectSource::OnlinePlayer { projection: Some(&projection) },
+                )
+            }
+            RankingInspectPresence::Offline => {
+                let Ok(facts) = saved_ranking_inspect_facts(
+                    &request.store, &target, Some(RANKING_INSPECT_SERVER_ALLOWS_OBSERVE),
+                ) else { return Vec::new(); };
+                project_ranking_inspect(&target, RankingInspectSource::OfflinePlayer { facts: Some(&facts) })
+            }
+        };
+        result.map(|info| vec![ServerPacket::PlayerInspect { info }]).unwrap_or_default()
+    }
+
     pub(crate) fn dispatch_default_npc_source_packets(&mut self, packets: &mut Vec<ServerPacket>) {
         super::default_npc_events::dispatch_source_packets(self.app.world_mut(),packets);
     }
@@ -9043,7 +9211,90 @@ impl SimulationSession {
         }
     }
 
+    /// Local typed ordinary purchase. Existing session authentication and StartGame
+    /// are required independently of any trusted caller's authentication flag.
+    pub fn try_npc_gold_buy_with_outcome(&mut self, request: NpcGoldBuyRequest)
+        -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+        self.run_npc_gold_buy_with_outcome(request, |result| result)
+    }
+
+    fn run_npc_gold_buy_with_outcome<F>(&mut self, request: NpcGoldBuyRequest, postprocess: F)
+        -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError>
+    where F: FnOnce(Result<Vec<ServerPacket>, String>) -> Result<Vec<ServerPacket>, String> {
+        if active_session_mutating_account_id(self.app.world().resource::<SessionResource>()).is_none() {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::NotAuthenticated));
+        }
+        if !is_in_world(self.app.world()) {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::NotInGame));
+        }
+        // Capture belongs to this invocation only, including any later pipeline error.
+        let mut outcome = None;
+        // This typed entry contains unwind panics without inspecting their payload.
+        // Abort/process loss cannot yield processing evidence. Legacy packet entry
+        // intentionally retains its original panic behavior.
+        let packets = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let packets = self.try_handle_packet_recording_buy(request.packet(), Some(&mut outcome), None);
+            postprocess(packets)
+        })).unwrap_or_else(|_| Err("purchase processing panicked; outcome may be unknown".into()));
+        finish_npc_gold_buy_processing(packets, outcome)
+    }
+
+    #[cfg(test)]
+    pub(super) fn npc_gold_buy_with_postprocessing_failure(&mut self, request: NpcGoldBuyRequest)
+        -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+        self.run_npc_gold_buy_with_outcome(request, |result| result.and_then(|_| Err("controlled postprocessing failure".into())))
+    }
+
+    #[cfg(test)]
+    pub(super) fn npc_gold_buy_with_postprocessing_panic(&mut self, request: NpcGoldBuyRequest)
+        -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+        self.run_npc_gold_buy_with_outcome(request, |_| panic!("controlled postprocessing panic"))
+    }
+
+    /// All NPC currencies and goods sources use the actual handler's local result.
+    /// This requires authentication and StartGame; it does not provide a durable receipt.
+    pub fn try_npc_purchase_with_outcome(&mut self, request: NpcPurchaseRequest)
+        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+        self.run_npc_purchase_with_outcome(request, |result| result)
+    }
+
+    fn run_npc_purchase_with_outcome<F>(&mut self, request: NpcPurchaseRequest, postprocess: F)
+        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError>
+    where F: FnOnce(Result<Vec<ServerPacket>, String>) -> Result<Vec<ServerPacket>, String> {
+        if active_session_mutating_account_id(self.app.world().resource::<SessionResource>()).is_none() {
+            return Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::NotAuthenticated));
+        }
+        if !is_in_world(self.app.world()) {
+            return Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::NotInGame));
+        }
+        let mut outcome = None;
+        let packets = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let packets = self.try_handle_packet_recording_buy(request.packet(), None, Some(&mut outcome));
+            postprocess(packets)
+        })).unwrap_or_else(|_| Err("purchase processing panicked; outcome may be unknown".into()));
+        finish_npc_purchase_processing(packets, outcome)
+    }
+
+    #[cfg(test)]
+    pub(super) fn npc_purchase_with_postprocessing_failure(&mut self, request: NpcPurchaseRequest)
+        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+        self.run_npc_purchase_with_outcome(request, |result| result.and_then(|_| Err("controlled postprocessing failure".into())))
+    }
+
+    #[cfg(test)]
+    pub(super) fn npc_purchase_with_postprocessing_panic(&mut self, request: NpcPurchaseRequest)
+        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+        self.run_npc_purchase_with_outcome(request, |_| panic!("controlled postprocessing panic"))
+    }
+
     pub fn try_handle_packet(&mut self, packet: ClientPacket) -> Result<Vec<ServerPacket>, String> {
+        self.try_handle_packet_recording_buy(packet, None, None)
+    }
+
+    fn try_handle_packet_recording_buy(&mut self, packet: ClientPacket,
+        buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
+        purchase_outcome: Option<&mut Option<NpcPurchaseProcessingOutcome>>,
+    ) -> Result<Vec<ServerPacket>, String> {
         // Journal capabilities must never survive into a client packet flow.
         super::recovery::clear_binding(self.app.world_mut());
         if matches!(
@@ -9059,6 +9310,9 @@ impl SimulationSession {
         }
         let mut recurrence_packets = Vec::new();
         if matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
+            // Failed saving retains personal state for recovery. Inspect
+            // authority still retires before that potentially failing write.
+            self.app.world_mut().resource_mut::<SessionResource>().retire_ranking_inspect();
             super::npc_input::invalidate(self.app.world_mut());
             recurrence_packets = refresh_quest_recurrence(self.app.world_mut());
             if let Err(error) = persist_active_character_save_for_logout(self.app.world()) {
@@ -9126,7 +9380,7 @@ impl SimulationSession {
             recurrence_packets.extend(refresh_quest_recurrence(self.app.world_mut()));
         }
         let journey_context = super::quests::newcomer_v2_events::command_context(&packet);
-        let mut packets = self.handle_packet_impl(packet);
+        let mut packets = self.handle_packet_impl(packet, buy_outcome, purchase_outcome);
         let mut journey_packets = super::quests::newcomer_v2_events::observe_committed_command(
             self.app.world_mut(), journey_context, &packets);
         packets.append(&mut journey_packets);
@@ -9136,7 +9390,10 @@ impl SimulationSession {
         self.finish_guild_experience_command(before,packets)
     }
 
-    fn handle_packet_impl(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
+    fn handle_packet_impl(&mut self, packet: ClientPacket,
+        buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
+        purchase_outcome: Option<&mut Option<NpcPurchaseProcessingOutcome>>,
+    ) -> Vec<ServerPacket> {
         match packet {
             ClientPacket::ClientVersion { .. } => {
                 self.app
@@ -9282,9 +9539,11 @@ impl SimulationSession {
             // `Player.TownRevive()` respawns a dead player at their bind/town point
             // and replies with `S.Revived` + broadcast `S.ObjectRevived`.
             ClientPacket::TownRevive => town_revive_packets(self.app.world_mut()),
+            // Observer mode has no authoritative runtime yet and is explicitly
+            // disabled by the same policy used in the Inspect projection.
+            ClientPacket::Observe { .. } => Vec::new(),
             ClientPacket::ReplaceWedRing { .. }
             | ClientPacket::Inspect { .. }
-            | ClientPacket::Observe { .. }
             | ClientPacket::ChangeTrade { .. }
             | ClientPacket::BuyItemBack { .. }
             | ClientPacket::RequestUserName { .. }
@@ -10144,8 +10403,31 @@ impl SimulationSession {
                 item_index,
                 count,
                 panel_type,
-            } => self.try_shared_conquest_buy(item_index, count, panel_type)
-                .unwrap_or_else(|| buy_item_impl(self.app.world_mut(), item_index, count, panel_type)),
+            } => {
+                let mut buy_outcome = buy_outcome;
+                let mut purchase_outcome = purchase_outcome;
+                let conquest_result = if buy_outcome.is_some() || purchase_outcome.is_some() {
+                    self.try_shared_conquest_buy_recording(
+                        NpcPurchaseRequest { item_index, count, panel_type },
+                        buy_outcome.as_deref_mut(), purchase_outcome.as_deref_mut(),
+                    )
+                } else { None };
+                if let Some(result) = conquest_result {
+                    result.unwrap_or_else(|error| {
+                        // The outcome capture stays empty on an unconfirmed
+                        // publication, so the typed caller reports Unknown.
+                        eprintln!("typed castle NPC purchase unavailable: {error}");
+                        Vec::new()
+                    })
+                } else { match (buy_outcome, purchase_outcome) {
+                (_, Some(outcome)) => super::npc::buy_item_with_purchase_outcome(self.app.world_mut(),
+                    NpcPurchaseRequest { item_index, count, panel_type }, outcome),
+                (Some(outcome), None) => super::npc::buy_item_with_processing_outcome(self.app.world_mut(),
+                    NpcGoldBuyRequest { item_index, count, panel_type }, outcome),
+                (None, None) => self.try_shared_conquest_buy(item_index, count, panel_type)
+                    .unwrap_or_else(|| buy_item_impl(self.app.world_mut(), item_index, count, panel_type)),
+                } }
+            },
             ClientPacket::SellItem { unique_id, count } => {
                 self.try_shared_conquest_sell(unique_id, count)
                     .unwrap_or_else(|| sell_item_impl(self.app.world_mut(), unique_id, count))

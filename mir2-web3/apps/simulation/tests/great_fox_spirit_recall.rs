@@ -75,6 +75,7 @@ fn monster_snapshot(
         has_class_weapon: None,
         dazed: None,
         fishing: None,
+        transform_type: None,
         disposition,
         sprite: None,
         quest_ids: Vec::new(),

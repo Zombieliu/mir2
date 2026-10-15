@@ -8,6 +8,7 @@ import { monitorEventLoopDelay, performance } from 'node:perf_hooks';
 import { pathToFileURL } from 'node:url';
 import { PlaytestClient, outsideRepository, validateEndpoint, observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { NativeResumeClient, validateResumeControl, assertResumeEvidence, assertReplayRejected, resumeFingerprint } from './playtest-native-resume-smoke.mjs';
+import { CATALOG_GZIP_CAPABILITY } from './playtest-catalog-transport.mjs';
 import { CommandBudget, SafetyStop } from './playtest-load-smoke.mjs';
 import { loadProtocolCollisionMap, findProtocolWalkPath, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
 import { hasAuthoritativePlayerDeath } from './quest-agent/protocol-observation.mjs';
@@ -29,6 +30,8 @@ const NAVIGATION_ATTEMPT_LIMIT = 40;
 const NAVIGATION_OCCUPANT_LIMIT = 32;
 const REJECTED_WALK_CELL_LIMIT = 16;
 const REJECTED_WALK_CELL_TTL_MS = 3000;
+const COMBAT_CHASE_DEFERRAL_LIMIT = 16;
+const COMBAT_CHASE_DEFERRAL_MS = 30000;
 
 // Deliberately select public identity/position fields. Never copy a packet or
 // snapshot wholesale into the persistent diagnostic stream.
@@ -107,6 +110,7 @@ export class CapacityClient extends NativeResumeClient {
     if (!context.accountBudgets.has(account.accountId)) context.accountBudgets.set(account.accountId, new CommandBudget());
     this.budget = context.accountBudgets.get(account.accountId);
     this.bytes = { sent: 0, received: 0 }; this.recentSecrets = []; this.movementCount = 0; this.targetCursor = 0; this.failedTargets = new Map();
+    this.combatPursuit = null; this.chaseDeferrals = new Map();
     this.evidencePending = new Set(); this.nativeRunPrimedUntil = 0;
     this.lifecycleConnection = context.nextLifecycleConnection = (context.nextLifecycleConnection ?? 0) + 1;
     this.lifecycleNames = new Set([this.label, ...(context.pool?.accounts ?? []).slice(0, 100).map(item => item.name)].filter(name => typeof name === 'string'));
@@ -142,6 +146,9 @@ export class CapacityClient extends NativeResumeClient {
     const ownerTransform = message.type === 'packet' && typeof message.packet === 'string';
     const beforeSelf = ownerTransform ? selfTransform(this.snapshot) : null;
     super.observe(message);
+    if (['MapInformation', 'MapChanged'].includes(message.packet)) {
+      this.combatPursuit = null; this.chaseDeferrals.clear();
+    }
     if (lifecycle) this.recordPlayerLifecycle(message, before, orphanMotion);
     if (ownerTransform) {
       const afterSelf = selfTransform(this.snapshot);
@@ -209,7 +216,7 @@ export class CapacityClient extends NativeResumeClient {
     validateResumeControl(command);
     if (!this.draining) this.context.guard.assert();
     this.budget.reserve(); this.bytes.sent += Buffer.byteLength(JSON.stringify(command));
-    this.record('sent', command); this.ws.send(JSON.stringify(command));
+    NativeResumeClient.prototype.control.call(this, command);
   }
   async pace() {
     while (this.budget.remainingWait()) {
@@ -245,7 +252,7 @@ export class CapacityClient extends NativeResumeClient {
     const promise = super.connect();
     this.ws.addEventListener('message', event => { this.bytes.received += Buffer.byteLength(event.data); });
     try { await promise; } finally { clearInterval(this.timer); }
-    await this.pace(); this.control({ type: 'clientCapabilities', capabilities: ['nativeResumeV1'] });
+    await this.pace(); this.control({ type: 'clientCapabilities', capabilities: ['nativeResumeV1', CATALOG_GZIP_CAPABILITY] });
   }
   async refresh() { await this.pace(); return PlaytestClient.prototype.refresh.call(this); }
   async logout() {
@@ -560,16 +567,72 @@ function nearbyObservers(client, context, margin = 16) {
 function combatObservers(client, context) {
   return nearbyObservers(client, context).filter(other => !client.combatCluster || client.combatCluster.observerNames.has(other.label));
 }
+function ordinaryCombatMonster(entity, context) {
+  return entity?.kind === 'monster' && !entity.dead && Number(entity.hp ?? 1) > 0 &&
+    String(entity.disposition ?? '').trim().toLowerCase() !== 'friendly' && !String(entity.ownerName ?? '').trim() &&
+    WEAK_MONSTERS.includes(entity.name) && context.monsterNames.includes(entity.name);
+}
 export function combatCandidates(client, context, now = Date.now()) {
   const owner = self(client);
   const observed = client.combatCluster ? new Set(combatObservers(client, context).flatMap(other => other.snapshot.entities.map(entity => entity.objectId))) : null;
-  return client.snapshot.entities.filter(entity => entity.kind === 'monster' && !entity.dead && Number(entity.hp ?? 1) > 0 &&
-    String(entity.disposition ?? '').trim().toLowerCase() !== 'friendly' && !String(entity.ownerName ?? '').trim() &&
-    WEAK_MONSTERS.includes(entity.name) && context.monsterNames.includes(entity.name) && distance(entity, owner) <= 16 &&
+  return client.snapshot.entities.filter(entity => ordinaryCombatMonster(entity, context) && distance(entity, owner) <= 16 &&
     insideCombatCoverage(client.combatCluster, entity) &&
     (client.failedTargets.get(entity.objectId)?.until ?? 0) <= now &&
+    (context.policy?.activityMode !== 'native' || client.chaseDeferrals?.get(entity.objectId)?.mapFileName !== String(client.snapshot.mapFileName) ||
+      client.chaseDeferrals.get(entity.objectId).until <= now) &&
     (!context.targetClaims.has(entity.objectId) || context.targetClaims.get(entity.objectId) === client.label))
     .sort((a, b) => (observed ? Number(observed.has(b.objectId)) - Number(observed.has(a.objectId)) : 0) || distance(a, owner) - distance(b, owner));
+}
+
+function rememberCombatTarget(client, target, now = Date.now()) {
+  const mapFileName = String(client.snapshot.mapFileName);
+  if (client.combatPursuit?.objectId !== target.objectId || client.combatPursuit.mapFileName !== mapFileName) {
+    client.combatPursuit = { objectId: target.objectId, name: target.name, mapFileName,
+      bestDistance: distance(self(client), target), lastProgressAt: now, nonImprovingMoves: 0,
+      lastReceiptSequence: client.sequence, attackSent: false };
+  }
+}
+
+// Progress is measured only at a successful, nonzero authoritative movement
+// receipt. Selecting a plan, waiting, turning, or a corrected step proves none.
+export function recordCombatPursuitMovement(client, context, plan, origin, receipt, status, now = Date.now()) {
+  const pursuit = client.combatPursuit, actual = receipt?.payload, kind = plan.command.type;
+  if (context.policy?.activityMode !== 'native' || !pursuit || pursuit.attackSent || status !== 'success' ||
+      !['walk', 'run'].includes(kind) || pursuit.objectId !== plan.chaseTargetId ||
+      pursuit.mapFileName !== String(client.snapshot.mapFileName) || receipt.packet !== 'UserLocation' ||
+      receipt.sequence <= pursuit.lastReceiptSequence || !lifecyclePoint(actual) || distance(origin, actual) === 0 ||
+      !(distance(actual, plan.target) === 0 || (kind === 'run' && distance(actual, plan.first) === 0))) return;
+  const target = combatCandidates(client, context, now).find(entity => entity.objectId === pursuit.objectId);
+  if (!target) { client.combatPursuit = null; return; }
+  pursuit.lastReceiptSequence = receipt.sequence;
+  const currentDistance = distance(actual, target);
+  if (currentDistance < pursuit.bestDistance) {
+    pursuit.bestDistance = currentDistance; pursuit.lastProgressAt = now; pursuit.nonImprovingMoves = 0; return;
+  }
+  pursuit.nonImprovingMoves++;
+  const elapsedMs = now - pursuit.lastProgressAt;
+  if (pursuit.nonImprovingMoves < 2 || (pursuit.nonImprovingMoves < 4 && elapsedMs < 6000)) return;
+  const deferred = client.chaseDeferrals ??= new Map();
+  for (const [id, entry] of deferred) if (entry.until <= now || entry.mapFileName !== pursuit.mapFileName) deferred.delete(id);
+  if (deferred.size >= COMBAT_CHASE_DEFERRAL_LIMIT) deferred.delete(deferred.keys().next().value);
+  deferred.set(pursuit.objectId, { mapFileName: pursuit.mapFileName, until: now + COMBAT_CHASE_DEFERRAL_MS });
+  context.writer?.add({ type: 'combatChaseDeferred', actor: client.label, phase: context.phase, at: now,
+    targetId: pursuit.objectId, mapFileName: pursuit.mapFileName, nonImprovingMoves: pursuit.nonImprovingMoves,
+    elapsedMs, ttlMs: COMBAT_CHASE_DEFERRAL_MS, actual: lifecyclePoint(actual), target: lifecyclePoint(target), attacksSent: 0 });
+  client.combatPursuit = null;
+}
+
+export function restoreCombatPursuit(original, restored, context, now = Date.now()) {
+  restored.combatCluster = original.combatCluster;
+  restored.chaseDeferrals = new Map([...(original.chaseDeferrals ?? [])].filter(([, entry]) =>
+    entry.until > now && entry.mapFileName === String(restored.snapshot.mapFileName)).slice(-COMBAT_CHASE_DEFERRAL_LIMIT));
+  const pursuit = original.combatPursuit;
+  const target = pursuit && pursuit.mapFileName === String(restored.snapshot.mapFileName)
+    ? combatCandidates(restored, context, now).find(entity => entity.objectId === pursuit.objectId && entity.name === pursuit.name) : null;
+  // Resume retains the choice and attack-written state, but offline time and a
+  // previous socket's receipt sequence cannot count as new chase evidence.
+  restored.combatPursuit = target ? { ...pursuit, bestDistance: distance(self(restored), target),
+    lastProgressAt: now, nonImprovingMoves: 0, lastReceiptSequence: restored.sequence } : null;
 }
 
 function returnToCombatCoverage(client, context) {
@@ -594,7 +657,7 @@ export function stableFanoutRange(kind, policy) {
   return kind === 'chat' ? 14 : 12;
 }
 function combatPlan(client, context) {
-  const owner = self(client);
+  const owner = self(client), native = context.policy?.activityMode === 'native';
   if (context.policy?.activityMode === 'native' && !client.combatArrival) {
     if (distance(owner, client.home) !== 0) {
       const plan = movement(client, client.home, context.map);
@@ -604,10 +667,24 @@ function combatPlan(client, context) {
   }
   if (!insideCombatCoverage(client.combatCluster, owner)) return returnToCombatCoverage(client, context);
   for (const [id, failure] of client.failedTargets) if (failure.until < Date.now() - 30000) client.failedTargets.delete(id);
-  const candidates = combatCandidates(client, context);
+  let candidates = combatCandidates(client, context);
+  const observers = combatObservers(client, context);
+  const witness = target => observers.find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId &&
+    (!native || (ordinaryCombatMonster(entity, context) && entity.name === target.name))) &&
+    (!native || Number.isInteger(observedPlayerId(other, client.label))));
+  if (native) {
+    const pursuit = client.combatPursuit;
+    const selected = pursuit?.mapFileName === String(client.snapshot.mapFileName)
+      ? candidates.find(target => target.objectId === pursuit.objectId && target.name === pursuit.name) : null;
+    if (!selected) client.combatPursuit = null;
+    const adjacent = candidates.filter(target => distance(owner, target) === 1 && witness(target));
+    candidates = [...new Set([...(selected && adjacent.includes(selected) ? [selected] : []), ...adjacent,
+      ...(selected ? [selected] : []), ...candidates])];
+  }
   for (const target of candidates.slice(0, 4)) {
-    const observer = combatObservers(client, context).find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId));
+    const observer = witness(target);
     if (distance(owner, target) === 1 && observer) {
+      if (native && !client.pending) rememberCombatTarget(client, target);
       const facing = directionOf(owner, target);
       if (owner.direction !== facing) return { command: { type: 'turn', direction: facing }, hunting: target.name };
       return { command: { type: 'attack', objectId: target.objectId }, targetEntity: target, observer, hunting: target.name,
@@ -618,8 +695,12 @@ function combatPlan(client, context) {
     for (const destination of adjacent) {
       if (!insideCombatCoverage(client.combatCluster, destination)) continue;
       const plan = movement(client, destination, context.map);
-      if (plan && insideCombatCoverage(client.combatCluster, plan.first) && insideCombatCoverage(client.combatCluster, plan.target)) return { ...plan, hunting: target.name };
+      if (plan && insideCombatCoverage(client.combatCluster, plan.first) && insideCombatCoverage(client.combatCluster, plan.target)) {
+        if (native && !client.pending) rememberCombatTarget(client, target);
+        return { ...plan, hunting: target.name, ...(native ? { chaseTargetId: target.objectId } : {}) };
+      }
     }
+    if (native && !client.pending && client.combatPursuit?.objectId === target.objectId) client.combatPursuit = null;
   }
   return returnToCombatCoverage(client, context);
 }
@@ -701,12 +782,15 @@ async function action(client, context, planned, preparedPlan) {
   }
   if (kind === 'attack') context.targetClaims.set(command.objectId, client.label);
   const row = { actor: client.label, phase, kind, plannedGameplay: true, scheduledAtMs: plannedAt, sentAtMs: sentAt,
-    plannedTarget: plan.target, targetId: command.objectId, hunting: plan.hunting, ...nativeMeta,
+    plannedTarget: plan.target, targetId: command.objectId, hunting: plan.hunting, chaseTargetId: plan.chaseTargetId, ...nativeMeta,
     ...(native && client.role === 'combat' ? { declaredHome: client.home, initialCombatTransit: Boolean(plan.initialCombatTransit),
       targetPosition: plan.targetEntity ? { x: plan.targetEntity.x, y: plan.targetEntity.y } : undefined } : {}) };
   try {
     client.waitReason = ['attack', 'chat'].includes(kind) ? 'evidence-wait' : 'owner-ack-wait';
     client.send(command);
+    if (native && kind === 'attack') {
+      rememberCombatTarget(client, plan.targetEntity); client.combatPursuit.attackSent = true;
+    }
     if (native && kind === 'attack') recordHuntAttempt(client, owner, row.targetPosition);
     if (native) {
       client.plan.sent(sentAt, planned.cadence.cooldownMs);
@@ -733,6 +817,7 @@ async function action(client, context, planned, preparedPlan) {
       else if (native) row.temporaryAvoidance = recordMovementCorrection(client, context, owner, plan, actual, phase, receipt);
       row.actual = { x: actual.x, y: actual.y }; row.direction = actual.direction;
       row.movedCells = distance(owner, actual);
+      recordCombatPursuitMovement(client, context, plan, owner, receipt, status);
       recordCombatArrival(client, context);
     } else if (kind === 'turn' && receipt.payload?.direction !== command.direction) status = 'corrected';
     context.add({ ...row, status, latencyMs: receipt.monotonicMs - sentAt, plannedLatencyMs: receipt.monotonicMs - plannedAt,
@@ -971,6 +1056,7 @@ async function resumeActor(original, context) {
     if (liveAck.payload?.direction !== direction) throw new Error('Resumed owner no longer accepts ordinary authoritative commands');
     restored.home = original.home; restored.role = original.role; restored.ready = true;
     restored.failedTargets = original.failedTargets;
+    restoreCombatPursuit(original, restored, context);
     restored.combatArrival = original.combatArrival; restored.combatHunting = original.combatHunting;
     restored.activityStartedAtMs = original.activityStartedAtMs;
     initializePlan(restored, context, performance.now() + 1000); restored.nextRtt = Date.now() + 5000; restored.nextRefresh = Date.now() + 60000;
@@ -1177,7 +1263,7 @@ export async function runCapacity(options) {
     report.cleanupErrors = context.cleanupErrors; report.metrics = aggregate.summary(); report.samples = aggregate.samples;
     report.continuousAcceptance = context.continuous.summary();
     report.peakServerActive = guard.peakServerActive; report.bytes = context.allClients.reduce((sum, client) => ({ sent: sum.sent + client.bytes.sent, received: sum.received + client.bytes.received }), { sent: 0, received: 0 });
-    report.bytesDefinition = 'WebSocket JSON payload bytes, excluding TLS and framing';
+    report.bytesDefinition = 'Physical WebSocket payload bytes, including catalog batch/gzip headers and excluding WebSocket/TLS framing';
     report.activityMode = policy.activityMode;
     report.actorActivity = [...aggregate.actors].filter(([name]) => context.clients.some(client => client.label === name)).map(([actor, activity]) => ({ actor, ...activity }));
     if (policy.activityMode === 'native') report.nativeLoadScope = {

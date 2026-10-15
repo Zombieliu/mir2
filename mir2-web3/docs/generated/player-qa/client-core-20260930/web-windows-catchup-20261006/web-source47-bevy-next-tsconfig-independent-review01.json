@@ -1,0 +1,545 @@
+{
+  "schemaVersion": 1,
+  "kind": "Source47 independent finite read-only source/data review; scope-separated Bevy preparation and strict TypeScript inputs",
+  "reviewedBy": "/root/source30_native_client",
+  "generatedAtUtc": "2026-10-08T16:19:25.176Z",
+  "inputPins": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source47-bevy-full-builder-prepared01.json",
+      "bytes": 517188,
+      "sha256": "ed448ecb2e1cad26a47cb4b9f09bd1b68ac17b3ce9af7ef677d18a123e30f19f"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source47-original-existing-builder-template-data01.json",
+      "bytes": 5007,
+      "sha256": "75dcd81559d98ceee80dc5b096b85a9f2917072f718668a71a15769cbe1b2f81"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-build-source47-web01-snapshot.json",
+      "bytes": 5969090,
+      "sha256": "e4aaa2a882515c6b32509257cbceacd7e0d6948d4bb128b9f9e083ec721c8026"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source45-stage5-01-source.json",
+      "bytes": 5965630,
+      "sha256": "61c9d932aab9943e91c35e986a7ac47e4d693b504d84dfc895a1d8eb2d1eafbb"
+    }
+  ],
+  "limitedSourceDataReviewAccepted": true,
+  "staticBlockers": [],
+  "readyToExecute": false,
+  "executionAuthorityCreated": false,
+  "wasmApiAnswerStillPending": true,
+  "bevyScope": {
+    "preparationPinsMatched": true,
+    "sourceCount": 607,
+    "totalDeclaredSourceBytes": 3062093976,
+    "all607ActualBytePinsMatched": true,
+    "sourceMismatches": [],
+    "allOrdinaryFilesAndAncestors": true,
+    "toolCount": 10,
+    "allActualToolPinsMatched": true,
+    "toolChecks": [
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.cs",
+        "bytes": 20309,
+        "sha256": "f1eeaaf4bddf13e8e3bae1379100095c4b22fa91c6d6696ad30bd218f9516689",
+        "matched": true
+      },
+      {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.exe",
+        "bytes": 37376,
+        "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e",
+        "matched": true
+      },
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/LICENSE.0BSD.txt",
+        "bytes": 661,
+        "sha256": "0715e35609fae3255502eab08ba3afea7ae64899c199c02fd2c7f32c5b98516d",
+        "matched": true
+      },
+      {
+        "path": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "bytes": 12814336,
+        "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "matched": true
+      },
+      {
+        "path": "C:/Users/Administrator/.cargo/bin/rustup.exe",
+        "bytes": 12814336,
+        "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "matched": true
+      },
+      {
+        "path": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+        "bytes": 495616,
+        "sha256": "8bb6fa8c283b4d92120b1ef249a9b311b0f804d4cabbe9981159976c8be76a5e",
+        "matched": true
+      },
+      {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+        "bytes": 772,
+        "sha256": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab",
+        "matched": true
+      },
+      {
+        "path": "C:/Program Files/nodejs/node.exe",
+        "bytes": 85202416,
+        "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7",
+        "matched": true
+      },
+      {
+        "path": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+        "bytes": 5551616,
+        "sha256": "806e1abf08ac1cde5ef71f679026d8177043496be50cbaa66d6225d26554ca28",
+        "matched": true
+      },
+      {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+        "bytes": 10061312,
+        "sha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3",
+        "matched": true
+      }
+    ],
+    "historicalDependencyEvidence": [
+      {
+        "backend": "webgpu",
+        "rawTokenCount": 212,
+        "uniqueCount": 212,
+        "omitted": [],
+        "invented": [],
+        "allDeclared": true
+      },
+      {
+        "backend": "webgl2",
+        "rawTokenCount": 130,
+        "uniqueCount": 130,
+        "omitted": [],
+        "invented": [],
+        "allDeclared": true
+      },
+      {
+        "backend": "webgl2-shared",
+        "rawTokenCount": 212,
+        "uniqueCount": 212,
+        "omitted": [],
+        "invented": [],
+        "allDeclared": true
+      }
+    ],
+    "historicalEvidenceQualification": "The .d files are actual Source45 compiler evidence, not a new Source47 compilation.",
+    "conservativeLocalRustInventory": {
+      "count": 293,
+      "allCurrentSourcesDeclared": true,
+      "manifestLocalCrates": [
+        "apps/game-client/runtime",
+        "apps/game-client/client-bevy",
+        "apps/game-client/client-core",
+        "apps/game-client/ui-core",
+        "packages/game-data",
+        "packages/protocol"
+      ],
+      "noOwnRootBuildRsFound": true,
+      "standaloneRuntimeWorkspace": true,
+      "rootForeignBackendNotRuntimeCompileDependency": true
+    },
+    "includes": {
+      "literalOccurrences": 50,
+      "uniqueInputs": 44,
+      "missing": [],
+      "concatInputs": {
+        "source": "apps/game-client/client-bevy/src/portable_hp_orb_ui.rs",
+        "lines": [
+          880,
+          888
+        ],
+        "expression": "concat!(env!(CARGO_MANIFEST_DIR), suffix)",
+        "actualFiles": [
+          "apps/web/public/original-ui/Prguse/6.png",
+          "apps/web/public/original-ui/Prguse/4.png"
+        ],
+        "readAndIncluded": true
+      },
+      "includingCfgTestSources": true
+    },
+    "originalCallerTemplate": {
+      "dataPin": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-source47-original-existing-builder-template-data01.json",
+        "bytes": 5007,
+        "sha256": "75dcd81559d98ceee80dc5b096b85a9f2917072f718668a71a15769cbe1b2f81"
+      },
+      "bodyBytes": 4569,
+      "bodySha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+      "twoPlaceholdersOnly": true,
+      "sourceAndToolPrePostPinChecks": true,
+      "completedExitedDisposedPolicyBStillRequired": true,
+      "noClaimedWholeCompileDeadline": true
+    },
+    "originalCargoCalls": [
+      {
+        "kind": "original-version-check",
+        "cwd": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime",
+        "args": [
+          "--version"
+        ]
+      },
+      {
+        "kind": "original-renderer-build",
+        "backend": "webgpu",
+        "cwd": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime",
+        "args": [
+          "build",
+          "--locked",
+          "--target",
+          "wasm32-unknown-unknown",
+          "--profile",
+          "wasm-release",
+          "--no-default-features",
+          "--features",
+          "webgpu,web-quest-ui"
+        ]
+      },
+      {
+        "kind": "original-renderer-build",
+        "backend": "webgl2",
+        "cwd": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime",
+        "args": [
+          "build",
+          "--locked",
+          "--target",
+          "wasm32-unknown-unknown",
+          "--profile",
+          "wasm-release",
+          "--no-default-features",
+          "--features",
+          "webgl2,web-item-tooltip"
+        ]
+      },
+      {
+        "kind": "original-renderer-build",
+        "backend": "webgl2-shared",
+        "cwd": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime",
+        "args": [
+          "build",
+          "--locked",
+          "--target",
+          "wasm32-unknown-unknown",
+          "--profile",
+          "wasm-release",
+          "--no-default-features",
+          "--features",
+          "webgl2,web-quest-ui,webgl2-shared-ui"
+        ]
+      }
+    ],
+    "requiredEnvironment": {
+      "SystemRoot": "C:/Windows",
+      "windir": "C:/Windows",
+      "SystemDrive": "C:",
+      "ComSpec": "C:/Windows/System32/cmd.exe",
+      "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+      "NUMBER_OF_PROCESSORS": "1",
+      "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+      "CARGO_HOME": "C:/Users/Administrator/.cargo",
+      "RUSTUP_HOME": "C:/Users/Administrator/.rustup",
+      "RUSTUP_TOOLCHAIN": "1.95.0",
+      "CARGO_BIN": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.exe",
+      "CARGO_BUILD_JOBS": "1",
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_NET_OFFLINE": "true",
+      "RUST_MIN_STACK": "67108864",
+      "MIR2_WASM_BINDGEN_RUST_MIN_STACK": "67108864",
+      "WASM_BINDGEN_BIN": "C:\\Users\\Administrator\\.cargo\\bin\\wasm-bindgen.exe",
+      "MIR2_BEVY_QUEST_UI": "1",
+      "MIR2_USE_PREBUILT_BEVY_RUNTIME": "0",
+      "MIR2_SKIP_RUSTUP_TARGET_CHECK": "1",
+      "MIR2_BEVY_CARGO_BUILD_ATTEMPTS": "1",
+      "MIR2_WASM_BINDGEN_ATTEMPTS": "1",
+      "MIR2_BEVY_WASM_OPT_BIN": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-mail-combined-build-01\\binaryen131-tool01\\bin\\wasm-opt.exe",
+      "MIR2_BEVY_WASM_OPT_SHA256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+    },
+    "requiredFreshFields": [
+      "QA_CARGO_GUARD_POLICY",
+      "QA_CARGO_GUARD_POLICY_SHA256",
+      "TEMP",
+      "TMP",
+      "MIR2_BEVY_CARGO_TARGET_ROOT",
+      "new absent stdout/stderr/outer paths",
+      "preexisting ordinary empty receiptRoot",
+      "current sourceReview/authority/policy pins"
+    ],
+    "originalBindgenArgs": [
+      "--target",
+      "web",
+      "--out-dir",
+      "<original nonce-owned staged package dir>",
+      "--out-name",
+      "mir2_bevy_runtime",
+      "--remove-name-section",
+      "<original backend Cargo WASM artifact>"
+    ],
+    "originalOptimizerArgs": [
+      "<staged input>",
+      "-O1",
+      "--strip-debug",
+      "-o",
+      "<absent nonce-owned output>"
+    ],
+    "originalCaps": {
+      "wasmBytesInclusive": 32505856,
+      "gzipDefaultBytesInclusive": 7340032,
+      "jsBytesInclusive": 204800
+    },
+    "perCallGuardRequirements": {
+      "thresholdBytes": 53687091200,
+      "freshnessMs": 2000,
+      "probeTimeoutMs": 15000,
+      "probeMode": "actual",
+      "sampleProof": "actualGetVolumeC",
+      "postChildPolicy": "B",
+      "requiredAfter": {
+        "completed": true,
+        "exited": true,
+        "disposed": true
+      },
+      "outerBuilderExitAloneInsufficient": true
+    },
+    "oldImmutableScope": {
+      "directories": 36,
+      "leafFiles": 250,
+      "totalBytes": 3012025427,
+      "actualLeafSetEqualsDeclaration": true,
+      "allActualLeafPinsMatched": true
+    },
+    "notCovered": [
+      "Registry sources were not enumerated by Bevy preparation or this review.",
+      "Next08 and Thin08 whole leaf hashes were not performed; these old outputs remain protected.",
+      "No new renderer compilation, static WASM gate, release publication, initialization, UI or player acceptance.",
+      "No acceptance of current foreign backend functionality or entire primary workspace."
+    ]
+  },
+  "nextConfigScope": {
+    "currentPin": {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/next.config.ts",
+      "bytes": 13454,
+      "sha256": "9df1068e2257c21a2bc2063e160e61121ab4cb662b95ba21484c68b0d783846c"
+    },
+    "originalPin": {
+      "bytes": 12310,
+      "sha256": "863b4a3e04f316a1080698e1001f534a07282d7efcf57c228e1215bf57a1f04b"
+    },
+    "mechanicalReversalRestoresOriginalBytes": true,
+    "mechanicalChanges": [
+      "Add lstatSync import.",
+      "Validate optional MIR2_NEXT_TSCONFIG_PATH existing relative ordinary single-hardlink JSON path.",
+      "Supply typescript.tsconfigPath only when that environment variable is set."
+    ],
+    "defaultUnsetBehaviorPreserved": true,
+    "noIgnoreBuildErrorsAdded": true,
+    "selectedPathBounds": {
+      "relative": true,
+      "asciiSegments": true,
+      "emptyDotDotOrParentRejected": true,
+      "colonBackslashAbsoluteRejected": true,
+      "jsonSuffixRequired": true,
+      "eachSelectedComponentLstat": true,
+      "symbolicLinksRejected": true,
+      "intermediateDirectoryRequired": true,
+      "leafRegularFileAndNlinkOneRequired": true
+    },
+    "userTsconfigPin": {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+      "bytes": 4932,
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+    },
+    "userTsconfigUnchanged": true,
+    "installedNextEvidence": [
+      {
+        "relativePath": "apps/web/node_modules/next/dist/lib/typescript/writeConfigurationDefaults.js",
+        "declaredInTscSnapshot": true,
+        "pin": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/lib/typescript/writeConfigurationDefaults.js",
+          "bytes": 18922,
+          "sha256": "a634ad2820c47afd37f26382bc1986ca6895cf8cb251d2023889893674d3704d"
+        }
+      },
+      {
+        "relativePath": "apps/web/node_modules/next/dist/lib/typescript/runTypeCheck.js",
+        "declaredInTscSnapshot": true,
+        "pin": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/lib/typescript/runTypeCheck.js",
+          "bytes": 6930,
+          "sha256": "b468a417152360d621ecd61a0ca2fe04aae5a418afc7d7cff7f97205ef28bb7f"
+        }
+      },
+      {
+        "relativePath": "apps/web/node_modules/next/dist/lib/verify-typescript-setup.js",
+        "declaredInTscSnapshot": true,
+        "pin": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/lib/verify-typescript-setup.js",
+          "bytes": 11018,
+          "sha256": "3d55331a12e51913c90767adb092a3d1bf2dbe63dc1547454366f7af6741b9d9"
+        }
+      },
+      {
+        "relativePath": "apps/web/node_modules/next/dist/build/type-check.js",
+        "declaredInTscSnapshot": true,
+        "pin": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/build/type-check.js",
+          "bytes": 6859,
+          "sha256": "99fa38119c2790014befc29873724789bf4532088ca24e47f9eb7be5f3e382c7"
+        }
+      },
+      {
+        "relativePath": "apps/web/node_modules/next/dist/server/config-shared.d.ts",
+        "declaredInTscSnapshot": true,
+        "pin": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/server/config-shared.d.ts",
+          "bytes": 58877,
+          "sha256": "5757b78830c681b3124af568b94c269259ea5e8171a4316508ef67310c2ed1ed"
+        }
+      },
+      {
+        "relativePath": "apps/web/node_modules/next/dist/lib/typescript/type-paths.js",
+        "declaredInTscSnapshot": true,
+        "pin": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/lib/typescript/type-paths.js",
+          "bytes": 1817,
+          "sha256": "3cf1ca2274f2aa387381d0200cc0b703f57c9f86445b1206571dcdde5ebf87b4"
+        }
+      }
+    ],
+    "sourceAnchors": [
+      {
+        "file": "apps/web/next.config.ts",
+        "lines": [
+          2,
+          12,
+          35,
+          124
+        ]
+      },
+      {
+        "file": "apps/web/node_modules/next/dist/lib/typescript/writeConfigurationDefaults.js",
+        "lines": [
+          230,
+          285,
+          286,
+          302,
+          315,
+          375
+        ]
+      },
+      {
+        "file": "apps/web/node_modules/next/dist/lib/verify-typescript-setup.js",
+        "lines": [
+          100,
+          102,
+          173,
+          194
+        ]
+      },
+      {
+        "file": "apps/web/node_modules/next/dist/build/type-check.js",
+        "lines": [
+          114,
+          129
+        ]
+      },
+      {
+        "file": "apps/web/node_modules/next/dist/lib/typescript/type-paths.js",
+        "lines": [
+          31,
+          40
+        ]
+      }
+    ],
+    "qualification": "Next writes generated type globs to the selected tsconfig. Future build must use a fresh ordinary copy, preserve original compiler options, and pin that copy; this change does not itself prove such a future copy. Direct tsc only typechecks next.config.ts and does not execute it."
+  },
+  "strictTscScope": {
+    "snapshotPin": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-build-source47-web01-snapshot.json",
+      "bytes": 5969090,
+      "sha256": "e4aaa2a882515c6b32509257cbceacd7e0d6948d4bb128b9f9e083ec721c8026"
+    },
+    "actualRehashedSources": 17136,
+    "totalDeclaredSourceBytes": 500812771,
+    "allActualPinsMatched": true,
+    "mismatches": [],
+    "typescriptTsTsxCount": 5413,
+    "comparisonToActualPriorSnapshot": {
+      "changed": [
+        {
+          "relativePath": "apps/simulation/src/runtime/fishing.rs",
+          "bytes": 31933,
+          "sha256": "736d34b844f75df67abbef3ed1156397ce433f79483d3eaa3e3f6c34d7db789f"
+        },
+        {
+          "relativePath": "apps/simulation/src/runtime/mining.rs",
+          "bytes": 15146,
+          "sha256": "b8ad73bd55654b8626b9c7c20a2808845f04386f001aaf46aed08efc4d314308"
+        },
+        {
+          "relativePath": "apps/simulation/src/runtime/mod.rs",
+          "bytes": 7238,
+          "sha256": "0abbb1b9da51b1acb44dff751475691cbb28610567680d3f37fff142c123d500"
+        },
+        {
+          "relativePath": "apps/simulation/src/runtime/quests.rs",
+          "bytes": 80871,
+          "sha256": "58f118967a154b7573ffa78073e4275db0c9dfbc29c99993ce2cdcef5a14d0ce"
+        },
+        {
+          "relativePath": "apps/web/next.config.ts",
+          "bytes": 13454,
+          "sha256": "9df1068e2257c21a2bc2063e160e61121ab4cb662b95ba21484c68b0d783846c"
+        }
+      ],
+      "newCount": 0,
+      "deletedCount": 0,
+      "unchangedCount": 17131
+    },
+    "foreignRustChangesOpaqueProtectedNotApproved": true,
+    "priorFalseStabilityAssertionNotRewritten": true,
+    "originalStrictTscConfigPin": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source41-tsc03.config.json",
+      "bytes": 5016,
+      "sha256": "1eae35d6efee5bb65c57d757d1cf3ab2282f5b692a5425f27b1fa87d5dd30dea"
+    },
+    "originalCwd": "E:\\mir2-player-journey\\mir2-web3\\apps\\web",
+    "originalArgs": [
+      "node_modules/typescript/bin/tsc",
+      "--noEmit",
+      "--incremental",
+      "false",
+      "--pretty",
+      "false"
+    ],
+    "strictNoEmitIncrementalFalsePreserved": true,
+    "noStaticBlockerToRootSerialOriginalStrictTsc": true,
+    "actualTscExecutionNotPerformedByReviewer": true,
+    "actualFreshPrePostPinsStillRequired": true
+  },
+  "actions": {
+    "ordinaryReviewJsonOnly": true,
+    "productOrConfigEdits": false,
+    "processesStarted": 0,
+    "commandsExecuted": 0,
+    "testsRun": 0,
+    "wasmApiUsed": false,
+    "uiOperated": false,
+    "networkUsed": false,
+    "pidsQueried": false,
+    "lockContentsRead": false,
+    "productTestOrHelperImportedOrEvaluated": false
+  },
+  "notClaimed": {
+    "buildAccepted": false,
+    "tscPassed": false,
+    "fullWasmMetadataNameNormalizedAbiGzipInitGatesAccepted": false,
+    "packagePublished": false,
+    "readyAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  }
+}

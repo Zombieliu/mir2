@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source59 first actual Next builder succeeded but frozen-input postcheck rejected",
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source59-bag-pointer-20261011-01/root-approved01/next-build01-config01.json",
+    "bytes": 4597,
+    "sha256": "0e33fc3deaa2dd7e6c59002d792d2ac3acfb9788b5be947003561a24f215db44"
+  },
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source59-bag-pointer-20261011-01/preparation/source-snapshot.json",
+    "bytes": 6599876,
+    "sha256": "f5f097a7ce131118bf72f8d27fe07d3d1b15771526957ea8361cbc1ca950c729"
+  },
+  "builderActual": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 56416,
+    "kind": "Source59 original strict Next build after bag pointer fix",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 99321,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source59-bag-pointer-20261011-01/root-approved01/next-build01-config01.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "originalCallerExitCode": 1,
+  "postHash": {
+    "checked": 19580,
+    "differences": [
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/next-env.d.ts",
+        "relativePath": "next-env.d.ts",
+        "before": {
+          "bytes": 294,
+          "sha256": "97f731305593e9be48d865e83ebdbe320fd123302273ec4dc3b581e7fb41e681"
+        },
+        "after": {
+          "path": "E:/mir2-player-journey/mir2-web3/apps/web/next-env.d.ts",
+          "bytes": 294,
+          "sha256": "c669d8d2421d02ae140d7db0552de35ccd68b4cdc10747825b155e5ce9a5f8bb"
+        }
+      }
+    ]
+  },
+  "accepted": false,
+  "reason": "Next regenerated next-env.d.ts import path from58 to59-01; original exact post hash rejects it; no product/test source differences",
+  "retainedOutputs": true,
+  "originalChecksUnchanged": true,
+  "repair": "Fresh59-02 dist/type with exact generated next-env target declared before execution",
+  "candidateAccepted": false,
+  "goalComplete": false
+}

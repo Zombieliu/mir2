@@ -58,30 +58,26 @@ impl CrystalKeyBind {
 pub fn crystal_default_keybinds() -> Vec<CrystalKeyBind> {
     // Exported from Crystal Client/KeyBindSettings.cs New() and English.json.
     // Preserve declaration order: multiple matching actions execute in order.
-    serde_json::from_str(include_str!("keyboard_defaults.json").trim_start_matches('\u{feff}'))
-        .expect("source-controlled Crystal key binding defaults")
+    let mut all: Vec<CrystalKeyBind> =
+        serde_json::from_str(include_str!("keyboard_defaults.json").trim_start_matches('\u{feff}'))
+            .expect("source-controlled Crystal key binding defaults");
+    let shared = crate::combat_input::default_skill_bindings();
+    for row in &mut all {
+        if let Some(binding) = shared.iter().find(|b| b.function == row.function) {
+            row.key = binding.key.clone();
+            row.group = binding.group.clone();
+            row.description = binding.description.clone();
+            row.alt = binding.alt;
+            row.ctrl = binding.ctrl;
+            row.shift = binding.shift;
+            row.tilde = binding.tilde;
+        }
+    }
+    all
 }
 
 fn is_source_skill_bar_binding(function: &str) -> bool {
-    matches!(
-        function,
-        "Bar1Skill1"
-            | "Bar1Skill2"
-            | "Bar1Skill3"
-            | "Bar1Skill4"
-            | "Bar1Skill5"
-            | "Bar1Skill6"
-            | "Bar1Skill7"
-            | "Bar1Skill8"
-            | "Bar2Skill1"
-            | "Bar2Skill2"
-            | "Bar2Skill3"
-            | "Bar2Skill4"
-            | "Bar2Skill5"
-            | "Bar2Skill6"
-            | "Bar2Skill7"
-            | "Bar2Skill8"
-    )
+    crate::combat_input::skill_function_slot(function).is_some()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

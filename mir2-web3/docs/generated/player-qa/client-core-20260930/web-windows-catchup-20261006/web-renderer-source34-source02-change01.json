@@ -1,0 +1,28 @@
+{
+  "owner": "Root",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-source02-snapshot.json",
+    "bytes": 273707,
+    "sha256": "66b09d028e7f50b3de95c0c66d137c75a0aa47909935ee05f652f4913f1ec292"
+  },
+  "editedFile": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\lib.rs",
+    "bytes": 436375,
+    "sha256": "1951fc53db16905b0ac3ac4e1bff729c572b8e12c373f38f31dc389e8385216d"
+  },
+  "functionBefore": "fn ingest_pending_hero_model(world:&mut World) {\n    let mut messages=Vec::new();\n    world.resource::<native_ingest::NativeInbound>().drain_matching(\n        |message| {\n            matches!(\n                message,\n                native_ingest::NativeInboundMessage::HeroModel(_)\n                    | native_ingest::NativeInboundMessage::HeroOwnerSnapshot(_)\n                    | native_ingest::NativeInboundMessage::HeroModelReceipt(_)\n            )\n        },\n        |message| messages.push(message),\n    );\n    for message in messages {\n            if let native_ingest::NativeInboundMessage::HeroOwnerSnapshot(update)=message {\n                npc_purchase_economy::apply_native_hero_owner_update(world,update);\n                continue;\n            }\n            if let native_ingest::NativeInboundMessage::HeroModel(json)\n            | native_ingest::NativeInboundMessage::HeroModelReceipt(json) = message\n            {\n                match serde_json::from_str::<mir2_client_bevy::hero_model::HeroModel>(&json) {\n                    Ok(model) => npc_purchase_economy::apply_native_hero_packet_model(world,model),\n                    Err(error) => eprintln!(\"[runtime] hero model decode error: {error}\"),\n                }\n            }\n    }\n}\n",
+  "functionAfter": "fn ingest_pending_hero_model(world: &mut World) {\n    let mut messages = Vec::new();\n    world.resource::<native_ingest::NativeInbound>().drain_matching(\n        |message| match message {\n            native_ingest::NativeInboundMessage::HeroModel(_)\n            | native_ingest::NativeInboundMessage::HeroModelReceipt(_) => true,\n            #[cfg(not(target_arch = \"wasm32\"))]\n            native_ingest::NativeInboundMessage::HeroOwnerSnapshot(_) => true,\n            _ => false,\n        },\n        |message| messages.push(message),\n    );\n    for message in messages {\n        #[cfg(not(target_arch = \"wasm32\"))]\n        if let native_ingest::NativeInboundMessage::HeroOwnerSnapshot(update) = message {\n            npc_purchase_economy::apply_native_hero_owner_update(world, update);\n            continue;\n        }\n        if let native_ingest::NativeInboundMessage::HeroModel(json)\n        | native_ingest::NativeInboundMessage::HeroModelReceipt(json) = message\n        {\n            match serde_json::from_str::<mir2_client_bevy::hero_model::HeroModel>(&json) {\n                Ok(model) => {\n                    #[cfg(not(target_arch = \"wasm32\"))]\n                    npc_purchase_economy::apply_native_hero_packet_model(world, model);\n                    #[cfg(target_arch = \"wasm32\")]\n                    {\n                        if model.skill_key_ack.is_some() {\n                            if let Some(mut receipts) = world.get_resource_mut::<mir2_client_bevy::hero_model::HeroModelReceipts>() {\n                                receipts.0.push_back(model.clone());\n                            }\n                        }\n                        world.insert_resource(model);\n                    }\n                }\n                Err(error) => eprintln!(\"[runtime] hero model decode error: {error}\"),\n            }\n        }\n    }\n}\n",
+  "retainedActualFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-renderer-source34-initial-webgpu-failure01.json",
+    "bytes": 6022,
+    "sha256": "b87882724a0e6a248cea456fe751cf78d164c358de870fe888b62ed352804627"
+  },
+  "review": "Root limited fix to ingress cfg boundary. Ordinary HeroModel/Receipt still matched for both adapters; Native HeroOwnerSnapshot only exists in actual Native enum and is now matched/handled only on Native; exact native owner/checkpoint helpers unchanged. WASM ordinary model/ACK update reproduces earlier Source25 semantics but zero-I/O adapter still does not feed it; actual browser Hero host visibility remains untested and Web React/projection unchanged. No claim of new Web Hero ABI or live input.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

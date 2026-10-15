@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "stage": "Source23 actual Git publication terminal record",
+  "previousRecord": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-fishing-source23-publication01.json",
+    "bytes": 18257,
+    "sha256": "1f9f5bea12d74b5f32423028c2271c23802a97c2a22ad9401cc16c63084f0c12"
+  },
+  "parentCommit": "4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef",
+  "localCommit": "c63136131bf9bc65e482188920c1c2a37730aeba",
+  "branch": "codex/windows-player-journey",
+  "retry6": {
+    "command": "git -c gc.auto=0 -c maintenance.auto=false -c http.version=HTTP/1.1 -c http.lowSpeedLimit=0 -c http.postBuffer=104857600 -c pack.threads=1 -c core.compression=1 push --no-thin origin codex/windows-player-journey",
+    "actual": {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "c06950",
+        "wall_time_seconds": 0.0000087,
+        "exit_code": 0,
+        "original_token_count": 31,
+        "output": "To github.com:Zombieliu/mir2.git\n   4cc32c3f9a..c63136131b  codex/windows-player-journey -> codex/windows-player-journey\n"
+      }
+    }
+  },
+  "remoteVerification": {
+    "status": "fulfilled",
+    "value": {
+      "chunk_id": "2a3133",
+      "wall_time_seconds": 4.9012697,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "c63136131bf9bc65e482188920c1c2a37730aeba\trefs/heads/codex/windows-player-journey\n"
+    }
+  },
+  "localVerification": {
+    "status": "fulfilled",
+    "value": {
+      "chunk_id": "b7c2fa",
+      "wall_time_seconds": 0.1381479,
+      "exit_code": 0,
+      "original_token_count": 11,
+      "output": "c63136131bf9bc65e482188920c1c2a37730aeba\n"
+    }
+  },
+  "published": true,
+  "history": "Previous five non-force push failures and earlier pending publication records remain historical. Before retry6 remote remained parent 4cc32c3. Supersedes only pending publication state.",
+  "source24Committed": false,
+  "scope": {
+    "network": "Git-only authorized exception",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "wasmApiUsed": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  }
+}

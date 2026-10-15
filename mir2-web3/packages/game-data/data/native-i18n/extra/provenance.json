@@ -8,9 +8,9 @@
     "th",
     "ar"
   ],
-  "entriesPerLocale": 9412,
+  "entriesPerLocale": 9421,
   "sourceSha256": {
-    "common.json": "fb5488ecf461cb732c1a606c28e9b8b0d503cff2b3dc02e8ec0c82fcb8afa8d1",
+    "common.json": "9bcf22b9f4ea1b6f7f514a7b0176cb6ab896d98c9e6ce75aba0d4d3c93d2d19d",
     "content.json": "142e05e9e628be47c45eec257c8616f6e7f5c485588de8a0b25f36fc406222d1",
     "shell.json": "52ace631cb335840532fcfec6a37b144b829950e25bd5e909e69b1ec5af6d3b1",
     "quest.json": "47a5beaa6feb4277b33a8617b55966a56eec2856b80000d34083ee6e23f9a5d1",
@@ -30,37 +30,37 @@
   },
   "methods": {
     "ru": {
-      "keyedReview": 3138,
+      "keyedReview": 3147,
       "exactSourceReview": 230,
       "offlineDraft": 5972,
       "offlineNameDraft": 45
     },
     "hi": {
-      "keyedReview": 3184,
+      "keyedReview": 3193,
       "exactSourceReview": 230,
       "offlineDraft": 5804,
       "offlineNameDraft": 167
     },
     "id": {
-      "keyedReview": 3299,
+      "keyedReview": 3308,
       "exactSourceReview": 230,
       "offlineDraft": 5106,
       "offlineNameDraft": 750
     },
     "vi": {
-      "keyedReview": 3168,
+      "keyedReview": 3177,
       "exactSourceReview": 230,
       "offlineDraft": 5836,
       "offlineNameDraft": 151
     },
     "th": {
-      "keyedReview": 3109,
+      "keyedReview": 3118,
       "exactSourceReview": 230,
       "offlineDraft": 5978,
       "offlineNameDraft": 68
     },
     "ar": {
-      "keyedReview": 3348,
+      "keyedReview": 3357,
       "exactSourceReview": 230,
       "offlineDraft": 5014,
       "offlineNameDraft": 793
@@ -2610,12 +2610,12 @@
     "ar": "1f5d24641f7597da1616caf8b632119abfd5d93c2e127ec2bf4ebb863966f66f"
   },
   "outputSha256": {
-    "ru": "5af1dd4377887789a7ef2855398bd87513b06d127c1e2c23599776fcd1aa826e",
-    "hi": "5c5e761247c5a96737eefb3728defbaa0b25e1e1451a004fe8fe3bc0983e1f53",
-    "id": "bb01e80a99d574800b9c0c55b95054ccd496b3a736b41057d7d227d8ba03e717",
-    "vi": "cdc1ec0657e0575f4d8aaebf917caa674d5cb9bb2f9adb879ee808aa37629ca5",
-    "th": "1120e924d271cdb13c4006a6b5c877984b627270f2f93245b2c1fb61e7cc4b99",
-    "ar": "d5f6e32b32bcef6bbaf5a4cecdadd5bdeb792b609c1cc967bb3266fa459b47b2"
+    "ru": "c88e7b28d8690aa4e6fa789cfebfed3ea4fe48aa698e7df39da81e3514bfdb44",
+    "hi": "37f44d1746942c3fcae28810b7b6291d5de17d02767850acd0fb37b4baa7360f",
+    "id": "af8e138801c84cde116627d6e6f57eb52c510e5f36e4657478ca323765c96aa4",
+    "vi": "b53bc32c4cd78f56ed470d47ecff8fb5c32dd49fdf3650324b6279f02115e43c",
+    "th": "60ca5db30a16fce9cf6b4a65ba5d2789ba8d474ae348ad80254e3f5165102b0c",
+    "ar": "4dc325cbc3698791dd33e0d5c6a25a5dd2cc07caa41706f5c23ce6b0c775bd39"
   },
   "review": "Keyed overrides were authored/reviewed by the development team. Remaining prose uses offline translation drafts and requires native-speaker acceptance; no full linguistic acceptance is claimed.",
   "textHashNormalization": "UTF-8, CRLF normalized to LF for source and reviewed JSON",
@@ -2641,6 +2641,26 @@
       ],
       "source": "Crystal HumanObject.PoisonSword/GetPoison(1), equipment Amulet shapes 1/2; existing Source skill names retained",
       "authoring": "keyed translations in all nine locales; original translations unchanged; native-speaker and native layout acceptance pending"
+    },
+    {
+      "scope": "merged shared quest headings and action feedback",
+      "newEntries": 9,
+      "keys": [
+        "ui.questProgressHeading",
+        "ui.questReturnHeading",
+        "ui.questClientLoading",
+        "ui.questClientUnavailable",
+        "ui.questActionPending",
+        "ui.questActionRewardRequired",
+        "ui.questActionTalkToNpc",
+        "ui.questActionStateChanged",
+        "ui.retry"
+      ],
+      "source": "packages/tooling/scripts/native-i18n-shared-translations.mjs",
+      "sourceSha256": "91f3182569ec40276db3f80dc1c961f57cf9c4010ffeefc9ef15c19c34537b71",
+      "preservedEntriesPerLocale": 9412,
+      "authoring": "keyed translations in all nine native locales; original catalogue and overlay values retained; native-speaker and layout acceptance pending"
     }
-  ]
+  ],
+  "sharedKeyTranslationsSha256": "91f3182569ec40276db3f80dc1c961f57cf9c4010ffeefc9ef15c19c34537b71"
 }

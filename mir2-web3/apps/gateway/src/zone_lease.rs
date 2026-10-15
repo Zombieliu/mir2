@@ -447,6 +447,48 @@ fn configured_owner_id(explicit_owner: Option<String>, instance_id: Option<Strin
 }
 
 impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {
+
+    fn supports_durable_npc_purchase_lease(&self) -> bool { true }
+
+    fn with_durable_npc_purchase_lease(&self, lease: &ZoneOwnerLease,
+        operation: &mut (dyn FnMut() + Send),
+    ) -> Result<(), String> {
+        // A scoped worker keeps the real row lock through the account commit;
+        // no cached/bootstrap lease is accepted and no new schema is created.
+        std::thread::scope(|scope| {
+            scope.spawn(|| {
+                let mut slot = self.client.lock().map_err(|_| "zone lease client mutex poisoned")?;
+                if slot.is_none() {
+                    *slot = Some(Client::connect(&self.database_url, NoTls)
+                        .map_err(|error| format!("durable NPC lease connect failed: {error}"))?);
+                }
+                let guarded_result = (|| {
+                let client = slot.as_mut().expect("connected lease client");
+                let mut transaction = client.transaction()
+                    .map_err(|error| format!("durable NPC lease transaction failed: {error}"))?;
+                let row = transaction.query_opt(
+                    "SELECT owner_id, fencing_token, expires_at_ms FROM zone_owner_leases WHERE zone_id=$1 FOR UPDATE",
+                    &[&lease.zone_id().as_str()],
+                ).map_err(|error| format!("durable NPC owner lease lock failed: {error}"))?
+                    .ok_or("durable NPC owner lease is not registered")?;
+                let owner: String = row.get("owner_id");
+                let token: i64 = row.get("fencing_token");
+                let expires: i64 = row.get("expires_at_ms");
+                if owner != lease.owner_id() || token <= 0 || token as u64 != lease.fencing_token()
+                    || expires <= 0 || expires as u64 <= now_ms() {
+                    return Err("stale durable NPC purchase owner lease".into());
+                }
+                crate::session::catch_gateway_panic("durable NPC lease callback", || operation())?;
+                // The row was only locked. Rollback releases the fencing guard;
+                // any release error follows the already captured commit receipt.
+                transaction.rollback().map_err(|error| format!("durable NPC lease guard release failed: {error}"))
+                })();
+                if guarded_result.is_err() { *slot = None; }
+                guarded_result
+            }).join().map_err(|_| "durable NPC lease guard worker panicked".to_string())?
+        })
+    }
+
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
         let now = now_ms();
         if let Some(cached) = self.cached_entry(zone_id) {

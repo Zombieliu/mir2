@@ -73,6 +73,8 @@ jobs:
         run: cargo test --locked -p mir2-simulation --features test-support --test activities --test billing_recharge --test billing_monthly_card --test monthly_card --test game_shop_gift -- --test-threads=1 2>&1 | tee activity-evidence/activities.log
       - name: Real PostgreSQL concurrent registrations and ordinary live Source save
         run: cargo test --locked -p mir2-simulation --test activities_postgres -- --ignored --test-threads=1 2>&1 | tee activity-evidence/postgres.log
+      - name: Real PostgreSQL source handoff preserves its committed admission
+        run: cargo test --locked -p mir2-simulation --features test-support --test character_handoff_postgres -- --ignored --test-threads=1 2>&1 | tee activity-evidence/handoff-postgres.log
       - name: Gateway bearer ownership and shared game lifecycle
         run: |
           cargo test --locked -p mir2-gateway --lib -- --test-threads=1 web::activities billing game_shop_gift 2>&1 | tee activity-evidence/gateway.log

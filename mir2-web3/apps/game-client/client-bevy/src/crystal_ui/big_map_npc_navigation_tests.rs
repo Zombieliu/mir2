@@ -339,6 +339,7 @@ fn big_map_npc_selected_row_offscreen_visual() {
                 &inventory,
                 &state,
                 &player,
+                crate::npc_gold_buy_attempt::NpcGoldBuyFeedback::default(),
             );
         });
     queue.apply(app.world_mut());

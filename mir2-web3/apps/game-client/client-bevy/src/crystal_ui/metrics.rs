@@ -51,7 +51,7 @@ impl CrystalStageTransform {
     /// Match the native Windows camera's integer 4:3 viewport exactly.
     /// Other hosts retain their existing floating-point presentation contract.
     pub fn fit_native(viewport_width: f32, viewport_height: f32) -> Self {
-        #[cfg(target_os = "windows")]
+        #[cfg(all(feature = "native-ui", target_os = "windows"))]
         {
             let width = viewport_width.max(1.0).round() as u32;
             let height = viewport_height.max(1.0).round() as u32;
@@ -276,7 +276,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(target_os = "windows")]
     fn native_pointer_matches_integer_camera_viewport_on_unusual_monitors() {
         for physical in [
             bevy::math::UVec2::new(2560, 1600),
@@ -284,18 +283,41 @@ mod tests {
             bevy::math::UVec2::new(1365, 767),
             bevy::math::UVec2::new(1080, 1920),
         ] {
-            let (origin, size) = crate::native_display::stage_viewport(physical);
             let transform = CrystalStageTransform::fit_native(physical.x as f32, physical.y as f32);
-            assert_eq!(transform.offset_x, origin.x as f32);
-            assert_eq!(transform.offset_y, origin.y as f32);
-            assert_eq!(transform.scale, size.x as f32 / STAGE_WIDTH);
+            #[cfg(all(feature = "native-ui", target_os = "windows"))]
+            let (origin_x, origin_y, scale) = {
+                let (origin, size) = crate::native_display::stage_viewport(physical);
+                (
+                    origin.x as f32,
+                    origin.y as f32,
+                    size.x as f32 / STAGE_WIDTH,
+                )
+            };
+            #[cfg(not(all(feature = "native-ui", target_os = "windows")))]
+            let (origin_x, origin_y, scale) = {
+                let expected = CrystalStageTransform::fit(physical.x as f32, physical.y as f32);
+                assert_eq!(
+                    transform, expected,
+                    "portable hosts retain floating-point fit"
+                );
+                (expected.offset_x, expected.offset_y, expected.scale)
+            };
+            assert_eq!(transform.offset_x, origin_x);
+            assert_eq!(transform.offset_y, origin_y);
+            assert_eq!(transform.scale, scale);
             for logical in [(0.0, 0.0), (512.0, 384.0), (1024.0, 768.0)] {
                 let pixel = transform.logical_to_physical(logical.0, logical.1);
-                assert_close(pixel.0, origin.x as f32 + logical.0 * transform.scale);
-                assert_close(pixel.1, origin.y as f32 + logical.1 * transform.scale);
+                assert_close(pixel.0, origin_x + logical.0 * transform.scale);
+                assert_close(pixel.1, origin_y + logical.1 * transform.scale);
                 let back = transform.physical_to_logical(pixel.0, pixel.1);
                 assert_close(back.0, logical.0);
                 assert_close(back.1, logical.1);
+            }
+            if origin_x >= 1.0 {
+                assert!(!transform.contains_physical_point(origin_x - 1.0, origin_y + 1.0));
+            }
+            if origin_y >= 1.0 {
+                assert!(!transform.contains_physical_point(origin_x + 1.0, origin_y - 1.0));
             }
         }
     }

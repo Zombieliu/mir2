@@ -45,10 +45,14 @@ use mir2_protocol::{
     ServerPacket, Spell, UserLocation,
 };
 use mir2_simulation::{
+    CharacterHandoffCheckpoint, CharacterHandoffCommitment,
     intelligent_creature_allows_ground_drop, world_entity_sprite_from_object_player,
     zone_ground_drop_snapshots_for_monster_at_tick, ActiveSessionIdentity, CharacterSaveRecord,
     ChatPacketPreparation, GameShopPurchaseOutcome, GroundDropClaimTicket, GroundDropLootSnapshot,
-    GroundDropSnapshot, InProcessWorldRuntime, SessionId, SharedAccountInventoryTransactionKind,
+    GroundDropSnapshot, InProcessWorldRuntime, NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingError,
+    NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingOutcome, NpcGoldBuyRequest,
+    SessionId, SharedAccountInventoryTransactionKind,
+    RankingInspectIdentity, RankingInspectOnlineProjection, RankingInspectPresence,
     SharedAccountInventoryTransactionReceipt, SharedInventoryItemDrop, SharedItemRentalAgreement,
     SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
     SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand,
@@ -65,6 +69,13 @@ use tokio::sync::mpsc::{error::TrySendError as TokioTrySendError, Sender as Toki
 
 use crate::web::GatewaySlowStage;
 use crate::GatewayConfig;
+use mir2_simulation::{NpcPurchaseDurableError, NpcPurchaseOwnerAction, NpcPurchaseOwnerExecution,
+    NpcPurchaseOwnerReply, NpcPurchaseProducer};
+use crate::npc_purchase_owner_route::NpcPurchaseOwnerRouteExecution;
+use crate::npc_gold_buy_route::{
+    finish_npc_gold_buy_packets, npc_gold_buy_route_failure, NpcGoldBuyRouteError,
+    NpcGoldBuyRouteExecution,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -276,6 +287,17 @@ impl ZoneOwnerCommandRequest {
 pub trait ZoneOwnerLeaseAuthority: Send + Sync {
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease;
 
+
+    /// Opt-in lease guard for durable NPC transactions. A cached lease or an
+    /// unsupported authority must never authorize this commit path.
+    fn supports_durable_npc_purchase_lease(&self) -> bool { false }
+
+    fn with_durable_npc_purchase_lease(&self, _lease: &ZoneOwnerLease,
+        _operation: &mut (dyn FnMut() + Send),
+    ) -> Result<(), String> {
+        Err("durable NPC purchase requires a lease authority that holds the current epoch".into())
+    }
+
     fn refresh_owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
         self.owner_lease(zone_id)
     }
@@ -306,6 +328,15 @@ pub trait ZoneOwnerLeaseAuthority: Send + Sync {
 pub type SharedZoneOwnerLeaseAuthority = Arc<dyn ZoneOwnerLeaseAuthority>;
 
 pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
+
+    fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool { false }
+
+    fn execute_npc_purchase_owner(&self, _runtime: &mut ZoneRuntimeHandle,
+        _lease: &ZoneOwnerLease, _authenticated: bool, _action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        Err(crate::npc_purchase_owner_route::before("durable NPC purchase owner route is unavailable"))
+    }
+
     fn on_connect(&self, runtime: &ZoneRuntimeHandle) -> Result<Vec<ServerPacket>, String> {
         Ok(runtime.on_connect())
     }
@@ -315,6 +346,23 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         runtime: &mut ZoneRuntimeHandle,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String>;
+
+    /// Explicit local capability. A local shadow runtime cannot establish remote support.
+    fn supports_typed_npc_gold_buy_outcome(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        false
+    }
+
+    /// Unsupported owner routes never fall back to the generic BuyItem command.
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        _request: ZoneOwnerCommandRequest,
+        _purchase: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyRouteExecution, NpcGoldBuyRouteError> {
+        Err(NpcGoldBuyRouteError::Processing(
+            NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::UnsupportedRuntime),
+        ))
+    }
 
     /// Execute one native-receipt purchase or gift only after proving that this exact
     /// command path can return the authoritative typed transaction outcome.
@@ -385,6 +433,16 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         runtime.restore_active_character_checkpoint(checkpoint)
     }
 
+    fn prepare_character_handoff(&self, _runtime: &mut ZoneRuntimeHandle, _lease: &ZoneOwnerLease)
+        -> Result<CharacterHandoffCheckpoint, String> {
+        Err("zone owner route does not implement trusted handoff preparation".into())
+    }
+
+    fn resume_character_handoff(&self, _runtime: &mut ZoneRuntimeHandle, _lease: &ZoneOwnerLease,
+        _checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
+        Err("zone owner route does not implement trusted handoff resume".into())
+    }
+
     fn prepare_teardown_checkpoint(
         &self,
         runtime: &mut ZoneRuntimeHandle,
@@ -442,6 +500,15 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
 pub type SharedZoneOwnerCommandClient = Arc<dyn ZoneOwnerCommandClient>;
 
 pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
+
+    fn supports_durable_npc_purchase_owner(&self) -> bool { false }
+
+    fn execute_npc_purchase_owner(&self, _lease: &ZoneOwnerLease,
+        _authenticated: bool, _action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        Err(crate::npc_purchase_owner_route::before("durable NPC purchase RPC route is unavailable"))
+    }
+
     fn on_connect(&self) -> Result<Vec<ServerPacket>, String> {
         Err("zone owner RPC transport does not implement on_connect".to_string())
     }
@@ -501,6 +568,14 @@ pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
         )
     }
 
+    fn prepare_character_handoff(&self, _lease: &ZoneOwnerLease) -> Result<CharacterHandoffCheckpoint, String> {
+        Err("zone owner RPC transport does not implement trusted handoff preparation".into())
+    }
+
+    fn resume_character_handoff(&self, _lease: &ZoneOwnerLease, _checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
+        Err("zone owner RPC transport does not implement trusted handoff resume".into())
+    }
+
     fn prepare_teardown_checkpoint(
         &self,
         _owner_lease: &ZoneOwnerLease,
@@ -555,6 +630,16 @@ impl RpcZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
+
+    fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        self.transport.supports_durable_npc_purchase_owner()
+    }
+    fn execute_npc_purchase_owner(&self, _runtime: &mut ZoneRuntimeHandle,
+        lease: &ZoneOwnerLease, authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        self.transport.execute_npc_purchase_owner(lease, authenticated, action)
+    }
+
     fn on_connect(&self, _runtime: &ZoneRuntimeHandle) -> Result<Vec<ServerPacket>, String> {
         self.transport.on_connect()
     }
@@ -609,6 +694,16 @@ impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
     ) -> Result<(), String> {
         self.transport
             .restore_active_character_checkpoint(checkpoint)
+    }
+
+    fn prepare_character_handoff(&self, _runtime: &mut ZoneRuntimeHandle, lease: &ZoneOwnerLease)
+        -> Result<CharacterHandoffCheckpoint, String> {
+        self.transport.prepare_character_handoff(lease)
+    }
+
+    fn resume_character_handoff(&self, _runtime: &mut ZoneRuntimeHandle, lease: &ZoneOwnerLease,
+        checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
+        self.transport.resume_character_handoff(lease, checkpoint)
     }
 
     fn prepare_teardown_checkpoint(
@@ -670,6 +765,15 @@ fn stale_zone_owner_lease_error(lease: &ZoneOwnerLease, current: &ZoneOwnerLease
     )
 }
 
+fn with_character_handoff_lease<T: Send>(authority: &SharedZoneOwnerLeaseAuthority, lease: &ZoneOwnerLease,
+    mut operation: impl FnMut() -> Result<T, String> + Send) -> Result<T, String> {
+    let mut result = None;
+    // Reuse the existing epoch-held repository guard: a second check after a
+    // write cannot retract that write if ownership changed during publication.
+    authority.with_durable_npc_purchase_lease(lease, &mut || { result = Some(operation()); })?;
+    result.ok_or_else(|| "handoff owner epoch guard did not execute".to_string())?
+}
+
 #[derive(Default)]
 pub struct InProcessZoneOwnerCommandClient {
     owner_lease_authority: Option<SharedZoneOwnerLeaseAuthority>,
@@ -690,6 +794,46 @@ impl fmt::Debug for InProcessZoneOwnerCommandClient {
     }
 }
 
+
+fn execute_durable_npc_owner_held(
+    lease: &ZoneOwnerLease, authenticated: bool, action: NpcPurchaseOwnerAction,
+    _source_sequence: Option<u64>, runtime: &mut ZoneRuntimeHandle,
+) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+    // The dedicated NPC path never enters shared award/trade/journey predrain.
+    // Those transactions can lock this lease row themselves and belong to their
+    // own command turn; holding a PG owner guard across them would deadlock.
+    crate::npc_purchase_owner_route::execute_owner(runtime, lease, authenticated, action)
+}
+
+fn execute_durable_npc_owner_with_guard(
+    authority: &SharedZoneOwnerLeaseAuthority, lease: &ZoneOwnerLease,
+    authenticated: bool, action: NpcPurchaseOwnerAction,
+    source_sequence: Option<u64>, runtime: &mut ZoneRuntimeHandle,
+) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+    if !authenticated { return Err(crate::npc_purchase_owner_route::before("NPC purchase owner action requires authentication")); }
+    if !authority.supports_durable_npc_purchase_lease() {
+        return Err(crate::npc_purchase_owner_route::before("durable NPC owner lease guard is unavailable"));
+    }
+    let mut result = None;
+    let mut known = None;
+    let guarded = crate::session::catch_gateway_panic("durable NPC owner epoch guard", || {
+        authority.with_durable_npc_purchase_lease(lease, &mut || {
+            let routed = execute_durable_npc_owner_held(lease, authenticated, action, source_sequence, runtime);
+            known = match &routed {
+                Ok(routed) => crate::npc_purchase_owner_route::terminal_receipt(&routed.reply),
+                Err(NpcPurchaseDurableError::PostCommit { receipt, .. }) => Some(receipt.clone()),
+                _ => None,
+            };
+            result = Some(routed);
+        })
+    }).and_then(|result| result);
+    match guarded {
+        Ok(()) => result.unwrap_or_else(|| Err(crate::npc_purchase_owner_route::failure("durable NPC owner guard did not execute", known))),
+        Err(detail) if result.is_some() => Err(crate::npc_purchase_owner_route::failure(detail, known)),
+        Err(detail) => Err(crate::npc_purchase_owner_route::before(detail)),
+    }
+}
+
 impl InProcessZoneOwnerCommandClient {
     pub fn new() -> Self {
         Self::default()
@@ -705,6 +849,143 @@ impl InProcessZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
+
+    fn prepare_character_handoff(&self, runtime: &mut ZoneRuntimeHandle, lease: &ZoneOwnerLease)
+        -> Result<CharacterHandoffCheckpoint, String> {
+        let authority = self.owner_lease_authority.as_ref().ok_or("handoff requires actual owner lease authority")?;
+        with_character_handoff_lease(authority, lease, || runtime.prepare_character_handoff())
+    }
+
+    fn resume_character_handoff(&self, runtime: &mut ZoneRuntimeHandle, lease: &ZoneOwnerLease,
+        checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
+        let authority = self.owner_lease_authority.as_ref().ok_or("handoff requires actual owner lease authority")?;
+        with_character_handoff_lease(authority, lease, || runtime.resume_character_handoff(checkpoint))
+    }
+
+    fn supports_durable_npc_purchase_owner(&self, runtime: &ZoneRuntimeHandle) -> bool {
+        self.owner_lease_authority.as_ref().is_some_and(|authority| authority.supports_durable_npc_purchase_lease())
+            && runtime.supports_durable_npc_purchase_owner()
+    }
+    fn execute_npc_purchase_owner(&self, runtime: &mut ZoneRuntimeHandle,
+        lease: &ZoneOwnerLease, authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        let authority = self.owner_lease_authority.as_ref()
+            .ok_or_else(|| crate::npc_purchase_owner_route::before("durable NPC purchase requires actual owner lease authority"))?;
+        execute_durable_npc_owner_with_guard(authority, lease, authenticated, action, None, runtime)
+    }
+
+    fn supports_typed_npc_gold_buy_outcome(&self, runtime: &ZoneRuntimeHandle) -> bool {
+        runtime.supports_typed_npc_gold_buy_outcome()
+    }
+
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        request: ZoneOwnerCommandRequest,
+        purchase: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyRouteExecution, NpcGoldBuyRouteError> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority.validate_owner_lease(request.owner_lease())
+                .map_err(|detail| NpcGoldBuyRouteError::BeforeExecution { detail })?;
+        }
+        let ZoneOwnerCommandMode::ProductionPlayer { authenticated } = request.mode() else {
+            return Err(NpcGoldBuyRouteError::BeforeExecution {
+                detail: "typed NPC gold purchase requires the production player route".into(),
+            });
+        };
+        if !matches!(request.command(), WorldCommand::ClientPacket(ClientPacket::BuyItem {
+            item_index, count, panel_type,
+        }) if *item_index == purchase.item_index && *count == purchase.count
+            && *panel_type == purchase.panel_type)
+        {
+            return Err(NpcGoldBuyRouteError::BeforeExecution {
+                detail: "typed NPC gold purchase requires its exact ordinary BuyItem tuple".into(),
+            });
+        }
+        if !authenticated {
+            return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotAuthenticated,
+            )));
+        }
+        let mut processing_outcome = None;
+        let result = crate::session::catch_gateway_panic("typed NPC gold owner execution", || {
+            if !runtime.supports_typed_npc_gold_buy_outcome() {
+                return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                    NpcGoldBuyBeforeExecution::UnsupportedRuntime,
+                )));
+            }
+            let identity = runtime.active_identity();
+            if identity.as_ref().is_some_and(|identity| {
+                identity.account_id.is_empty() || identity.account_id != identity.account_id.trim()
+            }) {
+                return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                    NpcGoldBuyBeforeExecution::NotAuthenticated,
+                )));
+            }
+            if identity.as_ref().is_some_and(|identity| {
+                identity.character_index < 0 || identity.character_name.is_empty()
+            }) {
+                return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                    NpcGoldBuyBeforeExecution::NotInGame,
+                )));
+            }
+            // With no active character, use the actual runtime's guarded typed
+            // entry once, before any economy context or shared pipeline. Its
+            // Session distinguishes unlogged from pre-StartGame state.
+            if identity.is_some() {
+                if let Some(shared) = runtime.as_mut().as_any_mut()
+                    .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+                {
+                    if shared.inner.current_map_file_name().is_some() {
+                        let context = shared.next_in_process_economy_execution_context(request.owner_lease());
+                        shared.set_economy_execution_context(context);
+                    }
+                }
+            }
+            let processed = match runtime.execute_production_npc_gold_buy_requiring_typed_outcome(
+                authenticated, purchase,
+            ) {
+                Ok(processed) => processed,
+                Err(error) => {
+                    if let NpcGoldBuyProcessingError::PostProcessing { outcome, .. } = &error {
+                        processing_outcome = Some(outcome.clone());
+                    }
+                    return Err(NpcGoldBuyRouteError::Processing(error));
+                }
+            };
+            processing_outcome = Some(processed.outcome.clone());
+            // Metadata is from this same owner runtime after the full pipeline.
+            // A metadata panic cannot erase the captured economic outcome.
+            let snapshot_tick = runtime.world_snapshot().tick;
+            let active_identity = runtime.active_identity();
+            let packet_count = processed.packets.len();
+            Ok(NpcGoldBuyRouteExecution {
+                execution: WorldCommandExecution {
+                    packets: processed.packets,
+                    outcome: WorldCommandOutcome {
+                        command_kind: request.command().kind(),
+                        packet_count,
+                        snapshot_tick,
+                        active_identity,
+                    },
+                    game_shop_purchase_outcome: None,
+                },
+                processing_outcome: processed.outcome,
+            })
+        });
+        let clear = crate::session::catch_gateway_panic("typed NPC gold economy context clear", || {
+            if let Some(shared) = runtime.as_mut().as_any_mut()
+                .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+            {
+                shared.set_economy_execution_context(None);
+            }
+        });
+        if let Err(detail) = clear {
+            return Err(npc_gold_buy_route_failure(detail, processing_outcome));
+        }
+        result.unwrap_or_else(|detail| Err(npc_gold_buy_route_failure(detail, processing_outcome)))
+    }
+
     fn supports_native_game_shop_gifts(&self, runtime: &ZoneRuntimeHandle) -> bool {
         runtime.supports_native_game_shop_gifts()
     }
@@ -813,6 +1094,74 @@ impl fmt::Debug for HostedZoneOwnerCommandClient {
 }
 
 impl HostedZoneOwnerCommandClient {
+
+
+
+    pub(crate) fn npc_purchase_owner_checkpoint_with_lease(&self, lease: &ZoneOwnerLease) -> Result<Option<CharacterSaveRecord>, String> {
+        let authority = self.owner_lease_authority.as_ref().ok_or("durable NPC owner lease authority unavailable")?;
+        let mut checkpoint = None;
+        let mut read_error = None;
+        authority.with_durable_npc_purchase_lease(lease, &mut || {
+            match self.runtime.lock() {
+                Ok(runtime) => checkpoint = runtime.as_ref().and_then(|runtime| runtime.npc_purchase_owner_checkpoint(crate::npc_purchase_owner_route::owner_epoch(lease))),
+                Err(_) => read_error = Some("zone owner hosted runtime mutex poisoned".to_string()),
+            }
+        })?;
+        match read_error { Some(error) => Err(error), None => Ok(checkpoint) }
+    }
+
+    pub(crate) fn apply_npc_purchase_owner_replica_checkpoint(&self, checkpoint: &CharacterSaveRecord) -> Result<(), String> {
+        let mut runtime = self.runtime.lock().map_err(|_| "zone owner hosted runtime mutex poisoned")?;
+        runtime.as_mut().ok_or("zone owner hosted runtime was handed off")?
+            .apply_npc_purchase_owner_replica_checkpoint(checkpoint)
+    }
+
+    pub fn supports_durable_npc_purchase_owner(&self) -> bool {
+        self.owner_lease_authority.as_ref().is_some_and(|authority| authority.supports_durable_npc_purchase_lease())
+            && self.runtime.lock().ok().and_then(|runtime| runtime.as_ref()
+                .map(|runtime| runtime.supports_durable_npc_purchase_owner())).unwrap_or(false)
+    }
+
+    pub fn execute_npc_purchase_owner(&self, lease: &ZoneOwnerLease,
+        authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        self.execute_npc_purchase_owner_with_source_sequence(lease, authenticated, action, None)
+    }
+
+    pub(crate) fn execute_npc_purchase_owner_with_source_sequence(&self,
+        lease: &ZoneOwnerLease, authenticated: bool, action: NpcPurchaseOwnerAction,
+        source_sequence: Option<u64>,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        if !authenticated { return Err(crate::npc_purchase_owner_route::before("NPC purchase owner action requires authentication")); }
+        let authority = self.owner_lease_authority.as_ref()
+            .filter(|authority| authority.supports_durable_npc_purchase_lease())
+            .ok_or_else(|| crate::npc_purchase_owner_route::before("durable NPC owner lease guard is unavailable"))?;
+        let mut result = None;
+        let mut known = None;
+        let guarded = crate::session::catch_gateway_panic("hosted durable NPC owner guard", || {
+            authority.with_durable_npc_purchase_lease(lease, &mut || {
+                let routed = crate::session::catch_gateway_panic("hosted durable NPC actual runtime", || {
+                    let mut runtime = self.runtime.lock()
+                        .map_err(|_| crate::npc_purchase_owner_route::before("zone owner hosted runtime mutex poisoned"))?;
+                    let runtime = runtime.as_mut()
+                        .ok_or_else(|| crate::npc_purchase_owner_route::before("zone owner hosted runtime was handed off"))?;
+                    execute_durable_npc_owner_held(lease, authenticated, action, source_sequence, runtime)
+                }).unwrap_or_else(|detail| Err(crate::npc_purchase_owner_route::failure(detail, None)));
+                known = match &routed {
+                    Ok(routed) => crate::npc_purchase_owner_route::terminal_receipt(&routed.reply),
+                    Err(NpcPurchaseDurableError::PostCommit { receipt, .. }) => Some(receipt.clone()),
+                    _ => None,
+                };
+                result = Some(routed);
+            })
+        }).and_then(|result| result);
+        match guarded {
+            Ok(()) => result.unwrap_or_else(|| Err(crate::npc_purchase_owner_route::failure("hosted NPC guard did not execute", known))),
+            Err(detail) if result.is_some() => Err(crate::npc_purchase_owner_route::failure(detail, known)),
+            Err(detail) => Err(crate::npc_purchase_owner_route::before(detail)),
+        }
+    }
+
     pub fn new(runtime: ZoneRuntimeHandle) -> Self {
         Self {
             runtime: Mutex::new(Some(runtime)),
@@ -905,6 +1254,30 @@ impl HostedZoneOwnerCommandClient {
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?
             .restore_active_character_checkpoint(checkpoint)
+    }
+
+    pub fn prepare_character_handoff(&self, lease: &ZoneOwnerLease) -> Result<CharacterHandoffCheckpoint, String> {
+        let authority = self.owner_lease_authority.as_ref().ok_or("handoff requires actual owner lease authority")?;
+        with_character_handoff_lease(authority, lease, || {
+            self.runtime.lock().map_err(|_| "zone owner hosted runtime mutex was poisoned")?
+                .as_mut().ok_or("zone owner hosted runtime was already handed off")?.prepare_character_handoff()
+        })
+    }
+
+    pub fn resume_character_handoff(&self, lease: &ZoneOwnerLease, checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
+        let authority = self.owner_lease_authority.as_ref().ok_or("handoff requires actual owner lease authority")?;
+        with_character_handoff_lease(authority, lease, || {
+            let mut runtime = self.runtime.lock().map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
+            let was_prepared = runtime.as_ref().ok_or("zone owner hosted runtime was already handed off")?.active_identity().is_none();
+            let result = runtime.as_mut().ok_or("zone owner hosted runtime was already handed off")?.resume_character_handoff(checkpoint);
+            if result.is_err() && was_prepared { runtime.take(); }
+            result
+        })
+    }
+
+    pub(crate) fn apply_character_handoff_replica(&self, checkpoint: &CharacterHandoffCheckpoint) -> Result<(), String> {
+        self.runtime.lock().map_err(|_| "zone owner hosted runtime mutex was poisoned")?
+            .as_mut().ok_or("zone owner hosted runtime was already handed off")?.apply_character_handoff_replica(checkpoint)
     }
 
     pub fn prepare_teardown_checkpoint(
@@ -1092,6 +1465,16 @@ impl HostedZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
+
+    fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        HostedZoneOwnerCommandClient::supports_durable_npc_purchase_owner(self)
+    }
+    fn execute_npc_purchase_owner(&self, _runtime: &mut ZoneRuntimeHandle,
+        lease: &ZoneOwnerLease, authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        HostedZoneOwnerCommandClient::execute_npc_purchase_owner(self, lease, authenticated, action)
+    }
+
     fn on_connect(&self, _runtime: &ZoneRuntimeHandle) -> Result<Vec<ServerPacket>, String> {
         HostedZoneOwnerCommandClient::on_connect(self)
     }
@@ -1154,6 +1537,16 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
         HostedZoneOwnerCommandClient::restore_active_character_checkpoint(self, checkpoint)
     }
 
+    fn prepare_character_handoff(&self, _runtime: &mut ZoneRuntimeHandle, lease: &ZoneOwnerLease)
+        -> Result<CharacterHandoffCheckpoint, String> {
+        HostedZoneOwnerCommandClient::prepare_character_handoff(self, lease)
+    }
+
+    fn resume_character_handoff(&self, _runtime: &mut ZoneRuntimeHandle, lease: &ZoneOwnerLease,
+        checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
+        HostedZoneOwnerCommandClient::resume_character_handoff(self, lease, checkpoint)
+    }
+
     fn prepare_teardown_checkpoint(
         &self,
         _runtime: &mut ZoneRuntimeHandle,
@@ -1208,6 +1601,23 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
+    fn prepare_character_handoff(&self, lease: &ZoneOwnerLease) -> Result<CharacterHandoffCheckpoint, String> {
+        HostedZoneOwnerCommandClient::prepare_character_handoff(self, lease)
+    }
+
+    fn resume_character_handoff(&self, lease: &ZoneOwnerLease, checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
+        HostedZoneOwnerCommandClient::resume_character_handoff(self, lease, checkpoint)
+    }
+
+    fn supports_durable_npc_purchase_owner(&self) -> bool {
+        HostedZoneOwnerCommandClient::supports_durable_npc_purchase_owner(self)
+    }
+    fn execute_npc_purchase_owner(&self, lease: &ZoneOwnerLease,
+        authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        HostedZoneOwnerCommandClient::execute_npc_purchase_owner(self, lease, authenticated, action)
+    }
+
     fn on_connect(&self) -> Result<Vec<ServerPacket>, String> {
         HostedZoneOwnerCommandClient::on_connect(self)
     }
@@ -1425,6 +1835,23 @@ impl InMemoryZoneOwnerLeaseAuthority {
 }
 
 impl ZoneOwnerLeaseAuthority for InMemoryZoneOwnerLeaseAuthority {
+
+    fn supports_durable_npc_purchase_lease(&self) -> bool { true }
+
+    fn with_durable_npc_purchase_lease(&self, lease: &ZoneOwnerLease,
+        operation: &mut (dyn FnMut() + Send),
+    ) -> Result<(), String> {
+        let leases = self.leases.lock().map_err(|_| "zone owner lease mutex poisoned")?;
+        let current = leases.get(lease.zone_id()).ok_or("durable NPC purchase owner lease is not registered")?;
+        if current.expired_at(shared_gateway_now_ms()) || current.lease != *lease {
+            return Err(stale_zone_owner_lease_error(lease, &current.lease));
+        }
+        // Handoff cannot change this epoch while the single-writer operation
+        // commits its checkpoint and captures its complete projection.
+        crate::session::catch_gateway_panic("durable NPC lease callback", || operation())?;
+        Ok(())
+    }
+
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
         self.owner_lease_at(zone_id, shared_gateway_now_ms())
     }
@@ -2730,6 +3157,14 @@ struct ZoneJourneyEventProgress {
     committed: BTreeSet<ZoneJourneyEventIdentity>,
 }
 
+#[derive(Debug, Clone)]
+struct RankingInspectOwnerProjection {
+    session_id: SessionId,
+    life_generation: u64,
+    object_id: u32,
+    projection: RankingInspectOnlineProjection,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct PendingOwnedMonsterKillProof {
     session_id: SessionId,
@@ -2787,6 +3222,8 @@ struct SharedInProcessZoneState {
     teardown_vital_fence_generations: BTreeMap<ZonePresenceKey, u64>,
     next_teardown_vital_fence_generation: u64,
     live_zone_outbounds: BTreeMap<ZonePresenceKey, SharedZoneLiveOutboundRecord>,
+    // Current owner equipment only; never checkpointed or used as offline data.
+    ranking_inspect_projections: BTreeMap<ZonePresenceKey, RankingInspectOwnerProjection>,
     // Ephemeral recipient identity cache; not part of any wire/checkpoint schema.
     // It keeps a departed player's queued Remove distinguishable from monsters.
     live_zone_player_ids: BTreeMap<ZonePresenceKey, BTreeSet<u32>>,
@@ -3105,6 +3542,7 @@ impl SharedInProcessZoneState {
             teardown_vital_fence_generations: BTreeMap::new(),
             next_teardown_vital_fence_generation: 0,
             live_zone_outbounds: BTreeMap::new(),
+            ranking_inspect_projections: BTreeMap::new(),
             live_zone_player_ids: BTreeMap::new(),
             departed_live_zone_player_ids: BTreeSet::new(),
             players: BTreeMap::new(),
@@ -3531,6 +3969,7 @@ impl SharedInProcessZoneState {
             teardown_vital_fence_generations: BTreeMap::new(),
             next_teardown_vital_fence_generation: 0,
             live_zone_outbounds: BTreeMap::new(),
+            ranking_inspect_projections: BTreeMap::new(),
             live_zone_player_ids: BTreeMap::new(),
             departed_live_zone_player_ids: BTreeSet::new(),
             players,
@@ -3705,6 +4144,7 @@ impl SharedInProcessZoneState {
         self.teardown_fences.remove(key);
         self.teardown_vital_fence_generations.remove(key);
         self.live_zone_outbounds.remove(key);
+        self.ranking_inspect_projections.remove(key);
         self.live_zone_player_ids.remove(key);
     }
 
@@ -6603,6 +7043,25 @@ impl SharedInProcessZoneRuntimeFactory {
         }
     }
 
+    /// Finite library tests use existing synchronous Zone operations without
+    /// creating a movement owner thread. Sending movement into this fixture is
+    /// deliberately disconnected; tests must not use it as a running server.
+    #[cfg(test)]
+    pub(crate) fn without_background_owner_for_test(zone_id: &ZoneId) -> Self {
+        let factory = Self::new().fresh_replica();
+        let (movement_sender, movement_receiver) = sync_channel(SHARED_ZONE_MOVEMENT_INGRESS_CAPACITY);
+        drop(movement_receiver);
+        let resources = SharedInProcessZoneResources {
+            zone_state: Arc::new(Mutex::new(SharedInProcessZoneState::new())),
+            movement_sender,
+            tick_count: Arc::new(AtomicU64::new(0)),
+            autonomous_ticks_enabled: Arc::new(AtomicBool::new(false)),
+        };
+        factory.zones.lock().expect("finite Zone fixture mutex should not be poisoned")
+            .insert(zone_id.clone(), resources);
+        factory
+    }
+
     pub(crate) fn configure_mutation_capture(
         &self,
         gate: Arc<SharedZoneMutationGate>,
@@ -7330,6 +7789,7 @@ fn world_entity_from_monster_info(info: &MonsterInfo) -> WorldEntitySnapshot {
         has_class_weapon: None,
         dazed: None,
         fishing: None,
+        transform_type: None,
         hp: None,
         max_hp: None,
         light: info.light,
@@ -7369,6 +7829,7 @@ fn world_entity_from_zone_monster_spawn(
         has_class_weapon: None,
         dazed: None,
         fishing: None,
+        transform_type: None,
         hp: Some(monster.hp),
         max_hp: Some(monster.max_hp),
         light: 0,
@@ -7496,6 +7957,7 @@ fn world_entity_from_object_player_info(
         has_class_weapon: None,
         dazed: None,
         fishing: Some(info.fishing),
+        transform_type: Some(info.transform_type),
         hp: None,
         max_hp: None,
         light: info.light,
@@ -7527,6 +7989,7 @@ fn world_entity_from_npc_info(info: &NpcInfo) -> WorldEntitySnapshot {
         has_class_weapon: None,
         dazed: None,
         fishing: None,
+        transform_type: None,
         hp: None,
         max_hp: None,
         light: 10,
@@ -8521,8 +8984,11 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             retired_local_ground_drop_ids: BTreeSet::new(),
             owner_dead_entity_ids: BTreeSet::new(),
             last_game_shop_purchase_outcome: None,
+            next_ranking_inspect_ms: 0,
             #[cfg(test)]
             fail_next_npc_teleport_checkpoint_restore: false,
+            #[cfg(test)]
+            npc_gold_buy_after_capture_hook: None,
         })
     }
 }
@@ -9182,6 +9648,12 @@ enum TradeProjectionReconciliationState {
     Pending(ActiveSessionIdentity),
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ZoneSnapshotAdmission {
+    Ordinary,
+    CharacterHandoffContinuation,
+}
+
 struct SharedInProcessZoneSessionRuntime {
     inner: InProcessWorldRuntime,
     shared_social_generation: Arc<AtomicU64>,
@@ -9208,8 +9680,11 @@ struct SharedInProcessZoneSessionRuntime {
     retired_local_ground_drop_ids: BTreeSet<(String, u32)>,
     owner_dead_entity_ids: BTreeSet<u32>,
     last_game_shop_purchase_outcome: Option<GameShopPurchaseOutcome>,
+    next_ranking_inspect_ms: u64,
     #[cfg(test)]
     fail_next_npc_teleport_checkpoint_restore: bool,
+    #[cfg(test)]
+    npc_gold_buy_after_capture_hook: Option<fn(&mut SharedInProcessZoneSessionRuntime)>,
 }
 
 pub(crate) fn shared_zone_movement_ingress(
@@ -9220,6 +9695,118 @@ pub(crate) fn shared_zone_movement_ingress(
         .as_any()
         .downcast_ref::<SharedInProcessZoneSessionRuntime>()
         .map(|runtime| runtime.movement_ingress.clone())
+}
+
+/// Test-only access to the real shared pipeline. No NPC result is stored here.
+#[cfg(test)]
+pub(crate) mod npc_gold_buy_test_access {
+    use super::*;
+
+    fn shared(runtime: &mut ZoneRuntimeHandle) -> &mut SharedInProcessZoneSessionRuntime {
+        runtime.as_mut().as_any_mut().downcast_mut().expect("real shared fixture")
+    }
+
+    fn poison_zone(shared: &mut SharedInProcessZoneSessionRuntime) {
+        let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let _guard = shared.zone_state.lock().unwrap();
+            panic!("controlled shared Zone poison");
+        }));
+    }
+
+    pub(crate) fn poison_before_capture(runtime: &mut ZoneRuntimeHandle) {
+        poison_zone(shared(runtime));
+    }
+
+    pub(crate) fn poison_after_capture(runtime: &mut ZoneRuntimeHandle) {
+        shared(runtime).npc_gold_buy_after_capture_hook = Some(poison_zone);
+    }
+
+    pub(crate) fn require_tail_after_capture(runtime: &mut ZoneRuntimeHandle) {
+        shared(runtime).npc_gold_buy_after_capture_hook = Some(|shared| {
+            shared.force_next_zone_transform_sync = true;
+        });
+    }
+
+    pub(crate) fn capture_hook_and_tail_consumed(runtime: &mut ZoneRuntimeHandle) -> bool {
+        let shared = shared(runtime);
+        shared.npc_gold_buy_after_capture_hook.is_none() && !shared.force_next_zone_transform_sync
+    }
+
+    pub(crate) fn clear_poison(runtime: &mut ZoneRuntimeHandle) {
+        shared(runtime).zone_state.clear_poison();
+    }
+
+    pub(crate) fn context_is_clear(runtime: &mut ZoneRuntimeHandle) -> bool {
+        shared(runtime).economy_execution_context.is_none()
+    }
+
+    pub(crate) fn queue_pending(runtime: &mut ZoneRuntimeHandle, packet: ServerPacket) {
+        let shared = shared(runtime);
+        let key = shared.current_presence_key().expect("active shared fixture");
+        shared.zone_state.lock().unwrap().pending_zone_packets.entry(key).or_default().push(packet);
+    }
+
+    pub(crate) fn economy_sequence(runtime: &mut ZoneRuntimeHandle) -> u64 {
+        shared(runtime).zone_state.lock().unwrap().next_economy_source_sequence
+    }
+}
+
+#[cfg(test)]
+pub(crate) mod character_handoff_test_access {
+    use super::*;
+
+    pub(crate) struct PresenceProbe {
+        state: Arc<Mutex<SharedInProcessZoneState>>,
+        key: ZonePresenceKey,
+    }
+
+    impl PresenceProbe {
+        pub(crate) fn is_present(&self) -> bool {
+            let state = self.state.lock().unwrap();
+            state.players.contains_key(&self.key) || state.zone_sessions.contains_key(&self.key)
+                || state.zone_manager.zone_key_for_session(
+                    &SharedInProcessZoneState::zone_session_id_for_key(&self.key)).is_some()
+        }
+
+        pub(crate) fn has_visible_object(&self, object_id: u32) -> Option<bool> {
+            let state = self.state.lock().unwrap();
+            let session = state.zone_sessions.get(&self.key)?;
+            let zone = state.zone_manager.zone_key_for_session(session)?;
+            state.zone_manager.zone(&zone)?.player_has_visible_object(session, object_id)
+        }
+
+        pub(crate) fn diagnostic(&self, object_id: u32) -> serde_json::Value {
+            let state = self.state.lock().unwrap();
+            let session = state.zone_sessions.get(&self.key);
+            let zone_key = session.and_then(|session| state.zone_manager.zone_key_for_session(session));
+            let zone = zone_key.as_ref().and_then(|key| state.zone_manager.zone(key));
+            let entity = zone_key.as_ref().and_then(|key| state.maps.get(&key.map_file_name))
+                .and_then(|map| map.entities.get(&object_id));
+            serde_json::json!({
+                "resource": format!("{:p}", Arc::as_ptr(&self.state)),
+                "zoneKey": zone_key,
+                "playerPosition": session.and_then(|session| zone.and_then(|zone| zone.player_position(session))),
+                "retained": zone.is_some_and(|zone| zone.retains_object_id(object_id)),
+                "visible": session.and_then(|session| zone.and_then(|zone| zone.player_has_visible_object(session, object_id))),
+                "mapLayerObject": entity.map(|entity| serde_json::json!({"id": entity.object_id,
+                    "name": entity.name, "kind": entity.kind, "x": entity.x, "y": entity.y})),
+            })
+        }
+    }
+
+    pub(crate) fn hosted_presence(hosted: &HostedZoneOwnerCommandClient,
+        account_id: &str, character_index: i32) -> PresenceProbe {
+        let runtime = hosted.runtime.lock().unwrap();
+        runtime_presence(runtime.as_ref().unwrap(), account_id, character_index)
+    }
+
+    pub(crate) fn runtime_presence(runtime: &ZoneRuntimeHandle,
+        account_id: &str, character_index: i32) -> PresenceProbe {
+        let shared = runtime.as_any()
+            .downcast_ref::<SharedInProcessZoneSessionRuntime>().expect("actual shared hosted runtime");
+        PresenceProbe { state: shared.zone_state.clone(),
+            key: ZonePresenceKey { account_id: account_id.into(), character_index } }
+    }
 }
 
 pub(crate) fn sync_zone_movement_transform(runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
@@ -9300,6 +9887,87 @@ impl fmt::Debug for SharedInProcessZoneSessionRuntime {
 }
 
 impl SharedInProcessZoneSessionRuntime {
+    fn ranking_inspect_presence(
+        &self,
+        identity: &RankingInspectIdentity,
+    ) -> Result<RankingInspectPresence, String> {
+        // Never hold a registry lock while acquiring a Zone or account lock.
+        let (registered_zones, replica_zone_ids) = {
+            let replicas = self.ranking_replica_zones.lock()
+                .map_err(|_| "inspect Zone replica registry unavailable".to_string())?;
+            let registry = self.ranking_zones.lock()
+                .map_err(|_| "inspect Zone registry unavailable".to_string())?;
+            (registry.iter().map(|(id, resources)| {
+                (id.clone(), resources.zone_state.clone(), replicas.contains(id))
+            }).collect::<Vec<_>>(), replicas.clone())
+        };
+        let has_replica = !replica_zone_ids.is_empty();
+        let mut zones = registered_zones.clone();
+        // A detached pre-restore Arc must never be added back beside a newer
+        // registered owner. Empty registries occur only in local memory fixtures.
+        if zones.is_empty() && !has_replica {
+            zones.push((self.inventory_zone_id.clone(), self.zone_state.clone(), false));
+        }
+        let key = ZonePresenceKey {
+            account_id: identity.account_id.clone(), character_index: identity.character_index,
+        };
+        let mut found = None;
+        for (_, state, replica) in zones {
+            let state = state.lock().map_err(|_| "inspect Zone presence unavailable".to_string())?;
+            let Some(player) = state.players.get(&key) else { continue; };
+            if found.is_some() { return Ok(RankingInspectPresence::Unknown); }
+            let current = !replica && !state.teardown_fences.contains(&key);
+            let projection = if current {
+                state.ranking_inspect_projections.get(&key).filter(|record| {
+                    state.zone_sessions.get(&key) == Some(&record.session_id)
+                        && state.zone_manager.player_life_generation(&record.session_id)
+                            == Some(record.life_generation)
+                        && player.zone_object_id == record.object_id
+                        && player.entity.name == identity.name
+                        && record.projection.identity == *identity
+                }).map(|record| record.projection.clone())
+            } else { None };
+            // A missing/retired online projection is not an offline character.
+            found = Some(RankingInspectPresence::Online(projection));
+        }
+        // Restore/adopt may retire a copied Arc while its old session is still
+        // finishing a command. Release every Zone lock before checking the
+        // complete registry and replica custody again, using the same lock order.
+        if !self.ranking_inspect_registry_is_current(&registered_zones, &replica_zone_ids)? {
+            return Ok(RankingInspectPresence::Unknown);
+        }
+        Ok(found.unwrap_or(if has_replica {
+            // Replica absence cannot prove that a remote owner is offline.
+            RankingInspectPresence::Unknown
+        } else { RankingInspectPresence::Offline }))
+    }
+
+    fn ranking_inspect_registry_is_current(
+        &self,
+        captured: &[(ZoneId, Arc<Mutex<SharedInProcessZoneState>>, bool)],
+        captured_replicas: &BTreeSet<ZoneId>,
+    ) -> Result<bool, String> {
+        let replicas = self.ranking_replica_zones.lock()
+            .map_err(|_| "inspect Zone replica registry unavailable".to_string())?;
+        let registry = self.ranking_zones.lock()
+            .map_err(|_| "inspect Zone registry unavailable".to_string())?;
+        Ok(*replicas == *captured_replicas && registry.len() == captured.len()
+            && captured.iter().all(|(id, state, _)| registry.get(id)
+                .is_some_and(|resources| Arc::ptr_eq(state, &resources.zone_state))))
+    }
+
+    fn execute_ranking_inspect(&mut self, player_id: u32) -> Result<Vec<ServerPacket>, String> {
+        let now_ms = Self::zone_now_ms();
+        if now_ms <= self.next_ranking_inspect_ms { return Ok(Vec::new()); }
+        self.next_ranking_inspect_ms = now_ms.saturating_add(500);
+        self.publish_ranking_inspect_projection();
+        let Some(request) = self.inner.prepare_ranking_inspect(player_id) else {
+            return Ok(Vec::new());
+        };
+        let presence = self.ranking_inspect_presence(request.target_identity())?;
+        Ok(self.inner.complete_ranking_inspect(request, presence))
+    }
+
     fn online_character_identities(&self) -> Result<BTreeSet<(String, i32)>, String> {
         // Release the registry lock before acquiring any Zone lock, and
         // release all presence locks before reading the account store.
@@ -9807,18 +10475,31 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn sync_zone_snapshot_with_vital_policy(&mut self, preserve_owner_vitals: bool) -> Vec<ServerPacket> {
+        self.sync_zone_snapshot_with_admission(preserve_owner_vitals, ZoneSnapshotAdmission::Ordinary)
+            .unwrap_or_else(|error| { eprintln!("[zone-snapshot] {error}"); self.remove_presence() })
+    }
+
+    fn zone_snapshot_admission_failed(&mut self, admission: ZoneSnapshotAdmission) -> Result<Vec<ServerPacket>, String> {
+        match admission {
+            ZoneSnapshotAdmission::Ordinary => Ok(self.remove_presence()),
+            ZoneSnapshotAdmission::CharacterHandoffContinuation => Err("handoff shared Zone admission failed".into()),
+        }
+    }
+
+    fn sync_zone_snapshot_with_admission(&mut self, preserve_owner_vitals: bool,
+        admission: ZoneSnapshotAdmission) -> Result<Vec<ServerPacket>, String> {
         if let Err(error) = self.consume_shared_group_projection() {
             eprintln!("[shared-group-projection] {error}");
-            return self.remove_presence();
+            return self.zone_snapshot_admission_failed(admission);
         }
         let allow_transform_sync = self.force_next_zone_transform_sync;
         self.force_next_zone_transform_sync = false;
         let Some(identity) = self.inner.active_identity() else {
-            return self.remove_presence();
+            return self.zone_snapshot_admission_failed(admission);
         };
         let snapshot = self.inner.world_snapshot();
         let Some(map_file_name) = snapshot.map_file_name.clone() else {
-            return self.remove_presence();
+            return self.zone_snapshot_admission_failed(admission);
         };
         let cached_map_transfers = snapshot
             .map_transfers
@@ -9870,7 +10551,7 @@ impl SharedInProcessZoneSessionRuntime {
             .unwrap_or_default();
 
         let Some(self_entity) = self_entity else {
-            return self.remove_presence();
+            return self.zone_snapshot_admission_failed(admission);
         };
         let key = ZonePresenceKey::from_identity(&identity);
         let session_id = SharedInProcessZoneState::zone_session_id_for_key(&key);
@@ -9899,7 +10580,7 @@ impl SharedInProcessZoneSessionRuntime {
             .map(|config| shared_conquest::bootstrap_projection(&config));
         if let Some(Err(error)) = &conquest_projection {
             eprintln!("[conquest-bootstrap] {error}");
-            return self.remove_presence();
+            return self.zone_snapshot_admission_failed(admission);
         }
         let experience_authority = self.inner.shared_mentor_config();
         // Party acceptance and map publication use the same coordinator -> Zone
@@ -10028,7 +10709,7 @@ impl SharedInProcessZoneSessionRuntime {
                         Ok(restored)=>outbounds.extend(restored),
                         Err(error)=>{
                             eprintln!("[pet-restore] {error}");
-                            drop(zone_state);drop(group_guard);return self.remove_presence();
+                            drop(zone_state);drop(group_guard);return self.zone_snapshot_admission_failed(admission);
                         }
                     }
                     zone_state.warm_pet_snapshots.remove(&key);
@@ -10083,7 +10764,7 @@ impl SharedInProcessZoneSessionRuntime {
                             eprintln!("[conquest-bootstrap] {error}");
                             drop(zone_state);
                             drop(group_guard);
-                            return self.remove_presence();
+                            return self.zone_snapshot_admission_failed(admission);
                         }
                     }
                 }
@@ -10191,7 +10872,7 @@ impl SharedInProcessZoneSessionRuntime {
                         eprintln!("[conquest-bootstrap] {error}");
                         drop(zone_state);
                         drop(group_guard);
-                        return self.remove_presence();
+                        return self.zone_snapshot_admission_failed(admission);
                     }
                 }
             }
@@ -10213,11 +10894,12 @@ impl SharedInProcessZoneSessionRuntime {
         drop(zone_state);
         drop(group_guard);
         if should_join_zone {
-            match self.sync_shared_group_presence(previous_map.is_none()) {
+            match self.sync_shared_group_presence(previous_map.is_none()
+                && admission == ZoneSnapshotAdmission::Ordinary) {
                 Ok(group_packets) => packets.extend(group_packets),
                 Err(error) => {
                     eprintln!("[shared-group-join] {error}");
-                    return self.remove_presence();
+                    return self.zone_snapshot_admission_failed(admission);
                 }
             }
             // New login starts unarmed; the same online player's map transfer
@@ -10228,11 +10910,27 @@ impl SharedInProcessZoneSessionRuntime {
             .session_state
             .lock()
             .expect("shared zone movement session mutex should not be poisoned")
-            .activate(key, map_file_name, cached_map_transfers);
+            .activate(key.clone(), map_file_name, cached_map_transfers);
+        let echoes_installed_transform = transform.as_ref().is_some_and(|(position, direction)|
+            self.inner.local_player_position().as_ref() == Some(position)
+                && snapshot.entities.iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+                    .is_some_and(|entity| entity.direction == *direction));
+        // The continuation already installed this exact transform. Calling
+        // force_authoritative_player_transform again would create a movement
+        // observation and advance the personal clock even for an identical echo.
+        // A real correction or vital action needs a new source command. Refuse
+        // it before movement/life/NPC hooks could change the saved authority.
+        if admission == ZoneSnapshotAdmission::CharacterHandoffContinuation
+            && ((transform.is_some() && !echoes_installed_transform)
+                || !player_damages.is_empty() || !player_heals.is_empty()) {
+            return Err("handoff shared Zone differs from its complete installed admission".into());
+        }
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
-        self.apply_zone_transform(transform);
-        if should_join_zone {
+        if admission == ZoneSnapshotAdmission::Ordinary {
+            self.apply_zone_transform(transform);
+        }
+        if should_join_zone && admission == ZoneSnapshotAdmission::Ordinary {
             // The authoritative map/bootstrap snapshot establishes the first
             // trusted state at which V2 checkpoint conditions may be refreshed.
             packets.extend(self.inner.commit_zone_journey_state());
@@ -10241,10 +10939,71 @@ impl SharedInProcessZoneSessionRuntime {
         self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
-        packets
+        self.publish_ranking_inspect_projection();
+        Ok(packets)
+    }
+
+    fn validate_character_handoff_zone_admission(&self, checkpoint: &CharacterHandoffCheckpoint) -> Result<(), String> {
+        let identity = self.inner.active_identity().ok_or("handoff Zone admission has no active identity")?;
+        let key = ZonePresenceKey::from_identity(&identity);
+        let movement = self.movement_ingress.session_state.lock()
+            .map_err(|_| "handoff movement admission is unavailable")?;
+        if movement.presence_key.as_ref() != Some(&key)
+            || movement.cached_map_file_name.as_deref() != Some(checkpoint.runtime.map_file_name.as_str()) {
+            return Err("handoff did not establish its movement admission".into());
+        }
+        drop(movement);
+        let state = self.zone_state.lock().map_err(|_| "handoff shared Zone admission is unavailable")?;
+        let session_id = state.zone_sessions.get(&key).ok_or("handoff did not join its shared Zone")?;
+        let save = &checkpoint.runtime;
+        if *session_id != SharedInProcessZoneState::zone_session_id_for_key(&key)
+            || state.teardown_fenced(&key)
+            || state.players.get(&key).is_none_or(|player|
+                player.map_file_name != save.map_file_name || player.entity.name != save.character.name)
+            || state.zone_manager.zone_key_for_session(session_id).is_none_or(|zone| zone.map_file_name != save.map_file_name)
+            || state.zone_manager.player_transform(session_id) != Some((save.position.clone(), save.direction))
+            || state.zone_manager.player_vitals(session_id) != Some((save.hp, save.max_hp, save.mp))
+            || state.zone_manager.player_is_dead(session_id) != Some(save.hp <= 0) {
+            return Err("handoff shared Zone differs from its complete installed admission".into());
+        }
+        Ok(())
+    }
+
+    /// Refresh only personal Inspect facts. Tick/native attack deliberately skip
+    /// the full map snapshot, but their level/equipment effects must still retire
+    /// the previous projection. Never retain an old cache when export fails.
+    fn publish_ranking_inspect_projection(&mut self) {
+        let Some(key) = self.current_presence_key() else { return; };
+        let session_id = SharedInProcessZoneState::zone_session_id_for_key(&key);
+        let inspect_projection = self.inner.active_ranking_inspect_projection();
+        let mut state = self.zone_state.lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        state.ranking_inspect_projections.remove(&key);
+        if let Some(projection) = inspect_projection {
+            if !state.teardown_fences.contains(&key)
+                && projection.identity.account_id == key.account_id
+                && projection.identity.character_index == key.character_index
+                && state.zone_sessions.get(&key) == Some(&session_id)
+            {
+                if let (Some(life_generation), Some(player)) = (
+                    state.zone_manager.player_life_generation(&session_id), state.players.get(&key),
+                ) {
+                    if player.entity.name == projection.identity.name {
+                        let object_id = player.zone_object_id;
+                        state.ranking_inspect_projections.insert(key, RankingInspectOwnerProjection {
+                            session_id, life_generation, object_id, projection,
+                        });
+                    }
+                }
+            }
+        }
     }
 
     fn remove_presence(&mut self) -> Vec<ServerPacket> {
+        self.remove_presence_with_admission(ZoneSnapshotAdmission::Ordinary)
+    }
+
+    fn remove_presence_with_admission(&mut self, admission: ZoneSnapshotAdmission) -> Vec<ServerPacket> {
         let social = self.shared_mentors.clone();
         let mut social_guard = social.lock().expect("social lifecycle coordinator");
         let Some(key) = self
@@ -10253,6 +11012,8 @@ impl SharedInProcessZoneSessionRuntime {
             .lock()
             .expect("shared zone movement session mutex should not be poisoned")
             .deactivate()
+            .or_else(|| (admission == ZoneSnapshotAdmission::CharacterHandoffContinuation)
+                .then(|| self.inner.active_identity().map(|identity| ZonePresenceKey::from_identity(&identity))).flatten())
         else {
             return Vec::new();
         };
@@ -10270,6 +11031,9 @@ impl SharedInProcessZoneSessionRuntime {
             zone_state.dispatch_zone_outbounds(outbounds, Some(&key));
         zone_state.forget_zone_session(&key);
         drop(zone_state);
+        // Failed continuation cleanup only retires the newly prepared Zone
+        // presence. Its leave transform/receipts cannot execute personal hooks.
+        if admission == ZoneSnapshotAdmission::CharacterHandoffContinuation { return packets; }
         self.apply_zone_transform(transform);
         self.apply_zone_shout_consume(shout_consume);
         self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
@@ -11827,6 +12591,32 @@ impl SharedInProcessZoneSessionRuntime {
 
     fn local_self_object_id(&self) -> Option<u32> {
         self.inner.local_player_object_id()
+    }
+
+
+    fn validate_durable_npc_actor(&self) -> Result<(), String> {
+        let identity = self.inner.active_identity().ok_or("durable NPC purchase requires an active character")?;
+        if identity.account_id.is_empty() || identity.account_id != identity.account_id.trim()
+            || identity.character_index < 0 || identity.character_name.is_empty() {
+            return Err("durable NPC purchase requires a canonical active character".into());
+        }
+        let expected_key = ZonePresenceKey::from_identity(&identity);
+        let map = self.inner.current_map_file_name().ok_or("durable NPC purchase requires the current in-world map")?;
+        let session = self.movement_ingress.session_state.lock().map_err(|_| "Zone movement session mutex poisoned")?;
+        if session.presence_key.as_ref() != Some(&expected_key) || session.cached_map_file_name.as_deref() != Some(map.as_str()) {
+            return Err("durable NPC purchase requires a live registered Zone session".into());
+        }
+        drop(session);
+        let state = self.zone_state.lock().map_err(|_| "shared Zone presence mutex poisoned")?;
+        if state.teardown_fenced(&expected_key) { return Err("durable NPC purchase owner is fenced for teardown".into()); }
+        let presence = state.players.get(&expected_key).ok_or("durable NPC purchase player is not in the shared Zone")?;
+        let session_id = state.zone_sessions.get(&expected_key).ok_or("durable NPC purchase has no shared Zone session")?;
+        let zone_key = ZoneKey::for_map(&map);
+        if presence.map_file_name != map || state.zone_manager.zone_key_for_session(session_id).as_ref() != Some(&zone_key)
+            || state.zone_manager.zone(&zone_key).and_then(|zone| zone.player_object_id(session_id)).map(|id| id.0) != Some(presence.zone_object_id) {
+            return Err("durable NPC purchase shared actor binding changed".into());
+        }
+        Ok(())
     }
 
     fn validate_shared_magic_actor(&self, command: &WorldCommand) -> Result<(), String> {
@@ -14840,23 +15630,12 @@ pub(crate) fn runtime_has_pending_shared_personal_work(runtime: &dyn WorldRuntim
             .any(|packet| !state.is_ordered_player_packet(&key, packet)))
 }
 
-impl WorldRuntime for SharedInProcessZoneSessionRuntime {
-    fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
-        self.inner.supports_magic_key_assignment(spell,key,old_key)
-    }
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-        self
-    }
-
-    fn on_connect(&self) -> Vec<ServerPacket> {
-        self.inner.on_connect()
-    }
-
-    fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+impl SharedInProcessZoneSessionRuntime {
+    fn execute_shared_pipeline(
+        &mut self,
+        command: WorldCommand,
+        mut npc_gold_buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
+    ) -> Result<Vec<ServerPacket>, String> {
         if !matches!(&command, WorldCommand::ClientPacket(ClientPacket::LogOut | ClientPacket::Disconnect)
             | WorldCommand::BillingRefresh { .. } | WorldCommand::BillingBuyMonthlyCard { .. }
             | WorldCommand::BillingActivateMonthlyCard { .. })
@@ -15321,6 +16100,18 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             is_trade_state_mutation && self.has_pending_durable_trade_projection();
         drop(predrain_stage);
         let inner_stage = GatewaySlowStage::start("shared_session.inner_execute");
+        // Logout/disconnect retire the personal Inspect generation before saving.
+        // A failed save retains the recovery presence, but must not retain its
+        // old online projection. Predrain can publish, so retire at this boundary.
+        if removes_presence {
+            if let Some(key) = self.current_presence_key() {
+                self.zone_state
+                    .lock()
+                    .expect("shared zone presence mutex should not be poisoned")
+                    .ranking_inspect_projections
+                    .remove(&key);
+            }
+        }
         // Only this ordinary command enters the trusted durable rename branch
         // below. Its source status-7 reply must precede the canonical refresh.
         let preserves_guild_rank_rename_terminal = matches!(
@@ -15346,6 +16137,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             result?
         } else if shared_guilds::is_guild_command(&command) {
             self.execute_shared_guild(&command)
+        } else if let WorldCommand::ClientPacket(ClientPacket::Inspect {
+            object_id, ranking: true, ..
+        }) = &command
+        {
+            self.execute_ranking_inspect(*object_id)?
         } else if let WorldCommand::ClientPacket(ClientPacket::GetRanking {
             rank_type,
             rank_index,
@@ -15462,6 +16258,30 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             let mut packets = execution.packets;
             if let Some(basis) = basis { self.commit_shared_personal_vital_command(basis, &mut packets)?; }
             packets
+        } else if let Some(capture) = npc_gold_buy_outcome.as_deref_mut() {
+            let WorldCommand::ClientPacket(ClientPacket::BuyItem {
+                item_index, count, panel_type,
+            }) = &command else {
+                return Err("typed NPC purchase pipeline requires ordinary BuyItem".into());
+            };
+            let request = NpcGoldBuyRequest {
+                item_index: *item_index, count: *count, panel_type: *panel_type,
+            };
+            match self.inner.execute_production_npc_gold_buy_requiring_typed_outcome(true, request) {
+                Ok(processed) => {
+                    *capture = Some(processed.outcome);
+                    #[cfg(test)]
+                    if let Some(hook) = self.npc_gold_buy_after_capture_hook.take() {
+                        hook(self);
+                    }
+                    processed.packets
+                }
+                Err(NpcGoldBuyProcessingError::PostProcessing { outcome, detail }) => {
+                    *capture = Some(outcome);
+                    return Err(detail);
+                }
+                Err(error) => return Err(format!("typed NPC purchase leaf failed: {error:?}")),
+            }
         } else if let WorldCommand::ClientPacket(packet) = &command {
             if let Some(zone_packets) = self.execute_zone_player_packet(packet) {
                 zone_packets
@@ -15729,7 +16549,65 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         }
         self.filter_stale_owner_dead_entity_packets(&mut packets);
         self.normalize_owner_state_packets(&mut packets);
+        if !removes_presence {
+            self.publish_ranking_inspect_projection();
+        }
         Ok(packets)
+    }
+
+}
+
+impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+    fn prepare_character_handoff(&mut self) -> Result<CharacterHandoffCheckpoint, String> {
+        self.sync_pending_zone_movement_transform()?;
+        self.settle_pending_zone_vitals_before_save();
+        self.inner.prepare_character_handoff()
+    }
+
+    fn resume_character_handoff(&mut self, checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
+        let was_prepared = self.inner.active_identity().is_none();
+        let result = (|| {
+            self.inner.resume_character_handoff(checkpoint)?;
+            self.sync_zone_snapshot_with_admission(true, ZoneSnapshotAdmission::CharacterHandoffContinuation)?;
+            self.validate_character_handoff_zone_admission(checkpoint)?;
+            self.inner.character_handoff_commitment(checkpoint)
+        })();
+        if result.is_err() && was_prepared {
+            self.remove_presence_with_admission(ZoneSnapshotAdmission::CharacterHandoffContinuation);
+        }
+        result
+    }
+
+    fn apply_character_handoff_replica(&mut self, checkpoint: &CharacterHandoffCheckpoint) -> Result<(), String> {
+        let was_prepared = self.inner.active_identity().is_none();
+        let result = (|| {
+            self.inner.apply_character_handoff_replica(checkpoint)?;
+            self.sync_zone_snapshot_with_admission(true, ZoneSnapshotAdmission::CharacterHandoffContinuation)?;
+            self.validate_character_handoff_zone_admission(checkpoint)?;
+            self.inner.character_handoff_commitment(checkpoint).map(|_| ())
+        })();
+        if result.is_err() && was_prepared {
+            self.remove_presence_with_admission(ZoneSnapshotAdmission::CharacterHandoffContinuation);
+        }
+        result
+    }
+    fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
+        self.inner.supports_magic_key_assignment(spell,key,old_key)
+    }
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
+
+    fn on_connect(&self) -> Vec<ServerPacket> {
+        self.inner.on_connect()
+    }
+
+    fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+        self.execute_shared_pipeline(command, None)
     }
 
     fn execute_with_outcome(
@@ -15769,6 +16647,122 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         self.inner.supports_typed_game_shop_purchase_outcome()
     }
 
+    fn supports_typed_npc_gold_buy_outcome(&self) -> bool {
+        self.inner.supports_typed_npc_gold_buy_outcome()
+    }
+
+    fn supports_durable_npc_purchase_owner(&self) -> bool {
+        self.inner.supports_durable_npc_purchase_owner()
+    }
+
+
+    fn npc_purchase_owner_checkpoint(&self, owner_epoch: [u8; 32]) -> Option<CharacterSaveRecord> {
+        self.validate_durable_npc_actor().ok()?;
+        self.inner.npc_purchase_owner_checkpoint(owner_epoch)
+    }
+    fn apply_npc_purchase_owner_replica_checkpoint(&mut self, checkpoint: &CharacterSaveRecord) -> Result<(), String> {
+        self.inner.apply_npc_purchase_owner_replica_checkpoint(checkpoint)
+    }
+
+    fn npc_purchase_owner_authority(&self, owner_epoch: [u8; 32]) -> Option<NpcPurchaseProducer> {
+        self.validate_durable_npc_actor().ok()?;
+        self.inner.npc_purchase_owner_authority(owner_epoch)
+    }
+
+    fn execute_npc_purchase_owner(&mut self, authenticated: bool, owner_epoch: [u8; 32],
+        action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerExecution, NpcPurchaseDurableError> {
+        if !authenticated { return Err(crate::npc_purchase_owner_route::before("NPC purchase requires authentication")); }
+        self.validate_durable_npc_actor().map_err(crate::npc_purchase_owner_route::before)?;
+        if !matches!(action, NpcPurchaseOwnerAction::Purchase { .. }) {
+            return self.inner.execute_npc_purchase_owner(authenticated, owner_epoch, action);
+        }
+        let mut known = None;
+        let result = crate::session::catch_gateway_panic("durable NPC shared owner leaf", || {
+            self.force_inner_to_current_zone_transform();
+            self.force_inner_to_current_zone_vitals();
+            let vital_basis = self.prepare_shared_personal_vital_command()
+                .map_err(crate::npc_purchase_owner_route::before)?;
+            let mut execution = match self.inner.execute_npc_purchase_owner(authenticated, owner_epoch, action) {
+                Ok(execution) => execution,
+                Err(error) => {
+                    if let NpcPurchaseDurableError::PostCommit { receipt, .. } = &error { known = Some(receipt.clone()); }
+                    return Err(error);
+                }
+            };
+            known = crate::npc_purchase_owner_route::terminal_receipt(&execution.reply);
+            self.validate_durable_npc_actor().map_err(|detail| crate::npc_purchase_owner_route::failure(detail, known.clone()))?;
+            if let Some(basis) = vital_basis {
+                self.commit_shared_personal_vital_command(basis, &mut execution.packets)
+                    .map_err(|detail| crate::npc_purchase_owner_route::failure(detail, known.clone()))?;
+            }
+            // Update an existing presence only. Never join/bootstrap, drain
+            // unrelated rewards or contact an external economy transaction.
+            let identity = self.inner.active_identity().expect("validated owner identity");
+            let key = ZonePresenceKey::from_identity(&identity);
+            let snapshot = self.inner.world_snapshot();
+            let entity = snapshot.entities.iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+                .cloned().ok_or_else(|| crate::npc_purchase_owner_route::failure("durable NPC owner projection has no player", known.clone()))?;
+            {
+                let mut state = self.zone_state.lock().map_err(|_| crate::npc_purchase_owner_route::failure("shared Zone presence mutex poisoned", known.clone()))?;
+                if !state.players.contains_key(&key) || state.teardown_fenced(&key) {
+                    return Err(crate::npc_purchase_owner_route::failure("durable NPC owner presence retired after commit", known.clone()));
+                }
+                state.upsert_player_with_transform_policy(key, &identity.character_name,
+                    snapshot.map_file_name.clone().expect("validated map"), entity,
+                    snapshot.free_bag_slots, snapshot.player_pk_points, true);
+            }
+            self.normalize_owner_state_packets(&mut execution.packets);
+            self.publish_ranking_inspect_projection();
+            execution.authority = self.npc_purchase_owner_authority(owner_epoch);
+            Ok(execution)
+        });
+        result.unwrap_or_else(|detail| Err(crate::npc_purchase_owner_route::failure(detail, known)))
+    }
+
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(
+        &mut self,
+        authenticated: bool,
+        request: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+        if !authenticated {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotAuthenticated,
+            ));
+        }
+        if !self.inner.supports_typed_npc_gold_buy_outcome() {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::UnsupportedRuntime,
+            ));
+        }
+        let Some(identity) = self.inner.active_identity() else {
+            // This is the real Session guard, before any shared predrain. Do
+            // not repeat the request if it unexpectedly returns an outcome.
+            return self.inner.execute_production_npc_gold_buy_requiring_typed_outcome(true, request);
+        };
+        if identity.account_id.is_empty() || identity.account_id != identity.account_id.trim() {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotAuthenticated,
+            ));
+        }
+        if identity.character_index < 0 || identity.character_name.is_empty() {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotInGame,
+            ));
+        }
+        if self.inner.current_map_file_name().is_none() {
+            // active_identity alone is not the Session's in-world gate.
+            return self.inner.execute_production_npc_gold_buy_requiring_typed_outcome(true, request);
+        }
+        let mut outcome = None;
+        let packets = crate::session::catch_gateway_panic("typed NPC shared pipeline", || {
+            self.execute_shared_pipeline(
+                crate::npc_gold_buy_route::npc_gold_buy_command(request), Some(&mut outcome),
+            )
+        }).and_then(|packets| packets);
+        finish_npc_gold_buy_packets(packets, outcome)
+    }
+
     fn current_tick(&self) -> u64 {
         // Shared AOI/vitals overlays do not change the personal snapshot tick.
         // Avoid composing that full snapshot just to read its clock.
@@ -15787,6 +16781,12 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             .filter_map(|entity| entity.quest_icon.map(|icon| (entity.object_id, icon)))
             .collect::<BTreeMap<_, _>>();
         let current_key = self.current_presence_key();
+        let current_identity_key = self
+            .inner
+            .active_identity()
+            .as_ref()
+            .map(ZonePresenceKey::from_identity);
+        let local_self_object_id = self.local_self_object_id();
         let zone_state = self
             .zone_state
             .lock()
@@ -15807,6 +16807,38 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                         self_entity.x = presence.entity.x;
                         self_entity.y = presence.entity.y;
                         self_entity.direction = presence.entity.direction;
+                    }
+                }
+            }
+        }
+        // A personal snapshot cannot infer the raw transform type. Project it
+        // only from the current player's matching retained Zone membership.
+        if current_key.as_ref() == current_identity_key.as_ref() {
+            if let (Some(key), Some(map_file_name), Some(local_self_object_id)) = (
+                current_key.as_ref(),
+                snapshot.map_file_name.as_deref(),
+                local_self_object_id,
+            ) {
+                if let (Some(presence), Some(session_id)) =
+                    (zone_state.players.get(key), zone_state.zone_sessions.get(key))
+                {
+                    let expected_zone_key = ZoneKey::for_map(map_file_name);
+                    if presence.map_file_name == map_file_name
+                        && zone_state.zone_manager.zone_key_for_session(session_id).as_ref()
+                            == Some(&expected_zone_key)
+                    {
+                        if let Some(zone) = zone_state.zone_manager.zone(&expected_zone_key) {
+                            if zone.player_object_id(session_id).map(|id| id.0)
+                                == Some(presence.zone_object_id)
+                            {
+                                if let Some(self_entity) = snapshot.entities.iter_mut().find(|entity| {
+                                    entity.kind == WorldEntityKind::SelfPlayer
+                                        && entity.object_id == local_self_object_id
+                                }) {
+                                    self_entity.transform_type = zone.player_transform_type(session_id);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -17231,13 +18263,72 @@ mod tests {
     }
 
     #[test]
+    fn handoff_local_collision_rejects_changed_admission_and_drops_prepared_presence() {
+        let factory = Arc::new(SharedInProcessZoneRuntimeFactory::without_background_owner_for_test(&ZoneId::primary()));
+        let registry = ZoneRegistry::with_router(ZoneId::primary(), factory.clone() as SharedZoneRuntimeFactory,
+            Arc::new(PerMapSessionRouter::new()) as SharedSessionRouter);
+        let mut config = GatewayConfig::default();
+        config.visible_monsters.clear(); config.map_hazards.clear();
+        let mut traveler = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        start_demo_character(&mut traveler);
+        assert_eq!(traveler.zone_id(), &ZoneId::new("map:0"));
+        let before = traveler.world_snapshot();
+        let traveler_identity = traveler.active_identity().unwrap();
+
+        // Establish the other actor's actual saved map through ordinary
+        // personal commands before its real Gateway admission. It occupies the
+        // requested destination without competing for the starter spawn.
+        let mut setup = InProcessWorldRuntime::new(config.clone());
+        setup.execute(WorldCommand::ClientPacket(ClientPacket::NewAccount {
+            account_id: "handoff-blocker".into(), password: "handoff-blocker".into(),
+            birth_date_binary: 0, user_name: String::new(), secret_question: String::new(),
+            secret_answer: String::new(), email_address: String::new(),
+        })).unwrap();
+        setup.execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: "handoff-blocker".into(), password: "handoff-blocker".into(),
+        })).unwrap();
+        let index = setup.execute(WorldCommand::ClientPacket(ClientPacket::NewCharacter {
+            name: "HandoffBlocker".into(), gender: MirGender::Male, class: MirClass::Warrior,
+        })).unwrap().into_iter().find_map(|packet| match packet {
+            ServerPacket::NewCharacterSuccess { char_info } => Some(char_info.index), _ => None,
+        }).expect("actual blocker character");
+        setup.execute(WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: index })).unwrap();
+        setup.execute(WorldCommand::TransferMap { key: "crystal:1:100:100".into() }).unwrap();
+        setup.save_active_character().unwrap();
+        drop(setup);
+        let mut blocker = GatewaySession::new_with_zone_registry(config, &registry);
+        blocker.try_handle_packet(ClientPacket::Login {
+            account_id: "handoff-blocker".into(), password: "handoff-blocker".into(),
+        }).unwrap();
+        blocker.try_handle_packet(ClientPacket::StartGame { character_index: index }).unwrap();
+        assert_eq!(blocker.zone_id(), &ZoneId::new("map:1"));
+        let blocker_identity = blocker.active_identity().unwrap();
+        let error = traveler.execute_with_outcome(WorldCommand::TransferMap {
+            key: "crystal:1:100:100".into(),
+        }).expect_err("a corrected destination cannot pass the original complete commitment");
+        assert!(error.contains("handoff shared Zone differs") || error.contains("handoff install witness"), "{error}");
+        assert_eq!(traveler.zone_id(), &ZoneId::new("map:0"));
+        assert_eq!(traveler.active_identity(), Some(traveler_identity.clone()));
+        assert_eq!(traveler.world_snapshot().player_hp, before.player_hp);
+        assert_eq!(traveler.world_snapshot().belt_items, before.belt_items);
+        let resources = factory.resources_for_zone(&ZoneId::new("map:1"));
+        let state = resources.zone_state.lock().unwrap();
+        let rejected_key = ZonePresenceKey::from_identity(&traveler_identity);
+        assert!(!state.players.contains_key(&rejected_key));
+        assert!(!state.zone_sessions.contains_key(&rejected_key));
+        assert!(state.zone_manager.zone_key_for_session(
+            &SharedInProcessZoneState::zone_session_id_for_key(&rejected_key)).is_none());
+        assert!(state.players.contains_key(&ZonePresenceKey::from_identity(&blocker_identity)));
+    }
+
+    #[test]
     fn checkpoint_handoff_repairs_a_stale_target_projection_before_commit() {
         #[derive(Debug)]
-        struct StaleStartGameRuntime {
+        struct StaleHandoffRuntime {
             inner: InProcessWorldRuntime,
         }
 
-        impl WorldRuntime for StaleStartGameRuntime {
+        impl WorldRuntime for StaleHandoffRuntime {
             fn as_any(&self) -> &dyn std::any::Any {
                 self
             }
@@ -17251,23 +18342,7 @@ mod tests {
             }
 
             fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
-                let corrupt_after_start = matches!(
-                    &command,
-                    WorldCommand::ClientPacket(ClientPacket::StartGame { .. })
-                );
-                let packets = self.inner.execute(command)?;
-                if corrupt_after_start {
-                    let mut stale = self
-                        .inner
-                        .active_character_checkpoint()
-                        .expect("StartGame should produce an active checkpoint");
-                    stale.hp = stale.hp.saturating_sub(7);
-                    stale.belt_items_json.clear();
-                    self.inner
-                        .restore_active_character_checkpoint(&stale)
-                        .expect("test fixture should install stale target state");
-                }
-                Ok(packets)
+                self.inner.execute(command)
             }
 
             fn world_snapshot(&self) -> mir2_simulation::WorldSnapshot {
@@ -17280,6 +18355,15 @@ mod tests {
 
             fn active_character_checkpoint(&self) -> Option<mir2_simulation::CharacterSaveRecord> {
                 self.inner.active_character_checkpoint()
+            }
+
+            fn resume_character_handoff(&mut self, checkpoint: &mir2_simulation::CharacterHandoffCheckpoint)
+                -> Result<mir2_simulation::CharacterHandoffCommitment, String> {
+                // The target's provisional personal scaffold is stale before
+                // the one trusted apply. Never corrupt an accepted admission
+                // and force a second timer-resetting restore to repair it.
+                self.inner.force_authoritative_player_vitals(Some(1), Some(0));
+                self.inner.resume_character_handoff(checkpoint)
             }
 
             fn restore_active_character_checkpoint(
@@ -17306,7 +18390,7 @@ mod tests {
         impl ZoneRuntimeFactory for StaleMapOneFactory {
             fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle {
                 if zone_id == &ZoneId::new("map:1") {
-                    return Box::new(StaleStartGameRuntime {
+                    return Box::new(StaleHandoffRuntime {
                         inner: InProcessWorldRuntime::new(config),
                     });
                 }
@@ -18615,6 +19699,133 @@ mod tests {
                 .map(|sprite| sprite.body_library.as_str()),
             Some("NPC/12")
         );
+    }
+
+    fn fishing_transform_fixture() -> (
+        Arc<Mutex<SharedInProcessZoneState>>,
+        SharedInProcessZoneSessionRuntime,
+        SessionId,
+        u32,
+        u32,
+    ) {
+        let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(shared.clone());
+        start_new_runtime(&mut runtime, "fishing-transform", "Scout");
+        let key = runtime.current_presence_key().unwrap();
+        let session = runtime.current_zone_session_id().unwrap();
+        let local_id = runtime.local_self_object_id().unwrap();
+        let zone_id = local_id.checked_add(1_000_000).unwrap();
+        let mut join = runtime.inner.active_zone_join_snapshot(session.as_str()).unwrap();
+        join.object_id = zone_id;
+        {
+            let mut state = shared.lock().unwrap();
+            state.players.get_mut(&key).unwrap().zone_object_id = zone_id;
+            // This stale DTO value must never be used as Zone transform evidence.
+            state.players.get_mut(&key).unwrap().entity.transform_type = Some(i16::MIN);
+            state.zone_manager = ZoneManager::new();
+            state.zone_manager.handle(ZoneCommand::Join(join));
+        }
+        (shared, runtime, session, local_id, zone_id)
+    }
+
+    #[test]
+    fn fishing_transform_snapshot_projects_retained_state_with_distinct_actor_ids() {
+        let (shared, runtime, session, local_id, zone_id) = fishing_transform_fixture();
+        assert_ne!(local_id, zone_id);
+        let personal = runtime.inner.world_snapshot();
+        let personal_self = personal.entities.iter().find(|entity| {
+            entity.kind == WorldEntityKind::SelfPlayer && entity.object_id == local_id
+        }).unwrap();
+        assert_eq!(personal_self.transform_type, None);
+        let initial = runtime.world_snapshot();
+        let initial_self = initial.entities.iter().find(|entity| {
+            entity.kind == WorldEntityKind::SelfPlayer && entity.object_id == local_id
+        }).unwrap();
+        assert_eq!(initial_self.transform_type, Some(0));
+        for raw in [i16::MIN, -1, 0, 4, i16::MAX] {
+            shared.lock().unwrap().zone_manager.handle(ZoneCommand::BroadcastPackets {
+                session_id: session.clone(),
+                owner_local_object_id: local_id,
+                packets: vec![ServerPacket::TransformUpdate {
+                    object_id: local_id,
+                    transform_type: raw,
+                }],
+                now_ms: 0,
+            });
+            let snapshot = runtime.world_snapshot();
+            let player = snapshot.entities.iter().find(|entity| {
+                entity.kind == WorldEntityKind::SelfPlayer && entity.object_id == local_id
+            }).unwrap();
+            assert_eq!(player.transform_type, Some(raw));
+        }
+    }
+
+    #[test]
+    fn fishing_transform_snapshot_rejects_mismatched_or_missing_zone_membership() {
+        for invalid in [
+            "presence", "map", "session", "unknown-session", "zone", "zone-map",
+            "object-id", "identity", "leave",
+        ] {
+            let (shared, runtime, session, local_id, _) = fishing_transform_fixture();
+            let key = runtime.current_presence_key().unwrap();
+            {
+                let mut state = shared.lock().unwrap();
+                match invalid {
+                    "presence" => { state.players.remove(&key); }
+                    "map" => {
+                        state.players.get_mut(&key).unwrap().map_file_name = "other-map".into();
+                    }
+                    "session" => { state.zone_sessions.remove(&key); }
+                    "unknown-session" => {
+                        state.zone_sessions.insert(key.clone(), SessionId::new("missing-session"));
+                    }
+                    "zone" => { state.zone_manager = ZoneManager::new(); }
+                    "zone-map" => {
+                        state.zone_manager.handle(ZoneCommand::Leave { session_id: session.clone() });
+                        let mut join = runtime.inner.active_zone_join_snapshot(session.as_str()).unwrap();
+                        join.object_id = state.players[&key].zone_object_id;
+                        join.map_file_name = "other-map".into();
+                        state.zone_manager.handle(ZoneCommand::Join(join));
+                    }
+                    "object-id" => {
+                        state.players.get_mut(&key).unwrap().zone_object_id += 1;
+                    }
+                    "identity" => {
+                        let mut stale = key.clone();
+                        stale.character_index += 1;
+                        let presence = state.players[&key].clone();
+                        state.players.insert(stale.clone(), presence);
+                        state.zone_sessions.insert(stale.clone(), session.clone());
+                        runtime.movement_ingress.session_state.lock().unwrap().presence_key = Some(stale);
+                    }
+                    "leave" => {
+                        state.zone_manager.handle(ZoneCommand::Leave { session_id: session.clone() });
+                    }
+                    _ => unreachable!(),
+                }
+            }
+            let snapshot = runtime.world_snapshot();
+            let player = snapshot.entities.iter().find(|entity| {
+                entity.kind == WorldEntityKind::SelfPlayer && entity.object_id == local_id
+            }).unwrap();
+            assert_eq!(player.transform_type, None, "invalid {invalid}");
+        }
+    }
+
+    #[test]
+    fn fishing_transform_remote_projection_preserves_the_object_player_raw_carrier() {
+        for raw in [i16::MIN, -1, 0, 4, i16::MAX] {
+            let mut info = shared_object_player_info(602, "RemoteArcher", 331, 271);
+            info.transform_type = raw;
+            info.fishing = true;
+            let entity = world_entity_from_object_player_info(&info, None);
+            assert_eq!(entity.transform_type, Some(raw));
+            assert_eq!(entity.fishing, Some(true));
+            let value = serde_json::to_value(&entity).unwrap();
+            assert_eq!(value["transformType"], serde_json::json!(raw));
+        }
+        assert_eq!(shared_monster_entity(603).transform_type, None);
+        assert_eq!(shared_picker_entity(604, 331, 271).transform_type, None);
     }
 
     #[test]
@@ -30685,8 +31896,83 @@ mod tests {
             retired_local_ground_drop_ids: Default::default(),
             owner_dead_entity_ids: Default::default(),
             last_game_shop_purchase_outcome: None,
+            next_ranking_inspect_ms: 0,
             fail_next_npc_teleport_checkpoint_restore: false,
+            npc_gold_buy_after_capture_hook: None,
         }
+    }
+
+    #[test]
+    fn ranking_inspect_registry_fence_rejects_replaced_arc_and_changed_replica_set() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let zone_id = ZoneId::new("inspect-custody");
+        let resources = factory.resources_for_zone(&zone_id);
+        let mut runtime = shared_session_runtime(resources.zone_state.clone());
+        runtime.ranking_zones = factory.zones.clone();
+        runtime.ranking_replica_zones = factory.replica_zone_ids.clone();
+        let captured = vec![(zone_id.clone(), resources.zone_state.clone(), false)];
+        let replicas = BTreeSet::new();
+        assert!(runtime.ranking_inspect_registry_is_current(&captured, &replicas).unwrap());
+        let replacement = SharedInProcessZoneRuntimeFactory::new();
+        let next_resources = replacement.resources_for_zone(&zone_id);
+        assert!(factory.adopt_zone_resources_from(&replacement, &zone_id).unwrap());
+        assert!(!runtime.ranking_inspect_registry_is_current(&captured, &replicas).unwrap());
+        let next = vec![(zone_id.clone(), next_resources.zone_state.clone(), false)];
+        assert!(runtime.ranking_inspect_registry_is_current(&next, &replicas).unwrap());
+        factory.mark_zone_as_replica(&zone_id);
+        assert!(!runtime.ranking_inspect_registry_is_current(&next, &replicas).unwrap());
+        assert!(!runtime.ranking_inspect_registry_is_current(&[], &replicas).unwrap());
+    }
+
+    #[test]
+    fn ranking_inspect_replica_absence_is_unknown_and_live_missing_projection_is_not_offline() {
+        let factory = SharedInProcessZoneRuntimeFactory::new();
+        let remote = ZoneId::new("inspect-replica");
+        let resources = factory.resources_for_zone(&remote);
+        let mut runtime = shared_session_runtime(resources.zone_state.clone());
+        runtime.ranking_zones = factory.zones.clone();
+        runtime.ranking_replica_zones = factory.replica_zone_ids.clone();
+        let identity = mir2_simulation::RankingInspectIdentity { account_id: "absent".into(), character_index: 17, name: "Absent".into() };
+        assert!(matches!(runtime.ranking_inspect_presence(&identity).unwrap(), mir2_simulation::RankingInspectPresence::Offline));
+        factory.mark_zone_as_replica(&remote);
+        assert!(matches!(runtime.ranking_inspect_presence(&identity).unwrap(), mir2_simulation::RankingInspectPresence::Unknown));
+
+        let mut local = shared_session_runtime(Arc::new(Mutex::new(SharedInProcessZoneState::new())));
+        start_new_runtime(&mut local, "inspect-local", "InspectLocal");
+        // The default starter fixture has no exact equipment root UIDs. Use a
+        // known empty loadout through the real restore and publication paths.
+        let mut initial = local.inner.active_character_checkpoint().unwrap();
+        initial.equipment_items_json.clear();
+        initial.equipment_items_explicit_empty = true;
+        local.inner.restore_active_character_checkpoint(&initial).unwrap();
+        local.execute(WorldCommand::Tick).unwrap();
+        let projection = local.inner.active_ranking_inspect_projection().unwrap();
+        let key = local.current_presence_key().unwrap();
+        local.zone_state.lock().unwrap().ranking_inspect_projections.remove(&key);
+        assert!(matches!(local.ranking_inspect_presence(&projection.identity).unwrap(), mir2_simulation::RankingInspectPresence::Online(None)));
+    }
+
+    #[test]
+    fn ranking_inspect_tick_refreshes_real_personal_level_without_full_zone_snapshot() {
+        let mut runtime = shared_session_runtime(Arc::new(Mutex::new(SharedInProcessZoneState::new())));
+        start_new_runtime(&mut runtime, "inspect-tick", "InspectTick");
+        // Establish a complete projection without inventing starter item UIDs.
+        let mut initial = runtime.inner.active_character_checkpoint().unwrap();
+        initial.equipment_items_json.clear();
+        initial.equipment_items_explicit_empty = true;
+        runtime.inner.restore_active_character_checkpoint(&initial).unwrap();
+        runtime.execute(WorldCommand::Tick).unwrap();
+        let before = runtime.inner.active_ranking_inspect_projection().unwrap();
+        let key = runtime.current_presence_key().unwrap();
+        let mut checkpoint = runtime.inner.active_character_checkpoint().unwrap();
+        checkpoint.character.level = 28;
+        runtime.inner.restore_active_character_checkpoint(&checkpoint).unwrap();
+        assert_ne!(before.info.level, 28);
+        assert_eq!(runtime.zone_state.lock().unwrap().ranking_inspect_projections[&key].projection.info.level, before.info.level);
+        runtime.execute(WorldCommand::Tick).unwrap();
+        let live = runtime.inner.active_ranking_inspect_projection().unwrap();
+        assert_eq!(live.info.level, 28);
+        assert_eq!(runtime.zone_state.lock().unwrap().ranking_inspect_projections[&key].projection.info.level, live.info.level);
     }
 
     #[test]
@@ -31007,6 +32293,7 @@ mod tests {
             has_class_weapon: None,
             dazed: None,
             fishing: None,
+            transform_type: None,
             hp: Some(12),
             max_hp: Some(12),
             light: 0,
@@ -31098,6 +32385,7 @@ mod tests {
             has_class_weapon: None,
             dazed: None,
             fishing: None,
+            transform_type: None,
             hp: None,
             max_hp: None,
             light: 3,

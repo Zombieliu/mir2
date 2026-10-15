@@ -1,0 +1,66 @@
+{
+  "owner": "Root",
+  "kind": "Source73 second actual strict Next with public raw-root isolation, static old default still traced",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\next-build02-config.json",
+    "bytes": 6008,
+    "sha256": "e2bec5621acafb9371367c1e00021f60378fd63a1c754f1138dacf5d242297d3"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\source73-strict-final-snapshot02.json",
+    "bytes": 39453152,
+    "sha256": "35b31b2a75a918ce9983020727433b2557c7b4ae481e07a040637251294a2f29"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 85708,
+    "kind": "Source73 strict Next build02 using existing public Crystal source root isolation after actual portable25/25",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 64516,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/next-build02-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\next-build02\\stdout.log",
+    "bytes": 2026,
+    "sha256": "435fa3f46d745b8fd37464de93ce902b355702ad26a3b5e020fe3577cd650142"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\next-build02\\stderr.log",
+    "bytes": 3462,
+    "sha256": "838e3336cffd92299b1791e59137832d50ed6f23c8fd92ad9787c73e693e8773"
+  },
+  "strictTypeScriptFinished": true,
+  "pagesGenerated": 13,
+  "nextOutputManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\source73-next-output-manifest02.json",
+    "bytes": 1442796,
+    "sha256": "2197bcac65c368fcafe4b0864f344c6b7bd556511047efa03c88cedd0554d21d"
+  },
+  "files": 2450,
+  "directories": 580,
+  "links": 0,
+  "warningCount": 4,
+  "nftFiles": 61,
+  "rawReferences": 170798,
+  "malformedDriveUniqueStrings": 5035,
+  "malformedRawOccurrences": 40280,
+  "malformedExternalTargetsNotRead": true,
+  "physicalNftClosureAccepted": false,
+  "packageAccepted": false,
+  "uiTested": false,
+  "nextRepairReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\write-review03\\default-client-root-review01.json",
+    "bytes": 1105,
+    "sha256": "e4845b02a7c08547a376cdbb1555121cd437e2ac798b208d44ce226d4f51eb11"
+  },
+  "candidateAccepted": false,
+  "goalComplete": false
+}

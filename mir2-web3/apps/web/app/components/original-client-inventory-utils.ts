@@ -28,9 +28,9 @@ export function applyOriginalItemIconFallback(image: HTMLImageElement) {
   image.src = originalItemIconPath(0);
 }
 
-export function formatBinaryDateTimeLabel(locale: string, value: number, template: string) {
-  const date = dateFromBinaryDateTime(value);
-  if (!date) {
+export function formatBinaryDateTimeLabel(locale: string, value: number | string, template: string) {
+  const decoded = dateFromBinaryDateTime(value);
+  if (!decoded) {
     return null;
   }
 
@@ -40,24 +40,33 @@ export function formatBinaryDateTimeLabel(locale: string, value: number, templat
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(date);
+    timeZone: decoded.local ? undefined : "UTC",
+  }).format(decoded.date);
 
   return template.replace("{0}", formatted);
 }
 
-function dateFromBinaryDateTime(value: number) {
-  if (!Number.isFinite(value) || value <= 0) {
+function dateFromBinaryDateTime(value: number | string) {
+  if (typeof value === "number" ? !Number.isSafeInteger(value)
+    : typeof value !== "string" || !/^(?:0|[1-9][0-9]{0,18}|-[1-9][0-9]{0,18})$/.test(value)) {
     return null;
   }
-
-  // Crystal serializes .NET DateTime ticks (100 ns since 0001-01-01), whereas
-  // JavaScript Date expects milliseconds since the Unix epoch.
-  const ticksFromUnixEpoch = value - 621355968000000000;
-  if (ticksFromUnixEpoch <= 0) {
+  const binary = BigInt(value);
+  if (binary === 0n || binary < -9223372036854775808n || binary > 9223372036854775807n) {
     return null;
   }
-
-  return new Date(Math.floor(ticksFromUnixEpoch / 10000));
+  // Use the same kind/tick decoding as Page's formatCrystalBinaryDateTime.
+  // Only integer milliseconds within the valid .NET calendar reach Number;
+  // the received i64 carrier and its sub-millisecond ticks remain untouched.
+  const bits = BigInt.asUintN(64, binary);
+  const ticks = bits & 0x3fff_ffff_ffff_ffffn;
+  if (ticks > 3155378975999999999n) return null;
+  const kind = bits & 0xc000_0000_0000_0000n;
+  const delta = ticks - 621_355_968_000_000_000n;
+  const milliseconds = delta / 10_000n - (delta < 0n && delta % 10_000n !== 0n ? 1n : 0n);
+  const date = new Date(Number(milliseconds));
+  if (Number.isNaN(date.getTime())) return null;
+  return { date, local: kind === 0x8000_0000_0000_0000n || kind === 0xc000_0000_0000_0000n };
 }
 
 export function equipmentSlotForItemKey(key: string): EquipmentSlot | null {

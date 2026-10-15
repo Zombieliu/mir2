@@ -9410,5 +9410,14 @@
   "quest.practice.class.toggle_hit": "Bật {skill}, rồi gây sát thương cho quái vật bằng đòn đánh thường.",
   "quest.practice.class.spell_hit": "Dùng {skill} gây sát thương cho quái vật; đòn không trúng không được tính.",
   "quest.supply.assassinPoisonEquip": "Độc kiếm: trang bị bột đỏ hoặc xanh; mỗi lần dùng 1.",
-  "quest.supply.assassinPoisonEquipped": "Độc kiếm: đã trang bị bột; mỗi lần dùng 1."
+  "quest.supply.assassinPoisonEquipped": "Độc kiếm: đã trang bị bột; mỗi lần dùng 1.",
+  "ui.questProgressHeading": "Tiến độ",
+  "ui.questReturnHeading": "Nơi trả nhiệm vụ",
+  "ui.questClientLoading": "Đang chuẩn bị thao tác nhiệm vụ…",
+  "ui.questClientUnavailable": "Tạm thời không thể thao tác nhiệm vụ. Vui lòng thử lại.",
+  "ui.questActionPending": "Yêu cầu của bạn đang được xử lý. Vui lòng chờ.",
+  "ui.questActionRewardRequired": "Hãy chọn phần thưởng trước.",
+  "ui.questActionTalkToNpc": "Hãy nói chuyện với NPC nhiệm vụ để tiếp tục.",
+  "ui.questActionStateChanged": "Nhiệm vụ đã thay đổi. Hãy xem lại rồi thử lại.",
+  "ui.retry": "Thử lại"
 }

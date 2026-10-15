@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "stage": "Source24 independent Pearl action chain source-only review",
+  "reviewer": "/root/source24_buy_chain_review",
+  "accepted": true,
+  "sourceOnly": true,
+  "confirmedBlockers": 0,
+  "productPins": [
+    {
+      "relativePath": "apps/game-client/client-bevy/src/shop.rs",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+      "bytes": 22536,
+      "sha256": "213a6e78c8f2403a33a740c3bc50e9a0ccdf399cfa97bf4d651c0c1060d9132c"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/lib.rs",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/game-client/client-core/src/lib.rs",
+      "bytes": 789,
+      "sha256": "90addfff93c1bca3830ba794a84ee0a15816f2beb3972e035e4adf8fa475d2ef"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/npc_pearl_buy.rs",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/game-client/client-core/src/npc_pearl_buy.rs",
+      "bytes": 8367,
+      "sha256": "00d676ab0f6e6aa41330c9e920a7148ab5e306bd07570be2b53482345ebdba22"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/fishing_click.rs",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/fishing_click.rs",
+      "bytes": 34143,
+      "sha256": "e6f4d2d47bf060b3c735280dfc93c82e56a0cc1ee4d9d58674686cef3bdfb342"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/lib.rs",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/lib.rs",
+      "bytes": 1831,
+      "sha256": "22cc068e0f34c736bf6a4d9e6c474bc206fea88034bf209fd8823896465a7004"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/npc_pearl_buy.rs",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/game-client/platform-web/src/npc_pearl_buy.rs",
+      "bytes": 7858,
+      "sha256": "4ebcb856b6c5ca594ead3f497ae5cf11bb067ff91090371246bdf7bccd08520a"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/inventory.rs",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "bytes": 182333,
+      "sha256": "311b6593f76d026fbe380c89dc1b050534c107bc695cad1dc53069c745935e0c"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc.rs",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc.rs",
+      "bytes": 49714,
+      "sha256": "ed87d528351df1db6637f2b541e71b497e0d8fbc6276fbc8c2099334e99a63ec"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_pearl_tests.rs",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc_pearl_tests.rs",
+      "bytes": 13486,
+      "sha256": "f46f21f3d3aed9a70c858471a449e92cc1347fcaa0fc41e3f1f2431baf96e6d3"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-game-shop.tsx",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/app/components/original-client-game-shop.tsx",
+      "bytes": 56044,
+      "sha256": "0a30a25ce7974a5368e36f13eabda48c6c58dc937ac99ab17f3582cc27cbe2b6"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-game-ui-scene.tsx",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/app/components/original-client-game-ui-scene.tsx",
+      "bytes": 35540,
+      "sha256": "6e08111983ccb64a6355033ed3abed00e8bb89c5932e6fede64e6593a72c65d8"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-types.ts",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/app/components/original-client-types.ts",
+      "bytes": 11870,
+      "sha256": "42e7487b08780475cb46e09ddd79eb57eac3aca4b464d8b488812ad10f9f366a"
+    },
+    {
+      "relativePath": "apps/web/app/page.tsx",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/app/page.tsx",
+      "bytes": 1010721,
+      "sha256": "7c7ca74ccd8774e9e01c6e4867dace8c05fbc9c78937be140ec25fb6458409b6"
+    },
+    {
+      "relativePath": "apps/web/lib/bevy-npc-shop-buy.ts",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/lib/bevy-npc-shop-buy.ts",
+      "bytes": 28261,
+      "sha256": "329228b277928ba6a5fa8afe3a85cf04fb2e1bad411ce3a1d8ceb025c14c706b"
+    },
+    {
+      "relativePath": "apps/web/lib/client-core-runtime.ts",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/lib/client-core-runtime.ts",
+      "bytes": 41118,
+      "sha256": "9d98c60b8d9a1cc24f4f833be3c3d80efa5b196f0d9c39275c2b638a927d58bf"
+    },
+    {
+      "relativePath": "apps/web/lib/client-presentation-runtime.ts",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/lib/client-presentation-runtime.ts",
+      "bytes": 26287,
+      "sha256": "34e161cbf78db75b381f8bbf81c593870c411b3d20c2a84f20476574546d0c79"
+    },
+    {
+      "relativePath": "apps/web/lib/crystal-item-source.ts",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/lib/crystal-item-source.ts",
+      "bytes": 12773,
+      "sha256": "7fca4f5840311a4ac6c7addc93b5701b1b135cfa4551139e45861d8e799734e6"
+    },
+    {
+      "relativePath": "apps/web/lib/npc-pearl-buy-source.ts",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/lib/npc-pearl-buy-source.ts",
+      "bytes": 8153,
+      "sha256": "830cd338caad87d5801b2db6f588ab88bd8503be5d655767d630b82a02e2abe7"
+    },
+    {
+      "relativePath": "apps/web/lib/npc-pearl-buy.ts",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/lib/npc-pearl-buy.ts",
+      "bytes": 6989,
+      "sha256": "2367a9b59dc8189a4e4f97c4fe8d183eeed3d324b952d8444ee4009fec34d7b5"
+    },
+    {
+      "relativePath": "apps/web/lib/shared-item-tooltip.ts",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/lib/shared-item-tooltip.ts",
+      "bytes": 7739,
+      "sha256": "057befa08f11f57f584c426ab32950b79d52d3de498616e02ab61943a34287d1"
+    },
+    {
+      "relativePath": "apps/web/lib/generated/client_core_runtime.json",
+      "path": "E:\\mir2-player-journey/mir2-web3/apps/web/lib/generated/client_core_runtime.json",
+      "bytes": 1039,
+      "sha256": "e2cceba61787956e8ed7e85202f4e6f014c4ff2abd6fc478654db0e44083d143"
+    }
+  ],
+  "chain": [
+    {
+      "path": "apps/web/app/components/original-client-game-shop.tsx",
+      "lines": [
+        737,
+        921
+      ],
+      "role": "Fresh Pearl quote/known wallet/null-safe raw UID0 render confirm double-click."
+    },
+    {
+      "path": "apps/web/app/components/original-client-game-ui-scene.tsx",
+      "line": 613,
+      "role": "Actual catalog/wallet/quote/buy callback forwarding."
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "lines": [
+        9259,
+        9509,
+        6263,
+        6505
+      ],
+      "role": "Complete current source/physical owner/inventory/Core/socket/sendEpoch fence; opaque claim adjacent actual socket.send."
+    },
+    {
+      "path": "apps/web/lib/bevy-npc-shop-buy.ts",
+      "line": 332,
+      "role": "Same dispatcher/permanent Core flight, separate WeakMap currency brands, no replay after entry."
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_pearl_buy.rs",
+      "role": "Shared pure admission, f32 unit-price oracle, 46 occupied entries, clamp1..99, saturation, negative stock unlimited."
+    },
+    {
+      "path": "apps/game-client/platform-web/src/npc_pearl_buy.rs",
+      "role": "Optional Pearl ABI2 exact12facts/custody rejects invalid or missing facts."
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/shop.rs",
+      "line": 225,
+      "role": "Native Pearl policy delegates same Core planner, ordinary Gold path retained."
+    },
+    {
+      "path": "apps/simulation/src/runtime/inventory.rs",
+      "line": 2076,
+      "role": "Stage legal free-slot delivery/carrier/full roster/output conversions."
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc.rs",
+      "line": 1055,
+      "role": "Stage stock update and output packets; then contiguous wallet/inventory/NPC state writes."
+    }
+  ],
+  "scope": {
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "wasmApiUsed": false,
+    "playerAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "limitations": [
+    "No correlated economic ACK; entered/flushed/unknown cannot be treated as completed or auto-unlocked for continuous buy.",
+    "Structured raw catalog envelope is bounded at2MiB, while complete buy authority keeps existing1MiB Core limit; exceeding it fails closed.",
+    "Backend preserves existing SomeDura/metadata/allocator behavior; does not promise full stats/sockets clone or catalog UID as delivery UID.",
+    "Expiry preprocessing is independent maintenance, not transaction rollback.",
+    "Whitespace-only old fishing test diff is a touched input, not Pearl product policy."
+  ]
+}

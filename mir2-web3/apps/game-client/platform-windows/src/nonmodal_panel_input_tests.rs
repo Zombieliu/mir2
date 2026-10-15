@@ -43,6 +43,7 @@ fn actual_skills_and_other_ordinary_panels_allow_outside_world_clicks_at_native_
                 app.world_mut().spawn(window);
                 app.insert_resource(ButtonInput::<MouseButton>::default());
                 app.insert_resource(panel_ui(panel));
+                app.insert_resource(QuestUiState::default());
                 app.insert_resource(NpcDialogModel::default());
                 app.insert_resource(UiReadModel::default());
                 app.insert_resource(movement_entities());

@@ -448,7 +448,12 @@ pub(super) struct SessionResource {
     pub(super) account_id: Option<String>,
     pub(super) characters: Vec<CharacterRecord>,
     pub(super) selected_character: Option<CharacterRecord>,
+    ranking_inspect_generation: u64,
+    ranking_inspect_active: bool,
     active_save_revision: Arc<AtomicU64>,
+    pub(super) npc_purchase_journal: Option<crate::npc_purchase_journal::NpcPurchaseJournal>,
+    pub(super) npc_purchase_producer: Option<[u8; 32]>,
+    pub(super) npc_purchase_owner_epoch: Option<[u8; 32]>,
 }
 
 impl SessionResource {
@@ -459,7 +464,12 @@ impl SessionResource {
             account_id: None,
             characters: vec![config.default_character.clone()],
             selected_character: None,
+            ranking_inspect_generation: 0,
+            ranking_inspect_active: false,
             active_save_revision: Arc::new(AtomicU64::new(UNKNOWN_ACTIVE_SAVE_REVISION)),
+            npc_purchase_journal: None,
+            npc_purchase_producer: None,
+            npc_purchase_owner_epoch: None,
         }
     }
 
@@ -472,7 +482,26 @@ impl SessionResource {
         self.active_save_revision.store(revision, Ordering::Release);
     }
 
-    pub(super) fn clear_active_save_revision(&self) {
+    pub(super) fn ranking_inspect_generation(&self) -> Option<u64> {
+        self.ranking_inspect_active.then_some(self.ranking_inspect_generation)
+    }
+
+    pub(super) fn activate_ranking_inspect(&mut self) {
+        self.ranking_inspect_active = false;
+        if let Some(generation) = self.ranking_inspect_generation.checked_add(1) {
+            self.ranking_inspect_generation = generation;
+            self.ranking_inspect_active = true;
+        }
+    }
+
+    pub(super) fn retire_ranking_inspect(&mut self) {
+        self.ranking_inspect_active = false;
+    }
+
+    pub(super) fn clear_active_save_revision(&mut self) {
+        self.npc_purchase_journal = None;
+        self.npc_purchase_producer = None;
+        self.npc_purchase_owner_epoch = None;
         self.active_save_revision
             .store(UNKNOWN_ACTIVE_SAVE_REVISION, Ordering::Release);
     }
@@ -1126,5 +1155,28 @@ impl ObjectIdAllocatorResource {
         let id = self.next_runtime_monster_object_id;
         self.next_runtime_monster_object_id += 1;
         id
+    }
+}
+
+#[cfg(test)]
+mod ranking_inspect_lifecycle_tests {
+    use super::*;
+    #[test]
+    fn ranking_inspect_game_generation_retires_and_never_wraps() {
+        let mut session = SessionResource::new(&SimulationConfig::default());
+        assert_eq!(session.ranking_inspect_generation(), None);
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), Some(1));
+        session.retire_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), None);
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), Some(2));
+        session.ranking_inspect_generation = u64::MAX;
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), None);
+        session.retire_ranking_inspect();
+        session.activate_ranking_inspect();
+        assert_eq!(session.ranking_inspect_generation(), None);
+        assert_eq!(session.ranking_inspect_generation, u64::MAX);
     }
 }

@@ -16,6 +16,11 @@ export type Mir2MobileAnalogInput = {
   force?: number;
 };
 
+export type Mir2NippleMoveData = {
+  vector?: { x?: unknown; y?: unknown };
+  force?: unknown;
+};
+
 export type Mir2MobileMoveIntent = {
   direction: Mir2MobileDirection;
   mode: Mir2MobileMoveMode;
@@ -114,6 +119,22 @@ export function mir2MobileMoveIntentFromVector(
     mode: mir2MobileMoveModeFromVector(input, runLocked),
     force: Math.max(Math.abs(input.x), Math.abs(input.y), input.force ?? 0),
   };
+}
+
+// nipplejs reports positive Y for an upward drag; the generic converter above
+// uses screen coordinates, where positive Y points down. Convert at this edge.
+export function mir2MobileMoveIntentFromNippleData(
+  data: Mir2NippleMoveData | null | undefined,
+  runLocked: boolean,
+  previousDirection: Mir2MobileDirection | null = null,
+): Mir2MobileMoveIntent | null {
+  const x = data?.vector?.x;
+  const y = data?.vector?.y;
+  if (typeof x !== "number" || !Number.isFinite(x) || typeof y !== "number" || !Number.isFinite(y)) {
+    return null;
+  }
+  const force = typeof data?.force === "number" && Number.isFinite(data.force) ? data.force : 0;
+  return mir2MobileMoveIntentFromVector({ x, y: -y, force }, runLocked, previousDirection);
 }
 
 function clampAxis(value: number) {

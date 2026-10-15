@@ -1,0 +1,30 @@
+{
+  "owner": "Root",
+  "generatedAtUtc": "2026-10-07T14:27:35.357Z",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-rust02-snapshot.json",
+    "bytes": 266901,
+    "sha256": "c9670d2491273a3c4d354c020ff854c8e5feba7903638fb4933c2255d9309a16"
+  },
+  "sourceCount": 877,
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceOnlyAcceptance": true,
+  "reviewers": [
+    "/root/source30_native_bundle",
+    "/root/source30_native_client",
+    "Root frontier integration lead"
+  ],
+  "confirmedBlockers": 0,
+  "review": "Source-only finite execution approval after independent Native client review and Runtime/queue shape audit. Host stale-witness test corrected against actual Core semantics. Runtime sparse named equipment, mandatory public city/Hero/Character/weights, direct scalar metadata and reserve materialization capacity defects corrected; all original25 Runtime tests retained plus5. Selected14 real Core-host Native tests and30 direct-World/local-queue tests only; no application/gateway/socket/build accepted.",
+  "limitations": [
+    "Native actual gateway receiver, source projector, typed applied pump, retained readonly Quote and final one-shot durable Purchase sender remain unhooked.",
+    "Runtime Hero/Social correspondence remains schema-only; mail contents/flags and tooltip-derived metadata not independently correlated. Trusted actual source projector is not yet implemented.",
+    "No WASM, UI, game, app, browser, renderer, socket/HTTP/PG or mobile run."
+  ],
+  "finiteCpuAccepted": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "independentSecondReadDrift": []
+}

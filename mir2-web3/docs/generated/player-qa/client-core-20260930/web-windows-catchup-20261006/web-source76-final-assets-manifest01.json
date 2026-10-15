@@ -1,0 +1,764 @@
+{
+  "task": "Source76 final canonical Shop Character Stats Spells finite static asset closure",
+  "files": [
+    {
+      "relative": "apps/web/scripts/lib/portable-next-standalone.mjs",
+      "source75Bytes": 36920,
+      "source75Sha256": "b1056f6b22b4502c145a6c4028b4ee6697165a0a792bd5b4446b12ec47a8abe3",
+      "afterShopBytes": 37397,
+      "afterShopSha256": "f553174c467b0c046ce607c2ed5c708d211bca15d9951296c14b771ae54d2440",
+      "finalBytes": 40949,
+      "finalSha256": "953ae698da31781fc3a02a0b1e80d923349898f0005a1908891573825e32e0c6",
+      "finalSnapshotSha256": "953ae698da31781fc3a02a0b1e80d923349898f0005a1908891573825e32e0c6"
+    },
+    {
+      "relative": "apps/web/scripts/test-portable-next-standalone.mjs",
+      "source75Bytes": 59634,
+      "source75Sha256": "73999db384aa1b7cf3c8669b65d8d8eeaebe5dc5c50009ff3b6cf6d195041959",
+      "afterShopBytes": 64999,
+      "afterShopSha256": "05baa5105d2a7bc0e64d7eb69afe76a3fc005e95aa88b55285c6ce484b3fbdb1",
+      "finalBytes": 76389,
+      "finalSha256": "b5b4a8967eef8d8c50d2c57f80a9573ce3bb0d8b824089eee8c160b4b6b07835",
+      "finalSnapshotSha256": "b5b4a8967eef8d8c50d2c57f80a9573ce3bb0d8b824089eee8c160b4b6b07835"
+    }
+  ],
+  "canonicalSourcePins": [
+    {
+      "relative": "apps/game-client/client-bevy/src/portable_character_ui.rs",
+      "bytes": 19402,
+      "sha256": "ff1dff6df4cb8d624b0c82817f89fabac9965bdac2f54a6616cce8181af6b62f"
+    },
+    {
+      "relative": "apps/game-client/client-bevy/src/crystal_ui/character_stats_portable.rs",
+      "bytes": 10337,
+      "sha256": "61d320eb6f47abf321577488bd7cccc45bc36c332a5aa6b6c1747d04a003d469"
+    },
+    {
+      "relative": "apps/game-client/runtime/src/spells_ui_host.rs",
+      "bytes": 24563,
+      "sha256": "953618b188eea3bade8fc387d3a30eb7b95e7ee8f5a51cede2a703263b190c9d"
+    },
+    {
+      "relative": "apps/game-client/client-bevy/src/crystal_ui/character_page.rs",
+      "bytes": 10327,
+      "sha256": "295eeb5b95da2a4c2f39a577072097d5c238a4ac5e0de2e933b47ee6d004aaf2"
+    },
+    {
+      "relative": "apps/game-client/client-bevy/src/crystal_ui/character_stats.rs",
+      "bytes": 8611,
+      "sha256": "8563b962df0f9f8d6b2f4c4a44e68d7bfe8b6f9204d722b24f6f6e80fdb59ddf"
+    },
+    {
+      "relative": "apps/game-client/client-bevy/src/crystal_ui/character_materials.rs",
+      "bytes": 3399,
+      "sha256": "67f377a018cf795c5e9051d7ffd155d3d3b5a1e2d03700cf39c47b861b7a3f91"
+    }
+  ],
+  "characterSpellsAssetPins": [
+    {
+      "relative": "original-ui/Prguse/100.png",
+      "bytes": 489,
+      "sha256": "1c0d8b58cfdceb9c1c2db32ebccb57830596d4e832d3a42e0196d2fe9b5a34c5",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/101.png",
+      "bytes": 451,
+      "sha256": "f64a60bf82b6b7ce7a926485c465a2229da924000b765cec43a62670d778de18",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/102.png",
+      "bytes": 502,
+      "sha256": "448482493fd1415b7aa2e30a5b094b270ec30e98dec4f270d8e052ac3888664e",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/103.png",
+      "bytes": 476,
+      "sha256": "cca30960a847d7633c5b153de26e9711ede27a26f9a43f03b29c19df9a73e1ea",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/104.png",
+      "bytes": 485,
+      "sha256": "649ba5adec8ab70e81afd17bec7196b3ca3c851f1a3daf7c5d24e336fd16bee8",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/1656.png",
+      "bytes": 794,
+      "sha256": "e3f0d75de8f816a9af7889e1c4e642d0f33c055a0d559650f95acd2869037c1c",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/1657.png",
+      "bytes": 807,
+      "sha256": "b41aec7bb1b5a8f8013d7b917fe0b31ec33b597b071a3d1b8b788a9348a92cee",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/1658.png",
+      "bytes": 856,
+      "sha256": "2727ac1016dbdc1a0245928a39f4f4c7e62a065d9c3ae6a62db6ecfbd0eed37a",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/340.png",
+      "bytes": 62307,
+      "sha256": "2230a0f0d6266f45372464e0ae807d881a0bbb84b80996fcdaeae5a83e71123a",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/341.png",
+      "bytes": 80800,
+      "sha256": "51e84b67c804183001ae23d236c50e86e971ee12c98b24374413fea1f0d60166",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/396.png",
+      "bytes": 260,
+      "sha256": "080af2e8915b6055f6bff7b9705f8e0f02d00e425483132d796e2506b8fe463c",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/397.png",
+      "bytes": 230,
+      "sha256": "0498d4c07dfe825ce6e4aed5e601375878dba1612a429854c1b34af033e8b9d8",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/398.png",
+      "bytes": 267,
+      "sha256": "45997026f769a9a5502df88ea129875c54b0c916716ecfb38eb8139e499ede51",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/399.png",
+      "bytes": 222,
+      "sha256": "901f5887afb1c8eeeecbb715846b9ddf24f64ce39820f661957ce944ae5d56f5",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/441.png",
+      "bytes": 348,
+      "sha256": "843650067ff77ddfc997ca2e12c2f7b2d07ed72e5728edd4961c1e7df17d14a0",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/442.png",
+      "bytes": 667,
+      "sha256": "3b87d7eea36b9125f2faac5d6f50d5a7773321c6b4e2e386b6179809116c7e7c",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/443.png",
+      "bytes": 435,
+      "sha256": "492f822d37742a508476ee2befd3940b888036de8954d5ab5adcfed36f7d1491",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/444.png",
+      "bytes": 883,
+      "sha256": "28976603a6a94cf1541d86865de27a5bf3e846f7d3378bc983ea0c841b26464a",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/445.png",
+      "bytes": 876,
+      "sha256": "efc7cf010d55b9cbf7a380d768f7e4917ea54ebe7085181e2fc07b2c25f84823",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/446.png",
+      "bytes": 877,
+      "sha256": "3476720e77c47767dc2b7fe04141ddd56856e3f8bac1e7d21e68636c07d38b8b",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/447.png",
+      "bytes": 548,
+      "sha256": "83896917e232d3c881e8382a807f419f1e8b140ccf5033cd84c159a3b0fd88cc",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/448.png",
+      "bytes": 499,
+      "sha256": "fe0a00c464de7be0d0ccf5ad0b6f804db74f865dfed6850e1c57987bf3615558",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/449.png",
+      "bytes": 493,
+      "sha256": "68cceba260bb67a649c3d0afce267dd4ac215eb961efdd43a23218d0986330c3",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/461.png",
+      "bytes": 336,
+      "sha256": "f6cb63270707ef61bd72493718155346b3bd7fb62589988ee8bb13925e59c725",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/462.png",
+      "bytes": 448,
+      "sha256": "1b253c14a5e44816328f228c491d9cb17fac5bb20d04c03d2d7e896d582ff809",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/463.png",
+      "bytes": 561,
+      "sha256": "11a14a61ca88f07bbfc58551e50a049032864c1b5f363e012b5c3c886726c73c",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/464.png",
+      "bytes": 1184,
+      "sha256": "df74a85e2ba6204ccacd848afceedcab6e7f1f081ee02d38de267f7ea6d1f751",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/465.png",
+      "bytes": 1059,
+      "sha256": "2384647be33d3cbf196ca3f9a45f7a0ec704a8a40ee7c8dd6e40b515a1f19db8",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/466.png",
+      "bytes": 1139,
+      "sha256": "7bee116f60b256d4953ffb8eee2be32563bb3081ee5f8b956f003ff46a77fca7",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/467.png",
+      "bytes": 574,
+      "sha256": "efb53ae4dd141e0a8ae608b47b56f1ceca68e0c457d0fd3a5a997027f8776dd6",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/468.png",
+      "bytes": 537,
+      "sha256": "d4b6ef375b4a6061b93395862735f7b0a2f5469274f634f0fcb86439e63c2fee",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/469.png",
+      "bytes": 529,
+      "sha256": "e436ee4a4bb9672fe5650436a4c7473de645fd890559dd3fb2851b48cdfe5747",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/481.png",
+      "bytes": 583,
+      "sha256": "ccd9d09cf1356ef6b90e860506ab61044a7540928e1330dff88b73992018c981",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/482.png",
+      "bytes": 604,
+      "sha256": "c5cced8c93f816d715c4c8882830431a38bccc881d2863e0d5026a72dabd4246",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/483.png",
+      "bytes": 997,
+      "sha256": "2772e15857cfd5b23e1f99e3b01be0c785e9b06da3c4aaa8e94cc425be607ba2",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/484.png",
+      "bytes": 683,
+      "sha256": "bb8348e91fd63e8f46a21a1d16cf6fc070a52bd87123b045c32b3fe0dbdb084d",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/485.png",
+      "bytes": 618,
+      "sha256": "58d1e8cccbd49846d75dfeea161775afe533713b8768043f2c38a7b2263cfb12",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/486.png",
+      "bytes": 682,
+      "sha256": "335538d9e75aef576ebcb30c19c9df4e206753dc3a3eb8cd6beb362698ab7e63",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/487.png",
+      "bytes": 1043,
+      "sha256": "8f1501058b7967ce4fd68f779c8c32c4b2a0a11f1e1208f4f3dc5db891d14e67",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/488.png",
+      "bytes": 861,
+      "sha256": "68499dfe27b5ed4db35610aadac72b32c91f2a752012e82c740eee0a036d96a7",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/489.png",
+      "bytes": 984,
+      "sha256": "f58cee1d46270c373f8afa339ca9b4d0cb13f6acfb7a9170678211dda9ce124d",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/501.png",
+      "bytes": 473,
+      "sha256": "a8f765b2688faa0f445e5b5da51449463b3437d5a961a20ec09465d0d97c7330",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/502.png",
+      "bytes": 490,
+      "sha256": "4b9f65bc755d5eae459c243fe92d24edff4599615120e4c14d118dfeb805f5b5",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/503.png",
+      "bytes": 651,
+      "sha256": "a340492357aeb2e07fbb5304f660069e86da7591b8ef0b88aef38ec4877449e2",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/504.png",
+      "bytes": 700,
+      "sha256": "57ff43b6c00376969471044b3a2d6ecc390648c9aec4de94330a5df0eee11e43",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/505.png",
+      "bytes": 696,
+      "sha256": "6f6aa3254736188688e96a354d8f558d0d5631ae5ffb5bc3f490c149614cf4f7",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/506.png",
+      "bytes": 691,
+      "sha256": "551fae023b8ef49ff74e4d7e690a9a8bcef0b7dc240db865e88fe895761cd121",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/507.png",
+      "bytes": 974,
+      "sha256": "8ac41b6e4c71065dca7d6dbf700bcc71e1ca6492a8bad77c8fc436f39791961b",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/508.png",
+      "bytes": 938,
+      "sha256": "2b8065e702160959cabed6499e77952d40c0a8f6b449f82e76df7c04f25953d6",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/509.png",
+      "bytes": 989,
+      "sha256": "09f514a71fb22e65970e18a7f8081fc7655cf29cb090986d8241757b183db815",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse/710.png",
+      "bytes": 27770,
+      "sha256": "5301c0b0001913ead001863433f4aec189e96947cb2691fee8c80d319950f52e",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1202.png",
+      "bytes": 13684,
+      "sha256": "f071ab4b78e34e2e5fb11ed5e69f6b19a8a433d8d469102a0af5a365ee698b4e",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1203.png",
+      "bytes": 15720,
+      "sha256": "d7a3e6a83089fc586b5d994f7e783e47cf83b8fe1ec3b67e38a387bf032fca4f",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1204.png",
+      "bytes": 24613,
+      "sha256": "956b010c3c5abb893a8134097e138e625d85180b04d0978d13f942608a3cc947",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1205.png",
+      "bytes": 25377,
+      "sha256": "d79edc797081849f6ee1b4376b63a8aaaf2fd353132d94a07802025dda46374d",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1290.png",
+      "bytes": 148,
+      "sha256": "d22313a4d47f674927b7173926b058afa2da2d72fbef85907a1fcf20414acdf4",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1291.png",
+      "bytes": 144,
+      "sha256": "9c373a20085f33ff99b1edae95f7b38a131365d85dc4d447cfb93fe1a3be74ca",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1292.png",
+      "bytes": 144,
+      "sha256": "44f8f9487fa3d866ca5f6f63987ff35b6108befd595a80cbf510d05ffb934ad7",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1293.png",
+      "bytes": 142,
+      "sha256": "ed09aab7fe1ce020f07a8e47ffdddc081afac7b9cae9d8d47316e99887c86652",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1294.png",
+      "bytes": 144,
+      "sha256": "744bd18ad44e7217a118b48486b725bcf68b4ea2f662ae143f76f11a61df900e",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1295.png",
+      "bytes": 143,
+      "sha256": "9206887761743b473b44f42c5449403033e735ee97facbbfdc2e93a64c82df56",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1296.png",
+      "bytes": 144,
+      "sha256": "278a9f3adf7e914386cc82758233f685fdf1bed079d44f476243692f66cc4ea7",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1297.png",
+      "bytes": 140,
+      "sha256": "e51aff79ebee3ac1377218c9ad141b95d49cd49beeb02ffd0c71b801a5a50d42",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1298.png",
+      "bytes": 140,
+      "sha256": "a1ece15f1641a210c88dc2c89f0766ba164544ad86e9d3930aab7819b21015c6",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1299.png",
+      "bytes": 139,
+      "sha256": "d7a286287aa70211f50da16e2c2381cda39de16107e6c9da08428335112a0ac7",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1300.png",
+      "bytes": 140,
+      "sha256": "2e07e21d43f703dc09f5f7cc43ce38961924f3f9fc5a0dc456481f542c353268",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1301.png",
+      "bytes": 138,
+      "sha256": "a0dd96446c824140d94c943f1940719e68ceb29ae0fb6f8edb54e3b882641071",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1302.png",
+      "bytes": 138,
+      "sha256": "7d6ec64f40a4a1aec0d0725acc1b61c7b5439ada49eb241b2e250cccc3f683d6",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1303.png",
+      "bytes": 138,
+      "sha256": "5efc21beb35a1a13e04847a17997e22f8999c535c65201114c78a025b0cd7e01",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1304.png",
+      "bytes": 137,
+      "sha256": "771278d79dd4b102cf24eabf301560970b4e330a276e9976f8435b00b4e4d9d2",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1305.png",
+      "bytes": 134,
+      "sha256": "61c0805cf43fa899ff5178857c8a178b7cced3c38953c12e6d8b649cc719216c",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1306.png",
+      "bytes": 133,
+      "sha256": "ea09740b49f858cdc6c7bd5aa110f14b39292e022a90763e08fb6041b6856fec",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1307.png",
+      "bytes": 132,
+      "sha256": "83f960376f5199ed1c8fe82a40b7f11fd6ef6c3f58a3d4f6a6e501491d0f89e1",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1308.png",
+      "bytes": 133,
+      "sha256": "198eb0b3251405cee3efef47d227d5abe0f9c1ef3a546736351cda04cd0615b8",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1309.png",
+      "bytes": 129,
+      "sha256": "0ecfa4fbe8b32262c2652c6629cd3ec2868606242f999deaa0912eca489a87cf",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1310.png",
+      "bytes": 131,
+      "sha256": "bc61fcdb3a4f4f2b0059e6358ef96282ad49f0d96710aa102d2884e08b295edd",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1311.png",
+      "bytes": 130,
+      "sha256": "26b072ba321c12ab3bef6a440de1f912db6d709780da1c687fb1ce83151c542a",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1312.png",
+      "bytes": 130,
+      "sha256": "d66c5aa29d092e5f0516e870fdc9506658c7804ec1ae428918f6c4d694e83030",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1313.png",
+      "bytes": 126,
+      "sha256": "dd91af5d42e4b30674772b830f65a9940f9dea41ee7cf141f0b992cafcef411c",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1314.png",
+      "bytes": 126,
+      "sha256": "a6318ff5d95f5990b18f6e2a42e92a37f05e6c53db74379eaadd01fe43c5f07e",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1315.png",
+      "bytes": 126,
+      "sha256": "fee35b4c35112dac3b455d2f70be8671a53a6e3df12f3a184826930bd1911b08",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1316.png",
+      "bytes": 126,
+      "sha256": "11f96814d725c91b1e0b022cfd12ce1a37311b91f157175b2c02dc51502b499f",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1317.png",
+      "bytes": 122,
+      "sha256": "8e1c15eff403dd702dd134682b62534edeb66828583969b70571a09265ec0230",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1318.png",
+      "bytes": 122,
+      "sha256": "9ba219d49b7cbc4b493eb4c950ec7d08c0df23b0d01651321be99473bdff5b42",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1319.png",
+      "bytes": 123,
+      "sha256": "74488e4a451b5ce361edad27622bb621ebeef8ebaf9c16cd6b12391f56952ea0",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1320.png",
+      "bytes": 122,
+      "sha256": "8af1b84475108225139e65d5dea2415b7fdd14f30e771e70539ba4e39439bfa3",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1321.png",
+      "bytes": 119,
+      "sha256": "27608b03871ed121be5645a5c5d4ed4bb517e73659f2f646658a365dbc3d0884",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1322.png",
+      "bytes": 119,
+      "sha256": "200515a823cd945789a6cadf1e06b869cc5b9d48ea64d1f59ae1391fb969667e",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1323.png",
+      "bytes": 111,
+      "sha256": "1ff148b8a7661a9b42b670e5fd4979a45f45d9a61b2a4e5ddae6c2c6077db43e",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/1324.png",
+      "bytes": 102,
+      "sha256": "b825b7b5f20a358c449c2fe02bc5689f93cb6335df937538f372c74f587c4110",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Prguse2/360.png",
+      "bytes": 681,
+      "sha256": "4e481bca194a082812caa01c6e4fdee387c016cf520b68b5fbb5fa2635d04675",
+      "newSinceShop": false
+    },
+    {
+      "relative": "original-ui/Prguse2/361.png",
+      "bytes": 684,
+      "sha256": "2a25918cd9b5acde7b9acc5b67fd0fddb537cd018dc7e2695436ab0bf7095238",
+      "newSinceShop": false
+    },
+    {
+      "relative": "original-ui/Prguse2/362.png",
+      "bytes": 686,
+      "sha256": "98614f07962fedc5722113a213ea0c6b89695680dc8cc91f708e5eb65f24fed2",
+      "newSinceShop": false
+    },
+    {
+      "relative": "original-ui/Title/156.png",
+      "bytes": 2346,
+      "sha256": "0547a8d2e8f4551ca9a23b8cba1794b71cf0981b2cdb7a09fa61e28332813c11",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/157.png",
+      "bytes": 2403,
+      "sha256": "d8b51b7bfeef81758d54573f25626ce25f4a7cc19ea048b6d9840fdef588487e",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/158.png",
+      "bytes": 2080,
+      "sha256": "651166714b01c11bb89391b691395a766cef187478c675f45cdb3acc953b1e64",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/287.png",
+      "bytes": 2138,
+      "sha256": "b913466d5571f31e8c609e15236174d855c7be38b6e0b7f934c0ff4e9b98681e",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/288.png",
+      "bytes": 2670,
+      "sha256": "35273e8af55fc529d3f73a847dcd597902a558b32ecd50f00b92d923b9efb2b2",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/289.png",
+      "bytes": 2122,
+      "sha256": "e42a6e7305e3ecd91e71ba207a8e49f3cc5cb4bea9c443ecff93d60eea6959d2",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/500.png",
+      "bytes": 2039,
+      "sha256": "7c130fb8029003e6545ff80d821bb2f1eee876393ad661d736e505efc0f7bf28",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/501.png",
+      "bytes": 2042,
+      "sha256": "97c28d438b008af89d5a6aa513c3b791d398b5b7e4e1ec2f6df36972f18df632",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/502.png",
+      "bytes": 2033,
+      "sha256": "2d3c67a93767481c328a91e9d483c9e2639c17a0a98c7700a066f64c05433dfb",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/503.png",
+      "bytes": 2012,
+      "sha256": "31450e0f451ba648b69324d814e9e16d7fcb67691706afe25394d8230bb1b1f8",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/504.png",
+      "bytes": 56690,
+      "sha256": "4fbe969e0d3dfe04975317ae28f5ca2e74f5202b5a36ab1d7048d19ba787fd30",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/506.png",
+      "bytes": 43356,
+      "sha256": "27a5738af66a2ef62dcbc590ba69993ea039e80a98dfce8695cf04039bcb1c8b",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/507.png",
+      "bytes": 43885,
+      "sha256": "12f5f4b05d12bf44e59ca982ff8399df91f34f7829fc277134fa321896fe0067",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/508.png",
+      "bytes": 50422,
+      "sha256": "fd827bfc396f89eaa02cc93ff8b6b5505bb0c5002e3f79475c34c76fb8f96feb",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/516.png",
+      "bytes": 251,
+      "sha256": "1b4b23d93c46de53b8eb1ac80756fb84ca0a5bc65221eba9c32e219f28242c22",
+      "newSinceShop": true
+    },
+    {
+      "relative": "original-ui/Title/517.png",
+      "bytes": 325,
+      "sha256": "d0aa03122974731fd082c8db73085efa6dd5cdd9e6e48af4fc881849136e2c06",
+      "newSinceShop": true
+    }
+  ],
+  "approvedExplorerPins": [
+    {
+      "name": "character-canonical-closure-review01.json",
+      "bytes": 13427,
+      "sha256": "3c951ed51d9285e5bbfc271f99835941aaeaa63aa5878d1783226c7b345d255e"
+    },
+    {
+      "name": "canonical-character-spells-finite-assets01.json",
+      "bytes": 52891,
+      "sha256": "4d9148489800a3c298cddc8e243b675d02be7e97477e2e137c4a6fdfc954e46b"
+    }
+  ],
+  "verifiedClosure": {
+    "source75FallbackPngs": 33,
+    "afterShopFallbackPngs": 45,
+    "finalFallbackPngs": 151,
+    "finalCanonicalUnionWithoutLegacy": 148,
+    "characterPaths": 109,
+    "characterAdded": 106,
+    "characterAddedBytes": 503189,
+    "totalAdded": 118,
+    "totalAddedBytes": 534684,
+    "allExistingRetained": true,
+    "uniqueFinalPaths": true
+  },
+  "textualVerification": {
+    "source75Tests": 27,
+    "afterShopTests": 29,
+    "finalTests": 31,
+    "source75Assertions": 217,
+    "afterShopAssertions": 242,
+    "finalAssertions": 296,
+    "source75TestTextRetained": true,
+    "shopTestTextRetained": true
+  },
+  "diffSummary": [
+    "Only106 approved deterministic Character/Stats/Spells/hair/wing PNG fallback literals added since Shop. Final exact static union148 plus3 existing legacy fallbacks151.",
+    "Two appended tests independently derive69 core+36 hair+4 wing from actual Rust required_assets, literal/range loops, class/gender/page formulas, authored four9 hair rect tables and wing/material index formula. DynamicItems/StateItem/MagIcon2 remain remote.",
+    "Actual-copy regression reads genuine148 PNGs, compares109 export metadata PNG hashes, copied/root/fixture bytes unchanged, preserves metadata raw bytes, and missing Character skin remains absent. Original27 and Shop2 test/assert bytes retained."
+  ],
+  "executedProduct": false,
+  "executedTests": false,
+  "rustEdited": false,
+  "abiEdited": false,
+  "mainTsconfigEdited": false,
+  "risks": [
+    "Root must run original guarded caller tests, strict Next, actual Thin and ordinary GUI verification.",
+    "Closure validates deterministic art source/selection only; actual decoded image/material readiness and native Character/Spells ownership remain unaccepted.",
+    "Runtime source-derived regex extraction intentionally fails if canonical authored formulas change; no Rust execution is used.",
+    "No account-dependent item/equipment/skill icon selection, full-library expansion, or character readiness/admission modification."
+  ]
+}

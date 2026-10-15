@@ -1,5 +1,6 @@
 //! Crystal Hero dialogs use a separate actor and inventory custody.
-//! The server's HeroInformation is the only bootstrap; the player's data is never a fallback.
+//! HeroInformation bootstraps actions; a complete owner checkpoint can show status.
+use crate::crystal_ui::amount_input::CrystalAmountInput;
 use mir2_protocol::{ClientMagic, HeroUserInformation, UserItem};
 #[path = "hero_assign_dialog.rs"]
 pub mod assign;
@@ -7,6 +8,7 @@ pub mod assign;
 pub mod cross;
 #[path = "hero_dialog_geometry.rs"]
 pub mod geometry;
+#[cfg(feature = "native-ui")]
 #[path = "hero_dialog_host.rs"]
 pub mod host;
 #[path = "hero_item_use.rs"]
@@ -29,8 +31,8 @@ pub enum HeroPage {
 pub struct HeroDialogModel {
     pub assign: assign::HeroAssignUi,
     pub cross: cross::CrossInput,
-    pub amount: Option<(u8, super::CrystalAmountInput)>,
-    pub pending_amount: Option<(u8, super::CrystalAmountInput)>,
+    pub amount: Option<(u8, CrystalAmountInput)>,
+    pub pending_amount: Option<(u8, CrystalAmountInput)>,
     pub config_pending: Option<mir2_protocol::ClientPacket>,
     pub hero_generation: u64,
     pub armed: Option<render::HeroAction>,
@@ -54,6 +56,9 @@ pub struct HeroDialogModel {
     pub observed_revision: u64,
     pub epoch: u64,
     pub info: Option<HeroUserInformation>,
+    /// Last actual packet identity; checkpoint-only views carry no object ID.
+    pub packet_actor_object_id: Option<u32>,
+    pub checkpoint_present: bool,
     pub inventory_open: bool,
     pub character_open: bool,
     pub page: HeroPage,
@@ -76,6 +81,13 @@ impl HeroDialogModel {
             self.hero_generation = model.hero_generation;
         }
         self.assign.reconcile(model);
+        self.checkpoint_present = model.snapshot_identity.is_some();
+        if !self.checkpoint_present && model.info.is_none() {
+            self.packet_actor_object_id = None;
+        }
+        if self.info.is_none() && !self.checkpoint_present {
+            self.character_open = false;
+        }
         if self.seen_item_result != model.item_result_serial {
             self.seen_item_result = model.item_result_serial;
             if let (Some(pending), Some((packet, payload))) = (
@@ -208,7 +220,9 @@ impl HeroDialogModel {
             } else {
                 self.info = None;
                 self.inventory_open = false;
-                self.character_open = false;
+                if !self.checkpoint_present {
+                    self.character_open = false;
+                }
                 self.belt_visible = false;
             }
             self.spawned = model.spawned;
@@ -224,9 +238,9 @@ impl HeroDialogModel {
     }
     pub fn bootstrap(&mut self, info: HeroUserInformation) {
         let new_actor = self
-            .info
-            .as_ref()
-            .is_none_or(|old| old.object_id != info.object_id);
+            .packet_actor_object_id
+            .or_else(|| self.info.as_ref().map(|old| old.object_id))
+            != Some(info.object_id);
         if new_actor {
             self.pending = None;
             self.selected = None;
@@ -238,6 +252,7 @@ impl HeroDialogModel {
             self.belt_vertical = false;
             self.spawned = false;
         }
+        self.packet_actor_object_id = Some(info.object_id);
         self.info = Some(info);
     }
     pub fn toggle_inventory(&mut self) {
@@ -246,9 +261,14 @@ impl HeroDialogModel {
         }
     }
     pub fn toggle_page(&mut self, page: HeroPage) {
-        if self.info.is_none() {
+        if self.info.is_none() && (!self.checkpoint_present || page == HeroPage::Skills) {
             return;
         }
+        let page = if self.info.is_none() {
+            HeroPage::Status
+        } else {
+            page
+        };
         if self.character_open && self.page == page {
             self.character_open = false;
         } else {
@@ -304,6 +324,31 @@ impl HeroDialogModel {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn native_npc_economy_hero_checkpoint_opens_read_only_status_without_packet_actions() {
+        let mut model = crate::hero_model::HeroModel::default();
+        model.observe_snapshot(
+            &serde_json::json!({"heroMaxExperience":200,"heroVitals":null,
+            "stage5Systems":{"hero":{"name":"Hero","class":"Wizard","gender":"Female","level":9,
+                "experience":77,"behaviour":0,"spawned":true,"autoPot":false,"autoHpPercent":30,
+                "autoMpPercent":30,"hpItemIndex":0,"mpItemIndex":0}}}),
+        );
+        let mut ui = HeroDialogModel::default();
+        ui.observe(&model);
+        ui.toggle_page(HeroPage::Status);
+        assert!(ui.character_open && ui.checkpoint_present);
+        assert!(ui.info.is_none());
+        assert!(!ui.can_assign_key());
+        ui.toggle_inventory();
+        assert!(!ui.inventory_open);
+        ui.toggle_page(HeroPage::Skills);
+        assert_eq!(ui.page, HeroPage::Status);
+        model.observe_snapshot(
+            &serde_json::json!({"heroMaxExperience":null,"stage5Systems":{"hero":null}}),
+        );
+        ui.observe(&model);
+        assert!(!ui.character_open && !ui.checkpoint_present);
+    }
     fn hero(capacity: usize) -> HeroUserInformation {
         HeroUserInformation {
             object_id: 12,

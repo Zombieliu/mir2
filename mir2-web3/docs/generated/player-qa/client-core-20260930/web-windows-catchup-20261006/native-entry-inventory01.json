@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "kind": "read-only-native-entry-inventory",
+  "baseline": {
+    "repository": "E:/mir2-player-journey",
+    "project": "mir2-web3",
+    "commit": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+    "currentCommit": "f1cf96324c7da62e57d5fd0fa4146be010adbba5"
+  },
+  "method": {
+    "source": "Git object reads at the fixed baseline; line numbers are one-based.",
+    "runtime": "No tests, builds, product helpers, UI, HTTP, sockets, or processes were used.",
+    "workingTree": "The listed baseline blobs are immutable Git-object content; unrelated pre-existing working-tree changes were left untouched."
+  },
+  "sourceEvidence": [
+    {
+      "id": "windows-main",
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "blobSha": "9ec148839200df8c8e853758d46329c691c75152",
+      "lines": "253-267",
+      "supports": "Windows host explicitly registers NativeShell UI, Crystal minimap, HUD, chat, notice, quest UI, and optional screenshot capture. It also provides the keyboard host, GameShop preview geometry, shell/gateway/gameplay inboxes, and BigMap state/queue."
+    },
+    {
+      "id": "native-shell-plugin",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "blobSha": "cf72b886feb6d6b49e9b708fef22c3307c5566e6",
+      "lines": "406-430",
+      "supports": "Native login/character-selection shell UI plugin and its keyboard/pointer/update systems."
+    },
+    {
+      "id": "hud-overlay-registration",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "blobSha": "2fe37a933b807d77fda78d3878107330115e9a5b",
+      "lines": "244-307",
+      "supports": "HUD plugin registers the overlay plugin, which owns inventory, character, skills, social, shop, mail, storage, ranking, guild, and companion panels."
+    },
+    {
+      "id": "chat-plugin",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "blobSha": "032bc81457a50bb148d572b82f80f20030fc6197",
+      "lines": "340-360",
+      "supports": "Crystal chat presentation and chat actions are registered by Windows."
+    },
+    {
+      "id": "minimap-plugin",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/minimap.rs",
+      "blobSha": "7bc4f8fd19921c4e97e341f9fbce34a17108f340",
+      "lines": "96-114",
+      "supports": "Crystal minimap plugin."
+    },
+    {
+      "id": "quest-plugin",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "blobSha": "77109f4c6affdfef9a7ad4de94e27465c28875f1",
+      "lines": "1583-1627",
+      "supports": "Quest/NPC/target/drop intent presentation and handling."
+    },
+    {
+      "id": "ui-actions",
+      "path": "mir2-web3/apps/game-client/ui-core/src/action.rs",
+      "blobSha": "346731a4d594b05f765d50824c36e958cb54d90b",
+      "lines": "6-249",
+      "supports": "Shared typed shell, HUD, options, inventory/storage, mail, quest, chat, combat/world and lifecycle actions."
+    },
+    {
+      "id": "control-registry",
+      "path": "mir2-web3/apps/game-client/ui-core/src/registry.rs",
+      "blobSha": "45381d44176eaf624a12f01076259a25bd2e7fe2",
+      "lines": "1-128, 662-888",
+      "supports": "Auditable source inventory of native visible controls, including screen/panel/action/condition/instance scope and intentional visual-only or no-op status."
+    },
+    {
+      "id": "overlay-intents-controls",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "blobSha": "37f340a576f31370d1ad9ecad374425cf5d2ec22",
+      "lines": "168-169, 526, 747-815, 2283-2480, 3360-3560, 3834-3885, 8415, 9078-9103, 9981-10068",
+      "supports": "Ranking/PlayerInspect module inclusion, native typed player UI intents, UI state, registry-backed control enums, plugin wiring and visible GameShop/skillbar/guild/rank dispatches."
+    },
+    {
+      "id": "native-protocol",
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_protocol.rs",
+      "blobSha": "5c55e2a5ea5d49f7697c19e65c655229178a0e19",
+      "lines": "34-545, 602-715",
+      "supports": "Complete NativeOutboundCommand enum and serialized command discriminants, covering auth/session, world/combat, quests/map, bag/equipment/storage/shop/mail, social/friends/ranking, guild, companion/hero, skills/modes and trade."
+    },
+    {
+      "id": "gameplay-bridge",
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "blobSha": "8a7fc1687243808da0ab13fed4267859db70345f",
+      "lines": "2241-2267, 2730-3240",
+      "supports": "Guild storage commands and conversion of Native UI intents to exact outbound command variants; ranking, friend, guild rank/notice/buff and trade mappings are explicit."
+    },
+    {
+      "id": "gateway-command-scope",
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "blobSha": "7cb66dbfbe481aea1dbd77f1f399da242f656d05",
+      "lines": "213-318",
+      "supports": "Separates local lifecycle from wire commands and classifies all Native wire actions as procedure/world/personal/leave scopes."
+    },
+    {
+      "id": "native-keyboard-input",
+      "path": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "blobSha": "a8c6b1c295c8ffaaa4729c26c05e8bf465c2975a",
+      "lines": "213-314, 1529-1568, 3479-3488, 3587-3605, 3739-3785, 3827-3845",
+      "supports": "Native movement and keyboard/pointer world input; death revive, spell cast, combat modes, pet mode, spell toggle and skill sends."
+    },
+    {
+      "id": "hero-wire",
+      "path": "mir2-web3/apps/game-client/platform-windows/src/hero_wire.rs",
+      "blobSha": "5c3fde8518ace4dca31607b1021c442a9eb58ddf",
+      "lines": "4-72",
+      "supports": "Hero switching/behaviour/autopot, hero inventory transfer, take-back, use, move, equip/remove and merge."
+    },
+    {
+      "id": "equipment-creature-wire",
+      "path": "mir2-web3/apps/game-client/platform-windows/src/equipment_creature_wire.rs",
+      "blobSha": "ea6fe4e57fc515872ded172baaa98ec1b27844f4",
+      "lines": "6-58",
+      "supports": "Equipment-slot changes, fishing cast/autocast and intelligent-creature pickup/update/control commands."
+    },
+    {
+      "id": "social-bond-wire",
+      "path": "mir2-web3/apps/game-client/platform-windows/src/social_bond_wire.rs",
+      "blobSha": "867b9519ed366376c020f065f7fd7f265a04ddb3",
+      "lines": "6-31, 32-116",
+      "supports": "Marriage/divorce/mentor mutations and replies, plus inbound bond request/update packets."
+    },
+    {
+      "id": "ranking-dialog",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/ranking_dialog.rs",
+      "blobSha": "9dd47580b6b7b0d45f97eb07c25da6029d1b1d01",
+      "lines": "1-150, 620-660",
+      "supports": "Native Ranking UI supports rank class, online-only filter, paging, refresh and ranking-row inspect; inspect sends an Inspect request with ranking=true and hero=false."
+    },
+    {
+      "id": "friend-dialog",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_dialog.rs",
+      "blobSha": "26b6abbde0a2eec1e9e70b06cd11e03bec272de0",
+      "lines": "60-95, 280-355",
+      "supports": "Friend refresh, remove by character index and memo update by character index."
+    },
+    {
+      "id": "group-controls",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/group_dialog.rs",
+      "blobSha": "a8dd4858e569544ac41466d8482919e7fae7d6fc",
+      "lines": "330-405, 480-550",
+      "supports": "Incoming group invitation accept/decline and group membership controls."
+    },
+    {
+      "id": "guild-controls",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "blobSha": "440c4e195c20f4871d57db49bd3a859481b7c0c4",
+      "lines": "800-930, 1000-1045",
+      "supports": "Guild invite, recruit, rank assignment/name/eight permission toggles, notice and guild-buff actions."
+    },
+    {
+      "id": "spellbar",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_bars.rs",
+      "blobSha": "7f10d15c91b685a54a5fad546341fc1a89f6e0ce",
+      "lines": "1-180",
+      "supports": "Native player and hero skill-bar presentation/action definitions; overlays and input map casts to Magic and key assignment to MagicKey."
+    }
+  ],
+  "nativeActionFamilies": [
+    {
+      "id": "shell-session",
+      "actions": "client version/capabilities/resume, login/register/change password, character create/delete/select/start, logout/disconnect",
+      "evidence": ["windows-main", "native-shell-plugin", "ui-actions", "native-protocol", "gateway-command-scope"]
+    },
+    {
+      "id": "world-and-combat",
+      "actions": "walk/run/turn, pointer path movement, target attack/directional attack/ranged attack/harvest, pickup object/tile, NPC interact, revive, chat, observe",
+      "evidence": ["native-protocol", "native-keyboard-input", "quest-plugin", "gateway-command-scope"]
+    },
+    {
+      "id": "hud-and-panels",
+      "actions": "character, bag, skills, quest, options, system menu, minimap, mail, big map, NPC shop, storage, group and guild panels",
+      "evidence": ["windows-main", "hud-overlay-registration", "ui-actions", "control-registry", "overlay-intents-controls"]
+    },
+    {
+      "id": "inventory-equipment-and-items",
+      "actions": "use/equip/remove/drop/delete/move/merge/split, item inspect, equipment-slot action, ordinary NPC buy/sell/repair/special repair",
+      "evidence": ["native-protocol", "control-registry", "overlay-intents-controls", "equipment-creature-wire"]
+    },
+    {
+      "id": "ordinary-storage-and-mail",
+      "actions": "storage deposit/withdraw, password unlock/set/remove, expand; mail list/read/lock/claim/delete, quote, compose/send with gold/items",
+      "evidence": ["ui-actions", "native-protocol", "control-registry", "overlay-intents-controls", "gameplay-bridge"]
+    },
+    {
+      "id": "cash-gameshop",
+      "actions": "server catalog presentation, selection/filter/quantity/payment/preview, confirmation, one pending purchase and receipt",
+      "evidence": ["control-registry", "overlay-intents-controls", "native-protocol", "gameplay-bridge"]
+    },
+    {
+      "id": "friends-ranking-inspect",
+      "actions": "friend refresh/add/block/remove/memo, observe, ranking class/filter/page/refresh, ranking-row player equipment inspect",
+      "evidence": ["friend-dialog", "ranking-dialog", "overlay-intents-controls", "native-protocol", "gameplay-bridge"]
+    },
+    {
+      "id": "guild-group-and-bonds",
+      "actions": "group invite/reply/member edits; guild invite/reply/recruit/kick/notice/rank assignment/rank name/eight rank permissions/storage/guild buffs; mentor/marriage/divorce requests and replies",
+      "evidence": ["group-controls", "guild-controls", "social-bond-wire", "control-registry", "native-protocol", "gameplay-bridge"]
+    },
+    {
+      "id": "hero-pet-mount-and-fishing",
+      "actions": "hero switch/behaviour/autopot/item custody; intelligent creature update/pickup; mount/ride and fishing UI/wire as present in the registered equipment/creature surface",
+      "evidence": ["hero-wire", "equipment-creature-wire", "control-registry", "native-protocol"]
+    },
+    {
+      "id": "skills-and-hotkeys",
+      "actions": "skill-bar activation/refresh, spell casts/toggles, player/hero MagicKey rebinding, attack/pet modes and keyboard movement",
+      "evidence": ["spellbar", "native-keyboard-input", "native-protocol", "overlay-intents-controls"]
+    },
+    {
+      "id": "chat-and-settings",
+      "actions": "chat focus/send/channel/history/resize/settings/transparency/channel filters; seven Crystal option switches, sound/music and observe permission request",
+      "evidence": ["chat-plugin", "ui-actions", "control-registry", "native-protocol", "gameplay-bridge"]
+    },
+    {
+      "id": "big-map-and-quest",
+      "actions": "quest accept/finish/abandon/reward, NPC service, map search/location/list/teleport-to-eligible-NPC",
+      "evidence": ["quest-plugin", "control-registry", "native-protocol", "gameplay-bridge"]
+    }
+  ],
+  "coverageFindings": {
+    "existing11Families": {
+      "status": "The goal's F01-F11 are usable as high-level domains, not a complete frozen action denominator.",
+      "confirmedRequiredSubfamilies": [
+        "F06: spellbar click/refresh, Magic/MagicKey/SpellToggle, keyboard attack/pet modes; registered Native behaviors.",
+        "F09: distinguish ordinary NPC buy/sell/repair from Cash GameShop catalog/purchase/receipt.",
+        "F11: include Friends memo/remove/refresh; Ranking refresh/class/onlineOnly/paging/row inspect; group and guild incoming replies; guild recruit/rank assignment/rank name/permission bits/buff; marriage/divorce/mentor incoming replies; trade item/gold/confirmation.",
+        "F02: include Big Map search/marker selection/eligible NPC teleport and ordinary world movement/combat/quest interactions."
+      ],
+      "not_new_top_level_families": "These are source-evidenced action groups within F01-F11, not a reason to fabricate a new family count."
+    },
+    "notRegisteredAtBaseline": [
+      {
+        "surface": "Auction or player market panel/actions",
+        "finding": "No auction/market UI control family or corresponding auction/market NativeOutboundCommand variant appears in the complete baseline UI registry and protocol enum inspected."
+      },
+      {
+        "surface": "Territory/castle-war player panel/actions",
+        "finding": "No territory/castle-war UI control family or corresponding NativeOutboundCommand variant appears in the inspected baseline registry and protocol enum."
+      }
+    ],
+    "boundedNativeInspect": "PlayerInspectUi is included in RankingDialogUi and the visible RankingAction::Inspect row path sends Inspect { ranking: true, hero: false }. This proves ranking-row inspection only. A separate ordinary world-object/hero inspect trigger was not established from the native control/action registry; keep that scope unknown.",
+    "commonOrServerUnknown": [
+      "UI registration and Native wire construction prove an attempted action, not successful server support, authoritative ACK, or end-to-end behavior.",
+      "Guild rank controls and EditGuildMember wire are Native-registered, but server-side rank assignment/create/permission semantics and ACK behavior require their own backend proof.",
+      "GameShop UI/wire includes receipt-related handling; this inventory does not prove production gateway ACK delivery or service success.",
+      "Market/auction/territory absence here is bounded to the fixed Native player's registered controls and the inspected Native command enum; it says nothing about unrelated server or admin-only capability."
+    ]
+  },
+  "denominatorRecommendation": {
+    "freezeNow": false,
+    "reason": "Freeze only after defining action-sized rows under each F01-F11 domain and marking registered UI control, action contract, authoritative response/ACK, and cross-platform comparison separately. The Native surface includes many sub-actions currently collapsed into broad domains; a source inventory does not define the complete Crystal player's behavior denominator.",
+    "candidateGranularity": "One row per player-visible action/result contract, with repeated controls grouped only when they share the same wire and authority semantics (for example, eight guild permission-bit toggles may be a parameterized action family).",
+    "keepUnknown": [
+      "PlayerInspect scope beyond ranking rows.",
+      "Production server support/ACK for each Native request, especially guild-rank maintenance and ordinary Gold purchase.",
+      "Whether any admin/service-only market or territory capability should be considered ordinary-player functionality."
+    ]
+  }
+}

@@ -189,14 +189,20 @@ fn mining_native_saturated_sender_never_retains_an_old_directional_attack() {
     use crate::gateway::CommandSource;
     let (mut app, _unbounded) = app_with_mining_gesture();
     let (sender, mut receiver) = crate::gateway::command_channel(8);
+    let stamp = sender.ownership_fence().unwrap().test_world_ready(1_000, 0);
     for _ in 0..8 {
         sender
-            .send(GatewayCommand::Player(PlayerIntent::Walk {
-                direction: "up".into(),
-            }))
+            .send_with_stamp(
+                GatewayCommand::Player(PlayerIntent::Walk {
+                    direction: "up".into(),
+                }),
+                Some(stamp),
+            )
             .unwrap();
     }
-    app.insert_resource(GatewayCommands::new(sender));
+    let commands = GatewayCommands::new(sender);
+    assert!(commands.activate_world_stamp(stamp));
+    app.insert_resource(commands);
     app.add_systems(
         bevy::prelude::Update,
         crate::gameplay_bridge::forward_quest_ui_intents,
@@ -205,9 +211,17 @@ fn mining_native_saturated_sender_never_retains_an_old_directional_attack() {
     assert_eq!(app.world().resource::<QuestUiIntentQueue>().retry_len(), 0);
     assert!(app.world().resource::<QuestUiIntentQueue>().is_empty());
     let sent: Vec<_> = std::iter::from_fn(|| receiver.try_command().ok()).collect();
+    assert_eq!(sent.len(), 8, "the actual bounded lane remained saturated");
+    assert!(sent
+        .iter()
+        .all(|command| matches!(command, GatewayCommand::Owned(_))));
     assert!(sent.iter().all(|command| !matches!(
-        command,
+        command.payload_for_test(),
         GatewayCommand::Wire(NativeOutboundCommand::AttackDirection { .. })
+    )));
+    assert!(sent.iter().all(|command| matches!(
+        command.payload_for_test(),
+        GatewayCommand::Player(PlayerIntent::Walk { direction }) if direction == "up"
     )));
     app.world_mut()
         .resource_mut::<WorldPointerMovementState>()

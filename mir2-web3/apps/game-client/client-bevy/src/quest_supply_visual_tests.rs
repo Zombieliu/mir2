@@ -291,10 +291,10 @@ fn spawn_cases(app: &mut App, camera: Entity, cases: &[Case; 3]) {
                     },
                     Some(&big_map),
                     case.class,
-                    &supplies
+                    Some(&supplies)
                 ));
             } else {
-                multi_guidance::render_supplies(parent, &state, Some(&big_map), &supplies);
+                multi_guidance::render_supplies(parent, &state, Some(&big_map), Some(&supplies));
             }
         });
         commands

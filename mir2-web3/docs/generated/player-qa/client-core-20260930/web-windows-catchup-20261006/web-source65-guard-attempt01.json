@@ -1,0 +1,22 @@
+{
+  "source": "Source65",
+  "task": "Gateway npc_purchase tests attempt01",
+  "owner": "Root",
+  "outer": {
+    "pid": 14560,
+    "exitCode": 90,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 72
+  },
+  "cargoForwarded": false,
+  "testsExecuted": false,
+  "reason": "Original Guard strict flat policy accepts string values only; pending metadata booleans caused refusal before Cargo. Root acceptance also separately required boolean fields; both control-data formats are corrected using successful Source62 schema.",
+  "originalCaller4569Unchanged": true,
+  "thresholdBytes": 53687091200,
+  "freshnessMs": 2000,
+  "probeTimeoutMs": 15000,
+  "postChildPolicy": "B",
+  "candidateAccepted": false,
+  "goalComplete": false
+}

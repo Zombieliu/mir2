@@ -145,7 +145,8 @@ fn render_fixture_tracker(parent: &mut ChildSpawnerCommands, quest: &Quest, clas
         },
         Some(&fixture_map()),
         class,
-        &supplies,
+        Some(&supplies),
+        QuestRenderText::default(),
     );
 }
 
@@ -495,7 +496,7 @@ fn nine_locale_selected_supply_vendors_have_no_missing_glyphs_offscreen() {
                         parent,
                         &state,
                         Some(&fixture_map()),
-                        &supplies,
+                        Some(&supplies),
                     );
                 },
             );
@@ -643,6 +644,7 @@ fn nine_locale_longest_quests_and_real_npc_menus_offscreen() {
                     &PendingOperations::default(),
                     false,
                     Some(assets),
+                    QuestRenderText::default(),
                 );
             },
         );
@@ -671,6 +673,7 @@ fn nine_locale_longest_quests_and_real_npc_menus_offscreen() {
                         &PendingOperations::default(),
                         false,
                         Some(assets),
+                        QuestRenderText::default(),
                     );
                 },
             );

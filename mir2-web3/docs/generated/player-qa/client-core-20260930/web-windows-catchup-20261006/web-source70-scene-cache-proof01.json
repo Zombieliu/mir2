@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source70 ordinary retained-browser-cache warehouse scene verification",
+  "normalReload": true,
+  "browserCacheCleared": false,
+  "ordinaryLoginAndStartGame": true,
+  "manifest": {
+    "status": 200,
+    "version": "897f1c8804b37877",
+    "cacheNamespace": "897f1c8804b37877-fa86f32321b4",
+    "fromDiskCache": false,
+    "fromServiceWorker": true
+  },
+  "warehouse": {
+    "path": "/api/scene/crystal",
+    "mapFileName": "0140.map",
+    "assetRelease": "897f1c8804b37877",
+    "versionMatchesManifest": true,
+    "status": 200,
+    "fromDiskCache": false,
+    "fromServiceWorker": true,
+    "cells": 340,
+    "sprites": 116,
+    "missingAssetsFieldPresent": false,
+    "missingAssetsCount": 0,
+    "visibleWarehouseFloorAndWalls": true,
+    "screenshot": "web-source70-warehouse-map01.png"
+  },
+  "retainedSource69WarehouseResponse": {
+    "mapFileName": "0140.map",
+    "sprites": 0,
+    "missingAssets": 116
+  },
+  "finiteImages": {
+    "referencedUniquePaths": 116,
+    "actualUniquePaths": 115,
+    "totalResponses": 120,
+    "allObservedStatus200": true,
+    "allReferencedPathsObserved": false,
+    "notObservedPaths": [
+      "/original-map/WemadeMir2/Objects2/4306.png"
+    ],
+    "captureElapsedMs": 7244,
+    "captureTruncated": false,
+    "all116PackagedHashesIndependentlyVerified": true
+  },
+  "secondaryUnversionedScene": {
+    "mapFileName": "0.map",
+    "warehouse": false,
+    "scope": "Separate background map0 response remains outside the active warehouse cache check"
+  },
+  "firstOrdinaryAccess": {
+    "beforeReactBagClick": true,
+    "visibleCompatibilityStorage": true,
+    "bagOwner": "react",
+    "questOwner": "react",
+    "storageOwnerDiagnostic": null,
+    "sharedStorageOwnerAccepted": false
+  },
+  "candidateAccepted": false,
+  "humanAccepted": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

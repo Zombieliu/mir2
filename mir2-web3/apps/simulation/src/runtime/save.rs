@@ -230,6 +230,10 @@ fn rebased_durable_cooldown_ticks(
 }
 
 pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterSaveRecord> {
+    snapshot_active_character_save_at(world, &super::refine_oven::capture_clock())
+}
+
+fn snapshot_active_character_save_at(world: &World, refine_clock: &super::refine_oven::RefineClockSample) -> Option<CharacterSaveRecord> {
     let resources = world.resource::<InventoryResource>();
     let hero_inventory = world.resource::<HeroInventoryResource>();
     let player_runtime = world.resource::<PlayerRuntimeResource>();
@@ -249,12 +253,13 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
     let vitals = entity_player_vitals(world, player)?;
 
     let mut saved_systems = stage5.stage5_systems.clone();
-    super::refine_oven::snapshot_timer(&mut saved_systems.refine, true);
+    super::refine_oven::snapshot_timer_at(&mut saved_systems.refine, true, refine_clock);
     Some(CharacterSaveRecord {
         saved_pets: super::shared_pet_progress::saved_snapshot(world).for_durable_storage(),
         player_kill_receipts: super::shared_player_kills::snapshot(world),
         default_npc_events: super::default_npc_events::capture(world),
         guild_experience_journal: super::shared_guild_experience::snapshot(world),
+        npc_purchase_journal: session.npc_purchase_journal.clone(),
         revision,
         character,
         map_file_name: map.current_map.file_name.clone(),
@@ -617,21 +622,29 @@ impl SimulationSession {
         &mut self,
         save: &CharacterSaveRecord,
     ) -> Result<(), String> {
-        let identity = self
-            .active_identity()
-            .ok_or_else(|| "active character checkpoint requires an active identity".to_string())?;
-        if identity.character_index != save.character.index
-            || identity.character_name != save.character.name
-        {
-            return Err(format!(
-                "active character checkpoint identity mismatch: runtime={}/{}, checkpoint={}/{}",
-                identity.character_index,
-                identity.character_name,
-                save.character.index,
-                save.character.name
-            ));
+        if let Some(identity) = self.active_identity() {
+            if identity.character_index != save.character.index
+                || identity.character_name != save.character.name
+            {
+                return Err(format!(
+                    "active character checkpoint identity mismatch: runtime={}/{}, checkpoint={}/{}",
+                    identity.character_index,
+                    identity.character_name,
+                    save.character.index,
+                    save.character.name
+                ));
+            }
+        } else {
+            // A base-snapshot standby reconstructs an existing admission. A
+            // normal StartGame would create a new Login hook and save revision
+            // before the source checkpoint can be installed.
+            validate_isolated_replica_character_bootstrap(self.app.world(), save)?;
         }
 
+        self.install_active_character_checkpoint(save)
+    }
+
+    fn install_active_character_checkpoint(&mut self, save: &CharacterSaveRecord) -> Result<(), String> {
         let replay_tick = runtime_tick(self.app.world());
         apply_character_save_with_timing(
             self.app.world_mut(),
@@ -654,6 +667,43 @@ impl SimulationSession {
         set_runtime_tick(self.app.world_mut(), replay_tick);
         Ok(())
     }
+}
+
+#[path = "character_handoff.rs"]
+mod character_handoff;
+
+fn validate_isolated_replica_character_bootstrap(
+    world: &World,
+    save: &CharacterSaveRecord,
+) -> Result<(), String> {
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    if !config.has_isolated_replica_bootstrap_authority() {
+        return Err("character checkpoint bootstrap requires its bound isolated replica authority".into());
+    }
+    let session = world.resource::<SessionResource>();
+    let CrystalCharacterSelectState::Authenticated { account_id } = crystal_character_select_state(session) else {
+        return Err("replica character bootstrap requires an authenticated character-select session".into());
+    };
+    config.ensure_account_store_writable()?;
+    validate_character_save_record(save)?;
+    if config.content_profile.as_ref().is_some_and(|profile|
+        !profile.class_is_allowed(save.character.class) || !profile.map_is_allowed(&save.map_file_name)) {
+        return Err("replica character checkpoint is outside the configured content profile".into());
+    }
+    if !session.characters.iter().any(|character| character == &save.character) {
+        return Err("replica character bootstrap does not match its authenticated roster".into());
+    }
+    let store = config.account_store.lock().map_err(|_| "replica bootstrap account image lock poisoned")?;
+    let account = store.accounts.get(&account_id).ok_or("replica bootstrap account is unavailable")?;
+    if !account.characters.iter().any(|character| character == &save.character) {
+        return Err("replica character bootstrap does not match its account roster".into());
+    }
+    let baseline = account.saves.get(&save.character.index).ok_or("replica bootstrap checkpoint is unavailable")?;
+    if serde_json::to_value(baseline).map_err(|error| error.to_string())?
+        != serde_json::to_value(save).map_err(|error| error.to_string())? {
+        return Err("replica bootstrap requires the complete checkpoint already bound to its isolated image".into());
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -1029,9 +1079,20 @@ pub(super) fn persist_character_save(
 fn persist_character_save_inner(
     world: &World,
     account_id: &str,
-    mut save: CharacterSaveRecord,
+    save: CharacterSaveRecord,
     last_access_binary_datetime: Option<i64>,
 ) -> Result<PersistCharacterSaveResult, String> {
+    persist_character_save_inner_with(world, account_id, save, last_access_binary_datetime, |_, result| Ok(result))
+}
+
+fn persist_character_save_inner_with<T, F>(
+    world: &World,
+    account_id: &str,
+    mut save: CharacterSaveRecord,
+    last_access_binary_datetime: Option<i64>,
+    capture: F,
+) -> Result<T, String>
+where F: FnOnce(&crate::config::AccountStore, PersistCharacterSaveResult) -> Result<T, String> {
     let config = world.resource::<RuntimeConfigResource>().config.clone();
     let active_character = {
         let session = world.resource::<SessionResource>();
@@ -1061,7 +1122,8 @@ fn persist_character_save_inner(
     let touched_accounts = vec![account_id.clone()];
 
     super::shared_guild_experience::commit_source(world, &config, &touched_accounts, move |store| {
-        apply_full_character_save_mutation(store, &account_id, &active_character, save, last_access_binary_datetime)
+        let result = apply_full_character_save_mutation(store, &account_id, &active_character, save, last_access_binary_datetime)?;
+        capture(store, result)
     })
 }
 
@@ -1175,8 +1237,9 @@ pub(super) fn merge_persisted_mail_into_character_save(
     save: &mut CharacterSaveRecord,
     persisted_save: &CharacterSaveRecord,
 ) -> Result<bool, String> {
+    let journal_changed = super::npc_purchase_transaction::protect_npc_purchase_journal(save, persisted_save)?;
     let Some(persisted_state) = persisted_save.stage5_systems_json.as_deref() else {
-        return Ok(false);
+        return Ok(journal_changed);
     };
     let persisted_systems = serde_json::from_str::<Stage5SystemsState>(persisted_state)
         .map_err(|error| format!("failed to decode persisted stage5 mail: {error}"))?;
@@ -1208,7 +1271,7 @@ pub(super) fn merge_persisted_mail_into_character_save(
         .extend(persisted_systems.economy_projection_event_ids);
     let markers_changed = systems.economy_projection_event_ids.len() != marker_count;
     let mail_changed = merge_external_stage5_mail(&mut systems.mail, persisted_systems.mail)?;
-    if !markers_changed && !mail_changed && !mentor_changed && !marriage_changed {
+    if !journal_changed && !markers_changed && !mail_changed && !mentor_changed && !marriage_changed {
         return Ok(false);
     }
     save.stage5_systems_json = Some(
@@ -1982,6 +2045,11 @@ pub(super) fn normalize_legacy_default_vitals(save: &mut CharacterSaveRecord) ->
 pub(super) fn normalize_legacy_default_account_demo_seed_state(
     save: &mut CharacterSaveRecord,
 ) -> bool {
+    // A committed complete checkpoint owns its empty containers and zero wallet.
+    // Only the uncommitted legacy demo record can require starter seeding.
+    if save.revision != 0 || save.npc_purchase_journal.is_some() {
+        return false;
+    }
     if save.character.index != 0 || save.character.level != 7 {
         return false;
     }
@@ -2595,6 +2663,10 @@ fn decode_and_validate_character_save(
 ) -> Result<DecodedCharacterSavePreflight, String> {
     save.saved_pets.validate_canonical()?;
     save.default_npc_events.validate()?;
+    if let Some(journal) = &save.npc_purchase_journal {
+        journal.validate_for(&journal.account_id, save.character.index, &save.character.name, save.revision)
+            .map_err(|error| error.to_string())?;
+    }
     let (mut inventory_items, belt_items, storage_items, equipment_items, hero_inventory_items) =
         decode_and_validate_character_items(save)?;
     let mut hero_equipment = decode_saved_item_states("hero equipment", &save.hero_equipment_items_json)?;
@@ -2673,6 +2745,22 @@ fn apply_character_save_with_timing(
         npc_buy_back_items,
         npc_used_goods_items,
     } = decode_and_validate_character_save(save)?;
+    if let Some(journal) = &save.npc_purchase_journal {
+        let session = world.resource::<SessionResource>();
+        let account = active_session_mutating_account_id(session)
+            .ok_or("NPC purchase journal restore requires an authenticated account")?;
+        journal.validate_for(&account, save.character.index, &save.character.name, save.revision)
+            .map_err(|error| error.to_string())?;
+    }
+    if let Some(current) = world.resource::<SessionResource>().npc_purchase_journal.as_ref()
+        .filter(|_| matches!(skill_timing_restore, SkillTimingRestore::PreserveSameSession)) {
+        let session = world.resource::<SessionResource>();
+        if session.active_save_revision().is_some_and(|revision| save.revision < revision)
+            || !save.npc_purchase_journal.as_ref().is_some_and(|restored|
+                current.actor == restored.actor && restored.entries.starts_with(&current.entries)) {
+            return Err("NPC purchase checkpoint cannot retire an actor or erase a committed result".into());
+        }
+    }
     let now_ms = unix_now_ms();
     let skill_states = skill_states
         .into_iter()
@@ -2692,7 +2780,8 @@ fn apply_character_save_with_timing(
             skill
         })
         .collect();
-    super::refine_oven::restore_timer(&mut stage5_systems.refine)?;
+    let refine_clock = super::refine_oven::capture_clock();
+    super::refine_oven::restore_timer_at(&mut stage5_systems.refine, &refine_clock)?;
     let mut custody_ids = super::item_custody::reserved_ids(&stage5_systems)?;
     for id in super::hero_inventory::validate_hero_custody(&hero_inventory)? {
         if !custody_ids.insert(id) {return Err("saved Hero UID collides with market/refine custody".into());}
@@ -2717,7 +2806,12 @@ fn apply_character_save_with_timing(
         let mut session = world.resource_mut::<SessionResource>();
         session.selected_character = Some(save.character.clone());
         session.bind_active_save_revision(save.revision);
+        session.npc_purchase_journal = save.npc_purchase_journal.clone();
+        session.npc_purchase_producer = None;
+        session.npc_purchase_owner_epoch = None;
+        session.activate_ranking_inspect();
     }
+    world.insert_resource(character_handoff::LastRestoreClock(refine_clock));
     world
         .resource_mut::<PlayerPermissionResource>()
         .unlock_curse = false;

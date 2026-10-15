@@ -36,11 +36,17 @@ pub(super) fn scroll_tracker(
             bevy::input::mouse::MouseScrollUnit::Pixel => event.y,
         })
         .sum();
-    if delta == 0.0
-        || shell.is_none_or(|shell| shell.screen != NativeShellScreen::InGame)
-        || ui.menu_pointer_consumed
-        || ui.amount_modal_open()
-    {
+    if delta == 0.0 || shell.is_none_or(|shell| shell.screen != NativeShellScreen::InGame) {
+        return;
+    }
+    #[cfg(feature = "native-ui")]
+    if ui.menu_pointer_consumed || ui.amount_modal_open() {
+        return;
+    }
+    // Portable overlays receive the browser host's current input ownership;
+    // native menu/modal structs are deliberately absent from that host state.
+    #[cfg(not(feature = "native-ui"))]
+    if ui.blocks_gameplay || ui.blocks_world {
         return;
     }
     for (cursor, computed, mut position) in &mut viewports {
@@ -463,7 +469,7 @@ pub(super) fn render(
     map: &MapModel,
     big_map: Option<&BigMapModel>,
     class_name: &str,
-    supplies: &crate::quest_supplies::SupplyPlan,
+    supplies: Option<&crate::quest_supplies::SupplyPlan>,
 ) -> bool {
     let Some(primary) = primary_quest_index(tracker, state, journey) else {
         return false;
@@ -676,8 +682,21 @@ pub(super) fn render(
                     quest_index: primary,
                 },
             );
+            if quest.status == QuestStatus::ReadyToTurnIn {
+                button(
+                    card,
+                    "返回交付",
+                    QuestUiButton::PrepareQuestFinish {
+                        quest_index: primary,
+                    },
+                );
+            }
             button(card, "打开大地图", QuestUiButton::OpenDestinationMap);
-            button(card, &supplies.summary(), QuestUiButton::ToggleSupplies);
+            if let Some(supplies) = supplies {
+                button(card, &supplies.summary(), QuestUiButton::ToggleSupplies);
+            } else {
+                line(card, "补给未就绪 · 等待当前角色库存", PANEL_TEXT);
+            }
             if !nearby.is_empty() {
                 line(card, "附近可顺便完成", PANEL_HIGHLIGHT);
             }
@@ -741,8 +760,22 @@ pub(super) fn render_supplies(
     parent: &mut ChildSpawnerCommands,
     state: &QuestUiState,
     big_map: Option<&BigMapModel>,
-    supplies: &crate::quest_supplies::SupplyPlan,
+    supplies: Option<&crate::quest_supplies::SupplyPlan>,
 ) {
+    let Some(supplies) = supplies else {
+        parent
+            .spawn((Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(8.0),
+                top: Val::Px(16.0),
+                ..default()
+            },))
+            .with_children(|card| {
+                line(card, "补给未就绪 · 等待当前角色库存", PANEL_TEXT);
+                button(card, "返回任务引导", QuestUiButton::ToggleSupplies);
+            });
+        return;
+    };
     let displayed_cost = supplies
         .rows
         .iter()
@@ -989,7 +1022,7 @@ mod tests {
                                     ..default()
                                 },
                                 Some(&big_map),
-                                &test_supplies(),
+                                Some(&test_supplies()),
                             );
                         });
                     queue.apply(&mut world);
@@ -1055,7 +1088,7 @@ mod tests {
             Commands::new(&mut queue, &world)
                 .spawn_empty()
                 .with_children(|parent| {
-                    render_supplies(parent, &state, None, &test_supplies());
+                    render_supplies(parent, &state, None, Some(&test_supplies()));
                 });
             queue.apply(&mut world);
             let (node, scroll) = world
@@ -1118,6 +1151,55 @@ mod tests {
             .get_mut::<RelativeCursorPosition>(viewport)
             .unwrap()
             .cursor_over = true;
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            #[cfg(feature = "native-ui")]
+            {
+                ui.menu_pointer_consumed = true;
+            }
+            #[cfg(not(feature = "native-ui"))]
+            {
+                ui.blocks_gameplay = true;
+            }
+        }
+        app.world_mut().write_message(wheel.clone());
+        app.update();
+        assert_eq!(
+            app.world().resource::<QuestUiState>().guidance_scroll_y,
+            0.0,
+            "input already consumed by the host must not scroll the tracker"
+        );
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            #[cfg(feature = "native-ui")]
+            {
+                ui.menu_pointer_consumed = false;
+                ui.billing_open = true;
+            }
+            #[cfg(not(feature = "native-ui"))]
+            {
+                ui.blocks_gameplay = false;
+                ui.blocks_world = true;
+            }
+        }
+        app.world_mut().write_message(wheel.clone());
+        app.update();
+        assert_eq!(
+            app.world().resource::<QuestUiState>().guidance_scroll_y,
+            0.0,
+            "an active host modal must retain its wheel input"
+        );
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            #[cfg(feature = "native-ui")]
+            {
+                ui.billing_open = false;
+            }
+            #[cfg(not(feature = "native-ui"))]
+            {
+                ui.blocks_world = false;
+            }
+        }
         app.world_mut().write_message(wheel);
         app.update();
         assert_eq!(
@@ -1247,7 +1329,7 @@ mod tests {
                 &MapModel::default(),
                 None,
                 "Warrior",
-                &test_supplies()
+                Some(&test_supplies())
             ));
         });
         queue.apply(&mut world);
@@ -1485,7 +1567,7 @@ mod tests {
                 &map,
                 Some(&big_map),
                 "Warrior",
-                &test_supplies()
+                Some(&test_supplies())
             ));
         });
         queue.apply(&mut world);
@@ -1556,7 +1638,7 @@ mod tests {
                     &map,
                     Some(&big_map),
                     "Warrior",
-                    &test_supplies()
+                    Some(&test_supplies())
                 ));
             });
             queue.apply(&mut world);
@@ -1674,7 +1756,7 @@ mod tests {
                     &map,
                     Some(&big_map),
                     "Warrior",
-                    &test_supplies()
+                    Some(&test_supplies())
                 ));
             });
             queue.apply(&mut world);
@@ -1806,7 +1888,7 @@ mod tests {
                     &map,
                     Some(&big_map),
                     "Warrior",
-                    &test_supplies()
+                    Some(&test_supplies())
                 ));
             });
             queue.apply(&mut world);

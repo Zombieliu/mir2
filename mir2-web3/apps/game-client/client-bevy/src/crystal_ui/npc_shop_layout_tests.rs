@@ -33,6 +33,7 @@ pub(crate) fn install_fixture(app: &mut App) {
             process_overlay_keyboard,
             process_overlay_buttons,
             sync_npc_shop_inventory_location,
+            synchronize_fixture_npc_shop_source,
             render_overlays,
         )
             .chain(),
@@ -52,6 +53,45 @@ pub(crate) fn install_fixture(app: &mut App) {
         icon: template.image,
         ..default()
     });
+}
+
+// The renderer now consumes the same complete applied owner/source gate as
+// Native gameplay. This offline fixture publishes its actual unchanged models;
+// it never creates a transport ticket or bypasses the ordinary-Gold planner.
+fn synchronize_fixture_npc_shop_source(
+    mut state: ResMut<NativePlayerUiState>,
+    mut shop_ui: ResMut<ShopUiState>,
+    mut shop: ResMut<ShopModel>,
+    inventory: Res<InventoryModel>,
+    intents: Res<NativePlayerUiIntentQueue>,
+) {
+    let gate = intents.npc_gold_buy_gate();
+    if crate::npc_shop_ui::ordinary_gold_surface(&shop, true) {
+        if gate.connection_epoch().is_none() {
+            assert!(gate.observe_connection(
+                crate::npc_gold_buy_attempt::NpcGoldBuyConnectionEpoch {
+                    run: 1,
+                    connection: 1
+                }
+            ));
+        }
+        let model =
+            crate::npc_gold_buy_attempt::npc_gold_buy_model_authority(&shop, &inventory).unwrap();
+        assert!(gate.observe("npc-shop-layout-fixture", 1, &model, true));
+    }
+    state.bind_npc_gold_buy_gate(gate.clone());
+    reconcile_native_npc_shop_ui(&mut state, &mut shop_ui, &mut shop, &inventory, &gate);
+}
+
+fn bag_action(app: &App, slot: u32) -> OverlayButton {
+    let unique_id = app
+        .world()
+        .resource::<InventoryModel>()
+        .items
+        .iter()
+        .find(|item| item.container == 0 && item.slot == slot)
+        .and_then(|item| item.unique_id);
+    OverlayButton::InspectBagSnapshot { slot, unique_id }
 }
 
 pub(crate) fn request_medicine_shop(app: &mut App, sell_too: bool) {
@@ -105,12 +145,16 @@ fn move_bag(app: &mut App, position: Vec2) {
 }
 
 pub(crate) fn press_real_button(app: &mut App, action: OverlayButton) {
+    let action = match action {
+        OverlayButton::InspectBag(slot) => bag_action(app, slot),
+        action => action,
+    };
     let id = app
         .world_mut()
         .query::<(Entity, &OverlayButton)>()
         .iter(app.world())
         .find_map(|(id, button)| (*button == action).then_some(id))
-        .expect("production overlay button");
+        .unwrap_or_else(|| panic!("production overlay button {action:?}"));
     app.world_mut().entity_mut(id).insert(Interaction::Pressed);
     app.update();
 }
@@ -269,6 +313,8 @@ pub(crate) fn request_caster_shop(app: &mut App, case: CasterShopCase) {
                 unique_id: index as u64,
                 name: item.name,
                 price: source.info.price,
+                purchase_rate: Some(1.0),
+                requires_gold_buy_plan: true,
                 count: 1,
                 stock: -1,
                 icon: item.icon,
@@ -379,15 +425,42 @@ fn caster_medicine_and_material_services_keep_buy_sell_close_reopen_usable() {
         );
         press_real_button(&mut app, OverlayButton::ShopQuantityInc);
         press_real_button(&mut app, OverlayButton::ShopBuy);
+        let gate = app
+            .world()
+            .resource::<NativePlayerUiIntentQueue>()
+            .npc_gold_buy_gate();
+        let publications = app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_for_gateway_with_npc_gold_buy();
         assert_eq!(
-            app.world_mut()
-                .resource_mut::<NativePlayerUiIntentQueue>()
-                .drain_intents(),
-            vec![NativePlayerUiIntent::BuyItem {
+            publications.len(),
+            1,
+            "{} must publish one owner-qualified purchase",
+            case.slug
+        );
+        let (intent, quote_token, send_token, buy_token) = &publications[0];
+        assert!(quote_token.is_none() && send_token.is_none());
+        let token = buy_token.expect("ordinary Gold purchase carries the actual reserved token");
+        assert_eq!(
+            intent,
+            &NativePlayerUiIntent::NpcGoldBuy {
+                token,
                 item_index: case.selected as u64,
-                count: 2
-            }],
-            "{} must emit the selected canonical goods request",
+                count: 2,
+            },
+            "{} must retain the selected UserItem UID and exact count",
+            case.slug
+        );
+        assert_eq!(
+            gate.command(token),
+            Some(crate::npc_shop_buy::NpcGoldBuyCommand {
+                command_type: crate::npc_shop_buy::NpcGoldBuyCommandType::BuyItem,
+                item_index: case.selected as u64,
+                count: 2,
+                panel_type: 0,
+            }),
+            "{} must pass the unchanged production source/price/inventory planner",
             case.slug
         );
         // Sending a request must not optimistically grant stock or change gold.
@@ -403,11 +476,12 @@ fn caster_medicine_and_material_services_keep_buy_sell_close_reopen_usable() {
                 .npc_shop_buy_tab
         );
         assert_eq!(bag_position(&app), Vec2::new(445.0, 0.0));
+        let expected_bag_action = bag_action(&app, 0);
         assert!(
             app.world_mut()
                 .query::<&OverlayButton>()
                 .iter(app.world())
-                .any(|action| *action == OverlayButton::InspectBag(0)),
+                .any(|action| *action == expected_bag_action),
             "sell must retain bag item input"
         );
         press_real_button(&mut app, OverlayButton::ShopShowBuy);
@@ -487,11 +561,12 @@ fn direct_medicine_service_opens_separate_bag_and_usable_buy_controls_in_one_fra
     assert_eq!(shop.display, Display::Flex);
     assert_eq!((shop.left, shop.top), (Val::Px(0.0), Val::Px(224.0)));
     assert_eq!((shop.width, shop.height), (Val::Px(440.0), Val::Px(334.0)));
+    let expected_bag_action = bag_action(&app, 0);
     assert!(app
         .world_mut()
         .query::<&OverlayButton>()
         .iter(app.world())
-        .any(|button| *button == OverlayButton::InspectBag(0)));
+        .any(|button| *button == expected_bag_action));
     assert!(app
         .world_mut()
         .resource_mut::<NativePlayerUiIntentQueue>()

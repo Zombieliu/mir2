@@ -561,6 +561,7 @@ fn spawn_case(app: &mut App, case: &str) -> Entity {
                         &inventory,
                         &state,
                         &ui.player,
+                        crate::npc_gold_buy_attempt::NpcGoldBuyFeedback::default(),
                     )
                 });
             parent

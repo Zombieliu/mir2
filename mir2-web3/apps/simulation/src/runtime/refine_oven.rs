@@ -48,6 +48,23 @@ fn now_ms() -> u64 {
     clock().1.elapsed().as_millis().min(u128::from(u64::MAX)) as u64
 }
 
+/// One private monotonic observation, shared by restore and its commitment.
+/// It is a clock input, not authority to change a source checkpoint.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(super) struct RefineClockSample {
+    pub epoch: String,
+    pub now_ms: u64,
+}
+
+pub(super) fn capture_clock() -> RefineClockSample {
+    let (epoch, started) = clock();
+    RefineClockSample {
+        epoch: epoch.clone(),
+        now_ms: started.elapsed().as_millis().min(u128::from(u64::MAX)) as u64,
+    }
+}
+
 fn remaining_at(state: &Stage5RefineState, epoch: &str, now: u64) -> u64 {
     if state.clock_epoch.as_deref() == Some(epoch) {
         state
@@ -62,27 +79,46 @@ fn remaining_at(state: &Stage5RefineState, epoch: &str, now: u64) -> u64 {
 /// Same server: retain the monotonic deadline, including offline character time.
 /// New server: use the last saved remaining duration, excluding server downtime.
 pub(super) fn restore_timer(state: &mut Stage5RefineState) -> Result<(), String> {
+    restore_timer_at(state, &capture_clock())
+}
+
+/// Pure counterpart of the production restore. The caller binds the source
+/// checkpoint separately; an arbitrary sample is not a source/owner proof.
+pub(super) fn restore_timer_at(
+    state: &mut Stage5RefineState,
+    sample: &RefineClockSample,
+) -> Result<(), String> {
     validate(state)?;
     if state.oven_item_state_json.is_none() {
         return Ok(());
     }
-    let remaining = remaining_at(state, &clock().0, now_ms());
-    let deadline = now_ms()
+    let remaining = remaining_at(state, &sample.epoch, sample.now_ms);
+    let deadline = sample
+        .now_ms
         .checked_add(remaining)
         .ok_or("refine deadline overflow")?;
     state.remaining_ms = remaining;
     state.collect_deadline_ms = Some(deadline);
-    state.clock_epoch = Some(clock().0.clone());
+    state.clock_epoch = Some(sample.epoch.clone());
     state.refining = true;
     state.ready = remaining == 0;
     Ok(())
 }
 
 pub(super) fn snapshot_timer(state: &mut Stage5RefineState, for_save: bool) {
+    snapshot_timer_at(state, for_save, &capture_clock());
+}
+
+/// Snapshot using the same observation recorded in a trusted readback witness.
+pub(super) fn snapshot_timer_at(
+    state: &mut Stage5RefineState,
+    for_save: bool,
+    sample: &RefineClockSample,
+) {
     if state.oven_item_state_json.is_none() {
         return;
     }
-    state.remaining_ms = remaining_at(state, &clock().0, now_ms());
+    state.remaining_ms = remaining_at(state, &sample.epoch, sample.now_ms);
     state.ready = state.remaining_ms == 0;
     state.refining = true;
     if !for_save {
@@ -594,6 +630,10 @@ fn apply_check_outcome(
         }
     }
 }
+
+#[cfg(test)]
+#[path = "refine_clock_tests.rs"]
+mod clock_tests;
 
 #[cfg(test)]
 mod tests {

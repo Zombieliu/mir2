@@ -1,0 +1,597 @@
+{
+  "owner": "Root",
+  "kind": "Source31 actual Web07 selected finite NPC and adjacent Storage tests",
+  "generatedAtUtc": "2026-10-07T18:30:07.038Z",
+  "parentCommit": "cb30715f53322f31304ed5c449b0347bdcfd95dd",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "actualSelectedPassingExecutions": 201,
+  "uniquePassingNames": 198,
+  "passingNames": [
+    "Source30 durable receiver and retained facade pass strict no-emit type checking",
+    "quote calls the actual runtime hook with exact full request and preserves Rust values",
+    "blocked Rust quotes retain computed amounts and never create a sending proof",
+    "response and wire shapes fail closed without rounding or transport extension",
+    "caller capture must match the live snapshot before the first Rust call",
+    "returned DTO and opaque token reject mutation, forgery and a foreign dispatcher",
+    "final listener changes to every bound owner, model, raw item, wallet or layout reject the send",
+    "altered or extended mutable wire is rejected and consumes its token",
+    "runtime refusal, throw, replacement and unavailable source fail at the final claim",
+    "runtime mutation during preparation or final revalidation cannot authorize a stale command",
+    "read and Rust synchronous reentry cannot claim or prepare a second command",
+    "a recursive final listener cannot reserve a second proof before the first Core flight enters",
+    "spent unchanged authority stays disabled across selection, quantity, layout and source withdrawal",
+    "same OPEN connection keeps entered flushed and unknown blocked through every authority change and ABA",
+    "an unclaimed old proof cannot revive after an observed model ABA",
+    "socket throw after claim retains the Core pending barrier without replaying a command",
+    "non-JSON transport values are refused rather than silently coerced or invoking user callbacks",
+    "missing raw purchase rate stays null and delegates invalidRate to Rust",
+    "actual Page quote delegates raw catalogue UID price rate and whole inventory to Rust",
+    "actual Page Buy callback uses one opaque proof and sendRaw claims only after the action listener",
+    "actual Page final listener catalogue replacement rejects even a same-template selected UID",
+    "actual Page NPC service retirement during action withdraws current source before final claim",
+    "actual Page synchronous action reentry is refused by the existing reserved Core flight",
+    "actual Page marker with missing raw source or rate delegates refusal without a legacy downgrade",
+    "actual Page unmarked legacy catalogue keeps its exact service proof and earlier quantity bound",
+    "actual Page unmarked legacy final listener cannot send through changed catalogue service or owner",
+    "actual Page send and sendRaw deny naked and forged buyItem commands before any event or socket",
+    "actual Page final listener rejects wallet owner socket and runtime changes and retains an unknown-send fence",
+    "actual Core facade forwards all nine exact operations and retains u64 decimal precision",
+    "actual Core request validators refuse getters extra fields malformed u64 and UTF8 before bridge entry",
+    "actual Core result validator rejects noncanonical malformed contradictory or imprecise responses",
+    "persistent document version facade survives module reevaluation without a second Core bridge",
+    "missing incompatible or throwing Core capability closes ordinary Buy while legacy Page remains usable",
+    "producer handoff prevents stale cleanup commands while forwarding only exact old receipts",
+    "actual facade transport identities bind current open object and retain decimal socket tickets",
+    "dispatcher requires exact body and exact socket at entry and never exposes a token on the wire",
+    "failed bind retires only the exact unpublished token and a later manual attempt gets a new token",
+    "ownerRevision invalidates a gesture proof but cannot change the entered Core authority",
+    "player object identity is required and authority changes bind the actual selected player",
+    "two dispatchers share one document bridge and stale dispose cannot withdraw the newer producer",
+    "actual Page rejected preentry listener finally submits exact Unsent and permits only a fresh manual token",
+    "actual Page Core enter refusal or throw produces zero socket calls and exact final cleanup",
+    "actual Page enter is directly before socket send and all terminal receipts keep exact token ticket",
+    "actual Page malformed receipt result poisons the slot without replaying an already sent purchase",
+    "actual NPCResponse clause synchronously retires old preentry proof before any later rendered service",
+    "actual Page player IDs reject noncanonical zero missing fractional and unsafe raw strings",
+    "temporary missing Core slot recovers with a fresh producer but cannot resurrect an old proof",
+    "shared UI status reads only an already attached producer and cannot discover or observe a Core",
+    "shared UI status preserves canonical full-u64 data and does not manufacture receipt history",
+    "shared UI exact revision withdrawal rejects malformed and stale strings before availability",
+    "shared UI withdrawal preserves Entered Flushed and Unknown rather than asserting a Buy ACK",
+    "shared UI status and withdrawal fail closed on synchronous producer reentry without cleaning the new lease",
+    "shared UI availability refusal throw and mismatched post-status cannot certify withdrawal",
+    "final shared UI beforeEntry veto or throw consumes only the unentered proof and never calls Core enter",
+    "last shared UI checkpoint follows all callbacks and cannot reenter or revive a consumed proof",
+    "capacity evidence remains in the Rust request and live proof but leaves persistent authority unchanged",
+    "evidence-only availability recovery presents the same authority to a held Entered or Unknown Core response",
+    "inventory readiness retires stale projection stages and owner replacements synchronously",
+    "canonical expiry strings survive actual WorldSnapshot Bag projection and NPC full request authority",
+    "old unsafe expiry uses actual source while no-source null is retained through the NPC transport",
+    "expiry transport never rescues adjacent unsafe UID count or dura or grants their item authority",
+    "trusted socket connection is observed before complete authority availability and reserve",
+    "public connection forgery and malformed trusted epoch fields never reach the Core bridge",
+    "only entered flushed and unknown results may retain a canonical old authority revision",
+    "connection refusal and unavailable old ABI1 operation cannot fall through to authority or reserve",
+    "preparation read and planner socket changes cannot publish a stale or replacement-socket proof",
+    "postproof planner Core allows and final callback socket changes produce zero entry",
+    "same socket close reopen HMR and dual producers retain every unresolved phase",
+    "new actual socket requires fresh complete observation and a new explicit manual token",
+    "returning to a known older socket refuses without any Core operation on the new flight",
+    "connection and Core model callbacks cannot admit an old full model on the current socket",
+    "final beforeEntry sees same-socket last-read source changes before any Core entry",
+    "same-content old72 holder is poisoned and rejected without returning its pre-connection facade",
+    "matching connection facade contract reuses the immutable holder and socket epoch across HMR",
+    "Pearl actual Page quote uses UID0 and Core scalar custody with zero Gold and no JS price",
+    "Pearl actual Page final claim enters the existing Core immediately before exact four-key send",
+    "Pearl opaque proof brands reject Gold and legacy routes and cross-currency prepare methods",
+    "Pearl actual Page quantity delegates 99 100 and u16 maximum and rejects absent or aliased UID",
+    "Pearl actual Page missing or invalid wallet never admits a free host quote",
+    "Pearl actual Page wallet catalog and service ABA invalidate exact captured source",
+    "Pearl actual Page socket session and scene changes burn proof and cannot revive on restoration",
+    "Pearl actual Page fresh quote and getter replacement reject after action without legacy downgrade",
+    "Pearl actual Page action and final Core entry reentrancy cannot publish a second flight",
+    "Pearl entered unknown and flushed Core holds survive ordinary snapshots observe and producer replacement",
+    "Pearl actual Page own parcel hero and storage reservations reject before Core entry",
+    "Pearl actual Page retires catalog while retaining personal wallet on service close",
+    "Pearl actual packet wallet fence ignores old socket generation and NewCreature without amount",
+    "Pearl full snapshot wallet observation remains inside completed owner inventory projection",
+    "Pearl actual Page foreign proof options and nested send attempts retire the outer Pearl entry",
+    "Pearl actual typed Goods case obtains a Core denial quote for every complete raw row before exposing UID0",
+    "Pearl actual Goods price Oracle missing malformed mismatch and getter custody failures retire all rows",
+    "Pearl actual Goods case preserves a whole unfiltered catalog and refuses a bad second raw row",
+    "Pearl actual final checkpoint rejects facts changed by the last ledger callback after the complete read",
+    "Pearl reentrant rejected other command still spends send epoch and cannot revive the older proof",
+    "Pearl actual Page quote and exact send retain an above16KiB complete structured catalog through original payload mutation",
+    "receipt_facade_document_remount_retains_one_host_and_original_operation",
+    "receipt_facade_version_mismatch_withdraws_but_never_recreates_retained_host",
+    "receipt_facade_old_cleanup_cannot_withdraw_successor_or_borrow_its_socket",
+    "receipt_facade_reconnect_tokens_remain_bound_to_original_physical_socket",
+    "receipt_facade_operation_accessor_is_rejected_without_invocation",
+    "receipt_facade_nested_nondata_and_lossy_values_never_enter_abi",
+    "receipt_facade_nested_proxy_reentry_cannot_enter_after_producer_transition",
+    "receipt_facade_caller_cannot_supply_core_token_or_open_its_own_connection",
+    "receipt_facade_bound_bridge_method_survives_old_instance_method_replacement",
+    "receipt_facade_invalid_output_poison_keeps_original_host_unavailable",
+    "receipt_facade_unavailable_abi_is_persistent_and_does_not_admit_producer",
+    "receipt_facade_valid_wire_operation_retains_canonical_u64_strings_and_zero_selector",
+    "Source30 raw parser rejects duplicate escaped duplicate unsafe integer and preserves canonical u64 strings",
+    "Source30 numeric token boundaries reject fractional identity rounding and bounded exponent underflow",
+    "Source30 public complete economy rejects omitted partial wallets stage5 hero or actor fields",
+    "Source30 actual WorldItem hero equipment and nullable u32 player weights match simulation client view",
+    "Source30 paired Begin applies frozen full source before exact complete witness",
+    "Source30 partial application unsafe original integer and omitted bundle never issue complete witness",
+    "Source30 actual gold trade explicit gesture Quote Reserve Enter sends once",
+    "Source30 actual gold buyBack explicit gesture Quote Reserve Enter sends once",
+    "Source30 actual gold used explicit gesture Quote Reserve Enter sends once",
+    "Source30 actual pearls trade explicit gesture Quote Reserve Enter sends once",
+    "Source30 quote rejects changed source currency request and stale physical owner before reserve",
+    "Source30 Enter send exception marks original Unknown and fresh Begin queries original operation only",
+    "Source30 post Enter callbacks and malformed decisions retain Unknown original without Purchase or retry",
+    "Source30 malformed Reserve and refused Enter cancel only exact queued definitely unsent custody",
+    "Source30 old Gold barrier refuses quote without withdrawing or resetting legacy custody",
+    "Source30 dispatcher malformed extra fields or accessor decisions cannot send",
+    "Source30 actual Page branches raw owner before generic decoder and complete application bypasses movement overlays",
+    "Source30 actual Pearl catalogue accepts and preserves only canonical purchase selectors",
+    "Source30 terminal frame applies its entire same revision economic source before complete witness",
+    "Source30 terminal receipt with partial snapshot preserves owner observation without complete or repeat purchase",
+    "Source30 actual owner Pearl projection preserves equal wallet custody and carries canonical selectors on changed balance",
+    "Source31 original owner numeric UID MAX and signed i64 dates project only exact declared snapshot leaves",
+    "Source31 exact owner integer projection rejects wrong paths duplicate fields fractions and integer range escapes",
+    "Source31 actual textual receipt facade preserves raw ABI snapshot and keeps control integers strict",
+    "Source31 raw full owner agrees with new ABI and quarantined old host before one complete witness",
+    "Source31 old host quarantine rejects changed receipt identity shape accessor and reflection reentry",
+    "Source31 exact bag identities and capacity roster compare canonically without numeric mutation authority",
+    "Source31 saved mail item JSON and signed dates remain exact and reject duplicate or rounded attachments",
+    "Source31 Hero reads same snapshot experience and actual max pair instead of cached packet values",
+    "Source31 Hero canonical full UID roster remains exact and cross-grid duplicates deny the model",
+    "Source31 complete Hero owner requires actual max pair and validates exact new shop integer leaves",
+    "Source31 actual Page durable full UID baseline preserves native shop with null main dialog across reads",
+    "Source31 ordinary declared storage dates reuse exact signed codec and unsupported numeric source is unavailable",
+    "Source31 actual Page owner apply refreshes Gold Pearl BuyBack Used catalog before first and second purchase",
+    "Source31 actual Page catalog switches NPC and withdraws missing unknown or unsupported full source",
+    "Source31 native display qualification rejects mismatched raw item selector profile duplicate and getter",
+    "Source31 real packet refresh Begin preserves entered operation and repeated owner display never loops",
+    "Source31 late catalog change after Quote or Enter cannot send a stale gesture and retains original Unknown",
+    "Source31 packet refresh final fences reject reentrant connection change or service withdrawal",
+    "Source31 ordinary raw world preserves full UID signed dates equipment mail and native catalog before application",
+    "Source31 actual Page equal periodic source and HP XP full fallback preserve first and second buy custody",
+    "Source31 actual Page catalog-only periodic changes switch parent and retire gestures before or after Quote Enter",
+    "Source31 ordinary complete changes never settle retained operation or create Begin Query and missing catalog withdraws",
+    "Source31 raw marker scans every escaped duplicate top-level type and strict owner never reaches ordinary decoder",
+    "Source31 ordinary unsafe or duplicate world fails closed without rounded fallback or paired source replacement",
+    "Source31 exact integer consumers pass bounded strict no-emit type checking",
+    "Source31 storage DOM decodes canonical wide i64 kind and exact epoch ticks without rounding",
+    "Source31 numeric storage ABI projects safe expiry and refuses wide exact strings or unsafe numeric dates",
+    "storage source projection preserves Bag2 physical slots, UID0 and binary expiry without deriving identity",
+    "Source31 storage controller safe expiry preserves custody and wide or unsafe date carriers fail closed",
+    "storage source projection rejects duplicate cells/UIDs, cross-pane UID collisions and invalid accessible inputs",
+    "independent ABI1 requires compiled/startup and every storage function; missing capability keeps fallback",
+    "prepare then arming never accepts input; exact enabled echo establishes one owner revision",
+    "every applied revision and identity must match before an intent can reach Page",
+    "unapplied arming timeout releases transition despite advancing renderer frames",
+    "false or throwing Page sink retains the admitted proof but never replays its sequence",
+    "successful dispatch claims exactly once and replacement intent cannot authorize an older DTO",
+    "live model, service, session, owner and layout changes invalidate admitted proof before polling",
+    "own transport reservations do not pretend to replace the model; handoff preserves pending data",
+    "stopped renderer frame expires synchronously at final allows/claim",
+    "invalid layout/model and rejected snapshot setters keep React rather than exposing an input owner",
+    "storage pointer origin stays fixed across both panes and world crossings",
+    "quarantined old terminal retains its identity and cannot clear a distinct new pointer lease",
+    "stale cancel/blur clean only the old renderer epoch and preserve a newly admitted proof",
+    "same-runtime HMR replacement owns sink and snapshot; old stop/withdraw cannot retire it",
+    "intent parser preserves physical UID0 while rejecting malformed identities and grid directions",
+    "late startup attaches the independent sink and capability withdrawal retires the accepted surface",
+    "admitted renderer tuple is frozen before callback and cannot be rewritten for a final claim",
+    "the common bag pane and storage pane both accept same-container moves with exact source identities",
+    "desktop and touch admission use their declared geometry thresholds without claiming actual device layout",
+    "actual Shell storage routing holds combat only for UI origin and preserves a crossing world gesture",
+    "actual Shell old cancellation cannot release a synchronously established replacement UI lease/token",
+    "actual Shell old cancel or up cannot clear a synchronously established replacement world hold",
+    "actual Page close returns ownership to normal Bag without closing the bag or sending a command",
+    "actual Page password handoff invokes the existing set/change/unlock panel once per service",
+    "actual Page rent confirms exactly one existing command after handoff; retired owner sends none",
+    "actual Page source Bag2 mapping and its own reserved empty target pass the final fence once",
+    "actual Page final listener owner retirement burns the unsent request ID and clears only its reservation",
+    "actual Page replacement source/target or edited DTO after mir2:action cannot enter socket",
+    "actual Page socket throw after irreversible claim retains outcome-unknown reservation",
+    "actual Storage RPC captured same-clock/same-pointer terminals cannot revoke a newer gesture proof",
+    "actual Storage new Down during final listener revokes the old intent before socket entry",
+    "actual Page service lifecycle requests only Storage until close then requests the normal Bag host",
+    "actual Shell storage routing holds combat only for UI origin and preserves a crossing world gesture",
+    "actual Shell old cancellation cannot release a synchronously established replacement UI lease/token",
+    "actual Shell old cancel or up cannot clear a synchronously established replacement world hold",
+    "actual Shell active or arming storage stops held keyboard movement even without a ready pointer context",
+    "actual Shell keyboard effects include storage transitions in their dependency roster",
+    "actual Shell window blur/resize/unmount withdraw Storage and remove its own terminal listeners",
+    "actual Shell layout owner/geometry replacement cancels Storage before clearing world holds",
+    "actual Bag hook first construction publishes its initial owner without a TDZ and retired cleanup cannot rewrite replacement",
+    "actual Storage hook obsolete cleanup leaves the replacement sink/host/owner intact",
+    "Source31 storage integration safe expiry preserves custody and wide or unsafe date carriers fail closed",
+    "actual Shell arming shortcut listener swallows combat/item keys before their callbacks"
+  ],
+  "byScript": [
+    {
+      "script": "test-bevy-npc-shop-buy.mjs",
+      "passes": 155
+    },
+    {
+      "script": "test-bevy-storage-ui.mjs",
+      "passes": 25
+    },
+    {
+      "script": "test-storage-surface-integration.mjs",
+      "passes": 21
+    }
+  ],
+  "duplicateNameExecutions": 3,
+  "newDistinctNpcComparedSource30": 27,
+  "newDistinctNpcNames": [
+    "Source31 original owner numeric UID MAX and signed i64 dates project only exact declared snapshot leaves",
+    "Source31 exact owner integer projection rejects wrong paths duplicate fields fractions and integer range escapes",
+    "Source31 actual textual receipt facade preserves raw ABI snapshot and keeps control integers strict",
+    "Source31 raw full owner agrees with new ABI and quarantined old host before one complete witness",
+    "Source31 old host quarantine rejects changed receipt identity shape accessor and reflection reentry",
+    "Source31 exact bag identities and capacity roster compare canonically without numeric mutation authority",
+    "Source31 saved mail item JSON and signed dates remain exact and reject duplicate or rounded attachments",
+    "Source31 Hero reads same snapshot experience and actual max pair instead of cached packet values",
+    "Source31 Hero canonical full UID roster remains exact and cross-grid duplicates deny the model",
+    "Source31 complete Hero owner requires actual max pair and validates exact new shop integer leaves",
+    "Source31 actual Page durable full UID baseline preserves native shop with null main dialog across reads",
+    "Source31 ordinary declared storage dates reuse exact signed codec and unsupported numeric source is unavailable",
+    "Source31 actual Page owner apply refreshes Gold Pearl BuyBack Used catalog before first and second purchase",
+    "Source31 actual Page catalog switches NPC and withdraws missing unknown or unsupported full source",
+    "Source31 native display qualification rejects mismatched raw item selector profile duplicate and getter",
+    "Source31 real packet refresh Begin preserves entered operation and repeated owner display never loops",
+    "Source31 late catalog change after Quote or Enter cannot send a stale gesture and retains original Unknown",
+    "Source31 packet refresh final fences reject reentrant connection change or service withdrawal",
+    "Source31 ordinary raw world preserves full UID signed dates equipment mail and native catalog before application",
+    "Source31 actual Page equal periodic source and HP XP full fallback preserve first and second buy custody",
+    "Source31 actual Page catalog-only periodic changes switch parent and retire gestures before or after Quote Enter",
+    "Source31 ordinary complete changes never settle retained operation or create Begin Query and missing catalog withdraws",
+    "Source31 raw marker scans every escaped duplicate top-level type and strict owner never reaches ordinary decoder",
+    "Source31 ordinary unsafe or duplicate world fails closed without rounded fallback or paired source replacement",
+    "Source31 exact integer consumers pass bounded strict no-emit type checking",
+    "Source31 storage DOM decodes canonical wide i64 kind and exact epoch ticks without rounding",
+    "Source31 numeric storage ABI projects safe expiry and refuses wide exact strings or unsafe numeric dates"
+  ],
+  "newDistinctStorageTests": 2,
+  "newDistinctStorageNames": [
+    "Source31 storage controller safe expiry preserves custody and wide or unsafe date carriers fail closed",
+    "Source31 storage integration safe expiry preserves custody and wide or unsafe date carriers fail closed"
+  ],
+  "actualProcess": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 158736,
+    "kind": "Source31 final NPC155 Storage46 actual declarations export-token fixture correction",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 7724,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web07.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web07.config.json",
+    "bytes": 4485,
+    "sha256": "31a97c2c1d66d44aa7cbd750a2fd6e37e3cd411ddddcb4c3f225ccde4b5503b4"
+  },
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web07-snapshot.json",
+    "bytes": 5438219,
+    "sha256": "459458fcd3a1ce0bf666079e469af51a6cdeb9c9e86736ea10a32d1e7978bac1"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web07-review.json",
+    "bytes": 2472,
+    "sha256": "90f88f1356096849a80a35c52bd714596bf4a5cb1c5679c6ba73ab61d844ae9f"
+  },
+  "prePostDeclaredInputCount": 15504,
+  "postDrift": [],
+  "rawPins": {
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web07.stdout.log",
+      "bytes": 21903,
+      "sha256": "b2005fb3f222888beb6bbb1586dc6b28fa20a376a56ac34db6ecfeaa8f0547c8"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web07.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web07.outer.json",
+      "bytes": 546,
+      "sha256": "2d2b87c57c3dc02c21cdc44c4b931d7cc315387384e64d4451381c097b52f75f"
+    }
+  },
+  "retainedHistoryExcluded": [
+    {
+      "id": "01",
+      "actualExitCode": 1,
+      "actualSummary": {
+        "tests": 89,
+        "pass": 88,
+        "fail": 1,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "excludedFromFinal": true,
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web01.config.json",
+        "bytes": 4269,
+        "sha256": "75514405ebafc71d390fac2e785b0566d7c25bdbbbebb61561fc20de4f841667"
+      },
+      "sourceSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web01-snapshot.json",
+        "bytes": 5436226,
+        "sha256": "1dd194d37a52ddfab41d508771a18c7449f1e6398101fc64d9514454ff5647ce"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web01-review.json",
+        "bytes": 1926,
+        "sha256": "89a1221f6e9b17c83b7e972ca63ae593ff80bc5187aa5f9e804d3636fda13730"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web01.outer.json",
+        "bytes": 538,
+        "sha256": "537958db7c8fe4b289469a4d80fcafce8d2a1791f7ebe0c5d02be5c39a7753fd"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web01.stdout.log",
+        "bytes": 10740,
+        "sha256": "d0fda090bcbea93df3130034885085b1a648b96d3e191ca5ea78d3ceb61c88ef"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "02",
+      "actualExitCode": 1,
+      "actualSummary": {
+        "tests": 153,
+        "pass": 151,
+        "fail": 2,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "excludedFromFinal": true,
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web02.config.json",
+        "bytes": 4273,
+        "sha256": "0fdfdc54392e5af24b3e849c212565d316942bfc1e223e138290fefabc37f2cd"
+      },
+      "sourceSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web02-snapshot.json",
+        "bytes": 5437133,
+        "sha256": "702c1c6a9a7489d45e410ee6052231171116482e3e9094c9b79efe3057d68325"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web02-review.json",
+        "bytes": 2485,
+        "sha256": "c9bcc096177ccd0757148280e4deeedb91f3c622dfa9989560c6d6a8698658cc"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web02.outer.json",
+        "bytes": 542,
+        "sha256": "4a5e9d0a5f297039d27a0014c6f8a7556a94f6dd63040897d090e356e069c4c2"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web02.stdout.log",
+        "bytes": 19655,
+        "sha256": "dfa56177b02d751c256e5fb07f8d681f5dd3fbc830668ee4738c854ddb7acc89"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web02.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "03",
+      "actualExitCode": 0,
+      "actualSummary": {
+        "tests": 153,
+        "pass": 153,
+        "fail": 0,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "excludedFromFinal": true,
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web03.config.json",
+        "bytes": 4278,
+        "sha256": "39df04382f05a79cd429d6afa1329a800add0dae44108b63d7363b559697e173"
+      },
+      "sourceSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web03-snapshot.json",
+        "bytes": 5437195,
+        "sha256": "ae36740f25b66462b25a6f378c5963f484a184dadf68e0c5893b217c298c9fde"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web03-review.json",
+        "bytes": 2586,
+        "sha256": "d003d9372fc5b4c47424db7b03b435c4f07d8e386ed4cb6601dceddbe45b806f"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web03.outer.json",
+        "bytes": 547,
+        "sha256": "4f1697de49b2ca52479e1a6f9893c48abac7c6c5c89a71cf6f6ecbc7354583d1"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web03.stdout.log",
+        "bytes": 16629,
+        "sha256": "7d72517fbcc41f598355dfde6c96dc79c591dc56b9a0bb410825f6c78714153a"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web03.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "04",
+      "actualExitCode": 1,
+      "actualSummary": {
+        "tests": 157,
+        "pass": 155,
+        "fail": 2,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "excludedFromFinal": true,
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web04.config.json",
+        "bytes": 4380,
+        "sha256": "055bdb1440d9c36c26c383367171505ee4cb4d3e6645177398affdeca0dbada7"
+      },
+      "sourceSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web04-snapshot.json",
+        "bytes": 5438178,
+        "sha256": "61eaa86290603719314849293de4de6fa3203fd8c76cf3bfb4887e90b588f8d8"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web04-review.json",
+        "bytes": 1843,
+        "sha256": "66a875ea966cf3de16553b56318d6e4eb708adb46d30b4cc60ea447c9a648216"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web04.outer.json",
+        "bytes": 525,
+        "sha256": "b04b8312053ba763f23efff25c1be9c6fcedf3121cef2ebdce24870bf18c0b3b"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web04.stdout.log",
+        "bytes": 19924,
+        "sha256": "41d226b919f846d62e5a610ab51a1f3d5fc36b99a0f14b2c78608101dcdb272a"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web04.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "05",
+      "actualExitCode": 1,
+      "actualSummary": {
+        "tests": 201,
+        "pass": 193,
+        "fail": 8,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "excludedFromFinal": true,
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web05.config.json",
+        "bytes": 4382,
+        "sha256": "0476e73d17758069b42e861bf6b65140cbf37ebde5164c11adfae2d54df3764c"
+      },
+      "sourceSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web05-snapshot.json",
+        "bytes": 5438513,
+        "sha256": "a28227dccc454a2d4bd74b4ab47a03813b8be37cc32120aba6c712ac9a7a261c"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web05-review.json",
+        "bytes": 2271,
+        "sha256": "1429a3b29632f1e0a11e49d5cd2dda9ea6147ef120baff9ec5136a6e6e890abf"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web05.outer.json",
+        "bytes": 527,
+        "sha256": "8968062f9d1828caba2bb2579d6b818976f7911930f7db07f2fc329e07db3de3"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web05.stdout.log",
+        "bytes": 29744,
+        "sha256": "12d4c9c7eb0c18587b3c83b13be3cc2f8c5af8c37129e5db2d7bef13373fc164"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web05.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "06",
+      "actualExitCode": 1,
+      "actualSummary": {
+        "tests": 201,
+        "pass": 192,
+        "fail": 9,
+        "skipped": 0,
+        "cancelled": 0
+      },
+      "excludedFromFinal": true,
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web06.config.json",
+        "bytes": 4395,
+        "sha256": "19cb5aeded3d5ac0283bc0c2142f2255596e4c115674dd28e8a518e9be1f71c0"
+      },
+      "sourceSnapshot": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web06-snapshot.json",
+        "bytes": 5438501,
+        "sha256": "e22472f170e09a439948f87fce37af945b7fb5488b313c998733555f92b8f6ea"
+      },
+      "sourceReview": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web06-review.json",
+        "bytes": 2523,
+        "sha256": "2dff3bd433f0255175911565e901103548da755bab91c6b3d561ccd76ec45c65"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web06.outer.json",
+        "bytes": 540,
+        "sha256": "824acd1916322d419e355ac3b7c8283e5a6f5b4bd69df1d90456b3c17a572003"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web06.stdout.log",
+        "bytes": 31086,
+        "sha256": "58a2f75d53a3ac322b8887b0e1de650c5d08f4c7f0012e525c27b2ce45ae2ad9"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web06.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "corrections": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-web-export-fixture-correction01.json",
+      "bytes": 1231,
+      "sha256": "d35995dc9be365acccba22962e3eb6e02564b175bbd6fcb486a9e7cc3e21c315"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-storage-fixture-correction01.json",
+      "bytes": 4709,
+      "sha256": "2fc3499416e3a3afe07456598484ba6c6915e10413af609eed05116eddd0d3f2"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-storage-allowlist-correction01.json",
+      "bytes": 2058,
+      "sha256": "c79f1301a0bd33c48da5cf2400772e8f8a47ee1f8f3eb58debe74cac206236e9"
+    }
+  ],
+  "knownLimitations": [
+    "Finite actual source declarations and pure models, not browser/React mount/game UI/socket/WASM.",
+    "Lossless wide UID sidecar is retained but old numeric selector/action/tooltip ABI fails closed; some counters still unsafe unsupported.",
+    "16*1024*1024 JS UTF-16 code-unit and depth64 parser ceiling is not encoded MiB.",
+    "Matched production Web build and live login/combat/save/relogin/mobile acceptance remain not-run."
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "goalActive": true
+}

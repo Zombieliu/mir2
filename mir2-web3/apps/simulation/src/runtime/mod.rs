@@ -47,6 +47,17 @@ pub(crate) mod source_map_loading;
 mod source_map_io;
 mod npc_conquest;
 mod npc_conquest_trade;
+mod npc_gold_buy_outcome;
+pub use npc_gold_buy_outcome::{NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBuyBeforeExecution,
+    NpcGoldBuyProcessingOutcome, NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution};
+mod npc_purchase_outcome;
+mod npc_purchase_transaction;
+mod npc_purchase_snapshot;
+pub use npc_purchase_transaction::{NpcPurchaseProducer, NpcPurchaseReceipt, NpcPurchaseDurableExecution, NpcPurchaseDurableError};
+pub use npc_purchase_outcome::{NpcPurchaseRequest, NpcPurchaseCurrency, NpcPurchaseSource,
+    NpcPurchaseRejection, NpcPurchaseBeforeExecution, NpcPurchaseProcessingOutcome,
+    NpcPurchaseProcessingError, NpcPurchaseProcessingExecution};
+mod npc_gold_trade_expiry;
 mod npc_script;
 mod npc_spawn_actions;
 #[cfg(test)]
@@ -72,6 +83,20 @@ mod quests;
 mod storage_rental_tests;
 pub(crate) use quests::periodic_quests::target_is_periodic as periodic_quest_target;
 mod recovery;
+mod ranking_inspect;
+pub use ranking_inspect::{
+    RankingInspectIdentity, RankingInspectOnlineProjection,
+};
+
+/// Server-owned presence, never a field supplied by a player packet. An online
+/// owner without a current projection must not fall back to its saved equipment.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RankingInspectPresence {
+    Offline,
+    Online(Option<RankingInspectOnlineProjection>),
+    Unknown,
+}
+
 mod refine_oven;
 mod rental;
 mod resources;
@@ -124,7 +149,7 @@ pub use drops::{
 pub use map::set_crystal_full_world_zone_collision;
 pub use monsters::crystal_world_respawn_spawns;
 pub use npc_script::CrystalNpcSavedValue as SharedNpcSavedValue;
-pub use packets::{ChatPacketPreparation, PreparedChatPacket};
+pub use packets::{ChatPacketPreparation, PreparedChatPacket, RankingInspectRequest};
 pub use save::{reset_account_password_after_recovery, validate_commercial_identity_credentials};
 pub use session::{
     ActiveSessionIdentity, LocalPlayerVitalsSnapshot, PasskeyRecoveryPreflight,

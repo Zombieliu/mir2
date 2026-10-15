@@ -9410,5 +9410,14 @@
   "quest.practice.class.toggle_hit": "Aktifkan {skill}, lalu lukai monster dengan serangan biasa.",
   "quest.practice.class.spell_hit": "Gunakan {skill} untuk melukai monster; serangan yang meleset tidak dihitung.",
   "quest.supply.assassinPoisonEquip": "Pedang Racun: kenakan bubuk merah atau hijau; 1 tiap penggunaan.",
-  "quest.supply.assassinPoisonEquipped": "Pedang Racun: bubuk dikenakan; 1 tiap penggunaan."
+  "quest.supply.assassinPoisonEquipped": "Pedang Racun: bubuk dikenakan; 1 tiap penggunaan.",
+  "ui.questProgressHeading": "Progres",
+  "ui.questReturnHeading": "Tempat penyerahan",
+  "ui.questClientLoading": "Menyiapkan tindakan misi…",
+  "ui.questClientUnavailable": "Tindakan misi sementara tidak tersedia. Silakan coba lagi.",
+  "ui.questActionPending": "Permintaan Anda sedang diproses. Harap tunggu.",
+  "ui.questActionRewardRequired": "Pilih hadiah terlebih dahulu.",
+  "ui.questActionTalkToNpc": "Bicara dengan NPC misi untuk melanjutkan.",
+  "ui.questActionStateChanged": "Misi telah berubah. Tinjau dan coba lagi.",
+  "ui.retry": "Coba lagi"
 }

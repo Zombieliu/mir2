@@ -19,7 +19,7 @@ import {
   SUPPORTED_LANGUAGES,
   type Mir2Language,
 } from "../../lib/localization";
-import type { SuiWalletSummary } from "../../lib/client-login-runtime";
+import type { SuiWalletSummary, LoginAuthControls, RegistrationDraft, ChangePasswordDraft } from "../../lib/client-login-runtime";
 import { crystalMainHudExperienceBarFillWidth } from "../../lib/crystal-hud-metrics";
 import { formatCrystalExperiencePercent } from "../../lib/extended-server-packets";
 import { playOriginalSoundId } from "../../lib/original-audio";
@@ -165,6 +165,7 @@ export type LoginOverlayProps = {
   password: string;
   loginBusy: boolean;
   loginError: string | null;
+  loginAuth: LoginAuthControls;
   suiWallets: SuiWalletSummary[];
   walletPickerOpen: boolean;
   dubheWalletUrl: string;
@@ -190,13 +191,13 @@ export function LoginOverlay({
   password,
   loginBusy,
   loginError,
+  loginAuth,
   suiWallets,
   walletPickerOpen,
   dubheWalletUrl,
   onLanguageChange,
   onAccountIdChange,
   onPasswordChange,
-  onCreateAccount,
   onSubmitLogin,
   onPasskeyLogin,
   onWalletPickerToggle,
@@ -204,12 +205,28 @@ export function LoginOverlay({
   onQuickEnter,
   onResetClient,
 }: LoginOverlayProps) {
-  const loginNotice = loginError ?? (loginBusy ? t("ui.loggingIn") : null);
+  const loginNotice = loginError ?? (loginBusy ? t("ui.loggingIn") : loginAuth.state.surface === "login" ? loginAuth.state.notice : null);
+  const authBlocked = !loginAuth.ready || loginAuth.pending || loginBusy;
+  const loginBlocked = loginAuth.pending || loginBusy || loginAuth.state.surface !== "login";
+  const overlayRef = useRef<HTMLElement>(null);
+  const authSafeFocusRef = useRef(loginAuth.state.safeFocus);
+  authSafeFocusRef.current = loginAuth.state.safeFocus;
+  const { surface: authSurface, epoch: authEpoch, focusField: authFocusField } = loginAuth.state;
+  useEffect(() => {
+    const root = overlayRef.current?.querySelector<HTMLElement>(`[data-login-auth-surface="${authSurface}"]`);
+    if (!root || !authFocusField && root.contains(document.activeElement)) return;
+    const requested = authFocusField?.split(".").at(-1);
+    const field = requested === "account" ? "accountId" : requested
+      ?? (authSurface === "safeKey" && authSafeFocusRef.current === "password" ? "password" : "accountId");
+    const target = Array.from(root.querySelectorAll<HTMLInputElement>("[data-login-auth-field]")).find(input => input.dataset.loginAuthField === field && !input.disabled)
+      ?? root.querySelector<HTMLButtonElement>("[data-login-auth-close]");
+    if (target && document.activeElement !== target) target.focus({ preventScroll: true });
+  }, [authSurface, authEpoch, authFocusField, loginAuth.ready, loginAuth.pending]);
   const [showAccountPanel, setShowAccountPanel] = useState(false);
   const dubheWalletDetected = suiWallets.some((wallet) => wallet.isDubhe);
 
   return (
-    <section className="login-overlay">
+    <section className="login-overlay" ref={overlayRef}>
       <LanguageSelector
         language={language}
         t={t}
@@ -220,9 +237,11 @@ export function LoginOverlay({
       <OriginalAudioSettingsControls t={t} compact className="login-audio-settings" />
       <form
         className="login-dialog"
+        data-login-auth-surface="login"
+        noValidate
         onSubmit={(event) => {
           event.preventDefault();
-          onSubmitLogin();
+          if (!loginBlocked) onSubmitLogin();
         }}
       >
         <img className="login-panel" src={ORIGINAL_UI.login.dialog} alt="" draggable={false} />
@@ -232,12 +251,17 @@ export function LoginOverlay({
         <input
           className="login-input account"
           data-gamepad-initial="true"
+          data-login-auth-field="accountId"
+          aria-label={t("ui.accountId", [], "Account ID")}
+          maxLength={24}
+          disabled={loginBlocked}
+          onFocus={() => { if (loginAuth.state.safeFocus !== "account") loginAuth.safeFocus("account"); }}
           value={accountId}
           onChange={(event) => onAccountIdChange(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               event.preventDefault();
-              onSubmitLogin();
+              if (!loginBlocked) onSubmitLogin();
             }
           }}
           autoComplete="off"
@@ -245,47 +269,55 @@ export function LoginOverlay({
         <input
           className="login-input password"
           type="password"
+          data-login-auth-field="password"
+          aria-label={t("ui.password", [], "Password")}
+          maxLength={32}
+          disabled={loginBlocked}
+          onFocus={() => { if (loginAuth.state.safeFocus !== "password") loginAuth.safeFocus("password"); }}
           value={password}
           onChange={(event) => onPasswordChange(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               event.preventDefault();
-              onSubmitLogin();
+              if (!loginBlocked) onSubmitLogin();
             }
           }}
           autoComplete="off"
         />
         <div className="login-button ok">
-          <SpriteButton sprite={ORIGINAL_UI.login.buttons.ok} label={t("ui.login")} onClick={onSubmitLogin} />
+          <SpriteButton sprite={ORIGINAL_UI.login.buttons.ok} label={t("ui.login")} disabled={loginBlocked} onClick={onSubmitLogin} />
         </div>
         <div className="login-button account">
           <SpriteButton
             sprite={ORIGINAL_UI.login.buttons.newAccount}
             label={t("client.NewAccount", [], "New Account")}
-            onClick={onCreateAccount}
+            disabled={loginBlocked}
+            onClick={() => loginAuth.open("registration")}
           />
         </div>
         <div className="login-button password">
-          <SpriteButton sprite={ORIGINAL_UI.login.buttons.changePassword} label={t("ui.quickEnter")} onClick={onQuickEnter} />
+          <SpriteButton sprite={ORIGINAL_UI.login.buttons.changePassword} label={t("ui.changePassword", [], "Change Password")}
+            disabled={loginBlocked} onClick={() => loginAuth.open("changePassword")} />
         </div>
         <div className="login-button view">
           <SpriteButton
             sprite={ORIGINAL_UI.login.buttons.viewKey}
             label={t("ui.viewKey")}
-            onClick={() => setShowAccountPanel((current) => !current)}
+            disabled={loginBlocked}
+            onClick={() => loginAuth.open("safeKey")}
           />
         </div>
         <div className="login-button close">
           <SpriteButton sprite={ORIGINAL_UI.login.buttons.close} label={t("ui.close")} onClick={onResetClient} />
         </div>
         <div className="login-web3-actions" aria-label={t("ui.web3Login", [], "Web3 login")}>
-          <button type="button" onClick={onPasskeyLogin} disabled={loginBusy}>
+          <button type="button" onClick={onPasskeyLogin} disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"}>
             {t("ui.passkeyLogin", [], "Passkey")}
           </button>
           <button
             type="button"
             onClick={onWalletPickerToggle}
-            disabled={loginBusy}
+            disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"}
             aria-expanded={walletPickerOpen}
             aria-controls="login-wallet-picker"
           >
@@ -303,7 +335,7 @@ export function LoginOverlay({
                     type="button"
                     className={`login-wallet-option ${wallet.isDubhe ? "dubhe" : ""}`}
                     onClick={() => onWalletLogin(wallet.id)}
-                    disabled={loginBusy}
+                    disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"}
                   >
                     {wallet.icon ? (
                       <img src={wallet.icon} alt="" aria-hidden="true" />
@@ -330,6 +362,19 @@ export function LoginOverlay({
           </div>
         ) : null}
       </form>
+      <div className="login-utility-actions">
+        <button type="button" disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"}
+          onClick={() => setShowAccountPanel(current => !current)} aria-expanded={showAccountPanel}>
+          {t("ui.accountInformation", [], "Account Info")}
+        </button>
+        <button type="button" disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"} onClick={onQuickEnter}>
+          {t("ui.quickEnter", [], "Quick Enter")}
+        </button>
+      </div>
+      {loginAuth.state.surface !== "login" ? (
+        <LoginAuthDialog t={t} loginAuth={loginAuth} blocked={authBlocked} accountId={accountId} password={password}
+          onAccountIdChange={onAccountIdChange} onPasswordChange={onPasswordChange} />
+      ) : null}
       {showAccountPanel ? (
         <div className="login-account-panel">
           <strong>{t("ui.viewKey")}</strong>
@@ -344,6 +389,148 @@ export function LoginOverlay({
         <div className="login-runtime-stamp" aria-hidden="true">{`${runtimePhase} / ${wsState} / ${runtimeMessage}`}</div>
       ) : null}
     </section>
+  );
+}
+
+const LOGIN_REGISTRATION_FIELDS: ReadonlyArray<{
+  field: keyof RegistrationDraft; label: string; labelKey: string; type?: "text" | "password" | "date"; maxLength?: number;
+}> = [
+  { field: "accountId", label: "Account ID", labelKey: "ui.accountId", maxLength: 24 },
+  { field: "password", label: "Password", labelKey: "ui.password", type: "password", maxLength: 32 },
+  { field: "confirmPassword", label: "Confirm Password", labelKey: "ui.confirmPassword", type: "password", maxLength: 32 },
+  { field: "userName", label: "Name", labelKey: "ui.userName" },
+  { field: "birthDate", label: "Date of Birth", labelKey: "ui.birthDate", type: "date" },
+  { field: "secretQuestion", label: "Secret Question", labelKey: "ui.secretQuestion" },
+  { field: "secretAnswer", label: "Secret Answer", labelKey: "ui.secretAnswer" },
+  { field: "emailAddress", label: "Email", labelKey: "ui.emailAddress" },
+];
+const LOGIN_PASSWORD_FIELDS: ReadonlyArray<{
+  field: keyof ChangePasswordDraft; label: string; labelKey: string; type?: "text" | "password"; maxLength: number;
+}> = [
+  { field: "accountId", label: "Account ID", labelKey: "ui.accountId", maxLength: 24 },
+  { field: "oldPassword", label: "Current Password", labelKey: "ui.oldPassword", type: "password", maxLength: 32 },
+  { field: "newPassword", label: "New Password", labelKey: "ui.newPassword", type: "password", maxLength: 32 },
+  { field: "confirmPassword", label: "Confirm Password", labelKey: "ui.confirmPassword", type: "password", maxLength: 32 },
+];
+
+function LoginAuthDialog({ t, loginAuth, blocked, accountId, password, onAccountIdChange, onPasswordChange }: {
+  t: TranslateFn; loginAuth: LoginAuthControls; blocked: boolean; accountId: string; password: string;
+  onAccountIdChange: (value: string) => void; onPasswordChange: (value: string) => void;
+}) {
+  const { state } = loginAuth;
+  const title = state.surface === "registration" ? t("client.NewAccount", [], "New Account")
+    : state.surface === "changePassword" ? t("ui.changePassword", [], "Change Password")
+    : t("ui.viewKey", [], "Safe Key");
+  return (
+    <div className="login-auth-backdrop">
+      <form
+        className="login-auth-panel"
+        data-login-auth-surface={state.surface}
+        data-login-auth-epoch={state.epoch}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-auth-title"
+        aria-busy={loginAuth.pending}
+        noValidate
+        autoComplete="off"
+        onSubmit={event => {
+          event.preventDefault();
+          if (blocked) return;
+          if (state.surface === "registration") loginAuth.submitRegistration();
+          else if (state.surface === "changePassword") loginAuth.submitChangePassword();
+          else if (state.surface === "safeKey") loginAuth.safeEnter();
+        }}
+        onKeyDown={event => {
+          if (event.key === "Escape") {
+            event.preventDefault(); event.stopPropagation(); loginAuth.close();
+          } else if (event.key === "Enter" && !event.nativeEvent.isComposing
+            && (state.surface === "registration" || state.surface === "changePassword")) {
+            const fields = Array.from(event.currentTarget.querySelectorAll<HTMLInputElement>("[data-login-auth-field]:not(:disabled)"));
+            const index = fields.indexOf(event.target as HTMLInputElement);
+            if (index >= 0) {
+              event.preventDefault(); event.stopPropagation();
+              const next = fields[index + 1] ?? event.currentTarget.querySelector<HTMLButtonElement>("[data-login-auth-submit]:not(:disabled)");
+              next?.focus();
+            }
+          } else if (event.key === "Tab") {
+            const fields = Array.from(event.currentTarget.querySelectorAll<HTMLElement>("input:not(:disabled), button:not(:disabled)"));
+            const first = fields[0], last = fields.at(-1);
+            if (event.shiftKey && document.activeElement === first && last) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && document.activeElement === last && first) { event.preventDefault(); first.focus(); }
+          }
+        }}
+      >
+        <img className="login-auth-frame" src={ORIGINAL_UI.login.dialog} alt="" draggable={false} />
+        <header className="login-auth-header">
+          <h2 id="login-auth-title">{title}</h2>
+          <button type="button" className="login-auth-close" data-login-auth-close="true"
+            aria-label={t("ui.close", [], "Close")} onClick={loginAuth.close}>×</button>
+        </header>
+        {state.surface === "registration" ? (
+          <div className="login-auth-fields">
+            {LOGIN_REGISTRATION_FIELDS.map(field => (
+              <label className="login-auth-field" key={field.field}>
+                <span>{t(field.labelKey, [], field.label)}</span>
+                <input data-login-auth-field={field.field} name={field.field}
+                  type={field.type ?? "text"} inputMode={field.field === "emailAddress" ? "email" : undefined}
+                  maxLength={field.maxLength} autoComplete="off" spellCheck={false}
+                  disabled={loginAuth.pending} value={state.registration[field.field]}
+                  onChange={event => loginAuth.registrationChange(field.field, event.target.value)} />
+              </label>
+            ))}
+          </div>
+        ) : state.surface === "changePassword" ? (
+          <div className="login-auth-fields">
+            {LOGIN_PASSWORD_FIELDS.map(field => (
+              <label className="login-auth-field" key={field.field}>
+                <span>{t(field.labelKey, [], field.label)}</span>
+                <input data-login-auth-field={field.field} name={field.field} type={field.type ?? "text"}
+                  maxLength={field.maxLength} autoComplete="off" spellCheck={false}
+                  disabled={loginAuth.pending} value={state.changePassword[field.field]}
+                  onChange={event => loginAuth.passwordChange(field.field, event.target.value)} />
+              </label>
+            ))}
+          </div>
+        ) : (
+          <div className="login-safe-key">
+            <div className="login-auth-fields">
+              <label className={state.safeFocus === "account" ? "login-auth-field active" : "login-auth-field"}>
+                <span>{t("ui.accountId", [], "Account ID")}</span>
+                <input data-login-auth-field="accountId" name="accountId" aria-label={t("ui.accountId", [], "Account ID")}
+                  maxLength={24} autoComplete="off" spellCheck={false} disabled={loginAuth.pending} value={accountId}
+                  onFocus={() => { if (state.safeFocus !== "account") loginAuth.safeFocus("account"); }}
+                  onChange={event => onAccountIdChange(event.target.value)} />
+              </label>
+              <label className={state.safeFocus === "password" ? "login-auth-field active" : "login-auth-field"}>
+                <span>{t("ui.password", [], "Password")}</span>
+                <input data-login-auth-field="password" name="password" aria-label={t("ui.password", [], "Password")}
+                  type="password" maxLength={32} autoComplete="off" disabled={loginAuth.pending} value={password}
+                  onFocus={() => { if (state.safeFocus !== "password") loginAuth.safeFocus("password"); }}
+                  onChange={event => onPasswordChange(event.target.value)} />
+              </label>
+            </div>
+            <div className="login-safe-key-grid" role="group" aria-label={t("ui.viewKey", [], "Safe Key")}>
+              {Array.from(state.safeKeys).map((key, index) => (
+                <button type="button" key={index + ":" + key} data-login-safe-key={key}
+                  disabled={blocked} onClick={() => loginAuth.safePress(key)}>{key}</button>
+              ))}
+            </div>
+            <div className="login-safe-key-tools">
+              <button type="button" disabled={blocked} onClick={loginAuth.safeDelete}>{t("ui.delete", [], "Delete")}</button>
+              <button type="button" disabled={blocked} onClick={loginAuth.safeRandom}>{t("ui.random", [], "Random")}</button>
+            </div>
+          </div>
+        )}
+        {state.notice ? <div className="login-auth-notice" role="status" aria-live="polite">{state.notice}</div> : null}
+        <div className="login-auth-actions">
+          <button type="submit" disabled={blocked} data-login-auth-submit={state.surface}>
+            {state.surface === "registration" ? t("client.NewAccount", [], "New Account")
+              : state.surface === "changePassword" ? t("ui.changePassword", [], "Change Password") : t("ui.enter", [], "Enter")}
+          </button>
+          <button type="button" data-login-auth-close="true" onClick={loginAuth.close}>{t("ui.close", [], "Close")}</button>
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -700,6 +887,7 @@ export type MainHudProps = {
   mapTitle: string | null;
   player: HudPlayerLike;
   world: HudWorldLike;
+  hpView?: boolean;
   showCharacter: boolean;
   showInventory: boolean;
   showQuestLog: boolean;
@@ -708,6 +896,7 @@ export type MainHudProps = {
   onToggleCharacter: () => void;
   onToggleInventory: () => void;
   onToggleQuestLog: () => void;
+  onToggleOptions?: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;
   onOpenInventoryTab: (tab: InventoryTabKey) => void;
   onDropGold: () => void;
@@ -719,12 +908,61 @@ export type MainHudProps = {
   onToggleMenu: () => void;
 };
 
+/** Unmigrated passive information, retained after the shared main HUD handoff. */
+export function HudSpriteFallback({ plan, experienceOwned, weightOwned }: {
+  plan: import("../../lib/bevy-hud-ui").MainHudPlan | null; experienceOwned: boolean; weightOwned: boolean;
+}) {
+  if (!plan) return null;
+  return <>{([[plan.experienceSprite, experienceOwned], [plan.weightSprite, weightOwned]] as const).map(([sprite, owned], index) =>
+    !owned && sprite?.image && sprite.source.width > 0 ? <div key={index} data-shared-hud-sprite-fallback={index === 0 ? "experience" : "weight"}
+      style={{ position: "absolute", left: sprite.destination.left, top: sprite.destination.top, width: sprite.destination.width,
+        height: sprite.destination.height, overflow: "hidden", pointerEvents: "none" }}>
+      <img src={`/${sprite.image}`} alt="" draggable={false} style={{ position: "absolute", left: -sprite.source.left, top: -sprite.source.top, maxWidth: "none" }} />
+    </div> : null)}</>;
+}
+
+export function MainHudStatus({ t, mapTitle, world }: Pick<MainHudProps, "t" | "mapTitle" | "world">) {
+  const buffLabel = world.activeBuffs.slice(0, 2).map(buff => `${buff.name}:${buff.remainingTicks}`).join("  ");
+  return <div className="hud-passive-compat" style={{ position: "absolute", left: 0, top: 618, width: 1024, height: 152, pointerEvents: "none" }}>
+    <div className="hud-map-label">{mapTitle ?? world.mapTitle ?? ""}{world.inSafeZone ? ` ${t("ui.safeZone", [], "Safe Zone")}` : ""}</div>
+    {buffLabel ? <div className="hud-buff-label">{buffLabel}</div> : null}
+    <div className="hud-space-label">{crystalMainHudFreeSlots(world)}</div>
+  </div>;
+}
+
+/** Native shared_hud.rs HPView labels; coordinates are in the 1024x768 stage. */
+export function crystalMainHudHealthLabels({ player, world, hpView = true }: Pick<MainHudProps, "player" | "world" | "hpView">) {
+  const hpOnly = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
+  const hp = world.playerHp ?? 0, maxHp = world.playerMaxHp ?? 0;
+  const mp = world.playerMp ?? 0, maxMp = world.playerMaxMp ?? 0;
+  if (hpView) return [
+    { kind: "compactHp", text: `HP ${hp}/${maxHp}`, left: 0, top: 673, width: 100, height: 14, compact: true },
+    ...(!hpOnly ? [{ kind: "compactMp", text: `MP ${mp}/${maxMp} `, left: 0, top: 688, width: 100, height: 14, compact: true }] : []),
+  ];
+  return [
+    { kind: "alternateTop", text: hpOnly ? `${hp}\n--` : ` ${hp}    ${mp} \n---------------`, left: 9, top: 666, width: 85, height: 30, compact: false },
+    { kind: "alternateBottom", text: hpOnly ? String(maxHp) : ` ${maxHp}    ${maxMp} `, left: 9, top: 696, width: 85, height: 30, compact: false },
+  ];
+}
+
+/** Passive labels only. Shared renderer hosts must retire their own labels before opting in. */
+export function MainHudHealthLabels({ player, world, hpView = true, originTop = 618 }: Pick<MainHudProps, "player" | "world" | "hpView"> & { originTop?: number }) {
+  return <>{crystalMainHudHealthLabels({ player, world, hpView }).map(label =>
+    <div key={label.kind} data-hud-health-label={label.kind}
+      style={{ position: "absolute", left: label.left, top: label.top - originTop, width: label.width, height: label.height,
+        display: label.compact ? "flex" : "block", alignItems: "center", justifyContent: "center",
+        overflow: "hidden", pointerEvents: "none", whiteSpace: "pre", textAlign: "center",
+        fontFamily: "Arial, Helvetica, sans-serif", fontSize: 32 / 3, fontWeight: 400, color: "#fff",
+        textShadow: "1px 1px 0 #000" }}>{label.text}</div>)}</>;
+}
+
 export function MainHud({
   t,
   connected,
   mapTitle,
   player,
   world,
+  hpView = true,
   showCharacter,
   showInventory,
   showQuestLog,
@@ -733,6 +971,7 @@ export function MainHud({
   onToggleCharacter,
   onToggleInventory,
   onToggleQuestLog,
+  onToggleOptions,
   onOpenCharacterTab,
   onOpenInventoryTab,
   showGameShop,
@@ -744,17 +983,7 @@ export function MainHud({
   const healthRatio = ratio(world.playerHp, world.playerMaxHp);
   const manaRatio = ratio(world.playerMp, world.playerMaxMp);
   const experienceRatio = ratio(world.playerExperience, world.playerMaxExperience);
-  const currentHp = world.playerHp ?? 0;
-  const maxHp = world.playerMaxHp ?? 0;
-  const currentMp = world.playerMp ?? 0;
-  const maxMp = world.playerMaxMp ?? 0;
   const hpOnlyOrb = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
-  const hpOnlyText = `HP ${currentHp}/${maxHp}`;
-  const hpOnlyGdiText = findCrystalGdiTextAsset({
-    text: hpOnlyText,
-    foreground: "#ffffff",
-    outline: true,
-  });
   const locationLabel = mapTitle ?? world.mapTitle ?? "";
   const buffLabel = world.activeBuffs
     .slice(0, 2)
@@ -777,19 +1006,19 @@ export function MainHud({
           className="hud-exp-bar"
           data-experience-ratio={experienceRatio.toFixed(4)}
           data-fill-width={experienceBarFillWidth}
-          style={{ width: `${experienceBarFillWidth}px` }}
+          data-experience={world.playerExperience}
+          data-max-experience={world.playerMaxExperience}
         >
-          {experienceBarFillWidth > 0 ? (
-            <img
-              className="hud-exp-bar-fill"
-              src={ORIGINAL_UI.hud.experienceBar}
-              alt=""
-              draggable={false}
-            />
-          ) : null}
+          <div className="hud-exp-bar-clip" style={{ width: `${experienceBarFillWidth}px` }}>
+            {experienceBarFillWidth > 0 ? (
+              <img className="hud-exp-bar-fill" src={ORIGINAL_UI.hud.experienceBar} alt="" draggable={false} />
+            ) : null}
+          </div>
         </div>
         <div
           className="hud-weight-bar"
+          data-current-weight={world.currentWeight}
+          data-max-weight={world.maxWeight}
           data-weight-ratio={bagWeightRatio.toFixed(4)}
           data-fill-width={weightBarFillWidth}
           data-mir2-original-src={weightBarSprite}
@@ -816,18 +1045,7 @@ export function MainHud({
           <img src={ORIGINAL_UI.hud.healthManaOrb} alt="" draggable={false} />
         </div>
 
-        {hpOnlyOrb ? (
-          <div className="hud-health-only-label">
-            {hpOnlyGdiText ? (
-              <CrystalGdiTextImage asset={hpOnlyGdiText} accessibleText={hpOnlyText} />
-            ) : hpOnlyText}
-          </div>
-        ) : (
-          <>
-            <div className="hud-top-label">{`${currentHp}    ${currentMp}`}</div>
-            <div className="hud-bottom-label">{`${maxHp}    ${maxMp}`}</div>
-          </>
-        )}
+        <MainHudHealthLabels player={player} world={world} hpView={hpView} />
         <div className="hud-level-label">{player?.level ?? 1}</div>
         <div className="hud-name-label">{player?.name ?? ""}</div>
         <div className="hud-map-label">
@@ -861,9 +1079,7 @@ export function MainHud({
           <SpriteButton sprite={ORIGINAL_UI.hud.buttons.quest} label={t("ui.quest")} onClick={onToggleQuestLog} active={showQuestLog} />
         </div>
         <div className="hud-button option">
-          {/* The Crystal button opens OptionDialog, not Character/stats2. Keep
-              it truthfully disabled until that distinct dialog is wired. */}
-          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.option} label={t("ui.options")} disabled />
+          <SpriteButton sprite={ORIGINAL_UI.hud.buttons.option} label={t("ui.options")} onClick={onToggleOptions} disabled={!onToggleOptions} />
         </div>
       </div>
     </div>

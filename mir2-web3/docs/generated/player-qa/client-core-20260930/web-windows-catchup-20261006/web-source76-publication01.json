@@ -1,0 +1,45 @@
+{
+  "owner": "Root",
+  "commit": "e20b1f4556f18f74cc8b65fbb6ef2b8da04e98a1",
+  "parent": "9b3840a552a8f249092e10e741951e88a3e63b62",
+  "branch": "codex/windows-player-journey",
+  "commitProof": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source76-shop-character-20261012-01/root-approved01/source76-commit-proof01.json",
+    "bytes": 20469,
+    "sha256": "5c8263cccc71f72b10bb2f0ac96982b307f3b9fadd91602a9193c10d1a576d12"
+  },
+  "rawBlobLeaves": 38,
+  "rawBlobDifferences": 0,
+  "code": 2,
+  "docs": 7,
+  "qa": 29,
+  "indexEmptyAfterCommit": true,
+  "push": {
+    "normal": true,
+    "exitCode": 0,
+    "forced": false,
+    "acknowledgedRemoteAdvance": "9b3840a552..e20b1f4556"
+  },
+  "independentHttpsRemote": {
+    "exitCode": 0,
+    "credentialHelperDisabled": true,
+    "branch": "refs/heads/codex/windows-player-journey",
+    "head": "e20b1f4556f18f74cc8b65fbb6ef2b8da04e98a1"
+  },
+  "codeCrlfOnlyNormalizations": 2,
+  "qaCrlfOnlyNormalizations": [
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-final-assets-manifest01.json",
+      "rawBytes": 26699,
+      "gitBytes": 25935,
+      "rawSha256": "ec3023f83b136629688c40a99f82d113e0600412bb90cc4a1849281fb60ed242",
+      "gitSha256": "4924b91a8203cffaf320f98413222def8a53fd2f757415c853f958c360bba252",
+      "onlyCRLFNormalization": true
+    }
+  ],
+  "foreignDocBodiesPreserved": true,
+  "MainTsConfigUnchanged": true,
+  "existingUnrelatedGitObjectCorruptionUntouched": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

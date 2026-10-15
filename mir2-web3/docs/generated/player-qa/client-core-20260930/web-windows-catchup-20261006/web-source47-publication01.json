@@ -1,0 +1,114 @@
+{
+  "owner": "Root",
+  "kind": "Source47 scoped code/evidence commit and independently verified normal push; full Web/player delivery still pending",
+  "generatedAtUtc": "2026-10-08T17:03:24.470Z",
+  "head": "944c082424a1f3fa8203624607998c9d4a4210d9",
+  "parent": "22d814ad2ae5e45cf177f3505e0ed0f993b47195",
+  "branch": "codex/windows-player-journey",
+  "commitMessage": "build(web): preserve user tsconfig with optional build copy",
+  "commitFileCount": 15,
+  "scope": {
+    "productFiles": [
+      "apps/web/next.config.ts"
+    ],
+    "ownDocPrefixes": 6,
+    "linesPerPrefix": 8,
+    "qaRecords": 8,
+    "userTsconfigStaged": false,
+    "foreignBackendOrDocumentBodiesStaged": false,
+    "ephemeralTsconfigCopyStaged": false
+  },
+  "actualStrictTsc": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source47-tsc-actual01.json",
+    "bytes": 4361,
+    "sha256": "a7c5e213c7120445c5feb23f6f55242e44c44c4aa1aa03bc2d70e2b44512325e"
+  },
+  "actualFiniteResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source47-finite-result02.json",
+    "bytes": 15337,
+    "sha256": "0697e22f8dbef40c01e87d22bfb8ecbd125df1a08e202219e86333ca6d0e110a"
+  },
+  "actualRawEvidence": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source47-raw-evidence02.json",
+    "bytes": 130854,
+    "sha256": "e2c38f28b4868915afd598c5e832d8d1073b2e33cc78a778bd1ea7fb28eff1b4"
+  },
+  "actualIndependentReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-source47-finite-actual-limited-review01.json",
+    "bytes": 18981,
+    "sha256": "8e937188a1ec8bd5b3abafb04e31b20fc6e825d2b05ccc2f110313724a217a18"
+  },
+  "userConfigAfterPush": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "gitActual": {
+    "commit": {
+      "chunk_id": "c4c751",
+      "wall_time_seconds": 0.6305718,
+      "exit_code": 0,
+      "original_token_count": 627,
+      "output": "[codex/windows-player-journey 944c082424] build(web): preserve user tsconfig with optional build copy\n 15 files changed, 2145 insertions(+), 1 deletion(-)\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-publication01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-bevy-next-tsconfig-independent-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-actual-limited-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-result02.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-next-thin-fresh-build-data02.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-old-flat-bevy-preservation01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-raw-evidence02.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-tsc-actual01.json\n944c082424a1f3fa8203624607998c9d4a4210d9\n22d814ad2ae5e45cf177f3505e0ed0f993b47195\n944c082424 build(web): preserve user tsconfig with optional build copy\n mir2-web3/apps/web/next.config.ts                  |  27 +-\n mir2-web3/docs/AGENT-ORCHESTRATION.md              |   8 +\n mir2-web3/docs/AGENT-TASK-QUEUE.md                 |   8 +\n mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md             |   8 +\n mir2-web3/docs/FRONTEND-1TO1-GAPS.md               |   8 +\n mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md         |   8 +\n mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md            |   8 +\n .../web-source46-publication01.json                | 104 ++++\n ...47-bevy-next-tsconfig-independent-review01.json | 545 +++++++++++++++++++++\n ...eb-source47-finite-actual-limited-review01.json | 422 ++++++++++++++++\n .../web-source47-finite-result02.json              | 303 ++++++++++++\n .../web-source47-next-thin-fresh-build-data02.json | 165 +++++++\n .../web-source47-old-flat-bevy-preservation01.json | 166 +++++++\n .../web-source47-raw-evidence02.json               | 267 ++++++++++\n .../web-source47-tsc-actual01.json                 |  99 ++++\n 15 files changed, 2145 insertions(+), 1 deletion(-)\n"
+    },
+    "pushStart": {
+      "chunk_id": "fb0b56",
+      "wall_time_seconds": 10.0086154,
+      "session_id": 15806,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "pushFinal": {
+      "chunk_id": "2e8bc8",
+      "wall_time_seconds": 0.0000099,
+      "exit_code": 0,
+      "original_token_count": 25,
+      "output": "To github.com:Zombieliu/mir2.git\n   22d814ad2a..944c082424  HEAD -> codex/windows-player-journey\n"
+    },
+    "remoteStart": {
+      "chunk_id": "639212",
+      "wall_time_seconds": 10.0170616,
+      "session_id": 87600,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "remoteFinal": {
+      "chunk_id": "42e8da",
+      "wall_time_seconds": 0.0000071,
+      "exit_code": 0,
+      "original_token_count": 403,
+      "output": "{\"head\":\"944c082424a1f3fa8203624607998c9d4a4210d9\",\"parent\":\"22d814ad2ae5e45cf177f3505e0ed0f993b47195\",\"branch\":\"codex/windows-player-journey\",\"remote\":\"944c082424a1f3fa8203624607998c9d4a4210d9\\trefs/heads/codex/windows-player-journey\",\"independentRemoteAccepted\":true,\"indexFiles\":0,\"committedNames\":[\"mir2-web3/apps/web/next.config.ts\",\"mir2-web3/docs/AGENT-ORCHESTRATION.md\",\"mir2-web3/docs/AGENT-TASK-QUEUE.md\",\"mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\",\"mir2-web3/docs/FRONTEND-1TO1-GAPS.md\",\"mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md\",\"mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md\",\"mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-publication01.json\",\"mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-bevy-next-tsconfig-independent-review01.json\",\"mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-actual-limited-review01.json\",\"mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-result02.json\",\"mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-next-thin-fresh-build-data02.json\",\"mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-old-flat-bevy-preservation01.json\",\"mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-raw-evidence02.json\",\"mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-tsc-actual01.json\"]}\r\n"
+    },
+    "stageInitialCheckFailure": {
+      "chunk_id": "dadc44",
+      "wall_time_seconds": 0.2777552,
+      "exit_code": 1,
+      "original_token_count": 257,
+      "output": "error: patch failed: mir2-web3/docs/AGENT-ORCHESTRATION.md:1\nerror: mir2-web3/docs/AGENT-ORCHESTRATION.md: patch does not apply\nerror: patch failed: mir2-web3/docs/AGENT-TASK-QUEUE.md:1\nerror: mir2-web3/docs/AGENT-TASK-QUEUE.md: patch does not apply\nerror: patch failed: mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md:1\nerror: mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md: patch does not apply\nerror: patch failed: mir2-web3/docs/FRONTEND-1TO1-GAPS.md:1\nerror: mir2-web3/docs/FRONTEND-1TO1-GAPS.md: patch does not apply\nerror: patch failed: mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md:1\nerror: mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md: patch does not apply\nerror: patch failed: mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md:1\nerror: mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md: patch does not apply\nException: \r\nLine |\r\n   2 |  … DE -ne 0) { throw 'Source47 own documentation prefix patch check fail …\r\n     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Source47 own documentation prefix patch check failed.\r\n"
+    },
+    "stageFinal": {
+      "chunk_id": "6307fe",
+      "wall_time_seconds": 0.8311601,
+      "exit_code": 0,
+      "original_token_count": 668,
+      "output": "26\t1\tmir2-web3/apps/web/next.config.ts\n8\t0\tmir2-web3/docs/AGENT-ORCHESTRATION.md\n8\t0\tmir2-web3/docs/AGENT-TASK-QUEUE.md\n8\t0\tmir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\n8\t0\tmir2-web3/docs/FRONTEND-1TO1-GAPS.md\n8\t0\tmir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md\n8\t0\tmir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md\n104\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-publication01.json\n545\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-bevy-next-tsconfig-independent-review01.json\n422\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-actual-limited-review01.json\n303\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-result02.json\n165\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-next-thin-fresh-build-data02.json\n166\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-old-flat-bevy-preservation01.json\n267\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-raw-evidence02.json\n99\t0\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-tsc-actual01.json\nmir2-web3/apps/web/next.config.ts\nmir2-web3/docs/AGENT-ORCHESTRATION.md\nmir2-web3/docs/AGENT-TASK-QUEUE.md\nmir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\nmir2-web3/docs/FRONTEND-1TO1-GAPS.md\nmir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md\nmir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-publication01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-bevy-next-tsconfig-independent-review01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-actual-limited-review01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-result02.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-next-thin-fresh-build-data02.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-old-flat-bevy-preservation01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-raw-evidence02.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-tsc-actual01.json\n22d814ad2ae5e45cf177f3505e0ed0f993b47195\n"
+    }
+  },
+  "gitPushExitCode": 0,
+  "independentRemoteExitCode": 0,
+  "independentRemoteHead": "944c082424a1f3fa8203624607998c9d4a4210d9",
+  "gitProcessesClosed": true,
+  "indexEmptyAfterPush": true,
+  "stagingFailureQualification": "The first cached documentation patch had insufficient trailing context and failed in --check before any staging. Three original trailing context lines were added to a new ordinary patch; original Git checks then passed. No product tests or build assertion changed.",
+  "newCompleteWebBuilt": false,
+  "staticWasmApiAnswerObserved": false,
+  "playerUiUsed": false,
+  "playableAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false,
+  "goalStatus": "active",
+  "currentGoalTurnClassification": "progress",
+  "nextRequired": "Existing pending static WASM API boundary answer, then original complete runtime gates/publication and fresh Next/Thin. Actual player and mobile acceptance remain unrun.",
+  "qualification": "This publication proves the scoped implementation and allowed strict TSC evidence reached the verified branch; it is not a deployed, complete Web, multiplayer or player acceptance result."
+}

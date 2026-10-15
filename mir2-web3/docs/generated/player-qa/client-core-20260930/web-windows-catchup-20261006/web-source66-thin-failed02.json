@@ -1,0 +1,57 @@
+{
+  "sourceRound": "Source66",
+  "kind": "Actual original Thin02 failed due incomplete public map atlas input",
+  "actual": {
+    "owner": "Root",
+    "exitCode": 1,
+    "builderPid": 33248,
+    "kind": "Source66 pending original Thin after accepted same-drive isolated Next02",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 114,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/thin-build02-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/thin-build02-config.json",
+    "bytes": 5541,
+    "sha256": "6794086f40b5c59cb20fe8cbd8641135ae50dc90df3d5ea9ea3057ac84168bea"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/thin-preparation02/full-snapshot.json",
+    "bytes": 9873996,
+    "sha256": "f5b17dcbf3f86387de72ed26f673c37635afa6d923f0c0564e7d4a9dd006451c"
+  },
+  "sourceReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/thin-source-review02.json",
+    "bytes": 11266,
+    "sha256": "2a8e00b7a52e638b3b347ea19c22bfb807d913c45798ab4785628e655f7d51f5"
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/thin-build02/stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/thin-build02/stderr.log",
+    "bytes": 1041,
+    "sha256": "9c82e9c25985aef9394c5f65cff8f5f954c38760f11dacffee09b943634b630f"
+  },
+  "originalCallerExitCode": 1,
+  "originalCallerUnchanged": true,
+  "originalCapBytes": 377487360,
+  "packageAccepted": false,
+  "failure": {
+    "code": "ENOENT",
+    "location": "public/generated/map-atlas",
+    "consumer": "selectMapAtlasClosure/readRegularPublicFile"
+  },
+  "reason": "Compile-source isolation copied only232 public files. Thin requires the complete selected public closure, including original map atlas manifest and79 PNG pages. Failed attempt is preserved; full-public isolated preparation03 will rebuild strict Next and Thin.",
+  "candidate100": false,
+  "goalComplete": false
+}

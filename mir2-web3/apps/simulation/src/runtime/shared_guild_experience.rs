@@ -525,6 +525,18 @@ impl SimulationSession {
         acknowledge(self.app.world(), sequence);
         super::npc_shared_guild_actions::acknowledge(self.app.world_mut());
         super::shared_pet_progress::acknowledge(self.app.world_mut());
+        // Publish the committed character to the selection-list mirror only
+        // after persistence succeeds. Speculative level changes must not leak
+        // into that list when the source is rejected or its outcome is unknown.
+        {
+            let mut session = self.app.world_mut().resource_mut::<SessionResource>();
+            if let Some(selected) = session.selected_character.clone() {
+                if let Some(character) = session.characters.iter_mut()
+                    .find(|character| character.index == selected.index) {
+                    *character = selected;
+                }
+            }
+        }
         Ok(packets)
     }
 }

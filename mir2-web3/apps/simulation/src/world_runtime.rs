@@ -4,7 +4,10 @@ use crate::runtime::{
     GameShopPurchaseOutcome, SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery,
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
     SharedSkillItemConsumptionComponent, SharedTradeOffer, ZoneMonsterSpawn, ZonePlayerCombatStats,
-    LocalPlayerVitalsSnapshot,
+    LocalPlayerVitalsSnapshot, NpcGoldBuyRequest, NpcGoldBuyBeforeExecution,
+    NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution,
+    NpcPurchaseRequest, NpcPurchaseBeforeExecution, NpcPurchaseProcessingError,
+    NpcPurchaseProcessingExecution,
 };
 use crate::{
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
@@ -46,6 +49,31 @@ pub struct NativeGameShopPurchaseRequest {
 pub struct NativeGameShopGiftRequest {
     pub purchase: NativeGameShopPurchaseRequest,
     pub recipient_name: String,
+}
+
+/// A server-prepared continuation of one admission. The durable half is bound
+/// byte-for-byte to the authority; the runtime half retains its clock domain.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CharacterHandoffCheckpoint {
+    pub durable: CharacterSaveRecord,
+    pub runtime: CharacterSaveRecord,
+    pub source_tick: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CharacterHandoffClockWitness {
+    pub epoch: String,
+    pub now_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CharacterHandoffCommitment {
+    pub runtime: CharacterSaveRecord,
+    pub restored_clock: CharacterHandoffClockWitness,
+    pub observed_clock: CharacterHandoffClockWitness,
 }
 
 #[derive(Debug, Clone)]
@@ -179,6 +207,9 @@ pub fn validate_production_player_command(
         WorldCommand::ClientPacket(ClientPacket::SendMail { .. }) if !authenticated => {
             Err("authenticated account is required to send mail".to_string())
         }
+        WorldCommand::ClientPacket(ClientPacket::Inspect { .. }) if !authenticated => {
+            Err("authenticated account is required to inspect a character".to_string())
+        }
         WorldCommand::NativeGameShopPurchase(_) | WorldCommand::NativeGameShopGift(_) if !authenticated => {
             Err("authenticated account is required for native GameShop purchases".to_string())
         }
@@ -221,6 +252,7 @@ pub(crate) fn parse_debug_crystal_transfer_key(
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WorldCommandKind {
+    NpcPurchaseOwner(&'static str),
     ClientPacket(&'static str),
     ReplayRetainedStartGameBootstrap,
     PasskeyLogin,
@@ -351,6 +383,44 @@ pub trait WorldRuntime: Send + Sync {
         false
     }
 
+    /// Local domain capability only; this does not advertise a network receipt ABI.
+    fn supports_typed_npc_gold_buy_outcome(&self) -> bool { false }
+
+    /// Unsupported implementations must never fall back to execute/legacy BuyItem.
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(&mut self,
+        _authenticated: bool, _request: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+        Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::UnsupportedRuntime))
+    }
+
+
+    /// Explicit durable owner capability. Unsupported routes never execute BuyItem.
+    fn supports_durable_npc_purchase_owner(&self) -> bool { false }
+
+    fn execute_npc_purchase_owner(&mut self, _authenticated: bool, _owner_epoch: [u8; 32],
+        _action: crate::NpcPurchaseOwnerAction,
+    ) -> Result<crate::NpcPurchaseOwnerExecution, crate::NpcPurchaseDurableError> {
+        Err(crate::NpcPurchaseDurableError::BeforeExecution { detail: "durable NPC purchase owner capability is unavailable".into() })
+    }
+
+    fn npc_purchase_owner_authority(&self, _owner_epoch: [u8; 32]) -> Option<crate::NpcPurchaseProducer> { None }
+
+
+    fn npc_purchase_owner_checkpoint(&self, _owner_epoch: [u8; 32]) -> Option<CharacterSaveRecord> { None }
+
+    fn apply_npc_purchase_owner_replica_checkpoint(&mut self, _checkpoint: &CharacterSaveRecord) -> Result<(), String> {
+        Err("world runtime does not implement isolated NPC purchase checkpoint replay".into())
+    }
+
+    /// Local evidence for all NPC purchase branches, not a network capability.
+    fn supports_typed_npc_purchase_outcome(&self) -> bool { false }
+
+    fn execute_production_npc_purchase_requiring_typed_outcome(&mut self,
+        _authenticated: bool, _request: NpcPurchaseRequest,
+    ) -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+        Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::UnsupportedRuntime))
+    }
+
     /// Gift support is negotiated separately from self-purchases.
     fn supports_native_game_shop_gifts(&self) -> bool {
         false
@@ -389,6 +459,19 @@ pub trait WorldRuntime: Send + Sync {
     ) -> Result<(), String> {
         Err("world runtime does not support active character checkpoint restore".to_string())
     }
+
+    /// Server-only handoff seams. These have no WorldCommand/client-packet form.
+    fn prepare_character_handoff(&mut self) -> Result<CharacterHandoffCheckpoint, String> {
+        Err("world runtime does not implement authoritative character handoff preparation".into())
+    }
+
+    fn resume_character_handoff(&mut self, _checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
+        Err("world runtime does not implement trusted character handoff resume".into())
+    }
+
+    fn apply_character_handoff_replica(&mut self, _checkpoint: &CharacterHandoffCheckpoint) -> Result<(), String> {
+        Err("world runtime does not implement verified character handoff replay".into())
+    }
     fn save_active_character(&mut self) -> Result<(), String>;
     /// Persist a final world-leave snapshot and Crystal LastLogoutDate.
     ///
@@ -422,6 +505,10 @@ impl InProcessWorldRuntime {
         Self {
             session: SimulationSession::new(config),
         }
+    }
+
+    pub fn character_handoff_commitment(&self, checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
+        self.session.character_handoff_commitment(checkpoint)
     }
 
     pub fn rebind_account_store(&mut self, authoritative: &SimulationConfig) {
@@ -511,6 +598,27 @@ impl InProcessWorldRuntime {
             online_only,
             online_characters,
         )
+    }
+
+    pub fn prepare_ranking_inspect(
+        &self,
+        player_id: u32,
+    ) -> Option<crate::runtime::RankingInspectRequest> {
+        self.session.prepare_ranking_inspect(player_id)
+    }
+
+    pub fn active_ranking_inspect_projection(
+        &self,
+    ) -> Option<crate::runtime::RankingInspectOnlineProjection> {
+        self.session.active_ranking_inspect_projection()
+    }
+
+    pub fn complete_ranking_inspect(
+        &self,
+        request: crate::runtime::RankingInspectRequest,
+        presence: crate::runtime::RankingInspectPresence,
+    ) -> Vec<ServerPacket> {
+        self.session.complete_ranking_inspect(request, presence)
     }
 
     pub fn friends_with_online_characters(
@@ -1334,6 +1442,52 @@ impl WorldRuntime for InProcessWorldRuntime {
         true
     }
 
+    fn supports_typed_npc_gold_buy_outcome(&self) -> bool { true }
+
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(&mut self,
+        authenticated: bool, request: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+        if !authenticated {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::NotAuthenticated));
+        }
+        self.session.try_npc_gold_buy_with_outcome(request)
+    }
+
+
+    fn supports_durable_npc_purchase_owner(&self) -> bool {
+        self.session.supports_durable_npc_purchase_owner()
+    }
+
+    fn execute_npc_purchase_owner(&mut self, authenticated: bool, owner_epoch: [u8; 32],
+        action: crate::NpcPurchaseOwnerAction,
+    ) -> Result<crate::NpcPurchaseOwnerExecution, crate::NpcPurchaseDurableError> {
+        self.session.execute_npc_purchase_owner(authenticated, owner_epoch, action)
+    }
+
+    fn npc_purchase_owner_authority(&self, owner_epoch: [u8; 32]) -> Option<crate::NpcPurchaseProducer> {
+        self.session.npc_purchase_owner_authority(owner_epoch).ok()
+    }
+
+
+    fn npc_purchase_owner_checkpoint(&self, owner_epoch: [u8; 32]) -> Option<CharacterSaveRecord> {
+        self.session.npc_purchase_owner_checkpoint(owner_epoch).ok()
+    }
+
+    fn apply_npc_purchase_owner_replica_checkpoint(&mut self, checkpoint: &CharacterSaveRecord) -> Result<(), String> {
+        self.session.apply_npc_purchase_owner_replica_checkpoint(checkpoint)
+    }
+
+    fn supports_typed_npc_purchase_outcome(&self) -> bool { true }
+
+    fn execute_production_npc_purchase_requiring_typed_outcome(&mut self,
+        authenticated: bool, request: NpcPurchaseRequest,
+    ) -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+        if !authenticated {
+            return Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::NotAuthenticated));
+        }
+        self.session.try_npc_purchase_with_outcome(request)
+    }
+
     fn supports_native_game_shop_gifts(&self) -> bool {
         self.session.game_shop_gift_enabled()
     }
@@ -1367,6 +1521,18 @@ impl WorldRuntime for InProcessWorldRuntime {
         checkpoint: &CharacterSaveRecord,
     ) -> Result<(), String> {
         self.session.restore_active_character_checkpoint(checkpoint)
+    }
+
+    fn prepare_character_handoff(&mut self) -> Result<CharacterHandoffCheckpoint, String> {
+        self.session.prepare_character_handoff()
+    }
+
+    fn resume_character_handoff(&mut self, checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
+        self.session.resume_character_handoff(checkpoint)
+    }
+
+    fn apply_character_handoff_replica(&mut self, checkpoint: &CharacterHandoffCheckpoint) -> Result<(), String> {
+        self.session.apply_character_handoff_replica(checkpoint)
     }
 
     fn save_active_character(&mut self) -> Result<(), String> {

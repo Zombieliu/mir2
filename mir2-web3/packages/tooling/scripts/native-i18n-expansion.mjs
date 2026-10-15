@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { createHash } from "node:crypto";
 import { catalogueFiles, placeholders, sameValueReason } from "./verify-native-i18n.mjs";
+import { sharedKeyTranslation } from "./native-i18n-shared-translations.mjs";
 
 export const expansionLocales = ["ru", "hi", "id", "vi", "th", "ar"];
 const root = resolve(import.meta.dirname, "../../..");
@@ -14,6 +15,7 @@ const hash = text => createHash("sha256").update(text).digest("hex");
 // Git stores these JSON catalogues with eol=lf. Fingerprint that canonical
 // text form so a Windows editor/checkout does not invalidate equal content.
 const textHash = bytes => hash(bytes.toString("utf8").replaceAll("\r\n", "\n"));
+const sharedKeySourceHash = () => textHash(readFileSync(new URL("./native-i18n-shared-translations.mjs", import.meta.url)));
 const read = path => JSON.parse(readFileSync(path, "utf8"));
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const commands = text => [...text.matchAll(/(?<![\w.])@[A-Za-z][A-Za-z0-9_]*(?:\([^\r\n)]*\))?/g)].map(m => m[0]).sort();
@@ -58,6 +60,15 @@ function loadOverrides(entries) {
       }
     }
   }
+  for (const entry of entries) {
+    const shared = sharedKeyTranslation(entry.key, entry.en);
+    if (!shared) continue;
+    result[entry.key] ??= {};
+    for (const locale of expansionLocales) {
+      if (result[entry.key][locale] && result[entry.key][locale] !== shared[locale]) throw new Error(`Conflicting shared translation ${entry.key}/${locale}`);
+      result[entry.key][locale] = shared[locale];
+    }
+  }
   return result;
 }
 
@@ -81,6 +92,7 @@ export function buildExpansion(draftsDirectory, { write = false } = {}) {
   const report = { schema: 1, locales: expansionLocales, entriesPerLocale: entries.length,
     sourceSha256: Object.fromEntries(catalogueFiles.map(file => [file, textHash(readFileSync(resolve(data, file)))])),
     reviewedOverrideSha256: Object.fromEntries(overrideFiles.filter(file => existsSync(resolve(reviewed, file))).map(file => [file, textHash(readFileSync(resolve(reviewed, file)))])),
+    sharedKeyTranslationsSha256: sharedKeySourceHash(),
     methods: {}, errors: [], identicalValues: [], draftSha256: {}, outputSha256: {},
     review: "Keyed overrides were authored/reviewed by the development team. Remaining prose uses offline translation drafts and requires native-speaker acceptance; no full linguistic acceptance is claimed." };
   const outputs = {};
@@ -142,7 +154,12 @@ export function verifyExpansionFiles() {
     if (provenance?.outputSha256?.[locale] !== hash(readFileSync(path))) errors.push({ locale, reason: "overlay bytes differ from reviewed generation" });
     if (!equal(Object.keys(values).sort(), entries.map(e => e.key).sort())) errors.push({ locale, reason: "key closure differs from source" });
     for (const entry of entries) for (const reason of validateValue(entry, locale, values[entry.key])) errors.push({ key: entry.key, locale, reason });
+    for (const entry of entries) {
+      const shared = sharedKeyTranslation(entry.key, entry.en);
+      if (shared && values[entry.key] !== shared[locale]) errors.push({ key: entry.key, locale, reason: "shared keyed translation differs from source" });
+    }
   }
+  if (entries.some(entry => sharedKeyTranslation(entry.key, entry.en)) && provenance?.sharedKeyTranslationsSha256 !== sharedKeySourceHash()) errors.push({ reason: "shared keyed translations changed since overlay generation" });
   return { locales: expansionLocales, entriesPerLocale: entries.length, errors };
 }
 

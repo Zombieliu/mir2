@@ -1839,10 +1839,8 @@ mod tests {
         let mut player_ui = NativePlayerUiState::default();
         player_ui.core.login_account = "must-not-leak".to_owned();
         player_ui.core.login_password = "must-not-leak".to_owned();
-        let quest_ui = QuestUiState {
-            detail_quest_index: Some(42),
-            ..Default::default()
-        };
+        let mut quest_ui = QuestUiState::default();
+        quest_ui.detail_quest_index = Some(42);
         let request = capture_request(
             PathBuf::from("captures/native-in-game-1.png"),
             "in-game",

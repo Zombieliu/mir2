@@ -1,0 +1,62 @@
+{
+  "owner": "Root",
+  "kind": "Source74 actual native warehouse and code QA publication",
+  "branch": "codex/windows-player-journey",
+  "commit": "dadbb704124f545e6fa93329553792d2e458f90b",
+  "parent": "dabe442ff1cd98f607190013540738cc97910315",
+  "files": 28,
+  "codeLeaves": 2,
+  "qaLeaves": 19,
+  "docsPrefixOnly": 7,
+  "allCommittedOwnedBlobsReadable": true,
+  "committedByteHashDifferences": 0,
+  "committedByteProof": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\publication01\\committed-scope-byte-proof01.json",
+    "bytes": 20628,
+    "sha256": "a22696c5a56bb4f5060f3f5146e07ca4c212151e0f74674b5bfd768f0d4b8e74"
+  },
+  "indexEmptyAfterCommit": true,
+  "foreignBodiesExcluded": true,
+  "pushExitCode": 0,
+  "remoteIndependentlyVerified": true,
+  "remoteHead": "dadbb704124f545e6fa93329553792d2e458f90b",
+  "priorFailures": [
+    {
+      "kind": "push01",
+      "exitCode": 128,
+      "reason": "SSH remote closed connection after sending pack"
+    },
+    {
+      "kind": "remoteCheck01",
+      "exitCode": 128,
+      "reason": "SSH connection closed before repository read"
+    }
+  ],
+  "successfulPush": {
+    "force": false,
+    "standardGitPush": true,
+    "sshEndpoint": "ssh.github.com:443",
+    "existingGithubHostKeyVerificationPreserved": true,
+    "packWindow": 0,
+    "packDepth": 0,
+    "compression": 1,
+    "thin": false,
+    "objects": 40,
+    "bytesReportedMiB": 1.94
+  },
+  "automaticGitGc": {
+    "commitSucceeded": true,
+    "error": "inflate incorrect data check; object 1ae7f886fa87573bdbb59caf0772103929fac94c cannot be read; repack failed",
+    "manualRepairPerformed": false,
+    "wholeRepositoryIntegrityVerified": false
+  },
+  "actualBuildAndNativeUiEvidenceCommitted": true,
+  "runtimeUrl": "http://127.0.0.1:19205/",
+  "runtimeStartupCallerStillOpen": true,
+  "finalStartupExitAndPostGuardPending": true,
+  "coldPrepareOverlapStillOpen": true,
+  "touchNativeStorageAcceptance": false,
+  "candidateAccepted": false,
+  "wholeParityPercentage": null,
+  "goalComplete": false
+}

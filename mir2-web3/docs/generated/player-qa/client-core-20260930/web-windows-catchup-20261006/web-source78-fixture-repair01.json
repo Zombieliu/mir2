@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "source": "Source78 fixture repair01",
+  "worker": "worker-code01",
+  "files": [
+    {
+      "path": "apps/web/scripts/test-spells-page-gate.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\before\\apps\\web\\scripts\\test-spells-page-gate.mjs",
+        "bytes": 15231,
+        "sha256": "895d7484c9fa49053df83d40875a78f716a3dd21159889065910998685dc302f"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\after\\apps\\web\\scripts\\test-spells-page-gate.mjs",
+        "bytes": 15829,
+        "sha256": "827f9504041eda5a15653be60da08a75d3a8ff80ffdfff977b40564a03cb8810"
+      },
+      "mainMatchesAfter": true
+    },
+    {
+      "path": "apps/web/scripts/test-spells-raw-ingress.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\before\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 6550,
+        "sha256": "2da5b3773f58bedcb16b005083eaa6cf5063e51864d128a50229ae294ac49a58"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\fixture-repair01\\after\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 8030,
+        "sha256": "9dd3d943b6ed7e1cbab52eacb272510485fcf815e309afb2083ca3ea23b123aa"
+      },
+      "mainMatchesAfter": true
+    }
+  ],
+  "readOnlyDependencyPins": [
+    {
+      "path": "apps/web/app/page.tsx",
+      "bytes": 1098961,
+      "sha256": "d8ba35f9427d41837622c7f685ae6426ed13f65d6b0b8972974f53416ec96e74",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/app/original-client-shell.tsx",
+      "bytes": 335016,
+      "sha256": "e82fe9a79838ae9e76b4af88811169d3da2bbc0a8e9f40ebe5fd77bc7905e6c3",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/extended-server-packets.ts",
+      "bytes": 22940,
+      "sha256": "c3e9e2435e7a9ef0df82a5e541c90e5c6de6a1843cdf6a10e462f708f8406514",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/npc-purchase-client.ts",
+      "bytes": 46405,
+      "sha256": "988575874f978710a1e825fa7d2a5054656429758e3ca4e2c3cb8373fe06a729",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/bevy-mail-ui.ts",
+      "bytes": 32804,
+      "sha256": "8783f6ac315a4c0df918840d33924ffc78c1a8fa23c247df147f5e1d0b5c9324",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/bevy-storage-presentation.ts",
+      "bytes": 1515,
+      "sha256": "121e37a049f3d98568a0a7abd17f46cfb02c7bd1e89f84bbe8e2c7bf0d572bf2",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/bevy-storage-ui.ts",
+      "bytes": 25522,
+      "sha256": "8e0fe50a1bf69f43e4a5ee3ff24dfeee4676646c1d1716c15d0a5d0c4032be2e",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/bevy-storage-model.ts",
+      "bytes": 2560,
+      "sha256": "52dc48156d41c082c21bbd1273d6446ddc2acc6183ce735dcabdc575328551ea",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/bevy-bag-ui.ts",
+      "bytes": 24620,
+      "sha256": "8c2820126fc2f7c5a4ca606786ced4ab9da53beb578175a92db2991a64bfd80c",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/bevy-bag-model.ts",
+      "bytes": 17534,
+      "sha256": "7d9df5bd7c8161f2080e782f2a9d10c4fd853107c1578562dd1810d69112db47",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/bag-belt-gesture.ts",
+      "bytes": 6192,
+      "sha256": "e4ac06538c5f70128d222fbd04fb37212b0c743f286fb74fd463e256b985e6f2",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/bag-belt-move-dispatcher.ts",
+      "bytes": 8587,
+      "sha256": "44988e16ef0aaf7385cf7208209cbd5ac72cf9c603f3ba7d7e15f30af3d9a4b2",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/client-login-runtime.ts",
+      "bytes": 8234,
+      "sha256": "fcf2d958d8485670f11b21b35ad805983f3f991d880d946f4a048273706dd484",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/mail-parcel-gateway-adapter.ts",
+      "bytes": 7314,
+      "sha256": "3d5645b2bd669fbf02e6eaaae174648534efcac768ebb918441be9c29f52f9d4",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/storage-gateway-adapter.ts",
+      "bytes": 8571,
+      "sha256": "3c6412a4afc308b66d7696191f15cf65c2ec9a0d8078bff84c59f5c3867848f4",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/equipment-gateway-adapter.ts",
+      "bytes": 6447,
+      "sha256": "0fd0a704a0b6c6cbe3b6e43a47cc80d330ce863674510ed84718fa23fae98da8",
+      "readOnly": true
+    },
+    {
+      "path": "apps/web/lib/world-model/item-identity.ts",
+      "bytes": 8874,
+      "sha256": "955d61e3f08d0d5a512bd50ca31dec6238ee0b0c21dde450ddfda794c20ac431",
+      "readOnly": true
+    }
+  ],
+  "confirmedCauses": [
+    "extended-server-packets.ts imports actual ./npc-purchase-client pure helpers, but old Mail fixture rejected every packet import. Repair adds exactly this actual pure dependency under asserted request identity.",
+    "captureSpellsGatewayEvent now clears combatBaselineSourceRef, questCapturedWorldRef and questSkillsBaselineCurrentRef. Old raw fixture omitted these refs. Repair models these refs without changing capture or owner assertions.",
+    "handleGatewayEvent now guards physical socket/source and calls captureQuestMapGatewayEvent before Spells capture. Old head fixture omitted socket/source/Quest capture. Repair supplies current physical source and idle Quest capture.",
+    "sendRaw now increments npcPearlSendEpochRef and invokes parityItemMutationAllowed, socialItemMutationAllowed and sensitive/preauth classification. Omitted fixture dependencies threw ReferenceError caught by dispatchBevySpellsIntent as outcomeUnknown. Repair loads actual Page parity/social function declarations, actual fresh BagBeltMoveDispatcher with idle refs, and only two actual pure auth classification declarations.",
+    "Shell pointer routing now visits Hero/NpcRepair/BagBelt owners and cancels Fishing holds; Canvas expressions include Hero flags and Storage prepare style. Repair adds explicit inactive owner fixtures and uses actual pure storagePrepareCanvasStyle with null prepare presentation."
+  ],
+  "preserved": [
+    "All existing semantic assertions retained. Current handleGatewayEvent calls additionally supply its required physical source argument.",
+    "Root appended two diagnostic tests and their pageSpellsFixture source remain byte-identical.",
+    "Entire actual sendRaw test remains byte-identical, including definitelyUnsent, confirmedSend, immutable DTO mismatch and unknown transport outcome expectations.",
+    "No product gates are replaced with permissive stubs: parity/social use actual Page source, BagBelt uses actual pure dispatcher, mail/storage/auth use actual pure helpers."
+  ],
+  "execution": {
+    "sourceDataOnly": true,
+    "testsRun": false,
+    "productImportEvalTranspileCheckBuildRun": false,
+    "networkBrowserRun": false,
+    "nodeReplReset": false,
+    "gitRun": false,
+    "docsOrRustGatewayTsconfigModified": false,
+    "deletionCompressionRun": false,
+    "note": "Only filesystem/source text/data/hash/rg operations. Root alone executes unchanged original callers."
+  },
+  "mainWriteOwnershipReleased": true,
+  "validation": "Pure text/hash review only; Root must execute actual repaired fixtures."
+}

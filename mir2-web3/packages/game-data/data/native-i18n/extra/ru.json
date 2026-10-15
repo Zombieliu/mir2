@@ -9410,5 +9410,14 @@
   "quest.practice.class.toggle_hit": "Включите {skill}, затем нанесите монстру урон обычной атакой.",
   "quest.practice.class.spell_hit": "Нанесите монстру урон с помощью {skill}; промахи не засчитываются.",
   "quest.supply.assassinPoisonEquip": "Ядовитый меч: экипируйте красный или зелёный порошок; 1 за применение.",
-  "quest.supply.assassinPoisonEquipped": "Ядовитый меч: порошок экипирован; 1 за применение."
+  "quest.supply.assassinPoisonEquipped": "Ядовитый меч: порошок экипирован; 1 за применение.",
+  "ui.questProgressHeading": "Прогресс",
+  "ui.questReturnHeading": "Место сдачи",
+  "ui.questClientLoading": "Подготовка действий задания…",
+  "ui.questClientUnavailable": "Действия задания временно недоступны. Попробуйте снова.",
+  "ui.questActionPending": "Ваш запрос обрабатывается. Пожалуйста, подождите.",
+  "ui.questActionRewardRequired": "Сначала выберите награду.",
+  "ui.questActionTalkToNpc": "Поговорите с NPC задания, чтобы продолжить.",
+  "ui.questActionStateChanged": "Задание изменилось. Проверьте его и попробуйте снова.",
+  "ui.retry": "Повторить"
 }

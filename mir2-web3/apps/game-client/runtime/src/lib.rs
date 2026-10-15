@@ -1,16 +1,31 @@
 mod additive_material;
+#[cfg(feature = "web-quest-ui")]
+mod bag_ui_host;
 pub mod capture_context;
+#[cfg(feature = "web-quest-ui")]
+pub mod character_ui_host;
+pub mod combat_input_host;
+#[cfg(feature = "web-item-tooltip")]
+mod combat_modes_host;
 pub mod entity_animation;
 mod entity_animation_bridge;
 #[cfg(test)]
 #[path = "fallback_hierarchy_tests.rs"]
 mod fallback_hierarchy_tests;
+#[cfg(all(feature = "web-quest-ui", any(target_arch = "wasm32", test)))]
+pub mod hero_ui_host;
+#[cfg(feature = "web-quest-ui")]
+pub mod hud_ui_host;
 mod interpolation;
+#[cfg(feature = "web-item-tooltip")]
+mod item_tooltip_query;
 mod lighting;
 mod local_motion;
 #[cfg(test)]
 #[path = "mail_service_runtime_tests.rs"]
 mod mail_service_runtime_tests;
+#[cfg(feature = "web-quest-ui")]
+pub mod mail_ui_host;
 mod motion;
 mod movement_shadow;
 #[cfg(not(target_arch = "wasm32"))]
@@ -18,10 +33,26 @@ pub mod native_ingest;
 #[cfg(target_arch = "wasm32")]
 #[path = "native_ingest_wasm.rs"]
 mod native_ingest;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod npc_purchase_economy;
+#[cfg(feature = "web-quest-ui")]
+mod npc_shop_ui_host;
 mod presentation_pose;
+#[cfg(feature = "web-quest-ui")]
+mod quest_route_plan;
+#[cfg(feature = "web-quest-ui")]
+mod quest_ui_host;
 mod remote_motion;
 #[cfg(not(target_arch = "wasm32"))]
 mod render_diagnostics;
+mod runtime_ui_capabilities;
+#[cfg(feature = "web-item-tooltip")]
+mod skill_bar_query;
+#[cfg(feature = "web-quest-ui")]
+pub mod spells_ui_host;
+#[cfg(feature = "web-quest-ui")]
+mod storage_ui_host;
+mod webgl2_shared_ui;
 #[cfg(not(target_arch = "wasm32"))]
 pub use render_diagnostics::{native_render_diagnostics_enabled, record_native_render_marker};
 
@@ -51,6 +82,8 @@ use mir2_client_bevy::pending_operations::{
 };
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::JsCast;
 
 const TILE_SIZE: f32 = 32.0;
 const FLOOR_COLOR: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
@@ -202,6 +235,25 @@ struct RuntimeEffectShadowCleanupTracker(u64);
 /// state-machine tests can exercise the exact same reset and receipt systems
 /// without creating a renderer/window.
 pub struct Mir2NativeSessionBoundaryPlugin;
+
+/// Production typed parcel ingress, usable with the session-boundary plugin
+/// on a plain App. Its parent runtime retains the original model ordering.
+pub struct Mir2NativeMailServiceIngestPlugin;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemSet)]
+struct NativeMailServiceIngestSet;
+impl Plugin for Mir2NativeMailServiceIngestPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<mir2_client_bevy::mail_service::MailServiceInbox>()
+            .init_resource::<native_ingest::NativeInbound>()
+            .add_systems(
+                Update,
+                ingest_pending_mail_service
+                    .in_set(PendingLifecycleSet::Ingest)
+                    .in_set(NativeMailServiceIngestSet)
+                    .after(apply_session_reset_to_runtime_models),
+            );
+    }
+}
 
 impl Plugin for Mir2NativeSessionBoundaryPlugin {
     fn build(&self, app: &mut App) {
@@ -1303,9 +1355,206 @@ pub fn get_mir2_renderer_backend() -> String {
     COMPILED_RENDER_BACKEND.to_owned()
 }
 
+fn web_startup_ui_mode() -> webgl2_shared_ui::StartupUiMode {
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    {
+        quest_ui_host::startup_mode()
+    }
+    #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
+    {
+        webgl2_shared_ui::StartupUiMode {
+            requested: false,
+            shared_webgl2: false,
+        }
+    }
+}
+
+#[wasm_bindgen(js_name = getMir2RuntimeCanvasSelector)]
+pub fn get_mir2_runtime_canvas_selector() -> String {
+    webgl2_shared_ui::runtime_canvas_selector(web_startup_ui_mode()).to_owned()
+}
+
+#[wasm_bindgen(js_name = getMir2RuntimeUiCapabilities)]
+pub fn get_mir2_runtime_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_json()
+}
+
+#[wasm_bindgen(js_name = getMir2HudUiCapabilities)]
+pub fn get_mir2_hud_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_hud_json()
+}
+
+#[wasm_bindgen(js_name = getMir2CharacterUiCapabilities)]
+pub fn get_mir2_character_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_character_json()
+}
+
+#[wasm_bindgen(js_name = getMir2SpellsUiCapabilities)]
+pub fn get_mir2_spells_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_spells_json()
+}
+
+#[wasm_bindgen(js_name = getMir2StorageUiCapabilities)]
+pub fn get_mir2_storage_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_storage_json()
+}
+
+#[wasm_bindgen(js_name = getMir2NpcShopUiCapabilities)]
+pub fn get_mir2_npc_shop_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_npc_shop_json()
+}
+
+/// Pure shared NPC Gold Buy decision; it does not send or mutate player state.
+#[wasm_bindgen(js_name = getMir2NpcGoldBuyPlan)]
+pub fn get_mir2_npc_gold_buy_plan(input_json: &str) -> String {
+    mir2_client_bevy::npc_shop_buy::plan_npc_gold_buy_json(input_json)
+}
+
+/// Pure ordinary Quest route selection; the host retains movement authority.
+#[cfg(feature = "web-quest-ui")]
+#[wasm_bindgen(js_name = getMir2QuestRoutePlan)]
+pub fn get_mir2_quest_route_plan(query_json: &str, blocked_bits: &[u8]) -> String {
+    quest_route_plan::plan(query_json, blocked_bits)
+}
+
+/// Additive local HUD preference support; the existing strict capabilities JSON is unchanged.
+#[wasm_bindgen(js_name = getMir2HudPreferencesVersion)]
+pub fn get_mir2_hud_preferences_version() -> u32 {
+    if cfg!(feature = "web-quest-ui") {
+        1
+    } else {
+        0
+    }
+}
+
+#[wasm_bindgen(js_name = getMir2QuestNameTargetsVersion)]
+pub fn get_mir2_quest_name_targets_version() -> u32 {
+    if cfg!(feature = "web-quest-ui") {
+        1
+    } else {
+        0
+    }
+}
+
+/// Read-only identities from the current shared Quest tracker. Thin ABI0 remains explicitly unknown.
+#[wasm_bindgen(js_name = getMir2QuestNameTargets)]
+pub fn get_mir2_quest_name_targets() -> String {
+    #[cfg(all(feature = "web-quest-ui", target_arch = "wasm32"))]
+    {
+        return quest_ui_host::quest_name_targets_json();
+    }
+    #[cfg(not(all(feature = "web-quest-ui", target_arch = "wasm32")))]
+    {
+        "{\"version\":1,\"known\":false,\"stamp\":null,\"objectIds\":[]}".into()
+    }
+}
+
+#[wasm_bindgen(js_name = getMir2CombatModeKeysVersion)]
+pub fn get_mir2_combat_mode_keys_version() -> u32 {
+    if cfg!(feature = "web-item-tooltip") {
+        1
+    } else {
+        0
+    }
+}
+
+/// Local Native reducer only; the browser's final socket gate retains all authority.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = processMir2CombatModeKeys)]
+pub fn process_mir2_combat_mode_keys(input: &str) -> String {
+    combat_modes_host::process_json(input)
+}
+
+/// Read-only Crystal item document, shared with the Native tooltip painter.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2ItemTooltipDocument)]
+pub fn get_mir2_item_tooltip_document(query_json: &str) -> String {
+    item_tooltip_query::query_item_tooltip_json(query_json)
+}
+
+/// Exact unique Crystal template lookup for readonly browser item labels.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2ItemCatalogInfo)]
+pub fn get_mir2_item_catalog_info(query_json: &str) -> String {
+    item_tooltip_query::query_item_catalog_json(query_json)
+}
+
+/// Read-only character rows from the same Native Status/State rule.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2CharacterStatsDocument)]
+pub fn get_mir2_character_stats_document(query_json: &str) -> String {
+    item_tooltip_query::query_character_stats_json(query_json)
+}
+
+/// Read-only bar metadata from the same Native learned-skill normalization.
+#[cfg(feature = "web-item-tooltip")]
+#[wasm_bindgen(js_name = getMir2SkillBarDocument)]
+pub fn get_mir2_skill_bar_document(query_json: &str) -> String {
+    skill_bar_query::query_skill_bar_json(query_json)
+}
+
+#[cfg(test)]
+#[test]
+fn npc_gold_buy_query_is_data_only_and_rejects_incomplete_models() {
+    let result: serde_json::Value =
+        serde_json::from_str(&get_mir2_npc_gold_buy_plan("{}")).unwrap();
+    assert_eq!(result["canBuy"], false);
+    assert_eq!(result["blockReason"], "invalidInput");
+    assert!(result["command"].is_null());
+}
+
+#[wasm_bindgen(js_name = getMir2MailUiCapabilities)]
+pub fn get_mir2_mail_ui_capabilities() -> String {
+    let compiled = cfg!(all(target_arch = "wasm32", feature = "web-quest-ui"))
+        && (COMPILED_RENDER_BACKEND == "webgpu"
+            || (COMPILED_RENDER_BACKEND == "webgl2" && cfg!(feature = "webgl2-shared-ui")));
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    let startup = {
+        let mode = quest_ui_host::startup_mode();
+        compiled && mode.requested && (COMPILED_RENDER_BACKEND == "webgpu" || mode.shared_webgl2)
+    };
+    #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
+    let startup = false;
+    serde_json::json!({"schemaVersion":1,"mailPageAbiVersion":u8::from(compiled),
+        "mailIntentAbiVersion":u8::from(compiled),"compiled":compiled,"startup":startup})
+    .to_string()
+}
+
+#[wasm_bindgen(js_name = getMir2MailComposeUiCapabilities)]
+pub fn get_mir2_mail_compose_ui_capabilities() -> String {
+    let compiled = cfg!(all(target_arch = "wasm32", feature = "web-quest-ui"))
+        && (COMPILED_RENDER_BACKEND == "webgpu"
+            || (COMPILED_RENDER_BACKEND == "webgl2" && cfg!(feature = "webgl2-shared-ui")));
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    let startup = {
+        let mode = quest_ui_host::startup_mode();
+        compiled && mode.requested && (COMPILED_RENDER_BACKEND == "webgpu" || mode.shared_webgl2)
+    };
+    #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
+    let startup = false;
+    serde_json::json!({"schemaVersion":1,"mailComposeUiAbiVersion":u8::from(compiled),
+        "textAdapterAbiVersion":u8::from(compiled),"compiled":compiled,"startup":startup})
+    .to_string()
+}
+#[wasm_bindgen(js_name = getMir2HudSourceGeometry)]
+pub fn get_mir2_hud_source_geometry() -> String {
+    #[cfg(feature = "web-quest-ui")]
+    return serde_json::to_string(&mir2_client_bevy::crystal_ui::shared_hud::main_hud_plan(
+        &mir2_client_bevy::read_model::UiReadModel::default(),
+    ))
+    .unwrap_or_default();
+    #[cfg(not(feature = "web-quest-ui"))]
+    return "null".to_owned();
+}
+
 #[wasm_bindgen(js_name = resolveMir2EntityAnimationPoses)]
 pub fn resolve_mir2_entity_animation_poses(snapshot_json: String) -> String {
     entity_animation_bridge::resolve_json(&snapshot_json)
+}
+
+#[wasm_bindgen(js_name = getMir2EntityActionPose)]
+pub fn get_mir2_entity_action_pose(query_json: String) -> String {
+    entity_animation_bridge::action_pose_json(&query_json)
 }
 
 #[wasm_bindgen(js_name = resetMir2EntityAnimations)]
@@ -1577,16 +1826,23 @@ pub struct RuntimeWindowSpec {
 }
 
 impl RuntimeWindowSpec {
-    /// Web WASM host: transparent overlay over the DOM map/floor/UI layers.
+    /// Web WASM host: world canvas ordinarily, fixed stage UI canvas for shared GL2.
     pub fn web() -> Self {
+        // The ordinary world canvas shares React's mouse routing. Cancelling
+        // pointerdown in winit suppresses the compatibility mousedown/up events
+        // that route requires. Only the fixed stage shared-UI surface owns
+        // those gestures; secondary UI windows keep their own prevention.
+        let startup = web_startup_ui_mode();
+        let prevent_default_event_handling = startup.shared_webgl2;
+
         Self {
-            canvas_selector: Some("#mir2-web3-canvas".to_owned()),
+            canvas_selector: Some(webgl2_shared_ui::runtime_canvas_selector(startup).to_owned()),
             title: "mir2-web3".to_owned(),
             width: 1280,
             height: 720,
             transparent: true,
             fit_canvas_to_parent: true,
-            prevent_default_event_handling: true,
+            prevent_default_event_handling,
             close_when_requested: true,
             composite_alpha_mode: WINDOW_COMPOSITE_ALPHA_MODE,
             asset_root: ".".to_owned(),
@@ -1673,6 +1929,9 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                         composite_alpha_mode: spec.composite_alpha_mode,
                         fit_canvas_to_parent: spec.fit_canvas_to_parent,
                         prevent_default_event_handling: spec.prevent_default_event_handling,
+                        // The web canvas is a fixed virtual stage. Browser DPR changes
+                        // must not halve its logical size while keeping its backing
+                        // dimensions unchanged. Desktop windows retain the OS scale.
                         resolution: WindowResolution::new(spec.width, spec.height),
                         title: spec.title,
                         transparent: spec.transparent,
@@ -1683,6 +1942,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         )
         .add_plugins((
             Mir2NativeSessionBoundaryPlugin,
+            Mir2NativeMailServiceIngestPlugin,
             additive_material::CrystalAdditiveMaterialPlugin,
             lighting::CrystalMultiplyMaterialPlugin,
             motion::CrystalMoveClockPlugin,
@@ -1694,6 +1954,12 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .configure_sets(
             Update,
             PendingLifecycleSet::Ingest.before(PendingLifecycleSet::UiReset),
+        )
+        .configure_sets(
+            Update,
+            NativeMailServiceIngestSet
+                .after(ingest_pending_mail_model)
+                .before(ingest_pending_shop_model),
         )
         .add_systems(
             Update,
@@ -1749,7 +2015,6 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 ingest_pending_inventory_operation_ack,
                 ingest_pending_wallet_patch,
                 ingest_pending_mail_model,
-                ingest_pending_mail_service,
                 ingest_pending_shop_model,
                 ingest_pending_game_shop_info,
                 ingest_pending_game_shop_stock,
@@ -1786,12 +2051,47 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         );
     app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
     #[cfg(not(target_arch = "wasm32"))]
+    app.add_systems(
+        Update,
+        npc_purchase_economy::apply_pending_native_npc_economy
+            .after(ingest_pending_chat_line)
+            .after(ingest_pending_lighting_render_state)
+            .after(NativeMailServiceIngestSet)
+            .before(PendingLifecycleSet::UiReset)
+            .before(RuntimePresentationSet)
+            .in_set(PendingLifecycleSet::Ingest),
+    );
+    combat_input_host::install(&mut app);
+    #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(Last, render_diagnostics::capture_committed_frame);
     #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(
         Update,
         emit_native_soak_metrics.after(publish_presentation_pose_frame),
     );
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    {
+        let ui_mode = quest_ui_host::startup_mode();
+        if ui_mode.requested {
+            if ui_mode.shared_webgl2 {
+                #[cfg(feature = "webgl2-shared-ui")]
+                app.insert_resource(webgl2_shared_ui::WebGl2SharedUiPrototype);
+            }
+            quest_ui_host::install(&mut app, ui_mode.shared_webgl2);
+            #[cfg(not(all(
+                feature = "webgl2",
+                not(feature = "webgpu"),
+                not(feature = "webgl2-shared-ui")
+            )))]
+            storage_ui_host::install(&mut app);
+            #[cfg(not(all(
+                feature = "webgl2",
+                not(feature = "webgpu"),
+                not(feature = "webgl2-shared-ui")
+            )))]
+            npc_shop_ui_host::install(&mut app);
+        }
+    }
     app
 }
 
@@ -1807,9 +2107,68 @@ pub fn boot_mir2_runtime() {
     app.run();
 }
 
-fn setup_scene(mut commands: Commands) {
-    commands.spawn((Camera2d, MainCamera));
+fn setup_scene(
+    mut commands: Commands,
+    #[cfg(feature = "webgl2-shared-ui")] prototype: Option<
+        Res<webgl2_shared_ui::WebGl2SharedUiPrototype>,
+    >,
+) {
+    commands.spawn((
+        Camera2d,
+        Camera {
+            is_active: {
+                #[cfg(feature = "webgl2-shared-ui")]
+                {
+                    prototype.is_none()
+                }
+                #[cfg(not(feature = "webgl2-shared-ui"))]
+                {
+                    true
+                }
+            },
+            ..Default::default()
+        },
+        MainCamera,
+    ));
     publish_status("scene-ready", "Camera ready");
+}
+
+#[cfg(all(test, feature = "web-quest-ui"))]
+mod shared_ui_camera_tests {
+    use super::*;
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn non_wasm_web_spec_uses_the_world_canvas_selector() {
+        let selector = get_mir2_runtime_canvas_selector();
+        assert_eq!(selector, "#mir2-web3-canvas");
+        assert_eq!(
+            RuntimeWindowSpec::web().canvas_selector.as_deref(),
+            Some(selector.as_str())
+        );
+    }
+
+    #[test]
+    fn ordinary_world_camera_remains_active() {
+        let mut app = App::new();
+        app.add_systems(Startup, setup_scene);
+        app.update();
+        let world = app.world_mut();
+        let mut query = world.query_filtered::<&Camera, With<MainCamera>>();
+        assert!(query.single(world).unwrap().is_active);
+    }
+
+    #[cfg(feature = "webgl2-shared-ui")]
+    #[test]
+    fn world_camera_is_inactive_for_shared_webgl2() {
+        let mut app = App::new();
+        app.insert_resource(webgl2_shared_ui::WebGl2SharedUiPrototype);
+        app.add_systems(Startup, setup_scene);
+        app.update();
+        let world = app.world_mut();
+        let mut query = world.query_filtered::<&Camera, With<MainCamera>>();
+        assert!(!query.single(world).unwrap().is_active);
+    }
 }
 
 fn ingest_pending_world_state(
@@ -1964,6 +2323,7 @@ fn ingest_pending_entity_render_atlases(
 fn ingest_pending_ui_read_model(
     mut ui: ResMut<mir2_client_bevy::read_model::UiReadModel>,
     native: Res<native_ingest::NativeInbound>,
+    ingress: Option<Res<mir2_client_bevy::read_model::UiReadModelIngress>>,
 ) {
     native.drain_matching(
         |message| matches!(message, native_ingest::NativeInboundMessage::UiReadModel(_)),
@@ -1971,6 +2331,9 @@ fn ingest_pending_ui_read_model(
             if let native_ingest::NativeInboundMessage::UiReadModel(json) = message {
                 match serde_json::from_str::<mir2_client_bevy::read_model::UiReadModel>(&json) {
                     Ok(model) => {
+                        if cfg!(target_arch = "wasm32") && ingress.is_some() {
+                            return;
+                        }
                         *ui = model;
                     }
                     Err(error) => {
@@ -1999,6 +2362,7 @@ fn ingest_pending_wallet_patch(
     mut ui: ResMut<mir2_client_bevy::read_model::UiReadModel>,
     mut inventory: ResMut<mir2_client_bevy::inventory::InventoryModel>,
     native: Res<native_ingest::NativeInbound>,
+    ingress: Option<Res<mir2_client_bevy::read_model::UiReadModelIngress>>,
 ) {
     native.drain_matching(
         |message| matches!(message, native_ingest::NativeInboundMessage::WalletPatch(_)),
@@ -2006,6 +2370,9 @@ fn ingest_pending_wallet_patch(
             if let native_ingest::NativeInboundMessage::WalletPatch(json) = message {
                 match serde_json::from_str::<WalletPatch>(&json) {
                     Ok(patch) if patch.gold.is_some() || patch.credit.is_some() => {
+                        if cfg!(target_arch = "wasm32") && ingress.is_some() {
+                            return;
+                        }
                         if let Some(gold) = patch.gold {
                             ui.player.gold = gold;
                             inventory.gold = gold;
@@ -2342,10 +2709,12 @@ fn apply_session_reset_to_runtime_models(
         ResMut<InventoryOperationFeedback>,
         ResMut<SessionResetGameShopPreservation>,
         Option<ResMut<local_motion::LocalMotionPresentationShadow>>,
+        Option<Res<mir2_client_bevy::read_model::UiReadModelIngress>>,
     ),
 ) {
     let (mut skills, mut receipts, mut hero, mut hero_receipts) = skill_state;
-    let (mut inventory_feedback, mut preservation, mut local_motion) = runtime_reset_state;
+    let (mut inventory_feedback, mut preservation, mut local_motion, ui_ingress) =
+        runtime_reset_state;
     if tracker.0 == reset.0 {
         return;
     }
@@ -2353,14 +2722,18 @@ fn apply_session_reset_to_runtime_models(
     if let Some(receipts) = receipts.as_deref_mut() {
         receipts.0.clear();
     }
-    *ui = mir2_client_bevy::read_model::UiReadModel::default();
+    // Portable complete/legacy snapshots use one generation-controlled ingress.
+    // A native protocol reset cannot mutate its player outside that owner.
+    if !cfg!(target_arch = "wasm32") || ui_ingress.is_none() {
+        *ui = mir2_client_bevy::read_model::UiReadModel::default();
+    }
     surface_signals.npc_shop_open_requested = false;
     *map = mir2_client_bevy::map::MapModel::default();
     *entities = mir2_client_bevy::entities::EntityModelSet::default();
     *inventory = mir2_client_bevy::inventory::InventoryModel::default();
     *chat = mir2_client_bevy::chat::ChatModel::default();
     *mail = mir2_client_bevy::mail::MailModel::default();
-    mail_service.clear();
+    mail_service.clear_session();
     *shop = mir2_client_bevy::shop::ShopModel::default();
     let preserved_receipt = preservation.receipt_for(reset.0).cloned();
     if let Some(receipt) = preserved_receipt.as_ref() {
@@ -2462,30 +2835,77 @@ fn ingest_pending_mail_service(
     mut inbox: ResMut<mir2_client_bevy::mail_service::MailServiceInbox>,
     native: Res<native_ingest::NativeInbound>,
 ) {
+    if let Some(epoch) = native.mail_stream_failure() {
+        inbox.fail_stream(epoch);
+    }
     native.drain_matching(
-        |message| matches!(message, native_ingest::NativeInboundMessage::MailService(_)),
         |message| {
-            if let native_ingest::NativeInboundMessage::MailService(json) = message {
-                match serde_json::from_str::<mir2_client_bevy::mail_service::MailServiceEvent>(
-                    &json,
-                ) {
-                    Ok(event) => {
-                        if !inbox.push(event) {
-                            publish_status(
-                                "native-mail-service-overflow",
-                                "mail service inbox is full",
-                            );
-                            eprintln!("[runtime] mail service inbox is full");
-                        }
-                    }
-                    Err(error) => {
-                        publish_status("native-decode-error", "invalid native mail service event");
-                        eprintln!("[runtime] mail service decode error: {error}");
-                    }
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::MailService(_)
+                    | native_ingest::NativeInboundMessage::MailServiceStreamStarted(_)
+                    | native_ingest::NativeInboundMessage::MailQuoteReceipt(_)
+                    | native_ingest::NativeInboundMessage::MailSendReceipt(_)
+                    | native_ingest::NativeInboundMessage::MailSendAcknowledgement(_)
+            )
+        },
+        |message| {
+            let critical_epoch = match &message {
+                native_ingest::NativeInboundMessage::MailQuoteReceipt(receipt) => {
+                    Some(receipt.ticket.epoch())
                 }
+                native_ingest::NativeInboundMessage::MailSendReceipt(receipt) => {
+                    Some(receipt.ticket.epoch())
+                }
+                native_ingest::NativeInboundMessage::MailSendAcknowledgement(ack) => {
+                    Some(ack.ticket.epoch())
+                }
+                native_ingest::NativeInboundMessage::MailService(delivery)
+                    if matches!(
+                        delivery.event,
+                        mir2_client_bevy::mail_service::MailServiceEvent::Cost { .. }
+                    ) =>
+                {
+                    Some(delivery.epoch)
+                }
+                _ => None,
+            };
+            let accepted = match message {
+                native_ingest::NativeInboundMessage::MailServiceStreamStarted(marker) => {
+                    inbox.start_stream(marker)
+                }
+                native_ingest::NativeInboundMessage::MailService(delivery) => {
+                    inbox.push_delivery(delivery)
+                }
+                native_ingest::NativeInboundMessage::MailQuoteReceipt(receipt) => {
+                    inbox.push_quote_receipt(receipt)
+                }
+                native_ingest::NativeInboundMessage::MailSendReceipt(receipt) => {
+                    inbox.push_send_receipt(receipt)
+                }
+                native_ingest::NativeInboundMessage::MailSendAcknowledgement(ack) => {
+                    inbox.push_send_acknowledgement(ack)
+                }
+                _ => return,
+            };
+            if !accepted {
+                if let Some(epoch) = critical_epoch {
+                    native.fail_mail_stream(epoch);
+                    inbox.fail_stream(epoch);
+                }
+                publish_status(
+                    "native-mail-service-overflow",
+                    "mail service delivery rejected",
+                );
+                eprintln!("[runtime] mail service delivery rejected");
             }
         },
     );
+    // A marker drained in this same pass must not erase an already-poisoned
+    // producing stream merely because the inbox had not seen its epoch yet.
+    if let Some(epoch) = native.mail_stream_failure() {
+        inbox.fail_stream(epoch);
+    }
 }
 
 fn ingest_pending_shop_model(
@@ -2970,35 +3390,47 @@ fn ingest_pending_storage_model(
     );
 }
 
-fn ingest_pending_hero_model(
-    mut hero: ResMut<mir2_client_bevy::hero_model::HeroModel>,
-    mut receipts: ResMut<mir2_client_bevy::hero_model::HeroModelReceipts>,
-    native: Res<native_ingest::NativeInbound>,
-) {
-    native.drain_matching(
-        |message| {
-            matches!(
-                message,
+fn ingest_pending_hero_model(world: &mut World) {
+    let mut messages = Vec::new();
+    world
+        .resource::<native_ingest::NativeInbound>()
+        .drain_matching(
+            |message| match message {
                 native_ingest::NativeInboundMessage::HeroModel(_)
-                    | native_ingest::NativeInboundMessage::HeroModelReceipt(_)
-            )
-        },
-        |message| {
-            if let native_ingest::NativeInboundMessage::HeroModel(json)
-            | native_ingest::NativeInboundMessage::HeroModelReceipt(json) = message
-            {
-                match serde_json::from_str::<mir2_client_bevy::hero_model::HeroModel>(&json) {
-                    Ok(model) => {
-                        if model.skill_key_ack.is_some() {
+                | native_ingest::NativeInboundMessage::HeroModelReceipt(_) => true,
+                #[cfg(not(target_arch = "wasm32"))]
+                native_ingest::NativeInboundMessage::HeroOwnerSnapshot(_) => true,
+                _ => false,
+            },
+            |message| messages.push(message),
+        );
+    for message in messages {
+        #[cfg(not(target_arch = "wasm32"))]
+        if let native_ingest::NativeInboundMessage::HeroOwnerSnapshot(update) = message {
+            npc_purchase_economy::apply_native_hero_owner_update(world, update);
+            continue;
+        }
+        if let native_ingest::NativeInboundMessage::HeroModel(json)
+        | native_ingest::NativeInboundMessage::HeroModelReceipt(json) = message
+        {
+            match serde_json::from_str::<mir2_client_bevy::hero_model::HeroModel>(&json) {
+                Ok(model) => {
+                    #[cfg(not(target_arch = "wasm32"))]
+                    npc_purchase_economy::apply_native_hero_packet_model(world, model);
+                    #[cfg(target_arch = "wasm32")]
+                    {
+                        if model.skill_key_ack.is_some() || model.item_result_receipt {
+                            if let Some(mut receipts) = world.get_resource_mut::<mir2_client_bevy::hero_model::HeroModelReceipts>() {
                             receipts.0.push_back(model.clone());
                         }
-                        *hero = model;
+                        }
+                        world.insert_resource(model);
                     }
-                    Err(error) => eprintln!("[runtime] hero model decode error: {error}"),
                 }
+                Err(error) => eprintln!("[runtime] hero model decode error: {error}"),
             }
-        },
-    );
+        }
+    }
 }
 
 fn ingest_pending_skill_model(

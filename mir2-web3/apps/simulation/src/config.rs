@@ -1838,6 +1838,10 @@ pub struct CharacterSaveRecord {
     pub player_kill_receipts: BTreeMap<String, String>,
     #[serde(default, skip_serializing_if = "default_npc_event_snapshot_is_empty")]
     pub default_npc_events: crate::DefaultNpcEventSnapshot,
+    /// Private atomic NPC purchase history and non-reusable character incarnation.
+    /// Absent on legacy saves; never projected through WorldSnapshot or mail.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub npc_purchase_journal: Option<crate::npc_purchase_journal::NpcPurchaseJournal>,
     #[serde(default, skip_serializing_if = "GuildExperienceJournal::is_empty")]
     pub guild_experience_journal: GuildExperienceJournal,
     /// Optimistic revision for the complete private character snapshot.
@@ -1961,6 +1965,7 @@ impl CharacterSaveRecord {
             guild_experience_journal: GuildExperienceJournal::default(),
             player_kill_receipts: BTreeMap::new(),
             default_npc_events: crate::DefaultNpcEventSnapshot::default(),
+            npc_purchase_journal: None,
             character,
             map_file_name: String::new(),
             map_title: String::new(),
@@ -3889,6 +3894,7 @@ pub struct SimulationConfig {
     save_recovery_mac_key: Option<SaveRecoveryMacKey>,
     pub content_profile: Option<ContentProfileRuntime>,
     file_authority: Option<Arc<file_authority::FileAuthority>>,
+    replica_bootstrap_authority: Option<ReplicaBootstrapAuthority>,
     guild_clock_driver: Arc<Mutex<guild_clock_driver::ClockDriverState>>,
     guild_clock_updates: Arc<std::sync::atomic::AtomicU64>,
     account_store_persist_lock: Arc<Mutex<()>>,
@@ -3908,6 +3914,15 @@ pub struct SimulationConfig {
 
 #[derive(Clone)]
 struct SaveRecoveryMacKey(Arc<[u8; 32]>);
+
+#[derive(Clone)]
+struct ReplicaBootstrapAuthority(SharedAccountStore);
+
+impl fmt::Debug for ReplicaBootstrapAuthority {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("ReplicaBootstrapAuthority([isolated])")
+    }
+}
 
 impl fmt::Debug for SaveRecoveryMacKey {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -3970,13 +3985,23 @@ impl SimulationConfig {
         fork.account_store_database_url = None;
         fork.save_recovery_dir = None;
         fork.save_recovery_mac_key = None;
+        fork.replica_bootstrap_authority = Some(ReplicaBootstrapAuthority(Arc::clone(&fork.account_store)));
         Ok(fork)
+    }
+
+    pub(crate) fn has_isolated_replica_bootstrap_authority(&self) -> bool {
+        self.account_store_path.is_none()
+            && self.account_store_database_url.is_none()
+            && self.file_authority.is_none()
+            && self.replica_bootstrap_authority.as_ref()
+                .is_some_and(|authority| Arc::ptr_eq(&authority.0, &self.account_store))
     }
 
     /// Rebind an already-restored replica Session to the authoritative account
     /// store when its Zone is promoted. The Session keeps its reconstructed
     /// world state while future character saves use the live host repository.
     pub fn rebind_account_store_from(&mut self, authoritative: &Self) {
+        self.replica_bootstrap_authority = None;
         self.file_authority = authoritative.file_authority.clone();
         self.guild_clock_driver = Arc::clone(&authoritative.guild_clock_driver);
         self.guild_clock_updates = Arc::clone(&authoritative.guild_clock_updates);
@@ -4086,6 +4111,7 @@ impl SimulationConfig {
             save_recovery_mac_key: None,
             content_profile: None,
             file_authority: None,
+            replica_bootstrap_authority: None,
             guild_clock_updates: Arc::new(std::sync::atomic::AtomicU64::new(0)),
             guild_clock_driver: Arc::new(Mutex::new(guild_clock_driver::ClockDriverState::default())),
             account_store_persist_lock: Arc::new(Mutex::new(())),
@@ -4228,6 +4254,7 @@ impl SimulationConfig {
     }
 
     pub fn with_account_store_path(mut self, path: impl Into<PathBuf>) -> Self {
+        self.replica_bootstrap_authority = None;
         let path=path.into();
         match file_authority::FileAuthority::acquire(&path,self.default_character.clone()) {
             Ok(authority)=>{
@@ -5131,6 +5158,20 @@ impl SimulationConfig {
         } else {
             false
         }
+    }
+
+    /// Ranking IDs are not globally unique database keys. Resolve them from one
+    /// complete repeatable-read source snapshot, not a per-process login cache.
+    /// This never installs that snapshot over live personal session state.
+    pub(crate) fn ranking_inspect_authority_snapshot(&self) -> Result<AccountStore, String> {
+        if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
+            let database_url = self.account_store_database_url.clone()
+                .ok_or("ranking inspect account source unavailable")?;
+            return load_account_store_from_postgres(database_url, self.default_character.clone());
+        }
+        self.account_store.lock()
+            .map(|store| store.clone())
+            .map_err(|_| "ranking inspect account source unavailable".to_string())
     }
 
     /// Refresh one account from the authoritative PostgreSQL repository.
@@ -6546,6 +6587,10 @@ pub struct WorldEntitySnapshot {
     /// use the value carried by Crystal `ObjectPlayerInfo`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fishing: Option<bool>,
+    /// Raw Crystal transform discriminant from authoritative Zone player state
+    /// or `ObjectPlayerInfo`. Missing producers must leave this unknown.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transform_type: Option<i16>,
     pub disposition: WorldEntityDisposition,
     pub sprite: Option<WorldEntitySpriteSnapshot>,
     pub quest_ids: Vec<i32>,
@@ -6605,10 +6650,10 @@ pub struct WorldItemTooltipSource {
     /// Direct socket `ItemInfo` values in the same positional order as
     /// `user_item.slots`. Crystal renders each socket's FriendlyName and also
     /// folds its base stats into the parent tooltip.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub socket_infos: Vec<Option<CrystalItemTemplate>>,
     /// Viewer-resolved rows corresponding positionally to `socket_infos`.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub real_socket_infos: Vec<Option<CrystalItemTemplate>>,
 }
 
@@ -7720,6 +7765,76 @@ pub struct HeroWeightsSnapshot { pub bag:u32, pub wear:u32, pub hand:u32 }
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayerWeightsSnapshot { pub bag:u32, pub wear:u32, pub hand:u32 }
+/// Read-only capacity evidence from one complete authoritative owned roster.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NpcGoldTradeCapacity {
+    pub roster_valid: bool,
+    pub fresh_compatible_unique_ids: Vec<u64>,
+}
+
+fn deserialize_npc_gold_trade_compatible_ids<'de, D>(deserializer: D) -> Result<Vec<u64>, D::Error>
+where D: serde::Deserializer<'de> {
+    struct Ids;
+    impl<'de> serde::de::Visitor<'de> for Ids {
+        type Value = Vec<u64>;
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("at most 86 distinct carried item identities")
+        }
+        fn visit_seq<A: serde::de::SeqAccess<'de>>(self, mut sequence: A) -> Result<Vec<u64>, A::Error> {
+            let mut values = Vec::new();
+            let mut seen = BTreeSet::new();
+            while let Some(id) = sequence.next_element::<u64>()? {
+                if values.len() >= usize::from(CRYSTAL_MAX_INVENTORY_CAPACITY) || !seen.insert(id) {
+                    return Err(serde::de::Error::custom("invalid NPC Gold capacity identities"));
+                }
+                values.push(id);
+            }
+            Ok(values)
+        }
+    }
+    deserializer.deserialize_seq(Ids)
+}
+
+impl<'de> Deserialize<'de> for NpcGoldTradeCapacity {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        #[serde(rename_all = "camelCase", deny_unknown_fields)]
+        struct Fields {
+            roster_valid: bool,
+            #[serde(deserialize_with = "deserialize_npc_gold_trade_compatible_ids")]
+            fresh_compatible_unique_ids: Vec<u64>,
+        }
+        let fields = Fields::deserialize(deserializer)?;
+        if !fields.roster_valid && !fields.fresh_compatible_unique_ids.is_empty() {
+            return Err(serde::de::Error::custom("invalid NPC Gold capacity roster"));
+        }
+        Ok(Self {
+            roster_valid: fields.roster_valid,
+            fresh_compatible_unique_ids: fields.fresh_compatible_unique_ids,
+        })
+    }
+}
+
+/// The current read-only NPC catalogue, captured from the same authoritative
+/// World as the personal economy. No packet cursor or private checkpoint is used.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NativeNpcShopSnapshot {
+    pub npc_object_id: u32,
+    pub script_key: String,
+    pub service: String,
+    pub packet_type: String,
+    pub list: Vec<UserItem>,
+    /// Same-turn browser presentation from the shared real Crystal template join.
+    #[serde(default)]
+    pub display_goods: Vec<serde_json::Value>,
+    /// Finite JSON number preserves the actual f32 packet rate while keeping Eq.
+    pub rate: serde_json::Number,
+    pub panel_type: u8,
+    pub hide_added_stats: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldSnapshot {
@@ -7760,6 +7875,9 @@ pub struct WorldSnapshot {
     /// Authoritative Crystal inventory-array length, including six belt cells.
     #[serde(default = "default_inventory_capacity")]
     pub inventory_capacity: u16,
+    /// Missing on older snapshots; only this full snapshot can grant merge evidence.
+    #[serde(default)]
+    pub npc_gold_trade_capacity: Option<NpcGoldTradeCapacity>,
     pub storage_size: u16,
     pub has_expanded_storage: bool,
     pub has_storage_password: bool,
@@ -7785,6 +7903,12 @@ pub struct WorldSnapshot {
     pub hero_vitals: Option<HeroVitalsSnapshot>,
     #[serde(default)]
     pub hero_weights: HeroWeightsSnapshot,
+    /// Actual current hero level table, paired with stage5Systems.hero.experience.
+    #[serde(default)]
+    pub hero_max_experience: Option<i64>,
+    /// Same-turn current service and catalogue; null means no current shop.
+    #[serde(default)]
+    pub native_npc_shop: Option<NativeNpcShopSnapshot>,
     #[serde(default)]
     pub storage_items: Vec<WorldItemSnapshot>,
     pub equipment_items: Vec<EquipmentItemSnapshot>,

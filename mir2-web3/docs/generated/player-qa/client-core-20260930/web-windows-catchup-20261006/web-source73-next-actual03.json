@@ -1,0 +1,75 @@
+{
+  "owner": "Root",
+  "kind": "Source73 actual strict Next03 and physical NFT boundary after portable default root repair",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\next-build03-config.json",
+    "bytes": 5768,
+    "sha256": "8a60adda0928e71670a19bcdebdf4672e8ffffb98c8b33481b854f3421bf5836"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\source73-strict-final-snapshot03.json",
+    "bytes": 41473859,
+    "sha256": "7fe8ef4f81206c4a4fa88e2d898652a0995def55101f38fbdcd35efc99c260c9"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 80108,
+    "kind": "Source73 strict Next build03 after bounded portable default Crystal root fix",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 89931,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/next-build03-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\next-build03\\stdout.log",
+    "bytes": 2026,
+    "sha256": "b1721f83822dd73227fca51c44f430c814fffd1cb389e6344a58fc15ba9ed082"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\next-build03\\stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "strictTypeScriptFinished": true,
+  "pagesGenerated": 13,
+  "nextOutputManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\source73-next-output-manifest03.json",
+    "bytes": 11960043,
+    "sha256": "3b0f6f564e5493b23225ffb134a31745501e5e7c7e7b8445d3e47248a171e5f1"
+  },
+  "files": 21036,
+  "directories": 631,
+  "links": 0,
+  "warningCount": 0,
+  "stderrEmpty": true,
+  "nftFiles": 61,
+  "rawReferences": 130518,
+  "uniqueNftTargets": 39332,
+  "nftClosure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\source73-next-nft-closure03.json",
+    "bytes": 14192284,
+    "sha256": "6e7662efc04c04a9769ffb7d594fb78315e05708c83508abc9de2476b980cfae"
+  },
+  "malformedDriveReferences": 0,
+  "outsideTargets": 0,
+  "unknownTargets": 0,
+  "missingTargets": 0,
+  "physicalHashDifferences": 0,
+  "physicalNftClosureAccepted": true,
+  "mainTsconfig": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "packageAccepted": false,
+  "uiTested": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

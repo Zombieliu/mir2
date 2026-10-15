@@ -104,11 +104,14 @@ export type QuestLogWindowProps = {
   onTrackQuest?: (questId: number) => void;
   onShareQuest?: (questId: number) => void;
   onAbandonQuest?: (questId: number) => void;
-  /** Quest Diary actions; bound quests are enabled only by the active NPC dialog predicates. */
+  /** Quest actions are enabled by the shared client policy and current server facts. */
   onAcceptQuest?: (questId: number) => void;
   onFinishQuest?: (questId: number, selectedItemIndex?: number) => void;
   canAcceptQuest?: (questId: number) => boolean;
   canFinishQuest?: (questId: number, selectedItemIndex?: number) => boolean;
+  isQuestActionPending?: (questId: number, action: "accept" | "finish") => boolean;
+  questClientStatus?: "loading" | "ready" | "error";
+  onRetryQuestClient?: () => void;
   onClose: () => void;
   /**
    * Lowercase class key of the local player. Rewrites class-blind onboarding copy
@@ -192,6 +195,9 @@ export function QuestLogWindow({
   onFinishQuest,
   canAcceptQuest,
   canFinishQuest,
+  isQuestActionPending,
+  questClientStatus,
+  onRetryQuestClient,
   onClose,
   playerClass,
   playerLevel,
@@ -244,6 +250,16 @@ export function QuestLogWindow({
     : null;
   const selectedRewardIndex = selected ? selectedRewards[selected.questId] : undefined;
   const needsRewardSelection = Boolean(selected?.rewards?.selectItems?.length);
+  const selectedActionPending = Boolean(selected && isQuestActionPending?.(
+    selected.questId, selected.stage === "available" ? "accept" : "finish",
+  ));
+  const clientFeedback = questClientStatus === "loading"
+    ? t("ui.questClientLoading", [], "Preparing quest actions…")
+    : questClientStatus === "error"
+      ? t("ui.questClientUnavailable", [], "Quest actions are temporarily unavailable. Please retry.")
+      : selectedActionPending
+        ? t("ui.questActionPending", [], "Your request is being processed. Please wait.")
+        : undefined;
   const canAcceptSelected = Boolean(
     selected
       && selected.stage === "available"
@@ -501,7 +517,7 @@ export function QuestLogWindow({
         </div>
       ) : null}
 
-      <div style={style.detail} data-quest-detail={selected?.questId ?? ""}>
+      <div style={{ ...style.detail, ...(clientFeedback ? { height: 92 } : null) }} data-quest-detail={selected?.questId ?? ""}>
         {selected ? (
           <>
             <div style={style.detailTitle}>{selected.title}</div>
@@ -628,6 +644,16 @@ export function QuestLogWindow({
         ) : null}
       </div>
 
+      {clientFeedback ? (
+        <div style={style.questClientStatus} role={questClientStatus === "error" ? "alert" : "status"}>
+          <span>{clientFeedback}</span>
+          {questClientStatus === "error" ? (
+            <button type="button" style={style.retryButton} onClick={onRetryQuestClient} data-testid="quest-client-retry">
+              {t("ui.retry", [], "Retry")}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       <div style={style.actions}>
         {selected?.stage === "available" ? (
           <button
@@ -635,13 +661,13 @@ export function QuestLogWindow({
             data-testid="quest-accept-button"
             disabled={!canAcceptSelected}
             title={
-              !canAcceptSelected
+              clientFeedback ?? (!canAcceptSelected
                 ? t(
                     "content.quest.generic.stage.available.objective",
                     [],
                     "Talk to the quest giver to accept this quest.",
                   )
-                : undefined
+                : undefined)
             }
             style={{ ...style.actionButton, ...(!canAcceptSelected ? style.actionButtonDisabled : null) }}
             onClick={() => {
@@ -657,7 +683,7 @@ export function QuestLogWindow({
             data-testid="quest-finish-button"
             disabled={!canFinishSelected}
             title={
-              needsRewardSelection && selectedRewardIndex === undefined
+              clientFeedback ?? (needsRewardSelection && selectedRewardIndex === undefined
                 ? t("client.YouMustSelectRewardItem", [], "Select a reward first.")
                 : !canFinishSelected
                   ? t(
@@ -665,7 +691,7 @@ export function QuestLogWindow({
                       [],
                       "Return to the quest NPC to turn in this quest.",
                     )
-                  : undefined
+                  : undefined)
             }
             style={{ ...style.actionButton, ...(!canFinishSelected ? style.actionButtonDisabled : null) }}
             onClick={() => {
@@ -965,7 +991,9 @@ const style: Record<string, CSSProperties> = {
   tab: {
     flex: 1,
     minWidth: 0,
-    border: "1px solid rgba(190, 157, 99, 0.5)",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "rgba(190, 157, 99, 0.5)",
     background: "linear-gradient(180deg, rgba(52, 32, 18, 0.92), rgba(28, 17, 9, 0.92))",
     color: "#cbb38a",
     height: 28,
@@ -1006,7 +1034,9 @@ const style: Record<string, CSSProperties> = {
     flex: "0 0 22px",
     padding: "0 6px",
     boxSizing: "border-box",
-    border: "1px solid transparent",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "transparent",
     background: "rgba(20, 13, 7, 0.4)",
     color: "#e3d3af",
     textAlign: "left",
@@ -1082,7 +1112,9 @@ const style: Record<string, CSSProperties> = {
   graduationChoices: { display: "flex", gap: 3, marginBottom: 3 },
   graduationButton: {
     flex: 1,
-    border: "1px solid rgba(190, 157, 99, 0.5)",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "rgba(190, 157, 99, 0.5)",
     background: "rgba(21, 13, 6, 0.65)",
     color: "#d6c6a5",
     fontSize: 9,
@@ -1150,6 +1182,27 @@ const style: Record<string, CSSProperties> = {
     width: 292,
     display: "flex",
     gap: 6,
+  },
+  questClientStatus: {
+    position: "absolute",
+    left: 10,
+    top: 374,
+    width: 292,
+    display: "flex",
+    alignItems: "center",
+    gap: 4,
+    fontSize: 10,
+    lineHeight: "12px",
+    color: "#f4dcaf",
+  },
+  retryButton: {
+    flexShrink: 0,
+    border: "1px solid rgba(190, 157, 99, 0.56)",
+    background: "#392410",
+    color: "#f4dcaf",
+    fontSize: 10,
+    padding: "3px 4px",
+    cursor: "pointer",
   },
   actionButton: {
     flex: 1,

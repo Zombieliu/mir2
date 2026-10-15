@@ -6,6 +6,8 @@ import { questRows, questCompletion } from "./native-i18n-quest-translations.mjs
 import { tooltipCopy } from "./native-i18n-tooltip-translations.mjs";
 import { sharedPortuguese, sharedTraditional } from "./native-i18n-shared-overrides.mjs";
 import { assertReviewedSources } from "./native-i18n-source-guard.mjs";
+import { sharedKeyTranslation, sharedKeyTranslations } from "./native-i18n-shared-translations.mjs";
+import { loadSources, validateValue, verifyExpansionFiles, expansionLocales } from "./native-i18n-expansion.mjs";
 
 export const root = resolve(import.meta.dirname, "../../..");
 const generated = resolve(root, "packages/game-data/data/generated");
@@ -99,14 +101,72 @@ export function translateName(source, family, depth = 0) {
   return null;
 }
 
-export function generate() {
+// Reconcile shared UI additions without rewriting the merged web bundle or
+// unrelated content. Existing catalogue/overlay values must remain identical.
+function generateCommonOnly(commonEntries) {
+  const current = JSON.parse(readFileSync(resolve(destination, "common.json"), "utf8"));
+  const proposed = new Map(commonEntries.map(entry => [entry.key, entry]));
+  const currentKeys = new Set(current.entries.map(entry => entry.key));
+  for (const entry of current.entries) if (Object.hasOwn(sharedKeyTranslations, entry.key) && JSON.stringify(entry) !== JSON.stringify(proposed.get(entry.key))) {
+    throw new Error(`Common-only generation would change an existing entry: ${entry.key}`);
+  }
+  const added = commonEntries.filter(entry => !currentKeys.has(entry.key));
+  for (const entry of added) if (!sharedKeyTranslation(entry.key, entry.en)) throw new Error(`Unreviewed shared addition: ${entry.key}`);
+  // Historical monthly and other extensions are not all bundle-derived.
+  // This bounded mode retains every old row, including its aliases/order.
+  commonEntries = [...current.entries, ...added];
+  const prior = verifyExpansionFiles();
+  if (prior.errors.length) throw new Error(`Existing overlay baseline is invalid: ${JSON.stringify(prior.errors)}`);
+  const expectedKeys = new Set([...loadSources().map(entry => entry.key), ...added.map(entry => entry.key)]);
+  const commonText = JSON.stringify({ entries: commonEntries }, null, 2) + "\n";
+  const sha256 = bytes => createHash("sha256").update(bytes).digest("hex");
+  const sourceHash = sha256(readFileSync(new URL("./native-i18n-shared-translations.mjs", import.meta.url), "utf8").replaceAll("\r\n", "\n"));
+  const provenance = JSON.parse(readFileSync(resolve(destination, "extra/provenance.json"), "utf8"));
+  const outputs = {};
+  for (const locale of expansionLocales) {
+    const values = JSON.parse(readFileSync(resolve(destination, `extra/${locale}.json`), "utf8"));
+    for (const entry of added) {
+      const text = sharedKeyTranslations[entry.key][locale];
+      const errors = validateValue(entry, locale, text);
+      if (errors.length || Object.hasOwn(values, entry.key)) throw new Error(`Invalid shared overlay addition: ${entry.key}/${locale}`);
+      values[entry.key] = text;
+    }
+    if (Object.keys(values).length !== expectedKeys.size || [...expectedKeys].some(key => !Object.hasOwn(values, key))) throw new Error(`Shared overlay key closure differs: ${locale}`);
+    outputs[locale] = JSON.stringify(values, null, 2) + "\n";
+    provenance.outputSha256[locale] = sha256(outputs[locale]);
+    provenance.methods[locale].keyedReview += added.length;
+  }
+  provenance.entriesPerLocale = expectedKeys.size;
+  provenance.sourceSha256["common.json"] = sha256(commonText);
+  provenance.sharedKeyTranslationsSha256 = sourceHash;
+  if (added.length) {
+    provenance.extensions ??= [];
+    provenance.extensions.push({
+      scope: "merged shared quest headings and action feedback",
+      newEntries: added.length,
+      keys: added.map(entry => entry.key),
+      source: "packages/tooling/scripts/native-i18n-shared-translations.mjs",
+      sourceSha256: sourceHash,
+      preservedEntriesPerLocale: prior.entriesPerLocale,
+      authoring: "keyed translations in all nine native locales; original catalogue and overlay values retained; native-speaker and layout acceptance pending",
+    });
+  }
+  writeFileSync(resolve(destination, "common.json"), commonText);
+  for (const [locale, text] of Object.entries(outputs)) writeFileSync(resolve(destination, `extra/${locale}.json`), text);
+  writeFileSync(resolve(destination, "extra/provenance.json"), JSON.stringify(provenance, null, 2) + "\n");
+  console.log(JSON.stringify({ common: commonEntries.length, added: added.length, entriesPerLocale: expectedKeys.size, mode: "common-only" }));
+  return { commonEntries, added: added.length };
+}
+
+export function generate({ commonOnly = false } = {}) {
   assertReviewedSources();
   const bundle = read("localization_bundle.json"); const english = bundle.languages.en.texts;
   if (!bundle.languages["zh-TW"]) throw new Error("Run generate-native-i18n-traditional.py first");
   const commonOverrides = dictionary(vocabulary.commonRows);
   const commonEntries = Object.entries(english).map(([key, en]) => {
     const overrides = commonOverrides.get(en);
-    return { key, en, "zh-TW": sharedTraditional[en] ?? overrides?.["zh-TW"] ?? bundle.languages["zh-TW"].texts[key] ?? en, "pt-BR": sharedPortuguese[en] ?? overrides?.["pt-BR"] ?? bundle.languages["pt-BR"].texts[key] ?? en, aliases: [...new Set([en, bundle.languages["zh-CN"].texts[key]].filter(Boolean))] };
+    const keyed = sharedKeyTranslation(key, en);
+    return { key, en, "zh-TW": keyed?.["zh-TW"] ?? sharedTraditional[en] ?? overrides?.["zh-TW"] ?? bundle.languages["zh-TW"].texts[key] ?? en, "pt-BR": keyed?.["pt-BR"] ?? sharedPortuguese[en] ?? overrides?.["pt-BR"] ?? bundle.languages["pt-BR"].texts[key] ?? en, aliases: [...new Set([en, bundle.languages["zh-CN"].texts[key]].filter(Boolean))] };
   });
   for (const [spell, title] of Object.entries(vocabulary.skillTitleOverrides ?? {})) {
     const entry = commonEntries.find((row) => row.key === `client.${spell}SkillDescription`);
@@ -120,7 +180,9 @@ export function generate() {
     const entry = commonEntries.find((row) => row.key === key);
     entry.aliases = entry.aliases.filter((alias) => !alias.includes("{0}"));
   }
-  for (const [en, tw, pt] of vocabulary.commonRows) if (!commonEntries.some((entry) => entry.en === en)) commonEntries.push({ key: `common.${hash(en)}`, en, "zh-TW": tw, "pt-BR": pt, aliases: [en, ...(vocabulary.commonLegacyAliases[en] ?? [])] });
+  // A newly keyed context (quest Return heading) must not retire the older
+  // generic common key merely because its English spelling is identical.
+  for (const [en, tw, pt] of vocabulary.commonRows) if (!commonEntries.some((entry) => entry.en === en && !Object.hasOwn(sharedKeyTranslations, entry.key))) commonEntries.push({ key: `common.${hash(en)}`, en, "zh-TW": tw, "pt-BR": pt, aliases: [en, ...(vocabulary.commonLegacyAliases[en] ?? [])] });
   for (const entry of commonEntries) entry.aliases = [...new Set([...entry.aliases, ...(vocabulary.commonLegacyAliases[entry.en] ?? [])])];
   for (const entry of commonEntries) if (/^content\.(entity|item|map)\..*\.name$/.test(entry.key)) {
     const family = entry.key.split(".")[1];
@@ -128,6 +190,7 @@ export function generate() {
     const translation = translateName(canonical, family === "entity" ? "npc" : family) ?? translateName(canonical, "monster");
     if (translation) for (const locale of ["zh-TW", "pt-BR"]) entry[locale] = translation[locale];
   }
+  if (commonOnly) return generateCommonOnly(commonEntries);
   const knownShared = new Map(commonEntries.map((entry) => [entry.en, entry]));
   for (const entry of commonEntries) if (entry.key.endsWith("SkillDescription")) {
     const spell = entry.key.slice(7, -16); const first = (text) => text.split(/\r?\n/)[0];
@@ -207,4 +270,4 @@ export function generate() {
   return { commonEntries, ...output, coverage };
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename)) generate();
+if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename)) generate({ commonOnly: process.argv.includes("--common-only") });

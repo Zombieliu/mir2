@@ -1,0 +1,61 @@
+{
+  "stage": "Source30",
+  "recordedAtUtc": "2026-10-07T14:58:29.159Z",
+  "scope": "Read-only independent finite evidence review; no new tests/processes/UI",
+  "reviews": [
+    {
+      "agent": "/root/source30_web_receiver",
+      "accepted": true,
+      "findings": [
+        "128 unique selected NPC stdout names matched; 22 Source30 tests include the strict two-pure-module compiler API check",
+        "2 selected fingerprint tests passed; final Node total 130",
+        "11 final result pins matched",
+        "Initial 126/128 failure preserved; repaired final result passed",
+        "No full-project typecheck, Rust, production build or frontend acceptance inferred"
+      ]
+    },
+    {
+      "agent": "/root/source30_native_client",
+      "accepted": true,
+      "findings": [
+        "44 unique selected Rust tests: Native14 and Runtime30",
+        "Web128 plus fingerprint2 yields 174 selected and 68 new distinct tests",
+        "Both nonce directories contain exactly five matching files; actual C samples exceed 50 GiB",
+        "Actual sampleEnd to childStarted bounds [77.5672,78.5672) ms and [74.501,75.501) ms are below 2000 ms",
+        "Both children completed, exited and disposed with exit0 and Policy B",
+        "Guard source, executable and probe hashes matched; repository combined result copy identical",
+        "Root 877-input zero-drift result remains attributed to Root"
+      ]
+    }
+  ],
+  "combinedResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-finite-result01.json",
+    "bytes": 15843,
+    "sha256": "e4d355123d8f3712e47528e40693f1a89d4c79842ff463f22cf24b63b30440cb"
+  },
+  "webResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-web-finite-result01.json",
+    "bytes": 20164,
+    "sha256": "3365e1fb4a13f44b912712b16726dcc6c34a026d2fd04c839439717481c2465f"
+  },
+  "rawEvidence": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-raw-evidence01.json",
+    "bytes": 753469,
+    "sha256": "87be95ac40dbb40f5e5c107ef78f5be95e4105a397cf190366d72c32c0d8ed95"
+  },
+  "rawEvidencePurpose": "Retains exact original evidence bytes as base64 data; visible JSON/log copies may be LF-normalized by repository attributes. No receipt factory or executable helper.",
+  "limits": {
+    "frontendEndToEnd": "not-run",
+    "fullProjectTypecheck": "not-run; only strict two pure modules in Web128 via installed TS5.9.2 API",
+    "candidateBuild": "Source25 only, Source26-30 rebuild not-run",
+    "NativeGatewayReceiverAppliedAndSender": "unhooked",
+    "largeIntegerProjection": "fail-closed until canonical lossless support",
+    "HeroVisibleExperience": "cached XP/maxXP issue remains",
+    "NativeProjection": "trusted actual projector pending; schema-only Hero/Social and partial mail/tooltip correspondence",
+    "matrix": "309/317=97.5% bounded code rows only; no global denominator",
+    "overallPercentage": null
+  },
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "goalActive": true
+}

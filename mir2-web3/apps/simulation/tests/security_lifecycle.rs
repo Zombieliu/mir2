@@ -124,6 +124,22 @@ fn unauthenticated_delete_character_rejected() {
 }
 
 #[test]
+fn unauthenticated_inspect_rejected_in_every_id_namespace() {
+    for (ranking, hero) in [(false, false), (true, false), (false, true), (true, true)] {
+        let command = WorldCommand::ClientPacket(ClientPacket::Inspect {
+            object_id: 0,
+            ranking,
+            hero,
+        });
+        assert!(validate_production_player_command(false, &command).is_err());
+        assert!(validate_production_player_command(true, &command).is_ok());
+        let mut runtime = InProcessWorldRuntime::new(SimulationConfig::default());
+        assert!(runtime.execute_production_player_command(false, command).is_err());
+        assert!(runtime.active_identity().is_none());
+    }
+}
+
+#[test]
 fn stage5_command_rejected_for_player_path() {
     assert_rejected(WorldCommand::Stage5Command {
         action: "qa.giveItem".to_string(),

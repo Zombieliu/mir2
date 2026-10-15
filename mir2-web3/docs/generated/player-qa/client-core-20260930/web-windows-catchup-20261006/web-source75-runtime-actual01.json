@@ -1,0 +1,41 @@
+{
+  "owner": "Root",
+  "originalCallerBytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "originalExecSession": 25783,
+  "configPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\web-start01-config.json",
+    "bytes": 3223,
+    "sha256": "0b4cbcae34b6e2358a0fec19613c3f4ffa4a3ae2f7b03301c557a70761173c8a"
+  },
+  "snapshotPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\runtime-preparation01\\runtime-snapshot01.json",
+    "bytes": 2540136,
+    "sha256": "31c4aa207f2f616c7a390ac1523745cd6dcb3f7dab66f9bbf99720f3cd8ae87b"
+  },
+  "sourcePackagePin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-thin-actual01.json",
+    "bytes": 3106,
+    "sha256": "7977d7f3dbfb2fa2ad507b64d44d185fc0d17f94f1efc6606e9e710e27187d40"
+  },
+  "childPid": 90988,
+  "parentPid": 89716,
+  "exactOwnedServerArgvAndOriginalParentVerified": true,
+  "loopbackHost": "127.0.0.1",
+  "port": 19205,
+  "wholeRuntimeFiles": 4433,
+  "runtimeCopyHashDifferences": 0,
+  "originalPreGuardPassed": true,
+  "actualRuntimeServingAndBrowserPlayed": true,
+  "originalCallerStillOpen": true,
+  "finalExitAndPostguardPending": true,
+  "activeRuntimeLogsRead": false,
+  "source65GatewayUnchanged": true,
+  "source74NormalLogoutExactOwnedClosureProof": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source74-owned-web-closure01.json",
+    "bytes": 1479,
+    "sha256": "07fedf6e37853dcefe3311952f045cb3551f04e4c11b7cb4a7ec1bcdddab5eff"
+  },
+  "candidateAccepted": false,
+  "goalComplete": false
+}

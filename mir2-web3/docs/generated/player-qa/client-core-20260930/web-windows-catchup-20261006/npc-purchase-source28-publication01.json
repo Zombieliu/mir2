@@ -1,0 +1,175 @@
+{
+  "owner": "root",
+  "kind": "npc-purchase-source28-actual-git-publication",
+  "generatedAtUtc": "2026-10-07T11:48:36.943Z",
+  "commit": "fdd3abc37d3ab6df45b428013dda85501d7404c5",
+  "parentCommit": "e2c42e066b48313309f62d65a2b320b9d93f4495",
+  "branch": "codex/windows-player-journey",
+  "title": "fix: fence durable NPC purchases through actual owners",
+  "scopeFiles": 30,
+  "reviewedPaths": [
+    "apps/gateway/src/events.rs",
+    "apps/gateway/src/lib.rs",
+    "apps/gateway/src/npc_gold_buy_route_tests.rs",
+    "apps/gateway/src/npc_purchase_owner_route.rs",
+    "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+    "apps/gateway/src/routing.rs",
+    "apps/gateway/src/session.rs",
+    "apps/gateway/src/zone_lease.rs",
+    "apps/gateway/src/zone_rpc.rs",
+    "apps/simulation/src/lib.rs",
+    "apps/simulation/src/npc_purchase_journal.rs",
+    "apps/simulation/src/npc_purchase_owner.rs",
+    "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+    "apps/simulation/src/runtime/npc_purchase_transaction.rs",
+    "apps/simulation/src/runtime/npc_purchase_transaction_tests.rs",
+    "apps/simulation/src/runtime/resources.rs",
+    "apps/simulation/src/runtime/save.rs",
+    "apps/simulation/src/world_runtime.rs",
+    "docs/AGENT-ORCHESTRATION.md",
+    "docs/AGENT-TASK-QUEUE.md",
+    "docs/BACKEND-1TO1-PROGRESS.md",
+    "docs/CROSS-PLATFORM-CLIENT-GOAL.md",
+    "docs/CRYSTAL-1TO1-ROADMAP.md",
+    "docs/CRYSTAL-SERVER-PARITY.md",
+    "docs/FRONTEND-1TO1-GAPS.md",
+    "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+    "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+    "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source27-publication01.json",
+    "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-finite-result01.json",
+    "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-independent-review01.json"
+  ],
+  "actualCommitTool": {
+    "chunkId": "a72af9",
+    "exitCode": 0,
+    "filesChanged": 30,
+    "insertions": 6860,
+    "deletions": 20
+  },
+  "actualLocalVerification": {
+    "chunkId": "16248c",
+    "exitCode": 0,
+    "commit": "fdd3abc37d3ab6df45b428013dda85501d7404c5",
+    "parentCommit": "e2c42e066b48313309f62d65a2b320b9d93f4495",
+    "commitDate": "2026-10-07T19:46:41+08:00"
+  },
+  "actualPushTool": {
+    "initialChunkId": "819746",
+    "completionChunkId": "d327e1",
+    "exitCode": 0,
+    "destination": "https://github.com/Zombieliu/mir2.git",
+    "from": "e2c42e066b",
+    "to": "fdd3abc37d"
+  },
+  "actualRemoteVerification": {
+    "chunkId": "a8804a",
+    "exitCode": 0,
+    "configuredOrigin": "git@github.com:Zombieliu/mir2.git",
+    "ref": "refs/heads/codex/windows-player-journey",
+    "commit": "fdd3abc37d3ab6df45b428013dda85501d7404c5"
+  },
+  "published": true,
+  "remoteVerified": true,
+  "gitOnlyNetworkExceptionUsed": true,
+  "forcePush": false,
+  "historyRewrite": false,
+  "maintenanceRun": false,
+  "credentialsUiOperated": false,
+  "unrelatedTrackedState": {
+    "chunkId": "b35ae1",
+    "exitCode": 0,
+    "paths": [
+      "apps/web/tsconfig.json"
+    ],
+    "preserved": true
+  },
+  "finiteResult": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-finite-result01.json",
+    "bytes": 180381,
+    "sha256": "049f81512e89cdda60cfab615a05e888f28a6d07a841b07d7e4ffdbee4660b63"
+  },
+  "independentFiniteReview": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-independent-review01.json",
+    "bytes": 3826,
+    "sha256": "45613507839ef3ca8f9bc80a4347696da57f531a69ed8441784d342ac74359a0"
+  },
+  "testedSourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-rust05-snapshot.json",
+    "bytes": 274835,
+    "sha256": "dc0272994f0762b13ee8751851bc144a225c2d16d9b7d75a5a01ca539bbfdaa9"
+  },
+  "finalPublicationSourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-npc-purchase-source28-final-formatting-snapshot02.json",
+    "bytes": 275769,
+    "sha256": "19dcbc785c9daf29be96e9503e38657a75312b814b14500c38d99f31e967cb98"
+  },
+  "finalSourceCount": 888,
+  "postCommitSourceDrift": 0,
+  "finalFormattingQualification": {
+    "file": "apps/gateway/src/npc_purchase_owner_route.rs",
+    "onlyChange": "Removed exactly one final LF byte after Rust05 execution; inverse restoration matches tested SHA256; other 887 inputs unchanged.",
+    "testedBytes": 4858,
+    "testedSha256": "9117c5a6c2b112ddc8e54dfc874c53f5865bfbc4d2590cfe07d95cdfa3460b71",
+    "publishedBytes": 4857,
+    "publishedSha256": "c2b557650c1878589610759a2d0d4336487b3ca84c23cdd05235a2afbd6399e2",
+    "newExecutionClaimed": false
+  },
+  "actualTests": {
+    "selectedSuccessfulExecutions": 177,
+    "uniqueSuccessfulNamedTests": 176,
+    "newDistinctDeclarationsExecuted": 30,
+    "simulationSelectedExecutions": 153,
+    "gatewaySelectedExecutions": 24,
+    "successfulGuardCalls": 7,
+    "totalGuardCallsIncludingRetainedFailures": 11,
+    "nonceFiles": 55,
+    "preparedButUnexecutedConfigs": 7,
+    "retainedFailureCalls": 4
+  },
+  "latestBuiltPackage": {
+    "publication": {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/ranking-source25-publication01.json",
+      "bytes": 9948,
+      "sha256": "5577d9778e660f5d0e4b9ad14b08f7cfe393b56c374f5a9d443d50c3427f7e34"
+    },
+    "sourceCommit": "7b1afe2706a4eec037f085d1f599d2ea987f031f",
+    "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-20261007-08",
+    "containsSource26": false,
+    "playerVerified": false,
+    "containsSource27": false,
+    "containsSource28": false
+  },
+  "matrix": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix11.json",
+    "bytes": 3228933,
+    "sha256": "1b533c6fba3af282d58be119cc591f004ee579b7d50e86b186a65249c100f6b1",
+    "total": 317,
+    "shared": 103,
+    "legacy": 206,
+    "common": 8,
+    "rawOpen": 0,
+    "boundedImplementedRecords": 309,
+    "boundedCodeChecklistPercentage": 97.47634069400631,
+    "qualification": "Bounded code record classification only. Not overall playable completion, runtime or frontend acceptance."
+  },
+  "outstanding": [
+    "Strict external client decimal u64 wire and raw duplicate-field rejection, accepted server capability/Begin response.",
+    "Core ABI and actual Native/Web receipt ledger dispatch/recovery, retained per Actor through reconnect/UI remount.",
+    "Native atomic economic snapshot application acknowledgement and Web complete application witness; queued or inventory-only readiness is insufficient.",
+    "Latest matching Native/Gateway/Core/PUI/Next/Thin build after full integration.",
+    "Actual TCP endpoint/PG lease/replication deployment and process-cold recovery remain unrun.",
+    "Personal NPC Used stock checkpoint does not establish shared-zone global stock ownership.",
+    "Resources/WASM/login/combat/save/relogin/mobile/frontend acceptance remain deferred."
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkGameUsed": false,
+  "wasmApiUsed": false,
+  "source28ProductionBuildAccepted": false,
+  "playerAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false,
+  "goalStatus": "active",
+  "recordQualification": "Ordinary JSON generated after actual commit, push and exact remote verification. Not included in its own 30-file commit; carry into next authorized implementation phase. 177 executions remain bound to tested Rust05; final EOF-only derivative has independent byte proof and does not expand runtime, PG, client or player acceptance."
+}

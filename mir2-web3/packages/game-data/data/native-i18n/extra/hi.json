@@ -9410,5 +9410,14 @@
   "quest.practice.class.toggle_hit": "{skill} चालू करें, फिर सामान्य हमले से राक्षस को नुकसान पहुँचाएँ।",
   "quest.practice.class.spell_hit": "{skill} से राक्षस को नुकसान पहुँचाएँ; चूके हुए वार नहीं गिने जाएँगे।",
   "quest.supply.assassinPoisonEquip": "विष तलवार: लाल या हरा विष चूर्ण सुसज्जित करें; प्रति प्रयोग 1।",
-  "quest.supply.assassinPoisonEquipped": "विष तलवार: विष चूर्ण सुसज्जित है; प्रति प्रयोग 1।"
+  "quest.supply.assassinPoisonEquipped": "विष तलवार: विष चूर्ण सुसज्जित है; प्रति प्रयोग 1।",
+  "ui.questProgressHeading": "प्रगति",
+  "ui.questReturnHeading": "जमा करने का स्थान",
+  "ui.questClientLoading": "कार्य की कार्रवाइयाँ तैयार की जा रही हैं…",
+  "ui.questClientUnavailable": "कार्य की कार्रवाइयाँ अभी उपलब्ध नहीं हैं। फिर से प्रयास करें।",
+  "ui.questActionPending": "आपके अनुरोध पर काम हो रहा है। कृपया प्रतीक्षा करें।",
+  "ui.questActionRewardRequired": "पहले एक पुरस्कार चुनें।",
+  "ui.questActionTalkToNpc": "आगे बढ़ने के लिए कार्य के NPC से बात करें।",
+  "ui.questActionStateChanged": "कार्य बदल गया है। उसे देखें और फिर से प्रयास करें।",
+  "ui.retry": "फिर से प्रयास करें"
 }

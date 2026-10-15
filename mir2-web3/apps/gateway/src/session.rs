@@ -10,11 +10,17 @@ use mir2_protocol::{ChatType, ClientPacket, Point, ServerPacket};
 #[cfg(test)]
 use mir2_simulation::CharacterSaveRecord;
 use mir2_simulation::{
-    ActiveSessionIdentity, SimulationConfig, WorldCommand, WorldCommandExecution, WorldEntityKind,
+    ActiveSessionIdentity, NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingError,
+    NpcGoldBuyRequest, SimulationConfig, WorldCommand, WorldCommandExecution, WorldEntityKind,
     WorldSnapshot, ZoneRuntimeHandle,
 };
 
+use mir2_simulation::{NpcPurchaseDurableError, NpcPurchaseOwnerAction};
+use crate::npc_purchase_owner_route::NpcPurchaseOwnerRouteExecution;
 use crate::events::{GatewayGameplayEventPublisher, SharedGameplayEventSink};
+use crate::npc_gold_buy_route::{
+    npc_gold_buy_command, npc_gold_buy_route_failure, NpcGoldBuyRouteError, NpcGoldBuyRouteExecution,
+};
 use crate::routing::{
     shared_zone_movement_ingress, sync_zone_movement_transform, GlobalZoneMessageBus,
     GlobalZoneMessageRegistration, InProcessZoneOwnerCommandClient, PreparedZoneTeardown,
@@ -619,6 +625,118 @@ impl GatewaySession {
             .supports_typed_game_shop_purchase_outcome(&self.runtime)
     }
 
+
+    pub fn supports_durable_npc_purchase_owner(&self) -> bool {
+        self.zone_owner_command_client.supports_durable_npc_purchase_owner(&self.runtime)
+    }
+
+    pub fn execute_npc_purchase_owner(&mut self, authenticated: bool, action: NpcPurchaseOwnerAction)
+        -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        let lease = self.zone_owner_lease.clone();
+        self.execute_npc_purchase_owner_with_zone_owner_lease(&lease, authenticated, action)
+    }
+
+    pub fn execute_npc_purchase_owner_with_zone_owner_lease(&mut self, lease: &ZoneOwnerLease,
+        authenticated: bool, action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        self.validate_zone_owner_lease(lease).map_err(crate::npc_purchase_owner_route::before)?;
+        if !authenticated { return Err(crate::npc_purchase_owner_route::before("NPC purchase requires authentication")); }
+        let mut known = None;
+        let result = catch_gateway_panic("durable NPC gateway owner route", || {
+            if !self.supports_durable_npc_purchase_owner() {
+                return Err(crate::npc_purchase_owner_route::before("durable NPC purchase owner capability is unavailable"));
+            }
+            let mut routed = match self.zone_owner_command_client.execute_npc_purchase_owner(
+                &mut self.runtime, lease, authenticated, action,
+            ) {
+                Ok(routed) => routed,
+                Err(error) => {
+                    if let NpcPurchaseDurableError::PostCommit { receipt, .. } = &error { known = Some(receipt.clone()); }
+                    return Err(error);
+                }
+            };
+            known = crate::npc_purchase_owner_route::terminal_receipt(&routed.reply);
+            // Control/read-only actions do not publish gameplay mutation events
+            // or drain an unrelated global bus into their recovery response.
+            if matches!(action, NpcPurchaseOwnerAction::Purchase { .. }) {
+                let execution = &mut routed.execution;
+                self.publish_gameplay_event(execution);
+                self.active_identity_binding = execution.outcome.active_identity.clone();
+                self.refresh_global_message_identity(execution.outcome.active_identity.as_ref());
+                if let Some(bus) = self.global_message_bus.as_ref() {
+                    execution.packets.extend(bus.drain(&self.session_id));
+                    execution.outcome.packet_count = execution.packets.len();
+                }
+            }
+            Ok(routed)
+        });
+        result.unwrap_or_else(|detail| Err(crate::npc_purchase_owner_route::failure(detail, known)))
+    }
+
+    /// Local owner-path capability only; this does not advertise a transport receipt.
+    pub fn supports_typed_npc_gold_buy_outcome(&self) -> bool {
+        self.zone_owner_command_client.supports_typed_npc_gold_buy_outcome(&self.runtime)
+    }
+
+    pub fn execute_production_npc_gold_buy_requiring_typed_outcome(
+        &mut self,
+        authenticated: bool,
+        purchase: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyRouteExecution, NpcGoldBuyRouteError> {
+        let lease = self.zone_owner_lease.clone();
+        self.execute_production_npc_gold_buy_requiring_typed_outcome_with_zone_owner_lease(
+            &lease, authenticated, purchase,
+        )
+    }
+
+    pub fn execute_production_npc_gold_buy_requiring_typed_outcome_with_zone_owner_lease(
+        &mut self,
+        lease: &ZoneOwnerLease,
+        authenticated: bool,
+        purchase: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyRouteExecution, NpcGoldBuyRouteError> {
+        self.validate_zone_owner_lease(lease)
+            .map_err(|detail| NpcGoldBuyRouteError::BeforeExecution { detail })?;
+        if !authenticated {
+            return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotAuthenticated,
+            )));
+        }
+        let mut processing_outcome = None;
+        let result = catch_gateway_panic("typed NPC gateway owner route", || {
+            if !self.supports_typed_npc_gold_buy_outcome() {
+                return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                    NpcGoldBuyBeforeExecution::UnsupportedRuntime,
+                )));
+            }
+            let request = ZoneOwnerCommandRequest::production_player(
+                lease.clone(), authenticated, npc_gold_buy_command(purchase),
+            );
+            let mut routed = match self.zone_owner_command_client
+                .execute_production_npc_gold_buy_requiring_typed_outcome(&mut self.runtime, request, purchase)
+            {
+                Ok(routed) => routed,
+                Err(error) => return Err(error),
+            };
+            processing_outcome = Some(routed.processing_outcome.clone());
+            let execution = &mut routed.execution;
+            self.publish_gameplay_event(execution);
+            self.active_identity_binding = execution.outcome.active_identity.clone();
+            self.refresh_global_message_identity(execution.outcome.active_identity.as_ref());
+            if is_global_message_execution(&execution.packets) {
+                if let Some(bus) = self.global_message_bus.as_ref() {
+                    bus.publish_to_other_zones(&self.session_id, &self.zone_id, &execution.packets);
+                }
+            }
+            if let Some(bus) = self.global_message_bus.as_ref() {
+                execution.packets.extend(bus.drain(&self.session_id));
+                execution.outcome.packet_count = execution.packets.len();
+            }
+            Ok(routed)
+        });
+        result.unwrap_or_else(|detail| Err(npc_gold_buy_route_failure(detail, processing_outcome)))
+    }
+
     /// Gifts require their own capability; support for buying for oneself is insufficient.
     pub fn supports_native_game_shop_gifts(&self) -> bool {
         self.zone_owner_command_client
@@ -1113,14 +1231,11 @@ impl GatewaySession {
 
         sync_zone_movement_transform(&mut self.runtime)
             .map_err(|error| format!("Zone handoff source transform sync failed: {error}"))?;
-        self.zone_owner_command_client
-            .save_active_character(&mut self.runtime)
-            .map_err(|error| format!("Zone handoff source save failed: {error}"))?;
-        let source_checkpoint = self
+        let handoff = self
             .zone_owner_command_client
-            .active_character_checkpoint(&self.runtime)
-            .map_err(|error| format!("Zone handoff source checkpoint failed: {error}"))?
-            .ok_or_else(|| "Zone handoff source has no active character checkpoint".to_string())?;
+            .prepare_character_handoff(&mut self.runtime, &self.zone_owner_lease)
+            .map_err(|error| format!("Zone handoff source checkpoint failed: {error}"))?;
+        let source_checkpoint = &handoff.runtime;
         let routed = routing
             .registry
             .try_open_session_for(routing.config.clone(), route_request.clone())?;
@@ -1139,17 +1254,13 @@ impl GatewaySession {
                     ),
                 )
                 .map_err(|error| format!("target login: {error}"))?;
-            target_client
-                .execute(
+            let target_commitment = target_client
+                .resume_character_handoff(
                     &mut target_runtime,
-                    ZoneOwnerCommandRequest::direct(
-                        routed.owner_lease.clone(),
-                        WorldCommand::ClientPacket(ClientPacket::StartGame {
-                            character_index: identity.character_index,
-                        }),
-                    ),
+                    &routed.owner_lease,
+                    &handoff,
                 )
-                .map_err(|error| format!("target StartGame: {error}"))?;
+                .map_err(|error| format!("target handoff resume: {error}"))?;
             let target_identity = target_client
                 .active_identity(&target_runtime)
                 .map_err(|error| format!("target identity read: {error}"))?;
@@ -1158,30 +1269,19 @@ impl GatewaySession {
                     "target identity mismatch: expected {identity:?}, got {target_identity:?}"
                 ));
             }
-            // Login refreshes the target host's account projection, but the
-            // target must not depend on a read-after-write race in that
-            // projection. Transfer the exact source checkpoint through the
-            // authenticated, fenced Zone RPC and verify it before ownership
-            // changes. This carries vitals, inventory, map and private systems
-            // as one commitment.
-            target_client
-                .restore_active_character_checkpoint(&mut target_runtime, &source_checkpoint)
-                .map_err(|error| format!("target checkpoint restore: {error}"))?;
-            let target_checkpoint = target_client
-                .active_character_checkpoint(&target_runtime)
-                .map_err(|error| format!("target checkpoint read: {error}"))?
-                .ok_or_else(|| {
-                    "target returned no active character checkpoint after restore".to_string()
-                })?;
-            let source_json = serde_json::to_value(&source_checkpoint)
+            // The target applies this admission once, then captures a complete
+            // readback with its actual restore/observe clock witnesses. A
+            // second apply could extend a timer when crossing process epochs.
+            let target_checkpoint = &target_commitment.runtime;
+            let source_json = serde_json::to_value(source_checkpoint)
                 .map_err(|error| format!("encode source checkpoint: {error}"))?;
             let target_json = serde_json::to_value(&target_checkpoint)
                 .map_err(|error| format!("encode target checkpoint: {error}"))?;
-            if source_json != target_json {
+            if let Err(error) = handoff.validate_commitment(&target_commitment) {
                 let difference = first_json_difference(&source_json, &target_json, "$")
                     .unwrap_or_else(|| "unknown field".to_string());
                 return Err(format!(
-                    "target checkpoint commitment mismatch at {difference}"
+                    "target checkpoint commitment mismatch at {difference}: {error}"
                 ));
             }
             Ok(())
@@ -1398,6 +1498,10 @@ fn first_json_difference(
 #[cfg(test)]
 #[path = "save_fail_closed_tests.rs"]
 mod save_fail_closed_tests;
+
+#[cfg(test)]
+#[path = "npc_gold_buy_route_tests.rs"]
+mod npc_gold_buy_route_tests;
 
 #[cfg(test)]
 mod abnormal_teardown_persistence_tests {

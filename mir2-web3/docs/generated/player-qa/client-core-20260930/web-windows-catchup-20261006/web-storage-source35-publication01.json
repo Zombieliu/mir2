@@ -1,0 +1,177 @@
+{
+  "owner": "Root",
+  "kind": "Source35 actual scoped Git commit/push and independent remote verification; post-commit record for next-round carry",
+  "generatedAtUtc": "2026-10-07T23:51:53.580Z",
+  "commit": "e068bbe9e0c5397255598edde7528d472fd6f08d",
+  "parentCommit": "64b2d675c83a22fb2c54f2d1a8753272ea87c94c",
+  "title": "Preserve exact shared storage expiry values",
+  "branch": "codex/windows-player-journey",
+  "actualCommit": {
+    "chunk_id": "f102de",
+    "wall_time_seconds": 0.5008738,
+    "exit_code": 0,
+    "original_token_count": 145,
+    "output": "[codex/windows-player-journey e068bbe9e0] Preserve exact shared storage expiry values\n 18 files changed, 3607 insertions(+), 24 deletions(-)\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-renderer-source34-publication01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-finite-result02.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-raw-evidence01.json\n"
+  },
+  "actualPush": {
+    "chunk_id": "a0864c",
+    "wall_time_seconds": 0.0000071,
+    "exit_code": 0,
+    "original_token_count": 25,
+    "output": "To github.com:Zombieliu/mir2.git\n   64b2d675c8..e068bbe9e0  HEAD -> codex/windows-player-journey\n"
+  },
+  "actualRemote": {
+    "chunk_id": "44cf60",
+    "wall_time_seconds": 7.821801,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "e068bbe9e0c5397255598edde7528d472fd6f08d\trefs/heads/codex/windows-player-journey\n"
+  },
+  "actualLog": {
+    "chunk_id": "9aa7ac",
+    "wall_time_seconds": 0.1671305,
+    "exit_code": 0,
+    "original_token_count": 32,
+    "output": "e068bbe9e0c5397255598edde7528d472fd6f08d\n64b2d675c83a22fb2c54f2d1a8753272ea87c94c\nPreserve exact shared storage expiry values\n"
+  },
+  "actualCommittedDiffTree": {
+    "chunk_id": "b01af6",
+    "wall_time_seconds": 0.1366912,
+    "exit_code": 0,
+    "original_token_count": 712,
+    "output": ":100644 100644 9f347c71c2bd534959504231bad20cf0ff270a0a d96e7ea23bd7ef3270c6d21e995deaa6312eced9 M\tmir2-web3/apps/game-client/client-bevy/src/storage.rs\n:100644 100644 3441a81d3210427a556a726581391e1d395ed69f d9a47d3b45051961a23bae6bcf5beda247be6c1e M\tmir2-web3/apps/game-client/runtime/src/storage_ui_host_tests.rs\n:100644 100644 91c6997ec80b0e27474d03e06cf487c173070856 066f7f42c919e6c97ee24b6ac4cdcb54bc04c40e M\tmir2-web3/apps/web/lib/bevy-storage-model.ts\n:100644 100644 ec13681ffbf527f0fc05b89f85c28998a4337d9b 932886faffefbcc25ae9ae7253b11bab80519700 M\tmir2-web3/apps/web/lib/bevy-storage-ui.ts\n:100644 100644 d4da47bb62a94bfc65ae53c21b40e951cbc36d6e e5f02de1f83663459b5c4c2b66d6f5fc9f3ae925 M\tmir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs\n:100644 100644 b577e0b42fb8eae7f9841935dc4ce735e20df8ac 64dd95bc73583b97a22cbdc81e70f95c5e91fd19 M\tmir2-web3/apps/web/scripts/test-bevy-storage-ui.mjs\n:100644 100644 d50e4d19ac76a2f1025782330591933ab20ec84e 02ddacc5f2b77edb64881246135ab5d52d806f66 M\tmir2-web3/apps/web/scripts/test-storage-surface-integration.mjs\n:100644 100644 b38db7252c1e37aa427131fdbd21ff87c2fa5e96 5d200559e70624f8bb23620c54b98a241dadc156 M\tmir2-web3/docs/AGENT-ORCHESTRATION.md\n:100644 100644 e9bb47301cdbae8425a8b9e83a1715b46ef276b8 8c09188aebb5bd387cb584002b3b7d8e4c2658e0 M\tmir2-web3/docs/AGENT-TASK-QUEUE.md\n:100644 100644 84bfcc83218fc855425941b2cb69277e21905a33 2403a75be37f8e4f4da030e68c515f7b881e9ee9 M\tmir2-web3/docs/BACKEND-1TO1-PROGRESS.md\n:100644 100644 e122902ca48072ce82ab11341bf2f750d20dc907 1100d7c77e9109c233661b786513c1925fc3991e M\tmir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\n:100644 100644 57c250ca113c903b69b97f3b28a7572d36c96717 220b4eb470be17ade22c68464189adf7b27d72db M\tmir2-web3/docs/CRYSTAL-SERVER-PARITY.md\n:100644 100644 dbf3c0356ebf74f30bf28c80179bea79e2ccc7e5 93f5ffece5a0e8915bf83bc97f60cddc82b9f8a2 M\tmir2-web3/docs/FRONTEND-1TO1-GAPS.md\n:100644 100644 4bdde77b11e849da7111d5eb69cbb258502e2329 ce1890ae986eb3aeaf6e7a929c46f45fbb8825d0 M\tmir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md\n:100644 100644 06f76f4809b779351269b536a7e5eec554ad4c8f 4e028de0b2f9e65f5ba020fceeaf2c8c0e9e7e5d M\tmir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md\n:000000 100644 0000000000000000000000000000000000000000 164f7e47ac6fb0a6a8648c5ed12107f230765c74 A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-renderer-source34-publication01.json\n:000000 100644 0000000000000000000000000000000000000000 4b4e7f7350dd976ccadda79aa78c4a8dea263a73 A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-finite-result02.json\n:000000 100644 0000000000000000000000000000000000000000 b501ddac9d663e6e33897fc77f4f6669929cba3a A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-raw-evidence01.json\n"
+  },
+  "actualStatus": {
+    "chunk_id": "16b9c9",
+    "wall_time_seconds": 0.1424546,
+    "exit_code": 0,
+    "original_token_count": 9,
+    "output": " M mir2-web3/apps/web/tsconfig.json\n"
+  },
+  "result": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-storage-source35-finite-result02.json",
+    "bytes": 113508,
+    "sha256": "f4d53422c2af9e1bb3614abda2b7a47052adbcc41b6855ad0b5e3ad2947994ce"
+  },
+  "rawEvidence": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-storage-source35-raw-evidence01.json",
+    "bytes": 9880851,
+    "sha256": "6d6985fe44f6bb3a5bd814128f748e326cc6bbd3ee5ae6c2ebe4b5d9d2588fad"
+  },
+  "actualIndependentReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-storage-source35-independent-review01.json",
+    "bytes": 1329,
+    "sha256": "698f6a356b79024324aef7f6719413e3251bec45db1fcfdc7be728b431737b8b"
+  },
+  "committedNormalizedBlobs": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "sha1": "d96e7ea23bd7ef3270c6d21e995deaa6312eced9",
+      "normalizedBytes": 21474
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/storage_ui_host_tests.rs",
+      "sha1": "d9a47d3b45051961a23bae6bcf5beda247be6c1e",
+      "normalizedBytes": 15058
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/bevy-storage-model.ts",
+      "sha1": "066f7f42c919e6c97ee24b6ac4cdcb54bc04c40e",
+      "normalizedBytes": 2560
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/bevy-storage-ui.ts",
+      "sha1": "932886faffefbcc25ae9ae7253b11bab80519700",
+      "normalizedBytes": 20620
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "sha1": "e5f02de1f83663459b5c4c2b66d6f5fc9f3ae925",
+      "normalizedBytes": 229025
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-bevy-storage-ui.mjs",
+      "sha1": "64dd95bc73583b97a22cbdc81e70f95c5e91fd19",
+      "normalizedBytes": 32653
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-storage-surface-integration.mjs",
+      "sha1": "02ddacc5f2b77edb64881246135ab5d52d806f66",
+      "normalizedBytes": 46749
+    },
+    {
+      "path": "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "sha1": "5d200559e70624f8bb23620c54b98a241dadc156",
+      "normalizedBytes": 275875
+    },
+    {
+      "path": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "sha1": "8c09188aebb5bd387cb584002b3b7d8e4c2658e0",
+      "normalizedBytes": 893995
+    },
+    {
+      "path": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "sha1": "1100d7c77e9109c233661b786513c1925fc3991e",
+      "normalizedBytes": 1013761
+    },
+    {
+      "path": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "sha1": "2403a75be37f8e4f4da030e68c515f7b881e9ee9",
+      "normalizedBytes": 556696
+    },
+    {
+      "path": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "sha1": "220b4eb470be17ade22c68464189adf7b27d72db",
+      "normalizedBytes": 499225
+    },
+    {
+      "path": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "sha1": "93f5ffece5a0e8915bf83bc97f60cddc82b9f8a2",
+      "normalizedBytes": 635520
+    },
+    {
+      "path": "mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md",
+      "sha1": "4e028de0b2f9e65f5ba020fceeaf2c8c0e9e7e5d",
+      "normalizedBytes": 30848
+    },
+    {
+      "path": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "sha1": "ce1890ae986eb3aeaf6e7a929c46f45fbb8825d0",
+      "normalizedBytes": 49872
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-finite-result02.json",
+      "sha1": "4b4e7f7350dd976ccadda79aa78c4a8dea263a73",
+      "normalizedBytes": 113508
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-raw-evidence01.json",
+      "sha1": "b501ddac9d663e6e33897fc77f4f6669929cba3a",
+      "normalizedBytes": 9880851
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-renderer-source34-publication01.json",
+      "sha1": "164f7e47ac6fb0a6a8648c5ed12107f230765c74",
+      "normalizedBytes": 24502
+    }
+  ],
+  "all18BlobSha1Matched": true,
+  "productAndDocWorktreePinsMatched": true,
+  "userTsconfigPreserved": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "unrelatedTrackedChangeExcluded": true,
+  "postCommitRecordNotInOwnCommit": true,
+  "fullProductionBuildAccepted": false,
+  "candidateAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "gameNetworkUsed": false,
+  "wasmApiUsed": false,
+  "goalStatus": "active",
+  "goalComplete": false
+}

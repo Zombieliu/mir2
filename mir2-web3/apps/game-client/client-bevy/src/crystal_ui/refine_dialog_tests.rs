@@ -63,6 +63,7 @@ fn inventory() -> InventoryModel {
             item(1002, 0, 79, false),
             item(1003, 1, 5, false),
         ],
+        npc_gold_trade_capacity: None,
     }
 }
 

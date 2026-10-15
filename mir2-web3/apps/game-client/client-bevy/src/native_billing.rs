@@ -1,9 +1,8 @@
 //! Account billing presentation. Only correlated server replies settle requests.
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::{SystemTime, UNIX_EPOCH};
+use web_time::{SystemTime, UNIX_EPOCH};
 
 use bevy::prelude::*;
-use bevy::ui::FocusPolicy;
 use serde::Deserialize;
 
 use crate::native_monthly_card::MonthlyCardStatus;
@@ -535,668 +534,678 @@ fn new_order_id(now: u64) -> String {
     )
 }
 
-#[derive(Component)]
-pub struct BillingButton {
-    action: BillingAction,
-    enabled: bool,
-}
+#[cfg(feature = "native-ui")]
+mod ui {
+    use super::*;
+    use bevy::ui::FocusPolicy;
+    #[derive(Component)]
+    pub struct BillingButton {
+        action: BillingAction,
+        enabled: bool,
+    }
 
-pub fn process_input(
-    mut shell: ResMut<NativeShellModel>,
-    keys: Res<ButtonInput<KeyCode>>,
-    buttons: Query<(&Interaction, &BillingButton), Changed<Interaction>>,
-    mut ui: Option<ResMut<crate::crystal_ui::overlays::NativePlayerUiState>>,
-) {
-    if shell.billing.open
-        && !shell.billing.scope_matches(
-            shell.last_account.as_deref().unwrap_or_default(),
-            shell.billing_character_index(),
-        )
-    {
-        shell.billing = Default::default();
-    }
-    shell.billing.expire_request(now_ms());
-    let was_open = shell.billing.open;
-    let input_ready = shell.billing.input_ready;
-    shell.billing.input_ready = shell.billing.open;
-    // The Enter that opens this panel belongs to the monthly-card button.
-    if shell.billing.open && input_ready {
-        let actions = shell.billing.actions();
-        if keys.just_pressed(KeyCode::Escape) {
-            shell.billing.action(BillingAction::Close, now_ms());
-        } else if keys.just_pressed(KeyCode::Tab) && !actions.is_empty() {
-            let backwards = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
-            shell.billing.focus = if backwards {
-                (shell.billing.focus + actions.len() - 1) % actions.len()
-            } else {
-                (shell.billing.focus + 1) % actions.len()
-            };
-        } else if keys.just_pressed(KeyCode::Enter) || keys.just_pressed(KeyCode::NumpadEnter) {
-            if let Some(action) = actions.get(shell.billing.focus % actions.len().max(1)) {
-                shell.billing.action(action.clone(), now_ms());
-            }
-        }
-        for (interaction, button) in &buttons {
-            if *interaction == Interaction::Pressed && button.enabled && shell.billing.open {
-                shell.billing.action(button.action.clone(), now_ms());
-                break;
-            }
-        }
-    }
-    if !matches!(
-        shell.screen,
-        NativeShellScreen::CharacterSelect | NativeShellScreen::InGame
+    pub fn process_input(
+        mut shell: ResMut<NativeShellModel>,
+        keys: Res<ButtonInput<KeyCode>>,
+        buttons: Query<(&Interaction, &BillingButton), Changed<Interaction>>,
+        mut ui: Option<ResMut<crate::crystal_ui::overlays::NativePlayerUiState>>,
     ) {
-        shell.billing = Default::default();
-    }
-    if let Some(ui) = ui.as_deref_mut() {
-        ui.billing_open = shell.billing.open;
-        ui.billing_input_consumed = was_open && !shell.billing.open;
-    }
-}
-
-fn rect(x: f32, y: f32, w: f32, h: f32) -> Node {
-    Node {
-        position_type: PositionType::Absolute,
-        left: Val::Px(x),
-        top: Val::Px(y),
-        width: Val::Px(w),
-        height: Val::Px(h),
-        ..default()
-    }
-}
-fn text(
-    parent: &mut ChildSpawnerCommands,
-    value: String,
-    x: f32,
-    y: f32,
-    w: f32,
-    h: f32,
-    size: f32,
-) {
-    let mut bounds = rect(x, y, w, h);
-    bounds.overflow = Overflow::clip();
-    parent.spawn((
-        bounds,
-        Text::new(value),
-        crate::crystal_ui::typography::crystal_text_font(size),
-        TextColor(Color::srgb(0.94, 0.89, 0.75)),
-    ));
-}
-fn button(
-    parent: &mut ChildSpawnerCommands,
-    panel: &BillingPanel,
-    action: BillingAction,
-    label: &str,
-    x: f32,
-    y: f32,
-    w: f32,
-) {
-    let actions = panel.actions();
-    let enabled = actions.contains(&action);
-    let focused = actions.get(panel.focus % actions.len().max(1)) == Some(&action);
-    let mut bounds = rect(x, y, w, 30.0);
-    bounds.border = UiRect::all(Val::Px(1.0));
-    parent
-        .spawn((
-            bounds,
-            Button,
-            FocusPolicy::Block,
-            BillingButton { action, enabled },
-            BackgroundColor(if enabled {
-                Color::srgb(0.19, 0.15, 0.09)
-            } else {
-                Color::srgb(0.10, 0.10, 0.10)
-            }),
-            BorderColor::all(if focused {
-                Color::srgb(1.0, 0.82, 0.25)
-            } else {
-                Color::srgb(0.45, 0.36, 0.20)
-            }),
-        ))
-        .with_children(|b| {
-            text(
-                b,
-                crate::native_i18n::tr(label),
-                6.0,
-                3.0,
-                w - 12.0,
-                26.0,
-                12.0,
+        if shell.billing.open
+            && !shell.billing.scope_matches(
+                shell.last_account.as_deref().unwrap_or_default(),
+                shell.billing_character_index(),
             )
-        });
-}
-
-pub fn render(parent: &mut ChildSpawnerCommands, panel: &BillingPanel) {
-    use crate::native_i18n::tr;
-    if !panel.open {
-        return;
+        {
+            shell.billing = Default::default();
+        }
+        shell.billing.expire_request(now_ms());
+        let was_open = shell.billing.open;
+        let input_ready = shell.billing.input_ready;
+        shell.billing.input_ready = shell.billing.open;
+        // The Enter that opens this panel belongs to the monthly-card button.
+        if shell.billing.open && input_ready {
+            let actions = shell.billing.actions();
+            if keys.just_pressed(KeyCode::Escape) {
+                shell.billing.action(BillingAction::Close, now_ms());
+            } else if keys.just_pressed(KeyCode::Tab) && !actions.is_empty() {
+                let backwards =
+                    keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
+                shell.billing.focus = if backwards {
+                    (shell.billing.focus + actions.len() - 1) % actions.len()
+                } else {
+                    (shell.billing.focus + 1) % actions.len()
+                };
+            } else if keys.just_pressed(KeyCode::Enter) || keys.just_pressed(KeyCode::NumpadEnter) {
+                if let Some(action) = actions.get(shell.billing.focus % actions.len().max(1)) {
+                    shell.billing.action(action.clone(), now_ms());
+                }
+            }
+            for (interaction, button) in &buttons {
+                if *interaction == Interaction::Pressed && button.enabled && shell.billing.open {
+                    shell.billing.action(button.action.clone(), now_ms());
+                    break;
+                }
+            }
+        }
+        if !matches!(
+            shell.screen,
+            NativeShellScreen::CharacterSelect | NativeShellScreen::InGame
+        ) {
+            shell.billing = Default::default();
+        }
+        if let Some(ui) = ui.as_deref_mut() {
+            ui.billing_open = shell.billing.open;
+            ui.billing_input_consumed = was_open && !shell.billing.open;
+        }
     }
-    parent
-        .spawn((
-            rect(0.0, 0.0, 1024.0, 768.0),
-            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.80)),
-            FocusPolicy::Block,
-            GlobalZIndex(6000),
-        ))
-        .with_children(|layer| {
-            layer
-                .spawn((
-                    rect(142.0, 45.0, 740.0, 682.0),
-                    BackgroundColor(Color::srgb(0.06, 0.045, 0.03)),
-                    BorderColor::all(Color::srgb(0.65, 0.49, 0.20)),
-                ))
-                .with_children(|p| {
-                    text(p, tr("billing.title"), 20.0, 14.0, 700.0, 30.0, 23.0);
-                    text(p, tr("billing.instructions"), 20.0, 48.0, 700.0, 42.0, 13.0);
-                    if let Some(s) = &panel.status {
-                        text(
-                            p,
-                            tr("billing.balance")
-                                .replace("{0}", &s.credit.to_string())
-                                .replace("{1}", &s.pending_credit.to_string()),
-                            20.0,
-                            94.0,
-                            700.0,
-                            30.0,
-                            17.0,
-                        );
-                        let access = if !s.monthly_card.required {
-                            "billing.optional"
-                        } else if s.monthly_card.active {
-                            "billing.active"
-                        } else {
-                            "billing.expired"
-                        };
-                        let expiry = s
-                            .monthly_card
-                            .expires_at_ms
-                            .and_then(|ms| i64::try_from(ms).ok())
-                            .and_then(chrono::DateTime::<chrono::Utc>::from_timestamp_millis)
-                            .map(|d| {
-                                format!(
-                                    "\n{} {} UTC",
-                                    tr("billing.expires"),
-                                    d.format("%Y-%m-%d %H:%M")
-                                )
-                            })
-                            .unwrap_or_default();
-                        text(
-                            p,
-                            format!("{}{}", tr(access), expiry),
-                            20.0,
-                            132.0,
-                            700.0,
-                            50.0,
-                            13.0,
-                        );
-                        if !s.enabled {
-                            text(p, tr("billing.unavailable"), 20.0, 190.0, 700.0, 42.0, 15.0);
+
+    fn rect(x: f32, y: f32, w: f32, h: f32) -> Node {
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(x),
+            top: Val::Px(y),
+            width: Val::Px(w),
+            height: Val::Px(h),
+            ..default()
+        }
+    }
+    fn text(
+        parent: &mut ChildSpawnerCommands,
+        value: String,
+        x: f32,
+        y: f32,
+        w: f32,
+        h: f32,
+        size: f32,
+    ) {
+        let mut bounds = rect(x, y, w, h);
+        bounds.overflow = Overflow::clip();
+        parent.spawn((
+            bounds,
+            Text::new(value),
+            crate::crystal_ui::typography::crystal_text_font(size),
+            TextColor(Color::srgb(0.94, 0.89, 0.75)),
+        ));
+    }
+    fn button(
+        parent: &mut ChildSpawnerCommands,
+        panel: &BillingPanel,
+        action: BillingAction,
+        label: &str,
+        x: f32,
+        y: f32,
+        w: f32,
+    ) {
+        let actions = panel.actions();
+        let enabled = actions.contains(&action);
+        let focused = actions.get(panel.focus % actions.len().max(1)) == Some(&action);
+        let mut bounds = rect(x, y, w, 30.0);
+        bounds.border = UiRect::all(Val::Px(1.0));
+        parent
+            .spawn((
+                bounds,
+                Button,
+                FocusPolicy::Block,
+                BillingButton { action, enabled },
+                BackgroundColor(if enabled {
+                    Color::srgb(0.19, 0.15, 0.09)
+                } else {
+                    Color::srgb(0.10, 0.10, 0.10)
+                }),
+                BorderColor::all(if focused {
+                    Color::srgb(1.0, 0.82, 0.25)
+                } else {
+                    Color::srgb(0.45, 0.36, 0.20)
+                }),
+            ))
+            .with_children(|b| {
+                text(
+                    b,
+                    crate::native_i18n::tr(label),
+                    6.0,
+                    3.0,
+                    w - 12.0,
+                    26.0,
+                    12.0,
+                )
+            });
+    }
+
+    pub fn render(parent: &mut ChildSpawnerCommands, panel: &BillingPanel) {
+        use crate::native_i18n::tr;
+        if !panel.open {
+            return;
+        }
+        parent
+            .spawn((
+                rect(0.0, 0.0, 1024.0, 768.0),
+                BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.80)),
+                FocusPolicy::Block,
+                GlobalZIndex(6000),
+            ))
+            .with_children(|layer| {
+                layer
+                    .spawn((
+                        rect(142.0, 45.0, 740.0, 682.0),
+                        BackgroundColor(Color::srgb(0.06, 0.045, 0.03)),
+                        BorderColor::all(Color::srgb(0.65, 0.49, 0.20)),
+                    ))
+                    .with_children(|p| {
+                        text(p, tr("billing.title"), 20.0, 14.0, 700.0, 30.0, 23.0);
+                        text(p, tr("billing.instructions"), 20.0, 48.0, 700.0, 42.0, 13.0);
+                        if let Some(s) = &panel.status {
+                            text(
+                                p,
+                                tr("billing.balance")
+                                    .replace("{0}", &s.credit.to_string())
+                                    .replace("{1}", &s.pending_credit.to_string()),
+                                20.0,
+                                94.0,
+                                700.0,
+                                30.0,
+                                17.0,
+                            );
+                            let access = if !s.monthly_card.required {
+                                "billing.optional"
+                            } else if s.monthly_card.active {
+                                "billing.active"
+                            } else {
+                                "billing.expired"
+                            };
+                            let expiry = s
+                                .monthly_card
+                                .expires_at_ms
+                                .and_then(|ms| i64::try_from(ms).ok())
+                                .and_then(chrono::DateTime::<chrono::Utc>::from_timestamp_millis)
+                                .map(|d| {
+                                    format!(
+                                        "\n{} {} UTC",
+                                        tr("billing.expires"),
+                                        d.format("%Y-%m-%d %H:%M")
+                                    )
+                                })
+                                .unwrap_or_default();
+                            text(
+                                p,
+                                format!("{}{}", tr(access), expiry),
+                                20.0,
+                                132.0,
+                                700.0,
+                                50.0,
+                                13.0,
+                            );
+                            if !s.enabled {
+                                text(p, tr("billing.unavailable"), 20.0, 190.0, 700.0, 42.0, 15.0);
+                            } else {
+                                text(
+                                    p,
+                                    tr(if s.checkout_enabled {
+                                        "billing.offers"
+                                    } else {
+                                        "billing.checkoutUnavailable"
+                                    }),
+                                    20.0,
+                                    190.0,
+                                    500.0,
+                                    35.0,
+                                    14.0,
+                                );
+                                if s.offers.len() > PAGE_SIZE {
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::OffersPage(false),
+                                        "billing.previous",
+                                        524.0,
+                                        185.0,
+                                        88.0,
+                                    );
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::OffersPage(true),
+                                        "billing.next",
+                                        622.0,
+                                        185.0,
+                                        88.0,
+                                    );
+                                }
+                                for (i, o) in s
+                                    .offers
+                                    .iter()
+                                    .skip(panel.offer_page * PAGE_SIZE)
+                                    .take(PAGE_SIZE)
+                                    .enumerate()
+                                {
+                                    let y = 225.0 + i as f32 * 48.0;
+                                    text(
+                                        p,
+                                        format!(
+                                            "{} · {} · {}",
+                                            o.label,
+                                            o.amount_label,
+                                            tr("billing.points")
+                                                .replace("{0}", &o.credits.to_string())
+                                        ),
+                                        20.0,
+                                        y,
+                                        510.0,
+                                        42.0,
+                                        13.0,
+                                    );
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::Checkout(o.id.clone()),
+                                        "billing.recharge",
+                                        550.0,
+                                        y + 4.0,
+                                        160.0,
+                                    );
+                                }
+                                if let Some(price) = s.monthly_card_credit_price {
+                                    text(
+                                        p,
+                                        tr("billing.monthlyPrice")
+                                            .replace("{0}", &price.to_string()),
+                                        20.0,
+                                        377.0,
+                                        510.0,
+                                        44.0,
+                                        13.0,
+                                    );
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::BuyMonthlyCard,
+                                        "billing.buyMonthly",
+                                        550.0,
+                                        378.0,
+                                        160.0,
+                                    );
+                                }
+                                text(p, tr("billing.owned"), 20.0, 427.0, 500.0, 28.0, 14.0);
+                                if s.owned_monthly_cards.len() > PAGE_SIZE {
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::CardsPage(false),
+                                        "billing.previous",
+                                        524.0,
+                                        422.0,
+                                        88.0,
+                                    );
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::CardsPage(true),
+                                        "billing.next",
+                                        622.0,
+                                        422.0,
+                                        88.0,
+                                    );
+                                }
+                                if s.owned_monthly_cards.is_empty() {
+                                    text(p, tr("billing.noCards"), 20.0, 459.0, 510.0, 30.0, 13.0);
+                                }
+                                for (i, card) in s
+                                    .owned_monthly_cards
+                                    .iter()
+                                    .skip(panel.card_page * PAGE_SIZE)
+                                    .take(PAGE_SIZE)
+                                    .enumerate()
+                                {
+                                    let y = 459.0 + i as f32 * 37.0;
+                                    text(
+                                        p,
+                                        format!(
+                                            "{} #{}",
+                                            if card.label.is_empty() {
+                                                tr("billing.card")
+                                            } else {
+                                                card.label.clone()
+                                            },
+                                            card.unique_id
+                                        ),
+                                        20.0,
+                                        y,
+                                        510.0,
+                                        32.0,
+                                        13.0,
+                                    );
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::Activate(card.unique_id.clone()),
+                                        "billing.activate",
+                                        550.0,
+                                        y,
+                                        160.0,
+                                    );
+                                }
+                            }
                         } else {
                             text(
                                 p,
-                                tr(if s.checkout_enabled {
-                                    "billing.offers"
+                                tr(if panel.pending.is_some() {
+                                    "billing.checking"
                                 } else {
-                                    "billing.checkoutUnavailable"
+                                    "billing.unavailable"
                                 }),
                                 20.0,
-                                190.0,
-                                500.0,
-                                35.0,
-                                14.0,
+                                100.0,
+                                700.0,
+                                44.0,
+                                15.0,
                             );
-                            if s.offers.len() > PAGE_SIZE {
-                                button(
-                                    p,
-                                    panel,
-                                    BillingAction::OffersPage(false),
-                                    "billing.previous",
-                                    524.0,
-                                    185.0,
-                                    88.0,
-                                );
-                                button(
-                                    p,
-                                    panel,
-                                    BillingAction::OffersPage(true),
-                                    "billing.next",
-                                    622.0,
-                                    185.0,
-                                    88.0,
-                                );
-                            }
-                            for (i, o) in s
-                                .offers
-                                .iter()
-                                .skip(panel.offer_page * PAGE_SIZE)
-                                .take(PAGE_SIZE)
-                                .enumerate()
-                            {
-                                let y = 225.0 + i as f32 * 48.0;
-                                text(
-                                    p,
-                                    format!(
-                                        "{} · {} · {}",
-                                        o.label,
-                                        o.amount_label,
-                                        tr("billing.points").replace("{0}", &o.credits.to_string())
-                                    ),
-                                    20.0,
-                                    y,
-                                    510.0,
-                                    42.0,
-                                    13.0,
-                                );
-                                button(
-                                    p,
-                                    panel,
-                                    BillingAction::Checkout(o.id.clone()),
-                                    "billing.recharge",
-                                    550.0,
-                                    y + 4.0,
-                                    160.0,
-                                );
-                            }
-                            if let Some(price) = s.monthly_card_credit_price {
-                                text(
-                                    p,
-                                    tr("billing.monthlyPrice").replace("{0}", &price.to_string()),
-                                    20.0,
-                                    377.0,
-                                    510.0,
-                                    44.0,
-                                    13.0,
-                                );
-                                button(
-                                    p,
-                                    panel,
-                                    BillingAction::BuyMonthlyCard,
-                                    "billing.buyMonthly",
-                                    550.0,
-                                    378.0,
-                                    160.0,
-                                );
-                            }
-                            text(p, tr("billing.owned"), 20.0, 427.0, 500.0, 28.0, 14.0);
-                            if s.owned_monthly_cards.len() > PAGE_SIZE {
-                                button(
-                                    p,
-                                    panel,
-                                    BillingAction::CardsPage(false),
-                                    "billing.previous",
-                                    524.0,
-                                    422.0,
-                                    88.0,
-                                );
-                                button(
-                                    p,
-                                    panel,
-                                    BillingAction::CardsPage(true),
-                                    "billing.next",
-                                    622.0,
-                                    422.0,
-                                    88.0,
-                                );
-                            }
-                            if s.owned_monthly_cards.is_empty() {
-                                text(p, tr("billing.noCards"), 20.0, 459.0, 510.0, 30.0, 13.0);
-                            }
-                            for (i, card) in s
-                                .owned_monthly_cards
-                                .iter()
-                                .skip(panel.card_page * PAGE_SIZE)
-                                .take(PAGE_SIZE)
-                                .enumerate()
-                            {
-                                let y = 459.0 + i as f32 * 37.0;
-                                text(
-                                    p,
-                                    format!(
-                                        "{} #{}",
-                                        if card.label.is_empty() {
-                                            tr("billing.card")
-                                        } else {
-                                            card.label.clone()
-                                        },
-                                        card.unique_id
-                                    ),
-                                    20.0,
-                                    y,
-                                    510.0,
-                                    32.0,
-                                    13.0,
-                                );
-                                button(
-                                    p,
-                                    panel,
-                                    BillingAction::Activate(card.unique_id.clone()),
-                                    "billing.activate",
-                                    550.0,
-                                    y,
-                                    160.0,
-                                );
-                            }
                         }
-                    } else {
-                        text(
-                            p,
-                            tr(if panel.pending.is_some() {
-                                "billing.checking"
-                            } else {
-                                "billing.unavailable"
-                            }),
-                            20.0,
-                            100.0,
-                            700.0,
-                            44.0,
-                            15.0,
-                        );
-                    }
-                    if let Some(message) = panel.message {
-                        text(p, tr(message), 20.0, 575.0, 700.0, 48.0, 13.0);
-                    }
-                    button(
-                        p,
-                        panel,
-                        BillingAction::Refresh,
-                        "billing.refresh",
-                        20.0,
-                        635.0,
-                        220.0,
-                    );
-                    if panel.retry_required && panel.last_purchase.is_some() {
+                        if let Some(message) = panel.message {
+                            text(p, tr(message), 20.0, 575.0, 700.0, 48.0, 13.0);
+                        }
                         button(
                             p,
                             panel,
-                            BillingAction::Retry,
-                            "billing.retry",
-                            260.0,
+                            BillingAction::Refresh,
+                            "billing.refresh",
+                            20.0,
                             635.0,
                             220.0,
                         );
-                    }
-                    button(
-                        p,
-                        panel,
-                        BillingAction::Close,
-                        "billing.close",
-                        500.0,
-                        635.0,
-                        210.0,
-                    );
-                });
-        });
-}
+                        if panel.retry_required && panel.last_purchase.is_some() {
+                            button(
+                                p,
+                                panel,
+                                BillingAction::Retry,
+                                "billing.retry",
+                                260.0,
+                                635.0,
+                                220.0,
+                            );
+                        }
+                        button(
+                            p,
+                            panel,
+                            BillingAction::Close,
+                            "billing.close",
+                            500.0,
+                            635.0,
+                            210.0,
+                        );
+                    });
+            });
+    }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    fn status(enabled: bool) -> BillingStatus {
-        BillingStatus {
-            enabled,
-            checkout_enabled: true,
-            credit: 900,
-            pending_credit: 0,
-            offers: vec![BillingOffer {
-                id: "small".into(),
-                label: "Small".into(),
-                currency: "usd".into(),
-                amount_minor: 100,
-                amount_label: "$1.00".into(),
-                credits: 100,
-            }],
-            monthly_card_credit_price: Some(900),
-            owned_monthly_cards: vec![],
-            monthly_card: MonthlyCardStatus {
-                required: true,
-                active: false,
-                expires_at_ms: None,
-                server_now_ms: 1,
-                remaining_ms: 0,
-                can_enter_game: false,
-            },
-            orders: vec![],
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        fn status(enabled: bool) -> BillingStatus {
+            BillingStatus {
+                enabled,
+                checkout_enabled: true,
+                credit: 900,
+                pending_credit: 0,
+                offers: vec![BillingOffer {
+                    id: "small".into(),
+                    label: "Small".into(),
+                    currency: "usd".into(),
+                    amount_minor: 100,
+                    amount_label: "$1.00".into(),
+                    credits: 100,
+                }],
+                monthly_card_credit_price: Some(900),
+                owned_monthly_cards: vec![],
+                monthly_card: MonthlyCardStatus {
+                    required: true,
+                    active: false,
+                    expires_at_ms: None,
+                    server_now_ms: 1,
+                    remaining_ms: 0,
+                    can_enter_game: false,
+                },
+                orders: vec![],
+            }
         }
-    }
-    fn reply(request: &BillingRequest) -> BillingReply {
-        BillingReply {
-            operation: request.operation,
-            request_id: request.request_id,
-            character_index: request.character_index,
-            status: None,
-            checkout_url: None,
-            error: None,
-            replayed: None,
+        fn reply(request: &BillingRequest) -> BillingReply {
+            BillingReply {
+                operation: request.operation,
+                request_id: request.request_id,
+                character_index: request.character_index,
+                status: None,
+                checkout_url: None,
+                error: None,
+                replayed: None,
+            }
         }
-    }
-    #[test]
-    fn checkout_is_bound_to_current_account_character_and_request() {
-        let mut p = BillingPanel::default();
-        p.open_for("alice", 7, 10);
-        p.pending = None;
-        p.begin(
-            Some(BillingPurchase::Checkout {
-                offer_id: "small".into(),
-                order_request_id: "native-stable-order".into(),
-            }),
-            10,
-        );
-        let r = p.pending.clone().unwrap();
-        p.mark_sent(r.request_id);
-        let mut result = reply(&r);
-        result.checkout_url = Some("https://checkout.stripe.com/c/pay/test".into());
-        assert!(!p.accept(result.clone(), "bob", Some(7), 20));
-        assert!(!p.accept(result.clone(), "alice", Some(8), 20));
-        result.request_id += 1;
-        assert!(!p.accept(result.clone(), "alice", Some(7), 20));
-        result.request_id = r.request_id;
-        assert!(p.accept(result, "alice", Some(7), 20));
-        assert!(p.take_checkout_url().is_some());
-        assert!(p.take_checkout_url().is_none());
-    }
-    #[test]
-    fn timeout_retry_preserves_order_and_ignores_late_original_url() {
-        let mut p = BillingPanel::default();
-        p.open_for("alice", 7, 1);
-        p.pending = None;
-        let purchase = BillingPurchase::Checkout {
-            offer_id: "small".into(),
-            order_request_id: "native-stable-order".into(),
-        };
-        p.begin(Some(purchase.clone()), 10);
-        let old = p.pending.clone().unwrap();
-        p.mark_sent(old.request_id);
-        p.expire_request(15_010);
-        p.action(BillingAction::Retry, 15_011);
-        let retry = p.pending.clone().unwrap();
-        assert_ne!(old.request_id, retry.request_id);
-        assert_eq!(retry.purchase, Some(purchase));
-        assert!(!p.accept(reply(&old), "alice", Some(7), 15_012));
-        assert!(p.take_checkout_url().is_none());
-    }
-    #[test]
-    fn unique_ids_remain_canonical_strings() {
-        assert!(canonical_item_id("18446744073709551615"));
-        for id in ["01", "0", "-1", "+1", "1.0", "18446744073709551616"] {
-            assert!(!canonical_item_id(id));
+        #[test]
+        fn checkout_is_bound_to_current_account_character_and_request() {
+            let mut p = BillingPanel::default();
+            p.open_for("alice", 7, 10);
+            p.pending = None;
+            p.begin(
+                Some(BillingPurchase::Checkout {
+                    offer_id: "small".into(),
+                    order_request_id: "native-stable-order".into(),
+                }),
+                10,
+            );
+            let r = p.pending.clone().unwrap();
+            p.mark_sent(r.request_id);
+            let mut result = reply(&r);
+            result.checkout_url = Some("https://checkout.stripe.com/c/pay/test".into());
+            assert!(!p.accept(result.clone(), "bob", Some(7), 20));
+            assert!(!p.accept(result.clone(), "alice", Some(8), 20));
+            result.request_id += 1;
+            assert!(!p.accept(result.clone(), "alice", Some(7), 20));
+            result.request_id = r.request_id;
+            assert!(p.accept(result, "alice", Some(7), 20));
+            assert!(p.take_checkout_url().is_some());
+            assert!(p.take_checkout_url().is_none());
         }
-    }
-    #[test]
-    fn purchase_reply_refreshes_status_and_disabled_status_cannot_purchase() {
-        let mut p = BillingPanel::default();
-        p.open_for("alice", 7, 10);
-        let request = p.pending.clone().unwrap();
-        p.mark_sent(request.request_id);
-        let mut result = reply(&request);
-        result.status = Some(status(false));
-        assert!(p.accept(result, "alice", Some(7), 11));
-        p.action(BillingAction::Checkout("small".into()), 12);
-        p.action(BillingAction::BuyMonthlyCard, 12);
-        assert!(p.pending.is_none());
-        p.status = Some(status(true));
-        p.action(BillingAction::BuyMonthlyCard, 13);
-        let request = p.pending.clone().unwrap();
-        p.mark_sent(request.request_id);
-        assert_eq!(request.operation, BillingOperation::BuyMonthlyCard);
-        if let Some(BillingPurchase::BuyMonthlyCard { order_request_id }) = &request.purchase {
-            assert!((12..=96).contains(&order_request_id.len()));
-            assert!(order_request_id
-                .bytes()
-                .all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b)));
-        } else {
-            panic!("missing stable order");
-        }
-        assert!(p.accept(reply(&request), "alice", Some(7), 14));
-        assert_eq!(
-            p.unsent_request().unwrap().operation,
-            BillingOperation::Status
-        );
-        assert_eq!(p.unsent_request().unwrap().character_index, 7);
-    }
-    #[test]
-    fn refresh_never_settles_an_unconfirmed_purchase() {
-        let mut p = BillingPanel::default();
-        p.open_for("alice", 7, 1);
-        p.pending = None;
-        let purchase = BillingPurchase::BuyMonthlyCard {
-            order_request_id: "native-stable-order".into(),
-        };
-        p.begin(Some(purchase.clone()), 10);
-        p.expire_request(15_010);
-        p.action(BillingAction::Refresh, 15_011);
-        let request = p.pending.clone().unwrap();
-        p.mark_sent(request.request_id);
-        let mut result = reply(&request);
-        result.status = Some(status(true));
-        assert!(p.accept(result, "alice", Some(7), 15_012));
-        assert!(p.retry_required);
-        assert_eq!(p.last_purchase, Some(purchase.clone()));
-        p.action(BillingAction::BuyMonthlyCard, 15_013);
-        assert!(p.pending.is_none());
-        p.action(BillingAction::Refresh, 15_014);
-        let request = p.pending.clone().unwrap();
-        p.mark_sent(request.request_id);
-        let mut result = reply(&request);
-        result.error = Some("unavailable".into());
-        assert!(p.accept(result, "alice", Some(7), 15_015));
-        p.action(BillingAction::Retry, 15_016);
-        assert_eq!(p.pending.unwrap().purchase, Some(purchase));
-    }
-    #[test]
-    fn rejected_purchase_allows_an_intentional_new_offer() {
-        let mut p = BillingPanel::default();
-        p.open_for("alice", 7, 1);
-        p.pending = None;
-        p.status = Some(status(true));
-        p.action(BillingAction::BuyMonthlyCard, 2);
-        let request = p.pending.clone().unwrap();
-        p.mark_sent(request.request_id);
-        let mut result = reply(&request);
-        result.error = Some("insufficient credits".into());
-        assert!(p.accept(result, "alice", Some(7), 3));
-        p.action(BillingAction::Checkout("small".into()), 4);
-        assert_eq!(p.pending.unwrap().operation, BillingOperation::Checkout);
-    }
-    #[test]
-    fn definitive_purchase_errors_are_specific_and_require_current_correlation() {
-        for (error, message) in [
-            ("billingInsufficientCredit", "billing.insufficientCredits"),
-            ("billingInsufficientCredits", "billing.insufficientCredits"),
-            ("billingInventoryFull", "billing.inventoryFull"),
-            ("billingUnavailable", "billing.unavailable"),
-            ("billingMonthlyCardDisabled", "billing.monthlyDisabled"),
-        ] {
+        #[test]
+        fn timeout_retry_preserves_order_and_ignores_late_original_url() {
             let mut p = BillingPanel::default();
             p.open_for("alice", 7, 1);
-            let refresh = p.pending.clone().unwrap();
-            p.mark_sent(refresh.request_id);
-            let mut refreshed = reply(&refresh);
-            refreshed.status = Some(status(true));
-            assert!(p.accept(refreshed, "alice", Some(7), 2));
-            p.action(BillingAction::BuyMonthlyCard, 3);
+            p.pending = None;
+            let purchase = BillingPurchase::Checkout {
+                offer_id: "small".into(),
+                order_request_id: "native-stable-order".into(),
+            };
+            p.begin(Some(purchase.clone()), 10);
+            let old = p.pending.clone().unwrap();
+            p.mark_sent(old.request_id);
+            p.expire_request(15_010);
+            p.action(BillingAction::Retry, 15_011);
+            let retry = p.pending.clone().unwrap();
+            assert_ne!(old.request_id, retry.request_id);
+            assert_eq!(retry.purchase, Some(purchase));
+            assert!(!p.accept(reply(&old), "alice", Some(7), 15_012));
+            assert!(p.take_checkout_url().is_none());
+        }
+        #[test]
+        fn unique_ids_remain_canonical_strings() {
+            assert!(canonical_item_id("18446744073709551615"));
+            for id in ["01", "0", "-1", "+1", "1.0", "18446744073709551616"] {
+                assert!(!canonical_item_id(id));
+            }
+        }
+        #[test]
+        fn purchase_reply_refreshes_status_and_disabled_status_cannot_purchase() {
+            let mut p = BillingPanel::default();
+            p.open_for("alice", 7, 10);
             let request = p.pending.clone().unwrap();
             p.mark_sent(request.request_id);
             let mut result = reply(&request);
-            result.error = Some(error.into());
-            let before = p.clone();
-            assert!(!p.accept(result.clone(), "bob", Some(7), 4));
-            assert_eq!(p, before);
-            assert!(!p.accept(result.clone(), "alice", Some(8), 4));
-            assert_eq!(p, before);
-            result.request_id += 1;
-            assert!(!p.accept(result.clone(), "alice", Some(7), 4));
-            assert_eq!(p, before);
-            result.request_id = request.request_id;
-            assert!(p.accept(result, "alice", Some(7), 4));
-            assert_eq!(p.message, Some(message));
+            result.status = Some(status(false));
+            assert!(p.accept(result, "alice", Some(7), 11));
+            p.action(BillingAction::Checkout("small".into()), 12);
+            p.action(BillingAction::BuyMonthlyCard, 12);
             assert!(p.pending.is_none());
-            assert!(p.last_purchase.is_none());
-            assert!(!p.retry_required);
-            assert!(p.take_checkout_url().is_none());
-            p.action(BillingAction::Retry, 5);
-            assert!(p.pending.is_none());
-            p.action(BillingAction::BuyMonthlyCard, 6);
-            let next = p.pending.unwrap();
-            assert_ne!(next.request_id, request.request_id);
-            assert_ne!(next.purchase, request.purchase);
+            p.status = Some(status(true));
+            p.action(BillingAction::BuyMonthlyCard, 13);
+            let request = p.pending.clone().unwrap();
+            p.mark_sent(request.request_id);
+            assert_eq!(request.operation, BillingOperation::BuyMonthlyCard);
+            if let Some(BillingPurchase::BuyMonthlyCard { order_request_id }) = &request.purchase {
+                assert!((12..=96).contains(&order_request_id.len()));
+                assert!(order_request_id
+                    .bytes()
+                    .all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b)));
+            } else {
+                panic!("missing stable order");
+            }
+            assert!(p.accept(reply(&request), "alice", Some(7), 14));
+            assert_eq!(
+                p.unsent_request().unwrap().operation,
+                BillingOperation::Status
+            );
+            assert_eq!(p.unsent_request().unwrap().character_index, 7);
         }
-    }
-    #[test]
-    fn panel_opening_enter_is_consumed_and_close_fences_world_input() {
-        let mut shell = NativeShellModel::default();
-        shell.screen = NativeShellScreen::InGame;
-        shell.last_account = Some("alice".into());
-        shell.active_character = Some(crate::native_shell::CharacterSummary::new(
-            7, "Hero", 1, "Warrior", "Male",
-        ));
-        shell.billing.open_for("alice", 7, now_ms());
-        let mut keys = ButtonInput::<KeyCode>::default();
-        keys.press(KeyCode::Enter);
-        let mut app = App::new();
-        app.insert_resource(shell)
-            .insert_resource(keys)
-            .init_resource::<crate::crystal_ui::overlays::NativePlayerUiState>()
-            .add_systems(Update, process_input);
-        app.update();
-        assert!(app.world().resource::<NativeShellModel>().billing.open);
-        app.world_mut()
-            .resource_mut::<ButtonInput<KeyCode>>()
-            .clear();
-        app.world_mut()
-            .resource_mut::<ButtonInput<KeyCode>>()
-            .press(KeyCode::Escape);
-        app.update();
-        let ui = app
-            .world()
-            .resource::<crate::crystal_ui::overlays::NativePlayerUiState>();
-        assert!(!app.world().resource::<NativeShellModel>().billing.open);
-        assert!(ui.billing_input_consumed);
-        assert!(ui.blocks_gameplay_keys_except_hero());
-    }
-    #[test]
-    fn uncertain_server_commit_retries_the_same_order() {
-        for error in [
-            "billingProviderResultUnconfirmed",
-            "billingResultUnconfirmed",
-            "billingCommitOutcomeUnknown",
-            "billingServiceUnavailable",
-        ] {
+        #[test]
+        fn refresh_never_settles_an_unconfirmed_purchase() {
             let mut p = BillingPanel::default();
             p.open_for("alice", 7, 1);
             p.pending = None;
             let purchase = BillingPurchase::BuyMonthlyCard {
                 order_request_id: "native-stable-order".into(),
             };
-            p.begin(Some(purchase.clone()), 2);
+            p.begin(Some(purchase.clone()), 10);
+            p.expire_request(15_010);
+            p.action(BillingAction::Refresh, 15_011);
             let request = p.pending.clone().unwrap();
             p.mark_sent(request.request_id);
             let mut result = reply(&request);
-            result.error = Some(error.into());
-            assert!(p.accept(result, "alice", Some(7), 3));
-            assert_eq!(p.message, Some("billing.unconfirmed"));
-            p.action(BillingAction::Retry, 4);
+            result.status = Some(status(true));
+            assert!(p.accept(result, "alice", Some(7), 15_012));
+            assert!(p.retry_required);
+            assert_eq!(p.last_purchase, Some(purchase.clone()));
+            p.action(BillingAction::BuyMonthlyCard, 15_013);
+            assert!(p.pending.is_none());
+            p.action(BillingAction::Refresh, 15_014);
+            let request = p.pending.clone().unwrap();
+            p.mark_sent(request.request_id);
+            let mut result = reply(&request);
+            result.error = Some("unavailable".into());
+            assert!(p.accept(result, "alice", Some(7), 15_015));
+            p.action(BillingAction::Retry, 15_016);
             assert_eq!(p.pending.unwrap().purchase, Some(purchase));
+        }
+        #[test]
+        fn rejected_purchase_allows_an_intentional_new_offer() {
+            let mut p = BillingPanel::default();
+            p.open_for("alice", 7, 1);
+            p.pending = None;
+            p.status = Some(status(true));
+            p.action(BillingAction::BuyMonthlyCard, 2);
+            let request = p.pending.clone().unwrap();
+            p.mark_sent(request.request_id);
+            let mut result = reply(&request);
+            result.error = Some("insufficient credits".into());
+            assert!(p.accept(result, "alice", Some(7), 3));
+            p.action(BillingAction::Checkout("small".into()), 4);
+            assert_eq!(p.pending.unwrap().operation, BillingOperation::Checkout);
+        }
+        #[test]
+        fn definitive_purchase_errors_are_specific_and_require_current_correlation() {
+            for (error, message) in [
+                ("billingInsufficientCredit", "billing.insufficientCredits"),
+                ("billingInsufficientCredits", "billing.insufficientCredits"),
+                ("billingInventoryFull", "billing.inventoryFull"),
+                ("billingUnavailable", "billing.unavailable"),
+                ("billingMonthlyCardDisabled", "billing.monthlyDisabled"),
+            ] {
+                let mut p = BillingPanel::default();
+                p.open_for("alice", 7, 1);
+                let refresh = p.pending.clone().unwrap();
+                p.mark_sent(refresh.request_id);
+                let mut refreshed = reply(&refresh);
+                refreshed.status = Some(status(true));
+                assert!(p.accept(refreshed, "alice", Some(7), 2));
+                p.action(BillingAction::BuyMonthlyCard, 3);
+                let request = p.pending.clone().unwrap();
+                p.mark_sent(request.request_id);
+                let mut result = reply(&request);
+                result.error = Some(error.into());
+                let before = p.clone();
+                assert!(!p.accept(result.clone(), "bob", Some(7), 4));
+                assert_eq!(p, before);
+                assert!(!p.accept(result.clone(), "alice", Some(8), 4));
+                assert_eq!(p, before);
+                result.request_id += 1;
+                assert!(!p.accept(result.clone(), "alice", Some(7), 4));
+                assert_eq!(p, before);
+                result.request_id = request.request_id;
+                assert!(p.accept(result, "alice", Some(7), 4));
+                assert_eq!(p.message, Some(message));
+                assert!(p.pending.is_none());
+                assert!(p.last_purchase.is_none());
+                assert!(!p.retry_required);
+                assert!(p.take_checkout_url().is_none());
+                p.action(BillingAction::Retry, 5);
+                assert!(p.pending.is_none());
+                p.action(BillingAction::BuyMonthlyCard, 6);
+                let next = p.pending.unwrap();
+                assert_ne!(next.request_id, request.request_id);
+                assert_ne!(next.purchase, request.purchase);
+            }
+        }
+        #[test]
+        fn panel_opening_enter_is_consumed_and_close_fences_world_input() {
+            let mut shell = NativeShellModel::default();
+            shell.screen = NativeShellScreen::InGame;
+            shell.last_account = Some("alice".into());
+            shell.active_character = Some(crate::native_shell::CharacterSummary::new(
+                7, "Hero", 1, "Warrior", "Male",
+            ));
+            shell.billing.open_for("alice", 7, now_ms());
+            let mut keys = ButtonInput::<KeyCode>::default();
+            keys.press(KeyCode::Enter);
+            let mut app = App::new();
+            app.insert_resource(shell)
+                .insert_resource(keys)
+                .init_resource::<crate::crystal_ui::overlays::NativePlayerUiState>()
+                .add_systems(Update, process_input);
+            app.update();
+            assert!(app.world().resource::<NativeShellModel>().billing.open);
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .clear();
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(KeyCode::Escape);
+            app.update();
+            let ui = app
+                .world()
+                .resource::<crate::crystal_ui::overlays::NativePlayerUiState>();
+            assert!(!app.world().resource::<NativeShellModel>().billing.open);
+            assert!(ui.billing_input_consumed);
+            assert!(ui.blocks_gameplay_keys_except_hero());
+        }
+        #[test]
+        fn uncertain_server_commit_retries_the_same_order() {
+            for error in [
+                "billingProviderResultUnconfirmed",
+                "billingResultUnconfirmed",
+                "billingCommitOutcomeUnknown",
+                "billingServiceUnavailable",
+            ] {
+                let mut p = BillingPanel::default();
+                p.open_for("alice", 7, 1);
+                p.pending = None;
+                let purchase = BillingPurchase::BuyMonthlyCard {
+                    order_request_id: "native-stable-order".into(),
+                };
+                p.begin(Some(purchase.clone()), 2);
+                let request = p.pending.clone().unwrap();
+                p.mark_sent(request.request_id);
+                let mut result = reply(&request);
+                result.error = Some(error.into());
+                assert!(p.accept(result, "alice", Some(7), 3));
+                assert_eq!(p.message, Some("billing.unconfirmed"));
+                p.action(BillingAction::Retry, 4);
+                assert_eq!(p.pending.unwrap().purchase, Some(purchase));
+            }
         }
     }
 }
+#[cfg(feature = "native-ui")]
+pub use ui::*;

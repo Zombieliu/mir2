@@ -1,12 +1,17 @@
 //! Authoritative Hero state; separate from the player's inventory, skills and vitals.
+use crate::inventory::ItemModel;
 use bevy::prelude::Resource;
 use mir2_protocol::{BaseStats, ClientMagic, HeroUserInformation};
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::Value;
 
 #[derive(Resource, Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct HeroModel {
+    /// Public owner-checkpoint identity and XP. Packet-only object ID/hair
+    /// remain in info; neither is manufactured from a personal checkpoint.
+    #[serde(default)]
+    pub snapshot_identity: Option<HeroSnapshotIdentity>,
     #[serde(default)]
     pub hero_generation: u64,
     #[serde(default)]
@@ -49,6 +54,32 @@ pub struct HeroModel {
     pub inventory_view: crate::inventory::InventoryModel,
     #[serde(default)]
     pub auto_pot_view: crate::inventory::InventoryModel,
+}
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroSnapshotIdentity {
+    pub name: String,
+    pub class: mir2_protocol::MirClass,
+    pub gender: mir2_protocol::MirGender,
+    pub level: u16,
+    pub experience: i64,
+    pub max_experience: i64,
+    pub behaviour: u8,
+    pub spawned: bool,
+    pub auto_pot: bool,
+    pub auto_hp_percent: u8,
+    pub auto_mp_percent: u8,
+    pub hp_item_index: i32,
+    pub mp_item_index: i32,
+    pub vitals: Option<HeroSnapshotVitals>,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroSnapshotVitals {
+    pub hp: i32,
+    pub max_hp: i32,
+    pub mp: i32,
+    pub max_mp: i32,
 }
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct HeroActorState {
@@ -97,9 +128,9 @@ impl HeroActorState {
 }
 /// Local monotonic anchor shared by transport and rendering in this process.
 pub fn hero_clock_ms() -> u64 {
-    static START: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
+    static START: std::sync::OnceLock<web_time::Instant> = std::sync::OnceLock::new();
     START
-        .get_or_init(std::time::Instant::now)
+        .get_or_init(web_time::Instant::now)
         .elapsed()
         .as_millis()
         .min(u64::MAX as u128) as u64
@@ -203,12 +234,54 @@ pub struct HeroWeights {
     pub hand: i32,
 }
 impl HeroModel {
+    /// The renderer uses checkpoint XP/max-XP whenever that exact public
+    /// source is present. Legacy packet-only sessions keep their old display.
+    pub fn snapshot_read_model(&self) -> Option<crate::read_model::UiReadModel> {
+        let hero = self.snapshot_identity.as_ref()?;
+        let mut player = crate::read_model::PlayerStats {
+            name: Some(hero.name.clone()),
+            class_name: Some(format!("{:?}", hero.class)),
+            gender: Some(format!("{:?}", hero.gender)),
+            level: u32::from(hero.level),
+            experience: hero.experience,
+            max_experience: hero.max_experience,
+            crystal_stats: self.stats.clone(),
+            ..Default::default()
+        };
+        if let Some(v) = hero.vitals {
+            player.hp = v.hp;
+            player.max_hp = v.max_hp;
+            player.mp = v.mp;
+            player.max_mp = v.max_mp;
+        }
+        Some(crate::read_model::UiReadModel { player })
+    }
     pub fn observe_snapshot(&mut self, payload: &Value) -> bool {
         self.item_result_receipt = false;
         let Some(stage) = payload.get("stage5Systems") else {
             return false;
         };
         let mut changed = false;
+        if payload.get("heroMaxExperience").is_some() {
+            let identity = stage
+                .get("hero")
+                .filter(|hero| !hero.is_null())
+                .and_then(|hero| {
+                    let mut source = hero.as_object()?.clone();
+                    source.insert(
+                        "maxExperience".into(),
+                        payload.get("heroMaxExperience")?.clone(),
+                    );
+                    source.insert("vitals".into(), payload.get("heroVitals")?.clone());
+                    serde_json::from_value::<HeroSnapshotIdentity>(Value::Object(source))
+                        .ok()
+                        .filter(|hero| hero.level > 0 && hero.max_experience >= 0)
+                });
+            if self.snapshot_identity != identity {
+                self.snapshot_identity = identity;
+                changed = true;
+            }
+        }
         self.skill_key_ack = payload
             .get("skillKeyAck")
             .filter(|v| !v.is_null())
@@ -480,6 +553,13 @@ impl HeroModel {
                         || old.class != info.class
                         || old.gender != info.gender
                 }) {
+                    if self.snapshot_identity.as_ref().is_some_and(|source| {
+                        source.name != info.name
+                            || source.class != info.class
+                            || source.gender != info.gender
+                    }) {
+                        self.snapshot_identity = None;
+                    }
                     self.hero_generation = self.hero_generation.saturating_add(1);
                     self.spawned = false;
                     self.riding_mount = None;
@@ -723,9 +803,368 @@ impl HeroModel {
     }
 }
 
+/// A complete owner projection error, independent of host provenance or settlement.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HeroOwnerProjectionError {
+    Incomplete,
+    Decode,
+    Projection,
+}
+
+// Shared strict owner projection preserves complete item and tooltip carriers
+// before the presentation models apply tolerant defaults.
+fn decode_source<T: DeserializeOwned>(raw: Value) -> Result<T, HeroOwnerProjectionError> {
+    serde_json::from_value(raw).map_err(|_| HeroOwnerProjectionError::Incomplete)
+}
+
+fn required_string<'a>(source: &'a Value, key: &str) -> Result<&'a str, HeroOwnerProjectionError> {
+    source
+        .get(key)
+        .and_then(Value::as_str)
+        .ok_or(HeroOwnerProjectionError::Incomplete)
+}
+fn required_bool(source: &Value, key: &str) -> Result<bool, HeroOwnerProjectionError> {
+    source
+        .get(key)
+        .and_then(Value::as_bool)
+        .ok_or(HeroOwnerProjectionError::Incomplete)
+}
+fn source_array<'a>(
+    source: &'a Value,
+    key: &str,
+) -> Result<&'a Vec<Value>, HeroOwnerProjectionError> {
+    source
+        .get(key)
+        .and_then(Value::as_array)
+        .ok_or(HeroOwnerProjectionError::Incomplete)
+}
+
+pub fn project_owner_item_tooltip(
+    raw: Option<&Value>,
+) -> Result<Option<crate::inventory::CrystalItemTooltipSourceModel>, HeroOwnerProjectionError> {
+    let Some(raw) = raw else {
+        return Ok(None);
+    };
+    if !raw.is_object() {
+        return Err(HeroOwnerProjectionError::Incomplete);
+    }
+    fn info(raw: &Value) -> Result<(), HeroOwnerProjectionError> {
+        let parsed: crate::inventory::CrystalItemInfoModel = decode_source(raw.clone())?;
+        let shape = serde_json::to_value(parsed).map_err(|_| HeroOwnerProjectionError::Decode)?;
+        if shape
+            .as_object()
+            .unwrap()
+            .keys()
+            .any(|key| raw.get(key).is_none())
+            || source_array(raw, "stats")?.iter().any(|s| {
+                s.get("stat").and_then(Value::as_u64).is_none()
+                    || s.get("value").and_then(Value::as_i64).is_none()
+            })
+        {
+            return Err(HeroOwnerProjectionError::Incomplete);
+        }
+        Ok(())
+    }
+    info(
+        raw.get("info")
+            .ok_or(HeroOwnerProjectionError::Incomplete)?,
+    )?;
+    if let Some(real) = raw.get("realInfo").filter(|v| !v.is_null()) {
+        info(real)?;
+    }
+    if let Some(user) = raw.get("userItem").filter(|v| !v.is_null()) {
+        if !crate::npc_shop_buy::full_npc_gold_user_item(user) {
+            return Err(HeroOwnerProjectionError::Incomplete);
+        }
+    }
+    for key in ["socketInfos", "realSocketInfos"] {
+        if let Some(rows) = raw.get(key) {
+            for row in rows
+                .as_array()
+                .ok_or(HeroOwnerProjectionError::Incomplete)?
+            {
+                if !row.is_null() {
+                    info(row)?;
+                }
+            }
+        }
+    }
+    decode_source(raw.clone()).map(Some)
+}
+
+pub fn project_owner_item(
+    raw: &Value,
+    container: u8,
+    slot: u64,
+) -> Result<ItemModel, HeroOwnerProjectionError> {
+    let mut item = raw
+        .as_object()
+        .cloned()
+        .ok_or(HeroOwnerProjectionError::Incomplete)?;
+    item.insert("container".into(), container.into());
+    item.insert("slot".into(), slot.into());
+    let mut projected: ItemModel = decode_source(Value::Object(item))?;
+    projected.tooltip_source = project_owner_item_tooltip(raw.get("tooltipSource"))?;
+    if let Some(source) = &projected.tooltip_source {
+        projected.icon = source.user_item_image(projected.quantity);
+    }
+    validate_owner_item_metadata(raw, &projected, false, false)?;
+    Ok(projected)
+}
+
+pub fn project_owner_hero(owner: &Value) -> Result<HeroModel, HeroOwnerProjectionError> {
+    let stage = owner
+        .get("stage5Systems")
+        .ok_or(HeroOwnerProjectionError::Incomplete)?;
+    let mut hero = HeroModel::default();
+    let maximum = owner
+        .get("heroMaxExperience")
+        .ok_or(HeroOwnerProjectionError::Incomplete)?;
+    let identity = stage
+        .get("hero")
+        .ok_or(HeroOwnerProjectionError::Incomplete)?;
+    if identity.is_null() {
+        if !maximum.is_null() {
+            return Err(HeroOwnerProjectionError::Incomplete);
+        }
+    } else if maximum.as_i64().is_none_or(|xp| xp < 0) {
+        return Err(HeroOwnerProjectionError::Incomplete);
+    }
+    let keys = source_array(stage, "heroLearnedMagics")?;
+    if keys.len() > 256
+        || keys.iter().any(|key| {
+            key.get("spell").and_then(Value::as_str).is_none()
+                || key
+                    .get("key")
+                    .and_then(Value::as_u64)
+                    .is_none_or(|key| key != 0 && !(17..=24).contains(&key))
+        })
+    {
+        return Err(HeroOwnerProjectionError::Incomplete);
+    }
+    let _: Vec<HeroLearnedKey> = decode_source(Value::Array(keys.clone()))?;
+    for stat in source_array(owner, "heroStats")? {
+        if stat.get("stat").and_then(Value::as_u64).is_none()
+            || stat.get("value").and_then(Value::as_i64).is_none()
+        {
+            return Err(HeroOwnerProjectionError::Incomplete);
+        }
+    }
+    let weights = owner
+        .get("heroWeights")
+        .ok_or(HeroOwnerProjectionError::Incomplete)?;
+    let _: HeroWeights = decode_source(weights.clone())?;
+    if let Some(identity) = stage.get("hero").filter(|v| !v.is_null()) {
+        for key in ["name", "class", "gender"] {
+            required_string(identity, key)?;
+        }
+        for key in ["level", "behaviour", "autoHpPercent", "autoMpPercent"] {
+            field_unsigned(identity, key)?;
+        }
+        for key in ["spawned", "autoPot"] {
+            required_bool(identity, key)?;
+        }
+        for key in ["experience", "hpItemIndex", "mpItemIndex"] {
+            if identity.get(key).and_then(Value::as_i64).is_none() {
+                return Err(HeroOwnerProjectionError::Incomplete);
+            }
+        }
+    }
+    hero.observe_snapshot(owner);
+    if !identity.is_null() && hero.snapshot_identity.is_none() {
+        return Err(HeroOwnerProjectionError::Incomplete);
+    }
+    hero.inventory_view.capacity = u16::try_from(field_unsigned(owner, "heroInventoryCapacity")?)
+        .map_err(|_| HeroOwnerProjectionError::Incomplete)?;
+    for raw in source_array(owner, "heroInventoryItems")? {
+        let slot = field_unsigned(raw, "slot")?;
+        if raw.get("container").and_then(Value::as_str) != Some("bag1")
+            || slot >= u64::from(hero.inventory_view.capacity)
+        {
+            return Err(HeroOwnerProjectionError::Incomplete);
+        }
+        hero.inventory_view
+            .items
+            .push(project_owner_item(raw, 0, slot)?);
+    }
+    for raw in source_array(owner, "heroEquipmentItems")? {
+        let slot = field_unsigned(raw, "slot")?;
+        if slot >= 14 || raw.get("container").and_then(Value::as_str) != Some("bag1") {
+            return Err(HeroOwnerProjectionError::Incomplete);
+        }
+        hero.inventory_view
+            .items
+            .push(project_owner_item(raw, 2, slot)?);
+    }
+    Ok(hero)
+}
+
+fn unsigned(v: &Value) -> Option<u64> {
+    v.as_u64().or_else(|| {
+        v.as_str()
+            .filter(|s| {
+                *s == "0" || (!s.starts_with('0') && s.bytes().all(|b| b.is_ascii_digit()))
+            })?
+            .parse()
+            .ok()
+    })
+}
+fn field_unsigned(v: &Value, key: &str) -> Result<u64, HeroOwnerProjectionError> {
+    v.get(key)
+        .and_then(unsigned)
+        .ok_or(HeroOwnerProjectionError::Incomplete)
+}
+pub fn validate_owner_item_metadata(
+    source: &Value,
+    projected: &ItemModel,
+    equipment: bool,
+    storage: bool,
+) -> Result<(), HeroOwnerProjectionError> {
+    for field in ["key", "name", "description", "grade"] {
+        if source.get(field).and_then(Value::as_str).is_none() {
+            return Err(HeroOwnerProjectionError::Incomplete);
+        }
+    }
+    if source
+        .get("icon")
+        .and_then(Value::as_u64)
+        .is_none_or(|n| n > u64::from(u16::MAX))
+    {
+        return Err(HeroOwnerProjectionError::Incomplete);
+    }
+    let expected_key = if storage {
+        field_unsigned(source, "uniqueId")?.to_string()
+    } else {
+        source["key"].as_str().unwrap().to_owned()
+    };
+    if projected.key != expected_key
+        || Some(projected.name.as_str()) != source["name"].as_str()
+        || Some(projected.description.as_str()) != source["description"].as_str()
+        || projected.grade.as_deref() != source["grade"].as_str()
+    {
+        return Err(HeroOwnerProjectionError::Projection);
+    }
+    // The gateway derives count-dependent icons from tooltip Info when it is
+    // present. Raw icon equality only applies to the legacy direct mapping.
+    if source.get("tooltipSource").is_none()
+        && Some(u64::from(projected.icon)) != source["icon"].as_u64()
+    {
+        return Err(HeroOwnerProjectionError::Projection);
+    }
+    let tooltip = project_owner_item_tooltip(source.get("tooltipSource"))?;
+    if tooltip
+        .as_ref()
+        .and_then(|tooltip| tooltip.user_item.as_ref())
+        .is_some_and(|user| {
+            source
+                .get("uniqueId")
+                .and_then(unsigned)
+                .is_some_and(|id| id != user.unique_id)
+                || source.get("quantity").and_then(unsigned) != Some(u64::from(user.count))
+        })
+    {
+        return Err(HeroOwnerProjectionError::Incomplete);
+    }
+    if projected.tooltip_source != tooltip
+        || tooltip
+            .as_ref()
+            .is_some_and(|source| projected.icon != source.user_item_image(projected.quantity))
+    {
+        return Err(HeroOwnerProjectionError::Projection);
+    }
+    let model = serde_json::to_value(projected).map_err(|_| HeroOwnerProjectionError::Decode)?;
+    for field in ["durabilityCurrent", "durabilityMax"] {
+        let raw = source
+            .get(field)
+            .ok_or(HeroOwnerProjectionError::Incomplete)?;
+        if !(raw.is_null() && !equipment) && raw.as_u64().is_none_or(|n| n > u64::from(u16::MAX)) {
+            return Err(HeroOwnerProjectionError::Incomplete);
+        }
+        if model[field] != *raw {
+            return Err(HeroOwnerProjectionError::Projection);
+        }
+    }
+    for field in ["addedAttack", "addedDefence"] {
+        let raw = source
+            .get(field)
+            .ok_or(HeroOwnerProjectionError::Incomplete)?;
+        if raw.as_i64().is_none_or(|n| i32::try_from(n).is_err()) {
+            return Err(HeroOwnerProjectionError::Incomplete);
+        }
+        if model[field] != *raw {
+            return Err(HeroOwnerProjectionError::Projection);
+        }
+    }
+    let extra: &[&str] = if equipment {
+        &[
+            "stateImage",
+            "shape",
+            "attack",
+            "defence",
+            "addedLuck",
+            "socketSlots",
+        ]
+    } else {
+        &["sellValue"]
+    };
+    for field in extra {
+        let raw = source
+            .get(*field)
+            .ok_or(HeroOwnerProjectionError::Incomplete)?;
+        if model[*field] != *raw {
+            return Err(HeroOwnerProjectionError::Projection);
+        }
+    }
+    if source
+        .get("equipSlot")
+        .is_some_and(|raw| model["equipSlot"] != *raw)
+    {
+        return Err(HeroOwnerProjectionError::Projection);
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn native_npc_economy_hero_visible_xp_uses_checkpoint_without_packet_identity() {
+        let mut model = HeroModel::default();
+        let snapshot = serde_json::json!({"heroMaxExperience":200,"heroVitals":{"hp":20,"maxHp":30,"mp":10,"maxMp":15},
+            "heroStats":[],"heroWeights":{"bag":1,"wear":2,"hand":3},"stage5Systems":{"heroLearnedMagics":[],
+                "hero":{"name":"Hero","class":"Warrior","gender":"Male","level":2,"experience":77,"behaviour":0,"spawned":true,
+                    "autoPot":false,"autoHpPercent":30,"autoMpPercent":40,"hpItemIndex":0,"mpItemIndex":0}}});
+        assert!(model.observe_snapshot(&snapshot));
+        assert!(model.info.is_none());
+        let display = model.snapshot_read_model().unwrap();
+        assert_eq!(
+            (display.player.experience, display.player.max_experience),
+            (77, 200)
+        );
+        assert_eq!(display.player.hair, None);
+        assert_eq!(display.player.hp, 20);
+        let mut packet = info();
+        packet.experience = 1;
+        packet.max_experience = 100;
+        model.apply_packet_at("HeroInformation", &serde_json::json!({"info":packet}), 0);
+        assert_eq!(model.snapshot_read_model().unwrap().player.experience, 77);
+        let mut next = snapshot;
+        next["stage5Systems"]["hero"]["experience"] = serde_json::json!(88);
+        next["heroMaxExperience"] = serde_json::json!(300);
+        assert!(model.observe_snapshot(&next));
+        assert_eq!(
+            model.snapshot_read_model().unwrap().player.max_experience,
+            300
+        );
+    }
+    #[test]
+    fn native_npc_economy_hero_absent_or_partial_maximum_cannot_invent_visible_pair() {
+        let mut model = HeroModel::default();
+        model.observe_snapshot(&serde_json::json!({"heroMaxExperience":null,"heroVitals":null,"stage5Systems":{"hero":null}}));
+        assert!(model.snapshot_read_model().is_none());
+        model.observe_snapshot(&serde_json::json!({"heroMaxExperience":100,"heroVitals":null,"stage5Systems":{"hero":{"name":"Partial","experience":2}}}));
+        assert!(model.snapshot_read_model().is_none());
+    }
     fn info() -> HeroUserInformation {
         HeroUserInformation {
             object_id: 12,
@@ -960,5 +1399,183 @@ mod tests {
         model.apply_packet("HeroInformation", &serde_json::json!({"info":changed}));
         assert!(model.hero_generation > generation);
         assert_eq!(model.info.as_ref().unwrap().object_id, 12);
+    }
+
+    fn complete_owner_hero() -> Value {
+        serde_json::json!({"heroMaxExperience":200,"heroVitals":{"hp":20,"maxHp":30,"mp":10,"maxMp":15},
+            "heroStats":[],"heroWeights":{"bag":1,"wear":2,"hand":3},"heroInventoryCapacity":10,
+            "heroInventoryItems":[],"heroEquipmentItems":[],"stage5Systems":{"heroLearnedMagics":[],
+                "hero":{"name":"Hero","class":"Warrior","gender":"Male","level":2,"experience":77,
+                    "behaviour":0,"spawned":true,"autoPot":false,"autoHpPercent":30,"autoMpPercent":40,
+                    "hpItemIndex":0,"mpItemIndex":0}}})
+    }
+    fn complete_owner_item(uid: u64, slot: u8) -> Value {
+        serde_json::json!({"uniqueId":uid,"key":uid.to_string(),"name":"Hero potion","slot":slot,"container":"bag1",
+            "quantity":2,"icon":0,"description":"Owned item","durabilityCurrent":null,"durabilityMax":null,
+            "sellValue":7,"grade":"common","addedAttack":0,"addedDefence":0})
+    }
+    #[test]
+    fn shared_hero_owner_preserves_wide_identity_items_and_sparse_slots() {
+        let mut owner = complete_owner_hero();
+        owner["stage5Systems"]["hero"]["experience"] = serde_json::json!(i64::MIN);
+        owner["heroMaxExperience"] = serde_json::json!(i64::MAX);
+        owner["heroInventoryItems"] = serde_json::json!([complete_owner_item(0, 3)]);
+        owner["heroEquipmentItems"] = serde_json::json!([complete_owner_item(u64::MAX, 13)]);
+        // The production boundary receives raw JSON; no JavaScript number round trip.
+        let raw = serde_json::to_string(&owner).unwrap();
+        let parsed: Value = serde_json::from_str(&raw).unwrap();
+        let hero = project_owner_hero(&parsed).unwrap();
+        let identity = hero.snapshot_identity.as_ref().unwrap();
+        assert_eq!(
+            (identity.experience, identity.max_experience),
+            (i64::MIN, i64::MAX)
+        );
+        assert_eq!(hero.inventory_view.capacity, 10);
+        assert_eq!(hero.inventory_view.items.len(), 2);
+        let bag = &hero.inventory_view.items[0];
+        let equipment = &hero.inventory_view.items[1];
+        assert_eq!((bag.unique_id, bag.container, bag.slot), (Some(0), 0, 3));
+        assert_eq!(
+            (equipment.unique_id, equipment.container, equipment.slot),
+            (Some(u64::MAX), 2, 13)
+        );
+        assert_eq!(
+            (bag.name.as_str(), bag.description.as_str(), bag.sell_value),
+            ("Hero potion", "Owned item", 7)
+        );
+        assert!(hero.info.is_none() && hero.base_stats.is_none() && hero.magic_clocks.is_empty());
+        assert!(hero.auto_pot_view.items.is_empty());
+    }
+    #[test]
+    fn shared_hero_owner_rejects_partial_identity_slots_keys_and_withdrawal_pair() {
+        use HeroOwnerProjectionError::Incomplete;
+        let owner = complete_owner_hero();
+        let mut cases = Vec::new();
+        let mut missing = owner.clone();
+        missing.as_object_mut().unwrap().remove("heroMaxExperience");
+        cases.push(missing);
+        let mut missing = owner.clone();
+        missing.as_object_mut().unwrap().remove("heroStats");
+        cases.push(missing);
+        let mut bad = owner.clone();
+        bad["stage5Systems"]["hero"]["level"] = 0.into();
+        cases.push(bad);
+        let mut bad = owner.clone();
+        bad["heroMaxExperience"] = (-1).into();
+        cases.push(bad);
+        let mut bad = owner.clone();
+        bad["stage5Systems"]["hero"] = Value::Null;
+        cases.push(bad);
+        let mut bad = owner.clone();
+        bad["heroInventoryItems"] = serde_json::json!([complete_owner_item(1, 10)]);
+        cases.push(bad);
+        let mut bad = owner.clone();
+        let mut item = complete_owner_item(1, 0);
+        item["container"] = "bag2".into();
+        bad["heroInventoryItems"] = serde_json::json!([item]);
+        cases.push(bad);
+        let mut bad = owner.clone();
+        bad["heroEquipmentItems"] = serde_json::json!([complete_owner_item(1, 14)]);
+        cases.push(bad);
+        let mut bad = owner.clone();
+        bad["stage5Systems"]["heroLearnedMagics"] =
+            serde_json::json!([{"spell":"FireBall","key":16}]);
+        cases.push(bad);
+        let mut bad = owner.clone();
+        bad["stage5Systems"]["heroLearnedMagics"] =
+            serde_json::json!(vec![serde_json::json!({"spell":"FireBall","key":17}); 257]);
+        cases.push(bad);
+        for (index, bad) in cases.iter().enumerate() {
+            assert_eq!(
+                project_owner_hero(bad).unwrap_err(),
+                Incomplete,
+                "case {index}"
+            );
+        }
+        let mut withdrawn = owner.clone();
+        withdrawn["stage5Systems"]["hero"] = Value::Null;
+        withdrawn["heroMaxExperience"] = Value::Null;
+        let hero = project_owner_hero(&withdrawn).unwrap();
+        assert!(hero.snapshot_identity.is_none() && hero.info.is_none());
+        assert_eq!(hero.inventory_view.capacity, 10);
+        let mut full = owner;
+        full["stage5Systems"]["heroLearnedMagics"] =
+            serde_json::json!(vec![serde_json::json!({"spell":"FireBall","key":24}); 256]);
+        assert_eq!(
+            project_owner_hero(&full)
+                .unwrap()
+                .learned_keys
+                .unwrap()
+                .len(),
+            256
+        );
+    }
+    #[test]
+    fn shared_hero_owner_keeps_complete_tooltip_carriers_and_rejects_conflicting_custody() {
+        use crate::inventory::{CrystalItemInfoModel, CrystalUserItemModel};
+        let mut owner = complete_owner_hero();
+        let info = CrystalItemInfoModel {
+            name: "Base potion".into(),
+            image: 33,
+            ..Default::default()
+        };
+        let real = CrystalItemInfoModel {
+            name: "Viewer potion".into(),
+            image: 99,
+            ..Default::default()
+        };
+        let socket = CrystalItemInfoModel {
+            name: "Socket".into(),
+            image: 66,
+            ..Default::default()
+        };
+        let user = CrystalUserItemModel {
+            unique_id: u64::MAX,
+            count: 2,
+            ..Default::default()
+        };
+        let mut item = complete_owner_item(u64::MAX, 3);
+        item["tooltipSource"] = serde_json::json!({"info":info,"realInfo":real,"userItem":user,
+            "socketInfos":[null,socket.clone()],"realSocketInfos":[socket,null]});
+        owner["heroInventoryItems"] = serde_json::json!([item.clone()]);
+        let hero = project_owner_hero(&owner).unwrap();
+        let projected = &hero.inventory_view.items[0];
+        let tooltip = projected.tooltip_source.as_ref().unwrap();
+        assert_eq!(projected.icon, 33);
+        assert_eq!(tooltip.real_info.as_ref().unwrap().image, 99);
+        assert_eq!(tooltip.user_item.as_ref().unwrap().unique_id, u64::MAX);
+        assert_eq!(tooltip.socket_infos.len(), 2);
+        assert!(tooltip.socket_infos[0].is_none());
+        assert!(tooltip.real_socket_infos[1].is_none());
+        for field in ["info", "realInfo"] {
+            let mut bad = owner.clone();
+            bad["heroInventoryItems"][0]["tooltipSource"][field]
+                .as_object_mut()
+                .unwrap()
+                .remove("image");
+            assert_eq!(
+                project_owner_hero(&bad).unwrap_err(),
+                HeroOwnerProjectionError::Incomplete,
+                "{field}"
+            );
+        }
+        let mut bad = owner.clone();
+        bad["heroInventoryItems"][0]["tooltipSource"]["userItem"]["count"] = 3.into();
+        assert_eq!(
+            project_owner_hero(&bad).unwrap_err(),
+            HeroOwnerProjectionError::Incomplete
+        );
+        let mut bad = owner;
+        bad["heroInventoryItems"][0]["tooltipSource"]["userItem"]["unique_id"] = 0.into();
+        assert_eq!(
+            project_owner_hero(&bad).unwrap_err(),
+            HeroOwnerProjectionError::Incomplete
+        );
+        let mut conflicting = projected.clone();
+        conflicting.description = "Replacement".into();
+        assert_eq!(
+            validate_owner_item_metadata(&item, &conflicting, false, false),
+            Err(HeroOwnerProjectionError::Projection)
+        );
     }
 }

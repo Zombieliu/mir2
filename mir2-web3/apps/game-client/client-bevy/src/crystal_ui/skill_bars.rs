@@ -1,5 +1,5 @@
 use super::*;
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 use std::time::Instant;
 #[path = "skill_bars_host.rs"]
 pub mod host;
@@ -12,21 +12,8 @@ pub struct SkillBarsUi {
     pub armed_slot: Option<u8>,
     pub visible: [bool; 2],
     epoch: Option<(u64, u32)>,
-    cast_starts: HashMap<u32, (u64, Instant)>,
-    readiness_samples: HashMap<u32, SkillReadinessSample>,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-struct SkillReadinessSample {
-    snapshot_serial: u64,
-    remaining_ms: u32,
-    observed_at: Instant,
-}
-
-fn snapshot_readiness_ms(binding: &crate::skill_model::SkillBinding) -> u32 {
-    binding
-        .cooldown_remaining_ms
-        .unwrap_or_else(|| binding.cooldown_remaining_ticks.saturating_mul(1_000))
+    clock: crate::skill_page_state::SkillCooldownClock,
+    origin: Option<Instant>,
 }
 impl SkillBarsUi {
     pub fn has_skill(skills: &SkillModel, bar: usize) -> bool {
@@ -35,66 +22,30 @@ impl SkillBarsUi {
                 .is_some_and(|key| key >= bar as i32 * 8 + 1 && key <= (bar as i32 + 1) * 8 + 1)
         })
     }
+    fn now_ms(&self, now: Instant) -> u64 {
+        self.origin
+            .map(|origin| {
+                now.saturating_duration_since(origin)
+                    .as_millis()
+                    .min(u64::MAX as u128) as u64
+            })
+            .unwrap_or(0)
+    }
     pub fn observe(&mut self, skills: &SkillModel, now: Instant) {
         let epoch = (
             skills.authority.session_epoch,
             skills.authority.player_object_id,
         );
         if self.epoch != Some(epoch) {
-            self.cast_starts.clear();
-            self.readiness_samples.clear();
             self.pending_casts.clear();
             self.epoch = Some(epoch);
         }
-        self.cast_starts
-            .retain(|id, _| skills.skills.iter().any(|s| s.id == *id));
-        self.readiness_samples
-            .retain(|id, _| skills.skills.iter().any(|s| s.id == *id));
-        for binding in &skills.bindings {
-            if binding.cast_sequence != 0
-                && self
-                    .cast_starts
-                    .get(&binding.skill_id)
-                    .is_none_or(|(seq, _)| binding.cast_sequence > *seq)
-            {
-                self.cast_starts
-                    .insert(binding.skill_id, (binding.cast_sequence, now));
-            }
-            let remaining_ms = snapshot_readiness_ms(binding);
-            // The same retained snapshot can be processed every frame or
-            // republished after an unrelated packet. Neither restarts its
-            // cooldown. A stale serial also cannot extend a newer sample.
-            let replace = self
-                .readiness_samples
-                .get(&binding.skill_id)
-                .is_none_or(|sample| {
-                    skills.authority.snapshot_serial > sample.snapshot_serial
-                        || (skills.authority.snapshot_serial == 0
-                            && sample.snapshot_serial == 0
-                            && sample.remaining_ms != remaining_ms)
-                });
-            if replace {
-                self.readiness_samples.insert(
-                    binding.skill_id,
-                    SkillReadinessSample {
-                        snapshot_serial: skills.authority.snapshot_serial,
-                        remaining_ms,
-                        observed_at: now,
-                    },
-                );
-            }
-        }
+        self.origin.get_or_insert(now);
+        let elapsed = self.now_ms(now);
+        self.clock.observe(skills, elapsed);
     }
     pub fn remaining_ms(&self, id: u32, skills: &SkillModel, now: Instant) -> u32 {
-        let Some((_, started)) = self.cast_starts.get(&id) else {
-            return 0;
-        };
-        let delay = skills.binding_for(id).delay_ms.unwrap_or(0);
-        delay.saturating_sub(
-            now.saturating_duration_since(*started)
-                .as_millis()
-                .min(u32::MAX as u128) as u32,
-        )
+        self.clock.remaining_ms(id, skills, self.now_ms(now))
     }
     /// Local input readiness includes both the accepted spell's own delay and
     /// the sampled authoritative action gate. It keeps counting down while
@@ -104,47 +55,12 @@ impl SkillBarsUi {
     /// `remaining_ms` instead, so another spell's short global gate does not
     /// draw this spell's cooldown animation.
     pub fn readiness_remaining_ms(&self, id: u32, skills: &SkillModel, now: Instant) -> u32 {
-        let binding = skills.binding_for(id);
-        let epoch = (
-            skills.authority.session_epoch,
-            skills.authority.player_object_id,
-        );
-        let sampled_remaining = self
-            .readiness_samples
-            .get(&id)
-            .filter(|sample| {
-                self.epoch == Some(epoch)
-                    && sample.snapshot_serial >= skills.authority.snapshot_serial
-            })
-            .map(|sample| {
-                sample.remaining_ms.saturating_sub(
-                    now.saturating_duration_since(sample.observed_at)
-                        .as_millis()
-                        .min(u128::from(u32::MAX)) as u32,
-                )
-            })
-            .unwrap_or_else(|| snapshot_readiness_ms(&binding));
-        // Crystal's SpellToggle shortcuts do not pass through CanCast or
-        // ClientMagic.CastTime. A late FlamingSword hit can draw its ordinary
-        // spell overlay, but must not extend the authoritative arm deadline.
-        let toggle = binding
-            .cast_kind
-            .as_deref()
-            .is_some_and(|kind| kind.trim().eq_ignore_ascii_case("toggle"));
-        let cast_remaining = if self.epoch == Some(epoch) && !toggle {
-            self.remaining_ms(id, skills, now)
-        } else {
-            0
-        };
-        sampled_remaining.max(cast_remaining)
+        self.clock
+            .readiness_remaining_ms(id, skills, self.now_ms(now))
     }
+
     pub fn cooldown_frame(&self, id: u32, skills: &SkillModel, now: Instant) -> Option<u16> {
-        let remaining = self.remaining_ms(id, skills, now);
-        let delay = skills.binding_for(id).delay_ms?;
-        if remaining < 100 || delay < 22 {
-            return None;
-        }
-        Some((1260 + 22 - (remaining / (delay / 22)).min(22)) as u16)
+        self.clock.frame(id, skills, self.now_ms(now), 1260, 22)
     }
     pub fn queue_cast(&mut self, slot: u8) {
         if (1..=16).contains(&slot) && self.pending_casts.len() < 16 {

@@ -4,7 +4,8 @@ use super::*;
 use crate::big_map::BigMapModel;
 use crate::entities::EntityKind;
 use crate::quest_model::QuestStatus;
-use std::time::{Duration, Instant};
+use std::time::Duration;
+use web_time::Instant;
 
 const NPC_DATA_RANGE: u32 = 16;
 const DIALOG_TIMEOUT: Duration = Duration::from_secs(5);
@@ -420,6 +421,7 @@ mod tests {
     fn app() -> App {
         let mut app = App::new();
         app.init_resource::<ButtonInput<KeyCode>>();
+        app.init_resource::<QuestPresentationLocale>();
         app.insert_resource(NativeShellModel {
             screen: NativeShellScreen::InGame,
             ..default()
@@ -502,17 +504,6 @@ mod tests {
         let mut queue = bevy::ecs::world::CommandQueue::default();
         let mut commands = Commands::new(&mut queue, &world);
         commands.spawn_empty().with_children(|parent| {
-            render_quest_detail_panel(
-                parent,
-                &quest,
-                &guidance,
-                &state,
-                &PendingOperations::default(),
-                None,
-                &Default::default(),
-            )
-        });
-        commands.spawn_empty().with_children(|parent| {
             multi_guidance::render(
                 parent,
                 &QuestTracker {
@@ -527,12 +518,12 @@ mod tests {
                     ..default()
                 }),
                 "Warrior",
-                &crate::quest_supplies::plan(
+                Some(&crate::quest_supplies::plan(
                     &crate::read_model::PlayerStats::default(),
                     &crate::inventory::InventoryModel::default(),
                     None,
                     None,
-                ),
+                )),
             );
         });
         queue.apply(&mut world);

@@ -235,6 +235,14 @@ assert.equal(butcherHunt.rewards.items[0].name, "旧铜戒指");
 
 assert.equal(zhT("ui.questAccept"), "接受");
 assert.equal(zhT("ui.questComplete"), "完成");
+for (const language of Object.values(localizationBundle.languages)) {
+  for (const key of ["ui.questClientLoading", "ui.questClientUnavailable", "ui.questActionPending",
+    "ui.questActionRewardRequired", "ui.questActionTalkToNpc", "ui.questActionStateChanged", "ui.retry"]) {
+    assert.ok(language.texts[key], `missing quest feedback: ${language.locale} ${key}`);
+  }
+}
+assert.equal(zhT("ui.questActionPending"), "请求处理中，请稍候。");
+assert.doesNotMatch(enTexts["ui.questClientUnavailable"], /shared|wasm|rejection/i);
 assert.equal(zhT("log.realmInfo", ["platinum_176", "platinum_176", 25]), "服务器 platinum_176 · 配置 platinum_176 v25");
 assert.equal(contentLocalization.localizeCrystalMapTitle("BichonProvince", zhT), "比奇省");
 assert.equal(contentLocalization.localizeCrystalEntityName("Deer", zhT), "鹿");
@@ -261,4 +269,35 @@ const sceneLayerSource = readFileSync(
 assert.match(sceneLayerSource, /t\("client\.OwnerHero"/);
 assert.doesNotMatch(sceneLayerSource, /text: `\$\{entity\.ownerName\}'s Hero`/);
 
-console.log("quest localization tests passed");
+// Exercise the same public task messages that NewQuestInfo projects. Checking
+// ids alone previously let N16's obsolete Zombie3 objective pass this suite.
+const journey = JSON.parse(readFileSync(
+  new URL("../../../config/quest-guidance/newcomer-journey-v2.json", import.meta.url),
+  "utf8",
+));
+for (const quest of journey.quests) {
+  const copy = newcomerV2Journey.newcomerV2QuestCopyFor(quest.id);
+  assert.ok(copy, `missing public copy for ${quest.id}`);
+  assert.equal(copy.title.en, quest.title, `title drift for ${quest.id}`);
+  for (const objective of [...(quest.kills ?? []), ...(quest.flags ?? [])]) {
+    const localizedObjective = newcomerV2Journey.newcomerV2ObjectiveTextFor(quest.id, objective.message);
+    assert.ok(localizedObjective, `untranslated authoritative objective ${quest.id}: ${objective.message}`);
+    assert.equal(localizedObjective.en, objective.message);
+    assert.match(localizedObjective.zhCN, /[\u3400-\u9fff]/);
+  }
+}
+const mineTask = journey.quests.find((quest) => quest.id === 2110016);
+const localizedMine = localizeQuestEntry({
+  ...smith,
+  questId: mineTask.id,
+  objectives: mineTask.kills.map((kill) => ({ label: kill.message, current: 0, required: kill.count })),
+}, zhT);
+assert.match(localizedMine.objective, /3 只 Zombie2/);
+assert.match(localizedMine.objectives[0].label, /3 只 Zombie2/);
+assert.doesNotMatch(localizedMine.objective, /Zombie3/);
+const nativeGuidance = JSON.parse(readFileSync(
+  new URL("../../../config/quest-guidance/newcomer-v2.json", import.meta.url), "utf8",
+));
+assert.match(nativeGuidance.quests.find((quest) => quest.id === mineTask.id).hint, /3 Zombie2/);
+
+console.log(`quest localization tests passed; ${journey.quests.length} authoritative V2 task definitions checked`);

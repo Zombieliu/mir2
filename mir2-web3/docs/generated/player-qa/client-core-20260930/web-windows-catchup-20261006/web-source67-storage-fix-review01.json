@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "source": "Source67",
+  "status": "code-reviewed-normal-ui-verification-pending",
+  "ownedPaths": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 1094350,
+      "sha256": "580e2cfe308ee8608d12187791e041948301d3e6705a235c0aec9440e1d79677"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-storage-ui.mjs",
+      "bytes": 44159,
+      "sha256": "ac6a3842f28f61be918fdddd5388e10851009bfa76789166156e7cf70b0307a6"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-bag-shell.mjs",
+      "bytes": 28437,
+      "sha256": "83f9e9b84cbf5aca0afaa1f1a3ab4e3d05a25e472676cb1c209796e5b5d5e6dc"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/globals.css",
+      "bytes": 132105,
+      "sha256": "e66dcc06381e1b6794bff2d602c2c024ce48048f097be6b8594e05f6ac6a5401"
+    }
+  ],
+  "ownedSourceRestoration": {
+    "rootIndependentExactInverse": true,
+    "files": 3,
+    "unknownChanges": 0,
+    "cssOriginalHadNoUnstagedChanges": true
+  },
+  "changes": {
+    "observedClickBlocker": "Full-window transparent storage-grid hit the visible Store button center.",
+    "pointerFix": "Grid and page-tab wrappers reject pointer hits while storage slots, item cards and page buttons retain them.",
+    "layoutFix": "The nested warehouse is positioned beside its containing bag.",
+    "parallelOwnershipRiskFix": "Ordinary compatibility interaction synchronously withdraws Storage before latching React ownership; current leased service page changes do not issue another shared openBag."
+  },
+  "preserved": [
+    "authority and unique-item identity checks",
+    "item/password/rental locks",
+    "pending reservations already entered the transport",
+    "owner and service revisions",
+    "shared readiness/proof lifecycle and final sending gates",
+    "new service fresh handoff",
+    "all existing test assertions"
+  ],
+  "actualFirstTests": {
+    "newStorageTestsPassed": 5,
+    "storageTestsPassed": 32,
+    "npcTestsPassed": 208,
+    "batchAccepted": false,
+    "oldBagFixtureFailed": 14,
+    "evidence": "web-source67-node-failed01.json"
+  },
+  "normalUi": {
+    "newCssVerified": false,
+    "modeStableVerified": false,
+    "depositVerified": false,
+    "depositReloginVerified": false,
+    "withdrawVerified": false,
+    "withdrawReloginVerified": false
+  },
+  "candidate100": false,
+  "overallPercentage": null
+}

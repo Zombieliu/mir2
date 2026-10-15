@@ -1,0 +1,49 @@
+{
+  "owner": "Root",
+  "kind": "Source73 actual25portable tests final full resources",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 83156,
+    "kind": "Source73 original25portable regressions final complete skins/index and real fixtures",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 2612,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/portable-test03-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "counts": {
+    "tests": 25,
+    "pass": 25,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "stderrBytes": 0,
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/source73-complete-final-snapshot02.json",
+    "bytes": 78702740,
+    "sha256": "08995ca5d9ae08c1abadc233b53dcb6924bdd85a503cbb5485f8f08adc1bb0a4"
+  },
+  "original21TestsRetainedWith2FixtureRepairs": true,
+  "new4ActualPassed": true,
+  "firstAttempt": {
+    "tests": 25,
+    "pass": 22,
+    "fail": 3,
+    "repairedWithoutSkippingAssertions": true
+  },
+  "all229ActualJsonIncluded": true,
+  "actualSharpClosure": true,
+  "actualHistoricalAtlasNegativeCheck": true,
+  "exact16SourceSkinsVerified": true,
+  "fullManifestOld41248Preserved": true,
+  "fullManifestActualCount": 41261,
+  "uiAccepted": false
+}

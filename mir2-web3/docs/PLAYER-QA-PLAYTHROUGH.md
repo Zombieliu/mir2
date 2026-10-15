@@ -1,5 +1,407 @@
 # Player-QA playthrough loop
 
+## Root owned Source78 authenticated Spells bootstrap and ordinary reentry QA (2026-10-12 Beijing)
+
+- Resolved: the packaged empty Spells page no longer falls back to the React table. The first public refusal was baseline-missing. Source review found that the initial Bag ownership revision can invalidate the earlier owner-qualified Spells cache before the new Host's one-time bootstrap. Page now bootstraps from the existing authenticated physical snapshot witness, preserving socket/session/scene/version/self/map checks and rejecting missing/null/nonarray/oversize learned data. It does not retag old cache, invent an empty list or replay an old ACK; live ACK and send-proof gates are unchanged.
+- Validation: current Node03 regression is 144/144 with no failures/skips, including actual Page/Host owner-initialization recovery and 20 old-source refusals. The unchanged portable selector/build tests passed 34/34 earlier in this round. Fresh strict Next02/TypeScript passed with 13 static pages; actual Thin03 is 5,260 files / 313,460,618B below the unchanged 377,487,360B cap. All checked output sources, 222 own compiled leaves, 857 genuine UI PNGs, 231 JSON compactions and 61 original NFT files match; 59 existing dependency warnings remain with zero new. The initial three stale test-fixture failures and Thin display-case copy failure are retained with their repairs.
+- Ordinary GUI: same existing account, normal Login/StartGame, native Character/Bag and empty Spells; public Spells ready=true/reason=ready with zero compatibility Name fields. Bag I shortcut closes it while Spells stays ready. Normal Alt+x save, retained-cache reload and Login/StartGame again preserve visible gold 170 and item art; Spells is ready again and remains ready with Bag open. No login screenshot, credential output, private frame/runtime read, QA/admin/teleport command or viewport override was used. A coordinate Bag header-close attempt did not establish closure; only the ordinary I shortcut closure is accepted.
+- Evidence: [round outcome](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-outcome01.json), [ordinary GUI proof](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-bootstrap-native-qa01.json), [reentry screenshot](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-bootstrap-relogin-bag-spells01.png), [actual Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-source78-thin-actual03.json), [Source77 publication](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-publication01.json).
+- Limits: this closes the tested empty-skill bootstrap branch, not nonempty skill assignment/casting, nonstarter gear, Bag2, every other panel, full ordinary battle/quest, mobile/touch or final human acceptance. Source65 gateway and Rust/ABI are unchanged; no backend percentage or global progress increase is inferred. Candidate100=false; goal remains active.
+- QA detail: retain transient Merchant exact-name wait misses and the subsequent ordinary public scene confirmation; StartGame was not repeated. C switched to equipment rather than proving Character closure. Native Spells ready was observed before and after normal save/reentry. No cast or binding is claimed for this empty-skill character.
+
+
+## Root owned Source77 public catalog, starter art and ordinary save/relogin QA (2026-10-12 Beijing)
+
+- Scope: add 709 genuine source PNGs (704 Items + five StateItem, 881,070B) selected from the public first-Trade catalog, shared count-dependent image rules and all five-class/two-gender starter definitions. Preserve all prior 151 selector paths. The actual Thin package contains 857 genuine UI PNGs; three old nonexistent fallback paths stay explicit. Selection is independent of the QA account.
+- Actual validation: 107 focused/adjacent tests + 34 portable tests passed (141 total, zero failures/skips); strict Next/TypeScript passed with 13 static pages. The first portable run failed because a test confused 131 referenced first-Trade sections with 128 sections containing valid goods; the source-derived classification was repaired without removing image-union, copy or missing-remote gates. The actual package has 5,260 files / 313,459,797B under the unchanged 377,487,360B cap, zero checked source/compiled/NFT differences and the same 59 warnings, zero new.
+- Ordinary GUI: Scott is now owned by the shared native Shop host (active, stable, input blocking, no error), with all seven icons visible. One Candle Buy changes gold 180 to 170 and emits You gained an item. Ordinary Alt+x save, cache-retaining reload, Login and StartGame preserve gold 170, Bichon Province 290,611 and the same visible post-purchase inventory. Native starter Character and Stats I/II paint; the minimap hides during their native ownership and returns after a normal native Close click. The compatibility name is pointer-events:none and its Close also works.
+- Remaining: Source77 empty Spells still stably falls back to the compatibility window; its native acceptance is not carried forward from Source76. The first refusal is not yet established. Empty bindings need no dynamic skill PNGs and all fixed Spells skins are selected, so do not enlarge art or force ready as a guessed fix. Stacked-item amount OK/Cancel/Escape, nonstarter gear, nonempty skills/binding, Bag2, other panels, mobile/touch and final human Candidate100 acceptance remain open.
+- Evidence: [round outcome](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-outcome01.json), [ordinary browser proof](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-source77-ordinary-browser-result01.json), and their exact owned QA leaves. Source76 parent e20b1f4 was pushed and independently matched remotely. Goal remains active; no overall percentage or backend-parity increase is claimed.
+- QA detail: the early footer click at 116,455 was QtyDec at quantity one, not a verified purchase; the single actual Buy click was 151,456. Keep both observations. No inventory count delta is invented because a pre-purchase bag count was not captured. No retained login screenshot, credential output, private API, CDP, forced focus, teleport/admin command or viewport override was used.
+
+## Root owned Source76 canonical Shop/Character assets and partial gameplay QA (2026-10-12 Beijing)
+
+- Scope: portable Thin static UI selection only. Preserve the original 33 fallback paths; add 118 genuine PNGs (534,684B) from Rust canonical Shop/Character/Stats/Spells skins. The 148 existing canonical panel PNGs match source SHA256; three old nonexistent Prguse fallback paths remain missing, never fabricated. Rust/ABI, production gateway, dynamic media miss policy, and the foreign Main TypeScript configuration are unchanged.
+- Actual validation: 107 focused/adjacent tests plus 31 portable tests passed (138 total, zero failures); strict Next and TypeScript passed. Root independently checked 71,176 pinned inputs, 61 raw NFT files / 130,518 references, 222 packaged actual Next leaves, 229 UI JSON semantics, six core leaves and 116 finite warehouse map leaves with zero differences. The actual standalone package is 4,551 files / 315,967,542B under the unchanged 377,487,360B cap; the same 59 optional/dynamic dependency warnings remain.
+- Ordinary local GUI: Source75 normal logout followed by Source76 login/StartGame preserved Bichon Province 290,611 and gold 180. Native Stats I, Stats II and empty Spells pages visibly paint and switch with ordinary controls; Escape closes them. The minimap overlaps the native header/tabs and was normally collapsed to read values. Nonempty skill icons/binding, all equipment, touch/mobile and final human frontend acceptance remain open.
+- Honest failure evidence: Scott View now paints the native shop background, but settled host stays active=false / transitioning=false / blocksInput=false / errorPresent=true and the compatibility shop still overlays it. Several catalog icons are visibly broken. Character main page still uses compatibility fallback. No purchase or equipment mutation was attempted; no native shop success is claimed. The public diagnostic does not expose the first host error, so the asset-loading explanation is source-based diagnosis, not a direct first-error read.
+- Next queue: derive a finite local Items closure from public NPC/Trade data and normal count-image rules, regenerate the real filesystem manifest, and repeat normal Shop select/quantity/cancel/one purchase/save/relogin. Separately resolve Character StateItem delivery and the name layer intercepting Close. Do not weaken readiness/owner gates or hardcode a test account. Remaining mobile, unlocked Bag2, amount-dialog cancellation and global acceptance stay open.
+- Backend/server parity acceptance and the active cross-platform goal are unchanged. Candidate100 / goalComplete remain false. Source75 commit 9b3840a552a8f249092e10e741951e88a3e63b62 was independently verified on the remote branch; its final SSH acknowledgment timed out after upload. Existing unrelated Git object corruption was not repaired or rewritten.
+- Evidence: [Source76 outcome](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-outcome01.json), [actual Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-thin-actual01.json), [Scott settled screenshot](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-scott-shared-settled01.png), [Stats II screenshot](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source76-stats2-after-static-assets01.png), [Source75 publication](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source75-publication01.json).
+
+## Root owned Source75 desktop warehouse prepare paint (2026-10-12 Beijing)
+
+- The existing successfully sent disabled storage snapshot now supplies a pure four-field prepare presentation. Desktop CSS masks only the shared header/Bag/Storage paint until readiness; active/withdrawal/retired lifecycle removes it. No extra runtime status reader, clock, timer, sender, Rust/ABI change or admission relaxation. Touch masks remain disabled because those panes extend over the shared HUD.
+- Actual original tests passed: focused and adjacent107/107, preserving the original43 storage cases plus7 new cases; portable27/27. The initial two outdated adjacent harness failures remain recorded. Strict Next01 closed0/postguard, TypeScript passed and13 static pages generated; all61 original NFT files and130,518 target rows resolve to declared hashed inputs. Main tsconfig4932B is unchanged.
+- Actual original Thin closed0/postguard:4,433 regular files/752 directories/315,435,442B within the original inclusive377,487,360B cap. All222 packaged Next leaves match the actual build;30 genuine skins,font,229 UI JSON values,116 map frames and6 Core leaves match. All59 dependency warnings are retained and equal the Source74 normalized multiset.
+- Ordinary desktop relogins captured react/prepare with statusUnavailable and controlsNotReady, with the new mask actually applied. The prepare screenshot shows no incomplete shared Storage behind the compatibility pane; HUD/minimap remain visible. Both settle to bevy/active/reason null with mask:none, unchanged644x483 Canvas and pointer-events:auto; no compatibility Storage actions were used.
+- Native Candle→Cancel→empty destination retained Bag5/Storage0/gold180. Store and ordinary save/logout/cache-retaining reload/Login/Start Game/Anthony Access preserved4/1/180. TakeBack and a second save/relogin restored5/0/180. One NPC locator deadline resolved after fresh observation; no repeat StartGame, QA/admin,teleport,cache clear,focus override,viewport override or product/WASM globals.
+- Source74 dadbb704124f545e6fa93329553792d2e458f90b was independently confirmed on origin and normally logged out before exact-owned closure; original caller closed-1 with passed4,433-file postguard. Source75 remains served at http://127.0.0.1:19205/ with unchanged Source65 gateway; its original startup caller is open, final exit/postguard pending.
+- Next queue:shared shop/character and remaining panels,unlocked Bag2,touch/mobile prepare/HUD reuse,then full frontend acceptance. No new backend parity conclusion;wholeParityPercentage=null,Candidate100=false,final human acceptance=false,goal active. The previously approved duplicate deletion was automatically rejected before launch;no deletion/compression. Existing Git object corruption is recorded in Source74 publication evidence and has not been repaired.
+- Evidence: [tests107](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source75-node-actual02.json), [actual Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source75-thin-actual01.json), [native prepare and persistence](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source75-native-storage-live-proof01.json), [actual prepare screenshot](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source75-native-stored-relogin-prepare01.png), [restored native relogin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source75-native-restored-relogin01.png), [Source74 publication](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-publication01.json).
+
+## Root owned Source74 native warehouse takeover and persistence (2026-10-12 Beijing)
+
+- Portable selection now includes the exact mandatory Bag17/Storage16 union30; fourteen genuine existing PNGs (52,132B) are present in frozen inputs and the actual package. Adjacent remote masks remain unchanged; dynamic account item icons are not hardcoded.
+- Final original portable27/27 passed with no failures/skips/cancels/todo/stderr. Strict Next02 closed0/postguard,13 pages,zero warnings; all61 NFT traces resolve to39,332 known physical targets. Next01 generated-control postguard rejection and the subsequent two-control refreeze are preserved. Main tsconfig4932B remains unchanged.
+- Original Thin closed0/postguard:4,433 ordinary files/752 directories/315,432,103B within the original inclusive377,487,360B cap. All30 genuine skins,font,229 UI JSON values,116 map frames and six active Core leaves match; all59 dependency warnings remain and equal Source73 normalized multiset.
+- Source73 commit dabe442ff1cd98f607190013540738cc97910315 is independently confirmed on origin. Its game was normally saved/logged out before exact-owned stop; original caller closed-1 with completed4,419-input postguard. Source74 is served at http://127.0.0.1:19205/ with unchanged Source65 gateway; new original startup caller remains open and final exit/postguard pending.
+- Before any compatibility Storage action, actual stable owner is bevy/active/reason null at virtual1024x768; physical shared Canvas644x483 has pointer-events:auto and normal Candle/Cancel/destination hits target that Canvas. React Candle/Cancel/Take Back button counts are zero; the shared header is Bevy UI.
+- Normal native Candle→Cancel→empty warehouse destination retained visibleBag5/Warehouse0/gold180. Native Candle→empty warehouse changed4/1/180; ordinary Alt+x save/logout,cache-retaining reload/Login/Start Game/Anthony Access read back4/1/180 with stable bevy/active ownership.
+- Normal native warehouse Candle→fresh empty Bag slot restored5/0/180. Native Close,ordinary bag Close and second Alt+x save/logout/reload/Login/Start Game/Anthony Access preserved5/0/180 and stable bevy/active. No compatibility Storage actions,QA/admin commands,teleport,cache clear,focus override,product/WASM global reads or captured credentials.
+- Finite passive response observations positively saw all34 allowed skin/font/current-icon paths with200. Some intervals were truncated; the whole interval is not claimed complete,and HTTP200 alone is not decoded-byte proof. Two selector wait deadlines resolved by later fresh state reads without repeating actions.
+- Both relogin first opens briefly showed react/prepare/controlsNotReady and incomplete shared paint beneath compatibility UI,then settled to bevy/active without compatibility actions. Cold prepare paint clearance remains open; unlocked Bag2,other shared panels,mobile and final human acceptance are not accepted.
+- Next queue:clear cold prepare overlap,verify shared shop/character and remaining panels,then mobile reuse and full1:1 frontend acceptance. This is new frontend QA,no new backend parity conclusion;wholeParityPercentage=null,Candidate100=false,goal active. User-approved duplicate deletion was automatically rejected before launch (blocked by policy);no deletion/compression,C builds retained.
+- Evidence: [portable27](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-portable-tests-actual03.json), [strict Next02](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-next-actual02.json), [actual Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-thin-actual01.json), [native pointer/persistence](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-native-storage-live-proof01.json), [finite public responses](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-public-ui-observations01.json), [restored native relogin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-native-restored-relogin01.png).
+
+## Root owned Source73 local warehouse skins and verified persistence (2026-10-12 Beijing)
+
+- Scope: five Web code leaves and seven genuine asset/manifest leaves. Four Title743-746 PNGs were actually exported; sixteen canonical Storage skins are selected locally. Default local Crystal source roots no longer assume a Windows drive; explicit CRYSTAL_CLIENT_ROOT remains supported.
+- Final original portable tests:25/25, zero failures/skips/cancels/todo/stderr. Strict Next03:13 pages, TypeScript preserved, exit0/postguard, zero warnings; all61 NFT traces resolve to39,332 known regular physical targets. Earlier Next01/02 compiled but their malformed NFT closures were rejected and remain recorded. Main tsconfig remains4932B unchanged.
+- Actual original Thin exit0/postguard:4,419 regular files/752 directories including root/315,382,564B within the original377,487,360B cap. All229 UI JSON values,16 canonical Storage PNGs,116 map frames and six Core leaves match. All59 dependency warnings remain and equal the previous normalized multiset.
+- Source72 Web was ordinarily saved/logged out and exact-owned stopped; its original caller closed-1 with completed4,182-input postguard. Source73 actual verified runtime is served at http://127.0.0.1:19205/ with unchanged Source65 gateway. Source73 startup caller remains open; final exit/postguard are pending.
+- Normal React Store Item/Candle/empty slot:Bag5→4,Warehouse0→1,gold180; Alt+x save/logout, ordinary cache-retaining reload/Login/Start Game/Anthony Access preserved4/1/180. Normal Take Back/Candle/fresh empty bag slot restored5/0/180, and a second ordinary save/relogin preserved5/0/180. The account was restored; no manual Bag1 correction or QA/admin commands.
+- Shared Storage still reports react/prepare/rendererAssetsFailed at644x483; DOM passive HUD remains present and main HUD shell absent. Shared Storage ownership, pointer handoff and shared Cancel are not accepted. No current unlocked Bag2 actual test, product/WASM global read, private gateway config read or active product log read.
+- Finite passive public resource observations positively saw34 distinct paths:32 returned200 and UI_32bit/470.png plus471.png returned404. Some earlier intervals were truncated, so the whole observation interval is not claimed complete; HTTP200 does not prove decoded assets. The two404s align with the Rust assets-failed gate, without reading private handles.
+- Root verified fourteen mandatory Bag-only genuine PNGs exist in Main but are absent from both frozen inputs and the actual package (52,132B). UI_32bit470/471 are already selected by the old policy; the next source snapshot must actually include them. Next Source74: package the full30-skin Bag/Storage union, verify actual responses and ownership, then remaining ready/pointer gates and other panels/mobile.
+- Evidence: [final portable25](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source73-portable-tests-actual03.json), [strict Next03](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source73-next-actual03.json), [actual Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source73-thin-build-actual01.json), [normal persistence](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source73-storage-live-proof01.json), [required-skin gap](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source73-required-skins-gap01.json), [restored relogin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source73-restored-relogin01.png).
+- No new backend parity result or overall completion estimate:wholeParityPercentage=null,Candidate100=false,final human acceptance=false; goal and queue remain active. User-approved duplicate deletion was automatically rejected before launch (blocked by policy); no deletion/compression, C build path retained.
+
+## Root owned Source72 Take Back fix and finite warehouse ready-error classification (2026-10-12 Beijing)
+
+- Three owned Web code leaves: Take Back retains Bag1/Bag2 and returns Quest to Bag1; the existing single storage status read now maps known renderer errors to finite reasons before the unchanged ready gate. No extra runtime reader, timer, now call, sender, admission change or raw error disclosure.
+- Actual original Node caller closed0/postguard: 278/278 (Storage43, Scene10), zero failures/skips/cancels/todo/stderr; 506 custom groups remain separate. All39 prior Storage tests retained, with one existing private-error expected reason changed to rendererError; four added tests verify finite reasons and unchanged calls/ownership/intent withdrawal.
+- Actual original strict Next caller closed0/postguard: 13 pages, 69796ms total, compile22.6s/strict TypeScript21.1s; main tsconfig remains original4932B. Output manifest02 corrects only relative-path metadata from preserved manifest01; no product rerun or old output substitution.
+- Actual original Thin caller closed0/postguard from fresh C mirror: 4,182 files/517 directories/0 links/285,115,179B within original inclusive377,487,360B cap; all116 finite local warehouse PNGs and six Core leaves verified. All59 dependency warnings match Source70 normalized multiset and remain in the full report.
+- E capacity failure and incomplete29500-file owned duplicate are recorded. Exact duplicate removal was user-authorized but automatically rejected before launch (blocked by policy); no deletion/compression executed. Complete source closure and actual export continued in C.
+- Source71 code/QA commit625a3d5f43788095fe2b65144d501b452e148d8c is independently confirmed on origin after a preserved first push failure. Its prior Web was normally saved/logged out, exact-owned stopped, and original caller closed-1 with completed postguard. Source72 Web runs at http://127.0.0.1:19205/ with unchanged Source65 gateway; its original startup caller remains open and final exit/postguard pending.
+- Before any React warehouse action, actual first open and normal relogin both show react/prepare/controlsNotReady at scene1024x768. This refutes viewport insufficiency for this observed scene only; actual failed Rust ready branch remains unknown. Shared Canvas controls/grid remain visible behind React; shared Storage ownership and incomplete-paint clearance are not accepted.
+- Existing DOM after normal relogin before any React warehouse action has .hud-passive-compat=true and .main-hud-shell=false, a positive full shared HUD ready witness; no new getter or product-global read. Storage tree/loaded/sink/pending first failing gate remains unobserved.
+- Actual normal Take Back keeps Bag1 and its five item cards; normal Quest→Take Back returns to Bag1 with five cards and no quest log. The character exposes40 inventory slots, so unlocked Bag2 preservation is not claimed as an actual test.
+- Normal Candle Store Item/slot changed Bag5→4 and Warehouse0→1, Take Back retained Bag1 and normal withdrawal restored Bag5/Warehouse0; gold180 throughout. Normal Alt+x save/logout, cache-retaining reload, credentials Login, Start Game and Anthony Access read back Bag5/Warehouse0/gold180. No manual Bag1 correction, QA/admin commands, privatecfg restore, active product log read, product/WASM global read or Cargo execution.
+- Evidence: [Source71 publication](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-publication01.json), [Node](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source72-node-actual01.json), [strict Next](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source72-next-actual02.json), [Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source72-thin-actual02.json), [live warehouse proof](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source72-storage-live-proof01.json), [relogin screenshot](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source72-storage-relogin01.png).
+- Next queue: identify the first actual Rust ready failure through bounded observation, clear incomplete shared paint, verify shared pointer handoff, then other shared panels and mobile reuse. No new backend parity conclusion. WholeParityPercentage=null, Candidate100=false, final human acceptance=false; goal and queue remain active.
+
+## Root owned Source71 finite warehouse handoff diagnostic and persistence (2026-10-12 Beijing)
+
+- Scope: five owned Web leaves expose only storage owner/phase/finite first-refusal reason through the existing tick/state path; no extra runtime getter, sender, timer, now call or changed ownership/admission gate.
+- Actual Node01 caller preparation failure is preserved: output parent was absent; product exit/counts unknown. Same frozen inputs in Node02 passed 274/274 (Storage39, Scene10), zero failures/skips/cancels; 506 custom groups are separate. Original caller closed0 and post-exit guard passed.
+- Actual strict Next original caller closed0/postguard, 13 pages, strict compiler preserved; no typecheck bypass or main tsconfig change.
+- Actual Thin original caller closed0/postguard: 4,182 files/517 directories/0 links/285,116,711B within original inclusive377,487,360B cap; all116 local warehouse frames and six selected Core leaves verified. All59 dependency warnings retained and match Source70 normalized multiset.
+- Original runtime copy/start accepted all4,182 leaves; local Web19205 and unchanged Gateway19100/19110. No privatecfg restore/read, live product logs, Cargo execution or product/WASM global reads. Source71 startup caller remains open; its final exit/postguard remain pending.
+- Before any React storage button/slot/key, first open and settled storage diagnostic both showed react/prepare/controlsNotReady. First-open screenshot shows shared Canvas Drag/Cancel/Close and grid behind the React panels; shared Bag ownership does not establish Storage ownership.
+- Normal Store Item changed diagnostic to react/inactive/compatibility. Candle deposit changed Bag5→4 and Warehouse0→1; ordinary Take Back still selected Quest and required manual Bag1, then withdrawal restored Bag5/Warehouse0.
+- Normal Alt+x save/logout, ordinary cache-retaining reload, credentials Login, Start Game and Anthony Access preserved Bag5/Warehouse0/gold180. Relogin storage remained react/prepare/controlsNotReady.
+- Open queue: distinguish the actual failed ready gate (current ready check precedes renderer error), clear incomplete shared paint, validate shared pointer handoff, and verify the single-line Source72 Take Back candidate in its own actual build/live QA. Disabled prepare input is not a proven ready loop.
+- Evidence: [Node actual02](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-node-actual02.json), [strict Next](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-next-actual01.json), [Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-thin-actual01.json), [normal live storage proof](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-storage-live-proof01.json).
+- This is finite Web QA, not whole media closure/1:1 completion, shared Storage acceptance, 100% Candidate or final human acceptance. Goal and queue remain active.
+
+
+## Source70：仓库地图恢复，存取及保存重登通过（2026-10-12）
+
+游戏入口新鲜读取资源清单，活动场景以 assetRelease 区分缓存，并防止旧异步任务覆盖新加载。保留浏览器缓存的正常 Login/Start Game 实测中，Warehouse0140 恢复地板与墙面：340 cells、116 sprite 字典项、missingAssets 0；旧 Source69 响应曾为0 sprites/116 missing。7244ms完整被动区间实际观察115个独立PNG路径、120个响应，均200；其中4306.png未在区间观察到，116张打包PNG均已独立核验。背景地图0的独立未版本化请求及地图边界fallback不属于本项通过范围。
+
+普通 Anthony Access、Store Item、选择Candle和仓库空格使背包5→4、仓库0→1；hover及键盘focus均显示耐久8/8，1119ms/1131ms完整区间发送帧均为0。正常Take Back后选择Bag I、仓库Candle及背包空格，使背包4→5、仓库1→0，金币180；Alt+x保存退出、正常登录/Start Game/Access后读回背包5、仓库0、金币180。重登缓存命中的版本化Warehouse场景仍为116 sprites/0 missing。此项为React兼容仓库实测，未称sharedStorageOwner接管。
+
+原Node第二轮267/267通过、0跳过，Scene10/10，Stage5自定义506组单独记录；第一轮因镜像缺少3个本地编译导入和58个声明而265/267通过，失败证据保留。严格Next实际退出0（74005ms、13页、stderr0）；原Thin实际退出0（38038ms），4182普通文件/517目录含根/0链接/285112029B≤377487360B，59条依赖警告与Source69归一化集合一致。4个冻结代码文件、实际编译页面及全部打包叶已核验；主tsconfig保持4932B原字节。新Source70运行在 http://127.0.0.1:19205/，启动caller仍打开，关闭后校验尚待运行结束；网关保持Source65。
+
+下一项Source71先记录共享仓库准入的实际首个拒绝原因：重登截图出现共享Storage预绘制与React仓库重叠，当前不能仅凭截图断言prepare或withdraw分支。Take Back默认切到Quest页、其他共享面板、移动真机、多端完整1:1和最终人类Accepted仍开放。不新增后端候选结论；overallPercentage=null、Candidate100=false、goal active。仅新增本轮前缀，外来正文保持，提交推送以实际publication记录为准。
+
+证据：[web-source68-69-publication01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source68-69-publication01.json)、[web-source70-node-failed01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-node-failed01.json)、[web-source70-node-actual02.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-node-actual02.json)、[web-source70-next-actual01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-next-actual01.json)、[web-source70-thin-actual01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-thin-actual01.json)、[web-source70-thin-size-report01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-thin-size-report01.json)、[web-source70-runtime-actual01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-runtime-actual01.json)、[web-source70-scene-cache-proof01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-scene-cache-proof01.json)、[web-source70-storage-live-proof01.json](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-storage-live-proof01.json)、[web-source70-warehouse-map01.png](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-warehouse-map01.png)、[web-source70-storage-tooltip-hover01.png](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-storage-tooltip-hover01.png)、[web-source70-storage-tab-empty01.png](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-storage-tab-empty01.png)、[web-source70-storage-relogin01.png](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source70-storage-relogin01.png)。
+
+
+## Source68–69：仓库耐久提示通过，地图资源补齐后发现旧场景缓存（2026-10-11）
+
+Source68 让兼容仓库使用现有 Core tooltip 格式化器。正常 hover 和键盘 focus 均实际显示 Candle 耐久8/8；锁页、失焦和关闭清除 tooltip，完整被动区间没有发送仓庫物品操作。正常 Store/Take Back 后保存退出并重登，背包5件、仓库0件、金币180读回。此处是 React 兼容仓库证据，sharedStorageOwner 未接管。原 Node 第三轮257项全部通过、0跳过，Stage5自定义506组独立记录；前两轮缺夹具失败保持。严格Next实际退出0（60838ms，TypeScript20s，13页，stderr0）；原Thin为4066文件/513目录（含根）/0链接/284883997B。
+
+Source69 以显式有限资源闭包补齐 Warehouse0140 原Lib中的116张PNG（204399B），保留旧41132项，资源清单增至41248项，assetHash=004f5da2655d1901625e51a3baf4b5f83354461a8f04b8143114a45af38a14c0。它是已核验选择范围，未称主public的全量或远端完整库存。原导出、原清单生成及21项portable Node测试均退出0、无跳过，原16条测试正文保持。新原Thin实际退出0（38226ms）：4182普通文件/517目录（含根）/0链接/285106825B≤377487360B；59项依赖警告完整保存，归一化集合与Source68一致。仅116PNG与完整清单改变打包叶，4065旧叶、6个Core叶、编译页面均保持。Source69未执行新Next，条件携带Source68严格Next并仅在新隔离目录叠加数据。
+
+本地入口仍为 http://127.0.0.1:19205/，运行Source69包；旧Source68在正常保存退出后仅停止已核验自有进程，原caller关闭并完成源后校验，网关保持Source65。新包正常Login/Start Game和新manifest指纹均实测，但仓库视觉尚未通过：完整未截断区间中Scene0140响应200、fromDiskCache=true、340cells/0sprites/116missing，实际黑区/棋盘仍在。原因链包括无资源版本的force-cache场景URL；Source70已排入资源版本请求、清单新鲜读取和异步覆盖防护，尚未执行或验收。没有清理浏览器缓存来冒充闭环。
+
+下一项为Source70正常浏览器仓库画面与保存重登，随后继续共享仓库/商店/角色面板及移动端复用。sharedStorageOwner、其他面板变体、移动真机、完整多端1:1和人类Accepted保持开放；本轮不新增后端候选结论，overallPercentage=null、Candidate100=false、goal active。局部资源选项为`--localMapClosure`与`--localMapClosureSha256`配对使用，有限控制文件见下方证据（SHA256=891e6e66b283c7da142af1b1644e45b341245548cec625ec9bff9274011fb66f），默认行为保持。
+
+证据：[Source68回归](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source68-node-actual03.json)、[耐久及存取重登闭环](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source68-storage-tooltip-closure01.json)、[实际tooltip截图](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source68-storage-tooltip-hover01.png)、[Source69回归](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-portable-node-actual01.json)、[原PNG导出](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-warehouse-original-png-export02.json)、[有限控制文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-warehouse-map-local-closure01.json)、[实际清单](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-warehouse-manifest-actual01.json)、[实际Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-thin-actual01.json)、[完整体积报告](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-thin-size-report01.json)、[实际运行](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-runtime-start-actual01.json)、[旧场景缓存实证](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source69-warehouse-scene-stale01.json)。
+
+
+## Source61–67：正常购买与仓库存取两次保存重登均通过（2026-10-11）
+
+当前本地入口 http://127.0.0.1:19205/。Source61 的普通 GoldenPendant 装备/卸下在兼容角色面板通过；Source62 修复权威物品 tooltip wire 投影，3 项实际回归通过；Source63–64 修复 NPC 商店能力来源及完整购买回执，Source65 将完整 owner snapshot 排在本次普通经济包之后，避免金币显示重复扣减。Source65 18 项实际网关回归通过，原调用者构建并启动的新网关已用于正常 UI 购买：Scott 单次购买1个 Candle，金币190→180，实际只扣10；保存退出并重登读回180金币、背包5件（3个Candle及GoldenPendant/CopperRing）、2级与HP24/24。此商店与角色证据为 React 兼容界面，不称共享面板接管。
+
+Source66 取消点击可见 NPC 前必须接近相邻格的客户端限制；实际在 Warehouse 2,10 单次点击6格外的 Anthony 打开对话，Access 收到正常 UserStorage/NPCStorage 并打开仓库。仓库首次操作失败：Store按钮中心实际命中透明 DIV.storage-grid，未点目的格且未完成存取；共享接管风险仅由代码识别，未将它冒充实测已发生的分支。Source67 修复透明网格/页签容器的命中及嵌套仓库相对位置，并让兼容仓库普通操作同步撤回共享 proof、保持已有所有权；切页不再额外发起共享 openBag，新服务重开继续走原准入。锁、UID、pending reservation 与最终发送门槛保持。
+
+Source67 第一轮原 Node 的256项中242通过、14失败（Bag测试夹具缺少dispatch/listener refs）；保留该失败证据，仅补充夹具，原16条Bag测试正文和断言保持。第二轮原Node实际256项全部通过，无跳过；严格Next使用cfg03实际退出0（42337ms，TypeScript12.5s，13页，stderr0，cfg02未执行）。完整原Thin实际退出0（19374ms）：4066普通文件/513目录（含根）/0链接/284883638B≤377487360B，59项依赖警告逐条完整保留。Root已启动该Source67本地包并通过正常仓库闭环：Store Item→Candle→仓库空格后背包5→4、仓库0→1；Alt+x保存退出、正常Login与Start Game后仍为背包4/仓库1；Take Back→Bag 1→重新选择仓库Candle→背包空格，普通TakeBackItemV2回执success=true，背包恢复5/仓库0；再次Alt+x保存退出及重登，实际界面读回背包5/40（3个Candle）、仓库0/80、金币180。存入和取回均已验证持久化，旧deposit/runtime证据中的pending是当时状态，由后续闭环证据补齐。切换Bag 1会清除自动选择，取回前需重新选择物品，此操作细节保持为已知项。
+
+Source66 原 Node208项、严格 Next03（43592ms，TypeScript12.9s，13页，stderr0）与原 Thin04 均实际通过；Thin04的完整 ordinary standalone依赖修复后包为4066文件/513目录（含根）/0链接/284885459B≤377487360B，59项依赖警告完整保留。旧C跨盘NFT、缺79页atlas、Sharp LICENSE/metadata缺失的失败和所有旧产物保留，不合并为通过；Next04未执行。用户主tsconfig4932B原字节、外来simulation/Cargo/原石工坊/生产/文档正文保持。
+
+当前普通商店、仓库和角色测试为兼容界面通过，sharedStorageOwner及共享商店/角色面板全面接管仍开放。Warehouse底图黑区/棋盘fallback、仓库Candle耐久仍显示8000/8000、其他面板变体、移动真机、多端完整1:1及人类前端Accepted尚未完成；overallPercentage=null，Candidate100=false，goal active。下一步优先修复实际地图/tooltip视觉差距，并继续共享面板与移动复用。此处更新仅新增本轮前缀，外来文档正文保持；本轮提交推送以publication实际记录为准。
+
+证据：[购买金币](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source65-purchase-gold-stable01.json)、[购买重登](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source65-purchase-relogin01.json)、[NPC开仓](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source66-npc-visible-range01.json)、[历史仓库阻断](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source66-storage-mode-blocked01.json)、[Source67回归256](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-node-actual02.json)、[严格Next](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-next-actual02.json)、[完整Thin](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-thin-actual01.json)、[实际运行](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-runtime-start-actual01.json)、[仓库完整闭环](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-storage-roundtrip-relogin01.json)、[最终重登截图](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source67-storage-withdraw-relogin01.png)。
+
+
+
+## Source60：Web 实际持续战斗、背包拖动与保存重登通过（2026-10-11）
+
+当前本地试玩入口为 http://127.0.0.1:19205/，运行 Source60 独立包。普通账号登录/StartGame 后，仅一次正常点击稻草人，HP 20→17→0、倒下及 SunPotion 掉落成立；正常拾取收到 You gained an item，角色从1级升到2级。共享画布聚焦的 I/Q 与背包 X 均正常。共享 Bevy Ready 背包内 Candle 从第4格移到第二行第1格（0-based 3→8）；(HP)DrugSmall x2 从背包移到快捷栏第2格，正常键2使用后剩1。用药时满血，只证明消耗，不称验证治疗。
+
+正常 Alt+X 保存退出、重新登录并 StartGame 后，实际读回2级、HP24/24、200金币、292,614、Candle 新格位及 Torch 8/8 提示，快捷栏 SunPotion2 与 (HP)DrugSmall1；原任务 GoldenPendant/CopperRing 的实际提示和两项已完成任务也读回。全过程使用正常界面输入，无 QA/admin 指令、直接游戏/WASM 内部 API 或焦点覆盖；本次刷新后的浏览器 error 为0。Source57的正常任务交付与奖励闭环为历史独立证据，本轮没有重新提交同一已完成任务。
+
+修复覆盖资源代理失败缓存、四类物品 UI 重复 Bevy layout 注册、共享画布世界目标命中、战斗原始来源更新、宿主时钟重锚倒退、Winit 前的键盘准入，以及 Bag wire identity 和 Bag→Belt 仲裁。Source59背包关闭已通过而同背包拖动失败；Source60只改非 Belt 释放的 Up/Cancel 判定，保留 Belt 拒绝、owner/geometry/callback、proof 与未知发送结果门槛。原 Node70/70（0失败/0跳过）、严格 Next实际106998ms（TypeScript12.0s/13页）、原 Thin实际20512ms全部exit0/exited/disposed。Next19582、Thin55329声明输入由原调用者前后校验；新包7331普通文件/778目录/0链接、374002944B≤原377487360B，运行副本全量0差异。Source54与Source58已执行且未变的 Rust/renderer 证据仅限定承接，本轮没有新 Rust 或 Native 编译。
+
+Source59首轮 Next 的编译exit0但调用者因生成 next-env 漂移exit1，明确保留为未接受；修正生成路径副本后的第二轮通过。既有失败、旧产物及用户4932B主tsconfig保留，外来simulation/Cargo/后端/文档正文不纳入本轮提交。尚未穷尽商店、仓库、装备等操作与各面板变体，移动真机、多端完整1:1及人类前端 Accepted 仍开放；overallPercentage=null、Candidate100=false、goal active。下一项继续普通 NPC 商店/仓库与装备实测及移动端输入复用。
+
+证据：[Source60实际试玩](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-ui-actual01.json)、[重登物品](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-relogin-inventory01.png)、[持续击杀](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-sustained-kill01.png)、[70项回归](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-node-actual01.json)、[Next](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-next-actual01.json)、[独立包](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source60-thin-actual01.json)。本轮 Git 推送以随后 publication 实际记录为准，下方旧 pending/未实测描述仅为历史。
+
+## Source57：Web 实际任务、领奖、保存重登闭环通过（2026-10-11）
+
+Root 在获准的本地独立 Web 包（19205）通过普通登录/StartGame、两只稻草人击杀、SunPotion 地面拾取、服务器 GingerTea 获取提示、助理 Jane 正常交付 The CraftLady's Request。实际收到 Quest completed、EXP 30、Gold 200、GoldenPendant x1、CopperRing x1。Alt+X 正常退出后重新登录并 StartGame；原位置 284,607、200 金币和两件奖励的实际 tooltip 均读回。全过程没有 QA/admin 指令或直接调用游戏/WASM 内部 API。
+
+当前 Source57 原 Node 53 项、严格 Next 和 Thin 构建通过；共享背包 Ready 正常显示。持续攻击实测仍只命中一次，需再次正常点击；Source58 正在修复宿主时钟帧间重锚倒退，尚未以新产物证明单次选择持续击杀。整体百分比仍不声明，Candidate100 和人类前端 Accepted 尚未达到。
+
+证据：[Source57 实际闭环](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source57-ui-actual01.json)、[重登奖励](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source57-relogin-reward01.png)、[重登戒指](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source57-relogin-ring01.png)。下方旧“未操作/待授权/构建中”均仅为历史。
+
+## Source54：已恢复本地实测，战斗启动崩溃修复待新包验证（2026-10-11）
+
+用户已授权启动本地网关/Web及浏览器操作。Source53 普通刷新恢复资源、登录、进入地图及读回既有装备/任务通过；Source51 首次任务与普通保存退出重登有实际结果。当前稻草人保持20/20，Bevy Update 因重复布局系统及函数排序崩溃，打怪和第二任务领奖未通过。
+
+Source54 已统一 item image layout 注册；组合24种安装顺序、4种单独安装及原几何检查5项通过，相邻界面130项通过、2项原默认跳过。原三 renderer 构建进行中，后续路线为新 Next/独立包→正常登录→稻草人战斗→姜茶任务领奖→正常保存退出重登。不使用QA发物品或调试传送完成玩法验证；移动真机和人类验收仍开放。
+
+证据：[实际资源与浏览器检查](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source53-local-cache-actual01.json)、[实际 Rust 回归](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source54-schedule-rust-actual01.json)。以下旧“暂不操作界面”是历史指令，已被最新授权取代。
+
+## Source50：新完整 Web 包已构建，Sharp 入口兼容修复；实玩待验证（2026-10-09）
+
+最新完整 Web 已更新为 Source49 Next＋Source50 Thin，包含当前共享 UI 与九类任务动作源码；本轮不新增界面操作。Source49 完整 Core/PUI/NPC 三包和 WebGPU、WebGL2、共享 WebGL2 三 renderer 均由原 builder 实际编译并通过 metadata/name/normalized ABI、原 WASM/JS/default-gzip 预算及不可变发布；静态 WASM 校验获本次“继续”授权，没有实例化游戏。Core 三次和 renderer 四次 Cargo 严格串行、原50GiB/2000ms/15000ms及PolicyB保持，均完成、退出并释放。
+
+原 Next build --webpack 实际 exit0，162013ms，19556项完整输入在原调用前后匹配，严格 TypeScript 和13页静态生成通过。Thin 首次因当前 Sharp0.35.3将 sharp.node 导出指向 index.cjs 失败（实际 exit1/25289ms）；本轮仅修真实打包 helper，支持包根有界单句入口并检查其实际版本化 .node，保留版本、许可、DLL、regular file/path/COPY_EXCL和原预算。55个现有Sharp输入仍等于此前恢复记录，没有安装或混入旧版本。该 helper 只供 Thin 消费，Next 原编译区间及不变产物明确限定承接；不声称当前整个旧广义快照仍匹配。
+
+Source50 原 Thin --skipBuild true 实际 exit0，38463ms，55303项完整当前输入在原调用前后匹配。新包7331 regular files、778目录（含根）、0链接、373987154B，原377487360B上限余3500206B；三套renderer和Core/PUI/NPC均与已编译版本一致。包位于 apps/web/.mir2-thin-client-web-windows-catchup-source50-20261009-01。231项JSON压缩及59条原NFT追踪警告保留，产物与依赖另有只读复核；原失败输出、历史旧08及不可变旧版本均保留。
+
+继续遵守“继续代码，暂不操作界面”：真实资源初始化、登录→任务/战斗→保存退出重登、移动真机及人类前端验收仍未执行；省略媒体的不可变资源origin和覆盖仍待真实验证，构建成功不证明在线可玩。Matrix11仍103 shared＋206 legacy＋8 common，309/317≈97.5%仅有界代码记录，overallPercentage=null、Candidate100=false、goal未完成，无可信可玩日期。用户主4932B tsconfig保留；外来Cargo/simulation/后端及制作加工文档正文保留且排除本轮提交。
+
+证据：[本轮交付](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-build-delivery01.json)、[64份原始记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-build-raw-evidence02.json)、[完整Thin实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-full-actual01.json)、[实际产物复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-full-actual-independent-review01.json)、[依赖及警告复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-dependency-actual-review01.json)、[Source47实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-publication01.json)。本轮提交推送随后另存真实记录，下方原正文及其他工作保持。
+
+## Source47：构建配置副本入口通过严格类型检查；完整 Web 包待生成（2026-10-09）
+
+next.config.ts 新增可选 MIR2_NEXT_TSCONFIG_PATH，未设置时保留原行为，未放宽类型检查。原严格 TSC 实际 exit0、零诊断、12188ms，17136声明输入在调用前后匹配；用户主 tsconfig 原4932B保留。路径校验为代码与源码审阅结果，尚未实际执行 Next 配置。
+
+完整 Core/PUI/NPC 859项与 Bevy 607项声明输入已核对并绑定原 builder；旧36套renderer版本及12份公开flat文件字节保留。未来 Thin 的 report 参数只修正等价路径分隔符，未启动构建。原静态 WASM API边界问答未收到回答，完整runtime校验、不可变发布和新Next/Thin仍未执行；最新完整Web仍Source25。真实登录/任务/战斗/保存/重登及移动验收未运行，overallPercentage=null、Candidate100=false，goal active，无可信可玩日期。
+
+证据：[实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-result02.json)、[20份原始文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-raw-evidence02.json)、[严格TSC](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-tsc-actual01.json)、[限定实际审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-finite-actual-limited-review01.json)、[Source46实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-publication01.json)。本轮提交推送随后另存实际记录，下方原正文及其他工作保留。
+
+## Source46：更新 EXE 实际编译通过；完整 Web 打包边界待确认（2026-10-08）
+
+原守卫下最新 Native EXE 实际编译 exit0，835593ms，保留原 dev/debug（optimized＋debuginfo）配置。917项隔离声明输入在实际调用前后重核匹配，原50GiB/2000ms/15000ms和PolicyB保持；实际C197697568768B、freshness保守上界74ms，完整completed/exited/disposed后才接受。新EXE106106368B已保存独立副本，旧Source31 EXE106137600B同字节历史副本保留。正常Native编译闭包成立；5个仅cfg(test)未声明资产不计全测试。本轮未新跑Rust/Web/TSC、未启动EXE、未打包完整运行资源。
+
+三套renderer编译与静态转换继续以Source45限定结果为依据，完整metadata/name/normalizedABI/defaultgzip/init未通过。原完整builder可条件性用现有CargoGuard直接逐次守卫（Bevy通常4nonce、Core3nonce），没有fresh预构建候选直接接纳入口；原Bevy锁若存在即拒绝启动，不读取锁内容或查询PID。当前任务保留禁WASM API约束，已问一次是否允许原静态构建校验，未收到回答前不执行依赖步骤；旧immutable版本与Next08/Thin08保护。最新完整Web仍Source25；登录/任务/战斗/保存/重登、移动及人类验收未执行，overallPercentage=null、Candidate100=false、goal active，无可信可玩日期。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-finite-result01.json)、[实际Native编译](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-native-actual01.json)、[14份原始文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-native-raw-evidence01.json)、[原完整流程守卫路线](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source46-original-builder-guard-route-review01.json)、[Source45实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-publication01.json)。Source45远端429fe0eb2a860da30f6327702b29395df62c3afc已核验，本轮随后单独保存实际提交推送；用户tsconfig及外来后端/文档正文保留并排除提交。下方历史保留。
+
+## Source45：最新 renderer 编译与动作回归通过；完整包及实玩仍待完成（2026-10-08）
+
+默认共享入口/任务四原脚本实际48/48 TAP通过；Hero原Stage5脚本实际1/1文件TAP、501逻辑组通过，其中原494组字节和断言保留，新增7组/11正向场景覆盖装备、卸装、合并、跨背包转移及补药配置。实际SharedHost→Page发送/claim→唯一台账→回执/完整快照接收路径执行，最终UID/数量/配置另有断言；Prepared/Ready、socket和权威结果仍为有限夹具，非真实服务器或玩家验收。两个输入区间分开记录，不声称整个当前checkout通过。
+
+三个renderer实际release Cargo及六次原bindgen/Binaryen静态转换全部exit0；优化WASM为31467818/17745325/32429102B，均在原32505856B内，共享WebGL2余76754B；JS均在原204800B内。917隔离Rust输入与当前17136项Web声明输入最终重核匹配，三Cargo严格串行、实际PolicyB关闭，原50GiB/2000ms门槛保留。本轮未新跑Rust测试、Native测试或TSC；源未变的Source44类型检查仅限定承接。
+
+Core/PUI/NPC只按56个相关源文件＋4个控制文件未变及18份产物pin限定保留Source33静态候选，旧完整workspace不承接。Windows EXE需要fresh编译；完整renderer metadata/name/ABI/defaultgzip/init、不可变发布与Next/Thin打包仍待完成。最新完整Web仍Source25，尚不含Source26–45。功能记录309/317≈97.5%含旧实现；共享分类103/317≈32.5%也不是总体进度。overallPercentage=null、Candidate100=false、goal active，可玩日期未知；继续代码且暂不操作界面，登录/任务/战斗/保存/重登与移动、人类验收未执行。
+
+证据：[本轮实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-finite-result01.json)、[74份原始记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-raw-evidence01.json)、[最小交付输入审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-delivery-input-review01.json)、[Source44实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-publication01.json)。Source44远端ad6f915a693e1322b69afeed926f36318caefdb4已核验；本轮随后单独记录实际提交推送。用户tsconfig及外来后端/文档正文保留并排除本轮提交，下方历史保留。
+
+## Source44：Hero 共享页面及输入接线通过有限验证；新版完整包仍待交付（2026-10-08）
+
+Page 与 Shell 已接入共享 Hero Host：隐藏根先完成布局，Prepared 后同步卸载旧 DOM，再启用控制并等待实际 matching Ready；渲染期只读投影，事件和原发送前 claim 重核来源、租约、sink、布局及500ms帧健康。鼠标、键盘、悬停与移动菜单接原输入仲裁；旧 pointer/cleanup 不得跨场景或接管新手势。同内容完整快照保留合法拖拽，新来源或控制变化清除旧排队输入和反馈。继续复用原唯一操作台账、精确ACK与后续完整快照屏障及 Unknown custody。以上为代码接线与有限回归，不是 live World/Ready 或玩家验收。
+
+实际隔离 Rust02 Runtime26/26＋portable66/66，共92次通过，新增5个测试函数；本轮未重新执行 Native。WebGL2 shared 与 WebGPU 两项静态 cargo check exit0。实际 Web03 原脚本185/185 TAP通过（155NPC购买＋29surface＋1Stage5脚本），Stage5另有494逻辑组＝原477＋新增17；TypeScript5.9.3 no-emit/nonincremental exit0、stdout/stderr均0B。旧测试业务断言继续执行；修复夹具依赖不表示整个旧runner逐字不变。
+
+917项隔离 Rust 输入、17130项 Web 输入及10个本轮源码在各自有限区间冻结，最终全量重核匹配；不合并声称当前整checkout或后端全部通过。四次最终 Cargo 均严格串行且原PolicyB completed/exited/disposed，实际C最低199272189952B、freshness保守上界最大79ms，原50GiB/2000ms门槛不变。原始64份最终/历史输出与配置归档；Rust01新夹具 spawned 状态不一致的一项失败、Web01/02遗漏新增Hero闭包依赖的失败完整保留，仅修夹具后通过。
+
+下一步复核默认共享入口与九类任务动作整链，再交付源码匹配的renderer/Core/EXE/Web完整包。Matrix11仍103 shared＋206 legacy＋8 common；32.5%仅共享分类覆盖，97.5%仅含旧实现的功能记录覆盖，overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–44；真实登录/任务/战斗/保存/重登、移动真机及最终人类验收not-run，继续代码且暂不操作界面，尚无可信可玩日期。用户tsconfig、外来制作加工/Cargo/simulation/文档变更保留且排除本轮提交。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-finite-result01.json)、[64份原始文件](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-raw-evidence01.json)、[独立实际复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-actual-review01.json)、[Rust首次夹具失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-rust01-historical-failure01.json)、[Web首次失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-web01-historical-failure01.json)、[Web第二次失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-web02-historical-failure01.json)、[Source43实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-publication01.json)。Source43已推送f359d5b5d0cebd964eadd99b8a46d1ca52ecbd1f；本轮提交推送随后另存实际记录，下方保留历史。
+
+## Source43：Hero 真实消费模型与独立显示一致性门通过代码验证；完整接管仍待完成（2026-10-08）
+
+Rust 与 TS 分别捕获 plannerInfo 和实际 actor_view 显示，按有界规范字符串比较，保留宽 UID、经验和有符号数的精确值。真实 HeroHealthChanged 已进入独立 TS 显示侧；Host 的 appliedWitness 只在 World 实际安装模型后产生，旧 bootstrap 或 setter 成功不能代替 Ready。既有精确 ACK＋后续完整快照屏障、Unknown custody、checkpoint/tail 和唯一操作账本保持。
+
+最终隔离 Rust 生成05实际 Runtime22/22、portable65/65、Native24/24，共111次执行、0失败/ignored，原函数归一化98项，新增13项；WebGL2 shared 与 WebGPU 静态 cargo check exit0。Web生成02有效调用区间实际184/184 TAP（155NPC＋28surface＋1Stage5脚本），Stage5逻辑477组另列，新增11组；TypeScript5.9.3 no-emit/nonincremental exit0、零诊断。未执行 WASM API、实例或 UI，不代表完整生产包。
+
+Rust隔离声明917项含909份同字节真实产品/数据和8个原脚本引用，最终全量重核匹配；Web17128项仅接受生成02各自有效调用区间，两类证据不可合并称当前整checkout或完整server通过。9个本轮源码始终匹配。5次最终Cargo均先实际PolicyB completed/exited/disposed再启动下一项；C最低204420620288 B、freshness保守上界最大83ms，原50GiB/2000ms门槛不变。原始148文件及85nonce保留全部历史：两个外来源码漂移区间不接受，GPU02在原preflight拒绝且未启Cargo；隔离portable03/native04缺少原include资产的编译失败保留，补齐同字节原PNG/JSON后全部通过，未削弱断言。
+
+下一Source44须接Page control/sink、Prepared后才绘制、实际visibility和capturesEscape、Shell输入仲裁及500ms帧健康；来源/control变化清旧输入队列、同内容完整快照保持合法拖拽也待修复。随后完成默认共享入口、九项任务动作整链及源码匹配的renderer/Core/EXE/Web完整包。Matrix11仍103 shared＋206 legacy＋8 common：32.5%仅共享分类覆盖，97.5%仅含旧实现的功能记录覆盖，overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–43；登录/战斗/保存/重登、移动真机及人类验收not-run，继续代码且暂不操作界面，尚无可信可玩日期。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-finite-result01.json)、[完整原始输出及历史](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-raw-evidence01.json)、[实际审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-actual-review01.json)、[隔离资产失败03](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-historical-scope-drift03.json)、[隔离资产失败04](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source43-historical-scope-drift04.json)、[Source42实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-publication01.json)。Source42已推送0a2bb7cee34fb3e330d087eaa3ad363598ab49db，本轮提交推送随后单独记录；下方保留历史。
+
+## Source42：Hero 动作依据与发送前校验通过回归；完整接管和可玩包仍待完成（2026-10-08）
+
+真实 Rust Hero reducer 的动作现必带原 planner 依据，独立 TS 模型捕获相同字段后精确比较：原物品 UID/数量/槽位、基础与生效政策、要求、原自动目标、补药和快捷键配置均保留。16KiB 有界依据支持实际42格背包，宽 UID 仅用于精确比较，旧数值 mutation 限制不扩大。Page 原 submitHeroAction 改为严格 transport-accepted boolean；发送前失败仅撤销 definitely-unsent，进入原最终 claim 后的未知结果仍保留 custody。原唯一 ledger 的 proof 另捕获最初 raw high-water，同步 listener 后在原 claim 前重核，不把后来帧或新模型贴回旧动作。
+
+实际 Runtime16/16＋portable58/58＋Native24/24，共98次通过、0失败/ignored，归一化原函数85项，新Rust函数6项。Web02 原有限脚本184/184 TAP通过（155NPC＋28surface＋1Stage5脚本），Stage5逻辑466组另列，原457组加9组。TypeScript5.9.3 no-emit/nonincremental exit0、零诊断。WebGL2 shared 与 WebGPU cargo check exit0，仅静态编译，0次WASM API/初始化，不代表新完整生产包。
+
+908声明Rust输入、17126声明Web输入、去重17135输入在实际调用前后匹配，最终声明集重核亦匹配；原905/17123集合保留，另加真实Hero模块和两个当前制作加工simulation依赖，外来工作保留且排除本轮提交。5次Cargo原Guard均先PolicyB completed/exited/disposed后才开始下一Cargo，25份nonce，C最低221675769856 B、freshness保守上界最大72ms，原50GiB/2000ms门槛不变。首次Web01的旧纯Page夹具缺少新增WeakMap引用而失败；保留完整输出，仅补42B真实闭包依赖后重跑，原457组与新增9组断言不削弱。未执行的TSC01不计通过，原工具、探针、模板与发布门槛保持，不声称强制deadline。
+
+本轮完成动作依据及发送前保护基础，尚未启用共享Hero的Page control/sink/matching Ready/Shell输入全链。下一步须补独立冻结TS模型与真实Rust已消费模型的数据一致性门，尤其实时HeroHealthChanged与checkpoint显示可能不同；来源戳、bootstrap或setter成功均不能据此隐藏React。继续接完整布局、帧推进、源/租约/sink/输入清理及回退，再完成默认共享入口、九项任务动作整链和源码匹配的renderer/Core/EXE/Web完整包。精确ACK＋后续完整快照屏障、Unknown custody、checkpoint/tail与原账本不变。
+
+Matrix11仍103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，103/317≈32.5%仅shared分类覆盖；overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–42；公开manifest及用户tsconfig保持，未改后端/共享Zone/协议parity。登录→任务/战斗→保存→重登、移动真机及最终玩家验收not-run；继续遵守“继续代码，暂不操作界面”，尚无可信可玩日期。原metadata/name/normalizedABI/defaultgzip/初始化/源码匹配门槛保留。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-finite-result01.json)、[49份完整原始文件与25nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-raw-evidence01.json)、[首次失败与修复](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-historical-failures01.json)、[Source41实际提交推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-publication01.json)。Source41已核验推送1ff247c37bb9c420cfff6b5e7c280691fe949c02；本轮Git发布以随后实际记录为准。下方保留历史。
+
+## Source41：Page Hero 原始数据接线通过代码回归；完整可玩包仍未交付（2026-10-08）
+
+Page 现持有有界原始帧尾队列和 Runtime 原 checkpoint 字符串，首次物理消息 performance 时钟在应用前捕获；不把 Hero snapshot 经过 JS 重编码。实际验证通过的 NPC purchase owner 回调以独立关联 tuple 加原文进入严格 Rust 接口，保留精确 u64/i64、noHero 清除和 receipt FIFO。Socket/connection/session、renderer run 与 scene 分开；恢复 held checkpoint 后按顺序补齐完整尾队列，未完成旧帧不可被后帧越过。Renderer 缺失/故障保留 Page custody，换图直接 activate；同步跨 scene 重入明确拒绝。
+
+当前 Source02 实际 Runtime16/16＋portable52/52＋Native24/24，共92次通过、0失败/ignored；跨 feature 原函数去重79项，新Rust函数7项。Web05 原有限脚本实际184/184 TAP通过（155NPC＋28surface＋1Stage5脚本），Stage5逻辑457组另列，新17组；surface新增1组真实 ordinary 快照委托/旧物理owner拒绝。严格 TypeScript5.9.3 no-emit/nonincremental 实际exit0、零诊断。WebGL2 shared与WebGPU两个 WASM cargo check exit0，仅静态编译，未生成或初始化新的完整生产包。
+
+905声明Rust输入、17123声明Web输入、去重17132输入在各实际调用前后冻结检查匹配，Root初次去重复核也匹配；最终审阅时其他任务继续编辑7个simulation/production输入，当前整checkout不再完全匹配。七个本轮源码仍匹配，后续其他任务变更另列保留并排除本轮提交，原测试冻结与工具/源码门槛不变；当前5次Cargo原Guard均PolicyB completed/exited/disposed，25份nonce，C最低236199809024 B、freshness保守上界最大122ms（门槛50GiB/2000ms）。原Source01 portable51通过/1失败、新测试误解available的noHero语义，修正新测试后当前全部通过；旧2Cargo和3CLI失败输出完整保留。原测试业务断言保留，NPCsurface26块原文不变、1块静态调用断言移至真实委托链；不替换原Guard、探针、模板、政策、预算或发布门槛，不声称强制Cargo/CLI deadline。
+
+本轮只接数据来源，不关闭Hero整条操作链：实际Rust planner动作依据须与独立捕获TS模型比较；控制、sink、布局、matching Ready及Shell输入仲裁尚待接线，bootstrap source不能当Ready，也不能据setter成功隐藏React。沿用唯一原Hero操作账本，原Core Applied、精确ACK后完整快照屏障及Unknown custody保持。下一轮继续这些功能、源码匹配的完整renderer/Core/EXE/Web包，以及默认共享入口和任务整链；宽UID操作、旧引擎宽日期与NewMagic完整producer限制仍开放。
+
+Matrix11保持103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，103/317≈32.5%仅shared分类覆盖；overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–41；公开manifest和用户tsconfig未替换。未改后端/共享Zone/协议parity，其他制作加工/Cargo/simulation/production工作保持且排除本轮提交。登录→任务/战斗→保存→重登、移动真机及玩家验收not-run；继续遵守“继续代码，暂不操作界面”，尚无可信试玩日期。原metadata/name/normalizedABI/defaultgzip/初始化/源码匹配门槛保留，未绕过原helper WASM API限制。
+
+证据：[本轮实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-finite-result02.json)、[完整原始71文件与35nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-raw-evidence01.json)、[晚期其他任务源码资格](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-late-foreign-qualification01.json)、[历史失败与修正记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-historical-failures01.json)、[Source40真实提交推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-publication01.json)。Source40已核验推送8e64c987849137b56a67fda4b64f18b0645917eb；本轮Git发布以随后实际结果为准。下方旧记录保留为历史。
+
+## Source40：Web Runtime Hero 接入通过有限回归；Page 与新包仍待完成（2026-10-08）
+
+本轮完成真实 Web Runtime 的单一 Hero raw consumer、source/control/input/sink ABI 和共享面板安装，复用原 Crystal painter、唯一 tooltip surface及真实 auto-pot catalog preview。Rust Hero 来源计数与 Web UI/ledger 计数分开；保留首次 DOM 时钟、精确宽整数及有界 receipt FIFO，不新增 Native ACK 结算或第二操作账本。Checkpoint 原字符串另保留 last-Hero 与 accepted-raw 两种游标；同 scope 的旧回调清理和旧输入受 sink generation 约束。任何禁用控制立即取消旧手势，快速恢复也不能续成旧点击。
+
+Ready 代码现在读取实际 PostLayout 坐标、面板/控制/个人格子的完整集合、当前角色页图像、字体 glyph、物品 image 0、材质与传播后的可见性；未绑定当前 sink 或未消费 reset 时撤回接管。关闭 Hero 库存同帧移除个人包/输入区域，提示框按实际接管及字体加载选择。上述是接入代码与有限数据回归，尚无真实界面 Ready 验收。
+
+最终 Source02 实际 Runtime15/15＋portable46/46＋Native24/24，共85次通过、0失败/ignored；跨 feature 同一原函数去重72项，新增16项。WebGL2 shared与WebGPU两个 WASM cargo check实际exit0，仅静态编译，不是新renderer/Core/EXE/完整Web产物。900声明Rust输入5改/895保护，五次实际转发全部原Guard PolicyB completed/exited/disposed；C最低256589996032 B、freshness保守上界最大67ms。首次Guard exit90没有转发Cargo、0测试/0nonce/无C采样；Root错误的普通authority布尔字段按原Flat字符串接口修正，完整失败输出保留，Guard/探针/模板/预算未改。
+
+当前固定状态：Runtime接入已实现并有限编译；Page/TS Hero hook、真实验证过的npcPurchaseOwner raw extractor、renderer checkpoint/replay、输入仲裁、fallback接管和现有唯一Hero账本仍待接线。后续必须分开bootstrap source查询与完整matchingReady；禁止把新Rust revision自动绑定旧TS模型，动作来源须可比较；换图直接activate保留私有Hero bootstrap，不先withdraw；send boolean只表示传输接受，精确receipt及后续完整authority仍按原ledger结算。继续全goal，不能将其缩小为本轮Host。
+
+Matrix11不变：103 shared＋206 legacy＋8 common，309/317≈97.5%仅为含旧实现的功能记录覆盖，103/317≈32.5%仅为shared分类覆盖；overallPercentage=null、Candidate100=false。完整公开Web仍Source25 Next08/Thin08，不含Source26–40；本轮无新TSC/MJS/Core/PUI/EXE/renderer包/完整Web，公开manifest及用户tsconfig保持。原metadata/name/normalized ABI/default-gzip/初始化/源码匹配门槛全部保留，未绕过原helper的WASM API限制。登录→战斗→保存→重登、移动真机及玩家验收not-run，无可信试玩日期。用户“继续代码，暂不操作界面”与全goal active保持；未改后端/共享Zone/协议parity。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-finite-result01.json)、[原始完整输出](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-raw-evidence01.json)、[原Guard拒绝记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-guard-refusal01.json)、[Source39实际提交与推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-publication01.json)。下面各Source记录保留为历史。
+
+## Source39：Hero 共享原始数据与面板模块完成有限验证；完整 Web 接线仍待交付（2026-10-08）
+
+共享库新增严格 raw Hero ingress 和 portable Hero painter/reducer，Native 与 Web 共用同一 Crystal 绘制及物品规划。保留原始 u64/i64、首次到达的相对技能时钟、scope/scene/run 退休门槛和 bounded FIFO；未消费回执禁止 checkpoint 交接。UID0 只读并保留真实目标占位，动态实例 metadata 不一致等新 owner；Native 默认入口、控件及操作逻辑保留。多指针、过期反馈、背包重开/锁定页/前景、模态全 stage 拦截和缺失布局保护均有回归。
+
+最终 Source03 实际 portable 45/45＋Native 24/24，共69次执行、0失败/ignored；同原函数跨feature去重56项，新增21项，不能说69项新功能。原两次编译失败均执行0测试，完整失败凭据保留，分别修复错误常量import与Root清理误伤的font函数调用。WASM shared-runtime cargo check 实际exit0，仅静态编译，不计测试或完整生产包。899声明Rust输入11改/888保护；原5次Guard、25份nonce文件全部PolicyB completed/exited/disposed，C最低264547229696 B、freshness保守上界最大70ms；没有强制Cargo deadline声明。
+
+下一队列必须完成实际 Runtime Hero consumer/ABI/sink/匹配Ready、现有tooltip surface与真实auto-pot catalog preview，然后接Page原始帧缓存、renderer交接及现有唯一操作账本。当前只在共享库实现，不表示Web已接通Hero；不能只凭setter接受切掉React fallback，精确ACK仍须新完整snapshot后才结算。
+
+Matrix11保持103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，shared分类103/317≈32.5%也不是整体验收率。overallPercentage=null、Candidate100=false、goal active，未新增关闭Hero整链行。完整公开Web仍Source25 Next08/Thin08，不含Source26–39；本轮未构建新EXE/Core/PUI/renderer包/完整Web，manifest不变、TS未改/未新跑TSC。原metadata/name/normalized ABI/default-gzip/初始化及源码匹配打包门槛仍须保留，未绕过原helper的WASM API限制。登录→战斗→保存→重登、移动真机与玩家验收not-run，无可信试玩日期；用户“继续代码，暂不操作界面”保持。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-finite-result01.json)、[五次真实Guard和完整原始输出](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-raw-evidence01.json)、[Source38实际发布失败与远端6116记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-publication01.json)。本轮Git发布状态以随后真实发布记录为准。未改后端/共享Zone/协议parity；下面旧轮次均为历史。
+
+
+## Source38：英雄共享数据基础及物品回执保留修复，50项回归通过；新版可玩包仍待交付（2026-10-08）
+
+完整Hero owner projector与item/tooltip校验移入client-bevy::hero_model；Native原签名用Incomplete/Decode/Projection三错误映射调用同一实现。完整inventory、Info/realInfo/UserItem/socket、UID0/u64MAX、i64 XP、容量/稀疏装备/keys/null配对保持原语义，gate/World/Applied/结算仍在Native。两个现有Hero consumer分支均保留item_result_receipt或skill ACK再应用最新模型，修复同批后续状态覆盖物品回执的问题。这不是完整WASM Hero adapter或共享面板完成。
+
+实际精确50/50、0失败/0ignored、50唯一名称：Bevy默认Hero11、Runtime Native economy/消费链38、Runtime默认配置1；新4均具名执行，原断言保持。独立只读复核10个迁移helper body、四文件逆替恢复及冻结pins通过。897声明Rust输入4改/893保护；原3次Guard/完整15份nonce，实际C最低269566263296 B、freshness保守上界最大102ms、PolicyB全部completed/exited/disposed。整次Guard耗时18831/35334/25942ms、测试0.01/0.20/0.00s，仅纯JSON/裸World/本地受控队列；未启动渲染器/游戏/界面/网络/WASM API，不声称强制Cargo deadline。
+
+Matrix11仍103 shared＋206 legacy＋8 common，309/317≈97.5%仅功能实现记录覆盖率；overallPercentage=null、Candidate100=false、goal active。本轮基础层不额外关闭共享Hero界面行。完整可分发Web仍Source25 Next08/Thin08，不含Source26–38；本轮无生产EXE/Core/PUI/NPC/renderer/完整Web构建，公开manifest未替换。TS输入未改且未新跑TSC，Source35仅按有效TS子集保留限定历史结果。实际资源初始化、登录→战斗→保存→重登、移动设备及玩家验收not-run，无可信试玩日期；用户“继续代码，暂不操作界面”保持。
+
+下一步仍须完成Hero原raw ingress、owner/scene/run/reset与相对cast_time生命周期、bounded receipt、portable painter/字体/tooltip/input、Page独立ABI/ready/fallback及原Web单操作账本。现有React Hero操作仍在；setter接受不等于ready，精确ACK还须等待新完整快照。宽UID动作ABI、旧引擎宽日期、NewMagic定义变化的匹配完整producer，以及原metadata/name/normalized ABI/default-gzip/初始化/源码匹配完整打包仍开放；未绕过原helper的WASM API限制。未改后端/共享Zone/协议parity。
+
+Source37已实际提交推送并独立核验6116c2e640227b2408b98682a66ebdafa092ea18；Source38发布以随后真实Git结果为准。证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-finite-result01.json)、[原始38文件含完整15份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source38-raw-evidence01.json)、[Source37真实发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-publication01.json)。数据reader路径/字符串唯一性/跨realm比较等修正未改产品断言，不计产品测试失败或通过。下面Source37及更旧段落为历史。
+
+
+## Source37：Native 通信超时修复，53 项选定回归通过；完整 Web 可玩包仍待交付（2026-10-08）
+
+Native owned/control/Purchase 使用真实 Tokio 单次10秒绝对时限覆盖 readiness→最终准入→flush。未进入发送的超时精确退役原 envelope 并返回 Unavailable；已进入则发布 Unknown、保留原购买/UI/durable custody，重连只 Query 原操作。普通 connect 另有10秒预算，整个普通 capabilities＋credential handshake 共用另一10秒，keepalive有界；Shutdown观察原 fence，不消费排队Login/StartGame。同时关闭优先；原 resume 绝对deadline、Origin/TLS、credential校验及协议保持。不是 connect＋handshake 合计10秒。
+
+当前Source02实际53/53、0失败/0ignored、53唯一名称，新11均具名执行。原Gateway153和NPC17测试/业务断言保持，纯NPC测试显式手动时钟调用同一生产body；旧模块经有限逆替换逐字恢复。独立复核发现的MutexGuard跨await来源风险已在同步block修正。897声明Rust输入2改/895保护，原Guard单次/完整5份nonce，实际C≥50GiB、freshness保守上界65ms，PolicyB全部关闭。整次Guard耗时373317ms、测试0.29s均为实际记录；10秒写入预算不限制Cargo编译。仅受控Sink/本地队列/裸World/最小App与真实1ms timer，不证明实际WebSocket卡住10秒。
+
+台账103 shared＋206 legacy＋8 common＝309/317≈97.5%仅实现记录覆盖率；Matrix11原字节保持，overallPercentage=null、Candidate100=false、goal active。可分发Web仍Source25 Next08/Thin08，不含Source26–37；本轮无生产EXE/Core/PUI/NPC/renderer/完整Web构建。严格TSC未重跑，只保留Source35按未变有效TS输入的限定历史结果，不能称整个当前Web已构建通过。公开manifests未替换。实际登录→战斗→保存→重登、资源初始化、移动设备、玩家验收not-run；用户“继续代码，暂不操作界面”保持，无可信试玩日期。
+
+下一项补Web shared Hero入口、完整物品/精确ACK生命周期及portable painter：现有React Hero功能仍在，不能将缺setter说成全部英雄操作不可用，也不能仅补setter就关闭共享面板。宽UID动作ABI、旧引擎宽日期限制、NewMagic定义变更待匹配完整producer，以及原metadata/name/normalized ABI/default-gzip/初始化/源码匹配打包仍未关闭；原helper当前禁止的WASM API未调用或绕过。本轮只改两Native客户端文件，服务器/共享Zone/协议parity不变。Source36已实际提交推送04d8780054e0fdfb66a5783679953ccc11c342b1；本轮发布以后续真实Git结果为准。
+
+证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-finite-result02.json)、[原始20文件含完整5份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-transport-source37-raw-evidence01.json)、[Source36真实发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-publication01.json)。原数据reader误将4个mail_夹具函数计入测试，执行前拒绝并保留修正记录，不计产品测试失败。下面Source36及更旧段落为历史。
+
+## Source36：完整技能与操作准入修复；最新可玩 Web 包未交付（2026-10-08）
+
+Native 技能 projector 移入现有 Runtime 供 producer 与 owner checkpoint 共用，保留原 null/0/catalog/alias 语义。完整快照核对 learned 行和绑定内容，显式 owner authority/ACK 才强匹配，保留独立宿主 epoch 刷新。Native 操作权限核对 learned 身份、顺序和不可变定义；真实后续 Cast/Delay/Leveled/Toggle、数字热键与 exact ACK 保留，不回滚 live model。NewMagic 改变定义仍等待匹配的完整 producer。
+
+当前选定57项通过：最终Source02新跑默认配置1＋Native economy34，Source01 Bevy15＋Native7按有效测试正文未变限定承接；整轮91次执行/57独立名字，新9项均具名执行，旧Runtime34只保留历史。独立复核找到的可选game-data依赖风险已修复，disabled owner API明确拒绝且无Applied。最终897声明Rust输入4改/893保护；原5次Guard/25份nonce、C≥50GiB、freshness上界最大65ms、PolicyB全部关闭。Native7编译593310ms不代表强制deadline。本轮无新生产EXE/renderer/Web构建。
+
+固定台账103 shared/206 legacy/8 common，309/317≈97.5%仅实现记录覆盖率；overallPercentage=null、Candidate100=false、goal active。可分发Web仍Source25 Next08/Thin08，不含Source26–36；完整metadata/name/normalized ABI/gzip/初始化及最新源码匹配打包未完成，公开manifest未替换。严格TSC仅按未变有效TS输入限定承接Source35，广泛快照有4处Rust变化。实际登录→战斗→保存→重登、移动设备及玩家验收 not-run，无可信试玩日期；用户“继续代码，暂不操作界面”保持。
+
+下一项落实Native整个readiness/flush/普通handshake/keepalive写入deadline；宽UID动作ABI、Hero WASM drain/setter与旧引擎宽日期限制仍未关闭。本轮不改simulation、gateway服务、协议或后端parity。Source35已实际提交推送e068bbe9e0c5397255598edde7528d472fd6f08d；Source36发布以随后真实Git结果为准。
+
+证据：[有限结果02](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-finite-result02.json)、[原始61文件含全部25份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-raw-evidence01.json)、[Source35实际发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-publication01.json)。独立复核73个嵌套pin/实际logs/原始字节通过；只读数据reader修正不计产品测试失败或通过。下面Source35及更旧段落为历史。
+
+
+
+## Source35：共享仓库日期修复；代码覆盖97.5%，实际可玩待验证（2026-10-08）
+
+共享 Storage 现在接受精确 canonical signed i64 日期字符串；兼容原安全 Number、Rust i64 数值序列化、默认0与 expiryTimeBinaryDatetime 别名。Web projector/direct host 使用同一原有谓词，拒绝 unsafe Number、溢出及非规范字符串；UID、authority与日历规则保持。本轮仅客户端和测试，未改变 simulation、gateway、协议或后端 parity。
+
+实际 Rust26＋原三个 Web脚本204次通过＝230次/227唯一名称，新增7项（Rust4/Web3），另3项为已有测试重命名。严格 TypeScript5.9.3 非增量 no-emit 实际 exit0、零诊断；用户 tsconfig 不纳入提交。897 Rust输入2改/895保护、17120 Web输入7改/17113保护，17121唯一声明输入在各调用前后及最终复核匹配；不是全 workspace 覆盖。独立只读复核原收据、日志、134个嵌套pins与17121源pins通过。
+
+三 renderer 原 Cargo、wasm-bindgen 与 Binaryen131 静态转换/优化均实际 exit0。optimized WASM30889189/17749024/31851030 B、JS134346/117176/132320 B 满足原 WASM≤32505856/JS≤204800。普通WebGL2 ABI0无共享Storage路径、产物保持旧字节；WebGPU/WebGL2-shared ABI1编译实际修改。原Guard5次/25份nonce、C≥50GiB、freshness上界最大96ms、PolicyB全部关闭。原CLI无强制deadline，实际优化小于600000ms。
+
+完整 metadata/name/normalized ABI/default-gzip/初始化/发布仍 not-run，原helper的WASM API当前禁止，未替换公开manifest。可分发Web仍Source25 Next08/Thin08，不含Source26–35。下一交付项是源码匹配的完整Web包；Shared SkillModel内容一致性、Native完整写入deadline、宽UID动作ABI、Hero WASM adapter与旧引擎packet-only宽日期仍未关闭。
+
+固定清单103 shared/206 legacy/8 common/0 raw open，309/317≈97.5%只是有界代码记录，overallPercentage=null、Candidate100=false、goal active。用户“继续代码，暂不操作界面”保持；实际登录→战斗→保存→重登、移动真机及玩家验收未执行，无可信试玩日期。Source34已实际提交推送核验64b2d675c83a22fb2c54f2d1a8753272ea87c94c；本轮提交以后续实际Git结果为准。
+
+证据：[实际有限结果02](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-finite-result02.json)、[原始字节含全部25份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-raw-evidence01.json)、[Source34发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-renderer-source34-publication01.json)。两次Root数据reader错误（展示括号、拒绝归档WASM字节）保留，不计产品/测试失败，未启动进程或改断言。下面Source34及更旧段落为历史。
+
+
+## Source34：三 renderer 静态编译及 WASM/JS 体积通过，完整交付待验证（2026-10-08）
+
+原 WebGPU 构建实际发现4个 WASM 编译错误：普通 Hero ingress 引用了 Native-only owner 消息和 NPC economy 模块。Root 只改 runtime/src/lib.rs 的条件编译边界，保留 Native 三类消息、owner checkpoint 与 packet 回执；独立逆替换恢复旧文件 SHA，897 声明输入1改/896保护。WASM 不再引用 Native owner/module，普通 Hero model/ACK 路径保留；但 wasm adapter drain 原本为空且无 Hero setter ABI/TS 接线，本修复不证明新 Bevy Hero 实时输入，普通 Web React/owner 投影未改。
+
+修复后原 Cargo 参数实际完成 webgpu、webgl2、webgl2-shared 三种 wasm-release 构建。原 wasm-bindgen0.2.118 与 Binaryen131 静态 CLI 转换/优化各3次实际 exit0；-O1/--strip-debug 顺序、原工具 SHA 与预算未改。optimized WASM为30888672/17749024/31850513 B，JS为134346/117176/132320 B，均满足原 inclusive WASM≤32505856 / JS≤204800。现有6项 Native Hero 内存/受控队列回归实际6/6通过；没有新增具名测试。四次成功 Cargo＋一次保留初始失败共5次原 Guard/25份 nonce 文件，实际 C≥53687091200 B、freshness上界最大86ms、PolicyB全部 completed/exited/disposed。声明输入在实际调用前后匹配，不等于全 workspace/工具链覆盖。
+
+原 full-module validation/name/normalized imports-exports 及 renderer default-gzip≤7340032 尚未运行；静态 CLI 分解不替代原完整 helper，原 helper 的 WASM API 当前仍禁止。未交换或发布未校验产物，public Core/renderer manifests字节保持；最新 Web 交付仍Source25 Next08/Thin08，不含Source26–34。Source33 Core/PUI/NPC尺寸与严格TSC只按未改变的有效输入子集限定承接，不称当前广泛快照未漂移或重新跑TSC。下一步继续完整三包/三renderer校验与 matching Next/Thin，待允许的验证成立后再交付候选包。
+
+用户“继续代码，暂不操作界面”保持；资源/WASM初始化、登录→战斗→保存→重登、移动真机及玩家验收 not-run。Shared SkillModel同行数不同内容、Native整个写入 deadline、仓库宽i64输入及宽UID动作ABI仍是未完成或共同限制；本轮不关闭这些问题。Matrix11保持103 shared/206 legacy/8 common/0 raw open，309/317≈97.5%有界代码记录，overallPercentage=null、Candidate100=false、goal active，无可信试玩日期。首次编译失败、未执行plan01参数次序纠正、Root纯数据reader跨realm数组比较及两次未启动命令的配置桥接错误均保留，不计产品/测试通过或改原断言。
+
+Source33已实际提交推送核验262e4d4b7fc18d67cd3b8c9b5d86badeee5b6e04，本轮携带其事后publication；Source34发布以Root后续实际Git结果为准。[Source34实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-renderer-source34-finite-result01.json)。下面Source33及更旧段落为历史，当前以上述Source34为准。
+
+
+## Source33：三包体积达标，完整 Web 交付与实际可玩验收仍待验证（2026-10-08）
+
+Core / Presentation / NPC Purchase 已按同一 Rust crate 的三个互斥生产 feature 拆分；原严格 JSON visitor 逐字迁移、Core/PUI 已发布 JS 保持字节一致，永久购买 facade 绑定独立 NPC 包版本且不因重试重建 ledger。原 optimizer、预算与 publication gates 保持；三包全部校验后才允许 immutable leaves 和 manifest-last。
+
+实际原工具链编译及静态优化尺寸：Core 252883 B、Presentation 261542 B、NPC 167607 B；JS 24393/24721/8332 B，全部满足原 WASM<262144 / JS≤204800。原 Guard 六次 Cargo 实际 C≥50GiB、freshness 上界最大65ms、PolicyB全部关闭，30份 nonce 文件。选定 Rust 17＋9＋17=43次通过（26独立名称，两个原 Mail capture ignored 不计），Node20＋5＋1=26独立名称，共69次/52独立通过；新增10项Node测试。严格非增量 TypeScript5.9.3实际exit0、零诊断。895声明产品输入8改/887保护；17720声明Web输入在各验证调用前后匹配，后续文档变更只作限定承接。
+
+尺寸通过不等于完整交付：原 full-module validation / name / normalized imports-exports 未运行，三 renderer、源码匹配 Next/Thin、完整当前 prebuilt 套件及 WASM/资源初始化均待验证。旧 Source25 prebuilt success 测试因真实双包manifest缺NPC而失败的日志、首次 Guard 审核配置绑定错误均保留；未改原断言或绕过门槛。Web交付仍Source25 Next08/Thin08，不含Source26–33。用户“继续代码，暂不操作界面”保持；实际登录→战斗→保存→重登、移动真机、玩家验收 not-run，无可信试玩日期。Matrix11保持309/317≈97.5%有界功能记录，含206 legacy、103 shared、8 common；overallPercentage=null、Candidate100=false、goal active。
+
+Source32已实际提交推送并核验1c786cf494a7dd9394b3c5de65a9c6b7944491d5，本轮携带其事后publication；Source33 Git发布另以Root随后实际结果为准。[Source33实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-finite-result01.json)。下面Source32及更旧段落保留为历史，当前以上述Source33为准。
+
+
+## Source32：严格编解码92项通过，最新 Web 包仍超过原体积预算（2026-10-08）
+
+Root 在两个原产品文件收缩 JSON 边界：保留原 typed serde 与 Native/Gateway encoders、校验和购买 host ledger；Web 改用严格 Value 解码、经校验的 Value 输出及逐字节等价的请求编码，并复用现有递归 StrictMailValue walker。外层按原MAX_INPUT（6×2MiB＋64KiB）限长，内层frame独立按原2MiB限长；两个raw walker仍拒绝重复/escaped duplicate、过深与尾随JSON。完整 snapshot 仍是原始 carrier，不能作为真实 Applied 或 live authority 证明。
+
+最终 Rust04 实际 Wire26＋Web ABI17＋Native36＋Gateway13＝92/92、92唯一具名测试；Source32新增14（Wire10＋bridge4）全部具名执行。864组 exact-byte specimens 是一个测试中的断言，不另加测试总数。893声明的普通 repository 输入中2改/891保护，冻结前后零漂移；不是全 workspace 或工具链覆盖。最终四次测试与一次Core编译均由原 immutable CargoGuard 串行运行，actual GetVolume C≥53687091200 B，sampleEnd→childStarted 截断UTC上界最大82ms<2000ms，PolicyB completed/exited/disposed，共25份原 nonce 文件。Rust03历史87通过、首轮 ABI14/15失败及空对象 unit enum 的原Serde兼容修复均保留，不累加为当前通过数或放宽断言。
+
+原 Rust1.95.0 Cargo、wasm-bindgen0.2.118 和 Binaryen131 CLI 参数实际完成 Core 编译与静态优化，未使用 WASM API/instance。optimized Core 从460011降到365241再降到351501 B，累计减少108510 B（约23.6%）；生成 JS 与两个DTS保持原字节一致。351501仍不满足原严格<262144 B，JS26545≤204800通过。PUI首轮261472只通过旧输入的体积检查，不称最终源码重建；name/normalized imports-exports/full-module validation、三renderer、Next/Thin与最新Web组合交付仍未完成。预算、原helper/probe/Guard与publication gates均未改，原manifest/公开资产未换成未通过的产物。Windows/Gateway生产EXE仍是Source31只编译证据；本轮Native/Gateway运行的是有限测试binary，没有新EXE或产品启动。
+
+下一轮Source33按独立只读调查落实第三个NPC policy feature/bundle。保护已发布Source25 Core/PUI全部导出，保留尚未交付的NPC Receipt ABI1及永久document facade；明确其raw export的包位置将改变。提取原无导出的StrictMailValue供两个模块复用，避免拉入Mail WASM exports；三包继续使用相同原预算与metadata gates，全部通过后才immutable publication、manifest-last。现有loader须绑定NPC包版本且不因重挂载/重连/加载重试重建ledger。该方案尚未实现或实测尺寸，不声明新包通过。
+
+最新Web交付仍Source25（7b1afe2706a4eec037f085d1f599d2ea987f031f），Next08/Thin08不含Source26–32。Matrix11原字节保持103 shared/206 legacy/0 raw open/8 common：309/317≈97.5%只是有界记录，含legacy实现，overallPercentage=null、Candidate100=false、goal active。用户“继续代码，暂不操作界面”保持有效；资源/WASM初始化、实际登录→战斗→保存→重登、移动真机及玩家验收全部not-run，当前没有可承诺试玩日期。
+
+Source31已实际提交推送并核验远端06da30011e4a98599bfee568e652f6d0839e894d，本轮携带事后publication。Source32 Git提交推送由Root随后实际操作另记，本文和测试不证明已推送。下面Source31及更旧段落均保留为历史，当前以上述Source32为准。
+
+证据：[最终有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-finite-result01.json)、[独立结果复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-independent-review01.json)、[最新Core实际构建与体积失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-core-build-result01.json)、[初轮构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-initial-build-result01.json)、[中间构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-intermediate-build-result01.json)、[历史87项](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust03-finite-result01.json)、[保留的ABI失败](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-abi-test01-failure.json)、[结构方案](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-next-structure01.json)、[冻结源码](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-snapshot.json)、[独立源码复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-rust04-review.json)、[选定75份原始字节](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-raw-evidence01.json)、[Source31发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-publication01.json)。原始容器仅归档选定实际证据，不是全历史；源码SHA、未改的manifest/matrix与真实输入同实际结果记录对应。
+
+
+## Source31：Native 完整购买接线与 Web 无损投影通过，最新 Web 交付包待重建（2026-10-08）
+
+Native 永久 client 已接实际 gateway receiver、同源 projector、主线程整体经济应用和有类型的 Applied 回传；Quote、poll_ready、最终 Enter 使用原 UI inventory/catalog/parent proof，单次 Purchase、重连只查原 operation。每个 BuyItem 在同步发布时保存原完整来源；普通移动、钱包同值、有效同源更新保留该来源，修改目录或 owner 会退役旧手势。新普通 Hero/NPC 来源驱动真实经验/maxXP、装备/邮件/tooltip 和 Trade/BuyBack/Used 显示，Used 显示1、请求0。共享 game-data goods 投影复用原真实 Info/raw 数据；个人 Used checkpoint 仍不证明 shared-zone 全局 stock 原子所有权。
+
+Web 在普通 decoder 前保留原 raw；声明的 u64/i64 叶子保留 canonical decimal string，safe Number 保持兼容。真实 Page 同步投影普通完整经济来源，并先于 movement-only 快路径替换变化内容；普通显示不能 settle 未决购买或循环 Begin/Query。宽 UID sidecar 保真，但既有 numeric selector/action/tooltip ABI 继续拒绝 unsafe 值。Storage 日期 DOM 从严格 i64 binary/ticks 转为可验证日历；Bevy numeric ABI 不接宽字符串或 unsafe Number。Hero 使用 fresh XP/maxXP。
+
+Root 实际最终 Rust91（Native36＋Runtime39＋Hero3＋Core2＋Bevy1＋Simulation8＋GameData2），原3个 Web 脚本201/201（NPC155＋Storage25＋integration21；198唯一名称，跨脚本重复3），共292次选定通过、289唯一名称；新增47 Rust＋27 NPC＋2 Storage＝76项 distinct。Native03 仅按依赖不编译后续 cfg(test) 夹具修正限定承接；不称新 Native 测试执行。881/367 为声明的 Rust 输入快照，不称全 workspace/工具链覆盖。Web07 的15504声明输入前后零漂移。首轮失败、注册中止、旧不安全日期夹具及后续 AST/纯依赖夹具修复均保留；所有业务/exact-one 断言保留，未跳过。
+
+原锁匹配的104公开 npm 包从本机 cache 按 SHA512 离线恢复，15209普通文件/0链接或额外文件，无安装器、生命周期或网络；原 TypeScript5.9.3 完整132文件已恢复。严格非增量 TSC02 实际 exit0/零诊断；其后仅声明 superset 中两个 MJS 测试夹具改变，有效 TS/JSON/依赖未变而限定承接，不称16827当前零漂移或重跑。用户 tsconfig 保持原状且不纳入本轮提交。
+
+Windows EXE106137600 B、Gateway108321280 B 实际编译通过，未启动。最终 Native02/Gateway01 用原命令、串行原 CargoGuard 和886普通 repository 输入，加入真实 MMap/MagIcon include_str、Cargo配置与两个 workspace 解析 manifest；输入前后零漂移。实际 GetVolume C≥50GiB、sampleEnd→childStarted 截断 UTC 上界64.8447ms/62.3821ms<2000ms，PolicyB completed/exited/disposed。Native02 复用 Cargo 已有产物0.33s，不能称全量重新链接；前一 Native01 真实3m56s产物与之 SHA 相同。完整 Web/Windows 组合仍未完成：Core/PUI、三 renderer、Next/Thin 未匹配 Source31；原 optimizer 必须使用 WebAssembly.Module API，按本轮禁止 WASM API 边界尚未调用，原 helper 与 metadata/体积门槛未改或绕过。现有 Web 包仍 Source25 Next08/Thin08，不含 Source26–31。
+
+Matrix11 原字节保持103 shared/206 legacy/0 raw open/8 common；309/317≈97.5%只是固定清单中的有界代码记录，overallPercentage=null、Candidate100=false、goal active。SkillModel 同数量行不等于逐行内容校验，poll_flush 无 deadline，controlled Sink/bare World/提取 Page 声明不等于 live UI/socket。用户“继续代码，暂不操作界面”保持有效；资源/WASM初始化、实际登录→战斗→保存→重登、移动真机和玩家验收全部 not-run，没有可承诺试玩日期。下一项先交付匹配 Web 包，再继续未穷尽的数值 ABI/技能内容/运输时限和共同缺陷；不以原始缺口分类关闭替代可玩验收。
+
+Source30 已实际提交推送并核验远端 cb30715f53322f31304ed5c449b0347bdcfd95dd；本轮携带其事后 publication。Source31 发布另由 Root 实际 Git 操作核验，测试、构建和本文不证明已推送。以下 Source30 与更旧段落，包括旧 Current Round 状态，均为历史；当前以上述 Source31 为准。
+
+证据：[本轮有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-finite-result01.json)、[Web实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-web-finite-result01.json)、[严格类型检查](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-tsc-finite-result01.json)、[静态构建](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-static-build-result01.json)、[独立源码范围复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-independent-review01.json)、[选定原始字节](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source31-raw-evidence01.json)、[Source30发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source30-publication01.json)。原始字节容器仅归档选定执行证据，完整历史/cache恢复台账仍在原外部QA路径；可读JSON副本与原SHA对应，CRLF归一不替代精确原始收据。
+
+
+## Preserved gameplay and release branch checkpoints
+
+The following entries retain their original dates, source identities and evidence limits from the gameplay/release branches. They do not report verification of this integration.
+
 > 2026-10-08 03:32 UTC: user's shop-wheel report was on the D/R19 client
 > mistakenly launched by root; R20 introduced that handler. Published R20
 > is now locally verified against original signed metadata and all154564

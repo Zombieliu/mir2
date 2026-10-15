@@ -39,6 +39,8 @@ mod native_display;
 mod native_fonts;
 mod native_locale;
 mod native_protocol;
+mod npc_purchase_client;
+mod npc_purchase_projection;
 mod refine_wire;
 mod session_config;
 mod shell_bridge;
@@ -165,8 +167,7 @@ fn run_native_client() -> bevy::app::AppExit {
     // Cross-thread channels: Bevy owns visible UI state on the main thread; one
     // async task exclusively owns the WebSocket.
     let (command_tx, command_rx) = gateway::command_channel(256);
-    let (event_tx, event_rx) =
-        std::sync::mpsc::channel::<mir2_client_bevy::native_shell::NativeGatewayEvent>();
+    let (event_tx, event_rx) = std::sync::mpsc::channel::<gateway::NativeShellEnvelope>();
     let (gameplay_tx, gameplay_rx) =
         std::sync::mpsc::channel::<gameplay_bridge::NativeGameplaySnapshot>();
 
@@ -308,7 +309,7 @@ fn run_native_client() -> bevy::app::AppExit {
         session.auto_login.as_ref(),
     ));
     app.insert_resource(mir2_client_bevy::native_shell::NativeUiIntentQueue::default());
-    app.insert_resource(shell_bridge::GatewayEventInbox::new(event_rx));
+    app.insert_resource(shell_bridge::GatewayEventInbox::new_owned(event_rx));
     app.insert_resource(gameplay_bridge::GameplayEventInbox::new(gameplay_rx));
     // The Big Map model and its bounded request queue are renderer-neutral.
     // Crystal UI wiring can consume these resources later without owning
@@ -326,6 +327,17 @@ fn run_native_client() -> bevy::app::AppExit {
     ));
     app.insert_resource(input::GatewayCommands::new(command_tx.clone()));
     app.add_systems(bevy::app::Startup, cursor::load_native_crystal_cursors);
+    app.init_resource::<gameplay_bridge::NativeWorldProducerStamp>();
+    app.add_systems(
+        bevy::app::Update,
+        (
+            gameplay_bridge::settle_native_command_terminals,
+            gameplay_bridge::activate_native_command_provenance,
+        )
+            .chain()
+            .after(mir2_client_bevy::pending_operations::PendingLifecycleSet::Ingest)
+            .before(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
+    );
     // Native packet production and held-pointer movement must precede the
     // shared Runtime's Update schedule. Previously these systems were appended
     // after build_runtime_app(), so a movement boundary was rendered once with
@@ -337,6 +349,7 @@ fn run_native_client() -> bevy::app::AppExit {
         (
             input::sync_native_modifier_state,
             shell_bridge::drain_gateway_events,
+            gameplay_bridge::withdraw_invalid_native_world_producers,
             gameplay_bridge::drain_gameplay_events,
             entity_presentation::tick_native_entity_presentation,
             input::sanitize_native_hud_pointer_input,
@@ -417,11 +430,17 @@ fn run_native_client() -> bevy::app::AppExit {
         startup_diagnostics::fatal_exit(startup_diagnostics::Failure::NetworkRuntime, 1);
     });
     let gateway_url = session.gateway_url;
+    let shell_event_sender = gateway::NativeShellEventSender::Owned {
+        sender: event_tx,
+        fence: command_tx
+            .ownership_fence()
+            .expect("production ownership fence"),
+    };
     let gateway_task = gateway_runtime.spawn(async move {
         match gateway::run_gateway_client(
             &gateway_url,
             command_rx,
-            event_tx,
+            shell_event_sender,
             gameplay_tx,
             session.reconnect,
         )

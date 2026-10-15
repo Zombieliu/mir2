@@ -1,6 +1,7 @@
 use super::super::*;
 use super::*;
 use crate::crystal_ui::widget::CrystalHint;
+use std::collections::HashMap;
 #[derive(Component)]
 pub struct SkillBarRoot;
 #[derive(Component)]

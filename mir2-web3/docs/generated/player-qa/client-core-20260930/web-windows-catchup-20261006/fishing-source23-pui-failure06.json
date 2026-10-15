@@ -1,0 +1,150 @@
+{
+  "owner": "Root",
+  "kind": "Source23 Rust06 original PUI actual new decode oracle failure retained",
+  "configuration": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui05.config.json",
+    "bytes": 3965,
+    "sha256": "5a3258c597caba69257fdb815f05a538e1cb3b92a0383c68e6a5ed91da37069b"
+  },
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust06-snapshot.json",
+    "bytes": 147552,
+    "sha256": "711011f4c4300bb2f51cd07d230f4f27b5e56d315141b5a99d9d97c6212a6c5b"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust06-review.json",
+    "bytes": 2720,
+    "sha256": "ce89e1b173dc6713c6df9b043143416fade377404139484db07d3711c3fcbe85"
+  },
+  "policy": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui05.policy.json",
+    "bytes": 2317,
+    "sha256": "f4b25b886d2b981ee88cc14e43d1d93a401fd3c7638f24337eb1c38774386051"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 101,
+    "guardPid": 89320,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 3977,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-fishing-source23-pui05.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false,
+    "pin": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui05.outer.json",
+      "bytes": 439,
+      "sha256": "d23ae780e5116d24d0e4d6fa0330faf876a373d3fd565679c033d016b06e8954"
+    }
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui05.stdout.log",
+    "bytes": 7706,
+    "sha256": "2ef480ed56174ccc833aa12d088bb77b4812b0788ae36812a47c639341d17e30"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui05.stderr.log",
+    "bytes": 1186,
+    "sha256": "014f0e8c8f764c7580d9301de6619f9c35ea18c055d3461553bbab17dba587e9"
+  },
+  "guardReceipts": {
+    "before": {
+      "schemaVersion": 1,
+      "mode": "real-cargo",
+      "nonce": "d73d6eb2e5024ed19760b9b2aebf6331",
+      "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui05.policy.json",
+      "policySha": "f4b25b886d2b981ee88cc14e43d1d93a401fd3c7638f24337eb1c38774386051",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/game-client/platform-web/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--features",
+        "presentation-ui",
+        "--lib",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "E:\\mir2-player-journey\\mir2-web3",
+      "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+      "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+      "sample": {
+        "schemaVersion": "1",
+        "driveLetter": "C",
+        "sampleBeginUtc": "2026-10-07T01:17:55.8695818Z",
+        "sampleEndUtc": "2026-10-07T01:17:56.5148243Z",
+        "remainingBytes": "464136425472",
+        "requiredBytes": "53687091200"
+      },
+      "probePid": 111468,
+      "probeLaunchMs": 85.5844,
+      "probeEndMs": 920.7972000000001,
+      "decision": "FORWARD",
+      "thresholdBytes": "53687091200",
+      "sampleProof": "actualGetVolumeC",
+      "pin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui05-cargo-receipts\\d73d6eb2e5024ed19760b9b2aebf6331\\before.json",
+        "bytes": 1028,
+        "sha256": "9f8467c2ce183bb679207a9823cc814b42794fd48ff2fc3e8655cb83875859c1"
+      }
+    },
+    "after": {
+      "childPid": 112296,
+      "childStartedUtc": "/Date(1791335876586)/",
+      "childStartMs": 950.4899,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 101,
+      "exitBits": "101",
+      "completedUtc": "/Date(1791335879570)/",
+      "completionMs": 3934.2957,
+      "postChildPolicy": "B",
+      "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close",
+      "pin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui05-cargo-receipts\\d73d6eb2e5024ed19760b9b2aebf6331\\after.json",
+        "bytes": 322,
+        "sha256": "0ed769f71784f9cfad14a816a1be83641c24bc0ee6754182fc4b7a805c83a10d"
+      }
+    },
+    "probe": {
+      "probePid": 111468,
+      "probeKilled": false,
+      "probeCode": 0,
+      "probeLaunchUtc": "/Date(1791335875722)/",
+      "probeEndUtc": "/Date(1791335876557)/",
+      "probeLaunchMs": 85.5844,
+      "probeEndMs": 920.7972000000001,
+      "probeMode": "actual",
+      "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+      "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab",
+      "pin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui05-cargo-receipts\\d73d6eb2e5024ed19760b9b2aebf6331\\probe-process.json",
+        "bytes": 441,
+        "sha256": "9acc1c2ca31107bb647c8b518b56d5113ecc7cffd9d721870a3c26dff39d73f5"
+      }
+    }
+  },
+  "passed": 63,
+  "failed": 1,
+  "ignored": 0,
+  "failure": "New complete-facts typed oracle found SourceInput positional arrays require exact3; original serde rejects length2 without default attribute. Root source-only assumption2..3 was incorrect. Full-output equivalence alone missed facts difference because missingUID rejected by unchanged planner.",
+  "correction": "Only production source input_shape minimum2->3; all seven Bag tests unchanged. Object missing/null UID remainsNone; positionalnull third element remainsNone. New execution pending.",
+  "finiteCpuAccepted": false,
+  "productionBuildAccepted": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

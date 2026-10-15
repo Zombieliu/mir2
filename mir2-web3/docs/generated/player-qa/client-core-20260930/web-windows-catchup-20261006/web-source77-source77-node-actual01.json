@@ -1,0 +1,56 @@
+{
+  "owner": "Root",
+  "kind": "actual focused and adjacent107 gate",
+  "originalCaller": "unchanged4569B",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\node-tests01-config.json",
+    "bytes": 4212,
+    "sha256": "09a1bfeb32a409bb06e4fdb37e6756bdd784e16c885c9a3d8ff68456af55ecec"
+  },
+  "inputSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-strict-snapshot01.json",
+    "bytes": 21880569,
+    "sha256": "be090dc7cbfa8be296d36c0ae81c1a92d50977e6f45aae876312870974e67842"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-code-review01.json",
+    "bytes": 8609,
+    "sha256": "5a83236512c8fa679b45f5c61d8fb2fc583b8bc2e5e5d9c85dd3a95591df5be8"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 78396,
+    "kind": "Root approved original Source77 focused and adjacent Node107 on reviewed strict input",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 1134,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/root-approved01/node-tests01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/node-tests01/stdout.txt",
+    "bytes": 27250,
+    "sha256": "4d063d2855f987c7caff1bb87f1e29b26ed6a816f9ea5185da8317739e9ca305"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/node-tests01/stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "result": {
+    "tests": 107,
+    "pass": 107,
+    "fail": 0,
+    "skip": 0,
+    "closed0": true,
+    "sourceGuardPreAndPostReturned": true
+  },
+  "candidateAccepted": false,
+  "goalComplete": false
+}

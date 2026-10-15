@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source56 original complete Thin and matched local runtime copy",
+  "observedAtUtc": "2026-10-11T02:37:44.211Z",
+  "actual": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 53856,
+    "kind": "Source56 original full Thin after matched fresh completed Next",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 21530,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source56-combat-baseline-20261011-01/thin-build01/config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "completeInputs": 55316,
+  "callerPrePostHashesMatched": true,
+  "originalCapBytes": 377487360,
+  "package": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-source56-20261011-01",
+    "files": 7331,
+    "dirs": 778,
+    "links": 0,
+    "bytes": 374008736,
+    "marginBytes": 3478624
+  },
+  "copy": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source56-combat-baseline-20261011-01/web-runtime01",
+    "all7331ByteMatched": true,
+    "snapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source56-combat-baseline-20261011-01/thin-build01/runtime-copy-snapshot.json",
+      "bytes": 2260162,
+      "sha256": "9fdc60b8586d617a22bcacbd07d2f2158097447a8886a3c3e20ccc4047614e10"
+    }
+  },
+  "dependencies": {
+    "warnings": 59,
+    "installed": false
+  },
+  "renderer": "bevy-201eff554f63b9a8",
+  "server": {
+    "url": "http://127.0.0.1:19205/",
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source56-combat-baseline-20261011-01/web-start01/config.json",
+      "bytes": 2188,
+      "sha256": "81311668018104d056ca868f8654adb63b96a9f6a4f630d4b91c2e526729f88d"
+    },
+    "running": true,
+    "closed": false
+  },
+  "previousSource55Server": {
+    "pid": 54104,
+    "intentionallyStopped": true,
+    "exitCode": -1,
+    "exited": true,
+    "disposed": true,
+    "all7331PostHashesMatched": true
+  },
+  "scope": "Finite build-only flags do not describe the separately authorized actual browser run.",
+  "combatVerified": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

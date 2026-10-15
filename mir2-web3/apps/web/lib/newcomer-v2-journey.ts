@@ -114,8 +114,8 @@ const NEWCOMER_V2_QUEST_COPY: Readonly<Record<number, NewcomerV2QuestCopy>> = {
     kill("Defeat 1 Zombie2.", "消灭 1 只 Zombie2"),
     flag("Complete your class practice", "完成职业练习"),
   ]),
-  2110016: copy("Complete the mine patrol", "完成矿区巡逻", "Complete class practice and defeat 3 Zombie3", "完成职业练习并消灭 3 只 Zombie3", [
-    kill("Defeat 3 Zombie3.", "消灭 3 只 Zombie3"),
+  2110016: copy("Complete the mine patrol", "完成矿区巡逻", "Complete class practice and defeat 3 Zombie2", "完成职业练习并消灭 3 只 Zombie2", [
+    kill("Defeat 3 Zombie2.", "消灭 3 只 Zombie2"),
     flag("Complete your class practice", "完成职业练习"),
   ]),
   2110017: copy("Prepare for the expedition", "准备远征", "Equip suitable armour and report to the Bichon Wall Board", "装备适合本职业与等级的盔甲，并向比奇城墙公告板报告", [

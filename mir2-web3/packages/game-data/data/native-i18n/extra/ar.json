@@ -9410,5 +9410,14 @@
   "quest.practice.class.toggle_hit": "فعّل {skill}، ثم ألحق ضررًا بوحش بهجوم عادي.",
   "quest.practice.class.spell_hit": "استخدم {skill} لإلحاق ضرر بوحش؛ الهجمات التي لا تصيب لا تُحتسب.",
   "quest.supply.assassinPoisonEquip": "سيف مسموم: جهّز مسحوقًا أحمر أو أخضر؛ 1 لكل استخدام.",
-  "quest.supply.assassinPoisonEquipped": "سيف مسموم: المسحوق مجهّز؛ 1 لكل استخدام."
+  "quest.supply.assassinPoisonEquipped": "سيف مسموم: المسحوق مجهّز؛ 1 لكل استخدام.",
+  "ui.questProgressHeading": "التقدم",
+  "ui.questReturnHeading": "مكان التسليم",
+  "ui.questClientLoading": "جارٍ تجهيز إجراءات المهمة…",
+  "ui.questClientUnavailable": "إجراءات المهمة غير متاحة مؤقتًا. يرجى المحاولة مرة أخرى.",
+  "ui.questActionPending": "جارٍ معالجة طلبك. يرجى الانتظار.",
+  "ui.questActionRewardRequired": "اختر مكافأة أولًا.",
+  "ui.questActionTalkToNpc": "تحدث إلى شخصية المهمة غير اللاعبة للمتابعة.",
+  "ui.questActionStateChanged": "تغيرت المهمة. راجعها وحاول مرة أخرى.",
+  "ui.retry": "إعادة المحاولة"
 }

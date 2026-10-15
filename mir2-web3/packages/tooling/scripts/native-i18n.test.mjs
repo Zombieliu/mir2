@@ -10,6 +10,7 @@ import { menuRows } from "./native-i18n-menu-translations.mjs";
 import { questRows } from "./native-i18n-quest-translations.mjs";
 import { assertReviewedSources } from "./native-i18n-source-guard.mjs";
 import { validateValue, verifyExpansionFiles } from "./native-i18n-expansion.mjs";
+import { sharedKeyLocales, sharedKeyTranslation, sharedKeyTranslations } from "./native-i18n-shared-translations.mjs";
 
 const read = (file) => JSON.parse(readFileSync(resolve(root, file), "utf8"));
 const valid = (key = "sample") => ({ key, en: "Give {amount} to {player}", "zh-TW": "將 {amount} 交給 {player}", "pt-BR": "Entregue {amount} a {player}", aliases: ["Give {amount} to {player}"] });
@@ -26,8 +27,38 @@ test("six additional locales preserve gameplay numbers, opaque arguments and dis
 test("every additional native locale has the exact source key closure and safe substitutions", () => {
   const report = verifyExpansionFiles();
   assert.deepEqual(report.locales, ["ru", "hi", "id", "vi", "th", "ar"]);
-  assert.equal(report.entriesPerLocale, 9412);
+  assert.equal(report.entriesPerLocale, 9421);
   assert.deepEqual(report.errors, []);
+});
+
+test("shared quest action additions retain bundle English and aliases in all nine native locales", () => {
+  const keys = ["ui.questProgressHeading", "ui.questReturnHeading", "ui.questClientLoading", "ui.questClientUnavailable", "ui.questActionPending", "ui.questActionRewardRequired", "ui.questActionTalkToNpc", "ui.questActionStateChanged", "ui.retry"];
+  const bundle = read("packages/game-data/data/generated/localization_bundle.json");
+  const common = read("packages/game-data/data/native-i18n/common.json").entries;
+  const overlays = Object.fromEntries(sharedKeyLocales.slice(3).map(locale => [locale, read(`packages/game-data/data/native-i18n/extra/${locale}.json`)]));
+  assert.deepEqual(Object.keys(sharedKeyTranslations), keys);
+  assert.deepEqual(sharedKeyLocales, ["en", "zh-TW", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"]);
+  for (const key of keys) {
+    const entries = common.filter(entry => entry.key === key);
+    assert.equal(entries.length, 1, key);
+    const entry = entries[0], english = bundle.languages.en.texts[key];
+    assert.equal(entry.en, english, key);
+    assert.deepEqual(entry.aliases, [english, bundle.languages["zh-CN"].texts[key]], key);
+    for (const alias of entry.aliases) assert.deepEqual(placeholders(alias), placeholders(english), `${key}/alias`);
+    for (const locale of sharedKeyLocales) {
+      const text = overlays[locale]?.[key] ?? entry[locale];
+      assert.equal(text, sharedKeyTranslation(key, english)[locale], `${key}/${locale}`);
+      assert.deepEqual(placeholders(text), placeholders(english), `${key}/${locale}`);
+      assert.deepEqual(validateValue(entry, locale, text), [], `${key}/${locale}`);
+    }
+    assert.equal(entry["pt-BR"], bundle.languages["pt-BR"].texts[key], `${key}/existing Portuguese`);
+    assert.throws(() => sharedKeyTranslation(key, `${english} changed`), /Shared UI source changed/, key);
+  }
+  // The quest location heading must not retire or overwrite generic Return.
+  const genericReturn = common.find(entry => entry.key === "common.6b0143d03864");
+  assert.equal(genericReturn.en, "Return");
+  assert.equal(genericReturn["zh-TW"], "交付");
+  assert.equal(genericReturn["pt-BR"], "Entrega");
 });
 
 test("five-class powder guidance retains the real skill name and one-use count in all nine locales", () => {

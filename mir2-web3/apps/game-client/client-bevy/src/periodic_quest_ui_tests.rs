@@ -83,6 +83,7 @@ fn finish_app(npc: u32) -> App {
     let destination = mir2_game_data::periodic_quests::npc(npc).unwrap();
     let mut app = App::new();
     app.init_resource::<ButtonInput<KeyCode>>();
+    app.init_resource::<QuestPresentationLocale>();
     app.insert_resource(NativeShellModel {
         screen: NativeShellScreen::InGame,
         ..default()
@@ -216,6 +217,7 @@ fn periodic_actual_npc_list_accept_button_sends_the_offering_towns_id_once() {
                         level: 10,
                         ..default()
                     },
+                    QuestRenderText::default(),
                 );
             });
         queue.apply(app.world_mut());
@@ -659,6 +661,7 @@ fn periodic_nine_language_catalog_covers_actual_server_copy_without_losing_reset
                             text: "Unrelated wire display text 5/999".into(),
                             objective_id: index.to_string(),
                         },
+                        QuestRenderText::default(),
                     );
                     assert!(
                         progress.contains("17 / 100"),
@@ -736,6 +739,7 @@ fn periodic_tabs_and_eight_rows_stay_above_the_existing_pagination_controls() {
                                 ..default()
                             },
                             None,
+                            QuestRenderText::default(),
                         );
                     });
                 queue.apply(&mut world);
@@ -797,12 +801,12 @@ fn periodic_ready_tracker_names_either_town_and_emits_the_current_towns_npc_rout
                         &MapModel::default(),
                         Some(&big_map),
                         "Wizard",
-                        &crate::quest_supplies::plan(
+                        Some(&crate::quest_supplies::plan(
                             &player,
                             &InventoryModel::default(),
                             None,
                             Some(92020)
-                        )
+                        ))
                     ));
                 });
             queue.apply(&mut world);
@@ -979,12 +983,13 @@ mod visual {
                     },
                     Some(&big_map),
                     "Wizard",
-                    &crate::quest_supplies::plan(
+                    Some(&crate::quest_supplies::plan(
                         &player,
                         &InventoryModel::default(),
                         None,
                         Some(quest.quest_index),
-                    ),
+                    )),
+                    QuestRenderText::default(),
                 );
             },
         );
@@ -1123,6 +1128,7 @@ mod visual {
                                 ..default()
                             },
                             Some(assets),
+                            QuestRenderText::default(),
                         );
                     },
                 );
@@ -1200,6 +1206,7 @@ mod visual {
                             &PendingOperations::default(),
                             false,
                             Some(assets),
+                            QuestRenderText::default(),
                         );
                     },
                 );
@@ -1272,6 +1279,7 @@ mod visual {
                                 class_name: Some("Warrior".into()),
                                 ..default()
                             },
+                            QuestRenderText::default(),
                         );
                     },
                 );

@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "kind": "source19-partial-repair-code-finite-next-thin-build-checkpoint",
+  "generatedAtUtc": "2026-10-06T18:22:49Z",
+  "parentCommit": "7567fab152381fc2e98840a73f4462ed61dff668",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "artifacts": {
+    "feature-matrix05.json": {
+      "bytes": 2763265,
+      "sha256": "1e5921dd279183d107a086edea1bf91de56d7402d3c1325be1a48796eeb4f94c",
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix05.json"
+    },
+    "feature-matrix05.md": {
+      "bytes": 37640,
+      "sha256": "e03d7aaf19c5a94b5ad829625e39decf4ef8a1ffd92ccfcf50a3a5981d45f545",
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix05.md"
+    },
+    "README.md": {
+      "bytes": 14579,
+      "sha256": "f7088e7b3a91b23e7d526940a96360f61ddae697f61ccc64f037bae342c4ee98",
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md"
+    },
+    "repair-source19-finite-result01.json": {
+      "bytes": 19667,
+      "sha256": "54aff998cd9718bf687acecb3f2d38e723564edee0ba0887ac590f7d8d208903",
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source19-finite-result01.json"
+    },
+    "repair-source19-action-chain-review01.json": {
+      "bytes": 6981,
+      "sha256": "a198189c5e6cae1d87e428abc9b68ea68946dc547bf14bc3011424708d720855",
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source19-action-chain-review01.json"
+    },
+    "repair-source19-combined-build-result01.json": {
+      "bytes": 52526,
+      "sha256": "14b732c460ce14cbb77de15fc0cc4578e23ad11661142508a5fd3506ddad684d",
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/repair-source19-combined-build-result01.json"
+    }
+  },
+  "currentDocs": [
+    {
+      "bytes": 215321,
+      "sha256": "31066d5cca80a3f72959089efd16765f752fb0be4ab942df12b19bbc16f23516",
+      "relativePath": "docs/AGENT-ORCHESTRATION.md"
+    },
+    {
+      "bytes": 826358,
+      "sha256": "09d76613162d1386e62c844b21fc8fefca61f09cfba46bd54598f7fa7c340fb3",
+      "relativePath": "docs/AGENT-TASK-QUEUE.md"
+    },
+    {
+      "bytes": 152648,
+      "sha256": "2e33c47a3c35e4af629b32ea7d9821043caf9d8eadd69c1f0ce0499cb5961307",
+      "relativePath": "docs/CROSS-PLATFORM-CLIENT-GOAL.md"
+    },
+    {
+      "bytes": 944045,
+      "sha256": "8c7d6c6f67aad4ebba1530dd5bbb39b8f82d77418885c000c6fade1a9ab84bee",
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md"
+    },
+    {
+      "bytes": 567882,
+      "sha256": "b675ac982ff41a96b02d8b823149a57ce7155836456b86ffb8c5397bbfe2d70e",
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md"
+    },
+    {
+      "bytes": 26127,
+      "sha256": "98ee08a4d147439ba5f634eb80bb814efa83cba7fe137fcd17d29c2208406d97",
+      "relativePath": "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md"
+    }
+  ],
+  "summary": {
+    "sourceCategories": {
+      "shared": 103,
+      "legacy": 197,
+      "open": 9,
+      "commonLimitation": 8
+    },
+    "stablePlayerRows": 317,
+    "allPlayerRows": "not-run",
+    "completeDenominatorFrozen": false,
+    "overallPercentage": null,
+    "fixtureAssociations": {
+      "source18HistoricalRows": 190,
+      "source18HistoricalDeclarations": 104,
+      "source19RowsAdded": 16,
+      "source19DeclarationsAdded": 6,
+      "currentRows": 206,
+      "currentDeclarations": 110
+    },
+    "node": {
+      "scripts": 11,
+      "passed": 218,
+      "failed": 0,
+      "skipped": 0,
+      "stage5InternalGroups": 282,
+      "stage5GroupsAreOneFileTest": true
+    },
+    "strictNonincrementalTscPassed": true,
+    "next": {
+      "actualExit0": true,
+      "regularOutputs": 19007,
+      "directoriesIncludingRoot": 308,
+      "nftTraces": 61,
+      "uniqueReferences": 37094,
+      "missing": 0,
+      "strictTypeScript": true,
+      "staticPages": 13,
+      "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.next-web-windows-catchup-20261007-02"
+    },
+    "thin": {
+      "actualExit0": true,
+      "files": 7301,
+      "directoriesIncludingRoot": 776,
+      "links": 0,
+      "bytes": 372704701,
+      "capBytes": 377487360,
+      "headroomBytes": 4782659,
+      "root": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-20261007-02"
+    },
+    "newRustExecutions": 0,
+    "source18CorePuiNativeRenderer": "carried only by exact effective inputs/artifact hashes",
+    "currentPackageIndependentStaticReview": "accepted; 70437 unique input/output files rehashed, exact Next/Thin/NFT/Core/PUI/renderer manifests, 231 JSON pairs and 44 warning multiset; 0 confirmed blocker, no reviewer execution",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "wasmInstantiated": false,
+    "candidateAccepted": false,
+    "playerAccepted": false,
+    "goalComplete": false
+  },
+  "repairRows": {
+    "stillOpen": [
+      "F09.NPC.REPAIR_BAG",
+      "F09.NPC.SREPAIR_BAG",
+      "F09.NPC.REPAIR_QUOTE"
+    ],
+    "implementedPartial": [
+      "real Bag UID/complete source",
+      "NPC owner and rate",
+      "shared Rust quote",
+      "selection/proof/ACK barrier"
+    ],
+    "remainingSource": [
+      "captured Bag gesture drop to ordinary/special NPC repair target",
+      "Hold toggle and continuous-selection auto-confirm"
+    ]
+  },
+  "independentReview": {
+    "actionChain": "accepted partial facets and confirms three composite rows remain open",
+    "packageStatic": "accepted, 0 confirmed blocker, reviewer did not execute",
+    "reviewerExecutions": 0
+  },
+  "completeAcceptanceDenominatorFrozen": false,
+  "overallPercentage": null,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

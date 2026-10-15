@@ -1,0 +1,67 @@
+{
+  "owner": "Root",
+  "kind": "actual unchanged-original strict Source77 Next; ordinary dependency closure pending",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\next-build01-config.json",
+    "bytes": 5337,
+    "sha256": "af4ba87ddf3db28afca945d8e20596c7fe9c54d4e73388ae35f23d8dd3e002e9"
+  },
+  "inputSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-strict-snapshot01.json",
+    "bytes": 21880569,
+    "sha256": "be090dc7cbfa8be296d36c0ae81c1a92d50977e6f45aae876312870974e67842"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-code-review01.json",
+    "bytes": 8609,
+    "sha256": "5a83236512c8fa679b45f5c61d8fb2fc583b8bc2e5e5d9c85dd3a95591df5be8"
+  },
+  "nodeActual": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-node-actual01.json",
+    "bytes": 2205,
+    "sha256": "3992e00b16115aef0c334773e946363bb8a658335fc7b6c5680ba9bdb3e8a184"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 83996,
+    "kind": "Root approved original Source77 strict Next01 after actual107 gate",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 44401,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/root-approved01/next-build01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/next-build01/stdout.txt",
+    "bytes": 2026,
+    "sha256": "cf89419942eafd67ad2e30f1a3143487527dbd4265f05a75fe1c3756c529f342"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/next-build01/stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "actualOutput": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\actual-next-output-snapshot01.json",
+    "bytes": 13803339,
+    "sha256": "9b148703154269d63738f26a905ee5503e532909613a91c4180defde18a60949"
+  },
+  "actualCounts": {
+    "files": 21036,
+    "directoriesIncludingRoot": 631,
+    "bytes": 671064516,
+    "links": 0
+  },
+  "typeScriptPassed": true,
+  "staticPages": 13,
+  "originalPostGuardReturned": true,
+  "oldCompiledOutputCopied": false,
+  "nftClosurePending": true,
+  "goalComplete": false
+}

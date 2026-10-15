@@ -1,0 +1,57 @@
+▲ Next.js 16.2.11 (webpack)
+
+  Creating an optimized production build ...
+  Using tsconfig file: tsconfig.source73-build03.json
+  Using tsconfig file: tsconfig.source73-build03.json
+  Using tsconfig file: tsconfig.source73-build03.json
+✓ Compiled successfully in 18.9s
+  Running next.config.js provided runAfterProductionCompile ...
+[mir2-full-pack-trace] {"target":"server/app/api/asset-manifest/route.js.nft.json","beforeSha256":"1cf737f2336c451e39b080d952e0a45453f79b5b8fe437201bfe8e143255ea6a","afterSha256":"1cf737f2336c451e39b080d952e0a45453f79b5b8fe437201bfe8e143255ea6a","rowsBefore":13,"rowsAfter":13,"removedDirectoryRows":0,"removedDescendantRows":0}
+✓ Completed runAfterProductionCompile in 2ms
+  Running TypeScript ...
+  Finished TypeScript in 12.1s ...
+  Collecting page data using 30 workers ...
+  Generating static pages using 30 workers (0/13) ...
+  Generating static pages using 30 workers (3/13) 
+  Generating static pages using 30 workers (6/13) 
+  Generating static pages using 30 workers (9/13) 
+✓ Generating static pages using 30 workers (13/13) in 468ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /ai-live
+├ ƒ /api/ai-live/[...path]
+├ ƒ /api/asset-manifest
+├ ƒ /api/channels/guest
+├ ƒ /api/channels/identity/link
+├ ƒ /api/channels/session/exchange
+├ ƒ /api/debug-snapshots
+├ ƒ /api/identity/[...path]
+├ ƒ /api/movement-diagnostics
+├ ƒ /api/original-ui-meta
+├ ƒ /api/passkey/challenge
+├ ƒ /api/passkey/login
+├ ƒ /api/qa/map-monster-scenes
+├ ƒ /api/r2-proxy/[...path]
+├ ƒ /api/remote-asset/[...path]
+├ ƒ /api/scene/collision
+├ ƒ /api/scene/crystal
+├ ƒ /api/scene/starter
+├ ƒ /health
+├ ○ /manifest.webmanifest
+├ ○ /qa/button-sounds
+├ ƒ /qa/map-monsters
+├ ○ /qa/webgl2-entity-renderer
+├ ○ /spectate
+├ ƒ /version
+└ ƒ /world-report
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

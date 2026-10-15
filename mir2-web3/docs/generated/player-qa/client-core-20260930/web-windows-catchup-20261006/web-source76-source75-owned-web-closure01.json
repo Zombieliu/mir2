@@ -1,0 +1,50 @@
+{
+  "owner": "Root",
+  "kind": "Source75 exact-owned Web closure after ordinary Scott route and normal logout before Source76",
+  "normalLogoutObserved": true,
+  "loginPasswordVisibleObservedWithoutReadingValues": true,
+  "configPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\web-start01-config.json",
+    "bytes": 3223,
+    "sha256": "0b4cbcae34b6e2358a0fec19613c3f4ffa4a3ae2f7b03301c557a70761173c8a"
+  },
+  "childPid": 90988,
+  "parentPid": 89716,
+  "exactOwnedChildStopped": true,
+  "parentNotKilled": true,
+  "exactConfigServerArgumentAnd127001ListenerVerified": true,
+  "originalExecSession": 25783,
+  "actualOriginalCallerClosedExit": -1,
+  "expectedExactOwnedStopExit": true,
+  "originalPostguardPassed": true,
+  "closedOuter": {
+    "owner": "Root",
+    "exitCode": -1,
+    "builderPid": 90988,
+    "kind": "Root original Source75 local Web desktop warehouse prepare mask actual package",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 4923734,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source75-storage-prepare-paint-20261012-01/root-approved01/web-start01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "closedStdoutPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\runtime-start01\\stdout.txt",
+    "bytes": 117,
+    "sha256": "274297c61c29155ff784e9ab9cbe5cf1e002c600d7d2045746d64c76c1997de5"
+  },
+  "closedStderrPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\runtime-start01\\stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "gatewayUnchanged": true,
+  "foreignProcessesNotQueried": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

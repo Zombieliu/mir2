@@ -1,3 +1,5 @@
+#[cfg(feature = "catalog-gzip")]
+pub mod catalog_transport;
 pub mod error;
 pub mod frame;
 pub mod ids;

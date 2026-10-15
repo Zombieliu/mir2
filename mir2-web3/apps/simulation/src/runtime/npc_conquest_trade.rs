@@ -7,6 +7,8 @@ use mir2_protocol::ServerPacket;
 use std::collections::BTreeSet;
 
 use super::npc::{self, ActiveNpcServiceState};
+use super::npc_gold_buy_outcome::{NpcGoldBuyProcessingOutcome, NpcGoldBuyRejection};
+use super::npc_purchase_outcome::{NpcPurchaseProcessingOutcome, NpcPurchaseRejection, NpcPurchaseRequest};
 use super::resources::{
     is_in_world, InventoryResource, MapRuntimeResource, NpcStateResource, PlayerRuntimeResource,
     RuntimeConfigResource, SessionResource,
@@ -80,6 +82,10 @@ fn eligible_service(world: &World, buy: bool) -> Option<ActiveNpcServiceState> {
         return None;
     }
     Some(service)
+}
+
+pub(super) fn requires_shared_conquest_buy(world: &World) -> bool {
+    eligible_service(world, true).is_some()
 }
 
 fn validate_policy(config: &SimulationConfig) -> Result<(), String> {
@@ -431,6 +437,52 @@ enum StagedTrade {
 }
 
 impl SimulationSession {
+    /// A preview is not an economic result. Publish typed evidence only after
+    /// the existing account + castle transaction accepts the complete image.
+    pub(super) fn try_shared_conquest_buy_recording(
+        &mut self,
+        request: NpcPurchaseRequest,
+        gold_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
+        purchase_outcome: Option<&mut Option<NpcPurchaseProcessingOutcome>>,
+    ) -> Option<Result<Vec<ServerPacket>, String>> {
+        let service = eligible_service(self.app.world(), true)?;
+        let wants_gold = gold_outcome.is_some();
+        let wants_purchase = purchase_outcome.is_some();
+        let mut gold_capture = None;
+        let mut purchase_capture = None;
+        let result = self.stage_castle_trade_recording(service, None, |world| {
+            if wants_purchase {
+                npc::buy_item_with_purchase_outcome(world, request, &mut purchase_capture)
+            } else if wants_gold {
+                npc::buy_item_with_processing_outcome(world, request.into(), &mut gold_capture)
+            } else {
+                npc::buy_item_impl(world, request.item_index, request.count, request.panel_type)
+            }
+        });
+        if matches!(&result, Ok(StagedTrade::Rejected(_))) {
+            if wants_gold && !matches!(&gold_capture, Some(NpcGoldBuyProcessingOutcome::Rejected { .. })) {
+                gold_capture = Some(NpcGoldBuyProcessingOutcome::Rejected {
+                    request: request.into(), reason: NpcGoldBuyRejection::ServiceUnavailable,
+                });
+            }
+            if wants_purchase && !matches!(&purchase_capture, Some(NpcPurchaseProcessingOutcome::Rejected { .. })) {
+                purchase_capture = Some(NpcPurchaseProcessingOutcome::Rejected {
+                    request, reason: NpcPurchaseRejection::ServiceUnavailable,
+                });
+            }
+        } else if result.is_err() {
+            // A failed/unknown store publication cannot turn a successful
+            // preview into either a commit receipt or a retryable rejection.
+            gold_capture = None;
+            purchase_capture = None;
+        }
+        if let Some(capture) = gold_outcome { *capture = gold_capture; }
+        if let Some(capture) = purchase_outcome { *capture = purchase_capture; }
+        Some(result.map(|trade| match trade {
+            StagedTrade::Committed(packets) | StagedTrade::Rejected(packets) => packets,
+        }))
+    }
+
     pub(super) fn try_shared_conquest_buy(
         &mut self,
         item_index: u64,
@@ -465,20 +517,31 @@ impl SimulationSession {
     where
         F: FnOnce(&mut World) -> Vec<ServerPacket>,
     {
-        let baseline = TradeRollback::take(self.app.world());
-        let result = self.stage_castle_trade_inner(&service, sale, preview);
+        let result = self.stage_castle_trade_recording(service, sale, preview);
         match result {
-            Ok(StagedTrade::Committed(packets)) => packets,
-            Ok(StagedTrade::Rejected(packets)) => {
-                baseline.restore(self.app.world_mut());
-                packets
-            }
+            Ok(StagedTrade::Committed(packets) | StagedTrade::Rejected(packets)) => packets,
             Err(error) => {
-                baseline.restore(self.app.world_mut());
                 eprintln!("castle NPC trade rejected: {error}");
                 trade_failure(self.app.world(), sale)
             }
         }
+    }
+
+    fn stage_castle_trade_recording<F>(
+        &mut self,
+        service: ActiveNpcServiceState,
+        sale: Option<(u64, u16)>,
+        preview: F,
+    ) -> Result<StagedTrade, String>
+    where
+        F: FnOnce(&mut World) -> Vec<ServerPacket>,
+    {
+        let baseline = TradeRollback::take(self.app.world());
+        let result = self.stage_castle_trade_inner(&service, sale, preview);
+        if !matches!(&result, Ok(StagedTrade::Committed(_))) {
+            baseline.restore(self.app.world_mut());
+        }
+        result
     }
 
     fn stage_castle_trade_inner<F>(
@@ -612,7 +675,7 @@ mod tests {
 
     // A mechanical authoritative NPC/service fixture. This does not establish
     // a human castle-interior or remote gateway acceptance claim.
-    fn fixture(
+    pub(super) fn fixture(
         owner_member: bool,
     ) -> (
         SimulationSession,
@@ -746,10 +809,10 @@ mod tests {
             .iter()
             .any(|p| matches!(p, ServerPacket::GainedItem { .. }))
     }
-    fn durable(config: &SimulationConfig) -> CharacterSaveRecord {
+    pub(super) fn durable(config: &SimulationConfig) -> CharacterSaveRecord {
         config.account_store.lock().unwrap().accounts["demo"].saves[&0].clone()
     }
-    fn treasury(config: &SimulationConfig) -> u32 {
+    pub(super) fn treasury(config: &SimulationConfig) -> u32 {
         config.account_store.lock().unwrap().shared_conquests[&SABUK_INDEX].gold
     }
     fn buy(session: &mut SimulationSession, item: u64) -> Vec<ServerPacket> {
@@ -757,7 +820,7 @@ mod tests {
             .try_shared_conquest_buy(item, 2, 0)
             .expect("bound castle merchant")
     }
-    fn inventory_image(session: &SimulationSession) -> serde_json::Value {
+    pub(super) fn inventory_image(session: &SimulationSession) -> serde_json::Value {
         let inventory = session.app.world().resource::<InventoryResource>();
         serde_json::json!({
             "bag": inventory.inventory_items,
@@ -816,7 +879,7 @@ mod tests {
             .iter()
             .any(|item| item.unique_id == unique_id));
     }
-    fn stock_image(session: &SimulationSession) -> (serde_json::Value, serde_json::Value) {
+    pub(super) fn stock_image(session: &SimulationSession) -> (serde_json::Value, serde_json::Value) {
         let npc = session.app.world().resource::<NpcStateResource>();
         (
             serde_json::to_value(&npc.npc_buy_back_items).unwrap(),
@@ -1269,3 +1332,7 @@ mod tests {
         assert_eq!((base, charged, charged - base), (11, 13, 2));
     }
 }
+
+#[cfg(test)]
+#[path = "npc_conquest_purchase_integration_tests.rs"]
+mod purchase_integration_tests;

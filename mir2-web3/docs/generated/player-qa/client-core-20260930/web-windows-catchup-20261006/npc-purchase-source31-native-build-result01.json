@@ -1,0 +1,118 @@
+{
+  "owner": "Root",
+  "kind": "Source31 actual original Native compile-only matching source build",
+  "generatedAtUtc": "2026-10-07T18:32:36.148Z",
+  "parentCommit": "cb30715f53322f31304ed5c449b0347bdcfd95dd",
+  "args": [
+    "+1.95.0",
+    "build",
+    "--manifest-path",
+    "apps/game-client/platform-windows/Cargo.toml",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1"
+  ],
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01.config.json",
+    "bytes": 4069,
+    "sha256": "aacaf2c99be414fd779d736ecce7b1afdfd2b565b2aaa07859eaf018da6100f0"
+  },
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01-snapshot.json",
+    "bytes": 268700,
+    "sha256": "56f7e716785a6e0fa0c6caac8803022333eb2ce552652b72f85324b762a478f8"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01-review.json",
+    "bytes": 1623,
+    "sha256": "c0f443bf36801397d5d078789b436c47b94245e85d4c8fcc5f883828ffd52129"
+  },
+  "policy": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01.policy.json",
+    "bytes": 2370,
+    "sha256": "7e38a4ff3aafdbfb369b1cfbf7eea76cd362b8c9b4b255cae49d883b4ecc3fc7"
+  },
+  "actualProcess": {
+    "owner": "Root",
+    "exitCode": 0,
+    "guardPid": 159632,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 237498,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "actualRepositoryInputs": 883,
+  "postSourceDrift": [],
+  "nonce": "b8bef4f17eba4a2eb652cae7eb70bb8b",
+  "actualCRemainingBytes": "365719076864",
+  "sampleEndToChildStartedUtcTruncatedUpperMs": 63.6947,
+  "rawPins": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01.stderr.log",
+      "bytes": 53900,
+      "sha256": "1ac30b305ff692be636d9f77f6299ca6f9107f312a69d324136508baa3933051"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01.outer.json",
+      "bytes": 457,
+      "sha256": "f2d5ec9af5e67364f162d829d5f80d2308d9f4dd6035d4cced922782edad1bb5"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01-cargo-receipts\\b8bef4f17eba4a2eb652cae7eb70bb8b\\after.json",
+      "bytes": 337,
+      "sha256": "9f0c3c9466e11dd8e799abce594076efb1924e88c894682f552690ff41d6d3fa"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01-cargo-receipts\\b8bef4f17eba4a2eb652cae7eb70bb8b\\before.json",
+      "bytes": 975,
+      "sha256": "9e7e7165b9c691b94baaa3232838217aaa3a846c8d4ef2605d231f47c68c7b36"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01-cargo-receipts\\b8bef4f17eba4a2eb652cae7eb70bb8b\\probe-process.json",
+      "bytes": 432,
+      "sha256": "7246cca9ac0332462f4aed309fcb892c00218cc427e892824212f65f387f8e26"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01-cargo-receipts\\b8bef4f17eba4a2eb652cae7eb70bb8b\\probe.stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source31-native-build01-cargo-receipts\\b8bef4f17eba4a2eb652cae7eb70bb8b\\probe.stdout.bin",
+      "bytes": 197,
+      "sha256": "b494e396a81a81c6ea59330e35fd774a2a5bafd8f04e5d5f1ff8335cdd8f19c5"
+    }
+  ],
+  "output": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\mir2-platform-windows.exe",
+    "bytes": 106137600,
+    "sha256": "78d4c00e8da1920aa077e92b9d0ed82ac3be0997bd4174d611cef0ba8289f206"
+  },
+  "outputHeader": "MZ / PE x64 AMD64, inspected bytes only",
+  "buildOnly": true,
+  "nativeCompileAccepted": true,
+  "matchingFullWebWindowsCombinationAccepted": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "limitations": [
+    "Compiler output only; Native process not started.",
+    "Other required Core/PUI/renderer/Next/Thin/Gateway outputs are not accepted matching Source31 from this build.",
+    "Third-party registry/proc macros/MSVC SDK tools not883 repository source inputs."
+  ]
+}

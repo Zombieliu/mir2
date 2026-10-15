@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import type { Mir2Language } from "../../lib/localization";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -54,7 +55,32 @@ const COPY: Record<"en" | "pt" | "zh", PwaCopy> = {
   },
 };
 
-export function PwaGameShell() {
+type PwaStatus = null | "fullscreenUnavailable";
+
+type PwaGameShellState = {
+  pathname: string | null;
+  mobileBrowser: boolean;
+  standalone: boolean;
+  guideOpen: boolean;
+  fullscreenActive: boolean;
+  ios: boolean;
+  status: PwaStatus;
+  install: () => Promise<void>;
+  enterFullscreen: () => Promise<void>;
+  dismissGuide: () => void;
+};
+
+const PwaGameShellContext = createContext<PwaGameShellState | null>(null);
+
+// Spanish currently uses the existing English copy.
+const COPY_BY_LANGUAGE: Record<Mir2Language, PwaCopy> = {
+  en: COPY.en,
+  "zh-CN": COPY.zh,
+  "pt-BR": COPY.pt,
+  es: COPY.en,
+};
+
+export function PwaGameShellCapture({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [mobileBrowser, setMobileBrowser] = useState(false);
@@ -62,9 +88,7 @@ export function PwaGameShell() {
   const [guideOpen, setGuideOpen] = useState(false);
   const [fullscreenActive, setFullscreenActive] = useState(false);
   const [ios, setIos] = useState(false);
-  const [status, setStatus] = useState("");
-
-  const copy = useMemo(() => COPY[preferredLanguage()], []);
+  const [status, setStatus] = useState<PwaStatus>(null);
 
   const refreshDisplayMode = useCallback(() => {
     const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
@@ -138,7 +162,7 @@ export function PwaGameShell() {
   }, [pathname, refreshDisplayMode]);
 
   const install = useCallback(async () => {
-    setStatus("");
+    setStatus(null);
     if (!installPrompt) {
       setGuideOpen(true);
       return;
@@ -152,13 +176,13 @@ export function PwaGameShell() {
   }, [installPrompt]);
 
   const enterFullscreen = useCallback(async () => {
-    setStatus("");
+    setStatus(null);
     try {
       if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
         await document.documentElement.requestFullscreen({ navigationUI: "hide" });
       } else if (!document.fullscreenElement) {
         setGuideOpen(true);
-        setStatus(copy.unavailable);
+        setStatus("fullscreenUnavailable");
         return;
       }
       await lockLandscapeWhenSupported();
@@ -166,15 +190,34 @@ export function PwaGameShell() {
       refreshDisplayMode();
     } catch {
       setGuideOpen(true);
-      setStatus(copy.unavailable);
+      setStatus("fullscreenUnavailable");
     }
-  }, [copy.unavailable, refreshDisplayMode]);
+  }, [refreshDisplayMode]);
 
   const dismissGuide = useCallback(() => {
     rememberInstallHintDismissal();
     setGuideOpen(false);
-    setStatus("");
+    setStatus(null);
   }, []);
+
+  return (
+    <PwaGameShellContext.Provider value={{
+      pathname, mobileBrowser, standalone, guideOpen, fullscreenActive, ios,
+      status, install, enterFullscreen, dismissGuide,
+    }}>
+      {children}
+    </PwaGameShellContext.Provider>
+  );
+}
+
+export function PwaGameShell({ language }: { language: Mir2Language }) {
+  const state = useContext(PwaGameShellContext);
+  if (!state) throw new Error("PwaGameShell requires PwaGameShellCapture");
+  const {
+    pathname, mobileBrowser, standalone, guideOpen, fullscreenActive, ios,
+    status, install, enterFullscreen, dismissGuide,
+  } = state;
+  const copy = COPY_BY_LANGUAGE[language];
 
   if (pathname !== "/" || !mobileBrowser || standalone || fullscreenActive) return null;
 
@@ -199,7 +242,7 @@ export function PwaGameShell() {
           <strong id="mir-pwa-guide-title">{copy.title}</strong>
           <p>{copy.body}</p>
           <p className="mir-pwa-guide-steps">{ios ? copy.iosSteps : copy.androidSteps}</p>
-          {status ? <p className="mir-pwa-guide-status" role="status">{status}</p> : null}
+          {status === "fullscreenUnavailable" ? <p className="mir-pwa-guide-status" role="status">{copy.unavailable}</p> : null}
           <div className="mir-pwa-guide-buttons">
             <button type="button" className="mir-pwa-guide-primary" onClick={() => void install()}>
               {copy.install}
@@ -212,14 +255,6 @@ export function PwaGameShell() {
       ) : null}
     </aside>
   );
-}
-
-function preferredLanguage(): keyof typeof COPY {
-  if (typeof navigator === "undefined") return "en";
-  const language = navigator.language.toLowerCase();
-  if (language.startsWith("zh")) return "zh";
-  if (language.startsWith("pt")) return "pt";
-  return "en";
 }
 
 function isIosDevice(): boolean {

@@ -1,0 +1,51 @@
+{
+  "owner": "root",
+  "kind": "normal-ui-observed-client-capability-overwrite",
+  "observedAt": "2026-10-11T07:35:38.756Z",
+  "webSource": 63,
+  "gatewaySource": 62,
+  "trigger": "Normal Alt+X saved logout, then normal Login to same local test endpoint",
+  "adjacentNetwork": {
+    "eventCount": 2,
+    "truncated": false,
+    "hasMore": false,
+    "sentInOrder": [
+      {
+        "type": "clientCapabilities",
+        "capabilities": [
+          "durableNpcPurchaseOwnerV1"
+        ]
+      },
+      {
+        "type": "clientCapabilities",
+        "capabilities": [
+          "nativeGameShopReceiptV1"
+        ]
+      }
+    ],
+    "samePhysicalConnection": true,
+    "allHaveConnectionMarker": true
+  },
+  "sourceCrossCheck": {
+    "webSocketOpenFirstObservesNpc": true,
+    "webSocketOpenThenSendsCashOnly": true,
+    "gatewayReplacesCapabilitiesFromEntireList": true
+  },
+  "observedConsequences": {
+    "subsequentNpcBeginFailure": "beforeExecution",
+    "quoteCandleTotal": 10,
+    "playerGold": 200,
+    "purchaseSucceeded": false
+  },
+  "followupNetwork": {
+    "truncated": true,
+    "absenceClaim": false
+  },
+  "normalSavedLogoutReturnedLogin": true,
+  "normalLoginReturnedExistingLevel2CharacterList": true,
+  "limits": [
+    "Only whitelisted capability names and finite structural frame metadata recorded",
+    "No auth frames, credentials, account ids, tokens or authority objects persisted",
+    "This does not claim delivery, deduction, stored items or purchased-item save/relogin"
+  ]
+}

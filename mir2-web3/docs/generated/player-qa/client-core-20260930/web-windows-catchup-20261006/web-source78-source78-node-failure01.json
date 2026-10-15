@@ -1,0 +1,55 @@
+{
+  "owner": "Root",
+  "kind": "actual original Source78 Node01 closed failure retained",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 1,
+    "builderPid": 101576,
+    "kind": "Root approved original Source78 Spells gate and adjacent Node tests on reviewed strict input",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 1196,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/root-approved01/source78-node-config01.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "outerPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\node-tests01\\outer.json",
+    "bytes": 555,
+    "sha256": "528d54eb9ea2ace4083baa668f1a9094a9f27f7c5f2878eaf9065bad59ed7d24"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\node-tests01\\stdout.txt",
+    "bytes": 38793,
+    "sha256": "a2f6528ae6b89a810c7906723e63696d5277856a589612b9dcf91b416329a5c7"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\node-tests01\\stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-node-config01.json",
+    "bytes": 4338,
+    "sha256": "d4a552d5f10fc05ed1ccdfb07a65adfa9f4486914b86ef00724ebe686bf1520f"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-code-review01.json",
+    "bytes": 11872,
+    "sha256": "2c3be22eb66dc9a20c393b35e17fc9f220a448a479adb3f88a15f1e35dfbc2f3"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-strict-snapshot01.json",
+    "bytes": 20522587,
+    "sha256": "605070f8734806c5dffeeffc6aa79de6662b93f2efa54d6dc4b1c6b626ce62a2"
+  },
+  "tests": 136,
+  "passed": 133,
+  "failed": 3,
+  "sourceAndToolGuardPassed": true,
+  "goalComplete": false
+}
