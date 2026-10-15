@@ -8,10 +8,10 @@ use super::combat::{
     apply_settled_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state,
 };
 use super::components::{
-    current_player_is_dead,
-    entity_by_object_id, entity_name, entity_object_id, entity_player_vitals, entity_position,
-    player_entity, DisplayName, Facing, Hero, Monster, MonsterAgent, MonsterVitals, Npc,
-    ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef,
+    current_player_is_dead, entity_by_object_id, entity_name, entity_object_id,
+    entity_player_vitals, entity_position, player_entity, DisplayName, Facing, Hero, Monster,
+    MonsterAgent, MonsterVitals, Npc, ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer,
+    SpawnSlotRef,
 };
 use super::crystal_compat::*;
 use super::drops::{
@@ -56,8 +56,8 @@ use crate::runtime::zone::{
 };
 use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate, LanguageCode};
 use mir2_protocol::{
-    ChatItem, ClientBuff, ClientIntelligentCreature, ItemRentalInformation, Point, ServerPacket, Spell,
-    UserItemRentalInformation,
+    ChatItem, ClientBuff, ClientIntelligentCreature, ItemRentalInformation, Point, ServerPacket,
+    Spell, UserItemRentalInformation,
 };
 
 #[cfg(test)]
@@ -210,16 +210,29 @@ impl SimulationSession {
     /// its existing authoritative logout/save path when this becomes true.
     pub fn monthly_card_access_expired(&self) -> Result<bool, String> {
         let config = &self.app.world().resource::<RuntimeConfigResource>().config;
-        if !config.monthly_card_policy.required { return Ok(false); }
-        let Some(identity) = self.active_identity() else { return Ok(false); };
+        if !config.monthly_card_policy.required {
+            return Ok(false);
+        }
+        let Some(identity) = self.active_identity() else {
+            return Ok(false);
+        };
         let now = crate::monthly_card::monthly_card_now_ms();
-        if config.monthly_card_can_enter_cached(&identity.account_id, now)? { return Ok(false); }
+        if config.monthly_card_can_enter_cached(&identity.account_id, now)? {
+            return Ok(false);
+        }
         // A renewal on another Gateway must be observed before logging out an
         // otherwise eligible player. The database is read only at this boundary.
-        Ok(!config.refresh_monthly_card_status(&identity.account_id, now)?.can_enter_game)
+        Ok(!config
+            .refresh_monthly_card_status(&identity.account_id, now)?
+            .can_enter_game)
     }
-    pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
-        super::skills::supports_magic_key_assignment(self.app.world(),spell,key,old_key)
+    pub fn supports_magic_key_assignment(
+        &self,
+        spell: mir2_protocol::Spell,
+        key: u8,
+        old_key: u8,
+    ) -> bool {
+        super::skills::supports_magic_key_assignment(self.app.world(), spell, key, old_key)
     }
     pub fn new(config: SimulationConfig) -> Self {
         let mut app = HeadlessRuntime::new();
@@ -796,7 +809,9 @@ impl SimulationSession {
                 }
                 let agent = entity.get::<MonsterAgent>()?;
                 if agent.dead
-                    || entity.get::<MonsterVitals>().is_some_and(|vitals| vitals.hp <= 0)
+                    || entity
+                        .get::<MonsterVitals>()
+                        .is_some_and(|vitals| vitals.hp <= 0)
                 {
                     return None;
                 }
@@ -895,9 +910,11 @@ impl SimulationSession {
             session.selected_character = None;
             session.clear_active_save_revision();
         }
-        self.app.world_mut().insert_resource(
-            super::recovery::TrustedRecoveryAccount(account_id.to_string()),
-        );
+        self.app
+            .world_mut()
+            .insert_resource(super::recovery::TrustedRecoveryAccount(
+                account_id.to_string(),
+            ));
         Ok(())
     }
 
@@ -978,7 +995,10 @@ impl SimulationSession {
         direction: mir2_protocol::MirDirection,
     ) {
         let world = self.app.world_mut();
-        let previous_position = world.resource::<PlayerRuntimeResource>().player_position.clone();
+        let previous_position = world
+            .resource::<PlayerRuntimeResource>()
+            .player_position
+            .clone();
         if let Some(player) = player_entity(world) {
             world
                 .entity_mut(player)
@@ -990,7 +1010,7 @@ impl SimulationSession {
             runtime.player_direction = direction;
         }
         super::map::refresh_player_bind_at_position(world, &position);
-        super::default_npc_events::observe_movement(world,&previous_position,&position);
+        super::default_npc_events::observe_movement(world, &previous_position, &position);
         advance_runtime_tick(world);
     }
 
@@ -1272,9 +1292,66 @@ impl SimulationSession {
             return Vec::new();
         };
         let tick = runtime_tick(world);
-        let mut packets = advance_magic_progression(world, index, receipt.spell.spell(), &magic, tick);
+        let mut packets =
+            advance_magic_progression(world, index, receipt.spell.spell(), &magic, tick);
         packets.extend(super::quests::newcomer_v2_events::record_spell_damage(
-            world, &magic.spell, receipt.cast_at_ms));
+            world,
+            &magic.spell,
+            receipt.cast_at_ms,
+        ));
+        if !packets.is_empty() {
+            advance_runtime_tick(world);
+        }
+        packets
+    }
+
+    /// Source-limited five-class progression after the gateway fences the
+    /// authenticated online owner, current life and monotonically ordered event.
+    pub fn commit_zone_five_class_practice(
+        &mut self,
+        receipt: &super::zone::ZoneFiveClassPracticeReceipt,
+    ) -> Vec<ServerPacket> {
+        if receipt.sequence == 0 || !is_in_world(self.app.world()) {
+            return Vec::new();
+        }
+        let Some(identity) = self.active_identity() else {
+            return Vec::new();
+        };
+        if identity.account_id != receipt.account_id
+            || identity.character_index != receipt.character_index
+        {
+            return Vec::new();
+        }
+        let world = self.app.world_mut();
+        let class = player_entity(world).and_then(|entity| {
+            world
+                .entity(entity)
+                .get::<super::components::CharacterBody>()
+                .map(|body| body.class)
+        });
+        if class != Some(receipt.spell.class())
+            || !world
+                .resource::<MapRuntimeResource>()
+                .current_map
+                .file_name
+                .eq_ignore_ascii_case(&receipt.zone_key.map_file_name)
+        {
+            return Vec::new();
+        }
+        let key = receipt.spell.skill_key();
+        let Some(magic) = crystal_magic_for_skill_key(key) else {
+            return Vec::new();
+        };
+        let Some(index) = world
+            .resource::<SkillResource>()
+            .skills
+            .iter()
+            .position(|skill| skill.key == key)
+        else {
+            return Vec::new();
+        };
+        let tick = runtime_tick(world);
+        let packets = advance_magic_progression(world, index, receipt.spell.spell(), &magic, tick);
         if !packets.is_empty() {
             advance_runtime_tick(world);
         }
@@ -1287,33 +1364,61 @@ impl SimulationSession {
         &mut self,
         receipt: super::zone::ZoneJourneyEventReceipt,
     ) -> Vec<ServerPacket> {
-        if !is_in_world(self.app.world()) { return Vec::new(); }
-        let Some(identity) = self.active_identity() else { return Vec::new(); };
-        if identity.account_id != receipt.account_id || identity.character_index != receipt.character_index
-            || !self.app.world().resource::<MapRuntimeResource>().current_map.file_name
-                .eq_ignore_ascii_case(&receipt.zone_key.map_file_name) {
+        if !is_in_world(self.app.world()) {
             return Vec::new();
         }
-        let packets = super::quests::newcomer_v2_events::record_zone_event(self.app.world_mut(), &receipt);
+        let Some(identity) = self.active_identity() else {
+            return Vec::new();
+        };
+        if identity.account_id != receipt.account_id
+            || identity.character_index != receipt.character_index
+            || !self
+                .app
+                .world()
+                .resource::<MapRuntimeResource>()
+                .current_map
+                .file_name
+                .eq_ignore_ascii_case(&receipt.zone_key.map_file_name)
+        {
+            return Vec::new();
+        }
+        let packets =
+            super::quests::newcomer_v2_events::record_zone_event(self.app.world_mut(), &receipt);
         self.finalize_packets(packets)
     }
 
     pub fn needs_zone_journey_evidence(&self) -> bool {
         let world = self.app.world();
-        super::quests::newcomer_v2::enabled(world) && is_in_world(world)
-            && world.resource::<QuestResource>().quests.iter().any(|quest|
-                quest.stage == crate::QuestStage::InProgress
-                    && super::quests::newcomer_v2::flag_objectives(world, quest.quest_id).iter().any(|flag|
-                        quest.task_progress.get(&format!("flag:{}", flag.number)).copied().unwrap_or(0) < 1))
+        super::quests::newcomer_v2::enabled(world)
+            && is_in_world(world)
+            && world
+                .resource::<QuestResource>()
+                .quests
+                .iter()
+                .any(|quest| {
+                    quest.stage == crate::QuestStage::InProgress
+                        && super::quests::newcomer_v2::flag_objectives(world, quest.quest_id)
+                            .iter()
+                            .any(|flag| {
+                                quest
+                                    .task_progress
+                                    .get(&format!("flag:{}", flag.number))
+                                    .copied()
+                                    .unwrap_or(0)
+                                    < 1
+                            })
+                })
     }
 
     pub fn commit_zone_journey_reposition(&mut self) -> Vec<ServerPacket> {
-        let packets = super::quests::newcomer_v2_events::record_legal_reposition(self.app.world_mut());
+        let packets =
+            super::quests::newcomer_v2_events::record_legal_reposition(self.app.world_mut());
         self.finalize_packets(packets)
     }
 
     pub fn commit_zone_journey_state(&mut self) -> Vec<ServerPacket> {
-        let packets = super::quests::newcomer_v2_events::refresh_state_conditions(self.app.world_mut());
+        let packets =
+            super::quests::newcomer_v2_events::refresh_state_conditions(self.app.world_mut());
         self.finalize_packets(packets)
     }
 
@@ -1383,10 +1488,13 @@ impl SimulationSession {
         let local_player_object_id = player_entity(self.app.world())
             .and_then(|player| entity_object_id(self.app.world(), player));
         match packet {
-            ServerPacket::SpellToggle { object_id, spell: Spell::FlamingSword, can_use }
-                if local_player_object_id.is_some_and(|local_object_id| {
-                    *object_id == local_object_id || *object_id == zone_object_id
-                }) =>
+            ServerPacket::SpellToggle {
+                object_id,
+                spell: Spell::FlamingSword,
+                can_use,
+            } if local_player_object_id.is_some_and(|local_object_id| {
+                *object_id == local_object_id || *object_id == zone_object_id
+            }) =>
             {
                 self.force_zone_flaming_sword_state(*can_use);
             }

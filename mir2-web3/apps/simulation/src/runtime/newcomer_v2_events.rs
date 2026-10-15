@@ -187,6 +187,11 @@ pub(in crate::runtime) fn refresh_state_conditions(world: &mut World) -> Vec<Ser
         "Poisoning",
         "SoulFireBall",
         "SummonSkeleton",
+        "FatalSword",
+        "DoubleSlash",
+        "Focus",
+        "StraightShot",
+        "DoubleShot",
     ] {
         if knows(world, spell) {
             conditions.push(format!("{spell} learned"));
@@ -431,18 +436,31 @@ pub(in crate::runtime) fn record_zone_event(
                     conditions.push("HalfMoon attack damage committed")
                 }
                 Technique::Normal | Technique::Fencing | Technique::Slaying => {
-                    for spell in ["Fencing", "Slaying", "SpiritSword"] {
+                    for spell in ["Fencing", "Slaying", "SpiritSword", "FatalSword"] {
                         if knows(world, spell) {
                             conditions.push(match spell {
                                 "Fencing" => "normal attack landed with Fencing learned",
                                 "Slaying" => "normal attack landed with Slaying learned",
+                                "FatalSword" => "normal attack landed with FatalSword learned",
                                 _ => "normal attack landed with SpiritSword learned",
                             });
                         }
                     }
                 }
+                Technique::DoubleSlash if knows(world, "DoubleSlash") => {
+                    return record_spell_damage(world, "DoubleSlash", receipt.source_action_at_ms)
+                }
                 _ => {}
             }
+        }
+        Event::RangedDamage if receipt.damage.is_some_and(|damage| damage > 0) && knows(world, "Focus") => {
+            conditions.push("normal ranged attack landed with Focus learned");
+        }
+        Event::StraightShotDamage if receipt.damage.is_some_and(|damage| damage > 0) => {
+            return record_spell_damage(world, "StraightShot", receipt.source_action_at_ms)
+        }
+        Event::DoubleShotDamage if receipt.damage.is_some_and(|damage| damage > 0) => {
+            return record_spell_damage(world, "DoubleShot", receipt.source_action_at_ms)
         }
         Event::LightningDamage if receipt.damage.is_some_and(|damage| damage > 0) => {
             return record_spell_damage(world, "Lightning", receipt.source_action_at_ms)

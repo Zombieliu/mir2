@@ -2,7 +2,7 @@
 //! mixed package: recovery runs under the installation lock before game launch.
 use crate::{
     fs_safe as safe,
-    model::{hash, FileEntry, MAX_META},
+    model::{hash, FileEntry, MAX_RECOVERY_BYTES, MAX_TRANSACTION_FILES},
 };
 use anyhow::{ensure, Result};
 use serde::{Deserialize, Serialize};
@@ -104,7 +104,7 @@ fn journal_path(root: &Path) -> std::path::PathBuf {
 fn save(root: &Path, journal: &Journal) -> Result<()> {
     let bytes = serde_json::to_vec(journal)?;
     ensure!(
-        bytes.len() as u64 <= MAX_META * 2,
+        bytes.len() as u64 <= MAX_RECOVERY_BYTES,
         "recovery journal too large"
     );
     safe::atomic_write(&journal_path(root), &bytes)
@@ -114,11 +114,11 @@ fn load(root: &Path) -> Result<Option<Journal>> {
     if !path.exists() {
         return Ok(None);
     }
-    let j: Journal = serde_json::from_slice(&safe::read_bounded(&path, MAX_META * 2)?)?;
+    let j: Journal = serde_json::from_slice(&safe::read_bounded(&path, MAX_RECOVERY_BYTES)?)?;
     ensure!(
         j.schema == 1
             && ["applying", "committed", "accepted", "rolled-back"].contains(&j.phase.as_str())
-            && j.records.len() <= 200010,
+            && j.records.len() <= MAX_TRANSACTION_FILES,
         "invalid recovery journal"
     );
     let mut seen = std::collections::BTreeSet::new();
@@ -493,6 +493,39 @@ pub fn stage_bytes(root: &Path, path: &str, bytes: &[u8]) -> Result<Change> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn five_class_recovery_reads_large_bounded_journal_and_rejects_extra_records() {
+        let fixture = tempfile::tempdir().unwrap();
+        let root = fixture.path();
+        let mut journal = Journal {
+            schema: 1,
+            phase: "applying".to_owned(),
+            records: (0..MAX_TRANSACTION_FILES)
+                .map(|index| Record {
+                    path: format!("game/mir2-assets/{index:06}.png"),
+                    backup: None,
+                    new: None,
+                })
+                .collect(),
+        };
+        save(root, &journal).unwrap();
+        assert_eq!(
+            load(root).unwrap().unwrap().records.len(),
+            MAX_TRANSACTION_FILES
+        );
+        journal.records.push(Record {
+            path: "game/mir2-assets/extra.png".to_owned(),
+            backup: None,
+            new: None,
+        });
+        save(root, &journal).unwrap();
+        assert!(load(root)
+            .unwrap_err()
+            .to_string()
+            .contains("invalid recovery journal"));
+    }
+
     #[test]
     fn interruption_at_every_commit_step_recovers_before_launch() {
         for stop in 0..=4 {

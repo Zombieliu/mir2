@@ -661,8 +661,7 @@ pub(super) fn crystal_player_magic_mitigated(world: &World, damage: i32) -> i32 
 /// per-session combat path. The passive Slaying DC bonus is folded into the DC
 /// bounds to match `crystal_player_melee_damage`.
 ///
-/// (Critical hits remain a session-only refinement for now — `ZonePlayerCombatStats`
-/// carries no crit fields yet.)
+/// The trusted projection also carries current critical and defensive stats.
 fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatStats {
     let stats = player_stats(world);
     let slaying = crystal_slaying_melee_bonus(world);
@@ -684,6 +683,11 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
         max_mac: stats.max_mac(),
         critical_rate: stats.critical_rate(),
         critical_damage: stats.critical_damage(),
+        attack_bonus: stats.get(108),
+        damage_reduction_percent: stats.get(124),
+        energy_shield_percent: stats.get(125),
+        energy_shield_hp_gain: stats.get(126),
+        reflect: stats.get(19),
         // Luck biases the physical attack-power roll (Crystal GetAttackPower), so
         // the zone melee/range path matches the per-session path's Luck handling.
         luck: stats.luck(),
@@ -692,6 +696,19 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
         poison_recovery: stats.get(34),
         magic_resist: stats.magic_resist(),
         gm_never_die: world.resource::<GmRuntimeResource>().gm_never_die,
+        fatal_sword_level: crystal_skill_magic(world, "FatalSword").map(|(_, level)| level),
+        mental_state: world.resource::<SkillResource>().mental_state,
+        mental_state_level: crystal_skill_magic(world, "MentalState").map(|(_, level)| level).unwrap_or(0),
+        meditation_level: crystal_skill_magic(world, "Meditation").map(|(_, level)| level),
+        mp_eater_level: crystal_skill_magic(world, "MPEater").map(|(_, level)| level),
+        hemorrhage_level: crystal_skill_magic(world, "Hemorrhage").map(|(_, level)| level),
+        max_mp: stats.max_mp(),
+        attack_speed: stats.attack_speed(),
+        five_class_learned_mask: world.resource::<SkillResource>().skills.iter()
+            .filter_map(|skill| crystal_magic_for_skill_key(&skill.key))
+            .filter_map(|magic| Spell::from_crystal_name(&magic.spell))
+            .filter_map(super::zone::ZoneFiveClassPracticeSpell::from_spell)
+            .fold(0, |mask, spell| mask | spell.learned_bit()),
     }
 }
 
@@ -3197,6 +3214,7 @@ impl SimulationSession {
             && !matches!(
                 requested_spell,
                 Spell::Slaying
+                    | Spell::DoubleSlash
                     | Spell::Thrusting
                     | Spell::HalfMoon
                     | Spell::CrossHalfMoon
@@ -3211,6 +3229,7 @@ impl SimulationSession {
         } else {
             [
                 Spell::FlamingSword,
+                Spell::DoubleSlash,
                 Spell::Slaying,
                 Spell::TwinDrakeBlade,
                 Spell::Thrusting,
@@ -3231,6 +3250,7 @@ impl SimulationSession {
         if matches!(
             active_spell,
             Spell::Slaying
+                | Spell::DoubleSlash
                 | Spell::Thrusting
                 | Spell::HalfMoon
                 | Spell::CrossHalfMoon
@@ -3240,7 +3260,7 @@ impl SimulationSession {
         {
             return (Spell::None, 0, base_damage);
         }
-        if active_spell == Spell::TwinDrakeBlade {
+        if matches!(active_spell, Spell::TwinDrakeBlade | Spell::DoubleSlash) {
             let cost = i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
             let mp = player_entity(world)
                 .and_then(|player| world.get::<PlayerVitals>(player))
@@ -3329,6 +3349,7 @@ impl SimulationSession {
             && matches!(
                 spell,
                 Spell::Slaying
+                    | Spell::DoubleSlash
                     | Spell::Thrusting
                     | Spell::HalfMoon
                     | Spell::CrossHalfMoon
@@ -3379,24 +3400,29 @@ impl SimulationSession {
         let world = self.app.world();
         let current_tick = runtime_tick(world);
         let player_object_id = current_player_object_id(world).unwrap_or_default();
-        let mut damage = crystal_player_zone_base_melee_damage(world).max(1);
+        let damage = crystal_player_zone_base_melee_damage(world).max(1);
         let mut spell = Spell::None;
         let mut spell_level = 0;
-        if let Some((magic, level)) = crystal_skill_magic(world, "Focus") {
-            if level >= 3
-                || deterministic_chance_roll(
-                    current_tick,
-                    player_object_id,
-                    Spell::Focus as u64,
-                    5_u64.saturating_sub(u64::from(level)).max(1),
-                )
-            {
+        if let Some((_, level)) = crystal_skill_magic(world, "Focus") {
+            if crystal_accuracy_roll(current_tick, player_object_id, Spell::Focus as u32, 5)
+                <= u64::from(level.min(3)) {
                 spell = Spell::Focus;
                 spell_level = level;
-                damage = crystal_magic_damage_from_base(&magic, level, damage).max(1);
             }
         }
         (spell, spell_level, damage)
+    }
+
+    /// Focus learns when a proc produces an accepted ranged action, including
+    /// misses; Crystal levels it before the projectile's hit-chance roll.
+    pub fn commit_zone_focus_attack(&mut self) -> Vec<ServerPacket> {
+        let world = self.app.world_mut();
+        if !is_in_world(world) { return Vec::new(); }
+        let Some(magic) = crystal_magic_by_spell("Focus") else { return Vec::new(); };
+        let Some(index) = world.resource::<SkillResource>().skills.iter()
+            .position(|skill| skill.key == "focus") else { return Vec::new(); };
+        let tick = runtime_tick(world);
+        advance_magic_progression(world, index, Spell::Focus, &magic, tick)
     }
 
     /// Trusted personal status admission for an actual shared-Zone cast.

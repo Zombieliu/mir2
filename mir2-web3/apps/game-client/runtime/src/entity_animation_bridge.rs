@@ -277,6 +277,7 @@ fn parse_action(value: &str) -> Option<AnimationAction> {
         "attackRange1" => Some(AnimationAction::AttackRange1),
         "attackRange2" => Some(AnimationAction::AttackRange2),
         "dashAttack" => Some(AnimationAction::DashAttack),
+        "jump" => Some(AnimationAction::Jump),
         "spell" => Some(AnimationAction::Spell),
         "struck" => Some(AnimationAction::Struck),
         "die" => Some(AnimationAction::Die),
@@ -318,6 +319,7 @@ fn action_name(action: AnimationAction) -> &'static str {
         AnimationAction::AttackRange1 => "attackRange1",
         AnimationAction::AttackRange2 => "attackRange2",
         AnimationAction::DashAttack => "dashAttack",
+        AnimationAction::Jump => "jump",
         AnimationAction::Spell => "spell",
         AnimationAction::Struck => "struck",
         AnimationAction::Die => "die",
@@ -343,6 +345,7 @@ fn animation_state_name(action: AnimationAction) -> &'static str {
         AnimationAction::AttackRange1 | AnimationAction::AttackRange2 | AnimationAction::Spell => {
             "attackRange"
         }
+        AnimationAction::Jump => "jump",
         AnimationAction::Struck => "struck",
         AnimationAction::Die => "dying",
         AnimationAction::Dead => "dead",

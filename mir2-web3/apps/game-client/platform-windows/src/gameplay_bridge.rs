@@ -95,6 +95,9 @@ pub struct NativeGameplayAdapter {
     /// client-owned player sound family when a later packet contains ids but
     /// not class/gender/equipment/mount presentation fields.
     actor_sound_contexts: HashMap<u32, Value>,
+    /// Crystal HasElements/ElementCasted used only to choose the sourced
+    /// ElementalShot body action. Only typed arrival packets update this cache.
+    elemental_animation_state: HashMap<u32, NativeElementalAnimationState>,
     latest_player_object_id: Option<u32>,
     /// Compatibility runtimes may echo a source-complete `ObjectMagic`
     /// immediately after the owner's compact `Magic` acknowledgement. Keep
@@ -124,6 +127,12 @@ struct AuthoritativePlayerTransform {
 struct NativeAnimationHint {
     sequence: u64,
     action: &'static str,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct NativeElementalAnimationState {
+    enabled: bool,
+    casted: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -681,7 +690,7 @@ impl NativeGameplayAdapter {
                     }
                     true
                 }
-                "UserDashAttack" => {
+                "UserDashAttack" | "UserBackStep" => {
                     let Some(transform) = transform_from_payload(payload) else {
                         return false;
                     };
@@ -702,8 +711,26 @@ impl NativeGameplayAdapter {
                         };
                         self.authoritative_player_transform = Some(transform);
                         self.authoritative_player_animation =
-                            Some(self.next_animation_hint("dashAttack"));
+                            Some(self.next_animation_hint(if packet == "UserBackStep" {
+                                "jump"
+                            } else {
+                                "dashAttack"
+                            }));
                         self.big_map.set_player_location(None, location);
+                        if packet == "UserBackStep" {
+                            let mut effect = payload.clone();
+                            if let (Some(body), Some(id)) =
+                                (effect.as_object_mut(), self.latest_player_object_id)
+                            {
+                                body.insert("objectId".to_owned(), Value::from(id));
+                            }
+                            self.record_actor_effect(
+                                packet,
+                                &effect,
+                                self.latest_player_object_id,
+                                self.latest_player_object_id,
+                            );
+                        }
                         true
                     }
                 }
@@ -753,6 +780,9 @@ impl NativeGameplayAdapter {
                     self.authoritative_player_dead = Some(true);
                     self.authoritative_player_animation = Some(self.next_animation_hint("die"));
                     let player_object_id = self.latest_player_object_id;
+                    if let Some(object_id) = player_object_id {
+                        self.elemental_animation_state.remove(&object_id);
+                    }
                     self.record_actor_effect("Death", payload, player_object_id, None);
                     true
                 }
@@ -779,7 +809,19 @@ impl NativeGameplayAdapter {
                 }
                 "ObjectMonster" | "NewMonsterInfo" => self.upsert_zone_entity(payload, "monster"),
                 "ObjectNpc" | "NewNpcInfo" => self.upsert_zone_entity(payload, "npc"),
-                "ObjectPlayer" | "ObjectHero" => self.upsert_zone_entity(payload, "player"),
+                "ObjectPlayer" | "ObjectHero" => {
+                    let changed = self.upsert_zone_entity(payload, "player");
+                    if changed && packet == "ObjectPlayer" {
+                        self.restore_elemental_animation_state(payload);
+                        self.record_actor_effect(
+                            packet,
+                            payload,
+                            packet_object_id(payload),
+                            packet_object_id(payload),
+                        );
+                    }
+                    changed
+                }
                 "ColourChanged" => {
                     self.patch_zone_name_colour(payload, self.latest_player_object_id)
                 }
@@ -807,6 +849,18 @@ impl NativeGameplayAdapter {
                     changed
                 }
                 "ObjectDashAttack" => self.patch_zone_entity_transform(payload, Some("dashAttack")),
+                "ObjectBackStep" => {
+                    let changed = self.patch_zone_entity_transform(payload, Some("jump"));
+                    if changed {
+                        self.record_actor_effect(
+                            packet,
+                            payload,
+                            packet_object_id(payload),
+                            packet_object_id(payload),
+                        );
+                    }
+                    changed
+                }
                 "ObjectTurn" => {
                     let pet = packet_object_id(payload)
                         .and_then(|id| self.zone_entities.get(&id))
@@ -854,6 +908,16 @@ impl NativeGameplayAdapter {
                         }
                     };
                     let changed = self.patch_zone_entity_action(payload, action, true);
+                    if is_player {
+                        if let (Some(id), Some(spell)) =
+                            (object_id, packet_body(payload).get("spell"))
+                        {
+                            self.zone_entities
+                                .entry(id)
+                                .or_default()
+                                .insert("_nativeAnimationSpell".into(), spell.clone());
+                        }
+                    }
                     // Most attacks are ignored by the effect consumer. Preserve
                     // the typed packet so spell-bearing Attack1 overlays such
                     // as FlamingSword and source-owned monster audio can be
@@ -898,9 +962,14 @@ impl NativeGameplayAdapter {
                     // AttackRange2. The gateway projects the typed Spell enum
                     // by name, so this is an authoritative discriminator and
                     // does not infer from class, distance, or target state.
-                    let action = object_magic_animation_action(payload);
+                    let action = self.source_object_magic_animation_action(payload);
                     let changed = self.patch_zone_entity_action(payload, action, false);
-                    self.record_effect("ObjectMagic", payload);
+                    self.record_actor_effect(
+                        "ObjectMagic",
+                        payload,
+                        packet_body(payload).get("targetId").and_then(value_u32),
+                        packet_object_id(payload),
+                    );
                     changed
                 }
                 "ObjectSpell" => {
@@ -910,6 +979,25 @@ impl NativeGameplayAdapter {
                 }
                 "ObjectProjectile" => {
                     self.record_effect("ObjectProjectile", payload);
+                    true
+                }
+                "SetElemental" => {
+                    self.observe_elemental_animation_state(payload);
+                    self.record_actor_effect(
+                        packet,
+                        payload,
+                        packet_object_id(payload),
+                        packet_object_id(payload),
+                    );
+                    true
+                }
+                "SetConcentration" | "SetBindingShot" | "RemoveDelayedExplosion" => {
+                    self.record_actor_effect(
+                        packet,
+                        payload,
+                        packet_object_id(payload),
+                        packet_object_id(payload),
+                    );
                     true
                 }
                 "ObjectEffect" => {
@@ -968,6 +1056,12 @@ impl NativeGameplayAdapter {
                 }
                 "ObjectHealth" => self.patch_zone_entity_health(payload),
                 "ObjectDied" => {
+                    // Crystal kind=2 is the DarkBody clone smoke/removal, not a death pose.
+                    // Capture the real tile and actor before applying its tombstone.
+                    if packet_body(payload).get("kind").and_then(value_i32) == Some(2) {
+                        self.record_actor_effect(packet, payload, packet_object_id(payload), None);
+                        return self.remove_zone_object(payload);
+                    }
                     let animate = packet_object_id(payload) != self.latest_player_object_id;
                     let changed = self.patch_zone_entity_death(payload, true, animate);
                     self.record_actor_effect(
@@ -1190,6 +1284,7 @@ impl NativeGameplayAdapter {
         self.effect_events.clear();
         self.owner_struck = None;
         self.actor_sound_contexts.clear();
+        self.elemental_animation_state.clear();
         self.latest_player_object_id = None;
         self.pending_local_magic_echo = None;
     }
@@ -1199,6 +1294,7 @@ impl NativeGameplayAdapter {
     /// boundary: clearing the self object id/animation here leaves a valid name
     /// and HP bar with no body until a later full personal snapshot arrives.
     fn clear_zone_state_for_map_change(&mut self) {
+        self.elemental_animation_state.clear();
         let player_object_id = self.latest_player_object_id;
         self.zone_entities.retain(|object_id, overlay| {
             player_object_id == Some(*object_id)
@@ -1272,10 +1368,15 @@ impl NativeGameplayAdapter {
         );
         body.insert("direction".to_owned(), Value::from(direction));
 
-        let action = object_magic_animation_action(&enriched);
+        let action = self.source_object_magic_animation_action(&enriched);
         self.authoritative_player_animation = Some(self.next_animation_hint(action));
         self.pending_local_magic_echo = Some(enriched.clone());
-        self.record_effect("ObjectMagic", &enriched);
+        self.record_actor_effect(
+            "ObjectMagic",
+            &enriched,
+            packet_body(&enriched).get("targetId").and_then(value_u32),
+            Some(object_id),
+        );
         true
     }
 
@@ -1370,8 +1471,112 @@ impl NativeGameplayAdapter {
             None
         } else {
             context_map.insert("objectId".to_owned(), Value::from(object_id));
+            if self.latest_player_object_id == Some(object_id) {
+                context_map.insert("_nativeSelf".to_owned(), Value::Bool(true));
+            }
             Some(context)
         }
+    }
+
+    fn elemental_animation_actor_is_known(&self, object_id: u32) -> bool {
+        if self.zone_tombstones.contains(&object_id)
+            || (self.latest_player_object_id == Some(object_id)
+                && self.authoritative_player_dead == Some(true))
+        {
+            return false;
+        }
+        self.actor_sound_context(object_id).is_some_and(|actor| {
+            matches!(
+                actor.get("kind").and_then(Value::as_str),
+                Some("selfPlayer" | "player" | "self" | "hero")
+            ) && (actor
+                .get("class")
+                .and_then(Value::as_str)
+                .is_some_and(|class| class.eq_ignore_ascii_case("Archer"))
+                || actor
+                    .get("classKey")
+                    .and_then(Value::as_str)
+                    .is_some_and(|class| class.eq_ignore_ascii_case("archer")))
+                && actor.get("dead").and_then(Value::as_bool) != Some(true)
+        })
+    }
+
+    fn observe_elemental_animation_state(&mut self, payload: &Value) {
+        let Some(object_id) = packet_object_id(payload) else {
+            return;
+        };
+        let body = packet_body(payload);
+        let (Some(enabled), Some(casted)) = (
+            body.get("enabled").and_then(Value::as_bool),
+            body.get("casted").and_then(Value::as_bool),
+        ) else {
+            return;
+        };
+        if !self.elemental_animation_actor_is_known(object_id) {
+            return;
+        }
+        self.elemental_animation_state.insert(
+            object_id,
+            NativeElementalAnimationState {
+                enabled,
+                // GameScene.SetElemental does not set ElementCasted for User.
+                casted: casted && self.latest_player_object_id != Some(object_id),
+            },
+        );
+    }
+
+    fn restore_elemental_animation_state(&mut self, payload: &Value) {
+        let Some(object_id) = packet_object_id(payload) else {
+            return;
+        };
+        // An AOI arrival restores initial state. It must not replay retained
+        // orb fields over a later SetElemental disable for this incarnation.
+        if self.elemental_animation_state.contains_key(&object_id)
+            || !self.elemental_animation_actor_is_known(object_id)
+        {
+            return;
+        }
+        let body = packet_body(payload);
+        let (Some(effect), Some(_level), Some(_max)) = (
+            body.get("elementOrbEffect").and_then(value_u32),
+            body.get("elementOrbLevel").and_then(value_u32),
+            body.get("elementOrbMax").and_then(value_u32),
+        ) else {
+            return;
+        };
+        if effect > 4 {
+            return;
+        }
+        self.elemental_animation_state.insert(
+            object_id,
+            NativeElementalAnimationState {
+                enabled: effect > 0,
+                casted: false,
+            },
+        );
+    }
+
+    fn source_object_magic_animation_action(&mut self, payload: &Value) -> &'static str {
+        if packet_body(payload).get("spell").and_then(Value::as_str) != Some("ElementalShot") {
+            return object_magic_animation_action(payload);
+        }
+        let Some(object_id) = packet_object_id(payload) else {
+            return "spell";
+        };
+        if !self.elemental_animation_actor_is_known(object_id) {
+            return "spell";
+        }
+        let Some(state) = self.elemental_animation_state.get_mut(&object_id) else {
+            return "spell";
+        };
+        let action = if state.enabled && !state.casted {
+            "attackRange2"
+        } else {
+            "spell"
+        };
+        // PlayerObject.SetAction consumes the observer's ElementCasted latch.
+        state.casted = false;
+        action
     }
 
     fn upsert_zone_entity(&mut self, payload: &Value, kind: &str) -> bool {
@@ -1619,6 +1824,9 @@ impl NativeGameplayAdapter {
         let Some(object_id) = packet_object_id(payload) else {
             return false;
         };
+        if dead {
+            self.elemental_animation_state.remove(&object_id);
+        }
         let hint = animate.then(|| self.next_animation_hint(if dead { "die" } else { "revive" }));
         let overlay = self.zone_entities.entry(object_id).or_default();
         overlay.insert("objectId".to_owned(), Value::from(object_id));
@@ -1699,6 +1907,7 @@ impl NativeGameplayAdapter {
             return false;
         };
         self.zone_entities.remove(&object_id);
+        self.elemental_animation_state.remove(&object_id);
         self.zone_ground_drops.remove(&object_id);
         self.zone_tombstones.insert(object_id);
         true
@@ -1838,7 +2047,13 @@ impl NativeGameplayAdapter {
                     .set_player_location(map_index, BigMapPoint { x, y });
             }
         }
-        self.latest_player_object_id = payload.get("playerObjectId").and_then(value_u32);
+        let player_object_id = payload.get("playerObjectId").and_then(value_u32);
+        if self.latest_player_object_id.is_some()
+            && player_object_id != self.latest_player_object_id
+        {
+            self.elemental_animation_state.clear();
+        }
+        self.latest_player_object_id = player_object_id;
         self.actor_sound_contexts.clear();
         if let Some(entities) = payload.get("entities").and_then(Value::as_array) {
             for entity in entities {
@@ -3865,9 +4080,8 @@ fn object_magic_animation_action(payload: &Value) -> &'static str {
             | "VampireShot" | "SummonToad" | "PoisonShot" | "CrippleShot" | "SummonSnakes"
             | "NapalmShot" | "BindingShot",
         ) => "attackRange2",
-        // Crystal gates ElementalShot's range-two pose on client-local
-        // HasElements/ElementCasted state that the current authoritative
-        // snapshot does not expose. Fail closed to the generic Spell pose.
+        // ElementalShot is resolved by the adapter's typed arrival state.
+        // This state-free helper must keep an unknown state fail-closed.
         _ => "spell",
     }
 }
@@ -7809,6 +8023,11 @@ mod tests {
                 "dead": true
             }),
         }));
+        // Admission is retained in the bounded event history. The normal
+        // renderer consumes by sequence rather than draining this buffer.
+        assert_eq!(adapter.effect_events.len(), 1);
+        assert_eq!(adapter.effect_events[0].packet, "ObjectPlayer");
+        let admission_sequence = adapter.effect_events[0].sequence;
         assert!(adapter.observe_packet(&PacketEvent::Other {
             packet: "ObjectRevived".to_owned(),
             payload: json!({"objectId": 2001, "effect": false}),
@@ -7816,9 +8035,16 @@ mod tests {
         let remote = adapter.zone_entities.get(&2001).expect("remote player");
         assert_eq!(remote.get("dead"), Some(&json!(false)));
         assert_eq!(remote.get("_nativeAnimationAction"), Some(&json!("revive")));
-        assert_eq!(adapter.effect_events.len(), 1);
-        assert_eq!(adapter.effect_events[0].packet, "ObjectRevived");
-        assert_eq!(adapter.effect_events[0].payload["effect"], false);
+        let revived_events = adapter
+            .effect_events
+            .iter()
+            .filter(|event| event.sequence > admission_sequence)
+            .collect::<Vec<_>>();
+        assert_eq!(revived_events.len(), 1);
+        assert_eq!(revived_events[0].packet, "ObjectRevived");
+        assert_eq!(revived_events[0].payload["effect"], false);
+        assert_eq!(adapter.effect_events[0].packet, "ObjectPlayer");
+        assert_eq!(adapter.effect_events[0].sequence, admission_sequence);
     }
 
     #[test]
@@ -7974,7 +8200,7 @@ mod tests {
                 "objectId": 2010,
                 "location": {"x": 286, "y": 615},
                 "direction": "Right",
-                "kind": 2
+                "kind": 0
             }),
         }));
         adapter.apply_authoritative_overlay(&mut payload);
@@ -7989,7 +8215,7 @@ mod tests {
         assert_eq!(plant["x"], json!(286));
         assert_eq!(plant["y"], json!(615));
         assert_eq!(plant["direction"], json!("Right"));
-        assert_eq!(plant["deathKind"], json!(2));
+        assert_eq!(plant["deathKind"], json!(0));
     }
 
     #[test]
@@ -9278,3 +9504,7 @@ mod status_buff_order_tests {
         assert!(ui.buffs[0].paused);
     }
 }
+
+#[cfg(test)]
+#[path = "five_class_bridge_tests.rs"]
+mod five_class_bridge_tests;

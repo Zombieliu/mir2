@@ -35,6 +35,104 @@ fn supply_templates() -> &'static [mir2_game_data::CrystalItemTemplate] {
     })
 }
 
+struct NewClassSupplySkill {
+    rule: mir2_game_data::ContentSkillRule,
+    base_cost: u32,
+    level_cost: u32,
+}
+
+struct NewClassSupplyPolicy {
+    maximum_level: u32,
+    skills: Vec<NewClassSupplySkill>,
+}
+
+fn new_class_supply_policy() -> &'static NewClassSupplyPolicy {
+    static POLICY: OnceLock<NewClassSupplyPolicy> = OnceLock::new();
+    POLICY.get_or_init(|| {
+        let profile = mir2_game_data::platinum_fiveclass_profile();
+        let magics = &mir2_game_data::crystal_magic_manifest_ref().magics;
+        NewClassSupplyPolicy {
+            maximum_level: u32::from(profile.acceptance_level).min(50),
+            skills: profile
+                .skills
+                .into_iter()
+                .filter(|rule| {
+                    matches!(
+                        rule.class,
+                        mir2_protocol::MirClass::Assassin | mir2_protocol::MirClass::Archer
+                    )
+                })
+                .filter_map(|rule| {
+                    let magic = magics.iter().find(|magic| magic.spell == rule.spell)?;
+                    Some(NewClassSupplySkill {
+                        base_cost: u32::from(magic.base_cost),
+                        level_cost: u32::from(magic.level_cost),
+                        rule,
+                    })
+                })
+                .collect(),
+        }
+    })
+}
+
+fn new_class_supply_skill(
+    player: &PlayerStats,
+    identifier: &str,
+) -> Option<&'static NewClassSupplySkill> {
+    let policy = new_class_supply_policy();
+    if player.level == 0 || player.level > policy.maximum_level {
+        return None;
+    }
+    let class = match player.class_name.as_deref()?.to_ascii_lowercase().as_str() {
+        "assassin" => mir2_protocol::MirClass::Assassin,
+        "archer" => mir2_protocol::MirClass::Archer,
+        _ => return None,
+    };
+    policy.skills.iter().find(|skill| {
+        skill.rule.class == class
+            && skill.rule.spell.eq_ignore_ascii_case(identifier)
+            && player.level >= u32::from(skill.rule.required_level)
+    })
+}
+
+fn learned_new_class_mp_skill(player: &PlayerStats, skills: Option<&SkillModel>) -> bool {
+    skills.is_some_and(|skills| {
+        skills.skills.iter().any(|skill| {
+            let Some(binding) = skills
+                .bindings
+                .iter()
+                .find(|binding| binding.skill_id == skill.id)
+            else {
+                return false;
+            };
+            let Some(identifier) = binding.spell.as_deref() else {
+                return false;
+            };
+            let Some(source) = new_class_supply_skill(player, identifier) else {
+                return false;
+            };
+            let Some(cast_kind) = binding.cast_kind.as_deref() else {
+                return false;
+            };
+            if !matches!(
+                cast_kind.trim().to_ascii_lowercase().as_str(),
+                "toggle" | "self" | "target" | "ground" | "direction"
+            ) || skill.level > 3
+            {
+                return false;
+            }
+            // canUse is the live toggle state, not a learned/active definition.
+            // An off toggle or a skill on cooldown still needs a mana reserve.
+            // Explicit zero MP from the server takes precedence over fallbacks.
+            binding
+                .mp_cost
+                .or_else(|| (skill.mp_cost > 0).then_some(skill.mp_cost))
+                .unwrap_or(source.base_cost + source.level_cost * u32::from(skill.level))
+                > 0
+        })
+    })
+}
+
 fn number(value: &serde_json::Value) -> u32 {
     value
         .as_u64()
@@ -189,6 +287,29 @@ pub struct SupplyPlan {
     pub bag_weight: Option<(u32, u32)>,
     pub bag_full: bool,
     pub needs_taoist_material_guidance: bool,
+    pub assassin_poison_readiness: Option<AssassinPoisonReadiness>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AssassinPoisonReadiness {
+    NeedsEquipment,
+    Equipped,
+}
+
+impl AssassinPoisonReadiness {
+    pub fn guidance(self) -> String {
+        let (key, fallback) = match self {
+            Self::NeedsEquipment => (
+                "quest.supply.assassinPoisonEquip",
+                "猛毒剑气需装备红毒或绿毒，每次消耗1份。",
+            ),
+            Self::Equipped => (
+                "quest.supply.assassinPoisonEquipped",
+                "猛毒剑气毒粉已装备，每次消耗1份。",
+            ),
+        };
+        crate::player_text::format_named(key, fallback, &[])
+    }
 }
 
 impl SupplyPlan {
@@ -301,6 +422,8 @@ fn usable_supply_kind(item: &ItemModel, player: &PlayerStats, now_ticks: i64) ->
             "warrior" => 1,
             "wizard" => 2,
             "taoist" => 4,
+            "assassin" => 8,
+            "archer" => 16,
             _ => 0,
         };
         let gender_mask = match player
@@ -314,7 +437,8 @@ fn usable_supply_kind(item: &ItemModel, player: &PlayerStats, now_ticks: i64) ->
             "female" => 2,
             _ => 0,
         };
-        if info.required_type != 0
+        if (matches!(kind, 2 | 3) && info.item_type != 8)
+            || info.required_type != 0
             || player.level < u32::from(info.required_amount)
             || (info.required_class != 0 && info.required_class & class_mask == 0)
             || (info.required_gender != 3 && info.required_gender & gender_mask == 0)
@@ -428,17 +552,26 @@ fn plan_at(
             || requirements.contains("SoulFireBall")
             || requirements.contains("SummonSkeleton")
             || requirements.contains("Amulet"));
-    let needs_poison = taoist
+    let needs_taoist_poison = taoist
         && player.level >= number(&config["poison"]["minimumLevel"])
         && (learned(&["Poisoning"])
             || requirements.contains("Poisoning")
             || requirements.contains("poison"));
+    let needs_assassin_poison =
+        new_class_supply_skill(player, "PoisonSword").is_some() && learned(&["PoisonSword"]);
+    let needs_poison = needs_taoist_poison || needs_assassin_poison;
     let mut held = [0_u32; 6];
+    let mut assassin_poison_equipped = false;
     let mut seen = BTreeSet::new();
     for item in &inventory.items {
         let Some(kind) = usable_supply_kind(item, player, now_ticks) else {
             continue;
         };
+        // Carried powder counts towards purchases, but PoisonSword's Source
+        // GetPoison(1) only reads equipment. Do not conflate the two states.
+        if kind == 3 && item.container == 2 {
+            assassin_poison_equipped = true;
+        }
         if item.unique_id.is_some_and(|id| !seen.insert(id)) {
             continue;
         }
@@ -480,9 +613,10 @@ fn plan_at(
         hp_item,
         SupplyVendor::Potions,
     );
-    if (wizard || taoist)
+    if ((wizard || taoist)
         && (player.level >= number(&config["casterMinimumLevel"])
-            || skills.is_some_and(|s| !s.skills.is_empty()))
+            || skills.is_some_and(|s| !s.skills.is_empty())))
+        || learned_new_class_mp_skill(player, skills)
     {
         add(
             "蓝药",
@@ -575,9 +709,18 @@ fn plan_at(
                 ))
             }),
         bag_full: occupied >= usize::from(inventory.bag_slot_capacity()),
-        needs_taoist_material_guidance: needs_amulet && needs_poison,
+        needs_taoist_material_guidance: needs_amulet && needs_taoist_poison,
+        assassin_poison_readiness: needs_assassin_poison.then_some(if assassin_poison_equipped {
+            AssassinPoisonReadiness::Equipped
+        } else {
+            AssassinPoisonReadiness::NeedsEquipment
+        }),
     }
 }
+
+#[cfg(test)]
+#[path = "quest_supplies_fiveclass_tests.rs"]
+mod five_class_tests;
 
 #[cfg(test)]
 mod tests {

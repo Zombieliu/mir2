@@ -1,0 +1,418 @@
+{
+  "schema": "mir2.first-merge-original-evidence-whitespace.v1",
+  "createdUtc": "2026-10-11T17:24:41.164420+00:00",
+  "fullCheckExitCode": 2,
+  "originalCheckLogSha256": "4d6df06b07603222f485d118a2a938154635de33fd424a2d7aaf9b94134c6425",
+  "allReportedFilesAreExactOriginalParentEvidence": true,
+  "originalEvidenceBytesNotNormalized": true,
+  "sourceAndAuthoredDocsCheckExitCode": 0,
+  "noUnstagedOrUnmergedOrUntrackedFiles": true,
+  "originalParentEvidence": [
+    {
+      "path": "mir2-web3/docs/generated/player-qa/classic-20261008/delivery-checkpoint-01/LINUX-ARTIFACT-VERIFICATION.json",
+      "stagedGitBlob": "679c5f0593c2d3b41fba23f4c237a0ba7bf71f62",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/classic-20261008/delivery-checkpoint-01/LOCAL-VERIFIED-SUBJECT-RETRY.json",
+      "stagedGitBlob": "360a29f272c4d1dae8d0de5c805b860264b5fa81",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/classic-20261008/delivery-checkpoint-01/R20-ORDINARY-CLIENT-READY.json",
+      "stagedGitBlob": "a2c7fc289d4b61c872dc3ebe52b94f20279a8cc7",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/classic-20261008/delivery-checkpoint-01/WINDOWS-ARTIFACT-DOWNLOAD-VERIFICATION.json",
+      "stagedGitBlob": "d5250e1aa6defd8448af06e3f2a5b18556ce2b97",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/classic-20261008/delivery-checkpoint-01/WINDOWS-PICKUP-VERIFICATION.json",
+      "stagedGitBlob": "1a5a1cb16c1a745659943e7a6b6f99c213a68345",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/classic-20261008/delivery-checkpoint-02/DELIVERY-SIGNER-ROOT-REVIEW.json",
+      "stagedGitBlob": "b0b0925322449640678825f74fec2f3a693b3aac",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/classic-20261008/delivery-checkpoint-02/FINAL-LOCAL-PACKAGE-VERIFICATION-03.json",
+      "stagedGitBlob": "e06cf7195be86dfb44e77042d38e8e34768491cf",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/classic-20261008/delivery-checkpoint-02/FROZEN-SOURCE-ATTESTATION-03.json",
+      "stagedGitBlob": "2490227bc56840fbcae44e78920140f79155ccf6",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/adjacent-monthly-ci-37946216237.log",
+      "stagedGitBlob": "150adea6a614ee4db3492e31d889e0ecf5d34abd",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/ci-37946216332/gateway.log",
+      "stagedGitBlob": "0f9e6ab3afd43f3c5f41d0f16b96044c1ba2ef6a",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/ci-37946216332/postgres.log",
+      "stagedGitBlob": "41741f41c5210ef43097ba503d847cda38993077",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/ci-37946216332/shared-owner.log",
+      "stagedGitBlob": "7786935ddc41690270e5fe47cfa1990f8d848bff",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/ci-37946216332/simulation.log",
+      "stagedGitBlob": "446079d1fce444097a5e983bbbb83ff669ff4b0e",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/gateway38.log",
+      "stagedGitBlob": "a76f97b27719e0369d685e8283c45b7e987bfd3b",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/provider-20261010/gateway01.log",
+      "stagedGitBlob": "e1da15ded0fb90eb52c9d4d07e74f1acc6906942",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/MONTHLY-TESTS.txt",
+      "stagedGitBlob": "b338da9cc814df6d558d0fb306245488826955a3",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/UI-TESTS.txt",
+      "stagedGitBlob": "3b3f91cd26967a449d70048610623147d61e28f9",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/UI-ZERO-FILTER.txt",
+      "stagedGitBlob": "12a5ade6e15e8cb63d8b26305457134e6a98b5a2",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/CI-GIFT-AUTH-SETUP-FINAL-FAILURE.txt",
+      "stagedGitBlob": "7421d6a8801f1a28da70b36d96c7ee96040dcc9f",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/CI-GIFT-CANONICAL-SETUP-PASS.txt",
+      "stagedGitBlob": "6966ed84a5d2320ce7b8394b28ced976756902e8",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/CI-GIFT-CAS-RECOVERY-01-FAILURE.txt",
+      "stagedGitBlob": "2d003f03b8a227b1a06c5013f1ffc32ef6f3e62e",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/CI-GIFT-DIAGNOSTIC-FAILURE.txt",
+      "stagedGitBlob": "af33e61b56cfc6cab244b52e7b1bd4f4dda1a24a",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/CI-GIFT-INITIAL-CANCELLED.txt",
+      "stagedGitBlob": "745d82e8a30e635e24e46a6a1db880b28f94a5d6",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/GATEWAY-BILLING-FINAL.txt",
+      "stagedGitBlob": "3eb88557add359a9cdcd151a0323265413209e69",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/GATEWAY-BILLING-TESTS.txt",
+      "stagedGitBlob": "6458106f4707f7b7f3752fbe28a95ccacf171b33",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/GATEWAY-GAME-SHOP-FINAL-02.txt",
+      "stagedGitBlob": "1ccda24732282e939312faa4747ec3766ce5d021",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/GATEWAY-GAME-SHOP-FINAL-03.txt",
+      "stagedGitBlob": "174cd59699976d4ef49ffca783cbacc02d6b2700",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/GATEWAY-GIFT-SESSION-TESTS.txt",
+      "stagedGitBlob": "995f0c6a686b8b970021f77e52382413b8c00999",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/GATEWAY-GIFT-TESTS-02.txt",
+      "stagedGitBlob": "aca60fa276e6843677a6238c9008cf3494cce64c",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/GATEWAY-GIFT-TESTS.txt",
+      "stagedGitBlob": "bcdf9589ffc3b09d9ae605456feb6e7d20fcda7b",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/GATEWAY-MONTHLY-OWNER-DIRECT-FINAL.txt",
+      "stagedGitBlob": "e8179c3e2bb4f1404218d07b85b4c9f96d24a586",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/GATEWAY-MONTHLY-OWNER-TESTS-02.txt",
+      "stagedGitBlob": "c2bb578d512db7302fe6756bcfb715f34c255616",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/GATEWAY-MONTHLY-OWNER-TESTS.txt",
+      "stagedGitBlob": "babcfd07e5499d4f64f5bc1fe90134bcaf259a79",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/GATEWAY-SHOP-CAS-RECOVERY-01.txt",
+      "stagedGitBlob": "f318e9b7bead85a6a5f2664b645e336da30fd428",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/NATIVE-MONTHLY-MAIL-BEVY-01.txt",
+      "stagedGitBlob": "5855904e52a4f48802c90744852c2a4fd9fea228",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/NATIVE-MONTHLY-MAIL-BEVY-02.txt",
+      "stagedGitBlob": "8862a8a5db5b94fd478b3bc52a2413f2acb64cd5",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/NATIVE-MONTHLY-MAIL-WINDOWS-01.txt",
+      "stagedGitBlob": "079d495e75bd7a9d1f46a19486abbc632836f225",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/SOURCE-GIFT-BOOTSTRAP-COMPILE.txt",
+      "stagedGitBlob": "42e8ae88e02d2bbb691bd4cce9727bff3f4a517d",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/SOURCE-GIFT-CANONICAL-SETUP-01.txt",
+      "stagedGitBlob": "5fb5a14286795c9708bb6ab574acb4eef0382b00",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/SOURCE-GIFT-CAS-RECOVERY-01.txt",
+      "stagedGitBlob": "551a6f1b608ce9b3561119495c89b667f0d3245b",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/SOURCE-GIFT-DIAGNOSTIC-COMPILE.txt",
+      "stagedGitBlob": "00be4405537ebbac3ec8f4ba80b35dc25b817bf7",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/SOURCE-GIFT-LEDGER-CAS-RECOVERY-01.txt",
+      "stagedGitBlob": "478898a4c9f8be4a5dd253138dae6e0b37d3f7e8",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/SOURCE-GIFT-LEDGER-TESTS.txt",
+      "stagedGitBlob": "483f9d4b0b44842866116368459a4c36cc915e8b",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/SOURCE-GIFT-MONTHLY-FINAL.txt",
+      "stagedGitBlob": "fdfa56db1701ea121f7e6216682e3042b3051bb5",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/SOURCE-GIFT-TESTS-03.txt",
+      "stagedGitBlob": "32140141c4d7d115ffae3b51d5670962584a0dbb",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/SOURCE-MONTHLY-CAS-RECOVERY-01.txt",
+      "stagedGitBlob": "25415aea30a45826e1d0f0484c2b97887caa8d42",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/bevy-game-shop.log",
+      "stagedGitBlob": "a50c3c1d984af4770d82b1c0a130ed2e084f2284",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/ui-core-game-shop.log",
+      "stagedGitBlob": "1b7ee8b9abe885619f79d54f19e87a9e54b0a51a",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/windows-game-shop.log",
+      "stagedGitBlob": "57ec0f4ae43add08d84b68094f75c36a6d5a4544",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/stripe-billing-gateway-20261009-05-tests.log",
+      "stagedGitBlob": "3be961039e5d62bc745a8a8e107a93fb0f048cd5",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/stripe-billing-gateway-20261009-09-final.log",
+      "stagedGitBlob": "a9df8aa47a536ecf44c04a066316de3ac843c0b8",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/stripe-billing-gateway-20261009-10-shared-final.log",
+      "stagedGitBlob": "0fd3332447fafe6e261dc769dda584ab16a1e04f",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/stripe-billing-gateway-20261009-11-adjacent.log",
+      "stagedGitBlob": "a7fa1c925f308ba864a0427724aeb5523c0b7555",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/stripe-billing-simulation-20261009-04-tests.log",
+      "stagedGitBlob": "1e73ae6ac2dfc7db327f3ae7b8eb1904eb8e82d9",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/stripe-billing-simulation-20261009-06-final.log",
+      "stagedGitBlob": "9d8f6ad57c3db07740c9a6e86c92439aaa38ba37",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/stripe-browser2-root-run.log",
+      "stagedGitBlob": "7690baa8aabe299e252c773932b4db99452c2634",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/stripe-native-focused-tests.log",
+      "stagedGitBlob": "cc3fdd3ca38635ab042c78b6d31dec52adc7a6e7",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/stripe-billing-20261009/stripe-native-model10-root-run.log",
+      "stagedGitBlob": "3e278276c92c1927b36e1ce28d4a2de0d67a0711",
+      "exactParentBlob": [
+        "87fd85a0d5a819e5b38c90d192421f9239f65678"
+      ]
+    }
+  ]
+}

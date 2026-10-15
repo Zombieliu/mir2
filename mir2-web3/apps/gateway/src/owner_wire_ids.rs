@@ -52,7 +52,11 @@ pub(super) fn normalize(packets: &mut [ServerPacket], zone_id: u32, local_id: u3
                     }
                 }
             }
-            ServerPacket::DamageIndicator { object_id, .. }
+            ServerPacket::SetConcentration { object_id, .. }
+            | ServerPacket::SetElemental { object_id, .. }
+            | ServerPacket::SetBindingShot { object_id, .. }
+            | ServerPacket::RemoveDelayedExplosion { object_id }
+            | ServerPacket::DamageIndicator { object_id, .. }
             | ServerPacket::ObjectPoisoned { object_id, .. }
             | ServerPacket::SpellToggle {
                 object_id,
@@ -76,9 +80,19 @@ pub(super) fn normalize(packets: &mut [ServerPacket], zone_id: u32, local_id: u3
             {
                 *object_id = local_id;
             }
-            ServerPacket::ObjectEffect { info } if info.object_id == zone_id => {
-                info.object_id = local_id;
+            ServerPacket::ObjectEffect { info } => {
+                if info.object_id == zone_id { info.object_id = local_id; }
+                // MPEater carries the attacking Human's ObjectID, not a level.
+                if info.effect == 16 && info.effect_type == zone_id { info.effect_type = local_id; }
             }
+            ServerPacket::ObjectProjectile { source_id, destination_id, .. } => {
+                if *source_id == zone_id { *source_id = local_id; }
+                if *destination_id == zone_id { *destination_id = local_id; }
+            }
+            ServerPacket::ObjectBackStep { movement, .. } if movement.object_id == zone_id => {
+                movement.object_id = local_id;
+            }
+            ServerPacket::ObjectDashAttack { object_id, .. } if *object_id == zone_id => { *object_id = local_id; }
             ServerPacket::ObjectMonster { info } if info.master_object_id == zone_id => {
                 info.master_object_id = local_id;
             }

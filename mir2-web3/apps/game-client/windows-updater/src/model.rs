@@ -9,7 +9,16 @@ pub const META: [&str; 4] = [
     "RELEASE-STATEMENT.json",
     "RELEASE-STATEMENT.p7s",
 ];
-pub const MAX_META: u64 = 32 * 1024 * 1024;
+// Five-class manifests contain the complete Source frame inventory. Keep the
+// metadata and entry limits finite, shared by parsing and delivery validation.
+pub const MAX_META: u64 = 64 * 1024 * 1024;
+pub const MAX_MANIFEST_FILES: usize = 300_000;
+// A rename-heavy upgrade can remove the entire old inventory and add the new
+// one. Recovery records therefore cover both inventories and control files.
+pub const MAX_TRANSACTION_FILES: usize = MAX_MANIFEST_FILES * 2 + 10;
+// Compact recovery records duplicate paths from two bounded manifests. Four
+// metadata budgets plus bounded control-file overhead cover that union.
+pub const MAX_RECOVERY_BYTES: u64 = MAX_META * 4 + 65_536;
 pub const MAX_FILE: u64 = 512 * 1024 * 1024;
 pub const MAX_TOTAL: u64 = 4 * 1024 * 1024 * 1024;
 pub fn hash(bytes: &[u8]) -> String {
@@ -147,7 +156,7 @@ impl Manifest {
         );
         ensure!(
             result.files.len() == result.file_count
-                && result.file_count <= 200000
+                && result.file_count <= MAX_MANIFEST_FILES
                 && result.file_count > 0
                 && result.total_bytes <= MAX_TOTAL,
             "manifest bounds"

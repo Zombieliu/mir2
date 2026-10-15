@@ -1216,3 +1216,190 @@ fn synthetic_parameterized_menu_accepts_legacy_bracket_confirmation_packets() {
         Some("Mary")
     );
 }
+
+fn created_five_class_npc_fixture(class: mir2_protocol::MirClass, name: &str) -> SimulationSession {
+    use mir2_protocol::MirGender;
+
+    let info = mir2_game_data::crystal_npc_info_manifest_ref()
+        .npcs
+        .iter()
+        .find(|npc| npc.loaded_object_id == Some(NPC))
+        .expect("canonical Guild Territory Steward");
+    assert_eq!(info.script_key, "GuildTerritory/GA0/GTAdmin-GA10");
+    assert_eq!(info.map_file_name.as_deref(), Some("GA10"));
+    assert_eq!(info.location, Point { x: 13, y: 27 });
+
+    let mut config = SimulationConfig::default().with_platinum_fiveclass_profile();
+    assert!(config.class_is_allowed(class));
+    assert!(!config.npc_script_is_allowed(&info.script_key));
+    // Only this local fixture admits the canonical input script. The authored
+    // five-class profile does not expose Guild Territory to ordinary players.
+    config
+        .content_profile
+        .as_mut()
+        .unwrap()
+        .profile
+        .npc_script_whitelist
+        .push(info.script_key.clone());
+    assert!(config.npc_script_is_allowed(&info.script_key));
+    // Retain the original fixture's local canonical NPC map. This proves
+    // five-class creation and input admission, not public GA10 map entry.
+    config.map.file_name = "GA10".into();
+    config.map.title = "Guild Territory".into();
+    config.spawn = Point { x: 14, y: 27 };
+    config.scene_view.center = config.spawn.clone();
+    config.visible_npcs = vec![VisibleNpcRecord {
+        object_id: NPC,
+        name: info.name.clone(),
+        image: info.image,
+        colour_argb: -1,
+        position: info.location.clone(),
+        direction: MirDirection::Down,
+        quest_ids: vec![],
+        script_key: Some(info.script_key.clone()),
+    }];
+    let mut session = SimulationSession::new(config);
+    assert!(session
+        .try_handle_packet(ClientPacket::Login {
+            account_id: "demo".into(),
+            password: "demo".into(),
+        })
+        .unwrap()
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    let created = session
+        .try_handle_packet(ClientPacket::NewCharacter {
+            name: name.into(),
+            gender: MirGender::Male,
+            class,
+        })
+        .unwrap();
+    let character = created
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::NewCharacterSuccess { char_info } => Some(char_info),
+            _ => None,
+        })
+        .expect("normal five-class profile must create the requested profession");
+    assert_eq!(character.name, name);
+    assert_eq!(character.class, class);
+    assert_eq!(character.gender, MirGender::Male);
+    // Crystal's NewCharacter selection packet uses zero; the created player
+    // must enter as level one through the actual StartGame bootstrap below.
+    assert_eq!(character.level, 0);
+    let character_index = character.index;
+    let started = session
+        .try_handle_packet(ClientPacket::StartGame { character_index })
+        .unwrap();
+    let user = started
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::UserInformation { info } => Some(info),
+            _ => None,
+        })
+        .expect("created character must bootstrap through normal StartGame");
+    assert_eq!(user.name, name);
+    assert_eq!(user.class, class);
+    assert_eq!(user.gender, MirGender::Male);
+    assert_eq!(user.level, 1);
+    assert!(user.hp > 0);
+    assert_eq!(user.location, Point { x: 14, y: 27 });
+    assert_eq!(
+        session.local_player_position(),
+        Some(Point { x: 14, y: 27 })
+    );
+    assert_eq!(
+        session.active_identity().unwrap().character_index,
+        character_index
+    );
+    assert_eq!(session.current_map_file_name().as_deref(), Some("GA10"));
+    let npc_entity = entity_by_object_id(session.app.world(), NPC)
+        .expect("the local fixture must spawn the canonical NPC through normal admission");
+    assert_eq!(
+        session
+            .app
+            .world()
+            .entity(npc_entity)
+            .get::<Position>()
+            .unwrap()
+            .0,
+        Point { x: 13, y: 27 }
+    );
+    assert!(super::npc::crystal_npc_object_visible_in_world(
+        session.app.world(),
+        NPC
+    ));
+    assert!(crystal_npc_object_in_data_range(session.app.world(), NPC));
+    call(&mut session, "[@MAIN]");
+    assert!(session
+        .world_snapshot()
+        .active_npc_dialog
+        .unwrap()
+        .links
+        .iter()
+        .any(|link| link.target.eq_ignore_ascii_case("@summon")));
+    session
+}
+
+#[test]
+fn five_class_created_characters_confirm_canonical_displayed_input_once() {
+    use mir2_protocol::MirClass;
+
+    for (class, name, value) in [
+        (MirClass::Warrior, "NpcInputW", "InputWarrior"),
+        (MirClass::Wizard, "NpcInputM", "InputWizard"),
+        (MirClass::Taoist, "NpcInputT", "InputTaoist"),
+        (MirClass::Assassin, "NpcInputA", "InputAssassin"),
+        (MirClass::Archer, "NpcInputR", "InputArcher"),
+    ] {
+        let mut session = created_five_class_npc_fixture(class, name);
+        request_input(&mut session);
+        let pending = session
+            .world_snapshot()
+            .active_npc_dialog
+            .unwrap()
+            .input
+            .unwrap();
+        assert!(crystal_npc_variable_value(session.app.world(), "A1").is_none());
+
+        session.force_authoritative_player_vitals(None, Some(1));
+        let runtime = session
+            .app
+            .world()
+            .resource::<super::resources::PlayerRuntimeResource>();
+        assert!(runtime.player_vitals.hp > 0);
+        assert_eq!(runtime.player_vitals.mp, 1);
+        assert!(!runtime.player_dead);
+        assert_eq!(
+            session.world_snapshot().active_npc_dialog.unwrap().input,
+            Some(pending),
+            "healthy authoritative vitals must preserve {class:?}'s issued prompt"
+        );
+
+        confirm(&mut session, NPC, "@@summontest", value);
+        assert_eq!(
+            crystal_npc_variable_value(session.app.world(), "A1").as_deref(),
+            Some(value),
+            "{class:?} must execute the canonical MOV with its exact input"
+        );
+        assert!(session.world_snapshot().active_npc_dialog.is_none());
+
+        let replay = session
+            .try_handle_packet(ClientPacket::NpcConfirmInput {
+                npc_id: NPC,
+                page_name: "@@summontest".into(),
+                value: "ReplayedInput".into(),
+            })
+            .unwrap();
+        assert!(
+            replay.is_empty(),
+            "{class:?}'s used prompt cannot run again"
+        );
+        assert_eq!(
+            crystal_npc_variable_value(session.app.world(), "A1").as_deref(),
+            Some(value),
+            "replay must not overwrite {class:?}'s accepted input"
+        );
+        assert!(session.world_snapshot().active_npc_dialog.is_none());
+    }
+}

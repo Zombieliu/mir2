@@ -137,6 +137,72 @@ class DeployTests(unittest.TestCase):
         self.assertIn(b'max-age=31536000, immutable', new)
         self.assertEqual(server.inject_route(new), new)
 
+    def test_original_exact_route_upgrades_without_changing_surrounding_config(self):
+        original = server.ANCHOR + server.LEGACY_BLOCK + b'\n handle_path /playtest/* { reverse_proxy 127.0.0.1:7210 }\n}\n'
+        upgraded = server.inject_route(original)
+        self.assertEqual(upgraded.replace(server.BLOCK, server.LEGACY_BLOCK, 1), original)
+        self.assertEqual(upgraded.count(b'root * /srv/mir2-client-updates/feed-current'), 1)
+        self.assertEqual(upgraded.count(b'root * /srv/mir2-client-updates/five-class/feed-current'), 1)
+        self.assertEqual(server.inject_route(upgraded), upgraded)
+        with self.assertRaises(ValueError):
+            server.inject_route(original.replace(b'root * /srv/mir2-client-updates/feed-current', b'root * /unreviewed', 1))
+
+    def test_fixed_scope_extraction_and_release_promotion_preserve_legacy_tree(self):
+        files = server.extract_checked(self.archive, self.receipt, self.feed, self.stage, helper, 'five-class')
+        release_root = self.root / 'published'
+        legacy = release_root / 'releases/game-r6'
+        legacy.mkdir(parents=True)
+        marker = legacy / 'preserve.txt'
+        marker.write_bytes(b'old users keep this exact game')
+        modern = release_root / 'five-class'
+        (modern / 'releases').mkdir(parents=True)
+        with mock.patch.object(server, 'ROOT', release_root):
+            self.assertEqual(server.channel_paths('legacy'), (release_root, '/client-updates/'))
+            self.assertEqual(server.channel_paths('five-class'), (modern, '/client-updates/five-class/'))
+            for scope in ['other', '../', '/client-updates/', 'five-class/']:
+                with self.assertRaises(ValueError):
+                    server.channel_paths(scope)
+            result = server.promote_immutable(self.stage, 'releases/game-r6', files['releases/game-r6'], helper, modern)
+            self.assertEqual(result, 'promoted')
+            self.assertEqual(marker.read_bytes(), b'old users keep this exact game')
+            self.assertEqual((modern / 'releases/game-r6/PACKAGE-MANIFEST.json').read_bytes(),
+                             (self.candidate / 'PACKAGE-MANIFEST.json').read_bytes())
+            self.assertEqual(server.promote_immutable(self.stage, 'releases/game-r6', files['releases/game-r6'], helper, modern), 'verified-existing')
+
+    def test_modern_origin_readback_never_uses_legacy_alias_or_hidden_directory(self):
+        base = '/client-updates/five-class/'
+        feed_bytes, signature = b'new signed fixture feed', b'fixture signature'
+        calls = []
+        class ScopedConnection:
+            def __init__(self, *args, **kwargs):
+                pass
+            def request(inner, method, path, headers):
+                self.assertTrue(path.startswith(base))
+                inner.key = (method, path)
+                calls.append(inner.key)
+            def getresponse(inner):
+                method, path = inner.key
+                status, body, headers = 404, b'', {}
+                if method == 'POST':
+                    status = 405
+                elif path == base + 'latest.json':
+                    status, body, headers = 200, feed_bytes, {'Cache-Control': 'no-store'}
+                elif path == base + 'latest.p7s':
+                    status, body, headers = 200, signature, {'Cache-Control': 'no-store'}
+                elif method == 'HEAD':
+                    entry = next(entry for component in [self.feed['game'], self.feed['engine']]
+                                 for entry in component['metadata'] if path == base + component['directory'] + '/' + entry['path'])
+                    status, headers = 200, {'Content-Length': str(entry['size']), 'Cache-Control': 'public, immutable'}
+                return types.SimpleNamespace(status=status, read=lambda limit: body[:limit],
+                    getheader=lambda name, default=None: headers.get(name, default))
+            def close(inner):
+                pass
+        with mock.patch.object(server, 'LocalTLS', ScopedConnection):
+            server.verify_serving(feed_bytes, signature, self.feed, 'five-class')
+        self.assertIn(('GET', base + 'feed-current/latest.json'), calls)
+        self.assertIn(('POST', base + 'latest.json'), calls)
+        self.assertEqual(len(calls), 2 + sum(len(c['metadata']) for c in [self.feed['game'], self.feed['engine']]) + 6)
+
     def test_unreviewed_caddy_configuration_rejected(self):
         for data in [b'changed.site { }', server.ANCHOR + b'\n# /client-updates\n}', server.ANCHOR + b'\n# BEGIN MIR2 NATIVE CLIENT UPDATES V1\n}']:
             with self.subTest(config=data), self.assertRaises(ValueError):
@@ -211,6 +277,18 @@ class DeployTests(unittest.TestCase):
         self.assertEqual(plan['inputs']['release.tar.gz']['sha256'], helper.sha256(self.archive.read_bytes()))
         preparer = load('plan_fixture_module', QA / 'deploy-prepare-plan.py')
         compile(preparer.BOOTSTRAP, '<SHA-pinned-root-bootstrap>', 'exec')
+
+    def test_modern_plan_passes_only_fixed_scope_to_sha_guarded_root_helper(self):
+        output = self.root / 'modern-plan'
+        command = self.plan_command(output) + ['--download-scope', 'five-class']
+        result = subprocess.run(command, capture_output=True, text=True, encoding='utf-8')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        plan = json.loads(result.stdout)
+        self.assertFalse(plan['serverMutated'])
+        self.assertEqual(plan['downloadScope'], 'five-class')
+        apply = (output / 'deploy-apply.sh').read_text()
+        self.assertIn('--download-scope five-class', apply)
+        self.assertIn(plan['inputs']['deploy-server-release.py']['sha256'], apply)
 
     def test_plan_cli_preserves_existing_output(self):
         output = self.root / 'existing-plan'

@@ -9402,5 +9402,13 @@
   "monthly.CodeExpired": "انتهت صلاحية الرمز. تواصل مع المسؤول.",
   "monthly.LoginRequired": "سجّل الدخول مجددًا لإدارة الاشتراك.",
   "monthly.Banned": "الحساب محظور. تواصل مع المسؤول.",
-  "monthly.Unavailable": "خدمة الاشتراك غير متاحة. حاول لاحقًا."
+  "monthly.Unavailable": "خدمة الاشتراك غير متاحة. حاول لاحقًا.",
+  "shell.assassin_description": "يهاجم القتلة بنصلين ويعتمدون على التخفي.\nيفضلون الضربات السريعة والحركة الحذرة.",
+  "shell.archer_description": "يهاجم الرماة من بعيد بالأقواس والطلقات الخاصة.\nحافظ على المسافة وانتبه إلى موقعك.",
+  "quest.practice.class.learn": "تعلّم {skill}.",
+  "quest.practice.class.normal_hit": "بعد تعلّم {skill}، أصب وحشًا بهجوم عادي.",
+  "quest.practice.class.toggle_hit": "فعّل {skill}، ثم ألحق ضررًا بوحش بهجوم عادي.",
+  "quest.practice.class.spell_hit": "استخدم {skill} لإلحاق ضرر بوحش؛ الهجمات التي لا تصيب لا تُحتسب.",
+  "quest.supply.assassinPoisonEquip": "سيف مسموم: جهّز مسحوقًا أحمر أو أخضر؛ 1 لكل استخدام.",
+  "quest.supply.assassinPoisonEquipped": "سيف مسموم: المسحوق مجهّز؛ 1 لكل استخدام."
 }

@@ -69,6 +69,60 @@
 > [Actual delivery and limits](CLASSIC-GATEWAY-CATALOGUE-TRANSPORT-20261012.md).
 
 
+> Five-class/live transport merge, 2026-10-12: nine actual guarded Windows
+> checks pass424 distinct names (424 executions), with zero failures or ignores.
+> Fresh563/781-file snapshots include the actual59/74 embedded input occurrences;
+> all169 reviewed source rows and every original50GiB/2000ms/PolicyB receipt bind.
+> Two Archer fixtures now check the real deferred1200/4100ms impact and pre-hit
+> negatives; production damage/clocks and all38 original tests remain intact.
+> The failed9bfa Linux run and missing-feature local compile stay failed and
+> preserved. Actual live28f transport/NPC changes are retained. Clean merged
+> original full Linux CI, signed R26 delivery and paired publication remain open;
+> no human acceptance. [Exact evidence](FIVE-CLASS-LIVE-TRANSPORT-MERGE-20261012.md).
+
+
+> Five-class/live NPC Gateway merge, 2026-10-12: separate server worktree
+> retains all live f574 ordinary-menu/periodic CAS behavior and02457 five-class
+> history. Fourteen real guarded checks pass 779 distinct names
+> (789 executions with overlap); one original isolated PostgreSQL fixture
+> remains ignored locally. The original02457 Linux291/1 red is retained; two
+> ordinary VIS01 death inputs now match Source Type0, with all assertions and
+> product Type1/2 bytes unchanged. No full Type1 acceptance. The old QA scope
+> loop checked zero rows; the independent actual snapshot binding now verifies
+> the captured Rust rows and receipts, but the VIS01 include_str fixture lacked
+> a historical snapshot row. Complete Gateway compiled-input capture remains
+> unproved and must not be inferred from current hashes. Actual client CI
+> passes all eight build jobs and Native987/0/7. Current merged Linux CI, signed
+> R26 package and fresh drained paired publication remain pending. Client and
+> engine stay on genuine02457; Gateway will retain its own actual commit identity.
+> [Original evidence and limits](FIVE-CLASS-LIVE-NPC-MERGE-20261012.md).
+> No human/native/laptop or whole-project100% acceptance.
+
+
+> Local ordinary NPC menu candidate, 2026-10-12: private trusted-display
+> permission now covers ordinary links and native NPC quest accept/finish.
+> Generated no-script menus and legitimate same-page retry remain usable.
+> Periodic Source checkpoints no longer force unchanged-page writes; recurrence
+> is captured before CAS, and exact live buff anchors detect actual changes.
+> Final405 distinct local checks pass (362 unit +43 integration,24 new);
+> one original dedicated PostgreSQL periodic fixture remains ignored locally.
+> [Original evidence, fixture changes and limits](CLASSIC-NPC-ORDINARY-MENU-20261012.md).
+> Exact-source Linux CI/package and a fresh drained publication remain open.
+> Public Gateway75c5/R25 appd917/updaterb439/feed20 are unchanged; no client
+> installer or wire/schema change. Full Source/Zone invocation, CHECKHUM/outbox,
+> fullP1-P7/Mentor/native/human remain open. Root is sole writer; expired
+> heartbeat stays paused and no old blocked Goal is marked complete.
+> 2026-10-12 P1 Gateway catalogue transport Candidate: bounded32-frame/64-KiB
+> feed/flush batches retain individual frames/order; accepted TCP_NODELAY is
+> explicit. Partial/cancelled writes fence before unlock. Actual331 distinct
+> adjacent Gateway checks pass; focused25 are a subset,13 are new, no ignores.
+> Original two RED checks and compiler failures remain retained. Linux/public
+> qualification is pending; live stays f574/R25/feed20. The historical37.571s
+> first scene and153ms unchanged retry are retained. Parent flush was78ms;
+> the cold latency cause remains unconfirmed. FullP1-P7/Mentor stays open.
+> [Source-bound evidence and limits](CLASSIC-GATEWAY-CATALOGUE-TRANSPORT-20261012.md).
+
+
 > Ordinary NPC menu backendf574 actually published, 2026-10-12: private
 > trusted-display qualification covers ordinary links and native NPC quests.
 > Periodic Source CAS preserves no-write views/retries, real buff anchors and
@@ -103,6 +157,96 @@
 > Ordinary-menu seals, full Source/Zone invocation, CHECKHUM/world outbox,
 > fullP1-P7/Mentor and native/human remain open. Root is the sole writer;
 > expired heartbeat stays paused.
+
+> Five-class Windows regression, 2026-10-12: the complete actual merged
+> Native host run passes 987 tests, with 7 original external checks ignored.
+> All five typed DoubleSlash/BackStep combinations pass, including committed
+> Jump behind Struck, continued held escape and unchanged attack cooldown.
+> Source has no drift; the original failed formatting log is retained.
+> Real Release binaries, complete signed delivery, full Linux Gateway qualification
+> and drained paired publication remain pending; this is not human acceptance.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Five-class/NPC merged server regression, 2026-10-12: ten real guarded checks
+> pass491 distinct names (523 executions with overlaps). This includes25 NPC
+> input cases,125 five-class simulation cases,18 Gateway skill/receipt cases,
+> 279 NPC regressions, CanMove9, health16/32, transfer4, zero-health7 and monthly8.
+> The new matrix creates all five classes through Login/NewCharacter/StartGame,
+> then confirms one canonical local input and rejects replay. Its GA10 script
+> admission is explicitly local fixture preparation; production whitelist and
+> all24 original tests are unchanged. Public GA10 is not accepted by this test.
+> Native full04, clean exact-source CI/build/package/paired publication remain
+> pending. PublicR25/feed20/Gateway75 is unchanged; no human acceptance.
+> [Exact evidence and retained failures](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Current Windows checkpoint, 2026-10-12: full Native01 compiled and ran,
+> with912 pass/75 fail/7 original external ignores; this is not a green gate.
+> The missing generated keyed-map index was rebuilt by the original Node
+> producer, and two new DoubleSlash idle assertions now match original500ms
+> Standing. Production animation/clocks and all other assertions are unchanged.
+> A retained old-binary asset-root diagnostic passes; current-source full02,
+> newest NPC integration, clean builds and paired publication remain pending.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Current five-class/R25 merge, 2026-10-12: actual second-merge checks pass
+> simulation124/Gateway18, consumption-time CanMove9, real buff clocks5,
+> owner health16/32, zero-health7, outcome3, map transfer4 and monthly8.
+> Counts overlap; two original test-support billing cases are not executed
+> locally here and remain in the unchanged Linux workflow. Original Sim120/4
+> failure and fixture preparation failures are retained. Native BackStep/queued
+> Jump input guards and five combination tests are now written; their actual
+> Windows checks, clean Git/Linux/build/package/paired rollout remain pending.
+> Source schema is 7/7 (Zone), 3/2 (Gateway/factory), not schema8.
+> Public R25/feed20 is unchanged. No game switch or human acceptance.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Five-class integration checkpoint, 2026-10-12: the actual first R24 working
+> merge passes simulation124/Gateway18, Native bridge32/health20, nine-locale
+> validation13 and game-data75 (67 library + 5/3 integration). Original failed,
+> aborted and zero-match runs are retained and not counted as passes. Public
+> is now R25/feed20/client d917 and Gateway4006; preserve both through the next
+> actual merge before fresh checks, genuine Native build and paired publication.
+> No game/Gateway switch or human acceptance occurred in this round.
+> [Scope and exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Five-class integration follow-up, 2026-10-11: actual public R24/feed19 uses
+> Source87fd85a0d5a819e5b38c90d192421f9239f65678. Preserve all its shop/mail/
+> month-card/billing/owner-health fixes before building the five-class release.
+> Current green five-class evidence precedes that merge; fresh merged checks,
+> genuine binaries and publication remain open. Updater81 passes/4 original
+> ignores; focused7 overlaps. No public switch or native acceptance occurred.
+> [Exact scope and evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+> Current five-class round, 2026-10-11: Assassin/Archer level 1–50 normal
+> content and authoritative shared-zone combat pass simulation118/Gateway12;
+> adjacent entity22/player-combat7 and native animation28/audio26/supplies21/
+> Windows bridge32 pass. Original failed logs remain; overlapping filters are
+> not summed. Real Source pixels and selected-profile asset closure pass.
+> Commit/Linux/attested EXE/updater compatibility/package/deploy/native human
+> gates remain open. Old 200,000-file/32 MiB update bounds need a finite,
+> backward-compatible engine upgrade before the larger resource release.
+> [Exact scope and evidence](FIVE-CLASS-CANDIDATE-20261011.md). This is a bounded
+> Candidate round, not all-level five-class or whole-project 100% acceptance.
+> Root owns common/production files; explorers are read-only. No new Goal.
+
+> Local NPC input candidate, 2026-10-12: undisplayed targets, skipped prompts,
+> added arguments and copied link/input pages cannot obtain input permission.
+> Private non-Clone menu/pending slots bind actual local identity, Entity and
+> imported script bodies, and invalidate on life/load/map/rollback/teardown.
+> Final318 distinct local Rust checks pass (24 new); focused29 are a subset.
+> All original result assertions remain. Exact parent reproduces3 old fixture
+> failures; Source-valid preparation fixes them. Original red/compile/review
+> failures and exact owned-file restoration proof remain. [Evidence and limits](CLASSIC-NPC-INPUT-ADMISSION-20261012.md).
+> New exact-source Linux CI/package and a drained Gateway switch remain open;
+> current public app d917/engine b439/feed20/Gateway4006 are unchanged. This is
+> deliberate local input hardening, not complete Source/Zone invocation,
+> CHECKHUM/world outbox, fullP1-P7/Mentor or native/human acceptance. Root is
+> the sole writer; expired heartbeat remains paused.
 
 
 > R25/feed20 actually published, 2026-10-11: genuine d917 Windows subject;

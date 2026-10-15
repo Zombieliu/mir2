@@ -44,7 +44,7 @@ const MAX_PASSWORD: usize = 32;
 const MAX_CHANGE_ACCOUNT: usize = 15;
 const MAX_CHANGE_PASSWORD: usize = 15;
 const MAX_NAME: usize = 18;
-const CLASSES: [&str; 3] = ["Warrior", "Wizard", "Taoist"];
+const CLASSES: [&str; 5] = ["Warrior", "Wizard", "Taoist", "Assassin", "Archer"];
 const GENDERS: [&str; 2] = ["Male", "Female"];
 
 const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
@@ -57,10 +57,21 @@ const NEW_CHARACTER_TITLE: spec::CrystalRect = spec::CrystalRect::new(424.0, 165
 const NEW_CHARACTER_NAME_FIELD: spec::CrystalRect =
     spec::CrystalRect::new(543.0, 422.0, 240.0, 20.0);
 const NEW_CHARACTER_PREVIEW_ANCHOR: (f32, f32) = (338.0, 404.0);
-const NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 3] = [
+const NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 5] = [
     spec::CrystalRect::new(541.0, 450.0, 44.0, 42.0),
     spec::CrystalRect::new(591.0, 450.0, 44.0, 42.0),
     spec::CrystalRect::new(641.0, 450.0, 44.0, 42.0),
+    spec::CrystalRect::new(691.0, 450.0, 44.0, 42.0),
+    spec::CrystalRect::new(741.0, 450.0, 44.0, 42.0),
+];
+// Three labels on the first row, two on the second. The original icon slots
+// remain unchanged; translated class names get enough width in every locale.
+const LOCALIZED_NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 5] = [
+    spec::CrystalRect::new(497.0, 450.0, 90.0, 30.0),
+    spec::CrystalRect::new(591.0, 450.0, 90.0, 30.0),
+    spec::CrystalRect::new(685.0, 450.0, 90.0, 30.0),
+    spec::CrystalRect::new(497.0, 489.0, 137.0, 30.0),
+    spec::CrystalRect::new(638.0, 489.0, 137.0, 30.0),
 ];
 const NEW_CHARACTER_GENDER_BUTTONS: [spec::CrystalRect; 2] = [
     spec::CrystalRect::new(541.0, 497.0, 44.0, 42.0),
@@ -1500,7 +1511,7 @@ fn render_character_create(
         if crate::native_i18n::active() {
             spawn_aux_text_button(
                 parent,
-                spec::CrystalRect::new(497.0 + index as f32 * 94.0, 474.0, 90.0, 30.0),
+                LOCALIZED_NEW_CHARACTER_CLASS_BUTTONS[index],
                 CLASSES[index].to_owned(),
                 NativeShellButton::SelectCreateClass(index as u8),
                 true,
@@ -2176,6 +2187,12 @@ fn character_description(class_name: &str) -> &'static str {
         }
         2 => {
             "Taoists support allies and master spiritual arts.\nThey balance healing, buffs, and combat."
+        }
+        3 => {
+            "Assassins strike with paired blades and stealth.\nThey favor quick attacks and careful movement."
+        }
+        4 => {
+            "Archers attack from range with bows and special shots.\nKeep your distance and watch your positioning."
         }
         _ => "",
     }
@@ -3164,12 +3181,84 @@ mod tests {
     }
 
     #[test]
-    fn new_character_class_and_gender_choices_are_limited_to_existing_backend_flow() {
-        assert_eq!(CLASSES, ["Warrior", "Wizard", "Taoist"]);
+    fn new_character_class_and_gender_choices_cover_all_five_source_classes() {
+        assert_eq!(
+            CLASSES,
+            ["Warrior", "Wizard", "Taoist", "Assassin", "Archer"]
+        );
         assert_eq!(GENDERS, ["Male", "Female"]);
-        assert!(!CLASSES.contains(&"Assassin"));
-        assert!(!CLASSES.contains(&"Archer"));
-        assert_eq!(character_description("Warrior").is_empty(), false);
+        for (index, class) in CLASSES.into_iter().enumerate() {
+            assert_eq!(character_class_index(class), index as u16);
+            assert!(!character_description(class).is_empty());
+            assert_eq!(
+                rotate_choice(class, &CLASSES, false),
+                CLASSES[(index + 1) % CLASSES.len()]
+            );
+            assert_eq!(
+                rotate_choice(class, &CLASSES, true),
+                CLASSES[(index + CLASSES.len() - 1) % CLASSES.len()]
+            );
+        }
+    }
+
+    #[test]
+    fn five_class_create_buttons_fit_the_frame_in_all_nine_locales() {
+        use crate::native_i18n::{self, Locale};
+        for locale in Locale::ALL {
+            for class in CLASSES {
+                native_i18n::with_locale(locale, || {
+                    let mut model = NativeShellModel::default();
+                    model.screen = NativeShellScreen::CharacterCreate;
+                    model.character_create.class_name = class.into();
+                    model.character_create.name = "OwnHero".into();
+                    let expected = model.clone();
+                    let mut app = multilingual_shell_app(model);
+                    app.update();
+                    let texts = shell_texts(&mut app);
+                    for choice in CLASSES {
+                        assert!(
+                            texts.contains(&native_i18n::tr(choice)),
+                            "{locale:?}: {choice}"
+                        );
+                    }
+                    let description = native_i18n::tr(character_description(class));
+                    assert!(texts.contains(&description), "{locale:?}: {class}");
+                    if locale != Locale::English {
+                        assert_ne!(description, character_description(class));
+                    }
+                    let mut buttons = app.world_mut().query::<(&NativeShellButton, &Node)>();
+                    let classes = buttons
+                        .iter(app.world())
+                        .filter_map(|(action, node)| {
+                            let NativeShellButton::SelectCreateClass(index) = action else {
+                                return None;
+                            };
+                            let expected_rect =
+                                LOCALIZED_NEW_CHARACTER_CLASS_BUTTONS[usize::from(*index)];
+                            assert_eq!(
+                                (node.left, node.top, node.width, node.height),
+                                (
+                                    Val::Px(expected_rect.left),
+                                    Val::Px(expected_rect.top),
+                                    Val::Px(expected_rect.width),
+                                    Val::Px(expected_rect.height)
+                                )
+                            );
+                            assert!(
+                                NEW_CHARACTER_FRAME.contains(expected_rect.left, expected_rect.top)
+                            );
+                            assert!(NEW_CHARACTER_FRAME.contains(
+                                expected_rect.left + expected_rect.width,
+                                expected_rect.top + expected_rect.height
+                            ));
+                            Some(*index)
+                        })
+                        .collect::<Vec<_>>();
+                    assert_eq!(classes.len(), CLASSES.len());
+                    assert_eq!(app.world().resource::<NativeShellModel>(), &expected);
+                });
+            }
+        }
     }
 
     #[test]

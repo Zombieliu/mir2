@@ -820,6 +820,7 @@ fn uses_archer_alt(action: AnimationAction) -> bool {
         action,
         AnimationAction::Walking
             | AnimationAction::Running
+            | AnimationAction::Jump
             | AnimationAction::AttackRange1
             | AnimationAction::AttackRange2
     )
@@ -914,8 +915,31 @@ fn resolved_native_sprite_with_availability(
         weapon_library_secondary = None;
         weapon_frame_offset = Some(gender_weapon_offset);
     }
-    let alt_body_library = available_sprite_library(sprite, "altBodyLibrary", library_exists);
-    let alt_hair_library = available_sprite_library(sprite, "altHairLibrary", library_exists);
+    // Source PlayerObject forces Archer altAnim for Jump even without a
+    // class bow. Derive only matching, actually available body/hair libraries
+    // from authoritative gear metadata; never invent an AR weapon.
+    let archer_jump = class_key == "archer" && untransformed && action == AnimationAction::Jump;
+    let jump_library = |library: Option<&str>, family: &str, alternate: &str| {
+        library
+            .and_then(|library| {
+                normalized_library_key(library)
+                    .strip_prefix(family)
+                    .map(|index| format!("/original-ui/{alternate}{index}"))
+            })
+            .filter(|library| library_exists(library))
+    };
+    let alt_body_library = available_sprite_library(sprite, "altBodyLibrary", library_exists)
+        .or_else(|| {
+            archer_jump
+                .then(|| jump_library(Some(&body_library), "CArmour/", "ARArmour/"))
+                .flatten()
+        });
+    let alt_hair_library = available_sprite_library(sprite, "altHairLibrary", library_exists)
+        .or_else(|| {
+            archer_jump
+                .then(|| jump_library(hair_library.as_deref(), "CHair/", "ARHair/"))
+                .flatten()
+        });
     let alt_weapon_library = available_sprite_library(sprite, "altWeaponLibrary", library_exists);
     let alt_weapon_library_secondary =
         available_sprite_library(sprite, "altWeaponLibrarySecondary", library_exists);
@@ -938,7 +962,7 @@ fn resolved_native_sprite_with_availability(
             weapon_library_secondary: None,
             mount_library,
             body_base_offset: sprite_number(sprite, "altFrameBaseOffset")
-                .unwrap_or(gender_body_offset),
+                .unwrap_or(if gender_key == "female" { 352 } else { 0 }),
             weapon_frame_offset: sprite_number(sprite, "altWeaponFrameOffset")
                 .or(weapon_frame_offset),
             mount_frame_offset,
@@ -996,6 +1020,7 @@ fn payload_animation_action(entity: &Value) -> AnimationAction {
         "attackRange1" => AnimationAction::AttackRange1,
         "attackRange2" => AnimationAction::AttackRange2,
         "dashAttack" => AnimationAction::DashAttack,
+        "jump" => AnimationAction::Jump,
         "spell" => AnimationAction::Spell,
         "struck" => AnimationAction::Struck,
         "die" => AnimationAction::Die,
@@ -3132,6 +3157,34 @@ mod tests {
             find(":weapon-primary")["z"].as_f64().unwrap() < find(":body")["z"].as_f64().unwrap()
         );
         assert!(find(":hair")["z"].as_f64().unwrap() > find(":body")["z"].as_f64().unwrap());
+    }
+
+    #[test]
+    fn five_class_archer_jump_uses_real_alt_body_without_a_class_bow() {
+        let entity = serde_json::json!({"kind":"player","classKey":"archer","genderKey":"female",
+            "transformType":-1,"sprite":{"bodyLibrary":"CArmour/03","hairLibrary":"CHair/02",
+            "weaponLibrary":"CWeapon/01","frameBaseOffset":808,"weaponFrameOffset":416}});
+        let available =
+            |library: &str| matches!(normalized_library_key(library), "ARArmour/03" | "ARHair/02");
+        let jump =
+            resolved_native_sprite_with_availability(&entity, AnimationAction::Jump, &available);
+        assert_eq!(normalized_library_key(&jump.body_library), "ARArmour/03");
+        assert_eq!(
+            normalized_library_key(jump.hair_library.as_deref().unwrap()),
+            "ARHair/02"
+        );
+        assert_eq!(jump.body_base_offset, 352);
+        assert_eq!(
+            jump.weapon_library.as_deref(),
+            Some("/original-ui/CWeapon/01")
+        );
+        assert_eq!(jump.weapon_frame_offset, Some(416));
+        let walk =
+            resolved_native_sprite_with_availability(&entity, AnimationAction::Walking, &available);
+        assert_eq!(walk.body_library, "/original-ui/CArmour/03");
+        let missing =
+            resolved_native_sprite_with_availability(&entity, AnimationAction::Jump, &|_| false);
+        assert_eq!(missing.body_library, "/original-ui/CArmour/03");
     }
 
     #[test]

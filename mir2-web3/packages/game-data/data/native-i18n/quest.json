@@ -3893,6 +3893,54 @@
       "zh-TW": "{amount} 經驗",
       "pt-BR": "{amount} de EXP",
       "aliases": []
+    },
+    {
+      "key": "quest.practice.class.learn",
+      "en": "Learn {skill}.",
+      "zh-TW": "學會{skill}。",
+      "pt-BR": "Aprenda {skill}.",
+      "aliases": []
+    },
+    {
+      "key": "quest.practice.class.normal_hit",
+      "en": "After learning {skill}, hit a monster with a normal attack.",
+      "zh-TW": "學會{skill}後，以普通攻擊命中怪物。",
+      "pt-BR": "Após aprender {skill}, acerte um monstro com um ataque normal.",
+      "aliases": []
+    },
+    {
+      "key": "quest.practice.class.toggle_hit",
+      "en": "Enable {skill}, then damage a monster with a normal attack.",
+      "zh-TW": "開啟{skill}後，以普通攻擊對怪物造成傷害。",
+      "pt-BR": "Ative {skill} e cause dano a um monstro com um ataque normal.",
+      "aliases": []
+    },
+    {
+      "key": "quest.practice.class.spell_hit",
+      "en": "Use {skill} to damage a monster; missed casts do not count.",
+      "zh-TW": "使用{skill}對怪物造成傷害；未命中不計。",
+      "pt-BR": "Use {skill} para causar dano a um monstro; usos que não acertam não contam.",
+      "aliases": []
+    },
+    {
+      "key": "quest.supply.assassinPoisonEquip",
+      "en": "Poison Sword needs equipped red or green powder; 1 per use.",
+      "zh-TW": "猛毒劍氣需裝備紅毒或綠毒，每次消耗1份。",
+      "pt-BR": "Espada Venenosa: equipe pó vermelho ou verde; 1 por uso.",
+      "aliases": [
+        "猛毒剑气需装备红毒或绿毒，每次消耗1份。",
+        "Poison Sword needs equipped red or green powder; 1 per use."
+      ]
+    },
+    {
+      "key": "quest.supply.assassinPoisonEquipped",
+      "en": "Poison Sword: powder equipped; 1 per use.",
+      "zh-TW": "猛毒劍氣毒粉已裝備，每次消耗1份。",
+      "pt-BR": "Espada Venenosa: pó equipado; 1 por uso.",
+      "aliases": [
+        "猛毒剑气毒粉已装备，每次消耗1份。",
+        "Poison Sword: powder equipped; 1 per use."
+      ]
     }
   ]
 }

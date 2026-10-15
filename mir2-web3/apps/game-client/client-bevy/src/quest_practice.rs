@@ -35,6 +35,11 @@ pub fn practice_guide(quest_index: i32, class_name: &str) -> Option<PracticeGuid
     let mut instructions = Vec::new();
     for requirement in requirements {
         let requirement = requirement.as_str()?;
+        if let Some(instruction) = five_class_requirement_instruction(requirement) {
+            summaries.push(instruction.clone());
+            instructions.push(instruction);
+            continue;
+        }
         let (summary, instruction) =
             requirement_instruction(requirement).unwrap_or((requirement, requirement));
         // Crystal ThunderBolt (雷電術) and Lightning (疾光電影) are
@@ -74,6 +79,67 @@ pub fn practice_guide(quest_index: i32, class_name: &str) -> Option<PracticeGuid
         )),
         instructions,
     })
+}
+
+/// Keep the canonical server requirement intact while resolving both the
+/// skill name and the surrounding instruction in the selected native locale.
+/// FatalSword and Focus are learned passives; neither asks the player to toggle
+/// or cast a passive. DoubleSlash is the active melee toggle.
+fn five_class_requirement_instruction(requirement: &str) -> Option<String> {
+    let (skill, template, fallback) = match requirement {
+        "FatalSword learned" => ("FatalSword", "quest.practice.class.learn", "Learn {skill}."),
+        "DoubleSlash learned" => (
+            "DoubleSlash",
+            "quest.practice.class.learn",
+            "Learn {skill}.",
+        ),
+        "Focus learned" => ("Focus", "quest.practice.class.learn", "Learn {skill}."),
+        "StraightShot learned" => (
+            "StraightShot",
+            "quest.practice.class.learn",
+            "Learn {skill}.",
+        ),
+        "DoubleShot learned" => ("DoubleShot", "quest.practice.class.learn", "Learn {skill}."),
+        "normal attack landed with FatalSword learned" => (
+            "FatalSword",
+            "quest.practice.class.normal_hit",
+            "After learning {skill}, hit a monster with a normal attack.",
+        ),
+        "normal ranged attack landed with Focus learned" => (
+            "Focus",
+            "quest.practice.class.normal_hit",
+            "After learning {skill}, hit a monster with a normal attack.",
+        ),
+        "DoubleSlash attack damage committed" => (
+            "DoubleSlash",
+            "quest.practice.class.toggle_hit",
+            "Enable {skill}, then damage a monster with a normal attack.",
+        ),
+        "StraightShot damage committed" => (
+            "StraightShot",
+            "quest.practice.class.spell_hit",
+            "Use {skill} to damage a monster; missed casts do not count.",
+        ),
+        "DoubleShot damage committed" => (
+            "DoubleShot",
+            "quest.practice.class.spell_hit",
+            "Use {skill} to damage a monster; missed casts do not count.",
+        ),
+        _ => return None,
+    };
+    let english_name = match skill {
+        "FatalSword" => "Fatal Sword",
+        "DoubleSlash" => "Double Slash",
+        "StraightShot" => "Straight Shot",
+        "DoubleShot" => "Double Shot",
+        _ => skill,
+    };
+    let name = crate::native_i18n::key(&format!("content.magic.{skill}.name"), english_name);
+    Some(crate::native_i18n::format_key(
+        template,
+        fallback,
+        &[("skill", &name)],
+    ))
 }
 
 fn requirement_instruction(requirement: &str) -> Option<(&str, &str)> {
@@ -366,7 +432,7 @@ mod tests {
             with_locale(locale, || {
                 for definition in newcomer_config()["quests"].as_array().unwrap() {
                     let id = definition["id"].as_i64().unwrap() as i32;
-                    for class in ["Warrior", "Wizard", "Taoist"] {
+                    for class in ["Warrior", "Wizard", "Taoist", "Assassin", "Archer"] {
                         if let Some(guide) = practice_guide(id, class) {
                             assert!(!guide.instructions.is_empty());
                             assert!(
@@ -404,13 +470,86 @@ mod tests {
                 for requirements in flag["requirements"].as_object().unwrap().values() {
                     for requirement in requirements.as_array().unwrap() {
                         assert!(
-                            requirement_instruction(requirement.as_str().unwrap()).is_some(),
+                            requirement_instruction(requirement.as_str().unwrap()).is_some()
+                                || five_class_requirement_instruction(
+                                    requirement.as_str().unwrap()
+                                )
+                                .is_some(),
                             "{requirement}"
                         );
                     }
                 }
             }
         }
+    }
+
+    #[test]
+    fn assassin_and_archer_practice_names_are_specific_in_all_nine_locales() {
+        use crate::native_i18n::{with_locale, Locale};
+        let requirements = [
+            ("FatalSword learned", "FatalSword"),
+            ("normal attack landed with FatalSword learned", "FatalSword"),
+            ("DoubleSlash learned", "DoubleSlash"),
+            ("DoubleSlash attack damage committed", "DoubleSlash"),
+            ("Focus learned", "Focus"),
+            ("normal ranged attack landed with Focus learned", "Focus"),
+            ("StraightShot learned", "StraightShot"),
+            ("StraightShot damage committed", "StraightShot"),
+            ("DoubleShot learned", "DoubleShot"),
+            ("DoubleShot damage committed", "DoubleShot"),
+        ];
+        for locale in Locale::ALL {
+            with_locale(locale, || {
+                for (requirement, skill) in requirements {
+                    let instruction = five_class_requirement_instruction(requirement).unwrap();
+                    let name =
+                        crate::native_i18n::key(&format!("content.magic.{skill}.name"), skill);
+                    assert!(instruction.contains(&name), "{locale:?}: {instruction}");
+                    assert!(!instruction.contains('{') && !instruction.contains("committed"));
+                    assert_ne!(instruction, requirement);
+                    if locale != Locale::English {
+                        let english = with_locale(Locale::English, || {
+                            five_class_requirement_instruction(requirement).unwrap()
+                        });
+                        assert_ne!(
+                            instruction, english,
+                            "untranslated {locale:?}: {requirement}"
+                        );
+                    }
+                }
+            });
+        }
+        assert!(five_class_requirement_instruction("Precise learned").is_none());
+        assert!(five_class_requirement_instruction("FatalSword damage committed").is_none());
+    }
+
+    #[test]
+    fn added_classes_receive_every_authored_practice_node() {
+        use crate::native_i18n::{with_locale, Locale};
+        with_locale(Locale::English, || {
+            for id in [
+                2_110_004, 2_110_008, 2_110_011, 2_110_012, 2_110_015, 2_110_016, 2_110_018,
+                2_110_021,
+            ] {
+                for class in ["Assassin", "Archer"] {
+                    let guide = practice_guide(id, class)
+                        .unwrap_or_else(|| panic!("missing {class} practice at {id}"));
+                    assert!(!guide.instructions.is_empty());
+                    assert!(!guide.summary.contains("committed"));
+                    assert!(!guide.summary.contains('{'));
+                }
+            }
+            let passive = practice_guide(2_110_004, "Assassin").unwrap();
+            assert!(passive.summary.contains("Fatal Sword"));
+            assert!(passive
+                .instructions
+                .iter()
+                .all(|line| !line.contains("Enable")));
+            assert!(passive
+                .instructions
+                .iter()
+                .any(|line| line.contains("normal attack")));
+        });
     }
 
     #[test]

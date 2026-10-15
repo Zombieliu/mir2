@@ -251,6 +251,7 @@ fn owner_health_plague_mp_zero_operation_precedes_lethal_hp_and_clears_poison() 
         damage: 10,
         spell_packets_at_ms: 0,
         spell_packets_sent: true,
+        trap_detonated: false,
         next_damage_at_ms: 0,
         expires_at_ms: 10000,
         tick_interval_ms: 1000,

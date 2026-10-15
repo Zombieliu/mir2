@@ -36,6 +36,7 @@ async fn async_main() -> std::io::Result<()> {
         .as_str()
     {
         "platinum_176" => config.with_platinum_176_profile(),
+        "platinum_fiveclass" => config.with_platinum_fiveclass_profile(),
         "crystal_full" => config,
         profile => {
             return Err(io::Error::new(

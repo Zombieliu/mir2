@@ -16,6 +16,8 @@ mod replay;
 mod replication;
 mod runtime;
 mod types;
+mod five_class_receipts;
+pub use five_class_receipts::{ZoneFiveClassPracticeReceipt, ZoneFiveClassPracticeSpell};
 mod intelligent_creatures;
 pub use intelligent_creatures::{CreatureOperation, CreatureOwner, CreaturePickupIntent};
 
@@ -38,6 +40,6 @@ pub use types::{
     ZoneNpcTeleportDestination, ZoneOutbound, ZonePlayerCombatStats, ZoneJourneyEventKind,
     ZoneJourneyEventReceipt, ZoneJourneyPhysicalTechnique, ZoneMagicPracticeReceipt,
     ZoneMagicPracticeSpell,
-    ZoneVitalSettlement, ZonePlayerAppearance,
+    ZoneVitalSettlement, ZoneManaSettlement, ZonePlayerAppearance,
     ZoneOwnedPetPlayerKillReceipt,
 };

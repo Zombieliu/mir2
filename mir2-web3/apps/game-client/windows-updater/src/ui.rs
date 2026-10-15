@@ -26,7 +26,7 @@ pub fn stage(locale: &str, key: &str) -> String {
         if let Some((done, total)) = counts.split_once('/') {
             if let (Ok(done), Ok(total)) = (done.parse::<usize>(), total.parse::<usize>()) {
                 if done <= total
-                    && total <= 200010
+                    && total <= crate::model::MAX_TRANSACTION_FILES
                     && matches!(
                         phase,
                         "extracting"

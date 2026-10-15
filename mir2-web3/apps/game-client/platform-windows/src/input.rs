@@ -6766,6 +6766,389 @@ mod tests {
         mouse.press(MouseButton::Right);
     }
 
+    fn typed_back_step_escape_fixture(
+        app: &mut bevy::prelude::App,
+        after_struck: bool,
+    ) -> (
+        u64,
+        u64,
+        crate::gameplay_bridge::NativeGameplayAdapter,
+        serde_json::Value,
+    ) {
+        let mut payload = serde_json::json!({
+            "playerObjectId": 1000,
+            "sceneView": {"center": {"x": 10, "y": 10}},
+            "entities": [{
+                "objectId": 1000, "kind": "selfPlayer", "class": "Archer",
+                "x": 10, "y": 10, "direction": "Right", "dead": false,
+                "sprite": {"bodyLibrary": "ARArmour/00", "directionStride": 4, "frameBaseOffset": 0}
+            }]
+        });
+        let mut adapter = crate::gameplay_bridge::NativeGameplayAdapter::default();
+        adapter.observe_world_snapshot(&payload);
+        let animation_origin = crate::entity_presentation::native_motion_clock_ms();
+        {
+            let mut presentation = app.world_mut().resource_mut::<NativeEntityPresentation>();
+            presentation.set_hover_grid_context_for_test((10, 10), (672., 352.));
+            presentation.observe_packet_payload(payload.clone(), animation_origin);
+        }
+        if after_struck {
+            assert!(
+                adapter.observe_packet(&crate::native_protocol::PacketEvent::Other {
+                    packet: "ObjectStruck".into(),
+                    payload: serde_json::json!({
+                        "objectId": 1000, "attackerId": 2001,
+                        "location": {"x": 10, "y": 10}, "direction": "Right"
+                    }),
+                })
+            );
+            let mut struck = payload.clone();
+            adapter.apply_authoritative_overlay(&mut struck);
+            assert_eq!(struck["entities"][0]["_nativeAnimationAction"], "struck");
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
+                .observe_packet_payload(struck, animation_origin);
+        }
+        assert!(
+            adapter.observe_packet(&crate::native_protocol::PacketEvent::Other {
+                packet: "UserBackStep".into(),
+                payload: serde_json::json!({
+                    "location": {"x": 7, "y": 10}, "direction": "Right", "distance": 3
+                }),
+            })
+        );
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert_eq!(payload["entities"][0]["_nativeAnimationAction"], "jump");
+        assert_eq!(payload["entities"][0]["x"], 7);
+        assert_eq!(payload["entities"][0]["direction"], "Right");
+        assert!(payload["entities"][0]["_nativeAnimationSequence"]
+            .as_u64()
+            .is_some());
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .observe_packet_payload(payload.clone(), animation_origin);
+        let presentation = app.world().resource::<NativeEntityPresentation>();
+        let motion = presentation.overlay_payload().unwrap()["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entity| entity["objectId"].as_u64() == Some(1000))
+            .expect("the real Jump overlay must retain the self actor");
+        let motion_origin = motion["motionStartedMs"]
+            .as_u64()
+            .expect("the admitted Jump must expose its actual motion clock");
+        assert_eq!(motion["motionDurationMs"].as_u64(), Some(800));
+        assert!(motion_origin >= animation_origin);
+        let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+        let player = entities
+            .entities
+            .iter_mut()
+            .find(|entity| entity.kind == EntityKind::SelfPlayer)
+            .unwrap();
+        player.x = 7;
+        player.y = 10;
+        player.direction = Some("right".into());
+        (animation_origin, motion_origin, adapter, payload)
+    }
+
+    #[test]
+    fn native_back_step_held_escape_preserves_jump_until_all_eight_source_frames_finish() {
+        for new_move in [false, true] {
+            let (mut app, receiver) = crowded_escape_input_app(new_move);
+            let (animation_origin, motion_origin, mut adapter, mut payload) =
+                typed_back_step_escape_fixture(&mut app, false);
+            assert_eq!(
+                app.world()
+                    .resource::<NativeEntityPresentation>()
+                    .self_motion_remaining_ms(motion_origin),
+                800
+            );
+            hold_escape_right(&mut app);
+            advance_movement_clock(&mut app, 1);
+            app.update();
+            assert!(
+                receiver.try_recv().is_err(),
+                "a held right button must not send a normal move over BackStep: NewMove={new_move}"
+            );
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .clear_just_pressed(MouseButton::Right);
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
+                .advance_animation_for_test(animation_origin + 799);
+            advance_movement_clock(&mut app, 798);
+            let source_camera_tail = app
+                .world()
+                .resource::<NativeEntityPresentation>()
+                .camera_screen_offset(motion_origin + 799);
+            app.update();
+            assert!(receiver.try_recv().is_err());
+            let presentation = app.world().resource::<NativeEntityPresentation>();
+            assert!(presentation.self_combat_action_blocks_movement("1000"));
+            assert_eq!(presentation.self_equipment_pose("1000").unwrap().0, false);
+            assert_eq!(
+                presentation.self_motion_remaining_ms(motion_origin + 799),
+                1
+            );
+            assert_eq!(
+                presentation.camera_screen_offset(motion_origin + 799),
+                source_camera_tail,
+                "normal prediction cannot replace the source Jump camera window"
+            );
+            assert!(app
+                .world()
+                .resource::<WorldPointerMovementState>()
+                .pending
+                .is_empty());
+
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
+                .advance_animation_for_test(animation_origin + 800);
+            assert!(!app
+                .world()
+                .resource::<NativeEntityPresentation>()
+                .self_combat_action_blocks_movement("1000"));
+            let sender_deadline = (animation_origin + 800).max(motion_origin + 800);
+            finish_escape_animation_for_sender(&mut app, sender_deadline);
+            assert!(
+                !adapter.observe_packet(&crate::native_protocol::PacketEvent::Other {
+                    packet: "UserBackStep".into(),
+                    payload: serde_json::json!({
+                        "location": {"x": 7, "y": 10}, "direction": "Right", "distance": 3
+                    }),
+                })
+            );
+            adapter.apply_authoritative_overlay(&mut payload);
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
+                .observe_packet_payload(payload, sender_deadline);
+            let presentation = app.world().resource::<NativeEntityPresentation>();
+            assert!(!presentation.self_combat_action_blocks_movement("1000"));
+            assert_eq!(
+                presentation.self_motion_remaining_ms(motion_origin + 800),
+                0
+            );
+            assert_eq!(presentation.self_equipment_pose("1000").unwrap().0, true);
+            advance_movement_clock(&mut app, 1);
+            app.update();
+            assert!(matches!(receiver.try_recv(),
+                Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"));
+            assert_escape_prediction_started(&app);
+            assert!(app
+                .world()
+                .resource::<ButtonInput<MouseButton>>()
+                .pressed(MouseButton::Right));
+            let movement = app.world().resource::<WorldPointerMovementState>();
+            assert_eq!(movement.pending.len(), 1);
+            assert_eq!(movement.pending.front().unwrap().from, (7, 10));
+            assert_eq!(movement.pending.front().unwrap().to, (8, 10));
+            assert!(receiver.try_recv().is_err());
+        }
+    }
+
+    #[test]
+    fn native_back_step_queued_after_struck_blocks_held_escape_and_early_local_camera() {
+        for new_move in [false, true] {
+            let (mut app, receiver) = crowded_escape_input_app(new_move);
+            let (animation_origin, motion_origin, _adapter, _payload) =
+                typed_back_step_escape_fixture(&mut app, true);
+            {
+                let mut presentation = app.world_mut().resource_mut::<NativeEntityPresentation>();
+                assert!(presentation.self_combat_action_blocks_movement("1000"));
+                let source_camera = presentation.camera_screen_offset(motion_origin);
+                assert!(!presentation.begin_local_self_motion(
+                    "1000",
+                    (7, 10),
+                    (8, 10),
+                    "right",
+                    false,
+                    animation_origin,
+                    motion_origin,
+                ));
+                assert_eq!(presentation.self_motion_remaining_ms(motion_origin), 800);
+                assert_eq!(
+                    presentation.camera_screen_offset(motion_origin),
+                    source_camera
+                );
+            }
+            hold_escape_right(&mut app);
+            advance_movement_clock(&mut app, 1);
+            app.update();
+            assert!(receiver.try_recv().is_err());
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .clear_just_pressed(MouseButton::Right);
+            let mut previous = 1;
+            for at_ms in [799, 800, 1_099] {
+                app.world_mut()
+                    .resource_mut::<NativeEntityPresentation>()
+                    .advance_animation_for_test(animation_origin + at_ms);
+                advance_movement_clock(&mut app, at_ms - previous);
+                previous = at_ms;
+                let presentation = app.world().resource::<NativeEntityPresentation>();
+                assert!(presentation.self_combat_action_blocks_movement("1000"));
+                assert_eq!(
+                    presentation.self_motion_remaining_ms(motion_origin + at_ms),
+                    800u64.saturating_sub(at_ms)
+                );
+                app.update();
+                assert!(
+                    receiver.try_recv().is_err(),
+                    "queued Jump must remain a body barrier after its arrival-time motion window expires: {at_ms}, NewMove={new_move}"
+                );
+                assert!(app
+                    .world()
+                    .resource::<WorldPointerMovementState>()
+                    .pending
+                    .is_empty());
+            }
+            let sender_deadline = (animation_origin + 1_100).max(motion_origin + 800);
+            finish_escape_animation_for_sender(&mut app, sender_deadline);
+            let presentation = app.world().resource::<NativeEntityPresentation>();
+            assert!(!presentation.self_combat_action_blocks_movement("1000"));
+            assert_eq!(presentation.self_equipment_pose("1000").unwrap().0, true);
+            advance_movement_clock(&mut app, 1);
+            app.update();
+            assert!(matches!(receiver.try_recv(),
+                Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"));
+            assert_escape_prediction_started(&app);
+            let movement = app.world().resource::<WorldPointerMovementState>();
+            assert_eq!(movement.pending.len(), 1);
+            assert_eq!(movement.pending.front().unwrap().to, (8, 10));
+            assert!(app
+                .world()
+                .resource::<ButtonInput<MouseButton>>()
+                .pressed(MouseButton::Right));
+            assert!(receiver.try_recv().is_err());
+        }
+    }
+
+    #[test]
+    fn native_double_slash_held_escape_waits_for_both_source_phases_without_hit_cooldown_lock() {
+        for new_move in [false, true] {
+            let (mut app, receiver) = crowded_escape_input_app(new_move);
+            app.add_systems(
+                bevy::prelude::Update,
+                crate::gameplay_bridge::forward_quest_ui_intents
+                    .after(mouse_world_interaction_system),
+            );
+            click_adjacent_escape_test_monster(&mut app);
+            app.update();
+            assert!(matches!(
+                receiver.try_recv(),
+                Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack {
+                    object_id: 2001
+                }))
+            ));
+            let next_attack =
+                crystal_attack_request_interval_ms(Some(app.world().resource::<UiReadModel>()));
+            assert!(next_attack > 600.0);
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .next_move_send_at_ms,
+                0.0,
+                "a normal Attack send is not an admitted movement deadline"
+            );
+
+            let mut payload = serde_json::json!({
+                "playerObjectId": 1000,
+                "sceneView": {"center": {"x": 10, "y": 10}},
+                "entities": [{
+                    "objectId": 1000, "kind": "selfPlayer", "class": "Assassin",
+                    "x": 10, "y": 10, "direction": "Right", "dead": false,
+                    "sprite": {"bodyLibrary": "CArmour/00", "directionStride": 4, "frameBaseOffset": 0}
+                }]
+            });
+            let mut adapter = crate::gameplay_bridge::NativeGameplayAdapter::default();
+            adapter.observe_world_snapshot(&payload);
+            assert!(
+                adapter.observe_packet(&crate::native_protocol::PacketEvent::Other {
+                    packet: "ObjectAttack".into(),
+                    payload: serde_json::json!({
+                        "objectId": 1000, "spell": 92, "level": 0, "direction": "Right",
+                        "location": {"x": 10, "y": 10}
+                    }),
+                })
+            );
+            adapter.apply_authoritative_overlay(&mut payload);
+            assert_eq!(payload["entities"][0]["_nativeAnimationSpell"], 92);
+            let source_sequence = payload["entities"][0]["_nativeAnimationSequence"]
+                .as_u64()
+                .unwrap();
+            let animation_origin = crate::entity_presentation::native_motion_clock_ms();
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
+                .observe_packet_payload(payload, animation_origin);
+            hold_escape_right(&mut app);
+            advance_movement_clock(&mut app, 1);
+            app.update();
+            assert!(
+                receiver.try_recv().is_err(),
+                "the first source phase is still playing"
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .attack_target,
+                None
+            );
+            assert_eq!(
+                app.world().resource::<WorldPointerMovementState>().active,
+                Some(WorldPointerMovementMode::Run)
+            );
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .clear_just_pressed(MouseButton::Right);
+
+            let mut previous = 1;
+            for at_ms in [275, 276, 551] {
+                app.world_mut()
+                    .resource_mut::<NativeEntityPresentation>()
+                    .advance_animation_for_test(animation_origin + at_ms);
+                advance_movement_clock(&mut app, at_ms - previous);
+                previous = at_ms;
+                let presentation = app.world().resource::<NativeEntityPresentation>();
+                assert!(presentation.self_combat_action_blocks_movement("1000"));
+                assert_eq!(
+                    presentation.double_slash_body_clock(1000, source_sequence),
+                    crate::entity_presentation::NativeDoubleSlashBodyClock::Started(
+                        animation_origin
+                    )
+                );
+                app.update();
+                assert!(
+                    receiver.try_recv().is_err(),
+                    "the same right hold cannot cut a source DoubleSlash phase: {at_ms}, NewMove={new_move}"
+                );
+            }
+            finish_escape_animation_for_sender(&mut app, animation_origin + 552);
+            assert!(!app
+                .world()
+                .resource::<NativeEntityPresentation>()
+                .self_combat_action_blocks_movement("1000"));
+            advance_movement_clock(&mut app, 1);
+            app.update();
+            assert!(
+                matches!(receiver.try_recv(),
+                Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"),
+                "the same right hold must escape after both phases before next-hit cooldown: NewMove={new_move}"
+            );
+            assert_escape_prediction_started(&app);
+            assert!(app
+                .world()
+                .resource::<ButtonInput<MouseButton>>()
+                .pressed(MouseButton::Right));
+            let state = app.world().resource::<WorldPointerMovementState>();
+            assert_eq!(state.next_attack_request_at_ms, next_attack);
+            assert!(state.next_attack_request_at_ms > 552.0);
+            assert_eq!(state.pending.len(), 1);
+            assert_eq!(state.pending.front().unwrap().to, (11, 10));
+            assert!(drain_world_intents(&mut app).is_empty());
+            assert!(receiver.try_recv().is_err());
+        }
+    }
+
     #[test]
     fn new_right_hold_after_attack_waits_for_real_action_but_not_next_hit_interval() {
         for new_move in [false, true] {

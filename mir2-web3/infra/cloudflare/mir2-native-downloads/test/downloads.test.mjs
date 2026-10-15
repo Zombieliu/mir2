@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { handle, OBJECT_PREFIX, POINTER_KEY, PUBLIC_BASE, MAX_ARTIFACT, MAX_METADATA, MAX_POINTER, feedDirectory } from "../src/index.mjs";
+import { handle, OBJECT_PREFIX, POINTER_KEY, PUBLIC_BASE, MAX_ARTIFACT, MAX_METADATA, MAX_FIVE_CLASS_METADATA, FIVE_CLASS_OBJECT_PREFIX, FIVE_CLASS_POINTER_KEY, FIVE_CLASS_PUBLIC_BASE, MAX_POINTER, feedDirectory } from "../src/index.mjs";
 
 const bytes = (text) => new TextEncoder().encode(text);
 const pointer = (sequence = 1) => ({
@@ -292,5 +292,136 @@ test("inconsistent R2 range metadata or changed object cannot be served or cache
     assert.equal(response.status, 502);
     assert.equal(response.headers.get("cache-control"), "no-store");
     assert.equal(f.cache.puts.length, 0);
+  }
+});
+
+
+test("five-class aliases read their own atomic pointer and preserve legacy discovery", async () => {
+  const f = setup();
+  const legacy = pointer(1);
+  const modern = pointer(2);
+  f.bucket.put("channels/invited.json", JSON.stringify(legacy));
+  f.bucket.put(feedDirectory(legacy) + "latest.json", "legacy-signed-feed");
+  f.bucket.put(feedDirectory(legacy) + "latest.p7s", "legacy-signature");
+  const putModern = (key, body) => f.bucket.rows.set(FIVE_CLASS_OBJECT_PREFIX + key, {
+    bytes: bytes(body), httpEtag: '"modern-' + key + '"', httpMetadata: {},
+  });
+  putModern("channels/invited.json", JSON.stringify(modern));
+  putModern(feedDirectory(modern) + "latest.json", "five-class-signed-feed");
+  putModern(feedDirectory(modern) + "latest.p7s", "five-class-signature");
+  for (const [base, feed, signature, sequence] of [
+    [PUBLIC_BASE, "legacy-signed-feed", "legacy-signature", "1"],
+    [FIVE_CLASS_PUBLIC_BASE, "five-class-signed-feed", "five-class-signature", "2"],
+  ]) {
+    for (const [name, body] of [["latest.json", feed], ["latest.p7s", signature]]) {
+      const response = await handle(new Request(base + name), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get("cache-control"), "no-store");
+      assert.equal(response.headers.get("x-mir2-sequence"), sequence);
+      assert.equal(await response.text(), body);
+    }
+  }
+  assert.ok(f.bucket.calls.some(([op, key]) => op === "get" && key === POINTER_KEY));
+  assert.ok(f.bucket.calls.some(([op, key]) => op === "get" && key === FIVE_CLASS_POINTER_KEY));
+  assert.equal(f.cache.puts.length, 0);
+});
+
+test("identical immutable object names have separate five-class cache and R2 keys", async () => {
+  const f = setup();
+  const path = "releases/r1/a.gz";
+  f.bucket.put(path, "legacy-bytes");
+  f.bucket.rows.set(FIVE_CLASS_OBJECT_PREFIX + path, {
+    bytes: bytes("five-class-bytes"), httpEtag: '"five-class-bytes"', httpMetadata: {},
+  });
+  for (let pass = 0; pass < 2; pass++) {
+    for (const [base, body] of [[PUBLIC_BASE, "legacy-bytes"], [FIVE_CLASS_PUBLIC_BASE, "five-class-bytes"]]) {
+      const response = await handle(new Request(base + path), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get("x-mir2-native-cache"), pass === 0 ? "MISS" : "HIT");
+      assert.equal(await response.text(), body);
+      await f.done();
+    }
+  }
+  assert.deepEqual(f.cache.puts, [PUBLIC_BASE + path, FIVE_CLASS_PUBLIC_BASE + path]);
+});
+
+test("five-class missing or invalid pointers never fall back to legacy discovery", async () => {
+  const f = setup();
+  f.bucket.put("channels/invited.json", JSON.stringify(pointer(1)));
+  f.bucket.put(feedDirectory(pointer(1)) + "latest.json", "legacy-signed-feed");
+  let response = await handle(new Request(FIVE_CLASS_PUBLIC_BASE + "latest.json"), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+  assert.equal(response.status, 503);
+  f.bucket.rows.set(FIVE_CLASS_POINTER_KEY, {
+    bytes: bytes("not-json"), httpEtag: '"invalid-five-class"', httpMetadata: {},
+  });
+  response = await handle(new Request(FIVE_CLASS_PUBLIC_BASE + "latest.json"), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+  assert.equal(response.status, 502);
+  assert.ok(!f.bucket.calls.some(([op, key]) => op === "get" && key === POINTER_KEY));
+});
+
+test("five-class supports measured metadata while old channel retains its original bound", async () => {
+  const f = setup();
+  const path = "releases/r1/PACKAGE-MANIFEST.json";
+  f.bucket.put(path, "", { declaredSize: MAX_METADATA + 1 });
+  f.bucket.rows.set(FIVE_CLASS_OBJECT_PREFIX + path, {
+    bytes: bytes(""), declaredSize: MAX_METADATA + 1, httpEtag: '"large-manifest"', httpMetadata: {},
+  });
+  let response = await f.fetch(path, {}, "HEAD");
+  assert.equal(response.status, 502);
+  response = await handle(new Request(FIVE_CLASS_PUBLIC_BASE + path, { method: "HEAD" }), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-length"), String(MAX_METADATA + 1));
+  f.bucket.rows.get(FIVE_CLASS_OBJECT_PREFIX + path).declaredSize = MAX_FIVE_CLASS_METADATA + 1;
+  response = await handle(new Request(FIVE_CLASS_PUBLIC_BASE + path, { method: "HEAD" }), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+  assert.equal(response.status, 502);
+});
+
+test("five-class route rejects encoded scope changes, separators and nested discovery", async () => {
+  for (const path of [
+    "five%2dclass/latest.json", "five-class%2flatest.json", "five-class/%2flatest.json",
+    "five-class/%5clatest.json", "five-class/five-class/latest.json", "other-class/latest.json",
+    "five-class/channels/invited.json", "five-class/latest.json?scope=legacy",
+  ]) {
+    const f = setup();
+    const response = await f.fetch(path);
+    assert.equal(response.status, 404, path);
+    assert.equal(f.bucket.calls.length, 0, path);
+  }
+});
+
+
+test("five-class loose repair paths preserve literal Source spaces and one cache key", async () => {
+  const f = setup();
+  const literal = "releases/r1/mir2-assets/original-ui/AWeapon/00 L/1.png";
+  f.bucket.rows.set(FIVE_CLASS_OBJECT_PREFIX + literal, {
+    bytes: bytes("source-frame"), httpEtag: '"source-space-frame"', httpMetadata: {},
+  });
+  for (const path of [literal.replace("00 L", "00%20L"), literal]) {
+    const response = await handle(new Request(FIVE_CLASS_PUBLIC_BASE + path), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), "source-frame");
+    await f.done();
+  }
+  assert.equal(f.cache.puts.length, 1);
+  assert.equal(f.cache.puts[0], FIVE_CLASS_PUBLIC_BASE + literal.replace("00 L", "00%20L"));
+  const head = await handle(new Request(FIVE_CLASS_PUBLIC_BASE + literal, { method: "HEAD" }), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+  assert.equal(head.status, 200);
+  assert.equal(head.headers.get("content-length"), "12");
+  assert.equal(await head.text(), "");
+  const legacy = await f.fetch(literal);
+  assert.equal(legacy.status, 404);
+});
+
+test("five-class space allowance still rejects Windows normalization and encoded separators", async () => {
+  for (const path of [
+    "releases/r1/mir2-assets/AWeapon/00%20/1.png", "releases/r1/mir2-assets/AWeapon/00./1.png",
+    "releases/r1/mir2-assets/AWeapon/%20/1.png", "releases/r1/mir2-assets/AWeapon/00%2520L/1.png",
+    "releases/r1/mir2-assets/AWeapon/00%2fL/1.png", "releases/r1/mir2-assets/AWeapon/00%5cL/1.png",
+    "releases/r1/mir2-assets/AWeapon/00%3aL/1.png",
+  ]) {
+    const f = setup();
+    const response = await handle(new Request(FIVE_CLASS_PUBLIC_BASE + path), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+    assert.equal(response.status, 404, path);
+    assert.equal(f.bucket.calls.length, 0, path);
   }
 });

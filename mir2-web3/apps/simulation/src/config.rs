@@ -18,6 +18,7 @@ use mir2_game_data::{
     content_profile_respawn_overrides_for_map, crystal_map_respawns_by_file_name,
     crystal_monster_by_name,
     crystal_respawn_manifest, platinum_176_profile, platinum_176_profile_bundle,
+    platinum_fiveclass_profile, platinum_fiveclass_profile_bundle, ContentProfileBundle,
     starter_map_collision, starter_scene, validate_content_profile, ContentProfile,
     ContentSkillRule, CrystalItemTemplate, CrystalRespawnTemplate, DecorObjectTemplate, MapBounds,
     SceneBootstrap, SceneView, StarterMapCollision, TerrainPatchTemplate,
@@ -3572,8 +3573,14 @@ pub struct ContentProfileRuntime {
 
 impl ContentProfileRuntime {
     pub fn platinum_176() -> Self {
-        let profile = platinum_176_profile();
-        let bundle = platinum_176_profile_bundle();
+        Self::from_bundle(platinum_176_profile(), platinum_176_profile_bundle())
+    }
+
+    pub fn platinum_fiveclass() -> Self {
+        Self::from_bundle(platinum_fiveclass_profile(), platinum_fiveclass_profile_bundle())
+    }
+
+    fn from_bundle(profile: ContentProfile, bundle: ContentProfileBundle) -> Self {
         debug_assert!(validate_content_profile(&profile).is_ok());
         Self {
             profile_id: profile.profile_id.clone(),
@@ -4092,10 +4099,17 @@ impl SimulationConfig {
         }
     }
 
-    pub fn with_platinum_176_profile(mut self) -> Self {
+    pub fn with_platinum_176_profile(self) -> Self {
+        self.with_content_profile(ContentProfileRuntime::platinum_176())
+    }
+
+    pub fn with_platinum_fiveclass_profile(self) -> Self {
+        self.with_content_profile(ContentProfileRuntime::platinum_fiveclass())
+    }
+
+    fn with_content_profile(mut self, runtime: ContentProfileRuntime) -> Self {
         // Explicit operating calendar: Chinese evening, distinct from source UTC.
         for policy in &mut self.conquest_policies { policy.utc_offset_minutes=480; }
-        let runtime = ContentProfileRuntime::platinum_176();
         if let Some(starter_map_rule) = runtime
             .profile
             .map_whitelist

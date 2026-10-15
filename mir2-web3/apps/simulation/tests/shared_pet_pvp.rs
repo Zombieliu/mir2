@@ -1038,7 +1038,19 @@ fn shared_human_owned_pet_real_spell_and_range_hits_use_typed_damage() {
             p,
             ServerPacket::RangeAttack { .. } | ServerPacket::Magic { .. }
         )));
-        let impact = z.tick(600);
+        let impact = if ranged {
+            // The real one-tile arrow arrives after 550 + 50ms; its range
+            // animation does not itself damage the owner's monster.
+            let in_flight = z.tick(1199);
+            assert_eq!(pet_hp(&z, pet), before);
+            assert!(!packets(&in_flight, "victim").iter().any(|p| matches!(
+                p,
+                ServerPacket::ObjectStruck { info } if info.object_id == pet
+            )));
+            z.tick(1200)
+        } else {
+            z.tick(600)
+        };
         assert!(pet_hp(&z, pet) < before, "ranged={ranged}");
         assert_eq!(hp(&z, "owner"), 1000);
         assert!(
@@ -2466,7 +2478,18 @@ fn shared_human_binding_shot_reaches_actual_owned_monster_and_releases_neighbour
         damage: 1,
         now_ms: 3500,
     });
-    let released = z.tick(3600);
+    // Keep the old observation time and check the actual arrow-flight
+    // boundary. Shock and the neighbour colours persist until real damage.
+    for early_time in [3600, 4099] {
+        let in_flight = z.tick(early_time);
+        assert_eq!(pet_hp(&z, pet), before);
+        assert!(!packets(&in_flight, "owner").iter().any(|p| matches!(
+            p,
+            ServerPacket::SetBindingShot { object_id, enabled: false, .. }
+                if *object_id == pet
+        )));
+    }
+    let released = z.tick(4100);
     assert!(pet_hp(&z, pet) < before);
     assert!(packets(&released, "owner").iter().any(
         |p| matches!(p,ServerPacket::SetBindingShot{object_id,enabled:false,..} if *object_id==pet)

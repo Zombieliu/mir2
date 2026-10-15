@@ -86,7 +86,9 @@ pub struct ZoneNpcTeleportConfig {
     pub destinations: Vec<ZoneNpcTeleportDestination>,
 }
 
-fn zone_default_max_boss_tames() -> u32 { 1 }
+fn zone_default_max_boss_tames() -> u32 {
+    1
+}
 
 impl ZoneNpcTeleportConfig {
     pub fn disabled(cost: u32) -> Self {
@@ -183,7 +185,9 @@ impl Default for ZoneChatProfile {
     }
 }
 
-fn zone_byte_is_zero(value: &u8) -> bool { *value == 0 }
+fn zone_byte_is_zero(value: &u8) -> bool {
+    *value == 0
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ZoneChatItem {
@@ -228,6 +232,17 @@ pub struct ZonePlayerCombatStats {
     /// +10% on a landed crit). Zero for a player with no crit gear.
     pub critical_rate: i32,
     pub critical_damage: i32,
+    /// Full trusted session projection, including current equipment and buffs.
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub attack_bonus: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub damage_reduction_percent: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub energy_shield_percent: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub energy_shield_hp_gain: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub reflect: i32,
     /// Crystal `Luck` stat. Biases the physical attack-power roll
     /// (`MapObject.GetAttackPower`): positive Luck can force the `MaxDC` end,
     /// negative Luck the `MinDC` end. Zero (the default) leaves the roll uniform,
@@ -245,6 +260,26 @@ pub struct ZonePlayerCombatStats {
     /// Trusted GM state; never decoded from a client movement/combat packet.
     #[serde(default, skip_serializing_if = "zone_flag_is_false")]
     pub gm_never_die: bool,
+    /// Trusted learned passive identity; None differs from learnt level zero.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fatal_sword_level: Option<u8>,
+    #[serde(default, skip_serializing_if = "zone_hair_is_zero")]
+    pub mental_state: u8,
+    #[serde(default, skip_serializing_if = "zone_hair_is_zero")]
+    pub mental_state_level: u8,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meditation_level: Option<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mp_eater_level: Option<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hemorrhage_level: Option<u8>,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub max_mp: i32,
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub attack_speed: i32,
+    /// Source-limited learned identities, projected by the authenticated session.
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub five_class_learned_mask: u64,
 }
 
 fn zone_poison_is_zero(value: &u16) -> bool {
@@ -893,6 +928,13 @@ pub enum ZoneOutbound {
     JourneyEvent {
         receipt: ZoneJourneyEventReceipt,
     },
+    FiveClassMagicPractice {
+        receipt: super::five_class_receipts::ZoneFiveClassPracticeReceipt,
+    },
+    PlayerManaChanged {
+        session_id: SessionId,
+        settlement: ZoneManaSettlement,
+    },
     OwnedPetPlayerKill {
         receipt: ZoneOwnedPetPlayerKillReceipt,
     },
@@ -917,6 +959,10 @@ pub enum ZoneMagicPracticeSpell {
     SoulFireBall,
     FireBall,
     GreatFireBall,
+    StraightShot,
+    DoubleShot,
+    DoubleShotSecond,
+    FatalSword,
 }
 
 impl ZoneMagicPracticeSpell {
@@ -925,6 +971,9 @@ impl ZoneMagicPracticeSpell {
             Spell::SoulFireBall => Some(Self::SoulFireBall),
             Spell::FireBall => Some(Self::FireBall),
             Spell::GreatFireBall => Some(Self::GreatFireBall),
+            Spell::StraightShot => Some(Self::StraightShot),
+            Spell::DoubleShot => Some(Self::DoubleShot),
+            Spell::FatalSword => Some(Self::FatalSword),
             _ => None,
         }
     }
@@ -934,6 +983,9 @@ impl ZoneMagicPracticeSpell {
             Self::SoulFireBall => Spell::SoulFireBall,
             Self::FireBall => Spell::FireBall,
             Self::GreatFireBall => Spell::GreatFireBall,
+            Self::StraightShot => Spell::StraightShot,
+            Self::DoubleShot | Self::DoubleShotSecond => Spell::DoubleShot,
+            Self::FatalSword => Spell::FatalSword,
         }
     }
 
@@ -942,6 +994,9 @@ impl ZoneMagicPracticeSpell {
             Self::SoulFireBall => "soulfireball",
             Self::FireBall => "fireball",
             Self::GreatFireBall => "greatfireball",
+            Self::StraightShot => "straightshot",
+            Self::DoubleShot | Self::DoubleShotSecond => "doubleshot",
+            Self::FatalSword => "fatalsword",
         }
     }
 }
@@ -977,6 +1032,7 @@ pub enum ZoneJourneyPhysicalTechnique {
     Slaying,
     Thrusting,
     HalfMoon,
+    DoubleSlash,
 }
 
 /// A narrowly scoped, server-owned gameplay outcome for the V2 journey bridge.
@@ -990,6 +1046,9 @@ pub enum ZoneJourneyEventKind {
     PhysicalDamage {
         technique: ZoneJourneyPhysicalTechnique,
     },
+    RangedDamage,
+    StraightShotDamage,
+    DoubleShotDamage,
     LightningDamage,
     FireWallDamage,
     PoisoningApplied,
@@ -1047,6 +1106,17 @@ pub struct ZoneVitalSettlement {
     pub hp_before: i32,
     pub hp_after: i32,
     pub death_transition: bool,
+}
+
+/// Exact same-life mana mutation; independent ordering from HP receipts.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneManaSettlement {
+    pub object_id: u32,
+    pub life_generation: u64,
+    pub receipt_sequence: u64,
+    pub mp_before: i32,
+    pub mp_after: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -1112,8 +1182,10 @@ pub(crate) struct ZoneGroundDropCustody {
 }
 impl ZoneGroundDropCustody {
     pub fn matches(&self, key: &ZoneKey, ticket: &GroundDropClaimTicket) -> bool {
-        &self.source == key && self.object_id == ticket.object_id
-            && self.drop_generation == ticket.drop_generation && self.payload_digest == ticket.payload_digest
+        &self.source == key
+            && self.object_id == ticket.object_id
+            && self.drop_generation == ticket.drop_generation
+            && self.payload_digest == ticket.payload_digest
     }
 }
 
@@ -1189,6 +1261,10 @@ pub(crate) struct ZoneNativeMonster {
     pub next_ai_ready_at_ms: u64,
     pub next_attack_ready_at_ms: u64,
     pub control_until_ms: u64,
+    /// Trusted Assassin Trap-only clock. Cold recovery revokes this online lease;
+    /// omitted for all original monsters/control sources and old checkpoints.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub assassin_trap_control_until_ms: Option<u64>,
     pub control_poison: u16,
     /// Crystal Hallucination suppresses a monster's normal player targeting
     /// without freezing its movement or making it invulnerable.
@@ -1300,6 +1376,7 @@ impl ZoneNativeMonster {
             next_ai_ready_at_ms: 0,
             next_attack_ready_at_ms: 0,
             control_until_ms: 0,
+            assassin_trap_control_until_ms: None,
             control_poison: 0,
             hallucination_until_ms: 0,
             revelation_until_ms: 0,
@@ -1380,6 +1457,10 @@ pub(crate) struct ZonePlayer {
     #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
     pub vital_receipt_sequence: u64,
     #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub mana_receipt_sequence: u64,
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub five_class_practice_sequence: u64,
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
     pub owner_health_sequence: u64,
     /// Command-local notifications are never replayed by a cold checkpoint.
     #[serde(skip)]
@@ -1397,6 +1478,12 @@ pub(crate) struct ZonePlayer {
     pub fishing: bool,
     pub transform_type: i16,
     pub level_effects: u16,
+    #[serde(default, skip_serializing_if = "zone_word_is_zero")]
+    pub element_orb_effect: u32,
+    #[serde(default, skip_serializing_if = "zone_word_is_zero")]
+    pub element_orb_level: u32,
+    #[serde(default, skip_serializing_if = "zone_word_is_zero")]
+    pub element_orb_max: u32,
     pub visible_object_ids: BTreeSet<u32>,
     pub movement_actions: VecDeque<ZoneMovementAction>,
     pub last_seen_move_seq: u64,
@@ -1408,6 +1495,8 @@ pub(crate) struct ZonePlayer {
     pub magic_ready_at_ms: BTreeMap<u8, u64>,
     #[serde(default)]
     pub flaming_sword_armed: bool,
+    #[serde(default, skip_serializing_if = "zone_flag_is_false")]
+    pub fatal_sword_armed: bool,
     #[serde(default)]
     pub flaming_sword_ready_at_ms: u64,
     #[serde(default)]
@@ -1443,10 +1532,15 @@ pub(crate) struct ZoneReincarnationOffer {
 impl ZonePlayer {
     pub(super) fn appearance(&self) -> ZonePlayerAppearance {
         ZonePlayerAppearance {
-            hair: self.hair, light: self.light, weapon: self.weapon,
-            weapon_effect: self.weapon_effect, armour: self.armour,
-            wing_effect: self.wing_effect, mount_type: self.mount_type,
-            riding_mount: self.riding_mount, fishing: self.fishing,
+            hair: self.hair,
+            light: self.light,
+            weapon: self.weapon,
+            weapon_effect: self.weapon_effect,
+            armour: self.armour,
+            wing_effect: self.wing_effect,
+            mount_type: self.mount_type,
+            riding_mount: self.riding_mount,
+            fishing: self.fishing,
         }
     }
 
@@ -1474,6 +1568,20 @@ impl ZonePlayer {
             hp_before,
             hp_after: self.hp,
             death_transition: hp_before > 0 && self.hp == 0,
+        }
+    }
+
+    pub(super) fn mana_settlement(&mut self, mp_before: i32) -> ZoneManaSettlement {
+        self.mana_receipt_sequence = self
+            .mana_receipt_sequence
+            .checked_add(1)
+            .expect("Zone player mana receipt sequence exhausted");
+        ZoneManaSettlement {
+            object_id: self.object_id,
+            life_generation: self.life_generation,
+            receipt_sequence: self.mana_receipt_sequence,
+            mp_before,
+            mp_after: self.mp,
         }
     }
 
@@ -1530,6 +1638,8 @@ impl ZonePlayer {
             dead: join.hp <= 0,
             life_generation: 0,
             vital_receipt_sequence: 0,
+            mana_receipt_sequence: 0,
+            five_class_practice_sequence: 0,
             owner_health_sequence: 0,
             pending_owner_health_changes: Vec::new(),
             journey_event_sequence: 0,
@@ -1542,6 +1652,9 @@ impl ZonePlayer {
             fishing: false,
             transform_type: -1,
             level_effects: 0,
+            element_orb_effect: 0,
+            element_orb_level: 0,
+            element_orb_max: 0,
             visible_object_ids: BTreeSet::new(),
             movement_actions: VecDeque::new(),
             last_seen_move_seq: 0,
@@ -1552,6 +1665,7 @@ impl ZonePlayer {
             next_spell_ready_at_ms: 0,
             magic_ready_at_ms: BTreeMap::new(),
             flaming_sword_armed: false,
+            fatal_sword_armed: false,
             flaming_sword_ready_at_ms: 0,
             last_damaged_at_ms: 0,
             native_struck_ready_at_ms: None,
@@ -1665,4 +1779,8 @@ mod combat_state_tests {
             );
         }
     }
+}
+
+fn zone_word_is_zero(value: &u32) -> bool {
+    *value == 0
 }

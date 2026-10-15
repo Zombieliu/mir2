@@ -55,6 +55,7 @@ def main():
     p.add_argument('--feed-root', required=True, type=Path)
     p.add_argument('--output-root', required=True, type=Path)
     p.add_argument('--sequence', type=int, required=True)
+    p.add_argument('--download-scope', choices=['legacy', 'five-class'], default='legacy')
     p.add_argument('--expected-caddy-sha256', required=True)
     p.add_argument('--archive-helper', type=Path, default=DEFAULT_HELPER)
     p.add_argument('--externally-verified-signatures', action='store_true', required=True)
@@ -85,7 +86,8 @@ def main():
     upload = [[str(path), stage + '/' + name] for name, path in inputs.items()]
     server_args = ['--staging', stage, '--archive-sha256', hashes['release.tar.gz'], '--receipt-sha256', hashes['release.tar.gz.receipt.json'],
                    '--latest-sha256', hashes['latest.json'], '--signature-sha256', hashes['latest.p7s'],
-                   '--sequence', str(a.sequence), '--expected-caddy-sha256', a.expected_caddy_sha256.upper(), '--externally-verified-signatures']
+                   '--sequence', str(a.sequence), '--download-scope', a.download_scope,
+                   '--expected-caddy-sha256', a.expected_caddy_sha256.upper(), '--externally-verified-signatures']
     command = ['sudo', '-n', 'python3', '-c', BOOTSTRAP, stage + '/deploy-server-release.py', hashes['deploy-server-release.py'],
                stage + '/archive-update-release.py', hashes['archive-update-release.py'], *server_args]
     apply = 'set -eu\nexec ' + ' '.join(map(shlex.quote, command)) + '\n'
@@ -101,6 +103,7 @@ done
         (output / name).write_text(text, encoding='utf-8', newline='\n')
     (output / 'deploy-upload.json').write_text(json.dumps(upload, indent=2), encoding='utf-8')
     result = {'schema': 'mir2.static-update-upload-plan.v1', 'serverMutated': False, 'sequence': a.sequence,
+              'downloadScope': a.download_scope,
               'remoteStaging': stage, 'inputs': {name: {'path': str(path), 'sha256': hashes[name]} for name, path in inputs.items()},
               'expectedCaddySha256': a.expected_caddy_sha256.upper(), 'externalCmsGateRequired': True,
               'commands': ['remote.py --command-file deploy-preflight.sh', 'remote.py --command-file deploy-create-stage.sh',
