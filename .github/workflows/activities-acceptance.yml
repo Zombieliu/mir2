@@ -67,6 +67,8 @@ jobs:
           git diff --exit-code
       - name: Website account and nine-language interaction checks
         run: node --test apps/recharge-web/tests/*.test.mjs 2>&1 | tee activity-evidence/website.log
+      - name: Offline immutable publication and exact proxy route checks
+        run: python3 -B -m unittest discover -s apps/recharge-web/tests -p test_deploy.py -v 2>&1 | tee activity-evidence/deployment.log
       - name: Account rights, old-schema guards and failed-publication boundaries
         run: cargo test --locked -p mir2-simulation --features test-support --test activities --test billing_recharge --test billing_monthly_card --test monthly_card --test game_shop_gift -- --test-threads=1 2>&1 | tee activity-evidence/activities.log
       - name: Real PostgreSQL concurrent registrations and ordinary live Source save
