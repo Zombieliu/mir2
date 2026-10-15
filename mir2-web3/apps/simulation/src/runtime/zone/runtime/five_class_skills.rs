@@ -207,7 +207,11 @@ mod tests {
     }
 
     fn victim_class(zone: &mut ZoneRuntime, hp: i32, class: MirClass) -> SessionId {
-        let position = offset_point(&zone.players[&SessionId::new("native-owner")].position, MirDirection::Right, 1);
+        let position = offset_point(
+            &zone.players[&SessionId::new("native-owner")].position,
+            MirDirection::Right,
+            1,
+        );
         let session = SessionId::new("native-victim");
         zone.handle(ZoneCommand::Join(ZoneJoin {
             session_id: session.clone(),

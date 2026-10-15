@@ -521,8 +521,8 @@ fn tcp_zone_rpc_registration_bridges_live_outbounds_to_gateway_channel() {
         &observer,
         SharedZoneLiveOutboundSender::new(sender.clone(), sender),
     )
-        .expect("remote live outbound registration should succeed")
-        .expect("TCP transport should provide a live registration");
+    .expect("remote live outbound registration should succeed")
+    .expect("TCP transport should provide a live registration");
     registration.activate();
 
     owner

@@ -273,16 +273,19 @@ impl ZoneRuntime {
         }
         let direction = zone_direction_toward(&m.position, target)?;
         let template = crystal_monster_by_name(&m.name);
-        let pet_dc = if m.owner_session_id.is_some() { i32::from(m.summon_skill_level) } else { 0 };
+        let pet_dc = if m.owner_session_id.is_some() {
+            i32::from(m.summon_skill_level)
+        } else {
+            0
+        };
         let damage = template
             .as_ref()
             .map(|t| {
                 zone_roll_stat_range(
                     t.min_dc.saturating_add(pet_dc),
-                    t.max_dc.saturating_add(pet_dc).saturating_add(zone_native_monster_buff_stat_total(
-                        &m,
-                        CRYSTAL_STAT_MAX_DC,
-                    )),
+                    t.max_dc.saturating_add(pet_dc).saturating_add(
+                        zone_native_monster_buff_stat_total(&m, CRYSTAL_STAT_MAX_DC),
+                    ),
                     now,
                     id,
                     0x518,
@@ -321,8 +324,14 @@ impl ZoneRuntime {
             if m.owner_session_id.is_some() {
                 let target = self.owned_pet_target_in_cell(id, &cell, now);
                 if let Some(target) = target {
-                    self.queue_owned_pet_hit(id, &target, damage,
-                        super::entity_combat::EntityDefence::ACAgility, due, now);
+                    self.queue_owned_pet_hit(
+                        id,
+                        &target,
+                        damage,
+                        super::entity_combat::EntityDefence::ACAgility,
+                        due,
+                        now,
+                    );
                 }
             } else if let Some(t) = self.players.values().find(|p| {
                 !p.dead
@@ -363,7 +372,10 @@ impl ZoneRuntime {
         let mut out = Vec::new();
         for id in ids {
             let expired = !self.shinsu_not_expired(id, now);
-            let owned = self.native_monsters.get(&id).is_some_and(|m| m.owner_session_id.is_some());
+            let owned = self
+                .native_monsters
+                .get(&id)
+                .is_some_and(|m| m.owner_session_id.is_some());
             let Some(s) = self
                 .native_monsters
                 .get_mut(&id)

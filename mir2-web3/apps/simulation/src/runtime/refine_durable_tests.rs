@@ -467,7 +467,9 @@ fn overweight_refine_cancel_returns_to_empty_source_cell_and_never_manufactures_
     let mut save = session.active_character_checkpoint().unwrap();
     // The default starter sample carries a legacy display-weight cache; use
     // the actual source Dagger weight for this prepared overweight fixture.
-    let source_weight = mir2_game_data::crystal_item_by_name("Dagger").unwrap().weight;
+    let source_weight = mir2_game_data::crystal_item_by_name("Dagger")
+        .unwrap()
+        .weight;
     for encoded in &mut save.inventory_items_json {
         let mut item: Value = serde_json::from_str(encoded).unwrap();
         item["weight"] = json!(source_weight);
@@ -483,8 +485,12 @@ fn overweight_refine_cancel_returns_to_empty_source_cell_and_never_manufactures_
     session.restore_active_character_checkpoint(&save).unwrap();
     session.save_active_character().unwrap();
     let snapshot = session.world_snapshot();
-    assert!(snapshot.current_weight > snapshot.max_weight,
-        "prepared original weight {} exceeds capacity {}", snapshot.current_weight, snapshot.max_weight);
+    assert!(
+        snapshot.current_weight > snapshot.max_weight,
+        "prepared original weight {} exceeds capacity {}",
+        snapshot.current_weight,
+        snapshot.max_weight
+    );
     open(&mut session);
     deposit(&mut session, 0);
     let held = session.world_snapshot().stage5_systems.refine.item_states;
@@ -495,28 +501,63 @@ fn overweight_refine_cancel_returns_to_empty_source_cell_and_never_manufactures_
     // RefineCancel already found that cell; weight does not select its mail
     // branch in the pinned Crystal source. Failed persistence still retains it.
     config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist);
-    assert!(session.try_handle_packet(ClientPacket::RefineCancel).is_err());
-    assert_eq!(session.world_snapshot().stage5_systems.refine.item_states, held);
+    assert!(session
+        .try_handle_packet(ClientPacket::RefineCancel)
+        .is_err());
+    assert_eq!(
+        session.world_snapshot().stage5_systems.refine.item_states,
+        held
+    );
     assert_eq!(carried(&session), before);
     assert_eq!(session.world_snapshot().stage5_systems.mail, mail_before);
 
-    let packets = session.try_handle_packet(ClientPacket::RefineCancel).unwrap();
-    assert!(packets.iter().any(|packet| matches!(packet,
-        ServerPacket::RetrieveRefineItem { from: 0, success: true, .. })));
-    assert!(packets.iter().any(|packet| matches!(packet, ServerPacket::RefineCancel)));
-    assert!(packets.iter().all(|packet| !matches!(packet, ServerPacket::ReceiveMail { .. })));
+    let packets = session
+        .try_handle_packet(ClientPacket::RefineCancel)
+        .unwrap();
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::RetrieveRefineItem {
+            from: 0,
+            success: true,
+            ..
+        }
+    )));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::RefineCancel)));
+    assert!(packets
+        .iter()
+        .all(|packet| !matches!(packet, ServerPacket::ReceiveMail { .. })));
     assert_eq!(session.world_snapshot().stage5_systems.mail, mail_before);
     let returned = stored_carried(&config);
-    let item = returned.iter().find(|item| item["unique_id"] == MATERIAL_BASE).unwrap();
+    let item = returned
+        .iter()
+        .find(|item| item["unique_id"] == MATERIAL_BASE)
+        .unwrap();
     let held: Value = serde_json::from_str(&held[&0]).unwrap();
     assert_eq!(item["durability_current"], held["durability_current"]);
     assert_eq!(item["durability_max"], held["durability_max"]);
     assert_eq!(item["description"], held["description"]);
-    assert_eq!(returned.iter().filter(|item| item["unique_id"] == MATERIAL_BASE).count(), 1);
-    assert!(stored_refine(&config)["itemStates"].as_object().unwrap().is_empty());
+    assert_eq!(
+        returned
+            .iter()
+            .filter(|item| item["unique_id"] == MATERIAL_BASE)
+            .count(),
+        1
+    );
+    assert!(stored_refine(&config)["itemStates"]
+        .as_object()
+        .unwrap()
+        .is_empty());
     let reloaded = login(&config);
     assert_eq!(reloaded.world_snapshot().stage5_systems.mail, mail_before);
-    assert_eq!(carried(&reloaded).iter().filter(|item| item["unique_id"] == MATERIAL_BASE).count(), 1);
+    assert_eq!(
+        carried(&reloaded)
+            .iter()
+            .filter(|item| item["unique_id"] == MATERIAL_BASE)
+            .count(),
+        1
+    );
 }
 
 #[test]

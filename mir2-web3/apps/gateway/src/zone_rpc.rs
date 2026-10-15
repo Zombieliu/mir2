@@ -17,28 +17,30 @@ use mir2_protocol::{
     ClientPacket, Point, ServerPacket,
 };
 use mir2_simulation::{
-    CharacterHandoffCheckpoint, CharacterHandoffCommitment,
-    AccountRecord, ActiveSessionIdentity, CharacterSaveRecord, GameShopPurchaseOutcome,
-    NativeGameShopGiftRequest, NativeGameShopPurchaseRequest, WorldCommand, WorldCommandExecution,
-    WorldCommandOutcome, WorldSnapshot,
+    AccountRecord, ActiveSessionIdentity, CharacterHandoffCheckpoint, CharacterHandoffCommitment,
+    CharacterSaveRecord, GameShopPurchaseOutcome, NativeGameShopGiftRequest,
+    NativeGameShopPurchaseRequest, WorldCommand, WorldCommandExecution, WorldCommandOutcome,
+    WorldSnapshot,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use tokio::sync::mpsc;
 
+use crate::npc_purchase_owner_route::NpcPurchaseOwnerRouteExecution;
 use crate::routing::{
-    OwnerHealthDelivery, OwnerHealthValidator,
-    HostedZoneOwnerCommandClient, SharedInProcessZoneRuntimeFactory, SharedZoneLiveOutbound,
-    SharedZoneLiveOutboundRegistration, SharedZoneLiveOutboundSender, SharedZoneMutationGate,
-    SharedZoneOwnerLeaseAuthority, ZoneId, ZoneLiveOutboundRegistration, ZoneOwnerCommandMode,
-    ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneOwnerRpcTransport, ZoneRuntimeFactory,
+    HostedZoneOwnerCommandClient, OwnerHealthDelivery, OwnerHealthValidator,
+    SharedInProcessZoneRuntimeFactory, SharedZoneLiveOutbound, SharedZoneLiveOutboundRegistration,
+    SharedZoneLiveOutboundSender, SharedZoneMutationGate, SharedZoneOwnerLeaseAuthority, ZoneId,
+    ZoneLiveOutboundRegistration, ZoneOwnerCommandMode, ZoneOwnerCommandRequest, ZoneOwnerLease,
+    ZoneOwnerRpcTransport, ZoneRuntimeFactory,
 };
 use crate::web::GatewaySlowStage;
 use crate::GatewayConfig;
 use crate::ZonePlacementLease;
-use mir2_simulation::{NpcPurchaseDurableError, NpcPurchaseOwnerAction, NpcPurchaseOwnerReply,
-    NpcPurchaseProducer, NPC_PURCHASE_OWNER_PROTOCOL_VERSION};
-use crate::npc_purchase_owner_route::NpcPurchaseOwnerRouteExecution;
+use mir2_simulation::{
+    NpcPurchaseDurableError, NpcPurchaseOwnerAction, NpcPurchaseOwnerReply, NpcPurchaseProducer,
+    NPC_PURCHASE_OWNER_PROTOCOL_VERSION,
+};
 
 pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 8;
 #[cfg(test)]
@@ -1695,11 +1697,14 @@ impl TcpZoneOwnerRpcTransport {
             .lock()
             .map_err(|_| "zone RPC outbound stream mutex poisoned".to_string())?
             .clone();
-        let (source_endpoint, payload) = self.call_with_response_endpoint(ZoneRpcRequest::PollOutbounds {
-            stream_id,
-            acknowledged_sequence,
-            max_items,
-        }, None)?;
+        let (source_endpoint, payload) = self.call_with_response_endpoint(
+            ZoneRpcRequest::PollOutbounds {
+                stream_id,
+                acknowledged_sequence,
+                max_items,
+            },
+            None,
+        )?;
         match payload {
             ZoneRpcPayload::Outbounds {
                 items,
@@ -1796,11 +1801,14 @@ impl TcpZoneOwnerRpcTransport {
         request: ZoneRpcRequest,
         required_capability: Option<&str>,
     ) -> Result<ZoneRpcPayload, String> {
-        self.call_with_response_endpoint(request, required_capability).map(|(_, payload)| payload)
+        self.call_with_response_endpoint(request, required_capability)
+            .map(|(_, payload)| payload)
     }
 
     fn call_with_response_endpoint(
-        &self, request: ZoneRpcRequest, required_capability: Option<&str>,
+        &self,
+        request: ZoneRpcRequest,
+        required_capability: Option<&str>,
     ) -> Result<(usize, ZoneRpcPayload), String> {
         validate_identifier("RPC session id", &self.session_id)?;
         if let ZoneRpcRequest::Execute { command, .. } = &request {
@@ -1810,8 +1818,11 @@ impl TcpZoneOwnerRpcTransport {
                 );
             }
         }
-        if matches!(&request, ZoneRpcRequest::NpcPurchaseOwner { request } if request.action.is_mutation()) {
-            return Err("durable NPC purchase mutation must use the single-attempt executor".into());
+        if matches!(&request, ZoneRpcRequest::NpcPurchaseOwner { request } if request.action.is_mutation())
+        {
+            return Err(
+                "durable NPC purchase mutation must use the single-attempt executor".into(),
+            );
         }
         let priority = request.priority();
         let envelope = ZoneRpcEnvelope {
@@ -2079,8 +2090,11 @@ mod game_shop_gift_tests;
 /// and unrelated gameplay commands retain endpoint fallback behavior.
 fn correlated_mutation_policy(command: &WorldCommand) -> Option<CorrelatedMutationPolicy> {
     match command {
-        WorldCommand::BillingRefresh { .. } | WorldCommand::BillingBuyMonthlyCard { .. }
-            | WorldCommand::BillingActivateMonthlyCard { .. } => Some(CorrelatedMutationPolicy::Billing),
+        WorldCommand::BillingRefresh { .. }
+        | WorldCommand::BillingBuyMonthlyCard { .. }
+        | WorldCommand::BillingActivateMonthlyCard { .. } => {
+            Some(CorrelatedMutationPolicy::Billing)
+        }
         WorldCommand::NativeGameShopPurchase(_) => Some(CorrelatedMutationPolicy::NativePurchaseV2),
         WorldCommand::NativeGameShopGift(_) => Some(CorrelatedMutationPolicy::NativeGiftV1),
         WorldCommand::ClientPacket(ClientPacket::GameShopBuy { .. }) => {
@@ -2097,8 +2111,11 @@ fn wire_correlated_mutation_policy(
     command: &WireWorldCommand,
 ) -> Result<Option<CorrelatedMutationPolicy>, String> {
     match command {
-        WireWorldCommand::BillingRefresh { .. } | WireWorldCommand::BillingBuyMonthlyCard { .. }
-            | WireWorldCommand::BillingActivateMonthlyCard { .. } => Ok(Some(CorrelatedMutationPolicy::Billing)),
+        WireWorldCommand::BillingRefresh { .. }
+        | WireWorldCommand::BillingBuyMonthlyCard { .. }
+        | WireWorldCommand::BillingActivateMonthlyCard { .. } => {
+            Ok(Some(CorrelatedMutationPolicy::Billing))
+        }
         WireWorldCommand::NativeGameShopPurchaseV2 { .. } => {
             Ok(Some(CorrelatedMutationPolicy::NativePurchaseV2))
         }
@@ -2121,29 +2138,45 @@ fn wire_correlated_mutation_policy(
 }
 
 impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
-
     fn supports_durable_npc_purchase_owner(&self) -> bool {
         matches!(self.call(ZoneRpcRequest::Health), Ok(ZoneRpcPayload::Health { capabilities, .. })
             if capabilities.iter().any(|capability| capability == ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1))
     }
 
-    fn execute_npc_purchase_owner(&self, lease: &ZoneOwnerLease,
-        authenticated: bool, action: NpcPurchaseOwnerAction,
+    fn execute_npc_purchase_owner(
+        &self,
+        lease: &ZoneOwnerLease,
+        authenticated: bool,
+        action: NpcPurchaseOwnerAction,
     ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
         if !authenticated || lease.zone_id() != &self.zone_id {
-            return Err(crate::npc_purchase_owner_route::before("NPC purchase requires the authenticated current Zone owner"));
+            return Err(crate::npc_purchase_owner_route::before(
+                "NPC purchase requires the authenticated current Zone owner",
+            ));
         }
-        let request = ZoneRpcRequest::NpcPurchaseOwner { request: WireNpcPurchaseOwnerRequest {
-            protocol_version: NPC_PURCHASE_OWNER_PROTOCOL_VERSION, owner_lease: lease.into(), authenticated, action,
-        }};
+        let request = ZoneRpcRequest::NpcPurchaseOwner {
+            request: WireNpcPurchaseOwnerRequest {
+                protocol_version: NPC_PURCHASE_OWNER_PROTOCOL_VERSION,
+                owner_lease: lease.into(),
+                authenticated,
+                action,
+            },
+        };
         let payload = if action.is_mutation() {
             self.call_mutation_once(request, Some(ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1))
         } else {
-            self.call_with_required_capability(request, Some(ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1))
-        }.map_err(|detail| crate::npc_purchase_owner_route::failure(detail, None))?;
+            self.call_with_required_capability(
+                request,
+                Some(ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1),
+            )
+        }
+        .map_err(|detail| crate::npc_purchase_owner_route::failure(detail, None))?;
         match payload {
             ZoneRpcPayload::NpcPurchaseOwner { response } => response.into_execution(action),
-            payload => Err(crate::npc_purchase_owner_route::failure(unexpected_payload("npcPurchaseOwner", &payload), None)),
+            payload => Err(crate::npc_purchase_owner_route::failure(
+                unexpected_payload("npcPurchaseOwner", &payload),
+                None,
+            )),
         }
     }
 
@@ -2156,17 +2189,17 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
 
     fn execute(&self, request: ZoneOwnerCommandRequest) -> Result<WorldCommandExecution, String> {
         match correlated_mutation_policy(request.command()) {
-            Some(CorrelatedMutationPolicy::Billing) => self.execute_owner_request(request, Some(ZONE_RPC_BILLING_V1), true),
+            Some(CorrelatedMutationPolicy::Billing) => {
+                self.execute_owner_request(request, Some(ZONE_RPC_BILLING_V1), true)
+            }
             Some(CorrelatedMutationPolicy::NativePurchaseV2) => self.execute_owner_request(
                 request,
                 Some(ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2),
                 true,
             ),
-            Some(CorrelatedMutationPolicy::NativeGiftV1) => self.execute_owner_request(
-                request,
-                Some(ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1),
-                true,
-            ),
+            Some(CorrelatedMutationPolicy::NativeGiftV1) => {
+                self.execute_owner_request(request, Some(ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1), true)
+            }
             Some(CorrelatedMutationPolicy::OrdinaryPurchase) => {
                 // Preserve old-host compatibility (no capability probe), but
                 // never replay an economic write to another endpoint after the
@@ -2262,15 +2295,27 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
         }
     }
 
-    fn prepare_character_handoff(&self, lease: &ZoneOwnerLease) -> Result<CharacterHandoffCheckpoint, String> {
-        match self.call(ZoneRpcRequest::PrepareCharacterHandoff { owner_lease: lease.into() })? {
+    fn prepare_character_handoff(
+        &self,
+        lease: &ZoneOwnerLease,
+    ) -> Result<CharacterHandoffCheckpoint, String> {
+        match self.call(ZoneRpcRequest::PrepareCharacterHandoff {
+            owner_lease: lease.into(),
+        })? {
             ZoneRpcPayload::CharacterHandoff { checkpoint } => Ok(*checkpoint),
             payload => Err(unexpected_payload("prepare_character_handoff", &payload)),
         }
     }
 
-    fn resume_character_handoff(&self, lease: &ZoneOwnerLease, checkpoint: &CharacterHandoffCheckpoint) -> Result<CharacterHandoffCommitment, String> {
-        match self.call(ZoneRpcRequest::ResumeCharacterHandoff { owner_lease: lease.into(), checkpoint: Box::new(checkpoint.clone()) })? {
+    fn resume_character_handoff(
+        &self,
+        lease: &ZoneOwnerLease,
+        checkpoint: &CharacterHandoffCheckpoint,
+    ) -> Result<CharacterHandoffCommitment, String> {
+        match self.call(ZoneRpcRequest::ResumeCharacterHandoff {
+            owner_lease: lease.into(),
+            checkpoint: Box::new(checkpoint.clone()),
+        })? {
             ZoneRpcPayload::CharacterHandoffCommitment { commitment } => Ok(*commitment),
             payload => Err(unexpected_payload("resume_character_handoff", &payload)),
         }
@@ -2344,28 +2389,31 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                                 // normal ACK. A replaced Source viewport must
                                 // never be relabelled as this new Gateway view.
                                 if worker_stop.load(Ordering::Acquire)
-                                    || current_generation.load(Ordering::Acquire) != generation { return; }
+                                    || current_generation.load(Ordering::Acquire) != generation
+                                {
+                                    return;
+                                }
                                 acknowledged.store(sequence, Ordering::Release);
                                 continue;
                             }
-                            let mut outbound = SharedZoneLiveOutbound::new(registration_id, item.packet);
+                            let mut outbound =
+                                SharedZoneLiveOutbound::new(registration_id, item.packet);
                             outbound.with_transport_failure_flag(transport_failed.clone());
                             if let Some(change) = item.owner_health {
                                 outbound = outbound.with_owner_health(OwnerHealthDelivery {
                                     change,
                                     validator: Arc::new(RemoteOwnerHealthValidator {
-                                        transport: transport.clone(), endpoint: item.source_endpoint,
+                                        transport: transport.clone(),
+                                        endpoint: item.source_endpoint,
                                         source_registration_id: item.source_registration_id,
-                                        generation, current_generation: current_generation.clone(),
+                                        generation,
+                                        current_generation: current_generation.clone(),
                                         stop: worker_stop.clone(),
                                     }),
                                     highest_sent_sequence: highest_health_sent_sequence.clone(),
                                 });
                             }
-                            if sender
-                                .blocking_send(outbound)
-                                .is_err()
-                            {
+                            if sender.blocking_send(outbound).is_err() {
                                 return;
                             }
                             if current_generation.load(Ordering::Acquire) != generation {
@@ -2376,7 +2424,8 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                     }
                     Err(error) => {
                         if worker_stop.load(Ordering::Acquire)
-                            || current_generation.load(Ordering::Acquire) != generation {
+                            || current_generation.load(Ordering::Acquire) != generation
+                        {
                             return;
                         }
                         if error.contains("outbound_gap") || error.contains("health_validation") {
@@ -2405,8 +2454,10 @@ struct RemoteZoneLiveOutboundRegistration {
     handle: Option<thread::JoinHandle<()>>,
 }
 
-fn source_viewport_frame_is_current(item: &SequencedZoneHostPacket,
-    current_source_registration: Option<u64>) -> bool {
+fn source_viewport_frame_is_current(
+    item: &SequencedZoneHostPacket,
+    current_source_registration: Option<u64>,
+) -> bool {
     item.source_registration_id == 0
         || !(crate::routing::is_owner_health_fifo_packet(&item.packet)
             || matches!(item.packet, ServerPacket::UserLocation { .. }))
@@ -2426,26 +2477,44 @@ struct RemoteOwnerHealthValidator {
 impl OwnerHealthValidator for RemoteOwnerHealthValidator {
     fn validate(&self, change: &mir2_simulation::ZoneOwnerHealthChange) -> Result<bool, String> {
         if self.stop.load(Ordering::Acquire)
-            || self.current_generation.load(Ordering::Acquire) != self.generation { return Ok(false); }
-        let encoded = encode_rpc_envelope(&ZoneRpcEnvelope {
-            protocol_version: ZONE_RPC_PROTOCOL_VERSION,
-            session_id: self.transport.session_id.clone(), zone_id: self.transport.zone_id.as_str().into(),
-            auth_token: self.transport.auth_token.clone(),
-            request: ZoneRpcRequest::ValidateOwnerHealth {
-                source_registration_id: self.source_registration_id, change: change.clone(),
+            || self.current_generation.load(Ordering::Acquire) != self.generation
+        {
+            return Ok(false);
+        }
+        let encoded = encode_rpc_envelope(
+            &ZoneRpcEnvelope {
+                protocol_version: ZONE_RPC_PROTOCOL_VERSION,
+                session_id: self.transport.session_id.clone(),
+                zone_id: self.transport.zone_id.as_str().into(),
+                auth_token: self.transport.auth_token.clone(),
+                request: ZoneRpcRequest::ValidateOwnerHealth {
+                    source_registration_id: self.source_registration_id,
+                    change: change.clone(),
+                },
             },
-        }, self.transport.codec).map_err(|e| format!("owner health validation encode failed: {e}"))?;
+            self.transport.codec,
+        )
+        .map_err(|e| format!("owner health validation encode failed: {e}"))?;
         // Use the Host that actually returned this frame. A fallback Host or a
         // concurrent active_endpoint change cannot authenticate its old Node.
-        let response = self.transport.call_endpoint_index(self.endpoint, &encoded, ZoneRpcPriority::Outbound)?;
+        let response = self.transport.call_endpoint_index(
+            self.endpoint,
+            &encoded,
+            ZoneRpcPriority::Outbound,
+        )?;
         if self.stop.load(Ordering::Acquire)
-            || self.current_generation.load(Ordering::Acquire) != self.generation { return Ok(false); }
+            || self.current_generation.load(Ordering::Acquire) != self.generation
+        {
+            return Ok(false);
+        }
         match response {
             ZoneRpcResponse::Ok { payload } => match *payload {
                 ZoneRpcPayload::Bool { value } => Ok(value),
                 payload => Err(unexpected_payload("validate_owner_health", &payload)),
             },
-            ZoneRpcResponse::Error { code, message } => Err(format!("owner health validation {code}: {message}")),
+            ZoneRpcResponse::Error { code, message } => {
+                Err(format!("owner health validation {code}: {message}"))
+            }
         }
     }
 }
@@ -2517,10 +2586,20 @@ impl ZoneHostSession {
         let mut live_registration = self.live_registration.lock().map_err(|_| {
             ZoneRpcFault::new("internal", "zone host live registration mutex poisoned")
         })?;
-        if live_registration.as_ref().is_some_and(|registration| registration.resync_required()) {
-            return Err(ZoneRpcFault::new("outbound_gap", "zone host presentation overflow requires snapshot resync"));
+        if live_registration
+            .as_ref()
+            .is_some_and(|registration| registration.resync_required())
+        {
+            return Err(ZoneRpcFault::new(
+                "outbound_gap",
+                "zone host presentation overflow requires snapshot resync",
+            ));
         }
-        if !force && live_registration.as_ref().is_some_and(|registration| registration.is_current()) {
+        if !force
+            && live_registration
+                .as_ref()
+                .is_some_and(|registration| registration.is_current())
+        {
             return Ok(());
         }
         *live_registration = None;
@@ -2577,9 +2656,14 @@ impl ZoneHostSession {
             ZoneRpcFault::new("internal", "zone host registration refresh mutex poisoned")
         })?;
         self.refresh_live_registration_locked(false)?;
-        let current_registration = self.live_registration.lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "zone host live registration mutex poisoned"))?
-            .as_ref().map(|registration| registration.registration_id());
+        let current_registration = self
+            .live_registration
+            .lock()
+            .map_err(|_| {
+                ZoneRpcFault::new("internal", "zone host live registration mutex poisoned")
+            })?
+            .as_ref()
+            .map(|registration| registration.registration_id());
         let mut receiver = self.outbound_receiver.lock().map_err(|_| {
             ZoneRpcFault::new("internal", "zone host outbound receiver mutex poisoned")
         })?;
@@ -2588,15 +2672,27 @@ impl ZoneHostSession {
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host outbox mutex poisoned"))?;
         while let Ok(outbound) = receiver.try_recv() {
-            if current_registration != Some(outbound.registration_id()) { continue; }
+            if current_registration != Some(outbound.registration_id()) {
+                continue;
+            }
             if outbound.is_overloaded() {
-                return Err(ZoneRpcFault::new("outbound_gap", "zone host presentation requires snapshot resync"));
+                return Err(ZoneRpcFault::new(
+                    "outbound_gap",
+                    "zone host presentation requires snapshot resync",
+                ));
             }
             let source_registration_id = outbound.registration_id();
-            let owner_health = outbound.owner_health().map(|delivery| delivery.change.clone());
+            let owner_health = outbound
+                .owner_health()
+                .map(|delivery| delivery.change.clone());
             if let Some(delivery) = outbound.owner_health() {
-                if !delivery.validator.validate(&delivery.change)
-                    .map_err(|e| ZoneRpcFault::new("health_validation", e))? { continue; }
+                if !delivery
+                    .validator
+                    .validate(&delivery.change)
+                    .map_err(|e| ZoneRpcFault::new("health_validation", e))?
+                {
+                    continue;
+                }
             }
             let frame = encode_server_packet(&outbound.into_packet()).map_err(|error| {
                 ZoneRpcFault::new(
@@ -2604,7 +2700,12 @@ impl ZoneHostSession {
                     format!("live outbound packet encode failed: {error}"),
                 )
             })?;
-            outbox.push_stamped(frame, self.max_outbound_messages, owner_health, source_registration_id);
+            outbox.push_stamped(
+                frame,
+                self.max_outbound_messages,
+                owner_health,
+                source_registration_id,
+            );
         }
         let reset = stream_id != Some(outbox.stream_id.as_str());
         let acknowledged_sequence = if reset { 0 } else { acknowledged_sequence };
@@ -2652,8 +2753,13 @@ impl ZoneHostOutbox {
         self.push_stamped(frame, capacity, None, 0);
     }
 
-    fn push_stamped(&mut self, frame: Vec<u8>, capacity: usize,
-        owner_health: Option<mir2_simulation::ZoneOwnerHealthChange>, source_registration_id: u64) {
+    fn push_stamped(
+        &mut self,
+        frame: Vec<u8>,
+        capacity: usize,
+        owner_health: Option<mir2_simulation::ZoneOwnerHealthChange>,
+        source_registration_id: u64,
+    ) {
         self.last_issued_sequence = self.last_issued_sequence.saturating_add(1).max(1);
         self.messages.push_back(WireSequencedServerFrame {
             sequence: self.last_issued_sequence,
@@ -3878,12 +3984,27 @@ impl ZoneHostServer {
             }) {
                 capabilities.push(ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1.to_string());
             }
-            let durable_source = self.config.lock().map(|config| config.account_store_path.is_some()
-                || (config.account_store_database_url.is_some()
-                    && config.account_store_database_mode == mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth)).unwrap_or(false);
-            let active_owner = self.runtime_factory.lock().map(|factory|
-                !factory.is_zone_replica(&ZoneId::new(&envelope.zone_id))).unwrap_or(false);
-            if durable_source && active_owner && self.owner_lease_authority.supports_durable_npc_purchase_lease() {
+            let durable_source = self
+                .config
+                .lock()
+                .map(|config| {
+                    config.account_store_path.is_some()
+                        || (config.account_store_database_url.is_some()
+                            && config.account_store_database_mode
+                                == mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth)
+                })
+                .unwrap_or(false);
+            let active_owner = self
+                .runtime_factory
+                .lock()
+                .map(|factory| !factory.is_zone_replica(&ZoneId::new(&envelope.zone_id)))
+                .unwrap_or(false);
+            if durable_source
+                && active_owner
+                && self
+                    .owner_lease_authority
+                    .supports_durable_npc_purchase_lease()
+            {
                 capabilities.push(ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1.to_string());
             }
             return Ok(ZoneRpcPayload::Health {
@@ -3972,26 +4093,53 @@ impl ZoneHostServer {
             }
         }
         match request {
-            ZoneRpcRequest::ValidateOwnerHealth { source_registration_id, change } => {
+            ZoneRpcRequest::ValidateOwnerHealth {
+                source_registration_id,
+                change,
+            } => {
                 let zone_id = ZoneId::new(&envelope.zone_id);
                 let lease = self.owner_lease_authority.owner_lease(&zone_id);
-                let legacy_owner = lease.owner_id() == "in-process" || lease.owner_id().starts_with("in-process:");
+                let legacy_owner =
+                    lease.owner_id() == "in-process" || lease.owner_id().starts_with("in-process:");
                 let blocked = (!legacy_owner && !self.owner_ids.contains(lease.owner_id()))
-                    || self.owner_lease_authority.validate_owner_lease(&lease).is_err()
-                    || self.quiesced_zones.lock().map_err(|_| ZoneRpcFault::new("internal", "quiesce mutex poisoned"))?.contains(&envelope.zone_id)
-                    || self.promotion_frozen_zones.lock().map_err(|_| ZoneRpcFault::new("internal", "freeze mutex poisoned"))?.contains(&envelope.zone_id);
-                if blocked { return Ok(ZoneRpcPayload::Bool { value: false }); }
+                    || self
+                        .owner_lease_authority
+                        .validate_owner_lease(&lease)
+                        .is_err()
+                    || self
+                        .quiesced_zones
+                        .lock()
+                        .map_err(|_| ZoneRpcFault::new("internal", "quiesce mutex poisoned"))?
+                        .contains(&envelope.zone_id)
+                    || self
+                        .promotion_frozen_zones
+                        .lock()
+                        .map_err(|_| ZoneRpcFault::new("internal", "freeze mutex poisoned"))?
+                        .contains(&envelope.zone_id);
+                if blocked {
+                    return Ok(ZoneRpcPayload::Bool { value: false });
+                }
                 // Validation must never create a missing session, execute a
                 // snapshot/Tick, save state, or append a mutation journal row.
-                let session = self.sessions.lock().map_err(|_| ZoneRpcFault::new("internal", "session mutex poisoned"))?
-                    .get(&(envelope.session_id.clone(), envelope.zone_id.clone())).cloned();
-                let Some(session) = session else { return Ok(ZoneRpcPayload::Bool { value: false }); };
-                let validator = session.live_registration.lock()
+                let session = self
+                    .sessions
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "session mutex poisoned"))?
+                    .get(&(envelope.session_id.clone(), envelope.zone_id.clone()))
+                    .cloned();
+                let Some(session) = session else {
+                    return Ok(ZoneRpcPayload::Bool { value: false });
+                };
+                let validator = session
+                    .live_registration
+                    .lock()
                     .map_err(|_| ZoneRpcFault::new("internal", "registration mutex poisoned"))?
-                    .as_ref().filter(|reg| reg.registration_id() == source_registration_id)
+                    .as_ref()
+                    .filter(|reg| reg.registration_id() == source_registration_id)
                     .and_then(|reg| reg.owner_health_validator());
                 let value = match validator {
-                    Some(validator) => validator.validate(&change)
+                    Some(validator) => validator
+                        .validate(&change)
                         .map_err(|e| ZoneRpcFault::new("health_validation", e))?,
                     None => false,
                 };
@@ -4133,31 +4281,65 @@ impl ZoneHostServer {
 
             ZoneRpcRequest::NpcPurchaseOwner { request } => {
                 let payload = |response| Ok(ZoneRpcPayload::NpcPurchaseOwner { response });
-                if request.protocol_version != NPC_PURCHASE_OWNER_PROTOCOL_VERSION || !request.authenticated {
-                    return payload(WireNpcPurchaseOwnerResponse::Error { error: crate::npc_purchase_owner_route::before("NPC purchase owner protocol/authentication rejected before execution") });
+                if request.protocol_version != NPC_PURCHASE_OWNER_PROTOCOL_VERSION
+                    || !request.authenticated
+                {
+                    return payload(WireNpcPurchaseOwnerResponse::Error {
+                        error: crate::npc_purchase_owner_route::before(
+                            "NPC purchase owner protocol/authentication rejected before execution",
+                        ),
+                    });
                 }
                 if request.owner_lease.zone_id != zone_id {
-                    return payload(WireNpcPurchaseOwnerResponse::Error { error: crate::npc_purchase_owner_route::before("NPC purchase owner lease zone differs from the actual envelope") });
+                    return payload(WireNpcPurchaseOwnerResponse::Error {
+                        error: crate::npc_purchase_owner_route::before(
+                            "NPC purchase owner lease zone differs from the actual envelope",
+                        ),
+                    });
                 }
                 let lease = request.owner_lease.into_lease()?;
                 let source_sequence = if request.action.is_mutation() {
-                    Some(self.journal.lock().map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
-                        .replication.next_sequence_for_append(zone_id)?)
-                } else { None };
-                let mut result = session.hosted.execute_npc_purchase_owner_with_source_sequence(
-                    &lease, request.authenticated, request.action, source_sequence);
+                    Some(
+                        self.journal
+                            .lock()
+                            .map_err(|_| {
+                                ZoneRpcFault::new("internal", "zone host journal mutex poisoned")
+                            })?
+                            .replication
+                            .next_sequence_for_append(zone_id)?,
+                    )
+                } else {
+                    None
+                };
+                let mut result = session
+                    .hosted
+                    .execute_npc_purchase_owner_with_source_sequence(
+                        &lease,
+                        request.authenticated,
+                        request.action,
+                        source_sequence,
+                    );
                 if request.action.is_mutation() {
                     let known = match &result {
-                        Ok(execution) => crate::npc_purchase_owner_route::terminal_receipt(&execution.reply),
-                        Err(NpcPurchaseDurableError::PostCommit { receipt, .. }) => Some(receipt.clone()),
+                        Ok(execution) => {
+                            crate::npc_purchase_owner_route::terminal_receipt(&execution.reply)
+                        }
+                        Err(NpcPurchaseDurableError::PostCommit { receipt, .. }) => {
+                            Some(receipt.clone())
+                        }
                         _ => None,
                     };
                     let checkpoint = match &result {
                         Ok(execution) => execution.checkpoint.clone(),
-                        Err(NpcPurchaseDurableError::PostCommit { .. }) => session.hosted.npc_purchase_owner_checkpoint_with_lease(&lease).ok().flatten(),
+                        Err(NpcPurchaseDurableError::PostCommit { .. }) => session
+                            .hosted
+                            .npc_purchase_owner_checkpoint_with_lease(&lease)
+                            .ok()
+                            .flatten(),
                         _ => None,
                     };
-                    let changed = result.is_ok() || matches!(&result, Err(NpcPurchaseDurableError::PostCommit { .. }));
+                    let changed = result.is_ok()
+                        || matches!(&result, Err(NpcPurchaseDurableError::PostCommit { .. }));
                     if changed {
                         let recorded = checkpoint.ok_or_else(|| "NPC purchase committed checkpoint is unavailable for replication".to_string())
                             .and_then(|checkpoint| self.append_journal(WireHostJournalEntry {
@@ -4167,13 +4349,17 @@ impl ZoneHostServer {
                                 closed: false, zone_tick_ms: None,
                             }).map_err(|error| format!("NPC purchase checkpoint journal publication failed: {error:?}")));
                         if let Err(detail) = recorded {
-                            if let Ok(mut frozen) = self.promotion_frozen_zones.lock() { frozen.insert(zone_id.to_string()); }
+                            if let Ok(mut frozen) = self.promotion_frozen_zones.lock() {
+                                frozen.insert(zone_id.to_string());
+                            }
                             result = Err(crate::npc_purchase_owner_route::failure(detail, known));
                         }
                     } else if matches!(&result, Err(NpcPurchaseDurableError::Unknown { .. })) {
                         // No replica may be promoted past an unrecorded unknown
                         // source commit. Original-ID read-only recovery remains.
-                        if let Ok(mut frozen) = self.promotion_frozen_zones.lock() { frozen.insert(zone_id.to_string()); }
+                        if let Ok(mut frozen) = self.promotion_frozen_zones.lock() {
+                            frozen.insert(zone_id.to_string());
+                        }
                     }
                 }
                 payload(match result {
@@ -4320,23 +4506,60 @@ impl ZoneHostServer {
                 Ok(ZoneRpcPayload::Unit)
             }
             ZoneRpcRequest::PrepareCharacterHandoff { owner_lease } => {
-                if owner_lease.zone_id != zone_id { return Err(ZoneRpcFault::new("zone_mismatch", "handoff lease does not match envelope zone")); }
+                if owner_lease.zone_id != zone_id {
+                    return Err(ZoneRpcFault::new(
+                        "zone_mismatch",
+                        "handoff lease does not match envelope zone",
+                    ));
+                }
                 let lease = owner_lease.into_lease()?;
-                self.owner_lease_authority.validate_owner_lease(&lease).map_err(classify_runtime_error)?;
-                let checkpoint = session.hosted.prepare_character_handoff(&lease).map_err(classify_runtime_error)?;
-                Ok(ZoneRpcPayload::CharacterHandoff { checkpoint: Box::new(checkpoint) })
+                self.owner_lease_authority
+                    .validate_owner_lease(&lease)
+                    .map_err(classify_runtime_error)?;
+                let checkpoint = session
+                    .hosted
+                    .prepare_character_handoff(&lease)
+                    .map_err(classify_runtime_error)?;
+                Ok(ZoneRpcPayload::CharacterHandoff {
+                    checkpoint: Box::new(checkpoint),
+                })
             }
-            ZoneRpcRequest::ResumeCharacterHandoff { owner_lease, checkpoint } => {
-                if owner_lease.zone_id != zone_id { return Err(ZoneRpcFault::new("zone_mismatch", "handoff lease does not match envelope zone")); }
+            ZoneRpcRequest::ResumeCharacterHandoff {
+                owner_lease,
+                checkpoint,
+            } => {
+                if owner_lease.zone_id != zone_id {
+                    return Err(ZoneRpcFault::new(
+                        "zone_mismatch",
+                        "handoff lease does not match envelope zone",
+                    ));
+                }
                 let lease = owner_lease.clone().into_lease()?;
-                self.owner_lease_authority.validate_owner_lease(&lease).map_err(classify_runtime_error)?;
-                self.journal.lock().map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
-                    .replication.next_sequence_for_append(zone_id)?;
-                let commitment = session.hosted.resume_character_handoff(&lease, &checkpoint).map_err(classify_runtime_error)?;
-                self.append_journal(WireHostJournalEntry { sequence: 0, session_id: session_id.into(), zone_id: zone_id.into(),
-                    owner_lease, mode: WireZoneOwnerCommandMode::Direct,
-                    command: Some(WireWorldCommand::ResumeCharacterHandoff { checkpoint }), closed: false, zone_tick_ms: None })?;
-                Ok(ZoneRpcPayload::CharacterHandoffCommitment { commitment: Box::new(commitment) })
+                self.owner_lease_authority
+                    .validate_owner_lease(&lease)
+                    .map_err(classify_runtime_error)?;
+                self.journal
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+                    .replication
+                    .next_sequence_for_append(zone_id)?;
+                let commitment = session
+                    .hosted
+                    .resume_character_handoff(&lease, &checkpoint)
+                    .map_err(classify_runtime_error)?;
+                self.append_journal(WireHostJournalEntry {
+                    sequence: 0,
+                    session_id: session_id.into(),
+                    zone_id: zone_id.into(),
+                    owner_lease,
+                    mode: WireZoneOwnerCommandMode::Direct,
+                    command: Some(WireWorldCommand::ResumeCharacterHandoff { checkpoint }),
+                    closed: false,
+                    zone_tick_ms: None,
+                })?;
+                Ok(ZoneRpcPayload::CharacterHandoffCommitment {
+                    commitment: Box::new(commitment),
+                })
             }
             ZoneRpcRequest::SaveActiveCharacter => {
                 ZoneOwnerRpcTransport::save_active_character(session.hosted.as_ref())
@@ -5321,19 +5544,28 @@ fn saturating_duration_ns(duration: Duration) -> u64 {
 }
 
 fn zone_replication_build_id() -> String {
-    let configured = std::env::var("MIR2_ZONE_HOST_BUILD_ID").ok().and_then(|build_id| {
-        let build_id = build_id.trim();
-        (!build_id.is_empty() && build_id.len() <= 128 && !build_id.chars().any(char::is_control))
+    let configured = std::env::var("MIR2_ZONE_HOST_BUILD_ID")
+        .ok()
+        .and_then(|build_id| {
+            let build_id = build_id.trim();
+            (!build_id.is_empty()
+                && build_id.len() <= 128
+                && !build_id.chars().any(char::is_control))
             .then(|| build_id.to_string())
+        });
+    let source_build = configured.unwrap_or_else(|| {
+        option_env!("GIT_COMMIT_SHA")
+            .filter(|build_id| !build_id.trim().is_empty() && build_id.len() <= 128)
+            .map(str::to_string)
+            .unwrap_or_else(|| format!("mir2-gateway/{}", env!("CARGO_PKG_VERSION")))
     });
-    let source_build = configured.unwrap_or_else(|| option_env!("GIT_COMMIT_SHA")
-        .filter(|build_id| !build_id.trim().is_empty() && build_id.len() <= 128)
-        .map(str::to_string)
-        .unwrap_or_else(|| format!("mir2-gateway/{}", env!("CARGO_PKG_VERSION"))));
     // Every base/batch/promotion comparison includes the checkpoint restore
     // schema, even when deployment supplied only a reusable version label.
     // Bound the identifier without truncating the source build identity.
-    format!("mir2-zone/npc-checkpoint-v1/{}", hex_lower_bytes(&Sha256::digest(source_build.as_bytes())))
+    format!(
+        "mir2-zone/npc-checkpoint-v1/{}",
+        hex_lower_bytes(&Sha256::digest(source_build.as_bytes()))
+    )
 }
 
 fn zone_replication_entry_digest(
@@ -5385,7 +5617,6 @@ struct ZoneRpcEnvelope {
     request: ZoneRpcRequest,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct WireNpcPurchaseOwnerRequest {
@@ -5396,7 +5627,12 @@ struct WireNpcPurchaseOwnerRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(tag = "kind", rename_all = "camelCase", rename_all_fields = "camelCase", deny_unknown_fields)]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
 enum WireNpcPurchaseOwnerResponse {
     Execution {
         reply: NpcPurchaseOwnerReply,
@@ -5406,7 +5642,9 @@ enum WireNpcPurchaseOwnerResponse {
         snapshot: Option<Box<WorldSnapshot>>,
         authority: Option<NpcPurchaseProducer>,
     },
-    Error { error: NpcPurchaseDurableError },
+    Error {
+        error: NpcPurchaseDurableError,
+    },
 }
 
 impl WireNpcPurchaseOwnerResponse {
@@ -5414,20 +5652,51 @@ impl WireNpcPurchaseOwnerResponse {
         let known = crate::npc_purchase_owner_route::terminal_receipt(&execution.reply);
         let frames = match encode_server_frames(execution.execution.packets) {
             Ok(frames) => frames,
-            Err(error) => return Self::Error { error: crate::npc_purchase_owner_route::failure(format!("NPC purchase frame publication failed: {error:?}"), known) },
+            Err(error) => {
+                return Self::Error {
+                    error: crate::npc_purchase_owner_route::failure(
+                        format!("NPC purchase frame publication failed: {error:?}"),
+                        known,
+                    ),
+                }
+            }
         };
-        Self::Execution { reply: execution.reply, packet_count: frames.len(), frames,
+        Self::Execution {
+            reply: execution.reply,
+            packet_count: frames.len(),
+            frames,
             active_identity: execution.execution.outcome.active_identity,
-            snapshot: execution.snapshot.map(Box::new), authority: execution.authority }
+            snapshot: execution.snapshot.map(Box::new),
+            authority: execution.authority,
+        }
     }
 
-    fn into_execution(self, action: NpcPurchaseOwnerAction) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+    fn into_execution(
+        self,
+        action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
         let (reply, frames, packet_count, active_identity, snapshot, authority) = match self {
-            Self::Execution { reply, frames, packet_count, active_identity, snapshot, authority } =>
-                (reply, frames, packet_count, active_identity, snapshot, authority),
+            Self::Execution {
+                reply,
+                frames,
+                packet_count,
+                active_identity,
+                snapshot,
+                authority,
+            } => (
+                reply,
+                frames,
+                packet_count,
+                active_identity,
+                snapshot,
+                authority,
+            ),
             Self::Error { error } => {
                 if let NpcPurchaseDurableError::PostCommit { receipt, .. } = &error {
-                    if action.operation().is_none_or(|operation| receipt.validate_for_operation(operation).is_err()) {
+                    if action
+                        .operation()
+                        .is_none_or(|operation| receipt.validate_for_operation(operation).is_err())
+                    {
                         return Err(crate::npc_purchase_owner_route::failure("RPC NPC purchase error carries an invalid or unrelated terminal receipt", None));
                     }
                 }
@@ -5435,39 +5704,89 @@ impl WireNpcPurchaseOwnerResponse {
             }
         };
         let valid_reply = match (action, &reply) {
-            (NpcPurchaseOwnerAction::Begin, NpcPurchaseOwnerReply::Producer { producer }) => producer.actor != [0; 32] && producer.producer_scope != [0; 32]
-                && producer.server_revision > 0 && producer.server_revision < u64::MAX,
-            (NpcPurchaseOwnerAction::Quote { request }, NpcPurchaseOwnerReply::Quote { intent }) => intent.request == request && intent.service_catalog_proof != [0; 32],
-            (NpcPurchaseOwnerAction::Query { operation }, NpcPurchaseOwnerReply::Recovery { receipt }) => receipt.as_ref().is_none_or(|receipt| receipt.validate_for_operation(operation).is_ok()),
-            (NpcPurchaseOwnerAction::Purchase { operation }, NpcPurchaseOwnerReply::Purchase { receipt, .. }) => receipt.validate_for_operation(operation).is_ok(),
+            (NpcPurchaseOwnerAction::Begin, NpcPurchaseOwnerReply::Producer { producer }) => {
+                producer.actor != [0; 32]
+                    && producer.producer_scope != [0; 32]
+                    && producer.server_revision > 0
+                    && producer.server_revision < u64::MAX
+            }
+            (
+                NpcPurchaseOwnerAction::Quote { request },
+                NpcPurchaseOwnerReply::Quote { intent },
+            ) => intent.request == request && intent.service_catalog_proof != [0; 32],
+            (
+                NpcPurchaseOwnerAction::Query { operation },
+                NpcPurchaseOwnerReply::Recovery { receipt },
+            ) => receipt
+                .as_ref()
+                .is_none_or(|receipt| receipt.validate_for_operation(operation).is_ok()),
+            (
+                NpcPurchaseOwnerAction::Purchase { operation },
+                NpcPurchaseOwnerReply::Purchase { receipt, .. },
+            ) => receipt.validate_for_operation(operation).is_ok(),
             _ => false,
         };
         if !valid_reply {
-            return Err(crate::npc_purchase_owner_route::failure("RPC NPC purchase response does not match a valid original action result", None));
+            return Err(crate::npc_purchase_owner_route::failure(
+                "RPC NPC purchase response does not match a valid original action result",
+                None,
+            ));
         }
         // Only a correlated, semantically valid terminal result may survive a
         // later frame/snapshot error as a known receipt.
         let known = crate::npc_purchase_owner_route::terminal_receipt(&reply);
         let malformed = |detail| crate::npc_purchase_owner_route::failure(detail, known.clone());
-        if snapshot.is_some() != authority.is_some() { return Err(malformed("RPC NPC purchase full snapshot/authority pair is incomplete")); }
+        if snapshot.is_some() != authority.is_some() {
+            return Err(malformed(
+                "RPC NPC purchase full snapshot/authority pair is incomplete",
+            ));
+        }
         if let Some(authority) = authority.as_ref() {
-            if authority.actor == [0; 32] || authority.producer_scope == [0; 32] || authority.server_revision == 0 || authority.server_revision == u64::MAX
-                || known.as_ref().is_some_and(|receipt| receipt.entry.operation.actor != authority.actor
-                    || receipt.producer_scope != authority.producer_scope || receipt.entry.server_revision > authority.server_revision) {
-                return Err(malformed("RPC NPC purchase snapshot authority does not cover its terminal receipt"));
+            if authority.actor == [0; 32]
+                || authority.producer_scope == [0; 32]
+                || authority.server_revision == 0
+                || authority.server_revision == u64::MAX
+                || known.as_ref().is_some_and(|receipt| {
+                    receipt.entry.operation.actor != authority.actor
+                        || receipt.producer_scope != authority.producer_scope
+                        || receipt.entry.server_revision > authority.server_revision
+                })
+            {
+                return Err(malformed(
+                    "RPC NPC purchase snapshot authority does not cover its terminal receipt",
+                ));
             }
             if let NpcPurchaseOwnerReply::Producer { producer } = &reply {
-                if producer != authority { return Err(malformed("RPC NPC producer differs from its complete baseline")); }
+                if producer != authority {
+                    return Err(malformed(
+                        "RPC NPC producer differs from its complete baseline",
+                    ));
+                }
             }
         }
-        let packets = decode_server_frames(frames).map_err(|detail| crate::npc_purchase_owner_route::failure(detail, known.clone()))?;
-        if packets.len() != packet_count { return Err(malformed("RPC NPC purchase packet count mismatch")); }
+        let packets = decode_server_frames(frames)
+            .map_err(|detail| crate::npc_purchase_owner_route::failure(detail, known.clone()))?;
+        if packets.len() != packet_count {
+            return Err(malformed("RPC NPC purchase packet count mismatch"));
+        }
         let snapshot = snapshot.map(|snapshot| *snapshot);
         let snapshot_tick = snapshot.as_ref().map(|snapshot| snapshot.tick).unwrap_or(0);
-        Ok(NpcPurchaseOwnerRouteExecution { reply, authority, snapshot, checkpoint: None,
-            execution: WorldCommandExecution { packets,
-                outcome: WorldCommandOutcome { command_kind: crate::npc_purchase_owner_route::action_kind(action),
-                    packet_count, snapshot_tick, active_identity }, game_shop_purchase_outcome: None } })
+        Ok(NpcPurchaseOwnerRouteExecution {
+            reply,
+            authority,
+            snapshot,
+            checkpoint: None,
+            execution: WorldCommandExecution {
+                packets,
+                outcome: WorldCommandOutcome {
+                    command_kind: crate::npc_purchase_owner_route::action_kind(action),
+                    packet_count,
+                    snapshot_tick,
+                    active_identity,
+                },
+                game_shop_purchase_outcome: None,
+            },
+        })
     }
 }
 
@@ -5478,7 +5797,9 @@ enum ZoneRpcRequest {
         source_registration_id: u64,
         change: mir2_simulation::ZoneOwnerHealthChange,
     },
-    NpcPurchaseOwner { request: WireNpcPurchaseOwnerRequest },
+    NpcPurchaseOwner {
+        request: WireNpcPurchaseOwnerRequest,
+    },
     Health,
     ReplicationHead,
     ExportMutationBatch {
@@ -5528,8 +5849,13 @@ enum ZoneRpcRequest {
     RestoreActiveCharacterCheckpoint {
         checkpoint: Box<CharacterSaveRecord>,
     },
-    PrepareCharacterHandoff { owner_lease: WireZoneOwnerLease },
-    ResumeCharacterHandoff { owner_lease: WireZoneOwnerLease, checkpoint: Box<CharacterHandoffCheckpoint> },
+    PrepareCharacterHandoff {
+        owner_lease: WireZoneOwnerLease,
+    },
+    ResumeCharacterHandoff {
+        owner_lease: WireZoneOwnerLease,
+        checkpoint: Box<CharacterHandoffCheckpoint>,
+    },
     SaveActiveCharacter,
     RefreshActiveExternalMail,
     CloseSession {
@@ -5569,7 +5895,9 @@ impl ZoneRpcRequest {
             | Self::SaveActiveCharacter
             | Self::RefreshActiveExternalMail
             | Self::CloseSession { .. } => ZoneRpcPriority::Gameplay,
-            Self::PollOutbounds { .. } | Self::ValidateOwnerHealth { .. } => ZoneRpcPriority::Outbound,
+            Self::PollOutbounds { .. } | Self::ValidateOwnerHealth { .. } => {
+                ZoneRpcPriority::Outbound
+            }
         }
     }
 }
@@ -5584,7 +5912,9 @@ enum ZoneRpcResponse {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum ZoneRpcPayload {
-    NpcPurchaseOwner { response: WireNpcPurchaseOwnerResponse },
+    NpcPurchaseOwner {
+        response: WireNpcPurchaseOwnerResponse,
+    },
     Health {
         host_id: String,
         process_id: u32,
@@ -5650,8 +5980,12 @@ enum ZoneRpcPayload {
     ActiveCharacterCheckpoint {
         checkpoint: Option<Box<CharacterSaveRecord>>,
     },
-    CharacterHandoff { checkpoint: Box<CharacterHandoffCheckpoint> },
-    CharacterHandoffCommitment { commitment: Box<CharacterHandoffCommitment> },
+    CharacterHandoff {
+        checkpoint: Box<CharacterHandoffCheckpoint>,
+    },
+    CharacterHandoffCommitment {
+        commitment: Box<CharacterHandoffCommitment>,
+    },
     Unit,
     Bool {
         value: bool,
@@ -5742,7 +6076,9 @@ impl WireZoneOwnerCommandMode {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "command", content = "arguments", rename_all = "camelCase")]
 enum WireWorldCommand {
-    ReplayRetainedStartGameBootstrap { character_index: i32 },
+    ReplayRetainedStartGameBootstrap {
+        character_index: i32,
+    },
     ClientPacket {
         frame: Vec<u8>,
     },
@@ -5821,14 +6157,26 @@ enum WireWorldCommand {
     SetLanguage {
         language: String,
     },
-    BillingRefresh { character_index: i32 },
-    BillingBuyMonthlyCard { character_index: i32, request_id: String },
-    BillingActivateMonthlyCard { character_index: i32, unique_id: u64 },
-    ResumeCharacterHandoff { checkpoint: Box<CharacterHandoffCheckpoint> },
+    BillingRefresh {
+        character_index: i32,
+    },
+    BillingBuyMonthlyCard {
+        character_index: i32,
+        request_id: String,
+    },
+    BillingActivateMonthlyCard {
+        character_index: i32,
+        unique_id: u64,
+    },
+    ResumeCharacterHandoff {
+        checkpoint: Box<CharacterHandoffCheckpoint>,
+    },
     RestoreActiveCharacterCheckpoint {
         checkpoint: Box<CharacterSaveRecord>,
     },
-    NpcPurchaseOwnerCheckpoint { checkpoint: Box<CharacterSaveRecord> },
+    NpcPurchaseOwnerCheckpoint {
+        checkpoint: Box<CharacterSaveRecord>,
+    },
     Tick,
 }
 
@@ -5904,9 +6252,23 @@ impl WireWorldCommand {
                 renting,
             },
             WorldCommand::SetLanguage { language } => Self::SetLanguage { language },
-            WorldCommand::BillingRefresh { character_index } => Self::BillingRefresh { character_index },
-            WorldCommand::BillingBuyMonthlyCard { character_index, request_id } => Self::BillingBuyMonthlyCard { character_index, request_id },
-            WorldCommand::BillingActivateMonthlyCard { character_index, unique_id } => Self::BillingActivateMonthlyCard { character_index, unique_id },
+            WorldCommand::BillingRefresh { character_index } => {
+                Self::BillingRefresh { character_index }
+            }
+            WorldCommand::BillingBuyMonthlyCard {
+                character_index,
+                request_id,
+            } => Self::BillingBuyMonthlyCard {
+                character_index,
+                request_id,
+            },
+            WorldCommand::BillingActivateMonthlyCard {
+                character_index,
+                unique_id,
+            } => Self::BillingActivateMonthlyCard {
+                character_index,
+                unique_id,
+            },
             WorldCommand::Tick => Self::Tick,
         })
     }
@@ -5986,11 +6348,26 @@ impl WireWorldCommand {
                 renting,
             },
             Self::SetLanguage { language } => WorldCommand::SetLanguage { language },
-            Self::BillingRefresh { character_index } => WorldCommand::BillingRefresh { character_index },
-            Self::BillingBuyMonthlyCard { character_index, request_id } => WorldCommand::BillingBuyMonthlyCard { character_index, request_id },
-            Self::BillingActivateMonthlyCard { character_index, unique_id } => WorldCommand::BillingActivateMonthlyCard { character_index, unique_id },
-            Self::RestoreActiveCharacterCheckpoint { .. } | Self::NpcPurchaseOwnerCheckpoint { .. }
-                | Self::ResumeCharacterHandoff { .. } => {
+            Self::BillingRefresh { character_index } => {
+                WorldCommand::BillingRefresh { character_index }
+            }
+            Self::BillingBuyMonthlyCard {
+                character_index,
+                request_id,
+            } => WorldCommand::BillingBuyMonthlyCard {
+                character_index,
+                request_id,
+            },
+            Self::BillingActivateMonthlyCard {
+                character_index,
+                unique_id,
+            } => WorldCommand::BillingActivateMonthlyCard {
+                character_index,
+                unique_id,
+            },
+            Self::RestoreActiveCharacterCheckpoint { .. }
+            | Self::NpcPurchaseOwnerCheckpoint { .. }
+            | Self::ResumeCharacterHandoff { .. } => {
                 return Err(ZoneRpcFault::new(
                     "checkpoint_command",
                     "active character checkpoint restore is an internal journal mutation",
@@ -6045,12 +6422,21 @@ impl WireHostJournalEntry {
         source_sequence: u64,
         replicated: bool,
     ) -> Result<(), ZoneRpcFault> {
-        if let Some(WireWorldCommand::ResumeCharacterHandoff { checkpoint }) = self.command.as_ref() {
-            session.hosted.apply_character_handoff_replica(checkpoint).map_err(classify_runtime_error)?;
+        if let Some(WireWorldCommand::ResumeCharacterHandoff { checkpoint }) = self.command.as_ref()
+        {
+            session
+                .hosted
+                .apply_character_handoff_replica(checkpoint)
+                .map_err(classify_runtime_error)?;
             return Ok(());
         }
-        if let Some(WireWorldCommand::NpcPurchaseOwnerCheckpoint { checkpoint }) = self.command.as_ref() {
-            session.hosted.apply_npc_purchase_owner_replica_checkpoint(checkpoint).map_err(classify_runtime_error)?;
+        if let Some(WireWorldCommand::NpcPurchaseOwnerCheckpoint { checkpoint }) =
+            self.command.as_ref()
+        {
+            session
+                .hosted
+                .apply_npc_purchase_owner_replica_checkpoint(checkpoint)
+                .map_err(classify_runtime_error)?;
             return Ok(());
         }
         if let Some(WireWorldCommand::RestoreActiveCharacterCheckpoint { checkpoint }) =
@@ -7108,7 +7494,9 @@ fn unexpected_payload(operation: &str, payload: &ZoneRpcPayload) -> String {
 }
 
 fn zone_rpc_request_requires_active_mutation(request: &ZoneRpcRequest) -> bool {
-    if let ZoneRpcRequest::NpcPurchaseOwner { request } = request { return request.action.is_mutation(); }
+    if let ZoneRpcRequest::NpcPurchaseOwner { request } = request {
+        return request.action.is_mutation();
+    }
     matches!(
         request,
         ZoneRpcRequest::OnConnect
@@ -7308,11 +7696,17 @@ mod zone_rpc_authorization_tests {
 
     #[test]
     fn retained_bootstrap_rpc_round_trip_remains_gateway_only() {
-        let wire = WireWorldCommand::from_world(WorldCommand::ReplayRetainedStartGameBootstrap { character_index: 8 }).unwrap();
+        let wire = WireWorldCommand::from_world(WorldCommand::ReplayRetainedStartGameBootstrap {
+            character_index: 8,
+        })
+        .unwrap();
         let encoded = serde_json::to_vec(&wire).unwrap();
         let decoded: WireWorldCommand = serde_json::from_slice(&encoded).unwrap();
         let command = decoded.into_world().unwrap();
-        assert!(matches!(command, WorldCommand::ReplayRetainedStartGameBootstrap { character_index: 8 }));
+        assert!(matches!(
+            command,
+            WorldCommand::ReplayRetainedStartGameBootstrap { character_index: 8 }
+        ));
         assert!(mir2_simulation::validate_production_player_command(true, &command).is_err());
         assert!(mir2_simulation::validate_production_player_command(false, &command).is_err());
     }

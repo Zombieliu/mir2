@@ -212,13 +212,13 @@ pub(super) fn bound_town_destination(world: &World) -> (mir2_protocol::MapInform
         .resource::<PlayerRuntimeResource>()
         .bind_point
         .as_ref()
-        .filter(|bind| !bind.map_file_name.is_empty() && config.map_is_allowed(&bind.map_file_name));
+        .filter(|bind| {
+            !bind.map_file_name.is_empty() && config.map_is_allowed(&bind.map_file_name)
+        });
     match bind {
         Some(bind) => {
-            let mut map = super::npc_script::crystal_npc_move_map_information(
-                world,
-                &bind.map_file_name,
-            );
+            let mut map =
+                super::npc_script::crystal_npc_move_map_information(world, &bind.map_file_name);
             crate::config::apply_crystal_map_metadata(&mut map);
             (map, bind.position.clone())
         }
@@ -362,11 +362,7 @@ pub(super) fn town_revive_packets(world: &mut World) -> Vec<ServerPacket> {
     let (bind_map, bind_position, current_map_file_name) = {
         let (bind_map, bind_position) = bound_town_destination(world);
         let current_map = &world.resource::<MapRuntimeResource>().current_map;
-        (
-            bind_map,
-            bind_position,
-            current_map.file_name.clone(),
-        )
+        (bind_map, bind_position, current_map.file_name.clone())
     };
     {
         let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
@@ -694,9 +690,11 @@ pub(super) fn step_player(world: &mut World, amount: i32) -> bool {
         if let Some(destination) =
             player_directional_destination(world, &position, direction, amount, Some(player))
         {
-            world.entity_mut(player).insert(Position(destination.clone()));
+            world
+                .entity_mut(player)
+                .insert(Position(destination.clone()));
             refresh_player_bind_at_position(world, &destination);
-            super::default_npc_events::observe_movement(world,&position,&destination);
+            super::default_npc_events::observe_movement(world, &position, &destination);
             return true;
         }
     }
@@ -718,7 +716,10 @@ fn player_directional_destination(
             return None;
         }
         current = next;
-        if super::default_npc_events::is_active_map_coord(&world.resource::<MapRuntimeResource>().current_map.file_name,&current) {
+        if super::default_npc_events::is_active_map_coord(
+            &world.resource::<MapRuntimeResource>().current_map.file_name,
+            &current,
+        ) {
             break;
         }
     }
@@ -927,7 +928,11 @@ impl SimulationSession {
                             .entity_mut(player_entity)
                             .insert((Position(next_step.clone()), Facing(direction)));
                         refresh_player_bind_at_position(self.app.world_mut(), &next_step);
-                        super::default_npc_events::observe_movement(self.app.world_mut(),&next_position,&next_step);
+                        super::default_npc_events::observe_movement(
+                            self.app.world_mut(),
+                            &next_position,
+                            &next_step,
+                        );
 
                         packets.push(player_motion_packet(self.app.world(), running));
                         follow_player_with_stage5_hero(

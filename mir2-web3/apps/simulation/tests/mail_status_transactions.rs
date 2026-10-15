@@ -77,7 +77,13 @@ fn start_game_projects_the_persisted_mailbox_with_unchanged_status() {
             password: "demo".to_string(),
         });
         let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-        assert_eq!(packets.iter().filter(|packet| matches!(packet, ServerPacket::ReceiveMail { .. })).count(), 1);
+        assert_eq!(
+            packets
+                .iter()
+                .filter(|packet| matches!(packet, ServerPacket::ReceiveMail { .. }))
+                .count(),
+            1
+        );
         assert_eq!(mail_flags(&packets, mail_id), (false, false, false));
     }
 }

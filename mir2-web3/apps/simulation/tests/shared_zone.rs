@@ -633,14 +633,20 @@ fn assert_combat_clears_only_older_movement(
     old_deadline: u64,
     combat_action_delay: u64,
 ) {
-    assert!(has_packet(launch, owner, |packet| matches!(
-        packet,
-        ServerPacket::UserLocation { location }
-            if location.position == (Point { x: 331, y: 270 })
-    )), "accepted combat cancels the buffered step with an owner correction");
+    assert!(
+        has_packet(launch, owner, |packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location }
+                if location.position == (Point { x: 331, y: 270 })
+        )),
+        "accepted combat cancels the buffered step with an owner correction"
+    );
     assert_eq!(zone.next_pending_movement_deadline_ms(), None);
     let stale_tick = zone.tick_pending_movement(old_deadline);
-    assert!(stale_tick.is_empty(), "the old walk must not execute after combat");
+    assert!(
+        stale_tick.is_empty(),
+        "the old walk must not execute after combat"
+    );
     assert_eq!(zone.player_position(owner), Some(Point { x: 331, y: 270 }));
 
     // Clearing the old step must not disable a fresh player input after the
@@ -665,32 +671,52 @@ fn accepted_melee_and_materialized_attack_cancel_only_pre_attack_movement() {
         let mut zone = zone();
         let owner = session("combat-movement-owner");
         zone.handle(ZoneCommand::Join(join(
-            "combat-movement-owner", 101, "Owner", 330, 270,
+            "combat-movement-owner",
+            101,
+            "Owner",
+            330,
+            270,
         )));
         admit_melee(&mut zone, &owner);
         let old_deadline = buffer_reverse_walk_before_combat(&mut zone, &owner);
         let monster = native_monster_spawn(9_100, 332, 270);
         if !materialized {
             zone.handle(ZoneCommand::SpawnMonster {
-                session_id: owner.clone(), monster: monster.clone(), now_ms: 11,
+                session_id: owner.clone(),
+                monster: monster.clone(),
+                now_ms: 11,
             });
         }
         let launch = zone.handle(if materialized {
             ZoneCommand::PlayerAttackMaterializedObject {
-                session_id: owner.clone(), object_id: 9_100, monster: Some(monster),
-                direction: MirDirection::Right, spell: Spell::None as u8,
-                level: 0, attack_type: 0, damage: 1, now_ms: old_deadline,
+                session_id: owner.clone(),
+                object_id: 9_100,
+                monster: Some(monster),
+                direction: MirDirection::Right,
+                spell: Spell::None as u8,
+                level: 0,
+                attack_type: 0,
+                damage: 1,
+                now_ms: old_deadline,
             }
         } else {
             ZoneCommand::PlayerAttackObject {
-                session_id: owner.clone(), object_id: 9_100,
-                direction: MirDirection::Right, spell: Spell::None as u8,
-                level: 0, attack_type: 0, damage: 1, now_ms: old_deadline,
+                session_id: owner.clone(),
+                object_id: 9_100,
+                direction: MirDirection::Right,
+                spell: Spell::None as u8,
+                level: 0,
+                attack_type: 0,
+                damage: 1,
+                now_ms: old_deadline,
             }
         });
-        assert!(has_packet(&launch, &owner, |packet| matches!(
-            packet, ServerPacket::ObjectAttack { info } if info.object_id == 101
-        )), "materialized={materialized}");
+        assert!(
+            has_packet(&launch, &owner, |packet| matches!(
+                packet, ServerPacket::ObjectAttack { info } if info.object_id == 101
+            )),
+            "materialized={materialized}"
+        );
         assert_combat_clears_only_older_movement(&mut zone, &owner, &launch, old_deadline, 550);
     }
 }
@@ -701,35 +727,60 @@ fn accepted_range_and_magic_cancel_pre_attack_movement() {
         let mut zone = zone();
         let owner = session("combat-movement-owner");
         let mut joining = join("combat-movement-owner", 101, "Owner", 330, 270);
-        if ranged { joining.class = MirClass::Archer; }
+        if ranged {
+            joining.class = MirClass::Archer;
+        }
         zone.handle(ZoneCommand::Join(joining));
-        if ranged { admit_archer_range(&mut zone, &owner); }
+        if ranged {
+            admit_archer_range(&mut zone, &owner);
+        }
         let old_deadline = buffer_reverse_walk_before_combat(&mut zone, &owner);
         zone.handle(ZoneCommand::SpawnMonster {
-            session_id: owner.clone(), monster: native_monster_spawn(9_100, 335, 270),
+            session_id: owner.clone(),
+            monster: native_monster_spawn(9_100, 335, 270),
             now_ms: 11,
         });
         let launch = zone.handle(if ranged {
             ZoneCommand::PlayerRangeAttackObject {
-                session_id: owner.clone(), object_id: 9_100,
-                direction: MirDirection::Right, target: Point { x: 335, y: 270 },
-                spell: Spell::Focus, level: 0, attack_type: 0, damage: 1, now_ms: old_deadline,
+                session_id: owner.clone(),
+                object_id: 9_100,
+                direction: MirDirection::Right,
+                target: Point { x: 335, y: 270 },
+                spell: Spell::Focus,
+                level: 0,
+                attack_type: 0,
+                damage: 1,
+                now_ms: old_deadline,
             }
         } else {
             ZoneCommand::PlayerCastMagic {
-                session_id: owner.clone(), object_id: 9_100, spell: Spell::FireBall,
-                direction: MirDirection::Right, target: Point { x: 335, y: 270 },
-                cast: true, level: 0, damage: 1, mp_cost: 0, cooldown_ms: 500,
+                session_id: owner.clone(),
+                object_id: 9_100,
+                spell: Spell::FireBall,
+                direction: MirDirection::Right,
+                target: Point { x: 335, y: 270 },
+                cast: true,
+                level: 0,
+                damage: 1,
+                mp_cost: 0,
+                cooldown_ms: 500,
                 now_ms: old_deadline,
             }
         });
-        assert!(has_packet(&launch, &owner, |packet| match packet {
-            ServerPacket::ObjectRangeAttack { info } => ranged && info.object_id == 101,
-            ServerPacket::ObjectMagic { object_id, .. } => !ranged && *object_id == 101,
-            _ => false,
-        }), "ranged={ranged}");
+        assert!(
+            has_packet(&launch, &owner, |packet| match packet {
+                ServerPacket::ObjectRangeAttack { info } => ranged && info.object_id == 101,
+                ServerPacket::ObjectMagic { object_id, .. } => !ranged && *object_id == 101,
+                _ => false,
+            }),
+            "ranged={ranged}"
+        );
         assert_combat_clears_only_older_movement(
-            &mut zone, &owner, &launch, old_deadline, if ranged { 550 } else { 600 },
+            &mut zone,
+            &owner,
+            &launch,
+            old_deadline,
+            if ranged { 550 } else { 600 },
         );
     }
 }
@@ -739,28 +790,42 @@ fn rejected_attack_discards_prior_movement_without_shortening_action_time() {
     let mut zone = zone();
     let owner = session("combat-movement-owner");
     zone.handle(ZoneCommand::Join(join(
-        "combat-movement-owner", 101, "Owner", 330, 270,
+        "combat-movement-owner",
+        101,
+        "Owner",
+        330,
+        270,
     )));
     admit_melee(&mut zone, &owner);
     let old_deadline = buffer_reverse_walk_before_combat(&mut zone, &owner);
     zone.handle(ZoneCommand::SpawnMonster {
-        session_id: owner.clone(), monster: native_monster_spawn(9_100, 335, 270),
+        session_id: owner.clone(),
+        monster: native_monster_spawn(9_100, 335, 270),
         now_ms: 11,
     });
     let rejected = zone.handle(ZoneCommand::PlayerAttackObject {
-        session_id: owner.clone(), object_id: 9_100,
-        direction: MirDirection::Right, spell: Spell::None as u8,
-        level: 0, attack_type: 0, damage: 1, now_ms: 12,
+        session_id: owner.clone(),
+        object_id: 9_100,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 1,
+        now_ms: 12,
     });
     assert!(!has_packet(&rejected, &owner, |packet| matches!(
-        packet, ServerPacket::ObjectAttack { .. }
+        packet,
+        ServerPacket::ObjectAttack { .. }
     )));
     assert!(has_packet(&rejected, &owner, |packet| matches!(
         packet, ServerPacket::UserLocation { location }
             if location.position == (Point { x: 331, y: 270 })
     )));
     assert_eq!(zone.next_pending_movement_deadline_ms(), None);
-    assert_eq!(zone.player_magic_cooldown_remaining_ms(&owner, Spell::FireBall, 12), Some(old_deadline - 12));
+    assert_eq!(
+        zone.player_magic_cooldown_remaining_ms(&owner, Spell::FireBall, 12),
+        Some(old_deadline - 12)
+    );
     assert!(zone.tick_pending_movement(old_deadline).is_empty());
     assert_eq!(zone.player_position(&owner), Some(Point { x: 331, y: 270 }));
 }
@@ -6736,7 +6801,8 @@ fn zone_native_player_magic_retargets_one_stale_monster_step_but_rejects_two() {
         now_ms: 1000,
     });
     assert!(!has_packet(&rejected, &caster, |packet| matches!(
-        packet, ServerPacket::Magic { .. } | ServerPacket::ObjectMagic { .. }
+        packet,
+        ServerPacket::Magic { .. } | ServerPacket::ObjectMagic { .. }
     )));
 }
 
@@ -8506,7 +8572,10 @@ fn zone_native_player_magic_respects_spell_action_window_across_spells() {
             ..
         } if *object_id == 101 && *spell == Spell::ThunderBolt && *target_id == 9100
     )));
-    assert_eq!(zone.player_vitals(&first).unwrap().2, mp_before_boundary - 1);
+    assert_eq!(
+        zone.player_vitals(&first).unwrap().2,
+        mp_before_boundary - 1
+    );
 }
 
 #[test]
@@ -9194,7 +9263,10 @@ fn zone_native_summon_attacks_hostile_monster_for_owner_without_hitting_players(
     )));
     let damage = damage_indicator_for(&struck, 9100)
         .expect("summon's hit should show authoritative monster damage");
-    assert!((12..=23).contains(&damage), "BoneFamiliar Crystal DC range: {damage}");
+    assert!(
+        (12..=23).contains(&damage),
+        "BoneFamiliar Crystal DC range: {damage}"
+    );
     assert!(has_packet(&struck, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectHealth { info }
@@ -14093,15 +14165,29 @@ fn level50_taoist_purification_clears_shared_poison_and_curse_state() {
     });
     assert!(!has_packet(&purification_cast, &friend, |packet| matches!(
         packet,
-        ServerPacket::ObjectPoisoned { object_id: 102, poison: 0 }
-            | ServerPacket::RemoveBuff { object_id: 102, buff_type: 12 }
+        ServerPacket::ObjectPoisoned {
+            object_id: 102,
+            poison: 0
+        } | ServerPacket::RemoveBuff {
+            object_id: 102,
+            buff_type: 12
+        }
     )));
     let before_purification = purification_zone.tick(1_039);
-    assert!(!has_packet(&before_purification, &friend, |packet| matches!(
-        packet,
-        ServerPacket::ObjectPoisoned { object_id: 102, poison: 0 }
-            | ServerPacket::RemoveBuff { object_id: 102, buff_type: 12 }
-    )));
+    assert!(!has_packet(
+        &before_purification,
+        &friend,
+        |packet| matches!(
+            packet,
+            ServerPacket::ObjectPoisoned {
+                object_id: 102,
+                poison: 0
+            } | ServerPacket::RemoveBuff {
+                object_id: 102,
+                buff_type: 12
+            }
+        )
+    ));
     let purified = purification_zone.tick(1_040);
     assert!(has_packet(&purified, &friend, |packet| matches!(
         packet,

@@ -1,8 +1,8 @@
 //! Ordinary shared SummonSnakes and the immediate Monster Master lifetime.
 use mir2_protocol::{MirClass, MirDirection, MirGender, Point, ServerPacket, Spell};
 use mir2_simulation::{
-    SessionId, WorldEntityDisposition, ZoneCommand, ZoneJoin, ZoneKey,
-    ZoneMonsterDefense, ZoneMonsterSpawn, ZoneOutbound, ZoneRuntime,
+    SessionId, WorldEntityDisposition, ZoneCommand, ZoneJoin, ZoneKey, ZoneMonsterDefense,
+    ZoneMonsterSpawn, ZoneOutbound, ZoneRuntime,
 };
 
 const TARGET: u32 = 9100;
@@ -59,7 +59,10 @@ fn fixture_with_ac(ac: i32) -> (ZoneRuntime, SessionId, u32, u32, u64) {
     // Translate the original geometry by (+222,+199) into walkable terrain;
     // all actor offsets, distances, deadlines and lifecycle assertions remain.
     let mut zone = ZoneRuntime::new(ZoneKey::for_map(MAP));
-    assert!(zone.has_available_collision(), "real fixture terrain must load");
+    assert!(
+        zone.has_available_collision(),
+        "real fixture terrain must load"
+    );
     zone.handle(ZoneCommand::Join(ZoneJoin {
         session_id: owner.clone(),
         account_id: "snake-source-account".into(),

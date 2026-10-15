@@ -1514,14 +1514,22 @@ impl SimulationSession {
             {
                 self.apply_zone_player_remove_buff(*buff_type);
             }
-            ServerPacket::PauseBuff { object_id, buff_type, paused }
-                if local_player_object_id.is_some_and(|local_object_id| {
-                    *object_id == local_object_id || *object_id == zone_object_id
-                }) =>
+            ServerPacket::PauseBuff {
+                object_id,
+                buff_type,
+                paused,
+            } if local_player_object_id.is_some_and(|local_object_id| {
+                *object_id == local_object_id || *object_id == zone_object_id
+            }) =>
             {
                 if let Some(key) = super::buffs::crystal_buff_key_for_type(*buff_type) {
-                    if let Some(duration) = self.app.world_mut().resource_mut::<BuffResource>()
-                        .buffs.iter_mut().find(|buff| buff.key == key)
+                    if let Some(duration) = self
+                        .app
+                        .world_mut()
+                        .resource_mut::<BuffResource>()
+                        .buffs
+                        .iter_mut()
+                        .find(|buff| buff.key == key)
                         .and_then(|buff| buff.real_time_duration.as_mut())
                     {
                         duration.set_paused(*paused);

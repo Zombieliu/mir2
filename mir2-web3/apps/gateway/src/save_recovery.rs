@@ -9,7 +9,9 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use hmac::{Hmac, KeyInit, Mac};
 use mir2_protocol::{MirDirection, Point};
-use mir2_simulation::{CharacterSaveRecord, RecoveryCharacterLoadError, SimulationConfig, SimulationSession};
+use mir2_simulation::{
+    CharacterSaveRecord, RecoveryCharacterLoadError, SimulationConfig, SimulationSession,
+};
 use rand::{rngs::OsRng, RngCore};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -1139,7 +1141,8 @@ fn replay_envelope(
     session
         .bind_account_for_recovery(&payload.account_id)
         .map_err(recovery_load_error)?;
-    let current = session.select_character_for_recovery(payload.character_index)
+    let current = session
+        .select_character_for_recovery(payload.character_index)
         .map_err(recovery_load_error)?;
     let journal_revision = payload.checkpoint.revision;
     if current.revision > journal_revision {
@@ -1174,8 +1177,9 @@ fn replay_envelope(
 fn recovery_load_error(error: RecoveryCharacterLoadError) -> String {
     match error {
         RecoveryCharacterLoadError::Conflict(error) => replay_conflict(error),
-        RecoveryCharacterLoadError::Deferred(error) =>
-            format!("recovery source or access unavailable; journal retained: {error}"),
+        RecoveryCharacterLoadError::Deferred(error) => {
+            format!("recovery source or access unavailable; journal retained: {error}")
+        }
     }
 }
 

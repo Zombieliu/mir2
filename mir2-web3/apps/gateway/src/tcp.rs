@@ -33,10 +33,18 @@ pub async fn run_tcp_gateway(
 
 /// Both production transports share this registry and the same authoritative world.
 pub async fn run_tcp_gateway_with_zone_registry(
-    addr: &str, config: GatewayConfig, chat_hub: ChatBroadcastHub,
+    addr: &str,
+    config: GatewayConfig,
+    chat_hub: ChatBroadcastHub,
     zone_registry: Arc<ZoneRegistry>,
 ) -> io::Result<()> {
-    serve_tcp_gateway_with_zone_registry(TcpListener::bind(addr).await?,config,chat_hub,zone_registry).await
+    serve_tcp_gateway_with_zone_registry(
+        TcpListener::bind(addr).await?,
+        config,
+        chat_hub,
+        zone_registry,
+    )
+    .await
 }
 
 /// Serve the public Mir2 TCP protocol on a pre-bound listener.
@@ -48,18 +56,23 @@ pub async fn serve_tcp_gateway(
     config: GatewayConfig,
     chat_hub: ChatBroadcastHub,
 ) -> io::Result<()> {
-    let topology=ZoneTopology::from_env().map_err(|error|io::Error::new(io::ErrorKind::InvalidInput,error))?;
-    let factory=topology.runtime_factory();
-    let registry=Arc::new(ZoneRegistry::with_router_and_owner_lease_authority(
-        topology.default_zone_id().clone(),factory.clone(),topology.router(),
+    let topology = ZoneTopology::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let factory = topology.runtime_factory();
+    let registry = Arc::new(ZoneRegistry::with_router_and_owner_lease_authority(
+        topology.default_zone_id().clone(),
+        factory.clone(),
+        topology.router(),
         crate::zone_lease::default_zone_owner_lease_authority_from_env(),
     ));
-    let _conquest=crate::conquest_clock::ConquestClockService::start(config.clone(),factory)?;
-    serve_tcp_gateway_with_zone_registry(listener,config,chat_hub,registry).await
+    let _conquest = crate::conquest_clock::ConquestClockService::start(config.clone(), factory)?;
+    serve_tcp_gateway_with_zone_registry(listener, config, chat_hub, registry).await
 }
 
 pub async fn serve_tcp_gateway_with_zone_registry(
-    listener: TcpListener, config: GatewayConfig, chat_hub: ChatBroadcastHub,
+    listener: TcpListener,
+    config: GatewayConfig,
+    chat_hub: ChatBroadcastHub,
     zone_registry: Arc<ZoneRegistry>,
 ) -> io::Result<()> {
     // Activated Crystal world: host every map full-size in the shared zone (see
@@ -166,10 +179,8 @@ async fn handle_client_inner(
         mpsc::channel::<SharedZoneLiveOutbound>(LIVE_ZONE_OUTBOUND_CAPACITY);
     let (owner_location_outbound_tx, mut owner_location_outbound_rx) =
         mpsc::channel::<SharedZoneLiveOutbound>(OWNER_LOCATION_OUTBOUND_CAPACITY);
-    let zone_outbound_sender = SharedZoneLiveOutboundSender::new(
-        zone_outbound_tx,
-        owner_location_outbound_tx,
-    );
+    let zone_outbound_sender =
+        SharedZoneLiveOutboundSender::new(zone_outbound_tx, owner_location_outbound_tx);
     let mut active_zone_outbound_registration_id = 0;
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
@@ -361,10 +372,7 @@ async fn handle_client_inner(
                 if active_identity.is_none() {
                     active_zone_outbound_registration_id = 0;
                     _zone_live_outbound_registration = None;
-                } else if _zone_live_outbound_registration.is_none()
-                    || starts_game
-                    || map_changed
-                {
+                } else if _zone_live_outbound_registration.is_none() || starts_game || map_changed {
                     let next_registration = gateway_blocking(|| {
                         session.register_zone_live_outbound(zone_outbound_sender.clone())
                     })

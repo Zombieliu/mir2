@@ -95,8 +95,16 @@ fn packets_for<'a>(outbounds: &'a [ZoneOutbound], recipient: &str) -> Vec<&'a Se
 fn fixture(ai: u8) -> ZoneRuntime {
     let mut z = ZoneRuntime::new(ZoneKey::for_map(SOURCE_MAP));
     z.handle(ZoneCommand::Join(player("player", 101, point(20, 22))));
-    z.handle(ZoneCommand::sync_player_combat_state(SessionId::new("player"),
-        MirClass::Warrior, false, false, true, false, false, false));
+    z.handle(ZoneCommand::sync_player_combat_state(
+        SessionId::new("player"),
+        MirClass::Warrior,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+    ));
     let mut node = monster(ai, point(20, 20));
     node.attack_speed_ms = 100_000;
     z.handle(ZoneCommand::SpawnMonster {

@@ -27,8 +27,9 @@ impl SimulationSession {
         };
         let marriage = config.shared_marriage_profile_for(&identity)?.relationship;
         let mentor = config.shared_mentor_profile_for(&identity)?.mentor;
-        let newbie = config.shared_guild_for_identity(&identity)?.is_some_and(|guild|
-            guild.name == config.crystal_newbie_guild_name);
+        let newbie = config
+            .shared_guild_for_identity(&identity)?
+            .is_some_and(|guild| guild.name == config.crystal_newbie_guild_name);
         let is_online = |partner: &Option<Stage5FriendIdentity>| {
             partner.as_ref().is_some_and(|peer| {
                 peer != &identity
@@ -72,19 +73,50 @@ fn synchronize_newbie(world: &mut World, member: bool) -> Vec<ServerPacket> {
     let eligible = member && settings.newbie_guild_buff_enabled;
     let mut packets = Vec::new();
     if !eligible {
-        let had = world.resource::<BuffResource>().buffs.iter().any(|buff| buff.key == "newbie");
-        world.resource_mut::<BuffResource>().buffs.retain(|buff| buff.key != "newbie");
+        let had = world
+            .resource::<BuffResource>()
+            .buffs
+            .iter()
+            .any(|buff| buff.key == "newbie");
+        world
+            .resource_mut::<BuffResource>()
+            .buffs
+            .retain(|buff| buff.key != "newbie");
         if had {
             if let (Some(object_id), Some(buff_type)) = (
-                player_entity(world).and_then(|entity| world.get::<ObjectId>(entity)).map(|id| id.0),
+                player_entity(world)
+                    .and_then(|entity| world.get::<ObjectId>(entity))
+                    .map(|id| id.0),
                 crystal_buff_type_for_key("newbie"),
-            ) { packets.push(ServerPacket::RemoveBuff { object_id, buff_type }); }
+            ) {
+                packets.push(ServerPacket::RemoveBuff {
+                    object_id,
+                    buff_type,
+                });
+            }
         }
-    } else if !world.resource::<BuffResource>().buffs.iter().any(|buff| buff.key == "newbie") {
-        let buff = BuffState { key:"newbie".into(), name:"Newbie".into(), description:String::new(),
-            expires_at_tick:u64::MAX, real_time_duration:None, attack_bonus:0, defence_bonus:0,
-            stats:vec![UserItemStat { stat:100, value:settings.newbie_guild_exp_buff }] };
-        if let Some(packet) = client_buff_packet_for_state(world, &buff) { packets.push(packet); }
+    } else if !world
+        .resource::<BuffResource>()
+        .buffs
+        .iter()
+        .any(|buff| buff.key == "newbie")
+    {
+        let buff = BuffState {
+            key: "newbie".into(),
+            name: "Newbie".into(),
+            description: String::new(),
+            expires_at_tick: u64::MAX,
+            real_time_duration: None,
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: vec![UserItemStat {
+                stat: 100,
+                value: settings.newbie_guild_exp_buff,
+            }],
+        };
+        if let Some(packet) = client_buff_packet_for_state(world, &buff) {
+            packets.push(packet);
+        }
         world.resource_mut::<BuffResource>().buffs.push(buff);
     }
     packets

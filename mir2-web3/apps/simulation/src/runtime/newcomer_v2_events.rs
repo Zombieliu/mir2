@@ -453,7 +453,9 @@ pub(in crate::runtime) fn record_zone_event(
                 _ => {}
             }
         }
-        Event::RangedDamage if receipt.damage.is_some_and(|damage| damage > 0) && knows(world, "Focus") => {
+        Event::RangedDamage
+            if receipt.damage.is_some_and(|damage| damage > 0) && knows(world, "Focus") =>
+        {
             conditions.push("normal ranged attack landed with Focus learned");
         }
         Event::StraightShotDamage if receipt.damage.is_some_and(|damage| damage > 0) => {

@@ -823,13 +823,7 @@ mod life_clear_tests {
         session
     }
 
-    fn spawn_monster(
-        zone: &mut ZoneRuntime,
-        object_id: u32,
-        name: &str,
-        ai: u8,
-        position: Point,
-    ) {
+    fn spawn_monster(zone: &mut ZoneRuntime, object_id: u32, name: &str, ai: u8, position: Point) {
         assert!(
             zone.spawn_authoritative_monster(
                 &ZoneMonsterSpawn {
@@ -897,7 +891,10 @@ mod life_clear_tests {
 
         let destination = Point { x: 16, y: 20 };
         assert_eq!(zone.native_monsters[&180].position, destination);
-        assert!(zone.object_grid.candidates_in_rect(&destination, 0, 0).contains(&180));
+        assert!(zone
+            .object_grid
+            .candidates_in_rect(&destination, 0, 0)
+            .contains(&180));
         assert!(!zone
             .object_grid
             .candidates_in_rect(&Point { x: 15, y: 20 }, 0, 0)
@@ -916,13 +913,7 @@ mod life_clear_tests {
         moved.owner_session_id = Some(weak.clone());
         moved.owner_player_object_id = 102;
         moved.hostile_to_player = false;
-        spawn_monster(
-            &mut zone,
-            9000,
-            "ArcherGuard",
-            0,
-            Point { x: 16, y: 21 },
-        );
+        spawn_monster(&mut zone, 9000, "ArcherGuard", 0, Point { x: 16, y: 21 });
         let targets = zone.native_entity_monster_targets(
             9000,
             &Point { x: 16, y: 21 },

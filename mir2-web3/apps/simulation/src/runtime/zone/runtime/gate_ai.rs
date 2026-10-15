@@ -66,7 +66,7 @@ impl ZoneRuntime {
     /// Derived dynamic occupancy never mutates static map walls. Removing a
     /// gate therefore cannot accidentally remove an overlapping real wall.
     pub(super) fn gate_blocks_tile(&self, point: &Point) -> bool {
-        self.native_monsters.iter().any(|(id,m)| {
+        self.native_monsters.iter().any(|(id, m)| {
             if m.ai != 81 || m.dead || m.hp <= 0 || self.conquest_gate_is_open(*id) {
                 return false;
             }

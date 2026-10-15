@@ -172,7 +172,8 @@ impl ZoneRuntime {
                         &position,
                         ZoneMonsterKillAward {
                             source_receipt_key: None,
-                            mentor_bank: None, experience_selection: None,
+                            mentor_bank: None,
+                            experience_selection: None,
                             monster_object_id: id,
                             killed_at_ms: now,
                             monster_name: name,

@@ -1410,9 +1410,9 @@ fn canonical_cross_account_send_mail_commits_sender_and_exact_target() {
     assert!(packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
-    assert!(packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold } if *gold == expected_debit)));
+    assert!(packets.iter().any(
+        |packet| matches!(packet, ServerPacket::LoseGold { gold } if *gold == expected_debit)
+    ));
     assert!(packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::DeleteItem {

@@ -1,10 +1,12 @@
 //! Durable NPC purchase actions through the actual, fenced owner runtime.
 //! No action is translated into a generic BuyItem or retried on another owner.
-use mir2_simulation::{NpcPurchaseDurableError, NpcPurchaseOwnerAction,
-    NpcPurchaseOwnerReply, NpcPurchaseProducer, NpcPurchaseReceipt, WorldCommandExecution,
-    WorldCommandKind, WorldCommandOutcome, WorldSnapshot, ZoneRuntimeHandle};
-use sha2::{Digest, Sha256};
 use crate::routing::ZoneOwnerLease;
+use mir2_simulation::{
+    NpcPurchaseDurableError, NpcPurchaseOwnerAction, NpcPurchaseOwnerReply, NpcPurchaseProducer,
+    NpcPurchaseReceipt, WorldCommandExecution, WorldCommandKind, WorldCommandOutcome,
+    WorldSnapshot, ZoneRuntimeHandle,
+};
+use sha2::{Digest, Sha256};
 
 #[derive(Debug, Clone)]
 pub struct NpcPurchaseOwnerRouteExecution {
@@ -18,18 +20,30 @@ pub struct NpcPurchaseOwnerRouteExecution {
 }
 
 pub(crate) fn before(detail: impl Into<String>) -> NpcPurchaseDurableError {
-    NpcPurchaseDurableError::BeforeExecution { detail: detail.into() }
+    NpcPurchaseDurableError::BeforeExecution {
+        detail: detail.into(),
+    }
 }
-pub(crate) fn failure(detail: impl Into<String>, receipt: Option<NpcPurchaseReceipt>) -> NpcPurchaseDurableError {
+pub(crate) fn failure(
+    detail: impl Into<String>,
+    receipt: Option<NpcPurchaseReceipt>,
+) -> NpcPurchaseDurableError {
     match receipt {
-        Some(receipt) => NpcPurchaseDurableError::PostCommit { receipt, detail: detail.into() },
-        None => NpcPurchaseDurableError::Unknown { detail: detail.into() },
+        Some(receipt) => NpcPurchaseDurableError::PostCommit {
+            receipt,
+            detail: detail.into(),
+        },
+        None => NpcPurchaseDurableError::Unknown {
+            detail: detail.into(),
+        },
     }
 }
 pub(crate) fn terminal_receipt(reply: &NpcPurchaseOwnerReply) -> Option<NpcPurchaseReceipt> {
     match reply {
-        NpcPurchaseOwnerReply::Purchase { receipt, .. } |
-        NpcPurchaseOwnerReply::Recovery { receipt: Some(receipt) } => Some(receipt.clone()),
+        NpcPurchaseOwnerReply::Purchase { receipt, .. }
+        | NpcPurchaseOwnerReply::Recovery {
+            receipt: Some(receipt),
+        } => Some(receipt.clone()),
         _ => None,
     }
 }
@@ -55,12 +69,18 @@ pub(crate) fn action_kind(action: NpcPurchaseOwnerAction) -> WorldCommandKind {
 /// The caller holds a validated lease guard for this entire function and, for
 /// Hosted/RPC routes, the actual runtime mutex and Zone mutation gate.
 pub(crate) fn execute_owner(
-    runtime: &mut ZoneRuntimeHandle, lease: &ZoneOwnerLease,
-    authenticated: bool, action: NpcPurchaseOwnerAction,
+    runtime: &mut ZoneRuntimeHandle,
+    lease: &ZoneOwnerLease,
+    authenticated: bool,
+    action: NpcPurchaseOwnerAction,
 ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
-    if !authenticated { return Err(before("NPC purchase owner action requires authentication")); }
+    if !authenticated {
+        return Err(before("NPC purchase owner action requires authentication"));
+    }
     if !runtime.supports_durable_npc_purchase_owner() {
-        return Err(before("durable NPC purchase owner capability is unavailable"));
+        return Err(before(
+            "durable NPC purchase owner capability is unavailable",
+        ));
     }
     let epoch = owner_epoch(lease);
     let mut known = None;
@@ -68,7 +88,9 @@ pub(crate) fn execute_owner(
         let processed = match runtime.execute_npc_purchase_owner(authenticated, epoch, action) {
             Ok(processed) => processed,
             Err(error) => {
-                if let NpcPurchaseDurableError::PostCommit { receipt, .. } = &error { known = Some(receipt.clone()); }
+                if let NpcPurchaseDurableError::PostCommit { receipt, .. } = &error {
+                    known = Some(receipt.clone());
+                }
                 return Err(error);
             }
         };
@@ -79,17 +101,28 @@ pub(crate) fn execute_owner(
         let mut authority = runtime.npc_purchase_owner_authority(epoch);
         let mut snapshot = authority.as_ref().map(|_| runtime.world_snapshot());
         if authority != runtime.npc_purchase_owner_authority(epoch) {
-            authority = None; snapshot = None;
+            authority = None;
+            snapshot = None;
         }
         let checkpoint = runtime.npc_purchase_owner_checkpoint(epoch);
         let active_identity = runtime.active_identity();
         let packet_count = processed.packets.len();
         let snapshot_tick = snapshot.as_ref().map(|snapshot| snapshot.tick).unwrap_or(0);
         Ok(NpcPurchaseOwnerRouteExecution {
-            reply: processed.reply, authority, snapshot, checkpoint,
-            execution: WorldCommandExecution { packets: processed.packets,
-                outcome: WorldCommandOutcome { command_kind: action_kind(action), packet_count, snapshot_tick, active_identity },
-                game_shop_purchase_outcome: None },
+            reply: processed.reply,
+            authority,
+            snapshot,
+            checkpoint,
+            execution: WorldCommandExecution {
+                packets: processed.packets,
+                outcome: WorldCommandOutcome {
+                    command_kind: action_kind(action),
+                    packet_count,
+                    snapshot_tick,
+                    active_identity,
+                },
+                game_shop_purchase_outcome: None,
+            },
         })
     });
     result.unwrap_or_else(|detail| Err(failure(detail, known)))

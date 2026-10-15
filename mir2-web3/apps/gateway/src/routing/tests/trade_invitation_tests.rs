@@ -81,8 +81,18 @@ fn invitation_requires_mutual_facing() {
     let turn_packets = second.handle_packet(ClientPacket::Turn {
         direction: MirDirection::Right,
     });
-    let facing = second.world_snapshot().entities.into_iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer).expect("recipient must remain active").direction;
-    assert_eq!(facing, MirDirection::Right, "fixture turn must reach authoritative state: {turn_packets:?}");
+    let facing = second
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("recipient must remain active")
+        .direction;
+    assert_eq!(
+        facing,
+        MirDirection::Right,
+        "fixture turn must reach authoritative state: {turn_packets:?}"
+    );
     first.handle_packet(ClientPacket::TradeRequest);
     assert!(!second
         .handle_packet(ClientPacket::KeepAlive { time: 1 })

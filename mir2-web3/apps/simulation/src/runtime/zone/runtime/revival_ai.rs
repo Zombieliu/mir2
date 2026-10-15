@@ -235,10 +235,8 @@ impl ZoneRuntime {
             monster.next_attack_ready_at_ms = action_ready_at;
             let position = monster.position.clone();
             let health_percent = native_monster_health_percent(monster.hp, monster.max_hp);
-            let health_expire = crate::crystal_health::crystal_health_expire(
-                monster.revelation_until_ms,
-                now_ms,
-            );
+            let health_expire =
+                crate::crystal_health::crystal_health_expire(monster.revelation_until_ms, now_ms);
             // Direct and delayed hits queued against the corpse's prior life
             // cannot be allowed to bypass the new life boundary.
             self.clear_reviving_zombie_life_actions(object_id);

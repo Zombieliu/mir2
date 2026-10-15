@@ -8,7 +8,9 @@ use std::collections::BTreeSet;
 
 use super::npc::{self, ActiveNpcServiceState};
 use super::npc_gold_buy_outcome::{NpcGoldBuyProcessingOutcome, NpcGoldBuyRejection};
-use super::npc_purchase_outcome::{NpcPurchaseProcessingOutcome, NpcPurchaseRejection, NpcPurchaseRequest};
+use super::npc_purchase_outcome::{
+    NpcPurchaseProcessingOutcome, NpcPurchaseRejection, NpcPurchaseRequest,
+};
 use super::resources::{
     is_in_world, InventoryResource, MapRuntimeResource, NpcStateResource, PlayerRuntimeResource,
     RuntimeConfigResource, SessionResource,
@@ -460,14 +462,26 @@ impl SimulationSession {
             }
         });
         if matches!(&result, Ok(StagedTrade::Rejected(_))) {
-            if wants_gold && !matches!(&gold_capture, Some(NpcGoldBuyProcessingOutcome::Rejected { .. })) {
+            if wants_gold
+                && !matches!(
+                    &gold_capture,
+                    Some(NpcGoldBuyProcessingOutcome::Rejected { .. })
+                )
+            {
                 gold_capture = Some(NpcGoldBuyProcessingOutcome::Rejected {
-                    request: request.into(), reason: NpcGoldBuyRejection::ServiceUnavailable,
+                    request: request.into(),
+                    reason: NpcGoldBuyRejection::ServiceUnavailable,
                 });
             }
-            if wants_purchase && !matches!(&purchase_capture, Some(NpcPurchaseProcessingOutcome::Rejected { .. })) {
+            if wants_purchase
+                && !matches!(
+                    &purchase_capture,
+                    Some(NpcPurchaseProcessingOutcome::Rejected { .. })
+                )
+            {
                 purchase_capture = Some(NpcPurchaseProcessingOutcome::Rejected {
-                    request, reason: NpcPurchaseRejection::ServiceUnavailable,
+                    request,
+                    reason: NpcPurchaseRejection::ServiceUnavailable,
                 });
             }
         } else if result.is_err() {
@@ -476,8 +490,12 @@ impl SimulationSession {
             gold_capture = None;
             purchase_capture = None;
         }
-        if let Some(capture) = gold_outcome { *capture = gold_capture; }
-        if let Some(capture) = purchase_outcome { *capture = purchase_capture; }
+        if let Some(capture) = gold_outcome {
+            *capture = gold_capture;
+        }
+        if let Some(capture) = purchase_outcome {
+            *capture = purchase_capture;
+        }
         Some(result.map(|trade| match trade {
             StagedTrade::Committed(packets) | StagedTrade::Rejected(packets) => packets,
         }))
@@ -732,7 +750,7 @@ mod tests {
             store.shared_guilds.insert(
                 GUILD.into(),
                 SharedGuildRecord {
-        active_wars: Default::default(),
+                    active_wars: Default::default(),
                     id: GUILD.into(),
                     name: "Knights".into(),
                     revision: 1,
@@ -879,7 +897,9 @@ mod tests {
             .iter()
             .any(|item| item.unique_id == unique_id));
     }
-    pub(super) fn stock_image(session: &SimulationSession) -> (serde_json::Value, serde_json::Value) {
+    pub(super) fn stock_image(
+        session: &SimulationSession,
+    ) -> (serde_json::Value, serde_json::Value) {
         let npc = session.app.world().resource::<NpcStateResource>();
         (
             serde_json::to_value(&npc.npc_buy_back_items).unwrap(),

@@ -158,17 +158,26 @@ fn parse_pet_settings(text: &str) -> Result<(bool, u32), String> {
     let mut max_boss_tames = None;
     for raw in text.lines() {
         let line = raw.trim().trim_start_matches('\u{feff}');
-        if line.starts_with(';') || line.starts_with('#') { continue; }
-        let Some((key, raw_value)) = line.split_once('=') else { continue; };
+        if line.starts_with(';') || line.starts_with('#') {
+            continue;
+        }
+        let Some((key, raw_value)) = line.split_once('=') else {
+            continue;
+        };
         let value = raw_value.split(';').next().unwrap_or("").trim();
         if key.trim().eq_ignore_ascii_case("PetSave") {
-            if pet_save.is_some() { return Err("duplicate PetSave".into()); }
+            if pet_save.is_some() {
+                return Err("duplicate PetSave".into());
+            }
             pet_save = Some(match value.to_ascii_lowercase().as_str() {
-                "true" => true, "false" => false,
+                "true" => true,
+                "false" => false,
                 _ => return Err("invalid PetSave".into()),
             });
         } else if key.trim().eq_ignore_ascii_case("MaxBossTames") {
-            if max_boss_tames.is_some() { return Err("duplicate MaxBossTames".into()); }
+            if max_boss_tames.is_some() {
+                return Err("duplicate MaxBossTames".into());
+            }
             max_boss_tames = Some(value.parse::<u32>().map_err(|_| "invalid MaxBossTames")?);
         }
     }
@@ -180,12 +189,19 @@ fn authoritative_pet_settings() -> (bool, u32) {
     *SETTINGS.get_or_init(|| {
         let explicit = env::var_os("MIR2_CRYSTAL_SETUP_INI").is_some();
         for path in setup_ini_candidates() {
-            if !path.is_file() && !explicit { continue; }
-            return match fs::read_to_string(&path).map_err(|error| error.to_string())
-                .and_then(|text| parse_pet_settings(&text)) {
+            if !path.is_file() && !explicit {
+                continue;
+            }
+            return match fs::read_to_string(&path)
+                .map_err(|error| error.to_string())
+                .and_then(|text| parse_pet_settings(&text))
+            {
                 Ok(value) => value,
                 Err(error) => {
-                    eprintln!("[crystal-pet-settings] {}: {error}; taming disabled", path.display());
+                    eprintln!(
+                        "[crystal-pet-settings] {}: {error}; taming disabled",
+                        path.display()
+                    );
                     (false, 0)
                 }
             };

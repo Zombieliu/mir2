@@ -142,13 +142,26 @@ fn retained_packets(state: &SharedInProcessZoneState, key: &ZonePresenceKey) -> 
     // Owner presentation now shares the ordered health FIFO. Inspect both
     // actual queues so these assertions still require the exact global packet
     // sequence, rather than assuming it resides in the legacy queue.
-    let mut packets = state.pending_zone_owner_health.get(key).into_iter()
-        .flatten().map(|presentation| match presentation {
+    let mut packets = state
+        .pending_zone_owner_health
+        .get(key)
+        .into_iter()
+        .flatten()
+        .map(|presentation| match presentation {
             super::super::owner_health::PendingOwnerPresentation::Packet(packet) => packet.clone(),
-            super::super::owner_health::PendingOwnerPresentation::Health(_) =>
-                panic!("quiet wire fixture must not introduce a health mutation"),
-        }).collect::<Vec<_>>();
-    packets.extend(state.pending_zone_packets.get(key).into_iter().flatten().cloned());
+            super::super::owner_health::PendingOwnerPresentation::Health(_) => {
+                panic!("quiet wire fixture must not introduce a health mutation")
+            }
+        })
+        .collect::<Vec<_>>();
+    packets.extend(
+        state
+            .pending_zone_packets
+            .get(key)
+            .into_iter()
+            .flatten()
+            .cloned(),
+    );
     packets
 }
 

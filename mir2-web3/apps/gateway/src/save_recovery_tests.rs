@@ -341,12 +341,16 @@ fn transport_recovery_lost_save_ack_keeps_dead_character_and_learned_skill_exact
         "key":"FireBall", "name":"FireBall", "description":"Learned recovery skill",
         "level":2, "experience":321, "hotkey":4, "cooldown_ticks":2,
         "delay_ms":1800, "cooldown_ends_at":123, "cast_time_ms":2000,
-    }).to_string()];
-    original.restore_active_character_checkpoint(&checkpoint).unwrap();
+    })
+    .to_string()];
+    original
+        .restore_active_character_checkpoint(&checkpoint)
+        .unwrap();
     // Journaling captures the actual runtime snapshot, never a hand-written
     // JSON string with a different field order than the SkillState encoder.
     checkpoint = original.active_character_checkpoint().unwrap();
-    let learned: serde_json::Value = serde_json::from_str(&checkpoint.skill_states_json[0]).unwrap();
+    let learned: serde_json::Value =
+        serde_json::from_str(&checkpoint.skill_states_json[0]).unwrap();
     assert_eq!(learned["experience"], 321);
     assert_eq!(learned["hotkey"], 4);
     assert_eq!(learned["cooldown_ends_at"], 123);
@@ -381,16 +385,23 @@ fn transport_recovery_lost_save_ack_keeps_dead_character_and_learned_skill_exact
 #[test]
 fn transport_recovery_preserves_running_refine_and_buff_bytes_across_primary_save_and_replay() {
     for primary_save in [false, true] {
-        let state = TestState::new(if primary_save { "timer-primary-save" } else { "timer-replay" });
+        let state = TestState::new(if primary_save {
+            "timer-primary-save"
+        } else {
+            "timer-replay"
+        });
         let mut original = SimulationSession::new(state.config.clone());
         original.select_account_for_recovery("demo").unwrap();
         original.handle_packet(ClientPacket::StartGame { character_index: 0 });
         let mut checkpoint = original.active_character_checkpoint().unwrap();
         // Isolated but valid held-weapon fixture: preserve the real carrier and
         // UID, removing it from the bag before assigning sole oven custody.
-        let mut weapon: serde_json::Value = checkpoint.inventory_items_json.iter()
+        let mut weapon: serde_json::Value = checkpoint
+            .inventory_items_json
+            .iter()
             .map(|encoded| serde_json::from_str::<serde_json::Value>(encoded).unwrap())
-            .find(|item| item["key"] == "dagger").unwrap();
+            .find(|item| item["key"] == "dagger")
+            .unwrap();
         let uid = weapon["unique_id"].as_u64().unwrap();
         weapon["user_item_metadata"] = serde_json::json!({
             "item_index": mir2_game_data::crystal_item_by_name("Dagger").unwrap().item_index,
@@ -402,8 +413,11 @@ fn transport_recovery_preserves_running_refine_and_buff_bytes_across_primary_sav
         let mut systems: mir2_simulation::Stage5SystemsState =
             serde_json::from_str(checkpoint.stage5_systems_json.as_deref().unwrap()).unwrap();
         systems.refine = mir2_simulation::Stage5RefineState {
-            oven_item_state_json: Some(weapon.to_string()), current_item: Some("dagger".into()),
-            refining: true, ready: false, remaining_ms: 60_000,
+            oven_item_state_json: Some(weapon.to_string()),
+            current_item: Some("dagger".into()),
+            refining: true,
+            ready: false,
+            remaining_ms: 60_000,
             ..Default::default()
         };
         checkpoint.stage5_systems_json = Some(serde_json::to_string(&systems).unwrap());
@@ -411,8 +425,11 @@ fn transport_recovery_preserves_running_refine_and_buff_bytes_across_primary_sav
             "key":"exp", "name":"Timed experience buff", "description":"Recovery fixture",
             "expires_at_tick":60, "real_time_duration":60_000,
             "attack_bonus":0, "defence_bonus":0, "stats":[],
-        }).to_string()];
-        original.restore_active_character_checkpoint(&checkpoint).unwrap();
+        })
+        .to_string()];
+        original
+            .restore_active_character_checkpoint(&checkpoint)
+            .unwrap();
         checkpoint = original.active_character_teardown_checkpoint().unwrap();
         let frozen_systems: mir2_simulation::Stage5SystemsState =
             serde_json::from_str(checkpoint.stage5_systems_json.as_deref().unwrap()).unwrap();
@@ -421,7 +438,9 @@ fn transport_recovery_preserves_running_refine_and_buff_bytes_across_primary_sav
         assert!(frozen_systems.refine.remaining_ms <= 60_000);
         journal_checkpoint(&state.config, "demo", 0, &checkpoint).unwrap();
         if primary_save {
-            original.save_frozen_character_checkpoint_for_logout(&checkpoint).unwrap();
+            original
+                .save_frozen_character_checkpoint_for_logout(&checkpoint)
+                .unwrap();
         }
         // Let the actual monotonic oven/buff clocks advance. Verification must
         // compare the frozen source bytes, not a newly generated World snapshot.
@@ -434,7 +453,10 @@ fn transport_recovery_preserves_running_refine_and_buff_bytes_across_primary_sav
         assert_eq!(durable.revision, checkpoint.revision + 1);
         assert_eq!(durable.buff_states_json, checkpoint.buff_states_json);
         assert_eq!(durable.stage5_systems_json, checkpoint.stage5_systems_json);
-        assert_eq!(durable.inventory_items_json, checkpoint.inventory_items_json);
+        assert_eq!(
+            durable.inventory_items_json,
+            checkpoint.inventory_items_json
+        );
         assert!(journal_files(&state).is_empty());
         // Reproduce a lost commit/cleanup ACK: same authenticated pre-CAS
         // journal, now with a committed source, must not save a second time.
@@ -444,7 +466,10 @@ fn transport_recovery_preserves_running_refine_and_buff_bytes_across_primary_sav
         assert_eq!(again.replayed, 0);
         assert_eq!(again.already_committed, 1);
         assert_eq!(again.quarantined, 0);
-        assert_eq!(serde_json::to_vec(&state.persisted_checkpoint()).unwrap(), serde_json::to_vec(&durable).unwrap());
+        assert_eq!(
+            serde_json::to_vec(&state.persisted_checkpoint()).unwrap(),
+            serde_json::to_vec(&durable).unwrap()
+        );
         assert!(journal_files(&state).is_empty());
     }
 }
@@ -766,9 +791,11 @@ fn recovery_path_comparison_resolves_missing_descendants_without_creating_them()
         canonical.join("not-created").join("accounts.json")
     );
     assert!(!state.root.join("not-created").exists());
-    assert!(super::absolute_without_parent_components(&state.root.join(".."))
-        .unwrap_err()
-        .contains("parent-directory"));
+    assert!(
+        super::absolute_without_parent_components(&state.root.join(".."))
+            .unwrap_err()
+            .contains("parent-directory")
+    );
 }
 
 #[test]

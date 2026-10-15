@@ -5,7 +5,10 @@ const MAP: &str = "D024";
 
 // Preserve the original geometry on real open terrain: translate (+20,+42).
 fn fixture_point(x: i32, y: i32) -> Point {
-    Point { x: x + 20, y: y + 42 }
+    Point {
+        x: x + 20,
+        y: y + 42,
+    }
 }
 
 fn sid(name: &str) -> SessionId {
@@ -120,7 +123,10 @@ fn self_cast(zone: &mut ZoneRuntime, now: u64) -> Vec<ZoneOutbound> {
 fn source_fixture() -> (ZoneRuntime, u64) {
     // Strict recovery must reload the same ordinary map collision.
     let mut zone = ZoneRuntime::new(ZoneKey::for_map(MAP));
-    assert!(zone.has_available_collision(), "real fixture terrain must load");
+    assert!(
+        zone.has_available_collision(),
+        "real fixture terrain must load"
+    );
     zone.handle(ZoneCommand::Join(join("healer", 101, 10)));
     zone.handle(ZoneCommand::Join(join("friend", 102, 12)));
     let mut enemy = join("enemy", 103, 14);

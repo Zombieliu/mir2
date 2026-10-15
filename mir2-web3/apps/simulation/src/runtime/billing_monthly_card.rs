@@ -321,12 +321,23 @@ pub(super) fn issue_credit_purchase(
     // is validated so the existing self-purchase helper remains all-or-nothing.
     let mut staged_account = account.clone();
     let (items, replayed) = issue_paid_items(
-        &mut staged_account, save, account_id, character, request, quantity, price,
-        now_ms, delivery,
+        &mut staged_account,
+        save,
+        account_id,
+        character,
+        request,
+        quantity,
+        price,
+        now_ms,
+        delivery,
     )?;
     if !replayed {
-        let total = price.checked_mul(u32::from(quantity)).ok_or("monthlyCardPriceOverflow")?;
-        let remaining = save.credit.checked_sub(total)
+        let total = price
+            .checked_mul(u32::from(quantity))
+            .ok_or("monthlyCardPriceOverflow")?;
+        let remaining = save
+            .credit
+            .checked_sub(total)
             .ok_or("insufficient game-shop credit at commit")?;
         account.monthly_card = staged_account.monthly_card;
         save.credit = remaining;

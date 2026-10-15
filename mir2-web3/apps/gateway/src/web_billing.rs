@@ -157,7 +157,13 @@ pub(super) fn rate_limit(
     let count = cache
         .record_auth_attempt(&format!("billing:{account}:{operation}"), 60)?
         .0;
-    if count > if matches!(operation, "status" | "activitiesStatus") { 120 } else { 20 } {
+    if count
+        > if matches!(operation, "status" | "activitiesStatus") {
+            120
+        } else {
+            20
+        }
+    {
         return Err("billingTooManyRequests".into());
     }
     Ok(())
@@ -619,8 +625,15 @@ async fn http_checkout(
 }
 async fn return_page() -> Response {
     // Query parameters (including "paid") are cosmetic and never fulfill an order.
-    ([("cache-control","no-store"),("content-security-policy", BILLING_RETURN_CSP),
-        ("referrer-policy","no-referrer"), ("x-content-type-options", "nosniff")],Html(include_str!("billing_return.html")))
+    (
+        [
+            ("cache-control", "no-store"),
+            ("content-security-policy", BILLING_RETURN_CSP),
+            ("referrer-policy", "no-referrer"),
+            ("x-content-type-options", "nosniff"),
+        ],
+        Html(include_str!("billing_return.html")),
+    )
         .into_response()
 }
 

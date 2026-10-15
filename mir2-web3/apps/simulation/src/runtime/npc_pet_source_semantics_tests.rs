@@ -321,14 +321,19 @@ fn actual_default_accept_quest_short_checkhum_keeps_original_omission() {
     // Check the original condition against its sealed pre-parser source.
     let source_bundle: serde_json::Value = serde_json::from_str(include_str!(
         "../../../../packages/game-data/data/generated/crystal_default_npc_scripts.json"
-    )).unwrap();
-    let original: CrystalNpcScript = serde_json::from_value(source_bundle["script"].clone()).unwrap();
+    ))
+    .unwrap();
+    let original: CrystalNpcScript =
+        serde_json::from_value(source_bundle["script"].clone()).unwrap();
     let original_section = crystal_npc_section(&original, "@_OnAcceptQuest(149)").unwrap();
     assert!(original_section
         .lines
         .iter()
         .any(|line| line.trim() == "CHECKHUM 1 D10071"));
-    assert!(source_section.lines[1].is_empty(), "verified omission is already applied");
+    assert!(
+        source_section.lines[1].is_empty(),
+        "verified omission is already applied"
+    );
     let before = serde_json::to_value(session.world_snapshot()).unwrap();
     let outcome = execute_crystal_npc_section(
         session.app.world_mut(),

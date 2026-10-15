@@ -2583,7 +2583,10 @@ fn encode_stat_values(writer: &mut PacketWriter, stats: &[UserItemStat]) {
 /// Binary packets still read/write i64. Legacy integers remain readable;
 /// strings must be the canonical decimal spelling of an i64.
 pub mod item_expiry_json {
-    use serde::{de::{self, Visitor}, Deserializer, Serializer};
+    use serde::{
+        de::{self, Visitor},
+        Deserializer, Serializer,
+    };
     use std::fmt;
 
     pub fn serialize<S: Serializer>(value: &i64, serializer: S) -> Result<S::Ok, S::Error> {
@@ -2604,7 +2607,8 @@ pub mod item_expiry_json {
                 i64::try_from(value).map_err(|_| E::custom("expiry integer out of range"))
             }
             fn visit_str<E: de::Error>(self, value: &str) -> Result<i64, E> {
-                let parsed = value.parse::<i64>()
+                let parsed = value
+                    .parse::<i64>()
                     .map_err(|_| E::custom("invalid expiry integer"))?;
                 if parsed.to_string() != value {
                     return Err(E::custom("noncanonical expiry integer"));

@@ -1162,7 +1162,10 @@ fn recharge_file_reload_retains_pending_and_applied_receipts_without_regrant() {
     let durable = FileAccountStoreRepository::new(&path)
         .load(config.default_character.clone())
         .unwrap();
-    assert_eq!(durable.schema_version, mir2_simulation::billing::BILLING_SCHEMA_VERSION);
+    assert_eq!(
+        durable.schema_version,
+        mir2_simulation::billing::BILLING_SCHEMA_VERSION
+    );
     assert_eq!(
         durable.accounts["demo"].billing.as_ref().unwrap().orders[&order.id].state,
         RechargeOrderState::PaidPending

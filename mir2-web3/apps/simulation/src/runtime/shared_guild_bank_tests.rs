@@ -119,7 +119,8 @@ fn guild_bank_gold_checks_current_rank_and_live_wallet_limits() {
                     options: 255,
                 });
                 guild.members[0].rank_index = 1;
-                guild.members.push(SharedGuildMember { membership_epoch: 0,
+                guild.members.push(SharedGuildMember {
+                    membership_epoch: 0,
                     identity: Stage5FriendIdentity {
                         account_id: identity.account_id.clone(),
                         character_index: 17,

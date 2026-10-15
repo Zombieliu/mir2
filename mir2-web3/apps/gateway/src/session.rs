@@ -10,17 +10,17 @@ use mir2_protocol::{ChatType, ClientPacket, Point, ServerPacket};
 #[cfg(test)]
 use mir2_simulation::CharacterSaveRecord;
 use mir2_simulation::{
-    ActiveSessionIdentity, NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingError,
-    NpcGoldBuyRequest, SimulationConfig, WorldCommand, WorldCommandExecution, WorldEntityKind,
-    WorldSnapshot, ZoneRuntimeHandle,
+    ActiveSessionIdentity, NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingError, NpcGoldBuyRequest,
+    SimulationConfig, WorldCommand, WorldCommandExecution, WorldEntityKind, WorldSnapshot,
+    ZoneRuntimeHandle,
 };
 
-use mir2_simulation::{NpcPurchaseDurableError, NpcPurchaseOwnerAction};
-use crate::npc_purchase_owner_route::NpcPurchaseOwnerRouteExecution;
 use crate::events::{GatewayGameplayEventPublisher, SharedGameplayEventSink};
 use crate::npc_gold_buy_route::{
-    npc_gold_buy_command, npc_gold_buy_route_failure, NpcGoldBuyRouteError, NpcGoldBuyRouteExecution,
+    npc_gold_buy_command, npc_gold_buy_route_failure, NpcGoldBuyRouteError,
+    NpcGoldBuyRouteExecution,
 };
+use crate::npc_purchase_owner_route::NpcPurchaseOwnerRouteExecution;
 use crate::routing::{
     shared_zone_movement_ingress, sync_zone_movement_transform, GlobalZoneMessageBus,
     GlobalZoneMessageRegistration, InProcessZoneOwnerCommandClient, PreparedZoneTeardown,
@@ -29,6 +29,7 @@ use crate::routing::{
     SharedZoneOwnerLeaseAuthority, ZoneId, ZoneLiveOutboundRegistration, ZoneOwnerCommandRequest,
     ZoneOwnerLease, ZoneRegistry,
 };
+use mir2_simulation::{NpcPurchaseDurableError, NpcPurchaseOwnerAction};
 
 #[path = "save_recovery.rs"]
 pub(crate) mod save_recovery;
@@ -108,7 +109,10 @@ impl GatewayZoneMovementIngress {
             authority.validate_owner_lease(&self.zone_owner_lease)?;
         }
         if let Some((config, account_id)) = &self.monthly_access {
-            if !config.monthly_card_can_enter_cached(account_id, mir2_simulation::monthly_card::monthly_card_now_ms())? {
+            if !config.monthly_card_can_enter_cached(
+                account_id,
+                mir2_simulation::monthly_card::monthly_card_now_ms(),
+            )? {
                 // Fall back to the serial owner path so expiry saves and leaves
                 // the Zone; a fast-path packet cannot extend expired access.
                 return Ok(None);
@@ -221,16 +225,34 @@ impl GatewaySession {
         crate::routing::runtime_has_pending_shared_personal_work(self.runtime.as_ref())
     }
     pub(crate) fn monthly_card_config(&self) -> Result<&GatewayConfig, String> {
-        self.routing_context.as_ref().map(|context| &context.config).ok_or_else(|| "monthlyCardServiceUnavailable".into())
+        self.routing_context
+            .as_ref()
+            .map(|context| &context.config)
+            .ok_or_else(|| "monthlyCardServiceUnavailable".into())
     }
     pub(crate) fn monthly_card_expiry_pending(&self, account_id: Option<&str>) -> bool {
-        self.routing_context.as_ref().filter(|context| context.config.monthly_card_policy.required)
-            .zip(account_id).is_some_and(|(context, account)| !context.config.monthly_card_can_enter_cached(
-                account, mir2_simulation::monthly_card::monthly_card_now_ms(),
-            ).unwrap_or(false))
+        self.routing_context
+            .as_ref()
+            .filter(|context| context.config.monthly_card_policy.required)
+            .zip(account_id)
+            .is_some_and(|(context, account)| {
+                !context
+                    .config
+                    .monthly_card_can_enter_cached(
+                        account,
+                        mir2_simulation::monthly_card::monthly_card_now_ms(),
+                    )
+                    .unwrap_or(false)
+            })
     }
-    pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
-        self.runtime.supports_magic_key_assignment(spell,key,old_key)
+    pub fn supports_magic_key_assignment(
+        &self,
+        spell: mir2_protocol::Spell,
+        key: u8,
+        old_key: u8,
+    ) -> bool {
+        self.runtime
+            .supports_magic_key_assignment(spell, key, old_key)
     }
     pub fn new(config: GatewayConfig) -> Self {
         Self::new_with_zone_registry(config, &ZoneRegistry::in_process())
@@ -478,8 +500,14 @@ impl GatewaySession {
         // on the owner cadence; topology-changing movement still runs the atomic
         // rebind transaction before the next command.
         shared_zone_movement_ingress(&self.runtime).map(|ingress| GatewayZoneMovementIngress {
-            monthly_access: self.routing_context.as_ref().filter(|context| context.config.monthly_card_policy.required)
-                .and_then(|context| self.active_identity().map(|identity| (context.config.clone(), identity.account_id))),
+            monthly_access: self
+                .routing_context
+                .as_ref()
+                .filter(|context| context.config.monthly_card_policy.required)
+                .and_then(|context| {
+                    self.active_identity()
+                        .map(|identity| (context.config.clone(), identity.account_id))
+                }),
             ingress,
             zone_owner_lease: self.zone_owner_lease.clone(),
             zone_owner_lease_authority: self.zone_owner_lease_authority.clone(),
@@ -540,13 +568,18 @@ impl GatewaySession {
         if !restored_from_reconnect || authenticated_account_id.is_empty() {
             return Err("retained bootstrap requires authenticated reconnect custody".to_string());
         }
-        let identity = self.active_identity()
+        let identity = self
+            .active_identity()
             .ok_or_else(|| "retained bootstrap requires an active character".to_string())?;
-        if identity.account_id != authenticated_account_id || identity.character_index != character_index {
+        if identity.account_id != authenticated_account_id
+            || identity.character_index != character_index
+        {
             return Err("retained bootstrap identity mismatch".to_string());
         }
-        self.execute_world_command(WorldCommand::ReplayRetainedStartGameBootstrap { character_index })
-            .map(|execution| execution.packets)
+        self.execute_world_command(WorldCommand::ReplayRetainedStartGameBootstrap {
+            character_index,
+        })
+        .map(|execution| execution.packets)
     }
 
     pub fn passkey_login(&mut self, account_id: &str) -> Vec<ServerPacket> {
@@ -625,33 +658,51 @@ impl GatewaySession {
             .supports_typed_game_shop_purchase_outcome(&self.runtime)
     }
 
-
     pub fn supports_durable_npc_purchase_owner(&self) -> bool {
-        self.zone_owner_command_client.supports_durable_npc_purchase_owner(&self.runtime)
+        self.zone_owner_command_client
+            .supports_durable_npc_purchase_owner(&self.runtime)
     }
 
-    pub fn execute_npc_purchase_owner(&mut self, authenticated: bool, action: NpcPurchaseOwnerAction)
-        -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+    pub fn execute_npc_purchase_owner(
+        &mut self,
+        authenticated: bool,
+        action: NpcPurchaseOwnerAction,
+    ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
         let lease = self.zone_owner_lease.clone();
         self.execute_npc_purchase_owner_with_zone_owner_lease(&lease, authenticated, action)
     }
 
-    pub fn execute_npc_purchase_owner_with_zone_owner_lease(&mut self, lease: &ZoneOwnerLease,
-        authenticated: bool, action: NpcPurchaseOwnerAction,
+    pub fn execute_npc_purchase_owner_with_zone_owner_lease(
+        &mut self,
+        lease: &ZoneOwnerLease,
+        authenticated: bool,
+        action: NpcPurchaseOwnerAction,
     ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
-        self.validate_zone_owner_lease(lease).map_err(crate::npc_purchase_owner_route::before)?;
-        if !authenticated { return Err(crate::npc_purchase_owner_route::before("NPC purchase requires authentication")); }
+        self.validate_zone_owner_lease(lease)
+            .map_err(crate::npc_purchase_owner_route::before)?;
+        if !authenticated {
+            return Err(crate::npc_purchase_owner_route::before(
+                "NPC purchase requires authentication",
+            ));
+        }
         let mut known = None;
         let result = catch_gateway_panic("durable NPC gateway owner route", || {
             if !self.supports_durable_npc_purchase_owner() {
-                return Err(crate::npc_purchase_owner_route::before("durable NPC purchase owner capability is unavailable"));
+                return Err(crate::npc_purchase_owner_route::before(
+                    "durable NPC purchase owner capability is unavailable",
+                ));
             }
             let mut routed = match self.zone_owner_command_client.execute_npc_purchase_owner(
-                &mut self.runtime, lease, authenticated, action,
+                &mut self.runtime,
+                lease,
+                authenticated,
+                action,
             ) {
                 Ok(routed) => routed,
                 Err(error) => {
-                    if let NpcPurchaseDurableError::PostCommit { receipt, .. } = &error { known = Some(receipt.clone()); }
+                    if let NpcPurchaseDurableError::PostCommit { receipt, .. } = &error {
+                        known = Some(receipt.clone());
+                    }
                     return Err(error);
                 }
             };
@@ -675,7 +726,8 @@ impl GatewaySession {
 
     /// Local owner-path capability only; this does not advertise a transport receipt.
     pub fn supports_typed_npc_gold_buy_outcome(&self) -> bool {
-        self.zone_owner_command_client.supports_typed_npc_gold_buy_outcome(&self.runtime)
+        self.zone_owner_command_client
+            .supports_typed_npc_gold_buy_outcome(&self.runtime)
     }
 
     pub fn execute_production_npc_gold_buy_requiring_typed_outcome(
@@ -685,7 +737,9 @@ impl GatewaySession {
     ) -> Result<NpcGoldBuyRouteExecution, NpcGoldBuyRouteError> {
         let lease = self.zone_owner_lease.clone();
         self.execute_production_npc_gold_buy_requiring_typed_outcome_with_zone_owner_lease(
-            &lease, authenticated, purchase,
+            &lease,
+            authenticated,
+            purchase,
         )
     }
 
@@ -698,23 +752,33 @@ impl GatewaySession {
         self.validate_zone_owner_lease(lease)
             .map_err(|detail| NpcGoldBuyRouteError::BeforeExecution { detail })?;
         if !authenticated {
-            return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
-                NpcGoldBuyBeforeExecution::NotAuthenticated,
-            )));
+            return Err(NpcGoldBuyRouteError::Processing(
+                NpcGoldBuyProcessingError::BeforeExecution(
+                    NpcGoldBuyBeforeExecution::NotAuthenticated,
+                ),
+            ));
         }
         let mut processing_outcome = None;
         let result = catch_gateway_panic("typed NPC gateway owner route", || {
             if !self.supports_typed_npc_gold_buy_outcome() {
-                return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
-                    NpcGoldBuyBeforeExecution::UnsupportedRuntime,
-                )));
+                return Err(NpcGoldBuyRouteError::Processing(
+                    NpcGoldBuyProcessingError::BeforeExecution(
+                        NpcGoldBuyBeforeExecution::UnsupportedRuntime,
+                    ),
+                ));
             }
             let request = ZoneOwnerCommandRequest::production_player(
-                lease.clone(), authenticated, npc_gold_buy_command(purchase),
+                lease.clone(),
+                authenticated,
+                npc_gold_buy_command(purchase),
             );
-            let mut routed = match self.zone_owner_command_client
-                .execute_production_npc_gold_buy_requiring_typed_outcome(&mut self.runtime, request, purchase)
-            {
+            let mut routed = match self
+                .zone_owner_command_client
+                .execute_production_npc_gold_buy_requiring_typed_outcome(
+                    &mut self.runtime,
+                    request,
+                    purchase,
+                ) {
                 Ok(routed) => routed,
                 Err(error) => return Err(error),
             };
@@ -1255,11 +1319,7 @@ impl GatewaySession {
                 )
                 .map_err(|error| format!("target login: {error}"))?;
             let target_commitment = target_client
-                .resume_character_handoff(
-                    &mut target_runtime,
-                    &routed.owner_lease,
-                    &handoff,
-                )
+                .resume_character_handoff(&mut target_runtime, &routed.owner_lease, &handoff)
                 .map_err(|error| format!("target handoff resume: {error}"))?;
             let target_identity = target_client
                 .active_identity(&target_runtime)
@@ -1548,17 +1608,43 @@ mod tests {
     #[test]
     fn retained_bootstrap_requires_exact_authenticated_custody() {
         let mut session = super::GatewaySession::new(crate::GatewayConfig::default());
-        assert!(session.replay_retained_start_game_bootstrap("demo", 0, true).is_err());
-        session.handle_packet(mir2_protocol::ClientPacket::Login { account_id: "demo".into(), password: "demo".into() });
+        assert!(session
+            .replay_retained_start_game_bootstrap("demo", 0, true)
+            .is_err());
+        session.handle_packet(mir2_protocol::ClientPacket::Login {
+            account_id: "demo".into(),
+            password: "demo".into(),
+        });
         session.handle_packet(mir2_protocol::ClientPacket::StartGame { character_index: 0 });
         let before = serde_json::to_value(session.world_snapshot()).unwrap();
-        for (account, index, restored) in [("demo", 0, false), ("", 0, true), ("other", 0, true), ("demo", 1, true)] {
-            assert!(session.replay_retained_start_game_bootstrap(account, index, restored).is_err());
+        for (account, index, restored) in [
+            ("demo", 0, false),
+            ("", 0, true),
+            ("other", 0, true),
+            ("demo", 1, true),
+        ] {
+            assert!(session
+                .replay_retained_start_game_bootstrap(account, index, restored)
+                .is_err());
         }
-        let packets = session.replay_retained_start_game_bootstrap("demo", 0, true).unwrap();
-        assert!(matches!(packets.first(), Some(mir2_protocol::ServerPacket::StartGame { result: 4, .. })));
-        assert_eq!(packets.iter().filter(|p| matches!(p, mir2_protocol::ServerPacket::GameShopInfo { .. })).count(), 105);
-        assert_eq!(serde_json::to_value(session.world_snapshot()).unwrap(), before);
+        let packets = session
+            .replay_retained_start_game_bootstrap("demo", 0, true)
+            .unwrap();
+        assert!(matches!(
+            packets.first(),
+            Some(mir2_protocol::ServerPacket::StartGame { result: 4, .. })
+        ));
+        assert_eq!(
+            packets
+                .iter()
+                .filter(|p| matches!(p, mir2_protocol::ServerPacket::GameShopInfo { .. }))
+                .count(),
+            105
+        );
+        assert_eq!(
+            serde_json::to_value(session.world_snapshot()).unwrap(),
+            before
+        );
     }
 
     use super::{GatewayConfig, GatewaySession};
@@ -1573,8 +1659,9 @@ mod tests {
     };
     use mir2_protocol::{ChatType, ClientPacket, MirClass, MirDirection, MirGender, ServerPacket};
     use mir2_simulation::{
-        NativeGameShopGiftRequest, NativeGameShopPurchaseRequest, WorldCommand, WorldCommandExecution,
-        WorldCommandKind, ZoneRuntimeHandle, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
+        NativeGameShopGiftRequest, NativeGameShopPurchaseRequest, WorldCommand,
+        WorldCommandExecution, WorldCommandKind, ZoneRuntimeHandle,
+        NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
     };
     use std::sync::{Arc, Mutex};
 

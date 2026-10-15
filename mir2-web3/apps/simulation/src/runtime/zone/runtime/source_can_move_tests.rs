@@ -79,11 +79,7 @@ fn action(
     })
 }
 
-fn movement_tick(
-    zone: &mut ZoneRuntime,
-    owner: &SessionId,
-    now_ms: u64,
-) -> Vec<ZoneOutbound> {
+fn movement_tick(zone: &mut ZoneRuntime, owner: &SessionId, now_ms: u64) -> Vec<ZoneOutbound> {
     zone.handle(ZoneCommand::TickPlayerMovement {
         session_id: owner.clone(),
         now_ms,
@@ -116,7 +112,11 @@ fn has_save(out: &[ZoneOutbound], owner: &SessionId) -> bool {
 }
 
 fn assert_correction_only(out: &[ZoneOutbound], owner: &SessionId, before: &ZonePlayer) {
-    assert_eq!(out.len(), 1, "rejection must only correct its owner: {out:?}");
+    assert_eq!(
+        out.len(),
+        1,
+        "rejection must only correct its owner: {out:?}"
+    );
     let ZoneOutbound::ToSession {
         session_id,
         packets,
@@ -126,8 +126,10 @@ fn assert_correction_only(out: &[ZoneOutbound], owner: &SessionId, before: &Zone
     };
     assert_eq!(session_id, owner);
     assert_eq!(packets.len(), 1);
-    assert!(matches!(&packets[0], ServerPacket::UserLocation { location }
-        if location.position == before.position && location.direction == before.direction));
+    assert!(
+        matches!(&packets[0], ServerPacket::UserLocation { location }
+        if location.position == before.position && location.direction == before.direction)
+    );
 }
 
 fn prime_walk(zone: &mut ZoneRuntime, owner: &SessionId) -> u64 {
@@ -159,11 +161,17 @@ fn assert_retired_rejection(
     let out = movement_tick(zone, owner, now_ms);
     assert_correction_only(&out, owner, &before);
     let after = &zone.players[owner];
-    assert!(after.movement_actions.is_empty(), "ready rejected intent must retire");
+    assert!(
+        after.movement_actions.is_empty(),
+        "ready rejected intent must retire"
+    );
     assert_eq!(after.position, before.position);
     assert_eq!(after.direction, before.direction);
     assert_eq!(after.movement_ready_at_ms, before.movement_ready_at_ms);
-    assert_eq!(after.next_attack_ready_at_ms, before.next_attack_ready_at_ms);
+    assert_eq!(
+        after.next_attack_ready_at_ms,
+        before.next_attack_ready_at_ms
+    );
     assert_eq!(after.next_spell_ready_at_ms, before.next_spell_ready_at_ms);
     assert_eq!(after.magic_ready_at_ms, before.magic_ready_at_ms);
     assert_eq!(
@@ -197,7 +205,10 @@ fn assert_no_replay_then_fresh_turn(zone: &mut ZoneRuntime, owner: &SessionId, n
         3,
         now_ms + 1_001,
     );
-    assert!(has_save(&fresh, owner), "a fresh post-status intent must work");
+    assert!(
+        has_save(&fresh, owner),
+        "a fresh post-status intent must work"
+    );
     assert_eq!(zone.players[owner].direction, MirDirection::Down);
 }
 
@@ -233,7 +244,13 @@ fn queued_turn_walk_and_run_revalidate_new_control_poisons_then_retire() {
     }
 }
 
-fn set_fishing(zone: &mut ZoneRuntime, owner: &SessionId, fishing: bool, packet: bool, now_ms: u64) {
+fn set_fishing(
+    zone: &mut ZoneRuntime,
+    owner: &SessionId,
+    fishing: bool,
+    packet: bool,
+    now_ms: u64,
+) {
     if packet {
         zone.handle(ZoneCommand::BroadcastPackets {
             session_id: owner.clone(),
@@ -269,15 +286,7 @@ fn queued_actions_revalidate_fishing_from_both_trusted_projections_without_repla
         ] {
             let (mut zone, owner, _) = fixture();
             let ready = prime_walk(&mut zone, &owner);
-            assert!(action(
-                &mut zone,
-                &owner,
-                kind,
-                MirDirection::Left,
-                2,
-                ready / 4,
-            )
-            .is_empty());
+            assert!(action(&mut zone, &owner, kind, MirDirection::Left, 2, ready / 4,).is_empty());
             set_fishing(&mut zone, &owner, true, packet, ready / 2);
             let queued = zone.players[&owner].movement_actions.clone();
             let grace = zone.players[&owner].run_step_until_ms;
@@ -376,7 +385,10 @@ fn queued_same_direction_turn_uses_slow_added_after_arrival() {
     assert!(movement_tick(&mut zone, &owner, ready - 1).is_empty());
     assert_eq!(zone.players[&owner].run_step_until_ms, ZONE_RUN_GRACE_MS);
     let accepted = movement_tick(&mut zone, &owner, ready);
-    assert!(has_save(&accepted, &owner), "Source admits a same-direction Turn");
+    assert!(
+        has_save(&accepted, &owner),
+        "Source admits a same-direction Turn"
+    );
     assert!(has_packet(&accepted, &observer, |packet| matches!(packet,
         ServerPacket::ObjectTurn { movement }
             if movement.object_id == OWNER_ID && movement.direction == MirDirection::Right)));
@@ -429,11 +441,16 @@ fn non_movement_poisons_and_missing_combat_admission_do_not_block_source_can_mov
             assert!(zone.players[&owner].combat_state.is_none());
             zone.apply_native_player_status_poison(&owner, poison, 1_000, 0);
             let accepted = action(&mut zone, &owner, kind, MirDirection::Down, 1, 100);
-            assert!(has_save(&accepted, &owner), "{poison}/{kind:?}: {accepted:?}");
-            assert!(has_packet(&accepted, &observer, |packet| matches!(packet,
+            assert!(
+                has_save(&accepted, &owner),
+                "{poison}/{kind:?}: {accepted:?}"
+            );
+            assert!(has_packet(&accepted, &observer, |packet| matches!(
+                packet,
                 ServerPacket::ObjectTurn { .. }
                     | ServerPacket::ObjectWalk { .. }
-                    | ServerPacket::ObjectRun { .. })));
+                    | ServerPacket::ObjectRun { .. }
+            )));
         }
     }
 }
@@ -456,7 +473,10 @@ fn dead_players_only_receive_correction_for_turn_walk_and_run_without_clock_chan
         let before = zone.players[&owner].clone();
         let out = action(&mut zone, &owner, kind, MirDirection::Left, 1, 100);
         assert_correction_only(&out, &owner, &before);
-        assert_eq!(zone.players[&owner].movement_ready_at_ms, before.movement_ready_at_ms);
+        assert_eq!(
+            zone.players[&owner].movement_ready_at_ms,
+            before.movement_ready_at_ms
+        );
         assert_eq!(zone.players[&owner].direction, before.direction);
         assert_eq!(zone.players[&owner].position, before.position);
         assert!(zone.players[&owner].movement_actions.is_empty());
@@ -472,7 +492,10 @@ fn accepted_same_direction_turn_still_checks_the_current_coordinate() {
             .typed_map_coordinate_bindings
             .iter()
             .find_map(|binding| {
-                let point = Point { x: binding.x, y: binding.y };
+                let point = Point {
+                    x: binding.x,
+                    y: binding.y,
+                };
                 match crystal_map_coordinate_decision(
                     &binding.map_id,
                     &point,
@@ -506,7 +529,10 @@ fn accepted_same_direction_turn_still_checks_the_current_coordinate() {
     assert_eq!(zone.players[&owner].movement_ready_at_ms, 450);
     let mut appearance = zone.players[&owner].appearance();
     appearance.fishing = true;
-    zone.handle(ZoneCommand::SyncPlayerAppearance { session_id: owner.clone(), appearance });
+    zone.handle(ZoneCommand::SyncPlayerAppearance {
+        session_id: owner.clone(),
+        appearance,
+    });
     let before = zone.players[&owner].clone();
     let rejected = action(
         &mut zone,

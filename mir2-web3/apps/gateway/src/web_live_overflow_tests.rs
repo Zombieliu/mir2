@@ -9,75 +9,131 @@ struct HealthValidationProbe(Arc<std::sync::atomic::AtomicUsize>);
 impl crate::routing::OwnerHealthValidator for HealthValidationProbe {
     fn validate(&self, _: &mir2_simulation::ZoneOwnerHealthChange) -> Result<bool, String> {
         match self.0.load(Ordering::Acquire) {
-            0 => Ok(false), 1 => Ok(true), _ => Err("prepared validation transport failure".into()),
+            0 => Ok(false),
+            1 => Ok(true),
+            _ => Err("prepared validation transport failure".into()),
         }
     }
 }
 
 // This probe isolates actual WS scheduling and cancellation. Current-life
 // Source validation is covered by the real Zone and authenticated RPC tests.
-async fn health_sender_socket_case(validation: usize) -> (Vec<Value>, Result<(), transport::TransportEnd>) {
+async fn health_sender_socket_case(
+    validation: usize,
+) -> (Vec<Value>, Result<(), transport::TransportEnd>) {
     let (done_tx, done_rx) = oneshot::channel::<()>();
     let (result_tx, result_rx) = oneshot::channel();
     let handoff = Arc::new(Mutex::new(Some((done_rx, result_tx))));
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let address = listener.local_addr().unwrap();
-    let router = Router::new().route("/ws", get(move |upgrade: WebSocketUpgrade| {
-        let (done, result) = handoff.lock().unwrap().take().unwrap();
-        async move { upgrade.on_upgrade(move |socket| async move {
-            let (sink, _stream) = socket.split();
-            let terminal = transport::TransportSignal::new();
-            let sender = Arc::new(transport::SocketSender::new(sink, terminal.clone()));
-            let gate = Arc::new(AsyncRwLock::new(()));
-            let active = Arc::new(AtomicU64::new(42));
-            let (failure_tx, failure_rx) = watch::channel(0);
-            let work = async {
-                let bootstrap = gate.write().await;
-                let (normal_tx, normal_rx) = mpsc::channel(2);
-                let (_owner_tx, owner_rx) = mpsc::channel(1);
-                let _writer = spawn_zone_outbound_sender(normal_rx, owner_rx, sender.clone(),
-                    gate.clone(), active.clone(), failure_tx);
-                let decision = Arc::new(std::sync::atomic::AtomicUsize::new(1));
-                let outbound = SharedZoneLiveOutbound::new(42, ServerPacket::HealthChanged { hp: 10, mp: 9 })
-                    .with_owner_health(crate::routing::OwnerHealthDelivery {
-                        change: mir2_simulation::ZoneOwnerHealthChange {
-                            cursor: mir2_simulation::ZoneOwnerHealthCursor {
-                                session_id: mir2_simulation::SessionId::new("web-health-probe"), online_owner: "private-probe".into(),
-                                object_id: 1, life_generation: 1, dead: false, health_sequence: 1,
-                            }, hp_before: 11, mp_before: 9, hp: 10, mp: 9,
-                        }, validator: Arc::new(HealthValidationProbe(decision.clone())),
-                        highest_sent_sequence: Arc::new(Mutex::new(0)),
-                    });
-                normal_tx.send(outbound).await.unwrap();
-                tokio::time::timeout(Duration::from_secs(2), async {
-                    while normal_tx.capacity() != 2 { tokio::task::yield_now().await; }
-                }).await.unwrap();
-                // The writer has already dequeued the packet, but cannot pass
-                // the bootstrap gate. Change validation before releasing it.
-                decision.store(validation, Ordering::Release);
-                drop(bootstrap);
-                normal_tx.send(SharedZoneLiveOutbound::new(42, ServerPacket::KeepAlive { time: 99 })).await.unwrap();
-                let _ = done.await;
-            };
-            let outcome = run_until_transport_end(work, failure_rx, active.clone(), terminal).await;
-            let _ = result.send(outcome);
-        }) }
-    }));
-    let server = tokio::spawn(async move { axum::serve(listener, router).await.unwrap(); });
-    let (mut client, _) = tokio_tungstenite::connect_async(format!("ws://{address}/ws")).await.unwrap();
+    let router = Router::new().route(
+        "/ws",
+        get(move |upgrade: WebSocketUpgrade| {
+            let (done, result) = handoff.lock().unwrap().take().unwrap();
+            async move {
+                upgrade.on_upgrade(move |socket| async move {
+                    let (sink, _stream) = socket.split();
+                    let terminal = transport::TransportSignal::new();
+                    let sender = Arc::new(transport::SocketSender::new(sink, terminal.clone()));
+                    let gate = Arc::new(AsyncRwLock::new(()));
+                    let active = Arc::new(AtomicU64::new(42));
+                    let (failure_tx, failure_rx) = watch::channel(0);
+                    let work = async {
+                        let bootstrap = gate.write().await;
+                        let (normal_tx, normal_rx) = mpsc::channel(2);
+                        let (_owner_tx, owner_rx) = mpsc::channel(1);
+                        let _writer = spawn_zone_outbound_sender(
+                            normal_rx,
+                            owner_rx,
+                            sender.clone(),
+                            gate.clone(),
+                            active.clone(),
+                            failure_tx,
+                        );
+                        let decision = Arc::new(std::sync::atomic::AtomicUsize::new(1));
+                        let outbound = SharedZoneLiveOutbound::new(
+                            42,
+                            ServerPacket::HealthChanged { hp: 10, mp: 9 },
+                        )
+                        .with_owner_health(
+                            crate::routing::OwnerHealthDelivery {
+                                change: mir2_simulation::ZoneOwnerHealthChange {
+                                    cursor: mir2_simulation::ZoneOwnerHealthCursor {
+                                        session_id: mir2_simulation::SessionId::new(
+                                            "web-health-probe",
+                                        ),
+                                        online_owner: "private-probe".into(),
+                                        object_id: 1,
+                                        life_generation: 1,
+                                        dead: false,
+                                        health_sequence: 1,
+                                    },
+                                    hp_before: 11,
+                                    mp_before: 9,
+                                    hp: 10,
+                                    mp: 9,
+                                },
+                                validator: Arc::new(HealthValidationProbe(decision.clone())),
+                                highest_sent_sequence: Arc::new(Mutex::new(0)),
+                            },
+                        );
+                        normal_tx.send(outbound).await.unwrap();
+                        tokio::time::timeout(Duration::from_secs(2), async {
+                            while normal_tx.capacity() != 2 {
+                                tokio::task::yield_now().await;
+                            }
+                        })
+                        .await
+                        .unwrap();
+                        // The writer has already dequeued the packet, but cannot pass
+                        // the bootstrap gate. Change validation before releasing it.
+                        decision.store(validation, Ordering::Release);
+                        drop(bootstrap);
+                        normal_tx
+                            .send(SharedZoneLiveOutbound::new(
+                                42,
+                                ServerPacket::KeepAlive { time: 99 },
+                            ))
+                            .await
+                            .unwrap();
+                        let _ = done.await;
+                    };
+                    let outcome =
+                        run_until_transport_end(work, failure_rx, active.clone(), terminal).await;
+                    let _ = result.send(outcome);
+                })
+            }
+        }),
+    );
+    let server = tokio::spawn(async move {
+        axum::serve(listener, router).await.unwrap();
+    });
+    let (mut client, _) = tokio_tungstenite::connect_async(format!("ws://{address}/ws"))
+        .await
+        .unwrap();
     let mut received = Vec::new();
-    while let Ok(Some(Ok(message))) = tokio::time::timeout(Duration::from_secs(2), client.next()).await {
+    while let Ok(Some(Ok(message))) =
+        tokio::time::timeout(Duration::from_secs(2), client.next()).await
+    {
         if let tokio_tungstenite::tungstenite::Message::Text(text) = message {
             let value: Value = serde_json::from_str(&text).unwrap();
             let terminal = value["packet"] == "KeepAlive";
             received.push(value);
-            if terminal { break; }
-        } else { break; }
+            if terminal {
+                break;
+            }
+        } else {
+            break;
+        }
     }
     let _ = done_tx.send(());
-    let outcome = tokio::time::timeout(Duration::from_secs(2), result_rx).await.unwrap().unwrap();
+    let outcome = tokio::time::timeout(Duration::from_secs(2), result_rx)
+        .await
+        .unwrap()
+        .unwrap();
     drop(client);
-    server.abort(); let _ = server.await;
+    server.abort();
+    let _ = server.await;
     (received, outcome)
 }
 
@@ -119,7 +175,10 @@ async fn owner_ack_order_web_sender_waits_for_prepared_registration_activation()
             async move {
                 upgrade.on_upgrade(move |socket| async move {
                     let (sink, _stream) = socket.split();
-                    let sender = Arc::new(transport::SocketSender::new(sink, transport::TransportSignal::new()));
+                    let sender = Arc::new(transport::SocketSender::new(
+                        sink,
+                        transport::TransportSignal::new(),
+                    ));
                     let gate = Arc::new(AsyncRwLock::new(()));
                     let bootstrap = gate.write().await;
                     let active = Arc::new(AtomicU64::new(0));
@@ -231,7 +290,12 @@ async fn live_overflow_prepared_registration_signal_waits_for_matching_activatio
     });
     let result = tokio::time::timeout(
         Duration::from_secs(1),
-        run_until_transport_end(std::future::pending::<()>(), receiver, active, transport::TransportSignal::new()),
+        run_until_transport_end(
+            std::future::pending::<()>(),
+            receiver,
+            active,
+            transport::TransportSignal::new(),
+        ),
     )
     .await
     .unwrap();
@@ -260,7 +324,10 @@ async fn live_overflow_cancels_stalled_real_websocket_writer_and_closes_transpor
                         let writer_terminal = terminal.clone();
                         let work = async move {
                             let (sink, stream) = socket.split();
-                            let sender = Arc::new(transport::SocketSender::new(sink, writer_terminal.clone()));
+                            let sender = Arc::new(transport::SocketSender::new(
+                                sink,
+                                writer_terminal.clone(),
+                            ));
                             let (_inputs, _reader, _pending) = spawn_socket_reader(
                                 stream,
                                 Arc::clone(&sender),
@@ -279,7 +346,8 @@ async fn live_overflow_cancels_stalled_real_websocket_writer_and_closes_transpor
                                 send_server_packet(&sender, &ServerPacket::KeepAlive { time: 7 })
                                     .await;
                         };
-                        let result = run_until_transport_end(work, overflows, active, terminal).await;
+                        let result =
+                            run_until_transport_end(work, overflows, active, terminal).await;
                         let _ = closed.send(result);
                     })
                 }

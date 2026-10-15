@@ -1,16 +1,12 @@
 use bevy_ecs::prelude::World;
 use mir2_protocol::{ClientPacket, ServerPacket};
 
-use super::{
-    active_npc_allows_quest_request, newcomer_diary_template_allows_quest_request,
-};
+use super::{active_npc_allows_quest_request, newcomer_diary_template_allows_quest_request};
 use crate::config::{ItemContainer, QuestStage, SimulationConfig};
 use crate::SimulationSession;
 
 use super::super::inventory::add_or_increment_item;
-use super::super::quests::{
-    advance_crystal_quest_item_task, ensure_runtime_quest, quest_stage,
-};
+use super::super::quests::{advance_crystal_quest_item_task, ensure_runtime_quest, quest_stage};
 use super::super::resources::{
     InventoryResource, NpcStateResource, PlayerRuntimeResource, QuestResource,
     RuntimeConfigResource, SessionResource,

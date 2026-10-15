@@ -19,7 +19,11 @@ pub(super) struct NativeExperienceImpact {
     current_owner_mismatched: bool,
 }
 
-fn claimant(player: &ZonePlayer, online_owner: Option<OnlineOwner>, now_ms: u64) -> ZoneExperienceOwner {
+fn claimant(
+    player: &ZonePlayer,
+    online_owner: Option<OnlineOwner>,
+    now_ms: u64,
+) -> ZoneExperienceOwner {
     ZoneExperienceOwner {
         session_id: player.session_id.clone(),
         account_id: player.account_id.clone(),
@@ -31,18 +35,38 @@ fn claimant(player: &ZonePlayer, online_owner: Option<OnlineOwner>, now_ms: u64)
 }
 
 impl ZoneRuntime {
-    pub(crate) fn online_player_snapshot(&self, book: &OnlineIdentityBook) -> OnlinePresenceSnapshot {
-        self.players.iter().filter_map(|(sid, player)| {
-            let owner = book.owner(sid).filter(|owner|owner.matches_player(player))?.clone();
-            Some((sid.clone(), OnlinePresence { owner, key: self.key.clone(), dead: player.dead,
-                owned_pet_clock: self.player_owned_pet_clock(sid),
-                life_generation: player.life_generation, guild_name: player.chat_profile.guild_name.clone(),
-                chat_profile: Some(player.chat_profile.clone()), brown_until_ms: self.owned_pet_brown_until(player),
-                position: player.position.clone(), level: player.level,
-                experience_profile: player.experience_profile.clone(),
-                name: player.name.clone(), group_members: player.chat_profile.group_members.clone(),
-                mentor_bank: player.mentor_bank.clone() }))
-        }).collect()
+    pub(crate) fn online_player_snapshot(
+        &self,
+        book: &OnlineIdentityBook,
+    ) -> OnlinePresenceSnapshot {
+        self.players
+            .iter()
+            .filter_map(|(sid, player)| {
+                let owner = book
+                    .owner(sid)
+                    .filter(|owner| owner.matches_player(player))?
+                    .clone();
+                Some((
+                    sid.clone(),
+                    OnlinePresence {
+                        owner,
+                        key: self.key.clone(),
+                        dead: player.dead,
+                        owned_pet_clock: self.player_owned_pet_clock(sid),
+                        life_generation: player.life_generation,
+                        guild_name: player.chat_profile.guild_name.clone(),
+                        chat_profile: Some(player.chat_profile.clone()),
+                        brown_until_ms: self.owned_pet_brown_until(player),
+                        position: player.position.clone(),
+                        level: player.level,
+                        experience_profile: player.experience_profile.clone(),
+                        name: player.name.clone(),
+                        group_members: player.chat_profile.group_members.clone(),
+                        mentor_bank: player.mentor_bank.clone(),
+                    },
+                ))
+            })
+            .collect()
     }
     pub(super) fn refresh_local_online_presence(&mut self) {
         if !self.managed_online_identity {
@@ -50,24 +74,42 @@ impl ZoneRuntime {
             self.ingest_online_presence(snapshot, false);
         }
     }
-    pub(crate) fn ingest_online_presence(&mut self, snapshot: OnlinePresenceSnapshot, managed: bool) {
+    pub(crate) fn ingest_online_presence(
+        &mut self,
+        snapshot: OnlinePresenceSnapshot,
+        managed: bool,
+    ) {
         self.online_presence = snapshot;
         self.managed_online_identity = managed;
         for monster in self.native_monsters.values_mut() {
-            if monster.experience_owner.as_ref().is_some_and(|owner|
-                owner.online_owner.as_ref().is_none_or(|proof|self.online_presence.get(&proof.session_id)
-                    .is_none_or(|presence|presence.owner != *proof))) {
+            if monster.experience_owner.as_ref().is_some_and(|owner| {
+                owner.online_owner.as_ref().is_none_or(|proof| {
+                    self.online_presence
+                        .get(&proof.session_id)
+                        .is_none_or(|presence| presence.owner != *proof)
+                })
+            }) {
                 monster.experience_owner = None;
             }
-            if monster.damage_poison_owner_session_id.as_ref().is_some_and(|sid|
-                self.online_presence.get(sid).is_none_or(|p|p.owner.object_id != monster.damage_poison_owner_object_id)) {
+            if monster
+                .damage_poison_owner_session_id
+                .as_ref()
+                .is_some_and(|sid| {
+                    self.online_presence
+                        .get(sid)
+                        .is_none_or(|p| p.owner.object_id != monster.damage_poison_owner_object_id)
+                })
+            {
                 monster.damage_poison_owner_session_id = None;
                 monster.damage_poison_owner_object_id = 0;
             }
         }
         for stored in self.ground_drops.values_mut() {
-            if stored.native_owner.as_ref().is_some_and(|owner|
-                self.online_presence.get(&owner.owner.session_id).is_none_or(|p|p.owner != owner.owner)) {
+            if stored.native_owner.as_ref().is_some_and(|owner| {
+                self.online_presence
+                    .get(&owner.owner.session_id)
+                    .is_none_or(|p| p.owner != owner.owner)
+            }) {
                 stored.owner_expires_at_ms = None;
                 stored.drop.ownership_remaining_ticks = None;
             }
@@ -75,10 +117,15 @@ impl ZoneRuntime {
     }
     pub(crate) fn revoke_online_session(&mut self, session_id: &SessionId) {
         self.online_presence.remove(session_id);
-        self.issued_native_monster_awards.retain(|_, owner| &owner.session_id != session_id);
+        self.issued_native_monster_awards
+            .retain(|_, owner| &owner.session_id != session_id);
         // Clear historical poison before a reused session/object can be admitted.
         for monster in self.native_monsters.values_mut() {
-            if monster.experience_owner.as_ref().is_some_and(|o|&o.session_id == session_id) {
+            if monster
+                .experience_owner
+                .as_ref()
+                .is_some_and(|o| &o.session_id == session_id)
+            {
                 monster.experience_owner = None;
             }
             if monster.damage_poison_owner_session_id.as_ref() == Some(session_id) {
@@ -86,7 +133,8 @@ impl ZoneRuntime {
                 monster.damage_poison_owner_object_id = 0;
             }
         }
-        self.pending_native_hits.retain(|hit|&hit.session_id != session_id);
+        self.pending_native_hits
+            .retain(|hit| &hit.session_id != session_id);
         let snapshot = self.online_presence.clone();
         self.ingest_online_presence(snapshot, self.managed_online_identity);
     }
@@ -100,7 +148,11 @@ impl ZoneRuntime {
         self.ingest_online_presence(BTreeMap::new(), self.managed_online_identity);
         // Legacy owner ids never authenticate a fresh spawned Node either.
         // This does not add an owner to manual/player-death loot.
-        for stored in self.ground_drops.values_mut().filter(|s|s.drop.owner_object_id.is_some()) {
+        for stored in self
+            .ground_drops
+            .values_mut()
+            .filter(|s| s.drop.owner_object_id.is_some())
+        {
             stored.owner_expires_at_ms = None;
             stored.drop.ownership_remaining_ticks = None;
         }
@@ -108,15 +160,33 @@ impl ZoneRuntime {
         self.clear_cold_five_class_state();
     }
     fn player_claimant(&self, player: &ZonePlayer, now_ms: u64) -> Option<ZoneExperienceOwner> {
-        let owner = self.online_presence.get(&player.session_id)
-            .filter(|p|p.owner.matches_player(player))?.owner.clone();
+        let owner = self
+            .online_presence
+            .get(&player.session_id)
+            .filter(|p| p.owner.matches_player(player))?
+            .owner
+            .clone();
         Some(claimant(player, Some(owner), now_ms))
     }
-    fn online_claimant(&self, session_id: &SessionId, object_id: u32, now_ms: u64) -> Option<ZoneExperienceOwner> {
-        let owner = &self.online_presence.get(session_id).filter(|p|p.owner.object_id == object_id)?.owner;
-        Some(ZoneExperienceOwner { session_id: owner.session_id.clone(), account_id: owner.account_id.clone(),
-            character_index: owner.character_index, object_id: owner.object_id,
-            expires_at_ms: now_ms.saturating_add(EXPERIENCE_OWNER_DELAY_MS), online_owner: Some(owner.clone()) })
+    fn online_claimant(
+        &self,
+        session_id: &SessionId,
+        object_id: u32,
+        now_ms: u64,
+    ) -> Option<ZoneExperienceOwner> {
+        let owner = &self
+            .online_presence
+            .get(session_id)
+            .filter(|p| p.owner.object_id == object_id)?
+            .owner;
+        Some(ZoneExperienceOwner {
+            session_id: owner.session_id.clone(),
+            account_id: owner.account_id.clone(),
+            character_index: owner.character_index,
+            object_id: owner.object_id,
+            expires_at_ms: now_ms.saturating_add(EXPERIENCE_OWNER_DELAY_MS),
+            online_owner: Some(owner.clone()),
+        })
     }
     pub(super) fn native_experience_impact(
         &self,
@@ -151,7 +221,11 @@ impl ZoneRuntime {
                     None => presence.key != self.key && presence.dead,
                 }
             }),
-            current_owner_mismatched: old.is_some_and(|o|o.online_owner.as_ref().is_none_or(|proof|!self.online_owner_current(proof))),
+            current_owner_mismatched: old.is_some_and(|o| {
+                o.online_owner
+                    .as_ref()
+                    .is_none_or(|proof| !self.online_owner_current(proof))
+            }),
         };
         match actor {
             Some(NativeExperienceActor::Object {
@@ -163,7 +237,8 @@ impl ZoneRuntime {
                     if matches!(monster.ai, 6 | 58 | 113) {
                         impact.clears_owner = true;
                     } else if monster.owner_session_id.is_some()
-                        && monster.master_object_id != zone_native_summon_owner_player_object_id(monster)
+                        && monster.master_object_id
+                            != zone_native_summon_owner_player_object_id(monster)
                     {
                         // MonsterObject.Attacked(MonsterObject): EXPOwner is
                         // the immediate Master, not the causal Human. A real
@@ -215,7 +290,8 @@ impl ZoneRuntime {
             Some(NativeExperienceActor::PeriodicPoison { owner_object_id }) => {
                 // Source periodic poison renews before PoisonDamage and does
                 // not reject a dead owner that remains a spawned object.
-                impact.claimant = session_id.and_then(|sid|self.online_claimant(sid, owner_object_id, now_ms));
+                impact.claimant =
+                    session_id.and_then(|sid| self.online_claimant(sid, owner_object_id, now_ms));
             }
             None => {
                 // Internal player spells and scripted special-AI trackers use
@@ -242,7 +318,10 @@ impl ZoneRuntime {
             return None;
         }
         // No alive gate here: MonsterObject.Die permits a spawned dead owner.
-        owner.online_owner.as_ref().filter(|proof|self.online_owner_current(proof))
+        owner
+            .online_owner
+            .as_ref()
+            .filter(|proof| self.online_owner_current(proof))
             .map(|_| owner.session_id.clone())
     }
 
@@ -305,7 +384,11 @@ impl ZoneRuntime {
         {
             return Vec::new();
         }
-        let Some(owner_object_id) = self.online_presence.get(&owner_session_id).map(|p| p.owner.object_id) else {
+        let Some(owner_object_id) = self
+            .online_presence
+            .get(&owner_session_id)
+            .map(|p| p.owner.object_id)
+        else {
             return Vec::new();
         };
         award.drops = self.spawn_native_monster_drops(

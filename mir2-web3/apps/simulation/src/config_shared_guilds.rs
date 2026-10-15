@@ -71,7 +71,9 @@ impl SharedGuildRecord {
     /// Advancing both endpoints together preserves reciprocal authority.
     pub(crate) fn advance_shared_guild_war_minutes(&mut self, minutes: u64) {
         self.active_wars.retain(|_, remaining| {
-            let Ok(current) = u64::try_from(*remaining) else { return false; };
+            let Ok(current) = u64::try_from(*remaining) else {
+                return false;
+            };
             if minutes > current {
                 return false;
             }
@@ -106,7 +108,10 @@ pub(super) fn build_guild_mutations(
     scope: AccountStoreMutationScope<'_>,
 ) -> BTreeMap<String, GuildMutation> {
     let ids: BTreeSet<String> = match scope {
-        AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithGuildsAndConquests { guild_ids, .. } => {
+        AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. }
+        | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. }
+        | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. }
+        | AccountStoreMutationScope::AccountsWithGuildsAndConquests { guild_ids, .. } => {
             guild_ids.iter().cloned().collect()
         }
         AccountStoreMutationScope::FullRestore => original
@@ -140,7 +145,10 @@ pub(super) fn validate_guild_scope(
             .map_err(AccountStoreTransactionScopeError::InvalidGuildState);
     }
     let allowed: BTreeSet<&str> = match scope {
-        AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithGuildsAndConquests { guild_ids, .. } => {
+        AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. }
+        | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. }
+        | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. }
+        | AccountStoreMutationScope::AccountsWithGuildsAndConquests { guild_ids, .. } => {
             guild_ids.iter().map(String::as_str).collect()
         }
         _ => BTreeSet::new(),
@@ -159,7 +167,10 @@ pub(super) fn validate_guild_scope(
         }
     }
     let authorized_accounts: BTreeSet<&str> = match scope {
-        AccountStoreMutationScope::AccountsWithGuilds { account_ids, .. } | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { account_ids, .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { account_ids, .. } | AccountStoreMutationScope::AccountsWithGuildsAndConquests { account_ids, .. } => {
+        AccountStoreMutationScope::AccountsWithGuilds { account_ids, .. }
+        | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { account_ids, .. }
+        | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { account_ids, .. }
+        | AccountStoreMutationScope::AccountsWithGuildsAndConquests { account_ids, .. } => {
             account_ids.iter().map(String::as_str).collect()
         }
         _ => BTreeSet::new(),
@@ -317,9 +328,10 @@ pub(super) fn validate_guild_state(store: &AccountStore) -> Result<(), String> {
             if enemy_id == id
                 || *remaining < 0
                 || *remaining > mir2_game_data::crystal_guild_settings().war_time
-                || !store.shared_guilds.get(enemy_id).is_some_and(|enemy| {
-                    enemy.active_wars.get(id) == Some(remaining)
-                })
+                || !store
+                    .shared_guilds
+                    .get(enemy_id)
+                    .is_some_and(|enemy| enemy.active_wars.get(id) == Some(remaining))
             {
                 return Err("invalid or asymmetric ordinary guild war".into());
             }
@@ -331,7 +343,7 @@ pub(super) fn validate_guild_state(store: &AccountStore) -> Result<(), String> {
         if guild.members.is_empty() || !guild.members.iter().any(|member| member.rank_index == 0) {
             return Err("guild has no leader".into());
         }
-        let mut public_character_indexes=BTreeSet::new();
+        let mut public_character_indexes = BTreeSet::new();
         for member in &guild.members {
             if !public_character_indexes.insert(member.identity.character_index) {
                 return Err("guild members have ambiguous legacy public character indexes".into());
@@ -496,7 +508,8 @@ mod tests {
                 name: "Leader".into(),
                 options: 255,
             }],
-            members: vec![SharedGuildMember { membership_epoch: 0,
+            members: vec![SharedGuildMember {
+                membership_epoch: 0,
                 identity: Stage5FriendIdentity {
                     account_id: "demo".into(),
                     character_index: character.index,
@@ -508,7 +521,8 @@ mod tests {
             storage: BTreeMap::new(),
             buffs: BTreeMap::new(),
             last_buff_tick_ms: 0,
-            experience_receipts: BTreeSet::new(), experience_receipt_payloads: Default::default(),
+            experience_receipts: BTreeSet::new(),
+            experience_receipt_payloads: Default::default(),
             active_wars: Default::default(),
         }
     }
@@ -521,7 +535,9 @@ mod tests {
         let mut peer = store.accounts["demo"].clone();
         peer.characters[0].name = "RivalPlayer".into();
         let peer_index = peer.characters[0].index;
-        if let Some(save) = peer.saves.get_mut(&peer_index) { save.character.name = "RivalPlayer".into(); }
+        if let Some(save) = peer.saves.get_mut(&peer_index) {
+            save.character.name = "RivalPlayer".into();
+        }
         store.accounts.insert("peer".into(), peer);
         let mut own = guild(&store, ID, "Knights");
         let mut enemy = guild(&store, OTHER, "Rivals");
@@ -535,32 +551,57 @@ mod tests {
         let valid = store.clone();
         for remaining in [-1, 181, 179] {
             store = valid.clone();
-            store.shared_guilds.get_mut(ID).unwrap().active_wars.insert(OTHER.into(), remaining);
+            store
+                .shared_guilds
+                .get_mut(ID)
+                .unwrap()
+                .active_wars
+                .insert(OTHER.into(), remaining);
             assert!(validate_guild_state(&store).is_err());
         }
-        store = valid.clone(); store.shared_guilds.get_mut(ID).unwrap().active_wars.insert(ID.into(), 180);
+        store = valid.clone();
+        store
+            .shared_guilds
+            .get_mut(ID)
+            .unwrap()
+            .active_wars
+            .insert(ID.into(), 180);
         assert!(validate_guild_state(&store).is_err());
-        store = valid.clone(); store.shared_guilds.remove(OTHER);
+        store = valid.clone();
+        store.shared_guilds.remove(OTHER);
         assert!(validate_guild_state(&store).is_err());
-        store = valid; store.shared_guilds.get_mut(OTHER).unwrap().active_wars.clear();
+        store = valid;
+        store
+            .shared_guilds
+            .get_mut(OTHER)
+            .unwrap()
+            .active_wars
+            .clear();
         assert!(validate_guild_state(&store).is_err());
     }
 
     #[test]
-    fn ordinary_guild_war_minutes_keep_zero_until_the_following_minute_and_handle_large_intervals() {
+    fn ordinary_guild_war_minutes_keep_zero_until_the_following_minute_and_handle_large_intervals()
+    {
         let config = SimulationConfig::default();
         let store = config.account_store.lock().unwrap();
         let mut own = guild(&store, ID, "Knights");
         let mut enemy = guild(&store, OTHER, "Rivals");
-        own.active_wars.insert(OTHER.into(), 180); enemy.active_wars.insert(ID.into(), 180);
+        own.active_wars.insert(OTHER.into(), 180);
+        enemy.active_wars.insert(ID.into(), 180);
         for minutes in [179, 1] {
-            own.advance_shared_guild_war_minutes(minutes); enemy.advance_shared_guild_war_minutes(minutes);
+            own.advance_shared_guild_war_minutes(minutes);
+            enemy.advance_shared_guild_war_minutes(minutes);
         }
-        assert_eq!(own.active_wars.get(OTHER), Some(&0)); assert_eq!(enemy.active_wars.get(ID), Some(&0));
-        own.advance_shared_guild_war_minutes(0); assert_eq!(own.active_wars.get(OTHER), Some(&0));
-        own.advance_shared_guild_war_minutes(1); enemy.advance_shared_guild_war_minutes(1);
+        assert_eq!(own.active_wars.get(OTHER), Some(&0));
+        assert_eq!(enemy.active_wars.get(ID), Some(&0));
+        own.advance_shared_guild_war_minutes(0);
+        assert_eq!(own.active_wars.get(OTHER), Some(&0));
+        own.advance_shared_guild_war_minutes(1);
+        enemy.advance_shared_guild_war_minutes(1);
         assert!(own.active_wars.is_empty() && enemy.active_wars.is_empty());
-        own.active_wars.insert(OTHER.into(), 180); own.advance_shared_guild_war_minutes(u64::MAX);
+        own.active_wars.insert(OTHER.into(), 180);
+        own.advance_shared_guild_war_minutes(u64::MAX);
         assert!(own.active_wars.is_empty());
     }
 
@@ -570,32 +611,67 @@ mod tests {
         let store = config.account_store.lock().unwrap();
         let record = guild(&store, ID, "Knights");
         let bytes = serde_json::to_vec(&record).unwrap();
-        assert!(!String::from_utf8(bytes.clone()).unwrap().contains("activeWars"));
+        assert!(!String::from_utf8(bytes.clone())
+            .unwrap()
+            .contains("activeWars"));
         let restored: SharedGuildRecord = serde_json::from_slice(&bytes).unwrap();
-        assert!(restored.active_wars.is_empty()); assert_eq!(serde_json::to_vec(&restored).unwrap(), bytes);
+        assert!(restored.active_wars.is_empty());
+        assert_eq!(serde_json::to_vec(&restored).unwrap(), bytes);
     }
     #[test]
-    fn guild_legacy_public_index_collision_rejects_join_and_file_without_repairing_assets(){
-        let config=SimulationConfig::default();
+    fn guild_legacy_public_index_collision_rejects_join_and_file_without_repairing_assets() {
+        let config = SimulationConfig::default();
         {
-            let mut store=config.account_store.lock().unwrap();
-            let mut peer=store.accounts["demo"].clone();
-            peer.characters[0].name="LegacyPeer".into();
-            store.accounts.insert("peer".into(),peer);
-            let value=guild(&store,ID,"Knights");store.shared_guilds.insert(ID.into(),value);
+            let mut store = config.account_store.lock().unwrap();
+            let mut peer = store.accounts["demo"].clone();
+            peer.characters[0].name = "LegacyPeer".into();
+            store.accounts.insert("peer".into(), peer);
+            let value = guild(&store, ID, "Knights");
+            store.shared_guilds.insert(ID.into(), value);
         }
-        let owner=config.account_store.lock().unwrap().shared_guilds[ID].members[0].identity.clone();
-        let peer=Stage5FriendIdentity{account_id:"peer".into(),character_index:owner.character_index};
-        assert!(config.commit_shared_guild_join(&owner,&peer,ID).unwrap_err().contains("ambiguous legacy"));
-        let mut store=config.account_store.lock().unwrap().clone();
-        assert_eq!(store.shared_guilds[ID].members.len(),1);
-        store.shared_guilds.get_mut(ID).unwrap().members.push(SharedGuildMember{ membership_epoch: 0,identity:peer,name:"LegacyPeer".into(),rank_index:0});
-        assert!(validate_guild_scope(&store,&store,AccountStoreMutationScope::FullRestore).is_err());
-        let path=std::env::temp_dir().join(format!("mir2-guild-index-collision-{}-{}.json",std::process::id(),SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));
-        let bytes=serde_json::to_vec(&store).unwrap();fs::write(&path,&bytes).unwrap();
-        assert!(FileAccountStoreRepository::new(path.clone()).load(config.default_character.clone()).is_err());
-        let frozen=SimulationConfig::default().with_account_store_path(path.clone());
-        assert!(frozen.save_account_store().is_err());assert_eq!(fs::read(&path).unwrap(),bytes);
+        let owner = config.account_store.lock().unwrap().shared_guilds[ID].members[0]
+            .identity
+            .clone();
+        let peer = Stage5FriendIdentity {
+            account_id: "peer".into(),
+            character_index: owner.character_index,
+        };
+        assert!(config
+            .commit_shared_guild_join(&owner, &peer, ID)
+            .unwrap_err()
+            .contains("ambiguous legacy"));
+        let mut store = config.account_store.lock().unwrap().clone();
+        assert_eq!(store.shared_guilds[ID].members.len(), 1);
+        store
+            .shared_guilds
+            .get_mut(ID)
+            .unwrap()
+            .members
+            .push(SharedGuildMember {
+                membership_epoch: 0,
+                identity: peer,
+                name: "LegacyPeer".into(),
+                rank_index: 0,
+            });
+        assert!(
+            validate_guild_scope(&store, &store, AccountStoreMutationScope::FullRestore).is_err()
+        );
+        let path = std::env::temp_dir().join(format!(
+            "mir2-guild-index-collision-{}-{}.json",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let bytes = serde_json::to_vec(&store).unwrap();
+        fs::write(&path, &bytes).unwrap();
+        assert!(FileAccountStoreRepository::new(path.clone())
+            .load(config.default_character.clone())
+            .is_err());
+        let frozen = SimulationConfig::default().with_account_store_path(path.clone());
+        assert!(frozen.save_account_store().is_err());
+        assert_eq!(fs::read(&path).unwrap(), bytes);
         fs::remove_file(path).unwrap();
     }
     #[test]
@@ -992,7 +1068,8 @@ mod postgres_tests {
                 name: "Leader".into(),
                 options: 255,
             }],
-            members: vec![SharedGuildMember { membership_epoch: 0,
+            members: vec![SharedGuildMember {
+                membership_epoch: 0,
                 identity: Stage5FriendIdentity {
                     account_id: account_id.clone(),
                     character_index: index,
@@ -1004,7 +1081,8 @@ mod postgres_tests {
             storage: BTreeMap::new(),
             buffs: BTreeMap::new(),
             last_buff_tick_ms: 0,
-            experience_receipts: BTreeSet::new(), experience_receipt_payloads: Default::default(),
+            experience_receipts: BTreeSet::new(),
+            experience_receipt_payloads: Default::default(),
             active_wars: Default::default(),
         };
         let mut staged = original.clone();
@@ -1169,7 +1247,11 @@ impl AccountStoreMutationPlan {
                 )
                 .map_err(|e| e.to_string())?;
         }
-        hero_postgres::lock_hero_mutations(transaction, &self.heroes, self.hero_allocator.as_ref())?;
+        hero_postgres::lock_hero_mutations(
+            transaction,
+            &self.heroes,
+            self.hero_allocator.as_ref(),
+        )?;
         for id in self.accounts.keys() {
             transaction
                 .query_opt(
@@ -1233,7 +1315,14 @@ impl SimulationConfig {
     pub fn shared_guild_for_name(&self, name: &str) -> Result<Option<SharedGuildRecord>, String> {
         self.ensure_account_store_writable()?;
         let name_key = canonical_guild_name(name);
-        let store = self.account_store.lock().map_err(|_| "guild authority mutex poisoned")?;
-        Ok(store.shared_guilds.values().find(|guild| guild.name_key() == name_key).cloned())
+        let store = self
+            .account_store
+            .lock()
+            .map_err(|_| "guild authority mutex poisoned")?;
+        Ok(store
+            .shared_guilds
+            .values()
+            .find(|guild| guild.name_key() == name_key)
+            .cloned())
     }
 }

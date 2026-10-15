@@ -63,12 +63,14 @@ fn has_packet(
     expected: impl Fn(&ServerPacket) -> bool,
 ) -> bool {
     outbounds.iter().any(|outbound| match outbound {
-        ZoneOutbound::ToSession { session_id, packets } if session_id == session => {
-            packets.iter().any(&expected)
-        }
-        ZoneOutbound::ToMany { session_ids, packets } if session_ids.contains(session) => {
-            packets.iter().any(&expected)
-        }
+        ZoneOutbound::ToSession {
+            session_id,
+            packets,
+        } if session_id == session => packets.iter().any(&expected),
+        ZoneOutbound::ToMany {
+            session_ids,
+            packets,
+        } if session_ids.contains(session) => packets.iter().any(&expected),
         ZoneOutbound::ToAll { packets } => packets.iter().any(&expected),
         _ => false,
     })
@@ -93,10 +95,8 @@ fn fishing_transform_snapshot_preserves_missing_and_signed_raw_values() {
 
 #[test]
 fn fishing_transform_zone_getter_distinguishes_absence_join_zero_and_leave() {
-    let mut zone = ZoneRuntime::new_with_collision(
-        ZoneKey::for_map("0"),
-        ZoneCollision::unbounded(),
-    );
+    let mut zone =
+        ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
     let session = SessionId::new("owner");
     assert_eq!(zone.player_transform_type(&session), None);
     zone.handle(ZoneCommand::Join(join("owner", 101, 330)));
@@ -110,10 +110,8 @@ fn fishing_transform_zone_getter_distinguishes_absence_join_zero_and_leave() {
 
 #[test]
 fn fishing_transform_zone_reads_updates_and_remote_spawn_from_the_same_raw_state() {
-    let mut zone = ZoneRuntime::new_with_collision(
-        ZoneKey::for_map("0"),
-        ZoneCollision::unbounded(),
-    );
+    let mut zone =
+        ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
     let owner = SessionId::new("owner");
     let observer = SessionId::new("observer");
     zone.handle(ZoneCommand::Join(join("owner", 101, 330)));

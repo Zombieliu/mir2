@@ -582,7 +582,10 @@ mod tests {
                 .iter()
                 .find_map(|p| match p {
                     ServerPacket::ObjectHealth { info }
-                        if info.object_id == online[subject].live.object_id => Some(info),
+                        if info.object_id == online[subject].live.object_id =>
+                    {
+                        Some(info)
+                    }
                     _ => None,
                 })
                 .expect("nearby ordinary group acceptance exchanges health");
