@@ -358,6 +358,7 @@ fn shared_owned_pet_manager_earned_steps_keep_other_map_pets_and_only_mirror_com
     );
 }
 
+#[cfg(feature = "test-support")]
 #[test]
 fn shared_owned_pet_actual_personal_gain_exp_and_source_save_are_atomic_and_mirror_once() {
     use mir2_protocol::ClientPacket;

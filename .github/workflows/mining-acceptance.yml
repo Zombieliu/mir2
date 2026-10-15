@@ -37,7 +37,9 @@ jobs:
         run: cargo +1.89.0 test --locked -p mir2-game-data -- --test-threads=1
       - name: Shared wall rules and checkpoint compatibility
         working-directory: mir2-web3
-        run: cargo +1.89.0 test --locked -p mir2-simulation mining -- --test-threads=1
+        run: |
+          cargo +1.89.0 test --locked -p mir2-simulation --features test-support mining -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-simulation --features test-support --test shared_pet_pvp shared_owned_pet_actual_personal_gain_exp_and_source_save_are_atomic_and_mirror_once -- --exact --test-threads=1
       - name: Three classes, durable inventory and real WebSocket
         working-directory: mir2-web3
         run: cargo +1.89.0 test --locked -p mir2-gateway --lib mining -- --test-threads=1

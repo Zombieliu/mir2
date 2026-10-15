@@ -28860,9 +28860,12 @@ mod tests {
     #[test]
     fn shared_in_process_registry_syncs_equipped_mount_before_three_tile_run() {
         let (mut first, mut second) = started_shared_zone_sessions();
+        let identity = first
+            .active_identity()
+            .expect("registered mount fixture character");
         let native_state = serde_json::json!({
             "character": {
-                "name": "Demo",
+                "name": identity.character_name.clone(),
                 "level": 22,
                 "class": "Warrior",
                 "gender": "Male"
@@ -28885,6 +28888,11 @@ mod tests {
             "equipmentItemsJson": []
         });
         first.stage5_command("qa.applyNativeState", vec![native_state.to_string()]);
+        assert_eq!(
+            first.active_identity(),
+            Some(identity.clone()),
+            "QA stats must preserve the registered character index/name"
+        );
         // MeatStore (0102) is authoritatively `NoMount` in Server.MirDB.
         // Exercise mounted three-tile movement on a known walkable, mount-allowed
         // Bichon fixture instead of relying on the former incomplete map metadata.
@@ -28959,6 +28967,63 @@ mod tests {
                     if location.position.x == start.x + 4 && location.position.y == start.y
             )),
             "mounted Walk + Run should move one plus three tiles: {run_packets:?}"
+        );
+
+        let before_save = first.world_snapshot();
+        let mount_before = before_save
+            .equipment_items
+            .iter()
+            .find(|item| item.key == "crystal-item-769")
+            .expect("equipped fixture mount");
+        assert_eq!(mount_before.unique_id, Some(mount_unique_id));
+        first
+            .save_active_character()
+            .expect("complete mount character save");
+        assert_eq!(first.active_identity(), Some(identity.clone()));
+        let logout = first.handle_packet(ClientPacket::LogOut);
+        let roster = logout
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::LogOutSuccess { characters } => Some(characters),
+                _ => None,
+            })
+            .expect("saved character returns to authenticated selection");
+        let saved_character = roster
+            .iter()
+            .find(|character| character.index == identity.character_index)
+            .expect("same registered character remains on roster");
+        assert_eq!(saved_character.name, identity.character_name);
+        assert_eq!(saved_character.level, 22);
+        assert_eq!(saved_character.class, MirClass::Warrior);
+        assert_eq!(saved_character.gender, MirGender::Male);
+        assert!(first.active_identity().is_none());
+        first.handle_packet(ClientPacket::StartGame {
+            character_index: identity.character_index,
+        });
+        assert_eq!(first.active_identity(), Some(identity));
+        let restored = first.world_snapshot();
+        assert_eq!(
+            restored.equipment_items, before_save.equipment_items,
+            "complete save/load preserves the same equipped mount UID and state"
+        );
+        assert_eq!(restored.inventory_items, before_save.inventory_items);
+        assert_eq!(restored.gold, before_save.gold);
+        assert_eq!(restored.credit, before_save.credit);
+        let restored_position = restored
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .map(|entity| Point {
+                x: entity.x,
+                y: entity.y,
+            })
+            .expect("reloaded mounted character");
+        assert_eq!(
+            restored_position,
+            Point {
+                x: start.x + 4,
+                y: start.y
+            }
         );
     }
 
@@ -31796,9 +31861,58 @@ mod tests {
     fn shared_in_process_registry_relays_share_quest_to_online_group_member() {
         let (mut first, mut second) = started_shared_zone_sessions();
 
+        // Crystal AddMember sends an invitation; GroupInvite(true) is what
+        // commits the shared roster (PlayerObject:9406/9462-9472).
+        first.handle_packet(ClientPacket::SwitchGroup { allow_group: true });
+        second.handle_packet(ClientPacket::SwitchGroup { allow_group: true });
         first.handle_packet(ClientPacket::AddMember {
             name: "Blade".to_string(),
         });
+        let invitation = second.tick();
+        assert!(
+            invitation.iter().any(|packet| matches!(packet,
+                ServerPacket::GroupInvite { name } if name == "Scout"
+            )),
+            "real shared-group invitation: {invitation:?}"
+        );
+        assert!(first
+            .world_snapshot()
+            .stage5_systems
+            .group
+            .members
+            .is_empty());
+        assert!(second
+            .world_snapshot()
+            .stage5_systems
+            .group
+            .members
+            .is_empty());
+        let accepted = second.handle_packet(ClientPacket::GroupInvite {
+            accept_invite: true,
+        });
+        assert!(
+            accepted.iter().any(|packet| matches!(packet,
+                ServerPacket::AddMember { name } if name == "Scout"
+            )),
+            "accepted group roster: {accepted:?}"
+        );
+        let owner_roster = first.tick();
+        assert!(
+            owner_roster.iter().any(|packet| matches!(packet,
+                ServerPacket::AddMember { name } if name == "Blade"
+            )),
+            "leader sees accepted member: {owner_roster:?}"
+        );
+        let expected_roster = vec!["Scout".to_string(), "Blade".to_string()];
+        assert_eq!(
+            first.world_snapshot().stage5_systems.group.members,
+            expected_roster
+        );
+        assert_eq!(
+            second.world_snapshot().stage5_systems.group.members,
+            expected_roster
+        );
+
         let owner_packets = first.handle_packet(ClientPacket::ShareQuest { quest_index: 1001 });
         let receiver_packets = second.tick();
 
@@ -33011,6 +33125,85 @@ mod tests {
     #[test]
     fn shared_in_process_registry_rolls_back_two_sided_trade_when_receiver_is_full() {
         let (mut first, mut second) = started_shared_zone_sessions();
+        // Demo seeds use a legacy slot-zero alias. A real escrow return assigns
+        // its incoming UID; materialize and save it before measuring rollback.
+        // Saving alone preserves that legacy alias rather than allocating a UID.
+        let initial_sender = first.world_snapshot();
+        let initial_receiver = second.world_snapshot();
+        // Blade uses a real NewCharacter under the default StarterScenario,
+        // whose initial bag is empty; only the demo sender has legacy starters.
+        assert!(
+            initial_receiver.inventory_items.is_empty(),
+            "the newly created receiver has no legacy starter UIDs to materialize"
+        );
+        let legacy_red = initial_sender
+            .inventory_items
+            .iter()
+            .find(|item| item.key == "red-potion")
+            .expect("sender starts with the legacy potion stack");
+        assert_eq!(legacy_red.quantity, 5);
+        assert_eq!(legacy_red.unique_id, 0);
+        let legacy_red_slot = inventory_slot_for_key(&first, "red-potion");
+        open_shared_trade_pair(&mut first, &mut second);
+        assert!(first
+            .handle_packet(ClientPacket::DepositTradeItem {
+                from: legacy_red_slot,
+                to: 0,
+            })
+            .iter()
+            .any(|packet| matches!(
+                packet,
+                ServerPacket::DepositTradeItem { from, to: 0, success: true }
+                    if *from == legacy_red_slot
+            )));
+        assert!(first
+            .handle_packet(ClientPacket::TradeConfirm { locked: true })
+            .iter()
+            .all(|packet| !matches!(packet, ServerPacket::TradeConfirm)));
+        let prepared = first
+            .world_snapshot()
+            .stage5_systems
+            .trade
+            .expect("the initial confirmation actually prepares escrow");
+        assert!(prepared.escrow_prepared && prepared.locked && !prepared.completed);
+        assert!(!has_inventory_key(&first, "red-potion"));
+        assert!(second
+            .handle_packet(ClientPacket::TradeCancel)
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: false })));
+        let materialization = first.handle_packet(ClientPacket::KeepAlive { time: 1 });
+        let materialized_uid = materialization
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::GainedItem { item } if item.count == 5 && item.unique_id > 0 => {
+                    Some(item.unique_id)
+                }
+                _ => None,
+            })
+            .expect("real escrow cancellation returns a stack with an assigned UID");
+        assert!(materialization
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::TradeCancel { unlock: false })));
+        assert_eq!(first.world_snapshot().gold, initial_sender.gold);
+        assert_eq!(second.world_snapshot().gold, initial_receiver.gold);
+        assert_eq!(
+            second.world_snapshot().inventory_items,
+            initial_receiver.inventory_items
+        );
+        assert!(first.world_snapshot().stage5_systems.trade.is_none());
+        assert!(second.world_snapshot().stage5_systems.trade.is_none());
+        first
+            .save_active_character()
+            .expect("persist the materialized starter UID before taking the trade baseline");
+        let saved_red = first
+            .world_snapshot()
+            .inventory_items
+            .into_iter()
+            .find(|item| item.key == "red-potion")
+            .expect("the saved potion stack remains in the bag");
+        assert_eq!(saved_red.quantity, 5);
+        assert_eq!(saved_red.unique_id, materialized_uid);
+
         first.handle_packet(ClientPacket::DropGold { amount: 100 });
         let funding_drop = second
             .world_snapshot()
@@ -33020,7 +33213,56 @@ mod tests {
             .expect("second session should see funding gold");
         second.transfer_map(&format!("crystal:0:{}:{}", funding_drop.x, funding_drop.y));
         second.pick_up(funding_drop.object_id);
-        fill_gateway_bag(&mut second);
+        // Use an actual non-stackable Crystal template. This is an owned QA
+        // fixture grant, not a claim that the normal economy minted these items.
+        // Keep the full receiver bag and every issued UID through failed trade.
+        let mut filler_uids = BTreeSet::new();
+        let initial_free = second.world_snapshot().free_bag_slots;
+        for _ in 0..initial_free {
+            let before = second.world_snapshot();
+            let before_uids = before
+                .inventory_items
+                .iter()
+                .map(|item| item.unique_id)
+                .collect::<BTreeSet<_>>();
+            second.stage5_command("qa.giveItem", vec!["crystal-item-769".to_string()]);
+            let after = second.world_snapshot();
+            assert_eq!(after.free_bag_slots + 1, before.free_bag_slots);
+            let added = after
+                .inventory_items
+                .iter()
+                .filter(|item| !before_uids.contains(&item.unique_id))
+                .collect::<Vec<_>>();
+            assert_eq!(added.len(), 1, "one real single-slot item per grant");
+            let item = added[0];
+            assert_eq!(item.key, "crystal-item-769");
+            assert_eq!(item.quantity, 1);
+            assert!(item.unique_id > 0);
+            assert!(
+                filler_uids.insert(item.unique_id),
+                "each fixture item has a distinct UID"
+            );
+        }
+        let full_receiver = second.world_snapshot();
+        assert_eq!(full_receiver.free_bag_slots, 0);
+        assert_eq!(filler_uids.len(), usize::from(initial_free));
+        let canonical_items = |mut items: Vec<mir2_simulation::WorldItemSnapshot>| {
+            items.sort_by_key(|item| (format!("{:?}", item.container), item.slot));
+            items
+        };
+        let receiver_inventory = canonical_items(full_receiver.inventory_items);
+        let sender_inventory = canonical_items(first.world_snapshot().inventory_items);
+        for baseline in [&sender_inventory, &receiver_inventory] {
+            let ids = baseline
+                .iter()
+                .map(|item| item.unique_id)
+                .collect::<BTreeSet<_>>();
+            assert!(
+                ids.iter().all(|id| *id > 0),
+                "all baseline UIDs are assigned"
+            );
+            assert_eq!(ids.len(), baseline.len(), "baseline UIDs are distinct");
+        }
 
         let first_starting_gold = first.world_snapshot().gold;
         let second_starting_gold = second.world_snapshot().gold;
@@ -33052,6 +33294,12 @@ mod tests {
             .iter()
             .all(|packet| !matches!(packet, ServerPacket::GainedItem { .. })));
         assert_eq!(second.world_snapshot().gold, second_starting_gold);
+        assert_eq!(second.world_snapshot().free_bag_slots, 0);
+        assert_eq!(
+            canonical_items(second.world_snapshot().inventory_items),
+            receiver_inventory,
+            "rejected trade preserves every full-bag item, slot, count and UID"
+        );
 
         let rollback = first.handle_packet(ClientPacket::KeepAlive { time: 4 });
         assert!(rollback
@@ -33063,6 +33311,15 @@ mod tests {
         )));
         assert_eq!(first.world_snapshot().gold, first_starting_gold);
         assert!(has_inventory_key(&first, "red-potion"));
+        assert_eq!(
+            canonical_items(first.world_snapshot().inventory_items),
+            sender_inventory,
+            "rollback restores the exact sender items and their UIDs"
+        );
+        assert_eq!(
+            canonical_items(second.world_snapshot().inventory_items),
+            receiver_inventory
+        );
     }
 
     fn inventory_slot_for_key(session: &GatewaySession, key: &str) -> i32 {
