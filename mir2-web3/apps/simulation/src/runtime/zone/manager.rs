@@ -1,12 +1,12 @@
 use std::collections::BTreeMap;
 
+use super::online_identity::{OnlineIdentityBook, OnlinePresenceSnapshot};
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine as _;
 use bevy_tasks::{ComputeTaskPool, TaskPool};
 use mir2_protocol::{MirDirection, Point, Spell};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use super::online_identity::{OnlineIdentityBook, OnlinePresenceSnapshot};
 
 /// Below this many zones, parallel ticking's task overhead outweighs the gain,
 /// so `tick_all` runs inline. Measured break-even; see the multi-zone scaling
@@ -16,8 +16,8 @@ const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 3;
 
 use super::runtime::ZoneRuntime;
 use super::types::{
-    GroundDropClaimTicket, SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneNativeMonsterSnapshot,
-    ZoneMonsterKillAward, ZoneOutbound,
+    GroundDropClaimTicket, SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneMonsterKillAward,
+    ZoneNativeMonsterSnapshot, ZoneOutbound,
 };
 
 #[path = "npc_population.rs"]
@@ -48,90 +48,162 @@ impl ZoneManagerCheckpoint {
     fn canonical_root(&self) -> Result<String, String> {
         let mut canonical = self.clone();
         canonical.state_root.clear();
-        let bytes = serde_json::to_vec(&canonical).map_err(|e|format!("manager commitment: {e}"))?;
+        let bytes =
+            serde_json::to_vec(&canonical).map_err(|e| format!("manager commitment: {e}"))?;
         let mut hasher = Sha256::new();
         hasher.update(b"obelisk.mir2.zone-manager.v3\0");
         hasher.update(bytes);
-        Ok(hasher.finalize().iter().map(|byte|format!("{byte:02x}")).collect())
+        Ok(hasher
+            .finalize()
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect())
     }
 }
 
 impl ZoneManager {
     fn online_snapshot(&self) -> OnlinePresenceSnapshot {
-        self.zones.values().flat_map(|zone|zone.online_player_snapshot(&self.online_identities)).collect()
+        self.zones
+            .values()
+            .flat_map(|zone| zone.online_player_snapshot(&self.online_identities))
+            .collect()
     }
     fn refresh_online_presence(&mut self) {
         let snapshot = self.online_snapshot();
-        for zone in self.zones.values_mut() { zone.ingest_online_presence(snapshot.clone(), true); }
-    }
-    pub fn refresh_online_pets_at(&mut self,now_ms:u64)->Vec<ZoneOutbound> {
-        self.refresh_online_presence();
-        let mut recalls=Vec::new();
-        let mut out=Vec::new();
         for zone in self.zones.values_mut() {
-            let (next,packets)=zone.drain_online_pet_recalls(now_ms);
-            recalls.extend(next); out.extend(packets);
+            zone.ingest_online_presence(snapshot.clone(), true);
+        }
+    }
+    pub fn refresh_online_pets_at(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        self.refresh_online_presence();
+        let mut recalls = Vec::new();
+        let mut out = Vec::new();
+        for zone in self.zones.values_mut() {
+            let (next, packets) = zone.drain_online_pet_recalls(now_ms);
+            recalls.extend(next);
+            out.extend(packets);
         }
         for recall in recalls {
-            if let Some(destination)=self.zones.get_mut(recall.destination()) {
-                out.extend(destination.adopt_online_pet_recall(recall,now_ms));
+            if let Some(destination) = self.zones.get_mut(recall.destination()) {
+                out.extend(destination.adopt_online_pet_recall(recall, now_ms));
             }
         }
         out
     }
-    pub fn capture_player_saved_pets(&self,session:&SessionId,now_ms:u64)->super::ZoneSavedPetSnapshot {
-        let mut snapshot=super::ZoneSavedPetSnapshot::default();
-        if self.online_identities.owner(session).is_none(){return snapshot;}
-        for zone in self.zones.values(){snapshot.append_other_zone(zone.capture_player_saved_pets(session,now_ms));}
+    pub fn capture_player_saved_pets(
+        &self,
+        session: &SessionId,
+        now_ms: u64,
+    ) -> super::ZoneSavedPetSnapshot {
+        let mut snapshot = super::ZoneSavedPetSnapshot::default();
+        if self.online_identities.owner(session).is_none() {
+            return snapshot;
+        }
+        for zone in self.zones.values() {
+            snapshot.append_other_zone(zone.capture_player_saved_pets(session, now_ms));
+        }
         snapshot
     }
-    pub fn capture_player_pet_experience(&self,session:&SessionId,now_ms:u64)->Option<super::ZonePetExperienceAdmission> {
-        let current=self.session_zones.get(session)?;
-        let mut admission=self.zones.get(current)?.capture_player_pet_experience(session,now_ms)?;
-        for (key,zone) in &self.zones {
-            if key==current {continue;}
-            if let Some(other)=zone.capture_player_pet_experience(session,now_ms) {
-                if !admission.append_other_zone(other){return None;}
+    pub fn capture_player_pet_experience(
+        &self,
+        session: &SessionId,
+        now_ms: u64,
+    ) -> Option<super::ZonePetExperienceAdmission> {
+        let current = self.session_zones.get(session)?;
+        let mut admission = self
+            .zones
+            .get(current)?
+            .capture_player_pet_experience(session, now_ms)?;
+        for (key, zone) in &self.zones {
+            if key == current {
+                continue;
+            }
+            if let Some(other) = zone.capture_player_pet_experience(session, now_ms) {
+                if !admission.append_other_zone(other) {
+                    return None;
+                }
             }
         }
         Some(admission)
     }
-    pub fn restore_player_saved_pets(&mut self,session:&SessionId,snapshot:&super::ZoneSavedPetSnapshot,now_ms:u64)
-        ->Result<Vec<ZoneOutbound>,String> {
-        let current=self.session_zones.get(session).ok_or("pet restore requires active Zone")?;
-        self.zones.get_mut(current).ok_or("pet restore Zone missing")?.restore_player_saved_pets(session,snapshot,now_ms)
+    pub fn restore_player_saved_pets(
+        &mut self,
+        session: &SessionId,
+        snapshot: &super::ZoneSavedPetSnapshot,
+        now_ms: u64,
+    ) -> Result<Vec<ZoneOutbound>, String> {
+        let current = self
+            .session_zones
+            .get(session)
+            .ok_or("pet restore requires active Zone")?;
+        self.zones
+            .get_mut(current)
+            .ok_or("pet restore Zone missing")?
+            .restore_player_saved_pets(session, snapshot, now_ms)
     }
-    pub fn mirror_player_pet_earned_steps(&mut self,session:&SessionId,admission:&super::ZonePetExperienceAdmission,steps:&[u32],now_ms:u64)->Vec<ZoneOutbound> {
-        self.session_zones.get(session).and_then(|key|self.zones.get_mut(key))
-            .map(|zone|zone.mirror_earned_steps(session,admission,steps,now_ms)).unwrap_or_default()
+    pub fn mirror_player_pet_earned_steps(
+        &mut self,
+        session: &SessionId,
+        admission: &super::ZonePetExperienceAdmission,
+        steps: &[u32],
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        self.session_zones
+            .get(session)
+            .and_then(|key| self.zones.get_mut(key))
+            .map(|zone| zone.mirror_earned_steps(session, admission, steps, now_ms))
+            .unwrap_or_default()
     }
     /// Server-only proof: no packet handler admits or chooses its epoch.
     pub fn online_owner_proof_is_current(&self, encoded: &str) -> bool {
         self.online_identities.validates_encoded(encoded)
     }
-    pub fn online_owner_proof_matches_session(&self, encoded: &str, session_id: &SessionId) -> bool {
-        self.online_identities.validates_for_session(encoded, session_id)
+    pub fn online_owner_proof_matches_session(
+        &self,
+        encoded: &str,
+        session_id: &SessionId,
+    ) -> bool {
+        self.online_identities
+            .validates_for_session(encoded, session_id)
     }
     pub fn online_owner_proof_for_session(&self, session_id: &SessionId) -> Option<String> {
         Some(self.online_identities.owner(session_id)?.encoded())
     }
-    pub fn owner_health_cursor(&self, session_id: &SessionId) -> Option<super::ZoneOwnerHealthCursor> {
-        let cursor = self.zones.get(self.session_zones.get(session_id)?)?.owner_health_cursor(session_id)?;
-        self.online_owner_proof_matches_session(&cursor.online_owner, session_id).then_some(cursor)
+    pub fn owner_health_cursor(
+        &self,
+        session_id: &SessionId,
+    ) -> Option<super::ZoneOwnerHealthCursor> {
+        let cursor = self
+            .zones
+            .get(self.session_zones.get(session_id)?)?
+            .owner_health_cursor(session_id)?;
+        self.online_owner_proof_matches_session(&cursor.online_owner, session_id)
+            .then_some(cursor)
     }
 
-    pub fn commit_owner_vitals(&mut self, session_id: &SessionId,
-        hp: i32, max_hp: i32, mp: i32, dead: bool) -> Vec<ZoneOutbound> {
+    pub fn commit_owner_vitals(
+        &mut self,
+        session_id: &SessionId,
+        hp: i32,
+        max_hp: i32,
+        mp: i32,
+        dead: bool,
+    ) -> Vec<ZoneOutbound> {
         self.refresh_online_presence();
-        let out = self.session_zones.get(session_id).and_then(|key| self.zones.get_mut(key))
-            .map(|zone| zone.commit_owner_vitals(session_id, hp, max_hp, mp, dead)).unwrap_or_default();
+        let out = self
+            .session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get_mut(key))
+            .map(|zone| zone.commit_owner_vitals(session_id, hp, max_hp, mp, dead))
+            .unwrap_or_default();
         self.refresh_online_presence();
         out
     }
 
     pub fn owner_health_change_is_current(&self, change: &super::ZoneOwnerHealthChange) -> bool {
-        self.owner_health_cursor(&change.cursor.session_id).is_some_and(|current| {
-            current.online_owner == change.cursor.online_owner
+        self.owner_health_cursor(&change.cursor.session_id)
+            .is_some_and(|current| {
+                current.online_owner == change.cursor.online_owner
                 && current.object_id == change.cursor.object_id
                 && current.life_generation == change.cursor.life_generation
                 // Earlier live pool operations remain valid in this life
@@ -144,61 +216,138 @@ impl ZoneManager {
                 // and a historical dead receipt cannot belong to a live life.
                 && (change.hp > 0 || change.cursor.dead)
                 && (!change.cursor.dead || current.dead)
-        })
+            })
     }
     /// An online Node alone cannot choose an award's source map or payload.
     /// Only the named source Zone's retained issuance can authorize delivery.
-    pub fn issued_monster_award_is_current(&self, source: &ZoneKey, session_id: &SessionId,
-        encoded: &str, award: &ZoneMonsterKillAward) -> bool {
+    pub fn issued_monster_award_is_current(
+        &self,
+        source: &ZoneKey,
+        session_id: &SessionId,
+        encoded: &str,
+        award: &ZoneMonsterKillAward,
+    ) -> bool {
         self.online_owner_proof_matches_session(encoded, session_id)
-            && self.zones.get(source).is_some_and(|zone|zone.issued_monster_award_matches(session_id, encoded, award))
+            && self
+                .zones
+                .get(source)
+                .is_some_and(|zone| zone.issued_monster_award_matches(session_id, encoded, award))
     }
-    pub fn acknowledge_issued_monster_award(&mut self, source: &ZoneKey, session_id: &SessionId,
-        award: &ZoneMonsterKillAward) {
-        if let Some(zone) = self.zones.get_mut(source) { zone.acknowledge_issued_monster_award(session_id, award); }
+    pub fn acknowledge_issued_monster_award(
+        &mut self,
+        source: &ZoneKey,
+        session_id: &SessionId,
+        award: &ZoneMonsterKillAward,
+    ) {
+        if let Some(zone) = self.zones.get_mut(source) {
+            zone.acknowledge_issued_monster_award(session_id, award);
+        }
     }
-    pub fn ground_drop_snapshot_for_key(&self, key: &ZoneKey, object_id: u32) -> Option<crate::config::GroundDropSnapshot> {
+    pub fn ground_drop_snapshot_for_key(
+        &self,
+        key: &ZoneKey,
+        object_id: u32,
+    ) -> Option<crate::config::GroundDropSnapshot> {
         self.zones.get(key)?.active_ground_drop_snapshot(object_id)
     }
-    pub fn ground_drop_absolute_clocks_for_key(&self, key: &ZoneKey, object_id: u32) -> Option<(Option<u64>, Option<u64>)> {
+    pub fn ground_drop_absolute_clocks_for_key(
+        &self,
+        key: &ZoneKey,
+        object_id: u32,
+    ) -> Option<(Option<u64>, Option<u64>)> {
         self.zones.get(key)?.ground_drop_absolute_clocks(object_id)
     }
     /// Some(None) means original native protection was released. None means
     /// this is not a source-owned native monster drop and has a different policy.
-    pub fn native_ground_drop_deadline_for_key(&self, key: &ZoneKey, object_id: u32) -> Option<Option<u64>> {
+    pub fn native_ground_drop_deadline_for_key(
+        &self,
+        key: &ZoneKey,
+        object_id: u32,
+    ) -> Option<Option<u64>> {
         self.zones.get(key)?.native_ground_drop_deadline(object_id)
     }
-    pub fn forget_detached_ground_custody(&mut self, key: &ZoneKey, ticket: &GroundDropClaimTicket) -> bool {
-        self.zones.get_mut(key).is_some_and(|zone|zone.forget_detached_ground_custody(ticket))
+    pub fn forget_detached_ground_custody(
+        &mut self,
+        key: &ZoneKey,
+        ticket: &GroundDropClaimTicket,
+    ) -> bool {
+        self.zones
+            .get_mut(key)
+            .is_some_and(|zone| zone.forget_detached_ground_custody(ticket))
     }
     pub fn conquest_projection_ready(&self, session_id: &SessionId) -> bool {
-        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
             .is_some_and(|zone| zone.conquest_projection_ready())
     }
     pub fn conquest_record_revision(&self, session_id: &SessionId) -> Option<u64> {
-        self.session_zones.get(session_id).and_then(|key| self.zones.get(key)).and_then(|zone| zone.conquest_record_revision())
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .and_then(|zone| zone.conquest_record_revision())
     }
-    pub fn conquest_membership_matches(&self, session_id: &SessionId, guild_id: Option<&str>) -> bool {
-        self.session_zones.get(session_id).and_then(|key| self.zones.get(key)).is_some_and(|zone| zone.conquest_membership_matches(session_id,guild_id))
+    pub fn conquest_membership_matches(
+        &self,
+        session_id: &SessionId,
+        guild_id: Option<&str>,
+    ) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| zone.conquest_membership_matches(session_id, guild_id))
     }
-    pub fn conquest_player_kill_is_lawful(&self, session_id: &SessionId, attacker_object_id: u32, target_object_id: u32, now_ms: u64) -> bool {
-        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
-            .is_some_and(|zone| zone.conquest_player_kill_is_lawful(session_id, attacker_object_id, target_object_id, now_ms))
+    pub fn conquest_player_kill_is_lawful(
+        &self,
+        session_id: &SessionId,
+        attacker_object_id: u32,
+        target_object_id: u32,
+        now_ms: u64,
+    ) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| {
+                zone.conquest_player_kill_is_lawful(
+                    session_id,
+                    attacker_object_id,
+                    target_object_id,
+                    now_ms,
+                )
+            })
     }
-    pub fn conquest_player_samples(&self)->Vec<super::ZoneConquestPlayerSample> {
-        self.zones.values().flat_map(|zone|zone.conquest_player_samples()).collect()
+    pub fn conquest_player_samples(&self) -> Vec<super::ZoneConquestPlayerSample> {
+        self.zones
+            .values()
+            .flat_map(|zone| zone.conquest_player_samples())
+            .collect()
     }
-    pub fn conquest_defense_samples(&self)->Vec<super::ZoneConquestDefenseSample> {
-        self.zones.values().flat_map(|zone|zone.conquest_defense_samples()).collect()
+    pub fn conquest_defense_samples(&self) -> Vec<super::ZoneConquestDefenseSample> {
+        self.zones
+            .values()
+            .flat_map(|zone| zone.conquest_defense_samples())
+            .collect()
     }
     pub fn apply_conquest_projection(
-        &mut self, policy:&crate::conquest::ConquestPolicy, record:&crate::conquest::SharedConquestRecord,
-        memberships:&[super::ZoneConquestMembership],epoch_now_ms:u64,zone_now_ms:u64,
-    )->Result<Vec<ZoneOutbound>,String> {
-        let mut outbounds=Vec::new();
-        for (key,zone) in &mut self.zones {
-            if key.shard_id!="primary" || key.channel_id!=0 || key.instance_id!="main" {continue;}
-            outbounds.extend(zone.apply_conquest_projection(policy,record,memberships,epoch_now_ms,zone_now_ms)?);
+        &mut self,
+        policy: &crate::conquest::ConquestPolicy,
+        record: &crate::conquest::SharedConquestRecord,
+        memberships: &[super::ZoneConquestMembership],
+        epoch_now_ms: u64,
+        zone_now_ms: u64,
+    ) -> Result<Vec<ZoneOutbound>, String> {
+        let mut outbounds = Vec::new();
+        for (key, zone) in &mut self.zones {
+            if key.shard_id != "primary" || key.channel_id != 0 || key.instance_id != "main" {
+                continue;
+            }
+            outbounds.extend(zone.apply_conquest_projection(
+                policy,
+                record,
+                memberships,
+                epoch_now_ms,
+                zone_now_ms,
+            )?);
         }
         Ok(outbounds)
     }
@@ -261,33 +410,59 @@ impl ZoneManager {
             .intelligent_creature_object_id(session_id)
     }
 
-    pub fn update_experience_profile(&mut self, session_id: &SessionId,
-        profile: Option<super::ZoneExperienceProfile>) -> bool {
-        let updated = self.session_zones.get(session_id).and_then(|key| self.zones.get_mut(key))
+    pub fn update_experience_profile(
+        &mut self,
+        session_id: &SessionId,
+        profile: Option<super::ZoneExperienceProfile>,
+    ) -> bool {
+        let updated = self
+            .session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get_mut(key))
             .is_some_and(|zone| zone.update_experience_profile(session_id, profile));
-        if updated { self.refresh_online_presence(); }
+        if updated {
+            self.refresh_online_presence();
+        }
         updated
     }
 
-    pub fn player_experience_profile(&self, session_id: &SessionId) -> Option<super::ZoneExperienceProfile> {
-        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
+    pub fn player_experience_profile(
+        &self,
+        session_id: &SessionId,
+    ) -> Option<super::ZoneExperienceProfile> {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
             .and_then(|zone| zone.player_experience_profile(session_id))
     }
 
-    pub fn current_social_experience_profile(&self, session_id: &SessionId)
-        -> Result<Option<super::ZoneExperienceProfile>, String> {
-        match self.session_zones.get(session_id).and_then(|key|self.zones.get(key)) {
+    pub fn current_social_experience_profile(
+        &self,
+        session_id: &SessionId,
+    ) -> Result<Option<super::ZoneExperienceProfile>, String> {
+        match self
+            .session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+        {
             Some(zone) => zone.current_social_experience_profile(session_id),
             None => Ok(None),
         }
     }
 
-    pub fn issued_owned_pet_kill_is_current(&self, receipt: &super::ZoneOwnedPetPlayerKillReceipt) -> bool {
-        self.zones.get(&receipt.zone_key).is_some_and(|zone| zone.issued_owned_pet_kill_is_current(receipt))
+    pub fn issued_owned_pet_kill_is_current(
+        &self,
+        receipt: &super::ZoneOwnedPetPlayerKillReceipt,
+    ) -> bool {
+        self.zones
+            .get(&receipt.zone_key)
+            .is_some_and(|zone| zone.issued_owned_pet_kill_is_current(receipt))
     }
 
     pub fn acknowledge_owned_pet_kill(&mut self, receipt: &super::ZoneOwnedPetPlayerKillReceipt) {
-        if let Some(zone) = self.zones.get_mut(&receipt.zone_key) { zone.acknowledge_owned_pet_kill(receipt); }
+        if let Some(zone) = self.zones.get_mut(&receipt.zone_key) {
+            zone.acknowledge_owned_pet_kill(receipt);
+        }
     }
     pub fn intelligent_creature_intent_is_current(
         &self,
@@ -384,7 +559,7 @@ impl ZoneManager {
         };
         checkpoint.state_root = checkpoint.canonical_root()?;
         serde_json::to_vec(&checkpoint)
-        .map_err(|error| format!("failed to encode zone manager checkpoint: {error}"))
+            .map_err(|error| format!("failed to encode zone manager checkpoint: {error}"))
     }
 
     pub fn restore_checkpoint(bytes: &[u8]) -> Result<Self, String> {
@@ -410,7 +585,9 @@ impl ZoneManager {
                 checkpoint.version, ZONE_MANAGER_CHECKPOINT_VERSION
             ));
         }
-        if checkpoint.version == ZONE_MANAGER_CHECKPOINT_VERSION && checkpoint.state_root != checkpoint.canonical_root()? {
+        if checkpoint.version == ZONE_MANAGER_CHECKPOINT_VERSION
+            && checkpoint.state_root != checkpoint.canonical_root()?
+        {
             return Err("zone manager checkpoint state root mismatch".into());
         }
         let mut zones = BTreeMap::new();
@@ -644,9 +821,14 @@ impl ZoneManager {
             let mut transferred_owned_human_poisons = None;
             let mut transferred_purification = None;
             let mut transferred_five_class = None;
-            let online_map_transfer = previous_key.as_ref().is_some_and(|previous| previous != &key);
-            let retain_online = online_map_transfer && self.online_identities.owner(&session_id)
-                .is_some_and(|owner|owner.matches_join(&join));
+            let online_map_transfer = previous_key
+                .as_ref()
+                .is_some_and(|previous| previous != &key);
+            let retain_online = online_map_transfer
+                && self
+                    .online_identities
+                    .owner(&session_id)
+                    .is_some_and(|owner| owner.matches_join(&join));
             if !retain_online {
                 self.online_identities.revoke(&session_id);
                 for zone in self.zones.values_mut() {
@@ -654,27 +836,41 @@ impl ZoneManager {
                     zone.revoke_online_session(&session_id);
                 }
             }
-            if self.online_identities.admit(&join, retain_online).is_none() { return Vec::new(); }
+            if self.online_identities.admit(&join, retain_online).is_none() {
+                return Vec::new();
+            }
             // Retain the same trusted snapshot across the atomic map detach /
             // attach gap. There is no global despawn in that interval.
             let snapshot = self.online_snapshot();
             if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
                 if retain_online {
-                    if let Some(zone)=self.zones.get_mut(&previous_key) { zone.prepare_player_online_pet_transfer(&session_id); }
-                    transferred_five_class = self.zones.get_mut(&previous_key)
+                    if let Some(zone) = self.zones.get_mut(&previous_key) {
+                        zone.prepare_player_online_pet_transfer(&session_id);
+                    }
+                    transferred_five_class = self
+                        .zones
+                        .get_mut(&previous_key)
                         .and_then(|zone| zone.take_online_five_class_state(&session_id));
                     transferred_purification = self
                         .zones
                         .get_mut(&previous_key)
                         .and_then(|zone| zone.take_online_purification_transfer(&session_id));
-                    transferred_owned_human_poisons = self.zones.get(&previous_key)
+                    transferred_owned_human_poisons = self
+                        .zones
+                        .get(&previous_key)
                         .map(|zone| zone.capture_player_owned_human_poisons(&session_id));
-                    transferred_owned_pet_clock = self.zones.get(&previous_key)
+                    transferred_owned_pet_clock = self
+                        .zones
+                        .get(&previous_key)
                         .and_then(|zone| zone.player_owned_pet_clock(&session_id));
                 }
-                transferred_poison_clock = self.zones.get(&previous_key)
+                transferred_poison_clock = self
+                    .zones
+                    .get(&previous_key)
                     .and_then(|zone| zone.player_finite_control_poison_clock(&session_id));
-                transferred_action_clock = self.zones.get(&previous_key)
+                transferred_action_clock = self
+                    .zones
+                    .get(&previous_key)
                     .and_then(|zone| zone.player_action_clock(&session_id));
                 transferred_clock = self
                     .zones
@@ -682,7 +878,9 @@ impl ZoneManager {
                     .and_then(|zone| zone.player_vital_clock(&session_id));
                 // Map.Remove is not global Despawn. Preserve the Node book.
                 if let Some(zone) = self.zones.get_mut(&previous_key) {
-                    outbounds.extend(zone.handle(ZoneCommand::Leave { session_id: session_id.clone() }));
+                    outbounds.extend(zone.handle(ZoneCommand::Leave {
+                        session_id: session_id.clone(),
+                    }));
                 }
             }
             self.session_zones.insert(session_id.clone(), key.clone());
@@ -734,13 +932,15 @@ impl ZoneManager {
             ZoneCommand::Leave { session_id } => {
                 self.session_zones.remove(session_id);
                 self.online_identities.revoke(session_id);
-                let mut pet_outbounds=Vec::new();
+                let mut pet_outbounds = Vec::new();
                 for zone in self.zones.values_mut() {
                     pet_outbounds.extend(zone.remove_player_detached_pets(session_id));
                     zone.revoke_online_session(session_id);
                 }
                 self.refresh_online_presence();
-                if let Some(zone)=self.zones.get_mut(&key){pet_outbounds.extend(zone.handle(command));}
+                if let Some(zone) = self.zones.get_mut(&key) {
+                    pet_outbounds.extend(zone.handle(command));
+                }
                 self.refresh_online_presence();
                 return pet_outbounds;
             }
@@ -767,10 +967,11 @@ impl ZoneManager {
     /// threshold (the common case, including today's single "primary" zone) it
     /// ticks inline to avoid task overhead.
     pub fn tick_all(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
-        let mut pet_outbounds=self.refresh_online_pets_at(now_ms);
+        let mut pet_outbounds = self.refresh_online_pets_at(now_ms);
         let zone_count = self.zones.len();
         if zone_count < PARALLEL_TICK_MIN_ZONES {
-            pet_outbounds.extend(self.tick_all_sequential(now_ms)); return pet_outbounds;
+            pet_outbounds.extend(self.tick_all_sequential(now_ms));
+            return pet_outbounds;
         }
 
         let pool = ComputeTaskPool::get_or_init(TaskPool::default);
@@ -791,27 +992,40 @@ impl ZoneManager {
                 });
             }
         });
-        pet_outbounds.extend(per_chunk.into_iter().flatten());pet_outbounds
+        pet_outbounds.extend(per_chunk.into_iter().flatten());
+        pet_outbounds
     }
 
     pub fn zone(&self, key: &ZoneKey) -> Option<&ZoneRuntime> {
         self.zones.get(key)
     }
 
-    pub fn prepare_mining_swing(&self,session:&SessionId,direction:MirDirection,
-        tool:&super::ZoneMiningTool,now_ms:u64)->Option<super::ZoneMiningSwing> {
-        let key=self.session_zones.get(session)?;
-        self.zones.get(key)?.prepare_mining_swing(session,direction,tool,now_ms)
+    pub fn prepare_mining_swing(
+        &self,
+        session: &SessionId,
+        direction: MirDirection,
+        tool: &super::ZoneMiningTool,
+        now_ms: u64,
+    ) -> Option<super::ZoneMiningSwing> {
+        let key = self.session_zones.get(session)?;
+        self.zones
+            .get(key)?
+            .prepare_mining_swing(session, direction, tool, now_ms)
     }
 
-    pub fn commit_mining_swing(&mut self,session:&SessionId,swing:&super::ZoneMiningSwing)
-        ->Option<Vec<ZoneOutbound>> {
-        let key=self.session_zones.get(session)?.clone();
+    pub fn commit_mining_swing(
+        &mut self,
+        session: &SessionId,
+        swing: &super::ZoneMiningSwing,
+    ) -> Option<Vec<ZoneOutbound>> {
+        let key = self.session_zones.get(session)?.clone();
         self.zones.get_mut(&key)?.commit_mining_swing(swing)
     }
 
     pub fn player_flaming_sword_armed(&self, session_id: &SessionId, now_ms: u64) -> bool {
-        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
             .is_some_and(|zone| zone.player_flaming_sword_armed(session_id, now_ms))
     }
 
@@ -861,11 +1075,14 @@ impl ZoneManager {
     /// used to force single-threaded execution (constrained environments) and as
     /// the benchmark baseline that proves the parallel path's speedup.
     pub fn tick_all_sequential(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
-        let mut out=self.refresh_online_pets_at(now_ms);
-        out.extend(self.zones
-            .values_mut()
-            .flat_map(|zone| zone.tick(now_ms))
-            .collect::<Vec<_>>());out
+        let mut out = self.refresh_online_pets_at(now_ms);
+        out.extend(
+            self.zones
+                .values_mut()
+                .flat_map(|zone| zone.tick(now_ms))
+                .collect::<Vec<_>>(),
+        );
+        out
     }
 
     pub fn player_transform(&self, session_id: &SessionId) -> Option<(Point, MirDirection)> {
@@ -888,19 +1105,36 @@ impl ZoneManager {
         self.session_zones
             .get(session_id)
             .and_then(|key| self.zones.get(key))
-            .is_some_and(|zone| zone.melee_primary_target_present(session_id, direction, materialized))
+            .is_some_and(|zone| {
+                zone.melee_primary_target_present(session_id, direction, materialized)
+            })
     }
 
-    pub fn player_can_attack_owned_pet(&self, session_id: &SessionId, pet: u32, now_ms: u64) -> bool {
-        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
+    pub fn player_can_attack_owned_pet(
+        &self,
+        session_id: &SessionId,
+        pet: u32,
+        now_ms: u64,
+    ) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
             .is_some_and(|zone| zone.player_can_attack_owned_pet(session_id, pet, now_ms))
     }
 
-    pub fn melee_primary_target_present_at(&self, session_id: &SessionId,
-        direction: MirDirection, materialized: Option<&super::types::ZoneMonsterSpawn>, now_ms: u64,
+    pub fn melee_primary_target_present_at(
+        &self,
+        session_id: &SessionId,
+        direction: MirDirection,
+        materialized: Option<&super::types::ZoneMonsterSpawn>,
+        now_ms: u64,
     ) -> bool {
-        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
-            .is_some_and(|zone| zone.melee_primary_target_present_at(session_id, direction, materialized, now_ms))
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| {
+                zone.melee_primary_target_present_at(session_id, direction, materialized, now_ms)
+            })
     }
 
     pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {

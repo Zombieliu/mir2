@@ -32,11 +32,7 @@ fn ordinary_zone(map: &str) -> ZoneRuntime {
 
 fn saved_pet_manager() -> ZoneManager {
     let mut config = mir2_simulation::ZoneNpcTeleportConfig::disabled(0);
-    for (index, name, no_pets) in [
-        (1, MAP_A, false),
-        (2, MAP_B, false),
-        (3, MAP_C, true),
-    ] {
+    for (index, name, no_pets) in [(1, MAP_A, false), (2, MAP_B, false), (3, MAP_C, true)] {
         config.maps.insert(
             name.into(),
             mir2_simulation::ZoneMapMetadata {
@@ -81,7 +77,9 @@ fn saved_pet_join(name: &str, id: u32, map: &str, position: Point, mode: u8) -> 
 }
 
 fn manager_summon(manager: &mut ZoneManager, spell: Spell, now: u64) -> u32 {
-    let map = manager.zone_key_for_session(&SessionId::new("owner")).unwrap();
+    let map = manager
+        .zone_key_for_session(&SessionId::new("owner"))
+        .unwrap();
     let target = map_point(&map.map_file_name, 11, 20);
     manager.handle(ZoneCommand::PlayerCastMagic {
         session_id: SessionId::new("owner"),
@@ -203,13 +201,7 @@ fn shared_owned_pet_manager_no_pets_freezes_then_forces_recall_and_true_logout_c
         manager.join(saved_pet_join("owner", 101, MAP_A, p(10, 20), mode));
         let pet = manager_summon(&mut manager, Spell::SummonSkeleton, 10);
         let position = manager.native_monster_snapshots(&a)[0].position.clone();
-        manager.join(saved_pet_join(
-            "owner",
-            101,
-            MAP_C,
-            p(40, 50),
-            mode,
-        ));
+        manager.join(saved_pet_join("owner", 101, MAP_C, p(40, 50), mode));
         let frozen = manager.refresh_online_pets_at(620);
         assert!(
             packets(&frozen, "owner")
@@ -283,8 +275,8 @@ fn shared_owned_pet_manager_no_pets_freezes_then_forces_recall_and_true_logout_c
 }
 
 #[test]
-fn shared_owned_pet_manager_earned_steps_keep_other_map_pets_and_only_mirror_committed_current_lives()
- {
+fn shared_owned_pet_manager_earned_steps_keep_other_map_pets_and_only_mirror_committed_current_lives(
+) {
     let sid = SessionId::new("owner");
     let a = ZoneKey::for_map(MAP_A);
     let b = ZoneKey::for_map(MAP_B);
@@ -366,6 +358,7 @@ fn shared_owned_pet_manager_earned_steps_keep_other_map_pets_and_only_mirror_com
     );
 }
 
+#[cfg(feature = "test-support")]
 #[test]
 fn shared_owned_pet_actual_personal_gain_exp_and_source_save_are_atomic_and_mirror_once() {
     use mir2_protocol::ClientPacket;
@@ -398,23 +391,19 @@ fn shared_owned_pet_actual_personal_gain_exp_and_source_save_are_atomic_and_mirr
     }
     let mut personal = SimulationSession::new(config.clone());
     personal.enable_shared_guild_authority();
-    assert!(
-        personal
-            .handle_packet(ClientPacket::Login {
-                account_id: "demo".into(),
-                password: "demo".into()
-            })
-            .iter()
-            .any(|p| matches!(p, ServerPacket::LoginSuccess { .. }))
-    );
-    assert!(
-        personal
-            .handle_packet(ClientPacket::StartGame {
-                character_index: config.default_character.index
-            })
-            .iter()
-            .any(|p| matches!(p, ServerPacket::StartGame { result: 4, .. }))
-    );
+    assert!(personal
+        .handle_packet(ClientPacket::Login {
+            account_id: "demo".into(),
+            password: "demo".into()
+        })
+        .iter()
+        .any(|p| matches!(p, ServerPacket::LoginSuccess { .. })));
+    assert!(personal
+        .handle_packet(ClientPacket::StartGame {
+            character_index: config.default_character.index
+        })
+        .iter()
+        .any(|p| matches!(p, ServerPacket::StartGame { result: 4, .. })));
     let sid = SessionId::new("owner");
     let mut manager = saved_pet_manager();
     let mut admitted = personal.active_zone_join_snapshot("owner").unwrap();
@@ -502,11 +491,9 @@ fn shared_owned_pet_actual_personal_gain_exp_and_source_save_are_atomic_and_mirr
     )
     .unwrap();
     config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist);
-    assert!(
-        personal
-            .try_commit_shared_monster_kill_award_with_receipt("actual-pet-kill-1", &award)
-            .is_err()
-    );
+    assert!(personal
+        .try_commit_shared_monster_kill_award_with_receipt("actual-pet-kill-1", &award)
+        .is_err());
     assert_eq!(
         personal.active_character_checkpoint().unwrap().experience,
         before.experience
@@ -564,11 +551,9 @@ fn shared_owned_pet_actual_personal_gain_exp_and_source_save_are_atomic_and_mirr
         .unwrap();
     assert!(replay.committed && duplicate && replay.packets.is_empty());
     assert!(personal.take_shared_pet_experience_commit().is_none());
-    assert!(
-        manager
-            .mirror_player_pet_earned_steps(&sid, &live, &recorded, 613)
-            .is_empty()
-    );
+    assert!(manager
+        .mirror_player_pet_earned_steps(&sid, &live, &recorded, 613)
+        .is_empty());
     assert_eq!(manager.capture_player_saved_pets(&sid, 613), desired);
     let durable_json = serde_json::to_value(&desired).unwrap();
     let mut fields = durable_json["pets"][0]
@@ -664,7 +649,9 @@ fn shared_owned_toad_real_summon_launches_source_mac_projectile_and_rechecks_fli
             .find(|m| m.object_id == pet.object_id)
             .unwrap();
         let target = p(12, 20);
-        let distance = (pet.position.x - target.x).abs().max((pet.position.y - target.y).abs()) as u64;
+        let distance = (pet.position.x - target.x)
+            .abs()
+            .max((pet.position.y - target.y).abs()) as u64;
         assert!((1..=12).contains(&distance));
         let due = started + 500 + distance * 50;
         assert_eq!(hp(&z, "victim"), 1000, "no damage on range animation");
@@ -718,11 +705,9 @@ fn shared_owned_toad_real_summon_launches_source_mac_projectile_and_rechecks_fli
                 hp(&z, "victim") < 1000,
                 "MAC source projectile ignores the prepared AC"
             );
-            assert!(
-                packets(&impact, "victim").iter().any(
-                    |p| matches!(p,ServerPacket::Struck{info}if info.attacker_id==pet.object_id)
-                )
-            );
+            assert!(packets(&impact, "victim")
+                .iter()
+                .any(|p| matches!(p,ServerPacket::Struck{info}if info.attacker_id==pet.object_id)));
             assert!(packets(&z.tick(started+2999),"owner").iter().all(|p|!matches!(p,ServerPacket::ObjectRangeAttack{info}if info.object_id==pet.object_id)));
             assert_eq!(
                 z.native_monster_snapshots()
@@ -981,12 +966,10 @@ fn shared_human_owned_pet_real_melee_obeys_source_mode_group_guild_enemy_and_saf
             ZoneOutbound::MonsterKillAward { .. } | ZoneOutbound::OwnedPetPlayerKill { .. }
         )));
         if legal {
-            assert!(
-                packets(&impact, "victim")
-                    .iter()
-                    .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
-                if info.object_id == pet && info.attacker_id == 102))
-            );
+            assert!(packets(&impact, "victim")
+                .iter()
+                .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
+                if info.object_id == pet && info.attacker_id == 102)));
             assert_eq!(packets(&impact, "victim").iter().any(|p| matches!(p,
                 ServerPacket::ColourChanged { name_colour_argb } if *name_colour_argb == 0xFF8B4513_u32 as i32)), pk < 200,
                 "the early HumanObject pet hit branch also browns EnemyGuild aggression");
@@ -1053,12 +1036,10 @@ fn shared_human_owned_pet_real_spell_and_range_hits_use_typed_damage() {
         };
         assert!(pet_hp(&z, pet) < before, "ranged={ranged}");
         assert_eq!(hp(&z, "owner"), 1000);
-        assert!(
-            packets(&impact, "victim")
-                .iter()
-                .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
-            if info.object_id == pet && info.attacker_id == 102))
-        );
+        assert!(packets(&impact, "victim")
+            .iter()
+            .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
+            if info.object_id == pet && info.attacker_id == 102)));
     }
 }
 
@@ -1124,11 +1105,9 @@ fn shared_human_owned_pet_delayed_hit_rechecks_friends_safe_and_online_life() {
         }
         let impact = z.tick(1000);
         assert_eq!(pet_hp(&z, pet), before, "impact change={change}");
-        assert!(
-            !packets(&impact, "victim")
-                .iter()
-                .any(|p| matches!(p, ServerPacket::ObjectStruck { info } if info.object_id == pet))
-        );
+        assert!(!packets(&impact, "victim")
+            .iter()
+            .any(|p| matches!(p, ServerPacket::ObjectStruck { info } if info.object_id == pet)));
     }
 }
 
@@ -1150,11 +1129,9 @@ fn shared_human_owned_pet_brown_starts_on_real_damage_and_expires_at_exact_deadl
     assert_eq!(packets(&started, "owner").iter().filter(|p| matches!(p,
         ServerPacket::ObjectColourChanged { object_id: 102, name_colour_argb } if *name_colour_argb == brown)).count(), 1);
     let early = z.tick(60_599);
-    assert!(
-        !packets(&early, "victim")
-            .iter()
-            .any(|p| matches!(p, ServerPacket::ColourChanged { .. }))
-    );
+    assert!(!packets(&early, "victim")
+        .iter()
+        .any(|p| matches!(p, ServerPacket::ColourChanged { .. })));
     let expired = z.tick(60_600);
     assert_eq!(
         packets(&expired, "victim")
@@ -1181,11 +1158,9 @@ fn shared_human_owned_pet_brown_starts_on_real_damage_and_expires_at_exact_deadl
             .count(),
         1
     );
-    assert!(
-        !packets(&z.tick(60_600), "victim")
-            .iter()
-            .any(|p| matches!(p, ServerPacket::ColourChanged { .. }))
-    );
+    assert!(!packets(&z.tick(60_600), "victim")
+        .iter()
+        .any(|p| matches!(p, ServerPacket::ColourChanged { .. })));
 }
 
 #[test]
@@ -1377,12 +1352,10 @@ fn shared_human_ground_one_shot_keeps_future_action_and_hits_ordinary_wild_once(
         now_ms: 600,
     });
     let early = z.tick(1099);
-    assert!(
-        !packets(&early, "victim")
-            .iter()
-            .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
-        if info.object_id == 9111 && info.attacker_id == 102))
-    );
+    assert!(!packets(&early, "victim")
+        .iter()
+        .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
+        if info.object_id == 9111 && info.attacker_id == 102)));
     assert_eq!(
         z.native_monster_snapshots()
             .iter()
@@ -1392,12 +1365,10 @@ fn shared_human_ground_one_shot_keeps_future_action_and_hits_ordinary_wild_once(
         5000
     );
     let impact = z.tick(1100);
-    assert!(
-        packets(&impact, "victim")
-            .iter()
-            .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
-        if info.object_id == 9111 && info.attacker_id == 102))
-    );
+    assert!(packets(&impact, "victim")
+        .iter()
+        .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
+        if info.object_id == 9111 && info.attacker_id == 102)));
     assert!(
         z.native_monster_snapshots()
             .iter()
@@ -1407,12 +1378,10 @@ fn shared_human_ground_one_shot_keeps_future_action_and_hits_ordinary_wild_once(
             < 5000
     );
     let duplicate = z.tick(1101);
-    assert!(
-        !packets(&duplicate, "victim")
-            .iter()
-            .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
-        if info.object_id == 9111 && info.attacker_id == 102))
-    );
+    assert!(!packets(&duplicate, "victim")
+        .iter()
+        .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
+        if info.object_id == 9111 && info.attacker_id == 102)));
 }
 
 #[test]
@@ -1438,35 +1407,27 @@ fn shared_human_owned_pet_fire_bounce_first_leg_and_wild_to_pet_chain_keep_cast_
         });
         let before = pet_hp(&z, pet);
         let early = z.tick(1149);
-        assert!(
-            !packets(&early, "victim")
-                .iter()
-                .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
-            if info.object_id == pet && info.attacker_id == 102))
-        );
+        assert!(!packets(&early, "victim")
+            .iter()
+            .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
+            if info.object_id == pet && info.attacker_id == 102)));
         let first = z.tick(1150);
         if first_owned {
-            assert!(
-                packets(&first, "victim")
-                    .iter()
-                    .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
-                if info.object_id == pet && info.attacker_id == 102))
-            );
+            assert!(packets(&first, "victim")
+                .iter()
+                .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
+                if info.object_id == pet && info.attacker_id == 102)));
             assert!(pet_hp(&z, pet) < before);
         } else {
-            assert!(
-                packets(&first, "victim")
-                    .iter()
-                    .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
-                if info.object_id == 9111 && info.attacker_id == 102))
-            );
+            assert!(packets(&first, "victim")
+                .iter()
+                .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
+                if info.object_id == 9111 && info.attacker_id == 102)));
             let second = z.tick(1200);
-            assert!(
-                packets(&second, "victim")
-                    .iter()
-                    .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
-                if info.object_id == pet && info.attacker_id == 102))
-            );
+            assert!(packets(&second, "victim")
+                .iter()
+                .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
+                if info.object_id == pet && info.attacker_id == 102)));
             assert!(pet_hp(&z, pet) < before);
         }
     }
@@ -1508,12 +1469,10 @@ fn shared_human_owned_pet_fire_bounce_old_wild_leg_cannot_mint_rejoined_source_a
     let first = z.tick(1150);
     let second = z.tick(1200);
     for out in [&first, &second] {
-        assert!(
-            !packets(out, "victim")
-                .iter()
-                .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
-            if (info.object_id == pet || info.object_id == 9111) && info.attacker_id == 102))
-        );
+        assert!(!packets(out, "victim")
+            .iter()
+            .any(|p| matches!(p, ServerPacket::ObjectStruck { info }
+            if (info.object_id == pet || info.object_id == 9111) && info.attacker_id == 102)));
     }
     assert_eq!(
         z.native_monster_snapshots()
@@ -1641,27 +1600,21 @@ fn shared_owned_pet_protects_owner_with_delayed_real_damage_and_pet_struck_id() 
     let (mut z, pet) = fixture(0);
     attack(&mut z, "victim", 101, MirDirection::Up, 600);
     let exact = z.tick(2510);
-    assert!(
-        !packets(&exact, "victim")
-            .iter()
-            .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet))
-    );
+    assert!(!packets(&exact, "victim")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet)));
     let launched = z.tick(2511);
-    assert!(
-        packets(&launched, "victim")
-            .iter()
-            .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet))
-    );
+    assert!(packets(&launched, "victim")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet)));
     assert_eq!(hp(&z, "victim"), 1000);
     z.tick(2810);
     assert_eq!(hp(&z, "victim"), 1000);
     let impact = z.tick(2811);
     assert!(hp(&z, "victim") < 1000);
-    assert!(
-        packets(&impact, "victim")
-            .iter()
-            .any(|p| matches!(p,ServerPacket::Struck{info}if info.attacker_id==pet))
-    );
+    assert!(packets(&impact, "victim")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::Struck{info}if info.attacker_id==pet)));
     assert_eq!(
         packets(&impact, "victim")
             .iter()
@@ -1669,11 +1622,9 @@ fn shared_owned_pet_protects_owner_with_delayed_real_damage_and_pet_struck_id() 
             .count(),
         1
     );
-    assert!(
-        !packets(&impact, "victim")
-            .iter()
-            .any(|p| matches!(p,ServerPacket::ObjectStruck{info}if info.object_id==102))
-    );
+    assert!(!packets(&impact, "victim")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectStruck{info}if info.object_id==102)));
     assert!(packets(&impact,"owner").iter().any(|p|matches!(p,ServerPacket::ObjectStruck{info}if info.object_id==102 && info.attacker_id==pet)));
     assert!(impact.iter().any(|o|matches!(o,ZoneOutbound::PlayerDamaged{session_id,settlement:Some(_),..}if *session_id==SessionId::new("victim"))));
 }
@@ -1715,16 +1666,13 @@ fn shared_owned_pet_focus_on_missed_owner_attack_can_causally_kill_once() {
     assert_eq!(kills[0].pet_object_id, pet);
     assert_eq!(kills[0].owner_object_id, 101);
     assert!(kills[0].unlawful);
-    assert!(
-        packets(&impact, "victim")
-            .iter()
-            .any(|p| matches!(p, ServerPacket::Death { .. }))
-    );
-    assert!(
-        !z.tick(3111)
-            .iter()
-            .any(|o| matches!(o, ZoneOutbound::OwnedPetPlayerKill { .. }))
-    );
+    assert!(packets(&impact, "victim")
+        .iter()
+        .any(|p| matches!(p, ServerPacket::Death { .. })));
+    assert!(!z
+        .tick(3111)
+        .iter()
+        .any(|o| matches!(o, ZoneOutbound::OwnedPetPlayerKill { .. })));
 }
 
 #[test]
@@ -1738,11 +1686,9 @@ fn shared_owned_pet_enemy_guild_mode_does_not_attack_player_after_provocation() 
     });
     attack(&mut z, "victim", 101, MirDirection::Up, 600);
     for now in [2511, 2811, 3111, 3411] {
-        assert!(
-            !packets(&z.tick(now), "victim")
-                .iter()
-                .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet))
-        );
+        assert!(!packets(&z.tick(now), "victim")
+            .iter()
+            .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet)));
     }
     assert_eq!(hp(&z, "victim"), 1000);
 }
@@ -1752,11 +1698,9 @@ fn shared_owned_pet_none_is_quiet_and_both_restores_guard() {
     let (mut z, pet) = fixture(3);
     attack(&mut z, "victim", 101, MirDirection::Up, 600);
     for now in [2511, 2811, 3111] {
-        assert!(
-            !packets(&z.tick(now), "victim")
-                .iter()
-                .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet))
-        );
+        assert!(!packets(&z.tick(now), "victim")
+            .iter()
+            .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet)));
     }
     let mut profile = z.player_chat_profile(&SessionId::new("owner")).unwrap();
     profile.pet_mode = 0;
@@ -1813,29 +1757,23 @@ fn shared_owned_pet_owner_death_emits_real_pet_death_and_cancels_hit() {
         mp: 1000,
         dead: true,
     });
-    assert!(
-        packets(&died, "victim")
-            .iter()
-            .any(|p| matches!(p,ServerPacket::ObjectDied{info}if info.object_id==pet))
-    );
-    assert!(
-        z.native_monster_snapshots()
-            .iter()
-            .any(|m| m.object_id == pet && m.dead)
-    );
+    assert!(packets(&died, "victim")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectDied{info}if info.object_id==pet)));
+    assert!(z
+        .native_monster_snapshots()
+        .iter()
+        .any(|m| m.object_id == pet && m.dead));
     z.tick(2811);
     assert_eq!(hp(&z, "victim"), 1000);
     let before_expiry = z.tick(182_510);
-    assert!(
-        !packets(&before_expiry, "victim")
-            .iter()
-            .any(|p| matches!(p, ServerPacket::ObjectRemove { object_id } if *object_id == pet))
-    );
-    assert!(
-        z.native_monster_snapshots()
-            .iter()
-            .any(|m| m.object_id == pet && m.dead)
-    );
+    assert!(!packets(&before_expiry, "victim")
+        .iter()
+        .any(|p| matches!(p, ServerPacket::ObjectRemove { object_id } if *object_id == pet)));
+    assert!(z
+        .native_monster_snapshots()
+        .iter()
+        .any(|m| m.object_id == pet && m.dead));
     let expiry = z.tick(182_511);
     assert!(
         packets(&expiry, "victim")
@@ -1843,11 +1781,10 @@ fn shared_owned_pet_owner_death_emits_real_pet_death_and_cancels_hit() {
             .any(|p| matches!(p, ServerPacket::ObjectRemove { object_id } if *object_id == pet)),
         "source DeadDelay retires the pet corpse at the exact 180000ms deadline"
     );
-    assert!(
-        !z.native_monster_snapshots()
-            .iter()
-            .any(|m| m.object_id == pet)
-    );
+    assert!(!z
+        .native_monster_snapshots()
+        .iter()
+        .any(|m| m.object_id == pet));
 }
 
 #[test]
@@ -1924,11 +1861,9 @@ fn shared_owned_summon_cast_cannot_cross_owner_death_revive_or_rejoin() {
             z.native_monster_snapshots().is_empty(),
             "reconnect={reconnect}"
         );
-        assert!(
-            !packets(&out, "owner")
-                .iter()
-                .any(|p| matches!(p, ServerPacket::ObjectMonster { .. }))
-        );
+        assert!(!packets(&out, "owner")
+            .iter()
+            .any(|p| matches!(p, ServerPacket::ObjectMonster { .. })));
     }
 }
 
@@ -1950,35 +1885,25 @@ fn shared_owned_shinsu_guard_uses_real_player_breath_and_550ms_delay() {
     }
     let pet = spawn(&mut z, "owner", p(11, 20), Spell::SummonShinsu, 10);
     attack(&mut z, "victim", 101, MirDirection::Up, 600);
-    assert!(
-        !packets(&z.tick(2510), "victim")
-            .iter()
-            .any(|p| matches!(p,ServerPacket::ObjectShow{object_id}if *object_id==pet))
-    );
-    assert!(
-        packets(&z.tick(2511), "victim")
-            .iter()
-            .any(|p| matches!(p,ServerPacket::ObjectShow{object_id}if *object_id==pet))
-    );
-    assert!(
-        !packets(&z.tick(3511), "victim")
-            .iter()
-            .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet))
-    );
-    assert!(
-        packets(&z.tick(3512), "victim")
-            .iter()
-            .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet))
-    );
+    assert!(!packets(&z.tick(2510), "victim")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectShow{object_id}if *object_id==pet)));
+    assert!(packets(&z.tick(2511), "victim")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectShow{object_id}if *object_id==pet)));
+    assert!(!packets(&z.tick(3511), "victim")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet)));
+    assert!(packets(&z.tick(3512), "victim")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet)));
     z.tick(4061);
     assert_eq!(hp(&z, "victim"), 1000);
     let hit = z.tick(4062);
     assert!(hp(&z, "victim") < 1000);
-    assert!(
-        packets(&hit, "victim")
-            .iter()
-            .any(|p| matches!(p,ServerPacket::Struck{info}if info.attacker_id==pet))
-    );
+    assert!(packets(&hit, "victim")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::Struck{info}if info.attacker_id==pet)));
 }
 
 #[test]
@@ -2123,11 +2048,9 @@ fn shared_human_real_native_fatal_attack_issues_source_receipt_for_all_three_cla
             0,
             "class={class:?}"
         );
-        assert!(
-            packets(&out, "owner")
-                .iter()
-                .any(|p| matches!(p, ServerPacket::Death { .. }))
-        );
+        assert!(packets(&out, "owner")
+            .iter()
+            .any(|p| matches!(p, ServerPacket::Death { .. })));
         let receipt = out
             .into_iter()
             .find_map(|o| match o {
@@ -2196,11 +2119,9 @@ fn shared_human_projectile_death_is_born_at_real_deferred_impact_and_rechecks_li
         });
         let cast = cast_human_damage(&mut z, 101, Spell::FireBall, p(10, 20), 620);
         assert_eq!(hp(&z, "owner"), 5);
-        assert!(
-            !cast
-                .iter()
-                .any(|o| matches!(o, ZoneOutbound::OwnedPetPlayerKill { .. }))
-        );
+        assert!(!cast
+            .iter()
+            .any(|o| matches!(o, ZoneOutbound::OwnedPetPlayerKill { .. })));
         assert!(packets(&cast, "victim").iter().any(|p| matches!(
             p,
             ServerPacket::Magic {
@@ -2287,11 +2208,10 @@ fn shared_human_projectile_death_is_born_at_real_deferred_impact_and_rechecks_li
                 (1170, 102, 101)
             );
         }
-        assert!(
-            !z.tick(1171)
-                .iter()
-                .any(|o| matches!(o, ZoneOutbound::OwnedPetPlayerKill { .. }))
-        );
+        assert!(!z
+            .tick(1171)
+            .iter()
+            .any(|o| matches!(o, ZoneOutbound::OwnedPetPlayerKill { .. })));
     }
 }
 
@@ -2448,11 +2368,9 @@ fn shared_human_binding_shot_reaches_actual_owned_monster_and_releases_neighbour
             ..
         }
     )));
-    assert!(
-        !packets(&z.tick(3169), "owner")
-            .iter()
-            .any(|p| matches!(p, ServerPacket::SetBindingShot { .. }))
-    );
+    assert!(!packets(&z.tick(3169), "owner")
+        .iter()
+        .any(|p| matches!(p, ServerPacket::SetBindingShot { .. })));
     let applied = z.tick(3170);
     assert!(packets(&applied,"owner").iter().any(|p|matches!(p,ServerPacket::SetBindingShot{object_id,enabled:true,value:20000} if *object_id==pet)));
     assert!(packets(&applied,"owner").iter().any(|p|matches!(p,ServerPacket::ObjectColourChanged{object_id,name_colour_argb} if *object_id==pet && *name_colour_argb==0xFFCD853F_u32 as i32)));
@@ -2517,18 +2435,14 @@ fn shared_human_electric_shock_is_delayed_and_its_source_colour_expires_exactly(
     }
     let start = started.expect("100 actual source rolls must produce a shock");
     let expiry = start + 25000;
-    assert!(
-        !packets(&z.tick(expiry - 1), "owner").iter().any(
-            |p| matches!(p,ServerPacket::ObjectColourChanged{object_id,..} if *object_id==pet)
-        )
-    );
+    assert!(!packets(&z.tick(expiry - 1), "owner")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectColourChanged{object_id,..} if *object_id==pet)));
     let ended = z.tick(expiry);
     assert!(packets(&ended,"owner").iter().any(|p|matches!(p,ServerPacket::ObjectColourChanged{object_id,name_colour_argb} if *object_id==pet && *name_colour_argb==0xFF7FFFD4_u32 as i32)));
-    assert!(
-        !packets(&z.tick(expiry + 1), "owner").iter().any(
-            |p| matches!(p,ServerPacket::ObjectColourChanged{object_id,..} if *object_id==pet)
-        )
-    );
+    assert!(!packets(&z.tick(expiry + 1), "owner")
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectColourChanged{object_id,..} if *object_id==pet)));
 }
 
 #[test]
@@ -2747,12 +2661,10 @@ fn shared_human_poison_death_retains_global_node_across_maps_and_revokes_real_ne
             );
             assert!(manager.issued_owned_pet_kill_is_current(receipt));
         }
-        assert!(
-            !manager
-                .tick_all(3123)
-                .iter()
-                .any(|o| matches!(o, ZoneOutbound::OwnedPetPlayerKill { .. }))
-        );
+        assert!(!manager
+            .tick_all(3123)
+            .iter()
+            .any(|o| matches!(o, ZoneOutbound::OwnedPetPlayerKill { .. })));
     }
 }
 
@@ -2841,12 +2753,10 @@ fn shared_owned_custom_vampire_and_toad_pause_modes_retain_real_assigned_target_
             });
             let paused = z.tick(3300);
             assert_eq!(hp(&z, "victim"), 1000);
-            assert!(
-                packets(&paused, "owner")
-                    .iter()
-                    .all(|packet| !matches!(packet,
-                ServerPacket::ObjectAttack { info } if info.object_id == pet))
-            );
+            assert!(packets(&paused, "owner")
+                .iter()
+                .all(|packet| !matches!(packet,
+                ServerPacket::ObjectAttack { info } if info.object_id == pet)));
             let mut profile = z.player_chat_profile(&SessionId::new("owner")).unwrap();
             profile.pet_mode = 4;
             z.handle(ZoneCommand::UpdateChatProfile {
@@ -2865,12 +2775,10 @@ fn shared_owned_custom_vampire_and_toad_pause_modes_retain_real_assigned_target_
                 assert_eq!(hp(&z, "victim"), 1000);
                 z.tick(now + 550);
             } else {
-                assert!(
-                    packets(&resumed, "owner")
-                        .iter()
-                        .any(|packet| matches!(packet,
-                    ServerPacket::ObjectAttack { info } if info.object_id == pet))
-                );
+                assert!(packets(&resumed, "owner")
+                    .iter()
+                    .any(|packet| matches!(packet,
+                    ServerPacket::ObjectAttack { info } if info.object_id == pet)));
             }
             assert!(
                 hp(&z, "victim") < 1000,
@@ -2976,8 +2884,8 @@ fn shared_owned_vampire_real_summon_bites_immediately_mac_and_heals_on_strict_so
 }
 
 #[test]
-fn shared_owned_vampire_public_fatal_hit_releases_master_before_safe_owner_death_and_never_bills_pk()
- {
+fn shared_owned_vampire_public_fatal_hit_releases_master_before_safe_owner_death_and_never_bills_pk(
+) {
     let (mut z, pet) = real_vampire_summon(20);
     sync_pet_safe(&mut z, "owner", true);
     z.handle(ZoneCommand::sync_player_combat_state(
@@ -3026,11 +2934,9 @@ fn shared_owned_vampire_public_fatal_hit_releases_master_before_safe_owner_death
         980,
         "same burst also applies actual MAC damage to its killer"
     );
-    assert!(
-        packets(&out, "owner")
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::Death { .. }))
-    );
+    assert!(packets(&out, "owner")
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Death { .. })));
     assert!(
         out.iter().all(|event| !matches!(
             event,

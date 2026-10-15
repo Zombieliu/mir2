@@ -1,6 +1,6 @@
 use super::components::{
-    CharacterBody, DisplayName, Facing, Npc, NpcAgent, ObjectId, Position, WorldObject,
-    entity_by_object_id, entity_position, player_entity,
+    entity_by_object_id, entity_position, player_entity, CharacterBody, DisplayName, Facing, Npc,
+    NpcAgent, ObjectId, Position, WorldObject,
 };
 use super::crystal_compat::{BASE_STORAGE_SLOTS, CRYSTAL_BIND_DONT_STORE};
 use super::equipment::{equipment_slot_index, user_item_from_equipment_state};
@@ -8,7 +8,7 @@ use super::items::{
     crystal_item_key_for_template, crystal_stack_size_for_item_key,
     embedded_item_state_from_template, item_unique_id,
 };
-use super::npc::{ActiveNpcServiceState, active_crystal_storage_service};
+use super::npc::{active_crystal_storage_service, ActiveNpcServiceState};
 use super::resources::{InventoryResource, NpcStateResource, SessionResource};
 use super::session::SimulationSession;
 use super::stats::{player_stats, refresh_player_stats};
@@ -32,12 +32,10 @@ fn authenticated_session() -> SimulationSession {
             _ => None,
         })
         .expect("demo login should expose a character");
-    assert!(
-        session
-            .handle_packet(ClientPacket::StartGame { character_index })
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. }))
-    );
+    assert!(session
+        .handle_packet(ClientPacket::StartGame { character_index })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
     session
         .app
         .world_mut()
@@ -137,16 +135,14 @@ fn equipped_amulet_and_target(
 
     let equipment_slot =
         equipment_slot_index(EquipmentSlot::Amulet).expect("Amulet slot index") as i32;
-    assert!(
-        session
-            .handle_packet(ClientPacket::EquipItem {
-                grid: MirGridType::Inventory,
-                unique_id: source_unique_id,
-                to: equipment_slot,
-            })
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::EquipItem { success: true, .. }))
-    );
+    assert!(session
+        .handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: source_unique_id,
+            to: equipment_slot,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::EquipItem { success: true, .. })));
 
     let resources = session.app.world().resource::<InventoryResource>();
     let equipment = resources
@@ -493,16 +489,14 @@ fn equipment_merge_rejects_non_amulet_and_dont_store_amulet() {
     }
     let weapon_slot =
         equipment_slot_index(EquipmentSlot::Weapon).expect("Weapon slot index") as i32;
-    assert!(
-        session
-            .handle_packet(ClientPacket::EquipItem {
-                grid: MirGridType::Inventory,
-                unique_id: source_unique_id,
-                to: weapon_slot,
-            })
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::EquipItem { success: true, .. }))
-    );
+    assert!(session
+        .handle_packet(ClientPacket::EquipItem {
+            grid: MirGridType::Inventory,
+            unique_id: source_unique_id,
+            to: weapon_slot,
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::EquipItem { success: true, .. })));
     let equipment_id = session
         .app
         .world()

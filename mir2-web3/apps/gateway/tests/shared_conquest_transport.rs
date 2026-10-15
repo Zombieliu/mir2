@@ -136,7 +136,10 @@ fn server_fixture() -> (GatewayConfig, u64) {
     // Keep the source calendar and its monotonic guard; exercise the next day.
     let transport_day = epoch.checked_add(86_400_000).unwrap();
     let start = policy.window(transport_day).unwrap().start_ms;
-    assert!(start > epoch, "transport clock must follow the real bootstrap");
+    assert!(
+        start > epoch,
+        "transport clock must follow the real bootstrap"
+    );
     config.conquest_policies = vec![policy];
     {
         let mut store = config.account_store.lock().unwrap();
@@ -162,7 +165,7 @@ fn server_fixture() -> (GatewayConfig, u64) {
         store.shared_guilds.insert(
             GUILD.into(),
             SharedGuildRecord {
-        active_wars: Default::default(),
+                active_wars: Default::default(),
                 id: GUILD.into(),
                 name: "Knights".into(),
                 revision: 1,

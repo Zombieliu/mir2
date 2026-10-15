@@ -3,6 +3,7 @@ use mir2_client_bevy::quest_model::QuestReward;
 
 #[test]
 fn world_ingest_keeps_new_quest_item_info_for_rendered_rewards() {
+    let _native_queue_guard = super::native_queue_test_guard();
     let context = GatewaySessionContext::default();
     let (shell_sender, _shell_receiver) = std::sync::mpsc::channel();
     let (gameplay_sender, gameplay_receiver) = std::sync::mpsc::channel();

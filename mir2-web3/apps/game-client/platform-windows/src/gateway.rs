@@ -10072,17 +10072,8 @@ mod quest_tooltip_tests;
 mod tests {
     use super::*;
 
-    // Native ingestion is a process-global slot. These fixtures must retain
-    // exclusive ownership through App drop and socket-task completion so an
-    // unrelated fixture cannot replace the slot or enqueue a terminal reset.
-    // Production never acquires this test-only lock.
-    static NATIVE_QUEUE_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
-
-    fn native_queue_test_guard() -> std::sync::MutexGuard<'static, ()> {
-        NATIVE_QUEUE_TEST_LOCK
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner())
-    }
+    // Use the same native_queue_test_guard imported from super as the sibling
+    // mail/ownership fixtures; another local static would not exclude them.
 
     #[test]
     fn skill_experience_projection_uses_real_snapshot_and_catalog_needs() {
@@ -15129,6 +15120,7 @@ mod tests {
 
     #[test]
     fn initial_bootstrap_waits_until_world_snapshot_ingest_is_applied() {
+        let _native_queue_guard = native_queue_test_guard();
         let context = GatewaySessionContext {
             account_id: Some("player-one".to_owned()),
             character_index: Some(3),
@@ -16556,6 +16548,9 @@ mod guild_wire_tests {
 
 #[cfg(test)]
 pub(crate) fn native_queue_test_guard() -> std::sync::MutexGuard<'static, ()> {
+    // The sole platform-windows fixture lock for the dependency's process-global
+    // ingress slot. Hold it through App drop and all client/server task joins.
+    // Production never acquires this test-only lock.
     static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
     LOCK.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
 }
@@ -17371,6 +17366,7 @@ mod ownership_tests {
     }
     #[tokio::test]
     async fn mail_send_receiver_recovery_and_unvisited_batch_tails_emit_exact_unsent() {
+        let _native_queue_guard = super::native_queue_test_guard();
         use mir2_client_bevy::mail_service::{
             MailSendOutcome, MailSendReceipt, MailServiceInboxMessage,
         };
@@ -18136,6 +18132,7 @@ mod ownership_tests {
     }
     #[tokio::test]
     async fn mail_quote_recovery_connect_tail_and_connected_error_tail_retire_exactly() {
+        let _native_queue_guard = super::native_queue_test_guard();
         use mir2_client_bevy::mail_service::MailQuoteOutcome;
         let (sender, mut receiver, fence, stamp) = prepared_world();
         let receipts = Arc::new(Mutex::new(Vec::new()));
@@ -18212,6 +18209,7 @@ mod ownership_tests {
     }
     #[tokio::test]
     async fn mail_quote_retry_connect_tail_and_resume_ignored_commands_retire_exactly() {
+        let _native_queue_guard = super::native_queue_test_guard();
         use mir2_client_bevy::mail_service::MailQuoteOutcome;
         for retry in [false, true] {
             let (sender, mut receiver, fence, stamp) = prepared_world();
@@ -18883,6 +18881,7 @@ mod ownership_tests {
     #[tokio::test]
     async fn handler_packet_first_inherits_full_skill_gate_and_changed_map_cannot_regrant_retained_entities(
     ) {
+        let _native_queue_guard = super::native_queue_test_guard();
         for invalidation in [
             "positive",
             "scene",
@@ -19372,6 +19371,7 @@ mod native_mail_stream_tests {
 
     #[tokio::test]
     async fn native_mail_actual_socket_handshake_publishes_marker_before_first_packet() {
+        let _native_queue_guard = super::native_queue_test_guard();
         use tokio::time::timeout;
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let address = listener.local_addr().unwrap();
@@ -19469,6 +19469,7 @@ mod native_mail_stream_tests {
 
     #[tokio::test]
     async fn native_mail_marker_rejection_terminates_actual_socket_before_packet_delivery() {
+        let _native_queue_guard = super::native_queue_test_guard();
         use tokio::time::timeout;
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let address = listener.local_addr().unwrap();

@@ -90,10 +90,9 @@ mod death_tests {
         );
         assert!(death.iter().any(|out| matches!(out, ZoneOutbound::ToMany { packets, .. }
             if packets.iter().any(|packet| matches!(packet, ServerPacket::ObjectDied { info } if info.object_id == 60)))));
-        assert!(
-            z.apply_native_monster_direct_damage(60, 200, None, 100)
-                .is_none()
-        );
+        assert!(z
+            .apply_native_monster_direct_damage(60, 200, None, 100)
+            .is_none());
         assert!(
             !z.vampire_death_pending(60),
             "death burst flushed in the same handle"
@@ -396,10 +395,9 @@ mod death_tests {
         assert_ne!(fresh, old.life);
         assert!(z.entity_ref_exists(&fresh, false));
         assert!(!z.entity_ref_exists(&old.life, false));
-        assert!(
-            z.resolve_released_vampire_burst(&source, &old, 102)
-                .is_empty()
-        );
+        assert!(z
+            .resolve_released_vampire_burst(&source, &old, 102)
+            .is_empty());
         assert_eq!(z.native_monsters[&target.object_id].hp, 100);
         assert!(!z.removed_object_ids.contains(&target.object_id));
     }

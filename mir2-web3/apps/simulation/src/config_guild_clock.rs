@@ -356,7 +356,9 @@ pub(super) fn validate_store(store: &AccountStore) -> Result<(), String> {
     }
     for account in store.accounts.values() {
         if let Some(card) = &account.monthly_card {
-            if store.schema_version < 7 { return Err("legacy account store cannot contain monthly card authority".into()); }
+            if store.schema_version < 7 {
+                return Err("legacy account store cannot contain monthly card authority".into());
+            }
             card.validate()?;
         }
     }

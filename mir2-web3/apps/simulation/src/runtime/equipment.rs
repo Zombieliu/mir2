@@ -33,9 +33,9 @@ use super::items::{
     default_item_unique_id, equipment_has_crystal_or_rental_bind_flag,
     item_has_crystal_or_rental_bind_flag, item_is_socket_type, item_state_can_equip_to_slot,
     item_state_identified, item_state_soul_bound_id, merged_user_item_stats,
-    rental_information_from_item_state,
-    try_item_state_from_user_item, try_user_item_from_item_state, upsert_user_item_stat,
-    user_item_from_item_state, ItemState, ItemStateUserItemMetadata,
+    rental_information_from_item_state, try_item_state_from_user_item,
+    try_user_item_from_item_state, upsert_user_item_stat, user_item_from_item_state, ItemState,
+    ItemStateUserItemMetadata,
 };
 use super::map::{current_map_disallows_mount, current_map_requires_bridle};
 use super::monsters::deterministic_roll;
@@ -1229,7 +1229,7 @@ pub(super) fn gm_toggle_ride(world: &mut World) -> Vec<ServerPacket> {
         mount_resource.riding_mount = wants_ride && can_ride;
         (mount_resource.riding_mount, mount_resource.mount_type)
     };
-    let mut packets=vec![ServerPacket::MountUpdate {
+    let mut packets = vec![ServerPacket::MountUpdate {
         object_id: current_player_object_id(world).unwrap_or_default(),
         mount_type,
         riding_mount,
@@ -2370,7 +2370,9 @@ pub(super) fn crystal_item_added_stat_weight(item: &ItemState) -> usize {
         None,
     )
     .iter()
-    .fold(0usize, |total, stat| total.saturating_add(stat.value.unsigned_abs() as usize))
+    .fold(0usize, |total, stat| {
+        total.saturating_add(stat.value.unsigned_abs() as usize)
+    })
 }
 
 pub(super) fn crystal_item_full_durability_price(

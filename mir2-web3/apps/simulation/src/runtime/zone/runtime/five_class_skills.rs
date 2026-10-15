@@ -207,7 +207,11 @@ mod tests {
     }
 
     fn victim_class(zone: &mut ZoneRuntime, hp: i32, class: MirClass) -> SessionId {
-        let position = offset_point(&zone.players[&SessionId::new("native-owner")].position, MirDirection::Right, 1);
+        let position = offset_point(
+            &zone.players[&SessionId::new("native-owner")].position,
+            MirDirection::Right,
+            1,
+        );
         let session = SessionId::new("native-victim");
         zone.handle(ZoneCommand::Join(ZoneJoin {
             session_id: session.clone(),
@@ -3859,7 +3863,9 @@ impl ZoneRuntime {
                 object_id: id,
                 location: position.clone(),
                 spell: Spell::Trap,
-                direction: player.direction,
+                // Map.cs Trap construction leaves the spell's own Direction
+                // at its enum default; it does not inherit the caster's facing.
+                direction: MirDirection::Up,
                 // Source SpellObject.GetInfo only ExplosiveTrap sets Param.
                 param: false,
             },

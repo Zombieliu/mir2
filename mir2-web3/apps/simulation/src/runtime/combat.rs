@@ -251,7 +251,10 @@ fn crystal_skill_level(world: &World, spell_name: &str) -> Option<u8> {
         .map(|skill| skill.level)
 }
 
-pub(super) fn crystal_skill_magic(world: &World, spell_name: &str) -> Option<(CrystalMagicTemplate, u8)> {
+pub(super) fn crystal_skill_magic(
+    world: &World,
+    spell_name: &str,
+) -> Option<(CrystalMagicTemplate, u8)> {
     let level = crystal_skill_level(world, spell_name)?;
     Some((crystal_magic_by_spell(spell_name)?, level))
 }
@@ -289,12 +292,9 @@ pub(super) fn crystal_player_has_active_buff(world: &World, key: &str) -> bool {
 }
 
 pub(super) fn crystal_player_movement_blocked_by_status(world: &World) -> bool {
-    [
-        CAVE_MAGGOT_PARALYSIS_BUFF_KEY,
-        ICE_GUARD_FROZEN_BUFF_KEY,
-    ]
-    .iter()
-    .any(|key| crystal_player_has_active_buff(world, key))
+    [CAVE_MAGGOT_PARALYSIS_BUFF_KEY, ICE_GUARD_FROZEN_BUFF_KEY]
+        .iter()
+        .any(|key| crystal_player_has_active_buff(world, key))
 }
 
 pub(super) fn crystal_player_attack_blocked_by_status(world: &World) -> bool {
@@ -698,13 +698,18 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
         gm_never_die: world.resource::<GmRuntimeResource>().gm_never_die,
         fatal_sword_level: crystal_skill_magic(world, "FatalSword").map(|(_, level)| level),
         mental_state: world.resource::<SkillResource>().mental_state,
-        mental_state_level: crystal_skill_magic(world, "MentalState").map(|(_, level)| level).unwrap_or(0),
+        mental_state_level: crystal_skill_magic(world, "MentalState")
+            .map(|(_, level)| level)
+            .unwrap_or(0),
         meditation_level: crystal_skill_magic(world, "Meditation").map(|(_, level)| level),
         mp_eater_level: crystal_skill_magic(world, "MPEater").map(|(_, level)| level),
         hemorrhage_level: crystal_skill_magic(world, "Hemorrhage").map(|(_, level)| level),
         max_mp: stats.max_mp(),
         attack_speed: stats.attack_speed(),
-        five_class_learned_mask: world.resource::<SkillResource>().skills.iter()
+        five_class_learned_mask: world
+            .resource::<SkillResource>()
+            .skills
+            .iter()
             .filter_map(|skill| crystal_magic_for_skill_key(&skill.key))
             .filter_map(|magic| Spell::from_crystal_name(&magic.spell))
             .filter_map(super::zone::ZoneFiveClassPracticeSpell::from_spell)
@@ -1761,7 +1766,11 @@ fn prepare_slaying_after_attack(world: &mut World, roll: u64) -> Vec<ServerPacke
 
 fn slaying_attack_roll(world: &World) -> u64 {
     // Reuse the existing combat chance seed, retaining all twelve outcomes.
-    combat_chance_value(runtime_tick(world), current_player_object_id(world).unwrap_or_default(), 2) % 12
+    combat_chance_value(
+        runtime_tick(world),
+        current_player_object_id(world).unwrap_or_default(),
+        2,
+    ) % 12
 }
 
 pub(super) fn apply_player_paralysis(world: &mut World, current_tick: u64, duration_ticks: u64) {
@@ -3405,7 +3414,8 @@ impl SimulationSession {
         let mut spell_level = 0;
         if let Some((_, level)) = crystal_skill_magic(world, "Focus") {
             if crystal_accuracy_roll(current_tick, player_object_id, Spell::Focus as u32, 5)
-                <= u64::from(level.min(3)) {
+                <= u64::from(level.min(3))
+            {
                 spell = Spell::Focus;
                 spell_level = level;
             }
@@ -3417,10 +3427,20 @@ impl SimulationSession {
     /// misses; Crystal levels it before the projectile's hit-chance roll.
     pub fn commit_zone_focus_attack(&mut self) -> Vec<ServerPacket> {
         let world = self.app.world_mut();
-        if !is_in_world(world) { return Vec::new(); }
-        let Some(magic) = crystal_magic_by_spell("Focus") else { return Vec::new(); };
-        let Some(index) = world.resource::<SkillResource>().skills.iter()
-            .position(|skill| skill.key == "focus") else { return Vec::new(); };
+        if !is_in_world(world) {
+            return Vec::new();
+        }
+        let Some(magic) = crystal_magic_by_spell("Focus") else {
+            return Vec::new();
+        };
+        let Some(index) = world
+            .resource::<SkillResource>()
+            .skills
+            .iter()
+            .position(|skill| skill.key == "focus")
+        else {
+            return Vec::new();
+        };
         let tick = runtime_tick(world);
         advance_magic_progression(world, index, Spell::Focus, &magic, tick)
     }
@@ -3714,7 +3734,10 @@ impl SimulationSession {
         }
 
         let slaying_roll = slaying_attack_roll(self.app.world());
-        packets.extend(prepare_slaying_after_attack(self.app.world_mut(), slaying_roll));
+        packets.extend(prepare_slaying_after_attack(
+            self.app.world_mut(),
+            slaying_roll,
+        ));
 
         if let Some(level) = crystal_skill_level(self.app.world(), "Meditation") {
             if level >= 3

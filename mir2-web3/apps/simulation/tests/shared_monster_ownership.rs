@@ -451,45 +451,73 @@ fn authenticated_cold_checkpoint_preserves_state_but_revokes_live_owner() {
     melee(&mut zone, "a", 20, 200);
     let bytes = zone.checkpoint_bytes().unwrap();
     let saved: Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(
-        saved["state_root"],
-        zone.canonical_state_root().unwrap()
-    );
+    assert_eq!(saved["state_root"], zone.canonical_state_root().unwrap());
     let mut expected_monster = saved["native_monsters"][MONSTER.to_string()].clone();
     assert_eq!(expected_monster["hp"], 80);
     assert_eq!(expected_monster["experience_owner"]["expires_at_ms"], 5_200);
     let old_owner = expected_monster["experience_owner"]["online_owner"].clone();
     assert_eq!(old_owner, saved["online_presence"]["a"]["owner"]);
-    expected_monster.as_object_mut().unwrap().remove("experience_owner");
+    expected_monster
+        .as_object_mut()
+        .unwrap()
+        .remove("experience_owner");
     for path in ["hp", "experience"] {
         let mut changed = saved.clone();
         changed["native_monsters"][MONSTER.to_string()][path] = json!(999);
-        assert!(ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&changed).unwrap())
-            .unwrap_err().contains("state root mismatch"));
+        assert!(
+            ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&changed).unwrap())
+                .unwrap_err()
+                .contains("state root mismatch")
+        );
     }
     let mut changed_owner = saved.clone();
-    changed_owner["native_monsters"][MONSTER.to_string()]["experience_owner"]["online_owner"]["epoch"] = json!(999);
-    assert!(ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&changed_owner).unwrap())
-        .unwrap_err().contains("state root mismatch"));
+    changed_owner["native_monsters"][MONSTER.to_string()]["experience_owner"]["online_owner"]
+        ["epoch"] = json!(999);
+    assert!(
+        ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&changed_owner).unwrap())
+            .unwrap_err()
+            .contains("state root mismatch")
+    );
 
     for at in [5_200, 5_201] {
         let mut restored = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
         let cold: Value = serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
-        assert_ne!(cold["state_root"], saved["state_root"], "cold live authority was cleared");
+        assert_ne!(
+            cold["state_root"], saved["state_root"],
+            "cold live authority was cleared"
+        );
         assert_eq!(cold["online_presence"], json!({}));
         assert_eq!(cold["issued_native_monster_awards"], json!({}));
-        assert_eq!(cold["players"], saved["players"], "complete player payload is retained");
-        assert_eq!(checkpoint_monster(&restored), expected_monster,
-            "all monster payload and original absolute clocks survive except revoked EXPOwner");
+        assert_eq!(
+            cold["players"], saved["players"],
+            "complete player payload is retained"
+        );
+        assert_eq!(
+            checkpoint_monster(&restored),
+            expected_monster,
+            "all monster payload and original absolute clocks survive except revoked EXPOwner"
+        );
         for (name, id, position) in [("a", 101, point(9, 10)), ("b", 102, point(10, 11))] {
-            restored.handle(ZoneCommand::Join(join(name, id, position, MirClass::Warrior)));
+            restored.handle(ZoneCommand::Join(join(
+                name,
+                id,
+                position,
+                MirClass::Warrior,
+            )));
             admit(&mut restored, name, MirClass::Warrior);
         }
-        let rejoined: Value = serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
+        let rejoined: Value =
+            serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
         assert_ne!(rejoined["online_presence"]["a"]["owner"], old_owner);
-        assert!(checkpoint_monster(&restored).get("experience_owner").is_none());
+        assert!(checkpoint_monster(&restored)
+            .get("experience_owner")
+            .is_none());
         let killed = melee(&mut restored, "b", 80, at);
-        assert_eq!(damage(&killed), 80, "B earns the kill by its own positive damage");
+        assert_eq!(
+            damage(&killed),
+            80,
+            "B earns the kill by its own positive damage"
+        );
         award(&killed, "b", 102);
     }
 }
@@ -531,14 +559,29 @@ fn fresh_same_map_join_revokes_old_claim_and_old_poison_identity() {
     );
     assert_eq!(state["damage_poison_owner_object_id"], 0);
     assert!(state["damage_poison_owner_session_id"].is_null());
-    for field in ["damage_poison", "damage_poison_value", "damage_poison_next_damage_at_ms", "damage_poison_expires_at_ms"] {
-        assert_eq!(state[field], before[field], "despawn revokes the caster but never rebases/erases active green poison: {field}");
+    for field in [
+        "damage_poison",
+        "damage_poison_value",
+        "damage_poison_next_damage_at_ms",
+        "damage_poison_expires_at_ms",
+    ] {
+        assert_eq!(
+            state[field], before[field],
+            "despawn revokes the caster but never rebases/erases active green poison: {field}"
+        );
     }
     assert_eq!(state["damage_poison_value"], 3);
     let fresh: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
-    assert_ne!(fresh["online_presence"]["a"]["owner"], old["online_presence"]["a"]["owner"]);
+    assert_ne!(
+        fresh["online_presence"]["a"]["owner"],
+        old["online_presence"]["a"]["owner"]
+    );
     let killed = melee(&mut zone, "b", 80, 800);
-    assert_eq!(damage(&killed), 80, "B must deal its own positive killing damage");
+    assert_eq!(
+        damage(&killed),
+        80,
+        "B must deal its own positive killing damage"
+    );
     award(&killed, "b", 102);
     assert!(!zone
         .tick(2_700)
@@ -552,22 +595,44 @@ fn fresh_same_map_join_revokes_old_claim_and_old_poison_identity() {
     let before = checkpoint_monster(&poisoned);
     let old: Value = serde_json::from_slice(&poisoned.checkpoint_bytes().unwrap()).unwrap();
     assert_eq!(before["hp"], 3);
-    poisoned.handle(ZoneCommand::Leave { session_id: sid("a") });
-    poisoned.handle(ZoneCommand::Join(join("a", 101, point(9, 10), MirClass::Taoist)));
+    poisoned.handle(ZoneCommand::Leave {
+        session_id: sid("a"),
+    });
+    poisoned.handle(ZoneCommand::Join(join(
+        "a",
+        101,
+        point(9, 10),
+        MirClass::Taoist,
+    )));
     admit(&mut poisoned, "a", MirClass::Taoist);
     let fresh: Value = serde_json::from_slice(&poisoned.checkpoint_bytes().unwrap()).unwrap();
-    assert_ne!(fresh["online_presence"]["a"]["owner"], old["online_presence"]["a"]["owner"]);
+    assert_ne!(
+        fresh["online_presence"]["a"]["owner"],
+        old["online_presence"]["a"]["owner"]
+    );
     let state = checkpoint_monster(&poisoned);
-    for field in ["damage_poison", "damage_poison_value", "damage_poison_next_damage_at_ms", "damage_poison_expires_at_ms"] {
-        assert_eq!(state[field], before[field], "fresh Join must not restart poison: {field}");
+    for field in [
+        "damage_poison",
+        "damage_poison_value",
+        "damage_poison_next_damage_at_ms",
+        "damage_poison_expires_at_ms",
+    ] {
+        assert_eq!(
+            state[field], before[field],
+            "fresh Join must not restart poison: {field}"
+        );
     }
     let killed = poisoned.tick(2_700);
     assert_eq!(damage(&killed), 3);
     assert_eq!(checkpoint_monster(&poisoned)["hp"], 0);
     assert!(checkpoint_monster(&poisoned)["experience_owner"].is_null());
-    assert!(!killed.iter().any(|o| matches!(o,
-        ZoneOutbound::MonsterKillAward { .. } | ZoneOutbound::OwnedMonsterKillAward { .. })),
-        "the old poison effect cannot reward either revoked epoch or fresh epoch");
+    assert!(
+        !killed.iter().any(|o| matches!(
+            o,
+            ZoneOutbound::MonsterKillAward { .. } | ZoneOutbound::OwnedMonsterKillAward { .. }
+        )),
+        "the old poison effect cannot reward either revoked epoch or fresh epoch"
+    );
 }
 
 #[test]

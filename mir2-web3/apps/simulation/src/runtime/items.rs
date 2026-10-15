@@ -2998,9 +2998,12 @@ pub(super) fn use_item(
     };
     if super::billing_monthly_card::is_card(&item) {
         // A key selects the next matching item and cannot identify a retry.
-        let Some((uid, grid)) = packet_ack else { return Vec::new(); };
-        return super::billing_monthly_card::use_card_packet(world, uid, grid)
-            .unwrap_or_else(|| prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new()));
+        let Some((uid, grid)) = packet_ack else {
+            return Vec::new();
+        };
+        return super::billing_monthly_card::use_card_packet(world, uid, grid).unwrap_or_else(
+            || prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new()),
+        );
     }
     let mut packets = Vec::new();
     let item_template = crystal_item_template_for_item_key(&item.key);
@@ -3061,7 +3064,9 @@ pub(super) fn use_item(
 
     if let Some(template) = item_template.as_ref().or(dynamic_item_template.as_ref()) {
         if let Some((success, creature_packets)) =
-            super::intelligent_creatures::use_creature_special_item(world, template, &item, location)
+            super::intelligent_creatures::use_creature_special_item(
+                world, template, &item, location,
+            )
         {
             return prepend_optional_packet(use_item_ack(packet_ack, success), creature_packets);
         }

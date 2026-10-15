@@ -3,8 +3,7 @@
 //! from accepted native spell commands, never from edited checkpoints.
 use mir2_protocol::{MirClass, MirDirection, MirGender, Point, ServerPacket, Spell};
 use mir2_simulation::{
-    SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneManager, ZoneOutbound,
-    ZoneRuntime,
+    SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneManager, ZoneOutbound, ZoneRuntime,
 };
 use serde_json::Value;
 
@@ -185,10 +184,7 @@ fn source_fixture_with_revived_actors(revive: bool) -> (ZoneManager, u64) {
             .get("12")
             .is_some()
         {
-            assert_ne!(
-                player(&manager, MAP_A, "friend")["poison"],
-                0
-            );
+            assert_ne!(player(&manager, MAP_A, "friend")["poison"], 0);
             return (manager, now + 520);
         }
     }
@@ -315,15 +311,9 @@ fn normal_map_join_preserves_real_hiding_flag_projection_and_original_expiry() {
             "first destination AOI projection lost {kind:?}: {moved:?}"
         );
         manager.tick_all(expiry - 1);
-        assert_eq!(
-            player(&manager, MAP_B, "healer")["hidden"],
-            true
-        );
+        assert_eq!(player(&manager, MAP_B, "healer")["hidden"], true);
         let expired = manager.tick_all(expiry);
-        assert_eq!(
-            player(&manager, MAP_B, "healer")["hidden"],
-            false
-        );
+        assert_eq!(player(&manager, MAP_B, "healer")["hidden"], false);
         assert!(player(&manager, MAP_B, "healer")["buffs"]
             .get("2")
             .is_none());
@@ -638,9 +628,7 @@ fn normal_purification_cold_manager_restore_never_rebinds_old_pending_actions() 
     let mut cold = ZoneManager::restore_checkpoint(&checkpoint).unwrap();
     assert!(!cold.online_owner_proof_is_current(&old_proof));
     no_purification_completion(&cold.tick_all(now + 500));
-    assert!(player(&cold, MAP_B, "friend")["buffs"]
-        .get("12")
-        .is_some());
+    assert!(player(&cold, MAP_B, "friend")["buffs"].get("12").is_some());
     for name in ["healer", "friend"] {
         cold.join(actor(name, MAP_B));
     }
@@ -657,10 +645,7 @@ fn normal_purification_destination_object_id_conflict_never_retags_the_original_
     for name in ["healer", "friend"] {
         transfer(&mut manager, name, MAP_B);
     }
-    assert_ne!(
-        player(&manager, MAP_B, "healer")["object_id"],
-        101
-    );
+    assert_ne!(player(&manager, MAP_B, "healer")["object_id"], 101);
     no_purification_completion(&manager.tick_all(now + 500));
     assert_curse_and_poison(&manager, MAP_B);
 }

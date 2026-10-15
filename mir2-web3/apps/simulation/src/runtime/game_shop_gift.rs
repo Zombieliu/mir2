@@ -536,14 +536,20 @@ impl SimulationSession {
     /// Paired commercial configuration also enables the authenticated 5s
     /// Source repository poll, including a recipient's first external gift.
     pub(crate) fn game_shop_gift_enabled(&self) -> bool {
-        self.app.world().resource::<super::resources::RuntimeConfigResource>()
-            .config.billing_monthly_card_credit_price.is_some_and(|price| price > 0)
+        self.app
+            .world()
+            .resource::<super::resources::RuntimeConfigResource>()
+            .config
+            .billing_monthly_card_credit_price
+            .is_some_and(|price| price > 0)
     }
 
     pub(crate) fn game_shop_gift_mail_notifications(&mut self) -> Vec<ServerPacket> {
         if self.game_shop_gift_enabled() && self.refresh_active_external_mail() {
             vec![super::packets::stage5_receive_mail_packet(self.app.world())]
-        } else { Vec::new() }
+        } else {
+            Vec::new()
+        }
     }
 
     pub(crate) fn game_shop_gift_packet_idempotent(
@@ -595,7 +601,9 @@ impl SimulationSession {
         }
         // A previously committed receipt remains readable if gifting is
         // later disabled; only fresh economic writes require paired config.
-        if !self.game_shop_gift_enabled() { return Err("gameShopGiftUnavailable".into()); }
+        if !self.game_shop_gift_enabled() {
+            return Err("gameShopGiftUnavailable".into());
+        }
         let checkpoint = snapshot_active_character_save(self.app.world())
             .ok_or("gameShopGiftOwnerNotInWorld")?;
         validate_character_save_record(&checkpoint)?;
@@ -890,7 +898,8 @@ impl SimulationSession {
             Ok(committed) => committed,
             Err(error)
                 if retry_known_cas
-                    && config.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth
+                    && config.account_store_database_mode
+                        == AccountStoreDatabaseMode::SourceOfTruth
                     && error == "gameShopGiftItemReceiptMissingOutcome" =>
             {
                 // Payer and recipient refreshes are separate reads. A competing
@@ -900,13 +909,20 @@ impl SimulationSession {
                 // the complete, matching durable payer receipt; never write a
                 // replacement outcome or parcel from a recipient unit alone.
                 config.refresh_account_store_account(&identity.account_id)?;
-                let store = config.account_store.lock()
+                let store = config
+                    .account_store
+                    .lock()
                     .map_err(|_| "gameShopGiftStoreUnavailable")?;
-                let save = store.accounts.get(&identity.account_id)
+                let save = store
+                    .accounts
+                    .get(&identity.account_id)
                     .and_then(|account| account.saves.get(&identity.character_index))
                     .ok_or("gameShopGiftSenderMissing")?;
                 if let Some(outcome) = existing_outcome(&systems(save)?, &request)? {
-                    return Ok(GameShopPurchaseExecution { packets: Vec::new(), outcome });
+                    return Ok(GameShopPurchaseExecution {
+                        packets: Vec::new(),
+                        outcome,
+                    });
                 }
                 return Err(error);
             }
@@ -925,7 +941,9 @@ impl SimulationSession {
                     config.refresh_game_shop_global_stock()?;
                 }
                 return self.game_shop_gift_attempt(
-                    request, false, RecipientSelection::Frozen(retry_recipient),
+                    request,
+                    false,
+                    RecipientSelection::Frozen(retry_recipient),
                 );
             }
             Err(error) => return Err(error),

@@ -93,9 +93,13 @@ pub(super) fn reserved_ids(systems: &Stage5SystemsState) -> Result<BTreeSet<u64>
 }
 pub(super) fn refresh(world: &mut World) -> Result<(), String> {
     let mut ids = reserved_ids(&world.resource::<Stage5SystemsResource>().stage5_systems)?;
-    let hero_ids = super::hero_inventory::validate_hero_custody(world.resource::<super::resources::HeroInventoryResource>())?;
+    let hero_ids = super::hero_inventory::validate_hero_custody(
+        world.resource::<super::resources::HeroInventoryResource>(),
+    )?;
     for id in hero_ids {
-        if !ids.insert(id) {return Err("Hero UID collides with market/refine custody".into());}
+        if !ids.insert(id) {
+            return Err("Hero UID collides with market/refine custody".into());
+        }
     }
     world
         .resource_mut::<InventoryResource>()
@@ -110,7 +114,9 @@ pub(super) fn can_take(inventory: &InventoryResource, item: &ItemState) -> bool 
     let mut remaining = inventory.clone();
     let collection = if item.container == ItemContainer::Belt {
         &mut remaining.belt_items
-    } else { &mut remaining.inventory_items };
+    } else {
+        &mut remaining.inventory_items
+    };
     let Some(index) = collection
         .iter()
         .position(|candidate| candidate.container == item.container && candidate.slot == item.slot)
@@ -205,33 +211,51 @@ pub(super) fn plan_return(
 /// Original Crystal Inventory[] addressing for refinement only: six belt
 /// cells followed by bag cells. Other services retain their bag-only indexes.
 pub(super) fn plan_return_crystal_array(
-    inventory: &InventoryResource, item: &ItemState, destination: Option<u8>,
+    inventory: &InventoryResource,
+    item: &ItemState,
+    destination: Option<u8>,
 ) -> Option<(InventoryResource, Vec<ItemState>)> {
     let index = match destination {
         Some(index) => index,
         None => (0..inventory.inventory_capacity.min(86)).find_map(|index| {
             let wire = index as u8;
             let occupied = if wire < 6 {
-                inventory.belt_items.iter().any(|item|item.slot == wire)
+                inventory.belt_items.iter().any(|item| item.slot == wire)
             } else {
                 let pair = inventory_container_and_slot_for_index(wire - 6)?;
-                inventory.inventory_items.iter().any(|item|(item.container,item.slot) == pair)
+                inventory
+                    .inventory_items
+                    .iter()
+                    .any(|item| (item.container, item.slot) == pair)
             };
             (!occupied).then_some(wire)
         })?,
     };
-    if u16::from(index) >= inventory.inventory_capacity || index >= 86 { return None; }
-    if index >= 6 { return plan_return(inventory, item, Some(index - 6), false); }
-    if inventory.belt_items.iter().any(|item|item.slot == index) { return None; }
+    if u16::from(index) >= inventory.inventory_capacity || index >= 86 {
+        return None;
+    }
+    if index >= 6 {
+        return plan_return(inventory, item, Some(index - 6), false);
+    }
+    if inventory.belt_items.iter().any(|item| item.slot == index) {
+        return None;
+    }
     let ids = item_ids(item).ok()?;
     let mut staged = inventory.clone();
-    for id in &ids { staged.reserved_item_unique_ids.remove(id); }
-    if ids.iter().any(|id|inventory_unique_id_is_used(&staged,*id)) { return None; }
+    for id in &ids {
+        staged.reserved_item_unique_ids.remove(id);
+    }
+    if ids
+        .iter()
+        .any(|id| inventory_unique_id_is_used(&staged, *id))
+    {
+        return None;
+    }
     let mut incoming = item.clone();
     incoming.container = ItemContainer::Belt;
     incoming.slot = index;
     staged.belt_items.push(incoming.clone());
-    Some((staged,vec![incoming]))
+    Some((staged, vec![incoming]))
 }
 pub(super) fn returned_packets(
     before: &InventoryResource,

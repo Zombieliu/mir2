@@ -4,8 +4,8 @@
 //! semantics; it does not prove an ordinary boss-poison player journey.
 use mir2_protocol::{MirClass, MirDirection, MirGender, Point, ServerPacket, Spell};
 use mir2_simulation::{
-    SessionId, WorldEntityDisposition, ZoneCommand, ZoneJoin, ZoneKey,
-    ZoneMonsterSpawn, ZoneOutbound, ZoneRuntime,
+    SessionId, WorldEntityDisposition, ZoneCommand, ZoneJoin, ZoneKey, ZoneMonsterSpawn,
+    ZoneOutbound, ZoneRuntime,
 };
 
 const MAP: &str = "D024";
@@ -30,13 +30,19 @@ fn session(name: &str) -> SessionId {
 }
 fn point(x: i32, y: i32) -> Point {
     // Translate every actor, ring, corridor and expected location together.
-    Point { x: x + 20, y: y + 42 }
+    Point {
+        x: x + 20,
+        y: y + 42,
+    }
 }
 
 fn fixture(class: MirClass) -> ZoneRuntime {
     // Ordinary terrain has the same signed identity after strict cold reload.
     let mut zone = ZoneRuntime::new(ZoneKey::for_map(MAP));
-    assert!(zone.has_available_collision(), "real fixture terrain must load");
+    assert!(
+        zone.has_available_collision(),
+        "real fixture terrain must load"
+    );
     for (name, object_id, position) in [
         (OWNER, OWNER_ID, point(10, 10)),
         (OBSERVER, OBSERVER_ID, point(22, 10)),
@@ -650,7 +656,10 @@ fn dense_struck_window_survives_exact_checkpoint_without_restarting_hit_flinch()
     // expired owner to the restored world.
     let owner = original.owner_health_cursor(&session(OWNER)).unwrap();
     assert!(restored.owner_health_cursor(&session(OWNER)).is_none());
-    assert_eq!(original.player_vitals(&session(OWNER)), restored.player_vitals(&session(OWNER)));
+    assert_eq!(
+        original.player_vitals(&session(OWNER)),
+        restored.player_vitals(&session(OWNER))
+    );
     for event in &first {
         if let ZoneOutbound::OwnerHealthChanged { change } = event {
             assert_eq!(change.cursor.session_id, session(OWNER));
@@ -660,7 +669,12 @@ fn dense_struck_window_survives_exact_checkpoint_without_restarting_hit_flinch()
             assert!(change.cursor.health_sequence > 0);
             assert!(change.cursor.health_sequence <= owner.health_sequence);
         }
-        if let ZoneOutbound::PlayerDamaged { session_id, damage, settlement: Some(receipt) } = event {
+        if let ZoneOutbound::PlayerDamaged {
+            session_id,
+            damage,
+            settlement: Some(receipt),
+        } = event
+        {
             assert_eq!(receipt.hp_before - receipt.hp_after, *damage);
             assert!(first.iter().any(|candidate| matches!(candidate,
                 ZoneOutbound::OwnerHealthChanged { change }
@@ -671,18 +685,34 @@ fn dense_struck_window_survives_exact_checkpoint_without_restarting_hit_flinch()
                     && change.hp == receipt.hp_after)));
         }
     }
-    assert!(!second.iter().any(|event| matches!(event, ZoneOutbound::OwnerHealthChanged { .. })));
-    let gameplay = |events: &[ZoneOutbound]| events.iter()
-        .filter(|event| !matches!(event, ZoneOutbound::OwnerHealthChanged { .. }))
-        .cloned().collect::<Vec<_>>();
+    assert!(!second
+        .iter()
+        .any(|event| matches!(event, ZoneOutbound::OwnerHealthChanged { .. })));
+    let gameplay = |events: &[ZoneOutbound]| {
+        events
+            .iter()
+            .filter(|event| !matches!(event, ZoneOutbound::OwnerHealthChanged { .. }))
+            .cloned()
+            .collect::<Vec<_>>()
+    };
     assert_eq!(
-        gameplay(&first), gameplay(&second),
+        gameplay(&first),
+        gameplay(&second),
         "an exact checkpoint keeps ordinary pending impacts and presentation admission"
     );
-    let before: serde_json::Value = serde_json::from_slice(&original.checkpoint_bytes().unwrap()).unwrap();
-    let after: serde_json::Value = serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
-    for key in ["players", "native_monsters", "native_monster_respawns", "pending_native_hits",
-        "pending_native_projectiles", "pending_native_player_hits", "native_periodic_player_poisons"] {
+    let before: serde_json::Value =
+        serde_json::from_slice(&original.checkpoint_bytes().unwrap()).unwrap();
+    let after: serde_json::Value =
+        serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
+    for key in [
+        "players",
+        "native_monsters",
+        "native_monster_respawns",
+        "pending_native_hits",
+        "pending_native_projectiles",
+        "pending_native_player_hits",
+        "native_periodic_player_poisons",
+    ] {
         assert_eq!(before[key], after[key], "checkpoint field {key}");
     }
     assert_eq!(damaged(&second).0, 2);

@@ -130,19 +130,26 @@ pub(super) async fn send_session_packets(
             && (batch.len() == super::transport::MAX_BATCH_MESSAGES
                 || batch_bytes + bytes > super::transport::MAX_BATCH_BYTES)
         {
-            sender.send_batch(std::mem::take(&mut batch)).await
+            sender
+                .send_batch(std::mem::take(&mut batch))
+                .await
                 .map_err(|error| error.to_string())?;
             batch_bytes = 0;
         }
         batch.push(frame);
         batch_bytes += bytes;
         if batch_bytes > super::transport::MAX_BATCH_BYTES {
-            sender.send_batch(std::mem::take(&mut batch)).await
+            sender
+                .send_batch(std::mem::take(&mut batch))
+                .await
                 .map_err(|error| error.to_string())?;
             batch_bytes = 0;
         }
     }
-    sender.send_batch(batch).await.map_err(|error| error.to_string())?;
+    sender
+        .send_batch(batch)
+        .await
+        .map_err(|error| error.to_string())?;
     Ok(())
 }
 

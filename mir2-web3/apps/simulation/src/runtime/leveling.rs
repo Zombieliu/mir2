@@ -123,21 +123,27 @@ pub(super) fn apply_experience_gain(world: &mut World, amount: i64) -> Vec<Serve
         return Vec::new();
     }
     if !super::default_npc_events::can_gain_experience(world)
-        && !super::shared_guild_experience::has_validated_selected_gain(world,amount) {
+        && !super::shared_guild_experience::has_validated_selected_gain(world, amount)
+    {
         return Vec::new();
     }
-    if !super::shared_guild_experience::record_gain_or_reject(world,amount) {
+    if !super::shared_guild_experience::record_gain_or_reject(world, amount) {
         return Vec::new();
     }
     if let Err(error) = super::shared_mentor_rewards::record_gain(world, amount as u64) {
         super::shared_guild_experience::reject_source(world, error);
         return Vec::new();
     }
-    let Ok(earned_amount)=u32::try_from(amount) else {
-        super::shared_guild_experience::reject_source(world,"saved pet earned experience exceeds the original uint width".into());
+    let Ok(earned_amount) = u32::try_from(amount) else {
+        super::shared_guild_experience::reject_source(
+            world,
+            "saved pet earned experience exceeds the original uint width".into(),
+        );
         return Vec::new();
     };
-    if !super::shared_pet_progress::record_gain_or_reject(world,earned_amount) { return Vec::new(); }
+    if !super::shared_pet_progress::record_gain_or_reject(world, earned_amount) {
+        return Vec::new();
+    }
 
     let mut level = player_current_level(world);
     let (mut experience, mut max_experience) = {
@@ -179,7 +185,10 @@ pub(super) fn apply_experience_gain(world: &mut World, amount: i64) -> Vec<Serve
         // all callbacks observe the final state when the queue is drained.
         if super::resources::is_in_world(world) {
             for _ in 1..levels_gained {
-                let _ = super::default_npc_events::enqueue(world,super::default_npc_events::DefaultNpcEvent::LevelUp);
+                let _ = super::default_npc_events::enqueue(
+                    world,
+                    super::default_npc_events::DefaultNpcEvent::LevelUp,
+                );
             }
         }
         packets.extend(level_changed_packets(world, level));
@@ -246,7 +255,10 @@ pub(super) fn apply_level_change(world: &mut World, level: u16) {
         world.resource_mut::<PlayerRuntimeResource>().player_vitals = restored;
     }
     if super::resources::is_in_world(world) {
-        let _ = super::default_npc_events::enqueue(world,super::default_npc_events::DefaultNpcEvent::LevelUp);
+        let _ = super::default_npc_events::enqueue(
+            world,
+            super::default_npc_events::DefaultNpcEvent::LevelUp,
+        );
     }
 }
 

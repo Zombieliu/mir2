@@ -437,7 +437,9 @@ fn append_platinum_176_sabuk_battlefield_rules(
     map_file_name: &str,
     rules: &mut Vec<MonsterSpawnRule>,
 ) {
-    if !config.conquest_policies.is_empty() {return;}
+    if !config.conquest_policies.is_empty() {
+        return;
+    }
     let normalized_map = map_file_name
         .trim()
         .trim_end_matches(".map")
@@ -1271,8 +1273,16 @@ pub(super) fn spawn_runtime_monster_on_source_script_cell(
     // MonsterObject.Spawn invokes base Spawned after NPCSegment's +1000;
     // the final ordinary Source activation time is +2000 milliseconds.
     spawn_runtime_monster_with_position_policy(
-        world, template, position, MirDirection::Up, None, None, None, None,
-        crystal_speed_to_ticks(2_000), true,
+        world,
+        template,
+        position,
+        MirDirection::Up,
+        None,
+        None,
+        None,
+        None,
+        crystal_speed_to_ticks(2_000),
+        true,
     )
 }
 

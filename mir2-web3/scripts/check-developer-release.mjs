@@ -8,6 +8,7 @@ import {
 } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { verifyDeveloperBevyRuntimeLock } from "./lib/verify-developer-bevy-runtime-lock.mjs";
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const PROJECT_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..");
@@ -204,15 +205,6 @@ function readPngDimensions(absolutePath, label) {
   const height = bytes.readUInt32BE(20);
   assert(width > 0 && height > 0, `${label} has invalid dimensions ${width}x${height}`);
   return { width, height };
-}
-
-function assertWasmHeader(absolutePath, label) {
-  const bytes = readFileSync(absolutePath);
-  assert(bytes.length >= 8, `${label} is too small to be WebAssembly`);
-  assert(
-    bytes.subarray(0, 8).equals(Buffer.from([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00])),
-    `${label} has an invalid WebAssembly header`,
-  );
 }
 
 function checkRepositoryAndSubmoduleLock() {
@@ -745,46 +737,11 @@ function checkBevyRuntimeLock() {
   assertTracked("mir2-web3/apps/web/scripts/fetch-prebuilt-bevy-runtime.mjs");
   assertTracked("mir2-web3/config/production-web-assets.json");
   const manifest = readJson(projectPath(manifestRelativePath), "Bevy runtime version manifest");
-  assert(/^bevy-[a-f0-9]{16}$/.test(manifest.version), "Bevy runtime version is invalid");
-  assert(
-    Array.isArray(manifest.files) && manifest.files.length === 4,
-    "Bevy runtime file set is incomplete",
-  );
-
-  const combined = createHash("sha256");
-  const records = new Map();
-  for (const record of manifest.files) {
-    const normalized = assertSafeRelativePath(record.path, "Bevy runtime path");
-    assert(
-      normalized.startsWith("public/bevy-runtime/"),
-      `Bevy runtime path is outside public/bevy-runtime: ${record.path}`,
-    );
-    assert(SHA256_PATTERN.test(record.sha256), `invalid Bevy runtime SHA-256: ${record.path}`);
-    const absolutePath = path.resolve(WEB_ROOT, ...normalized.split("/"));
-    fileInfo(absolutePath, `Bevy runtime ${record.path}`);
-    assertExternalized(`mir2-web3/apps/web/${normalized}`);
-    const actualHash = sha256(absolutePath);
-    assert(actualHash === record.sha256, `Bevy runtime hash mismatch: ${record.path}`);
-    if (record.path.endsWith(".wasm")) {
-      assertWasmHeader(absolutePath, record.path);
-    }
-    combined.update(record.path);
-    combined.update("\0");
-    combined.update(record.sha256);
-    combined.update("\0");
-    records.set(record.path, record.sha256);
+  const verified = verifyDeveloperBevyRuntimeLock(manifest, WEB_ROOT);
+  for (const file of verified.files) {
+    assertExternalized(`mir2-web3/apps/web/${file.path}`);
   }
-
-  const expectedVersion = `bevy-${combined.digest("hex").slice(0, 16)}`;
-  assert(manifest.version === expectedVersion, `Bevy runtime version should be ${expectedVersion}`);
-  assert(
-    records.has("public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js") &&
-      records.has("public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm") &&
-      records.has("public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js") &&
-      records.has("public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm"),
-    "WebGPU/WebGL2 runtime variants are incomplete",
-  );
-  record("Bevy runtime lock", `${manifest.version} / ${manifest.files.length} hashed files`);
+  record("Bevy runtime lock", `${verified.version} / ${verified.files.length} hashed files`);
 }
 
 function checkStarterResources() {

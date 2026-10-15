@@ -335,7 +335,8 @@ impl SimulationConfig {
                         name: "Leader".into(),
                         options: 255,
                     }],
-                    members: vec![SharedGuildMember { membership_epoch: 1,
+                    members: vec![SharedGuildMember {
+                        membership_epoch: 1,
                         identity: identity.clone(),
                         name: next.character.name.clone(),
                         rank_index: 0,
@@ -344,7 +345,8 @@ impl SimulationConfig {
                     storage: BTreeMap::new(),
                     buffs: BTreeMap::new(),
                     last_buff_tick_ms: 0,
-                    experience_receipts: BTreeSet::new(), experience_receipt_payloads: Default::default(),
+                    experience_receipts: BTreeSet::new(),
+                    experience_receipt_payloads: Default::default(),
                     active_wars: Default::default(),
                 };
                 if store
@@ -412,8 +414,14 @@ impl SimulationConfig {
             if !guild.active_wars.is_empty() {
                 return Err("server.CannotRecruitDuringWar".into());
             }
-            if guild.members.iter().any(|member|member.identity.character_index==target.character_index){
-                return Err("ambiguous legacy public character index; account migration required".into());
+            if guild
+                .members
+                .iter()
+                .any(|member| member.identity.character_index == target.character_index)
+            {
+                return Err(
+                    "ambiguous legacy public character index; account migration required".into(),
+                );
             }
             let cap = *mir2_game_data::crystal_guild_settings()
                 .member_caps
@@ -431,7 +439,11 @@ impl SimulationConfig {
                 });
             }
             let rank_index = guild.ranks.last().ok_or("guild rank missing")?.index;
-            guild.members.push(SharedGuildMember { membership_epoch: guild.revision.checked_add(1).ok_or("guild membership epoch exhausted")?,
+            guild.members.push(SharedGuildMember {
+                membership_epoch: guild
+                    .revision
+                    .checked_add(1)
+                    .ok_or("guild membership epoch exhausted")?,
                 identity: target.clone(),
                 name: target_name,
                 rank_index,
@@ -461,7 +473,7 @@ pub(super) struct SharedGuildSession {
 }
 struct GuildCreationGrant {
     identity: Stage5FriendIdentity,
-    npc_binding: Option<(u32,String)>,
+    npc_binding: Option<(u32, String)>,
 }
 fn world_identity(world: &World) -> Option<Stage5FriendIdentity> {
     let session = world.resource::<SessionResource>();
@@ -521,9 +533,16 @@ pub(super) fn project_legacy_shape(world: &World) -> Option<Stage5GuildState> {
     view.storage_gold = guild.gold;
     let config = &world.resource::<RuntimeConfigResource>().config;
     if let Ok(store) = config.account_store.lock() {
-        view.active_wars = guild.active_wars.keys().filter_map(|enemy_id| {
-            store.shared_guilds.get(enemy_id).map(|enemy| enemy.name.clone())
-        }).collect();
+        view.active_wars = guild
+            .active_wars
+            .keys()
+            .filter_map(|enemy_id| {
+                store
+                    .shared_guilds
+                    .get(enemy_id)
+                    .map(|enemy| enemy.name.clone())
+            })
+            .collect();
     }
     for (bit, name) in [
         (1, "CanChangeRank"),
@@ -692,7 +711,8 @@ impl crate::SimulationSession {
         }
     }
     pub(super) fn grant_shared_guild_creation_from_npc(&mut self) -> Vec<ServerPacket> {
-        if !enabled(self.app.world()) || super::components::current_player_is_dead(self.app.world()) {
+        if !enabled(self.app.world()) || super::components::current_player_is_dead(self.app.world())
+        {
             return Vec::new();
         }
         let Some(identity) = world_identity(self.app.world()) else {
@@ -707,12 +727,30 @@ impl crate::SimulationSession {
         {
             return Vec::new();
         }
-        let npc_binding=self.app.world().resource::<super::resources::NpcStateResource>().active_npc_dialog.as_ref()
-            .map(|dialog|(dialog.npc_object_id,self.app.world().resource::<super::resources::MapRuntimeResource>().current_map.file_name.clone()));
+        let npc_binding = self
+            .app
+            .world()
+            .resource::<super::resources::NpcStateResource>()
+            .active_npc_dialog
+            .as_ref()
+            .map(|dialog| {
+                (
+                    dialog.npc_object_id,
+                    self.app
+                        .world()
+                        .resource::<super::resources::MapRuntimeResource>()
+                        .current_map
+                        .file_name
+                        .clone(),
+                )
+            });
         self.app
             .world_mut()
             .resource_mut::<SharedGuildSession>()
-            .create_grant = Some(GuildCreationGrant{identity,npc_binding});
+            .create_grant = Some(GuildCreationGrant {
+            identity,
+            npc_binding,
+        });
         vec![ServerPacket::GuildNameRequest]
     }
     pub fn submit_shared_guild_name(&mut self, name: &str) -> Result<Vec<ServerPacket>, String> {
@@ -723,18 +761,32 @@ impl crate::SimulationSession {
             .world_mut()
             .get_resource_mut::<SharedGuildSession>()
             .and_then(|mut state| state.create_grant.take());
-        let Some(grant)=grant else {
+        let Some(grant) = grant else {
             return Err("guild create requires an unused NPC authorization".into());
         };
-        if grant.identity!=identity {return Err("guild creation actor changed".into());}
+        if grant.identity != identity {
+            return Err("guild creation actor changed".into());
+        }
         if super::components::current_player_is_dead(self.app.world()) {
             return Err("guild creation requires a living character".into());
         }
-        if let Some((npc_id,map))=grant.npc_binding {
-            let current=self.app.world().resource::<super::resources::NpcStateResource>().active_npc_dialog.as_ref();
-            if current.is_none_or(|dialog|dialog.npc_object_id!=npc_id)
-                || self.app.world().resource::<super::resources::MapRuntimeResource>().current_map.file_name!=map
-                || !super::npc::crystal_npc_object_in_data_range(self.app.world(),npc_id) {
+        if let Some((npc_id, map)) = grant.npc_binding {
+            let current = self
+                .app
+                .world()
+                .resource::<super::resources::NpcStateResource>()
+                .active_npc_dialog
+                .as_ref();
+            if current.is_none_or(|dialog| dialog.npc_object_id != npc_id)
+                || self
+                    .app
+                    .world()
+                    .resource::<super::resources::MapRuntimeResource>()
+                    .current_map
+                    .file_name
+                    != map
+                || !super::npc::crystal_npc_object_in_data_range(self.app.world(), npc_id)
+            {
                 return Err("guild creation NPC authorization expired".into());
             }
         }

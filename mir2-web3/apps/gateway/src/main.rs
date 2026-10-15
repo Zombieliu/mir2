@@ -82,8 +82,14 @@ async fn async_main() -> std::io::Result<()> {
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let policy = mir2_simulation::monthly_card::MonthlyCardPolicy::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    if policy.required && config.account_store_path.is_none() && config.account_store_database_url.is_none() {
-        return Err(io::Error::new(io::ErrorKind::InvalidInput, "monthly access requires durable account storage"));
+    if policy.required
+        && config.account_store_path.is_none()
+        && config.account_store_database_url.is_none()
+    {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "monthly access requires durable account storage",
+        ));
     }
     let activity_policy = mir2_simulation::activities::ActivityPolicy::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;

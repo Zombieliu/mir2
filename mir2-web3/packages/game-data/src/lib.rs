@@ -3,13 +3,16 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::OnceLock;
 
-mod crystal_guild_settings;
 mod crystal_creature_settings;
+mod crystal_guild_settings;
 mod crystal_hero_settings;
 mod crystal_npc_goods;
-pub use crystal_npc_goods::{crystal_npc_goods_item_json, crystal_npc_goods_list_json};
-pub use crystal_hero_settings::{crystal_hero_settings, calculate_crystal_hero_base_stat, CrystalHeroSettings, CrystalHeroSource, CrystalHeroRules};
 pub use crystal_creature_settings::{crystal_creature_settings, CrystalCreatureSettings};
+pub use crystal_hero_settings::{
+    calculate_crystal_hero_base_stat, crystal_hero_settings, CrystalHeroRules, CrystalHeroSettings,
+    CrystalHeroSource,
+};
+pub use crystal_npc_goods::{crystal_npc_goods_item_json, crystal_npc_goods_list_json};
 #[cfg(test)]
 mod crystal_item_image;
 pub mod crystal_map_events;
@@ -219,24 +222,33 @@ pub fn platinum_176_profile_bundle() -> ContentProfileBundle {
 
 pub fn platinum_fiveclass_profile() -> ContentProfile {
     static PROFILE: OnceLock<ContentProfile> = OnceLock::new();
-    PROFILE.get_or_init(|| {
-        serde_json::from_str(include_str!("../data/content_profiles/platinum_fiveclass.json"))
+    PROFILE
+        .get_or_init(|| {
+            serde_json::from_str(include_str!(
+                "../data/content_profiles/platinum_fiveclass.json"
+            ))
             .expect("platinum_fiveclass content profile json should be valid")
-    }).clone()
+        })
+        .clone()
 }
 
 pub fn platinum_fiveclass_profile_bundle() -> ContentProfileBundle {
     static BUNDLE: OnceLock<ContentProfileBundle> = OnceLock::new();
-    BUNDLE.get_or_init(|| {
-        let bundle: ContentProfileBundle = serde_json::from_str(include_str!(
-            "../data/generated/platinum_fiveclass_bundle.json"))
+    BUNDLE
+        .get_or_init(|| {
+            let bundle: ContentProfileBundle = serde_json::from_str(include_str!(
+                "../data/generated/platinum_fiveclass_bundle.json"
+            ))
             .expect("platinum_fiveclass content profile bundle json should be valid");
-        let profile = platinum_fiveclass_profile();
-        assert_eq!((bundle.profile_id.as_str(), bundle.profile_version),
-            (profile.profile_id.as_str(), profile.version),
-            "platinum_fiveclass bundle must describe the compiled content profile");
-        bundle
-    }).clone()
+            let profile = platinum_fiveclass_profile();
+            assert_eq!(
+                (bundle.profile_id.as_str(), bundle.profile_version),
+                (profile.profile_id.as_str(), profile.version),
+                "platinum_fiveclass bundle must describe the compiled content profile"
+            );
+            bundle
+        })
+        .clone()
 }
 
 pub fn content_profile_experience_required(profile: &ContentProfile, level: u16) -> Option<i64> {
@@ -322,7 +334,10 @@ fn validate_native_resource_only_maps(
     );
     for name in &profile.native_resource_only_maps {
         if name != "D71653"
-            || !matches!(profile.profile_id.as_str(), "platinum_176" | "platinum_fiveclass")
+            || !matches!(
+                profile.profile_id.as_str(),
+                "platinum_176" | "platinum_fiveclass"
+            )
         {
             errors.push(format!(
                 "nativeResourceOnlyMaps has no named original-room policy for {name}"
@@ -451,18 +466,21 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
     }
 
     let classic_classes = [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist];
-    let five_classes = [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist,
-        MirClass::Assassin, MirClass::Archer];
+    let five_classes = [
+        MirClass::Warrior,
+        MirClass::Wizard,
+        MirClass::Taoist,
+        MirClass::Assassin,
+        MirClass::Archer,
+    ];
     let expected_classes: &[MirClass] = if profile.profile_id == "platinum_fiveclass" {
         &five_classes
     } else {
         &classic_classes
     };
     if profile.allowed_classes.as_slice() != expected_classes {
-        errors.push(
-            "allowedClasses must match the selected profile in canonical order"
-                .to_string(),
-        );
+        errors
+            .push("allowedClasses must match the selected profile in canonical order".to_string());
     }
 
     let mut expected_level = 1_u16;
@@ -964,12 +982,18 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
             ));
         }
         if !profile.item_whitelist.iter().any(|name| {
-            let Some(book) = crystal_item_by_name(name) else { return false; };
-            let class_flag = match skill.class {
-                MirClass::Warrior => 1, MirClass::Wizard => 2, MirClass::Taoist => 4,
-                MirClass::Assassin => 8, MirClass::Archer => 16,
+            let Some(book) = crystal_item_by_name(name) else {
+                return false;
             };
-            book.required_class & class_flag != 0 && book.required_type == 0
+            let class_flag = match skill.class {
+                MirClass::Warrior => 1,
+                MirClass::Wizard => 2,
+                MirClass::Taoist => 4,
+                MirClass::Assassin => 8,
+                MirClass::Archer => 16,
+            };
+            book.required_class & class_flag != 0
+                && book.required_type == 0
                 && u16::from(book.required_amount) == skill.required_level
                 && crystal_magic_for_book(&book).is_some_and(|magic| magic.spell == skill.spell)
         }) {
@@ -2884,10 +2908,15 @@ pub fn crystal_magic_by_spell(spell: &str) -> Option<CrystalMagicTemplate> {
 /// Crystal stores a skill book's authoritative spell ID in Shape. Display
 /// names include historical typos (CresentSlash, CatTognue, StoneTrap).
 pub fn crystal_magic_for_book(book: &CrystalItemTemplate) -> Option<CrystalMagicTemplate> {
-    if book.item_type != 20 { return None; }
+    if book.item_type != 20 {
+        return None;
+    }
     let spell = Spell::try_from(u8::try_from(book.shape).ok()?).ok()?;
-    crystal_magic_manifest_ref().magics.iter()
-        .find(|magic| Spell::from_crystal_name(&magic.spell) == Some(spell)).cloned()
+    crystal_magic_manifest_ref()
+        .magics
+        .iter()
+        .find(|magic| Spell::from_crystal_name(&magic.spell) == Some(spell))
+        .cloned()
 }
 
 pub fn crystal_buff_by_type(buff_type: &str) -> Option<CrystalBuffTemplate> {
@@ -3968,8 +3997,11 @@ mod tests {
             profile.quest_reward_overrides.len()
         );
         assert_eq!(bundle.files.len(), 14);
-        assert!(bundle.files.iter().any(|file| file.path ==
-            "packages/game-data/data/generated/crystal_mining_manifest.json"));
+        assert!(bundle
+            .files
+            .iter()
+            .any(|file| file.path
+                == "packages/game-data/data/generated/crystal_mining_manifest.json"));
     }
 
     #[test]
@@ -5018,5 +5050,7 @@ mod tests {
 mod crystal_mining;
 #[cfg(test)]
 mod fiveclass_tests;
-pub use crystal_mining::{crystal_mine_set, crystal_mining_manifest, crystal_mining_map, crystal_mining_item,
-    CrystalMineDrop, CrystalMineSet, CrystalMineZone, CrystalMiningMap, CrystalMiningManifest};
+pub use crystal_mining::{
+    crystal_mine_set, crystal_mining_item, crystal_mining_manifest, crystal_mining_map,
+    CrystalMineDrop, CrystalMineSet, CrystalMineZone, CrystalMiningManifest, CrystalMiningMap,
+};

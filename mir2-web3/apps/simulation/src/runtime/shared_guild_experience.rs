@@ -14,15 +14,22 @@ pub(super) struct SharedKillExperiencePermit(
     pub GuildExperienceCommitPermit,
     pub Option<super::zone::ZoneMentorBankAttribution>,
 );
-pub(super) fn has_validated_selected_gain(world:&World,amount:i64)->bool {
-    let Some(permit)=world.get_resource::<SharedKillExperiencePermit>() else{return false;};
-    let Some(selection)=&permit.0.selection else{return false;};
-    let session=world.resource::<SessionResource>();
-    session.account_id.as_deref()==Some(permit.0.identity.account_id.as_str())
-        && session.selected_character.as_ref().is_some_and(|character|character.index==permit.0.identity.character_index)
-        && selection.account_id==permit.0.identity.account_id
-        && selection.character_index==permit.0.identity.character_index
-        && i64::from(selection.final_amount)==amount
+pub(super) fn has_validated_selected_gain(world: &World, amount: i64) -> bool {
+    let Some(permit) = world.get_resource::<SharedKillExperiencePermit>() else {
+        return false;
+    };
+    let Some(selection) = &permit.0.selection else {
+        return false;
+    };
+    let session = world.resource::<SessionResource>();
+    session.account_id.as_deref() == Some(permit.0.identity.account_id.as_str())
+        && session
+            .selected_character
+            .as_ref()
+            .is_some_and(|character| character.index == permit.0.identity.character_index)
+        && selection.account_id == permit.0.identity.account_id
+        && selection.character_index == permit.0.identity.character_index
+        && i64::from(selection.final_amount) == amount
 }
 pub(super) fn commit_source<T, F>(
     world: &World,
@@ -36,9 +43,15 @@ where
     let actions = super::npc_shared_guild_actions::capture(world);
     let guild_ids = super::npc_shared_guild_actions::guild_ids(&actions);
     if !guild_ids.is_empty() {
-        return config.commit_source_with_guild_post(accounts, &guild_ids,
-            world.get_resource::<SharedKillExperiencePermit>().map(|permit| &permit.0),
-            transaction, |store| super::npc_shared_guild_actions::apply(store, &actions));
+        return config.commit_source_with_guild_post(
+            accounts,
+            &guild_ids,
+            world
+                .get_resource::<SharedKillExperiencePermit>()
+                .map(|permit| &permit.0),
+            transaction,
+            |store| super::npc_shared_guild_actions::apply(store, &actions),
+        );
     }
     match world.get_resource::<SharedKillExperiencePermit>() {
         Some(permit) => config.commit_account_store_transaction_with_guild_experience_permit(
@@ -57,7 +70,9 @@ pub(super) struct GuildExperienceResource(
     AtomicBool,
 );
 pub(super) fn source_command_active(world: &World) -> bool {
-    world.get_resource::<GuildExperienceResource>().is_some_and(|resource| resource.1.load(Ordering::Acquire))
+    world
+        .get_resource::<GuildExperienceResource>()
+        .is_some_and(|resource| resource.1.load(Ordering::Acquire))
 }
 pub(super) fn snapshot(world: &World) -> GuildExperienceJournal {
     world
@@ -138,12 +153,17 @@ pub(super) fn record_gain(world: &mut World, amount: u32) -> Result<(), String> 
         } else {
             // REMOVEFROMGUILD earlier in this very source command takes effect
             // before a subsequent GiveExp, even though publication is one CAS.
-            if super::npc_shared_guild_actions::has_pending(world) { return Ok(()); }
+            if super::npc_shared_guild_actions::has_pending(world) {
+                return Ok(());
+            }
             let Some(guild) = super::shared_guilds::guild_view(world) else {
                 return Ok(());
             };
-            if guild.name == world.resource::<super::resources::RuntimeConfigResource>()
-                .config.crystal_newbie_guild_name
+            if guild.name
+                == world
+                    .resource::<super::resources::RuntimeConfigResource>()
+                    .config
+                    .crystal_newbie_guild_name
             {
                 return Ok(());
             }
@@ -231,8 +251,10 @@ fn restore_checkpoint_npc_random(
 /// Compare its exact trusted live Source state instead, retaining the item,
 /// ingredients, phase, epoch and deadline. Actual durable snapshots are never
 /// normalized: the usual save still samples the real remaining duration.
-fn npc_source_comparison_image(mut save: CharacterSaveRecord, refine: &crate::Stage5RefineState)
-    -> Result<Vec<u8>, String> {
+fn npc_source_comparison_image(
+    mut save: CharacterSaveRecord,
+    refine: &crate::Stage5RefineState,
+) -> Result<Vec<u8>, String> {
     // Serialized timed buffs sample their remaining duration at each capture.
     // Compare the actual live BuffState/clock anchors separately, so elapsed
     // time alone cannot create writes while mutations are still detected.
@@ -274,13 +296,18 @@ pub(super) fn reject_source(world: &World, error: String) {
 
 fn mentor_checkpoint_required(world: &World) -> bool {
     let session = world.resource::<SessionResource>();
-    let (Some(account), Some(character)) = (&session.account_id, &session.selected_character) else {
+    let (Some(account), Some(character)) = (&session.account_id, &session.selected_character)
+    else {
         return false;
     };
-    world.resource::<RuntimeConfigResource>().config
+    world
+        .resource::<RuntimeConfigResource>()
+        .config
         .shared_mentor_profile_for(&Stage5FriendIdentity {
-            account_id: account.clone(), character_index: character.index,
-        }).is_ok_and(|profile| profile.mentor.partner_identity.is_some())
+            account_id: account.clone(),
+            character_index: character.index,
+        })
+        .is_ok_and(|profile| profile.mentor.partner_identity.is_some())
 }
 
 fn has_uncommitted(world: &World) -> Result<bool, String> {
@@ -343,19 +370,30 @@ impl SimulationSession {
     /// Marks the real NPC entry even when an outer packet/WorldCommand already
     /// owns the Source checkpoint. The outermost finish then persists any full
     /// character mutation; unchanged dialog views do not force storage writes.
-    pub(crate) fn begin_npc_dialog_source_command(&mut self, force: bool)
-        -> Result<Option<GuildExperienceCheckpoint>, String> {
+    pub(crate) fn begin_npc_dialog_source_command(
+        &mut self,
+        force: bool,
+    ) -> Result<Option<GuildExperienceCheckpoint>, String> {
         let mut before = self.begin_guild_experience_command(true)?;
-        if let Some(checkpoint) = before.as_mut() { checkpoint.force_save = force; }
+        if let Some(checkpoint) = before.as_mut() {
+            checkpoint.force_save = force;
+        }
         if source_command_active(self.app.world()) {
-            self.app.world().resource::<GuildExperienceResource>().3.store(true, Ordering::Release);
+            self.app
+                .world()
+                .resource::<GuildExperienceResource>()
+                .3
+                .store(true, Ordering::Release);
         }
         Ok(before)
     }
-    pub(crate) fn begin_default_npc_source_command(&mut self)
-        -> Result<Option<GuildExperienceCheckpoint>, String> {
+    pub(crate) fn begin_default_npc_source_command(
+        &mut self,
+    ) -> Result<Option<GuildExperienceCheckpoint>, String> {
         let mut before = self.begin_guild_experience_command(true)?;
-        if let Some(checkpoint) = before.as_mut() { checkpoint.force_save = false; }
+        if let Some(checkpoint) = before.as_mut() {
+            checkpoint.force_save = false;
+        }
         Ok(before)
     }
     pub(crate) fn begin_guild_experience_command(
@@ -376,7 +414,13 @@ impl SimulationSession {
         let mentor_active = mentor_checkpoint_required(world);
         let guild_active = super::shared_guilds::enabled(world)
             && super::shared_guilds::guild_view(world).is_some();
-        if !force && !mentor_active && !guild_active && !super::shared_pet_progress::has_live_admission(world) { return Ok(None); }
+        if !force
+            && !mentor_active
+            && !guild_active
+            && !super::shared_pet_progress::has_live_admission(world)
+        {
+            return Ok(None);
+        }
         world
             .resource::<RuntimeConfigResource>()
             .config
@@ -388,7 +432,10 @@ impl SimulationSession {
             .resource::<GuildExperienceResource>()
             .1
             .store(true, Ordering::Release);
-        world.resource::<GuildExperienceResource>().3.store(false, Ordering::Release);
+        world
+            .resource::<GuildExperienceResource>()
+            .3
+            .store(false, Ordering::Release);
         *world
             .resource::<GuildExperienceResource>()
             .2
@@ -411,7 +458,11 @@ impl SimulationSession {
             npc_guild_actions: super::npc_shared_guild_actions::capture(world),
             pet_progress: super::shared_pet_progress::capture(world),
             default_transient: super::default_npc_events::capture_transient(world),
-            refine_source: world.resource::<super::resources::Stage5SystemsResource>().stage5_systems.refine.clone(),
+            refine_source: world
+                .resource::<super::resources::Stage5SystemsResource>()
+                .stage5_systems
+                .refine
+                .clone(),
         }))
     }
     pub(crate) fn finish_guild_experience_command(
@@ -435,33 +486,75 @@ impl SimulationSession {
             .lock()
             .map_err(|_| "guild XP error state poisoned")?
             .take();
-        let npc_entry = self.app.world().resource::<GuildExperienceResource>().3.swap(false, Ordering::AcqRel);
+        let npc_entry = self
+            .app
+            .world()
+            .resource::<GuildExperienceResource>()
+            .3
+            .swap(false, Ordering::AcqRel);
         let npc_source_changed = if npc_entry {
             let result = (|| -> Result<bool, String> {
-                let after = self.active_character_checkpoint().ok_or("NPC Source postimage missing")?;
+                let after = self
+                    .active_character_checkpoint()
+                    .ok_or("NPC Source postimage missing")?;
                 let old = npc_source_comparison_image(before.save.clone(), &before.refine_source)?;
-                let new = npc_source_comparison_image(after, &self.app.world().resource::<super::resources::Stage5SystemsResource>().stage5_systems.refine)?;
-                Ok(old != new || before.buffs.buffs != self.app.world().resource::<BuffResource>().buffs)
+                let new = npc_source_comparison_image(
+                    after,
+                    &self
+                        .app
+                        .world()
+                        .resource::<super::resources::Stage5SystemsResource>()
+                        .stage5_systems
+                        .refine,
+                )?;
+                Ok(old != new
+                    || before.buffs.buffs != self.app.world().resource::<BuffResource>().buffs)
             })();
             match result {
                 Ok(changed) => changed,
-                Err(error) => { if source_error.is_none() { source_error = Some(error); } false }
+                Err(error) => {
+                    if source_error.is_none() {
+                        source_error = Some(error);
+                    }
+                    false
+                }
             }
-        } else { false };
-        let mentor_before = before.save.stage5_systems_json.as_deref()
-            .map(serde_json::from_str::<crate::Stage5SystemsState>).transpose()
+        } else {
+            false
+        };
+        let mentor_before = before
+            .save
+            .stage5_systems_json
+            .as_deref()
+            .map(serde_json::from_str::<crate::Stage5SystemsState>)
+            .transpose()
             .map_err(|e| format!("mentor source checkpoint invalid: {e}"))?
-            .unwrap_or_default().mentor;
-        let mentor_now = &self.app.world().resource::<super::resources::Stage5SystemsResource>()
-            .stage5_systems.mentor;
-        let force_save = before.force_save || npc_source_changed || mentor_now.ledger != mentor_before.ledger
+            .unwrap_or_default()
+            .mentor;
+        let mentor_now = &self
+            .app
+            .world()
+            .resource::<super::resources::Stage5SystemsResource>()
+            .stage5_systems
+            .mentor;
+        let force_save = before.force_save
+            || npc_source_changed
+            || mentor_now.ledger != mentor_before.ledger
             || super::shared_pet_progress::has_earned_steps(self.app.world())
-            || super::default_npc_events::capture(self.app.world()) != before.save.default_npc_events
+            || super::default_npc_events::capture(self.app.world())
+                != before.save.default_npc_events
             || super::npc_shared_guild_actions::has_pending(self.app.world())
-            || ((mentor_before.partner_identity.is_some() || mentor_checkpoint_required(self.app.world()))
-                && self.active_character_checkpoint().is_some_and(|save|
-                    save.experience != before.save.experience || save.character.level != before.save.character.level))
-            || super::quests::periodic_quests::successful_claim_since(self.app.world(),&before.save,&packets);
+            || ((mentor_before.partner_identity.is_some()
+                || mentor_checkpoint_required(self.app.world()))
+                && self.active_character_checkpoint().is_some_and(|save| {
+                    save.experience != before.save.experience
+                        || save.character.level != before.save.character.level
+                }))
+            || super::quests::periodic_quests::successful_claim_since(
+                self.app.world(),
+                &before.save,
+                &packets,
+            );
         let result = match source_error.map_or_else(|| has_uncommitted(self.app.world()), Err) {
             Ok(false) if !force_save => return Ok(packets),
             Ok(false) => super::save::persist_active_character_save(self.app.world()),
@@ -494,7 +587,10 @@ impl SimulationSession {
                 .ok_or("guild XP rollback source missing")?;
             if durable.revision == before.save.revision {
                 self.restore_active_character_checkpoint(&before.save)?;
-                self.app.world_mut().resource_mut::<super::resources::PlayerRuntimeResource>().player_dead = before.player_dead;
+                self.app
+                    .world_mut()
+                    .resource_mut::<super::resources::PlayerRuntimeResource>()
+                    .player_dead = before.player_dead;
                 // Preserve original in-memory clock anchors. Deserializing the
                 // saved remaining duration alone would extend real-time buffs.
                 *self.app.world_mut().resource_mut::<BuffResource>() = before.buffs;
@@ -503,15 +599,28 @@ impl SimulationSession {
                 *self.app.world_mut().resource_mut::<RuntimeQueueResource>() = before.queue;
                 set_runtime_tick(self.app.world_mut(), before.tick);
                 super::hero_ai::hero_transient::restore(self.app.world_mut(), &before.hero)?;
-                super::npc_shared_guild_actions::restore(self.app.world_mut(), before.npc_guild_actions);
+                super::npc_shared_guild_actions::restore(
+                    self.app.world_mut(),
+                    before.npc_guild_actions,
+                );
                 super::shared_pet_progress::restore(self.app.world_mut(), before.pet_progress);
-                super::default_npc_events::restore_transient(self.app.world_mut(),&before.default_transient);
-                self.app.world_mut().resource_mut::<super::resources::Stage5SystemsResource>().stage5_systems.refine = before.refine_source;
+                super::default_npc_events::restore_transient(
+                    self.app.world_mut(),
+                    &before.default_transient,
+                );
+                self.app
+                    .world_mut()
+                    .resource_mut::<super::resources::Stage5SystemsResource>()
+                    .stage5_systems
+                    .refine = before.refine_source;
                 self.visible_objects = before.visible;
                 self.dirty_economy_projection_event_ids = before.dirty_economy;
             } else {
                 self.restore_active_character_checkpoint(&durable)?;
-                self.app.world_mut().resource_mut::<super::resources::PlayerRuntimeResource>().player_dead = before.player_dead;
+                self.app
+                    .world_mut()
+                    .resource_mut::<super::resources::PlayerRuntimeResource>()
+                    .player_dead = before.player_dead;
                 super::npc_shared_guild_actions::acknowledge(self.app.world_mut());
             }
             // RNG is separate from the cloneable NPC state and durable image.
@@ -531,8 +640,11 @@ impl SimulationSession {
         {
             let mut session = self.app.world_mut().resource_mut::<SessionResource>();
             if let Some(selected) = session.selected_character.clone() {
-                if let Some(character) = session.characters.iter_mut()
-                    .find(|character| character.index == selected.index) {
+                if let Some(character) = session
+                    .characters
+                    .iter_mut()
+                    .find(|character| character.index == selected.index)
+                {
                     *character = selected;
                 }
             }

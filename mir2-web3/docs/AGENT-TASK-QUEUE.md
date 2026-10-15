@@ -1,5 +1,12 @@
 # Agent Task Queue
 
+## PR #255 最后功能回归与远端 CI 收据（2026-10-16，北京时间）
+
+Gateway persistence 的普通 starter 与原版 Q1–Q4、掉落/采集、奖励及保存重登完整 target 已实际 **5/5，0 failed / ignored，194.40s**。最后改动仅测试墙钟调度和接受回执观察，生产行为及 80/600/54 原预算保持；前后失败/通过、fixture SHA 和命令见[Gateway 收据](generated/player-qa/recharge-readiness-20261015/gateway-action-timing-20261016.json)。父提交 `56ee8627` 的 Home、真实 Docker/Compose、四平台 DeveloperEnv、Handoff 完整 Web、跨平台构建及 Stripe/Mining/Activities 真实 PostgreSQL/故障注入收据已通过；Candidate Linux 成功，记录时父提交 Windows 仍在运行。最终新 SHA CI 与合入以 [PR #255](https://github.com/Zombieliu/mir2/pull/255) 为准，父提交结果不转记到新 SHA。
+
+分组证据和仍开放的发布/玩法边界见[最新集成说明](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。Core 六叶与源码指纹核验一致，原 41 份差异及 HEAD 未动，测试服 `bad3737` / Stripe TEST 未部署，`Candidate100=false`；下方旧状态保留为历史。
+
+
 ## 五远程分支：本地验证完成与交付关口（2026-10-15，北京时间）
 
 冲突处理和本地验证完成。五个冻结 head、合并顺序及收据见[本轮集成说明](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。已通过 Windows1138、Native UI1556、Core196、Web505/Quest24/packaging59、NPC456、File handoff/Refine/导师17、Runtime521、portable31及两种 WASM静态检查；Gateway11和相邻105分别通过，有交集不相加。

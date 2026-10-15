@@ -1,8 +1,8 @@
 //! Authoritative local processing evidence for all NPC purchase branches.
 //! These results are not durable, correlated network receipts or delivery ACKs.
+use super::npc_gold_buy_outcome::{NpcGoldBuyRejection, NpcGoldBuyRequest};
 use mir2_protocol::{ClientPacket, ServerPacket};
 use serde::{Deserialize, Serialize};
-use super::npc_gold_buy_outcome::{NpcGoldBuyRequest, NpcGoldBuyRejection};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -13,33 +13,59 @@ pub struct NpcPurchaseRequest {
 }
 impl NpcPurchaseRequest {
     pub(super) fn packet(self) -> ClientPacket {
-        ClientPacket::BuyItem { item_index: self.item_index, count: self.count, panel_type: self.panel_type }
+        ClientPacket::BuyItem {
+            item_index: self.item_index,
+            count: self.count,
+            panel_type: self.panel_type,
+        }
     }
 }
 impl From<NpcGoldBuyRequest> for NpcPurchaseRequest {
     fn from(request: NpcGoldBuyRequest) -> Self {
-        Self { item_index: request.item_index, count: request.count, panel_type: request.panel_type }
+        Self {
+            item_index: request.item_index,
+            count: request.count,
+            panel_type: request.panel_type,
+        }
     }
 }
 impl From<NpcPurchaseRequest> for NpcGoldBuyRequest {
     fn from(request: NpcPurchaseRequest) -> Self {
-        Self { item_index: request.item_index, count: request.count, panel_type: request.panel_type }
+        Self {
+            item_index: request.item_index,
+            count: request.count,
+            panel_type: request.panel_type,
+        }
     }
 }
 
 /// Determined by the actual server service, independently of the goods source.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub enum NpcPurchaseCurrency { Gold, Pearls }
+pub enum NpcPurchaseCurrency {
+    Gold,
+    Pearls,
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub enum NpcPurchaseSource { Trade, BuyBack, Used }
+pub enum NpcPurchaseSource {
+    Trade,
+    BuyBack,
+    Used,
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum NpcPurchaseRejection {
-    InvalidRequest, PlayerDead, ServiceUnavailable, UnsupportedService,
-    UnknownGood, InvalidQuantity, InsufficientCurrency, ClockUnavailable, InvalidDelivery,
+    InvalidRequest,
+    PlayerDead,
+    ServiceUnavailable,
+    UnsupportedService,
+    UnknownGood,
+    InvalidQuantity,
+    InsufficientCurrency,
+    ClockUnavailable,
+    InvalidDelivery,
 }
 impl From<NpcGoldBuyRejection> for NpcPurchaseRejection {
     fn from(reason: NpcGoldBuyRejection) -> Self {
@@ -58,7 +84,11 @@ impl From<NpcGoldBuyRejection> for NpcPurchaseRejection {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", rename_all_fields = "camelCase", deny_unknown_fields)]
+#[serde(
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
 pub enum NpcPurchaseProcessingOutcome {
     /// Wallet, inventory and any resale stock updates completed in memory.
     /// `admitted_count` is the actual delivery count after the legacy resale clamp.
@@ -71,15 +101,27 @@ pub enum NpcPurchaseProcessingOutcome {
         admitted_count: u16,
         incoming_unique_id: u64,
     },
-    Rejected { request: NpcPurchaseRequest, reason: NpcPurchaseRejection },
+    Rejected {
+        request: NpcPurchaseRequest,
+        reason: NpcPurchaseRejection,
+    },
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum NpcPurchaseBeforeExecution { NotAuthenticated, NotInGame, UnsupportedRuntime }
+pub enum NpcPurchaseBeforeExecution {
+    NotAuthenticated,
+    NotInGame,
+    UnsupportedRuntime,
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NpcPurchaseProcessingError {
     BeforeExecution(NpcPurchaseBeforeExecution),
-    PostProcessing { outcome: NpcPurchaseProcessingOutcome, detail: String },
-    Unknown { detail: String },
+    PostProcessing {
+        outcome: NpcPurchaseProcessingOutcome,
+        detail: String,
+    },
+    Unknown {
+        detail: String,
+    },
 }
 #[derive(Debug, Clone)]
 pub struct NpcPurchaseProcessingExecution {
@@ -87,11 +129,14 @@ pub struct NpcPurchaseProcessingExecution {
     pub outcome: NpcPurchaseProcessingOutcome,
 }
 pub(super) fn finish_npc_purchase_processing(
-    packets: Result<Vec<ServerPacket>, String>, outcome: Option<NpcPurchaseProcessingOutcome>,
+    packets: Result<Vec<ServerPacket>, String>,
+    outcome: Option<NpcPurchaseProcessingOutcome>,
 ) -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
     match (packets, outcome) {
         (Ok(packets), Some(outcome)) => Ok(NpcPurchaseProcessingExecution { packets, outcome }),
-        (Err(detail), Some(outcome)) => Err(NpcPurchaseProcessingError::PostProcessing { outcome, detail }),
+        (Err(detail), Some(outcome)) => {
+            Err(NpcPurchaseProcessingError::PostProcessing { outcome, detail })
+        }
         (Err(detail), None) => Err(NpcPurchaseProcessingError::Unknown { detail }),
         (Ok(_), None) => Err(NpcPurchaseProcessingError::Unknown {
             detail: "purchase processing did not return an authoritative outcome".into(),

@@ -447,10 +447,13 @@ fn configured_owner_id(explicit_owner: Option<String>, instance_id: Option<Strin
 }
 
 impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {
+    fn supports_durable_npc_purchase_lease(&self) -> bool {
+        true
+    }
 
-    fn supports_durable_npc_purchase_lease(&self) -> bool { true }
-
-    fn with_durable_npc_purchase_lease(&self, lease: &ZoneOwnerLease,
+    fn with_durable_npc_purchase_lease(
+        &self,
+        lease: &ZoneOwnerLease,
         operation: &mut (dyn FnMut() + Send),
     ) -> Result<(), String> {
         // A scoped worker keeps the real row lock through the account commit;

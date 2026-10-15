@@ -59,7 +59,10 @@ fn tooltip_wire_emits_explicit_empty_socket_arrays() {
     assert_eq!(wire["info"], serde_json::to_value(&source.info).unwrap());
     assert!(wire.get("realInfo").is_none());
     assert!(wire.get("userItem").is_none());
-    assert_eq!(serde_json::from_value::<WorldItemTooltipSource>(wire).unwrap(), source);
+    assert_eq!(
+        serde_json::from_value::<WorldItemTooltipSource>(wire).unwrap(),
+        source
+    );
 }
 
 #[test]
@@ -70,7 +73,10 @@ fn tooltip_wire_preserves_nonempty_socket_positions_and_template_rows() {
     let wire = serde_json::to_value(&source).expect("serialize positional sockets");
     assert_eq!(wire["socketInfos"], json!([null, template(658), null]));
     assert_eq!(wire["realSocketInfos"], json!([null, template(659), null]));
-    assert_eq!(serde_json::from_value::<WorldItemTooltipSource>(wire).unwrap(), source);
+    assert_eq!(
+        serde_json::from_value::<WorldItemTooltipSource>(wire).unwrap(),
+        source
+    );
 }
 
 #[test]
@@ -80,7 +86,8 @@ fn tooltip_wire_legacy_omitted_socket_arrays_still_deserialize_empty() {
     let object = legacy.as_object_mut().unwrap();
     object.remove("socketInfos");
     object.remove("realSocketInfos");
-    let decoded: WorldItemTooltipSource = serde_json::from_value(legacy).expect("legacy tooltip source");
+    let decoded: WorldItemTooltipSource =
+        serde_json::from_value(legacy).expect("legacy tooltip source");
     assert_eq!(decoded, source);
     let canonical = serde_json::to_value(decoded).unwrap();
     assert_eq!(canonical.get("socketInfos"), Some(&json!([])));

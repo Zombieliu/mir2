@@ -1,5 +1,34 @@
 # Frontend 1:1 Gaps
 
+
+## PR #255 收尾：当前源码的三包 WASM 与严格构建（2026-10-15，北京时间）
+
+[后续集成 PR #255](https://github.com/Zombieliu/mir2/pull/255) 补齐真实构建的 Core / Presentation / NPC Purchase 六份 JS/WASM 与共同 manifest；三个 bundle 均绑定当前源码指纹 `46569ff649e96bdea15c81080f05144c3031606d618becc9066800acd1edd620`。原 manifest 引用未跟踪文件、源码指纹落后的问题已在本地修复，最终提交与精确 SHA CI 状态以 PR 为准，本节不宣称已部署。
+
+复用现有 OrderedSet 保存 DoubleSlash 序号、玩家属性 ID 和物品 UID，保留 FIFO、克隆、删除、去重与原输入边界。三处 Tooltip 私有格式化直接生成相同文本，完整 key/fallback/args/suffix 保留；27 组实际输入逐行与旧替换实现比较。Core 私有 Binaryen 131 固定参数为 `-Oz --flatten --rereloop -Oz --converge`；Renderer 仍为 `-O1`，原文件 pin、清理、metadata 与预算门禁保留。
+
+真实重建的 WASM 为 Core **250,070B**、Presentation **262,089B**、NPC Purchase **165,835B**，均严格小于原 262,144B 上限。三份包已实际实例化、执行 ABI 查询，六文件 SHA/组合版本与源码指纹全部一致，见[持久源码/发布文件收据](generated/player-qa/recharge-readiness-20261015/core-release-20261015.json)。Core Rust 197/197、Presentation Rust 92/92、浏览器 Core 186/186、发布 guards 72/72 均通过；完整 Windows 默认并发 host 再跑 1138 passed / 0 failed / 原 7 ignored。
+
+隔离新输出 `.next-deps-core-final04` 严格 TypeScript、13/13 页构建通过，真实 standalone 打包 59/59、tracing 8/8、安全断言 19/19；编译时 manifest 与最终三包 manifest 完整相等。57 个指纹输入、六发布文件与六安全配置构建前后 SHA 一致，tsconfig 仅由 Next 增加本次输出的两个 include。未编辑既有 node_modules，未手补 standalone。早期缺少 fixture/宿主环境前置的失败日志保留，最终干净环境全 186 项通过。
+
+本节是构建与协议边界证据，不替代普通玩家 GUI、移动真机或人类手感验收；服务器仍未部署本轮，Candidate100=false。下方各轮历史保持原边界。
+
+## 合入后 followups：依赖安全与直接构建验证（2026-10-15，北京时间）
+
+五分支集成已由 [PR #254](https://github.com/Zombieliu/mir2/pull/254) 以 `573c4b8abdfd46b9a73ca6487f783db6165b7ac0` 合入远程 Windows 分支。本节记录后续分支 `codex/recharge-readiness-followups-20261015` 的本地修复；该分支本轮尚未合并、未部署，后续精确 SHA CI 与合入状态以对应 PR/Actions 为准。
+
+Web/Admin 的 Next 更新到 `16.4.1`，Sharp `0.35.5`、PostCSS `8.5.23`、source-map-js `1.2.2`、baseline-browser-mapping `2.11.0`；React/React DOM 保持 `19.2.3`。两应用安装后的完整 npm audit 均为零漏洞。Web standalone 严格 TypeScript/13 页和 Admin 严格 TypeScript/22 页构建通过；打包 59/59、tracing 8/8 通过，均无失败或跳过。
+
+standalone production 的窄 tracing include 持久纳入实际安装的 `@img/sharp-*` 包。最终采用全新 `.next-deps-security-native03` 直接构建产物，没有手补文件：本机 Windows x64 的 Sharp 原生包完整 8 文件与 fresh npm 源 SHA 全同，NFT 引用齐全且最终物理路径唯一，真实 SVG 解码、resize、PNG 输出通过（librsvg `2.63.2`）。既有 Web `node_modules` 的 15,240 文件/380,652,835B 全量摘要前后相同，原工作区及既有依赖目录未写。
+
+Docker 源码闭包静态检查覆盖 11 个 Cargo manifests/24 个 manifest 与入口输入；Developer Bevy schema2/legacy lock 检查 17/17、R2 发布安全检查在合法上下文中 19/19。Docker 本机 daemon 不可用，镜像构建与隧道执行没有通过记录。上述均见[本轮 followups 详情](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。日志仅位于被忽略的本机 `.mir2-player-qa/followups-20261015/`，未转成持久 QA receipt，也不代表远程 CI 或发布验收。
+
+Root 确认 Gateway 认证/真实 RPC 23/23、Simulation 认证/handoff 15/15（含 7 handoff）、Shared Zone 209/209 均为 0 失败/忽略；Rust 1.89 格式检查 exit 0。完整 resource-loading npm 脚本实际重生 115,408 个资源后通过，本机 manifest 按运行前字节恢复。Windows 独立默认并发全 host 为 1138 passed、0 failed、原 7 ignored；仅 cfg(test) effect store 跨线程与 native queue 测试 guard 收束，生产实现、CI 默认并发和原 ignore 不变，旧 4 失败日志保留。
+
+Handoff checkpoint 新增必填 `accountId`，以真实 Source D/账号、完整 roster/profile/ban 校验后做纯会话选择；Gateway 删除 handoff/base 重建时内部 Passkey 账号转换，不缓存用户密码、不授 recovery capability、不新增玩家命令。冷恢复认证 preflight 先于 journal 重放；普通密码真 RPC/File 字节、base 实际隔离 session 配置/密码、普通 logout 后密码 relogin 与 Passkey 安全分组均已回归。旧 DTO/旧 build fail closed，gateway/Zone 上线须同新版本成对发布。18 处旧 fixture 仅校正严格前置/时序，Trap 产品仅把 caster 方向改为 `Up`，既有 `param=false` 保持；Vampire 在 1000ms 计划时刻不结算、下一毫秒才结算一次真实吸血池，自然 regen 独立区分，其既有 3000ms 与 Crystal 10000ms 差异仍开放，不能据此宣称全战斗 1:1。详见本轮集成说明顶部。
+
+本轮真 PG 与新 SHA CI 仍待执行，旧 PR #254 / `573c` 的 PG 证据不转记为新代码结果；下方历史保留原轮次边界。测试服健康检查仍记录为正常、`bad3737` / Stripe TEST；本轮未部署。GUI、移动真机、人类验收及新完整签名包仍开放，`Candidate100=false`。
+
 > 2026-10-15 runtime配置补充：Root默认318通过（原2项忽略），Native economy/shared UI启用521通过（原4项忽略）。28项既有Native正例转至启用配置真实执行，默认拒绝与结构负例保留；CI覆盖两配置及WASM检查。仅修测试配置，产品guard未改，GUI/发布/人类验收仍开放。详见[本轮集成记录](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。
 
 

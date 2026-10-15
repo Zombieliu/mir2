@@ -253,13 +253,25 @@ fn journey_public_healing_with_explicit_self_id_uses_self_route_at_full_and_part
             now_ms: 10,
         });
         let receipts = journey_receipts(&accepted);
-        assert_eq!(receipts.len(), 1, "explicit self target at {hp} HP must retain journey evidence");
-        assert_eq!(receipts[0].kind, ZoneJourneyEventKind::HealingAccepted { full_hp_exercise: hp == 100 });
+        assert_eq!(
+            receipts.len(),
+            1,
+            "explicit self target at {hp} HP must retain journey evidence"
+        );
+        assert_eq!(
+            receipts[0].kind,
+            ZoneJourneyEventKind::HealingAccepted {
+                full_hp_exercise: hp == 100
+            }
+        );
         assert_eq!(receipts[0].target_object_id, Some(101));
         assert_eq!(zone.players[&owner].mp, 9);
         zone.tick(510);
         if hp < 100 {
-            assert!(zone.players[&owner].hp > hp, "normal self healing still restores damaged HP");
+            assert!(
+                zone.players[&owner].hp > hp,
+                "normal self healing still restores damaged HP"
+            );
         } else {
             assert_eq!(zone.players[&owner].hp, 100);
         }
@@ -540,9 +552,16 @@ fn journey_summon_receipts_require_real_spawn_and_owned_skeleton_damage() {
     // Wait beyond Spawned's real +2000ms activation and use the normal AI tick.
     assert!(journey_receipts(&zone.tick(600)).is_empty());
     let owner_cast = zone.handle(ZoneCommand::PlayerCastMagic {
-        session_id: owner.clone(), object_id: 9001, spell: Spell::SoulFireBall,
-        direction: MirDirection::Right, target: target_location,
-        cast: true, level: 2, damage: 1, mp_cost: 1, cooldown_ms: 1_000,
+        session_id: owner.clone(),
+        object_id: 9001,
+        spell: Spell::SoulFireBall,
+        direction: MirDirection::Right,
+        target: target_location,
+        cast: true,
+        level: 2,
+        damage: 1,
+        mp_cost: 1,
+        cooldown_ms: 1_000,
         now_ms: 2_600,
     });
     assert!(owner_cast.iter().any(|out| matches!(out,
@@ -559,16 +578,22 @@ fn journey_summon_receipts_require_real_spawn_and_owned_skeleton_damage() {
     let hp_before_hit = zone.native_monsters[&9001].hp;
     let damage = journey_receipts(&zone.tick(2_900));
     let actual_damage = hp_before_hit - zone.native_monsters[&9001].hp;
-    assert!(actual_damage > 0, "the ordinary skeleton hit must change real HP");
-    assert!(damage.iter().any(|receipt| {
-        receipt.kind == ZoneJourneyEventKind::SummonSkeletonDamage
-            && receipt.session_id == owner
-            && receipt.source_object_id == skeleton_id
-            && receipt.target_object_id == Some(9001)
-            && receipt.damage == Some(actual_damage)
-            && receipt.target_location == Some(Point { x: 12, y: 10 })
-            && receipt.effect_object_id.is_none()
-            && receipt.source_action_at_ms == 2_600
-            && receipt.committed_at_ms == 2_900
-    }), "the receipt must retain the real target and exact committed HP loss: {damage:?}");
+    assert!(
+        actual_damage > 0,
+        "the ordinary skeleton hit must change real HP"
+    );
+    assert!(
+        damage.iter().any(|receipt| {
+            receipt.kind == ZoneJourneyEventKind::SummonSkeletonDamage
+                && receipt.session_id == owner
+                && receipt.source_object_id == skeleton_id
+                && receipt.target_object_id == Some(9001)
+                && receipt.damage == Some(actual_damage)
+                && receipt.target_location == Some(Point { x: 12, y: 10 })
+                && receipt.effect_object_id.is_none()
+                && receipt.source_action_at_ms == 2_600
+                && receipt.committed_at_ms == 2_900
+        }),
+        "the receipt must retain the real target and exact committed HP loss: {damage:?}"
+    );
 }

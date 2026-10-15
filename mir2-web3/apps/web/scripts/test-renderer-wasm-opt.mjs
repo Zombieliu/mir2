@@ -41,11 +41,11 @@ function fixture(t) {
   return { root, stagingRoot, packageDir, wasmPath, jsPath, bin, canonical, sourceEnv: {},
     toolConfig: { bin, sha256: sha(fs.readFileSync(bin)) } };
 }
-function runner(bytes = EMPTY, onOptimize = null, optimizationFlag = "-O1") {
+function runner(bytes = EMPTY, onOptimize = null, optimizationArgs = ["-O1"]) {
   return (bin, args, options) => {
     if (args.length === 1 && args[0] === "--version") return ok("wasm-opt version 131 (version_131)\n");
-    assert.equal(args[1], optimizationFlag); assert.equal(args[2], "--strip-debug"); assert.equal(args[3], "-o");
-    fs.writeFileSync(args[4], bytes, { flag: "wx" });
+    assert.deepEqual(args.slice(1, -1), [...optimizationArgs, "--strip-debug", "-o"]);
+    fs.writeFileSync(args.at(-1), bytes, { flag: "wx" });
     return onOptimize ? onOptimize(bin, args, options) : ok();
   };
 }
@@ -364,7 +364,7 @@ test("renderer diagnostic formatter preserves nested tool failures without seria
 // Core uses the same private lifecycle machinery with a fixed pair/profile;
 // these runners write only owned test fixtures and never execute a real tool.
 function coreRunner(bytes = EMPTY, onOptimize = null) {
-  return runner(bytes, onOptimize, "-Oz");
+  return runner(bytes, onOptimize, ["-Oz", "--flatten", "--rereloop", "-Oz", "--converge"]);
 }
 function coreFixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "mir2-core-opt-test-"));
@@ -418,14 +418,15 @@ test("Core budget measures whole actual pair and never applies the larger render
   coreUnchanged(f);
 });
 
-test("Core optimizer uses fixed131 Oz strip-debug hidden single-core commands and pins final actual bytes", (t) => {
+test("Core optimizer uses fixed131 Oz flatten rereloop Oz converge and bounded hidden single-core commands", (t) => {
   const f = coreFixture(t), calls = [], injected = coreRunner();
-  const result = optimizeClientCoreReleaseWasm({ ...f, optimizationFlag: "-O1", sourceEnv: { SystemRoot: "fixture-system", NODE_OPTIONS: "not-forwarded", PATH: "untrusted", BINARYEN_CORES: "9" },
+  const result = optimizeClientCoreReleaseWasm({ ...f, optimizationFlag: "-O1", optimizationArgs: ["--untrusted-pass"], passes: ["--untrusted-pass"], sourceEnv: { SystemRoot: "fixture-system", NODE_OPTIONS: "not-forwarded", PATH: "untrusted", BINARYEN_CORES: "9" },
     run: (bin, args, options) => { calls.push({ bin, args, options }); return injected(bin, args, options); } });
   assert.equal(calls.length, 2); assert.deepEqual(calls[0].args, ["--version"]);
-  assert.deepEqual(calls[1].args.slice(0, 4), [f.wasmPath, "-Oz", "--strip-debug", "-o"]);
-  assert.match(path.basename(calls[1].args[4]), /^\.mir2-client-core-opt-\d+-[a-f0-9]{12}\.wasm$/);
-  assert.equal(path.dirname(calls[1].args[4]), f.stagingRoot);
+  assert.equal(calls[1].args.length, 9);
+  assert.deepEqual(calls[1].args.slice(0, 8), [f.wasmPath, "-Oz", "--flatten", "--rereloop", "-Oz", "--converge", "--strip-debug", "-o"]);
+  assert.match(path.basename(calls[1].args[8]), /^\.mir2-client-core-opt-\d+-[a-f0-9]{12}\.wasm$/);
+  assert.equal(path.dirname(calls[1].args[8]), f.stagingRoot);
   for (const call of calls) {
     assert.equal(call.bin, f.bin); assert.equal(call.options.cwd, f.stagingRoot);
     assert.equal(call.options.shell, false); assert.equal(call.options.windowsHide, true);
@@ -511,7 +512,7 @@ test("Core output symlink is refused without following its target", (t) => {
   const probe = path.join(f.root, "permission-probe"); if (!linkOrSkip(t, target, probe)) return; fs.unlinkSync(probe);
   assert.throws(() => optimizeClientCoreReleaseWasm({ ...f, run: (bin, args) => {
     if (args[0] === "--version") return ok("wasm-opt version 131\n");
-    fs.symlinkSync(target, args[4], "file"); return ok();
+    fs.symlinkSync(target, args[8], "file"); return ok();
   } }), /linked or irregular/);
   assert.equal(fs.readFileSync(target, "utf8"), "external sentinel"); coreUnchanged(f);
 });
@@ -535,7 +536,7 @@ test("Core cleanup rejects a retargeted staging ancestor and retains tool postpi
   try {
     optimizeClientCoreReleaseWasm({ ...f, run: (bin, args) => {
       if (args[0] === "--version") return ok("wasm-opt version 131\n");
-      generated = args[4]; fs.writeFileSync(generated, EMPTY, { flag: "wx" }); fs.renameSync(f.stagingRoot, saved);
+      generated = args[8]; fs.writeFileSync(generated, EMPTY, { flag: "wx" }); fs.renameSync(f.stagingRoot, saved);
       outsideLeaf = path.join(outside, path.basename(generated)); fs.writeFileSync(outsideLeaf, "outside sentinel", { flag: "wx" });
       fs.symlinkSync(outside, f.stagingRoot, type);
       return { ...ok(), status: null, signal: "SIGTERM", error: Object.assign(Error("tool timeout"), { code: "ETIMEDOUT" }), stderr: "controlled stderr" };
@@ -557,7 +558,7 @@ test("Core cleanup rejects a retargeted staging ancestor and retains tool postpi
   fs.unlinkSync(generated); coreUnchanged(f);
 });
 
-test("actual Core sourceFingerprint includes optimizer bytes and retains LF normalization sorted old recipe", () => {
+test("actual Core sourceFingerprint includes optimizer and client-wire bytes and retains LF normalization sorted old recipe", () => {
   const source = fs.readFileSync(new URL("./build-client-core.mjs", import.meta.url), "utf8");
   const start = source.indexOf("function sourceFingerprint() {"), end = source.indexOf("\nfunction run(", start);
   assert(start >= 0 && end > start); const declaration = source.slice(start, end);
@@ -565,10 +566,13 @@ test("actual Core sourceFingerprint includes optimizer bytes and retains LF norm
   // Only this complete function runs, against an exact virtual source tree.
   const executable = declaration.replaceAll("import.meta.url", "builderUrl");
   const projectRoot = path.resolve("virtual-core-fingerprint"), webRoot = path.join(projectRoot, "apps", "web"), crateRoot = path.join(projectRoot, "apps", "game-client", "platform-web"), coreRoot = path.join(projectRoot, "apps", "game-client", "client-core");
+  const wireRoot = path.join(projectRoot, "apps", "game-client", "client-wire");
   const builderFile = path.join(webRoot, "scripts", "build-client-core.mjs"), optimizerFile = path.join(webRoot, "scripts", "lib", "renderer-wasm-opt.mjs"), releaseHelperFile = path.join(webRoot, "scripts", "lib", "client-core-release-files.mjs");
   const data = new Map([
     [path.join(crateRoot, "Cargo.toml"), "platform crate\n"], [path.join(crateRoot, "Cargo.lock"), "locked\n"],
     [path.join(crateRoot, "rust-toolchain.toml"), "pinned toolchain\n"], [path.join(coreRoot, "Cargo.toml"), "core crate\n"],
+    [path.join(wireRoot, "Cargo.toml"), "wire crate\n"],
+    [path.join(wireRoot, "src", "lib.rs"), "wire lib\n"], [path.join(wireRoot, "src", "packets.rs"), "wire packets\n"],
     [builderFile, "builder bytes\n"], [optimizerFile, "optimizer bytes\n"], [releaseHelperFile, "release helper bytes\n"],
     [path.join(coreRoot, "src", "z.rs"), "z\n"], [path.join(coreRoot, "src", "a.rs"), "a\n"],
     [path.join(coreRoot, "src", "nested", "b.rs"), "b\n"],
@@ -577,7 +581,8 @@ test("actual Core sourceFingerprint includes optimizer bytes and retains LF norm
   let reverse = false, hashInput;
   const dirent = (name, directory = false) => ({ name, isDirectory: () => directory, isFile: () => !directory });
   const directoryRows = new Map([[path.join(coreRoot, "src"), [dirent("z.rs"), dirent("nested", true), dirent("a.rs")]],
-    [path.join(coreRoot, "src", "nested"), [dirent("b.rs")]], [path.join(crateRoot, "src"), [dirent("z.rs"), dirent("a.rs")]]]);
+    [path.join(coreRoot, "src", "nested"), [dirent("b.rs")]], [path.join(crateRoot, "src"), [dirent("z.rs"), dirent("a.rs")]],
+    [path.join(wireRoot, "src"), [dirent("packets.rs"), dirent("lib.rs")]]]);
   const fakeFs = { readdirSync(directory, options) { assert.deepEqual(options, { withFileTypes: true }); assert(directoryRows.has(directory)); const rows = directoryRows.get(directory); return reverse ? [...rows].reverse() : [...rows]; },
     readFileSync(filename, encoding) { assert.equal(encoding, "utf8"); assert(data.has(filename), "unexpected source read " + filename); return data.get(filename); } };
   const run = new Function("fs", "path", "crateRoot", "webRoot", "fileURLToPath", "hash", "builderUrl", executable + "\nreturn sourceFingerprint();");
@@ -592,4 +597,12 @@ test("actual Core sourceFingerprint includes optimizer bytes and retains LF norm
   data.set(optimizerFile, "optimizer bytes\r\n"); assert.equal(invoke(), baseline);
   data.set(releaseHelperFile, "release helper changed\r\n"); assert.notEqual(invoke(), baseline);
   assert.equal(JSON.parse(hashInput).filter(row => row.name === "apps/web/scripts/lib/client-core-release-files.mjs").length, 1);
+  data.set(releaseHelperFile, "release helper bytes\r\n"); assert.equal(invoke(), baseline);
+  for (const filename of [path.join(wireRoot, "Cargo.toml"), path.join(wireRoot, "src", "lib.rs")]) {
+    const original = data.get(filename);
+    data.set(filename, original + "// wire identity changed\r\n"); assert.notEqual(invoke(), baseline);
+    const relative = path.relative(projectRoot, filename).split(path.sep).join("/");
+    assert.equal(JSON.parse(hashInput).filter(row => row.name === relative).length, 1);
+    data.set(filename, original); assert.equal(invoke(), baseline);
+  }
 });

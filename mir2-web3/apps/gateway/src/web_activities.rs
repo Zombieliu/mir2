@@ -4,11 +4,17 @@ use mir2_simulation::monthly_card::monthly_card_now_ms;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct StatusRequest { request_id: u64 }
+struct StatusRequest {
+    request_id: u64,
+}
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct ClaimRequest { character_index: i32, reward_id: String, request_id: u64 }
+struct ClaimRequest {
+    character_index: i32,
+    reward_id: String,
+    request_id: u64,
+}
 
 pub(super) fn router() -> Router<WebState> {
     Router::new()
@@ -18,24 +24,44 @@ pub(super) fn router() -> Router<WebState> {
 }
 
 fn private_response(status: StatusCode, value: Value) -> Response {
-    (status, [(CACHE_CONTROL, "no-store"), (axum::http::header::REFERRER_POLICY, "no-referrer")], Json(value)).into_response()
+    (
+        status,
+        [
+            (CACHE_CONTROL, "no-store"),
+            (axum::http::header::REFERRER_POLICY, "no-referrer"),
+        ],
+        Json(value),
+    )
+        .into_response()
 }
 
 fn error_response(error: &str) -> Response {
     let (status, public) = match error {
-        "billingAuthenticationRequired" => (StatusCode::UNAUTHORIZED, "activitiesAuthenticationRequired"),
+        "billingAuthenticationRequired" => {
+            (StatusCode::UNAUTHORIZED, "activitiesAuthenticationRequired")
+        }
         "billingTooManyRequests" => (StatusCode::TOO_MANY_REQUESTS, "activitiesTooManyRequests"),
         "activityAccountBanned" => (StatusCode::FORBIDDEN, "activitiesAccountBanned"),
-        "activityCharacterMissing" | "activityCharacterIdentityMismatch" => (StatusCode::NOT_FOUND, "activitiesCharacterMissing"),
+        "activityCharacterMissing" | "activityCharacterIdentityMismatch" => {
+            (StatusCode::NOT_FOUND, "activitiesCharacterMissing")
+        }
         "activityRewardMissing" => (StatusCode::NOT_FOUND, "activitiesRewardMissing"),
         "activityLevelRequired" => (StatusCode::CONFLICT, "activitiesLevelTooLow"),
         "activityDisabled" => (StatusCode::CONFLICT, "activitiesDisabled"),
         "activityPhaseSealed" => (StatusCode::CONFLICT, "activitiesPhaseClosed"),
-        "activityClaimRecipientChanged" => (StatusCode::CONFLICT, "activitiesClaimRecipientChanged"),
-        "activitiesLevelTooLow" | "activitiesPhaseClosed" | "activitiesNotEligible" |
-        "activitiesPhaseMismatch" | "activitiesDisabled" => (StatusCode::CONFLICT, error),
+        "activityClaimRecipientChanged" => {
+            (StatusCode::CONFLICT, "activitiesClaimRecipientChanged")
+        }
+        "activitiesLevelTooLow"
+        | "activitiesPhaseClosed"
+        | "activitiesNotEligible"
+        | "activitiesPhaseMismatch"
+        | "activitiesDisabled" => (StatusCode::CONFLICT, error),
         "activitiesRequestInvalid" => (StatusCode::BAD_REQUEST, error),
-        _ => (StatusCode::SERVICE_UNAVAILABLE, "activitiesResultUnconfirmed"),
+        _ => (
+            StatusCode::SERVICE_UNAVAILABLE,
+            "activitiesResultUnconfirmed",
+        ),
     };
     private_response(status, json!({"error":public}))
 }
@@ -47,16 +73,32 @@ fn durable(config: &GatewayConfig) -> Result<(), String> {
     Ok(())
 }
 
-async fn status(State(state): State<WebState>, headers: HeaderMap, Query(request): Query<StatusRequest>) -> Response {
+async fn status(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Query(request): Query<StatusRequest>,
+) -> Response {
     let verified = match billing::http_identity(&state.identity, &headers).await {
-        Ok(v) => v, Err(e) => return error_response(&e),
+        Ok(v) => v,
+        Err(e) => return error_response(&e),
     };
-    if request.request_id == 0 { return error_response("activitiesRequestInvalid"); }
+    if request.request_id == 0 {
+        return error_response("activitiesRequestInvalid");
+    }
     let result = tokio::task::spawn_blocking(move || {
         durable(&state.config)?;
-        billing::rate_limit(state.session_cache.as_ref(), &verified.account_id, "activitiesStatus")?;
-        state.config.activity_status(&verified.account_id, &state.config.activity_policy, monthly_card_now_ms())
-    }).await;
+        billing::rate_limit(
+            state.session_cache.as_ref(),
+            &verified.account_id,
+            "activitiesStatus",
+        )?;
+        state.config.activity_status(
+            &verified.account_id,
+            &state.config.activity_policy,
+            monthly_card_now_ms(),
+        )
+    })
+    .await;
     match result {
         Ok(Ok(value)) => private_response(StatusCode::OK, json!(value)),
         Ok(Err(e)) => error_response(&e),
@@ -64,19 +106,34 @@ async fn status(State(state): State<WebState>, headers: HeaderMap, Query(request
     }
 }
 
-async fn claim(State(state): State<WebState>, headers: HeaderMap, Json(request): Json<ClaimRequest>) -> Response {
+async fn claim(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(request): Json<ClaimRequest>,
+) -> Response {
     let verified = match billing::http_identity(&state.identity, &headers).await {
-        Ok(v) => v, Err(e) => return error_response(&e),
+        Ok(v) => v,
+        Err(e) => return error_response(&e),
     };
     if request.request_id == 0 || request.character_index < 0 || request.reward_id.len() > 80 {
         return error_response("activitiesRequestInvalid");
     }
     let result = tokio::task::spawn_blocking(move || {
         durable(&state.config)?;
-        billing::rate_limit(state.session_cache.as_ref(), &verified.account_id, "activitiesClaim")?;
-        state.config.activity_claim(&verified.account_id, request.character_index,
-            &request.reward_id, &state.config.activity_policy, monthly_card_now_ms())
-    }).await;
+        billing::rate_limit(
+            state.session_cache.as_ref(),
+            &verified.account_id,
+            "activitiesClaim",
+        )?;
+        state.config.activity_claim(
+            &verified.account_id,
+            request.character_index,
+            &request.reward_id,
+            &state.config.activity_policy,
+            monthly_card_now_ms(),
+        )
+    })
+    .await;
     match result {
         Ok(Ok(value)) => private_response(StatusCode::OK, json!(value)),
         Ok(Err(e)) => error_response(&e),

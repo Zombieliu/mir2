@@ -45,7 +45,10 @@ pub(crate) struct OnlinePresence {
     pub chat_profile: Option<super::ZoneChatProfile>,
     #[serde(default, skip_serializing_if = "online_presence_life_is_zero")]
     pub brown_until_ms: u64,
-    #[serde(default = "online_presence_default_position", skip_serializing_if = "online_presence_position_is_zero")]
+    #[serde(
+        default = "online_presence_default_position",
+        skip_serializing_if = "online_presence_position_is_zero"
+    )]
     pub position: mir2_protocol::Point,
     #[serde(default, skip_serializing_if = "online_presence_level_is_zero")]
     pub level: u16,
@@ -61,10 +64,18 @@ pub(crate) struct OnlinePresence {
 }
 pub(crate) type OnlinePresenceSnapshot = BTreeMap<SessionId, OnlinePresence>;
 
-fn online_presence_default_position() -> mir2_protocol::Point { mir2_protocol::Point { x: 0, y: 0 } }
-fn online_presence_position_is_zero(value: &mir2_protocol::Point) -> bool { value.x == 0 && value.y == 0 }
-fn online_presence_level_is_zero(value: &u16) -> bool { *value == 0 }
-fn online_presence_life_is_zero(value: &u64) -> bool { *value == 0 }
+fn online_presence_default_position() -> mir2_protocol::Point {
+    mir2_protocol::Point { x: 0, y: 0 }
+}
+fn online_presence_position_is_zero(value: &mir2_protocol::Point) -> bool {
+    value.x == 0 && value.y == 0
+}
+fn online_presence_level_is_zero(value: &u16) -> bool {
+    *value == 0
+}
+fn online_presence_life_is_zero(value: &u64) -> bool {
+    *value == 0
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct OnlineIdentityBook {

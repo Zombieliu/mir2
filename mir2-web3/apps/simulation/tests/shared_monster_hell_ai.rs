@@ -130,18 +130,28 @@ fn assert_checkpoint_tick(
         let session = SessionId::new(name);
         assert!(original.owner_health_cursor(&session).is_some());
         assert!(restored.owner_health_cursor(&session).is_none());
-        assert_eq!(original.player_vitals(&session), restored.player_vitals(&session));
+        assert_eq!(
+            original.player_vitals(&session),
+            restored.player_vitals(&session)
+        );
     }
     for event in &out {
         if let ZoneOutbound::OwnerHealthChanged { change } = event {
-            let owner = original.owner_health_cursor(&change.cursor.session_id).unwrap();
+            let owner = original
+                .owner_health_cursor(&change.cursor.session_id)
+                .unwrap();
             assert_eq!(change.cursor.online_owner, owner.online_owner);
             assert_eq!(change.cursor.object_id, owner.object_id);
             assert_eq!(change.cursor.life_generation, owner.life_generation);
             assert!(change.cursor.health_sequence > 0);
             assert!(change.cursor.health_sequence <= owner.health_sequence);
         }
-        if let ZoneOutbound::PlayerDamaged { session_id, damage, settlement: Some(receipt) } = event {
+        if let ZoneOutbound::PlayerDamaged {
+            session_id,
+            damage,
+            settlement: Some(receipt),
+        } = event
+        {
             assert_eq!(receipt.hp_before - receipt.hp_after, *damage);
             assert!(out.iter().any(|candidate| matches!(candidate,
                 ZoneOutbound::OwnerHealthChanged { change }
@@ -152,10 +162,16 @@ fn assert_checkpoint_tick(
                     && change.hp == receipt.hp_after)));
         }
     }
-    assert!(!replay.iter().any(|event| matches!(event, ZoneOutbound::OwnerHealthChanged { .. })));
-    let gameplay = |events: &[ZoneOutbound]| events.iter()
-        .filter(|event| !matches!(event, ZoneOutbound::OwnerHealthChanged { .. }))
-        .cloned().collect::<Vec<_>>();
+    assert!(!replay
+        .iter()
+        .any(|event| matches!(event, ZoneOutbound::OwnerHealthChanged { .. })));
+    let gameplay = |events: &[ZoneOutbound]| {
+        events
+            .iter()
+            .filter(|event| !matches!(event, ZoneOutbound::OwnerHealthChanged { .. }))
+            .cloned()
+            .collect::<Vec<_>>()
+    };
     assert_eq!(gameplay(&out), gameplay(&replay));
     let before = state(original);
     let after = state(restored);
@@ -164,9 +180,16 @@ fn assert_checkpoint_tick(
     // Live retaliation ownership also expires at restore. Compare the Hell
     // gameplay state explicitly; a restored instance cannot inherit sockets
     // or their owner-bound PK records merely by loading world state.
-    for key in ["players", "native_monsters", "native_monster_respawns",
-        "pending_native_hits", "pending_native_projectiles", "pending_native_player_hits",
-        "native_periodic_player_poisons", "hell_world"] {
+    for key in [
+        "players",
+        "native_monsters",
+        "native_monster_respawns",
+        "pending_native_hits",
+        "pending_native_projectiles",
+        "pending_native_player_hits",
+        "native_periodic_player_poisons",
+        "hell_world",
+    ] {
         assert_eq!(before[key], after[key], "checkpoint field {key}");
     }
     out
@@ -608,7 +631,13 @@ fn purification_then_same_bit_reapplication_starts_a_fresh_counted_lease() {
     assert!(!packets(&before)
         .iter()
         .any(|p| matches!(p,ServerPacket::ObjectPoisoned{object_id:101,poison}if poison&128==0)));
-    assert_eq!(state(&z)["native_periodic_player_poisons"].as_array().unwrap().len(), 1);
+    assert_eq!(
+        state(&z)["native_periodic_player_poisons"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
     let clean = z.tick(11003);
     assert!(packets(&clean)
         .iter()

@@ -75,7 +75,9 @@ impl SharedInProcessZoneSessionRuntime {
                     && invite.target_epoch.matches(p)
             })
         });
-        if let Some(packets) = management::execute(self, packet, &config, &key, &presences, &mut coordinator) {
+        if let Some(packets) =
+            management::execute(self, packet, &config, &key, &presences, &mut coordinator)
+        {
             return packets;
         }
         if let Some(packets) = wars::execute(packet, &config, &key, &presences, &mut coordinator) {
@@ -314,7 +316,8 @@ impl SharedInProcessZoneSessionRuntime {
                 rank_name,
                 ..
             } => {
-                match config.commit_shared_guild_rank_name(&identity(&key), *rank_index, rank_name) {
+                match config.commit_shared_guild_rank_name(&identity(&key), *rank_index, rank_name)
+                {
                     Ok(guild) => {
                         let actor = guild
                             .member(&identity(&key))
@@ -344,9 +347,9 @@ impl SharedInProcessZoneSessionRuntime {
                                         .copied()
                                         .unwrap_or(0),
                                     has_voted: false,
-                                    online: presences.iter().any(|presence| {
-                                        identity(&presence.key) == member.identity
-                                    }),
+                                    online: presences
+                                        .iter()
+                                        .any(|presence| identity(&presence.key) == member.identity),
                                 })
                                 .collect()
                         };

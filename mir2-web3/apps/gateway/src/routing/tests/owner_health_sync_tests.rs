@@ -1213,9 +1213,14 @@ fn owner_health_routing_mentor_peer_uses_confirmed_source_level_before_viewport_
         .unwrap();
     let teacher_key = teacher.current_presence_key().unwrap();
     let initial = owner.runtime.execute(WorldCommand::Tick).unwrap();
-    assert!(initial.iter().any(|p| matches!(p, ServerPacket::MentorUpdate {
-        level: 11, online: true, ..
-    })));
+    assert!(initial.iter().any(|p| matches!(
+        p,
+        ServerPacket::MentorUpdate {
+            level: 11,
+            online: true,
+            ..
+        }
+    )));
     let amount = teacher
         .inner
         .active_character_checkpoint()
@@ -1256,11 +1261,15 @@ fn owner_health_routing_mentor_peer_uses_confirmed_source_level_before_viewport_
         Some(teacher_id)
     );
     let updated = owner.runtime.execute(WorldCommand::Tick).unwrap();
-    assert!(updated.iter().any(|p| matches!(p,
-        ServerPacket::MentorUpdate {
-            level: 12,
-            online: true,
-            ..
-        }
-    )), "ordinary Tick must notify the confirmed peer level: {updated:?}");
+    assert!(
+        updated.iter().any(|p| matches!(
+            p,
+            ServerPacket::MentorUpdate {
+                level: 12,
+                online: true,
+                ..
+            }
+        )),
+        "ordinary Tick must notify the confirmed peer level: {updated:?}"
+    );
 }

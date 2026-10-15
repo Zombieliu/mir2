@@ -1,6 +1,6 @@
 //! Trusted health presentation cannot sign death, erase movement or settle loot.
-use super::*;
 use super::super::owner_health::PendingOwnerPresentation;
+use super::*;
 use crate::routing::death_drop_anchors;
 
 const ID: u32 = 8_010_001;
@@ -207,10 +207,14 @@ fn health_zero_registered_owner_full_channel_keeps_global_attack_until_one_wire_
         let pending = state.pending_zone_owner_health.get(&key);
         (
             pending.map_or(0, Vec::len),
-            pending.into_iter().flatten().filter_map(|entry| match entry {
-                PendingOwnerPresentation::Packet(packet) => Some(packet.clone()),
-                PendingOwnerPresentation::Health(_) => None,
-            }).collect::<Vec<_>>(),
+            pending
+                .into_iter()
+                .flatten()
+                .filter_map(|entry| match entry {
+                    PendingOwnerPresentation::Packet(packet) => Some(packet.clone()),
+                    PendingOwnerPresentation::Health(_) => None,
+                })
+                .collect::<Vec<_>>(),
             !state.pending_zone_packets.contains_key(&key),
         )
     };
@@ -236,7 +240,11 @@ fn health_zero_registered_owner_full_channel_keeps_global_attack_until_one_wire_
         .unwrap()
         .pending_zone_packets
         .contains_key(&key));
-    assert!(!shared.lock().unwrap().pending_zone_owner_health.contains_key(&key));
+    assert!(!shared
+        .lock()
+        .unwrap()
+        .pending_zone_owner_health
+        .contains_key(&key));
 }
 
 mod ordinary_transport {
@@ -265,7 +273,10 @@ mod ordinary_transport {
     // Preserve both players' adjacency and one-tile walks on real bundled
     // terrain. An unavailable synthetic map must correctly reject movement.
     fn fixture_point(x: i32, y: i32) -> Point {
-        Point { x: x + 20, y: y + 42 }
+        Point {
+            x: x + 20,
+            y: y + 42,
+        }
     }
     const PASSWORD: &str = "isolated-health-zero-password";
     type WebClient = WebSocketStream<MaybeTlsStream<TcpStream>>;

@@ -719,7 +719,10 @@ fn owned_pet_brown_uses_victim_at_war_and_pet_hits_do_not_brown_owner() {
 #[test]
 fn owned_shinsu_pve_hits_real_hostile_line_cells() {
     let mut z = ZoneRuntime::new(ZoneKey::for_map(REAL_MAP));
-    assert!(z.has_available_collision(), "real fixture terrain must load");
+    assert!(
+        z.has_available_collision(),
+        "real fixture terrain must load"
+    );
     let mut owner = join("owner", 101, point(20, 20));
     owner.map_file_name = REAL_MAP.into();
     owner.chat_profile.attack_mode = 0;
@@ -852,10 +855,9 @@ fn owned_pet_birth_receipt_survives_owner_logout_cold_restore_and_exact_ack() {
         z.issued_owned_pet_kill_is_current(&receipt),
         "logout cannot revoke an already born death"
     );
-    assert!(
-        z.transaction_fork()
-            .issued_owned_pet_kill_is_current(&receipt)
-    );
+    assert!(z
+        .transaction_fork()
+        .issued_owned_pet_kill_is_current(&receipt));
     let checkpoint = z.checkpoint_bytes().unwrap();
     let mut restored = ZoneRuntime::restore_checkpoint(&checkpoint).unwrap();
     assert!(
@@ -921,8 +923,8 @@ fn owned_pet_birth_receipt_rejects_every_identity_law_roll_and_checkpoint_tamper
     assert!(z.issued_owned_pet_kill_is_current(&receipt));
     let mut checkpoint: serde_json::Value =
         serde_json::from_slice(&z.checkpoint_bytes().unwrap()).unwrap();
-    checkpoint["entity_combat"]["owned_pet"]["issued_kills"][receipt.sequence.to_string()]["owner_account_id"] =
-        serde_json::json!("forged");
+    checkpoint["entity_combat"]["owned_pet"]["issued_kills"][receipt.sequence.to_string()]
+        ["owner_account_id"] = serde_json::json!("forged");
     assert!(ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&checkpoint).unwrap()).is_err());
 }
 
@@ -937,11 +939,9 @@ fn owned_pet_owner_logout_before_impact_never_births_damage_or_death_receipt() {
     });
     let output = z.tick(900);
     assert_eq!(z.players[&SessionId::new("victim")].hp, 10);
-    assert!(
-        !output
-            .iter()
-            .any(|out| matches!(out, ZoneOutbound::OwnedPetPlayerKill { .. }))
-    );
+    assert!(!output
+        .iter()
+        .any(|out| matches!(out, ZoneOutbound::OwnedPetPlayerKill { .. })));
     assert!(z.owned_pet_state().unwrap().issued_kills.is_empty());
 }
 
@@ -1092,11 +1092,9 @@ fn owned_pet_no_fight_guards_human_targets_but_preserves_monster_attacker_branch
         damage: 1,
         now_ms: 600,
     });
-    assert!(
-        !rejected
-            .iter()
-            .any(|out| matches!(out, ZoneOutbound::PlayerDamaged { .. }))
-    );
+    assert!(!rejected
+        .iter()
+        .any(|out| matches!(out, ZoneOutbound::PlayerDamaged { .. })));
     // An already existing threat is independently legal for the MonsterObject
     // branch; NoFight is absent from PlayerObject.IsAttackTarget(MonsterObject).
     threaten_owner(&mut z);
@@ -1247,11 +1245,9 @@ fn owned_pet_common_human_last_hitter_has_strict_expiry_and_wild_overrides_it() 
         700,
     );
     let death = direct_human_fatal(&mut z, source, 900);
-    assert!(
-        !death
-            .iter()
-            .any(|o| matches!(o, ZoneOutbound::OwnedPetPlayerKill { .. }))
-    );
+    assert!(!death
+        .iter()
+        .any(|o| matches!(o, ZoneOutbound::OwnedPetPlayerKill { .. })));
 }
 
 #[test]
@@ -1262,8 +1258,8 @@ fn owned_pet_human_poison_uses_mac_once_recovery_and_strict_final_tick() {
     victim.combat_stats.min_mac = 3;
     victim.combat_stats.max_mac = 3;
     victim.combat_stats.poison_recovery = 1;
-    assert!(
-        !z.apply_owned_human_poison(
+    assert!(!z
+        .apply_owned_human_poison(
             &caster,
             &target,
             CRYSTAL_POISON_GREEN,
@@ -1273,8 +1269,7 @@ fn owned_pet_human_poison_uses_mac_once_recovery_and_strict_final_tick() {
             false,
             600
         )
-        .is_empty()
-    );
+        .is_empty());
     assert_eq!(z.owned_pet_state().unwrap().poisons[0].value, 7);
     assert_eq!(z.owned_pet_state().unwrap().poisons[0].ticks_left, 3);
     // Armour is sampled at application, then source ticks are raw HP loss.
@@ -1408,8 +1403,8 @@ fn owned_pet_human_poison_refresh_preserves_stronger_green_and_longer_red() {
         true,
         600,
     );
-    assert!(
-        z.apply_owned_human_poison(
+    assert!(z
+        .apply_owned_human_poison(
             &caster,
             &target,
             CRYSTAL_POISON_GREEN,
@@ -1419,14 +1414,12 @@ fn owned_pet_human_poison_refresh_preserves_stronger_green_and_longer_red() {
             true,
             601
         )
-        .is_empty()
-    );
+        .is_empty());
     assert_eq!(z.owned_pet_state().unwrap().poisons[0].ticks_left, 3);
     z.apply_owned_human_poison(&caster, &target, CRYSTAL_POISON_RED, 0, 12, 1000, true, 600);
-    assert!(
-        z.apply_owned_human_poison(&caster, &target, CRYSTAL_POISON_RED, 0, 11, 1000, true, 601)
-            .is_empty()
-    );
+    assert!(z
+        .apply_owned_human_poison(&caster, &target, CRYSTAL_POISON_RED, 0, 11, 1000, true, 601)
+        .is_empty());
     assert_eq!(
         z.owned_pet_state()
             .unwrap()
@@ -1627,10 +1620,9 @@ fn owned_pet_real_summon_grows_source_stats_and_separate_gain_exp_steps() {
     assert_eq!(z.owned_monster_clock(pet).unwrap().pet_experience, 40_003);
     assert!(out.iter().any(|o|matches!(o,ZoneOutbound::ToMany{packets,..} if packets.iter().any(|p|matches!(p,ServerPacket::ObjectHealth{info} if info.object_id==pet)))));
     assert!(out.iter().any(|o|matches!(o,ZoneOutbound::ToMany{packets,..} if packets.iter().any(|p|matches!(p,ServerPacket::ObjectColourChanged{object_id,name_colour_argb} if *object_id==pet && *name_colour_argb == 0xFF6A5ACD_u32 as i32)))));
-    assert!(
-        z.mirror_earned_steps(&sid, &admission, &[60_000, 1], 621)
-            .is_empty()
-    );
+    assert!(z
+        .mirror_earned_steps(&sid, &admission, &[60_000, 1], 621)
+        .is_empty());
     assert_eq!(z.owned_monster_clock(pet).unwrap().pet_experience, 40_003);
 }
 
@@ -1645,16 +1637,14 @@ fn owned_pet_gain_exp_range_death_cap_and_uint_wrapping_match_source() {
         assert_eq!(after.pets[0].level, if distance == 16 { 3 } else { 2 });
         z.native_monsters.get_mut(&pet).unwrap().dead = true;
         z.native_monsters.get_mut(&pet).unwrap().hp = 0;
-        assert!(
-            z.mirror_earned_steps(&sid, &admission, &[20_000], 610)
-                .is_empty()
-        );
-        assert!(
-            z.capture_player_pet_experience(&sid, 610)
-                .unwrap()
-                .before_snapshot()
-                .is_empty()
-        );
+        assert!(z
+            .mirror_earned_steps(&sid, &admission, &[20_000], 610)
+            .is_empty());
+        assert!(z
+            .capture_player_pet_experience(&sid, 610)
+            .unwrap()
+            .before_snapshot()
+            .is_empty());
     }
     let (mut z, pet, _) = fixture();
     z.native_monsters.get_mut(&pet).unwrap().summon_skill_level = 6;
@@ -1895,10 +1885,9 @@ fn owned_pet_online_map_recall_uses_source_mode_and_same_online_node() {
         } else {
             assert!(old.owned_pet_life(pet).is_some());
             assert!(current.native_monsters.is_empty());
-            assert!(
-                !old.capture_player_saved_pets(&SessionId::new("owner"), 2600)
-                    .is_empty()
-            );
+            assert!(!old
+                .capture_player_saved_pets(&SessionId::new("owner"), 2600)
+                .is_empty());
             let distant = old
                 .capture_player_pet_experience(&SessionId::new("owner"), 2600)
                 .unwrap();

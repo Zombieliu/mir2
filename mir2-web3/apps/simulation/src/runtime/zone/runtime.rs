@@ -68,16 +68,16 @@ mod checkpoint;
 mod crowded_fixture;
 mod experience_ownership;
 mod experience_profiles;
+#[cfg(test)]
+mod five_class_owner_health_tests;
 mod ground_ownership;
 pub(super) mod mining;
+#[cfg(test)]
+mod owner_health_tests;
 #[cfg(test)]
 mod purification_tests;
 #[cfg(test)]
 mod stat_roll_tests;
-#[cfg(test)]
-mod owner_health_tests;
-#[cfg(test)]
-mod five_class_owner_health_tests;
 use super::online_identity::{
     OnlineIdentityBook, OnlineOwner, OnlinePresence, OnlinePresenceSnapshot,
 };
@@ -1163,7 +1163,9 @@ impl ZoneRuntime {
 
     /// Reads the retained raw transform discriminant without inferring a default.
     pub fn player_transform_type(&self, session_id: &SessionId) -> Option<i16> {
-        self.players.get(session_id).map(|player| player.transform_type)
+        self.players
+            .get(session_id)
+            .map(|player| player.transform_type)
     }
 
     pub fn player_chat_profile(&self, session_id: &SessionId) -> Option<super::ZoneChatProfile> {
@@ -1430,22 +1432,28 @@ impl ZoneRuntime {
             return out;
         }
         player.flaming_sword_armed = true;
-        player.flaming_sword_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_PLAYER_FLAMING_SWORD_MS);
+        player.flaming_sword_ready_at_ms =
+            now_ms.saturating_add(ZONE_NATIVE_PLAYER_FLAMING_SWORD_MS);
         player.change_owner_mp(-cost);
         let object_id = player.object_id;
         let mana_percent = zone_mana_percent(player.mp);
         out.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: vec![ServerPacket::SpellToggle {
-                object_id, spell: Spell::FlamingSword, can_use: true,
+                object_id,
+                spell: Spell::FlamingSword,
+                can_use: true,
             }],
         });
         out.extend(self.take_owner_health_through(session_id, u64::MAX));
         out.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
-            packets: vec![ServerPacket::ObjectMana { info: ObjectManaInfo {
-                object_id, percent: mana_percent,
-            }}],
+            packets: vec![ServerPacket::ObjectMana {
+                info: ObjectManaInfo {
+                    object_id,
+                    percent: mana_percent,
+                },
+            }],
         });
         out
     }
@@ -1499,43 +1507,76 @@ impl ZoneRuntime {
             .map(|player| (player.hp, player.max_hp, player.mp))
     }
 
-    pub fn owner_health_cursor(&self, session_id: &SessionId) -> Option<super::ZoneOwnerHealthCursor> {
+    pub fn owner_health_cursor(
+        &self,
+        session_id: &SessionId,
+    ) -> Option<super::ZoneOwnerHealthCursor> {
         let player = self.players.get(session_id)?;
-        let owner = &self.online_presence.get(session_id)
-            .filter(|presence| presence.owner.matches_player(player))?.owner;
+        let owner = &self
+            .online_presence
+            .get(session_id)
+            .filter(|presence| presence.owner.matches_player(player))?
+            .owner;
         Some(super::ZoneOwnerHealthCursor {
-            session_id: session_id.clone(), online_owner: owner.encoded(),
-            object_id: player.object_id, life_generation: player.life_generation,
-            dead: player.dead || player.hp == 0, health_sequence: player.owner_health_sequence,
+            session_id: session_id.clone(),
+            online_owner: owner.encoded(),
+            object_id: player.object_id,
+            life_generation: player.life_generation,
+            dead: player.dead || player.hp == 0,
+            health_sequence: player.owner_health_sequence,
         })
     }
 
     fn drain_owner_health_changes(&mut self) -> Vec<ZoneOutbound> {
         let sessions = self.players.keys().cloned().collect::<Vec<_>>();
-        sessions.into_iter().flat_map(|session| self.take_owner_health_through(&session, u64::MAX)).collect()
+        sessions
+            .into_iter()
+            .flat_map(|session| self.take_owner_health_through(&session, u64::MAX))
+            .collect()
     }
 
     /// Drain operation receipts through the sequence captured at the mutation.
     /// This keeps shield healing before Death and damage health after Death;
     /// it never infers a health operation from the final pool or display packet.
-    fn take_owner_health_through(&mut self, session_id: &SessionId, through: u64) -> Vec<ZoneOutbound> {
-        let Some(player) = self.players.get_mut(session_id) else { return Vec::new(); };
-        let owner = self.online_presence.get(session_id)
-            .filter(|presence| presence.owner.matches_player(player)).map(|p| p.owner.encoded());
-        let (changes, retained): (Vec<_>, Vec<_>) = std::mem::take(&mut player.pending_owner_health_changes)
-            .into_iter().partition(|event| event.health_sequence <= through);
+    fn take_owner_health_through(
+        &mut self,
+        session_id: &SessionId,
+        through: u64,
+    ) -> Vec<ZoneOutbound> {
+        let Some(player) = self.players.get_mut(session_id) else {
+            return Vec::new();
+        };
+        let owner = self
+            .online_presence
+            .get(session_id)
+            .filter(|presence| presence.owner.matches_player(player))
+            .map(|p| p.owner.encoded());
+        let (changes, retained): (Vec<_>, Vec<_>) =
+            std::mem::take(&mut player.pending_owner_health_changes)
+                .into_iter()
+                .partition(|event| event.health_sequence <= through);
         player.pending_owner_health_changes = retained;
-        changes.into_iter().filter_map(|event| {
-            Some(ZoneOutbound::OwnerHealthChanged { change: super::ZoneOwnerHealthChange {
-                cursor: super::ZoneOwnerHealthCursor {
-                    session_id: session_id.clone(), online_owner: owner.clone()?,
-                    object_id: player.object_id, life_generation: event.life_generation,
-                    dead: event.dead, health_sequence: event.health_sequence,
-                },
-                hp_before: event.hp_before, mp_before: event.mp_before,
-                hp: event.hp, mp: event.mp,
-            } })
-        }).collect()
+        changes
+            .into_iter()
+            .filter_map(|event| {
+                Some(ZoneOutbound::OwnerHealthChanged {
+                    change: super::ZoneOwnerHealthChange {
+                        cursor: super::ZoneOwnerHealthCursor {
+                            session_id: session_id.clone(),
+                            online_owner: owner.clone()?,
+                            object_id: player.object_id,
+                            life_generation: event.life_generation,
+                            dead: event.dead,
+                            health_sequence: event.health_sequence,
+                        },
+                        hp_before: event.hp_before,
+                        mp_before: event.mp_before,
+                        hp: event.hp,
+                        mp: event.mp,
+                    },
+                })
+            })
+            .collect()
     }
 
     /// Integration-fixture access to existing finite status admission. This is
@@ -1787,9 +1828,17 @@ impl ZoneRuntime {
     /// Trusted personal operations (drugs, level refresh, equipment break)
     /// commit under the Gateway's same Zone writer lock. Ordinary mirrors use
     /// SyncPlayerVitals and stay silent. Preserve Source's HP-then-MP states.
-    pub fn commit_owner_vitals(&mut self, session_id: &SessionId,
-        hp: i32, max_hp: i32, mp: i32, dead: bool) -> Vec<ZoneOutbound> {
-        let Some(before) = self.players.get(session_id).map(|p| (p.hp, p.mp)) else { return Vec::new(); };
+    pub fn commit_owner_vitals(
+        &mut self,
+        session_id: &SessionId,
+        hp: i32,
+        max_hp: i32,
+        mp: i32,
+        dead: bool,
+    ) -> Vec<ZoneOutbound> {
+        let Some(before) = self.players.get(session_id).map(|p| (p.hp, p.mp)) else {
+            return Vec::new();
+        };
         let mut out = self.sync_player_vitals(session_id, hp, max_hp, mp, Some(dead));
         if let Some(player) = self.players.get_mut(session_id) {
             let after_mp = player.mp;
@@ -5524,7 +5573,8 @@ impl ZoneRuntime {
                 },
             });
         }
-        let mut outbounds = self.take_owner_health_through(target_session_id, owner_health_heal_sequence);
+        let mut outbounds =
+            self.take_owner_health_through(target_session_id, owner_health_heal_sequence);
         outbounds.extend(death_receipt);
         outbounds.extend(legacy_cleanup);
         if killed {
@@ -12299,7 +12349,8 @@ impl ZoneRuntime {
                 death_receipt.into_iter().collect(),
             );
         }
-        let mut outbounds = self.take_owner_health_through(&hit.target_session_id, owner_health_heal_sequence);
+        let mut outbounds =
+            self.take_owner_health_through(&hit.target_session_id, owner_health_heal_sequence);
         outbounds.extend(death_receipt);
         outbounds.extend(legacy_cleanup);
         packets.extend(shield_end_packets);
@@ -15097,9 +15148,11 @@ impl ZoneRuntime {
             // Preserve the statue's source sleep presentation without letting
             // a display percentage clear a genuine death/harvest incarnation.
             if let ServerPacket::ObjectHealth { info } = packet {
-                if self.native_monsters.get(&info.object_id).is_some_and(|m| {
-                    m.ai == 54 && !m.dead && !sleep_monster_accepts_hp_change(m)
-                }) && !self.dead_object_ids.contains_key(&info.object_id)
+                if self
+                    .native_monsters
+                    .get(&info.object_id)
+                    .is_some_and(|m| m.ai == 54 && !m.dead && !sleep_monster_accepts_hp_change(m))
+                    && !self.dead_object_ids.contains_key(&info.object_id)
                 {
                     if let Some(object) = self.objects.get_mut(&info.object_id) {
                         object.health = Some(info.clone());

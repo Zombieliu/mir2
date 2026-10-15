@@ -519,7 +519,11 @@ fn shared_assassin_and_taoist_mirrors_keep_subtick_duration_and_serialized_clock
         let mut restored: BuffState = serde_json::from_value(saved).unwrap();
         assert!(restored.real_time_duration.is_some());
         assert!(!restored.expired(tick));
-        restored.real_time_duration.as_mut().unwrap().elapse_for_test(7500);
+        restored
+            .real_time_duration
+            .as_mut()
+            .unwrap()
+            .elapse_for_test(7500);
         assert!(restored.expired(tick));
     }
 }

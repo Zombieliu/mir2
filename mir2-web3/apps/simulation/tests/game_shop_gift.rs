@@ -86,13 +86,17 @@ fn start(config: &SimulationConfig, account: &str, index: i32) -> InProcessWorld
             password: PASSWORD.into(),
         }))
         .unwrap();
-    assert!(login.iter().any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    assert!(login
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     let bootstrap = runtime
         .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
             character_index: index,
         }))
         .unwrap();
-    assert!(bootstrap.iter().any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
+    assert!(bootstrap
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
     assert_eq!(runtime.active_identity().unwrap().account_id, account);
     runtime
 }
@@ -934,18 +938,26 @@ fn gift_recipient_unit_without_payer_receipt_never_recreates_a_paid_outcome() {
     assert!(gift(&mut sender, request(20)).unwrap().outcome.success);
     {
         let mut store = config.account_store.lock().unwrap();
-        let payer = store.accounts.get_mut(SENDER).unwrap()
-            .saves.get_mut(&SENDER_INDEX).unwrap();
-        let mut state: Stage5SystemsState = serde_json::from_str(
-            payer.stage5_systems_json.as_deref().unwrap(),
-        ).unwrap();
-        state.mail.retain(|mail| mail.subject != "NativeGameShopGiftLedgerV1");
+        let payer = store
+            .accounts
+            .get_mut(SENDER)
+            .unwrap()
+            .saves
+            .get_mut(&SENDER_INDEX)
+            .unwrap();
+        let mut state: Stage5SystemsState =
+            serde_json::from_str(payer.stage5_systems_json.as_deref().unwrap()).unwrap();
+        state
+            .mail
+            .retain(|mail| mail.subject != "NativeGameShopGiftLedgerV1");
         payer.stage5_systems_json = Some(serde_json::to_string(&state).unwrap());
     }
     let mut fresh_sender = start(config, SENDER, SENDER_INDEX);
     let before = serialized(config);
-    assert_eq!(gift(&mut fresh_sender, request(20)).unwrap_err(),
-        "gameShopGiftItemReceiptMissingOutcome");
+    assert_eq!(
+        gift(&mut fresh_sender, request(20)).unwrap_err(),
+        "gameShopGiftItemReceiptMissingOutcome"
+    );
     assert_eq!(serialized(config), before);
     assert_eq!(save(config, SENDER, SENDER_INDEX).credit, 990);
     assert_eq!(mail(config, RECEIVER, RECEIVER_INDEX).len(), 1);
@@ -1067,23 +1079,31 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
     // Every ordinary StartGame intentionally saves the owner and advances its
     // revision. Complete both before preparing this Source CAS race; otherwise
     // the second startup correctly makes the first live checkpoint stale.
-    let mut writers: Vec<_> = configs.into_iter()
+    let mut writers: Vec<_> = configs
+        .into_iter()
         .map(|writer| {
             let runtime = start(&writer, SENDER, SENDER_INDEX);
             (writer, runtime)
-        }).collect();
+        })
+        .collect();
     let canonical = save(&open(&scoped), SENDER, SENDER_INDEX);
     assert_eq!(canonical.character.name, "GiftSender");
     assert_eq!(canonical.character.index, SENDER_INDEX);
     assert_eq!(canonical.credit, 1000);
     assert!(serde_json::from_str::<Stage5SystemsState>(
         canonical.stage5_systems_json.as_deref().unwrap(),
-    ).unwrap().mail.iter().all(|mail| mail.subject != "NativeGameShopGiftLedgerV1"));
+    )
+    .unwrap()
+    .mail
+    .iter()
+    .all(|mail| mail.subject != "NativeGameShopGiftLedgerV1"));
     for (_, runtime) in &mut writers {
         // Trusted, test-only preparation of the complete authoritative owner
         // checkpoint, not a revision-only rebase or a public client command.
         // No game action has run on either sender. Recipient state is untouched.
-        runtime.restore_active_character_checkpoint(&canonical).unwrap();
+        runtime
+            .restore_active_character_checkpoint(&canonical)
+            .unwrap();
         let checkpoint = runtime.active_character_checkpoint().unwrap();
         assert_eq!(checkpoint.revision, canonical.revision);
         assert_eq!(checkpoint.character, canonical.character);
@@ -1103,12 +1123,22 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
                         // Print only fixed, allowlisted domain labels. Repository
                         // errors may contain a private URI or account details.
                         let label = match error.as_str() {
-                            "gameShopGiftItemReceiptMissingOutcome" => "item-receipt-without-outcome",
+                            "gameShopGiftItemReceiptMissingOutcome" => {
+                                "item-receipt-without-outcome"
+                            }
                             "gameShopGiftOwnerCheckpointStale" => "owner-checkpoint-stale",
                             "gameShopGiftReplayMismatch" => "request-replay-mismatch",
-                            _ if error.starts_with("stale postgres account-store write") => "account-cas-stale",
-                            _ if error.starts_with("stale postgres character-save write") => "character-cas-stale",
-                            _ if error.starts_with("stale postgres game-shop global-stock write") => "stock-cas-stale",
+                            _ if error.starts_with("stale postgres account-store write") => {
+                                "account-cas-stale"
+                            }
+                            _ if error.starts_with("stale postgres character-save write") => {
+                                "character-cas-stale"
+                            }
+                            _ if error
+                                .starts_with("stale postgres game-shop global-stock write") =>
+                            {
+                                "stock-cas-stale"
+                            }
                             _ if error.contains("OUTCOME_UNKNOWN") => "outcome-unknown",
                             _ => "other-error-redacted",
                         };
@@ -1200,21 +1230,30 @@ fn gift_postgres_independent_writers_mail_cas_and_online_owner_survive() {
     let orphaned = open(&scoped);
     {
         let mut store = orphaned.account_store.lock().unwrap();
-        let payer = store.accounts.get_mut(SENDER).unwrap()
-            .saves.get_mut(&SENDER_INDEX).unwrap();
-        let mut state: Stage5SystemsState = serde_json::from_str(
-            payer.stage5_systems_json.as_deref().unwrap(),
-        ).unwrap();
-        state.mail.retain(|mail| mail.subject != "NativeGameShopGiftLedgerV1");
+        let payer = store
+            .accounts
+            .get_mut(SENDER)
+            .unwrap()
+            .saves
+            .get_mut(&SENDER_INDEX)
+            .unwrap();
+        let mut state: Stage5SystemsState =
+            serde_json::from_str(payer.stage5_systems_json.as_deref().unwrap()).unwrap();
+        state
+            .mail
+            .retain(|mail| mail.subject != "NativeGameShopGiftLedgerV1");
         payer.stage5_systems_json = Some(serde_json::to_string(&state).unwrap());
     }
-    orphaned.save_account_store_account(SENDER)
+    orphaned
+        .save_account_store_account(SENDER)
         .unwrap_or_else(|_| panic!("QA orphan fixture save failed; credentials suppressed"));
     let observed = open(&scoped);
     let mut fresh_sender = start(&observed, SENDER, SENDER_INDEX);
     let before = serialized(&observed);
-    assert_eq!(gift(&mut fresh_sender, request(19)).unwrap_err(),
-        "gameShopGiftItemReceiptMissingOutcome");
+    assert_eq!(
+        gift(&mut fresh_sender, request(19)).unwrap_err(),
+        "gameShopGiftItemReceiptMissingOutcome"
+    );
     assert_eq!(serialized(&observed), before);
     assert_eq!(save(&open(&scoped), SENDER, SENDER_INDEX).credit, 990);
     assert_eq!(mail(&open(&scoped), RECEIVER, RECEIVER_INDEX).len(), 1);

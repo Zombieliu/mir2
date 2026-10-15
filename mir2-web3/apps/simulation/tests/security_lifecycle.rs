@@ -134,7 +134,9 @@ fn unauthenticated_inspect_rejected_in_every_id_namespace() {
         assert!(validate_production_player_command(false, &command).is_err());
         assert!(validate_production_player_command(true, &command).is_ok());
         let mut runtime = InProcessWorldRuntime::new(SimulationConfig::default());
-        assert!(runtime.execute_production_player_command(false, command).is_err());
+        assert!(runtime
+            .execute_production_player_command(false, command)
+            .is_err());
         assert!(runtime.active_identity().is_none());
     }
 }

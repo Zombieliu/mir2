@@ -394,3 +394,90 @@ fn handoff_refuses_to_drop_a_bound_unknown_refine_field_in_live_or_replica_insta
     );
     assert_eq!(std::fs::read(&path).unwrap(), before);
 }
+
+#[test]
+fn handoff_server_continuation_keeps_password_and_entire_file_without_recovery_capability() {
+    let (config, path, mut source) = source();
+    let handoff = source.prepare_character_handoff().unwrap();
+    assert_eq!(handoff.account_id, "demo");
+    let mut legacy = serde_json::to_value(&handoff).unwrap();
+    legacy.as_object_mut().unwrap().remove("accountId");
+    assert!(serde_json::from_value::<CharacterHandoffCheckpoint>(legacy).is_err());
+    let bytes = std::fs::read(&path).unwrap();
+    let mut target = SimulationSession::new(config.clone());
+    let commitment = target
+        .resume_authenticated_character_handoff(&handoff)
+        .unwrap();
+    handoff.validate_commitment(&commitment).unwrap();
+    assert_eq!(target.active_identity(), source.active_identity());
+    assert!(target
+        .app
+        .world()
+        .get_resource::<crate::runtime::recovery::TrustedRecoveryAccount>()
+        .is_none());
+    assert!(
+        std::fs::read(&path).unwrap() == bytes,
+        "continuation changed the source File"
+    );
+    let mut relogin = select(&config);
+    assert!(relogin.active_identity().is_none());
+    assert!(relogin
+        .app
+        .world()
+        .get_resource::<crate::runtime::recovery::TrustedRecoveryAccount>()
+        .is_none());
+    relogin.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert!(relogin.active_identity().is_some());
+}
+
+#[test]
+fn handoff_server_continuation_rejects_missing_banned_and_foreign_accounts_without_writes() {
+    use crate::{InProcessWorldRuntime, WorldRuntime};
+    let (config, path, mut source) = source();
+    let handoff = source.prepare_character_handoff().unwrap();
+    let bytes = std::fs::read(&path).unwrap();
+    let mut missing = handoff.clone();
+    missing.account_id = "missing-account".into();
+    let mut target = InProcessWorldRuntime::new(config.clone());
+    assert!(target
+        .restore_replica_session_checkpoint(&source.active_identity().unwrap(), &handoff.durable)
+        .is_err());
+    assert!(target.resume_character_handoff(&missing).is_err());
+    assert!(target.active_identity().is_none());
+    assert!(
+        std::fs::read(&path).unwrap() == bytes,
+        "continuation changed the source File"
+    );
+    let mut store: crate::config::AccountStore = serde_json::from_slice(&bytes).unwrap();
+    let mut foreign = store.accounts["demo"].clone();
+    foreign.password = "foreign".into();
+    store.accounts.insert("foreign".into(), foreign);
+    *config.account_store.lock().unwrap() = store.clone();
+    std::fs::write(&path, serde_json::to_vec(&store).unwrap()).unwrap();
+    let mut selected = SimulationSession::new(config.clone());
+    assert!(selected
+        .handle_packet(ClientPacket::Login {
+            account_id: "foreign".into(),
+            password: "foreign".into()
+        })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    let foreign_bytes = std::fs::read(&path).unwrap();
+    assert!(selected
+        .resume_authenticated_character_handoff(&handoff)
+        .is_err());
+    assert!(
+        std::fs::read(&path).unwrap() == foreign_bytes,
+        "foreign continuation wrote the source File"
+    );
+    store.accounts.get_mut("demo").unwrap().is_banned = true;
+    std::fs::write(&path, serde_json::to_vec(&store).unwrap()).unwrap();
+    let banned_bytes = std::fs::read(&path).unwrap();
+    let mut target = InProcessWorldRuntime::new(config);
+    assert!(target.resume_character_handoff(&handoff).is_err());
+    assert!(target.active_identity().is_none());
+    assert!(
+        std::fs::read(&path).unwrap() == banned_bytes,
+        "banned continuation wrote the source File"
+    );
+}

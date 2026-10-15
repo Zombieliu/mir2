@@ -154,7 +154,7 @@ pub(super) fn is_safe_zone_point(
 /// player happened to occupy. The Zone calls this through its authoritative
 /// transform projection after an accepted step.
 pub(super) fn refresh_player_bind_at_position(world: &mut World, position: &Point) {
-    let _=super::buffs::refresh_player_safe_duration_buffs(world,position);
+    let _ = super::buffs::refresh_player_safe_duration_buffs(world, position);
     let map_file_name = world
         .resource::<MapRuntimeResource>()
         .current_map
@@ -361,21 +361,30 @@ pub(super) fn is_current_map_transfer_source(world: &World, point: &Point) -> bo
             .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
         || crystal_map_coordinate_source_cells(&map.current_map.file_name)
             .any(|(x, y)| point.x == x && point.y == y)
-        || super::default_npc_events::is_active_map_coord(&map.current_map.file_name,point)
+        || super::default_npc_events::is_active_map_coord(&map.current_map.file_name, point)
 }
 
 pub(super) fn apply_current_player_position_map_transfer(world: &mut World) -> Vec<ServerPacket> {
-    let map_file_name = world.resource::<MapRuntimeResource>().current_map.file_name.clone();
-    let position = player_entity(world).and_then(|player| entity_position(world,player));
-    if let Some(position) = position.filter(|position| super::default_npc_events::is_active_map_coord(&map_file_name,position)) {
-        let source_need_move = crystal_map_respawns_ref(&map_file_name).is_some_and(|map|
-            map.movements.iter().any(|movement| movement.source == position && movement.need_move && !movement.need_hole));
+    let map_file_name = world
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .file_name
+        .clone();
+    let position = player_entity(world).and_then(|player| entity_position(world, player));
+    if let Some(position) = position
+        .filter(|position| super::default_npc_events::is_active_map_coord(&map_file_name, position))
+    {
+        let source_need_move = crystal_map_respawns_ref(&map_file_name).is_some_and(|map| {
+            map.movements.iter().any(|movement| {
+                movement.source == position && movement.need_move && !movement.need_hole
+            })
+        });
         if source_need_move {
-            if super::default_npc_events::has_coordinate_ticket(world,&map_file_name,&position) {
+            if super::default_npc_events::has_coordinate_ticket(world, &map_file_name, &position) {
                 // Only a newly accepted entry owns a pending coordinate hook.
                 // A failed script condition must let the next step leave the
                 // entrance rather than locking the character on that cell.
-                return vec![ServerPacket::NPCUpdate { npc_id:0 }];
+                return vec![ServerPacket::NPCUpdate { npc_id: 0 }];
             }
             return Vec::new();
         }
@@ -455,15 +464,35 @@ pub(super) fn conquest_movement_allowed(world: &World, conquest_index: i32) -> b
     if conquest_index <= 0 {
         return true;
     }
-    let config=&world.resource::<RuntimeConfigResource>().config;
-    if config.conquest_policies.iter().any(|p|p.index==conquest_index) {
-        let Ok(Some(record))=config.shared_conquest_snapshot_checked(conquest_index) else{return false};
-        let session=world.resource::<SessionResource>();
-        let Some((account_id,character))=session.account_id.as_ref().zip(session.selected_character.as_ref()) else{return false};
-        let identity=crate::config::Stage5FriendIdentity{account_id:account_id.clone(),character_index:character.index};
-        let Ok(store)=config.account_store.lock() else{return false};
-        return record.owner_guild_id.as_ref()
-            .and_then(|id|store.shared_guilds.get(id)).is_some_and(|g|g.member(&identity).is_some());
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    if config
+        .conquest_policies
+        .iter()
+        .any(|p| p.index == conquest_index)
+    {
+        let Ok(Some(record)) = config.shared_conquest_snapshot_checked(conquest_index) else {
+            return false;
+        };
+        let session = world.resource::<SessionResource>();
+        let Some((account_id, character)) = session
+            .account_id
+            .as_ref()
+            .zip(session.selected_character.as_ref())
+        else {
+            return false;
+        };
+        let identity = crate::config::Stage5FriendIdentity {
+            account_id: account_id.clone(),
+            character_index: character.index,
+        };
+        let Ok(store) = config.account_store.lock() else {
+            return false;
+        };
+        return record
+            .owner_guild_id
+            .as_ref()
+            .and_then(|id| store.shared_guilds.get(id))
+            .is_some_and(|g| g.member(&identity).is_some());
     }
     let guild = world
         .resource::<Stage5SystemsResource>()
@@ -486,7 +515,7 @@ pub(super) fn conquest_movement_allowed(world: &World, conquest_index: i32) -> b
 pub(crate) fn crystal_direct_movement_transfer_source_cells(
     map_file_name: &str,
 ) -> BTreeSet<(i32, i32)> {
-    let mut cells: BTreeSet<(i32,i32)> = crystal_movement_transfer_records_for_map(map_file_name)
+    let mut cells: BTreeSet<(i32, i32)> = crystal_movement_transfer_records_for_map(map_file_name)
         .into_iter()
         .flat_map(|transfer| {
             (transfer.from_bounds.min_y..=transfer.from_bounds.max_y).flat_map(move |y| {
@@ -495,9 +524,19 @@ pub(crate) fn crystal_direct_movement_transfer_source_cells(
         })
         .collect();
     if let Some(map) = crystal_map_respawns_ref(map_file_name) {
-        cells.extend(map.movements.iter().filter(|movement| movement.need_move && !movement.need_hole
-            && super::default_npc_events::is_active_map_coord(map_file_name,&movement.source))
-            .map(|movement| (movement.source.x,movement.source.y)));
+        cells.extend(
+            map.movements
+                .iter()
+                .filter(|movement| {
+                    movement.need_move
+                        && !movement.need_hole
+                        && super::default_npc_events::is_active_map_coord(
+                            map_file_name,
+                            &movement.source,
+                        )
+                })
+                .map(|movement| (movement.source.x, movement.source.y)),
+        );
     }
     cells
 }
@@ -794,8 +833,15 @@ pub(super) fn relocate_player_to_map(
     // settlement, so entering their map mid-session must seed the last known tier.
     packets.extend(super::onchain::onchain_mine_node_state_packets(world));
     if super::resources::is_in_world(world) {
-        let map_file_name = world.resource::<MapRuntimeResource>().current_map.file_name.clone();
-        let _ = super::default_npc_events::enqueue(world,super::default_npc_events::DefaultNpcEvent::MapEnter { map_file_name });
+        let map_file_name = world
+            .resource::<MapRuntimeResource>()
+            .current_map
+            .file_name
+            .clone();
+        let _ = super::default_npc_events::enqueue(
+            world,
+            super::default_npc_events::DefaultNpcEvent::MapEnter { map_file_name },
+        );
     }
     packets
 }
@@ -990,19 +1036,17 @@ pub(super) fn materialize_cold_source_pool_for_test(world: &mut World) -> Result
     let mut table = world
         .remove_resource::<MonsterSpawnTable>()
         .ok_or("missing original spawn pool")?;
-    let unavailable = table
-        .rules
-        .iter()
-        .flat_map(|rule| &rule.slots)
-        .any(|slot| {
-            slot.next_respawn_tick.is_some()
-                || slot.entity.is_some_and(|entity| {
-                    world.get::<MonsterAgent>(entity).is_none_or(|agent| agent.dead)
-                        || world
-                            .get::<MonsterVitals>(entity)
-                            .is_none_or(|vitals| vitals.hp <= 0)
-                })
-        });
+    let unavailable = table.rules.iter().flat_map(|rule| &rule.slots).any(|slot| {
+        slot.next_respawn_tick.is_some()
+            || slot.entity.is_some_and(|entity| {
+                world
+                    .get::<MonsterAgent>(entity)
+                    .is_none_or(|agent| agent.dead)
+                    || world
+                        .get::<MonsterVitals>(entity)
+                        .is_none_or(|vitals| vitals.hp <= 0)
+            })
+    });
     if unavailable {
         world.insert_resource(table);
         return Err("cold source pool cannot resurrect or replace existing actors".into());
@@ -1014,8 +1058,13 @@ pub(super) fn materialize_cold_source_pool_for_test(world: &mut World) -> Result
                 continue;
             }
             let rule = &table.rules[rule_index];
-            let entity =
-                materialize_monster_slot(world, rule_index, rule, slot_index, &rule.slots[slot_index]);
+            let entity = materialize_monster_slot(
+                world,
+                rule_index,
+                rule,
+                slot_index,
+                &rule.slots[slot_index],
+            );
             table.rules[rule_index].slots[slot_index].entity = Some(entity);
             activated += 1;
         }
@@ -1160,8 +1209,13 @@ pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
     };
     for entity in existing {
         if let Some(vitals) = world.get::<PlayerVitals>(entity) {
-            let saved=crate::config::HeroVitalsState {hp:vitals.hp,mp:vitals.mp};
-            world.resource_mut::<super::resources::HeroInventoryResource>().saved_vitals=Some(saved);
+            let saved = crate::config::HeroVitalsState {
+                hp: vitals.hp,
+                mp: vitals.mp,
+            };
+            world
+                .resource_mut::<super::resources::HeroInventoryResource>()
+                .saved_vitals = Some(saved);
         }
         let _ = world.despawn(entity);
     }
@@ -1188,13 +1242,19 @@ pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
         .map(|facing| facing.0)?;
     let spawn_position =
         summon_spawn_position_near(world, &player_position, player_direction, 1, Some(player));
-    let max_hp=super::hero_ai::hero_authoritative_stat(world,super::crystal_compat::CRYSTAL_STAT_HP).max(0);
-    let max_mp=super::hero_ai::hero_authoritative_stat(world,super::crystal_compat::CRYSTAL_STAT_MP).max(0);
-    let saved=world.resource::<super::resources::HeroInventoryResource>().saved_vitals;
-    let hp=saved.map_or(max_hp,|v|v.hp.min(max_hp));
-    let mp=saved.map_or(max_mp,|v|v.mp.min(max_mp));
+    let max_hp =
+        super::hero_ai::hero_authoritative_stat(world, super::crystal_compat::CRYSTAL_STAT_HP)
+            .max(0);
+    let max_mp =
+        super::hero_ai::hero_authoritative_stat(world, super::crystal_compat::CRYSTAL_STAT_MP)
+            .max(0);
+    let saved = world
+        .resource::<super::resources::HeroInventoryResource>()
+        .saved_vitals;
+    let hp = saved.map_or(max_hp, |v| v.hp.min(max_hp));
+    let mp = saved.map_or(max_mp, |v| v.mp.min(max_mp));
 
-    let looks=super::hero_inventory::appearance(world);
+    let looks = super::hero_inventory::appearance(world);
     Some(
         world
             .spawn((
@@ -1273,22 +1333,33 @@ pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
     let quest_ids_by_npc = super::npc::crystal_quest_ids_by_npc();
     let config = world.resource::<RuntimeConfigResource>().config.clone();
 
-    for npc in crystal_npc_info_manifest().npcs.into_iter().chain(mir2_game_data::periodic_quests::npc_templates()) {
+    for npc in crystal_npc_info_manifest()
+        .npcs
+        .into_iter()
+        .chain(mir2_game_data::periodic_quests::npc_templates())
+    {
         let npc_map_file_name = npc.map_file_name.as_deref().map(normalize_map_file_name);
         if npc_map_file_name.as_deref() != Some(map_file_name.as_str()) {
             continue;
         }
-        if !npc.loaded_object_id.is_some_and(|id|mir2_game_data::periodic_quests::npc(id).is_some())
-            && !config.npc_script_is_allowed(&npc.script_key) {
+        if !npc
+            .loaded_object_id
+            .is_some_and(|id| mir2_game_data::periodic_quests::npc(id).is_some())
+            && !config.npc_script_is_allowed(&npc.script_key)
+        {
             continue;
         }
         let Some(object_id) = npc.loaded_object_id else {
             continue;
         };
-        let quest_ids = super::quests::effective_quest_ids_for_npc(world,object_id,&quest_ids_by_npc
-            .get(&object_id)
-            .map(|ids| ids.iter().copied().collect::<Vec<_>>())
-            .unwrap_or_default());
+        let quest_ids = super::quests::effective_quest_ids_for_npc(
+            world,
+            object_id,
+            &quest_ids_by_npc
+                .get(&object_id)
+                .map(|ids| ids.iter().copied().collect::<Vec<_>>())
+                .unwrap_or_default(),
+        );
 
         world.spawn((
             WorldObject,

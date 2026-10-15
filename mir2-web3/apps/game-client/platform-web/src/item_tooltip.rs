@@ -4,7 +4,8 @@
 //! sellValue/attack/defence/addedAttack/addedDefence/addedLuck/socketSlots default zero.
 //! Missing source fields never become complete through DTO defaults.
 
-use std::{collections::HashSet, fmt};
+use std::fmt;
+use mir2_client_core::ordered_map::OrderedSet;
 use mir2_client_core::{item_tooltip::{crystal_item_tooltip_document_with_options, CrystalItemTooltipColour, CrystalItemTooltipDocument, CrystalItemTooltipSectionKind, CrystalItemTooltipOptions, CrystalStackSplitHint}, item_tooltip_types::*};
 use serde::{de::{self, MapAccess, SeqAccess, Visitor}, Deserialize, Deserializer};
 use serde_json::{json, Map, Value};
@@ -152,7 +153,7 @@ fn parse_player(raw: &mut Value, stat_budget: &mut i64) -> Result<(ItemTooltipPl
     unsigned(level, u32::MAX as u64)?;
     if let Some(stats) = player.get("crystalStats").filter(|v| !v.is_null()) {
         stats_array(stats, stat_budget)?;
-        let mut ids = HashSet::new();
+        let mut ids = OrderedSet::new();
         for stat in stats.as_array().ok_or("invalidPlayerStats")? {
             if !ids.insert(stat.get("stat").and_then(Value::as_u64).ok_or("invalidPlayerStat")?) { return Err("duplicatePlayerStat"); }
         }
@@ -282,7 +283,7 @@ fn validate_source(raw: &mut Value, item: &QueryItem, reasons: &mut Vec<&'static
 }
 
 #[derive(Default)]
-struct SourceValidation { ids: HashSet<u64>, item_nodes: usize, stat_budget: i64 }
+struct SourceValidation { ids: OrderedSet<u64>, item_nodes: usize, stat_budget: i64 }
 
 fn validate_info(info: &Value, budget: &mut i64) -> Result<bool, &'static str> {
     let info = info.as_object().ok_or("invalidInfo")?;

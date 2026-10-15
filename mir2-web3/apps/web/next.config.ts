@@ -193,6 +193,11 @@ const nextConfig: NextConfig = {
     "/api/movement-diagnostics": localDiagnosticsTracingExcludes,
   },
   outputFileTracingIncludes: {
+    // NFT can omit native Sharp license/version metadata. Keep each installed
+    // binary package and libvips companion complete in downloadable builds.
+    ...(isStandaloneProduction ? {
+      "/*": ["./node_modules/@img/sharp-*/**/*"],
+    } : {}),
     "/api/scene/crystal": [
       "./lib/generated/crystal_respawn_manifest.json",
       "./lib/generated/crystal_starter_map_collision.json",

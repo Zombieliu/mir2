@@ -159,7 +159,10 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(session) = state.zone_sessions.get(&key).cloned() else {
             return Ok(());
         };
-        let previous_level = state.zone_manager.player_experience_profile(&session).map(|p| p.level);
+        let previous_level = state
+            .zone_manager
+            .player_experience_profile(&session)
+            .map(|p| p.level);
         let next_level = profile.as_ref().map(|p| p.level);
         if !state
             .zone_manager

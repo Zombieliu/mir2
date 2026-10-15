@@ -41,40 +41,46 @@ mod monster_ai;
 mod monsters;
 mod movement;
 mod npc;
-mod npc_input;
-mod npc_population;
-pub(crate) mod source_map_loading;
-mod source_map_io;
 mod npc_conquest;
 mod npc_conquest_trade;
 mod npc_gold_buy_outcome;
-pub use npc_gold_buy_outcome::{NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBuyBeforeExecution,
-    NpcGoldBuyProcessingOutcome, NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution};
+mod npc_input;
+mod npc_population;
+mod source_map_io;
+pub(crate) mod source_map_loading;
+pub use npc_gold_buy_outcome::{
+    NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution,
+    NpcGoldBuyProcessingOutcome, NpcGoldBuyRejection, NpcGoldBuyRequest,
+};
 mod npc_purchase_outcome;
-mod npc_purchase_transaction;
 mod npc_purchase_snapshot;
-pub use npc_purchase_transaction::{NpcPurchaseProducer, NpcPurchaseReceipt, NpcPurchaseDurableExecution, NpcPurchaseDurableError};
-pub use npc_purchase_outcome::{NpcPurchaseRequest, NpcPurchaseCurrency, NpcPurchaseSource,
-    NpcPurchaseRejection, NpcPurchaseBeforeExecution, NpcPurchaseProcessingOutcome,
-    NpcPurchaseProcessingError, NpcPurchaseProcessingExecution};
-mod npc_gold_trade_expiry;
-mod npc_script;
-mod npc_spawn_actions;
-#[cfg(test)]
-mod npc_dialog_admission_tests;
-mod npc_world_plan;
-#[cfg(test)]
-mod npc_source_guard_tests;
-#[cfg(test)]
-mod npc_random_source_guard_tests;
-#[cfg(test)]
-mod npc_spawn_action_tests;
-#[cfg(test)]
-mod npc_parser_omission_tests;
+mod npc_purchase_transaction;
+pub use npc_purchase_outcome::{
+    NpcPurchaseBeforeExecution, NpcPurchaseCurrency, NpcPurchaseProcessingError,
+    NpcPurchaseProcessingExecution, NpcPurchaseProcessingOutcome, NpcPurchaseRejection,
+    NpcPurchaseRequest, NpcPurchaseSource,
+};
+pub use npc_purchase_transaction::{
+    NpcPurchaseDurableError, NpcPurchaseDurableExecution, NpcPurchaseProducer, NpcPurchaseReceipt,
+};
 #[cfg(test)]
 mod npc_buff_action_tests;
 #[cfg(test)]
 mod npc_catalog_lookup_tests;
+#[cfg(test)]
+mod npc_dialog_admission_tests;
+mod npc_gold_trade_expiry;
+#[cfg(test)]
+mod npc_parser_omission_tests;
+#[cfg(test)]
+mod npc_random_source_guard_tests;
+mod npc_script;
+#[cfg(test)]
+mod npc_source_guard_tests;
+#[cfg(test)]
+mod npc_spawn_action_tests;
+mod npc_spawn_actions;
+mod npc_world_plan;
 mod onchain;
 mod packets;
 mod pathfind;
@@ -82,11 +88,9 @@ mod quests;
 #[cfg(test)]
 mod storage_rental_tests;
 pub(crate) use quests::periodic_quests::target_is_periodic as periodic_quest_target;
-mod recovery;
 mod ranking_inspect;
-pub use ranking_inspect::{
-    RankingInspectIdentity, RankingInspectOnlineProjection,
-};
+mod recovery;
+pub use ranking_inspect::{RankingInspectIdentity, RankingInspectOnlineProjection};
 
 /// Server-owned presence, never a field supplied by a player packet. An online
 /// owner without a current projection must not fall back to its saved equipment.
@@ -130,10 +134,10 @@ pub use shared_relationships::{
     validate_shared_mentor_request, SharedMentorMutation, SharedMentorProfile,
     SHARED_MENTOR_DURATION_MS, SHARED_MENTOR_LEVEL_GAP,
 };
+mod game_shop_gift;
 mod skills;
 mod social_economy;
 mod stage5;
-mod game_shop_gift;
 mod stats;
 pub mod zone;
 pub use zone::ZoneMentorBankAttribution;
@@ -170,11 +174,11 @@ pub use zone::{
     ZoneMapMetadata, ZoneMinedOre, ZoneMiningSwing, ZoneMiningTool, ZoneMonsterDefense,
     ZoneMonsterKillAward, ZoneMonsterRespawnPolicy, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot,
     ZoneNpcPopulationReadSet, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
-    ZoneOutput, ZoneOwnedPetPlayerKillReceipt, ZonePetExperienceAdmission, ZonePlayerAppearance,
-    ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
-    ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneSavedPetSnapshot,
-    ZoneStandbyReplica, ZoneVitalSettlement,
-    ZoneOwnerHealthChange, ZoneOwnerHealthCursor,
+    ZoneOutput, ZoneOwnedPetPlayerKillReceipt, ZoneOwnerHealthChange, ZoneOwnerHealthCursor,
+    ZonePetExperienceAdmission, ZonePlayerAppearance, ZonePlayerCombatStats, ZoneReplayCombatStats,
+    ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport, ZoneReplayScenario,
+    ZoneReplicaCheckpoint, ZoneRuntime, ZoneSavedPetSnapshot, ZoneStandbyReplica,
+    ZoneVitalSettlement,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

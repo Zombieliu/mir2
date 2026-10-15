@@ -16,36 +16,73 @@ fn periodic_recurrence_is_inside_source_cas_before_a_rejected_native_request() {
             quest_recurrence::weekly_period_at(now - 7 * DAY)
         };
         let definition = mir2_game_data::periodic_quests::quest(id).unwrap();
-        let mut completed = QuestState::from_crystal_info(&definition.info(14_000, definition.gold), QuestStage::Completed);
+        let mut completed = QuestState::from_crystal_info(
+            &definition.info(14_000, definition.gold),
+            QuestStage::Completed,
+        );
         completed.current = completed.required;
         completed.cadence_last_claimed_period = Some(previous);
         completed.cadence_high_watermark_period = Some(previous);
         completed.accepted_periodic_reward = Some(periodic_quests::AcceptedPeriodicReward {
-            level: 20, experience: 14_000, gold: definition.gold,
+            level: 20,
+            experience: 14_000,
+            gold: definition.gold,
         });
-        session.app.world_mut().resource_mut::<QuestResource>().quests.push(completed);
+        session
+            .app
+            .world_mut()
+            .resource_mut::<QuestResource>()
+            .quests
+            .push(completed);
         session.save_active_character().unwrap();
-        let config = session.app.world().resource::<RuntimeConfigResource>().config.clone();
+        let config = session
+            .app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .clone();
         let durable = config.account_store.lock().unwrap().accounts["demo"].saves[&0].clone();
         config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist);
-        let request = ClientPacket::AcceptQuest { npc_index: 2180, quest_index: id };
-        assert!(session.try_handle_packet(request.clone()).is_err(),
-            "Real recurrence escaped the Source CAS: {id}");
-        assert_eq!(serde_json::to_value(&config.account_store.lock().unwrap().accounts["demo"].saves[&0]).unwrap(),
-            serde_json::to_value(&durable).unwrap());
-        let restored = session.app.world().resource::<QuestResource>().quests.iter().find(|quest| quest.quest_id == id).unwrap();
+        let request = ClientPacket::AcceptQuest {
+            npc_index: 2180,
+            quest_index: id,
+        };
+        assert!(
+            session.try_handle_packet(request.clone()).is_err(),
+            "Real recurrence escaped the Source CAS: {id}"
+        );
+        assert_eq!(
+            serde_json::to_value(&config.account_store.lock().unwrap().accounts["demo"].saves[&0])
+                .unwrap(),
+            serde_json::to_value(&durable).unwrap()
+        );
+        let restored = session
+            .app
+            .world()
+            .resource::<QuestResource>()
+            .quests
+            .iter()
+            .find(|quest| quest.quest_id == id)
+            .unwrap();
         assert_eq!(restored.stage, QuestStage::Completed);
         assert_eq!(restored.cadence_high_watermark_period, Some(previous));
         let packets = session.try_handle_packet(request).unwrap();
-        assert!(packets.iter().any(|packet| matches!(packet, ServerPacket::CompleteQuest { .. })));
-        assert!(!packets.iter().any(|packet| matches!(packet,
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::CompleteQuest { .. })));
+        assert!(
+            !packets.iter().any(|packet| matches!(packet,
             ServerPacket::ChangeQuest { quest_id, taken: true, .. } if *quest_id == id)),
-            "Rollover cannot authorize an unopened NPC offer");
+            "Rollover cannot authorize an unopened NPC offer"
+        );
         let committed = config.account_store.lock().unwrap().accounts["demo"].saves[&0].clone();
         assert_eq!(committed.revision, durable.revision + 1);
-        let row: serde_json::Value = committed.quest_states_json.iter()
+        let row: serde_json::Value = committed
+            .quest_states_json
+            .iter()
             .map(|json| serde_json::from_str::<serde_json::Value>(json).unwrap())
-            .find(|row| row["quest_id"] == id).unwrap();
+            .find(|row| row["quest_id"] == id)
+            .unwrap();
         assert_eq!(row["stage"], "available");
         assert!(row["cadence_high_watermark_period"].as_u64().unwrap() > previous);
         assert!(row["accepted_periodic_reward"].is_null());

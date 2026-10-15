@@ -20,7 +20,13 @@ fn return_page_csp_pins_only_its_trusted_script() {
     assert!(!tail.contains("<script"));
     let hash = base64::engine::general_purpose::STANDARD.encode(Sha256::digest(script.as_bytes()));
     assert!(BILLING_RETURN_CSP.contains(&format!("script-src 'sha256-{hash}'")));
-    for directive in ["default-src 'none'", "connect-src 'none'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'none'"] {
+    for directive in [
+        "default-src 'none'",
+        "connect-src 'none'",
+        "base-uri 'none'",
+        "form-action 'none'",
+        "frame-ancestors 'none'",
+    ] {
         assert!(BILLING_RETURN_CSP.contains(directive));
     }
     assert!(!BILLING_RETURN_CSP.contains("unsafe-eval"));

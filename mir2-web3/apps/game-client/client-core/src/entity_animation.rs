@@ -7,8 +7,8 @@
 //! globals so a renderer can advance it with an explicit monotonic millisecond
 //! clock.
 
-use crate::ordered_map::OrderedMap;
-use std::collections::{BTreeSet, VecDeque};
+use crate::ordered_map::{OrderedMap, OrderedSet};
+use std::collections::VecDeque;
 use std::fmt;
 
 const MONSTER_SPAWN_MOTION_GRID_MS: u64 = 100;
@@ -527,7 +527,7 @@ pub struct EntityAnimationState {
     /// Crystal queues Attack4 locally for a received DoubleSlash Attack1.
     /// Keep its identity beside the FIFO rather than synthesizing a new wire
     /// sequence or changing the ordinary player attack descriptors.
-    double_slash_sequences: BTreeSet<u64>,
+    double_slash_sequences: OrderedSet<u64>,
     double_slash_descriptor: Option<FrameDescriptor>,
     double_slash_second_pending: bool,
 }
@@ -582,7 +582,7 @@ impl EntityAnimationState {
             rng,
             last_enqueued_event_sequence: None,
             last_started_event_sequence: None,
-            double_slash_sequences: BTreeSet::new(),
+            double_slash_sequences: OrderedSet::new(),
             double_slash_descriptor: None,
             double_slash_second_pending: false,
         })

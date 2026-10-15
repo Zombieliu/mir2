@@ -75,7 +75,10 @@ fn fixture() -> (ZoneRuntime, u32, u32, u64) {
     // Translate every original actor/target point by (+222,+199); the source
     // offsets, birth/impact clocks and all retired-identity checks stay intact.
     let mut z = ZoneRuntime::new(ZoneKey::for_map(MAP));
-    assert!(z.has_available_collision(), "real fixture terrain must load");
+    assert!(
+        z.has_available_collision(),
+        "real fixture terrain must load"
+    );
     let owner = SessionId::new("owner");
     z.handle(ZoneCommand::Join(join(
         "owner",

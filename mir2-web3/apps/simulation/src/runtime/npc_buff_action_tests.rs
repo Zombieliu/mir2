@@ -80,15 +80,27 @@ fn parser_page(
         args,
         input: None,
     };
-    let diagnostics = session.app.world().resource::<NpcStateResource>().npc_script_diagnostics.clone();
+    let diagnostics = session
+        .app
+        .world()
+        .resource::<NpcStateResource>()
+        .npc_script_diagnostics
+        .clone();
     let result = run_crystal_npc_script_impl(session.app.world_mut(), &context, &script, "@Main")
         .expect("a matched section with SAY must return its page");
     assert_eq!(
-        session.app.world().resource::<NpcStateResource>().npc_script_diagnostics,
+        session
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .npc_script_diagnostics,
         diagnostics,
         "original omission or ActList return is not a Source execution error"
     );
-    (result.dialog.expect("SAY survives an ActList return").body, result.packets)
+    (
+        result.dialog.expect("SAY survives an ActList return").body,
+        result.packets,
+    )
 }
 
 fn selected_act_page(action: &str, select_else: bool) -> Vec<String> {
@@ -96,7 +108,12 @@ fn selected_act_page(action: &str, select_else: bool) -> Vec<String> {
     let say = if select_else { "#ELSESAY" } else { "#SAY" };
     vec![
         "#IF".into(),
-        if select_else { "LEVEL < 0" } else { "LEVEL >= 1" }.into(),
+        if select_else {
+            "LEVEL < 0"
+        } else {
+            "LEVEL >= 1"
+        }
+        .into(),
         act.into(),
         format!("SET [{PREFIX}] 1"),
         action.into(),
@@ -117,19 +134,37 @@ fn selected_act_page(action: &str, select_else: bool) -> Vec<String> {
 }
 
 fn assert_selected_act_flags(session: &SimulationSession, aborted: bool) {
-    assert!(crystal_npc_flag_value(session.app.world(), PREFIX), "executed prefix is retained");
-    assert_eq!(crystal_npc_flag_value(session.app.world(), SUFFIX), !aborted, "remaining ACT suffix");
-    assert_eq!(crystal_npc_flag_value(session.app.world(), REPEATED_ACT), !aborted, "same ActList after SAY");
-    assert!(crystal_npc_flag_value(session.app.world(), NEXT_SEGMENT), "the next original segment still executes");
+    assert!(
+        crystal_npc_flag_value(session.app.world(), PREFIX),
+        "executed prefix is retained"
+    );
+    assert_eq!(
+        crystal_npc_flag_value(session.app.world(), SUFFIX),
+        !aborted,
+        "remaining ACT suffix"
+    );
+    assert_eq!(
+        crystal_npc_flag_value(session.app.world(), REPEATED_ACT),
+        !aborted,
+        "same ActList after SAY"
+    );
+    assert!(
+        crystal_npc_flag_value(session.app.world(), NEXT_SEGMENT),
+        "the next original segment still executes"
+    );
 }
 
 fn seed_prison(session: &mut SimulationSession) {
     let (_, packets) = parser_page(
         session,
-        ["#ACT", "GIVEBUFF Prison 3600 FALSE", "#SAY", "seed-prison"].map(str::to_owned).to_vec(),
+        ["#ACT", "GIVEBUFF Prison 3600 FALSE", "#SAY", "seed-prison"]
+            .map(str::to_owned)
+            .to_vec(),
         vec![],
     );
-    assert!(packets.iter().any(|p| matches!(p, ServerPacket::AddBuff { buff } if buff.buff_type == 111)));
+    assert!(packets
+        .iter()
+        .any(|p| matches!(p, ServerPacket::AddBuff { buff } if buff.buff_type == 111)));
 }
 
 #[test]
@@ -143,9 +178,20 @@ fn complete_bad_givebuff_name_returns_from_selected_act_list_but_keeps_say_and_n
                 vec![],
             );
             assert_selected_act_flags(&session, true);
-            assert_eq!(body, ["selected-segment-say", "next-segment-say"], "{name}, else={select_else}");
-            assert!(session.app.world().resource::<BuffResource>().buffs.is_empty());
-            assert!(!packets.iter().any(|p| matches!(p, ServerPacket::AddBuff { .. })));
+            assert_eq!(
+                body,
+                ["selected-segment-say", "next-segment-say"],
+                "{name}, else={select_else}"
+            );
+            assert!(session
+                .app
+                .world()
+                .resource::<BuffResource>()
+                .buffs
+                .is_empty());
+            assert!(!packets
+                .iter()
+                .any(|p| matches!(p, ServerPacket::AddBuff { .. })));
         }
     }
 }
@@ -167,41 +213,76 @@ fn complete_bad_removebuff_name_preserves_existing_buff_and_returns_only_from_se
             let buffs = &session.app.world().resource::<BuffResource>().buffs;
             assert_eq!(buffs.len(), 1);
             assert_eq!(buffs[0].key, before.key);
-            assert_eq!(buffs[0].real_time_duration.as_ref().unwrap().instance_id(), before.real_time_duration.as_ref().unwrap().instance_id());
-            assert!(!packets.iter().any(|p| matches!(p, ServerPacket::RemoveBuff { .. })));
+            assert_eq!(
+                buffs[0].real_time_duration.as_ref().unwrap().instance_id(),
+                before.real_time_duration.as_ref().unwrap().instance_id()
+            );
+            assert!(!packets
+                .iter()
+                .any(|p| matches!(p, ServerPacket::RemoveBuff { .. })));
         }
     }
 }
 
 #[test]
 fn short_givebuff_is_a_parser_omission_without_aborting_the_remaining_act_list() {
-    for action in ["GIVEBUFF", "GIVEBUFF Prison", "GIVEBUFF PRISON 3600", "GIVEBUFF   PRISON   3600"] {
+    for action in [
+        "GIVEBUFF",
+        "GIVEBUFF Prison",
+        "GIVEBUFF PRISON 3600",
+        "GIVEBUFF   PRISON   3600",
+    ] {
         let mut session = logged_in(&SimulationConfig::default());
         let (body, packets) = parser_page(&mut session, selected_act_page(action, false), vec![]);
         assert_selected_act_flags(&session, false);
         assert_eq!(body, ["selected-segment-say", "next-segment-say"]);
-        assert!(session.app.world().resource::<BuffResource>().buffs.is_empty());
-        assert!(!packets.iter().any(|p| matches!(p, ServerPacket::AddBuff { .. })));
+        assert!(session
+            .app
+            .world()
+            .resource::<BuffResource>()
+            .buffs
+            .is_empty());
+        assert!(!packets
+            .iter()
+            .any(|p| matches!(p, ServerPacket::AddBuff { .. })));
     }
 }
 
 #[test]
 fn invalid_buff_actions_in_an_unselected_branch_do_not_abort_the_selected_branch() {
     let mut session = logged_in(&SimulationConfig::default());
-    let (body, packets) = parser_page(&mut session, vec![
-        "#IF".into(), "LEVEL < 0".into(), "#ACT".into(),
-        "GIVEBUFF PRISON 3600 FALSE".into(), "REMOVEBUFF NotABuff".into(),
-        "#SAY".into(), "unselected-say".into(), "#ELSEACT".into(),
-        format!("SET [{PREFIX}] 1"), format!("SET [{SUFFIX}] 1"),
-        "#ELSESAY".into(), "selected-else-say".into(), "#IF".into(),
-        "LEVEL >= 1".into(), "#ACT".into(), format!("SET [{NEXT_SEGMENT}] 1"),
-        "#SAY".into(), "next-segment-say".into(),
-    ], vec![]);
+    let (body, packets) = parser_page(
+        &mut session,
+        vec![
+            "#IF".into(),
+            "LEVEL < 0".into(),
+            "#ACT".into(),
+            "GIVEBUFF PRISON 3600 FALSE".into(),
+            "REMOVEBUFF NotABuff".into(),
+            "#SAY".into(),
+            "unselected-say".into(),
+            "#ELSEACT".into(),
+            format!("SET [{PREFIX}] 1"),
+            format!("SET [{SUFFIX}] 1"),
+            "#ELSESAY".into(),
+            "selected-else-say".into(),
+            "#IF".into(),
+            "LEVEL >= 1".into(),
+            "#ACT".into(),
+            format!("SET [{NEXT_SEGMENT}] 1"),
+            "#SAY".into(),
+            "next-segment-say".into(),
+        ],
+        vec![],
+    );
     assert!(crystal_npc_flag_value(session.app.world(), PREFIX));
     assert!(crystal_npc_flag_value(session.app.world(), SUFFIX));
     assert!(crystal_npc_flag_value(session.app.world(), NEXT_SEGMENT));
     assert_eq!(body, ["selected-else-say", "next-segment-say"]);
-    assert!(!packets.iter().any(|p| matches!(p, ServerPacket::AddBuff { .. } | ServerPacket::RemoveBuff { .. })));
+    assert!(!packets.iter().any(|p| matches!(
+        p,
+        ServerPacket::AddBuff { .. } | ServerPacket::RemoveBuff { .. }
+    )));
 }
 
 #[test]
@@ -211,11 +292,22 @@ fn argument_spaces_cannot_supply_missing_original_givebuff_parameters() {
         ("GIVEBUFF Prison %ARG(0)", "3600 FALSE"),
     ] {
         let mut session = logged_in(&SimulationConfig::default());
-        let (body, packets) = parser_page(&mut session, selected_act_page(action, false), vec![arg.into()]);
+        let (body, packets) = parser_page(
+            &mut session,
+            selected_act_page(action, false),
+            vec![arg.into()],
+        );
         assert_selected_act_flags(&session, false);
         assert_eq!(body, ["selected-segment-say", "next-segment-say"]);
-        assert!(session.app.world().resource::<BuffResource>().buffs.is_empty());
-        assert!(!packets.iter().any(|p| matches!(p, ServerPacket::AddBuff { .. })));
+        assert!(session
+            .app
+            .world()
+            .resource::<BuffResource>()
+            .buffs
+            .is_empty());
+        assert!(!packets
+            .iter()
+            .any(|p| matches!(p, ServerPacket::AddBuff { .. })));
     }
 }
 
@@ -225,7 +317,10 @@ fn expanded_buff_name_is_one_parameter_and_cannot_be_resplit_into_a_valid_name()
         let mut session = logged_in(&SimulationConfig::default());
         seed_prison(&mut session);
         let duration_instance = session.app.world().resource::<BuffResource>().buffs[0]
-            .real_time_duration.as_ref().unwrap().instance_id();
+            .real_time_duration
+            .as_ref()
+            .unwrap()
+            .instance_id();
         let (body, packets) = parser_page(
             &mut session,
             selected_act_page(action, false),
@@ -236,8 +331,14 @@ fn expanded_buff_name_is_one_parameter_and_cannot_be_resplit_into_a_valid_name()
         let buffs = &session.app.world().resource::<BuffResource>().buffs;
         assert_eq!(buffs.len(), 1);
         assert_eq!(buffs[0].key, "prison");
-        assert_eq!(buffs[0].real_time_duration.as_ref().unwrap().instance_id(), duration_instance);
-        assert!(!packets.iter().any(|p| matches!(p, ServerPacket::AddBuff { .. } | ServerPacket::RemoveBuff { .. })));
+        assert_eq!(
+            buffs[0].real_time_duration.as_ref().unwrap().instance_id(),
+            duration_instance
+        );
+        assert!(!packets.iter().any(|p| matches!(
+            p,
+            ServerPacket::AddBuff { .. } | ServerPacket::RemoveBuff { .. }
+        )));
     }
 }
 
@@ -260,47 +361,107 @@ fn canonical_prison_swiftfeet_and_clearring_keep_original_type_key_and_packet_me
         assert_eq!(buffs.len(), 1);
         assert_eq!(buffs[0].key, key);
         assert!(buffs[0].stats.is_empty());
-        let added = packets.iter().filter_map(|p| match p {
-            ServerPacket::AddBuff { buff } => Some(buff),
-            _ => None,
-        }).collect::<Vec<_>>();
+        let added = packets
+            .iter()
+            .filter_map(|p| match p {
+                ServerPacket::AddBuff { buff } => Some(buff),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
         assert_eq!(added.len(), 1);
         let buff = added[0];
         assert_eq!(buff.buff_type, buff_type);
         assert_eq!(buff.object_id, actor);
-        assert_eq!(buff.visible, visible, "the third script parameter does not set ClientBuff.Visible");
+        assert_eq!(
+            buff.visible, visible,
+            "the third script parameter does not set ClientBuff.Visible"
+        );
         assert_eq!(buff.infinite, infinite);
         assert!(buff.stats.is_empty());
         // Buff.ToClientBuff forwards ExpireTime even for an infinite stack
         // type; the script bool does not replace the supplied duration.
-        if infinite { assert_eq!(buff.expire_time, 3_600_000); }
-        else { assert!(buff.expire_time > 0 && buff.expire_time <= 3_600_000); }
+        if infinite {
+            assert_eq!(buff.expire_time, 3_600_000);
+        } else {
+            assert!(buff.expire_time > 0 && buff.expire_time <= 3_600_000);
+        }
     }
 }
 
 #[test]
 fn checkbuff_remains_case_insensitive_even_though_act_buff_names_are_case_sensitive() {
     let mut session = logged_in(&SimulationConfig::default());
-    parser_page(&mut session, [
-        "#ACT", "GIVEBUFF Prison 3600 FALSE", "GIVEBUFF SwiftFeet 3600 FALSE",
-        "GIVEBUFF ClearRing 3600 FALSE", "#SAY", "three-canonical-buffs",
-    ].map(str::to_owned).to_vec(), vec![]);
-    let context = CrystalNpcContextState { npc_position: Point { x: 0, y: 0 } };
-    for name in ["Prison", "PRISON", "pRiSoN", "SwiftFeet", "SWIFTFEET", "swiftfeet", "ClearRing", "CLEARRING", "clearring"] {
-        assert!(evaluate_crystal_npc_condition(session.app.world_mut(), &format!("CHECKBUFF {name}"), &context), "{name}");
+    parser_page(
+        &mut session,
+        [
+            "#ACT",
+            "GIVEBUFF Prison 3600 FALSE",
+            "GIVEBUFF SwiftFeet 3600 FALSE",
+            "GIVEBUFF ClearRing 3600 FALSE",
+            "#SAY",
+            "three-canonical-buffs",
+        ]
+        .map(str::to_owned)
+        .to_vec(),
+        vec![],
+    );
+    let context = CrystalNpcContextState {
+        npc_position: Point { x: 0, y: 0 },
+    };
+    for name in [
+        "Prison",
+        "PRISON",
+        "pRiSoN",
+        "SwiftFeet",
+        "SWIFTFEET",
+        "swiftfeet",
+        "ClearRing",
+        "CLEARRING",
+        "clearring",
+    ] {
+        assert!(
+            evaluate_crystal_npc_condition(
+                session.app.world_mut(),
+                &format!("CHECKBUFF {name}"),
+                &context
+            ),
+            "{name}"
+        );
     }
-    assert!(!evaluate_crystal_npc_condition(session.app.world_mut(), "CHECKBUFF NotABuff", &context));
-    assert!(evaluate_crystal_npc_condition(session.app.world_mut(), "CHECKBUFF 111", &context));
-    assert!(!evaluate_crystal_npc_condition(session.app.world_mut(), "CHECKBUFF swift-feet", &context));
-    assert!(!evaluate_crystal_npc_condition(session.app.world_mut(), "CHECKBUFF clear-ring", &context));
+    assert!(!evaluate_crystal_npc_condition(
+        session.app.world_mut(),
+        "CHECKBUFF NotABuff",
+        &context
+    ));
+    assert!(evaluate_crystal_npc_condition(
+        session.app.world_mut(),
+        "CHECKBUFF 111",
+        &context
+    ));
+    assert!(!evaluate_crystal_npc_condition(
+        session.app.world_mut(),
+        "CHECKBUFF swift-feet",
+        &context
+    ));
+    assert!(!evaluate_crystal_npc_condition(
+        session.app.world_mut(),
+        "CHECKBUFF clear-ring",
+        &context
+    ));
 }
 
 #[test]
 fn bad_duration_and_boolean_default_instead_of_aborting_a_canonical_givebuff() {
     for duration in ["not-an-int", "2147483648"] {
         let mut session = logged_in(&SimulationConfig::default());
-        let (_, packets) = parser_page(&mut session,
-            selected_act_page(&format!("GIVEBUFF Prison {duration} not-a-bool not-a-bool not-a-bool"), false), vec![]);
+        let (_, packets) = parser_page(
+            &mut session,
+            selected_act_page(
+                &format!("GIVEBUFF Prison {duration} not-a-bool not-a-bool not-a-bool"),
+                false,
+            ),
+            vec![],
+        );
         assert_selected_act_flags(&session, false);
         assert!(packets.iter().any(|p| matches!(p, ServerPacket::AddBuff { buff }
             if buff.buff_type == 111 && buff.expire_time == 0 && !buff.infinite && !buff.visible && buff.stats.is_empty())));
@@ -312,9 +473,18 @@ fn canonical_removebuff_removes_the_requested_buff_and_continues_its_act_list() 
     let mut session = logged_in(&SimulationConfig::default());
     seed_prison(&mut session);
     let actor = current_player_object_id(session.app.world()).unwrap();
-    let (_, packets) = parser_page(&mut session, selected_act_page("REMOVEBUFF Prison", false), vec![]);
+    let (_, packets) = parser_page(
+        &mut session,
+        selected_act_page("REMOVEBUFF Prison", false),
+        vec![],
+    );
     assert_selected_act_flags(&session, false);
-    assert!(session.app.world().resource::<BuffResource>().buffs.is_empty());
+    assert!(session
+        .app
+        .world()
+        .resource::<BuffResource>()
+        .buffs
+        .is_empty());
     assert_eq!(packets.iter().filter(|p| matches!(p, ServerPacket::RemoveBuff { buff_type:111, object_id } if *object_id == actor)).count(), 1);
 }
 
@@ -330,7 +500,13 @@ fn drop_fixture(two_items: bool) -> (SimulationConfig, SimulationSession) {
     config.spawn = Point { x: 339, y: 270 };
     {
         let mut store = config.account_store.lock().unwrap();
-        let save = store.accounts.get_mut("demo").unwrap().saves.get_mut(&0).unwrap();
+        let save = store
+            .accounts
+            .get_mut("demo")
+            .unwrap()
+            .saves
+            .get_mut(&0)
+            .unwrap();
         save.map_file_name = config.map.file_name.clone();
         save.position = config.spawn.clone();
     }
@@ -342,59 +518,114 @@ fn drop_fixture(two_items: bool) -> (SimulationConfig, SimulationSession) {
     assert_eq!(template.stack_size, 1);
     let mut save = session.active_character_checkpoint().unwrap();
     save.inventory_items_json.clear();
-    for (slot, unique_id) in [DROP_UID, SECOND_DROP_UID].into_iter().take(if two_items { 2 } else { 1 }).enumerate() {
-        let mut item = super::items::embedded_item_state_from_template(&template, crate::ItemContainer::Bag1, slot as u8);
+    for (slot, unique_id) in [DROP_UID, SECOND_DROP_UID]
+        .into_iter()
+        .take(if two_items { 2 } else { 1 })
+        .enumerate()
+    {
+        let mut item = super::items::embedded_item_state_from_template(
+            &template,
+            crate::ItemContainer::Bag1,
+            slot as u8,
+        );
         item.unique_id = unique_id;
         assert_eq!(item.quantity, 1);
-        save.inventory_items_json.push(serde_json::to_string(&item).unwrap());
+        save.inventory_items_json
+            .push(serde_json::to_string(&item).unwrap());
     }
     session.restore_active_character_checkpoint(&save).unwrap();
     session.save_active_character().unwrap();
-    assert!(!session.app.world().resource::<BuffResource>().buffs.iter().any(|b| b.key == "drop"));
+    assert!(!session
+        .app
+        .world()
+        .resource::<BuffResource>()
+        .buffs
+        .iter()
+        .any(|b| b.key == "drop"));
     (config, session)
 }
 
 fn use_drop(session: &mut SimulationSession, unique_id: u64) -> Result<Vec<ServerPacket>, String> {
-    session.try_handle_packet(ClientPacket::UseItem { unique_id, grid: MirGridType::Inventory })
+    session.try_handle_packet(ClientPacket::UseItem {
+        unique_id,
+        grid: MirGridType::Inventory,
+    })
 }
 
 fn drop_buff(session: &SimulationSession) -> BuffState {
-    let matches = session.app.world().resource::<BuffResource>().buffs.iter()
-        .filter(|b| b.key == "drop").cloned().collect::<Vec<_>>();
+    let matches = session
+        .app
+        .world()
+        .resource::<BuffResource>()
+        .buffs
+        .iter()
+        .filter(|b| b.key == "drop")
+        .cloned()
+        .collect::<Vec<_>>();
     assert_eq!(matches.len(), 1);
     matches.into_iter().next().unwrap()
 }
 
 fn saved_drop_remaining(save: &CharacterSaveRecord) -> u64 {
-    let buffs = save.buff_states_json.iter().map(|encoded| serde_json::from_str::<serde_json::Value>(encoded).unwrap())
-        .filter(|buff| buff["key"] == "drop").collect::<Vec<_>>();
+    let buffs = save
+        .buff_states_json
+        .iter()
+        .map(|encoded| serde_json::from_str::<serde_json::Value>(encoded).unwrap())
+        .filter(|buff| buff["key"] == "drop")
+        .collect::<Vec<_>>();
     assert_eq!(buffs.len(), 1);
     buffs[0]["real_time_duration"].as_u64().unwrap()
 }
 
 fn assert_use_success(packets: &[ServerPacket], unique_id: u64) {
     assert_eq!(packets.iter().filter(|p| matches!(p, ServerPacket::UseItem { unique_id:id, success:true, grid:MirGridType::Inventory } if *id == unique_id)).count(), 1);
-    assert_eq!(packets.iter().filter(|p| matches!(p, ServerPacket::AddBuff { buff } if buff.buff_type == 103)).count(), 1);
+    assert_eq!(
+        packets
+            .iter()
+            .filter(|p| matches!(p, ServerPacket::AddBuff { buff } if buff.buff_type == 103))
+            .count(),
+        1
+    );
 }
 
 #[test]
-fn normal_shape6_before_persist_failure_restores_full_source_without_consumption_buff_or_receipt_ack() {
+fn normal_shape6_before_persist_failure_restores_full_source_without_consumption_buff_or_receipt_ack(
+) {
     let (config, mut session) = drop_fixture(false);
     let before = session.active_character_checkpoint().unwrap();
     let stored = durable(&config);
     let queue = events::capture(session.app.world());
     config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist);
-    assert!(use_drop(&mut session, DROP_UID).is_err(), "uncommitted UseItem success packets must not escape");
-    assert_eq!(serde_json::to_value(session.active_character_checkpoint().unwrap()).unwrap(), serde_json::to_value(&before).unwrap());
-    assert_eq!(serde_json::to_value(durable(&config)).unwrap(), serde_json::to_value(stored).unwrap());
+    assert!(
+        use_drop(&mut session, DROP_UID).is_err(),
+        "uncommitted UseItem success packets must not escape"
+    );
+    assert_eq!(
+        serde_json::to_value(session.active_character_checkpoint().unwrap()).unwrap(),
+        serde_json::to_value(&before).unwrap()
+    );
+    assert_eq!(
+        serde_json::to_value(durable(&config)).unwrap(),
+        serde_json::to_value(stored).unwrap()
+    );
     assert_eq!(events::capture(session.app.world()), queue);
-    assert!(!session.app.world().resource::<BuffResource>().buffs.iter().any(|b| b.key == "drop"));
-    let packets = use_drop(&mut session, DROP_UID).expect("known pre-persist failure allows normal retry");
+    assert!(!session
+        .app
+        .world()
+        .resource::<BuffResource>()
+        .buffs
+        .iter()
+        .any(|b| b.key == "drop"));
+    let packets =
+        use_drop(&mut session, DROP_UID).expect("known pre-persist failure allows normal retry");
     assert_use_success(&packets, DROP_UID);
     let committed = durable(&config);
     assert!(committed.inventory_items_json.is_empty());
     assert_eq!(committed.revision, before.revision + 1);
-    assert_eq!(committed.default_npc_events.committed_sequence, queue.committed_sequence + 1);
+    assert_eq!(
+        committed.default_npc_events.committed_sequence,
+        queue.committed_sequence + 1
+    );
     assert!(committed.default_npc_events.pending.is_empty());
     assert!(saved_drop_remaining(&committed) > 0);
 }
@@ -405,26 +636,64 @@ fn normal_shape6_commit_consumes_once_and_cold_reload_does_not_reset_to_full_sou
     let queue = events::capture(session.app.world());
     let packets = use_drop(&mut session, DROP_UID).unwrap();
     assert_use_success(&packets, DROP_UID);
-    assert!(packets.iter().any(|p| matches!(p, ServerPacket::AddBuff { buff }
+    assert!(packets
+        .iter()
+        .any(|p| matches!(p, ServerPacket::AddBuff { buff }
         if buff.buff_type == 103 && !buff.infinite && !buff.visible && buff.stats.is_empty())));
     let committed = durable(&config);
     assert!(committed.inventory_items_json.is_empty());
-    assert_eq!(committed.default_npc_events.committed_sequence, queue.committed_sequence + 1);
+    assert_eq!(
+        committed.default_npc_events.committed_sequence,
+        queue.committed_sequence + 1
+    );
     let initial = saved_drop_remaining(&committed);
     assert!(initial > 0 && initial <= DROP_DURATION_MS);
-    let old_instance = drop_buff(&session).real_time_duration.as_ref().unwrap().instance_id();
+    let old_instance = drop_buff(&session)
+        .real_time_duration
+        .as_ref()
+        .unwrap()
+        .instance_id();
     let duplicate = use_drop(&mut session, DROP_UID).unwrap();
-    assert!(duplicate.iter().any(|p| matches!(p, ServerPacket::UseItem { unique_id:DROP_UID, success:false, .. })));
-    assert!(!duplicate.iter().any(|p| matches!(p, ServerPacket::AddBuff { .. })));
+    assert!(duplicate.iter().any(|p| matches!(
+        p,
+        ServerPacket::UseItem {
+            unique_id: DROP_UID,
+            success: false,
+            ..
+        }
+    )));
+    assert!(!duplicate
+        .iter()
+        .any(|p| matches!(p, ServerPacket::AddBuff { .. })));
     assert_eq!(durable(&config).revision, committed.revision);
-    assert_eq!(events::capture(session.app.world()), committed.default_npc_events);
-    assert_eq!(drop_buff(&session).real_time_duration.as_ref().unwrap().instance_id(), old_instance);
+    assert_eq!(
+        events::capture(session.app.world()),
+        committed.default_npc_events
+    );
+    assert_eq!(
+        drop_buff(&session)
+            .real_time_duration
+            .as_ref()
+            .unwrap()
+            .instance_id(),
+        old_instance
+    );
 
-    assert!(!drop_buff(&session).real_time_duration.as_ref().unwrap().is_paused(), "trusted fixture is outside the source safe zone");
+    assert!(
+        !drop_buff(&session)
+            .real_time_duration
+            .as_ref()
+            .unwrap()
+            .is_paused(),
+        "trusted fixture is outside the source safe zone"
+    );
     std::thread::sleep(Duration::from_millis(6));
     session.save_active_character().unwrap();
     let elapsed = saved_drop_remaining(&durable(&config));
-    assert!(elapsed <= initial.saturating_sub(4), "real elapsed time must be sampled before save: {initial}->{elapsed}");
+    assert!(
+        elapsed <= initial.saturating_sub(4),
+        "real elapsed time must be sampled before save: {initial}->{elapsed}"
+    );
     session.try_handle_packet(ClientPacket::LogOut).unwrap();
     let logged_out = durable(&config);
     let saved_remaining = saved_drop_remaining(&logged_out);
@@ -463,44 +732,92 @@ fn normal_shape6_failed_stack_preserves_the_live_original_duration_anchor_and_ot
     config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist);
     assert!(use_drop(&mut session, SECOND_DROP_UID).is_err());
     let restored = drop_buff(&session);
-    assert_eq!(restored.real_time_duration.as_ref().unwrap().instance_id(), instance, "known rollback restores the exact live clock, not a deserialized fresh anchor");
-    assert!(restored.remaining_ms(runtime_tick(session.app.world())) <= remaining.saturating_sub(4));
+    assert_eq!(
+        restored.real_time_duration.as_ref().unwrap().instance_id(),
+        instance,
+        "known rollback restores the exact live clock, not a deserialized fresh anchor"
+    );
+    assert!(
+        restored.remaining_ms(runtime_tick(session.app.world())) <= remaining.saturating_sub(4)
+    );
     let mut old_image = serde_json::to_value(old).unwrap();
     let mut restored_image = serde_json::to_value(restored).unwrap();
-    old_image.as_object_mut().unwrap().remove("real_time_duration");
-    restored_image.as_object_mut().unwrap().remove("real_time_duration");
-    assert_eq!(restored_image, old_image, "all other live buff metadata stays identical");
+    old_image
+        .as_object_mut()
+        .unwrap()
+        .remove("real_time_duration");
+    restored_image
+        .as_object_mut()
+        .unwrap()
+        .remove("real_time_duration");
+    assert_eq!(
+        restored_image, old_image,
+        "all other live buff metadata stays identical"
+    );
     assert_eq!(events::capture(session.app.world()), queue);
-    assert_eq!(serde_json::to_value(durable(&config)).unwrap(), serde_json::to_value(&before).unwrap());
-    assert_eq!(session.active_character_checkpoint().unwrap().inventory_items_json, before.inventory_items_json);
+    assert_eq!(
+        serde_json::to_value(durable(&config)).unwrap(),
+        serde_json::to_value(&before).unwrap()
+    );
+    assert_eq!(
+        session
+            .active_character_checkpoint()
+            .unwrap()
+            .inventory_items_json,
+        before.inventory_items_json
+    );
     assert_eq!(before.inventory_items_json.len(), 1);
-    let remaining_item: super::items::ItemState = serde_json::from_str(&before.inventory_items_json[0]).unwrap();
+    let remaining_item: super::items::ItemState =
+        serde_json::from_str(&before.inventory_items_json[0]).unwrap();
     assert_eq!(remaining_item.unique_id, SECOND_DROP_UID);
     assert_eq!(remaining_item.quantity, 1);
 }
 
 #[test]
 fn genuine_luke_visible_menu_omits_short_prison_action_but_keeps_move_and_message() {
-    let info = mir2_game_data::crystal_npc_info_manifest_ref().npcs.iter()
-        .find(|npc| npc.script_key == "BichonProvince/BichonWall/Luke").unwrap();
+    let info = mir2_game_data::crystal_npc_info_manifest_ref()
+        .npcs
+        .iter()
+        .find(|npc| npc.script_key == "BichonProvince/BichonWall/Luke")
+        .unwrap();
     let object_id = info.loaded_object_id.unwrap();
     assert_eq!(object_id, 37);
     assert_eq!(info.map_file_name.as_deref(), Some("0"));
     assert_eq!(info.flag_needed, 951);
     let script = mir2_game_data::crystal_npc_script_by_key(&info.script_key).unwrap();
-    assert!(script.sections.iter().find(|s| s.label.eq_ignore_ascii_case("@yes")).unwrap()
-        .lines.iter().any(|line| line == "GIVEBUFF PRISON 3600"));
+    assert!(script
+        .sections
+        .iter()
+        .find(|s| s.label.eq_ignore_ascii_case("@yes"))
+        .unwrap()
+        .lines
+        .iter()
+        .any(|line| line == "GIVEBUFF PRISON 3600"));
     let mut config = SimulationConfig::default();
     config.map.file_name = "0".into();
-    config.spawn = Point { x: info.location.x + 1, y: info.location.y };
+    config.spawn = Point {
+        x: info.location.x + 1,
+        y: info.location.y,
+    };
     config.visible_npcs = vec![VisibleNpcRecord {
-        object_id, name: info.name.clone(), image: info.image, colour_argb: -1,
-        position: info.location.clone(), direction: MirDirection::Down, quest_ids: vec![],
+        object_id,
+        name: info.name.clone(),
+        image: info.image,
+        colour_argb: -1,
+        position: info.location.clone(),
+        direction: MirDirection::Down,
+        quest_ids: vec![],
         script_key: Some(info.script_key.clone()),
     }];
     {
         let mut store = config.account_store.lock().unwrap();
-        let save = store.accounts.get_mut("demo").unwrap().saves.get_mut(&0).unwrap();
+        let save = store
+            .accounts
+            .get_mut("demo")
+            .unwrap()
+            .saves
+            .get_mut(&0)
+            .unwrap();
         save.map_file_name = config.map.file_name.clone();
         save.position = config.spawn.clone();
         save.quest_states_json.clear();
@@ -508,29 +825,76 @@ fn genuine_luke_visible_menu_omits_short_prison_action_but_keeps_move_and_messag
         // preparation supplies that genuine prerequisite; it is not natural
         // quest completion or a bypass of the offered-link/range gates.
         save.npc_flag_states_json = vec![serde_json::to_string(&super::npc::NpcFlagState {
-            index: 951, value: true,
-        }).unwrap()];
+            index: 951,
+            value: true,
+        })
+        .unwrap()];
     }
     let mut session = logged_in(&config);
     session.save_active_character().unwrap();
-    let main_packets = session.try_handle_packet(ClientPacket::CallNpc { object_id, key: "@MAIN".into() }).unwrap();
+    let main_packets = session
+        .try_handle_packet(ClientPacket::CallNpc {
+            object_id,
+            key: "@MAIN".into(),
+        })
+        .unwrap();
     let snapshot = session.world_snapshot();
     let save = session.active_character_checkpoint().unwrap();
-    let page = snapshot.active_npc_dialog.expect(&format!("Luke Main page absent: map={} position={:?}, NPC={:?}, packets={main_packets:?}", save.map_file_name, save.position, snapshot.entities.iter().find(|e| e.object_id == object_id)));
-    assert!(page.links.iter().any(|link| link.target.eq_ignore_ascii_case("@Bribe")), "genuine offered source link");
-    let bribe_packets = session.try_handle_packet(ClientPacket::CallNpc { object_id, key: "@Bribe".into() }).unwrap();
+    let page = snapshot.active_npc_dialog.expect(&format!(
+        "Luke Main page absent: map={} position={:?}, NPC={:?}, packets={main_packets:?}",
+        save.map_file_name,
+        save.position,
+        snapshot.entities.iter().find(|e| e.object_id == object_id)
+    ));
+    assert!(
+        page.links
+            .iter()
+            .any(|link| link.target.eq_ignore_ascii_case("@Bribe")),
+        "genuine offered source link"
+    );
+    let bribe_packets = session
+        .try_handle_packet(ClientPacket::CallNpc {
+            object_id,
+            key: "@Bribe".into(),
+        })
+        .unwrap();
     let snapshot = session.world_snapshot();
-    let page = snapshot.active_npc_dialog.expect(&format!("offered Bribe page vanished: {bribe_packets:?}"));
-    assert!(page.links.iter().any(|link| link.target.eq_ignore_ascii_case("@yes")), "genuine offered source link");
-    let packets = session.try_handle_packet(ClientPacket::CallNpc { object_id, key: "@yes".into() }).unwrap();
-    assert!(packets.iter().any(|p| matches!(p, ServerPacket::MapInformation { info } if info.file_name == "0127")));
+    let page = snapshot
+        .active_npc_dialog
+        .expect(&format!("offered Bribe page vanished: {bribe_packets:?}"));
+    assert!(
+        page.links
+            .iter()
+            .any(|link| link.target.eq_ignore_ascii_case("@yes")),
+        "genuine offered source link"
+    );
+    let packets = session
+        .try_handle_packet(ClientPacket::CallNpc {
+            object_id,
+            key: "@yes".into(),
+        })
+        .unwrap();
+    assert!(packets
+        .iter()
+        .any(|p| matches!(p, ServerPacket::MapInformation { info } if info.file_name == "0127")));
     assert!(packets.iter().any(|p| matches!(p, ServerPacket::Chat { message, .. } if message.contains("[Commander Luke] Take some time to think."))));
-    assert!(!packets.iter().any(|p| matches!(p, ServerPacket::AddBuff { buff } if buff.buff_type == 111)));
-    assert!(!session.app.world().resource::<BuffResource>().buffs.iter().any(|buff| buff.key == "prison"));
+    assert!(!packets
+        .iter()
+        .any(|p| matches!(p, ServerPacket::AddBuff { buff } if buff.buff_type == 111)));
+    assert!(!session
+        .app
+        .world()
+        .resource::<BuffResource>()
+        .buffs
+        .iter()
+        .any(|buff| buff.key == "prison"));
     let saved = durable(&config);
     assert_eq!(saved.map_file_name, "0127");
     assert_eq!(saved.position, Point { x: 7, y: 11 });
-    assert!(saved.buff_states_json.iter().all(|buff| serde_json::from_str::<serde_json::Value>(buff).unwrap()["key"] != "prison"));
+    assert!(saved
+        .buff_states_json
+        .iter()
+        .all(|buff| serde_json::from_str::<serde_json::Value>(buff).unwrap()["key"] != "prison"));
 }
 
 #[test]
@@ -539,19 +903,34 @@ fn infinite_source_repeat_trusted_zone_projection_save_and_cold_login_keep_first
         let config = SimulationConfig::default();
         let mut session = logged_in(&config);
         let actor = current_player_object_id(session.app.world()).unwrap();
-        let (_, first) = parser_page(&mut session, vec!["#ACT".into(),
-            format!("GIVEBUFF ClearRing {seconds} FALSE"), "#SAY".into(), "first".into()], vec![]);
+        let (_, first) = parser_page(
+            &mut session,
+            vec![
+                "#ACT".into(),
+                format!("GIVEBUFF ClearRing {seconds} FALSE"),
+                "#SAY".into(),
+                "first".into(),
+            ],
+            vec![],
+        );
         let initial = session.app.world().resource::<BuffResource>().buffs[0].clone();
         assert!(initial.infinite());
         assert!(!initial.expired(u64::MAX));
         assert!(!initial.real_time_expired());
         let record = serde_json::to_value(&initial).unwrap();
         assert!(record.get("real_time_duration").is_none());
-        assert_eq!(record["source_infinite_expire_time_ms"], seconds as u64 * 1000);
+        assert_eq!(
+            record["source_infinite_expire_time_ms"],
+            seconds as u64 * 1000
+        );
         // Prior serde readers ignore the added outer metadata and retain
         // Infinite None/MAX; this checks its clock layout, not an old binary.
         #[derive(serde::Deserialize)]
-        struct PriorClockLayout { expires_at_tick: u64, #[serde(default)] real_time_duration: Option<u64> }
+        struct PriorClockLayout {
+            expires_at_tick: u64,
+            #[serde(default)]
+            real_time_duration: Option<u64>,
+        }
         let prior: PriorClockLayout = serde_json::from_value(record.clone()).unwrap();
         assert_eq!(prior.expires_at_tick, u64::MAX);
         assert!(prior.real_time_duration.is_none());
@@ -562,19 +941,46 @@ fn infinite_source_repeat_trusted_zone_projection_save_and_cold_login_keep_first
         conflicting["expires_at_tick"] = 10.into();
         assert!(serde_json::from_value::<BuffState>(conflicting).is_err());
         let instance = initial.real_time_duration.as_ref().unwrap().instance_id();
-        let (_, repeated) = parser_page(&mut session, vec!["#ACT".into(),
-            "GIVEBUFF ClearRing 99 TRUE TRUE TRUE".into(), "#SAY".into(), "repeat".into()], vec![]);
-        assert_eq!(session.app.world().resource::<BuffResource>().buffs[0].real_time_duration.as_ref().unwrap().instance_id(), instance);
+        let (_, repeated) = parser_page(
+            &mut session,
+            vec![
+                "#ACT".into(),
+                "GIVEBUFF ClearRing 99 TRUE TRUE TRUE".into(),
+                "#SAY".into(),
+                "repeat".into(),
+            ],
+            vec![],
+        );
+        assert_eq!(
+            session.app.world().resource::<BuffResource>().buffs[0]
+                .real_time_duration
+                .as_ref()
+                .unwrap()
+                .instance_id(),
+            instance
+        );
         for packets in [&first, &repeated] {
-            assert_eq!(packets.iter().filter(|packet| matches!(packet, ServerPacket::AddBuff { buff }
+            assert_eq!(
+                packets
+                    .iter()
+                    .filter(|packet| matches!(packet, ServerPacket::AddBuff { buff }
                 if buff.buff_type == 114 && buff.infinite && !buff.paused && !buff.visible
-                    && buff.expire_time == seconds * 1000 && buff.object_id == actor)).count(), 1);
+                    && buff.expire_time == seconds * 1000 && buff.object_id == actor))
+                    .count(),
+                1
+            );
         }
         // Trusted projection is covered separately from routing authority.
         // This does not establish a public/shared-world ClearRing source.
         session.apply_zone_player_buff_packets(&repeated, actor);
-        let projected = super::buffs::client_buff_packet_for_state(session.app.world(), &session.app.world().resource::<BuffResource>().buffs[0]).unwrap();
-        assert!(matches!(projected, ServerPacket::AddBuff { buff } if buff.infinite && buff.expire_time == seconds * 1000));
+        let projected = super::buffs::client_buff_packet_for_state(
+            session.app.world(),
+            &session.app.world().resource::<BuffResource>().buffs[0],
+        )
+        .unwrap();
+        assert!(
+            matches!(projected, ServerPacket::AddBuff { buff } if buff.infinite && buff.expire_time == seconds * 1000)
+        );
         session.save_active_character().unwrap();
         session.try_handle_packet(ClientPacket::LogOut).unwrap();
         drop(session);
@@ -583,8 +989,14 @@ fn infinite_source_repeat_trusted_zone_projection_save_and_cold_login_keep_first
         assert!(saved.infinite());
         assert!(!saved.expired(u64::MAX));
         assert!(!saved.real_time_expired());
-        assert_eq!(saved.remaining_ms(runtime_tick(reloaded.app.world())), seconds as u64 * 1000);
-        let packet = super::buffs::client_buff_packet_for_state(reloaded.app.world(), saved).unwrap();
-        assert!(matches!(packet, ServerPacket::AddBuff { buff } if buff.infinite && buff.expire_time == seconds * 1000));
+        assert_eq!(
+            saved.remaining_ms(runtime_tick(reloaded.app.world())),
+            seconds as u64 * 1000
+        );
+        let packet =
+            super::buffs::client_buff_packet_for_state(reloaded.app.world(), saved).unwrap();
+        assert!(
+            matches!(packet, ServerPacket::AddBuff { buff } if buff.infinite && buff.expire_time == seconds * 1000)
+        );
     }
 }

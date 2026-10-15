@@ -622,16 +622,31 @@ fn five_class_billing_shop_mail_card_survives_logout_and_preserves_expiry() {
         {
             let mut store = config.account_store.lock().unwrap();
             let account = store.accounts.get_mut("demo").unwrap();
-            account.characters.iter_mut().find(|c| c.index == index).unwrap().class = class;
+            account
+                .characters
+                .iter_mut()
+                .find(|c| c.index == index)
+                .unwrap()
+                .class = class;
             account.saves.get_mut(&index).unwrap().character.class = class;
         }
         let mut runtime = InProcessWorldRuntime::new(config.clone());
-        runtime.execute(WorldCommand::PasskeyLogin { account_id: "demo".into() }).unwrap();
-        let boot = runtime.execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
-            character_index: index,
-        })).unwrap();
-        assert!(boot.iter().any(|p| matches!(p, ServerPacket::StartGame { result: 4, .. })));
-        assert!(boot.iter().any(|p| matches!(p, ServerPacket::GameShopInfo { item, .. }
+        runtime
+            .execute(WorldCommand::PasskeyLogin {
+                account_id: "demo".into(),
+            })
+            .unwrap();
+        let boot = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: index,
+            }))
+            .unwrap();
+        assert!(boot
+            .iter()
+            .any(|p| matches!(p, ServerPacket::StartGame { result: 4, .. })));
+        assert!(boot
+            .iter()
+            .any(|p| matches!(p, ServerPacket::GameShopInfo { item, .. }
             if item.g_index == BILLING_MONTHLY_CARD_GAME_SHOP_INDEX
                 && item.item_index == BILLING_MONTHLY_CARD_ITEM_INDEX)));
         let request = NativeGameShopPurchaseRequest {
@@ -645,11 +660,17 @@ fn five_class_billing_shop_mail_card_survives_logout_and_preserves_expiry() {
             quantity: 1,
             price_type: 0,
         };
-        let purchased = runtime.execute(WorldCommand::NativeGameShopPurchase(request.clone())).unwrap();
-        assert!(purchased.iter().any(|p| matches!(p, ServerPacket::LoseCredit { credit: 10 })));
+        let purchased = runtime
+            .execute(WorldCommand::NativeGameShopPurchase(request.clone()))
+            .unwrap();
+        assert!(purchased
+            .iter()
+            .any(|p| matches!(p, ServerPacket::LoseCredit { credit: 10 })));
         assert_eq!(saved_credit(&config), 90);
         let before_replay = serialized(&config);
-        runtime.execute(WorldCommand::NativeGameShopPurchase(request)).unwrap();
+        runtime
+            .execute(WorldCommand::NativeGameShopPurchase(request))
+            .unwrap();
         assert_eq!(serialized(&config), before_replay);
         let (uid, mail_id) = {
             let store = config.account_store.lock().unwrap();
@@ -659,43 +680,116 @@ fn five_class_billing_shop_mail_card_survives_logout_and_preserves_expiry() {
             assert_eq!(ledger.item_receipts.len(), 1);
             let uid = ledger.item_receipts.values().next().unwrap().unique_id;
             let systems: mir2_simulation::Stage5SystemsState = serde_json::from_str(
-                account.saves[&index].stage5_systems_json.as_deref().unwrap()).unwrap();
-            let mail = systems.mail.iter().find(|m| !m.deleted && !m.claimed).unwrap();
+                account.saves[&index]
+                    .stage5_systems_json
+                    .as_deref()
+                    .unwrap(),
+            )
+            .unwrap();
+            let mail = systems
+                .mail
+                .iter()
+                .find(|m| !m.deleted && !m.claimed)
+                .unwrap();
             (uid, u64::from(mail.id))
         };
-        let claimed = runtime.execute(WorldCommand::ClientPacket(ClientPacket::CollectParcel {
-            mail_id,
-        })).unwrap();
-        assert!(claimed.iter().any(|p| matches!(p, ServerPacket::GainedItem { item }
+        let claimed = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::CollectParcel {
+                mail_id,
+            }))
+            .unwrap();
+        assert!(claimed
+            .iter()
+            .any(|p| matches!(p, ServerPacket::GainedItem { item }
             if item.unique_id == uid && item.item_index == BILLING_MONTHLY_CARD_ITEM_INDEX)));
-        let use_item = ClientPacket::UseItem { unique_id: uid, grid: MirGridType::Inventory };
-        let used = runtime.execute(WorldCommand::ClientPacket(use_item.clone())).unwrap();
+        let use_item = ClientPacket::UseItem {
+            unique_id: uid,
+            grid: MirGridType::Inventory,
+        };
+        let used = runtime
+            .execute(WorldCommand::ClientPacket(use_item.clone()))
+            .unwrap();
         assert!(used.iter().any(|p| matches!(p, ServerPacket::UseItem {
             unique_id, success: true, ..
         } if *unique_id == uid)));
         let now = monthly_card_now_ms();
-        let expiry = config.monthly_card_status("demo", now).unwrap().expires_at_ms.unwrap();
+        let expiry = config
+            .monthly_card_status("demo", now)
+            .unwrap()
+            .expires_at_ms
+            .unwrap();
         assert!(expiry >= now && expiry <= now + MONTHLY_CARD_DURATION_MS);
-        runtime.execute(WorldCommand::ClientPacket(use_item.clone())).unwrap();
-        assert_eq!(config.monthly_card_status("demo", now).unwrap().expires_at_ms, Some(expiry));
-        runtime.execute(WorldCommand::ClientPacket(ClientPacket::LogOut)).unwrap();
+        runtime
+            .execute(WorldCommand::ClientPacket(use_item.clone()))
+            .unwrap();
+        assert_eq!(
+            config
+                .monthly_card_status("demo", now)
+                .unwrap()
+                .expires_at_ms,
+            Some(expiry)
+        );
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::LogOut))
+            .unwrap();
         drop(runtime);
-        let config = config.with_monthly_card_policy(MonthlyCardPolicy::new(true, Some(KEY)).unwrap());
-        assert!(config.monthly_card_status("demo", expiry - 1).unwrap().can_enter_game);
-        assert!(!config.monthly_card_status("demo", expiry).unwrap().can_enter_game);
+        let config =
+            config.with_monthly_card_policy(MonthlyCardPolicy::new(true, Some(KEY)).unwrap());
+        assert!(
+            config
+                .monthly_card_status("demo", expiry - 1)
+                .unwrap()
+                .can_enter_game
+        );
+        assert!(
+            !config
+                .monthly_card_status("demo", expiry)
+                .unwrap()
+                .can_enter_game
+        );
         let mut reopened = InProcessWorldRuntime::new(config.clone());
-        reopened.execute(WorldCommand::PasskeyLogin { account_id: "demo".into() }).unwrap();
-        let started = reopened.execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
-            character_index: index,
-        })).unwrap();
-        assert!(started.iter().any(|p| matches!(p, ServerPacket::StartGame { result: 4, .. })));
-        assert!(config.list_billing_monthly_cards("demo", index).unwrap().is_empty());
-        let before = config.monthly_card_status("demo", monthly_card_now_ms()).unwrap().expires_at_ms;
-        reopened.execute(WorldCommand::ClientPacket(use_item)).unwrap();
-        assert_eq!(config.monthly_card_status("demo", monthly_card_now_ms()).unwrap().expires_at_ms, before);
+        reopened
+            .execute(WorldCommand::PasskeyLogin {
+                account_id: "demo".into(),
+            })
+            .unwrap();
+        let started = reopened
+            .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+                character_index: index,
+            }))
+            .unwrap();
+        assert!(started
+            .iter()
+            .any(|p| matches!(p, ServerPacket::StartGame { result: 4, .. })));
+        assert!(config
+            .list_billing_monthly_cards("demo", index)
+            .unwrap()
+            .is_empty());
+        let before = config
+            .monthly_card_status("demo", monthly_card_now_ms())
+            .unwrap()
+            .expires_at_ms;
+        reopened
+            .execute(WorldCommand::ClientPacket(use_item))
+            .unwrap();
+        assert_eq!(
+            config
+                .monthly_card_status("demo", monthly_card_now_ms())
+                .unwrap()
+                .expires_at_ms,
+            before
+        );
         assert_eq!(saved_credit(&config), 90);
         let store = config.account_store.lock().unwrap();
         assert_eq!(store.accounts["demo"].saves[&index].character.class, class);
-        assert_eq!(store.accounts["demo"].monthly_card.as_ref().unwrap().item_receipts.len(), 1);
+        assert_eq!(
+            store.accounts["demo"]
+                .monthly_card
+                .as_ref()
+                .unwrap()
+                .item_receipts
+                .len(),
+            1
+        );
     }
 }

@@ -263,16 +263,21 @@ fn unchanged_main_with_live_oven_does_not_save_elapsed_only_timer_projection() {
 
 fn prepare_live_buff(session: &mut SimulationSession) {
     use super::buffs::{BuffState, RealTimeBuffDuration};
-    session.app.world_mut().resource_mut::<super::resources::BuffResource>().buffs.push(BuffState {
-        key: "owned-npc-source-clock".into(),
-        name: "Owned Source clock fixture".into(),
-        description: "No-op NPC display must not save elapsed time".into(),
-        expires_at_tick: 3600,
-        real_time_duration: Some(RealTimeBuffDuration::new(60_000)),
-        attack_bonus: 0,
-        defence_bonus: 0,
-        stats: vec![],
-    });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<super::resources::BuffResource>()
+        .buffs
+        .push(BuffState {
+            key: "owned-npc-source-clock".into(),
+            name: "Owned Source clock fixture".into(),
+            description: "No-op NPC display must not save elapsed time".into(),
+            expires_at_tick: 3600,
+            real_time_duration: Some(RealTimeBuffDuration::new(60_000)),
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: vec![],
+        });
     session.save_active_character().unwrap();
 }
 
@@ -289,12 +294,24 @@ fn unchanged_main_with_live_buff_preserves_source_clock_and_next_write_fault() {
     std::thread::sleep(std::time::Duration::from_millis(5));
     let packets = open(&mut session, &npc, 4);
     let result = session.finish_guild_experience_command(before, packets);
-    assert!(result.is_ok(), "Elapsed buff projection attempted a write: {result:?}");
+    assert!(
+        result.is_ok(),
+        "Elapsed buff projection attempted a write: {result:?}"
+    );
     assert!(succeeded(&result.unwrap()));
-    assert_eq!(session.app.world().resource::<BuffResource>().buffs, raw_before);
+    assert_eq!(
+        session.app.world().resource::<BuffResource>().buffs,
+        raw_before
+    );
     let durable_after = config.account_store.lock().unwrap().accounts["demo"].saves[&0].clone();
-    assert_eq!(serde_json::to_value(durable_after).unwrap(), serde_json::to_value(durable_before).unwrap());
-    assert!(session.save_active_character().is_err(), "unchanged view consumed a real write fault");
+    assert_eq!(
+        serde_json::to_value(durable_after).unwrap(),
+        serde_json::to_value(durable_before).unwrap()
+    );
+    assert!(
+        session.save_active_character().is_err(),
+        "unchanged view consumed a real write fault"
+    );
 }
 
 #[test]
@@ -315,23 +332,39 @@ fn live_buff_source_mutations_save_and_known_failure_restores_exact_clock() {
                 0 => buff.real_time_duration.as_mut().unwrap().set_paused(true),
                 1 => buff.real_time_duration = Some(RealTimeBuffDuration::new(60_000)),
                 2 => buff.attack_bonus += 1,
-                _ => { resource.buffs.clear(); }
+                _ => {
+                    resource.buffs.clear();
+                }
             }
         }
         let changed = session.app.world().resource::<BuffResource>().buffs.clone();
         assert_ne!(changed, old);
         config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist);
         let packets = open(&mut session, &npc, 4);
-        assert!(session.finish_guild_experience_command(before, packets).is_err(),
-            "Actual buff mutation did not reach Source CAS: {kind}");
+        assert!(
+            session
+                .finish_guild_experience_command(before, packets)
+                .is_err(),
+            "Actual buff mutation did not reach Source CAS: {kind}"
+        );
         assert_eq!(session.app.world().resource::<BuffResource>().buffs, old);
-        assert_eq!(serde_json::to_value(&config.account_store.lock().unwrap().accounts["demo"].saves[&0]).unwrap(),
-            serde_json::to_value(&durable).unwrap());
+        assert_eq!(
+            serde_json::to_value(&config.account_store.lock().unwrap().accounts["demo"].saves[&0])
+                .unwrap(),
+            serde_json::to_value(&durable).unwrap()
+        );
         let before = session.begin_npc_dialog_source_command(false).unwrap();
         session.app.world_mut().resource_mut::<BuffResource>().buffs = changed.clone();
         let packets = open(&mut session, &npc, 4);
-        assert!(succeeded(&session.finish_guild_experience_command(before, packets).unwrap()));
-        assert_eq!(session.app.world().resource::<BuffResource>().buffs, changed);
+        assert!(succeeded(
+            &session
+                .finish_guild_experience_command(before, packets)
+                .unwrap()
+        ));
+        assert_eq!(
+            session.app.world().resource::<BuffResource>().buffs,
+            changed
+        );
         let stored = config.account_store.lock().unwrap().accounts["demo"].saves[&0].clone();
         assert_eq!(stored.revision, durable.revision + 1);
         assert_eq!(stored.buff_states_json.len(), if kind == 3 { 0 } else { 1 });
@@ -451,16 +484,21 @@ fn original_main_known_file_rename_failure_retains_image_and_retry_saves_once() 
         let (config, mut session, npc) = fixture_with_store(Some(&file));
         let before = std::fs::read(&file).unwrap();
         let revision = config.account_store.lock().unwrap().accounts["demo"].saves[&0].revision;
-        config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforeFileRename);
+        config
+            .inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforeFileRename);
         assert!(!succeeded(&open(&mut session, &npc, path)));
         assert!(!crystal_npc_flag_value(session.app.world(), FLAG));
         assert_eq!(std::fs::read(&file).unwrap(), before);
         assert_eq!(std::fs::metadata(writer_marker(&file)).unwrap().len(), 0);
         config.ensure_account_store_writable().unwrap();
         assert!(succeeded(&open(&mut session, &npc, path)));
-        let stored: crate::AccountStore = serde_json::from_slice(&std::fs::read(&file).unwrap()).unwrap();
+        let stored: crate::AccountStore =
+            serde_json::from_slice(&std::fs::read(&file).unwrap()).unwrap();
         assert_eq!(stored.accounts["demo"].saves[&0].revision, revision + 1);
-        assert_eq!(config.account_store.lock().unwrap().accounts["demo"].saves[&0].revision, revision + 1);
+        assert_eq!(
+            config.account_store.lock().unwrap().accounts["demo"].saves[&0].revision,
+            revision + 1
+        );
         assert!(crystal_npc_flag_value(session.app.world(), FLAG));
         assert_eq!(std::fs::metadata(writer_marker(&file)).unwrap().len(), 0);
         drop(session);
@@ -480,9 +518,13 @@ fn original_main_unknown_file_publication_suppresses_ack_and_survives_restart_fr
             AccountStoreTransactionFault::AfterFileRenameBeforeDirectorySync,
         );
         assert!(!succeeded(&open(&mut session, &npc, path)));
-        assert!(crystal_npc_flag_value(session.app.world(), FLAG), "unknown cannot guess an old live image");
+        assert!(
+            crystal_npc_flag_value(session.app.world(), FLAG),
+            "unknown cannot guess an old live image"
+        );
         assert_eq!(
-            serde_json::to_value(&config.account_store.lock().unwrap().accounts["demo"].saves[&0]).unwrap(),
+            serde_json::to_value(&config.account_store.lock().unwrap().accounts["demo"].saves[&0])
+                .unwrap(),
             serde_json::to_value(&before).unwrap()
         );
         assert!(config.ensure_account_store_writable().is_err());
@@ -490,9 +532,13 @@ fn original_main_unknown_file_publication_suppresses_ack_and_survives_restart_fr
         let visible: crate::AccountStore = serde_json::from_slice(&visible_bytes).unwrap();
         let visible_save = &visible.accounts["demo"].saves[&0];
         assert_eq!(visible_save.revision, before.revision + 1);
-        assert!(visible_save.npc_flag_states_json.iter().any(|entry|
-            serde_json::from_str::<serde_json::Value>(entry).unwrap()
-                == serde_json::json!({"index":FLAG,"value":true})));
+        assert!(visible_save
+            .npc_flag_states_json
+            .iter()
+            .any(
+                |entry| serde_json::from_str::<serde_json::Value>(entry).unwrap()
+                    == serde_json::json!({"index":FLAG,"value":true})
+            ));
         // Windows enforces the authority's OS lock even for another read-only
         // handle. Observe length now, and exact persistent bytes only after
         // every live holder is dropped; never bypass the authority lock.
@@ -503,7 +549,10 @@ fn original_main_unknown_file_publication_suppresses_ack_and_survives_restart_fr
         let clone = config.clone();
         assert!(clone.save_account_store().is_err());
         assert_eq!(std::fs::read(&file).unwrap(), visible_bytes);
-        assert_eq!(std::fs::metadata(writer_marker(&file)).unwrap().len(), marker_length);
+        assert_eq!(
+            std::fs::metadata(writer_marker(&file)).unwrap().len(),
+            marker_length
+        );
         drop(clone);
         drop(session);
         drop(config);

@@ -234,9 +234,9 @@ async fn stripe_http_checkout_binding_failure_retries_same_frozen_order_and_key(
         "demo"
     );
     assert_eq!(params["allowed_payment_method_types[0]"], "card");
-    assert!(!params.keys().any(|key| {
-        key == "payment_method_types" || key.starts_with("payment_method_types[")
-    }));
+    assert!(!params
+        .keys()
+        .any(|key| { key == "payment_method_types" || key.starts_with("payment_method_types[") }));
     assert_eq!(
         c.recharge_credit_status("demo", o.character_index).unwrap(),
         (0, 0)

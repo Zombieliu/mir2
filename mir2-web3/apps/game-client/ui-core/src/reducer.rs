@@ -85,14 +85,24 @@ fn chat_draft(next: &mut UiState) -> Option<&mut UiChatSettings> {
     next.chat_settings_draft.as_mut()
 }
 
-
-fn reduce_chat_settings(next:&mut UiState,action:mir2_client_core::chat_ui::SettingsAction)->Option<UiChatSettings> {
-    use mir2_client_core::chat_ui::{settings_transition,SettingsAction};
-    if next.panel!=UiPanel::ChatSettings {return None;}
-    if !matches!(action,SettingsAction::Apply|SettingsAction::Cancel) {let _=chat_draft(next);}
-    let transition=settings_transition(next.chat_settings.to_mask(),next.chat_settings_draft.map(UiChatSettings::to_mask),action);
-    next.chat_settings=UiChatSettings::from_mask(transition.committed);
-    next.chat_settings_draft=transition.draft.map(UiChatSettings::from_mask);
+fn reduce_chat_settings(
+    next: &mut UiState,
+    action: mir2_client_core::chat_ui::SettingsAction,
+) -> Option<UiChatSettings> {
+    use mir2_client_core::chat_ui::{settings_transition, SettingsAction};
+    if next.panel != UiPanel::ChatSettings {
+        return None;
+    }
+    if !matches!(action, SettingsAction::Apply | SettingsAction::Cancel) {
+        let _ = chat_draft(next);
+    }
+    let transition = settings_transition(
+        next.chat_settings.to_mask(),
+        next.chat_settings_draft.map(UiChatSettings::to_mask),
+        action,
+    );
+    next.chat_settings = UiChatSettings::from_mask(transition.committed);
+    next.chat_settings_draft = transition.draft.map(UiChatSettings::from_mask);
     transition.applied.map(UiChatSettings::from_mask)
 }
 
@@ -409,7 +419,8 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
                 match mir2_client_core::mail_compose::normalize_message(&message) {
                     Ok(message) => compose.message = message,
                     Err(error) => effects.push(UiEffect::ShowNotice {
-                        message: error.message().into(), is_error: true,
+                        message: error.message().into(),
+                        is_error: true,
                     }),
                 }
             }
@@ -438,18 +449,22 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
                 };
             };
             match mir2_client_core::mail_compose::prepare_send(
-                &compose.recipient, &compose.message, compose.gold, &compose.attachment_unique_ids,
+                &compose.recipient,
+                &compose.message,
+                compose.gold,
+                &compose.attachment_unique_ids,
             ) {
                 Ok(payload) => {
-                effects.push(UiEffect::GatewayCommand(GatewayCommand::SendMail {
-                    recipient: payload.recipient,
-                    message: payload.message,
-                    gold: payload.gold,
-                    attachment_unique_ids: payload.attachment_unique_ids,
-                }));
-            }
+                    effects.push(UiEffect::GatewayCommand(GatewayCommand::SendMail {
+                        recipient: payload.recipient,
+                        message: payload.message,
+                        gold: payload.gold,
+                        attachment_unique_ids: payload.attachment_unique_ids,
+                    }));
+                }
                 Err(error) => effects.push(UiEffect::ShowNotice {
-                    message: error.message().into(), is_error: true,
+                    message: error.message().into(),
+                    is_error: true,
                 }),
             }
         }
@@ -551,31 +566,52 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
         | UiAction::CancelOptions
         | UiAction::ResetOptionsToDefaults => {}
         UiAction::SetChatFilterVisibility { channel, visible } => {
-            let _=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::Filter {channel:channel as u8,visible});
+            let _ = reduce_chat_settings(
+                &mut next,
+                mir2_client_core::chat_ui::SettingsAction::Filter {
+                    channel: channel as u8,
+                    visible,
+                },
+            );
         }
         UiAction::SetAllChatFilterVisibility { visible } => {
-            let _=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::All {visible});
+            let _ = reduce_chat_settings(
+                &mut next,
+                mir2_client_core::chat_ui::SettingsAction::All { visible },
+            );
         }
         UiAction::SetChatTransparency { transparent } => {
-            let _=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::Transparent(transparent));
+            let _ = reduce_chat_settings(
+                &mut next,
+                mir2_client_core::chat_ui::SettingsAction::Transparent(transparent),
+            );
         }
         UiAction::ApplyChatSettings => {
-            if state.panel==UiPanel::ChatSettings {
-                if let Some(settings)=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::Apply) {
-                    next.panel=UiPanel::None;
-                    effects.push(UiEffect::ApplyChatSettings {settings});
-                    effects.push(UiEffect::PersistChatSettings {settings});
+            if state.panel == UiPanel::ChatSettings {
+                if let Some(settings) = reduce_chat_settings(
+                    &mut next,
+                    mir2_client_core::chat_ui::SettingsAction::Apply,
+                ) {
+                    next.panel = UiPanel::None;
+                    effects.push(UiEffect::ApplyChatSettings { settings });
+                    effects.push(UiEffect::PersistChatSettings { settings });
                 }
             }
         }
         UiAction::CancelChatSettings | UiAction::CloseChatSettings => {
-            if state.panel==UiPanel::ChatSettings {
-                let _=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::Cancel);
+            if state.panel == UiPanel::ChatSettings {
+                let _ = reduce_chat_settings(
+                    &mut next,
+                    mir2_client_core::chat_ui::SettingsAction::Cancel,
+                );
                 close_panels(&mut next);
             }
         }
         UiAction::ResetChatSettingsToDefaults => {
-            let _=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::Defaults);
+            let _ = reduce_chat_settings(
+                &mut next,
+                mir2_client_core::chat_ui::SettingsAction::Defaults,
+            );
         }
         UiAction::ClosePanel => close_panels(&mut next),
         UiAction::CloseAllPanels => close_panels(&mut next),
@@ -1457,20 +1493,43 @@ mod tests {
     fn shared_mail_message_edit_rejects_whole_overflow_and_submit_revalidates_bypassed_drafts() {
         let mut state = reduce(&game(), UiAction::OpenMailCompose).state;
         state.mail_compose.as_mut().unwrap().recipient = " R ".into();
-        state = reduce(&state, UiAction::SetMailMessage { message: "😀".repeat(250) }).state;
-        let rejected = reduce(&state, UiAction::SetMailMessage { message: "😀".repeat(251) });
+        state = reduce(
+            &state,
+            UiAction::SetMailMessage {
+                message: "😀".repeat(250),
+            },
+        )
+        .state;
+        let rejected = reduce(
+            &state,
+            UiAction::SetMailMessage {
+                message: "😀".repeat(251),
+            },
+        );
         assert_eq!(rejected.state.mail_compose, state.mail_compose);
-        assert!(matches!(rejected.effects.as_slice(), [UiEffect::ShowNotice { is_error: true, .. }]));
+        assert!(matches!(
+            rejected.effects.as_slice(),
+            [UiEffect::ShowNotice { is_error: true, .. }]
+        ));
         state.mail_compose.as_mut().unwrap().message = "a\r\nb\rc\t".into();
         state.mail_compose.as_mut().unwrap().gold = 700;
         let sent = reduce(&state, UiAction::SubmitMail);
-        assert_eq!(sent.effects, vec![UiEffect::GatewayCommand(GatewayCommand::SendMail {
-            recipient:"R".into(),message:"a\nb\nc".into(),gold:700,attachment_unique_ids:vec![],
-        })]);
-        state.mail_compose.as_mut().unwrap().attachment_unique_ids = vec![7,7];
+        assert_eq!(
+            sent.effects,
+            vec![UiEffect::GatewayCommand(GatewayCommand::SendMail {
+                recipient: "R".into(),
+                message: "a\nb\nc".into(),
+                gold: 700,
+                attachment_unique_ids: vec![],
+            })]
+        );
+        state.mail_compose.as_mut().unwrap().attachment_unique_ids = vec![7, 7];
         let rejected = reduce(&state, UiAction::SubmitMail);
         assert_eq!(rejected.state.mail_compose, state.mail_compose);
-        assert!(matches!(rejected.effects.as_slice(), [UiEffect::ShowNotice { is_error: true, .. }]));
+        assert!(matches!(
+            rejected.effects.as_slice(),
+            [UiEffect::ShowNotice { is_error: true, .. }]
+        ));
     }
 
     #[test]

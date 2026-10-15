@@ -48,7 +48,9 @@ pub(super) fn cadence_for_quest(world: &World, quest_id: i32) -> Option<QuestCad
 }
 
 fn cadence_for_quest_id(quest_id: i32, newcomer_v1: bool) -> Option<QuestCadence> {
-    if let Some(cadence)=super::periodic_quests::cadence(quest_id) { return Some(cadence); }
+    if let Some(cadence) = super::periodic_quests::cadence(quest_id) {
+        return Some(cadence);
+    }
     if newcomer_v1 && super::newcomer_progression::is_daily_quest(quest_id) {
         return Some(QuestCadence::Daily);
     }
@@ -73,9 +75,10 @@ fn cadence_for_quest_id(quest_id: i32, newcomer_v1: bool) -> Option<QuestCadence
 }
 
 pub(super) fn apply_cadence_quest_info(world: &World, info: &mut ClientQuestInfo) {
-    if !mir2_game_data::periodic_quests::is_periodic(info.index) && !world
-        .get_resource::<QuestResource>()
-        .is_some_and(|quests| quests.newcomer_v1_cadence)
+    if !mir2_game_data::periodic_quests::is_periodic(info.index)
+        && !world
+            .get_resource::<QuestResource>()
+            .is_some_and(|quests| quests.newcomer_v1_cadence)
     {
         return;
     }
@@ -90,7 +93,9 @@ pub(super) fn apply_cadence_quest_info(world: &World, info: &mut ClientQuestInfo
             "Repeatable: available again after successful completion.",
         ),
     };
-    if !mir2_game_data::periodic_quests::is_periodic(info.index) { info.group = label.to_string(); }
+    if !mir2_game_data::periodic_quests::is_periodic(info.index) {
+        info.group = label.to_string();
+    }
     if !info.description.iter().any(|line| line == detail) {
         info.description.insert(0, detail.to_string());
     }
@@ -114,7 +119,7 @@ pub(super) fn record_quest_completion_at(world: &mut World, quest_id: i32, now_m
     if cadence == QuestCadence::Repeatable {
         return;
     }
-    let effective_period = effective_period(world,cadence,now_ms);
+    let effective_period = effective_period(world, cadence, now_ms);
     let mut quests = world.resource_mut::<QuestResource>();
     let Some(quest) = quests
         .quests
@@ -127,15 +132,15 @@ pub(super) fn record_quest_completion_at(world: &mut World, quest_id: i32, now_m
     quest.cadence_last_claimed_period = Some(effective_period);
 }
 
-pub(super) fn effective_period(world:&World,cadence:QuestCadence,now_ms:u64) -> u64 {
-    let newcomer_v1=world.resource::<QuestResource>().newcomer_v1_cadence;
+pub(super) fn effective_period(world: &World, cadence: QuestCadence, now_ms: u64) -> u64 {
+    let newcomer_v1 = world.resource::<QuestResource>().newcomer_v1_cadence;
     world
         .resource::<QuestResource>()
         .quests
         .iter()
         .filter(|quest| cadence_for_quest_id(quest.quest_id, newcomer_v1) == Some(cadence))
         .filter_map(|quest| quest.cadence_high_watermark_period)
-        .fold(cadence_period(cadence,now_ms), u64::max)
+        .fold(cadence_period(cadence, now_ms), u64::max)
 }
 
 pub(in crate::runtime) fn refresh_quest_recurrence(world: &mut World) -> Vec<ServerPacket> {
@@ -164,7 +169,11 @@ pub(super) fn refresh_quest_recurrence_at(world: &mut World, now_ms: u64) -> Vec
     let mut packets = vec![ServerPacket::CompleteQuest {
         completed_quests: super::completed_quest_ids(world),
     }];
-    packets.extend(super::periodic_quests::infos(world).into_iter().map(|info|ServerPacket::NewQuestInfo{info}));
+    packets.extend(
+        super::periodic_quests::infos(world)
+            .into_iter()
+            .map(|info| ServerPacket::NewQuestInfo { info }),
+    );
     if matches!(
         super::quest_stage(world, super::newcomer_progression::DAILY_BONUS_ID),
         Some(QuestStage::InProgress | QuestStage::ReadyToTurnIn)
@@ -242,7 +251,7 @@ fn reset_completed_quest(quest: &mut super::QuestState) {
     quest.stage = QuestStage::Available;
     quest.current = 0;
     quest.task_progress.clear();
-    quest.accepted_periodic_reward=None;
+    quest.accepted_periodic_reward = None;
 }
 
 fn cadence_period(cadence: QuestCadence, now_ms: u64) -> u64 {

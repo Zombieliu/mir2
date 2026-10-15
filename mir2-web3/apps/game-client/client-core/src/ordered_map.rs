@@ -49,6 +49,11 @@ impl<K, V> OrderedMap<K, V> {
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
+
+    /// Remove every entry while retaining the allocated storage for reuse.
+    pub fn clear(&mut self) {
+        self.entries.clear();
+    }
 }
 
 impl<K: Ord, V> OrderedMap<K, V> {
@@ -142,6 +147,11 @@ impl<K> OrderedSet<K> {
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
+
+    /// Remove every key while retaining the allocated storage for reuse.
+    pub fn clear(&mut self) {
+        self.entries.clear();
+    }
 }
 
 impl<K: Ord> OrderedSet<K> {
@@ -155,6 +165,14 @@ impl<K: Ord> OrderedSet<K> {
         Q: Ord + ?Sized,
     {
         self.entries.contains_key(key)
+    }
+
+    pub fn remove<Q>(&mut self, key: &Q) -> bool
+    where
+        K: Borrow<Q>,
+        Q: Ord + ?Sized,
+    {
+        self.entries.remove(key).is_some()
     }
 }
 
@@ -352,5 +370,32 @@ mod tests {
             tree.iter().rev().map(|k| k.text).collect::<Vec<_>>()
         );
         assert_eq!(format!("{set:?}"), format!("{tree:?}"));
+        for text in ["m", "absent", "a", "m"] {
+            assert_eq!(set.remove(text), tree.remove(text));
+            assert_eq!(
+                set.iter().map(|k| (k.text, k.identity)).collect::<Vec<_>>(),
+                tree.iter()
+                    .map(|k| (k.text, k.identity))
+                    .collect::<Vec<_>>()
+            );
+        }
+        let capacity = set.entries.entries.capacity();
+        assert!(!set.is_empty());
+        set.clear();
+        tree.clear();
+        assert!(set.is_empty());
+        assert_eq!(set.entries.entries.capacity(), capacity);
+        assert_eq!(set.remove("z"), tree.remove("z"));
+        let key = IdentityKey {
+            text: "z",
+            identity: 9,
+        };
+        assert_eq!(set.insert(key.clone()), tree.insert(key));
+        assert_eq!(
+            set.iter().map(|k| (k.text, k.identity)).collect::<Vec<_>>(),
+            tree.iter()
+                .map(|k| (k.text, k.identity))
+                .collect::<Vec<_>>()
+        );
     }
 }

@@ -180,7 +180,6 @@ fn assert_only_rename(
     assert_eq!(after, &expected);
 }
 
-
 // Ordinary typed packets through the production wrapper; no injected success.
 #[test]
 fn guild_rank_actor_receives_original_status7_after_canonical_refresh() {
@@ -195,22 +194,42 @@ fn guild_rank_actor_receives_original_status7_after_canonical_refresh() {
     let before = persisted(&config);
     let reply = send(&mut leader, edit(2, "Veterans"));
     assert_only_rename(&before, &persisted(&config), 2, "Veterans");
-    let terminals = reply.iter().filter(|p| matches!(p,
-        ServerPacket::GuildMemberChange { status: 7, .. })).collect::<Vec<_>>();
-    assert_eq!(terminals.len(), 1, "full projection is not the source terminal: {reply:?}");
+    let terminals = reply
+        .iter()
+        .filter(|p| matches!(p, ServerPacket::GuildMemberChange { status: 7, .. }))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        terminals.len(),
+        1,
+        "full projection is not the source terminal: {reply:?}"
+    );
     assert!(matches!(terminals[0], ServerPacket::GuildMemberChange {
         name, rank_index: 0, status: 7, ranks
     } if name == "Leader" && ranks.len() == 1 && ranks[0].index == 2
         && ranks[0].name == "Veterans" && ranks[0].options == 0
         && ranks[0].members.len() == 1 && ranks[0].members[0].name == "Member"));
-    let terminal_index = reply.iter().position(|p| matches!(p,
-        ServerPacket::GuildMemberChange { status: 7, .. })).unwrap();
-    let canonical_index = reply.iter().position(|p| matches!(p,
-        ServerPacket::GuildMemberChange { status: 255, .. })).unwrap();
-    assert!(terminal_index < canonical_index,
-        "source terminal must enter the actual native FIFO before full metadata: {reply:?}");
-    assert!(source_rank_event(&member.execute(WorldCommand::Tick).unwrap(), 2, "Veterans"));
-    assert!(!has_rank(&outsider.execute(WorldCommand::Tick).unwrap(), 2, "Veterans"));
+    let terminal_index = reply
+        .iter()
+        .position(|p| matches!(p, ServerPacket::GuildMemberChange { status: 7, .. }))
+        .unwrap();
+    let canonical_index = reply
+        .iter()
+        .position(|p| matches!(p, ServerPacket::GuildMemberChange { status: 255, .. }))
+        .unwrap();
+    assert!(
+        terminal_index < canonical_index,
+        "source terminal must enter the actual native FIFO before full metadata: {reply:?}"
+    );
+    assert!(source_rank_event(
+        &member.execute(WorldCommand::Tick).unwrap(),
+        2,
+        "Veterans"
+    ));
+    assert!(!has_rank(
+        &outsider.execute(WorldCommand::Tick).unwrap(),
+        2,
+        "Veterans"
+    ));
 }
 
 #[test]
@@ -223,7 +242,10 @@ fn guild_rank_repeated_same_name_has_source_terminal_for_each_valid_request() {
     for offset in 1..=2 {
         let reply = send(&mut leader, edit(2, "Members"));
         assert_eq!(persisted(&config).revision, before.revision + offset);
-        assert!(source_rank_event(&reply, 2, "Members"), "same name is still a source reply: {reply:?}");
+        assert!(
+            source_rank_event(&reply, 2, "Members"),
+            "same name is still a source reply: {reply:?}"
+        );
     }
 }
 
@@ -236,5 +258,7 @@ fn guild_rank_denied_request_has_no_success_terminal_or_durable_change() {
     let before = persisted(&config);
     let reply = send(&mut member, edit(2, "Forbidden"));
     assert_eq!(persisted(&config), before);
-    assert!(!reply.iter().any(|p| matches!(p, ServerPacket::GuildMemberChange { status: 7, .. })));
+    assert!(!reply
+        .iter()
+        .any(|p| matches!(p, ServerPacket::GuildMemberChange { status: 7, .. })));
 }

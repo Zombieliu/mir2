@@ -728,29 +728,40 @@ fn normal_gateway_purification_survives_real_town_scroll_map_changes_in_both_act
     }
 }
 
-
 #[test]
 fn normal_gateway_private_ticks_cannot_expire_authoritative_curse() {
     let config = fixture();
     let factory = Arc::new(SharedInProcessZoneRuntimeFactory::with_tick_cadences(
-        Duration::from_millis(25), BTreeMap::new(),
+        Duration::from_millis(25),
+        BTreeMap::new(),
     ));
     let registry = ZoneRegistry::new(ZoneId::primary(), factory.clone());
     let (mut friend, _) = login(&config, &registry, "friend", 2);
     let (mut enemy, enemy_id) = login(&config, &registry, "enemy", 3);
-    enemy.try_handle_packet(ClientPacket::ChangeAMode { mode: 5 }).unwrap();
+    enemy
+        .try_handle_packet(ClientPacket::ChangeAMode { mode: 5 })
+        .unwrap();
     let mut cursed = false;
     for _ in 0..12 {
         std::thread::sleep(Duration::from_millis(1_850));
-        assert!(admitted(&magic(&mut enemy, enemy_id, Spell::Curse, 0), Spell::Curse));
+        assert!(admitted(
+            &magic(&mut enemy, enemy_id, Spell::Curse, 0),
+            Spell::Curse
+        ));
         std::thread::sleep(Duration::from_millis(550));
         friend.tick();
-        if zone_player(&factory, "friend").1["buffs"].get("12").is_some() {
+        if zone_player(&factory, "friend").1["buffs"]
+            .get("12")
+            .is_some()
+        {
             cursed = true;
             break;
         }
     }
-    assert!(cursed, "ordinary native Curse did not land in bounded source attempts");
+    assert!(
+        cursed,
+        "ordinary native Curse did not land in bounded source attempts"
+    );
     let original = zone_player(&factory, "friend").1;
     let expires = original["buffs"]["12"]["expires_at_ms"].as_u64().unwrap();
     let started = now_ms();
@@ -762,14 +773,25 @@ fn normal_gateway_private_ticks_cannot_expire_authoritative_curse() {
     let current = zone_player(&factory, "friend").1;
     eprintln!("ordinary private tick clock: calls=40 elapsedMs={} actualCurseExpiry={expires} ended={completed}",
         completed.saturating_sub(started));
-    assert!(completed < expires, "the actual pre-expiry interval must be observed");
-    assert_eq!(current["buffs"]["12"], original["buffs"]["12"],
-        "private ticks must neither clear nor renew actual Zone Curse");
-    assert!(!packets.iter().any(|packet| matches!(packet,
-        ServerPacket::RemoveBuff { buff_type: 12, .. })),
-        "personal tick expiry cannot echo an early native removal: {packets:?}");
+    assert!(
+        completed < expires,
+        "the actual pre-expiry interval must be observed"
+    );
+    assert_eq!(
+        current["buffs"]["12"], original["buffs"]["12"],
+        "private ticks must neither clear nor renew actual Zone Curse"
+    );
+    assert!(
+        !packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::RemoveBuff { buff_type: 12, .. })),
+        "personal tick expiry cannot echo an early native removal: {packets:?}"
+    );
     for session in [&mut friend, &mut enemy] {
-        assert!(session.try_handle_packet(ClientPacket::LogOut).unwrap().iter()
+        assert!(session
+            .try_handle_packet(ClientPacket::LogOut)
+            .unwrap()
+            .iter()
             .any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
     }
 }
