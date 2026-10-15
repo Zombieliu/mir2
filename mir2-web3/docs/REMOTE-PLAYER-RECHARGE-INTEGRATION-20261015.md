@@ -1,5 +1,75 @@
 # 远程分支、玩家客户端与充值代码集成（2026-10-15，北京时间）
 
+## 合入后的 followups：安全依赖、构建与基础设施边界（2026-10-15，北京时间）
+
+五远程输入的集成已由 [PR #254](https://github.com/Zombieliu/mir2/pull/254) 以 [`573c4b8abdfd46b9a73ca6487f783db6165b7ac0`](https://github.com/Zombieliu/mir2/commit/573c4b8abdfd46b9a73ca6487f783db6165b7ac0) 合入远程 `codex/windows-player-journey`。下文原集成历史保留原文。本节新增后续分支 `codex/recharge-readiness-followups-20261015` 的本地验证记录：该分支本轮尚未合并、未部署，未来提交、精确 SHA CI 和合入以对应 PR/Actions 为准。
+
+### 安全版本与六份 Web/Admin 变更
+
+| 依赖 | 本轮锁定版本 | 修复依据 |
+| --- | --- | --- |
+| Next.js | `16.4.1` | [2026-10-14 官方安全更新](https://nextjs.org/blog/nextjs-security-update-october-14-2026)；保留受支持的 16.x 安全修复线 |
+| Sharp | `0.35.5` | [librsvg 上游漏洞公告](https://github.com/lovell/sharp/security/advisories/GHSA-wq5f-xc86-pv6w) |
+| PostCSS | `8.5.23` | [不完整路径校验修复公告](https://github.com/postcss/postcss/security/advisories/GHSA-fxqj-rqcc-2cmp) |
+| source-map-js | `1.2.2` | [官方 DoS 修复版本](https://github.com/7rulnik/source-map-js/releases/tag/v1.2.2) |
+| baseline-browser-mapping | `2.11.0` | [官方无效输入处理修复](https://github.com/web-platform-dx/baseline-browser-mapping/releases/tag/v2.11.0) |
+
+Web/Admin 依赖与 tracing 变更涉及六份文件：两应用各自的 `package.json` / `package-lock.json`，以及 Web `next.config.ts`、`scripts/test-standalone-full-pack-tracing.mjs`。Next 自带的 PostCSS/Sharp 已满足安全下限，旧冗余 override 移除；仅增加 source-map-js/baseline 的精确安全下限，Web 原 valibot override 保留。React/React DOM 保持 `19.2.3`；未扩展其余直接依赖版本范围。Sharp 要求的原生依赖闭包随真实 npm 解析更新。
+
+所有安装与构建均使用全新隔离目录、独立 npm cache 和真实物理文件副本。既有 Web `node_modules` 的 15,240 文件/380,652,835B 全量内容摘要前后均为 `27bdcaa4118c16965a02adfdf1c565a9119a9caeecfe639b1e6706fb252109d9`；原 Admin 仍无 `node_modules`，原工作区与既有依赖树未写。
+
+只读核对 [Developer release 配置](../config/developer-release.json) 与 [检查脚本](../scripts/check-developer-release.mjs)：未发现 Next/Sharp/PostCSS 旧版本另行精确锁定；Node `22.18.0`、npm `11.13.0`、Rust `1.89.0`、GitHub CLI `2.96.0` 的工具链锁保持。两应用 lockfileVersion 3 的 name/version/dependencies/devDependencies/engines 五个根字段均与 package 一致。本次静态核对不等于完整 DeveloperEnv 验收通过；本机既有 Crystal 子模块身份与资产缺项失败日志仍保留，未改资产锁来制造通过。
+
+### 直接 standalone 产物与本机实际验证
+
+依据 [Next 官方 output tracing 文档](https://nextjs.org/docs/app/api-reference/config/next-config-js/output) 及本地 `next@16.4.1` 实现，include 路径相对 Next 项目根解析。仅 standalone production 使用 `"/*": ["./node_modules/@img/sharp-*/**/*"]`，纳入实际已安装的原生包与 libvips companion；未安装平台没有匹配项。Next 合并 NFT 的 Set 与 standalone 输出路径的 Set 保证同一文件仅复制一次。现有 full-pack/重媒体排除、编译后审计 hook 和全部原断言保留；测试补上真实 Core manifest 输入，并增加普通/开发关闭、standalone production 开启的正反例。
+
+最终使用此前不存在的 `.next-deps-security-native03` 重新构建，产物未手补：本机 Windows x64 的 Sharp `0.35.5` 原生包完整 8 文件与 fresh npm 源逐文件 SHA 全同；30 个 NFT 有真实原生引用，最终仅 8 条唯一物理路径，所有元数据均由构建规则直接携带。真实 fresh 与 standalone 两侧 SVG 解码、resize、PNG 输出均通过，librsvg 为 `2.63.2`、libvips 为 `8.18.7`。早期仅手补产物的诊断日志保留，不作为最终闭环证据。
+
+以下日志均位于仓库根目录被忽略的 `.mir2-player-qa/followups-20261015/`，仅供本机复核；没有复制为持久 QA receipt，也不代表远程 CI、发布或 GUI 验收。
+
+| 实际验证 | 结果 | 本机日志 |
+| --- | --- | --- |
+| Web/Admin 安装后完整 npm audit | 两边全部严重级别均为 0 | `dependency-web-audit-final01.json`、`dependency-admin-web-audit-final01.json` |
+| Web 全新 standalone 构建 | 严格 TypeScript、13/13 页及原 SHA/NFT hook 通过 | `dependency-web-standalone-build03.txt` |
+| Admin 正常构建 | 严格 TypeScript、22/22 页通过 | `dependency-admin-build01.txt` |
+| 原打包组 / tracing 组 | 59/59 与 8/8，0 失败/跳过；直接新产物 | `dependency-web-package-final04.tap`、`dependency-web-trace-final03.tap` |
+| Sharp 完整闭包 / 真实原生执行 | 8 文件 SHA 一致、NFT 齐全、`manualFilesCopied=0`；SVG→resize→PNG 通过 | `dependency-sharp-native-final02.json`、`dependency-sharp-smoke-final02.json` |
+| Admin 邻接检查 | 7/7、37 个 TSX 按钮检查通过 | `dependency-admin-regressions01.txt` |
+| 既有模块保护 / 六源码副本一致 | 全量模块 SHA 未变；实测副本与六源文件逐字节相同 | `dependency-existing-modules-final02.json`、`dependency-source-six-final01.json` |
+| tracing 规则依据 | 官方 URL 与本地 Next `collect-build-traces.js:443/444/521`、`utils.js:1041/1101/1102` | `dependency-next-tracing-source01.json` |
+
+首次 TLS 建连失败、隔离输入遗漏与原生元数据缺失等旧失败/诊断日志保留；最终采用上述重跑结果，没有降低 audit、NFT、SHA 或文件完整性门禁。
+
+### 冷恢复认证、handoff 账号绑定与 Shared Zone 回归
+
+本轮代码修复下方原集成历史记录的普通密码跨 Zone 被内部 PasskeyLogin 转换风险。`CharacterHandoffCheckpoint` 新增必填 `accountId`；server-only continuation 重新绑定真实 Source D、账号、完整 roster/profile 与 ban 状态后，仅选择目标会话。Gateway 移除 handoff/base 重建时的内部 Passkey 账号转换，不缓存用户密码、不授予 recovery capability、不增加玩家命令；恢复一次、无额外 Login 和完整 revision/UID/journal/history 门禁保留。冷恢复认证 preflight 位于 journal 重放之前；真实 Passkey 首次 provision、被 ban/删除账号、未验证请求和失败 target 回收均独立回归。
+
+Gateway 23/23 覆盖普通密码真实 RPC、完整 File 字节保持、verified batch、base 实际隔离 session 配置/密码、普通 logout 后密码 relogin，以及 Passkey ban/provision/security 和失败目标回收。Simulation 15/15 包含 7 个 handoff 用例、Source 错账号、ban、必填 DTO、真实 Passkey 与无 recovery capability。旧 DTO 与旧 build 按协议 fail closed；gateway/Zone 必须同新版本成对上线，不使用旧 DTO 或内部 Passkey 转换作为兼容回退。本轮尚未部署。
+
+Shared Zone 的 18 处旧 fixture 按 Crystal `92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d` 逐项核对命中、出生与既有 regen 前置/事件时序，保留严格生命值、对象及输出断言。本轮 Shared Zone 战斗侧唯一额外产品改动是 Trap 输出方向由 caster 方向改为 `Up`；`param=false` 原产品已正确，本轮保留该值并修正旧 fixture，对应 Crystal `Server/MirEnvir/Map.cs:2079–2089`、`Server/MirObjects/SpellObject.cs:18/542–548` 与 `Shared/Enums.cs:835`（`Up=0`）的默认字段；未扩展其余战斗公式。
+
+**已知差异仍开放：**Spider 测试独立区分当前 Zone 既有自然 regen（3000ms、3%+1）；Vampire 验证 1000ms 计划时刻不结算，下一毫秒才结算一次真实吸血池。Crystal `HumanObject.cs:186` 的 `RegenDelay=10000`；本地 `zone/runtime.rs:281–282/2757` 仍保留既有差异。本轮只校正旧测试前置与观察时序，不能据 18 个场景或 209 项通过宣称自然再生时钟及全部战斗规则已 1:1。13 个 Sabuk 重合商人的 durable 税款仍为 BeforeExecution 无副作用拒绝。
+
+以下仍为同一 ignored 本机日志目录内的分组证据，不相加为整体 parity 或新发布验收：
+
+| 本轮实际验证 | 结果 | 本机日志 |
+| --- | --- | --- |
+| Gateway 认证 / 真 RPC / 目标回收 | 23/23，0 失败/忽略 | `gateway-auth-regression05.txt` |
+| Simulation 认证与 handoff | 15/15，含 7 handoff，0 失败/忽略 | `simulation-auth-regression04.txt` |
+| Shared Zone 全组 | 209/209，0 失败/忽略 | `shared-zone-final02.txt` |
+| Rust 1.89 格式检查 | exit 0 | `candidate-rustfmt-189-final01.txt` |
+| 完整 resource-loading npm 脚本 | 实际重新生成 115,408 个资源后验证通过；本机 manifest 按运行前字节还原 | `resource-loading-full03.txt` |
+| Windows 功能 profile 重编 / 默认并发全 host | 重编 41.65s；1138 passed、0 failed、原 7 ignored，7.70s | `windows-host-build02.txt`、`windows-host-parallel02.txt` |
+
+Windows 仅修 `cfg(test)` effect store 的跨线程观察与统一 native queue 测试 guard，生产实现保持。CI 默认并发未改为串行，未增加 ignore。先前默认并发的 4 个失败与串行诊断日志 `windows-host-parallel01.txt`、`windows-host-three-serial01.txt` 仍保留，最终独立 `parallel02` 取代先前失败结论。resource-loading 也未将本机临时重生的 manifest 或资源数量记成新资产发布。
+
+### 基础设施与未完成关口
+
+Docker 源码闭包静态检查通过，覆盖 11 个可达 Cargo manifests 与 24 个 manifest/入口输入，核对 client-wire/client-core/ui-core 的 COPY 和 `.dockerignore` 包含关系；日志为 `docker-source-closure02.txt`。Developer Bevy schema2/legacy immutable runtime lock 检查为 17/17、0 失败/跳过（`developer-bevy-lock-tests01.txt`）；R2 发布安全检查在合法上下文中 19/19（`asset-release-safety02.txt`）。本机缺少 Docker daemon 的 Linux engine 管道，尚无镜像构建、容器运行或隧道执行通过证据；这些源码检查也没有发布镜像或上传资源。
+
+本轮上述后端与 Windows 本地结果已由 Root 确认；新 SHA CI 与新代码真 PG 仍待执行。旧 PR #254 / `573c` 的 PG 证据只对应旧代码，不能替代新增账号绑定/认证门禁后的真 PG 验证。测试服务器健康检查仍记录正常，线上为 `bad3737f265b0547d838382c2bb3592caa5dcb31` / Stripe TEST；本轮 followups 未部署。新完整签名包、资源/网关成对发布、GUI、移动真机与最终人类验收仍开放，`Candidate100=false`。
+
 本轮按用户授权，在独立集成工作树整合五条远程代码线，集成分支为
 `codex/player-recharge-integration-20261015`。**冲突处理和本地验证完成；
 最终提交、精确 SHA CI与合入状态以本轮 PR和 Actions为准。**
