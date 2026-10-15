@@ -4,6 +4,8 @@ WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY apps/admin-api ./apps/admin-api
 COPY apps/dubhe-node-desktop/src-tauri ./apps/dubhe-node-desktop/src-tauri
+COPY apps/game-client/client-core ./apps/game-client/client-core
+COPY apps/game-client/client-wire ./apps/game-client/client-wire
 COPY apps/game-client/ui-core ./apps/game-client/ui-core
 COPY apps/gateway ./apps/gateway
 COPY apps/simulation ./apps/simulation
