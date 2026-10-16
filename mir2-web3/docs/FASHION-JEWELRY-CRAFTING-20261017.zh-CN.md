@@ -2,7 +2,7 @@
 
 用户已确认：**时装只改变外观，不增加战斗属性；制作首饰沿用原版道具属性**。本轮代码和验证位于独立本地候选中，制作服务默认关闭，尚未部署。代码候选 `fd21fbdc38c110289e8e92bcb6105d452c8b2db1` 的 Native/Gateway 两端构建已成功，均为exit0、原Guard/audit接受、1453行0漂移，实际EXE长度/SHA与artifact收据匹配；这完成本轮配套构建，不代表安装或实机验收。
 
-数据crate第二轮72通过与Simulation有界组87通过分别绑定 `174269caf8`；Native完整lib1582通过、host focused6通过、Gateway有界组10通过及两端build绑定 `fd21fbdc38`。完整Windows host仍为1139通过/1失败/7原忽略，最后失败已确认为既有安装资源缺口，不能称全绿。用户physicalEsc后GUI输入已停止，runtime06未启动，真PostgreSQL未执行。`Candidate100=false`，不据此上调整体1:1百分比或标记人类验收完成。
+数据crate第二轮72通过与Simulation有界组87通过分别绑定 `174269caf8`；Native完整lib1582通过、host focused6通过、Gateway有界组10通过及两端build绑定 `fd21fbdc38`。前序fd21完整Windows host的1139通过/1失败/7原忽略保留为历史；资源修复轮 `53700985cf98f1a4aa479e763f3b27ba3c68053b` 在新的独立QA资产根上完整1140通过/0失败/7原忽略，已关闭该测试关口。原D安装基底未改，不代表全局资产包更新。用户physicalEsc后GUI输入已停止，runtime06未启动，真PostgreSQL未执行。`Candidate100=false`，不据此上调整体1:1百分比或标记人类验收完成。
 
 本轮持久化脱敏摘要入口：[原SHA与结果摘要](generated/player-qa/fashion-20261017/outcomes.json)、[既有安装资源缺口摘要](generated/player-qa/fashion-20261017/host-asset-gap.json)，由Root整理并随最终文档提交归档；摘要只记录原SHA/结果及证据摘要，不是原始完整日志。后续doc-only提交仅安排缓存产物指纹一致性复核，不将它描述为新HEAD重新执行这些测试。
 
@@ -50,12 +50,14 @@
 | `simulation-tests01` | **87 passed / 0 failed / 1 原 PG ignored / 2861 filtered**；测试1065.43s，编译另4m02s；exit0，原 Guard audit accepted | 同一 `174269caf8b909c20e0d5ba26cffcfbf032c193c`；`simulation-tests01/cargo.log`、`result.json`、`receipt-audit.json`；1453 行、0 source drift |
 | `native-tests01` | **编译失败：2处 E0624，零测试执行**；exit101，未接受 | 同一 `174269caf8b909c20e0d5ba26cffcfbf032c193c`；`native-tests01/cargo.log` 与原 `result.json` 保留；不能记作 Native 测试通过 |
 | `native-tests02` | **完整 lib：1582 passed / 0 failed / 14 原 ignored**；测试14.79s，编译3m02s；exit0，原 audit accepted | `fd21fbdc38c110289e8e92bcb6105d452c8b2db1`；`native-tests02/cargo.log`、`result.json`、`receipt-audit.json`；1453 行、0 drift |
-| `native-host-tests01` | **完整 suite：1072 passed / 68 failed / 7 原 ignored**；未全绿 | 同一 `fd21fbdc38`；`native-host-tests01/cargo.log` 与原结果保留；默认稀疏资源问题待分项核实 |
-| `native-host-tests02` | **完整 suite：1139 passed / 1 failed / 7 原 ignored**；测试17.10s，仍未全绿 | 同一 `fd21fbdc38`；通过既有 `MIR2_NATIVE_ASSET_ROOT` 显式选择本地正式只读资产根；`native-host-tests02/cargo.log` 与原失败结果保留 |
+| `native-host-tests01` | **历史完整 suite：1072 passed / 68 failed / 7 原 ignored**；当轮未全绿 | 同一 `fd21fbdc38`；`native-host-tests01/cargo.log` 与原结果保留；默认稀疏资源问题待分项核实 |
+| `native-host-tests02` | **历史完整 suite：1139 passed / 1 failed / 7 原 ignored**；测试17.10s，当轮未全绿 | 同一 `fd21fbdc38`；通过既有 `MIR2_NATIVE_ASSET_ROOT` 显式选择本地正式只读资产根；`native-host-tests02/cargo.log` 与原失败结果保留 |
 | `native-host-focused03` | **6 passed / 0 failed / 0 ignored / 1141 filtered**；测试0.00s；exit0，完整原 Guard accepted | 同一 `fd21fbdc38`；runner03/正式只读资产根；`native-host-focused03/cargo.log`、`result.json`、`receipt-audit.json`；1453 行、0 drift |
 | `gateway-tests01` | **10 passed / 0 failed / 0 ignored / 1170 filtered**；测试79.50s；exit0，完整原 Guard audit accepted | 同一 `fd21fbdc38c110289e8e92bcb6105d452c8b2db1`；low_latency 7项 + 既有 shared_player_appearance 3项；`gateway-tests01/cargo.log`、`result.json`、`receipt-audit.json`；1453 行、0 drift |
 | `native-build01` | **构建exit0，receiptAccepted / productAccepted / 原audit accepted均true**；完整生命周期，1453行、0 drift | 同一 `fd21fbdc38c110289e8e92bcb6105d452c8b2db1`；`native-build01/result.json`、`receipt-audit.json`及原日志；实际 `mir2-platform-windows.exe` 为131208192B，SHA见下文 |
 | `gateway-build01` | **构建exit0，receiptAccepted / productAccepted / 原audit accepted均true**；完整生命周期，1453行、0 drift | 同一 `fd21fbdc38c110289e8e92bcb6105d452c8b2db1`；`gateway-build01/result.json`、`receipt-audit.json`及原日志；实际 `mir2-gateway.exe` 为123352064B，SHA见下文 |
+| 弓手资源轮 `archer-focused01` | **原失败exact：1 passed / 0 failed / 0 ignored / 1146 filtered**；测试0.02s；exit0，原Guard/audit accepted | `53700985cf98f1a4aa479e763f3b27ba3c68053b`；新QA `archer-assets-20261017`；1549行、0 drift，95项overlay前后hash不变 |
+| 弓手资源轮 `native-host-full01` | **完整host：1140 passed / 0 failed / 7 原 ignored / 0 filtered**；测试19.54s；exit0，原Guard/audit accepted | 同一 `53700985cf98f1a4aa479e763f3b27ba3c68053b`；独立QA资产根；1549行、0 drift，95项overlay前后hash不变 |
 
 已只读核对 `native-build01` / `gateway-build01` 的原 `result.json`、`receipt-audit.json` 和实际EXE：source均为 `fd21fbdc38c110289e8e92bcb6105d452c8b2db1`，构建及审计exit0、完整生命周期、1453行0漂移。两份实际文件的长度/SHA与原artifact收据一致：
 
@@ -66,11 +68,13 @@
 
 两端已按单Cargo通道顺序构建完成，尚未启动runtime06或GUI；后续文档提交不改变以上实际构建的原source SHA。
 
-Windows host 首轮多项失败表现为 sparse 工作树缺完整 resources / fallback 帧；显式指定正式资产根后，既有正式入口诊断的20项门槛保持严格，完整重跑只余 `effects::tests::archer_normal_arrow_and_focus_catalog_follow_exact_source_frames` 一项。独立只读定位已确认：本地既有安装资源包缺 Magic3 普通箭80张帧（`1030 + 10*d + [0..4]`，`d=0..15`）及 Focus 的 `2730..2739` 共90张PNG与对应metadata，安装包 `effects.generated` 中这两个effect均为0条；仓库90张均存在且逐项SHA匹配。`effects.rs`、`main.rs`、`assets.rs` 与旧 `a455` 源SHA完全一致，因此该最后失败定位为既有安装资源覆盖缺口。针对该失败未修改资产、帧断言或增加ignore，完整suite仍为1139/1/7，不能写成全绿。
+前序fd21 Windows host首轮多项失败当时表现为 sparse 工作树缺完整 resources / fallback 帧；显式指定正式资产根后，既有正式入口诊断的20项门槛保持严格，完整重跑只余 `effects::tests::archer_normal_arrow_and_focus_catalog_follow_exact_source_frames` 一项。当轮独立只读定位确认：本地既有安装资源包缺 Magic3 普通箭80张帧（`1030 + 10*d + [0..4]`，`d=0..15`）及 Focus 的 `2730..2739` 共90张PNG与对应metadata，安装包 `effects.generated` 中这两个effect均为0条；仓库90张均存在且逐项SHA匹配。`effects.rs`、`main.rs`、`assets.rs` 与旧 `a455` 源SHA完全一致，因此该最后失败定位为既有安装资源覆盖缺口。当轮只定位而未修改资产、帧断言或增加ignore，完整suite结果1139/1/7作为历史保留，不将其改写为通过。
 
 本机缺口审查证据为 `host-asset-gap-review.json`，SHA256 `c7cf8de4f98f0141bf0fed653c100b0ce56c2b857ee4f2809efc17b6b14560cf`；它仍属于上述 ignored QA目录的本机证据。本文不复制其原始路径清单或大日志；持久化脱敏版本入口为[资源缺口摘要](generated/player-qa/fashion-20261017/host-asset-gap.json)。
 
-随后独立执行的 `native-host-focused03` 通过6项：2 cosmetic + 2 cursor + 1 wing + 1 weight，0失败/0忽略、1141过滤，原Guard/audit接受、1453行0漂移。它确认这些有界用例在正式资产根下真实通过，不替代仍失败的完整host suite。
+本轮53700985另以只读安装基底生成新的 `.mir2-player-qa/archer-assets-20261017/assets`，补入90张真实PNG、对应metadata/Source配置（2个JSON）及3个真实WAV，共95个overlay文件；原D基底244项文件未变。这是在指定独立QA资产根上的资源闭包和测试修复，不是修改原安装包或完成全局发行资源更新。原失败exact与完整host两次新调用均exit0/原Guard接受、1549行0漂移，95个overlay文件前后hash相同。最小修复范围见[弓手资源修复说明](NATIVE-ARCHER-ASSET-FIX-20261017.zh-CN.md)，实际新SHA/结果见[脱敏收据](generated/player-qa/archer-assets-20261017/outcomes.json)。
+
+随后独立执行的 `native-host-focused03` 通过6项：2 cosmetic + 2 cursor + 1 wing + 1 weight，0失败/0忽略、1141过滤，原Guard/audit接受、1453行0漂移。它确认这些有界用例当时在正式资产根下真实通过，不替代当轮失败的完整host suite；后续修复的完整通过另绑定53700985记录。
 
 Native 首轮错误来自 `atelier_ui` 两处 `cfg(test)` 期望跨模块调用私有 `QuestLogRect::new`。Root 仅将这两处期望改为相同数值的 public 字段 literal，提交 `fd21fbdc38c110289e8e92bcb6105d452c8b2db1`；生产、数据和后台源码与 `174269caf8` 完全相同，未公开私有构造器、未放宽断言。两处 literal 修复另经独立只读复核，确认期望值和断言语义未变。`native-tests02` 已在该新头完成完整 lib 1582/0/14原忽略；原有数据/Simulation 收据继续按各自原 SHA 记录，不改标为新头测试。
 
@@ -83,10 +87,10 @@ Native 首轮错误来自 `atelier_ui` 两处 `cfg(test)` 期望跨模块调用�
 <!-- fashion-acceptance-pending:start -->
 | 关口 | 当前状态 | 后续只按真实结果补充 |
 | --- | --- | --- |
-| 源码与交付SHA | 代码候选 `fd21fbdc38` 已独立复核并以1453行冻结；文档提交由Root收束 | 数据/Simulation保持174原SHA，Native相关/Gateway/build保持fd21原SHA；后续doc-only只做缓存产物指纹复核，不冒充新头测试 |
+| 源码与交付SHA | 前序代码fd21为1453行；本轮资源修复53700985为1549行，分别保留原收据 | 数据/Simulation保持174原SHA；Native lib/旧host/Gateway/build保持fd21原SHA；新弓手exact/完整host绑定537原SHA，后续doc-only不改标执行版本 |
 | Simulation 本轮有界回归 | **已完成：87 passed / 0 failed / 1 原 PG ignored / 2861 filtered** | `simulation-tests01`，绑定 `174269caf8`；19 atelier、6 fashion 和相邻回归，原 Guard accepted / 1453 行 / 0 drift；不代表整套 simulation 全绿 |
 | Native UI 回归 | **已完成完整 lib：1582 passed / 0 failed / 14 原 ignored**；首轮编译失败保留 | `native-tests02` 绑定 `fd21fbdc38c110289e8e92bcb6105d452c8b2db1`；exit0 / 原 audit accepted / 1453 行 / 0 drift；GUI 另待验收 |
-| Windows host 回归 | 两次完整 suite 均未全绿：01为1072/68/7；02为1139/1/7；独立focused03为6/0/0，1141过滤 | 同一 `fd21fbdc38`；focused原Guard accepted / 1453行 / 0 drift；唯一完整组失败已确认既有安装资源缺90张Magic3/Focus PNG及metadata，未改资产/断言/ignore |
+| Windows host 回归 | **本轮537已完整1140/0/7，0过滤；原失败exact另1/0/0，1146过滤**；旧fd21两次失败与focused03保留为历史 | 独立QA overlay补90PNG+2JSON配置/metadata+3WAV；原Guard/audit accepted / 1549行 / 0 drift，95文件前后hash不变，原D基底未改；不代表GUI或全局资产包更新 |
 | Gateway 测试 | **已完成有界组：10 passed / 0 failed / 0 ignored / 1170 filtered** | `gateway-tests01` 绑定 `fd21fbdc38`；low_latency 7 + 既有 shared_player_appearance 3；原 Guard accepted / 1453行 / 0 drift；不是GUI或完整Gateway suite验收 |
 | 当前候选 Native/Gateway 成对构建 | **已完成两端build01，均exit0、原Guard/audit接受** | source同fd21、各1453行0漂移；Native131208192B/Gateway123352064B及完整SHA如上，实际bin与收据匹配；runtime06/安装/GUI另待执行 |
 | 普通玩家 GUI、保存与重登 | 未执行；检测用户 physicalEsc 后已停止全部 GUI 输入，runtime06 未启动 | 普通登录建角、自然材料来源、Alice 制作、穿戴/卸下、真实装备/属性不变、结果和持久化；旧客户端选择不计新候选验收 |
@@ -94,7 +98,7 @@ Native 首轮错误来自 `atelier_ui` 两处 `cfg(test)` 期望跨模块调用�
 | 发布、线上部署、人类验收 | 未执行 | 独立发布和玩家验收结果；本轮本地准备不构成发布许可或完成证明 |
 <!-- fashion-acceptance-pending:end -->
 
-Windows Computer Use 可用；在选择既有旧客户端期间检测到用户 `physicalEsc`，Root 已停止全部 GUI 输入。本轮没有新的 GUI 验收，也未启动 `runtime06`；该停止原因不记为工具不可用或实机通过。本轮代码测试与配套构建的已完成范围见上表；完整host仍失败，GUI和真PG仍待验收。
+Windows Computer Use 可用；在选择既有旧客户端期间检测到用户 `physicalEsc`，Root 已停止全部 GUI 输入。本轮没有新的 GUI 验收，也未启动 `runtime06`；该停止原因不记为工具不可用或实机通过。本轮完整host已在新QA资产根通过；GUI、真PG、部署与全局资源分发仍未验收。
 
 Root 另以 `runtime-map-asset-baseline.json` 重新只读计算真实哈希：地图 `0`、`0103`、`d401` 的 D 盘客户端资源与当前 source 完全相同。该记录仅证明所列地图静态字节一致，不作为当前候选成对 build 或 GUI 的执行证明。
 

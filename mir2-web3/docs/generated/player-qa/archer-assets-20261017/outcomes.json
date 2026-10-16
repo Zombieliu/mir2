@@ -1,0 +1,998 @@
+{
+  "schema": "mir2.native-archer-fix-outcomes.v1",
+  "recordedUtc": "2026-10-16T20:06:09.476555+00:00",
+  "head": "53700985cf98f1a4aa479e763f3b27ba3c68053b",
+  "sourceFix": "mir2-web3/scripts/prepare-native-archer-overlay.mjs",
+  "sourceFixSha256": "92b61b1eebd69f11a0a6c6a8e9fafcd911cdfcb965661a42150e3c5c3a6b701b",
+  "originalEvidenceRoot": ".mir2-player-qa/archer-assets-20261017",
+  "assetRoot": ".mir2-player-qa/archer-assets-20261017/assets",
+  "historicalFailure": {
+    "evidence": "../fashion-20261017/host-asset-gap.json",
+    "head": "fd21fbdc38c110289e8e92bcb6105d452c8b2db1",
+    "passed": 1139,
+    "failed": 1,
+    "ignored": 7,
+    "preserved": true
+  },
+  "assetRepair": {
+    "schema": "mir2.archer-overlay-validation.v1",
+    "accepted": true,
+    "receiptSha256": "755bd88f877ee943f151764171c4a2f7ffc9aee58552b074f7e9767775fb8cd0",
+    "patchSha256": "4cb0d621ef06baa497e1456c12c1dd5cd8d1a9f7a61b8f39b06d060f8a31398e",
+    "pngs": 90,
+    "pngBytes": 135969,
+    "fullyDecodedPngs": 90,
+    "rgbaHashesMatched": 90,
+    "soundCount": 3,
+    "soundBytes": 319900,
+    "baseSoundCount": 62,
+    "overlaySoundCount": 65,
+    "oldFrameRecords": 179,
+    "newFrameRecords": 269,
+    "libraryCount": 7898,
+    "oldClientEffects": 10,
+    "newClientEffects": 12,
+    "exactProductionSourceEntries": 2,
+    "unrelatedEffectRecordsPreserved": true,
+    "baseFilesUnchanged": 244,
+    "inputsUnchanged": true,
+    "physicalWritableBranches": true,
+    "directoryAliasesVerified": 38,
+    "guiExecuted": false,
+    "deployed": false
+  },
+  "resourceClosure": {
+    "frames": [
+      {
+        "path": "original-effects/Magic3/1030.png",
+        "length": 756,
+        "sha256": "60199c4db417dc3e244a14a16accbc9f87750c08d9073ce2b232b543a11b4838",
+        "rgbaSha256": "ed0699090efacd504a77713d13c564738a50ed1f14f76a1a5d3a446de28f3177",
+        "width": 12,
+        "height": 60,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1031.png",
+        "length": 809,
+        "sha256": "f2adbbcc2cafab2777c4dd4f6b257bf8a9f7fb4f2c35c701000dc026015c6837",
+        "rgbaSha256": "4c06cefbcc8d8aa77bc5d94bafa6727c4a086d9ca169cf6f6af4ffc0450e1486",
+        "width": 12,
+        "height": 64,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1032.png",
+        "length": 770,
+        "sha256": "4267f08142c1ef368a2b702384d38ec762daf56c32468045b23e1c5b61bd8ccb",
+        "rgbaSha256": "2b5513754f663f8c9122c252a18afaa06265bcde9c4eaff76e2d47ec0a8ea990",
+        "width": 12,
+        "height": 60,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1033.png",
+        "length": 805,
+        "sha256": "684d91da3a7d847155b6429eeecc74c8c6975b498f9285d4a09f1cf993310508",
+        "rgbaSha256": "c1e48aef2ec5c4f30cf7112138338e5d0c06f82b94232011a3786174efe08dc5",
+        "width": 12,
+        "height": 64,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1034.png",
+        "length": 774,
+        "sha256": "d78ad6f6044acf693c1c9825e9aca5c411934176312c9727dfa040d6a285ab30",
+        "rgbaSha256": "eeb1dbc3b95bed8f26f7501eb2c2c44670d63f9405ae6955e8be95f1c605f1fb",
+        "width": 12,
+        "height": 61,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1040.png",
+        "length": 836,
+        "sha256": "b7c44120a1dc213c7b7d93828fb0e10a8a2cb5413b9da2000b8cd85044eff48e",
+        "rgbaSha256": "ee0dfb0dcc02a53386ca0d4ca8f1c0f837428d2769a1d9105e5519525abddc59",
+        "width": 40,
+        "height": 55,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1041.png",
+        "length": 885,
+        "sha256": "dcf46edd3b3302e49f779690b3d77cbee97c0029cd24be5eb9d7f18e35a787b8",
+        "rgbaSha256": "6d43fb3fb2963b1ab807ec449c4aca82d9bcdb96a3dfbd8c91350a1525d3bc41",
+        "width": 40,
+        "height": 58,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1042.png",
+        "length": 835,
+        "sha256": "a4e2fb4b979a29d724a75133513379f2f48fbdbd3bd2eff2005cf5e98d88df62",
+        "rgbaSha256": "9c1ab360da055148e189e084c706aadfb3e8758f1f0de7bfed2b09e7d07ce6c1",
+        "width": 36,
+        "height": 54,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1043.png",
+        "length": 911,
+        "sha256": "f28cd2f0a1637d5390bdc95c6602c4fc5b643fe4fd73894d08ca7ae5a14c4347",
+        "rgbaSha256": "0dfd51ab43dd190dfbb3515ebc53f747c9f6e65272f9622c08e7dc7754e7b983",
+        "width": 40,
+        "height": 58,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1044.png",
+        "length": 857,
+        "sha256": "028a99963afbb755a2a48629309b417b9bd7bdc706f754f95bd9f0a343cbb48e",
+        "rgbaSha256": "c0bfa348915d67ce7fabb97737bbbec4320edefc609750d092c797c6f2db6cf4",
+        "width": 40,
+        "height": 56,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1050.png",
+        "length": 810,
+        "sha256": "517d64dafad54d6f94817d9fbd25c7fec4c16e317efe2cbbc6637beed19c1114",
+        "rgbaSha256": "5c6235de6c26a8c5028baf25834fc12309f8c039fd549a6d07c94ff4fc2999ea",
+        "width": 64,
+        "height": 41,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1051.png",
+        "length": 912,
+        "sha256": "c4af30e37e14a10bbf78821bbdb411f404457bd5b89530a783ebf4382cc256b1",
+        "rgbaSha256": "a07ac2820aef915ba277f08e96770fd6c11b345a16dd9841dbb36bc5131d55a0",
+        "width": 68,
+        "height": 45,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1052.png",
+        "length": 852,
+        "sha256": "7a9c505b96fc465dd78f44b0d9c8b92678423079c50a0f214ec953d5af20e425",
+        "rgbaSha256": "e89b7ba4af2ad62c77d82f647b09f9ad4e09a44e771d0f6d4bffd387e233962b",
+        "width": 68,
+        "height": 42,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1053.png",
+        "length": 884,
+        "sha256": "1b4bbe34d2a5e71fe72975ac98b0fd8356ff3fe4af3244321565bc90e253a3ae",
+        "rgbaSha256": "b5a155ce87ca2ea8858d9723f8085e495c5560641a5d9c8f0b0d9707e91693e6",
+        "width": 68,
+        "height": 46,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1054.png",
+        "length": 858,
+        "sha256": "90f445b320ea65fa93943931a182b759e9972333825e7bca31ca43bcea117c36",
+        "rgbaSha256": "6117c0f793dcb98958354291f1deaf0f8344f6114ced0467568a7eb049b3ad0b",
+        "width": 68,
+        "height": 43,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1060.png",
+        "length": 753,
+        "sha256": "80459d01fa86399232b0aa53101f1cb957eb339d4e6923f00b76b8f01349a222",
+        "rgbaSha256": "42a380cfcccd14da4b67512a60fa18196bc95afba6653d6755112c11d8185601",
+        "width": 80,
+        "height": 22,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1061.png",
+        "length": 828,
+        "sha256": "8a2001614eeb76577c80a3755cf62e72cc77c7fba79a323b7456b573b3104eb2",
+        "rgbaSha256": "cfc3e5c52a6b2373dd963820b729e78f99e55730cfa902498c5605b09285ec9b",
+        "width": 88,
+        "height": 25,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1062.png",
+        "length": 761,
+        "sha256": "a0eb2de5744e85fe6b3df8e8363653d80c20ca559655eec68ea391ac9b557477",
+        "rgbaSha256": "af04e75c577abde19f2c716bcc4c19da294b7ad6a42f5ec769dccbdd2d666c68",
+        "width": 80,
+        "height": 22,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1063.png",
+        "length": 864,
+        "sha256": "23b873216c857d252ddea596cd718bc45641375c29869812121b5a3c588c6503",
+        "rgbaSha256": "eae1e3f1cef8383dc6e5d6dbaa836224e71315a5ffef25e38567790b747b88bc",
+        "width": 88,
+        "height": 25,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1064.png",
+        "length": 796,
+        "sha256": "b020d59bf2c6f2ae8deeb8cedd0bdaa5710281686b397bf05a46f2ce09c56981",
+        "rgbaSha256": "d5a3b35ebe55041c5d08724c15d3cccdf3fbd2768b86f4832f0d13a3fb1a75a0",
+        "width": 84,
+        "height": 23,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1070.png",
+        "length": 672,
+        "sha256": "f3f7e4cd28593dbf43995981c7c528476637d63e8f5750e6bafd2f49f7320f3a",
+        "rgbaSha256": "09b63d6a06fb523b1fdf4cf8491ea44988d43ef04e0163b7eb142701f8761761",
+        "width": 84,
+        "height": 7,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1071.png",
+        "length": 690,
+        "sha256": "46fe80b06ea667db2ec75088358e19d600267c68c5f72fcb3d7fe52449d0fa40",
+        "rgbaSha256": "32818b09dff881601c45500398e29904a404b6e0cd09832dc362d9b7d76e68c5",
+        "width": 92,
+        "height": 7,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1072.png",
+        "length": 666,
+        "sha256": "ee2f778579b4e7b4f9095403bf4db21d2e1d7beffca53cf5bc3173887168bee8",
+        "rgbaSha256": "d0c33983f0ca24ee23dae795647a3688c1b61d022b778c475b7327f8188f995a",
+        "width": 88,
+        "height": 7,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1073.png",
+        "length": 697,
+        "sha256": "e69a53b7edbd4c3ca0908c0e82622b67e9b60713be077d3adbe2b45526f0b826",
+        "rgbaSha256": "6d3ec9e7ab9dc676f5cb6afaab4dd35408eadbdd01e6e7f309d8a18bd1a91b70",
+        "width": 92,
+        "height": 7,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1074.png",
+        "length": 687,
+        "sha256": "8bbecbe96967dce74e06b5735088a150fb51dce6ee2ad2834ef5547bb23d07bd",
+        "rgbaSha256": "6f3ed95606e93cce1cb01a8b838bd37d5a6e3f61d6b4022987473ab27c8e4410",
+        "width": 88,
+        "height": 7,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1080.png",
+        "length": 812,
+        "sha256": "119dd6f117400109d6e00a98d34db8c89fe8eb45b631ee9edc55ef10abfdb8f1",
+        "rgbaSha256": "6b5b6d63cca560f62a7273760b51a5ab69f177ee13df260d3cc25170a437211a",
+        "width": 80,
+        "height": 24,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1081.png",
+        "length": 877,
+        "sha256": "7c72c303d27c27f4be98844e7dc624548f6a495361e467efab2753fb47c05ee9",
+        "rgbaSha256": "367a2a16b816e84f27653abb0580935caf43361359121b1d717809ecd0f75c3c",
+        "width": 84,
+        "height": 25,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1082.png",
+        "length": 820,
+        "sha256": "fde0d04815a765ce8dc9dc9657723eaa38e0e8f9bba5e3fecdae395978504d87",
+        "rgbaSha256": "290bce0da2d9595dcbc0abe1aa0704afbfc68c2dcbbf26174f21fc371c3cc131",
+        "width": 80,
+        "height": 24,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1083.png",
+        "length": 862,
+        "sha256": "c2e1ed36a25e517ed89bb73bc8d92226199c4c512d0ba25e91368040f1adc554",
+        "rgbaSha256": "1798030ae87d7cbf957551ed22042de71c6771d9c1eab76efd72d4b91592fe8a",
+        "width": 88,
+        "height": 24,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1084.png",
+        "length": 847,
+        "sha256": "bac95c7f7a9d13f3b498799a5213fe6d7629208ae7c87ca09ab7ccdacbdbc435",
+        "rgbaSha256": "05483c93658aec53619f108408efff78ba6f8fd158d5645acc28c60987c199ff",
+        "width": 84,
+        "height": 24,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1090.png",
+        "length": 830,
+        "sha256": "f01d0fc471eeb77a0ef6539c7fbcb7613c8f6cbf40417e732eeabd9ec1b7c587",
+        "rgbaSha256": "49e5cd2f236ecd8154f95c490db122b0b85377e809d5ae7db3a9a2b117ec030c",
+        "width": 64,
+        "height": 42,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1091.png",
+        "length": 873,
+        "sha256": "166cc661edf00bc1bbb1b29644423dca52338f07a901bc55850b983083ff3835",
+        "rgbaSha256": "70153d6328e08631024790a4562ce9f5e2a7ef09f07b0eb5ff06d36b1b3a6f58",
+        "width": 68,
+        "height": 44,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1092.png",
+        "length": 818,
+        "sha256": "1510dc2ca4bb6301c05e0b439335bc07ae66b1d2df2830414855e8839e774854",
+        "rgbaSha256": "5c47659a460a736ab1890a2944e63737b1591d6d19b4fe4f47290eca80190a95",
+        "width": 64,
+        "height": 43,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1093.png",
+        "length": 845,
+        "sha256": "f8cce7519016600ce1411de7a55d85b16b587fe880f9371d6f66707b283fc4bb",
+        "rgbaSha256": "75026eb93538a0c0676aaf43ca149cee19b385ceaba3cc8aa3285f6cd678d86e",
+        "width": 68,
+        "height": 44,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1094.png",
+        "length": 849,
+        "sha256": "587658dffc752d6aaf1400856518597612b14219d73cea0d570e6e57301189c2",
+        "rgbaSha256": "62277adcfebc31dafea1e1236880216f6cce1cac9d9e0f373aaa39446690c8de",
+        "width": 68,
+        "height": 45,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1100.png",
+        "length": 871,
+        "sha256": "40ddcecc0bc4659bf1751e1d80efdcdc66fd061cf4e8b5cc525cc4b2a7dd06f0",
+        "rgbaSha256": "3aaea48d49831bc5719f15fe04b6a8cfcf0754d5243f6801d67663a7b47eb9c6",
+        "width": 40,
+        "height": 56,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1101.png",
+        "length": 855,
+        "sha256": "f0f4baea3c905b30f9eabe29077ce29902f9330ed8460b4df16784cbe9abcf51",
+        "rgbaSha256": "5418877f59931411ee28526e01e1d3f3b62352832995c709c20cfaace7a7cf86",
+        "width": 40,
+        "height": 58,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1102.png",
+        "length": 887,
+        "sha256": "80d07b5e98c2386d002aa2c181c362aa314b55ec6c14fc9347e873571bafa66d",
+        "rgbaSha256": "18c304da38831f00cdb536d37264e13c29a206bcc6ce9cb0123bc0ad99dc9b87",
+        "width": 40,
+        "height": 55,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1103.png",
+        "length": 883,
+        "sha256": "11a9092ac7f91da55f20598c95922e9c4349da7a280c1964e701be8be9e9114c",
+        "rgbaSha256": "117947393244580063a096b6ca15f399ecaffc8d10696c915ba7bd0bc06112b7",
+        "width": 40,
+        "height": 58,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1104.png",
+        "length": 893,
+        "sha256": "3e9327aabc6b89fe08b40281549d08364bd70be144c8ba413582f8d19894afe9",
+        "rgbaSha256": "5fcae134fb1e80c409e3ea4f80a90de1caf48a1d425d86fef9a85a7e12293e2e",
+        "width": 40,
+        "height": 57,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1110.png",
+        "length": 734,
+        "sha256": "8c99712c5684ef3c0026be954f1da4a89f9f98734cd666f37b9e96ec601d9d32",
+        "rgbaSha256": "14689905c7ebd373bc65c6d507c2754f23ffa656e4ee4b4ade90b692bcd04e11",
+        "width": 12,
+        "height": 60,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1111.png",
+        "length": 727,
+        "sha256": "faa25b8a7dfe4ee7a674043891ce3d4a0b04eb2d86605c64f6d950983892203f",
+        "rgbaSha256": "5c8db3f1dda07b8804f196d41a79b45e9798004f8df914341812097d436bdb06",
+        "width": 12,
+        "height": 60,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1112.png",
+        "length": 726,
+        "sha256": "8c7ace7b377d280ff4203bac00a9826a5e675ee82f7f3995d8c82e6b2cc60acc",
+        "rgbaSha256": "5fb581ce8e9a7d624c8eb60498c19ab8a2285158c5f350240e326419c95e261e",
+        "width": 12,
+        "height": 60,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1113.png",
+        "length": 776,
+        "sha256": "caed46fd42e70d0890a50cf903facda9e62398932c19b4243073f1eac270b613",
+        "rgbaSha256": "c1ca525904934778816108a814f76b0d471de688d4f8394893b8f2a04df2a6eb",
+        "width": 12,
+        "height": 60,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1114.png",
+        "length": 731,
+        "sha256": "0d211eb1da49ee11ac25e12e1ec2d5c290bbeece16978c3d80c4fc519f089482",
+        "rgbaSha256": "8dbd3b066d585df4a73f635c4d5fc53e5e0245fa852fc60cf0edeb5daff3ccba",
+        "width": 12,
+        "height": 61,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1120.png",
+        "length": 857,
+        "sha256": "4837cec02b82a883cd801c8e8b7b6e11d5e37069c72752df09d690ae72fd86de",
+        "rgbaSha256": "c1d6b0abfb7c2e94b6206c56e072c9c94d5b48a30238a5159ab7d2d60a76ea77",
+        "width": 40,
+        "height": 56,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1121.png",
+        "length": 870,
+        "sha256": "8e00b28a7ceb4827b498d13367da05d38ad97db0dd12a9fbff6a8b3fa110f5c4",
+        "rgbaSha256": "e69cad5a19f4b8cc2c98f9ecae643225d2a57933255158d848568b1e53cca9e5",
+        "width": 40,
+        "height": 59,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1122.png",
+        "length": 879,
+        "sha256": "199fbc1d8d8ef4f38f20ac22ec01c89f50890db47710066a8a4344a7d375e435",
+        "rgbaSha256": "527e6abeec1fb2c5f6a8af0b47206f84a8d5689be48fd64fa690052f94b6cfa5",
+        "width": 40,
+        "height": 56,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1123.png",
+        "length": 887,
+        "sha256": "aa442f2e5e630edd439871911567cf6c6f9a477211da24f3bd0b94d3ab507c80",
+        "rgbaSha256": "fbe121c0f30ec974f37527127d63dc0619428ef0b8520951ac7fb53a2534673f",
+        "width": 40,
+        "height": 58,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1124.png",
+        "length": 899,
+        "sha256": "ccc271e3b68091c405678b3c8e942ef22d723b53718ebbb3eb7161727b340d68",
+        "rgbaSha256": "999f099a85024cd2f2ed10cde849647979fcab14d1564dcbdea8b8bd432deb73",
+        "width": 40,
+        "height": 57,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1130.png",
+        "length": 833,
+        "sha256": "99261e18a51304544f5056e929ae78622d361fe12f79c2955f1f01c1f23d9d85",
+        "rgbaSha256": "d838255285d54f0364bf1749cc398b64b8bc7ea7ca84fc3654273c8ef4d242a2",
+        "width": 64,
+        "height": 43,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1131.png",
+        "length": 834,
+        "sha256": "02c5d2e813a0b10a66ae685b69a7b8826f9ae9bc412c12bf87c6b4b983f5bc4e",
+        "rgbaSha256": "21043f7adbc85ad739e3d8aeb78e7f9a22006799bed803308403c1e2f09af1b3",
+        "width": 68,
+        "height": 44,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1132.png",
+        "length": 834,
+        "sha256": "8979f24d0a3394fb0296c4e4a2f2bb37cb57cb5d3794d28bf6341c1d0affd06c",
+        "rgbaSha256": "3293581fc6c868958a19c4723ddb2b772474ffa55f8fb48278938bd1a070a903",
+        "width": 64,
+        "height": 42,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1133.png",
+        "length": 857,
+        "sha256": "cd89da00e25c7fae4fd14ee01df9fb077824c4b59d18dd576e3ad2e6484514df",
+        "rgbaSha256": "9f4b1febe866bd225beacc78ba77a4daf924f7ca080cff893d85665a8fcf79d8",
+        "width": 68,
+        "height": 45,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1134.png",
+        "length": 859,
+        "sha256": "7f50435f8f96288edd9c1169e1b66a78a8657655723ff5213df27dad955e3472",
+        "rgbaSha256": "88cbd7c82264ee4e8707aec722a783d2fb5d0bf493f208c0db93d2f301e3ef8a",
+        "width": 64,
+        "height": 44,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1140.png",
+        "length": 802,
+        "sha256": "8c9c9ac0212bbb9a865d36fd87cdc4426db25b6cc6b8964d35556195d28f8fd0",
+        "rgbaSha256": "1510db3cc3a9009e80f1d20f839d172ed2c0042940541a45bb46141ea6195e23",
+        "width": 84,
+        "height": 25,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1141.png",
+        "length": 820,
+        "sha256": "89bcc7830c9f3d8778b643ac70aaafea5c0861752ab4e32ad41248c0e77ef037",
+        "rgbaSha256": "46b1c3e00dc6acc3f2080805387f98fb4cd7643ef0f69a0c652af77e9cf7a04e",
+        "width": 84,
+        "height": 26,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1142.png",
+        "length": 818,
+        "sha256": "87b5dc43a66fdf755a425dcd6330d73156c6239679aab1054100d8e81b8cc1ce",
+        "rgbaSha256": "376b700051521db0ce5f4518d396898774a7df2298fc366881975ed6eb0d327d",
+        "width": 84,
+        "height": 25,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1143.png",
+        "length": 837,
+        "sha256": "b9d0e940d2b0f1b8db5515a7e98a17afa0eda756d943304216dc716cc5e3e3db",
+        "rgbaSha256": "de1a916847da87a7b4694139a551f85fe8675f54319eaa1efaee3131ef4e4871",
+        "width": 84,
+        "height": 25,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1144.png",
+        "length": 808,
+        "sha256": "f3b8ee9362b328a45b736f3244d30d6e5b36abd719ef43ecc9d4a02bbda850d8",
+        "rgbaSha256": "71f08e72877bcb109fa5e80973293a53dc64fcf39e14dd540089e6a0df9147a5",
+        "width": 84,
+        "height": 25,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1150.png",
+        "length": 632,
+        "sha256": "af3c75cb243e40eb22dd855c14052e733b10904f07036fd8f29af071add18d5e",
+        "rgbaSha256": "acb05198c5e9b2b5f84970a4161f28d705376eb8fac86de3ab9275d8763577f7",
+        "width": 84,
+        "height": 7,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1151.png",
+        "length": 680,
+        "sha256": "0ee2eab2f74ec67885e79d455492d4c20a2d7d13ebe125454d1a8d3e507a3802",
+        "rgbaSha256": "aa279d4587a3a22715e1440e7343a43b668260e0a822ec2cbe5f13020978ed19",
+        "width": 92,
+        "height": 7,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1152.png",
+        "length": 618,
+        "sha256": "886b3c0053dabe91fa5280751422e0023de15f899494e552f2d20f849b2af665",
+        "rgbaSha256": "6e08deea82169e99c38923b2a33e56693d23dd856bba51d3089c1db732896a74",
+        "width": 88,
+        "height": 6,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1153.png",
+        "length": 642,
+        "sha256": "1d8536df0b68ca63cb2e2a9e31fe8e1b6287fe13b68284074ca2af0e7574672a",
+        "rgbaSha256": "30eafcc84b85c9db6e86f71842c043df544354c661ec0333ce62eb05e278d062",
+        "width": 96,
+        "height": 6,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1154.png",
+        "length": 649,
+        "sha256": "b0b00e6e984eb8aa38e235b25444b73e7978d90a209b79919e17beea0b9dba27",
+        "rgbaSha256": "5b1854550b6af2f3af3d7f08fd6fdce33aa7c570983facfbcab52fc0973c3206",
+        "width": 88,
+        "height": 7,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1160.png",
+        "length": 783,
+        "sha256": "826b72e0d9a0feb12e91fab22e328c0b3d917ccbe1faf1a308689a37598e09cf",
+        "rgbaSha256": "e8c04e20638b7f95b9c8a642fa4e3785124b43af99ab252563abaf131d2ba03e",
+        "width": 80,
+        "height": 22,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1161.png",
+        "length": 900,
+        "sha256": "cd699ea898cf5f198234847c93f85ff3bef9614da51088c81be0cc1e2b0908f8",
+        "rgbaSha256": "94afd73131593f7d84a7a49cff1961a11f6940acec8a9e04b6a8fee8a229875c",
+        "width": 88,
+        "height": 25,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1162.png",
+        "length": 789,
+        "sha256": "01d0a60ec258003610845630eae49e2f4c415972fa5ceb8a8041580f6ae98231",
+        "rgbaSha256": "fdd7c323bfdb58b416685039e5f4ad29283b1a131b4443062ac83818a5a6a02a",
+        "width": 80,
+        "height": 22,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1163.png",
+        "length": 878,
+        "sha256": "351ac3d35b3f6c4091443d4a3cc9acc0ea236070ed20c87bb3d0d3151cf6b27c",
+        "rgbaSha256": "b0f1fc47a63eb6cc36792d7f2754c45d1830e9f980b79715cfc200458c424de6",
+        "width": 84,
+        "height": 25,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1164.png",
+        "length": 857,
+        "sha256": "72ed039cb8a04675dd7ae778fac4f48f2ab24ce06bc6b0d8cee0e1edbf45fb8f",
+        "rgbaSha256": "7b6ecfc66fb3f144177b07dd7d51a69b2f65f5e4f472b20fdf17055810cd635e",
+        "width": 84,
+        "height": 23,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1170.png",
+        "length": 836,
+        "sha256": "2024de66fee63f71d8fed456e9d9b9f72d91a4682d2584e2055ac2183b84726f",
+        "rgbaSha256": "5c89228c6d22cc30dad7d2da4bcdc7e70601c075719a235558aa17fc8fd6610a",
+        "width": 64,
+        "height": 41,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1171.png",
+        "length": 916,
+        "sha256": "1b85d044119f06ed3318a0c258f4544036ca7ad7c850300af27744a1e2ae8644",
+        "rgbaSha256": "3632c6ab407291ae0efb168444070be71d00c331bce1a577ac462f60ff2ea688",
+        "width": 72,
+        "height": 44,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1172.png",
+        "length": 834,
+        "sha256": "85a8c1f69662c373d0bfa6b9b5213cd6ff39d841cc9c73e1acbb1ed41971e5f1",
+        "rgbaSha256": "edaefd7e4e90b2cc497f65d123b1e6cfa325c9bcdaa86f8de73ddb44aed19f9b",
+        "width": 64,
+        "height": 41,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1173.png",
+        "length": 895,
+        "sha256": "f34895b8138e8f725038ffa42c9998e51fd14830edb6da4735eded34afd9f788",
+        "rgbaSha256": "cfad1cb6cf6033f8631b2080aa7c002f0a5712ab8e260d8c18be58d32176aa4a",
+        "width": 68,
+        "height": 44,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1174.png",
+        "length": 834,
+        "sha256": "b7aa446605c90a1eaf7fb9b3e8ebfcf27df74f6b70a48c8678d920833987bf19",
+        "rgbaSha256": "756d8c7bd2f22929f2bd19b7086ea2d26aab2010783730fa1e26f04136dc1551",
+        "width": 64,
+        "height": 42,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1180.png",
+        "length": 824,
+        "sha256": "412fdf5d2ae686db90fc05a13467159d8117acd1cd6e3ab36a89e375c37b6c4a",
+        "rgbaSha256": "c9eff42ca55291ea572ed0fd16768488046c54e6fabe8bb518d6f9355353b10e",
+        "width": 40,
+        "height": 54,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1181.png",
+        "length": 882,
+        "sha256": "826ebb0d05eed14079f1e06bcb76acb56cfac04801d69980e0433364fca802be",
+        "rgbaSha256": "2a3fcec33186a93f5405a0dd87b31eebb5a0f780da7556904415b1a805e0453d",
+        "width": 40,
+        "height": 58,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1182.png",
+        "length": 843,
+        "sha256": "b0a5ac74df1a634d86fde56ac206ec0f124c6b69867d17c36fd0fa576ff5770e",
+        "rgbaSha256": "4302dc1a83fd5335169ded1ab2a264cb509777a1800e83906776473b1232ac9a",
+        "width": 40,
+        "height": 54,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1183.png",
+        "length": 880,
+        "sha256": "3bcab9f90b30a61680706bb6459fa7493e032a3858ff1e66fabb4cff51fa7ec8",
+        "rgbaSha256": "75345ca1571ee1cee5510d6260c3eecc7a737e12d61383fb4a3375ac2412d83d",
+        "width": 40,
+        "height": 58,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/1184.png",
+        "length": 862,
+        "sha256": "c2ea70fcaa5936c64b5491036c2dadb559d5d09d1ce81be3cc49fed73f42c809",
+        "rgbaSha256": "ab7b26896690a1f483e72e32dad4814c1c31e167d69baf8dbea4857b2967b647",
+        "width": 40,
+        "height": 56,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/2730.png",
+        "length": 3532,
+        "sha256": "e3f7c13181a73d9c3eb4dffc07b56cbfca3c928d0a96d4eac0d19b8e01dcd30b",
+        "rgbaSha256": "e0a1d88f3d09407451167c7e93a70d206baa906bf840b55d5454dfed8f99c628",
+        "width": 52,
+        "height": 146,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/2731.png",
+        "length": 7373,
+        "sha256": "291f68d7fe16a2a1ee49c511c5c65a3f926d1ddedf909db2ce9c5118e8ced17d",
+        "rgbaSha256": "9f8556e4c8f74107c1032a4bb6fce703a4fe3f25f76bef7dbd0a5a474ec5eb40",
+        "width": 64,
+        "height": 167,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/2732.png",
+        "length": 8545,
+        "sha256": "bf13638637ed7d1db581c97ccdda53dbd138ee1c9e00bffe0e32d1b059a9b145",
+        "rgbaSha256": "f87c11a367b148decd874e3743a7204d268c28140922e84585a25cb6a84e17e4",
+        "width": 72,
+        "height": 180,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/2733.png",
+        "length": 9697,
+        "sha256": "65e3fd9fa08d98016ddd734f82e35eac1a973598003093a66b5dcd461186b424",
+        "rgbaSha256": "2d976873b61446ba54106a5b7160288b7c877c0f97a15e47fa383e907bdc3d09",
+        "width": 76,
+        "height": 191,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/2734.png",
+        "length": 10369,
+        "sha256": "320a91c35ada94199e103c1ee39c77e1923fa3d8b677c7e674953406952b3f8e",
+        "rgbaSha256": "cc8c66060598519f5d60107e55979a225105c252e45de9becafd0346c04f33b8",
+        "width": 84,
+        "height": 192,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/2735.png",
+        "length": 10096,
+        "sha256": "89493736c351025eaecd9a6d81916c49412036077eac50ceb255fcf0eaa6efc4",
+        "rgbaSha256": "5ab26a6ff3484c2f25ce88039390239750839ecd811da8774fb99d2ee51ca2c0",
+        "width": 84,
+        "height": 194,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/2736.png",
+        "length": 8950,
+        "sha256": "b567621ffb120012932748449b7babbf48fb238ffd06a0169f7c4ae446de829b",
+        "rgbaSha256": "8105eba4985dae2896ff6ead8704f6ccffd1208d009c242d6a5a7c2f5e570777",
+        "width": 84,
+        "height": 188,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/2737.png",
+        "length": 5301,
+        "sha256": "4c8e89308a27a86bbed2e7f09a9910897d690ffdf5da19e3bb3761a51985e6a0",
+        "rgbaSha256": "51d39295dc0e7136199345895390a7b4f57f307b66464ef3878ddcb8ea53e135",
+        "width": 72,
+        "height": 175,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/2738.png",
+        "length": 4410,
+        "sha256": "9affc8800c6a8281322891f0457ce7cf9ee40ac10d3459466a9f0be4ddb88938",
+        "rgbaSha256": "08a797e6666d8dbba30362f1bf67061bcb8046e8210d7deafd183349b4c7a8aa",
+        "width": 64,
+        "height": 156,
+        "addedMetadata": true
+      },
+      {
+        "path": "original-effects/Magic3/2739.png",
+        "length": 2484,
+        "sha256": "55b7b26eac950dcddbcc5d095fa0b66a38ca2c6d32a38f6618df760ba61f85fa",
+        "rgbaSha256": "9dcc2f91ebee8f98695b9e9e2f8d0284ebd0b9d2a362d46893a368e248585208",
+        "width": 52,
+        "height": 118,
+        "addedMetadata": true
+      }
+    ],
+    "sounds": [
+      {
+        "path": "original-ui/Sound/M121-0.wav",
+        "length": 124286,
+        "sha256": "13d305e77950b737299ebc67154f2cffadfee781fe5d49809bb11f3c6146e9e9",
+        "added": true
+      },
+      {
+        "path": "original-ui/Sound/M121-2.wav",
+        "length": 79616,
+        "sha256": "fb24aad9359cc9c5296dc8031b660d884a6161b8e073a6ab835a8dda182dd817",
+        "added": true
+      },
+      {
+        "path": "original-ui/Sound/M121-5.wav",
+        "length": 115998,
+        "sha256": "39a06d219c3f38a5d1c1e47f3910159d1077b48f12d1c41730ea3069bee9d224",
+        "added": true
+      }
+    ],
+    "effects": [
+      {
+        "effect": "ArcherFocusProc",
+        "canonicalSha256": "01938c2e27b262ba82dc7f6fcd39bd60d89e1f2c290b581f1c1cb34e2a13dc62",
+        "added": true
+      },
+      {
+        "effect": "ArcherNormalArrow",
+        "canonicalSha256": "a42d4a5071633fc18fcba3b6f3109b893c3ab5f7e93dff6a99630403b7b464a3",
+        "added": true
+      }
+    ],
+    "outputMetaSha256": "37a3dbb98e978b2377e3f74fbfd5c4e01e7ed277625377840835cdb70354eb96",
+    "outputManifestSha256": "6b27f4ebc372cbfd5f5bae9ca67321b9c58c2950e05a4ff89a5244e02615bfb2"
+  },
+  "runs": [
+    {
+      "runId": "archer-focused01",
+      "head": "53700985cf98f1a4aa479e763f3b27ba3c68053b",
+      "kind": "native-host-tests",
+      "argv": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--",
+        "--test-threads=1",
+        "--exact",
+        "effects::tests::archer_normal_arrow_and_focus_catalog_follow_exact_source_frames"
+      ],
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "declaredInputs": 1549,
+      "sourceDrift": [],
+      "fullSuite": false,
+      "summary": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1146 filtered out; finished in 0.02s",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 1146,
+      "seconds": 0.02,
+      "resultSha256": "5baae3ce36938263e854c15e60a1184a8dbbdfc4abf98cb508ae88cc98c0d16d",
+      "cargoLogSha256": "2f8c1dc152d3c0b859ca1568adf715fc271399cf5de70dd194c6a47f14139383",
+      "receiptAuditSha256": "a32fdee8b8680170d6edf5a463a636549724254e6bb9d502afc9a4d97bc6f98b",
+      "sourceSnapshotSha256": "f66f49dd0b4b1c23e8b5b5c7a6693aebf2019fbe7736f7faacd2b1f8e03a959f",
+      "assetValidationSha256": "f7edff812386eef9e867b70cf2afcd82bb5faeae6788202dc6e7e0192692ed2a",
+      "guard": {
+        "remainingBytes": 53915287552,
+        "monotonicFreshnessMs": 45.21129999999994,
+        "conservativeWallFreshnessMs": 102,
+        "sourceRowsMatched": 1549,
+        "lifecycleComplete": true
+      }
+    },
+    {
+      "runId": "native-host-full01",
+      "head": "53700985cf98f1a4aa479e763f3b27ba3c68053b",
+      "kind": "native-host-tests",
+      "argv": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--",
+        "--test-threads=1"
+      ],
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "declaredInputs": 1549,
+      "sourceDrift": [],
+      "fullSuite": true,
+      "summary": "test result: ok. 1140 passed; 0 failed; 7 ignored; 0 measured; 0 filtered out; finished in 19.54s",
+      "passed": 1140,
+      "failed": 0,
+      "ignored": 7,
+      "filtered": 0,
+      "seconds": 19.54,
+      "resultSha256": "4c3546d1dd362e833472f148db537555162f2def1b6bedac5ad7edba08c04138",
+      "cargoLogSha256": "932c3e1d60a0386ccbbd8630ef1217c0ffcf108919512fc3cab48ca002bcc023",
+      "receiptAuditSha256": "3a30785d9d8a6ca244851267a8e2f1a0022804bbc39197a7b0835977f4728cfa",
+      "sourceSnapshotSha256": "0eb34a1f8be0aea2fb0910bfa50a212e7106abdfd4343dcb4606185155a3ef57",
+      "assetValidationSha256": "f7edff812386eef9e867b70cf2afcd82bb5faeae6788202dc6e7e0192692ed2a",
+      "guard": {
+        "remainingBytes": 53900226560,
+        "monotonicFreshnessMs": 39.34569999999985,
+        "conservativeWallFreshnessMs": 98,
+        "sourceRowsMatched": 1549,
+        "lifecycleComplete": true
+      }
+    }
+  ],
+  "unchangedIgnoredTests": [
+    "assets::tests::measure_asset_root_diagnosis_per_frame",
+    "entity_presentation::mining_visual_tests::mining_source_pose_and_original_ore_icons_offscreen_gpu",
+    "gateway::target_lifecycle_network_tests::native_rejected_target_actual_gateway_round_trip",
+    "native_fonts::gpu_tests::font_gpu_rebuild_negative_control",
+    "native_fonts::gpu_tests::font_gpu_rebuild_soak",
+    "native_fonts::gpu_tests::nine_language_bundled_fonts_gpu_shapes_and_switches_without_os_fonts",
+    "window_sizing::tests::real_winit_login_choices_resize_world_ui_and_mouse_together"
+  ],
+  "fullHostAccepted": true,
+  "originalInstallationModified": false,
+  "testCodeModified": false,
+  "newIgnores": 0,
+  "guiExecuted": false,
+  "postgresExecuted": false,
+  "deployed": false,
+  "candidate100": false,
+  "limits": "Local QA overlay depends on its installed base via directory aliases; only the two Archer production effect closures match the canonical source. Full installed asset-catalog parity and GUI/gameplay acceptance are not claimed."
+}
