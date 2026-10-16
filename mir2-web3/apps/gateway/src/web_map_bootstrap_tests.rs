@@ -115,6 +115,23 @@ mod map_bootstrap_websocket_tests {
         config.spawn = Point { x: 335, y: 298 };
         assert_eq!(config.map.map_index, 1);
         assert_eq!(config.map.file_name, "0");
+        assert!(config.account_store_path.is_none() && config.account_store_database_url.is_none());
+        {
+            // StartGame restores the character's saved transform. Prepare only
+            // this fixture's in-memory save before the character is admitted.
+            let mut store = config.account_store.lock().unwrap();
+            let save = store
+                .accounts
+                .get_mut("demo")
+                .unwrap()
+                .saves
+                .get_mut(&0)
+                .unwrap();
+            save.map_file_name = config.map.file_name.clone();
+            save.map_title = config.map.title.clone();
+            save.position = config.spawn.clone();
+            save.direction = MirDirection::Down;
+        }
         let mut session = crate::GatewaySession::new(config);
         assert!(session
             .try_handle_packet(ClientPacket::Login {
@@ -127,7 +144,20 @@ mod map_bootstrap_websocket_tests {
         session
             .try_handle_packet(ClientPacket::StartGame { character_index: 0 })
             .unwrap();
-        assert_eq!(session.world_snapshot().map_file_name.as_deref(), Some("0"));
+        let source = session.world_snapshot();
+        assert_eq!(source.map_file_name.as_deref(), Some("0"));
+        let source_player = source
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!(
+            (source_player.x, source_player.y),
+            (335, 298),
+            "the admitted shared-Zone actor must start immediately before the real doorway"
+        );
+        assert_eq!(source_player.direction, MirDirection::Down);
+        assert!(source.player_hp.is_some_and(|hp| hp > 0));
         let mut packets = session
             .try_handle_packet(ClientPacket::Walk {
                 direction: MirDirection::Down,
