@@ -4326,6 +4326,12 @@ impl SimulationSession {
             }
         }
 
+        // Opaque workshop quotes are validated against the exact original
+        // active link after the normal Crystal NPC distance check.
+        if let Some(packets) = super::stone_npc::handle_target(self, target) {
+            return packets;
+        }
+
         if normalized_target.eq_ignore_ascii_case("@CREATEGUILD") {
             return self.grant_shared_guild_creation_from_npc();
         }

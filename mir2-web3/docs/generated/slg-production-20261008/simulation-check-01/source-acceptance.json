@@ -1,0 +1,12 @@
+{
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceSnapshot": {
+    "sha256": "c73829391c2dc0a69eb09e2e64a9e496b9b9539939ab163d581e996d64333539"
+  },
+  "independentSourceReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-20261008\\independent-source-review.json",
+    "sha256": "951f3c93f119da87999aa873c0fddd3709b4bab9df56c9c1deca8d35a87f74a5"
+  },
+  "scope": "Production preparation library only; simulation-check is compile integration, not game play or durable inventory commit."
+}

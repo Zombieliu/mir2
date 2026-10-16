@@ -1,0 +1,466 @@
+{
+  "schema": "mir2.native-play-acceptance-result.v1",
+  "recordedUtc": "2026-10-09T19:13:03.254619+00:00",
+  "operator": "/root",
+  "platform": "Windows native @oai/sky",
+  "clientCandidate": "WN-CANDIDATE-20261009-invited-23",
+  "clientRevision": "faefb69671272843958f68781b4f8ca2f4014522",
+  "clientExeSha256": "cf7bdb16ad307a744a910f3e17b7d21c78482e556676788bab7b0682913171e1",
+  "serverRevisionObserved": "c70436f34eabb432d769e0082c0afa23303294b0",
+  "preGameChecks": [
+    {
+      "id": "NATIVE-UPDATE",
+      "status": "passed_after_repair",
+      "observed": "First launcher run checked154579 files then failed on a404 and startedR19. Four exact resources772163B appended; all full HTTP hashes matched. Ordinary launcher retry activated signed sequence18/R23,7 changed game files verified.",
+      "localCheckingFirstMs": 457535,
+      "localCheckingRetryMs": 414474,
+      "retryDownloadedResourceBytes": 772163,
+      "retryWireBytesIncludingMetadata": 42880824,
+      "latencyIssueStillOpen": true
+    },
+    {
+      "id": "NATIVE-RESOLUTION",
+      "status": "passed_bounded",
+      "observed": "Actual setting changed1024x768 automatic to1280x960; bounded capture resized1026x800 to1282x992. Original automatic mode restored. Choices too large for the current display visibly disabled.",
+      "notChecked": "Other resolutions, restart persistence, other laptop DPI, in-game layout."
+    },
+    {
+      "id": "NATIVE-LOCALE-BASE",
+      "status": "passed_bounded",
+      "observedLocales": [
+        "zh-TW",
+        "en",
+        "pt-BR",
+        "ar",
+        "hi",
+        "ru",
+        "id",
+        "vi",
+        "th"
+      ],
+      "observed": "Visible basic labels switched for all nine locales, no apparent tofu or clipping. Russian/Vietnamese long screen-keyboard labels wrapped within buttons. Original Traditional Chinese restored.",
+      "notChecked": "Translation semantics, expert Arabic/Hindi shaping, tasks/NPC/store texts, game HUD and chat; no nine-language game-parity claim."
+    }
+  ],
+  "gameplayCases": [
+    {
+      "id": "P0-00",
+      "title": "安装与会话基线",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P0-01",
+      "title": "新手首次报告、背包与装备",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P0-02",
+      "title": "正常NPC买药、滚轮及背包布局",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P0-03",
+      "title": "任务/NPC语言和字体",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P1-00",
+      "title": "走/跑、寻路与停止",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P1-01",
+      "title": "战士技能、快捷键与战斗节奏",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P1-02",
+      "title": "法师施法、冷却与缺蓝",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P1-03",
+      "title": "道士治疗、毒/符与召唤",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P1-04",
+      "title": "战斗停止、逃跑和生命反馈",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P2-00",
+      "title": "采矿",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P2-01",
+      "title": "钓鱼",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P2-02",
+      "title": "原版即时制作/配方入口探查",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P2-03",
+      "title": "新SLG订单/公共工坊/生产侧栏",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered.",
+      "additionalPrerequisite": "New production/stone branch is not included in installed R23 or current c704 server; needs matched isolated deployment and persistent-store verification."
+    },
+    {
+      "id": "P2-04",
+      "title": "三档原石工坊",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered.",
+      "additionalPrerequisite": "New production/stone branch is not included in installed R23 or current c704 server; needs matched isolated deployment and persistent-store verification."
+    },
+    {
+      "id": "P3-00",
+      "title": "日任务",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P3-01",
+      "title": "周任务",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P3-02",
+      "title": "行会入会与双账号",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P3-03",
+      "title": "正常创建行会",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P3-04",
+      "title": "师徒双账号",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P3-05",
+      "title": "沙巴克与活动时间",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P3-06",
+      "title": "0–30后半段与真正后期地图",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    },
+    {
+      "id": "P0-04",
+      "title": "每组结束的正常保存/重登",
+      "acceptance_status": "not_run",
+      "reason": "Manual login has not occurred; no native game world entered."
+    }
+  ],
+  "gameplayCaseCounts": {
+    "total": 22,
+    "passed": 0,
+    "failed": 0,
+    "notRun": 22
+  },
+  "screenshots": [
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/001-r19-login.jpg",
+      "sha256": "b7d239a1e493ceb06c65bc488d0e6a7847abaeb8067e184942b3475bb16717c4",
+      "bytes": 317178,
+      "screenshotId": "screenshot-0",
+      "window": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 230887572,
+        "title": "numeron-legend of rebirth"
+      },
+      "description": "Observed installed R19 login, no credentials entered; updater R23 activation failed.",
+      "savedForAcceptanceEvidence": true
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/002-r23-checking.jpg",
+      "purpose": "Normal updater retry after origin resource repair; not a completed installation or gameplay acceptance.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\.update\\engine-9213EC3FE1A992F757EA48C53981AFA661765B42E637C1AD811E326060B170B8.exe",
+        "id": 71831420,
+        "title": "Numeron - Legend of Rebirth · 遊戲更新"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 582,
+      "height": 284,
+      "mime": "image/jpeg",
+      "bytes": 19377,
+      "sha256": "db1b97032017abc528de5ded8ed51bd96df8f720f7adf346c277b07fcccd3fef",
+      "recordedUtc": "2026-10-09T18:13:31.462Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/003-r23-login.jpg",
+      "purpose": "Actual R23 installation verified independently; visible ordinary login screen, no user authentication actions performed.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 317075,
+      "sha256": "dd70d2c1c7aa262174cea69bc5f4ef5f63ab0219ce010d9e25272fac14174f61",
+      "recordedUtc": "2026-10-09T18:17:33.975Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/004-r23-resolution-options.jpg",
+      "purpose": "Actual non-authentication display menu lists resolution choices and disables resolutions that cannot fit this display.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 294749,
+      "sha256": "aeccf76d804895d83d1004e4e66b3493971b20b1bd4eb7d52286918a5c322175",
+      "recordedUtc": "2026-10-09T18:19:45.759Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/005-r23-resolution-1280.jpg",
+      "purpose": "Display menu selection resized actual client screenshot to 1282x992 including borders; UI remained visible, no gameplay or persistence claim.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1282,
+      "height": 992,
+      "mime": "image/jpeg",
+      "bytes": 475768,
+      "sha256": "7355cdef3a24cb2cef837faded6ec3d64569e0d02686ecb464aa5ae006470d34",
+      "recordedUtc": "2026-10-09T18:21:03.081Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/006-r23-resolution-restored.jpg",
+      "purpose": "Automatic1024x768 restored after1280x960 actual UI check.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 316920,
+      "sha256": "c39f82b255d73eb0a7fe412f9e478b65fc6589b48a671b09c3b8592585804e1c",
+      "recordedUtc": "2026-10-09T18:25:08.225Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/007-r23-language-options.jpg",
+      "purpose": "Actual non-authentication locale menu shows nine requested locales.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 303857,
+      "sha256": "e37db2e8e68615536632af68e49dfe1d11d7529ec9451b4a465a4b576ae1699c",
+      "recordedUtc": "2026-10-09T18:27:20.992Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/008-r23-locale-en.jpg",
+      "purpose": "English login labels and display controls render without visible clipping; no authentication or game-text acceptance.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 318658,
+      "sha256": "e03a7825fa95b832998bc11e27faf99f16856e1d474da02d5b5fc2929c4b581b",
+      "recordedUtc": "2026-10-09T18:29:10.186Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/009-r23-locale-pt-br.jpg",
+      "purpose": "Portuguese Brazil basic labels render and remain inside visible controls; no full NPC/task translation acceptance.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 319282,
+      "sha256": "bd56c3d7e2e6bebfe074ca8458e96442f2f92f65856cb426022b02270086aba0",
+      "recordedUtc": "2026-10-09T18:32:57.787Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/010-r23-locale-ar.jpg",
+      "purpose": "Arabic glyphs and connected text visible in basic labels; no expert RTL or full-game translation acceptance.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 317511,
+      "sha256": "d44fb0ef464acb364b987daf6fffb0e73a03a1f68d742355b2c79e36a2e84c7f",
+      "recordedUtc": "2026-10-09T18:37:51.550Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/011-r23-locale-hi.jpg",
+      "purpose": "Hindi basic label glyphs visible without apparent tofu or clipping; translation semantics and game text remain pending.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 317889,
+      "sha256": "55fde48c2dfaba3b6fe2ec4cc497984ec60e5cf045929b6b1a711477651aa833",
+      "recordedUtc": "2026-10-09T18:42:18.049Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/012-r23-locale-ru.jpg",
+      "purpose": "Russian labels visible; screen-keyboard caption wraps to two lines inside its button. No full-game or linguistic acceptance.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 318827,
+      "sha256": "754ab7e248fdc6c6a11c15ab1a2f90233d9c6d1bb8ed202f490bfc1ef5595b21",
+      "recordedUtc": "2026-10-09T18:47:27.224Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/013-r23-locale-id.jpg",
+      "purpose": "Indonesian basic labels visible inside controls; game-text acceptance pending.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 318850,
+      "sha256": "51ddb9e86c976e99c2aabbacd49e35b29acea5f7e7ca162ba1484d43bb3dc959",
+      "recordedUtc": "2026-10-09T18:52:13.668Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/014-r23-locale-vi.jpg",
+      "purpose": "Vietnamese accents visible; screen-keyboard caption wraps inside its button. Game translation and play remain pending.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 319657,
+      "sha256": "c01386c06b43553f65ad6afbe59ce075969d8953318b2947d14a0f9b954d2a21",
+      "recordedUtc": "2026-10-09T18:56:55.572Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/015-r23-locale-th.jpg",
+      "purpose": "Thai basic labels rendered without apparent tofu; no full game translation acceptance.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 317536,
+      "sha256": "61f6e1f4c2491873969a7c2a736bf39d73f83c6a0dc4fb4f34527cead34d6fb3",
+      "recordedUtc": "2026-10-09T19:02:18.873Z"
+    },
+    {
+      "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/016-r23-final-waiting-login.jpg",
+      "purpose": "All nine basic locale screens observed and original Traditional Chinese/automatic resolution restored. Login remains empty; no gameplay acceptance.",
+      "observedWindow": {
+        "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+        "id": 18419886,
+        "title": "numeron-legend of rebirth"
+      },
+      "screenshotId": "screenshot-0",
+      "width": 1026,
+      "height": 800,
+      "mime": "image/jpeg",
+      "bytes": 316777,
+      "sha256": "fd207612be40ea0384bca33e80dcc7a634ce6415d9aa0d4a4f7afd4ab610bb31",
+      "recordedUtc": "2026-10-09T19:06:30.790Z"
+    }
+  ],
+  "manualLoginHandoff": {
+    "pending": true,
+    "authenticationActionsAutomated": false,
+    "rule": "Do not automate user authentication dialogs.",
+    "source": "computer-use/26.1002.52244/docs/guidance.md",
+    "requiredAction": "Human signs into a test account and selects a character; no password in chat."
+  },
+  "currentClientState": "R23 running at empty login screen, Traditional Chinese, automatic1024x768.",
+  "gameGatewayRestarted": false,
+  "feedPromoted": false,
+  "liveAccountStateEdited": false,
+  "nativeGameplayAccepted": false,
+  "humanFrontendAccepted": false,
+  "candidate100": false,
+  "toolingHistory": [
+    "Initial inspection queried nonexistent mir2-playtest-gateway.service; actual mir2-playtest.service discovery proved healthy and its PID stayed unchanged.",
+    "First append dry-run rejected uploaded664 data-file permissions before any public mutation; only four fixed scratch files changed to600, subsequent dry-run passed.",
+    "Two new REPL variable assignments lacked declarations and failed; corrected before updater interaction. Occluded screenshots were not saved as evidence."
+  ],
+  "remaining": [
+    "Manual login before any game-world acceptance.",
+    "Current R23 matches public sequence18, not unpublished stone/production feature branch.",
+    "Six-to-seven-minute checking phase remains a separate updater performance issue."
+  ]
+}

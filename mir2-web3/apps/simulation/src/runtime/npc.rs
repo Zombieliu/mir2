@@ -105,7 +105,8 @@ pub(super) fn dismiss_dialog(world: &mut World) {
     world.resource_mut::<NpcStateResource>().active_npc_dialog = None;
 }
 
-pub(super) fn set_dialog(world: &mut World, dialog: ActiveNpcDialogState) {
+pub(super) fn set_dialog(world: &mut World, mut dialog: ActiveNpcDialogState) {
+    super::stone_npc::decorate_dialog(world, &mut dialog);
     super::npc_input::record_display(world, &dialog);
     let mut resources = world.resource_mut::<NpcStateResource>();
     resources.active_npc_service = None;
@@ -1315,6 +1316,9 @@ fn prepare_npc_purchase_checked(
     if balance < cost {
         reject!(NpcGoldBuyRejection::InsufficientGold);
     }
+    if super::item_uid_issuance::refresh_world_history_floor(world).is_err() {
+        reject!(NpcGoldBuyRejection::InvalidDelivery);
+    }
     let resources = world.resource::<InventoryResource>();
     let (inventory, incoming) = if source == NpcPurchaseSource::Trade && !uses_pearls {
         let Some(now_utc_ticks) = npc_gold_trade_utc_ticks(world, &service) else {
@@ -1590,6 +1594,11 @@ pub(super) fn sell_item_impl(world: &mut World, unique_id: u64, count: u16) -> V
         }
 
         let mut item = resources.inventory_items[index].clone();
+        // Buyback/used-goods are UserItem-only, so they cannot retain a stone's
+        // server registry reference. Raw stones must not enter that custody.
+        if item.stone_serial.is_some() {
+            return vec![failed_packet];
+        }
         item.quantity = requested;
         let template = crystal_item_template_for_item_key(&item.key);
 

@@ -1,0 +1,4430 @@
+{
+  "schema": "mir2.production-independent-result-review.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-09T01:11:53.4118466+00:00",
+  "accepted": true,
+  "testCounts": {
+    "total": 186,
+    "unique": 177,
+    "new": 8,
+    "failed": 0,
+    "ignored": 0
+  },
+  "discrepancies": [],
+  "authoredSource": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\authored-source-02.json",
+    "sha256": "40199f01559110ef850271eff8dff950dd0422761638d77f6031b94e88dca0d6",
+    "length": 974
+  },
+  "authoredFileCount": 4,
+  "authoredFilePins": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\user_item_uid.rs",
+      "sha256": "5335ced4868a62f8eb59f0d816a76459e0d57a4c23959c0164c8fdce64106b41",
+      "length": 43402
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\intelligent_creatures.rs",
+      "sha256": "b271a9ebbd24419f8ce5938580aac484330c319725b0b6cefc05d3c3d36e6523",
+      "length": 24237
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\creature_reward_uid_tests.rs",
+      "sha256": "aba96d0cd4e60deb3d51b4e6eb4749ceab7e3525d5e5403ebe6ae52e603d833f",
+      "length": 9230
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\tests.rs",
+      "sha256": "7b843fe5b126c5a2ef9cade04d0647dce47ac85542634fa7e88cdfa69f8f6fe7",
+      "length": 2432244
+    }
+  ],
+  "baselineCommit": "78d3abecb887d0e2c447d06e8224e7670486758e",
+  "sourcePinAudit": {
+    "allDeclaredRowsVerified": 3696,
+    "finalRowsVerified": 2310,
+    "historicalRowsVerified": 1386,
+    "uniquePhysicalFilesRehashed": 463,
+    "rowsPerRun": 462,
+    "noRowsExcluded": true,
+    "mismatches": 0,
+    "historicalTestBytesUseExactArchive": true
+  },
+  "protectedParent": {
+    "count": 458,
+    "method": "Independent batched canonical git hash-object --stdin-paths versus parent git ls-tree",
+    "mismatches": 0,
+    "proof": [
+      {
+        "path": "mir2-web3/.cargo/config.toml",
+        "parentBlob": "8af59dd8cf84353bb1ba6e731b869ef999d49c02",
+        "currentCanonicalBlob": "8af59dd8cf84353bb1ba6e731b869ef999d49c02"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/Cargo.toml",
+        "parentBlob": "12fd184f70099c0d1b546619542c3e07ecb342ba",
+        "currentCanonicalBlob": "12fd184f70099c0d1b546619542c3e07ecb342ba"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/examples/zone_load.rs",
+        "parentBlob": "77e898d3409209e5808e4cd6f04737c835cbd426",
+        "currentCanonicalBlob": "77e898d3409209e5808e4cd6f04737c835cbd426"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/bin/zone_replay.rs",
+        "parentBlob": "4838a16702e033848a9c91dafe0c0ec24cabb8a5",
+        "currentCanonicalBlob": "4838a16702e033848a9c91dafe0c0ec24cabb8a5"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_account_store_durability_tests.rs",
+        "parentBlob": "3c5b3a3a93073ef9411c2a08392c9315c1c1cf7c",
+        "currentCanonicalBlob": "3c5b3a3a93073ef9411c2a08392c9315c1c1cf7c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_file_authority.rs",
+        "parentBlob": "870a3e6463cf53e2ca6723e563b39e07b1630d45",
+        "currentCanonicalBlob": "870a3e6463cf53e2ca6723e563b39e07b1630d45"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_clock_driver.rs",
+        "parentBlob": "bf09c0ead0d72e3a020e17dfec6bc18db4b8db3d",
+        "currentCanonicalBlob": "bf09c0ead0d72e3a020e17dfec6bc18db4b8db3d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_clock_late_pg_tests.rs",
+        "parentBlob": "f4ed6ccc2d499738672bc77c43663eef59546df8",
+        "currentCanonicalBlob": "f4ed6ccc2d499738672bc77c43663eef59546df8"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_clock_pg_tests.rs",
+        "parentBlob": "c4f9e404643370f4bde218f25110ca09a53f38e3",
+        "currentCanonicalBlob": "c4f9e404643370f4bde218f25110ca09a53f38e3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_clock_schema_tests.rs",
+        "parentBlob": "b6d5e2160223250be468abdf7f113c8a0a708cdf",
+        "currentCanonicalBlob": "b6d5e2160223250be468abdf7f113c8a0a708cdf"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_clock_transactions.rs",
+        "parentBlob": "ddb926f599112949dc4c5311b40bfb3829f7f4aa",
+        "currentCanonicalBlob": "ddb926f599112949dc4c5311b40bfb3829f7f4aa"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_clock.rs",
+        "parentBlob": "cc1f0a8ea21fd6b6859d2c68f5967629ec475e78",
+        "currentCanonicalBlob": "cc1f0a8ea21fd6b6859d2c68f5967629ec475e78"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_experience_capture_tests.rs",
+        "parentBlob": "b496180aabd83f5c21ad6e60c5e4689997eea346",
+        "currentCanonicalBlob": "b496180aabd83f5c21ad6e60c5e4689997eea346"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_experience_commit.rs",
+        "parentBlob": "5a2d662d702fb1e495982f316759cfef104c64b0",
+        "currentCanonicalBlob": "5a2d662d702fb1e495982f316759cfef104c64b0"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_experience_permit.rs",
+        "parentBlob": "4630a7b3419c186da2e4a0867de0fb5bf8cdeaa0",
+        "currentCanonicalBlob": "4630a7b3419c186da2e4a0867de0fb5bf8cdeaa0"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_experience_tests.rs",
+        "parentBlob": "548783bef712e4ab54f94b4ba83240a434ed8b19",
+        "currentCanonicalBlob": "548783bef712e4ab54f94b4ba83240a434ed8b19"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_experience.rs",
+        "parentBlob": "e65bc878b71def75bb7ccd3a1884f9da167caae0",
+        "currentCanonicalBlob": "e65bc878b71def75bb7ccd3a1884f9da167caae0"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_guild_xp_pg_tests.rs",
+        "parentBlob": "d635f93cee7b329d8bf44b89583d34c3996bb32d",
+        "currentCanonicalBlob": "d635f93cee7b329d8bf44b89583d34c3996bb32d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_hero_authority.rs",
+        "parentBlob": "0acc6a0e0cc299d0ba75d02b278b2e5889f95e32",
+        "currentCanonicalBlob": "0acc6a0e0cc299d0ba75d02b278b2e5889f95e32"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_hero_compensation.rs",
+        "parentBlob": "e83599dbc1d2e9ce1312b6d6a731cf1132ca54b1",
+        "currentCanonicalBlob": "e83599dbc1d2e9ce1312b6d6a731cf1132ca54b1"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_hero_map.rs",
+        "parentBlob": "3ba8474f821ed32a8851bec904f39e7bcec1ed42",
+        "currentCanonicalBlob": "3ba8474f821ed32a8851bec904f39e7bcec1ed42"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_hero_postgres_tests.rs",
+        "parentBlob": "4d043d3290fe0a29e8e7d45b959cd20c90cfbc2d",
+        "currentCanonicalBlob": "4d043d3290fe0a29e8e7d45b959cd20c90cfbc2d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_hero_postgres.rs",
+        "parentBlob": "8457530c1083ff3ffa6bdb58c50da822057156f6",
+        "currentCanonicalBlob": "8457530c1083ff3ffa6bdb58c50da822057156f6"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_hero_registry.rs",
+        "parentBlob": "d492f805a313c31a8ede81f5397a84363f483749",
+        "currentCanonicalBlob": "d492f805a313c31a8ede81f5397a84363f483749"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_hero_scope.rs",
+        "parentBlob": "107a332a5b08ce1ab605fdbdf21a2b501213198f",
+        "currentCanonicalBlob": "107a332a5b08ce1ab605fdbdf21a2b501213198f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_hero_transaction_tests.rs",
+        "parentBlob": "71c055c85eebc5b202e47c2ce9fdd279344fe877",
+        "currentCanonicalBlob": "71c055c85eebc5b202e47c2ce9fdd279344fe877"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_item_identity_tests.rs",
+        "parentBlob": "f61e43f62705ec0e1d396accaa768ec8fff2efce",
+        "currentCanonicalBlob": "f61e43f62705ec0e1d396accaa768ec8fff2efce"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_item_identity.rs",
+        "parentBlob": "188eace978588e902e17c90a3e5b8c937f7c6d75",
+        "currentCanonicalBlob": "188eace978588e902e17c90a3e5b8c937f7c6d75"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_prepared_kill.rs",
+        "parentBlob": "fb9ec6362b9988d41f7bac45416aa7286f5d4827",
+        "currentCanonicalBlob": "fb9ec6362b9988d41f7bac45416aa7286f5d4827"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_refresh_fail_closed_tests.rs",
+        "parentBlob": "f7bb00074a761279f440adbb36e90dcf72a858db",
+        "currentCanonicalBlob": "f7bb00074a761279f440adbb36e90dcf72a858db"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_shared_guild_pg_tests.rs",
+        "parentBlob": "6d422b11678f94310f3a40c86cfcaf0d2bb1f49b",
+        "currentCanonicalBlob": "6d422b11678f94310f3a40c86cfcaf0d2bb1f49b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config_shared_guilds.rs",
+        "parentBlob": "dd567df2db6ea6a756820943a35c0ebca181a689",
+        "currentCanonicalBlob": "dd567df2db6ea6a756820943a35c0ebca181a689"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/config.rs",
+        "parentBlob": "1fb91bf5dd05c9eccd14deef8506992a87e56ce4",
+        "currentCanonicalBlob": "1fb91bf5dd05c9eccd14deef8506992a87e56ce4"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/db_projection.rs",
+        "parentBlob": "c0202b86d1d7659fd5fa349d15eed364d8acbdad",
+        "currentCanonicalBlob": "c0202b86d1d7659fd5fa349d15eed364d8acbdad"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/item_identity_postgres_tests.rs",
+        "parentBlob": "8da7dd668377309e2156e7922011b998ca467b2c",
+        "currentCanonicalBlob": "8da7dd668377309e2156e7922011b998ca467b2c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/item_identity_postgres.rs",
+        "parentBlob": "9d4640f729748d89a90d910c1cc1bfa6723860e8",
+        "currentCanonicalBlob": "9d4640f729748d89a90d910c1cc1bfa6723860e8"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/item_identity_reservation.rs",
+        "parentBlob": "31857b284ec6e506d7aa823e62f0feb9f12453f2",
+        "currentCanonicalBlob": "31857b284ec6e506d7aa823e62f0feb9f12453f2"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/lib.rs",
+        "parentBlob": "1ec25ea0372dbaac2568d5a287d14748eef2da0f",
+        "currentCanonicalBlob": "1ec25ea0372dbaac2568d5a287d14748eef2da0f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/npc_purchase_journal.rs",
+        "parentBlob": "53ee9960601e6697f790682a0ed28a40657fb567",
+        "currentCanonicalBlob": "53ee9960601e6697f790682a0ed28a40657fb567"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/npc_purchase_owner.rs",
+        "parentBlob": "e68c09dbe630d59579e095b90e4ccbaf944eee35",
+        "currentCanonicalBlob": "e68c09dbe630d59579e095b90e4ccbaf944eee35"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/big_map/mod.rs",
+        "parentBlob": "c1e20eb5a00e7398bbe69df53585bc1e1371eeb8",
+        "currentCanonicalBlob": "c1e20eb5a00e7398bbe69df53585bc1e1371eeb8"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/buff_duration.rs",
+        "parentBlob": "83ded81b800ccfbfd360a81c1e1e8f3aa3185276",
+        "currentCanonicalBlob": "83ded81b800ccfbfd360a81c1e1e8f3aa3185276"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/buffs.rs",
+        "parentBlob": "f3524ab431c7885fe2db63eec1cf5347880f9a0f",
+        "currentCanonicalBlob": "f3524ab431c7885fe2db63eec1cf5347880f9a0f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/combat.rs",
+        "parentBlob": "256b8f116d9fdfa6b5a307bd801755157d33de15",
+        "currentCanonicalBlob": "256b8f116d9fdfa6b5a307bd801755157d33de15"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/components.rs",
+        "parentBlob": "7506184d4703b41e1a4fb337771dab2d857e32f9",
+        "currentCanonicalBlob": "7506184d4703b41e1a4fb337771dab2d857e32f9"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/crystal_compat.rs",
+        "parentBlob": "86ae1d1bc9993f9a3151c0f9f078f08dc0143890",
+        "currentCanonicalBlob": "86ae1d1bc9993f9a3151c0f9f078f08dc0143890"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/door.rs",
+        "parentBlob": "bd33504451313bfb17915f808a32ff181c343f2a",
+        "currentCanonicalBlob": "bd33504451313bfb17915f808a32ff181c343f2a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/drops.rs",
+        "parentBlob": "ab3d2b57e53546b0a4439ef492967f46fb9519da",
+        "currentCanonicalBlob": "ab3d2b57e53546b0a4439ef492967f46fb9519da"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/drops/zone_harvest_drop_tests.rs",
+        "parentBlob": "7edb6326b6c8daf84e063b1b85cfb2a7b02fae0e",
+        "currentCanonicalBlob": "7edb6326b6c8daf84e063b1b85cfb2a7b02fae0e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/equipment_storage_merge_tests.rs",
+        "parentBlob": "63ea002618c5cb64f7649518af80c3b5ef3de7d2",
+        "currentCanonicalBlob": "63ea002618c5cb64f7649518af80c3b5ef3de7d2"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/equipment.rs",
+        "parentBlob": "9fac1db250372528ebdc7bd19a484f4a9e5f9216",
+        "currentCanonicalBlob": "9fac1db250372528ebdc7bd19a484f4a9e5f9216"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/exact_drop_uid_tests.rs",
+        "parentBlob": "855239378e504795bb95c88b4251bd933b1466b4",
+        "currentCanonicalBlob": "855239378e504795bb95c88b4251bd933b1466b4"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/experience_rates.rs",
+        "parentBlob": "a3447dfa663c1a41c45b9d223fe745574dfc6db1",
+        "currentCanonicalBlob": "a3447dfa663c1a41c45b9d223fe745574dfc6db1"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/fishing_equipment_tests.rs",
+        "parentBlob": "aeebfcf4e70fe8f9f5a62cdcc0957321d943f362",
+        "currentCanonicalBlob": "aeebfcf4e70fe8f9f5a62cdcc0957321d943f362"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/fishing_uid_tests.rs",
+        "parentBlob": "7be8a5ce27d66af9af8c228450e158ac47cab292",
+        "currentCanonicalBlob": "7be8a5ce27d66af9af8c228450e158ac47cab292"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/fishing.rs",
+        "parentBlob": "d6d43647992f528f227c0edd147ac2690b164778",
+        "currentCanonicalBlob": "d6d43647992f528f227c0edd147ac2690b164778"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/fixtures/d401.map.gz",
+        "parentBlob": "be5905062f3e743858b4037816932be60bf1d75a",
+        "currentCanonicalBlob": "be5905062f3e743858b4037816932be60bf1d75a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/gm_commands.rs",
+        "parentBlob": "aa7722ae91b3953e5e10303ab253aaa71031c0c5",
+        "currentCanonicalBlob": "aa7722ae91b3953e5e10303ab253aaa71031c0c5"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hazard.rs",
+        "parentBlob": "49f10ee05db95487935624b6a13d07b79edc787d",
+        "currentCanonicalBlob": "49f10ee05db95487935624b6a13d07b79edc787d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_ai.rs",
+        "parentBlob": "7e1788e2f737fbe693cf70d00a98bed87deef94a",
+        "currentCanonicalBlob": "7e1788e2f737fbe693cf70d00a98bed87deef94a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_buffs.rs",
+        "parentBlob": "205c60bd70ef98b3517a9663a86e070a2824185a",
+        "currentCanonicalBlob": "205c60bd70ef98b3517a9663a86e070a2824185a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_cadence.rs",
+        "parentBlob": "2d76b8eecf981b5902615774e96624721b2615fd",
+        "currentCanonicalBlob": "2d76b8eecf981b5902615774e96624721b2615fd"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_cast.rs",
+        "parentBlob": "a517bb4f66c729a034c83eb3ee3f8adad808fa30",
+        "currentCanonicalBlob": "a517bb4f66c729a034c83eb3ee3f8adad808fa30"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_combat_math.rs",
+        "parentBlob": "41f9b62ab0d4f4ea8bbb2f53eb3f76b07931a84b",
+        "currentCanonicalBlob": "41f9b62ab0d4f4ea8bbb2f53eb3f76b07931a84b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_delayed_actions.rs",
+        "parentBlob": "5c60456a2d6db301c5486e1a1f6320549a515ce5",
+        "currentCanonicalBlob": "5c60456a2d6db301c5486e1a1f6320549a515ce5"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_hit_dispatch.rs",
+        "parentBlob": "8065c0a4c4912e2556d80104aaa10ea4b7a330d1",
+        "currentCanonicalBlob": "8065c0a4c4912e2556d80104aaa10ea4b7a330d1"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_hit_math.rs",
+        "parentBlob": "b425a7449294062b26f39b6e6836bdf8fce9c37e",
+        "currentCanonicalBlob": "b425a7449294062b26f39b6e6836bdf8fce9c37e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_inventory.rs",
+        "parentBlob": "c06cc57438d48579e9ae5a8e2dcf0c5e1b3729e9",
+        "currentCanonicalBlob": "c06cc57438d48579e9ae5a8e2dcf0c5e1b3729e9"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_legacy_migration_tests.rs",
+        "parentBlob": "562a947781be9f3bd89fc41ce7278e895231cafc",
+        "currentCanonicalBlob": "562a947781be9f3bd89fc41ce7278e895231cafc"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_merge.rs",
+        "parentBlob": "0bebf50b7523036c937a3374a94a2ab52c4cab7f",
+        "currentCanonicalBlob": "0bebf50b7523036c937a3374a94a2ab52c4cab7f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_mount.rs",
+        "parentBlob": "4b703b129c513e7276dc50db3fe3ce681cf5ee97",
+        "currentCanonicalBlob": "4b703b129c513e7276dc50db3fe3ce681cf5ee97"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_registry_carriers.rs",
+        "parentBlob": "ac9a6d12c260656fb18bddfe80765e5b534d05f2",
+        "currentCanonicalBlob": "ac9a6d12c260656fb18bddfe80765e5b534d05f2"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_registry_scan_tests.rs",
+        "parentBlob": "7c34772b173c01691d3803ead301b8e0f5f62ef7",
+        "currentCanonicalBlob": "7c34772b173c01691d3803ead301b8e0f5f62ef7"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_registry_scan.rs",
+        "parentBlob": "dc45efa01df6a8a9a8df06dbf2c33c51a820d0e8",
+        "currentCanonicalBlob": "dc45efa01df6a8a9a8df06dbf2c33c51a820d0e8"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_registry_validation.rs",
+        "parentBlob": "a3c6bfe0eddd4ebe94e9537ff37d7d22eed058a2",
+        "currentCanonicalBlob": "a3c6bfe0eddd4ebe94e9537ff37d7d22eed058a2"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_stats_rod_tests.rs",
+        "parentBlob": "985537ca9fa6d26a3e92e697ca22a3a366d3614f",
+        "currentCanonicalBlob": "985537ca9fa6d26a3e92e697ca22a3a366d3614f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_stats.rs",
+        "parentBlob": "87253bc3824051be3d1827faf0b6fa269a93e914",
+        "currentCanonicalBlob": "87253bc3824051be3d1827faf0b6fa269a93e914"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/hero_transient.rs",
+        "parentBlob": "2e0f27a93088ea4ba45df7301a2ef03f0156da9e",
+        "currentCanonicalBlob": "2e0f27a93088ea4ba45df7301a2ef03f0156da9e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creature_item_tests.rs",
+        "parentBlob": "8d95eb6be086a530297fbef98a98ed500706659f",
+        "currentCanonicalBlob": "8d95eb6be086a530297fbef98a98ed500706659f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+        "parentBlob": "14d6dee9eb6486bfb83de85d07e113e282817b1c",
+        "currentCanonicalBlob": "14d6dee9eb6486bfb83de85d07e113e282817b1c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/item_custody_tests.rs",
+        "parentBlob": "cd572b1364c1a1074b6064960c50e674580a54d4",
+        "currentCanonicalBlob": "cd572b1364c1a1074b6064960c50e674580a54d4"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/item_custody.rs",
+        "parentBlob": "6490dcbc804c38321f26470d8465db95936ce911",
+        "currentCanonicalBlob": "6490dcbc804c38321f26470d8465db95936ce911"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/item_grants_tests.rs",
+        "parentBlob": "f6be905b180dd8017607ecaf487cdce0eb00157a",
+        "currentCanonicalBlob": "f6be905b180dd8017607ecaf487cdce0eb00157a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/item_grants.rs",
+        "parentBlob": "85a7de0ee8926dcb0ae126201e9e2c83e549f26a",
+        "currentCanonicalBlob": "85a7de0ee8926dcb0ae126201e9e2c83e549f26a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/item_sets.rs",
+        "parentBlob": "8f9af2e46e7aaa1daf99b1dd48230e896a5465cd",
+        "currentCanonicalBlob": "8f9af2e46e7aaa1daf99b1dd48230e896a5465cd"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance_tests.rs",
+        "parentBlob": "7951dd9f3ebcd73cbf7bff6ff433fdf6540843cb",
+        "currentCanonicalBlob": "7951dd9f3ebcd73cbf7bff6ff433fdf6540843cb"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance.rs",
+        "parentBlob": "73ed96a07a54be1fd22c091d001ec70e69d81281",
+        "currentCanonicalBlob": "73ed96a07a54be1fd22c091d001ec70e69d81281"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+        "parentBlob": "feee579c70afec6cd3bad154b91d349c8def2712",
+        "currentCanonicalBlob": "feee579c70afec6cd3bad154b91d349c8def2712"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/leveling.rs",
+        "parentBlob": "49534a235031971b91f67994e24af566e3312c6b",
+        "currentCanonicalBlob": "49534a235031971b91f67994e24af566e3312c6b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/magic_key_preflight_tests.rs",
+        "parentBlob": "5f5a4b2b86231065cd8059162ac51d756b5d3474",
+        "currentCanonicalBlob": "5f5a4b2b86231065cd8059162ac51d756b5d3474"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/mail_body_validation_tests.rs",
+        "parentBlob": "22031a29de019583fe560da6fea9638b1a94b323",
+        "currentCanonicalBlob": "22031a29de019583fe560da6fea9638b1a94b323"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/mail_parcel_tests.rs",
+        "parentBlob": "2fd54c3088970ac0f6fa2b6264aa8ed6ab3b05d5",
+        "currentCanonicalBlob": "2fd54c3088970ac0f6fa2b6264aa8ed6ab3b05d5"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/map_collision_source_tests.rs",
+        "parentBlob": "8590db4cd053bd2f36f9bc4c360d56f808ab1e02",
+        "currentCanonicalBlob": "8590db4cd053bd2f36f9bc4c360d56f808ab1e02"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/map_events.rs",
+        "parentBlob": "79419dad630828483a85c1c20675290d6f8215e4",
+        "currentCanonicalBlob": "79419dad630828483a85c1c20675290d6f8215e4"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/map_transfer_metadata_tests.rs",
+        "parentBlob": "b4b18f06578fbe65557f22750321d2674a88c019",
+        "currentCanonicalBlob": "b4b18f06578fbe65557f22750321d2674a88c019"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/map.rs",
+        "parentBlob": "014b59e6446aed4bf2347a200128938d848e7864",
+        "currentCanonicalBlob": "014b59e6446aed4bf2347a200128938d848e7864"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/mentor_reward_tests.rs",
+        "parentBlob": "435cc51b6a88bcc9c59e39fc4919cc562fb2b865",
+        "currentCanonicalBlob": "435cc51b6a88bcc9c59e39fc4919cc562fb2b865"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/mining_uid_tests.rs",
+        "parentBlob": "f510a9f2d25eca46994958f9c9f7174512044525",
+        "currentCanonicalBlob": "f510a9f2d25eca46994958f9c9f7174512044525"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/mining.rs",
+        "parentBlob": "fb1bbc0b5286d2a6eb62f04e5c8e87bfbc20ee69",
+        "currentCanonicalBlob": "fb1bbc0b5286d2a6eb62f04e5c8e87bfbc20ee69"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/mod.rs",
+        "parentBlob": "e747bc939eb09d19005475c4d1b4e4f282f1c71d",
+        "currentCanonicalBlob": "e747bc939eb09d19005475c4d1b4e4f282f1c71d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/armadillo.rs",
+        "parentBlob": "3db5d93701090a09491b405f343b36e1594229b5",
+        "currentCanonicalBlob": "3db5d93701090a09491b405f343b36e1594229b5"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/axe_skeleton_fear.rs",
+        "parentBlob": "0c243d7d61727b57f04e206805c448646c2d940d",
+        "currentCanonicalBlob": "0c243d7d61727b57f04e206805c448646c2d940d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/bomb_spider.rs",
+        "parentBlob": "e23a2ab2f7a494cc143e4f0c7b500faab286ed2e",
+        "currentCanonicalBlob": "e23a2ab2f7a494cc143e4f0c7b500faab286ed2e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/bone_lord.rs",
+        "parentBlob": "666b77fc5a0b13b530d32afa9583d04b92d37cdc",
+        "currentCanonicalBlob": "666b77fc5a0b13b530d32afa9583d04b92d37cdc"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/boulder_spirit.rs",
+        "parentBlob": "76465db85fd73164176b0c43af91ba699410058e",
+        "currentCanonicalBlob": "76465db85fd73164176b0c43af91ba699410058e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/cannibal_plant.rs",
+        "parentBlob": "06a6ed0a8ce55f3962bf5f66fdfb20ac43ce0619",
+        "currentCanonicalBlob": "06a6ed0a8ce55f3962bf5f66fdfb20ac43ce0619"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/common.rs",
+        "parentBlob": "50e711d02258451d71a254e6cb4bdded5a0396f0",
+        "currentCanonicalBlob": "50e711d02258451d71a254e6cb4bdded5a0396f0"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/deer_run_away.rs",
+        "parentBlob": "a313293594c111384f126f0757e124983f4b6d9b",
+        "currentCanonicalBlob": "a313293594c111384f126f0757e124983f4b6d9b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/dig_out_zombie.rs",
+        "parentBlob": "909dbb937e24bc432d23dc5c97932784418add6e",
+        "currentCanonicalBlob": "909dbb937e24bc432d23dc5c97932784418add6e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/dragon_statue_sleep.rs",
+        "parentBlob": "7f770ee5ef2e554319e1e442f201bc19aab55336",
+        "currentCanonicalBlob": "7f770ee5ef2e554319e1e442f201bc19aab55336"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/evil_centipede.rs",
+        "parentBlob": "d3c3a6c5a70eba1548b9e4d4c6bdaf5c2e228851",
+        "currentCanonicalBlob": "d3c3a6c5a70eba1548b9e4d4c6bdaf5c2e228851"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/evil_mir.rs",
+        "parentBlob": "87f4cffa8aee852fe44b9dfb8ad78dea9298d77a",
+        "currentCanonicalBlob": "87f4cffa8aee852fe44b9dfb8ad78dea9298d77a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/football.rs",
+        "parentBlob": "6c75967320747f23a9320ef93d7715f64c08db88",
+        "currentCanonicalBlob": "6c75967320747f23a9320ef93d7715f64c08db88"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/foxman_fear.rs",
+        "parentBlob": "8cc43d49aca22dd404b9a04e54c78255622d33bf",
+        "currentCanonicalBlob": "8cc43d49aca22dd404b9a04e54c78255622d33bf"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/frost_tiger_sitting.rs",
+        "parentBlob": "d65e7fb9404fa89340163df73c33d23bd7a73bc5",
+        "currentCanonicalBlob": "d65e7fb9404fa89340163df73c33d23bd7a73bc5"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/gate.rs",
+        "parentBlob": "150f2026586f08d2949f48273fc80c31c8bcdc5e",
+        "currentCanonicalBlob": "150f2026586f08d2949f48273fc80c31c8bcdc5e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/general_meow_meow.rs",
+        "parentBlob": "93b9a70420fa0f54fdee7ead5c01b57b21f6d4e8",
+        "currentCanonicalBlob": "93b9a70420fa0f54fdee7ead5c01b57b21f6d4e8"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/great_fox_spirit.rs",
+        "parentBlob": "aabac79d9034b367976886821df4d8982c9db184",
+        "currentCanonicalBlob": "aabac79d9034b367976886821df4d8982c9db184"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/hell_bomb.rs",
+        "parentBlob": "d6af23e70a4ad15aa1346d5f5ce1721d4b3f2f3b",
+        "currentCanonicalBlob": "d6af23e70a4ad15aa1346d5f5ce1721d4b3f2f3b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/hell_lord.rs",
+        "parentBlob": "66be63be39099f50330ee5dcc67731db28455d73",
+        "currentCanonicalBlob": "66be63be39099f50330ee5dcc67731db28455d73"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/holy_deva_fear.rs",
+        "parentBlob": "be6ee0a33f1554c446c2e028241801c64c813fa3",
+        "currentCanonicalBlob": "be6ee0a33f1554c446c2e028241801c64c813fa3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/horned_archer.rs",
+        "parentBlob": "2640debb40c5ea91509e3828c56feb1bfdb60aa6",
+        "currentCanonicalBlob": "2640debb40c5ea91509e3828c56feb1bfdb60aa6"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/horned_commander.rs",
+        "parentBlob": "ff7a43f4f617d561f564ce1de52f94a2e9536f1c",
+        "currentCanonicalBlob": "ff7a43f4f617d561f564ce1de52f94a2e9536f1c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/horned_mage.rs",
+        "parentBlob": "6cb2f435b4e8828fea58047f9850e035304f4997",
+        "currentCanonicalBlob": "6cb2f435b4e8828fea58047f9850e035304f4997"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/horned_sorceror.rs",
+        "parentBlob": "e1d75513924194ad367319f89373c0fa884dda70",
+        "currentCanonicalBlob": "e1d75513924194ad367319f89373c0fa884dda70"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/horned_warrior.rs",
+        "parentBlob": "6e8e74fc83829cd7d96a82dd44c631b92e113b92",
+        "currentCanonicalBlob": "6e8e74fc83829cd7d96a82dd44c631b92e113b92"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/hugger.rs",
+        "parentBlob": "2c497dd3853515a1d97df92686dae0ee4ce9a207",
+        "currentCanonicalBlob": "2c497dd3853515a1d97df92686dae0ee4ce9a207"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/kirin_ice_thrust.rs",
+        "parentBlob": "51c5cd48f9b63bb4e9ebc9811375d8bc81482284",
+        "currentCanonicalBlob": "51c5cd48f9b63bb4e9ebc9811375d8bc81482284"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/mod.rs",
+        "parentBlob": "8289214486cf29f695fd20d267dfa9d649fe2488",
+        "currentCanonicalBlob": "8289214486cf29f695fd20d267dfa9d649fe2488"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/mud_zombie.rs",
+        "parentBlob": "0da702fb34b4e7e8c7193951dee81761af3ceded",
+        "currentCanonicalBlob": "0da702fb34b4e7e8c7193951dee81761af3ceded"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/poison_hugger.rs",
+        "parentBlob": "5a7bd06798ecd79336c0f7a5d1a8991abdcf5467",
+        "currentCanonicalBlob": "5a7bd06798ecd79336c0f7a5d1a8991abdcf5467"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/reviving_zombie.rs",
+        "parentBlob": "831730010135c8a949697c662fc47d2b6cbdd4d4",
+        "currentCanonicalBlob": "831730010135c8a949697c662fc47d2b6cbdd4d4"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/shinsu.rs",
+        "parentBlob": "3716f43079a531bd069462e503a8fb26d0b1b1fb",
+        "currentCanonicalBlob": "3716f43079a531bd069462e503a8fb26d0b1b1fb"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/snake_totem.rs",
+        "parentBlob": "795788e053fcbc7bd2159e73c3d237804090518c",
+        "currentCanonicalBlob": "795788e053fcbc7bd2159e73c3d237804090518c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/snow_wolf_king.rs",
+        "parentBlob": "59a1385ced70e6996f30a2c01bc9af81ea727ee7",
+        "currentCanonicalBlob": "59a1385ced70e6996f30a2c01bc9af81ea727ee7"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/spitting_toad.rs",
+        "parentBlob": "ac6da8813a92cb8f14cb7c7bb9364d5ed8e71935",
+        "currentCanonicalBlob": "ac6da8813a92cb8f14cb7c7bb9364d5ed8e71935"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/stone_trap.rs",
+        "parentBlob": "cacc1737432da5bf0f914bdff51368a12c6e95ee",
+        "currentCanonicalBlob": "cacc1737432da5bf0f914bdff51368a12c6e95ee"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/summoned_monster.rs",
+        "parentBlob": "a9bf4a72950f202259981e7ffe0358123377496e",
+        "currentCanonicalBlob": "a9bf4a72950f202259981e7ffe0358123377496e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/thunder_element.rs",
+        "parentBlob": "5b3dd4f66b19f268e41538fbb7c9a6cdc139b9ec",
+        "currentCanonicalBlob": "5b3dd4f66b19f268e41538fbb7c9a6cdc139b9ec"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/town_archer.rs",
+        "parentBlob": "056e957b69e1b8ddc115b5c490f1c4dfe7a3a464",
+        "currentCanonicalBlob": "056e957b69e1b8ddc115b5c490f1c4dfe7a3a464"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/trap_rock.rs",
+        "parentBlob": "39b111990e272c585eba4a719afe753f6f2414ef",
+        "currentCanonicalBlob": "39b111990e272c585eba4a719afe753f6f2414ef"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/tree_queen.rs",
+        "parentBlob": "9ff12c35d465afd4b027ea1f9a662c4705a58deb",
+        "currentCanonicalBlob": "9ff12c35d465afd4b027ea1f9a662c4705a58deb"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/tucson_general.rs",
+        "parentBlob": "2dbc197b0cbf66d62aee67579a55e8eda328ae3e",
+        "currentCanonicalBlob": "2dbc197b0cbf66d62aee67579a55e8eda328ae3e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/vampire_spider.rs",
+        "parentBlob": "886f5f61b126db7c37dbfeacf827bb55886e3e3a",
+        "currentCanonicalBlob": "886f5f61b126db7c37dbfeacf827bb55886e3e3a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/wooma_taurus.rs",
+        "parentBlob": "25c664705cd7b53c574d3c0b195d537d4e2f5710",
+        "currentCanonicalBlob": "25c664705cd7b53c574d3c0b195d537d4e2f5710"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/yimoogi.rs",
+        "parentBlob": "cf76a985621777ce56377bbd41cc42701e15e752",
+        "currentCanonicalBlob": "cf76a985621777ce56377bbd41cc42701e15e752"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/yin_devil_node.rs",
+        "parentBlob": "60178f996d0901f38450f2a405ef6635d800334a",
+        "currentCanonicalBlob": "60178f996d0901f38450f2a405ef6635d800334a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/zuma_monster.rs",
+        "parentBlob": "ecbfe63c6e1cef17dffee5d67684295cb7035b73",
+        "currentCanonicalBlob": "ecbfe63c6e1cef17dffee5d67684295cb7035b73"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/zuma_taurus_stage.rs",
+        "parentBlob": "0575135400468143a2bec5344ad2fee73f8d48f8",
+        "currentCanonicalBlob": "0575135400468143a2bec5344ad2fee73f8d48f8"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/monsters.rs",
+        "parentBlob": "58762bc79ce326749c2879650ca2896c72b2040a",
+        "currentCanonicalBlob": "58762bc79ce326749c2879650ca2896c72b2040a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/movement.rs",
+        "parentBlob": "ad4eed6c9d4177162971e70310645d5c506763d6",
+        "currentCanonicalBlob": "ad4eed6c9d4177162971e70310645d5c506763d6"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/newcomer_journey_tests.rs",
+        "parentBlob": "6a3ad7d87cf543cee20a4a5de44061c0657dbf36",
+        "currentCanonicalBlob": "6a3ad7d87cf543cee20a4a5de44061c0657dbf36"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/newcomer_npc_visibility_tests.rs",
+        "parentBlob": "ac366ee1893c33fc3bd81f67210472c3bdad99ed",
+        "currentCanonicalBlob": "ac366ee1893c33fc3bd81f67210472c3bdad99ed"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/newcomer_progression_tests.rs",
+        "parentBlob": "f1b7567ecec71b197263021ec8e3c5c6a6ac74ec",
+        "currentCanonicalBlob": "f1b7567ecec71b197263021ec8e3c5c6a6ac74ec"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/newcomer_progression.rs",
+        "parentBlob": "e65dc032bab416a9dc6c26f125ac603f9f9ae314",
+        "currentCanonicalBlob": "e65dc032bab416a9dc6c26f125ac603f9f9ae314"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/newcomer_v2_event_tests.rs",
+        "parentBlob": "1871fbe21200b8f2843dfb362c339d450a73b9a3",
+        "currentCanonicalBlob": "1871fbe21200b8f2843dfb362c339d450a73b9a3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/newcomer_v2_events.rs",
+        "parentBlob": "74af5cd1565db1f2df7ec8aa167ea905326b72e6",
+        "currentCanonicalBlob": "74af5cd1565db1f2df7ec8aa167ea905326b72e6"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/newcomer_v2_tests.rs",
+        "parentBlob": "e4908af65c6681898451146ac52c950b934f885e",
+        "currentCanonicalBlob": "e4908af65c6681898451146ac52c950b934f885e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/newcomer_v2.rs",
+        "parentBlob": "31b57df26be0edcbf424efa9b64bc397fe3d9867",
+        "currentCanonicalBlob": "31b57df26be0edcbf424efa9b64bc397fe3d9867"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_buy_outcome_tests.rs",
+        "parentBlob": "4bded37550e908c441365833700be62d65a63015",
+        "currentCanonicalBlob": "4bded37550e908c441365833700be62d65a63015"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_buy_outcome.rs",
+        "parentBlob": "4dc0d3c33f7cccbd354f76073c1ced20128f6e40",
+        "currentCanonicalBlob": "4dc0d3c33f7cccbd354f76073c1ced20128f6e40"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_trade_capacity_tests.rs",
+        "parentBlob": "2c8cf53e43d068523ca4879e8a9071b6ef6c4353",
+        "currentCanonicalBlob": "2c8cf53e43d068523ca4879e8a9071b6ef6c4353"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_trade_evidence_tests.rs",
+        "parentBlob": "bc54a740268310a252b7c08fea28b076e411942d",
+        "currentCanonicalBlob": "bc54a740268310a252b7c08fea28b076e411942d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_trade_expiry_tests.rs",
+        "parentBlob": "e07fdf890a5bd4e66535564744a1a0d7a6a6b6b1",
+        "currentCanonicalBlob": "e07fdf890a5bd4e66535564744a1a0d7a6a6b6b1"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_gold_trade_expiry.rs",
+        "parentBlob": "51c5d5b9d6263a2fc62a78474c0e6b69704c3b20",
+        "currentCanonicalBlob": "51c5d5b9d6263a2fc62a78474c0e6b69704c3b20"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_item_price_tests.rs",
+        "parentBlob": "6659559e324587fcf2fb5882c3c4928a58de783a",
+        "currentCanonicalBlob": "6659559e324587fcf2fb5882c3c4928a58de783a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_parcel_tests.rs",
+        "parentBlob": "303eb0aedd8f9b0a817370989e1d771ec7981f9d",
+        "currentCanonicalBlob": "303eb0aedd8f9b0a817370989e1d771ec7981f9d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_pearl_tests.rs",
+        "parentBlob": "c5e114d95a02911a8a67f628b7cf1aab67d5df52",
+        "currentCanonicalBlob": "c5e114d95a02911a8a67f628b7cf1aab67d5df52"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_outcome_tests.rs",
+        "parentBlob": "968ba23a2002419762ad5a012b92f56dcb19d55a",
+        "currentCanonicalBlob": "968ba23a2002419762ad5a012b92f56dcb19d55a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_outcome.rs",
+        "parentBlob": "08750f7887d8ff1baa2843ecd47e785d39b898ce",
+        "currentCanonicalBlob": "08750f7887d8ff1baa2843ecd47e785d39b898ce"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+        "parentBlob": "75b2e0fc11e5d5826e82320ab142cf0394750378",
+        "currentCanonicalBlob": "75b2e0fc11e5d5826e82320ab142cf0394750378"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_snapshot.rs",
+        "parentBlob": "6ae2ba81b242de3d740b93812dffbc610eba0d86",
+        "currentCanonicalBlob": "6ae2ba81b242de3d740b93812dffbc610eba0d86"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction_tests.rs",
+        "parentBlob": "58df516748f59943f0174b5aac4c32b65b418c81",
+        "currentCanonicalBlob": "58df516748f59943f0174b5aac4c32b65b418c81"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_transaction.rs",
+        "parentBlob": "a873222712ce4b14a0551266d5897f5e9533fb0c",
+        "currentCanonicalBlob": "a873222712ce4b14a0551266d5897f5e9533fb0c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_purchase_uid_tests.rs",
+        "parentBlob": "475853c3ecb24be63b8f62e9c734b5415a1d698e",
+        "currentCanonicalBlob": "475853c3ecb24be63b8f62e9c734b5415a1d698e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc_script.rs",
+        "parentBlob": "17ca5933ac809487b793ff39ebc01da3faca588e",
+        "currentCanonicalBlob": "17ca5933ac809487b793ff39ebc01da3faca588e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/npc.rs",
+        "parentBlob": "5b85747a20d0fc870c0b9b8a898b66dac7016a98",
+        "currentCanonicalBlob": "5b85747a20d0fc870c0b9b8a898b66dac7016a98"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/onchain.rs",
+        "parentBlob": "f294d7489e1d6cc584fc9193df1157d25d4c9983",
+        "currentCanonicalBlob": "f294d7489e1d6cc584fc9193df1157d25d4c9983"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/packets_diary_quest_tests.rs",
+        "parentBlob": "b5468e84d09293b1a7478f2c5666cb8f440fc545",
+        "currentCanonicalBlob": "b5468e84d09293b1a7478f2c5666cb8f440fc545"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/packets.rs",
+        "parentBlob": "30d9802575963b820b2dba73ae52ad0c6ff52d76",
+        "currentCanonicalBlob": "30d9802575963b820b2dba73ae52ad0c6ff52d76"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/pathfind.rs",
+        "parentBlob": "92b3e3c19cfb7b785975b48830a78d92b4274213",
+        "currentCanonicalBlob": "92b3e3c19cfb7b785975b48830a78d92b4274213"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/player_weights.rs",
+        "parentBlob": "fd81fc4ad87daf35edd59392fc1d973ac39b4446",
+        "currentCanonicalBlob": "fd81fc4ad87daf35edd59392fc1d973ac39b4446"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/prepared_kill_experience.rs",
+        "parentBlob": "3f102f952afe4bb07e91f737c8a270bb0a0dbe22",
+        "currentCanonicalBlob": "3f102f952afe4bb07e91f737c8a270bb0a0dbe22"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/production_tests.rs",
+        "parentBlob": "1dd82e21054e920d34722098a2baa65070a16eb6",
+        "currentCanonicalBlob": "1dd82e21054e920d34722098a2baa65070a16eb6"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/production.rs",
+        "parentBlob": "90d60b2a6208d3e0e7c1051b806b425815706c86",
+        "currentCanonicalBlob": "90d60b2a6208d3e0e7c1051b806b425815706c86"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/quest_endpoint_identity_tests.rs",
+        "parentBlob": "034dc5369c8571ff1345611897438ec44e29fd3d",
+        "currentCanonicalBlob": "034dc5369c8571ff1345611897438ec44e29fd3d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/quest_level15_tests.rs",
+        "parentBlob": "4db5b22ef0b580c5a32666cc6769861578c8e329",
+        "currentCanonicalBlob": "4db5b22ef0b580c5a32666cc6769861578c8e329"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/quest_reconcile_tests.rs",
+        "parentBlob": "1b4e1580f40de46f09813d4ccb8dbb47c3ff4dff",
+        "currentCanonicalBlob": "1b4e1580f40de46f09813d4ccb8dbb47c3ff4dff"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/quest_recurrence_tests.rs",
+        "parentBlob": "c1b46ad765bed1dc16f9cfdbb8e8c96b375c7dee",
+        "currentCanonicalBlob": "c1b46ad765bed1dc16f9cfdbb8e8c96b375c7dee"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/quest_recurrence.rs",
+        "parentBlob": "15c20d4ee1b1febdca3b46bcd537394932521013",
+        "currentCanonicalBlob": "15c20d4ee1b1febdca3b46bcd537394932521013"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/quest_uid_tests.rs",
+        "parentBlob": "9e72f3b06f07098951646d5c3ff2d07e0eb99771",
+        "currentCanonicalBlob": "9e72f3b06f07098951646d5c3ff2d07e0eb99771"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/quests.rs",
+        "parentBlob": "43e2ba6e3a735955b716411a1e7bbc8994b927b0",
+        "currentCanonicalBlob": "43e2ba6e3a735955b716411a1e7bbc8994b927b0"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/ranking_inspect.rs",
+        "parentBlob": "fc8b18f7be282edc4beecdbbf9ddd2a1c2aa48c6",
+        "currentCanonicalBlob": "fc8b18f7be282edc4beecdbbf9ddd2a1c2aa48c6"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/refine_oven.rs",
+        "parentBlob": "a5691710420918370c734f01e1e08b5521f0573e",
+        "currentCanonicalBlob": "a5691710420918370c734f01e1e08b5521f0573e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/rental.rs",
+        "parentBlob": "cb7d6ef37b5eef43b20ddadb74d0ddc7fa8a06e5",
+        "currentCanonicalBlob": "cb7d6ef37b5eef43b20ddadb74d0ddc7fa8a06e5"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/resources.rs",
+        "parentBlob": "db09a415c301fbdfcd9f4e8bf2d97ac025229049",
+        "currentCanonicalBlob": "db09a415c301fbdfcd9f4e8bf2d97ac025229049"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/save_fail_closed_tests.rs",
+        "parentBlob": "ac8e662dbe782c36841e06f72985390a1581b1d7",
+        "currentCanonicalBlob": "ac8e662dbe782c36841e06f72985390a1581b1d7"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/save.rs",
+        "parentBlob": "74f559fcf0d002c2abb7a08841aa30f693aa4379",
+        "currentCanonicalBlob": "74f559fcf0d002c2abb7a08841aa30f693aa4379"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/session_active_monster_ids_tests.rs",
+        "parentBlob": "73903b0b7be40943641184d210f31423f351c570",
+        "currentCanonicalBlob": "73903b0b7be40943641184d210f31423f351c570"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/session_lightweight_snapshot_tests.rs",
+        "parentBlob": "bfb47c02e78fa22ddb3422759a3351e6eebf4167",
+        "currentCanonicalBlob": "bfb47c02e78fa22ddb3422759a3351e6eebf4167"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+        "parentBlob": "bf135e364ceaa0ed6564888c3fe82f9f71dbae04",
+        "currentCanonicalBlob": "bf135e364ceaa0ed6564888c3fe82f9f71dbae04"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_bank_tests.rs",
+        "parentBlob": "34bcaa45605c2250ff1b35de1060ebe038e64986",
+        "currentCanonicalBlob": "34bcaa45605c2250ff1b35de1060ebe038e64986"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_bank.rs",
+        "parentBlob": "273535a54140985c4aea6623b4b2ec6cd8585dbd",
+        "currentCanonicalBlob": "273535a54140985c4aea6623b4b2ec6cd8585dbd"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_buff_tests.rs",
+        "parentBlob": "0ba7d875f1b40bf2a938ecc179ae1961b43f80c3",
+        "currentCanonicalBlob": "0ba7d875f1b40bf2a938ecc179ae1961b43f80c3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_buffs.rs",
+        "parentBlob": "555d72ba21c647dd8452582651055ab08bce2236",
+        "currentCanonicalBlob": "555d72ba21c647dd8452582651055ab08bce2236"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_experience_tests.rs",
+        "parentBlob": "1eaef5718b0b087ee8d96a8526547aac018018dc",
+        "currentCanonicalBlob": "1eaef5718b0b087ee8d96a8526547aac018018dc"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_experience.rs",
+        "parentBlob": "e7579a11d1367b4dd8ce9c631ef081373a0a0c85",
+        "currentCanonicalBlob": "e7579a11d1367b4dd8ce9c631ef081373a0a0c85"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_guild_item_tests.rs",
+        "parentBlob": "b3cf6e34e4d91492d5a23fd6a3520bdb29a7868b",
+        "currentCanonicalBlob": "b3cf6e34e4d91492d5a23fd6a3520bdb29a7868b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_guilds.rs",
+        "parentBlob": "06ab7f8ee2a712f22f86f92830dc16284e65569e",
+        "currentCanonicalBlob": "06ab7f8ee2a712f22f86f92830dc16284e65569e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_kill_experience.rs",
+        "parentBlob": "2f52e7c9528c46f44be3f7c908521d22eb495823",
+        "currentCanonicalBlob": "2f52e7c9528c46f44be3f7c908521d22eb495823"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_marriage.rs",
+        "parentBlob": "2d934a19b1a538b852a71dea307783699f70a4f2",
+        "currentCanonicalBlob": "2d934a19b1a538b852a71dea307783699f70a4f2"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_mentor_rewards.rs",
+        "parentBlob": "0e6f5490935880827fddec05dd61f8d154582bab",
+        "currentCanonicalBlob": "0e6f5490935880827fddec05dd61f8d154582bab"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_relationships.rs",
+        "parentBlob": "b83b06d3949a29924ba6728fb9dc14a9b9853e88",
+        "currentCanonicalBlob": "b83b06d3949a29924ba6728fb9dc14a9b9853e88"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/shared_social_buffs.rs",
+        "parentBlob": "944fb1ed1f04a158eba6a2afe135b5275f3d09d1",
+        "currentCanonicalBlob": "944fb1ed1f04a158eba6a2afe135b5275f3d09d1"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/skill_cooldown_restore_tests.rs",
+        "parentBlob": "b60ce0c6fac3c19df76a2e5847eb8bfd3db928b3",
+        "currentCanonicalBlob": "b60ce0c6fac3c19df76a2e5847eb8bfd3db928b3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/skills.rs",
+        "parentBlob": "f6d3aca3499c59b7082f8b4a5730c7cd310f7ade",
+        "currentCanonicalBlob": "f6d3aca3499c59b7082f8b4a5730c7cd310f7ade"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/slaying_passive_tests.rs",
+        "parentBlob": "210462bcd7383dea91ef541900b47628e3dfb42e",
+        "currentCanonicalBlob": "210462bcd7383dea91ef541900b47628e3dfb42e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/social_economy.rs",
+        "parentBlob": "e308d9a6099a01171e95428e0bd42e7bebefa6ef",
+        "currentCanonicalBlob": "e308d9a6099a01171e95428e0bd42e7bebefa6ef"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/social_experience.rs",
+        "parentBlob": "33ea7798ec630e6712838896c9fb51754c69557f",
+        "currentCanonicalBlob": "33ea7798ec630e6712838896c9fb51754c69557f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/special_monster_sprite_tests.rs",
+        "parentBlob": "8c5ec8f92dbf296f68295e5a6354bfb116f1f4f9",
+        "currentCanonicalBlob": "8c5ec8f92dbf296f68295e5a6354bfb116f1f4f9"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/stage5.rs",
+        "parentBlob": "fbfaa0ec16408365115f484c3196919146fa8c64",
+        "currentCanonicalBlob": "fbfaa0ec16408365115f484c3196919146fa8c64"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/stats.rs",
+        "parentBlob": "bb3bab6cdc2e48bacdc6d72837cda40e341c8bbd",
+        "currentCanonicalBlob": "bb3bab6cdc2e48bacdc6d72837cda40e341c8bbd"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/storage_rental_tests.rs",
+        "parentBlob": "6f1c2e275c140b8600a8bd67ef73f6966b08381e",
+        "currentCanonicalBlob": "6f1c2e275c140b8600a8bd67ef73f6966b08381e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/warrior_preparation_tests.rs",
+        "parentBlob": "cd31d0cfd6adefa569661484f4299f1724c8900d",
+        "currentCanonicalBlob": "cd31d0cfd6adefa569661484f4299f1724c8900d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone_melee_passive_progression_tests.rs",
+        "parentBlob": "edaa3d3a13a38a63be630aebd2cef8585391c1dd",
+        "currentCanonicalBlob": "edaa3d3a13a38a63be630aebd2cef8585391c1dd"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/aoi_grid.rs",
+        "parentBlob": "8625a1a5825f41f616c9113eac5ed9651cc3e50d",
+        "currentCanonicalBlob": "8625a1a5825f41f616c9113eac5ed9651cc3e50d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/aoi.rs",
+        "parentBlob": "f9bb13fcc6ff96238db45ebcacc572c63969f3e8",
+        "currentCanonicalBlob": "f9bb13fcc6ff96238db45ebcacc572c63969f3e8"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/collision.rs",
+        "parentBlob": "865eb80d4011aa53948f1eeb7ac31b91d8097c9f",
+        "currentCanonicalBlob": "865eb80d4011aa53948f1eeb7ac31b91d8097c9f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/ecs.rs",
+        "parentBlob": "b78d164fc262c463d38fd5df231502ad257ca276",
+        "currentCanonicalBlob": "b78d164fc262c463d38fd5df231502ad257ca276"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/experience.rs",
+        "parentBlob": "eb13df3b626debc2a6be897cd7d1099b525630dd",
+        "currentCanonicalBlob": "eb13df3b626debc2a6be897cd7d1099b525630dd"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/intelligent_creature_host.rs",
+        "parentBlob": "1fc79b4f4645a21ed124669b3263d88354d8e67a",
+        "currentCanonicalBlob": "1fc79b4f4645a21ed124669b3263d88354d8e67a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/intelligent_creatures_tests.rs",
+        "parentBlob": "0fb3a448c8eadd25f3bfab217f4f07aac88bbcbd",
+        "currentCanonicalBlob": "0fb3a448c8eadd25f3bfab217f4f07aac88bbcbd"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/intelligent_creatures.rs",
+        "parentBlob": "1cdf083d15c09ed0347bb30c1727306353870ea9",
+        "currentCanonicalBlob": "1cdf083d15c09ed0347bb30c1727306353870ea9"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+        "parentBlob": "8ba04cbc8e81d7dd7188c1549e76d837f1c9db97",
+        "currentCanonicalBlob": "8ba04cbc8e81d7dd7188c1549e76d837f1c9db97"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+        "parentBlob": "87b84f1afbe8af9553ff2d8be0e6c86577cbefd2",
+        "currentCanonicalBlob": "87b84f1afbe8af9553ff2d8be0e6c86577cbefd2"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/movement_deadline_tests.rs",
+        "parentBlob": "498756e859fd5a1219050f3ef4863a637923f0cf",
+        "currentCanonicalBlob": "498756e859fd5a1219050f3ef4863a637923f0cf"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/movement.rs",
+        "parentBlob": "3459a3a0956cd8ee5280764836ddf6c0bb4a930a",
+        "currentCanonicalBlob": "3459a3a0956cd8ee5280764836ddf6c0bb4a930a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/packets.rs",
+        "parentBlob": "d6b2116d1345046ebe18e56533d9ce1d052fc2ab",
+        "currentCanonicalBlob": "d6b2116d1345046ebe18e56533d9ce1d052fc2ab"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/replay.rs",
+        "parentBlob": "be9393127d872ffb71d0f5cf5649a16bc85d87fa",
+        "currentCanonicalBlob": "be9393127d872ffb71d0f5cf5649a16bc85d87fa"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/replication.rs",
+        "parentBlob": "f4f7790018b23722b48477d258c236c4f414df72",
+        "currentCanonicalBlob": "f4f7790018b23722b48477d258c236c4f414df72"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+        "parentBlob": "71247c4f7963a4ec8b85a5b6c10e8dea09d36b02",
+        "currentCanonicalBlob": "71247c4f7963a4ec8b85a5b6c10e8dea09d36b02"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/armadillo_ai.rs",
+        "parentBlob": "4a30884ea8d0d1bb83bc1631c7d8ad4aeee165b3",
+        "currentCanonicalBlob": "4a30884ea8d0d1bb83bc1631c7d8ad4aeee165b3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+        "parentBlob": "69bbdb57f763f1c28ca03bc32979c517d7600a53",
+        "currentCanonicalBlob": "69bbdb57f763f1c28ca03bc32979c517d7600a53"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+        "parentBlob": "fa1bfe2dcfc84f68ae3c1b675672bf7314e60321",
+        "currentCanonicalBlob": "fa1bfe2dcfc84f68ae3c1b675672bf7314e60321"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/evil_mir_ai.rs",
+        "parentBlob": "f5bce65ba00b194847de564171f07d6ac924bf70",
+        "currentCanonicalBlob": "f5bce65ba00b194847de564171f07d6ac924bf70"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/football_ai.rs",
+        "parentBlob": "2914dc6ef1c3f0f337ff09878e87954ce525261e",
+        "currentCanonicalBlob": "2914dc6ef1c3f0f337ff09878e87954ce525261e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/gate_ai.rs",
+        "parentBlob": "3f15b40960ad6930841bdf3ea0521813bdcc6a12",
+        "currentCanonicalBlob": "3f15b40960ad6930841bdf3ea0521813bdcc6a12"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/great_fox_ai.rs",
+        "parentBlob": "487b1a4b684c90f15af8d96b27fb555693b738f0",
+        "currentCanonicalBlob": "487b1a4b684c90f15af8d96b27fb555693b738f0"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/hell_ai.rs",
+        "parentBlob": "d9f504ebb35aebd1cb8dfe14469c4369b9a8ad30",
+        "currentCanonicalBlob": "d9f504ebb35aebd1cb8dfe14469c4369b9a8ad30"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/horned_ai.rs",
+        "parentBlob": "1ee30d0c94433db89213e37a2ae656d0b4239647",
+        "currentCanonicalBlob": "1ee30d0c94433db89213e37a2ae656d0b4239647"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/horned_encounter_ai.rs",
+        "parentBlob": "e4949914e283e8598974730ff28c2cbd5cae7d15",
+        "currentCanonicalBlob": "e4949914e283e8598974730ff28c2cbd5cae7d15"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/hugger_ai.rs",
+        "parentBlob": "e936bad80199d83d06e913e09f05407c8b843bea",
+        "currentCanonicalBlob": "e936bad80199d83d06e913e09f05407c8b843bea"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/journey_events.rs",
+        "parentBlob": "9501f8fd7650e7ae69b2f49ea9cc30aae268b6ed",
+        "currentCanonicalBlob": "9501f8fd7650e7ae69b2f49ea9cc30aae268b6ed"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/kirin_snow_ai.rs",
+        "parentBlob": "aa585162cc25f56c4cc9e2f338776571cb227649",
+        "currentCanonicalBlob": "aa585162cc25f56c4cc9e2f338776571cb227649"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/meow_ai.rs",
+        "parentBlob": "f798d2394c4420eaae8e377d887268776b1320b4",
+        "currentCanonicalBlob": "f798d2394c4420eaae8e377d887268776b1320b4"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/mud_boulder_ai.rs",
+        "parentBlob": "41b198abd2972d1424957e496d30677df51c9715",
+        "currentCanonicalBlob": "41b198abd2972d1424957e496d30677df51c9715"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/node_ai.rs",
+        "parentBlob": "5d72c8f527b8d6232c28dd1edc1544cfdac7cc62",
+        "currentCanonicalBlob": "5d72c8f527b8d6232c28dd1edc1544cfdac7cc62"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+        "parentBlob": "b3047be8763e6a641e854ab10ad25297a4eedea6",
+        "currentCanonicalBlob": "b3047be8763e6a641e854ab10ad25297a4eedea6"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/periodic_poison.rs",
+        "parentBlob": "53a78d48c997c7b0fd077066fa84dfd20ca61c32",
+        "currentCanonicalBlob": "53a78d48c997c7b0fd077066fa84dfd20ca61c32"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/pet_special_ai.rs",
+        "parentBlob": "1bff4448f62b00e420d2036728ff4de1591f73a3",
+        "currentCanonicalBlob": "1bff4448f62b00e420d2036728ff4de1591f73a3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/player_magic_cooldown_tests.rs",
+        "parentBlob": "bfe731c34c7a8b0bb11ed433c2a56a15878fef12",
+        "currentCanonicalBlob": "bfe731c34c7a8b0bb11ed433c2a56a15878fef12"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/reactive_ai.rs",
+        "parentBlob": "9b3f4edfda687d73503fcf02befecb2d6dce2fe1",
+        "currentCanonicalBlob": "9b3f4edfda687d73503fcf02befecb2d6dce2fe1"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/revival_ai.rs",
+        "parentBlob": "54053eefe1943af038dccf75b692b7bc655a262f",
+        "currentCanonicalBlob": "54053eefe1943af038dccf75b692b7bc655a262f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/reward_rate_tests.rs",
+        "parentBlob": "480ccb72f5b8b2a72947b7dc2c2ac34d50e68184",
+        "currentCanonicalBlob": "480ccb72f5b8b2a72947b7dc2c2ac34d50e68184"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/safe_zone_profile_tests.rs",
+        "parentBlob": "3f709f09dfc44cf309decd9f88695743eecbbadb",
+        "currentCanonicalBlob": "3f709f09dfc44cf309decd9f88695743eecbbadb"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/shared_harvest_tests.rs",
+        "parentBlob": "9234b3789a1bac7400c230080b42f73191adc7b0",
+        "currentCanonicalBlob": "9234b3789a1bac7400c230080b42f73191adc7b0"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/shinsu_ai.rs",
+        "parentBlob": "1920bd20ce78a0dbdfae5d62d4fafefd0f438c6f",
+        "currentCanonicalBlob": "1920bd20ce78a0dbdfae5d62d4fafefd0f438c6f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/sleep_ai.rs",
+        "parentBlob": "8e2eb905a71e80dc845979e94eb9c95ca2cba8a0",
+        "currentCanonicalBlob": "8e2eb905a71e80dc845979e94eb9c95ca2cba8a0"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/snake_totem_ai.rs",
+        "parentBlob": "ed4eb4cc2cb1e38f336fc5a106c20a478821d138",
+        "currentCanonicalBlob": "ed4eb4cc2cb1e38f336fc5a106c20a478821d138"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/soulfire_practice_tests.rs",
+        "parentBlob": "c71ac8e402fb4b3ad54a38add4d1777e6848a6d0",
+        "currentCanonicalBlob": "c71ac8e402fb4b3ad54a38add4d1777e6848a6d0"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/special_ai.rs",
+        "parentBlob": "7d299aba5ce8b1157f085354f76f0eea7182dabc",
+        "currentCanonicalBlob": "7d299aba5ce8b1157f085354f76f0eea7182dabc"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/spider_ai.rs",
+        "parentBlob": "d32bb0a2df6e27bb117b46bf53a1852805237e98",
+        "currentCanonicalBlob": "d32bb0a2df6e27bb117b46bf53a1852805237e98"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/stage_summons.rs",
+        "parentBlob": "21de56664a1069ae73c5a3add01ab96e69c8daac",
+        "currentCanonicalBlob": "21de56664a1069ae73c5a3add01ab96e69c8daac"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/statue_centipede_ai.rs",
+        "parentBlob": "876b6789f0003e8567e548774fba1bb73d3b0aef",
+        "currentCanonicalBlob": "876b6789f0003e8567e548774fba1bb73d3b0aef"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/status_poison.rs",
+        "parentBlob": "9552338cb16cdc84f10f05e0664c7eda2a142b0e",
+        "currentCanonicalBlob": "9552338cb16cdc84f10f05e0664c7eda2a142b0e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/stone_trap_ai.rs",
+        "parentBlob": "21e2ca5fd6e6555dd682ad165212fea976cc387d",
+        "currentCanonicalBlob": "21e2ca5fd6e6555dd682ad165212fea976cc387d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/thunder_ai.rs",
+        "parentBlob": "e8aacd4fd917fbdd7d31160810c37487bc4d8207",
+        "currentCanonicalBlob": "e8aacd4fd917fbdd7d31160810c37487bc4d8207"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/town_archer_ai.rs",
+        "parentBlob": "f645280d02920d84bb76ecd4b8e756dc3fb6219d",
+        "currentCanonicalBlob": "f645280d02920d84bb76ecd4b8e756dc3fb6219d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/trap_rock_ai.rs",
+        "parentBlob": "4ed9e3b4a3730ce086aad5cabca0b671376e3210",
+        "currentCanonicalBlob": "4ed9e3b4a3730ce086aad5cabca0b671376e3210"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/tree_queen_ai.rs",
+        "parentBlob": "d29c5263bafc69c24a0ebdb3b806677918511866",
+        "currentCanonicalBlob": "d29c5263bafc69c24a0ebdb3b806677918511866"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/tucson_ai.rs",
+        "parentBlob": "b613184bedd8d6eb2c7056a827258d8cce4d97e3",
+        "currentCanonicalBlob": "b613184bedd8d6eb2c7056a827258d8cce4d97e3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/vampire_ai.rs",
+        "parentBlob": "589127ef904a9269c60c863d31e7c2d1ae53aa4e",
+        "currentCanonicalBlob": "589127ef904a9269c60c863d31e7c2d1ae53aa4e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/visibility_ai.rs",
+        "parentBlob": "834219d6633513ac018295b75d2190e7e0bf286f",
+        "currentCanonicalBlob": "834219d6633513ac018295b75d2190e7e0bf286f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/yimoogi_ai.rs",
+        "parentBlob": "c3f6be8875e89ac1f1bab21767c56058953a1317",
+        "currentCanonicalBlob": "c3f6be8875e89ac1f1bab21767c56058953a1317"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+        "parentBlob": "e941aa8e16a0410b9b79ca9f11116412bd7e8a93",
+        "currentCanonicalBlob": "e941aa8e16a0410b9b79ca9f11116412bd7e8a93"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+        "parentBlob": "884278ba228a8ddbab1aa01d278154c0a8902255",
+        "currentCanonicalBlob": "884278ba228a8ddbab1aa01d278154c0a8902255"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/big_map.rs",
+        "parentBlob": "88e4800c303616d0cd7012d4f95a63dbd5fcee5d",
+        "currentCanonicalBlob": "88e4800c303616d0cd7012d4f95a63dbd5fcee5d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/character_wings.rs",
+        "parentBlob": "e6db453e5f05d28e923c1c1819c814842f08be92",
+        "currentCanonicalBlob": "e6db453e5f05d28e923c1c1819c814842f08be92"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/crystal_map_events.rs",
+        "parentBlob": "6156a7f432398e40e81e59b3cb73d2dae4a5afb4",
+        "currentCanonicalBlob": "6156a7f432398e40e81e59b3cb73d2dae4a5afb4"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/crystal_map_hazards.rs",
+        "parentBlob": "92c9929212c6a9e7bc98baf5cc5bd48fac35a2a3",
+        "currentCanonicalBlob": "92c9929212c6a9e7bc98baf5cc5bd48fac35a2a3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/crystal_scroll_teleport.rs",
+        "parentBlob": "52b95f78dd5f27b2f00e95937bd54436ec28acee",
+        "currentCanonicalBlob": "52b95f78dd5f27b2f00e95937bd54436ec28acee"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/fishing_transform.rs",
+        "parentBlob": "f3fff818e6565c9dcf9c79f4892e77b14af5f21d",
+        "currentCanonicalBlob": "f3fff818e6565c9dcf9c79f4892e77b14af5f21d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/friends_authority.rs",
+        "parentBlob": "1809740e1c3486da6566b8a707c8450d797e5329",
+        "currentCanonicalBlob": "1809740e1c3486da6566b8a707c8450d797e5329"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/great_fox_spirit_recall.rs",
+        "parentBlob": "20f45c03f7e66e4571663f39df86c133cee5d653",
+        "currentCanonicalBlob": "20f45c03f7e66e4571663f39df86c133cee5d653"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/hero_ai.rs",
+        "parentBlob": "e1b1226fc022823d60b5baeb4432014df9436143",
+        "currentCanonicalBlob": "e1b1226fc022823d60b5baeb4432014df9436143"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/intelligent_creature_authority.rs",
+        "parentBlob": "7ce297d36ffdfa447d8f780b9f0ec4008fec175c",
+        "currentCanonicalBlob": "7ce297d36ffdfa447d8f780b9f0ec4008fec175c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/item_stack_images.rs",
+        "parentBlob": "5013581f39f76cc6f766d8ff257985ef5caedb41",
+        "currentCanonicalBlob": "5013581f39f76cc6f766d8ff257985ef5caedb41"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/login_notice.rs",
+        "parentBlob": "a42a5d0e678542eebfe7ed2659223902c49e5e9a",
+        "currentCanonicalBlob": "a42a5d0e678542eebfe7ed2659223902c49e5e9a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/mail_status_transactions.rs",
+        "parentBlob": "c8b02efa0850a1769c9feda4602c9181401ee2e8",
+        "currentCanonicalBlob": "c8b02efa0850a1769c9feda4602c9181401ee2e8"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/map_coordinate_events.rs",
+        "parentBlob": "38f7f22db4e41c9fa13093674b89bab483162b4d",
+        "currentCanonicalBlob": "38f7f22db4e41c9fa13093674b89bab483162b4d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/map_event_binding_e1.rs",
+        "parentBlob": "362f106d53359800f9803effdd3904c024114213",
+        "currentCanonicalBlob": "362f106d53359800f9803effdd3904c024114213"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/market_refine_custody.rs",
+        "parentBlob": "b9e82cd3f2cc30018e307b7083d72336ce6d599b",
+        "currentCanonicalBlob": "b9e82cd3f2cc30018e307b7083d72336ce6d599b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/marriage_authority.rs",
+        "parentBlob": "67d57ef5d25d1ab12300c93cd8a7e8ac0df27642",
+        "currentCanonicalBlob": "67d57ef5d25d1ab12300c93cd8a7e8ac0df27642"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/mentor_authority.rs",
+        "parentBlob": "0e8993d25de864361881995ff12094bb6912192a",
+        "currentCanonicalBlob": "0e8993d25de864361881995ff12094bb6912192a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/native_startup_contract.rs",
+        "parentBlob": "eb01e57a5fb640697a8efb2f816d9b7a953fc2e4",
+        "currentCanonicalBlob": "eb01e57a5fb640697a8efb2f816d9b7a953fc2e4"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/newcomer_progression_persistence.rs",
+        "parentBlob": "c16b033791912da4b9d7a383184a259bb01b6575",
+        "currentCanonicalBlob": "c16b033791912da4b9d7a383184a259bb01b6575"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/newcomer_v2_training_spawns.rs",
+        "parentBlob": "420e368e30fa326699c5109c137d0af458137e73",
+        "currentCanonicalBlob": "420e368e30fa326699c5109c137d0af458137e73"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/ordinary_candidate_loop.rs",
+        "parentBlob": "fb83f6291b8aef927ecac9916d5f67ec64613d93",
+        "currentCanonicalBlob": "fb83f6291b8aef927ecac9916d5f67ec64613d93"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/platinum_176_combat_milestones.rs",
+        "parentBlob": "4ffd4504098d0fe81fca20502ef80bd0ac64fb87",
+        "currentCanonicalBlob": "4ffd4504098d0fe81fca20502ef80bd0ac64fb87"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/platinum_176_party_boss.rs",
+        "parentBlob": "447368b39cb8dd7abc4b6143662c0dc55803b759",
+        "currentCanonicalBlob": "447368b39cb8dd7abc4b6143662c0dc55803b759"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/platinum_176_progression.rs",
+        "parentBlob": "3518c392d255a5b42149ca65d6e7dc1944ebaeed",
+        "currentCanonicalBlob": "3518c392d255a5b42149ca65d6e7dc1944ebaeed"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/quest_agent_respawns.rs",
+        "parentBlob": "d5c1186a7f72f73baa4a4c2ae97c4251b1f6677d",
+        "currentCanonicalBlob": "d5c1186a7f72f73baa4a4c2ae97c4251b1f6677d"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/quest_agent_special_scripts.rs",
+        "parentBlob": "1a177c016eb6e8ca5ebd61675930c540c66c9736",
+        "currentCanonicalBlob": "1a177c016eb6e8ca5ebd61675930c540c66c9736"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/quest_icons.rs",
+        "parentBlob": "2550d922597fed77d274bdc6402cd39956ae467c",
+        "currentCanonicalBlob": "2550d922597fed77d274bdc6402cd39956ae467c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/quest_recurrence_persistence.rs",
+        "parentBlob": "f43ecd8aa1d2ed5f1651708a0ea6107e778fe516",
+        "currentCanonicalBlob": "f43ecd8aa1d2ed5f1651708a0ea6107e778fe516"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/ranking_shared_presence.rs",
+        "parentBlob": "88b90a15afa77e42bd21c448ef1ff2d530ca5253",
+        "currentCanonicalBlob": "88b90a15afa77e42bd21c448ef1ff2d530ca5253"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/ranking.rs",
+        "parentBlob": "55a77699d14a180d2a04acc7c8156ccf9a22106b",
+        "currentCanonicalBlob": "55a77699d14a180d2a04acc7c8156ccf9a22106b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/refine_oven_custody.rs",
+        "parentBlob": "d67ab29c533c57c75ec8a10b08a35ead86cf5151",
+        "currentCanonicalBlob": "d67ab29c533c57c75ec8a10b08a35ead86cf5151"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/replica_recovery_config.rs",
+        "parentBlob": "9151521f1d04eb5a71d1ccec60497cb8fc71c0b6",
+        "currentCanonicalBlob": "9151521f1d04eb5a71d1ccec60497cb8fc71c0b6"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/retained_bootstrap.rs",
+        "parentBlob": "0968500ac618edbca1263e7c7f5cb6b7a9c029db",
+        "currentCanonicalBlob": "0968500ac618edbca1263e7c7f5cb6b7a9c029db"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/save_failure_propagation.rs",
+        "parentBlob": "3b2429317e9865e7ae921103e5dec085aa598aa7",
+        "currentCanonicalBlob": "3b2429317e9865e7ae921103e5dec085aa598aa7"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/security_lifecycle.rs",
+        "parentBlob": "4a700823683a52877b6785dbe1783c97be8e185f",
+        "currentCanonicalBlob": "4a700823683a52877b6785dbe1783c97be8e185f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_entity_combat.rs",
+        "parentBlob": "d6a2646f22cc70f0432ad9bea5a5c9618b01eeeb",
+        "currentCanonicalBlob": "d6a2646f22cc70f0432ad9bea5a5c9618b01eeeb"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_armadillo_ai.rs",
+        "parentBlob": "2e455e0c8f8113d9f6007f4196ddeb1f5dd0b1de",
+        "currentCanonicalBlob": "2e455e0c8f8113d9f6007f4196ddeb1f5dd0b1de"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_evil_mir_ai.rs",
+        "parentBlob": "a89cbf7dbf8a9790edbe04913d27391298a1a92e",
+        "currentCanonicalBlob": "a89cbf7dbf8a9790edbe04913d27391298a1a92e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_football_ai.rs",
+        "parentBlob": "c35c8f35d87003a750f0c8ee226b18a148e4a6dd",
+        "currentCanonicalBlob": "c35c8f35d87003a750f0c8ee226b18a148e4a6dd"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_gate_ai.rs",
+        "parentBlob": "686c8c719a9c5f89b5404ad7d58ef6b58f240bdc",
+        "currentCanonicalBlob": "686c8c719a9c5f89b5404ad7d58ef6b58f240bdc"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_great_fox_ai.rs",
+        "parentBlob": "0ddb54aa882994bfe1b6d6aa372b62ab1f042f6c",
+        "currentCanonicalBlob": "0ddb54aa882994bfe1b6d6aa372b62ab1f042f6c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_hell_ai.rs",
+        "parentBlob": "727e497e6d9081433c9fede136c9f40176d7ddb1",
+        "currentCanonicalBlob": "727e497e6d9081433c9fede136c9f40176d7ddb1"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_horned_ai.rs",
+        "parentBlob": "c843df790c4fdc4035a36803a8ae926d3c598aad",
+        "currentCanonicalBlob": "c843df790c4fdc4035a36803a8ae926d3c598aad"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_horned_encounter_ai.rs",
+        "parentBlob": "e1d624843441147adcc953da0ca5b26d99db7c44",
+        "currentCanonicalBlob": "e1d624843441147adcc953da0ca5b26d99db7c44"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_hugger_ai.rs",
+        "parentBlob": "1e75f43036be7972bd972f71dd1994972bd36a7e",
+        "currentCanonicalBlob": "1e75f43036be7972bd972f71dd1994972bd36a7e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_kirin_snow_ai.rs",
+        "parentBlob": "cb1fe8d1d65c650308671e7c3dd8f5cd211f8d82",
+        "currentCanonicalBlob": "cb1fe8d1d65c650308671e7c3dd8f5cd211f8d82"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_meow_ai.rs",
+        "parentBlob": "19f5cdd34723e7e1a7a5de4ef9ec61467da0f9dc",
+        "currentCanonicalBlob": "19f5cdd34723e7e1a7a5de4ef9ec61467da0f9dc"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_mud_boulder_ai.rs",
+        "parentBlob": "a503c324ef5695a3d3c9a0ae83868d067a658824",
+        "currentCanonicalBlob": "a503c324ef5695a3d3c9a0ae83868d067a658824"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_node_ai.rs",
+        "parentBlob": "4398f447eecc94c59abac5638db4e55231c2597f",
+        "currentCanonicalBlob": "4398f447eecc94c59abac5638db4e55231c2597f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_passive_ai.rs",
+        "parentBlob": "0ae25324bb7a0ed1281b75b8373c4aca8704d831",
+        "currentCanonicalBlob": "0ae25324bb7a0ed1281b75b8373c4aca8704d831"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_pet_special_ai.rs",
+        "parentBlob": "27a28b1cd62f7a05b58009cc0e617553b638c405",
+        "currentCanonicalBlob": "27a28b1cd62f7a05b58009cc0e617553b638c405"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_reactive_ai.rs",
+        "parentBlob": "1b5f45604af67624f7a4b3806fbc1c1e201b6446",
+        "currentCanonicalBlob": "1b5f45604af67624f7a4b3806fbc1c1e201b6446"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_revival_ai.rs",
+        "parentBlob": "649db01072e9b23a86b40221e469f7bb045dfea2",
+        "currentCanonicalBlob": "649db01072e9b23a86b40221e469f7bb045dfea2"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_shinsu_ai.rs",
+        "parentBlob": "02a7a6b41a4dcbc497cb42773fe45284de801e26",
+        "currentCanonicalBlob": "02a7a6b41a4dcbc497cb42773fe45284de801e26"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_sleep_ai.rs",
+        "parentBlob": "634fff0221e1151fefc5efab62a8429fad8bd591",
+        "currentCanonicalBlob": "634fff0221e1151fefc5efab62a8429fad8bd591"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_snake_totem_ai.rs",
+        "parentBlob": "45341a2d725fce01c2b36b5ff7f7ba4fcc7fa777",
+        "currentCanonicalBlob": "45341a2d725fce01c2b36b5ff7f7ba4fcc7fa777"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_special_ai.rs",
+        "parentBlob": "93ff568c8cc0c4448c7a79e64dcfb96566cc6a8b",
+        "currentCanonicalBlob": "93ff568c8cc0c4448c7a79e64dcfb96566cc6a8b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_spider_ai.rs",
+        "parentBlob": "d30302c81cfec518c2309b9f09753bb4248d4eb2",
+        "currentCanonicalBlob": "d30302c81cfec518c2309b9f09753bb4248d4eb2"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_stage_summons.rs",
+        "parentBlob": "d624be845caf4aeb2d8b648f44e6d3ebd21ecdfd",
+        "currentCanonicalBlob": "d624be845caf4aeb2d8b648f44e6d3ebd21ecdfd"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_statue_centipede_ai.rs",
+        "parentBlob": "048f97f94b3f90b1cb6496da831f3655ff085d08",
+        "currentCanonicalBlob": "048f97f94b3f90b1cb6496da831f3655ff085d08"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_stone_trap_ai.rs",
+        "parentBlob": "53db4a98b0a59dfc4e9f54311564fd117b3c98cb",
+        "currentCanonicalBlob": "53db4a98b0a59dfc4e9f54311564fd117b3c98cb"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_thunder_ai.rs",
+        "parentBlob": "716d90156fa19379404d79e58d50b626335796db",
+        "currentCanonicalBlob": "716d90156fa19379404d79e58d50b626335796db"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_town_archer_ai.rs",
+        "parentBlob": "c22e8fdd70539ddd7e3bb0b34404b972d8cf021f",
+        "currentCanonicalBlob": "c22e8fdd70539ddd7e3bb0b34404b972d8cf021f"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_trap_rock_ai.rs",
+        "parentBlob": "bedb394367c240a86114225170ce526a173e5d1c",
+        "currentCanonicalBlob": "bedb394367c240a86114225170ce526a173e5d1c"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_tree_queen_ai.rs",
+        "parentBlob": "2e3c71815f52e368c6feb5a3d1112582894bd6a4",
+        "currentCanonicalBlob": "2e3c71815f52e368c6feb5a3d1112582894bd6a4"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_tucson_ai.rs",
+        "parentBlob": "366daa26160e1f688ed4b65b6684eb2e421980ca",
+        "currentCanonicalBlob": "366daa26160e1f688ed4b65b6684eb2e421980ca"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_vampire_ai.rs",
+        "parentBlob": "6d735a3d89028255d8181c15bae5eef970190aa5",
+        "currentCanonicalBlob": "6d735a3d89028255d8181c15bae5eef970190aa5"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_visibility_ai.rs",
+        "parentBlob": "d4d44fa559ed2284b5b2df27eae24f6930f70c8e",
+        "currentCanonicalBlob": "d4d44fa559ed2284b5b2df27eae24f6930f70c8e"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_monster_yimoogi_ai.rs",
+        "parentBlob": "d56efad9a31f7ad82b3f52d0cb978be175701c50",
+        "currentCanonicalBlob": "d56efad9a31f7ad82b3f52d0cb978be175701c50"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_player_damage_settlement.rs",
+        "parentBlob": "d60bd104f8e079f54d5c731092c74564001685fb",
+        "currentCanonicalBlob": "d60bd104f8e079f54d5c731092c74564001685fb"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_player_death_zone.rs",
+        "parentBlob": "f5540073663cece33d438e515a29e337155507ba",
+        "currentCanonicalBlob": "f5540073663cece33d438e515a29e337155507ba"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_player_vital_transfer.rs",
+        "parentBlob": "bec29d74c2e2ea1bb4f733b8f4d906d53a7be981",
+        "currentCanonicalBlob": "bec29d74c2e2ea1bb4f733b8f4d906d53a7be981"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_trade_completion.rs",
+        "parentBlob": "3e8c1271234e08397711eec065610cd47dbbfa08",
+        "currentCanonicalBlob": "3e8c1271234e08397711eec065610cd47dbbfa08"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_trade_gold.rs",
+        "parentBlob": "f95dbe20655c5ca1552f0961c276bd94924983c5",
+        "currentCanonicalBlob": "f95dbe20655c5ca1552f0961c276bd94924983c5"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_zone_melee_mana.rs",
+        "parentBlob": "c78b344fe131201ad2e678f7ae72a16424ccba8a",
+        "currentCanonicalBlob": "c78b344fe131201ad2e678f7ae72a16424ccba8a"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_zone_self_magic.rs",
+        "parentBlob": "5b103276b645e08a2af41d4704cf48b77b882ac8",
+        "currentCanonicalBlob": "5b103276b645e08a2af41d4704cf48b77b882ac8"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_zone_thrusting.rs",
+        "parentBlob": "fab7f99305c5f7cd5eacad0d406f624d5aac9898",
+        "currentCanonicalBlob": "fab7f99305c5f7cd5eacad0d406f624d5aac9898"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/shared_zone.rs",
+        "parentBlob": "925db35da4384804147ad1e2fb5efd45832439e5",
+        "currentCanonicalBlob": "925db35da4384804147ad1e2fb5efd45832439e5"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/social_economy_integration.rs",
+        "parentBlob": "78a75dcd590596c694f681a2e62bc4facff48b18",
+        "currentCanonicalBlob": "78a75dcd590596c694f681a2e62bc4facff48b18"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/storage_request_id.rs",
+        "parentBlob": "388225056fe1fad30b18882fad7e3e772185abe3",
+        "currentCanonicalBlob": "388225056fe1fad30b18882fad7e3e772185abe3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/trade_item_destinations.rs",
+        "parentBlob": "9b1fa56e2f739b2c29dce35c9997a39ce5af4fda",
+        "currentCanonicalBlob": "9b1fa56e2f739b2c29dce35c9997a39ce5af4fda"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/trade_item_merges.rs",
+        "parentBlob": "f0922844858edc3c658dbf1551cf948b40b6d1e0",
+        "currentCanonicalBlob": "f0922844858edc3c658dbf1551cf948b40b6d1e0"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/user_item_uid_file.rs",
+        "parentBlob": "6ba4fff5cb956c85fcaba9c55c87c110a5b75ad5",
+        "currentCanonicalBlob": "6ba4fff5cb956c85fcaba9c55c87c110a5b75ad5"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/vertical_slice.rs",
+        "parentBlob": "2775679de70f73d5b8e15eb6744ce634defca06b",
+        "currentCanonicalBlob": "2775679de70f73d5b8e15eb6744ce634defca06b"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/yin_devil_node.rs",
+        "parentBlob": "ca4e12633745275a24fb6ae2fc0d6bdc28229fa3",
+        "currentCanonicalBlob": "ca4e12633745275a24fb6ae2fc0d6bdc28229fa3"
+      },
+      {
+        "path": "mir2-web3/apps/simulation/tests/zone_replay.rs",
+        "parentBlob": "4f0f52cd7f2504d38ca3bbd10579b91e314e5a96",
+        "currentCanonicalBlob": "4f0f52cd7f2504d38ca3bbd10579b91e314e5a96"
+      },
+      {
+        "path": "mir2-web3/Cargo.lock",
+        "parentBlob": "e21059c8430d0c1279c9b53f0f417efe67340922",
+        "currentCanonicalBlob": "e21059c8430d0c1279c9b53f0f417efe67340922"
+      },
+      {
+        "path": "mir2-web3/Cargo.toml",
+        "parentBlob": "8c0567acb253eec7f94fad349d0d7de2883b8c16",
+        "currentCanonicalBlob": "8c0567acb253eec7f94fad349d0d7de2883b8c16"
+      },
+      {
+        "path": "mir2-web3/config/quest-guidance/newcomer-journey-v1.json",
+        "parentBlob": "31675ed6969c5614919846bddb423f2a4144e707",
+        "currentCanonicalBlob": "31675ed6969c5614919846bddb423f2a4144e707"
+      },
+      {
+        "path": "mir2-web3/config/quest-guidance/newcomer-journey-v2-ui.json",
+        "parentBlob": "6f076a5ea55929b2abda661c76d4b6d5289bdd74",
+        "currentCanonicalBlob": "6f076a5ea55929b2abda661c76d4b6d5289bdd74"
+      },
+      {
+        "path": "mir2-web3/config/quest-guidance/newcomer-journey-v2.json",
+        "parentBlob": "5e8e0103573e5817c6a99e563dfaa5814e6d0ca3",
+        "currentCanonicalBlob": "5e8e0103573e5817c6a99e563dfaa5814e6d0ca3"
+      },
+      {
+        "path": "mir2-web3/config/quest-guidance/newcomer-supplies.json",
+        "parentBlob": "fc3818903e99af395fb9caf2d669be873db412f0",
+        "currentCanonicalBlob": "fc3818903e99af395fb9caf2d669be873db412f0"
+      },
+      {
+        "path": "mir2-web3/config/quest-guidance/newcomer-v1.json",
+        "parentBlob": "6482db7dda98086f26ee05467c7cdeea01b42956",
+        "currentCanonicalBlob": "6482db7dda98086f26ee05467c7cdeea01b42956"
+      },
+      {
+        "path": "mir2-web3/config/quest-guidance/newcomer-v2-graduation.json",
+        "parentBlob": "9331f3bcb212ae008e58d668eb8c7b57363b6aa0",
+        "currentCanonicalBlob": "9331f3bcb212ae008e58d668eb8c7b57363b6aa0"
+      },
+      {
+        "path": "mir2-web3/config/quest-guidance/newcomer-v2.json",
+        "parentBlob": "681f3fa0ff022740be625ccc61ddf6bb2fcfaa87",
+        "currentCanonicalBlob": "681f3fa0ff022740be625ccc61ddf6bb2fcfaa87"
+      },
+      {
+        "path": "mir2-web3/config/quest-guidance/README.md",
+        "parentBlob": "3e9f9ade3b2d295dcbc8ec2452e9b2d007b602c0",
+        "currentCanonicalBlob": "3e9f9ade3b2d295dcbc8ec2452e9b2d007b602c0"
+      },
+      {
+        "path": "mir2-web3/docs/SLG-PRODUCTION-CATALOG.v0.2.json",
+        "parentBlob": "c2e639404a1ed9f287f34b393a78585404e5235d",
+        "currentCanonicalBlob": "c2e639404a1ed9f287f34b393a78585404e5235d"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0001_core.sql",
+        "parentBlob": "e3b0e659c73351aeffa199e7b6787005ea115a39",
+        "currentCanonicalBlob": "e3b0e659c73351aeffa199e7b6787005ea115a39"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0002_normalized_projections.sql",
+        "parentBlob": "9022e1b6d57b069082f69343ba7713e4498cd130",
+        "currentCanonicalBlob": "9022e1b6d57b069082f69343ba7713e4498cd130"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0003_zone_owner_leases.sql",
+        "parentBlob": "bd54384b74149ee455c8ed9fccc4df462d9a22ef",
+        "currentCanonicalBlob": "bd54384b74149ee455c8ed9fccc4df462d9a22ef"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0004_city_currencies.sql",
+        "parentBlob": "ee59468a7d4b286c8b4fde535d09ae34a43877d9",
+        "currentCanonicalBlob": "ee59468a7d4b286c8b4fde535d09ae34a43877d9"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0005_game_economy_outbox.sql",
+        "parentBlob": "ca667dde47b6dbba718d510145d585d169fc5670",
+        "currentCanonicalBlob": "ca667dde47b6dbba718d510145d585d169fc5670"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0006_game_economy_bootstrap.sql",
+        "parentBlob": "ec9cc25d5fdac40ddeae41038c06b9ea4157add9",
+        "currentCanonicalBlob": "ec9cc25d5fdac40ddeae41038c06b9ea4157add9"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0007_admin_read_audits.sql",
+        "parentBlob": "b9255d1a12fe9fc30464d05fd152a49c778f7b5e",
+        "currentCanonicalBlob": "b9255d1a12fe9fc30464d05fd152a49c778f7b5e"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0008_ai_daily_reports.sql",
+        "parentBlob": "b1266955c50eea95a2569f8afe8f896fdb7139a6",
+        "currentCanonicalBlob": "b1266955c50eea95a2569f8afe8f896fdb7139a6"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0009_world_director_approval.sql",
+        "parentBlob": "951afba8b1e3c2d2934b0eb81f1ca7de78b5a18b",
+        "currentCanonicalBlob": "951afba8b1e3c2d2934b0eb81f1ca7de78b5a18b"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0010_commercial_identity.sql",
+        "parentBlob": "62c3a294df21280fea8b47eca9312800fcbd1926",
+        "currentCanonicalBlob": "62c3a294df21280fea8b47eca9312800fcbd1926"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0011_game_economy_trade_projections.sql",
+        "parentBlob": "4eacac1739d677ad1c3e0950c92657d5ed2e231c",
+        "currentCanonicalBlob": "4eacac1739d677ad1c3e0950c92657d5ed2e231c"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0012_shared_guild_authority.sql",
+        "parentBlob": "0221716f0f639f19e8cd303f1b81e2a238b4e407",
+        "currentCanonicalBlob": "0221716f0f639f19e8cd303f1b81e2a238b4e407"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0013_shared_guild_clock.sql",
+        "parentBlob": "b4db1796a8704a39c955203e214dadca496474cc",
+        "currentCanonicalBlob": "b4db1796a8704a39c955203e214dadca496474cc"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0014_shared_hero_authority.sql",
+        "parentBlob": "f596bc51f3f754a8ca2f9cc6a480e47c4b471463",
+        "currentCanonicalBlob": "f596bc51f3f754a8ca2f9cc6a480e47c4b471463"
+      },
+      {
+        "path": "mir2-web3/infra/postgres/migrations/0015_shared_item_identity.sql",
+        "parentBlob": "b65d1a89b7eb7162272489f56234dacd142431a5",
+        "currentCanonicalBlob": "b65d1a89b7eb7162272489f56234dacd142431a5"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/Cargo.toml",
+        "parentBlob": "2cdb3bc2f8913f36b4ad7e86d7b18e653f5253b9",
+        "currentCanonicalBlob": "2cdb3bc2f8913f36b4ad7e86d7b18e653f5253b9"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/content_profiles/platinum_176.json",
+        "parentBlob": "3f31cfeb85ebfa7caf53fd044ae4119a175c61e5",
+        "currentCanonicalBlob": "3f31cfeb85ebfa7caf53fd044ae4119a175c61e5"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_base_stats_packet_manifest.json",
+        "parentBlob": "15b1fd9ab99ca346c1762bb18a91a9c4724b821c",
+        "currentCanonicalBlob": "15b1fd9ab99ca346c1762bb18a91a9c4724b821c"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_buff_manifest.json",
+        "parentBlob": "5a5ad8818853f8c569633271420035b7ee2f8470",
+        "currentCanonicalBlob": "5a5ad8818853f8c569633271420035b7ee2f8470"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_creature_settings.json",
+        "parentBlob": "59f85582436a11bc82403b3837beb6fd9b8aabcd",
+        "currentCanonicalBlob": "59f85582436a11bc82403b3837beb6fd9b8aabcd"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_drop_manifest.json",
+        "parentBlob": "10186bca29dc00be23e6fb84769c1e22d2d6ddae",
+        "currentCanonicalBlob": "10186bca29dc00be23e6fb84769c1e22d2d6ddae"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_game_shop_packet_manifest.json",
+        "parentBlob": "7a41d8dd6767ef85784e346aa142d69618fb853c",
+        "currentCanonicalBlob": "7a41d8dd6767ef85784e346aa142d69618fb853c"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_guild_buff_packet_manifest.json",
+        "parentBlob": "c32720142e5ef62e437ef4f2b3ecd9597010645d",
+        "currentCanonicalBlob": "c32720142e5ef62e437ef4f2b3ecd9597010645d"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_guild_settings.json",
+        "parentBlob": "0cc157169557eb46f9cee55a7a34e218c146dfd0",
+        "currentCanonicalBlob": "0cc157169557eb46f9cee55a7a34e218c146dfd0"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_hero_settings.json",
+        "parentBlob": "50f4ce05e8ed8b216b6bd95ef778151a85a82150",
+        "currentCanonicalBlob": "50f4ce05e8ed8b216b6bd95ef778151a85a82150"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_item_manifest.json",
+        "parentBlob": "4c95509ec59784790f3243739d2b4f19fec4df2e",
+        "currentCanonicalBlob": "4c95509ec59784790f3243739d2b4f19fec4df2e"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_magic_manifest.json",
+        "parentBlob": "73d099ae301a290f8811d784eecc5d8616f5ff50",
+        "currentCanonicalBlob": "73d099ae301a290f8811d784eecc5d8616f5ff50"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_map_event_manifest.json",
+        "parentBlob": "114e3643ce376a1b38ae0229de4f61623a3dde19",
+        "currentCanonicalBlob": "114e3643ce376a1b38ae0229de4f61623a3dde19"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_monster_ai_summary.json",
+        "parentBlob": "a894a2502452f63759ebb750e0b98fc65f902c82",
+        "currentCanonicalBlob": "a894a2502452f63759ebb750e0b98fc65f902c82"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+        "parentBlob": "ca615f4b3290ec04f85dfaa3d0f48f15f91e63ca",
+        "currentCanonicalBlob": "ca615f4b3290ec04f85dfaa3d0f48f15f91e63ca"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_command_summary.json",
+        "parentBlob": "946e2a836370e1070cc381e013faf675aab602e2",
+        "currentCanonicalBlob": "946e2a836370e1070cc381e013faf675aab602e2"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+        "parentBlob": "0260fe100bb8995934e3ebc685e91e1b65b067ba",
+        "currentCanonicalBlob": "0260fe100bb8995934e3ebc685e91e1b65b067ba"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+        "parentBlob": "573b08bb40a7e240552582cce9b3fdd7518d332c",
+        "currentCanonicalBlob": "573b08bb40a7e240552582cce9b3fdd7518d332c"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_quest_packet_manifest.json",
+        "parentBlob": "c04a30f63fa6de0ea25680c9dfd95f50822aab21",
+        "currentCanonicalBlob": "c04a30f63fa6de0ea25680c9dfd95f50822aab21"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_random_item_stats_manifest.json",
+        "parentBlob": "39dcd28b72f69c43d9122471d3965d803d137786",
+        "currentCanonicalBlob": "39dcd28b72f69c43d9122471d3965d803d137786"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_recipe_packet_manifest.json",
+        "parentBlob": "0af231fb5a0537d8c410c7bb174b37dbd617a237",
+        "currentCanonicalBlob": "0af231fb5a0537d8c410c7bb174b37dbd617a237"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_respawn_manifest.json",
+        "parentBlob": "2d8c7437cb4745fe8a9b14f158f63fe808f66538",
+        "currentCanonicalBlob": "2d8c7437cb4745fe8a9b14f158f63fe808f66538"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_starter_map_collision.json",
+        "parentBlob": "db41b31d141b0e1d6bd3dcf921816d5b63809cf6",
+        "currentCanonicalBlob": "db41b31d141b0e1d6bd3dcf921816d5b63809cf6"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/crystal_starter_map_region.json",
+        "parentBlob": "2e4aa275f49cdf6bba1f8ad15e82514209787c3d",
+        "currentCanonicalBlob": "2e4aa275f49cdf6bba1f8ad15e82514209787c3d"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/localization_bundle.json",
+        "parentBlob": "8f3b0960ecf807270d87716a00ec303f766db86a",
+        "currentCanonicalBlob": "8f3b0960ecf807270d87716a00ec303f766db86a"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/platinum_176_bundle.json",
+        "parentBlob": "822e2d0f699df72d07fc150652a15c39c6473b8c",
+        "currentCanonicalBlob": "822e2d0f699df72d07fc150652a15c39c6473b8c"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/generated/quest_presentation_text.rs",
+        "parentBlob": "e92e2455a2e5be976d3346791dc044f2db2cd064",
+        "currentCanonicalBlob": "e92e2455a2e5be976d3346791dc044f2db2cd064"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/i18n-overrides.json",
+        "parentBlob": "05731f25ae7d2f95e4113751054922b506715337",
+        "currentCanonicalBlob": "05731f25ae7d2f95e4113751054922b506715337"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/starter_scene.json",
+        "parentBlob": "7218fdaaf21eff0eb251737297c950f66cd9315c",
+        "currentCanonicalBlob": "7218fdaaf21eff0eb251737297c950f66cd9315c"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/data/starter_server_data.json",
+        "parentBlob": "68f6aa7f2bd455a01d2b541e1bce75f57309afc6",
+        "currentCanonicalBlob": "68f6aa7f2bd455a01d2b541e1bce75f57309afc6"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/src/crystal_creature_settings.rs",
+        "parentBlob": "5827e8bc94d3f997c1f173682805279a897ef4fa",
+        "currentCanonicalBlob": "5827e8bc94d3f997c1f173682805279a897ef4fa"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/src/crystal_guild_settings.rs",
+        "parentBlob": "1f5c1b60ad1fba135841542048befd4e170d3ee1",
+        "currentCanonicalBlob": "1f5c1b60ad1fba135841542048befd4e170d3ee1"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/src/crystal_hero_settings.rs",
+        "parentBlob": "16124332fcf6fc93b7ac1547d6e6406c83f68af9",
+        "currentCanonicalBlob": "16124332fcf6fc93b7ac1547d6e6406c83f68af9"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/src/crystal_item_image.rs",
+        "parentBlob": "bfee6db29cafeaca23f5e43da0ee558eadd949a2",
+        "currentCanonicalBlob": "bfee6db29cafeaca23f5e43da0ee558eadd949a2"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/src/crystal_map_events.rs",
+        "parentBlob": "3e0bea6c3ae09228c401acaccea15a3ef75e9ca0",
+        "currentCanonicalBlob": "3e0bea6c3ae09228c401acaccea15a3ef75e9ca0"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/src/crystal_npc_goods.rs",
+        "parentBlob": "6aada153a011880681cca3aebf770a5db5e3beab",
+        "currentCanonicalBlob": "6aada153a011880681cca3aebf770a5db5e3beab"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/src/lib.rs",
+        "parentBlob": "3f3d3dd1b366947acf1cdedbb0096bc5ca3d64fb",
+        "currentCanonicalBlob": "3f3d3dd1b366947acf1cdedbb0096bc5ca3d64fb"
+      },
+      {
+        "path": "mir2-web3/packages/game-data/tests/platinum_176_content_loop.rs",
+        "parentBlob": "30f0d53e690dec99b86d25a3ca7e4b3b100ec9f5",
+        "currentCanonicalBlob": "30f0d53e690dec99b86d25a3ca7e4b3b100ec9f5"
+      },
+      {
+        "path": "mir2-web3/packages/production/Cargo.toml",
+        "parentBlob": "819d084f422cb860f0971d248725521d9003b3fd",
+        "currentCanonicalBlob": "819d084f422cb860f0971d248725521d9003b3fd"
+      },
+      {
+        "path": "mir2-web3/packages/production/README.md",
+        "parentBlob": "a974a0f55f319f0710fa82fb0cdbb35ab80b996c",
+        "currentCanonicalBlob": "a974a0f55f319f0710fa82fb0cdbb35ab80b996c"
+      },
+      {
+        "path": "mir2-web3/packages/production/src/catalog.rs",
+        "parentBlob": "f289baf8e05b2d65d15cdde5d5a58db6c71c3f4d",
+        "currentCanonicalBlob": "f289baf8e05b2d65d15cdde5d5a58db6c71c3f4d"
+      },
+      {
+        "path": "mir2-web3/packages/production/src/jobs.rs",
+        "parentBlob": "85b513d8c884872c8c9d16a71ef44c7442b8f229",
+        "currentCanonicalBlob": "85b513d8c884872c8c9d16a71ef44c7442b8f229"
+      },
+      {
+        "path": "mir2-web3/packages/production/src/lib.rs",
+        "parentBlob": "ea486e4675ff44c315f14c26e58d87c617923252",
+        "currentCanonicalBlob": "ea486e4675ff44c315f14c26e58d87c617923252"
+      },
+      {
+        "path": "mir2-web3/packages/production/src/planning.rs",
+        "parentBlob": "d5d4c9270fdf4b99a7d42dc9ebbc96a433985a8f",
+        "currentCanonicalBlob": "d5d4c9270fdf4b99a7d42dc9ebbc96a433985a8f"
+      },
+      {
+        "path": "mir2-web3/packages/production/tests/production.rs",
+        "parentBlob": "51896e4a922626d5e625b0ed63b9056dc8b1ee80",
+        "currentCanonicalBlob": "51896e4a922626d5e625b0ed63b9056dc8b1ee80"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/Cargo.toml",
+        "parentBlob": "0f683aea52dd6e3dbcf86e8e79165e8c4258a1aa",
+        "currentCanonicalBlob": "0f683aea52dd6e3dbcf86e8e79165e8c4258a1aa"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/crystal-mvp-v1.json",
+        "parentBlob": "1e625b68ebe888d529ca9032e9e3cc4f44701447",
+        "currentCanonicalBlob": "1e625b68ebe888d529ca9032e9e3cc4f44701447"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/src/catalog_transport.rs",
+        "parentBlob": "e7f98a39c8d90061aa1225b84945a308c235ac72",
+        "currentCanonicalBlob": "e7f98a39c8d90061aa1225b84945a308c235ac72"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/src/error.rs",
+        "parentBlob": "bb4a02cd283c06ee32367f910cbe622374862ba4",
+        "currentCanonicalBlob": "bb4a02cd283c06ee32367f910cbe622374862ba4"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/src/frame.rs",
+        "parentBlob": "1388e130dac368ab02f1c96a6c1f0418eed13c6f",
+        "currentCanonicalBlob": "1388e130dac368ab02f1c96a6c1f0418eed13c6f"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/src/ids.rs",
+        "parentBlob": "23607dd3d1efa6bf31613e547dfbc11cd990f293",
+        "currentCanonicalBlob": "23607dd3d1efa6bf31613e547dfbc11cd990f293"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/src/io.rs",
+        "parentBlob": "7874c666a4c7c86a627ba9ab8f30cd9ab4a62946",
+        "currentCanonicalBlob": "7874c666a4c7c86a627ba9ab8f30cd9ab4a62946"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/src/item_image.rs",
+        "parentBlob": "22667d73dc5bc920cca2f7eb01742ef09c1307c1",
+        "currentCanonicalBlob": "22667d73dc5bc920cca2f7eb01742ef09c1307c1"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/src/lib.rs",
+        "parentBlob": "b04d84d728d038db7d0d233f4bd2b7bd2883166e",
+        "currentCanonicalBlob": "b04d84d728d038db7d0d233f4bd2b7bd2883166e"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/src/packets.rs",
+        "parentBlob": "e750377453a16c1e9449a1d97f006cc6d1c9032c",
+        "currentCanonicalBlob": "e750377453a16c1e9449a1d97f006cc6d1c9032c"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/src/trace.rs",
+        "parentBlob": "4e52672366d0679a42b411cf38c4cdd8fbc00df0",
+        "currentCanonicalBlob": "4e52672366d0679a42b411cf38c4cdd8fbc00df0"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/src/types.rs",
+        "parentBlob": "42b99a0adca9a536d15715d69b2faf7d21504721",
+        "currentCanonicalBlob": "42b99a0adca9a536d15715d69b2faf7d21504721"
+      },
+      {
+        "path": "mir2-web3/packages/protocol/tests/codec.rs",
+        "parentBlob": "716a32f8534ad5fc8b0b1ae1e9186fbf64483261",
+        "currentCanonicalBlob": "716a32f8534ad5fc8b0b1ae1e9186fbf64483261"
+      },
+      {
+        "path": "mir2-web3/rust-toolchain.toml",
+        "parentBlob": "f743bbaef57b29fee96a2ff413c1e71424135560",
+        "currentCanonicalBlob": "f743bbaef57b29fee96a2ff413c1e71424135560"
+      }
+    ],
+    "rootQualificationSha256": "22974873a577347d6e4d1c4f1ecdf26f2bb710a44982f7b3fcb84db6bb3035dd"
+  },
+  "originalToolPins": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.cs",
+      "sha256": "f1eeaaf4bddf13e8e3bae1379100095c4b22fa91c6d6696ad30bd218f9516689",
+      "length": 20309
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.exe",
+      "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e",
+      "length": 37376
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\LICENSE.0BSD.txt",
+      "sha256": "0715e35609fae3255502eab08ba3afea7ae64899c199c02fd2c7f32c5b98516d",
+      "length": 661
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.cargo\\bin\\cargo.exe",
+      "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+      "length": 0
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.cargo\\bin\\rustup.exe",
+      "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+      "length": 12814336
+    },
+    {
+      "path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "sha256": "8bb6fa8c283b4d92120b1ef249a9b311b0f804d4cabbe9981159976c8be76a5e",
+      "length": 495616
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\probe-volume-C.ps1",
+      "sha256": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab",
+      "length": 772
+    }
+  ],
+  "originalPolicyTemplate": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-transport-source37-native-transport-test01.policy.json",
+    "sha256": "0510be32e885c39302f7d4f278b651c7c949eddcff40b7a4e5a797833eb92ca9"
+  },
+  "sourceReviewPins": [
+    {
+      "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\independent-source-review-01.json",
+      "sha256": "74d1be005bc11bec73b3948235859bf1cf544d7cb2945750b0181c5d87b34913",
+      "length": 4304
+    },
+    {
+      "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\independent-source-review-02.json",
+      "sha256": "2ccc335aca9392f1657a15fb8de2abde5ac01de8e0e7a1b5e24383ff8d819aa1",
+      "length": 4589
+    }
+  ],
+  "finalRunnerPin": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\run-check.ps1",
+    "sha256": "6c7802afc7c73cc742d409eb72b6b8898e81e7d9ad4f7e4ae909a2b50a10eb06",
+    "length": 10265
+  },
+  "guardAudit": {
+    "originalCalls": 8,
+    "originalNonceFiles": 40,
+    "allForward": true,
+    "allActualGetVolumeC": true,
+    "allCompletedExitedDisposed": true,
+    "allPolicyB": true,
+    "thresholdBytes": 53687091200,
+    "freshnessMs": 2000,
+    "probeTimeoutMs": 15000,
+    "minimumActualCBytes": 98492534784,
+    "maximumSampleBeginConservativeUpperMs": 1134.9096,
+    "maximumSampleEndConservativeUpperMs": 88.7862,
+    "maximumProbeLaunchToChildUpperMs": 1343.3922000000002,
+    "childrenSerialWithinPhase": true,
+    "runs": [
+      {
+        "run": "creature-reward-tests-01",
+        "includedInFinal": false,
+        "sourceVersion": "01",
+        "actualPassed": 8,
+        "actualFailed": 0,
+        "ignored": 0,
+        "exitCode": 0,
+        "declaredInputs": 462,
+        "sourceRowsVerified": 462,
+        "nonce": "7b8a9e12c8844799904996e3eabf9261",
+        "nonceFiles": 5,
+        "decision": "FORWARD",
+        "actualCRemainingBytes": 108840833024,
+        "sampleBeginAgeMs": 1133.9096,
+        "sampleEndAgeMs": 87.1568,
+        "sampleBeginConservativeUpperMs": 1134.9096,
+        "sampleEndConservativeUpperMs": 88.1568,
+        "probeLaunchToChildUpperMs": 1343.3922000000002,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "postChildPolicy": "B",
+        "childStartedUtc": "2026-10-08T23:37:08.7880000+00:00",
+        "childCompletedUtc": "2026-10-08T23:40:46.9690000+00:00",
+        "policySha256": "34323f6a2070184b6b058e4240778cb40dc074487b98aa792702a1aef816e7ba",
+        "resultSha256": "08699485ad7ef3f9ba2aaff9689724d6cfff81a1a8b075e7873fd6a5efbed8fe",
+        "sourceSnapshotSha256": "a85bacd5bf5e2f6dad3734bd94863edf9828c1701c0148d35a6eeeb3bd7d1297",
+        "sourceReviewSha256": "74d1be005bc11bec73b3948235859bf1cf544d7cb2945750b0181c5d87b34913",
+        "cargoLogSha256": "bbba7d23a7d2cfeaf82990f9749c28e21b2f4f8675dcfbdd985ffb2041e206c1",
+        "rootAuthoritySha256": "a74c569c2a9a30fc6f071833c2868370edc2bdf6f0b7a62d3c031a52e51aca1c",
+        "sourceAcceptanceSha256": "ea76b040c95649a57b14d0fea1242f058080f63550ecf239fd267f9583d6417f"
+      },
+      {
+        "run": "creature-regression-01",
+        "includedInFinal": false,
+        "sourceVersion": "01",
+        "actualPassed": 55,
+        "actualFailed": 0,
+        "ignored": 0,
+        "exitCode": 0,
+        "declaredInputs": 462,
+        "sourceRowsVerified": 462,
+        "nonce": "59089b8f674e494bbe62aa3fb002c9f8",
+        "nonceFiles": 5,
+        "decision": "FORWARD",
+        "actualCRemainingBytes": 107868983296,
+        "sampleBeginAgeMs": 917.673,
+        "sampleEndAgeMs": 83.4887,
+        "sampleBeginConservativeUpperMs": 918.673,
+        "sampleEndConservativeUpperMs": 84.4887,
+        "probeLaunchToChildUpperMs": 1112.9085,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "postChildPolicy": "B",
+        "childStartedUtc": "2026-10-08T23:44:23.1480000+00:00",
+        "childCompletedUtc": "2026-10-08T23:44:45.4640000+00:00",
+        "policySha256": "45f769a5799802fa9820028d3cd77cd88b7c2b2859343da1c1599166dcd60d43",
+        "resultSha256": "e01492bf9e3d92375aa3e1e39039455093f857e1ff0bf3fdd7d3ceedc89405af",
+        "sourceSnapshotSha256": "80c857e4ba8314570862d317f1315a56cdcc2dc2047b9fda3c4d865505acb76c",
+        "sourceReviewSha256": "74d1be005bc11bec73b3948235859bf1cf544d7cb2945750b0181c5d87b34913",
+        "cargoLogSha256": "60857d3a0bbc899a4a9308c66e188d5627cc90584e452c4541da901ecf0f9ff6",
+        "rootAuthoritySha256": "96e74a148e67f5ffab0459ded28c19caea8f129e3d0e3cd178523fa19cea660f",
+        "sourceAcceptanceSha256": "fd4c23c6c02619d0557bd378d2683e7fde44ea8b6dd022cbc0613d32bf94e71a"
+      },
+      {
+        "run": "use-item-regression-01",
+        "includedInFinal": false,
+        "sourceVersion": "01",
+        "actualPassed": 46,
+        "actualFailed": 1,
+        "ignored": 0,
+        "exitCode": 101,
+        "declaredInputs": 462,
+        "sourceRowsVerified": 462,
+        "nonce": "58a42b1481a24271ad683510078cbfdd",
+        "nonceFiles": 5,
+        "decision": "FORWARD",
+        "actualCRemainingBytes": 105539661824,
+        "sampleBeginAgeMs": 943.635,
+        "sampleEndAgeMs": 84.8375,
+        "sampleBeginConservativeUpperMs": 944.635,
+        "sampleEndConservativeUpperMs": 85.8375,
+        "probeLaunchToChildUpperMs": 1136.997,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "postChildPolicy": "B",
+        "childStartedUtc": "2026-10-08T23:51:58.1180000+00:00",
+        "childCompletedUtc": "2026-10-08T23:52:20.7730000+00:00",
+        "policySha256": "36c022e8bbf7858f69db78e721fb2c37b04a9d3c322041923eba3df82fd7d101",
+        "resultSha256": "ddf52369a61a9712b159dd3fd3dca474418fbc35cae1e8fa966ceb82d3fa6877",
+        "sourceSnapshotSha256": "7e1fa71407e2543dee1061eee41b77a8e8b8dca06b098965bae13d155aa53790",
+        "sourceReviewSha256": "74d1be005bc11bec73b3948235859bf1cf544d7cb2945750b0181c5d87b34913",
+        "cargoLogSha256": "cdc08d7bfee6712d53dabc01ba4900de91a9f5f657aa68def3b3ca5bec777d49",
+        "rootAuthoritySha256": "12f3c9bb8f9036f73266c927edede6d2d04a3c45582913e198b2cf761a220956",
+        "sourceAcceptanceSha256": "6c5eac2ba29a4d8708503b3fd02a1f610535597b5453b26775c8ed8ac59c06a5"
+      },
+      {
+        "run": "creature-reward-tests-02",
+        "includedInFinal": true,
+        "sourceVersion": "02",
+        "actualPassed": 8,
+        "actualFailed": 0,
+        "ignored": 0,
+        "exitCode": 0,
+        "declaredInputs": 462,
+        "sourceRowsVerified": 462,
+        "nonce": "4184205a21cc468da762e33ab25ad0ee",
+        "nonceFiles": 5,
+        "decision": "FORWARD",
+        "actualCRemainingBytes": 101077487616,
+        "sampleBeginAgeMs": 967.493,
+        "sampleEndAgeMs": 85.7619,
+        "sampleBeginConservativeUpperMs": 968.493,
+        "sampleEndConservativeUpperMs": 86.7619,
+        "probeLaunchToChildUpperMs": 1159.3389000000002,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "postChildPolicy": "B",
+        "childStartedUtc": "2026-10-09T00:26:25.7980000+00:00",
+        "childCompletedUtc": "2026-10-09T00:28:35.6180000+00:00",
+        "policySha256": "26478a4087106eeba5d4f69f40f3f26e073cbc2239c066c08f22801fbfc15ef1",
+        "resultSha256": "efae60995f02a7a6365757c97f0c941dd1ae31d9821db967844f478cfbb724f3",
+        "sourceSnapshotSha256": "46b515c910090e7981cc65855d867b1c30859ff760187ab93661f499d0d8a7cd",
+        "sourceReviewSha256": "2ccc335aca9392f1657a15fb8de2abde5ac01de8e0e7a1b5e24383ff8d819aa1",
+        "cargoLogSha256": "155a7cd6823762d242c182ffa1027a5e69fdc3a4c2557c557f2cae7906b399c9",
+        "rootAuthoritySha256": "fb9a5d1a8fadd35744e55b4f8a62eccf8ab88e51295f004ba6379713befc43e2",
+        "sourceAcceptanceSha256": "59b1ba08e27ebd4168b7bf1bfaabbfc42072feb921b2ffd71d2009201f02e9bc"
+      },
+      {
+        "run": "creature-regression-02",
+        "includedInFinal": true,
+        "sourceVersion": "02",
+        "actualPassed": 55,
+        "actualFailed": 0,
+        "ignored": 0,
+        "exitCode": 0,
+        "declaredInputs": 462,
+        "sourceRowsVerified": 462,
+        "nonce": "ef6223b168e5435680ea5c68c11c9cef",
+        "nonceFiles": 5,
+        "decision": "FORWARD",
+        "actualCRemainingBytes": 99498610688,
+        "sampleBeginAgeMs": 754.9892,
+        "sampleEndAgeMs": 71.6088,
+        "sampleBeginConservativeUpperMs": 755.9892,
+        "sampleEndConservativeUpperMs": 72.6088,
+        "probeLaunchToChildUpperMs": 908.1066000000001,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "postChildPolicy": "B",
+        "childStartedUtc": "2026-10-09T00:39:21.4930000+00:00",
+        "childCompletedUtc": "2026-10-09T00:39:41.7110000+00:00",
+        "policySha256": "c78dd3031306010fcc61df32dc76964556b4e14b6589dde4c5663b8814579c52",
+        "resultSha256": "a54daf8e9473102de51d5d2381d86e85a30272a017724c0f13dc94d3cb9c58a5",
+        "sourceSnapshotSha256": "c68d63dc63fb3d518202c136bdbb333880e6a948c47ea910ea2cc7b1ef5562c2",
+        "sourceReviewSha256": "2ccc335aca9392f1657a15fb8de2abde5ac01de8e0e7a1b5e24383ff8d819aa1",
+        "cargoLogSha256": "36e2995016ccc6d9c5b8ecaa79067ecc21b2fb5d807cb60ccb828da859a66c9e",
+        "rootAuthoritySha256": "b6e12bdee1bb518349e35e7a84671c53cc32deb2518e603d429d1917936f2167",
+        "sourceAcceptanceSha256": "48fef2e0a4be95712f1724c253ba254a0cbde05d89d664d6997dad43c3b70010"
+      },
+      {
+        "run": "use-item-regression-02",
+        "includedInFinal": true,
+        "sourceVersion": "02",
+        "actualPassed": 47,
+        "actualFailed": 0,
+        "ignored": 0,
+        "exitCode": 0,
+        "declaredInputs": 462,
+        "sourceRowsVerified": 462,
+        "nonce": "6cd9e3ad43af44709fa55cf15671eda1",
+        "nonceFiles": 5,
+        "decision": "FORWARD",
+        "actualCRemainingBytes": 100720230400,
+        "sampleBeginAgeMs": 942.2071,
+        "sampleEndAgeMs": 87.7862,
+        "sampleBeginConservativeUpperMs": 943.2071,
+        "sampleEndConservativeUpperMs": 88.7862,
+        "probeLaunchToChildUpperMs": 1136.0828,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "postChildPolicy": "B",
+        "childStartedUtc": "2026-10-09T00:32:27.7740000+00:00",
+        "childCompletedUtc": "2026-10-09T00:32:50.7130000+00:00",
+        "policySha256": "5ff3304c2cfa6d12260642600b0456b41521a9412837a1dab3dd50842231c465",
+        "resultSha256": "eadac56bc46d6794482aaaf89a94053e1465fe61ad60d4054bac92f796f8bbe3",
+        "sourceSnapshotSha256": "13d477118f394d310882db8447992ce83dfa66d72bd3c17f8c5e833d94c84fd6",
+        "sourceReviewSha256": "2ccc335aca9392f1657a15fb8de2abde5ac01de8e0e7a1b5e24383ff8d819aa1",
+        "cargoLogSha256": "b18e02c9d6f3174386ac7d05680d4f2a11db093219700542ccd1e997b9b546f9",
+        "rootAuthoritySha256": "c13cdb838228a596eff9dc9dec74c5aa7743ad5d84c70cae7b6f694c80f9bcd4",
+        "sourceAcceptanceSha256": "5b150db70684bc4d70c5e3b34e075679224c10f14c583c82d9412f73224d5865"
+      },
+      {
+        "run": "uid-file-regression-01",
+        "includedInFinal": true,
+        "sourceVersion": "02",
+        "actualPassed": 17,
+        "actualFailed": 0,
+        "ignored": 0,
+        "exitCode": 0,
+        "declaredInputs": 462,
+        "sourceRowsVerified": 462,
+        "nonce": "12b6e0fe996a45c6b0978b0fb945dd3c",
+        "nonceFiles": 5,
+        "decision": "FORWARD",
+        "actualCRemainingBytes": 99494006784,
+        "sampleBeginAgeMs": 721.8526,
+        "sampleEndAgeMs": 71.0532,
+        "sampleBeginConservativeUpperMs": 722.8526,
+        "sampleEndConservativeUpperMs": 72.0532,
+        "probeLaunchToChildUpperMs": 873.7884,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "postChildPolicy": "B",
+        "childStartedUtc": "2026-10-09T00:41:31.8750000+00:00",
+        "childCompletedUtc": "2026-10-09T00:42:26.2790000+00:00",
+        "policySha256": "4936261122093c2b0dbfeb1a3e12f12d52440895aae25ff9b0d545a3cabbe0ce",
+        "resultSha256": "33bfaa01b99df9fb87506821523a8d4274d5dd0ced45cac58fc51c920c1bd0a9",
+        "sourceSnapshotSha256": "e5736cf2cdabb8538eeafacef25775175d8205085f9fd18587155954f9f346ef",
+        "sourceReviewSha256": "2ccc335aca9392f1657a15fb8de2abde5ac01de8e0e7a1b5e24383ff8d819aa1",
+        "cargoLogSha256": "38954ea6f0d9cf932587d26743e223f5f0c08539168e03b38991f8e053270c49",
+        "rootAuthoritySha256": "ddafb387d6d29cfac45b92e988fa5589ce7d6bc0102a07d8fbe4f6d63288701c",
+        "sourceAcceptanceSha256": "2ab0b178a3c6c3e217deaeb273e64dba00415c63de7a45591fce0191d7a47b9f"
+      },
+      {
+        "run": "save-regression-01",
+        "includedInFinal": true,
+        "sourceVersion": "02",
+        "actualPassed": 59,
+        "actualFailed": 0,
+        "ignored": 0,
+        "exitCode": 0,
+        "declaredInputs": 462,
+        "sourceRowsVerified": 462,
+        "nonce": "2e98f7498d734bfeb6fb3a47018dfbe2",
+        "nonceFiles": 5,
+        "decision": "FORWARD",
+        "actualCRemainingBytes": 98492534784,
+        "sampleBeginAgeMs": 779.873,
+        "sampleEndAgeMs": 73.7295,
+        "sampleBeginConservativeUpperMs": 780.873,
+        "sampleEndConservativeUpperMs": 74.7295,
+        "probeLaunchToChildUpperMs": 933.8219,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "postChildPolicy": "B",
+        "childStartedUtc": "2026-10-09T00:51:07.6230000+00:00",
+        "childCompletedUtc": "2026-10-09T00:51:19.3380000+00:00",
+        "policySha256": "c215cc8610011c6550f95854ae537e25d708c571c433ec9744812aad97c2ba91",
+        "resultSha256": "8669ca44323714ab5750e6a86a6e267e73d66341193285f285a82d0ccbf5517b",
+        "sourceSnapshotSha256": "5bfe4288e2c2fa46accc6f52e5d3b6fcdacf169c98f5a1de98c86230edd27078",
+        "sourceReviewSha256": "2ccc335aca9392f1657a15fb8de2abde5ac01de8e0e7a1b5e24383ff8d819aa1",
+        "cargoLogSha256": "7abff1ab88344fb9c7d76237ecb1c03a150110c270022000b346025690745663",
+        "rootAuthoritySha256": "a6e75cbb5eb087c86410c00b637eb42068328bc3b90ba15028468e2771b81233",
+        "sourceAcceptanceSha256": "7adf016736558520d4bc6ef293935df198883d0819e02ad5e592860bd08e4027"
+      }
+    ]
+  },
+  "rawEvidence": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\slg-production-p02b2c-20261009\\raw-evidence.json",
+    "sha256": "15eac0bd6f7e74fc5017696c2e400667baf43508cc4721d9affd7def34fc6894",
+    "exactCopiesVerified": 122,
+    "shaLengthAndExactBytesAllMatch": true,
+    "copies": [
+      {
+        "path": "creature-regression-01/cargo.log",
+        "sha256": "60857d3a0bbc899a4a9308c66e188d5627cc90584e452c4541da901ecf0f9ff6",
+        "length": 45404,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-01/guard-policy.json",
+        "sha256": "45f769a5799802fa9820028d3cd77cd88b7c2b2859343da1c1599166dcd60d43",
+        "length": 2275,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-01/result.json",
+        "sha256": "e01492bf9e3d92375aa3e1e39039455093f857e1ff0bf3fdd7d3ceedc89405af",
+        "length": 735,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-01/root-authority.json",
+        "sha256": "96e74a148e67f5ffab0459ded28c19caea8f129e3d0e3cd178523fa19cea660f",
+        "length": 530,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-01/source-acceptance.json",
+        "sha256": "fd4c23c6c02619d0557bd378d2683e7fde44ea8b6dd022cbc0613d32bf94e71a",
+        "length": 750,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-01/source-snapshot.json",
+        "sha256": "80c857e4ba8314570862d317f1315a56cdcc2dc2047b9fda3c4d865505acb76c",
+        "length": 92738,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-01/cargo-receipts/59089b8f674e494bbe62aa3fb002c9f8/after.json",
+        "sha256": "07b3501f21f25458ef69c4ec86db3648fef5a9c8bab33ca72c64151a725ec14a",
+        "length": 320,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-01/cargo-receipts/59089b8f674e494bbe62aa3fb002c9f8/before.json",
+        "sha256": "af849b097ab34238cf7122197477b67f55b902d14dfbca4eefedabf81ace2712",
+        "length": 965,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-01/cargo-receipts/59089b8f674e494bbe62aa3fb002c9f8/probe-process.json",
+        "sha256": "1ea6716d5da0f565e74d4e357262be3a88c834314eccb938950dccbff03398a7",
+        "length": 452,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-01/cargo-receipts/59089b8f674e494bbe62aa3fb002c9f8/probe.stderr.bin",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "length": 0,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-01/cargo-receipts/59089b8f674e494bbe62aa3fb002c9f8/probe.stdout.bin",
+        "sha256": "1322ee9a063a5118bf306ebb68c6b75bf400bb7457708d5a26cb6a97ac407f6d",
+        "length": 197,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-02/cargo.log",
+        "sha256": "36e2995016ccc6d9c5b8ecaa79067ecc21b2fb5d807cb60ccb828da859a66c9e",
+        "length": 45404,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-02/guard-policy.json",
+        "sha256": "c78dd3031306010fcc61df32dc76964556b4e14b6589dde4c5663b8814579c52",
+        "length": 2275,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-02/result.json",
+        "sha256": "a54daf8e9473102de51d5d2381d86e85a30272a017724c0f13dc94d3cb9c58a5",
+        "length": 735,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-02/root-authority.json",
+        "sha256": "b6e12bdee1bb518349e35e7a84671c53cc32deb2518e603d429d1917936f2167",
+        "length": 530,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-02/source-acceptance.json",
+        "sha256": "48fef2e0a4be95712f1724c253ba254a0cbde05d89d664d6997dad43c3b70010",
+        "length": 750,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-02/source-snapshot.json",
+        "sha256": "c68d63dc63fb3d518202c136bdbb333880e6a948c47ea910ea2cc7b1ef5562c2",
+        "length": 92738,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-02/cargo-receipts/ef6223b168e5435680ea5c68c11c9cef/after.json",
+        "sha256": "988b29cf2230f71723f03ddbfdfaa1b9b76548bdd51aa8a432318e2fb5a0c216",
+        "length": 329,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-02/cargo-receipts/ef6223b168e5435680ea5c68c11c9cef/before.json",
+        "sha256": "09c380331287e9f627a44789cd969aceb1401bd6aaa03fe69b8102982f8b1cfe",
+        "length": 964,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-02/cargo-receipts/ef6223b168e5435680ea5c68c11c9cef/probe-process.json",
+        "sha256": "93ec5485557ae608752d9b41b85dc0020c7ccdf9b4364a60f3dee6930e78ef45",
+        "length": 452,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-02/cargo-receipts/ef6223b168e5435680ea5c68c11c9cef/probe.stderr.bin",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "length": 0,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-regression-02/cargo-receipts/ef6223b168e5435680ea5c68c11c9cef/probe.stdout.bin",
+        "sha256": "1d3e16617ff8274b8ec1af10a95baa90afbee214dad33a354274c09391efe087",
+        "length": 196,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-01/cargo.log",
+        "sha256": "bbba7d23a7d2cfeaf82990f9749c28e21b2f4f8675dcfbdd985ffb2041e206c1",
+        "length": 41816,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-01/guard-policy.json",
+        "sha256": "34323f6a2070184b6b058e4240778cb40dc074487b98aa792702a1aef816e7ba",
+        "length": 2283,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-01/result.json",
+        "sha256": "08699485ad7ef3f9ba2aaff9689724d6cfff81a1a8b075e7873fd6a5efbed8fe",
+        "length": 772,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-01/root-authority.json",
+        "sha256": "a74c569c2a9a30fc6f071833c2868370edc2bdf6f0b7a62d3c031a52e51aca1c",
+        "length": 530,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-01/source-acceptance.json",
+        "sha256": "ea76b040c95649a57b14d0fea1242f058080f63550ecf239fd267f9583d6417f",
+        "length": 750,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-01/source-snapshot.json",
+        "sha256": "a85bacd5bf5e2f6dad3734bd94863edf9828c1701c0148d35a6eeeb3bd7d1297",
+        "length": 92740,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-01/cargo-receipts/7b8a9e12c8844799904996e3eabf9261/after.json",
+        "sha256": "9d5ed3947494b20f81fc4e8d7681c7d0041f4e151094b7847b871b4e9bfeb9af",
+        "length": 330,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-01/cargo-receipts/7b8a9e12c8844799904996e3eabf9261/before.json",
+        "sha256": "775d3194952ab641fb62f8a0ed61df7371b221ae8d1a540e44b30623c10210d5",
+        "length": 992,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-01/cargo-receipts/7b8a9e12c8844799904996e3eabf9261/probe-process.json",
+        "sha256": "4662e61f61093cd0863e2261e2e139467e9ebdbf09746dde2db196d719880b51",
+        "length": 442,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-01/cargo-receipts/7b8a9e12c8844799904996e3eabf9261/probe.stderr.bin",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "length": 0,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-01/cargo-receipts/7b8a9e12c8844799904996e3eabf9261/probe.stdout.bin",
+        "sha256": "001741528410171a75f892c3f0f1bdd4b490b5e4d80ce5928fd47c55d999c0f7",
+        "length": 197,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-02/cargo.log",
+        "sha256": "155a7cd6823762d242c182ffa1027a5e69fdc3a4c2557c557f2cae7906b399c9",
+        "length": 39474,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-02/guard-policy.json",
+        "sha256": "26478a4087106eeba5d4f69f40f3f26e073cbc2239c066c08f22801fbfc15ef1",
+        "length": 2283,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-02/result.json",
+        "sha256": "efae60995f02a7a6365757c97f0c941dd1ae31d9821db967844f478cfbb724f3",
+        "length": 772,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-02/root-authority.json",
+        "sha256": "fb9a5d1a8fadd35744e55b4f8a62eccf8ab88e51295f004ba6379713befc43e2",
+        "length": 530,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-02/source-acceptance.json",
+        "sha256": "59b1ba08e27ebd4168b7bf1bfaabbfc42072feb921b2ffd71d2009201f02e9bc",
+        "length": 750,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-02/source-snapshot.json",
+        "sha256": "46b515c910090e7981cc65855d867b1c30859ff760187ab93661f499d0d8a7cd",
+        "length": 92740,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-02/cargo-receipts/4184205a21cc468da762e33ab25ad0ee/after.json",
+        "sha256": "c9372a2d2b32088311b95608ab27578afac23605a00ef7ea1c5a6c2d150ea2ae",
+        "length": 321,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-02/cargo-receipts/4184205a21cc468da762e33ab25ad0ee/before.json",
+        "sha256": "09407cd990cd5591f5278d4a3c73852cfc42b0bd1d1dd0494da949ce04da5e4e",
+        "length": 992,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-02/cargo-receipts/4184205a21cc468da762e33ab25ad0ee/probe-process.json",
+        "sha256": "57b1f32d8215ff0e955ca92fdcfcd10a0907b8b2ba53aad301fd09a00b5f7025",
+        "length": 442,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-02/cargo-receipts/4184205a21cc468da762e33ab25ad0ee/probe.stderr.bin",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "length": 0,
+        "byteEqual": true
+      },
+      {
+        "path": "creature-reward-tests-02/cargo-receipts/4184205a21cc468da762e33ab25ad0ee/probe.stdout.bin",
+        "sha256": "0e173e7d4dc9bf7e19d2407c5638dfe5450932366dc9afc538d42ee2d1a54c5f",
+        "length": 197,
+        "byteEqual": true
+      },
+      {
+        "path": "save-regression-01/cargo.log",
+        "sha256": "7abff1ab88344fb9c7d76237ecb1c03a150110c270022000b346025690745663",
+        "length": 45792,
+        "byteEqual": true
+      },
+      {
+        "path": "save-regression-01/guard-policy.json",
+        "sha256": "c215cc8610011c6550f95854ae537e25d708c571c433ec9744812aad97c2ba91",
+        "length": 2259,
+        "byteEqual": true
+      },
+      {
+        "path": "save-regression-01/result.json",
+        "sha256": "8669ca44323714ab5750e6a86a6e267e73d66341193285f285a82d0ccbf5517b",
+        "length": 738,
+        "byteEqual": true
+      },
+      {
+        "path": "save-regression-01/root-authority.json",
+        "sha256": "a6e75cbb5eb087c86410c00b637eb42068328bc3b90ba15028468e2771b81233",
+        "length": 530,
+        "byteEqual": true
+      },
+      {
+        "path": "save-regression-01/source-acceptance.json",
+        "sha256": "7adf016736558520d4bc6ef293935df198883d0819e02ad5e592860bd08e4027",
+        "length": 750,
+        "byteEqual": true
+      },
+      {
+        "path": "save-regression-01/source-snapshot.json",
+        "sha256": "5bfe4288e2c2fa46accc6f52e5d3b6fcdacf169c98f5a1de98c86230edd27078",
+        "length": 92734,
+        "byteEqual": true
+      },
+      {
+        "path": "save-regression-01/cargo-receipts/2e98f7498d734bfeb6fb3a47018dfbe2/after.json",
+        "sha256": "1595036bb21e614abf9c149839cf0f6beb9b42349c2ad8e93957e55626d30402",
+        "length": 337,
+        "byteEqual": true
+      },
+      {
+        "path": "save-regression-01/cargo-receipts/2e98f7498d734bfeb6fb3a47018dfbe2/before.json",
+        "sha256": "9936dc2a4e5da1aff78da93cbd523efbc10d0b2e2ff6d92475b354148b01b201",
+        "length": 946,
+        "byteEqual": true
+      },
+      {
+        "path": "save-regression-01/cargo-receipts/2e98f7498d734bfeb6fb3a47018dfbe2/probe-process.json",
+        "sha256": "9b599340060c6845bb9c8d6c9cc4c2086703c3a8b790ad212b2cfe4c70881927",
+        "length": 431,
+        "byteEqual": true
+      },
+      {
+        "path": "save-regression-01/cargo-receipts/2e98f7498d734bfeb6fb3a47018dfbe2/probe.stderr.bin",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "length": 0,
+        "byteEqual": true
+      },
+      {
+        "path": "save-regression-01/cargo-receipts/2e98f7498d734bfeb6fb3a47018dfbe2/probe.stdout.bin",
+        "sha256": "51dea764da2bfa75f31d8cbf4d2b51ca8d4f3a1df76133adbc73858dd22d66a3",
+        "length": 196,
+        "byteEqual": true
+      },
+      {
+        "path": "uid-file-regression-01/cargo.log",
+        "sha256": "38954ea6f0d9cf932587d26743e223f5f0c08539168e03b38991f8e053270c49",
+        "length": 33151,
+        "byteEqual": true
+      },
+      {
+        "path": "uid-file-regression-01/guard-policy.json",
+        "sha256": "4936261122093c2b0dbfeb1a3e12f12d52440895aae25ff9b0d545a3cabbe0ce",
+        "length": 2275,
+        "byteEqual": true
+      },
+      {
+        "path": "uid-file-regression-01/result.json",
+        "sha256": "33bfaa01b99df9fb87506821523a8d4274d5dd0ced45cac58fc51c920c1bd0a9",
+        "length": 746,
+        "byteEqual": true
+      },
+      {
+        "path": "uid-file-regression-01/root-authority.json",
+        "sha256": "ddafb387d6d29cfac45b92e988fa5589ce7d6bc0102a07d8fbe4f6d63288701c",
+        "length": 530,
+        "byteEqual": true
+      },
+      {
+        "path": "uid-file-regression-01/source-acceptance.json",
+        "sha256": "2ab0b178a3c6c3e217deaeb273e64dba00415c63de7a45591fce0191d7a47b9f",
+        "length": 750,
+        "byteEqual": true
+      },
+      {
+        "path": "uid-file-regression-01/source-snapshot.json",
+        "sha256": "e5736cf2cdabb8538eeafacef25775175d8205085f9fd18587155954f9f346ef",
+        "length": 92738,
+        "byteEqual": true
+      },
+      {
+        "path": "uid-file-regression-01/cargo-receipts/12b6e0fe996a45c6b0978b0fb945dd3c/after.json",
+        "sha256": "d1b2a10e6b78242912d0806cd4a286ab36c3c64b55ae4d492dfd2d0530bb5411",
+        "length": 318,
+        "byteEqual": true
+      },
+      {
+        "path": "uid-file-regression-01/cargo-receipts/12b6e0fe996a45c6b0978b0fb945dd3c/before.json",
+        "sha256": "061d2e2d29f9802f64c044ae2441d952dde6919cc9c56044b62e949b09aad9c4",
+        "length": 974,
+        "byteEqual": true
+      },
+      {
+        "path": "uid-file-regression-01/cargo-receipts/12b6e0fe996a45c6b0978b0fb945dd3c/probe-process.json",
+        "sha256": "5d84df32a07d06b22f8ae6cb0321ae5c04c28dab0af51d1aed0943c642007f7d",
+        "length": 451,
+        "byteEqual": true
+      },
+      {
+        "path": "uid-file-regression-01/cargo-receipts/12b6e0fe996a45c6b0978b0fb945dd3c/probe.stderr.bin",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "length": 0,
+        "byteEqual": true
+      },
+      {
+        "path": "uid-file-regression-01/cargo-receipts/12b6e0fe996a45c6b0978b0fb945dd3c/probe.stdout.bin",
+        "sha256": "7f39d02f0d286e2989ebcca36127987a7593c116afb4aaf0e7d8c1e5674e4253",
+        "length": 196,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-01/cargo.log",
+        "sha256": "cdc08d7bfee6712d53dabc01ba4900de91a9f5f657aa68def3b3ca5bec777d49",
+        "length": 44009,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-01/guard-policy.json",
+        "sha256": "36c022e8bbf7858f69db78e721fb2c37b04a9d3c322041923eba3df82fd7d101",
+        "length": 2275,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-01/result.json",
+        "sha256": "ddf52369a61a9712b159dd3fd3dca474418fbc35cae1e8fa966ceb82d3fa6877",
+        "length": 737,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-01/root-authority.json",
+        "sha256": "12f3c9bb8f9036f73266c927edede6d2d04a3c45582913e198b2cf761a220956",
+        "length": 530,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-01/source-acceptance.json",
+        "sha256": "6c5eac2ba29a4d8708503b3fd02a1f610535597b5453b26775c8ed8ac59c06a5",
+        "length": 750,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-01/source-snapshot.json",
+        "sha256": "7e1fa71407e2543dee1061eee41b77a8e8b8dca06b098965bae13d155aa53790",
+        "length": 92738,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-01/cargo-receipts/58a42b1481a24271ad683510078cbfdd/after.json",
+        "sha256": "46f85b55fac4a68ad2238218604af2f072c4a99f1dadc4aa5f98ec25f6cc790f",
+        "length": 322,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-01/cargo-receipts/58a42b1481a24271ad683510078cbfdd/before.json",
+        "sha256": "88cb6416e92afbf51edc3a2b801dc811923ef97b7e3cd89c80154f4054900095",
+        "length": 946,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-01/cargo-receipts/58a42b1481a24271ad683510078cbfdd/probe-process.json",
+        "sha256": "561e926561ba0c4b4022b39bb6ee75468c7e9bde814529ccbcb9e190bcc62f0e",
+        "length": 433,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-01/cargo-receipts/58a42b1481a24271ad683510078cbfdd/probe.stderr.bin",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "length": 0,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-01/cargo-receipts/58a42b1481a24271ad683510078cbfdd/probe.stdout.bin",
+        "sha256": "988221b55061cbedfaede41d1bac3d272d959885a4e5088d137497327bf25e50",
+        "length": 197,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-02/cargo.log",
+        "sha256": "b18e02c9d6f3174386ac7d05680d4f2a11db093219700542ccd1e997b9b546f9",
+        "length": 43320,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-02/guard-policy.json",
+        "sha256": "5ff3304c2cfa6d12260642600b0456b41521a9412837a1dab3dd50842231c465",
+        "length": 2275,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-02/result.json",
+        "sha256": "eadac56bc46d6794482aaaf89a94053e1465fe61ad60d4054bac92f796f8bbe3",
+        "length": 735,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-02/root-authority.json",
+        "sha256": "c13cdb838228a596eff9dc9dec74c5aa7743ad5d84c70cae7b6f694c80f9bcd4",
+        "length": 530,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-02/source-acceptance.json",
+        "sha256": "5b150db70684bc4d70c5e3b34e075679224c10f14c583c82d9412f73224d5865",
+        "length": 750,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-02/source-snapshot.json",
+        "sha256": "13d477118f394d310882db8447992ce83dfa66d72bd3c17f8c5e833d94c84fd6",
+        "length": 92738,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-02/cargo-receipts/6cd9e3ad43af44709fa55cf15671eda1/after.json",
+        "sha256": "dd618319d71b74bc8b347272e74d434b1f55c6ccf267fffcedc80a1659f02ce0",
+        "length": 320,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-02/cargo-receipts/6cd9e3ad43af44709fa55cf15671eda1/before.json",
+        "sha256": "4abe95dd68c9c31ad10b30ad679f905b827b7b508b3a7f1bc2b5a5c7eae11d67",
+        "length": 946,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-02/cargo-receipts/6cd9e3ad43af44709fa55cf15671eda1/probe-process.json",
+        "sha256": "4ed33f4a1f8de3499bbcacd3c60b12cf69ee4dc4954fb324b98c6e3870d96421",
+        "length": 433,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-02/cargo-receipts/6cd9e3ad43af44709fa55cf15671eda1/probe.stderr.bin",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "length": 0,
+        "byteEqual": true
+      },
+      {
+        "path": "use-item-regression-02/cargo-receipts/6cd9e3ad43af44709fa55cf15671eda1/probe.stdout.bin",
+        "sha256": "db9b90f659915b2569e555f892a23f582da4465e4afac2b56bbfe89d818d8fec",
+        "length": 197,
+        "byteEqual": true
+      },
+      {
+        "path": "audit-helper-error-01.json",
+        "sha256": "1526ba62942d38936d1ced4e7b08585a6b473738d2c060979ff2d29b0dd11670",
+        "length": 577,
+        "byteEqual": true
+      },
+      {
+        "path": "audit-results.ps1",
+        "sha256": "c2892c1f3d29db51d858516b27a7324a1fe78896e2f98b6ef73668bb2861197a",
+        "length": 5711,
+        "byteEqual": true
+      },
+      {
+        "path": "authored-source-01.json",
+        "sha256": "0a749e8cf6ab03a4bf3f96b16a1cef2f8b173b7a2050f1e905bb7acc608902f2",
+        "length": 778,
+        "byteEqual": true
+      },
+      {
+        "path": "authored-source-02.json",
+        "sha256": "40199f01559110ef850271eff8dff950dd0422761638d77f6031b94e88dca0d6",
+        "length": 974,
+        "byteEqual": true
+      },
+      {
+        "path": "final-protected-parent-qualification.json",
+        "sha256": "22974873a577347d6e4d1c4f1ecdf26f2bb710a44982f7b3fcb84db6bb3035dd",
+        "length": 393,
+        "byteEqual": true
+      },
+      {
+        "path": "fixture-repair.json",
+        "sha256": "ed9b0ab6cafaf261af3a1da8013075b6dbb70fb389ef27bc54f0cc1eba2acc72",
+        "length": 722,
+        "byteEqual": true
+      },
+      {
+        "path": "historical-results-audit.json",
+        "sha256": "87a7fd6a650dcaf388b0d9a513320d84bc8cd256862b93fd25ac4973e665453f",
+        "length": 1548,
+        "byteEqual": true
+      },
+      {
+        "path": "independent-issuer-exploration-01.json",
+        "sha256": "f89fbbe832a15e2a3ec29d2720e5acc5d2e169829f579b333292a8b90c4e19ec",
+        "length": 11116,
+        "byteEqual": true
+      },
+      {
+        "path": "independent-next-issuer-exploration-01.json",
+        "sha256": "10a3c4b3fc128ecca35a3afdb36516bf5fee40b7cb974d43fe0b49d9cb22a691",
+        "length": 11538,
+        "byteEqual": true
+      },
+      {
+        "path": "independent-source-review-01.json",
+        "sha256": "74d1be005bc11bec73b3948235859bf1cf544d7cb2945750b0181c5d87b34913",
+        "length": 4304,
+        "byteEqual": true
+      },
+      {
+        "path": "independent-source-review-02.json",
+        "sha256": "2ccc335aca9392f1657a15fb8de2abde5ac01de8e0e7a1b5e24383ff8d819aa1",
+        "length": 4589,
+        "byteEqual": true
+      },
+      {
+        "path": "independent-teleport-failure-exploration-01.json",
+        "sha256": "e06b93074de5ac4e3697f3f66d463a76ac75a0030b09900f996947087b1e6d28",
+        "length": 5737,
+        "byteEqual": true
+      },
+      {
+        "path": "package-evidence.ps1",
+        "sha256": "32225f50d1f6250542d563b1de00eddf6324cb737405d0274f71c6d00ed4355a",
+        "length": 6791,
+        "byteEqual": true
+      },
+      {
+        "path": "prepare-evidence.py",
+        "sha256": "7fd444465b464a39f465d121d652fb2dad4eb5032bf5472e192a1377f88f3e4a",
+        "length": 3733,
+        "byteEqual": true
+      },
+      {
+        "path": "private-cache.json",
+        "sha256": "fa4af510c3f10754ba6ac1c0e930e7aba8b72d0712503cf2a73938fb5f66925d",
+        "length": 521,
+        "byteEqual": true
+      },
+      {
+        "path": "protected-parent-qualification.json",
+        "sha256": "5e6eeb87538deb13f82380b02c81be7ba30e9551fcd9747dc04aeb2e1ec026c2",
+        "length": 393,
+        "byteEqual": true
+      },
+      {
+        "path": "qualify-parent-final.ps1",
+        "sha256": "8b188c8126be69e7b59e516cd81cf4b4c475ca67ba77fd5ca34e8151513fbbbf",
+        "length": 2346,
+        "byteEqual": true
+      },
+      {
+        "path": "qualify-parent.ps1",
+        "sha256": "9a10a2bd6892bbfb8908f0ef936b42b94f2d220df125cd8ada3ce71cd5040ed0",
+        "length": 2319,
+        "byteEqual": true
+      },
+      {
+        "path": "relink-probe-02.json",
+        "sha256": "9fe3d3eb87b6585a914c399090564922947ea1bc660bc1801dc3fc563b8a4b5d",
+        "length": 306,
+        "byteEqual": true
+      },
+      {
+        "path": "repair-fixture.py",
+        "sha256": "f0d8290cefd6159980d6ebfc50690e79552c0fe1f13711f2e00ed4d62db6b323",
+        "length": 3975,
+        "byteEqual": true
+      },
+      {
+        "path": "result-audit-01.json",
+        "sha256": "a79263109e3678a32233557ee20ee1208376a6803259e87b659ca3b2139f9327",
+        "length": 39714,
+        "byteEqual": true
+      },
+      {
+        "path": "run-check-01.ps1",
+        "sha256": "323594a70682a24d7ef76ee56594dd576505b9ddd0a986458e452c209421c99e",
+        "length": 10265,
+        "byteEqual": true
+      },
+      {
+        "path": "run-check.ps1",
+        "sha256": "6c7802afc7c73cc742d409eb72b6b8898e81e7d9ad4f7e4ae909a2b50a10eb06",
+        "length": 10265,
+        "byteEqual": true
+      },
+      {
+        "path": "runner-byte-restoration.json",
+        "sha256": "47e2d06f3d69fc1443469902894ec145c05b1b761985fc0fa583d1578d208794",
+        "length": 350,
+        "byteEqual": true
+      },
+      {
+        "path": "update-docs.py",
+        "sha256": "ff1474376a381040c79770bde488bc7769edb2fa74228272495e3fb828ecde4a",
+        "length": 11912,
+        "byteEqual": true
+      },
+      {
+        "path": "wait-and-check.ps1",
+        "sha256": "f3cc69afe983d00ebe36a64cf7ce28de7d6fbc2bad359b927cd980787d210d7b",
+        "length": 842,
+        "byteEqual": true
+      },
+      {
+        "path": "authored-bytes-01/mir2-web3/apps/simulation/src/user_item_uid.rs",
+        "sha256": "5335ced4868a62f8eb59f0d816a76459e0d57a4c23959c0164c8fdce64106b41",
+        "length": 43402,
+        "byteEqual": true
+      },
+      {
+        "path": "authored-bytes-01/mir2-web3/apps/simulation/src/runtime/creature_reward_uid_tests.rs",
+        "sha256": "aba96d0cd4e60deb3d51b4e6eb4749ceab7e3525d5e5403ebe6ae52e603d833f",
+        "length": 9230,
+        "byteEqual": true
+      },
+      {
+        "path": "authored-bytes-01/mir2-web3/apps/simulation/src/runtime/intelligent_creatures.rs",
+        "sha256": "b271a9ebbd24419f8ce5938580aac484330c319725b0b6cefc05d3c3d36e6523",
+        "length": 24237,
+        "byteEqual": true
+      },
+      {
+        "path": "authored-bytes-01/mir2-web3/apps/simulation/src/runtime/tests.rs",
+        "sha256": "4e2f941822068c6a4108a1e7b57378b220b94433ad0d72e4a648f3896a5dea56",
+        "length": 2431698,
+        "byteEqual": true
+      },
+      {
+        "path": "authored-bytes-02/mir2-web3/apps/simulation/src/user_item_uid.rs",
+        "sha256": "5335ced4868a62f8eb59f0d816a76459e0d57a4c23959c0164c8fdce64106b41",
+        "length": 43402,
+        "byteEqual": true
+      },
+      {
+        "path": "authored-bytes-02/mir2-web3/apps/simulation/src/runtime/creature_reward_uid_tests.rs",
+        "sha256": "aba96d0cd4e60deb3d51b4e6eb4749ceab7e3525d5e5403ebe6ae52e603d833f",
+        "length": 9230,
+        "byteEqual": true
+      },
+      {
+        "path": "authored-bytes-02/mir2-web3/apps/simulation/src/runtime/intelligent_creatures.rs",
+        "sha256": "b271a9ebbd24419f8ce5938580aac484330c319725b0b6cefc05d3c3d36e6523",
+        "length": 24237,
+        "byteEqual": true
+      },
+      {
+        "path": "authored-bytes-02/mir2-web3/apps/simulation/src/runtime/tests.rs",
+        "sha256": "7b843fe5b126c5a2ef9cade04d0647dce47ac85542634fa7e88cdfa69f8f6fe7",
+        "length": 2432244,
+        "byteEqual": true
+      }
+    ]
+  },
+  "historical": {
+    "source01Manifest": {
+      "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\authored-source-01.json",
+      "sha256": "0a749e8cf6ab03a4bf3f96b16a1cef2f8b173b7a2050f1e905bb7acc608902f2",
+      "length": 778
+    },
+    "source01PositiveExecutionsNotIncluded": 63,
+    "source01ActualFailedRun": "use-item-regression-01",
+    "source01FailedRunCounts": {
+      "passed": 46,
+      "failed": 1,
+      "ignored": 0,
+      "exitCode": 101
+    },
+    "originalSourceTestArchive": {
+      "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\authored-bytes-01\\mir2-web3\\apps\\simulation\\src\\runtime\\tests.rs",
+      "sha256": "4e2f941822068c6a4108a1e7b57378b220b94433ad0d72e4a648f3896a5dea56",
+      "length": 2431698
+    },
+    "archiveCanonicalParentBlob": "5cacfa129630cb1f0e1518294561d599a6475f6a",
+    "fixtureInverseExactBytes": true,
+    "originalAssertionsUnchanged": true,
+    "observedAuditHelperErrorPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\audit-helper-error-01.json",
+    "observedAuditHelperErrorSha256": "1526ba62942d38936d1ced4e7b08585a6b473738d2c060979ff2d29b0dd11670",
+    "observedErrorIsNotRawStderr": true,
+    "helperErrorCargoAndTests": 0
+  },
+  "proseClarification": {
+    "originalHistoricalNotePreserved": true,
+    "separateCorrectivePin": {
+      "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\historical-bind-clarification.json",
+      "sha256": "c0b6274a81f05ee1bf9b7769e928961e4cd6fedcf53e083ed79922e6c66e18f9",
+      "length": 780
+    },
+    "separateCopyOutsideOriginal122": true,
+    "assessment": "Original historical rebind explanation is imprecise: set_player_position writes only ECS Position. Bootstrap/legacy-save/relocation imports the active safe-zone bind. Separate hash-bound clarification corrects this without changing original raw failure or assertions."
+  },
+  "reviewerHelperObservation": {
+    "initialChronologySortWasIncorrect": true,
+    "reason": "OrderedDictionary property Sort-Object did not chronologically reorder receipts; direct PSCustomObject UTC timestamps show all eight children serial.",
+    "correctedUsingActualAfterJson": true,
+    "noCargoOrProductChanges": true,
+    "noRejectedReceiptPublished": true
+  },
+  "actualNamedRoster": [
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::actual_box_mints_above_retired_source_and_preserves_complete_reward_on_relogin",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::corrupt_authority_keeps_box_and_emits_no_success_or_reward",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::empty_blackstone_retires_high_source_in_history_without_minting_a_reward",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::exhausted_authority_never_falls_back_to_the_removed_source_or_slot",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::reward_sessions_share_one_authority_even_when_their_source_slots_are_reused",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::stale_source_reference_is_rejected_before_history_floor_or_inventory_changes",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::unavailable_and_fenced_rewards_cannot_consume_the_box",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::wrong_configured_authority_cannot_mutate_either_store_or_consume_the_box",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::buffs::buff_duration::tests::creature_duration_clone_preserves_anchor_and_monotonic_expiry",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::buffs::buff_duration::tests::creature_duration_serialization_preserves_remaining_and_legacy_absence",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_attack_operation_receipt_is_persisted_and_not_repeated_after_dismiss",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_attack_wallet_and_receipt_rollback_together_on_save_failure",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_blackstone_ordinary_use_consumes_once_and_does_not_invent_rewards",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_blackstone_uses_mail_when_bag_is_full_and_does_not_repeat_same_second",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_box_selection_uses_minimum_score_first_tie_and_shipped_tables",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_dynamic_wonder_drugs_preserve_all_seven_original_three_tier_values",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_knapsack_stacks_duration_preserves_first_stats_and_consumes_once",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_maintenance_uses_seconds_food_protection_expiry_and_blackstone_reward",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_ordinary_use_item_acquires_all_shipped_eggs_and_duplicate_preserves_item",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_real_duration_ignores_movement_ticks_and_expires_before_maintenance",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_real_duration_relogin_keeps_remaining_not_full_duration",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_real_duration_world_snapshot_uses_clock_not_legacy_tick_deadline",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_strongbox_reuses_only_freed_slot_once_and_preserves_reward_on_relogin",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_template_handler_accepts_all_fifteen_original_pet_types",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_updates_subscription_controls_periodic_packets_without_stopping_maintenance",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_wonder_drug_uses_instance_stats_and_rejects_second_use_without_consumption",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::reward_rate_wonder_drug_changes_shared_experience_award_and_authoritative_drop_stats",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::actual_box_mints_above_retired_source_and_preserves_complete_reward_on_relogin",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::corrupt_authority_keeps_box_and_emits_no_success_or_reward",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::empty_blackstone_retires_high_source_in_history_without_minting_a_reward",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::exhausted_authority_never_falls_back_to_the_removed_source_or_slot",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::reward_sessions_share_one_authority_even_when_their_source_slots_are_reused",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::stale_source_reference_is_rejected_before_history_floor_or_inventory_changes",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::unavailable_and_fenced_rewards_cannot_consume_the_box",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::wrong_configured_authority_cannot_mutate_either_store_or_consume_the_box",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::session::tests::intelligent_creature_filter_applies_category_and_grade_rules",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::session::tests::intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::session::tests::intelligent_creature_packets_update_state_and_pick_up_ground_gold",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::session::tests::intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::session_lightweight_snapshot_tests::lightweight_active_intelligent_creature_matches_full_snapshot_selection",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::attack_precedes_pickup_by_500ms_and_transaction_is_not_reissued",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::automatic_search_origin_is_pet_and_blocked_adjacent_drop_can_be_collected",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::disappeared_or_no_longer_eligible_target_cancels_pending_attack",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::follows_owner_and_recalls_using_remove_appear_without_blocking",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::idle_variants_follow_source_types_and_ten_second_cooldown",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::injected_seed_replays_obstacle_rotation_and_supports_both_directions",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::lifecycle_removal_is_once_and_stale_session_cannot_keep_actor_alive",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::maintenance_sync_preserves_pending_manual_pickup_but_policy_and_hunger_cancel",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::mouse_command_remains_delayed_even_when_pet_is_in_automatic_mode",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::moves_on_cadence_and_never_catches_up_a_stale_queue",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::rejects_foreign_owner_distant_mouse_and_starved_requests",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::rename_updates_aoi_appearance_and_rejects_foreign_owner",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::validates_catalog_and_accepts_all_fifteen_types_including_zero",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_cleans_stale_owner_and_retained_phantom",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_commits_actor_seed_and_rejects_tampering",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_preserves_pending_timer_rng_and_in_flight_receipt",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_death_leave_and_restriction_remove_actor",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_follows_owner_and_forks_actor_state",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_forged_candidate_cannot_bypass_ownership_or_filter",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_manager_owner_scoped_delivery_preserves_other_owner_and_offline_receipts",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_one_operation_and_intent_until_settlement_then_dismiss_invalidates",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_reconnected_identity_recovers_old_session_operation_without_cross_character_access",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_two_clients_receive_real_nonblocking_aoi_actor",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_ordinary_use_item_acquires_all_shipped_eggs_and_duplicate_preserves_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::crystal_use_item_packet_consumes_belt_slot",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::crystal_use_item_packet_consumes_inventory_slot",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::hero_inventory_use_item_consumes_potion_and_restores_hero_health",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::inventory_use_item_equips_metadata_backed_exact_zero_from_nonzero_slot",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_ancient_banga_green_grants_free_map_shout",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_ancient_banga_purple_grants_free_server_shout",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_belt_equipment_rejects_without_runtime_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_credit_token_emits_localized_hint_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_book_learns_skill_when_eligible",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_book_rejects_duplicate_known_skill",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_book_rejects_low_level_with_localized_message",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_book_rejects_wrong_class_with_localized_message",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_equipment_allows_modeled_max_mc_requirement",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_equipment_rejects_low_max_dc_requirement",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dead_player_ack_fails_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dead_player_resurrection_scroll_rejects_on_no_reincarnation_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dead_player_resurrection_scroll_revives_and_consumes_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_apple_applies_multiple_template_buffs",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_credit_token_emits_localized_hint_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_dungeon_escape_rejects_on_no_escape_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_dungeon_escape_teleports_same_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_food_feeds_equipped_mount",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_food_requires_equipped_mount",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_gt_invite_consumes_without_active_effect",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_gt_teleport_consumes_without_teleporting",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting_stats",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_normal_potion_queues_timed_restore",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_potion_rejects_on_no_drug_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_random_teleport_rejects_on_no_random_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_random_teleport_teleports_same_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_repair_oils_respect_weapon_repair_binds",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_repair_oils_use_template_scroll_shapes",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_sun_potion_applies_template_hp_and_mp",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_equipped_mount_toggles_riding_state",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_equipping_need_identify_item_emits_refresh_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_hero_inventory_grid_does_not_mutate_matching_player_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_missing_inventory_item_rejects_without_runtime_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_mystery_water_unlocks_cursed_removal_and_consumes_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_mystery_water_when_already_unlocked_ack_fails_and_keeps_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_rejects_gender_locked_equipment_with_crystal_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_resurrection_scroll_while_alive_hint_chats_and_preserves_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_static_potion_rejects_on_no_drug_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_unusable_inventory_item_rejects_without_runtime_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_uses_inventory_unique_id_when_duplicate_keys_exist",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "concurrent_child_processes_share_the_file_authority",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "concurrent_threads_issue_one_contiguous_set",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "corrupt_truncated_and_unknown_state_fail_closed",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "exhaustion_never_wraps_or_reuses_zero",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "first_uid_is_one_and_restart_is_monotonic",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "floor_raise_refuses_generation_overflow_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "initialize_new_refuses_existing_state",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "missing_state_after_initialization_fails_closed",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "nonzero_initial_floor_issues_floor_plus_one",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "open_existing_refuses_missing_state",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "parent_directory_components_are_rejected",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "raise_floor_is_monotonic_durable_and_restart_safe",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "replacing_authority_directory_is_detected_fail_closed",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "replacing_lock_file_is_detected_fail_closed",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "symbolic_link_state_is_never_followed",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "windows_file_id_info_detects_recreated_lock_identity",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "windows_rejects_unc_verbatim_unc_and_device_paths_before_io",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::committed_zero_quantity_persisted_roots_and_children_reject_atomically",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::crystal_buff_state_survives_save_preflight_and_apply",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::crystal_inventory_capacity_controls_bag2_and_user_information_raw_slots",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::duplicate_exact_equipment_root_uid_rejects_start_game_atomically",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::legacy_candidate_key_with_conflicting_exact_index_is_rejected",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::legacy_candidate_keys_migrate_across_stage5_item_carriers",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::legal_legacy_item_save_without_metadata_carrier_still_applies",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_item_carrier_rejects_before_mutating_the_world",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_npc_buy_back_json_rejects_before_world_session_or_disk_changes",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_quest_and_skill_state_fail_preflight_instead_of_clearing",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_stage5_json_rejects_before_mutating_world_or_session",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::overbudget_mail_attachment_is_rejected_before_disk_or_world_changes",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::overbudget_npc_used_goods_item_rejects_before_world_session_or_disk_changes",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::oversized_item_carrier_start_game_returns_result_two_without_partial_state",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::six_legacy_candidate_keys_migrate_once_to_exact_crystal_templates",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::start_game_legacy_item_migration_is_persisted_and_idempotent",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::zero_quantity_live_inventory_rejects_active_save_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::zero_quantity_persisted_inventory_rejects_start_game_atomically",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::account_creation_persistence_failure_returns_crystal_failure_and_rolls_back_live_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::active_snapshot_without_account_identity_is_rejected",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_account_switch_with_colliding_index_cannot_refresh_foreign_mail",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_cross_account_send_mail_commits_sender_and_exact_target",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_identity_still_commits_mail_transaction_and_full_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_select_missing_character_returns_crystal_result_two_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::delete_character_persistence_failure_keeps_character",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::delete_character_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::disconnect_persistence_failure_still_clears_gm_permissions",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::existing_only_passkey_login_does_not_provision_missing_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::first_time_passkey_provision_is_durable_and_locked",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_all_private_mail_transactions",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_normal_revision_full_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_stale_revision_full_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::gm_password_binding_login_switch_and_successful_disconnect_clear_permissions",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::in_game_character_lifecycle_requests_are_silent_and_leave_world_and_store_unchanged",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::legacy_password_migration_persistence_failure_rejects_login_and_keeps_live_password",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::legal_gm_and_ranking_paths_sync_exact_authorized_levels",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::local_missing_account_start_returns_none_without_recreating_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::malformed_empty_and_switched_identities_cannot_reuse_gm_or_leak_private_packets",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::new_character_persistence_failure_returns_crystal_failure_and_keeps_roster",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::new_character_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::noncanonical_bound_identity_cannot_alias_or_mutate_either_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::noncanonical_live_identity_cannot_read_merge_or_mutate_either_mailbox",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::passkey_provision_persistence_failure_rolls_back_live_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::password_change_persistence_failure_returns_crystal_failure_and_keeps_old_hash",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::recovery_password_reset_persistence_failure_keeps_old_hash",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::send_mail_target_durable_identity_mismatch_is_silent_and_atomic",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::source_of_truth_start_requires_authoritative_refresh_and_does_not_recreate_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::standard_and_passkey_recovery_preflight_fail_closed_for_source_states",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::start_game_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::start_normalization_persistence_failure_returns_crystal_failure_and_keeps_live_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::trusted_select_account_for_recovery_still_starts_game",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::durable_cooldown_rebase_uses_elapsed_wall_time_and_authoritative_cap",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::inactive_skill_encoding_is_deterministic_across_wall_clock_samples",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::legacy_absolute_skill_deadline_expires_instead_of_becoming_an_hour_cooldown",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::new_session_restore_rebases_remaining_skill_cooldown_and_keeps_progression",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::same_session_checkpoint_restore_preserves_active_skill_cooldown",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::stale_mail_status_merge_tests::stale_snapshot_can_only_strengthen_mail_lock",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::stale_mail_status_merge_tests::stale_snapshot_cannot_remove_newer_durable_mail_lock",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::stale_mail_status_merge_tests::stale_unlocked_snapshot_cannot_delete_newer_durable_locked_mail",
+      "result": "ok"
+    }
+  ],
+  "newActualTestNames": [
+    "runtime::intelligent_creatures::uid_tests::actual_box_mints_above_retired_source_and_preserves_complete_reward_on_relogin",
+    "runtime::intelligent_creatures::uid_tests::reward_sessions_share_one_authority_even_when_their_source_slots_are_reused",
+    "runtime::intelligent_creatures::uid_tests::corrupt_authority_keeps_box_and_emits_no_success_or_reward",
+    "runtime::intelligent_creatures::uid_tests::exhausted_authority_never_falls_back_to_the_removed_source_or_slot",
+    "runtime::intelligent_creatures::uid_tests::unavailable_and_fenced_rewards_cannot_consume_the_box",
+    "runtime::intelligent_creatures::uid_tests::wrong_configured_authority_cannot_mutate_either_store_or_consume_the_box",
+    "runtime::intelligent_creatures::uid_tests::empty_blackstone_retires_high_source_in_history_without_minting_a_reward",
+    "runtime::intelligent_creatures::uid_tests::stale_source_reference_is_rejected_before_history_floor_or_inventory_changes"
+  ],
+  "rootAuditSha256": "a79263109e3678a32233557ee20ee1208376a6803259e87b659ca3b2139f9327",
+  "rawFinal": "Accepted bounded actual results: five final Source02 original Guard calls contain186 passing executions/177 distinct named tests/8 new unique tests/zero failed or ignored. All3696 declared rows verified with exact historical archive for Source01,458 canonical protected blobs match parent78d3,8 original Guard calls40 nonce files retain original tool/authority/policy/source permits and actual C>=50GiB/sampleBegin+sampleEnd freshness<=2000ms/PolicyB completed-exited-disposed lifecycle. All122 work/QA copies match SHA,length and exact bytes. Source01 positives and46/1 failure remain excluded history; separate historical prose correction preserves earlier copies.",
+  "scope": "Controlled File opt-in personal shape21/25 creature reward-box selected-output UID issuance, source retirement floor and synchronous in-memory source/reward publication. Actual UseItem/logout/relogin fixture uses memory AccountStore.",
+  "limitations": [
+    "No full-account atomic durability or all-issuer migration accepted.",
+    "Original discarded candidate UID timing and existing Belt-space fallback parity not established.",
+    "Periodic blackstone fresh mail/custody-mail lifecycle/external census/PostgreSQL/shared receipts remain outside scope.",
+    "No public gateway, client UI, installers or live deployment acceptance.",
+    "Stone-cutting or gamble-stone mechanic is a separate design request and is not implemented or tested by this receipt."
+  ],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noProductOrDocsEdits": true
+}

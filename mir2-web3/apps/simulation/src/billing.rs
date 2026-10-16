@@ -298,21 +298,31 @@ pub(crate) fn validate_complete_store(store: &AccountStore) -> Result<(), String
     let mut payments = BTreeSet::new();
     for account in store.accounts.values() {
         validate_account_record(account)?;
-        if account.activities.is_some() && store.schema_version != BILLING_SCHEMA_VERSION {
+        if account.activities.is_some()
+            && !matches!(
+                store.schema_version,
+                BILLING_SCHEMA_VERSION | crate::config::ACCOUNT_STORE_SCHEMA_VERSION
+            )
+        {
             return Err("activitiesSchemaInvalid".into());
         }
-        if store.schema_version != BILLING_SCHEMA_VERSION
-            && account
-                .monthly_card
-                .as_ref()
-                .is_some_and(|card| !card.item_receipts.is_empty())
+        if !matches!(
+            store.schema_version,
+            BILLING_SCHEMA_VERSION | crate::config::ACCOUNT_STORE_SCHEMA_VERSION
+        ) && account
+            .monthly_card
+            .as_ref()
+            .is_some_and(|card| !card.item_receipts.is_empty())
         {
             return Err("billingSchemaInvalid".into());
         }
         let Some(ledger) = &account.billing else {
             continue;
         };
-        if store.schema_version != BILLING_SCHEMA_VERSION {
+        if !matches!(
+            store.schema_version,
+            BILLING_SCHEMA_VERSION | crate::config::ACCOUNT_STORE_SCHEMA_VERSION
+        ) {
             return Err("billingSchemaInvalid".into());
         }
         ledger.validate()?;

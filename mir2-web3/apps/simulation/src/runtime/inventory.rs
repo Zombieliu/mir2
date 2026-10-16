@@ -20,6 +20,9 @@ use super::crystal_compat::{
     CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC, DOTNET_DATETIME_KIND_LOCAL,
     DOTNET_TICKS_AT_UNIX_EPOCH, EXPANDED_STORAGE_SLOTS,
 };
+use super::item_uid_issuance::{
+    issue_for_staged_inventory, refresh_world_history_floor, ItemUidIssuance,
+};
 use super::items::{
     crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
     crystal_equipment_slot_for_template, crystal_item_has_bind_flag, crystal_item_key_for_template,
@@ -61,6 +64,7 @@ fn seed_item(
     heal_mp: i32,
 ) -> ItemState {
     ItemState {
+        stone_serial: None,
         key: key.to_string(),
         name: name.to_string(),
         icon: item_icon_for_key(key),
@@ -128,6 +132,7 @@ pub(super) fn crystal_start_inventory_items(character: &CharacterRecord) -> Vec<
                 .tooltip
                 .unwrap_or_else(|| "Crystal start item.".to_string());
             ItemState {
+                stone_serial: None,
                 key,
                 name: template.name,
                 icon: template.image,
@@ -1291,7 +1296,7 @@ fn collect_inventory_unique_ids(resources: &InventoryResource, seen: &mut BTreeS
     }
 }
 
-fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
+pub(super) fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
     resources
         .belt_items
         .iter()
@@ -2067,7 +2072,30 @@ pub(super) fn plan_npc_gold_trade_gain(
     let (canonical, incoming) = canonical_npc_gold_trade_fresh(
         template,
         count,
-        allocate_item_unique_id(&staged, ItemContainer::Bag1, 0),
+        match &resources.item_uid_issuance {
+            super::item_uid_issuance::ItemUidIssuance::Legacy => {
+                allocate_item_unique_id(&staged, ItemContainer::Bag1, 0)
+            }
+            _ => {
+                let mut uid = super::item_uid_issuance::issue_for_staged_inventory(
+                    resources,
+                    crate::UserItemUidReason::NpcTradePurchase,
+                    ItemContainer::Bag1,
+                    0,
+                )
+                .ok()?;
+                if uid == catalog_uid {
+                    uid = super::item_uid_issuance::issue_for_staged_inventory(
+                        resources,
+                        crate::UserItemUidReason::NpcTradePurchase,
+                        ItemContainer::Bag1,
+                        0,
+                    )
+                    .ok()?;
+                }
+                uid
+            }
+        },
         expire_info,
     )?;
     if incoming.unique_id == 0 || incoming.unique_id == catalog_uid {
@@ -2146,11 +2174,18 @@ pub(super) fn plan_npc_resale_or_pearl_gain(
         .next()?;
     let (added_attack, added_defence) = super::items::user_item_added_attack_defence(source);
     let item = ItemState {
+        stone_serial: None,
         key: key.clone(),
         name: template.name.clone(),
         icon: item_icon_for_key(&key),
         slot,
-        unique_id: allocate_item_unique_id(resources, container, slot),
+        unique_id: super::item_uid_issuance::issue_for_staged_inventory(
+            resources,
+            crate::UserItemUidReason::NpcTradePurchase,
+            container,
+            slot,
+        )
+        .ok()?,
         container,
         quantity,
         description: template
@@ -2223,6 +2258,83 @@ fn ground_drop_user_item_uids_are_assigned(item: &UserItem) -> bool {
             .all(ground_drop_user_item_uids_are_assigned)
 }
 
+// Exact drop previews are structural only. Minting is a separate committing
+// step; custody returns never acquire replacement identities.
+struct ExactGroundDropPlan {
+    inventory: InventoryResource,
+    changed: Vec<ItemState>,
+    fresh_locations: Vec<(bool, usize)>,
+    fresh_source: bool,
+}
+
+fn exact_ground_drop_plan(
+    inventory: InventoryResource,
+    changed: Vec<ItemState>,
+    fresh_locations: Vec<(bool, usize)>,
+    fresh_source: bool,
+) -> Option<ExactGroundDropPlan> {
+    Some(ExactGroundDropPlan {
+        inventory,
+        changed,
+        fresh_locations,
+        fresh_source,
+    })
+}
+
+fn issue_fresh_ground_drop_tree(
+    inventory: &InventoryResource,
+    item: &mut UserItem,
+    container: ItemContainer,
+    slot: u8,
+) -> Option<()> {
+    item.unique_id = issue_for_staged_inventory(
+        inventory,
+        crate::UserItemUidReason::MonsterDrop,
+        container,
+        slot,
+    )
+    .ok()?;
+    // Traverse the exact raw carrier once. Hydration later rebuilds both live
+    // sockets and captured metadata from these same issued identities.
+    for (slot, child) in item.slots.iter_mut().enumerate() {
+        if let Some(child) = child {
+            issue_fresh_ground_drop_tree(inventory, child, container, u8::try_from(slot).ok()?)?;
+        }
+    }
+    Some(())
+}
+
+// This protects cloning/temporary normalization only. It is never sufficient
+// for commit: the original complete carrier validator still runs afterwards.
+fn fresh_ground_drop_raw_shape_is_bounded(item: &UserItem) -> bool {
+    fn visit(
+        item: &UserItem,
+        depth: usize,
+        nodes: &mut usize,
+        budget: super::items::UserItemCarrierBudget,
+    ) -> bool {
+        *nodes = nodes.saturating_add(1);
+        if depth > budget.max_depth
+            || *nodes > budget.max_total_nodes
+            || item.slots.len() > budget.max_slots_per_item
+            || item.added_stats.len() > budget.max_added_stats_per_item
+            || item.awake_values.len() > budget.max_awake_values_per_item
+        {
+            return false;
+        }
+        item.slots
+            .iter()
+            .flatten()
+            .all(|child| visit(child, depth + 1, nodes, budget))
+    }
+    visit(
+        item,
+        0,
+        &mut 0,
+        super::items::UserItemCarrierBudget::default(),
+    )
+}
+
 #[allow(clippy::too_many_arguments)]
 fn plan_exact_ground_drop_item(
     resources: &InventoryResource,
@@ -2233,8 +2345,18 @@ fn plan_exact_ground_drop_item(
     preferred_slot: u8,
     expected_quantity: u32,
     payload: &GroundDropItemPayload,
-) -> Option<(InventoryResource, Vec<ItemState>)> {
-    validate_committed_user_item_carrier(&payload.item).ok()?;
+) -> Option<ExactGroundDropPlan> {
+    if !matches!(
+        container,
+        ItemContainer::Bag1 | ItemContainer::Bag2 | ItemContainer::Belt | ItemContainer::Quest
+    ) {
+        return None;
+    }
+    if payload.uid_assigned {
+        validate_committed_user_item_carrier(&payload.item).ok()?;
+    } else if !fresh_ground_drop_raw_shape_is_bounded(&payload.item) {
+        return None;
+    }
     if u32::from(payload.item.count) != expected_quantity || expected_quantity == 0 {
         return None;
     }
@@ -2257,7 +2379,22 @@ fn plan_exact_ground_drop_item(
     base.key = canonical_key.clone();
     base.name = name.to_string();
     base.description = description.to_string();
-    let mut canonical = try_item_state_from_user_item(base, &payload.item).ok()?;
+    let mut preview_item = payload.item.clone();
+    if !payload.uid_assigned {
+        // Fresh raw drops may have repeated child templates with all IDs zero.
+        // Give the clone temporary distinct identities before captured socket
+        // validation. No durable service/history is consulted by this preview.
+        clear_user_item_tree_unique_ids(&mut preview_item);
+        let mut seen = BTreeSet::new();
+        collect_inventory_unique_ids(resources, &mut seen);
+        let mut next = inventory_max_unique_id(resources)
+            .checked_add(1)
+            .unwrap_or(1)
+            .max(1);
+        normalize_user_item_tree_unique_ids(&mut preview_item, &mut seen, &mut next, false);
+    }
+    validate_committed_user_item_carrier(&preview_item).ok()?;
+    let mut canonical = try_item_state_from_user_item(base, &preview_item).ok()?;
     canonical.container = container;
     canonical.slot = preferred_slot;
 
@@ -2267,7 +2404,15 @@ fn plan_exact_ground_drop_item(
     }
 
     let mut staged = resources.clone();
+    let mut fresh_locations = Vec::new();
     if payload.uid_assigned {
+        // Custody must be conflict-free before even a full-stack merge. A
+        // merge cannot hide an already-present source root or nested identity.
+        let exact_before = try_user_item_from_item_state(&canonical).ok()?;
+        normalize_incoming_item_tree_unique_ids(resources, &mut canonical, &[]);
+        if try_user_item_from_item_state(&canonical).ok()? != exact_before {
+            return None;
+        }
         if max_stack > 1 {
             let mut merge_capacity = 0_u32;
             if matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2) {
@@ -2319,7 +2464,12 @@ fn plan_exact_ground_drop_item(
                         validate_committed_item_state_carrier(existing).ok()?;
                         changed.push(existing.clone());
                         if remaining == 0 {
-                            return Some((staged, changed));
+                            return exact_ground_drop_plan(
+                                staged,
+                                changed,
+                                fresh_locations,
+                                !payload.uid_assigned,
+                            );
                         }
                     }
                 }
@@ -2338,33 +2488,22 @@ fn plan_exact_ground_drop_item(
                     validate_committed_item_state_carrier(existing).ok()?;
                     changed.push(existing.clone());
                     if remaining == 0 {
-                        return Some((staged, changed));
+                        return exact_ground_drop_plan(
+                            staged,
+                            changed,
+                            fresh_locations,
+                            !payload.uid_assigned,
+                        );
                     }
                 }
                 return None;
             }
         }
 
-        let exact_before = try_user_item_from_item_state(&canonical).ok()?;
-        normalize_incoming_item_tree_unique_ids(resources, &mut canonical, &[]);
-        if try_user_item_from_item_state(&canonical).ok()? != exact_before {
-            return None;
-        }
         let (item_container, slot) =
             crystal_empty_add_item_slots(&staged, container, &canonical_key)
                 .into_iter()
-                .next()
-                .or_else(|| {
-                    find_empty_inventory_item_slot(
-                        &staged.inventory_items,
-                        container,
-                        staged.inventory_capacity,
-                    )
-                    .or(Some((container, preferred_slot)))
-                    .filter(|(candidate_container, candidate_slot)| {
-                        !collection_slot_occupied(&staged, *candidate_container, *candidate_slot)
-                    })
-                })?;
+                .next()?;
         canonical.container = item_container;
         canonical.slot = slot;
         validate_committed_item_state_carrier(&canonical).ok()?;
@@ -2373,7 +2512,7 @@ fn plan_exact_ground_drop_item(
         } else {
             staged.inventory_items.push(canonical.clone());
         }
-        return Some((staged, vec![canonical]));
+        return exact_ground_drop_plan(staged, vec![canonical], fresh_locations, false);
     }
 
     let mut remaining = expected_quantity;
@@ -2394,7 +2533,12 @@ fn plan_exact_ground_drop_item(
                 validate_committed_item_state_carrier(existing).ok()?;
                 changed.push(existing.clone());
                 if remaining == 0 {
-                    return Some((staged, changed));
+                    return exact_ground_drop_plan(
+                        staged,
+                        changed,
+                        fresh_locations,
+                        !payload.uid_assigned,
+                    );
                 }
             }
         }
@@ -2413,7 +2557,12 @@ fn plan_exact_ground_drop_item(
             validate_committed_item_state_carrier(existing).ok()?;
             changed.push(existing.clone());
             if remaining == 0 {
-                return Some((staged, changed));
+                return exact_ground_drop_plan(
+                    staged,
+                    changed,
+                    fresh_locations,
+                    !payload.uid_assigned,
+                );
             }
         }
     }
@@ -2422,34 +2571,28 @@ fn plan_exact_ground_drop_item(
         let (item_container, slot) =
             crystal_empty_add_item_slots(&staged, container, &canonical_key)
                 .into_iter()
-                .next()
-                .or_else(|| {
-                    find_empty_inventory_item_slot(
-                        &staged.inventory_items,
-                        container,
-                        staged.inventory_capacity,
-                    )
-                    .or(Some((container, preferred_slot)))
-                    .filter(|(candidate_container, candidate_slot)| {
-                        !collection_slot_occupied(&staged, *candidate_container, *candidate_slot)
-                    })
-                })?;
+                .next()?;
         let mut item = canonical.clone();
         item.container = item_container;
         item.slot = slot;
         item.quantity = remaining.min(max_stack);
+        // Pure temporary identities permit lossless socket hydration even for
+        // repeated child templates. This has no durable allocator side effect.
+        // Durable commit replaces the entire tree before publishing any cell.
         normalize_fresh_item_tree_unique_ids(&staged, &mut item, &[]);
         validate_committed_item_state_carrier(&item).ok()?;
         if item_container == ItemContainer::Belt {
+            fresh_locations.push((true, staged.belt_items.len()));
             staged.belt_items.push(item.clone());
         } else {
+            fresh_locations.push((false, staged.inventory_items.len()));
             staged.inventory_items.push(item.clone());
         }
         remaining -= item.quantity;
         changed.push(item);
     }
 
-    Some((staged, changed))
+    exact_ground_drop_plan(staged, changed, fresh_locations, !payload.uid_assigned)
 }
 #[allow(clippy::too_many_arguments)]
 pub(super) fn can_gain_exact_ground_drop_item(
@@ -2512,7 +2655,7 @@ pub(super) fn add_exact_ground_drop_items(
     expected_quantity: u32,
     payload: &GroundDropItemPayload,
 ) -> Option<Vec<ItemState>> {
-    let (staged, changed_items) = {
+    let mut plan = {
         let resources = world.resource::<InventoryResource>();
         plan_exact_ground_drop_item(
             resources,
@@ -2525,7 +2668,67 @@ pub(super) fn add_exact_ground_drop_items(
             payload,
         )?
     };
-    *world.resource_mut::<InventoryResource>() = staged;
+    if plan.fresh_source
+        && matches!(
+            &plan.inventory.item_uid_issuance,
+            ItemUidIssuance::Unavailable | ItemUidIssuance::Fenced
+        )
+    {
+        return None;
+    }
+    // Capacity failure above has no mint/floor effect. The complete fresh plan
+    // may burn IDs on issuance failure, but never publishes a partial inventory.
+    refresh_world_history_floor(world).ok()?;
+    if payload.uid_assigned {
+        // A fully absorbed custody source may disappear from the live roster.
+        // Its retired ID must still remain above the shared authority floor.
+        plan.inventory
+            .item_uid_issuance
+            .raise_serialized_floor(&payload.item)
+            .ok()?;
+    }
+    // Temporary planning IDs are not issued history. Only the actual original
+    // live roster participates in the mint floor; the shared allocator itself
+    // keeps every earlier newly issued root/child and discarded ID reserved.
+    let mint_context = world.resource::<InventoryResource>().clone();
+    for (belt, index) in &plan.fresh_locations {
+        if matches!(&plan.inventory.item_uid_issuance, ItemUidIssuance::Legacy) {
+            continue;
+        }
+        let original = if *belt {
+            plan.inventory.belt_items.get(*index)?
+        } else {
+            plan.inventory.inventory_items.get(*index)?
+        }
+        .clone();
+        let mut raw = try_user_item_from_item_state(&original).ok()?;
+        issue_fresh_ground_drop_tree(&mint_context, &mut raw, original.container, original.slot)?;
+        let issued = try_item_state_from_user_item(original, &raw).ok()?;
+        validate_committed_item_state_carrier(&issued).ok()?;
+        if *belt {
+            plan.inventory.belt_items[*index] = issued;
+        } else {
+            plan.inventory.inventory_items[*index] = issued;
+        }
+    }
+    // Reproject every changed cell from the final plan, never the temporary or
+    // pre-mint clones collected during structural preview.
+    let changed_items = plan
+        .changed
+        .iter()
+        .map(|changed| {
+            let items = if changed.container == ItemContainer::Belt {
+                &plan.inventory.belt_items
+            } else {
+                &plan.inventory.inventory_items
+            };
+            items
+                .iter()
+                .find(|item| item.container == changed.container && item.slot == changed.slot)
+                .cloned()
+        })
+        .collect::<Option<Vec<_>>>()?;
+    *world.resource_mut::<InventoryResource>() = plan.inventory;
     Some(changed_items)
 }
 pub(super) fn add_or_increment_item(
@@ -2725,6 +2928,7 @@ pub(super) fn add_or_increment_item_with_random_metadata(
             },
         };
         let item = ItemState {
+            stone_serial: None,
             key: key.to_string(),
             name: name.to_string(),
             icon: item_icon_for_key(key),
@@ -4026,7 +4230,10 @@ pub(super) fn split_item_impl(
         return vec![failed_packet];
     }
 
-    let mut resources = world.resource_mut::<InventoryResource>();
+    if super::item_uid_issuance::refresh_world_history_floor(world).is_err() {
+        return vec![failed_packet];
+    }
+    let mut resources = world.resource::<InventoryResource>().clone();
     let split_packet_item = match grid {
         MirGridType::Storage => {
             let Some(index) = resources
@@ -4055,10 +4262,21 @@ pub(super) fn split_item_impl(
             // the empty slot is therefore the canonical ID even when another
             // grid uses the same numeric value.
             let preferred = default_item_unique_id(split.container, next_slot);
-            split.unique_id = if resources.reserved_item_unique_ids.contains(&preferred) {
-                allocate_item_unique_id(&resources, split.container, next_slot)
-            } else {
-                preferred
+            split.unique_id = match &resources.item_uid_issuance {
+                super::item_uid_issuance::ItemUidIssuance::Legacy
+                    if !resources.reserved_item_unique_ids.contains(&preferred) =>
+                {
+                    preferred
+                }
+                _ => match super::item_uid_issuance::issue_for_staged_inventory(
+                    &resources,
+                    crate::UserItemUidReason::ItemStackSplit,
+                    split.container,
+                    next_slot,
+                ) {
+                    Ok(uid) => uid,
+                    Err(_) => return vec![failed_packet],
+                },
             };
             split.quantity = u32::from(count);
             let Ok(split_packet_item) = try_user_item_from_item_state(&split) else {
@@ -4096,7 +4314,15 @@ pub(super) fn split_item_impl(
             let mut split = resources.inventory_items[index].clone();
             split.container = next_container;
             split.slot = next_slot;
-            split.unique_id = allocate_item_unique_id(&resources, split.container, next_slot);
+            split.unique_id = match super::item_uid_issuance::issue_for_staged_inventory(
+                &resources,
+                crate::UserItemUidReason::ItemStackSplit,
+                split.container,
+                next_slot,
+            ) {
+                Ok(uid) => uid,
+                Err(_) => return vec![failed_packet],
+            };
             split.quantity = u32::from(count);
             let Ok(split_packet_item) = try_user_item_from_item_state(&split) else {
                 return vec![failed_packet];
@@ -4111,6 +4337,7 @@ pub(super) fn split_item_impl(
         }
         _ => unreachable!("unsupported SplitItem grids return early"),
     };
+    *world.resource_mut::<InventoryResource>() = resources;
 
     vec![
         ServerPacket::SplitItem1 {
@@ -5220,3 +5447,7 @@ mod stack_identity_tests {
 #[cfg(test)]
 #[path = "npc_gold_trade_evidence_tests.rs"]
 mod npc_gold_trade_evidence_tests;
+
+#[cfg(test)]
+#[path = "exact_drop_uid_tests.rs"]
+mod exact_drop_uid_tests;

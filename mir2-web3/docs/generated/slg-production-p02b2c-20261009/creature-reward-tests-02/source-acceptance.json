@@ -1,0 +1,12 @@
+{
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceSnapshot": {
+    "sha256": "46b515c910090e7981cc65855d867b1c30859ff760187ab93661f499d0d8a7cd"
+  },
+  "independentSourceReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\independent-source-review-02.json",
+    "sha256": "2ccc335aca9392f1657a15fb8de2abde5ac01de8e0e7a1b5e24383ff8d819aa1"
+  },
+  "scope": "Controlled File personal creature box reward issuance, source retirement floor and synchronous source/reward publication; original empty and no-space semantics retained. Full account atomic persistence, all issuers, mail, census, PostgreSQL, public gateway/UI/installers and existing belt fallback parity are not accepted."
+}

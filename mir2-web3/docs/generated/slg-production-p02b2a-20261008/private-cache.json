@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.production-private-build-cache.v1",
+  "source": "E:\\mir2-player-journey\\work\\slg-production-p02b-20261008\\target-retry01",
+  "destination": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\target",
+  "startedUtc": "2026-10-08T15:35:37.3271186Z",
+  "completedUtc": "2026-10-08T15:35:44.6265409Z",
+  "copiedFiles": 2353,
+  "copiedBytes": 2284474688,
+  "skippedExecutables": 38,
+  "foreignProcessClosed": false,
+  "filesRemoved": false,
+  "originalGuardOrPolicyChanged": false
+}

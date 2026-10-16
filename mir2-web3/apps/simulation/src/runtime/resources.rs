@@ -452,6 +452,7 @@ pub(super) struct SessionResource {
     ranking_inspect_active: bool,
     active_save_revision: Arc<AtomicU64>,
     pub(super) npc_purchase_journal: Option<crate::npc_purchase_journal::NpcPurchaseJournal>,
+    pub(super) personal_production: Option<super::production::PersonalProductionState>,
     pub(super) npc_purchase_producer: Option<[u8; 32]>,
     pub(super) npc_purchase_owner_epoch: Option<[u8; 32]>,
 }
@@ -468,6 +469,7 @@ impl SessionResource {
             ranking_inspect_active: false,
             active_save_revision: Arc::new(AtomicU64::new(UNKNOWN_ACTIVE_SAVE_REVISION)),
             npc_purchase_journal: None,
+            personal_production: None,
             npc_purchase_producer: None,
             npc_purchase_owner_epoch: None,
         }
@@ -501,6 +503,7 @@ impl SessionResource {
 
     pub(super) fn clear_active_save_revision(&mut self) {
         self.npc_purchase_journal = None;
+        self.personal_production = None;
         self.npc_purchase_producer = None;
         self.npc_purchase_owner_epoch = None;
         self.active_save_revision
@@ -698,6 +701,7 @@ impl MapRuntimeResource {
 
 #[derive(Resource, Debug, Clone)]
 pub(super) struct InventoryResource {
+    pub(super) item_uid_issuance: super::item_uid_issuance::ItemUidIssuance,
     pub(super) reserved_item_unique_ids: std::collections::BTreeSet<u64>,
     pub(super) inventory_capacity: u16,
     pub(super) inventory_items: Vec<ItemState>,
@@ -717,6 +721,7 @@ pub(super) struct InventoryResource {
 impl InventoryResource {
     pub(super) fn new(base_storage_slots: u16) -> Self {
         Self {
+            item_uid_issuance: Default::default(),
             reserved_item_unique_ids: Default::default(),
             inventory_capacity: default_inventory_capacity(),
             inventory_items: Vec::new(),

@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.production-creature-box-fixture-repair.v1",
+  "createdUtc": "2026-10-09T00:10:32.538718+00:00",
+  "path": "mir2-web3/apps/simulation/src/runtime/tests.rs",
+  "beforeSha256": "4e2f941822068c6a4108a1e7b57378b220b94433ad0d72e4a648f3896a5dea56",
+  "afterSha256": "7b843fe5b126c5a2ef9cade04d0647dce47ac85542634fa7e88cdfa69f8f6fe7",
+  "beforeLength": 2431698,
+  "afterLength": 2432244,
+  "originalFunctionRetainedAfterRemovingOnlyInsertion": true,
+  "originalAssertionsUnchanged": true,
+  "productionTeleportRuleChanged": false,
+  "note": "Existing scroll routing fixture pins the bind point it already asserted; actual Source01 46pass/1fail retained. Normal latest-safe-zone rule unchanged."
+}

@@ -1,0 +1,62 @@
+{
+  "schema": "mir2.production-result-audit.v1",
+  "reviewer": "Root",
+  "createdUtc": "2026-10-08T09:33:33.3052076Z",
+  "accepted": true,
+  "checks": [
+    {
+      "run": "production-tests-01",
+      "verifiedDeclaredInputs": 14,
+      "sourceDrift": 0,
+      "actualNamedTestPasses": 19,
+      "remainingCBytes": "225164677120",
+      "freshnessUpperBoundMs": 66.8251,
+      "nonce": "dea18335225044a0bff1794a64e5c947",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "simulation-tests-01",
+      "verifiedDeclaredInputs": 452,
+      "sourceDrift": 0,
+      "actualNamedTestPasses": 15,
+      "remainingCBytes": "225173868544",
+      "freshnessUpperBoundMs": 68.6078,
+      "nonce": "958463df77c64a42b69600c01fcc2fcf",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "npc-regression-01",
+      "verifiedDeclaredInputs": 452,
+      "sourceDrift": 0,
+      "actualNamedTestPasses": 30,
+      "remainingCBytes": "221989474304",
+      "freshnessUpperBoundMs": 67.4169,
+      "nonce": "e0286570380149de8f61399bedc37906",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "save-regression-01",
+      "verifiedDeclaredInputs": 452,
+      "sourceDrift": 0,
+      "actualNamedTestPasses": 59,
+      "remainingCBytes": "221967093760",
+      "freshnessUpperBoundMs": 73.36,
+      "nonce": "a54a7de2e44c4bd1ac33266133204880",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    }
+  ],
+  "controlledDurableInventoryTestsPassed": true,
+  "liveGameplayAcceptance": false
+}

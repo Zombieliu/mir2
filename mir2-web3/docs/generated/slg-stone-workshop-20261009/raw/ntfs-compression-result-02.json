@@ -1,0 +1,35 @@
+[
+  {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_client_bevy-1f94850533cba0ab.pdb",
+    "logicalBytes": 1402638336,
+    "beforeSha256": "923f20113e2c113728256e7d479e596ef8215853028962c1dccc87f023627afb",
+    "afterSha256": "923f20113e2c113728256e7d479e596ef8215853028962c1dccc87f023627afb",
+    "beforeAllocatedBytes": 1402638336,
+    "afterAllocatedBytes": 508039168,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,402,638,336 total bytes of data are stored in 508,039,168 bytes.\r\nThe compression ratio is 2.8 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_client_bevy-a5f55986e74346a1.pdb",
+    "logicalBytes": 1395888128,
+    "beforeSha256": "65d08170b74d00b7c0ad36064eee13aadd2ff09f98c9c87eeab696e686f18c0e",
+    "afterSha256": "65d08170b74d00b7c0ad36064eee13aadd2ff09f98c9c87eeab696e686f18c0e",
+    "beforeAllocatedBytes": 1395888128,
+    "afterAllocatedBytes": 506822656,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,395,888,128 total bytes of data are stored in 506,822,656 bytes.\r\nThe compression ratio is 2.8 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-9d9a7e3d97e9db99.pdb",
+    "logicalBytes": 1317933056,
+    "beforeSha256": "fe5a4b4a4f3041ead40d440a6f2c1f56c24aaa2666ed222365f089f8078abe91",
+    "afterSha256": "fe5a4b4a4f3041ead40d440a6f2c1f56c24aaa2666ed222365f089f8078abe91",
+    "beforeAllocatedBytes": 1317933056,
+    "afterAllocatedBytes": 474013696,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,317,933,056 total bytes of data are stored in 474,013,696 bytes.\r\nThe compression ratio is 2.8 to 1.\r\n",
+    "stderr": ""
+  }
+]

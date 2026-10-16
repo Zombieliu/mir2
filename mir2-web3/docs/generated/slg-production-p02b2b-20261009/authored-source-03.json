@@ -1,0 +1,17 @@
+{
+  "schema": "mir2.production-authored-source.v1",
+  "parent": "488ec6f034182977fec03ad2952cccfd76b06eb2",
+  "createdUtc": "2026-10-08T17:42:00.2491604Z",
+  "files": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "sha256": "16c9633f6f49dfd0849c6a4a88cd0de15b384c1c6bba81fed01121f37afc39a0",
+      "length": 192645
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/exact_drop_uid_tests.rs",
+      "sha256": "721ce098d49a5c85cad5c3951d0130ae65370029a139c6f0d0e69eda731e2f55",
+      "length": 15744
+    }
+  ]
+}

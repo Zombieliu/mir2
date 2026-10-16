@@ -207,7 +207,7 @@ mod guild_clock_driver;
 #[path = "config_guild_experience.rs"]
 pub(crate) mod guild_experience;
 pub use guild_experience::{GuildExperienceEvent, GuildExperienceJournal};
-const ACCOUNT_STORE_SCHEMA_VERSION: u16 = crate::billing::BILLING_SCHEMA_VERSION;
+pub(crate) const ACCOUNT_STORE_SCHEMA_VERSION: u16 = 10;
 
 #[path = "config_conquest_account_fences.rs"]
 mod conquest_account_fences;
@@ -216,6 +216,8 @@ mod conquest_authority;
 #[path = "config_shared_conquests.rs"]
 mod shared_conquest_store;
 pub use conquest_authority::{ConquestDefenseSample, ConquestManagementAction};
+#[path = "config_stones.rs"]
+mod stone_authority;
 
 #[path = "config_hero_postgres.rs"]
 mod hero_postgres;
@@ -233,6 +235,11 @@ pub use shared_guild_store::{
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountStore {
+    /// Private results and cut tombstones. Never included in a client snapshot.
+    #[serde(rename = "sealedStones", default)]
+    pub(crate) sealed_stones: mir2_production::StoneRegistry,
+    #[serde(skip)]
+    source_stone_version: Option<i64>,
     #[serde(
         rename = "schemaVersion",
         default = "legacy_account_store_schema_version"
@@ -297,6 +304,8 @@ impl AccountStore {
             shared_conquests: BTreeMap::new(),
             source_conquest_versions: BTreeMap::new(),
             shared_heroes: BTreeMap::new(),
+            sealed_stones: mir2_production::StoneRegistry::default(),
+            source_stone_version: None,
             hero_id_high_watermark: 0,
             source_hero_versions: BTreeMap::new(),
             source_hero_allocator_version: None,
@@ -366,6 +375,8 @@ impl AccountStore {
     fn migrate_to_current_schema(mut self) -> Self {
         // Never promote authority fields which did not exist in the tagged
         // schema. Version 3 guild records otherwise survive the clock upgrade.
+        let impossible_stones = self.schema_version < ACCOUNT_STORE_SCHEMA_VERSION
+            && self.sealed_stones != mir2_production::StoneRegistry::default();
         let impossible_guilds = self.schema_version < 3 && !self.shared_guilds.is_empty();
         let impossible_clock = self.schema_version < 4 && self.guild_clock.is_some();
         let impossible_heroes = self.schema_version < 5
@@ -397,6 +408,7 @@ impl AccountStore {
             && !impossible_monthly_cards
             && !impossible_billing
             && !impossible_activities
+            && !impossible_stones
         {
             self.schema_version = ACCOUNT_STORE_SCHEMA_VERSION;
         }
@@ -428,6 +440,9 @@ impl AccountStore {
         if let Some(clock) = versions.clock {
             self.guild_clock = Some(clock.record);
             self.source_guild_clock_version = Some(clock.version);
+        }
+        if let Some(version) = versions.stones {
+            self.source_stone_version = Some(version);
         }
         self.source_hero_versions = versions.heroes.heroes;
         self.source_hero_allocator_version = versions.heroes.allocator;
@@ -486,6 +501,8 @@ impl AccountStore {
             shared_conquests: self.shared_conquests.clone(),
             source_conquest_versions: self.source_conquest_versions.clone(),
             shared_heroes: self.shared_heroes.clone(),
+            sealed_stones: self.sealed_stones.clone(),
+            source_stone_version: self.source_stone_version,
             hero_id_high_watermark: self.hero_id_high_watermark,
             source_hero_versions: self.source_hero_versions.clone(),
             source_hero_allocator_version: self.source_hero_allocator_version,
@@ -503,6 +520,9 @@ impl AccountStore {
         if let Some(clock) = versions.clock {
             self.guild_clock = Some(clock.record);
             self.source_guild_clock_version = Some(clock.version);
+        }
+        if let Some(version) = versions.stones {
+            self.source_stone_version = Some(version);
         }
         self.source_hero_versions.extend(versions.heroes.heroes);
         if let Some(version) = versions.heroes.allocator {
@@ -528,6 +548,7 @@ impl AccountStore {
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct AccountStoreSourceVersions {
+    stones: Option<i64>,
     clock: Option<guild_clock::GuildClockSourceVersion>,
     guilds: BTreeMap<String, i64>,
     conquests: BTreeMap<i32, i64>,
@@ -539,6 +560,15 @@ struct AccountStoreSourceVersions {
 
 #[derive(Debug, Clone, Copy)]
 enum AccountStoreMutationScope<'a> {
+    AccountsWithStones {
+        account_ids: &'a [String],
+        stone_ids: &'a [u64],
+    },
+    AccountsWithStonesAndGuilds {
+        account_ids: &'a [String],
+        stone_ids: &'a [u64],
+        guild_ids: &'a [String],
+    },
     Accounts(&'a [String]),
     AccountsWithGlobal(&'a [String]),
     AccountsWithHeroes {
@@ -578,6 +608,7 @@ enum AccountStoreTransactionScopeError {
     InvalidHeroState(String),
     InvalidConquestState(String),
     OutOfScopeConquestChanged { conquest_index: i32 },
+    InvalidStoneState(String),
     AccountFingerprintFailed { account_id: String, reason: String },
 }
 
@@ -587,6 +618,7 @@ impl fmt::Display for AccountStoreTransactionScopeError {
             Self::InvalidConquestState(reason) => write!(formatter, "invalid shared conquest state: {reason}"),
             Self::OutOfScopeConquestChanged { conquest_index } => write!(formatter, "conquest {conquest_index} changed outside the authorized scope"),
             Self::OutOfScopeGuildChanged { guild_id } => write!(formatter, "guild {guild_id} changed outside the authorized scope"),
+            Self::InvalidStoneState(reason) => write!(formatter, "invalid sealed stone state: {reason}"),
             Self::InvalidHeroState(reason) => write!(formatter, "invalid shared Hero state: {reason}"),
             Self::InvalidGuildState(reason) => write!(formatter, "invalid shared guild state: {reason}"),
             Self::OutOfScopeAccountChanged { account_id } => write!(
@@ -616,6 +648,7 @@ fn validate_account_store_transaction_scope(
     staged: &AccountStore,
     scope: AccountStoreMutationScope<'_>,
 ) -> Result<(), AccountStoreTransactionScopeError> {
+    stone_authority::validate_scope(original, staged, scope)?;
     hero_registry::validate_scope(original, staged, scope)?;
     guild_clock::validate_store_scope(original, staged, scope)?;
     shared_guild_store::validate_guild_scope(original, staged, scope)?;
@@ -629,7 +662,9 @@ fn validate_account_store_transaction_scope(
         AccountStoreMutationScope::AccountsWithGuilds { account_ids, .. }
         | AccountStoreMutationScope::AccountsWithHeroes { account_ids, .. }
         | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { account_ids, .. }
-        | AccountStoreMutationScope::AccountsWithGuildsAndConquests { account_ids, .. } => {
+        | AccountStoreMutationScope::AccountsWithGuildsAndConquests { account_ids, .. }
+        | AccountStoreMutationScope::AccountsWithStones { account_ids, .. }
+        | AccountStoreMutationScope::AccountsWithStonesAndGuilds { account_ids, .. } => {
             (account_ids, false)
         }
         AccountStoreMutationScope::FullRestore => return Ok(()),
@@ -694,6 +729,7 @@ fn validate_account_store_transaction_scope(
 
 #[derive(Debug, Clone)]
 struct AccountStoreMutationPlan {
+    stones: Option<stone_authority::StoneMutation>,
     /// Compensation is fenced by its own committed receipt even for a File
     /// primary's PostgreSQL mirror. Never overwrite a later domain mutation.
     force_source_cas: bool,
@@ -812,6 +848,14 @@ fn build_account_store_mutation_plan(
         | AccountStoreMutationScope::AccountsWithGuildsAndConquests {
             account_ids: scoped_ids,
             ..
+        }
+        | AccountStoreMutationScope::AccountsWithStones {
+            account_ids: scoped_ids,
+            ..
+        }
+        | AccountStoreMutationScope::AccountsWithStonesAndGuilds {
+            account_ids: scoped_ids,
+            ..
         } => {
             account_ids.extend(scoped_ids.iter().cloned());
         }
@@ -897,6 +941,7 @@ fn build_account_store_mutation_plan(
     };
 
     AccountStoreMutationPlan {
+        stones: stone_authority::build(original, desired),
         force_source_cas: false,
         clock: matches!(scope, AccountStoreMutationScope::FullRestore).then(|| {
             guild_clock::GuildClockMutation::Invalidate {
@@ -992,6 +1037,9 @@ fn apply_account_store_mutation_source_versions(
         store.guild_clock = Some(clock.record);
         store.source_guild_clock_version = Some(clock.version);
     }
+    if let Some(version) = versions.stones {
+        store.source_stone_version = Some(version);
+    }
     store.source_hero_versions.extend(versions.heroes.heroes);
     if let Some(version) = versions.heroes.allocator {
         store.source_hero_allocator_version = Some(version);
@@ -1049,6 +1097,7 @@ pub struct AccountStoreRepositoryStatus {
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct AccountStoreRepositorySave {
+    pub(crate) stones: Option<i64>,
     pub(crate) clock: Option<guild_clock::GuildClockSourceVersion>,
     pub guild_versions: BTreeMap<String, i64>,
     pub conquest_versions: BTreeMap<i32, i64>,
@@ -1061,6 +1110,7 @@ pub struct AccountStoreRepositorySave {
 impl From<AccountStoreSourceVersions> for AccountStoreRepositorySave {
     fn from(value: AccountStoreSourceVersions) -> Self {
         Self {
+            stones: value.stones,
             clock: value.clock,
             guild_versions: value.guilds,
             conquest_versions: value.conquests,
@@ -1075,6 +1125,7 @@ impl From<AccountStoreSourceVersions> for AccountStoreRepositorySave {
 impl AccountStoreRepositorySave {
     fn into_source_versions(self) -> AccountStoreSourceVersions {
         AccountStoreSourceVersions {
+            stones: self.stones,
             clock: self.clock,
             guilds: self.guild_versions,
             conquests: self.conquest_versions,
@@ -1180,6 +1231,7 @@ impl AccountStoreRepository for FileAccountStoreRepository {
         }
         .migrate_to_current_schema();
         crate::billing::validate_complete_store(&store)?;
+        stone_authority::validate_store(&store)?;
         hero_registry::validate_complete_state(&store)?;
         shared_conquest_store::validate_complete_state(&store)?;
         shared_guild_store::validate_complete_guild_state(&store)?;
@@ -1966,6 +2018,9 @@ pub struct CharacterSaveRecord {
     /// Absent on legacy saves; never projected through WorldSnapshot or mail.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub npc_purchase_journal: Option<crate::npc_purchase_journal::NpcPurchaseJournal>,
+    /// Private personal jobs; published with the same inventory/wallet checkpoint.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub personal_production: Option<crate::runtime::PersonalProductionState>,
     #[serde(default, skip_serializing_if = "GuildExperienceJournal::is_empty")]
     pub guild_experience_journal: GuildExperienceJournal,
     /// Optimistic revision for the complete private character snapshot.
@@ -2090,6 +2145,7 @@ impl CharacterSaveRecord {
             player_kill_receipts: BTreeMap::new(),
             default_npc_events: crate::DefaultNpcEventSnapshot::default(),
             npc_purchase_journal: None,
+            personal_production: None,
             character,
             map_file_name: String::new(),
             map_title: String::new(),
@@ -2253,6 +2309,8 @@ mod tests {
                 hero_id_high_watermark: 0,
                 source_hero_versions: BTreeMap::new(),
                 source_hero_allocator_version: None,
+                sealed_stones: mir2_production::StoneRegistry::default(),
+                source_stone_version: None,
                 guild_clock: None,
                 source_guild_clock_version: None,
                 source_guild_versions: BTreeMap::new(),
@@ -4014,6 +4072,7 @@ pub struct SimulationConfig {
     pub onchain_mine_nodes: Vec<OnchainMineNodeRecord>,
     pub map_hazards: Vec<MapHazardRecord>,
     pub account_store: SharedAccountStore,
+    pub(crate) item_uid_issuance: crate::runtime::item_uid_issuance::ItemUidIssuance,
     pub account_store_path: Option<PathBuf>,
     pub account_store_database_url: Option<String>,
     pub account_store_database_mode: AccountStoreDatabaseMode,
@@ -4093,6 +4152,13 @@ impl SimulationConfig {
             .clone();
         let mut fork = self.clone();
         fork.account_store = Arc::new(Mutex::new(account_store));
+        if matches!(
+            fork.item_uid_issuance,
+            crate::runtime::item_uid_issuance::ItemUidIssuance::Durable(_)
+        ) {
+            fork.item_uid_issuance =
+                crate::runtime::item_uid_issuance::ItemUidIssuance::Unavailable;
+        }
         fork.guild_clock_driver =
             Arc::new(Mutex::new(guild_clock_driver::ClockDriverState::default()));
         fork.guild_clock_updates = Arc::new(std::sync::atomic::AtomicU64::new(0));
@@ -4137,6 +4203,9 @@ impl SimulationConfig {
     pub fn rebind_account_store_from(&mut self, authoritative: &Self) {
         self.replica_bootstrap_authority = None;
         self.file_authority = authoritative.file_authority.clone();
+        self.item_uid_issuance = self
+            .item_uid_issuance
+            .rebind_from(&authoritative.item_uid_issuance);
         self.guild_clock_driver = Arc::clone(&authoritative.guild_clock_driver);
         self.guild_clock_updates = Arc::clone(&authoritative.guild_clock_updates);
         self.account_store = Arc::clone(&authoritative.account_store);
@@ -4238,6 +4307,7 @@ impl SimulationConfig {
             monthly_card_policy: crate::monthly_card::MonthlyCardPolicy::default(),
             activity_policy: crate::activities::ActivityPolicy::default(),
             billing_monthly_card_credit_price: None,
+            item_uid_issuance: Default::default(),
             account_store_path: None,
             account_store_database_url: None,
             account_store_database_mode: AccountStoreDatabaseMode::Mirror,
@@ -4750,6 +4820,8 @@ impl SimulationConfig {
                     .and_then(|receipt| {
                         hero_registry::validate_receipt(mutation_plan, &receipt)
                             .map_err(|error| self.freeze_account_store_writes(error))?;
+                        stone_authority::validate_receipt(mutation_plan, &receipt)
+                            .map_err(|error| self.freeze_account_store_writes(error))?;
                         shared_conquest_store::validate_receipt(mutation_plan, &receipt)
                             .map_err(|error| self.freeze_account_store_writes(error))?;
                         Ok(receipt)
@@ -4761,6 +4833,8 @@ impl SimulationConfig {
             .map_err(|error| self.map_clock_repository_error(mutation_plan, error))
             .and_then(|receipt| {
                 hero_registry::validate_receipt(mutation_plan, &receipt)
+                    .map_err(|error| self.freeze_account_store_writes(error))?;
+                stone_authority::validate_receipt(mutation_plan, &receipt)
                     .map_err(|error| self.freeze_account_store_writes(error))?;
                 shared_conquest_store::validate_receipt(mutation_plan, &receipt)
                     .map_err(|error| self.freeze_account_store_writes(error))?;
@@ -4778,6 +4852,7 @@ impl SimulationConfig {
             || ((!plan.heroes.is_empty() || plan.hero_allocator.is_some())
                 && error.starts_with(hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN))
             || (!plan.conquests.is_empty() && error.starts_with("CONQUEST_COMMIT_OUTCOME_UNKNOWN"))
+            || (plan.stones.is_some() && error.starts_with(stone_authority::COMMIT_UNKNOWN))
         {
             self.freeze_account_store_writes(error)
         } else {
@@ -4933,6 +5008,34 @@ impl SimulationConfig {
         )
     }
 
+    pub(crate) fn commit_account_store_transaction_with_stones<T, F>(
+        &self,
+        account_ids: &[String],
+        stone_ids: &[u64],
+        transaction: F,
+    ) -> Result<T, String>
+    where
+        F: FnOnce(&mut AccountStore) -> Result<T, String>,
+    {
+        if account_ids.is_empty() || stone_ids.len() != 1 || stone_ids[0] == 0 {
+            return Err(
+                "stone transaction requires one exact identity and an authenticated account".into(),
+            );
+        }
+        // There is no business rollback of an issued sealed result. File with
+        // an independent PostgreSQL mirror therefore cannot run this producer.
+        if self.account_store_path.is_some() && self.account_store_database_url.is_some() {
+            return Err("stone authority requires one durable source, not File plus Mirror".into());
+        }
+        self.commit_account_store_transaction_inner(
+            AccountStoreMutationScope::AccountsWithStones {
+                account_ids,
+                stone_ids,
+            },
+            transaction,
+        )
+    }
+
     pub(crate) fn commit_account_store_transaction_with_global<T, F>(
         &self,
         account_ids: &[String],
@@ -5053,7 +5156,11 @@ impl SimulationConfig {
     {
         let empty_account_scope = match scope {
             AccountStoreMutationScope::Accounts(account_ids)
-            | AccountStoreMutationScope::AccountsWithGlobal(account_ids) => account_ids.is_empty(),
+            | AccountStoreMutationScope::AccountsWithGlobal(account_ids)
+            | AccountStoreMutationScope::AccountsWithStones { account_ids, .. }
+            | AccountStoreMutationScope::AccountsWithStonesAndGuilds { account_ids, .. } => {
+                account_ids.is_empty()
+            }
             AccountStoreMutationScope::AccountsWithGuilds {
                 account_ids,
                 guild_ids,
@@ -5096,6 +5203,10 @@ impl SimulationConfig {
         let result = transaction(&mut staged_store)?;
         if matches!(scope, AccountStoreMutationScope::FullRestore) {
             staged_store = staged_store.migrate_to_current_schema();
+            // Backups contain no repository CAS metadata. Stones cannot be
+            // rewound by restore, so keep the locked current source version.
+            staged_store.source_stone_version = original_store.source_stone_version;
+            stone_authority::validate_store(&staged_store)?;
             hero_registry::validate_complete_state(&staged_store)?;
             shared_guild_store::validate_complete_guild_state(&staged_store)?;
             shared_conquest_store::validate_complete_state(&staged_store)?;
@@ -5125,7 +5236,9 @@ impl SimulationConfig {
             | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { account_ids, .. }
             | AccountStoreMutationScope::AccountsWithHeroes { account_ids, .. }
             | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { account_ids, .. }
-            | AccountStoreMutationScope::AccountsWithGuildsAndConquests { account_ids, .. } => {
+            | AccountStoreMutationScope::AccountsWithGuildsAndConquests { account_ids, .. }
+            | AccountStoreMutationScope::AccountsWithStones { account_ids, .. }
+            | AccountStoreMutationScope::AccountsWithStonesAndGuilds { account_ids, .. } => {
                 account_ids
             }
             AccountStoreMutationScope::FullRestore => &[],
@@ -5161,7 +5274,8 @@ impl SimulationConfig {
         if let AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. }
         | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. }
         | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. }
-        | AccountStoreMutationScope::AccountsWithGuildsAndConquests { guild_ids, .. } = scope
+        | AccountStoreMutationScope::AccountsWithGuildsAndConquests { guild_ids, .. }
+        | AccountStoreMutationScope::AccountsWithStonesAndGuilds { guild_ids, .. } = scope
         {
             xp_guilds.extend(guild_ids.iter().cloned());
         }
@@ -5198,6 +5312,14 @@ impl SimulationConfig {
                     guild_ids: &xp_guild_ids,
                     conquest_ids,
                 },
+                AccountStoreMutationScope::AccountsWithStones { stone_ids, .. }
+                | AccountStoreMutationScope::AccountsWithStonesAndGuilds { stone_ids, .. } => {
+                    AccountStoreMutationScope::AccountsWithStonesAndGuilds {
+                        account_ids: xp_accounts,
+                        stone_ids,
+                        guild_ids: &xp_guild_ids,
+                    }
+                }
                 _ => AccountStoreMutationScope::AccountsWithGuilds {
                     account_ids: xp_accounts,
                     guild_ids: &xp_guild_ids,
@@ -5442,6 +5564,10 @@ impl SimulationConfig {
             | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { .. } => {
                 AccountStoreTransactionScopeObservation::WithGlobal
             }
+            AccountStoreMutationScope::AccountsWithStones { .. }
+            | AccountStoreMutationScope::AccountsWithStonesAndGuilds { .. } => {
+                AccountStoreTransactionScopeObservation::WithGlobal
+            }
             AccountStoreMutationScope::AccountsWithHeroes { .. }
             | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { .. } => {
                 AccountStoreTransactionScopeObservation::WithHeroes
@@ -5629,6 +5755,58 @@ impl SimulationConfig {
         Ok(true)
     }
 
+    pub(crate) fn refresh_sealed_stone_authority(&self) -> Result<bool, String> {
+        let _persist_guard = self
+            .account_store_persist_lock
+            .lock()
+            .map_err(|_| "account store persist mutex poisoned".to_string())?;
+        self.ensure_account_store_writable()?;
+        if self.account_store_database_mode != AccountStoreDatabaseMode::SourceOfTruth
+            || self.account_store_database_url.is_none()
+        {
+            let store = self
+                .account_store
+                .lock()
+                .map_err(|_| "account store mutex poisoned")?;
+            stone_authority::validate_store(&store)?;
+            return Ok(false);
+        }
+        let database_url = self
+            .account_store_database_url
+            .clone()
+            .ok_or("stone database missing")?;
+        let mut fresh = self
+            .account_store
+            .lock()
+            .map_err(|_| "account store mutex poisoned")?
+            .clone();
+        fresh = std::thread::spawn(move || {
+            with_account_store_postgres_client(&database_url, |client| {
+                stone_authority::load(client, &mut fresh)?;
+                Ok(fresh)
+            })
+        })
+        .join()
+        .map_err(|_| "stone refresh worker panicked")??;
+        let mut store = self
+            .account_store
+            .lock()
+            .map_err(|_| "account store mutex poisoned")?;
+        if store
+            .source_stone_version
+            .is_some_and(|v| fresh.source_stone_version.is_none_or(|n| n < v))
+        {
+            return Err("stone authority source version regressed".into());
+        }
+        store
+            .sealed_stones
+            .validate_successor(&fresh.sealed_stones)
+            .map_err(|e| e.to_string())?;
+        store.sealed_stones = fresh.sealed_stones;
+        store.source_stone_version = fresh.source_stone_version;
+        Ok(true)
+    }
+
     pub fn save_account_store_account(&self, account_id: &str) -> Result<(), String> {
         self.save_account_store_with_plan_writer(
             Some(account_id),
@@ -5699,6 +5877,7 @@ impl SimulationConfig {
         // Otherwise a missing demo owner could be manufactured into a valid guild leader.
         let decoded = decoded.migrate_to_current_schema();
         crate::billing::validate_complete_store(&decoded)?;
+        stone_authority::validate_store(&decoded)?;
         hero_registry::validate_complete_state(&decoded)?;
         shared_conquest_store::validate_complete_state(&decoded)?;
         shared_guild_store::validate_complete_guild_state(&decoded)?;
@@ -5713,6 +5892,7 @@ impl SimulationConfig {
         restored.source_guild_clock_version = None;
         restored.source_guild_versions.clear();
         restored.source_conquest_versions.clear();
+        restored.source_stone_version = None;
         restored.source_hero_versions.clear();
         restored.source_hero_allocator_version = None;
         restored.source_account_versions.clear();
@@ -5926,8 +6106,10 @@ fn load_account_store_from_postgres_with_pool(
         )?;
         shared_guild_store::load_guilds(&mut transaction, &mut store)?;
         shared_conquest_store::load_conquests(&mut transaction, &mut store)?;
+        stone_authority::load(&mut transaction, &mut store)?;
         hero_postgres::load_heroes(&mut transaction, &mut store)?;
         crate::billing::validate_complete_store(&store)?;
+        stone_authority::validate_store(&store)?;
         hero_registry::validate_complete_state(&store)?;
         shared_conquest_store::validate_complete_state(&store)?;
         let clock=guild_clock::load_postgres(&mut transaction)?;
@@ -5975,6 +6157,8 @@ fn assemble_account_store_from_postgres_rows(
         hero_id_high_watermark: 0,
         source_hero_versions: BTreeMap::new(),
         source_hero_allocator_version: None,
+        sealed_stones: mir2_production::StoneRegistry::default(),
+        source_stone_version: None,
         guild_clock: None,
         source_guild_clock_version: None,
         source_guild_versions: BTreeMap::new(),
@@ -6076,6 +6260,7 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     let carries_heroes = !plan.heroes.is_empty() || plan.hero_allocator.is_some();
     let carries_conquests = !plan.conquests.is_empty();
     let carries_billing = plan.carries_billing_source();
+    let carries_stones = plan.stones.is_some();
     std::thread::spawn(move || {
         let mut client = pool.connection()?;
         pool.ensure_migrated(&mut client)?;
@@ -6097,6 +6282,11 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
             format!(
                 "{}: postgres guild transaction worker panicked",
                 guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN
+            )
+        } else if carries_stones {
+            format!(
+                "{}: stone transaction worker panicked",
+                stone_authority::COMMIT_UNKNOWN
             )
         } else if carries_heroes {
             format!(
@@ -6128,7 +6318,7 @@ fn write_account_store_mutation_plan_to_postgres(
         write_account_store_mutation_plan_in_transaction(&mut transaction, plan, mode)?;
     transaction
         .commit()
-        .map_err(|error|if plan.carries_billing_source() && error.as_db_error().is_none(){format!("{}: postgres billing commit response unavailable: {error}",crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)}else if plan.clock.is_some(){guild_clock::classify_commit_error(error).to_string()}else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.as_db_error().is_none(){format!("{}: postgres guild commit response unavailable: {error}",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.as_db_error().is_none(){format!("{}: postgres Hero commit response unavailable: {error}",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if !plan.conquests.is_empty() && error.as_db_error().is_none(){format!("CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}")}else{format!("postgres account-store commit failed: {error}")})?;
+        .map_err(|error|if plan.carries_billing_source() && error.as_db_error().is_none(){format!("{}: postgres billing commit response unavailable: {error}",crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)}else if plan.clock.is_some(){guild_clock::classify_commit_error(error).to_string()}else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.as_db_error().is_none(){format!("{}: postgres guild commit response unavailable: {error}",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if plan.stones.is_some() && error.as_db_error().is_none(){format!("{}: stone commit response unavailable: {error}",stone_authority::COMMIT_UNKNOWN)}else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.as_db_error().is_none(){format!("{}: postgres Hero commit response unavailable: {error}",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if !plan.conquests.is_empty() && error.as_db_error().is_none(){format!("CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}")}else{format!("postgres account-store commit failed: {error}")})?;
     Ok(source_versions)
 }
 
@@ -6160,6 +6350,7 @@ fn write_account_store_mutation_plan_in_transaction(
             mode
         },
     )?;
+    let stone_version = stone_authority::write(transaction, plan.stones.as_ref())?;
     let hero_versions = hero_postgres::write_hero_mutations(
         transaction,
         &plan.heroes,
@@ -6204,6 +6395,7 @@ fn write_account_store_mutation_plan_in_transaction(
             }
         })?;
     source_versions.clock = clock_version;
+    source_versions.stones = stone_version;
     source_versions.guilds = guild_versions;
     source_versions.conquests = conquest_versions;
     source_versions.heroes = hero_versions;
@@ -8474,3 +8666,7 @@ mod config_refresh_fail_closed_tests;
 #[cfg(test)]
 #[path = "config_account_store_durability_tests.rs"]
 mod config_account_store_durability_tests;
+
+#[cfg(test)]
+#[path = "config_stone_schema_tests.rs"]
+mod config_stone_schema_tests;

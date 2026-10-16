@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.production-preflight-history.v1",
+  "createdUtc": "2026-10-08T12:55:29.8593046Z",
+  "run": "before inventory-regression-01",
+  "result": "another Cargo/rustc invocation active",
+  "toolChunk": "808304",
+  "guardNonceCreated": false,
+  "cargoSpawned": false,
+  "testsRun": 0,
+  "consoleLog": "work/slg-production-p02b-20261008/inventory-regression-01-preflight-active-cargo.console.log",
+  "consoleSha256": "a7ad697fd8f9b9b6ba7114bb38d9a536d7429c2fc1c4473b51498db06ba23fc0",
+  "note": "Do not terminate foreign work or count a non-executed run as a failed/passed test."
+}

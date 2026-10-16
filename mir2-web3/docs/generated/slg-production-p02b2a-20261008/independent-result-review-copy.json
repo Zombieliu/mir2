@@ -1,0 +1,10 @@
+{
+  "schema": "mir2.production-review-copy.v1",
+  "createdUtc": "2026-10-08T17:05:49.9646463Z",
+  "source": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\independent-result-review.json",
+  "destination": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\slg-production-p02b2a-20261008\\independent-result-review.json",
+  "sha256": "0747d547d2cb7edfc26760f0b81d63ab72eda50d390790f763739f478dfb3930",
+  "length": 21920,
+  "rawEvidenceManifestEntries": 106,
+  "includedInEarlierRawManifest": false
+}

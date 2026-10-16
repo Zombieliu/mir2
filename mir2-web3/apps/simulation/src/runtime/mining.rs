@@ -15,12 +15,13 @@ use std::collections::BTreeMap;
 
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::crystal_item_by_name;
-use mir2_protocol::{MirDirection, Point, ServerPacket};
+use mir2_protocol::{ChatType, MirDirection, Point, ServerPacket};
 
 use super::components::{current_player_object_id, entity_position, player_entity};
 use super::crystal_compat::CRYSTAL_ITEM_TYPE_ORE;
 use super::equipment::equipment_slot_unique_id;
-use super::inventory::{add_or_increment_item_with_random_metadata, can_gain_item_quantity};
+use super::inventory::can_gain_item_quantity;
+use super::item_grants::{FreshItemGrant, publish_world_grants};
 use super::items::{crystal_item_key_for_template, crystal_item_template_for_item_key};
 use super::monsters::deterministic_roll;
 use super::movement::offset_point;
@@ -272,6 +273,17 @@ pub(super) fn try_mine(world: &mut World, direction: MirDirection) -> Option<Vec
     let set = world.resource::<MiningResource>().mine_sets[set_index].clone();
 
     if stones_left > 0 {
+        let hit = roll(tick, object_id, &target, 0x10, 100) < u64::from(set.hit_rate);
+        if hit && roll(tick, object_id, &target, 0x20, 100) < u64::from(set.drop_rate) {
+            match give_mine_payout(world, &set, tick, object_id, &target) {
+                Ok(Some(item_packet)) => packets.push(item_packet),
+                Ok(None) => {}, // Ordinary no-drop/full-bag keeps Crystal's swing cost.
+                Err(_) => return Some(vec![ServerPacket::Chat {
+                    message: "Item delivery is temporarily unavailable. Please try again.".into(),
+                    chat_type: ChatType::System,
+                }]), // Failed issuance consumes neither node stone nor pickaxe dura.
+            }
+        }
         if let Some(spot) = world
             .resource_mut::<MiningResource>()
             .spots
@@ -280,13 +292,7 @@ pub(super) fn try_mine(world: &mut World, direction: MirDirection) -> Option<Vec
             spot.stones_left = spot.stones_left.saturating_sub(1);
         }
 
-        let hit = roll(tick, object_id, &target, 0x10, 100) < u64::from(set.hit_rate);
         if hit {
-            if roll(tick, object_id, &target, 0x20, 100) < u64::from(set.drop_rate) {
-                if let Some(item_packet) = give_mine_payout(world, &set, tick, object_id, &target) {
-                    packets.push(item_packet);
-                }
-            }
             // Damage the pickaxe by 5 + Random(15).
             let damage = 5 + roll(tick, object_id, &target, 0x30, 15) as u16;
             if let Some(packet) = damage_pickaxe(world, &pickaxe, damage) {
@@ -356,7 +362,7 @@ fn give_mine_payout(
     tick: u64,
     object_id: u32,
     target: &Point,
-) -> Option<ServerPacket> {
+) -> Result<Option<ServerPacket>, String> {
     let slot = roll(
         tick,
         object_id,
@@ -369,7 +375,7 @@ fn give_mine_payout(
             continue;
         }
         // Crystal skips drops whose item is not present in the item table.
-        let template = crystal_item_by_name(drop.item_name)?;
+        let Some(template) = crystal_item_by_name(drop.item_name) else { return Ok(None); };
 
         // Ore durability is the mined quantity: (MinDura + rand) * 1000, with a
         // bonus chance. Non-ore payouts keep the item's template durability
@@ -401,15 +407,14 @@ fn give_mine_payout(
         {
             let inventory = world.resource::<InventoryResource>();
             if !can_gain_item_quantity(inventory, ItemContainer::Bag1, &key, 1) {
-                return None;
+                return Ok(None);
             }
         }
         let description = template
             .tooltip
             .clone()
             .unwrap_or_else(|| format!("{} mined from the rock face.", template.name));
-        let item = add_or_increment_item_with_random_metadata(
-            world,
+        let mut grant = FreshItemGrant::plain(
             ItemContainer::Bag1,
             &key,
             &template.name,
@@ -417,17 +422,19 @@ fn give_mine_payout(
             30,
             1,
             u16::from(template.weight.max(1)),
-            Some(dura),
-            Some(dura.max(1)),
-            0,
-            0,
-            Vec::new(),
-            false,
-            0,
-        );
-        return Some(ServerPacket::GainedItem {
+            crate::UserItemUidReason::Mining,
+        )?;
+        grant.prototype.durability_current = Some(dura);
+        grant.prototype.durability_max = Some(dura.max(1));
+        let mut changed = publish_world_grants(world, &[grant])?;
+        let item = changed.pop().ok_or("mine payout did not produce an item")?;
+        return Ok(Some(ServerPacket::GainedItem {
             item: super::items::user_item_from_item_state(&item),
-        });
+        }));
     }
-    None
+    Ok(None)
 }
+
+#[cfg(test)]
+#[path = "mining_uid_tests.rs"]
+mod uid_tests;

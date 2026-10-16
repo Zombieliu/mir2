@@ -1,0 +1,43 @@
+{
+  "schema": "mir2.production-creature-box-history.v1",
+  "actualHistoricalRuns": 3,
+  "runs": [
+    {
+      "run": "creature-regression-01",
+      "exitCode": 0,
+      "actualPassed": 55,
+      "actualFailed": 0,
+      "includedInFinalTotal": false,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "note": "Original Source01 positive checks retained as history; final Source02 checks are counted separately, not added together."
+    },
+    {
+      "run": "creature-reward-tests-01",
+      "exitCode": 0,
+      "actualPassed": 8,
+      "actualFailed": 0,
+      "includedInFinalTotal": false,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "note": "Original Source01 positive checks retained as history; final Source02 checks are counted separately, not added together."
+    },
+    {
+      "run": "use-item-regression-01",
+      "exitCode": 101,
+      "actualPassed": 46,
+      "actualFailed": 1,
+      "includedInFinalTotal": false,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "note": "Original TownTeleport test expected configured spawn after its movement fixture had rebound to the nearest safety zone. Source02 pins this routing fixture bind point explicitly; all original assertions and normal return behavior retained. Source01 46pass/1fail is historical only."
+    }
+  ],
+  "serialPreflightOrWaitCount": 0,
+  "serialPreflightCargoStarted": false,
+  "serialPreflightTests": 0,
+  "serialPreflightNonces": 0
+}

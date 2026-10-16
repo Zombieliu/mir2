@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.production-audit-helper-history.v1",
+  "createdUtc": "2026-10-08T14:02:37.0909589Z",
+  "toolChunk": "ba25d2",
+  "resultAuditPath": "result-audit-01.json",
+  "actualLength": 0,
+  "error": "Unexpected final execution total",
+  "reason": "Measure-Object cannot resolve the key property on OrderedDictionary. Each individual expected count already passed; use an explicit integer projection before Sum.",
+  "productChanged": false,
+  "assertionsChanged": false,
+  "additionalCargoRun": false,
+  "supersededBy": "result-audit-02.json"
+}

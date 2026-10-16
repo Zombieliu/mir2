@@ -30,7 +30,9 @@ mod equipment_storage_merge_tests;
 mod hero_stats;
 mod inventory;
 mod item_custody;
+mod item_grants;
 mod item_sets;
+pub(crate) mod item_uid_issuance;
 mod items;
 mod leveling;
 mod map;
@@ -69,6 +71,14 @@ mod npc_buff_action_tests;
 mod npc_catalog_lookup_tests;
 #[cfg(test)]
 mod npc_dialog_admission_tests;
+mod production;
+mod stone_npc;
+mod stones;
+pub use production::{
+    PersonalProductionConfig, PersonalProductionFacility, PersonalProductionState,
+    ProductionDurableError, ProductionDurableExecution,
+};
+pub use stone_npc::StoneWorkshopError;
 mod npc_gold_trade_expiry;
 #[cfg(test)]
 mod npc_parser_omission_tests;
