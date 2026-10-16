@@ -9099,7 +9099,11 @@ fn responses_change_player_progression(responses: &[ServerPacket]) -> bool {
 }
 
 fn low_latency_responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
-    responses_change_quest_state(responses) || responses_change_player_progression(responses)
+    // A portal may complete on Walk/Run or a later Tick. Its destination needs
+    // a complete producer source before Native can authorize the new scene.
+    responses_begin_zone_bootstrap(responses)
+        || responses_change_quest_state(responses)
+        || responses_change_player_progression(responses)
 }
 
 fn responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
@@ -13074,6 +13078,7 @@ mod tests {
 
     include!("web_monthly_card_tests.rs");
     include!("web_mining_tests.rs");
+    include!("web_map_bootstrap_tests.rs");
 
     fn snapshot_test_spectator(enabled: bool) -> crate::spectator::SpectatorHub {
         crate::spectator::SpectatorHub::new(crate::spectator::SpectatorConfig {
