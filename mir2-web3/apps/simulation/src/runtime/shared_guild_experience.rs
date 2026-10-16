@@ -470,6 +470,23 @@ impl SimulationSession {
         before: Option<GuildExperienceCheckpoint>,
         packets: Vec<ServerPacket>,
     ) -> Result<Vec<ServerPacket>, String> {
+        match self.finish_guild_experience_command_impl(before, packets) {
+            Ok(mut packets) => {
+                super::atelier_npc::publish_pending(self, &mut packets);
+                Ok(packets)
+            }
+            Err(error) => {
+                super::atelier_npc::discard_pending(self.app.world_mut());
+                Err(error)
+            }
+        }
+    }
+
+    fn finish_guild_experience_command_impl(
+        &mut self,
+        before: Option<GuildExperienceCheckpoint>,
+        packets: Vec<ServerPacket>,
+    ) -> Result<Vec<ServerPacket>, String> {
         let Some(before) = before else {
             return Ok(packets);
         };

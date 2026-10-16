@@ -8331,6 +8331,16 @@ impl Default for Stage5GuildTerritoryState {
 #[serde(rename_all = "camelCase")]
 pub struct Stage5AppearanceState {
     pub hair: u8,
+    /// Independent cosmetic unlocks. These never occupy an equipment slot or
+    /// contribute item stats, weight, requirements, durability or resale value.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    pub owned_fashions: BTreeSet<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub selected_fashion: Option<String>,
+    /// Bounded, server-authored operation receipts committed with the exact
+    /// Gold/material/save mutation. Older requests remain revision-fenced.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub atelier_receipts: BTreeMap<String, String>,
 }
 
 /// Current Hero pools persisted separately from identity and maximum stats.
@@ -8515,6 +8525,10 @@ pub struct WorldSnapshot {
     pub in_safe_zone: bool,
     pub light_setting: u8,
     pub player_object_id: Option<u32>,
+    /// Selected wardrobe StateItem artwork only; never an equipment item or stat.
+    /// Legacy full snapshots default to no cosmetic override.
+    #[serde(default)]
+    pub cosmetic_armour_image: Option<u32>,
     pub player_hp: Option<i32>,
     pub player_max_hp: Option<i32>,
     pub player_mp: Option<i32>,
@@ -8621,6 +8635,12 @@ impl Serialize for WorldSnapshotClientView<'_> {
             }
         }
         if let Some(systems) = value.get_mut("stage5Systems") {
+            if let Some(appearance) = systems.get_mut("appearance").and_then(Value::as_object_mut) {
+                // The permanent wardrobe is public display state. Exact
+                // atelier operation receipts contain private actor/material
+                // witnesses and remain only in the durable snapshot.
+                appearance.remove("atelierReceipts");
+            }
             // Durable transaction ledgers are Source state, never a mailbox
             // payload for players or spectators. Keep them in the lossless
             // snapshot/checkpoint but omit their identities and replay keys

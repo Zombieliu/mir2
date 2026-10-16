@@ -101,12 +101,15 @@ pub(super) struct ActiveNpcServiceState {
 }
 
 pub(super) fn dismiss_dialog(world: &mut World) {
+    super::atelier_npc::discard_pending(world);
     super::npc_input::invalidate(world);
     world.resource_mut::<NpcStateResource>().active_npc_dialog = None;
 }
 
 pub(super) fn set_dialog(world: &mut World, mut dialog: ActiveNpcDialogState) {
+    super::atelier_npc::discard_pending(world);
     super::stone_npc::decorate_dialog(world, &mut dialog);
+    super::atelier_npc::decorate_dialog(world, &mut dialog);
     super::npc_input::record_display(world, &dialog);
     let mut resources = world.resource_mut::<NpcStateResource>();
     resources.active_npc_service = None;

@@ -3162,6 +3162,8 @@ pub(crate) struct NativeUiPlayerCursor {
     gender: Option<String>,
     hair: Option<u8>,
     wing_effect: Option<u8>,
+    cosmetic_armour_image: Option<u32>,
+    cosmetic_owner_object_id: Option<u32>,
     guild_name: Option<String>,
     guild_rank_name: Option<String>,
     map_name: Option<String>,
@@ -3174,6 +3176,14 @@ impl NativeUiPlayerCursor {
     }
 
     pub(crate) fn observe_world_snapshot(&mut self, payload: &Value) {
+        // Full snapshots own this optional field: absence/null is an explicit
+        // wardrobe clear, including legacy servers. Packet-first movement uses
+        // the same owner's retained full payload, which carries the field until
+        // the next full source replaces it. Never infer it from a remote actor.
+        self.cosmetic_owner_object_id = value_u32(payload.get("playerObjectId"));
+        self.cosmetic_armour_image = self
+            .cosmetic_owner_object_id
+            .and_then(|_| value_u32(payload.get("cosmeticArmourImage")));
         if let Some(source) = payload.get("nativeNpcShop") {
             self.npc_shop_uses_pearls =
                 source.get("packetType").and_then(Value::as_str) == Some("NPCPearlGoods");
@@ -3303,6 +3313,14 @@ impl NativeUiPlayerCursor {
     }
 
     fn observe_user_information(&mut self, payload: &Value) {
+        let owner = value_u32(payload.get("objectId"));
+        let changed_name = value_string(payload.get("name"))
+            .zip(self.name.as_ref())
+            .is_some_and(|(incoming, current)| incoming != *current);
+        if owner.is_none() || owner != self.cosmetic_owner_object_id || changed_name {
+            self.cosmetic_armour_image = None;
+        }
+        self.cosmetic_owner_object_id = owner;
         if let Some(value) = value_i32(payload.get("hp").or_else(|| payload.get("playerHp"))) {
             self.hp = Some(value);
         }
@@ -3420,6 +3438,7 @@ impl NativeUiPlayerCursor {
                 "gender": self.gender,
                 "hair": self.hair,
                 "wingEffect": self.wing_effect,
+                "cosmeticArmourImage": self.cosmetic_armour_image,
                 "guildName": self.guild_name,
                 "guildRankName": self.guild_rank_name,
                 "mapName": self.map_name,
@@ -12485,6 +12504,80 @@ mod tests {
         assert_eq!(model.player.max_weight, 0);
         assert_eq!(model.player.map_name, None);
         assert!(!model.player.in_safe_zone);
+    }
+
+    #[test]
+    fn cosmetic_native_full_snapshot_clears_absent_null_and_invalid_art() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        let selected = json!({
+            "playerObjectId": 99,
+            "cosmeticArmourImage": 605,
+            "entities": [{"objectId":99,"kind":"selfPlayer","name":"Alice"}]
+        });
+        for clear in [
+            json!({"playerObjectId":99,"entities":[]}),
+            json!({"playerObjectId":99,"cosmeticArmourImage":null}),
+            json!({"playerObjectId":99,"cosmeticArmourImage":-1}),
+            json!({"playerObjectId":99,"cosmeticArmourImage":4_294_967_296_u64}),
+            json!({"cosmeticArmourImage":605}),
+        ] {
+            cursor.observe_world_snapshot(&selected);
+            assert_eq!(cursor.cosmetic_armour_image, Some(605));
+            cursor.observe_world_snapshot(&clear);
+            let model: mir2_client_bevy::read_model::UiReadModel =
+                serde_json::from_value(cursor.to_read_model_json()).unwrap();
+            assert_eq!(model.player.cosmetic_armour_image, None, "source={clear}");
+        }
+        cursor.observe_world_snapshot(&json!({
+            "playerObjectId":99,"entities":[
+                {"objectId":7,"kind":"player","cosmeticArmourImage":595}
+            ]
+        }));
+        assert_eq!(
+            cursor.cosmetic_armour_image, None,
+            "remote art is not self authority"
+        );
+    }
+
+    #[test]
+    fn cosmetic_native_retained_user_location_keeps_only_same_owner_art() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        let retained = json!({
+            "playerObjectId":99,"cosmeticArmourImage":60,
+            "entities":[{"objectId":99,"kind":"selfPlayer","name":"Alice","x":10,"y":10}]
+        });
+        cursor.observe_world_snapshot(&retained);
+        // The production packet-first path clones this accepted owner payload,
+        // applies UserLocation, then republishes it through this same cursor.
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.observe_world_snapshot(&retained);
+        assert!(adapter.observe_packet(&PacketEvent::UserLocation(
+            crate::native_protocol::UserLocation {
+                location: mir2_client_bevy::big_map::BigMapPoint { x: 11, y: 10 },
+                direction: Some("right".into()),
+            }
+        )));
+        let mut packet_first = retained.clone();
+        adapter.apply_authoritative_overlay(&mut packet_first);
+        assert_eq!(packet_first["entities"][0]["x"], 11);
+        cursor.observe_world_snapshot(&packet_first);
+        cursor.observe_user_information(&json!({"objectId":99,"name":"Alice","hp":17}));
+        assert_eq!(cursor.cosmetic_armour_image, Some(60));
+        assert_eq!(cursor.hp, Some(17));
+        cursor.observe_user_information(&json!({"objectId":100,"name":"Bob"}));
+        assert_eq!(cursor.cosmetic_armour_image, None);
+        cursor.observe_world_snapshot(&retained);
+        cursor.observe_user_information(&json!({"objectId":99,"name":"Bob"}));
+        assert_eq!(
+            cursor.cosmetic_armour_image, None,
+            "a reused actor id cannot inherit another character's style"
+        );
+        cursor.observe_world_snapshot(&retained);
+        cursor.reset();
+        assert_eq!(cursor.cosmetic_armour_image, None);
+        assert_eq!(cursor.cosmetic_owner_object_id, None);
+        cursor.observe_world_snapshot(&json!({"playerObjectId":100,"entities":[]}));
+        assert_eq!(cursor.cosmetic_armour_image, None);
     }
 
     #[test]

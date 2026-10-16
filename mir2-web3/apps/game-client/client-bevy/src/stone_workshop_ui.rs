@@ -155,9 +155,19 @@ pub fn sidebar_rect(
     dialog: &NpcDialogModel,
     presentation: Option<QuestUiPresentation>,
 ) -> Option<QuestLogRect> {
+    if !is_workshop_dialog(dialog) {
+        return None;
+    }
+    workshop_sidebar_rect(presentation)
+}
+
+/// Shared layout only. Each workshop must first classify its own complete page;
+/// neither this geometry nor a target prefix grants any NPC service authority.
+pub(crate) fn workshop_sidebar_rect(
+    presentation: Option<QuestUiPresentation>,
+) -> Option<QuestLogRect> {
     let p = presentation?;
-    if !is_workshop_dialog(dialog)
-        || p.touch
+    if p.touch
         || ![p.logical_width, p.logical_height, p.stage_css_scale]
             .into_iter()
             .all(|v| v.is_finite() && v > 0.0)

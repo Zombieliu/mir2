@@ -4031,12 +4031,11 @@ fn render_quest_ui(
         .presentation
         .as_deref()
         .and_then(|value| value.mobile_layout());
-    let workshop_rect = crate::stone_workshop_ui::sidebar_rect(
-        &dialog,
-        journey_models
-            .workshop_geometry
-            .presentation(journey_models.presentation.as_deref().copied()),
-    );
+    let workshop_presentation = journey_models
+        .workshop_geometry
+        .presentation(journey_models.presentation.as_deref().copied());
+    let workshop_rect = crate::stone_workshop_ui::sidebar_rect(&dialog, workshop_presentation)
+        .or_else(|| crate::atelier_ui::sidebar_rect(&dialog, workshop_presentation));
     let workshop_layout_changed = *journey_models.workshop_layout != Some(workshop_rect);
     #[cfg(not(feature = "native-ui"))]
     let compact_stamp = journey_models
@@ -11873,6 +11872,252 @@ mod tests {
             rendered_npc_rect(&mut app),
             QuestLogRect::new(0.0, 0.0, 440.0, 224.0)
         );
+    }
+
+    fn atelier_dialog_for_layout() -> NpcDialogModel {
+        let mut dialog = NpcDialogModel::default();
+        dialog.apply(crate::quest_model::NpcDialogUpdate {
+            npc_object_id: 33,
+            npc_name: Some("Alice".into()),
+            lines: vec![
+                "Crafting workshop".into(),
+                "Gold: 9000".into(),
+                "Traveler attire".into(),
+                "Copper ore ×1".into(),
+                "Gold: 500".into(),
+                "Cosmetics change appearance only.".into(),
+            ],
+            options: [
+                format!("@atelier:v1:craft:traveler:7:{}", "a".repeat(64)),
+                "@atelier:v1:home".into(),
+                "@Main".into(),
+                "@Exit".into(),
+            ]
+            .into_iter()
+            .map(|target| crate::quest_model::NpcDialogOption {
+                option_id: target,
+                label: "server option".into(),
+                enabled: true,
+            })
+            .collect(),
+            open: true,
+            replace: true,
+        });
+        dialog
+    }
+
+    #[test]
+    fn atelier_render_uses_real_scaled_geometry_and_preserves_the_npc_modal_gate() {
+        for scale in [1.0, 1.5, 2.0] {
+            let mut app = App::new();
+            app.insert_resource(ButtonInput::<KeyCode>::default());
+            app.insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            });
+            app.insert_resource(bevy::prelude::UiScale(scale));
+            let mut window = Window::default();
+            window.resolution.set(1024.0 * scale, 768.0 * scale);
+            let primary = app
+                .world_mut()
+                .spawn((window, bevy::window::PrimaryWindow))
+                .id();
+            app.add_plugins(Mir2QuestUiPlugin);
+            app.insert_resource(atelier_dialog_for_layout());
+            app.update();
+            assert_eq!(
+                rendered_npc_rect(&mut app),
+                QuestLogRect::new(568.0, 16.0, 440.0, 224.0)
+            );
+            assert!(is_world_click_blocked_for_quest(
+                None,
+                app.world().resource::<NpcDialogModel>(),
+                false
+            ));
+            let world = app.world_mut();
+            assert_eq!(
+                world
+                    .query_filtered::<&Node, With<QuestUiModalBlocker>>()
+                    .single(world)
+                    .unwrap()
+                    .display,
+                Display::Flex
+            );
+            // No new server page: a physical window resize still invalidates geometry.
+            app.world_mut()
+                .get_mut::<Window>(primary)
+                .unwrap()
+                .resolution
+                .set(1280.0 * scale, 768.0 * scale);
+            app.update();
+            assert_eq!(
+                rendered_npc_rect(&mut app),
+                QuestLogRect::new(824.0, 16.0, 440.0, 224.0)
+            );
+            app.world_mut().resource_mut::<NpcDialogModel>().close();
+            app.update();
+            let world = app.world_mut();
+            assert_eq!(
+                world
+                    .query_filtered::<&Node, With<NpcDialogPanel>>()
+                    .single(world)
+                    .unwrap()
+                    .display,
+                Display::None
+            );
+        }
+    }
+
+    #[test]
+    fn atelier_render_rejects_a_retired_or_disabled_quote_and_sends_only_current_npc_target() {
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        app.insert_resource(QuestUiPresentation {
+            logical_width: 1024.0,
+            logical_height: 768.0,
+            stage_css_scale: 1.0,
+            touch: false,
+        });
+        app.add_plugins(Mir2QuestUiPlugin);
+        let page = atelier_dialog_for_layout();
+        let old_target = page.options[0].option_id.clone();
+        app.insert_resource(page);
+        app.update();
+        // A denied/current recipe page has no Make link. The old rendered
+        // pressed origin must not enqueue the previous material/fee quote.
+        app.world_mut()
+            .resource_mut::<NpcDialogModel>()
+            .options
+            .remove(0);
+        let stale = app
+            .world_mut()
+            .spawn((
+                Button,
+                QuestUiButton::SelectNpcDialog {
+                    target: old_target.clone(),
+                },
+                Interaction::Pressed,
+            ))
+            .id();
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            QuestLogRect::new(568.0, 16.0, 440.0, 224.0)
+        );
+        app.world_mut().despawn(stale);
+
+        let mut disabled = atelier_dialog_for_layout();
+        disabled.options[0].enabled = false;
+        app.insert_resource(disabled);
+        let pressed = app
+            .world_mut()
+            .spawn((
+                Button,
+                QuestUiButton::SelectNpcDialog {
+                    target: old_target.clone(),
+                },
+                Interaction::Pressed,
+            ))
+            .id();
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        app.world_mut().despawn(pressed);
+
+        app.insert_resource(atelier_dialog_for_layout());
+        app.update();
+        let world = app.world_mut();
+        let button = world
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(world)
+            .find_map(|(entity, action)| {
+                matches!(action, QuestUiButton::SelectNpcDialog { target } if target == &old_target)
+                    .then_some(entity)
+            })
+            .unwrap();
+        world.entity_mut(button).insert(Interaction::Pressed);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::SelectNpcDialog { target: old_target }]
+        );
+    }
+
+    #[test]
+    fn atelier_render_keeps_touch_denied_and_unknown_pages_on_the_existing_modal_path() {
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        app.add_plugins(Mir2QuestUiPlugin);
+        app.insert_resource(atelier_dialog_for_layout());
+        let touch = QuestUiPresentation {
+            logical_width: 1664.0,
+            logical_height: 768.0,
+            stage_css_scale: 0.507,
+            touch: true,
+        };
+        app.insert_resource(touch);
+        app.update();
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            touch.mobile_layout().unwrap().panel
+        );
+        app.insert_resource(QuestUiPresentation {
+            logical_width: 1024.0,
+            logical_height: 768.0,
+            stage_css_scale: 1.0,
+            touch: false,
+        });
+        app.world_mut()
+            .resource_mut::<NpcDialogModel>()
+            .options
+            .remove(0);
+        app.update();
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            QuestLogRect::new(568.0, 16.0, 440.0, 224.0)
+        );
+        app.world_mut()
+            .resource_mut::<NpcDialogModel>()
+            .options
+            .retain(|option| option.option_id == "@Exit");
+        app.update();
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            QuestLogRect::new(568.0, 16.0, 440.0, 224.0)
+        );
+        assert!(is_world_click_blocked_for_quest(
+            None,
+            app.world().resource::<NpcDialogModel>(),
+            false
+        ));
+        let world = app.world_mut();
+        let targets: Vec<_> = world
+            .query::<&QuestUiButton>()
+            .iter(world)
+            .filter_map(|action| match action {
+                QuestUiButton::SelectNpcDialog { target } => Some(target.clone()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(targets, vec!["@Exit".to_owned()]);
     }
 
     #[test]

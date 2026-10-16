@@ -129,6 +129,35 @@ pub(crate) fn crystal_character_state_item_frame(item: &ItemModel) -> Option<Cry
     ))
 }
 
+fn crystal_character_cosmetic_armour_frame(ui: &UiReadModel) -> Option<CrystalFrameSpec> {
+    let image = ui.player.cosmetic_armour_image?;
+    let female = match crystal_character_gender_offset(ui.player.gender.as_deref())? {
+        0 => false,
+        1 => true,
+        _ => return None,
+    };
+    let class = ui.player.class_name.as_deref()?.trim();
+    let classic = ["warrior", "wizard", "taoist"]
+        .iter()
+        .any(|known| class.eq_ignore_ascii_case(known));
+    let alternate = ["assassin", "archer"]
+        .iter()
+        .any(|known| class.eq_ignore_ascii_case(known));
+    if !classic && !alternate {
+        return None;
+    }
+    // Exact intrinsic geometry from original-ui/StateItem/meta.json. These four
+    // frames are the bounded atelier art catalogue, not equipment or stat data.
+    let rect = match (image, female) {
+        (60, false) => CrystalRect::new(92.0, 194.0, 80.0, 128.0),
+        (80, true) => CrystalRect::new(93.0, 195.0, 80.0, 127.0),
+        (595, false) if classic => CrystalRect::new(90.0, 180.0, 84.0, 145.0),
+        (605, true) if classic => CrystalRect::new(94.0, 178.0, 80.0, 145.0),
+        _ => return None,
+    };
+    Some(CrystalFrameSpec::new("StateItem", image as u16, rect))
+}
+
 pub(crate) fn crystal_character_wing_frame(
     wing_effect: Option<u8>,
     gender: Option<&str>,
@@ -228,17 +257,20 @@ pub(crate) fn crystal_character_paper_doll_layers(
     };
     let mut layers = Vec::with_capacity(4);
 
-    // Exact CharacterPage.AfterDraw condition and order: a wing is legal only
-    // while an armour item exists, then armour, weapon, and helmet-or-hair.
-    if let Some(armour) = equipped(1) {
+    // Keep the real armour's wing rule, weapon and helmet-or-hair ordering.
+    // A wardrobe image overrides only the painted body, including when no real
+    // armour is worn; it never creates an equipment cell or its attributes.
+    if equipped(1).is_some() {
         if let Some(frame) =
             crystal_character_wing_frame(ui.player.wing_effect, ui.player.gender.as_deref())
         {
             layers.push(CrystalCharacterLayer::draw_blend(frame));
         }
-        if let Some(frame) = crystal_character_state_item_frame(armour) {
-            layers.push(CrystalCharacterLayer::alpha(frame));
-        }
+    }
+    if let Some(frame) = crystal_character_cosmetic_armour_frame(ui)
+        .or_else(|| equipped(1).and_then(crystal_character_state_item_frame))
+    {
+        layers.push(CrystalCharacterLayer::alpha(frame));
     }
     if let Some(frame) = equipped(0).and_then(crystal_character_state_item_frame) {
         layers.push(CrystalCharacterLayer::alpha(frame));
@@ -289,3 +321,131 @@ fn spawn_character_alpha(
 #[cfg(test)]
 #[path = "character_page_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+mod cosmetic_tests {
+    use super::*;
+
+    fn real_armour() -> ItemModel {
+        ItemModel {
+            key: "real-armour".into(),
+            name: "Real armour".into(),
+            quantity: 1,
+            container: 2,
+            slot: 1,
+            unique_id: Some(712),
+            state_image: 61,
+            state_image_width: 80,
+            state_image_height: 128,
+            durability_current: Some(321),
+            durability_max: Some(4000),
+            ..default()
+        }
+    }
+
+    #[test]
+    fn cosmetic_paper_doll_covers_supported_classes_genders_without_equipment_mutation() {
+        for class in ["warrior", "wizard", "taoist", "assassin", "archer"] {
+            for (gender, traveler, gala) in [("male", 60, 595), ("female", 80, 605)] {
+                for image in [traveler, gala] {
+                    let mut inventory = InventoryModel::default();
+                    inventory.items = vec![real_armour()];
+                    let before = serde_json::to_value(&inventory).unwrap();
+                    let mut ui = UiReadModel::default();
+                    ui.player.class_name = Some(class.into());
+                    ui.player.gender = Some(gender.into());
+                    ui.player.cosmetic_armour_image = Some(image);
+                    let layers = crystal_character_paper_doll_layers(&inventory, &ui);
+                    let expected = if image == gala && matches!(class, "assassin" | "archer") {
+                        61
+                    } else {
+                        image as u16
+                    };
+                    assert_eq!(layers.len(), 1);
+                    assert_eq!(layers[0].frame.library, "StateItem");
+                    assert_eq!(layers[0].frame.index, expected);
+                    assert_eq!(serde_json::to_value(&inventory).unwrap(), before);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn cosmetic_paper_doll_without_armour_and_clear_use_current_real_armour() {
+        let mut inventory = InventoryModel::default();
+        inventory.items.clear();
+        let mut ui = UiReadModel::default();
+        ui.player.class_name = Some("Warrior".into());
+        ui.player.gender = Some("Male".into());
+        ui.player.cosmetic_armour_image = Some(595);
+        ui.player.wing_effect = Some(1);
+        let layers = crystal_character_paper_doll_layers(&inventory, &ui);
+        assert_eq!(layers.len(), 1, "fashion cannot invent real-armour wings");
+        assert_eq!(layers[0].frame.index, 595);
+        inventory.items.push(real_armour());
+        ui.player.wing_effect = None;
+        assert_eq!(
+            crystal_character_paper_doll_layers(&inventory, &ui)[0]
+                .frame
+                .index,
+            595
+        );
+        inventory.items[0].state_image = 740;
+        assert_eq!(
+            crystal_character_paper_doll_layers(&inventory, &ui)[0]
+                .frame
+                .index,
+            595
+        );
+        ui.player.cosmetic_armour_image = None;
+        assert_eq!(
+            crystal_character_paper_doll_layers(&inventory, &ui)[0]
+                .frame
+                .index,
+            740
+        );
+        inventory.items.clear();
+        assert!(crystal_character_paper_doll_layers(&inventory, &ui).is_empty());
+    }
+
+    #[test]
+    fn cosmetic_paper_doll_refuses_unknown_wrong_gender_or_missing_identity_art() {
+        let mut inventory = InventoryModel::default();
+        inventory.items = vec![real_armour()];
+        let mut ui = UiReadModel::default();
+        ui.player.class_name = Some("Warrior".into());
+        ui.player.gender = Some("Male".into());
+        for image in [0, 80, 605, 65_536, u32::MAX] {
+            ui.player.cosmetic_armour_image = Some(image);
+            assert_eq!(
+                crystal_character_paper_doll_layers(&inventory, &ui)[0]
+                    .frame
+                    .index,
+                61
+            );
+        }
+        ui.player.cosmetic_armour_image = Some(60);
+        ui.player.class_name = None;
+        assert_eq!(
+            crystal_character_paper_doll_layers(&inventory, &ui)[0]
+                .frame
+                .index,
+            61
+        );
+        ui.player.class_name = Some("Unknown".into());
+        assert_eq!(
+            crystal_character_paper_doll_layers(&inventory, &ui)[0]
+                .frame
+                .index,
+            61
+        );
+        ui.player.class_name = Some("Warrior".into());
+        ui.player.gender = None;
+        assert_eq!(
+            crystal_character_paper_doll_layers(&inventory, &ui)[0]
+                .frame
+                .index,
+            61
+        );
+    }
+}

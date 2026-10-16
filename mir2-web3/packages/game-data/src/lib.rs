@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::OnceLock;
 
+pub mod atelier;
 mod crystal_creature_settings;
 mod crystal_guild_settings;
 mod crystal_hero_settings;
@@ -2426,7 +2427,7 @@ pub fn starter_server_data() -> StarterServerData {
 }
 
 mod stone_items;
- pub use stone_items::{RAW_STONE_ROUGH, RAW_STONE_FINE, RAW_STONE_PRECIOUS, RAW_STONE_INDICES};
+pub use stone_items::{RAW_STONE_FINE, RAW_STONE_INDICES, RAW_STONE_PRECIOUS, RAW_STONE_ROUGH};
 
 pub fn crystal_item_manifest() -> CrystalItemManifest {
     crystal_item_manifest_ref().clone()
@@ -2436,8 +2437,9 @@ pub fn crystal_item_manifest() -> CrystalItemManifest {
 pub fn crystal_item_manifest_ref() -> &'static CrystalItemManifest {
     static CRYSTAL_ITEM_MANIFEST: OnceLock<CrystalItemManifest> = OnceLock::new();
     CRYSTAL_ITEM_MANIFEST.get_or_init(|| {
-        let mut manifest: CrystalItemManifest = serde_json::from_str(include_str!("../data/generated/crystal_item_manifest.json"))
-            .expect("crystal item manifest json should be valid");
+        let mut manifest: CrystalItemManifest =
+            serde_json::from_str(include_str!("../data/generated/crystal_item_manifest.json"))
+                .expect("crystal item manifest json should be valid");
         stone_items::extend(&mut manifest.items);
         manifest.total_items = manifest.items.len();
         manifest

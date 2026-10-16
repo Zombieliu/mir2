@@ -2764,6 +2764,7 @@ fn decode_and_validate_character_save(
     save.saved_pets.validate_canonical()?;
     save.default_npc_events.validate()?;
     super::production::validate_checkpoint(save)?;
+    super::atelier::validate_receipts(save)?;
     if let Some(journal) = &save.npc_purchase_journal {
         journal
             .validate_for(

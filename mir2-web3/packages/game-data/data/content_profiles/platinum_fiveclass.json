@@ -1,6 +1,6 @@
 {
   "profileId": "platinum_fiveclass",
-  "version": 1,
+  "version": 2,
   "source": "Crystal.Database-29.01.25/Jev with classic 1.76 world overrides and the source three-class level-50 skill set; Crystal source Assassin/Archer books and equipment through level 50",
   "disabledStage5ActionPrefixes": [
     "auction.",
@@ -2072,6 +2072,7 @@
     }
   ],
   "itemWhitelist": [
+    "JadeCrystal",
     "WoodenSword",
     "Dagger",
     "EbonySword",

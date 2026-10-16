@@ -7786,7 +7786,10 @@ fn sync_npc_dialog_inventory_location(
     let sidebar = npc_dialog
         .as_deref()
         .filter(|_| is_open)
-        .and_then(|dialog| crate::stone_workshop_ui::sidebar_rect(dialog, p));
+        .and_then(|dialog| {
+            crate::stone_workshop_ui::sidebar_rect(dialog, p)
+                .or_else(|| crate::atelier_ui::sidebar_rect(dialog, p))
+        });
     let sidebar_state = sidebar.zip(p);
     let sidebar_changed = sidebar_state != *previous_sidebar;
     let returned_to_ordinary = sidebar.is_none() && previous_sidebar.is_some();
@@ -19890,6 +19893,110 @@ mod tests {
             assert_eq!(state.shop_service_drag_unique_id, None);
             assert_eq!(state.npc_service_hold, None);
             assert!(!state.accepts_npc_service_reply());
+            assert_eq!(
+                app.world().resource::<ShopModel>().service_mode,
+                NpcShopServiceMode::Closed
+            );
+        }
+    }
+
+    fn atelier_bag_dialog() -> NpcDialogModel {
+        let mut dialog = workshop_bag_dialog();
+        dialog.npc_object_id = Some(33);
+        dialog.lines[0].text = "Crafting workshop".into();
+        dialog.lines.last_mut().unwrap().text = "Cosmetics change appearance only.".into();
+        dialog.options[0].option_id = "@atelier:v1:recipe:traveler".into();
+        dialog
+    }
+
+    #[test]
+    fn atelier_bag_render_avoids_sidebar_at_all_scales_and_keeps_independent_drag() {
+        for scale in [1.0, 1.5, 2.0] {
+            let (mut app, primary) = workshop_bag_render_app(1024.0 * scale, 768.0 * scale);
+            app.insert_resource(bevy::prelude::UiScale(scale));
+            app.insert_resource(atelier_bag_dialog());
+            app.update();
+            assert_eq!(
+                rendered_workshop_bag_origin(&mut app),
+                Vec2::new(568.0, 248.0)
+            );
+            {
+                let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+                state.inventory_window.left = 0.0;
+                state.inventory_window.top = 10.0;
+            }
+            app.update();
+            assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::new(0.0, 10.0));
+            {
+                let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+                state.inventory_window.left = 445.0;
+                state.inventory_window.top = 0.0;
+                state.inventory_item_drag = Some(InventoryItemDrag {
+                    source_slot: 2,
+                    unique_id: 7,
+                    start: Vec2::new(445.0, 0.0),
+                });
+            }
+            app.world_mut()
+                .get_mut::<Window>(primary)
+                .unwrap()
+                .resolution
+                .set(1024.0 * scale, 480.0 * scale);
+            app.update();
+            assert_eq!(
+                rendered_workshop_bag_origin(&mut app),
+                Vec2::new(244.0, 16.0)
+            );
+            assert!(app
+                .world()
+                .resource::<NativePlayerUiState>()
+                .inventory_item_drag
+                .is_none());
+            app.world_mut().resource_mut::<NpcDialogModel>().lines[0].text = "Alice".into();
+            app.update();
+            assert_eq!(
+                rendered_workshop_bag_origin(&mut app),
+                Vec2::new(445.0, 0.0)
+            );
+            app.world_mut().resource_mut::<NpcDialogModel>().close();
+            app.update();
+            assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::ZERO);
+        }
+    }
+
+    #[test]
+    fn atelier_bag_render_keeps_exit_and_map_retirement_authoritative() {
+        for map_change in [false, true] {
+            let (mut app, _) = workshop_bag_render_app(2048.0, 1536.0);
+            app.init_resource::<ShopModel>()
+                .init_resource::<BigMapModel>();
+            app.insert_resource(atelier_bag_dialog());
+            app.update();
+            assert_eq!(
+                rendered_workshop_bag_origin(&mut app),
+                Vec2::new(568.0, 248.0)
+            );
+            {
+                let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+                state.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+                state.shop_service_drag_unique_id = Some(7);
+                state.npc_service_hold = Some(NpcShopServiceMode::Buy);
+                if !map_change {
+                    state.request_npc_service_exit();
+                }
+            }
+            app.world_mut().resource_mut::<ShopModel>().service_mode = NpcShopServiceMode::Buy;
+            if map_change {
+                app.world_mut().resource_mut::<BigMapModel>().reset_epoch += 1;
+            }
+            assert!(app.world().resource::<NpcDialogModel>().is_open);
+            app.update();
+            assert_eq!(rendered_workshop_bag_origin(&mut app), Vec2::ZERO);
+            let state = app.world().resource::<NativePlayerUiState>();
+            assert_eq!(state.core.panel, mir2_ui_core::state::UiPanel::Inventory);
+            assert!(!state.accepts_npc_service_reply());
+            assert_eq!(state.shop_service_drag_unique_id, None);
+            assert_eq!(state.npc_service_hold, None);
             assert_eq!(
                 app.world().resource::<ShopModel>().service_mode,
                 NpcShopServiceMode::Closed

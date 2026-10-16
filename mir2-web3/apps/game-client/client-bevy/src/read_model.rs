@@ -65,11 +65,38 @@ pub struct PlayerStats {
     /// CharacterDialog wing frame; `0` and other values intentionally draw
     /// nothing. Kept optional so partial snapshots cannot invent an effect.
     pub wing_effect: Option<u8>,
+    /// Server-selected wardrobe StateItem image. This affects paper-doll paint
+    /// only; equipment cells, tooltip stats and durability keep their real items.
+    pub cosmetic_armour_image: Option<u32>,
     pub guild_name: Option<String>,
     pub guild_rank_name: Option<String>,
     pub map_name: Option<String>,
     /// Server-authoritative safe-zone membership for the local player.
     pub in_safe_zone: bool,
+}
+
+#[cfg(test)]
+mod cosmetic_read_model_tests {
+    use super::PlayerStats;
+
+    #[test]
+    fn cosmetic_read_model_full_legacy_or_null_source_clears_selected_art() {
+        let selected: PlayerStats = serde_json::from_value(serde_json::json!({
+            "gold": 123, "cosmeticArmourImage": 605
+        }))
+        .unwrap();
+        assert_eq!(selected.cosmetic_armour_image, Some(605));
+        for source in [
+            serde_json::json!({"gold": 123}),
+            serde_json::json!({
+                "gold": 123, "cosmeticArmourImage": null
+            }),
+        ] {
+            let current: PlayerStats = serde_json::from_value(source).unwrap();
+            assert_eq!(current.cosmetic_armour_image, None);
+            assert_eq!(current.gold, selected.gold);
+        }
+    }
 }
 
 impl PlayerStats {
@@ -272,6 +299,7 @@ mod tests {
                 gender: Some("Male".to_owned()),
                 hair: Some(0),
                 wing_effect: Some(1),
+                cosmetic_armour_image: None,
                 guild_name: Some("DemoGuild".to_owned()),
                 guild_rank_name: Some("Member".to_owned()),
                 map_name: Some("BichonProvince".to_owned()),

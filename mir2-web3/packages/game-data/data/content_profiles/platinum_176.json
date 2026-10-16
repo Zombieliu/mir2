@@ -1,6 +1,6 @@
 {
   "profileId": "platinum_176",
-  "version": 27,
+  "version": 28,
   "source": "Crystal.Database-29.01.25/Jev with classic 1.76 world overrides and the source three-class level-50 skill set",
   "disabledStage5ActionPrefixes": [
     "auction.",
@@ -592,6 +592,7 @@
     }
   ],
   "itemWhitelist": [
+    "JadeCrystal",
     "WoodenSword",
     "Dagger",
     "EbonySword",

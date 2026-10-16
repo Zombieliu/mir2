@@ -1,3 +1,6 @@
+mod atelier;
+mod atelier_npc;
+mod fashion;
 mod big_map;
 mod billing;
 mod billing_monthly_card;

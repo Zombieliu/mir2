@@ -7173,6 +7173,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
             .unwrap_or(false),
         light_setting: current_crystal_time_of_day_lights(),
         player_object_id,
+        cosmetic_armour_image: super::fashion::armour_image(world),
         player_hp: player_vitals.map(|vitals| vitals.hp),
         player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
         player_mp: player_vitals.map(|vitals| vitals.mp),
@@ -8208,7 +8209,8 @@ pub(super) fn self_player_update_packet(world: &World, light: u8) -> Option<Serv
             .or_else(|| body.and_then(|b| b.weapon_shape)),
     );
     let armour = shape_to_i16(
-        equipment_shape(Some(&equipment_items), EquipmentSlot::Armour)
+        super::fashion::armour_shape(world)
+            .or_else(|| equipment_shape(Some(&equipment_items), EquipmentSlot::Armour))
             .or_else(|| body.and_then(|b| b.armour_shape)),
     );
     Some(ServerPacket::PlayerUpdate {
@@ -8245,7 +8247,9 @@ pub(super) fn self_zone_player_appearance(world: &World) -> Option<crate::ZonePl
         light: crystal_self_player_light(world, equipment),
         weapon: shape(EquipmentSlot::Weapon, body.weapon_shape),
         weapon_effect: 0,
-        armour: shape(EquipmentSlot::Armour, body.armour_shape),
+        armour: super::fashion::armour_shape(world)
+            .and_then(|shape| i16::try_from(shape).ok())
+            .unwrap_or_else(|| shape(EquipmentSlot::Armour, body.armour_shape)),
         wing_effect: crystal_player_wing_effect(body, equipment),
         mount_type: mount.mount_type,
         riding_mount: mount.riding_mount,
@@ -8375,7 +8379,7 @@ pub(super) fn collect_world_entities(
             continue;
         };
 
-        let sprite = entity_sprite_snapshot(
+        let sprite = entity_sprite_snapshot_with_cosmetic(
             body,
             monster_agent,
             npc_agent,
@@ -8397,6 +8401,11 @@ pub(super) fn collect_world_entities(
             },
             if self_marker.is_some() {
                 self_mount
+            } else {
+                None
+            },
+            if self_marker.is_some() {
+                super::fashion::armour_shape(world)
             } else {
                 None
             },
@@ -8512,8 +8521,29 @@ pub(super) fn entity_sprite_snapshot(
     // (`RidingMount`). Other entities / dismounted players pass `None`.
     self_mount: Option<i16>,
 ) -> Option<WorldEntitySpriteSnapshot> {
+    entity_sprite_snapshot_with_cosmetic(
+        body,
+        monster_agent,
+        npc_agent,
+        equipment_items,
+        hair,
+        self_mount,
+        None,
+    )
+}
+
+fn entity_sprite_snapshot_with_cosmetic(
+    body: Option<&CharacterBody>,
+    monster_agent: Option<&MonsterAgent>,
+    npc_agent: Option<&NpcAgent>,
+    equipment_items: Option<&[EquipmentState]>,
+    hair: u8,
+    self_mount: Option<i16>,
+    cosmetic_armour_shape: Option<u16>,
+) -> Option<WorldEntitySpriteSnapshot> {
     if let Some(body) = body {
-        let armour_shape = equipment_shape(equipment_items, EquipmentSlot::Armour)
+        let armour_shape = cosmetic_armour_shape
+            .or_else(|| equipment_shape(equipment_items, EquipmentSlot::Armour))
             .or(body.armour_shape)
             .unwrap_or(0);
         let hair_shape = u16::from(hair);

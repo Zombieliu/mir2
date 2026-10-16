@@ -1803,6 +1803,10 @@ impl WorldRuntime for InProcessWorldRuntime {
 mod outcome_tick_tests;
 
 #[cfg(test)]
+#[path = "world_runtime_atelier_tests.rs"]
+mod atelier_tests;
+
+#[cfg(test)]
 mod tests {
     use super::{InProcessWorldRuntime, WorldCommand, WorldCommandKind, WorldRuntime};
     use crate::{SimulationConfig, SimulationSession};
