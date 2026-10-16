@@ -108,18 +108,13 @@ mod map_bootstrap_websocket_tests {
     }
 
     async fn ordinary_weapon_store_entry() -> (crate::GatewaySession, Vec<ServerPacket>) {
-        let mut config = SimulationConfig::default();
-        config.monster_spawn_source = mir2_simulation::config::MonsterSpawnSource::CrystalWorld;
+        let mut config = SimulationConfig::default().with_crystal_world_runtime();
         // Only fixture placement. The actual transfer is the ordinary Walk
-        // through the imported 0(335,299) -> 0103(5,12) doorway.
+        // through the imported 0(335,299) -> 0103(5,12) doorway. Set this after
+        // the public builder, which selects the map's safe-zone start point.
         config.spawn = Point { x: 335, y: 298 };
-        config.map_transfers.clear();
-        config.visible_players.clear();
-        config.visible_monsters.clear();
-        config.visible_npcs.clear();
-        assert!(mir2_simulation::config::apply_crystal_map_metadata(
-            &mut config.map
-        ));
+        assert_eq!(config.map.map_index, 1);
+        assert_eq!(config.map.file_name, "0");
         let mut session = crate::GatewaySession::new(config);
         assert!(session
             .try_handle_packet(ClientPacket::Login {
