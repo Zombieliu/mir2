@@ -166,7 +166,12 @@ mod tests {
                     assert_eq!(page.options[0].option_id, target);
                     assert_eq!(
                         sidebar_rect(&page, Some(desktop())),
-                        Some(QuestLogRect::new(568.0, 16.0, 440.0, 224.0))
+                        Some(QuestLogRect {
+                            left: 568.0,
+                            top: 16.0,
+                            width: 440.0,
+                            height: 224.0
+                        })
                     );
                 }
             }
@@ -321,7 +326,12 @@ mod tests {
                         ..desktop()
                     })
                 ),
-                Some(QuestLogRect::new(568.0, 16.0, 440.0, 224.0))
+                Some(QuestLogRect {
+                    left: 568.0,
+                    top: 16.0,
+                    width: 440.0,
+                    height: 224.0
+                })
             );
         }
         for (width, height, scale, touch) in [
