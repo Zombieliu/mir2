@@ -110,9 +110,24 @@ fn begin(session: &mut SimulationSession, id: i32) -> (i32, u64) {
         .resource_mut::<MapRuntimeResource>()
         .current_map
         .file_name = map;
+    let class = session
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .selected_character
+        .as_ref()
+        .unwrap()
+        .class;
+    // This state-only node is already satisfied by the real learned skill,
+    // eligible equipped weapon and the D021 location established above.
+    let expected_stage = match (class, id) {
+        (MirClass::Assassin | MirClass::Archer, 2_110_018) => QuestStage::ReadyToTurnIn,
+        _ => QuestStage::InProgress,
+    };
     assert_eq!(
         super::super::begin_quest(session.app.world_mut(), id),
-        QuestStage::InProgress
+        expected_stage,
+        "{class:?} {id}: acceptance reflects the authored conditions"
     );
     let world = session.app.world();
     let flag = definition(id)
@@ -273,9 +288,16 @@ fn fiveclass_all_sixteen_practice_flags_accept_only_their_authored_outcome_seque
                 .for_class(class)
                 .to_vec();
             if id == 2_110_018 {
+                assert_eq!(conditions.len(), 2, "{class:?} {id}: state-only practice");
+                for authored in &conditions {
+                    assert!(
+                        condition(session.app.world(), id, flag, authored),
+                        "{class:?} {id}: {authored}"
+                    );
+                }
                 assert!(
                     flag_complete(session.app.world(), id, flag),
-                    "learned + actual eligible source weapon"
+                    "{class:?} {id}: learned + actual eligible source weapon"
                 );
                 continue;
             }
