@@ -1,0 +1,784 @@
+{
+  "schema": "mir2.native-host-asset-gap-public.v1",
+  "sourceEvidenceSha256": "c7cf8de4f98f0141bf0fed653c100b0ce56c2b857ee4f2809efc17b6b14560cf",
+  "summary": {
+    "requiredFrames": 90,
+    "normalArrowFrames": 80,
+    "focusFrames": 10,
+    "repositoryPngHashesMatchingMetadata": 90,
+    "installedMissingPngs": 90,
+    "installedMissingMetadataEntries": 90,
+    "fallbackCachePresent": 0
+  },
+  "firstMissingWebPath": "/original-effects/Magic3/1030.png",
+  "effectManifestEntries": [
+    {
+      "effect": "ArcherNormalArrow",
+      "repositoryEntryCount": 1,
+      "installedEntryCount": 0
+    },
+    {
+      "effect": "ArcherFocusProc",
+      "repositoryEntryCount": 1,
+      "installedEntryCount": 0
+    }
+  ],
+  "unchangedCodeProof": {
+    "referenceHead": "a455ebf3d44f307fd99af8c7c9638d918ff0edae",
+    "files": [
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/effects.rs",
+        "a455Sha256": "5a1e69a7c58f0ffc37953a6ee6d0f5f088e5852d0bce93e22da632849152d465",
+        "currentSha256": "5a1e69a7c58f0ffc37953a6ee6d0f5f088e5852d0bce93e22da632849152d465",
+        "unchangedFromA455": true
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+        "a455Sha256": "2048bf6c304f7a7b9c1a93a678595e0e81a6fe0567bf92e696e43397d01046bc",
+        "currentSha256": "2048bf6c304f7a7b9c1a93a678595e0e81a6fe0567bf92e696e43397d01046bc",
+        "unchangedFromA455": true
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/assets.rs",
+        "a455Sha256": "e77018ae0451159388e99ee46ef83480a4b69b7a2026809c8350780f0b297478",
+        "currentSha256": "e77018ae0451159388e99ee46ef83480a4b69b7a2026809c8350780f0b297478",
+        "unchangedFromA455": true
+      }
+    ]
+  },
+  "originalFullHostResult": {
+    "runId": "native-host-tests02",
+    "logSha256": "49831d8cad496bc6d6f69f719844159306bbf54b0a13d4c7c581ec2f2e06b7bf",
+    "summary": "test result: FAILED. 1139 passed; 1 failed; 7 ignored; 0 measured; 0 filtered out; finished in 17.10s",
+    "passed": 1139,
+    "failed": 1,
+    "ignored": 7,
+    "failedTest": "effects::tests::archer_normal_arrow_and_focus_catalog_follow_exact_source_frames",
+    "fullHostAccepted": false
+  },
+  "frames": [
+    {
+      "webPath": "/original-effects/Magic3/1030.png",
+      "repositoryPngSha256": "60199c4db417dc3e244a14a16accbc9f87750c08d9073ce2b232b543a11b4838",
+      "repositoryMetadataPngSha256": "60199c4db417dc3e244a14a16accbc9f87750c08d9073ce2b232b543a11b4838",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1031.png",
+      "repositoryPngSha256": "f2adbbcc2cafab2777c4dd4f6b257bf8a9f7fb4f2c35c701000dc026015c6837",
+      "repositoryMetadataPngSha256": "f2adbbcc2cafab2777c4dd4f6b257bf8a9f7fb4f2c35c701000dc026015c6837",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1032.png",
+      "repositoryPngSha256": "4267f08142c1ef368a2b702384d38ec762daf56c32468045b23e1c5b61bd8ccb",
+      "repositoryMetadataPngSha256": "4267f08142c1ef368a2b702384d38ec762daf56c32468045b23e1c5b61bd8ccb",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1033.png",
+      "repositoryPngSha256": "684d91da3a7d847155b6429eeecc74c8c6975b498f9285d4a09f1cf993310508",
+      "repositoryMetadataPngSha256": "684d91da3a7d847155b6429eeecc74c8c6975b498f9285d4a09f1cf993310508",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1034.png",
+      "repositoryPngSha256": "d78ad6f6044acf693c1c9825e9aca5c411934176312c9727dfa040d6a285ab30",
+      "repositoryMetadataPngSha256": "d78ad6f6044acf693c1c9825e9aca5c411934176312c9727dfa040d6a285ab30",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1040.png",
+      "repositoryPngSha256": "b7c44120a1dc213c7b7d93828fb0e10a8a2cb5413b9da2000b8cd85044eff48e",
+      "repositoryMetadataPngSha256": "b7c44120a1dc213c7b7d93828fb0e10a8a2cb5413b9da2000b8cd85044eff48e",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1041.png",
+      "repositoryPngSha256": "dcf46edd3b3302e49f779690b3d77cbee97c0029cd24be5eb9d7f18e35a787b8",
+      "repositoryMetadataPngSha256": "dcf46edd3b3302e49f779690b3d77cbee97c0029cd24be5eb9d7f18e35a787b8",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1042.png",
+      "repositoryPngSha256": "a4e2fb4b979a29d724a75133513379f2f48fbdbd3bd2eff2005cf5e98d88df62",
+      "repositoryMetadataPngSha256": "a4e2fb4b979a29d724a75133513379f2f48fbdbd3bd2eff2005cf5e98d88df62",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1043.png",
+      "repositoryPngSha256": "f28cd2f0a1637d5390bdc95c6602c4fc5b643fe4fd73894d08ca7ae5a14c4347",
+      "repositoryMetadataPngSha256": "f28cd2f0a1637d5390bdc95c6602c4fc5b643fe4fd73894d08ca7ae5a14c4347",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1044.png",
+      "repositoryPngSha256": "028a99963afbb755a2a48629309b417b9bd7bdc706f754f95bd9f0a343cbb48e",
+      "repositoryMetadataPngSha256": "028a99963afbb755a2a48629309b417b9bd7bdc706f754f95bd9f0a343cbb48e",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1050.png",
+      "repositoryPngSha256": "517d64dafad54d6f94817d9fbd25c7fec4c16e317efe2cbbc6637beed19c1114",
+      "repositoryMetadataPngSha256": "517d64dafad54d6f94817d9fbd25c7fec4c16e317efe2cbbc6637beed19c1114",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1051.png",
+      "repositoryPngSha256": "c4af30e37e14a10bbf78821bbdb411f404457bd5b89530a783ebf4382cc256b1",
+      "repositoryMetadataPngSha256": "c4af30e37e14a10bbf78821bbdb411f404457bd5b89530a783ebf4382cc256b1",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1052.png",
+      "repositoryPngSha256": "7a9c505b96fc465dd78f44b0d9c8b92678423079c50a0f214ec953d5af20e425",
+      "repositoryMetadataPngSha256": "7a9c505b96fc465dd78f44b0d9c8b92678423079c50a0f214ec953d5af20e425",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1053.png",
+      "repositoryPngSha256": "1b4bbe34d2a5e71fe72975ac98b0fd8356ff3fe4af3244321565bc90e253a3ae",
+      "repositoryMetadataPngSha256": "1b4bbe34d2a5e71fe72975ac98b0fd8356ff3fe4af3244321565bc90e253a3ae",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1054.png",
+      "repositoryPngSha256": "90f445b320ea65fa93943931a182b759e9972333825e7bca31ca43bcea117c36",
+      "repositoryMetadataPngSha256": "90f445b320ea65fa93943931a182b759e9972333825e7bca31ca43bcea117c36",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1060.png",
+      "repositoryPngSha256": "80459d01fa86399232b0aa53101f1cb957eb339d4e6923f00b76b8f01349a222",
+      "repositoryMetadataPngSha256": "80459d01fa86399232b0aa53101f1cb957eb339d4e6923f00b76b8f01349a222",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1061.png",
+      "repositoryPngSha256": "8a2001614eeb76577c80a3755cf62e72cc77c7fba79a323b7456b573b3104eb2",
+      "repositoryMetadataPngSha256": "8a2001614eeb76577c80a3755cf62e72cc77c7fba79a323b7456b573b3104eb2",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1062.png",
+      "repositoryPngSha256": "a0eb2de5744e85fe6b3df8e8363653d80c20ca559655eec68ea391ac9b557477",
+      "repositoryMetadataPngSha256": "a0eb2de5744e85fe6b3df8e8363653d80c20ca559655eec68ea391ac9b557477",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1063.png",
+      "repositoryPngSha256": "23b873216c857d252ddea596cd718bc45641375c29869812121b5a3c588c6503",
+      "repositoryMetadataPngSha256": "23b873216c857d252ddea596cd718bc45641375c29869812121b5a3c588c6503",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1064.png",
+      "repositoryPngSha256": "b020d59bf2c6f2ae8deeb8cedd0bdaa5710281686b397bf05a46f2ce09c56981",
+      "repositoryMetadataPngSha256": "b020d59bf2c6f2ae8deeb8cedd0bdaa5710281686b397bf05a46f2ce09c56981",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1070.png",
+      "repositoryPngSha256": "f3f7e4cd28593dbf43995981c7c528476637d63e8f5750e6bafd2f49f7320f3a",
+      "repositoryMetadataPngSha256": "f3f7e4cd28593dbf43995981c7c528476637d63e8f5750e6bafd2f49f7320f3a",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1071.png",
+      "repositoryPngSha256": "46fe80b06ea667db2ec75088358e19d600267c68c5f72fcb3d7fe52449d0fa40",
+      "repositoryMetadataPngSha256": "46fe80b06ea667db2ec75088358e19d600267c68c5f72fcb3d7fe52449d0fa40",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1072.png",
+      "repositoryPngSha256": "ee2f778579b4e7b4f9095403bf4db21d2e1d7beffca53cf5bc3173887168bee8",
+      "repositoryMetadataPngSha256": "ee2f778579b4e7b4f9095403bf4db21d2e1d7beffca53cf5bc3173887168bee8",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1073.png",
+      "repositoryPngSha256": "e69a53b7edbd4c3ca0908c0e82622b67e9b60713be077d3adbe2b45526f0b826",
+      "repositoryMetadataPngSha256": "e69a53b7edbd4c3ca0908c0e82622b67e9b60713be077d3adbe2b45526f0b826",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1074.png",
+      "repositoryPngSha256": "8bbecbe96967dce74e06b5735088a150fb51dce6ee2ad2834ef5547bb23d07bd",
+      "repositoryMetadataPngSha256": "8bbecbe96967dce74e06b5735088a150fb51dce6ee2ad2834ef5547bb23d07bd",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1080.png",
+      "repositoryPngSha256": "119dd6f117400109d6e00a98d34db8c89fe8eb45b631ee9edc55ef10abfdb8f1",
+      "repositoryMetadataPngSha256": "119dd6f117400109d6e00a98d34db8c89fe8eb45b631ee9edc55ef10abfdb8f1",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1081.png",
+      "repositoryPngSha256": "7c72c303d27c27f4be98844e7dc624548f6a495361e467efab2753fb47c05ee9",
+      "repositoryMetadataPngSha256": "7c72c303d27c27f4be98844e7dc624548f6a495361e467efab2753fb47c05ee9",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1082.png",
+      "repositoryPngSha256": "fde0d04815a765ce8dc9dc9657723eaa38e0e8f9bba5e3fecdae395978504d87",
+      "repositoryMetadataPngSha256": "fde0d04815a765ce8dc9dc9657723eaa38e0e8f9bba5e3fecdae395978504d87",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1083.png",
+      "repositoryPngSha256": "c2e1ed36a25e517ed89bb73bc8d92226199c4c512d0ba25e91368040f1adc554",
+      "repositoryMetadataPngSha256": "c2e1ed36a25e517ed89bb73bc8d92226199c4c512d0ba25e91368040f1adc554",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1084.png",
+      "repositoryPngSha256": "bac95c7f7a9d13f3b498799a5213fe6d7629208ae7c87ca09ab7ccdacbdbc435",
+      "repositoryMetadataPngSha256": "bac95c7f7a9d13f3b498799a5213fe6d7629208ae7c87ca09ab7ccdacbdbc435",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1090.png",
+      "repositoryPngSha256": "f01d0fc471eeb77a0ef6539c7fbcb7613c8f6cbf40417e732eeabd9ec1b7c587",
+      "repositoryMetadataPngSha256": "f01d0fc471eeb77a0ef6539c7fbcb7613c8f6cbf40417e732eeabd9ec1b7c587",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1091.png",
+      "repositoryPngSha256": "166cc661edf00bc1bbb1b29644423dca52338f07a901bc55850b983083ff3835",
+      "repositoryMetadataPngSha256": "166cc661edf00bc1bbb1b29644423dca52338f07a901bc55850b983083ff3835",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1092.png",
+      "repositoryPngSha256": "1510dc2ca4bb6301c05e0b439335bc07ae66b1d2df2830414855e8839e774854",
+      "repositoryMetadataPngSha256": "1510dc2ca4bb6301c05e0b439335bc07ae66b1d2df2830414855e8839e774854",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1093.png",
+      "repositoryPngSha256": "f8cce7519016600ce1411de7a55d85b16b587fe880f9371d6f66707b283fc4bb",
+      "repositoryMetadataPngSha256": "f8cce7519016600ce1411de7a55d85b16b587fe880f9371d6f66707b283fc4bb",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1094.png",
+      "repositoryPngSha256": "587658dffc752d6aaf1400856518597612b14219d73cea0d570e6e57301189c2",
+      "repositoryMetadataPngSha256": "587658dffc752d6aaf1400856518597612b14219d73cea0d570e6e57301189c2",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1100.png",
+      "repositoryPngSha256": "40ddcecc0bc4659bf1751e1d80efdcdc66fd061cf4e8b5cc525cc4b2a7dd06f0",
+      "repositoryMetadataPngSha256": "40ddcecc0bc4659bf1751e1d80efdcdc66fd061cf4e8b5cc525cc4b2a7dd06f0",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1101.png",
+      "repositoryPngSha256": "f0f4baea3c905b30f9eabe29077ce29902f9330ed8460b4df16784cbe9abcf51",
+      "repositoryMetadataPngSha256": "f0f4baea3c905b30f9eabe29077ce29902f9330ed8460b4df16784cbe9abcf51",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1102.png",
+      "repositoryPngSha256": "80d07b5e98c2386d002aa2c181c362aa314b55ec6c14fc9347e873571bafa66d",
+      "repositoryMetadataPngSha256": "80d07b5e98c2386d002aa2c181c362aa314b55ec6c14fc9347e873571bafa66d",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1103.png",
+      "repositoryPngSha256": "11a9092ac7f91da55f20598c95922e9c4349da7a280c1964e701be8be9e9114c",
+      "repositoryMetadataPngSha256": "11a9092ac7f91da55f20598c95922e9c4349da7a280c1964e701be8be9e9114c",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1104.png",
+      "repositoryPngSha256": "3e9327aabc6b89fe08b40281549d08364bd70be144c8ba413582f8d19894afe9",
+      "repositoryMetadataPngSha256": "3e9327aabc6b89fe08b40281549d08364bd70be144c8ba413582f8d19894afe9",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1110.png",
+      "repositoryPngSha256": "8c99712c5684ef3c0026be954f1da4a89f9f98734cd666f37b9e96ec601d9d32",
+      "repositoryMetadataPngSha256": "8c99712c5684ef3c0026be954f1da4a89f9f98734cd666f37b9e96ec601d9d32",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1111.png",
+      "repositoryPngSha256": "faa25b8a7dfe4ee7a674043891ce3d4a0b04eb2d86605c64f6d950983892203f",
+      "repositoryMetadataPngSha256": "faa25b8a7dfe4ee7a674043891ce3d4a0b04eb2d86605c64f6d950983892203f",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1112.png",
+      "repositoryPngSha256": "8c7ace7b377d280ff4203bac00a9826a5e675ee82f7f3995d8c82e6b2cc60acc",
+      "repositoryMetadataPngSha256": "8c7ace7b377d280ff4203bac00a9826a5e675ee82f7f3995d8c82e6b2cc60acc",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1113.png",
+      "repositoryPngSha256": "caed46fd42e70d0890a50cf903facda9e62398932c19b4243073f1eac270b613",
+      "repositoryMetadataPngSha256": "caed46fd42e70d0890a50cf903facda9e62398932c19b4243073f1eac270b613",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1114.png",
+      "repositoryPngSha256": "0d211eb1da49ee11ac25e12e1ec2d5c290bbeece16978c3d80c4fc519f089482",
+      "repositoryMetadataPngSha256": "0d211eb1da49ee11ac25e12e1ec2d5c290bbeece16978c3d80c4fc519f089482",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1120.png",
+      "repositoryPngSha256": "4837cec02b82a883cd801c8e8b7b6e11d5e37069c72752df09d690ae72fd86de",
+      "repositoryMetadataPngSha256": "4837cec02b82a883cd801c8e8b7b6e11d5e37069c72752df09d690ae72fd86de",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1121.png",
+      "repositoryPngSha256": "8e00b28a7ceb4827b498d13367da05d38ad97db0dd12a9fbff6a8b3fa110f5c4",
+      "repositoryMetadataPngSha256": "8e00b28a7ceb4827b498d13367da05d38ad97db0dd12a9fbff6a8b3fa110f5c4",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1122.png",
+      "repositoryPngSha256": "199fbc1d8d8ef4f38f20ac22ec01c89f50890db47710066a8a4344a7d375e435",
+      "repositoryMetadataPngSha256": "199fbc1d8d8ef4f38f20ac22ec01c89f50890db47710066a8a4344a7d375e435",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1123.png",
+      "repositoryPngSha256": "aa442f2e5e630edd439871911567cf6c6f9a477211da24f3bd0b94d3ab507c80",
+      "repositoryMetadataPngSha256": "aa442f2e5e630edd439871911567cf6c6f9a477211da24f3bd0b94d3ab507c80",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1124.png",
+      "repositoryPngSha256": "ccc271e3b68091c405678b3c8e942ef22d723b53718ebbb3eb7161727b340d68",
+      "repositoryMetadataPngSha256": "ccc271e3b68091c405678b3c8e942ef22d723b53718ebbb3eb7161727b340d68",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1130.png",
+      "repositoryPngSha256": "99261e18a51304544f5056e929ae78622d361fe12f79c2955f1f01c1f23d9d85",
+      "repositoryMetadataPngSha256": "99261e18a51304544f5056e929ae78622d361fe12f79c2955f1f01c1f23d9d85",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1131.png",
+      "repositoryPngSha256": "02c5d2e813a0b10a66ae685b69a7b8826f9ae9bc412c12bf87c6b4b983f5bc4e",
+      "repositoryMetadataPngSha256": "02c5d2e813a0b10a66ae685b69a7b8826f9ae9bc412c12bf87c6b4b983f5bc4e",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1132.png",
+      "repositoryPngSha256": "8979f24d0a3394fb0296c4e4a2f2bb37cb57cb5d3794d28bf6341c1d0affd06c",
+      "repositoryMetadataPngSha256": "8979f24d0a3394fb0296c4e4a2f2bb37cb57cb5d3794d28bf6341c1d0affd06c",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1133.png",
+      "repositoryPngSha256": "cd89da00e25c7fae4fd14ee01df9fb077824c4b59d18dd576e3ad2e6484514df",
+      "repositoryMetadataPngSha256": "cd89da00e25c7fae4fd14ee01df9fb077824c4b59d18dd576e3ad2e6484514df",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1134.png",
+      "repositoryPngSha256": "7f50435f8f96288edd9c1169e1b66a78a8657655723ff5213df27dad955e3472",
+      "repositoryMetadataPngSha256": "7f50435f8f96288edd9c1169e1b66a78a8657655723ff5213df27dad955e3472",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1140.png",
+      "repositoryPngSha256": "8c9c9ac0212bbb9a865d36fd87cdc4426db25b6cc6b8964d35556195d28f8fd0",
+      "repositoryMetadataPngSha256": "8c9c9ac0212bbb9a865d36fd87cdc4426db25b6cc6b8964d35556195d28f8fd0",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1141.png",
+      "repositoryPngSha256": "89bcc7830c9f3d8778b643ac70aaafea5c0861752ab4e32ad41248c0e77ef037",
+      "repositoryMetadataPngSha256": "89bcc7830c9f3d8778b643ac70aaafea5c0861752ab4e32ad41248c0e77ef037",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1142.png",
+      "repositoryPngSha256": "87b5dc43a66fdf755a425dcd6330d73156c6239679aab1054100d8e81b8cc1ce",
+      "repositoryMetadataPngSha256": "87b5dc43a66fdf755a425dcd6330d73156c6239679aab1054100d8e81b8cc1ce",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1143.png",
+      "repositoryPngSha256": "b9d0e940d2b0f1b8db5515a7e98a17afa0eda756d943304216dc716cc5e3e3db",
+      "repositoryMetadataPngSha256": "b9d0e940d2b0f1b8db5515a7e98a17afa0eda756d943304216dc716cc5e3e3db",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1144.png",
+      "repositoryPngSha256": "f3b8ee9362b328a45b736f3244d30d6e5b36abd719ef43ecc9d4a02bbda850d8",
+      "repositoryMetadataPngSha256": "f3b8ee9362b328a45b736f3244d30d6e5b36abd719ef43ecc9d4a02bbda850d8",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1150.png",
+      "repositoryPngSha256": "af3c75cb243e40eb22dd855c14052e733b10904f07036fd8f29af071add18d5e",
+      "repositoryMetadataPngSha256": "af3c75cb243e40eb22dd855c14052e733b10904f07036fd8f29af071add18d5e",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1151.png",
+      "repositoryPngSha256": "0ee2eab2f74ec67885e79d455492d4c20a2d7d13ebe125454d1a8d3e507a3802",
+      "repositoryMetadataPngSha256": "0ee2eab2f74ec67885e79d455492d4c20a2d7d13ebe125454d1a8d3e507a3802",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1152.png",
+      "repositoryPngSha256": "886b3c0053dabe91fa5280751422e0023de15f899494e552f2d20f849b2af665",
+      "repositoryMetadataPngSha256": "886b3c0053dabe91fa5280751422e0023de15f899494e552f2d20f849b2af665",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1153.png",
+      "repositoryPngSha256": "1d8536df0b68ca63cb2e2a9e31fe8e1b6287fe13b68284074ca2af0e7574672a",
+      "repositoryMetadataPngSha256": "1d8536df0b68ca63cb2e2a9e31fe8e1b6287fe13b68284074ca2af0e7574672a",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1154.png",
+      "repositoryPngSha256": "b0b00e6e984eb8aa38e235b25444b73e7978d90a209b79919e17beea0b9dba27",
+      "repositoryMetadataPngSha256": "b0b00e6e984eb8aa38e235b25444b73e7978d90a209b79919e17beea0b9dba27",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1160.png",
+      "repositoryPngSha256": "826b72e0d9a0feb12e91fab22e328c0b3d917ccbe1faf1a308689a37598e09cf",
+      "repositoryMetadataPngSha256": "826b72e0d9a0feb12e91fab22e328c0b3d917ccbe1faf1a308689a37598e09cf",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1161.png",
+      "repositoryPngSha256": "cd699ea898cf5f198234847c93f85ff3bef9614da51088c81be0cc1e2b0908f8",
+      "repositoryMetadataPngSha256": "cd699ea898cf5f198234847c93f85ff3bef9614da51088c81be0cc1e2b0908f8",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1162.png",
+      "repositoryPngSha256": "01d0a60ec258003610845630eae49e2f4c415972fa5ceb8a8041580f6ae98231",
+      "repositoryMetadataPngSha256": "01d0a60ec258003610845630eae49e2f4c415972fa5ceb8a8041580f6ae98231",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1163.png",
+      "repositoryPngSha256": "351ac3d35b3f6c4091443d4a3cc9acc0ea236070ed20c87bb3d0d3151cf6b27c",
+      "repositoryMetadataPngSha256": "351ac3d35b3f6c4091443d4a3cc9acc0ea236070ed20c87bb3d0d3151cf6b27c",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1164.png",
+      "repositoryPngSha256": "72ed039cb8a04675dd7ae778fac4f48f2ab24ce06bc6b0d8cee0e1edbf45fb8f",
+      "repositoryMetadataPngSha256": "72ed039cb8a04675dd7ae778fac4f48f2ab24ce06bc6b0d8cee0e1edbf45fb8f",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1170.png",
+      "repositoryPngSha256": "2024de66fee63f71d8fed456e9d9b9f72d91a4682d2584e2055ac2183b84726f",
+      "repositoryMetadataPngSha256": "2024de66fee63f71d8fed456e9d9b9f72d91a4682d2584e2055ac2183b84726f",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1171.png",
+      "repositoryPngSha256": "1b85d044119f06ed3318a0c258f4544036ca7ad7c850300af27744a1e2ae8644",
+      "repositoryMetadataPngSha256": "1b85d044119f06ed3318a0c258f4544036ca7ad7c850300af27744a1e2ae8644",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1172.png",
+      "repositoryPngSha256": "85a8c1f69662c373d0bfa6b9b5213cd6ff39d841cc9c73e1acbb1ed41971e5f1",
+      "repositoryMetadataPngSha256": "85a8c1f69662c373d0bfa6b9b5213cd6ff39d841cc9c73e1acbb1ed41971e5f1",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1173.png",
+      "repositoryPngSha256": "f34895b8138e8f725038ffa42c9998e51fd14830edb6da4735eded34afd9f788",
+      "repositoryMetadataPngSha256": "f34895b8138e8f725038ffa42c9998e51fd14830edb6da4735eded34afd9f788",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1174.png",
+      "repositoryPngSha256": "b7aa446605c90a1eaf7fb9b3e8ebfcf27df74f6b70a48c8678d920833987bf19",
+      "repositoryMetadataPngSha256": "b7aa446605c90a1eaf7fb9b3e8ebfcf27df74f6b70a48c8678d920833987bf19",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1180.png",
+      "repositoryPngSha256": "412fdf5d2ae686db90fc05a13467159d8117acd1cd6e3ab36a89e375c37b6c4a",
+      "repositoryMetadataPngSha256": "412fdf5d2ae686db90fc05a13467159d8117acd1cd6e3ab36a89e375c37b6c4a",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1181.png",
+      "repositoryPngSha256": "826ebb0d05eed14079f1e06bcb76acb56cfac04801d69980e0433364fca802be",
+      "repositoryMetadataPngSha256": "826ebb0d05eed14079f1e06bcb76acb56cfac04801d69980e0433364fca802be",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1182.png",
+      "repositoryPngSha256": "b0a5ac74df1a634d86fde56ac206ec0f124c6b69867d17c36fd0fa576ff5770e",
+      "repositoryMetadataPngSha256": "b0a5ac74df1a634d86fde56ac206ec0f124c6b69867d17c36fd0fa576ff5770e",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1183.png",
+      "repositoryPngSha256": "3bcab9f90b30a61680706bb6459fa7493e032a3858ff1e66fabb4cff51fa7ec8",
+      "repositoryMetadataPngSha256": "3bcab9f90b30a61680706bb6459fa7493e032a3858ff1e66fabb4cff51fa7ec8",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/1184.png",
+      "repositoryPngSha256": "c2ea70fcaa5936c64b5491036c2dadb559d5d09d1ce81be3cc49fed73f42c809",
+      "repositoryMetadataPngSha256": "c2ea70fcaa5936c64b5491036c2dadb559d5d09d1ce81be3cc49fed73f42c809",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/2730.png",
+      "repositoryPngSha256": "e3f7c13181a73d9c3eb4dffc07b56cbfca3c928d0a96d4eac0d19b8e01dcd30b",
+      "repositoryMetadataPngSha256": "e3f7c13181a73d9c3eb4dffc07b56cbfca3c928d0a96d4eac0d19b8e01dcd30b",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/2731.png",
+      "repositoryPngSha256": "291f68d7fe16a2a1ee49c511c5c65a3f926d1ddedf909db2ce9c5118e8ced17d",
+      "repositoryMetadataPngSha256": "291f68d7fe16a2a1ee49c511c5c65a3f926d1ddedf909db2ce9c5118e8ced17d",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/2732.png",
+      "repositoryPngSha256": "bf13638637ed7d1db581c97ccdda53dbd138ee1c9e00bffe0e32d1b059a9b145",
+      "repositoryMetadataPngSha256": "bf13638637ed7d1db581c97ccdda53dbd138ee1c9e00bffe0e32d1b059a9b145",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/2733.png",
+      "repositoryPngSha256": "65e3fd9fa08d98016ddd734f82e35eac1a973598003093a66b5dcd461186b424",
+      "repositoryMetadataPngSha256": "65e3fd9fa08d98016ddd734f82e35eac1a973598003093a66b5dcd461186b424",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/2734.png",
+      "repositoryPngSha256": "320a91c35ada94199e103c1ee39c77e1923fa3d8b677c7e674953406952b3f8e",
+      "repositoryMetadataPngSha256": "320a91c35ada94199e103c1ee39c77e1923fa3d8b677c7e674953406952b3f8e",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/2735.png",
+      "repositoryPngSha256": "89493736c351025eaecd9a6d81916c49412036077eac50ceb255fcf0eaa6efc4",
+      "repositoryMetadataPngSha256": "89493736c351025eaecd9a6d81916c49412036077eac50ceb255fcf0eaa6efc4",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/2736.png",
+      "repositoryPngSha256": "b567621ffb120012932748449b7babbf48fb238ffd06a0169f7c4ae446de829b",
+      "repositoryMetadataPngSha256": "b567621ffb120012932748449b7babbf48fb238ffd06a0169f7c4ae446de829b",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/2737.png",
+      "repositoryPngSha256": "4c8e89308a27a86bbed2e7f09a9910897d690ffdf5da19e3bb3761a51985e6a0",
+      "repositoryMetadataPngSha256": "4c8e89308a27a86bbed2e7f09a9910897d690ffdf5da19e3bb3761a51985e6a0",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/2738.png",
+      "repositoryPngSha256": "9affc8800c6a8281322891f0457ce7cf9ee40ac10d3459466a9f0be4ddb88938",
+      "repositoryMetadataPngSha256": "9affc8800c6a8281322891f0457ce7cf9ee40ac10d3459466a9f0be4ddb88938",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    },
+    {
+      "webPath": "/original-effects/Magic3/2739.png",
+      "repositoryPngSha256": "55b7b26eac950dcddbcc5d095fa0b66a38ca2c6d32a38f6618df760ba61f85fa",
+      "repositoryMetadataPngSha256": "55b7b26eac950dcddbcc5d095fa0b66a38ca2c6d32a38f6618df760ba61f85fa",
+      "repositoryHashMatchesMetadata": true,
+      "installedPngExists": false,
+      "installedMetadataEntryMissing": true
+    }
+  ],
+  "sourceModified": false,
+  "assetsModified": false,
+  "testsIgnoredOrDeleted": false
+}

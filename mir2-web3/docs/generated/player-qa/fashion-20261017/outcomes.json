@@ -1,0 +1,284 @@
+{
+  "schema": "mir2.fashion-original-outcomes.v1",
+  "originalEvidenceRoot": ".mir2-player-qa/fashion-20261017",
+  "runs": [
+    {
+      "kind": "data-tests",
+      "head": "2e45f318ea464cb63150c0894f40affab7720bda",
+      "exitCode": 101,
+      "receiptAccepted": false,
+      "productAccepted": true,
+      "declaredInputs": 1453,
+      "sourceDrift": [],
+      "run": "data-tests01",
+      "resultSha256": "71a83ff04b35dc84fcdf58063733d1280aa6df7019c34651d5c158b85b3bdcf8",
+      "cargoLogSha256": "899c8fe80ff9616346a2bad3a81ece053b40e599320e02ed1cb77363cd0c0731",
+      "auditSha256": "a48dd5f2b17b3a93a50b88ef5434daace743d4acac77207fe4598818b42adb8b",
+      "accepted": false,
+      "suites": [
+        {
+          "status": "FAILED",
+          "passed": 67,
+          "failed": 5,
+          "ignored": 1,
+          "measured": 0,
+          "filtered": 0,
+          "seconds": 10.5
+        }
+      ]
+    },
+    {
+      "kind": "data-tests",
+      "head": "174269caf8b909c20e0d5ba26cffcfbf032c193c",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "productAccepted": true,
+      "declaredInputs": 1453,
+      "sourceDrift": [],
+      "run": "data-tests02",
+      "resultSha256": "4769d90a87603b13521b7a5cb03c8c81a609b316b5c47481c60ef78cd29a30a9",
+      "cargoLogSha256": "9806b277f367dee43c0a4bfb8b071b61b2372f89c2afaa801cd6a754a93a058a",
+      "auditSha256": "eccc4190dda6789a58106454d2dee1abe84ecd538cfca0b778d3ba70cda67408",
+      "accepted": true,
+      "suites": [
+        {
+          "status": "ok",
+          "passed": 72,
+          "failed": 0,
+          "ignored": 1,
+          "measured": 0,
+          "filtered": 0,
+          "seconds": 11.25
+        }
+      ]
+    },
+    {
+      "kind": "gateway",
+      "head": "fd21fbdc38c110289e8e92bcb6105d452c8b2db1",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "productAccepted": true,
+      "declaredInputs": 1453,
+      "sourceDrift": [],
+      "run": "gateway-build01",
+      "resultSha256": "40b44c6e74c910527930b029280ea5878a966fe91dcdaae79d4a468ab76c9f99",
+      "cargoLogSha256": "5448029bcb357853b56458efb0d64d3cce76a0991da524c8b15b6e17acacc583",
+      "auditSha256": "8867dd4c461b0d18b4fa01f3fd1394c8c7778bd653a4856bc71444b028b0430b",
+      "accepted": true,
+      "suites": [],
+      "artifact": {
+        "length": 123352064,
+        "sha256": "a2c76a2c5a48cb66aa2dc63be19f5a76093ea65219cf8b6dbe972c3414824d83"
+      }
+    },
+    {
+      "kind": "gateway-tests",
+      "head": "fd21fbdc38c110289e8e92bcb6105d452c8b2db1",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "productAccepted": true,
+      "declaredInputs": 1453,
+      "sourceDrift": [],
+      "run": "gateway-tests01",
+      "resultSha256": "d71dd44945a4bb0722ba4fbc1fd072a51b7952a0b40fca55df3d2632c9a63478",
+      "cargoLogSha256": "946c34baf85d509c1ee358d5229d3df20849e7e04632e4e10f227631c18590b7",
+      "auditSha256": "3b57012bfb7243e6158f88c3b06fd7204ac96252f8e07e2dd616b6802f166337",
+      "accepted": true,
+      "suites": [
+        {
+          "status": "ok",
+          "passed": 10,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 1170,
+          "seconds": 79.5
+        }
+      ]
+    },
+    {
+      "kind": "native",
+      "head": "fd21fbdc38c110289e8e92bcb6105d452c8b2db1",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "productAccepted": true,
+      "declaredInputs": 1453,
+      "sourceDrift": [],
+      "run": "native-build01",
+      "resultSha256": "978b44e8d3330240dd2ca6428c8124ae169516acd67030320f9a3debeecceef6",
+      "cargoLogSha256": "ca425e66e3dfc9f500b2029374f764507fa27360b7570cc8c1c79220c2ce866c",
+      "auditSha256": "d89024e45d7fd241ea0504d3938729987297f108644b9bf9bf6b9142cfada3f0",
+      "accepted": true,
+      "suites": [],
+      "artifact": {
+        "length": 131208192,
+        "sha256": "d927d8adfe8c05414d6971adbef7bf44652ac58fbb46bf8d1830078f4290ae8b"
+      }
+    },
+    {
+      "kind": "native-host-tests",
+      "head": "fd21fbdc38c110289e8e92bcb6105d452c8b2db1",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "productAccepted": true,
+      "declaredInputs": 1453,
+      "sourceDrift": [],
+      "run": "native-host-focused03",
+      "resultSha256": "9ac6a83284ee92759f1646bd5aec65167396f080f84975d8c6a3f4e0ecc662a9",
+      "cargoLogSha256": "b770e5630364c13e3abecab0bcb16ac4db55942ac5f4200e603a775984516ff3",
+      "auditSha256": "171bc56fdd07705bab586b45169bfba9c5009e70a42f3fceb75e4c37cfe3a8e2",
+      "accepted": true,
+      "suites": [
+        {
+          "status": "ok",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 1141,
+          "seconds": 0.0
+        }
+      ]
+    },
+    {
+      "kind": "native-host-tests",
+      "head": "fd21fbdc38c110289e8e92bcb6105d452c8b2db1",
+      "exitCode": 101,
+      "receiptAccepted": false,
+      "productAccepted": true,
+      "declaredInputs": 1453,
+      "sourceDrift": [],
+      "run": "native-host-tests01",
+      "resultSha256": "680f4421170f59b167294768af1d55768e65f73f5c00da8ca5f4cd5e6fc82d68",
+      "cargoLogSha256": "0c7fac8e12d939b5274e8e6c600b794fcc093d95e29f04ee344907662f7b4fd5",
+      "auditSha256": "25a1245028a0e025d819babd6782cacfee4969d470238f58913cd5424ccf7b07",
+      "accepted": false,
+      "suites": [
+        {
+          "status": "FAILED",
+          "passed": 1072,
+          "failed": 68,
+          "ignored": 7,
+          "measured": 0,
+          "filtered": 0,
+          "seconds": 19.02
+        }
+      ]
+    },
+    {
+      "kind": "native-host-tests",
+      "head": "fd21fbdc38c110289e8e92bcb6105d452c8b2db1",
+      "exitCode": 101,
+      "receiptAccepted": false,
+      "productAccepted": true,
+      "declaredInputs": 1453,
+      "sourceDrift": [],
+      "run": "native-host-tests02",
+      "resultSha256": "9352f6c9be86eb41a145d21299c1e35a18881df87b48fbe5d0c582616fa7cd1e",
+      "cargoLogSha256": "49831d8cad496bc6d6f69f719844159306bbf54b0a13d4c7c581ec2f2e06b7bf",
+      "auditSha256": "830726dabcda4e6db9878b7f2778a1d01897a8d6c6c91dffed25104ce3a56637",
+      "accepted": false,
+      "suites": [
+        {
+          "status": "FAILED",
+          "passed": 1139,
+          "failed": 1,
+          "ignored": 7,
+          "measured": 0,
+          "filtered": 0,
+          "seconds": 17.1
+        }
+      ]
+    },
+    {
+      "kind": "native-tests",
+      "head": "174269caf8b909c20e0d5ba26cffcfbf032c193c",
+      "exitCode": 101,
+      "receiptAccepted": false,
+      "productAccepted": true,
+      "declaredInputs": 1453,
+      "sourceDrift": [],
+      "run": "native-tests01",
+      "resultSha256": "df385a2a83608c5a65696a8dfa9ed1a4f7935055de942789265fb5480aa78c10",
+      "cargoLogSha256": "3d2f75afcfa846061b2e983b34d26260477ad041f075c3fd9828d57ec2c8603c",
+      "auditSha256": "3060c1af6a0fa87fa74cd0c60ba9dd825feb13fb354363551eba49c579b23851",
+      "accepted": false,
+      "suites": []
+    },
+    {
+      "kind": "native-tests",
+      "head": "fd21fbdc38c110289e8e92bcb6105d452c8b2db1",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "productAccepted": true,
+      "declaredInputs": 1453,
+      "sourceDrift": [],
+      "run": "native-tests02",
+      "resultSha256": "82468ec5a74685564c8977a9ca3714d75ecceabee3cabba96ab79aedcea5fa54",
+      "cargoLogSha256": "1cdccf7e0a57351b8e876618c632ecdfa515c2675465fc2990ae1c9c6dabe8a8",
+      "auditSha256": "5b40b8d6cf03fff1e80f06ecff5a067164f5c1a7ca038b2ecacc6d57d0f1e917",
+      "accepted": true,
+      "suites": [
+        {
+          "status": "ok",
+          "passed": 1582,
+          "failed": 0,
+          "ignored": 14,
+          "measured": 0,
+          "filtered": 0,
+          "seconds": 14.79
+        }
+      ]
+    },
+    {
+      "kind": "simulation-tests",
+      "head": "174269caf8b909c20e0d5ba26cffcfbf032c193c",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "productAccepted": true,
+      "declaredInputs": 1453,
+      "sourceDrift": [],
+      "run": "simulation-tests01",
+      "resultSha256": "106641cfb08e1d82a022696543d5c460872f0c850d1b74dcecc64316e35db592",
+      "cargoLogSha256": "0e332e19ef82b7911d0a13238541cc56fd06eee5c4189f371c1371038d55a695",
+      "auditSha256": "d5020a6891597e46c5413ef715206ccecb5a02e4c1a355587d4682d081c5dac3",
+      "accepted": true,
+      "suites": [
+        {
+          "status": "ok",
+          "passed": 87,
+          "failed": 0,
+          "ignored": 1,
+          "measured": 0,
+          "filtered": 2861,
+          "seconds": 1065.43
+        }
+      ]
+    }
+  ],
+  "deployed": false,
+  "candidate100": false,
+  "recordedUtc": "2026-10-16T19:06:43.632835+00:00",
+  "productSourceHead": "fd21fbdc38c110289e8e92bcb6105d452c8b2db1",
+  "sourceRows": 1453,
+  "sourceRowSetSha256": "c1653a7163f122c4763e9ad67949adc0936049a647ddff27b9a386ffcd1b80ea",
+  "originalLogsCommitted": false,
+  "fullHostAccepted": false,
+  "guiAccepted": false,
+  "postgresExecuted": false,
+  "runtime06Started": false,
+  "productionDeploymentPaused": true,
+  "guiInterruption": {
+    "tool": "Windows Computer Use",
+    "reason": "User physical Escape during observation of old local client",
+    "newGameplayScreenshotCaptured": false,
+    "furtherAppInputIssued": false
+  },
+  "scope": "Local source/tests and paired Windows debug builds only; no GUI acceptance, production rollout, full-host or overall parity completion.",
+  "testRevisionBoundary": "Data and simulation executed on174269; fd21 only changes two cfg(test) expected rectangle constructions in client-bevy, without production behavior changes. Later documentation commits do not imply tests re-executed on their SHA.",
+  "protectedOriginalCheckout": {
+    "head": "2e9d95bbb3cd9f7852980af385a1298b57a1511e",
+    "baselineTrackedFiles": 41,
+    "drift": []
+  }
+}

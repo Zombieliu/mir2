@@ -1,5 +1,15 @@
 # Windows 原生可玩闭环验收清单
 
+<!-- fashion-crafting-20261017:start -->
+## 制作工坊：Native已build，尚无本轮GUI验收（2026-10-17）
+
+用户确认时装仅外观、首饰沿原版stats；Alice地图0(321,265)、四配方、默认关闭及Source/64项收据规则见[专项说明](FASHION-JEWELRY-CRAFTING-20261017.zh-CN.md)。本地隔离，未部署。持久化脱敏入口：[原SHA/结果摘要](generated/player-qa/fashion-20261017/outcomes.json)、[安装资源缺口](generated/player-qa/fashion-20261017/host-asset-gap.json)；原始完整日志仍ignored。
+
+数据72/0/1既有benchmark忽略、Simulation有界87/0/1原PG忽略（2861过滤）绑定174269caf8；Native完整lib1582/0/14原忽略、host focused6/0/0（1141过滤）、Gateway有界10/0/0（1170过滤，79.50s）绑定fd21fbdc38。以上通过调用均原Guard接受、1453行0漂移，不能转记为后续doc-only新头执行。首轮数据67/5/1、Native两E0624且零执行、完整host01的1072/68/7及host02的1139/1/7保留；后者唯一缺90张Magic3/Focus PNG及metadata已确认为既有安装资源缺口，未改资产/帧断言/ignore，完整host仍非全绿。
+
+两端build01已在fd21完成：Native **131208192B**，SHA256 `d927d8adfe8c05414d6971adbef7bf44652ac58fbb46bf8d1830078f4290ae8b`；Gateway **123352064B**，SHA256 `a2c76a2c5a48cb66aa2dc63be19f5a76093ea65219cf8b6dbe972c3414824d83`。均exit0/原audit接受、1453行0漂移，实际bin与artifact收据一致。配套已build，runtime06/安装/GUI未执行；用户physicalEsc后已停止全部GUI输入，Computer Use可用。真PG未跑，旧a455 map-bootstrap7/7和构建不迁记、GUI未复测，历史整套Simulation38失败仍开放。`Candidate100=false`，整体1:1百分比不变。下一步保留完整host资源闭环、普通GUI/重登、真PG、发布及人类验收；后续doc-only仅核对缓存产物指纹，不重跑或改标原测试。下方历史原文保留。
+<!-- fashion-crafting-20261017:end -->
+
 > 2026-10-15 runtime配置补充：Root默认318通过（原2项忽略），Native economy/shared UI启用521通过（原4项忽略）。28项既有Native正例转至启用配置真实执行，默认拒绝与结构负例保留；CI覆盖两配置及WASM检查。仅修测试配置，产品guard未改，GUI/发布/人类验收仍开放。详见[本轮集成记录](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。
 
 
