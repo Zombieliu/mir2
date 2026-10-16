@@ -187,7 +187,7 @@ mod tests {
             assert!(profile
                 .disabled_stage5_action_prefixes
                 .iter()
-                .any(|p| p == "craft."));
+                .any(|p| p == "craft"));
             for entry in RECIPES {
                 let mut templates: Vec<_> =
                     entry.ingredients.iter().map(|i| i.template_id).collect();

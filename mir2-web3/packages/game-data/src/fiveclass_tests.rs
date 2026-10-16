@@ -30,14 +30,15 @@ fn fiveclass_profile_preserves_the_classic_world_and_exact_existing_items_skills
     let classic = platinum_176_profile();
     let five = platinum_fiveclass_profile();
     assert_eq!(classic.profile_id, "platinum_176");
-    assert_eq!(classic.version, 27);
+    assert_eq!(classic.version, 28);
     assert_eq!(
         classic.allowed_classes,
         [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist]
     );
-    assert_eq!(classic.item_whitelist.len(), 203);
+    assert_eq!(classic.item_whitelist.len(), 204);
     assert_eq!(classic.skills.len(), 63);
     assert_eq!(five.profile_id, "platinum_fiveclass");
+    assert_eq!(five.version, 2);
     assert_eq!(
         five.allowed_classes,
         [
@@ -49,7 +50,7 @@ fn fiveclass_profile_preserves_the_classic_world_and_exact_existing_items_skills
         ]
     );
     assert_eq!(five.acceptance_level, 50);
-    assert_eq!(five.item_whitelist.len(), 345);
+    assert_eq!(five.item_whitelist.len(), 346);
     assert_eq!(five.skills.len(), 97);
     assert_eq!(
         &five.item_whitelist[..classic.item_whitelist.len()],
@@ -343,7 +344,7 @@ fn fiveclass_bundle_binds_new_profile_and_original_classic_profile_identity() {
         bundle.summary.native_maps,
         profile.map_whitelist.len() + profile.native_resource_only_maps.len()
     );
-    assert_eq!(bundle.summary.items, 345);
+    assert_eq!(bundle.summary.items, 346);
     assert_eq!(bundle.summary.skills, 97);
     assert_eq!(bundle.summary.drop_overrides, profile.drop_overrides.len());
     assert_eq!(

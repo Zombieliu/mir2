@@ -3727,7 +3727,7 @@ mod tests {
         let profile = platinum_176_profile();
 
         assert_eq!(profile.profile_id, "platinum_176");
-        assert_eq!(profile.version, 27);
+        assert_eq!(profile.version, 28);
         assert_eq!(
             profile.allowed_classes,
             [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist,]

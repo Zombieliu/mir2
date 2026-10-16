@@ -232,6 +232,6 @@ mod tests {
                 "{name} must not be filtered out"
             );
         }
-        assert_eq!(crate::platinum_176_profile_bundle().summary.items, 203);
+        assert_eq!(crate::platinum_176_profile_bundle().summary.items, 204);
     }
 }
