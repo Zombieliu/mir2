@@ -109,10 +109,11 @@ mod map_bootstrap_websocket_tests {
 
     async fn ordinary_weapon_store_entry() -> (crate::GatewaySession, Vec<ServerPacket>) {
         let mut config = SimulationConfig::default().with_crystal_world_runtime();
-        // Only fixture placement. The actual transfer is the ordinary Walk
-        // through the imported 0(335,299) -> 0103(5,12) doorway. Set this after
+        // Only fixture placement. Source 0.map marks the southern (335,300)
+        // and entrance (335,299) cells walkable; (335,298) is blocked roof.
+        // Walk Up through imported 0(335,299) -> 0103(5,12). Set this after
         // the public builder, which selects the map's safe-zone start point.
-        config.spawn = Point { x: 335, y: 298 };
+        config.spawn = Point { x: 335, y: 300 };
         assert_eq!(config.map.map_index, 1);
         assert_eq!(config.map.file_name, "0");
         assert!(config.account_store_path.is_none() && config.account_store_database_url.is_none());
@@ -130,7 +131,7 @@ mod map_bootstrap_websocket_tests {
             save.map_file_name = config.map.file_name.clone();
             save.map_title = config.map.title.clone();
             save.position = config.spawn.clone();
-            save.direction = MirDirection::Down;
+            save.direction = MirDirection::Up;
         }
         let mut session = crate::GatewaySession::new(config);
         assert!(session
@@ -153,14 +154,14 @@ mod map_bootstrap_websocket_tests {
             .unwrap();
         assert_eq!(
             (source_player.x, source_player.y),
-            (335, 298),
+            (335, 300),
             "the admitted shared-Zone actor must start immediately before the real doorway"
         );
-        assert_eq!(source_player.direction, MirDirection::Down);
+        assert_eq!(source_player.direction, MirDirection::Up);
         assert!(source.player_hp.is_some_and(|hp| hp > 0));
         let mut packets = session
             .try_handle_packet(ClientPacket::Walk {
-                direction: MirDirection::Down,
+                direction: MirDirection::Up,
             })
             .unwrap();
         let deadline = Instant::now() + Duration::from_secs(5);
@@ -202,7 +203,7 @@ mod map_bootstrap_websocket_tests {
                         big_map: info.big_map,
                         lights: info.lights,
                         location: Point { x: 5, y: 12 },
-                        direction: MirDirection::Down,
+                        direction: MirDirection::Up,
                         map_dark_light: info.map_dark_light,
                         music: info.music,
                         weather: info.weather_particles,
