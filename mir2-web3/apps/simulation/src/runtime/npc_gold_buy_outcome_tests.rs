@@ -639,15 +639,46 @@ fn npc_gold_buy_outcome_post_commit_panic_preserves_known_commit_and_actual_inve
 }
 
 #[test]
-fn npc_gold_buy_outcome_actual_precommit_panic_is_unknown_without_gold_debit() {
+fn npc_gold_buy_outcome_missing_inventory_is_invalid_delivery_without_gold_debit() {
     let (mut s, r) = session();
+    let before = snapshot(&s);
     let gold = s.app.world().resource::<PlayerRuntimeResource>().gold;
-    // Actual handler/pipeline cannot obtain this required resource. No simulated
-    // outcome or packet oracle supplies a rejection and no live purchase commits.
     let inventory = s
         .app
         .world_mut()
         .remove_resource::<InventoryResource>()
+        .unwrap();
+    let execution = s.try_npc_gold_buy_with_outcome(r).unwrap();
+    assert_eq!(
+        execution.outcome,
+        NpcGoldBuyProcessingOutcome::Rejected {
+            request: r,
+            reason: NpcGoldBuyRejection::InvalidDelivery,
+        }
+    );
+    assert!(execution.packets.iter().all(|packet| !matches!(
+        packet,
+        ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
+    )));
+    assert_eq!(s.app.world().resource::<PlayerRuntimeResource>().gold, gold);
+    assert!(s.app.world().get_resource::<InventoryResource>().is_none());
+    s.app.world_mut().insert_resource(inventory);
+    assert_eq!(snapshot(&s), before);
+    let execution = s.try_npc_gold_buy_with_outcome(r).unwrap();
+    committed(&execution, r);
+}
+
+#[test]
+fn npc_gold_buy_outcome_actual_precommit_panic_is_unknown_without_gold_debit() {
+    let (mut s, r) = session();
+    let before = snapshot(&s);
+    let gold = s.app.world().resource::<PlayerRuntimeResource>().gold;
+    // The real purchase handler requires this resource before preparing or
+    // applying a plan. No supplied outcome or postprocessing hook causes panic.
+    let npc = s
+        .app
+        .world_mut()
+        .remove_resource::<NpcStateResource>()
         .unwrap();
     assert_eq!(
         s.try_npc_gold_buy_with_outcome(r).unwrap_err(),
@@ -656,8 +687,9 @@ fn npc_gold_buy_outcome_actual_precommit_panic_is_unknown_without_gold_debit() {
         }
     );
     assert_eq!(s.app.world().resource::<PlayerRuntimeResource>().gold, gold);
-    assert!(s.app.world().get_resource::<InventoryResource>().is_none());
-    s.app.world_mut().insert_resource(inventory);
-    let e = s.try_npc_gold_buy_with_outcome(r).unwrap();
-    committed(&e, r);
+    assert!(s.app.world().get_resource::<NpcStateResource>().is_none());
+    s.app.world_mut().insert_resource(npc);
+    assert_eq!(snapshot(&s), before);
+    let execution = s.try_npc_gold_buy_with_outcome(r).unwrap();
+    committed(&execution, r);
 }

@@ -398,7 +398,10 @@ pub(in crate::runtime) fn record_spell_damage(
         }
     }
     for (id, moved) in advanced {
-        let mut conditions = vec![format!("{spell} damage committed")];
+        let mut conditions = vec![match spell {
+            "DoubleSlash" => "DoubleSlash attack damage committed".to_owned(),
+            _ => format!("{spell} damage committed"),
+        }];
         if spell == "SoulFireBall" {
             conditions.push("SoulFireBall damage committed with material consumption".into());
         }

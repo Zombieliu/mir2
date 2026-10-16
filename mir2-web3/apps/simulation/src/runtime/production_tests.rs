@@ -584,21 +584,31 @@ fn production_overweight_rejects_whole_batch_before_global_uid_issuance() {
 #[test]
 fn production_double_session_cas_and_original_request_recovery() {
     let mut f = Fixture::new("cas");
-    let mut stale = login(f.config.clone());
-    stale.configure_personal_production(f.cfg.clone()).unwrap();
+    // The second ordinary StartGame commits Login and makes the original
+    // session stale. Execute the new operation with the fresh Source session.
+    let mut current = login(f.config.clone());
+    current.configure_personal_production(f.cfg.clone()).unwrap();
+    let mut stale = std::mem::replace(&mut f.session, current);
     let receipt = f.execute(f.start.clone(), 1000).unwrap().receipt;
-    assert!(
-        stale
-            .run_personal_production(f.start.clone(), 1001, |_| Ok(()))
-            .unwrap()
-            .replayed
-    );
+    let committed = fs::read(&f.path).unwrap();
+    let uid_before = f.cfg.global_uid_allocator.issued_through().unwrap();
+    let replay = stale
+        .run_personal_production(f.start.clone(), 1001, |_| Ok(()))
+        .unwrap();
+    assert!(replay.replayed);
+    assert!(replay.packets.is_empty());
+    assert_eq!(replay.receipt, receipt);
     let mut different = f.start.clone();
     different.request_id = "stale-other".into();
     assert!(
         matches!(stale.run_personal_production(different, 1002, |_| Ok(())), Err(ProductionDurableError::BeforeExecution(detail)) if detail.contains("stale"))
     );
     assert!(stale.save_active_character().is_err());
+    assert_eq!(fs::read(&f.path).unwrap(), committed);
+    assert_eq!(
+        f.cfg.global_uid_allocator.issued_through().unwrap(),
+        uid_before
+    );
     assert_eq!(
         f.session.query_personal_production(&f.start).unwrap(),
         Some(receipt)

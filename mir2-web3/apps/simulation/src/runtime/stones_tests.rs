@@ -209,9 +209,25 @@ fn stone_save_reload_keeps_original_secret_and_physical_reference() {
     let config=SimulationConfig::default().with_crystal_world_runtime().with_account_store_path(&path);
     let mut reloaded=login(config);reloaded.begin_stone_workshops().unwrap();reloaded.interact(npc);
     assert!(reloaded.stone_workshop_view().unwrap().stones.is_empty());
+    // Ordinary StartGame commits one new Login event. Every other durable field,
+    // including the complete private registry, physical item and Gold, is exact.
+    let after_login = fs::read(&path).unwrap();
+    let mut expected: serde_json::Value = serde_json::from_slice(&durable).unwrap();
+    let save = &mut expected["accounts"]["demo"]["saves"]["0"];
+    let next_revision = save["revision"].as_u64().unwrap().checked_add(1).unwrap();
+    save["revision"] = serde_json::json!(next_revision);
+    for field in ["committedSequence", "nextSequence"] {
+        let next = save["default_npc_events"][field]
+            .as_u64()
+            .unwrap()
+            .checked_add(1)
+            .unwrap();
+        save["default_npc_events"][field] = serde_json::json!(next);
+    }
+    assert_eq!(serde_json::from_slice::<serde_json::Value>(&after_login).unwrap(), expected);
     let replay=reloaded.execute_stone_workshop(cut).unwrap();
     assert!(replay.replayed);assert!(replay.packets.is_empty());
-    assert_eq!(fs::read(&path).unwrap(),durable);
+    assert_eq!(fs::read(&path).unwrap(),after_login);
 }
 #[test]
 fn stone_ordinary_account_scope_and_restore_cannot_rewind_secret_or_cut_tombstone() {

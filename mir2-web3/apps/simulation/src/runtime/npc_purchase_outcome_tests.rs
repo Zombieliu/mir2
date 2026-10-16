@@ -547,6 +547,44 @@ fn npc_purchase_known_resale_commit_survives_postprocessing_failure_or_panic() {
 }
 
 #[test]
+fn npc_purchase_missing_inventory_is_invalid_delivery_and_does_not_debit() {
+    let (mut s, _) = session();
+    let request = resale(&mut s, "BUYUSED", source_item(444_007, 2));
+    let before = snapshot(&s);
+    let gold = s.app.world().resource::<PlayerRuntimeResource>().gold;
+    let inventory = s
+        .app
+        .world_mut()
+        .remove_resource::<InventoryResource>()
+        .unwrap();
+    let execution = s.try_npc_purchase_with_outcome(request).unwrap();
+    assert_eq!(
+        execution.outcome,
+        NpcPurchaseProcessingOutcome::Rejected {
+            request,
+            reason: NpcPurchaseRejection::InvalidDelivery,
+        }
+    );
+    assert!(execution.packets.iter().all(|packet| !matches!(
+        packet,
+        ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
+    )));
+    assert_eq!(s.app.world().resource::<PlayerRuntimeResource>().gold, gold);
+    assert!(s.app.world().get_resource::<InventoryResource>().is_none());
+    s.app.world_mut().insert_resource(inventory);
+    assert_eq!(snapshot(&s), before);
+    let execution = s.try_npc_purchase_with_outcome(request).unwrap();
+    expect_commit(
+        &execution,
+        request,
+        NpcPurchaseCurrency::Gold,
+        NpcPurchaseSource::Used,
+        2,
+        160,
+    );
+}
+
+#[test]
 fn npc_purchase_missing_capture_or_precommit_panic_is_unknown_and_does_not_debit() {
     assert!(matches!(
         finish_npc_purchase_processing(Ok(vec![]), None),
@@ -555,17 +593,33 @@ fn npc_purchase_missing_capture_or_precommit_panic_is_unknown_and_does_not_debit
     let (mut s, _) = session();
     let request = resale(&mut s, "BUYUSED", source_item(444_007, 2));
     let before = snapshot(&s);
-    let inventory = s
+    let gold = s.app.world().resource::<PlayerRuntimeResource>().gold;
+    // Missing NPC authority panics in the real handler before plan preparation;
+    // restoring it must leave the same request and complete economy unchanged.
+    let npc = s
         .app
         .world_mut()
-        .remove_resource::<InventoryResource>()
+        .remove_resource::<NpcStateResource>()
         .unwrap();
-    assert!(matches!(
-        s.try_npc_purchase_with_outcome(request),
-        Err(NpcPurchaseProcessingError::Unknown { .. })
-    ));
-    s.app.world_mut().insert_resource(inventory);
+    assert_eq!(
+        s.try_npc_purchase_with_outcome(request).unwrap_err(),
+        NpcPurchaseProcessingError::Unknown {
+            detail: "purchase processing panicked; outcome may be unknown".into()
+        }
+    );
+    assert_eq!(s.app.world().resource::<PlayerRuntimeResource>().gold, gold);
+    assert!(s.app.world().get_resource::<NpcStateResource>().is_none());
+    s.app.world_mut().insert_resource(npc);
     assert_eq!(snapshot(&s), before);
+    let execution = s.try_npc_purchase_with_outcome(request).unwrap();
+    expect_commit(
+        &execution,
+        request,
+        NpcPurchaseCurrency::Gold,
+        NpcPurchaseSource::Used,
+        2,
+        160,
+    );
 }
 
 #[test]

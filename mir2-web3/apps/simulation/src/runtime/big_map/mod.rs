@@ -769,7 +769,8 @@ mod tests {
         assert_eq!(info.title, "BichonProvince");
         assert_eq!((info.width, info.height, info.big_map), (700, 700, 101));
         assert_eq!(info.movements.len(), 6);
-        assert_eq!(info.npcs.len(), 40);
+        assert_eq!(info.npcs.len(), 41);
+        assert!(info.npcs.iter().any(|npc| npc.object_id == 2180));
         assert!(info.npcs.iter().all(|npc| npc.show_on_big_map));
         assert!(info.npcs.iter().all(|npc| !npc.can_teleport_to));
     }

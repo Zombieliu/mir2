@@ -153,7 +153,7 @@ fn monthly_card_history() -> MonthlyCardLedger {
 fn activity_history() -> ActivityLedger {
     let ledger = ActivityLedger {
         phases: BTreeMap::from([(
-            "closed".into(),
+            "closed-v1".into(),
             ActivityPhaseRecord {
                 phase: ActivityPhase::Closed,
                 start_ms: 1_000,
