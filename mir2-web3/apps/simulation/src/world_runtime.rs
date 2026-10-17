@@ -1807,6 +1807,10 @@ mod outcome_tick_tests;
 mod atelier_tests;
 
 #[cfg(test)]
+#[path = "world_runtime_stone_tests.rs"]
+mod stone_tests;
+
+#[cfg(test)]
 mod tests {
     use super::{InProcessWorldRuntime, WorldCommand, WorldCommandKind, WorldRuntime};
     use crate::{SimulationConfig, SimulationSession};

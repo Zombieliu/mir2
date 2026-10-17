@@ -3,7 +3,7 @@
 use super::*;
 use crate::{AccountStoreTransactionFault, SimulationConfig};
 use super::super::components::{NpcAgent, ObjectId};
-use mir2_production::{StoneError, StoneLifecycle};
+use mir2_production::{StoneError, StoneLifecycle, StoneMaterial};
 use mir2_protocol::{ClientPacket, MirDirection, Point};
 use std::{fs, path::PathBuf, sync::atomic::{AtomicU64, Ordering}};
 static SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -66,6 +66,326 @@ impl Fixture {
         assert_eq!(live.inventory_items_json,durable.inventory_items_json);
         assert_eq!(live.belt_items_json,durable.belt_items_json);
         assert_eq!(live.npc_purchase_journal,durable.npc_purchase_journal);
+    }
+}
+
+impl SimulationSession {
+    // The WorldRuntime child module can wrap this controlled, independent File
+    // fixture without adding any production constructor or global opt-in.
+    #[cfg(test)]
+    pub(crate) fn stone_world_runtime_test_fixture() -> (Self, PathBuf) {
+        let fixture = Fixture::new("world-command", 824);
+        (fixture.session, fixture.path)
+    }
+}
+
+fn displayed_link(session: &SimulationSession, prefix: &str) -> String {
+    session
+        .app
+        .world()
+        .resource::<NpcStateResource>()
+        .active_npc_dialog
+        .as_ref()
+        .unwrap()
+        .links
+        .iter()
+        .find(|link| link.target.starts_with(prefix))
+        .unwrap_or_else(|| panic!("missing actual stone link {prefix}"))
+        .target
+        .clone()
+}
+
+fn assert_final_stone_page(session: &SimulationSession, packets: &[ServerPacket]) {
+    let dialog = session
+        .app
+        .world()
+        .resource::<NpcStateResource>()
+        .active_npc_dialog
+        .as_ref()
+        .unwrap();
+    assert_eq!(dialog.title, "Stone workshop");
+    assert!(super::super::stone_npc::approved_npc(
+        session.app.world(),
+        dialog.npc_object_id
+    ));
+    let revision = session.active_character_checkpoint().unwrap().revision;
+    let mut expected = vec![dialog.title.clone()];
+    expected.extend(dialog.body.iter().cloned());
+    for link in &dialog.links {
+        expected.push(format!("<{}/{}>", link.text, link.target));
+        if ["@stone:v1:seal:", "@stone:v1:appraise:", "@stone:v1:cut:"]
+            .iter()
+            .any(|prefix| link.target.starts_with(prefix))
+        {
+            assert_eq!(
+                link.target.rsplit(':').nth(1).unwrap().parse::<u64>(),
+                Ok(revision)
+            );
+        }
+        assert!(super::super::npc_input::has_menu_target(
+            session.app.world(),
+            &link.target
+        ));
+    }
+    expected.push(dialog.footer.clone());
+    let pages: Vec<_> = packets
+        .iter()
+        .filter_map(|packet| match packet {
+            ServerPacket::NPCResponse { page } => Some(page),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(pages, vec![&expected]);
+}
+
+fn open_public_ore_page(f: &mut Fixture) {
+    for prefix in ["@stone:v1:home", "@stone:v1:list:ore:", "@stone:v1:ore:"] {
+        let target = displayed_link(&f.session, prefix);
+        let packets = f.session.select_npc_dialog_target(&target);
+        assert_final_stone_page(&f.session, &packets);
+        f.assert_checkpoint();
+    }
+}
+
+#[test]
+fn stone_public_file_source_accepts_first_seal_appraise_cut_quotes_after_final_revision() {
+    let mut f = Fixture::new("public-source", 824);
+    open_public_ore_page(&mut f);
+    let initial = f.live();
+    let actor = initial.npc_purchase_journal.as_ref().unwrap().actor;
+    let mut old_seal = None;
+    for (index, prefix, fee) in [
+        (0, "@stone:v1:seal:", 0),
+        (1, "@stone:v1:appraise:", 100),
+        (2, "@stone:v1:cut:", 1500),
+    ] {
+        let target = displayed_link(&f.session, prefix);
+        let before = f.live();
+        assert_eq!(
+            target.rsplit(':').nth(1).unwrap().parse::<u64>(),
+            Ok(before.revision)
+        );
+        if index == 0 {
+            old_seal = Some(target.clone());
+        }
+        // The exact first displayed quote must work. No refresh, retry or
+        // private economic method may repair an intermediate revision.
+        let packets = f.session.select_npc_dialog_target(&target);
+        let after = f.live();
+        assert_eq!(after.revision, before.revision + 2);
+        assert_eq!(after.gold, before.gold - fee);
+        assert_eq!(after.npc_purchase_journal.as_ref().unwrap().actor, actor);
+        let inventory = f.session.app.world().resource::<InventoryResource>();
+        assert_eq!(inventory.inventory_items.len(), 1);
+        let item = &inventory.inventory_items[0];
+        assert_eq!(item.unique_id, 120_000_001);
+        assert_eq!(item.slot, 0);
+        if index < 2 {
+            assert!(item.stone_serial.is_some());
+            let public = f.view();
+            assert_eq!(public.stones.len(), 1);
+            assert_eq!(public.stones[0].revision, index.to_string());
+            assert_eq!(
+                public.stones[0].lifecycle,
+                if index == 0 {
+                    StoneLifecycle::Sealed
+                } else {
+                    StoneLifecycle::Appraised
+                }
+            );
+        } else {
+            assert_eq!(item.stone_serial, None);
+            assert!(packets.iter().any(|packet| matches!(packet,
+                ServerPacket::GainedItem { item } if item.unique_id == 120_000_001
+                    && StoneMaterial::ALL.iter().any(|material| material.template_id() == item.item_index))));
+            assert!(f.view().stones.is_empty());
+        }
+        if fee == 0 {
+            assert!(!packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::LoseGold { .. })));
+        } else {
+            assert_eq!(
+                packets
+                    .iter()
+                    .filter(|packet| matches!(packet,
+                ServerPacket::LoseGold { gold } if *gold == fee))
+                    .count(),
+                1
+            );
+        }
+        assert_final_stone_page(&f.session, &packets);
+        f.assert_checkpoint();
+    }
+    let committed = fs::read(&f.path).unwrap();
+    let before = f.live();
+    let packets = f.session.select_npc_dialog_target(&old_seal.unwrap());
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
+    )));
+    assert_eq!(f.live(), before);
+    assert_eq!(fs::read(&f.path).unwrap(), committed);
+}
+
+#[test]
+fn stone_public_known_file_failure_requotes_without_debit_and_first_retry_succeeds() {
+    let mut f = Fixture::new("public-known-failure", 824);
+    open_public_ore_page(&mut f);
+    let target = displayed_link(&f.session, "@stone:v1:seal:");
+    let before = f.live();
+    let bytes = fs::read(&f.path).unwrap();
+    f.config
+        .inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforeFileRename);
+    let packets = f.session.select_npc_dialog_target(&target);
+    assert_eq!(f.live(), before);
+    assert_eq!(fs::read(&f.path).unwrap(), bytes);
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
+    )));
+    assert_final_stone_page(&f.session, &packets);
+    let retry = displayed_link(&f.session, "@stone:v1:seal:");
+    assert_eq!(retry, target);
+    let packets = f.session.select_npc_dialog_target(&retry);
+    assert_eq!(f.live().revision, before.revision + 2);
+    assert_eq!(f.live().gold, before.gold);
+    assert_eq!(f.view().stones.len(), 1);
+    assert_final_stone_page(&f.session, &packets);
+    f.assert_checkpoint();
+}
+
+#[test]
+fn stone_public_unknown_file_commit_never_publishes_new_quotes_or_retries() {
+    let mut f = Fixture::new("public-unknown", 824);
+    open_public_ore_page(&mut f);
+    let target = displayed_link(&f.session, "@stone:v1:seal:");
+    let before = f.live();
+    f.config.inject_account_store_transaction_fault(
+        AccountStoreTransactionFault::AfterFileRenameBeforeDirectorySync,
+    );
+    let packets = f.session.select_npc_dialog_target(&target);
+    assert!(f.config.ensure_account_store_writable().is_err());
+    assert_eq!(f.live(), before);
+    assert!(!packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
+    )));
+    let dialog = f
+        .session
+        .app
+        .world()
+        .resource::<NpcStateResource>()
+        .active_npc_dialog
+        .as_ref()
+        .unwrap();
+    assert_eq!(dialog.links.len(), 1);
+    assert_eq!(dialog.links[0].target, "@Exit");
+    let committed = fs::read(&f.path).unwrap();
+    let store = f.disk();
+    let saved = &store.accounts["demo"].saves[&0];
+    assert_eq!(saved.revision, before.revision + 1);
+    assert_eq!(saved.gold, before.gold);
+    assert_ne!(saved.inventory_items_json, before.inventory_items_json);
+    let mut late = Vec::new();
+    super::super::atelier_npc::publish_pending(&mut f.session, &mut late);
+    assert!(late.is_empty());
+    f.session.select_npc_dialog_target(&target);
+    assert_eq!(fs::read(&f.path).unwrap(), committed);
+    assert_eq!(f.live(), before);
+}
+
+#[test]
+fn stone_outer_source_failure_discards_the_nested_page_after_one_economic_commit() {
+    let mut f = Fixture::new("public-outer-failure", 824);
+    open_public_ore_page(&mut f);
+    let target = displayed_link(&f.session, "@stone:v1:seal:");
+    let before_revision = f.live().revision;
+    let before = f.session.begin_npc_dialog_source_command(false).unwrap();
+    assert!(before.is_some());
+    let packets = f.session.select_npc_dialog_target(&target);
+    assert!(super::super::shared_guild_experience::source_command_active(f.session.app.world()));
+    assert!(!packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::NPCResponse { .. })));
+    assert_eq!(f.live().revision, before_revision + 1);
+    assert!(f
+        .session
+        .app
+        .world()
+        .resource::<NpcStateResource>()
+        .active_npc_dialog
+        .as_ref()
+        .unwrap()
+        .links
+        .iter()
+        .all(|link| !link.target.starts_with("@stone:v1:appraise:")));
+    let committed = fs::read(&f.path).unwrap();
+    f.config
+        .inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforeFileRename);
+    assert!(f
+        .session
+        .finish_guild_experience_command(before, packets)
+        .is_err());
+    assert_eq!(fs::read(&f.path).unwrap(), committed);
+    assert_eq!(f.live().revision, before_revision + 1);
+    assert!(f
+        .session
+        .app
+        .world()
+        .resource::<NpcStateResource>()
+        .active_npc_dialog
+        .is_none());
+    let mut late = Vec::new();
+    super::super::atelier_npc::publish_pending(&mut f.session, &mut late);
+    assert!(late.is_empty());
+    assert_eq!(fs::read(&f.path).unwrap(), committed);
+    f.assert_checkpoint();
+}
+
+#[test]
+fn stone_pending_page_cannot_reopen_after_exit_replacement_or_leaving_npc_range() {
+    for change in ["exit", "replace", "range"] {
+        let mut f = Fixture::new(change, 824);
+        let before = f.session.begin_npc_dialog_source_command(false).unwrap();
+        assert!(before.is_some());
+        let mut packets = f.session.select_npc_dialog_target("@stone:v1:home");
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::NPCResponse { .. })));
+        match change {
+            "exit" => {
+                f.session.select_npc_dialog_target("@Exit");
+            }
+            "replace" => {
+                f.session.interact(f.npc);
+            }
+            "range" => f
+                .session
+                .force_authoritative_player_transform(Point { x: 400, y: 400 }, MirDirection::Up),
+            _ => unreachable!(),
+        }
+        packets = f
+            .session
+            .finish_guild_experience_command(before, packets)
+            .unwrap();
+        assert!(!packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::NPCResponse { .. })));
+        let dialog = &f
+            .session
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .active_npc_dialog;
+        if change == "exit" {
+            assert!(dialog.is_none());
+        } else {
+            assert_ne!(dialog.as_ref().unwrap().title, "Stone workshop");
+        }
+        let mut late = Vec::new();
+        super::super::atelier_npc::publish_pending(&mut f.session, &mut late);
+        assert!(late.is_empty());
     }
 }
 

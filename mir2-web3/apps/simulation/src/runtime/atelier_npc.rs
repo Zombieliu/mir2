@@ -14,7 +14,7 @@ use mir2_protocol::ServerPacket;
 const PREFIX: &str = "@atelier:v1:";
 const HOME: &str = "@atelier:v1:home";
 
-// Quotes belong to the final Source revision, not the atelier transaction's
+// Quotes belong to the final Source revision, not a workshop transaction's
 // intermediate revision. The original displayed menu retains the normal NPC
 // actor/entity/map permission until the outermost Source command has settled.
 #[derive(Resource)]
@@ -23,8 +23,13 @@ struct PendingAtelier {
     origin_target: String,
     owner: ActiveSessionIdentity,
     generation: u64,
-    recipe_id: Option<String>,
+    page: PendingWorkshopPage,
     notice: Option<String>,
+}
+
+enum PendingWorkshopPage {
+    Atelier(Option<String>),
+    Stone(super::stone_npc::DeferredPage),
 }
 
 pub(super) fn discard_pending(world: &mut World) {
@@ -36,6 +41,42 @@ fn request_page(
     active: ActiveNpcDialogState,
     origin_target: &str,
     recipe_id: Option<&str>,
+    notice: Option<&str>,
+    packets: &mut Vec<ServerPacket>,
+) {
+    defer_page(
+        session,
+        active,
+        origin_target,
+        PendingWorkshopPage::Atelier(recipe_id.map(str::to_owned)),
+        notice,
+        packets,
+    );
+}
+
+pub(super) fn request_stone_page(
+    session: &mut SimulationSession,
+    active: ActiveNpcDialogState,
+    origin_target: &str,
+    page: super::stone_npc::DeferredPage,
+    notice: Option<&str>,
+    packets: &mut Vec<ServerPacket>,
+) {
+    defer_page(
+        session,
+        active,
+        origin_target,
+        PendingWorkshopPage::Stone(page),
+        notice,
+        packets,
+    );
+}
+
+fn defer_page(
+    session: &mut SimulationSession,
+    active: ActiveNpcDialogState,
+    origin_target: &str,
+    page: PendingWorkshopPage,
     notice: Option<&str>,
     packets: &mut Vec<ServerPacket>,
 ) {
@@ -55,7 +96,7 @@ fn request_page(
         origin_target: origin_target.into(),
         owner,
         generation,
-        recipe_id: recipe_id.map(str::to_owned),
+        page,
         notice: notice.map(str::to_owned),
     });
     // Private implementation callers have no outer Source owner. Production
@@ -83,10 +124,10 @@ pub(super) fn publish_pending(session: &mut SimulationSession, packets: &mut Vec
     let Some(pending) = session.app.world_mut().remove_resource::<PendingAtelier>() else {
         return;
     };
-    // Never let a pre-settlement atelier page escape with the final response.
+    // Never let a pre-settlement workshop page escape with the final response.
     packets.retain(|packet| {
         !matches!(packet, ServerPacket::NPCResponse { page }
-        if page.iter().any(|line| line.contains(PREFIX)))
+        if page.iter().any(|line| line.contains(PREFIX) || line.contains("@stone:v1:")))
     });
     if session.active_identity().as_ref() != Some(&pending.owner)
         || session
@@ -95,17 +136,30 @@ pub(super) fn publish_pending(session: &mut SimulationSession, packets: &mut Vec
             .resource::<SessionResource>()
             .ranking_inspect_generation()
             != Some(pending.generation)
-        || !atelier::allowed(session.app.world())
         || !super::npc_input::has_menu_target(session.app.world(), &pending.origin_target)
     {
         return;
     }
-    let dialog = render(
-        session,
-        &pending.active,
-        pending.recipe_id.as_deref(),
-        pending.notice.as_deref(),
-    );
+    let dialog = match pending.page {
+        PendingWorkshopPage::Atelier(recipe_id) if atelier::allowed(session.app.world()) => {
+            Some(render(
+                session,
+                &pending.active,
+                recipe_id.as_deref(),
+                pending.notice.as_deref(),
+            ))
+        }
+        PendingWorkshopPage::Stone(page) => super::stone_npc::render_deferred(
+            session,
+            &pending.active,
+            page,
+            pending.notice.as_deref(),
+        ),
+        PendingWorkshopPage::Atelier(_) => None,
+    };
+    let Some(dialog) = dialog else {
+        return;
+    };
     let page = response_page(&dialog);
     set_dialog(session.app.world_mut(), dialog);
     packets.push(ServerPacket::NPCResponse { page });

@@ -139,6 +139,9 @@ fn valid_request_id(value: &str) -> bool {
 enum Items { Ore, Stone }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Page { Home, List(Items, u64), Ore(u64), Stone(u64) }
+// Opaque to the shared deferred renderer: only this module creates and renders
+// stone pages, and no quote or inventory revision is retained in the queue.
+pub(super) struct DeferredPage(Page);
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum Target { Page(Page), Action(StoneWorkshopCommand) }
 fn parse_target(target: &str) -> Option<Target> {
@@ -404,6 +407,48 @@ fn render_page(active: &ActiveNpcDialogState, language: LanguageCode, view: &Sto
     dialog
 }
 
+pub(super) fn render_deferred(
+    session: &mut SimulationSession,
+    active: &ActiveNpcDialogState,
+    page: DeferredPage,
+    notice: Option<&str>,
+) -> Option<ActiveNpcDialogState> {
+    if !workshop_allowed(session.app.world())
+        || !approved_npc(session.app.world(), active.npc_object_id)
+    {
+        return None;
+    }
+    let view = session.stone_workshop_view().ok()?;
+    if !valid_view(&view) {
+        return None;
+    }
+    Some(render_page(
+        active,
+        current_language(session.app.world()),
+        &view,
+        page.0,
+        notice,
+    ))
+}
+
+fn request_page(
+    session: &mut SimulationSession,
+    active: ActiveNpcDialogState,
+    target: &str,
+    page: Page,
+    notice: Option<&str>,
+    packets: &mut Vec<ServerPacket>,
+) {
+    super::atelier_npc::request_stone_page(
+        session,
+        active,
+        target,
+        DeferredPage(page),
+        notice,
+        packets,
+    );
+}
+
 fn error_notice(language: LanguageCode, error: &StoneWorkshopError) -> &'static str {
     match error {
         StoneWorkshopError::OutcomeUnknown => text(language,
@@ -472,80 +517,129 @@ fn success_notice(language: LanguageCode, operation: &StoneWorkshopOperation, ex
 }
 /// Hook only after the original live-dialog link and DataRange checks. Raw
 /// target must be passed unchanged: do not strip parentheses or trailing fields.
-pub(super) fn handle_target(session: &mut SimulationSession, target: &str) -> Option<Vec<ServerPacket>> {
-    if !is_workshop_target(target) { return None; }
-    let Some(active) = session.app.world().resource::<NpcStateResource>().active_npc_dialog.clone() else { return Some(Vec::new()); };
+pub(super) fn handle_target(
+    session: &mut SimulationSession,
+    target: &str,
+) -> Option<Vec<ServerPacket>> {
+    if !is_workshop_target(target) {
+        return None;
+    }
+    let Some(active) = session
+        .app
+        .world()
+        .resource::<NpcStateResource>()
+        .active_npc_dialog
+        .clone()
+    else {
+        return Some(Vec::new());
+    };
     if !active.links.iter().any(|link| link.target == target)
         || !approved_npc(session.app.world(), active.npc_object_id)
-    { return Some(Vec::new()); }
+    {
+        return Some(Vec::new());
+    }
     let language = current_language(session.app.world());
     if !workshop_allowed(session.app.world()) {
         let notice = error_notice(language, &StoneWorkshopError::Unavailable);
-        set_dialog(session.app.world_mut(), notice_dialog(&active, language, notice));
+        set_dialog(
+            session.app.world_mut(),
+            notice_dialog(&active, language, notice),
+        );
         return Some(vec![system_message(notice)]);
     }
     let Some(parsed) = parse_target(target) else {
         let notice = error_notice(language, &StoneWorkshopError::InvalidRequest);
-        set_dialog(session.app.world_mut(), notice_dialog(&active, language, notice));
+        set_dialog(
+            session.app.world_mut(),
+            notice_dialog(&active, language, notice),
+        );
         return Some(vec![system_message(notice)]);
     };
     let view = match session.stone_workshop_view() {
         Ok(view) if valid_view(&view) => view,
         _ => {
             let notice = error_notice(language, &StoneWorkshopError::Unavailable);
-            set_dialog(session.app.world_mut(), notice_dialog(&active, language, notice));
+            set_dialog(
+                session.app.world_mut(),
+                notice_dialog(&active, language, notice),
+            );
             return Some(vec![system_message(notice)]);
-        },
+        }
     };
     match parsed {
         Target::Page(page) => {
-            set_dialog(session.app.world_mut(), render_page(&active, language, &view, page, None));
-            Some(Vec::new())
-        },
+            let mut packets = Vec::new();
+            request_page(session, active, target, page, None, &mut packets);
+            Some(packets)
+        }
         Target::Action(command) => {
             if !current_command(&view, &command) {
                 let notice = error_notice(language, &StoneWorkshopError::StaleInventory);
-                set_dialog(session.app.world_mut(), render_page(&active, language, &view, command_page(&command.operation), Some(notice)));
-                return Some(vec![system_message(notice)]);
+                let mut packets = vec![system_message(notice)];
+                request_page(
+                    session,
+                    active,
+                    target,
+                    command_page(&command.operation),
+                    Some(notice),
+                    &mut packets,
+                );
+                return Some(packets);
             }
             let operation = command.operation.clone();
             match session.execute_stone_workshop(command) {
                 Ok(mut execution) => {
                     let notice = success_notice(language, &operation, &execution);
-                    let updated = session.stone_workshop_view();
-                    let dialog = match updated {
-                        Ok(view) if valid_view(&view) => {
-                            let page = match operation {
-                                StoneWorkshopOperation::Seal { uid } => view.stones.iter().find(|stone| canonical_decimal(&stone.uid, true) == Some(uid))
-                                    .and_then(|stone| canonical_decimal(&stone.serial, true)).map(Page::Stone).unwrap_or(Page::Home),
-                                StoneWorkshopOperation::Appraise { serial, .. } => Page::Stone(serial),
-                                StoneWorkshopOperation::Cut { .. } => Page::Home,
-                            };
-                            render_page(&active, language, &view, page, Some(&notice))
-                        },
-                        _ => notice_dialog(&active, language, &notice),
+                    let page = match operation {
+                        StoneWorkshopOperation::Seal { uid } => session
+                            .stone_workshop_view()
+                            .ok()
+                            .filter(valid_view)
+                            .and_then(|view| {
+                                view.stones
+                                    .iter()
+                                    .find(|stone| canonical_decimal(&stone.uid, true) == Some(uid))
+                                    .and_then(|stone| canonical_decimal(&stone.serial, true))
+                            })
+                            .map(Page::Stone)
+                            .unwrap_or(Page::Home),
+                        StoneWorkshopOperation::Appraise { serial, .. } => Page::Stone(serial),
+                        StoneWorkshopOperation::Cut { .. } => Page::Home,
                     };
-                    set_dialog(session.app.world_mut(), dialog);
                     execution.packets.push(system_message(&notice));
+                    request_page(
+                        session,
+                        active,
+                        target,
+                        page,
+                        Some(&notice),
+                        &mut execution.packets,
+                    );
                     Some(execution.packets)
-                },
+                }
                 Err(error) => {
                     let notice = error_notice(language, &error);
+                    let mut packets = vec![system_message(notice)];
                     // An unknown commit result never triggers refresh, execution,
-                    // reroll or replacement action links. Original menu/exit remain.
-                    let dialog = if error == StoneWorkshopError::OutcomeUnknown {
-                        notice_dialog(&active, language, notice)
+                    // reroll or replacement quotes. Only Exit remains available.
+                    if error == StoneWorkshopError::OutcomeUnknown {
+                        let mut dialog = notice_dialog(&active, language, notice);
+                        dialog.links.retain(|link| link.target == "@Exit");
+                        set_dialog(session.app.world_mut(), dialog);
                     } else {
-                        match session.stone_workshop_view() {
-                            Ok(view) if valid_view(&view) => render_page(&active, language, &view, command_page(&operation), Some(notice)),
-                            _ => notice_dialog(&active, language, notice),
-                        }
-                    };
-                    set_dialog(session.app.world_mut(), dialog);
-                    Some(vec![system_message(notice)])
-                },
+                        request_page(
+                            session,
+                            active,
+                            target,
+                            command_page(&operation),
+                            Some(notice),
+                            &mut packets,
+                        );
+                    }
+                    Some(packets)
+                }
             }
-        },
+        }
     }
 }
 
