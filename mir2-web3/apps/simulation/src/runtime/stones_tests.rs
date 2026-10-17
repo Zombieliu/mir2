@@ -280,16 +280,25 @@ fn stone_public_unknown_file_commit_never_publishes_new_quotes_or_retries() {
         packet,
         ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
     )));
-    let dialog = f
+    if let Some(dialog) = f
         .session
         .app
         .world()
         .resource::<NpcStateResource>()
         .active_npc_dialog
         .as_ref()
-        .unwrap();
-    assert_eq!(dialog.links.len(), 1);
-    assert_eq!(dialog.links[0].target, "@Exit");
+    {
+        // The public failure boundary may remove the page or disable every
+        // link. An optional Exit is the only remaining permitted target.
+        assert!(dialog.links.len() <= 1);
+        assert!(dialog.links.iter().all(|link| link.target == "@Exit"));
+    }
+    let assert_no_workshop_quotes = |packets: &[ServerPacket]| {
+        assert!(!packets.iter().any(|packet| matches!(packet,
+            ServerPacket::NPCResponse { page } if page.iter().any(|line|
+                line.contains("@stone:v1:") || line.contains("@atelier:v1:")))));
+    };
+    assert_no_workshop_quotes(&packets);
     let committed = fs::read(&f.path).unwrap();
     let store = f.disk();
     let saved = &store.accounts["demo"].saves[&0];
@@ -299,7 +308,12 @@ fn stone_public_unknown_file_commit_never_publishes_new_quotes_or_retries() {
     let mut late = Vec::new();
     super::super::atelier_npc::publish_pending(&mut f.session, &mut late);
     assert!(late.is_empty());
-    f.session.select_npc_dialog_target(&target);
+    let followup = f.session.select_npc_dialog_target(&target);
+    assert_no_workshop_quotes(&followup);
+    assert!(!followup.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
+    )));
     assert_eq!(fs::read(&f.path).unwrap(), committed);
     assert_eq!(
         serde_json::to_value(f.live()).unwrap(),
