@@ -141,6 +141,7 @@ enum Items { Ore, Stone }
 enum Page { Home, List(Items, u64), Ore(u64), Stone(u64) }
 // Opaque to the shared deferred renderer: only this module creates and renders
 // stone pages, and no quote or inventory revision is retained in the queue.
+#[derive(Clone, Copy)]
 pub(super) struct DeferredPage(Page);
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum Target { Page(Page), Action(StoneWorkshopCommand) }

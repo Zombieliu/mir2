@@ -1778,7 +1778,16 @@ impl WorldRuntime for InProcessWorldRuntime {
     }
 
     fn save_active_character(&mut self) -> Result<(), String> {
-        self.session.save_active_character()
+        match self.session.save_active_character() {
+            Ok(()) => {
+                self.session.refresh_workshop_after_checkpoint();
+                Ok(())
+            }
+            Err(error) => {
+                self.session.invalidate_workshop_checkpoint_publication();
+                Err(error)
+            }
+        }
     }
 
     fn save_active_character_for_logout(&mut self) -> Result<(), String> {
@@ -1809,6 +1818,10 @@ mod atelier_tests;
 #[cfg(test)]
 #[path = "world_runtime_stone_tests.rs"]
 mod stone_tests;
+
+#[cfg(test)]
+#[path = "world_runtime_workshop_checkpoint_tests.rs"]
+mod workshop_checkpoint_tests;
 
 #[cfg(test)]
 mod tests {

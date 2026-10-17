@@ -6894,22 +6894,32 @@ async fn handle_socket_work(
                         return;
                     }
                 }
-                if responses.is_empty() {
-                    let checkpoint_result = {
-                        let _slow_stage = GatewaySlowStage::start("runtime_tick.save_checkpoint");
-                        save_queue.checkpoint(now, || {
-                            tokio::task::block_in_place(|| {
-                                catch_gateway_panic("web save_active_character", || {
-                                    session.save_active_character()
-                                })
-                                .and_then(|result| result)
+                let mut responses = responses;
+                let mut checkpoint_saved = false;
+                let mut checkpoint_had_workshop = false;
+                let checkpoint_result = {
+                    let _slow_stage = GatewaySlowStage::start("runtime_tick.save_checkpoint");
+                    save_queue.checkpoint(now, || {
+                        tokio::task::block_in_place(|| {
+                            catch_gateway_panic("web save_active_character", || {
+                                checkpoint_had_workshop =
+                                    checkpoint_workshop_packet(&session.world_snapshot()).is_some();
+                                session.save_active_character()?;
+                                checkpoint_saved = true;
+                                Ok(())
                             })
+                            .and_then(|result| result)
                         })
-                    };
-                    if let Err(error) = checkpoint_result {
-                        let _ = send_error_message(&sender, &error).await;
-                        return;
-                    }
+                    })
+                };
+                if let Err(error) = checkpoint_result {
+                    let _ = send_error_message(&sender, &error).await;
+                    return;
+                }
+                let checkpoint_workshop_changed = checkpoint_saved
+                    && (replace_checkpoint_workshop_packets(&mut responses, &session.world_snapshot())
+                        || checkpoint_had_workshop);
+                if responses.is_empty() && !checkpoint_workshop_changed {
                     continue;
                 }
                 let flush_result = {
@@ -6923,8 +6933,8 @@ async fn handle_socket_work(
                         responses,
                         server_catalog_gzip_v1,
                         None,
-                        false,
-                        true,
+                        checkpoint_workshop_changed,
+                        !checkpoint_workshop_changed,
                         false,
                         false,
                     )
@@ -7026,13 +7036,52 @@ const DEFAULT_GATEWAY_RUNTIME_TICK_INPUT_WAKE_MS: u64 = 75;
 const DEFAULT_GATEWAY_RUNTIME_TICK_BOOTSTRAP_GRACE_MS: u64 = 15_000;
 const DEFAULT_GATEWAY_ZONE_OWNER_HEARTBEAT_MS: u64 = 10_000;
 
+fn checkpoint_workshop_packet(snapshot: &mir2_simulation::WorldSnapshot) -> Option<ServerPacket> {
+    let dialog = snapshot.active_npc_dialog.as_ref()?;
+    if dialog.npc_object_id == 0
+        || !dialog.links.iter().any(|link| {
+            link.target.starts_with("@stone:v1:") || link.target.starts_with("@atelier:v1:")
+        })
+    {
+        return None;
+    }
+    let mut page = vec![dialog.title.clone()];
+    page.extend(dialog.body.iter().cloned());
+    page.extend(
+        dialog
+            .links
+            .iter()
+            .map(|link| format!("<{}/{}>", link.text, link.target)),
+    );
+    page.push(dialog.footer.clone());
+    Some(ServerPacket::NPCResponse { page })
+}
+
+fn replace_checkpoint_workshop_packets(
+    responses: &mut Vec<ServerPacket>,
+    snapshot: &mir2_simulation::WorldSnapshot,
+) -> bool {
+    let previous = responses.len();
+    responses.retain(|packet| {
+        !matches!(packet, ServerPacket::NPCResponse { page }
+        if page.iter().any(|line| line.contains("@stone:v1:") || line.contains("@atelier:v1:")))
+    });
+    let removed = responses.len() != previous;
+    if let Some(packet) = checkpoint_workshop_packet(snapshot) {
+        responses.push(packet);
+        true
+    } else {
+        removed
+    }
+}
+
 async fn flush_session_updates(
     sender: &SharedWebSocketSender,
     session: &mut GatewaySession,
     session_cache: &dyn crate::cache::GatewaySessionCache,
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
-    responses: Vec<ServerPacket>,
+    mut responses: Vec<ServerPacket>,
     server_catalog_gzip_v1: bool,
     quest_operation_ack: Option<&QuestOperationAck>,
     should_send_snapshot_by_action: bool,
@@ -7044,13 +7093,11 @@ async fn flush_session_updates(
     let low_latency_response_requires_snapshot =
         low_latency_responses_require_world_snapshot(&responses);
 
-    {
-        let _slow_stage = GatewaySlowStage::start("flush.responses");
-        catalog_transport::send_session_packets(sender, &responses, server_catalog_gzip_v1).await?;
-    }
-    drop(responses);
-
     if low_latency_action {
+        {
+            let _slow_stage = GatewaySlowStage::start("flush.responses");
+            catalog_transport::send_session_packets(sender, &responses, server_catalog_gzip_v1).await?;
+        }
         // Calendar/kill progress and committed player progression are folded
         // from the authoritative snapshot by the native client. Keep ordinary
         // movement and world deltas on the packet-only fast path.
@@ -7064,13 +7111,8 @@ async fn flush_session_updates(
         let _slow_stage = GatewaySlowStage::start("flush.external_state");
         tokio::task::block_in_place(|| refresh_external_session_state(session))?
     };
-    let should_send_snapshot =
-        should_send_snapshot_by_action || response_requires_snapshot || external_state_changed;
-
-    if should_send_snapshot {
-        send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
-    }
-
+    let mut saved = false;
+    let mut had_workshop = false;
     let save_result = {
         let _slow_stage = GatewaySlowStage::start("flush.save");
         if !low_latency_action
@@ -7080,7 +7122,11 @@ async fn flush_session_updates(
             save_queue.request_save(Instant::now(), || {
                 tokio::task::block_in_place(|| {
                     catch_gateway_panic("web save_active_character", || {
-                        session.save_active_character()
+                        had_workshop =
+                            checkpoint_workshop_packet(&session.world_snapshot()).is_some();
+                        session.save_active_character()?;
+                        saved = true;
+                        Ok(())
                     })
                     .and_then(|result| result)
                 })
@@ -7089,7 +7135,11 @@ async fn flush_session_updates(
             save_queue.checkpoint(Instant::now(), || {
                 tokio::task::block_in_place(|| {
                     catch_gateway_panic("web save_active_character", || {
-                        session.save_active_character()
+                        had_workshop =
+                            checkpoint_workshop_packet(&session.world_snapshot()).is_some();
+                        session.save_active_character()?;
+                        saved = true;
+                        Ok(())
                     })
                     .and_then(|result| result)
                 })
@@ -7097,6 +7147,23 @@ async fn flush_session_updates(
         }
     };
     save_result?;
+
+    // A complete checkpoint may advance revision again after the economic
+    // Source finished. Publish only the render-only, owner-bound current page.
+    let workshop_changed = saved
+        && (replace_checkpoint_workshop_packets(&mut responses, &session.world_snapshot())
+            || had_workshop);
+    {
+        let _slow_stage = GatewaySlowStage::start("flush.responses");
+        catalog_transport::send_session_packets(sender, &responses, server_catalog_gzip_v1).await?;
+    }
+    if should_send_snapshot_by_action
+        || response_requires_snapshot
+        || external_state_changed
+        || workshop_changed
+    {
+        send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
+    }
 
     if let Err(error) = tokio::task::block_in_place(|| {
         route_refresh.maybe_refresh(session_cache, session, Instant::now(), force_route_refresh)
@@ -13079,6 +13146,7 @@ mod tests {
     include!("web_monthly_card_tests.rs");
     include!("web_mining_tests.rs");
     include!("web_map_bootstrap_tests.rs");
+    include!("web_workshop_checkpoint_tests.rs");
 
     fn snapshot_test_spectator(enabled: bool) -> crate::spectator::SpectatorHub {
         crate::spectator::SpectatorHub::new(crate::spectator::SpectatorConfig {

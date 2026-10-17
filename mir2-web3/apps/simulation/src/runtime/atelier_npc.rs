@@ -32,8 +32,127 @@ enum PendingWorkshopPage {
     Stone(super::stone_npc::DeferredPage),
 }
 
+#[derive(Resource)]
+struct PublishedWorkshop {
+    display: ActiveNpcDialogState,
+    owner: ActiveSessionIdentity,
+    generation: u64,
+    page: PendingWorkshopPage,
+    notice: Option<String>,
+}
+
 pub(super) fn discard_pending(world: &mut World) {
     world.remove_resource::<PendingAtelier>();
+    world.remove_resource::<PublishedWorkshop>();
+}
+
+fn same_display(left: &ActiveNpcDialogState, right: &ActiveNpcDialogState) -> bool {
+    left.npc_object_id == right.npc_object_id
+        && left.npc_name == right.npc_name
+        && left.npc_name_key == right.npc_name_key
+        && left.stage == right.stage
+        && left.current == right.current
+        && left.required == right.required
+        && left.title == right.title
+        && left.body == right.body
+        && left.footer == right.footer
+        && left.links == right.links
+        && left.input == right.input
+}
+
+fn render_workshop(
+    session: &mut SimulationSession,
+    active: &ActiveNpcDialogState,
+    page: &PendingWorkshopPage,
+    notice: Option<&str>,
+) -> Option<ActiveNpcDialogState> {
+    // Both quote helpers can establish a producer on initial entry. A retained
+    // display may only observe its existing producer, never create a new one.
+    session
+        .app
+        .world()
+        .resource::<SessionResource>()
+        .npc_purchase_journal
+        .as_ref()?;
+    match page {
+        PendingWorkshopPage::Atelier(recipe_id) if atelier::allowed(session.app.world()) => {
+            Some(render(session, active, recipe_id.as_deref(), notice))
+        }
+        PendingWorkshopPage::Stone(page) => {
+            super::stone_npc::render_deferred(session, active, *page, notice)
+        }
+        PendingWorkshopPage::Atelier(_) => None,
+    }
+}
+
+impl SimulationSession {
+    #[cfg(test)]
+    pub(crate) fn inject_workshop_checkpoint_fault_for_test(
+        &self,
+        fault: crate::AccountStoreTransactionFault,
+    ) {
+        self.app
+            .world()
+            .resource::<super::resources::RuntimeConfigResource>()
+            .config
+            .inject_account_store_transaction_fault(fault);
+    }
+
+    pub(crate) fn invalidate_workshop_checkpoint_publication(&mut self) {
+        let world = self.app.world_mut();
+        let owned = world.contains_resource::<PublishedWorkshop>()
+            || world.contains_resource::<PendingAtelier>();
+        discard_pending(world);
+        if owned {
+            super::npc::dismiss_dialog(world);
+        }
+    }
+
+    pub(crate) fn refresh_workshop_after_checkpoint(&mut self) {
+        if super::shared_guild_experience::source_command_active(self.app.world()) {
+            return;
+        }
+        let Some(mut published) = self.app.world_mut().remove_resource::<PublishedWorkshop>()
+        else {
+            return;
+        };
+        let valid = self.active_identity().as_ref() == Some(&published.owner)
+            && self
+                .app
+                .world()
+                .resource::<SessionResource>()
+                .ranking_inspect_generation()
+                == Some(published.generation)
+            && self
+                .app
+                .world()
+                .resource::<NpcStateResource>()
+                .active_npc_dialog
+                .as_ref()
+                .is_some_and(|dialog| same_display(dialog, &published.display))
+            && published
+                .display
+                .links
+                .iter()
+                .any(|link| super::npc_input::has_menu_target(self.app.world(), &link.target));
+        let dialog = valid
+            .then(|| {
+                render_workshop(
+                    self,
+                    &published.display,
+                    &published.page,
+                    published.notice.as_deref(),
+                )
+            })
+            .flatten();
+        let Some(dialog) = dialog else {
+            super::npc::dismiss_dialog(self.app.world_mut());
+            return;
+        };
+        published.display = dialog.clone();
+        set_dialog(self.app.world_mut(), dialog);
+        self.app.world_mut().insert_resource(published);
+    }
 }
 
 fn request_page(
@@ -140,7 +259,7 @@ pub(super) fn publish_pending(session: &mut SimulationSession, packets: &mut Vec
     {
         return;
     }
-    let dialog = match pending.page {
+    let dialog = match &pending.page {
         PendingWorkshopPage::Atelier(recipe_id) if atelier::allowed(session.app.world()) => {
             Some(render(
                 session,
@@ -152,7 +271,7 @@ pub(super) fn publish_pending(session: &mut SimulationSession, packets: &mut Vec
         PendingWorkshopPage::Stone(page) => super::stone_npc::render_deferred(
             session,
             &pending.active,
-            page,
+            *page,
             pending.notice.as_deref(),
         ),
         PendingWorkshopPage::Atelier(_) => None,
@@ -161,7 +280,15 @@ pub(super) fn publish_pending(session: &mut SimulationSession, packets: &mut Vec
         return;
     };
     let page = response_page(&dialog);
+    let published = PublishedWorkshop {
+        display: dialog.clone(),
+        owner: pending.owner,
+        generation: pending.generation,
+        page: pending.page,
+        notice: pending.notice,
+    };
     set_dialog(session.app.world_mut(), dialog);
+    session.app.world_mut().insert_resource(published);
     packets.push(ServerPacket::NPCResponse { page });
 }
 
