@@ -2,7 +2,7 @@
 // fixtures do not claim natural acquisition or add a production grant ingress.
 mod workshop_checkpoint_websocket_tests {
     use super::*;
-    use mir2_simulation::{AccountStoreTransactionFault, CharacterSaveRecord};
+    use mir2_simulation::{AccountStoreTransactionFault, CharacterSaveRecord, SimulationSession};
     use std::{ffi::OsString, fs, path::PathBuf};
 
     struct Environment(Vec<(&'static str, Option<OsString>)>);
@@ -53,6 +53,132 @@ mod workshop_checkpoint_websocket_tests {
                 }
             }
         }
+    }
+
+    // File Source can perform several complete fsync-backed commits for one
+    // ordinary action. Keep this budget local, without retrying any command or
+    // weakening the required economic/menu acknowledgement.
+    async fn read_workshop_until(
+        socket: &mut TestWebSocket,
+        label: &str,
+        predicate: impl Fn(&Value) -> bool,
+    ) -> (Value, Vec<Value>) {
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(60);
+        let mut observed = Vec::<Value>::new();
+        loop {
+            let message = tokio::time::timeout_at(deadline, socket.next())
+                .await
+                .unwrap_or_else(|_| {
+                    let kinds: Vec<_> = observed
+                        .iter()
+                        .rev()
+                        .take(24)
+                        .map(|event| {
+                            event["packet"]
+                                .as_str()
+                                .or_else(|| event["type"].as_str())
+                                .unwrap_or("unknown")
+                        })
+                        .collect();
+                    panic!("timed out waiting for {label}; last frame kinds={kinds:?}")
+                })
+                .unwrap_or_else(|| panic!("WebSocket closed waiting for {label}"))
+                .unwrap_or_else(|error| panic!("WebSocket failed waiting for {label}: {error}"));
+            match message {
+                ClientWebSocketMessage::Text(text) => {
+                    let event: Value = serde_json::from_str(text.as_ref()).unwrap();
+                    observed.push(event.clone());
+                    if predicate(&event) {
+                        return (event, observed);
+                    }
+                    assert_ne!(
+                        event["type"], "error",
+                        "unexpected error waiting for {label}: {}",
+                        event["message"]
+                    );
+                }
+                ClientWebSocketMessage::Close(_) => panic!("WebSocket closed waiting for {label}"),
+                _ => {}
+            }
+        }
+    }
+
+    fn prepare_source_fixture(config: &SimulationConfig, atelier: bool) -> i32 {
+        // Complete normal account/character creation synchronously before any
+        // WebSocket exists. No connected Source may race this initial fixture.
+        let mut source = SimulationSession::new(config.clone());
+        assert!(source
+            .try_handle_packet(ClientPacket::NewAccount {
+                account_id: "WorkshopSocket".into(),
+                password: "WorkshopPass123".into(),
+                birth_date_binary: 0,
+                user_name: "Workshop fixture".into(),
+                secret_question: "q".into(),
+                secret_answer: "a".into(),
+                email_address: String::new(),
+            })
+            .unwrap()
+            .iter()
+            .any(|p| matches!(p, ServerPacket::NewAccount { result: 8 })));
+        assert!(source
+            .try_handle_packet(ClientPacket::Login {
+                account_id: "WorkshopSocket".into(),
+                password: "WorkshopPass123".into(),
+            })
+            .unwrap()
+            .iter()
+            .any(|p| matches!(p, ServerPacket::LoginSuccess { .. })));
+        let index = source
+            .try_handle_packet(ClientPacket::NewCharacter {
+                name: "WorkshopWire".into(),
+                gender: MirGender::Male,
+                class: MirClass::Warrior,
+            })
+            .unwrap()
+            .into_iter()
+            .find_map(|packet| match packet {
+                ServerPacket::NewCharacterSuccess { char_info } => Some(char_info.index),
+                _ => None,
+            })
+            .expect("ordinary Source character creation");
+        assert!(
+            source.active_identity().is_none(),
+            "fixture has never entered StartGame"
+        );
+        drop(source);
+        {
+            // Only initial isolated Source fixture preparation. All displayed
+            // NPC navigation and economic mutations below use ordinary JSON.
+            let ore = mir2_game_data::crystal_item_by_index(824).unwrap();
+            let mut store = config.account_store.lock().unwrap();
+            let account = store.accounts.get_mut("WorkshopSocket").unwrap();
+            account
+                .characters
+                .iter_mut()
+                .find(|c| c.index == index)
+                .unwrap()
+                .level = 12;
+            let save = account.saves.get_mut(&index).unwrap();
+            save.character.level = 12;
+            save.gold = 10000;
+            save.map_file_name = "0".into();
+            save.map_title = "BichonProvince".into();
+            save.position = if atelier {
+                Point { x: 321, y: 266 }
+            } else {
+                Point { x: 302, y: 222 }
+            };
+            save.inventory_items_json = (0..3).map(|slot| json!({
+                "key":"crystal-item-824","name":"CopperOre","icon":ore.image,"slot":slot,
+                "unique_id":9000001u64+slot,"container":"bag1","quantity":1,"description":"Source ore fixture",
+                "durability_current":3000,"durability_max":ore.durability,"weight":ore.weight,"equip_slot":null,
+                "attack":0,"defence":0,"heal_hp":0,"heal_mp":0,
+                "user_item_metadata":{"item_index":824}
+            }).to_string()).collect();
+            save.belt_items_json.clear();
+        }
+        config.save_account_store().unwrap();
+        index
     }
 
     fn expected_page(dialog: &Value, action: &str) -> bool {
@@ -114,6 +240,7 @@ mod workshop_checkpoint_websocket_tests {
                     }))
                     .unwrap(),
             );
+            let index = prepare_source_fixture(config.as_ref(), atelier);
             let state = super::super::WebState {
                 config: config.clone(),
                 deploy_revision: None,
@@ -165,78 +292,40 @@ mod workshop_checkpoint_websocket_tests {
             assert_eq!(response.status(), 101);
             send_test_websocket_json(
                 &mut socket,
-                json!({"type":"newAccount","accountId":"WorkshopSocket",
-                "password":"WorkshopPass123","birthDateBinary":0,"userName":"Workshop fixture",
-                "secretQuestion":"q","secretAnswer":"a","emailAddress":""}),
-            )
-            .await;
-            let (created, _) = read_test_websocket_until(&mut socket, "workshop account", |e| {
-                test_packet(e, "NewAccount")
-            })
-            .await;
-            assert_eq!(created["payload"]["result"], 8);
-            send_test_websocket_json(
-                &mut socket,
                 json!({"type":"login","accountId":"WorkshopSocket","password":"WorkshopPass123"}),
             )
             .await;
-            read_test_websocket_until(&mut socket, "workshop login", |e| {
+            read_workshop_until(&mut socket, "workshop login", |e| {
                 test_packet(e, "LoginSuccess")
             })
             .await;
-            send_test_websocket_json(&mut socket, json!({"type":"newCharacter","name":"WorkshopWire","gender":"Male","class":"Warrior"})).await;
-            let (created, _) = read_test_websocket_until(&mut socket, "workshop character", |e| {
-                test_packet(e, "NewCharacterSuccess")
+            // Consume the authenticated CharacterSelect projection before
+            // enqueueing StartGame; it cannot be mistaken for its InGame world.
+            read_workshop_until(&mut socket, "workshop CharacterSelect world", |e| {
+                e["type"] == "worldSnapshot"
+                    && e["payload"]["playerObjectId"].is_null()
+                    && e["payload"]["playerHp"].is_null()
             })
             .await;
-            let index = created["payload"]["character"]["index"].as_i64().unwrap() as i32;
-            {
-                // Only initial isolated Source fixture preparation. All displayed
-                // NPC navigation and economic mutations below use ordinary JSON.
-                let ore = mir2_game_data::crystal_item_by_index(824).unwrap();
-                let mut store = config.account_store.lock().unwrap();
-                let account = store.accounts.get_mut("WorkshopSocket").unwrap();
-                account
-                    .characters
-                    .iter_mut()
-                    .find(|c| c.index == index)
-                    .unwrap()
-                    .level = 12;
-                let save = account.saves.get_mut(&index).unwrap();
-                save.character.level = 12;
-                save.gold = 10000;
-                save.map_file_name = "0".into();
-                save.map_title = "BichonProvince".into();
-                save.position = if atelier {
-                    Point { x: 321, y: 266 }
-                } else {
-                    Point { x: 302, y: 222 }
-                };
-                save.inventory_items_json = (0..3).map(|slot| json!({
-                        "key":"crystal-item-824","name":"CopperOre","icon":ore.image,"slot":slot,
-                    "unique_id":9000001u64+slot,"container":"bag1","quantity":1,"description":"Source ore fixture",
-                        "durability_current":3000,"durability_max":ore.durability,"weight":ore.weight,"equip_slot":null,
-                    "attack":0,"defence":0,"heal_hp":0,"heal_mp":0,
-                    "user_item_metadata":{"item_index":824}
-                }).to_string()).collect();
-                save.belt_items_json.clear();
-            }
-            config.save_account_store().unwrap();
             send_test_websocket_json(
                 &mut socket,
                 json!({"type":"startGame","characterIndex":index}),
             )
             .await;
-            let (started, _) = read_test_websocket_until(&mut socket, "workshop StartGame", |e| {
+            let (started, _) = read_workshop_until(&mut socket, "workshop StartGame", |e| {
                 test_packet(e, "StartGame")
             })
             .await;
             assert_eq!(started["payload"]["result"], 4);
-            let (snapshot, _) =
-                read_test_websocket_until(&mut socket, "workshop StartGame world", |e| {
-                    e["type"] == "worldSnapshot" && e["payload"]["mapFileName"] == "0"
-                })
-                .await;
+            let (snapshot, _) = read_workshop_until(&mut socket, "workshop StartGame world", |e| {
+                e["type"] == "worldSnapshot"
+                    && e["payload"]["mapFileName"] == "0"
+                    && e["payload"]["playerObjectId"]
+                        .as_u64()
+                        .is_some_and(|id| id != 0)
+                    && e["payload"]["playerHp"].as_i64().is_some_and(|hp| hp > 0)
+            })
+            .await;
             Self {
                 socket,
                 server,
@@ -264,12 +353,11 @@ mod workshop_checkpoint_websocket_tests {
         async fn interact(&mut self, npc: u32) {
             send_test_websocket_json(&mut self.socket, json!({"type":"interact","objectId":npc}))
                 .await;
-            let (snapshot, _) =
-                read_test_websocket_until(&mut self.socket, "workshop real NPC", |e| {
-                    e["type"] == "worldSnapshot"
-                        && e["payload"]["activeNpcDialog"]["npcObjectId"] == npc
-                })
-                .await;
+            let (snapshot, _) = read_workshop_until(&mut self.socket, "workshop real NPC", |e| {
+                e["type"] == "worldSnapshot"
+                    && e["payload"]["activeNpcDialog"]["npcObjectId"] == npc
+            })
+            .await;
             self.snapshot = snapshot;
         }
         async fn choose(&mut self, prefix: &str) -> Vec<Value> {
@@ -280,16 +368,18 @@ mod workshop_checkpoint_websocket_tests {
             )
             .await;
             let (snapshot, observed) =
-                read_test_websocket_until(&mut self.socket, "workshop final page", |e| {
+                read_workshop_until(&mut self.socket, "workshop final page", |e| {
                     e["type"] == "worldSnapshot"
                         && expected_page(&e["payload"]["activeNpcDialog"], prefix)
                 })
                 .await;
             self.snapshot = snapshot;
-            self.assert_final_page(&observed);
+            // A dirty idle queue may already be committing the next revision.
+            // Bind to File at its checkpoint ACK below, not an interim frame.
+            self.assert_final_page(&observed, !self.idle);
             observed
         }
-        fn assert_final_page(&self, observed: &[Value]) {
+        fn assert_final_page(&self, observed: &[Value], checkpoint_settled: bool) {
             let dialog = &self.snapshot["payload"]["activeNpcDialog"];
             let saved = self.saved();
             assert_eq!(
@@ -317,6 +407,7 @@ mod workshop_checkpoint_websocket_tests {
                 ]
                 .iter()
                 .any(|p| target.starts_with(p))
+                    && checkpoint_settled
                 {
                     assert_eq!(
                         target.rsplit(':').nth(1).unwrap().parse::<u64>(),
@@ -342,6 +433,21 @@ mod workshop_checkpoint_websocket_tests {
         }
         async fn idle_checkpoint(&mut self) {
             let before = self.saved();
+            // The File commit can precede delivery of its refresh frame. The
+            // actual previously displayed quote is the stable wire baseline.
+            let quoted_before = self.snapshot["payload"]["activeNpcDialog"]["links"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find_map(|link| {
+                    let target = link["target"].as_str()?;
+                    ["@stone:v1:seal:", "@stone:v1:appraise:", "@stone:v1:cut:"]
+                        .iter()
+                        .any(|p| target.starts_with(p))
+                        .then(|| target.rsplit(':').nth(1).unwrap().parse::<u64>().unwrap())
+                })
+                .expect("actual displayed economic quote before idle checkpoint");
+            assert!(before.revision == quoted_before || before.revision == quoted_before + 1);
             let prefix = if self.snapshot["payload"]["activeNpcDialog"]["title"] == "Stone workshop"
             {
                 "@stone:v1:"
@@ -349,7 +455,7 @@ mod workshop_checkpoint_websocket_tests {
                 "@atelier:v1:"
             };
             let (snapshot, observed) =
-                read_test_websocket_until(&mut self.socket, "idle real checkpoint page", |e| {
+                read_workshop_until(&mut self.socket, "idle real checkpoint page", |e| {
                     e["type"] == "worldSnapshot"
                         && e["payload"]["activeNpcDialog"]["links"]
                             .as_array()
@@ -361,7 +467,7 @@ mod workshop_checkpoint_websocket_tests {
                                                 .rsplit(':')
                                                 .nth(1)
                                                 .and_then(|s| s.parse::<u64>().ok())
-                                                .is_some_and(|r| r > before.revision)
+                                                .is_some_and(|r| r == quoted_before + 1)
                                     })
                                 })
                             })
@@ -369,14 +475,14 @@ mod workshop_checkpoint_websocket_tests {
                 .await;
             self.snapshot = snapshot;
             let after = self.saved();
-            assert_eq!(after.revision, before.revision + 1);
+            assert_eq!(after.revision, quoted_before + 1);
             assert_eq!(after.gold, before.gold);
             assert_eq!(after.inventory_items_json, before.inventory_items_json);
             assert_eq!(after.npc_purchase_journal, before.npc_purchase_journal);
             assert!(!observed
                 .iter()
                 .any(|e| test_packet(e, "LoseGold") || test_packet(e, "GainedItem")));
-            self.assert_final_page(&observed);
+            self.assert_final_page(&observed, true);
         }
         async fn close(mut self) {
             let _ = self.socket.close(None).await;
@@ -500,7 +606,7 @@ mod workshop_checkpoint_websocket_tests {
             )
             .await;
             let (_, observed) =
-                read_test_websocket_until(&mut f.socket, "workshop checkpoint failure", |e| {
+                read_workshop_until(&mut f.socket, "workshop checkpoint failure", |e| {
                     e["type"] == "error"
                 })
                 .await;
