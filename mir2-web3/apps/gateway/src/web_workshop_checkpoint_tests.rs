@@ -522,7 +522,10 @@ mod workshop_checkpoint_websocket_tests {
                 assert_eq!(fs::read(&f.path).unwrap(), bytes);
             } else {
                 assert_eq!(after.revision, before.revision + 1);
-                assert!(f.config.ensure_account_store_writable().is_err());
+                let committed_bytes = fs::read(&f.path).unwrap();
+                let error = f.config.save_account_store().unwrap_err();
+                assert!(error.contains("writes are frozen"), "{error}");
+                assert_eq!(fs::read(&f.path).unwrap(), committed_bytes);
             }
             f.close().await;
         }
