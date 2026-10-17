@@ -914,6 +914,8 @@ pub fn owner_shop_service(
 }
 
 pub fn owner_shop_catalog(owner: &Value) -> Result<ShopModel, NativeNpcEconomyError> {
+    use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal};
+
     let source = owner
         .get("nativeNpcShop")
         .ok_or(NativeNpcEconomyError::Incomplete)?;
@@ -924,7 +926,12 @@ pub fn owner_shop_catalog(owner: &Value) -> Result<ShopModel, NativeNpcEconomyEr
         source.get("service").and_then(Value::as_str),
         Some("BUYSELL" | "BUYSELLNEW")
     ) {
-        capabilities.supports_sell = true;
+        // Crystal emits NPCGoods followed by NPCSell for both combined services.
+        // Match their final mode as well as the accumulated trade capabilities.
+        capabilities.apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Sell,
+            repair_rate: None,
+        });
     }
     if source.is_null() {
         return Ok(capabilities);
@@ -2980,6 +2987,232 @@ pub(crate) mod tests {
             NativeNpcEconomyError::Incomplete
         );
         assert_eq!(gate.try_recv_applied(), None);
+    }
+
+    #[cfg(feature = "native-npc-economy")]
+    fn pickaxe_packet_shop_fixture(
+        service: &str,
+    ) -> (
+        NativeNpcEconomyGate,
+        SnapshotWitness,
+        NativeNpcEconomyProjection,
+        ShopModel,
+    ) {
+        use mir2_client_bevy::inventory::CrystalUserItemModel;
+        use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal, ShopGood};
+
+        let (gate, witness, mut projection) = fixture();
+        let mut owner: Value = serde_json::from_str(&projection.owner_json).unwrap();
+        owner["gold"] = json!(10_000);
+        owner["playerHp"] = json!(10);
+        owner["playerMaxHp"] = json!(20);
+        owner["entities"][0]["level"] = json!(12);
+        owner["entities"][0]["hp"] = json!(10);
+        owner["entities"][0]["maxHp"] = json!(20);
+        let mut ui: UiReadModel = serde_json::from_str(&projection.ui_json).unwrap();
+        ui.player.gold = 10_000;
+        ui.player.level = 12;
+        ui.player.hp = 10;
+        ui.player.max_hp = 20;
+        projection.ui_json = serde_json::to_string(&ui).unwrap();
+        let mut world: Value = serde_json::from_str(&projection.world_json).unwrap();
+        world["entities"][0]["level"] = json!(12);
+        projection.world_json = world.to_string();
+        let mut inventory: InventoryModel =
+            serde_json::from_str(&projection.inventory_json).unwrap();
+        inventory.gold = 10_000;
+        projection.inventory_json = serde_json::to_string(&inventory).unwrap();
+
+        let template = mir2_game_data::crystal_item_by_index(836).unwrap();
+        assert_eq!((template.name.as_str(), template.price), ("PickAxe", 2500));
+        let ordinary = !matches!(service, "BUYBACK" | "BUYUSED");
+        let pearls = service == "PEARLBUY";
+        let user = CrystalUserItemModel {
+            unique_id: 901,
+            item_index: template.item_index,
+            count: 1,
+            current_dura: template.durability,
+            max_dura: template.durability,
+            is_shop_item: ordinary,
+            ..Default::default()
+        };
+        let raw = serde_json::to_value(&user).unwrap();
+        owner["nativeNpcShop"] = json!({
+            "npcObjectId":5,"scriptKey":"BichonProvince/BorderVillage/Blacksmith",
+            "service":service,"packetType":if pearls { "NPCPearlGoods" } else { "NPCGoods" },
+            "list":[raw.clone()],"rate":1.0,"panelType":0,"hideAddedStats":false
+        });
+        let tooltip = shop_tooltip(&owner, &raw).unwrap();
+        // Independently reproduce the advertised catalog and actual packet signals.
+        // Do not derive the expected service mode from owner_shop_catalog.
+        let mut packet_shop = ShopModel {
+            goods: vec![ShopGood {
+                unique_id: user.unique_id,
+                name: template.name.clone(),
+                price: 2500,
+                purchase_rate: ordinary.then_some(1.0),
+                requires_gold_buy_plan: ordinary && !pearls,
+                use_pearls: pearls,
+                count: user.count,
+                stock: if ordinary { -1 } else { i32::from(user.count) },
+                icon: tooltip.user_item_image(u32::from(user.count)),
+                tooltip_source: Some(tooltip),
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        assert!(packet_shop.apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Buy,
+            repair_rate: None,
+        }));
+        if matches!(service, "BUYSELL" | "BUYSELLNEW") {
+            assert!(packet_shop.apply_service_signal(NpcShopServiceSignal {
+                mode: NpcShopServiceMode::Sell,
+                repair_rate: None,
+            }));
+        }
+        projection.owner_json = owner.to_string();
+        projection.shop_json = serde_json::to_string(&packet_shop).unwrap();
+        projection.hero_json = serde_json::to_string(&owner_hero_model(&owner).unwrap()).unwrap();
+        projection.social_json =
+            serde_json::to_string(&owner_social_model(&owner).unwrap()).unwrap();
+        (gate, witness, projection, packet_shop)
+    }
+
+    #[cfg(feature = "native-npc-economy")]
+    #[test]
+    fn native_npc_economy_buysell_pickaxe_packet_order_applies_and_reserves_gold_buy() {
+        use mir2_client_bevy::npc_gold_buy_attempt::{
+            npc_gold_buy_model_authority, NpcGoldBuyConnectionEpoch, NpcGoldBuyGate,
+        };
+        use mir2_client_bevy::npc_shop_buy::plan_npc_gold_buy;
+        use mir2_client_bevy::shop::NpcShopServiceMode;
+
+        for service in ["BUYSELL", "BUYSELLNEW"] {
+            let (gate, witness, projection, packet_shop) = pickaxe_packet_shop_fixture(service);
+            let owner: Value = serde_json::from_str(&projection.owner_json).unwrap();
+            let expected = owner_shop_catalog(&owner).unwrap();
+            assert_eq!(packet_shop.service_mode, NpcShopServiceMode::Sell);
+            assert!(packet_shop.supports_buy && packet_shop.supports_sell);
+            assert_eq!(packet_shop, expected, "{service}");
+            assert_eq!(check_owner_shop(&owner, &packet_shop), Ok(()));
+
+            // Service fields remain part of the strict full owner projection.
+            let mut stale_buy_mode = packet_shop.clone();
+            stale_buy_mode.service_mode = NpcShopServiceMode::Buy;
+            let mut no_sell = packet_shop.clone();
+            no_sell.supports_sell = false;
+            let mut no_buy = packet_shop.clone();
+            no_buy.supports_buy = false;
+            let mut wrong_price = packet_shop.clone();
+            wrong_price.goods[0].price -= 1;
+            for invalid in [stale_buy_mode, no_sell, no_buy, wrong_price] {
+                let mut changed = projection.clone();
+                changed.shop_json = serde_json::to_string(&invalid).unwrap();
+                assert_eq!(
+                    gate.prepare(witness, changed).unwrap_err(),
+                    NativeNpcEconomyError::Projection
+                );
+            }
+
+            let mut world = World::new();
+            assert!(apply_bundle(
+                &mut world,
+                prepare(&gate, witness, projection)
+            ));
+            let applied = gate.try_recv_applied().unwrap();
+            assert_eq!(applied.witness(), witness);
+            assert_eq!(world.resource::<ShopModel>(), &packet_shop);
+            let inventory = world.resource::<InventoryModel>();
+            let actual_model =
+                npc_gold_buy_model_authority(world.resource::<ShopModel>(), inventory).unwrap();
+            let expected_model = npc_gold_buy_model_authority(&expected, inventory).unwrap();
+            assert_eq!(actual_model, expected_model);
+
+            let buy_gate = NpcGoldBuyGate::default();
+            assert!(buy_gate.observe_connection(NpcGoldBuyConnectionEpoch {
+                run: 1,
+                connection: 1,
+            }));
+            let ready = actual_model == expected_model
+                && world.resource::<UiReadModel>().player.hp > 0
+                && packet_shop.allows_buy();
+            assert!(buy_gate.observe(
+                &format!("{:?}", applied.binding()),
+                witness.server_revision,
+                &expected_model,
+                ready,
+            ));
+            assert!(buy_gate.feedback().can_reserve);
+            let mut selected = packet_shop.clone();
+            selected.selected_id = Some(selected.goods[0].unique_id);
+            let quote = plan_npc_gold_buy(&selected, inventory, 1);
+            assert!(quote.can_buy);
+            assert_eq!(quote.total_gold, Some(2500));
+            let (token, command) = buy_gate.reserve(&selected, inventory, 1).unwrap();
+            assert!(token.value() > 0);
+            assert_eq!(Some(command.clone()), quote.command);
+            assert_eq!(
+                (command.item_index, command.count, command.panel_type),
+                (901, 1, 0)
+            );
+            assert!(buy_gate.reserve(&selected, inventory, 1).is_none());
+            assert_eq!(world.resource::<InventoryModel>().gold, 10_000);
+            assert!(world.resource::<InventoryModel>().items.is_empty());
+        }
+    }
+
+    #[cfg(feature = "native-npc-economy")]
+    #[test]
+    fn native_npc_economy_buysell_fix_preserves_single_buy_and_closed_capabilities() {
+        use mir2_client_bevy::shop::NpcShopServiceMode;
+
+        for service in ["BUY", "BUYNEW", "BUYBACK", "BUYUSED", "PEARLBUY"] {
+            let (gate, witness, projection, packet_shop) = pickaxe_packet_shop_fixture(service);
+            let owner: Value = serde_json::from_str(&projection.owner_json).unwrap();
+            let catalog = owner_shop_catalog(&owner).unwrap();
+            assert_eq!(catalog, packet_shop, "{service}");
+            assert_eq!(catalog.service_mode, NpcShopServiceMode::Buy);
+            assert!(catalog.allows_buy());
+            assert!(!catalog.supports_sell && !catalog.allows_sell());
+            let mut world = World::new();
+            assert!(apply_bundle(
+                &mut world,
+                prepare(&gate, witness, projection)
+            ));
+            assert_eq!(world.resource::<ShopModel>(), &catalog);
+        }
+
+        let (gate, witness, mut projection, packet_shop) = pickaxe_packet_shop_fixture("BUYSELL");
+        let mut world = World::new();
+        assert!(apply_bundle(
+            &mut world,
+            prepare(&gate, witness, projection.clone())
+        ));
+        assert!(world.resource::<ShopModel>().allows_buy());
+        assert!(world.resource::<ShopModel>().allows_sell());
+        let mut owner: Value = serde_json::from_str(&projection.owner_json).unwrap();
+        owner["nativeNpcShop"] = Value::Null;
+        projection.owner_json = owner.to_string();
+        projection.shop_json = serde_json::to_string(&ShopModel::default()).unwrap();
+        assert_eq!(
+            check_owner_shop(&owner, &packet_shop),
+            Err(NativeNpcEconomyError::Projection)
+        );
+        assert!(apply_bundle(
+            &mut world,
+            prepare(
+                &gate,
+                SnapshotWitness {
+                    server_revision: witness.server_revision + 1,
+                    ..witness
+                },
+                projection
+            )
+        ));
+        assert_eq!(world.resource::<ShopModel>(), &ShopModel::default());
+        assert!(!world.resource::<ShopModel>().allows_buy());
+        assert!(!world.resource::<ShopModel>().allows_sell());
     }
 
     #[cfg(feature = "native-npc-economy")]
