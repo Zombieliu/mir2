@@ -109,7 +109,9 @@ mod workshop_checkpoint_websocket_tests {
                     .with_platinum_176_profile()
                     .with_account_store_path(path.clone())
                     .with_save_recovery_dir(root.join("recovery"))
-                    .with_save_recovery_mac_key([81; 32])
+                    .with_save_recovery_mac_key(std::array::from_fn::<_, 32, _>(|index| {
+                        (index as u8).wrapping_mul(13)
+                    }))
                     .unwrap(),
             );
             let state = super::super::WebState {
