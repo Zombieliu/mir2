@@ -224,7 +224,10 @@ fn stone_public_file_source_accepts_first_seal_appraise_cut_quotes_after_final_r
         packet,
         ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
     )));
-    assert_eq!(f.live(), before);
+    assert_eq!(
+        serde_json::to_value(f.live()).unwrap(),
+        serde_json::to_value(&before).unwrap()
+    );
     assert_eq!(fs::read(&f.path).unwrap(), committed);
 }
 
@@ -238,7 +241,10 @@ fn stone_public_known_file_failure_requotes_without_debit_and_first_retry_succee
     f.config
         .inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforeFileRename);
     let packets = f.session.select_npc_dialog_target(&target);
-    assert_eq!(f.live(), before);
+    assert_eq!(
+        serde_json::to_value(f.live()).unwrap(),
+        serde_json::to_value(&before).unwrap()
+    );
     assert_eq!(fs::read(&f.path).unwrap(), bytes);
     assert!(!packets.iter().any(|packet| matches!(
         packet,
@@ -266,7 +272,10 @@ fn stone_public_unknown_file_commit_never_publishes_new_quotes_or_retries() {
     );
     let packets = f.session.select_npc_dialog_target(&target);
     assert!(f.config.ensure_account_store_writable().is_err());
-    assert_eq!(f.live(), before);
+    assert_eq!(
+        serde_json::to_value(f.live()).unwrap(),
+        serde_json::to_value(&before).unwrap()
+    );
     assert!(!packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
@@ -292,7 +301,10 @@ fn stone_public_unknown_file_commit_never_publishes_new_quotes_or_retries() {
     assert!(late.is_empty());
     f.session.select_npc_dialog_target(&target);
     assert_eq!(fs::read(&f.path).unwrap(), committed);
-    assert_eq!(f.live(), before);
+    assert_eq!(
+        serde_json::to_value(f.live()).unwrap(),
+        serde_json::to_value(&before).unwrap()
+    );
 }
 
 #[test]

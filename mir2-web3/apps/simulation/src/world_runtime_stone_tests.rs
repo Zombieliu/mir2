@@ -166,5 +166,8 @@ fn stone_world_command_file_source_accepts_first_seal_appraise_cut_quotes_after_
         ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
     )));
     assert_eq!(fs::read(&path).unwrap(), bytes);
-    assert_eq!(runtime.active_character_checkpoint().unwrap(), before);
+    assert_eq!(
+        serde_json::to_value(runtime.active_character_checkpoint().unwrap()).unwrap(),
+        serde_json::to_value(&before).unwrap()
+    );
 }
