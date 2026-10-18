@@ -1043,7 +1043,7 @@ fn npc_gold_named_equipment_source_reaches_real_gate_and_paints_buysell_controls
                 &mir2_client_bevy::read_model::PlayerStats::default(),
                 &view,
                 &ShopPaintOptions::default(),
-                |action| (action,),
+                |_| (),
             );
         });
     }
