@@ -3241,6 +3241,59 @@ pub fn forward_quest_ui_intents(
             .map(|state| state.blocks_world_action(dialog_open, dead))
             .unwrap_or(dialog_open || dead);
 
+    // Input and forwarding are separate systems. Retire an established gesture
+    // if authority or a gameplay guard changed between them; restoring the
+    // guard later must not revive the old AutoHit without a fresh click.
+    let directional_attack_invalid = movement
+        .as_deref()
+        .and_then(WorldPointerMovementState::current_directional_attack)
+        .is_some_and(|gesture| {
+            world_actions_blocked
+                || (gesture.mining()
+                    && player_ui_state.as_deref().is_some_and(|ui| {
+                        ui.core.panel != mir2_ui_core::state::UiPanel::None
+                            || ui.blocks_gameplay_keys()
+                    }))
+                || !read_model
+                    .as_deref()
+                    .is_some_and(|model| model.player.max_hp > 0 && model.player.hp > 0)
+                || !click_state.as_deref().is_some_and(|state| {
+                    state.riding_mount == Some(false)
+                        && state.dazed == Some(false)
+                        && state.fishing == Some(false)
+                })
+                || commands.ownership_fence().is_some_and(|fence| {
+                    commands
+                        .applied_world_stamp()
+                        .is_none_or(|stamp| !fence.accepts(stamp, true))
+                })
+                || !entities.as_deref().is_some_and(|entities| {
+                    entities
+                        .entities
+                        .iter()
+                        .find(|entity| entity.kind == EntityKind::SelfPlayer)
+                        .is_some_and(|owner| {
+                            gesture
+                                .owner_is_current(&owner.object_id, commands.applied_world_stamp())
+                                && gesture.remains_current(
+                                    presentation
+                                        .as_deref()
+                                        .and_then(|model| model.current_map_file_name()),
+                                    (owner.x, owner.y),
+                                    inventory.as_deref(),
+                                )
+                        })
+                })
+        });
+    if directional_attack_invalid {
+        if let Some(movement) = movement.as_deref_mut() {
+            movement.cancel_directional_attack();
+        }
+        if let Some(presentation) = presentation.as_deref_mut() {
+            presentation.clear_local_mining_request();
+        }
+    }
+
     let mut retry_intents = Vec::new();
     // Combat selection expresses the latest target, not a FIFO of attacks.
     // A burst of UI/world input can cross this bridge in one batch; only the
@@ -3446,7 +3499,15 @@ pub fn forward_quest_ui_intents(
                 }) else {
                     continue;
                 };
-                if gesture.id != gesture_id
+                let current_owner = entities.as_deref().and_then(|model| {
+                    model
+                        .entities
+                        .iter()
+                        .find(|entity| entity.kind == EntityKind::SelfPlayer)
+                });
+                if !current_owner.is_some_and(|owner| {
+                    gesture.owner_is_current(&owner.object_id, commands.applied_world_stamp())
+                }) || gesture.id != gesture_id
                     || gesture.direction != direction
                     || gesture.mining() != mining
                     || !gesture.remains_current(current_map, current_origin, inventory.as_deref())

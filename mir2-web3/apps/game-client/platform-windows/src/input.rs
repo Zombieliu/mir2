@@ -757,6 +757,10 @@ impl WorldPointerMovementState {
         self.directional_attack.as_ref()
     }
 
+    pub(crate) fn cancel_directional_attack(&mut self) {
+        self.directional_attack = None;
+    }
+
     /// Arm the same target pursuit used by an ordinary unmodified monster
     /// click. Quest UI buttons call this through the host bridge so they keep
     /// following a moving monster until it is in attack range.
@@ -2534,7 +2538,23 @@ pub fn mouse_world_interaction_system(
     let left_click_pulse = left_pressed && left_released && !mouse.pressed(MouseButton::Left);
     let right_click_pulse = right_pressed && right_released && !mouse.pressed(MouseButton::Right);
     let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
-    let cancels_directional_attack = !mouse.pressed(MouseButton::Left)
+    let mining_auto_hit = movement
+        .directional_attack
+        .as_ref()
+        .is_some_and(|gesture| gesture.mining());
+    let cancels_directional_attack = (!mouse.pressed(MouseButton::Left) && !mining_auto_hit)
+        || (mining_auto_hit
+            && (mouse.get_just_pressed().next().is_some()
+                || player_ui.as_deref().is_some_and(|ui| {
+                    ui.core.panel != mir2_ui_core::state::UiPanel::None || ui.blocks_gameplay_keys()
+                })
+                || keys.is_some_and(|keys| {
+                    keys.get_just_pressed().any(|key| {
+                        player_ui
+                            .as_deref()
+                            .is_some_and(|ui| key_owned_by_binding(&ui.keyboard, keys, *key))
+                    })
+                })))
         || mouse.pressed(MouseButton::Right)
         || modifiers.alt
         || keys.is_some_and(|keys| {
@@ -3033,7 +3053,13 @@ pub fn mouse_world_interaction_system(
         && !left_pressed
         && !right_pressed
         && !mouse.pressed(MouseButton::Right);
-    let continuing_auto_action = continuing_map_route || continuing_attack;
+    let continuing_mining = movement
+        .directional_attack
+        .as_ref()
+        .is_some_and(|gesture| gesture.mining())
+        && !mouse.pressed(MouseButton::Right)
+        && mouse.get_just_pressed().next().is_none();
+    let continuing_auto_action = continuing_map_route || continuing_attack || continuing_mining;
     let keyboard_movement_requested = keys.is_some_and(|keys| {
         walk_key_map().iter().any(|(key, _)| {
             keys.pressed(*key)
@@ -3044,9 +3070,9 @@ pub fn mouse_world_interaction_system(
     });
     // The route button's release has already been consumed above. A passive
     // hover must not cancel the newly started route on the following frame.
-    let quest_pointer_press =
-        (left_pressed || right_pressed || pointer_held || left_released || right_released)
-            && quest_pointer_ui.contains_cursor(window);
+    let quest_pointer_press = !continuing_mining
+        && (left_pressed || right_pressed || pointer_held || left_released || right_released)
+        && quest_pointer_ui.contains_cursor(window);
     let ui_state_blocks = player_ui.as_deref().is_some_and(|ui| {
         if keyboard_movement_requested {
             return ui.blocks_world_action(false, false);
@@ -3486,15 +3512,48 @@ pub fn mouse_world_interaction_system(
             ui.local_keys.set_auto_run(false);
         }
     }
-    if !right_pressed
-        && !mouse.pressed(MouseButton::Right)
-        && mining_input::handle_directional_attack(
+    if !modifiers.alt && !right_pressed && !mouse.pressed(MouseButton::Right) {
+        let owner_stamp = commands
+            .as_deref()
+            .and_then(GatewayCommands::applied_world_stamp);
+        let owner_ready = commands.as_deref().is_some_and(|commands| {
+            commands
+                .ownership_fence()
+                .is_none_or(|fence| owner_stamp.is_some_and(|stamp| fence.accepts(stamp, true)))
+        });
+        let press_grid = if left_pressed && press_origins.ordered {
+            press_origins.left.and_then(|point| {
+                let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
+                    window.resolution.width(),
+                    window.resolution.height(),
+                );
+                presentation
+                    .grid_position_for_stage(transform.physical_to_logical(point.x, point.y))
+            })
+        } else {
+            presentation.hovered_grid_position()
+        };
+        // Preserve actor ownership at the real down tile as well as the current
+        // pixel hover. A coalesced drag cannot borrow an empty release target.
+        let press_grid_empty = press_grid.is_some_and(|(x, y)| {
+            !entities.entities.iter().any(|entity| {
+                entity.kind != EntityKind::SelfPlayer && entity.x == x && entity.y == y
+            })
+        });
+        let decision = mining_input::handle_directional_attack(
             &mut movement,
             queue.as_deref_mut(),
             presentation,
             mining_input::DirectionalAttackInput {
                 object_id: &object_id,
                 origin: entity_position,
+                owner_stamp,
+                owner_ready,
+                mining_ui_open: player_ui.as_deref().is_some_and(|ui| {
+                    ui.core.panel != mir2_ui_core::state::UiPanel::None || ui.blocks_gameplay_keys()
+                }),
+                press_grid,
+                press_grid_empty,
                 inventory: inventory.as_deref(),
                 read_model: ui_read_model.as_deref(),
                 click_state: click_state.as_deref(),
@@ -3504,9 +3563,19 @@ pub fn mouse_world_interaction_system(
                 now_ms,
                 motion_now_ms: crate::entity_presentation::native_motion_clock_ms(),
             },
-        )
-    {
-        return;
+        );
+        match decision {
+            mining_input::DirectionalAttackDecision::Unhandled => {}
+            mining_input::DirectionalAttackDecision::Consumed => return,
+            mining_input::DirectionalAttackDecision::Turn(direction) => {
+                if let Some(commands) = commands.as_deref() {
+                    commands.send(PlayerIntent::Turn {
+                        direction: direction.into(),
+                    });
+                }
+                return;
+            }
+        }
     }
     let auto_run = player_ui
         .as_deref()

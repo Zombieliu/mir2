@@ -1,4 +1,5 @@
-//! Held mining is a current input gesture, never a FIFO of future swings.
+//! Crystal mine-wall AutoHit and held Shift attacks share the current gesture
+//! fence, never a FIFO of future swings.
 
 use mir2_client_bevy::inventory::InventoryModel;
 
@@ -43,6 +44,8 @@ pub(crate) fn equipped_mining_tool(
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct DirectionalAttackGesture {
     pub id: u64,
+    pub owner: String,
+    pub owner_stamp: Option<crate::gateway::NativeCommandStamp>,
     pub direction: &'static str,
     pub origin: (i32, i32),
     pub map_file: String,
@@ -52,6 +55,14 @@ pub(crate) struct DirectionalAttackGesture {
 impl DirectionalAttackGesture {
     pub fn mining(&self) -> bool {
         self.mining_tool.is_some()
+    }
+
+    pub fn owner_is_current(
+        &self,
+        owner: &str,
+        stamp: Option<crate::gateway::NativeCommandStamp>,
+    ) -> bool {
+        self.owner == owner && self.owner_stamp == stamp
     }
 
     pub fn remains_current(
@@ -74,9 +85,28 @@ pub(crate) fn mining_interval_ms(level: u32) -> f64 {
     (1400 - (i64::from(level) * 14).min(370)) as f64
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum DirectionalAttackDecision {
+    Unhandled,
+    Consumed,
+    Turn(&'static str),
+}
+
+#[cfg(test)]
+impl DirectionalAttackDecision {
+    fn handled(self) -> bool {
+        self != Self::Unhandled
+    }
+}
+
 pub(crate) struct DirectionalAttackInput<'a> {
     pub object_id: &'a str,
     pub origin: (i32, i32),
+    pub owner_stamp: Option<crate::gateway::NativeCommandStamp>,
+    pub owner_ready: bool,
+    pub mining_ui_open: bool,
+    pub press_grid: Option<(i32, i32)>,
+    pub press_grid_empty: bool,
     pub inventory: Option<&'a InventoryModel>,
     pub read_model: Option<&'a mir2_client_bevy::read_model::UiReadModel>,
     pub click_state: Option<&'a crate::gameplay_bridge::NativeWorldClickState>,
@@ -92,7 +122,7 @@ pub(crate) fn handle_directional_attack(
     queue: Option<&mut mir2_client_bevy::quest_ui::QuestUiIntentQueue>,
     presentation: &mut crate::entity_presentation::NativeEntityPresentation,
     input: DirectionalAttackInput<'_>,
-) -> bool {
+) -> DirectionalAttackDecision {
     handle_directional_attack_with_collision(
         movement,
         queue,
@@ -108,12 +138,14 @@ fn handle_directional_attack_with_collision(
     presentation: &mut crate::entity_presentation::NativeEntityPresentation,
     input: DirectionalAttackInput<'_>,
     cell_blocks: impl Fn(&str, i32, i32) -> Option<bool>,
-) -> bool {
+) -> DirectionalAttackDecision {
     use mir2_client_bevy::quest_ui::QuestUiIntent;
+    use DirectionalAttackDecision::{Consumed, Turn, Unhandled};
     let origin = movement.authoritative_position.unwrap_or(input.origin);
     let map_file = presentation.current_map_file_name().map(str::to_owned);
     let had_gesture = movement.directional_attack.is_some();
-    let valid_hold = input.left_held
+    let valid_actor = input.owner_ready
+        && movement.self_object_id.as_deref() == Some(input.object_id)
         && input
             .read_model
             .is_some_and(|model| model.player.max_hp > 0 && model.player.hp > 0)
@@ -123,24 +155,48 @@ fn handle_directional_attack_with_collision(
                 && state.fishing == Some(false)
         });
     let current = movement.directional_attack.as_ref().is_none_or(|gesture| {
-        gesture.remains_current(map_file.as_deref(), origin, input.inventory)
-            && (gesture.mining() || input.shift)
-    });
-    if !valid_hold || !current {
-        if had_gesture {
-            movement.directional_attack = None;
-            movement.stop_hold(input.now_ms, "directionalAttackCanceled");
-            if let Some(queue) = queue.as_deref_mut() {
-                queue.clear_directional_attack_intents();
+        gesture.owner_is_current(input.object_id, input.owner_stamp)
+            && gesture.remains_current(map_file.as_deref(), origin, input.inventory)
+            && if gesture.mining() {
+                !input.mining_ui_open
+                    && !input.shift
+                    && movement
+                        .authoritative_direction
+                        .as_deref()
+                        .is_some_and(|facing| facing.eq_ignore_ascii_case(gesture.direction))
+            } else {
+                input.left_held && input.shift
             }
-            presentation.clear_local_mining_request();
+    });
+    if !valid_actor || !current {
+        if had_gesture {
+            cancel(movement, queue.as_deref_mut(), presentation, input.now_ms);
         }
-        return had_gesture;
+        return if had_gesture { Consumed } else { Unhandled };
     }
-    let hover = presentation.hovered_grid_position();
-    let direction = super::movement_direction_toward(hover, origin);
-    // NPC, corpse, ground-item and monster click priorities remain source-owned.
-    let empty_hover = presentation.hovered_object_id().is_none();
+
+    // An accepted down edge owns its real grid. Never borrow the final cursor
+    // of a coalesced down/move/up batch to choose a mining direction.
+    let hover = if input.left_pressed {
+        input.press_grid
+    } else {
+        presentation.hovered_grid_position()
+    };
+    let continuing_mining = movement
+        .directional_attack
+        .as_ref()
+        .is_some_and(|gesture| gesture.mining());
+    // AutoHit belongs to the accepted wall, not to wherever the cursor travels
+    // after that click. A fresh press still has to establish an empty target.
+    let empty_hover = continuing_mining
+        || (presentation.hovered_object_id().is_none()
+            && (!input.left_pressed || input.press_grid_empty));
+    let direction = movement
+        .directional_attack
+        .as_ref()
+        .filter(|gesture| gesture.mining())
+        .map(|gesture| gesture.direction)
+        .or_else(|| super::movement_direction_toward(hover, origin));
     let tool = equipped_mining_tool(input.inventory);
     let blocked_wall = tool.is_some()
         && map_file
@@ -150,7 +206,13 @@ fn handle_directional_attack_with_collision(
                 let wall = super::movement_target(origin, direction, 1);
                 cell_blocks(map, wall.0, wall.1) == Some(true)
             });
-    let mining = empty_hover && blocked_wall && tool.is_some();
+    // Shift has Crystal's earlier forced-attack precedence even with a pickaxe.
+    let mining = !input.shift
+        && !input.mining_ui_open
+        && empty_hover
+        && (continuing_mining || hover.is_some())
+        && blocked_wall
+        && tool.is_some();
     let archer_bow = input.click_state.is_some_and(|state| {
         state.has_class_weapon == Some(true)
             && state
@@ -158,29 +220,47 @@ fn handle_directional_attack_with_collision(
                 .as_deref()
                 .is_some_and(|class| class.eq_ignore_ascii_case("Archer"))
     });
-    let direction_attack = empty_hover && (mining || (input.shift && !archer_bow));
+    let direction_attack =
+        empty_hover && (mining || (input.left_held && input.shift && !archer_bow));
     if !direction_attack || direction.is_none() || map_file.is_none() {
         if had_gesture {
-            movement.directional_attack = None;
-            movement.stop_hold(input.now_ms, "directionalAttackCanceled");
-            if let Some(queue) = queue.as_deref_mut() {
-                queue.clear_directional_attack_intents();
-            }
-            presentation.clear_local_mining_request();
-            return true;
+            cancel(movement, queue.as_deref_mut(), presentation, input.now_ms);
+            return Consumed;
         }
-        return false;
+        return Unhandled;
     }
-    // After UI/equipment/map cancellation the still-held button is not a fresh
-    // press. An existing ordinary walk can enter mining when it reaches a wall.
+    // A canceled AutoHit cannot rearm on release, a stale queued request or a
+    // still-held button. A current walk may reach a wall with its original hold.
     if !had_gesture
         && !input.left_pressed
-        && movement.active != Some(super::WorldPointerMovementMode::Walk)
+        && !(input.left_held && movement.active == Some(super::WorldPointerMovementMode::Walk))
     {
-        return false;
+        return Unhandled;
     }
     let direction = direction.unwrap();
     let map_file = map_file.unwrap();
+    if mining && !had_gesture {
+        movement.stop_hold(input.now_ms, "miningClick");
+        movement.stop_auto_path(input.now_ms, "miningClick");
+        movement.attack_target = None;
+        movement.harvest_target = None;
+        movement.harvest_direction = None;
+        if !movement.pending.is_empty() {
+            return Consumed;
+        }
+        let Some(facing) = movement.authoritative_direction.as_deref() else {
+            return Consumed;
+        };
+        if !facing.eq_ignore_ascii_case(direction) {
+            // Source CheckInput returns after Standing. Only another accepted
+            // click, after the authoritative turn ACK, may arm AutoHit.
+            return if movement.can_send(input.now_ms) {
+                Turn(direction)
+            } else {
+                Consumed
+            };
+        }
+    }
     let mining_tool = mining.then_some(tool).flatten();
     let replaces = movement
         .directional_attack
@@ -195,6 +275,8 @@ fn handle_directional_attack_with_collision(
         movement.directional_attack_epoch = movement.directional_attack_epoch.saturating_add(1);
         movement.directional_attack = Some(DirectionalAttackGesture {
             id: movement.directional_attack_epoch,
+            owner: input.object_id.to_owned(),
+            owner_stamp: input.owner_stamp,
             direction,
             origin,
             map_file,
@@ -205,12 +287,10 @@ fn handle_directional_attack_with_collision(
             queue.clear_attack_intents();
         }
     }
-    // Do not overlap visible locomotion or consume an unacknowledged move as an
-    // attack. Moving remains available on the next manual movement gesture.
     if !movement.pending.is_empty()
         || !super::attack_request_ready(movement, presentation, input.now_ms, input.motion_now_ms)
     {
-        return true;
+        return Consumed;
     }
     let gesture = movement.directional_attack.as_ref().unwrap();
     let id = gesture.id;
@@ -228,13 +308,26 @@ fn handle_directional_attack_with_collision(
             };
             movement.next_attack_request_at_ms = input.now_ms + interval;
             crate::movement_trace::record(serde_json::json!({
-                "type": "directionalAttackQueued", "atMs": input.now_ms,
-                "objectId": input.object_id, "direction": direction,
-                "mining": gesture.mining(), "gestureId": id,
+                "type":"directionalAttackQueued", "atMs":input.now_ms,
+                "objectId":input.object_id, "direction":direction,
+                "mining":gesture.mining(), "gestureId":id,
             }));
         }
     }
-    true
+    Consumed
+}
+
+fn cancel(
+    movement: &mut super::WorldPointerMovementState,
+    queue: Option<&mut mir2_client_bevy::quest_ui::QuestUiIntentQueue>,
+    presentation: &mut crate::entity_presentation::NativeEntityPresentation,
+    now_ms: f64,
+) {
+    movement.stop_hold(now_ms, "directionalAttackCanceled");
+    if let Some(queue) = queue {
+        queue.clear_directional_attack_intents();
+    }
+    presentation.clear_local_mining_request();
 }
 
 #[cfg(test)]
@@ -268,8 +361,10 @@ mod tests {
         read_model.player.hp = 100;
         read_model.player.max_hp = 100;
         read_model.player.level = 12;
+        let mut movement = super::super::WorldPointerMovementState::default();
+        movement.observe_identity("1000", (24, 182), "right");
         (
-            Default::default(),
+            movement,
             Default::default(),
             presentation,
             InventoryModel {
@@ -296,6 +391,11 @@ mod tests {
         DirectionalAttackInput {
             object_id: "1000",
             origin: (24, 182),
+            owner_stamp: None,
+            owner_ready: true,
+            mining_ui_open: false,
+            press_grid: Some((25, 182)),
+            press_grid_empty: true,
             inventory: Some(inventory),
             read_model: Some(read_model),
             click_state: Some(click_state),
@@ -388,6 +488,8 @@ mod tests {
         };
         let gesture = DirectionalAttackGesture {
             id: 1,
+            owner: "1000".into(),
+            owner_stamp: None,
             direction: "right",
             origin: (24, 182),
             map_file: "D401".into(),
@@ -405,7 +507,7 @@ mod tests {
     }
 
     #[test]
-    fn mining_hold_paces_swings_and_replaces_unsent_work_then_cancels_on_release() {
+    fn mining_auto_hit_paces_and_survives_release_without_accumulating_intents() {
         let (mut movement, mut queue, mut presentation, inventory, read, click) = fixture();
         let next = mining_interval_ms(12);
         for now in [0., 10., next - 1., next, next + 5., next * 2.] {
@@ -414,8 +516,9 @@ mod tests {
                 Some(&mut queue),
                 &mut presentation,
                 input(&inventory, &read, &click, now),
-                |_, _, _| Some(true)
-            ));
+                |_, _, _| Some(true),
+            )
+            .handled());
             assert_eq!(queue.len(), 1, "pending swings must never accumulate");
             assert!(movement.active.is_none());
             assert!(movement.auto_path_destination.is_none());
@@ -424,15 +527,9 @@ mod tests {
                 "mining must not block the escape movement clock"
             );
         }
-        assert!(
-            matches!(queue.drain_intents().as_slice(), [QuestUiIntent::AttackDirection {
-            direction, mining: true, .. }] if direction == "right")
-        );
-        queue.push_intent(QuestUiIntent::AttackDirection {
-            direction: "right".into(),
-            mining: true,
-            gesture_id: 1,
-        });
+        let id = movement.directional_attack.as_ref().unwrap().id;
+        assert!(matches!(queue.drain_intents().as_slice(),
+            [QuestUiIntent::AttackDirection { direction, mining: true, .. }] if direction == "right"));
         let mut released = input(&inventory, &read, &click, next * 2. + 10.);
         released.left_held = false;
         assert!(handle_directional_attack_with_collision(
@@ -440,20 +537,216 @@ mod tests {
             Some(&mut queue),
             &mut presentation,
             released,
-            |_, _, _| Some(true)
-        ));
-        assert!(movement.directional_attack.is_none());
-        assert!(queue.is_empty());
+            |_, _, _| Some(true),
+        )
+        .handled());
         assert!(
-            !handle_directional_attack_with_collision(
+            queue.is_empty(),
+            "release cannot bypass the original cooldown"
+        );
+        assert_eq!(movement.directional_attack.as_ref().unwrap().id, id);
+        presentation.set_hover_grid_context_for_test((24, 182), (-1., -1.));
+        presentation.observe_packet_payload(
+            serde_json::json!({
+                "mapFileName": "D401", "sceneView": {"center": {"x": 24, "y": 182}}, "entities": []
+            }),
+            10,
+        );
+        presentation.set_hovered_object_id_for_test(Some("2001"));
+        assert!(presentation.hovered_grid_position().is_none());
+        for now in [next * 3., next * 4.] {
+            let mut idle = input(&inventory, &read, &click, now);
+            idle.left_held = false;
+            assert!(handle_directional_attack_with_collision(
                 &mut movement,
                 Some(&mut queue),
                 &mut presentation,
-                input(&inventory, &read, &click, next * 3.),
-                |_, _, _| Some(true)
+                idle,
+                |_, _, _| Some(true),
+            )
+            .handled());
+            assert!(matches!(queue.drain_intents().as_slice(),
+                [QuestUiIntent::AttackDirection { gesture_id, mining: true, .. }] if *gesture_id == id));
+        }
+    }
+
+    #[test]
+    fn mining_auto_hit_same_frame_pulse_turns_then_needs_an_aligned_new_click() {
+        let (mut movement, mut queue, mut presentation, inventory, read, click) = fixture();
+        movement.authoritative_direction = Some("up".into());
+        let mut pulse = input(&inventory, &read, &click, 0.);
+        pulse.left_held = false;
+        assert_eq!(
+            handle_directional_attack_with_collision(
+                &mut movement,
+                Some(&mut queue),
+                &mut presentation,
+                pulse,
+                |_, _, _| Some(true),
             ),
-            "a canceled hold needs a new accepted press"
+            DirectionalAttackDecision::Turn("right")
         );
+        assert!(movement.directional_attack.is_none());
+        assert!(queue.is_empty(), "turning may not mine in the same click");
+        // A real UserLocation ACK updates this field in the host; do not let an
+        // old release create AutoHit even after the turn has been confirmed.
+        movement.authoritative_direction = Some("right".into());
+        let mut idle = input(&inventory, &read, &click, 100.);
+        idle.left_held = false;
+        assert_eq!(
+            handle_directional_attack_with_collision(
+                &mut movement,
+                Some(&mut queue),
+                &mut presentation,
+                idle,
+                |_, _, _| Some(true),
+            ),
+            DirectionalAttackDecision::Unhandled
+        );
+        assert!(queue.is_empty());
+        let mut pulse = input(&inventory, &read, &click, 200.);
+        pulse.left_pressed = true;
+        pulse.left_held = false;
+        assert_eq!(
+            handle_directional_attack_with_collision(
+                &mut movement,
+                Some(&mut queue),
+                &mut presentation,
+                pulse,
+                |_, _, _| Some(true),
+            ),
+            DirectionalAttackDecision::Consumed
+        );
+        assert!(matches!(queue.drain_intents().as_slice(),
+            [QuestUiIntent::AttackDirection { mining: true, direction, .. }] if direction == "right"));
+    }
+
+    #[test]
+    fn mining_auto_hit_uses_real_down_grid_instead_of_the_release_cursor() {
+        let (mut movement, mut queue, mut presentation, inventory, read, click) = fixture();
+        movement.authoritative_direction = Some("left".into());
+        let mut pulse = input(&inventory, &read, &click, 0.);
+        pulse.left_held = false;
+        pulse.press_grid = Some((23, 182));
+        assert_eq!(
+            handle_directional_attack_with_collision(
+                &mut movement,
+                Some(&mut queue),
+                &mut presentation,
+                pulse,
+                |map, x, y| {
+                    assert_eq!((map, x, y), ("D401", 23, 182));
+                    Some(true)
+                },
+            ),
+            DirectionalAttackDecision::Consumed
+        );
+        assert!(matches!(queue.drain_intents().as_slice(),
+            [QuestUiIntent::AttackDirection { mining: true, direction, .. }] if direction == "left"));
+    }
+
+    #[test]
+    fn mining_auto_hit_cold_click_refuses_missing_authority_actor_tool_or_wall() {
+        for case in [
+            "transport",
+            "wrongOwner",
+            "missingRead",
+            "dead",
+            "missingHp",
+            "ridingUnknown",
+            "riding",
+            "dazedUnknown",
+            "dazed",
+            "fishingUnknown",
+            "fishing",
+            "noTool",
+            "noDown",
+            "actorAtDown",
+            "hoverActor",
+            "unknownWall",
+            "open",
+            "ui",
+        ] {
+            let (mut movement, mut queue, mut presentation, mut inventory, mut read, mut click) =
+                fixture();
+            match case {
+                "dead" => read.player.hp = 0,
+                "missingHp" => read.player.max_hp = 0,
+                "ridingUnknown" => click.riding_mount = None,
+                "riding" => click.riding_mount = Some(true),
+                "dazedUnknown" => click.dazed = None,
+                "dazed" => click.dazed = Some(true),
+                "fishingUnknown" => click.fishing = None,
+                "fishing" => click.fishing = Some(true),
+                "noTool" => inventory.items.clear(),
+                "hoverActor" => presentation.set_hovered_object_id_for_test(Some("2001")),
+                _ => {}
+            }
+            let mut pulse = input(&inventory, &read, &click, 0.);
+            pulse.left_held = false;
+            match case {
+                "transport" => pulse.owner_ready = false,
+                "wrongOwner" => pulse.object_id = "2000",
+                "missingRead" => pulse.read_model = None,
+                "noDown" => pulse.press_grid = None,
+                "actorAtDown" => pulse.press_grid_empty = false,
+                "ui" => pulse.mining_ui_open = true,
+                _ => {}
+            }
+            assert_eq!(
+                handle_directional_attack_with_collision(
+                    &mut movement,
+                    Some(&mut queue),
+                    &mut presentation,
+                    pulse,
+                    |_, _, _| match case {
+                        "unknownWall" => None,
+                        "open" => Some(false),
+                        _ => Some(true),
+                    },
+                ),
+                DirectionalAttackDecision::Unhandled,
+                "{case}"
+            );
+            assert!(movement.directional_attack.is_none(), "{case}");
+            assert!(queue.is_empty(), "{case}");
+        }
+    }
+
+    #[test]
+    fn mining_auto_hit_shift_keeps_forced_attack_held_and_separate() {
+        let (mut movement, mut queue, mut presentation, inventory, read, click) = fixture();
+        let mut shifted = input(&inventory, &read, &click, 0.);
+        shifted.shift = true;
+        assert_eq!(
+            handle_directional_attack_with_collision(
+                &mut movement,
+                Some(&mut queue),
+                &mut presentation,
+                shifted,
+                |_, _, _| Some(true),
+            ),
+            DirectionalAttackDecision::Consumed
+        );
+        assert!(matches!(
+            queue.drain_intents().as_slice(),
+            [QuestUiIntent::AttackDirection { mining: false, .. }]
+        ));
+        let mut released = input(&inventory, &read, &click, 2000.);
+        released.shift = true;
+        released.left_held = false;
+        assert_eq!(
+            handle_directional_attack_with_collision(
+                &mut movement,
+                Some(&mut queue),
+                &mut presentation,
+                released,
+                |_, _, _| Some(true),
+            ),
+            DirectionalAttackDecision::Consumed
+        );
+        assert!(movement.directional_attack.is_none());
+        assert!(queue.is_empty());
     }
 
     #[test]
@@ -466,7 +759,8 @@ mod tests {
             &mut presentation,
             input(&inventory, &read, &click, 0.),
             |_, _, _| Some(true)
-        ));
+        )
+        .handled());
         assert!(queue.is_empty());
         let mut shifted = input(&inventory, &read, &click, 0.);
         shifted.shift = true;
@@ -476,7 +770,8 @@ mod tests {
             &mut presentation,
             shifted,
             |_, _, _| Some(false)
-        ));
+        )
+        .handled());
         assert!(
             matches!(queue.drain_intents().as_slice(), [QuestUiIntent::AttackDirection {
             direction, mining: false, .. }] if direction == "right")
@@ -490,7 +785,8 @@ mod tests {
             &mut presentation,
             shifted,
             |_, _, _| Some(false)
-        ));
+        )
+        .handled());
         assert!(
             movement.directional_attack.is_none(),
             "actor clicks retain ordinary combat ownership"
@@ -514,7 +810,8 @@ mod tests {
                 &mut presentation,
                 input(&inventory, &read, &click, 0.),
                 |_, _, _| Some(true),
-            );
+            )
+            .handled();
             match case {
                 "death" => read.player.hp = 0,
                 "toolSwap" => inventory.items[0].unique_id = Some(999),
@@ -531,11 +828,21 @@ mod tests {
                     &mut presentation,
                     input(&inventory, &read, &click, 2_000.),
                     |_, _, _| Some(true)
-                ),
+                )
+                .handled(),
                 "{case}"
             );
             assert!(movement.directional_attack.is_none(), "{case}");
             assert!(queue.is_empty(), "{case}");
+            // Returning to the exact original valid facts must not resurrect
+            // the discarded click or its already-queued directional request.
+            read.player.hp = 100;
+            inventory.items[0].unique_id = Some(700);
+            inventory.items[0].durability_current = Some(10_000);
+            movement.authoritative_position = Some((24, 182));
+            presentation.observe_packet_payload(serde_json::json!({
+                "mapFileName": "D401", "sceneView": {"center": {"x": 24, "y": 182}}, "entities": []
+            }), 20);
             assert!(
                 !handle_directional_attack_with_collision(
                     &mut movement,
@@ -543,9 +850,11 @@ mod tests {
                     &mut presentation,
                     input(&inventory, &read, &click, 3_000.),
                     |_, _, _| Some(true)
-                ),
+                )
+                .handled(),
                 "{case}"
             );
+            assert!(queue.is_empty(), "{case}");
         }
     }
 }
