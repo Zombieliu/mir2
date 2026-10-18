@@ -9644,7 +9644,34 @@ fn full_npc_gold_buy_inventory_snapshot(payload: &Value) -> bool {
             if !item.is_object() {
                 return false;
             }
-            let Some(slot) = item.get("slot").and_then(Value::as_u64) else {
+            // Source equipment snapshots serialize EquipmentSlot as a camelCase
+            // name; Bag/Belt snapshots use numeric slots. This is an admission
+            // boundary, so do not use normalized_slot's permissive fallback.
+            let slot = item.get("slot").and_then(|value| {
+                value.as_u64().or_else(|| {
+                    if name != "equipmentItems" {
+                        return None;
+                    }
+                    match value.as_str()? {
+                        "weapon" => Some(0),
+                        "armour" => Some(1),
+                        "helmet" => Some(2),
+                        "torch" => Some(3),
+                        "necklace" => Some(4),
+                        "braceletLeft" => Some(5),
+                        "braceletRight" => Some(6),
+                        "ringLeft" => Some(7),
+                        "ringRight" => Some(8),
+                        "amulet" => Some(9),
+                        "belt" => Some(10),
+                        "boots" => Some(11),
+                        "stone" => Some(12),
+                        "mount" => Some(13),
+                        _ => None,
+                    }
+                })
+            });
+            let Some(slot) = slot else {
                 return false;
             };
             let container = item.get("container").and_then(Value::as_str).unwrap_or("");

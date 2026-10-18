@@ -920,6 +920,185 @@ fn npc_gold_raw_inventory_presence_and_full_raw_planner_never_invent_fields() {
     }
 }
 
+// These are the wire spellings of simulation::EquipmentSlot (serde camelCase),
+// rather than the already-normalized numeric slots used by older fixtures.
+fn named_equipment_source_inventory() -> Value {
+    let slots = [
+        "weapon",
+        "armour",
+        "helmet",
+        "torch",
+        "necklace",
+        "braceletLeft",
+        "braceletRight",
+        "ringLeft",
+        "ringRight",
+        "amulet",
+        "belt",
+        "boots",
+        "stone",
+        "mount",
+    ];
+    json!({
+        "inventoryCapacity": 46,
+        "gold": 100,
+        "inventoryItems": [{"slot":0,"container":"bag1","uniqueId":100,"quantity":1}],
+        "beltItems": [{"slot":0,"uniqueId":101,"quantity":1}],
+        "equipmentItems": slots.iter().enumerate().map(|(index, slot)| {
+            json!({"slot":slot,"uniqueId":200 + index as u64,"quantity":1})
+        }).collect::<Vec<_>>()
+    })
+}
+
+#[test]
+fn npc_gold_named_equipment_source_reaches_real_gate_and_paints_buysell_controls() {
+    use bevy::asset::AssetApp;
+    use bevy::prelude::*;
+    use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue;
+    use mir2_client_bevy::crystal_ui::shop_paint::{
+        paint_npc_gold_shop, ShopPaintControl, ShopPaintOptions, ShopPaintPanel,
+    };
+    use mir2_client_bevy::npc_shop_ui::{NpcShopUiAction, NpcShopUiContext, NpcShopUiState};
+
+    let raw = named_equipment_source_inventory();
+    assert!(full_npc_gold_buy_inventory_snapshot(&raw));
+    let projected = transform_inventory_model(&raw);
+    let inventory: InventoryModel = serde_json::from_value(projected.clone()).unwrap();
+    assert_eq!(inventory.items.len(), 16);
+    let equipment = inventory
+        .items
+        .iter()
+        .filter(|item| item.container == 2)
+        .collect::<Vec<_>>();
+    assert_eq!(equipment.len(), 14);
+    for (slot, item) in equipment.into_iter().enumerate() {
+        assert_eq!(item.slot, slot as u32);
+        assert_eq!(item.unique_id, Some(200 + slot as u64));
+    }
+
+    let (sender, _receiver) = command_channel(8);
+    let fence = sender.ownership_fence().unwrap();
+    let stamp = fence.test_world_ready(10, 0);
+    let (mut shop, _) = models();
+    assert!(shop.apply_service_signal(NpcShopServiceSignal {
+        mode: NpcShopServiceMode::Sell,
+        repair_rate: None,
+    }));
+    let staged = fence.stage_npc_gold_buy_inventory(&projected);
+    assert!(staged.is_some());
+    fence.finish_npc_gold_buy_inventory(staged, true);
+    let staged = fence.stage_npc_gold_buy_catalog(&serde_json::to_value(&shop).unwrap(), true);
+    assert!(staged.is_some());
+    fence.finish_npc_gold_buy_catalog(staged, true);
+    for mode in [NpcShopServiceMode::Buy, NpcShopServiceMode::Sell] {
+        fence.observe_npc_gold_buy_service(
+            NpcShopServiceSignal {
+                mode,
+                repair_rate: None,
+            },
+            true,
+        );
+    }
+    let source = fence
+        .npc_gold_buy_source()
+        .expect("complete applied source");
+    assert_eq!(source.stamp, stamp);
+    assert_eq!(
+        Some(source.model.as_str()),
+        mir2_client_bevy::npc_gold_buy_attempt::npc_gold_buy_model_authority(&shop, &inventory)
+            .as_deref()
+    );
+    let mut queue = NativePlayerUiIntentQueue::default();
+    assert!(queue.npc_gold_buy_gate().ui_authority_revision().is_none());
+    assert!(queue.observe_npc_gold_buy_connection(source.connection));
+    assert!(queue.observe_npc_gold_buy(
+        &format!("{:?}", source.stamp),
+        source.revision,
+        &source.model,
+        true
+    ));
+    let context = NpcShopUiContext {
+        source_revision: queue.npc_gold_buy_gate().ui_authority_revision(),
+        open: true,
+        input_enabled: true,
+        show_buy: true,
+    };
+    let mut common_ui = NpcShopUiState::default();
+    common_ui.reconcile(context, &shop, &inventory);
+    let view = common_ui.view(context, &shop, &inventory, queue.npc_gold_buy_feedback());
+    assert!(view.stamp.is_some());
+    assert!(view.can_select && view.show_sell);
+
+    let mut app = App::new();
+    app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()))
+        .init_asset::<Image>();
+    let assets = app.world().resource::<AssetServer>().clone();
+    {
+        let mut commands = app.world_mut().commands();
+        commands.spawn_empty().with_children(|parent| {
+            paint_npc_gold_shop(
+                parent,
+                Some(&assets),
+                &shop,
+                &mir2_client_bevy::read_model::PlayerStats::default(),
+                &view,
+                &ShopPaintOptions::default(),
+                |action| (action,),
+            );
+        });
+    }
+    app.world_mut().flush();
+    let mut panels = app.world_mut().query::<&ShopPaintPanel>();
+    assert_eq!(panels.iter(app.world()).count(), 1);
+    let mut controls = app.world_mut().query::<&ShopPaintControl>();
+    assert!(controls
+        .iter(app.world())
+        .any(|control| { control.action == NpcShopUiAction::HandoffSell && control.enabled }));
+    assert!(queue.drain_for_gateway_with_npc_gold_buy().is_empty());
+}
+
+#[test]
+fn npc_gold_named_equipment_never_defaults_unknown_or_non_equipment_slots() {
+    let raw = named_equipment_source_inventory();
+    assert!(full_npc_gold_buy_inventory_snapshot(&raw));
+    for value in [
+        Value::Null,
+        json!(-1),
+        json!(32),
+        json!(1.5),
+        json!(true),
+        json!("Weapon"),
+        json!("armor"),
+        json!("ring-left"),
+        json!("ringleft"),
+        json!("weapon "),
+        json!("0"),
+        json!("unknown"),
+    ] {
+        let mut invalid = raw.clone();
+        invalid["equipmentItems"][0]["slot"] = value.clone();
+        assert!(
+            !full_npc_gold_buy_inventory_snapshot(&invalid),
+            "invalid slot {value}"
+        );
+    }
+    for array in ["inventoryItems", "beltItems", "equipmentItems"] {
+        for field in ["slot", "uniqueId", "quantity"] {
+            let mut missing = raw.clone();
+            missing[array][0].as_object_mut().unwrap().remove(field);
+            assert!(
+                !full_npc_gold_buy_inventory_snapshot(&missing),
+                "missing {array}.{field}"
+            );
+        }
+    }
+    for array in ["inventoryItems", "beltItems"] {
+        let mut invalid = raw.clone();
+        invalid[array][0]["slot"] = json!("weapon");
+        assert!(!full_npc_gold_buy_inventory_snapshot(&invalid));
+    }
+}
+
 #[test]
 fn npc_gold_canceled_queued_variant_cannot_rebind_or_clear_fresh_wrapper_attempt() {
     use mir2_client_bevy::crystal_ui::overlays::{NativePlayerUiIntent, NativePlayerUiIntentQueue};
