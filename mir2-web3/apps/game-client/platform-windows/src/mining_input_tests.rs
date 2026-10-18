@@ -648,6 +648,8 @@ fn mining_auto_hit_native_cancellation_never_rearms_after_owner_ui_tool_or_focus
 
 #[test]
 fn mining_auto_hit_bridge_epoch_or_permission_failure_retires_the_established_gesture() {
+    use crate::gateway::CommandSource;
+
     for case in ["reconnect", "unknownState", "dialog"] {
         let (mut app, _unbounded) = app_with_mining_gesture();
         let (sender, mut receiver) = crate::gateway::command_channel(8);
