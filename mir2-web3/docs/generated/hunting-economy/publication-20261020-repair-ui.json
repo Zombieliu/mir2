@@ -1,0 +1,243 @@
+{
+  "recorded_at_utc": "2026-10-19T23:43:25.122Z",
+  "code_commit": "82d6303558d69962ec10c104e4833b7225f17fbf",
+  "branch": "codex/hunting-permit-economy",
+  "owned_files": 25,
+  "all_owned_blobs_fully_read": true,
+  "all_owned_working_blobs_match_after_git_normalization": true,
+  "source_files_still_match_test_inputs": 1147,
+  "source_manifest_committed_sha256": "50fbf9237e4d95685df301f3945d469cbd71dc109434cf1b7def2103511b7729",
+  "foreign_qa_files_preserved_and_unstaged": 3,
+  "protected_config_compiler_inputs_unchanged": 3,
+  "automatic_gc_disabled_for_this_commit_only": true,
+  "focused_node": 101,
+  "adjacent_node_top_level": 353,
+  "stage5_custom_groups_inside_one_adjacent_wrapper": 506,
+  "compiled_wallet_native_http_synthetic_upstream": 10,
+  "native_next_build_exit": 0,
+  "full_frontend_typecheck_build": true,
+  "physical_game_socket_or_browser_visual_accepted": false,
+  "page_npc_service_shop_shell_wired": true,
+  "untracked_build_configuration_copies": [
+    {
+      "path": "apps/web/tsconfig.hunting-repair-ui-27.json",
+      "sha256": "9ce5120f2c3fe8063bae2cfebf8169c893346d2a423fc056212755de610b7472",
+      "reason": "native build copy; original tsconfig unchanged; not product source"
+    },
+    {
+      "path": "apps/web/tsconfig.hunting-repair-ui-28.json",
+      "sha256": "93b5a6462e575a50060980c3c14d6db2c4e207c5b7399934d925a911469f6789",
+      "reason": "native build copy; original tsconfig unchanged; not product source"
+    },
+    {
+      "path": "apps/web/tsconfig.hunting-repair-ui-29.json",
+      "sha256": "5a3a10494ff0e9a0dbca9b66e74f7ed62e994c13ddfec226ec503a7efffd565e",
+      "reason": "native build copy; original tsconfig unchanged; not product source"
+    }
+  ],
+  "goal_complete": false,
+  "pushed": false,
+  "deployed": false,
+  "blobs": [
+    {
+      "path": "apps/web/app/api/economy/hunting-wallet/route.ts",
+      "git_blob": "d09343c9aca1594db03903a81655507a6b6c725f",
+      "bytes": 3024,
+      "committed_sha256": "9faa61c0a3876365c76626c3ae3ed5830e0edb7855dbc17e8250b677c9579b33",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/app/components/original-client-game-shop.tsx",
+      "git_blob": "49b64d07201d0dc82d06a0c19aae85d2a3bf705d",
+      "bytes": 61559,
+      "committed_sha256": "56549d0025535d1ad74efeaee5b30dd12b26f3105ae1cd7b6b12074ff3a73abc",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/app/components/original-client-game-ui-scene.tsx",
+      "git_blob": "d9f5ebc3eb263f7496178f5d543a48000abd8b7f",
+      "bytes": 35700,
+      "committed_sha256": "8df98a3cc94bc27b7c9ed39beddbbb0d8ab81bbd7574fc4391ff347e227c483b",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/app/components/original-client-shell-types.ts",
+      "git_blob": "9a4a056b7acfd1da65daab027d92331ff79d6bf3",
+      "bytes": 18874,
+      "committed_sha256": "5a7402d8658933d1ea7e895e319b7f9d5ce8753e4740dcb5095abdfd8f9eec15",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/app/original-client-shell.tsx",
+      "git_blob": "4969ec813d4159ad2deeb7d4883a28516b7a26de",
+      "bytes": 335097,
+      "committed_sha256": "1a1f5af6e22fabcf2fd91a0a020b96834506c702f7c541b11a73f4c6859191b4",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "git_blob": "826e7ecf6e2e0d75fe911901a27466c4fab1b6e1",
+      "bytes": 1094241,
+      "committed_sha256": "47618ec144b4a5edf0c3e4f72eb6907ad1fdece2064df20f19f18953c6c73b0a",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/lib/hunting-repair-wallet.ts",
+      "git_blob": "eb8de829bda42201f09525c46474f7ff194e5ec5",
+      "bytes": 6442,
+      "committed_sha256": "4339cdd715fce8738f0ae986b021a0dfea03945923a66618a9938528524d8c70",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/lib/npc-repair-service.ts",
+      "git_blob": "636bef809c3612af7ee7db6b82e2229c57f74dbc",
+      "bytes": 24646,
+      "committed_sha256": "d87f3d6ef92194dd88d6634cec74b4b6ed7bcb937a1a4c949102b9820f023e76",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "git_blob": "d7a326925e53903ac3eef26a9509c9f60fa89bf3",
+      "bytes": 253973,
+      "committed_sha256": "aa381d6eb69a1de9c7b208b0eb84327b01b24ebf2520dd28039bf2cdeb1220a7",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/scripts/test-hunting-repair-page.mjs",
+      "git_blob": "4c27c94bc139678ef53362464e2e5b5716b5d663",
+      "bytes": 37602,
+      "committed_sha256": "1d6af1389ff2b87059a47763a6165bb82e542e83179df0c6b987818a087ac63f",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/scripts/test-hunting-repair-ui.mjs",
+      "git_blob": "cd5d7c23d8e7434cea7487384b1614b5eded8777",
+      "bytes": 18221,
+      "committed_sha256": "15222c3229e373d6ca89c8b87d7b73eda7d5436c1ff80653c88d1f5a61fa0df0",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/scripts/test-hunting-repair-wallet.mjs",
+      "git_blob": "73998c015030fd7cfe21fb8062ecacfa4dce7000",
+      "bytes": 21391,
+      "committed_sha256": "85997a9e440fcd5739e23a0ebbaba1d36ea2be5b62bae146bc384307023f5cdf",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/scripts/test-npc-shop-surface-integration.mjs",
+      "git_blob": "5898e1169ce27f609f41e66417431f575ef8d735",
+      "bytes": 69513,
+      "committed_sha256": "eaf3d42c9740d1abf649d15c1b9947521572fb362fc6c45c1d1d6c405a819571",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "git_blob": "50392e164c88404525f17e8735c8b0869977335e",
+      "bytes": 757091,
+      "committed_sha256": "50fa8b22f7ad817cebfbf0ce3d418f3c78b70475a9dbdca5bea9190935b2174d",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/scripts/test-storage-page-gate.mjs",
+      "git_blob": "81457e4565ee31caa790968011f1264f3c5cafc6",
+      "bytes": 141422,
+      "committed_sha256": "c9c594e83c562e348f80b91458d81e9cbe41bec2c63bf8617cefecdbcb0f6e40",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/scripts/test-storage-surface-integration.mjs",
+      "git_blob": "70b7d425cfe8540ff4f0896fd5b3305a0183348d",
+      "bytes": 47277,
+      "committed_sha256": "44b479b77e948a4864e9508f95a578c5c88c475f274cfc23973224595ceab982",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/AGENT-ORCHESTRATION.md",
+      "git_blob": "2929be46ae7a10a34ca9e9eb14ceccb73229a966",
+      "bytes": 368354,
+      "committed_sha256": "d7fd715320cd23f78174ab05ec79a72e5e2a240dfc7c301d07fc543a0d9b1aba",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/AGENT-TASK-QUEUE.md",
+      "git_blob": "27498281bf72830c20884954450b49b0d555ab2d",
+      "bytes": 986466,
+      "committed_sha256": "638e0cc01b606d8079e8f578d7ce8a67679325c40e763353a7fc10a2da20effe",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/BACKEND-1TO1-PROGRESS.md",
+      "git_blob": "90bb5229644384178ddf0fffa515c3b0a675f386",
+      "bytes": 604500,
+      "committed_sha256": "9c4be38a898ae07ae5f0e70f791da7f79319316a58859cc10e13198b55f2581b",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "git_blob": "99b514faca5b049e469aa82c9aec8fb660deab83",
+      "bytes": 1105655,
+      "committed_sha256": "3bf889f48dd9f31aafff52057fe9e6bc23aec78bad34e7d659ea1e23d14aecf7",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/CRYSTAL-SERVER-PARITY.md",
+      "git_blob": "a6b249e3651207a6706ca40952fcac69e66fa130",
+      "bytes": 546325,
+      "committed_sha256": "6c7cdc17cd3b35699002bb5c3f6bcce671f1b1df2ba8595069f581d39447fe20",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/HUNTING-PERMIT-ECONOMY.md",
+      "git_blob": "3d0c4fc1db249db4d70aec406e06fcbf907b6dff",
+      "bytes": 32026,
+      "committed_sha256": "dd2e3de85ce20f0cf7e5e3a78865eeef619474472ace3f7aa33a02771695ef34",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/HUNTING-SOURCE-INTEGRATION.md",
+      "git_blob": "0cb088684e16a97f1208988978939dafcbba25ab",
+      "bytes": 21224,
+      "committed_sha256": "9758ccf4d6aa2821d5d9d939440e14ab8003dbde7ab6d639117af0e6ebaef091",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/generated/hunting-economy/acceptance-20261020-repair-ui.json",
+      "git_blob": "8bf835da2ed652053aab9f69a0b4080a807089d0",
+      "bytes": 60994,
+      "committed_sha256": "99c6d31e4d662a0788472105ee20ca24cf51631855643b20d1903fb6be4ad76c",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/generated/hunting-economy/sources-20261020-repair-ui.json",
+      "git_blob": "41624ad658577a7d3f68cd1608ca5a0b04407fe0",
+      "bytes": 174453,
+      "committed_sha256": "50fbf9237e4d95685df301f3945d469cbd71dc109434cf1b7def2103511b7729",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    }
+  ]
+}
