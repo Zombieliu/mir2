@@ -312,6 +312,19 @@ impl Fixture {
         let response =
             wire::parse_server_frame(&wire::encode_server_frame(&dispatch.frame).unwrap()).unwrap();
         response.validate_for_request(&request).unwrap();
+        assert_eq!(response, dispatch.frame);
+        if !matches!(
+            &dispatch.frame.reply,
+            wire::Reply::Committed {
+                reload_required: false,
+                ..
+            }
+        ) {
+            assert!(
+                dispatch.frame.snapshot.is_none(),
+                "only a current committed owner turn may carry a snapshot"
+            );
+        }
         dispatch
     }
     fn quote(&mut self, request_id: u64) -> wire::Quote {
@@ -550,6 +563,25 @@ fn charged_roundtrip(shared: bool) {
         (970, 970)
     );
     assert_eq!(live.gold, before.gold);
+    let captured = confirmed
+        .frame
+        .snapshot
+        .as_ref()
+        .expect("real committed owner turn snapshot");
+    let live_projection = serde_json::to_value(live.client_view()).unwrap();
+    assert_eq!(captured["gold"], json!(before.gold));
+    assert_eq!(
+        captured["playerObjectId"],
+        live_projection["playerObjectId"]
+    );
+    assert_eq!(
+        captured["equipmentItems"],
+        live_projection["equipmentItems"]
+    );
+    assert_eq!(
+        captured["inventoryItems"],
+        live_projection["inventoryItems"]
+    );
     for (id, action) in [
         (
             5,
@@ -570,6 +602,14 @@ fn charged_roundtrip(shared: bool) {
         );
         assert!(replay.packets.is_empty());
         assert!(!replay.close_session);
+        let replay_snapshot = replay.frame.snapshot.as_ref().expect(
+            "Query/replay captures the current owner snapshot without replaying old packets",
+        );
+        assert_eq!(
+            replay_snapshot["equipmentItems"],
+            captured["equipmentItems"]
+        );
+        assert_eq!(replay_snapshot["gold"], json!(before.gold));
     }
     assert_eq!(
         db.balance(),
@@ -630,12 +670,79 @@ fn hunting_repair_carrier_postgres_free_source_without_wallet_or_burn() {
         matches!(query.frame.reply,wire::Reply::Committed {receipt:actual,replayed:true,reload_required:false} if actual==receipt)
     );
     assert!(query.packets.is_empty());
+    assert!(confirmed.frame.snapshot.is_some());
+    assert!(query.frame.snapshot.is_some());
     assert_eq!(db.balance(), None);
     assert_eq!(db.count("hunting_economy_burn_events"), 0);
     assert_eq!(db.count("hunting_repair_results"), 1);
     let after = db.durable();
     assert_eq!(after.revision, before.revision + 1);
     assert_eq!(after.gold, before.gold);
+}
+
+#[test]
+#[ignore = "requires explicitly isolated loopback PostgreSQL acceptance database"]
+fn hunting_repair_carrier_postgres_shared_tail_and_snapshot_failures_keep_receipt_without_sync() {
+    let mut db = Fixture::new(true, false);
+    let before = db.durable();
+    let quote = db.quote(1);
+    let account = db.account.clone();
+    db.session
+        .set_hunting_repair_owner_turn_test_fault(1)
+        .unwrap();
+    let committed = db.dispatch(
+        Some(&account),
+        2,
+        wire::Action::Confirm {
+            quote_id: quote.quote_id.clone(),
+        },
+    );
+    let receipt = match &committed.frame.reply {
+        wire::Reply::Committed {
+            receipt,
+            replayed: false,
+            reload_required: false,
+        } => receipt.clone(),
+        reply => panic!("actual commit must survive failed Shared projection: {reply:?}"),
+    };
+    assert!(committed.frame.snapshot.is_none() && !committed.close_session);
+    assert_eq!(db.durable().revision, before.revision + 1);
+    assert_eq!(
+        db.balance(),
+        Some((FUNDING - quote.cost_bound_gold.get()) as i64)
+    );
+    db.session
+        .set_hunting_repair_owner_turn_test_fault(2)
+        .unwrap();
+    let no_snapshot = db.dispatch(
+        Some(&account),
+        3,
+        wire::Action::Query {
+            quote_id: quote.quote_id.clone(),
+        },
+    );
+    assert!(
+        matches!(&no_snapshot.frame.reply, wire::Reply::Committed { receipt: actual, replayed: true, reload_required: false } if actual == &receipt)
+    );
+    assert!(
+        no_snapshot.frame.snapshot.is_none()
+            && no_snapshot.packets.is_empty()
+            && !no_snapshot.close_session
+    );
+    let recovered = db.dispatch(
+        Some(&account),
+        4,
+        wire::Action::Query {
+            quote_id: quote.quote_id,
+        },
+    );
+    assert!(
+        matches!(&recovered.frame.reply, wire::Reply::Committed { receipt: actual, replayed: true, reload_required: false } if actual == &receipt)
+    );
+    assert!(recovered.frame.snapshot.is_some() && recovered.packets.is_empty());
+    assert_eq!(db.count("hunting_repair_results"), 1);
+    assert_eq!(db.count("hunting_economy_burn_events"), 1);
+    assert_eq!(db.durable().revision, before.revision + 1);
 }
 
 #[test]

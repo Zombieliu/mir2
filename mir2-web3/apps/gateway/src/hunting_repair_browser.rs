@@ -4,7 +4,8 @@ use crate::GatewaySession;
 use mir2_client_wire::{hunting_repair as wire, U64};
 use mir2_protocol::ServerPacket;
 use mir2_simulation::{
-    HuntingRepairAction, HuntingRepairExecution, HuntingRepairRejection, HuntingRepairReply,
+    HuntingRepairAction, HuntingRepairExecution, HuntingRepairOwnerTurn, HuntingRepairRejection,
+    HuntingRepairReply,
 };
 
 pub struct BrowserHuntingRepairDispatch {
@@ -46,7 +47,7 @@ fn response(
     packets: Vec<ServerPacket>,
     close_session: bool,
 ) -> Result<BrowserHuntingRepairDispatch, String> {
-    let frame = wire::ServerFrame::new(request, reply).map_err(|error| error.to_string())?;
+    let frame = wire::ServerFrame::new(request, reply, None).map_err(|error| error.to_string())?;
     wire::encode_server_frame(&frame).map_err(|error| error.to_string())?;
     Ok(BrowserHuntingRepairDispatch {
         frame,
@@ -103,6 +104,41 @@ pub(crate) fn frame_from_execution(
     };
     response(request, reply, execution.packets, close_session)
 }
+
+/// Project only the owner turn supplied by the fenced route. A failed or
+/// oversized current projection cannot erase its immutable committed receipt.
+pub(crate) fn frame_from_turn(
+    request: &wire::ClientRequest,
+    turn: HuntingRepairOwnerTurn,
+) -> Result<BrowserHuntingRepairDispatch, String> {
+    let mut dispatch = frame_from_execution(request, turn.repair)?;
+    if matches!(
+        &dispatch.frame.reply,
+        wire::Reply::Committed {
+            reload_required: false,
+            ..
+        }
+    ) {
+        if let Some(snapshot) = turn.snapshot {
+            let projected = crate::session::catch_gateway_panic(
+                "hunting repair browser snapshot projection",
+                || {
+                    let value = serde_json::to_value(snapshot.client_view())
+                        .map_err(|error| error.to_string())?;
+                    let mut frame = dispatch.frame.clone();
+                    frame.snapshot = Some(value);
+                    wire::encode_server_frame(&frame).map_err(|error| error.to_string())?;
+                    Ok::<_, String>(frame)
+                },
+            )
+            .and_then(|result| result);
+            if let Ok(frame) = projected {
+                dispatch.frame = frame;
+            }
+        }
+    }
+    Ok(dispatch)
+}
 pub(crate) fn unknown(
     request: &wire::ClientRequest,
 ) -> Result<BrowserHuntingRepairDispatch, String> {
@@ -153,8 +189,8 @@ pub fn execute_browser_hunting_repair(
             false,
         );
     }
-    match session.execute_hunting_repair_owner(true, owner_action(&request.action)) {
-        Ok(execution) => frame_from_execution(request, execution),
+    match session.execute_hunting_repair_owner_turn(true, owner_action(&request.action)) {
+        Ok(turn) => frame_from_turn(request, turn),
         // Before/after execution cannot be distinguished after a panic or an
         // owner transport failure. Never turn missing evidence into rejection.
         Err(_) => unknown(request),
@@ -181,6 +217,8 @@ mod tests {
         calls: Arc<AtomicUsize>,
         supported: bool,
         unknown: bool,
+        committed: bool,
+        world_reads: Arc<AtomicUsize>,
     }
     impl WorldRuntime for Owner {
         fn as_any(&self) -> &dyn std::any::Any {
@@ -196,6 +234,7 @@ mod tests {
             panic!("typed repair must not fall back to generic or legacy execution")
         }
         fn world_snapshot(&self) -> WorldSnapshot {
+            self.world_reads.fetch_add(1, Ordering::SeqCst);
             self.inner.world_snapshot()
         }
         fn active_identity(&self) -> Option<ActiveSessionIdentity> {
@@ -227,10 +266,22 @@ mod tests {
             let HuntingRepairAction::Query { quote_id } = action else {
                 panic!("expected original query");
             };
+            if self.committed {
+                return Ok(committed_repair(quote_id));
+            }
             Ok(HuntingRepairExecution {
                 reply: HuntingRepairReply::Pending { quote_id },
                 packets: Vec::new(),
             })
+        }
+        fn execute_hunting_repair_owner_turn(
+            &mut self,
+            authenticated: bool,
+            action: HuntingRepairAction,
+        ) -> Result<HuntingRepairOwnerTurn, String> {
+            let repair = self.execute_hunting_repair_owner(authenticated, action)?;
+            let snapshot = self.committed.then(|| self.world_snapshot());
+            Ok(HuntingRepairOwnerTurn { repair, snapshot })
         }
     }
     fn session(
@@ -251,6 +302,8 @@ mod tests {
             calls: calls.clone(),
             supported,
             unknown,
+            committed: false,
+            world_reads: Arc::new(AtomicUsize::new(0)),
         });
         let gate = with_authority.then(|| authority.clone() as SharedZoneOwnerLeaseAuthority);
         (
@@ -269,6 +322,24 @@ mod tests {
             },
         )
         .unwrap()
+    }
+    fn committed_repair(quote_id: String) -> HuntingRepairExecution {
+        HuntingRepairExecution {
+            reply: HuntingRepairReply::Committed {
+                receipt: HuntingRepairReceiptView {
+                    quote_id,
+                    cost_bound_gold: 0,
+                    free: true,
+                    operation_key: "original-op".into(),
+                    request_digest: "original-digest".into(),
+                    business_day: 1,
+                    committed_at_ms: 1,
+                },
+                replayed: true,
+                reload_required: false,
+            },
+            packets: Vec::new(),
+        }
     }
     #[test]
     fn real_gateway_boundary_requires_current_account_and_local_owner_guard() {
@@ -357,7 +428,8 @@ mod tests {
         assert!(dispatch.close_session);
         let encoded = wire::encode_server_frame(&dispatch.frame).unwrap();
         assert!(!encoded.contains("wallet"));
-        assert!(!encoded.contains("snapshot"));
+        assert!(dispatch.frame.snapshot.is_none());
+        assert!(encoded.contains("\"snapshot\":null"));
     }
     #[test]
     fn unknown_retains_original_query_without_closing_or_packets() {
@@ -373,6 +445,115 @@ mod tests {
         assert!(
             matches!(dispatch.frame.reply, wire::Reply::Unknown { quote_id:Some(id) } if id=="cd".repeat(32))
         );
+    }
+
+    #[test]
+    fn owner_turn_snapshot_is_immutable_and_oversize_keeps_original_commit() {
+        let request = query();
+        let mut snapshot = InProcessWorldRuntime::new(SimulationConfig::default()).world_snapshot();
+        snapshot.gold = 123;
+        let captured = frame_from_turn(
+            &request,
+            HuntingRepairOwnerTurn {
+                repair: committed_repair("ab".repeat(32)),
+                snapshot: Some(snapshot.clone()),
+            },
+        )
+        .unwrap();
+        assert_eq!(captured.frame.snapshot.as_ref().unwrap()["gold"], 123);
+        snapshot.gold = 999;
+        assert_eq!(captured.frame.snapshot.as_ref().unwrap()["gold"], 123);
+        snapshot.map_title = Some("x".repeat(wire::MAX_FRAME_BYTES));
+        let limited = frame_from_turn(
+            &request,
+            HuntingRepairOwnerTurn {
+                repair: committed_repair("ab".repeat(32)),
+                snapshot: Some(snapshot),
+            },
+        )
+        .unwrap();
+        assert_eq!(limited.frame.reply, captured.frame.reply);
+        assert!(limited.frame.snapshot.is_none() && !limited.close_session);
+        let encoded = wire::encode_server_frame(&limited.frame).unwrap();
+        assert!(encoded.len() < 4096);
+        wire::parse_server_frame(&encoded)
+            .unwrap()
+            .validate_for_request(&request)
+            .unwrap();
+    }
+
+    struct CompletionGuard {
+        authority: Arc<InMemoryZoneOwnerLeaseAuthority>,
+        invoke: bool,
+    }
+    impl ZoneOwnerLeaseAuthority for CompletionGuard {
+        fn owner_lease(&self, zone: &ZoneId) -> crate::routing::ZoneOwnerLease {
+            self.authority.owner_lease(zone)
+        }
+        fn supports_durable_npc_purchase_lease(&self) -> bool {
+            true
+        }
+        fn with_durable_npc_purchase_lease(
+            &self,
+            lease: &crate::routing::ZoneOwnerLease,
+            operation: &mut (dyn FnMut() + Send),
+        ) -> Result<(), String> {
+            if self.invoke {
+                self.authority
+                    .with_durable_npc_purchase_lease(lease, operation)?;
+            }
+            Err("controlled guard completion/delivery failure".into())
+        }
+    }
+
+    #[test]
+    fn actual_owner_turn_retains_captured_commit_after_guard_release_failure_without_reread() {
+        for invoke in [true, false] {
+            let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+            let zone = ZoneId::primary();
+            let lease = authority.owner_lease(&zone);
+            let calls = Arc::new(AtomicUsize::new(0));
+            let reads = Arc::new(AtomicUsize::new(0));
+            let runtime = Box::new(Owner {
+                inner: InProcessWorldRuntime::new(SimulationConfig::default()),
+                calls: calls.clone(),
+                supported: true,
+                unknown: false,
+                committed: true,
+                world_reads: reads.clone(),
+            });
+            let gate =
+                Arc::new(CompletionGuard { authority, invoke }) as SharedZoneOwnerLeaseAuthority;
+            let mut session = GatewaySession::with_routed_world_runtime_and_owner_authority(
+                zone,
+                lease,
+                Some(gate),
+                runtime,
+            );
+            let before_reads = reads.load(Ordering::SeqCst);
+            let dispatch =
+                execute_browser_hunting_repair(&mut session, Some("owner"), true, &query())
+                    .unwrap();
+            if invoke {
+                assert!(matches!(
+                    &dispatch.frame.reply,
+                    wire::Reply::Committed {
+                        reload_required: false,
+                        ..
+                    }
+                ));
+                assert!(dispatch.frame.snapshot.is_some());
+            } else {
+                assert!(matches!(&dispatch.frame.reply, wire::Reply::Unknown { .. }));
+                assert!(dispatch.frame.snapshot.is_none());
+            }
+            assert_eq!(calls.load(Ordering::SeqCst), usize::from(invoke));
+            assert_eq!(
+                reads.load(Ordering::SeqCst) - before_reads,
+                usize::from(invoke),
+                "no outer Session snapshot may repair a lost turn"
+            );
+        }
     }
 }
 

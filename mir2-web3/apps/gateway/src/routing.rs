@@ -323,6 +323,11 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
     ) -> Result<mir2_simulation::HuntingRepairExecution, String> {
         Err("typed hunting repair owner route is unavailable".into())
     }
+    fn execute_hunting_repair_owner_turn(&self, _runtime: &mut ZoneRuntimeHandle,
+        _lease: &ZoneOwnerLease, _authenticated: bool, _action: mir2_simulation::HuntingRepairAction,
+    ) -> Result<mir2_simulation::HuntingRepairOwnerTurn, String> {
+        Err("typed hunting repair owner turn route is unavailable".into())
+    }
 
     fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool { false }
 
@@ -1043,6 +1048,26 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
         match result {
             Some(result) => result,
             None => Err(guarded.err().unwrap_or_else(|| "hunting repair owner guard did not execute".into())),
+        }
+    }
+    fn execute_hunting_repair_owner_turn(&self, runtime: &mut ZoneRuntimeHandle,
+        lease: &ZoneOwnerLease, authenticated: bool, action: mir2_simulation::HuntingRepairAction,
+    ) -> Result<mir2_simulation::HuntingRepairOwnerTurn, String> {
+        if !authenticated || !self.supports_hunting_repair_owner(runtime) {
+            return Err("typed hunting repair requires authenticated local owner authority".into());
+        }
+        let authority = self.owner_lease_authority.as_ref().ok_or("hunting repair owner authority is unavailable")?;
+        let mut result = None;
+        let guarded = crate::session::catch_gateway_panic("hunting repair owner turn epoch guard", || {
+            authority.with_durable_npc_purchase_lease(lease, &mut || {
+                // The full turn, including its own projection, stays inside
+                // the real epoch lock. Never reread a snapshot after release.
+                result = Some(runtime.execute_hunting_repair_owner_turn(authenticated, action.clone()));
+            })
+        }).and_then(|result| result);
+        match result {
+            Some(result) => result,
+            None => Err(guarded.err().unwrap_or_else(|| "hunting repair owner turn guard did not execute".into())),
         }
     }
 
@@ -8773,6 +8798,8 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             fail_next_npc_teleport_checkpoint_restore: false,
             #[cfg(test)]
             npc_gold_buy_after_capture_hook: None,
+            #[cfg(test)]
+            hunting_repair_owner_turn_test_fault: 0,
         })
     }
 }
@@ -9437,6 +9464,8 @@ struct SharedInProcessZoneSessionRuntime {
     fail_next_npc_teleport_checkpoint_restore: bool,
     #[cfg(test)]
     npc_gold_buy_after_capture_hook: Option<fn(&mut SharedInProcessZoneSessionRuntime)>,
+    #[cfg(test)]
+    hunting_repair_owner_turn_test_fault: u8,
 }
 
 pub(crate) fn shared_zone_movement_ingress(
@@ -9558,6 +9587,15 @@ pub(crate) fn set_hunting_repair_test_fault(runtime: &mut ZoneRuntimeHandle, fau
         return local.set_hunting_repair_test_fault(fault);
     }
     Err("repair test fault requires actual local runtime".into())
+}
+
+#[cfg(test)]
+pub(crate) fn set_hunting_repair_owner_turn_test_fault(runtime: &mut ZoneRuntimeHandle, fault: u8) -> Result<(), String> {
+    if !matches!(fault, 1 | 2) { return Err("invalid repair owner turn test fault".into()); }
+    let shared = runtime.as_mut().as_any_mut().downcast_mut::<SharedInProcessZoneSessionRuntime>()
+        .ok_or("repair owner turn fault requires a real Shared runtime")?;
+    shared.hunting_repair_owner_turn_test_fault = fault;
+    Ok(())
 }
 
 pub(crate) fn persist_zone_teardown_checkpoint(
@@ -15770,6 +15808,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     fn execute_hunting_repair_owner(&mut self, authenticated: bool,
         action: mir2_simulation::HuntingRepairAction,
     ) -> Result<mir2_simulation::HuntingRepairExecution, String> {
+        self.execute_hunting_repair_owner_turn(authenticated, action).map(|turn| turn.repair)
+    }
+    fn execute_hunting_repair_owner_turn(&mut self, authenticated: bool,
+        action: mir2_simulation::HuntingRepairAction,
+    ) -> Result<mir2_simulation::HuntingRepairOwnerTurn, String> {
         if !authenticated { return Err("hunting repair requires authentication".into()); }
         self.validate_durable_npc_actor()?;
         // Shared Zone state wins at both quote and confirmation boundaries.
@@ -15780,19 +15823,40 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         // Capture the immutable result before optional shared projection work.
         // A poisoned projection mutex must not erase an established receipt.
         let completed = execution.clone();
+        #[cfg(test)]
+        let test_fault = std::mem::replace(&mut self.hunting_repair_owner_turn_test_fault, 0);
         if matches!(&execution.reply, mir2_simulation::HuntingRepairReply::Committed { reload_required: true, .. }) {
             let cleanup = crate::session::catch_gateway_panic("hunting repair retired Zone presence", || self.remove_presence());
             if let Ok(packets) = cleanup { execution.packets.extend(packets); }
-            return Ok(execution);
+            return Ok(mir2_simulation::HuntingRepairOwnerTurn { repair: execution, snapshot: None });
         }
         let projected = crate::session::catch_gateway_panic("hunting repair shared projection", || {
+            #[cfg(test)]
+            if test_fault == 1 { panic!("controlled repair Shared projection failure after actual execution"); }
             self.validate_durable_npc_actor()?;
             self.sync_current_zone_vitals_from_inner();
             self.normalize_owner_state_packets(&mut execution.packets);
             self.publish_ranking_inspect_projection();
             Ok::<(), String>(())
         }).and_then(|result| result);
-        match projected { Ok(()) => Ok(execution), Err(_) => Ok(completed) }
+        if projected.is_err() {
+            return Ok(mir2_simulation::HuntingRepairOwnerTurn { repair: completed, snapshot: None });
+        }
+        let snapshot = if matches!(&execution.reply, mir2_simulation::HuntingRepairReply::Committed {
+            reload_required: false, ..
+        }) {
+            // A completed receipt alone is insufficient: capture only after
+            // this Shared runtime's tail succeeded, using its real Zone view.
+            crate::session::catch_gateway_panic("hunting repair shared owner snapshot", || {
+                #[cfg(test)]
+                if test_fault == 2 { panic!("controlled repair Shared snapshot capture failure"); }
+                self.validate_durable_npc_actor()?;
+                let snapshot = self.world_snapshot();
+                self.validate_durable_npc_actor()?;
+                Ok::<_, String>(snapshot)
+            }).and_then(|result| result).ok()
+        } else { None };
+        Ok(mir2_simulation::HuntingRepairOwnerTurn { repair: execution, snapshot })
     }
     fn requires_local_hunting_source_authority(&self) -> bool {
         self.inner.requires_local_hunting_source_authority()
@@ -30917,6 +30981,7 @@ mod tests {
             next_ranking_inspect_ms: 0,
             fail_next_npc_teleport_checkpoint_restore: false,
             npc_gold_buy_after_capture_hook: None,
+            hunting_repair_owner_turn_test_fault: 0,
         }
     }
 

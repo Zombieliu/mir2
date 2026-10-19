@@ -22,6 +22,14 @@ use serde::{Deserialize, Serialize};
 
 pub const NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2: u16 = 2;
 
+/// A repair result and optional current projection captured in the same local
+/// owner turn. The receipt remains valid when projection cannot complete.
+#[derive(Debug, Clone)]
+pub struct HuntingRepairOwnerTurn {
+    pub repair: crate::HuntingRepairExecution,
+    pub snapshot: Option<WorldSnapshot>,
+}
+
 /// Server-generated identity for one native GameShop transaction.
 ///
 /// `client_request_id` is receipt correlation only. The opaque 256-bit
@@ -313,6 +321,14 @@ pub trait WorldRuntime: Send + Sync {
         _action: crate::HuntingRepairAction,
     ) -> Result<crate::HuntingRepairExecution, String> {
         Err("typed hunting repair owner is unavailable".into())
+    }
+
+    /// Implementations must capture only their own completed, current owner
+    /// projection. An old typed method alone does not grant this capability.
+    fn execute_hunting_repair_owner_turn(&mut self, _authenticated: bool,
+        _action: crate::HuntingRepairAction,
+    ) -> Result<HuntingRepairOwnerTurn, String> {
+        Err("typed hunting repair owner turn is unavailable".into())
     }
 
     /// Resolve the original pending repair before capturing a teardown save.
@@ -1103,6 +1119,20 @@ impl WorldRuntime for InProcessWorldRuntime {
         if !authenticated { return Err("hunting repair requires authentication".into()); }
         if !self.supports_hunting_repair_owner() { return Err("typed hunting repair owner is unavailable".into()); }
         Ok(self.session.execute_hunting_repair(action))
+    }
+    fn execute_hunting_repair_owner_turn(&mut self, authenticated: bool,
+        action: crate::HuntingRepairAction,
+    ) -> Result<HuntingRepairOwnerTurn, String> {
+        let repair = self.execute_hunting_repair_owner(authenticated, action)?;
+        // The Session has just verified/applied this result against its real
+        // StartGame incarnation and current save revision. There is no second
+        // command entry between that check and this same-World projection.
+        let snapshot = if matches!(&repair.reply, crate::HuntingRepairReply::Committed {
+            reload_required: false, ..
+        }) {
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| self.session.world_snapshot())).ok()
+        } else { None };
+        Ok(HuntingRepairOwnerTurn { repair, snapshot })
     }
     fn requires_local_hunting_source_authority(&self) -> bool {
         self.session.requires_local_hunting_source_authority()

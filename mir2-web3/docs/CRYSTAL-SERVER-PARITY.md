@@ -2,7 +2,7 @@
 
 ## 狩猎许可定制经济边界（2026-10-20）
 
-第四阶段已验证真实NPC修理服务端来源：Quote→Confirm→Query、零费用结果、共同checkpoint/扣款/销毁和Unknown/断线恢复，含真实InProcess/Shared网关5项新增PG；详见 [第四阶段证据](generated/hunting-economy/acceptance-20261020-repair-source.json)。旧UID包在启用新经济时拒绝且不回退旧金币。现有游戏UI、快照同步及物理客户端/网络验收仍待，不能据此宣称全服销毁来源覆盖或生产上线；本服定制规则不增加Crystal1:1闭合项。默认关闭、goal active、原生无Docker/WSL/虚拟机，PG连接上限保持30。
+第五阶段已验证修理同owner回合快照载体、required nullable snapshot及已知提交的失败保留语义，另有尚未接窗口的纯Web client adapter。最终26共137项去重通过（Gateway62、wire33、Node42；其中10项真实原生PG），RecordingSink3项属于实际发送helper验收，未使用物理WebSocket；详见 [第五阶段证据](generated/hunting-economy/acceptance-20261020-repair-sync.json)。realmInfo静态hunting-v1不会因政策关闭回退legacy；旧UID包仍不能确认新报价。第四阶段真实来源326项/81PG保留为历史范围。现有Page/NpcRepairService/Shop/Shell、费用展示、实际snapshot apply及物理客户端/网络仍待，不新建网页；没有全前端构建、全workspace、全服覆盖或生产资格结论，本服定制规则不增加Crystal1:1闭合项。默认关闭、goal active、原生无Docker/WSL/虚拟机、PG30、串行Cargo jobs2及三个外来QA JSON保持。
 
 狩猎许可持续目标active：经济核心外已接无物品一次性任务的同PG完整奖励/绑定入账和原请求恢复，原生Grafana实际导入/TLS查询/表达式与合成图表抽查通过，见 [实现及验收边界](HUNTING-PERMIT-ECONOMY.md)。K=0.1、基准0.72/硬上限1.08许可及默认禁用保持；当前真实来源限本地未复制权威，禁止通过旧命令副本/晋升回退legacy金币。物品/周期任务、种植挖矿、三层真实销毁、材料传播、全服指标、通知与发布资格尚未闭合。用户禁止Docker，后续原生运行；线上资产、旧金币定性和既有Crystal结论保持，本服定制规则不计新增Crystal1:1行为。
 

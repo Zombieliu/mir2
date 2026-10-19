@@ -8950,6 +8950,7 @@ fn realm_info_event(config: &GatewayConfig) -> Value {
         "payload": {
             "schema": "mir2-realm-handshake/1",
             "realmId": realm_id,
+            "npcRepairMode": if config.hunting_economy_realm.is_some() { "hunting-v1" } else { "legacy" },
             "profileId": profile_id,
             "profileVersion": profile.map(|profile| profile.version).unwrap_or(0),
             "acceptanceLevel": profile.map(|profile| profile.acceptance_level),
@@ -8990,18 +8991,24 @@ where
     Ok(())
 }
 
-/// Encode the immutable typed result before publishing this turn's repair
-/// deltas. Recovery never rereads an inventory or replays old repair packets.
+/// A complete owner snapshot finishes its original repair deltas so those
+/// deltas cannot invalidate the just-applied full projection. Receipt-only
+/// turns retain owner-first order; neither path rereads Session state.
 async fn send_hunting_repair_dispatch<S>(sender: &AsyncMutex<S>,
     dispatch: &crate::hunting_repair_browser::BrowserHuntingRepairDispatch,
 ) -> Result<(), String>
 where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
     let encoded = mir2_client_wire::hunting_repair::encode_server_frame(&dispatch.frame)
         .map_err(|error| error.to_string())?;
-    sender.lock().await.send(Message::Text(encoded.into())).await.map_err(|error| error.to_string())?;
-    for packet in &dispatch.packets {
-        sender.lock().await.send(Message::Text(server_packet_to_event(packet).to_string().into()))
-            .await.map_err(|error| error.to_string())?;
+    // Validation and complete frame encoding precede every ordinary packet.
+    let owner = Message::Text(encoded.into());
+    let (before, after) = if dispatch.frame.snapshot.is_some() {
+        (None, Some(owner))
+    } else { (Some(owner), None) };
+    let packets = dispatch.packets.iter().map(|packet|
+        Message::Text(server_packet_to_event(packet).to_string().into()));
+    for message in before.into_iter().chain(packets).chain(after) {
+        sender.lock().await.send(message).await.map_err(|error| error.to_string())?;
     }
     Ok(())
 }
@@ -13094,6 +13101,81 @@ mod tests {
                 assert!(events(&sink).as_slice() == &frame_first[..fail_at], "frame-first send failure preserves original prefix");
             }
         }
+
+        // Carrier/send boundary only: the receipt is a controlled typed
+        // specimen; the current snapshot uses the real client-view projector.
+        fn repair_dispatch(with_snapshot: bool) -> crate::hunting_repair_browser::BrowserHuntingRepairDispatch {
+            use mir2_client_wire::hunting_repair as repair_wire;
+            use mir2_simulation::WorldRuntime;
+            let quote_id = "ab".repeat(32);
+            let request = repair_wire::ClientRequest::new(U64::new(7), repair_wire::Action::Confirm {
+                quote_id: quote_id.clone(),
+            }).unwrap();
+            let snapshot = with_snapshot.then(|| {
+                let snapshot = InProcessWorldRuntime::new(SimulationConfig::default()).world_snapshot();
+                serde_json::to_value(snapshot.client_view()).unwrap()
+            });
+            crate::hunting_repair_browser::BrowserHuntingRepairDispatch {
+                frame: repair_wire::ServerFrame::new(&request, repair_wire::Reply::Committed {
+                    receipt: repair_wire::Receipt {
+                        quote_id, cost_bound_gold: U64::new(7), free: false,
+                        operation_key: "original-repair-operation".into(), request_digest: "original-repair-digest".into(),
+                        business_day: 1, committed_at_ms: 1,
+                    },
+                    replayed: false, reload_required: false,
+                }, snapshot).unwrap(),
+                packets: vec![ServerPacket::RepairItem { unique_id: 0 },
+                    ServerPacket::ItemRepaired { unique_id: 0, current_dura: 970, max_dura: 970 }],
+                close_session: false,
+            }
+        }
+
+        #[tokio::test]
+        async fn hunting_repair_dispatch_snapshot_finishes_original_packets() {
+            let dispatch = repair_dispatch(true);
+            let sender = super::super::AsyncMutex::new(RecordingSink::default());
+            super::super::send_hunting_repair_dispatch(&sender, &dispatch).await.unwrap();
+            let sink = sender.lock().await;
+            let observed = events(&sink);
+            let packets: Vec<_> = dispatch.packets.iter().map(super::super::server_packet_to_event).collect();
+            assert_eq!(&observed[..packets.len()], packets.as_slice());
+            assert!(test_packet(&observed[1], "ItemRepaired"));
+            assert_eq!(observed.last().unwrap(), &serde_json::to_value(&dispatch.frame).unwrap());
+            assert_eq!(observed.len(), packets.len() + 1);
+        }
+
+        #[tokio::test]
+        async fn hunting_repair_dispatch_without_snapshot_keeps_owner_first() {
+            let dispatch = repair_dispatch(false);
+            let sender = super::super::AsyncMutex::new(RecordingSink::default());
+            super::super::send_hunting_repair_dispatch(&sender, &dispatch).await.unwrap();
+            let sink = sender.lock().await;
+            let observed = events(&sink);
+            assert_eq!(observed[0], serde_json::to_value(&dispatch.frame).unwrap());
+            assert!(observed[0]["snapshot"].is_null());
+            let packets: Vec<_> = dispatch.packets.iter().map(super::super::server_packet_to_event).collect();
+            assert_eq!(&observed[1..], packets.as_slice());
+            assert_eq!(observed.len(), packets.len() + 1);
+        }
+
+        #[tokio::test]
+        async fn hunting_repair_dispatch_encoding_failure_publishes_nothing() {
+            for invalid in 0..3 {
+                let mut dispatch = repair_dispatch(true);
+                match invalid {
+                    0 => dispatch.frame.request_id = U64::new(0),
+                    1 => if let mir2_client_wire::hunting_repair::Reply::Committed { reload_required, .. } = &mut dispatch.frame.reply {
+                        *reload_required = true;
+                    },
+                    _ => dispatch.frame.snapshot.as_mut().unwrap()["mapTitle"] = Value::String("x".repeat(mir2_client_wire::MAX_SERVER_FRAME_BYTES)),
+                }
+                let sender = super::super::AsyncMutex::new(RecordingSink::default());
+                assert!(super::super::send_hunting_repair_dispatch(&sender, &dispatch).await.is_err());
+                let sink = sender.lock().await;
+                assert_eq!(sink.attempts, 0);
+                assert!(sink.messages.is_empty());
+            }
+        }
     }
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -13117,6 +13199,7 @@ mod tests {
         let event = realm_info_event(&config);
 
         assert_eq!(event["type"], "realmInfo");
+        assert_eq!(event["payload"]["npcRepairMode"], "legacy");
         assert_eq!(event["payload"]["schema"], "mir2-realm-handshake/1");
         assert_eq!(event["payload"]["profileId"], "platinum_176");
         assert_eq!(event["payload"]["profileVersion"], 26);
@@ -13133,6 +13216,16 @@ mod tests {
             event["payload"]["bundleHash"].as_str().map(str::len),
             Some(64)
         );
+    }
+
+    #[test]
+    fn realm_info_hunting_repair_mode_is_required_by_source_binding() {
+        let mut config = SimulationConfig::default();
+        assert_eq!(realm_info_event(&config)["payload"]["npcRepairMode"], "legacy");
+        // Binding is the gate, not a policy/database query. A disabled or
+        // temporarily unavailable policy must never advertise legacy fallback.
+        config.hunting_economy_realm = Some("required-hunting-realm".into());
+        assert_eq!(realm_info_event(&config)["payload"]["npcRepairMode"], "hunting-v1");
     }
 
     #[test]

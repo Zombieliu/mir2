@@ -2,10 +2,10 @@
 
 ## 狩猎许可经济持续目标（2026-10-20）
 
-持续目标active。第四阶段已接通服务端NPC单物品修理的Quote→Confirm→Query、零费用持久分支、完整checkpoint/绑定扣款/真实销毁共同事务，以及Unknown和断线前恢复；真实InProcess/Shared网关5项新增PG通过，见 [第四阶段证据](generated/hunting-economy/acceptance-20261020-repair-source.json)。下一最小队列：现有游戏修理UI接入typed协议、正确展示服务端报价/绑定钱包并同步当前快照，再做物理客户端与真实网络保存重登验收；旧UID包不能暗映射为新报价确认。
+持续目标active。第五阶段已补服务端同owner回合快照与required nullable snapshot帧、Shared尾部/采样失败后保留已知回执，以及纯Web client adapter；最终26的Gateway62、wire33、Node42共137项去重通过，含10项实际原生PG，见 [第五阶段证据](generated/hunting-economy/acceptance-20261020-repair-sync.json)。第四阶段真实修理来源的326项/81PG保留为历史范围。下一最小队列：在现有Page/NpcRepairService/Shop/Shell接入typed Quote→Confirm→Query、服务端费用/绑定钱包展示和真实snapshot apply，再做物理玩家确认、Pending恢复及网络保存重登验收；不新建网页。旧UID包不能暗映射为新报价确认，Pending不得换ID重试，关闭窗口不能丢失未决操作。纯adapter尚未接游戏窗口，没有UI、物理网络、全workspace或全前端构建验收。
 
 
-新钱包/全服池/转换/04:00日结、认证HTTP、可靠partial时序导出及无物品一次性任务已接；原生Grafana完成TLS只读查询/表达式和合成服目标图表抽查。材料绑定传播、物品/周期任务、种植挖矿、其它三层销毁来源、真实市场画像收益、通知/全面板布局及迁移发布资格仍开放，范围见 [实施记录](HUNTING-PERMIT-ECONOMY.md)。K=0.1、基准0.72/硬上限1.08许可和默认禁用保持；仅支持未复制本地权威，远端/副本/晋升在执行前拒绝。未改远程资产或重分类旧gold，不提高Crystal1:1百分比；全服覆盖和生产资格未取得。用户禁止Docker/WSL/虚拟机，后续仅原生，PG连接上限保持30。
+新钱包/全服池/转换/04:00日结、认证HTTP、可靠partial时序导出及无物品一次性任务已接；原生Grafana完成TLS只读查询/表达式和合成服目标图表抽查。材料绑定传播、物品/周期任务、种植挖矿、其它三层销毁来源、真实市场画像收益、通知/全面板布局及迁移发布资格仍开放，范围见 [实施记录](HUNTING-PERMIT-ECONOMY.md)。K=0.1、基准0.72/硬上限1.08许可和默认禁用保持；仅支持未复制本地权威，远端/副本/晋升在执行前拒绝。未改远程资产或重分类旧gold，不提高Crystal1:1百分比；全服覆盖和生产资格未取得。用户禁止Docker/WSL/虚拟机，后续仅原生，PG连接上限保持30，Cargo串行且2个build jobs；三个外来QA JSON保留。
 
 ## 三个聊天的代码进度整理（2026-10-14，北京时间）
 

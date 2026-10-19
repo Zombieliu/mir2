@@ -2,7 +2,7 @@
 
 ## 狩猎经济协调约束（2026-10-20）
 
-第四阶段已由Root集成并实际验证服务端NPC修理来源：Quote→Confirm→Query、零费用持久结果、完整checkpoint/绑定扣款/销毁共同事务，以及Unknown、断线保存前恢复和明确退役。真实InProcess/Shared网关PG链路通过，见 [第四阶段证据](generated/hunting-economy/acceptance-20261020-repair-source.json)。现有游戏UI接线、同回合快照同步和物理客户端/网络验收仍待，不宣称已上线。Root继续负责串行原生Cargo、证据与提交，限定写集释放后再分配；三个外来QA JSON保留。下一队列见 [来源接线计划](HUNTING-SOURCE-INTEGRATION.md)，完整goal active、默认关闭；不运行Docker/WSL/虚拟机，不干扰游戏或修改虚拟化设置。
+第五阶段已由Root集成修理同owner回合快照载体和纯Web client adapter：已知提交在Shared尾部或快照失败时保留原回执及显式null，Pending只能查询原报价，realmInfo静态绑定hunting-v1以阻止政策关闭时回退。最终26定向验收137项去重通过（Gateway62、wire33、Node42；其中10项实际原生PG），见 [第五阶段证据](generated/hunting-economy/acceptance-20261020-repair-sync.json)。Page、NpcRepairService、Shop、Shell及实际snapshot apply尚未接入；没有UI、物理网络或全前端构建验收。第四阶段真实修理来源及326项/81PG保留为历史范围。Root继续负责串行原生Cargo、2个build jobs、证据与提交，限定写集释放后再分配；三个外来QA JSON保留。下一队列在现有游戏窗口完成typed报价/确认/查询和费用展示，不新建网页；详见 [来源接线计划](HUNTING-SOURCE-INTEGRATION.md)。完整goal active、默认关闭，不运行Docker/WSL/虚拟机，不干扰游戏或修改虚拟化设置。
 
 本轮继续用户明确创建的狩猎许可经济goal；原生PostgreSQL/Grafana验收，PG验收库max_connections保持30，Sim/Gateway的PG回归按逐用例独立进程执行（service仍按4个integration harness批次执行），不提高连接上限。真实一次性无物品任务及NPC修理服务端来源已接；完整复制/晋升仍须可信结果checkpoint和原角色代际，未支持组合在执行前拒绝，不允许副本清realm后发旧金币。当前验收不是全workspace、浏览器或网络整链，也不证明全服资产覆盖；goal保持active，不推断Crystal百分比或生产资格。
 

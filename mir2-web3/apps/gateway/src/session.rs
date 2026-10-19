@@ -615,6 +615,35 @@ impl GatewaySession {
         result
     }
 
+    /// Capture the result and current projection under the same actual owner
+    /// epoch. Browser serialization must only consume this returned bundle.
+    pub fn execute_hunting_repair_owner_turn(&mut self, authenticated: bool,
+        action: mir2_simulation::HuntingRepairAction,
+    ) -> Result<mir2_simulation::HuntingRepairOwnerTurn, String> {
+        let lease = self.zone_owner_lease.clone();
+        self.execute_hunting_repair_owner_turn_with_zone_owner_lease(&lease, authenticated, action)
+    }
+    pub fn execute_hunting_repair_owner_turn_with_zone_owner_lease(&mut self, lease: &ZoneOwnerLease,
+        authenticated: bool, action: mir2_simulation::HuntingRepairAction,
+    ) -> Result<mir2_simulation::HuntingRepairOwnerTurn, String> {
+        self.validate_zone_owner_lease(lease)?;
+        if !authenticated || !self.supports_hunting_repair_owner() {
+            return Err("typed hunting repair requires authenticated local owner authority".into());
+        }
+        let result = catch_gateway_panic("hunting repair gateway owner turn", || {
+            self.zone_owner_command_client.execute_hunting_repair_owner_turn(&mut self.runtime, lease, authenticated, action)
+        }).and_then(|result| result);
+        if matches!(&result, Ok(mir2_simulation::HuntingRepairOwnerTurn {
+            repair: mir2_simulation::HuntingRepairExecution {
+                reply: mir2_simulation::HuntingRepairReply::Committed { reload_required: true, .. }, ..
+            }, ..
+        })) {
+            self.active_identity_binding = None;
+            self.refresh_global_message_identity(None);
+        }
+        result
+    }
+
     pub fn execute_npc_purchase_owner(&mut self, authenticated: bool, action: NpcPurchaseOwnerAction)
         -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
         let lease = self.zone_owner_lease.clone();
@@ -1044,6 +1073,11 @@ impl GatewaySession {
     #[cfg(test)]
     pub(crate) fn set_hunting_repair_test_fault(&mut self, fault: u8) -> Result<(), String> {
         crate::routing::set_hunting_repair_test_fault(&mut self.runtime, fault)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_hunting_repair_owner_turn_test_fault(&mut self, fault: u8) -> Result<(), String> {
+        crate::routing::set_hunting_repair_owner_turn_test_fault(&mut self.runtime, fault)
     }
 
     pub(crate) fn prepare_standard_login_recovery(

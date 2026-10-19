@@ -4,7 +4,7 @@
 
 更新：2026-10-20。用户明确要求本机不用 Docker；开发验收采用原生 PostgreSQL、原生 Grafana，不启动 Docker/WSL/虚拟机。本次启动的 Docker Desktop 进程已退出，服务恢复为停止；未关闭游戏或改动系统虚拟化设置。
 
-当前第四阶段已完成真实NPC修理服务端来源与typed carrier的限定验收，见 [第四阶段证据](generated/hunting-economy/acceptance-20261020-repair-source.json)。现有游戏UI、快照同步及物理客户端/真实网络验证仍待；完整goal active，默认关闭，不代表生产上线或全服资产覆盖。
+当前第五阶段已完成服务端修理同owner回合快照载体和纯Web client adapter的限定验收，见 [第五阶段证据](generated/hunting-economy/acceptance-20261020-repair-sync.json)。最终26共137项去重通过，含10项实际原生PG；现有Page/NpcRepairService/Shop/Shell、费用展示、实际snapshot apply及物理玩家/真实网络验证仍待，不新建网页。纯模块strict TS不代表全前端构建；完整goal active，默认关闭，不代表生产上线或全服资产覆盖。第四阶段的326项/81PG及失败历史保留在下文。
 
 ## 权威边界
 
@@ -42,7 +42,8 @@
 - [x] 普通角色删除与完整账号删除的同事务新钱包保护，非零资产拒删；零余额历史保留与新UUID隔离。
 - [x] 无物品一次性金币任务的同事务真实来源：普通FinishQuest/CallNpc处理器、完整个人奖励checkpoint和绑定入账共同提交；独立PG与正常包分发测试通过。
 - [x] NPC单物品修理的服务端Quote→Confirm→Query、零费用结果、完整checkpoint/绑定扣款/销毁共同事务与Unknown/断线前恢复；真实本地owner及Shared网关PG验收。
-- [ ] 现有游戏修理UI接线、服务端报价/绑定钱包展示、当前快照同步及物理客户端/真实网络保存重登验收。
+- [x] 服务端同owner回合快照与required nullable snapshot帧、已知提交失败保留及纯Web client adapter；限定模块/原生PG验收通过。
+- [ ] 现有Page/NpcRepairService/Shop/Shell的typed报价/确认/查询接线、费用/绑定钱包展示、实际snapshot apply及物理客户端/真实网络保存重登验收；不新建网页。
 - [ ] 种植、挖矿、任务及维护/PVP/沙巴克的可信来源接线；绑定身份贯穿交易、邮件、NPC、合成与丢地。
 - [x] 进程生命周期的04:00调度、空服运行、重启追赶、锁等待/退出有界；不依赖玩家请求。
 - [x] 日结outbox到永久时序版本的幂等导出、提交不明恢复和并发消费；默认仅新钱包partial诊断，ACK与指标/消费回执同事务。
@@ -93,7 +94,7 @@
 
 ## 第三阶段：真实Guild分支与修理事务基础（历史范围）
 
-以下保留第三阶段当时的交付与验证边界；当前修理来源状态以第四阶段为准。
+以下保留第三阶段当时的交付与验证边界；真实修理来源见第四阶段，当前同步载体与纯client adapter见第五阶段。
 
 补齐真实Guild成员的3项原生PG测试：实际共享成员epoch=2，服务端有效EXP属性404，任务基础48EXP得到241EXP，个人4→5级并保留240EXP，Guild得到2EXP跨越45000升级线；完整奖励、Guild源回执和绑定金币共同提交。覆盖普通LogOut/新配置Login/StartGame读回、提交前全回滚、Unknown后更改当前buff仍只恢复原奖励。没有发现需修改任务业务逻辑的缺陷。
 
@@ -107,7 +108,9 @@ NPC修理提取纯`RepairPlan`，保留普通/特殊、背包/装备优先顺序
 
 第三阶段结束时的下一步是带服务端令牌的修理报价/确认/查询、零费用持久结果、完整checkpoint与Unknown恢复；该阶段基础不具备开启真实修理经济或生产发布资格。默认禁用及K=0.1/基准0.72/硬上限1.08许可保持。
 
-## 第四阶段：真实NPC修理来源与typed carrier
+## 第四阶段：真实NPC修理来源与typed carrier（历史范围）
+
+以下保留第四阶段当时的来源及326项去重测试（81项真实原生PG）范围；当前快照载体与纯client adapter状态以第五阶段为准。这两个阶段有回归重叠，不相加作为新增场景数。
 
 `runtime/hunting_repair.rs`与`config_hunting_repair.rs`现在执行真实NPC修理：报价来自原有普通/特殊修理定价与完整`RepairPlan`，绑定原角色PG UUID、DB/realm、会话物品变更见证、完整目标和30秒有效期。客户端Quote只提供UID/类型，Confirm/Query只提供服务器生成的随机quote ID，不提供金额或销毁当量。首次确认重新校验真实NPC/范围/类型/bind、物品见证和完整checkpoint CAS；报价过期和NPC条件不阻挡已提交原结果的授权查询。
 
@@ -126,7 +129,23 @@ Pending/Unknown保留原报价和会话，恢复先查询原结果，不提交�
 
 保留失败与修复：Gateway19的3项PG夹具遗漏真实routing context和PG恢复目录/MAC，修夹具后再验，未绕过登录保护。Sim21整批曾45通过/29失败，原因是PG连接池在单进程中滞留触及30连接上限；保持`max_connections=30`，45项PG改为逐fresh process全部通过。Gateway22的2项新Shared PG误把Windows正常29字节`.mir2-directory-durability`控制文件计为quarantine；只修测试，对该文件精确校验名称/类型/字节，其它文件和隔离结果仍拒绝，Gateway23全部通过，原失败目录和日志保留。
 
-证据见 [第四阶段验收](generated/hunting-economy/acceptance-20261020-repair-source.json)。没有启动Docker/WSL/虚拟机、关闭游戏或提高PG连接上限。下一步是现有修理UI和当前快照同步，再做物理客户端/网络验收；材料、其它来源、复制、全服指标、通知与迁移发布仍开放。默认禁用及K=0.1/基准0.72/硬上限1.08许可不变，完整goal继续active。
+证据见 [第四阶段验收](generated/hunting-economy/acceptance-20261020-repair-source.json)。没有启动Docker/WSL/虚拟机、关闭游戏或提高PG连接上限。第四阶段结束时下一步是现有修理UI和当前快照同步，再做物理客户端/网络验收；材料、其它来源、复制、全服指标、通知与迁移发布仍开放。默认禁用及K=0.1/基准0.72/硬上限1.08许可不变，完整goal继续active。
+
+## 第五阶段：同回合快照载体与纯Web client adapter
+
+修理与快照在同一真实owner回合及epoch guard内采样，typed返回修理结果和该回合的可选快照；Gateway不从外层个人Session另读快照。wire帧必须包含`snapshot`字段，成功可为真实client-view快照，无法提供时明确为null。Shared尾部失败、采样panic、client-view投影或2MiB上限检查失败均保留已知不可变修理回执，不改写为Unknown、不再次执行来源，也不以旧快照替代。
+
+实际发送helper的RecordingSink3项验证：有snapshot时先发送同回合packets再发修理帧；无snapshot时先发保留回执的修理帧；编码失败零发送。此处使用真实发送helper和记录sink，尚未经过物理WebSocket。realmInfo的`npcRepairMode`按realm静态绑定为`hunting-v1`，不会随政策enabled切换回legacy，避免禁用时绕回旧金币修理。
+
+`apps/web/lib/hunting-repair-client.ts`是纯adapter：严格解析原始JSON、规范十进制u64、nullable snapshot及拒绝码；固定物理owner、角色scope和mode，使用同owner不复用的request ID并发布不可变view。Confirm在尝试发送前即进入Pending，发送异常、超时或缺少/应用失败的snapshot都保留原quote，只能Query；关窗或resetView不丢Pending。已知回执不会被后到NotSubmitted抹除，reloadRequired退役且不应用snapshot；跨owner/角色迟到、重复字段及回调重入拒绝。回调后再次校验control和active token，防止回调内超时清理后继续发送或应用旧帧。
+
+Root最终26验收：
+
+- Gateway：25项hunting纯测试、10项真实原生PG（其中6项实际carrier PG），邻接teardown persistence5、zone drain3、NPC purchase21、realm2；共66次执行，按完整测试名去重62项。三个dispatch测试和一个realm测试重复执行不重复计数。
+- client-wire：33项通过。Web adapter：独立Node42/42、模块strict TypeScript及语法检查通过。
+- 本轮合计137项去重测试、141次执行，其中10项真实原生PG；Gateway库、主二进制、ZoneHost检查及限定新增文件格式检查退出0。该数字不与第四阶段326累加，不是全workspace或全前端编译。
+
+证据见 [第五阶段验收](generated/hunting-economy/acceptance-20261020-repair-sync.json)。当前没有接入Page、NpcRepairService、Shop或Shell；snapshot apply只是adapter回调契约，尚未连到真实游戏状态。下一队列在现有修理窗口接typed报价/确认/查询、费用与绑定钱包展示、真实snapshot apply，再验物理玩家确认/拒绝、Pending恢复、断线保存重登，不新建网页。原生运行、PG连接上限30、串行Cargo jobs2及三个外来QA JSON保持；未启动Docker/WSL/虚拟机、未改远程资产，默认关闭、完整goal active，全服覆盖与生产资格仍未取得。
 
 ## 后端接线与交付物
 

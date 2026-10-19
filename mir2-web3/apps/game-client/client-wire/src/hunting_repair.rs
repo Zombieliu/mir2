@@ -2,10 +2,11 @@
 //! confirmation identity; legacy RepairItem and purchase-v1 are not adapters.
 use super::{Opaque32, WireError, U64};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 pub const PROTOCOL_VERSION: u16 = 1;
 pub const MAX_REQUEST_BYTES: usize = 4096;
-pub const MAX_FRAME_BYTES: usize = 16384;
+pub const MAX_FRAME_BYTES: usize = super::MAX_SERVER_FRAME_BYTES;
 type Result<T> = std::result::Result<T, WireError>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -189,14 +190,19 @@ pub struct ServerFrame {
     pub protocol_version: u16,
     pub request_id: U64,
     pub reply: Reply,
+    /// An optional current owner snapshot, captured with this completed turn.
+    /// Explicit null preserves a known receipt without claiming synchronization.
+    #[serde(deserialize_with = "super::required_option")]
+    pub snapshot: Option<Value>,
 }
 impl ServerFrame {
-    pub fn new(request: &ClientRequest, reply: Reply) -> Result<Self> {
+    pub fn new(request: &ClientRequest, reply: Reply, snapshot: Option<Value>) -> Result<Self> {
         let frame = Self {
             wire_type: EnvelopeType::HuntingRepairOwner,
             protocol_version: PROTOCOL_VERSION,
             request_id: request.request_id,
             reply,
+            snapshot,
         };
         frame.validate_for_request(request)?;
         Ok(frame)
@@ -207,7 +213,22 @@ impl ServerFrame {
                 "unsupported repair response protocol or identity",
             ));
         }
-        self.reply.validate()
+        self.reply.validate()?;
+        if self.snapshot.as_ref().is_some_and(|snapshot| {
+            snapshot.is_null()
+                || !matches!(
+                    &self.reply,
+                    Reply::Committed {
+                        reload_required: false,
+                        ..
+                    }
+                )
+        }) {
+            return Err(WireError::Invalid(
+                "repair snapshot requires a completed current owner result",
+            ));
+        }
+        Ok(())
     }
     pub fn validate_for_request(&self, request: &ClientRequest) -> Result<()> {
         self.validate()?;
@@ -282,6 +303,30 @@ mod tests {
     fn id() -> String {
         "ab".repeat(32)
     }
+    fn receipt() -> Receipt {
+        Receipt {
+            quote_id: id(),
+            cost_bound_gold: U64::new(10),
+            free: false,
+            operation_key: "original-repair-operation".into(),
+            request_digest: "original-repair-digest".into(),
+            business_day: 1,
+            committed_at_ms: 1,
+        }
+    }
+    fn committed_frame(reload_required: bool, snapshot: Option<Value>) -> ServerFrame {
+        let request = ClientRequest::new(U64::new(1), Action::Query { quote_id: id() }).unwrap();
+        ServerFrame::new(
+            &request,
+            Reply::Committed {
+                receipt: receipt(),
+                replayed: true,
+                reload_required,
+            },
+            snapshot,
+        )
+        .unwrap()
+    }
     #[test]
     fn strict_carrier_preserves_full_width_ids_and_refuses_client_prices() {
         let request = ClientRequest::new(
@@ -330,6 +375,7 @@ mod tests {
                 replayed: true,
                 reload_required: true,
             },
+            None,
         )
         .unwrap();
         assert_eq!(
@@ -382,6 +428,7 @@ mod tests {
                     expires_at_ms: 30_001,
                 },
             },
+            None,
         )
         .unwrap();
         assert_eq!(
@@ -389,5 +436,144 @@ mod tests {
             frame
         );
         assert!(ClientRequest::new(U64::new(0), request.action).is_err());
+    }
+
+    #[test]
+    fn snapshot_is_required_nullable_and_preserves_known_receipt_without_sync() {
+        for reload_required in [false, true] {
+            let frame = committed_frame(reload_required, None);
+            let encoded = encode_server_frame(&frame).unwrap();
+            assert!(encoded.contains("\"snapshot\":null"));
+            let parsed = parse_server_frame(&encoded).unwrap();
+            assert_eq!(parsed, frame);
+            assert_eq!(parsed.snapshot, None);
+            assert!(matches!(parsed.reply, Reply::Committed {
+                receipt: original,
+                replayed: true,
+                reload_required: actual,
+            } if original == receipt() && actual == reload_required));
+
+            let mut missing = serde_json::to_value(&frame).unwrap();
+            missing.as_object_mut().unwrap().remove("snapshot");
+            assert!(parse_server_frame(&missing.to_string()).is_err());
+            let mut unknown = serde_json::to_value(&frame).unwrap();
+            unknown["snapshotAvailable"] = Value::Bool(false);
+            assert!(parse_server_frame(&unknown.to_string()).is_err());
+        }
+    }
+
+    #[test]
+    fn snapshot_only_attaches_to_nonretired_committed_results() {
+        let snapshot = serde_json::json!({
+            "inventory": [{"uniqueId": u64::MAX.to_string(), "durability": 100}],
+            "equipment": [],
+            "publicValues": [null, true, -1, "英雄"]
+        });
+        let frame = committed_frame(false, Some(snapshot.clone()));
+        let encoded = encode_server_frame(&frame).unwrap();
+        assert_eq!(parse_server_frame(&encoded).unwrap(), frame);
+        assert_eq!(frame.snapshot, Some(snapshot));
+
+        let quote_request = ClientRequest::new(
+            U64::new(2),
+            Action::Quote {
+                unique_id: U64::new(0),
+                special: false,
+            },
+        )
+        .unwrap();
+        let query_request =
+            ClientRequest::new(U64::new(3), Action::Query { quote_id: id() }).unwrap();
+        let illegal = [
+            (
+                &quote_request,
+                Reply::Quoted {
+                    quote: Quote {
+                        quote_id: id(),
+                        unique_id: U64::new(0),
+                        special: false,
+                        cost_bound_gold: U64::new(10),
+                        created_at_ms: 1,
+                        expires_at_ms: 30_001,
+                    },
+                },
+            ),
+            (&query_request, Reply::Pending { quote_id: id() }),
+            (
+                &query_request,
+                Reply::Unknown {
+                    quote_id: Some(id()),
+                },
+            ),
+            (
+                &query_request,
+                Reply::Rejected {
+                    quote_id: Some(id()),
+                    code: Rejection::Unavailable,
+                },
+            ),
+            (
+                &query_request,
+                Reply::Committed {
+                    receipt: receipt(),
+                    replayed: false,
+                    reload_required: true,
+                },
+            ),
+        ];
+        for (request, reply) in illegal {
+            assert!(ServerFrame::new(request, reply.clone(), Some(serde_json::json!({}))).is_err());
+            let mut raw =
+                serde_json::to_value(ServerFrame::new(request, reply, None).unwrap()).unwrap();
+            raw["snapshot"] = serde_json::json!({});
+            assert!(parse_server_frame(&raw.to_string()).is_err());
+        }
+
+        let mut explicit_null = frame;
+        explicit_null.snapshot = Some(Value::Null);
+        assert!(explicit_null.validate().is_err());
+        assert!(encode_server_frame(&explicit_null).is_err());
+    }
+
+    #[test]
+    fn snapshot_rejects_duplicate_plain_escaped_and_nested_keys() {
+        let encoded = encode_server_frame(&committed_frame(false, None)).unwrap();
+        for replacement in [
+            "\"snapshot\":null,\"snapshot\":null",
+            "\"snapshot\":null,\"snapsh\\u006ft\":{}",
+            "\"snapshot\":{\"inventory\":[{\"uid\":1,\"uid\":2}]}",
+            "\"snapshot\":{\"inventory\":[{\"uid\":1,\"u\\u0069d\":2}]}",
+        ] {
+            let invalid = encoded.replacen("\"snapshot\":null", replacement, 1);
+            assert_ne!(invalid, encoded);
+            assert!(parse_server_frame(&invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn snapshot_frames_share_the_two_mebibyte_server_limit() {
+        assert_eq!(MAX_FRAME_BYTES, super::super::MAX_SERVER_FRAME_BYTES);
+        assert_eq!(MAX_FRAME_BYTES, 2 * 1024 * 1024);
+        assert_eq!(MAX_REQUEST_BYTES, 4096);
+        let frame = committed_frame(
+            false,
+            Some(serde_json::json!({"data": "a".repeat(32 * 1024)})),
+        );
+        let encoded = encode_server_frame(&frame).unwrap();
+        assert!(encoded.len() > 16_384);
+        assert_eq!(parse_server_frame(&encoded).unwrap(), frame);
+
+        let exact = format!("{}{}", " ".repeat(MAX_FRAME_BYTES - encoded.len()), encoded);
+        assert_eq!(exact.len(), MAX_FRAME_BYTES);
+        assert_eq!(parse_server_frame(&exact).unwrap(), frame);
+        assert!(parse_server_frame(&format!(" {exact}")).is_err());
+
+        let oversized = committed_frame(
+            false,
+            Some(serde_json::json!({"data": "a".repeat(MAX_FRAME_BYTES)})),
+        );
+        assert!(oversized.validate().is_ok());
+        assert!(encode_server_frame(&oversized).is_err());
+        assert!(parse_server_frame(&serde_json::to_string(&oversized).unwrap()).is_err());
     }
 }

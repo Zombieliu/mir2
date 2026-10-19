@@ -1,0 +1,378 @@
+{
+  "recorded_at_utc": "2026-10-19T20:25:28.6133228Z",
+  "classification": "same-turn authoritative repair snapshot carrier and pure Web client state machine; no Page/UI integration or physical WebSocket acceptance",
+  "parent_commit": "f1d837f626b98596f17fc4d94944a6aa80df2995",
+  "prior_repair_source_commit": "77f7961bda",
+  "branch": "codex/hunting-permit-economy",
+  "goal_complete": false,
+  "production_activated": false,
+  "remote_assets_changed": false,
+  "legacy_gold_reclassified": false,
+  "default_policy": {
+    "schema_version": 1,
+    "policy_version": "hunting-economy-k01-recalibrated-v1-disabled",
+    "enabled": false,
+    "k": {
+      "numerator": 1,
+      "denominator": 10
+    },
+    "conversion_fee": {
+      "numerator": 1,
+      "denominator": 50
+    },
+    "daily_decay": {
+      "numerator": 1,
+      "denominator": 150
+    },
+    "baseline_daily_mint_atoms": 720000,
+    "daily_mint_cap_multiplier": {
+      "numerator": 3,
+      "denominator": 2
+    },
+    "business_timezone": "Asia/Shanghai",
+    "settlement_hour": 4
+  },
+  "scope": {
+    "browser_only_projects_supplied_turn": true,
+    "shared_tail_or_snapshot_failure_preserves_known_receipt_without_sync": true,
+    "full_workspace_tested": false,
+    "realm_mode_by_config_binding_no_disabled_fallback": true,
+    "client_never_reconfirms_unknown_operation": true,
+    "same_turn_repair_and_snapshot_inside_real_owner_lease": true,
+    "physical_socket_browser_gameplay_verified": false,
+    "pure_client_requires_complete_current_snapshot_applied_before_release": true,
+    "nonretired_committed_only_for_nonnull_snapshot": true,
+    "real_send_helper_incremental_packets_before_complete_frame": true,
+    "full_frontend_typecheck_build": false,
+    "page_npc_service_shop_shell_wired": false,
+    "required_nullable_snapshot_and_two_mebibyte_wire_limit": true,
+    "encoding_failure_zero_sends": true,
+    "pure_client_strict_raw_parser_original_quote_recovery_and_callback_reentry": true
+  },
+  "native_constraint": {
+    "docker_processes": 0,
+    "postgres": "native isolated loopback acceptance database",
+    "docker_service_status": "Stopped",
+    "cargo_build_jobs": 2,
+    "pg_connection_cap": 30,
+    "docker_wsl_vm_started": false,
+    "game_stopped": false,
+    "pg_cap_changed": false,
+    "docker_start_mode": "Manual",
+    "pg_cases_fresh_process": true,
+    "virtualization_settings_changed": false
+  },
+  "tests": [
+    {
+      "name": "gateway hunting pure",
+      "ignored": 0,
+      "passed": 25,
+      "failed": 0,
+      "package": "gateway",
+      "sha256": "321d4dca5984da54c95d02522871cfa5e4b31417473483c02c53be0b66ea9f33",
+      "path": "C:/mir2-build/hunting-repair-gateway-pure-tests-26.log",
+      "explicit_native_postgres": 0,
+      "tests": [
+        "hunting_clock::tests::disabled_needs_no_database_realm_or_policy",
+        "hunting_clock::tests::hunting_game_source_binding_is_disabled_by_default_and_requires_one_authority",
+        "hunting_clock::tests::hunting_source_topology_rejects_replication_before_source_activation",
+        "hunting_repair_browser::tests::actual_owner_turn_retains_captured_commit_after_guard_release_failure_without_reread",
+        "hunting_repair_browser::tests::immutable_free_receipt_has_no_historical_wallet_projection",
+        "hunting_repair_browser::tests::owner_turn_snapshot_is_immutable_and_oversize_keeps_original_commit",
+        "hunting_repair_browser::tests::real_gateway_boundary_requires_current_account_and_local_owner_guard",
+        "hunting_repair_browser::tests::unknown_retains_original_query_without_closing_or_packets",
+        "hunting_repair_browser::tests::unsupported_paths_never_execute_and_unknown_preserves_same_session_for_query",
+        "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_registry_rejects_factory_that_drops_runtime_authority",
+        "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_registry_rejects_unknown_factory_before_create",
+        "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_rpc_reads_prelogin_and_rebound_runtime_authority",
+        "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_rpc_rejects_before_every_legacy_transport_entry",
+        "tcp::hunting_source_programmatic_entry_tests::hunting_source_programmatic_public_entrypoints_reject_before_startup",
+        "web::hunting_economy::tests::hunting_http_handlers_require_bearer_and_default_config_never_connects",
+        "web::hunting_economy::tests::identity_bearer_never_uses_cookies_and_revoked_token_cannot_authorize",
+        "web::hunting_economy::tests::strict_http_conversion_parser_and_exact_decimal_range",
+        "web::hunting_economy::tests::wallet_projection_preserves_integers_beyond_javascript_precision",
+        "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_encoding_failure_publishes_nothing",
+        "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_snapshot_finishes_original_packets",
+        "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_without_snapshot_keeps_owner_first",
+        "web::tests::realm_info_hunting_repair_mode_is_required_by_source_binding",
+        "zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_guards_direct_session_dispatch_and_keeps_auth_precedence",
+        "zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_rejects_programmatic_execute_replication_and_promotion",
+        "zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_rejects_serve_before_accepting"
+      ]
+    },
+    {
+      "name": "gateway hunting PG fresh process per case",
+      "ignored": 0,
+      "passed": 10,
+      "failed": 0,
+      "package": "gateway",
+      "sha256": "2c3a4bdacba45876dc057420416a3245cdfc71e8f0a1de4578454bdc78353fbd",
+      "path": "C:/mir2-build/hunting-repair-gateway-postgres-tests-26.log",
+      "explicit_native_postgres": 10,
+      "tests": [
+        "hunting_clock::tests::hunting_clock_postgres_catches_up_without_players_or_duplicate_days",
+        "hunting_clock::tests::hunting_clock_postgres_lock_wait_and_shutdown_are_bounded",
+        "hunting_repair_browser::postgres_tests::hunting_repair_carrier_postgres_free_source_without_wallet_or_burn",
+        "hunting_repair_browser::postgres_tests::hunting_repair_carrier_postgres_inprocess_quote_confirm_query_once",
+        "hunting_repair_browser::postgres_tests::hunting_repair_carrier_postgres_real_shared_quote_confirm_query_once",
+        "hunting_repair_browser::postgres_tests::hunting_repair_carrier_postgres_shared_tail_and_snapshot_failures_keep_receipt_without_sync",
+        "hunting_repair_browser::postgres_tests::hunting_repair_carrier_postgres_shared_unknown_retirement_clears_binding_without_journal",
+        "hunting_repair_browser::postgres_tests::hunting_repair_carrier_postgres_shared_unknown_teardown_retries_before_capture_then_real_login",
+        "web::hunting_economy::tests::hunting_http_postgres_guard_checks_owner_ban_revocation_and_uuid_incarnation",
+        "web::hunting_economy::tests::hunting_http_postgres_revoke_waits_for_the_authorized_conversion_commit"
+      ]
+    },
+    {
+      "name": "gateway teardown persistence",
+      "ignored": 0,
+      "passed": 5,
+      "failed": 0,
+      "package": "gateway",
+      "sha256": "031b5d69d6dbb233df7e8f81b59bbe905a14208b0918fb7b6fc8aaba8f579fb3",
+      "path": "C:/mir2-build/hunting-repair-gateway-adjacent-abnormal_teardown_persistence_tests-26.log",
+      "explicit_native_postgres": 0,
+      "tests": [
+        "session::abnormal_teardown_persistence_tests::abnormal_teardown_updates_the_next_character_roster_last_access",
+        "session::abnormal_teardown_persistence_tests::db_and_journal_failure_retain_frozen_authority_and_retry_same_checkpoint",
+        "session::abnormal_teardown_persistence_tests::db_failure_journals_the_exact_frozen_checkpoint_and_revokes_resume_eligibility",
+        "session::abnormal_teardown_persistence_tests::mismatched_or_switched_prepared_identity_is_rejected_without_persist_journal_or_cleanup",
+        "session::abnormal_teardown_persistence_tests::owner_lease_handoff_racing_prepare_is_rejected_before_cache_or_persistence"
+      ]
+    },
+    {
+      "name": "gateway teardown zone drain",
+      "ignored": 0,
+      "passed": 3,
+      "failed": 0,
+      "package": "gateway",
+      "sha256": "90a4946b2c5a88324892c4befe461e113f6fa3cd38d557df6cdb69c869dc786e",
+      "path": "C:/mir2-build/hunting-repair-gateway-adjacent-abnormal_teardown_zone_drain_tests-26.log",
+      "explicit_native_postgres": 0,
+      "tests": [
+        "routing::tests::abnormal_teardown_zone_drain_tests::abrupt_tcp_and_web_teardown_drain_authoritative_state_and_economy_once",
+        "routing::tests::abnormal_teardown_zone_drain_tests::abrupt_teardown_rolls_back_unmatched_debited_trade_before_checkpoint",
+        "routing::tests::abnormal_teardown_zone_drain_tests::web_mail_refresh_cannot_overwrite_zone_vitals_before_teardown_drain"
+      ]
+    },
+    {
+      "name": "gateway NPC purchase adjacent",
+      "ignored": 0,
+      "passed": 21,
+      "failed": 0,
+      "package": "gateway",
+      "sha256": "a8370b99e8683c433a27080f149cd5458cfd472b819284a4cf10d097c71a32c0",
+      "path": "C:/mir2-build/hunting-repair-gateway-adjacent-npc_purchase-26.log",
+      "explicit_native_postgres": 0,
+      "tests": [
+        "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_encoding_failure_publishes_nothing",
+        "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_snapshot_finishes_original_packets",
+        "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_without_snapshot_keeps_owner_first",
+        "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_complete_owner_pair_finishes_actual_gold_once",
+        "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_encode_failure_publishes_nothing",
+        "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_missing_pair_keeps_failure_and_receipt_first",
+        "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_packet_free_control_and_replay_emit_only_original_frame",
+        "web::tests::npc_purchase_dispatch_tests::npc_purchase_dispatch_send_failure_stops_before_later_messages",
+        "web::tests::npc_purchase_goods_selector_is_canonical_before_any_number_conversion",
+        "web::tests::npc_purchase_reader_raw_envelope_cannot_fallback_to_generic_buy_item",
+        "zone_rpc::npc_purchase_owner_route_tests::durable_actual_local_and_hosted_purchase_replay_preserve_receipt_checkpoint_and_authority",
+        "zone_rpc::npc_purchase_owner_route_tests::durable_hosted_rpc_adapter_uses_real_file_owner_and_leaves_unlogged_shadow_untouched",
+        "zone_rpc::npc_purchase_owner_route_tests::durable_in_process_begin_quote_and_query_use_actual_file_and_read_only_original_id",
+        "zone_rpc::npc_purchase_owner_route_tests::durable_lease_handoff_refuses_stale_debit_and_recovers_exact_original_operation",
+        "zone_rpc::npc_purchase_owner_route_tests::durable_library_host_dispatch_fences_auth_version_lease_and_records_only_replay_checkpoint",
+        "zone_rpc::npc_purchase_owner_route_tests::durable_mutation_classification_blocks_generic_tcp_fallback_before_any_endpoint_access",
+        "zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_accepts_only_actual_begin_and_idempotent_owner_pair",
+        "zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_actual_purchase_original_query_and_replay_are_lossless",
+        "zone_rpc::npc_purchase_owner_route_tests::durable_npc_purchase_browser_snapshot_projection_keeps_original_turn_and_known_receipt_on_size_failure",
+        "zone_rpc::npc_purchase_owner_route_tests::durable_owner_defaults_and_missing_lease_authority_refuse_without_generic_execution",
+        "zone_rpc::npc_purchase_owner_route_tests::durable_real_receipt_wire_roundtrips_and_refuses_mismatched_action_pair_and_packet_count"
+      ]
+    },
+    {
+      "name": "gateway realm declaration",
+      "ignored": 0,
+      "passed": 2,
+      "failed": 0,
+      "package": "gateway",
+      "sha256": "c2f73f1f431ed77df9c329cded0ee56d449701c6805d7171f5c6427d5b58492b",
+      "path": "C:/mir2-build/hunting-repair-gateway-adjacent-realm_info_-26.log",
+      "explicit_native_postgres": 0,
+      "tests": [
+        "web::tests::realm_info_exposes_platinum_176_release_identity",
+        "web::tests::realm_info_hunting_repair_mode_is_required_by_source_binding"
+      ]
+    },
+    {
+      "name": "client-wire",
+      "ignored": 0,
+      "passed": 33,
+      "failed": 0,
+      "package": "client-wire",
+      "sha256": "2a7de99f0bade11454f41d9c021a0864949c74385f83b3f561f59d1cf043fa1f",
+      "path": "C:/mir2-build/hunting-repair-client-wire-tests-26.log",
+      "explicit_native_postgres": 0,
+      "tests": [
+        "hunting_repair::tests::exact_quote_correlation_and_free_receipts_are_required",
+        "hunting_repair::tests::real_legacy_weapon_uid_zero_is_valid_but_request_id_zero_is_not",
+        "hunting_repair::tests::snapshot_frames_share_the_two_mebibyte_server_limit",
+        "hunting_repair::tests::snapshot_is_required_nullable_and_preserves_known_receipt_without_sync",
+        "hunting_repair::tests::snapshot_only_attaches_to_nonretired_committed_results",
+        "hunting_repair::tests::snapshot_rejects_duplicate_plain_escaped_and_nested_keys",
+        "hunting_repair::tests::strict_carrier_preserves_full_width_ids_and_refuses_client_prices",
+        "tests::schema_action_reply_correlation_keeps_original_operation_and_missing_recovery_unknown",
+        "tests::schema_action_shapes_mutation_classification_and_original_identity_are_exact",
+        "tests::schema_authority_pair_actor_scope_revision_and_initial_zero_are_checked",
+        "tests::schema_compact_client_request_bytes_match_original_encoder",
+        "tests::schema_control_echo_is_nonzero_and_cannot_correlate_delayed_begin_or_quote",
+        "tests::schema_explicit_null_fields_are_required_and_failure_states_cannot_invent_known_results",
+        "tests::schema_opaque_identity_requires_nonzero_lower_hex_and_roundtrips_actual_bytes",
+        "tests::schema_protocol_and_all_nested_unknown_fields_are_rejected",
+        "tests::schema_raw_limits_trailing_data_and_deep_json_fail_closed",
+        "tests::schema_recursive_duplicate_and_escaped_duplicate_request_keys_are_refused",
+        "tests::schema_rejections_use_exact_nine_actual_terminal_reasons",
+        "tests::schema_server_nested_unknown_fields_and_wrong_shapes_are_rejected",
+        "tests::schema_server_raw_duplicate_keys_include_uninterpreted_snapshot_arrays",
+        "tests::schema_supported_currency_source_receipts_preserve_u64_max_selector_and_uid_zero",
+        "tests::schema_terminal_receipt_requires_exact_tuple_currency_source_count_and_revision",
+        "tests::schema_u64_is_string_only_canonical_and_covers_zero_and_maximum",
+        "tests::schema_value_decode_all_replies_and_integer_boundaries_match_serde",
+        "tests::schema_value_decode_missing_extra_and_wrong_shapes_match_serde",
+        "tests::schema_value_decode_positional_struct_and_buffered_outcomes_match_serde",
+        "tests::schema_value_decode_public_helpers_keep_exact_scalar_shapes",
+        "tests::schema_value_decode_raw_duplicate_depth_and_limits_match_serde",
+        "tests::schema_value_decode_semantic_tuple_mutations_match_serde",
+        "tests::schema_value_decode_unit_enum_compatibility_matches_serde",
+        "tests::schema_value_encode_all_valid_variants_and_boundaries_match_serde",
+        "tests::schema_value_encode_invalid_public_dtos_match_serde_rejection",
+        "tests::schema_zero_sequence_and_count_refuse_decode_and_typed_serialization"
+      ]
+    },
+    {
+      "name": "pure Web client, strict TS program",
+      "ignored": 0,
+      "passed": 42,
+      "failed": 0,
+      "package": "web-pure",
+      "sha256": "7e4fb8d9b41ea23117e080d1c78c1bd2c6b968dc6a9235868908614aa9a25511",
+      "path": "C:/mir2-build/hunting-repair-web-client-tests-26.log",
+      "explicit_native_postgres": 0,
+      "tests": [
+        "strict parser accepts only the exact repair envelope and required nullable snapshot",
+        "duplicate and escaped duplicate fields cannot be normalized into a valid frame",
+        "rejection codes are exact strings without array/object coercion",
+        "owner probe recognizes top-level escaped markers and never nested or quoted substrings",
+        "quoted timestamps and immutable receipt money are independently validated",
+        "full snapshot is allowed only on synchronized committed results",
+        "full snapshot u64 remains exact without Number conversion and unknown unsafe leaves reject",
+        "the frame limit counts UTF-8 bytes and blocks frames above 2 MiB",
+        "legacy or unannounced/current-mode mismatch never sends or falls back",
+        "captured physical owner and frozen actor scope cannot be rebound through options",
+        "quote keeps zero and u64-max ids as canonical strings",
+        "quote reply must match request id uid and normal/special mode exactly",
+        "fresh Quote and Confirm require the same current physical item selection",
+        "a changed item selection before quote reply cannot authorize a charge",
+        "expired Quote and double-click Confirm do not create another request",
+        "send exception after Confirm retains the original id and permits only Query",
+        "Confirm timeout retains original operation and ignores the superseded late response",
+        "lost unconfirmed Quote permits a new Quote but not an implicit Confirm",
+        "close/cancel invalidates an unconfirmed Quote and pending Quote response",
+        "closing the UI preserves an entered original and its current response",
+        "known receipt without snapshot never releases pending or replays old wallet values",
+        "failed or throwing snapshot application stays pending until a later successful Query",
+        "snapshot callback that loses physical ownership cannot release the pending source",
+        "reloadRequired explicitly retires and preserves the immutable receipt without applying",
+        "retired old connection cannot apply a response on a new socket or actor",
+        "one live adapter per physical owner prevents UI remount from forgetting Pending",
+        "correlation rejects another quote result and changed immutable receipt payload",
+        "receipt field order does not change the immutable original identity",
+        "unavailable or unauthenticated rejection cannot clear an uncertain Confirm",
+        "only an original Query proving NotSubmitted releases an uncommitted attempt",
+        "NotSubmitted cannot erase an already known committed receipt",
+        "reentrant UI callbacks cannot submit a Confirm or Query while receiving a Quote or receipt",
+        "UI cancellation during Quote notification aborts sending before any charge",
+        "mode or actor authority change after Confirm rejects the old snapshot",
+        "selection changes at the final Confirm boundary never send a charge",
+        "receipt notification that retires the owner cannot apply a snapshot",
+        "free repair still requires a complete applied result before allowing another action",
+        "isCurrent callback retiring the adapter cannot grant permission to apply afterward",
+        "view consumers and observers cannot mutate retained nested quote authority",
+        "retained receipt and the entire accepted snapshot graph are deeply frozen",
+        "callbacks timing out the final dispatch control cannot send an unowned Confirm",
+        "callbacks timing out a response control cannot apply its superseded snapshot"
+      ]
+    }
+  ],
+  "test_executions": 141,
+  "unique_top_level_tests": 137,
+  "duplicate_executions_excluded": 4,
+  "duplicate_reason": "three hunting_repair_dispatch_ tests also match npc_purchase module path; hunting realm declaration also matches realm_info_",
+  "explicit_native_postgres_tests": 10,
+  "prior_phase4_not_added_as_new_tests": true,
+  "checks": [
+    {
+      "path": "C:/mir2-build/hunting-repair-gateway-check-26.log",
+      "sha256": "b3edd7128fe4f4579f3dc7d2ca0af7704161a929a6fde10a2787ccf144471d37",
+      "exit_code": 0
+    },
+    {
+      "path": "C:/mir2-build/hunting-repair-format-owned-new-26.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0
+    },
+    {
+      "path": "C:/mir2-build/hunting-repair-web-client-syntax-26.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0
+    }
+  ],
+  "source_pin": {
+    "manifest": "sources-20261020-repair-sync.json",
+    "sha256": "6459a2917563b8e983f770a02e5cb52e312910c59d1270129a9499097b732357",
+    "selected_inputs_only": true,
+    "line_endings": "LF canonical manifest",
+    "native_inputs_frozen_before_final26_build": true,
+    "files": 474,
+    "format_only_after_final25_then_final26_rebuilt_and_retested": true,
+    "pure_client_inputs_frozen_before_final26_tests": true
+  },
+  "client_compiler_input": {
+    "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675",
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/lib/typescript.js"
+  },
+  "review_fixes": [
+    "isCurrent callback must recheck retired/token after returning",
+    "rejection code must be a string, never String(array/object) coercion",
+    "retained frame and view graph deep immutable",
+    "callback can time out old control; final control/token check required before send and apply",
+    "complete frame must follow incremental packets so new owner projection is not invalidated immediately"
+  ],
+  "earlier_format_check": {
+    "path": "C:/mir2-build/hunting-repair-format-owned-new-25.log",
+    "sha256": "7129af9661bf3be6a796a34fe55987c59fdc6ff558906dac2be18198dc7459fd",
+    "repair": "formatted only bounded owned new Rust files then built/tested final26",
+    "exit_code": 1
+  },
+  "foreign_qa_files": [
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-portable-statistics-repair01.json",
+      "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+      "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json",
+      "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd"
+    }
+  ],
+  "remaining": [
+    "existing Page socket dispatcher and immutable realm mode binding",
+    "bound repair selection/view without legacy gold affordability",
+    "existing Shop/Shell confirmation and independent original-query UI",
+    "verified full snapshot application in current physical actor",
+    "real browser and physical network disconnect/save/relogin acceptance",
+    "remaining full economy goal sources/material/replication/metrics/notification/migration rollout"
+  ],
+  "pushed": false,
+  "deployed": false
+}
