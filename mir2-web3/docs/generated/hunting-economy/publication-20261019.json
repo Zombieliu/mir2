@@ -1,0 +1,340 @@
+{
+  "date_beijing": "2026-10-19",
+  "implementation_commit": "99ce96f9fb8d8a6c6207f4f9c88ee7459c98bc10",
+  "branch": "codex/hunting-permit-economy",
+  "commit_created": true,
+  "changed_blobs_read_from_commit": 63,
+  "changed_blob_sha256": [
+    {
+      "path": "mir2-web3/Cargo.lock",
+      "bytes": 240825,
+      "sha256": "04fd5185c86b74e07b249e777cfb56bf86185c2fd36916a6539ce5ea98761bcb"
+    },
+    {
+      "path": "mir2-web3/Cargo.toml",
+      "bytes": 401,
+      "sha256": "f51fe2bb2e2e61c48b30638dbb7a0f94b9499f81f944b75a96f51d3956601f22"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/Cargo.toml",
+      "bytes": 3362,
+      "sha256": "3367fbf5259f32917e5078585b3be7b4141d2a069851a3f2626d0f19d98c75dc"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/hunting_clock.rs",
+      "bytes": 16747,
+      "sha256": "39147c5675ed30122449c104188a6a8df4780854ed89e723a6913b34dd12b344"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/lib.rs",
+      "bytes": 11254,
+      "sha256": "6134b735000f1cc4098864dd16c03be47cf6dcf86d98d6c2c9cc18cebfb374dc"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/main.rs",
+      "bytes": 9369,
+      "sha256": "fbe5613b9f4f58148e37111fb77b0fa00b8a5d9e70e97a16a2146f71f9a1fbad"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 793228,
+      "sha256": "58899f71f870ef216757eea15316b4ea83ff78f5186d567cc8e78c7914be4d54"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web/hunting_economy.rs",
+      "bytes": 35526,
+      "sha256": "dd2b170ec7cd82f2d527ed179b4f91a1b95b3c6866469099761354bf37b85ed6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "bytes": 299634,
+      "sha256": "e7df68e1f708255da2c8e18048a11da7d2c8d30a5cce6b4390f1a6731eddcd9b"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hunting_deletion.rs",
+      "bytes": 4038,
+      "sha256": "b008b7e30b6f673b0ea05ace0b3ec47c970d4082c22ae6ac960c5bff9ec2a13f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_hunting_deletion_tests.rs",
+      "bytes": 17043,
+      "sha256": "4ad9dfa6b65f1ab0633b80a683ce496f9879f1c25f2f9952841fad67af60cf3f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/db_projection.rs",
+      "bytes": 32893,
+      "sha256": "1500ed6351617876de591d8105fe6717a44d2beb22005368d5fa786be4069048"
+    },
+    {
+      "path": "mir2-web3/config/hunting-economy.json",
+      "bytes": 448,
+      "sha256": "ac954666b126c030fab9deb523417edac958eec3c14474fc07884824877c5562"
+    },
+    {
+      "path": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "bytes": 984299,
+      "sha256": "8acdd24b893b62e3f0be766672c13f2fce1f07e4927ed75b7a205ced3f32e6ca"
+    },
+    {
+      "path": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "bytes": 601886,
+      "sha256": "a4ba294d25df27f4eaa783cdf427507192f2d9a0204e60f4159243ec16183f96"
+    },
+    {
+      "path": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 1103776,
+      "sha256": "0f1cce43f7581fec2faa636f18b8deee60a95e2efdc7b675898ea4b70296dd76"
+    },
+    {
+      "path": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "bytes": 544342,
+      "sha256": "98a6e1297e38f947dfb7c7db9d8f24738cd1e406e6c9ab7ea6467f12579d05c3"
+    },
+    {
+      "path": "mir2-web3/docs/HUNTING-PERMIT-ECONOMY.md",
+      "bytes": 11874,
+      "sha256": "f5e7d0f791171466bac90ee9813873a36d6dabc2aa65be16d2bfc34b00cbc5ec"
+    },
+    {
+      "path": "mir2-web3/docs/HUNTING-SOURCE-INTEGRATION.md",
+      "bytes": 14503,
+      "sha256": "5f2f0423a39dc9618764ea5dea1b667c9fae3a904f8b544356db8ad244e3dc4c"
+    },
+    {
+      "path": "mir2-web3/docs/generated/hunting-economy/acceptance-20261019.json",
+      "bytes": 6172,
+      "sha256": "532db105415c4e874e6c7ace69af7a900be4787eff990e09039b85af959f754c"
+    },
+    {
+      "path": "mir2-web3/fixtures/hunting-economy-vectors.json",
+      "bytes": 9636,
+      "sha256": "ddffba6dfd5fba07618df268ebb5cc8ccf0354ee25e29379dd9f45e8d26a1e01"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/CONTRACT.zh-CN.md",
+      "bytes": 10508,
+      "sha256": "d37e4d0575b35ca5d22dcf73e088c14fc9273c32ae3a64082aba346c4daf4069"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/EXPORT.zh-CN.md",
+      "bytes": 4815,
+      "sha256": "9579ec8299f10756e25af588fae3f88e0654cc98e6098903270eab2f8f316857"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/README.zh-CN.md",
+      "bytes": 6889,
+      "sha256": "0a102534316a1e681d1253202eef2574788f461843f69c17820ad8d125f45f52"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/fixtures/alert-cases.json",
+      "bytes": 6023,
+      "sha256": "2609a023a0a444611e96fac3b50bbb5583797bd4cd694ff593b59506faa4d4a0"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/generate.py",
+      "bytes": 18015,
+      "sha256": "c26f8bc56f4edea9802352c8c812fd32e58a5df9d6480475d8ff8c402e2678e8"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/grafana/dashboards/hunting-permit.json",
+      "bytes": 33279,
+      "sha256": "02812f72bcc200cca98e5f98fd31ad19caf06025be09f96b6d1e4b84ac849fb3"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/grafana/economy-notification-route.example",
+      "bytes": 565,
+      "sha256": "8879d6587cdb70dbf5294fb2d58ffc09137ac6e3499e09270a08f6a924011cb9"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/grafana/provisioning/alerting/economy-contact-points.yaml",
+      "bytes": 520,
+      "sha256": "97ac4937a03e8106f7fd40a85da242bbbb7afdd91f59138dfb762de46a955636"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/grafana/provisioning/alerting/economy-rules.yaml",
+      "bytes": 21051,
+      "sha256": "0b64bc6bc7eb0a9f2ad59c1492680d62ae0dde23702340a994d75851a0b53815"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/grafana/provisioning/dashboards/economy.yaml",
+      "bytes": 330,
+      "sha256": "5126547da31d114812b9d680f4a824d7e1003f56e2a4594149a71e3f7f28eaa2"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/grafana/provisioning/datasources/economy.yaml",
+      "bytes": 675,
+      "sha256": "bb8f52b84e7cbaefd86d5e1ca9a709319e44838c50ff1d21670949a23ec6ebb0"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/postgres-validation-result.json",
+      "bytes": 1731,
+      "sha256": "93c9aba3819785b164778318e22da84d59aab41fd0f468e6f2eb7dc970362047"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/sql/alerts/burn_pulse.sql",
+      "bytes": 1027,
+      "sha256": "0708f77fa5cc109e5b0bcc35c110dcaa71fb81bd6080b974640a9def8a393991"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/sql/alerts/data_integrity.sql",
+      "bytes": 2364,
+      "sha256": "4c07372e181164e1d75922618ea2a2c7405026640e3a9d2fb1a880980466d06b"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/sql/alerts/deflation.sql",
+      "bytes": 929,
+      "sha256": "822b04a5dabff932ab5218d7bd504c5a25c809f053950acfc6dcdc0364a513b8"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/sql/alerts/inflation.sql",
+      "bytes": 929,
+      "sha256": "959e6e3df9490d6b098e9f0a2b6aebcd4abddae68dd476df66b574acefe484c0"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/sql/alerts/permit_exhaustion.sql",
+      "bytes": 918,
+      "sha256": "bd94b7134b139be9db5585ea3608a7bad1a2b00f3acc8f70eae7f0731474a336"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/tests/postgres_acceptance.py",
+      "bytes": 13502,
+      "sha256": "e4e6bc968507a659d1637f56ed072d4b41daf824b99192ff6d21d5e32074158d"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/tests/postgres_extra_assertions.sql",
+      "bytes": 12763,
+      "sha256": "bac8653cbaa597c2345186bc4d06e82bfa0493490f37f11dddca170408c964e1"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/tests/postgres_readonly_assertions.sql",
+      "bytes": 1552,
+      "sha256": "6897e9d80f391fddb92d51dd736618206c11d2da61ab788a772f5fb177beb675"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/tests/render-only-result.json",
+      "bytes": 268,
+      "sha256": "b60a9652dd143cc679898b61023148ed082ec8ccbe840ee56c08e6025968df9b"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/validation-result.json",
+      "bytes": 3542,
+      "sha256": "1bad13829f5f8e2b56c6989e8cbddfc4dd411e77f067bcefb1576532f1359aac"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/verification-history.json",
+      "bytes": 590,
+      "sha256": "b9ed243cd8654c6680f470f0785bdd66eaf95b632128dbb43e83c862efbaed83"
+    },
+    {
+      "path": "mir2-web3/infra/economy-observability/verify.py",
+      "bytes": 15568,
+      "sha256": "730a588630f3953839b71fa4dcf99102f80c34c02592640292d6c7aa64ad594b"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0016_hunting_economy.sql",
+      "bytes": 7543,
+      "sha256": "baf99e92457d0e0e247db56174962e8422681e4b32824ccca1771d12eb9518ee"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0017_hunting_economy_observability.sql",
+      "bytes": 15728,
+      "sha256": "dbd23f7e4360a75fcc53a15877a51088134e752acddea84ed0c9215c0c3b1d3e"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0018_hunting_character_incarnation.sql",
+      "bytes": 450,
+      "sha256": "35eedf0d33bea39a489db963d05b1de68e8c3da84dde6e37b07d9b1b45ce9287"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0019_hunting_economy_metric_exports.sql",
+      "bytes": 1452,
+      "sha256": "4a5a5628c6db20ff95be2d43f31d57aeee7735a2e02fb962fb2daa8234bcc596"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0020_hunting_wallet_owner_guard.sql",
+      "bytes": 353,
+      "sha256": "6e4683b20b07e8870df5b2e0035fb32d767fd8329c8389f2c1ba15ad8f7a6314"
+    },
+    {
+      "path": "mir2-web3/packages/economy-policy/Cargo.toml",
+      "bytes": 292,
+      "sha256": "6c8c6295be6fc38787f47c1242a7a10d796b45e3d3cf261221f0ddec4f29ccd7"
+    },
+    {
+      "path": "mir2-web3/packages/economy-policy/README.md",
+      "bytes": 3003,
+      "sha256": "f1cda1674738abaea77eff222862aff9bfd13aea0a00de06109c87e73aabb501"
+    },
+    {
+      "path": "mir2-web3/packages/economy-policy/src/lib.rs",
+      "bytes": 11421,
+      "sha256": "a47bd43bf61f6790875a96870ebed23dc5f1686da3055b1db71cd100a6a1d321"
+    },
+    {
+      "path": "mir2-web3/packages/economy-policy/tests/policy_vectors.rs",
+      "bytes": 8535,
+      "sha256": "9d52506ac658f497a4b933bacebe0bb1a09ffa4b483ff6da0f830b8a33c51c8e"
+    },
+    {
+      "path": "mir2-web3/packages/economy-service/Cargo.toml",
+      "bytes": 425,
+      "sha256": "9aa10c89f62bbeae324ac518eff402e37d91084c2610af1d09625e54157599df"
+    },
+    {
+      "path": "mir2-web3/packages/economy-service/src/export.rs",
+      "bytes": 26930,
+      "sha256": "9ac2661d3c9b7f811278cb8bd38d8195fc308203e41c3c34a5ad77e983598757"
+    },
+    {
+      "path": "mir2-web3/packages/economy-service/src/lib.rs",
+      "bytes": 1151,
+      "sha256": "7c7a20d29701881f48d7c64de505107bafdbf354348a68c1f12de4ffbf1f2aa3"
+    },
+    {
+      "path": "mir2-web3/packages/economy-service/src/store.rs",
+      "bytes": 44121,
+      "sha256": "72939517504e44cca88ca0e26271272d6921ae91605179a911ee95313cb20f3e"
+    },
+    {
+      "path": "mir2-web3/packages/economy-service/src/types.rs",
+      "bytes": 6291,
+      "sha256": "f9c5757f017c4af755c3168c38e9ec2449db3766dd2c8064db6a7b0f993a4a2c"
+    },
+    {
+      "path": "mir2-web3/packages/economy-service/tests/postgres_authority.rs",
+      "bytes": 18214,
+      "sha256": "56672b47bf1a66bc763f4c2c3f736b7436b2b7c1ef16f4135c014271c4fbd091"
+    },
+    {
+      "path": "mir2-web3/packages/economy-service/tests/postgres_export.rs",
+      "bytes": 18405,
+      "sha256": "706c6c88a782896393fc21c3943c071fe9ca5ec6ebdeae39d651b83a9aa3b425"
+    },
+    {
+      "path": "mir2-web3/scripts/hunting_economy_model.py",
+      "bytes": 9394,
+      "sha256": "65c7ddea940a7dd289af52395c110ebdbfec129daac7365a010b339c9afe2782"
+    },
+    {
+      "path": "mir2-web3/scripts/test_hunting_economy_model.py",
+      "bytes": 6322,
+      "sha256": "9338eb41de2f5be1d2b1c655f9067d5b673efd7d359f59a523afbf81b418927c"
+    }
+  ],
+  "push_attempted": false,
+  "deployed": false,
+  "remote_assets_modified": false,
+  "goal_status": "active",
+  "unrelated_dirty_paths_preserved": [
+    " M mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-portable-statistics-repair01.json",
+    " M mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+    " M mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json"
+  ],
+  "git_auto_gc": {
+    "status": "failed_after_commit_was_created",
+    "error": "inflate: data stream error (incorrect data check); object 1ae7f886fa87573bdbb59caf0772103929fac94c cannot be read; failed to run repack",
+    "scope": "pre-existing unrelated repository corruption already recorded in prior project history",
+    "repair_attempted": false,
+    "history_rewritten": false
+  }
+}

@@ -61,6 +61,8 @@
 
 可审查的执行摘要与本地原始日志SHA256见 [验收记录](generated/hunting-economy/acceptance-20261019.json)。最终政策/服务包格式检查、新增Rust文件格式检查及Gateway库/二进制编译检查均通过；未对旧巨型模块做整体格式化。
 
+首阶段本地提交为`99ce96f9fb8d8a6c6207f4f9c88ee7459c98bc10`，63个变更文件均从该提交逐一读取并校验，见 [提交核对](generated/hunting-economy/publication-20261019.json)。提交后的自动GC遇到已有损坏对象`1ae7f886fa87573bdbb59caf0772103929fac94c`导致repack失败，未影响本次提交创建；没有重写、清理或修复无关历史，没有推送或部署。后续仅证据提交按单次命令关闭自动GC，不更改仓库配置。
+
 ## 后端接线与交付物
 
 - 实现：`packages/economy-policy`、`packages/economy-service`；迁移从0016开始，0015保留给其他工作。
