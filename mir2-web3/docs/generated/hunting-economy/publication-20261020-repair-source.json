@@ -1,0 +1,327 @@
+{
+  "recorded_at_utc": "2026-10-19T19:21:34.2086393Z",
+  "code_commit": "77f7961bdaeb083ecddc98c66c8ae7ab63b4eb64",
+  "branch": "codex/hunting-permit-economy",
+  "owned_files": 38,
+  "all_owned_blobs_fully_read": true,
+  "all_owned_working_blobs_match_after_git_normalization": true,
+  "source_files_still_match_test_inputs": 471,
+  "foreign_qa_files_preserved_and_unstaged": 3,
+  "automatic_gc_disabled_for_this_commit_only": true,
+  "tests_passed": 326,
+  "explicit_native_postgres_tests": 81,
+  "actual_npc_repair_server_source_connected": true,
+  "player_ui_or_physical_websocket_accepted": false,
+  "source_manifest_working_sha256": "8e0159b8d2dd7847602539a9c77da0f6161c5ed01f95bf8db6ac1da906b00eed",
+  "source_manifest_committed_sha256": "fdd1ca0bd44aa1789bea79c25b66c7c963bad456112f16014bf096d4099c7e73",
+  "line_endings": "acceptance source_pin.sha256 records original tested working manifest; Git normalizes text CRLF to LF, committed manifest digest is recorded separately here",
+  "goal_complete": false,
+  "pushed": false,
+  "deployed": false,
+  "blobs": [
+    {
+      "git_blob": "094ad32c7c77b40b893f556b41384a77e23477b9",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "251f3f08c4ee98d9dbff28a701af77af061738c0786553e98e9bc63706d5dcf4",
+      "bytes": 2673,
+      "path": "apps/game-client/client-wire/Cargo.lock"
+    },
+    {
+      "git_blob": "819ba0c8b361472d0e96e806eb28a95bbb126025",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "96e2eda58fde738b9e36b0918fa24c8d426a12b9ae8ae9c5ffe16baf7729e117",
+      "bytes": 12586,
+      "path": "apps/game-client/client-wire/src/hunting_repair.rs"
+    },
+    {
+      "git_blob": "efabe3d445fee369c15d77d4c04aa77e8c4f7809",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "0e34fb0c6d23c3a392a6f1ec96626de3420f4d4c1cd2f37b5d30903dfdc711c8",
+      "bytes": 108219,
+      "path": "apps/game-client/client-wire/src/lib.rs"
+    },
+    {
+      "git_blob": "99c7da0e77232cbcc0b6c1c0d356f6bb7e81f250",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "8a5ed8c73b7e625743ab21c868769b0eb00fc867b28aef3d1dc2c51aed733682",
+      "bytes": 14245,
+      "path": "apps/gateway/src/hunting_repair_browser.rs"
+    },
+    {
+      "git_blob": "6d00f9db84581d2642a31ce5b26405a5f197d815",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "97a2aa9dc0feb7a7b3f42ed7df884bb00d4e82889a4b0a92a875eeb7a26300bb",
+      "bytes": 29023,
+      "path": "apps/gateway/src/hunting_repair_postgres_tests.rs"
+    },
+    {
+      "git_blob": "502a1ee21090fc826791456567532d24fd61f2ca",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "b1968d269517a594fa4850dd5e0832d5175784b896dcb194d77a9bc61ac88a1a",
+      "bytes": 11286,
+      "path": "apps/gateway/src/lib.rs"
+    },
+    {
+      "git_blob": "51b7c650c61f831687df6f32f872d0c5b8a7b85b",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "29ebcbb8c8a601dc4e6f9e60a5be76f4d09da438b7364eef1601d6d0868a347d",
+      "bytes": 1263390,
+      "path": "apps/gateway/src/routing.rs"
+    },
+    {
+      "git_blob": "c20877769b8827acfc359bab37d34c6af603c36e",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "13cb0b70137fe2d92fd14318c38e95cc25577bd720f7c901e2b8a0d65fd5a7a1",
+      "bytes": 104998,
+      "path": "apps/gateway/src/session.rs"
+    },
+    {
+      "git_blob": "6e863c2d6fa2493d7d76a35d91b88071a05530ee",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "71144241b1d6bc74cb70c53eafa76911a89f781117b522616e1ba9bdb4330f81",
+      "bytes": 797140,
+      "path": "apps/gateway/src/web.rs"
+    },
+    {
+      "git_blob": "ca9cae2d58aeeb74a5db7081c51123ce52a0a08c",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "311e4c79b155c5bcad81e2a9a9b451c56e0ab7966fcb326bfd70be486c9e8779",
+      "bytes": 303101,
+      "path": "apps/simulation/src/config.rs"
+    },
+    {
+      "git_blob": "8f4f442079b518e15d08c45ae0b8eb9b99857e0a",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "dc6a42f37b572cb4b404e82584d1289d7c98f04da14ce7646eedb45cc64606b0",
+      "bytes": 55573,
+      "path": "apps/simulation/src/config_hunting_repair.rs"
+    },
+    {
+      "git_blob": "a4aaf0d660fc546168481da6bbc58ef7a506fbfa",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "1f516dffec71c2dcff574a1cda27bf0f407abb9364354835b541a3e727fd5917",
+      "bytes": 52475,
+      "path": "apps/simulation/src/config_hunting_repair_tests.rs"
+    },
+    {
+      "git_blob": "cb7271b142ecbe11ce58167774cff57fe0b50de4",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "5544745a4a32d68309d93202d02c01833a4cb1e390a4a07fd810ab9e9d7306f3",
+      "bytes": 43788,
+      "path": "apps/simulation/src/config_hunting_source.rs"
+    },
+    {
+      "git_blob": "b0ebd7d6446bb223f3e30a08b7b623c1dea381c7",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "37bb3d81f162d9d2821deba6a70b5ad90726e22d4b4e0212f214711878a46375",
+      "bytes": 33473,
+      "path": "apps/simulation/src/db_projection.rs"
+    },
+    {
+      "git_blob": "b00697280ba894b1d002e3b7a8a9180c4278b11a",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "c1ef040fdc429f4b467fe5277134f1aa314346475cda09ccda4f4e9b61356b4e",
+      "bytes": 5655,
+      "path": "apps/simulation/src/lib.rs"
+    },
+    {
+      "git_blob": "f180faac579a019dddca012690fe6fcb12009fe5",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "c8d489c0d4c5ce94d3066ff8de238bd2f460e209ac91af9ba4eeecdc78e9d07a",
+      "bytes": 35345,
+      "path": "apps/simulation/src/runtime/hunting_repair.rs"
+    },
+    {
+      "git_blob": "2ca196ed28e9e287ca602ed382ae2bc2d63127a7",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "2e27ab7d152be25aed3104da503cc2504206df61284cc8332e26c8927e8a808a",
+      "bytes": 51761,
+      "path": "apps/simulation/src/runtime/hunting_repair_tests.rs"
+    },
+    {
+      "git_blob": "b801e120fb3aee1584d412b2a2720676b81b8722",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "dcb0e20a26d1645156415a1ccf882e0e2348e64c9276e4425ffb54fc7b508ea5",
+      "bytes": 7230,
+      "path": "apps/simulation/src/runtime/mod.rs"
+    },
+    {
+      "git_blob": "09d7503bbf5e8b5931b8ac13afd6e39eb7d37cbe",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "898ac32998e25e5ecafcbbf20c13f7e92a748cacb722ee70ee8afb7436c17544",
+      "bytes": 403025,
+      "path": "apps/simulation/src/runtime/packets.rs"
+    },
+    {
+      "git_blob": "6dd00973bc92e9af001a05a6022c855912ea4b6f",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "e5ad5c6858e6c258b4674da49365266f82d82b961d1c9e2ec580fd0ffba1d298",
+      "bytes": 166015,
+      "path": "apps/simulation/src/runtime/save.rs"
+    },
+    {
+      "git_blob": "03e735a9596d02e9883c86eaca157314fd28fb7d",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "7ebd7f79fe70b909afb81b3e58db9ffad37ec267a8370d7f940d8eb2bb0f8d29",
+      "bytes": 64921,
+      "path": "apps/simulation/src/world_runtime.rs"
+    },
+    {
+      "git_blob": "0bc588f53987ec602043089eda6d7c8bc5bd6761",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "09a3bcc009712cf206d2742ccd87e530c77849118e27f1eba0954b25044720ed",
+      "bytes": 366917,
+      "path": "docs/AGENT-ORCHESTRATION.md"
+    },
+    {
+      "git_blob": "40855123a692f1ecdfabc1846bf75a0d35236af4",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "05538dc5ac0eb45f3ecfcf3a095f7fe06e2a4e9cfca541c8aa0bdac1cded2034",
+      "bytes": 984985,
+      "path": "docs/AGENT-TASK-QUEUE.md"
+    },
+    {
+      "git_blob": "bda276219240add0b5e59a7088a31d8baa6e4493",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "f34ac7269f4c8801f5e26224d47c9670ac46350809d4708ce44e18e4a1ba8392",
+      "bytes": 603077,
+      "path": "docs/BACKEND-1TO1-PROGRESS.md"
+    },
+    {
+      "git_blob": "3e74627aa003317981e9fea70565983a056135f2",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "f0bb245d8dddf01edf8dfa940322a2a8bf4d37b4f0f434e98ef3f71e538cdc76",
+      "bytes": 1104497,
+      "path": "docs/CRYSTAL-1TO1-ROADMAP.md"
+    },
+    {
+      "git_blob": "b7495d9cb3df942ff0dd1beaae56a4a67ad3c3a0",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "48f87170db8684bc991b5283f25c644a47145b5dd607acb94097b9f828dab95a",
+      "bytes": 545195,
+      "path": "docs/CRYSTAL-SERVER-PARITY.md"
+    },
+    {
+      "git_blob": "e991ce4b13b8e3e238a3451ce209277182cd023f",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "0b207811722c5c0844151c437560ebfb8cb6f68347e59506ebf80aee6f9d6a76",
+      "bytes": 25157,
+      "path": "docs/HUNTING-PERMIT-ECONOMY.md"
+    },
+    {
+      "git_blob": "ff17b68b8f90a5fb85b72ea3d5de8dee861afe65",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "8d5324e4bc12a9894dc53b5affb64f356a0af2708baaa15e75d058c75bf40c51",
+      "bytes": 19656,
+      "path": "docs/HUNTING-SOURCE-INTEGRATION.md"
+    },
+    {
+      "git_blob": "ca2c478c2cc80a975bdcb202a00c45d4ce349eca",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "aa765fe7b46d5bada31e4f848396a73b1a10b9a727defebfe9fa19123acee121",
+      "bytes": 51836,
+      "path": "docs/generated/hunting-economy/acceptance-20261020-repair-source.json"
+    },
+    {
+      "git_blob": "1d8518d8cf67095e231e4a9e09e66fefae069a83",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "fdd1ca0bd44aa1789bea79c25b66c7c963bad456112f16014bf096d4099c7e73",
+      "bytes": 72271,
+      "path": "docs/generated/hunting-economy/sources-20261020-repair-source.json"
+    },
+    {
+      "git_blob": "7ba589bcf2488f7ff665731dde0cf74138cbbb13",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "4073b87fad35c73e964cbf3d342d0bb6653d2f084a82d7708a704b603a130f5c",
+      "bytes": 484,
+      "path": "infra/postgres/migrations/0023_hunting_zero_fee_source.sql"
+    },
+    {
+      "git_blob": "0e0aac56a43dd0625576375fd862394d55605615",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "8dccc5211f881c104a7c56c90e977fba87862cc0844e27421debfba597305872",
+      "bytes": 2955,
+      "path": "infra/postgres/migrations/0024_hunting_repair_sources.sql"
+    },
+    {
+      "git_blob": "8b05fe1819241ac0a7695407daaf931af4d4f2d3",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "8d3dab65cd45bc23df0feb14178425c3f14fe8b82f3344985decf13b87b5be1d",
+      "bytes": 11449,
+      "path": "packages/economy-service/src/debit.rs"
+    },
+    {
+      "git_blob": "552c74584b2781b6acecda29b04e6d9789cb382a",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "ea6dcd0ba93fad3149c354fac2ab9ee02e2c8c7298ee85312f5fbae4505f6ccf",
+      "bytes": 1515,
+      "path": "packages/economy-service/src/lib.rs"
+    },
+    {
+      "git_blob": "ade85a7ad67587a64bbf29981db7e39f41614563",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "8bc6f22ab8a497e90ad62e52d5b68288811677debd5bc1e83dd3953a668e4250",
+      "bytes": 48610,
+      "path": "packages/economy-service/src/store.rs"
+    },
+    {
+      "git_blob": "6d9bad8ca4e0fc5b3f3a404b0ec1781e45415e6a",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "7b391d387559b326f96a1eca484a0a190996d539ea95cfe79e138286766ca98d",
+      "bytes": 7626,
+      "path": "packages/economy-service/src/types.rs"
+    },
+    {
+      "git_blob": "a6cef90b5308abc025c1d2555d1a0b31e98c23bd",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "b9eb28e56f77039b8d3f9e4638def40e6e51061382cf213c68f50cfecbc99c99",
+      "bytes": 9964,
+      "path": "packages/economy-service/src/zero.rs"
+    },
+    {
+      "git_blob": "066f8a176b6dd12c567977705b6511986e829c7c",
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true,
+      "committed_sha256": "6e2ab4ec159fa39f194a5ac2667df73799433fc14a475a375739684930a3f8ab",
+      "bytes": 26887,
+      "path": "packages/economy-service/tests/postgres_zero_fee_source.rs"
+    }
+  ]
+}
