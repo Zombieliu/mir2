@@ -42,6 +42,8 @@ hmac = "0.13"
 jsonwebtoken = "9.3"
 keyring = { version = "3.6.3", features = ["apple-native", "windows-native", "sync-secret-service", "vendored"] }
 mir2-game-data = { path = "../../packages/game-data" }
+mir2-economy-policy = { path = "../../packages/economy-policy" }
+mir2-economy-service = { path = "../../packages/economy-service" }
 mir2-protocol = { path = "../../packages/protocol", features = ["catalog-gzip"] }
 mir2-simulation = { path = "../simulation" }
 mir2-client-wire = { path = "../game-client/client-wire" }

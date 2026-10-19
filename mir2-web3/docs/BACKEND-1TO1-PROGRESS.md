@@ -1,5 +1,10 @@
 # Backend 1:1 Progress
 
+## 狩猎许可经济基础（2026-10-19）
+
+独立工作树已实现新经济PostgreSQL事务、全服许可竞争控制、认证HTTP和04:00进程任务；共享公式Rust12/Python14、核心真实PG5项及授权/空服追赶/锁退出等有界验收通过。用户选择保留K=0.1，基准与硬上限重算为0.72/1.08许可。详见 [实施记录](HUNTING-PERMIT-ECONOMY.md)。真实游戏来源、材料绑定、全服指标覆盖及生产发布仍开放；默认关闭、旧gold未迁移、远程资产未改，不提高Crystal1:1进度。
+
+
 ## Root owned Source78 authenticated Spells bootstrap and ordinary reentry QA (2026-10-12 Beijing)
 
 - Resolved: the packaged empty Spells page no longer falls back to the React table. The first public refusal was baseline-missing. Source review found that the initial Bag ownership revision can invalidate the earlier owner-qualified Spells cache before the new Host's one-time bootstrap. Page now bootstraps from the existing authenticated physical snapshot witness, preserving socket/session/scene/version/self/map checks and rejecting missing/null/nonarray/oversize learned data. It does not retag old cache, invent an empty list or replay an old ACK; live ACK and send-proof gates are unchanged.

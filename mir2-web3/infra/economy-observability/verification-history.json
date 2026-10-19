@@ -1,0 +1,8 @@
+{
+  "initial_command": "python verify.py",
+  "initial_result": "failed",
+  "failure": "burn_pulse_over_150_percent: burn_pulse expected 1, got 0",
+  "finding": "Synthetic fixture used 81+30+20=131 against a 100 baseline, which is below 150%; the independent rule model correctly rejected it.",
+  "repair": "Changed only the synthetic over-threshold amount to 101 (total151) and exact-boundary amount to100 (total150). Preserved strict business threshold >1.50 and both original assertions.",
+  "production_effect": "none; no database, game server, Grafana or remote service was accessed"
+}

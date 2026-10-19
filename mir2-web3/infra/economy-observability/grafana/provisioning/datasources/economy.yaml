@@ -1,0 +1,27 @@
+{
+  "apiVersion": 1,
+  "datasources": [
+    {
+      "name": "Mir2 Economy Readonly",
+      "uid": "mir2-economy-readonly",
+      "type": "grafana-postgresql-datasource",
+      "access": "proxy",
+      "url": "$MIR2_ECONOMY_DB_HOST",
+      "user": "$MIR2_ECONOMY_DB_USER",
+      "isDefault": false,
+      "editable": false,
+      "jsonData": {
+        "database": "$MIR2_ECONOMY_DB_NAME",
+        "sslmode": "verify-full",
+        "postgresVersion": 1500,
+        "maxOpenConns": 5,
+        "maxIdleConns": 2,
+        "connMaxLifetime": 14400,
+        "timescaledb": false
+      },
+      "secureJsonData": {
+        "password": "$MIR2_ECONOMY_DB_PASSWORD"
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "status": "rendered-and-checked",
+  "postgres_executed": false,
+  "credentials_read": false,
+  "sql_bytes": 804057,
+  "sql_sha256": "df6a68fb25d3731003806304c5156ae5e76b3e0e4af75c89e2665201a164113c",
+  "synthetic_fixture_cases": 29,
+  "expected_rule_values": 57
+}

@@ -79,6 +79,12 @@ async fn async_main() -> std::io::Result<()> {
     let config = configure_save_recovery_mac_key(config, encoded_recovery_key.as_deref())
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let _guild_clock = mir2_gateway::guild_clock::GuildClockService::start(config.clone())?;
+    let hunting_config = config.clone();
+    let _hunting_clock = tokio::task::spawn_blocking(move || {
+        mir2_gateway::hunting_clock::HuntingClockService::start(&hunting_config)
+    })
+    .await
+    .map_err(io::Error::other)??;
     let chat_hub = ChatBroadcastHub::from_env()?;
     let _chat_broadcast_task = chat_hub.spawn();
 
@@ -100,6 +106,7 @@ async fn async_main() -> std::io::Result<()> {
     // Operators should disconnect players before stopping the local server.
     // Joining the clock completes any in-flight File publication before exit.
     drop(_guild_clock);
+    drop(_hunting_clock);
 
     Ok(())
 }

@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "settlements": [
+    {
+      "name": "720wan_k_point1_is_point72_permits",
+      "pool": { "stock_atoms": 0, "mint_remainder": 0, "decay_remainder": 0 },
+      "destruction_gold_equivalent": 7200000,
+      "expected": {
+        "raw_mint_atoms": 720000, "daily_mint_cap_atoms": 1080000,
+        "minted_atoms": 720000, "capped_atoms": 0,
+        "pre_decay_stock_atoms": 720000, "decayed_atoms": 4800,
+        "next_pool": { "stock_atoms": 715200, "mint_remainder": 0, "decay_remainder": 0 }
+      }
+    },
+    {
+      "name": "720wan_k_point2_raw_1point44_permits_limited_by_shared_cap",
+      "policy_override": { "k": { "numerator": 1, "denominator": 5 } },
+      "pool": { "stock_atoms": 0, "mint_remainder": 0, "decay_remainder": 0 },
+      "destruction_gold_equivalent": 7200000,
+      "expected": {
+        "raw_mint_atoms": 1440000, "daily_mint_cap_atoms": 1080000, "minted_atoms": 1080000,
+        "capped_atoms": 360000, "pre_decay_stock_atoms": 1080000, "decayed_atoms": 7200,
+        "next_pool": { "stock_atoms": 1072800, "mint_remainder": 0, "decay_remainder": 0 }
+      }
+    },
+    {
+      "name": "108_permit_cap_applied_before_decay",
+      "policy_override": { "baseline_daily_mint_atoms": 72000000 },
+      "pool": { "stock_atoms": 0, "mint_remainder": 0, "decay_remainder": 0 },
+      "destruction_gold_equivalent": 2000000000,
+      "expected": {
+        "raw_mint_atoms": 200000000, "daily_mint_cap_atoms": 108000000,
+        "minted_atoms": 108000000, "capped_atoms": 92000000,
+        "pre_decay_stock_atoms": 108000000, "decayed_atoms": 720000,
+        "next_pool": { "stock_atoms": 107280000, "mint_remainder": 0, "decay_remainder": 0 }
+      }
+    },
+    {
+      "name": "fractional_mint_remainder_is_retained",
+      "pool": { "stock_atoms": 0, "mint_remainder": 0, "decay_remainder": 0 },
+      "destruction_gold_equivalent": 1,
+      "expected": {
+        "raw_mint_atoms": 0, "minted_atoms": 0, "decayed_atoms": 0,
+        "next_pool": { "stock_atoms": 0, "mint_remainder": 1, "decay_remainder": 0 }
+      }
+    },
+    {
+      "name": "fractional_mint_eventually_releases_one_atom",
+      "pool": { "stock_atoms": 0, "mint_remainder": 9, "decay_remainder": 0 },
+      "destruction_gold_equivalent": 1,
+      "expected": {
+        "raw_mint_atoms": 1, "minted_atoms": 1, "decayed_atoms": 0,
+        "next_pool": { "stock_atoms": 1, "mint_remainder": 0, "decay_remainder": 1 }
+      }
+    },
+    {
+      "name": "fractional_decay_eventually_destroys_one_atom",
+      "pool": { "stock_atoms": 149, "mint_remainder": 0, "decay_remainder": 1 },
+      "destruction_gold_equivalent": 0,
+      "expected": {
+        "raw_mint_atoms": 0, "minted_atoms": 0, "decayed_atoms": 1,
+        "next_pool": { "stock_atoms": 148, "mint_remainder": 0, "decay_remainder": 0 }
+      }
+    },
+    {
+      "name": "empty_pool_stays_empty_without_destruction",
+      "pool": { "stock_atoms": 0, "mint_remainder": 0, "decay_remainder": 0 },
+      "destruction_gold_equivalent": 0,
+      "expected": {
+        "raw_mint_atoms": 0, "minted_atoms": 0, "decayed_atoms": 0,
+        "next_pool": { "stock_atoms": 0, "mint_remainder": 0, "decay_remainder": 0 }
+      }
+    }
+  ],
+  "settlement_sequences": [
+    {
+      "name": "capped_whole_atoms_never_reappear_the_next_day",
+      "policy_override": { "baseline_daily_mint_atoms": 72000000 },
+      "initial_pool": { "stock_atoms": 0, "mint_remainder": 0, "decay_remainder": 0 },
+      "steps": [
+        {
+          "destruction_gold_equivalent": 2000000009,
+          "expected": {
+            "raw_mint_atoms": 200000000, "minted_atoms": 108000000, "capped_atoms": 92000000,
+            "next_pool": { "stock_atoms": 107280000, "mint_remainder": 9, "decay_remainder": 0 }
+          }
+        },
+        {
+          "destruction_gold_equivalent": 0,
+          "expected": {
+            "raw_mint_atoms": 0, "minted_atoms": 0, "capped_atoms": 0,
+            "decayed_atoms": 715200,
+            "next_pool": { "stock_atoms": 106564800, "mint_remainder": 9, "decay_remainder": 0 }
+          }
+        },
+        {
+          "destruction_gold_equivalent": 1,
+          "expected": {
+            "raw_mint_atoms": 1, "minted_atoms": 1, "capped_atoms": 0,
+            "decayed_atoms": 710432,
+            "next_pool": { "stock_atoms": 105854369, "mint_remainder": 0, "decay_remainder": 1 }
+          }
+        }
+      ]
+    }
+  ],
+  "conversions": [
+    {
+      "name": "one_permit_one_million_gold_gross",
+      "gross_gold": 1000000,
+      "expected": {
+        "bound_gold_debit": 1000000, "license_atoms_debit": 1000000,
+        "fee_unbound_gold": 20000, "net_unbound_gold_credit": 980000
+      }
+    },
+    {
+      "name": "ordinary_monthly_cap_supports_fractional_permits",
+      "gross_gold": 200000,
+      "expected": {
+        "bound_gold_debit": 200000, "license_atoms_debit": 200000,
+        "fee_unbound_gold": 4000, "net_unbound_gold_credit": 196000
+      }
+    },
+    {
+      "name": "fee_rounds_up_on_small_amount",
+      "gross_gold": 51,
+      "expected": {
+        "bound_gold_debit": 51, "license_atoms_debit": 51,
+        "fee_unbound_gold": 2, "net_unbound_gold_credit": 49
+      }
+    },
+    {
+      "name": "one_gold_rounds_to_one_gold_fee",
+      "gross_gold": 1,
+      "expected": {
+        "bound_gold_debit": 1, "license_atoms_debit": 1,
+        "fee_unbound_gold": 1, "net_unbound_gold_credit": 0
+      }
+    },
+    {
+      "name": "u64_max_amount_does_not_overflow_fee_intermediate",
+      "gross_gold": 18446744073709551615,
+      "expected": {
+        "bound_gold_debit": 18446744073709551615,
+        "license_atoms_debit": 18446744073709551615,
+        "fee_unbound_gold": 368934881474191033,
+        "net_unbound_gold_credit": 18077809192235360582
+      }
+    }
+  ],
+  "invalid_policies": [
+    { "name": "unsupported_schema", "policy_override": { "schema_version": 2 }, "expected_error": "invalid_policy" },
+    { "name": "empty_policy_version", "policy_override": { "policy_version": " " }, "expected_error": "invalid_policy" },
+    { "name": "zero_k", "policy_override": { "k": { "numerator": 0, "denominator": 10 } }, "expected_error": "invalid_policy" },
+    { "name": "zero_denominator", "policy_override": { "k": { "numerator": 1, "denominator": 0 } }, "expected_error": "invalid_policy" },
+    { "name": "zero_fee", "policy_override": { "conversion_fee": { "numerator": 0, "denominator": 50 } }, "expected_error": "invalid_policy" },
+    { "name": "full_fee", "policy_override": { "conversion_fee": { "numerator": 1, "denominator": 1 } }, "expected_error": "invalid_policy" },
+    { "name": "zero_decay", "policy_override": { "daily_decay": { "numerator": 0, "denominator": 150 } }, "expected_error": "invalid_policy" },
+    { "name": "full_decay", "policy_override": { "daily_decay": { "numerator": 1, "denominator": 1 } }, "expected_error": "invalid_policy" },
+    { "name": "zero_baseline", "policy_override": { "baseline_daily_mint_atoms": 0 }, "expected_error": "invalid_policy" },
+    { "name": "cap_multiplier_below_one", "policy_override": { "daily_mint_cap_multiplier": { "numerator": 1, "denominator": 2 } }, "expected_error": "invalid_policy" },
+    { "name": "wrong_timezone", "policy_override": { "business_timezone": "UTC" }, "expected_error": "invalid_policy" },
+    { "name": "wrong_rollover_hour", "policy_override": { "settlement_hour": 0 }, "expected_error": "invalid_policy" },
+    { "name": "cap_overflow", "policy_override": { "baseline_daily_mint_atoms": 18446744073709551615 }, "expected_error": "overflow" }
+  ],
+  "invalid_settlements": [
+    {
+      "name": "mint_remainder_out_of_range",
+      "pool": { "stock_atoms": 0, "mint_remainder": 10, "decay_remainder": 0 },
+      "destruction_gold_equivalent": 0, "expected_error": "invalid_remainder"
+    },
+    {
+      "name": "decay_remainder_out_of_range",
+      "pool": { "stock_atoms": 0, "mint_remainder": 0, "decay_remainder": 150 },
+      "destruction_gold_equivalent": 0, "expected_error": "invalid_remainder"
+    },
+    {
+      "name": "raw_mint_u64_overflow_rejected_even_if_cap_exists",
+      "policy_override": { "k": { "numerator": 2, "denominator": 1 } },
+      "pool": { "stock_atoms": 0, "mint_remainder": 0, "decay_remainder": 0 },
+      "destruction_gold_equivalent": 18446744073709551615, "expected_error": "overflow"
+    },
+    {
+      "name": "pool_overflow_rejected",
+      "pool": { "stock_atoms": 18446744073709551615, "mint_remainder": 0, "decay_remainder": 0 },
+      "destruction_gold_equivalent": 10, "expected_error": "overflow"
+    }
+  ],
+  "invalid_conversions": [
+    { "name": "zero_conversion", "gross_gold": 0, "expected_error": "invalid_amount" }
+  ],
+  "business_days": [
+    { "name": "before_epoch_local_four", "unix_seconds": -14401, "expected_day_key": -1 },
+    { "name": "at_epoch_local_four", "unix_seconds": -14400, "expected_day_key": 0 },
+    { "name": "epoch_utc_is_local_eight", "unix_seconds": 0, "expected_day_key": 0 },
+    { "name": "before_next_local_four", "unix_seconds": 71999, "expected_day_key": 0 },
+    { "name": "at_next_local_four", "unix_seconds": 72000, "expected_day_key": 1 }
+  ],
+  "settlement_windows": [
+    { "name": "epoch_day", "day_key": 0, "expected_start": -14400, "expected_end": 72000 },
+    { "name": "preceding_day", "day_key": -1, "expected_start": -100800, "expected_end": -14400 }
+  ],
+  "invalid_business_days": [
+    { "name": "timestamp_overflow", "unix_seconds": 9223372036854775807, "expected_error": "overflow" }
+  ],
+  "invalid_settlement_windows": [
+    { "name": "window_overflow", "day_key": 9223372036854775807, "expected_error": "overflow" }
+  ]
+}

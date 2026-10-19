@@ -1,0 +1,17 @@
+{
+  "apiVersion": 1,
+  "providers": [
+    {
+      "name": "Mir2 Economy",
+      "orgId": 1,
+      "folder": "Mir2 Economy",
+      "type": "file",
+      "disableDeletion": true,
+      "editable": false,
+      "updateIntervalSeconds": 60,
+      "options": {
+        "path": "/var/lib/grafana/economy-dashboards"
+      }
+    }
+  ]
+}

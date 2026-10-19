@@ -1,0 +1,753 @@
+{
+  "uid": "mir2-hunting-permit",
+  "title": "Mir2 狩猎许可与资产经济",
+  "version": 1,
+  "schemaVersion": 39,
+  "editable": false,
+  "graphTooltip": 1,
+  "refresh": "1m",
+  "timezone": "Asia/Shanghai",
+  "time": {
+    "from": "now-90d",
+    "to": "now"
+  },
+  "tags": [
+    "mir2",
+    "economy",
+    "read-only"
+  ],
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "realm",
+        "label": "经济服",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "mir2-economy-readonly"
+        },
+        "query": "SELECT realm_id AS __text, realm_id AS __value FROM public.hunting_permit_observability_realms WHERE enabled IS TRUE ORDER BY realm_id",
+        "refresh": 1,
+        "multi": false,
+        "includeAll": false,
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "options": []
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "经济监控口径",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "北京时间04:00切日；金额单位为金币，许可单位为1许可=100万金币额度。图表显示完整经济日快照；空值表示缺数据。月卡美元值为等价估值，不是提现收入。此面板只读，不控制游戏资产。"
+      }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "每日三层销毁金币当量",
+      "description": "只计实际永久销毁；转移给其他玩家的货物不计销毁。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.burn_daily_gold ELSE NULL END AS \"日常保底\",\n  CASE WHEN o.is_complete IS TRUE THEN o.burn_light_pvp_gold ELSE NULL END AS \"轻PVP\",\n  CASE WHEN o.is_complete IS TRUE THEN o.burn_sabuk_gold ELSE NULL END AS \"沙巴克脉冲\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end ASC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 45,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "许可每日新增、消耗与衰减",
+      "description": "许可原子在查询时除以1,000,000；不使用金币数充当许可数量。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.permit_minted_atoms / 1000000.0 ELSE NULL END AS \"实际新增许可\",\n  CASE WHEN o.is_complete IS TRUE THEN o.permit_consumed_atoms / 1000000.0 ELSE NULL END AS \"玩家消耗许可\",\n  CASE WHEN o.is_complete IS TRUE THEN o.permit_decayed_atoms / 1000000.0 ELSE NULL END AS \"衰减许可\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end ASC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "bars",
+            "lineWidth": 0,
+            "fillOpacity": 70,
+            "barAlignment": 0
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "全局许可日结库存",
+      "description": "最新完整日结快照；不代表此刻可转换额度。实时请求始终由主服务端校验。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.permit_closing_atoms / 1000000.0 ELSE NULL END AS \"日结库存许可\",\n  CASE WHEN o.is_complete IS TRUE THEN o.planned_daily_consumption_atoms / 1000000.0 ELSE NULL END AS \"计划每日需求许可\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end ASC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "月卡凭证市场汇率 · 90天",
+      "description": "有效真实成交金币总额÷成交月卡张数；无成交时为空。排除无效、撤销、自成交及已确认操纵成交。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.monthly_card_gold_per_card ELSE NULL END AS \"非绑定金币/张月卡\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end ASC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "timeFrom": "90d"
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "原材料价格指数 · 固定篮子基期100",
+      "description": "固定权重与基期的版本化篮子。无有效覆盖时为空，不能通过动态删掉贵材料制造稳定价格。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.raw_material_price_index ELSE NULL END AS \"价格指数\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end ASC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "绑定与可交易金币日结存量",
+      "description": "包括在线和离线钱包、行会、托管、邮件未领取金币；所有权唯一计数。存量基准不能使用7200万/天流量。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.bound_gold_stock ELSE NULL END AS \"绑定金币\",\n  CASE WHEN o.is_complete IS TRUE THEN o.unbound_gold_stock ELSE NULL END AS \"非绑定金币\",\n  CASE WHEN o.is_complete IS TRUE THEN o.unbound_stock_baseline_gold ELSE NULL END AS \"非绑定稳态基准\",\n  CASE WHEN o.is_complete IS TRUE THEN o.unbound_stock_baseline_gold * 1.30 ELSE NULL END AS \"通胀130%\",\n  CASE WHEN o.is_complete IS TRUE THEN o.unbound_stock_baseline_gold * 0.70 ELSE NULL END AS \"通缩70%\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end ASC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "绑定转换：毛额、费用与净流入",
+      "description": "每笔毛额=手续费+净到账。这里仅展示转换净流入；其他产币来源需独立记账。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.gross_converted_gold ELSE NULL END AS \"转换毛额\",\n  CASE WHEN o.is_complete IS TRUE THEN o.conversion_fee_gold ELSE NULL END AS \"销毁手续费\",\n  CASE WHEN o.is_complete IS TRUE THEN o.net_unbound_inflow_gold ELSE NULL END AS \"净非绑定流入\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end ASC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "每日互斥活跃账号",
+      "description": "账号去重；同日按沙巴克＞轻PVP＞休闲优先级互斥归类，三类和=总DAU。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.active_casual_accounts ELSE NULL END AS \"休闲生产\",\n  CASE WHEN o.is_complete IS TRUE THEN o.active_light_pvp_accounts ELSE NULL END AS \"轻度PVP\",\n  CASE WHEN o.is_complete IS TRUE THEN o.active_sabuk_accounts ELSE NULL END AS \"硬核沙巴克\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end ASC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 45,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "piechart",
+      "title": "所选范围最后完整日玩家构成",
+      "description": "按所选时间范围最后一个已闭合经济日取值；该日缺失时显示无数据，不回退旧日冒充。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.active_casual_accounts ELSE NULL END AS \"休闲生产\",\n  CASE WHEN o.is_complete IS TRUE THEN o.active_light_pvp_accounts ELSE NULL END AS \"轻度PVP\",\n  CASE WHEN o.is_complete IS TRUE THEN o.active_sabuk_accounts ELSE NULL END AS \"硬核沙巴克\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end DESC LIMIT 1;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "pieType": "pie",
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "生产玩家月度人均等价美元价值",
+      "description": "当月截至该日人均净非绑定收益÷月卡金币成交价×月卡美元参考价；不得标记实际提现。价格、玩家样本或成本覆盖不足时为空。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.heavy_producer_monthly_usd_equivalent ELSE NULL END AS \"重度种田\",\n  CASE WHEN o.is_complete IS TRUE THEN o.ordinary_producer_monthly_usd_equivalent ELSE NULL END AS \"普通休闲\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end ASC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "生产玩家月度人均净金币收益",
+      "description": "按账号和政策版本归类，收入减已覆盖成本；不能只取正收益玩家。与美元估值共享人口及月份。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.heavy_producer_monthly_net_gold ELSE NULL END AS \"重度种田\",\n  CASE WHEN o.is_complete IS TRUE THEN o.ordinary_producer_monthly_net_gold ELSE NULL END AS \"普通休闲\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end ASC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "月卡成交量与生产画像样本",
+      "description": "成交量为日量，画像为截至该经济日所属月份的样本账号数。真实零与未接入NULL明确区分。",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "WITH calendar AS (\n  SELECT d::date AS economy_date,\n    ((d::date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai' AS period_end\n  FROM generate_series(\n    (to_timestamp($__unixEpochFrom()) AT TIME ZONE 'Asia/Shanghai')::date - 1,\n    (to_timestamp($__unixEpochTo()) AT TIME ZONE 'Asia/Shanghai')::date,\n    interval '1 day') d\n)\nSELECT c.period_end AS time,\n  CASE WHEN o.is_complete IS TRUE THEN o.monthly_card_completed_quantity ELSE NULL END AS \"月卡成交张数\",\n  CASE WHEN o.is_complete IS TRUE THEN o.heavy_producer_accounts ELSE NULL END AS \"重度种田账号\",\n  CASE WHEN o.is_complete IS TRUE THEN o.ordinary_producer_accounts ELSE NULL END AS \"普通休闲账号\"\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.economy_date = c.economy_date AND o.realm_id IN (${realm:sqlstring})\nWHERE $__timeFilter(c.period_end)\n  AND c.period_end <= (date_trunc('day', now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours') AT TIME ZONE 'Asia/Shanghai') + interval '4 hours'\nORDER BY c.period_end ASC;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "暂无有效数据",
+          "custom": {
+            "spanNulls": false,
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "type": "stat",
+      "title": "经济数据完整性（0正常 / 1异常）",
+      "description": "覆盖最近10个闭合经济日、资金字段、画像互斥和配置基准。缺失的价格保持NULL；无成交价格不是零。",
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 58
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "mir2-economy-readonly"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "mir2-economy-readonly"
+          },
+          "rawQuery": true,
+          "format": "time_series",
+          "rawSql": "SELECT * FROM (\nWITH bounds AS (\n  SELECT ((now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours')::date - 1) AS closed_date\n), calendar AS (\n  SELECT r.realm_id, d::date AS economy_date\n  FROM public.hunting_permit_observability_realms r CROSS JOIN bounds b\n  CROSS JOIN LATERAL generate_series(b.closed_date - (10 - 1), b.closed_date, interval '1 day') d\n  WHERE r.enabled IS TRUE\n)\nSELECT now() AS time, c.realm_id,\n  CASE WHEN count(o.economy_date) = 10\n    AND bool_and(o.is_complete IS TRUE)\n    AND bool_and((o.burn_daily_gold IS NOT NULL AND o.burn_daily_gold >= 0 AND\n      o.burn_light_pvp_gold IS NOT NULL AND o.burn_light_pvp_gold >= 0 AND\n      o.burn_sabuk_gold IS NOT NULL AND o.burn_sabuk_gold >= 0 AND\n      o.permit_minted_atoms IS NOT NULL AND o.permit_minted_atoms >= 0 AND\n      o.permit_consumed_atoms IS NOT NULL AND o.permit_consumed_atoms >= 0 AND\n      o.permit_decayed_atoms IS NOT NULL AND o.permit_decayed_atoms >= 0 AND\n      o.permit_closing_atoms IS NOT NULL AND o.permit_closing_atoms >= 0 AND\n      o.bound_gold_stock IS NOT NULL AND o.bound_gold_stock >= 0 AND\n      o.unbound_gold_stock IS NOT NULL AND o.unbound_gold_stock >= 0 AND\n      o.gross_converted_gold IS NOT NULL AND o.gross_converted_gold >= 0 AND\n      o.conversion_fee_gold IS NOT NULL AND o.conversion_fee_gold >= 0 AND\n      o.net_unbound_inflow_gold IS NOT NULL AND o.net_unbound_inflow_gold >= 0 AND\n      o.unbound_stock_baseline_gold > 0 AND o.burn_baseline_gold > 0\n      AND o.planned_daily_consumption_atoms > 0\n      AND o.policy_version IS NOT NULL AND length(o.policy_version) > 0\n      AND o.period_end = ((o.economy_date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai'\n      AND o.gross_converted_gold::numeric = o.conversion_fee_gold::numeric + o.net_unbound_inflow_gold::numeric\n      AND o.active_casual_accounts IS NOT NULL AND o.active_casual_accounts >= 0\n      AND o.active_light_pvp_accounts IS NOT NULL AND o.active_light_pvp_accounts >= 0\n      AND o.active_sabuk_accounts IS NOT NULL AND o.active_sabuk_accounts >= 0\n      AND o.active_account_total = o.active_casual_accounts + o.active_light_pvp_accounts + o.active_sabuk_accounts) IS TRUE)\n  THEN 0.0 ELSE 1.0 END AS value\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.realm_id = c.realm_id AND o.economy_date = c.economy_date\nGROUP BY c.realm_id ORDER BY c.realm_id\n) health WHERE realm_id IN (${realm:sqlstring});"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "无数据",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background"
+      }
+    }
+  ]
+}

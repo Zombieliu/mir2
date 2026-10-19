@@ -1,0 +1,22 @@
+{
+  "apiVersion": 1,
+  "contactPoints": [
+    {
+      "orgId": 1,
+      "name": "mir2-economy-chatops",
+      "receivers": [
+        {
+          "uid": "mir2-economy-webhook",
+          "type": "webhook",
+          "disableResolveMessage": false,
+          "settings": {
+            "url": "$MIR2_ECONOMY_ALERT_RELAY_URL",
+            "httpMethod": "POST",
+            "authorization_scheme": "Bearer",
+            "authorization_credentials": "$MIR2_ECONOMY_ALERT_RELAY_TOKEN"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+[package]
+name = "mir2-economy-service"
+version = "0.1.0"
+edition = "2021"
+description = "Synchronous authoritative PostgreSQL hunting-permit economy"
+license = "MIT"
+
+[features]
+default = []
+test-support = []
+
+[dependencies]
+mir2-economy-policy = { path = "../economy-policy" }
+postgres = { version = "0.19", features = ["with-serde_json-1"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.11"

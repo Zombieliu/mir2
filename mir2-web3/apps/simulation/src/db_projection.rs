@@ -83,6 +83,26 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0014_shared_hero_authority",
         include_str!("../../../infra/postgres/migrations/0014_shared_hero_authority.sql"),
     ),
+    (
+        "0016_hunting_economy",
+        include_str!("../../../infra/postgres/migrations/0016_hunting_economy.sql"),
+    ),
+    (
+        "0017_hunting_economy_observability",
+        include_str!("../../../infra/postgres/migrations/0017_hunting_economy_observability.sql"),
+    ),
+    (
+        "0018_hunting_character_incarnation",
+        include_str!("../../../infra/postgres/migrations/0018_hunting_character_incarnation.sql"),
+    ),
+    (
+        "0019_hunting_economy_metric_exports",
+        include_str!("../../../infra/postgres/migrations/0019_hunting_economy_metric_exports.sql"),
+    ),
+    (
+        "0020_hunting_wallet_owner_guard",
+        include_str!("../../../infra/postgres/migrations/0020_hunting_wallet_owner_guard.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.

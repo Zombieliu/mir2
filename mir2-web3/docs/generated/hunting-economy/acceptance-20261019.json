@@ -1,0 +1,150 @@
+{
+  "date_beijing": "2026-10-19",
+  "scope": "Initial authoritative hunting economy core; new wallets only; not full game source integration or production acceptance",
+  "goal_status": "active",
+  "branch": "codex/hunting-permit-economy",
+  "base_commit": "2e9d95bbb3cd9f7852980af385a1298b57a1511e",
+  "policy_decision": {
+    "k_numerator": 1,
+    "k_denominator": 10,
+    "default_enabled": false,
+    "fixed_scenario_all_in_daily_destruction_gold": 7200000,
+    "baseline_daily_mint_atoms": 720000,
+    "daily_mint_cap_atoms": 1080000,
+    "zero_opening_pool_daily_conversion_gross_gold": 715200,
+    "daily_conversion_net_gold": 700896,
+    "qualification": "Scenario assumes fixed all-in destruction including conversion fee, zero opening pool, aggregate one conversion using all available permits. Not observed steady state or personal income guarantee."
+  },
+  "checks": {
+    "rust_policy": {
+      "passed": 12,
+      "failed": 0
+    },
+    "python_shared_formula": {
+      "passed": 14,
+      "failed": 0
+    },
+    "service_unit": {
+      "passed": 9,
+      "failed": 0
+    },
+    "postgres_authority": {
+      "passed": 5,
+      "failed": 0
+    },
+    "postgres_metric_export": {
+      "passed": 10,
+      "failed": 0
+    },
+    "gateway_hunting": {
+      "passed": 10,
+      "failed": 0,
+      "postgres_cases": 4
+    },
+    "simulation_deletion": {
+      "passed": 6,
+      "failed": 0,
+      "postgres_cases": 4
+    },
+    "adjacent_delete_character": {
+      "passed": 4,
+      "failed": 0
+    },
+    "adjacent_identity": {
+      "passed": 8,
+      "failed": 0,
+      "ignored": 2,
+      "ignored_reason": "Existing unrelated channel/lifecycle PostgreSQL tests require different isolated database variables"
+    },
+    "grafana_offline": {
+      "fixture_cases": 33,
+      "fixture_assertions": 72,
+      "artifact_checks": 216
+    },
+    "grafana_postgres": {
+      "fixture_cases": 29,
+      "expected_rule_values": 57,
+      "fixture_transaction_rolled_back": true,
+      "evidence": "../../../infra/economy-observability/postgres-validation-result.json"
+    },
+    "gateway_library_and_binary_cargo_check": {
+      "exit_code": 0,
+      "log_path": "C:\\mir2-build\\hunting-permit-gateway-check-final.log",
+      "sha256": "bedd673c5df1752f7efa605fc1c20528446ee3802b181efa9f1365eb123de837",
+      "existing_warnings_retained": true
+    },
+    "rust_format": {
+      "policy_and_service_cargo_fmt_check": true,
+      "new_gateway_and_simulation_files_rustfmt_check": true,
+      "legacy_large_modules_reformatted": false
+    }
+  },
+  "scenario_assertions": [
+    "80 empty-realm days caught up automatically without player requests",
+    "80 partial metric revisions exported automatically; missing whole-realm balances remain NULL",
+    "Global permit concurrency cannot overspend",
+    "Original request recovers uncertain commit without duplicate credit",
+    "Authorized account/session/character locks order revocation and deletion with conversion",
+    "Metric target, consumer receipt and outbox ACK commit together; richer revisions are preserved"
+  ],
+  "logs": [
+    {
+      "log_path": "C:\\mir2-build\\hunting-permit-service-tests-02.log",
+      "sha256": "b1dee5e8c149534b108710ae9af560052e70338476a03e495a8d025d32362fdb",
+      "actual_test_summaries": [
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s",
+        "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.05s"
+      ]
+    },
+    {
+      "log_path": "C:\\mir2-build\\hunting-permit-gateway-tests-03.log",
+      "sha256": "2e76af747a2fcdc8076fcb567057dad3c432415646663f2a55fe4b1b7bda393b",
+      "actual_test_summaries": [
+        "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 914 filtered out; finished in 5.81s"
+      ]
+    },
+    {
+      "log_path": "C:\\mir2-build\\hunting-permit-deletion-tests-02.log",
+      "sha256": "2145711e21ca99e9ec8df2f402364873ed45811e9f88c3f6222f5d6e8e10e9fa",
+      "actual_test_summaries": [
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 2078 filtered out; finished in 4.59s"
+      ]
+    },
+    {
+      "log_path": "C:\\mir2-build\\hunting-permit-deletion-adjacent.log",
+      "sha256": "b7358a8729bff0a825dacf13a73a43435ba7c8643a713d35064611c78b1da258",
+      "actual_test_summaries": [
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 2080 filtered out; finished in 1.90s"
+      ]
+    },
+    {
+      "log_path": "C:\\mir2-build\\hunting-permit-identity-adjacent.log",
+      "sha256": "5f7b34f6eff0cfddb38e27438fcf8345b5a7e3f824df62fcd7570dfa802cb612",
+      "actual_test_summaries": [
+        "test result: ok. 8 passed; 0 failed; 2 ignored; 0 measured; 914 filtered out; finished in 0.01s"
+      ]
+    }
+  ],
+  "prior_failures_retained": [
+    "Initial rustfmt differences",
+    "SHA2 0.11 LowerHex compatibility compile failure; explicit hex encoding fixed it",
+    "Overly strict policy-toggle guard regression; identical economic parameters may toggle enabled while K change remains blocked",
+    "Initial observability PostgreSQL run before 0017 applied returned missing relation; applied locally then reran",
+    "Clock fixture used nonexistent inventory_atoms field; corrected to stock_atoms and reran"
+  ],
+  "not_claimed": [
+    "Real farming/mining/quest credit integration",
+    "All three gameplay destruction adapters",
+    "Material binding propagation and material conversion",
+    "Legacy gold classification or migration",
+    "Whole-realm market/player/income data coverage",
+    "Actual Grafana import/render or DingTalk/WeCom delivery",
+    "Remote server deployment or normal-player end-to-end acceptance",
+    "Faulted network transport detach acceptance"
+  ],
+  "remote_assets_modified": false,
+  "unrelated_primary_worktree_changes_preserved": true
+}

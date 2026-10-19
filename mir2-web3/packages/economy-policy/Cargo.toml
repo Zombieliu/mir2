@@ -1,0 +1,12 @@
+[package]
+name = "mir2-economy-policy"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Pure integer hunting-permit policy calculations shared by server and offline checks"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1"

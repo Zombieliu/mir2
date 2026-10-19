@@ -5,6 +5,8 @@ members = [
     "apps/gateway",
     "apps/simulation",
     "apps/game-client/ui-core",
+    "packages/economy-policy",
+    "packages/economy-service",
     "packages/game-data",
     "packages/protocol",
     "vendor/dubhe-network-core",

@@ -173,6 +173,8 @@ impl CharacterRecord {
 }
 
 pub type SharedAccountStore = Arc<Mutex<AccountStore>>;
+#[path = "config_hunting_deletion.rs"]
+mod hunting_deletion;
 #[path = "config_prepared_kill.rs"]
 mod prepared_kill;
 pub use prepared_kill::{PreparedKillAccountSource, PreparedKillPublication, PreparedKillPublicationFailure};
@@ -5525,6 +5527,9 @@ fn write_account_store_account_mutation(
         )
         .map_err(|error| format!("postgres account lock failed for {account_id}: {error}"))?
         .map(|row| row.get::<_, i64>("store_version"));
+    // Same PostgreSQL transaction and account lock as the actual tombstones.
+    // Never check the new wallet in a separate preflight or take realm locks here.
+    hunting_deletion::guard_character_tombstones(transaction, account_id, mutation)?;
     let current_save_versions = transaction
         .query(
             "SELECT character_index, save_version FROM character_saves \

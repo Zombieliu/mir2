@@ -1,0 +1,109 @@
+# 狩猎经济：真实游戏来源接入计划
+
+日期：2026-10-19（北京时间）。本文记录现有源码边界和后续验收要求；不是来源已经接通、覆盖完整或已经发布的证明。经济公式与参数以 [HUNTING-PERMIT-ECONOMY.md](HUNTING-PERMIT-ECONOMY.md) 和有效政策版本为准。保持 K=0.1；原个人月额度不能作为当前供应承诺。
+
+## 权威边界
+
+游戏主服务端必须从真实动作计算产出和实际销毁，并在 PostgreSQL 中提交对应来源状态及资产账本。个人 Session 只是运行状态，Zone 负责共享世界；两者都不能维护独立的全服许可库存。来源操作和日结使用相同 realm、同一事务锁及数据库时钟。
+
+新 `hunting_economy_wallets` 双钱包与旧 `gold` 分离。不得把历史 `gold` 直接复制、重新命名或按快照差额充值到新钱包。不得在原有发奖后再追加新钱包发奖，也不得在旧金币扣除后另开事务补记销毁。网络包、客户端参数、`GainedGold`/`LoseGold` 包、战报、Python 输出或 Grafana 统计都不是可授权的来源事件。
+
+观测表 `hunting_economy_daily_metric_versions`、观测完整性字段和 `hunting_permit_daily_observations` 只用于统计。不得读取其占位值、补报值或 NULL 替代值来发金币、生产许可或修改游戏资产。新钱包统计不能自动成为全服资产统计；只有真实来源及全部资产范围经独立核对后才能声明全服覆盖。
+
+## 现有来源与存档缺口
+
+| 来源 | 现有入口 | 当前变更 | 接入前必须补齐的边界 |
+| --- | --- | --- | --- |
+| 普通任务金币 | `runtime/quests.rs`：`complete_quest_with_selection` | 直接增加 `PlayerRuntimeResource.gold`，随后修改任务完成状态和奖励物品 | 完成状态、领取标记、相关物品/经验及新绑定金币必须共同持久化；目前仅有 ECS 内的阶段检查 |
+| Crystal 任务金币 | `runtime/quests.rs`：`complete_crystal_quest` | `player.gold.saturating_add(info.reward_gold)`；随后发物品、扣任务物品、写 Completed | 需要完整奖励计划，不能只迁移金币而让同一次领取的其余结果失去原子性 |
+| 个人地面金币拾取 | `runtime/drops.rs`：`pick_up_ground_drop` | ECS 加旧金币并删除本地地面物 | 必须把不可重复的掉落身份、拾取归属和绑定入账共同提交，不能依赖重启后可重复的临时 object_id |
+| 共享地面金币拾取 | `runtime/drops.rs`：`commit_shared_ground_drop_pickup_transaction_impl`；Gateway 的共享拾取调用链 | 个人状态加旧金币，返回共享拾取回执 | Zone 领取/删除和数据库入账需要持久 claim 协议；不能把“内存事务回执”当作与新钱包共同提交的 PG 事务 |
+| 挖矿材料 | `runtime/mining.rs`：`try_mine`、`give_mine_payout` | 消耗本地矿点石数、损耗镐耐久，通过 inventory helper 直接发矿石 | 需要共享矿点来源身份、持久产出 claim、逐实例经济绑定，以及完整材料传播规则 |
+| NPC 修理 | `runtime/equipment.rs`：`repair_item_impl` | ECS 扣旧金币、修改耐久，返回 `LoseGold`/`ItemRepaired` | 扣款、修理结果和实际金币销毁须同一持久事务；不能因重启恢复旧装备/金币而重复生成销毁额度 |
+| NPC 出售 | `runtime/npc.rs`：`sell_item_impl` | 删除/减少物品，增加旧金币，放入回购物品表 | 绑定材料出售所得必须保持绑定；回购与重售不得洗成非绑定金币 |
+
+核心状态定义仍只有一份旧金币：`runtime/resources.rs` 的 `PlayerRuntimeResource.gold` 和 `config.rs` 的 `CharacterSaveRecord.gold`。`runtime/save.rs::snapshot_active_character_save` 将它及 `quest_states_json`、背包、装备、NPC 状态打包成完整存档。
+
+已有 `config.rs::commit_account_store_transaction` 可以先在独立 `AccountStore` 镜像上修改，再持久化并发布内存，但它的闭包只获得 `&mut AccountStore`。底层 `write_account_store_mutation_plan_to_postgres` 自行开启并提交 PG 事务；`write_account_store_mutation_plan_in_transaction` 当前是内部函数。直接在前述闭包中调用 economy service 会产生第二条连接/第二个事务，不能获得共同原子提交。
+
+`runtime/npc_purchase_transaction.rs` 已有完整 checkpoint、角色 incarnation、幂等 journal、版本检查、提交后发布及 Unknown 恢复的设计，可用于参考。它还不是任务/修理与狩猎账本之间的现成事务桥。
+
+## 首条推荐来源：一次性固定金币任务
+
+先限定服务端明确列出的、非每日、非每周、非重复的固定金币奖励任务。任务定义和奖励版本由服务器加载，客户端只提交原有完成意图，不提交金额、来源摘要、账户或角色 incarnation。优先选择没有可选物品或额外复杂奖励的真实任务；不能为缩小实现而忽略原任务实际包含的奖励。
+
+`quest_recurrence.rs::quest_completion_is_permanent` 只排除 Repeatable，不能用于判断“永久不可再次领取”：Daily/Weekly 也可能返回 true。首批应明确要求 `cadence_for_quest(...) == None`，并复核具体任务定义。已有日任务以北京时间 00:00 重置；许可日结以 04:00 关闭。将来接入周期任务必须使用任务自己的有效 cycle，不能拿许可日键代替领取周期。
+
+建议新增受限的来源 mutation plan，而不是让业务层直接修改完整存档 JSON：
+
+1. 从当前受信任角色 checkpoint 生成待提交奖励计划，包含任务定义版本、完整奖励、完成前置状态、预期存档 revision、实际 `hunting_incarnation` 和固定来源 ID。规划阶段不发布 ECS 成功结果。
+2. 在 SourceOfTruth PG 路径中先取得经济 realm 锁及 DB 时钟，再按统一顺序锁 account、character/character_save。不得先持有 account 锁后再请求 realm 锁，避免与 HTTP 转换路径形成反向锁等待。
+3. 复核角色仍存在且 incarnation 未变，任务确实 ReadyToTurnIn，定义/奖励摘要一致，完整存档 revision 未变。读取持久来源记录，决定重放、冲突或首次执行。
+4. 在同一 PG 事务内提交任务 Completed/领取标记、任务物品消耗、原有其他奖励与完整 checkpoint CAS，以及新绑定金币 credit、来源幂等回执和 outbox。不再执行该笔旧金币奖励。
+5. 提交确认后，按已提交 revision 更新会话投影并发送原有任务结果及新钱包状态。普通退出保存不能覆盖新钱包，也不能擦除持久领取记录。
+6. 提交结果 Unknown 时冻结该来源的再次执行；用原来源 ID、原摘要和原 incarnation 恢复，不能换 ID、再次发奖或补偿退款。重连/进程重启同样通过持久记录恢复。
+
+推荐来源标识至少覆盖 `realm + durable character incarnation + quest id + quest-definition/reward revision + completion cycle`；一次性任务使用稳定的单次领取槽。定义版本变更不能让已完成任务再次获得领取资格，因此还需要独立于奖励摘要的业务唯一领取约束。相同业务来源、不同金额/摘要应返回冲突，而不是产生第二笔奖励。
+
+实现时可扩展现有 account mutation plan 的 SourceOfTruth writer，在其真实 PG 事务中应用受限经济 mutation；也可提取仅服务端可调用的共同事务 writer。两条路径都必须保留现有完整存档 CAS、共享内存镜像发布、角色删除/重建保护及提交不明分类。不要为了接一个来源绕开旧持久化防线。
+
+首条来源验收：
+
+- [ ] 普通客户端完成真实任务，绑定钱包只增加服务器定义金额；旧金币不重复增加。
+- [ ] 任务完成、任务物品消耗、其他奖励和绑定金币在提交前故障时全部回滚。
+- [ ] 提交确认丢失后，同 ID 恢复返回同一回执，不重复执行来源回调。
+- [ ] 重复 FinishQuest、跨进程并发领取和重新登录只产生一次奖励。
+- [ ] 相同来源改金额或奖励摘要返回冲突；修改任务定义不能绕过领取业务唯一性。
+- [ ] 陈旧 checkpoint、封禁/撤销身份、角色删除重建、归属不符均拒绝；旧角色回执不进入新 incarnation。
+- [ ] 库存/日结追赶阻塞不会先修改 ECS；04:00 等锁后使用真实 DB 业务日。
+- [ ] disabled 时不发新奖励，且不存在 legacy/new 双发兜底。
+
+## 真实销毁接入要求
+
+| 层级 | 可计入的真实事件 | 不得当作销毁的事件 | 必须共同提交的来源状态 |
+| --- | --- | --- | --- |
+| 日常保底 | 已扣除的工具修理金币、建筑维护费、领地维持税、资产转换手续费 | 仅减少可修复耐久、只计算应缴费用、未实际扣款的日志 | 钱包扣款/维护期完成/修理结果与唯一销毁事件；零费用不能伪造正销毁 |
+| 轻度 PVP | 永久删除的装备或货物、规则明确永久丢失的部分 | 换了所有者的抢夺、仍在地面的战利品、仓库转移 | 战斗/货运结果、删除资产实例/数量、估值版本与销毁记录 |
+| 沙巴克脉冲 | 战役规则确认永久消失的军备、装备、仓库物资和缴获损失部分 | 整场伤害量、参战预算、同一物资的缴获转手、重复汇总战报 | 唯一战役/阶段 ID、资产删除或明确损失、逐项估值证据和分层总额 |
+
+销毁估值由版本化的服务器规则产生；玩家不得填写金币当量，也不能直接采用可操纵的单笔市场成交价。转移给胜方的货物不计销毁；只有实际删除部分计入。同一源事件不能同时按装备价值、替换支出和战报总额重复计入。金币实际销毁以面额计入，资产许可本身衰减不重复当作金币销毁。
+
+销毁接入验收：
+
+- [ ] 来源行/资产实例与销毁事件同事务；来源拒绝、异常或回滚不留下销毁额度。
+- [ ] 每种来源有稳定业务唯一键；重试跳过真实来源删除，金额/估值版本冲突拒绝。
+- [ ] 新增事件使用与转换、政策切换、日结相同的全服串行化顺序；不允许客户端指定历史日期。
+- [ ] 04:00 前后并发提交均归入唯一经济日；已闭合日期不能再补入未经明确修订程序的来源事件。
+- [ ] 沙巴克大额事件应用当日增发上限；被截掉的整数额度不在次日补发。
+- [ ] 转换手续费已经由转换事务产生，其他来源禁止再次登记 `conversion_fee`。
+- [ ] 逐事件来源对账与分层日合计一致，且保存原始业务证据；观测修订不反向改游戏账本。
+
+## 材料经济绑定与传播缺口
+
+现有 `runtime/items.rs::ItemState` 有 `soul_bound_id`、Crystal 模板 bind、租赁绑定等既有语义，没有独立的狩猎经济绑定/产出来源属性。`soul_bound_id` 是角色索引语义，不能代替带持久 incarnation 的新经济所有者。材料解绑定也不能顺带清除 Crystal/租赁/封印等其他限制。
+
+新增材料经济属性至少要区分绑定/可交易状态、受信任所有者 incarnation 和来源身份；默认只对新接入的可信产出生成绑定，旧资产分类需要独立迁移方案。`ItemState`、装备状态、递归 socket、存档 JSON 及协议转换都必须保留身份，不能只在一个新增字段上打标。
+
+当前 `inventory.rs::add_or_increment_item_with_random_metadata` 的堆叠按 key、容器、数量等匹配，并在新建时写 `soul_bound_id: None`。未来只在新产出后设置绑定会把绑定/非绑定材料先混入同一栈；必须先把绑定类别与所有者加入容量规划、堆叠等价判断和创建路径。`mining.rs::give_mine_payout` 正使用这一 helper。
+
+当前 `social_economy.rs::stage5_trade_item_can_enter` 只判断既有 Crystal/soul/rental 限制；`npc.rs::sell_item_impl` 增加旧金币。经济绑定需要同时进入相关准入与结算路径，不能仅改交易界面显示。
+
+材料传播验收：
+
+- [ ] 矿石、种植物、任务材料在来源创建时即为绑定；不能先进入可交易栈再补标。
+- [ ] 绑定与非绑定、不同所有者的材料不会合并；拆分、部分移动与满包规划保留准确数量及身份。
+- [ ] 存档、读取、重连、装备、仓库、腰带、Hero 背包及递归 socket 往返不丢失绑定。
+- [ ] 直接交易、摆摊/拍卖、邮件/附件、租赁、行会仓库、掉地/拾取、回购不能绕过绑定准入。
+- [ ] 绑定材料卖 NPC 后所得保持绑定；回购、炼制、合成、拆解等输出执行明确的绑定继承规则。
+- [ ] 解绑定消耗全局许可、验证准确资产实例及数量、收取定义明确的手续费，在同一权威事务提交。
+- [ ] 材料估值、许可换算、数量取整及手续费币种先形成版本化规则；不得套用金币接口猜测。
+- [ ] 同一材料多窗口并发处理、提交不明重试和删除重建不重复解绑定，也不产生负库存。
+- [ ] 客户端旧协议不能把服务端绑定资产重建为可交易资产；未知/缺失绑定元数据的写入路径按明确兼容策略拒绝或隔离。
+
+## 调度与 HTTP 复核范围
+
+最新 `apps/gateway/src/hunting_clock.rs` 已改为维护专用 PG 连接，未再从登录/存档共享连接池取 CancelToken。连接上限 5 秒、锁超时 2 秒、语句超时 10 秒；Drop 等待 worker 最多约 12 秒后解除等待，断线提交通过持久日结 cursor 恢复。它默认关闭、要求显式 realm 和 PG SourceOfTruth，不按在线人数启动，也不从政策文件注入初始许可或隐式改变 K。
+
+新增 ignored PG 测试源码覆盖空服追赶 80 个日期、重复执行无重复日、锁超时和正常锁等待下的有界退出。源码存在不等于已经执行；真实编译、隔离 PG 结果和最终回归由协调者的实际执行记录确认。故障网络下 detach 路径不能仅凭正常锁等待测试就宣称已经验收。
+
+`web/hunting_economy.rs` 的转换/钱包 HTTP 路径使用身份 bearer token，并在资产事务内重新锁定账户、身份 session、角色 incarnation；锁后再校验 DB 时间、过期、封禁和撤销。客户端不能提供账户或 incarnation，金额以规范十进制字符串传输，并发许可随 blocking 工作生命周期持有。当前源码复核未发现确定越权或并发超发缺陷；这一结论不替代真实玩家来源接线和上线验收。

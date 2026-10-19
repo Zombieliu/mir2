@@ -1,0 +1,478 @@
+{
+  "apiVersion": 1,
+  "groups": [
+    {
+      "orgId": 1,
+      "name": "Mir2 daily economy",
+      "folder": "Mir2 Economy",
+      "interval": "1m",
+      "rules": [
+        {
+          "uid": "mir2-econ-inflation",
+          "title": "可交易金币通胀：连续7完整日高于存量基准130%",
+          "condition": "C",
+          "for": "10m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "isPaused": false,
+          "labels": {
+            "service": "mir2-economy",
+            "severity": "red",
+            "economy_rule": "inflation"
+          },
+          "annotations": {
+            "summary": "可交易金币通胀：连续7完整日高于存量基准130%",
+            "description": "按北京时间04:00闭合的经济日和版本化基准计算；缺日期或缺基准产生数据异常，不代表业务阈值已触发。此告警只通知，不变更游戏资产。"
+          },
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {
+                "from": 864000,
+                "to": 0
+              },
+              "datasourceUid": "mir2-economy-readonly",
+              "model": {
+                "refId": "A",
+                "datasource": {
+                  "type": "grafana-postgresql-datasource",
+                  "uid": "mir2-economy-readonly"
+                },
+                "rawQuery": true,
+                "format": "time_series",
+                "rawSql": "WITH bounds AS (\n  SELECT ((now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours')::date - 1) AS closed_date\n), calendar AS (\n  SELECT r.realm_id, d::date AS economy_date\n  FROM public.hunting_permit_observability_realms r CROSS JOIN bounds b\n  CROSS JOIN LATERAL generate_series(b.closed_date - (7 - 1), b.closed_date, interval '1 day') d\n  WHERE r.enabled IS TRUE\n)\nSELECT now() AS time, c.realm_id,\n  CASE WHEN count(o.economy_date) = 7\n    AND bool_and(o.is_complete IS TRUE)\n    AND bool_and((o.unbound_gold_stock >= 0 AND o.unbound_stock_baseline_gold > 0) IS TRUE)\n  THEN CASE WHEN bool_and((o.unbound_gold_stock::numeric > o.unbound_stock_baseline_gold::numeric * 1.30) IS TRUE) THEN 1.0 ELSE 0.0 END\n  ELSE NULL::double precision END AS value\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.realm_id = c.realm_id AND o.economy_date = c.economy_date\nGROUP BY c.realm_id ORDER BY c.realm_id;",
+                "intervalMs": 60000,
+                "maxDataPoints": 1000
+              }
+            },
+            {
+              "refId": "B",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "refId": "B",
+                "type": "reduce",
+                "expression": "A",
+                "reducer": "last",
+                "settings": {
+                  "mode": "strict"
+                }
+              }
+            },
+            {
+              "refId": "C",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "refId": "C",
+                "type": "threshold",
+                "expression": "B",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0.5
+                      ]
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "reducer": {
+                      "type": "last",
+                      "params": []
+                    },
+                    "query": {
+                      "params": [
+                        "C"
+                      ]
+                    },
+                    "type": "query"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "uid": "mir2-econ-deflation",
+          "title": "可交易金币通缩：连续7完整日低于存量基准70%",
+          "condition": "C",
+          "for": "10m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "isPaused": false,
+          "labels": {
+            "service": "mir2-economy",
+            "severity": "yellow",
+            "economy_rule": "deflation"
+          },
+          "annotations": {
+            "summary": "可交易金币通缩：连续7完整日低于存量基准70%",
+            "description": "按北京时间04:00闭合的经济日和版本化基准计算；缺日期或缺基准产生数据异常，不代表业务阈值已触发。此告警只通知，不变更游戏资产。"
+          },
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {
+                "from": 864000,
+                "to": 0
+              },
+              "datasourceUid": "mir2-economy-readonly",
+              "model": {
+                "refId": "A",
+                "datasource": {
+                  "type": "grafana-postgresql-datasource",
+                  "uid": "mir2-economy-readonly"
+                },
+                "rawQuery": true,
+                "format": "time_series",
+                "rawSql": "WITH bounds AS (\n  SELECT ((now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours')::date - 1) AS closed_date\n), calendar AS (\n  SELECT r.realm_id, d::date AS economy_date\n  FROM public.hunting_permit_observability_realms r CROSS JOIN bounds b\n  CROSS JOIN LATERAL generate_series(b.closed_date - (7 - 1), b.closed_date, interval '1 day') d\n  WHERE r.enabled IS TRUE\n)\nSELECT now() AS time, c.realm_id,\n  CASE WHEN count(o.economy_date) = 7\n    AND bool_and(o.is_complete IS TRUE)\n    AND bool_and((o.unbound_gold_stock >= 0 AND o.unbound_stock_baseline_gold > 0) IS TRUE)\n  THEN CASE WHEN bool_and((o.unbound_gold_stock::numeric < o.unbound_stock_baseline_gold::numeric * 0.70) IS TRUE) THEN 1.0 ELSE 0.0 END\n  ELSE NULL::double precision END AS value\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.realm_id = c.realm_id AND o.economy_date = c.economy_date\nGROUP BY c.realm_id ORDER BY c.realm_id;",
+                "intervalMs": 60000,
+                "maxDataPoints": 1000
+              }
+            },
+            {
+              "refId": "B",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "refId": "B",
+                "type": "reduce",
+                "expression": "A",
+                "reducer": "last",
+                "settings": {
+                  "mode": "strict"
+                }
+              }
+            },
+            {
+              "refId": "C",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "refId": "C",
+                "type": "threshold",
+                "expression": "B",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0.5
+                      ]
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "reducer": {
+                      "type": "last",
+                      "params": []
+                    },
+                    "query": {
+                      "params": [
+                        "C"
+                      ]
+                    },
+                    "type": "query"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "uid": "mir2-econ-permit-exhaustion",
+          "title": "许可库存：连续10完整日不足1天计划需求",
+          "condition": "C",
+          "for": "10m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "isPaused": false,
+          "labels": {
+            "service": "mir2-economy",
+            "severity": "yellow",
+            "economy_rule": "permit_exhaustion"
+          },
+          "annotations": {
+            "summary": "许可库存：连续10完整日不足1天计划需求",
+            "description": "按北京时间04:00闭合的经济日和版本化基准计算；缺日期或缺基准产生数据异常，不代表业务阈值已触发。此告警只通知，不变更游戏资产。"
+          },
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {
+                "from": 864000,
+                "to": 0
+              },
+              "datasourceUid": "mir2-economy-readonly",
+              "model": {
+                "refId": "A",
+                "datasource": {
+                  "type": "grafana-postgresql-datasource",
+                  "uid": "mir2-economy-readonly"
+                },
+                "rawQuery": true,
+                "format": "time_series",
+                "rawSql": "WITH bounds AS (\n  SELECT ((now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours')::date - 1) AS closed_date\n), calendar AS (\n  SELECT r.realm_id, d::date AS economy_date\n  FROM public.hunting_permit_observability_realms r CROSS JOIN bounds b\n  CROSS JOIN LATERAL generate_series(b.closed_date - (10 - 1), b.closed_date, interval '1 day') d\n  WHERE r.enabled IS TRUE\n)\nSELECT now() AS time, c.realm_id,\n  CASE WHEN count(o.economy_date) = 10\n    AND bool_and(o.is_complete IS TRUE)\n    AND bool_and((o.permit_closing_atoms >= 0 AND o.planned_daily_consumption_atoms > 0) IS TRUE)\n  THEN CASE WHEN bool_and((o.permit_closing_atoms < o.planned_daily_consumption_atoms) IS TRUE) THEN 1.0 ELSE 0.0 END\n  ELSE NULL::double precision END AS value\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.realm_id = c.realm_id AND o.economy_date = c.economy_date\nGROUP BY c.realm_id ORDER BY c.realm_id;",
+                "intervalMs": 60000,
+                "maxDataPoints": 1000
+              }
+            },
+            {
+              "refId": "B",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "refId": "B",
+                "type": "reduce",
+                "expression": "A",
+                "reducer": "last",
+                "settings": {
+                  "mode": "strict"
+                }
+              }
+            },
+            {
+              "refId": "C",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "refId": "C",
+                "type": "threshold",
+                "expression": "B",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0.5
+                      ]
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "reducer": {
+                      "type": "last",
+                      "params": []
+                    },
+                    "query": {
+                      "params": [
+                        "C"
+                      ]
+                    },
+                    "type": "query"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "uid": "mir2-econ-burn-pulse",
+          "title": "销毁脉冲：完整经济日超稳态150%",
+          "condition": "C",
+          "for": "10m",
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "isPaused": false,
+          "labels": {
+            "service": "mir2-economy",
+            "severity": "red",
+            "economy_rule": "burn_pulse"
+          },
+          "annotations": {
+            "summary": "销毁脉冲：完整经济日超稳态150%",
+            "description": "按北京时间04:00闭合的经济日和版本化基准计算；缺日期或缺基准产生数据异常，不代表业务阈值已触发。此告警只通知，不变更游戏资产。"
+          },
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {
+                "from": 864000,
+                "to": 0
+              },
+              "datasourceUid": "mir2-economy-readonly",
+              "model": {
+                "refId": "A",
+                "datasource": {
+                  "type": "grafana-postgresql-datasource",
+                  "uid": "mir2-economy-readonly"
+                },
+                "rawQuery": true,
+                "format": "time_series",
+                "rawSql": "WITH bounds AS (\n  SELECT ((now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours')::date - 1) AS closed_date\n), calendar AS (\n  SELECT r.realm_id, d::date AS economy_date\n  FROM public.hunting_permit_observability_realms r CROSS JOIN bounds b\n  CROSS JOIN LATERAL generate_series(b.closed_date - (1 - 1), b.closed_date, interval '1 day') d\n  WHERE r.enabled IS TRUE\n)\nSELECT now() AS time, c.realm_id,\n  CASE WHEN count(o.economy_date) = 1\n    AND bool_and(o.is_complete IS TRUE)\n    AND bool_and((o.burn_daily_gold >= 0 AND o.burn_light_pvp_gold >= 0 AND o.burn_sabuk_gold >= 0 AND o.burn_baseline_gold > 0) IS TRUE)\n  THEN CASE WHEN bool_and(((o.burn_daily_gold::numeric + o.burn_light_pvp_gold::numeric + o.burn_sabuk_gold::numeric) > o.burn_baseline_gold::numeric * 1.50) IS TRUE) THEN 1.0 ELSE 0.0 END\n  ELSE NULL::double precision END AS value\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.realm_id = c.realm_id AND o.economy_date = c.economy_date\nGROUP BY c.realm_id ORDER BY c.realm_id;",
+                "intervalMs": 60000,
+                "maxDataPoints": 1000
+              }
+            },
+            {
+              "refId": "B",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "refId": "B",
+                "type": "reduce",
+                "expression": "A",
+                "reducer": "last",
+                "settings": {
+                  "mode": "strict"
+                }
+              }
+            },
+            {
+              "refId": "C",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "refId": "C",
+                "type": "threshold",
+                "expression": "B",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0.5
+                      ]
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "reducer": {
+                      "type": "last",
+                      "params": []
+                    },
+                    "query": {
+                      "params": [
+                        "C"
+                      ]
+                    },
+                    "type": "query"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "uid": "mir2-econ-data-integrity",
+          "title": "经济日结数据、配置或画像完整性异常",
+          "condition": "C",
+          "for": "10m",
+          "noDataState": "Alerting",
+          "execErrState": "Error",
+          "isPaused": false,
+          "labels": {
+            "service": "mir2-economy",
+            "severity": "red",
+            "economy_rule": "data_integrity"
+          },
+          "annotations": {
+            "summary": "经济日结数据、配置或画像完整性异常",
+            "description": "按北京时间04:00闭合的经济日和版本化基准计算；缺日期或缺基准产生数据异常，不代表业务阈值已触发。此告警只通知，不变更游戏资产。"
+          },
+          "data": [
+            {
+              "refId": "A",
+              "relativeTimeRange": {
+                "from": 864000,
+                "to": 0
+              },
+              "datasourceUid": "mir2-economy-readonly",
+              "model": {
+                "refId": "A",
+                "datasource": {
+                  "type": "grafana-postgresql-datasource",
+                  "uid": "mir2-economy-readonly"
+                },
+                "rawQuery": true,
+                "format": "time_series",
+                "rawSql": "WITH bounds AS (\n  SELECT ((now() AT TIME ZONE 'Asia/Shanghai' - interval '4 hours')::date - 1) AS closed_date\n), calendar AS (\n  SELECT r.realm_id, d::date AS economy_date\n  FROM public.hunting_permit_observability_realms r CROSS JOIN bounds b\n  CROSS JOIN LATERAL generate_series(b.closed_date - (10 - 1), b.closed_date, interval '1 day') d\n  WHERE r.enabled IS TRUE\n)\nSELECT now() AS time, c.realm_id,\n  CASE WHEN count(o.economy_date) = 10\n    AND bool_and(o.is_complete IS TRUE)\n    AND bool_and((o.burn_daily_gold IS NOT NULL AND o.burn_daily_gold >= 0 AND\n      o.burn_light_pvp_gold IS NOT NULL AND o.burn_light_pvp_gold >= 0 AND\n      o.burn_sabuk_gold IS NOT NULL AND o.burn_sabuk_gold >= 0 AND\n      o.permit_minted_atoms IS NOT NULL AND o.permit_minted_atoms >= 0 AND\n      o.permit_consumed_atoms IS NOT NULL AND o.permit_consumed_atoms >= 0 AND\n      o.permit_decayed_atoms IS NOT NULL AND o.permit_decayed_atoms >= 0 AND\n      o.permit_closing_atoms IS NOT NULL AND o.permit_closing_atoms >= 0 AND\n      o.bound_gold_stock IS NOT NULL AND o.bound_gold_stock >= 0 AND\n      o.unbound_gold_stock IS NOT NULL AND o.unbound_gold_stock >= 0 AND\n      o.gross_converted_gold IS NOT NULL AND o.gross_converted_gold >= 0 AND\n      o.conversion_fee_gold IS NOT NULL AND o.conversion_fee_gold >= 0 AND\n      o.net_unbound_inflow_gold IS NOT NULL AND o.net_unbound_inflow_gold >= 0 AND\n      o.unbound_stock_baseline_gold > 0 AND o.burn_baseline_gold > 0\n      AND o.planned_daily_consumption_atoms > 0\n      AND o.policy_version IS NOT NULL AND length(o.policy_version) > 0\n      AND o.period_end = ((o.economy_date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai'\n      AND o.gross_converted_gold::numeric = o.conversion_fee_gold::numeric + o.net_unbound_inflow_gold::numeric\n      AND o.active_casual_accounts IS NOT NULL AND o.active_casual_accounts >= 0\n      AND o.active_light_pvp_accounts IS NOT NULL AND o.active_light_pvp_accounts >= 0\n      AND o.active_sabuk_accounts IS NOT NULL AND o.active_sabuk_accounts >= 0\n      AND o.active_account_total = o.active_casual_accounts + o.active_light_pvp_accounts + o.active_sabuk_accounts) IS TRUE)\n  THEN 0.0 ELSE 1.0 END AS value\nFROM calendar c LEFT JOIN public.hunting_permit_daily_observations o\n  ON o.realm_id = c.realm_id AND o.economy_date = c.economy_date\nGROUP BY c.realm_id ORDER BY c.realm_id;",
+                "intervalMs": 60000,
+                "maxDataPoints": 1000
+              }
+            },
+            {
+              "refId": "B",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "refId": "B",
+                "type": "reduce",
+                "expression": "A",
+                "reducer": "last",
+                "settings": {
+                  "mode": "strict"
+                }
+              }
+            },
+            {
+              "refId": "C",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "datasourceUid": "__expr__",
+              "model": {
+                "refId": "C",
+                "type": "threshold",
+                "expression": "B",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0.5
+                      ]
+                    },
+                    "operator": {
+                      "type": "and"
+                    },
+                    "reducer": {
+                      "type": "last",
+                      "params": []
+                    },
+                    "query": {
+                      "params": [
+                        "C"
+                      ]
+                    },
+                    "type": "query"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

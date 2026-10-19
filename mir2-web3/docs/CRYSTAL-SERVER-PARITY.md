@@ -1,5 +1,10 @@
 # Crystal Server Parity
 
+## 狩猎许可定制经济边界（2026-10-19）
+
+狩猎许可持续目标active：真实PostgreSQL核心、认证转换HTTP、空服日结追赶和只读Grafana配置已通过本地有界验收，见 [实现及验收边界](HUNTING-PERMIT-ECONOMY.md)。K=0.1保留，默认基准/硬上限重算为0.72/1.08许可。全部真实产出/销毁来源、材料传播、完整指标和发布资格尚未闭合。未更改线上资产、旧金币定性或现有Crystal结论；本服定制规则不计新增Crystal1:1行为。
+
+
 ## Root owned Source78 authenticated Spells bootstrap and ordinary reentry QA (2026-10-12 Beijing)
 
 - Resolved: the packaged empty Spells page no longer falls back to the React table. The first public refusal was baseline-missing. Source review found that the initial Bag ownership revision can invalidate the earlier owner-qualified Spells cache before the new Host's one-time bootstrap. Page now bootstraps from the existing authenticated physical snapshot witness, preserving socket/session/scene/version/self/map checks and rejecting missing/null/nonarray/oversize learned data. It does not retag old cache, invent an empty list or replay an old ACK; live ACK and send-proof gates are unchanged.

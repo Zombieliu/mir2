@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "postgres_executed": true,
+  "exit_code": 0,
+  "synthetic_realm_prefix": "hunting-observer-test-99ec8493b9a64620",
+  "all_fixture_changes_rolled_back": true,
+  "grafana_import_verified": false,
+  "notifications_sent": false,
+  "synthetic_fixture_cases": 29,
+  "expected_rule_values": 57,
+  "psql_output": "               set_config               \n----------------------------------------\n hunting-observer-test-99ec8493b9a64620\n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n \n \n(3 rows)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n count \n-------\n    38\n(1 row)\n\n count \n-------\n   289\n(1 row)\n\n hunting_observer_assert \n-------------------------\n \n(1 row)\n\n                         acceptance_summary                         \n--------------------------------------------------------------------\n {\"assertions\" : 23, \"synthetic_realms\" : 30, \"rolled_back\" : true}\n(1 row)\n\n"
+}

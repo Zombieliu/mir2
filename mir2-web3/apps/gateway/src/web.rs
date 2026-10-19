@@ -13,6 +13,8 @@ use axum::http::{HeaderMap, StatusCode};
 use axum::response::{Html, IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
+
+mod hunting_economy;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine as _;
 use futures_util::{SinkExt, StreamExt};
@@ -2661,6 +2663,8 @@ pub async fn run_web_gateway(
         .route("/admin/kick-player", post(admin_kick_player))
         .route("/admin/control", post(admin_control))
         .route("/v1/identity/me", get(identity_overview))
+        .route("/v1/economy/hunting-wallet", get(hunting_economy::hunting_wallet))
+        .route("/v1/economy/convert", post(hunting_economy::convert_bound_gold).layer(axum::extract::DefaultBodyLimit::max(4096)))
         .route(
             "/v1/identity/sessions/revoke",
             post(identity_revoke_session),

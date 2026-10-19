@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "policy_version": "hunting-economy-k01-recalibrated-v1-disabled",
+  "enabled": false,
+  "k": { "numerator": 1, "denominator": 10 },
+  "conversion_fee": { "numerator": 1, "denominator": 50 },
+  "daily_decay": { "numerator": 1, "denominator": 150 },
+  "baseline_daily_mint_atoms": 720000,
+  "daily_mint_cap_multiplier": { "numerator": 3, "denominator": 2 },
+  "business_timezone": "Asia/Shanghai",
+  "settlement_hour": 4
+}

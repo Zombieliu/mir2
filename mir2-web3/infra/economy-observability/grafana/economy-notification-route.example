@@ -1,0 +1,29 @@
+{
+  "apiVersion": 1,
+  "policies": [
+    {
+      "orgId": 1,
+      "receiver": "EXISTING_DEFAULT_RECEIVER",
+      "routes": [
+        {
+          "receiver": "mir2-economy-chatops",
+          "object_matchers": [
+            [
+              "service",
+              "=",
+              "mir2-economy"
+            ]
+          ],
+          "group_by": [
+            "alertname",
+            "realm_id",
+            "severity"
+          ],
+          "group_wait": "30s",
+          "group_interval": "5m",
+          "repeat_interval": "4h"
+        }
+      ]
+    }
+  ]
+}
