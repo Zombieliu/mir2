@@ -2,6 +2,8 @@
 
 ## 狩猎许可经济来源接线（2026-10-20）
 
+第三阶段补齐真实Guild成员专项3项PG验证，并实现正额绑定debit+同面额burn共事务、保持旧修理行为的纯RepairPlan，以及私有单调物品mutation见证。经济服务32/仿真focused57/邻接105，共194项通过（41项明确PG）；Gateway库/主/ZoneHost检查通过，见 [第三阶段证据](generated/hunting-economy/acceptance-20261020-repair-foundation.json)。该基础尚无报价协议与真实修理来源共同checkpoint/恢复，不宣称已接NPC销毁或可以启用生产；原生、不用Docker，goal active。
+
 独立工作树新增无物品一次性任务权威来源、完整checkpoint/绑定金币同事务CAS及原NPC请求提交不明恢复；配置桥12项、实际任务分发12项通过，包含独立规划、UUID、worker丢失、当前buff上限、Zone伤害/死亡及不同顺序的冻结归属保护。原生Grafana完成只读TLS/实际查询和表达式、合成图表抽查；详见 [实施记录](HUNTING-PERMIT-ECONOMY.md)。副本完整结果及原代际尚未复制，启用来源时远端/旧命令重放/晋升在执行前拒绝。K=0.1、基准0.72/硬上限1.08许可、默认关闭保持；其他玩法来源、材料、全服指标、通知和发布仍开放。仅原生、不用Docker，旧gold和远程资产未改，不提高Crystal1:1进度。
 
 

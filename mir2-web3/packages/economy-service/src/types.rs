@@ -145,6 +145,28 @@ pub struct BoundCreditReceipt {
     pub wallet_after: WalletBalance,
 }
 
+/// One real source mutation, bound-wallet debit and permanent face-value burn.
+/// Original source identity is retained even though the burn ledger key is
+/// namespaced internally by the authenticated character incarnation.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BoundDebitBurnReceipt {
+    pub realm_id: String,
+    pub operation_key: String,
+    pub request_digest: String,
+    pub owner: WalletOwner,
+    pub source_kind: String,
+    pub source_key: String,
+    pub bound_gold_debit: u64,
+    pub burn_event_id: String,
+    pub layer: BurnLayer,
+    pub valuation_version: String,
+    pub policy_version: String,
+    pub business_day: i64,
+    pub committed_at_ms: i64,
+    pub wallet_after: WalletBalance,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct BurnReceipt {

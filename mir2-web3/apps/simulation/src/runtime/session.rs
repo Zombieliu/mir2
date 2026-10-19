@@ -82,19 +82,28 @@ pub(super) use super::packets::{
 };
 pub(super) use super::resources::{current_language, is_in_world, runtime_tick, set_runtime_tick};
 
+#[path = "repair_mutation.rs"]
+mod repair_mutation;
+pub(super) use repair_mutation::RepairMutationWitness;
+
 #[derive(Debug)]
 pub(super) struct HeadlessRuntime {
     world: World,
+    repair_mutation: repair_mutation::RepairMutationTracker,
 }
 
 impl HeadlessRuntime {
     pub(super) fn new() -> Self {
+        let world = World::new();
+        let repair_mutation = repair_mutation::RepairMutationTracker::new(&world);
         Self {
-            world: World::new(),
+            world,
+            repair_mutation,
         }
     }
 
     pub(super) fn insert_resource<R: Resource>(&mut self, resource: R) {
+        self.repair_mutation.before_mutable_access(&mut self.world);
         self.world.insert_resource(resource);
     }
 
@@ -103,7 +112,21 @@ impl HeadlessRuntime {
     }
 
     pub(super) fn world_mut(&mut self) -> &mut World {
+        self.repair_mutation.before_mutable_access(&mut self.world);
         &mut self.world
+    }
+
+    /// Flush the last mutable borrow before capturing a local item witness.
+    /// This is not a repair quote, an item UUID, or a durable write authority.
+    pub(super) fn repair_mutation_witness(&mut self) -> Option<RepairMutationWitness> {
+        self.repair_mutation.witness(&self.world)
+    }
+
+    pub(super) fn repair_mutation_witness_matches(
+        &mut self,
+        witness: &RepairMutationWitness,
+    ) -> bool {
+        self.repair_mutation_witness().as_ref() == Some(witness)
     }
 }
 

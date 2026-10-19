@@ -87,6 +87,20 @@
 
 原始失败保留：初次编译的私有函数可见性/SHA2 hex格式问题；隔离测试把会推进tick的准备操作误当成prepare的副作用（保留全部隔离断言后修正取样点）；Windows旧测试EXE被DeltaForce占用导致两次LNK1104。没有结束游戏、删除锁定文件或改动保护设置；使用Cargo原生test profile和唯一输出名构建、实际运行同一测试harness。执行记录及最终范围见 [第二阶段验收](generated/hunting-economy/acceptance-20261020-quest.json)；这仍不代表全部生产/销毁来源、材料传播或生产发布完成，goal保持active。
 
+## 第三阶段：真实Guild分支与修理事务基础
+
+补齐真实Guild成员的3项原生PG测试：实际共享成员epoch=2，服务端有效EXP属性404，任务基础48EXP得到241EXP，个人4→5级并保留240EXP，Guild得到2EXP跨越45000升级线；完整奖励、Guild源回执和绑定金币共同提交。覆盖普通LogOut/新配置Login/StartGame读回、提交前全回滚、Unknown后更改当前buff仍只恢复原奖励。没有发现需修改任务业务逻辑的缺陷。
+
+新增正额绑定扣款与面额销毁的共同事务API及0022迁移；授权回调先于原回执查询，来源完整checkpoint、wallet、burn、operation/outbox同事务，重复操作不再执行来源。来源金额只能是实际扣除面额，不能套用材料估值倍率，也不能重复登记转换手续费。原生PG覆盖并发余额竞争、不同角色/UUID、摘要冲突、提交前/提交后回执丢失、禁用/日结欠账后的原查询和局部超时恢复。另在已有旧`bound_credit`及新操作记录的隔离schema中重复执行0022两次，六类经济表完整内容保持一致；验证事务最后回滚。
+
+NPC修理提取纯`RepairPlan`，保留普通/特殊、背包/装备优先顺序、租赁/附加属性定价和递归元数据。旧金币路径仍原样扣款，**绑定钱包修理与真实销毁尚未接通**。私有物品变更见证使用随机会话scope及不可恢复的checked u64；Bevy u32仅感知两个Inventory资源在短借用区间内的实际写入，不作为物品身份或持久授权。它能使同值覆盖、ABA、checkpoint恢复后的旧见证失效，同时保留正常闲置tick。
+
+实际验证：经济服务32项（21项PG），仿真focused57项（33项经济来源含20项PG、6项修理计划、18项变更见证），邻接105项（旧修理10、价格4、Guild经验11、NPC购买80）全部通过，共194项互不重叠的顶层测试，零失败/忽略；这不是全工作区测试。Gateway库、主二进制和ZoneHost编译检查通过，321个选定源码/迁移输入构建前后SHA256相同。初次修理测试误认两种NPC fixture的费率配置，两轮失败日志保留；按真实数据确认普通费率2.0、特殊fixture缺省1.0后，仅修断言，业务未迁就测试。限定格式检查通过。
+
+所有运行均原生、串行Cargo、2个build jobs；继续用唯一测试输出名，未关闭DeltaForce或改动虚拟化。复核时退出昨日遗留的独立`docker-sandbox.exe` CLI；Docker服务仍Stopped/Manual，无Docker进程。三个外来QA JSON保持原字节且未暂存。详见 [第三阶段验收](generated/hunting-economy/acceptance-20261020-repair-foundation.json)。
+
+下一步是带服务端令牌的修理报价/确认/查询、零费用持久结果、完整checkpoint与Unknown恢复；规则见 [来源接线计划](HUNTING-SOURCE-INTEGRATION.md)。当前基础不具备开启真实修理经济或生产发布资格，默认禁用及K=0.1/基准0.72/硬上限1.08许可保持，完整goal继续active。
+
 ## 后端接线与交付物
 
 - 实现：`packages/economy-policy`、`packages/economy-service`；迁移从0016开始，0015保留给其他工作。

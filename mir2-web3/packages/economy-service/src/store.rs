@@ -7,6 +7,10 @@ use sha2::{Digest, Sha256};
 
 const LOCK_SEED: i64 = 0x4855_4e54_4543_4f4e;
 
+#[path = "debit.rs"]
+mod debit;
+pub use debit::*;
+
 fn db(error: postgres::Error) -> EconomyError {
     // Never print connection strings, SQL parameters, or PostgreSQL DETAIL fields.
     EconomyError::Database {

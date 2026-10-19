@@ -2168,23 +2168,151 @@ pub(super) fn active_crystal_repair_service(
     )
 }
 
-pub(super) fn repair_item_impl(
-    world: &mut World,
+/// An immediate, owner-local repair calculation, not a durable authorization or
+/// item incarnation. Legacy slot/UID references can be reused; a future wallet
+/// source must add request identity, item generations and pending recovery.
+#[derive(Debug, Clone)]
+pub(super) struct RepairPlan {
+    service: ActiveNpcServiceState,
     unique_id: u64,
     special: bool,
-) -> Vec<ServerPacket> {
+    cost: u32,
+    target: RepairPlanTarget,
+}
+
+#[derive(Debug, Clone)]
+pub(super) enum RepairPlanTarget {
+    Equipment {
+        index: usize,
+        before: EquipmentState,
+        after: EquipmentState,
+    },
+    Inventory {
+        index: usize,
+        before: ItemState,
+        after: ItemState,
+    },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(super) enum RepairPlanRejection {
+    Silent,
+    CannotRepairItem,
+    CannotRepairItemHere,
+}
+
+impl RepairPlan {
+    pub(super) fn service(&self) -> &ActiveNpcServiceState {
+        &self.service
+    }
+
+    pub(super) fn cost(&self) -> u32 {
+        self.cost
+    }
+
+    pub(super) fn special(&self) -> bool {
+        self.special
+    }
+
+    pub(super) fn target(&self) -> &RepairPlanTarget {
+        &self.target
+    }
+
+    /// The existing packet dispatcher owns this entry ACK for both repair kinds.
+    pub(super) fn entry_acknowledgement(&self) -> ServerPacket {
+        ServerPacket::RepairItem {
+            unique_id: self.unique_id,
+        }
+    }
+
+    pub(super) fn repaired_acknowledgement(&self) -> ServerPacket {
+        let max_dura = match &self.target {
+            RepairPlanTarget::Equipment { after, .. } => after.durability_max,
+            RepairPlanTarget::Inventory { after, .. } => after.durability_max.unwrap_or(0),
+        };
+        ServerPacket::ItemRepaired {
+            unique_id: self.unique_id,
+            max_dura,
+            current_dura: max_dura,
+        }
+    }
+
+    /// Stage only the captured target. This does not reauthorize a later World
+    /// operation or debit any wallet; the caller still owns those boundaries.
+    pub(super) fn apply_to_inventory(&self, inventory: &mut InventoryResource) -> bool {
+        let equipment_index = inventory
+            .equipment_items
+            .iter()
+            .position(|item| equipment_slot_unique_id(item.slot) == Some(self.unique_id));
+        match &self.target {
+            RepairPlanTarget::Equipment {
+                index,
+                before,
+                after,
+            } => {
+                if equipment_index != Some(*index)
+                    || !inventory
+                        .equipment_items
+                        .get(*index)
+                        .is_some_and(|current| repair_snapshot_matches(current, before))
+                {
+                    return false;
+                }
+                inventory.equipment_items[*index] = after.clone();
+            }
+            RepairPlanTarget::Inventory {
+                index,
+                before,
+                after,
+            } => {
+                if equipment_index.is_some()
+                    || inventory
+                        .inventory_items
+                        .iter()
+                        .position(|item| item_matches_inventory_unique_id(item, self.unique_id))
+                        != Some(*index)
+                    || !inventory
+                        .inventory_items
+                        .get(*index)
+                        .is_some_and(|current| repair_snapshot_matches(current, before))
+                {
+                    return false;
+                }
+                inventory.inventory_items[*index] = after.clone();
+            }
+        }
+        true
+    }
+}
+
+fn repair_snapshot_matches<T: Serialize>(current: &T, before: &T) -> bool {
+    // ItemState/EquipmentState intentionally have no PartialEq. Compare all
+    // serialized fields, including recursive slots and metadata; fail closed.
+    match (serde_json::to_value(current), serde_json::to_value(before)) {
+        (Ok(current), Ok(before)) => current == before,
+        _ => false,
+    }
+}
+
+/// Prepare using the existing real NPC checks and price calculation. Wallet
+/// sufficiency is deliberately left to the caller; this never mutates World.
+pub(super) fn prepare_repair_plan(
+    world: &World,
+    unique_id: u64,
+    special: bool,
+) -> Result<RepairPlan, RepairPlanRejection> {
     if current_player_is_dead(world) {
-        return Vec::new();
+        return Err(RepairPlanRejection::Silent);
     }
 
     let Some(service) = current_crystal_npc_service_in_range(world)
         .filter(|service| active_crystal_repair_service(service, special))
     else {
-        return Vec::new();
+        return Err(RepairPlanRejection::Silent);
     };
 
     let Some(script) = crystal_npc_script_by_key(&service.script_key) else {
-        return Vec::new();
+        return Err(RepairPlanRejection::Silent);
     };
 
     let repair_types = crystal_npc_script_item_types(&script);
@@ -2210,56 +2338,41 @@ pub(super) fn repair_item_impl(
             u8::try_from(unique_id).unwrap_or_default(),
         );
         let Some(template) = crystal_item_template_for_item_key(&item.key) else {
-            return Vec::new();
+            return Err(RepairPlanRejection::Silent);
         };
 
         if equipment_has_crystal_or_rental_bind_flag(&equipment, CRYSTAL_BIND_DONT_REPAIR)
             || (special
                 && equipment_has_crystal_or_rental_bind_flag(&equipment, CRYSTAL_BIND_NO_SREPAIR))
         {
-            return vec![super::session::system_message_key(
-                world,
-                "server.CannotRepairItem",
-            )];
+            return Err(RepairPlanRejection::CannotRepairItem);
         }
 
         if !repair_types.is_empty() && !repair_types.contains(&template.item_type) {
-            return vec![super::session::system_message_key(
-                world,
-                "server.CannotRepairItemHere",
-            )];
+            return Err(RepairPlanRejection::CannotRepairItemHere);
         }
 
         let cost = crystal_npc_repair_cost(&item, &template, rate, special);
-        {
-            if world.resource::<PlayerRuntimeResource>().gold < cost {
-                return Vec::new();
-            }
+        let mut after = equipment.clone();
+        if !special {
+            let loss = after
+                .durability_max
+                .saturating_sub(after.durability_current)
+                / 30;
+            after.durability_max = after.durability_max.saturating_sub(loss);
         }
-
-        let (max_dura, current_dura) = {
-            world.resource_mut::<PlayerRuntimeResource>().gold -= cost;
-            let mut resources = world.resource_mut::<InventoryResource>();
-            let item = &mut resources.equipment_items[equipment_index];
-            let current = item.durability_current;
-            let mut max = item.durability_max;
-            if !special {
-                let loss = max.saturating_sub(current) / 30;
-                max = max.saturating_sub(loss);
-                item.durability_max = max;
-            }
-            item.durability_current = max;
-            (max, max)
-        };
-
-        return vec![
-            ServerPacket::LoseGold { gold: cost },
-            ServerPacket::ItemRepaired {
-                unique_id,
-                max_dura,
-                current_dura,
+        after.durability_current = after.durability_max;
+        return Ok(RepairPlan {
+            service,
+            unique_id,
+            special,
+            cost,
+            target: RepairPlanTarget::Equipment {
+                index: equipment_index,
+                before: equipment,
+                after,
             },
-        ];
+        });
     }
 
     let item_index = {
@@ -2270,7 +2383,7 @@ pub(super) fn repair_item_impl(
             .position(|item| item_matches_inventory_unique_id(item, unique_id))
     };
     let Some(item_index) = item_index else {
-        return Vec::new();
+        return Err(RepairPlanRejection::Silent);
     };
 
     let item = {
@@ -2278,54 +2391,75 @@ pub(super) fn repair_item_impl(
         resources.inventory_items[item_index].clone()
     };
     let Some(template) = crystal_item_template_for_item_key(&item.key) else {
-        return Vec::new();
+        return Err(RepairPlanRejection::Silent);
     };
 
     if crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_DONT_REPAIR)
         || (special && crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_NO_SREPAIR))
     {
-        return vec![super::session::system_message_key(
-            world,
-            "server.CannotRepairItem",
-        )];
+        return Err(RepairPlanRejection::CannotRepairItem);
     }
 
     if !repair_types.is_empty() && !repair_types.contains(&template.item_type) {
-        return vec![super::session::system_message_key(
-            world,
-            "server.CannotRepairItemHere",
-        )];
+        return Err(RepairPlanRejection::CannotRepairItemHere);
     }
 
     let cost = crystal_npc_repair_cost(&item, &template, rate, special);
-    {
-        if world.resource::<PlayerRuntimeResource>().gold < cost {
-            return Vec::new();
-        }
+    let mut after = item.clone();
+    let current = after.durability_current.unwrap_or(0);
+    let mut max = after.durability_max.unwrap_or(0);
+    if !special {
+        let loss = max.saturating_sub(current) / 30;
+        max = max.saturating_sub(loss);
+        after.durability_max = Some(max);
     }
-
-    let (max_dura, current_dura) = {
-        world.resource_mut::<PlayerRuntimeResource>().gold -= cost;
-        let mut resources = world.resource_mut::<InventoryResource>();
-        let item = &mut resources.inventory_items[item_index];
-        let current = item.durability_current.unwrap_or(0);
-        let mut max = item.durability_max.unwrap_or(0);
-        if !special {
-            let loss = max.saturating_sub(current) / 30;
-            max = max.saturating_sub(loss);
-            item.durability_max = Some(max);
-        }
-        item.durability_current = Some(max);
-        (max, max)
-    };
-
-    vec![
-        ServerPacket::LoseGold { gold: cost },
-        ServerPacket::ItemRepaired {
-            unique_id,
-            max_dura,
-            current_dura,
+    after.durability_current = Some(max);
+    Ok(RepairPlan {
+        service,
+        unique_id,
+        special,
+        cost,
+        target: RepairPlanTarget::Inventory {
+            index: item_index,
+            before: item,
+            after,
         },
+    })
+}
+
+pub(super) fn repair_item_impl(
+    world: &mut World,
+    unique_id: u64,
+    special: bool,
+) -> Vec<ServerPacket> {
+    let plan = match prepare_repair_plan(world, unique_id, special) {
+        Ok(plan) => plan,
+        Err(RepairPlanRejection::Silent) => return Vec::new(),
+        Err(RepairPlanRejection::CannotRepairItem) => {
+            return vec![super::session::system_message_key(
+                world,
+                "server.CannotRepairItem",
+            )];
+        }
+        Err(RepairPlanRejection::CannotRepairItemHere) => {
+            return vec![super::session::system_message_key(
+                world,
+                "server.CannotRepairItemHere",
+            )];
+        }
+    };
+    if world.resource::<PlayerRuntimeResource>().gold < plan.cost() {
+        return Vec::new();
+    }
+    let mut staged_inventory = world.resource::<InventoryResource>().clone();
+    if !plan.apply_to_inventory(&mut staged_inventory) {
+        return Vec::new();
+    }
+    world.resource_mut::<PlayerRuntimeResource>().gold -= plan.cost();
+    *world.resource_mut::<InventoryResource>() = staged_inventory;
+    vec![
+        ServerPacket::LoseGold { gold: plan.cost() },
+        plan.repaired_acknowledgement(),
     ]
 }
 
@@ -2965,3 +3099,7 @@ pub(super) fn crystal_apply_added_stat_price_factor(price: f32, added_stat_count
 #[cfg(test)]
 #[path = "npc_item_price_tests.rs"]
 mod npc_item_price_tests;
+
+#[cfg(test)]
+#[path = "repair_plan_tests.rs"]
+mod repair_plan_tests;

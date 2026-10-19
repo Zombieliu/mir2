@@ -1,0 +1,1286 @@
+[
+  {
+    "path": "apps/simulation/Cargo.toml",
+    "sha256": "a8b875598edc72855a9a2a13525c79d1d3dde2cfbdce30a9b67e9b780fa12191"
+  },
+  {
+    "path": "apps/simulation/src\\bin\\zone_replay.rs",
+    "sha256": "6d900fe0963b61591b583d1d1176116cd169d22514829d96cab2c3f97316348b"
+  },
+  {
+    "path": "apps/simulation/src\\config_account_store_durability_tests.rs",
+    "sha256": "195a76501d192738f983ded1809e71c2e2c08f8a95e3e4a19c8645f9bda3dec0"
+  },
+  {
+    "path": "apps/simulation/src\\config_file_authority.rs",
+    "sha256": "2b05ffa956ebbf198997357c3b90c02a2f8b0b465ae486014f6d2d1d2ccbffb0"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_clock_driver.rs",
+    "sha256": "a80fc6c512951f9d23828041407a6d028a1a755313fab566660f144718c957f4"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_clock_late_pg_tests.rs",
+    "sha256": "557df713670c992045e0e7a213240af7cda6126652e751007728ad907c5cc700"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_clock_pg_tests.rs",
+    "sha256": "3e54ff2a8afea7916f5dba14c8aba0079fa2a0e08f0796494d669c235ddf8908"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_clock_schema_tests.rs",
+    "sha256": "a6142629ec28dd137e8d6827e9a0e109d1d2d4f78070581061f7eaa6740a63bc"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_clock_transactions.rs",
+    "sha256": "4e8ab8b4530c961606fffeb058edeeb404e8f06e7ecccd080747bcf337bfbef3"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_clock.rs",
+    "sha256": "2a26860fd7fb34208d8b94943b6f727899ee54f63b3ea50439c19a374850b4f9"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_experience_capture_tests.rs",
+    "sha256": "91f9a09464c68de9aecde699af2074bca75c6413b86189eeb667adba8b3a3593"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_experience_commit.rs",
+    "sha256": "b29fafb9aa597db7be714d53ad4714d915407501cf5f3192604f93ab512c18ed"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_experience_permit.rs",
+    "sha256": "318edfd15273632237f3b05178ce1a595c1f2f18c265d042b611014302c9d80f"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_experience_tests.rs",
+    "sha256": "42795fce20740a79c8de7f3c9ea39b90a012d7dddeb4e782683684046a2eeddd"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_experience.rs",
+    "sha256": "95508910039346218a2d1104181f2b298fc986b4478e386e1dcc16695d7db2d3"
+  },
+  {
+    "path": "apps/simulation/src\\config_guild_xp_pg_tests.rs",
+    "sha256": "7b897031c4783fbc19a549aafaa35d92380cff6daf87ec104287e158696827ca"
+  },
+  {
+    "path": "apps/simulation/src\\config_hero_authority.rs",
+    "sha256": "77c781fd809b78d94b4b2fcdb999dd0832d8525dcc615be3041f448b1491e61e"
+  },
+  {
+    "path": "apps/simulation/src\\config_hero_compensation.rs",
+    "sha256": "f1979bd2684a800f811e7477a1b126ff11232b9283b9f462b8837f2fe32d1624"
+  },
+  {
+    "path": "apps/simulation/src\\config_hero_map.rs",
+    "sha256": "580895e2f687645f50ad1e578f9f8a6b4cbc43a4b5291332d1c46dccd3d2d1a8"
+  },
+  {
+    "path": "apps/simulation/src\\config_hero_postgres_tests.rs",
+    "sha256": "299acc316d75a1f76c7889dc2f549d842f35fa79cd8656acbe9394cc3050fb8b"
+  },
+  {
+    "path": "apps/simulation/src\\config_hero_postgres.rs",
+    "sha256": "cc61e027e7ed449179d58a145e9984ace44b30878c70e52957b35b8872f45726"
+  },
+  {
+    "path": "apps/simulation/src\\config_hero_registry.rs",
+    "sha256": "cd9afcebb5ed61beb4d1f69cff6ce61cd53503ad18644bb326885a6d36d0203b"
+  },
+  {
+    "path": "apps/simulation/src\\config_hero_scope.rs",
+    "sha256": "b82af653acb3414f4cfda1fef375d791c07683e24474b33581a8281f7917a969"
+  },
+  {
+    "path": "apps/simulation/src\\config_hero_transaction_tests.rs",
+    "sha256": "11849dde582e7c587564cc5197b52ab60b834989b19748ecd2ea2f6c963dfa32"
+  },
+  {
+    "path": "apps/simulation/src\\config_hunting_deletion_tests.rs",
+    "sha256": "4ad9dfa6b65f1ab0633b80a683ce496f9879f1c25f2f9952841fad67af60cf3f"
+  },
+  {
+    "path": "apps/simulation/src\\config_hunting_deletion.rs",
+    "sha256": "b008b7e30b6f673b0ea05ace0b3ec47c970d4082c22ae6ac960c5bff9ec2a13f"
+  },
+  {
+    "path": "apps/simulation/src\\config_hunting_source_tests.rs",
+    "sha256": "1267436ffc53ee4980a741bfde30d498bae98a959e7f9e408260ee9273376d4d"
+  },
+  {
+    "path": "apps/simulation/src\\config_hunting_source.rs",
+    "sha256": "9040fa1da98a26a5ae60d880ca7f8e0cc7673c270259d46e1545fc56d28d7ff0"
+  },
+  {
+    "path": "apps/simulation/src\\config_item_identity_tests.rs",
+    "sha256": "7ff630d64ddef0ce611a7c76e393de5f31858b44307aef3f4b7bef4e9311222b"
+  },
+  {
+    "path": "apps/simulation/src\\config_item_identity.rs",
+    "sha256": "33bf6ac2d1806aea75e97598e608e3a3faed9b03c90776f8dbe90ef2081a244c"
+  },
+  {
+    "path": "apps/simulation/src\\config_prepared_kill.rs",
+    "sha256": "774eaea5e9c18f9e0a98223cfb48b17610d965782de6e84f3b14fead24615152"
+  },
+  {
+    "path": "apps/simulation/src\\config_refresh_fail_closed_tests.rs",
+    "sha256": "5b31fabd2899857cc98b15e2f4fe0ac2cdb6f3965b8f3f624eec902ce8bdebf3"
+  },
+  {
+    "path": "apps/simulation/src\\config_shared_guild_pg_tests.rs",
+    "sha256": "aa499589fac01f04fef0c7855ecc27c08f5c8180160222150cd6791c4bad6570"
+  },
+  {
+    "path": "apps/simulation/src\\config_shared_guilds.rs",
+    "sha256": "6d4b233c6adcef4028e222eb0392c08b9f8d6f84faa074b62d1dd25eb0515edd"
+  },
+  {
+    "path": "apps/simulation/src\\config.rs",
+    "sha256": "5b43454d95310359292078e0133ae861434005053189e38d0281c3ce1ef6e351"
+  },
+  {
+    "path": "apps/simulation/src\\db_projection.rs",
+    "sha256": "ae907a0cc48736cc708c1f4e8007941fccff6e869bd2744cb3dd08763b376703"
+  },
+  {
+    "path": "apps/simulation/src\\item_identity_postgres_tests.rs",
+    "sha256": "f97cc69712b975919364d7ae0f4f7acd86116847cbe7dee282349778d1d33ebd"
+  },
+  {
+    "path": "apps/simulation/src\\item_identity_postgres.rs",
+    "sha256": "81ab8a2563160346e68a111aef91106fdf38eb476c2d071034ad839f341c7113"
+  },
+  {
+    "path": "apps/simulation/src\\item_identity_reservation.rs",
+    "sha256": "5fd8bcdb031388dff1ad2b30e76e237a7fe86d7edecc713006e01d22523b16c2"
+  },
+  {
+    "path": "apps/simulation/src\\lib.rs",
+    "sha256": "aa8d769c56edc833a1a68f03e8b5e60fcdd75294dd3bf9b265e3615f65a6f733"
+  },
+  {
+    "path": "apps/simulation/src\\npc_purchase_journal.rs",
+    "sha256": "e823494a615353310329d8ee0faec6ab8288dbca6da72bbf1138caf76aa76580"
+  },
+  {
+    "path": "apps/simulation/src\\npc_purchase_owner.rs",
+    "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\big_map\\mod.rs",
+    "sha256": "06c423d98c652f7ebb7bde6a97732d4d58839ec9c1d0688beafdbb61d35771c8"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\buff_duration.rs",
+    "sha256": "01050e2c0274342082a246ccd49502aad0e574bed7028167fe56d643663df921"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\buffs.rs",
+    "sha256": "4f9e9347fdda70d9a0eb6666557ec5b86da4cbec547f9cae77115fabe8df1e7d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\combat.rs",
+    "sha256": "64d4a2cb4facfd16cce451ec370c41b5ec333ace6de6a22570bf5504b7c2be65"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\components.rs",
+    "sha256": "2a0476d302bd7dee542e7bc70dda720b72d67752cd68ba2b8e74fdfafe10da42"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\crystal_compat.rs",
+    "sha256": "0bef0f11e4c61cd5e52a57175a4cb54978564f45ad4ffb96f76143ec011eacb7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\door.rs",
+    "sha256": "01e0e313e26966bd9f9ad879a7009081532dbfc5a2f28f5a1e8aecf6dc4bf451"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\drops.rs",
+    "sha256": "9b47435fc671c0c60467ff53d4d6518fb9d243ad056612a1e05eb038ac0c6be5"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\drops\\zone_harvest_drop_tests.rs",
+    "sha256": "a25534bfe2c1a3117c3e20f9fe4460d46937683951a404ae650973a714bf4fc0"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\equipment_storage_merge_tests.rs",
+    "sha256": "ce191845687c9c03995b82b9bb6aae707077fd4c23c14e26efc3eb5716a87f03"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\equipment.rs",
+    "sha256": "9ab29092d5f393f6b65c1e2ec903c77df54de6691b52e6535b6e960fd6245b7a"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\experience_rates.rs",
+    "sha256": "0c1ecb8b34697b5e0e24d209b10acbc44343d0526bf2b086c0a2e46cefb015cd"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\fishing_equipment_tests.rs",
+    "sha256": "77fab0af804cd96dae97d3a31ca2181b652e7cd43cbd3f55cad12dc23d1b47ec"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\fishing.rs",
+    "sha256": "6046c709c179a3e1f8398c6e7b398913e3a9e5338b47b4297c0176670aaad679"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\gm_commands.rs",
+    "sha256": "855ad6f85cfc82f2f20b24dbd8504acd60d11bfc7158111370df9802c56610a7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hazard.rs",
+    "sha256": "ed19dc0fca477ff637e82e12f77225966cc0fc3cfc703cf22a102441377aa4b1"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_ai.rs",
+    "sha256": "776768e0ce53ce14f2730de26d7ad198190ca81bbef2d3531a4693ce6fed681c"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_buffs.rs",
+    "sha256": "45cecbeb718a86fc3d0c16dd9cc95db376305d8fb36285809fd7a59c44d23ce6"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_cadence.rs",
+    "sha256": "bf78c1e38ff993604b47e5d912562623b5d0ea5d29d0cb6643be1339bb53fbad"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_cast.rs",
+    "sha256": "155f60c243bdca6c7652fcca07f53c9279813a89daadec4f3828f0ae6c044e47"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_combat_math.rs",
+    "sha256": "0ead5c2e98e84421f719fe76950815e55506f2b2c5319d0f07a4a617c7052911"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_delayed_actions.rs",
+    "sha256": "4a8ab4f0ded80d95c44e6ce6bb8e2867140342edf669acd7e5b315a95cb6a6e0"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_hit_dispatch.rs",
+    "sha256": "a5090ca7b48c3b0aa3742779be99ea8c39aa9d522120b8df61ad81452a51b441"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_hit_math.rs",
+    "sha256": "75a7916cc7a0c77bc0f6fa2d9d0ef0dab8342bddbfbbccae11b972a2ead255f9"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_inventory.rs",
+    "sha256": "51cb2df88d438e09e506162f7ae3fb3183d62d9fbb06d040e2b58bbd00ab594f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_legacy_migration_tests.rs",
+    "sha256": "d074c04a999c7958c349841d9e86a592177a146fe14473d429565927c4c87f4d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_merge.rs",
+    "sha256": "8ab4c0d52396eb476597d572ce8cb3b8346beb7311777aaff1c36ab782f38f6f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_mount.rs",
+    "sha256": "82ee9de8deb3072f7a6fc3848ea0a6831020f488d42a64734fe08ef26558268a"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_registry_carriers.rs",
+    "sha256": "7519ad8ad4ff02050b15f31eda8e0182ee4c0cff9928b887f09d3942dc8632a4"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_registry_scan_tests.rs",
+    "sha256": "09119db52991ed9d4a204acc1055325145a46cb3c492971495e8919e79b70b8b"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_registry_scan.rs",
+    "sha256": "f530670cac4d0c2266413c8dbc21318669d79603535ae3ffe210c2c9ae463d44"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_registry_validation.rs",
+    "sha256": "079f87e0350e7ff7630de198386c8ca9b722730e821a1412c09d9cdb7804d33a"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_stats_rod_tests.rs",
+    "sha256": "5abe2b89a485bb3521f0ca9d75ff4f6750e137d285d15e082e9d970df656fdca"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_stats.rs",
+    "sha256": "b4c6a3712820593c38105caccb64df365c806cfd4c81a1a2846c52bf42567021"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hero_transient.rs",
+    "sha256": "08c7465c1635ab1d20f0b2bdaaedc0d61fd309014e761b8b70faf792f08d3304"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hunting_quests_guild_tests.rs",
+    "sha256": "487f2ab2631bad76fb7975eb18e6bb97f6b8d4356a0b03b2cc4403b19046573c"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hunting_quests_tests.rs",
+    "sha256": "1e0f5f436ba436b05e5aea2c78565d1a0d8e75db72f1a4d6b60f5a8c59d10226"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\hunting_quests.rs",
+    "sha256": "3f3e42d56376c89e67d5af0f79beb80604753ff683d279bced138d52077e6ff5"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\intelligent_creature_item_tests.rs",
+    "sha256": "b2e7b333941ab449019c3e350ac40dc64fa8d185c7dd3f8e84986e3aa3105616"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\intelligent_creatures.rs",
+    "sha256": "07a00b3214b0801ac36c3c7f3eb00e161d18525a7dfd91f2273418c1a68d392d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\inventory.rs",
+    "sha256": "e8cb44b483eff80593576f0c0f799f989fbc14edceaff312048f0ae7c7326c55"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\item_custody_tests.rs",
+    "sha256": "6f5d536cf1149a138018d6feb78318ba0e0b2e37f2b87c254e39f42c278b287f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\item_custody.rs",
+    "sha256": "19f571b6165ea632dd8807bac53c5c52469f24b871279d05a31225b640c443f7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\item_sets.rs",
+    "sha256": "2180da4e9710e7c0fa040b0cac523e19f38ade6b9fea699667d57cb1680dc3f8"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\items.rs",
+    "sha256": "8c375841f8e49ac970fafc4c3fbf93443a4c39872955165eeb46e0b0509ac1e6"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\leveling.rs",
+    "sha256": "6760018dc57f9663b3f5ea48272750600f3af2c3ae3348e4026bd142ca1b4d3a"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\magic_key_preflight_tests.rs",
+    "sha256": "0c84bfd33aa8cb6fe4072b91e85ddfc88c58ba730c52b9aee6120b2fc6bec177"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\mail_body_validation_tests.rs",
+    "sha256": "8f7f649d296701892ad4f2ea38899b28db133ec6b95532df3d940111f044e05d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\mail_parcel_tests.rs",
+    "sha256": "060c7ecf1739745d33367f963fc62a829fe461e6ef6d3236dbfb984109c61fbf"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\map_collision_source_tests.rs",
+    "sha256": "d4cc2dc9c3f29abc8535f7fad2ae57fee2d939a8fe66d7d3b6ae60f384214de7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\map_events.rs",
+    "sha256": "6dc066136cbcd32ae1bd205c8619532aa7f96f8632f2047ca1dd691a6d14a128"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\map_transfer_metadata_tests.rs",
+    "sha256": "1028310e84631d0f293324d78f19b7ca1d94dcf873e42244af1503fee7b11722"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\map.rs",
+    "sha256": "033dc58683075939152fa4134cc89c3b12a22c706cf731767baa4cdf1a3bb72b"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\mentor_reward_tests.rs",
+    "sha256": "9a9256cff05f72ff84e81b2dd36df55480d8d22962e700762a3dccaca3f3ce3b"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\mining.rs",
+    "sha256": "9ca67da9f19a5eaaff66bc5716a5fb2df62b386e9d0a3e787aa794729f2b3b08"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\mod.rs",
+    "sha256": "a15aea3150b3aa6f3256af75be4b5131572b9d734cf500ec4241b9774aa58c82"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\armadillo.rs",
+    "sha256": "639ab9871db19fb68a5226f209b089d154e87ebf9fbf0a71a2bf6db39257f45e"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\axe_skeleton_fear.rs",
+    "sha256": "0de0bd96032fbd2715f20abc04f47d5576bf19f2f6fcf23f7620e1595809f080"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\bomb_spider.rs",
+    "sha256": "87cd50a55a00de48b4601e83dec73ea0fbefc17b4c61646aeec45698e5823baf"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\bone_lord.rs",
+    "sha256": "e4d6df13f705f2ce5389bbaa9811496117ecb7f7f73592b3792348baa6dac7be"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\boulder_spirit.rs",
+    "sha256": "4cf124041f0448a680ce442b9fc1dcf2c59586838a7d1507140776ee50668af8"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\cannibal_plant.rs",
+    "sha256": "af08123c51a2691012667248c656ba3dcb1b388e601408c4e05ae8eab257057f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\common.rs",
+    "sha256": "ed5f258530ca1e889ddcfb013b5a4005c16fcf95cfe9679bf28630848d149f93"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\deer_run_away.rs",
+    "sha256": "cca567a9b141d39158b3a7703a1104edd48fa8d9b34e343b3bf133c4422f533d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\dig_out_zombie.rs",
+    "sha256": "18a7fa57bdcd84df6a97b37f8384c1897683bed9d8d8c609df1aa98538e56fdc"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\dragon_statue_sleep.rs",
+    "sha256": "d8b2d7747eddbabaf8b68c42cdde3fdebee9aaef77409be1a2846eb9e23496af"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\evil_centipede.rs",
+    "sha256": "1435637092433bba657985c4ab8524abb400ddd1964acdcd5c871f7ebdb4d44f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\evil_mir.rs",
+    "sha256": "6501bcf4cd9a1aa29d41deb6b4d7c5211e35c7877ab16f1b9d43f27963588557"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\football.rs",
+    "sha256": "e02f7cd8fc6036f8aaddeeb5b2032667bb6b797c562c9af1b6c5c8b111f42228"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\foxman_fear.rs",
+    "sha256": "0c1f3c1501cf84964ec34040d2d0205464e2fc11353a165c671f8c0d4349f4d2"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\frost_tiger_sitting.rs",
+    "sha256": "7f69ff5c125eef6a687847ee0274d4e0d66c1ed4d9fb9c548b7445af5e99ff37"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\gate.rs",
+    "sha256": "456f68578b15639265cd21c5ede8ee74f555d5cfdbc6420f15f8e0b791c2d6a4"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\general_meow_meow.rs",
+    "sha256": "4ece265827196493bfb7c8f4538ca3c7b15fc065f61df614829d4305e17f96e1"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\great_fox_spirit.rs",
+    "sha256": "28e4bf2003444d2e2d931cadbb836ea2d4a99099f05b62a36daabb1c637c4913"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\hell_bomb.rs",
+    "sha256": "de10255a71a755a1f0b43eb29869d99d94e4e2e5095381d8a41d0e4c971692a6"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\hell_lord.rs",
+    "sha256": "febbb1583275f87ec7ad6603eb943947f62807c180c37525dbedf2fe5e77848c"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\holy_deva_fear.rs",
+    "sha256": "6bdc829381729270f8fdfa7e9a91a1c56990f78cd0af2d09fe46d820838a80d6"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\horned_archer.rs",
+    "sha256": "89253283148c2b14dbdab1e3d047631bc49e5d1d479d06e43dbf56074e543ee6"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\horned_commander.rs",
+    "sha256": "c041c3666d6afd9423025067642b7b525a6e0c278280a6f82563514db9a2115c"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\horned_mage.rs",
+    "sha256": "21d4ad791ce61fefa912e3458fb85ee494142b23b450ad35e6c2b8885d669701"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\horned_sorceror.rs",
+    "sha256": "292151b63f1ceb2af19c9c47ee681463a521f7eb8511d16c1dbb13dcb73104b0"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\horned_warrior.rs",
+    "sha256": "4fbc0ca1d9438a59990dbbe97cb610149d5b8360a017cabf38b0af773788ca92"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\hugger.rs",
+    "sha256": "6429730a034e7fac5cfbc93e0672713ae23b309fb132acffa024c7b3ffbe5a58"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\kirin_ice_thrust.rs",
+    "sha256": "51b711681e87903441e913d350f7b19535e7b432b62f76712786f59425e48017"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\mod.rs",
+    "sha256": "47aff00da1116f5a266d5adeaebd35890b4c5e303d98617d3a595eb31fcf3982"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\mud_zombie.rs",
+    "sha256": "a58dd3ae19e40d0fc3439027563249ff374e8ad07b13425c8926eadb329b13d8"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\poison_hugger.rs",
+    "sha256": "5d886076b6eaa9fc7d5ee57a849a9b689bd1d13d6f07d9262c941c64548db727"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\reviving_zombie.rs",
+    "sha256": "64aadbe1f12c2609cc2782603661053528debce2a56394d0d88b2a158c24ef38"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\shinsu.rs",
+    "sha256": "0c3241467edeff46537ca3cd499795fdad3813dfc5f6084a3f0bc004696f87d3"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\snake_totem.rs",
+    "sha256": "3f9b728c0ba4b01b1ebd5de5b6d3a85ade73cabe894022da0c52ad2f171d45e7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\snow_wolf_king.rs",
+    "sha256": "88a9860d22cea6e58e00a7ffe1545419062e97a1b0041b9897e75b1f68055f1e"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\spitting_toad.rs",
+    "sha256": "d5faeffc3463713a68a55c23f309905ed86d3bb1dbb418f8fd1eb6f56e329953"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\stone_trap.rs",
+    "sha256": "d2aae9821b3e975513103a6eedc0522123e0beb870155c2beb65a1c20daa361a"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\summoned_monster.rs",
+    "sha256": "46793edf62dea626c127f8251406ffd5b4a3c835a995b8337a4f3d57772df608"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\thunder_element.rs",
+    "sha256": "2883e9b155ffd3ec40b2177bc0f7d4b18d13f02006a1497e16993eef89f3ae51"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\town_archer.rs",
+    "sha256": "a78138310bd4b954538fbf71b9ababcc74d4a949f0cdcf3dcb7133c7745cb65d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\trap_rock.rs",
+    "sha256": "53c58c2ad24836c0d171c69e1b3854a60cbe2cdb8f123899b64e64c6b356bae1"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\tree_queen.rs",
+    "sha256": "fb54bda02701bdfe38bd8822570be61ef783df79843b960fea508291a7c9cd00"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\tucson_general.rs",
+    "sha256": "c94ab8e96f1827a1fd7e480c73c7c96fb724fa4cb7e2f5ace217b86be8beae8d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\vampire_spider.rs",
+    "sha256": "89e0a45474ee69eb28024668f0ad5df122e2cfa6b4cd373aebbe2522ba46eee1"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\wooma_taurus.rs",
+    "sha256": "46c1fc4c458823d2543cdb699f88e6389747e08cfb3d90b0a6392cf3ef23304a"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\yimoogi.rs",
+    "sha256": "ff02e0af5175e2fc74b5adf7a8bbff433662a4d1f047c051f325ec6547a87c56"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\yin_devil_node.rs",
+    "sha256": "dfa2c1b84bf8bff329bf5e3464697e86844aa80254d3fd397dfdd9e618766d96"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\zuma_monster.rs",
+    "sha256": "0b3513fdf7a521dc91e70f4acdab0a33e7090f50de5748d35425a9cc9f573181"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monster_ai\\zuma_taurus_stage.rs",
+    "sha256": "24f9a3691dbe514cdd639f4408eaad27000ac13e46d9d2bc9fd01271984a1e95"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\monsters.rs",
+    "sha256": "73c0899977fc06963466eca9991d939e391933b7dfa88bf32c93c13019b884ba"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\movement.rs",
+    "sha256": "d5336b4ff122e9f4cdf005350fcaeef2a49ab6687cbb3bc4fb5b3bd09ec01ca7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\newcomer_journey_tests.rs",
+    "sha256": "ce44d4db719dd7c6a8b88bae2878a1fcc6892ac7fa7969383f1d1e0182db1d71"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\newcomer_npc_visibility_tests.rs",
+    "sha256": "f359b16c84e2b150ccea0ece9e889c4b113dd1043af875e5f0599072061b73bc"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\newcomer_progression_tests.rs",
+    "sha256": "1be3c17b402e5a14b3663b0b54ce17964ac1221d710adf384854bd421f5a7201"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\newcomer_progression.rs",
+    "sha256": "621be98d0887d837a6be2d43d226bbee494462713fd364033c7c974c0f77a944"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\newcomer_v2_event_tests.rs",
+    "sha256": "eef5009245f5884b61f21126978b207446e93562b3b4d148843242a680cebfdc"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\newcomer_v2_events.rs",
+    "sha256": "c4f3b5342af58d3692212b15fdeec21c124336a51c9fa1ed2030037be63de1d2"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\newcomer_v2_tests.rs",
+    "sha256": "2d47911cb48b0ce762602bb7b81c1bb93c524e67b88344c515317986ce373fae"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\newcomer_v2.rs",
+    "sha256": "b5aea984220a5a841c4bfa7607b369c9a1a0d0a76601341300bf1b65e9e2a80d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_gold_buy_outcome_tests.rs",
+    "sha256": "c5adf2f95960ab79b9919875584e3703e692729fbef6f68ceae8fb22e956d431"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_gold_buy_outcome.rs",
+    "sha256": "3d250c5cf021588b5d1a32a7ece79dbd7c70a2c41b84c5d02af2314400464b20"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_gold_trade_capacity_tests.rs",
+    "sha256": "42cc763a537b7ddeb0f03a9451d5499da3a28729764d7c5950480e6733c4dba2"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_gold_trade_evidence_tests.rs",
+    "sha256": "2683b4703f25b40692cbbd427a151786681eb314a25da206022ce99dd628dc9f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_gold_trade_expiry_tests.rs",
+    "sha256": "778a084605e390aa48a5dcd2671d420c6697ce192c3a2c8cd7498bcbaa3b8029"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_gold_trade_expiry.rs",
+    "sha256": "2700aab9de243b4596e92ff0a8bb045b3b81e90b87e941c96780f80ceee9dcc5"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_item_price_tests.rs",
+    "sha256": "1df18d1dddf588597a3e5bbbf376747509c8fe1da3e143e3bd07bbab496cdde8"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_parcel_tests.rs",
+    "sha256": "e4d727777a8af06284368fe06fe0fa0f128629415eff3051cf7a971c1d41f0f8"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_pearl_tests.rs",
+    "sha256": "f46f21f3d3aed9a70c858471a449e92cc1347fcaa0fc41e3f1f2431baf96e6d3"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_purchase_outcome_tests.rs",
+    "sha256": "7dc5817e482628624734e0d9794c5939cfd20db2aef1591c04a4bc77511f37ef"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_purchase_outcome.rs",
+    "sha256": "00e8a7917dad13477e572d99945261faa1558be4abc4c40807647e9ba162a79f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_purchase_owner_tests.rs",
+    "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_purchase_snapshot.rs",
+    "sha256": "946c4fcbb8ce955919ffb70d81a6dfa943b2b7494f685a5906035db3985a0073"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_purchase_transaction_tests.rs",
+    "sha256": "693b73b83b7d1d5ceee7a8e23b898383b39e579902bfabdc7de53c2eb66206d7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_purchase_transaction.rs",
+    "sha256": "c31ac61eb2561ffc19aa384eeba8ddbc9b46f97094e4f4277a4e749ad68e05ef"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc_script.rs",
+    "sha256": "c98feebeec8f80f059608d7ee0dfc5c6f23e611270c0c96e904812e76dc1358e"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\npc.rs",
+    "sha256": "39683f63f38eb8f91eb74c4ffc04a073585e1645adea4b4bf14a6e2321dd2972"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\onchain.rs",
+    "sha256": "2f9fbc67ff170c0ea17d2a3f97dee282a4d4922c0bd8ad6062cbe6b9924e62bd"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\packets_diary_quest_tests.rs",
+    "sha256": "b6fdc745704377bb9c94c5aa01b94f4226b46392527b6f936ddd16448d5d1914"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\packets.rs",
+    "sha256": "c6859bc95eb6a68e439778949d4a4a819ce24385343793f7f3a1b7208d5d86ae"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\pathfind.rs",
+    "sha256": "1aaa0e81c731256fa2dcf571dade45f7c61288200b1695a3c664c763cfa942a9"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\player_weights.rs",
+    "sha256": "e93384181e5fa3a0cef52373d812a28b230b1009f165b75eb9651c90ecac57d7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\prepared_kill_experience.rs",
+    "sha256": "de218dd898b15011ce561d81e191b3ceb2fb2598d13986174972fc96965bf805"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\quest_endpoint_identity_tests.rs",
+    "sha256": "36a14adc60e380830202523286514a077db7dcde1c3dc094a188e79b8c74568e"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\quest_level15_tests.rs",
+    "sha256": "2b69e332e8bb53281341292580b9299f80549cada1679ee5af33fec48628e604"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\quest_reconcile_tests.rs",
+    "sha256": "424934cd6c325a097c222b433f5b40780145f3d9cecb73408cad50c8bdb5055d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\quest_recurrence_tests.rs",
+    "sha256": "08ceddc0b483afe167b0f6a8c4334155ae369720b9ef62a7b5e5c79fcb7c7da4"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\quest_recurrence.rs",
+    "sha256": "c98625794540ed8115fa2a5657ffe8108ded20e5b62b5fdc3ede3c9311febdf9"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\quests.rs",
+    "sha256": "8d42024ce5c05b8ed19034f2cdeb904884b7ad0a14685e7936507f6231eee54f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\ranking_inspect.rs",
+    "sha256": "94ff5fa5337e3c9d792a4ac84062f9ac7c4db52ad0eb5891f63aece171a89677"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\refine_oven.rs",
+    "sha256": "0a48100fffc7737e2bc0c955cb7eb968c544c9a443b9e7e6777fd6f12e2736b8"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\rental.rs",
+    "sha256": "6b8520706c7db5d74257064ae4c0ab84cef6f4f9390e60a6bd7325c08d8f0936"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\repair_mutation.rs",
+    "sha256": "18fd0e76b1d6a850d2dc9384a004c4bc1b1d85ce8c20dbf3797dc04cbca64078"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\repair_plan_tests.rs",
+    "sha256": "c0ddf5ea25f6bac6471bfd7962712a4f01d96a66b4a8dcfdf6c8f884dd26a7bd"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\resources.rs",
+    "sha256": "b3a316a41b3356714529c3db306a5637fcd70d0a47fde669e1842a0aa3583902"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\save_fail_closed_tests.rs",
+    "sha256": "08ff0eed15853a653af202f6ec17013103e8d5f63422a42d209b5845228329a3"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\save.rs",
+    "sha256": "586a670f621c99712b95fdbd453663f56bf57409e11197d06221aafc416c5700"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\session_active_monster_ids_tests.rs",
+    "sha256": "a277daa4cca08f57279019643dc45033a7cf46856328ea7b95632b5d8578617f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\session_lightweight_snapshot_tests.rs",
+    "sha256": "93e45e8c737ec07423fe3fe29c9b9b19eda11e05e1f39dbd0e1eab189d692a9a"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\session.rs",
+    "sha256": "ed0b2fcb908f8598b09d308c1169d39e92309dd750ee04bd4e1aa1ce912059ab"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_guild_bank_tests.rs",
+    "sha256": "f7e9d778d6bb610ad851d00a4bcc06beb11b37222ca2f533e1f5300beb1ef4f2"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_guild_bank.rs",
+    "sha256": "c417ac65112c0903dc603218ae858ff7fd4b6a5dd2d151d99a631c8892e65ba2"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_guild_buff_tests.rs",
+    "sha256": "c5394d4a8762c838eb45df1f703db72abf2b5a6d4862b605b9e1abf9479dfdb5"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_guild_buffs.rs",
+    "sha256": "ee7b0d308913103e5fba0251a6b45ea93d568c0a9440c071e1f93b83b58e2848"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_guild_experience_tests.rs",
+    "sha256": "94ce33eac85eba58dd517f3a757421c5b1fa560b52a99e3120397029b650585b"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_guild_experience.rs",
+    "sha256": "8322983978da9b4150b0e77283b99c147d23a355440e613cf1ebc7aaa701eab3"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_guild_item_tests.rs",
+    "sha256": "5f9c0a7520eab000de3fabc2b28590f4f5b17264e16fd911e1d4e8dd1e10c20b"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_guilds.rs",
+    "sha256": "5ee7c0b7927ff4718339ae5381351d6b70d34903e5d7538d4aa88575697e52b6"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_kill_experience.rs",
+    "sha256": "5a0442328090a94d481c13501df37bc9695d467efa975226a8e5b5cb3b95c981"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_marriage.rs",
+    "sha256": "096539ceecf236f3b2c56d1d34deaee0deee4dedde57784a78de34a1a9ff3969"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_mentor_rewards.rs",
+    "sha256": "efd7446ea6bfc1c25a1915e062402a81e5c1d28f4806a34fcbc5fa2cbd4c709d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_relationships.rs",
+    "sha256": "8c70353282a6bdded68823bd527e82ab63631fc8bd529979aed469d505ece1fb"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\shared_social_buffs.rs",
+    "sha256": "d2f4ea5926ba99f02dd511e5613303313505ee11d3d70200e9857f37314919c7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\skill_cooldown_restore_tests.rs",
+    "sha256": "53c93efb6c9afb60d065dac752fad6e75b320bb8132f78966bf394bb3c79112d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\skills.rs",
+    "sha256": "74432f52560f1ef5955ceb5f09faa8cbccc2395168b3cbfc7004bd5124e4bae9"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\slaying_passive_tests.rs",
+    "sha256": "6aac5ee3e3707e30dde2a8207af4ab56159fad622061f5f3f6320fb977504c34"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\social_economy.rs",
+    "sha256": "2aa05c85e4f49ad3798840da6ecdc7e400217570f1d51b8385d25b01d5dd72eb"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\social_experience.rs",
+    "sha256": "45a7f1d5e1bb1539af1d947f0e3452a2f7ea4a30e13f8c734d5c79eba8483460"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\special_monster_sprite_tests.rs",
+    "sha256": "f53b7a3bee2f5a3b7011b97022ff2061fff6aa3579299afeb78508f7487b2984"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\stage5.rs",
+    "sha256": "bf2556bb355e0afff5a996c684d72737a49489a430f66e5b82cd51ce6a4212e2"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\stats.rs",
+    "sha256": "ec2ef7fddc47f57c87e23e621198c30e9de80cd97eff21803a17926036fc9752"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\storage_rental_tests.rs",
+    "sha256": "524d44bd9f35a78d5fd729b4f5f3adaccc27a10edcfb0b2fe657d53b5a78c16d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\tests.rs",
+    "sha256": "4e2f941822068c6a4108a1e7b57378b220b94433ad0d72e4a648f3896a5dea56"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\warrior_preparation_tests.rs",
+    "sha256": "1c883d97a25d938052af6274dc566d811782973f6c163ebcbc54075cc2931ca8"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone_melee_passive_progression_tests.rs",
+    "sha256": "7707f56a93c9e416dfadbb69acec9b5970f1b2a91c7337c780653b829add30fc"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\aoi_grid.rs",
+    "sha256": "7df99f8b71a303ff13c2aed8b598f7c58442b1f3fdc3dcd7210ed149564d0344"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\aoi.rs",
+    "sha256": "efd99aca9b94490df20f6fff4da4b3614f0a936f48af7426858185a398baf32f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\collision.rs",
+    "sha256": "7ba3ef1c37ba45c75cbb4107b5cbbfe41f751ce66dbe067a1daa43e9d95b430e"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\ecs.rs",
+    "sha256": "d1f094c3f37fa77e0797bc4f6df18bc27f716184aac1ec8b3c8307a960f93265"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\experience.rs",
+    "sha256": "8697585b481d09aad2df42c3b84e9fe9e8da7ef918adba3aabe71717ce04e755"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\intelligent_creature_host.rs",
+    "sha256": "be0a3cab0ec04946c3800af78dca4150a73aa1a11e746a2ae5603c568271959e"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\intelligent_creatures_tests.rs",
+    "sha256": "e9a25c0375528d94dbd2926f24470d38ae0bd479d023824050b0de195bca6997"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\intelligent_creatures.rs",
+    "sha256": "30302a9cbd99efd997d8b959007b27d69fd64f2d4b8df61ed535f5d8cd360964"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\manager.rs",
+    "sha256": "e956f72f961ea7f45cf888567f95b56a24d4744ad8850fce9222c725439875f2"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\mod.rs",
+    "sha256": "2893588003d00798da1a5272c6070be00172027356821e1b83b3d9d705432b92"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\movement_deadline_tests.rs",
+    "sha256": "35991cd2e8f89efaa2ed9b448d0cb889f317f379d5401ad4e515ac389ae55cba"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\movement.rs",
+    "sha256": "994d82a13b5a304ef85535d9755a6ae5c0e5eaf4336cd0111d59fee6aae9b393"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\packets.rs",
+    "sha256": "7dde306dec5a6fe288f7b96d6dc60bf8ed371cbdc704c4a373368dadf1eade76"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\replay.rs",
+    "sha256": "493acd3f2d76655abdd526ce22f8ef011f2d10dbd9f94704fcfd57f610016676"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\replication.rs",
+    "sha256": "9e3806372fedd8aef59e8682f6639ed9835d518a8213353b40f9ed3336b84e6a"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime.rs",
+    "sha256": "c5f356c4e8153255ffafcd3ee7f8cd4c9a3cf7c6e4cc9c73b45fc3206f66df43"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\armadillo_ai.rs",
+    "sha256": "ed4276db1e18dffe704d02d9e6612659feb5f66a476a3cf4dc3671f08e679e7e"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\checkpoint.rs",
+    "sha256": "a741ff51dc4092106edb5ede85de5991366302f6c993ce4a3eff620402145a34"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\entity_combat.rs",
+    "sha256": "30501abac1c0f2c617813964f424efa7464d3ae39fd0b52b0847628702062561"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\evil_mir_ai.rs",
+    "sha256": "fe0355c1bbcb3a6ad9d3772bcb66eff625bfa122d14b1822a4beeea451bbdb38"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\football_ai.rs",
+    "sha256": "bb320b3d8ab676088c0a72aa7cc6b3d5b1feb07c6aba914497dc15e2877dc92f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\gate_ai.rs",
+    "sha256": "ab78b66d769c9fa6d41401b474e19caf20771d42541922bab5eb7ae6ebdbff8d"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\great_fox_ai.rs",
+    "sha256": "39e5f9ece2fcd5768c55695f1bfe37c7736be1dd9f2d7ec301b892bb2f6ba0d1"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\hell_ai.rs",
+    "sha256": "4b6a44c0f3c43abb88b9726222ad6521c65ccbd01480aaec6cecdefb4dfceb3a"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\horned_ai.rs",
+    "sha256": "38e74cc73342a2703e80d81c3b7787c6ea267cc8b14c1e0fedfb8a63611a3a21"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\horned_encounter_ai.rs",
+    "sha256": "7478e623f2209221ab4de5e2ffd844158a85d31946c74da51f1ba5b82aa68053"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\hugger_ai.rs",
+    "sha256": "b0b1027ccdec1c5cb0f512472a34fbca721ceee4013f2c4e30740e8682dc1ac8"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\journey_events.rs",
+    "sha256": "761e382d6d026faa016c3a3419edaec0f7961ea850564f8e379d892873587a63"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\kirin_snow_ai.rs",
+    "sha256": "f43d7a532a1d4b6e7f3b5f16aa4c870bfe26fa0b348cc2f9cdbfbd4dd03c4b70"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\meow_ai.rs",
+    "sha256": "d078e6ac6be7f2a59201be6bc62d62ce301acb8bf1f4cce1c355f2b4cd859d0f"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\mud_boulder_ai.rs",
+    "sha256": "e266fae14ddfd809984786eb860ecaa51644f64632ac0b292dd01dddbe518db4"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\node_ai.rs",
+    "sha256": "047b05dadbc1e9f4ea21aa89179198620d79f401ae91cabcc3f0b68feb9601c7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\passive_ai.rs",
+    "sha256": "505434b94e7163cb4546cb7bbb518336d6cecaefcc1b54f2085ec720c0a4e145"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\periodic_poison.rs",
+    "sha256": "6f45c370ee36a7fdc80eee7b2bf13c7ae61c7ad2b4f5c89ff37224d28ff142a5"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\pet_special_ai.rs",
+    "sha256": "aa8730cd61f52a31d3effe0956fd040f523ed98fcc6d11251bb397843cb97498"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\player_magic_cooldown_tests.rs",
+    "sha256": "c1938539621deb890eb445172f6f20f9324c4239a807ad9bab0edab5db33e8b1"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\reactive_ai.rs",
+    "sha256": "a765a4906b638dcc53af3089acd2b84c6f7eaff960e4e708116ba7417fb55ba7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\revival_ai.rs",
+    "sha256": "764eaaebc32df76df63d9de84195d46f0e7707270787ec7d4c7d4ac115ce8f41"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\reward_rate_tests.rs",
+    "sha256": "48e6e52922717c8876beb1b8a26f2056ec95ba3243294fcd643869e564e521db"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\safe_zone_profile_tests.rs",
+    "sha256": "25dbd35fc07377857d40d7d30c4e0d3e4ffd40a31df793eb4a67fb24838991a1"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\shared_harvest_tests.rs",
+    "sha256": "c20bd9c4f0570ba62061d32df9414f2a66c0d68a68dad8678456a3e7a40a8ddb"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\shinsu_ai.rs",
+    "sha256": "1144d265f88833baae65f29072a086a482541cf979bd838570b01030695b1206"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\sleep_ai.rs",
+    "sha256": "95d68c2f4427fabb712dd00606d2cf11a56032566b1129b83f5774dc2d9b4560"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\snake_totem_ai.rs",
+    "sha256": "ac6ac15ab68fce8c49f28499ce1b1ffc593d175096195323499e549e76777082"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\soulfire_practice_tests.rs",
+    "sha256": "0529d74b49e6a4167cc1c695b96e2df195b4f010b7a36845eb97e2ed5a43ef45"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\special_ai.rs",
+    "sha256": "869218ab39ff72a50053ddd247e687a51f20d3633dc0ec28d57f138141aff1ef"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\spider_ai.rs",
+    "sha256": "d9f842d5684a306a7facffe5159a6000944335229b967d2ea3c86cf15d448186"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\stage_summons.rs",
+    "sha256": "6b427aaea63f30a8afb987ce88b2b7e72afe0c92abf9bd5789f49a6668978fff"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\statue_centipede_ai.rs",
+    "sha256": "96260c9910c0fa88688fe4a8978e554b636050e197900524095fb17d33de8233"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\status_poison.rs",
+    "sha256": "491971b7b4a77507e7c58cca84de032c769cb918d3b6a615c2573da9dd2bc666"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\stone_trap_ai.rs",
+    "sha256": "d6090b129c760b6b0bdab688761ef2c37d2eeca3e8f85014598472f3d1c373f2"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\thunder_ai.rs",
+    "sha256": "0016285a62646b6547976b65e016faa00c8cfe9f0ff11f27877e92ef671b2191"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\town_archer_ai.rs",
+    "sha256": "eb9b45eb532af7a36e81d79198b9b19060aea1533afa024447a0865e9eadb2b7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\trap_rock_ai.rs",
+    "sha256": "0ef87697fc7e6bd00754e71ee33d4a1f9e9dbdc5b99fa2e1a62d9cc549c4a8e7"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\tree_queen_ai.rs",
+    "sha256": "441491baf1fdb90cc37e0720d3ac9d4d7ebe5fddb593e188a132277d696e989e"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\tucson_ai.rs",
+    "sha256": "626f1f02bc66ecc6dac64346349474473c38dea3cb2e1fe6a7375f92ad6deabe"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\vampire_ai.rs",
+    "sha256": "4d79409386783af7445fa578f58dbed1cad294810b516bb7b4b805d1e00bc6d2"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\visibility_ai.rs",
+    "sha256": "92dd817ffe8798ea2998bf5417ba037c8478b222d7c318950ec5a1b58c4bf7ea"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\runtime\\yimoogi_ai.rs",
+    "sha256": "297a3bfe800c49e0ab934d49cf21406ee856c04a23be8a43982b8fe736a5d576"
+  },
+  {
+    "path": "apps/simulation/src\\runtime\\zone\\types.rs",
+    "sha256": "c41433b761de53816a4682400a9a3505c6bfb50350dd3f59174e8fc3d5c07725"
+  },
+  {
+    "path": "apps/simulation/src\\user_item_uid.rs",
+    "sha256": "d5cfc56cd10f83726ecfa20af5e285fea47ee057aa36200d29e22a4af1e8357a"
+  },
+  {
+    "path": "apps/simulation/src\\world_runtime.rs",
+    "sha256": "f06d1b7f1dfcb7f21e3b0d1fe39b3297655643869b661858b8a9afa7c5d54edf"
+  },
+  {
+    "path": "Cargo.lock",
+    "sha256": "c1d0c0576d14a9acab78510077602ec2f1967767798362ad2865c1dbd8bb5189"
+  },
+  {
+    "path": "Cargo.toml",
+    "sha256": "f51fe2bb2e2e61c48b30638dbb7a0f94b9499f81f944b75a96f51d3956601f22"
+  },
+  {
+    "path": "infra/postgres/migrations\\0001_core.sql",
+    "sha256": "ff8bcd1a7f9622d5f2ad9e8a3f396b1f06169a2355826693cefc6b3ff8966ab5"
+  },
+  {
+    "path": "infra/postgres/migrations\\0002_normalized_projections.sql",
+    "sha256": "baba05dba3003b5304e3aa42fdab328d24ad0b8fb80b88d7fff5f59482a37a65"
+  },
+  {
+    "path": "infra/postgres/migrations\\0003_zone_owner_leases.sql",
+    "sha256": "71db28dd5266c65e8707c08de11347afbf0b67f4facf736f1378927904049701"
+  },
+  {
+    "path": "infra/postgres/migrations\\0004_city_currencies.sql",
+    "sha256": "50bab7a2af67203c2396fede441e3f97089a32b45a336cdff74b146a9595d80d"
+  },
+  {
+    "path": "infra/postgres/migrations\\0005_game_economy_outbox.sql",
+    "sha256": "cbd39219803f894d627e50d806df3179125f3ce4164f34dbb03c2a842c3077c4"
+  },
+  {
+    "path": "infra/postgres/migrations\\0006_game_economy_bootstrap.sql",
+    "sha256": "f126e33bb5cbe9c0c5edec60bb1fb725038c8e5975fba44dcf4db8eb8c742321"
+  },
+  {
+    "path": "infra/postgres/migrations\\0007_admin_read_audits.sql",
+    "sha256": "194b85230db671b63ac8da4e2d02df903a4d4084f0d8cd8f49266102ae7a4e0b"
+  },
+  {
+    "path": "infra/postgres/migrations\\0008_ai_daily_reports.sql",
+    "sha256": "69f9cc152f059b1091841e5a222e358124f0321622952066ed81df6ff679bd66"
+  },
+  {
+    "path": "infra/postgres/migrations\\0009_world_director_approval.sql",
+    "sha256": "e746ded0a561aa086052e72e986d14f8b6da5a4802ff31c35bd2f7dcf8d4d2bd"
+  },
+  {
+    "path": "infra/postgres/migrations\\0010_commercial_identity.sql",
+    "sha256": "3745a1f1ac34fa2b7e2a26ee3d38959131464a0d922eb0d1f1ea47e2f57c86c9"
+  },
+  {
+    "path": "infra/postgres/migrations\\0011_game_economy_trade_projections.sql",
+    "sha256": "9dfcf2b5fee50f67710342eb929571ba84fe709fa0be99148d6847e4298d3499"
+  },
+  {
+    "path": "infra/postgres/migrations\\0012_shared_guild_authority.sql",
+    "sha256": "f22b56a3b8da24cb65e5bee552b2e28018c10614833635bab26b585b4910a79d"
+  },
+  {
+    "path": "infra/postgres/migrations\\0013_shared_guild_clock.sql",
+    "sha256": "69020f2ae1503f4ab73ce4129b95ceeccc487d189327d6b7c580d5ff2d90a355"
+  },
+  {
+    "path": "infra/postgres/migrations\\0014_shared_hero_authority.sql",
+    "sha256": "929880747dabf598dce0904a86db229c9a1a6180cd39f4cd835fa89ff9eea035"
+  },
+  {
+    "path": "infra/postgres/migrations\\0015_shared_item_identity.sql",
+    "sha256": "ad2fe7ae1a3bfae8cd8058453de746b8966d2416143801f8975769b9f76bc196"
+  },
+  {
+    "path": "infra/postgres/migrations\\0016_hunting_economy.sql",
+    "sha256": "baf99e92457d0e0e247db56174962e8422681e4b32824ccca1771d12eb9518ee"
+  },
+  {
+    "path": "infra/postgres/migrations\\0017_hunting_economy_observability.sql",
+    "sha256": "dbd23f7e4360a75fcc53a15877a51088134e752acddea84ed0c9215c0c3b1d3e"
+  },
+  {
+    "path": "infra/postgres/migrations\\0018_hunting_character_incarnation.sql",
+    "sha256": "35eedf0d33bea39a489db963d05b1de68e8c3da84dde6e37b07d9b1b45ce9287"
+  },
+  {
+    "path": "infra/postgres/migrations\\0019_hunting_economy_metric_exports.sql",
+    "sha256": "4a5a5628c6db20ff95be2d43f31d57aeee7735a2e02fb962fb2daa8234bcc596"
+  },
+  {
+    "path": "infra/postgres/migrations\\0020_hunting_wallet_owner_guard.sql",
+    "sha256": "6e4683b20b07e8870df5b2e0035fb32d767fd8329c8389f2c1ba15ad8f7a6314"
+  },
+  {
+    "path": "infra/postgres/migrations\\0021_hunting_quest_sources.sql",
+    "sha256": "d30fd2e12eb3a39720ffc0f7e386856cf35e5ec4882be96f5d260a99a11e87ea"
+  },
+  {
+    "path": "infra/postgres/migrations\\0022_hunting_bound_debit_burn.sql",
+    "sha256": "2d0231e374ee7cb0d7e49afb0054f94d6fb84061e46cabfc25c643079784c594"
+  },
+  {
+    "path": "packages/economy-policy\\Cargo.toml",
+    "sha256": "6c8c6295be6fc38787f47c1242a7a10d796b45e3d3cf261221f0ddec4f29ccd7"
+  },
+  {
+    "path": "packages/economy-policy\\src\\lib.rs",
+    "sha256": "a47bd43bf61f6790875a96870ebed23dc5f1686da3055b1db71cd100a6a1d321"
+  },
+  {
+    "path": "packages/economy-policy\\tests\\policy_vectors.rs",
+    "sha256": "9d52506ac658f497a4b933bacebe0bb1a09ffa4b483ff6da0f830b8a33c51c8e"
+  },
+  {
+    "path": "packages/economy-service\\Cargo.toml",
+    "sha256": "9aa10c89f62bbeae324ac518eff402e37d91084c2610af1d09625e54157599df"
+  },
+  {
+    "path": "packages/economy-service\\src\\debit.rs",
+    "sha256": "49b74ebc569adeb92689a85a13d3eb03d238aac535345d4443bef11cf31d5bc4"
+  },
+  {
+    "path": "packages/economy-service\\src\\export.rs",
+    "sha256": "9ac2661d3c9b7f811278cb8bd38d8195fc308203e41c3c34a5ad77e983598757"
+  },
+  {
+    "path": "packages/economy-service\\src\\lib.rs",
+    "sha256": "64c4fb7f2bfbb3dd8986aed013ce53d8394e91bbcddee20246fb38867168ea83"
+  },
+  {
+    "path": "packages/economy-service\\src\\store.rs",
+    "sha256": "df6cfb3326fde154a9f719e9f2e7a094e757329052fcc636454612320a30df9d"
+  },
+  {
+    "path": "packages/economy-service\\src\\types.rs",
+    "sha256": "c746253b96806bccccc56850f161b06fee46541347ffdd234b81f1739923118a"
+  },
+  {
+    "path": "packages/economy-service\\tests\\postgres_authority.rs",
+    "sha256": "56672b47bf1a66bc763f4c2c3f736b7436b2b7c1ef16f4135c014271c4fbd091"
+  },
+  {
+    "path": "packages/economy-service\\tests\\postgres_bound_debit_burn.rs",
+    "sha256": "e1a1f7e4893b2171ed1d1756d8485b6d04eb6f14db2dc2feb8adb0f122c7caf8"
+  },
+  {
+    "path": "packages/economy-service\\tests\\postgres_export.rs",
+    "sha256": "706c6c88a782896393fc21c3943c071fe9ca5ec6ebdeae39d651b83a9aa3b425"
+  },
+  {
+    "path": "rust-toolchain.toml",
+    "sha256": "667a93776d9bb1bb4a17b8839e365d26ed380807de5b44f664c87af73bb0bd87"
+  }
+]

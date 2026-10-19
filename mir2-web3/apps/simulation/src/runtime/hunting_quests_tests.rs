@@ -858,3 +858,6 @@ fn hunting_quest_postgres_unknown_recovery_preserves_zone_vitals_and_current_cap
         assert_eq!(db.counts(), (1, 1, 1));
     }
 }
+
+#[path = "hunting_quests_guild_tests.rs"]
+mod guild_tests;

@@ -2,6 +2,8 @@
 
 ## 狩猎经济协调约束（2026-10-20）
 
+第三阶段已由Root集成：真实Guild成员PG专项及修理的正额共同debit/burn、纯计划和本地物品变更见证；194项focused/邻接通过，Gateway库/主/ZoneHost检查通过。限定写集全部释放，Root串行原生Cargo、证据和本地提交；三个外来QA JSON保留。真实修理报价令牌/完整来源与恢复仍待接，不得把基础当成NPC销毁已上线。下一队列及边界见 [来源接线计划](HUNTING-SOURCE-INTEGRATION.md)，完整goal active、默认关闭；不运行Docker/WSL/虚拟机或改动游戏/虚拟化。
+
 本轮继续用户明确创建的狩猎许可经济goal；原生PostgreSQL/Grafana验收，不使用Docker，不启动WSL/虚拟机，不干扰游戏或修改系统虚拟化设置。Root负责独立工作树最终集成、串行Cargo、证据与提交；任务规划/来源和只读观测按限定写集委派，既有主工作区及三个外来QA JSON保留。真实一次性无物品任务来源已接，完整复制/晋升仍须可信结果checkpoint和原角色代际；未支持组合在执行前拒绝，不允许副本清realm后发旧金币。下一队列见任务队列及HUNTING-SOURCE-INTEGRATION，goal保持active，默认关闭，不推断Crystal百分比或生产资格。
 
 ## 三个聊天的代码进度整理（2026-10-14，北京时间）

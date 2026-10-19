@@ -5,7 +5,7 @@
 持续目标active。新钱包/全服池/转换/04:00日结、认证HTTP及可靠partial时序导出已接通；无物品一次性任务现在通过同PG事务提交完整奖励checkpoint和绑定金币，并验证原请求Unknown/worker丢失恢复、代际/CAS及Zone血量保护。原生Grafana13.2.4完成导入、TLS只读查询/告警表达式及合成服目标图表抽查，通知/全面板布局仍开放。范围与失败修复见 [实施记录](HUNTING-PERMIT-ECONOMY.md)。K=0.1，基准0.72/硬上限1.08许可。当前来源只允许未复制的本地权威，远端/副本/晋升须待可信完整结果和原代际复制；禁止清realm后走legacy。下一最小队列：NPC单物品修理的同事务绑定扣款+真实销毁，再扩材料绑定传播/物品任务与周期/挖矿种植、三层销毁、真实市场画像收益及迁移发布资格。用户禁止Docker，后续仅原生，不启动Docker/WSL/虚拟机。默认禁用，远程资产未改，旧gold未重分类；不提高Crystal1:1百分比。
 
 
-进入下一真实销毁来源前，先补真实Guild成员的一次性任务奖励分成/等级及同PG提交专项；当前任务fixture仅开启共享Guild权威，没有实际成员，不视为该分支已验收。
+真实Guild成员专项现已补齐并通过3项实际PG测试（正常保存重登、共同提交/回滚、Unknown原奖励恢复）。修理基础已完成正额绑定debit+面额burn同事务、纯RepairPlan和不随存档恢复的物品mutation见证；194项focused/邻接测试及Gateway检查通过，见 [第三阶段证据](generated/hunting-economy/acceptance-20261020-repair-foundation.json)。这些基础尚未接成真实NPC销毁。下一最小队列：服务端Quote→Confirm→Query令牌、零费用持久分支、完整checkpoint CAS与原操作Unknown恢复及现有游戏客户端接线；不能把旧UID包暗映射为新报价确认。继续默认关闭、仅原生、不用Docker，完整goal保持active。
 
 ## 三个聊天的代码进度整理（2026-10-14，北京时间）
 

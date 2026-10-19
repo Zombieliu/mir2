@@ -1,0 +1,201 @@
+{
+  "recorded_at_utc": "2026-10-19T17:09:22.9198091Z",
+  "classification": "real Guild-member quest acceptance and repair transaction foundations; actual repair source remains unconnected",
+  "goal_complete": false,
+  "production_activated": false,
+  "remote_assets_changed": false,
+  "legacy_gold_reclassified": false,
+  "branch": "codex/hunting-permit-economy",
+  "parent_commit": "e349e1f80240de0a63b12a694f277ff4c35fae24",
+  "default_policy": {
+    "schema_version": 1,
+    "policy_version": "hunting-economy-k01-recalibrated-v1-disabled",
+    "enabled": false,
+    "k": {
+      "numerator": 1,
+      "denominator": 10
+    },
+    "conversion_fee": {
+      "numerator": 1,
+      "denominator": 50
+    },
+    "daily_decay": {
+      "numerator": 1,
+      "denominator": 150
+    },
+    "baseline_daily_mint_atoms": 720000,
+    "daily_mint_cap_multiplier": {
+      "numerator": 3,
+      "denominator": 2
+    },
+    "business_timezone": "Asia/Shanghai",
+    "settlement_hour": 4
+  },
+  "native_constraint": {
+    "postgres": "native PG16; explicit isolated loopback acceptance database",
+    "docker_service_status": "Stopped",
+    "docker_start_type": "Manual",
+    "remaining_docker_processes": 0,
+    "terminated_old_orphan_cli_pid": 216708,
+    "docker_wsl_vm_started": false,
+    "game_stopped": false,
+    "virtualization_settings_changed": false,
+    "cargo_build_jobs": 2,
+    "unique_test_executable": "C:/mir2-build/hunting-permit-economy-target/debug/deps/mir2_simulation-hunting-repair-16.exe"
+  },
+  "scope": {
+    "real_guild_member_tests": 3,
+    "positive_bound_debit_face_value_burn_api": true,
+    "migration_0022_registered": true,
+    "pure_repair_plan_legacy_parity": true,
+    "local_private_inventory_mutation_witness": true,
+    "quote_confirm_query_protocol": false,
+    "actual_npc_repair_checkpoint_debit_burn": false,
+    "free_repair_durable_result": false
+  },
+  "test_runs": [
+    {
+      "name": "economy-service",
+      "passed": 32,
+      "failed": 0,
+      "ignored": 0,
+      "explicit_native_postgres": 21,
+      "log": "C:/mir2-build/hunting-repair-service-regression-14.log",
+      "sha256": "ca918b624f953fa5795a33c773a957fcb5595587c26d7988a227f6b212fee968"
+    },
+    {
+      "name": "simulation hunting",
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0,
+      "explicit_native_postgres": 20,
+      "log": "C:/mir2-build/hunting-repair-hunting-tests-16.log",
+      "sha256": "08cffc1d8f4b8232899a33c7c322b481dd32d75b42160b98e13c83410c1f4a4b"
+    },
+    {
+      "name": "simulation repair plan",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0,
+      "explicit_native_postgres": 0,
+      "log": "C:/mir2-build/hunting-repair-plan-tests-16.log",
+      "sha256": "e4360d4e290841ff445cca9c822c6994d9458c23b83c3d3959de366ca4874738"
+    },
+    {
+      "name": "simulation mutation witness",
+      "passed": 18,
+      "failed": 0,
+      "ignored": 0,
+      "explicit_native_postgres": 0,
+      "log": "C:/mir2-build/hunting-repair-mutation-tests-16.log",
+      "sha256": "c10feef8db71db2f6d59000735a370aed321293935e8ec7b5197300453d4abc0"
+    },
+    {
+      "name": "legacy repair",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "explicit_native_postgres": 0,
+      "log": "C:/mir2-build/hunting-repair-legacy-tests-16.log",
+      "sha256": "82dc3cb963af08875348e4a5789e2e37580f170d69536f3e822801a6eead2bc1"
+    },
+    {
+      "name": "NPC prices",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "explicit_native_postgres": 0,
+      "log": "C:/mir2-build/hunting-repair-prices-tests-16.log",
+      "sha256": "2b1b0ef7b8f83935ba8df7a5fdd2ca104d0a800fdae6b3895d8f171ce4a18e2b"
+    },
+    {
+      "name": "Guild experience adjacent",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "explicit_native_postgres": 0,
+      "log": "C:/mir2-build/hunting-repair-guild-adjacent-tests-16.log",
+      "sha256": "2812b75cf27af9be85604fce6087c7aaab0688303dcd10499f4a384bab9ceb71"
+    },
+    {
+      "name": "NPC purchase adjacent",
+      "passed": 80,
+      "failed": 0,
+      "ignored": 0,
+      "explicit_native_postgres": 0,
+      "log": "C:/mir2-build/hunting-repair-purchase-adjacent-tests-16.log",
+      "sha256": "912a10531e879e86083b186c215f182f499a2984a4679a15a204f2d5ebcf23aa"
+    }
+  ],
+  "unique_top_level_tests": 194,
+  "explicit_native_postgres_tests": 41,
+  "full_workspace_tested": false,
+  "gateway_check": "cargo check -p mir2-gateway --lib --bin mir2-gateway --bin zone_host --offline: exit 0",
+  "migration_reapply": "0022 reapplied twice with existing old/new receipts; operations/wallets/burns/outbox/pools/policies unchanged; isolated transaction rolled back",
+  "source_pin": {
+    "manifest": "sources-20261020-repair-foundation.json",
+    "files": 321,
+    "unchanged_through_final_tests_and_check": true,
+    "sha256": "50e1bc56530e532f7d2d97ff70716da3cde6eb87363eb81522398e5c29d2e627"
+  },
+  "foreign_qa_preserved": [
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-portable-statistics-repair01.json",
+      "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+      "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json",
+      "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd"
+    }
+  ],
+  "other_log_hashes": [
+    {
+      "path": "C:/mir2-build/hunting-repair-simulation-build-16.log",
+      "sha256": "12e17a7d224dbcab0ddce14b5b85b98745a5803064915f2d84513ab37e0c692d"
+    },
+    {
+      "path": "C:/mir2-build/hunting-repair-gateway-check-16.log",
+      "sha256": "606e2a69251792617c96a849a448e97cececc95427c71bcccdd0112c3a4719f5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-repair-migration-reapply-16.log",
+      "sha256": "8561f4dec64b32a6d630c5feaf30c7a2f773ebb53862b9cee7e91928820b8592"
+    },
+    {
+      "path": "C:/mir2-build/hunting-repair-migration-reapply-16.sql",
+      "sha256": "d3a04b88c25b344edc1903603e2ab97d5b85a12527ad01fb1b191d688450aeef"
+    },
+    {
+      "path": "C:/mir2-build/hunting-repair-format-service-16.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:/mir2-build/hunting-repair-format-simulation-16.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "retained_failed_test_runs": [
+    {
+      "path": "C:/mir2-build/hunting-repair-plan-tests-14.log",
+      "sha256": "87d7a7e7aa1e2ad05acb7fca6fbb00437df23cb127674267ffa88381a6a61dca"
+    },
+    {
+      "path": "C:/mir2-build/hunting-repair-plan-tests-15.log",
+      "sha256": "70d3fe52a05e8220af43f5c9c1e9efd0767d7076ff5ed07b3f77dffe6fc73d1b"
+    }
+  ],
+  "failure_resolution": "Two fixture assumptions about configured NPC rates were corrected against source data: ordinary WickedTrader Some(2.0), special Blacksmith-0 None/default1.0. All purity, metadata and pricing assertions retained; no product change for the failure.",
+  "next_required": [
+    "server-issued opaque quote/confirm/query and durable source checkpoint",
+    "fresh validation vs original outcome lookup separation",
+    "zero-cost repair outcome without debit or fabricated burn",
+    "Unknown recovery without stale item/wallet replay",
+    "client integration; other true sources/material binding; full metrics and rollout qualification"
+  ],
+  "pushed": false,
+  "deployed": false
+}

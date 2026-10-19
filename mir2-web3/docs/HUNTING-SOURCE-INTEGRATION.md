@@ -10,7 +10,25 @@
 
 原始命令副本没有已解决来源checkpoint/原UUID载体，因此当前禁止启用来源与远端/复制/晋升混用；不能把副本realm清空后重放成legacy金币，也不能在retained bootstrap首次领取新UUID。完整复制支持仍是后续工作。带物品、任务材料、周期任务以及种植/挖矿尚未迁移。
 
-下一验证项包含真实Guild成员的任务分成与共同PG提交；当前开启共享Guild权威的fixture并不具有成员身份，现有通过记录不能证明该成员分支。
+真实Guild成员分支现已补齐3项原生PG验收：使用实际成员关系与epoch、有效Guild/个人EXP buff，验证个人升级、Guild分成升级及绑定金币共同提交、故障全回滚、Unknown原请求恢复和正常LogOut/新配置Login/StartGame读回。此前仅开启共享Guild权威的fixture仍不能单独证明该成员分支；新增证据见 [第三阶段验收](generated/hunting-economy/acceptance-20261020-repair-foundation.json)。
+
+## NPC修理接线基础与下一步
+
+本轮已实现三个基础，但**尚未把普通修理请求接到绑定钱包与销毁账本**：
+
+1. `economy-service`提供授权的`debit_bound_and_burn_authorized_with_source_with_timeouts`和原回执查询。先realm锁/DB时钟、角色及来源行授权锁，再检查原回执；首次执行将真实来源checkpoint、绑定扣款、同面额销毁、操作回执和outbox共同提交。估值固定为`bound-gold-face-value-v1`，拒绝零额、溢出及重复手续费来源；没有即时补充许可。0022迁移仅扩操作种类约束，未改0016或旧钱包。
+2. `equipment.rs::prepare_repair_plan`只读生成完整物品前后态，沿用真实NPC/range/type/bind、普通/特殊修理及现有价格算法。`apply_to_inventory`验证完整目标前态与装备槽优先定位；旧修理路径复用该计划，仍按既有`gold`扣款，当前不会产生新经济销毁。
+3. `HeadlessRuntime`持有不进存档的随机scope与checked u64物品变更版本。仅把Bevy的短借用区间dirty当传感器，捕获Inventory/HeroInventory同值写、ABA和恢复；普通闲置tick保持有效。最后借用在读取/核对见证前flush，资源替换、熵失败、溢出或非受控Bevy tick均拒绝旧见证。它不是永久item UUID、报价令牌或数据库写入授权；完整PG CAS仍不可缺。
+
+旧`RepairItem`/`SRepairItem`只携带可复用UID，不能安全识别首次迟到请求和重试。下一步必须完成服务端Quote→Confirm→Query及持久来源checkpoint：
+
+- 报价绑定原角色PG UUID、DB/realm、当前会话scope/物品版本、完整目标证据、原修理类型/价格和有效期；客户端只确认不透明令牌，不传销毁当量。
+- 新执行重新校验真实NPC、距离、服务、存档/物品CAS与钱包；所有来源锁仍须在钱包锁前获取。报价过期、NPC范围、物品前态仅限制新执行，不能挡住已提交回执的授权查询。
+- Unknown只能用原报价及原摘要恢复；成功回执不能重装旧物品、旧钱包余额或过时`ItemRepaired`。当前库存已变化时必须保留新状态并同步当前快照；等待期间的完整checkpoint需要单写独占和PG CAS。
+- 零费用修理仍可能改变耐久/字段，需要无扣款、无销毁的持久结果分支，不能伪造一金币销毁、调用正额debit或回退旧钱包绕开新规则。
+- 重连只允许查询已提交原操作；未消费的旧会话报价失效。原始无令牌包不能暗中变成当前同UID新物品的报价确认。
+
+上述报价、零费用分支、完整来源提交/恢复及游戏客户端接线均仍开放。不能将本轮service测试中的合成source表当作真实NPC销毁来源。
 
 ## 权威边界
 
