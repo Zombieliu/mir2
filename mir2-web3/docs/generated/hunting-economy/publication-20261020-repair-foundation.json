@@ -1,0 +1,173 @@
+{
+  "recorded_at_utc": "2026-10-19T17:10:29.2000985Z",
+  "code_commit": "9ffcc37368b5265c5e5e7da0812f9d596fe63d2b",
+  "branch": "codex/hunting-permit-economy",
+  "owned_files": 22,
+  "all_owned_blobs_fully_read": true,
+  "all_owned_working_blobs_match_after_git_normalization": true,
+  "source_files_still_match_test_inputs": 321,
+  "foreign_qa_files_preserved_and_unstaged": 3,
+  "automatic_gc_disabled_for_this_commit_only": true,
+  "tests_passed": 194,
+  "explicit_native_postgres_tests": 41,
+  "actual_npc_repair_source_connected": false,
+  "goal_complete": false,
+  "pushed": false,
+  "deployed": false,
+  "blobs": [
+    {
+      "path": "apps/simulation/src/db_projection.rs",
+      "git_blob": "476ad4e372352ba1ec54c855b7919cbc2b9fe10a",
+      "bytes": 33183,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/equipment.rs",
+      "git_blob": "bae8e26b75721eb78e4cf088050a4cb76a15ff5d",
+      "bytes": 114252,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_quests_tests.rs",
+      "git_blob": "b895069fe23a91adbd161ef317272a136405e06b",
+      "bytes": 35495,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_quests_guild_tests.rs",
+      "git_blob": "6548e41ae94e657e8089fa243befb7abc3c1fb18",
+      "bytes": 21411,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/repair_plan_tests.rs",
+      "git_blob": "efaf165dba0dfe8aca3b75d323d5ccc03928b41f",
+      "bytes": 16775,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/session.rs",
+      "git_blob": "961f72c96d6049087faa601449deca60ff16c77a",
+      "bytes": 91139,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/simulation/src/runtime/repair_mutation.rs",
+      "git_blob": "2b87306ab46614cffbaf36f45e797f25b96e5137",
+      "bytes": 15696,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "packages/economy-service/src/lib.rs",
+      "git_blob": "73bd427d3aceee62c91b814d878c830dbf952a03",
+      "bytes": 1378,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "packages/economy-service/src/store.rs",
+      "git_blob": "241e24c9490017c7466862304633f840e844f0e8",
+      "bytes": 48028,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "packages/economy-service/src/types.rs",
+      "git_blob": "506c690a3410a34fc0d913a11143fe78f18cf766",
+      "bytes": 7071,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "packages/economy-service/src/debit.rs",
+      "git_blob": "059f15c3593232dad7c79acf46cb17ef28f6eff9",
+      "bytes": 11502,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "packages/economy-service/tests/postgres_bound_debit_burn.rs",
+      "git_blob": "f5e69c2ed54ade3f288414f9159eb3ca803d622d",
+      "bytes": 25876,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "infra/postgres/migrations/0022_hunting_bound_debit_burn.sql",
+      "git_blob": "b34f29d5f9704fe89560e38c9bd92ac1950605f2",
+      "bytes": 469,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/AGENT-ORCHESTRATION.md",
+      "git_blob": "51449326e17549e207182c32d6e34b13c1d620f3",
+      "bytes": 366787,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/AGENT-TASK-QUEUE.md",
+      "git_blob": "3217ae5906497ed76b57f168eca222ad8043c623",
+      "bytes": 985430,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "git_blob": "d1ce498177d9f41b0595292c81f12ec8ec06de24",
+      "bytes": 1104424,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/BACKEND-1TO1-PROGRESS.md",
+      "git_blob": "d56c5e1b88332a6f46ea904906be6525082d1465",
+      "bytes": 602718,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/CRYSTAL-SERVER-PARITY.md",
+      "git_blob": "0c5d9d91944ab84cb79bd3baee4d4ed4cdcbc6f9",
+      "bytes": 545009,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/HUNTING-PERMIT-ECONOMY.md",
+      "git_blob": "ba6678591442f9ef7b6ebeb8ea7a32d4d93c7e0b",
+      "bytes": 20522,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/HUNTING-SOURCE-INTEGRATION.md",
+      "git_blob": "75e60c27b43faa6f0a09ecfb168823913bb7db01",
+      "bytes": 19255,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/generated/hunting-economy/acceptance-20261020-repair-foundation.json",
+      "git_blob": "dd1d769a9c9cb81702954018702eba94bbfc1296",
+      "bytes": 7716,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/generated/hunting-economy/sources-20261020-repair-foundation.json",
+      "git_blob": "aa8f9f6d5c3b6e2fa2d76bb3cb4c8c2bd0683f63",
+      "bytes": 50679,
+      "full_blob_read": true,
+      "working_blob_after_git_normalization_matches": true
+    }
+  ]
+}
