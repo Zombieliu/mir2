@@ -1,0 +1,364 @@
+{
+  "recorded_at_utc": "2026-10-19T16:37:27.380312+00:00",
+  "code_commit": "333c73e2e26d3d8f9e1cca0aaba7eafc3a6ee89a",
+  "branch": "codex/hunting-permit-economy",
+  "code_commit_owned_files": 58,
+  "all_owned_blobs_readable": true,
+  "working_owned_paths_match_code_commit_after_git_normalization": true,
+  "foreign_qa_files_unchanged_and_unstaged": 3,
+  "automatic_gc_disabled_for_this_commit_only": true,
+  "pushed": false,
+  "deployed": false,
+  "goal_complete": false,
+  "blobs": [
+    {
+      "path": "Cargo.lock",
+      "git_blob": "ef5310376ce095e6253a900862334db014888567",
+      "bytes": 240850,
+      "sha256": "c1d0c0576d14a9acab78510077602ec2f1967767798362ad2865c1dbd8bb5189"
+    },
+    {
+      "path": "apps/gateway/src/bin/zone_host.rs",
+      "git_blob": "c55da19ed96018eef9b9d8c8e8619eda3907c1cb",
+      "bytes": 13370,
+      "sha256": "9de3056c5e33e3fa59591e2a6db7d2b385b966e4c768b485eb19dd3e61472aee"
+    },
+    {
+      "path": "apps/gateway/src/hunting_clock.rs",
+      "git_blob": "564498b4026a63afe7ff31ccba9a6e40a34ea03b",
+      "bytes": 21633,
+      "sha256": "bc9e3fcb857d81440ef12e70c7d2e10f012bc9d0b785a461d77562d8aa6892ae"
+    },
+    {
+      "path": "apps/gateway/src/main.rs",
+      "git_blob": "7357b25f8e41ae59bab12d7c53314aaf538ffc4c",
+      "bytes": 9533,
+      "sha256": "e14fc2a50a2d23b4ac28b976a04bf5e30d4f3faefc82b2bc92b20915ad5d3086"
+    },
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "git_blob": "d19612ce0ff51977b3751e5baa11ce76694a58df",
+      "bytes": 1255750,
+      "sha256": "d462b2fe611782829c5bb827423282b097407e1f988e2cf26b19e09b67c46e79"
+    },
+    {
+      "path": "apps/gateway/src/session.rs",
+      "git_blob": "38dbbab493463695c66dd03add336a1fb17123bc",
+      "bytes": 102709,
+      "sha256": "2e061d8d4f29c9e93b9b2e49ecfa631be3ebf4efbe32b291568a57fbbf077ff7"
+    },
+    {
+      "path": "apps/gateway/src/tcp.rs",
+      "git_blob": "df8c7b68ee9c587641548e12531674cb48abd5ee",
+      "bytes": 30043,
+      "sha256": "0cb2e65ded1e890738c0a94538a561e68b2836cb3172640935eec99cee8c591a"
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "git_blob": "f273d0a6f0f596b9574ae342f63033136ac4d4bd",
+      "bytes": 793378,
+      "sha256": "ae6954c77984df05bfe17b50d0f48415bd66b7c7f6686bf59654e158cd32a89a"
+    },
+    {
+      "path": "apps/gateway/src/zone_rpc.rs",
+      "git_blob": "cd556476182d84d64025a7f61f202207a8d59d5e",
+      "bytes": 335662,
+      "sha256": "920552a21ba34c8f5ec3435b901aa1360bc0f3295f3f9f0a963658f750d9267a"
+    },
+    {
+      "path": "apps/simulation/Cargo.toml",
+      "git_blob": "8bafe44ddde8ab34d49951798c22fcfec849c617",
+      "bytes": 808,
+      "sha256": "a8b875598edc72855a9a2a13525c79d1d3dde2cfbdce30a9b67e9b780fa12191"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "git_blob": "1924030ee26c3b1ee8255b96f24dcc7e4a6136e5",
+      "bytes": 302307,
+      "sha256": "5b43454d95310359292078e0133ae861434005053189e38d0281c3ce1ef6e351"
+    },
+    {
+      "path": "apps/simulation/src/config_hunting_source.rs",
+      "git_blob": "d760e3317ed545a7bcc034d052410169db1ded0c",
+      "bytes": 43667,
+      "sha256": "9040fa1da98a26a5ae60d880ca7f8e0cc7673c270259d46e1545fc56d28d7ff0"
+    },
+    {
+      "path": "apps/simulation/src/config_hunting_source_tests.rs",
+      "git_blob": "6c7d54ffa5e84bd5b254f780a1590a6bddcf77c5",
+      "bytes": 30352,
+      "sha256": "1267436ffc53ee4980a741bfde30d498bae98a959e7f9e408260ee9273376d4d"
+    },
+    {
+      "path": "apps/simulation/src/db_projection.rs",
+      "git_blob": "f33e7237803832bc3ea86aa9541dce8b591ad6ff",
+      "bytes": 33035,
+      "sha256": "a75b022f83a4216bdf65bbae6714c06252a706a9259825f9c3894da576d5e26d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_quests.rs",
+      "git_blob": "3c550a5d33d8d2dc998aedab4125a61a50d06910",
+      "bytes": 19675,
+      "sha256": "3f3e42d56376c89e67d5af0f79beb80604753ff683d279bced138d52077e6ff5"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_quests_tests.rs",
+      "git_blob": "a94506dd6e6328955094c630bdbe4cc917c3a0bd",
+      "bytes": 35435,
+      "sha256": "1dc9fa3df8953e114f65f17db9baa9b24916b68d45c17a4ba347fd3df7128d15"
+    },
+    {
+      "path": "apps/simulation/src/runtime/mod.rs",
+      "git_blob": "205585de5aab2cdb3e39199163a79e290bfcb280",
+      "bytes": 7034,
+      "sha256": "a15aea3150b3aa6f3256af75be4b5131572b9d734cf500ec4241b9774aa58c82"
+    },
+    {
+      "path": "apps/simulation/src/runtime/packets.rs",
+      "git_blob": "681f772d7effd10f714af0903df025a2e6335143",
+      "bytes": 402767,
+      "sha256": "c6859bc95eb6a68e439778949d4a4a819ce24385343793f7f3a1b7208d5d86ae"
+    },
+    {
+      "path": "apps/simulation/src/runtime/quests.rs",
+      "git_blob": "e3d2e417812f7e075bae595806e060bd57b3866e",
+      "bytes": 80012,
+      "sha256": "8d42024ce5c05b8ed19034f2cdeb904884b7ad0a14685e7936507f6231eee54f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/resources.rs",
+      "git_blob": "fd61d0f9520409e5969e6edda5532f3e78f418e6",
+      "bytes": 39793,
+      "sha256": "b3a316a41b3356714529c3db306a5637fcd70d0a47fde669e1842a0aa3583902"
+    },
+    {
+      "path": "apps/simulation/src/runtime/save.rs",
+      "git_blob": "80e2c4b23d58411b0a50b7cb9be627fd3781ee52",
+      "bytes": 165935,
+      "sha256": "586a670f621c99712b95fdbd453663f56bf57409e11197d06221aafc416c5700"
+    },
+    {
+      "path": "apps/simulation/src/runtime/session.rs",
+      "git_blob": "3ff9bd2dc9a70403e7cd00aef075d0dcf91f722c",
+      "bytes": 90199,
+      "sha256": "ad484f0ce6b25d9a5072aee0d83673e746db2536c933d3841b43535373516dd4"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guild_experience.rs",
+      "git_blob": "719189c95b1c4524f2faec74615fd13861f12d4b",
+      "bytes": 13944,
+      "sha256": "8322983978da9b4150b0e77283b99c147d23a355440e613cf1ebc7aaa701eab3"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guilds.rs",
+      "git_blob": "39291583c15ed2f198d65577e6b66319776c4fd4",
+      "bytes": 36539,
+      "sha256": "5ee7c0b7927ff4718339ae5381351d6b70d34903e5d7538d4aa88575697e52b6"
+    },
+    {
+      "path": "apps/simulation/src/world_runtime.rs",
+      "git_blob": "2f08962c39691385e91445f54d325aa5d7b93d7a",
+      "bytes": 62587,
+      "sha256": "f06d1b7f1dfcb7f21e3b0d1fe39b3297655643869b661858b8a9afa7c5d54edf"
+    },
+    {
+      "path": "docs/AGENT-ORCHESTRATION.md",
+      "git_blob": "2487fd4e52f68b7f74fe8ba2aac70baf6d16330b",
+      "bytes": 366212,
+      "sha256": "02725ccd354c660194376f2e2805402686b9c8d635ad776d549357bab9c1e872"
+    },
+    {
+      "path": "docs/AGENT-TASK-QUEUE.md",
+      "git_blob": "a719919c645961c56eb2d7bf2c77fb08c7f1c6a1",
+      "bytes": 984916,
+      "sha256": "d574fff4d508b701e120536be7faf667bb5a1b7fb9815100e8c434abbea64fb7"
+    },
+    {
+      "path": "docs/BACKEND-1TO1-PROGRESS.md",
+      "git_blob": "da54042a01be8e18113a8e5b4c6205ceefd0b026",
+      "bytes": 602152,
+      "sha256": "cc5e358756d6c84b4497dabc5b6caf2f8adcecf392942453b207042102b7bd8e"
+    },
+    {
+      "path": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "git_blob": "8cd874b0cd805e461d1739b9cb635f082f5ed0bc",
+      "bytes": 1103966,
+      "sha256": "10dc0ed08c2c7b7a70da4ebeb9608178acfff729dc2e80214e51ba2b892471aa"
+    },
+    {
+      "path": "docs/CRYSTAL-SERVER-PARITY.md",
+      "git_blob": "0862b12723ab9119b989748f4eb6b477024bd6d5",
+      "bytes": 544573,
+      "sha256": "e1c9eca77112b1daeddd89c5a69a495b100de91267c55ba3503edea5909d8d4c"
+    },
+    {
+      "path": "docs/HUNTING-PERMIT-ECONOMY.md",
+      "git_blob": "62759bed1e2859fad41f08c3eb5b643faa116063",
+      "bytes": 17480,
+      "sha256": "73d9039626b4bf656dae537c80524659b7276c51361d5e68b47a0dd558623764"
+    },
+    {
+      "path": "docs/HUNTING-SOURCE-INTEGRATION.md",
+      "git_blob": "191b2623e8fe7915520e84ec1018990fef7b0a98",
+      "bytes": 16216,
+      "sha256": "b79ba1fb1fbcff83e46726a9c9de3b9a4d26df305c494e79fb0e993c3d9bd8a0"
+    },
+    {
+      "path": "docs/generated/hunting-economy/acceptance-20261020-quest.json",
+      "git_blob": "87dcf547dddc2ed1561fcb77873bb7b2ca73f2bc",
+      "bytes": 17274,
+      "sha256": "1b98a4865396b7f958b09b6c13bc966ada221a9f1696ee3a15ce1121d9d04f4a"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-acceptance.zh-CN.md",
+      "git_blob": "b2d4722bdfe6b798cbd8540d08f5748bccffe74e",
+      "bytes": 5230,
+      "sha256": "f36e098d9426181d1219e317ab099365fbbe3624d6910d59c2e7b671e0667c2f"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-browser-validation.json",
+      "git_blob": "1a088b031222ba943a9f9bca5f41bac756d76d04",
+      "bytes": 3062,
+      "sha256": "90ad8d3db4a244a16bebd5f0f96d0e349dbda358d16046b06c1c5dc1f901bdf1"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-compatibility-history.json",
+      "git_blob": "7b31b394b65e6a7ef078d386ed8607d724fa9309",
+      "bytes": 2466,
+      "sha256": "5dd93bacd569705ca70d0a238bd9d6349dfbb87c5272f329fa0f16ca24b9ead9"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-dashboard-health.jpg",
+      "git_blob": "6d9e695c2c3c55e144fb5ee2072222f0c1dc0935",
+      "bytes": 20743,
+      "sha256": "45ce98e22b63a43a2699cee9b3f8e67e595330e8432cb4f24897cdd28ad497ef"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-dashboard-income-null.jpg",
+      "git_blob": "3d4bd3fcba75b6eda9ea89f25eea60d6d1023223",
+      "bytes": 21526,
+      "sha256": "e3892eecab95c3f935abb723a031aa24055ad61f57ff167c936ac464d3901970"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-dashboard-permit.jpg",
+      "git_blob": "e752f188224e2d8c3c796c3842262fa6b010b895",
+      "bytes": 24859,
+      "sha256": "4815ac50cdb80eb1e61539e7624ab8691090331bac63a3f78e0e23fc9811123c"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-dashboard-players.jpg",
+      "git_blob": "6d51d37fe8b2853ea7cff7a53e071816a8c395bf",
+      "bytes": 24144,
+      "sha256": "04c2560f4fdad25954e57638148617f346c78dfbe17036ecc41d5a40a5c4ff76"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-dashboard-steady-complete.jpg",
+      "git_blob": "325ce8317fd4dd607df0f37631b3701d7ee45959",
+      "bytes": 174998,
+      "sha256": "f51a0bae4945948a3b240eb989d5809c0ade4f6549d0fd3b8385c3795f5de028"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-download.json",
+      "git_blob": "ee4fc11cceca9b9464b931c8979acb8261d56f5f",
+      "bytes": 264,
+      "sha256": "4459861748877fba6696c5e028c463d65357ff42f7c12a95cfe6410ae40a3fbc"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-fixture-applied.json",
+      "git_blob": "bcc754f5f0886f334953714cc5458403cc7aa073",
+      "bytes": 379,
+      "sha256": "cb6d21e5074c3916708360d1929d13c807aeda4d376d775669696554ceaab2bf"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-fixture-expected.json",
+      "git_blob": "8c6b98bc028ed282580ed4e423138575c9250098",
+      "bytes": 4322,
+      "sha256": "4403730cc5d530a872be3d4d397693faa92956ca6daaf03baf1ae3885fcfaaae"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-fixture.sql",
+      "git_blob": "9a3fdcfc5be329a08702bbedd413530c202f67da",
+      "bytes": 789936,
+      "sha256": "2afc73de008174b3a2770a401921bbdd798cb82758ee25b57838212108c36987"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-native-query-validation.json",
+      "git_blob": "626e51b1afa74ab8e7a8fd75d31e1b5b64b76915",
+      "bytes": 760,
+      "sha256": "5a7f50c7facc2b1cda259d740f1eaef086280e6bbbdc3ea87018e95c4dce17ca"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-panel-query-validation.json",
+      "git_blob": "71cb788d016e37d722b56b86e442676aea0c1bbc",
+      "bytes": 284,
+      "sha256": "4b4af63615b9528a464f0f0b4dbbd03e98f69e73b37e4f1dcbe82f132cccf4fc"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-schema-validation.json",
+      "git_blob": "54d470247bd409a4717e5080d4ac19ea574a9819",
+      "bytes": 384,
+      "sha256": "a78f78cd03b5989274e9ca79b0df29d25f60013e0c458fb9938accf6aa89e7d1"
+    },
+    {
+      "path": "docs/generated/hunting-economy/grafana-shutdown.json",
+      "git_blob": "0ff294409c599b81e20bc9ec9d605db08dec5361",
+      "bytes": 122,
+      "sha256": "9b38699f9d9f755e95984be732ae9a4d7f2ef250ed973698d0fb18b7267ea0b5"
+    },
+    {
+      "path": "docs/generated/hunting-economy/native-runtime-constraint.json",
+      "git_blob": "74d06861ee9200885ade34d2c9dd57e5bd79d866",
+      "bytes": 309,
+      "sha256": "6f985f162faa5bb766f60f309b255311e175d6e8997a8d4fda490f4b94af475d"
+    },
+    {
+      "path": "infra/economy-observability/README.zh-CN.md",
+      "git_blob": "5c89d3f148bbc3c46c1eb040b8ffb67c2940cbea",
+      "bytes": 9480,
+      "sha256": "839ca2450a33f56e03001370051a0dc3462d5d31a22dfd468b0a4cd151502570"
+    },
+    {
+      "path": "infra/economy-observability/generate.py",
+      "git_blob": "9292076225c088ccd27544942382d1f7e4bc88d3",
+      "bytes": 18147,
+      "sha256": "0fb58b2d2c38c3d2421caae25cacaf02879c0bc21c9c419fc9bec81c684ae5c5"
+    },
+    {
+      "path": "infra/economy-observability/grafana/provisioning/alerting/economy-rules.yaml",
+      "git_blob": "c5379159a35378ddf72204b1faa70775a4a8082c",
+      "bytes": 20631,
+      "sha256": "68a1ce88c913d86fb4042c56d5f40435f8496ad1aed54d51e7d853c3831a9406"
+    },
+    {
+      "path": "infra/economy-observability/tests/grafana_native_acceptance.py",
+      "git_blob": "f4be565ce665ede6c52d92cf23c5768944c8b164",
+      "bytes": 30199,
+      "sha256": "a607fa091187cb45d787e86fd37c848d5632410c9d85dcdc8a52a899430bfb6f"
+    },
+    {
+      "path": "infra/economy-observability/validation-result.json",
+      "git_blob": "e4fada7d0cadd899bcb032b1b221eeb9ea7dc47c",
+      "bytes": 3652,
+      "sha256": "5de00c1c07640c9bf04d68fa691c80054ae5afa1a24d2a58c8efb6bde126b0e8"
+    },
+    {
+      "path": "infra/economy-observability/verify.py",
+      "git_blob": "13a032d9dda9d85d5c7b4ea3362c876b032bcd55",
+      "bytes": 15702,
+      "sha256": "bc1619065f44b488671bd3f7d760d0073323085c52dd0d1a8792c554e2d4db89"
+    },
+    {
+      "path": "infra/postgres/migrations/0021_hunting_quest_sources.sql",
+      "git_blob": "403e24c2a11fe54e6b3b611a18599ae2edd1aa32",
+      "bytes": 1517,
+      "sha256": "d30fd2e12eb3a39720ffc0f7e386856cf35e5ec4882be96f5d260a99a11e87ea"
+    },
+    {
+      "path": "packages/economy-service/src/store.rs",
+      "git_blob": "335033bebb1fff55606e89797351db65befc5cbd",
+      "bytes": 47977,
+      "sha256": "433768d9b92cf38fc7bbe1218e5e5685ff3b31d302184bed194d862906fefb96"
+    }
+  ],
+  "repository_limit": "Previously recorded unrelated corrupt object 1ae7f886fa87573bdbb59caf0772103929fac94c remains untouched; this validates the owned new commit blobs, not full repository history health."
+}
