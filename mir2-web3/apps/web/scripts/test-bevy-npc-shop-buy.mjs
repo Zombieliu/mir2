@@ -21,6 +21,7 @@ const actualCrystalItem=loadPearlBuyDependency("../lib/crystal-item-source.ts");
 const actualPearlSource=loadPearlBuyDependency("../lib/npc-pearl-buy-source.ts",{"./crystal-item-source":actualCrystalItem});
 const actualPearlBuy=loadPearlBuyDependency("../lib/npc-pearl-buy.ts",{"./npc-pearl-buy-source":actualPearlSource});
 const actualDurableNpc=loadPearlBuyDependency("../lib/npc-purchase-client.ts");
+const actualHuntingRepair=loadPearlBuyDependency("../lib/hunting-repair-client.ts",{"./npc-purchase-client":actualDurableNpc});
 test("Source30 durable receiver and retained facade pass strict no-emit type checking", () => {
   const files = ["../lib/npc-purchase-client.ts", "../lib/npc-purchase-receipt.ts"]
     .map(relative => fileURLToPath(new URL(relative, import.meta.url)));
@@ -535,7 +536,8 @@ const npcPageNames = ["npcGoldBuyCurrent", "readNpcGoldBuyCurrent", "quoteNpcSho
   "npcPurchaseFullEconomyCurrent", "npcPurchaseDisplayFingerprint", "npcPurchaseSnapshotEconomics", "receiveNpcPurchaseGatewayFrame", "applyNpcPurchaseOrdinarySnapshot", "npcPurchaseSessionKey",
   "npcPurchaseShopMatches", "applyNpcPurchaseShopSnapshot", "applyNpcShopCatalogPacket", "dispatchDurableNpcPurchase", "currentNpcShopTab",
   "sendClientCapabilities", "observeNpcPurchaseSocket", "retireNpcPurchaseClient",
-  "closeNpcRepairService", "cancelWorldFishingGesture", "retireWorldFishingGesture", "retainNpcPurchaseSelectors"];
+  "closeNpcRepairService", "currentNpcRepairPaymentMode", "currentHuntingRepairBinding", "observeHuntingRepairActor",
+  "cancelWorldFishingGesture", "retireWorldFishingGesture", "retainNpcPurchaseSelectors"];
 const npcPageDeclarations = new Map();
 const npcPageDispatcherCreations = [];
 const npcResponseClauses = [];
@@ -628,6 +630,7 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
     mailRawRef:{current:null},socialFriendsRef:{current:null},charactersRef:{current:[]},setCharacters:()=>{},
     completeNpcPurchaseSnapshot:actualDurableNpc.completeNpcPurchaseSnapshot,currentHeroModel:()=>null,
     isNpcPurchaseOwnerFrame:actualDurableNpc.isNpcPurchaseOwnerFrame,isNpcPurchaseWorldFrame:actualDurableNpc.isNpcPurchaseWorldFrame,
+    isHuntingRepairOwnerFrame:actualHuntingRepair.isHuntingRepairOwnerFrame,
     parseNpcPurchaseWorldFrame:actualDurableNpc.parseNpcPurchaseWorldFrame,
     parseGatewayMailDates:expiryPackets.parseGatewayMailDates,
     handleGatewayEvent:(event,generation,socket,raw)=>{
@@ -671,6 +674,11 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
     creatureOperationsRef:{current:new (loadPagePure("creature").CreaturePlayerOperations)()},
     npcRepairAuthorityRef:{current:new (loadPagePure("repair").NpcRepairService)()},
     npcRepairDialogBindingRef:{current:null}, setNpcRepairService:()=>{},
+    // This adjacent purchase fixture has an explicit legacy handshake. Execute
+    // the actual mode/actor helpers so new repair observation cannot hide a
+    // missing dependency or bypass the original NPC retirement gates.
+    huntingRepairBindingRef:{current:null},
+    huntingRepairHandshakeRef:{current:Object.freeze({socket,generation:owner.connectionGeneration,mode:"legacy",huntingDeclared:false})},
     worldFishingGestureRegistryRef:{current:new WeakMap()},
     worldFishingActiveGestureRef:{current:null},worldFishingQueuedRef:{current:null},
     NpcGoldBuyDispatcher, projectBevyBagModel: npcPureBag.projectBevyBagModel,

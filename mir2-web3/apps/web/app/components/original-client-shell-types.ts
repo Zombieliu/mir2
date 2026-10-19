@@ -294,6 +294,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   npcRepairView?: NpcRepairView | null;
   onSelectNpcRepair?: (view: NpcRepairView, uniqueId: number) => NpcRepairSelection | null;
   onConfirmNpcRepair?: (selection: NpcRepairSelection) => boolean;
+  onQueryNpcRepair?: () => boolean;
   onToggleNpcRepairHold?: (view: NpcRepairView) => void;
   onBeginNpcRepairDrag?: (view: NpcRepairView, item: ItemActionRef, geometry: NpcRepairDragGeometry) => NpcRepairDrag | null;
   onCancelNpcRepairDrag?: (drag: NpcRepairDrag) => void;

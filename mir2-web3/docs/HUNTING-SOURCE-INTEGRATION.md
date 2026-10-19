@@ -1,6 +1,6 @@
 # 狩猎经济：真实游戏来源接入计划
 
-更新：2026-10-20（北京时间）。无物品一次性金币任务与NPC修理服务端真实来源已接通；第五阶段补同owner回合快照和纯Web client adapter，最终26共137项去重通过（其中10项真实原生PG），见 [第五阶段验收](generated/hunting-economy/acceptance-20261020-repair-sync.json)。第四阶段326项/81PG保留为历史范围。Page/NpcRepairService/Shop/Shell、费用展示、实际snapshot apply、物理客户端/真实网络及其它来源与材料仍待接；不新建网页。本文不代表全workspace、全前端构建、全服覆盖或已经发布；公式与参数以 [实施记录](HUNTING-PERMIT-ECONOMY.md) 和有效政策为准。保持K=0.1、默认禁用和goal active，原个人月额度不作供应承诺；仅原生、不用Docker/WSL/虚拟机，PG连接上限30、串行Cargo jobs2和三个外来QA JSON保持。
+更新：2026-10-20（北京时间）。第六阶段已把既有权威修理carrier接入Page/NpcRepairService/Shop/Shell，显示服务端绑定费用与只读新钱包、应用真实完整snapshot，并保留主动关闭后的原Pending查询入口，不新建网页。最终29专项101/101、原生Next生产构建（严格TS/13页）、独立严格TS零错及编译后钱包本机HTTP10/10通过，见 [第六阶段验收](generated/hunting-economy/acceptance-20261020-repair-ui.json)。HTTP仅使用合成只读upstream，没有真实浏览器、物理游戏WebSocket或玩家保存重登结论。第四/五阶段历史测试不累加，本轮不改Rust/schema；其它来源、材料、全服覆盖与发布仍开放，goal active。公式以 [实施记录](HUNTING-PERMIT-ECONOMY.md) 和有效政策为准，K=0.1、0.72/1.08许可及默认禁用保持，原个人月额度不作供应承诺。后续仅原生，无Docker/WSL/虚拟机、不改虚拟化或停止游戏，PG30、串行Cargo jobs2及三个外来QA JSON保持。
 
 ## 已实现的首条来源
 
@@ -22,9 +22,9 @@
 
 独立`huntingRepairOwner` v1已连通strict wire parser→当前认证账号/会话→owner lease→真实本地InProcess/Shared→Simulation/PG。金额和UID以规范十进制字符串传输，合法武器槽UID `0`保持；Confirm/Query只携带原quote ID。远端/default owner明确unsupported，不扩purchase-v1。配置新经济realm后旧`RepairItem`/`SRepairItem`拒绝，不能暗映射为同UID当前物品的确认；仅未配置新经济realm保留旧行为，政策disabled不会降级为legacy。
 
-第五阶段已在同一真实owner回合及epoch guard内采样修理后的快照；required nullable snapshot帧不从外层Session补读。Shared尾部失败、采样panic或2MiB超限保留已知原回执及null，不重复提交或伪造成功同步；RecordingSink3项实际验证有snapshot先packets后帧、无snapshot帧先行、编码失败零发送。realmInfo静态`npcRepairMode=hunting-v1`不会因政策关闭降为legacy。纯Web client adapter已处理严格解析、固定物理owner/actor/mode、不可变view、原报价Pending只能Query、缺snapshot保持未决和回调重入；Node42/42与模块strict TS通过，但尚未接任何游戏窗口或真实snapshot apply。
+第五阶段已在同一真实owner回合及epoch guard内采样修理后的快照；required nullable snapshot帧不从外层Session补读。Shared尾部失败、采样panic或2MiB超限保留已知原回执及null，不重复提交或伪造成功同步；RecordingSink3项实际验证有snapshot先packets后帧、无snapshot帧先行、编码失败零发送。realmInfo静态`npcRepairMode=hunting-v1`不会因政策关闭降为legacy。第六阶段现已把纯adapter接到实际Page物理message闭包、现有窗口和真实snapshot apply；Pending原Query独立于NPC/目标/钱包，主动Close撤销选择权限但保留只读恢复面板。钱包GET只是观察，不能按余额推断修理授权，不使用旧gold回退。
 
-下一步仅在现有Page/NpcRepairService/Shop/Shell修理窗口接入typed Quote→Confirm→Query、服务端费用/绑定钱包展示与真实snapshot apply，不新建网页，再验证真实浏览器/网络中的确认、拒绝、Pending恢复、断线与保存重登。接线必须将事件闭包绑定原物理socket/adapter，不能把旧socket迟到帧交给新current引用；关窗不得清掉Pending，发送可能发生后只能Query原quote。对于旧会话报价，新连接只查询原结果，不能确认尚未消费的旧报价；新的修理须重新获取当前World报价，未知结果不能触发换ID重试。当前服务端PG和纯adapter验收不替代这些客户端与网络验收。
+下一步在原生隔离环境验证真实浏览器/网络中的确认、拒绝、Pending恢复、断线与保存重登。现有接线已经将事件闭包绑定原物理socket/adapter，拒绝把旧帧交给新current引用；关窗不丢Pending，发送可能发生后只能Query原quote。对于旧会话报价，新连接不能确认尚未消费的旧报价；服务端可信登录恢复原已提交checkpoint后，新的修理须重新获取当前World报价。当前进程内、Page函数、组件和合成HTTP测试不替代这些真实玩家网络验收。
 
 第四阶段5项新增PG使用真实账户Login/StartGame、NPC、报价、wallet/burn及完整存档，包含Shared未决teardown禁止旧日志和真实退役；更广生命周期、见证与全checkpoint边界由Sim21及邻接teardown测试共同限定，详见第四阶段证据。第五阶段Gateway10项PG含6项实际carrier PG，另有同turn快照与Shared尾部/采样失败断言；Gateway62唯一、wire33、Node42合计137项通过，均属限定进程内/模块验收，物理WebSocket尚未验证。
 
@@ -45,7 +45,7 @@
 | 个人地面金币拾取 | `runtime/drops.rs`：`pick_up_ground_drop` | ECS 加旧金币并删除本地地面物 | 必须把不可重复的掉落身份、拾取归属和绑定入账共同提交，不能依赖重启后可重复的临时 object_id |
 | 共享地面金币拾取 | `runtime/drops.rs`：`commit_shared_ground_drop_pickup_transaction_impl`；Gateway 的共享拾取调用链 | 个人状态加旧金币，返回共享拾取回执 | Zone 领取/删除和数据库入账需要持久 claim 协议；不能把“内存事务回执”当作与新钱包共同提交的 PG 事务 |
 | 挖矿材料 | `runtime/mining.rs`：`try_mine`、`give_mine_payout` | 消耗本地矿点石数、损耗镐耐久，通过 inventory helper 直接发矿石 | 需要共享矿点来源身份、持久产出 claim、逐实例经济绑定，以及完整材料传播规则 |
-| NPC 修理 | `runtime/hunting_repair.rs`、`config_hunting_repair.rs`；未配置新经济时保留`equipment.rs::repair_item_impl` | 已实现服务端quote、共同PG修理checkpoint/绑定扣款/真实销毁、零费用及原结果恢复；同turn nullable snapshot与纯adapter已测，hunting-v1政策关闭不降legacy | 现有窗口typed接线、费用展示、实际snapshot apply、物理客户端/真实网络确认及保存重登仍待；不得回退旧金币或复用旧quote确认新物品 |
+| NPC 修理 | `runtime/hunting_repair.rs`、`config_hunting_repair.rs`；未配置新经济时保留`equipment.rs::repair_item_impl` | 已接服务端quote、共同PG修理checkpoint/绑定扣款/真实销毁、零费用及原结果恢复；现有窗口typed接线、费用/只读新钱包、实际snapshot apply与Pending恢复面板已测，hunting-v1政策关闭不降legacy | 真实浏览器/物理游戏WebSocket确认、拒绝、Pending及保存重登仍待；不得回退旧金币或复用旧quote确认新物品 |
 | NPC 出售 | `runtime/npc.rs`：`sell_item_impl` | 删除/减少物品，增加旧金币，放入回购物品表 | 绑定材料出售所得必须保持绑定；回购与重售不得洗成非绑定金币 |
 
 个人World存档仍保留旧金币：`runtime/resources.rs`的`PlayerRuntimeResource.gold`和`config.rs`的`CharacterSaveRecord.gold`；绑定/非绑定钱包由独立PG经济账本保存，不能拿World旧`gold`展示新钱包。`snapshot_active_character_save`仍打包旧金币、任务、背包、装备及NPC等完整存档。

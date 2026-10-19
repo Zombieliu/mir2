@@ -217,7 +217,8 @@ const pageNames=["recordNpcPurchaseAction","sendNpcPurchaseAction","npcGoldBuyCu
   "invalidateNpcGoldBuyGatewayPacket","applyNpcGoldBuyGatewaySnapshot","npcPurchaseSessionKey","applyNpcPurchaseOrdinarySnapshot","socialItemMutationAllowed", "parityItemMutationAllowed",
   "currentSpellsOwner","currentEquipmentOwner","currentSocialReplyOwner","currentSocialReceiveOwner","sameSocialPhysicalOwner","captureParitySnapshot",
   "referenceWindowsBlockGameplay","syncObservePreference","currentQuestWorldIdentity","currentCombatModeOwner",
-  "nextCombatModeRevision","captureCombatModeSnapshot"];
+  "nextCombatModeRevision","captureCombatModeSnapshot",
+  "currentNpcRepairPaymentMode","currentHuntingRepairBinding","observeHuntingRepairActor"];
 const clone=v=>JSON.parse(JSON.stringify(v));
 function pageFixture() {
   const trace=[],sent=[],receipts=[],prepared=[],tabs=[],closed=[],errors=[];let listener=null,throws=false,allow=true,claimed=false,withdrawResult=true,finalUiCurrent=true,beforeLast=null;
@@ -278,6 +279,10 @@ function pageFixture() {
     invalidateBagBeltInventory:()=>{},observeBagBeltInventorySnapshot:()=>{},observeNpcPearlWallet:()=>{},
     readNpcRepairOwner:()=>null,captureNpcRepairDialog:()=>{},npcRepairDialogBindingRef:{current:null},
     npcRepairAuthorityRef:{current:{prepareSnapshot:()=>{},invalidateInventory:()=>{},observeSnapshot:()=>{}}},
+    // Keep this original shop fixture in explicit legacy mode, while running
+    // the real actor observer now called after a complete owner snapshot.
+    huntingRepairBindingRef:{current:null},
+    huntingRepairHandshakeRef:{current:Object.freeze({socket,generation:1,mode:"legacy",huntingDeclared:false})},
     observeBootstrapRef:{current:null},observePreferenceRef:{current:null},
     combatModePhysicalRef:{current:null},combatModeRawRef:{current:null},combatModeRevisionRef:{current:0},
     // Combat capture is inactive in this NPC fixture; inventory staging below

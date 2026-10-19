@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## 狩猎经济第六阶段边界（2026-10-20）
+
+既有修理服务端carrier现已接入Page/NpcRepairService/Shop/Shell，包含服务端费用、只读新钱包、完整snapshot apply和关窗不丢原Pending查询。最终29专项101/101、原生Next生产构建（含严格TS、13页）、独立严格TS及编译后钱包本机HTTP10/10通过，见 [第六阶段验收](generated/hunting-economy/acceptance-20261020-repair-ui.json)。HTTP使用合成只读upstream；尚未完成真实浏览器、物理游戏WebSocket或玩家保存重登，不扩大既有Rust/PG、Crystal1:1、全服覆盖或生产发布结论。K=0.1、0.72/1.08许可及默认关闭保持，goal active，原生无Docker/WSL/虚拟机、不改虚拟化或关闭游戏。以下第五阶段表述为历史范围。
+
 ## 狩猎许可定制经济边界（2026-10-20）
 
 第五阶段已验证修理同owner回合快照载体、required nullable snapshot及已知提交的失败保留语义，另有尚未接窗口的纯Web client adapter。最终26共137项去重通过（Gateway62、wire33、Node42；其中10项真实原生PG），RecordingSink3项属于实际发送helper验收，未使用物理WebSocket；详见 [第五阶段证据](generated/hunting-economy/acceptance-20261020-repair-sync.json)。realmInfo静态hunting-v1不会因政策关闭回退legacy；旧UID包仍不能确认新报价。第四阶段真实来源326项/81PG保留为历史范围。现有Page/NpcRepairService/Shop/Shell、费用展示、实际snapshot apply及物理客户端/网络仍待，不新建网页；没有全前端构建、全workspace、全服覆盖或生产资格结论，本服定制规则不增加Crystal1:1闭合项。默认关闭、goal active、原生无Docker/WSL/虚拟机、PG30、串行Cargo jobs2及三个外来QA JSON保持。

@@ -17,6 +17,11 @@ const allow = { rankingInspectRequests:{}, pearlSource:{"./crystal-item-source":
     "./mail-parcel-gateway-adapter": "parcel" }, social: {}, operations: {},
   rental: { "./social-incoming-replies": "social" }, bag: { "./world-model/item-identity": "identity" },
   socialItems: { "./bevy-bag-model": "bag", "./world-model/item-identity": "identity" }, stage5:{}, tooltip:{"./crystal-item-source":"crystalItem"}, guildBuff:{}, socialActions: {}, extended: {} };
+// Rental uses the shared lossless integer parser; keep its real pure dependency.
+sources.npcPurchase = "../lib/npc-purchase-client.ts";
+allow.npcPurchase = {};
+allow.rental["./npc-purchase-client"] = "npcPurchase";
+allow.extended["./npc-purchase-client"] = "npcPurchase";
 const modules = new Map();
 function loadPure(name) {
   assert(Object.hasOwn(sources, name), "module outside pure allowlist");
@@ -84,6 +89,7 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "clearGatewayReconnectTimer", "setGatewayReconnectStatus", "resetGatewayReconnectState", "createIdleReconnectStatus", "flushGatewayProtocolQueue", "captureSpouseUiSource", "spouseUiSourceCurrent", "mailSpouse", "whisperSpouse", "openMailWindow",
   "submitStorageTransfer", "storeItem", "takeBackItem", "send", "sendRaw",
   "itemCommandRequiresOwner", "retireEquipmentSession", "advanceHeroWindowEpochs", "mailParcelItemsIdle", "endStorageService", "closeNpcRepairService", "retireNpcShopService",
+  "recordNpcPurchaseAction", "currentNpcRepairPaymentMode", "currentHuntingRepairBinding", "retireHuntingRepairActor", "invalidateHuntingRepairWallet", "clearIdentitySessionToken",
   "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner",
   "socialReplyWindowOpen", "captureSocialRequest", "closeSocialReplyWindow", "replySocialRequest", "retireSocialRequests",
   "retireSocialItemConnection", "socialItemMutationAllowed", "parityItemMutationAllowed", "readSocialItemSurface", "socialItemProofCurrent",
@@ -273,6 +279,15 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     language:"en", failGatewayReconnect:()=>{scope.reconnectFailed=true;},
     setScreen:value=>{scope.screenRef.current=value;},questCoreRuntimeRef:{current:null},
     identityLinkBusyRef:{current:false},identityLinkIntentRef:{current:0},identityLinkEvents:[],
+    // No purchase/repair transport is active in this storage/social fixture.
+    // Keep actual Page retirement and rejection helpers, with their real empty
+    // custody state and an explicit physical-owner legacy handshake.
+    npcPurchaseClientRef:{current:null},npcPurchaseUnavailableRef:{current:false},npcPurchaseOptInSocketsRef:{current:new WeakSet()},
+    npcPurchaseEconomicSourceRef:{current:null},npcPurchaseDisplaySourceRef:{current:null},
+    npcPurchaseActionRef:{current:null},npcPurchaseSendActionRef:{current:null},setNpcPurchaseActionStatus:()=>{},
+    huntingRepairBindingRef:{current:null},
+    huntingRepairHandshakeRef:{current:Object.freeze({socket,generation:identity.connectionGeneration,mode:"legacy",huntingDeclared:false})},
+    identitySessionBindingRef:{current:null},setIdentitySessionToken:()=>{},
     setIdentityLinkBusyState:value=>{scope.linkBusy=value;},setIdentityLinkStatus:value=>scope.identityLinkEvents.push(value),
     requestPasskeyIdentityCredential:()=>scope.credentialProvider(),requestWalletIdentityCredential:()=>scope.credentialProvider(),
     linkSuiIdentity:(...args)=>scope.linkProvider(...args),
@@ -318,7 +333,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     } },
     currentEquipmentOwner: token => token != null && Object.keys(owner).every(key => token[key] === liveOwner.current[key]),
     rejectEquipmentCommand: reason => { logs.push(reason); return false; },
-    combatIngressRef: { current: null }, combatRawRef: { current: null },
+    combatIngressRef: { current: null }, combatRawRef: { current: null },combatBaselineSourceRef:{current:null},
     combatMastersRef: { current: new Map() }, combatPointerRef: { current: null },
     spellsIngressRef: { current: null }, spellsRawSnapshotRef: { current: null },
     mailParcelRef: { current: null }, mailIngressRef: { current: null },

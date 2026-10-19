@@ -645,6 +645,8 @@ export type NpcShopWindowProps = {
   repairView?: NpcRepairView | null;
   onSelectRepair?: (view: NpcRepairView, uniqueId: number) => NpcRepairSelection | null;
   onConfirmRepair?: (selection: NpcRepairSelection) => boolean;
+  /** Original pending operation lookup; independent of item/NPC/mutation readiness. */
+  onQueryRepair?: () => boolean;
   repairTargetSelection?: NpcRepairSelection | null;
   onToggleRepairHold?: (view: NpcRepairView) => void;
   onRegisterRepairTarget?: (view: NpcRepairView, node: HTMLElement) => () => void;
@@ -723,7 +725,7 @@ export function NpcShopWindow({
   sellItems,
   repairItems,
   specialRepairItems,
-  repairView, onSelectRepair, onConfirmRepair,
+  repairView, onSelectRepair, onConfirmRepair, onQueryRepair,
   repairTargetSelection, onToggleRepairHold, onRegisterRepairTarget,
   onBuy,
   onBuyBack, onQuoteBuy,
@@ -740,6 +742,7 @@ export function NpcShopWindow({
   const [repairSelection, setRepairSelection] = useState<NpcRepairSelection | null>(null);
   const [buyClickStatus, setBuyClickStatus] = useState<"idle" | "requested" | "inputBlocked" | "selectionUnavailable" | "selectionDisabled" | "freshQuoteRejected" | "freshInputBlocked" | "callbackInvoked" | "callbackUnavailable">("idle");
   const repairTab = tab === "repair" || tab === "special";
+  const boundRepair = repairTab && repairView?.paymentMode === "hunting-v1";
   const repairSelectionCurrent = repairSelection !== null && repairSelection.stamp === repairView?.stamp
     && repairSelection.uniqueId === selectedId;
   useEffect(() => { setRepairSelection(null); setSelectedId(null); }, [repairView?.stamp]);
@@ -799,6 +802,13 @@ export function NpcShopWindow({
       if (blocked()) { if (ordinaryBuy) setBuyClickStatus("freshInputBlocked"); return; }
     }
     if (repairTab) {
+      if (boundRepair) {
+        const current = repairView?.hunting;
+        if (repairSelectionCurrent && repairSelection && current?.phase === "quoted"
+          && current.quote?.uniqueId === String(repairSelection.uniqueId)
+          && current.quote.special === (repairView?.mode === "special")) onConfirmRepair?.(repairSelection);
+        return;
+      }
       if (!selected.disabled && repairSelectionCurrent && repairSelection && selectedRepairQuote?.affordable) {
         onConfirmRepair?.(repairSelection); setRepairSelection(null); setSelectedId(null);
       }
@@ -847,15 +857,29 @@ export function NpcShopWindow({
     const targetSelection = repairTargetSelection?.stamp === repairView?.stamp ? repairTargetSelection : null;
     const target = targetSelection ? repairView?.rows.find(row => row.uniqueId === targetSelection.uniqueId) : null;
     const quote = target?.quote;
+    const hunting = boundRepair ? repairView?.hunting : null;
+    const originalPending = hunting?.phase === "pending" && hunting.quoteId !== null;
+    const boundConfirm = boundRepair && !repairView?.recoveryOnly && hunting?.phase === "quoted" && targetSelection && target
+      && !target.disabled && hunting.quote?.uniqueId === String(targetSelection.uniqueId)
+      && hunting.quote.special === (repairView?.mode === "special");
+    const fee = boundRepair ? hunting?.quote?.costBoundGold ?? hunting?.receipt?.costBoundGold ?? null : null;
+    const feeText = fee === null ? "—" : fee.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     const sprite = (base: number, hover: number, pressed: number) => ({ base: originalAssetPath(`/original-ui/Title/${base}.png`),
       hover: originalAssetPath(`/original-ui/Title/${hover}.png`), pressed: originalAssetPath(`/original-ui/Title/${pressed}.png`) });
     return <section className="npc-shop-window" data-ui-interactive="true" data-shop-tab={tab}
       aria-label={npcName || actionLabel} style={{ position: "absolute", left: 264, top: 224, width: 176, height: 147, zIndex: 30 }}>
       <img src={originalAssetPath("/original-ui/Prguse2/351.png")} alt="" draggable={false}
         style={{ position: "absolute", width: 176, height: 147, pointerEvents: "none" }} />
-      <div style={{ position: "absolute", left: 30, top: 10, width: 140, height: 20, fontSize: 10, color: "#f4ecd6" }}>
-        {actionLabel}: {quote ? quote.displayedTotal.toLocaleString("en-US") : "—"}
+      <div title={boundRepair ? `${t("ui.boundRepairFee", [], "Bound fee")}: ${feeText}` : undefined}
+        style={{ position: "absolute", left: 30, top: 10, width: 140, height: 20, fontSize: 10, color: "#f4ecd6", overflow: "hidden", whiteSpace: "nowrap" }}>
+        {boundRepair ? `${t("ui.boundRepairFee", [], "Bound fee")}: ${feeText}` : `${actionLabel}: ${quote ? quote.displayedTotal.toLocaleString("en-US") : "—"}`}
       </div>
+      {boundRepair ? <div data-npc-repair-wallet="observed" title={repairView?.wallet
+        ? `Bound: ${repairView.wallet.boundGold}; Unbound: ${repairView.wallet.unboundGold}` : undefined}
+        style={{ position: "absolute", left: 14, top: 31, width: 96, fontSize: 9, color: "#f4ecd6", overflow: "hidden", whiteSpace: "nowrap" }}>
+        {t("ui.boundGold", [], "Bound")}: {repairView?.wallet?.boundGold ?? "—"}
+        <br />{t("ui.unboundGold", [], "Unbound")}: {repairView?.wallet?.unboundGold ?? "—"}
+      </div> : null}
       <div ref={repairTargetRef} aria-label={t("ui.npcRepairTarget", [], "Drag a bag item here to repair")}
         title={target?.name || t("ui.npcRepairTarget", [], "Drag a bag item here to repair")}
         style={{ position: "absolute", left: 20, top: 55, width: 75, height: 75, touchAction: "none" }}>
@@ -865,16 +889,28 @@ export function NpcShopWindow({
       <div data-npc-repair-control="hold" style={{ position: "absolute", left: 114, top: 36, width: 48, height: 25 }}>
         <SpriteButton sprite={{ ...sprite(293, 294, 295), active: originalAssetPath("/original-ui/Title/295.png") }} active={repairView?.hold === true}
           label={t("ui.npcRepairHold", [], "Hold") + (repairView?.hold ? " (on)" : " (off)")}
-          disabled={!repairView || blocked() || !onToggleRepairHold}
-          onClick={() => { if (repairView && !blocked()) onToggleRepairHold?.(repairView); }} />
+          disabled={boundRepair || !repairView || blocked() || !onToggleRepairHold}
+          onClick={() => { if (!boundRepair && repairView && !blocked()) onToggleRepairHold?.(repairView); }} />
       </div>
       <div data-npc-repair-control="confirm" style={{ position: "absolute", left: 114, top: 62, width: 48, height: 25 }}>
         <SpriteButton sprite={sprite(290, 291, 292)} label={actionLabel}
-          disabled={!targetSelection || !target || target.disabled || blocked() || !onConfirmRepair}
-          onClick={() => { if (targetSelection && target && !target.disabled && !blocked()) onConfirmRepair?.(targetSelection); }} />
+          disabled={blocked() || !onConfirmRepair || (boundRepair ? !boundConfirm : !targetSelection || !target || target.disabled)}
+          onClick={() => { if (!blocked() && targetSelection && target && !target.disabled
+            && (!boundRepair || boundConfirm)) onConfirmRepair?.(targetSelection); }} />
       </div>
+      {boundRepair && originalPending ? <div data-npc-repair-control="query"
+        style={{ position: "absolute", left: 104, top: 91, width: 39, height: 20 }}>
+        <button type="button" aria-label={t("ui.queryRepair", [], "Query repair")}
+          style={{ width: 39, height: 20, padding: 0, fontSize: 10 }} disabled={!onQueryRepair}
+          onClick={() => { onQueryRepair?.(); }}>{t("ui.query", [], "Query")}</button>
+      </div> : null}
       <div style={{ position: "absolute", left: 14, top: 132, width: 148, color: target?.reason === "gold" ? "#ff8888" : "#f4ecd6", fontSize: 10 }}>
         {!repairView ? t("ui.itemStateSync", [], "Item state is not ready.")
+          : boundRepair && originalPending ? t("ui.repairPending", [], "Pending: query original repair.")
+          : boundRepair && hunting?.reloadRequired ? t("ui.repairReload", [], "Reconnect to reload your character.")
+          : boundRepair && hunting?.phase === "quoting" ? t("ui.repairQuoting", [], "Requesting server quote…")
+          : boundRepair && hunting?.phase === "rejected" ? t("ui.repairRejected", [], "Quote unavailable. Select again.")
+          : boundRepair && hunting?.phase === "committed" ? t("ui.repairCompleted", [], "Repair completed.")
           : target?.reason === "gold" ? t("client.LowGold", [], "Not enough gold.")
           : target ? `${target.input?.currentDura}/${target.input?.maxDura}` : t("ui.npcRepairBagDrag", [], "Drag from your bag.")}
       </div>

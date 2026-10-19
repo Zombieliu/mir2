@@ -1,5 +1,9 @@
 # Agent Orchestration
 
+## 狩猎经济第六阶段接线（2026-10-20）
+
+现有Page、NpcRepairService、Shop与Shell已接typed Quote→Confirm→原Query、服务端绑定费用、只读新钱包和真实完整snapshot apply，没有新增网页。物理socket/冻结actor/realm mode绑定贯穿接收闭包、最终发送与snapshot apply；Pending主动Close后保留只读恢复面板，NPC消失也不能丢失原Query入口。Root最终29专项101/101、原生Next生产构建（含严格TS、13页）、独立严格TS零错误，以及编译后钱包接口本机HTTP10/10通过；后者只接合成只读upstream，不代表游戏资产或真实浏览器操作。证据与旧夹具修复见 [第六阶段验收](generated/hunting-economy/acceptance-20261020-repair-ui.json)。Root负责整合/原生运行/证据/提交，所有限定写集释放后才串行接管；三个外来QA JSON及主工作区依赖保持。仍默认关闭、goal active；真实玩家确认/拒绝/网络保存重登、其它来源、材料与发布资格继续开放。不运行Docker/WSL/虚拟机、不改虚拟化设置或关闭游戏。下方第五阶段叙述保留为当时范围。
+
 ## 狩猎经济协调约束（2026-10-20）
 
 第五阶段已由Root集成修理同owner回合快照载体和纯Web client adapter：已知提交在Shared尾部或快照失败时保留原回执及显式null，Pending只能查询原报价，realmInfo静态绑定hunting-v1以阻止政策关闭时回退。最终26定向验收137项去重通过（Gateway62、wire33、Node42；其中10项实际原生PG），见 [第五阶段证据](generated/hunting-economy/acceptance-20261020-repair-sync.json)。Page、NpcRepairService、Shop、Shell及实际snapshot apply尚未接入；没有UI、物理网络或全前端构建验收。第四阶段真实修理来源及326项/81PG保留为历史范围。Root继续负责串行原生Cargo、2个build jobs、证据与提交，限定写集释放后再分配；三个外来QA JSON保留。下一队列在现有游戏窗口完成typed报价/确认/查询和费用展示，不新建网页；详见 [来源接线计划](HUNTING-SOURCE-INTEGRATION.md)。完整goal active、默认关闭，不运行Docker/WSL/虚拟机，不干扰游戏或修改虚拟化设置。

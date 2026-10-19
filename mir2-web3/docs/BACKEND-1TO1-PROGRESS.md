@@ -1,5 +1,9 @@
 # Backend 1:1 Progress
 
+## 狩猎经济第六阶段Web接线（2026-10-20）
+
+Page/NpcRepairService/Shop/Shell已连接既有权威修理carrier；新钱包只读代理固定服务端上游、Bearer仅headers、16KiB/8秒上限、无cookie/redirect/缓存或写接口。客户端冻结socket/actor/identity，严格原始帧与最终发送门，真实完整snapshot apply后才释放未决，钱包显示不授权资产变更。Pending主动关闭后仍保留仅原Query的恢复面板。最终29专项101/101、原生Next生产构建（严格TS、13页）、独立严格TS零错、编译后钱包本机HTTP10/10通过，见 [第六阶段证据](generated/hunting-economy/acceptance-20261020-repair-ui.json)。本轮未改Rust/数据库schema，既有PG验收不重复累加；合成只读HTTP不代表真实玩家资产、物理游戏WebSocket、保存重登或浏览器视觉验收。默认关闭、goal active，本服定制经济不增加Crystal进度；其它来源/材料/全服指标与发布仍待。坚持原生、不用Docker/WSL/虚拟机、不关闭游戏或改虚拟化；下方阶段五记录保留当时范围。
+
 ## 狩猎许可经济来源接线（2026-10-20）
 
 第五阶段已补修理同owner回合快照与required nullable snapshot帧：Shared尾部、采样panic或2MiB超限保留已知回执及null，不在外层重读旧Session。实际RecordingSink3项验证packets→有snapshot帧、无snapshot帧先行及编码失败零发送；realmInfo静态hunting-v1阻止政策关闭时legacy回退。纯Web client adapter已实现严格解析、原报价Pending/Query、不可变view和回调重入保护，尚未接Page/NpcRepairService/Shop/Shell或实际snapshot apply。最终26：Gateway66次执行/62唯一（25 hunting纯+10PG、邻接5/3/21/2），wire33、Node42，共137项去重通过，其中10项真实原生PG；模块strict TS/语法、Gateway库/主/ZoneHost及限定新增文件格式检查通过，见 [第五阶段证据](generated/hunting-economy/acceptance-20261020-repair-sync.json)。不是全workspace、全前端构建、UI或物理WebSocket验收。第四阶段真实来源的326项/81PG及失败历史保留在 [实施记录](HUNTING-PERMIT-ECONOMY.md)；下一步只接现有游戏窗口和物理玩家流程。默认关闭、goal active，原生无Docker/WSL/虚拟机、PG30、串行Cargo jobs2及三个外来QA JSON保持，不具备全服覆盖或生产发布资格。

@@ -12,8 +12,9 @@
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import ts from "typescript";
+const ts = createRequire(import.meta.url)(process.env.MIR2_TEST_TYPESCRIPT_PATH ?? "typescript");
 
 function loadTypeScriptModule(url, requireMap = {}) {
   const source = readFileSync(url, "utf8");
@@ -2792,7 +2793,9 @@ const parityPageNames = ["recordNpcPurchaseAction", "currentSpellsOwner", "curre
   "currentQuestWorldIdentity", "currentCombatModeOwner", "sameCombatModeOwner", "nextCombatModeRevision",
   "captureCombatModeSnapshot", "captureCombatModeReceipt", "readCombatModeSource", "retireWorldFishingGesture", "cancelWorldFishingGesture",
   "currentGuildBuffSource", "captureParityPacket", "captureParitySnapshot", "ownedItemTooltipRequest", "readPlayerItemTooltip", "readHeroItemTooltip",
-  "readCashGameShopItemTooltip", "guildStorageTooltipItem", "readGuildStorageItemTooltip", "readSocialItemSurface", "readNpcRepairOwner", "captureNpcRepairDialog", "currentNpcRepairDialogSource", "readNpcRepairView", "selectNpcRepair", "toggleNpcRepairHold", "beginNpcRepairDrag", "cancelNpcRepairDrag", "dropNpcRepairDrag", "confirmNpcRepair"];
+  "readCashGameShopItemTooltip", "guildStorageTooltipItem", "readGuildStorageItemTooltip", "readSocialItemSurface",
+  "currentNpcRepairPaymentMode", "currentHuntingRepairBinding", "npcRepairCanMutate", "quoteHuntingRepairSelection",
+  "readNpcRepairOwner", "captureNpcRepairDialog", "currentNpcRepairDialogSource", "readNpcRepairView", "selectNpcRepair", "toggleNpcRepairHold", "beginNpcRepairDrag", "cancelNpcRepairDrag", "dropNpcRepairDrag", "confirmNpcRepair"];
 const parityDeclarations = new Map();
 const ownedTooltipCaptures = new Map(); let ownedTooltipMemo, ownedTooltipCommit;
 let paritySendRawNode, parityReceiptNode, parityReceiveGuard;
@@ -2902,6 +2905,8 @@ function parityPageFixture(owner, world = {}) {
     socialReplyWindowsRef:ref({group:false,bonds:false}), socialRosterWindowsRef:ref({friends:false}), rankingWindowRef:ref(false),
     marketOpenRef:ref(false), conquestOpenRef:ref(false), buffsOpenRef:ref(false), mailUiOpenRef:ref(false), worldMapOpenRef:ref(false),
     chatSettingsOpenRef:ref(false), tutorialOpenRef:ref(false), npcShopServiceRef:ref(null), npcRepairServiceRef:ref(null),
+    huntingRepairHandshakeRef:ref(Object.freeze({ socket, generation:owner.connectionGeneration,
+      mode:"legacy", huntingDeclared:false })), huntingRepairBindingRef:ref(null),
     storageServiceActiveRef:ref(false), storageServiceRevisionRef:ref(0), npcShopUiIngressRef:ref(null), npcRepairAuthorityRef:ref({invalidateInventory:()=>{}}), storageUiIngressRef:ref(null), combatIngressRef:ref(null), spellsIngressRef:ref(null),
     skillBarPointerHeldRef:ref(false), heroUiProofLeasesRef:ref(new WeakMap()), heroProofHighWaterRef:ref(new WeakMap()),
     heroSharedUiIngressRef:ref(null),heroSharedProofsRef:ref(new WeakMap()),heroProofRendererTokensRef:ref(new WeakMap()),
@@ -4702,8 +4707,11 @@ check("NPC repair Page consumer captures NPC owner and rate, retires invalid sou
   assert.ok(preflight&&diagnostic&&preflight.pos<diagnostic.pos,"repair snapshot preflight must run before gateway diagnostics");
   const viewText=fn("readNpcRepairView").getText(ast);
   assert.match(viewText,/core\?\.readNpcRepairQuote\(input\)/);
-  assert.match(viewText,/mailMutationAllowed\(wire, mailParcelRef\.current\?\.snapshot \?\? null,/);
-  assert.match(viewText,/mailParcelRef\.current\?\.state\?\.blockedUniqueIds \?\? \[\]/);
+  assert.match(viewText,/\.view\(owner, input => core\?\.readNpcRepairQuote\(input\) \?\? null, npcRepairCanMutate\)/);
+  assert.match(viewText,/\.viewHunting\(owner, binding\.client\.view\(\), npcRepairCanMutate,/);
+  const mutationText=fn("npcRepairCanMutate").getText(ast);
+  assert.match(mutationText,/mailMutationAllowed\(wire, mailParcelRef\.current\?\.snapshot \?\? null,/);
+  assert.match(mutationText,/mailParcelRef\.current\?\.state\?\.blockedUniqueIds \?\? \[\]/);
   const snapshot=fn("applyNpcGoldBuyGatewaySnapshot").getText(ast);
   assert.match(snapshot,/npcRepairAuthorityRef\.current\.observeSnapshot\(owner, snapshot\)/);
   assert.match(snapshot,/captureNpcRepairDialog\(snapshot, owner\)/);
@@ -4741,11 +4749,32 @@ check("NPC repair Page consumer captures NPC owner and rate, retires invalid sou
   findRepairControl(repairBranch);assert.ok(confirmControl,"reachable physical repair confirm control");
   const confirmButtons=confirmControl.children.filter(node=>ts.isJsxSelfClosingElement(node)&&node.tagName.getText(shopAst)==="SpriteButton");assert.equal(confirmButtons.length,1);
   const confirmAttributes=new Map(confirmButtons[0].attributes.properties.filter(ts.isJsxAttribute).map(attr=>[attr.name.getText(shopAst),attr.initializer]));
-  assert.equal(confirmAttributes.get("disabled").expression.getText(shopAst),"!targetSelection || !target || target.disabled || blocked() || !onConfirmRepair");
+  const disabledText=confirmAttributes.get("disabled").expression.getText(shopAst);
+  assert.equal(disabledText,"blocked() || !onConfirmRepair || (boundRepair ? !boundConfirm : !targetSelection || !target || target.disabled)");
   const confirmClick=confirmAttributes.get("onClick").expression;assert.ok(ts.isArrowFunction(confirmClick)&&ts.isBlock(confirmClick.body));
   assert.equal(confirmClick.body.statements.length,1);const confirmIf=confirmClick.body.statements[0];assert.ok(ts.isIfStatement(confirmIf));
-  assert.equal(confirmIf.expression.getText(shopAst),"targetSelection && target && !target.disabled && !blocked()");
+  assert.equal(confirmIf.expression.getText(shopAst).replace(/\s+/g," "),"!blocked() && targetSelection && target && !target.disabled && (!boundRepair || boundConfirm)");
   assert.equal(confirmIf.thenStatement.getText(shopAst),"onConfirmRepair?.(targetSelection);");
+  // The reachable control now shares a bound-repair quote gate. Execute its
+  // actual expressions for the complete legacy truth table, retaining every
+  // former selected-item, disabled-row, blocked-input and callback condition.
+  const confirmGate=new Function("targetSelection","target","blockedValue","hasCallback","boundRepair","repairView","hunting",
+    "const blocked=()=>blockedValue; let calls=0; const onConfirmRepair=hasCallback?()=>{calls++;}:undefined;"
+    + "const boundConfirm="+repairBindings.get("boundConfirm").getText(shopAst)+"; const disabled="+disabledText+";"
+    + confirmClick.body.getText(shopAst)+";return {disabled:Boolean(disabled),calls};");
+  for(const selected of [false,true])for(const present of [false,true])for(const rowDisabled of [false,true])
+    for(const blocked of [false,true])for(const callback of [false,true]){
+      const result=confirmGate(selected?{uniqueId:900}:null,present?{disabled:rowDisabled}:null,blocked,callback,false,null,null);
+      const disabled=!selected||!present||rowDisabled||blocked||!callback;
+      assert.equal(result.disabled,disabled,"legacy confirm preserves every original disabled condition");
+      assert.equal(result.calls,disabled?0:1,"legacy click preserves every original entry condition");
+    }
+  for(const [view,hunting] of [[{mode:"repair",recoveryOnly:true},{phase:"quoted",quote:{uniqueId:"900",special:false}}],
+    [{mode:"repair",recoveryOnly:false},{phase:"pending",quote:{uniqueId:"900",special:false}}],
+    [{mode:"repair",recoveryOnly:false},{phase:"quoted",quote:{uniqueId:"901",special:false}}]]){
+      const result=confirmGate({uniqueId:900},{disabled:false},false,true,true,view,hunting);
+      assert.equal(result.disabled,true);assert.equal(result.calls,0);
+    }
   assert.match(shopText,/const blocked = \(\) => inputBlocked \|\| getInputBlocked\?\.\(\) === true/);
   assert.match(shopText,/if \(repairTab && repairView && node\) return onRegisterRepairTarget\?\.\(repairView, node\)/);
   assert.match(shopText,/\[repairTab, repairView\?\.stamp, onRegisterRepairTarget\]/);
@@ -7628,10 +7657,10 @@ check("Hero original Page message captures first clock before synchronous ingres
   const compiled=ts.transpileModule('const originalHandler='+handlers[0].getText(parityPageAst)+';',
     {compilerOptions:{module:ts.ModuleKind.None,target:ts.ScriptTarget.ES2022}}).outputText;
   const socket={},physical={socket,connectionGeneration:1,sessionGeneration:2},calls=[];let now=10.375;
-  const scope={socket,socketRef:{current:socket},connectionGeneration:1,equipmentConnectionGenerationRef:{current:1},
+  const scope={socket,socketRef:{current:socket},connectionGeneration:1,equipmentConnectionGenerationRef:{current:1},huntingRepairBindingRef:{current:null},
     performance:{now(){calls.push("clock");return now;}},syncHeroRawIngress(){calls.push("sync");now=999;},
     currentHeroRawPhysical:()=>physical,heroRawIngressRef:{current:{capture(raw,p,at){calls.push({raw,p,at});return {raw,at};},reject(){throw Error("unexpected reject");}}},
-    receiveNpcPurchaseGatewayFrame(event,generation,s,d){calls.push({received:d});},appendLog(){throw Error("unexpected Page log");},t:()=>"log"};
+    receiveNpcPurchaseGatewayFrame(event,generation,s,d,repairBinding){assert.equal(repairBinding,null);calls.push({received:d});},appendLog(){throw Error("unexpected Page log");},t:()=>"log"};
   const handler=new Function('scope','with(scope){'+compiled+'return originalHandler;}')(scope);handler({data:heroWideOriginal});
   assert.equal(calls[0],"clock");assert.equal(calls[1],"sync");assert.equal(calls[2].at,10.375);assert.equal(calls[3].received.at,10.375);
   scope.socketRef.current={};const before=calls.length;handler({data:heroWideOriginal});assert.equal(calls.length,before);

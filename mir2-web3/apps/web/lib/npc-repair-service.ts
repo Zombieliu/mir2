@@ -1,5 +1,6 @@
 import { projectEquipmentGatewaySnapshot } from "./equipment-gateway-adapter";
 import type { NpcRepairQuote, NpcRepairQuoteInput } from "./client-presentation-runtime";
+import type { HuntingRepairView } from "./hunting-repair-client";
 
 export type NpcRepairOwner = Readonly<{ socket: object; connectionGeneration: number; sessionGeneration: number;
   ownerRevision: number; playerObjectId: number; sceneRevision: number; mapFileName: string }>;
@@ -9,7 +10,9 @@ export type NpcRepairBagRow = Readonly<{ uniqueId: number | null; slot: number; 
 export type NpcRepairRow = NpcRepairBagRow & Readonly<{ quote: NpcRepairQuote | null; disabled: boolean;
   reason: "unknown" | "gold" | "busy" | "locked" | null }>;
 export type NpcRepairView = Readonly<{ stamp: object; source: object; mode: NpcRepairMode; name: string;
-  gold: number; hold: boolean; rows: readonly NpcRepairRow[] }>;
+  paymentMode: "legacy" | "hunting-v1"; gold: number | null; hold: boolean; rows: readonly NpcRepairRow[];
+  hunting: HuntingRepairView | null; wallet: NpcRepairWallet | null; recoveryOnly: boolean }>;
+export type NpcRepairWallet = Readonly<{ boundGold: string; unboundGold: string }>;
 export type NpcRepairSelection = Readonly<{ stamp: object; uniqueId: number }>;
 export type NpcRepairDragGeometry = Readonly<{ pointerId: number; pointerType: "mouse" | "touch"; page: "bag1" | "bag2";
   stage: object; target: object; item: object; stageRect: readonly number[]; targetRect: readonly number[]; itemRect: readonly number[];
@@ -51,8 +54,11 @@ function quoteValid(q: NpcRepairQuote | null): q is NpcRepairQuote {
 
 /** Full raw placement authority only; incomplete concrete pricing stays unknown. */
 export function projectNpcRepairBag(raw: unknown): readonly NpcRepairBagRow[] | null {
+  return projectRepairBag(raw, false);
+}
+function projectRepairBag(raw: unknown, hunting: boolean): readonly NpcRepairBagRow[] | null {
   const layout = projectEquipmentGatewaySnapshot(raw);
-  if (!layout || !record(raw) || !uint(raw.gold, 0xffffffff)) return null;
+  if (!layout || !record(raw) || !hunting && !uint(raw.gold, 0xffffffff)) return null;
   const ids = new Set<number>(), cells = new Set<string>();
   for (const p of layout.placements) {
     const key = `${p.container}:${p.slot}`;
@@ -91,7 +97,8 @@ function barrier(socket: object, create = true): Barrier | null {
     Object.defineProperty(socket, key, { value, configurable: false, writable: false }); return value;
   } catch { return null; }
 }
-type Active = Readonly<{ owner: NpcRepairOwner; mode: NpcRepairMode; rate: number; source: object; name: string; epoch: number }>;
+type Active = Readonly<{ owner: NpcRepairOwner; mode: NpcRepairMode; paymentMode: "legacy" | "hunting-v1";
+  rate: number; source: object; name: string; epoch: number }>;
 type Capture = Readonly<{ active: Active; key: string; view: NpcRepairView }>;
 function geometryValid(g: NpcRepairDragGeometry): boolean {
   return record(g) && uint(g.pointerId) && (g.pointerType === "mouse" || g.pointerType === "touch") && (g.page === "bag1" || g.page === "bag2")
@@ -111,20 +118,20 @@ function freezeData(value: unknown): void {
 }
 type RawSource = Readonly<{ snapshot: Record<string, unknown>; key: string }>;
 /** Only the carried source graph participates; movement/chat/world clocks do not. */
-function snapshotSource(owner: NpcRepairOwner | null, raw: unknown): RawSource | null {
+function snapshotSource(owner: NpcRepairOwner | null, raw: unknown, hunting = false): RawSource | null {
   if (!owner || !ownerValid(owner) || !record(raw) || raw.playerObjectId !== owner.playerObjectId || raw.mapFileName !== owner.mapFileName) return null;
   try {
     const snapshot = JSON.parse(JSON.stringify({ playerObjectId: raw.playerObjectId, mapFileName: raw.mapFileName,
       gold: raw.gold, inventoryCapacity: raw.inventoryCapacity, inventoryItems: raw.inventoryItems,
       beltItems: raw.beltItems, equipmentItems: raw.equipmentItems, storageItems: raw.storageItems, storageSize: raw.storageSize })) as Record<string, unknown>;
-    const layout = projectEquipmentGatewaySnapshot(snapshot), bag = projectNpcRepairBag(snapshot);
+    const layout = projectEquipmentGatewaySnapshot(snapshot), bag = projectRepairBag(snapshot, hunting);
     if (!layout || !bag) return null;
     const bagSources = (snapshot.inventoryItems as Record<string, unknown>[]).flatMap((item, index) => layout.placements[index].container !== 0 ? [] : [{
       uniqueId: layout.placements[index].uniqueId, slot: layout.placements[index].slot,
       name: item.name, icon: item.icon, quantity: item.quantity, currentDura: item.durabilityCurrent, maxDura: item.durabilityMax,
       tooltipSource: item.tooltipSource,
     }]);
-    const key = JSON.stringify({ gold: snapshot.gold, layout, bagSources });
+    const key = JSON.stringify({ ...(hunting ? {} : { gold: snapshot.gold }), layout, bagSources });
     freezeData(snapshot); return { snapshot, key };
   } catch { return null; }
 }
@@ -140,11 +147,19 @@ export class NpcRepairService {
   private proofs = new WeakMap<NpcRepairProof, { capture: Capture; used: boolean }>();
   private drags = new WeakMap<NpcRepairDrag, { capture: Capture; geometry: NpcRepairDragGeometry; used: boolean }>();
   private holdMode: NpcRepairMode | null = null;
+  private recoverySource = Object.freeze({});
   open(owner: NpcRepairOwner, mode: NpcRepairMode, rate: unknown, source: object, name = ""): boolean {
     this.close();
     if (!ownerValid(owner) || (mode !== "repair" && mode !== "special") || typeof rate !== "number" || !Number.isFinite(rate)
       || rate < 0 || !Number.isFinite(Math.fround(rate)) || !source || !barrier(owner.socket) || this.epoch >= Number.MAX_SAFE_INTEGER) return false;
-    this.active = Object.freeze({ owner: Object.freeze({ ...owner }), mode, rate, source, name, epoch: this.epoch }); return true;
+    this.active = Object.freeze({ owner: Object.freeze({ ...owner }), mode, paymentMode: "legacy", rate, source, name, epoch: this.epoch }); return true;
+  }
+  /** Bound fees come exclusively from the owner protocol; no legacy rate is accepted. */
+  openHunting(owner: NpcRepairOwner, mode: NpcRepairMode, source: object, name = ""): boolean {
+    this.close();
+    if (!ownerValid(owner) || (mode !== "repair" && mode !== "special") || !source || this.epoch >= Number.MAX_SAFE_INTEGER) return false;
+    this.active = Object.freeze({ owner: Object.freeze({ ...owner }), mode, paymentMode: "hunting-v1", rate: 0, source, name, epoch: this.epoch });
+    return true;
   }
   close(): void { this.active = null; this.currentCapture = null; this.holdMode = null; if (this.epoch < Number.MAX_SAFE_INTEGER) ++this.epoch; }
   invalidateInventory(): void {
@@ -153,12 +168,12 @@ export class NpcRepairService {
   }
   /** Changed/unknown input retires intents before any receive callbacks run. */
   prepareSnapshot(owner: NpcRepairOwner | null, raw: unknown): void {
-    const source = snapshotSource(owner, raw);
+    const source = snapshotSource(owner, raw, this.active?.paymentMode === "hunting-v1");
     if (!source || !owner || this.active && !sameOwner(this.active.owner, owner)) this.holdMode = null;
     if (!source || !owner || !this.raw || !sameOwner(this.raw.owner, owner) || this.raw.key !== source.key) this.invalidateInventory();
   }
   observeSnapshot(owner: NpcRepairOwner | null, raw: unknown): boolean {
-    const source = snapshotSource(owner, raw);
+    const source = snapshotSource(owner, raw, this.active?.paymentMode === "hunting-v1");
     if (owner && this.active && !sameOwner(this.active.owner, owner)) this.holdMode = null;
     if (!source || !owner || this.inventoryEpoch >= Number.MAX_SAFE_INTEGER) { this.holdMode = null; this.invalidateInventory(); return false; }
     if (this.raw && sameOwner(this.raw.owner, owner) && this.raw.key === source.key) return true;
@@ -170,6 +185,7 @@ export class NpcRepairService {
   view(owner: NpcRepairOwner | null, quoteReader: QuoteReader, canMutate: (uniqueId: number) => boolean): NpcRepairView | null {
     const active = this.active, raw = this.raw;
     if (!active || !owner || !sameOwner(active.owner, owner)) { this.close(); return null; }
+    if (active.paymentMode !== "legacy") return null;
     const pending = barrier(owner.socket);
     if (!pending || !raw || !sameOwner(raw.owner, owner)) return null;
     const bag = projectNpcRepairBag(raw.snapshot); if (!bag) return null;
@@ -189,8 +205,49 @@ export class NpcRepairService {
     const key = JSON.stringify({ epoch: active.epoch, inventoryEpoch: this.inventoryEpoch, rate: active.rate, gold, bag, rows });
     const stamp = this.currentCapture?.active === active && this.currentCapture.key === key ? this.currentCapture.view.stamp : Object.freeze({});
     const view: NpcRepairView = Object.freeze({ stamp, source: active.source, mode: active.mode, name: active.name, gold,
-      hold: this.holdMode === active.mode, rows: Object.freeze(rows) });
+      paymentMode: "legacy", hold: this.holdMode === active.mode, rows: Object.freeze(rows), hunting: null, wallet: null, recoveryOnly: false });
     const capture = { active, key, view }; this.views.set(view, capture); this.currentCapture = capture; return view;
+  }
+  /** Transport/receipt/wallet updates never change the carried-item proof stamp. */
+  viewHunting(owner: NpcRepairOwner | null, state: HuntingRepairView, canMutate: (uniqueId: number) => boolean,
+    wallet: NpcRepairWallet | null = null): NpcRepairView | null {
+    if (!owner || !ownerValid(owner)) return null;
+    const money = (v: string) => typeof v === "string" && /^(0|[1-9][0-9]*)$/.test(v) && v.length <= 20 && BigInt(v) <= 18446744073709551615n;
+    const observedWallet = wallet && money(wallet.boundGold) && money(wallet.unboundGold)
+      ? Object.freeze({ boundGold: wallet.boundGold, unboundGold: wallet.unboundGold }) : null;
+    const hunting = Object.freeze({ ...state, quote: state.quote && Object.freeze({ ...state.quote }), receipt: state.receipt && Object.freeze({ ...state.receipt }) });
+    const active = this.active, raw = this.raw;
+    const recovery = () => state.phase === "pending" && state.quoteId !== null ? Object.freeze({
+      stamp: this.recoverySource, source: this.recoverySource, mode: state.quote?.special ? "special" as const : "repair" as const,
+      name: "", paymentMode: "hunting-v1" as const, gold: null, hold: false, rows: Object.freeze([]), hunting,
+      wallet: observedWallet, recoveryOnly: true }) : null;
+    if (active?.paymentMode === "hunting-v1" && !sameOwner(active.owner, owner)) { this.close(); return recovery(); }
+    if (!active || active.paymentMode !== "hunting-v1" || !raw || !sameOwner(raw.owner, owner)) return recovery();
+    const bag = projectRepairBag(raw.snapshot, true); if (!bag) return recovery();
+    const rows = bag.map(row => {
+      let allowed = false; try { if (row.uniqueId !== null) allowed = canMutate(row.uniqueId); } catch { /* closed */ }
+      const reason: NpcRepairRow["reason"] = !row.input ? "unknown" : !allowed ? "locked" : null;
+      return Object.freeze({ ...row, quote: null, reason, disabled: reason !== null });
+    });
+    if (this.active !== active || this.raw !== raw) return null;
+    const key = JSON.stringify({ epoch: active.epoch, inventoryEpoch: this.inventoryEpoch, bag });
+    const stamp = this.currentCapture?.active === active && this.currentCapture.key === key ? this.currentCapture.view.stamp : Object.freeze({});
+    const view: NpcRepairView = Object.freeze({ stamp, source: active.source, mode: active.mode, name: active.name,
+      paymentMode: "hunting-v1", gold: null, hold: false, rows: Object.freeze(rows), hunting, wallet: observedWallet, recoveryOnly: false });
+    const capture = { active, key, view }; this.views.set(view, capture); this.currentCapture = capture; return view;
+  }
+  /** Non-consuming full-source proof used by the owner adapter on Quote/Confirm. */
+  huntingIntent(selection: NpcRepairSelection, current: NpcRepairView | null): Readonly<{ uniqueId: string; special: boolean }> | null {
+    const capture = this.selections.get(selection);
+    if (!capture || capture.active.paymentMode !== "hunting-v1" || !this.current(capture, current)
+      || !uint(selection.uniqueId)
+      || !current!.rows.some(row => row.uniqueId === selection.uniqueId && row.input !== null && !row.disabled)) return null;
+    return Object.freeze({ uniqueId: String(selection.uniqueId), special: capture.active.mode === "special" });
+  }
+  private selectable(view: NpcRepairView, row: NpcRepairRow): boolean {
+    return row.input !== null && (view.paymentMode === "hunting-v1"
+      ? view.hunting?.phase !== "pending" && !view.recoveryOnly && row.reason === null
+      : row.quote !== null && (row.reason === null || row.reason === "gold"));
   }
   private current(capture: Capture, view: NpcRepairView | null): boolean {
     const live = view && this.views.get(view);
@@ -199,13 +256,12 @@ export class NpcRepairService {
   }
   select(view: NpcRepairView, uniqueId: number, current: NpcRepairView | null): NpcRepairSelection | null {
     const capture = this.views.get(view);
-    if (!capture || !this.current(capture, current) || !view.rows.some(row => row.uniqueId === uniqueId && row.input !== null
-      && row.quote !== null && (row.reason === null || row.reason === "gold"))) return null;
+    if (!capture || !this.current(capture, current) || !current!.rows.some(row => row.uniqueId === uniqueId && this.selectable(current!, row))) return null;
     const selection = Object.freeze({ stamp: view.stamp, uniqueId }); this.selections.set(selection, capture); return selection;
   }
   toggleHold(view: NpcRepairView, current: NpcRepairView | null): boolean | null {
     const capture = this.views.get(view);
-    if (!capture || !this.current(capture, current)) return null;
+    if (!capture || capture.active.paymentMode !== "legacy" || !this.current(capture, current)) return null;
     this.holdMode = this.holdMode === capture.active.mode ? null : capture.active.mode;
     return this.holdMode !== null;
   }
@@ -214,8 +270,7 @@ export class NpcRepairService {
     const capture = this.views.get(view);
     if (!capture || !this.current(capture, current) || !geometryValid(geometry) || !uint(uniqueId) || !uint(slot, 79)
       || Math.floor(slot / 40) !== (geometry.page === "bag2" ? 1 : 0)
-      || !view.rows.some(row => row.uniqueId === uniqueId && row.slot === slot && row.input !== null && row.quote !== null
-        && (row.reason === null || row.reason === "gold"))) return null;
+      || !current!.rows.some(row => row.uniqueId === uniqueId && row.slot === slot && this.selectable(current!, row))) return null;
     const drag = Object.freeze({ stamp: view.stamp, uniqueId, slot });
     const detached = Object.freeze({ ...geometry, stageRect: Object.freeze([...geometry.stageRect]),
       targetRect: Object.freeze([...geometry.targetRect]), itemRect: Object.freeze([...geometry.itemRect]) });
@@ -230,14 +285,15 @@ export class NpcRepairService {
     const r = lease.geometry.targetRect;
     if (!this.current(lease.capture, current) || !sameGeometry(lease.geometry, geometry) || !Number.isFinite(x) || !Number.isFinite(y)
       || x < r[0] || y < r[1] || x >= r[0] + r[2] || y >= r[1] + r[3]
-      || !current!.rows.some(row => row.uniqueId === drag.uniqueId && row.slot === drag.slot && row.input !== null && row.quote !== null
-        && (row.reason === null || row.reason === "gold"))) return null;
+      || !current!.rows.some(row => row.uniqueId === drag.uniqueId && row.slot === drag.slot && this.selectable(current!, row))) return null;
     const selection = Object.freeze({ stamp: current!.stamp, uniqueId: drag.uniqueId });
     this.selections.set(selection, lease.capture); return selection;
   }
   reserve(selection: NpcRepairSelection, current: NpcRepairView | null): NpcRepairProof | null {
-    const capture = this.selections.get(selection); this.selections.delete(selection);
-    if (!capture || !this.current(capture, current) || !current!.rows.some(row => row.uniqueId === selection.uniqueId && !row.disabled)) return null;
+    const capture = this.selections.get(selection);
+    if (capture?.active.paymentMode === "hunting-v1") return null;
+    this.selections.delete(selection);
+    if (!capture || capture.active.paymentMode !== "legacy" || !this.current(capture, current) || !current!.rows.some(row => row.uniqueId === selection.uniqueId && !row.disabled)) return null;
     const command = Object.freeze({ type: capture.active.mode === "special" ? "specialRepairItem" as const : "repairItem" as const, uniqueId: selection.uniqueId });
     const proof = Object.freeze({ command }); this.proofs.set(proof, { capture, used: false }); return proof;
   }
@@ -245,7 +301,7 @@ export class NpcRepairService {
     const lease = this.proofs.get(proof);
     if (!lease || lease.used) return false;
     lease.used = true;
-    if (!this.current(lease.capture, current) || Object.keys(wire).sort().join() !== "type,uniqueId"
+    if (lease.capture.active.paymentMode !== "legacy" || !this.current(lease.capture, current) || Object.keys(wire).sort().join() !== "type,uniqueId"
       || wire.type !== proof.command.type || wire.uniqueId !== proof.command.uniqueId
       || !current!.rows.some(row => row.uniqueId === proof.command.uniqueId && !row.disabled)) return false;
     const pending = barrier(lease.capture.active.owner.socket);

@@ -88,6 +88,7 @@ type GameUiSceneProps = {
   npcRepairView?: NpcRepairView | null;
   onSelectNpcRepair?: (view: NpcRepairView, uniqueId: number) => NpcRepairSelection | null;
   onConfirmNpcRepair?: (selection: NpcRepairSelection) => boolean;
+  onQueryNpcRepair?: () => boolean;
   onToggleNpcRepairHold?: (view: NpcRepairView) => void;
   npcRepairTargetSelection?: NpcRepairSelection | null;
   onRegisterNpcRepairTarget?: (view: NpcRepairView, node: HTMLElement) => () => void;
@@ -198,7 +199,7 @@ function GameUiSceneInner({
   storagePasswordOpenVersion = 0,
   npcShopService,
   npcRepairService,
-  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair,
+  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair, onQueryNpcRepair,
   onToggleNpcRepairHold, npcRepairTargetSelection, onRegisterNpcRepairTarget, onNpcRepairBagPointerDown,
   onBagBeltPointerDown, onRegisterBeltTargets, onFenceBeltMouse,
   defaultChatExpanded = true,
@@ -646,10 +647,11 @@ function GameUiSceneInner({
           key={npcRepairService}
           t={t}
           npcName={npcRepairView?.name || (npcRepairService === "special" ? t("ui.shopSpecialRepair", [], "Special Repair") : t("ui.shopRepair", [], "Repair"))}
-          gold={npcRepairView?.gold}
+          gold={npcRepairView?.gold ?? undefined}
           repairView={npcRepairView}
           onSelectRepair={onSelectNpcRepair}
           onConfirmRepair={onConfirmNpcRepair}
+          onQueryRepair={onQueryNpcRepair}
           onToggleRepairHold={onToggleNpcRepairHold}
           repairTargetSelection={npcRepairTargetSelection}
           onRegisterRepairTarget={onRegisterNpcRepairTarget}

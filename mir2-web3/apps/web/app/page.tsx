@@ -129,6 +129,9 @@ import { NpcGoldBuyDispatcher, NpcGoldBuyInventoryReadiness, npcGoldBuyInventory
   type NpcGoldBuyProof, type NpcPearlBuyProof, type NpcGoldBuyQuote, type NpcGoldBuyGood } from "../lib/bevy-npc-shop-buy";
 import { NpcPearlShopSource, npcPearlJson } from "../lib/npc-pearl-buy-source";
 import { NpcPurchaseClient, completeNpcPurchaseSnapshot, isNpcPurchaseOwnerFrame, isNpcPurchaseWorldFrame, parseNpcPurchaseWorldFrame, npcPurchaseDecimal, npcPurchaseShopSource, sameNpcPurchaseData } from "../lib/npc-purchase-client";
+import { HuntingRepairClient, isHuntingRepairOwnerFrame,
+  type NpcRepairMode as HuntingRepairMode } from "../lib/hunting-repair-client";
+import { HuntingRepairWalletClient, type HuntingRepairWalletIdentity } from "../lib/hunting-repair-wallet";
 import { parseNpcPearlBuyPlan, type NpcPearlBuyCurrent } from "../lib/npc-pearl-buy";
 import { sameBagOwner, type BagCommandToken, type BagOwnerToken, type BevyBagUiIntent, type BevyBagUiRuntime } from "../lib/bevy-bag-ui";
 import { bagBeltGeometryIsCurrent, bagBeltReleasePointIsCurrent, sameBagBeltGeometry, type BagBeltGeometry, type BagBeltDropTarget,
@@ -145,6 +148,11 @@ type NpcShopSendProof = Readonly<{ intent: NpcShopIntent; currentJson: string; s
 // its selection/proof separately bind the current full ownerRevision.
 type NpcRepairDialogPhysicalOwner = Omit<NpcRepairOwner, "ownerRevision">;
 type NpcRepairDialogSource = Readonly<{ owner: NpcRepairDialogPhysicalOwner; dialog: GatewayNpcDialog; key: string }>;
+type HuntingRepairActorScope = Readonly<{ accountId: string; characterIndex: number; playerObjectId: number;
+  connectionGeneration: number; sessionGeneration: number; startGame: object }>;
+type HuntingRepairBinding = { socket: WebSocket; generation: number; actor: HuntingRepairActorScope;
+  client: HuntingRepairClient<WebSocket>; selection: NpcRepairSelection | null;
+  walletClient: HuntingRepairWalletClient<WebSocket> | null; walletIdentity: HuntingRepairWalletIdentity | null };
 type SpouseUiSource = Readonly<{
   owner: SocialReplyOwner;
   windowEpoch: number;
@@ -569,6 +577,7 @@ type CrystalBootstrapChatLine = {
 type GatewayRealmInfo = {
   schema: string;
   realmId: string;
+  npcRepairMode?: HuntingRepairMode;
   profileId: string;
   profileVersion: number;
   acceptanceLevel: number | null;
@@ -2662,6 +2671,8 @@ export default function HomePage() {
   // Commercial identity bearer stays in React memory only. It is never written
   // to localStorage/sessionStorage, so closing or reloading the tab discards it.
   const [identitySessionToken, setIdentitySessionToken] = useState<string | null>(null);
+  const identitySessionBindingRef = useRef<Readonly<{ socket: WebSocket; generation: number; accountId: string;
+    sessionId: string; expiresAtMs: number; token: string }> | null>(null);
   // ── On-chain smart mine state (M4, WF-6) — inert unless NEXT_PUBLIC_ONCHAIN_MINE=1.
   const [onchainMine, setOnchainMine] = useState(() => createOnchainMineState());
   const [onchainWallet, setOnchainWallet] = useState<ActiveSuiWalletSession | null>(null);
@@ -2860,9 +2871,17 @@ export default function HomePage() {
   }, []);
   const npcServiceNameRef = useRef("");
   const npcRepairAuthorityRef = useRef(new NpcRepairService());
+  const huntingRepairHandshakeRef = useRef<Readonly<{ socket: WebSocket; generation: number;
+    mode: HuntingRepairMode | "blocked"; huntingDeclared: boolean }> | null>(null);
+  const huntingRepairBindingRef = useRef<HuntingRepairBinding | null>(null);
+  const huntingRepairApplyingRef = useRef(false);
   const npcRepairDialogSourceRef = useRef<NpcRepairDialogSource | null>(null);
   const npcRepairDialogBindingRef = useRef<NpcRepairDialogSource | null>(null);
   const [npcRepairService, setNpcRepairService, npcRepairServiceRef] = useImmediateUiState<"repair" | "special" | null>(null);
+  useEffect(() => {
+    const timer = window.setInterval(() => huntingRepairBindingRef.current?.client.checkTimeout(), 500);
+    return () => { window.clearInterval(timer); retireHuntingRepairActor(); };
+  }, []);
   const [showQuestLog, setShowQuestLogState] = useState(false);
   const questLogOpenRef = useRef(false);
   function setShowQuestLog(open: boolean) {
@@ -6198,6 +6217,8 @@ export default function HomePage() {
   }
 
   function suspendEquipmentConnection(reason: "socketClosed" | "logoutPending" | "connectionUnavailable") {
+    if (reason !== "logoutPending") retireHuntingRepairActor();
+    if (reason === "socketClosed") clearIdentitySessionToken();
     if (npcPurchaseClientRef.current) npcPurchaseUnavailableRef.current = true;
     npcPurchaseClientRef.current?.client.withdraw(reason === "socketClosed");
     npcPurchaseEconomicSourceRef.current = null;
@@ -6221,6 +6242,7 @@ export default function HomePage() {
   }
 
   function retireEquipmentSession() {
+    retireHuntingRepairActor();
     npcPurchaseClientRef.current?.client.withdraw();
     npcPurchaseEconomicSourceRef.current = null;
     npcPurchaseDisplaySourceRef.current = null;
@@ -6402,6 +6424,7 @@ export default function HomePage() {
       && typeof command.from === "number" && command.from >= 6 && !options?.bagBeltProof) return false;
     if (options?.bagBeltProof && !bagBeltFinalCurrent(options.bagBeltProof, command)) return false;
     if (["repairItem", "specialRepairItem"].includes(String(command.type)) && !options?.npcRepairProof) return false;
+    if (["repairItem", "specialRepairItem"].includes(String(command.type)) && currentNpcRepairPaymentMode() !== "legacy") return false;
     if (options?.npcRepairProof && !["repairItem", "specialRepairItem"].includes(String(command.type))) return false;
     if (["changeAMode", "changePMode"].includes(String(command.type)) && !options?.modeProof) return false;
     if (options?.modeProof && !combatModeHostRef.current?.allows(options.modeProof, command)) return false;
@@ -6614,7 +6637,7 @@ export default function HomePage() {
     // Re-read complete Bag/source/quote and mail locks after every synchronous listener.
     if (options?.npcRepairProof) {
       const repairView = readNpcRepairView();
-      if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
+      if (currentNpcRepairPaymentMode() !== "legacy" || socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
         || !npcRepairAuthorityRef.current.enter(options.npcRepairProof, repairView, wireCommand)) return false;
     }
     if (isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))) {
@@ -7222,6 +7245,8 @@ export default function HomePage() {
   function connectGateway(_bootstrapAfterOpen = false, freshAuthSocket = false) {
     if (freshAuthSocket && socketRef.current) {
       const previous = socketRef.current;
+      retireHuntingRepairActor();
+      clearIdentitySessionToken();
       // Drop the old physical identity before its close callback can reconnect.
       socketRef.current = null;
       gatewayProtocolReadyRef.current = false;
@@ -7243,6 +7268,8 @@ export default function HomePage() {
     manualSocketCloseRef.current = false;
     gatewayProtocolReadyRef.current = false;
     const socket = new WebSocket(gatewayUrl);
+    clearIdentitySessionToken();
+    huntingRepairHandshakeRef.current = null;
     suspendEquipmentConnection("connectionUnavailable");
     pendingStorageRequestsRef.current.clear();
     const connectionGeneration = ++equipmentConnectionGenerationRef.current;
@@ -7315,12 +7342,15 @@ export default function HomePage() {
 
     socket.addEventListener("message", (event) => {
       if (socketRef.current !== socket || connectionGeneration !== equipmentConnectionGenerationRef.current) return;
+      // Capture before any raw-ingress callback can synchronously replace the
+      // actor. An old event must never be delivered to the replacement adapter.
+      const repairBinding = huntingRepairBindingRef.current;
       const receivedAtMs=performance.now();
       syncHeroRawIngress();
       const physical = currentHeroRawPhysical();
       const delivery = heroRawIngressRef.current?.capture(event.data, physical, receivedAtMs) ?? null;
       try {
-        receiveNpcPurchaseGatewayFrame(event, connectionGeneration, socket, delivery);
+        receiveNpcPurchaseGatewayFrame(event, connectionGeneration, socket, delivery, repairBinding);
       } catch (error) {
         heroRawIngressRef.current?.reject(delivery);
         appendLog(t("log.invalidGatewayPayload", [String(error)]), "system");
@@ -10185,6 +10215,178 @@ export default function HomePage() {
     });
   }
 
+  function clearIdentitySessionToken() {
+    identitySessionBindingRef.current = null;
+    const binding = huntingRepairBindingRef.current;
+    if (binding) invalidateHuntingRepairWallet(binding);
+    setIdentitySessionToken(null);
+  }
+
+  function captureIdentitySessionBinding(event: unknown, socket: WebSocket, generation: number): boolean {
+    if (!event || typeof event !== "object") return false;
+    const grant = event as { token?: unknown; session?: unknown };
+    if (!grant.session || typeof grant.session !== "object") return false;
+    const session = grant.session as BrowserIdentitySession, token = grant.token;
+    if (socketRef.current !== socket || generation !== equipmentConnectionGenerationRef.current
+      || typeof token !== "string" || token.length === 0 || token.length > 4096 || /[\r\n]/.test(token)
+      || !session || typeof session.accountId !== "string" || session.accountId !== accountIdRef.current
+      || typeof session.sessionId !== "string" || session.sessionId.length === 0
+      || !Number.isSafeInteger(session.expiresAtMs) || session.expiresAtMs <= Date.now() || session.revokedAtMs != null) return false;
+    identitySessionBindingRef.current = Object.freeze({ socket, generation, accountId: session.accountId,
+      sessionId: session.sessionId, expiresAtMs: session.expiresAtMs, token });
+    setIdentitySessionToken(token);
+    const binding = huntingRepairBindingRef.current;
+    if (binding) { invalidateHuntingRepairWallet(binding); void refreshHuntingRepairWallet(binding); }
+    return true;
+  }
+
+  function currentNpcRepairPaymentMode(): HuntingRepairMode | "blocked" | null {
+    const handshake = huntingRepairHandshakeRef.current;
+    return handshake && handshake.socket === socketRef.current && handshake.generation === equipmentConnectionGenerationRef.current
+      ? handshake.mode : null;
+  }
+
+  function captureHuntingRepairMode(payload: unknown, socket: WebSocket, generation: number) {
+    if (socketRef.current !== socket || generation !== equipmentConnectionGenerationRef.current) return;
+    const record = payload && typeof payload === "object" && !Array.isArray(payload) ? payload as Record<string, unknown> : null;
+    const declared = !record ? null : Object.hasOwn(record, "npcRepairMode") ? record.npcRepairMode : "legacy";
+    const prior = huntingRepairHandshakeRef.current;
+    const same = prior?.socket === socket && prior.generation === generation;
+    const parsedMode = declared === "legacy" || declared === "hunting-v1" ? declared : "blocked";
+    const mode = parsedMode === "blocked" || same && (prior.mode === "blocked" || prior.mode !== parsedMode) ? "blocked" : parsedMode;
+    huntingRepairHandshakeRef.current = Object.freeze({ socket, generation, mode,
+      huntingDeclared: declared === "hunting-v1" || !!(same && prior.huntingDeclared) });
+    if (mode !== "hunting-v1") retireHuntingRepairActor();
+    else observeHuntingRepairActor(socket);
+    renderParityServices(n => n + 1);
+  }
+
+  function currentHuntingRepairBinding(binding: HuntingRepairBinding | null): binding is HuntingRepairBinding {
+    const session = equipmentStartGameRef.current;
+    return !!binding && huntingRepairBindingRef.current === binding && currentNpcRepairPaymentMode() === "hunting-v1"
+      && socketRef.current === binding.socket && binding.socket.readyState === WebSocket.OPEN
+      && equipmentConnectionGenerationRef.current === binding.generation
+      && !!session && session === binding.actor.startGame && session.connectionGeneration === binding.generation
+      && session.sessionGeneration === binding.actor.sessionGeneration && equipmentSessionGenerationRef.current === binding.actor.sessionGeneration
+      && accountIdRef.current === binding.actor.accountId && socialCharacterIndexRef.current.current === binding.actor.characterIndex
+      && worldRef.current.connected && String(binding.actor.playerObjectId) === worldRef.current.playerObjectId
+      && screenRef.current === "game" && !isSpectatorBrowserMode();
+  }
+
+  function retireHuntingRepairActor() {
+    const prior = huntingRepairBindingRef.current;
+    huntingRepairBindingRef.current = null;
+    if (prior) invalidateHuntingRepairWallet(prior);
+    prior?.client.retireConnection();
+    npcRepairAuthorityRef.current.close();
+    npcRepairDialogBindingRef.current = null;
+    setNpcRepairService(null);
+  }
+
+  function observeHuntingRepairActor(socket: WebSocket): HuntingRepairBinding | null {
+    const prior = huntingRepairBindingRef.current;
+    if (prior && currentHuntingRepairBinding(prior)) return prior;
+    if (prior) retireHuntingRepairActor();
+    const session = equipmentStartGameRef.current, baseline = equipmentSnapshotRef.current;
+    const index = socialCharacterIndexRef.current.current, objectId = Number(worldRef.current.playerObjectId);
+    if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN || currentNpcRepairPaymentMode() !== "hunting-v1"
+      || !session || !baseline || baseline.connectionGeneration !== session.connectionGeneration
+      || baseline.sessionGeneration !== session.sessionGeneration || equipmentHostSuspendReasonRef.current !== null
+      || !Number.isSafeInteger(index) || index === null || index < 0 || index > 0x7fffffff || !accountIdRef.current
+      || !Number.isSafeInteger(objectId) || objectId <= 0 || objectId > 0xffffffff
+      || !worldRef.current.connected || screenRef.current !== "game" || isSpectatorBrowserMode()) return null;
+    const actor = Object.freeze({ accountId: accountIdRef.current, characterIndex: index, playerObjectId: objectId,
+      connectionGeneration: session.connectionGeneration, sessionGeneration: session.sessionGeneration, startGame: session });
+    let binding: HuntingRepairBinding;
+    const client = new HuntingRepairClient({ owner: socket, actorScope: actor, mode: "hunting-v1",
+      isCurrent: (owner, scope) => owner === socket && scope === actor && currentHuntingRepairBinding(binding),
+      selectionMatches: (_owner, selection) => {
+        if (!currentHuntingRepairBinding(binding) || !binding.selection) return false;
+        const intent = npcRepairAuthorityRef.current.huntingIntent(binding.selection, readNpcRepairView());
+        return !!intent && intent.uniqueId === selection.uniqueId && intent.special === selection.special;
+      },
+      send: (owner, raw) => {
+        if (owner !== socket || !currentHuntingRepairBinding(binding)) throw Error("Repair owner changed");
+        socket.send(raw);
+      },
+      applySnapshot: snapshot => applyHuntingRepairSnapshot(binding, snapshot),
+      onChange: view => {
+        if (huntingRepairBindingRef.current !== binding) return;
+        renderParityServices(n => n + 1);
+        if (view.receipt || view.phase === "rejected" && view.reason === "notSubmitted") void refreshHuntingRepairWallet(binding);
+      },
+    });
+    binding = { socket, generation: session.connectionGeneration, actor, client, selection: null, walletClient: null, walletIdentity: null };
+    huntingRepairBindingRef.current = binding;
+    void refreshHuntingRepairWallet(binding);
+    return binding;
+  }
+
+  function invalidateHuntingRepairWallet(binding: HuntingRepairBinding) {
+    binding.walletClient?.retire();
+    binding.walletClient = null;
+    binding.walletIdentity = null;
+  }
+
+  async function refreshHuntingRepairWallet(binding: HuntingRepairBinding): Promise<boolean> {
+    const identity = identitySessionBindingRef.current;
+    if (!currentHuntingRepairBinding(binding) || !identity || identity.socket !== binding.socket
+      || identity.generation !== binding.generation || identity.accountId !== binding.actor.accountId
+      || identity.expiresAtMs <= Date.now()) { invalidateHuntingRepairWallet(binding); return false; }
+    if (!binding.walletClient || binding.walletIdentity !== identity) {
+      invalidateHuntingRepairWallet(binding);
+      binding.walletIdentity = identity;
+      try { binding.walletClient = new HuntingRepairWalletClient({ owner: binding.socket, actorScope: binding.actor,
+        identity, characterIndex: binding.actor.characterIndex,
+        isCurrent: (owner, actor, grant) => owner === binding.socket && actor === binding.actor
+          && currentHuntingRepairBinding(binding) && identitySessionBindingRef.current === grant && binding.walletIdentity === grant,
+        onChange: () => { if (currentHuntingRepairBinding(binding)) renderParityServices(n => n + 1); },
+      }); } catch { invalidateHuntingRepairWallet(binding); return false; }
+    }
+    return binding.walletClient.refresh();
+  }
+
+  function applyHuntingRepairSnapshot(binding: HuntingRepairBinding, raw: Readonly<Record<string, unknown>>): boolean {
+    if (!currentHuntingRepairBinding(binding) || huntingRepairApplyingRef.current || !completeNpcPurchaseSnapshot(raw)
+      || raw.playerObjectId !== binding.actor.playerObjectId) return false;
+    const snapshot = raw as unknown as GatewayWorldSnapshot;
+    const event: GatewayEvent = { type: "worldSnapshot", payload: snapshot };
+    const version = ++worldSnapshotVersionRef.current;
+    huntingRepairApplyingRef.current = true;
+    try {
+      invalidateNpcGoldBuyGatewayPacket(event);
+      captureQuestMapGatewayEvent(event, binding.generation);
+      captureSpellsGatewayEvent(event, binding.generation);
+      const owner = currentSpellsOwner(snapshot.playerObjectId);
+      const mail = mergeMailList(snapshot.stage5Systems?.mail, null);
+      if (!owner || mail === null || !currentHuntingRepairBinding(binding)) return false;
+      mailRawRef.current = { owner: { ...owner }, mail, catalogResolved: false };
+      socialFriendsRef.current = null;
+      npcPurchaseDisplaySourceRef.current = null;
+      // This is a real owner snapshot, not a purchase/Core Applied witness.
+      applyNpcGoldBuyGatewaySnapshot(snapshot, binding.generation, true);
+      if (!currentHuntingRepairBinding(binding) || version !== worldSnapshotVersionRef.current
+        || worldRef.current.stage5Systems !== snapshot.stage5Systems || worldRef.current.gold !== snapshot.gold
+        || worldRef.current.credit !== snapshot.credit || worldRef.current.playerExperience !== snapshot.playerExperience
+        || worldRef.current.playerMaxExperience !== snapshot.playerMaxExperience) return false;
+      const inventory = projectBevyBagModel(worldRef.current, { npcGoldTrade: true });
+      return inventory.ok && npcGoldBuyInventoryRef.current.matches(currentSpellsOwner(snapshot.playerObjectId), inventory.model)
+        && equipmentSnapshotRef.current?.connectionGeneration === binding.generation
+        && equipmentSnapshotRef.current?.sessionGeneration === binding.actor.sessionGeneration;
+    } finally { huntingRepairApplyingRef.current = false; }
+  }
+
+  function npcRepairCanMutate(uniqueId: number): boolean {
+    const current = worldRef.current, player = current.entities.find(entity => entity.objectId === current.playerObjectId);
+    const wire = { type: npcRepairServiceRef.current === "special" ? "specialRepairItem" : "repairItem", uniqueId };
+    return screenRef.current === "game" && current.connected && !!player && !player.dead && current.playerHp !== 0
+      && equipmentHostSuspendReasonRef.current === null && equipmentControllerRef.current?.status().ready === true
+      && (equipmentControllerRef.current?.status().pending ?? 0) === 0 && pendingStorageRequestsRef.current.size === 0
+      && !socialItemOperationsRef.current.pending && !storageRentalRef.current.pending && !npcBuyDispatcherRef.current?.status()?.flight
+      && parityItemMutationAllowed(wire) && mailMutationAllowed(wire, mailParcelRef.current?.snapshot ?? null,
+        mailParcelRef.current?.state?.blockedUniqueIds ?? []);
+  }
+
   function readNpcRepairOwner(): NpcRepairOwner | null {
     const owner = currentSocialReplyOwner(false);
     return owner ? { ...owner, ownerRevision: equipmentBagOwnerRef.current.ownerRevision } : null;
@@ -10209,33 +10411,51 @@ export default function HomePage() {
       && source.owner.sceneRevision === owner.sceneRevision && source.owner.mapFileName === owner.mapFileName ? source : null;
   }
 
-  function closeNpcRepairService() {
+  function closeNpcRepairService(hide = true) {
     npcRepairAuthorityRef.current.close();
     npcRepairDialogBindingRef.current = null;
-    setNpcRepairService(null);
+    const binding = huntingRepairBindingRef.current;
+    if (currentHuntingRepairBinding(binding) && binding.client.view().phase === "pending") {
+      // Closing retires item/NPC selection authority, while the original
+      // uncertain operation keeps its read-only Query control reachable.
+      if (hide) binding.client.showView();
+      setNpcRepairService(binding.client.view().quote?.special ? "special" : "repair");
+    } else {
+      setNpcRepairService(null);
+      binding?.client.resetView();
+    }
   }
 
   function readNpcRepairView(): NpcRepairView | null {
-    if (!npcRepairServiceRef.current) return null;
+    const binding = huntingRepairBindingRef.current;
+    if (currentHuntingRepairBinding(binding)) {
+      const owner = readNpcRepairOwner();
+      if (!owner) return null;
+      if (!npcRepairDialogBindingRef.current || currentNpcRepairDialogSource(owner) !== npcRepairDialogBindingRef.current) npcRepairAuthorityRef.current.close();
+      return npcRepairAuthorityRef.current.viewHunting(owner, binding.client.view(), npcRepairCanMutate, binding.walletClient?.balance() ?? null);
+    }
+    if (!npcRepairServiceRef.current || currentNpcRepairPaymentMode() !== "legacy") return null;
     const owner = readNpcRepairOwner();
     if (!owner || !npcRepairDialogBindingRef.current || currentNpcRepairDialogSource(owner) !== npcRepairDialogBindingRef.current) {
       npcRepairAuthorityRef.current.close(); return null;
     }
-    const core = questCoreRuntimeRef.current, current = worldRef.current;
-    const player = current.entities.find(entity => entity.objectId === current.playerObjectId);
-    return npcRepairAuthorityRef.current.view(owner, input => core?.readNpcRepairQuote(input) ?? null, uniqueId => {
-      const wire = { type: npcRepairServiceRef.current === "special" ? "specialRepairItem" : "repairItem", uniqueId };
-      return screenRef.current === "game" && current.connected && !!player && !player.dead && current.playerHp !== 0
-        && equipmentHostSuspendReasonRef.current === null && equipmentControllerRef.current?.status().ready === true
-        && (equipmentControllerRef.current?.status().pending ?? 0) === 0 && pendingStorageRequestsRef.current.size === 0
-        && !socialItemOperationsRef.current.pending && !storageRentalRef.current.pending && !npcBuyDispatcherRef.current?.status()?.flight
-        && parityItemMutationAllowed(wire) && mailMutationAllowed(wire, mailParcelRef.current?.snapshot ?? null,
-          mailParcelRef.current?.state?.blockedUniqueIds ?? []);
-    });
+    const core = questCoreRuntimeRef.current;
+    return npcRepairAuthorityRef.current.view(owner, input => core?.readNpcRepairQuote(input) ?? null, npcRepairCanMutate);
   }
 
   function selectNpcRepair(view: NpcRepairView, uniqueId: number): NpcRepairSelection | null {
-    return npcRepairAuthorityRef.current.select(view, uniqueId, readNpcRepairView());
+    const selection = npcRepairAuthorityRef.current.select(view, uniqueId, readNpcRepairView());
+    if (selection && view.paymentMode === "hunting-v1") quoteHuntingRepairSelection(selection);
+    return selection;
+  }
+
+  function quoteHuntingRepairSelection(selection: NpcRepairSelection): boolean {
+    const binding = huntingRepairBindingRef.current;
+    if (!currentHuntingRepairBinding(binding)) return false;
+    const intent = npcRepairAuthorityRef.current.huntingIntent(selection, readNpcRepairView());
+    if (!intent) return false;
+    binding.selection = selection;
+    return binding.client.quote(intent);
   }
 
   function toggleNpcRepairHold(view: NpcRepairView): void {
@@ -10259,6 +10479,7 @@ export default function HomePage() {
     const current = readNpcRepairView();
     const selection = npcRepairAuthorityRef.current.drop(drag, geometry, x, y, current);
     if (!selection || !current) return null;
+    if (current.paymentMode === "hunting-v1") { quoteHuntingRepairSelection(selection); return { selection, submitted: false }; }
     const row = current.rows.find(row => row.uniqueId === selection.uniqueId);
     if (row?.reason === "gold") appendLog(t("client.LowGold", [], "Not enough gold."), "system");
     const submitted = current.hold && row?.disabled === false ? confirmNpcRepair(selection) : false;
@@ -10266,11 +10487,31 @@ export default function HomePage() {
   }
 
   function confirmNpcRepair(selection: NpcRepairSelection): boolean {
+    if (currentNpcRepairPaymentMode() === "hunting-v1") {
+      const binding = huntingRepairBindingRef.current;
+      if (!currentHuntingRepairBinding(binding)) return false;
+      const intent = npcRepairAuthorityRef.current.huntingIntent(selection, readNpcRepairView());
+      if (!intent) return false;
+      binding.selection = selection;
+      const state = binding.client.view();
+      if ((state.phase === "idle" || state.phase === "rejected") && state.receipt === null) return binding.client.quote(intent);
+      if (state.phase !== "quoted" || state.quote?.uniqueId !== intent.uniqueId || state.quote.special !== intent.special) return false;
+      invalidateHuntingRepairWallet(binding);
+      return binding.client.confirm();
+    }
     const proof = npcRepairAuthorityRef.current.reserve(selection, readNpcRepairView());
     if (!proof) return false;
     try { return sendRaw({ ...proof.command }, { npcRepairProof: proof }); }
     catch (error) { console.error("[mir2] NPC repair send outcome is unknown", error); return false; }
     finally { renderParityServices(n => n + 1); }
+  }
+
+  function queryNpcRepair(): boolean {
+    const binding = huntingRepairBindingRef.current;
+    if (!currentHuntingRepairBinding(binding)) return false;
+    const result = binding.client.query();
+    if (result && binding.client.view().receipt) void refreshHuntingRepairWallet(binding);
+    return result;
   }
 
   // Character equipment menus cannot create the Bag selection proof required by NPC repair.
@@ -13421,7 +13662,7 @@ export default function HomePage() {
       bagBeltInventoryReadyRef.current = null;
       npcRepairAuthorityRef.current.prepareSnapshot(readNpcRepairOwner(), event.payload);
       const dialog = (event.payload as GatewayWorldSnapshot).activeNpcDialog, binding = npcRepairDialogBindingRef.current;
-      if (dialog && binding && JSON.stringify(dialog) !== binding.key) closeNpcRepairService();
+      if (dialog && binding && JSON.stringify(dialog) !== binding.key) closeNpcRepairService(false);
       npcGoldBuyInventoryRef.current.invalidate();
       npcBuyDispatcherRef.current?.withdraw();
     }
@@ -13487,12 +13728,15 @@ export default function HomePage() {
         const owner = readNpcRepairOwner();
         npcRepairAuthorityRef.current.observeSnapshot(owner, snapshot);
         captureNpcRepairDialog(snapshot, owner);
+        const socket = socketRef.current;
+        if (socket) observeHuntingRepairActor(socket);
       } else npcRepairAuthorityRef.current.invalidateInventory();
       npcBuyDispatcherRef.current?.observe();
     }
   }
 
-  function receiveNpcPurchaseGatewayFrame(event: { data: unknown }, connectionGeneration: number, socket: WebSocket, delivery: HeroRawDelivery | null = null) {
+  function receiveNpcPurchaseGatewayFrame(event: { data: unknown }, connectionGeneration: number, socket: WebSocket,
+    delivery: HeroRawDelivery | null = null, repairBinding: HuntingRepairBinding | null = null) {
     if (socketRef.current !== socket || connectionGeneration !== equipmentConnectionGenerationRef.current) return;
     let strictWorld = false;
     const apply = (decoded: GatewayEvent, rawWorld?: string) => {
@@ -13506,6 +13750,14 @@ export default function HomePage() {
       // New bounded raw-source policy. The previous generic decoder was
       // uncapped; reject before either marker or decoder to prevent fallback.
       if (typeof event.data !== "string" || event.data.length > 16 * 1024 * 1024) { strictWorld = true; throw Error("Invalid gateway raw frame size"); }
+      if (isHuntingRepairOwnerFrame(event.data)) {
+        if (repairBinding?.socket === socket && repairBinding.generation === connectionGeneration
+          && currentHuntingRepairBinding(repairBinding)) repairBinding.client.receive(event.data);
+        // The original namespace is terminal even when malformed/unpaired.
+        // It carries no purchase producer/Core Applied or Hero owner proof.
+        if (delivery) { syncHeroRawIngress(); heroRawIngressRef.current?.offer(delivery); heroSharedUiIngressRef.current?.tick(); }
+        return;
+      }
       if (isNpcPurchaseOwnerFrame(event.data)) {
         const adapter = npcPurchaseClientRef.current;
         if (adapter?.socket === socket && adapter.core === questCoreRuntimeRef.current) {
@@ -13606,7 +13858,7 @@ export default function HomePage() {
       npcRepairAuthorityRef.current.acknowledge(source, event.packet, event.payload);
     }
     if (event.type === "packet" && (event.packet === "MapChanged" || event.packet === "NPCResponse"
-      || event.packet?.startsWith("NPC") && event.packet !== "NPCRepair" && event.packet !== "NPCSRepair")) closeNpcRepairService();
+      || event.packet?.startsWith("NPC") && event.packet !== "NPCRepair" && event.packet !== "NPCSRepair")) closeNpcRepairService(false);
     if (event.type === "packet" && event.packet === "MapChanged") npcRepairDialogSourceRef.current = null;
     if (event.type === "packet" && event.packet === "MapChanged") retireSocialRequests();
     invalidateNpcGoldBuyGatewayPacket(event);
@@ -13652,10 +13904,7 @@ export default function HomePage() {
       return;
     }
     if (event.type === "identitySession") {
-      const identityToken = "token" in event ? event.token : undefined;
-      if (typeof identityToken === "string" && identityToken.length <= 4096) {
-        setIdentitySessionToken(identityToken);
-    }
+      if (!captureIdentitySessionBinding(event, source, connectionGeneration)) clearIdentitySessionToken();
       return;
     }
     if ((event as {type:string}).type === "gameShopReceipt") {
@@ -13686,6 +13935,7 @@ export default function HomePage() {
     }
     if (event.type === "realmInfo") {
       const info = event.payload as GatewayRealmInfo;
+      captureHuntingRepairMode(info, source, connectionGeneration);
       setRealmInfo(info);
       (
         window as typeof window & {
@@ -13774,7 +14024,7 @@ export default function HomePage() {
         questDefinitionByIdRef.current.clear();
         questAuthoritativeStageByIdRef.current.clear();
         clearPendingQuestActions();
-        setIdentitySessionToken(null);
+        clearIdentitySessionToken();
         gatewayProtocolReadyRef.current = false;
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
@@ -14638,7 +14888,7 @@ export default function HomePage() {
         questAuthoritativeStageByIdRef.current.clear();
         clearPendingQuestActions();
         cancelPendingEntitySounds();
-        setIdentitySessionToken(null);
+        clearIdentitySessionToken();
         resetGatewayReconnectState();
         activeReconnectAuthRef.current = null;
         screenRef.current = "login";
@@ -15463,10 +15713,20 @@ export default function HomePage() {
         setActiveInventoryTab("bag1");
         const owner = readNpcRepairOwner();
         const npcSource = owner && currentNpcRepairDialogSource(owner);
-        if (owner && npcSource && npcRepairAuthorityRef.current.open(owner, mode, payload.rate,
-          Object.freeze({ packet: event, npc: npcSource }), npcSource.dialog.npcName)) {
+        const paymentMode = currentNpcRepairPaymentMode();
+        const repairBinding = paymentMode === "hunting-v1" ? observeHuntingRepairActor(source) : null;
+        const repairSource = npcSource && Object.freeze({ packet: event, npc: npcSource });
+        const opened = owner && npcSource && repairSource && (paymentMode === "hunting-v1"
+          ? repairBinding && npcRepairAuthorityRef.current.openHunting(owner, mode, repairSource, npcSource.dialog.npcName)
+          : paymentMode === "legacy" && npcRepairAuthorityRef.current.open(owner, mode, payload.rate, repairSource, npcSource.dialog.npcName));
+        if (opened) {
           npcRepairDialogBindingRef.current = npcSource;
           setNpcRepairService(mode);
+          if (repairBinding) {
+            repairBinding.client.showView();
+            invalidateHuntingRepairWallet(repairBinding);
+            void refreshHuntingRepairWallet(repairBinding);
+          }
         }
         setShowCharacter(false);
         break;
@@ -20210,6 +20470,7 @@ export default function HomePage() {
       npcRepairView={readNpcRepairView()}
       onSelectNpcRepair={selectNpcRepair}
       onConfirmNpcRepair={confirmNpcRepair}
+      onQueryNpcRepair={queryNpcRepair}
       onToggleNpcRepairHold={toggleNpcRepairHold}
       onBeginNpcRepairDrag={beginNpcRepairDrag}
       onCancelNpcRepairDrag={cancelNpcRepairDrag}
@@ -20425,7 +20686,7 @@ export default function HomePage() {
         accountId={accountId}
         language={language}
         onCurrentSessionRevoked={() => {
-          setIdentitySessionToken(null);
+          clearIdentitySessionToken();
           send({ type: "logOut" });
         }}
       />

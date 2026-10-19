@@ -147,6 +147,18 @@ Root最终26验收：
 
 证据见 [第五阶段验收](generated/hunting-economy/acceptance-20261020-repair-sync.json)。当前没有接入Page、NpcRepairService、Shop或Shell；snapshot apply只是adapter回调契约，尚未连到真实游戏状态。下一队列在现有修理窗口接typed报价/确认/查询、费用与绑定钱包展示、真实snapshot apply，再验物理玩家确认/拒绝、Pending恢复、断线保存重登，不新建网页。原生运行、PG连接上限30、串行Cargo jobs2及三个外来QA JSON保持；未启动Docker/WSL/虚拟机、未改远程资产，默认关闭、完整goal active，全服覆盖与生产资格仍未取得。
 
+## 第六阶段：现有游戏修理窗口与新钱包观测
+
+Page、NpcRepairService、Shop和Shell现已接独立typed Quote→Confirm→原Query。realm握手按物理socket/generation固定模式，缺握手拒绝修理，冲突声明持续封闭；hunting-v1不会在政策禁用或失败时回退legacy。每个adapter持有冻结actor，实际message闭包在其它接收回调前捕获原binding；未知/畸形/不配对的修理namespace终止，不交给泛化旧处理或新的current adapter。
+
+新费用只显示服务器报价中的规范十进制绑定金币，不用旧gold推断可付金额。新钱包GET是观测，不能授权Confirm；角色索引由冻结actor确定，Bearer只在同源请求headers里，identity/socket/actor替换、过期、旧请求与revision倒退均拒绝。固定代理只连接可信配置上游，16KiB/8秒限制、禁止跟随重定向和转发cookie，所有响应no-store；没有新资产写接口。
+
+有效选择/完整物品来源见证只申请Quote，已报价后才Confirm；Confirm发出后不论send异常、超时或缺少/应用失败的snapshot，只能Query原quote。Hold在新模式停用。已知结果携带的完整快照连接现有真实Quest/Spells/Mail/World/Inventory apply，不伪造NPC purchase Producer/Core Applied或Hero证明；原actor和完整快照确实应用后才解除未决。Query独立于物品目标、NPC和新资产操作就绪；主动关闭会撤销选择/NPC权限，但保留只读recoveryOnly面板，避免NPC退场后原查询无入口。非Pending关闭正常隐藏。
+
+最终29专项101/101（纯client42、UI16、实际Page函数15、wallet/proxy28），原生Next16.2.11生产构建包含严格TypeScript与13静态页；另使用真实TS5.9.3全配置严格检查315 roots/982 source files、零错误。旧NPC/Bag/Storage/Stage5八份脚本统一353/353顶层测试通过，其中Stage5文件级结果内部执行506组自定义检查；不把文件级包装与内部组数重复相加。旧夹具补入真实依赖/空custody与显式legacy模式；原场景保留，Confirm旧表达式改为完整32组合真值表及新增bound拒绝检查。编译后的钱包路由另有10项本机物理HTTP验收：请求形状/身份拒绝、完整十进制、固定GET、禁止POST/重定向/206/超限及错误保留；上游明确为合成只读数据，没有游戏资产变动。以上数字不与历史137项或PG测试相加。
+
+证据见 [第六阶段验收](generated/hunting-economy/acceptance-20261020-repair-ui.json)。首轮旧夹具缺新增依赖、Page generic-event类型错误及Windows跨磁盘Next入口失败均保留历史日志；类型问题已修，Next包在独立C盘逐文件与原依赖校验一致后原生构建，未安装包或修改主工作区依赖。原tsconfig/编译器和三个外来QA JSON均保持。没有浏览器截图、物理游戏WebSocket或玩家保存重登结论；下一队列是原生隔离环境真实客户端流程，其它来源/材料/全服指标/通知/迁移发布仍开放。默认关闭、K=0.1、0.72/1.08许可和goal active保持；Docker停止/手动、相关进程0，不运行Docker/WSL/虚拟机、不改虚拟化或停止游戏。
+
 ## 后端接线与交付物
 
 - 实现：`packages/economy-policy`、`packages/economy-service`；迁移从0016开始，0015保留给其他工作。

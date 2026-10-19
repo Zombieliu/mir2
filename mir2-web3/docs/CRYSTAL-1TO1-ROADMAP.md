@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 狩猎经济第六阶段（2026-10-20）
+
+现有修理窗口已接独立typed报价/确认/原Query、服务端绑定费用、只读新钱包与真实snapshot apply；Pending主动关闭仍可无NPC查询原结果。最终29专项101/101、原生Next生产构建（含严格TS、13页）、独立严格TS及编译后本机钱包HTTP10/10通过，见 [第六阶段验收](generated/hunting-economy/acceptance-20261020-repair-ui.json)。HTTP为合成只读upstream，未验真实浏览器、物理游戏WebSocket或玩家保存重登；不等于全workspace/全服覆盖/生产资格。默认关闭、K=0.1及0.72/1.08许可不变，定制经济不增加Crystal闭合项，Candidate100与完整goal均未完成。后续仅原生，无Docker/WSL/虚拟机，不改虚拟化或停止游戏；下方阶段五为历史范围。
+
 ## 本服狩猎许可经济（2026-10-20）
 
 第五阶段：服务端修理已提供同owner回合快照与required nullable snapshot，Shared尾部、采样panic或2MiB超限保留原已知回执；纯Web client adapter已处理严格解析、原报价Pending/Query及回调重入。最终26定向137项去重通过，含10项实际原生PG，见 [第五阶段证据](generated/hunting-economy/acceptance-20261020-repair-sync.json)。第四阶段真实来源的326项/81PG保留为历史范围。现有Page/NpcRepairService/Shop/Shell、费用展示、实际snapshot apply和物理客户端/真实网络验收仍待，不新建网页；纯模块验证不是全前端构建或全workspace验收。这是本服定制经济，不增加Crystal闭合项。完整goal active、默认禁用、原生无Docker/WSL/虚拟机，PG连接上限保持30，串行Cargo使用2个build jobs；三个外来QA JSON保留。

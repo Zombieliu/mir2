@@ -621,7 +621,7 @@ export function OriginalClientShell({
   storagePasswordOpenVersion = 0,
   npcShopService,
   npcRepairService,
-  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair, onToggleNpcRepairHold,
+  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair, onQueryNpcRepair, onToggleNpcRepairHold,
   onBeginNpcRepairDrag, onCancelNpcRepairDrag, onDropNpcRepairDrag,
   onBagBeltDropGeometry, onBeginBagToBeltGesture, onArmBagToBeltGesture, onBagToBeltMove, onCancelBagToBeltGesture,
   worldFishingAnimation, onWorldFishingAnimationCommit, onBeginWorldFishingGesture, onCancelWorldFishingGesture,
@@ -867,7 +867,7 @@ export function OriginalClientShell({
   }
   function confirmNpcRepairTarget(selection: NpcRepairSelection): boolean {
     const result = onConfirmNpcRepair?.(selection) === true;
-    if (npcRepairVisibleTargetRef.current === selection) changeNpcRepairTarget(null);
+    if (npcRepairView?.paymentMode !== "hunting-v1" && npcRepairVisibleTargetRef.current === selection) changeNpcRepairTarget(null);
     return result;
   }
   function openNpcRepairBagPage(tab: InventoryTabKey) {
@@ -5330,7 +5330,7 @@ export function OriginalClientShell({
                   storagePasswordOpenVersion,
                   npcShopService,
                   npcRepairService,
-                  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair: confirmNpcRepairTarget,
+                  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair: confirmNpcRepairTarget, onQueryNpcRepair,
                   onToggleNpcRepairHold,
                   npcRepairTargetSelection: npcRepairTargetSelection?.stamp === npcRepairView?.stamp ? npcRepairTargetSelection : null,
                   onRegisterNpcRepairTarget: registerNpcRepairTarget,

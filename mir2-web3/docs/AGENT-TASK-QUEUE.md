@@ -1,5 +1,9 @@
 # Agent Task Queue
 
+## 狩猎经济第六阶段与下一队列（2026-10-20）
+
+已在现有Page/NpcRepairService/Shop/Shell接typed修理报价、确认、原操作查询，显示服务端绑定费用及只读新钱包，并将同回合完整snapshot应用到真实游戏状态。未知提交、缺快照、主动关窗或NPC退场保留原Pending查询，不重新确认；身份/actor/socket退役拒绝迟到。最终29：专项101/101、原生Next生产构建（严格TS、13页）、独立严格TS零错误，编译后钱包接口原生HTTP10/10，见 [第六阶段证据](generated/hunting-economy/acceptance-20261020-repair-ui.json)。没有真实浏览器/物理游戏WebSocket或玩家保存重登验收，HTTP使用合成只读来源。下一最小队列是原生隔离环境真实客户端确认/拒绝、Pending与断线保存重登；其后其它来源、材料绑定传播、全服指标、通知和迁移发布。默认禁用、K=0.1及0.72/1.08许可保持；goal active，不新增网页、不用Docker/WSL/虚拟机、不关闭游戏。以下第五阶段队列为历史范围，现有窗口接线项由本段更新。
+
 ## 狩猎许可经济持续目标（2026-10-20）
 
 持续目标active。第五阶段已补服务端同owner回合快照与required nullable snapshot帧、Shared尾部/采样失败后保留已知回执，以及纯Web client adapter；最终26的Gateway62、wire33、Node42共137项去重通过，含10项实际原生PG，见 [第五阶段证据](generated/hunting-economy/acceptance-20261020-repair-sync.json)。第四阶段真实修理来源的326项/81PG保留为历史范围。下一最小队列：在现有Page/NpcRepairService/Shop/Shell接入typed Quote→Confirm→Query、服务端费用/绑定钱包展示和真实snapshot apply，再做物理玩家确认、Pending恢复及网络保存重登验收；不新建网页。旧UID包不能暗映射为新报价确认，Pending不得换ID重试，关闭窗口不能丢失未决操作。纯adapter尚未接游戏窗口，没有UI、物理网络、全workspace或全前端构建验收。
