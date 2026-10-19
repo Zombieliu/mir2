@@ -1,0 +1,87 @@
+{
+  "classification": "local native browser spot-check of synthetic Grafana data; not production economic acceptance",
+  "recorded_on": "2026-10-20",
+  "browser": "normal native in-app browser (IAB), narrow viewport; no device emulation claim",
+  "viewport": {
+    "width": 446,
+    "height": 636
+  },
+  "selected_realm": "hunting-observer-test-grafana-20261019-native1-steady_complete",
+  "synthetic_only": true,
+  "images": [
+    {
+      "file": "grafana-dashboard-steady-complete.jpg",
+      "bytes": 174998,
+      "sha256": "f51a0bae4945948a3b240eb989d5809c0ade4f6549d0fd3b8385c3795f5de028",
+      "width": 446,
+      "height": 4735,
+      "capture_fullPage_requested": true,
+      "visible_checks": [
+        "selected synthetic realm and economic definitions",
+        "three-layer destruction stack: daily, light PVP, Sabuk"
+      ],
+      "coverage_note": "Capture flag and tall artifact are not an all-panel visual/layout or full-page coverage acceptance."
+    },
+    {
+      "file": "grafana-dashboard-permit.jpg",
+      "bytes": 24859,
+      "sha256": "4815ac50cdb80eb1e61539e7624ab8691090331bac63a3f78e0e23fc9811123c",
+      "width": 446,
+      "height": 636,
+      "visible_checks": [
+        "permit flow legends",
+        "global daily closing permit inventory and planned daily consumption"
+      ]
+    },
+    {
+      "file": "grafana-dashboard-players.jpg",
+      "bytes": 24144,
+      "sha256": "04c2560f4fdad25954e57638148617f346c78dfbe17036ecc41d5a40a5c4ff76",
+      "width": 446,
+      "height": 636,
+      "visible_checks": [
+        "synthetic mutually exclusive account groups: casual6/light PVP3/Sabuk1",
+        "pie chart percentages60/30/10"
+      ]
+    },
+    {
+      "file": "grafana-dashboard-health.jpg",
+      "bytes": 20743,
+      "sha256": "45ce98e22b63a43a2699cee9b3f8e67e595330e8432cb4f24897cdd28ad497ef",
+      "width": 446,
+      "height": 636,
+      "visible_checks": [
+        "synthetic realm completeness indicator green0"
+      ]
+    },
+    {
+      "file": "grafana-dashboard-income-null.jpg",
+      "bytes": 21526,
+      "sha256": "e3892eecab95c3f935abb723a031aa24055ad61f57ff167c936ac464d3901970",
+      "width": 446,
+      "height": 636,
+      "visible_checks": [
+        "empty monthly income plot for missing source NULL values"
+      ],
+      "interpretation": "Empty plot is not evidence of measured zero income."
+    }
+  ],
+  "fullPage_flag_establishes_all_nested_scroll_content_coverage": false,
+  "all_14_panels_visual_or_layout_accepted": false,
+  "real_monthly_card_market_data_accepted": false,
+  "production_asset_coverage_claimed": false,
+  "external_notifications_sent": false,
+  "runtime": {
+    "grafana": "native Windows portable process",
+    "postgresql": "native local loopback service",
+    "docker_used_for_this_browser_validation": false,
+    "user_prohibits_docker_wsl_virtualization": true
+  },
+  "shutdown": {
+    "evidence": "grafana-shutdown.json",
+    "owned_pid": 220812,
+    "owned_backend_processes_stopped": 13,
+    "server_stopped": true,
+    "private_runtime_retained": true
+  }
+}

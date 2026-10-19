@@ -56,10 +56,7 @@
                 "refId": "B",
                 "type": "reduce",
                 "expression": "A",
-                "reducer": "last",
-                "settings": {
-                  "mode": "strict"
-                }
+                "reducer": "last"
               }
             },
             {
@@ -149,10 +146,7 @@
                 "refId": "B",
                 "type": "reduce",
                 "expression": "A",
-                "reducer": "last",
-                "settings": {
-                  "mode": "strict"
-                }
+                "reducer": "last"
               }
             },
             {
@@ -242,10 +236,7 @@
                 "refId": "B",
                 "type": "reduce",
                 "expression": "A",
-                "reducer": "last",
-                "settings": {
-                  "mode": "strict"
-                }
+                "reducer": "last"
               }
             },
             {
@@ -335,10 +326,7 @@
                 "refId": "B",
                 "type": "reduce",
                 "expression": "A",
-                "reducer": "last",
-                "settings": {
-                  "mode": "strict"
-                }
+                "reducer": "last"
               }
             },
             {
@@ -428,10 +416,7 @@
                 "refId": "B",
                 "type": "reduce",
                 "expression": "A",
-                "reducer": "last",
-                "settings": {
-                  "mode": "strict"
-                }
+                "reducer": "last"
               }
             },
             {

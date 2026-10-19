@@ -1,8 +1,8 @@
 # Backend 1:1 Progress
 
-## 狩猎许可经济基础（2026-10-19）
+## 狩猎许可经济来源接线（2026-10-20）
 
-独立工作树已实现新经济PostgreSQL事务、全服许可竞争控制、认证HTTP和04:00进程任务；共享公式Rust12/Python14、核心真实PG5项及授权/空服追赶/锁退出等有界验收通过。用户选择保留K=0.1，基准与硬上限重算为0.72/1.08许可。详见 [实施记录](HUNTING-PERMIT-ECONOMY.md)。真实游戏来源、材料绑定、全服指标覆盖及生产发布仍开放；默认关闭、旧gold未迁移、远程资产未改，不提高Crystal1:1进度。
+独立工作树新增无物品一次性任务权威来源、完整checkpoint/绑定金币同事务CAS及原NPC请求提交不明恢复；配置桥12项、实际任务分发12项通过，包含独立规划、UUID、worker丢失、当前buff上限、Zone伤害/死亡及不同顺序的冻结归属保护。原生Grafana完成只读TLS/实际查询和表达式、合成图表抽查；详见 [实施记录](HUNTING-PERMIT-ECONOMY.md)。副本完整结果及原代际尚未复制，启用来源时远端/旧命令重放/晋升在执行前拒绝。K=0.1、基准0.72/硬上限1.08许可、默认关闭保持；其他玩法来源、材料、全服指标、通知和发布仍开放。仅原生、不用Docker，旧gold和远程资产未改，不提高Crystal1:1进度。
 
 
 ## Root owned Source78 authenticated Spells bootstrap and ordinary reentry QA (2026-10-12 Beijing)

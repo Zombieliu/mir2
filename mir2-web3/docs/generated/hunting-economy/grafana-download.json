@@ -1,0 +1,10 @@
+{
+  "version": "13.2.4",
+  "archive_bytes": 466144621,
+  "sha256_verified": true,
+  "download_transport": "environment_proxy_https",
+  "download_range_count": 32,
+  "download_concurrency": 4,
+  "download_tls_maximum": "1.2",
+  "tls_verification_disabled": false
+}

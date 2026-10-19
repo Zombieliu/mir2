@@ -57,7 +57,7 @@ Contact point默认使用Grafana标准Webhook格式，不能把钉钉或企业�
 3. 用受控样本触发四类业务阈值、缺日期、缺基准、整库无数据、单服缺失及数据库不可用。业务数据不可用只产生数据异常描述。
 4. 通过测试通知确认钉钉/企业微信接收与恢复消息，不进行真实资产写入。
 
-本包没有执行上述部署或资格检查。`validation-result.json`只记录实际运行的离线artifact验证。
+配置部署不会自动执行上述资格检查。`validation-result.json`只记录离线artifact验证；独立的PostgreSQL和原生Grafana验收证据见后文，不能用它们代替真实服数据覆盖或通知平台接收验收。
 
 ## 隔离PostgreSQL验收
 
@@ -73,3 +73,17 @@ python infra/economy-observability/tests/postgres_acceptance.py
 脚本把五份实际告警SQL原文嵌入验收，不用测试假表遮蔽public视图。覆盖四项严格阈值、缺日、缺基准、没有任何历史的已配置服、04:00/跨月、不可变版本、完整覆盖资格、真实形状成交与画像数据、负收益及月度估值。物理schema不允许重复日/零基准，改测约束拒绝；手续费由receipt毛额减净额派生，改测守恒恒等式，不通过伪造重复行或无效配置绕过约束。
 
 未运行该真实数据库脚本前，不得把render-only或离线模型通过写成PostgreSQL验收通过。
+
+## 原生Grafana隔离验收（2026-10-19）
+
+用户已明确禁止Docker，以免影响本机三角洲游戏。后续验收只使用原生Windows进程，不启动Docker、WSL或其他虚拟化环境；当前Grafana与PostgreSQL均原生运行。
+
+已在自有loopback实例真实运行Grafana OSS 13.2.4，官方Windows包SHA256校验通过。专用只读角色只查询两个观测view，数据源通过 `verify-full` 和私有测试CA验证；14个panel与5条告警原生导入、13个数据panel SQL实际执行通过。29个明确标为synthetic的独立realm上，57个SQL值和57个原生表达式值通过，其中17项明确检查NULL不会转成正常0。执行模型取自Grafana的provisioning API，避免只测试本地副本而漏掉旧的持久配置。
+
+首次表达式执行实际返回HTTP400：`reducer mode 'strict' is not supported`。Grafana原生默认行为就是strict，只有 `dropNN` / `replaceNN` 作为显式mode。已仅删除5处 `settings.mode=strict`，保留SQL、阈值、日数、NoData策略，再次导入并执行通过。离线检查增加禁止写出该非法字段的断言。仅导入成功不能证明告警表达式能执行。
+
+详细证据在 `docs/generated/hunting-economy/grafana-acceptance.zh-CN.md`、`grafana-native-query-validation.json` 和 `grafana-compatibility-history.json`。当前测试使用服务器now推导的十月完整经济日，不能因fixture名称而声称真实跨闰日；没有发送真实通知，也没有改变真实服覆盖资格或游戏额度。
+
+`tests/grafana_native_acceptance.py` 提供公开包校验下载、私有实例启动、原生导入、只读查询、合成fixture SQL生成和有界私有进程关闭。它不持有业务owner凭据；fixture需由集成人审查后在隔离库单独提交。所有运行凭据、SQLite、日志和详细响应只留在自有私有目录，不写仓库。数据库配置只接受loopback与 `mir2_hunting_acceptance_` 库名。
+
+自定义CA的原生配置为 `jsonData.tlsConfigurationMethod=file-path` 与 `jsonData.sslRootCertFile=<公开CA路径>`，保留 `sslmode=verify-full`；也可用 `file-content` 与 `secureJsonData.tlsCACert`。不需要客户端私钥来验证数据库服务器。主bundle不携带本地证书或凭据，测试只在私有provisioning副本接线。字段依据[官方PostgreSQL TLS provisioning文档](https://grafana.com/docs/grafana/latest/datasources/postgres/configure/#provisioning-with-tls)。

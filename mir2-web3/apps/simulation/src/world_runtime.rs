@@ -302,6 +302,10 @@ pub trait WorldRuntime: Send + Sync {
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
 
+    /// Bound sources currently require this runtime's local authority. Raw RPC
+    /// owners cannot carry its trusted source result or character incarnation.
+    fn requires_local_hunting_source_authority(&self) -> bool { false }
+
     fn on_connect(&self) -> Vec<ServerPacket>;
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String>;
     fn execute_with_outcome(
@@ -423,6 +427,11 @@ impl InProcessWorldRuntime {
         Self {
             session: SimulationSession::new(config),
         }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn from_test_session(session: SimulationSession) -> Self {
+        Self { session }
     }
 
     pub fn rebind_account_store(&mut self, authoritative: &SimulationConfig) {
@@ -1047,6 +1056,10 @@ impl InProcessWorldRuntime {
 }
 
 impl WorldRuntime for InProcessWorldRuntime {
+    fn requires_local_hunting_source_authority(&self) -> bool {
+        self.session.requires_local_hunting_source_authority()
+    }
+
     fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
         self.session.supports_magic_key_assignment(spell,key,old_key)
     }
@@ -1063,6 +1076,11 @@ impl WorldRuntime for InProcessWorldRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+        if let WorldCommand::SelectNpcDialog { target } = &command {
+            if let Some(packets) = self.session.try_recover_hunting_quest_npc_target(target) {
+                return Ok(packets);
+            }
+        }
         let xp_source = matches!(&command, WorldCommand::Attack{..}|WorldCommand::Interact{..}
             |WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}|WorldCommand::CastSkill{..});
         let before = if xp_source { self.session.begin_guild_experience_command(false)? } else { None };

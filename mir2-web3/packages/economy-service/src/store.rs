@@ -557,6 +557,28 @@ pub fn credit_bound_with_source<F>(
 where
     F: FnOnce(&mut Transaction<'_>, SourceContext) -> EconomyResult<()>,
 {
+    credit_bound_authorized_with_source_impl(
+        client,
+        realm,
+        source_key,
+        source_digest,
+        amount,
+        None,
+        |_, _| Ok(owner.clone()),
+        source,
+    )
+}
+
+/// Stable server-side identity for a trusted credit. Source participants may
+/// use this key for a deferred foreign key in the SAME transaction.
+pub fn bound_credit_operation_identity(
+    realm: &str,
+    owner: &WalletOwner,
+    source_key: &str,
+    source_digest: &str,
+    amount: u64,
+) -> EconomyResult<(String, String)> {
+    token(realm, "realm_id", 128)?;
     validate_owner(owner)?;
     token(source_key, "source_key", 256)?;
     token(source_digest, "source_digest", 256)?;
@@ -573,7 +595,83 @@ where
         source_digest,
         amount,
     ))?;
-    transaction(client, realm, |tx, clock| {
+    Ok((key, hash))
+}
+
+/// Authorization runs under the realm lock before receipt lookup, including
+/// retries. It must lock the real source owner (and any preceding Guild locks)
+/// before this library can create or lock its wallet. The source callback writes
+/// the complete gameplay CAS using this same transaction; it is skipped on replay.
+pub fn credit_bound_authorized_with_source<A, S>(
+    client: &mut Client,
+    realm: &str,
+    source_key: &str,
+    source_digest: &str,
+    amount: u64,
+    authorize: A,
+    source: S,
+) -> EconomyResult<Idempotent<BoundCreditReceipt>>
+where
+    A: FnOnce(&mut Transaction<'_>, SourceContext) -> EconomyResult<WalletOwner>,
+    S: FnOnce(&mut Transaction<'_>, SourceContext) -> EconomyResult<()>,
+{
+    credit_bound_authorized_with_source_impl(
+        client,
+        realm,
+        source_key,
+        source_digest,
+        amount,
+        None,
+        authorize,
+        source,
+    )
+}
+
+pub fn credit_bound_authorized_with_source_with_timeouts<A, S>(
+    client: &mut Client,
+    realm: &str,
+    source_key: &str,
+    source_digest: &str,
+    amount: u64,
+    lock_timeout_ms: u32,
+    statement_timeout_ms: u32,
+    authorize: A,
+    source: S,
+) -> EconomyResult<Idempotent<BoundCreditReceipt>>
+where
+    A: FnOnce(&mut Transaction<'_>, SourceContext) -> EconomyResult<WalletOwner>,
+    S: FnOnce(&mut Transaction<'_>, SourceContext) -> EconomyResult<()>,
+{
+    credit_bound_authorized_with_source_impl(
+        client,
+        realm,
+        source_key,
+        source_digest,
+        amount,
+        Some((lock_timeout_ms, statement_timeout_ms)),
+        authorize,
+        source,
+    )
+}
+
+fn credit_bound_authorized_with_source_impl<A, S>(
+    client: &mut Client,
+    realm: &str,
+    source_key: &str,
+    source_digest: &str,
+    amount: u64,
+    timeouts: Option<(u32, u32)>,
+    authorize: A,
+    source: S,
+) -> EconomyResult<Idempotent<BoundCreditReceipt>>
+where
+    A: FnOnce(&mut Transaction<'_>, SourceContext) -> EconomyResult<WalletOwner>,
+    S: FnOnce(&mut Transaction<'_>, SourceContext) -> EconomyResult<()>,
+{
+    transaction_with_timeouts(client, realm, timeouts, |tx, clock| {
+        let owner = authorize(tx, clock)?;
+        let (key, hash) =
+            bound_credit_operation_identity(realm, &owner, source_key, source_digest, amount)?;
         if let Some(receipt) = existing(tx, realm, &key, "bound_credit", &hash)? {
             return Ok(Idempotent {
                 receipt,
@@ -583,10 +681,10 @@ where
         let (state, policy) = load_pool(tx, realm)?;
         require_enabled(&policy)?;
         require_caught_up(&state, clock)?;
-        let mut balance = wallet(tx, realm, owner, clock.database_time_ms)?;
-        balance.bound_gold = checked_add(balance.bound_gold, amount, "bound_gold")?;
         source(tx, clock)?;
-        write_wallet(tx, realm, owner, &mut balance, clock.database_time_ms)?;
+        let mut balance = wallet(tx, realm, &owner, clock.database_time_ms)?;
+        balance.bound_gold = checked_add(balance.bound_gold, amount, "bound_gold")?;
+        write_wallet(tx, realm, &owner, &mut balance, clock.database_time_ms)?;
         let receipt = BoundCreditReceipt {
             realm_id: realm.into(),
             operation_key: key.clone(),
@@ -604,6 +702,35 @@ where
             replayed: false,
         })
     })
+}
+
+/// Read-only original-operation recovery. No policy check, wallet creation,
+/// source callback or new credit occurs. The trusted caller supplies locking
+/// authorization; normal clients must never select a historical owner.
+pub fn lookup_bound_credit_authorized_with_timeouts<A>(
+    client: &mut Client,
+    realm: &str,
+    source_key: &str,
+    source_digest: &str,
+    amount: u64,
+    lock_timeout_ms: u32,
+    statement_timeout_ms: u32,
+    authorize: A,
+) -> EconomyResult<Option<BoundCreditReceipt>>
+where
+    A: FnOnce(&mut Transaction<'_>, SourceContext) -> EconomyResult<WalletOwner>,
+{
+    transaction_with_timeouts(
+        client,
+        realm,
+        Some((lock_timeout_ms, statement_timeout_ms)),
+        |tx, clock| {
+            let owner = authorize(tx, clock)?;
+            let (key, hash) =
+                bound_credit_operation_identity(realm, &owner, source_key, source_digest, amount)?;
+            existing(tx, realm, &key, "bound_credit", &hash)
+        },
+    )
 }
 
 fn insert_burn(

@@ -1,0 +1,13 @@
+{
+  "grafana_version": "13.2.4",
+  "health_database": "ok",
+  "dashboard_panels_imported": 14,
+  "alert_rules_imported": 5,
+  "alert_sql_preserved": true,
+  "contact_point_imported": true,
+  "datasource_plugin": "grafana-postgresql-datasource",
+  "sslmode": "verify-full",
+  "native_schema_import_passed": true,
+  "datasource_queries_executed": false,
+  "notifications_sent": false
+}

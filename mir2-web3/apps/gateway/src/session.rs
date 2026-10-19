@@ -187,6 +187,8 @@ impl GatewaySession {
     }
 
     pub fn new_with_zone_registry(config: GatewayConfig, registry: &ZoneRegistry) -> Self {
+        crate::hunting_clock::ensure_hunting_game_source_topology(&config)
+            .expect("hunting sources require a supported local owner topology");
         let routed = registry.open_session(config.clone());
         Self::with_routed_world_runtime_and_owner_authority(
             routed.zone_id,
@@ -327,6 +329,8 @@ impl GatewaySession {
         registry: &ZoneRegistry,
         gameplay_event_sink: SharedGameplayEventSink,
     ) -> Self {
+        crate::hunting_clock::ensure_hunting_game_source_topology(&config)
+            .expect("hunting sources require a supported local owner topology");
         let routed = registry.open_session(config.clone());
         Self::with_routed_world_runtime_and_owner_authority_and_event_sink(
             routed.zone_id,
@@ -339,6 +343,8 @@ impl GatewaySession {
     }
 
     fn with_routing_context(mut self, config: GatewayConfig, registry: ZoneRegistry) -> Self {
+        crate::hunting_clock::ensure_hunting_game_source_topology(&config)
+            .expect("hunting sources require a supported local owner topology");
         let global_message_bus = registry.global_message_bus();
         global_message_bus.register_session(&self.session_id, self.zone_id.clone());
         self.routing_context = Some(GatewaySessionRoutingContext { config, registry });

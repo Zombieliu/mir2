@@ -3865,12 +3865,32 @@ impl SimulationSession {
         };
         let character = save.character.clone();
 
+        // Bind the database creation identity before entering the world. A late
+        // reward may not derive a fresh UUID for an old Session after deletion
+        // and recreation at the same character index/name.
+        let hunting_incarnation = {
+            let config = &self.app.world().resource::<RuntimeConfigResource>().config;
+            match config.bind_hunting_character_incarnation(&account_id, &save) {
+                Ok(identity) => identity,
+                Err(_) => {
+                    return vec![ServerPacket::StartGame {
+                        result: 2,
+                        resolution: 0,
+                    }];
+                }
+            }
+        };
+
         if apply_character_save(self.app.world_mut(), &save).is_err() {
             return vec![ServerPacket::StartGame {
                 result: 2,
                 resolution: 0,
             }];
         }
+        self.app
+            .world_mut()
+            .resource_mut::<SessionResource>()
+            .hunting_character_incarnation = hunting_incarnation;
         refresh_runtime_map_collision(self.app.world_mut());
         if recover_out_of_bounds_loaded_transform(self.app.world_mut()) {
             refresh_runtime_map_collision(self.app.world_mut());

@@ -22,11 +22,66 @@ const LIVE_ZONE_OUTBOUND_CAPACITY: usize = 256;
 const OWNER_LOCATION_OUTBOUND_CAPACITY: usize = 8;
 const DEFAULT_MAX_PERSISTENCE_SESSION_TASKS: usize = 2_048;
 
+#[cfg(test)]
+mod hunting_source_programmatic_entry_tests {
+    use super::*;
+
+    #[test]
+    fn hunting_source_programmatic_public_entrypoints_reject_before_startup() {
+        const MARKER: &str = "MIR2_HUNTING_PUBLIC_GUARD_TEST_CHILD";
+        const TEST: &str = "tcp::hunting_source_programmatic_entry_tests::hunting_source_programmatic_public_entrypoints_reject_before_startup";
+        if std::env::var(MARKER).ok().as_deref() != Some("1") {
+            let output = std::process::Command::new(std::env::current_exe().unwrap())
+                .args(["--exact", TEST, "--nocapture"])
+                .env(MARKER, "1")
+                // Deliberately disabled env must not erase a caller's binding.
+                .env("MIR2_HUNTING_ECONOMY_ENABLED", "false")
+                .env("MIR2_ZONE_HOST_ADDR", "127.0.0.1:9")
+                .env_remove("MIR2_GATE15_VALIDATOR_URLS")
+                .env_remove("MIR2_ZONE_HOST_ACTIVE_ADDRS")
+                .env_remove("MIR2_ZONE_HOST_ADDRS")
+                .output().expect("isolated public entry test should launch");
+            assert!(output.status.success(), "isolated public entry test failed: {} {}",
+                String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
+            assert!(String::from_utf8_lossy(&output.stdout).contains("1 passed"), "the exact isolated test must execute");
+            return;
+        }
+        let mut config = GatewayConfig::default();
+        config.hunting_economy_realm = Some("programmatic-startup-guard".into());
+        let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
+        runtime.block_on(async {
+            let error = run_tcp_gateway("invalid-address", config.clone(), ChatBroadcastHub::for_tests()).await.unwrap_err();
+            assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
+            assert!(error.to_string().contains("hunting"));
+            let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let error = tokio::time::timeout(std::time::Duration::from_secs(1),
+                serve_tcp_gateway(listener, config.clone(), ChatBroadcastHub::for_tests()))
+                .await.expect("serve must reject without accepting a client").unwrap_err();
+            assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
+            assert!(error.to_string().contains("hunting"));
+            let error = tokio::time::timeout(std::time::Duration::from_secs(1),
+                crate::web::run_web_gateway("invalid-address", config.clone(), ChatBroadcastHub::for_tests()))
+                .await.expect("web entry must reject before initialization").unwrap_err();
+            assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
+            assert!(error.to_string().contains("hunting"));
+        });
+        assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            GatewaySession::new(config.clone())
+        })).is_err());
+        assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            GatewaySession::new_with_zone_registry_and_event_sink(config.clone(), &ZoneRegistry::in_process(),
+                Arc::new(crate::InMemoryGameplayEventSink::default()))
+        })).is_err());
+    }
+}
+
 pub async fn run_tcp_gateway(
     addr: &str,
     config: GatewayConfig,
     chat_hub: ChatBroadcastHub,
 ) -> io::Result<()> {
+    crate::hunting_clock::ensure_hunting_game_source_topology(&config)
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let listener = TcpListener::bind(addr).await?;
     serve_tcp_gateway(listener, config, chat_hub).await
 }
@@ -40,6 +95,8 @@ pub async fn serve_tcp_gateway(
     config: GatewayConfig,
     chat_hub: ChatBroadcastHub,
 ) -> io::Result<()> {
+    crate::hunting_clock::ensure_hunting_game_source_topology(&config)
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     // Activated Crystal world: host every map full-size in the shared zone (see
     // `run_web_gateway`). Empty maps stay dormant regardless.
     if config.monster_spawn_source == mir2_simulation::MonsterSpawnSource::CrystalWorld {

@@ -273,6 +273,11 @@ impl SimulationSession {
             .rebind_account_store_from(authoritative);
     }
 
+    pub(crate) fn requires_local_hunting_source_authority(&self) -> bool {
+        self.app.world().resource::<RuntimeConfigResource>()
+            .config.hunting_economy_realm.is_some()
+    }
+
     pub fn set_language(&mut self, language: LanguageCode) {
         self.app
             .world_mut()

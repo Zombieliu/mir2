@@ -1,0 +1,8 @@
+{
+  "synthetic_only": true,
+  "isolated_database": "mir2_hunting_acceptance_20261019",
+  "fixture_sha256": "bc5cc0e00770aa21a0775b1fd3f72687927728a211fb0ce0d627686954b32f1a",
+  "committed_synthetic_realms": 29,
+  "no_remote_access": true,
+  "purpose": "cross-connection read-only native Grafana SQL/expression acceptance; not gameplay, full-realm or economic calibration data"
+}

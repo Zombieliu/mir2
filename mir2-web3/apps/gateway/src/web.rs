@@ -2591,6 +2591,8 @@ pub async fn run_web_gateway(
     config: GatewayConfig,
     chat_hub: ChatBroadcastHub,
 ) -> io::Result<()> {
+    crate::hunting_clock::ensure_hunting_game_source_topology(&config)
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     // Activated Crystal world: host every map full-size in the shared zone so
     // players roam all of Bichon (and reach every transfer), not just the
     // starter slice. Empty maps stay dormant regardless.

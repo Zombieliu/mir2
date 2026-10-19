@@ -175,6 +175,9 @@ impl CharacterRecord {
 pub type SharedAccountStore = Arc<Mutex<AccountStore>>;
 #[path = "config_hunting_deletion.rs"]
 mod hunting_deletion;
+#[path = "config_hunting_source.rs"]
+pub(crate) mod hunting_source;
+pub(crate) use hunting_source::{HuntingQuestCommit, HuntingSourceError, PreparedHuntingQuestSource};
 #[path = "config_prepared_kill.rs"]
 mod prepared_kill;
 pub use prepared_kill::{PreparedKillAccountSource, PreparedKillPublication, PreparedKillPublicationFailure};
@@ -3777,6 +3780,8 @@ pub struct SimulationConfig {
     pub account_store_path: Option<PathBuf>,
     pub account_store_database_url: Option<String>,
     pub account_store_database_mode: AccountStoreDatabaseMode,
+    /// Trusted server opt-in only. Never copied into a replica apply sandbox.
+    pub hunting_economy_realm: Option<String>,
     /// Explicit durable directory for Gateway character-save recovery journals.
     /// PostgreSQL deployments must configure this independently because a DB
     /// URL is not a filesystem location.
@@ -3792,6 +3797,8 @@ pub struct SimulationConfig {
     /// Only explicit reconciliation may restore writes; reload does not clear it.
     /// See docs/FILE-PUBLICATION-FENCE.md for the durable marker contract.
     account_store_write_state: Arc<Mutex<AccountStoreWriteState>>,
+    account_store_freeze_epoch: Arc<std::sync::atomic::AtomicU64>,
+    hunting_source_fence: Arc<Mutex<Option<hunting_source::HuntingSourceFence>>>,
     #[cfg(any(test, feature = "test-support"))]
     account_store_transaction_fault: Arc<Mutex<Option<AccountStoreTransactionFault>>>,
     #[cfg(test)]
@@ -3859,10 +3866,26 @@ impl SimulationConfig {
     /// an isolated account image and must never mirror those shadow writes back
     /// into the active file/PostgreSQL account repository.
     pub fn fork_for_replica_apply(&self) -> Result<Self, String> {
+        // A raw quest command with the source capability cleared would award
+        // old gold on the standby, contradicting the active bound-wallet CAS.
+        // Refuse before creating any replay World until resolved source
+        // checkpoints and original incarnation witnesses are replicated.
+        self.ensure_hunting_source_replication_supported()?;
+        self.fork_for_hunting_preparation()
+    }
+
+    /// A trusted personal quest planner calls the pure reward implementation
+    /// with legacy gold explicitly suppressed. This is not a replication API:
+    /// callers must never dispatch ordinary packets into this shadow World.
+    pub(crate) fn fork_for_hunting_preparation(&self) -> Result<Self, String> {
         let mut fork = self.fork_with_isolated_account_store()?;
         fork.account_store_path = None;
         fork.file_authority = None;
         fork.account_store_database_url = None;
+        fork.hunting_economy_realm = None;
+        fork.account_store_write_state = Arc::new(Mutex::new(AccountStoreWriteState::Writable));
+        fork.account_store_freeze_epoch = Arc::new(std::sync::atomic::AtomicU64::new(0));
+        fork.hunting_source_fence = Arc::new(Mutex::new(None));
         fork.save_recovery_dir = None;
         fork.save_recovery_mac_key = None;
         Ok(fork)
@@ -3879,10 +3902,13 @@ impl SimulationConfig {
         self.account_store_path = authoritative.account_store_path.clone();
         self.account_store_database_url = authoritative.account_store_database_url.clone();
         self.account_store_database_mode = authoritative.account_store_database_mode;
+        self.hunting_economy_realm = authoritative.hunting_economy_realm.clone();
         self.save_recovery_dir = authoritative.save_recovery_dir.clone();
         self.save_recovery_mac_key = authoritative.save_recovery_mac_key.clone();
         self.account_store_persist_lock = Arc::clone(&authoritative.account_store_persist_lock);
         self.account_store_write_state = Arc::clone(&authoritative.account_store_write_state);
+        self.account_store_freeze_epoch = Arc::clone(&authoritative.account_store_freeze_epoch);
+        self.hunting_source_fence = Arc::clone(&authoritative.hunting_source_fence);
     }
 
     pub fn from_scene(scene: &SceneBootstrap) -> Self {
@@ -3970,6 +3996,7 @@ impl SimulationConfig {
             account_store_path: None,
             account_store_database_url: None,
             account_store_database_mode: AccountStoreDatabaseMode::Mirror,
+            hunting_economy_realm: None,
             save_recovery_dir: None,
             save_recovery_mac_key: None,
             content_profile: None,
@@ -3978,6 +4005,8 @@ impl SimulationConfig {
             guild_clock_driver: Arc::new(Mutex::new(guild_clock_driver::ClockDriverState::default())),
             account_store_persist_lock: Arc::new(Mutex::new(())),
             account_store_write_state: Arc::new(Mutex::new(AccountStoreWriteState::Writable)),
+            account_store_freeze_epoch: Arc::new(std::sync::atomic::AtomicU64::new(0)),
+            hunting_source_fence: Arc::new(Mutex::new(None)),
             #[cfg(any(test, feature = "test-support"))]
             account_store_transaction_fault: Arc::new(Mutex::new(None)),
             #[cfg(test)]
@@ -4345,6 +4374,10 @@ impl SimulationConfig {
     }
 
     fn freeze_account_store_writes(&self, reason: String) -> String {
+        self.freeze_account_store_writes_with_epoch(reason).0
+    }
+
+    fn freeze_account_store_writes_with_epoch(&self, reason: String) -> (String, u64, bool) {
         let mut reason = format!("{reason}; live AccountStore was not published");
         if let (Some(authority),Some(path))=(self.file_authority.as_ref(),self.account_store_path.as_deref()) {
             if authority.owns(self,path) {
@@ -4353,18 +4386,26 @@ impl SimulationConfig {
         }
         match self.account_store_write_state.lock() {
             Ok(mut state) => {
-                if matches!(*state, AccountStoreWriteState::Writable) {
+                // Epoch and freeze ownership share the same linearization point.
+                // A source may recover only a Writable -> Frozen transition it
+                // performed itself; an existing freeze never transfers ownership.
+                let epoch = self.account_store_freeze_epoch.fetch_add(1, std::sync::atomic::Ordering::AcqRel) + 1;
+                let newly_frozen = matches!(*state, AccountStoreWriteState::Writable);
+                if newly_frozen {
                     *state = AccountStoreWriteState::Frozen {
                         reason: reason.clone(),
                     };
                 }
-                match &*state {
+                let reason = match &*state {
                     AccountStoreWriteState::Writable => unreachable!(),
                     AccountStoreWriteState::Frozen { reason } => reason.clone(),
-                }
+                };
+                (reason, epoch, newly_frozen)
             }
-            Err(_) => format!(
-                "{reason}; account-store write-state mutex poisoned, so subsequent writes remain fail-closed"
+            Err(_) => (
+                format!("{reason}; account-store write-state mutex poisoned, so subsequent writes remain fail-closed"),
+                self.account_store_freeze_epoch.load(std::sync::atomic::Ordering::Acquire),
+                false,
             ),
         }
     }

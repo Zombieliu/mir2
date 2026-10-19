@@ -1,0 +1,10 @@
+{
+  "grafana_version": "13.2.4",
+  "datasource_health": "OK",
+  "sslmode": "verify-full",
+  "custom_ca_verified": true,
+  "panel_queries_executed": 13,
+  "selected_realm": "synthetic acceptance namespace",
+  "fixture_value_assertions_executed": false,
+  "notifications_sent": false
+}

@@ -19,6 +19,7 @@ const DEFAULT_ACCOUNT_STORE_PATH: &str = ".mir2-data/accounts.json";
 const DEFAULT_ZONE_HOST_JOURNAL_COMPACT_INTERVAL_MS: u64 = 30_000;
 
 fn main() -> io::Result<()> {
+    ensure_hunting_sources_unsupported_from_env()?;
     mir2_gateway::gate15::initialize_from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::Other, error))?;
     use_signing_identity_as_default_host_id()?;
@@ -280,4 +281,48 @@ fn env_flag(name: &str, default: bool) -> bool {
         .ok()
         .map(|value| !matches!(value.trim(), "0" | "false" | "FALSE" | "no" | "NO"))
         .unwrap_or(default)
+}
+
+// The raw-command replication protocol does not carry resolved hunting source
+// checkpoints or their original character-incarnation witnesses yet. Reject
+// before opening listeners, loading accounts or starting observer threads.
+fn ensure_hunting_sources_unsupported_from_env() -> io::Result<()> {
+    match env::var("MIR2_HUNTING_ECONOMY_ENABLED") {
+        Ok(value) => ensure_hunting_sources_unsupported(Some(&value)),
+        Err(env::VarError::NotPresent) => ensure_hunting_sources_unsupported(None),
+        Err(env::VarError::NotUnicode(_)) => Err(io::Error::new(io::ErrorKind::InvalidInput,
+            "MIR2_HUNTING_ECONOMY_ENABLED must be valid Unicode true, false, 1 or 0")),
+    }
+}
+
+fn ensure_hunting_sources_unsupported(value: Option<&str>) -> io::Result<()> {
+    match value.map(str::trim).map(str::to_ascii_lowercase).as_deref() {
+        None | Some("false" | "0") => Ok(()),
+        Some("true" | "1") => Err(io::Error::new(io::ErrorKind::InvalidInput,
+            "hunting quest sources are unsupported on the raw-command replicated Zone Host; use an unreplicated in-process game runtime")),
+        _ => Err(io::Error::new(io::ErrorKind::InvalidInput,
+            "MIR2_HUNTING_ECONOMY_ENABLED must be true, false, 1 or 0")),
+    }
+}
+
+#[cfg(test)]
+mod hunting_source_containment_tests {
+    use super::*;
+
+    #[test]
+    fn hunting_source_zone_host_env_rejects_enabled_and_invalid_before_startup() {
+        for value in [None, Some("false"), Some("0"), Some(" FALSE "), Some(" 0 ")] {
+            assert!(ensure_hunting_sources_unsupported(value).is_ok());
+        }
+        for value in ["true", "1", " TRUE ", " 1 "] {
+            let error=ensure_hunting_sources_unsupported(Some(value)).unwrap_err();
+            assert_eq!(error.kind(),io::ErrorKind::InvalidInput);
+            assert!(error.to_string().contains("unsupported"));
+        }
+        for value in ["", "yes", "no", "2", "off", "enabled"] {
+            let error=ensure_hunting_sources_unsupported(Some(value)).unwrap_err();
+            assert_eq!(error.kind(),io::ErrorKind::InvalidInput);
+            assert!(error.to_string().contains("must be true, false, 1 or 0"));
+        }
+    }
 }

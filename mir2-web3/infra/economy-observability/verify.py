@@ -173,6 +173,7 @@ def check_artifacts() -> int:
         check(rule["noDataState"] == ("Alerting" if key == "data_integrity" else "NoData"), f"{key}: missing-data handling")
         check(rule["labels"]["severity"] in {"red", "yellow"}, f"{key}: severity")
         check(rule["data"][2]["model"]["conditions"][0]["evaluator"] == {"type": "gt", "params": [0.5]}, f"{key}: incorrect boolean threshold")
+        check("settings" not in rule["data"][1]["model"], f"{key}: strict reduce must use native default; explicit mode is rejected")
         if key == "data_integrity":
             check("THEN 0.0 ELSE 1.0 END AS value" in sql and "ELSE NULL" not in sql, "health query must explicitly flag gaps")
         else:

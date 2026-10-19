@@ -448,6 +448,9 @@ pub(super) struct SessionResource {
     pub(super) account_id: Option<String>,
     pub(super) characters: Vec<CharacterRecord>,
     pub(super) selected_character: Option<CharacterRecord>,
+    /// Bound only by a successful StartGame against the authoritative PG row.
+    /// A reused index/name must never let an old World mutate a new creation.
+    pub(super) hunting_character_incarnation: Option<String>,
     ranking_inspect_generation: u64,
     ranking_inspect_active: bool,
     active_save_revision: Arc<AtomicU64>,
@@ -464,6 +467,7 @@ impl SessionResource {
             account_id: None,
             characters: vec![config.default_character.clone()],
             selected_character: None,
+            hunting_character_incarnation: None,
             ranking_inspect_generation: 0,
             ranking_inspect_active: false,
             active_save_revision: Arc::new(AtomicU64::new(UNKNOWN_ACTIVE_SAVE_REVISION)),
@@ -476,6 +480,16 @@ impl SessionResource {
     pub(super) fn active_save_revision(&self) -> Option<u64> {
         let revision = self.active_save_revision.load(Ordering::Acquire);
         (revision != UNKNOWN_ACTIVE_SAVE_REVISION).then_some(revision)
+    }
+
+    /// A planning World owns its revision cell; ordinary Clone shares the cell
+    /// so that unrelated live checkpoint helpers can observe one real session.
+    pub(super) fn fork_for_hunting_preparation(&self) -> Self {
+        let mut prepared = self.clone();
+        prepared.active_save_revision = Arc::new(AtomicU64::new(
+            self.active_save_revision.load(Ordering::Acquire),
+        ));
+        prepared
     }
 
     pub(super) fn bind_active_save_revision(&self, revision: u64) {
@@ -499,6 +513,7 @@ impl SessionResource {
     }
 
     pub(super) fn clear_active_save_revision(&mut self) {
+        self.hunting_character_incarnation = None;
         self.npc_purchase_journal = None;
         self.npc_purchase_producer = None;
         self.npc_purchase_owner_epoch = None;

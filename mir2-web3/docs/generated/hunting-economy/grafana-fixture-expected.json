@@ -1,0 +1,122 @@
+{
+  "fixture_prefix": "hunting-observer-test-grafana-20261019-native1",
+  "synthetic_only": true,
+  "fixture_sql_sha256": "bc5cc0e00770aa21a0775b1fd3f72687927728a211fb0ce0d627686954b32f1a",
+  "expected": {
+    "hunting-observer-test-grafana-20261019-native1-steady_complete": {
+      "inflation": 0,
+      "deflation": 0,
+      "permit_exhaustion": 0,
+      "burn_pulse": 0,
+      "data_integrity": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-inflation_all_seven": {
+      "inflation": 1,
+      "data_integrity": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-inflation_equal_130_percent_not_above": {
+      "inflation": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-inflation_six_days_not_seven": {
+      "inflation": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-inflation_gap_in_middle": {
+      "inflation": null,
+      "data_integrity": 1
+    },
+    "hunting-observer-test-grafana-20261019-native1-inflation_current_missing_old_seven_cannot_substitute": {
+      "inflation": null,
+      "deflation": null,
+      "permit_exhaustion": null,
+      "burn_pulse": null,
+      "data_integrity": 1
+    },
+    "hunting-observer-test-grafana-20261019-native1-deflation_all_seven": {
+      "deflation": 1,
+      "data_integrity": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-deflation_equal_70_percent_not_below": {
+      "deflation": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-deflation_one_day_recovered": {
+      "deflation": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-missing_stock_baseline_not_normal": {
+      "inflation": null,
+      "deflation": null,
+      "data_integrity": 1
+    },
+    "hunting-observer-test-grafana-20261019-native1-permit_nine_days_not_ten": {
+      "permit_exhaustion": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-permit_ten_days_below_one_day": {
+      "permit_exhaustion": 1,
+      "data_integrity": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-permit_equal_one_day_not_exhausted": {
+      "permit_exhaustion": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-permit_zero_true_stock": {
+      "permit_exhaustion": 1,
+      "data_integrity": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-permit_missing_plan_undefined": {
+      "permit_exhaustion": null,
+      "data_integrity": 1
+    },
+    "hunting-observer-test-grafana-20261019-native1-burn_pulse_over_150_percent": {
+      "burn_pulse": 1,
+      "data_integrity": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-burn_equal_150_percent_not_above": {
+      "burn_pulse": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-old_burn_spike_not_current_pulse": {
+      "burn_pulse": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-missing_burn_baseline": {
+      "burn_pulse": null,
+      "data_integrity": 1
+    },
+    "hunting-observer-test-grafana-20261019-native1-incomplete_latest_day": {
+      "inflation": null,
+      "deflation": null,
+      "permit_exhaustion": null,
+      "burn_pulse": null,
+      "data_integrity": 1
+    },
+    "hunting-observer-test-grafana-20261019-native1-missing_portrait_is_not_zero": {
+      "data_integrity": 1
+    },
+    "hunting-observer-test-grafana-20261019-native1-overlapping_portrait_counts": {
+      "data_integrity": 1
+    },
+    "hunting-observer-test-grafana-20261019-native1-period_end_wrong_cutoff": {
+      "data_integrity": 1
+    },
+    "hunting-observer-test-grafana-20261019-native1-missing_market_price_stays_null": {
+      "data_integrity": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-uninitialized_realm_no_history": {
+      "inflation": null,
+      "deflation": null,
+      "permit_exhaustion": null,
+      "burn_pulse": null,
+      "data_integrity": 1
+    },
+    "hunting-observer-test-grafana-20261019-native1-before_beijing_0400": {
+      "data_integrity": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-exactly_beijing_0400": {
+      "data_integrity": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-calendar_crosses_month": {
+      "inflation": 1,
+      "data_integrity": 0
+    },
+    "hunting-observer-test-grafana-20261019-native1-calendar_crosses_leap_day": {
+      "permit_exhaustion": 1,
+      "data_integrity": 0
+    }
+  }
+}

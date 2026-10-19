@@ -206,7 +206,9 @@ def main() -> None:
                           {"refId": "A", "relativeTimeRange": {"from": 864000, "to": 0}, "datasourceUid": DS["uid"],
                            "model": {"refId": "A", "datasource": DS, "rawQuery": True, "format": "time_series", "rawSql": sql, "intervalMs": 60000, "maxDataPoints": 1000}},
                           {"refId": "B", "relativeTimeRange": {"from": 0, "to": 0}, "datasourceUid": "__expr__",
-                           "model": {"refId": "B", "type": "reduce", "expression": "A", "reducer": "last", "settings": {"mode": "strict"}}},
+                           # Strict is the native default. An explicit mode named
+                           # "strict" is rejected by Grafana's expression parser.
+                           "model": {"refId": "B", "type": "reduce", "expression": "A", "reducer": "last"}},
                           {"refId": "C", "relativeTimeRange": {"from": 0, "to": 0}, "datasourceUid": "__expr__",
                            "model": {"refId": "C", "type": "threshold", "expression": "B",
                                      "conditions": [{"evaluator": {"type": "gt", "params": [0.5]}, "operator": {"type": "and"}, "reducer": {"type": "last", "params": []}, "query": {"params": ["C"]}, "type": "query"}]}},

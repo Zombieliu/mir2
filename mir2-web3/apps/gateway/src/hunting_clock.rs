@@ -80,6 +80,79 @@ pub fn hunting_http_runtime(
     )
 }
 
+/// The main game runtime and authenticated conversion adapter share one explicit
+/// realm/database binding. Raw command replication cannot carry these source
+/// commits yet, so an enabled source must stay on the local authority path.
+pub fn configure_hunting_game_sources(config: GatewayConfig) -> Result<GatewayConfig, String> {
+    let runtime = hunting_http_runtime(&config)?;
+    let config = bind_hunting_game_sources(config, runtime)?;
+    ensure_hunting_game_source_topology(&config)?;
+    Ok(config)
+}
+
+/// Shared with public/programmatic Gateway entry points. Trust the actual
+/// runtime capability; reading a disabled environment flag must never erase a
+/// source binding supplied by a server caller.
+pub(crate) fn ensure_hunting_game_source_topology(config: &GatewayConfig) -> Result<(), String> {
+    validate_hunting_source_topology(
+        config.hunting_economy_realm.is_some(),
+        crate::gate15::health().is_some(),
+        env::var("MIR2_GATE15_VALIDATOR_URLS").ok().as_deref(),
+        crate::TcpZoneOwnerRpcTransport::configured_endpoints_from_env(
+            &crate::routing::ZoneId::primary(),
+        )
+        .is_some(),
+    )
+}
+
+fn validate_hunting_source_topology(
+    enabled: bool,
+    gate15_initialized: bool,
+    validator_urls: Option<&str>,
+    remote_zone_owner: bool,
+) -> Result<(), String> {
+    if enabled
+        && (gate15_initialized
+            || validator_urls.is_some_and(|urls| !urls.trim().is_empty())
+            || remote_zone_owner)
+    {
+        return Err("hunting game sources require local authority; replicated Zone owners need trusted source checkpoints and character incarnation replication before activation".into());
+    }
+    Ok(())
+}
+
+fn bind_hunting_game_sources(
+    config: GatewayConfig,
+    runtime: Option<HuntingRuntimeConfig>,
+) -> Result<GatewayConfig, String> {
+    match runtime {
+        None => {
+            if config.hunting_economy_realm.is_some() {
+                return Err(
+                    "hunting game source binding cannot be silently disabled by the environment"
+                        .into(),
+                );
+            }
+            Ok(config)
+        }
+        Some(runtime) => {
+            if config.account_store_database_url.as_deref() != Some(runtime.database_url.as_str()) {
+                return Err(
+                    "hunting game source database differs from conversion authority".into(),
+                );
+            }
+            if config
+                .hunting_economy_realm
+                .as_ref()
+                .is_some_and(|realm| realm != &runtime.realm_id)
+            {
+                return Err("hunting game source realm differs from conversion authority".into());
+            }
+            config.with_hunting_economy_realm(runtime.realm_id)
+        }
+    }
+}
+
 fn initialize(runtime: &HuntingRuntimeConfig, policy_path: Option<PathBuf>) -> Result<(), String> {
     let policy = policy_path
         .map(|path| {
@@ -288,6 +361,46 @@ mod tests {
         .unwrap();
         assert_eq!(runtime.realm_id, "test-realm");
         assert!(!format!("{runtime:?}").contains("private-value"));
+    }
+
+    #[test]
+    fn hunting_game_source_binding_is_disabled_by_default_and_requires_one_authority() {
+        let disabled = bind_hunting_game_sources(GatewayConfig::default(), None).unwrap();
+        assert!(disabled.hunting_economy_realm.is_none());
+        let mut config = GatewayConfig::default();
+        config.account_store_database_mode = AccountStoreDatabaseMode::SourceOfTruth;
+        config.account_store_database_url = Some("postgresql://isolated-config-only".into());
+        let runtime = HuntingRuntimeConfig {
+            realm_id: "game-source-binding".into(),
+            database_url: "postgresql://isolated-config-only".into(),
+        };
+        let enabled = bind_hunting_game_sources(config.clone(), Some(runtime.clone())).unwrap();
+        assert_eq!(
+            enabled.hunting_economy_realm.as_deref(),
+            Some("game-source-binding")
+        );
+        assert!(enabled.fork_for_replica_apply().is_err());
+        assert!(bind_hunting_game_sources(enabled.clone(), None).is_err());
+        let mut wrong_realm = runtime.clone();
+        wrong_realm.realm_id = "other-realm".into();
+        assert!(bind_hunting_game_sources(enabled, Some(wrong_realm)).is_err());
+        let mut wrong = runtime;
+        wrong.database_url = "postgresql://other-authority".into();
+        assert!(bind_hunting_game_sources(config, Some(wrong)).is_err());
+    }
+
+    #[test]
+    fn hunting_source_topology_rejects_replication_before_source_activation() {
+        assert!(validate_hunting_source_topology(true, false, None, false).is_ok());
+        assert!(validate_hunting_source_topology(true, false, Some("  "), false).is_ok());
+        assert!(validate_hunting_source_topology(true, true, None, false).is_err());
+        assert!(
+            validate_hunting_source_topology(true, false, Some("http://validator"), false).is_err()
+        );
+        assert!(validate_hunting_source_topology(true, false, None, true).is_err());
+        assert!(
+            validate_hunting_source_topology(false, true, Some("http://validator"), true).is_ok()
+        );
     }
 
     fn postgres_fixture(label: &str) -> (Client, HuntingRuntimeConfig) {

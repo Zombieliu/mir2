@@ -1,0 +1,363 @@
+{
+  "recorded_at_utc": "2026-10-19T16:33:27.423261+00:00",
+  "classification": "local authoritative once-quest source milestone; overall goal active",
+  "goal_complete": false,
+  "production_activated": false,
+  "remote_assets_changed": false,
+  "legacy_gold_reclassified": false,
+  "default_policy": {
+    "schema_version": 1,
+    "policy_version": "hunting-economy-k01-recalibrated-v1-disabled",
+    "enabled": false,
+    "k": {
+      "numerator": 1,
+      "denominator": 10
+    },
+    "conversion_fee": {
+      "numerator": 1,
+      "denominator": 50
+    },
+    "daily_decay": {
+      "numerator": 1,
+      "denominator": 150
+    },
+    "baseline_daily_mint_atoms": 720000,
+    "daily_mint_cap_multiplier": {
+      "numerator": 3,
+      "denominator": 2
+    },
+    "business_timezone": "Asia/Shanghai",
+    "settlement_hour": 4
+  },
+  "runtime_constraint": {
+    "RecordedAt": "2026-10-19T16:33:27.3536144Z",
+    "DockerServiceStatus": "Stopped",
+    "DockerServiceStartType": "Manual",
+    "RemainingDockerProcesses": 0,
+    "GameStoppedByAgent": false,
+    "VirtualizationSettingsChanged": false,
+    "NativePostgreSQL": true,
+    "NativeGrafanaAcceptanceInstanceStopped": true
+  },
+  "selected_rust_cargo_sql_sources_sha256": {
+    "Cargo.lock": "c1d0c0576d14a9acab78510077602ec2f1967767798362ad2865c1dbd8bb5189",
+    "apps/gateway/src/bin/zone_host.rs": "9de3056c5e33e3fa59591e2a6db7d2b385b966e4c768b485eb19dd3e61472aee",
+    "apps/gateway/src/hunting_clock.rs": "bc9e3fcb857d81440ef12e70c7d2e10f012bc9d0b785a461d77562d8aa6892ae",
+    "apps/gateway/src/main.rs": "e14fc2a50a2d23b4ac28b976a04bf5e30d4f3faefc82b2bc92b20915ad5d3086",
+    "apps/gateway/src/routing.rs": "d462b2fe611782829c5bb827423282b097407e1f988e2cf26b19e09b67c46e79",
+    "apps/gateway/src/session.rs": "2e061d8d4f29c9e93b9b2e49ecfa631be3ebf4efbe32b291568a57fbbf077ff7",
+    "apps/gateway/src/tcp.rs": "0cb2e65ded1e890738c0a94538a561e68b2836cb3172640935eec99cee8c591a",
+    "apps/gateway/src/web.rs": "ae6954c77984df05bfe17b50d0f48415bd66b7c7f6686bf59654e158cd32a89a",
+    "apps/gateway/src/zone_rpc.rs": "920552a21ba34c8f5ec3435b901aa1360bc0f3295f3f9f0a963658f750d9267a",
+    "apps/simulation/Cargo.toml": "a8b875598edc72855a9a2a13525c79d1d3dde2cfbdce30a9b67e9b780fa12191",
+    "apps/simulation/src/config.rs": "5b43454d95310359292078e0133ae861434005053189e38d0281c3ce1ef6e351",
+    "apps/simulation/src/config_hunting_source.rs": "9040fa1da98a26a5ae60d880ca7f8e0cc7673c270259d46e1545fc56d28d7ff0",
+    "apps/simulation/src/config_hunting_source_tests.rs": "1267436ffc53ee4980a741bfde30d498bae98a959e7f9e408260ee9273376d4d",
+    "apps/simulation/src/db_projection.rs": "a75b022f83a4216bdf65bbae6714c06252a706a9259825f9c3894da576d5e26d",
+    "apps/simulation/src/runtime/hunting_quests.rs": "3f3e42d56376c89e67d5af0f79beb80604753ff683d279bced138d52077e6ff5",
+    "apps/simulation/src/runtime/hunting_quests_tests.rs": "1dc9fa3df8953e114f65f17db9baa9b24916b68d45c17a4ba347fd3df7128d15",
+    "apps/simulation/src/runtime/mod.rs": "a15aea3150b3aa6f3256af75be4b5131572b9d734cf500ec4241b9774aa58c82",
+    "apps/simulation/src/runtime/packets.rs": "c6859bc95eb6a68e439778949d4a4a819ce24385343793f7f3a1b7208d5d86ae",
+    "apps/simulation/src/runtime/quests.rs": "8d42024ce5c05b8ed19034f2cdeb904884b7ad0a14685e7936507f6231eee54f",
+    "apps/simulation/src/runtime/resources.rs": "b3a316a41b3356714529c3db306a5637fcd70d0a47fde669e1842a0aa3583902",
+    "apps/simulation/src/runtime/save.rs": "586a670f621c99712b95fdbd453663f56bf57409e11197d06221aafc416c5700",
+    "apps/simulation/src/runtime/session.rs": "ad484f0ce6b25d9a5072aee0d83673e746db2536c933d3841b43535373516dd4",
+    "apps/simulation/src/runtime/shared_guild_experience.rs": "8322983978da9b4150b0e77283b99c147d23a355440e613cf1ebc7aaa701eab3",
+    "apps/simulation/src/runtime/shared_guilds.rs": "5ee7c0b7927ff4718339ae5381351d6b70d34903e5d7538d4aa88575697e52b6",
+    "apps/simulation/src/world_runtime.rs": "f06d1b7f1dfcb7f21e3b0d1fe39b3297655643869b661858b8a9afa7c5d54edf",
+    "docs/generated/hunting-economy/grafana-fixture.sql": "bc5cc0e00770aa21a0775b1fd3f72687927728a211fb0ce0d627686954b32f1a",
+    "infra/postgres/migrations/0021_hunting_quest_sources.sql": "d30fd2e12eb3a39720ffc0f7e386856cf35e5ec4882be96f5d260a99a11e87ea",
+    "packages/economy-service/src/store.rs": "433768d9b92cf38fc7bbe1218e5e5685ff3b31d302184bed194d862906fefb96"
+  },
+  "selected_sources_unchanged_after_final_tests": true,
+  "focused_test_runs": [
+    {
+      "path": "C:/mir2-build/hunting-quest-final-simulation-tests-11.log",
+      "bytes": 3755,
+      "sha256": "6aeb7f22b0510a9879b3906d332dd0fcaff73f01feb9f58d9963472c8b86e8c3",
+      "observed_test_results": [
+        {
+          "passed": 30,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-final-gateway-tests-12.log",
+      "bytes": 2515,
+      "sha256": "08e84764012f20d44004fb61adbdbd92405d67c6d7371de50d527bb7c3f3923e",
+      "observed_test_results": [
+        {
+          "passed": 20,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-final-zonehost-tests-13.log",
+      "bytes": 236,
+      "sha256": "88948dd4e114f43c3e7e06d86a336b04bbf051d694c1e22c7d4db86203320eb4",
+      "observed_test_results": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    }
+  ],
+  "focused_top_level_test_executions": 51,
+  "focused_pg_test_executions": 21,
+  "simulation_breakdown": {
+    "deletion": 6,
+    "source": 12,
+    "quest_runtime": 12
+  },
+  "gateway_breakdown": {
+    "clock_http_binding": 12,
+    "rpc_host_containment": 3,
+    "programmatic_containment": 5
+  },
+  "adjacent_test_runs": [
+    {
+      "path": "C:/mir2-build/hunting-quest-adjacent-quests-05.log",
+      "bytes": 14460,
+      "sha256": "c97c8a3dbc3f319630f6fe7812661f8a240893593e7f402e4982ec74a45b4cb6",
+      "observed_test_results": [
+        {
+          "passed": 115,
+          "failed": 0,
+          "ignored": 5
+        }
+      ]
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-adjacent-guild-05.log",
+      "bytes": 1580,
+      "sha256": "9714cdee371d4b0d447600d03aeeccad3ea608b2b5a00d958f8150b6bd5dd589",
+      "observed_test_results": [
+        {
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-final-publication-tests-11.log",
+      "bytes": 1714,
+      "sha256": "310933f3e749a7758498567d3ce8821a499f8bec63975ae85771945b305aa480",
+      "observed_test_results": [
+        {
+          "passed": 10,
+          "failed": 0,
+          "ignored": 2
+        }
+      ]
+    }
+  ],
+  "adjacent_scope_note": "Quest115 and Guild11 ran before the additive authority marker/final freeze-owner fix. Publication10 was rerun after the final freeze change. Overlapping filters are not summed as unique scenarios; ignored PG deletion tests were separately executed in final hunting30.",
+  "unchanged_economy_service_run": {
+    "path": "C:/mir2-build/hunting-quest-service-tests-01.log",
+    "bytes": 2968,
+    "sha256": "fd64144ef2119c8e589ac0a5e51ba40c9306b4fd53905e155440888f77c809fb",
+    "observed_test_results": [
+      {
+        "passed": 9,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0
+      }
+    ]
+  },
+  "logs": [
+    {
+      "path": "C:/mir2-build/hunting-quest-source-tests-01.log",
+      "bytes": 7526,
+      "sha256": "0dd34ecfe46fb4bc74292479f42400aadfcef3823b2b2ef1009abdd340f468a7"
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-runtime-tests-01.log",
+      "bytes": 41432,
+      "sha256": "76df7d4b7f7d4ce04026bcb1366aac8b9e869fef4c5d0146f8e12b539206d92b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-runtime-tests-02.log",
+      "bytes": 45109,
+      "sha256": "2b574596309d9a335b0c701238b4ba907218f357329c8714f7d71472742bed5e"
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-runtime-tests-03.log",
+      "bytes": 45109,
+      "sha256": "83d7ef1eb670e86b4c9450c3858d8162f688f58dea73d907a806585bfaf5307b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-runtime-build-04.log",
+      "bytes": 2690,
+      "sha256": "428fae54931c24791f4b82d7ba91c3169a13b5b31cdb44dff2fb1e7b529bc1a9"
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-final-simulation-build-11.log",
+      "bytes": 39223,
+      "sha256": "f768ee2a2fba0057581c430121126fb430e87a994603b31472e530b1e6aa9182"
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-final-gateway-build-12.log",
+      "bytes": 34344,
+      "sha256": "1d7ebef11e64914c8c933ef66887dbc149f26246ab8815874e13cbcdd5b711ba"
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-final-zonehost-build-13.log",
+      "bytes": 35784,
+      "sha256": "a7a1d4bc154f0ab6d87e00e240542dc27b8f450914def10bc5ad920763a2222d"
+    },
+    {
+      "path": "C:/mir2-build/hunting-quest-final-check-13.log",
+      "bytes": 35931,
+      "sha256": "9f97caf9907803e78745ed2a8db62ad67eb01d2fc2d72373901f969660f959f9"
+    }
+  ],
+  "native_grafana": {
+    "version": "13.2.4",
+    "panels_imported": 14,
+    "data_panel_queries_executed": 13,
+    "synthetic_realms": 29,
+    "raw_sql_expectations": 57,
+    "native_reduce_threshold_expectations": 57,
+    "explicit_null_expectations": 17,
+    "offline_cases": 33,
+    "offline_model_assertions": 72,
+    "offline_artifact_checks": 221,
+    "evidence_files": [
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-acceptance.zh-CN.md",
+        "bytes": 5230,
+        "sha256": "f36e098d9426181d1219e317ab099365fbbe3624d6910d59c2e7b671e0667c2f"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-browser-validation.json",
+        "bytes": 3149,
+        "sha256": "76123dfa323442fef3a2a36a5efa2835168232ce482f6c962a89a703a2e1cea1"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-compatibility-history.json",
+        "bytes": 2466,
+        "sha256": "5dd93bacd569705ca70d0a238bd9d6349dfbb87c5272f329fa0f16ca24b9ead9"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-dashboard-health.jpg",
+        "bytes": 20743,
+        "sha256": "45ce98e22b63a43a2699cee9b3f8e67e595330e8432cb4f24897cdd28ad497ef"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-dashboard-income-null.jpg",
+        "bytes": 21526,
+        "sha256": "e3892eecab95c3f935abb723a031aa24055ad61f57ff167c936ac464d3901970"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-dashboard-permit.jpg",
+        "bytes": 24859,
+        "sha256": "4815ac50cdb80eb1e61539e7624ab8691090331bac63a3f78e0e23fc9811123c"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-dashboard-players.jpg",
+        "bytes": 24144,
+        "sha256": "04c2560f4fdad25954e57638148617f346c78dfbe17036ecc41d5a40a5c4ff76"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-dashboard-steady-complete.jpg",
+        "bytes": 174998,
+        "sha256": "f51a0bae4945948a3b240eb989d5809c0ade4f6549d0fd3b8385c3795f5de028"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-download.json",
+        "bytes": 274,
+        "sha256": "63818fdef9f9427ca944d0230bedecfe5c51d66ac321de1505481a5042027166"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-fixture-applied.json",
+        "bytes": 387,
+        "sha256": "304a5d155483e393b7ac95664e6bc74233b1303894ed77cd723e5394d5e27de0"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-fixture-expected.json",
+        "bytes": 4444,
+        "sha256": "5997a22454076309d095462dc03abd45f9065abe5a7dab712b157b865bf780d1"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-fixture.sql",
+        "bytes": 790838,
+        "sha256": "bc5cc0e00770aa21a0775b1fd3f72687927728a211fb0ce0d627686954b32f1a"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-native-query-validation.json",
+        "bytes": 778,
+        "sha256": "b80d2ad7a0029d59eba66789b6b32610b3c47eb8ed9a3be146ee80b0d4dc1447"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-panel-query-validation.json",
+        "bytes": 294,
+        "sha256": "0e9a1f83e158e848d5cab92c3ca64167a80c7688b932f7629c7bd789a56a063e"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-schema-validation.json",
+        "bytes": 397,
+        "sha256": "576fcdab08b86ae72ce733874261ee0e1ca6f670a8660023664006b2181e0901"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/docs/generated/hunting-economy/grafana-shutdown.json",
+        "bytes": 128,
+        "sha256": "9dd21cb0a34049abac13cfd51bfd2450f6105e6fa5de495e4855b95c07a77708"
+      }
+    ],
+    "real_notifications_sent": false,
+    "all_panel_visual_layout_accepted": false,
+    "production_asset_coverage_accepted": false
+  },
+  "preliminary_failures_preserved": [
+    "Initial private cadence function and SHA2 LowerHex compile errors.",
+    "Isolation fixture force_authoritative_player_transform advanced tick before prepare; retained all isolation assertions and corrected sampling.",
+    "Two LNK1104 runs: Windows Restart Manager reported DeltaForce holding the old owned test EXE. The game was not stopped; the file was neither moved nor deleted.",
+    "Initial unique-output Cargo invocation duplicated --test; corrected to native test profile with unique extra-filename.",
+    "Native Grafana provisioning accepted settings.mode=strict but runtime expressions returned HTTP400; omit settings to use the default strict reducer, retaining SQL and thresholds."
+  ],
+  "review_findings_fixed": [
+    "Current stat caps and intervening Zone damage/death must not be overwritten by a committed old vitals snapshot.",
+    "Raw command standby replay could re-award legacy gold; local-only admission now applies at binary, public entry, factory, RPC and host boundaries.",
+    "An existing unrelated freeze could be adopted using its old reason and a new epoch; only an owned Writable-to-Frozen transition grants recovery."
+  ],
+  "unrelated_dirty_files_preserved": [
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-portable-statistics-repair01.json",
+      "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+      "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json",
+      "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd"
+    }
+  ],
+  "remaining_required_work": [
+    "Actual Guild-member once-quest share/level and atomic Guild PG write test; existing fixture enables authority without real membership.",
+    "Item and recurring quest source atomicity; real physical client quest/save/relogin acceptance.",
+    "Bound wallet debit plus authoritative NPC repair/destruction source, then farming/mining and all three burn layers.",
+    "Material economic binding and propagation through every transfer/craft/mail/storage path, with versioned unbinding valuation/fee rules.",
+    "Trusted resolved source checkpoint and original character-incarnation replication before remote owners/promotion.",
+    "Real market prices, stock coverage, player profiles and income data; external notification delivery.",
+    "Reviewed old-asset migration, full production qualification and deployment."
+  ]
+}

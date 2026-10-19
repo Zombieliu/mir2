@@ -1,0 +1,10 @@
+{
+  "RecordedAt": "2026-10-19T16:33:27.3536144Z",
+  "DockerServiceStatus": "Stopped",
+  "DockerServiceStartType": "Manual",
+  "RemainingDockerProcesses": 0,
+  "GameStoppedByAgent": false,
+  "VirtualizationSettingsChanged": false,
+  "NativePostgreSQL": true,
+  "NativeGrafanaAcceptanceInstanceStopped": true
+}

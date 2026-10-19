@@ -2,6 +2,8 @@
 
 日期：2026-10-19（北京时间）。用户已授权建立持续目标并实施。该系统是本服定制经济规则，不改变或抬高 Crystal 1:1 验收结论。
 
+更新：2026-10-20。用户明确要求本机不用 Docker；开发验收采用原生 PostgreSQL、原生 Grafana，不启动 Docker/WSL/虚拟机。本次启动的 Docker Desktop 进程已退出，服务恢复为停止；未关闭游戏或改动系统虚拟化设置。
+
 ## 权威边界
 
 游戏主服务端和 PostgreSQL 事务是资产唯一真值源。Grafana 只读观测，Python 只做对照预演。个人 Session、地图 Zone 和各 Gateway 不能各持有一份独立许可池。正式服、测试服按经济域隔离。
@@ -36,15 +38,17 @@
 - [x] 真实 PostgreSQL 并发、幂等重试、回滚、提交不明与日结追赶测试。
 - [x] Gateway Bearer认证HTTP钱包查询与转换接口，事务内核对角色归属、封禁、会话撤销/过期与UUID incarnation；没有原始来源记账接口。
 - [x] 普通角色删除与完整账号删除的同事务新钱包保护，非零资产拒删；零余额历史保留与新UUID隔离。
+- [x] 无物品一次性金币任务的同事务真实来源：普通FinishQuest/CallNpc处理器、完整个人奖励checkpoint和绑定入账共同提交；独立PG与正常包分发测试通过。
 - [ ] 种植、挖矿、任务及维护/PVP/沙巴克的可信来源接线；绑定身份贯穿交易、邮件、NPC、合成与丢地。
 - [x] 进程生命周期的04:00调度、空服运行、重启追赶、锁等待/退出有界；不依赖玩家请求。
 - [x] 日结outbox到永久时序版本的幂等导出、提交不明恢复和并发消费；默认仅新钱包partial诊断，ACK与指标/消费回执同事务。
 - [ ] 真实成交、存量、画像与收益数据接线，缺失值保持 NULL。
 - [x] Grafana只读视图、14个面板、4类业务告警和逐服数据完整性告警配置；实际PostgreSQL规则与只读权限验收。
-- [ ] 目标Grafana版本导入/渲染、数据库TLS及钉钉/企业微信测试通知。
+- [x] 原生Grafana13.2.4导入、verify-full数据库TLS、实际查询/表达式及合成服目标图表浏览器抽查。
+- [ ] 全面板布局、真实市场数据与钉钉/企业微信测试通知。
 - [ ] 参数与旧资产迁移发布资格、普通玩家保存重登及最终部署验证。
 
-## 本轮实际验证
+## 第一阶段实际验证（保留历史范围）
 
 隔离工作树分支 `codex/hunting-permit-economy` 从 `2e9d95bbb3cd9f7852980af385a1298b57a1511e` 建立。原工作区的 SLG、运行时和配置未提交修改未复制、未覆盖。
 
@@ -61,7 +65,27 @@
 
 可审查的执行摘要与本地原始日志SHA256见 [验收记录](generated/hunting-economy/acceptance-20261019.json)。最终政策/服务包格式检查、新增Rust文件格式检查及Gateway库/二进制编译检查均通过；未对旧巨型模块做整体格式化。
 
-首阶段本地提交为`99ce96f9fb8d8a6c6207f4f9c88ee7459c98bc10`，63个变更文件均从该提交逐一读取并校验，见 [提交核对](generated/hunting-economy/publication-20261019.json)。提交后的自动GC遇到已有损坏对象`1ae7f886fa87573bdbb59caf0772103929fac94c`导致repack失败，未影响本次提交创建；没有重写、清理或修复无关历史，没有推送或部署。后续仅证据提交按单次命令关闭自动GC，不更改仓库配置。
+首阶段本地提交为`99ce96f9fb8d8a6c6207f4f9c88ee7459c98bc10`，63个变更文件均从该提交逐一读取并校验，见 [提交核对](generated/hunting-economy/publication-20261019.json)。提交后的自动GC遇到已有损坏对象`1ae7f886fa87573bdbb59caf0772103929fac94c`导致repack失败，未影响本次提交创建；没有重写、清理或修复无关历史，没有推送或部署。后续提交按单次命令关闭自动GC，不更改仓库配置。
+
+## 第二阶段：首条真实任务来源与原生观测
+
+服务端按真实effective任务定义选择无物品、无carry/item任务、金币大于零且cadence=None的一次性任务；没有为测试账号硬编码任务白名单。已支持原有经验、等级、credit和Guild XP效果，共同写入完整存档CAS与新绑定钱包，不再另发该笔旧gold。带物品/周期任务仍明确拒绝；例如V2首个物品任务尚不支持，不能据此宣称整条新手链已闭合。
+
+新增迁移0021保存独立于定义摘要的角色终身领取槽及不可变完整checkpoint。StartGame首次从canonical角色加载时绑定PG UUID；不能在发奖或旧会话恢复时临时领取当前UUID。全服锁、账户/Guild锁、角色代际、旧存档revision和来源完成状态在同一PG事务核验；重复请求只返回原回执。COMMIT或外层worker结果丢失时保留原金额/摘要/代际和冻结epoch，正常原NPC请求可以恢复，其他任务、NPC、角色或另一冻结不能借此解冻。
+
+冻结归属由同一write-state锁内的Writable→Frozen原子转换确定，不能把已存在冻结的旧理由和新epoch认领为自己的恢复许可。另一个操作先冻结、原请求后进入Unknown，以及反向顺序、相同理由再次冻结，均有明确测试；不属于当前来源的冻结保持拒绝，不能只因找到已提交回执而清除。
+
+规划World的revision、账户镜像、Guild journal和时钟均独立，确认提交前不改变真人ECS。发布只接受存档的直接后继revision，不把更晚完整checkpoint的revision赋给旧个人状态。HP/MP上限按当前有效buff/Guild/新等级重算；Unknown恢复保留当前Zone伤害、耗蓝和死亡，不重放旧血量或复活。缺少持久vital事件顺序时，恢复不补发可能遗漏的一次升级回血；精确重排仍是剩余边界。
+
+当前来源仅支持未复制的本地权威runtime。旧副本协议重放原任务命令会产生legacy/new差异，也不携带原StartGame代际；在完整结果checkpoint及受信witness复制接通前，启用来源与远端Zone Host/Gate15/普通副本重放和晋升的组合必须在执行前拒绝。私有纯规划fork不是副本API。没有把retained bootstrap的相同姓名、索引或相同存档内容当作代际证明。
+
+原生观测已完成：14面板导入、13个数据查询、29个合成服的57项SQL和57项原生reduce/threshold断言通过，含17个NULL；离线33案例/72模型断言/221配置检查通过。发现并修复Grafana接受导入却执行HTTP400的显式`settings.mode=strict`，改用原生默认strict；SQL和业务阈值保持。浏览器实际抽查三层堆叠、许可、玩家饼图、健康值及缺失收益空曲线，未将合成数据当真实运营数据。验收后已停止本次原生Grafana及13个后端子进程，详见 [原生验收](generated/hunting-economy/grafana-acceptance.zh-CN.md)。通知接收、所有面板布局及真实市场数据仍未验收。
+
+最终定向测试51项全部通过：simulation30（来源12、真实任务分发12、删角6），Gateway库20，Zone Host二进制环境门槛1；其中21项实际使用原生隔离PG。Gateway库、主二进制及Zone Host最终编译检查通过，选定28个Rust/Cargo/SQL输入的前后SHA256一致。服务包本轮9单元+5核心PG+10导出PG通过。邻接任务115（默认忽略5）、Guild XP11通过，最终冻结修复后重跑publication10（忽略2，相关PG删角另已实际执行）。过滤器有重叠，不把这些数字相加成独立场景或全workspace结论；编译告警及旧失败日志保留。
+
+任务PG fixture已开启共享Guild权威，但未建立真实Guild成员；实际成员的任务分成/等级变化及同事务Guild写入专项仍需补测，不能以该开关或既有Guild单元回归替代此证明。
+
+原始失败保留：初次编译的私有函数可见性/SHA2 hex格式问题；隔离测试把会推进tick的准备操作误当成prepare的副作用（保留全部隔离断言后修正取样点）；Windows旧测试EXE被DeltaForce占用导致两次LNK1104。没有结束游戏、删除锁定文件或改动保护设置；使用Cargo原生test profile和唯一输出名构建、实际运行同一测试harness。执行记录及最终范围见 [第二阶段验收](generated/hunting-economy/acceptance-20261020-quest.json)；这仍不代表全部生产/销毁来源、材料传播或生产发布完成，goal保持active。
 
 ## 后端接线与交付物
 

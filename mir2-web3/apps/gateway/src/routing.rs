@@ -559,115 +559,139 @@ impl RpcZoneOwnerCommandClient {
     pub fn new(transport: SharedZoneOwnerRpcTransport) -> Self {
         Self { transport }
     }
+
+    fn ensure_runtime_supported(runtime: &ZoneRuntimeHandle) -> Result<(), String> {
+        if runtime.requires_local_hunting_source_authority() {
+            return Err("hunting sources require local authority; raw RPC owners do not support trusted source checkpoints and character incarnations".into());
+        }
+        Ok(())
+    }
 }
 
 impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
 
-    fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+    fn supports_durable_npc_purchase_owner(&self, runtime: &ZoneRuntimeHandle) -> bool {
+        if Self::ensure_runtime_supported(runtime).is_err() { return false; }
         self.transport.supports_durable_npc_purchase_owner()
     }
-    fn execute_npc_purchase_owner(&self, _runtime: &mut ZoneRuntimeHandle,
+    fn execute_npc_purchase_owner(&self, runtime: &mut ZoneRuntimeHandle,
         lease: &ZoneOwnerLease, authenticated: bool, action: NpcPurchaseOwnerAction,
     ) -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+        Self::ensure_runtime_supported(runtime).map_err(crate::npc_purchase_owner_route::before)?;
         self.transport.execute_npc_purchase_owner(lease, authenticated, action)
     }
 
-    fn on_connect(&self, _runtime: &ZoneRuntimeHandle) -> Result<Vec<ServerPacket>, String> {
+    fn on_connect(&self, runtime: &ZoneRuntimeHandle) -> Result<Vec<ServerPacket>, String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.on_connect()
     }
 
     fn execute(
         &self,
-        _runtime: &mut ZoneRuntimeHandle,
+        runtime: &mut ZoneRuntimeHandle,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.execute(request)
     }
 
     fn execute_requiring_typed_game_shop_purchase_outcome(
         &self,
-        _runtime: &mut ZoneRuntimeHandle,
+        runtime: &mut ZoneRuntimeHandle,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport
             .execute_requiring_typed_game_shop_purchase_outcome(request)
     }
 
-    fn supports_typed_game_shop_purchase_outcome(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+    fn supports_typed_game_shop_purchase_outcome(&self, runtime: &ZoneRuntimeHandle) -> bool {
+        if Self::ensure_runtime_supported(runtime).is_err() { return false; }
         self.transport.supports_typed_game_shop_purchase_outcome()
     }
 
-    fn world_snapshot(&self, _runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
+    fn world_snapshot(&self, runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.world_snapshot()
     }
 
     fn active_identity(
         &self,
-        _runtime: &ZoneRuntimeHandle,
+        runtime: &ZoneRuntimeHandle,
     ) -> Result<Option<ActiveSessionIdentity>, String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.active_identity()
     }
 
     fn active_character_checkpoint(
         &self,
-        _runtime: &ZoneRuntimeHandle,
+        runtime: &ZoneRuntimeHandle,
     ) -> Result<Option<CharacterSaveRecord>, String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.active_character_checkpoint()
     }
 
     fn restore_active_character_checkpoint(
         &self,
-        _runtime: &mut ZoneRuntimeHandle,
+        runtime: &mut ZoneRuntimeHandle,
         checkpoint: &CharacterSaveRecord,
     ) -> Result<(), String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport
             .restore_active_character_checkpoint(checkpoint)
     }
 
     fn prepare_teardown_checkpoint(
         &self,
-        _runtime: &mut ZoneRuntimeHandle,
+        runtime: &mut ZoneRuntimeHandle,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<Option<PreparedZoneTeardown>, String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.prepare_teardown_checkpoint(owner_lease)
     }
 
     fn persist_teardown_checkpoint(
         &self,
-        _runtime: &mut ZoneRuntimeHandle,
+        runtime: &mut ZoneRuntimeHandle,
         prepared: &PreparedZoneTeardown,
     ) -> Result<(), String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.persist_teardown_checkpoint(prepared)
     }
 
-    fn release_teardown_fence(&self, _runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+    fn release_teardown_fence(&self, runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.release_teardown_fence()
     }
 
-    fn save_active_character(&self, _runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+    fn save_active_character(&self, runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.save_active_character()
     }
 
     fn refresh_active_external_mail(
         &self,
-        _runtime: &mut ZoneRuntimeHandle,
+        runtime: &mut ZoneRuntimeHandle,
     ) -> Result<bool, String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.refresh_active_external_mail()
     }
 
     fn close_session(
         &self,
-        _runtime: &mut ZoneRuntimeHandle,
+        runtime: &mut ZoneRuntimeHandle,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<(), String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.close_session(owner_lease)
     }
 
     fn register_live_outbound(
         &self,
-        _runtime: &ZoneRuntimeHandle,
+        runtime: &ZoneRuntimeHandle,
         sender: SharedZoneLiveOutboundSender,
     ) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
+        Self::ensure_runtime_supported(runtime)?;
         self.transport.register_live_outbound(sender)
     }
 }
@@ -681,6 +705,206 @@ fn stale_zone_owner_lease_error(lease: &ZoneOwnerLease, current: &ZoneOwnerLease
         lease.owner_id(),
         lease.fencing_token()
     )
+}
+
+#[cfg(test)]
+mod hunting_source_programmatic_guard_tests {
+    use super::*;
+    use std::sync::atomic::AtomicUsize;
+
+    fn run_in_local_topology_process(test_name: &str) -> bool {
+        const MARKER: &str = "MIR2_HUNTING_LOCAL_GUARD_TEST_CHILD";
+        if std::env::var(MARKER).ok().as_deref() == Some(test_name) { return false; }
+        let mut child = std::process::Command::new(std::env::current_exe().unwrap());
+        child.args(["--exact", test_name, "--nocapture"]).env(MARKER, test_name);
+        for key in ["MIR2_GATE15_VALIDATOR_URLS", "MIR2_ZONE_HOST_ACTIVE_ADDRS",
+            "MIR2_ZONE_HOST_STANDBY_ADDRS", "MIR2_ZONE_HOST_ADDRS", "MIR2_ZONE_HOST_ADDR"] {
+            child.env_remove(key);
+        }
+        let output = child.output().expect("isolated topology test process should launch");
+        assert!(output.status.success(), "isolated topology test failed: {} {}",
+            String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
+        assert!(String::from_utf8_lossy(&output.stdout).contains("1 passed"), "the exact isolated test must execute");
+        true
+    }
+
+    fn enabled_config() -> GatewayConfig {
+        let mut config = GatewayConfig::default();
+        // No database is opened: these boundaries must reject before any source.
+        config.hunting_economy_realm = Some("programmatic-guard".into());
+        config
+    }
+
+    #[derive(Debug, Default)]
+    struct LegacyTransport { calls: AtomicUsize }
+
+    impl LegacyTransport {
+        fn called(&self) -> String {
+            self.calls.fetch_add(1, Ordering::Relaxed);
+            "legacy transport reached".into()
+        }
+    }
+
+    impl ZoneOwnerRpcTransport for LegacyTransport {
+        fn on_connect(&self) -> Result<Vec<ServerPacket>, String> { Err(self.called()) }
+        fn execute(&self, _: ZoneOwnerCommandRequest) -> Result<WorldCommandExecution, String> {
+            Err(self.called())
+        }
+        fn supports_durable_npc_purchase_owner(&self) -> bool { self.called(); true }
+        fn execute_npc_purchase_owner(&self, _: &ZoneOwnerLease, _: bool, _: NpcPurchaseOwnerAction)
+            -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
+            Err(crate::npc_purchase_owner_route::before(self.called()))
+        }
+        fn supports_typed_game_shop_purchase_outcome(&self) -> bool { self.called(); true }
+        fn world_snapshot(&self) -> Result<WorldSnapshot, String> { Err(self.called()) }
+        fn active_identity(&self) -> Result<Option<ActiveSessionIdentity>, String> { Err(self.called()) }
+        fn active_character_checkpoint(&self) -> Result<Option<CharacterSaveRecord>, String> { Err(self.called()) }
+        fn restore_active_character_checkpoint(&self, _: &CharacterSaveRecord) -> Result<(), String> { Err(self.called()) }
+        fn prepare_teardown_checkpoint(&self, _: &ZoneOwnerLease) -> Result<Option<PreparedZoneTeardown>, String> { Err(self.called()) }
+        fn persist_teardown_checkpoint(&self, _: &PreparedZoneTeardown) -> Result<(), String> { Err(self.called()) }
+        fn release_teardown_fence(&self) -> Result<(), String> { Err(self.called()) }
+        fn save_active_character(&self) -> Result<(), String> { Err(self.called()) }
+        fn refresh_active_external_mail(&self) -> Result<bool, String> { Err(self.called()) }
+        fn close_session(&self, _: &ZoneOwnerLease) -> Result<(), String> { Err(self.called()) }
+        fn register_live_outbound(&self, _: SharedZoneLiveOutboundSender)
+            -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> { Err(self.called()) }
+    }
+
+    #[test]
+    fn hunting_source_programmatic_rpc_rejects_before_every_legacy_transport_entry() {
+        let transport = Arc::new(LegacyTransport::default());
+        let client = RpcZoneOwnerCommandClient::new(transport.clone());
+        let zone = ZoneId::primary();
+        let lease = ZoneOwnerLease::in_process(&zone);
+        let mut runtime: ZoneRuntimeHandle = Box::new(InProcessWorldRuntime::new(GatewayConfig::default()));
+        runtime.execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: "demo".into(), password: "demo".into(),
+        })).unwrap();
+        runtime.execute(WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 })).unwrap();
+        let checkpoint = runtime.active_character_checkpoint().unwrap();
+        let identity = runtime.active_identity().unwrap();
+        runtime.as_any_mut().downcast_mut::<InProcessWorldRuntime>().unwrap()
+            .rebind_account_store(&enabled_config());
+        assert!(runtime.requires_local_hunting_source_authority());
+        let request = |command| ZoneOwnerCommandRequest::production_player(lease.clone(), true, command);
+        for command in [
+            WorldCommand::ClientPacket(ClientPacket::FinishQuest { quest_index: 7, selected_item_index: -1 }),
+            WorldCommand::ClientPacket(ClientPacket::CallNpc { object_id: 1, key: "@finishquest(7)".into() }),
+            WorldCommand::SelectNpcDialog { target: "@finishquest(7)".into() },
+        ] {
+            assert!(client.execute(&mut runtime, request(command)).unwrap_err().contains("hunting"));
+        }
+        assert!(client.on_connect(&runtime).is_err());
+        assert!(!client.supports_durable_npc_purchase_owner(&runtime));
+        assert!(!client.supports_typed_game_shop_purchase_outcome(&runtime));
+        assert!(client.execute_npc_purchase_owner(&mut runtime, &lease, true, NpcPurchaseOwnerAction::Begin).is_err());
+        assert!(client.execute_requiring_typed_game_shop_purchase_outcome(&mut runtime,
+            request(WorldCommand::NativeGameShopPurchase(mir2_simulation::NativeGameShopPurchaseRequest {
+                protocol_version: mir2_simulation::NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
+                server_idempotency_key: "0".repeat(64), gateway_session_id: "hunting-guard".into(),
+                account_id: "demo".into(), character_index: 0, client_request_id: "guard-request".into(),
+                g_index: 1, quantity: 1, price_type: 0,
+            }))).is_err());
+        assert!(client.world_snapshot(&runtime).is_err());
+        assert!(client.active_identity(&runtime).is_err());
+        assert!(client.active_character_checkpoint(&runtime).is_err());
+        assert!(client.restore_active_character_checkpoint(&mut runtime, &checkpoint).is_err());
+        assert!(client.prepare_teardown_checkpoint(&mut runtime, &lease).is_err());
+        let prepared = PreparedZoneTeardown::new(lease.clone(), identity, checkpoint);
+        assert!(client.persist_teardown_checkpoint(&mut runtime, &prepared).is_err());
+        assert!(client.release_teardown_fence(&mut runtime).is_err());
+        assert!(client.save_active_character(&mut runtime).is_err());
+        assert!(client.refresh_active_external_mail(&mut runtime).is_err());
+        assert!(client.close_session(&mut runtime, &lease).is_err());
+        let (normal, _) = tokio::sync::mpsc::channel(1);
+        let (location, _) = tokio::sync::mpsc::channel(1);
+        assert!(client.register_live_outbound(&runtime, SharedZoneLiveOutboundSender::new(normal, location)).is_err());
+        assert_eq!(transport.calls.load(Ordering::Relaxed), 0);
+    }
+
+    #[test]
+    fn hunting_source_programmatic_rpc_reads_prelogin_and_rebound_runtime_authority() {
+        let transport = Arc::new(LegacyTransport::default());
+        let client = RpcZoneOwnerCommandClient::new(transport.clone());
+        let zone = ZoneId::primary();
+        for factory in [Arc::new(InProcessZoneRuntimeFactory) as SharedZoneRuntimeFactory,
+            Arc::new(SharedInProcessZoneRuntimeFactory::new()) as SharedZoneRuntimeFactory] {
+            assert!(factory.supports_local_hunting_source_authority());
+            let runtime = factory.create_runtime(enabled_config(), &zone);
+            assert!(runtime.requires_local_hunting_source_authority());
+            assert!(client.on_connect(&runtime).is_err());
+        }
+        assert_eq!(transport.calls.load(Ordering::Relaxed), 0);
+        let mut runtime: ZoneRuntimeHandle = Box::new(InProcessWorldRuntime::new(GatewayConfig::default()));
+        assert!(!runtime.requires_local_hunting_source_authority());
+        assert_eq!(client.execute(&mut runtime, ZoneOwnerCommandRequest::production_player(
+            ZoneOwnerLease::in_process(&zone), true,
+            WorldCommand::ClientPacket(ClientPacket::FinishQuest { quest_index: 7, selected_item_index: -1 }),
+        )).unwrap_err(), "legacy transport reached");
+        assert_eq!(client.on_connect(&runtime).unwrap_err(), "legacy transport reached");
+        runtime.as_any_mut().downcast_mut::<InProcessWorldRuntime>().unwrap()
+            .rebind_account_store(&enabled_config());
+        assert!(client.on_connect(&runtime).is_err());
+        assert_eq!(transport.calls.load(Ordering::Relaxed), 2);
+        runtime.as_any_mut().downcast_mut::<InProcessWorldRuntime>().unwrap()
+            .rebind_account_store(&GatewayConfig::default());
+        assert!(!runtime.requires_local_hunting_source_authority());
+        assert_eq!(client.on_connect(&runtime).unwrap_err(), "legacy transport reached");
+        assert_eq!(transport.calls.load(Ordering::Relaxed), 3);
+    }
+
+    struct UnknownFactory { calls: Arc<AtomicUsize> }
+    impl ZoneRuntimeFactory for UnknownFactory {
+        fn create_runtime(&self, _: GatewayConfig, _: &ZoneId) -> ZoneRuntimeHandle {
+            self.calls.fetch_add(1, Ordering::Relaxed);
+            Box::new(InProcessWorldRuntime::new(GatewayConfig::default()))
+        }
+    }
+
+    struct MarkerDroppingFactory { calls: Arc<AtomicUsize> }
+    impl ZoneRuntimeFactory for MarkerDroppingFactory {
+        fn supports_local_hunting_source_authority(&self) -> bool { true }
+        fn create_runtime(&self, _: GatewayConfig, _: &ZoneId) -> ZoneRuntimeHandle {
+            self.calls.fetch_add(1, Ordering::Relaxed);
+            Box::new(InProcessWorldRuntime::new(GatewayConfig::default()))
+        }
+    }
+
+    struct ReleasingRouter { releases: Arc<AtomicUsize> }
+    impl SessionRouter for ReleasingRouter {
+        fn route_session(&self, _: &SessionRouteRequest, default_zone_id: &ZoneId) -> ZoneId { default_zone_id.clone() }
+        fn release_session(&self, _: &SessionRouteRequest, _: u64) -> Result<(), String> {
+            self.releases.fetch_add(1, Ordering::Relaxed);
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn hunting_source_programmatic_registry_rejects_unknown_factory_before_create() {
+        if run_in_local_topology_process("routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_registry_rejects_unknown_factory_before_create") { return; }
+        let calls = Arc::new(AtomicUsize::new(0));
+        let registry = ZoneRegistry::new(ZoneId::primary(), Arc::new(UnknownFactory {
+            calls: calls.clone(),
+        }));
+        assert!(registry.try_open_session_for(enabled_config(), SessionRouteRequest::anonymous()).is_err());
+        assert_eq!(calls.load(Ordering::Relaxed), 0);
+        assert!(registry.try_open_session_for(GatewayConfig::default(), SessionRouteRequest::anonymous()).is_ok());
+        assert_eq!(calls.load(Ordering::Relaxed), 1);
+    }
+
+    #[test]
+    fn hunting_source_programmatic_registry_rejects_factory_that_drops_runtime_authority() {
+        if run_in_local_topology_process("routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_registry_rejects_factory_that_drops_runtime_authority") { return; }
+        let calls = Arc::new(AtomicUsize::new(0));
+        let releases = Arc::new(AtomicUsize::new(0));
+        let factory = MarkerDroppingFactory { calls: calls.clone() };
+        let registry = ZoneRegistry::with_router(ZoneId::primary(), Arc::new(factory),
+            Arc::new(ReleasingRouter { releases: releases.clone() }));
+        let rejected = registry.try_open_session_for(enabled_config(), SessionRouteRequest::anonymous());
+        assert!(matches!(rejected, Err(detail) if detail.contains("runtime without its local authority")));
+        assert_eq!(calls.load(Ordering::Relaxed), 1);
+        assert_eq!(releases.load(Ordering::Relaxed), 1);
+    }
 }
 
 #[derive(Default)]
@@ -1678,6 +1902,9 @@ impl ZoneOwnerLeaseAuthority for InMemoryZoneOwnerLeaseAuthority {
 }
 
 pub trait ZoneRuntimeFactory: Send + Sync {
+    /// Custom factories default to unsupported until they explicitly preserve
+    /// the local source authority and its trusted character identity.
+    fn supports_local_hunting_source_authority(&self) -> bool { false }
     fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle;
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease {
         ZoneOwnerLease::in_process(zone_id)
@@ -2401,6 +2628,7 @@ impl SessionRouter for PerMapSessionRouter {
 pub struct InProcessZoneRuntimeFactory;
 
 impl ZoneRuntimeFactory for InProcessZoneRuntimeFactory {
+    fn supports_local_hunting_source_authority(&self) -> bool { true }
     fn create_runtime(&self, config: GatewayConfig, _zone_id: &ZoneId) -> ZoneRuntimeHandle {
         Box::new(InProcessWorldRuntime::new(config))
     }
@@ -8439,6 +8667,7 @@ fn shared_trade_offer_fits(free_bag_slots: u16, offer: &SharedTradeOffer) -> boo
 }
 
 impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
+    fn supports_local_hunting_source_authority(&self) -> bool { true }
     fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle {
         let resources = self.resources_for_zone(zone_id);
         Box::new(SharedInProcessZoneSessionRuntime {
@@ -15425,6 +15654,9 @@ impl SharedInProcessZoneSessionRuntime {
 }
 
 impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+    fn requires_local_hunting_source_authority(&self) -> bool {
+        self.inner.requires_local_hunting_source_authority()
+    }
     fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
         self.inner.supports_magic_key_assignment(spell,key,old_key)
     }
@@ -16106,10 +16338,25 @@ impl ZoneRegistry {
         config: GatewayConfig,
         route_request: SessionRouteRequest,
     ) -> Result<RoutedZoneRuntime, String> {
+        crate::hunting_clock::ensure_hunting_game_source_topology(&config)?;
+        if config.hunting_economy_realm.is_some()
+            && !self.runtime_factory.supports_local_hunting_source_authority()
+        {
+            return Err("hunting sources require a factory with explicit local authority support".into());
+        }
         let zone_id = self.try_route_session(&route_request)?;
         let owner_lease = self.owner_lease_authority.owner_lease(&zone_id);
+        let hunting_sources = config.hunting_economy_realm.is_some();
+        let runtime = self.runtime_factory.create_runtime(config, &zone_id);
+        if hunting_sources && !runtime.requires_local_hunting_source_authority() {
+            let detail = "hunting source factory returned a runtime without its local authority requirement";
+            return Err(match self.release_session(&route_request, shared_gateway_now_ms()) {
+                Ok(()) => detail.to_string(),
+                Err(error) => format!("{detail}; failed to release rejected session placement: {error}"),
+            });
+        }
         Ok(RoutedZoneRuntime {
-            runtime: self.runtime_factory.create_runtime(config, &zone_id),
+            runtime,
             owner_lease,
             owner_lease_authority: self.owner_lease_authority.clone(),
             zone_id,

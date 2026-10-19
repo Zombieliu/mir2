@@ -2868,6 +2868,7 @@ impl ZoneHostServer {
         &self,
         retained_entry_limit: usize,
     ) -> Result<(usize, usize), String> {
+        self.ensure_hunting_replication_admission()?;
         if retained_entry_limit == 0 {
             return Err("Zone journal retained entry limit must be positive".to_string());
         }
@@ -3073,6 +3074,7 @@ impl ZoneHostServer {
         source_observed_at_ms: u64,
         max_lag_ms: u64,
     ) -> Result<ZonePromotionReadiness, String> {
+        self.ensure_hunting_replication_admission()?;
         let _operation = self
             .operation_gate
             .lock_zone(zone_id)
@@ -3093,6 +3095,7 @@ impl ZoneHostServer {
         source_observed_at_ms: u64,
         max_lag_ms: u64,
     ) -> Result<ZonePromotionReadiness, ZoneRpcFault> {
+        self.ensure_hunting_replication_rpc_admission()?;
         if active_head.version != ZONE_REPLICATION_HEAD_VERSION {
             return Err(ZoneRpcFault::new(
                 "promotion_head_version",
@@ -3257,6 +3260,7 @@ impl ZoneHostServer {
         readiness_id: &str,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<ZonePromotionReceipt, String> {
+        self.ensure_hunting_replication_admission()?;
         let _operation = self
             .operation_gate
             .lock_zone(zone_id)
@@ -3271,6 +3275,7 @@ impl ZoneHostServer {
         readiness_id: &str,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<ZonePromotionReceipt, ZoneRpcFault> {
+        self.ensure_hunting_replication_rpc_admission()?;
         self.promotion_attempts_total
             .fetch_add(1, Ordering::Relaxed);
         if readiness_id.trim().is_empty() {
@@ -3369,6 +3374,7 @@ impl ZoneHostServer {
     }
 
     fn activate_replica_session_persistence(&self, zone_id: &ZoneId) -> Result<(), ZoneRpcFault> {
+        self.ensure_hunting_replication_rpc_admission()?;
         let authoritative_config = self
             .config
             .lock()
@@ -3400,6 +3406,7 @@ impl ZoneHostServer {
         max_entries: usize,
         max_payload_bytes: usize,
     ) -> Result<ZoneMutationBatch, String> {
+        self.ensure_hunting_replication_admission()?;
         let max_entries = max_entries
             .max(1)
             .min(DEFAULT_ZONE_REPLICATION_MAX_BATCH_ENTRIES);
@@ -3521,7 +3528,20 @@ impl ZoneHostServer {
         self.draining.load(Ordering::Acquire)
     }
 
+    fn ensure_hunting_replication_admission(&self) -> Result<(), String> {
+        self.config.lock()
+            .map_err(|_| "zone host config mutex poisoned".to_string())?
+            .ensure_hunting_source_replication_supported()
+    }
+
+    fn ensure_hunting_replication_rpc_admission(&self) -> Result<(), ZoneRpcFault> {
+        self.ensure_hunting_replication_admission()
+            .map_err(|message| ZoneRpcFault::new("hunting_source_replication_unsupported", message))
+    }
+
     pub fn serve(self: Arc<Self>, listener: TcpListener) -> io::Result<()> {
+        self.ensure_hunting_replication_admission()
+            .map_err(|message| io::Error::new(io::ErrorKind::InvalidInput, message))?;
         for stream in listener.incoming() {
             let stream = stream?;
             self.spawn_connection(stream);
@@ -3534,6 +3554,8 @@ impl ZoneHostServer {
         listener: TcpListener,
         stop: Arc<AtomicBool>,
     ) -> io::Result<()> {
+        self.ensure_hunting_replication_admission()
+            .map_err(|message| io::Error::new(io::ErrorKind::InvalidInput, message))?;
         listener.set_nonblocking(true)?;
         while !stop.load(Ordering::Acquire) {
             match listener.accept() {
@@ -3659,6 +3681,10 @@ impl ZoneHostServer {
         if !tokens_equal(self.auth_token.as_deref(), envelope.auth_token.as_deref()) {
             return Err(ZoneRpcFault::new("unauthorized", "invalid zone host token"));
         }
+        // This host journals raw commands. Do not execute the active source
+        // first and discover only during standby replay that it cannot be
+        // reproduced without minting the legacy gold reward.
+        self.ensure_hunting_replication_rpc_admission()?;
         validate_identifier("RPC session id", &envelope.session_id)
             .map_err(|message| ZoneRpcFault::new("invalid_request", message))?;
         validate_identifier("zone id", &envelope.zone_id)
@@ -3876,6 +3902,9 @@ impl ZoneHostServer {
         session: Arc<ZoneHostSession>,
         request: ZoneRpcRequest,
     ) -> Result<ZoneRpcPayload, ZoneRpcFault> {
+        // Keep the direct/programmatic session dispatch boundary guarded too;
+        // callers may not bypass the network/startup admission check.
+        self.ensure_hunting_replication_rpc_admission()?;
         match request {
             ZoneRpcRequest::Health => unreachable!(),
             ZoneRpcRequest::ReplicationHead
@@ -8279,3 +8308,79 @@ mod shard_endpoint_tests {
 #[cfg(test)]
 #[path = "npc_purchase_owner_route_tests.rs"]
 mod npc_purchase_owner_route_tests;
+
+#[cfg(test)]
+mod hunting_source_replication_containment_tests {
+    use super::*;
+    use crate::routing::InMemoryZoneOwnerLeaseAuthority;
+
+    fn server(enabled: bool) -> Arc<ZoneHostServer> {
+        let mut config=GatewayConfig::default();
+        if enabled {
+            config.account_store_database_mode=mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth;
+            config.account_store_database_url=Some("postgresql://not-opened.invalid/config-only".into());
+            config=config.with_hunting_economy_realm("containment-realm").unwrap();
+        }
+        Arc::new(ZoneHostServer::with_options(config,
+            Arc::new(InMemoryZoneOwnerLeaseAuthority::new()),
+            Some("hunting-containment-token".into()),ZoneRpcLimits::default()))
+    }
+    fn envelope(request:ZoneRpcRequest)->ZoneRpcEnvelope {
+        ZoneRpcEnvelope {protocol_version:ZONE_RPC_PROTOCOL_VERSION,
+            session_id:"hunting-containment-session".into(),zone_id:"primary".into(),
+            auth_token:Some("hunting-containment-token".into()),request}
+    }
+    fn execute(server:&ZoneHostServer)->ZoneRpcRequest {
+        let lease=server.owner_lease_authority.owner_lease(&ZoneId::primary());
+        ZoneRpcRequest::Execute {owner_lease:WireZoneOwnerLease::from(&lease),mode:WireZoneOwnerCommandMode::Direct,
+            command:WireWorldCommand::from_world(WorldCommand::ClientPacket(ClientPacket::FinishQuest {quest_index:7,selected_item_index:-1})).unwrap()}
+    }
+
+    #[test]
+    fn hunting_source_zone_host_containment_rejects_serve_before_accepting() {
+        let server=server(true);
+        let listener=TcpListener::bind("127.0.0.1:0").unwrap();
+        // A missing admission guard must fail fast with WouldBlock, not hang.
+        listener.set_nonblocking(true).unwrap();
+        assert_eq!(Arc::clone(&server).serve(listener).unwrap_err().kind(),io::ErrorKind::InvalidInput);
+        let listener=TcpListener::bind("127.0.0.1:0").unwrap();
+        let stopped=Arc::new(AtomicBool::new(true));
+        assert_eq!(Arc::clone(&server).serve_until(listener,stopped).unwrap_err().kind(),io::ErrorKind::InvalidInput);
+        assert_eq!(server.accepted_connections_total.load(Ordering::Acquire),0);
+        assert_eq!(server.session_count(),0);
+    }
+
+    #[test]
+    fn hunting_source_zone_host_containment_rejects_programmatic_execute_replication_and_promotion() {
+        let server=server(true);
+        let lease=server.owner_lease_authority.owner_lease(&ZoneId::primary());
+        for request in [execute(&server),ZoneRpcRequest::ReplicationHead,ZoneRpcRequest::ExportBaseSnapshot,
+            ZoneRpcRequest::InstallHostCheckpoint {bytes:b"invalid checkpoint must not be decoded".to_vec()},
+            ZoneRpcRequest::PromoteReplica {readiness_id:"not-a-receipt".into(),owner_lease:WireZoneOwnerLease::from(&lease)}] {
+            let fault=server.handle_envelope(envelope(request)).unwrap_err();
+            assert_eq!(fault.code,"hunting_source_replication_unsupported");
+        }
+        assert_eq!(server.runtime_execute_calls.load(Ordering::Acquire),0);
+        assert_eq!(server.session_count(),0);
+        assert!(server.journal.lock().unwrap().entries.is_empty());
+        // Operator/programmatic promotion is not allowed to bypass the RPC gate.
+        assert!(server.promote_replica(&ZoneId::primary(),"not-a-receipt",&lease).unwrap_err().contains("do not support"));
+        assert!(server.export_mutation_batch(&ZoneId::primary(),0,1,1024).unwrap_err().contains("do not support"));
+        assert!(server.compact_mutation_journals(1).unwrap_err().contains("do not support"));
+        assert_eq!(server.promotions_total.load(Ordering::Acquire),0);
+    }
+
+    #[test]
+    fn hunting_source_zone_host_containment_guards_direct_session_dispatch_and_keeps_auth_precedence() {
+        let server=server(false);
+        assert!(matches!(server.handle_envelope(envelope(ZoneRpcRequest::Health)).unwrap(),ZoneRpcPayload::Health{..}));
+        let session=server.hosted_session("hunting-containment-session","primary").unwrap();
+        server.config.lock().unwrap().hunting_economy_realm=Some("enabled-after-construction".into());
+        let fault=server.handle_session_request("hunting-containment-session","primary",session,execute(&server)).unwrap_err();
+        assert_eq!(fault.code,"hunting_source_replication_unsupported");
+        assert_eq!(server.runtime_execute_calls.load(Ordering::Acquire),0);
+        assert!(server.journal.lock().unwrap().entries.is_empty());
+        let mut wrong_token=envelope(ZoneRpcRequest::Health);wrong_token.auth_token=Some("wrong-token".into());
+        assert_eq!(server.handle_envelope(wrong_token).unwrap_err().code,"unauthorized");
+    }
+}

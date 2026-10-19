@@ -3701,6 +3701,18 @@ fn quest_dialog_link_allows_operation(
             }))
 }
 
+fn hunting_finish_target_id(target: &str) -> Option<i32> {
+    let (target, arguments) = super::npc_script::parse_crystal_label_target(target);
+    if !arguments.is_empty() { return None; }
+    let parts = target.trim().trim_start_matches('@').split(':').collect::<Vec<_>>();
+    let value = match parts.as_slice() {
+        [kind, id] if kind.eq_ignore_ascii_case("FinishQuest") => *id,
+        [kind, action, id] if kind.eq_ignore_ascii_case("quest") && action.eq_ignore_ascii_case("finish") => *id,
+        _ => return None,
+    };
+    value.parse::<i32>().ok().filter(|id| *id > 0)
+}
+
 #[cfg(test)]
 mod quest_dialog_operation_link_tests {
     use bevy_ecs::prelude::World;
@@ -3949,6 +3961,9 @@ pub(super) fn stage5_finish_quest_packet(
         return vec![system_message_key(world, "client.YouMustSelectRewardItem")];
     }
     complete_quest_with_selection(world, quest_id, selected_item_index);
+    if let Some(rejection) = super::hunting_quests::take_rejection_packet(world) {
+        return vec![rejection];
+    }
     if stage5_quest_stage(world, quest_id) != Some(QuestStage::Completed) {
         return vec![system_message_key(world, "server.CannotHandInQuestBagFull")];
     }
@@ -9161,6 +9176,37 @@ impl SimulationSession {
         self.try_handle_packet_recording_buy(packet, None, None)
     }
 
+    /// A normal NPC finish target may recover only its own original uncertain
+    /// source before the Guild XP wrapper's general write freeze check.
+    pub(crate) fn try_recover_hunting_quest_npc_target(&mut self, target: &str) -> Option<Vec<ServerPacket>> {
+        if !is_in_world(self.app.world()) { return None; }
+        let quest = hunting_finish_target_id(target)?;
+        let dialog = self.app.world().resource::<NpcStateResource>().active_npc_dialog.as_ref()?;
+        if !dialog.links.iter().any(|link| super::npc_script::crystal_npc_labels_match(&link.target, target))
+            || !active_npc_allows_quest_request(self.app.world(), quest, None, true, None) {
+            return None;
+        }
+        let packets = super::hunting_quests::recover_original_request(self.app.world_mut(), quest)?;
+        Some(self.finalize_packets(packets))
+    }
+
+    fn try_recover_hunting_quest_packet(&mut self, packet: &ClientPacket) -> Option<Vec<ServerPacket>> {
+        if !is_in_world(self.app.world()) { return None; }
+        match packet {
+            ClientPacket::FinishQuest { quest_index, selected_item_index } if *selected_item_index < 0 => {
+                if !active_npc_allows_quest_request(self.app.world(), *quest_index, None, true, None) { return None; }
+                let packets = super::hunting_quests::recover_original_request(self.app.world_mut(), *quest_index)?;
+                Some(self.finalize_packets(packets))
+            }
+            ClientPacket::CallNpc { object_id, key } => {
+                let dialog = self.app.world().resource::<NpcStateResource>().active_npc_dialog.as_ref()?;
+                if dialog.npc_object_id != *object_id { return None; }
+                self.try_recover_hunting_quest_npc_target(key)
+            }
+            _ => None,
+        }
+    }
+
     fn try_handle_packet_recording_buy(&mut self, packet: ClientPacket,
         buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
         purchase_outcome: Option<&mut Option<NpcPurchaseProcessingOutcome>>,
@@ -9175,6 +9221,9 @@ impl SimulationSession {
             if let ClientPacket::GuildNameReturn { ref name } = packet {
                 return self.submit_shared_guild_name(name);
             }
+        }
+        if let Some(packets) = self.try_recover_hunting_quest_packet(&packet) {
+            return Ok(packets);
         }
         let mut recurrence_packets = if matches!(packet, ClientPacket::StartGame { .. }) {
             Vec::new()

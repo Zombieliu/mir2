@@ -1,0 +1,18 @@
+{
+  "grafana_version": "13.2.4",
+  "synthetic_only": true,
+  "fixture_prefix": "hunting-observer-test-grafana-20261019-native1",
+  "fixture_realms": 29,
+  "panel_queries_executed": 13,
+  "alert_sql_assertions": 57,
+  "alert_native_threshold_assertions": 57,
+  "explicit_null_preservation_assertions": 17,
+  "fixture_sql_sha256": "bc5cc0e00770aa21a0775b1fd3f72687927728a211fb0ce0d627686954b32f1a",
+  "evaluated_models_from_native_provisioning_api": true,
+  "economic_window": "current complete economic days from server now(), Asia/Shanghai 04:00; no historical leap-day claim",
+  "sslmode": "verify-full",
+  "tls_configuration_method": "file-path",
+  "datasource_queries_executed": true,
+  "notifications_sent": false,
+  "production_coverage_claimed": false
+}

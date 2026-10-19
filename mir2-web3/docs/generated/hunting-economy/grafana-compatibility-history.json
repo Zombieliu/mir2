@@ -1,0 +1,39 @@
+{
+  "classification": "local isolated native Grafana acceptance; not production game data",
+  "date": "2026-10-19",
+  "grafana_version": "13.2.4",
+  "initial_native_import": "passed; import alone did not execute expressions",
+  "initial_expression_execution": {
+    "http_status": 400,
+    "message_id": "sse.parseError",
+    "error": "failed to parse expression [B]: reducer mode 'strict' is not supported. Supported only: [dropNN,replaceNN]"
+  },
+  "repair": {
+    "files": ["infra/economy-observability/generate.py", "infra/economy-observability/grafana/provisioning/alerting/economy-rules.yaml", "infra/economy-observability/verify.py"],
+    "change": "Omit unsupported explicit settings.mode=strict on the five reduce models; use the native strict default.",
+    "sql_thresholds_days_and_nodata_policy_changed": false,
+    "native_reprovisioning_performed": true
+  },
+  "after_repair": {
+    "models_read_from_native_provisioning_api": true,
+    "synthetic_realms": 29,
+    "actual_sql_assertions_passed": 57,
+    "native_expression_assertions_passed": 57,
+    "explicit_null_preservation_assertions_passed": 17,
+    "null_converted_to_normal_zero": false,
+    "tls": "verify-full with a local CA signed loopback PostgreSQL certificate",
+    "notifications_sent": false,
+    "production_coverage_claimed": false
+  },
+  "runtime_preliminary_findings": [
+    "Docker engine returned HTTP500; it was not restarted or repeatedly probed.",
+    "Default proxy TLS negotiation failed; direct HTTPS was valid but too slow. Proxy TLS1.2, bounded range concurrency4 and at most3 transport attempts per range completed the official archive. TLS certificate verification remained enabled; final official SHA256 matched.",
+    "First private Grafana start lacked its data directory and exited; helper now creates its owned data/log/plugin paths and retains prior private logs.",
+    "Windows backend plugin processes inherit log handles; shutdown verifies and stops only child executables inside the owned distribution before the owned server. Restart preserves the private SQLite admin identity and encryption key."
+  ],
+  "remaining_qualification": [
+    "Real server asset coverage, actual market/player/revenue sources and calibrated stock baselines remain outside this synthetic acceptance.",
+    "No real DingDing/WeCom notification or recovery delivery was attempted.",
+    "Current server-now October windows do not provide actual leap-day boundary coverage."
+  ]
+}

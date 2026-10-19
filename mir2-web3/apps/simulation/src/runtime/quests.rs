@@ -45,6 +45,10 @@ pub(super) mod newcomer_v2_events;
 #[path = "quest_recurrence.rs"]
 pub(super) mod quest_recurrence;
 
+pub(super) fn quest_has_recurrence(world: &World, quest_id: i32) -> bool {
+    quest_recurrence::cadence_for_quest(world, quest_id).is_some()
+}
+
 #[cfg(test)]
 #[path = "quest_level15_tests.rs"]
 mod quest_level15_tests;
@@ -1058,6 +1062,23 @@ pub(super) fn complete_quest_with_selection(
     quest_id: i32,
     selected_item_index: Option<i32>,
 ) -> bool {
+    if let Some(completed) = super::hunting_quests::complete_if_configured(
+        world, quest_id, selected_item_index,
+    ) {
+        return completed;
+    }
+    complete_quest_personal(world, quest_id, selected_item_index, true)
+}
+
+/// The hunting planner invokes the exact personal reward implementation in an
+/// isolated World, with the old gold award suppressed. All other effects remain
+/// part of its complete checkpoint and are not published before PG commits.
+pub(super) fn complete_quest_personal(
+    world: &mut World,
+    quest_id: i32,
+    selected_item_index: Option<i32>,
+    award_legacy_gold: bool,
+) -> bool {
     // Keep reward settlement idempotent even when an ordinary FinishQuest
     // packet is retried or a caller bypasses the packet-layer stage check.
     if quest_stage(world, quest_id) != Some(QuestStage::ReadyToTurnIn) {
@@ -1068,7 +1089,7 @@ pub(super) fn complete_quest_with_selection(
         return false;
     }
     if let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) {
-        return complete_crystal_quest(world, &info, selected_item_index);
+        return complete_crystal_quest(world, &info, selected_item_index, award_legacy_gold);
     }
     let Some(quest) = quest_template_by_id(quest_id) else {
         return false;
@@ -1098,7 +1119,9 @@ pub(super) fn complete_quest_with_selection(
             .inventory_items
             .retain(|item| item.key != quest.quest_item.key);
     }
-    world.resource_mut::<PlayerRuntimeResource>().gold += quest.completion_rewards.gold;
+    if award_legacy_gold {
+        world.resource_mut::<PlayerRuntimeResource>().gold += quest.completion_rewards.gold;
+    }
     if let Some(quest) = world
         .resource_mut::<QuestResource>()
         .quests
@@ -1132,6 +1155,7 @@ fn complete_crystal_quest(
     world: &mut World,
     info: &ClientQuestInfo,
     selected_item_index: Option<i32>,
+    award_legacy_gold: bool,
 ) -> bool {
     let fixed_rewards = info.rewards_fixed_item.clone();
     let selected_reward = selected_crystal_quest_reward(info, selected_item_index);
@@ -1148,7 +1172,9 @@ fn complete_crystal_quest(
 
     {
         let mut player = world.resource_mut::<PlayerRuntimeResource>();
-        player.gold = player.gold.saturating_add(info.reward_gold);
+        if award_legacy_gold {
+            player.gold = player.gold.saturating_add(info.reward_gold);
+        }
         player.credit = player.credit.saturating_add(info.reward_credit);
     }
     // Crystal `GainExp`: quest experience rolls into levels via the shared curve;
@@ -1940,6 +1966,7 @@ fn finish_crystal_quest_from_npc(
     selected_item_index: Option<i32>,
 ) -> (ActiveCrystalQuestDialog, Vec<ServerPacket>) {
     let mut packets = Vec::new();
+    let mut hunting_retry = false;
     if !crystal_quest_finish_npc_matches(info, npc_object_id) {
         return (
             crystal_quest_dialog_copy(info, QuestStage::InProgress, false),
@@ -1973,6 +2000,9 @@ fn finish_crystal_quest_from_npc(
             if let Some(packet) = newcomer_daily_bonus_update_packet(world, info.index) {
                 packets.push(packet);
             }
+        } else if let Some(rejection) = super::hunting_quests::take_rejection_packet(world) {
+            hunting_retry = true;
+            packets.push(rejection);
         } else {
             packets.push(ServerPacket::Chat {
                 message: "Cannot hand in quest; your bag is full.".to_string(),
@@ -1981,7 +2011,7 @@ fn finish_crystal_quest_from_npc(
         }
     }
     (
-        crystal_quest_dialog_copy(info, quest_stage(world, info.index).unwrap_or(stage), false),
+        crystal_quest_dialog_copy(info, quest_stage(world, info.index).unwrap_or(stage), hunting_retry),
         packets,
     )
 }

@@ -54,6 +54,25 @@ pub(super) fn restore(world: &mut World, journal: &GuildExperienceJournal) {
         Mutex::new(None),
     ));
 }
+
+/// Quest preparation journals against owned state only. The canonical account
+/// writer settles this journal in the same transaction as the bound-gold credit.
+pub(super) fn begin_owned_hunting_preparation(world: &mut World) {
+    if let Some(resource) = world.get_resource::<GuildExperienceResource>() {
+        resource.1.store(true, Ordering::Release);
+    }
+}
+
+pub(super) fn finish_owned_hunting_preparation(world: &World) -> Result<(), String> {
+    let Some(resource) = world.get_resource::<GuildExperienceResource>() else {
+        return Ok(());
+    };
+    resource.1.store(false, Ordering::Release);
+    match resource.2.lock().map_err(|_| "quest preparation XP journal poisoned")?.take() {
+        Some(error) => Err(error),
+        None => Ok(()),
+    }
+}
 pub(super) fn acknowledge(world: &World, sequence: u64) {
     if let Some(resource) = world.get_resource::<GuildExperienceResource>() {
         resource

@@ -1,6 +1,16 @@
 # 狩猎经济：真实游戏来源接入计划
 
-日期：2026-10-19（北京时间）。本文记录现有源码边界和后续验收要求；不是来源已经接通、覆盖完整或已经发布的证明。经济公式与参数以 [HUNTING-PERMIT-ECONOMY.md](HUNTING-PERMIT-ECONOMY.md) 和有效政策版本为准。保持 K=0.1；原个人月额度不能作为当前供应承诺。
+更新：2026-10-20（北京时间）。无物品一次性金币任务的首条真实来源已接通并通过本地PG/正常包分发验收；其余来源与材料仍待接。本文记录实际边界及后续要求，不代表完整覆盖或已经发布。经济公式与参数以 [HUNTING-PERMIT-ECONOMY.md](HUNTING-PERMIT-ECONOMY.md) 和有效政策版本为准。保持 K=0.1；原个人月额度不能作为当前供应承诺。用户要求原生运行，不用Docker。
+
+## 已实现的首条来源
+
+`runtime/hunting_quests.rs` 从服务端effective定义筛选无物品的一次性金币任务，普通FinishQuest、CallNpc和高层NPC目标共用同一实现。真实任务领取与完整EXP/等级/credit/Guild journal、新绑定金币在同一PG事务完成；客户端不提供金额、摘要、来源ID或代际。`config_hunting_source.rs`复用完整存档writer，迁移0021保存角色终身领取槽；服务包提供授权回调和原回执查询，禁止另开第二事务补账。关闭新业务时保留原有流程，启用但拒绝时不会回退发旧金币。
+
+真实PG测试覆盖共同提交、回滚、CAS/角色重建拒绝、跨独立实例同槽一次、原摘要冲突、COMMIT/worker结果丢失和原NPC请求恢复。独立World规划与直接后继投影测试覆盖当前HP/MP上限、Zone伤害/死亡及后续完整存档revision拒绝。服务器测试实际经过正常包分发，但没有宣称物理客户端玩家任务、重登或整条新手链已验收。
+
+原始命令副本没有已解决来源checkpoint/原UUID载体，因此当前禁止启用来源与远端/复制/晋升混用；不能把副本realm清空后重放成legacy金币，也不能在retained bootstrap首次领取新UUID。完整复制支持仍是后续工作。带物品、任务材料、周期任务以及种植/挖矿尚未迁移。
+
+下一验证项包含真实Guild成员的任务分成与共同PG提交；当前开启共享Guild权威的fixture并不具有成员身份，现有通过记录不能证明该成员分支。
 
 ## 权威边界
 
@@ -14,8 +24,8 @@
 
 | 来源 | 现有入口 | 当前变更 | 接入前必须补齐的边界 |
 | --- | --- | --- | --- |
-| 普通任务金币 | `runtime/quests.rs`：`complete_quest_with_selection` | 直接增加 `PlayerRuntimeResource.gold`，随后修改任务完成状态和奖励物品 | 完成状态、领取标记、相关物品/经验及新绑定金币必须共同持久化；目前仅有 ECS 内的阶段检查 |
-| Crystal 任务金币 | `runtime/quests.rs`：`complete_crystal_quest` | `player.gold.saturating_add(info.reward_gold)`；随后发物品、扣任务物品、写 Completed | 需要完整奖励计划，不能只迁移金币而让同一次领取的其余结果失去原子性 |
+| 普通任务金币 | `runtime/quests.rs`：`complete_quest_with_selection` | 启用时先走共同来源hook；关闭时沿用旧流程 | 已覆盖受限的一次性无物品奖励；其他任务不能以双发或legacy回退绕过限制 |
+| Crystal 任务金币 | `runtime/quests.rs`：`complete_crystal_quest` | 纯规划可显式抑制legacy gold，保留其他完整奖励 | 物品/周期来源须扩展完整计划和周期领取槽，当前拒绝未支持定义 |
 | 个人地面金币拾取 | `runtime/drops.rs`：`pick_up_ground_drop` | ECS 加旧金币并删除本地地面物 | 必须把不可重复的掉落身份、拾取归属和绑定入账共同提交，不能依赖重启后可重复的临时 object_id |
 | 共享地面金币拾取 | `runtime/drops.rs`：`commit_shared_ground_drop_pickup_transaction_impl`；Gateway 的共享拾取调用链 | 个人状态加旧金币，返回共享拾取回执 | Zone 领取/删除和数据库入账需要持久 claim 协议；不能把“内存事务回执”当作与新钱包共同提交的 PG 事务 |
 | 挖矿材料 | `runtime/mining.rs`：`try_mine`、`give_mine_payout` | 消耗本地矿点石数、损耗镐耐久，通过 inventory helper 直接发矿石 | 需要共享矿点来源身份、持久产出 claim、逐实例经济绑定，以及完整材料传播规则 |
@@ -24,17 +34,17 @@
 
 核心状态定义仍只有一份旧金币：`runtime/resources.rs` 的 `PlayerRuntimeResource.gold` 和 `config.rs` 的 `CharacterSaveRecord.gold`。`runtime/save.rs::snapshot_active_character_save` 将它及 `quest_states_json`、背包、装备、NPC 状态打包成完整存档。
 
-已有 `config.rs::commit_account_store_transaction` 可以先在独立 `AccountStore` 镜像上修改，再持久化并发布内存，但它的闭包只获得 `&mut AccountStore`。底层 `write_account_store_mutation_plan_to_postgres` 自行开启并提交 PG 事务；`write_account_store_mutation_plan_in_transaction` 当前是内部函数。直接在前述闭包中调用 economy service 会产生第二条连接/第二个事务，不能获得共同原子提交。
+已有 `config.rs::commit_account_store_transaction` 的通用闭包只获得 `&mut AccountStore`，直接在其中调用economy service仍会产生第二事务。新受限任务桥在service持有的同一PG事务中调用内部完整checkpoint writer，保留原CAS、Guild结算和提交后镜像发布；这不是给任意来源开放的客户端写接口。
 
 `runtime/npc_purchase_transaction.rs` 已有完整 checkpoint、角色 incarnation、幂等 journal、版本检查、提交后发布及 Unknown 恢复的设计，可用于参考。它还不是任务/修理与狩猎账本之间的现成事务桥。
 
-## 首条推荐来源：一次性固定金币任务
+## 首条来源契约：一次性固定金币任务
 
-先限定服务端明确列出的、非每日、非每周、非重复的固定金币奖励任务。任务定义和奖励版本由服务器加载，客户端只提交原有完成意图，不提交金额、来源摘要、账户或角色 incarnation。优先选择没有可选物品或额外复杂奖励的真实任务；不能为缩小实现而忽略原任务实际包含的奖励。
+当前按服务端真实定义筛选非每日、非每周、非重复、无物品的固定金币任务，并非只放行测试任务ID。任务定义和奖励版本由服务器加载，客户端只提交原有完成意图，不提交金额、来源摘要、账户或角色incarnation；不能为缩小实现而忽略原任务实际包含的奖励。物理客户端完整任务/重登验收及其他定义扩展仍开放。
 
 `quest_recurrence.rs::quest_completion_is_permanent` 只排除 Repeatable，不能用于判断“永久不可再次领取”：Daily/Weekly 也可能返回 true。首批应明确要求 `cadence_for_quest(...) == None`，并复核具体任务定义。已有日任务以北京时间 00:00 重置；许可日结以 04:00 关闭。将来接入周期任务必须使用任务自己的有效 cycle，不能拿许可日键代替领取周期。
 
-建议新增受限的来源 mutation plan，而不是让业务层直接修改完整存档 JSON：
+当前受限来源mutation plan遵守以下契约；后续物品及周期扩展也须保留：
 
 1. 从当前受信任角色 checkpoint 生成待提交奖励计划，包含任务定义版本、完整奖励、完成前置状态、预期存档 revision、实际 `hunting_incarnation` 和固定来源 ID。规划阶段不发布 ECS 成功结果。
 2. 在 SourceOfTruth PG 路径中先取得经济 realm 锁及 DB 时钟，再按统一顺序锁 account、character/character_save。不得先持有 account 锁后再请求 realm 锁，避免与 HTTP 转换路径形成反向锁等待。
@@ -49,14 +59,15 @@
 
 首条来源验收：
 
+- [x] 配置桥12项（纯4/真实PG8）及普通服务端任务分发12项（纯7/真实PG5）通过，包含原始请求Unknown恢复与旧冻结先到的并发保护；不是物理玩家客户端证明。
 - [ ] 普通客户端完成真实任务，绑定钱包只增加服务器定义金额；旧金币不重复增加。
 - [ ] 任务完成、任务物品消耗、其他奖励和绑定金币在提交前故障时全部回滚。
-- [ ] 提交确认丢失后，同 ID 恢复返回同一回执，不重复执行来源回调。
+- [x] 已接一次性无物品任务提交确认丢失后，同ID恢复返回同一回执，不重复执行来源回调。
 - [ ] 重复 FinishQuest、跨进程并发领取和重新登录只产生一次奖励。
-- [ ] 相同来源改金额或奖励摘要返回冲突；修改任务定义不能绕过领取业务唯一性。
+- [x] 已接一次性来源改金额或奖励摘要返回冲突；修改任务定义不能绕过终身领取槽。
 - [ ] 陈旧 checkpoint、封禁/撤销身份、角色删除重建、归属不符均拒绝；旧角色回执不进入新 incarnation。
 - [ ] 库存/日结追赶阻塞不会先修改 ECS；04:00 等锁后使用真实 DB 业务日。
-- [ ] disabled 时不发新奖励，且不存在 legacy/new 双发兜底。
+- [x] disabled不发新钱包奖励；启用来源被拒绝时不回退legacy，也不存在双发兜底。
 
 ## 真实销毁接入要求
 
@@ -104,6 +115,6 @@
 
 最新 `apps/gateway/src/hunting_clock.rs` 已改为维护专用 PG 连接，未再从登录/存档共享连接池取 CancelToken。连接上限 5 秒、锁超时 2 秒、语句超时 10 秒；Drop 等待 worker 最多约 12 秒后解除等待，断线提交通过持久日结 cursor 恢复。它默认关闭、要求显式 realm 和 PG SourceOfTruth，不按在线人数启动，也不从政策文件注入初始许可或隐式改变 K。
 
-新增 ignored PG 测试源码覆盖空服追赶 80 个日期、重复执行无重复日、锁超时和正常锁等待下的有界退出。源码存在不等于已经执行；真实编译、隔离 PG 结果和最终回归由协调者的实际执行记录确认。故障网络下 detach 路径不能仅凭正常锁等待测试就宣称已经验收。
+协调者已在原生隔离PG实际执行空服追赶80个日期、重复执行无重复日、锁超时和正常锁等待下有界退出测试，当前验收记录见主文档。故障网络下detach路径不能仅凭正常锁等待测试就宣称已经验收。
 
 `web/hunting_economy.rs` 的转换/钱包 HTTP 路径使用身份 bearer token，并在资产事务内重新锁定账户、身份 session、角色 incarnation；锁后再校验 DB 时间、过期、封禁和撤销。客户端不能提供账户或 incarnation，金额以规范十进制字符串传输，并发许可随 blocking 工作生命周期持有。当前源码复核未发现确定越权或并发超发缺陷；这一结论不替代真实玩家来源接线和上线验收。

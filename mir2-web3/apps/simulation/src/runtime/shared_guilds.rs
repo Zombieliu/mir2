@@ -392,7 +392,7 @@ use crate::config::Stage5GuildState;
 use bevy_ecs::prelude::{Resource, World};
 use mir2_protocol::{GuildMember, GuildRank, ServerPacket};
 
-#[derive(Resource, Default)]
+#[derive(Resource, Default, Clone)]
 pub(super) struct SharedGuildSession {
     pub enabled: bool,
     create_grant: Option<Stage5FriendIdentity>,

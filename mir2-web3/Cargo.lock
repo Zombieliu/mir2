@@ -4840,6 +4840,7 @@ dependencies = [
  "bevy_tasks 0.17.3",
  "flate2",
  "libc",
+ "mir2-economy-service",
  "mir2-game-data",
  "mir2-protocol",
  "postgres",

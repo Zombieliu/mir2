@@ -21,8 +21,6 @@ fn main() -> std::io::Result<()> {
 }
 
 async fn async_main() -> std::io::Result<()> {
-    mir2_gateway::gate15::initialize_from_env()
-        .map_err(|error| io::Error::new(io::ErrorKind::Other, error))?;
     let tcp_addr =
         env::var("MIR2_GATEWAY_TCP_ADDR").unwrap_or_else(|_| DEFAULT_TCP_ADDR.to_string());
     let web_addr =
@@ -78,6 +76,10 @@ async fn async_main() -> std::io::Result<()> {
     };
     let config = configure_save_recovery_mac_key(config, encoded_recovery_key.as_deref())
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let config = mir2_gateway::hunting_clock::configure_hunting_game_sources(config)
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    mir2_gateway::gate15::initialize_from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::Other, error))?;
     let _guild_clock = mir2_gateway::guild_clock::GuildClockService::start(config.clone())?;
     let hunting_config = config.clone();
     let _hunting_clock = tokio::task::spawn_blocking(move || {

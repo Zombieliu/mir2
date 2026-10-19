@@ -1,8 +1,8 @@
 # Crystal Server Parity
 
-## 狩猎许可定制经济边界（2026-10-19）
+## 狩猎许可定制经济边界（2026-10-20）
 
-狩猎许可持续目标active：真实PostgreSQL核心、认证转换HTTP、空服日结追赶和只读Grafana配置已通过本地有界验收，见 [实现及验收边界](HUNTING-PERMIT-ECONOMY.md)。K=0.1保留，默认基准/硬上限重算为0.72/1.08许可。全部真实产出/销毁来源、材料传播、完整指标和发布资格尚未闭合。未更改线上资产、旧金币定性或现有Crystal结论；本服定制规则不计新增Crystal1:1行为。
+狩猎许可持续目标active：经济核心外已接无物品一次性任务的同PG完整奖励/绑定入账和原请求恢复，原生Grafana实际导入/TLS查询/表达式与合成图表抽查通过，见 [实现及验收边界](HUNTING-PERMIT-ECONOMY.md)。K=0.1、基准0.72/硬上限1.08许可及默认禁用保持；当前真实来源限本地未复制权威，禁止通过旧命令副本/晋升回退legacy金币。物品/周期任务、种植挖矿、三层真实销毁、材料传播、全服指标、通知与发布资格尚未闭合。用户禁止Docker，后续原生运行；线上资产、旧金币定性和既有Crystal结论保持，本服定制规则不计新增Crystal1:1行为。
 
 
 ## Root owned Source78 authenticated Spells bootstrap and ordinary reentry QA (2026-10-12 Beijing)
