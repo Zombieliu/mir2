@@ -167,6 +167,22 @@ pub struct BoundDebitBurnReceipt {
     pub wallet_after: WalletBalance,
 }
 
+/// An intrinsically zero-fee source mutation. This receipt carries no wallet
+/// balance or burn event: neither is read, provisioned or modified by the adapter.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ZeroFeeSourceReceipt {
+    pub realm_id: String,
+    pub operation_key: String,
+    pub request_digest: String,
+    pub owner: WalletOwner,
+    pub source_kind: String,
+    pub source_key: String,
+    pub policy_version: String,
+    pub business_day: i64,
+    pub committed_at_ms: i64,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct BurnReceipt {

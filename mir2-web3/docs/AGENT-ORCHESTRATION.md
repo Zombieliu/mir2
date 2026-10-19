@@ -2,9 +2,9 @@
 
 ## 狩猎经济协调约束（2026-10-20）
 
-第三阶段已由Root集成：真实Guild成员PG专项及修理的正额共同debit/burn、纯计划和本地物品变更见证；194项focused/邻接通过，Gateway库/主/ZoneHost检查通过。限定写集全部释放，Root串行原生Cargo、证据和本地提交；三个外来QA JSON保留。真实修理报价令牌/完整来源与恢复仍待接，不得把基础当成NPC销毁已上线。下一队列及边界见 [来源接线计划](HUNTING-SOURCE-INTEGRATION.md)，完整goal active、默认关闭；不运行Docker/WSL/虚拟机或改动游戏/虚拟化。
+第四阶段已由Root集成并实际验证服务端NPC修理来源：Quote→Confirm→Query、零费用持久结果、完整checkpoint/绑定扣款/销毁共同事务，以及Unknown、断线保存前恢复和明确退役。真实InProcess/Shared网关PG链路通过，见 [第四阶段证据](generated/hunting-economy/acceptance-20261020-repair-source.json)。现有游戏UI接线、同回合快照同步和物理客户端/网络验收仍待，不宣称已上线。Root继续负责串行原生Cargo、证据与提交，限定写集释放后再分配；三个外来QA JSON保留。下一队列见 [来源接线计划](HUNTING-SOURCE-INTEGRATION.md)，完整goal active、默认关闭；不运行Docker/WSL/虚拟机，不干扰游戏或修改虚拟化设置。
 
-本轮继续用户明确创建的狩猎许可经济goal；原生PostgreSQL/Grafana验收，不使用Docker，不启动WSL/虚拟机，不干扰游戏或修改系统虚拟化设置。Root负责独立工作树最终集成、串行Cargo、证据与提交；任务规划/来源和只读观测按限定写集委派，既有主工作区及三个外来QA JSON保留。真实一次性无物品任务来源已接，完整复制/晋升仍须可信结果checkpoint和原角色代际；未支持组合在执行前拒绝，不允许副本清realm后发旧金币。下一队列见任务队列及HUNTING-SOURCE-INTEGRATION，goal保持active，默认关闭，不推断Crystal百分比或生产资格。
+本轮继续用户明确创建的狩猎许可经济goal；原生PostgreSQL/Grafana验收，PG验收库max_connections保持30，Sim/Gateway的PG回归按逐用例独立进程执行（service仍按4个integration harness批次执行），不提高连接上限。真实一次性无物品任务及NPC修理服务端来源已接；完整复制/晋升仍须可信结果checkpoint和原角色代际，未支持组合在执行前拒绝，不允许副本清realm后发旧金币。当前验收不是全workspace、浏览器或网络整链，也不证明全服资产覆盖；goal保持active，不推断Crystal百分比或生产资格。
 
 ## 三个聊天的代码进度整理（2026-10-14，北京时间）
 

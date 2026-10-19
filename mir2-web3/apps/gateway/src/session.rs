@@ -584,6 +584,37 @@ impl GatewaySession {
         self.zone_owner_command_client.supports_durable_npc_purchase_owner(&self.runtime)
     }
 
+    pub fn supports_hunting_repair_owner(&self) -> bool {
+        self.zone_owner_command_client.supports_hunting_repair_owner(&self.runtime)
+    }
+
+    /// Same current owner lease as production gameplay, with no generic-command
+    /// fallback and no unrelated award/trade/global-message predrain.
+    pub fn execute_hunting_repair_owner(&mut self, authenticated: bool,
+        action: mir2_simulation::HuntingRepairAction,
+    ) -> Result<mir2_simulation::HuntingRepairExecution, String> {
+        let lease = self.zone_owner_lease.clone();
+        self.execute_hunting_repair_owner_with_zone_owner_lease(&lease, authenticated, action)
+    }
+    pub fn execute_hunting_repair_owner_with_zone_owner_lease(&mut self, lease: &ZoneOwnerLease,
+        authenticated: bool, action: mir2_simulation::HuntingRepairAction,
+    ) -> Result<mir2_simulation::HuntingRepairExecution, String> {
+        self.validate_zone_owner_lease(lease)?;
+        if !authenticated || !self.supports_hunting_repair_owner() {
+            return Err("typed hunting repair requires authenticated local owner authority".into());
+        }
+        let result = catch_gateway_panic("hunting repair gateway owner route", || {
+            self.zone_owner_command_client.execute_hunting_repair_owner(&mut self.runtime, lease, authenticated, action)
+        }).and_then(|result| result);
+        if matches!(&result, Ok(mir2_simulation::HuntingRepairExecution {
+            reply: mir2_simulation::HuntingRepairReply::Committed { reload_required: true, .. }, ..
+        })) {
+            self.active_identity_binding = None;
+            self.refresh_global_message_identity(None);
+        }
+        result
+    }
+
     pub fn execute_npc_purchase_owner(&mut self, authenticated: bool, action: NpcPurchaseOwnerAction)
         -> Result<NpcPurchaseOwnerRouteExecution, NpcPurchaseDurableError> {
         let lease = self.zone_owner_lease.clone();
@@ -885,6 +916,13 @@ impl GatewaySession {
         }
         let owner_lease = self.zone_owner_lease.clone();
         self.validate_zone_owner_lease(&owner_lease)?;
+        if self.zone_owner_command_client.prepare_hunting_repair_teardown(&mut self.runtime, &owner_lease)? {
+            // An explicit recovery result proves this exact actor's World was
+            // retired. Generic Ok(None) still follows the strict old check.
+            self.active_identity_binding = None;
+            self.refresh_global_message_identity(None);
+            return Ok(false);
+        }
         let prepared = self
             .zone_owner_command_client
             .prepare_teardown_checkpoint(&mut self.runtime, &owner_lease)?;
@@ -1001,6 +1039,11 @@ impl GatewaySession {
         self.teardown_checkpoint
             .as_ref()
             .map(PreparedZoneTeardown::checkpoint)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_hunting_repair_test_fault(&mut self, fault: u8) -> Result<(), String> {
+        crate::routing::set_hunting_repair_test_fault(&mut self.runtime, fault)
     }
 
     pub(crate) fn prepare_standard_login_recovery(

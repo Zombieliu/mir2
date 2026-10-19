@@ -12,6 +12,8 @@ use serde::de::{self, MapAccess, SeqAccess, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::Value;
 
+pub mod hunting_repair;
+
 pub const NPC_PURCHASE_OWNER_PROTOCOL_VERSION: u16 = 1;
 pub const NPC_PURCHASE_OWNER_CAPABILITY: &str = "durableNpcPurchaseOwnerV1";
 pub const MAX_CLIENT_REQUEST_BYTES: usize = 64 * 1024;

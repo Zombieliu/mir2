@@ -306,6 +306,33 @@ pub trait WorldRuntime: Send + Sync {
     /// owners cannot carry its trusted source result or character incarnation.
     fn requires_local_hunting_source_authority(&self) -> bool { false }
 
+    /// Dedicated local repair entry. Unsupported owners must never translate
+    /// this into a legacy RepairItem or a generic WorldCommand.
+    fn supports_hunting_repair_owner(&self) -> bool { false }
+    fn execute_hunting_repair_owner(&mut self, _authenticated: bool,
+        _action: crate::HuntingRepairAction,
+    ) -> Result<crate::HuntingRepairExecution, String> {
+        Err("typed hunting repair owner is unavailable".into())
+    }
+
+    /// Resolve the original pending repair before capturing a teardown save.
+    /// True is explicit proof that this actor was retired by recovery; callers
+    /// must not manufacture a checkpoint or journal for its former World.
+    fn prepare_hunting_repair_teardown(&mut self) -> Result<bool, String> {
+        if self.requires_local_hunting_source_authority() {
+            return Err("local hunting repair teardown recovery is unavailable".into());
+        }
+        Ok(false)
+    }
+
+    /// Authenticated Session account only; no caller-supplied account identity.
+    fn reconcile_hunting_repair_login_authority(&mut self) -> Result<(), String> {
+        if self.requires_local_hunting_source_authority() {
+            return Err("local hunting repair account recovery is unavailable".into());
+        }
+        Ok(())
+    }
+
     fn on_connect(&self) -> Vec<ServerPacket>;
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String>;
     fn execute_with_outcome(
@@ -423,6 +450,11 @@ pub struct InProcessWorldRuntime {
 }
 
 impl InProcessWorldRuntime {
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn set_hunting_repair_test_fault(&mut self, fault: u8) -> Result<(), String> {
+        self.session.set_hunting_repair_test_fault(fault)
+    }
+
     pub fn new(config: SimulationConfig) -> Self {
         Self {
             session: SimulationSession::new(config),
@@ -1056,6 +1088,22 @@ impl InProcessWorldRuntime {
 }
 
 impl WorldRuntime for InProcessWorldRuntime {
+    fn prepare_hunting_repair_teardown(&mut self) -> Result<bool, String> {
+        self.session.prepare_hunting_repair_teardown()
+    }
+    fn reconcile_hunting_repair_login_authority(&mut self) -> Result<(), String> {
+        self.session.reconcile_hunting_repair_login_authority()
+    }
+    fn supports_hunting_repair_owner(&self) -> bool {
+        self.session.requires_local_hunting_source_authority()
+    }
+    fn execute_hunting_repair_owner(&mut self, authenticated: bool,
+        action: crate::HuntingRepairAction,
+    ) -> Result<crate::HuntingRepairExecution, String> {
+        if !authenticated { return Err("hunting repair requires authentication".into()); }
+        if !self.supports_hunting_repair_owner() { return Err("typed hunting repair owner is unavailable".into()); }
+        Ok(self.session.execute_hunting_repair(action))
+    }
     fn requires_local_hunting_source_authority(&self) -> bool {
         self.session.requires_local_hunting_source_authority()
     }

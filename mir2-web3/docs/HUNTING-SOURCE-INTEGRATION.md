@@ -1,6 +1,6 @@
 # 狩猎经济：真实游戏来源接入计划
 
-更新：2026-10-20（北京时间）。无物品一次性金币任务的首条真实来源已接通并通过本地PG/正常包分发验收；其余来源与材料仍待接。本文记录实际边界及后续要求，不代表完整覆盖或已经发布。经济公式与参数以 [HUNTING-PERMIT-ECONOMY.md](HUNTING-PERMIT-ECONOMY.md) 和有效政策版本为准。保持 K=0.1；原个人月额度不能作为当前供应承诺。用户要求原生运行，不用Docker。
+更新：2026-10-20（北京时间）。无物品一次性金币任务与NPC修理服务端真实来源已接通；修理的真实InProcess/Shared网关5项新增PG通过，见 [第四阶段验收](generated/hunting-economy/acceptance-20261020-repair-source.json)。修理UI、当前快照同步、物理客户端/真实网络及其它来源与材料仍待接。本文不代表全服覆盖或已经发布；公式与参数以 [实施记录](HUNTING-PERMIT-ECONOMY.md) 和有效政策为准。保持K=0.1、默认禁用和goal active，原个人月额度不作供应承诺；仅原生、不用Docker/WSL/虚拟机，PG连接上限保持30。
 
 ## 已实现的首条来源
 
@@ -12,23 +12,19 @@
 
 真实Guild成员分支现已补齐3项原生PG验收：使用实际成员关系与epoch、有效Guild/个人EXP buff，验证个人升级、Guild分成升级及绑定金币共同提交、故障全回滚、Unknown原请求恢复和正常LogOut/新配置Login/StartGame读回。此前仅开启共享Guild权威的fixture仍不能单独证明该成员分支；新增证据见 [第三阶段验收](generated/hunting-economy/acceptance-20261020-repair-foundation.json)。
 
-## NPC修理接线基础与下一步
+## NPC修理服务端来源与剩余接线
 
-本轮已实现三个基础，但**尚未把普通修理请求接到绑定钱包与销毁账本**：
+第三阶段的正额debit/burn、纯`RepairPlan`和私有会话物品变更见证已在第四阶段接成真实修理来源；历史范围保留在 [第三阶段记录](HUNTING-PERMIT-ECONOMY.md#第三阶段真实guild分支与修理事务基础历史范围)。当前实现：
 
-1. `economy-service`提供授权的`debit_bound_and_burn_authorized_with_source_with_timeouts`和原回执查询。先realm锁/DB时钟、角色及来源行授权锁，再检查原回执；首次执行将真实来源checkpoint、绑定扣款、同面额销毁、操作回执和outbox共同提交。估值固定为`bound-gold-face-value-v1`，拒绝零额、溢出及重复手续费来源；没有即时补充许可。0022迁移仅扩操作种类约束，未改0016或旧钱包。
-2. `equipment.rs::prepare_repair_plan`只读生成完整物品前后态，沿用真实NPC/range/type/bind、普通/特殊修理及现有价格算法。`apply_to_inventory`验证完整目标前态与装备槽优先定位；旧修理路径复用该计划，仍按既有`gold`扣款，当前不会产生新经济销毁。
-3. `HeadlessRuntime`持有不进存档的随机scope与checked u64物品变更版本。仅把Bevy的短借用区间dirty当传感器，捕获Inventory/HeroInventory同值写、ABA和恢复；普通闲置tick保持有效。最后借用在读取/核对见证前flush，资源替换、熵失败、溢出或非受控Bevy tick均拒绝旧见证。它不是永久item UUID、报价令牌或数据库写入授权；完整PG CAS仍不可缺。
+1. `runtime/hunting_repair.rs`从真实NPC普通/特殊修理生成服务端报价，绑定原角色UUID、DB/realm、随机会话scope、物品变更见证、完整目标与30秒有效期。Confirm只接受服务器quote ID，重新校验NPC/距离/类型/bind、完整物品前态与checkpoint CAS，沿用原定价和普通修理最大耐久损失规则。
+2. `config_hunting_repair.rs`与0024在同一PG事务提交完整修理结果、绑定扣款、同面额日常销毁、操作回执和outbox；0023支持零费用持久结果，无扣款/钱包创建/销毁。旧`gold`不变，新增销毁只进入后续日结，不即时生成许可。
+3. Pending/Unknown仅恢复原操作。已提交回执查询不受旧报价有效期或NPC范围阻挡，也不重装旧物品、旧钱包或历史`ItemRepaired`。断线保存前原Query仍未决则Retry且无旧checkpoint/journal；安全投影后保存当前Zone状态，不安全则真实退役并清Shared/Gateway身份。登录可信镜像恢复只解除自身冻结，已有World重复StartGame不能借此解冻。
 
-旧`RepairItem`/`SRepairItem`只携带可复用UID，不能安全识别首次迟到请求和重试。下一步必须完成服务端Quote→Confirm→Query及持久来源checkpoint：
+独立`huntingRepairOwner` v1已连通strict wire parser→当前认证账号/会话→owner lease→真实本地InProcess/Shared→Simulation/PG。金额和UID以规范十进制字符串传输，合法武器槽UID `0`保持；Confirm/Query只携带原quote ID。远端/default owner明确unsupported，不扩purchase-v1。启用新经济后旧`RepairItem`/`SRepairItem`拒绝，不能暗映射为同UID当前物品的确认；未启用保留旧行为。
 
-- 报价绑定原角色PG UUID、DB/realm、当前会话scope/物品版本、完整目标证据、原修理类型/价格和有效期；客户端只确认不透明令牌，不传销毁当量。
-- 新执行重新校验真实NPC、距离、服务、存档/物品CAS与钱包；所有来源锁仍须在钱包锁前获取。报价过期、NPC范围、物品前态仅限制新执行，不能挡住已提交回执的授权查询。
-- Unknown只能用原报价及原摘要恢复；成功回执不能重装旧物品、旧钱包余额或过时`ItemRepaired`。当前库存已变化时必须保留新状态并同步当前快照；等待期间的完整checkpoint需要单写独占和PG CAS。
-- 零费用修理仍可能改变耐久/字段，需要无扣款、无销毁的持久结果分支，不能伪造一金币销毁、调用正额debit或回退旧钱包绕开新规则。
-- 重连只允许查询已提交原操作；未消费的旧会话报价失效。原始无令牌包不能暗中变成当前同UID新物品的报价确认。
+下一步仅在现有游戏修理窗口接入typed Quote→Confirm→Query、服务端报价/绑定钱包展示与当前快照同步，再验证真实浏览器/网络中的确认、拒绝、Pending恢复、断线与保存重登。对于旧会话报价，新连接只查询原结果，不能确认尚未消费的旧报价；新的修理须重新获取当前World报价，未知结果不能触发换ID重试。当前服务端PG验收不替代这些客户端与网络验收。
 
-上述报价、零费用分支、完整来源提交/恢复及游戏客户端接线均仍开放。不能将本轮service测试中的合成source表当作真实NPC销毁来源。
+当前5项新增PG使用真实账户Login/StartGame、NPC、报价、wallet/burn及完整存档，包含Shared未决teardown禁止旧日志和真实退役；属于进程内carrier链路验收，物理WebSocket尚未验证。更广生命周期、见证与全checkpoint边界由Sim21及邻接teardown测试共同限定，详见第四阶段证据。
 
 ## 权威边界
 
@@ -47,14 +43,14 @@
 | 个人地面金币拾取 | `runtime/drops.rs`：`pick_up_ground_drop` | ECS 加旧金币并删除本地地面物 | 必须把不可重复的掉落身份、拾取归属和绑定入账共同提交，不能依赖重启后可重复的临时 object_id |
 | 共享地面金币拾取 | `runtime/drops.rs`：`commit_shared_ground_drop_pickup_transaction_impl`；Gateway 的共享拾取调用链 | 个人状态加旧金币，返回共享拾取回执 | Zone 领取/删除和数据库入账需要持久 claim 协议；不能把“内存事务回执”当作与新钱包共同提交的 PG 事务 |
 | 挖矿材料 | `runtime/mining.rs`：`try_mine`、`give_mine_payout` | 消耗本地矿点石数、损耗镐耐久，通过 inventory helper 直接发矿石 | 需要共享矿点来源身份、持久产出 claim、逐实例经济绑定，以及完整材料传播规则 |
-| NPC 修理 | `runtime/equipment.rs`：`repair_item_impl` | ECS 扣旧金币、修改耐久，返回 `LoseGold`/`ItemRepaired` | 扣款、修理结果和实际金币销毁须同一持久事务；不能因重启恢复旧装备/金币而重复生成销毁额度 |
+| NPC 修理 | `runtime/hunting_repair.rs`、`config_hunting_repair.rs`；关闭时保留`equipment.rs::repair_item_impl` | 已实现服务端quote、共同PG修理checkpoint/绑定扣款/真实销毁、零费用及原结果恢复；enabled旧UID包拒绝 | 现有UI与当前快照同步、物理客户端/真实网络确认及保存重登仍待；不得回退旧金币或复用旧quote确认新物品 |
 | NPC 出售 | `runtime/npc.rs`：`sell_item_impl` | 删除/减少物品，增加旧金币，放入回购物品表 | 绑定材料出售所得必须保持绑定；回购与重售不得洗成非绑定金币 |
 
-核心状态定义仍只有一份旧金币：`runtime/resources.rs` 的 `PlayerRuntimeResource.gold` 和 `config.rs` 的 `CharacterSaveRecord.gold`。`runtime/save.rs::snapshot_active_character_save` 将它及 `quest_states_json`、背包、装备、NPC 状态打包成完整存档。
+个人World存档仍保留旧金币：`runtime/resources.rs`的`PlayerRuntimeResource.gold`和`config.rs`的`CharacterSaveRecord.gold`；绑定/非绑定钱包由独立PG经济账本保存，不能拿World旧`gold`展示新钱包。`snapshot_active_character_save`仍打包旧金币、任务、背包、装备及NPC等完整存档。
 
 已有 `config.rs::commit_account_store_transaction` 的通用闭包只获得 `&mut AccountStore`，直接在其中调用economy service仍会产生第二事务。新受限任务桥在service持有的同一PG事务中调用内部完整checkpoint writer，保留原CAS、Guild结算和提交后镜像发布；这不是给任意来源开放的客户端写接口。
 
-`runtime/npc_purchase_transaction.rs` 已有完整 checkpoint、角色 incarnation、幂等 journal、版本检查、提交后发布及 Unknown 恢复的设计，可用于参考。它还不是任务/修理与狩猎账本之间的现成事务桥。
+任务和修理已由独立`hunting_*`桥接完整checkpoint与新经济账本。`runtime/npc_purchase_transaction.rs`的完整checkpoint/角色代际/journal设计可参考，但不能把purchase-v1载体或旧购买回执当作新任务/修理的来源授权。
 
 ## 首条来源契约：一次性固定金币任务
 
@@ -97,7 +93,7 @@
 
 销毁估值由版本化的服务器规则产生；玩家不得填写金币当量，也不能直接采用可操纵的单笔市场成交价。转移给胜方的货物不计销毁；只有实际删除部分计入。同一源事件不能同时按装备价值、替换支出和战报总额重复计入。金币实际销毁以面额计入，资产许可本身衰减不重复当作金币销毁。
 
-销毁接入验收：
+后续各类销毁来源仍须逐类完成以下验收；当前NPC修理和转换手续费的有界通过不代表其它来源合格：
 
 - [ ] 来源行/资产实例与销毁事件同事务；来源拒绝、异常或回滚不留下销毁额度。
 - [ ] 每种来源有稳定业务唯一键；重试跳过真实来源删除，金额/估值版本冲突拒绝。

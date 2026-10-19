@@ -10,6 +10,9 @@ const LOCK_SEED: i64 = 0x4855_4e54_4543_4f4e;
 #[path = "debit.rs"]
 mod debit;
 pub use debit::*;
+#[path = "zero.rs"]
+mod zero;
+pub use zero::*;
 
 fn db(error: postgres::Error) -> EconomyError {
     // Never print connection strings, SQL parameters, or PostgreSQL DETAIL fields.
@@ -87,6 +90,20 @@ fn digest<T: Serialize>(value: &T) -> EconomyResult<String> {
         .map(|byte| format!("{byte:02x}"))
         .collect::<String>();
     Ok(format!("sha256:{hex}"))
+}
+// Preserve the original positive-debit key domain. A source quoted at zero and
+// the same source quoted at a positive price MUST compete for this one slot.
+fn bound_source_operation_key(
+    realm: &str,
+    owner: &WalletOwner,
+    source_kind: &str,
+    source_key: &str,
+) -> EconomyResult<String> {
+    token(realm, "realm_id", 128)?;
+    validate_owner(owner)?;
+    token(source_kind, "source_kind", 128)?;
+    token(source_key, "source_key", 256)?;
+    digest(&("bound_debit_burn_v1", realm, owner, source_kind, source_key))
 }
 fn decode<T: DeserializeOwned>(value: Value) -> EconomyResult<T> {
     serde_json::from_value(value).map_err(|_| EconomyError::CorruptHistory("json_decode"))

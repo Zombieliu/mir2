@@ -30,13 +30,7 @@ pub fn bound_debit_burn_operation_identity(
     token(realm, "realm_id", 128)?;
     validate_owner(owner)?;
     validate_debit_burn(burn, source_digest)?;
-    let key = digest(&(
-        "bound_debit_burn_v1",
-        realm,
-        owner,
-        &burn.source_kind,
-        &burn.source_key,
-    ))?;
+    let key = bound_source_operation_key(realm, owner, &burn.source_kind, &burn.source_key)?;
     let hash = digest(&(
         "bound_debit_burn_v1",
         realm,

@@ -178,6 +178,9 @@ mod hunting_deletion;
 #[path = "config_hunting_source.rs"]
 pub(crate) mod hunting_source;
 pub(crate) use hunting_source::{HuntingQuestCommit, HuntingSourceError, PreparedHuntingQuestSource};
+#[path = "config_hunting_repair.rs"]
+pub(crate) mod hunting_repair;
+pub(crate) use hunting_repair::{HuntingRepairCommit, HuntingRepairQuote, HuntingRepairReceipt, HuntingRepairSourceError};
 #[path = "config_prepared_kill.rs"]
 mod prepared_kill;
 pub use prepared_kill::{PreparedKillAccountSource, PreparedKillPublication, PreparedKillPublicationFailure};
@@ -3799,6 +3802,7 @@ pub struct SimulationConfig {
     account_store_write_state: Arc<Mutex<AccountStoreWriteState>>,
     account_store_freeze_epoch: Arc<std::sync::atomic::AtomicU64>,
     hunting_source_fence: Arc<Mutex<Option<hunting_source::HuntingSourceFence>>>,
+    hunting_repair_fence: Arc<Mutex<Option<hunting_repair::HuntingRepairFence>>>,
     #[cfg(any(test, feature = "test-support"))]
     account_store_transaction_fault: Arc<Mutex<Option<AccountStoreTransactionFault>>>,
     #[cfg(test)]
@@ -3886,6 +3890,7 @@ impl SimulationConfig {
         fork.account_store_write_state = Arc::new(Mutex::new(AccountStoreWriteState::Writable));
         fork.account_store_freeze_epoch = Arc::new(std::sync::atomic::AtomicU64::new(0));
         fork.hunting_source_fence = Arc::new(Mutex::new(None));
+        fork.hunting_repair_fence = Arc::new(Mutex::new(None));
         fork.save_recovery_dir = None;
         fork.save_recovery_mac_key = None;
         Ok(fork)
@@ -3909,6 +3914,7 @@ impl SimulationConfig {
         self.account_store_write_state = Arc::clone(&authoritative.account_store_write_state);
         self.account_store_freeze_epoch = Arc::clone(&authoritative.account_store_freeze_epoch);
         self.hunting_source_fence = Arc::clone(&authoritative.hunting_source_fence);
+        self.hunting_repair_fence = Arc::clone(&authoritative.hunting_repair_fence);
     }
 
     pub fn from_scene(scene: &SceneBootstrap) -> Self {
@@ -4007,6 +4013,7 @@ impl SimulationConfig {
             account_store_write_state: Arc::new(Mutex::new(AccountStoreWriteState::Writable)),
             account_store_freeze_epoch: Arc::new(std::sync::atomic::AtomicU64::new(0)),
             hunting_source_fence: Arc::new(Mutex::new(None)),
+            hunting_repair_fence: Arc::new(Mutex::new(None)),
             #[cfg(any(test, feature = "test-support"))]
             account_store_transaction_fault: Arc::new(Mutex::new(None)),
             #[cfg(test)]
@@ -4998,6 +5005,10 @@ impl SimulationConfig {
         let Some(database_url) = self.account_store_database_url.as_deref() else {
             return Err("postgres account source is unavailable".to_string());
         };
+        // Reconcile only this account's exact private repair fence before the
+        // refresh loader takes the persistence lock. New Login/StartGame must
+        // then load current canonical data and perform normal authorization.
+        self.reconcile_hunting_repair_before_account_refresh(account_id)?;
         self.refresh_account_store_account_with_loader(account_id, || {
             load_account_from_postgres(database_url.to_string(), account_id.to_string())
         })

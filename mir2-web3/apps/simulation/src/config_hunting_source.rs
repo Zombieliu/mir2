@@ -84,24 +84,24 @@ pub(super) struct HuntingSourceFence {
     epoch: u64,
 }
 
-struct LockedImage {
-    owner: WalletOwner,
-    account: AccountRecord,
-    versions: AccountStoreSourceVersions,
-    guilds: BTreeMap<String, Option<SharedGuildRecord>>,
+pub(super) struct LockedImage {
+    pub(super) owner: WalletOwner,
+    pub(super) account: AccountRecord,
+    pub(super) versions: AccountStoreSourceVersions,
+    pub(super) guilds: BTreeMap<String, Option<SharedGuildRecord>>,
     original_checkpoint: Option<CharacterSaveRecord>,
 }
 
 fn source_key(quest_id: i32) -> String {
     format!("quest-once-v1:{quest_id}")
 }
-fn database_binding(url: &str) -> String {
+pub(super) fn database_binding(url: &str) -> String {
     Sha256::digest(url.as_bytes())
         .iter()
         .map(|byte| format!("{byte:02x}"))
         .collect()
 }
-fn validate_token(value: &str, max: usize) -> Result<(), String> {
+pub(super) fn validate_token(value: &str, max: usize) -> Result<(), String> {
     if value.is_empty()
         || value.trim() != value
         || value.len() > max
@@ -111,7 +111,7 @@ fn validate_token(value: &str, max: usize) -> Result<(), String> {
     }
     Ok(())
 }
-fn canonical_hash(value: &Value) -> Result<String, String> {
+pub(super) fn canonical_hash(value: &Value) -> Result<String, String> {
     fn sorted(value: Value) -> Value {
         match value {
             Value::Object(fields) => {
@@ -157,11 +157,11 @@ fn quest_stage(save: &CharacterSaveRecord, quest: i32) -> Result<Option<QuestSta
     }
     Ok(found)
 }
-fn source_db(_: postgres::Error) -> EconomyError {
+pub(super) fn source_db(_: postgres::Error) -> EconomyError {
     EconomyError::SourceRejected
 }
 
-fn lock_and_load(
+pub(super) fn lock_and_load(
     tx: &mut Transaction<'_>,
     account: &str,
     index: i32,
@@ -414,7 +414,7 @@ impl SimulationConfig {
         self.hunting_economy_realm = Some(realm);
         Ok(self)
     }
-    fn hunting_source_binding(&self) -> Result<(&str, &str), String> {
+    pub(super) fn hunting_source_binding(&self) -> Result<(&str, &str), String> {
         if self.account_store_database_mode != AccountStoreDatabaseMode::SourceOfTruth
             || self.account_store_path.is_some()
         {

@@ -25,3 +25,5 @@ pub const MIGRATION_SQL: &str =
     include_str!("../../../infra/postgres/migrations/0016_hunting_economy.sql");
 pub const BOUND_DEBIT_BURN_MIGRATION_SQL: &str =
     include_str!("../../../infra/postgres/migrations/0022_hunting_bound_debit_burn.sql");
+pub const ZERO_FEE_SOURCE_MIGRATION_SQL: &str =
+    include_str!("../../../infra/postgres/migrations/0023_hunting_zero_fee_source.sql");

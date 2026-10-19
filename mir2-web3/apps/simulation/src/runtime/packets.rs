@@ -10278,14 +10278,16 @@ impl SimulationSession {
             ClientPacket::SellItem { unique_id, count } => {
                 sell_item_impl(self.app.world_mut(), unique_id, count)
             }
-            ClientPacket::RepairItem { unique_id } => prepend_packet(
-                ServerPacket::RepairItem { unique_id },
-                repair_item_impl(self.app.world_mut(), unique_id, false),
-            ),
-            ClientPacket::SRepairItem { unique_id } => prepend_packet(
-                ServerPacket::RepairItem { unique_id },
-                repair_item_impl(self.app.world_mut(), unique_id, true),
-            ),
+            ClientPacket::RepairItem { unique_id } => {
+                let packets = super::hunting_repair::reject_raw_if_configured(self.app.world())
+                    .unwrap_or_else(|| repair_item_impl(self.app.world_mut(), unique_id, false));
+                prepend_packet(ServerPacket::RepairItem { unique_id }, packets)
+            }
+            ClientPacket::SRepairItem { unique_id } => {
+                let packets = super::hunting_repair::reject_raw_if_configured(self.app.world())
+                    .unwrap_or_else(|| repair_item_impl(self.app.world_mut(), unique_id, true));
+                prepend_packet(ServerPacket::RepairItem { unique_id }, packets)
+            }
             ClientPacket::MagicKey {
                 spell,
                 key,

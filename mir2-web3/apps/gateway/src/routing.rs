@@ -306,6 +306,24 @@ pub type SharedZoneOwnerLeaseAuthority = Arc<dyn ZoneOwnerLeaseAuthority>;
 
 pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
 
+    /// Resolve pending source state under the real local owner epoch before
+    /// the ordinary teardown drain is allowed to capture any checkpoint.
+    fn prepare_hunting_repair_teardown(&self, runtime: &mut ZoneRuntimeHandle,
+        _lease: &ZoneOwnerLease,
+    ) -> Result<bool, String> {
+        if runtime.requires_local_hunting_source_authority() {
+            return Err("local hunting repair teardown owner route is unavailable".into());
+        }
+        Ok(false)
+    }
+
+    fn supports_hunting_repair_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool { false }
+    fn execute_hunting_repair_owner(&self, _runtime: &mut ZoneRuntimeHandle,
+        _lease: &ZoneOwnerLease, _authenticated: bool, _action: mir2_simulation::HuntingRepairAction,
+    ) -> Result<mir2_simulation::HuntingRepairExecution, String> {
+        Err("typed hunting repair owner route is unavailable".into())
+    }
+
     fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool { false }
 
     fn execute_npc_purchase_owner(&self, _runtime: &mut ZoneRuntimeHandle,
@@ -983,6 +1001,51 @@ impl InProcessZoneOwnerCommandClient {
 
 impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
 
+    fn prepare_hunting_repair_teardown(&self, runtime: &mut ZoneRuntimeHandle,
+        lease: &ZoneOwnerLease,
+    ) -> Result<bool, String> {
+        if !runtime.requires_local_hunting_source_authority() { return Ok(false); }
+        let authority = self.owner_lease_authority.as_ref()
+            .filter(|authority| authority.supports_durable_npc_purchase_lease())
+            .ok_or("hunting repair teardown requires actual local owner epoch authority")?;
+        let mut result = None;
+        let guarded = crate::session::catch_gateway_panic("hunting repair teardown epoch guard", || {
+            authority.with_durable_npc_purchase_lease(lease, &mut || {
+                result = Some(runtime.prepare_hunting_repair_teardown());
+            })
+        }).and_then(|result| result);
+        // Retirement is explicit completed evidence even if guard release
+        // fails. Any unresolved query prevents old checkpoint capture.
+        if matches!(&result, Some(Ok(true))) { return Ok(true); }
+        guarded?;
+        result.unwrap_or_else(|| Err("hunting repair teardown guard did not execute".into()))
+    }
+
+    fn supports_hunting_repair_owner(&self, runtime: &ZoneRuntimeHandle) -> bool {
+        self.owner_lease_authority.as_ref().is_some_and(|authority| authority.supports_durable_npc_purchase_lease())
+            && runtime.supports_hunting_repair_owner()
+    }
+    fn execute_hunting_repair_owner(&self, runtime: &mut ZoneRuntimeHandle,
+        lease: &ZoneOwnerLease, authenticated: bool, action: mir2_simulation::HuntingRepairAction,
+    ) -> Result<mir2_simulation::HuntingRepairExecution, String> {
+        if !authenticated || !self.supports_hunting_repair_owner(runtime) {
+            return Err("typed hunting repair requires authenticated local owner authority".into());
+        }
+        let authority = self.owner_lease_authority.as_ref().ok_or("hunting repair owner authority is unavailable")?;
+        let mut result = None;
+        let guarded = crate::session::catch_gateway_panic("hunting repair owner epoch guard", || {
+            authority.with_durable_npc_purchase_lease(lease, &mut || {
+                result = Some(runtime.execute_hunting_repair_owner(authenticated, action.clone()));
+            })
+        }).and_then(|result| result);
+        // A completed turn remains authoritative even if releasing the guard
+        // fails. Missing turn completion is unknown and must retain its quote.
+        match result {
+            Some(result) => result,
+            None => Err(guarded.err().unwrap_or_else(|| "hunting repair owner guard did not execute".into())),
+        }
+    }
+
     fn supports_durable_npc_purchase_owner(&self, runtime: &ZoneRuntimeHandle) -> bool {
         self.owner_lease_authority.as_ref().is_some_and(|authority| authority.supports_durable_npc_purchase_lease())
             && runtime.supports_durable_npc_purchase_owner()
@@ -1161,6 +1224,10 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
         runtime: &mut ZoneRuntimeHandle,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<Option<PreparedZoneTeardown>, String> {
+        if runtime.requires_local_hunting_source_authority() {
+            if self.prepare_hunting_repair_teardown(runtime, owner_lease)? { return Ok(None); }
+            return prepare_zone_teardown_after_hunting_resolution(runtime, owner_lease);
+        }
         if let Some(authority) = &self.owner_lease_authority {
             authority.validate_owner_lease(owner_lease)?;
         }
@@ -9451,6 +9518,19 @@ pub(crate) fn prepare_zone_teardown_checkpoint(
     runtime: &mut ZoneRuntimeHandle,
     owner_lease: &ZoneOwnerLease,
 ) -> Result<Option<PreparedZoneTeardown>, String> {
+    if runtime.requires_local_hunting_source_authority() {
+        return Err("hunting teardown requires actual guarded local owner recovery before capture".into());
+    }
+    prepare_zone_teardown_after_hunting_resolution(runtime, owner_lease)
+}
+
+/// Called for a hunting source only after the local command client's real
+/// epoch guard resolved its pending repair. The later ordinary shared drain
+/// must not hold that guard: award paths can acquire the same lease row.
+fn prepare_zone_teardown_after_hunting_resolution(
+    runtime: &mut ZoneRuntimeHandle,
+    owner_lease: &ZoneOwnerLease,
+) -> Result<Option<PreparedZoneTeardown>, String> {
     if let Some(shared) = runtime
         .as_mut()
         .as_any_mut()
@@ -9467,6 +9547,17 @@ pub(crate) fn prepare_zone_teardown_checkpoint(
     let prepared = PreparedZoneTeardown::new(owner_lease.clone(), identity, checkpoint);
     prepared.validate_identity_checkpoint()?;
     Ok(Some(prepared))
+}
+
+#[cfg(test)]
+pub(crate) fn set_hunting_repair_test_fault(runtime: &mut ZoneRuntimeHandle, fault: u8) -> Result<(), String> {
+    if let Some(shared) = runtime.as_mut().as_any_mut().downcast_mut::<SharedInProcessZoneSessionRuntime>() {
+        return shared.inner.set_hunting_repair_test_fault(fault);
+    }
+    if let Some(local) = runtime.as_mut().as_any_mut().downcast_mut::<InProcessWorldRuntime>() {
+        return local.set_hunting_repair_test_fault(fault);
+    }
+    Err("repair test fault requires actual local runtime".into())
 }
 
 pub(crate) fn persist_zone_teardown_checkpoint(
@@ -14807,7 +14898,10 @@ impl SharedInProcessZoneSessionRuntime {
     ) -> Result<Vec<ServerPacket>, String> {
         self.validate_shared_magic_actor(&command)?;
         self.inner.enable_shared_guild_authority();
-        if matches!(&command,WorldCommand::ClientPacket(ClientPacket::StartGame{..})){self.inner.refresh_shared_guild_authority()?;}
+        if matches!(&command,WorldCommand::ClientPacket(ClientPacket::StartGame{..})) {
+            self.inner.reconcile_hunting_repair_login_authority()?;
+            self.inner.refresh_shared_guild_authority()?;
+        }
         self.last_game_shop_purchase_outcome = None;
         if self.current_presence_key().is_some_and(|key| {
             self.zone_state
@@ -15654,6 +15748,52 @@ impl SharedInProcessZoneSessionRuntime {
 }
 
 impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+    fn prepare_hunting_repair_teardown(&mut self) -> Result<bool, String> {
+        // Resolve using this same actor's authoritative current Zone state.
+        // No reward/trade/pickup predrain may run while its source is unknown.
+        self.force_inner_to_current_zone_transform();
+        self.force_inner_to_current_zone_vitals();
+        let retired = self.inner.prepare_hunting_repair_teardown()?;
+        if retired {
+            self.remove_presence();
+            return Ok(true);
+        }
+        self.sync_current_zone_vitals_from_inner();
+        Ok(false)
+    }
+    fn reconcile_hunting_repair_login_authority(&mut self) -> Result<(), String> {
+        self.inner.reconcile_hunting_repair_login_authority()
+    }
+    fn supports_hunting_repair_owner(&self) -> bool {
+        self.inner.supports_hunting_repair_owner()
+    }
+    fn execute_hunting_repair_owner(&mut self, authenticated: bool,
+        action: mir2_simulation::HuntingRepairAction,
+    ) -> Result<mir2_simulation::HuntingRepairExecution, String> {
+        if !authenticated { return Err("hunting repair requires authentication".into()); }
+        self.validate_durable_npc_actor()?;
+        // Shared Zone state wins at both quote and confirmation boundaries.
+        // Query never requires proximity, but still observes this same actor.
+        self.force_inner_to_current_zone_transform();
+        self.force_inner_to_current_zone_vitals();
+        let mut execution = self.inner.execute_hunting_repair_owner(authenticated, action)?;
+        // Capture the immutable result before optional shared projection work.
+        // A poisoned projection mutex must not erase an established receipt.
+        let completed = execution.clone();
+        if matches!(&execution.reply, mir2_simulation::HuntingRepairReply::Committed { reload_required: true, .. }) {
+            let cleanup = crate::session::catch_gateway_panic("hunting repair retired Zone presence", || self.remove_presence());
+            if let Ok(packets) = cleanup { execution.packets.extend(packets); }
+            return Ok(execution);
+        }
+        let projected = crate::session::catch_gateway_panic("hunting repair shared projection", || {
+            self.validate_durable_npc_actor()?;
+            self.sync_current_zone_vitals_from_inner();
+            self.normalize_owner_state_packets(&mut execution.packets);
+            self.publish_ranking_inspect_projection();
+            Ok::<(), String>(())
+        }).and_then(|result| result);
+        match projected { Ok(()) => Ok(execution), Err(_) => Ok(completed) }
+    }
     fn requires_local_hunting_source_authority(&self) -> bool {
         self.inner.requires_local_hunting_source_authority()
     }

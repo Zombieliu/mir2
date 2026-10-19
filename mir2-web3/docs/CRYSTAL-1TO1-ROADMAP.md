@@ -2,7 +2,7 @@
 
 ## 本服狩猎许可经济（2026-10-20）
 
-补充：真实Guild成员任务奖励与共同PG结算3项通过；修理仅完成原子正额debit/burn API、纯计划及本地物品mutation见证。194项focused/邻接测试与Gateway检查通过，见 [实施记录](HUNTING-PERMIT-ECONOMY.md)。服务端报价令牌、真实修理checkpoint/Unknown恢复及零费用分支仍待接，不计真实修理销毁闭合，不提高Crystal百分比；完整goal active、默认禁用、原生无Docker。
+第四阶段：服务端NPC修理的报价令牌、零费用结果、完整checkpoint/绑定扣款/销毁共同事务及Unknown/断线恢复已实现，真实InProcess/Shared网关5项新增PG通过，见 [第四阶段证据](generated/hunting-economy/acceptance-20261020-repair-source.json)。现有游戏UI与快照同步、物理客户端/真实网络验收仍待；这是本服定制经济服务端来源验收，不增加Crystal闭合项。完整goal active、默认禁用、原生无Docker，PG验收连接上限保持30。
 
 用户已授权持续实现，见 [狩猎许可经济实施与验收](HUNTING-PERMIT-ECONOMY.md)。经济核心与04:00任务之外，已接无物品一次性任务的完整checkpoint/绑定入账和原请求恢复；原生Grafana13.2.4的TLS、导入、实际SQL/告警表达式及合成服图表抽查通过。保留K=0.1、0.72/1.08许可，默认禁用；当前来源明确限制本地未复制权威，不能用旧命令副本冒充结果复制。其他真实产出/销毁、材料绑定、完整指标、物理玩家任务/重登、通知及迁移发布仍开放，goal保持active。用户禁止Docker，后续仅原生；未改变线上资产、旧gold或Crystal协议验收，不计新增1:1闭合项。
 

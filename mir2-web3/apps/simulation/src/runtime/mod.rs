@@ -74,6 +74,11 @@ mod rental;
 mod resources;
 mod save;
 mod session;
+mod hunting_repair;
+pub use hunting_repair::{
+    HuntingRepairAction, HuntingRepairExecution, HuntingRepairQuoteView, HuntingRepairReceiptView,
+    HuntingRepairRejection, HuntingRepairReply,
+};
 mod shared_guilds;
 pub(crate) use shared_guilds::buffs::advance_minutes as advance_shared_guild_minutes;
 mod shared_marriage;

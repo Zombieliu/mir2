@@ -111,6 +111,14 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0022_hunting_bound_debit_burn",
         include_str!("../../../infra/postgres/migrations/0022_hunting_bound_debit_burn.sql"),
     ),
+    (
+        "0023_hunting_zero_fee_source",
+        include_str!("../../../infra/postgres/migrations/0023_hunting_zero_fee_source.sql"),
+    ),
+    (
+        "0024_hunting_repair_sources",
+        include_str!("../../../infra/postgres/migrations/0024_hunting_repair_sources.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.

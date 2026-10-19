@@ -13,6 +13,7 @@ pub mod gate14;
 pub mod gate15;
 pub mod guild_clock;
 pub mod hunting_clock;
+pub mod hunting_repair_browser;
 pub mod guild_node_foundation {
     pub use dubhe_network_core::capacity::*;
 }

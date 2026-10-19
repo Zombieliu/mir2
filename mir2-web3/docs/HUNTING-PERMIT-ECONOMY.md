@@ -4,6 +4,8 @@
 
 更新：2026-10-20。用户明确要求本机不用 Docker；开发验收采用原生 PostgreSQL、原生 Grafana，不启动 Docker/WSL/虚拟机。本次启动的 Docker Desktop 进程已退出，服务恢复为停止；未关闭游戏或改动系统虚拟化设置。
 
+当前第四阶段已完成真实NPC修理服务端来源与typed carrier的限定验收，见 [第四阶段证据](generated/hunting-economy/acceptance-20261020-repair-source.json)。现有游戏UI、快照同步及物理客户端/真实网络验证仍待；完整goal active，默认关闭，不代表生产上线或全服资产覆盖。
+
 ## 权威边界
 
 游戏主服务端和 PostgreSQL 事务是资产唯一真值源。Grafana 只读观测，Python 只做对照预演。个人 Session、地图 Zone 和各 Gateway 不能各持有一份独立许可池。正式服、测试服按经济域隔离。
@@ -39,6 +41,8 @@
 - [x] Gateway Bearer认证HTTP钱包查询与转换接口，事务内核对角色归属、封禁、会话撤销/过期与UUID incarnation；没有原始来源记账接口。
 - [x] 普通角色删除与完整账号删除的同事务新钱包保护，非零资产拒删；零余额历史保留与新UUID隔离。
 - [x] 无物品一次性金币任务的同事务真实来源：普通FinishQuest/CallNpc处理器、完整个人奖励checkpoint和绑定入账共同提交；独立PG与正常包分发测试通过。
+- [x] NPC单物品修理的服务端Quote→Confirm→Query、零费用结果、完整checkpoint/绑定扣款/销毁共同事务与Unknown/断线前恢复；真实本地owner及Shared网关PG验收。
+- [ ] 现有游戏修理UI接线、服务端报价/绑定钱包展示、当前快照同步及物理客户端/真实网络保存重登验收。
 - [ ] 种植、挖矿、任务及维护/PVP/沙巴克的可信来源接线；绑定身份贯穿交易、邮件、NPC、合成与丢地。
 - [x] 进程生命周期的04:00调度、空服运行、重启追赶、锁等待/退出有界；不依赖玩家请求。
 - [x] 日结outbox到永久时序版本的幂等导出、提交不明恢复和并发消费；默认仅新钱包partial诊断，ACK与指标/消费回执同事务。
@@ -87,7 +91,9 @@
 
 原始失败保留：初次编译的私有函数可见性/SHA2 hex格式问题；隔离测试把会推进tick的准备操作误当成prepare的副作用（保留全部隔离断言后修正取样点）；Windows旧测试EXE被DeltaForce占用导致两次LNK1104。没有结束游戏、删除锁定文件或改动保护设置；使用Cargo原生test profile和唯一输出名构建、实际运行同一测试harness。执行记录及最终范围见 [第二阶段验收](generated/hunting-economy/acceptance-20261020-quest.json)；这仍不代表全部生产/销毁来源、材料传播或生产发布完成，goal保持active。
 
-## 第三阶段：真实Guild分支与修理事务基础
+## 第三阶段：真实Guild分支与修理事务基础（历史范围）
+
+以下保留第三阶段当时的交付与验证边界；当前修理来源状态以第四阶段为准。
 
 补齐真实Guild成员的3项原生PG测试：实际共享成员epoch=2，服务端有效EXP属性404，任务基础48EXP得到241EXP，个人4→5级并保留240EXP，Guild得到2EXP跨越45000升级线；完整奖励、Guild源回执和绑定金币共同提交。覆盖普通LogOut/新配置Login/StartGame读回、提交前全回滚、Unknown后更改当前buff仍只恢复原奖励。没有发现需修改任务业务逻辑的缺陷。
 
@@ -99,7 +105,28 @@ NPC修理提取纯`RepairPlan`，保留普通/特殊、背包/装备优先顺序
 
 所有运行均原生、串行Cargo、2个build jobs；继续用唯一测试输出名，未关闭DeltaForce或改动虚拟化。复核时退出昨日遗留的独立`docker-sandbox.exe` CLI；Docker服务仍Stopped/Manual，无Docker进程。三个外来QA JSON保持原字节且未暂存。详见 [第三阶段验收](generated/hunting-economy/acceptance-20261020-repair-foundation.json)。
 
-下一步是带服务端令牌的修理报价/确认/查询、零费用持久结果、完整checkpoint与Unknown恢复；规则见 [来源接线计划](HUNTING-SOURCE-INTEGRATION.md)。当前基础不具备开启真实修理经济或生产发布资格，默认禁用及K=0.1/基准0.72/硬上限1.08许可保持，完整goal继续active。
+第三阶段结束时的下一步是带服务端令牌的修理报价/确认/查询、零费用持久结果、完整checkpoint与Unknown恢复；该阶段基础不具备开启真实修理经济或生产发布资格。默认禁用及K=0.1/基准0.72/硬上限1.08许可保持。
+
+## 第四阶段：真实NPC修理来源与typed carrier
+
+`runtime/hunting_repair.rs`与`config_hunting_repair.rs`现在执行真实NPC修理：报价来自原有普通/特殊修理定价与完整`RepairPlan`，绑定原角色PG UUID、DB/realm、会话物品变更见证、完整目标和30秒有效期。客户端Quote只提供UID/类型，Confirm/Query只提供服务器生成的随机quote ID，不提供金额或销毁当量。首次确认重新校验真实NPC/范围/类型/bind、物品见证和完整checkpoint CAS；报价过期和NPC条件不阻挡已提交原结果的授权查询。
+
+正额修理在同一PG事务提交完整修理checkpoint、绑定扣款、同面额日常销毁、持久操作结果与outbox；旧`gold`保持。0023增加零费用持久操作，零费用不创建钱包、不扣款、不产生销毁；0024保存报价及原来源结果。成功重放只返回不可变回执，不重装旧物品、不覆盖当前钱包，也不重发历史`ItemRepaired`。新增销毁仍由下一闭合经济日日结生成许可，没有即时补充额度。
+
+Pending/Unknown保留原报价和会话，恢复先查询原结果，不提交替代操作。断线保存前先在真实owner epoch guard内协调原结果；仍未决则Retry，不捕获或journal旧checkpoint。安全投影后再捕获当前Zone transform/vitals与完整存档；不安全或角色生命周期已变化时真实退役旧World、移除Shared presence并清Gateway身份。可信登录刷新可恢复自身原提交的镜像/冻结，保留其它冻结；已有World重复StartGame不能借登录刷新解冻或获得新scope。
+
+独立`huntingRepairOwner` v1 carrier已接严格字节解析、当前认证账号/会话验证、Gateway owner lease、本地InProcess/Shared和Simulation。u64使用规范十进制字符串，合法旧武器槽UID `0`保持；重复/未知字段、客户端价格和旧UID-only确认拒绝。远端/default owner明确unsupported，不扩NPC purchase v1或回退legacy。启用新经济时原`RepairItem`/`SRepairItem`拒绝；未启用仍保留旧修理行为。现有游戏UI与同回合快照同步尚未接入此新carrier。
+
+最终原生验证范围：
+
+- 经济服务（build17）：13纯+27真实PG，共40项通过。
+- Sim build21 hunting：29纯+45真实PG通过；邻接修理计划6、物品见证18、旧修理10、价格4、Guild经验11、NPC购买80通过。
+- Gateway build23 hunting：19纯+9真实PG通过，其中新增carrier PG 5项实际经过严格wire parser、真实Gateway/InProcess或Shared、真实NPC及数据库；另teardown persistence5、zone drain3、NPC purchase18通过。库、主二进制、ZoneHost检查退出0。
+- client-wire（build20，源码未变）：29项通过。`save_recovery`过滤器命中0项，不计测试通过数。以上不是全workspace或浏览器/真实WebSocket断线验收。
+
+保留失败与修复：Gateway19的3项PG夹具遗漏真实routing context和PG恢复目录/MAC，修夹具后再验，未绕过登录保护。Sim21整批曾45通过/29失败，原因是PG连接池在单进程中滞留触及30连接上限；保持`max_connections=30`，45项PG改为逐fresh process全部通过。Gateway22的2项新Shared PG误把Windows正常29字节`.mir2-directory-durability`控制文件计为quarantine；只修测试，对该文件精确校验名称/类型/字节，其它文件和隔离结果仍拒绝，Gateway23全部通过，原失败目录和日志保留。
+
+证据见 [第四阶段验收](generated/hunting-economy/acceptance-20261020-repair-source.json)。没有启动Docker/WSL/虚拟机、关闭游戏或提高PG连接上限。下一步是现有修理UI和当前快照同步，再做物理客户端/网络验收；材料、其它来源、复制、全服指标、通知与迁移发布仍开放。默认禁用及K=0.1/基准0.72/硬上限1.08许可不变，完整goal继续active。
 
 ## 后端接线与交付物
 

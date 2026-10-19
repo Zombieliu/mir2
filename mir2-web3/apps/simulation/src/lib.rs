@@ -78,4 +78,8 @@ pub use world_runtime::{
 };
 
 pub use runtime::apply_crystal_experience_rates;
+pub use runtime::{
+    HuntingRepairAction, HuntingRepairExecution, HuntingRepairQuoteView, HuntingRepairReceiptView,
+    HuntingRepairRejection, HuntingRepairReply,
+};
 pub use runtime::{crystal_social_experience_peer_eligible, ExperienceCharacter, ExperiencePresence};
