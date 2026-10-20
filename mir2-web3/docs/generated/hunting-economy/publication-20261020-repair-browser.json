@@ -1,0 +1,145 @@
+{
+  "recorded_at_utc": "2026-10-20T06:09:04.447Z",
+  "code_commit": "ebecb52ff8c6ff53968a77dbaafc40799e0d1b61",
+  "owned_file_count": 16,
+  "full_blob_checks": [
+    {
+      "path": "apps/gateway/src/web_hunting_repair_network_tests.rs",
+      "git_bytes": 49708,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "apps/web/app/components/original-client-game-shop.tsx",
+      "git_bytes": 62354,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "apps/web/lib/npc-repair-service.ts",
+      "git_bytes": 25004,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "apps/web/scripts/test-hunting-repair-ui.mjs",
+      "git_bytes": 26665,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/AGENT-ORCHESTRATION.md",
+      "git_bytes": 372274,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/AGENT-TASK-QUEUE.md",
+      "git_bytes": 990052,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "git_bytes": 1109364,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/BACKEND-1TO1-PROGRESS.md",
+      "git_bytes": 608633,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/CRYSTAL-SERVER-PARITY.md",
+      "git_bytes": 550092,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/HUNTING-PERMIT-ECONOMY.md",
+      "git_bytes": 38014,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/HUNTING-SOURCE-INTEGRATION.md",
+      "git_bytes": 25490,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/HUNTING-NATIVE-WINDOWS-INTEGRATION.md",
+      "git_bytes": 4519,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/generated/hunting-economy/browser-20261020-repair-quote.jpg",
+      "git_bytes": 241639,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/generated/hunting-economy/browser-20261020-repair-pending.jpg",
+      "git_bytes": 242267,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/generated/hunting-economy/acceptance-20261020-repair-browser.json",
+      "git_bytes": 16303,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    },
+    {
+      "path": "docs/generated/hunting-economy/sources-20261020-repair-browser.json",
+      "git_bytes": 176502,
+      "full_blob_read": true,
+      "working_copy_matches": true
+    }
+  ],
+  "source_pins_checked": 1161,
+  "source_pins_match": true,
+  "foreign_qa_preserved": [
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-portable-statistics-repair01.json",
+      "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+      "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json",
+      "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd"
+    }
+  ],
+  "protected_inputs_preserved": [
+    {
+      "sha256": "70145b1787f5dea10c830730d9a6968f226bf8e1145602c8a9c964856a44f2ec",
+      "path": "apps/web/tsconfig.json"
+    },
+    {
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json"
+    },
+    {
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/lib/typescript.js"
+    }
+  ],
+  "excluded_local_acceptance_resources": [
+    "apps/web/public/client-core/8229c82207a57269af1756c036a5479c633dc02437edf212ff6a693d7b372953/",
+    "apps/web/public/client-core/95264b0737039c26a6ac0917986873beb0c3ddfc77c5a655c454e066a1c7fa9e/",
+    "apps/web/public/client-core/93ae6ec9455c8b5fc76d3519809ae927077b7bdcf0e47ab46a4eb29d81c50450/"
+  ],
+  "private_tsconfigs_excluded": true,
+  "pushed": false,
+  "goal_complete": false,
+  "native_windows_hunting_implemented": false,
+  "native_windows_baseline_check_passed": true,
+  "native_windows_exe_linked_or_run": false,
+  "post_fix_browser_visual_accepted": false
+}
