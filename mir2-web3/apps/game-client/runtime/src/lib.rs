@@ -26,6 +26,8 @@ mod movement_shadow;
 pub mod native_ingest;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod npc_purchase_economy;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod hunting_repair_economy;
 #[cfg(target_arch = "wasm32")]
 #[path = "native_ingest_wasm.rs"]
 mod native_ingest;
@@ -2011,7 +2013,8 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         );
     app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
     #[cfg(not(target_arch = "wasm32"))]
-    app.add_systems(Update, npc_purchase_economy::apply_pending_native_npc_economy
+    app.add_systems(Update, (ingest_pending_hunting_repair_model,
+        npc_purchase_economy::apply_pending_native_npc_economy).chain()
         .after(ingest_pending_chat_line)
         .after(ingest_pending_lighting_render_state)
         .after(NativeMailServiceIngestSet)
@@ -2814,6 +2817,35 @@ fn ingest_pending_mail_service(
     // A marker drained in this same pass must not erase an already-poisoned
     // producing stream merely because the inbox had not seen its epoch yet.
     if let Some(epoch)=native.mail_stream_failure(){inbox.fail_stream(epoch);}
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Resource, Default)]
+struct NativeHuntingRepairModelGeneration(Option<(u64,u64)>);
+
+/// Presentation delivery is deliberately independent from the sealed Applied
+/// channel. Even an equal model is replaced to acknowledge its UI input turn.
+#[cfg(not(target_arch = "wasm32"))]
+fn ingest_pending_hunting_repair_model(world:&mut World) {
+    use mir2_client_bevy::hunting_repair::HuntingRepairModel;
+    let generation=(world.get_resource::<SessionResetRevision>().map_or(0,|r|r.0),
+        world.get_resource::<SceneResetRevision>().map_or(0,|r|r.0));
+    if world.get_resource::<NativeHuntingRepairModelGeneration>().and_then(|tracker|tracker.0)!=Some(generation) {
+        world.insert_resource(HuntingRepairModel::default());
+        world.insert_resource(NativeHuntingRepairModelGeneration(Some(generation)));
+    }
+    let mut messages=Vec::new();
+    if let Some(native)=world.get_resource::<native_ingest::NativeInbound>() {
+        native.drain_matching(|message|matches!(message,native_ingest::NativeInboundMessage::HuntingRepairModel(_)),
+            |message|messages.push(message));
+    }
+    for message in messages {
+        if let native_ingest::NativeInboundMessage::HuntingRepairModel(json)=message {
+            if let Ok(model)=serde_json::from_str::<HuntingRepairModel>(&json) {
+                world.insert_resource(model);
+            }else{ eprintln!("[runtime] invalid native hunting repair model"); }
+        }
+    }
 }
 
 fn ingest_pending_shop_model(

@@ -267,6 +267,12 @@ pub struct NativeHeroOwnerEpoch {
 #[derive(Debug,Clone)]
 pub struct NativeHeroOwnerGate { epoch:NativeHeroOwnerEpoch,active:Arc<Mutex<bool>> }
 impl NativeHeroOwnerGate {
+    pub(crate) fn epoch(&self)->NativeHeroOwnerEpoch{self.epoch}
+    pub(crate) fn with_active<R>(&self, commit:impl FnOnce()->R)->Option<R>{
+        let active=self.active.lock().ok()?;
+        if !*active{return None;}
+        Some(commit())
+    }
     pub fn new(epoch:NativeHeroOwnerEpoch)->Result<Self,NativeNpcEconomyError> {
         if [epoch.run,epoch.connection,epoch.procedure,epoch.owner_epoch,epoch.scene_epoch,epoch.cancellation].contains(&u64::MAX) {
             return Err(NativeNpcEconomyError::Correlation);
@@ -332,6 +338,13 @@ pub(crate) fn merge_fresh_native_hero_checkpoint(world:&World,incoming:&mut Hero
         if incoming.snapshot_identity.is_none() || incoming.info.as_ref().zip(incoming.snapshot_identity.as_ref()).is_some_and(|(packet,source)|
             packet.name!=source.name || packet.class!=source.class || packet.gender!=source.gender) {
             incoming.info=None;incoming.base_stats=None;
+        }
+        if current && source.hero.snapshot_identity.is_none() {
+            // A complete no-Hero checkpoint also withdraws cached packet
+            // assets and vitals, just like the original owner-source helper.
+            incoming.spawned=false;
+            incoming.inventory_view=source.hero.inventory_view.clone();
+            incoming.stats=source.hero.stats.clone();incoming.weights=source.hero.weights;
         }
     }else{
         merge_native_owner_hero_checkpoint(world.get_resource::<NativeNpcEconomySource>(),reset,scene,incoming);
@@ -534,7 +547,7 @@ impl NativeNpcEconomyProjection {
         if self.retained_bytes()>MAX_BUNDLE_BYTES {return Err(NativeNpcEconomyError::TooLarge);}
         Decoded::decode(self).map(|_|())
     }
-    fn retained_bytes(&self) -> usize {
+    pub(crate) fn retained_bytes(&self) -> usize {
         [&self.owner_json, &self.world_json, &self.ui_json, &self.inventory_json,
             &self.mail_json, &self.storage_json, &self.shop_json, &self.skill_json,
             &self.hero_json, &self.social_json].iter()
@@ -622,6 +635,7 @@ impl NativeNpcEconomyBundle {
         Ok(self)
     }
     pub(crate) fn gate(&self) -> &NativeNpcEconomyGate { &self.gate }
+    pub(crate) fn is_current(&self)->bool {self.gate.accepts(self.binding,self.witness)}
     pub(crate) fn retained_bytes(&self) -> usize { self.projection.retained_bytes().saturating_add(
         self.hero_owner_gate.as_ref().map_or(0,|_|std::mem::size_of::<NativeHeroOwnerGate>())) }
     pub(crate) fn retire(&self) { self.gate.retire(); }
@@ -745,8 +759,8 @@ fn canonical_economic_value(value: Value) -> Value {
     }
 }
 
-struct Decoded {
-    owner: Value,
+pub(crate) struct Decoded {
+    pub(crate) owner: Value,
     world: crate::WorldSnapshot,
     ui: UiReadModel,
     inventory: InventoryModel,
@@ -754,7 +768,7 @@ struct Decoded {
     storage: StorageModel,
     shop: ShopModel,
     skill: SkillModel,
-    hero: HeroModel,
+    pub(crate) hero: HeroModel,
     social: SocialModel,
 }
 
@@ -809,7 +823,7 @@ fn field_unsigned(v: &Value, key: &str) -> Result<u64, NativeNpcEconomyError> {
     v.get(key).and_then(unsigned).ok_or(NativeNpcEconomyError::Incomplete)
 }
 impl Decoded {
-    fn decode(p: &NativeNpcEconomyProjection) -> Result<Self, NativeNpcEconomyError> {
+    pub(crate) fn decode(p: &NativeNpcEconomyProjection) -> Result<Self, NativeNpcEconomyError> {
         let owner = value(&p.owner_json)?;
         for key in ["inventoryItems", "beltItems", "equipmentItems", "storageItems", "knownSkills", "entities",
             "heroInventoryItems", "heroEquipmentItems", "heroStats", "playerCrystalStats"] {
@@ -1004,6 +1018,7 @@ pub(crate) fn apply_pending_native_npc_economy(world: &mut World) {
     let bundle = world.get_resource::<crate::native_ingest::NativeInbound>()
         .and_then(|inbound| inbound.take_npc_economy_front());
     if let Some(bundle) = bundle { let _ = apply_native_npc_economy_bundle(world, bundle); }
+    else { crate::hunting_repair_economy::apply_pending_native_hunting_repair(world); }
 }
 
 /// Exclusive main-thread application for trusted native World owners. The
@@ -1026,9 +1041,29 @@ fn apply_bundle(world: &mut World, bundle: NativeNpcEconomyBundle) -> bool {
         if !*active{return false;}Some(active)
     }else{None};
     preserve_current_hero_presentation(world,&bundle,&mut decoded.hero);
+    crate::hunting_repair_economy::clear_native_hunting_repair_source(world);
+    let owner=commit_complete_owner_models(world,decoded,bundle.hero_owner_gate.clone());
+    let reset_revision=world.get_resource::<mir2_client_bevy::pending_operations::SessionResetRevision>().map_or(0,|r|r.0);
+    let scene_revision=world.get_resource::<crate::SceneResetRevision>().map_or(0,|r|r.0);
+    world.insert_resource(NativeNpcEconomySource { binding: bundle.binding, witness: bundle.witness,
+        projection: Arc::clone(&bundle.projection), owner: Arc::new(owner), gate: bundle.gate.clone(), reset_revision, scene_revision });
+    if !world.contains_resource::<NativeNpcEconomyHighWater>() { world.insert_resource(NativeNpcEconomyHighWater::default()); }
+    world.resource_mut::<NativeNpcEconomyHighWater>().actors.insert(bundle.witness.actor,
+        (bundle.witness.server_revision, fingerprint));
+    custody.applied.push_back(NativeNpcEconomyApplied { binding: bundle.binding, witness: bundle.witness });
+    drop(hero_guard);
+    true
+}
+
+/// Pure shared resource commit after the caller has decoded its complete owner
+/// and locked its own custody. This function creates no transaction identity or
+/// Applied witness; each protocol retains that responsibility in its wrapper.
+pub(crate) fn commit_complete_owner_models(world:&mut World,mut decoded:Decoded,
+    hero_owner_gate:Option<NativeHeroOwnerGate>)->Value {
     use mir2_client_bevy::pending_operations::{PendingOperations, AuthoritativeModelRevisions,
         AuthoritativeModelDomain, mark_authoritative_refresh, reconcile_inventory_refresh,
         reconcile_mail_refresh, reconcile_storage_refresh, reconcile_shop_refresh};
+    preserve_same_owner_skill_authority(world,&mut decoded,hero_owner_gate.as_ref());
     let old_inventory = world.get_resource::<InventoryModel>().cloned().unwrap_or_default();
     let old_mail = world.get_resource::<MailModel>().cloned().unwrap_or_default();
     let old_storage = world.get_resource::<StorageModel>().cloned().unwrap_or_default();
@@ -1059,15 +1094,55 @@ fn apply_bundle(world: &mut World, bundle: NativeNpcEconomyBundle) -> bool {
     world.insert_resource(decoded.social);
     let reset_revision = world.get_resource::<mir2_client_bevy::pending_operations::SessionResetRevision>().map_or(0, |r| r.0);
     let scene_revision=world.get_resource::<crate::SceneResetRevision>().map_or(0,|r|r.0);
-    world.insert_resource(NativeHeroOwnerCheckpoint{hero:hero_checkpoint,gate:bundle.hero_owner_gate.clone(),reset_revision,scene_revision});
-    world.insert_resource(NativeNpcEconomySource { binding: bundle.binding, witness: bundle.witness,
-        projection: Arc::clone(&bundle.projection), owner: Arc::new(decoded.owner), gate: bundle.gate.clone(), reset_revision, scene_revision });
-    if !world.contains_resource::<NativeNpcEconomyHighWater>() { world.insert_resource(NativeNpcEconomyHighWater::default()); }
-    world.resource_mut::<NativeNpcEconomyHighWater>().actors.insert(bundle.witness.actor,
-        (bundle.witness.server_revision, fingerprint));
-    custody.applied.push_back(NativeNpcEconomyApplied { binding: bundle.binding, witness: bundle.witness });
-    drop(hero_guard);
-    true
+    world.insert_resource(NativeHeroOwnerCheckpoint{hero:hero_checkpoint,gate:hero_owner_gate,reset_revision,scene_revision});
+    decoded.owner
+}
+
+/// Public economy snapshots do not contain the native skill cursor's local
+/// provenance. Keep only already-applied metadata from the exact live physical
+/// owner. Fresh learned descriptors, bindings and acknowledgements still come
+/// entirely from this decoded complete owner turn.
+fn preserve_same_owner_skill_authority(world:&World,decoded:&mut Decoded,
+    gate:Option<&NativeHeroOwnerGate>) {
+    if decoded.owner.get("_nativeSkillAuthority").is_some()
+        || decoded.skill.authority!=Default::default() {return;}
+    let Some(gate)=gate else{return;};
+    let reset=world.get_resource::<mir2_client_bevy::pending_operations::SessionResetRevision>().map_or(0,|r|r.0);
+    let scene=world.get_resource::<crate::SceneResetRevision>().map_or(0,|r|r.0);
+    if world.get_resource::<NativeHeroOwnerCheckpoint>().is_none_or(|source|
+        source.reset_revision!=reset || source.scene_revision!=scene
+            || !source.gate.as_ref().is_some_and(|current|current.same_gate(gate))) {return;}
+    let Some(current)=world.get_resource::<SkillModel>() else{return;};
+    let authority=current.authority;
+    if authority.session_epoch==0 || authority.session_epoch==u64::MAX
+        || authority.snapshot_serial==0 || authority.snapshot_serial==u64::MAX
+        || authority.player_object_id!=gate.epoch.actor
+        || field_unsigned(&decoded.owner,"playerObjectId").ok()!=Some(u64::from(gate.epoch.actor))
+        || !current.has_same_learned_descriptors(&decoded.skill) {return;}
+    decoded.skill.authority=authority;
+}
+
+/// Retire only the previous purchase economic source. The current display
+/// lifetime is independent and can accompany a repair's complete owner turn.
+pub(crate) fn retire_purchase_source_for_repair(world:&mut World) {
+    if let Some(source)=world.remove_resource::<NativeNpcEconomySource>() {source.gate.retire();}
+}
+
+/// Only an exact, live display lifetime may lend its local presentation clocks.
+/// The original owner values and complete model projection remain unchanged.
+pub(crate) fn preserve_repair_hero_presentation(world:&World,decoded:&mut Decoded,
+    gate:Option<&NativeHeroOwnerGate>) {
+    if decoded.hero.session_epoch!=0{return;}
+    let Some(gate)=gate else{return;};
+    let reset=world.get_resource::<mir2_client_bevy::pending_operations::SessionResetRevision>().map_or(0,|r|r.0);
+    let scene=world.get_resource::<crate::SceneResetRevision>().map_or(0,|r|r.0);
+    let Some(checkpoint)=world.get_resource::<NativeHeroOwnerCheckpoint>()
+        .filter(|s|s.reset_revision==reset && s.scene_revision==scene) else{return;};
+    if !checkpoint.gate.as_ref().is_some_and(|current|current.same_gate(gate)){return;}
+    let Some(current)=world.get_resource::<HeroModel>().filter(|hero|hero.session_epoch!=0 && hero.session_epoch!=u64::MAX) else{return;};
+    decoded.hero.session_epoch=current.session_epoch;
+    decoded.hero.hero_generation=current.hero_generation;
+    decoded.hero.revision=current.revision.saturating_add(1);
 }
 
 fn preserve_current_hero_presentation(world:&World,bundle:&NativeNpcEconomyBundle,incoming:&mut HeroModel) {
@@ -1378,6 +1453,38 @@ pub(crate) mod tests {
         assert_eq!(gate.try_recv_applied().unwrap().witness(),w);assert_eq!(gate.try_recv_applied(),None);
     }
 
+    #[cfg(feature = "native-npc-economy")]
+    #[test]
+    fn native_hunting_repair_no_hero_checkpoint_withdraws_cached_packet_assets() {
+        use crate::hunting_repair_economy::{NativeHuntingRepairEpoch,NativeHuntingRepairGate,
+            apply_native_hunting_repair_bundle};
+        let (_,_,projection)=fixture();
+        let owner:Value=serde_json::from_str(&projection.owner_json).unwrap();
+        assert!(owner["stage5Systems"]["hero"].is_null());
+        let gate=NativeHuntingRepairGate::new(NativeHuntingRepairEpoch{run:1,connection:2,
+            procedure:3,owner_epoch:4,scene_epoch:5,cancellation:0,actor:3,map:0}).unwrap();
+        let bundle=gate.prepare(1,&"ab".repeat(32),projection).unwrap();
+        let mut world=World::new();
+        assert!(apply_native_hunting_repair_bundle(&mut world,bundle));
+        assert!(gate.try_recv_applied().is_some());
+        let complete=world.resource::<HeroModel>().clone();
+        assert!(complete.snapshot_identity.is_none());
+        let mut cached=complete.clone();
+        cached.spawned=true;
+        cached.inventory_view.items=vec![
+            ItemModel{unique_id:Some(22),key:"cached-bag".into(),container:0,slot:0,quantity:1,..Default::default()},
+            ItemModel{unique_id:Some(23),key:"cached-equipment".into(),container:2,slot:8,quantity:1,..Default::default()}];
+        cached.stats=Some(vec![mir2_client_bevy::read_model::CrystalPlayerStatModel{stat:1,value:999}]);
+        cached.weights=Some(mir2_client_bevy::hero_model::HeroWeights{bag:7,wear:8,hand:9});
+        apply_native_hero_packet_model(&mut world,cached);
+        let actual=world.resource::<HeroModel>();
+        assert!(actual.snapshot_identity.is_none() && actual.info.is_none() && actual.base_stats.is_none());
+        assert!(!actual.spawned);
+        assert_eq!(serde_json::to_value(&actual.inventory_view).unwrap(),serde_json::to_value(&complete.inventory_view).unwrap());
+        assert_eq!(actual.stats,complete.stats);
+        assert_eq!(actual.weights,complete.weights);
+    }
+
     #[test]
     fn native_npc_economy_nonempty_social_members_wallet_and_sparse_trade_correspond() {
         let (gate,w,mut p)=fixture();let mut owner:Value=serde_json::from_str(&p.owner_json).unwrap();
@@ -1590,6 +1697,79 @@ pub(crate) mod tests {
         assert!(apply_native_npc_economy_bundle(&mut world,prepare(&gate,w,explicit)));
         assert!(apply_native_npc_economy_bundle(&mut world,prepare(&gate,w,projection)));
         assert_eq!((world.resource::<HeroModel>().session_epoch,world.resource::<HeroModel>().hero_generation),(11,3));
+    }
+
+    #[cfg(feature = "native-npc-economy")]
+    #[test]
+    fn native_npc_economy_skill_authority_survives_same_owner_complete_checkpoint() {
+        let (gate,witness,projection)=source36_skill_fixture();
+        let owner:Value=serde_json::from_str(&projection.owner_json).unwrap();
+        assert!(owner.get("_nativeSkillAuthority").is_none());
+        let display=NativeHeroOwnerGate::new(NativeHeroOwnerEpoch{run:1,connection:2,
+            procedure:3,owner_epoch:4,scene_epoch:5,cancellation:0,actor:3,map:0}).unwrap();
+        let mut current:SkillModel=serde_json::from_str(&projection.skill_json).unwrap();
+        current.authority=mir2_client_bevy::skill_model::SkillModelAuthority{
+            session_epoch:11,snapshot_serial:12,player_object_id:3};
+        current.skill_key_ack=Some(mir2_client_bevy::skill_model::SkillKeyAck{
+            request_id:73,spell:"FireBall".into(),key:1,old_key:0,accepted:true});
+        let authority=current.authority;
+        let mut world=World::new();world.insert_resource(current);
+        assert!(apply_native_hero_owner_update(&mut world,display.prepare(&owner).unwrap()));
+        let bundle=prepare(&gate,witness,projection.clone()).with_hero_owner_gate(&display).unwrap();
+        assert!(apply_native_npc_economy_bundle(&mut world,bundle));
+        let applied=world.resource::<SkillModel>();
+        assert_eq!(applied.authority,authority);
+        let mut expected:SkillModel=serde_json::from_str(&projection.skill_json).unwrap();
+        expected.authority=authority;
+        assert_eq!(serde_json::to_value(applied).unwrap(),serde_json::to_value(expected).unwrap(),
+            "only native provenance survives; fresh learned fields and ACK stay exact");
+        assert_eq!(world.resource::<NativeNpcEconomySource>().owner_json(),projection.owner_json);
+        assert_eq!(gate.try_recv_applied().unwrap().witness(),witness);
+    }
+
+    #[cfg(feature = "native-npc-economy")]
+    #[test]
+    fn native_npc_economy_skill_authority_never_crosses_owner_reset_or_descriptors() {
+        for boundary in ["missing-checkpoint","other-gate","scene","session","wrong-actor",
+            "invalid-session","invalid-serial","changed-skills","retired"] {
+            let (gate,witness,projection)=source36_skill_fixture();
+            let owner:Value=serde_json::from_str(&projection.owner_json).unwrap();
+            let epoch=NativeHeroOwnerEpoch{run:1,connection:2,procedure:3,owner_epoch:4,
+                scene_epoch:5,cancellation:0,actor:3,map:0};
+            let display=NativeHeroOwnerGate::new(epoch).unwrap();
+            let mut current:SkillModel=serde_json::from_str(&projection.skill_json).unwrap();
+            current.authority=mir2_client_bevy::skill_model::SkillModelAuthority{
+                session_epoch:11,snapshot_serial:12,player_object_id:3};
+            match boundary {
+                "wrong-actor"=>current.authority.player_object_id=4,
+                "invalid-session"=>current.authority.session_epoch=0,
+                "invalid-serial"=>current.authority.snapshot_serial=0,
+                "changed-skills"=>current.skills[0].name="cached different learned skill".into(),
+                _=>{},
+            }
+            let mut world=World::new();world.insert_resource(current);
+            if boundary!="missing-checkpoint" {
+                assert!(apply_native_hero_owner_update(&mut world,display.prepare(&owner).unwrap()));
+            }
+            let other=NativeHeroOwnerGate::new(NativeHeroOwnerEpoch{connection:3,..epoch}).unwrap();
+            let attached=if boundary=="other-gate"{&other}else{&display};
+            let bundle=prepare(&gate,witness,projection).with_hero_owner_gate(attached).unwrap();
+            match boundary {
+                "scene"=>{world.insert_resource(crate::SceneResetRevision(1));},
+                "session"=>{world.insert_resource(mir2_client_bevy::pending_operations::SessionResetRevision(1));},
+                "retired"=>display.retire(),
+                _=>{},
+            }
+            let accepted=apply_native_npc_economy_bundle(&mut world,bundle);
+            if boundary=="retired" {
+                assert!(!accepted);assert!(gate.try_recv_applied().is_none());
+            }else{
+                assert!(accepted,"{boundary}");
+                assert_eq!(world.resource::<SkillModel>().authority,
+                    mir2_client_bevy::skill_model::SkillModelAuthority::default(),"{boundary}");
+                assert_eq!(gate.try_recv_applied().unwrap().witness(),witness);
+            }
+        }
     }
 
     #[test]

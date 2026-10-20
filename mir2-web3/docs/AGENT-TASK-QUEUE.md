@@ -1,6 +1,14 @@
 # Agent Task Queue
 
-## 第八阶段：浏览器恢复核对与 Windows 原生优先（2026-10-20）
+## 第九阶段当前队列：隔离环境已结束，成功确认留待新一轮（2026-10-21）
+
+新EXE59已通过普通登录/StartGame/NPC/Repair和Bag拖入，实际得到服务端费用6；第一次显式Close未收费，顶X尝试不能当作已关闭。第二次报价到OKAY约97秒，超过30秒TTL，正常拒绝且未发Confirm。停服后独立psql仍为0结果/0销毁、绑定1,000,000、旧gold 1234、Bag100/1000、save_version15/revision14，见`C:/mir2-build/hunting-native-pg-final-after-deadline-56.json`；尚无成功扣款或原生完整闭环。
+
+fixture56已达到2小时截止正常退出0，proxy56按stop marker退出0，EXE59仅自己的窗口Alt+F4正常退出0，其他游戏未操作。原当前窗口30秒快速确认请求已撤回，当前不要操作。下轮新隔离环境再验成功Confirm→Pending Close→原Query→断线→正常保存冷登录，并独立核对结果/销毁/钱包/耐久；不改TTL/时钟或绕guard。Quoted通用选择提示、顶X点击/关闭未验仍是小UX待办。
+
+独立repair source gate已接真实命名装备位/合法缺省UID、严格raw字段/重复键和actual inventory hash，buy gate逐字保持。Host60的39/39含5项rich-source；正向Confirm只在实际TestSink验证，不能当GUI/物理WS成功。producer60b为1项测试/7案例，UI58为17/17；Gateway46纯5+物理WS1及PG45的1项会话撤销/原有效期证明保留，各轮不相加。[阶段九审计](generated/hunting-economy/acceptance-20261021-repair-native-windows.json)与[Windows接入边界](HUNTING-NATIVE-WINDOWS-INTEGRATION.md)为当前范围。之后仍有真实产出、材料传播、维护/PVP/沙巴克销毁、完整市场画像收益及通知/迁移发布五条主线；完整狩猎经济任务未完成，不提升Crystal/Candidate或生产资格。原生运行，无Docker/WSL/虚拟机、远程资产修改或其它窗口干扰；以下历史队列不当作本轮结论。
+
+## 第八阶段：浏览器恢复核对与 Windows 原生优先（2026-10-20，历史范围）
 
 浏览器已用本机隔离 Axum/PG 的合成账号完成普通登录/StartGame、真实 NPC 服务、Bag 拖入、服务端报价 6 绑定金币及一次 Confirm。测试 transport 仅省略一次已提交 owner 回执；Pending 主动 Close 后仍可原 Query。独立 psql 在 Query 后、普通 Alt+x 退出后及服务停止后均核对：结果/销毁各 1 条、扣费/销毁 6、绑定余额 999994、旧 gold 1234、Bag 耐久 970/970。该路径不是强制服务端 OutcomeUnknown，本轮未重新登录验证。见 [第八阶段证据](generated/hunting-economy/acceptance-20261020-repair-browser.json)。
 

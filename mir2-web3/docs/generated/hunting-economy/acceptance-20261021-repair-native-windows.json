@@ -1,0 +1,345 @@
+{
+  "version": "hunting-native-windows-acceptance/1",
+  "userDate": "2026-10-21",
+  "timezone": "Asia/Shanghai",
+  "recordedAt": "2026-10-20T19:02:55.721Z",
+  "status": "partial",
+  "executable": {
+    "path": "C:/mir2-build/hunting-native-windows-target/debug/deps/mir2_platform_windows-hunting-native-59.exe",
+    "bytes": 107110400,
+    "sha256": "4bfebb3a01a590b6c33ff78f91fbb7dd7ef476baa5291c91d6224eed40ec0393",
+    "candidatePackageVerified": false
+  },
+  "sourcePins": "sources-20261021-repair-native-windows.json",
+  "tests": [
+    {
+      "scope": "native-host",
+      "passed": 39,
+      "failed": 0,
+      "path": "C:/mir2-build/hunting-native-host-tests-60.log",
+      "sha256": "1a932d746a0e5cbd009303fd8b439defa127f9d1c3371bbe55a9fc8333c9780f"
+    },
+    {
+      "scope": "native-ui",
+      "passed": 17,
+      "failed": 0,
+      "path": "C:/mir2-build/hunting-native-ui-tests-58.log",
+      "sha256": "2aaa40a7efb459b4d84f842850314e9b7b4bdc7bc0a72162cd5ca668b7a64ed7"
+    },
+    {
+      "scope": "initial-producer-seven-cases",
+      "passed": 1,
+      "failed": 0,
+      "path": "C:/mir2-build/hunting-native-producer-tests-60b.log",
+      "sha256": "5170aab44e5bf0d666b33a27087517dad1ae6c0bc7e3753be1d867eac2216afc"
+    },
+    {
+      "scope": "native-runtime-repair",
+      "passed": 15,
+      "failed": 0,
+      "path": "C:/mir2-build/hunting-native-runtime-tests-50.log",
+      "sha256": "6ae996cb201653316b45d84f0cd4e10a721bba3c995c579d00f57bdf4c241c32"
+    },
+    {
+      "scope": "native-runtime-adjacent",
+      "passed": 41,
+      "failed": 0,
+      "path": "C:/mir2-build/hunting-native-runtime-adjacent-tests-50.log",
+      "sha256": "336797ec1a6f7aa3f18b43fd8b34ce39395ecc83c20a13f7c874286b1a2054e4"
+    },
+    {
+      "scope": "ui-dialog-adjacent",
+      "passed": 7,
+      "failed": 0,
+      "path": "C:/mir2-build/hunting-native-dialog-tests-55.log",
+      "sha256": "482173f86707b8630ef6a72bcb1c39230df6a5e8b527aae2c5deea906e1fe9dd"
+    },
+    {
+      "scope": "resume-grant-unit",
+      "passed": 5,
+      "failed": 0,
+      "path": "C:/mir2-build/hunting-native-resume-unit-tests-46.log",
+      "sha256": "762e58dba91e326e9fadb2e296f9720692bd3d926c66c13938306d8a2fa8428d"
+    },
+    {
+      "scope": "physical-websocket-resume",
+      "passed": 1,
+      "failed": 0,
+      "path": "C:/mir2-build/hunting-native-resume-ws-tests-46.log",
+      "sha256": "1af1a73db7bcb6cdffdc3f3fc9a12016e4fb2f6b6fccb6f2e8382da87c793f6e"
+    },
+    {
+      "scope": "postgres-original-session-revocation",
+      "passed": 1,
+      "failed": 0,
+      "path": "C:/mir2-build/hunting-native-resume-pg-tests-45.log",
+      "sha256": "e502187c1f82ccb5db7a4debde89a17ad4a622fb81503d8cdfb09e2ab4d71a39"
+    }
+  ],
+  "builds": [
+    {
+      "path": "C:/mir2-build/hunting-native-game-build-59.log",
+      "sha256": "70872caa9eaab69da07838ccc8e10d1437eacf371f20ddf2d0d66196563304b5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-native-gateway-build-46.log",
+      "sha256": "d9ca349d05c3d031b4c48be1b8df96f0f878b3aefc3a1ea6694877fa5e80ed60"
+    }
+  ],
+  "countsAreNotSummedAcrossOverlappingFilters": true,
+  "gui": {
+    "nativeBevyExe": true,
+    "normalLoginStartGameNpcRepair": true,
+    "ordinaryBagDrag": true,
+    "quotedBoundGold": "6",
+    "wallet": {
+      "boundGold": "1000000",
+      "unboundGold": "0"
+    },
+    "explicitCloseObserved": true,
+    "headerXAttemptEstablishedClosure": false,
+    "confirmationSucceeded": false,
+    "confirmAttemptRejectedBeforePhysicalSend": true,
+    "quotedValidityMs": 30000,
+    "observedAutomationClickGapMs": 97376.9,
+    "successfulPendingQueryResumeColdLogin": false,
+    "manualTimingStepRequested": true,
+    "noPasswordRequested": true,
+    "notes": [
+      "Quote59 and explicit Close used ordinary native controls. The database remained untouched.",
+      "The second quote-to-OKAY automation gap exceeded the production 30s validity. No Confirm frame entered the socket.",
+      "The host unit regression executes one fresh Confirm, Pending and original Query through a recording sink; this is not GUI or physical-WS acceptance.",
+      "The test transport supports one committed owner omission and one physical break, but neither has occurred in this GUI run.",
+      "The currently quoted status uses generic selection wording. Successful completed UI and cold-login flow remain open."
+    ],
+    "manualTimingStepCurrentlyAvailable": false,
+    "manualTimingStepRequestWithdrawn": true,
+    "manualTimingStepCancelledReason": "The bounded two-hour fixture reached its deadline with no Confirm. Do not use the previous temporary window; start a fresh isolated run for the remaining GUI steps."
+  },
+  "postgres": {
+    "recordedAt": "2026-10-20T18:40:18.434Z",
+    "label": "confirm-refused",
+    "schema": "repair_network_250788_1792515744253798600_0",
+    "bag_max": 1000,
+    "burn_gold": "0",
+    "bound_gold": "1000000",
+    "burn_count": 0,
+    "bag_current": 100,
+    "legacy_gold": 1234,
+    "result_count": 0,
+    "save_version": 14,
+    "saved_revision": 13,
+    "independentPsql": true,
+    "exactSchemaOnly": true
+  },
+  "fixture": {
+    "schema": "repair_network_250788_1792515744253798600_0",
+    "realm": "native-repair-browser-56",
+    "readyStatus": "stopped",
+    "expiresAtMs": 1792522946875,
+    "syntheticAccountOnly": true,
+    "transport": {
+      "kind": "isolated native single committed owner omission and optional physical break",
+      "upstream": "ws://127.0.0.1:19541/ws",
+      "listen": "ws://127.0.0.1:19542/ws",
+      "connections": 7,
+      "confirms": 0,
+      "queries": 0,
+      "resumes": 5,
+      "omitted": 0,
+      "breaks": 0,
+      "forwardedServerFrames": 1001,
+      "clientTypes": {
+        "clientCapabilities": 7,
+        "keepAlive": 275,
+        "clientVersion": 2,
+        "login": 2,
+        "startGame": 2,
+        "npcPurchaseOwner": 3,
+        "requestIntelligentCreatureUpdates": 2,
+        "interact": 3,
+        "selectNpcDialog": 3,
+        "logOut": 1,
+        "huntingRepairOwner": 2,
+        "resumeSession": 5
+      },
+      "serverTypes": {
+        "realmInfo": 2,
+        "packet": 562,
+        "worldSnapshot": 17,
+        "identitySession": 2,
+        "resumeCredential": 394,
+        "npcPurchaseOwner": 3,
+        "huntingRepairOwner": 2,
+        "error": 1
+      },
+      "startedAt": "2026-10-20T17:02:34.390Z",
+      "state": "stopped",
+      "reason": "120 minute deadline",
+      "stoppedAt": "2026-10-20T19:02:34.500Z"
+    },
+    "finalStatus": "stopped",
+    "stopReason": "deadline",
+    "finalTransport": {
+      "kind": "isolated native single committed owner omission and optional physical break",
+      "upstream": "ws://127.0.0.1:19541/ws",
+      "listen": "ws://127.0.0.1:19542/ws",
+      "connections": 7,
+      "confirms": 0,
+      "queries": 0,
+      "resumes": 5,
+      "omitted": 0,
+      "breaks": 0,
+      "forwardedServerFrames": 1001,
+      "clientTypes": {
+        "clientCapabilities": 7,
+        "keepAlive": 275,
+        "clientVersion": 2,
+        "login": 2,
+        "startGame": 2,
+        "npcPurchaseOwner": 3,
+        "requestIntelligentCreatureUpdates": 2,
+        "interact": 3,
+        "selectNpcDialog": 3,
+        "logOut": 1,
+        "huntingRepairOwner": 2,
+        "resumeSession": 5
+      },
+      "serverTypes": {
+        "realmInfo": 2,
+        "packet": 562,
+        "worldSnapshot": 17,
+        "identitySession": 2,
+        "resumeCredential": 394,
+        "npcPurchaseOwner": 3,
+        "huntingRepairOwner": 2,
+        "error": 1
+      },
+      "startedAt": "2026-10-20T17:02:34.390Z",
+      "state": "stopped",
+      "reason": "120 minute deadline",
+      "stoppedAt": "2026-10-20T19:02:34.500Z"
+    }
+  },
+  "screenshots": [
+    {
+      "path": "native-windows-20261021-world-47.png",
+      "sha256": "d573b7fea325ac08b2528cc30f622125d3234339981b0066a0c16e03d3605cd1"
+    },
+    {
+      "path": "native-windows-20261021-repair-source-misclose-51.png",
+      "sha256": "8ea179edf7916383e585f314ae7cfb3c1e69b6f61b4c5aaaeb99e3d9081aa922"
+    },
+    {
+      "path": "native-windows-20261021-quote-refused-56.png",
+      "sha256": "e96a4329f0a610c7d3ce3df5930bc535af7db6869a0fbcb347ba25a5b386cb5e"
+    },
+    {
+      "path": "native-windows-20261021-quote-59.png",
+      "sha256": "6b3e8891c2c3898dcc41505744396d31b9bf6174533872a989e899ee2a1ae204"
+    },
+    {
+      "path": "native-windows-20261021-confirm-refused-59.png",
+      "sha256": "6f56879eab48ae670ba18308d1cccd2e1457008ae05eb5fdd050af3d77e583d3"
+    }
+  ],
+  "protectedInputs": [
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-portable-statistics-repair01.json",
+      "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473",
+      "unchanged": true
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+      "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b",
+      "unchanged": true
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json",
+      "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd",
+      "unchanged": true
+    },
+    {
+      "sha256": "70145b1787f5dea10c830730d9a6968f226bf8e1145602c8a9c964856a44f2ec",
+      "path": "apps/web/tsconfig.json",
+      "unchanged": true
+    },
+    {
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+      "unchanged": true
+    },
+    {
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/lib/typescript.js",
+      "unchanged": true
+    }
+  ],
+  "fixes": [
+    "same live owner skill authority survives complete economic checkpoint without borrowing learned/ACK/bindings",
+    "one-shot NPC service handoff survives split-frame text-dialog dismissal, while close/new actor/reset retire it",
+    "repair-only raw inventory completeness accepts canonical named equipment slots and absent legacy equipment UID, preserving strict concrete Bag identity",
+    "pending custody final Applied verifies both physical fence and live Runtime gate"
+  ],
+  "economy": {
+    "enabledByDefault": false,
+    "productionActivated": false,
+    "remoteAssetsModified": false,
+    "legacyGoldReclassified": false,
+    "k": "0.1",
+    "baselinePermits": "0.72",
+    "capPermits": "1.08"
+  },
+  "constraints": {
+    "dockerUsed": false,
+    "wslUsed": false,
+    "vmUsed": false,
+    "virtualizationChanged": false,
+    "otherGameWindowOperated": false
+  },
+  "limits": [
+    "not full Windows repair GUI acceptance",
+    "not a verified release candidate",
+    "not global economic coverage",
+    "not final human frontend acceptance",
+    "not full workspace testing"
+  ],
+  "remainingBusinessStreams": [
+    "production sources and item/recurring rewards",
+    "material economic identity propagation and unbinding",
+    "maintenance/tax/light-PVP/Sabuk authoritative burns",
+    "global stock/market/player/income metrics",
+    "notification delivery, legacy migration, replication authority and production qualification"
+  ],
+  "finalizedAt": "2026-10-20T19:19:53.554Z",
+  "postTeardownPostgres": {
+    "recordedAt": "2026-10-20T19:07:05.506Z",
+    "label": "final-after-deadline",
+    "schema": "repair_network_250788_1792515744253798600_0",
+    "bag_max": 1000,
+    "burn_gold": "0",
+    "bound_gold": "1000000",
+    "burn_count": 0,
+    "bag_current": 100,
+    "legacy_gold": 1234,
+    "result_count": 0,
+    "save_version": 15,
+    "saved_revision": 14,
+    "independentPsql": true,
+    "exactSchemaOnly": true
+  },
+  "teardown": {
+    "gatewayExitCode": 0,
+    "transportExitCode": 0,
+    "nativeExeExit": {
+      "code": 0,
+      "exitedAt": "2026-10-20T19:11:05.593Z"
+    },
+    "otherGameWindowsOperated": false
+  },
+  "ordinaryBuyGateUnchanged": {
+    "baselineCommit": "c45eda4f3eb94c2edd2a816d014c5c480afa538d",
+    "sha256": "ee1fbf3a2cca26f657010e982d90730df8f8056a18b99a137cd7c122391bbe97",
+    "exactFunctionBytesMatched": true
+  }
+}

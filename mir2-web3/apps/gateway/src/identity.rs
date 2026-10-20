@@ -262,6 +262,51 @@ impl IdentityService {
         })
     }
 
+    /// Re-deliver the bearer of an already authenticated server-side session.
+    /// This is not a login API: callers must first authenticate their trusted
+    /// resume binding. Read current storage rather than signing caller-supplied
+    /// timestamps, and preserve the original issue/expiry and session identity.
+    pub(crate) fn reissue_verified_session_grant(
+        &self,
+        verified: &VerifiedIdentitySession,
+    ) -> Result<IdentitySessionGrant, String> {
+        let now_ms = unix_now_ms();
+        validate_account_id(&verified.account_id)?;
+        if verified.session_id.is_empty()
+            || verified.session_id.len() > 256
+            || verified.session_id.chars().any(char::is_control)
+            || verified.expires_at_ms <= now_ms
+        {
+            return Err("identity session is not active".to_string());
+        }
+        let mut session = self
+            .session_by_id(&verified.session_id)
+            .map_err(|_| "identity session reissue unavailable".to_string())?
+            .ok_or_else(|| "identity session is not active".to_string())?;
+        if session.account_id != verified.account_id
+            || session.session_id != verified.session_id
+            || session.expires_at_ms != verified.expires_at_ms
+            || session.revoked_at_ms.is_some()
+            || session.expires_at_ms <= now_ms
+            || session.issued_at_ms > now_ms.saturating_add(30_000)
+            || session.issued_at_ms >= session.expires_at_ms
+        {
+            return Err("identity session is not active".to_string());
+        }
+        let payload = IdentitySessionTokenPayload {
+            version: SESSION_TOKEN_VERSION.to_string(),
+            account_id: session.account_id.clone(),
+            session_id: session.session_id.clone(),
+            issued_at_ms: session.issued_at_ms,
+            expires_at_ms: session.expires_at_ms,
+        };
+        let token = self
+            .sign_session_token(&payload)
+            .map_err(|_| "identity session reissue unavailable".to_string())?;
+        session.current = true;
+        Ok(IdentitySessionGrant { token, session })
+    }
+
     pub fn touch_session(&self, verified: &VerifiedIdentitySession) -> Result<(), String> {
         let now_ms = unix_now_ms();
         if self.database_url.is_some() {

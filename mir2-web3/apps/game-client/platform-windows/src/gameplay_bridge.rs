@@ -1698,7 +1698,7 @@ impl NativeWorldProducerState<'_>{
                     NativePlayerUiIntent::EquipmentCreaturePacket(packet)=>crate::equipment_creature_wire::command(packet).is_some_and(|wire|crate::gateway::native_command_scope(&GatewayCommand::Wire(wire))==crate::gateway::NativeCommandScope::World),
                     NativePlayerUiIntent::HeroPacket(packet)=>crate::hero_wire::command(packet).is_some_and(|wire|crate::gateway::native_command_scope(&GatewayCommand::Wire(wire))==crate::gateway::NativeCommandScope::World),
                     NativePlayerUiIntent::SocialBondPacket(packet)=>crate::social_bond_wire::command(packet).is_some_and(|wire|crate::gateway::native_command_scope(&GatewayCommand::Wire(wire))==crate::gateway::NativeCommandScope::World),
-                    NativePlayerUiIntent::DropItem {..}|NativePlayerUiIntent::Chat {..}|NativePlayerUiIntent::BuyItem {..}|NativePlayerUiIntent::NpcGoldBuy {..}|NativePlayerUiIntent::SellItem {..}|NativePlayerUiIntent::RepairItem {..}|NativePlayerUiIntent::SRepairItem {..}|NativePlayerUiIntent::StoreItem {..}|NativePlayerUiIntent::TakeBackItem {..}|NativePlayerUiIntent::UnlockStorage {..}|NativePlayerUiIntent::SetStoragePassword {..}|NativePlayerUiIntent::RemoveStoragePassword {..}|NativePlayerUiIntent::ExpandStorage|NativePlayerUiIntent::ObservePlayer {..}|NativePlayerUiIntent::GuildStorageGoldChange {..}|NativePlayerUiIntent::GuildStorageItemChange {..}|NativePlayerUiIntent::TradeRequest|NativePlayerUiIntent::TradeReply {..}|NativePlayerUiIntent::TradeGold {..}|NativePlayerUiIntent::TradeDepositItem {..}|NativePlayerUiIntent::TradeRetrieveItem {..}|NativePlayerUiIntent::TradeConfirm {..}|NativePlayerUiIntent::TradeCancel=>true,
+                    NativePlayerUiIntent::DropItem {..}|NativePlayerUiIntent::Chat {..}|NativePlayerUiIntent::BuyItem {..}|NativePlayerUiIntent::NpcGoldBuy {..}|NativePlayerUiIntent::SellItem {..}|NativePlayerUiIntent::RepairItem {..}|NativePlayerUiIntent::SRepairItem {..}|NativePlayerUiIntent::HuntingRepairQuote{..}|NativePlayerUiIntent::HuntingRepairConfirm{..}|NativePlayerUiIntent::HuntingRepairQuery{..}|NativePlayerUiIntent::HuntingRepairClose|NativePlayerUiIntent::StoreItem {..}|NativePlayerUiIntent::TakeBackItem {..}|NativePlayerUiIntent::UnlockStorage {..}|NativePlayerUiIntent::SetStoragePassword {..}|NativePlayerUiIntent::RemoveStoragePassword {..}|NativePlayerUiIntent::ExpandStorage|NativePlayerUiIntent::ObservePlayer {..}|NativePlayerUiIntent::GuildStorageGoldChange {..}|NativePlayerUiIntent::GuildStorageItemChange {..}|NativePlayerUiIntent::TradeRequest|NativePlayerUiIntent::TradeReply {..}|NativePlayerUiIntent::TradeGold {..}|NativePlayerUiIntent::TradeDepositItem {..}|NativePlayerUiIntent::TradeRetrieveItem {..}|NativePlayerUiIntent::TradeConfirm {..}|NativePlayerUiIntent::TradeCancel=>true,
                     _=>false,
                 };
                 if !world&&preserve_personal{queue.push_intent(intent);}
@@ -2372,6 +2372,7 @@ pub fn forward_quest_ui_intents(
     tracker: Option<Res<QuestTracker>>,
     inventory: Option<Res<InventoryModel>>,
     mut social: Option<ResMut<SocialModel>>,
+    mut hunting_model:Option<ResMut<mir2_client_bevy::hunting_repair::HuntingRepairModel>>,
 ) {
     let NativeQuestWorldInput {
         entities,
@@ -2806,6 +2807,30 @@ pub fn forward_quest_ui_intents(
             _ => None,
         };
         let command = match intent {
+            NativePlayerUiIntent::HuntingRepairQuote{unique_id,special}=>{
+                let selection=inventory.as_deref().and_then(|actual|commands.ownership_fence()?.hunting_repair_selection(actual));
+                if !commands.send_command(GatewayCommand::HuntingRepair(crate::gateway::HuntingRepairCommand::Quote{unique_id,special,selection})) {
+                    if let Some(model)=hunting_model.as_deref_mut(){model.notice=Some("definitelyUnsent".into());}
+                }
+                continue;
+            }
+            NativePlayerUiIntent::HuntingRepairConfirm{quote_id}=>{
+                let selection=inventory.as_deref().and_then(|actual|commands.ownership_fence()?.hunting_repair_selection(actual));
+                if !commands.send_command(GatewayCommand::HuntingRepair(crate::gateway::HuntingRepairCommand::Confirm{quote_id,selection})) {
+                    if let Some(model)=hunting_model.as_deref_mut(){model.notice=Some("definitelyUnsent".into());}
+                }
+                continue;
+            }
+            NativePlayerUiIntent::HuntingRepairQuery{quote_id}=>{
+                if !commands.send_command(GatewayCommand::HuntingRepair(crate::gateway::HuntingRepairCommand::Query{quote_id})) {
+                    if let Some(model)=hunting_model.as_deref_mut(){model.notice=Some("definitelyUnsent".into());}
+                }continue;
+            }
+            NativePlayerUiIntent::HuntingRepairClose=>{
+                if !commands.send_command(GatewayCommand::HuntingRepair(crate::gateway::HuntingRepairCommand::Close)) {
+                    if let Some(model)=hunting_model.as_deref_mut(){model.notice=Some("definitelyUnsent".into());}
+                }continue;
+            }
             NativePlayerUiIntent::GuildBuffUpdate(request) => {
                 NativeOutboundCommand::GuildBuffUpdate {
                     action: request.action,

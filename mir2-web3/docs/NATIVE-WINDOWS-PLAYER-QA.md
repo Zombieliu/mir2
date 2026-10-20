@@ -1,5 +1,15 @@
 # Windows 原生可玩闭环验收清单
 
+## 第九阶段当前实机审计：修理报价已达，成功确认待验（2026-10-21）
+
+新EXE59已真实启动，经普通登录/StartGame/NPC/Repair、Bag拖入获得服务端6绑定金币报价；真实只读钱包为绑定1,000,000、非绑定0。第一次显式Close后0扣款，顶X点击尝试不计作已关闭。第二次报价到OKAY约97秒，超过原30秒TTL，拒绝且未发Confirm；停服后独立psql仍为0结果/0销毁、绑定1,000,000、旧gold 1234、Bag100/1000、save_version15/revision14，见`C:/mir2-build/hunting-native-pg-final-after-deadline-56.json`。未声称原生成功扣款、Pending原Query、断线、最终冷登录或候选包验收。
+
+fixture56已达到2小时截止正常退出0，proxy56按stop marker退出0，EXE59仅自己的窗口Alt+F4正常退出0，其他游戏未操作。原当前窗口30秒快速确认请求已撤回，当前不要操作；下轮新隔离环境再验成功Confirm→Pending Close→原Query→断线→保存冷登录，不改TTL或时钟、不绕guard。Quoted通用选择文案、顶X关闭未验仍列为小UX待办。
+
+独立repair source gate修复支持命名装备位/合法缺省UID，保留严格raw字段/重复键及actual inventory hash，buy gate逐字不变。Host60的39/39含5项rich-source，其中合法当前报价到单Confirm/Unknown原Query使用实际TestSink，不是GUI或物理WS；producer60b为1测试/7案例、UI58为17/17。Gateway46恢复纯5+物理WS1、PG45的1项会话撤销/原有效期证明属于服务端证据，43/44等历史不累加。详见[阶段九审计](generated/hunting-economy/acceptance-20261021-repair-native-windows.json)及[Windows接入边界](HUNTING-NATIVE-WINDOWS-INTEGRATION.md)。
+
+完整狩猎经济任务未完成；其他产出、材料传播、维护/PVP/沙巴克销毁、全服市场画像收益及通知/迁移发布仍开放，不提升Crystal/Candidate或生产资格。无Docker/WSL/虚拟机、远程资产修改或其它窗口干扰。下方旧Source记录保留其各自历史范围，不能当作本轮Windows GUI结论。
+
 ## Source50：新完整 Web 包已构建，Sharp 入口兼容修复；实玩待验证（2026-10-09）
 
 最新完整 Web 已更新为 Source49 Next＋Source50 Thin，包含当前共享 UI 与九类任务动作源码；本轮不新增界面操作。Source49 完整 Core/PUI/NPC 三包和 WebGPU、WebGL2、共享 WebGL2 三 renderer 均由原 builder 实际编译并通过 metadata/name/normalized ABI、原 WASM/JS/default-gzip 预算及不可变发布；静态 WASM 校验获本次“继续”授权，没有实例化游戏。Core 三次和 renderer 四次 Cargo 严格串行、原50GiB/2000ms/15000ms及PolicyB保持，均完成、退出并释放。

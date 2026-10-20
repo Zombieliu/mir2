@@ -12,6 +12,90 @@ const NPC_DROP_PANEL_LEFT: f32 = 264.0;
 const NPC_DROP_PANEL_TOP: f32 = 224.0;
 const LOW_GOLD_NOTICE: &str = "Not enough gold.";
 const GOLD_CAP_NOTICE: &str = "Cannot carry anymore gold.";
+// Keep the canonical 147px skin intact; the wallet begins immediately at 173.
+const HUNTING_STATUS_RECT: CrystalRect = CrystalRect::new(0.0, 147.0, 176.0, 26.0);
+
+fn hunting_status_text(hunting: &HuntingRepairUi) -> &'static str {
+    if hunting.model.reload_required { return "Reconnect to reload character."; }
+    if hunting.pending() { return "Pending: query original repair."; }
+    if let Some(notice) = hunting.model.notice.as_deref() {
+        return match notice {
+            "itemOrServiceChanged" | "itemChanged" => "Item changed. Select again.",
+            "expired" => "Quote expired. Select again.",
+            "authenticatedEntryRequired" | "unauthenticated" | "ownerChanged" => "Reconnect before repairing.",
+            "purchasePending" => "Finish pending purchase first.",
+            "notSubmitted" | "definitelyUnsent" => "Not submitted. Select again.",
+            "quoteUnknown" | "timeout" => "No reply. Select item again.",
+            "unsupported" => "This item cannot be repaired.",
+            "invalidRequest" => "Select a bag item again.",
+            "originalQueryRequired" | "snapshotRequired" | "pending" | "unknown" => "Pending: query original repair.",
+            "reloadRequired" => "Reconnect to reload character.",
+            // Never expose internal/unknown transport details in the panel.
+            _ => "Repair unavailable. Try later.",
+        };
+    }
+    if hunting.model.phase == HuntingRepairPhase::Committed { "Repair completed." }
+    else if hunting.input == Some(HuntingRepairInput::Quote) || hunting.model.phase == HuntingRepairPhase::Quoting {
+        "Requesting server quote…"
+    } else if hunting.model.phase == HuntingRepairPhase::Rejected { "Quote unavailable. Select again." }
+    else { "Select item for server quote." }
+}
+
+pub(super) fn sync_hunting_model(
+    model: Option<Res<HuntingRepairModel>>,
+    mut state: ResMut<NativePlayerUiState>,
+) {
+    let Some(model) = model.filter(|model| model.is_changed()) else { return; };
+    state.hunting_repair_ui.observe(&model);
+    if model.mode != HuntingRepairMode::Legacy {
+        state.npc_service_hold = None;
+    }
+}
+
+fn is_repair_service(shop: &ShopModel) -> bool {
+    shop.allows_repair() || shop.allows_special_repair()
+}
+
+pub(super) fn request_hunting_quote(
+    shop: &ShopModel,
+    inventory: &InventoryModel,
+    state: &mut NativePlayerUiState,
+    intents: &mut NativePlayerUiIntentQueue,
+) -> bool {
+    if !state.npc_shop_open() || !is_repair_service(shop) || !state.hunting_repair_ui.can_quote() {
+        return false;
+    }
+    let Some(unique_id) = selected_item(shop, inventory, state).and_then(item_unique_id) else { return false; };
+    if !intents.push_transient_unique(NativePlayerUiIntent::HuntingRepairQuote {
+        unique_id, special: shop.allows_special_repair(),
+    }) { return false; }
+    state.hunting_repair_ui.input = Some(HuntingRepairInput::Quote);
+    state.npc_service_hold = None;
+    true
+}
+
+pub(super) fn query_hunting_repair(
+    state: &mut NativePlayerUiState,
+    intents: &mut NativePlayerUiIntentQueue,
+) -> bool {
+    if !state.hunting_repair_ui.can_query() { return false; }
+    let Some(quote_id) = state.hunting_repair_ui.model.quote_id.clone() else { return false; };
+    if !intents.push_transient_unique(NativePlayerUiIntent::HuntingRepairQuery { quote_id }) { return false; }
+    state.hunting_repair_ui.input = Some(HuntingRepairInput::Query);
+    true
+}
+
+pub(super) fn close_hunting_repair(
+    state: &mut NativePlayerUiState,
+    intents: &mut NativePlayerUiIntentQueue,
+) {
+    if state.hunting_repair_ui.model.mode == HuntingRepairMode::HuntingV1 {
+        // The host retains an unresolved original operation when this local
+        // presentation closes. A later Query does not need an NPC or target.
+        let _ = intents.push_transient_unique(NativePlayerUiIntent::HuntingRepairClose);
+        state.hunting_repair_ui.close();
+    }
+}
 
 pub(super) fn service_action(shop: &ShopModel) -> Option<(&'static str, OverlayButton)> {
     if shop.allows_special_repair() {
@@ -65,6 +149,12 @@ pub(super) fn select_bag_dragged_for_service(
     {
         return false;
     }
+    if is_repair_service(shop)
+        && state.hunting_repair_ui.model.mode != HuntingRepairMode::Legacy
+        && !state.hunting_repair_ui.can_quote()
+    {
+        return false;
+    }
 
     let dragged_count = inventory
         .items
@@ -85,7 +175,9 @@ pub(super) fn select_bag_dragged_for_service(
         return false;
     }
 
-    if state.npc_service_hold == Some(shop.service_mode) {
+    if is_repair_service(shop) && state.hunting_repair_ui.model.mode == HuntingRepairMode::HuntingV1 {
+        let _ = request_hunting_quote(shop, inventory, state, intents);
+    } else if state.npc_service_hold == Some(shop.service_mode) {
         let _ = submit_selection(shop, inventory, state, intents, pending);
     }
     true
@@ -98,6 +190,9 @@ fn selection_intent(
     state: &NativePlayerUiState,
 ) -> Option<NativePlayerUiIntent> {
     if !state.npc_shop_open() {
+        return None;
+    }
+    if is_repair_service(shop) && state.hunting_repair_ui.model.mode != HuntingRepairMode::Legacy {
         return None;
     }
     let item = selected_item(shop, inventory, state)?;
@@ -158,6 +253,22 @@ pub(super) fn submit_selection(
     intents: &mut NativePlayerUiIntentQueue,
     pending: &mut PendingOperations,
 ) -> bool {
+    if is_repair_service(shop) && state.hunting_repair_ui.model.mode != HuntingRepairMode::Legacy {
+        if !state.npc_shop_open() || !dragged_service_selection_is_current(shop, inventory, state) {
+            return false;
+        }
+        let Some(unique_id) = selected_item(shop, inventory, state).and_then(item_unique_id) else { return false; };
+        if !state.hunting_repair_ui.can_confirm(unique_id, shop.allows_special_repair()) {
+            return false;
+        }
+        let quote_id = state.hunting_repair_ui.model.quote_id.clone().expect("validated host quote id");
+        if !intents.push_transient_unique(NativePlayerUiIntent::HuntingRepairConfirm { quote_id }) {
+            return false;
+        }
+        state.hunting_repair_ui.input = Some(HuntingRepairInput::Confirm);
+        state.npc_service_hold = None;
+        return true;
+    }
     if !dragged_service_selection_is_current(shop, inventory, state) {
         clear_dragged_service_selection(shop, state);
         return false;
@@ -336,14 +447,26 @@ fn render_contents(
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
 ) {
-    let service = service_action(shop);
-    let repair = shop.allows_repair() || shop.allows_special_repair();
+    let hunting = &state.hunting_repair_ui;
+    let recovery = hunting.recovery_visible();
+    let repair = is_repair_service(shop) || recovery;
+    let bound = repair && hunting.model.mode == HuntingRepairMode::HuntingV1;
+    let legacy_repair = repair && hunting.model.mode == HuntingRepairMode::Legacy;
+    let service = service_action(shop).or_else(|| recovery.then_some(if hunting.model.special {
+        ("Special repair", OverlayButton::ShopSRepair)
+    } else { ("Repair", OverlayButton::ShopRepair) }));
     let selected = selected_item(shop, inventory, state);
-    let repair_quote = repair.then(|| selected.and_then(|item| repair_quote(shop, item))).flatten();
+    let repair_quote = legacy_repair.then(|| selected.and_then(|item| repair_quote(shop, item))).flatten();
     let enabled = service.is_some()
         && selected.is_some_and(|item| item_unique_id(item).is_some())
         && if repair {
-            repair_selection_enabled(state, inventory) && repair_quote.is_some()
+            if bound {
+                state.npc_shop_open() && is_repair_service(shop)
+                    && selected.and_then(item_unique_id).is_some_and(|unique_id|
+                        hunting.can_confirm(unique_id, shop.allows_special_repair()))
+            } else {
+                legacy_repair && repair_selection_enabled(state, inventory) && repair_quote.is_some()
+            }
         } else {
             sale_quote(shop, inventory, state).is_some()
         };
@@ -355,7 +478,7 @@ fn render_contents(
                 parent, assets, "Title", 290, 291, 292, CONFIRM, action, enabled,
             );
         }
-        let held = state.npc_service_hold == Some(shop.service_mode);
+        let held = (!repair || legacy_repair) && state.npc_service_hold == Some(shop.service_mode);
         spawn_overlay_crystal_button_enabled(
             parent,
             assets,
@@ -365,7 +488,7 @@ fn render_contents(
             295,
             CrystalRect::new(114.0, 36.0, 48.0, 25.0),
             OverlayButton::ShopToggleHold,
-            service.is_some(),
+            service.is_some() && (!repair || legacy_repair),
         );
     } else if let Some((title, action)) = service {
         overlay_absolute_button(parent, title, CONFIRM, action, enabled);
@@ -374,11 +497,15 @@ fn render_contents(
             "Hold",
             CrystalRect::new(114.0, 36.0, 48.0, 25.0),
             OverlayButton::ShopToggleHold,
-            true,
+            !repair || legacy_repair,
         );
     }
     let title = service.map_or("Unavailable", |(title, _)| title);
-    let info = if repair {
+    let info = if bound {
+        format!("Bound fee: {}", hunting.model.cost_bound_gold.map_or_else(|| "—".into(), |value| value.to_string()))
+    } else if repair && !legacy_repair {
+        "Repair protocol unavailable".to_owned()
+    } else if repair {
         repair_quote.map_or_else(
             || "Quote unavailable".to_owned(),
             |quote| format!("{title}: {} gold", quote.displayed_total),
@@ -402,6 +529,37 @@ fn render_contents(
         10.0,
         TEXT,
     );
+    if bound {
+        if hunting.pending() {
+            overlay_absolute_button(parent, "Query", CrystalRect::new(104.0, 91.0, 48.0, 22.0),
+                OverlayButton::HuntingRepairQuery, hunting.can_query());
+        }
+        overlay_absolute_button(parent, "Close", CrystalRect::new(137.0, 114.0, 37.0, 20.0),
+            OverlayButton::HuntingRepairClose, true);
+        parent.spawn((Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(HUNTING_STATUS_RECT.left), top: Val::Px(HUNTING_STATUS_RECT.top),
+            width: Val::Px(HUNTING_STATUS_RECT.width), height: Val::Px(HUNTING_STATUS_RECT.height),
+            padding: UiRect::all(Val::Px(4.0)), overflow: Overflow::clip(), ..default()
+        }, BackgroundColor(Color::srgba(0.035, 0.043, 0.051, 0.96)), FocusPolicy::Pass))
+            .with_children(|status| {
+                status.spawn((Text::new(hunting_status_text(hunting)),
+                    crate::crystal_ui::typography::crystal_text_font(11.0), TextColor(TEXT),
+                    TextLayout::new(Justify::Left, LineBreak::WordBoundary), FocusPolicy::Pass));
+            });
+        parent.spawn((Node {
+            position_type: PositionType::Absolute, left: Val::Px(0.0), top: Val::Px(173.0),
+            width: Val::Px(176.0), min_height: Val::Px(44.0), padding: UiRect::all(Val::Px(6.0)),
+            ..default()
+        }, BackgroundColor(Color::srgba(0.035, 0.043, 0.051, 0.96)), FocusPolicy::Pass))
+            .with_children(|wallet| {
+                let bound = hunting.model.bound_gold.map_or_else(|| "—".into(), |value| value.to_string());
+                let unbound = hunting.model.unbound_gold.map_or_else(|| "—".into(), |value| value.to_string());
+                wallet.spawn((Text::new(format!("Bound: {bound}\nUnbound: {unbound}")),
+                    crate::crystal_ui::typography::crystal_text_font(11.0), TextColor(TEXT),
+                    TextLayout::new(Justify::Left, LineBreak::WordBoundary), FocusPolicy::Pass));
+            });
+    }
     if let Some(item) = selected {
         if let Some(assets) = assets {
             parent
@@ -468,12 +626,48 @@ fn render_contents(
 }
 
 #[cfg(test)]
+#[path = "hunting_repair_ui_tests.rs"]
+mod hunting_repair_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::inventory::{
         CrystalItemInfoModel, CrystalItemStatModel, CrystalItemTooltipSourceModel,
         CrystalUserItemModel,
     };
+
+    #[test]
+    fn hunting_native_status_strip_is_outside_skin_and_before_wallet() {
+        assert_eq!((HUNTING_STATUS_RECT.left, HUNTING_STATUS_RECT.top,
+            HUNTING_STATUS_RECT.width, HUNTING_STATUS_RECT.height), (0.0, 147.0, 176.0, 26.0));
+        assert_eq!(HUNTING_STATUS_RECT.top + HUNTING_STATUS_RECT.height, 173.0);
+    }
+
+    #[test]
+    fn hunting_native_status_hides_internal_details_without_changing_pending() {
+        let mut hunting = HuntingRepairUi::default();
+        hunting.model.mode = HuntingRepairMode::HuntingV1;
+        hunting.model.phase = HuntingRepairPhase::Rejected;
+        hunting.model.notice = Some("itemOrServiceChanged".into());
+        assert_eq!(hunting_status_text(&hunting), "Item changed. Select again.");
+        hunting.model.notice = Some("private diagnostic detail".into());
+        assert_eq!(hunting_status_text(&hunting), "Repair unavailable. Try later.");
+        hunting.model.phase = HuntingRepairPhase::Pending;
+        hunting.model.quote_id = Some("ab".repeat(32));
+        let before = hunting.model.clone();
+        assert_eq!(hunting_status_text(&hunting), "Pending: query original repair.");
+        assert!(hunting.can_query());
+        assert_eq!(hunting.model, before);
+    }
+
+    fn legacy_state() -> NativePlayerUiState {
+        let mut legacy = NativePlayerUiState::default();
+        legacy.hunting_repair_ui.observe(&HuntingRepairModel {
+            mode: HuntingRepairMode::Legacy, ..Default::default()
+        });
+        legacy
+    }
 
     fn repairable_item(unique_id: u64, container: u8, slot: u32) -> ItemModel {
         ItemModel {
@@ -599,7 +793,7 @@ mod tests {
             }],
             ..default()
         };
-        let mut state = NativePlayerUiState::default();
+        let mut state = legacy_state();
         state.toggle_npc_shop();
         state.shop_quantity = 99;
         let mut shop = ShopModel {
@@ -659,7 +853,7 @@ mod tests {
             items: vec![item.clone()],
             ..default()
         };
-        let mut state = NativePlayerUiState::default();
+        let mut state = legacy_state();
         state.toggle_npc_shop();
         state.shop_service_drag_count = Some(2);
         let mut shop = ShopModel {
@@ -734,7 +928,7 @@ mod tests {
             }],
             ..default()
         };
-        let mut state = NativePlayerUiState::default();
+        let mut state = legacy_state();
         state.toggle_npc_shop();
         state.shop_service_drag_count = Some(2);
         let mut shop = ShopModel {
@@ -769,7 +963,7 @@ mod tests {
                 items: vec![repairable_item(42, 0, 4)],
                 ..default()
             };
-            let mut state = NativePlayerUiState::default();
+            let mut state = legacy_state();
             state.toggle_npc_shop();
             state.shop_repair_container = 0;
             state.shop_repair_slot = Some(4);
@@ -818,7 +1012,7 @@ mod tests {
             items: vec![repairable_item(42, 0, 4)],
             ..default()
         };
-        let mut state = NativePlayerUiState::default();
+        let mut state = legacy_state();
         state.toggle_npc_shop();
         state.shop_repair_container = 0;
         state.shop_repair_slot = Some(4);
@@ -1033,7 +1227,7 @@ mod tests {
             service_mode: NpcShopServiceMode::Sell,
             ..default()
         };
-        let mut state = NativePlayerUiState::default();
+        let mut state = legacy_state();
         state.toggle_npc_shop();
         assert!(drag_target_at_cursor(&shop, &state, Vec2::new(304.0, 298.0)));
         assert!(!drag_target_at_cursor(&shop, &state, Vec2::new(40.0, 298.0)));
@@ -1078,7 +1272,7 @@ mod tests {
             ],
             ..default()
         };
-        let mut state = NativePlayerUiState::default();
+        let mut state = legacy_state();
         state.shop_repair_container = 2;
         state.shop_repair_slot = Some(13);
         let mut shop = ShopModel {

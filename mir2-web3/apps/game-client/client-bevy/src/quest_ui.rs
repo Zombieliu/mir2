@@ -9774,16 +9774,15 @@ mod tests {
             screen: NativeShellScreen::InGame,
             ..default()
         });
-        app.insert_resource(NativePlayerUiState {
-            core: mir2_ui_core::state::UiState {
+        let mut player_ui = NativePlayerUiState::default();
+        player_ui.core = mir2_ui_core::state::UiState {
                 panel: mir2_ui_core::state::UiPanel::QuestLog,
                 screen: mir2_ui_core::state::UiScreen::InGame,
                 minimap_visible: true,
                 chat_focused: false,
                 ..Default::default()
-            },
-            ..Default::default()
-        });
+            };
+        app.insert_resource(player_ui);
         app.insert_resource(QuestTracker {
             active_quests: vec![
                 quest(10, QuestStatus::InProgress),

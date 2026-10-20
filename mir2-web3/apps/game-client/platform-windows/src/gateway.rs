@@ -48,6 +48,9 @@ mod catalog_transport;
 
 #[path = "npc_purchase_gateway.rs"]
 mod npc_purchase_gateway;
+#[path = "hunting_repair_gateway.rs"]
+mod hunting_repair_gateway;
+use mir2_client_bevy::hunting_repair::{HuntingRepairMode,HuntingRepairPhase};
 
 /// The gateway WebSocket endpoint for the local development gateway.
 pub const LOCAL_GATEWAY_WS_URL: &str = "ws://127.0.0.1:7110/ws";
@@ -253,10 +256,20 @@ pub enum GatewayCommand {
     Connect,
     Wire(NativeOutboundCommand),
     Player(PlayerIntent),
+    HuntingRepair(HuntingRepairCommand),
     Shutdown,
     Owned(Box<OwnedGatewayCommand>),
 }
 
+
+/// Local UI intent, never a legacy BrowserCommand or a repair authorization.
+#[derive(Debug,Clone)]
+pub enum HuntingRepairCommand {
+    Quote { unique_id:u64, special:bool, selection:Option<String> },
+    Confirm { quote_id:String, selection:Option<String> },
+    Query { quote_id:String },
+    Close,
+}
 
 /// Immutable producer provenance. Unknown map is None; map zero is a real map.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -282,7 +295,7 @@ pub(crate) fn native_command_scope(command: &GatewayCommand) -> NativeCommandSco
         GatewayCommand::Owned(owned) => native_command_scope(&owned.command),
         GatewayCommand::Connect => S::Procedure,
         GatewayCommand::Shutdown => S::Shutdown,
-        GatewayCommand::Player(_) => S::World,
+        GatewayCommand::Player(_) | GatewayCommand::HuntingRepair(_) => S::World,
         GatewayCommand::Wire(wire) => match wire {
             C::ClientVersion | C::ClientCapabilities { .. } | C::ResumeSession { .. }
             | C::Login { .. } | C::ChangePassword { .. } | C::NewAccount { .. }
@@ -480,11 +493,17 @@ struct NativeCommandFenceState {
     npc_economy_gate:Option<mir2_bevy_runtime::npc_purchase_economy::NativeNpcEconomyGate>,
     hero_owner_gate:Option<(NativeCommandStamp,mir2_bevy_runtime::npc_purchase_economy::NativeHeroOwnerGate)>,
     npc_entry_pending:bool,
+    hunting_repair_source:hunting_repair_gateway::RepairSourceState,
+    hunting_repair_mode:HuntingRepairMode,
+    hunting_repair_busy:bool,
+    hunting_repair_gate:Option<mir2_bevy_runtime::hunting_repair_economy::NativeHuntingRepairGate>,
 }
 impl NativeCommandFenceState {
     fn retire_npc_economy(&mut self) {
         if let Some(gate) = self.npc_economy_gate.take() { gate.retire(); }
         if let Some((_,gate)) = self.hero_owner_gate.take() { gate.retire(); }
+        if let Some(gate)=self.hunting_repair_gate.take(){gate.retire();}
+        self.hunting_repair_source.retire();self.hunting_repair_busy=false;
     }
 }
 
@@ -565,6 +584,12 @@ impl Drop for NativeNpcGoldBuyProof {
 pub(crate) struct NativeCommandFence(Arc<Mutex<NativeCommandFenceState>>);
 
 impl NativeCommandFence {
+    pub(crate) fn hunting_repair_selection(&self,actual:&mir2_client_bevy::inventory::InventoryModel)->Option<String>{
+        let state=self.0.lock().ok()?;
+        if state.hunting_repair_mode!=HuntingRepairMode::HuntingV1
+            || !Self::matches(&state,state.current,NativeCommandScope::World){return None;}
+        state.hunting_repair_source.selection_for_actual(state.current,actual)
+    }
     pub(crate) fn npc_gold_buy_source(&self) -> Option<NativeNpcGoldBuySource> {
         let mut state = self.0.lock().ok()?;
         let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
@@ -590,6 +615,7 @@ impl NativeCommandFence {
     fn begin_npc_gold_buy_snapshot(&self, payload: Option<&Value>) {
         if let Ok(mut state) = self.0.lock() {
             let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+            state.hunting_repair_source.sync_owner(stamp);state.hunting_repair_source.ready=false;
             // A store replaces the main text dialog. Its same-turn service
             // parent, not visibility of NPCDialog text, owns the catalogue.
             let dialog = npc_snapshot_service_parent(payload);
@@ -613,6 +639,7 @@ impl NativeCommandFence {
     fn invalidate_npc_gold_buy_packet(&self, packet: &str) {
         if let Ok(mut state) = self.0.lock() {
             let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+            state.hunting_repair_source.observe_packet(stamp,packet);
             if matches!(packet, "NPCDialog" | "NPCResponse") {
                 state.npc_gold_buy.dialog_retired_since_snapshot = true;
             }
@@ -649,6 +676,7 @@ impl NativeCommandFence {
         state.npc_gold_buy.inventory_ready = false;
         for waker in state.waiters.values(){waker.wake_by_ref();}
         let model = serde_json::from_value::<mir2_client_bevy::inventory::InventoryModel>(value.clone()).ok()?;
+        state.hunting_repair_source.stage_inventory(stamp,&model);
         let authority = |inventory: &mir2_client_bevy::inventory::InventoryModel| {
             let mut inventory = inventory.clone(); inventory.npc_gold_trade_capacity = None;
             serde_json::to_value(inventory).ok()
@@ -661,7 +689,23 @@ impl NativeCommandFence {
     }
     fn finish_npc_gold_buy_inventory(&self, staged: Option<(NativeCommandStamp, u64)>, delivered: bool) {
         if let Ok(mut state) = self.0.lock() {
-            if staged == Some((state.current, state.npc_gold_buy.revision)) { state.npc_gold_buy.inventory_ready = delivered;for waker in state.waiters.values(){waker.wake_by_ref();} }
+            if staged == Some((state.current, state.npc_gold_buy.revision)) { state.npc_gold_buy.inventory_ready = delivered;state.hunting_repair_source.ready=delivered;for waker in state.waiters.values(){waker.wake_by_ref();} }
+        }
+    }
+    /// Repair admits the public inventory DTO, independently of the ordinary
+    /// buy planner. Stage and publish under one fence lock; an incomplete or
+    /// undelivered snapshot must also withdraw an earlier repair source.
+    fn finish_hunting_repair_inventory(&self, value: &Value, complete: bool, delivered: bool) {
+        if let Ok(mut state) = self.0.lock() {
+            let stamp = state.current;
+            state.hunting_repair_source.sync_owner(stamp);
+            state.hunting_repair_source.ready = false;
+            if complete {
+                if let Ok(model) = serde_json::from_value::<mir2_client_bevy::inventory::InventoryModel>(value.clone()) {
+                    state.hunting_repair_source.stage_inventory(stamp, &model);
+                    state.hunting_repair_source.ready = delivered;
+                }
+            }
         }
     }
     fn stage_npc_gold_buy_catalog(&self, value: &Value, catalog_packet:bool) -> Option<(NativeCommandStamp, u64)> {
@@ -696,6 +740,7 @@ impl NativeCommandFence {
     fn observe_npc_gold_buy_service(&self, signal: mir2_client_bevy::shop::NpcShopServiceSignal, delivered: bool) {
         if let Ok(mut state) = self.0.lock() {
             let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+            state.hunting_repair_source.observe_service(stamp,signal,delivered);
             let old = state.npc_gold_buy.shop.clone();
             if !delivered || !state.npc_gold_buy.shop.apply_service_signal(signal) {
                 state.npc_gold_buy.shop_ready = false;for waker in state.waiters.values(){waker.wake_by_ref();} return;
@@ -713,6 +758,8 @@ impl NativeCommandFence {
             current: NativeCommandStamp { run:run.unwrap_or(0),connection:1,procedure:1,owner_epoch:1,scene_epoch:1,cancellation:1,actor:None,map:None },
             connected:false,connection_entry_revision:None,retired:run.is_none(),next_sequence:Some(1),outstanding:HashMap::new(),
             entry_requested:false,entry_authorized:false,terminals:VecDeque::new(),waiters:HashMap::new(),mail_quote_delivery_failed:None,mail_send_flight:None,npc_gold_buy:Default::default(),npc_economy_gate:None,hero_owner_gate:None,npc_entry_pending:false,
+            hunting_repair_source:Default::default(),hunting_repair_mode:HuntingRepairMode::Unknown,
+            hunting_repair_busy:false,hunting_repair_gate:None,
         })))
     }
     pub(crate) fn stamp(&self) -> Option<NativeCommandStamp> {
@@ -755,6 +802,11 @@ impl NativeCommandFence {
             !state.retired && stamp==state.current
         } else { Self::matches(&state,stamp,scope) };
         if !valid { return Err(()); }
+        if matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::RepairItem{..}|NativeOutboundCommand::SpecialRepairItem{..}))
+            && (state.hunting_repair_mode!=HuntingRepairMode::Legacy||state.hunting_repair_busy){return Err(());}
+        if matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::Interact{..}|NativeOutboundCommand::SelectNpcDialog{..})) {
+            state.hunting_repair_source.retire();
+        }
 
         if matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::Login {..}
             | NativeOutboundCommand::NewAccount {..} | NativeOutboundCommand::StartGame {..})) {
@@ -806,12 +858,14 @@ impl NativeCommandFence {
     fn begin_connection(&self) -> Result<(),String> {
         let mut s=self.0.lock().map_err(|_|"ownership fence poisoned")?;
         if s.retired { return Err("command channel retired".into()); }
+        s.hunting_repair_mode=HuntingRepairMode::Unknown;
         s.connected=true;s.connection_entry_revision=Some(s.current.cancellation);Ok(())
     }
     fn socket_lost(&self) {
         if let Ok(mut s)=self.0.lock() {
             s.retire_npc_economy();
             for waker in s.waiters.values(){waker.wake_by_ref();}
+            s.hunting_repair_mode=HuntingRepairMode::Unknown;
             s.connected=false;s.connection_entry_revision=None;s.current.actor=None;s.current.map=None;s.entry_requested=false;s.entry_authorized=false;
             if let (Some(c),Some(o),Some(e),Some(p))=(s.current.connection.checked_add(1),s.current.owner_epoch.checked_add(1),s.current.scene_epoch.checked_add(1),s.current.procedure.checked_add(1)) {
                 s.current.connection=c;s.current.owner_epoch=o;s.current.scene_epoch=e;s.current.procedure=p;
@@ -1028,6 +1082,10 @@ where S:futures_util::Sink<Message>+Unpin, S::Error:std::fmt::Display {
                 || !state.npc_gold_buy.shop.goods.iter().any(|good|good.unique_id==*item_index&&!good.uses_gold_buy_plan()) {
                 drop(state);owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;
             }
+        }
+        if matches!(&owned.command,GatewayCommand::Wire(NativeOutboundCommand::RepairItem{..}|NativeOutboundCommand::SpecialRepairItem{..}))
+            && (state.hunting_repair_mode!=HuntingRepairMode::Legacy||state.hunting_repair_busy){
+            drop(state);owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;
         }
         if budget.expired(){drop(state);owned.fence.retire(owned);return NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into());}
         state.outstanding.remove(&owned.sequence);
@@ -1364,6 +1422,8 @@ fn is_storage_transaction(command: &GatewayCommand) -> bool {
 
 fn is_correlated_transaction(command: &GatewayCommand) -> bool {
     is_game_shop_transaction(command) || is_storage_transaction(command)
+        ||matches!(command.payload(),GatewayCommand::HuntingRepair(HuntingRepairCommand::Quote{..}
+            |HuntingRepairCommand::Confirm{..}|HuntingRepairCommand::Query{..}))
 }
 
 pub(crate) fn game_shop_request_from_wire(wire:&NativeOutboundCommand)->Option<GameShopRequest>{
@@ -3059,6 +3119,8 @@ where
     let mut retry_delay = None;
     // Permanent Actor ledgers outlive physical reconnect and UI entry.
     let mut npc_purchases = npc_purchase_gateway::NativeNpcPurchaseGateway::new()?;
+    let mut hunting_repairs = hunting_repair_gateway::NativeHuntingRepairGateway::new();
+    hunting_repairs.configure_wallet(base_url);
     loop {
         if let Some(delay) = retry_delay.take() {
             match wait_for_retry_or_leave_until(
@@ -3215,6 +3277,7 @@ where
 
         generation = generation.checked_add(1).ok_or_else(||"connection generation exhausted".to_owned())?;
         npc_purchases.open_connection()?;
+        hunting_repairs.open_connection();
         if let Some(fence)=&ownership {fence.begin_connection()?;}
         crate::timing::report(
             &format!("websocket_connected:generation{generation}"),
@@ -3334,9 +3397,10 @@ where
             &mut push_world_state,
             mail_stream,
             &mut npc_purchases,
+            &mut hunting_repairs,
         )
         .await;
-        npc_purchases.disconnect();
+        npc_purchases.disconnect();hunting_repairs.disconnect();
         if let Some(fence)=&ownership {fence.socket_lost();}
         match exit {
             Ok(ConnectedExit::Shutdown) => return Ok(()),
@@ -3461,7 +3525,7 @@ where
                 GatewayCommand::Shutdown => return Ok(false),
                 GatewayCommand::Wire(NativeOutboundCommand::LogOut)
                 | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => return Ok(false),
-                GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::Owned(_) => {}
+                GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::HuntingRepair(_) | GatewayCommand::Owned(_) => {}
             }
         }
         if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed before socket entry".into());}
@@ -3553,7 +3617,7 @@ where
                         | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
                             return Ok(RetryWait::Leave)
                         }
-                        GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::Owned(_) => {}
+                        GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::HuntingRepair(_) | GatewayCommand::Owned(_) => {}
                     }
                 }
                 if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed during recovery".into());}
@@ -4084,7 +4148,7 @@ fn awaiting_resume_command_action(command: &GatewayCommand) -> AwaitingResumeCom
         | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
             AwaitingResumeCommandAction::Cancel
         }
-        GatewayCommand::Connect | GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::Owned(_) => {
+        GatewayCommand::Connect | GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::HuntingRepair(_) | GatewayCommand::Owned(_) => {
             AwaitingResumeCommandAction::Ignore
         }
     }
@@ -4121,6 +4185,7 @@ async fn run_connected_gateway<R, F>(
     push_world_state: &mut F,
     mail_stream: NativeMailServiceStream,
     npc_purchases: &mut npc_purchase_gateway::NativeNpcPurchaseGateway,
+    hunting_repairs: &mut hunting_repair_gateway::NativeHuntingRepairGateway,
 ) -> Result<ConnectedExit, String>
 where
     R: CommandSource,
@@ -4195,25 +4260,28 @@ where
             _ = input_poll.tick() => {
                 if commands.ownership_fence().is_some_and(|fence|fence.is_retired()){return Ok(ConnectedExit::Shutdown);}
                 if let Some(fence) = commands.ownership_fence() {
-                    if let Some((dispatch,stamp)) = npc_purchases.begin_if_ready(Some(&fence),gameplay_adapter.last_full_producer_stamp,*phase,connection_bootstrap_sent,last_world_payload.as_ref().and_then(map_file_name))? {
-                        match npc_purchase_gateway::commit_control(&mut socket,&fence,stamp,dispatch).await {
-                            NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
-                            other => return Err(format!("Native purchase Begin control unavailable: {other:?}")),
-                        }
-                    }
-                    // This consumes only the Runtime's sealed completion after
-                    // every model and the entire owner source changed in World.
                     npc_purchases.drain_applied(&fence)?;
-                    if let Some((dispatch,stamp)) = npc_purchases.recovery_if_ready()? {
-                        match npc_purchase_gateway::commit_control(&mut socket,&fence,stamp,dispatch).await {
-                            NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
-                            other => return Err(format!("Native purchase Query control unavailable: {other:?}")),
+                    hunting_repairs.tick(&context,&fence,gameplay_adapter.last_full_producer_stamp,*phase,
+                        connection_bootstrap_sent,npc_purchases)?;
+                    hunting_repairs.poll_wallet().await;
+                    if !hunting_repairs.purchase_suspended()&&!hunting_repairs.blocks_purchase() {
+                        if let Some((dispatch,stamp)) = npc_purchases.begin_if_ready(Some(&fence),gameplay_adapter.last_full_producer_stamp,*phase,connection_bootstrap_sent,last_world_payload.as_ref().and_then(map_file_name))? {
+                            match npc_purchase_gateway::commit_control(&mut socket,&fence,stamp,dispatch).await {
+                                NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
+                                other => return Err(format!("Native purchase Begin control unavailable: {other:?}")),
+                            }
                         }
-                    }
-                    if let Some(outcome) = npc_purchases.purchase_if_ready(&mut socket).await {
-                        match outcome {
-                            NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
-                            other => return Err(format!("Native purchase entered sender unavailable: {other:?}")),
+                        if let Some((dispatch,stamp)) = npc_purchases.recovery_if_ready()? {
+                            match npc_purchase_gateway::commit_control(&mut socket,&fence,stamp,dispatch).await {
+                                NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
+                                other => return Err(format!("Native purchase Query control unavailable: {other:?}")),
+                            }
+                        }
+                        if let Some(outcome) = npc_purchases.purchase_if_ready(&mut socket).await {
+                            match outcome {
+                                NativeSinkCommit::Flushed | NativeSinkCommit::DefinitelyUnsent => {},
+                                other => return Err(format!("Native purchase entered sender unavailable: {other:?}")),
+                            }
                         }
                     }
                 }
@@ -4246,7 +4314,20 @@ where
                             AwaitingResumeCommandAction::Ignore => {retire_unsent_command(&enveloped_command);continue;},
                         }
                     }
+                    if matches!(&command,GatewayCommand::HuntingRepair(_)) {
+                        let Some(owned)=ownership_proof.as_ref() else{continue;};
+                        if let Some(dispatch)=hunting_repairs.prepare(owned,npc_purchases){
+                            match hunting_repairs.send(&mut socket,owned,dispatch).await{
+                                NativeSinkCommit::Flushed|NativeSinkCommit::DefinitelyUnsent=>{},
+                                _=>return Err("Native repair physical transport unavailable".into()),
+                            }
+                        }else{owned.fence.retire(owned);}
+                        continue;
+                    }
                     if matches!(&command, GatewayCommand::Wire(NativeOutboundCommand::BuyItem {..})) {
+                        if hunting_repairs.blocks_purchase(){retire_unsent_command(&enveloped_command);continue;}
+                        if hunting_repairs.purchase_suspended(){hunting_repairs.retire_idle_for_purchase(npc_purchases);}
+
                         // Every actual native NPC Buy gesture uses the durable
                         // lane. An unavailable/refused quote never falls back.
                         let Some(owned) = ownership_proof else { continue; };
@@ -4265,6 +4346,9 @@ where
                         | NativeOutboundCommand::NewAccount {..} | NativeOutboundCommand::StartGame {..}
                         | NativeOutboundCommand::LogOut | NativeOutboundCommand::Disconnect)) {
                         npc_purchases.leave_or_select();
+                        if matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::StartGame{..}|NativeOutboundCommand::LogOut)) {
+                            hunting_repairs.reset_entry();
+                        }else{hunting_repairs.clear_identity_and_leave();}
                     }
                     let explicit_leave = matches!(
                         &command,
@@ -4321,6 +4405,7 @@ where
                         GatewayCommand::Wire(command) => {
                             command.to_wire_json()
                         }
+                        GatewayCommand::HuntingRepair(_)=>unreachable!("typed repair is handled before ordinary serialization"),
                         GatewayCommand::Owned(_)=>unreachable!("only normalized queue payload reaches serialization"),
                     };
                     if trace_player_command
@@ -4379,6 +4464,15 @@ where
                             |text, gate| {
                                 // Owner frames bypass all ordinary number/date
                                 // decoders, packet cursors and movement overlays.
+                                if hunting_repairs.observe_connection(text,gameplay_adapter.command_fence.as_ref())? {
+                                    return Ok(InboundDisposition::Applied);
+                                }
+                                if hunting_repair_gateway::claims_owner_frame(text){
+                                    if *phase!=ConnectionPhase::Normal{return Ok(InboundDisposition::Quarantined);}
+                                    let Some(fence)=gameplay_adapter.command_fence.as_ref() else{return Ok(InboundDisposition::Quarantined);};
+                                    hunting_repairs.receive(text,fence)?;
+                                    return Ok(InboundDisposition::Applied);
+                                }
                                 if npc_purchase_gateway::claims_owner_frame(text) {
                                     if *phase != ConnectionPhase::Normal { return Ok(InboundDisposition::Quarantined); }
                                     let Some(fence) = gameplay_adapter.command_fence.as_ref() else { return Ok(InboundDisposition::Quarantined); };
@@ -4392,6 +4486,7 @@ where
                                     }
                                     return Ok(InboundDisposition::Applied);
                                 }
+                                hunting_repairs.before_ordinary_frame(text);
                                 npc_purchases.before_ordinary_frame(text);
                                 let disposition = handle_gateway_text_for_connection(
                                     text,
@@ -5081,8 +5176,17 @@ where
                 Some(payload.clone())
             } else {None};
             let npc_buy_raw_inventory=full_npc_gold_buy_inventory_snapshot(&payload);
+            let repair_raw_inventory=full_hunting_repair_inventory_snapshot(&payload)
+                && unique_hunting_repair_snapshot_json(text);
             let npc_buy_raw_catalog = if payload.get("nativeNpcShop").is_some() {
-                Some(serde_json::to_value(crate::npc_purchase_projection::project_shop(&payload)?).map_err(|error|error.to_string())?)
+                let mut shop=crate::npc_purchase_projection::project_shop(&payload)?;
+                if payload.get("nativeNpcShop").is_some_and(Value::is_null) {
+                    if let Some(signal)=gameplay_adapter.command_fence.as_ref()
+                        .and_then(|fence|fence.0.lock().ok().and_then(|state|state.hunting_repair_source.signal())) {
+                        shop.apply_service_signal(signal);
+                    }
+                }
+                Some(serde_json::to_value(shop).map_err(|error|error.to_string())?)
             } else { None };
             validate_quest_operation_ack(&payload)?;
             map_packet_cursor.trace_snapshot_identity(&payload);
@@ -5241,6 +5345,8 @@ where
             if let Some(fence)=&gameplay_adapter.command_fence{
                 let staged=if npc_buy_raw_inventory{fence.stage_npc_gold_buy_inventory(&inventory)}else{None};
                 fence.finish_npc_gold_buy_inventory(staged,npc_buy_raw_inventory&&inventory_ingest&&world_ingest==WorldSnapshotIngestOutcome::Applied&&owned_gameplay_snapshot.producer_models.is_some());
+                fence.finish_hunting_repair_inventory(&inventory,repair_raw_inventory,
+                    inventory_ingest&&world_ingest==WorldSnapshotIngestOutcome::Applied&&owned_gameplay_snapshot.producer_models.is_some());
                 if let Some((shop,delivered,complete))=npc_buy_shop_delivery{let staged=if complete {fence.stage_npc_gold_buy_complete_catalog(&shop)}else{fence.stage_npc_gold_buy_catalog(&shop,false)};fence.finish_npc_gold_buy_catalog(staged,delivered);}
             }
             // Legacy adapters preserve established fixture delivery; production never
@@ -7563,6 +7669,119 @@ mod ranking_projection_tests {
     }
 }
 
+
+/// Reject duplicate JSON members before Value's last-write-wins decoding can
+/// create a repair source. Ordinary packet/presentation decoding is unchanged.
+fn unique_hunting_repair_snapshot_json(raw: &str) -> bool {
+    struct Unique;
+    impl<'de> Deserialize<'de> for Unique {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            struct Visitor;
+            impl<'de> serde::de::Visitor<'de> for Visitor {
+                type Value = Unique;
+                fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { f.write_str("unique snapshot JSON") }
+                fn visit_bool<E: serde::de::Error>(self, _: bool) -> Result<Unique, E> { Ok(Unique) }
+                fn visit_i64<E: serde::de::Error>(self, _: i64) -> Result<Unique, E> { Ok(Unique) }
+                fn visit_u64<E: serde::de::Error>(self, _: u64) -> Result<Unique, E> { Ok(Unique) }
+                fn visit_f64<E: serde::de::Error>(self, _: f64) -> Result<Unique, E> { Ok(Unique) }
+                fn visit_str<E: serde::de::Error>(self, _: &str) -> Result<Unique, E> { Ok(Unique) }
+                fn visit_unit<E: serde::de::Error>(self) -> Result<Unique, E> { Ok(Unique) }
+                fn visit_seq<A: serde::de::SeqAccess<'de>>(self, mut seq: A) -> Result<Unique, A::Error> {
+                    while seq.next_element::<Unique>()?.is_some() {}
+                    Ok(Unique)
+                }
+                fn visit_map<A: serde::de::MapAccess<'de>>(self, mut map: A) -> Result<Unique, A::Error> {
+                    let mut keys = std::collections::HashSet::new();
+                    while let Some(key) = map.next_key::<String>()? {
+                        if !keys.insert(key) { return Err(serde::de::Error::custom("duplicate snapshot member")); }
+                        let _ = map.next_value::<Unique>()?;
+                    }
+                    Ok(Unique)
+                }
+            }
+            d.deserialize_any(Visitor)
+        }
+    }
+    serde_json::from_str::<Unique>(raw).is_ok()
+}
+
+fn hunting_repair_equipment_slot(value: &Value) -> Option<u64> {
+    if let Some(slot) = value.as_u64() { return (slot < 14).then_some(slot); }
+    Some(match value.as_str()? {
+        "weapon" => 0, "armour" => 1, "helmet" => 2, "torch" => 3, "necklace" => 4,
+        "braceletLeft" => 5, "braceletRight" => 6, "ringLeft" => 7, "ringRight" => 8,
+        "amulet" => 9, "belt" => 10, "boots" => 11, "stone" => 12, "mount" => 13,
+        _ => return None,
+    })
+}
+
+/// The public WorldItemSnapshot and EquipmentItemSnapshot are different DTOs:
+/// worn slots have names and their legacy outer UID may be absent. Preserve
+/// those absences; only the selected concrete Bag row can authorize a Quote.
+/// No tolerant mapper default establishes presence, identity or completeness.
+fn full_hunting_repair_inventory_snapshot(payload: &Value) -> bool {
+    use mir2_client_bevy::{hero_model::validate_owner_item_metadata, inventory::InventoryModel};
+    let Some(capacity) = payload.get("inventoryCapacity").and_then(Value::as_u64)
+        .and_then(|n| u16::try_from(n).ok()) else { return false; };
+    if InventoryModel::canonical_capacity(capacity) != capacity
+        || payload.get("gold").and_then(Value::as_u64).and_then(|n| u32::try_from(n).ok()).is_none() {
+        return false;
+    }
+    let Ok(projected) = serde_json::from_value::<InventoryModel>(transform_inventory_model(payload)) else { return false; };
+    let mut position = 0;
+    let mut slots = std::collections::HashSet::new();
+    let mut identities = std::collections::HashSet::new();
+    for name in ["inventoryItems", "beltItems", "equipmentItems"] {
+        let Some(rows) = payload.get(name).and_then(Value::as_array) else { return false; };
+        if rows.len() > 256 { return false; }
+        for raw in rows {
+            if !raw.is_object() { return false; }
+            let equipment = name == "equipmentItems";
+            let Some(count) = raw.get("quantity").and_then(Value::as_u64)
+                .and_then(|n| u32::try_from(n).ok()).filter(|n| *n > 0) else { return false; };
+            let uid = match raw.get("uniqueId") {
+                None | Some(Value::Null) if equipment => None,
+                Some(value) => match value.as_u64() { Some(id) => Some(id), None => return false },
+                _ => return false,
+            };
+            if uid.is_some_and(|id| !identities.insert(id)) { return false; }
+            let Some((container, slot)) = (if equipment {
+                raw.get("slot").and_then(hunting_repair_equipment_slot).map(|slot| (2, slot))
+            } else {
+                raw.get("slot").and_then(Value::as_u64).and_then(|slot| {
+                    match (name, raw.get("container").and_then(Value::as_str)) {
+                        ("beltItems", Some("belt")) if slot < 6 => Some((1, slot)),
+                        ("inventoryItems", Some("bag1")) if slot < 40 && slot < u64::from(capacity - 6) => Some((0, slot)),
+                        ("inventoryItems", Some("bag2")) if slot < 40 && slot + 40 < u64::from(capacity - 6) => Some((0, slot + 40)),
+                        ("inventoryItems", Some("quest")) if slot < 80 => Some((3, slot)),
+                        _ => None,
+                    }
+                })
+            }) else { return false; };
+            if !slots.insert((container, slot)) { return false; }
+            let Some(model) = projected.items.get(position) else { return false; };
+            position += 1;
+            if model.unique_id != uid || model.quantity != count || u64::from(model.container) != container
+                || u64::from(model.slot) != slot { return false; }
+            if !matches!(raw.get("grade").and_then(Value::as_str),
+                Some("none" | "common" | "rare" | "legendary" | "mythical" | "heroic")) { return false; }
+            if raw.get("equipSlot").filter(|v| !v.is_null()).is_some_and(|value|
+                value.as_str().is_none() || hunting_repair_equipment_slot(value).is_none()) { return false; }
+            if equipment && ["sealedExpiryTimeBinaryDatetime", "sealedNextTimeBinaryDatetime"].iter()
+                .any(|key| raw.get(*key).and_then(Value::as_i64).is_none()) { return false; }
+            // Optional tooltip/user/realInfo absences remain absent. Present
+            // carriers must include every Info/UserItem field, recursively.
+            let mut metadata = raw.clone();
+            if metadata.get("tooltipSource").is_some_and(Value::is_null) {
+                metadata.as_object_mut().unwrap().remove("tooltipSource");
+            }
+            if metadata.get("tooltipSource").is_some_and(|source|
+                ["socketInfos", "realSocketInfos"].iter().any(|key| !source.get(*key).is_some_and(Value::is_array)))
+                || validate_owner_item_metadata(&metadata, model, equipment, false).is_err() { return false; }
+        }
+    }
+    position == projected.items.len()
+}
 
 fn full_npc_gold_buy_inventory_snapshot(payload:&Value)->bool {
     use mir2_client_bevy::inventory::InventoryModel;

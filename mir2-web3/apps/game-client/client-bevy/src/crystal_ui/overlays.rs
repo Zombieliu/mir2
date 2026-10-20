@@ -41,6 +41,7 @@ use crate::game_shop::{
     GAME_SHOP_QUANTITY_MIN,
 };
 use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
+use crate::hunting_repair::{HuntingRepairInput, HuntingRepairMode, HuntingRepairModel, HuntingRepairPhase, HuntingRepairUi};
 use crate::mail::{
     mail_claim_enabled, mail_date_label, mail_delete_enabled, MailAttachment, MailMessage,
     MailModel, MailOperationKind, MailPageCursor, MAX_MAIL_ATTACHMENTS,
@@ -699,8 +700,35 @@ fn queue_group_invite_by_name(
     true
 }
 
+/// Local UI retirement only. It cannot authorize a server operation. Existing
+/// explicit NPC exits use a shared handle so a queued service handoff cannot
+/// survive them, even when that exit and its snapshot straddle UI updates.
+#[derive(Debug, Clone, Default)]
+struct NpcServiceUiEpoch(Option<std::sync::Arc<std::sync::atomic::AtomicU64>>);
+impl PartialEq for NpcServiceUiEpoch {
+    fn eq(&self, other: &Self) -> bool { self.value() == other.value() }
+}
+impl NpcServiceUiEpoch {
+    fn value(&self) -> Option<u64> {
+        self.0.as_ref().map(|value| value.load(std::sync::atomic::Ordering::SeqCst))
+    }
+    fn retire(&self) {
+        let Some(epoch) = &self.0 else { return; };
+        let _ = epoch.fetch_update(std::sync::atomic::Ordering::SeqCst,
+            std::sync::atomic::Ordering::SeqCst,
+            |value| (value != 0).then(|| value.checked_add(1).unwrap_or(0)));
+    }
+    fn capture(&mut self) -> Option<(std::sync::Arc<std::sync::atomic::AtomicU64>, u64)> {
+        let epoch = self.0.get_or_insert_with(|| std::sync::Arc::new(std::sync::atomic::AtomicU64::new(1)));
+        let value = epoch.load(std::sync::atomic::Ordering::SeqCst);
+        (value != 0).then(|| (epoch.clone(), value))
+    }
+}
+
 #[derive(Debug, Clone, Resource, PartialEq)]
 pub struct NativePlayerUiState {
+    pub(crate) hunting_repair_ui: HuntingRepairUi,
+    npc_service_takeover_epoch: NpcServiceUiEpoch,
     pub mail_draft_clock: MailDraftClock,
     /// A shared revocation handle; the attempt slot remains owned by the queue.
     pub(crate) npc_gold_buy_gate: Option<crate::npc_gold_buy_attempt::NpcGoldBuyGate>,
@@ -1323,6 +1351,8 @@ impl Eq for NativePlayerUiState {}
 impl Default for NativePlayerUiState {
     fn default() -> Self {
         Self {
+            hunting_repair_ui: HuntingRepairUi::default(),
+            npc_service_takeover_epoch: NpcServiceUiEpoch::default(),
             mail_draft_clock: MailDraftClock::default(),
             npc_gold_buy_gate: None,
             core: mir2_ui_core::state::UiState {
@@ -1429,6 +1459,7 @@ impl NativePlayerUiState {
         self.npc_gold_buy_gate = Some(gate);
     }
     pub(crate) fn withdraw_bound_npc_gold_buy(&self) {
+        self.npc_service_takeover_epoch.retire();
         if let Some(gate) = &self.npc_gold_buy_gate { gate.withdraw(); }
     }
     fn withdraw_npc_gold_buy_before_panel(&self, next: &mir2_ui_core::state::UiState) {
@@ -2416,6 +2447,10 @@ pub enum NativePlayerUiIntent {
     SRepairItem {
         unique_id: u64,
     },
+    HuntingRepairQuote { unique_id: u64, special: bool },
+    HuntingRepairConfirm { quote_id: String },
+    HuntingRepairQuery { quote_id: String },
+    HuntingRepairClose,
     // Storage
     StoreItem {
         request_id: String,
@@ -2509,6 +2544,8 @@ impl NativePlayerUiIntent {
             | Self::MailCost { .. }
             | Self::MailLockItem { .. }
             | Self::NpcGoldBuy { .. } => None,
+            Self::HuntingRepairQuote { .. } | Self::HuntingRepairConfirm { .. }
+            | Self::HuntingRepairQuery { .. } | Self::HuntingRepairClose => None,
             Self::ClaimMail { mail_id } => Some(PendingOperationKey::ClaimMail(*mail_id)),
             Self::SendMail {
                 recipient,
@@ -2812,6 +2849,10 @@ impl NativePlayerUiIntentQueue {
             NativePlayerUiIntent::ReadMail { .. }
                 | NativePlayerUiIntent::DeleteMail { .. }
                 | NativePlayerUiIntent::LockMail { .. }
+                | NativePlayerUiIntent::HuntingRepairQuote { .. }
+                | NativePlayerUiIntent::HuntingRepairConfirm { .. }
+                | NativePlayerUiIntent::HuntingRepairQuery { .. }
+                | NativePlayerUiIntent::HuntingRepairClose
         )
             && (self.intents.len() >= MAX_QUEUED || self.intents.iter().any(|queued| queued == &intent))
         {
@@ -2837,6 +2878,10 @@ impl NativePlayerUiIntentQueue {
                     | NativePlayerUiIntent::HeroPacket(_)
                     | NativePlayerUiIntent::EquipmentCreaturePacket(_)
                     | NativePlayerUiIntent::GameShopBuy { .. }
+                    | NativePlayerUiIntent::HuntingRepairQuote { .. }
+                    | NativePlayerUiIntent::HuntingRepairConfirm { .. }
+                    | NativePlayerUiIntent::HuntingRepairQuery { .. }
+                    | NativePlayerUiIntent::HuntingRepairClose
                     | NativePlayerUiIntent::GetRanking { .. }
                     | NativePlayerUiIntent::InspectRanking { .. }
                     | NativePlayerUiIntent::AddFriend { .. }
@@ -2855,6 +2900,10 @@ impl NativePlayerUiIntentQueue {
                         | NativePlayerUiIntent::HeroPacket(_)
                         | NativePlayerUiIntent::EquipmentCreaturePacket(_)
                         | NativePlayerUiIntent::GameShopBuy { .. }
+                        | NativePlayerUiIntent::HuntingRepairQuote { .. }
+                        | NativePlayerUiIntent::HuntingRepairConfirm { .. }
+                        | NativePlayerUiIntent::HuntingRepairQuery { .. }
+                        | NativePlayerUiIntent::HuntingRepairClose
                         | NativePlayerUiIntent::GetRanking { .. }
                         | NativePlayerUiIntent::InspectRanking { .. }
                         | NativePlayerUiIntent::AddFriend { .. }
@@ -3540,6 +3589,8 @@ enum OverlayButton {
     ShopToggleHold,
     ShopRepair,
     ShopSRepair,
+    HuntingRepairQuery,
+    HuntingRepairClose,
     ShopQuantityInc,
     ShopQuantityDec,
     ShopPageUp,
@@ -3918,6 +3969,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<NativeShellModel>()
             .init_resource::<NativeUiIntentQueue>()
             .init_resource::<ShopModel>()
+            .init_resource::<HuntingRepairModel>()
             .init_resource::<GameShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<crate::storage::StorageUiFeedback>()
@@ -3977,6 +4029,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .add_systems(
                 Update,
                 (
+                    npc_item_service::sync_hunting_model,
                     sync_big_map_ui,
                     sync_local_panel_models,
                     sync_npc_dialog_inventory_location,
@@ -6814,45 +6867,23 @@ fn submit_storage_password_prompt(
     true
 }
 
-/// Crystal's NPCDialog.Show moves InventoryDialog beside its 440px frame and
-/// NPCDialog.Hide restores the origin. Track the authoritative dialogue, not
-/// the narrower NPCDrop service panel, so closing a service tab cannot move a
-/// bag while its parent dialogue remains open.
-fn sync_npc_dialog_inventory_location(
-    mut state: ResMut<NativePlayerUiState>,
-    npc_dialog: Option<Res<NpcDialogModel>>,
-    mut shop: Option<ResMut<ShopModel>>,
-    intents: Option<Res<NativePlayerUiIntentQueue>>,
-    mut was_open: Local<bool>,
-) {
-    if let Some(intents) = intents { state.bind_npc_gold_buy_gate(intents.npc_gold_buy_gate()); }
-    let is_open = npc_dialog.is_some_and(|dialog| dialog.is_open);
-    if !is_open { state.withdraw_bound_npc_gold_buy(); }
-    if is_open == *was_open {
-        return;
-    }
-    let was_npc_shop_open = state.npc_shop_open();
-    *was_open = is_open;
-    state.inventory_window.end_drag();
-    state.inventory_window.clear_cursor();
-    state.inventory_item_drag = None;
-    state.inventory_item_pointer_consumed = false;
-    if is_open {
-        state.inventory_window.left = 445.0;
-        state.inventory_window.top = 0.0;
-        return;
-    }
+#[derive(Default)]
+struct NpcDialogSurfaceLifetime {
+    was_open: bool,
+    owner: Option<u32>,
+    reset_revision: Option<u64>,
+    takeover: Option<NpcDialogServiceTakeover>,
+}
+struct NpcDialogServiceTakeover {
+    owner: u32,
+    mode: NpcShopServiceMode,
+    epoch: std::sync::Arc<std::sync::atomic::AtomicU64>,
+    revision: u64,
+}
 
-    state.inventory_window.left = INVENTORY_PANEL_ORIGIN.x as f32;
-    state.inventory_window.top = INVENTORY_PANEL_ORIGIN.y as f32;
-    if !was_npc_shop_open {
-        return;
-    }
-
-    // NPCDialog.Hide closes its child NPCGoods/NPCDrop panels. Its ordinary
-    // InventoryDialog stays visible unless the user had explicitly hidden it.
-    let keep_inventory_open = !state.npc_inventory_hidden;
-    state.core.panel = if keep_inventory_open {
+fn close_npc_service_children(state: &mut NativePlayerUiState, shop: Option<&mut ShopModel>) {
+    // Ordinary Inventory stays visible unless the player explicitly hid it.
+    state.core.panel = if !state.npc_inventory_hidden {
         mir2_ui_core::state::UiPanel::Inventory
     } else {
         mir2_ui_core::state::UiPanel::None
@@ -6865,12 +6896,86 @@ fn sync_npc_dialog_inventory_location(
     state.npc_service_notice_mode = None;
     state.shop_repair_container = 0;
     state.shop_repair_slot = None;
-    if let Some(shop) = shop.as_deref_mut() {
+    if let Some(shop) = shop {
         shop.selected_id = None;
         shop.selected_bag_slot_for_sell = None;
         shop.selected_bag_slot_for_repair = None;
         let _ = shop.apply_service_signal(NpcShopServiceSignal::default());
     }
+}
+
+/// Crystal's NPCDialog.Show moves InventoryDialog beside its 440px frame and
+/// NPCDialog.Hide restores the origin. Track the authoritative dialogue, not
+/// the narrower NPCDrop service panel, so closing a service tab cannot move a
+/// bag while its parent dialogue remains open.
+fn sync_npc_dialog_inventory_location(
+    mut state: ResMut<NativePlayerUiState>,
+    npc_dialog: Option<Res<NpcDialogModel>>,
+    mut shop: Option<ResMut<ShopModel>>,
+    intents: Option<Res<NativePlayerUiIntentQueue>>,
+    surface_signals: Option<Res<crate::read_model::UiSurfaceSignals>>,
+    reset: Option<Res<SessionResetRevision>>,
+    mut lifetime: Local<NpcDialogSurfaceLifetime>,
+) {
+    if let Some(intents) = intents { state.bind_npc_gold_buy_gate(intents.npc_gold_buy_gate()); }
+    let reset_revision = reset.as_deref().map(|reset| reset.0);
+    if lifetime.reset_revision != reset_revision {
+        *lifetime = NpcDialogSurfaceLifetime { reset_revision, ..Default::default() };
+    }
+    let is_open = npc_dialog.as_deref().is_some_and(|dialog| dialog.is_open);
+    let owner = npc_dialog.as_deref().filter(|dialog| dialog.is_open).and_then(|dialog| dialog.npc_object_id);
+    let new_parent = is_open && (!lifetime.was_open || owner != lifetime.owner);
+    if new_parent {
+        lifetime.takeover = None;
+        state.withdraw_bound_npc_gold_buy();
+        if state.npc_shop_open() {
+            close_npc_service_children(&mut state, shop.as_deref_mut());
+        }
+    }
+    // This one-shot comes only from actual NPC service delivery and is read
+    // before keyboard consumes it. It is independent of hunting mode/phase.
+    if surface_signals.as_deref().is_some_and(|signals| signals.npc_shop_open_requested) {
+        let service = shop.as_deref().filter(|shop| shop.allows_repair() || shop.allows_special_repair());
+        if let (Some(owner), Some(service)) = (owner.or(lifetime.owner), service) {
+            if let Some((epoch, revision)) = state.npc_service_takeover_epoch.capture() {
+                lifetime.takeover = Some(NpcDialogServiceTakeover { owner,
+                    mode: service.service_mode, epoch, revision });
+            }
+        }
+    }
+    let takeover = !is_open && lifetime.was_open && lifetime.takeover.take().is_some_and(|proof| {
+        lifetime.owner == Some(proof.owner)
+            && state.npc_service_takeover_epoch.0.as_ref().is_some_and(|epoch|
+                std::sync::Arc::ptr_eq(epoch, &proof.epoch)
+                    && epoch.load(std::sync::atomic::Ordering::SeqCst) == proof.revision)
+            && shop.as_deref().is_some_and(|shop| shop.service_mode == proof.mode)
+    });
+    if !is_open { state.withdraw_bound_npc_gold_buy(); }
+    if is_open == lifetime.was_open && !new_parent {
+        return;
+    }
+    let was_npc_shop_open = state.npc_shop_open();
+    lifetime.was_open = is_open;
+    lifetime.owner = owner;
+    state.inventory_window.end_drag();
+    state.inventory_window.clear_cursor();
+    state.inventory_item_drag = None;
+    state.inventory_item_pointer_consumed = false;
+    if is_open || takeover {
+        state.inventory_window.left = 445.0;
+        state.inventory_window.top = 0.0;
+        return;
+    }
+
+    state.inventory_window.left = INVENTORY_PANEL_ORIGIN.x as f32;
+    state.inventory_window.top = INVENTORY_PANEL_ORIGIN.y as f32;
+    if !was_npc_shop_open {
+        return;
+    }
+
+    // An ordinary close still withdraws every child. Only the exact one-shot
+    // service handoff above survives the server replacing its text dialogue.
+    close_npc_service_children(&mut state, shop.as_deref_mut());
 }
 
 pub(crate) fn process_overlay_keyboard(
@@ -7900,6 +8005,7 @@ pub(crate) fn process_overlay_keyboard(
     }
     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Closeall") {
         if state.core.panel != mir2_ui_core::state::UiPanel::None
+            || state.hunting_repair_ui.recovery_visible()
             || state.inspect.is_some()
             || state.help_open()
             || state.equipment_dialogs.mount_open
@@ -7918,6 +8024,7 @@ pub(crate) fn process_overlay_keyboard(
                 &mut intents,
                 time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64),
             );
+            npc_item_service::close_hunting_repair(&mut state, &mut intents);
             let trade = std::mem::take(&mut state.trade_dialog);
             state.close_all_windows();
             state.trade_dialog = trade;
@@ -8475,6 +8582,7 @@ fn process_overlay_buttons(
                     &mut intents,
                     time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64),
                 );
+                npc_item_service::close_hunting_repair(&mut state, &mut intents);
                 state.close_windows();
                 state.shop_quantity = 1;
                 if let Some(skill_binding) = skill_binding.as_deref_mut() {
@@ -8561,6 +8669,7 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::CloseShop => {
+                npc_item_service::close_hunting_repair(&mut state, &mut intents);
                 intents.withdraw_npc_gold_buy();
                 if state.npc_shop_open() {
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
@@ -8659,6 +8768,9 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::ToggleNpcShop => {
+                if state.npc_shop_open() {
+                    npc_item_service::close_hunting_repair(&mut state, &mut intents);
+                }
                 state.toggle_npc_shop();
             }
             OverlayButton::ToggleStorage => {
@@ -10145,7 +10257,9 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::ShopToggleHold => {
-                if state.npc_shop_open() && npc_item_service::service_action(&shop).is_some() {
+                if state.npc_shop_open() && npc_item_service::service_action(&shop).is_some()
+                    && (!(shop.allows_repair() || shop.allows_special_repair())
+                        || state.hunting_repair_ui.model.mode == HuntingRepairMode::Legacy) {
                     state.npc_service_hold = if state.npc_service_hold == Some(shop.service_mode) {
                         None
                     } else {
@@ -10232,6 +10346,7 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::ShopCancel => {
+                npc_item_service::close_hunting_repair(&mut state, &mut intents);
                 intents.withdraw_npc_gold_buy();
                 if state.npc_shop_open() {
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
@@ -10260,16 +10375,33 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::SelectBagForRepair(slot) => {
-                if state.npc_shop_open() && (shop.allows_repair() || shop.allows_special_repair()) {
+                if state.npc_shop_open() && (shop.allows_repair() || shop.allows_special_repair())
+                    && (state.hunting_repair_ui.model.mode == HuntingRepairMode::Legacy
+                        || state.hunting_repair_ui.can_quote()) {
                     shop.selected_bag_slot_for_repair = Some(slot);
                     state.shop_service_drag_count = None;
                     state.shop_service_drag_unique_id = None;
                     state.shop_repair_container = 0;
                     state.shop_repair_slot = Some(slot);
-                    if state.npc_service_hold == Some(shop.service_mode) {
+                    if state.hunting_repair_ui.model.mode == HuntingRepairMode::HuntingV1 {
+                        npc_item_service::request_hunting_quote(&shop, &inventory, &mut state, &mut intents);
+                    } else if state.npc_service_hold == Some(shop.service_mode) {
                         npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
                     }
                 }
+            }
+            OverlayButton::HuntingRepairQuery => {
+                npc_item_service::query_hunting_repair(&mut state, &mut intents);
+            }
+            OverlayButton::HuntingRepairClose => {
+                npc_item_service::close_hunting_repair(&mut state, &mut intents);
+                state.core.panel = mir2_ui_core::state::UiPanel::None;
+                state.shop_service_drag_count = None;
+                state.shop_service_drag_unique_id = None;
+                state.npc_service_hold = None;
+                state.shop_repair_container = 0;
+                state.shop_repair_slot = None;
+                let _ = shop.apply_service_signal(NpcShopServiceSignal::default());
             }
             // Storage
             OverlayButton::SelectBagForStore(slot) => {
@@ -11593,7 +11725,7 @@ fn render_overlays(
         fill_panel(
             &mut commands,
             &mut secondary.p2(),
-            state.npc_shop_open(),
+            state.npc_shop_open() || state.hunting_repair_ui.recovery_visible(),
             |parent| {
                 render_shop(
                     parent,
@@ -15198,6 +15330,10 @@ fn render_shop(
     player: &crate::read_model::PlayerStats,
     attempt:crate::npc_gold_buy_attempt::NpcGoldBuyFeedback,
 ) {
+    if state.hunting_repair_ui.recovery_visible() {
+        npc_item_service::render(parent, asset_server, shop, inventory, state);
+        return;
+    }
     let show_buy = shop.allows_buy() && (!shop.allows_sell() || state.npc_shop_buy_tab);
     if !show_buy {
         npc_item_service::render(parent, asset_server, shop, inventory, state);
@@ -17251,6 +17387,13 @@ mod tests {
     }
 
     pub(super) fn init_overlay_button_test_resources(app: &mut App) {
+        // These existing fixtures describe the legacy realm explicitly. The
+        // production resource and UI defaults remain Unknown until handshake.
+        if let Some(mut state) = app.world_mut().get_resource_mut::<NativePlayerUiState>() {
+            state.hunting_repair_ui.observe(&HuntingRepairModel {
+                mode: HuntingRepairMode::Legacy, ..Default::default()
+            });
+        }
         let test_name = std::thread::current()
             .name()
             .unwrap_or("unnamed")
@@ -17311,6 +17454,9 @@ mod tests {
             })
             .add_systems(Startup, spawn_overlay_root)
             .add_systems(Update, (sync_mail_letter_editor, render_overlays).chain());
+        app.world_mut().resource_mut::<NativePlayerUiState>().hunting_repair_ui.observe(&HuntingRepairModel {
+            mode: HuntingRepairMode::Legacy, ..Default::default()
+        });
         app
     }
 

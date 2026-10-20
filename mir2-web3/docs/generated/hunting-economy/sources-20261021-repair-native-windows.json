@@ -1,0 +1,4731 @@
+{
+  "kind": "Rust source and Cargo manifests/locks; not a complete external asset or compiler closure",
+  "recordedAt": "2026-10-20T19:02:55.719Z",
+  "inputs": [
+    {
+      "path": "apps/game-client/client-bevy/Cargo.lock",
+      "bytes": 128362,
+      "sha256": "95b91663273ad093562ae53ef36cc36babf8d22b7f971a5dfcc14eb7e0a1fd37"
+    },
+    {
+      "path": "apps/game-client/client-bevy/Cargo.toml",
+      "bytes": 1485,
+      "sha256": "b7ac37faa72c3355fab43d12100386deade12dab932d31221ee8f603cbe83670"
+    },
+    {
+      "path": "apps/game-client/client-bevy/examples/font_atlas_probe.rs",
+      "bytes": 16014,
+      "sha256": "0eb9daa9f3978069bd271fa3d7ca2b1dae17886f484a58cf8998ce569662a5b5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/audio.rs",
+      "bytes": 57245,
+      "sha256": "cea873b2df5aa520972b669e0400c8189c0ec893f371b089526b219fd90078b1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/bag_ui.rs",
+      "bytes": 13164,
+      "sha256": "99c97d001c410a2d2c29f760b9268377fddc486bafb3f630e7a017be4d0efae6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/big_map.rs",
+      "bytes": 46169,
+      "sha256": "0a1f91a1ef552b996445495cd19f16ebd33a72e4a306ff404b2fe419bca2ee97"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/big_map_geometry.rs",
+      "bytes": 4157,
+      "sha256": "e34f4900608a157441ff9ba3760c689fa617a42e8e10007c0e37876598afe2dc"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/character.rs",
+      "bytes": 3525,
+      "sha256": "a88338e21f6f26c59f5f91c5501eda3a7740d646159f221745b9ab74d241fb50"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/chat.rs",
+      "bytes": 9148,
+      "sha256": "42cad272298ee37a5605c0d582bc299317762e76ce9d6e40c98f39029d58dc7f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/chat_settings_effects.rs",
+      "bytes": 10554,
+      "sha256": "04357156a342fef53328b49e72e18c860c64f400f8ba498fabc77d5ad6f4ad8b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/combat_input.rs",
+      "bytes": 38414,
+      "sha256": "5a4bf89f4e5ae86af2b6b311d33e9c3ab7b993de1864c1cbabdb00cc65339742"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/combat_input_tests.rs",
+      "bytes": 28587,
+      "sha256": "dd215f108653287a7293f285989b5eb9c8dbbf2abba6ef4957b4ebed1059de25"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/amount_input.rs",
+      "bytes": 4167,
+      "sha256": "2446d51f4340280ed7c7534290b230b2de7a71a7ea33ac185cb6693a78f03172"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/assets.rs",
+      "bytes": 5081,
+      "sha256": "dce72c5010735d60c531250bb3f20534b26651ea2a4698d94187b7105fcf8b64"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/bag_paint.rs",
+      "bytes": 25839,
+      "sha256": "614bed97e501d5bb2c0e0ffce762353f3574d250380679f3e364cdfb22d04bc7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates.rs",
+      "bytes": 5558,
+      "sha256": "09452c2c893731518a40cdf10e3f2e2877602c3061af6075e5385561736a65be"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates_tests.rs",
+      "bytes": 12593,
+      "sha256": "1b71977b7c33c5b3ba5e969f21413cd3cc929e4c9608872db33d60b03e8b9eaf"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/change_password.rs",
+      "bytes": 6471,
+      "sha256": "4afdf9690f0a989b5be41d7597320511ec5a84435e9dec9ae2621120a232d3bf"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_materials.rs",
+      "bytes": 3399,
+      "sha256": "67f377a018cf795c5e9051d7ffd155d3d3b5a1e2d03700cf39c47b861b7a3f91"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_page.rs",
+      "bytes": 10327,
+      "sha256": "295eeb5b95da2a4c2f39a577072097d5c238a4ac5e0de2e933b47ee6d004aaf2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_page_tests.rs",
+      "bytes": 3723,
+      "sha256": "70fa9085774fdd40dc1fca51021680f208f57200d471fa3292d30373a99ed5f0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_stats.rs",
+      "bytes": 8611,
+      "sha256": "8563b962df0f9f8d6b2f4c4a44e68d7bfe8b6f9204d722b24f6f6e80fdb59ddf"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_stats_portable.rs",
+      "bytes": 10337,
+      "sha256": "61d320eb6f47abf321577488bd7cccc45bc36c332a5aa6b6c1747d04a003d469"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "bytes": 94152,
+      "sha256": "80fdc60f05983c41fb1e1e340046df463e1e58717464455d3b4cb4dc3e4f8efe"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/combat_mode_keys.rs",
+      "bytes": 4945,
+      "sha256": "c515029e2757eb4293a5e803b548f4205c842faf31c7d5882ff8c124a439560f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+      "bytes": 17156,
+      "sha256": "e5ebfda4f3e01fd414f1736bf19225f1ab4b994678150f418adbd8e6e37a7e86"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog_render.rs",
+      "bytes": 25025,
+      "sha256": "d6795e47484c7bfa668d756a3fb63a8ef9e84dc19e8d3a1b34fb6e36fdd360b6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog_tests.rs",
+      "bytes": 6764,
+      "sha256": "27583b21b786a7ee8f85ee1a3161bb894e4f109456c1d2d82a898771029cec38"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs",
+      "bytes": 25057,
+      "sha256": "94a905bb9bfd24f08d97c1bd56a0a36313f83deffdcc01c4054176f42b3feed1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_storage_tests.rs",
+      "bytes": 12155,
+      "sha256": "2773bad1d7339aa8f49549825e66d45738805a9a3c4f33cd62e0bb64382116b1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog.rs",
+      "bytes": 12416,
+      "sha256": "bf753efa55761572605605455bedb596586a45a70b0ada920827874127eb81ec"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_host.rs",
+      "bytes": 26742,
+      "sha256": "33c4a62263ff7c5226e87e913536c77fb9d03d0bf2a9e342eebcef9999e8d46a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_render.rs",
+      "bytes": 16881,
+      "sha256": "91578626cfb4cbc4aebee51dfa849285228241c09d1348b09172640a20dbc6e3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_tests.rs",
+      "bytes": 5785,
+      "sha256": "079c90665f29881c932261d569f23daef7e96654473a818178fa2843fb34d015"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_text_editor.rs",
+      "bytes": 10750,
+      "sha256": "d883fb09df661f9ab197f6c444821d6ed5df88bd5be4e1530a4a69685dbfb28d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_text_editor_tests.rs",
+      "bytes": 4710,
+      "sha256": "c8d037635dab159243428f95b1f6a5e7fc5b3d50e5d8443cc751ef80f0101c0d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 70625,
+      "sha256": "bdd14dc28248e7a13db318118ec4e91829d8efe137a1e1e9aeb70d7fc6154e53"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/group_dialog.rs",
+      "bytes": 20025,
+      "sha256": "b1f4e80020ff83ae59a24e658d3feda21ae8f52047a0f92f3f04251946f0e09f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog.rs",
+      "bytes": 7599,
+      "sha256": "99525afbafb8affd057dc9752763386f7238895a0839de4f3ae6ed3bf8911a65"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog_tests.rs",
+      "bytes": 5742,
+      "sha256": "94198f0805ef0d67155ec489fc7aa7488987cfb9f730226b29fcfa2350d77e98"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "bytes": 43136,
+      "sha256": "8006975f4046a9c0e6753dbfaf98cb6d4c85dda8ffbd219c31d837d94c61a648"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+      "bytes": 12243,
+      "sha256": "2b9b27155a33db4e8058fa2e0b94d8caa5dadc815357ff9af9fc02cd5f3ec6a4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage_tests.rs",
+      "bytes": 41551,
+      "sha256": "b76c722fa58f4bedf0cd57cb46bd09a1d6665686e8790bb5210617c6c8e4edce"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_assign_dialog.rs",
+      "bytes": 9046,
+      "sha256": "b4935dc36d12f48b563457149db579c668fde070e84e262c204b05556ea401d6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud.rs",
+      "bytes": 9944,
+      "sha256": "1bc4ad1314ccfecc06cce93142391d05d1449713020bcb37ec4e071b54361606"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud_tests.rs",
+      "bytes": 3994,
+      "sha256": "501b39d47e14d8bad22f9442889a94e0b4ccb30f16930573b3af42683b367a66"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory.rs",
+      "bytes": 10687,
+      "sha256": "36527219a325a0fe905645ea390e77fcde15e7536292427f9ede55e8b59ab150"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory_tests.rs",
+      "bytes": 8158,
+      "sha256": "2b0634dcd27a4a428fc250138a12c1d69b94a7a03a26638dfc76dc8a42339117"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog.rs",
+      "bytes": 17231,
+      "sha256": "9adee0b49a98086d11eefa8010938d15697887e28cee9369de0a54d97ca5837c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_geometry.rs",
+      "bytes": 9172,
+      "sha256": "0eeb23f49e11e47a6150b05c90c04132f5207ec6eb3aa19beb1f23bad51c4062"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_host.rs",
+      "bytes": 27219,
+      "sha256": "ca026fc5ed7d7492e0a0450eb4a3d0010f68dccfbf9a5e01ca8146de93f6e95b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs",
+      "bytes": 42657,
+      "sha256": "1d0699f042bfc45f860f689e739b9ca15f68f814811a5dfe0c3c1103d6ddf1a4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_item_use.rs",
+      "bytes": 7101,
+      "sha256": "8106efb7e39f1589d31e4c59387570964b46a5eab644f1a1a05a4178ecc2bb05"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_item_use_tests.rs",
+      "bytes": 4446,
+      "sha256": "466ed3dfa5176a5cda58dfa3fc7fad9f7da5a5f4ca2444eb311f9a9f82c92117"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_pointer_settings.rs",
+      "bytes": 340,
+      "sha256": "c1ff409f274b58ab5c80b93a5772f2f14fbd47cc83ef4770be9cb9d77193b3db"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "bytes": 78404,
+      "sha256": "3aa487fb039aed74faa0493aceab20dbf64538aab821b131617cc07fbe739b87"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_bar.rs",
+      "bytes": 1288,
+      "sha256": "18850cad9b755d21a8805f3bde1c19938031053c1329795f6229cad6ba36a3c3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_item_image_tests.rs",
+      "bytes": 6725,
+      "sha256": "be8f0f978d6d33f95ab1c7c98e0223d04047c488d0a7e565766daa5843f26293"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_orb.rs",
+      "bytes": 8631,
+      "sha256": "a1a05bede2bbffc408be649bd8b6ab7ab90cca3864b0cadca12c927142078703"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_portable.rs",
+      "bytes": 6932,
+      "sha256": "dd91221007d2c164952a99b8d2efdedb96d69ce1c4802d6dc47f46ee7f1190d2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hunting_repair_ui_tests.rs",
+      "bytes": 17657,
+      "sha256": "e6116df19f0d0af5e0a1344aed8580695c4aa1905121122d19202f5a4d1bd1eb"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "bytes": 12504,
+      "sha256": "94cae1b21759625a15efb0d0005787b7ae6ee036a0d09958233b68b256b04749"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/item_tooltip.rs",
+      "bytes": 14498,
+      "sha256": "1a06feb416dd1b8c11ba763b2faf97f7473dbb48865e1718afed3bd9f4d63efe"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog.rs",
+      "bytes": 14280,
+      "sha256": "b1dc4b27efa32781eb47f0436691cac2824959038e01ee5923195cad9909c153"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_host.rs",
+      "bytes": 31577,
+      "sha256": "f75db61c01d6f0a72589790837d9cba032022d5b1865331389c3ca68257e8526"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_render.rs",
+      "bytes": 9568,
+      "sha256": "1b5765a0bdd88daf91bf310aa22b984d21f0cdf4cf5425cdb42170598c1d651b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_tests.rs",
+      "bytes": 7576,
+      "sha256": "e950baa73a673b6da4f1944f3dbe8353d8d7a5262be4c4833fd856261ae0acdd"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/leave_game_dialog.rs",
+      "bytes": 6479,
+      "sha256": "7e1d2d74ed1e53dc4636f125cff77ea908a7a76f28957feb2b5fe1d2ae41cead"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/leave_game_input_tests.rs",
+      "bytes": 2722,
+      "sha256": "d43815d47d9c73bd678852e80f3be0ff828834648ac8c6fefcbf9d72761d1339"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/local_keyboard_ui.rs",
+      "bytes": 1936,
+      "sha256": "f235a96e71ee6a873703e33879bd51c7cb7b35280f29d0ea9a132ed53da9e07e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "bytes": 9653,
+      "sha256": "8d67b5b73274b5252a017361598e60ad1e9f8bc5dbf29defab5739feb3de2d38"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_drag.rs",
+      "bytes": 9217,
+      "sha256": "1898828073c769ddebd53b63e16540968bec4cff371473de02eafef0c069387e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_input_tests.rs",
+      "bytes": 3804,
+      "sha256": "4a379f1fee1d8e7be98d4dd37ad7b11a790c5864acc77c70492c1824d95ab156"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_shared.rs",
+      "bytes": 35747,
+      "sha256": "19731f41acb4332f81cbecf0a195d457af0d2e204b544f47ef149e1293f54f9c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_tests.rs",
+      "bytes": 26933,
+      "sha256": "aec99019fdf4db06f06771632b829da17edae4e14a7e1da4304c1c3f2a487a0f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_delete_tests.rs",
+      "bytes": 14154,
+      "sha256": "3637e952ebabb849849779011aa0dc595a3e92f15e8fdfb894f3b4c14edff52e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_editor.rs",
+      "bytes": 37503,
+      "sha256": "76ba6585e473391cb1ef9076e2db342d825694b875cd577ea9860b955cba77c7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_editor_tests.rs",
+      "bytes": 56287,
+      "sha256": "c2a2fb463c7d4ddbaf56cdf76c722eb5285c0127ff8d1ed9f81bf8e5d7761ed4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_feedback_tests.rs",
+      "bytes": 24631,
+      "sha256": "815d2a7f2097f9fb4e210fb6d1b562329b6f5520212cdb04fad959c1268f50b5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_list.rs",
+      "bytes": 2157,
+      "sha256": "d43dddf3492a7f7af7a7d37f1955660ec896c3ee8e547d0990bee0deaa8f19b6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_page_shared.rs",
+      "bytes": 26529,
+      "sha256": "1774f94b2b4a3057b96b7b006f88af17c70e5c3fc2692e6606029af90e96dd75"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_parcel.rs",
+      "bytes": 20282,
+      "sha256": "09b3556fff7f0b5bd3e82c39b4d2d349c7d15bb256ae447608fadb34d9eb0a8d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_parcel_tests.rs",
+      "bytes": 35608,
+      "sha256": "81a9e20def5dc1d716d088fc2889ae3d74b1139d6d0daf5f4fa3d2755ac4757c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_reader_drag.rs",
+      "bytes": 9101,
+      "sha256": "65371fe97bbf328ea890b9afa2b3fc8731aa1014e1f9795aa2ed01d70c72c876"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_reader_tests.rs",
+      "bytes": 15399,
+      "sha256": "86fea107d78b5a4dc6f800d985e7569eabe2dc64248c31b1803901abffbe1e00"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter.rs",
+      "bytes": 2542,
+      "sha256": "90ecee3444e05ab683a1a3d270c458ae5ee3f38c4e79ef76e4cdc9458b25850a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter_tests.rs",
+      "bytes": 3014,
+      "sha256": "936ef6e333af9e4aad855d79e1f2f13ef5fddd7476fe4bb523a9c6ca9979570a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/metrics.rs",
+      "bytes": 9833,
+      "sha256": "efd4ec3904fb98b1400350c0fe89d0a44c8201020e827016234a1e8691e751f7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/minimap.rs",
+      "bytes": 18097,
+      "sha256": "ac54aee1debc3370d47498c6eb0748c4924a2f444e06a9662251f0c28561da14"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+      "bytes": 2619,
+      "sha256": "744560d3457d3c62bae0b0e9d478f89d7e58f07691b0de9e34073dfaa6e0b91d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs",
+      "bytes": 16447,
+      "sha256": "9494e5ba9042b3915f3429318732015a62ddbd3a983dbcda2bd2505eb4297117"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_render.rs",
+      "bytes": 19979,
+      "sha256": "66e79c7ec4c6b0e5494fdb9b4659f46b0d0dfccd37aecdff7d65a984458216a7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_tests.rs",
+      "bytes": 8152,
+      "sha256": "57689fef43667dd00e2eb04a11309cde539a87d7182845dfb4fb57f316800016"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "bytes": 21942,
+      "sha256": "e53c29fd454cc86c6d8a34cf9c3925d7c349476fd3dc79d1317bd9ce1c98fb25"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_item_quote.rs",
+      "bytes": 10527,
+      "sha256": "97da060ee778e623a49a41c37746b96c743a504528abb02e2ceac3227d4cb2d1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "bytes": 50657,
+      "sha256": "049bb20a3bd294ad2d0f60795f1b2932bf5ca9c93f1009778f835ef294f32de7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/options_volume.rs",
+      "bytes": 6800,
+      "sha256": "b8f95910747b706e680daf95a053bd914717118b6f6e44278577509e8a5f0581"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/options_volume_tests.rs",
+      "bytes": 13061,
+      "sha256": "47090774678f4675efc107cb096e1fec5507478041cbfcda2c928abb00caa698"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 882928,
+      "sha256": "5e7fdfa742e526f1bdf552603da7122c394f941533ee9764a9fa139c698a2a62"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays_portable.rs",
+      "bytes": 1916,
+      "sha256": "6c744b45910bffbfe4aac4ded289344d96ad2cf41beda27cc3de49e2ea448386"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "bytes": 66450,
+      "sha256": "f4da839373cbdf9616575f98dbe4ef1f52a3a87a006e66d0953c82d992c966fa"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/panel_navigation.rs",
+      "bytes": 2772,
+      "sha256": "6e003eba04b7f2b24639b20f1e2731f8d7b6658f25071235b7d1df1f9a7e7a2a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/player_inspect.rs",
+      "bytes": 15246,
+      "sha256": "8ccd20046e2d44d24bb67a65edbe820c3e9ee0285e5cd07c92e2096442d8dd0d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/preview_data.rs",
+      "bytes": 12982,
+      "sha256": "892be3b94a0a9a3159c5184d56fdcdeb4a039097090282fac5cc74a98fa4ead1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/primary_item_image_tests.rs",
+      "bytes": 17405,
+      "sha256": "f4d289d829c81d30d111ba739e1898c60c8bdfa8f1bd957a01b5de31adc2fe29"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/quest_targets.rs",
+      "bytes": 9308,
+      "sha256": "b17bea53ab0f29344a9c15c47c5e9bcac4dfaf7c0849ad256755aede172465df"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog.rs",
+      "bytes": 24757,
+      "sha256": "b75a0a6aa1ddddb98cb47a4a5fe3c3ff88077d78de86caf510c79bd0102d5867"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog_tests.rs",
+      "bytes": 7887,
+      "sha256": "baadbe9f8d63fa6ff188c38ae8bcf1c728514f996de4c7c322c159d08569f2f9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/select.rs",
+      "bytes": 20676,
+      "sha256": "e626e2a9904b83874b9dc8d8d5e54afd4a052c0104725b5bd6c441666e243b7c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shared_hud.rs",
+      "bytes": 16596,
+      "sha256": "3e6fcdc241efdec0f8c1bdae402957b036e2651a30415fe496ccdd605217dee5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shop_paint.rs",
+      "bytes": 15477,
+      "sha256": "eaf8a797181f08608ac1a94b1aa60162bd969424559bbb125cd16df635c06f6c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shop_paint_tests.rs",
+      "bytes": 16555,
+      "sha256": "4141f5218d20f6be8e71b9dbfda15254211d61689f2db200322a5217db25513d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_assign_dialog.rs",
+      "bytes": 12924,
+      "sha256": "891e6fcff5826907e426b9ee63ec9627b200b3d82060c343cf6a8bb1e4e42da5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_bars.rs",
+      "bytes": 3529,
+      "sha256": "29eda37d5aefec57b8f7ce91de1a49f94b99bc1c1642349ce705e88c352baef0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_bars_host.rs",
+      "bytes": 11845,
+      "sha256": "15d063a71128425ef6773a386c90b431beaf5b9ddd4fbd1e2efa78695775be20"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page.rs",
+      "bytes": 5794,
+      "sha256": "22a87ba44bc7809fb7a8013946373676e9e7cfb46c5364933c25842332b92731"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared.rs",
+      "bytes": 13461,
+      "sha256": "5124f9a2210c23717df4cba8f2145c7c80a5d957ec87c464af67b446be93a368"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared_tests.rs",
+      "bytes": 3894,
+      "sha256": "d4557b8a4f360a891251fcd32f0cbe6bafd2951494345abfd0781213edab086d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog.rs",
+      "bytes": 20415,
+      "sha256": "049991cb6496aa9dd146d3834dd9a4ddcdb07ae3b254857fd78c11c3eb93c3a2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_host.rs",
+      "bytes": 13092,
+      "sha256": "2c03db012c8fd0a8abbd40f77c4eb413dafe5df6140e1134e0f07ea00a7cdd40"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_render.rs",
+      "bytes": 12624,
+      "sha256": "734068c2ccef7e6e3ae0cdbe9d20a6a67adec6de564f4911a106f271dee83286"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_tests.rs",
+      "bytes": 8199,
+      "sha256": "c4e3e1e2887b832ac8bb39dc12e70663ae69b9b8552ed760982d661e40eb3115"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/spec.rs",
+      "bytes": 17307,
+      "sha256": "f82abfcc3f4b222224027c4004b0441273caf771f150ea8002e57f8bfc336b55"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/status_hud.rs",
+      "bytes": 27576,
+      "sha256": "f2821907c77c95818a89d854a40bcf373b64bbb4a5a1333f079a7fb24e5ca712"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/status_hud_tests.rs",
+      "bytes": 8556,
+      "sha256": "98c4ddd5528254bdbb78f396b0614b68090382812cf108548d345d1e7536b148"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_drag_tests.rs",
+      "bytes": 20942,
+      "sha256": "8a6329ae4027fa73a51f35a971a0960954593f74069e53a234fd0d3b9009a2c6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_paint.rs",
+      "bytes": 15468,
+      "sha256": "fa705cb5cea381a872c7eacbf253c7c05679a6bccbd073fccca30e76578748d2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_paint_tests.rs",
+      "bytes": 12135,
+      "sha256": "8de63630c86aa00d681349bce7d5b27675388c1f62ab2617460f55687540d8ee"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_password.rs",
+      "bytes": 5080,
+      "sha256": "d779200f6fec869418324f8b2b85f73960af927ff3e732a66f69bd3ca767b4d5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_password_tests.rs",
+      "bytes": 12664,
+      "sha256": "762fd87715031d06bc7a56584cf78906d31b6de9bee0c6bcc328e873f43d7705"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_rental_tests.rs",
+      "bytes": 9212,
+      "sha256": "a6163e01f38c6e6fbc83d22000c9fa2f4e0e639aa8cec1d9757751c17a8b4a70"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/text_input.rs",
+      "bytes": 15357,
+      "sha256": "353298e383826a95b0ac40472153b7f12023369e038952d5ab53ffbceec03092"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/text_input_tests.rs",
+      "bytes": 13861,
+      "sha256": "1d4d4c075ea0dfee64b20facfe80635aca297818651ac28505a2b393650916aa"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "bytes": 26798,
+      "sha256": "d2e9fab18f2c07d848b6fba0cd2ea2b7216f7e3734d2ddc512af9452feec2a3d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog_tests.rs",
+      "bytes": 33158,
+      "sha256": "57088e60edf1c18a24b44b6c4b683f11302f30e5eb70ddb253653b909e0de5f7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_item_input.rs",
+      "bytes": 17157,
+      "sha256": "d3022d83e31e199decccabc24db4601cf4560c8276663dc92a54a1e3a3326d98"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_item_tests.rs",
+      "bytes": 28376,
+      "sha256": "093ec8546f3d4a7a531811648725ac3ab2d8cba696964fb69f3d5515220b35a1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/typography.rs",
+      "bytes": 1525,
+      "sha256": "cd89a25e7ee9e5065ebf294af4cf86ab428005cf22d3563a5479a54302eac514"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "bytes": 66965,
+      "sha256": "5f98ba8ee1a34d8f994cca612254fc1c31b926e5d6a6ba113f2421ce62ba385b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/entities.rs",
+      "bytes": 9192,
+      "sha256": "da2c85d305d97ad03dadef22f7eb4211ec69ec4948abe4a43d91a079e694cd2c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/game_shop.rs",
+      "bytes": 27408,
+      "sha256": "85472574682a0e476d00321d17f0d02161e5e480b19a46c0e5785b83e383f448"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/graduation_tests.rs",
+      "bytes": 3683,
+      "sha256": "3e941caba423a34b92a65304a4acf1fd3d8b203fbf6deb548e05949d6203f507"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_action_basis.rs",
+      "bytes": 30883,
+      "sha256": "a7935d5bf3bf0e5781a5527cb43b0e19d7ea24fe111cb0a3d730a168f43f7496"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_ingress.rs",
+      "bytes": 77309,
+      "sha256": "fe0155d4cfdc433145193ebab6f3ed0662859b6e07921ec44073f896409184d0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_model.rs",
+      "bytes": 60197,
+      "sha256": "d3cf763b8b61f3e1ca10f55d7b76e1719f33767199182f993e8b7ed3f2fac493"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_source_witness.rs",
+      "bytes": 21916,
+      "sha256": "fb741169f6a3d6b43a0769105b89dbd0c76b146e5a7e358b9cc3d9837cd01f91"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hud.rs",
+      "bytes": 6225,
+      "sha256": "b23c5f5b19b4b02b5aec27cb8f4b1440d8a9822748a69e91500933cab41704a9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hunting_repair.rs",
+      "bytes": 7683,
+      "sha256": "9028375a8cfa2a2326e7944e5f07861c227bacd3dbd8a143be7c518ece976d49"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/inventory.rs",
+      "bytes": 32107,
+      "sha256": "f748995a9b28afff30ab6dba356de8155bba95c3e76047b1fecf9d1504c40af4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 4968,
+      "sha256": "95abeb927f1aa6c4d7ea5532cf6b6104efa3e3f7670c21a9f09657849de28441"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/mail.rs",
+      "bytes": 23110,
+      "sha256": "1ae7aee8e9c8cd5facdbabdb0371858b247d0e7d002e8755d28520fa5c411e21"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/mail_service.rs",
+      "bytes": 19826,
+      "sha256": "df464aad4a8163a1c4d554792dfa9b029b44362c9e362cf5237016cb57882205"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/map.rs",
+      "bytes": 10934,
+      "sha256": "7613359832b2cb3985d58528ac97599112ed6891e51435f13defda8678a0eb51"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell.rs",
+      "bytes": 79510,
+      "sha256": "7e4090f4551301ee0a2f807ac2510fc6be42b33e9afcd187671911a6a0f766f9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "bytes": 106352,
+      "sha256": "55cc25f1fa757061db22536eb60fe9182a63b5d9965f6f85c03e2082daf65927"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/newcomer_v2_guidance_tests.rs",
+      "bytes": 5530,
+      "sha256": "cc66e1000f8949e470b36d7309c259179e8c70564b666a9b2356a768df10ddc8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_gold_buy_attempt.rs",
+      "bytes": 21436,
+      "sha256": "581532b4663cb8673177b1706e934f734198583919ac1f886a7bbab2b92b89bc"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_buy.rs",
+      "bytes": 17992,
+      "sha256": "2d2cf7fceae57773fddecec1038af870475ebbe0eb3d7e367c302cccf80143ad"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_buy_tests.rs",
+      "bytes": 29203,
+      "sha256": "89b8009ec72158ba1f8544a7fdff9a70085caa7e7ff966a7ac4f52a7c400643d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_ui.rs",
+      "bytes": 18622,
+      "sha256": "984aad5de9c89a2b32b6c9d4602008951a6ee10caaa1ca5d5f5b78b48afe3cfe"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_ui_tests.rs",
+      "bytes": 19254,
+      "sha256": "62ff113f8c2ec7b8a2e53ad1f43158a14cca99528d43ed360a2048edce9b488c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/options_effects.rs",
+      "bytes": 28290,
+      "sha256": "d086e5faa0c6e20a659da1fe5b35636a374021135d97ea84300b9279a8901a7a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/pending_operations.rs",
+      "bytes": 123746,
+      "sha256": "9aa8367b3a0647d15613b33caa5fe1887cdddba257f54b9424b2630e2a5d8b7e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/player_text.rs",
+      "bytes": 29080,
+      "sha256": "3935f1cb83801f69ed4c64ea7b211fe419d126a2e9ae3b207451b8e09ae6f22a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "bytes": 128593,
+      "sha256": "70e25a476756fa88c9cfcca8a405d5d0a7611d991915ae4a6f64a964ae63d3f8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_character_ui.rs",
+      "bytes": 19402,
+      "sha256": "ff1dff6df4cb8d624b0c82817f89fabac9965bdac2f54a6616cce8181af6b62f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_character_ui_tests.rs",
+      "bytes": 6521,
+      "sha256": "e02a7386e939a1196224848dc69cde6bbbdf50532a3346867f1f702639c607fe"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_experience_bar_ui.rs",
+      "bytes": 18563,
+      "sha256": "6e835c5d6bcb62db12204888014dfcdfa55db2687825f28e23386fe06ebe6796"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hero_ui.rs",
+      "bytes": 48494,
+      "sha256": "07edd4be247ee4656763c1abd97871fc725d6257e018aee742da8720ff1974c4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hp_orb_ui.rs",
+      "bytes": 60674,
+      "sha256": "322e9c46e31108cd588f525a218ec2251a7cae347a6faebc85409cbe1c1f9c04"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hud_bar_draw_plan.rs",
+      "bytes": 12781,
+      "sha256": "8f7ef2a307289e479a3696e79e25c05ce6022e44be4da075fff54f6d7d893d2a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_mail_ui.rs",
+      "bytes": 31429,
+      "sha256": "530c47b6563ac20a141e97054eeac3535a9648aad9372fb79b30e2ac3da04b6a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_npc_shop_ui.rs",
+      "bytes": 40372,
+      "sha256": "6770e2340f0d7f15a61ad54515ad62d653b6b9ca75beeb8862fc2748465a8474"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_npc_shop_ui_tests.rs",
+      "bytes": 31069,
+      "sha256": "cda369038a2f47ae348c05850ae135859c03212ca6199c34e96e389fa3f38088"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_quest_ui.rs",
+      "bytes": 43975,
+      "sha256": "aad6210f03aa1728785ac33d5e71ee83981f53f813d5004cb6cf08338b724e49"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_spells_ui.rs",
+      "bytes": 15429,
+      "sha256": "c858933be07fe1f994d2248ed3a5cf642ea421bae167efa67c51e484d172673a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_spells_ui_tests.rs",
+      "bytes": 8110,
+      "sha256": "f470b9a430d1ad1e25c960bf6ad958c0cad09ccd56705111138b74983501af0b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_storage_ui.rs",
+      "bytes": 57881,
+      "sha256": "8366dd8ca196489a30c3dcee0665be4cf6b0eec3c3de397626055d3acb44e17c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_weight_bar_ui.rs",
+      "bytes": 17598,
+      "sha256": "700a492ee2e8de661aa2026f66a71fe19a8d1973db396b75e79f10c7f7444c02"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_destination.rs",
+      "bytes": 3449,
+      "sha256": "46a307d23217a06e04facdef125163957efc63bc9418db56f2ceb91774e5c332"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_guidance.rs",
+      "bytes": 5675,
+      "sha256": "202a7faa12f0d2e635512570fb05616ee29900275f0d0f9341e758745b787c2c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "bytes": 9663,
+      "sha256": "2e1f728f1911652486027b57d7faf1c376e8ee58dcd39c67cc3fe77cf7e63399"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_intents.rs",
+      "bytes": 6508,
+      "sha256": "6696a9e49a9089a8cf4dc05467004459bd1cdf3d0ec7eab023306dda3efc33b2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_journey.rs",
+      "bytes": 36822,
+      "sha256": "a591c6e926e3af87f0f5f46ca7cd6586bd26ceca3ee429d03efa821a8b519456"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_model.rs",
+      "bytes": 32330,
+      "sha256": "3d99a0b1d67615d08c0281e5eca180eee9e16462fc368d77a0996e44511b0798"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_multi_guidance.rs",
+      "bytes": 42012,
+      "sha256": "ca3efa0d77fdf8e9a2caacbb46ebdaf78dd4462c51ddc96bd1f809fad846d5d4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_practice.rs",
+      "bytes": 9064,
+      "sha256": "61514931d40165eff565cb822dfc91cc6992ddb837c9abb636f0f3d099fc0cb0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_presentation_text.rs",
+      "bytes": 3447,
+      "sha256": "b9168aaa3a54e16335cf386b0411fc1a9eb354b49beadf760879a3d797ad0bb8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_route.rs",
+      "bytes": 6346,
+      "sha256": "3c8a535c2395bc968b25c63d884d33ae88ef66de8ae1bba20a4f6a1d1da09de9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_route_search.rs",
+      "bytes": 292,
+      "sha256": "879b0634c0a76d4f88a0dff03da3103f81e556b49b8a06c28ff8a9e9a58dca45"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_supplies.rs",
+      "bytes": 30592,
+      "sha256": "8761ea24c787bf8866f1a83d079d0e468d8493087ad0c05f09415662993a450e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_supply_visual_tests.rs",
+      "bytes": 19277,
+      "sha256": "52a2fd145a0adf2b28a29cb1a11474aa8c11b32314cf6a3434f9a9af8be33453"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_turn_in.rs",
+      "bytes": 17505,
+      "sha256": "54de8bd98b31385597920d30311686d665a97b0ce65921399f6a58be1c103e0c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "bytes": 511048,
+      "sha256": "cfc489d85609d810f82b8e19fca24ab39c226f200ea54804ae6ddc3e4fc28b5d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/read_model.rs",
+      "bytes": 11721,
+      "sha256": "f570ee71ed883051062e385a745eb6b00dfc6973136878cc50c2b519af7a1373"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/shop.rs",
+      "bytes": 22536,
+      "sha256": "213a6e78c8f2403a33a740c3bc50e9a0ccdf399cfa97bf4d651c0c1060d9132c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_binding_persistence.rs",
+      "bytes": 16414,
+      "sha256": "ee7edd097d1f2208a6a746a1d1c84bcaa096d02a5008411734dd3122bba27357"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_binding_ui.rs",
+      "bytes": 21495,
+      "sha256": "5d73ec6765b3df04ad357686d6abe2d10910e0e3cad628d5dd7ce4156322bbd5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_model.rs",
+      "bytes": 30919,
+      "sha256": "534e43debc36e62e302495cf1b99f05d947547c520b99b0a8eab5c9ec7cbc348"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_page_state.rs",
+      "bytes": 12884,
+      "sha256": "fdc9aebeab2e702c6adf57263ebe263b46e4ea4dcbebd0ce1768d9ae287e8732"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_page_state_tests.rs",
+      "bytes": 10024,
+      "sha256": "68b5ec253f88d5d4deac53c7c3e43a94a60f661bff1267921a8af6f3b0991548"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social.rs",
+      "bytes": 76619,
+      "sha256": "efe22789c06888d1d65d29be68896e579fcbaffc40829f9d3618a7b54ca56ead"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_trade_tests.rs",
+      "bytes": 10477,
+      "sha256": "5ad3148fda7f25ea47b1754ebcbfdad9c8fb5b54ba7106bd550ecf2fc6b832c6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 21474,
+      "sha256": "f2850c73bd16f99f7116158371fa0483d938673661e3ad1a85c27b075bb78569"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/storage_interaction.rs",
+      "bytes": 20497,
+      "sha256": "0d5a9c6ffd58082dca6cfb3b8dd9d45f91b7e8d03474628c711f1a8aae48b761"
+    },
+    {
+      "path": "apps/game-client/client-bevy/tests/quest_presentation_locale.rs",
+      "bytes": 12080,
+      "sha256": "1ca88bd0c175ac4c9ded0e40dabe3c66687240e27f1a0a93e66b420aafa45c3c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/tests/shared_hud_navigation.rs",
+      "bytes": 9784,
+      "sha256": "722eb8688dc9a1daca679c629d8a6d50664c3744f39f180514fd78327a749808"
+    },
+    {
+      "path": "apps/game-client/client-bevy/tests/web_bag_projection.rs",
+      "bytes": 6089,
+      "sha256": "3c88742e625dbcbe9b7eb50c2f92b5b23e2b5e32ed69c6ea00ceeb2bb07bc54d"
+    },
+    {
+      "path": "apps/game-client/client-core/Cargo.lock",
+      "bytes": 167,
+      "sha256": "55d34e3a9050a26360e9fb635a52c248752efc9557b1339bf9ce9afc94e6d8a8"
+    },
+    {
+      "path": "apps/game-client/client-core/Cargo.toml",
+      "bytes": 390,
+      "sha256": "ecc48174c912f769b5974fe27e428de84e730d489129c2f5fdc27ea38800eb4a"
+    },
+    {
+      "path": "apps/game-client/client-core/src/auth_ui.rs",
+      "bytes": 16041,
+      "sha256": "99eb021f190ddda8681e59cb155d41938cbe78c542943042efd29c258a818147"
+    },
+    {
+      "path": "apps/game-client/client-core/src/cash_preview.rs",
+      "bytes": 6202,
+      "sha256": "8f75b889dd2b697673b106ff62cfe9083d60993d38e5048deb3fba52adb3a91f"
+    },
+    {
+      "path": "apps/game-client/client-core/src/chat_ui.rs",
+      "bytes": 10371,
+      "sha256": "79cbe01bfe0d239111c7f3d86dae7d3f4d8f23d38264fe9fb579f655c5567c1e"
+    },
+    {
+      "path": "apps/game-client/client-core/src/clock.rs",
+      "bytes": 1543,
+      "sha256": "5a972dba7de1aab6092cedb654939c54f5a5a7493e99809057ad93995c1eabd5"
+    },
+    {
+      "path": "apps/game-client/client-core/src/entity_animation.rs",
+      "bytes": 63457,
+      "sha256": "48afc568bb2e7e867dd30906b020ac1039a2b913ac7e6145abacea0666ab5d1e"
+    },
+    {
+      "path": "apps/game-client/client-core/src/equipment_pending.rs",
+      "bytes": 13569,
+      "sha256": "b7bbaeb24d61a1b74973f77b91f5240e38555291cdc5aee717272355cfff2b3a"
+    },
+    {
+      "path": "apps/game-client/client-core/src/fishing_click.rs",
+      "bytes": 14575,
+      "sha256": "b022699aef538a4cf70d550cecb0c9abec31bf629b961bf249816200c1d8f0aa"
+    },
+    {
+      "path": "apps/game-client/client-core/src/intent.rs",
+      "bytes": 7513,
+      "sha256": "adeec3ffbab3ddee1399e73280682dd120201bdb591a2505264bf5c5df8b8a1f"
+    },
+    {
+      "path": "apps/game-client/client-core/src/interpolation.rs",
+      "bytes": 3723,
+      "sha256": "919b78ff7663066713c74c53af5be2483a8c06660c1fe8d45ab4fd9500ac7753"
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_names.rs",
+      "bytes": 10185,
+      "sha256": "797c07b2d38ba868e4eda0f812aaad74f4ca54fbf70fd19a3d4110a1cadea160"
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_tooltip.rs",
+      "bytes": 72929,
+      "sha256": "b1eaee082e6b4f570302d9ed2e5a929faa4b51f60e67c4c20b42e0bd57746552"
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_tooltip_types.rs",
+      "bytes": 5441,
+      "sha256": "046a7d721dda11ed62c0ac579a9772ad37732e510c3131cb333e5581833b1963"
+    },
+    {
+      "path": "apps/game-client/client-core/src/lib.rs",
+      "bytes": 871,
+      "sha256": "abdd7a6c7ad988e4757645d0c957cf8fb7a8c9a9d94fbf07156815f9866d4fa0"
+    },
+    {
+      "path": "apps/game-client/client-core/src/mail_compose.rs",
+      "bytes": 10789,
+      "sha256": "388afe73f95401a00c9ff17e45c0f7989a83e0554e037da17457207d3a119fc2"
+    },
+    {
+      "path": "apps/game-client/client-core/src/mail_parcel.rs",
+      "bytes": 17544,
+      "sha256": "bfd8447860543832e1277e830187c72add6de5b718d4652a9b12ce15e0d65889"
+    },
+    {
+      "path": "apps/game-client/client-core/src/map_route.rs",
+      "bytes": 6374,
+      "sha256": "02de643f0ffd8657190b9e9227c3885492193d18a577537f175d7913bd784fdd"
+    },
+    {
+      "path": "apps/game-client/client-core/src/motion.rs",
+      "bytes": 2181,
+      "sha256": "ad5d6bef1ef144ea6173f36ef5d89ea54c51954c00629fec46e7e1450d7c9d66"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_gold_buy_attempt.rs",
+      "bytes": 13918,
+      "sha256": "8c17caf73098d39644d0e6a1187590ade10dae9d632bfeb141ee6b9357fde5b9"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_gold_buy_attempt_tests.rs",
+      "bytes": 17439,
+      "sha256": "8b483ae46733d7de4e50a9d22c2e04fe5502db41cf69777f300c4646d237ff29"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_pearl_buy.rs",
+      "bytes": 8367,
+      "sha256": "00d676ab0f6e6aa41330c9e920a7148ab5e306bd07570be2b53482345ebdba22"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_purchase_host.rs",
+      "bytes": 27995,
+      "sha256": "2f7f4f7aef826fb660b65a66f816bc2db404bb4543e1b76d3f794e18cfc7e9eb"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_purchase_receipt.rs",
+      "bytes": 38254,
+      "sha256": "0c95d0659685a2b3d260ae3c79af2c03c3e8707d5a531bb4a61e8998d2ad305b"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_repair_quote.rs",
+      "bytes": 7948,
+      "sha256": "6c299f148e2bbafd55cec749f8ba65076b07d17fef65d469af8f779be06a9cee"
+    },
+    {
+      "path": "apps/game-client/client-core/src/ordered_map.rs",
+      "bytes": 9323,
+      "sha256": "e01db4fc2679d8174948d9820fb3d971c0cb041d9b64373bec667b0e4f754a31"
+    },
+    {
+      "path": "apps/game-client/client-core/src/quest.rs",
+      "bytes": 11249,
+      "sha256": "99d9edff9b59c644e83d822945d7c3c577786397e738172a50246f10baca42c6"
+    },
+    {
+      "path": "apps/game-client/client-core/src/ranking_inspect.rs",
+      "bytes": 4346,
+      "sha256": "a382dd9fb89afb296295d1de5aa2cbd34f2ac8f565806c6325aae577b3c91106"
+    },
+    {
+      "path": "apps/game-client/client-core/src/reconciliation.rs",
+      "bytes": 3579,
+      "sha256": "f91301ab67276f825d684a95d51a7031799b597a2e1a2a71c455104e6bb37867"
+    },
+    {
+      "path": "apps/game-client/client-wire/Cargo.lock",
+      "bytes": 2673,
+      "sha256": "251f3f08c4ee98d9dbff28a701af77af061738c0786553e98e9bc63706d5dcf4"
+    },
+    {
+      "path": "apps/game-client/client-wire/Cargo.toml",
+      "bytes": 364,
+      "sha256": "38a3ac4cc26de4d18c51c36026e84383c1c4ccc88dd31b725385cebd5651588e"
+    },
+    {
+      "path": "apps/game-client/client-wire/src/hunting_repair.rs",
+      "bytes": 19839,
+      "sha256": "014950062bc54b2ab9c483ddd400943c82d38f2dc2b4077c1323df7965565126"
+    },
+    {
+      "path": "apps/game-client/client-wire/src/lib.rs",
+      "bytes": 108219,
+      "sha256": "0e34fb0c6d23c3a392a6f1ec96626de3420f4d4c1cd2f37b5d30903dfdc711c8"
+    },
+    {
+      "path": "apps/game-client/platform-android/Cargo.lock",
+      "bytes": 126516,
+      "sha256": "96696031deb21302ff2164529a67ea2f3081395360610d832912e5f1c9373356"
+    },
+    {
+      "path": "apps/game-client/platform-android/Cargo.toml",
+      "bytes": 1097,
+      "sha256": "7959d9d4dd2cdeeb75adc65ecc527847fe129338c808463ff56752bce95b0088"
+    },
+    {
+      "path": "apps/game-client/platform-android/src/android_input.rs",
+      "bytes": 25130,
+      "sha256": "affe9d5ce1a4ec28608a520e7f1c419aec5af24cf6d30facba80c8a060195024"
+    },
+    {
+      "path": "apps/game-client/platform-android/src/gateway_bridge.rs",
+      "bytes": 116392,
+      "sha256": "eda67816b1e56493c726fae0ded7fbe96ea1e765a53392ec3ee93e69baaddf49"
+    },
+    {
+      "path": "apps/game-client/platform-android/src/lib.rs",
+      "bytes": 63650,
+      "sha256": "862dde14fb4fa3b72ca1b4729bc1d4348f0957737299ebe58152a574970649c5"
+    },
+    {
+      "path": "apps/game-client/platform-android/src/main.rs",
+      "bytes": 368,
+      "sha256": "3180e4e43507fc2ee69f130fcc3069fea5d430d62b559d8f7d377353d50ae05a"
+    },
+    {
+      "path": "apps/game-client/platform-web/Cargo.lock",
+      "bytes": 5243,
+      "sha256": "19e95c75dfe01023f937ff9190abd4ca0802d936144de2947cae459bdd53492e"
+    },
+    {
+      "path": "apps/game-client/platform-web/Cargo.toml",
+      "bytes": 710,
+      "sha256": "ef797825e86c499ece3528c8bcea25b3cb2ec564f4c4b2633bdf757b5ab49b7b"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/auth_ui.rs",
+      "bytes": 2773,
+      "sha256": "93f11a325c7c52eb74973269601f36bc31fc7c85140bba74efaa874bf61a6c52"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/bag_to_belt.rs",
+      "bytes": 16516,
+      "sha256": "c209be803870326f8d0869dd7db4f065b56a111a1a11405552a7c0af99f4014d"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/cash_preview.rs",
+      "bytes": 2661,
+      "sha256": "c92beffad40a5069dbb8a93e3be09dcc69630764fe6f2d03f177187ec1375c38"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/chat_ui.rs",
+      "bytes": 3487,
+      "sha256": "7f66ee40f459d580a5cfa4c62ec511cc1bea50271deda9a3d565ca810aec25ed"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/core_api.rs",
+      "bytes": 8244,
+      "sha256": "5743271b90f2f6a25d45b47b0a83be2d5154c69ae0a15908d04471fa14d2cd7a"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/entity_animation.rs",
+      "bytes": 4527,
+      "sha256": "091ef8e7ee6282a14cca14fcff464e25352bb74fe6e0edf2673e289bb3bfd38f"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/entity_animation_state.rs",
+      "bytes": 36055,
+      "sha256": "cb49aff50076dfd29669cb191651e1a6185a066d09727ed50f68a6a6d4b71552"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/equipment_pending.rs",
+      "bytes": 17345,
+      "sha256": "5d27eff8a70f165a0d96bddf8e99113d8bb3d66ab7c63b367f3969595bb91a99"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/fishing_click.rs",
+      "bytes": 34540,
+      "sha256": "441d92172f117641743477755ef35f2299ff9e192f64b2ad3785c00393a90356"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/item_tooltip.rs",
+      "bytes": 63748,
+      "sha256": "a33c21d6ccb557d064fd36121c0a5be07b75fff3a077f8ced91645fc0ee84654"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/lib.rs",
+      "bytes": 3051,
+      "sha256": "c7ed74d8fe6fc2d243942ce488a16742868ab96b8c524138ed4eef0562fe6062"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/mail_compose.rs",
+      "bytes": 33223,
+      "sha256": "2b8e71002931549269489e0ef8662ea65604aaeb08fa2d40c182df5fdfb921a9"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/mail_parcel.rs",
+      "bytes": 11810,
+      "sha256": "8f645711c71c277c63a61224ddcfd50b4c4a45b301aeb6fbb3afa35b2c97fd3e"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/map_route.rs",
+      "bytes": 4626,
+      "sha256": "661ce8827a1bc136d125aa5e16d473d71c7a8e135af8785e85db45abaee5df76"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/npc_gold_buy_attempt.rs",
+      "bytes": 8128,
+      "sha256": "d8b8813cb7a81c9a2e51fed9cfa6ce55d327e6daaf902f634b46a2c9ccf12605"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/npc_gold_buy_attempt_tests.rs",
+      "bytes": 25660,
+      "sha256": "7e6949114c9c0961274a69a2cd91abdaf700508cd83084317e7b3f40e427104f"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/npc_pearl_buy.rs",
+      "bytes": 7858,
+      "sha256": "4ebcb856b6c5ca594ead3f497ae5cf11bb067ff91090371246bdf7bccd08520a"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/npc_purchase_receipt.rs",
+      "bytes": 69876,
+      "sha256": "679fc449ea536d65fa0290a1834ea27691a74ebb10d97bc16a3065284b417b8d"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/npc_repair_quote.rs",
+      "bytes": 4623,
+      "sha256": "70d27fa8a1cc1151401b3c0d184a65b431e423965fbaeaf51cfb5aae1e508259"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/ranking_inspect.rs",
+      "bytes": 8274,
+      "sha256": "cef1926b341a805f86d210865cf62b9f09aa4b1fefc6b8887febc71cafe43d7c"
+    },
+    {
+      "path": "apps/game-client/platform-web/src/strict_json.rs",
+      "bytes": 2338,
+      "sha256": "7f8bfc46a2b38fc8c24ae43bb78fc557f4acfe27592643ff904e97a5d06baf98"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.lock",
+      "bytes": 155135,
+      "sha256": "b5374f6416b9dd5eaaf917b4f0461c2d544ef516489359ba49ca7c5cc444e748"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.toml",
+      "bytes": 2190,
+      "sha256": "fdb0a8f4027b9eb2caecdc89e5eef9e7cd40a531df0aba554aa300c51551720e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/build.rs",
+      "bytes": 400,
+      "sha256": "9063303d223f5bc7476f63f39e14d22e242ee6073ca6fb5ee90d2fc3027b4c6a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/assets.rs",
+      "bytes": 35827,
+      "sha256": "e77018ae0451159388e99ee46ef83480a4b69b7a2026809c8350780f0b297478"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/atlas.rs",
+      "bytes": 146998,
+      "sha256": "9f5f7acd6a4743cc8cac0ac14caa765c5b6b5b895779cd484975968891923034"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_input.rs",
+      "bytes": 9718,
+      "sha256": "5d0e30af55b74396b212449a228f6b3e32793973c5410636d9be83afa8e6995d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_input_tests.rs",
+      "bytes": 17113,
+      "sha256": "877347cb5fd04813ac6e07028cda2df84e7af5de283bbde075e43a18e79ae3cc"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/branding.rs",
+      "bytes": 2012,
+      "sha256": "999dcde18d74c5161e9c02453a3034ed00ce5f42e63d7df73976399c321edea1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/capture.rs",
+      "bytes": 69513,
+      "sha256": "877b3a96c1e484abfc688499c0939e1a1f1a0ea0b20f4a570f23f2b7c1dc4ca3"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/capture/provenance.rs",
+      "bytes": 6284,
+      "sha256": "a4396ffecdbaf1d17b50fc41e5b161c68f6a36937bdd53d0ca1c56243c86c8f5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/clipboard.rs",
+      "bytes": 26292,
+      "sha256": "fb8fe5478777bbda687c8b5554d7bfe8d4616ff2343302f4977a040589879770"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/cursor.rs",
+      "bytes": 6232,
+      "sha256": "1bf6166fbfa866623be079be0c9984d959dff93624d06cdfbfc9eca74c1a3e4d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/effects.rs",
+      "bytes": 419572,
+      "sha256": "9720b7920dcaa59acd0c115ae1d5e4be1ae483fa85986cea2ed751126ac6a44c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_health.rs",
+      "bytes": 16623,
+      "sha256": "89e882263dd97b7f46ca4deb75ffaa029735873fc3788883ad1cbc429540e9f2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_overlays.rs",
+      "bytes": 88975,
+      "sha256": "57f64cbbf509b8c14f06af95086220116be1d7628ed90d291edddd33a259d7b0"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_presentation.rs",
+      "bytes": 159884,
+      "sha256": "a7ee21b709e585cab3092472cd14da3039c9767c7aa9d7c17d6e260882634d4b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/equipment_creature_wire.rs",
+      "bytes": 9696,
+      "sha256": "537602df77c31189ffee93dbbbe775b35905abb54f58d668fdf16d18e3c22d97"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/frame_sets.rs",
+      "bytes": 19005,
+      "sha256": "91e81ee8493937c7f36cc36aba8fe78d3e505463dfa513ba936e2c41063e32ea"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 363042,
+      "sha256": "5472ed46ce4855175d362d62a8e0e078e2b3fdaae4bf0fd805fb8c9defe32926"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 704924,
+      "sha256": "17b710184646288a52919559eeb5074390b9c5d0ef18478f00949a6facb7c0f7"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_catalog_transport.rs",
+      "bytes": 12021,
+      "sha256": "3da0c9a6ff12ec8b640c7d5d1d3df2e5d7e44d7fe67ab835aa365fc32b673690"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_handshake_tests.rs",
+      "bytes": 6652,
+      "sha256": "00adc0100280164dac2c980bb5957443d340ad95d86a66120c1e883906ae8123"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_map_identity_tests.rs",
+      "bytes": 11862,
+      "sha256": "e1b5813a1ece2717339bcc51105c30aa4f87cfd6991e6ad413e5c7a046baf31a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_quest_tooltip_tests.rs",
+      "bytes": 4675,
+      "sha256": "b54c78c820b825e4e7f26a48188bc9a9c074858a04d00744e494eb5871483f2d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hero_pointer_settings.rs",
+      "bytes": 599,
+      "sha256": "811e218f65588532fe23e9d4f81596f48ff8b6fae62ce02ea418061a0b217e1b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hero_wire.rs",
+      "bytes": 3584,
+      "sha256": "2c42694b507d0787d3aa8adf7d99c264703cfe5670e59cbd41781596738365b5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_repair_client.rs",
+      "bytes": 38737,
+      "sha256": "90a084db03d3af36f2f07c827c6de0f2449ea1c43c9ded4d00667d2276977815"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_repair_connection.rs",
+      "bytes": 24890,
+      "sha256": "7a8e403a429eb79d228dd095044f9645f11cdbc4b617630a724f5aa06908a431"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_repair_gateway.rs",
+      "bytes": 61891,
+      "sha256": "1f57fa30f5437c2b9daa0ab1d3579375a4c3663c8c40c625ae3e6ddd61648a32"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/input.rs",
+      "bytes": 367623,
+      "sha256": "6d67ff71dc910e76f452ec468e42e9da15780e306ae7a35b01046da91c4f36c9"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/keyboard_world_actions.rs",
+      "bytes": 9337,
+      "sha256": "5fd4cfa4b37c0ef2810bb9f42094188f598e319f62388f4fd5d738c721cabc43"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/lifecycle.rs",
+      "bytes": 2648,
+      "sha256": "fa273895f7100c749a690f75836bdc9ba6398bd1cd34e14fb48c3c1cf0a45083"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/lighting.rs",
+      "bytes": 45813,
+      "sha256": "da4750ef952584c5d7e9f85f64db5fb4686a284949c410c7e36e029621a78286"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "bytes": 19863,
+      "sha256": "f39e40e22622f58908f41d1167e315612a45e37f161c85535548bf491753859c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/map_parser.rs",
+      "bytes": 105184,
+      "sha256": "376d1f6416032c93484bfd8ca91fec39f6aa67a4bba6a1c3d3fd694d5d6d78c9"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/map_player_movement_tests.rs",
+      "bytes": 4208,
+      "sha256": "89620d464fc6a51a925096bb5bbb47792fe9302214c91ffc334ded5ca86f0585"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/minimap_input.rs",
+      "bytes": 2408,
+      "sha256": "d982d2018d4b5306ac20de638c2de8c254d8e2b446637c20592bb46c460a8fc1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/minimap_input_tests.rs",
+      "bytes": 11412,
+      "sha256": "ec852356b9d68af66afb7d4838eb80c58d7cce58853da1c760d27813ca0f5fd4"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/movement_trace.rs",
+      "bytes": 6217,
+      "sha256": "3791e450cdfe0d60dfb5ca8aea9b9195af2a9952e31e06f96b71b50abd321b77"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts.rs",
+      "bytes": 7962,
+      "sha256": "03f91a9822a526f9d5aa35341accbc82b4522d62d0784f033522af8e33065e88"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_gpu_tests.rs",
+      "bytes": 7253,
+      "sha256": "3148b82a4731f906bd03688eca0d87b3fdf857cf8bd860eaca8bbbd584403305"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_soak_tests.rs",
+      "bytes": 11353,
+      "sha256": "4dca3ea1ad5bf04c7bc53b28c2280803269583c320e1eb6ab2b346e5235762a0"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_hunting_repair_inventory_tests.rs",
+      "bytes": 24887,
+      "sha256": "83683f3bc4a3f61fbddc53653941c06ddbfcf3a2fd8b6c6c4f6b60bcee4b6b54"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_producer_skill_authority_tests.rs",
+      "bytes": 8823,
+      "sha256": "a10722161e4153163d492c1510a298684cd06a1709600ca00ad455eb015720f1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+      "bytes": 82980,
+      "sha256": "b258df7ca548a7e104f5a9a17328083a856dc943269471eace8dbad02894aad8"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_gold_buy_transport_tests.rs",
+      "bytes": 51091,
+      "sha256": "44934c0ac73d8eb55f49a7c60e360e441413b2bd40875a036a863b6f3f92faa3"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_client.rs",
+      "bytes": 41718,
+      "sha256": "e27c6f77f68331a92de64269be5babd3c476b1d2472dbcac8bf893c15306151d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+      "bytes": 77729,
+      "sha256": "34046e08ac40013f1ed07176d8676a7462a5d8ae848ab397e1784a9158ad9904"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_projection.rs",
+      "bytes": 13703,
+      "sha256": "52db495d5febee05ea7620def1606985d755c9d442fc50309db88470985746a4"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/pet_effects.rs",
+      "bytes": 9972,
+      "sha256": "77e5a8f705d65269250062df46a592ea0c11b287cbd4fd0f7c50e75846086a55"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/quest_route_input_tests.rs",
+      "bytes": 39257,
+      "sha256": "da6d977ed2785f7c087be34fca931560724f7c382e7a8fcbba6446526fab2bc3"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/self_occlusion_redraw_tests.rs",
+      "bytes": 4349,
+      "sha256": "180e96e5a5066a459cc06a3ad3f4d06bdde575d5d580a2ee92282fdfb684dc04"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/session_config.rs",
+      "bytes": 22913,
+      "sha256": "56b100adb3cc320c77886a9a693081ac47d3e0ac5815f92a956da15dc3081e2e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/shell_bridge.rs",
+      "bytes": 30849,
+      "sha256": "d0166ef611eba6d626abce6b57671c76ece1531979de5e1d4d9edeabbe67b4b8"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/social_bond_wire.rs",
+      "bytes": 4165,
+      "sha256": "81cdd23d1ef56b700a2f013f386fb31d24994313568731ade9154672b98cca40"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/spell_targeting.rs",
+      "bytes": 6636,
+      "sha256": "e809a9d431fb6b2d7e7d95397ed9d8f5ef2c04ffbeb4f0ab2b1bf034663c5c5a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/timing.rs",
+      "bytes": 3263,
+      "sha256": "94bdd0cfc851b8b79f4cc6b2fa1c41c756a17abd3b85c7af97653cb3db702394"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/trade_projection.rs",
+      "bytes": 12404,
+      "sha256": "24ee8e1b34c06dcf1d29a9d4105a6109e11f7e585376952f7a9d55251245183d"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.lock",
+      "bytes": 131232,
+      "sha256": "6a7ed4ea789743298a6c9f25bd4464f1a06a34e9039ca2690933ec1be46b62fd"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.toml",
+      "bytes": 1447,
+      "sha256": "a4ca9a1ae0890ede3214ee5196dad415414f815dc47d0c6abcef2a3b25436c26"
+    },
+    {
+      "path": "apps/game-client/runtime/examples/tile_seam_probe.rs",
+      "bytes": 16474,
+      "sha256": "a9bf1c0d41d34a868b809c9fc72b0e1f1b0d99c03b472a3df27250c922c6784f"
+    },
+    {
+      "path": "apps/game-client/runtime/src/additive_material.rs",
+      "bytes": 13668,
+      "sha256": "478ebde3f15e1d1cfda49f32a18e1cbda6a6da87de183c0e085057939708e464"
+    },
+    {
+      "path": "apps/game-client/runtime/src/additive_material_gpu_tests.rs",
+      "bytes": 12441,
+      "sha256": "79ccebe5d0dd38a515795dcf13e9eec1b4393c8d9584b1853b58841045d13af9"
+    },
+    {
+      "path": "apps/game-client/runtime/src/bag_ui_host.rs",
+      "bytes": 51366,
+      "sha256": "7aa523c8761cdfdb5feb8235654775cd28b5ed89306b1cb229451c851fbfb489"
+    },
+    {
+      "path": "apps/game-client/runtime/src/capture_context.rs",
+      "bytes": 7956,
+      "sha256": "00754168779eda8591989226d9985c0fc2ce5b02a687dbd19b7aeccba7604ab5"
+    },
+    {
+      "path": "apps/game-client/runtime/src/character_ui_host.rs",
+      "bytes": 18887,
+      "sha256": "35c8c2294de5301e68be961cc0a9fad747005df56cf3688c46e9b0db866e8070"
+    },
+    {
+      "path": "apps/game-client/runtime/src/character_ui_host_tests.rs",
+      "bytes": 3682,
+      "sha256": "07011de04cdb4e1ae0b93f66b8d6d02729f39e2d62b8ba4c9204633ddc82221b"
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_input_host.rs",
+      "bytes": 7003,
+      "sha256": "fe49d12e5d1b9313d426eb35392c39d8c27461407665b1cc9bdcb4043d088eb5"
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_input_host_tests.rs",
+      "bytes": 8196,
+      "sha256": "aa2a3f5139ad7a327c6b2323ca674b7b6b7721f2be90db5bffd95a949062bc52"
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_modes_host.rs",
+      "bytes": 21337,
+      "sha256": "14a9cc0ffd6a28d5d901dbef30bcc695ca07ed8d76f66f520677db5a702f8334"
+    },
+    {
+      "path": "apps/game-client/runtime/src/entity_animation.rs",
+      "bytes": 203,
+      "sha256": "380d310bf2d761159915dd820142a671cfd460f45bed4ee5e33f305c68ffb9e4"
+    },
+    {
+      "path": "apps/game-client/runtime/src/entity_animation_bridge.rs",
+      "bytes": 236,
+      "sha256": "74b7fc12e7354bfdfef49f0ce7bd100e01de259e57d2e39af208e25cd3b106e0"
+    },
+    {
+      "path": "apps/game-client/runtime/src/fallback_hierarchy_tests.rs",
+      "bytes": 4326,
+      "sha256": "754e5fd395941d82f98402483f05092dd7e87b0d3a657ebfa850b3352ad99316"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hero_ui_host.rs",
+      "bytes": 101634,
+      "sha256": "c6fb5573e7b60ae28fda739c367075f7e151662bfe04eed76b201bfe02f42fc6"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hud_ui_host.rs",
+      "bytes": 20782,
+      "sha256": "3f0f4a4953b2672ce8549d1022a87c09c41eec5860dd235934610c63d8f28c10"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hunting_repair_economy.rs",
+      "bytes": 24963,
+      "sha256": "403bbf873dac93cb5361ddd7846957d3af798abbe4e614e4c1fd07c883785124"
+    },
+    {
+      "path": "apps/game-client/runtime/src/interpolation.rs",
+      "bytes": 8462,
+      "sha256": "d31c211204e35750913bb2c252f60af30edb6227fac4d9e59e6f2b9ced41abb6"
+    },
+    {
+      "path": "apps/game-client/runtime/src/item_tooltip_query.rs",
+      "bytes": 65466,
+      "sha256": "2fe2dc7b849be95d1e15a920a915f534d3838efa7b00dab68fc1341cba525fee"
+    },
+    {
+      "path": "apps/game-client/runtime/src/lib.rs",
+      "bytes": 438110,
+      "sha256": "572590edb073fbd0f4ea3fddd45f25ea56373e8c88a5c12446d1ba45d6392041"
+    },
+    {
+      "path": "apps/game-client/runtime/src/lighting.rs",
+      "bytes": 21670,
+      "sha256": "537a9316c5f63e82b623cff8fbc0bd6c67df24e07cc614c0b52ac2ffcbf1fc33"
+    },
+    {
+      "path": "apps/game-client/runtime/src/local_motion.rs",
+      "bytes": 66528,
+      "sha256": "a9bcf833a68bf2503ada77d94b8b90b4a4af85500e2848c1606b6f08c42a955d"
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_service_runtime_tests.rs",
+      "bytes": 13271,
+      "sha256": "43bf27036f1e662a1dde05b749e74b93cb2b7805251ba46346dab7d6b4fe4a9f"
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_ui_host.rs",
+      "bytes": 47448,
+      "sha256": "7241266592a374d9ae48b2d8fbfde085c10d83a74bfa5398ea15747f81f8a608"
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_ui_host_tests.rs",
+      "bytes": 55487,
+      "sha256": "909867ebdce1a221bd494aa01d469ffb10534a347fd824d3b4869ad2e094288c"
+    },
+    {
+      "path": "apps/game-client/runtime/src/motion.rs",
+      "bytes": 42732,
+      "sha256": "af068cb08ead0e1f3d005950fe3cbd6ddd14627173d95c6a90853d6773eb5adb"
+    },
+    {
+      "path": "apps/game-client/runtime/src/movement_shadow.rs",
+      "bytes": 53217,
+      "sha256": "ca24171396c5566ce0a4ce510763590a3fbf680d3811bc512e8f8e961521a369"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 142962,
+      "sha256": "fb5f5b2e40baecc4276ba4eef57a35c8e405bd701b410b973f8c04c3dd2ed7d3"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_ingest_wasm.rs",
+      "bytes": 2340,
+      "sha256": "89336801456f9c843807b652addee306eb27092647bdac8c2ad205838c97e2a9"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "bytes": 132273,
+      "sha256": "1ee429283b298e1cc1ffc91221c28d7dcb17d0ead5de8d96610c0e2d90abb4d9"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_shop_ui_host.rs",
+      "bytes": 31911,
+      "sha256": "f5df4d937f9fb181422d3cbcca93807e725f44d0a368f3e1c7a19751ec9a2a02"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_shop_ui_host_tests.rs",
+      "bytes": 25346,
+      "sha256": "50cc0cd99f66c02ecb0ed536ad25869c27e834e98a643cac7bd9d72ac49a8d75"
+    },
+    {
+      "path": "apps/game-client/runtime/src/presentation_pose.rs",
+      "bytes": 26877,
+      "sha256": "9d28250412fabd3890626d58cc2492982a21fdbc4fa988222e27198786ac984b"
+    },
+    {
+      "path": "apps/game-client/runtime/src/quest_route_plan.rs",
+      "bytes": 11027,
+      "sha256": "0ddeeb223245154e103c406608efb33f8865c15e6f2af8b6d6894c1d9e1fc94d"
+    },
+    {
+      "path": "apps/game-client/runtime/src/quest_ui_host.rs",
+      "bytes": 121114,
+      "sha256": "53609a9a0380e321839b45a77fc082fd247048a6b20e4b85a2a1901ec0271031"
+    },
+    {
+      "path": "apps/game-client/runtime/src/remote_motion.rs",
+      "bytes": 29209,
+      "sha256": "d44aea56e9f6bfdf2a530fe19eb015fbdef0191f7f743d5f6ad7e9dff40d821e"
+    },
+    {
+      "path": "apps/game-client/runtime/src/render_diagnostics.rs",
+      "bytes": 27764,
+      "sha256": "0a89afcd1067c657cb65766792e67969122a5904eeb4ae97214866e746cb3cd0"
+    },
+    {
+      "path": "apps/game-client/runtime/src/runtime_ui_capabilities.rs",
+      "bytes": 12610,
+      "sha256": "d88f5a3adcee45c6d562fc14340fa138e5da4f45430f1789b08840b31c83e749"
+    },
+    {
+      "path": "apps/game-client/runtime/src/skill_bar_query.rs",
+      "bytes": 11849,
+      "sha256": "70f7e119a02d9d068bb02415174acf64d00ea198d56325c0794bd4a4b0a4f146"
+    },
+    {
+      "path": "apps/game-client/runtime/src/spells_ui_host.rs",
+      "bytes": 24563,
+      "sha256": "953618b188eea3bade8fc387d3a30eb7b95e7ee8f5a51cede2a703263b190c9d"
+    },
+    {
+      "path": "apps/game-client/runtime/src/spells_ui_host_tests.rs",
+      "bytes": 3410,
+      "sha256": "48c3dd5c785c5e0e1e4c3849713fba63b85b2138091f5b73d4d36d817e4789cc"
+    },
+    {
+      "path": "apps/game-client/runtime/src/storage_ui_host.rs",
+      "bytes": 22503,
+      "sha256": "5df835d2c3a88f6bc51047f213bcb4370b5e88907494b2675b9fee4b8b7f2b01"
+    },
+    {
+      "path": "apps/game-client/runtime/src/storage_ui_host_tests.rs",
+      "bytes": 15058,
+      "sha256": "0cd276641985a9719e0be2dba1f290d2acb6cc5aac586a4b0eb283a1443ec3a8"
+    },
+    {
+      "path": "apps/game-client/runtime/src/webgl2_shared_ui.rs",
+      "bytes": 11391,
+      "sha256": "06bc8aecfdabc2026a6e3bee302451959f2fafcdc5ebb4aa5e8c51f3e8f2defd"
+    },
+    {
+      "path": "apps/game-client/runtime/tests/shared_hud_ingest.rs",
+      "bytes": 6289,
+      "sha256": "995aeae5f73ea2e49c6b93e3bb3fede97b3727bb860fd08aeb1f7a4b5df38212"
+    },
+    {
+      "path": "apps/game-client/ui-core/Cargo.toml",
+      "bytes": 421,
+      "sha256": "781a69888a9a50d5d2b1a8a490871c53076cb1269fcf57265f47992574a08a30"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/action.rs",
+      "bytes": 6653,
+      "sha256": "d95e0b339619179d361ba076576ba036b711d52c2c032c443a9879335ae28ae0"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/effect.rs",
+      "bytes": 7369,
+      "sha256": "9ac4779907ebf8791f5680a7718cc7db49c121faf0033a6b3f8d0e4962db33d1"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/game_shop.rs",
+      "bytes": 9660,
+      "sha256": "ce9a43af84fce92e4ba437cdabc1978889bd1661916ed338a63ef15dfcdc267c"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/lib.rs",
+      "bytes": 443,
+      "sha256": "fa2548bb42f386f8b01084f143d8865d2ad61a09696cb965a7345106f326093b"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/reducer.rs",
+      "bytes": 68848,
+      "sha256": "abf822121a46cdd7ea13b2b6f0043d6a3071c7c3b73c98e09cc2dbe67e96fd4d"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/registry.rs",
+      "bytes": 88537,
+      "sha256": "4bb2744f107109feba9b9ac699e82b231f0905e01fb4babd6c810fc5aefa8934"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/state.rs",
+      "bytes": 24356,
+      "sha256": "f44f769a14c832d555787b7c00a89805fb227bdd0c0857bd9fe23d34ce8fa211"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/storage.rs",
+      "bytes": 4363,
+      "sha256": "8b080cde6b3321d77b2d0f0865c6b196d0241ee4a546ca50e6f6a7edb9fafce0"
+    },
+    {
+      "path": "apps/gateway/Cargo.toml",
+      "bytes": 3362,
+      "sha256": "3367fbf5259f32917e5078585b3be7b4141d2a069851a3f2626d0f19d98c75dc"
+    },
+    {
+      "path": "apps/gateway/src/abnormal_teardown_persistence_tests.rs",
+      "bytes": 16817,
+      "sha256": "b87aa8a37ee53b484d42401455de6b0331f139f0042d6a6c111577777bef678d"
+    },
+    {
+      "path": "apps/gateway/src/abnormal_teardown_zone_drain_tests.rs",
+      "bytes": 7582,
+      "sha256": "b95765a6820ac3e62b51212f294d2f70f8ec7ca69e28c81e3eb9d303cf695cf7"
+    },
+    {
+      "path": "apps/gateway/src/ai_distribution.rs",
+      "bytes": 56256,
+      "sha256": "4a05c2d958971c2fce8e02880c87e036e7a220c3ac0f90c09dd005b74c4ea1a8"
+    },
+    {
+      "path": "apps/gateway/src/ai_live.rs",
+      "bytes": 44045,
+      "sha256": "05892d65292e975ac521c8be4eb14e88348014e54306163ebf2f0681f55241f1"
+    },
+    {
+      "path": "apps/gateway/src/auth.rs",
+      "bytes": 25013,
+      "sha256": "463e66a794fda8fc0fec6c16ccb9f70c52ca9ba368541dbafa297f2853cc519e"
+    },
+    {
+      "path": "apps/gateway/src/beta.rs",
+      "bytes": 20228,
+      "sha256": "dedf1e52f1b5ba622795eedebcf023d73b8405c65b17c38e64d6eb4368ef0adc"
+    },
+    {
+      "path": "apps/gateway/src/bin/crystal_original_capture_relay.rs",
+      "bytes": 32162,
+      "sha256": "453dcaf438617488492de055f262d90f4232182e2a8884cd1d2da5f528776912"
+    },
+    {
+      "path": "apps/gateway/src/bin/file_store_reconcile.rs",
+      "bytes": 11179,
+      "sha256": "27ddbe8e2ede8934ad319031a2e38e193e57854e0bf1bc6a956c10df885174e7"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate10_acceptance.rs",
+      "bytes": 1671,
+      "sha256": "22584943427ab64b6e9b072cedc1e459915de1055b95e08a095e2c28ee187ea9"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate11_acceptance.rs",
+      "bytes": 216,
+      "sha256": "565d360c5a2d59c1e2ee51ae0ddf3e9130447bccbfc309fe75ca68694ad4c030"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate11_full_acceptance.rs",
+      "bytes": 1813,
+      "sha256": "64ba4e5022736d3c64156fe5b96402d31cb1d05013306d7faa93469cba3c305d"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate11_scale_acceptance.rs",
+      "bytes": 228,
+      "sha256": "7bacfa78251a5a0e59ed11c7cfe6e214446693d9276b6579bf1ad6db3213d437"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate12_acceptance.rs",
+      "bytes": 16748,
+      "sha256": "11321b3b75bf52613c4efb107f50291ccb4cc22c59b199c78b25c8ddc49d908b"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate13_acceptance.rs",
+      "bytes": 11651,
+      "sha256": "43ab90e3c7af7028cf9c0ded609f0e8d971ec48b58043facd11765856a67d66e"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate14_gateway.rs",
+      "bytes": 21594,
+      "sha256": "a6344dbf32332bfbbf533a93c1ca8f1168e33fc24b2a2affc75fdd3659a58103"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate14_projector.rs",
+      "bytes": 18472,
+      "sha256": "84c3eaeaf4814104b2d7a8b2d67392bc8c405d65125fe652eae7b4b13a60ab82"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate14_validator.rs",
+      "bytes": 31260,
+      "sha256": "acde49d6a2f4515fbea3009581b6eff8fa782158f878b99ce5dcddd5d4edcbf9"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate16_checkpoint_load.rs",
+      "bytes": 18582,
+      "sha256": "467db287bf10a9cecef8234c3fef0f609b4b146abd37c4b284c93700fea2cf16"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate16_v5_certification.rs",
+      "bytes": 24971,
+      "sha256": "463845a41cbedc0db478a9898159ccbd9ef4ea9bfda1ad09650d80087d117e08"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate17_acceptance.rs",
+      "bytes": 12591,
+      "sha256": "9306b5459174c8b85b7b0b33b25d7718924fc7aa9238aea86bf85363391064ab"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate18_economy_producer_acceptance.rs",
+      "bytes": 26397,
+      "sha256": "388a30835832917f71a2d177159b0a50b436df7810de1442f09187c073d73769"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate18_gameplay_acceptance.rs",
+      "bytes": 18245,
+      "sha256": "9a01d1ecdf97cac1435bcbcb8f63d2f51547926808e1af85bc8b35bade983490"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate18_load_acceptance.rs",
+      "bytes": 62370,
+      "sha256": "8a9fbd24451894b1a0a2fb2e9ead7bd167dcfb3ea76b1626b93114e410d60c6f"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate18_migration_acceptance.rs",
+      "bytes": 3834,
+      "sha256": "2f1c5c95b59f5ca3444386c31c1ca813614a04b95f035ff6246b60c18bdfc35d"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate18_remote_economy_acceptance.rs",
+      "bytes": 16074,
+      "sha256": "241acb67ca017b317644fe9cdae73ca75272f7f90526580b8aeb72e59ab351d3"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate19_infra_probe.rs",
+      "bytes": 8824,
+      "sha256": "ad428be4cd82cc1dac30d846413ccd888fa0958678e48f219b2a6ea239fa17d7"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate19_zone_failover_controller.rs",
+      "bytes": 15097,
+      "sha256": "a5d98dedccae1bf7b0dd42f8185069f3cf3628d8f1c73737a4c14f8cc0371703"
+    },
+    {
+      "path": "apps/gateway/src/bin/gate19_zone_seed.rs",
+      "bytes": 7835,
+      "sha256": "51bb201a537651a2da5c7ef669dcac84b2980abb43632c0db514ea0bdb35fb82"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_agent.rs",
+      "bytes": 27966,
+      "sha256": "2bfba063219357f905c5f1f679f90c06b63bc5e33bed25a4cf51a45c46b99b78"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_agent_launcher.rs",
+      "bytes": 8100,
+      "sha256": "de0af3e45ebd696bee034a91b20c2a32f7e9065fee6747b43063e1002c83c079"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_agent_release.rs",
+      "bytes": 4732,
+      "sha256": "34e5d828c75a52b89029636ca056013d5aff499a5d21e70d3794119343fd1025"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_agent_supervisor.rs",
+      "bytes": 47116,
+      "sha256": "c27995d7040a4f6594c8f29c52da698dd2b19a3a7eb897e320c773dd46ff9a03"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_beta_controller.rs",
+      "bytes": 5720,
+      "sha256": "bf4dd50d2a834ab675ddd28309cc95e8742cde1d387b52b7c3c41e28fe41f606"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_beta_local_acceptance.rs",
+      "bytes": 8428,
+      "sha256": "550e90afda3005442d93c6b412f3ff4665f14606a4eec255fffd0d1264f60b04"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_beta_policy.rs",
+      "bytes": 7396,
+      "sha256": "7de00919f27a44d57e21346e5d9e81b2f68a682c6156655a2c5664ad2338be72"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_beta_runner.rs",
+      "bytes": 7430,
+      "sha256": "09476f2f3c7aef72a7d9ae3ddef78e391141a08b1dbfcb9ba0efd0de08e95141"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_enrollment_service.rs",
+      "bytes": 46689,
+      "sha256": "32187699e54a67124c6ce58f0c9bdcac7da832bff8821e4601f8a10c9af5c03b"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_local_stack_fixture.rs",
+      "bytes": 7282,
+      "sha256": "ddf105e3d7c94bc1957475b768a17c758d98f7019c0fd23a5ceffacfd2d826ff"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_player_probe.rs",
+      "bytes": 7492,
+      "sha256": "df8bbdf0538167f00ef0b7499a4af2bc2c997ef574bdd015ea540cf1730b94c5"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_relay.rs",
+      "bytes": 4955,
+      "sha256": "c2f2f38e8d148465cc6e843c51795218848aa37301c21b3e65bd652527628c99"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_sandbox_policy.rs",
+      "bytes": 5840,
+      "sha256": "6077bed3cfc70c42c64a65ebbaf18bb273b68e5aba0ddb6d38c5b9b0d94dde70"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_telemetry_collector.rs",
+      "bytes": 33923,
+      "sha256": "d5bfd9fe021fb5f26d5ba63a9cbaff0e331a7b1ff3ecc6944b3f05b1a0e55b54"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_tunnel_acceptance.rs",
+      "bytes": 4089,
+      "sha256": "df1e89fd0cb6ec6e64eb68a57c63136e0a4faf56c66a63a1b0817ecac241128c"
+    },
+    {
+      "path": "apps/gateway/src/bin/home_tunnel_fixture.rs",
+      "bytes": 4920,
+      "sha256": "8d85b5d153e65f248adffb75f9c3d92ad69fdec98b9b750856d9b9ad5ec99587"
+    },
+    {
+      "path": "apps/gateway/src/bin/node_identity.rs",
+      "bytes": 2875,
+      "sha256": "8c2736c466ca14b1f38f453c93a1a169971c1434f1232a5dff82a2ddc0e9465b"
+    },
+    {
+      "path": "apps/gateway/src/bin/packet_trace.rs",
+      "bytes": 86893,
+      "sha256": "9c140dcadf380445785a8635f6d37c6b5f7b83c81b1211050739d1e6b7293891"
+    },
+    {
+      "path": "apps/gateway/src/bin/seed_playtest_pg_accounts.rs",
+      "bytes": 27677,
+      "sha256": "6ad286d8c81d621dfcbafce3f8a40055cec833c55bb2ca3ba134b0a74a231bac"
+    },
+    {
+      "path": "apps/gateway/src/bin/seed_ws_load_accounts.rs",
+      "bytes": 16412,
+      "sha256": "feb0754b5b100108e37c03d1abcba731d35251dccbcfc6e4bec598b80cf265a4"
+    },
+    {
+      "path": "apps/gateway/src/bin/smoke.rs",
+      "bytes": 3968,
+      "sha256": "f45bba6ef203f925a147c771a050fbec17d85c5df50dbcfe03922d1e4066905c"
+    },
+    {
+      "path": "apps/gateway/src/bin/tcp_load.rs",
+      "bytes": 12655,
+      "sha256": "70928a7e6a4c5743ee36e2debd278a4bd49ab7d9945dc8ce20275c87153bb3b1"
+    },
+    {
+      "path": "apps/gateway/src/bin/world_director_demo.rs",
+      "bytes": 8961,
+      "sha256": "481a97337933d6e1bf786cd30e5336006782120a9912eb10644c0d2e1abb66e2"
+    },
+    {
+      "path": "apps/gateway/src/bin/zone_host.rs",
+      "bytes": 13370,
+      "sha256": "9de3056c5e33e3fa59591e2a6db7d2b385b966e4c768b485eb19dd3e61472aee"
+    },
+    {
+      "path": "apps/gateway/src/bin/zone_promoter.rs",
+      "bytes": 4857,
+      "sha256": "52657c0bc6bac93453ee5e555335c16a806a56a2bd4674897e9b16a32292a68a"
+    },
+    {
+      "path": "apps/gateway/src/bin/zone_replicator.rs",
+      "bytes": 49048,
+      "sha256": "4d1d4d41b2d8a6bd443f36a3cdfb06eaead7407655eafde2bad204776a49a03d"
+    },
+    {
+      "path": "apps/gateway/src/browser_commands.rs",
+      "bytes": 3189,
+      "sha256": "37abb244133d7fd9d044ed2cfb53fac165e40ee592ffd6b1805e80bb12e85024"
+    },
+    {
+      "path": "apps/gateway/src/cache.rs",
+      "bytes": 102109,
+      "sha256": "1c257d99144c51af24be254e85947a6eac2b18608ba0ba6ae904fa035f442614"
+    },
+    {
+      "path": "apps/gateway/src/channel_identity.rs",
+      "bytes": 44776,
+      "sha256": "f700da34aea7e5e2527d61d40e250d0340c86f9b81d801fc604acd2d8837e978"
+    },
+    {
+      "path": "apps/gateway/src/chat_broadcast.rs",
+      "bytes": 20911,
+      "sha256": "8eb5ee898d0da97aabe4b0b2eca284d5a78c70ed5c4fb3fa6aa325a4ad714c05"
+    },
+    {
+      "path": "apps/gateway/src/consensus_log.rs",
+      "bytes": 43562,
+      "sha256": "9b89ad6e118f43b708866526c8dba90eaca863c314292d4be373651e578d01c0"
+    },
+    {
+      "path": "apps/gateway/src/control_plane.rs",
+      "bytes": 24549,
+      "sha256": "c9070a6f21645ee31ad056b13f97006f5e4595432fb25bf722d855c3bdcdcd94"
+    },
+    {
+      "path": "apps/gateway/src/economy.rs",
+      "bytes": 200850,
+      "sha256": "bbf434af6de0d63dfc9e86afdd3411c6195757d059cd4b14d8838946f383d524"
+    },
+    {
+      "path": "apps/gateway/src/economy/prepared_kill.rs",
+      "bytes": 8425,
+      "sha256": "9be6153c020befae9b609e2943fa6e771654b8ed217a002912f531445ba617b6"
+    },
+    {
+      "path": "apps/gateway/src/economy/prepared_kill/runtime_bridge.rs",
+      "bytes": 9182,
+      "sha256": "f890f3570930709dfa24981bcdd2788ce04fcdb9eebe1059021f53dcb47fdcd6"
+    },
+    {
+      "path": "apps/gateway/src/economy/prepared_kill/tests.rs",
+      "bytes": 21551,
+      "sha256": "10e8bb53ce2418ada6ebeccdd313695607d47d88c2dd47baa740766bd927b148"
+    },
+    {
+      "path": "apps/gateway/src/events.rs",
+      "bytes": 25188,
+      "sha256": "ea749dd5fdd275d79ce15c213c59ab0879e2f6a47d1ca2a69882eba55933e568"
+    },
+    {
+      "path": "apps/gateway/src/gate14.rs",
+      "bytes": 43464,
+      "sha256": "0750c70d5f454e887f0657669602a6676cdab296f967b6eea70d0013d56b31de"
+    },
+    {
+      "path": "apps/gateway/src/gate15.rs",
+      "bytes": 37170,
+      "sha256": "8cbce042324a4eea459cd5e8e091be119352be72eb1ea3274cf500d5fd925eb7"
+    },
+    {
+      "path": "apps/gateway/src/guild_clock.rs",
+      "bytes": 3713,
+      "sha256": "12f9ec63819e3868794694cfc9cfab897db417c7448b7c7a37efebd5c844d4d2"
+    },
+    {
+      "path": "apps/gateway/src/home_tunnel_transport.rs",
+      "bytes": 41844,
+      "sha256": "47bca4d7e9c649c03696c58200c4421054a0a7d8876934c5b9574e4afe954d0c"
+    },
+    {
+      "path": "apps/gateway/src/hotspot.rs",
+      "bytes": 16857,
+      "sha256": "2c02a2ba852c085c5e887a8ebb6bbe4903316036e0b4167cfd8950f5aac74481"
+    },
+    {
+      "path": "apps/gateway/src/hunting_clock.rs",
+      "bytes": 21633,
+      "sha256": "bc9e3fcb857d81440ef12e70c7d2e10f012bc9d0b785a461d77562d8aa6892ae"
+    },
+    {
+      "path": "apps/gateway/src/hunting_repair_browser.rs",
+      "bytes": 21341,
+      "sha256": "53f8be40a2a75764dbdd5c947cfa4d8c0ce3e349399eea6d67924d0634ce4653"
+    },
+    {
+      "path": "apps/gateway/src/hunting_repair_postgres_tests.rs",
+      "bytes": 32714,
+      "sha256": "32f48f971d708f34c986ed1f3d75f24d842d0f1da9a406cdc7b46a7719b35c69"
+    },
+    {
+      "path": "apps/gateway/src/identity.rs",
+      "bytes": 56757,
+      "sha256": "f07d5cd2a03bcf550d8c1ce185555eb4d361dedf3f717ee12f6e7f639ce0ae1f"
+    },
+    {
+      "path": "apps/gateway/src/inject.rs",
+      "bytes": 12046,
+      "sha256": "e105c4fc93f391395775daf49881ca7789fa5de32d6e7f5ef035841cd0a09be1"
+    },
+    {
+      "path": "apps/gateway/src/lib.rs",
+      "bytes": 11286,
+      "sha256": "b1968d269517a594fa4850dd5e0832d5175784b896dcb194d77a9bc61ac88a1a"
+    },
+    {
+      "path": "apps/gateway/src/main.rs",
+      "bytes": 9533,
+      "sha256": "e14fc2a50a2d23b4ac28b976a04bf5e30d4f3faefc82b2bc92b20915ad5d3086"
+    },
+    {
+      "path": "apps/gateway/src/mir2_workload.rs",
+      "bytes": 45469,
+      "sha256": "93c118ba701016d2c8a196cb3b20c0b89a8c6ad8fab63b8aa832217bbab63898"
+    },
+    {
+      "path": "apps/gateway/src/node_security.rs",
+      "bytes": 38680,
+      "sha256": "0c95f61bbdf78eccbf19f59cd60da7e2be96395704bd493fe4c18d329271255d"
+    },
+    {
+      "path": "apps/gateway/src/npc_gold_buy_route.rs",
+      "bytes": 2388,
+      "sha256": "fbf43e2ddf68e283a320c6586bd0c5040220871954d1886a8b9d6496da006584"
+    },
+    {
+      "path": "apps/gateway/src/npc_gold_buy_route_tests.rs",
+      "bytes": 33445,
+      "sha256": "c623be537511a214e5c0f75474a56c27c9d1bf19999789a70700da999ea6a2ac"
+    },
+    {
+      "path": "apps/gateway/src/npc_purchase_browser.rs",
+      "bytes": 12366,
+      "sha256": "ece105e1db2a8b41f1bd01901411dec432a17e5d259f01fc39ead2725f8d6952"
+    },
+    {
+      "path": "apps/gateway/src/npc_purchase_owner_route.rs",
+      "bytes": 4857,
+      "sha256": "c2b557650c1878589610759a2d0d4336487b3ca84c23cdd05235a2afbd6399e2"
+    },
+    {
+      "path": "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+      "bytes": 48204,
+      "sha256": "11ae33305a91a4085c94223e3b1613206ad5cdbc4240102d417130ef5d37439f"
+    },
+    {
+      "path": "apps/gateway/src/operator.rs",
+      "bytes": 60973,
+      "sha256": "b4d0bf21c41af3da06ec1362dcc7d22d7f77fd1faacf14ebf6390800396e9f67"
+    },
+    {
+      "path": "apps/gateway/src/regional.rs",
+      "bytes": 11942,
+      "sha256": "dd9bac00d7459185009b7a280b3ea4e4a0a827848a56af13f4690c31e3e789ac"
+    },
+    {
+      "path": "apps/gateway/src/resume.rs",
+      "bytes": 19047,
+      "sha256": "172ed611ad16a68aefa79e9d7fb703ee21240e6b926bd4490495a70a5ad14168"
+    },
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "bytes": 1267222,
+      "sha256": "86c981ca23dfb2d8f370f98745d49d1249175951dd0cd65fdfdd1fa535392277"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/cadence_map_transfer_tests.rs",
+      "bytes": 9497,
+      "sha256": "ecf88a0144a45d62206195655b72eec598c54b2df8b94acbbc2e7f1c7ab55095"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/creature_authority_tests.rs",
+      "bytes": 9009,
+      "sha256": "48841c669ff753057b8910620a00c8ca14ad2415cfdbf24869fd6a0ef71e9361"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/guild_kill_source_tests.rs",
+      "bytes": 5668,
+      "sha256": "22a282bb0fd4f3f815c9a2a0860b60abcd3c293cbb382d4b137a2c306176521f"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/harvest_corpse_expiry_tests.rs",
+      "bytes": 6230,
+      "sha256": "b32e558dc76d5cb5daaa58500d679d8064acbf0b63790b8397c86bb5d4d730e9"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/incremental_monster_hydration_tests.rs",
+      "bytes": 7374,
+      "sha256": "47e6c38b86c6a38b52cb6f9f6a5dc565e491b7a10079594ee7c9be326e6ef0d1"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/inventory_receipt_scope_tests.rs",
+      "bytes": 8569,
+      "sha256": "a3ec9e2e12ebc43bbe8695c42e529ee19c978cc36dea760dba85b79f6802de8c"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "bytes": 26272,
+      "sha256": "95da0e53b5c0ec844c85a383b327e07130a41d2aa09846272720dfe63874f7d3"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/live_chat_tests.rs",
+      "bytes": 6603,
+      "sha256": "4d03cfada882860b11a4a68f4045c8591c5fc215e6cc80b2e8d56978a5a4b9de"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/movement_deadline_tests.rs",
+      "bytes": 5600,
+      "sha256": "6851c963f16c4530fa03c8b6d6aa5b3c97f2fb25662f25d1bd599376016a2611"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/ordered_economy_replay_tests.rs",
+      "bytes": 5101,
+      "sha256": "89a19913862fb26b6e5fe0378065ea396b884bd7393da9a69f86d74e7e3eb1b0"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/owner_attack_animation_tests.rs",
+      "bytes": 4470,
+      "sha256": "bee61db2edb99ac459898e83e5762afd5f99a9eed1593fa1a82e0db32b8c5981"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/owner_location_order_tests.rs",
+      "bytes": 17319,
+      "sha256": "b454a96ea0b03d4991f72be710bc42cd6247532d875462b6fbbc8b4875d5c9ea"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/owner_packet_normalization_tests.rs",
+      "bytes": 5547,
+      "sha256": "7a66c515fa72d20291e3c56c2bbc3ec7020e7010c94e98287cccdd8179dc1e66"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+      "bytes": 12866,
+      "sha256": "b77858fb1542e0ee9041f430a7e3702e47190e6650596ab7ac768ba15a02ed6d"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+      "bytes": 12555,
+      "sha256": "dc5d0862501b588263f1a187628af6a1e00ec30a268d000e73feebb8aa42f722"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/predrain_performance_tests.rs",
+      "bytes": 7322,
+      "sha256": "786745ae809490ed8c42e3664f2fa95548376520697982ac5df3211f4c7e20b6"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/shared_drop_aoi_tests.rs",
+      "bytes": 7534,
+      "sha256": "c300b0f470b9065f8da4216a416d7a291635fbfc52027083dcb7ad7278b5353b"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/shared_item_teleport_tests.rs",
+      "bytes": 5231,
+      "sha256": "8382c475dcc9029a0952dc99078cfa3ae56f0db2ed87150b203258371e69736f"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/shared_session_hot_path_tests.rs",
+      "bytes": 10792,
+      "sha256": "982d2ccbad67a1b0fe5f215834d35ecaae7bf65ad59775c7f49bbfb1b61b0c0f"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/trade_completion_tests.rs",
+      "bytes": 11938,
+      "sha256": "02c782ce811b2608e72658509241d6876cbe10e4e3c34233b6d34c8cdc7935e2"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/trade_gold_tests.rs",
+      "bytes": 18486,
+      "sha256": "9052085306592b7daa1ab28b1e7f3fcc26b21d0ef3533edfd3f797427edc369b"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/trade_invitation_tests.rs",
+      "bytes": 17601,
+      "sha256": "4c93c29f9157653570cd51041db4165bceeb5e68ac51be12262f3fcaf80968de"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/trade_item_edit_tests.rs",
+      "bytes": 5337,
+      "sha256": "c3d6bcbf93a4d3d663df4db7cbe4733e11c19802ab2f033f30833aeadac2e2aa"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/zone_journey_event_bridge_tests.rs",
+      "bytes": 23852,
+      "sha256": "bdc1cdccde9b2d55e950c878cc284b1efc1ee53908b8336609c281dcfe3a7db5"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/zone_melee_passive_progression_tests.rs",
+      "bytes": 9860,
+      "sha256": "6a04caa05e41f6df3a44a6692f1f739294d8c7c93d5b7525ff74326028a5b763"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/zone_soulfire_practice_tests.rs",
+      "bytes": 25076,
+      "sha256": "0e91d63ef5f3a7622f0eaf57ac39a8a8218163f77171db25b437feb191186013"
+    },
+    {
+      "path": "apps/gateway/src/save_fail_closed_tests.rs",
+      "bytes": 4343,
+      "sha256": "c4bfd2767779c4d8c7fb93a937f7c93a57bc4f7b63fed1a23632b95ce4377696"
+    },
+    {
+      "path": "apps/gateway/src/save_recovery.rs",
+      "bytes": 88825,
+      "sha256": "145ceede753887ae2d054f69f1fe95f8dd57d4ae68058ba4318b12e8880adc41"
+    },
+    {
+      "path": "apps/gateway/src/save_recovery_tests.rs",
+      "bytes": 36804,
+      "sha256": "ce86c339ab4856a81e60652c5af28a554199bbf6498525aaf67c5c0a71cdb795"
+    },
+    {
+      "path": "apps/gateway/src/session.rs",
+      "bytes": 106855,
+      "sha256": "883383f5288f582f4569db0d64db2378c2e2ddbeacf14385b94bdc9250263651"
+    },
+    {
+      "path": "apps/gateway/src/shared_creatures.rs",
+      "bytes": 7754,
+      "sha256": "758b0bcd276689749d67b3bb64f3c7b4db68957e5f5fc4553ad864216d46efd6"
+    },
+    {
+      "path": "apps/gateway/src/shared_guilds.rs",
+      "bytes": 14220,
+      "sha256": "56cdfe61f1ffacd2d9f199bf41c9c881730e9ab99f2d8d57b401e439de9ad61b"
+    },
+    {
+      "path": "apps/gateway/src/shared_marriage.rs",
+      "bytes": 13279,
+      "sha256": "494a5476fd70b37ede17192cd641de9f1f94da5a2332c0fe0b70e8dd1e73cf5c"
+    },
+    {
+      "path": "apps/gateway/src/shared_mentor.rs",
+      "bytes": 12726,
+      "sha256": "b5d978e0cf90da014eb4bca1ff238b38abe45f08c8ec800bbeb8028830aeea9f"
+    },
+    {
+      "path": "apps/gateway/src/spectator.rs",
+      "bytes": 49019,
+      "sha256": "d57e9679217c3251e295793e450be29d8c1e810ed30726dbd0fc6eb8919edad7"
+    },
+    {
+      "path": "apps/gateway/src/tcp.rs",
+      "bytes": 30043,
+      "sha256": "0cb2e65ded1e890738c0a94538a561e68b2836cb3172640935eec99cee8c591a"
+    },
+    {
+      "path": "apps/gateway/src/tcp_save_fail_closed_tests.rs",
+      "bytes": 1081,
+      "sha256": "935472b05accb7c4011b055f4756d928acfd0e12fd53fb2a5f1f349eb353f984"
+    },
+    {
+      "path": "apps/gateway/src/topology.rs",
+      "bytes": 23508,
+      "sha256": "1336ed74fe21547ef386204d53ce698af36f166e3a3e243e559d6b8ca6fc0ddb"
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "bytes": 805966,
+      "sha256": "eabdf5dc6b3a4e528a21909cde83519541af2bbdf38b4d751f213a368ce4f9e6"
+    },
+    {
+      "path": "apps/gateway/src/web/catalog_transport.rs",
+      "bytes": 29544,
+      "sha256": "39ffb549c290dc67fd2902346af219cee60f965f59aea409cfe9cf9012298b5b"
+    },
+    {
+      "path": "apps/gateway/src/web/hunting_economy.rs",
+      "bytes": 35526,
+      "sha256": "dd2b170ec7cd82f2d527ed179b4f91a1b95b3c6866469099761354bf37b85ed6"
+    },
+    {
+      "path": "apps/gateway/src/web_auth_peer_bucket_tests.rs",
+      "bytes": 3329,
+      "sha256": "75abfe1e93a02ae9aeb35599993167b996e9549dee4aa81df78c7ed25b260847"
+    },
+    {
+      "path": "apps/gateway/src/web_explicit_leave_route_tests.rs",
+      "bytes": 9145,
+      "sha256": "3c6a56c13f24a7ef46c3bd614d1f23f113132f5393abfd9424c4b857b138f4af"
+    },
+    {
+      "path": "apps/gateway/src/web_hunting_repair_network_tests.rs",
+      "bytes": 49708,
+      "sha256": "3b56e57e48faa03e00fc88ae649daf2138ba417b0843507e6d19bdeb302622b3"
+    },
+    {
+      "path": "apps/gateway/src/web_live_overflow_tests.rs",
+      "bytes": 20873,
+      "sha256": "5bc045bf5d47baf3b050200717392ecaf66fae163eedb3942693126fd40089c4"
+    },
+    {
+      "path": "apps/gateway/src/web_resume_identity_grant_tests.rs",
+      "bytes": 14982,
+      "sha256": "bccd63cd0a58f51b4edfd7b58aa3f2902b84920ebc17a7bcc09f4f7f28b7af27"
+    },
+    {
+      "path": "apps/gateway/src/web_save_fail_closed_tests.rs",
+      "bytes": 20563,
+      "sha256": "3637160768cb0fc179a838c06a9d40307a225cddb781d6163c9dce8bc11dfe27"
+    },
+    {
+      "path": "apps/gateway/src/world_director.rs",
+      "bytes": 101436,
+      "sha256": "5dda181d031fe99db42ec6ba3e3d1e924787ed6adab62a9a867900c2653b734f"
+    },
+    {
+      "path": "apps/gateway/src/zone_lease.rs",
+      "bytes": 46237,
+      "sha256": "5e6cf29b3be27ab543fbca6c46e35bf460a68affb44596e5840a61abecf0a038"
+    },
+    {
+      "path": "apps/gateway/src/zone_replication.rs",
+      "bytes": 23119,
+      "sha256": "075de15aa6a30b01f4480e0db4168f913e287681bc43f9e181bfce908adc2fa8"
+    },
+    {
+      "path": "apps/gateway/src/zone_rpc.rs",
+      "bytes": 335662,
+      "sha256": "920552a21ba34c8f5ec3435b901aa1360bc0f3295f3f9f0a963658f750d9267a"
+    },
+    {
+      "path": "apps/gateway/tests/friends_shared_presence.rs",
+      "bytes": 4113,
+      "sha256": "7802d756b4d95e084530d30cdd103fb978b4413f4bcfd84b9c92e7331df2d4f5"
+    },
+    {
+      "path": "apps/gateway/tests/gate11_workload.rs",
+      "bytes": 630,
+      "sha256": "941ebc10215a941d4ac01240b7cacb679f9ccb415ccb6d35c8daab860197a107"
+    },
+    {
+      "path": "apps/gateway/tests/guild_shared_lifecycle.rs",
+      "bytes": 19696,
+      "sha256": "8b52c3a02b215e2f7e2b11e1cf96f7f469fdd49a20d3f77b6dce8ce5023a2387"
+    },
+    {
+      "path": "apps/gateway/tests/home_tunnel.rs",
+      "bytes": 28990,
+      "sha256": "7b9ee730f45da9bffb15d1d667544f9b50b22e181f2839c10f319e4efd153185"
+    },
+    {
+      "path": "apps/gateway/tests/marriage_shared_lifecycle.rs",
+      "bytes": 8334,
+      "sha256": "fe28ad772e6a3217bddc16b9bdbfb771213249d7ac60488b3a5e8d9d693bff17"
+    },
+    {
+      "path": "apps/gateway/tests/mentor_shared_lifecycle.rs",
+      "bytes": 11341,
+      "sha256": "a5837326242c4bcf8480d711feb6e32b3b75dc676fb78c16538c684361092e55"
+    },
+    {
+      "path": "apps/gateway/tests/ranking_shared_presence.rs",
+      "bytes": 20170,
+      "sha256": "7e4e33688b47235f1f395782c7bc48c95f093fe406ff056871e71f796a2cff34"
+    },
+    {
+      "path": "apps/gateway/tests/vertical_slice_gateway_persistence.rs",
+      "bytes": 74024,
+      "sha256": "e918e54c772dea30644c7a7828b84f1891b5d994d23f67e88ff30b0a459f283b"
+    },
+    {
+      "path": "apps/gateway/tests/zone_rpc.rs",
+      "bytes": 99567,
+      "sha256": "288f829988df6ea302b8e6bc020082d48b45d89aa48019723f459ec8c97d6afd"
+    },
+    {
+      "path": "apps/simulation/Cargo.toml",
+      "bytes": 808,
+      "sha256": "a8b875598edc72855a9a2a13525c79d1d3dde2cfbdce30a9b67e9b780fa12191"
+    },
+    {
+      "path": "apps/simulation/examples/zone_load.rs",
+      "bytes": 22369,
+      "sha256": "5714291c02588f9759efa755f050b817b256876ccc7b43b0d3f58fdc3b58cf32"
+    },
+    {
+      "path": "apps/simulation/src/bin/zone_replay.rs",
+      "bytes": 2457,
+      "sha256": "6d900fe0963b61591b583d1d1176116cd169d22514829d96cab2c3f97316348b"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 303101,
+      "sha256": "311e4c79b155c5bcad81e2a9a9b451c56e0ab7966fcb326bfd70be486c9e8779"
+    },
+    {
+      "path": "apps/simulation/src/config_account_store_durability_tests.rs",
+      "bytes": 5489,
+      "sha256": "195a76501d192738f983ded1809e71c2e2c08f8a95e3e4a19c8645f9bda3dec0"
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "bytes": 23658,
+      "sha256": "2b05ffa956ebbf198997357c3b90c02a2f8b0b465ae486014f6d2d1d2ccbffb0"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock.rs",
+      "bytes": 18643,
+      "sha256": "2a26860fd7fb34208d8b94943b6f727899ee54f63b3ea50439c19a374850b4f9"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 21723,
+      "sha256": "a80fc6c512951f9d23828041407a6d028a1a755313fab566660f144718c957f4"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_late_pg_tests.rs",
+      "bytes": 5293,
+      "sha256": "557df713670c992045e0e7a213240af7cda6126652e751007728ad907c5cc700"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_pg_tests.rs",
+      "bytes": 21887,
+      "sha256": "3e54ff2a8afea7916f5dba14c8aba0079fa2a0e08f0796494d669c235ddf8908"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_schema_tests.rs",
+      "bytes": 8139,
+      "sha256": "a6142629ec28dd137e8d6827e9a0e109d1d2d4f78070581061f7eaa6740a63bc"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_transactions.rs",
+      "bytes": 9377,
+      "sha256": "4e8ab8b4530c961606fffeb058edeeb404e8f06e7ecccd080747bcf337bfbef3"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_experience.rs",
+      "bytes": 8162,
+      "sha256": "95508910039346218a2d1104181f2b298fc986b4478e386e1dcc16695d7db2d3"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_experience_capture_tests.rs",
+      "bytes": 6892,
+      "sha256": "91f9a09464c68de9aecde699af2074bca75c6413b86189eeb667adba8b3a3593"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_experience_commit.rs",
+      "bytes": 13060,
+      "sha256": "b29fafb9aa597db7be714d53ad4714d915407501cf5f3192604f93ab512c18ed"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_experience_permit.rs",
+      "bytes": 3317,
+      "sha256": "318edfd15273632237f3b05178ce1a595c1f2f18c265d042b611014302c9d80f"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_experience_tests.rs",
+      "bytes": 8303,
+      "sha256": "42795fce20740a79c8de7f3c9ea39b90a012d7dddeb4e782683684046a2eeddd"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_xp_pg_tests.rs",
+      "bytes": 4898,
+      "sha256": "7b897031c4783fbc19a549aafaa35d92380cff6daf87ec104287e158696827ca"
+    },
+    {
+      "path": "apps/simulation/src/config_hero_authority.rs",
+      "bytes": 1654,
+      "sha256": "77c781fd809b78d94b4b2fcdb999dd0832d8525dcc615be3041f448b1491e61e"
+    },
+    {
+      "path": "apps/simulation/src/config_hero_compensation.rs",
+      "bytes": 1933,
+      "sha256": "f1979bd2684a800f811e7477a1b126ff11232b9283b9f462b8837f2fe32d1624"
+    },
+    {
+      "path": "apps/simulation/src/config_hero_map.rs",
+      "bytes": 1054,
+      "sha256": "580895e2f687645f50ad1e578f9f8a6b4cbc43a4b5291332d1c46dccd3d2d1a8"
+    },
+    {
+      "path": "apps/simulation/src/config_hero_postgres.rs",
+      "bytes": 7954,
+      "sha256": "cc61e027e7ed449179d58a145e9984ace44b30878c70e52957b35b8872f45726"
+    },
+    {
+      "path": "apps/simulation/src/config_hero_postgres_tests.rs",
+      "bytes": 10922,
+      "sha256": "299acc316d75a1f76c7889dc2f549d842f35fa79cd8656acbe9394cc3050fb8b"
+    },
+    {
+      "path": "apps/simulation/src/config_hero_registry.rs",
+      "bytes": 13380,
+      "sha256": "cd9afcebb5ed61beb4d1f69cff6ce61cd53503ad18644bb326885a6d36d0203b"
+    },
+    {
+      "path": "apps/simulation/src/config_hero_scope.rs",
+      "bytes": 5897,
+      "sha256": "b82af653acb3414f4cfda1fef375d791c07683e24474b33581a8281f7917a969"
+    },
+    {
+      "path": "apps/simulation/src/config_hero_transaction_tests.rs",
+      "bytes": 7310,
+      "sha256": "11849dde582e7c587564cc5197b52ab60b834989b19748ecd2ea2f6c963dfa32"
+    },
+    {
+      "path": "apps/simulation/src/config_hunting_deletion.rs",
+      "bytes": 4038,
+      "sha256": "b008b7e30b6f673b0ea05ace0b3ec47c970d4082c22ae6ac960c5bff9ec2a13f"
+    },
+    {
+      "path": "apps/simulation/src/config_hunting_deletion_tests.rs",
+      "bytes": 17043,
+      "sha256": "4ad9dfa6b65f1ab0633b80a683ce496f9879f1c25f2f9952841fad67af60cf3f"
+    },
+    {
+      "path": "apps/simulation/src/config_hunting_repair.rs",
+      "bytes": 55573,
+      "sha256": "dc6a42f37b572cb4b404e82584d1289d7c98f04da14ce7646eedb45cc64606b0"
+    },
+    {
+      "path": "apps/simulation/src/config_hunting_repair_tests.rs",
+      "bytes": 52475,
+      "sha256": "1f516dffec71c2dcff574a1cda27bf0f407abb9364354835b541a3e727fd5917"
+    },
+    {
+      "path": "apps/simulation/src/config_hunting_source.rs",
+      "bytes": 43788,
+      "sha256": "5544745a4a32d68309d93202d02c01833a4cb1e390a4a07fd810ab9e9d7306f3"
+    },
+    {
+      "path": "apps/simulation/src/config_hunting_source_tests.rs",
+      "bytes": 30352,
+      "sha256": "1267436ffc53ee4980a741bfde30d498bae98a959e7f9e408260ee9273376d4d"
+    },
+    {
+      "path": "apps/simulation/src/config_item_identity.rs",
+      "bytes": 11014,
+      "sha256": "33bf6ac2d1806aea75e97598e608e3a3faed9b03c90776f8dbe90ef2081a244c"
+    },
+    {
+      "path": "apps/simulation/src/config_item_identity_tests.rs",
+      "bytes": 6448,
+      "sha256": "7ff630d64ddef0ce611a7c76e393de5f31858b44307aef3f4b7bef4e9311222b"
+    },
+    {
+      "path": "apps/simulation/src/config_prepared_kill.rs",
+      "bytes": 15432,
+      "sha256": "774eaea5e9c18f9e0a98223cfb48b17610d965782de6e84f3b14fead24615152"
+    },
+    {
+      "path": "apps/simulation/src/config_refresh_fail_closed_tests.rs",
+      "bytes": 66276,
+      "sha256": "5b31fabd2899857cc98b15e2f4fe0ac2cdb6f3965b8f3f624eec902ce8bdebf3"
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guild_pg_tests.rs",
+      "bytes": 6437,
+      "sha256": "aa499589fac01f04fef0c7855ecc27c08f5c8180160222150cd6791c4bad6570"
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 46478,
+      "sha256": "6d4b233c6adcef4028e222eb0392c08b9f8d6f84faa074b62d1dd25eb0515edd"
+    },
+    {
+      "path": "apps/simulation/src/db_projection.rs",
+      "bytes": 33473,
+      "sha256": "37bb3d81f162d9d2821deba6a70b5ad90726e22d4b4e0212f214711878a46375"
+    },
+    {
+      "path": "apps/simulation/src/item_identity_postgres.rs",
+      "bytes": 6878,
+      "sha256": "81ab8a2563160346e68a111aef91106fdf38eb476c2d071034ad839f341c7113"
+    },
+    {
+      "path": "apps/simulation/src/item_identity_postgres_tests.rs",
+      "bytes": 6951,
+      "sha256": "f97cc69712b975919364d7ae0f4f7acd86116847cbe7dee282349778d1d33ebd"
+    },
+    {
+      "path": "apps/simulation/src/item_identity_reservation.rs",
+      "bytes": 6141,
+      "sha256": "5fd8bcdb031388dff1ad2b30e76e237a7fe86d7edecc713006e01d22523b16c2"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "bytes": 5679,
+      "sha256": "060ae7bda9d858e082a1aa33172ba83a1a6eeae86a75a1f7d8cd31d63c359c60"
+    },
+    {
+      "path": "apps/simulation/src/npc_purchase_journal.rs",
+      "bytes": 33037,
+      "sha256": "e823494a615353310329d8ee0faec6ab8288dbca6da72bbf1138caf76aa76580"
+    },
+    {
+      "path": "apps/simulation/src/npc_purchase_owner.rs",
+      "bytes": 21830,
+      "sha256": "bec552c731b00a5eb0a0cb8102306377d2f8635c14910edbf2371b1c67baa4db"
+    },
+    {
+      "path": "apps/simulation/src/runtime/big_map/mod.rs",
+      "bytes": 24773,
+      "sha256": "06c423d98c652f7ebb7bde6a97732d4d58839ec9c1d0688beafdbb61d35771c8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/buff_duration.rs",
+      "bytes": 2863,
+      "sha256": "01050e2c0274342082a246ccd49502aad0e574bed7028167fe56d643663df921"
+    },
+    {
+      "path": "apps/simulation/src/runtime/buffs.rs",
+      "bytes": 22087,
+      "sha256": "4f9e9347fdda70d9a0eb6666557ec5b86da4cbec547f9cae77115fabe8df1e7d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/combat.rs",
+      "bytes": 142417,
+      "sha256": "64d4a2cb4facfd16cce451ec370c41b5ec333ace6de6a22570bf5504b7c2be65"
+    },
+    {
+      "path": "apps/simulation/src/runtime/components.rs",
+      "bytes": 8626,
+      "sha256": "2a0476d302bd7dee542e7bc70dda720b72d67752cd68ba2b8e74fdfafe10da42"
+    },
+    {
+      "path": "apps/simulation/src/runtime/crystal_compat.rs",
+      "bytes": 19231,
+      "sha256": "0bef0f11e4c61cd5e52a57175a4cb54978564f45ad4ffb96f76143ec011eacb7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/door.rs",
+      "bytes": 3300,
+      "sha256": "01e0e313e26966bd9f9ad879a7009081532dbfc5a2f28f5a1e8aecf6dc4bf451"
+    },
+    {
+      "path": "apps/simulation/src/runtime/drops.rs",
+      "bytes": 173251,
+      "sha256": "9b47435fc671c0c60467ff53d4d6518fb9d243ad056612a1e05eb038ac0c6be5"
+    },
+    {
+      "path": "apps/simulation/src/runtime/drops/zone_harvest_drop_tests.rs",
+      "bytes": 2182,
+      "sha256": "a25534bfe2c1a3117c3e20f9fe4460d46937683951a404ae650973a714bf4fc0"
+    },
+    {
+      "path": "apps/simulation/src/runtime/equipment.rs",
+      "bytes": 114252,
+      "sha256": "9ab29092d5f393f6b65c1e2ec903c77df54de6691b52e6535b6e960fd6245b7a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/equipment_storage_merge_tests.rs",
+      "bytes": 20097,
+      "sha256": "ce191845687c9c03995b82b9bb6aae707077fd4c23c14e26efc3eb5716a87f03"
+    },
+    {
+      "path": "apps/simulation/src/runtime/experience_rates.rs",
+      "bytes": 1389,
+      "sha256": "0c1ecb8b34697b5e0e24d209b10acbc44343d0526bf2b086c0a2e46cefb015cd"
+    },
+    {
+      "path": "apps/simulation/src/runtime/fishing.rs",
+      "bytes": 31126,
+      "sha256": "6046c709c179a3e1f8398c6e7b398913e3a9e5338b47b4297c0176670aaad679"
+    },
+    {
+      "path": "apps/simulation/src/runtime/fishing_equipment_tests.rs",
+      "bytes": 8953,
+      "sha256": "77fab0af804cd96dae97d3a31ca2181b652e7cd43cbd3f55cad12dc23d1b47ec"
+    },
+    {
+      "path": "apps/simulation/src/runtime/gm_commands.rs",
+      "bytes": 64858,
+      "sha256": "855ad6f85cfc82f2f20b24dbd8504acd60d11bfc7158111370df9802c56610a7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hazard.rs",
+      "bytes": 6820,
+      "sha256": "ed19dc0fca477ff637e82e12f77225966cc0fc3cfc703cf22a102441377aa4b1"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_ai.rs",
+      "bytes": 57005,
+      "sha256": "776768e0ce53ce14f2730de26d7ad198190ca81bbef2d3531a4693ce6fed681c"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_buffs.rs",
+      "bytes": 8260,
+      "sha256": "45cecbeb718a86fc3d0c16dd9cc95db376305d8fb36285809fd7a59c44d23ce6"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_cadence.rs",
+      "bytes": 3256,
+      "sha256": "bf78c1e38ff993604b47e5d912562623b5d0ea5d29d0cb6643be1339bb53fbad"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_cast.rs",
+      "bytes": 9729,
+      "sha256": "155f60c243bdca6c7652fcca07f53c9279813a89daadec4f3828f0ae6c044e47"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_combat_math.rs",
+      "bytes": 3518,
+      "sha256": "0ead5c2e98e84421f719fe76950815e55506f2b2c5319d0f07a4a617c7052911"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_delayed_actions.rs",
+      "bytes": 6372,
+      "sha256": "4a8ab4f0ded80d95c44e6ce6bb8e2867140342edf669acd7e5b315a95cb6a6e0"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_hit_dispatch.rs",
+      "bytes": 2697,
+      "sha256": "a5090ca7b48c3b0aa3742779be99ea8c39aa9d522120b8df61ad81452a51b441"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_hit_math.rs",
+      "bytes": 3787,
+      "sha256": "75a7916cc7a0c77bc0f6fa2d9d0ef0dab8342bddbfbbccae11b972a2ead255f9"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_inventory.rs",
+      "bytes": 38638,
+      "sha256": "51cb2df88d438e09e506162f7ae3fb3183d62d9fbb06d040e2b58bbd00ab594f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_legacy_migration_tests.rs",
+      "bytes": 4484,
+      "sha256": "d074c04a999c7958c349841d9e86a592177a146fe14473d429565927c4c87f4d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_merge.rs",
+      "bytes": 11874,
+      "sha256": "8ab4c0d52396eb476597d572ce8cb3b8346beb7311777aaff1c36ab782f38f6f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_mount.rs",
+      "bytes": 10327,
+      "sha256": "82ee9de8deb3072f7a6fc3848ea0a6831020f488d42a64734fe08ef26558268a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_registry_carriers.rs",
+      "bytes": 9932,
+      "sha256": "7519ad8ad4ff02050b15f31eda8e0182ee4c0cff9928b887f09d3942dc8632a4"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_registry_scan.rs",
+      "bytes": 8532,
+      "sha256": "f530670cac4d0c2266413c8dbc21318669d79603535ae3ffe210c2c9ae463d44"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_registry_scan_tests.rs",
+      "bytes": 5684,
+      "sha256": "09119db52991ed9d4a204acc1055325145a46cb3c492971495e8919e79b70b8b"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_registry_validation.rs",
+      "bytes": 946,
+      "sha256": "079f87e0350e7ff7630de198386c8ca9b722730e821a1412c09d9cdb7804d33a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_stats.rs",
+      "bytes": 10622,
+      "sha256": "b4c6a3712820593c38105caccb64df365c806cfd4c81a1a2846c52bf42567021"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_stats_rod_tests.rs",
+      "bytes": 1936,
+      "sha256": "5abe2b89a485bb3521f0ca9d75ff4f6750e137d285d15e082e9d970df656fdca"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_transient.rs",
+      "bytes": 3284,
+      "sha256": "08c7465c1635ab1d20f0b2bdaaedc0d61fd309014e761b8b70faf792f08d3304"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_quests.rs",
+      "bytes": 19675,
+      "sha256": "3f3e42d56376c89e67d5af0f79beb80604753ff683d279bced138d52077e6ff5"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_quests_guild_tests.rs",
+      "bytes": 21411,
+      "sha256": "487f2ab2631bad76fb7975eb18e6bb97f6b8d4356a0b03b2cc4403b19046573c"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_quests_tests.rs",
+      "bytes": 35495,
+      "sha256": "1e0f5f436ba436b05e5aea2c78565d1a0d8e75db72f1a4d6b60f5a8c59d10226"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_repair.rs",
+      "bytes": 35345,
+      "sha256": "c8d489c0d4c5ce94d3066ff8de238bd2f460e209ac91af9ba4eeecdc78e9d07a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_repair_tests.rs",
+      "bytes": 51761,
+      "sha256": "2e27ab7d152be25aed3104da503cc2504206df61284cc8332e26c8927e8a808a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/intelligent_creature_item_tests.rs",
+      "bytes": 31087,
+      "sha256": "b2e7b333941ab449019c3e350ac40dc64fa8d185c7dd3f8e84986e3aa3105616"
+    },
+    {
+      "path": "apps/simulation/src/runtime/intelligent_creatures.rs",
+      "bytes": 22960,
+      "sha256": "07a00b3214b0801ac36c3c7f3eb00e161d18525a7dfd91f2273418c1a68d392d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/inventory.rs",
+      "bytes": 182354,
+      "sha256": "e8cb44b483eff80593576f0c0f799f989fbc14edceaff312048f0ae7c7326c55"
+    },
+    {
+      "path": "apps/simulation/src/runtime/item_custody.rs",
+      "bytes": 7836,
+      "sha256": "19f571b6165ea632dd8807bac53c5c52469f24b871279d05a31225b640c443f7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/item_custody_tests.rs",
+      "bytes": 5681,
+      "sha256": "6f5d536cf1149a138018d6feb78318ba0e0b2e37f2b87c254e39f42c278b287f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/item_sets.rs",
+      "bytes": 4875,
+      "sha256": "2180da4e9710e7c0fa040b0cac523e19f38ade6b9fea699667d57cb1680dc3f8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/items.rs",
+      "bytes": 166139,
+      "sha256": "8c375841f8e49ac970fafc4c3fbf93443a4c39872955165eeb46e0b0509ac1e6"
+    },
+    {
+      "path": "apps/simulation/src/runtime/leveling.rs",
+      "bytes": 14467,
+      "sha256": "6760018dc57f9663b3f5ea48272750600f3af2c3ae3348e4026bd142ca1b4d3a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/magic_key_preflight_tests.rs",
+      "bytes": 3575,
+      "sha256": "0c84bfd33aa8cb6fe4072b91e85ddfc88c58ba730c52b9aee6120b2fc6bec177"
+    },
+    {
+      "path": "apps/simulation/src/runtime/mail_body_validation_tests.rs",
+      "bytes": 1263,
+      "sha256": "8f7f649d296701892ad4f2ea38899b28db133ec6b95532df3d940111f044e05d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/mail_parcel_tests.rs",
+      "bytes": 8761,
+      "sha256": "060c7ecf1739745d33367f963fc62a829fe461e6ef6d3236dbfb984109c61fbf"
+    },
+    {
+      "path": "apps/simulation/src/runtime/map.rs",
+      "bytes": 81371,
+      "sha256": "033dc58683075939152fa4134cc89c3b12a22c706cf731767baa4cdf1a3bb72b"
+    },
+    {
+      "path": "apps/simulation/src/runtime/map_collision_source_tests.rs",
+      "bytes": 23486,
+      "sha256": "d4cc2dc9c3f29abc8535f7fad2ae57fee2d939a8fe66d7d3b6ae60f384214de7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/map_events.rs",
+      "bytes": 9732,
+      "sha256": "6dc066136cbcd32ae1bd205c8619532aa7f96f8632f2047ca1dd691a6d14a128"
+    },
+    {
+      "path": "apps/simulation/src/runtime/map_transfer_metadata_tests.rs",
+      "bytes": 3499,
+      "sha256": "1028310e84631d0f293324d78f19b7ca1d94dcf873e42244af1503fee7b11722"
+    },
+    {
+      "path": "apps/simulation/src/runtime/mentor_reward_tests.rs",
+      "bytes": 7222,
+      "sha256": "9a9256cff05f72ff84e81b2dd36df55480d8d22962e700762a3dccaca3f3ce3b"
+    },
+    {
+      "path": "apps/simulation/src/runtime/mining.rs",
+      "bytes": 14488,
+      "sha256": "9ca67da9f19a5eaaff66bc5716a5fb2df62b386e9d0a3e787aa794729f2b3b08"
+    },
+    {
+      "path": "apps/simulation/src/runtime/mod.rs",
+      "bytes": 7230,
+      "sha256": "dcb0e20a26d1645156415a1ccf882e0e2348e64c9276e4425ffb54fc7b508ea5"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/armadillo.rs",
+      "bytes": 3697,
+      "sha256": "639ab9871db19fb68a5226f209b089d154e87ebf9fbf0a71a2bf6db39257f45e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/axe_skeleton_fear.rs",
+      "bytes": 2535,
+      "sha256": "0de0bd96032fbd2715f20abc04f47d5576bf19f2f6fcf23f7620e1595809f080"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/bomb_spider.rs",
+      "bytes": 933,
+      "sha256": "87cd50a55a00de48b4601e83dec73ea0fbefc17b4c61646aeec45698e5823baf"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/bone_lord.rs",
+      "bytes": 2432,
+      "sha256": "e4d6df13f705f2ce5389bbaa9811496117ecb7f7f73592b3792348baa6dac7be"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/boulder_spirit.rs",
+      "bytes": 14767,
+      "sha256": "4cf124041f0448a680ce442b9fc1dcf2c59586838a7d1507140776ee50668af8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/cannibal_plant.rs",
+      "bytes": 1823,
+      "sha256": "af08123c51a2691012667248c656ba3dcb1b388e601408c4e05ae8eab257057f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/common.rs",
+      "bytes": 20496,
+      "sha256": "ed5f258530ca1e889ddcfb013b5a4005c16fcf95cfe9679bf28630848d149f93"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/deer_run_away.rs",
+      "bytes": 2099,
+      "sha256": "cca567a9b141d39158b3a7703a1104edd48fa8d9b34e343b3bf133c4422f533d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/dig_out_zombie.rs",
+      "bytes": 1109,
+      "sha256": "18a7fa57bdcd84df6a97b37f8384c1897683bed9d8d8c609df1aa98538e56fdc"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/dragon_statue_sleep.rs",
+      "bytes": 1209,
+      "sha256": "d8b2d7747eddbabaf8b68c42cdde3fdebee9aaef77409be1a2846eb9e23496af"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/evil_centipede.rs",
+      "bytes": 1936,
+      "sha256": "1435637092433bba657985c4ab8524abb400ddd1964acdcd5c871f7ebdb4d44f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/evil_mir.rs",
+      "bytes": 24229,
+      "sha256": "6501bcf4cd9a1aa29d41deb6b4d7c5211e35c7877ab16f1b9d43f27963588557"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/football.rs",
+      "bytes": 8316,
+      "sha256": "e02f7cd8fc6036f8aaddeeb5b2032667bb6b797c562c9af1b6c5c8b111f42228"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/foxman_fear.rs",
+      "bytes": 5013,
+      "sha256": "0c1f3c1501cf84964ec34040d2d0205464e2fc11353a165c671f8c0d4349f4d2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/frost_tiger_sitting.rs",
+      "bytes": 1510,
+      "sha256": "7f69ff5c125eef6a687847ee0274d4e0d66c1ed4d9fb9c548b7445af5e99ff37"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/gate.rs",
+      "bytes": 11886,
+      "sha256": "456f68578b15639265cd21c5ede8ee74f555d5cfdbc6420f15f8e0b791c2d6a4"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/general_meow_meow.rs",
+      "bytes": 6474,
+      "sha256": "4ece265827196493bfb7c8f4538ca3c7b15fc065f61df614829d4305e17f96e1"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/great_fox_spirit.rs",
+      "bytes": 11691,
+      "sha256": "28e4bf2003444d2e2d931cadbb836ea2d4a99099f05b62a36daabb1c637c4913"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/hell_bomb.rs",
+      "bytes": 2016,
+      "sha256": "de10255a71a755a1f0b43eb29869d99d94e4e2e5095381d8a41d0e4c971692a6"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/hell_lord.rs",
+      "bytes": 5058,
+      "sha256": "febbb1583275f87ec7ad6603eb943947f62807c180c37525dbedf2fe5e77848c"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/holy_deva_fear.rs",
+      "bytes": 2309,
+      "sha256": "6bdc829381729270f8fdfa7e9a91a1c56990f78cd0af2d09fe46d820838a80d6"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/horned_archer.rs",
+      "bytes": 9973,
+      "sha256": "89253283148c2b14dbdab1e3d047631bc49e5d1d479d06e43dbf56074e543ee6"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/horned_commander.rs",
+      "bytes": 33485,
+      "sha256": "c041c3666d6afd9423025067642b7b525a6e0c278280a6f82563514db9a2115c"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/horned_mage.rs",
+      "bytes": 19484,
+      "sha256": "21d4ad791ce61fefa912e3458fb85ee494142b23b450ad35e6c2b8885d669701"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/horned_sorceror.rs",
+      "bytes": 38263,
+      "sha256": "292151b63f1ceb2af19c9c47ee681463a521f7eb8511d16c1dbb13dcb73104b0"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/horned_warrior.rs",
+      "bytes": 22629,
+      "sha256": "4fbc0ca1d9438a59990dbbe97cb610149d5b8360a017cabf38b0af773788ca92"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/hugger.rs",
+      "bytes": 13653,
+      "sha256": "6429730a034e7fac5cfbc93e0672713ae23b309fb132acffa024c7b3ffbe5a58"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/kirin_ice_thrust.rs",
+      "bytes": 2970,
+      "sha256": "51b711681e87903441e913d350f7b19535e7b432b62f76712786f59425e48017"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/mod.rs",
+      "bytes": 123239,
+      "sha256": "47aff00da1116f5a266d5adeaebd35890b4c5e303d98617d3a595eb31fcf3982"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/mud_zombie.rs",
+      "bytes": 21559,
+      "sha256": "a58dd3ae19e40d0fc3439027563249ff374e8ad07b13425c8926eadb329b13d8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/poison_hugger.rs",
+      "bytes": 20855,
+      "sha256": "5d886076b6eaa9fc7d5ee57a849a9b689bd1d13d6f07d9262c941c64548db727"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/reviving_zombie.rs",
+      "bytes": 1591,
+      "sha256": "64aadbe1f12c2609cc2782603661053528debce2a56394d0d88b2a158c24ef38"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/shinsu.rs",
+      "bytes": 1988,
+      "sha256": "0c3241467edeff46537ca3cd499795fdad3813dfc5f6084a3f0bc004696f87d3"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/snake_totem.rs",
+      "bytes": 5144,
+      "sha256": "3f9b728c0ba4b01b1ebd5de5b6d3a85ade73cabe894022da0c52ad2f171d45e7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/snow_wolf_king.rs",
+      "bytes": 3935,
+      "sha256": "88a9860d22cea6e58e00a7ffe1545419062e97a1b0041b9897e75b1f68055f1e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/spitting_toad.rs",
+      "bytes": 532,
+      "sha256": "d5faeffc3463713a68a55c23f309905ed86d3bb1dbb418f8fd1eb6f56e329953"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/stone_trap.rs",
+      "bytes": 1882,
+      "sha256": "d2aae9821b3e975513103a6eedc0522123e0beb870155c2beb65a1c20daa361a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/summoned_monster.rs",
+      "bytes": 3270,
+      "sha256": "46793edf62dea626c127f8251406ffd5b4a3c835a995b8337a4f3d57772df608"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/thunder_element.rs",
+      "bytes": 4221,
+      "sha256": "2883e9b155ffd3ec40b2177bc0f7d4b18d13f02006a1497e16993eef89f3ae51"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/town_archer.rs",
+      "bytes": 3054,
+      "sha256": "a78138310bd4b954538fbf71b9ababcc74d4a949f0cdcf3dcb7133c7745cb65d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/trap_rock.rs",
+      "bytes": 7601,
+      "sha256": "53c58c2ad24836c0d171c69e1b3854a60cbe2cdb8f123899b64e64c6b356bae1"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/tree_queen.rs",
+      "bytes": 26672,
+      "sha256": "fb54bda02701bdfe38bd8822570be61ef783df79843b960fea508291a7c9cd00"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/tucson_general.rs",
+      "bytes": 8029,
+      "sha256": "c94ab8e96f1827a1fd7e480c73c7c96fb724fa4cb7e2f5ace217b86be8beae8d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/vampire_spider.rs",
+      "bytes": 939,
+      "sha256": "89e0a45474ee69eb28024668f0ad5df122e2cfa6b4cd373aebbe2522ba46eee1"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/wooma_taurus.rs",
+      "bytes": 5520,
+      "sha256": "46c1fc4c458823d2543cdb699f88e6389747e08cfb3d90b0a6392cf3ef23304a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/yimoogi.rs",
+      "bytes": 9001,
+      "sha256": "ff02e0af5175e2fc74b5adf7a8bbff433662a4d1f047c051f325ec6547a87c56"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/yin_devil_node.rs",
+      "bytes": 6525,
+      "sha256": "dfa2c1b84bf8bff329bf5e3464697e86844aa80254d3fd397dfdd9e618766d96"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/zuma_monster.rs",
+      "bytes": 2566,
+      "sha256": "0b3513fdf7a521dc91e70f4acdab0a33e7090f50de5748d35425a9cc9f573181"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/zuma_taurus_stage.rs",
+      "bytes": 1878,
+      "sha256": "24f9a3691dbe514cdd639f4408eaad27000ac13e46d9d2bc9fd01271984a1e95"
+    },
+    {
+      "path": "apps/simulation/src/runtime/monsters.rs",
+      "bytes": 104131,
+      "sha256": "73c0899977fc06963466eca9991d939e391933b7dfa88bf32c93c13019b884ba"
+    },
+    {
+      "path": "apps/simulation/src/runtime/movement.rs",
+      "bytes": 36326,
+      "sha256": "d5336b4ff122e9f4cdf005350fcaeef2a49ab6687cbb3bc4fb5b3bd09ec01ca7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/newcomer_journey_tests.rs",
+      "bytes": 20299,
+      "sha256": "ce44d4db719dd7c6a8b88bae2878a1fcc6892ac7fa7969383f1d1e0182db1d71"
+    },
+    {
+      "path": "apps/simulation/src/runtime/newcomer_npc_visibility_tests.rs",
+      "bytes": 1450,
+      "sha256": "f359b16c84e2b150ccea0ece9e889c4b113dd1043af875e5f0599072061b73bc"
+    },
+    {
+      "path": "apps/simulation/src/runtime/newcomer_progression.rs",
+      "bytes": 20768,
+      "sha256": "621be98d0887d837a6be2d43d226bbee494462713fd364033c7c974c0f77a944"
+    },
+    {
+      "path": "apps/simulation/src/runtime/newcomer_progression_tests.rs",
+      "bytes": 31659,
+      "sha256": "1be3c17b402e5a14b3663b0b54ce17964ac1221d710adf384854bd421f5a7201"
+    },
+    {
+      "path": "apps/simulation/src/runtime/newcomer_v2.rs",
+      "bytes": 20374,
+      "sha256": "b5aea984220a5a841c4bfa7607b369c9a1a0d0a76601341300bf1b65e9e2a80d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/newcomer_v2_event_tests.rs",
+      "bytes": 23241,
+      "sha256": "eef5009245f5884b61f21126978b207446e93562b3b4d148843242a680cebfdc"
+    },
+    {
+      "path": "apps/simulation/src/runtime/newcomer_v2_events.rs",
+      "bytes": 18652,
+      "sha256": "c4f3b5342af58d3692212b15fdeec21c124336a51c9fa1ed2030037be63de1d2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/newcomer_v2_tests.rs",
+      "bytes": 5184,
+      "sha256": "2d47911cb48b0ce762602bb7b81c1bb93c524e67b88344c515317986ce373fae"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc.rs",
+      "bytes": 51729,
+      "sha256": "39683f63f38eb8f91eb74c4ffc04a073585e1645adea4b4bf14a6e2321dd2972"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_gold_buy_outcome.rs",
+      "bytes": 2577,
+      "sha256": "3d250c5cf021588b5d1a32a7ece79dbd7c70a2c41b84c5d02af2314400464b20"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_gold_buy_outcome_tests.rs",
+      "bytes": 17751,
+      "sha256": "c5adf2f95960ab79b9919875584e3703e692729fbef6f68ceae8fb22e956d431"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_gold_trade_capacity_tests.rs",
+      "bytes": 27872,
+      "sha256": "42cc763a537b7ddeb0f03a9451d5499da3a28729764d7c5950480e6733c4dba2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_gold_trade_evidence_tests.rs",
+      "bytes": 13922,
+      "sha256": "2683b4703f25b40692cbbd427a151786681eb314a25da206022ce99dd628dc9f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_gold_trade_expiry.rs",
+      "bytes": 8688,
+      "sha256": "2700aab9de243b4596e92ff0a8bb045b3b81e90b87e941c96780f80ceee9dcc5"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_gold_trade_expiry_tests.rs",
+      "bytes": 11695,
+      "sha256": "778a084605e390aa48a5dcd2671d420c6697ce192c3a2c8cd7498bcbaa3b8029"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_item_price_tests.rs",
+      "bytes": 3052,
+      "sha256": "1df18d1dddf588597a3e5bbbf376747509c8fe1da3e143e3bd07bbab496cdde8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_parcel_tests.rs",
+      "bytes": 2159,
+      "sha256": "e4d727777a8af06284368fe06fe0fa0f128629415eff3051cf7a971c1d41f0f8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_pearl_tests.rs",
+      "bytes": 13486,
+      "sha256": "f46f21f3d3aed9a70c858471a449e92cc1347fcaa0fc41e3f1f2431baf96e6d3"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_purchase_outcome.rs",
+      "bytes": 4786,
+      "sha256": "00e8a7917dad13477e572d99945261faa1558be4abc4c40807647e9ba162a79f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_purchase_outcome_tests.rs",
+      "bytes": 17858,
+      "sha256": "7dc5817e482628624734e0d9794c5939cfd20db2aef1591c04a4bc77511f37ef"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_purchase_owner_tests.rs",
+      "bytes": 34132,
+      "sha256": "0af7f301c44d9d9c51de85c6db96ccddc3a8081ce48ce0236008a5029bdaef0d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_purchase_snapshot.rs",
+      "bytes": 12597,
+      "sha256": "946c4fcbb8ce955919ffb70d81a6dfa943b2b7494f685a5906035db3985a0073"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_purchase_transaction.rs",
+      "bytes": 38728,
+      "sha256": "c31ac61eb2561ffc19aa384eeba8ddbc9b46f97094e4f4277a4e749ad68e05ef"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_purchase_transaction_tests.rs",
+      "bytes": 40988,
+      "sha256": "693b73b83b7d1d5ceee7a8e23b898383b39e579902bfabdc7de53c2eb66206d7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_script.rs",
+      "bytes": 125816,
+      "sha256": "c98feebeec8f80f059608d7ee0dfc5c6f23e611270c0c96e904812e76dc1358e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/onchain.rs",
+      "bytes": 9748,
+      "sha256": "2f9fbc67ff170c0ea17d2a3f97dee282a4d4922c0bd8ad6062cbe6b9924e62bd"
+    },
+    {
+      "path": "apps/simulation/src/runtime/packets.rs",
+      "bytes": 403025,
+      "sha256": "898ac32998e25e5ecafcbbf20c13f7e92a748cacb722ee70ee8afb7436c17544"
+    },
+    {
+      "path": "apps/simulation/src/runtime/packets_diary_quest_tests.rs",
+      "bytes": 9050,
+      "sha256": "b6fdc745704377bb9c94c5aa01b94f4226b46392527b6f936ddd16448d5d1914"
+    },
+    {
+      "path": "apps/simulation/src/runtime/pathfind.rs",
+      "bytes": 13929,
+      "sha256": "1aaa0e81c731256fa2dcf571dade45f7c61288200b1695a3c664c763cfa942a9"
+    },
+    {
+      "path": "apps/simulation/src/runtime/player_weights.rs",
+      "bytes": 5470,
+      "sha256": "e93384181e5fa3a0cef52373d812a28b230b1009f165b75eb9651c90ecac57d7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/prepared_kill_experience.rs",
+      "bytes": 10361,
+      "sha256": "de218dd898b15011ce561d81e191b3ceb2fb2598d13986174972fc96965bf805"
+    },
+    {
+      "path": "apps/simulation/src/runtime/quest_endpoint_identity_tests.rs",
+      "bytes": 1451,
+      "sha256": "36a14adc60e380830202523286514a077db7dcde1c3dc094a188e79b8c74568e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/quest_level15_tests.rs",
+      "bytes": 2340,
+      "sha256": "2b69e332e8bb53281341292580b9299f80549cada1679ee5af33fec48628e604"
+    },
+    {
+      "path": "apps/simulation/src/runtime/quest_reconcile_tests.rs",
+      "bytes": 3325,
+      "sha256": "424934cd6c325a097c222b433f5b40780145f3d9cecb73408cad50c8bdb5055d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/quest_recurrence.rs",
+      "bytes": 9054,
+      "sha256": "c98625794540ed8115fa2a5657ffe8108ded20e5b62b5fdc3ede3c9311febdf9"
+    },
+    {
+      "path": "apps/simulation/src/runtime/quest_recurrence_tests.rs",
+      "bytes": 10743,
+      "sha256": "08ceddc0b483afe167b0f6a8c4334155ae369720b9ef62a7b5e5c79fcb7c7da4"
+    },
+    {
+      "path": "apps/simulation/src/runtime/quests.rs",
+      "bytes": 80012,
+      "sha256": "8d42024ce5c05b8ed19034f2cdeb904884b7ad0a14685e7936507f6231eee54f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/ranking_inspect.rs",
+      "bytes": 55407,
+      "sha256": "94ff5fa5337e3c9d792a4ac84062f9ac7c4db52ad0eb5891f63aece171a89677"
+    },
+    {
+      "path": "apps/simulation/src/runtime/refine_oven.rs",
+      "bytes": 15082,
+      "sha256": "0a48100fffc7737e2bc0c955cb7eb968c544c9a443b9e7e6777fd6f12e2736b8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/rental.rs",
+      "bytes": 26116,
+      "sha256": "6b8520706c7db5d74257064ae4c0ab84cef6f4f9390e60a6bd7325c08d8f0936"
+    },
+    {
+      "path": "apps/simulation/src/runtime/repair_mutation.rs",
+      "bytes": 15696,
+      "sha256": "18fd0e76b1d6a850d2dc9384a004c4bc1b1d85ce8c20dbf3797dc04cbca64078"
+    },
+    {
+      "path": "apps/simulation/src/runtime/repair_plan_tests.rs",
+      "bytes": 16775,
+      "sha256": "c0ddf5ea25f6bac6471bfd7962712a4f01d96a66b4a8dcfdf6c8f884dd26a7bd"
+    },
+    {
+      "path": "apps/simulation/src/runtime/resources.rs",
+      "bytes": 39793,
+      "sha256": "b3a316a41b3356714529c3db306a5637fcd70d0a47fde669e1842a0aa3583902"
+    },
+    {
+      "path": "apps/simulation/src/runtime/save.rs",
+      "bytes": 166015,
+      "sha256": "e5ad5c6858e6c258b4674da49365266f82d82b961d1c9e2ec580fd0ffba1d298"
+    },
+    {
+      "path": "apps/simulation/src/runtime/save_fail_closed_tests.rs",
+      "bytes": 87234,
+      "sha256": "08ff0eed15853a653af202f6ec17013103e8d5f63422a42d209b5845228329a3"
+    },
+    {
+      "path": "apps/simulation/src/runtime/session.rs",
+      "bytes": 91139,
+      "sha256": "ed0b2fcb908f8598b09d308c1169d39e92309dd750ee04bd4e1aa1ce912059ab"
+    },
+    {
+      "path": "apps/simulation/src/runtime/session_active_monster_ids_tests.rs",
+      "bytes": 15263,
+      "sha256": "a277daa4cca08f57279019643dc45033a7cf46856328ea7b95632b5d8578617f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/session_lightweight_snapshot_tests.rs",
+      "bytes": 7471,
+      "sha256": "93e45e8c737ec07423fe3fe29c9b9b19eda11e05e1f39dbd0e1eab189d692a9a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guild_bank.rs",
+      "bytes": 13748,
+      "sha256": "c417ac65112c0903dc603218ae858ff7fd4b6a5dd2d151d99a631c8892e65ba2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guild_bank_tests.rs",
+      "bytes": 4724,
+      "sha256": "f7e9d778d6bb610ad851d00a4bcc06beb11b37222ca2f533e1f5300beb1ef4f2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guild_buff_tests.rs",
+      "bytes": 6351,
+      "sha256": "c5394d4a8762c838eb45df1f703db72abf2b5a6d4862b605b9e1abf9479dfdb5"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guild_buffs.rs",
+      "bytes": 7694,
+      "sha256": "ee7b0d308913103e5fba0251a6b45ea93d568c0a9440c071e1f93b83b58e2848"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guild_experience.rs",
+      "bytes": 13944,
+      "sha256": "8322983978da9b4150b0e77283b99c147d23a355440e613cf1ebc7aaa701eab3"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guild_experience_tests.rs",
+      "bytes": 13179,
+      "sha256": "94ce33eac85eba58dd517f3a757421c5b1fa560b52a99e3120397029b650585b"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guild_item_tests.rs",
+      "bytes": 6449,
+      "sha256": "5f9c0a7520eab000de3fabc2b28590f4f5b17264e16fd911e1d4e8dd1e10c20b"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 36539,
+      "sha256": "5ee7c0b7927ff4718339ae5381351d6b70d34903e5d7538d4aa88575697e52b6"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_kill_experience.rs",
+      "bytes": 6244,
+      "sha256": "5a0442328090a94d481c13501df37bc9695d467efa975226a8e5b5cb3b95c981"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_marriage.rs",
+      "bytes": 12402,
+      "sha256": "096539ceecf236f3b2c56d1d34deaee0deee4dedde57784a78de34a1a9ff3969"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_mentor_rewards.rs",
+      "bytes": 9656,
+      "sha256": "efd7446ea6bfc1c25a1915e062402a81e5c1d28f4806a34fcbc5fa2cbd4c709d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_relationships.rs",
+      "bytes": 13507,
+      "sha256": "8c70353282a6bdded68823bd527e82ab63631fc8bd529979aed469d505ece1fb"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_social_buffs.rs",
+      "bytes": 9772,
+      "sha256": "d2f4ea5926ba99f02dd511e5613303313505ee11d3d70200e9857f37314919c7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/skill_cooldown_restore_tests.rs",
+      "bytes": 5677,
+      "sha256": "53c93efb6c9afb60d065dac752fad6e75b320bb8132f78966bf394bb3c79112d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/skills.rs",
+      "bytes": 299799,
+      "sha256": "74432f52560f1ef5955ceb5f09faa8cbccc2395168b3cbfc7004bd5124e4bae9"
+    },
+    {
+      "path": "apps/simulation/src/runtime/slaying_passive_tests.rs",
+      "bytes": 3057,
+      "sha256": "6aac5ee3e3707e30dde2a8207af4ab56159fad622061f5f3f6320fb977504c34"
+    },
+    {
+      "path": "apps/simulation/src/runtime/social_economy.rs",
+      "bytes": 3288,
+      "sha256": "2aa05c85e4f49ad3798840da6ecdc7e400217570f1d51b8385d25b01d5dd72eb"
+    },
+    {
+      "path": "apps/simulation/src/runtime/social_experience.rs",
+      "bytes": 4943,
+      "sha256": "45a7f1d5e1bb1539af1d947f0e3452a2f7ea4a30e13f8c734d5c79eba8483460"
+    },
+    {
+      "path": "apps/simulation/src/runtime/special_monster_sprite_tests.rs",
+      "bytes": 676,
+      "sha256": "f53b7a3bee2f5a3b7011b97022ff2061fff6aa3579299afeb78508f7487b2984"
+    },
+    {
+      "path": "apps/simulation/src/runtime/stage5.rs",
+      "bytes": 225843,
+      "sha256": "bf2556bb355e0afff5a996c684d72737a49489a430f66e5b82cd51ce6a4212e2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/stats.rs",
+      "bytes": 29086,
+      "sha256": "ec2ef7fddc47f57c87e23e621198c30e9de80cd97eff21803a17926036fc9752"
+    },
+    {
+      "path": "apps/simulation/src/runtime/storage_rental_tests.rs",
+      "bytes": 8210,
+      "sha256": "524d44bd9f35a78d5fd729b4f5f3adaccc27a10edcfb0b2fe657d53b5a78c16d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/tests.rs",
+      "bytes": 2431698,
+      "sha256": "4e2f941822068c6a4108a1e7b57378b220b94433ad0d72e4a648f3896a5dea56"
+    },
+    {
+      "path": "apps/simulation/src/runtime/warrior_preparation_tests.rs",
+      "bytes": 5576,
+      "sha256": "1c883d97a25d938052af6274dc566d811782973f6c163ebcbc54075cc2931ca8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/aoi.rs",
+      "bytes": 486,
+      "sha256": "efd99aca9b94490df20f6fff4da4b3614f0a936f48af7426858185a398baf32f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/aoi_grid.rs",
+      "bytes": 10290,
+      "sha256": "7df99f8b71a303ff13c2aed8b598f7c58442b1f3fdc3dcd7210ed149564d0344"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/collision.rs",
+      "bytes": 4497,
+      "sha256": "7ba3ef1c37ba45c75cbb4107b5cbbfe41f751ce66dbe067a1daa43e9d95b430e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/ecs.rs",
+      "bytes": 7498,
+      "sha256": "d1f094c3f37fa77e0797bc4f6df18bc27f716184aac1ec8b3c8307a960f93265"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/experience.rs",
+      "bytes": 4623,
+      "sha256": "8697585b481d09aad2df42c3b84e9fe9e8da7ef918adba3aabe71717ce04e755"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/intelligent_creature_host.rs",
+      "bytes": 40612,
+      "sha256": "be0a3cab0ec04946c3800af78dca4150a73aa1a11e746a2ae5603c568271959e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/intelligent_creatures.rs",
+      "bytes": 20576,
+      "sha256": "30302a9cbd99efd997d8b959007b27d69fd64f2d4b8df61ed535f5d8cd360964"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/intelligent_creatures_tests.rs",
+      "bytes": 13655,
+      "sha256": "e9a25c0375528d94dbd2926f24470d38ae0bd479d023824050b0de195bca6997"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/manager.rs",
+      "bytes": 27961,
+      "sha256": "e956f72f961ea7f45cf888567f95b56a24d4744ad8850fce9222c725439875f2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/mod.rs",
+      "bytes": 1306,
+      "sha256": "2893588003d00798da1a5272c6070be00172027356821e1b83b3d9d705432b92"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/movement.rs",
+      "bytes": 934,
+      "sha256": "994d82a13b5a304ef85535d9755a6ae5c0e5eaf4336cd0111d59fee6aae9b393"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/movement_deadline_tests.rs",
+      "bytes": 3372,
+      "sha256": "35991cd2e8f89efaa2ed9b448d0cb889f317f379d5401ad4e515ac389ae55cba"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/packets.rs",
+      "bytes": 50490,
+      "sha256": "7dde306dec5a6fe288f7b96d6dc60bf8ed371cbdc704c4a373368dadf1eade76"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/replay.rs",
+      "bytes": 22937,
+      "sha256": "493acd3f2d76655abdd526ce22f8ef011f2d10dbd9f94704fcfd57f610016676"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/replication.rs",
+      "bytes": 7520,
+      "sha256": "9e3806372fedd8aef59e8682f6639ed9835d518a8213353b40f9ed3336b84e6a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 649363,
+      "sha256": "c5f356c4e8153255ffafcd3ee7f8cd4c9a3cf7c6e4cc9c73b45fc3206f66df43"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/armadillo_ai.rs",
+      "bytes": 22067,
+      "sha256": "ed4276db1e18dffe704d02d9e6612659feb5f66a476a3cf4dc3671f08e679e7e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 75274,
+      "sha256": "a741ff51dc4092106edb5ede85de5991366302f6c993ce4a3eff620402145a34"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/entity_combat.rs",
+      "bytes": 104492,
+      "sha256": "30501abac1c0f2c617813964f424efa7464d3ae39fd0b52b0847628702062561"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/evil_mir_ai.rs",
+      "bytes": 15701,
+      "sha256": "fe0355c1bbcb3a6ad9d3772bcb66eff625bfa122d14b1822a4beeea451bbdb38"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/football_ai.rs",
+      "bytes": 3901,
+      "sha256": "bb320b3d8ab676088c0a72aa7cc6b3d5b1feb07c6aba914497dc15e2877dc92f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/gate_ai.rs",
+      "bytes": 3391,
+      "sha256": "ab78b66d769c9fa6d41401b474e19caf20771d42541922bab5eb7ae6ebdbff8d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/great_fox_ai.rs",
+      "bytes": 41497,
+      "sha256": "39e5f9ece2fcd5768c55695f1bfe37c7736be1dd9f2d7ec301b892bb2f6ba0d1"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/hell_ai.rs",
+      "bytes": 30068,
+      "sha256": "4b6a44c0f3c43abb88b9726222ad6521c65ccbd01480aaec6cecdefb4dfceb3a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/horned_ai.rs",
+      "bytes": 35362,
+      "sha256": "38e74cc73342a2703e80d81c3b7787c6ea267cc8b14c1e0fedfb8a63611a3a21"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/horned_encounter_ai.rs",
+      "bytes": 60196,
+      "sha256": "7478e623f2209221ab4de5e2ffd844158a85d31946c74da51f1ba5b82aa68053"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/hugger_ai.rs",
+      "bytes": 29955,
+      "sha256": "b0b1027ccdec1c5cb0f512472a34fbca721ceee4013f2c4e30740e8682dc1ac8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/journey_events.rs",
+      "bytes": 17975,
+      "sha256": "761e382d6d026faa016c3a3419edaec0f7961ea850564f8e379d892873587a63"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/kirin_snow_ai.rs",
+      "bytes": 39105,
+      "sha256": "f43d7a532a1d4b6e7f3b5f16aa4c870bfe26fa0b348cc2f9cdbfbd4dd03c4b70"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/meow_ai.rs",
+      "bytes": 17949,
+      "sha256": "d078e6ac6be7f2a59201be6bc62d62ce301acb8bf1f4cce1c355f2b4cd859d0f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/mud_boulder_ai.rs",
+      "bytes": 33337,
+      "sha256": "e266fae14ddfd809984786eb860ecaa51644f64632ac0b292dd01dddbe518db4"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/node_ai.rs",
+      "bytes": 7684,
+      "sha256": "047b05dadbc1e9f4ea21aa89179198620d79f401ae91cabcc3f0b68feb9601c7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+      "bytes": 7779,
+      "sha256": "505434b94e7163cb4546cb7bbb518336d6cecaefcc1b54f2085ec720c0a4e145"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/periodic_poison.rs",
+      "bytes": 8194,
+      "sha256": "6f45c370ee36a7fdc80eee7b2bf13c7ae61c7ad2b4f5c89ff37224d28ff142a5"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/pet_special_ai.rs",
+      "bytes": 11463,
+      "sha256": "aa8730cd61f52a31d3effe0956fd040f523ed98fcc6d11251bb397843cb97498"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/player_magic_cooldown_tests.rs",
+      "bytes": 7260,
+      "sha256": "c1938539621deb890eb445172f6f20f9324c4239a807ad9bab0edab5db33e8b1"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/reactive_ai.rs",
+      "bytes": 15145,
+      "sha256": "a765a4906b638dcc53af3089acd2b84c6f7eaff960e4e708116ba7417fb55ba7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/revival_ai.rs",
+      "bytes": 15463,
+      "sha256": "764eaaebc32df76df63d9de84195d46f0e7707270787ec7d4c7d4ac115ce8f41"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/reward_rate_tests.rs",
+      "bytes": 3170,
+      "sha256": "48e6e52922717c8876beb1b8a26f2056ec95ba3243294fcd643869e564e521db"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/safe_zone_profile_tests.rs",
+      "bytes": 6341,
+      "sha256": "25dbd35fc07377857d40d7d30c4e0d3e4ffd40a31df793eb4a67fb24838991a1"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/shared_harvest_tests.rs",
+      "bytes": 5773,
+      "sha256": "c20bd9c4f0570ba62061d32df9414f2a66c0d68a68dad8678456a3e7a40a8ddb"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/shinsu_ai.rs",
+      "bytes": 17215,
+      "sha256": "1144d265f88833baae65f29072a086a482541cf979bd838570b01030695b1206"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/sleep_ai.rs",
+      "bytes": 9481,
+      "sha256": "95d68c2f4427fabb712dd00606d2cf11a56032566b1129b83f5774dc2d9b4560"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/snake_totem_ai.rs",
+      "bytes": 13527,
+      "sha256": "ac6ac15ab68fce8c49f28499ce1b1ffc593d175096195323499e549e76777082"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/soulfire_practice_tests.rs",
+      "bytes": 10763,
+      "sha256": "0529d74b49e6a4167cc1c695b96e2df195b4f010b7a36845eb97e2ed5a43ef45"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/special_ai.rs",
+      "bytes": 13085,
+      "sha256": "869218ab39ff72a50053ddd247e687a51f20d3633dc0ec28d57f138141aff1ef"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/spider_ai.rs",
+      "bytes": 32961,
+      "sha256": "d9f842d5684a306a7facffe5159a6000944335229b967d2ea3c86cf15d448186"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/stage_summons.rs",
+      "bytes": 16950,
+      "sha256": "6b427aaea63f30a8afb987ce88b2b7e72afe0c92abf9bd5789f49a6668978fff"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/statue_centipede_ai.rs",
+      "bytes": 12352,
+      "sha256": "96260c9910c0fa88688fe4a8978e554b636050e197900524095fb17d33de8233"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/status_poison.rs",
+      "bytes": 14153,
+      "sha256": "491971b7b4a77507e7c58cca84de032c769cb918d3b6a615c2573da9dd2bc666"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/stone_trap_ai.rs",
+      "bytes": 13740,
+      "sha256": "d6090b129c760b6b0bdab688761ef2c37d2eeca3e8f85014598472f3d1c373f2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/thunder_ai.rs",
+      "bytes": 17637,
+      "sha256": "0016285a62646b6547976b65e016faa00c8cfe9f0ff11f27877e92ef671b2191"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/town_archer_ai.rs",
+      "bytes": 8477,
+      "sha256": "eb9b45eb532af7a36e81d79198b9b19060aea1533afa024447a0865e9eadb2b7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/trap_rock_ai.rs",
+      "bytes": 15442,
+      "sha256": "0ef87697fc7e6bd00754e71ee33d4a1f9e9dbdc5b99fa2e1a62d9cc549c4a8e7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/tree_queen_ai.rs",
+      "bytes": 28788,
+      "sha256": "441491baf1fdb90cc37e0720d3ac9d4d7ebe5fddb593e188a132277d696e989e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/tucson_ai.rs",
+      "bytes": 20058,
+      "sha256": "626f1f02bc66ecc6dac64346349474473c38dea3cb2e1fe6a7375f92ad6deabe"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/vampire_ai.rs",
+      "bytes": 18791,
+      "sha256": "4d79409386783af7445fa578f58dbed1cad294810b516bb7b4b805d1e00bc6d2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/visibility_ai.rs",
+      "bytes": 12443,
+      "sha256": "92dd817ffe8798ea2998bf5417ba037c8478b222d7c318950ec5a1b58c4bf7ea"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/yimoogi_ai.rs",
+      "bytes": 26008,
+      "sha256": "297a3bfe800c49e0ab934d49cf21406ee856c04a23be8a43982b8fe736a5d576"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/types.rs",
+      "bytes": 47980,
+      "sha256": "c41433b761de53816a4682400a9a3505c6bfb50350dd3f59174e8fc3d5c07725"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone_melee_passive_progression_tests.rs",
+      "bytes": 3997,
+      "sha256": "7707f56a93c9e416dfadbb69acec9b5970f1b2a91c7337c780653b829add30fc"
+    },
+    {
+      "path": "apps/simulation/src/user_item_uid.rs",
+      "bytes": 43171,
+      "sha256": "d5cfc56cd10f83726ecfa20af5e285fea47ee057aa36200d29e22a4af1e8357a"
+    },
+    {
+      "path": "apps/simulation/src/world_runtime.rs",
+      "bytes": 66440,
+      "sha256": "ad3ebf16323d91088b80b4eaa98a320f16e066e846d41af3b093f9adc822267c"
+    },
+    {
+      "path": "apps/simulation/tests/big_map.rs",
+      "bytes": 5845,
+      "sha256": "e04abca780acd81c88036bc905d17313649c7538a8069dcaa8590332289486c8"
+    },
+    {
+      "path": "apps/simulation/tests/character_wings.rs",
+      "bytes": 8916,
+      "sha256": "ef9f84f11e923c4032be7cf219e8e1c081fd0db9116af39519732c7efe9ead64"
+    },
+    {
+      "path": "apps/simulation/tests/crystal_map_events.rs",
+      "bytes": 2296,
+      "sha256": "81436fc7935fd029adce0d9993751296c0475a4f2af4c7c3b38cbd0cd93f22d7"
+    },
+    {
+      "path": "apps/simulation/tests/crystal_map_hazards.rs",
+      "bytes": 2267,
+      "sha256": "2d2746440acc1a5334379ac25e6308f8a99b62cc3b93cf549058307c66d0a0f7"
+    },
+    {
+      "path": "apps/simulation/tests/crystal_scroll_teleport.rs",
+      "bytes": 10875,
+      "sha256": "f749247e25ff761cfe43fee0488d1e90fc498444b5915306353410caa710d3a7"
+    },
+    {
+      "path": "apps/simulation/tests/fishing_transform.rs",
+      "bytes": 5581,
+      "sha256": "690782db8caac6b31efaafddecce1cd8df5e33cd3f3389f421aef1f338880e3c"
+    },
+    {
+      "path": "apps/simulation/tests/friends_authority.rs",
+      "bytes": 7998,
+      "sha256": "aacf3f38d75148dad96d3ffa940420e12d5df4e2c3e5eee9118c8e42ce4abd04"
+    },
+    {
+      "path": "apps/simulation/tests/great_fox_spirit_recall.rs",
+      "bytes": 7665,
+      "sha256": "749ed4054f9554024deda5ca55fa49091799c388dfa9176801244e3ca341c41e"
+    },
+    {
+      "path": "apps/simulation/tests/hero_ai.rs",
+      "bytes": 57603,
+      "sha256": "6b5c6cb8a4a4f36dba745e5f28186666a40ddeda479fe48623a08949ffcbad0a"
+    },
+    {
+      "path": "apps/simulation/tests/intelligent_creature_authority.rs",
+      "bytes": 11735,
+      "sha256": "7c639900a9f575734efb1237ff9377770f17e5cbddcd02a4e0c28dc7ff002eab"
+    },
+    {
+      "path": "apps/simulation/tests/item_stack_images.rs",
+      "bytes": 11054,
+      "sha256": "c7d06473e60ca4cec3a36a9433f592c605d96862cf6e04081e3cd208b26e5793"
+    },
+    {
+      "path": "apps/simulation/tests/item_tooltip_wire.rs",
+      "bytes": 3056,
+      "sha256": "fe61bc47c6417c4ad273d40c968fb833cb9021afb53889bc2934d4d188598891"
+    },
+    {
+      "path": "apps/simulation/tests/login_notice.rs",
+      "bytes": 3180,
+      "sha256": "396679ba83747d461d9131f5ec27fa01a8eee936ece4ad5c5b38a25f05d9b66a"
+    },
+    {
+      "path": "apps/simulation/tests/mail_status_transactions.rs",
+      "bytes": 7392,
+      "sha256": "70c8d1ea8017dc80a1aee016ccf401cc0bcd8f09156f69f245183450ddf9ac63"
+    },
+    {
+      "path": "apps/simulation/tests/map_coordinate_events.rs",
+      "bytes": 11961,
+      "sha256": "2cdc9b7d3704d3fe6eb4956b4151204d58030f1f68a93b3580981447e44bb09a"
+    },
+    {
+      "path": "apps/simulation/tests/map_event_binding_e1.rs",
+      "bytes": 11652,
+      "sha256": "596ad59b0e6e257bd601a02d285fd5001be6232d6d254942f5e8a2711645fca3"
+    },
+    {
+      "path": "apps/simulation/tests/market_refine_custody.rs",
+      "bytes": 15961,
+      "sha256": "b3f221209bca4cf80a8aeea979cd78ae9fa9e35eff047ff57747d6e38104f178"
+    },
+    {
+      "path": "apps/simulation/tests/marriage_authority.rs",
+      "bytes": 6416,
+      "sha256": "e2c4007d4c60968bc65b479b10070c7a88a0d8954f85acb5cb60ebd7e26d5e48"
+    },
+    {
+      "path": "apps/simulation/tests/mentor_authority.rs",
+      "bytes": 9717,
+      "sha256": "98874cce270f411d8054fcf4c95edd13b3d77a30141b0cfaf9c6749d2041ec03"
+    },
+    {
+      "path": "apps/simulation/tests/native_startup_contract.rs",
+      "bytes": 1700,
+      "sha256": "a7f7514838da6355e84eadb8318f4d16e6fb934aeadf6032daa66dda753a1ca0"
+    },
+    {
+      "path": "apps/simulation/tests/newcomer_progression_persistence.rs",
+      "bytes": 7113,
+      "sha256": "d682daceda1aab9dfb867806bdd68613d55c57eeb1b4d437bd958a7eea128c67"
+    },
+    {
+      "path": "apps/simulation/tests/newcomer_v2_training_spawns.rs",
+      "bytes": 3514,
+      "sha256": "e996e28a5cc1dd9c915d98db03a99a4c0688643ab19a73aed1d13653fd979f4e"
+    },
+    {
+      "path": "apps/simulation/tests/ordinary_candidate_loop.rs",
+      "bytes": 26010,
+      "sha256": "8ca5844886dcc350323f0fb9142bf1b72dcc3c116d98474b3460b059bbf75990"
+    },
+    {
+      "path": "apps/simulation/tests/platinum_176_combat_milestones.rs",
+      "bytes": 24177,
+      "sha256": "4e8a77377207b33ccc474d0f531d9964937a4dd55d69e25287dcd8bf0c71fcad"
+    },
+    {
+      "path": "apps/simulation/tests/platinum_176_party_boss.rs",
+      "bytes": 17434,
+      "sha256": "6c5424f3be832c96d82d9f733952bc4d28b8c9c3fc864e8bc06d8cb0c73920e8"
+    },
+    {
+      "path": "apps/simulation/tests/platinum_176_progression.rs",
+      "bytes": 38980,
+      "sha256": "252a48bc90ed2a621b3589dea9e75afe16df82cbf3e1708aba3f88fae73cafb0"
+    },
+    {
+      "path": "apps/simulation/tests/quest_agent_respawns.rs",
+      "bytes": 4424,
+      "sha256": "dc0732af97c5d80bfcba447d53c8659bc7aba1e8a36718a50eb73e7aaf1b935d"
+    },
+    {
+      "path": "apps/simulation/tests/quest_agent_special_scripts.rs",
+      "bytes": 2998,
+      "sha256": "64fd292e6764719a79322c7b73d2d2a9f371c9bb12dd79215ea8cbc1b7ef309a"
+    },
+    {
+      "path": "apps/simulation/tests/quest_icons.rs",
+      "bytes": 4212,
+      "sha256": "dd0d89fce7c9caefc1f3873720e09336f35f3eb43c835c18ba058357c0b8672b"
+    },
+    {
+      "path": "apps/simulation/tests/quest_recurrence_persistence.rs",
+      "bytes": 5434,
+      "sha256": "3dc105e011635c2a54fd03a975be7429adb3729aab34bc0a59a84f4be063007b"
+    },
+    {
+      "path": "apps/simulation/tests/ranking.rs",
+      "bytes": 15875,
+      "sha256": "ecde747dc4c9e969fb96a82a54c5d728f3ec47a1205aa365d9b8ba0925de6fdf"
+    },
+    {
+      "path": "apps/simulation/tests/ranking_shared_presence.rs",
+      "bytes": 18832,
+      "sha256": "60292d7f0658f0c608fa518312e33bc7cc779cd6f0f021e5489dec1070cf2b83"
+    },
+    {
+      "path": "apps/simulation/tests/refine_oven_custody.rs",
+      "bytes": 17375,
+      "sha256": "9e04f7d8eebfd7d3438a694bdf1376a2df63cb3aa6f4dd2ed0d801ff97d3ef34"
+    },
+    {
+      "path": "apps/simulation/tests/replica_recovery_config.rs",
+      "bytes": 1172,
+      "sha256": "95abd748d1b6c81a536c543f18334e31a9f85350ab2051380b6625128df615e9"
+    },
+    {
+      "path": "apps/simulation/tests/retained_bootstrap.rs",
+      "bytes": 3609,
+      "sha256": "5d465fbd1534fe7ad984bd0090436c8959a80ef0edd74ba3fa0b368b6a9850f6"
+    },
+    {
+      "path": "apps/simulation/tests/save_failure_propagation.rs",
+      "bytes": 2948,
+      "sha256": "16efa946e175374e26135a3049f10ed472d536d6c2a2eb413a235423e72d6e8d"
+    },
+    {
+      "path": "apps/simulation/tests/security_lifecycle.rs",
+      "bytes": 22337,
+      "sha256": "645142945ea96bacd8ac0ca7a72e9be160fce666df4e5b5d45875ccc5a3faebb"
+    },
+    {
+      "path": "apps/simulation/tests/shared_entity_combat.rs",
+      "bytes": 8551,
+      "sha256": "d39432d4259d20c7e6ca4dead0b7ade33d87641da4db79f2de039f0bd3ad3048"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_armadillo_ai.rs",
+      "bytes": 18841,
+      "sha256": "7673f8a7090b8f125db53cd7ebdf05e2c4e6c44b4b7afaac13b8487e3f0879e6"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_evil_mir_ai.rs",
+      "bytes": 11955,
+      "sha256": "7bfc82457613a01ebafda62c0fbe5612ecd54a5c8f47eb8a27a964fd77494325"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_football_ai.rs",
+      "bytes": 7236,
+      "sha256": "944c869c0d56e55915d0e33ecee1ea4308321da059640bc115ea699227a48692"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_gate_ai.rs",
+      "bytes": 3744,
+      "sha256": "ee1384727a5aa62225250e24530589253b19dd8d95ebd98de182be779f2c3919"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_great_fox_ai.rs",
+      "bytes": 26913,
+      "sha256": "c38fc322a044298800e89b7231d1e5dc315743ee8242c142e32a173ab8556b6f"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_hell_ai.rs",
+      "bytes": 29063,
+      "sha256": "49a4a2c6b4d65e76863e4bc469c44c4e2f0908a3c51bafdcba2c6066ce48838c"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_horned_ai.rs",
+      "bytes": 17046,
+      "sha256": "a349b4dbfe19d5dea231151dd2c83c3b57c7f91cc8bd1c1af4b900286faa4431"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_horned_encounter_ai.rs",
+      "bytes": 16519,
+      "sha256": "fb86916bddd78dc22c1401798cf67ba1c26ddb35d4528c8dafcefdb07a14df16"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_hugger_ai.rs",
+      "bytes": 20397,
+      "sha256": "59b737aca5647c006c814221d2e57f7a09465bdacc42fd23e0c4ecc1a54d6258"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_kirin_snow_ai.rs",
+      "bytes": 13934,
+      "sha256": "7421bb60f089f981f4c0b66176fb00457bde2c6ec36e13ce5a66ca1090784183"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_meow_ai.rs",
+      "bytes": 16300,
+      "sha256": "526dd62a70de913ceab9c64fa4b713e2fbf08924df178e3da52029460f5678bd"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_mud_boulder_ai.rs",
+      "bytes": 23047,
+      "sha256": "c4e5cd5b2d53048e93c6c78ca0fc0c5c5e94db0ea8bdd13145c59029829f3441"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_node_ai.rs",
+      "bytes": 7033,
+      "sha256": "f4202b425ae3da3c9a86b66e8d518d30c411ddc7b9ebba6566baae10cd4128e5"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_passive_ai.rs",
+      "bytes": 5938,
+      "sha256": "99cb3fa9b58ff518ed86cf48dd24b34accdb7a99630ce833917512e2dbacd999"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_pet_special_ai.rs",
+      "bytes": 7876,
+      "sha256": "c441d59b3be4f160b120ac2ea1b6da8fb7c8e3eac16b81ca072ff906cc9378cd"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+      "bytes": 16022,
+      "sha256": "f5965fae4da2f13197b670e322a12ddab1aa103c578470510b44b8e5e2a9b536"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_revival_ai.rs",
+      "bytes": 17921,
+      "sha256": "5e31582a5ca6a1be540230d11ae393b02ac49ffa39ecbb72554f06fd53dce1db"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_shinsu_ai.rs",
+      "bytes": 9606,
+      "sha256": "d8d9326f48ef25687ab8f714e1d665202770b777c283be70a16db5ebbe8a32aa"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+      "bytes": 8700,
+      "sha256": "54b30751f35b75e05e3fb10559de5cd7f68cef7a46a6f8989a3e20c10f3acb5a"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_snake_totem_ai.rs",
+      "bytes": 7221,
+      "sha256": "e7c32eb7ba576e61d9a5ea76e083db8c8045dc922b29ed16301c95e420d7664e"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_special_ai.rs",
+      "bytes": 11799,
+      "sha256": "812fccf5a955c60d14d02c60ea4e40fb52a9c6a3c897093f30bef6c6d28bc739"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+      "bytes": 33898,
+      "sha256": "284d06eb94645e36d8f1c19bcea8b214c280c21ca919c48a373f761459cf1ef0"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_stage_summons.rs",
+      "bytes": 8979,
+      "sha256": "1a26cc61381a292ab2a777f23b0916bbd3645d9e4527e93716c9591c00a34569"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_statue_centipede_ai.rs",
+      "bytes": 8477,
+      "sha256": "59e58e42fe3f07d76ceb69084b55472d7677e8e7fa000316bdcd0426e7a06f5a"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_stone_trap_ai.rs",
+      "bytes": 8867,
+      "sha256": "7aca46a1c6861075d44615c3f3b5a8904c3547e3fa730ad02e4b0fe229241cbd"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_thunder_ai.rs",
+      "bytes": 10253,
+      "sha256": "0366d52cd51c8f3f0ca7fbe770bbe4305cbe5c0e8c7805c068178f395f6fdd7d"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_town_archer_ai.rs",
+      "bytes": 7628,
+      "sha256": "7f5967c6c863deb7ce97e1df8cb950a42606a7aaf0632a8be724bcbb020cfd70"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_trap_rock_ai.rs",
+      "bytes": 6130,
+      "sha256": "320bdda3ca6413b4ae9f06c66dfaa5ce95cb367933024a2bf9aa97af2238cca4"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_tree_queen_ai.rs",
+      "bytes": 12120,
+      "sha256": "8bdf20ce4617ad90dd86e1bf23aedcb5bd2921ca16715fe09b232547b9b4fdc2"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_tucson_ai.rs",
+      "bytes": 12729,
+      "sha256": "d10c7abd7650dcb8fded00155f1ee2b5dba3193e56dec7069388470da40355e8"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_vampire_ai.rs",
+      "bytes": 5406,
+      "sha256": "71f679117ca4f8f6afa8f02db01d1c34b9f416ea43c390097c9e1394f104fb8c"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+      "bytes": 16562,
+      "sha256": "6dd23606f0799fa7d79aa4ed932c048c638369ab549dba0d082cc9dfb317a646"
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_yimoogi_ai.rs",
+      "bytes": 16600,
+      "sha256": "1a445ba18e95ba5ddda7331317e9c6aecc1c740a6d0af8b8c78da9a8e3af7a88"
+    },
+    {
+      "path": "apps/simulation/tests/shared_player_damage_settlement.rs",
+      "bytes": 17075,
+      "sha256": "86ed7f59d3c6ec516f9b2ca9789e394453688229bd0a4698cb34b204ef15b25a"
+    },
+    {
+      "path": "apps/simulation/tests/shared_player_death_zone.rs",
+      "bytes": 10277,
+      "sha256": "3ca648359493099b9e217a49240cdfc485e07a6661f2eb8e4be7caa4dc3fb9fe"
+    },
+    {
+      "path": "apps/simulation/tests/shared_player_vital_transfer.rs",
+      "bytes": 7839,
+      "sha256": "468c553f4ce83f618406e08aa1f849b7f474375469641823db457dcf144b8bab"
+    },
+    {
+      "path": "apps/simulation/tests/shared_trade_completion.rs",
+      "bytes": 13839,
+      "sha256": "2a81767d25dac4485a59781d8474977e11b1a1573a36cc459a0d6cdd9225b569"
+    },
+    {
+      "path": "apps/simulation/tests/shared_trade_gold.rs",
+      "bytes": 13529,
+      "sha256": "139e1b09b83afc18f45226d8467b5fcbb72d086221bf76e40d78978cb6b0aefe"
+    },
+    {
+      "path": "apps/simulation/tests/shared_zone.rs",
+      "bytes": 469443,
+      "sha256": "c39b155461cc9e1236e76296a889bc846aee4fb0a784ebe1934fec3f87225583"
+    },
+    {
+      "path": "apps/simulation/tests/shared_zone_melee_mana.rs",
+      "bytes": 3354,
+      "sha256": "449656c3fccba701d371da32ebe54966c878847054561152372d33d0433bc142"
+    },
+    {
+      "path": "apps/simulation/tests/shared_zone_self_magic.rs",
+      "bytes": 7145,
+      "sha256": "a5765190206b0455e45d1f46a17418990b839c9b0140590aa599197002b8296f"
+    },
+    {
+      "path": "apps/simulation/tests/shared_zone_thrusting.rs",
+      "bytes": 14475,
+      "sha256": "6682a2d14d46f432703b8ef7ba925173ca5ecc7f2a4f176566105cbcafa4c80c"
+    },
+    {
+      "path": "apps/simulation/tests/social_economy_integration.rs",
+      "bytes": 8815,
+      "sha256": "5b924ecec3d70ffdf2af3dfa16752fb6483a7ad236e599b80a95c419d79f3db6"
+    },
+    {
+      "path": "apps/simulation/tests/storage_request_id.rs",
+      "bytes": 3045,
+      "sha256": "fba185060549b52434b2169f66cfb6b1fa3c5e312be7022f4b8cfe57957f05f6"
+    },
+    {
+      "path": "apps/simulation/tests/trade_item_destinations.rs",
+      "bytes": 11330,
+      "sha256": "c82d4c3e8cdd420c5b5c2a77993e0f6c7490c86bee402338fce40266ef68782d"
+    },
+    {
+      "path": "apps/simulation/tests/trade_item_merges.rs",
+      "bytes": 8700,
+      "sha256": "7d94952a406f099d5557df17033f41506b49b2c5e6cf569469799514ebc2a9d8"
+    },
+    {
+      "path": "apps/simulation/tests/user_item_uid_file.rs",
+      "bytes": 20368,
+      "sha256": "610fa687bf8671d0b6c37af953fcd82d5e351d5dc493066cbe58cf81e4126cf5"
+    },
+    {
+      "path": "apps/simulation/tests/vertical_slice.rs",
+      "bytes": 131087,
+      "sha256": "70029efbd18943e72f9b427e2205f218621325ad7a12ad827f328e41416a51df"
+    },
+    {
+      "path": "apps/simulation/tests/yin_devil_node.rs",
+      "bytes": 3523,
+      "sha256": "d4535638bedfa2351338e3d7a9e6fc6a9fcae7c8aeea8c795c3e02d0578e79e0"
+    },
+    {
+      "path": "apps/simulation/tests/zone_replay.rs",
+      "bytes": 8858,
+      "sha256": "8f2e56153fd37289d6335ae0036b5c0d1a1e89943b3cbe4f47aca7276bf700b4"
+    },
+    {
+      "path": "packages/economy-policy/Cargo.toml",
+      "bytes": 292,
+      "sha256": "6c8c6295be6fc38787f47c1242a7a10d796b45e3d3cf261221f0ddec4f29ccd7"
+    },
+    {
+      "path": "packages/economy-policy/src/lib.rs",
+      "bytes": 11421,
+      "sha256": "a47bd43bf61f6790875a96870ebed23dc5f1686da3055b1db71cd100a6a1d321"
+    },
+    {
+      "path": "packages/economy-policy/tests/policy_vectors.rs",
+      "bytes": 8535,
+      "sha256": "9d52506ac658f497a4b933bacebe0bb1a09ffa4b483ff6da0f830b8a33c51c8e"
+    },
+    {
+      "path": "packages/economy-service/Cargo.toml",
+      "bytes": 425,
+      "sha256": "9aa10c89f62bbeae324ac518eff402e37d91084c2610af1d09625e54157599df"
+    },
+    {
+      "path": "packages/economy-service/src/debit.rs",
+      "bytes": 11449,
+      "sha256": "8d3dab65cd45bc23df0feb14178425c3f14fe8b82f3344985decf13b87b5be1d"
+    },
+    {
+      "path": "packages/economy-service/src/export.rs",
+      "bytes": 26930,
+      "sha256": "9ac2661d3c9b7f811278cb8bd38d8195fc308203e41c3c34a5ad77e983598757"
+    },
+    {
+      "path": "packages/economy-service/src/lib.rs",
+      "bytes": 1515,
+      "sha256": "ea6dcd0ba93fad3149c354fac2ab9ee02e2c8c7298ee85312f5fbae4505f6ccf"
+    },
+    {
+      "path": "packages/economy-service/src/store.rs",
+      "bytes": 48610,
+      "sha256": "8bc6f22ab8a497e90ad62e52d5b68288811677debd5bc1e83dd3953a668e4250"
+    },
+    {
+      "path": "packages/economy-service/src/types.rs",
+      "bytes": 7626,
+      "sha256": "7b391d387559b326f96a1eca484a0a190996d539ea95cfe79e138286766ca98d"
+    },
+    {
+      "path": "packages/economy-service/src/zero.rs",
+      "bytes": 9964,
+      "sha256": "b9eb28e56f77039b8d3f9e4638def40e6e51061382cf213c68f50cfecbc99c99"
+    },
+    {
+      "path": "packages/economy-service/tests/postgres_authority.rs",
+      "bytes": 18214,
+      "sha256": "56672b47bf1a66bc763f4c2c3f736b7436b2b7c1ef16f4135c014271c4fbd091"
+    },
+    {
+      "path": "packages/economy-service/tests/postgres_bound_debit_burn.rs",
+      "bytes": 25876,
+      "sha256": "e1a1f7e4893b2171ed1d1756d8485b6d04eb6f14db2dc2feb8adb0f122c7caf8"
+    },
+    {
+      "path": "packages/economy-service/tests/postgres_export.rs",
+      "bytes": 18405,
+      "sha256": "706c6c88a782896393fc21c3943c071fe9ca5ec6ebdeae39d651b83a9aa3b425"
+    },
+    {
+      "path": "packages/economy-service/tests/postgres_zero_fee_source.rs",
+      "bytes": 26887,
+      "sha256": "6e2ab4ec159fa39f194a5ac2667df73799433fc14a475a375739684930a3f8ab"
+    },
+    {
+      "path": "packages/game-data/Cargo.toml",
+      "bytes": 327,
+      "sha256": "e69823755b2f5f4818f76754a47db6e6911180463d0e20ba26dc2ccacc7b1091"
+    },
+    {
+      "path": "packages/game-data/data/generated/quest_presentation_text.rs",
+      "bytes": 2168,
+      "sha256": "2b7bf21b2518dadb6ff92603021885453e9e5e85ccc898df2fbd220dabe68e03"
+    },
+    {
+      "path": "packages/game-data/src/crystal_creature_settings.rs",
+      "bytes": 2162,
+      "sha256": "6ead34f9056a38921d6397048f85ed1f3ffdc31f7b8ab5e9e28b8ee466928c95"
+    },
+    {
+      "path": "packages/game-data/src/crystal_guild_settings.rs",
+      "bytes": 4046,
+      "sha256": "19bbf36fb8812162a7853b66f4efb2dbe747394eac39aa5df4c8dd019585cd38"
+    },
+    {
+      "path": "packages/game-data/src/crystal_hero_settings.rs",
+      "bytes": 7918,
+      "sha256": "58a19687be4d6794dfed69f6a16608f76adb82722b9cf000eaca2f6b73daaf27"
+    },
+    {
+      "path": "packages/game-data/src/crystal_item_image.rs",
+      "bytes": 2932,
+      "sha256": "b57acb109955d4157ec352fa8b0ec4f5de083e9021828a67e1e54501cc23993e"
+    },
+    {
+      "path": "packages/game-data/src/crystal_map_events.rs",
+      "bytes": 6669,
+      "sha256": "6a627807f49eafda4e44a3b53541e48131bec13046ae60a0079ae353ba1754b8"
+    },
+    {
+      "path": "packages/game-data/src/crystal_npc_goods.rs",
+      "bytes": 5045,
+      "sha256": "4144f851d4d6b98e06989e294c1c6e5f5b6ca831459fcd49d5539982b67ada21"
+    },
+    {
+      "path": "packages/game-data/src/lib.rs",
+      "bytes": 167372,
+      "sha256": "035c3a4f23c2ae5a0665c2bb857e4bd66c8f783f5bedbe99d4c8de55576fc987"
+    },
+    {
+      "path": "packages/game-data/tests/platinum_176_content_loop.rs",
+      "bytes": 13538,
+      "sha256": "e2a293de0d2547efd7d430c4221aa0b3596cb7567d84191e5ba3b432e018315a"
+    },
+    {
+      "path": "packages/protocol/Cargo.toml",
+      "bytes": 378,
+      "sha256": "245b0e2cb7c34270f9f5dc2aa96572d19699d5ff208f3f796add42b0a953aab3"
+    },
+    {
+      "path": "packages/protocol/src/catalog_transport.rs",
+      "bytes": 11788,
+      "sha256": "cd6f73582d2774805e66ca9898a8f2b96e829d8bce648e6ddf983d13f485689d"
+    },
+    {
+      "path": "packages/protocol/src/error.rs",
+      "bytes": 3373,
+      "sha256": "a7e13c9abbdf35f98e830a62355f9dd082e6c95a66a887f4e7c4d3d90bf9a6ba"
+    },
+    {
+      "path": "packages/protocol/src/frame.rs",
+      "bytes": 1275,
+      "sha256": "ba0ac651251624b4595711dc3d0fbc70ab57428b21d0997bd418a0fc1d49c7ad"
+    },
+    {
+      "path": "packages/protocol/src/ids.rs",
+      "bytes": 30620,
+      "sha256": "930259a2f29d2dd7c09f77d861ab5db1477629d75b31b2ca59d2479dd8efb126"
+    },
+    {
+      "path": "packages/protocol/src/io.rs",
+      "bytes": 5117,
+      "sha256": "e80ef0c9a01c5c185469cab988ef7e257a5de6638fe5326360d36fe1ca766046"
+    },
+    {
+      "path": "packages/protocol/src/item_image.rs",
+      "bytes": 1218,
+      "sha256": "09fc26d058b62409a1ca99acdbd717b59a8ab21f956244fa60e82a7fa51b7a72"
+    },
+    {
+      "path": "packages/protocol/src/lib.rs",
+      "bytes": 1969,
+      "sha256": "b5fc91187079005e0b19945c3c43e68736bb1786f7098e83134dead5e302766d"
+    },
+    {
+      "path": "packages/protocol/src/packets.rs",
+      "bytes": 307016,
+      "sha256": "6397a43b3a4c2376cfcf8b6a7d0811d2ff9dd6e3da9ca84dc07d8854675beec7"
+    },
+    {
+      "path": "packages/protocol/src/trace.rs",
+      "bytes": 29621,
+      "sha256": "1d2fcb0f5eaff134e5693e9497461587de8dfd9e0aa893184f5ca156541f3c89"
+    },
+    {
+      "path": "packages/protocol/src/types.rs",
+      "bytes": 120048,
+      "sha256": "c25a956e371aee4e1b56276c3203c541473d04235cb52feaf391480662a1a7d6"
+    },
+    {
+      "path": "packages/protocol/tests/codec.rs",
+      "bytes": 39828,
+      "sha256": "82b4121dddce796729baa6aed3de0b925c1ab1eb8735d9e641e9f0e86e581443"
+    }
+  ]
+}

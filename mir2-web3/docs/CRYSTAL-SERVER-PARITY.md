@@ -1,6 +1,14 @@
 # Crystal Server Parity
 
-## 第八阶段：浏览器恢复核对与 Windows 原生优先（2026-10-20）
+## 第九阶段当前审计边界（2026-10-21）
+
+新EXE59普通登录/StartGame/NPC/Repair及Bag拖入已拿到服务端6绑定金币报价；显式Close后无收费。第二次报价至OKAY约97秒，超过原30秒TTL，拒绝且未发Confirm。停服后独立psql保持0结果/0销毁、绑定1,000,000、旧gold 1234、Bag100/1000、save_version15/revision14，见`C:/mir2-build/hunting-native-pg-final-after-deadline-56.json`；成功Confirm、Pending原Query、断线和最终冷登录尚未建立原生实机证明。
+
+独立repair source gate已修命名装备位/合法缺省UID，并保持严格raw字段/重复键、actual inventory hash和原buy gate。Host60的39/39（含5项rich-source）以TestSink证明合法当前Quoted到单Confirm及原Query Unknown仍Pending，绝非GUI/物理WS收费验收。producer60b为1测试/7案例，UI58为17/17；Gateway46纯5+物理WS1和PG45会话1项保留原scope，不与其它轮次累加。详见[阶段九审计](generated/hunting-economy/acceptance-20261021-repair-native-windows.json)。
+
+fixture56已达到2小时截止正常退出0，proxy56按stop marker退出0，EXE59仅自己的窗口Alt+F4正常退出0，其他游戏未操作。原当前窗口30秒操作请求已撤回，当前不要操作；下轮新隔离环境再验成功Confirm→Pending Close→原Query→断线→冷登录，不改TTL/时钟或绕guard。Quoted通用选择文案及顶X关闭未验仍有小UX待办。完整狩猎经济任务未完成，其他来源、材料、三层真实销毁、完整市场画像收益、通知及迁移发布仍开放；本服定制规则不增加Crystal/Candidate或生产资格。无Docker/WSL/虚拟机、远程资产变更或其它窗口干扰；以下第八阶段及更早文字仅为历史范围。
+
+## 第八阶段：浏览器恢复核对与 Windows 原生优先（2026-10-20，历史范围）
 
 浏览器已用本机隔离 Axum/PG 的合成账号完成普通登录/StartGame、真实 NPC 服务、Bag 拖入、服务端报价 6 绑定金币及一次 Confirm。测试 transport 仅省略一次已提交 owner 回执；Pending 主动 Close 后仍可原 Query。独立 psql 在 Query 后、普通 Alt+x 退出后及服务停止后均核对：结果/销毁各 1 条、扣费/销毁 6、绑定余额 999994、旧 gold 1234、Bag 耐久 970/970。该路径不是强制服务端 OutcomeUnknown，本轮未重新登录验证。见 [第八阶段证据](generated/hunting-economy/acceptance-20261020-repair-browser.json)。
 

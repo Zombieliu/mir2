@@ -5570,6 +5570,27 @@ async fn handle_socket_work(
                             continue;
                         };
 
+                        // The accepted resume has authenticated this exact
+                        // identity session. Re-deliver its original bearer;
+                        // never turn a resume credential into an identity token.
+                        let resumed_identity_grant = tokio::task::block_in_place(|| {
+                            reissue_native_resume_identity_grant(
+                                session_cache.as_ref(),
+                                &identity,
+                                &binding,
+                                &verified,
+                                gateway_unix_ms(),
+                            )
+                        });
+                        let Ok(resumed_identity_grant) = resumed_identity_grant else {
+                            drop(prepared_zone_registration);
+                            drop(restored);
+                            if send_resume_rejected(&sender).await.is_err() {
+                                return;
+                            }
+                            continue;
+                        };
+
                         *session = restored.session;
                         *active_session_permit = restored.active_session_permit;
                         authenticated = true;
@@ -5605,6 +5626,9 @@ async fn handle_socket_work(
                             session,
                         );
                         let resumed_generation = binding.generation.saturating_add(1);
+                        if send_identity_session_grant(&sender, &resumed_identity_grant).await.is_err() {
+                            return;
+                        }
                         if send_session_resumed(
                             &sender,
                             binding.character_index,
@@ -9440,6 +9464,38 @@ fn native_resume_identity_is_active(
             })
 }
 
+/// Called only after a native resume credential has been consumed successfully.
+/// Recheck both shared revocation stores before and after signing, preserving
+/// the exact identity/session/expiry authenticated by the committed binding.
+fn reissue_native_resume_identity_grant(
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    binding: &ResumeBinding,
+    verified: &VerifiedIdentitySession,
+    now_ms: u64,
+) -> Result<crate::identity::IdentitySessionGrant, NativeResumeCommitError> {
+    if binding.account_id != verified.account_id
+        || binding.identity_session_id != verified.session_id
+        || binding.identity_expires_at_ms != verified.expires_at_ms
+        || !native_resume_identity_is_active(session_cache, identity, verified, now_ms)
+    {
+        return Err(NativeResumeCommitError::IdentityUnavailable);
+    }
+    let grant = identity
+        .reissue_verified_session_grant(verified)
+        .map_err(|_| NativeResumeCommitError::IdentityUnavailable)?;
+    if grant.session.account_id != binding.account_id
+        || grant.session.session_id != binding.identity_session_id
+        || grant.session.expires_at_ms != binding.identity_expires_at_ms
+        || !native_resume_identity_is_active(
+            session_cache, identity, verified, gateway_unix_ms().max(now_ms),
+        )
+    {
+        return Err(NativeResumeCommitError::IdentityUnavailable);
+    }
+    Ok(grant)
+}
+
 fn validate_and_prepare_native_resume<'a, PreparedZone>(
     reconnect_sessions: &'a ReconnectSessionStore,
     session_cache: &dyn crate::cache::GatewaySessionCache,
@@ -12689,6 +12745,10 @@ mod web_live_overflow_tests;
 mod web_hunting_repair_network_tests;
 
 #[cfg(test)]
+#[path = "web_resume_identity_grant_tests.rs"]
+mod web_resume_identity_grant_tests;
+
+#[cfg(test)]
 mod tests {
     use super::{
         realm_info_event, responses_require_world_snapshot, should_send_world_snapshot_for_action,
@@ -12828,7 +12888,7 @@ mod tests {
         loop {
             let message = tokio::time::timeout_at(deadline, socket.next())
                 .await
-                .unwrap_or_else(|_| panic!("timed out waiting for {label}; observed={observed:?}"))
+                .unwrap_or_else(|_| panic!("timed out waiting for {label}; observed {} frames", observed.len()))
                 .unwrap_or_else(|| panic!("WebSocket closed waiting for {label}"))
                 .unwrap_or_else(|error| panic!("WebSocket failed waiting for {label}: {error}"));
             match message {
@@ -13514,7 +13574,7 @@ mod tests {
         session
     }
 
-    fn issue_test_identity() -> (
+    pub(super) fn issue_test_identity() -> (
         crate::identity::IdentityService,
         crate::identity::VerifiedIdentitySession,
     ) {
@@ -13534,7 +13594,7 @@ mod tests {
         (identity, verified)
     }
 
-    fn store_native_resume_fixture(
+    pub(super) fn store_native_resume_fixture(
         store: &super::ReconnectSessionStore,
         verified: &crate::identity::VerifiedIdentitySession,
         gateway_session_id_override: Option<&str>,
@@ -16306,6 +16366,15 @@ mod tests {
         .expect("first socket close should retain exactly one reconnect lease");
 
         let mut resumed_socket = connect(address).await;
+        let (_, connect_events) = read_test_websocket_until(
+            &mut resumed_socket,
+            "unselected resume connection snapshot",
+            |event| event["type"] == "worldSnapshot",
+        )
+        .await;
+        super::web_resume_identity_grant_tests::assert_unselected_native_resume_connect(
+            &connect_events,
+        );
         send_test_websocket_json(
             &mut resumed_socket,
             json!({
@@ -16325,6 +16394,9 @@ mod tests {
             |event| event["type"] == "resumeCredential",
         )
         .await;
+        super::web_resume_identity_grant_tests::assert_resumed_grant_matches_original(
+            &login_events, &resumed_events,
+        );
         let resumed_at = resumed_events
             .iter()
             .position(|event| event["type"] == "sessionResumed")
@@ -16353,7 +16425,7 @@ mod tests {
             .as_str()
             .expect("rotated resume credential")
             .to_string();
-        assert_ne!(rotated_credential, first_credential);
+        assert!(rotated_credential != first_credential, "resume credential must rotate");
         assert_eq!(
             rotated_credential_event["generation"].as_u64(),
             Some(first_generation.saturating_add(1)),

@@ -143,6 +143,14 @@ impl NativeNpcPurchaseGateway {
         self.sources.clear(); self.applied = None; self.binding_stamp = None; self.recovery_sent = false; self.map_file_name = None;
         if let Some(token) = self.token { self.client.withdraw_current(token); }
     }
+    pub(super) fn suspend_for_repair(&mut self)->bool {
+        if self.client.pending_current().is_some()||!self.entered_ui.is_empty(){return false;}
+        self.retire_binding();self.attempted_stamp=None;self.entry_allowed=false;self.needs_world=true;
+        true
+    }
+    pub(super) fn resume_after_repair(&mut self){
+        self.attempted_stamp=None;self.entry_allowed=true;self.needs_world=false;
+    }
     pub(super) fn disconnect(&mut self) {
         self.retire_binding();
         if let Some(token) = self.token.take() { self.client.disconnect(token); }
@@ -356,8 +364,14 @@ impl NativeNpcPurchaseGateway {
     }
 }
 
-fn publish_applied_ui_source(fence: &NativeCommandFence, stamp: NativeCommandStamp,
+pub(super) fn publish_applied_ui_source(fence: &NativeCommandFence, stamp: NativeCommandStamp,
     projection: &NativeNpcEconomyProjection) -> Result<(),String>
+{
+    with_applied_ui_source(fence,stamp,projection,|_|())
+}
+
+pub(super) fn with_applied_ui_source<R>(fence:&NativeCommandFence,stamp:NativeCommandStamp,
+    projection:&NativeNpcEconomyProjection,after:impl FnOnce(&mut NativeCommandFenceState)->R)->Result<R,String>
 {
     let inventory: mir2_client_bevy::inventory::InventoryModel = serde_json::from_str(&projection.inventory_json).map_err(|error| error.to_string())?;
     let shop: mir2_client_bevy::shop::ShopModel = serde_json::from_str(&projection.shop_json).map_err(|error| error.to_string())?;
@@ -375,7 +389,7 @@ fn publish_applied_ui_source(fence: &NativeCommandFence, stamp: NativeCommandSta
     state.npc_gold_buy.dialog_retired_since_snapshot = false;
     state.npc_gold_buy.inventory_ready = true; state.npc_gold_buy.shop_ready = true;
     for waker in state.waiters.values() { waker.wake_by_ref(); }
-    Ok(())
+    Ok(after(&mut state))
 }
 
 /// No UI sequence/gate claim occurs for Begin/Quote/Query. The exact physical
@@ -623,6 +637,20 @@ mod tests {
         if service=="BUYUSED" {source["nativeNpcShop"]["panelType"]=json!(1);}
         if service=="PEARLBUY" {source["nativeNpcShop"]["packetType"]=json!("NPCPearlGoods");}
         source
+    }
+    #[test]
+    fn native_npc_gateway_pending_purchase_prevents_repair_lane_retirement() {
+        let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready();
+        let ui=ui_gate(&fence,stamp);let mut sink=LocalSink::default();
+        let owned=owned_buy(&sender,&mut receiver,&fence,stamp,&ui);
+        quote_local(&mut gateway,owned,&fence,&mut sink);
+        assert_eq!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
+        let pending=gateway.client.pending_current().unwrap().clone();
+        assert!(!gateway.suspend_for_repair());
+        assert_eq!(gateway.client.pending_current(),Some(pending));
+        assert!(gateway.binding_stamp.is_some());
+        assert!(!gateway.entered_ui.is_empty());
+        assert_eq!(sink.0.lock().unwrap().frames.len(),2);
     }
     fn ready_profile(source:&Value)->(NativeNpcPurchaseGateway,GatewayCommandSender,GatewayCommandReceiver,NativeCommandFence,NativeCommandStamp,bevy::prelude::World) {
         let (sender,receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();let stamp=fence.test_world_ready(3,0);
@@ -1004,4 +1032,6 @@ mod tests {
         fence.begin_npc_gold_buy_snapshot(Some(&source));
         assert!(!fence.0.lock().unwrap().npc_gold_buy.shop_ready);assert!(fence.npc_gold_buy_source().is_none());assert!(fence.accepts(stamp,true));
     }
+
+    include!("native_producer_skill_authority_tests.rs");
 }
