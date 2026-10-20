@@ -1,0 +1,161 @@
+{
+  "recorded_at_utc": "2026-10-20T02:04:47.220Z",
+  "code_commit": "a8165e5157207eb9e60b55d9cde5b763232f91d2",
+  "branch": "codex/hunting-permit-economy",
+  "owned_files": 14,
+  "all_owned_blobs_fully_read": true,
+  "all_owned_working_blobs_match_after_git_normalization": true,
+  "source_files_still_match_test_inputs": 1151,
+  "source_manifest_committed_sha256": "15fb6ea60d785feac6d8660fb8015c9e50d4d06bbfd388b18eca24fe4d2f692e",
+  "foreign_qa_files_preserved_and_unstaged": 3,
+  "protected_config_compiler_inputs_unchanged": 3,
+  "focused_node": 105,
+  "gateway_pure": 25,
+  "explicit_native_postgres_physical_ws_tests": 2,
+  "compiled_wallet_synthetic_http": 12,
+  "independent_post_run_pg_reconciliation_schemas": 2,
+  "full_frontend_strict_build": true,
+  "true_browser_click_or_visual_accepted": false,
+  "forced_source_outcome_unknown_physical_fault_accepted": false,
+  "production_activated": false,
+  "goal_complete": false,
+  "pushed": false,
+  "deployed": false,
+  "automatic_gc_disabled_for_this_commit_only": true,
+  "untracked_build_configuration_copies": [
+    {
+      "path": "apps/web/tsconfig.hunting-repair-ui-27.json",
+      "sha256": "9ce5120f2c3fe8063bae2cfebf8169c893346d2a423fc056212755de610b7472",
+      "reason": "native build copy; original config unchanged"
+    },
+    {
+      "path": "apps/web/tsconfig.hunting-repair-ui-28.json",
+      "sha256": "93b5a6462e575a50060980c3c14d6db2c4e207c5b7399934d925a911469f6789",
+      "reason": "native build copy; original config unchanged"
+    },
+    {
+      "path": "apps/web/tsconfig.hunting-repair-ui-29.json",
+      "sha256": "5a3a10494ff0e9a0dbca9b66e74f7ed62e994c13ddfec226ec503a7efffd565e",
+      "reason": "native build copy; original config unchanged"
+    },
+    {
+      "path": "apps/web/tsconfig.hunting-repair-ui-30.json",
+      "sha256": "46f83f548cf9e526ee947cbd5b356e06054101c3f5af0409b9ad444141c9d8a2",
+      "reason": "native build copy; original config unchanged"
+    }
+  ],
+  "blobs": [
+    {
+      "path": "apps/gateway/src/web.rs",
+      "git_blob": "7beaaab0651889e8a452e474ea70df5626c0f8a2",
+      "bytes": 802602,
+      "committed_sha256": "452c8b343310541edbd2b8728bd674638aedd4c64ec68cdb62f9220f9bf5dc03",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/gateway/src/web_hunting_repair_network_tests.rs",
+      "git_blob": "237edbe51f2790e9c20812ea5744f207fbb8a7c6",
+      "bytes": 40689,
+      "committed_sha256": "819446cb0dccb8a640f8614b2b4717bdba5e31ee284cf8a9b0b53c30984b6c93",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/.env.example",
+      "git_blob": "5813db2f133813e3ea412a1399270beb1fdaf21c",
+      "bytes": 3503,
+      "committed_sha256": "b95eada081282e8365bb36328f67e0d19841f5898445174a4329d0ffa7d3cda6",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/app/api/economy/hunting-wallet/route.ts",
+      "git_blob": "326ea0fafb25bb93d730bc1f5ae8d742584d9235",
+      "bytes": 4208,
+      "committed_sha256": "2704c34a8760c623519c5288543d35bf5cae7c0e7edd27e5506e88fe54122d2a",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "apps/web/scripts/test-hunting-repair-wallet.mjs",
+      "git_blob": "e3b2d859b73be5a7043bf7b053e6921b6cc9d454",
+      "bytes": 24498,
+      "committed_sha256": "7876c6a28070414be7ef939274959a96bd37d88be1dae108f3748887e9525eae",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/AGENT-ORCHESTRATION.md",
+      "git_blob": "f11645d2d0d6567da398afa078a77ede3ec5e9a4",
+      "bytes": 370128,
+      "committed_sha256": "db25b2b7224da465ca604b92801e07593cab182346c21d8376be36cc8563c7c9",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/AGENT-TASK-QUEUE.md",
+      "git_blob": "517726661684cc1f75b6c34aefd3abddf4c3893f",
+      "bytes": 987906,
+      "committed_sha256": "3007bd2b0b87e166a5701ceb9bd50a241c0423073e5a1ffe1093115ac99d6258",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/BACKEND-1TO1-PROGRESS.md",
+      "git_blob": "5709b2fa21b23df32d31c4ce9e6aa1331a536976",
+      "bytes": 606487,
+      "committed_sha256": "78052b9916e1683b294fc75b2858726e2de3aba62931b752b2c4644a52d7a60d",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "git_blob": "06e509cbadf6a04cae81f7950596ba058fddce00",
+      "bytes": 1107218,
+      "committed_sha256": "fa8ad0ac1a9af5949f4adea9190a9979aa2fade70930504738ce8eeaec4bf87f",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/CRYSTAL-SERVER-PARITY.md",
+      "git_blob": "96fddb33d3212656971fe3e5827871bfb671bdbd",
+      "bytes": 547946,
+      "committed_sha256": "c4a9698c5cae78d02d179e777084ffa1c42671638b9e08fbcbbd914a43a06b9c",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/HUNTING-PERMIT-ECONOMY.md",
+      "git_blob": "2f0cdbf581843a0aa0dbe6ea7636f8d74e525cc8",
+      "bytes": 35868,
+      "committed_sha256": "b312bac7d659bcd4e583a71052699f9c66a47fae3e0cc423c51f1ec8d936410c",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/HUNTING-SOURCE-INTEGRATION.md",
+      "git_blob": "c80ce4f0ad807f75e75eb876ff9baa4d27f82227",
+      "bytes": 23344,
+      "committed_sha256": "0114409e1b50b2dae68daf7b026df4c26ed23a50dd5cf0d56720d275a2dcf18c",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/generated/hunting-economy/acceptance-20261020-repair-network.json",
+      "git_blob": "7c936ef7a519ba165aab83e79fcba31670bbeba4",
+      "bytes": 29635,
+      "committed_sha256": "cc919199c27a2e47dd201e8f6271fcd430180957fc7adae45b1c79a0a48b98ef",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    },
+    {
+      "path": "docs/generated/hunting-economy/sources-20261020-repair-network.json",
+      "git_blob": "68a6cc10e0b5a16ef673d5fe3754644642c74664",
+      "bytes": 175069,
+      "committed_sha256": "15fb6ea60d785feac6d8660fb8015c9e50d4d06bbfd388b18eca24fe4d2f692e",
+      "full_blob_read": true,
+      "working_after_git_normalization_matches": true
+    }
+  ]
+}
