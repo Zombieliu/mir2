@@ -19,6 +19,7 @@ use mir2_simulation::{CharacterSaveRecord, SimulationConfig, VisibleNpcRecord};
 use serde_json::{json, Value};
 use std::{
     collections::BTreeMap,
+    io::{Seek, SeekFrom, Write},
     net::{IpAddr, SocketAddr},
     path::PathBuf,
     sync::{
@@ -72,6 +73,7 @@ fn policy(enabled: bool) -> Policy {
 struct Database {
     url: String,
     realm: String,
+    schema: String,
     root: PathBuf,
 }
 impl Database {
@@ -133,7 +135,12 @@ impl Database {
             mir2_simulation::apply_migrations(&mut scoped).unwrap();
             economy::initialize_realm(&mut scoped, &realm, &policy(true)).unwrap();
         });
-        Self { url, realm, root }
+        Self {
+            url,
+            realm,
+            schema,
+            root,
+        }
     }
 
     fn run<T: Send>(&self, action: impl FnOnce(&mut postgres::Client) -> T + Send) -> T {
@@ -292,6 +299,11 @@ struct Server {
 }
 impl Server {
     async fn start(db: &Database) -> Self {
+        Self::start_on(db, "127.0.0.1:0".parse().unwrap()).await
+    }
+
+    async fn start_on(db: &Database, bind: SocketAddr) -> Self {
+        assert!(bind.ip().is_loopback(), "fixture listener must be loopback");
         let config = Arc::new(db.config());
         let identity = outside_runtime(|| {
             crate::identity::IdentityService::from_env(Some(db.url.clone())).unwrap_or_else(|_| {
@@ -349,7 +361,7 @@ impl Server {
                 axum::routing::get(hunting_economy::hunting_wallet),
             )
             .with_state(state);
-        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let listener = tokio::net::TcpListener::bind(bind).await.unwrap();
         let address = listener.local_addr().unwrap();
         let task = tokio::spawn(async move {
             axum::serve(
@@ -1027,4 +1039,209 @@ async fn hunting_repair_network_postgres_unread_commit_raw_close_saves_then_cold
     drop(socket);
     cold.wait_empty(index).await;
     cold.stop().await;
+}
+
+// Only direct, new control files in the explicitly designated private build
+// directory are allowed. No credential/DSN is written and no directory deleted.
+fn browser_control_file(variable: &str) -> PathBuf {
+    let configured =
+        PathBuf::from(std::env::var_os(variable).expect("explicit fixture control file required"));
+    assert!(
+        configured.is_absolute(),
+        "fixture control path must be absolute"
+    );
+    let configured_root = PathBuf::from(
+        std::env::var_os("MIR2_HUNTING_BROWSER_CONTROL_DIR")
+            .expect("explicit private fixture control directory required"),
+    );
+    assert!(
+        configured_root.is_absolute(),
+        "absolute control directory required"
+    );
+    let root = configured_root
+        .canonicalize()
+        .expect("private build directory must exist");
+    let parent = configured
+        .parent()
+        .unwrap()
+        .canonicalize()
+        .expect("fixture control parent must exist");
+    assert_eq!(
+        parent, root,
+        "fixture control file must be directly inside private build directory"
+    );
+    let name = configured
+        .file_name()
+        .and_then(|name| name.to_str())
+        .expect("ASCII fixture filename required");
+    assert!(
+        name.starts_with("hunting-repair-browser-")
+            && name
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || b"._-".contains(&byte)),
+        "bounded fixture filename required"
+    );
+    let resolved = parent.join(name);
+    assert!(
+        !resolved
+            .try_exists()
+            .expect("fixture control path check failed"),
+        "fixture control file must be new"
+    );
+    resolved
+}
+
+fn write_browser_status(file: &mut std::fs::File, value: &Value) {
+    let encoded = serde_json::to_vec_pretty(value).unwrap();
+    file.seek(SeekFrom::Start(0)).unwrap();
+    file.set_len(0).unwrap();
+    file.write_all(&encoded).unwrap();
+    file.sync_all().unwrap();
+}
+
+/// A temporary test-only Gateway for ordinary browser Login/StartGame. The
+/// synthetic password is the existing test constant, never a ready-file field
+/// or console output. A real browser may inspect and mutate only this schema.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[ignore = "holds an isolated loopback browser fixture until its stop file or bounded deadline"]
+async fn hunting_repair_network_postgres_browser_fixture() {
+    let bind: SocketAddr = std::env::var("MIR2_HUNTING_BROWSER_ADDR")
+        .expect("explicit browser fixture listener required")
+        .parse()
+        .expect("valid fixture listener required");
+    assert!(
+        bind.ip().is_loopback() && bind.port() != 0,
+        "fixed loopback fixture port required"
+    );
+    let ready_path = browser_control_file("MIR2_HUNTING_BROWSER_READY_FILE");
+    let stop_path = browser_control_file("MIR2_HUNTING_BROWSER_STOP_FILE");
+    assert_ne!(ready_path, stop_path);
+    let seconds = std::env::var("MIR2_HUNTING_BROWSER_SECONDS")
+        .map(|value| {
+            value
+                .parse::<u64>()
+                .expect("fixture lifetime must be seconds")
+        })
+        .unwrap_or(20 * 60);
+    assert!(
+        (1..=2 * 60 * 60).contains(&seconds),
+        "fixture lifetime must be between 1 and 7200 seconds"
+    );
+    let origin = local_origin();
+    let db = Database::new();
+    let server = Server::start_on(&db, bind).await;
+    let mut preparation = server.connect().await;
+    let _ = register_and_login(&mut preparation).await;
+    let index = new_character(&mut preparation).await;
+    db.prepare_offline_target(&server.config, index);
+    // No StartGame: the browser must establish its own normal Login, actor and
+    // canonical snapshot. Disconnect completes without retaining a character.
+    disconnect(&mut preparation).await;
+    drop(preparation);
+    server.wait_empty(index).await;
+    let initial = db.checkpoint(index);
+    assert_eq!(initial.gold, LEGACY_GOLD);
+    assert_eq!(db.facts(index), (FUNDING, 0, 0, 0));
+    let expires_at_ms = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis()
+        .checked_add(u128::from(seconds) * 1000)
+        .unwrap();
+    let mut ready = json!({"version":"hunting-repair-browser-fixture-v1","status":"ready",
+        "processId":std::process::id(),"schema":db.schema,"realm":db.realm,
+        "gatewayHttpUrl":format!("http://{}",server.address),"gatewayWsUrl":format!("ws://{}/ws",server.address),
+        "publicOrigin":origin,"accountId":ACCOUNT,"character":{"index":index,"name":"RepairNetHero"},
+        "target":{"uniqueId":BAG_UID.to_string(),"container":"bag1","slot":20,"npcObjectId":NPC_ID,
+            "durabilityCurrent":100,"durabilityMax":1000},
+        "initialBoundGold":FUNDING.to_string(),"initialLegacyGold":LEGACY_GOLD,
+        "expiresAtMs":u64::try_from(expires_at_ms).unwrap(),"stopFile":stop_path.to_string_lossy()});
+    let mut ready_file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&ready_path)
+        .expect("new private browser ready file required");
+    write_browser_status(&mut ready_file, &ready);
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(seconds);
+    let reason = loop {
+        match std::fs::symlink_metadata(&stop_path) {
+            Ok(metadata) => {
+                assert!(
+                    metadata.is_file() && !metadata.file_type().is_symlink(),
+                    "stop marker must be a plain file"
+                );
+                break "stopFile";
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => panic!("browser fixture stop marker check failed"),
+        }
+        if tokio::time::Instant::now() >= deadline {
+            break "deadline";
+        }
+        assert!(
+            !server.task.is_finished(),
+            "browser fixture listener ended before stop"
+        );
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    };
+    ready["status"] = json!("stopping");
+    ready["stopReason"] = json!(reason);
+    write_browser_status(&mut ready_file, &ready);
+    // Stop accepting first. Normally the browser has already used its ordinary
+    // logout/Disconnect before touching stop. Only this isolated synthetic
+    // account is revoked if a tab remains; the production loop then saves it.
+    server.task.abort();
+    let revocation = server.reconnect.begin_account_identity_revocation(ACCOUNT);
+    if server.capacity.status().current_ws_connections != 0 {
+        outside_runtime(|| {
+            let identity = crate::identity::IdentityService::from_env(Some(db.url.clone()))
+                .unwrap_or_else(|_| panic!("isolated fixture shutdown identity unavailable"));
+            let sessions = identity
+                .list_account_session_ids(ACCOUNT)
+                .unwrap_or_else(|_| panic!("isolated fixture shutdown sessions unavailable"));
+            identity
+                .revoke_all_account_sessions(ACCOUNT, "browser_fixture_shutdown")
+                .unwrap_or_else(|_| panic!("isolated fixture shutdown revocation failed"));
+            for session in sessions {
+                server
+                    .cache
+                    .revoke_identity_session(&session, 120)
+                    .unwrap_or_else(|_| {
+                        panic!("isolated fixture shutdown cache revocation failed")
+                    });
+            }
+        });
+    }
+    let closed = tokio::time::timeout(Duration::from_secs(30), async {
+        while server.capacity.status().current_ws_connections != 0 {
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+    })
+    .await;
+    if closed.is_err() {
+        ready["status"] = json!("shutdownUnproven");
+        write_browser_status(&mut ready_file, &ready);
+        panic!("browser fixture did not prove real socket teardown before shutdown deadline");
+    }
+    let key = GatewaySessionCacheKey {
+        account_id: ACCOUNT.into(),
+        character_index: index,
+    };
+    if let Some(retired) = server.reconnect.take(&key) {
+        outside_runtime(|| {
+            assert_eq!(
+                crate::cache::remove_owned_session_cache(server.cache.as_ref(), &retired.session),
+                Some(key)
+            );
+            drop(retired);
+        });
+    }
+    server.wait_empty(index).await;
+    let saved = db.checkpoint(index);
+    ready["status"] = json!("stopped");
+    ready["savedRevision"] = json!(saved.revision);
+    ready["finalLegacyGold"] = json!(saved.gold);
+    write_browser_status(&mut ready_file, &ready);
+    drop(revocation);
+    server.stop().await;
 }

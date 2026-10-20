@@ -112,6 +112,24 @@ test("close and missing target preserve a recovery-only view incapable of issuin
   assert.equal(f.service.select(view, 900, view), null); assert.equal(f.service.beginDrag(view, 900, 7, geometry(), view), null);
   f.state = state(); assert.equal(f.view(), null);
 });
+test("retired source retains only a visible matching committed result, never mutation authority", () => {
+  const f = fixture(), initial = f.view(), selected = f.service.select(initial, 900, initial);
+  const g = geometry(), drag = f.service.beginDrag(initial, 900, 7, g, initial); assert(selected && drag);
+  const receipt = { quoteId, costBoundGold: "6", free: false, operationKey: "repair-original", requestDigest: "digest", businessDay: 20000, committedAtMs: 2000 };
+  f.state = state({ phase: "pending", quoteId, quote: serverQuote({ costBoundGold: "6" }) });
+  f.service.close(); f.service.invalidateInventory(); assert(f.view().recoveryOnly);
+  f.state = state({ phase: "committed", quoteId, quote: serverQuote({ costBoundGold: "6" }), receipt });
+  const result = f.view({ boundGold: "999994", unboundGold: "0" });
+  assert(result && result.recoveryOnly); assert.equal(result.paymentMode, "hunting-v1"); assert.deepEqual(result.rows, []);
+  assert.deepEqual(result.hunting.receipt, receipt); assert.equal(result.wallet.boundGold, "999994");
+  assert.equal(f.service.select(result, 900, result), null); assert.equal(f.service.beginDrag(result, 900, 7, geometry(), result), null);
+  assert.equal(f.service.drop(drag, g, 110, 110, result), null); assert.equal(f.service.huntingIntent(selected, result), null);
+  assert.equal(f.service.reserve(selected, result), null); assert.equal(f.service.toggleHold(result, result), null);
+  for (const patch of [{ visible: false }, { reloadRequired: true }, { receipt: null },
+    { receipt: { ...receipt, quoteId: "b".repeat(64) } }, { phase: "retired" }, { quoteId: null }]) {
+    f.state = state({ phase: "committed", quoteId, receipt, ...patch }); assert.equal(f.view(), null);
+  }
+});
 test("unsafe u64 item identities cannot become bound repair requests", () => {
   for (const id of [Number.MAX_SAFE_INTEGER + 1, "9007199254740993"]) {
     const f = fixture(); f.service.observeSnapshot(f.owner, snapshot({ inventoryItems: [item(id)] }));
@@ -141,6 +159,44 @@ test("real owner adapter Confirm can recheck existing source after changing phas
     reply: { kind: "quoted", quote: serverQuote() }, snapshot: null })));
   assert(client.confirm()); assert.equal(sent[1].action.kind, "confirm"); assert.equal(client.confirm(), false);
   assert.equal(sent.filter(v => v.action.kind === "confirm").length, 1);
+});
+test("real original Query applies full snapshot then retains completed readonly view until ordinary Close", () => {
+  const f = fixture(), sent = [], initial = f.view(), selection = f.service.select(initial, 900, initial); let live = initial, applied = 0, now = 1000;
+  const client = new HuntingRepairClient({ owner: f.owner.socket, actorScope: Object.freeze({ actor: 17 }), mode: "hunting-v1", now: () => now,
+    isCurrent: socket => socket === f.owner.socket, selectionMatches: (_socket, requested) => {
+      const proof = f.service.huntingIntent(selection, live); return !!proof && proof.uniqueId === requested.uniqueId && proof.special === requested.special;
+    }, send: (_socket, raw) => sent.push(JSON.parse(raw)), applySnapshot: full => {
+      ++applied; f.service.prepareSnapshot(f.owner, full); return f.service.observeSnapshot(f.owner, full);
+    }, onChange: next => { f.state = next; live = f.view(); } });
+  assert(client.quote({ uniqueId: "900", special: false }));
+  assert(client.receive(JSON.stringify({ type: "huntingRepairOwner", protocolVersion: 1, requestId: sent[0].requestId,
+    reply: { kind: "quoted", quote: serverQuote({ costBoundGold: "6" }) }, snapshot: null })));
+  assert(client.confirm()); assert.equal(client.confirm(), false);
+  // No Confirm result is consumed. Closing the old source cannot erase the
+  // transport's original Pending operation or create another item authority.
+  f.service.close(); f.service.invalidateInventory(); client.resetView(); client.showView();
+  assert(live.recoveryOnly); assert.equal(live.hunting.phase, "pending");
+  now += 10_001; client.checkTimeout();
+  assert(client.query()); assert.equal(sent.at(-1).action.kind, "query");
+  // Reuse the existing complete protocol fixture without executing its tests;
+  // only this test's real adapter/service and the full-snapshot parser run.
+  const ast = tree(read("./test-hunting-repair-client.mjs"), "complete-repair-fixture.mjs");
+  const code = ts.transpileModule(functions(ast, ["snapshot"]), { compilerOptions: options }).outputText;
+  const full = new Function(code + "\nreturn snapshot;")()();
+  const repaired = item(); repaired.durabilityCurrent = repaired.durabilityMax = 97;
+  repaired.tooltipSource.userItem.current_dura = repaired.tooltipSource.userItem.max_dura = 97;
+  Object.assign(full, snapshot({ inventoryItems: [{ ...repaired, key: "sword", description: "repaired original" }] }));
+  full.entities[0].objectId = f.owner.playerObjectId;
+  const receipt = { quoteId, costBoundGold: "6", free: false, operationKey: "repair-original", requestDigest: "digest", businessDay: 20000, committedAtMs: 2000 };
+  assert(client.receive(JSON.stringify({ type: "huntingRepairOwner", protocolVersion: 1, requestId: sent.at(-1).requestId,
+    reply: { kind: "committed", receipt, replayed: true, reloadRequired: false }, snapshot: full })));
+  assert.equal(applied, 1); assert.equal(client.view().phase, "committed");
+  assert(live && live.recoveryOnly); assert.deepEqual(live.rows, []); assert.equal(live.hunting.receipt.quoteId, quoteId);
+  assert.equal(client.confirm(), false); assert.equal(f.service.huntingIntent(selection, live), null);
+  assert.equal(sent.filter(value => value.action.kind === "confirm").length, 1);
+  // Ordinary Page Close already couples these two operations; the owner clears
+  // the completed receipt, so a retired NPC cannot leave a persistent panel.
+  f.service.close(); client.resetView(); assert.equal(f.view(), null);
 });
 
 function tree(text, filename) { return ts.createSourceFile(filename, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX); }
@@ -185,6 +241,42 @@ test("actual Shop pending Query works without target, NPC source, funds or mutat
   const ui = shopFixture(f.view(), null, true); assert.equal(ui.control("confirm").props.disabled, true);
   assert.equal(ui.control("query").props.disabled, false); ui.control("query").props.onClick(); assert.equal(ui.calls.query, 1);
   assert.equal(ui.calls.confirm.length, 0); assert(ui.text().includes("Pending"));
+});
+test("actual Shop keeps a recovered completion in bound readonly mode and closes normally", () => {
+  const f = fixture(); f.service.close(); f.service.invalidateInventory();
+  f.state = state({ phase: "committed", quoteId, quote: serverQuote({ costBoundGold: "6" }),
+    receipt: { quoteId, costBoundGold: "6", free: false, operationKey: "repair-original", requestDigest: "digest", businessDay: 20000, committedAtMs: 2000 } });
+  const ui = shopFixture(f.view({ boundGold: "999994", unboundGold: "0" }));
+  assert(ui.text().includes("Repair completed.")); assert(ui.text().includes("Bound fee: 6"));
+  assert(!ui.text().includes("Item state is not ready.")); assert(!ui.text().includes("Repair: —"));
+  assert.equal(ui.control("confirm").props.disabled, true); ui.control("confirm").props.onClick(); assert.equal(ui.calls.confirm.length, 0);
+  assert.equal(ui.control("hold").props.disabled, true); assert.equal(ui.findAll(node => node.props["data-npc-repair-control"] === "query").length, 0);
+  ui.control("close").props.onClick(); assert.equal(ui.calls.close, 1);
+});
+test("actual bound wallet occupies a separate readable panel without clipping full balances or blocking Query", () => {
+  for (const value of ["1000000", "18446744073709551615"]) {
+    const f = fixture(); f.state = state({ phase: "pending", quoteId, quote: serverQuote() }); f.service.close(); f.service.invalidateInventory();
+    const ui = shopFixture(f.view({ boundGold: value, unboundGold: value }), null, true);
+    const wallet = ui.findAll(node => node.props["data-npc-repair-wallet"] === "observed"); assert.equal(wallet.length, 1);
+    const style = wallet[0].props.style; assert(style.top >= 160); assert(style.fontSize >= 11); assert.equal(style.width, 176);
+    assert.equal(style.pointerEvents, "none"); assert(style.background && style.border); assert.equal(style.overflow, undefined);
+    assert.equal(style.whiteSpace, undefined); assert.equal(style.textOverflow, undefined);
+    const rows = wallet[0].children.filter(node => node && typeof node === "object"); assert.equal(rows.length, 2);
+    for (const row of rows) {
+      assert.equal(row.props.style.display, "flex");
+      const amount = row.children.filter(node => node && typeof node === "object").at(-1);
+      assert.equal(amount.props.style.overflowWrap, "anywhere"); assert.equal(amount.props.style.minWidth, 0);
+      assert.equal(amount.props.style.textOverflow, undefined); assert.equal(amount.props.style.overflow, undefined);
+      assert(amount.children.flat(Infinity).includes(value), "complete decimal balance, without Number conversion");
+    }
+    for (const control of ["hold", "confirm", "query", "close"]) {
+      const box = ui.findAll(node => node.props["data-npc-repair-control"] === control)[0].props.style;
+      assert(box.top + box.height <= style.top, `${control} remains outside the wallet panel`);
+    }
+    const target = ui.findAll(node => node.props["aria-label"] === "Drag a bag item here to repair")[0].props.style;
+    assert(target.top + target.height <= style.top); assert.equal(ui.control("query").props.disabled, false);
+    ui.control("query").props.onClick(); assert.equal(ui.calls.query, 1); assert.equal(ui.calls.confirm.length, 0);
+  }
 });
 test("actual Shop fresh selection or quoting cannot trigger Confirm", () => {
   for (const phase of ["idle", "quoting", "rejected", "pending", "committed"]) {

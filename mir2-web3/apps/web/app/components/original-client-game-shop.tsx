@@ -876,9 +876,21 @@ export function NpcShopWindow({
       </div>
       {boundRepair ? <div data-npc-repair-wallet="observed" title={repairView?.wallet
         ? `Bound: ${repairView.wallet.boundGold}; Unbound: ${repairView.wallet.unboundGold}` : undefined}
-        style={{ position: "absolute", left: 14, top: 31, width: 96, fontSize: 9, color: "#f4ecd6", overflow: "hidden", whiteSpace: "nowrap" }}>
-        {t("ui.boundGold", [], "Bound")}: {repairView?.wallet?.boundGold ?? "—"}
-        <br />{t("ui.unboundGold", [], "Unbound")}: {repairView?.wallet?.unboundGold ?? "—"}
+        style={{ position: "absolute", left: 0, top: 160, width: 176, boxSizing: "border-box", padding: "6px 8px",
+          border: "1px solid #806b3b", borderRadius: 3, background: "rgba(9, 11, 13, 0.94)",
+          fontSize: 11, lineHeight: "15px", color: "#f4ecd6", pointerEvents: "none" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
+          <span style={{ whiteSpace: "nowrap" }}>{t("ui.boundGold", [], "Bound")}:</span>
+          <span style={{ minWidth: 0, overflowWrap: "anywhere", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+            {repairView?.wallet?.boundGold ?? "—"}
+          </span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
+          <span style={{ whiteSpace: "nowrap" }}>{t("ui.unboundGold", [], "Unbound")}:</span>
+          <span style={{ minWidth: 0, overflowWrap: "anywhere", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+            {repairView?.wallet?.unboundGold ?? "—"}
+          </span>
+        </div>
       </div> : null}
       <div ref={repairTargetRef} aria-label={t("ui.npcRepairTarget", [], "Drag a bag item here to repair")}
         title={target?.name || t("ui.npcRepairTarget", [], "Drag a bag item here to repair")}

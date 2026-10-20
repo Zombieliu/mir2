@@ -217,7 +217,11 @@ export class NpcRepairService {
       ? Object.freeze({ boundGold: wallet.boundGold, unboundGold: wallet.unboundGold }) : null;
     const hunting = Object.freeze({ ...state, quote: state.quote && Object.freeze({ ...state.quote }), receipt: state.receipt && Object.freeze({ ...state.receipt }) });
     const active = this.active, raw = this.raw;
-    const recovery = () => state.phase === "pending" && state.quoteId !== null ? Object.freeze({
+    // The original receipt may outlive the NPC/item source after Query applied
+    // its full snapshot. Keep that visible result readonly until the owner
+    // adapter resets it on ordinary Close; never recreate a source capture.
+    const recovery = () => state.quoteId !== null && (state.phase === "pending"
+      || state.phase === "committed" && state.visible && !state.reloadRequired && state.receipt?.quoteId === state.quoteId) ? Object.freeze({
       stamp: this.recoverySource, source: this.recoverySource, mode: state.quote?.special ? "special" as const : "repair" as const,
       name: "", paymentMode: "hunting-v1" as const, gold: null, hold: false, rows: Object.freeze([]), hunting,
       wallet: observedWallet, recoveryOnly: true }) : null;

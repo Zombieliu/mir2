@@ -1,5 +1,15 @@
 # Agent Orchestration
 
+## 第八阶段：浏览器恢复核对与 Windows 原生优先（2026-10-20）
+
+浏览器已用本机隔离 Axum/PG 的合成账号完成普通登录/StartGame、真实 NPC 服务、Bag 拖入、服务端报价 6 绑定金币及一次 Confirm。测试 transport 仅省略一次已提交 owner 回执；Pending 主动 Close 后仍可原 Query。独立 psql 在 Query 后、普通 Alt+x 退出后及服务停止后均核对：结果/销毁各 1 条、扣费/销毁 6、绑定余额 999994、旧 gold 1234、Bag 耐久 970/970。该路径不是强制服务端 OutcomeUnknown，本轮未重新登录验证。见 [第八阶段证据](generated/hunting-economy/acceptance-20261020-repair-browser.json)。
+
+实际发现 Query 成功后因 NPC 来源已退休而退回旧空面板，已修为保留原回执的只读完成状态至普通 Close；不会恢复选择/Confirm 权限。钱包另移独立可读区域。最终专项 109/109（UI 20）、原生 Next41 严格生产构建/13 页通过；截图来自修复前的 Next30 浏览器轮次，不能声称这两处修复后的视觉验收已完成。Gateway40 纯 25/25、两个真实 WS+PG 回归 2/2 均通过。
+
+用户明确下一优先项是 Windows 游戏原生客户端。已核实当前 Bevy EXE 源仍旧 raw repair 与旧 gold，本轮 typed hunting 协议/钱包尚未接入；浏览器或 Windows 上原生执行的 Next/Gateway 均不能代表 Windows 游戏通过。1.95.0/MSVC、独立 C target、jobs2、locked/offline 的当前 native baseline check 已通过（42 条现有警告），尚无新 EXE 链接/运行/候选包或 Windows GUI 结论。按 [Windows 接入计划](HUNTING-NATIVE-WINDOWS-INTEGRATION.md) 先约定独立 repair custody/实际 Applied 接口，再接现有原生窗口。
+
+完整 goal active、默认关闭、K=0.1 与 0.72/1.08 许可保持；不运行 Docker/WSL/虚拟机，不修改虚拟化、远程资产或旧 gold 定性，不停止游戏。三个外来 QA JSON、原主树和旧 EXE 保留。本轮不增加 Crystal/Candidate 百分比；后续来源、材料、全服指标、通知和迁移发布仍开放。以下旧段落保留当时范围。
+
 ## 狩猎经济第七阶段真实网络验收（2026-10-20）
 
 Root最终37已通过2/2真实原生Axum WebSocket+PostgreSQL用例，每例独立进程、独立schema，使用真实Shared Zone factory及普通注册/登录/建角/NPC交互。正额Bag修理验证同事务扣绑定金币、销毁、完整checkpoint和原Query不二扣；显式Disconnect及已提交但客户端未读回执的raw close均经过真实保存，再以全新config/WebState冷登录核对。raw close仅在测试中受控清退已保存retained owner，不能称作resume或强制服务端OutcomeUnknown验收。证据见 [第七阶段验收](generated/hunting-economy/acceptance-20261020-repair-network.json)。
