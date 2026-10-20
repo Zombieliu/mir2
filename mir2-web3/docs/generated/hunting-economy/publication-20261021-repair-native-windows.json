@@ -1,0 +1,159 @@
+{
+  "recordedAt": "2026-10-20T19:26:07.494Z",
+  "commit": "582bf3c9037f1b99664a70e6be6ca78c2a18198a",
+  "ownedFiles": 37,
+  "sourcePins": 945,
+  "fullFilteredGitBlobMatches": [
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "gitBlob": "9e8c6d1829ac2ac55e9f1ccb7ea45129cd9c5087"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "gitBlob": "a59c2c7f7face54e5994590af47c7975d4191158"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/lib.rs",
+      "gitBlob": "775c9f5430b17cbd4a91c922c7e82f98ff4f4886"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "gitBlob": "66564d3b94b86a97b850249893fd8bd48a3a76ae"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "gitBlob": "1ed7d9701bb1a1941faf771b60ab7950dd9ce258"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "gitBlob": "756ab1b47da3ac42e32978c066d81870c6837d3d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "gitBlob": "a1cfbd061b5f79f67f9173eb315e4e5a537b572d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+      "gitBlob": "6a779449900726f565619defc6e9071570edfcc4"
+    },
+    {
+      "path": "apps/game-client/runtime/src/lib.rs",
+      "gitBlob": "cb9bc2c57e1da47545066ba343d14895698db4e0"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_ingest.rs",
+      "gitBlob": "a8f965563b33c9513431a59c12555e6d7bf21eae"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "gitBlob": "2b00ce29fee4e53440320c33360a86f5e9c6b648"
+    },
+    {
+      "path": "apps/gateway/src/identity.rs",
+      "gitBlob": "642db2ecc4c2466cb74ab507c217c76ed58bb85c"
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "gitBlob": "191e2dcf59f43dbdc093627a1d88e3529c770dd2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hunting_repair_ui_tests.rs",
+      "gitBlob": "b4c5350dd41961922661700dbae583cb314f2e8f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hunting_repair.rs",
+      "gitBlob": "72dd95275c3b602aafa336024f5bfaba7b81d2f7"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_repair_client.rs",
+      "gitBlob": "00b6ec090d3331f1c53d9bf2b08ec211945f6ed4"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_repair_connection.rs",
+      "gitBlob": "d89f3bda56885858c8a6665d925b0d9b75854e79"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_repair_gateway.rs",
+      "gitBlob": "e84a0bebc84649d76f1e813fd221e439e8a5c9bf"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_hunting_repair_inventory_tests.rs",
+      "gitBlob": "57cbb17f4f469f6f58ad04c4678cfd59767f75aa"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_producer_skill_authority_tests.rs",
+      "gitBlob": "a9475fcfb095c6b59c599c190553304f069f7edc"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hunting_repair_economy.rs",
+      "gitBlob": "3a2d9174fde8c01dfb699ad43be2257c2eeb3be2"
+    },
+    {
+      "path": "apps/gateway/src/web_resume_identity_grant_tests.rs",
+      "gitBlob": "bf55cbf5a36eed57e2217a37c6ecbecefb4ffc14"
+    },
+    {
+      "path": "docs/AGENT-ORCHESTRATION.md",
+      "gitBlob": "4dbd6aeb84b4478ec6ef0358047fe5922c9867b1"
+    },
+    {
+      "path": "docs/AGENT-TASK-QUEUE.md",
+      "gitBlob": "81ca921a6793018751b6e4be161f9fbf8136acf7"
+    },
+    {
+      "path": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "gitBlob": "7405dd7500de6e0b7efeca3a58ba2f9f88609f62"
+    },
+    {
+      "path": "docs/BACKEND-1TO1-PROGRESS.md",
+      "gitBlob": "eeb86171ec36f33d23b539e53f1206d44848e5b2"
+    },
+    {
+      "path": "docs/CRYSTAL-SERVER-PARITY.md",
+      "gitBlob": "5570b2d52fddccc0ad3cb3dd22a626ad8304592e"
+    },
+    {
+      "path": "docs/HUNTING-NATIVE-WINDOWS-INTEGRATION.md",
+      "gitBlob": "98dcb3bcec81fd7f14deb3eb38859ff61593961f"
+    },
+    {
+      "path": "docs/HUNTING-PERMIT-ECONOMY.md",
+      "gitBlob": "3a50b76666347f4a04a6a359c6ce5a7fb778b973"
+    },
+    {
+      "path": "docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "gitBlob": "eeb9a595a0ac6a519b71e95169fb5d4e0ac283db"
+    },
+    {
+      "path": "docs/generated/hunting-economy/acceptance-20261021-repair-native-windows.json",
+      "gitBlob": "73007217ea5716aee492940a17c2dec0fdca4e38"
+    },
+    {
+      "path": "docs/generated/hunting-economy/sources-20261021-repair-native-windows.json",
+      "gitBlob": "bd34b4cb8522d027a4758e5fa4d906ac4916230a"
+    },
+    {
+      "path": "docs/generated/hunting-economy/native-windows-20261021-world-47.png",
+      "gitBlob": "d143d721c02f4f488f8455ae180e4d15b0cbd22a"
+    },
+    {
+      "path": "docs/generated/hunting-economy/native-windows-20261021-repair-source-misclose-51.png",
+      "gitBlob": "4584664da046cd61423c8cf077c0cb60afef39ed"
+    },
+    {
+      "path": "docs/generated/hunting-economy/native-windows-20261021-quote-refused-56.png",
+      "gitBlob": "23c778d83868b432c827cca3e86852623b5e5241"
+    },
+    {
+      "path": "docs/generated/hunting-economy/native-windows-20261021-quote-59.png",
+      "gitBlob": "f57282bb3dda719fd62348cae09eeb25132f0ac6"
+    },
+    {
+      "path": "docs/generated/hunting-economy/native-windows-20261021-confirm-refused-59.png",
+      "gitBlob": "f59a87db8b6596ac5284b6001eb769d366ebecae"
+    }
+  ],
+  "foreignQaUnchanged": true,
+  "pushed": false,
+  "productionActivated": false
+}
