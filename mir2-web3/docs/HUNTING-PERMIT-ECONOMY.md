@@ -4,7 +4,7 @@
 
 更新：2026-10-20。用户明确要求本机不用 Docker；开发验收采用原生 PostgreSQL、原生 Grafana，不启动 Docker/WSL/虚拟机。本次启动的 Docker Desktop 进程已退出，服务恢复为停止；未关闭游戏或改动系统虚拟化设置。
 
-当前第五阶段已完成服务端修理同owner回合快照载体和纯Web client adapter的限定验收，见 [第五阶段证据](generated/hunting-economy/acceptance-20261020-repair-sync.json)。最终26共137项去重通过，含10项实际原生PG；现有Page/NpcRepairService/Shop/Shell、费用展示、实际snapshot apply及物理玩家/真实网络验证仍待，不新建网页。纯模块strict TS不代表全前端构建；完整goal active，默认关闭，不代表生产上线或全服资产覆盖。第四阶段的326项/81PG及失败历史保留在下文。
+当前第七阶段已通过真实原生Axum WebSocket+PG修理、原结果查询、实际保存后冷加载及钱包Origin约束验收，见 [第七阶段证据](generated/hunting-economy/acceptance-20261020-repair-network.json)。第六阶段已接现有Page/NpcRepairService/Shop/Shell、费用/只读钱包和完整snapshot apply；真实浏览器点击及玩家流程仍未验，不新建网页。完整goal active、默认关闭，不代表生产上线、全服资产覆盖或Crystal百分比提升。第四至第六阶段的历史计数、当时范围及失败记录保留在下文，不累加为本轮结果。
 
 ## 权威边界
 
@@ -158,6 +158,20 @@ Page、NpcRepairService、Shop和Shell现已接独立typed Quote→Confirm→原
 最终29专项101/101（纯client42、UI16、实际Page函数15、wallet/proxy28），原生Next16.2.11生产构建包含严格TypeScript与13静态页；另使用真实TS5.9.3全配置严格检查315 roots/982 source files、零错误。旧NPC/Bag/Storage/Stage5八份脚本统一353/353顶层测试通过，其中Stage5文件级结果内部执行506组自定义检查；不把文件级包装与内部组数重复相加。旧夹具补入真实依赖/空custody与显式legacy模式；原场景保留，Confirm旧表达式改为完整32组合真值表及新增bound拒绝检查。编译后的钱包路由另有10项本机物理HTTP验收：请求形状/身份拒绝、完整十进制、固定GET、禁止POST/重定向/206/超限及错误保留；上游明确为合成只读数据，没有游戏资产变动。以上数字不与历史137项或PG测试相加。
 
 证据见 [第六阶段验收](generated/hunting-economy/acceptance-20261020-repair-ui.json)。首轮旧夹具缺新增依赖、Page generic-event类型错误及Windows跨磁盘Next入口失败均保留历史日志；类型问题已修，Next包在独立C盘逐文件与原依赖校验一致后原生构建，未安装包或修改主工作区依赖。原tsconfig/编译器和三个外来QA JSON均保持。没有浏览器截图、物理游戏WebSocket或玩家保存重登结论；下一队列是原生隔离环境真实客户端流程，其它来源/材料/全服指标/通知/迁移发布仍开放。默认关闭、K=0.1、0.72/1.08许可和goal active保持；Docker停止/手动、相关进程0，不运行Docker/WSL/虚拟机、不改虚拟化或停止游戏。
+
+## 第七阶段：真实物理WebSocket、PG冷加载与钱包Origin
+
+独立`web_hunting_repair_network_tests.rs`使用真实Axum loopback WebSocket、PG身份会话和Shared Zone factory，没有模拟WorldRuntime。普通NewAccount/Login/NewCharacter之后，仅在进入World前离线准备一个损坏的真实目录WoodenSword Bag物品（完整实例metadata、安全UID）和合成绑定余额/旧金币；不把这些准备当作玩家正常产出。之后通过普通StartGame、实际NPC对话中的服务端`@repair`链接和`NPCRepair`进入服务，使用原始wire字节执行Quote/Confirm/Query，验证原ItemRepaired先于同回合完整snapshot、绑定扣款/销毁/结果/完整checkpoint共同提交、旧gold不变以及原Query不二扣或重播物品delta。
+
+第一用例还验证未认证和无对话报价拒绝、损坏物品上的旧raw repair拒绝，以及政策关闭后仍声明`hunting-v1`并允许查询原提交回执。政策关闭的新报价在当前runtime返回有界`Unavailable`，不能写成已经验证精确`Disabled`错误码。第二用例发送Confirm后不消费任何socket回执，由独立PG连接先证明真实提交，再drop连接并等待服务端真实保存/retained handoff；测试受控移除该已保存旧owner及其路由并丢弃旧runtime后，重建全新config、account mirror、registry/cache/identity/WebState，再普通Login/StartGame冷加载并Query原结果。该路径不证明浏览器resume，也没有强制注入服务端OutcomeUnknown。
+
+同一真实PG身份和HTTP listener验证只读钱包：没有Origin返回403、配置Origin与有效Bearer返回实际新钱包、坏token返回401。Next代理另修复公开Origin传递：`MIR2_WEB_PUBLIC_ORIGIN`只接受可信单一HTTP(S) origin（可带根`/`，不允许凭证、路径、query或fragment）；未设置时取`request.url.origin`。如果请求带Origin，必须与该canonical origin精确匹配；不使用Host、forwarded或cookie建立权限，原Gateway allowlist/Bearer校验不放松。真实Next运行呈现内部request URL，部署时应按`apps/web/.env.example`显式配置公开origin并与Gateway的`MIR2_ALLOWED_WEB_ORIGINS`一致。
+
+最终37：两个真实WS+PG用例逐用例fresh process运行，2/2通过；hunting纯25/25、Gateway lib+bins检查及仅新文件rustfmt检查通过。Web专项105/105（含wallet/proxy32/32），原生Next30生产构建包含严格TypeScript和13页，编译后合成allowlist上游HTTP12/12通过。真实PG钱包接口与合成Next代理HTTP分开记载，不把合成上游当作游戏资产，也不与此前阶段的计数相加。
+
+首次原生编译后的夹具失败和修正保留在 [本阶段证据](generated/hunting-economy/acceptance-20261020-repair-network.json)：恢复MAC key改用满足原diversity guard的多样测试值；完整bootstrap读取预算由512帧改为16K帧/32MiB/10秒，并只统计帧类型，不输出身份或完整payload。高层Interact实际返回ObjectChat与snapshot中的dialog，不能假定NPCResponse；修理链接从真实服务端dialog读取。旧raw repair拒绝以同FIFO队列的后续Quote作为barrier，KeepAlive走reader fast lane，不能证明前一个命令已执行。这些修正没有放宽生产业务、Origin、密钥或资产检查。
+
+本轮没有真实浏览器DOM、截图、正常玩家点击、浏览器Pending恢复或完整新手流程验收。下一步在既有游戏窗口完成这些确认/拒绝、原Query和保存重登，再继续其它来源、材料绑定传播、全服指标、通知及迁移发布。默认禁用、K=0.1、0.72/1.08许可、旧gold不重分类、远程资产不变和完整goal active保持。只用原生环境，PG上限30、Cargo串行jobs2，不运行Docker/WSL/虚拟机或关闭游戏。
 
 ## 后端接线与交付物
 

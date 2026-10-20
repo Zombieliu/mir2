@@ -1,0 +1,543 @@
+{
+  "recorded_at_utc": "2026-10-20T01:57:24.577Z",
+  "parent_commit": "069d8a71ba59d18812340a22fff4e50e88491e20",
+  "classification": "Native physical Axum WebSocket and PostgreSQL repair/recovery acceptance plus fixed Next wallet Origin proxy; no real browser/visual/player acceptance",
+  "goal_complete": false,
+  "production_activated": false,
+  "remote_assets_changed": false,
+  "legacy_gold_reclassified": false,
+  "default_policy": {
+    "schema_version": 1,
+    "policy_version": "hunting-economy-k01-recalibrated-v1-disabled",
+    "enabled": false,
+    "k": {
+      "numerator": 1,
+      "denominator": 10
+    },
+    "conversion_fee": {
+      "numerator": 1,
+      "denominator": 50
+    },
+    "daily_decay": {
+      "numerator": 1,
+      "denominator": 150
+    },
+    "baseline_daily_mint_atoms": 720000,
+    "daily_mint_cap_multiplier": {
+      "numerator": 3,
+      "denominator": 2
+    },
+    "business_timezone": "Asia/Shanghai",
+    "settlement_hour": 4
+  },
+  "runtime_changes": {
+    "gateway_production_code_changed": false,
+    "gateway_test_module_registration_only": true,
+    "database_migrations_changed": false,
+    "next_wallet_origin_proxy_fixed": true,
+    "public_origin_variable": "MIR2_WEB_PUBLIC_ORIGIN",
+    "public_origin_contract": "one trusted HTTP(S) canonical origin; optional root slash; no credentials/path/query/hash; inbound Origin if present exact-match; no Host/forwarded/cookie authority; Gateway Origin allowlist and Bearer checks unchanged",
+    "deployment": "Explicit public-origin is required when Next presents an internal request URL; configure the same canonical browser origin in Gateway MIR2_ALLOWED_WEB_ORIGINS. Unset falls back to request.url.origin.",
+    "example": "apps/web/.env.example"
+  },
+  "physical_network": {
+    "real_axum_loopback_ws": true,
+    "normal_new_account_login_character_creation": true,
+    "real_postgres_identity_grant_and_http_wallet": true,
+    "real_shared_zone_factory_no_mock_world": true,
+    "offline_test_fixtures": [
+      "One damaged real catalogue WoodenSword Bag slot20, exact protocol metadata and safe UID900001; current maximum1000 below real template durability4000",
+      "Synthetic bound funding1000000 via trusted source transaction; synthetic legacy gold1234 before StartGame only"
+    ],
+    "actual_bag_user_item_and_catalogue_source_checked": true,
+    "normal_interact_server_dialog_link_and_npc_repair": true,
+    "strict_original_wire_bytes_quote_confirm_query": true,
+    "original_packets_before_committed_same_turn_snapshot": true,
+    "quote_without_asset_effect": true,
+    "one_atomic_bound_debit_burn_result_checkpoint": true,
+    "legacy_gold_unchanged": true,
+    "original_query_without_recharge_or_item_delta_replay": true,
+    "preauth_and_no_dialog_quote_refused": true,
+    "damaged_item_legacy_raw_repair_refused_before_fifo_quote": true,
+    "disabled_policy_blocks_new_quote_keeps_static_hunting_mode_and_original_query": true,
+    "explicit_disconnect_teardown_clears_capacity_cache_route_before_cold_login": true,
+    "unread_commit_raw_socket_close_real_teardown_saved": true,
+    "raw_close_semantics": "Independent PostgreSQL proves commit before dropping the socket without consuming any result frame. Test then observes real Saved/retained handoff, removes only the saved retained owner and its route in controlled fixture cleanup, stops old server, and starts entirely fresh config/store/registry/cache/identity before normal Login/StartGame and original Query.",
+    "retained_resume_or_browser_reconnect_claimed": false,
+    "forced_source_outcome_unknown_network_tested": false,
+    "browser_dom_screenshot_or_normal_player_clicks_verified": false
+  },
+  "tests": [
+    {
+      "path": "C:/mir2-build/hunting-repair-network-postgres-paid-tests-37.log",
+      "sha256": "6e4ed693dbaa8dc62f5827eb0bf187108e5c09c2aef0d746e116493b4b0da66d",
+      "bytes": 266,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "explicit_native_postgres": 1,
+      "tests": [
+        "web::web_hunting_repair_network_tests::hunting_repair_network_postgres_paid_bag_confirm_query_disconnect_cold_login_and_wallet_origin"
+      ]
+    },
+    {
+      "path": "C:/mir2-build/hunting-repair-network-postgres-unread-tests-37.log",
+      "sha256": "4b5111284c55e6690660765d184a210e3b48c8ffbc1591212d19ccb150c98e32",
+      "bytes": 554,
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "explicit_native_postgres": 1,
+      "tests": [
+        "web::web_hunting_repair_network_tests::hunting_repair_network_postgres_unread_commit_raw_close_saves_then_cold_queries_original_once"
+      ]
+    },
+    {
+      "path": "C:/mir2-build/hunting-repair-network-gateway-pure-tests-37.log",
+      "sha256": "f686909a18f8a9c97124e449d004a264c4e5d42bdd3eb56183fb5bf2db79e263",
+      "bytes": 3101,
+      "passed": 25,
+      "failed": 0,
+      "ignored": 0,
+      "explicit_native_postgres": 0,
+      "tests": [
+        "hunting_clock::tests::disabled_needs_no_database_realm_or_policy",
+        "hunting_clock::tests::hunting_game_source_binding_is_disabled_by_default_and_requires_one_authority",
+        "hunting_clock::tests::hunting_source_topology_rejects_replication_before_source_activation",
+        "hunting_repair_browser::tests::actual_owner_turn_retains_captured_commit_after_guard_release_failure_without_reread",
+        "hunting_repair_browser::tests::immutable_free_receipt_has_no_historical_wallet_projection",
+        "hunting_repair_browser::tests::owner_turn_snapshot_is_immutable_and_oversize_keeps_original_commit",
+        "hunting_repair_browser::tests::real_gateway_boundary_requires_current_account_and_local_owner_guard",
+        "hunting_repair_browser::tests::unknown_retains_original_query_without_closing_or_packets",
+        "hunting_repair_browser::tests::unsupported_paths_never_execute_and_unknown_preserves_same_session_for_query",
+        "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_registry_rejects_factory_that_drops_runtime_authority",
+        "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_registry_rejects_unknown_factory_before_create",
+        "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_rpc_reads_prelogin_and_rebound_runtime_authority",
+        "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_rpc_rejects_before_every_legacy_transport_entry",
+        "tcp::hunting_source_programmatic_entry_tests::hunting_source_programmatic_public_entrypoints_reject_before_startup",
+        "web::hunting_economy::tests::hunting_http_handlers_require_bearer_and_default_config_never_connects",
+        "web::hunting_economy::tests::identity_bearer_never_uses_cookies_and_revoked_token_cannot_authorize",
+        "web::hunting_economy::tests::strict_http_conversion_parser_and_exact_decimal_range",
+        "web::hunting_economy::tests::wallet_projection_preserves_integers_beyond_javascript_precision",
+        "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_encoding_failure_publishes_nothing",
+        "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_snapshot_finishes_original_packets",
+        "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_without_snapshot_keeps_owner_first",
+        "web::tests::realm_info_hunting_repair_mode_is_required_by_source_binding",
+        "zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_guards_direct_session_dispatch_and_keeps_auth_precedence",
+        "zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_rejects_programmatic_execute_replication_and_promotion",
+        "zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_rejects_serve_before_accepting"
+      ]
+    }
+  ],
+  "web_tests": {
+    "path": "C:/mir2-build/hunting-web-focused-tests-30.log",
+    "sha256": "1ec6770ff94d4bde7595f0f8843801b1a4068114576e91e64e6a84a8d7c3820d",
+    "bytes": 24576,
+    "passed": 105,
+    "failed": 0,
+    "skipped": 0,
+    "tests": [
+      "strict parser accepts only the exact repair envelope and required nullable snapshot",
+      "duplicate and escaped duplicate fields cannot be normalized into a valid frame",
+      "rejection codes are exact strings without array/object coercion",
+      "owner probe recognizes top-level escaped markers and never nested or quoted substrings",
+      "quoted timestamps and immutable receipt money are independently validated",
+      "full snapshot is allowed only on synchronized committed results",
+      "full snapshot u64 remains exact without Number conversion and unknown unsafe leaves reject",
+      "the frame limit counts UTF-8 bytes and blocks frames above 2 MiB",
+      "legacy or unannounced/current-mode mismatch never sends or falls back",
+      "captured physical owner and frozen actor scope cannot be rebound through options",
+      "quote keeps zero and u64-max ids as canonical strings",
+      "quote reply must match request id uid and normal/special mode exactly",
+      "fresh Quote and Confirm require the same current physical item selection",
+      "a changed item selection before quote reply cannot authorize a charge",
+      "expired Quote and double-click Confirm do not create another request",
+      "send exception after Confirm retains the original id and permits only Query",
+      "Confirm timeout retains original operation and ignores the superseded late response",
+      "lost unconfirmed Quote permits a new Quote but not an implicit Confirm",
+      "close/cancel invalidates an unconfirmed Quote and pending Quote response",
+      "closing the UI preserves an entered original and its current response",
+      "known receipt without snapshot never releases pending or replays old wallet values",
+      "failed or throwing snapshot application stays pending until a later successful Query",
+      "snapshot callback that loses physical ownership cannot release the pending source",
+      "reloadRequired explicitly retires and preserves the immutable receipt without applying",
+      "retired old connection cannot apply a response on a new socket or actor",
+      "one live adapter per physical owner prevents UI remount from forgetting Pending",
+      "correlation rejects another quote result and changed immutable receipt payload",
+      "receipt field order does not change the immutable original identity",
+      "unavailable or unauthenticated rejection cannot clear an uncertain Confirm",
+      "only an original Query proving NotSubmitted releases an uncommitted attempt",
+      "NotSubmitted cannot erase an already known committed receipt",
+      "reentrant UI callbacks cannot submit a Confirm or Query while receiving a Quote or receipt",
+      "UI cancellation during Quote notification aborts sending before any charge",
+      "mode or actor authority change after Confirm rejects the old snapshot",
+      "selection changes at the final Confirm boundary never send a charge",
+      "receipt notification that retires the owner cannot apply a snapshot",
+      "free repair still requires a complete applied result before allowing another action",
+      "isCurrent callback retiring the adapter cannot grant permission to apply afterward",
+      "view consumers and observers cannot mutate retained nested quote authority",
+      "retained receipt and the entire accepted snapshot graph are deeply frozen",
+      "callbacks timing out the final dispatch control cannot send an unowned Confirm",
+      "callbacks timing out a response control cannot apply its superseded snapshot",
+      "actual Page requires a physical mode and permanently blocks an in-place mode change",
+      "actual Page binds mode and actor to the physical socket and exact StartGame witness",
+      "actual Page accepts only a complete current owner snapshot through its full application path",
+      "actual Page refuses nested snapshot publication and rechecks actor and revision after callbacks",
+      "actual Page does not acknowledge a displayed world or inventory that failed synchronization",
+      "actual Page consumes the original repair namespace without generic decoding or legacy fallback",
+      "actual physical listener captures the old adapter before Hero callbacks can bind a new actor",
+      "actual hunting drag selects a carried source without auto-confirm or legacy hold behavior",
+      "actual Page preserves a pending repair across close and queries only the original quote",
+      "actual Page manual Close keeps original Query reachable after NPC and item readiness disappear",
+      "actual Page non-pending Close still hides repair and rejects the old quote selection",
+      "actual Page refuses a quoted selection after the full carried-item source changes",
+      "actual Page updates private identity custody before React and rejects stale or mismatched grants",
+      "actual Page clear retires the existing real wallet without retiring the repair actor",
+      "actual NPC repair cases select hunting or legacy service from this physical handshake only",
+      "bound view does not invoke legacy pricing or expose legacy gold/affordability",
+      "bound source accepts missing legacy gold and displays only observed u64 wallets",
+      "quote, receipt and wallet updates preserve carried-source stamp and existing selection",
+      "real source mutation, unknown interval and actor/NPC changes retire original proof",
+      "current locks are checked without conflating them with transport stamp",
+      "bound drag preserves exact geometry and only returns an unsubmitted source selection",
+      "pending forbids new selections and drags but keeps non-consuming original proof",
+      "close and missing target preserve a recovery-only view incapable of issuing selection/proof",
+      "unsafe u64 item identities cannot become bound repair requests",
+      "legacy quote, affordability, entered barrier and Hold semantics remain intact",
+      "real owner adapter Confirm can recheck existing source after changing phase to pending",
+      "actual Shop displays server u64 fee and observed wallets, disables Hold, and only confirms matching quote",
+      "actual Shop pending Query works without target, NPC source, funds or mutation readiness",
+      "actual Shop fresh selection or quoting cannot trigger Confirm",
+      "actual Shell preserves bound target across accepted or rejected Confirm and retains legacy clearing",
+      "Query contract is forwarded independently through actual Shell/Scene props",
+      "strict wallet parser preserves exact u64 strings and immutable observational facts",
+      "wallet parser rejects missing/unknown/duplicate fields and non-object JSON",
+      "wallet parser rejects noncanonical/overflow/numeric currency and mismatched character",
+      "uninitialized wallets cannot carry previous balances or revision",
+      "wallet parser enforces the UTF-8 16KiB boundary before JSON parsing",
+      "wallet client uses only Authorization and fixed same-origin no-store GET",
+      "wallet client rejects invalid mutable custody, token, index and expiry declarations",
+      "pending refresh clears old observations until a new current balance succeeds",
+      "late response cannot cross physical socket, actor, identity or expiry boundaries",
+      "identity expiry and invalid clocks block refresh without issuing a request",
+      "invalidate and retire abort pending fetch and reject its late result",
+      "concurrent refresh supersedes original request even if old transport ignores abort",
+      "older wallet revisions never resurrect pre-mutation balances after invalidation",
+      "malformed HTTP, JSON, wrong character and rejected fetch leave no old balance",
+      "callback reentry cannot install a retired or invalidated balance",
+      "selection callbacks cannot reenter refresh during wallet change notifications",
+      "late body completion after owner change cannot publish observation",
+      "proxy only calls trusted env host/path with canonical index and private no-store output",
+      "proxy supplies the canonical application origin when a same-origin GET has no Origin header",
+      "proxy rejects foreign, opaque and noncanonical inbound origins before contacting the Gateway",
+      "trusted public-origin configuration supports an internal proxy URL without trusting forwarding headers",
+      "proxy refuses invalid configured public origins and non-HTTP request origins",
+      "proxy rejects duplicate, unknown, missing and noncanonical index queries before fetch",
+      "proxy requires bounded Bearer identity and never substitutes cookie authorization",
+      "proxy rejects absent, malformed, credentialed and unsafe trusted upstream declarations",
+      "proxy invalid request URL fails closed as a private bounded response",
+      "proxy never forwards upstream Set-Cookie, cache or redirect headers",
+      "proxy preserves explicit HTTP failures but rejects redirects and unsupported status",
+      "proxy accepts an exact 16KiB streamed response but cancels over-limit bodies",
+      "proxy counts raw UTF-8 bytes across chunks and decodes split codepoints safely",
+      "proxy malformed UTF-8, missing body and network exceptions fail closed",
+      "proxy exports only the fixed GET node runtime and dynamic route behavior"
+    ]
+  },
+  "independent_post_run_postgres": {
+    "path": "C:/mir2-build/hunting-repair-network-independent-pg-37.json",
+    "sha256": "c338ba1c18259f409604a5838f5a194c53db824ec15abdc69a9fa84869a159f2",
+    "bytes": 541,
+    "schemas": [
+      {
+        "schema": "repair_network_214052_1792460488132762700_0",
+        "result_count": 1,
+        "burn_count": 1,
+        "burn_gold": "6",
+        "bound_gold": "999994",
+        "legacy_gold": 1234,
+        "saved_revision": 5,
+        "bag_current": 970,
+        "bag_max": 970
+      },
+      {
+        "schema": "repair_network_227536_1792460483428806700_0",
+        "result_count": 1,
+        "burn_count": 1,
+        "burn_gold": "6",
+        "bound_gold": "999994",
+        "legacy_gold": 1234,
+        "saved_revision": 5,
+        "bag_current": 970,
+        "bag_max": 970
+      }
+    ],
+    "reconciliation": "Each synthetic schema has exactly1 repair result and1 burn of6; bound wallet999994 plus burn6 equals original funding1000000; legacy gold1234, Bag durability970/970. Observed independently after both test processes and servers exited."
+  },
+  "counting": "Gateway27 (25 pure plus2 explicitly run native PG network cases); Web105 separately. Do not add historical phases or internal HTTP assertions as extra independent Rust/Node tests.",
+  "native_build": {
+    "path": "C:/mir2-build/hunting-repair-network-gateway-build-37.log",
+    "sha256": "f63456f52fcd8ed44e73cf55cd4d6f31befd54c57f519cad1687eda734d2bed1",
+    "bytes": 36621,
+    "exit_code": 0,
+    "command": "cargo rustc -p mir2-gateway --lib --profile test --locked --offline -- -C extra-filename=-hunting-repair-network-37 -C debuginfo=0",
+    "test_binary": "C:/mir2-build/hunting-permit-economy-target/debug/deps/mir2_gateway-hunting-repair-network-37.exe",
+    "extra_name_avoids_touching_game_locked_executables": true,
+    "debug_symbols_disabled_for_resource_use_only": true
+  },
+  "gateway_check": {
+    "path": "C:/mir2-build/hunting-repair-network-gateway-check-37.log",
+    "sha256": "4411cba6b3e93f3a9738aaeb01fec4ca40d2a274364d49d02f2d020e1127a06b",
+    "bytes": 37866,
+    "exit_code": 0,
+    "targets": "lib and all ordinary bins"
+  },
+  "next_production_build": {
+    "path": "C:/mir2-build/hunting-web-next-build-30.log",
+    "sha256": "5a77152fe57716311cc342e477d6f6edae0d6a46e79ebb2959e0e3b0be1bc9cb",
+    "bytes": 2189,
+    "exit_code": 0,
+    "next": "16.2.11",
+    "strict_typescript": true,
+    "static_pages": 13,
+    "workers": 2,
+    "dist": ".next-hunting-repair-ui-30",
+    "tsconfig": "apps/web/tsconfig.hunting-repair-ui-30.json",
+    "original_tsconfig_unchanged": true
+  },
+  "compiled_wallet_http": {
+    "path": "C:/mir2-build/hunting-web-native-http-smoke-30.json",
+    "sha256": "d3a171a3870c95ab7b8c4e3f98d8532e5bbfb42141a96e5078b44f499f2e51ab",
+    "bytes": 1539,
+    "scope": "physical loopback HTTP to compiled native Next wallet route; synthetic read-only upstream enforcing the Gateway Origin allowlist contract, no game assets",
+    "cases": [
+      {
+        "name": "missing index",
+        "status": 400,
+        "upstream_requests": 0
+      },
+      {
+        "name": "duplicate index",
+        "status": 400,
+        "upstream_requests": 0
+      },
+      {
+        "name": "caller host refused",
+        "status": 400,
+        "upstream_requests": 0
+      },
+      {
+        "name": "missing bearer",
+        "status": 401,
+        "upstream_requests": 0
+      },
+      {
+        "name": "compiled GET exact decimal proxy",
+        "status": 200,
+        "upstream_requests": 1
+      },
+      {
+        "name": "mutation verb unavailable",
+        "status": 405,
+        "upstream_requests": 0
+      },
+      {
+        "name": "same-origin browser GET without Origin",
+        "status": 200,
+        "upstream_requests": 1
+      },
+      {
+        "name": "foreign browser Origin refused",
+        "status": 403,
+        "upstream_requests": 0
+      },
+      {
+        "name": "redirect is not followed",
+        "status": 503,
+        "upstream_requests": 1
+      },
+      {
+        "name": "partial success refused",
+        "status": 502,
+        "upstream_requests": 1
+      },
+      {
+        "name": "oversize response refused",
+        "status": 503,
+        "upstream_requests": 1
+      },
+      {
+        "name": "upstream refusal preserved without cookie",
+        "status": 401,
+        "upstream_requests": 1
+      }
+    ],
+    "passed": 12,
+    "failed": 0,
+    "docker": false,
+    "physical_gameplay": false,
+    "upstream": "Synthetic read-only native HTTP server enforcing Origin allowlist contract, not the real PostgreSQL gateway",
+    "public_origin_explicitly_configured": true,
+    "server_log": {
+      "path": "C:/mir2-build/hunting-web-native-http-server-30.log",
+      "sha256": "5a0e96fffb6183bc9eede4f1c7a1c2ed12dedb883ad3f69411e706e74e97fc15",
+      "bytes": 119
+    },
+    "owned_native_servers_stopped": true
+  },
+  "format_and_static": {
+    "new_native_file_only_rustfmt_check": true,
+    "changed_wallet_test_node_check": true,
+    "scope_limited_git_diff_check": true
+  },
+  "native_constraint": {
+    "docker_service_status": "Stopped",
+    "docker_start_mode": "Manual",
+    "docker_processes": 0,
+    "docker_wsl_vm_started": false,
+    "virtualization_changed": false,
+    "game_stopped": false,
+    "game_compatibility_tested": false,
+    "postgres_connection_cap": 30,
+    "observed_pg_connections_after_native_tests": 6,
+    "postgres_cases_fresh_process": true,
+    "cargo_build_jobs": 2,
+    "next_workers": 2,
+    "node_heap_cap_mib": 2048,
+    "original_dependency_directory_modified": false
+  },
+  "source_manifest": {
+    "path": "docs/generated/hunting-economy/sources-20261020-repair-network.json",
+    "files": 1151,
+    "sha256": "15fb6ea60d785feac6d8660fb8015c9e50d4d06bbfd388b18eca24fe4d2f692e",
+    "scope": "Previous selected1147 Web/backend/wire inputs plus new network test, Web origin env example and exact catalogue/NPC source manifests; hashes after final tests with product sources then frozen"
+  },
+  "protected_inputs": [
+    {
+      "sha256": "70145b1787f5dea10c830730d9a6968f226bf8e1145602c8a9c964856a44f2ec",
+      "path": "apps/web/tsconfig.json"
+    },
+    {
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json"
+    },
+    {
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/lib/typescript.js"
+    }
+  ],
+  "foreign_qa_files": [
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-portable-statistics-repair01.json",
+      "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+      "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json",
+      "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd"
+    }
+  ],
+  "foreign_qa_preserved_and_unstaged": true,
+  "earlier_attempts": {
+    "failed_network_runs": [
+      {
+        "path": "C:/mir2-build/hunting-repair-network-postgres-tests-30.log",
+        "sha256": "42679c1ee852d57a7a6bea78e9b867f6d793122ba7a8c5faa4194b2cc07d5c7a",
+        "bytes": 965
+      },
+      {
+        "path": "C:/mir2-build/hunting-repair-network-postgres-paid-tests-31.log",
+        "sha256": "52c7049ea3b44a7bceb6a0e1a8e973791e17890c5fecc706a866792482f95fea",
+        "bytes": 1106
+      },
+      {
+        "path": "C:/mir2-build/hunting-repair-network-postgres-paid-tests-33.log",
+        "sha256": "9c866cf51d9588dd45f02fe3bc16befa27b8a957775bdc4f55249f2da6346a68",
+        "bytes": 1200
+      },
+      {
+        "path": "C:/mir2-build/hunting-repair-network-postgres-paid-tests-35.log",
+        "sha256": "830d4e792a1e1895d1983ba4d238f8b70c02df9d5a2414aad6a6bd26015502fe",
+        "bytes": 1253
+      },
+      {
+        "path": "C:/mir2-build/hunting-repair-network-postgres-paid-tests-36.log",
+        "sha256": "5378a3ffa5b9b64856c2984b18ccf67c379950be9273d44e65ec8da5cc646ea2",
+        "bytes": 1127
+      }
+    ],
+    "earlier_native_builds": [
+      {
+        "path": "C:/mir2-build/hunting-repair-network-gateway-build-30.log",
+        "sha256": "a6c93f9e1fb45460b725c5eefcfce8ee86d83f9c199e0d88d5b5220e2bc54c4f",
+        "bytes": 36621
+      },
+      {
+        "path": "C:/mir2-build/hunting-repair-network-gateway-build-31.log",
+        "sha256": "e2785bfc57d1b78c690192d3a5b95af22f26c9022542dadd317a3bdb95254243",
+        "bytes": 36621
+      },
+      {
+        "path": "C:/mir2-build/hunting-repair-network-gateway-build-32.log",
+        "sha256": "9e1d21995f4d6d903a8db76c1231d83cedf6f1c6ace50d9a19163442d485e877",
+        "bytes": 36621
+      },
+      {
+        "path": "C:/mir2-build/hunting-repair-network-gateway-build-33.log",
+        "sha256": "63e08404370794b297f22e162cd9b4c8531f9786ec0fd3666a2f10de14a11bde",
+        "bytes": 36621
+      },
+      {
+        "path": "C:/mir2-build/hunting-repair-network-gateway-build-34.log",
+        "sha256": "f395e484402d4303d50d59d6de1171d7d2d5576e4df3a86c943732a113f5b5ae",
+        "bytes": 36621
+      },
+      {
+        "path": "C:/mir2-build/hunting-repair-network-gateway-build-35.log",
+        "sha256": "d476f5f5cd3e5e24921d32234e83865544657908158eaa1bde95e295beda4238",
+        "bytes": 36621
+      },
+      {
+        "path": "C:/mir2-build/hunting-repair-network-gateway-build-36.log",
+        "sha256": "c0bef9fb10ba7a9ab286a29e8ac8db4c23189b5c53ad2841f0bbd3511a42b1bb",
+        "bytes": 36621
+      }
+    ],
+    "origin_red": {
+      "path": "C:/mir2-build/hunting-web-wallet-origin-red-30.log",
+      "sha256": "a110b12727890a99b09de3c2ba80aa3cbeafe545a266a2fcdd5ae0e187ff40d0",
+      "bytes": 11483
+    },
+    "origin_green": {
+      "path": "C:/mir2-build/hunting-web-wallet-origin-green-30.log",
+      "sha256": "5c3f76cfc079b5d1ef28d002502b55706da492e52ae8cee642fcdc37543705a2",
+      "bytes": 7517
+    },
+    "compiled_missing_public_origin": {
+      "path": "C:/mir2-build/hunting-web-native-http-missing-public-origin-30.json",
+      "sha256": "4b235963e5464a2aa343dc1f55e2f53e020ff0c25d55472de777017489383b71",
+      "bytes": 169
+    },
+    "repairs": [
+      "Rejected repeated-byte fixture MAC replaced with diverse legal test-only key; existing strength gate unchanged.",
+      "Ordinary bootstrap exceeds512 frames: fixture keeps10-second deadline and adds16K-frame/32MiB budget plus compact frame-type counts; production queue/frame budgets unchanged.",
+      "Normal high-level Interact publishes ObjectChat and full dialog snapshot, not NPCResponse; fixture consumes actual dialog and its case-insensitive @repair link.",
+      "KeepAlive is a reader fast lane, not a FIFO barrier; damaged raw repair is now followed by the real queued Quote and refusal inspected before positive paid Confirm.",
+      "Disabled database policy registration maps to bounded Unavailable response; fixture checks this exact runtime contract with a fresh NPC service and verifies immutable prior Query.",
+      "Static catalogue durability is4000, distinct from test item current maximum1000; source metadata now asserted against real catalogue value before any quote.",
+      "Unconfigured public origin was rejected by actual compiled Next route before upstream contact; explicit public origin then passed12/12 physical synthetic-upstream checks."
+    ]
+  },
+  "remaining": [
+    "Real browser/player clicks and visual state including recovery-only panel",
+    "Forced source OutcomeUnknown physical socket fault path (existing in-process fault coverage is separate)",
+    "Remaining production/burn sources and material binding/valuation propagation",
+    "Full asset coverage, market/player/income metrics",
+    "Notification delivery, legacy migration and production rollout qualification"
+  ],
+  "pushed": false,
+  "deployed": false
+}

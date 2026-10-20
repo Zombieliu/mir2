@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+## 狩猎经济第七阶段真实网络验收（2026-10-20）
+
+Root最终37已通过2/2真实原生Axum WebSocket+PostgreSQL用例，每例独立进程、独立schema，使用真实Shared Zone factory及普通注册/登录/建角/NPC交互。正额Bag修理验证同事务扣绑定金币、销毁、完整checkpoint和原Query不二扣；显式Disconnect及已提交但客户端未读回执的raw close均经过真实保存，再以全新config/WebState冷登录核对。raw close仅在测试中受控清退已保存retained owner，不能称作resume或强制服务端OutcomeUnknown验收。证据见 [第七阶段验收](generated/hunting-economy/acceptance-20261020-repair-network.json)。
+
+Next只读钱包代理现补可信`MIR2_WEB_PUBLIC_ORIGIN`，未配置时取`request.url.origin`；存在入站Origin必须精确匹配，不借Host/forwarded/cookie生成权限，Gateway allowlist及Bearer校验保持。真实Next运行暴露内部request URL，因此反向代理环境须显式配置与Gateway allowlist一致的公开origin。Web专项105/105（含wallet/proxy32/32）、原生Next30严格生产构建/13页、编译后合成allowlist HTTP12/12及Gateway hunting纯25/25、lib+bins检查均通过，分项不与历史计数相加。
+
+下一队列仍是既有游戏窗口的真实浏览器点击、玩家确认/拒绝、Pending面板及保存重登；本轮没有DOM/截图/玩家流程结论。其后继续其它来源、材料传播、全服指标、通知与迁移发布。Root独占整合、原生运行、证据与提交；默认禁用、K=0.1、0.72/1.08许可、goal active及三个外来QA JSON保持。不运行Docker/WSL/虚拟机，不关闭游戏，PG连接上限30、Cargo串行jobs2不变。以下阶段六及更早段落保留为当时范围。
+
 ## 狩猎经济第六阶段接线（2026-10-20）
 
 现有Page、NpcRepairService、Shop与Shell已接typed Quote→Confirm→原Query、服务端绑定费用、只读新钱包和真实完整snapshot apply，没有新增网页。物理socket/冻结actor/realm mode绑定贯穿接收闭包、最终发送与snapshot apply；Pending主动Close后保留只读恢复面板，NPC消失也不能丢失原Query入口。Root最终29专项101/101、原生Next生产构建（含严格TS、13页）、独立严格TS零错误，以及编译后钱包接口本机HTTP10/10通过；后者只接合成只读upstream，不代表游戏资产或真实浏览器操作。证据与旧夹具修复见 [第六阶段验收](generated/hunting-economy/acceptance-20261020-repair-ui.json)。Root负责整合/原生运行/证据/提交，所有限定写集释放后才串行接管；三个外来QA JSON及主工作区依赖保持。仍默认关闭、goal active；真实玩家确认/拒绝/网络保存重登、其它来源、材料与发布资格继续开放。不运行Docker/WSL/虚拟机、不改虚拟化设置或关闭游戏。下方第五阶段叙述保留为当时范围。

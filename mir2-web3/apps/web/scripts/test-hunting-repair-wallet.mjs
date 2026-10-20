@@ -173,11 +173,11 @@ const routeCode = compile(read("../app/api/economy/hunting-wallet/route.ts"));
 class MockNextResponse extends Response {
   static json(value, init) { return new MockNextResponse(JSON.stringify(value), init); }
 }
-function proxyFixture({ configured = "http://127.0.0.1:19500", answer, fetchError } = {}) {
+function proxyFixture({ configured = "http://127.0.0.1:19500", publicOrigin, answer, fetchError } = {}) {
   const calls = [], timeouts = [], controller = new AbortController(), module = { exports: {} };
   new Function("require", "module", "exports", "process", "fetch", "AbortSignal", routeCode)(id => {
     assert.equal(id, "next/server"); return { NextResponse: MockNextResponse };
-  }, module, module.exports, { env: { MIR2_GATEWAY_HTTP_URL: configured } }, async (input, init) => {
+  }, module, module.exports, { env: { MIR2_GATEWAY_HTTP_URL: configured, MIR2_WEB_PUBLIC_ORIGIN: publicOrigin } }, async (input, init) => {
     calls.push({ input, init }); if (fetchError) throw Error("simulated network failure");
     return typeof answer === "function" ? answer(input, init) : answer ?? response();
   }, { timeout: milliseconds => { timeouts.push(milliseconds); return controller.signal; } });
@@ -196,10 +196,52 @@ test("proxy only calls trusted env host/path with canonical index and private no
   const result = await f.GET(request("characterIndex=2147483647", { cookie: "do-not-forward", "x-forwarded-host": "attacker.example" }));
   assert.equal(result.status, 200); privateResponse(result); assert.equal(await result.text(), raw());
   assert.equal(f.calls[0].input, "https://trusted.example/prefix/v1/economy/hunting-wallet?characterIndex=2147483647");
-  assert.equal(f.calls[0].init.method, "GET"); assert.deepEqual(Object.keys(f.calls[0].init.headers).sort(), ["accept", "authorization"]);
+  assert.equal(f.calls[0].init.method, "GET"); assert.deepEqual(Object.keys(f.calls[0].init.headers).sort(), ["accept", "authorization", "origin"]);
+  assert.equal(f.calls[0].init.headers.origin, "https://game.example");
   assert.equal(f.calls[0].init.headers.cookie, undefined); assert.equal(f.calls[0].init.headers["x-forwarded-host"], undefined);
   assert.equal(f.calls[0].init.cache, "no-store"); assert.equal(f.calls[0].init.redirect, "error");
   assert.equal(f.calls[0].init.signal, f.signal); assert.deepEqual(f.timeouts, [8000]);
+});
+
+test("proxy supplies the canonical application origin when a same-origin GET has no Origin header", async () => {
+  const f = proxyFixture({ answer: (_input, init) => init.headers.origin === "https://game.example"
+    ? response() : new Response('{"code":"originNotAllowed"}', { status: 403 }) });
+  const req = request(); assert.equal(req.headers.has("origin"), false);
+  const result = await f.GET(req); assert.equal(result.status, 200); privateResponse(result);
+  assert.equal(f.calls[0].init.headers.origin, new URL(req.url).origin);
+});
+
+test("proxy rejects foreign, opaque and noncanonical inbound origins before contacting the Gateway", async () => {
+  for (const origin of ["https://attacker.example", "http://game.example", "https://game.example:444", "null",
+    "https://game.example/", "https://game.example/path", "https://game.example https://attacker.example"]) {
+    const f = proxyFixture(), result = await f.GET(request("characterIndex=2", { origin }));
+    assert.equal(result.status, 403, origin); privateResponse(result); assert.equal(f.calls.length, 0);
+  }
+  const f = proxyFixture(), result = await f.GET(request("characterIndex=2", { origin: "https://game.example" }));
+  assert.equal(result.status, 200); assert.equal(f.calls[0].init.headers.origin, "https://game.example");
+});
+
+test("trusted public-origin configuration supports an internal proxy URL without trusting forwarding headers", async () => {
+  const f = proxyFixture({ publicOrigin: " https://play.example:8443/ " });
+  const internal = new Request("http://127.0.0.1:19528/api/economy/hunting-wallet?characterIndex=2", {
+    headers: { authorization: "Bearer unit.test-token", origin: "https://play.example:8443",
+      host: "attacker.example", "x-forwarded-host": "attacker.example", "x-forwarded-proto": "ftp" } });
+  assert.equal((await f.GET(internal)).status, 200);
+  assert.equal(f.calls[0].init.headers.origin, "https://play.example:8443");
+  internal.headers.set("origin", "http://127.0.0.1:19528");
+  assert.equal((await f.GET(internal)).status, 403); assert.equal(f.calls.length, 1);
+});
+
+test("proxy refuses invalid configured public origins and non-HTTP request origins", async () => {
+  for (const publicOrigin of ["", " ", "not an origin", "null", "ftp://game.example", "https://user:secret@game.example",
+    "https://game.example/path", "https://game.example?", "https://game.example/#", "https://game.example/?q=x"]) {
+    const f = proxyFixture({ publicOrigin }), result = await f.GET(request());
+    assert.equal(result.status, 503, publicOrigin); privateResponse(result); assert.equal(f.calls.length, 0);
+  }
+  for (const url of ["file:///api/economy/hunting-wallet?characterIndex=2", "ftp://game.example/api?characterIndex=2"]) {
+    const f = proxyFixture(), result = await f.GET({ url, headers: new Headers({ authorization: "Bearer unit.test" }) });
+    assert.equal(result.status, 400, url); privateResponse(result); assert.equal(f.calls.length, 0);
+  }
 });
 test("proxy rejects duplicate, unknown, missing and noncanonical index queries before fetch", async () => {
   for (const query of ["", "characterIndex=", "characterIndex=-1", "characterIndex=01", "characterIndex=+1", "characterIndex=1.0",

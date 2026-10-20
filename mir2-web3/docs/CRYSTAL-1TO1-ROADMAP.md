@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 狩猎经济第七阶段真实网络验收（2026-10-20）
+
+原生Axum物理WebSocket与PG验收2/2通过，逐用例使用全新进程。普通注册、登录、建角后，仅离线合成真实Bag损伤和测试资金；StartGame经真实NPC ObjectChat与snapshot对话选择服务端@repair，再发送原字节Quote/Confirm/Query。已验证旧raw repair拒绝、政策关闭后原Query不重复扣款，以及显式断开和已提交但回执未读后的真实保存、全新WebState冷加载；受控清理retained仅属测试，不将resume或强制OutcomeUnknown当作冷加载证据。见 [第七阶段验收](generated/hunting-economy/acceptance-20261020-repair-network.json)。
+
+最终37另有hunting纯测试25/25、Gateway库与bins check及仅新增文件rustfmt check零错误；Web Origin/钱包32/32、focused105/105、原生Next30生产构建（严格TS、13页）及编译后HTTP12/12通过。编译后代理HTTP12项使用合成只读upstream和Origin allowlist；真实WS同state的钱包GET另读取实际PG余额，两者均不代表真实浏览器点击，各专项不与历史结果重复累加。
+
+下一步仍为真实浏览器点击与玩家流程验收，其后其它来源、材料绑定、完整指标、通知和迁移发布。默认关闭、K=0.1及0.72/1.08许可保持，未改远程资产或重分类旧gold，不提高Candidate或Crystal百分比，完整goal active。继续原生、PG30与Cargo jobs2，不用Docker/WSL/虚拟机，不改虚拟化或关闭游戏；以下第六阶段及更早条目保留当时范围。
+
 ## 狩猎经济第六阶段（2026-10-20）
 
 现有修理窗口已接独立typed报价/确认/原Query、服务端绑定费用、只读新钱包与真实snapshot apply；Pending主动关闭仍可无NPC查询原结果。最终29专项101/101、原生Next生产构建（含严格TS、13页）、独立严格TS及编译后本机钱包HTTP10/10通过，见 [第六阶段验收](generated/hunting-economy/acceptance-20261020-repair-ui.json)。HTTP为合成只读upstream，未验真实浏览器、物理游戏WebSocket或玩家保存重登；不等于全workspace/全服覆盖/生产资格。默认关闭、K=0.1及0.72/1.08许可不变，定制经济不增加Crystal闭合项，Candidate100与完整goal均未完成。后续仅原生，无Docker/WSL/虚拟机，不改虚拟化或停止游戏；下方阶段五为历史范围。

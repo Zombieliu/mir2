@@ -26,9 +26,14 @@ async function boundedText(response: Response): Promise<string> {
 
 /** Fixed read-only endpoint; no caller-selected host, path or asset mutation. */
 export async function GET(request: Request): Promise<NextResponse> {
-  let query: URLSearchParams;
-  try { query = new URL(request.url).searchParams; }
+  let requestUrl: URL;
+  try {
+    requestUrl = new URL(request.url);
+    if (!["http:", "https:"].includes(requestUrl.protocol) || requestUrl.username || requestUrl.password)
+      throw Error("Invalid application URL");
+  }
   catch { return NextResponse.json({ error: "Invalid wallet request." }, { status: 400, headers: responseHeaders }); }
+  const query = requestUrl.searchParams;
   const index = query.get("characterIndex");
   if ([...query.keys()].join() !== "characterIndex" || index === null || !/^(?:0|[1-9][0-9]*)$/.test(index)
     || index.length > 10 || BigInt(index) > 2147483647n)
@@ -36,6 +41,23 @@ export async function GET(request: Request): Promise<NextResponse> {
   const authorization = request.headers.get("authorization");
   if (!authorization || authorization.length > 4096 || !/^Bearer [A-Za-z0-9._~-]+$/.test(authorization))
     return NextResponse.json({ error: "An identity session is required." }, { status: 401, headers: responseHeaders });
+  // Same-origin browser GETs often omit Origin. Supply the application's
+  // canonical origin so the Gateway's unchanged allowlist can still check it.
+  // A trusted public declaration also supports reverse proxies whose internal
+  // request URL differs; never derive authority from forwarded/Host headers.
+  let origin = requestUrl.origin;
+  const publicOrigin = process.env.MIR2_WEB_PUBLIC_ORIGIN;
+  if (publicOrigin !== undefined) {
+    try {
+      const declared = new URL(publicOrigin.trim());
+      if (!["http:", "https:"].includes(declared.protocol) || declared.username || declared.password
+        || declared.href !== `${declared.origin}/`) return unavailable();
+      origin = declared.origin;
+    } catch { return unavailable(); }
+  }
+  const incomingOrigin = request.headers.get("origin");
+  if (incomingOrigin !== null && incomingOrigin !== origin)
+    return NextResponse.json({ error: "Cross-origin wallet request rejected." }, { status: 403, headers: responseHeaders });
   const configured = process.env.MIR2_GATEWAY_HTTP_URL?.trim().replace(/\/+$/u, "");
   if (!configured) return unavailable();
   let base: URL;
@@ -46,7 +68,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   } catch { return unavailable(); }
   try {
     const upstream = await fetch(`${base.href.replace(/\/+$/u, "")}/v1/economy/hunting-wallet?characterIndex=${index}`, {
-      method: "GET", headers: { accept: "application/json", authorization }, cache: "no-store", redirect: "error",
+      method: "GET", headers: { accept: "application/json", authorization, origin }, cache: "no-store", redirect: "error",
       signal: AbortSignal.timeout(8_000),
     });
     if (upstream.status !== 200 && (upstream.status < 400 || upstream.status > 599)) return unavailable(502);

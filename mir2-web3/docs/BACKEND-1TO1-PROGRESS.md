@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+## 狩猎经济第七阶段物理WebSocket与冷加载（2026-10-20）
+
+真实native Axum WS+PG逐用例全新进程2/2通过：普通注册/登录/建角，离线合成真实Bag损伤与测试资金后StartGame，经真实NPC ObjectChat和snapshot对话选择服务端@repair，原字节Quote/Confirm/Query走实际网关。损伤目标的旧raw repair拒绝由同FIFO Quote作barrier；KeepAlive reader fastlane不能证明排序。政策关闭仍宣告hunting-v1，原Query不二次扣款；运行时有界unavailable不宣称精确Disabled错误码。显式断开及PG已提交但回执未读后的真实保存，再仅在测试内受控清理retained，用全新config/WebState冷加载；不使用resume，也未强制服务端OutcomeUnknown。MAC多样性使用合法夹具；接收预算16K帧/32MiB/10秒并保留帧类型统计。见 [第七阶段证据](generated/hunting-economy/acceptance-20261020-repair-network.json)。
+
+只读钱包Origin代理接受可信单origin配置MIR2_WEB_PUBLIC_ORIGIN（允许根路径/），未配置时使用request.url.origin；请求存在Origin时须精确匹配，不读Host/forwarded/cookie，不放宽Gateway allowlist。实际Next内部URL可能不同，显式public origin须与Gateway allowlist一致。Web Origin/钱包32/32、focused105/105、原生Next30生产构建（严格TS、13页）、编译后合成只读HTTP与Origin allowlist12/12通过；真实WS同state的钱包GET另读取实际PG余额。最终37另有hunting纯25/25、Gateway库与bins check零错误、仅新增文件rustfmt check零错误，不扩大为全workspace验收。
+
+真实浏览器点击与玩家流程、其它来源/材料/全服指标/通知/迁移发布仍待。默认关闭、K=0.1及0.72/1.08许可不变，未改远程资产或重分类旧gold，完整goal active，不增加Candidate或Crystal百分比。保持原生、PG30、Cargo jobs2，不用Docker/WSL/虚拟机，不改虚拟化或关闭游戏；下方第六阶段保留历史范围。
+
 ## 狩猎经济第六阶段Web接线（2026-10-20）
 
 Page/NpcRepairService/Shop/Shell已连接既有权威修理carrier；新钱包只读代理固定服务端上游、Bearer仅headers、16KiB/8秒上限、无cookie/redirect/缓存或写接口。客户端冻结socket/actor/identity，严格原始帧与最终发送门，真实完整snapshot apply后才释放未决，钱包显示不授权资产变更。Pending主动关闭后仍保留仅原Query的恢复面板。最终29专项101/101、原生Next生产构建（严格TS、13页）、独立严格TS零错、编译后钱包本机HTTP10/10通过，见 [第六阶段证据](generated/hunting-economy/acceptance-20261020-repair-ui.json)。本轮未改Rust/数据库schema，既有PG验收不重复累加；合成只读HTTP不代表真实玩家资产、物理游戏WebSocket、保存重登或浏览器视觉验收。默认关闭、goal active，本服定制经济不增加Crystal进度；其它来源/材料/全服指标与发布仍待。坚持原生、不用Docker/WSL/虚拟机、不关闭游戏或改虚拟化；下方阶段五记录保留当时范围。

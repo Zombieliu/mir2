@@ -1,5 +1,11 @@
 # Agent Task Queue
 
+## 狩猎经济第七阶段与下一队列（2026-10-20）
+
+真实物理网络这一有界分支已通过：最终37的2/2原生Axum WS+PG用例经过普通注册/登录/建角、真实Shared Zone及NPC服务、Bag Quote/Confirm/原Query、一次绑定扣款/销毁、真实断线保存和全新配置冷登录；损坏物品与资金仅为离线合成测试准备。raw close测试先由PG证明已提交，客户端不读回执，再经真实保存及测试受控清retained后冷加载，不是resume或强制服务端OutcomeUnknown。钱包代理补可信公开Origin与精确入站匹配，Gateway allowlist不放松。证据见 [第七阶段验收](generated/hunting-economy/acceptance-20261020-repair-network.json)。
+
+分项验证为hunting纯25/25、Gateway lib+bins检查通过，Web专项105/105（含wallet/proxy32/32）、原生Next30生产构建（严格TS/13页）及编译后合成allowlist HTTP12/12；不与阶段六或历史计数重复累加。下一最小队列是在现有游戏窗口验证真实浏览器点击、确认/拒绝、Pending原操作查询和玩家保存重登，仍无该层验收；随后接其它来源、材料绑定传播、全服指标、通知及迁移发布。默认关闭、K=0.1、0.72/1.08许可、goal active、不新增网页及不提高Crystal百分比保持；仅原生、PG30/Cargo串行jobs2，不用Docker/WSL/虚拟机或关闭游戏。以下阶段六及更早记录为当时范围。
+
 ## 狩猎经济第六阶段与下一队列（2026-10-20）
 
 已在现有Page/NpcRepairService/Shop/Shell接typed修理报价、确认、原操作查询，显示服务端绑定费用及只读新钱包，并将同回合完整snapshot应用到真实游戏状态。未知提交、缺快照、主动关窗或NPC退场保留原Pending查询，不重新确认；身份/actor/socket退役拒绝迟到。最终29：专项101/101、原生Next生产构建（严格TS、13页）、独立严格TS零错误，编译后钱包接口原生HTTP10/10，见 [第六阶段证据](generated/hunting-economy/acceptance-20261020-repair-ui.json)。没有真实浏览器/物理游戏WebSocket或玩家保存重登验收，HTTP使用合成只读来源。下一最小队列是原生隔离环境真实客户端确认/拒绝、Pending与断线保存重登；其后其它来源、材料绑定传播、全服指标、通知和迁移发布。默认禁用、K=0.1及0.72/1.08许可保持；goal active，不新增网页、不用Docker/WSL/虚拟机、不关闭游戏。以下第五阶段队列为历史范围，现有窗口接线项由本段更新。

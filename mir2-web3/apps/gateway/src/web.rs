@@ -12685,6 +12685,10 @@ mod web_auth_peer_bucket_tests;
 mod web_live_overflow_tests;
 
 #[cfg(test)]
+#[path = "web_hunting_repair_network_tests.rs"]
+mod web_hunting_repair_network_tests;
+
+#[cfg(test)]
 mod tests {
     use super::{
         realm_info_event, responses_require_world_snapshot, should_send_world_snapshot_for_action,

@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+## 狩猎经济第七阶段验收边界（2026-10-20）
+
+原生Axum物理WS+PG逐用例全新进程2/2通过，覆盖普通注册/登录/建角、真实NPC对话与服务端@repair选择、原字节Quote/Confirm/Query、旧raw repair拒绝和政策关闭后原Query不重复扣款。Bag损伤与资金来自离线合成测试准备；显式断开及PG已提交但未读回执后经过真实保存，仅在测试内清理retained，再以全新config/WebState冷加载。不是resume验收，未强制服务端OutcomeUnknown，运行时有界unavailable也不当作精确Disabled码。见 [第七阶段验收](generated/hunting-economy/acceptance-20261020-repair-network.json)。
+
+最终37另验hunting纯25/25、Gateway库与bins check及仅新增文件rustfmt check零错误；Web Origin/钱包32/32、focused105/105、原生Next30生产构建（严格TS、13页）、编译后合成只读HTTP与Origin allowlist12/12通过；真实WS同state的钱包GET另读取实际PG余额。可信public origin与Gateway allowlist须一致，请求Origin存在时精确匹配，未放宽网关来源限制。真实浏览器点击与玩家流程仍待，之后为其它来源、材料、完整指标、通知和迁移发布；不据这些专项推断全服覆盖、全workspace或生产资格。
+
+本服定制经济不增加Crystal1:1闭合项或Candidate/全局百分比。默认关闭、K=0.1、0.72/1.08许可和完整goal active保持，未改远程资产或重分类旧gold；原生PG30、Cargo jobs2，不用Docker/WSL/虚拟机，不改虚拟化或关闭游戏。以下第六阶段及更早描述保留各自历史范围。
+
 ## 狩猎经济第六阶段边界（2026-10-20）
 
 既有修理服务端carrier现已接入Page/NpcRepairService/Shop/Shell，包含服务端费用、只读新钱包、完整snapshot apply和关窗不丢原Pending查询。最终29专项101/101、原生Next生产构建（含严格TS、13页）、独立严格TS及编译后钱包本机HTTP10/10通过，见 [第六阶段验收](generated/hunting-economy/acceptance-20261020-repair-ui.json)。HTTP使用合成只读upstream；尚未完成真实浏览器、物理游戏WebSocket或玩家保存重登，不扩大既有Rust/PG、Crystal1:1、全服覆盖或生产发布结论。K=0.1、0.72/1.08许可及默认关闭保持，goal active，原生无Docker/WSL/虚拟机、不改虚拟化或关闭游戏。以下第五阶段表述为历史范围。
