@@ -138,7 +138,10 @@ pub(in crate::runtime) fn refresh_quest_recurrence(world: &mut World) -> Vec<Ser
     refresh_quest_recurrence_at(world, server_now_millis())
 }
 
-pub(super) fn refresh_quest_recurrence_at(world: &mut World, now_ms: u64) -> Vec<ServerPacket> {
+pub(in crate::runtime) fn refresh_quest_recurrence_at(
+    world: &mut World,
+    now_ms: u64,
+) -> Vec<ServerPacket> {
     if !is_in_world(world)
         || world
             .get_resource::<SessionResource>()
@@ -250,8 +253,7 @@ fn cadence_period(cadence: QuestCadence, now_ms: u64) -> u64 {
     }
 }
 
-#[cfg(test)]
-pub(super) fn daily_period_at(now_ms: u64) -> u64 {
+pub(in crate::runtime) fn daily_period_at(now_ms: u64) -> u64 {
     cadence_period(QuestCadence::Daily, now_ms)
 }
 

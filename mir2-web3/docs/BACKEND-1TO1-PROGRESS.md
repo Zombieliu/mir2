@@ -1,5 +1,11 @@
 # Backend 1:1 Progress
 
+## 第十一阶段：真实日常委托来源（2026-10-21）
+
+NPC24日常来源复用完整checkpoint/Guild writer，新增0025不可变日槽；业务唯一键含角色代际/任务/UTC+8日，不含digest或金额。私有DB时间cap绑定原账号/版本，锁后fresh clock判期；仅PeriodChanged最多一次完整重规划，Unknown始终查原日。14新增PG、31既有PG、21普通回归通过，含全回滚、并发同槽、定义冲突、高水位/legacy保守拒绝、原请求/丢Session恢复及三组选二+bonus冷登录，见[阶段十一证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。
+
+本服定制不增加Crystal闭合项；周期按00:00，与经济04:00分开。仍未覆盖有物品/材料任务、其它周期和全服经济。Windows新实际收费成功，但resume缺口独立修复中。goal active，默认关闭、不用Docker或修改远程资产。
+
 ## 第十阶段：任务来源登录恢复（2026-10-21）
 
 普通账号刷新已接任务来源原单恢复，处理已提交/已回滚、丢失 Session、后续 canonical 存档、停用政策、删除或重建角色、密码/封禁、半证据、外来 fence、锁超时，以及真实 Guild 变化后删除账号的最新镜像/版本。存档 raw_json 与 snapshot/name 不一致时保持冻结。9 项新增 PG、22 项既有 PG、8 项普通回归通过，见[本轮证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。

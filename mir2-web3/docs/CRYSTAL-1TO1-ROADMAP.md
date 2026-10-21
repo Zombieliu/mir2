@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 第十一阶段：真实日常委托来源（2026-10-21）
+
+本服定制经济已支持现有NPC24日常三选二+bonus的原子绑定入账、独立DB午夜日槽、整组资格和原日恢复。新增PG14/14、邻接PG31/31、普通回归21/21；普通NPC路径覆盖三种组合及冷登录，未宣称物理战斗或玩家GUI。见[阶段十一限定证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。不增加Crystal/Candidate百分比。Windows成功扣费已有新实机证明，物理resume仍待修复验收，其他经济主线及goal继续开放，默认关闭、无Docker。
+
 ## 第十阶段：任务来源登录恢复（2026-10-21）
 
 本服定制经济补齐一次性任务 Unknown/lost Session 的普通登录恢复：原槽与经济回执双证据、当前完整 checkpoint/角色名一致性、完整 fence/epoch 归属均通过后，才刷新当前镜像并解除自身冻结。新增 PG 9/9、既有 PG 22/22、普通回归 8/8 通过，见[限定证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。这不增加 Crystal/Candidate 百分比。每日任务、Windows 成功扣费完整实机链及其余经济主线仍开放，goal active、默认关闭、无 Docker。

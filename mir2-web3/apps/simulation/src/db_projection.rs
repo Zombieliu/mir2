@@ -119,6 +119,10 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0024_hunting_repair_sources",
         include_str!("../../../infra/postgres/migrations/0024_hunting_repair_sources.sql"),
     ),
+    (
+        "0025_hunting_daily_quest_sources",
+        include_str!("../../../infra/postgres/migrations/0025_hunting_daily_quest_sources.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.

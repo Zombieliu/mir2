@@ -861,3 +861,6 @@ fn hunting_quest_postgres_unknown_recovery_preserves_zone_vitals_and_current_cap
 
 #[path = "hunting_quests_guild_tests.rs"]
 mod guild_tests;
+
+#[path = "hunting_daily_quests_tests.rs"]
+mod daily_tests;

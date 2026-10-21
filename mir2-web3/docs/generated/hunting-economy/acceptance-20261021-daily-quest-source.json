@@ -1,0 +1,705 @@
+{
+  "schemaVersion": 1,
+  "scope": "newcomer-v1 NPC24 item-free daily board authoritative bound credit",
+  "createdAt": "2026-10-21T07:23:42.263Z",
+  "parentCommit": "cf6c489ba58fd4987be6b9aa0c361c3775a31d5c",
+  "goalStatus": "active",
+  "implemented": [
+    "Existing 2100001..4 ordinary quest routes retain three-choose-two + bonus; three valid pairs each yield 11000 base bound gold and 20000 base EXP with unchanged legacy gold",
+    "Opaque DB UTC+8 midnight capability; complete canonical account/save/UUID/version and whole cadence-group validation",
+    "Immutable daily business slot independent of digest and reward amount, migration 0025 registered",
+    "Full quest/EXP/Guild checkpoint, bound credit, receipt and outbox commit atomically",
+    "Lock-time fresh DB period check; at most one complete replanning on typed PeriodChanged; original uncertain outcome retains original period for packet and lost-Session login recovery"
+  ],
+  "verification": {
+    "newPostgresPassed": 14,
+    "existingPostgresPassed": 31,
+    "uniquePostgresPassed": 45,
+    "postgresCases": [
+      {
+        "test": "config::hunting_source::daily::tests::hunting_daily_source_postgres_atomic_rollback_receipt_and_immutable_claim_slot",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1316,
+        "log": "C:/mir2-build/hunting-daily-pg-65-hunting_daily_source_postgres_atomic_rollback_receipt_and_immutable_claim_slot.log",
+        "sha256": "9ff8776e95567898f662b98869f00371ceef0e8d7a5f393d0aae92793c8817d9",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 1.31s"
+      },
+      {
+        "test": "config::hunting_source::daily::tests::hunting_daily_source_postgres_canonical_group_legacy_future_and_claimed_guards",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 6644,
+        "log": "C:/mir2-build/hunting-daily-pg-65-hunting_daily_source_postgres_canonical_group_legacy_future_and_claimed_guards.log",
+        "sha256": "80337cf65a2be60fa86e700c57a699e8b0c563ba5482664132512c44f491016b",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 6.63s"
+      },
+      {
+        "test": "config::hunting_source::daily::tests::hunting_daily_source_postgres_capability_cas_generation_and_epoch_are_bound",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1133,
+        "log": "C:/mir2-build/hunting-daily-pg-65-hunting_daily_source_postgres_capability_cas_generation_and_epoch_are_bound.log",
+        "sha256": "108576f9ef34c0efd0307ac3fd8ad0fdc0db07253e949904b274407bf89fc77f",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 1.12s"
+      },
+      {
+        "test": "config::hunting_source::daily::tests::hunting_daily_source_postgres_original_period_recovery_ignores_later_cadence",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1149,
+        "log": "C:/mir2-build/hunting-daily-pg-65-hunting_daily_source_postgres_original_period_recovery_ignores_later_cadence.log",
+        "sha256": "3e1da2427010533484b9da162d982ab37cc9e84fd08ce30f746e6380fe38d036",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 1.14s"
+      },
+      {
+        "test": "config::hunting_source::daily::tests::hunting_daily_source_postgres_original_slot_recovers_disabled_policy_and_lost_session",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2752,
+        "log": "C:/mir2-build/hunting-daily-pg-65-hunting_daily_source_postgres_original_slot_recovers_disabled_policy_and_lost_session.log",
+        "sha256": "ccfd45e026c66bd19fbb40721895548a3260c8633c2d38686230d375bd055242",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 2.74s"
+      },
+      {
+        "test": "config::hunting_source::daily::tests::hunting_daily_source_postgres_prior_period_and_bonus_use_canonical_current_group",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1188,
+        "log": "C:/mir2-build/hunting-daily-pg-65-hunting_daily_source_postgres_prior_period_and_bonus_use_canonical_current_group.log",
+        "sha256": "2ae19c3abf4e5ffe068ba30f63d15264c9a87ac078aad8ec9ff752ced6bfa232",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 1.17s"
+      },
+      {
+        "test": "config::hunting_source::daily::tests::hunting_daily_source_postgres_stale_period_returns_typed_replan_without_writes",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1143,
+        "log": "C:/mir2-build/hunting-daily-pg-65-hunting_daily_source_postgres_stale_period_returns_typed_replan_without_writes.log",
+        "sha256": "a05220b450c4223d7a6e3d9c3307e6c2146c9d8f456e955454f0464425040771",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 1.13s"
+      },
+      {
+        "test": "config::hunting_source::daily::tests::hunting_daily_source_postgres_two_independent_sessions_share_one_daily_slot",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1203,
+        "log": "C:/mir2-build/hunting-daily-pg-65-hunting_daily_source_postgres_two_independent_sessions_share_one_daily_slot.log",
+        "sha256": "a870422ecc089eeefec7b775e146018b9d6a7616db416f13efe59e04f150c413",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 1.19s"
+      },
+      {
+        "test": "config::hunting_source::daily::tests::hunting_daily_source_postgres_unknown_cannot_release_foreign_freeze",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1173,
+        "log": "C:/mir2-build/hunting-daily-pg-65-hunting_daily_source_postgres_unknown_cannot_release_foreign_freeze.log",
+        "sha256": "a6ab5b0227e9d03dd6f13c02efba53f9cface6a0adba6e201d0f6091c29d556c",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 1.16s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_postgres_controlled_period_change_replans_full_source_once",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 51627,
+        "log": "C:/mir2-build/hunting-daily-pg-67-hunting_daily_quest_postgres_controlled_period_change_replans_full_source_once.log",
+        "sha256": "7a04a1375810c286c4853004cf58f1a73bae1ec312d0f56483b00a57ce4c920f",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 51.61s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_postgres_lost_session_ordinary_login_resolves_original_slot",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 58957,
+        "log": "C:/mir2-build/hunting-daily-pg-67-hunting_daily_quest_postgres_lost_session_ordinary_login_resolves_original_slot.log",
+        "sha256": "b7aece1b596ec1dba6c7fd0ce29a188267a055c8f8b139c2e300bcb85775db58",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 58.94s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_postgres_normal_board_two_options_bonus_and_cold_login",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 244757,
+        "log": "C:/mir2-build/hunting-daily-pg-68-hunting_daily_quest_postgres_normal_board_two_options_bonus_and_cold_login.log",
+        "sha256": "d9cc23763fb14f1e61eafd4223d46b17285434469be067975704115c98bdc074",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 244.74s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_postgres_original_unknown_request_keeps_reward_and_vitals",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 132676,
+        "log": "C:/mir2-build/hunting-daily-pg-68-hunting_daily_quest_postgres_original_unknown_request_keeps_reward_and_vitals.log",
+        "sha256": "c038cf0d51b0493a24df0a448da7c6aea27298279510b7620f0ce6d662f7f1db",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 132.66s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_postgres_source_rollback_publishes_no_partial_reward",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 56551,
+        "log": "C:/mir2-build/hunting-daily-rollback-70-hunting_daily_quest_postgres_source_rollback_publishes_no_partial_reward.log",
+        "sha256": "bae34a59130ad58cbe031b88c1a9582b536d853e1cb7a58e7ea91ef75bd22ebe",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 56.35s"
+      },
+      {
+        "test": "config::hunting_repair::tests::hunting_repair_postgres_login_refresh_cannot_claim_foreign_or_rebound_fence",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1201,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_repair_postgres_login_refresh_cannot_claim_foreign_or_rebound_fence.log",
+        "sha256": "1776c5cd534a3ebcfc3eaf1fff1d006a42bfbde6a80cf1e2c18aff97b62c0fa0",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.19s"
+      },
+      {
+        "test": "config::hunting_repair::tests::hunting_repair_postgres_login_refresh_handles_retired_or_missing_current_owner",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 3481,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_repair_postgres_login_refresh_handles_retired_or_missing_current_owner.log",
+        "sha256": "5491f29015c41ef2a1b217ff2ec1ced3293a718b580463f9f6a91000d75f9e39",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 3.46s"
+      },
+      {
+        "test": "config::hunting_repair::tests::hunting_repair_postgres_login_refresh_reconciles_lost_session_commits_and_rollbacks",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 4378,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_repair_postgres_login_refresh_reconciles_lost_session_commits_and_rollbacks.log",
+        "sha256": "796cc3cafa4ac20dd61a012df2962bb29402852450ed84d69b81cc92e4b70da8",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 4.37s"
+      },
+      {
+        "test": "config::hunting_repair::tests::hunting_repair_postgres_login_refresh_resolves_old_outcome_without_bypassing_new_ban",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1392,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_repair_postgres_login_refresh_resolves_old_outcome_without_bypassing_new_ban.log",
+        "sha256": "1785b706cfa129eb57d71f522c28f0bdc3eafea6ff6e314ed8949e52e6f71875",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.38s"
+      },
+      {
+        "test": "config::hunting_source::login_recovery_tests::hunting_source_postgres_login_refresh_cannot_clear_foreign_rebound_or_other_account_fence",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1157,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_login_refresh_cannot_clear_foreign_rebound_or_other_account_fence.log",
+        "sha256": "878466e193426ed541e9780058e16653a1e39d9d683eb46cad8d205523703965",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.15s"
+      },
+      {
+        "test": "config::hunting_source::login_recovery_tests::hunting_source_postgres_login_refresh_current_checkpoint_mismatch_keeps_own_fence",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2210,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_login_refresh_current_checkpoint_mismatch_keeps_own_fence.log",
+        "sha256": "c9fd4fbb0db36e8203b4b38bd60e645a2d387cfbeb34cf72f0a358ada0e142d7",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 2.20s"
+      },
+      {
+        "test": "config::hunting_source::login_recovery_tests::hunting_source_postgres_login_refresh_does_not_bypass_password_or_ban",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2345,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_login_refresh_does_not_bypass_password_or_ban.log",
+        "sha256": "62a2463836641b3b0c2d5038dd2a482cced5ced5fba618546490143f960b24cf",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 2.33s"
+      },
+      {
+        "test": "config::hunting_source::login_recovery_tests::hunting_source_postgres_login_refresh_incomplete_evidence_remains_frozen",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1136,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_login_refresh_incomplete_evidence_remains_frozen.log",
+        "sha256": "25b2e9dc7c95088256c5cc8afc4c236271983504ce9f723e75f3554bbb2eff5a",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.12s"
+      },
+      {
+        "test": "config::hunting_source::login_recovery_tests::hunting_source_postgres_login_refresh_keeps_later_canonical_checkpoint",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1533,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_login_refresh_keeps_later_canonical_checkpoint.log",
+        "sha256": "2686cb52513f5d419331d572935d816880c53fc604af1514a72f04b5836495dc",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.52s"
+      },
+      {
+        "test": "config::hunting_source::login_recovery_tests::hunting_source_postgres_login_refresh_missing_account_keeps_latest_real_guild_source",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1463,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_login_refresh_missing_account_keeps_latest_real_guild_source.log",
+        "sha256": "50f2ba41ef2061f22a53754210a45bbe9747b7afbf0d0335e8a0a769c011538c",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.45s"
+      },
+      {
+        "test": "config::hunting_source::login_recovery_tests::hunting_source_postgres_login_refresh_recovers_lost_session_commit_and_rollback",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 4917,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_login_refresh_recovers_lost_session_commit_and_rollback.log",
+        "sha256": "93eb46e74adbdbe9f8b778c4b4f9d11b8de526deaaedfd94fd8e0be3871e1bd1",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 4.90s"
+      },
+      {
+        "test": "config::hunting_source::login_recovery_tests::hunting_source_postgres_login_refresh_retired_or_missing_owner_never_restores_old_role",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 4058,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_login_refresh_retired_or_missing_owner_never_restores_old_role.log",
+        "sha256": "14c3c378d88c8986f340293ec811cd5853d7cd8be119f01d18948635f8eef3b1",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 4.04s"
+      },
+      {
+        "test": "config::hunting_source::login_recovery_tests::hunting_source_postgres_login_refresh_unresolved_realm_lock_keeps_exact_fence",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 3203,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_login_refresh_unresolved_realm_lock_keeps_exact_fence.log",
+        "sha256": "b8c1daf63828c4edaca898e5da896fb63f30160dc0ce26675ce7f11b35e71da0",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 3.19s"
+      },
+      {
+        "test": "config::hunting_source::tests::hunting_source_postgres_atomic_checkpoint_wallet_and_immutable_replay",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1190,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_atomic_checkpoint_wallet_and_immutable_replay.log",
+        "sha256": "69fec0935c9c16b41dd590d41bc2f5e878d7af0d43d15d37e95c42d1dcb4be2a",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.18s"
+      },
+      {
+        "test": "config::hunting_source::tests::hunting_source_postgres_known_commit_keeps_receipt_and_absent_unknown_mints_nothing",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2264,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_known_commit_keeps_receipt_and_absent_unknown_mints_nothing.log",
+        "sha256": "75b629666dc7da2af488af463ca2be565910828c165c7e5efef44a4af3e87e6f",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 2.25s"
+      },
+      {
+        "test": "config::hunting_source::tests::hunting_source_postgres_known_receipt_survives_missing_current_projection",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2297,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_known_receipt_survives_missing_current_projection.log",
+        "sha256": "fd22fb3f25822e869d737a060ebe7e18d9028741b2da3d89a494ae6e8deb20aa",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 2.29s"
+      },
+      {
+        "test": "config::hunting_source::tests::hunting_source_postgres_original_unknown_recovery_and_other_fence_isolation",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2242,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_original_unknown_recovery_and_other_fence_isolation.log",
+        "sha256": "6107fcc2ea408f18b704f3b7d5b1982f6df4742b452d5dd9edc97d9cf4314cf5",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 2.23s"
+      },
+      {
+        "test": "config::hunting_source::tests::hunting_source_postgres_other_freeze_before_unknown_fence_keeps_original_owner",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1380,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_other_freeze_before_unknown_fence_keeps_original_owner.log",
+        "sha256": "a1784c0cbf961787b5198b1a6dccc68c77929b3b2243bf43d05d9022ebfac63f",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.37s"
+      },
+      {
+        "test": "config::hunting_source::tests::hunting_source_postgres_stale_cas_and_retired_incarnation_cannot_credit",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1224,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_stale_cas_and_retired_incarnation_cannot_credit.log",
+        "sha256": "8ba45e52144a036c0e8180767c2759f802e9dfa3de0168696015a42fc00230dc",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.21s"
+      },
+      {
+        "test": "config::hunting_source::tests::hunting_source_postgres_two_independent_instances_credit_one_lifetime_slot",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1245,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_two_independent_instances_credit_one_lifetime_slot.log",
+        "sha256": "4d4dc6322c1d0834e681f66e78108feab07fdc2424152cd74bab572fc0eb6f78",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.23s"
+      },
+      {
+        "test": "config::hunting_source::tests::hunting_source_postgres_worker_result_loss_fences_old_saves_and_recovers_original",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2373,
+        "log": "C:/mir2-build/hunting-daily-regression-69-hunting_source_postgres_worker_result_loss_fences_old_saves_and_recovers_original.log",
+        "sha256": "e05ad514e985efbee65cfcb337c58e2e20057d314053e132cb83e6d9e1297170",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 2.36s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::guild_tests::hunting_quest_postgres_real_guild_member_commits_exp_level_buffs_and_bound_gold",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2926,
+        "log": "C:/mir2-build/hunting-daily-regression-71-hunting_quest_postgres_real_guild_member_commits_exp_level_buffs_and_bound_gold.log",
+        "sha256": "f14dc014dc9804c7901323be0aa8d6a68c9f31f4d9b57fd8d99cda8181878154",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 2.91s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::guild_tests::hunting_quest_postgres_real_guild_member_precommit_failure_rolls_back_complete_reward",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2588,
+        "log": "C:/mir2-build/hunting-daily-regression-71-hunting_quest_postgres_real_guild_member_precommit_failure_rolls_back_complete_reward.log",
+        "sha256": "ba2f2a682381169cd24a6a1747d6083f647f35443616c0096dfc9ecd844c956c",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 2.57s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::guild_tests::hunting_quest_postgres_real_guild_member_unknown_replays_one_exp_and_wallet_source",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2394,
+        "log": "C:/mir2-build/hunting-daily-regression-71-hunting_quest_postgres_real_guild_member_unknown_replays_one_exp_and_wallet_source.log",
+        "sha256": "fba1c2f637aaf54d5fedd43fe1b0be787f0abb7b79998fe38ae00ee37d1dce6d",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 2.38s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::hunting_quest_postgres_high_level_npc_wrapper_recovers_only_original_source",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1831,
+        "log": "C:/mir2-build/hunting-daily-regression-71-hunting_quest_postgres_high_level_npc_wrapper_recovers_only_original_source.log",
+        "sha256": "81fb6e803c061aa2964e7769efc4593ff23198362ac998400ac16ee86de3cc37",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.82s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::hunting_quest_postgres_normal_routes_reject_wrong_npc_and_distance",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1925,
+        "log": "C:/mir2-build/hunting-daily-regression-71-hunting_quest_postgres_normal_routes_reject_wrong_npc_and_distance.log",
+        "sha256": "5e21943be2814d335d95b242f332c6d53153ba62d8fa47aca8868b6598f61511",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 1.91s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::hunting_quest_postgres_original_packet_recovers_unknown_and_worker_loss_with_shared_guild",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 5464,
+        "log": "C:/mir2-build/hunting-daily-regression-71-hunting_quest_postgres_original_packet_recovers_unknown_and_worker_loss_with_shared_guild.log",
+        "sha256": "14aea18a704dcdbd84e7dbff1651f70ade4337337b93057b707c4481f8fb2bc8",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 5.45s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::hunting_quest_postgres_real_finish_and_call_npc_share_atomic_once_source",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 3618,
+        "log": "C:/mir2-build/hunting-daily-regression-71-hunting_quest_postgres_real_finish_and_call_npc_share_atomic_once_source.log",
+        "sha256": "f16f3a840939fa31af85fc7a09095cff55198276900eb3a466d9cfa7c7422f68",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 3.61s"
+      },
+      {
+        "test": "runtime::hunting_quests::tests::hunting_quest_postgres_unknown_recovery_preserves_zone_vitals_and_current_caps",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 3485,
+        "log": "C:/mir2-build/hunting-daily-regression-71-hunting_quest_postgres_unknown_recovery_preserves_zone_vitals_and_current_caps.log",
+        "sha256": "d49612cceec68d5fe25e33988442898386544d01188020a5254cf13fceecc950",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 3.47s"
+      },
+      {
+        "test": "runtime::hunting_repair::tests::hunting_repair_postgres_lost_session_login_loads_committed_source_with_new_scope",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 4689,
+        "log": "C:/mir2-build/hunting-daily-regression-71-hunting_repair_postgres_lost_session_login_loads_committed_source_with_new_scope.log",
+        "sha256": "3448d236bf02d132d3c1fa9dc05309fc44f6ff8be4c906671b18c9697ff70c1f",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 4.67s"
+      },
+      {
+        "test": "runtime::hunting_repair::tests::hunting_repair_postgres_lost_session_login_proves_rolled_back_source_without_debit",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2568,
+        "log": "C:/mir2-build/hunting-daily-regression-71-hunting_repair_postgres_lost_session_login_proves_rolled_back_source_without_debit.log",
+        "sha256": "8af2d09aeba882dd99ffca792b3d28b9a3aed6301c2ac36e8387c2a32438a7eb",
+        "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2208 filtered out; finished in 2.55s"
+      }
+    ],
+    "purePassed": 21,
+    "pureLogs": [
+      {
+        "path": "C:/mir2-build/hunting-daily-pure-67.log",
+        "sha256": "405c843b5e160be1b9b6c881a1ce0af414a7aa935efc0598bbbb468254a18c22",
+        "result": "test result: ok. 5 passed; 0 failed; 14 ignored; 0 measured; 2185 filtered out; finished in 200.49s"
+      },
+      {
+        "path": "C:/mir2-build/hunting-daily-cadence-regression-67.log",
+        "sha256": "7a803bf6451428e95a1bc21e1abc806728c2c59de3eba03a4ae3fd9b7da3da1e",
+        "result": "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 2195 filtered out; finished in 1.53s"
+      },
+      {
+        "path": "C:/mir2-build/hunting-daily-once-pure-regression-69.log",
+        "sha256": "00255125b4bacc05332146db91c1a35f1c3b938deb7e29b356ee88e231653e3b",
+        "result": "test result: ok. 7 passed; 0 failed; 5 ignored; 0 measured; 2197 filtered out; finished in 2.90s"
+      }
+    ],
+    "builds": [
+      {
+        "label": 65,
+        "exitCode": 0,
+        "profile": "test",
+        "toolchain": "Rust 1.89.0",
+        "jobs": 2,
+        "offline": true,
+        "locked": true
+      },
+      {
+        "label": 67,
+        "exitCode": 0,
+        "profile": "test",
+        "toolchain": "Rust 1.89.0",
+        "jobs": 2,
+        "offline": true,
+        "locked": true
+      },
+      {
+        "label": 69,
+        "exitCode": 0,
+        "profile": "test",
+        "toolchain": "Rust 1.89.0",
+        "jobs": 2,
+        "offline": true,
+        "locked": true
+      },
+      {
+        "label": 70,
+        "exitCode": 0,
+        "profile": "test",
+        "toolchain": "Rust 1.89.0",
+        "jobs": 2,
+        "offline": true,
+        "locked": true
+      }
+    ],
+    "dailyIndexPins": [
+      {
+        "path": "apps/simulation/src/config.rs",
+        "bytes": 303207,
+        "sha256": "668619ea5b1c8c87ef05e9c9e4911114aece0fa2eeff7a2d5a3ac5e115684f42",
+        "gitBlob": "8ae37ea1a7c07afb39ebf70a1a775d14d7f8ac51"
+      },
+      {
+        "path": "apps/simulation/src/config_hunting_source.rs",
+        "bytes": 58570,
+        "sha256": "bf4295ca268b3240720050bf6ffa192ae08a5084c67012870e89364e9a62ffde",
+        "gitBlob": "241fe6797b0bec07fe392a867f9e2cd40eb456c7"
+      },
+      {
+        "path": "apps/simulation/src/config_hunting_daily_source.rs",
+        "bytes": 13982,
+        "sha256": "442e84c1fbe8db4de30fa5c61d0c6a610029eb44c0d36841bf9b4926ea68dc19",
+        "gitBlob": "a3189364355864ad6c6af74866fed86c7840b35c"
+      },
+      {
+        "path": "apps/simulation/src/config_hunting_daily_source_tests.rs",
+        "bytes": 25252,
+        "sha256": "2f1f292c0788be1cca50e467053693f1879d8b772dfefad9430be7f59f0afe60",
+        "gitBlob": "bc93e719f9c8077b30b4ed9c32fdf438f6e4cdc7"
+      },
+      {
+        "path": "apps/simulation/src/db_projection.rs",
+        "bytes": 33627,
+        "sha256": "8468c632f20d909b5bd5053d8a985a45748f460eeeb525d2806d7784a7fa7498",
+        "gitBlob": "0a91bbc2b3583b07691365469686460ba2688e29"
+      },
+      {
+        "path": "apps/simulation/src/runtime/hunting_quests.rs",
+        "bytes": 23853,
+        "sha256": "27ab4a01dbf4963bb5a9da0aef95f18201237b6a47cdee88dbbb385356806096",
+        "gitBlob": "6b356ac118faec2bdd724c25d1dca95f92310f27"
+      },
+      {
+        "path": "apps/simulation/src/runtime/quests.rs",
+        "bytes": 81710,
+        "sha256": "4cf8fd6e3db5222a2adcd7acde8212e6ad103c1fca38415343d525280d57b094",
+        "gitBlob": "da307c62bb1b3d174f1cd0252b34522d88a39747"
+      },
+      {
+        "path": "apps/simulation/src/runtime/quest_recurrence.rs",
+        "bytes": 9076,
+        "sha256": "60e62cda16b479816600edde05538ef5ebc3be8f62ffaad0e8c8093142eb0c25",
+        "gitBlob": "8b5b9a7d619e85743d42a58114aa2bcc6d0f67ee"
+      },
+      {
+        "path": "apps/simulation/src/runtime/hunting_quests_tests.rs",
+        "bytes": 35555,
+        "sha256": "646ac44e34d9829e0b7808be6c33048207a3a3e5d79a977d75cc93453fcfa34c",
+        "gitBlob": "a5f75d6e59c0058938565e741ba7b1fac6d784d8"
+      },
+      {
+        "path": "apps/simulation/src/runtime/hunting_daily_quests_tests.rs",
+        "bytes": 23405,
+        "sha256": "6418162ae16618585982b33682e634db7b491c4314e9818369ef9656a11cf85f",
+        "gitBlob": "bce629df532c4c3f7dc05592a706f99023158756"
+      },
+      {
+        "path": "infra/postgres/migrations/0025_hunting_daily_quest_sources.sql",
+        "bytes": 1719,
+        "sha256": "9718d16b3e08991ed1d6e6556198b618228896f0849057cb8142ec7d18cbb0c0",
+        "gitBlob": "4fbed7269e73cc71e0ec2afbf9ff748c692879c4"
+      }
+    ],
+    "preMapCompiledSourcePins67": [
+      {
+        "path": "apps/simulation/src/config.rs",
+        "bytes": 303207,
+        "sha256": "668619ea5b1c8c87ef05e9c9e4911114aece0fa2eeff7a2d5a3ac5e115684f42"
+      },
+      {
+        "path": "apps/simulation/src/config_hunting_source.rs",
+        "bytes": 58570,
+        "sha256": "bf4295ca268b3240720050bf6ffa192ae08a5084c67012870e89364e9a62ffde"
+      },
+      {
+        "path": "apps/simulation/src/config_hunting_daily_source.rs",
+        "bytes": 13982,
+        "sha256": "442e84c1fbe8db4de30fa5c61d0c6a610029eb44c0d36841bf9b4926ea68dc19"
+      },
+      {
+        "path": "apps/simulation/src/config_hunting_daily_source_tests.rs",
+        "bytes": 25252,
+        "sha256": "2f1f292c0788be1cca50e467053693f1879d8b772dfefad9430be7f59f0afe60"
+      },
+      {
+        "path": "apps/simulation/src/db_projection.rs",
+        "bytes": 33627,
+        "sha256": "8468c632f20d909b5bd5053d8a985a45748f460eeeb525d2806d7784a7fa7498"
+      },
+      {
+        "path": "apps/simulation/src/runtime/hunting_quests.rs",
+        "bytes": 23853,
+        "sha256": "27ab4a01dbf4963bb5a9da0aef95f18201237b6a47cdee88dbbb385356806096"
+      },
+      {
+        "path": "apps/simulation/src/runtime/quests.rs",
+        "bytes": 81710,
+        "sha256": "4cf8fd6e3db5222a2adcd7acde8212e6ad103c1fca38415343d525280d57b094"
+      },
+      {
+        "path": "apps/simulation/src/runtime/quest_recurrence.rs",
+        "bytes": 9076,
+        "sha256": "60e62cda16b479816600edde05538ef5ebc3be8f62ffaad0e8c8093142eb0c25"
+      },
+      {
+        "path": "apps/simulation/src/runtime/hunting_quests_tests.rs",
+        "bytes": 35555,
+        "sha256": "646ac44e34d9829e0b7808be6c33048207a3a3e5d79a977d75cc93453fcfa34c"
+      },
+      {
+        "path": "apps/simulation/src/runtime/hunting_daily_quests_tests.rs",
+        "bytes": 23253,
+        "sha256": "842616e5049eefbbb5a3befcf0ee93546a18b872807d1b9511ba23c9d2f2cad6"
+      },
+      {
+        "path": "infra/postgres/migrations/0025_hunting_daily_quest_sources.sql",
+        "bytes": 1719,
+        "sha256": "9718d16b3e08991ed1d6e6556198b618228896f0849057cb8142ec7d18cbb0c0"
+      }
+    ],
+    "currentCombinedSourcePins70": [
+      {
+        "path": "apps/simulation/src/config.rs",
+        "bytes": 303344,
+        "sha256": "dbc5ef078a7c6313391abbaa96ecaaff91cc5c25c82fd6110166eeeec32f66e8"
+      },
+      {
+        "path": "apps/simulation/src/config_hunting_source.rs",
+        "bytes": 58570,
+        "sha256": "bf4295ca268b3240720050bf6ffa192ae08a5084c67012870e89364e9a62ffde"
+      },
+      {
+        "path": "apps/simulation/src/config_hunting_daily_source.rs",
+        "bytes": 13982,
+        "sha256": "442e84c1fbe8db4de30fa5c61d0c6a610029eb44c0d36841bf9b4926ea68dc19"
+      },
+      {
+        "path": "apps/simulation/src/config_hunting_daily_source_tests.rs",
+        "bytes": 25252,
+        "sha256": "2f1f292c0788be1cca50e467053693f1879d8b772dfefad9430be7f59f0afe60"
+      },
+      {
+        "path": "apps/simulation/src/db_projection.rs",
+        "bytes": 33627,
+        "sha256": "8468c632f20d909b5bd5053d8a985a45748f460eeeb525d2806d7784a7fa7498"
+      },
+      {
+        "path": "apps/simulation/src/runtime/hunting_quests.rs",
+        "bytes": 23853,
+        "sha256": "27ab4a01dbf4963bb5a9da0aef95f18201237b6a47cdee88dbbb385356806096"
+      },
+      {
+        "path": "apps/simulation/src/runtime/quests.rs",
+        "bytes": 81710,
+        "sha256": "4cf8fd6e3db5222a2adcd7acde8212e6ad103c1fca38415343d525280d57b094"
+      },
+      {
+        "path": "apps/simulation/src/runtime/quest_recurrence.rs",
+        "bytes": 9076,
+        "sha256": "60e62cda16b479816600edde05538ef5ebc3be8f62ffaad0e8c8093142eb0c25"
+      },
+      {
+        "path": "apps/simulation/src/runtime/hunting_quests_tests.rs",
+        "bytes": 35555,
+        "sha256": "646ac44e34d9829e0b7808be6c33048207a3a3e5d79a977d75cc93453fcfa34c"
+      },
+      {
+        "path": "apps/simulation/src/runtime/hunting_daily_quests_tests.rs",
+        "bytes": 23405,
+        "sha256": "6418162ae16618585982b33682e634db7b491c4314e9818369ef9656a11cf85f"
+      },
+      {
+        "path": "infra/postgres/migrations/0025_hunting_daily_quest_sources.sql",
+        "bytes": 1719,
+        "sha256": "9718d16b3e08991ed1d6e6556198b618228896f0849057cb8142ec7d18cbb0c0"
+      }
+    ],
+    "inputScope": "named changed files, not a full transitive closure; binaries 69/70 additionally contain unstaged additive WorldSnapshot map identity for the independent native resume fix",
+    "review": "Independent final read-only source/schema audit found no actionable issue"
+  },
+  "retainedFailures": [
+    {
+      "run": 65,
+      "kind": "new runtime fixture used StarterScenario; real NPC24 not present",
+      "repair": "enable actual CrystalWorld manifest roster in PG fixture; keep ordinary dialog/distance authorization"
+    },
+    {
+      "run": 67,
+      "kind": "normal three-pair acceptance exceeded harness 180 second per-case timeout",
+      "repair": "rerun isolated case with 900 second budget; passed in 244757ms; OS and PG clocks unchanged"
+    },
+    {
+      "run": 68,
+      "kind": "rollback test captured baseline before ordinary Board recurrence initialized high watermark",
+      "repair": "capture after ordinary Board entry; keep complete quest-state equality; passed run70"
+    },
+    {
+      "run": 69,
+      "kind": "broad regression selector repeated one daily case and selected another duplicate",
+      "repair": "stop only exact owned duplicate child, preserve log; explicit original names finished 31 unique regressions across runs69/71"
+    }
+  ],
+  "scopeLimits": [
+    "NPC proof uses ordinary in-process real routes and real quest-kill progress helper, not physical player combat or GUI",
+    "Midnight math has exact pure boundary tests; PG stale-capability test exercises fresh DB clock rejection without changing system/database clock or waiting for real midnight",
+    "Later-cadence historical recovery test does not claim a real elapsed PostgreSQL day transition",
+    "Legacy Completed without claim period is conservatively rejected until normal recurrence initialization and ordinary canonical save; no asset migration inferred",
+    "No material-item rewards, native Daily141/repeatable/weekly sources, planting/mining custody, complete burn coverage or production rollout acceptance"
+  ],
+  "safety": {
+    "docker": false,
+    "wsl": false,
+    "virtualizationChanges": false,
+    "remoteAssetChanges": false,
+    "legacyGoldReclassified": false,
+    "productionEnabled": false,
+    "pushOrDeploy": false
+  },
+  "next": "Finish actual Windows native paid-repair physical resume/query/cold-login verification; continue materials and remaining source/burn/observability coverage"
+}

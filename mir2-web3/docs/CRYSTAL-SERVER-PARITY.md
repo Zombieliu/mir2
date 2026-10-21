@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## 第十一阶段：真实日常委托来源（2026-10-21）
+
+现有newcomer-v1 NPC24三选二+bonus已获得每日独立领取槽、完整存档/EXP/Guild/绑定金币同事务及原日未知结果恢复。新增PG14、既有PG31、普通回归21通过，见[限定证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。不改变原玩法额度或Crystal/Candidate资格，未证明物理玩家任务/全服覆盖。Windows实机收费6已建立，物理resume仍在独立修复；完整goal active、默认关闭、K=0.1，无Docker与远程资产修改。
+
 ## 第十阶段：任务来源登录恢复（2026-10-21）
 
 任务来源恢复现在可在原 Session 丢失后通过普通登录刷新触发，依赖原私有 fence 与双份不可变证据，不执行奖励；只加载当前角色/账户/Guild 状态，正常密码、封禁及代际授权仍执行。新增 PG 9/9、既有 PG 22/22、普通回归 8/8，见[本轮证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。这是定制经济恢复修复，不增加 Crystal/Candidate 资格。每日任务及 Windows 成功收费至冷登录实机链尚未完成，完整 goal active、默认关闭，无 Docker 或远程资产修改。

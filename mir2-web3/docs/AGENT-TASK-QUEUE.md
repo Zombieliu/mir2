@@ -1,5 +1,11 @@
 # Agent Task Queue
 
+## 第十一阶段：真实日常委托来源（2026-10-21）
+
+NPC24 newcomer-v1 日常委托已接齐 2100001..4；三组选二 + bonus 的真实普通NPC/kill-progress/冷登录用例通过，每组11,000基础绑定金币与20,000基础EXP，旧gold不变。新增PG14、邻接PG31、普通回归21通过；夹具、时限及基线修复均保留在[阶段十一证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。
+
+下一优先收尾Windows原生恢复：新实机已成功扣6并进入Pending，但物理resume超时；服务端mapIndex和客户端context/队列边界正在独立验证，不能称完整闭环。之后继续材料与剩余真实来源、完整三层销毁/全服指标和通知/迁移发布。goal active、默认关闭、无Docker。
+
 ## 第十阶段：任务来源登录恢复（2026-10-21）
 
 已修复一次性任务入账结果不明且原 Session 丢失后，新登录被旧冻结阻挡的问题。仅核对原私有来源证据并加载当前状态；9 项新增 PG、22 项任务/修理邻接 PG、8 项普通回归通过，见[本轮证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。

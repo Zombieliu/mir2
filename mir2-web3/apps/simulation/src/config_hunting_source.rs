@@ -17,6 +17,9 @@ pub(crate) struct HuntingQuestCommit {
 #[derive(Debug)]
 pub(crate) enum HuntingSourceError {
     Rejected(String),
+    /// No source or asset writes occurred; trusted runtime may plan once again
+    /// with a fresh DB-derived daily capability.
+    PeriodChanged,
     OutcomeUnknown(String),
     PostCommit {
         commit: Box<HuntingQuestCommit>,
@@ -37,6 +40,7 @@ impl From<String> for HuntingSourceError {
 impl fmt::Display for HuntingSourceError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::PeriodChanged => f.write_str("hunting quest period changed; replan required"),
             Self::Rejected(detail) | Self::OutcomeUnknown(detail) => f.write_str(detail),
             Self::PostCommit { detail, .. } | Self::KnownCommitted { detail, .. } => {
                 write!(f, "hunting source committed; {detail}")
@@ -55,6 +59,8 @@ pub(crate) struct PreparedHuntingQuestSource {
     expected_incarnation: String,
     index: i32,
     quest_id: i32,
+    slot: QuestSourceSlot,
+    daily_period: Option<HuntingDailyQuestPeriod>,
     source_digest: String,
     amount: u64,
     before: CharacterSaveRecord,
@@ -77,6 +83,7 @@ pub(super) struct HuntingSourceFence {
     database_binding: String,
     owner: WalletOwner,
     quest_id: i32,
+    slot: QuestSourceSlot,
     source_digest: String,
     amount: u64,
     guilds: Vec<String>,
@@ -95,6 +102,23 @@ pub(super) struct LockedImage {
 fn source_key(quest_id: i32) -> String {
     format!("quest-once-v1:{quest_id}")
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum QuestSourceSlot {
+    Once,
+    Daily { period: i64 },
+}
+
+fn slot_source_key(quest_id: i32, slot: QuestSourceSlot) -> String {
+    match slot {
+        QuestSourceSlot::Once => source_key(quest_id),
+        QuestSourceSlot::Daily { period } => format!("quest-daily-v1:{quest_id}:{period}"),
+    }
+}
+
+#[path = "config_hunting_daily_source.rs"]
+mod daily;
+pub(crate) use daily::HuntingDailyQuestPeriod;
 pub(super) fn database_binding(url: &str) -> String {
     Sha256::digest(url.as_bytes())
         .iter()
@@ -261,21 +285,25 @@ fn load_original_checkpoint(
     realm: &str,
     owner: &WalletOwner,
     quest_id: i32,
+    slot: QuestSourceSlot,
     digest: &str,
     amount: u64,
 ) -> Result<Option<CharacterSaveRecord>, EconomyError> {
-    let row = tx.query_opt("SELECT source_key,source_digest,bound_gold,before_revision,after_revision,checkpoint_json,checkpoint_digest,operation_key FROM hunting_quest_source_checkpoints WHERE realm_id=$1 AND account_id=$2 AND character_index=$3 AND character_incarnation=$4 AND quest_id=$5", &[&realm,&owner.account_id,&owner.character_index,&owner.incarnation,&quest_id]).map_err(source_db)?;
+    let row = match slot {
+        QuestSourceSlot::Once => tx.query_opt("SELECT source_key,source_digest,bound_gold,before_revision,after_revision,checkpoint_json,checkpoint_digest,operation_key FROM hunting_quest_source_checkpoints WHERE realm_id=$1 AND account_id=$2 AND character_index=$3 AND character_incarnation=$4 AND quest_id=$5", &[&realm,&owner.account_id,&owner.character_index,&owner.incarnation,&quest_id]),
+        QuestSourceSlot::Daily { period } => tx.query_opt("SELECT source_key,source_digest,bound_gold,before_revision,after_revision,checkpoint_json,checkpoint_digest,operation_key FROM hunting_daily_quest_source_checkpoints WHERE realm_id=$1 AND account_id=$2 AND character_index=$3 AND character_incarnation=$4 AND quest_id=$5 AND cadence='daily-utc8-v1' AND claim_period=$6", &[&realm,&owner.account_id,&owner.character_index,&owner.incarnation,&quest_id,&period]),
+    }.map_err(source_db)?;
     let Some(row) = row else {
         return Ok(None);
     };
     let (operation_key, _) = economy::bound_credit_operation_identity(
         realm,
         owner,
-        &source_key(quest_id),
+        &slot_source_key(quest_id, slot),
         digest,
         amount,
     )?;
-    if row.get::<_, String>("source_key") != source_key(quest_id)
+    if row.get::<_, String>("source_key") != slot_source_key(quest_id, slot)
         || row.get::<_, String>("source_digest") != digest
         || row.get::<_, i64>("bound_gold")
             != i64::try_from(amount).map_err(|_| EconomyError::Overflow("credit_amount"))?
@@ -297,6 +325,10 @@ fn load_original_checkpoint(
         || quest_stage(&checkpoint, quest_id).ok() != Some(Some(QuestStage::Completed))
     {
         return Err(EconomyError::CorruptHistory("source_checkpoint_identity"));
+    }
+    if let QuestSourceSlot::Daily { period } = slot {
+        daily::validate_completed_period(&checkpoint, quest_id, period)
+            .map_err(|_| EconomyError::CorruptHistory("daily_source_period"))?;
     }
     Ok(Some(checkpoint))
 }
@@ -344,6 +376,7 @@ impl SimulationConfig {
                     incarnation: source.expected_incarnation.clone(),
                 },
                 quest_id: source.quest_id,
+                slot: source.slot,
                 source_digest: source.source_digest.clone(),
                 amount: source.amount,
                 guilds: source.plan.guilds.keys().cloned().collect(),
@@ -446,6 +479,34 @@ impl SimulationConfig {
     where
         F: FnOnce(&mut AccountStore) -> Result<(), String>,
     {
+        self.prepare_hunting_quest_source_for_slot(
+            account,
+            expected_incarnation,
+            quest_id,
+            source_digest,
+            amount,
+            runtime_before,
+            stage,
+            QuestSourceSlot::Once,
+            None,
+        )
+    }
+
+    fn prepare_hunting_quest_source_for_slot<F>(
+        &self,
+        account: &str,
+        expected_incarnation: &str,
+        quest_id: i32,
+        source_digest: &str,
+        amount: u64,
+        runtime_before: CharacterSaveRecord,
+        stage: F,
+        slot: QuestSourceSlot,
+        daily_period: Option<HuntingDailyQuestPeriod>,
+    ) -> Result<PreparedHuntingQuestSource, String>
+    where
+        F: FnOnce(&mut AccountStore) -> Result<(), String>,
+    {
         self.ensure_account_store_writable()?;
         let (realm, url) = self.hunting_source_binding()?;
         validate_token(account, 256)?;
@@ -542,6 +603,8 @@ impl SimulationConfig {
             expected_incarnation: expected_incarnation.into(),
             index,
             quest_id,
+            slot,
+            daily_period,
             source_digest: source_digest.into(),
             amount,
             before: runtime_before,
@@ -624,7 +687,8 @@ impl SimulationConfig {
         let locked = RefCell::new(None::<LockedImage>);
         let written = RefCell::new(None::<AccountStoreSourceVersions>);
         let source_error = RefCell::new(None::<String>);
-        let key = source_key(source.quest_id);
+        let period_changed = std::cell::Cell::new(false);
+        let key = slot_source_key(source.quest_id, source.slot);
         let delivered = with_account_store_postgres_client(url, |client| {
             Ok(economy::credit_bound_authorized_with_source_with_timeouts(
                 client,
@@ -660,6 +724,7 @@ impl SimulationConfig {
                         realm,
                         &image.owner,
                         source.quest_id,
+                        source.slot,
                         &source.source_digest,
                         source.amount,
                     )?;
@@ -668,6 +733,30 @@ impl SimulationConfig {
                     Ok(owner)
                 },
                 |tx, clock| {
+                    if let QuestSourceSlot::Daily { period } = source.slot {
+                        #[cfg(test)]
+                        if test_fault == 11 {
+                            period_changed.set(true);
+                            return Err(EconomyError::SourceRejected);
+                        }
+                        if daily::period_at(daily::database_time_ms(tx)?)? != period {
+                            period_changed.set(true);
+                            return Err(EconomyError::SourceRejected);
+                        }
+                        let locked_image = locked.borrow();
+                        let image = locked_image.as_ref().ok_or(EconomyError::SourceRejected)?;
+                        daily::validate_first_write(
+                            tx,
+                            self,
+                            source
+                                .daily_period
+                                .as_ref()
+                                .ok_or(EconomyError::SourceRejected)?,
+                            image,
+                            &source.before,
+                            source.checkpoint(),
+                        )?;
+                    }
                     if !local_matches {
                         *source_error.borrow_mut() = Some(
                             "hunting source account or Guild changed before publication".into(),
@@ -696,8 +785,16 @@ impl SimulationConfig {
                         to_json(source.checkpoint()).map_err(|_| EconomyError::SourceRejected)?;
                     let hash =
                         canonical_hash(&checkpoint).map_err(|_| EconomyError::SourceRejected)?;
-                    tx.execute("INSERT INTO hunting_quest_source_checkpoints(realm_id,account_id,character_index,character_incarnation,quest_id,source_key,source_digest,bound_gold,before_revision,after_revision,checkpoint_json,checkpoint_digest,operation_key,committed_at_ms) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)",
-                        &[&realm,&source.account,&source.index,&image.owner.incarnation,&source.quest_id,&key,&source.source_digest,&(source.amount as i64),&(source.before.revision as i64),&(source.checkpoint().revision as i64),&checkpoint,&hash,&operation,&clock.database_time_ms]).map_err(source_db)?;
+                    match source.slot {
+                        QuestSourceSlot::Once => {
+                            tx.execute("INSERT INTO hunting_quest_source_checkpoints(realm_id,account_id,character_index,character_incarnation,quest_id,source_key,source_digest,bound_gold,before_revision,after_revision,checkpoint_json,checkpoint_digest,operation_key,committed_at_ms) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)",
+                                &[&realm,&source.account,&source.index,&image.owner.incarnation,&source.quest_id,&key,&source.source_digest,&(source.amount as i64),&(source.before.revision as i64),&(source.checkpoint().revision as i64),&checkpoint,&hash,&operation,&clock.database_time_ms]).map_err(source_db)?;
+                        }
+                        QuestSourceSlot::Daily { period } => {
+                            tx.execute("INSERT INTO hunting_daily_quest_source_checkpoints(realm_id,account_id,character_index,character_incarnation,quest_id,source_key,source_digest,bound_gold,before_revision,after_revision,checkpoint_json,checkpoint_digest,operation_key,committed_at_ms,cadence,claim_period) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'daily-utc8-v1',$15)",
+                                &[&realm,&source.account,&source.index,&image.owner.incarnation,&source.quest_id,&key,&source.source_digest,&(source.amount as i64),&(source.before.revision as i64),&(source.checkpoint().revision as i64),&checkpoint,&hash,&operation,&clock.database_time_ms,&period]).map_err(source_db)?;
+                        }
+                    }
                     *written.borrow_mut() = Some(versions);
                     #[cfg(test)]
                     if test_fault == 1 || test_fault == 4 {
@@ -750,11 +847,14 @@ impl SimulationConfig {
                 return Err(HuntingSourceError::OutcomeUnknown(reason));
             }
             Err(error) => {
+                if period_changed.get() {
+                    return Err(HuntingSourceError::PeriodChanged);
+                }
                 return Err(HuntingSourceError::Rejected(
                     source_error
                         .into_inner()
                         .unwrap_or_else(|| error.to_string()),
-                ))
+                ));
             }
         };
         #[cfg(test)]
@@ -909,7 +1009,7 @@ impl SimulationConfig {
             Ok(economy::lookup_bound_credit_authorized_with_timeouts(
                 client,
                 realm,
-                &source_key(fence.quest_id),
+                &slot_source_key(fence.quest_id, fence.slot),
                 &fence.source_digest,
                 fence.amount,
                 2000,
@@ -972,7 +1072,7 @@ impl SimulationConfig {
                         }
                     }
                     *original.borrow_mut() = load_original_checkpoint(
-                        tx, realm, &fence.owner, fence.quest_id,
+                        tx, realm, &fence.owner, fence.quest_id, fence.slot,
                         &fence.source_digest, fence.amount,
                     )?;
                     *current.borrow_mut() = image;
@@ -989,14 +1089,14 @@ impl SimulationConfig {
             let (key, digest) = economy::bound_credit_operation_identity(
                 realm,
                 &fence.owner,
-                &source_key(fence.quest_id),
+                &slot_source_key(fence.quest_id, fence.slot),
                 &fence.source_digest,
                 fence.amount,
             )
             .map_err(|_| "quest original refresh recovery identity invalid")?;
             if receipt.realm_id != realm
                 || receipt.owner != fence.owner
-                || receipt.source_key != source_key(fence.quest_id)
+                || receipt.source_key != slot_source_key(fence.quest_id, fence.slot)
                 || receipt.bound_gold_credit != fence.amount
                 || receipt.operation_key != key
                 || receipt.request_digest != digest
@@ -1161,7 +1261,7 @@ impl SimulationConfig {
             Ok(economy::lookup_bound_credit_authorized_with_timeouts(
                 client,
                 realm,
-                &source_key(quest_id),
+                &slot_source_key(quest_id, fence.slot),
                 digest,
                 amount,
                 2000,
@@ -1192,6 +1292,7 @@ impl SimulationConfig {
                         realm,
                         &fence.owner,
                         quest_id,
+                        fence.slot,
                         digest,
                         amount,
                     )?;

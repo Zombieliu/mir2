@@ -1,4 +1,4 @@
-//! Server-only once-quest source adapter. Preparation owns a separate World and
+//! Server-only quest source adapter. Preparation owns a separate World and
 //! account image; the live ECS changes only after the common PG commit confirms.
 use bevy_ecs::prelude::{Resource, World};
 use mir2_protocol::{ChatType, ServerPacket};
@@ -56,14 +56,16 @@ struct PreparedQuest {
 
 /// A stable definition digest deliberately excludes revision, transient EXP
 /// modifiers, time, connection and position. Recovery must use the original
-/// once slot even after a buff expires or the player reconnects.
+/// business slot even after a buff expires or the player reconnects.
 fn source_definition(world: &World, quest_id: i32) -> Result<(String, u64), String> {
     let info = quests::effective_crystal_quest_info_by_id(world, quest_id)
         .ok_or_else(|| UNSUPPORTED.to_owned())?;
     let template = quests::effective_crystal_quest_template_by_id(world, quest_id)
         .ok_or_else(|| UNSUPPORTED.to_owned())?;
-    if quests::quest_has_recurrence(world, quest_id)
-        || !matches!(info.quest_type, 0 | 3)
+    let daily = quests::is_hunting_newcomer_daily_quest(world, quest_id);
+    if (quests::quest_has_recurrence(world, quest_id) && !daily)
+        || (daily && (info.quest_type != 1 || info.npc_index != 24 || info.finish_npc_index != 24))
+        || (!daily && !matches!(info.quest_type, 0 | 3))
         || info.reward_gold == 0
         || info
             .rewards_fixed_item
@@ -75,7 +77,12 @@ fn source_definition(world: &World, quest_id: i32) -> Result<(String, u64), Stri
     {
         return Err(UNSUPPORTED.into());
     }
-    let bytes = serde_json::to_vec(&("hunting-once-quest-definition-v1", &info, &template))
+    let domain = if daily {
+        "hunting-newcomer-daily-quest-definition-v1"
+    } else {
+        "hunting-once-quest-definition-v1"
+    };
+    let bytes = serde_json::to_vec(&(domain, &info, &template))
         .map_err(|_| "quest definition cannot be encoded".to_owned())?;
     let digest = format!(
         "sha256:{}",
@@ -88,6 +95,17 @@ fn source_definition(world: &World, quest_id: i32) -> Result<(String, u64), Stri
 }
 
 fn prepare(world: &World, quest_id: i32) -> Result<PreparedQuest, String> {
+    prepare_with_daily_time(world, quest_id, None)
+}
+
+fn prepare_with_daily_time(
+    world: &World,
+    quest_id: i32,
+    database_time_ms: Option<u64>,
+) -> Result<PreparedQuest, String> {
+    if quests::is_hunting_newcomer_daily_quest(world, quest_id) != database_time_ms.is_some() {
+        return Err("daily quest preparation requires its database period capability".into());
+    }
     if quests::quest_stage(world, quest_id) != Some(QuestStage::ReadyToTurnIn) {
         return Err("quest is not ready".into());
     }
@@ -151,6 +169,41 @@ fn prepare(world: &World, quest_id: i32) -> Result<PreparedQuest, String> {
     );
     super::shared_guild_experience::begin_owned_hunting_preparation(shadow.app.world_mut());
 
+    if let Some(now_ms) = database_time_ms {
+        let period = quests::quest_recurrence::daily_period_at(now_ms);
+        // OS refresh may already have advanced a live calendar. It cannot be
+        // lowered or used as permission to select a different database slot.
+        if shadow
+            .app
+            .world()
+            .resource::<QuestResource>()
+            .quests
+            .iter()
+            .filter(|quest| {
+                quests::is_hunting_newcomer_daily_quest(shadow.app.world(), quest.quest_id)
+            })
+            .any(|quest| {
+                quest
+                    .cadence_high_watermark_period
+                    .is_some_and(|value| value > period)
+                    || quest
+                        .cadence_last_claimed_period
+                        .is_some_and(|value| value > period)
+                    || (quest.cadence_last_claimed_period == Some(period)
+                        && quest.quest_id == quest_id)
+                    || (quest.stage == QuestStage::Completed
+                        && quest.cadence_last_claimed_period.is_none())
+            })
+        {
+            return Err("daily quest calendar is ahead of its database claim period".into());
+        }
+        let _ =
+            quests::quest_recurrence::refresh_quest_recurrence_at(shadow.app.world_mut(), now_ms);
+        if quests::quest_stage(shadow.app.world(), quest_id) != Some(QuestStage::ReadyToTurnIn) {
+            return Err("daily quest eligibility changed at database reset".into());
+        }
+    }
+
     // Recheck server level/class/profile/prerequisite gates without the ordinary
     // "already accepted" gate rejecting this existing ReadyToTurnIn quest.
     let info = quests::effective_crystal_quest_info_by_id(shadow.app.world(), quest_id)
@@ -158,9 +211,35 @@ fn prepare(world: &World, quest_id: i32) -> Result<PreparedQuest, String> {
     quests::set_quest_stage(shadow.app.world_mut(), quest_id, QuestStage::Available);
     let eligible = quests::can_accept_crystal_quest(shadow.app.world(), &info);
     quests::set_quest_stage(shadow.app.world_mut(), quest_id, QuestStage::ReadyToTurnIn);
-    if !eligible || !quests::complete_quest_personal(shadow.app.world_mut(), quest_id, None, false)
-    {
+    let completed = eligible
+        && match database_time_ms {
+            Some(now_ms) => quests::complete_quest_personal_at(
+                shadow.app.world_mut(),
+                quest_id,
+                None,
+                false,
+                now_ms,
+            ),
+            None => quests::complete_quest_personal(shadow.app.world_mut(), quest_id, None, false),
+        };
+    if !completed {
         return Err("quest eligibility changed".into());
+    }
+    if let Some(now_ms) = database_time_ms {
+        let period = quests::quest_recurrence::daily_period_at(now_ms);
+        let quest = shadow
+            .app
+            .world()
+            .resource::<QuestResource>()
+            .quests
+            .iter()
+            .find(|quest| quest.quest_id == quest_id)
+            .ok_or("prepared daily quest missing")?;
+        if quest.cadence_last_claimed_period != Some(period)
+            || quest.cadence_high_watermark_period != Some(period)
+        {
+            return Err("prepared daily completion left its database claim period".into());
+        }
     }
     super::shared_guild_experience::finish_owned_hunting_preparation(shadow.app.world())?;
     let after = snapshot_active_character_save(shadow.app.world())
@@ -398,10 +477,6 @@ pub(super) fn complete_if_configured(
     if selected.is_some() {
         return Some(reject(world, UNSUPPORTED));
     }
-    let (digest, amount) = match source_definition(world, quest_id) {
-        Ok(value) => value,
-        Err(_) => return Some(reject(world, UNSUPPORTED)),
-    };
     let session = world.resource::<SessionResource>();
     let Some(account) = active_session_mutating_account_id(session) else {
         return Some(reject(world, UNAVAILABLE));
@@ -409,13 +484,54 @@ pub(super) fn complete_if_configured(
     let Some(incarnation) = session.hunting_character_incarnation.clone() else {
         return Some(reject(world, UNAVAILABLE));
     };
-    let Some(before) = snapshot_active_character_save(world) else {
-        return Some(reject(world, UNAVAILABLE));
-    };
-    let committed = match prepare(world, quest_id) {
-        Ok(prepared) => {
-            let planned = prepared.planned.clone();
-            let source = config.prepare_hunting_quest_source(
+    // A midnight wait can invalidate an uncommitted daily plan. Start again
+    // from a fresh DB observation and owned World at most once; a published or
+    // unknown result always stays on its original slot and never enters here.
+    for attempt in 0..=1 {
+        let (digest, amount) = match source_definition(world, quest_id) {
+            Ok(value) => value,
+            Err(_) => return Some(reject(world, UNSUPPORTED)),
+        };
+        let daily = quests::is_hunting_newcomer_daily_quest(world, quest_id);
+        let Some(before) = snapshot_active_character_save(world) else {
+            return Some(reject(world, UNAVAILABLE));
+        };
+        let period = if daily {
+            match config.read_hunting_daily_quest_period(&account, &incarnation, quest_id, &before)
+            {
+                Ok(period) => Some(period),
+                Err(_) => return Some(reject(world, UNAVAILABLE)),
+            }
+        } else {
+            None
+        };
+        let prepared = match period.as_ref() {
+            Some(period) => {
+                prepare_with_daily_time(world, quest_id, Some(period.database_time_ms()))
+            }
+            None => prepare(world, quest_id),
+        };
+        let prepared = match prepared {
+            Ok(prepared) => prepared,
+            Err(_) => return Some(reject(world, UNAVAILABLE)),
+        };
+        let planned = prepared.planned.clone();
+        let source = if let Some(period) = period.as_ref() {
+            config.prepare_hunting_daily_quest_source(
+                period,
+                &digest,
+                amount,
+                prepared.before.clone(),
+                |store| {
+                    super::save::stage_prepared_character_save(
+                        prepared.shadow.app.world(),
+                        store,
+                        planned,
+                    )
+                },
+            )
+        } else {
+            config.prepare_hunting_quest_source(
                 &account,
                 &incarnation,
                 quest_id,
@@ -429,49 +545,43 @@ pub(super) fn complete_if_configured(
                         planned,
                     )
                 },
-            );
-            match source {
-                Ok(source) => {
-                    #[cfg(test)]
-                    if let Some(fault) = world.remove_resource::<HuntingQuestTestFault>() {
-                        return Some(
-                            match config
-                                .publish_hunting_quest_source_with_test_fault(&source, fault.0)
-                            {
-                                Ok(commit) => {
-                                    match publish(world, &commit, before.revision, Some(&before)) {
-                                        Ok(()) => true,
-                                        Err(detail) => {
-                                            config.freeze_hunting_quest_publication(detail);
-                                            reject(world, RELOAD_REQUIRED)
-                                        }
-                                    }
-                                }
-                                Err(HuntingSourceError::Rejected(_)) => reject(world, UNAVAILABLE),
-                                Err(_) => reject(world, RECOVERING),
-                            },
-                        );
-                    }
-                    config.publish_hunting_quest_source(&source)
-                }
-                Err(error) => Err(HuntingSourceError::Rejected(error)),
+            )
+        };
+        let source = match source {
+            Ok(source) => source,
+            Err(_) => return Some(reject(world, UNAVAILABLE)),
+        };
+        #[cfg(test)]
+        let committed = match world.remove_resource::<HuntingQuestTestFault>() {
+            Some(fault) => config.publish_hunting_quest_source_with_test_fault(&source, fault.0),
+            None => config.publish_hunting_quest_source(&source),
+        };
+        #[cfg(not(test))]
+        let committed = config.publish_hunting_quest_source(&source);
+        match committed {
+            Ok(commit) => {
+                return Some(
+                    match publish(world, &commit, before.revision, Some(&before)) {
+                        Ok(()) => true,
+                        Err(detail) => {
+                            config.freeze_hunting_quest_publication(detail);
+                            reject(world, RELOAD_REQUIRED)
+                        }
+                    },
+                )
+            }
+            Err(HuntingSourceError::PeriodChanged) if daily && attempt == 0 => continue,
+            Err(HuntingSourceError::PeriodChanged | HuntingSourceError::Rejected(_)) => {
+                return Some(reject(world, UNAVAILABLE));
+            }
+            Err(HuntingSourceError::OutcomeUnknown(_))
+            | Err(HuntingSourceError::PostCommit { .. })
+            | Err(HuntingSourceError::KnownCommitted { .. }) => {
+                return Some(reject(world, RECOVERING));
             }
         }
-        Err(_) => return Some(reject(world, UNAVAILABLE)),
-    };
-    match committed {
-        Ok(commit) => match publish(world, &commit, before.revision, Some(&before)) {
-            Ok(()) => Some(true),
-            Err(detail) => {
-                config.freeze_hunting_quest_publication(detail);
-                Some(reject(world, RELOAD_REQUIRED))
-            }
-        },
-        Err(HuntingSourceError::Rejected(_)) => Some(reject(world, UNAVAILABLE)),
-        Err(HuntingSourceError::OutcomeUnknown(_))
-        | Err(HuntingSourceError::PostCommit { .. })
-        | Err(HuntingSourceError::KnownCommitted { .. }) => Some(reject(world, RECOVERING)),
     }
+    Some(reject(world, UNAVAILABLE))
 }
 
 #[cfg(test)]

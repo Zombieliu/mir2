@@ -1,5 +1,11 @@
 # 狩猎经济：真实游戏来源接入计划
 
+## 第十一阶段：真实日常委托来源（2026-10-21）
+
+已接现有 newcomer-v1 NPC24 2100001..4，三选二+bonus、DB UTC+8午夜周期与原经济04:00分离。完整任务/EXP/Guild/checkpoint、绑定credit、receipt/outbox同事务；0025日槽不含digest/金额，原未决fence保存原日。锁后重读DB时间，跨期只允许一次完整freshcap+shadow重规划。14新增PG、31既有PG、21普通回归通过，实际普通NPC/kill-progress与冷登录覆盖三种两项组合，见[阶段十一证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。
+
+Legacy已完成但无period暂拒绝发新奖励，正常recurrence初始化及普通canonical保存保留迁移出路。尚不支持带材料/物品、原Daily141、Repeatable/Weekly或种植挖矿；没有改时钟冒充跨日。Windows新实机已扣6且一笔销毁，但Pending后的物理resume超时，独立修复验证中；不视为全客户端或生产验收。goal active、默认关闭、无Docker。
+
 ## 第十阶段：任务来源登录恢复（2026-10-21）
 
 已补一次性任务结果不明、原 Session 丢失后的登录恢复：只核对原槽/回执，验证当前完整 checkpoint 与角色名后刷新最新账户/Guild 镜像，不重放奖励；证据缺失、不一致或外来 fence 均保留冻结。新增 PG 9/9、既有任务/修理 PG 22/22、普通回归 8/8 通过，见[本轮证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。第九阶段 Windows 接线和实际报价证据见[原生审计](generated/hunting-economy/acceptance-20261021-repair-native-windows.json)，成功收费完整实机链仍待。

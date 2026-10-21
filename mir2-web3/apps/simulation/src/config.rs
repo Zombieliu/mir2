@@ -177,7 +177,9 @@ pub type SharedAccountStore = Arc<Mutex<AccountStore>>;
 mod hunting_deletion;
 #[path = "config_hunting_source.rs"]
 pub(crate) mod hunting_source;
-pub(crate) use hunting_source::{HuntingQuestCommit, HuntingSourceError, PreparedHuntingQuestSource};
+pub(crate) use hunting_source::{
+    HuntingDailyQuestPeriod, HuntingQuestCommit, HuntingSourceError, PreparedHuntingQuestSource,
+};
 #[path = "config_hunting_repair.rs"]
 pub(crate) mod hunting_repair;
 pub(crate) use hunting_repair::{HuntingRepairCommit, HuntingRepairQuote, HuntingRepairReceipt, HuntingRepairSourceError};

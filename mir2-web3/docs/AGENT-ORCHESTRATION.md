@@ -1,5 +1,11 @@
 # Agent Orchestration
 
+## 第十一阶段：真实日常委托来源（2026-10-21）
+
+现有 newcomer-v1 NPC24 的四项日常来源已接同 PG 完整奖励/绑定入账；保留三选二 + bonus、UTC+8 午夜周期，与经济 04:00 分离。私有 DB period、整组 canonical 资格、独立每日不可变槽及原日恢复均已落地。14 项新增 PG、31 项既有 PG、21 项普通回归通过，见[阶段十一证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。
+
+Root 已另用 EXE59/旧 Gateway46 完成实际单 Confirm：费用/销毁6、绑定999994、旧gold1234、耐久970/970；省略原回执后 Pending Close，物理resume超时，定位为缺mapIndex及恢复context。原生修复独立验证中，本次不当作完整GUI恢复通过。默认关闭、K=0.1、goal active；无Docker或远程修改。
+
 ## 第十阶段：任务来源登录恢复（2026-10-21）
 
 登录刷新现在先核对原任务来源的私有 fence、原领取槽和原经济回执，仅在证据完整时刷新当前 canonical 镜像并解除自身冻结。不会重发奖励或跳过密码、封禁、角色代际校验。Root 串行完成 9 项新增 PG、22 项既有 PG 和 8 项普通回归，详见[本轮证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。

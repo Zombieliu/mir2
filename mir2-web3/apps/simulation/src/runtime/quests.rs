@@ -49,6 +49,15 @@ pub(super) fn quest_has_recurrence(world: &World, quest_id: i32) -> bool {
     quest_recurrence::cadence_for_quest(world, quest_id).is_some()
 }
 
+/// Only this existing, item-free board is supported by the daily bound source.
+/// Other Crystal Daily/Weekly/Repeatable definitions retain their own gates.
+pub(super) fn is_hunting_newcomer_daily_quest(world: &World, quest_id: i32) -> bool {
+    newcomer_progression::enabled(world)
+        && newcomer_progression::is_daily_quest(quest_id)
+        && quest_recurrence::cadence_for_quest(world, quest_id)
+            == Some(quest_recurrence::QuestCadence::Daily)
+}
+
 #[cfg(test)]
 #[path = "quest_level15_tests.rs"]
 mod quest_level15_tests;
@@ -1079,17 +1088,58 @@ pub(super) fn complete_quest_personal(
     selected_item_index: Option<i32>,
     award_legacy_gold: bool,
 ) -> bool {
+    complete_quest_personal_with_time(
+        world,
+        quest_id,
+        selected_item_index,
+        award_legacy_gold,
+        None,
+    )
+}
+
+/// A trusted hunting shadow uses the database observation that selected its
+/// daily slot. This is not called with a client clock or on the live World.
+pub(super) fn complete_quest_personal_at(
+    world: &mut World,
+    quest_id: i32,
+    selected_item_index: Option<i32>,
+    award_legacy_gold: bool,
+    now_ms: u64,
+) -> bool {
+    complete_quest_personal_with_time(
+        world,
+        quest_id,
+        selected_item_index,
+        award_legacy_gold,
+        Some(now_ms),
+    )
+}
+
+fn complete_quest_personal_with_time(
+    world: &mut World,
+    quest_id: i32,
+    selected_item_index: Option<i32>,
+    award_legacy_gold: bool,
+    now_ms: Option<u64>,
+) -> bool {
     // Keep reward settlement idempotent even when an ordinary FinishQuest
     // packet is retried or a caller bypasses the packet-layer stage check.
     if quest_stage(world, quest_id) != Some(QuestStage::ReadyToTurnIn) {
         return false;
     }
     if !newcomer_progression::can_finish(world, quest_id)
-        || !newcomer_v2::can_finish(world, quest_id) {
+        || !newcomer_v2::can_finish(world, quest_id)
+    {
         return false;
     }
     if let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) {
-        return complete_crystal_quest(world, &info, selected_item_index, award_legacy_gold);
+        return complete_crystal_quest(
+            world,
+            &info,
+            selected_item_index,
+            award_legacy_gold,
+            now_ms,
+        );
     }
     let Some(quest) = quest_template_by_id(quest_id) else {
         return false;
@@ -1131,7 +1181,7 @@ pub(super) fn complete_quest_personal(
         quest.stage = QuestStage::Completed;
         quest.current = quest.required;
     }
-    quest_recurrence::record_quest_completion(world, quest_id);
+    record_quest_completion_with_time(world, quest_id, now_ms);
 
     for item in quest.completion_rewards.items {
         add_or_increment_item(
@@ -1156,6 +1206,7 @@ fn complete_crystal_quest(
     info: &ClientQuestInfo,
     selected_item_index: Option<i32>,
     award_legacy_gold: bool,
+    now_ms: Option<u64>,
 ) -> bool {
     let fixed_rewards = info.rewards_fixed_item.clone();
     let selected_reward = selected_crystal_quest_reward(info, selected_item_index);
@@ -1198,9 +1249,16 @@ fn complete_crystal_quest(
         quest.stage = QuestStage::Completed;
         quest.current = quest.required;
     }
-    quest_recurrence::record_quest_completion(world, info.index);
+    record_quest_completion_with_time(world, info.index, now_ms);
     newcomer_progression::sync_daily_bonus(world);
     true
+}
+
+fn record_quest_completion_with_time(world: &mut World, quest_id: i32, now_ms: Option<u64>) {
+    match now_ms {
+        Some(now_ms) => quest_recurrence::record_quest_completion_at(world, quest_id, now_ms),
+        None => quest_recurrence::record_quest_completion(world, quest_id),
+    }
 }
 
 fn selected_crystal_quest_reward(
