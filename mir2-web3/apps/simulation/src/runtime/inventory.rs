@@ -60,6 +60,7 @@ fn seed_item(
 ) -> ItemState {
     ItemState {
         economic_binding: None,
+        economic_conversion: None,
         key: key.to_string(),
         name: name.to_string(),
         icon: item_icon_for_key(key),
@@ -128,6 +129,7 @@ pub(super) fn crystal_start_inventory_items(character: &CharacterRecord) -> Vec<
                 .unwrap_or_else(|| "Crystal start item.".to_string());
             ItemState {
                 economic_binding: None,
+                economic_conversion: None,
                 key,
                 name: template.name,
                 icon: template.image,
@@ -1321,6 +1323,18 @@ pub(super) fn allocate_item_unique_id(
     allocate_item_unique_id_avoiding(resources, container, slot, &[])
 }
 
+fn allocate_item_unique_id_for_item(resources: &InventoryResource, item: &ItemState) -> u64 {
+    if super::items::hunting_item_binding::has_economic_provenance(item) {
+        // Legacy grid zero is a valid old selector. A new bound/converted
+        // instance must keep an explicit positive identity even in an empty bag.
+        let mut allocator = resources.clone();
+        allocator.reserved_item_unique_ids.insert(0);
+        allocate_item_unique_id(&allocator, item.container, item.slot)
+    } else {
+        allocate_item_unique_id(resources, item.container, item.slot)
+    }
+}
+
 pub(super) fn allocate_item_unique_id_avoiding(
     resources: &InventoryResource,
     container: ItemContainer,
@@ -1811,7 +1825,7 @@ pub(super) fn additional_slots_needed_for_item_quantity(
                 .belt_items
                 .iter()
                 .filter(|item| item.key == key && item.quantity < max_stack
-                    && !super::items::hunting_item_binding::has_bound(item))
+                    && !super::items::hunting_item_binding::has_economic_provenance(item))
             {
                 let available = max_stack.saturating_sub(item.quantity);
                 remaining = remaining.saturating_sub(available);
@@ -1822,7 +1836,7 @@ pub(super) fn additional_slots_needed_for_item_quantity(
         }
         for item in resources.inventory_items.iter().filter(|item| {
             item.key == key && item_containers_stack_together(item.container, container)
-                && !super::items::hunting_item_binding::has_bound(item)
+                && !super::items::hunting_item_binding::has_economic_provenance(item)
         }) {
             let available = max_stack.saturating_sub(item.quantity);
             remaining = remaining.saturating_sub(available);
@@ -2097,6 +2111,7 @@ pub(super) fn plan_npc_resale_or_pearl_gain(
     let (added_attack, added_defence) = super::items::user_item_added_attack_defence(source);
     let item = ItemState {
         economic_binding: None,
+        economic_conversion: None,
         key: key.clone(),
         name: template.name.clone(),
         icon: item_icon_for_key(&key),
@@ -2729,7 +2744,7 @@ pub(super) fn add_or_increment_item_with_random_metadata(
                 .belt_items
                 .iter_mut()
                 .filter(|item| item.key == key && item.quantity < max_stack
-                    && !super::items::hunting_item_binding::has_bound(item))
+                    && !super::items::hunting_item_binding::has_economic_provenance(item))
             {
                 let added = remaining.min(max_stack - existing.quantity);
                 if added == 0 {
@@ -2745,7 +2760,7 @@ pub(super) fn add_or_increment_item_with_random_metadata(
         }
         for existing in resources.inventory_items.iter_mut().filter(|item| {
             item.key == key
-                && !super::items::hunting_item_binding::has_bound(item)
+                && !super::items::hunting_item_binding::has_economic_provenance(item)
                 && item_containers_stack_together(item.container, container)
                 && item.quantity < max_stack
         }) {
@@ -2782,6 +2797,7 @@ pub(super) fn add_or_increment_item_with_random_metadata(
         };
         let item = ItemState {
             economic_binding: None,
+            economic_conversion: None,
             key: key.to_string(),
             name: name.to_string(),
             icon: item_icon_for_key(key),
@@ -3148,7 +3164,7 @@ pub(super) fn store_item_impl(world: &mut World, from: i32, to: i32) -> Vec<Serv
         item.slot = to_slot;
         item.container = ItemContainer::Storage;
         if inventory_unique_id_is_used(&resources, inventory_item_unique_id(&item)) {
-            item.unique_id = allocate_item_unique_id(&resources, item.container, item.slot);
+            item.unique_id = allocate_item_unique_id_for_item(&resources, &item);
         }
         resources.storage_items.push(item);
     }
@@ -3216,7 +3232,7 @@ pub(super) fn take_back_item_impl(world: &mut World, from: i32, to: i32) -> Vec<
         item.slot = to_inventory_slot;
         item.container = to_container;
         if inventory_unique_id_is_used(&resources, inventory_item_unique_id(&item)) {
-            item.unique_id = allocate_item_unique_id(&resources, item.container, item.slot);
+            item.unique_id = allocate_item_unique_id_for_item(&resources, &item);
         }
         resources.inventory_items.push(item);
     }
@@ -3436,7 +3452,7 @@ pub(super) fn merge_item_impl(
     if (grid_from == MirGridType::Fishing || grid_to == MirGridType::Fishing)
         && world.resource::<InventoryResource>().equipment_items.iter()
             .any(|item| item.slot == EquipmentSlot::Weapon
-                && super::items::hunting_item_binding::equipment_has_bound(item))
+                && super::items::hunting_item_binding::equipment_has_economic_provenance(item))
     {
         return vec![ServerPacket::MergeItem { grid_from, grid_to, id_from, id_to, success: false }];
     }
@@ -3947,6 +3963,7 @@ fn item_state_functional_identity_compatible(left: &ItemState, right: &ItemState
         let right_metadata = right.user_item_metadata.as_ref();
         if left.key != right.key
             || left.economic_binding != right.economic_binding
+            || left.economic_conversion != right.economic_conversion
             || left.name != right.name
             || left.icon != right.icon
             || left.description != right.description
@@ -4135,10 +4152,10 @@ pub(super) fn split_item_impl(
             // the empty slot is therefore the canonical ID even when another
             // grid uses the same numeric value.
             let preferred = default_item_unique_id(split.container, next_slot);
-            split.unique_id = if super::items::hunting_item_binding::has_bound(&split)
+            split.unique_id = if super::items::hunting_item_binding::has_economic_provenance(&split)
                 || resources.reserved_item_unique_ids.contains(&preferred)
             {
-                allocate_item_unique_id(&resources, split.container, next_slot)
+                allocate_item_unique_id_for_item(&resources, &split)
             } else {
                 preferred
             };
@@ -4178,7 +4195,7 @@ pub(super) fn split_item_impl(
             let mut split = resources.inventory_items[index].clone();
             split.container = next_container;
             split.slot = next_slot;
-            split.unique_id = allocate_item_unique_id(&resources, split.container, next_slot);
+            split.unique_id = allocate_item_unique_id_for_item(&resources, &split);
             split.quantity = u32::from(count);
             let Ok(split_packet_item) = try_user_item_from_item_state(&split) else {
                 return vec![failed_packet];
@@ -4530,6 +4547,7 @@ mod stack_identity_tests {
     ) -> EquipmentState {
         EquipmentState {
             economic_binding: None,
+            economic_conversion: None,
             key: "uid-reservation-equipment".to_string(),
             slot,
             quantity: 1,

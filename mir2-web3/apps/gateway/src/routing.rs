@@ -306,6 +306,13 @@ pub type SharedZoneOwnerLeaseAuthority = Arc<dyn ZoneOwnerLeaseAuthority>;
 
 pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
 
+    fn supports_hunting_material_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool { false }
+    fn execute_hunting_material_owner_turn(&self, _runtime: &mut ZoneRuntimeHandle,
+        _lease: &ZoneOwnerLease, _authenticated: bool, _action: mir2_simulation::HuntingMaterialAction,
+    ) -> Result<mir2_simulation::HuntingMaterialOwnerTurn, String> {
+        Err("typed hunting material owner turn route is unavailable".into())
+    }
+
     /// Resolve pending source state under the real local owner epoch before
     /// the ordinary teardown drain is allowed to capture any checkpoint.
     fn prepare_hunting_repair_teardown(&self, runtime: &mut ZoneRuntimeHandle,
@@ -1029,6 +1036,28 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
     fn supports_hunting_repair_owner(&self, runtime: &ZoneRuntimeHandle) -> bool {
         self.owner_lease_authority.as_ref().is_some_and(|authority| authority.supports_durable_npc_purchase_lease())
             && runtime.supports_hunting_repair_owner()
+    }
+    fn supports_hunting_material_owner(&self, runtime: &ZoneRuntimeHandle) -> bool {
+        self.owner_lease_authority.as_ref().is_some_and(|authority|authority.supports_durable_npc_purchase_lease())
+            && runtime.requires_local_hunting_source_authority() && runtime.supports_hunting_material_owner()
+    }
+    fn execute_hunting_material_owner_turn(&self, runtime: &mut ZoneRuntimeHandle,
+        lease: &ZoneOwnerLease, authenticated: bool, action: mir2_simulation::HuntingMaterialAction,
+    ) -> Result<mir2_simulation::HuntingMaterialOwnerTurn, String> {
+        if !authenticated || !self.supports_hunting_material_owner(runtime) {
+            return Err("typed hunting material requires authenticated local owner authority".into());
+        }
+        let authority=self.owner_lease_authority.as_ref().ok_or("hunting material owner authority is unavailable")?;
+        let mut result=None;
+        let guarded=crate::session::catch_gateway_panic("hunting material owner turn epoch guard",|| {
+            authority.with_durable_npc_purchase_lease(lease,&mut || {
+                result=Some(runtime.execute_hunting_material_owner_turn(authenticated,action.clone()));
+            })
+        }).and_then(|result|result);
+        match result {
+            Some(result)=>result,
+            None=>Err(guarded.err().unwrap_or_else(||"hunting material owner guard did not execute".into())),
+        }
     }
     fn execute_hunting_repair_owner(&self, runtime: &mut ZoneRuntimeHandle,
         lease: &ZoneOwnerLease, authenticated: bool, action: mir2_simulation::HuntingRepairAction,
@@ -15804,6 +15833,43 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     }
     fn supports_hunting_repair_owner(&self) -> bool {
         self.inner.supports_hunting_repair_owner()
+    }
+    fn supports_hunting_material_owner(&self) -> bool {
+        self.inner.requires_local_hunting_source_authority() && self.inner.supports_hunting_material_owner()
+    }
+    fn execute_hunting_material_owner_turn(&mut self, authenticated: bool,
+        action: mir2_simulation::HuntingMaterialAction,
+    ) -> Result<mir2_simulation::HuntingMaterialOwnerTurn, String> {
+        if !authenticated {return Err("hunting material requires authentication".into());}
+        self.validate_durable_npc_actor()?;
+        self.force_inner_to_current_zone_transform();
+        self.force_inner_to_current_zone_vitals();
+        // Discard a personal projection; only this Shared Zone's completed tail
+        // may supply the same-turn owner snapshot.
+        let mut execution=self.inner.execute_hunting_material_owner_turn(authenticated,action)?.material;
+        let completed=execution.clone();
+        if matches!(&execution.reply,mir2_simulation::HuntingMaterialReply::Committed{reload_required:true,..}) {
+            let cleanup=crate::session::catch_gateway_panic("hunting material retired Zone presence",||self.remove_presence());
+            if let Ok(packets)=cleanup {execution.packets.extend(packets);}
+            return Ok(mir2_simulation::HuntingMaterialOwnerTurn{material:execution,snapshot:None});
+        }
+        let projected=crate::session::catch_gateway_panic("hunting material shared projection",|| {
+            self.validate_durable_npc_actor()?;
+            self.sync_current_zone_vitals_from_inner();
+            self.normalize_owner_state_packets(&mut execution.packets);
+            self.publish_ranking_inspect_projection();
+            Ok::<(),String>(())
+        }).and_then(|result|result);
+        if projected.is_err() {return Ok(mir2_simulation::HuntingMaterialOwnerTurn{material:completed,snapshot:None});}
+        let snapshot=if matches!(&execution.reply,mir2_simulation::HuntingMaterialReply::Committed{reload_required:false,..}) {
+            crate::session::catch_gateway_panic("hunting material shared owner snapshot",|| {
+                self.validate_durable_npc_actor()?;
+                let snapshot=self.world_snapshot();
+                self.validate_durable_npc_actor()?;
+                Ok::<_,String>(snapshot)
+            }).and_then(|result|result).ok()
+        } else {None};
+        Ok(mir2_simulation::HuntingMaterialOwnerTurn{material:execution,snapshot})
     }
     fn execute_hunting_repair_owner(&mut self, authenticated: bool,
         action: mir2_simulation::HuntingRepairAction,

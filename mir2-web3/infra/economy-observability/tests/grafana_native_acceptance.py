@@ -322,12 +322,13 @@ def fixture_sql(prefix):
     if not prefix.startswith("hunting-observer-test-grafana-") or any(c not in "abcdefghijklmnopqrstuvwxyz0123456789-" for c in prefix):
         raise RuntimeError("Synthetic fixture prefix must use the dedicated Grafana namespace")
     sys.path.insert(0, str(ROOT / "tests"))
-    from postgres_acceptance import build_script
-    script, _ = build_script(prefix, "unused_grafana_fixture_role")
+    from postgres_acceptance import build_script, DERIVED_OR_CONSTRAINT_CASES
+    # This append-only fixture must not commit schema changes. Its owner must
+    # apply 0019/0027 first; build_script asserts the actual 44-column view.
+    script, _ = build_script(prefix, "unused_grafana_fixture_role", install_material_view=False)
     inserts = script.split("CREATE TEMP TABLE hunting_observer_expected AS", 1)[0]
     vectors = json.loads((ROOT / "fixtures/alert-cases.json").read_text(encoding="utf-8"))
-    rejected = {"duplicate_daily_row", "zero_stock_baseline_not_normal", "permit_zero_plan_undefined", "conversion_conservation_error"}
-    expected = {prefix + "-" + case["name"]: case["expected"] for case in vectors["cases"] if case["name"] not in rejected}
+    expected = {prefix + "-" + case["name"]: case["expected"] for case in vectors["cases"] if case["name"] not in DERIVED_OR_CONSTRAINT_CASES}
     script = inserts + "COMMIT;\n"
     return script, {"fixture_prefix": prefix, "synthetic_only": True,
                     "fixture_sql_sha256": hashlib.sha256(script.encode("utf-8")).hexdigest(), "expected": expected}

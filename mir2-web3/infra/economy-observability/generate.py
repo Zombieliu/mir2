@@ -47,6 +47,7 @@ CORE_FIELDS = [
     "burn_daily_gold", "burn_light_pvp_gold", "burn_sabuk_gold",
     "permit_minted_atoms", "permit_consumed_atoms", "permit_decayed_atoms", "permit_closing_atoms",
     "bound_gold_stock", "unbound_gold_stock", "gross_converted_gold", "conversion_fee_gold", "net_unbound_inflow_gold",
+    "gold_conversion_fee_gold", "material_conversion_gold_equivalent", "material_conversion_fee_unbound_gold",
 ]
 HEALTH_REQUIRED = " AND\n      ".join(f"o.{field} IS NOT NULL AND o.{field} >= 0" for field in CORE_FIELDS)
 HEALTH_REQUIRED += """ AND
@@ -54,7 +55,12 @@ HEALTH_REQUIRED += """ AND
       AND o.planned_daily_consumption_atoms > 0
       AND o.policy_version IS NOT NULL AND length(o.policy_version) > 0
       AND o.period_end = ((o.economy_date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai'
-      AND o.gross_converted_gold::numeric = o.conversion_fee_gold::numeric + o.net_unbound_inflow_gold::numeric
+      AND o.gross_converted_gold::numeric = o.gold_conversion_fee_gold::numeric + o.net_unbound_inflow_gold::numeric
+      AND o.conversion_fee_gold::numeric = o.gold_conversion_fee_gold::numeric + o.material_conversion_fee_unbound_gold::numeric
+      AND o.permit_consumed_atoms::numeric = o.gross_converted_gold::numeric + o.material_conversion_gold_equivalent::numeric
+      AND (o.material_conversion_gold_equivalent = 0) = (o.material_conversion_fee_unbound_gold = 0)
+      AND o.material_conversion_fee_unbound_gold <= o.material_conversion_gold_equivalent
+      AND o.conversion_fee_gold <= o.burn_daily_gold
       AND o.active_casual_accounts IS NOT NULL AND o.active_casual_accounts >= 0
       AND o.active_light_pvp_accounts IS NOT NULL AND o.active_light_pvp_accounts >= 0
       AND o.active_sabuk_accounts IS NOT NULL AND o.active_sabuk_accounts >= 0
@@ -167,7 +173,7 @@ def main() -> None:
         panel(5, "月卡凭证市场汇率 · 90天", {"非绑定金币/张月卡": "o.monthly_card_gold_per_card"}, 12, 13, description="有效真实成交金币总额÷成交月卡张数；无成交时为空。排除无效、撤销、自成交及已确认操纵成交。"),
         panel(6, "原材料价格指数 · 固定篮子基期100", {"价格指数": "o.raw_material_price_index"}, 0, 22, description="固定权重与基期的版本化篮子。无有效覆盖时为空，不能通过动态删掉贵材料制造稳定价格。"),
         panel(7, "绑定与可交易金币日结存量", {"绑定金币": "o.bound_gold_stock", "非绑定金币": "o.unbound_gold_stock", "非绑定稳态基准": "o.unbound_stock_baseline_gold", "通胀130%": "o.unbound_stock_baseline_gold * 1.30", "通缩70%": "o.unbound_stock_baseline_gold * 0.70"}, 12, 22, description="包括在线和离线钱包、行会、托管、邮件未领取金币；所有权唯一计数。存量基准不能使用7200万/天流量。"),
-        panel(8, "绑定转换：毛额、费用与净流入", {"转换毛额": "o.gross_converted_gold", "销毁手续费": "o.conversion_fee_gold", "净非绑定流入": "o.net_unbound_inflow_gold"}, 0, 31, description="每笔毛额=手续费+净到账。这里仅展示转换净流入；其他产币来源需独立记账。"),
+        panel(8, "绑定转换：金币流入与材料费用", {"金币转换毛额": "o.gross_converted_gold", "金币转换手续费": "o.gold_conversion_fee_gold", "材料转换手续费": "o.material_conversion_fee_unbound_gold", "转换总手续费": "o.conversion_fee_gold", "金币转换净流入": "o.net_unbound_inflow_gold"}, 0, 31, description="金币毛额=金币转换费+净到账；总费=金币费+材料费。材料估值只耗许可，不产金币。手续费已计入日常销毁，不重复相加。"),
         panel(9, "每日互斥活跃账号", {"休闲生产": "o.active_casual_accounts", "轻度PVP": "o.active_light_pvp_accounts", "硬核沙巴克": "o.active_sabuk_accounts"}, 12, 31, stacked=True, description="账号去重；同日按沙巴克＞轻PVP＞休闲优先级互斥归类，三类和=总DAU。"),
         panel(10, "所选范围最后完整日玩家构成", {"休闲生产": "o.active_casual_accounts", "轻度PVP": "o.active_light_pvp_accounts", "硬核沙巴克": "o.active_sabuk_accounts"}, 0, 40, kind="piechart", latest=True, description="按所选时间范围最后一个已闭合经济日取值；该日缺失时显示无数据，不回退旧日冒充。"),
         panel(11, "生产玩家月度人均等价美元价值", {"重度种田": "o.heavy_producer_monthly_usd_equivalent", "普通休闲": "o.ordinary_producer_monthly_usd_equivalent"}, 12, 40, unit="currencyUSD", description="当月截至该日人均净非绑定收益÷月卡金币成交价×月卡美元参考价；不得标记实际提现。价格、玩家样本或成本覆盖不足时为空。"),

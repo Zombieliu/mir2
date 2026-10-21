@@ -70,11 +70,16 @@ use super::skills::{
 #[path = "hunting_item_binding.rs"]
 pub(in crate::runtime) mod hunting_item_binding;
 use self::hunting_item_binding::HuntingItemBinding;
+#[path = "hunting_item_conversion.rs"]
+pub(in crate::runtime) mod hunting_item_conversion;
+use self::hunting_item_conversion::HuntingItemConversionProvenance;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub(super) struct ItemState {
+hunting_item_conversion::economic_state! {
+pub(super) struct ItemState, ItemStateWire {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(super) economic_binding: Option<HuntingItemBinding>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(super) economic_conversion: Option<HuntingItemConversionProvenance>,
     pub(super) key: String,
     pub(super) name: String,
     pub(super) icon: u16,
@@ -134,6 +139,7 @@ pub(super) struct ItemState {
     pub(super) defence: i32,
     pub(super) heal_hp: i32,
     pub(super) heal_mp: i32,
+}
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -921,6 +927,7 @@ pub(super) fn embedded_item_state_from_template(
 ) -> ItemState {
     ItemState {
         economic_binding: None,
+        economic_conversion: None,
         key: crystal_item_key_for_template(template),
         name: template.name.clone(),
         icon: template.image,
@@ -965,9 +972,21 @@ fn hydrate_user_item_into_state(
     nodes: &mut usize,
     captured_socket_position: Option<u8>,
 ) -> Result<ItemState, UserItemCarrierError> {
-    if state.socketed.iter().any(hunting_item_binding::has_bound) {
+    if state.economic_binding.is_some() && state.economic_conversion.is_some() {
         return Err(UserItemCarrierError::SocketMapping {
-            reason: "wire hydration would discard a bound child instance",
+            reason: "item cannot be both bound and converted",
+        });
+    }
+    if state.economic_conversion.is_some()
+        && (item.unique_id != state.unique_id || u32::from(item.count) != state.quantity)
+    {
+        return Err(UserItemCarrierError::SocketMapping {
+            reason: "wire hydration cannot replace a converted root identity or quantity",
+        });
+    }
+    if state.socketed.iter().any(hunting_item_binding::has_economic_provenance) {
+        return Err(UserItemCarrierError::SocketMapping {
+            reason: "wire hydration would discard a child's economic provenance",
         });
     }
     validate_item_state_key_for_exact_index(&state, item.item_index)?;
@@ -1531,6 +1550,11 @@ fn validate_item_state_carrier_storage_inner(
     nodes: &mut usize,
 ) -> Result<(), UserItemCarrierError> {
     enter_user_item_node(depth, nodes, budget)?;
+    if item.economic_binding.is_some() && item.economic_conversion.is_some() {
+        return Err(UserItemCarrierError::SocketMapping {
+            reason: "item cannot be both bound and converted",
+        });
+    }
     exact_item_index_for_item_state(item)?;
     check_item_state_quantity(item.quantity)?;
     let metadata = item.user_item_metadata.as_ref();
@@ -2103,8 +2127,8 @@ pub(super) fn combine_item_impl(
         }
 
         let source_item = resources.inventory_items[from_index].clone();
-        if hunting_item_binding::has_bound(&source_item)
-            || hunting_item_binding::has_bound(&resources.inventory_items[to_index])
+        if hunting_item_binding::has_economic_provenance(&source_item)
+            || hunting_item_binding::has_economic_provenance(&resources.inventory_items[to_index])
         {
             return vec![failed_packet];
         }
@@ -2605,7 +2629,7 @@ pub(super) fn craft_item_impl(
                     .durability_current
                     .unwrap_or(0),
             );
-            if hunting_item_binding::has_bound(&resources.inventory_items[inv_index]) {
+            if hunting_item_binding::has_economic_provenance(&resources.inventory_items[inv_index]) {
                 return fail();
             }
             if current_dura / 1000 < craft_count {
@@ -2634,7 +2658,7 @@ pub(super) fn craft_item_impl(
             used_slots.push(slot);
 
             let item = &resources.inventory_items[inv_index];
-            if hunting_item_binding::has_bound(item) {
+            if hunting_item_binding::has_economic_provenance(item) {
                 return fail();
             }
             // Durability requirement: ingredient.CurrentDura < MaxDura && > item.CurrentDura.
@@ -3023,7 +3047,7 @@ pub(super) fn use_item(
     let mut packets = Vec::new();
     let item_template = crystal_item_template_for_item_key(&item.key);
     let dynamic_item_template = crystal_item_template_for_dynamic_key(&item.key);
-    if hunting_item_binding::has_bound(&item) {
+    if hunting_item_binding::has_economic_provenance(&item) {
         let ordinary_potion = item_template.as_ref().or(dynamic_item_template.as_ref())
             .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_POTION
                 && template.shape == CRYSTAL_POTION_SHAPE_NORMAL);

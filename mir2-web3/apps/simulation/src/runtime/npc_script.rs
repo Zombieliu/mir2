@@ -755,7 +755,8 @@ pub(super) fn run_crystal_npc_script(
 
 // An exchange may cross GOTO sections and put TAKEGOLD/GIVE before TAKEITEM.
 // Inspect its reachable action graph before executing any line. This deliberately
-// refuses only an exchange which can reference a held Bound input; ordinary
+// refuses only an exchange which can reference an economically marked input;
+// Converted is tradeable but this script has no derived-provenance plan. Ordinary
 // dialogue and transactions involving unrelated legacy items remain available.
 fn npc_action_references_bound_input(
     world: &World,
@@ -765,7 +766,7 @@ fn npc_action_references_bound_input(
     let inventory = world.resource::<InventoryResource>();
     let command_is_dynamic = raw.split_whitespace().next()
         .is_some_and(|word| word.contains('%') || word.contains("<$"));
-    if command_is_dynamic && (inventory.inventory_items.iter().any(super::items::hunting_item_binding::has_bound)
+    if command_is_dynamic && (inventory.inventory_items.iter().any(super::items::hunting_item_binding::has_economic_provenance)
         || npc_hero_contains_bound(world)) {
         // MOV may change the command itself after this preflight. Its current
         // expansion is not evidence that the later action is harmless.
@@ -779,7 +780,7 @@ fn npc_action_references_bound_input(
     let dynamic = raw.contains('%') || raw.contains("<$");
     let key = words.next().map(normalize_crystal_item_key);
     inventory.inventory_items.iter().any(|item| {
-        super::items::hunting_item_binding::has_bound(item)
+        super::items::hunting_item_binding::has_economic_provenance(item)
             && (dynamic || key.as_ref().is_some_and(|key| item.key.eq_ignore_ascii_case(key)))
     })
 }
@@ -2540,12 +2541,12 @@ pub(super) fn crystal_npc_take_item(world: &mut World, parts: &[&str]) -> bool {
     };
     let item_key = normalize_crystal_item_key(item_name);
     // Build the complete debit before removing a single stack. An unavailable
-    // or Bound input must not leave a partial TAKE or enable following GIVE.
+    // or economically marked input must not leave a partial TAKE or enable following GIVE.
     {
         let resources = world.resource::<InventoryResource>();
         let mut available = 0_u64;
         for item in resources.inventory_items.iter().filter(|item| item.key.eq_ignore_ascii_case(&item_key)) {
-            if super::items::hunting_item_binding::has_bound(item) { return false; }
+            if super::items::hunting_item_binding::has_economic_provenance(item) { return false; }
             available = available.saturating_add(u64::from(item.quantity));
         }
         if u64::from(quantity) > available { return false; }
@@ -3334,7 +3335,7 @@ pub(super) fn crystal_npc_revive_hero(world: &mut World) {
 
 fn npc_hero_contains_bound(world: &World) -> bool {
     let hero = world.resource::<HeroInventoryResource>();
-    hero.items.iter().chain(&hero.equipment).any(super::items::hunting_item_binding::has_bound)
+    hero.items.iter().chain(&hero.equipment).any(super::items::hunting_item_binding::has_economic_provenance)
 }
 
 pub(super) fn crystal_npc_seal_hero(world: &mut World) {

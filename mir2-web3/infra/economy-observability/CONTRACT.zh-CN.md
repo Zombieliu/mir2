@@ -1,4 +1,4 @@
-# 狩猎许可只读观测契约 v1
+# 狩猎许可只读观测契约 v2
 
 这是供游戏主服务端实现的 SQL 视图接口，不是另一个经济控制器。Grafana 查询视图；游戏主服务端通过已提交的权威流水、闭合日结和版本化参数生成数据。这里不创建空表、假数据或以全零填充缺失指标。
 
@@ -33,9 +33,12 @@
 | `permit_closing_atoms` | BIGINT / NUMERIC | 明确按主服务端日结顺序产生的日结快照，不是实时池余额 |
 | `bound_gold_stock` | BIGINT / NUMERIC, nullable | 该闭合边界全服绑定金币总存量；不满足可信完整覆盖为NULL |
 | `unbound_gold_stock` | BIGINT / NUMERIC, nullable | 同边界的非绑定金币总存量；包括离线钱包、行会、托管及邮件，按所有权唯一计数；未全量覆盖为NULL |
-| `gross_converted_gold` | BIGINT / NUMERIC | 当日成功转换毛额 |
-| `conversion_fee_gold` | BIGINT / NUMERIC | 本日转换实际销毁手续费 |
-| `net_unbound_inflow_gold` | BIGINT / NUMERIC | 仅绑定转换产生的净非绑定流入，等于毛额减手续费；其他铸币来源另记，不能混入 |
+| `gross_converted_gold` | BIGINT / NUMERIC | 当日绑定金币转换毛额，不含材料估值 |
+| `conversion_fee_gold` | BIGINT / NUMERIC, nullable | 金币转换费与材料转换费之和；已经计入日常销毁，不再重复相加 |
+| `net_unbound_inflow_gold` | BIGINT / NUMERIC | 仅绑定金币转换产生的净非绑定流入，等于金币毛额减金币转换费；材料不产生金币，其他铸币来源另记 |
+| `material_conversion_gold_equivalent` | NUMERIC, nullable | 策划固定估值E，仅消耗E个许可原子，不是销毁或金币流入 |
+| `material_conversion_fee_unbound_gold` | NUMERIC, nullable | 材料转换扣现有非绑定金币的手续费，单独计一次日常销毁 |
+| `gold_conversion_fee_gold` | NUMERIC | 仅金币转换手续费，等于 `gross_converted_gold - net_unbound_inflow_gold` |
 | `unbound_stock_baseline_gold` | BIGINT / NUMERIC, nullable | 版本化存量稳态基准，必须>0；不能拿每日流量代替 |
 | `burn_baseline_gold` | BIGINT / NUMERIC, nullable | 版本化每日销毁稳态，必须>0 |
 | `planned_daily_consumption_atoms` | BIGINT / NUMERIC, nullable | 版本化计划日许可需求，必须>0；库存少于该量表示覆盖不足1日 |
@@ -54,6 +57,10 @@
 | `ordinary_producer_accounts` | BIGINT, nullable | 与普通休闲当月收益相同人口的账号样本数 |
 
 所有资金/许可数量使用非负整数或精确 NUMERIC，公式计算不用浮点数。允许净收益为负；不得丢弃负收益玩家以夸大人均收益。只有最后显示许可时执行 `atoms / 1000000.0`，告警直接比较原子数量。数据缺失保留 NULL，绝不补0。
+
+0027保留原41列的顺序和类型，在末尾追加材料估值、材料费用、金币费用3列。健康检查分别核对「金币毛额=金币费用+金币净流入」「总费用=金币费用+材料费用」「许可消费原子=金币毛额+材料估值」，并核对费用不超过当日日常销毁。不能把材料费用再次从金币转换净流入中减去，也不能把材料估值当成新产金币。
+
+旧receipt省略材料字段时，只有0019 export receipt来自v1/v2可信consumer、关联同realm/day的daily_settlement事件且原始payload与不可变settlement完全一致，视图才输出材料0。没有证据、未知consumer、payload不一致或显式JSON null继续为NULL；Grafana查询不使用COALESCE补0。该来源资格不等于全服覆盖资格，原有 `is_complete`、存量、市场、画像与收益NULL门保持。
 
 活跃玩家以账号去重，同日按「沙巴克 > 轻PVP > 休闲」优先级互斥归类。生产画像阈值和成本覆盖也须版本化；同一天切换分类不得重复计数。月收益人口、样本数和月卡价格期间要一致；若该月缺有效价格、样本或成本覆盖，不生成美元估值。
 

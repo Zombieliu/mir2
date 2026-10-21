@@ -13,6 +13,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_json::Value;
 
 pub mod hunting_repair;
+pub mod hunting_material;
 
 pub const NPC_PURCHASE_OWNER_PROTOCOL_VERSION: u16 = 1;
 pub const NPC_PURCHASE_OWNER_CAPABILITY: &str = "durableNpcPurchaseOwnerV1";

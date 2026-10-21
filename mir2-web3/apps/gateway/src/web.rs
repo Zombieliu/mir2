@@ -166,6 +166,7 @@ enum ParsedSocketInput {
     ClientCapabilities(Vec<String>),
     NpcPurchaseOwner(mir2_client_wire::ClientRequest),
     HuntingRepairOwner(mir2_client_wire::hunting_repair::ClientRequest),
+    HuntingMaterialOwner(mir2_client_wire::hunting_material::ClientRequest),
     ResumeSession(ResumeCredential),
     ResumeRejected,
     SkillKeyRejected {
@@ -1579,6 +1580,13 @@ impl ReconnectSessionStore {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum BrowserCommand {
+    HuntingMaterialOwner {
+        #[serde(rename = "protocolVersion")]
+        protocol_version: u16,
+        #[serde(rename = "requestId")]
+        request_id: mir2_client_wire::U64,
+        action: mir2_client_wire::hunting_material::Action,
+    },
     HuntingRepairOwner {
         #[serde(rename = "protocolVersion")]
         protocol_version: u16,
@@ -5042,6 +5050,16 @@ fn spawn_socket_reader(
                 }
             };
             let command = match command {
+                BrowserCommand::HuntingMaterialOwner { .. } => {
+                    let parsed=match mir2_client_wire::hunting_material::parse_client_request(&message) {
+                        Ok(request)=>ParsedSocketInput::HuntingMaterialOwner(request),
+                        Err(_)=>ParsedSocketInput::ProtocolError("invalid hunting material request".to_owned()),
+                    };
+                    if input_tx.send(SocketInbound::Queued(QueuedSocketInput::new(
+                        parsed,Arc::clone(&reader_pending_count),message_permit,
+                    ))).await.is_err() {return;}
+                    continue;
+                }
                 BrowserCommand::HuntingRepairOwner { .. } => {
                     let parsed = match mir2_client_wire::hunting_repair::parse_client_request(&message) {
                         Ok(request) => ParsedSocketInput::HuntingRepairOwner(request),
@@ -5475,6 +5493,7 @@ async fn handle_socket_work(
                 let parsed_input = queued_input.take_input();
                 let mut npc_purchase_request = None;
                 let mut hunting_repair_request = None;
+                let mut hunting_material_request = None;
                 let (action, quest_operation_request, skill_key_request) = match parsed_input {
                     ParsedSocketInput::ClientCapabilities(capabilities) => {
                         match validate_native_client_capabilities(&capabilities) {
@@ -5672,6 +5691,10 @@ async fn handle_socket_work(
                         hunting_repair_request = Some(request);
                         (None, None, None)
                     }
+                    ParsedSocketInput::HuntingMaterialOwner(request) => {
+                        hunting_material_request=Some(request);
+                        (None,None,None)
+                    }
                     ParsedSocketInput::Action {
                         action,
                         quest_operation_request,
@@ -5737,6 +5760,26 @@ async fn handle_socket_work(
                         socket_authenticated.store(false, Ordering::Release);
                         return;
                     }
+                    continue;
+                }
+                if let Some(request)=hunting_material_request {
+                    let dispatch=tokio::task::block_in_place(|| {
+                        let identity_valid=authenticated && active_identity_session.as_ref()
+                            .zip(authenticated_account_id.as_deref())
+                            .is_some_and(|(verified,account_id)|verified.account_id==account_id
+                                && native_resume_identity_is_active(session_cache.as_ref(),&identity,verified,gateway_unix_ms()));
+                        crate::hunting_material_browser::execute_browser_hunting_material(
+                            session,authenticated_account_id.as_deref(),identity_valid,&request,
+                        )
+                    });
+                    let dispatch=match dispatch {
+                        Ok(dispatch)=>dispatch,
+                        Err(_)=>match crate::hunting_material_browser::unknown(&request) {
+                            Ok(dispatch)=>dispatch,Err(_)=>return,
+                        },
+                    };
+                    if send_hunting_material_dispatch(sender.as_ref(),&dispatch).await.is_err() {return;}
+                    if dispatch.close_session {socket_authenticated.store(false,Ordering::Release);return;}
                     continue;
                 }
                 if let Some(request) = npc_purchase_request {
@@ -7865,7 +7908,8 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             version_hash: Vec::new(),
         })),
         BrowserCommand::ClientCapabilities { .. } | BrowserCommand::ResumeSession(_)
-        | BrowserCommand::NpcPurchaseOwner { .. } | BrowserCommand::HuntingRepairOwner { .. } => Err(
+        | BrowserCommand::NpcPurchaseOwner { .. } | BrowserCommand::HuntingRepairOwner { .. }
+        | BrowserCommand::HuntingMaterialOwner { .. } => Err(
             "native resume control commands must be handled before gameplay dispatch".to_string(),
         ),
         BrowserCommand::Disconnect => Ok(SessionAction::Packet(ClientPacket::Disconnect)),
@@ -8975,6 +9019,8 @@ fn realm_info_event(config: &GatewayConfig) -> Value {
             "schema": "mir2-realm-handshake/1",
             "realmId": realm_id,
             "npcRepairMode": if config.hunting_economy_realm.is_some() { "hunting-v1" } else { "legacy" },
+            "huntingMaterialOwnerProtocolVersion": config.hunting_economy_realm.as_ref()
+                .map(|_| mir2_client_wire::hunting_material::PROTOCOL_VERSION),
             "profileId": profile_id,
             "profileVersion": profile.map(|profile| profile.version).unwrap_or(0),
             "acceptanceLevel": profile.map(|profile| profile.acceptance_level),
@@ -9033,6 +9079,21 @@ where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
         Message::Text(server_packet_to_event(packet).to_string().into()));
     for message in before.into_iter().chain(packets).chain(after) {
         sender.lock().await.send(message).await.map_err(|error| error.to_string())?;
+    }
+    Ok(())
+}
+
+async fn send_hunting_material_dispatch<S>(sender:&AsyncMutex<S>,
+    dispatch:&crate::hunting_material_browser::BrowserHuntingMaterialDispatch,
+) -> Result<(),String>
+where S:futures_util::Sink<Message>+Unpin,S::Error:std::fmt::Display {
+    let encoded=mir2_client_wire::hunting_material::encode_server_frame(&dispatch.frame)
+        .map_err(|error|error.to_string())?;
+    let owner=Message::Text(encoded.into());
+    let (before,after)=if dispatch.frame.snapshot.is_some() {(None,Some(owner))} else {(Some(owner),None)};
+    let packets=dispatch.packets.iter().map(|packet|Message::Text(server_packet_to_event(packet).to_string().into()));
+    for message in before.into_iter().chain(packets).chain(after) {
+        sender.lock().await.send(message).await.map_err(|error|error.to_string())?;
     }
     Ok(())
 }

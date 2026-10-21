@@ -70,7 +70,7 @@ pub(in crate::runtime) fn merge_item(world: &mut World, from: MirGridType, to: M
     if source==0 || target==0 || source==target || !ready(world,false) { return vec![ack(false)]; }
     if (from==MirGridType::Fishing || to==MirGridType::Fishing)
         && world.resource::<InventoryResource>().equipment_items.iter().any(|item|
-            item.slot==crate::EquipmentSlot::Weapon && super::super::items::hunting_item_binding::equipment_has_bound(item))
+            item.slot==crate::EquipmentSlot::Weapon && super::super::items::hunting_item_binding::equipment_has_economic_provenance(item))
     { return vec![ack(false)]; }
     if matches!(from,MirGridType::Storage)||matches!(to,MirGridType::Storage) {
         if !super::super::npc::active_crystal_storage_service(world)||storage_locked(world) {return vec![ack(false)];}

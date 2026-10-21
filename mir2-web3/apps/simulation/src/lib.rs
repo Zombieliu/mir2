@@ -72,7 +72,7 @@ pub use runtime::{
     ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
 };
 pub use world_runtime::{
-    validate_production_player_command, HuntingRepairOwnerTurn, InProcessWorldRuntime, NativeGameShopPurchaseRequest,
+    validate_production_player_command, HuntingRepairOwnerTurn, HuntingMaterialOwnerTurn, InProcessWorldRuntime, NativeGameShopPurchaseRequest,
     WorldCommand, WorldCommandExecution, WorldCommandKind, WorldCommandOutcome, WorldRuntime,
     ZoneRuntimeHandle, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
 };
@@ -81,5 +81,7 @@ pub use runtime::apply_crystal_experience_rates;
 pub use runtime::{
     HuntingRepairAction, HuntingRepairExecution, HuntingRepairQuoteView, HuntingRepairReceiptView,
     HuntingRepairRejection, HuntingRepairReply,
+    HuntingMaterialAction, HuntingMaterialExecution, HuntingMaterialQuoteView,
+    HuntingMaterialReceiptView, HuntingMaterialRejection, HuntingMaterialReply,
 };
 pub use runtime::{crystal_social_experience_peer_eligible, ExperienceCharacter, ExperiencePresence};

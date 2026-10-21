@@ -3901,6 +3901,7 @@ impl SimulationSession {
             .hunting_character_incarnation = hunting_incarnation;
         super::hunting_quests::complete_character_load(self.app.world_mut());
         super::hunting_repair::bind_start_game_authority(self.app.world_mut());
+        super::hunting_material::bind_start_game_authority(self.app.world_mut());
         refresh_runtime_map_collision(self.app.world_mut());
         if recover_out_of_bounds_loaded_transform(self.app.world_mut()) {
             refresh_runtime_map_collision(self.app.world_mut());

@@ -5,6 +5,7 @@ claim about PostgreSQL execution, Grafana import/render or notification delivery
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import re
@@ -15,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 SHANGHAI = timezone(timedelta(hours=8))
 MUTATIONS = re.compile(r"\b(insert|update|delete|merge|truncate|alter|create|drop|grant|revoke|call|copy|do|set|reset|vacuum|refresh|pg_sleep|dblink|lo_import|nextval|setval)\b", re.I)
-CORE = ["burn_daily_gold", "burn_light_pvp_gold", "burn_sabuk_gold", "permit_minted_atoms", "permit_consumed_atoms", "permit_decayed_atoms", "permit_closing_atoms", "bound_gold_stock", "unbound_gold_stock", "gross_converted_gold", "conversion_fee_gold", "net_unbound_inflow_gold"]
+CORE = ["burn_daily_gold", "burn_light_pvp_gold", "burn_sabuk_gold", "permit_minted_atoms", "permit_consumed_atoms", "permit_decayed_atoms", "permit_closing_atoms", "bound_gold_stock", "unbound_gold_stock", "gross_converted_gold", "conversion_fee_gold", "net_unbound_inflow_gold", "gold_conversion_fee_gold", "material_conversion_gold_equivalent", "material_conversion_fee_unbound_gold"]
 CHECKS = 0
 
 
@@ -37,8 +38,11 @@ def closed_date(now: datetime) -> date:
 def seed(day: date) -> dict:
     return {"economy_date": day, "period_end_hour": 4, "is_complete": True, "policy_version": "synthetic-v1",
             "burn_daily_gold": 50, "burn_light_pvp_gold": 30, "burn_sabuk_gold": 20,
-            "permit_minted_atoms": 1000, "permit_consumed_atoms": 1000, "permit_decayed_atoms": 1, "permit_closing_atoms": 1000,
+            "permit_minted_atoms": 1000, "permit_consumed_atoms": 100, "permit_decayed_atoms": 1, "permit_closing_atoms": 1000,
             "bound_gold_stock": 2000, "unbound_gold_stock": 1000, "gross_converted_gold": 100, "conversion_fee_gold": 2, "net_unbound_inflow_gold": 98,
+            "gold_conversion_fee_gold": 2, "material_conversion_gold_equivalent": 0, "material_conversion_fee_unbound_gold": 0,
+            "material_receipt_fields": False, "export_evidence_present": True, "export_payload_matches": True,
+            "export_consumer_version": "hunting-daily-new-wallet-diagnostics-v1",
             "unbound_stock_baseline_gold": 1000, "burn_baseline_gold": 100, "planned_daily_consumption_atoms": 1000,
             "active_casual_accounts": 6, "active_light_pvp_accounts": 3, "active_sabuk_accounts": 1, "active_account_total": 10,
             "monthly_card_gold_per_card": None, "raw_material_price_index": None, "heavy_producer_monthly_usd_equivalent": None}
@@ -76,7 +80,12 @@ def model(rows: list[dict], end: date) -> dict:
         return (all(nonnegative(r[f]) for f in CORE)
                 and all(positive(r[f]) for f in ("unbound_stock_baseline_gold", "burn_baseline_gold", "planned_daily_consumption_atoms"))
                 and bool(r["policy_version"]) and r["period_end_hour"] == 4
-                and r["gross_converted_gold"] == r["conversion_fee_gold"] + r["net_unbound_inflow_gold"]
+                and r["gross_converted_gold"] == r["gold_conversion_fee_gold"] + r["net_unbound_inflow_gold"]
+                and r["conversion_fee_gold"] == r["gold_conversion_fee_gold"] + r["material_conversion_fee_unbound_gold"]
+                and r["permit_consumed_atoms"] == r["gross_converted_gold"] + r["material_conversion_gold_equivalent"]
+                and (r["material_conversion_gold_equivalent"] == 0) == (r["material_conversion_fee_unbound_gold"] == 0)
+                and r["material_conversion_fee_unbound_gold"] <= r["material_conversion_gold_equivalent"]
+                and r["conversion_fee_gold"] <= r["burn_daily_gold"]
                 and all(nonnegative(c) for c in counts) and r["active_account_total"] == sum(counts))
 
     result["data_integrity"] = 0 if evaluate(rows, end, 10, healthy, lambda r: True) == 1 else 1
@@ -152,6 +161,11 @@ def check_artifacts() -> int:
             count += 3
     card = next(p for p in dashboard["panels"] if p["id"] == 5)
     check(card["timeFrom"] == "90d", "monthly card panel must show 90 days")
+    conversion = next(p for p in dashboard["panels"] if p["id"] == 8)
+    check("o.gold_conversion_fee_gold" in conversion["targets"][0]["rawSql"]
+          and "o.material_conversion_fee_unbound_gold" in conversion["targets"][0]["rawSql"],
+          "coin inflow panel must distinguish gold and material fees")
+    check("材料估值只耗许可，不产金币" in conversion["description"], "material valuation cannot be presented as coin inflow")
     for p in dashboard["panels"]:
         if p["id"] in {3, 4}:
             check("/ 1000000.0" in p["targets"][0]["rawSql"], "permit atom display scale")
@@ -176,6 +190,12 @@ def check_artifacts() -> int:
         check("settings" not in rule["data"][1]["model"], f"{key}: strict reduce must use native default; explicit mode is rejected")
         if key == "data_integrity":
             check("THEN 0.0 ELSE 1.0 END AS value" in sql and "ELSE NULL" not in sql, "health query must explicitly flag gaps")
+            check("o.gross_converted_gold::numeric = o.gold_conversion_fee_gold::numeric + o.net_unbound_inflow_gold::numeric" in sql,
+                  "coin conservation must use the gold-only fee")
+            check("o.conversion_fee_gold::numeric = o.gold_conversion_fee_gold::numeric + o.material_conversion_fee_unbound_gold::numeric" in sql,
+                  "total conversion fee must include each fee once")
+            check("o.permit_consumed_atoms::numeric = o.gross_converted_gold::numeric + o.material_conversion_gold_equivalent::numeric" in sql,
+                  "material equivalent must consume permit atoms without minting coins")
         else:
             check("ELSE NULL::double precision END AS value" in sql, f"{key}: missing data is not normal")
         count += 11
@@ -214,10 +234,24 @@ def check_artifacts() -> int:
         check("hunting_economy_observation_settings_immutable" in schema and "hunting_economy_daily_metrics_immutable" in schema, "observation revisions must preserve immutable history")
         check("SUM(" not in schema.upper(), "must not promote wallet sums to full realm assets")
         check("DEFAULT 72000000" not in schema and "DEFAULT 720000000" not in schema, "baseline must not be guessed from flow")
+    material_migration = ROOT.parent / "postgres/migrations/0027_hunting_material_observations.sql"
+    schema = material_migration.read_text(encoding="utf-8")
+    check("CASE WHEN qualified.is_complete THEN metric.bound_gold_stock END AS bound_gold_stock" in schema,
+          "material view must preserve global bound coverage gate")
+    check("CASE WHEN qualified.is_complete THEN metric.unbound_gold_stock END AS unbound_gold_stock" in schema,
+          "material view must preserve global unbound coverage gate")
+    check("WHEN exported.source_verified THEN 0::numeric" in schema and "e.payload_json=s.receipt_json" in schema,
+          "legacy omitted material fields require exact exporter-verified source")
+    check("hunting-daily-new-wallet-diagnostics-v1" in schema and "hunting-daily-new-wallet-diagnostics-v2" in schema,
+          "material view must retain v1 export evidence while accepting v2")
     return CHECKS - start_checks
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path, default=ROOT / "validation-result.json",
+                        help="write a fresh offline result without replacing historical evidence")
+    args = parser.parse_args()
     cases, fixture_assertions = run_fixtures()
     artifact_checks = check_artifacts()
     files = sorted(p for p in ROOT.rglob("*") if p.is_file() and p.name != "validation-result.json" and "__pycache__" not in p.parts)
@@ -232,7 +266,10 @@ def main():
     }
     migration = ROOT.parent / "postgres/migrations/0017_hunting_economy_observability.sql"
     result["schema_migration_sha256"] = hashlib.sha256(migration.read_bytes()).hexdigest() if migration.exists() else None
-    (ROOT / "validation-result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    material_migration = ROOT.parent / "postgres/migrations/0027_hunting_material_observations.sql"
+    result["material_schema_migration_sha256"] = hashlib.sha256(material_migration.read_bytes()).hexdigest()
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({key: value for key, value in result.items() if key != "files_sha256"}, ensure_ascii=False))
 
 

@@ -73,15 +73,15 @@ struct FishingReelOutcome {
 fn fishing_inputs_are_unbound(world: &World) -> bool {
     let inventory = world.resource::<InventoryResource>();
     if inventory.equipment_items.iter().filter(|item| item.slot == EquipmentSlot::Weapon)
-        .any(super::items::hunting_item_binding::equipment_has_bound)
+        .any(super::items::hunting_item_binding::equipment_has_economic_provenance)
         || world.resource::<FishingResource>().slot_items.iter().flatten()
-            .any(super::items::hunting_item_binding::has_bound) {
+            .any(super::items::hunting_item_binding::has_economic_provenance) {
         return false;
     }
     if !fishing_slot_model_available(world) {
         return inventory.inventory_items.iter().chain(&inventory.belt_items)
             .find(|item| item_is_fishing_bait(item))
-            .is_none_or(|item| !super::items::hunting_item_binding::has_bound(item));
+            .is_none_or(|item| !super::items::hunting_item_binding::has_economic_provenance(item));
     }
     true
 }

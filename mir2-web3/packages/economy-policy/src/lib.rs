@@ -11,6 +11,13 @@
 use serde::{Deserialize, Serialize};
 use std::{error::Error, fmt};
 
+mod material;
+pub use material::{
+    quote_material_conversion, quote_material_conversion_for_item, MaterialConversionError,
+    MaterialConversionQuote, MaterialValuationEntry, MaterialValuationSet,
+    MAX_MATERIAL_GOLD_EQUIVALENT,
+};
+
 pub const LICENSE_ATOMS_PER_UNIT: u64 = 1_000_000;
 pub const GOLD_PER_LICENSE: u64 = 1_000_000;
 pub const BUSINESS_UTC_OFFSET_SECONDS: i64 = 8 * 60 * 60;

@@ -16,13 +16,13 @@ export_daily_metrics_with_timeouts(
 
 ## 事务和恢复
 
-先通过0016、0017、0019迁移建立权威outbox、不可变日指标版本和export receipt。新增的 `hunting_economy_metric_exports` 以 `(realm_id,event_id,consumer_version)` 幂等，FK指向实际指标revision，历史不可UPDATE/DELETE。
+先通过0016、0017、0019、0026、0027迁移建立权威outbox、不可变日指标版本、材料流水与更新后的只读视图。`hunting_economy_metric_exports` 以 `(realm_id,event_id,consumer_version)` 幂等，FK指向实际指标revision，历史不可UPDATE/DELETE。当前consumer为 `hunting-daily-new-wallet-diagnostics-v2`，追加自己的回执并保留v1历史ACK。
 
 每批次取得相同realm单写者锁、事务内数据库时钟，以 `FOR UPDATE SKIP LOCKED` 选择尚无本consumer receipt的日结事件。逐个执行：
 
 1. 验证事件ID、payload摘要、realm/day/policy/committed_at与不可变原始settlement一致，日已经闭合且在合法连续cursor区间中。
 2. 校验规范非负十进制快照，不将多钱包总量收窄到BIGINT/u64；核对许可增发、硬上限、库存、衰减和余数链，最新池库存减去后续转换消费与实时许可池相符。
-3. 核对原始三层销毁、同日转换毛额/净额/许可消费/手续费汇总，以及每笔转换手续费对应真实daily销毁和政策费率。
+3. 核对原始三层销毁、同日金币与材料许可消费和各自手续费汇总，以及每笔转换手续费对应真实daily销毁和政策费率。材料估值E只消耗E原子，只有其手续费进入daily销毁，E不计金币净流入。材料按原报价的不可变policy校验费率；SQL使用整数 `div(n+d-1,d)` 精确向上取整。
 4. 已有任何FK可溯源指标revision时复用该版本，不追加partial遮盖已有完整版本。否则创建revision1，仅包含原始receipt诊断、来源摘要、水位及不可用来源清单。
 5. 插入consumer/schema/event的export receipt后，再ACK该日结outbox。目标指标、export receipt及ACK同一事务提交；任何目标写入失败都回滚三者。
 
@@ -33,6 +33,8 @@ COMMIT回执不确定时返回 `OutcomeUnknown`。调用方按原consumer/event�
 ## 覆盖范围
 
 默认revision始终 `coverage_complete=false`、`coverage_scope=new_wallets_only`。全服绑定/非绑定存量、市场成交、材料指数、玩家画像、收益等未接入字段保持NULL；不会自动授予可信全服覆盖资格。原始receipt的新钱包求和只作为诊断，不能证明旧金币、邮件、行会或托管资产已覆盖。
+
+材料字段为0时序列化省略，旧v1 receipt的JSON与摘要保持。0027只读视图在精确原payload已有v1/v2导出证据时，将省略的材料字段解释为0；未验证来源继续NULL，不修改旧receipt，也不以一次partial指标ACK赋予全服覆盖资格。
 
 目前尚无真实市场/生产/PVP来源聚合器，因此该模块只关闭“真实日结事件到耐久partial指标的自动生产/恢复”链路。它不等于整个全服经济数据建设完成，也不等于历史新钱包快照已获得真实全服日切资格。
 

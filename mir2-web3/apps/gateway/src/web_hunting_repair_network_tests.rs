@@ -303,8 +303,12 @@ impl Server {
     }
 
     async fn start_on(db: &Database, bind: SocketAddr) -> Self {
+        Self::start_with_config(db, bind, db.config()).await
+    }
+
+    async fn start_with_config(db: &Database, bind: SocketAddr, config: SimulationConfig) -> Self {
         assert!(bind.ip().is_loopback(), "fixture listener must be loopback");
-        let config = Arc::new(db.config());
+        let config = Arc::new(config);
         let identity = outside_runtime(|| {
             crate::identity::IdentityService::from_env(Some(db.url.clone())).unwrap_or_else(|_| {
                 panic!("test PostgreSQL identity requires configured identity secrets")
@@ -486,7 +490,15 @@ async fn until(
     label: &str,
     predicate: impl Fn(&Value) -> bool,
 ) -> (Observed, Vec<Observed>) {
-    let deadline = tokio::time::Instant::now() + Duration::from_secs(10);
+    until_with_timeout(socket, label, predicate, Duration::from_secs(10)).await
+}
+async fn until_with_timeout(
+    socket: &mut Socket,
+    label: &str,
+    predicate: impl Fn(&Value) -> bool,
+    timeout: Duration,
+) -> (Observed, Vec<Observed>) {
+    let deadline = tokio::time::Instant::now() + timeout;
     let mut events = Vec::new();
     // Diagnostics retain fixed frame names only. Never print identity grants,
     // credentials, passwords, full payloads or database connection strings.
@@ -1245,3 +1257,6 @@ async fn hunting_repair_network_postgres_browser_fixture() {
     drop(revocation);
     server.stop().await;
 }
+
+#[path = "web_hunting_material_network_tests.rs"]
+mod material_network;

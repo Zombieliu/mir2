@@ -113,8 +113,59 @@ SELECT pg_temp.hunting_observer_assert(
 SELECT pg_temp.hunting_observer_assert(
     NOT EXISTS(SELECT 1 FROM hunting_permit_daily_observations o
         WHERE o.realm_id LIKE current_setting('hunting_observer_test.prefix') || '%'
-        AND o.gross_converted_gold IS DISTINCT FROM o.conversion_fee_gold+o.net_unbound_inflow_gold),
-    'fee-derived-from-authoritative-gross-and-net');
+        AND o.gross_converted_gold IS DISTINCT FROM o.gold_conversion_fee_gold+o.net_unbound_inflow_gold),
+    'gold-only-fee-derived-from-authoritative-gross-and-net');
+SELECT pg_temp.hunting_observer_assert(
+    NOT EXISTS(SELECT 1 FROM hunting_permit_daily_observations o
+        WHERE o.realm_id LIKE current_setting('hunting_observer_test.prefix') || '%'
+        AND o.material_conversion_fee_unbound_gold IS NOT NULL
+        AND o.conversion_fee_gold IS DISTINCT FROM o.gold_conversion_fee_gold+o.material_conversion_fee_unbound_gold),
+    'total-conversion-fee-counts-gold-and-material-once');
+
+SELECT pg_temp.hunting_observer_assert(
+    (SELECT o.is_complete AND o.gross_converted_gold=100 AND o.net_unbound_inflow_gold=98
+        AND o.gold_conversion_fee_gold=2 AND o.material_conversion_gold_equivalent=250
+        AND o.material_conversion_fee_unbound_gold=5 AND o.conversion_fee_gold=7
+        AND o.permit_consumed_atoms=350 AND o.burn_daily_gold=55
+     FROM hunting_permit_daily_observations o CROSS JOIN hunting_observer_source_witness w
+     WHERE o.realm_id=current_setting('hunting_observer_test.prefix')||'-material_fee_complete'
+        AND o.economy_date=date '1970-01-01'+w.business_day::integer),
+    'material-equivalent-consumes-permits-without-coin-inflow-or-double-burn');
+SELECT pg_temp.hunting_observer_assert(
+    (SELECT o.is_complete AND o.gross_converted_gold=0 AND o.net_unbound_inflow_gold=0
+        AND o.gold_conversion_fee_gold=0 AND o.material_conversion_gold_equivalent=250
+        AND o.material_conversion_fee_unbound_gold=5 AND o.conversion_fee_gold=5
+        AND o.permit_consumed_atoms=250
+     FROM hunting_permit_daily_observations o CROSS JOIN hunting_observer_source_witness w
+     WHERE o.realm_id=current_setting('hunting_observer_test.prefix')||'-material_only_complete'
+        AND o.economy_date=date '1970-01-01'+w.business_day::integer),
+    'material-only-day-does-not-invent-gold-conversions');
+
+SELECT pg_temp.hunting_observer_assert(
+    (SELECT count(*)=2 AND bool_and(o.is_complete
+        AND NOT (s.receipt_json ? 'material_conversion_gold_equivalent')
+        AND NOT (s.receipt_json ? 'material_conversion_fee_unbound_gold')
+        AND o.material_conversion_gold_equivalent=0 AND o.material_conversion_fee_unbound_gold=0
+        AND o.conversion_fee_gold=2)
+     FROM hunting_permit_daily_observations o
+     JOIN hunting_economy_settlements s ON s.realm_id=o.realm_id
+        AND s.business_day=o.economy_date-date '1970-01-01'
+     CROSS JOIN hunting_observer_source_witness w
+     WHERE o.realm_id IN (current_setting('hunting_observer_test.prefix')||'-legacy_v1_ack_zero_material',
+                         current_setting('hunting_observer_test.prefix')||'-legacy_v2_ack_zero_material')
+        AND o.economy_date=date '1970-01-01'+w.business_day::integer),
+    'legacy-v1-and-v2-exact-export-evidence-permits-zero-material');
+SELECT pg_temp.hunting_observer_assert(
+    (SELECT count(*)=4 AND bool_and(o.is_complete AND o.material_conversion_gold_equivalent IS NULL
+        AND o.material_conversion_fee_unbound_gold IS NULL AND o.conversion_fee_gold IS NULL
+        AND o.gold_conversion_fee_gold=2)
+     FROM hunting_permit_daily_observations o CROSS JOIN hunting_observer_source_witness w
+     WHERE o.realm_id IN (current_setting('hunting_observer_test.prefix')||'-legacy_unverified_not_zero',
+                         current_setting('hunting_observer_test.prefix')||'-legacy_unknown_consumer_not_zero',
+                         current_setting('hunting_observer_test.prefix')||'-legacy_payload_mismatch_not_zero',
+                         current_setting('hunting_observer_test.prefix')||'-explicit_material_null_not_zero')
+        AND o.economy_date=date '1970-01-01'+w.business_day::integer),
+    'missing-untrusted-mismatched-and-null-material-sources-remain-null');
 
 -- New, disabled realm is still discoverable but excluded by enabled filter.
 INSERT INTO hunting_economy_policies(realm_id,policy_version,policy_digest,policy_json,created_at_ms)

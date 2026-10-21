@@ -30,6 +30,12 @@ pub struct HuntingRepairOwnerTurn {
     pub snapshot: Option<WorldSnapshot>,
 }
 
+#[derive(Debug, Clone)]
+pub struct HuntingMaterialOwnerTurn {
+    pub material: crate::HuntingMaterialExecution,
+    pub snapshot: Option<WorldSnapshot>,
+}
+
 /// Server-generated identity for one native GameShop transaction.
 ///
 /// `client_request_id` is receipt correlation only. The opaque 256-bit
@@ -313,6 +319,15 @@ pub trait WorldRuntime: Send + Sync {
     /// Bound sources currently require this runtime's local authority. Raw RPC
     /// owners cannot carry its trusted source result or character incarnation.
     fn requires_local_hunting_source_authority(&self) -> bool { false }
+
+    /// Material conversion has its own owner capability; generic/RPC owners
+    /// cannot translate it into a legacy item or debug command.
+    fn supports_hunting_material_owner(&self) -> bool { false }
+    fn execute_hunting_material_owner_turn(&mut self, _authenticated: bool,
+        _action: crate::HuntingMaterialAction,
+    ) -> Result<HuntingMaterialOwnerTurn, String> {
+        Err("typed hunting material owner turn is unavailable".into())
+    }
 
     /// Dedicated local repair entry. Unsupported owners must never translate
     /// this into a legacy RepairItem or a generic WorldCommand.
@@ -1104,6 +1119,20 @@ impl InProcessWorldRuntime {
 }
 
 impl WorldRuntime for InProcessWorldRuntime {
+    fn supports_hunting_material_owner(&self) -> bool {
+        self.session.requires_local_hunting_source_authority()
+    }
+    fn execute_hunting_material_owner_turn(&mut self, authenticated: bool,
+        action: crate::HuntingMaterialAction,
+    ) -> Result<HuntingMaterialOwnerTurn, String> {
+        if !authenticated { return Err("hunting material requires authentication".into()); }
+        if !self.supports_hunting_material_owner() { return Err("typed hunting material owner is unavailable".into()); }
+        let material=self.session.execute_hunting_material(action);
+        let snapshot=if matches!(&material.reply,crate::HuntingMaterialReply::Committed{reload_required:false,..}) {
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(||self.session.world_snapshot())).ok()
+        } else {None};
+        Ok(HuntingMaterialOwnerTurn{material,snapshot})
+    }
     fn prepare_hunting_repair_teardown(&mut self) -> Result<bool, String> {
         self.session.prepare_hunting_repair_teardown()
     }

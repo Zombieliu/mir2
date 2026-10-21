@@ -47,10 +47,12 @@ use super::resources::{
     BuffResource, InventoryResource, MountResource, PlayerPermissionResource, PlayerRuntimeResource,
 };
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub(super) struct EquipmentState {
+super::items::hunting_item_conversion::economic_state! {
+pub(super) struct EquipmentState, EquipmentStateWire {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(super) economic_binding: Option<super::items::hunting_item_binding::HuntingItemBinding>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(super) economic_conversion: Option<super::items::hunting_item_conversion::HuntingItemConversionProvenance>,
     pub(super) key: String,
     pub(super) slot: EquipmentSlot,
     #[serde(default = "default_equipment_quantity")]
@@ -113,6 +115,7 @@ pub(super) struct EquipmentState {
     pub(super) rental_locked: bool,
     pub(super) attack: i32,
     pub(super) defence: i32,
+}
 }
 
 fn default_equipment_quantity() -> u32 {
@@ -548,6 +551,7 @@ pub(super) fn equipment_template_to_state(template: &EquipmentTemplate) -> Equip
     let slot = equipment_slot_from_template(&template.slot);
     EquipmentState {
         economic_binding: None,
+        economic_conversion: None,
         key: equipment_state_key(slot, &template.name),
         slot,
         quantity: 1,
@@ -683,6 +687,7 @@ fn crystal_start_equipment(item_index: i32, slot: EquipmentSlot) -> EquipmentSta
 
     EquipmentState {
         economic_binding: None,
+        economic_conversion: None,
         key,
         slot,
         quantity: 1,
@@ -846,6 +851,7 @@ pub(super) fn item_state_from_equipment_state(
 
     ItemState {
         economic_binding: equipment.economic_binding,
+        economic_conversion: equipment.economic_conversion,
         key: equipment.key,
         name: equipment.name,
         icon: equipment.icon,
@@ -903,6 +909,7 @@ pub(super) fn equipment_state_from_item_state(
     });
     EquipmentState {
         economic_binding: item.economic_binding.clone(),
+        economic_conversion: item.economic_conversion.clone(),
         key: item.key.clone(),
         slot,
         quantity: item.quantity,
@@ -1556,8 +1563,8 @@ fn item_state_with_socket_inserted(
     socket_item: &ItemState,
     to: i32,
 ) -> Option<ItemState> {
-    if super::items::hunting_item_binding::has_bound(host)
-        || super::items::hunting_item_binding::has_bound(socket_item)
+    if super::items::hunting_item_binding::has_economic_provenance(host)
+        || super::items::hunting_item_binding::has_economic_provenance(socket_item)
     {
         return None;
     }
@@ -1592,7 +1599,7 @@ fn item_state_with_socket_removed(
     destination_container: ItemContainer,
     destination_slot: u8,
 ) -> Option<(ItemState, ItemState)> {
-    if super::items::hunting_item_binding::has_bound(host) {
+    if super::items::hunting_item_binding::has_economic_provenance(host) {
         return None;
     }
     let mut host_user_item = validated_item_state_user_item(host)?;

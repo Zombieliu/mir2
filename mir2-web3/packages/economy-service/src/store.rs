@@ -13,6 +13,9 @@ pub use debit::*;
 #[path = "zero.rs"]
 mod zero;
 pub use zero::*;
+#[path = "material.rs"]
+mod material;
+pub use material::*;
 
 fn db(error: postgres::Error) -> EconomyError {
     // Never print connection strings, SQL parameters, or PostgreSQL DETAIL fields.
@@ -785,7 +788,7 @@ where
     token(&burn.source_key, "source_key", 256)?;
     token(&burn.valuation_version, "valuation_version", 128)?;
     token(source_digest, "source_digest", 256)?;
-    if burn.source_kind == "conversion_fee" || burn.gold_equivalent == 0 {
+    if matches!(burn.source_kind.as_str(), "conversion_fee" | "material_conversion_fee") || burn.gold_equivalent == 0 {
         return Err(EconomyError::InvalidInput("burn_source"));
     }
     bigint(burn.gold_equivalent, "burn_amount")?;
@@ -1083,6 +1086,7 @@ fn settle_impl(
             .map_err(|_| EconomyError::Overflow("settlement_plan"))?;
         bigint(plan.next_pool.stock_atoms, "stock_atoms")?;
         let flows=tx.query_one("SELECT COALESCE(sum(consumed_atoms),0)::text AS consumed,COALESCE(sum(gross_gold),0)::text AS gross,COALESCE(sum(net_gold),0)::text AS net FROM hunting_economy_conversions WHERE realm_id=$1 AND business_day=$2", &[&realm,&day]).map_err(db)?;
+        let materials=tx.query_one("SELECT COALESCE(sum(consumed_atoms),0)::text AS consumed,COALESCE(sum(gold_equivalent),0)::text AS equivalent,COALESCE(sum(fee_gold),0)::text AS fee FROM hunting_economy_material_conversions WHERE realm_id=$1 AND business_day=$2", &[&realm,&day]).map_err(db)?;
         let stocks=tx.query_one("SELECT COALESCE(sum(bound_gold),0)::text AS bound,COALESCE(sum(unbound_gold),0)::text AS unbound FROM hunting_economy_wallets WHERE realm_id=$1", &[&realm]).map_err(db)?;
         let receipt = SettlementReceipt {
             realm_id: realm.into(),
@@ -1091,9 +1095,12 @@ fn settle_impl(
             committed_at_ms: clock.database_time_ms,
             burns,
             plan: plan.clone(),
-            consumed_atoms: sum_u64(&flows, "consumed")?,
+            consumed_atoms: sum_u64(&flows, "consumed")?.checked_add(sum_u64(&materials, "consumed")?)
+                .ok_or(EconomyError::Overflow("daily_consumed_atoms"))?,
             gross_conversion_gold: sum_u64(&flows, "gross")?,
             net_unbound_gold_inflow: sum_u64(&flows, "net")?,
+            material_conversion_gold_equivalent: sum_u64(&materials, "equivalent")?,
+            material_conversion_fee_unbound_gold: sum_u64(&materials, "fee")?,
             bound_gold_stock: stocks.get("bound"),
             unbound_gold_stock: stocks.get("unbound"),
         };

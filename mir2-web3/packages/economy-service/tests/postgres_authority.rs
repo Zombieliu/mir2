@@ -75,6 +75,7 @@ fn fixture(label: &str) -> (Client, String, WalletOwner) {
     client
         .batch_execute(MIGRATION_SQL)
         .expect("isolated test migration");
+    client.batch_execute(MATERIAL_CONVERSION_MIGRATION_SQL).expect("material ledger migration");
     let nonce = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()

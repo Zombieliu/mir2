@@ -8,7 +8,7 @@ use mir2_economy_service::*;
 use postgres::{config::Host, Client, NoTls};
 use serde_json::json;
 use std::{
-    sync::{Arc, Barrier, Once},
+    sync::{Arc, Barrier, Once, OnceLock},
     thread,
     time::{SystemTime, UNIX_EPOCH},
 };
@@ -40,9 +40,19 @@ fn connect() -> Client {
                 .all(std::net::IpAddr::is_loopback),
         "refusing fixture SQL outside local hunting acceptance database"
     );
-    config
+    let mut client = config
         .connect(NoTls)
-        .unwrap_or_else(|_| panic!("isolated acceptance connection failed"))
+        .unwrap_or_else(|_| panic!("isolated acceptance connection failed"));
+    // Each test process and all of its worker connections share one fresh
+    // schema. Reapplying an old view definition to a newer shared public schema
+    // would try to remove appended observation columns before testing export.
+    static TEST_SCHEMA: OnceLock<String> = OnceLock::new();
+    let schema = TEST_SCHEMA.get_or_init(|| format!("hunting_export_p_{}_{}",
+        std::process::id(), SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));
+    client.batch_execute(&format!(
+        "CREATE SCHEMA IF NOT EXISTS {schema}; SET search_path TO {schema},public"
+    )).expect("isolated export schema");
+    client
 }
 
 fn policy() -> Policy {
@@ -79,6 +89,8 @@ fn fixture(label: &str) -> (Client, String, WalletOwner) {
         client.batch_execute(MIGRATION_SQL).unwrap();
         client.batch_execute(OBSERVATION_MIGRATION_SQL).unwrap();
         client.batch_execute(METRIC_EXPORT_MIGRATION_SQL).unwrap();
+        client.batch_execute(MATERIAL_CONVERSION_MIGRATION_SQL).unwrap();
+        client.batch_execute(MATERIAL_OBSERVATION_MIGRATION_SQL).unwrap();
     });
     let nonce = SystemTime::now()
         .duration_since(UNIX_EPOCH)

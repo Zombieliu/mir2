@@ -4,6 +4,7 @@ use super::super::equipment::EquipmentState;
 use super::super::resources::{
     HeroInventoryResource, InventoryResource, RuntimeConfigResource, SessionResource,
 };
+use super::hunting_item_conversion::HuntingItemConversionProvenance;
 use super::ItemState;
 use crate::config::CharacterSaveRecord;
 use bevy_ecs::world::World;
@@ -56,6 +57,10 @@ fn incarnation(value: &str) -> bool {
 }
 
 impl HuntingItemBinding {
+    pub(in crate::runtime) fn realm(&self) -> &str {
+        &self.realm
+    }
+
     fn validate(&self) -> Result<(), String> {
         let source = self
             .source_ref
@@ -177,6 +182,54 @@ pub(in crate::runtime) fn equipment_has_bound(item: &EquipmentState) -> bool {
     item.economic_binding.is_some() || item.socketed.iter().any(has_bound)
 }
 
+/// Restriction and preservation are different: Converted may leave its owner,
+/// but a wire-only reconstruction must not discard its immutable provenance.
+pub(in crate::runtime) fn has_economic_provenance(item: &ItemState) -> bool {
+    let mut pending = vec![(item, 0_usize)];
+    let mut nodes = 0_usize;
+    while let Some((item, depth)) = pending.pop() {
+        nodes += 1;
+        if depth > 8
+            || nodes > 256
+            || item.economic_binding.is_some()
+            || item.economic_conversion.is_some()
+            || item
+                .socketed
+                .len()
+                .saturating_add(nodes)
+                .saturating_add(pending.len())
+                > 256
+        {
+            return true;
+        }
+        pending.extend(item.socketed.iter().map(|child| (child, depth + 1)));
+    }
+    false
+}
+
+pub(in crate::runtime) fn equipment_has_economic_provenance(item: &EquipmentState) -> bool {
+    item.economic_binding.is_some()
+        || item.economic_conversion.is_some()
+        || item.socketed.iter().any(has_economic_provenance)
+}
+
+fn custody_matches_current_owner(
+    world: &World,
+    binding: Option<&HuntingItemBinding>,
+    conversion: Option<&HuntingItemConversionProvenance>,
+) -> bool {
+    if binding.is_some() && conversion.is_some() {
+        return false;
+    }
+    binding.is_none_or(|binding| binding.is_current_owner(world))
+        && conversion.is_none_or(|conversion| {
+            world
+                .get_resource::<RuntimeConfigResource>()
+                .and_then(|runtime| runtime.config.hunting_economy_realm.as_deref())
+                == Some(conversion.realm())
+        })
+}
+
 pub(in crate::runtime) fn belongs_to_current_owner(world: &World, item: &ItemState) -> bool {
     let mut pending = vec![(item, 0_usize)];
     let mut nodes = 0;
@@ -190,10 +243,11 @@ pub(in crate::runtime) fn belongs_to_current_owner(world: &World, item: &ItemSta
                 .saturating_add(nodes)
                 .saturating_add(pending.len())
                 > 256
-            || item
-                .economic_binding
-                .as_ref()
-                .is_some_and(|binding| !binding.is_current_owner(world))
+            || !custody_matches_current_owner(
+                world,
+                item.economic_binding.as_ref(),
+                item.economic_conversion.as_ref(),
+            )
         {
             return false;
         }
@@ -206,13 +260,14 @@ pub(in crate::runtime) fn equipment_belongs_to_current_owner(
     world: &World,
     item: &EquipmentState,
 ) -> bool {
-    item.economic_binding
-        .as_ref()
-        .is_none_or(|binding| binding.is_current_owner(world))
-        && item
-            .socketed
-            .iter()
-            .all(|child| belongs_to_current_owner(world, child))
+    custody_matches_current_owner(
+        world,
+        item.economic_binding.as_ref(),
+        item.economic_conversion.as_ref(),
+    ) && item
+        .socketed
+        .iter()
+        .all(|child| belongs_to_current_owner(world, child))
 }
 
 /// A mismatched marked carrier is never an ordinary legacy inventory. Refuse
@@ -261,40 +316,52 @@ pub(in crate::runtime) fn validate_character_load(
             && save.character.index == binding.index
             && incarnation == Some(binding.incarnation.as_str())
     };
-    let validate_tree =
-        |binding: Option<&HuntingItemBinding>, children: &[ItemState]| -> Result<(), String> {
-            if binding.is_some_and(|binding| !matches(binding)) {
-                return Err("saved bound item does not belong to the loading character".into());
-            }
-            let mut nodes = 1_usize;
-            if children.len().saturating_add(nodes) > 256 {
+    let validate_tree = |binding: Option<&HuntingItemBinding>,
+                         conversion: Option<&HuntingItemConversionProvenance>,
+                         children: &[ItemState]|
+     -> Result<(), String> {
+        if binding.is_some() && conversion.is_some()
+            || conversion.is_some_and(|conversion| realm != Some(conversion.realm()))
+        {
+            return Err("saved item has invalid conversion custody".into());
+        }
+        if binding.is_some_and(|binding| !matches(binding)) {
+            return Err("saved bound item does not belong to the loading character".into());
+        }
+        let mut nodes = 1_usize;
+        if children.len().saturating_add(nodes) > 256 {
+            return Err("character binding tree exceeds its carrier budget".into());
+        }
+        let mut pending: Vec<_> = children.iter().map(|child| (child, 1_usize)).collect();
+        while let Some((item, depth)) = pending.pop() {
+            nodes += 1;
+            if depth > 8
+                || nodes > 256
+                || item
+                    .socketed
+                    .len()
+                    .saturating_add(nodes)
+                    .saturating_add(pending.len())
+                    > 256
+            {
                 return Err("character binding tree exceeds its carrier budget".into());
             }
-            let mut pending: Vec<_> = children.iter().map(|child| (child, 1_usize)).collect();
-            while let Some((item, depth)) = pending.pop() {
-                nodes += 1;
-                if depth > 8
-                    || nodes > 256
-                    || item
-                        .socketed
-                        .len()
-                        .saturating_add(nodes)
-                        .saturating_add(pending.len())
-                        > 256
-                {
-                    return Err("character binding tree exceeds its carrier budget".into());
-                }
-                if item
+            if item.economic_binding.is_some() && item.economic_conversion.is_some()
+                || item
+                    .economic_conversion
+                    .as_ref()
+                    .is_some_and(|conversion| realm != Some(conversion.realm()))
+                || item
                     .economic_binding
                     .as_ref()
                     .is_some_and(|binding| !matches(binding))
-                {
-                    return Err("saved bound item does not belong to the loading character".into());
-                }
-                pending.extend(item.socketed.iter().map(|child| (child, depth + 1)));
+            {
+                return Err("saved bound item does not belong to the loading character".into());
             }
-            Ok(())
-        };
+            pending.extend(item.socketed.iter().map(|child| (child, depth + 1)));
+        }
+        Ok(())
+    };
     for (label, encoded) in [
         ("inventory", &save.inventory_items_json),
         ("belt", &save.belt_items_json),
@@ -305,13 +372,21 @@ pub(in crate::runtime) fn validate_character_load(
         for value in encoded {
             let item: ItemState = serde_json::from_str(value)
                 .map_err(|_| format!("invalid {label} binding carrier"))?;
-            validate_tree(item.economic_binding.as_ref(), &item.socketed)?;
+            validate_tree(
+                item.economic_binding.as_ref(),
+                item.economic_conversion.as_ref(),
+                &item.socketed,
+            )?;
         }
     }
     for value in &save.equipment_items_json {
         let item: EquipmentState = serde_json::from_str(value)
             .map_err(|_| "invalid equipment binding carrier".to_string())?;
-        validate_tree(item.economic_binding.as_ref(), &item.socketed)?;
+        validate_tree(
+            item.economic_binding.as_ref(),
+            item.economic_conversion.as_ref(),
+            &item.socketed,
+        )?;
     }
     Ok(())
 }

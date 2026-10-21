@@ -21,11 +21,19 @@ SELECT now() AS time, c.realm_id,
       o.gross_converted_gold IS NOT NULL AND o.gross_converted_gold >= 0 AND
       o.conversion_fee_gold IS NOT NULL AND o.conversion_fee_gold >= 0 AND
       o.net_unbound_inflow_gold IS NOT NULL AND o.net_unbound_inflow_gold >= 0 AND
+      o.gold_conversion_fee_gold IS NOT NULL AND o.gold_conversion_fee_gold >= 0 AND
+      o.material_conversion_gold_equivalent IS NOT NULL AND o.material_conversion_gold_equivalent >= 0 AND
+      o.material_conversion_fee_unbound_gold IS NOT NULL AND o.material_conversion_fee_unbound_gold >= 0 AND
       o.unbound_stock_baseline_gold > 0 AND o.burn_baseline_gold > 0
       AND o.planned_daily_consumption_atoms > 0
       AND o.policy_version IS NOT NULL AND length(o.policy_version) > 0
       AND o.period_end = ((o.economy_date + 1) + time '04:00') AT TIME ZONE 'Asia/Shanghai'
-      AND o.gross_converted_gold::numeric = o.conversion_fee_gold::numeric + o.net_unbound_inflow_gold::numeric
+      AND o.gross_converted_gold::numeric = o.gold_conversion_fee_gold::numeric + o.net_unbound_inflow_gold::numeric
+      AND o.conversion_fee_gold::numeric = o.gold_conversion_fee_gold::numeric + o.material_conversion_fee_unbound_gold::numeric
+      AND o.permit_consumed_atoms::numeric = o.gross_converted_gold::numeric + o.material_conversion_gold_equivalent::numeric
+      AND (o.material_conversion_gold_equivalent = 0) = (o.material_conversion_fee_unbound_gold = 0)
+      AND o.material_conversion_fee_unbound_gold <= o.material_conversion_gold_equivalent
+      AND o.conversion_fee_gold <= o.burn_daily_gold
       AND o.active_casual_accounts IS NOT NULL AND o.active_casual_accounts >= 0
       AND o.active_light_pvp_accounts IS NOT NULL AND o.active_light_pvp_accounts >= 0
       AND o.active_sabuk_accounts IS NOT NULL AND o.active_sabuk_accounts >= 0

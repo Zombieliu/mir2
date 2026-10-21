@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+## 第十五阶段：固定估值材料转换（2026-10-21）
+
+用户已选策划固定估值、手续费扣现有非绑定金币。主服现已实现普通 Bag 的 Bound 根整栈/部分转换：总估值 E 只扣 E 许可原子及 ceil(2%E) 非绑手续费，不生成金币；完整物品 checkpoint、钱包、许可、fee 销毁与不可变结果同 PG 提交。原单 Query、未决普通退出及冷登录恢复已接，旧 gold 不改，正式价格白名单为空且默认关闭。详见[材料服务端合同/伪代码](HUNTING-MATERIAL-CONVERSION.md)。
+
+实际验证：policy/service24项普通、经济PG相关42项最终去重、Sim48项普通及6项实际PG（11个隔离schema）、wire43、Gateway35、Python21通过；真实WS3项/5个schema及相邻修理退出3项（含2项PG）通过。WS整批/部分/新配置冷登录来自189，真实未读回执后raw断线/resume/原Query及冷登录来自207；前两项普通路径未受最后native夹具调整影响。BI离线47案例/87断言/230配置检查及实际PG42案例/71规则值通过，44列视图DDL/测试数据全部ROLLBACK。早期编译、UID分配及各夹具修复失败记录均保留；不是同一个二进制或全工作区测试，未重新导入Grafana或验证通知。见[阶段十五证据](generated/hunting-economy/acceptance-20261021-material-conversion.json)。
+
+Windows材料客户端、Runtime及背包界面正在独立第十六阶段接线，未纳入本轮后端提交范围，尚无材料EXE/GUI验收；第十二阶段修理实机结论原样保留。完整goal active、K=0.1及0.72/1.08许可不变，不提高Crystal/Candidate。剩余：Windows材料完整背包Applied/物理发送/GUI、其它生产来源和三层销毁、全服市场画像收益、通知、正式价格管理与迁移发布。无Docker/WSL/虚拟机或远程资产变更。
+
+
 ## 第十四阶段：首个真实绑定物品来源与冷加载保护（2026-10-21）
 
 现有 newcomer-v2 NPC3 Jane 的 2110001 任务已接真实绑定物品来源：保留原职业武器/药水、100金币及100EXP设计，完整物品 checkpoint 与绑定金币共用一次 PG 提交。新增严格 v1 服务端 realm/账号/角色 index/PG incarnation/source 标记；旧 None 仍省略序列化、不重新分类。发放先完整规划，绑定与旧栈或不同来源不混堆；普通用药、穿卸装备、个人仓库、拆分及同角色 Hero 保留标记并核所有者。

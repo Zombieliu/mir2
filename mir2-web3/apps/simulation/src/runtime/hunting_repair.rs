@@ -372,6 +372,9 @@ impl SimulationSession {
     /// captures an immutable teardown checkpoint. This never submits a repair.
     /// `true` proves authority was retired and forbids saving the old World.
     pub fn prepare_hunting_repair_teardown(&mut self) -> Result<bool, String> {
+        if self.prepare_hunting_material_teardown()? {
+            return Ok(true);
+        }
         if self
             .app
             .world()
@@ -914,7 +917,7 @@ impl SimulationSession {
         }
     }
 
-    fn retire_hunting_repair_authority(&mut self) {
+    pub(super) fn retire_hunting_repair_authority(&mut self) {
         let world = self.app.world_mut();
         {
             let mut session = world.resource_mut::<SessionResource>();

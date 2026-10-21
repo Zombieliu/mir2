@@ -587,6 +587,33 @@ impl GatewaySession {
     pub fn supports_hunting_repair_owner(&self) -> bool {
         self.zone_owner_command_client.supports_hunting_repair_owner(&self.runtime)
     }
+    pub fn supports_hunting_material_owner(&self) -> bool {
+        self.runtime.requires_local_hunting_source_authority()
+            && self.zone_owner_command_client.supports_hunting_material_owner(&self.runtime)
+    }
+    pub fn execute_hunting_material_owner_turn(&mut self, authenticated: bool,
+        action: mir2_simulation::HuntingMaterialAction,
+    ) -> Result<mir2_simulation::HuntingMaterialOwnerTurn, String> {
+        let lease=self.zone_owner_lease.clone();
+        self.execute_hunting_material_owner_turn_with_zone_owner_lease(&lease,authenticated,action)
+    }
+    pub fn execute_hunting_material_owner_turn_with_zone_owner_lease(&mut self, lease:&ZoneOwnerLease,
+        authenticated:bool, action:mir2_simulation::HuntingMaterialAction,
+    ) -> Result<mir2_simulation::HuntingMaterialOwnerTurn,String> {
+        self.validate_zone_owner_lease(lease)?;
+        if !authenticated || !self.supports_hunting_material_owner() {
+            return Err("typed hunting material requires authenticated local owner authority".into());
+        }
+        let result=catch_gateway_panic("hunting material gateway owner turn",|| {
+            self.zone_owner_command_client.execute_hunting_material_owner_turn(&mut self.runtime,lease,authenticated,action)
+        }).and_then(|result|result);
+        if matches!(&result,Ok(mir2_simulation::HuntingMaterialOwnerTurn {
+            material:mir2_simulation::HuntingMaterialExecution {
+                reply:mir2_simulation::HuntingMaterialReply::Committed{reload_required:true,..},..
+            },..
+        })) {self.active_identity_binding=None;self.refresh_global_message_identity(None);}
+        result
+    }
 
     /// Same current owner lease as production gameplay, with no generic-command
     /// fallback and no unrelated award/trade/global-message predrain.

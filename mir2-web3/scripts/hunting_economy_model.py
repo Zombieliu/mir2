@@ -20,6 +20,7 @@ I64_MIN = -(1 << 63)
 I64_MAX = (1 << 63) - 1
 LICENSE_ATOMS_PER_UNIT = 1_000_000
 GOLD_PER_LICENSE = 1_000_000
+MAX_MATERIAL_GOLD_EQUIVALENT = I64_MAX
 
 
 class PolicyError(ValueError):
@@ -150,6 +151,95 @@ def quote_conversion(policy: dict, gross_gold: int) -> dict:
         "fee_unbound_gold": fee,
         "net_unbound_gold_credit": _u64(gross_gold - fee, "net_unbound_gold_credit"),
     }
+
+
+def normalize_material_valuations(value: dict) -> dict:
+    """Strict fixed server catalog; no NPC/market fallback and no invented prices."""
+    if not isinstance(value, dict) or set(value) != {"schema_version", "valuation_version", "entries"}:
+        raise PolicyError("invalid_valuation", "valuation_fields")
+    if type(value["schema_version"]) is not int or value["schema_version"] != 1:
+        raise PolicyError("invalid_valuation", "schema_version")
+    version = value["valuation_version"]
+    if not isinstance(version, str):
+        raise PolicyError("invalid_valuation", "valuation_version")
+    try:
+        version_bytes = len(version.encode("utf-8"))
+    except UnicodeEncodeError as error:
+        raise PolicyError("invalid_valuation", "valuation_version") from error
+    if (not version or version.strip() != version
+            or version_bytes > 128
+            or any(ord(char) < 32 or 0x7F <= ord(char) <= 0x9F for char in version)):
+        raise PolicyError("invalid_valuation", "valuation_version")
+    if not isinstance(value["entries"], list):
+        raise PolicyError("invalid_valuation", "entries")
+    entries = []
+    seen = set()
+    for entry in value["entries"]:
+        if not isinstance(entry, dict) or set(entry) != {"item_index", "unit_gold"}:
+            raise PolicyError("invalid_valuation", "entry_fields")
+        index = entry["item_index"]
+        if type(index) is not int or not 0 < index <= (1 << 31) - 1:
+            raise PolicyError("invalid_valuation", "item_index")
+        if index in seen:
+            raise PolicyError("invalid_valuation", "duplicate_item_index")
+        unit_gold = entry["unit_gold"]
+        _validate_material_unit_gold(unit_gold)
+        seen.add(index)
+        entries.append({"item_index": index, "unit_gold": unit_gold})
+    return {"schema_version": 1, "valuation_version": version,
+            "entries": sorted(entries, key=lambda entry: entry["item_index"])}
+
+
+def _strict_material_json_object(pairs: list) -> dict:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise PolicyError("invalid_valuation", "duplicate_json_field")
+        result[key] = value
+    return result
+
+
+def parse_material_valuations(encoded: str) -> dict:
+    try:
+        value = json.loads(encoded, object_pairs_hook=_strict_material_json_object)
+    except (json.JSONDecodeError, TypeError, ValueError) as error:
+        if isinstance(error, PolicyError):
+            raise
+        raise PolicyError("invalid_valuation", "json") from error
+    return normalize_material_valuations(value)
+
+
+def load_material_valuations(path: Path | str | None = None) -> dict:
+    return parse_material_valuations(Path(path or ROOT / "config/hunting-material-valuations.json").read_text(encoding="utf-8"))
+
+
+def _validate_material_unit_gold(unit_gold: int) -> None:
+    if type(unit_gold) is not int or unit_gold <= 0:
+        raise PolicyError("invalid_valuation", "unit_gold")
+    if unit_gold > MAX_MATERIAL_GOLD_EQUIVALENT:
+        raise PolicyError("overflow", "unit_gold")
+
+
+def quote_material_conversion(policy: dict, unit_gold: int, quantity: int) -> dict:
+    """Pure planning: E permit atoms and an existing-unbound-wallet fee; no gold credit."""
+    validate_policy(policy)
+    _validate_material_unit_gold(unit_gold)
+    if type(quantity) is not int or quantity <= 0:
+        raise PolicyError("invalid_amount", "quantity")
+    gold_equivalent = _integer(unit_gold * quantity, 1, MAX_MATERIAL_GOLD_EQUIVALENT, "gold_equivalent")
+    fee = quote_conversion(policy, gold_equivalent)["fee_unbound_gold"]
+    return {"gold_equivalent": gold_equivalent, "license_atoms_debit": gold_equivalent,
+            "fee_unbound_gold": fee}
+
+
+def quote_material_conversion_for_item(policy: dict, valuations: dict, item_index: int, quantity: int) -> dict:
+    valuations = normalize_material_valuations(valuations)
+    if type(item_index) is not int or not 0 < item_index <= (1 << 31) - 1:
+        raise PolicyError("invalid_valuation", "item_index")
+    for entry in valuations["entries"]:
+        if entry["item_index"] == item_index:
+            return quote_material_conversion(policy, entry["unit_gold"], quantity)
+    raise PolicyError("unconfigured_material", "item_index")
 
 
 def business_day_key(unix_seconds: int) -> int:

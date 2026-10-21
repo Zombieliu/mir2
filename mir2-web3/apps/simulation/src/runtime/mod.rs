@@ -76,6 +76,11 @@ mod resources;
 mod save;
 mod session;
 mod hunting_repair;
+mod hunting_material_plan;
+mod hunting_material;
+pub use hunting_material::{HuntingMaterialAction, HuntingMaterialExecution,
+    HuntingMaterialQuoteView, HuntingMaterialReceiptView, HuntingMaterialRejection, HuntingMaterialReply};
+pub(crate) use hunting_material_plan::validate_hunting_material_quote_source;
 pub use hunting_repair::{
     HuntingRepairAction, HuntingRepairExecution, HuntingRepairQuoteView, HuntingRepairReceiptView,
     HuntingRepairRejection, HuntingRepairReply,

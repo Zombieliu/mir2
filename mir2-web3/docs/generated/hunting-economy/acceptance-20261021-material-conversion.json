@@ -1,0 +1,3235 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-21",
+  "phase": 15,
+  "parentCommit": "bd41069e01",
+  "scope": "Authoritative fixed-value Bound material conversion, immutable full checkpoint/fee/permit transaction, recovery, settlement/export and read-only BI accounting",
+  "goalStatus": "active",
+  "enabledByDefault": false,
+  "productionDeployment": false,
+  "userDecision": {
+    "valuation": "Planner versioned fixed gold values",
+    "fee": "Existing unbound wallet; ceil2percent",
+    "officialPrices": "empty whitelist; reject unconfigured"
+  },
+  "formula": {
+    "k": "0.1",
+    "baselineDailyBurnGold": "7200000",
+    "baselinePermits": "0.72",
+    "dailyPermitCap": "1.08",
+    "permitAtomsPerPermit": "1000000",
+    "materialEquivalent": "unit_gold * quantity",
+    "permitAtomsDebit": "materialEquivalent",
+    "fee": "ceil(materialEquivalent * feeNumerator / feeDenominator)",
+    "coinInflowFromMaterial": "0",
+    "burnFromMaterial": "fee only"
+  },
+  "sourcePins": [
+    {
+      "path": "apps/game-client/client-wire/src/hunting_material.rs",
+      "bytes": 13810,
+      "sha256": "a7a5f57dcb0309e39dba6f41fe9e0f4ab9391bb53fe010154a7ab17629bf9fa0"
+    },
+    {
+      "path": "apps/game-client/client-wire/src/hunting_material_tests.rs",
+      "bytes": 18240,
+      "sha256": "63bfa87e20c4f768d070172cb0ee02cc475d1713da3b9aa01f82add160f928c6"
+    },
+    {
+      "path": "apps/gateway/src/hunting_material_browser.rs",
+      "bytes": 10182,
+      "sha256": "78f0750588abe90734c866fbde0928254b6eba2527fc1f9b1ef36def26906e76"
+    },
+    {
+      "path": "apps/gateway/src/hunting_material_browser_tests.rs",
+      "bytes": 23711,
+      "sha256": "928fdc50a2d98ccf3769cd412e6495eb39f35fec71c11d7e0aa5426a258191f6"
+    },
+    {
+      "path": "apps/gateway/src/web_hunting_material_network_tests.rs",
+      "bytes": 42984,
+      "sha256": "49705677e219d4e30e3cfd93bca41c2e75cb956ea4d0fdffd47d87cbd79df9ac"
+    },
+    {
+      "path": "apps/simulation/src/config_hunting_material.rs",
+      "bytes": 44242,
+      "sha256": "a446c3ac22ce6cce837db10cd3d238dbcb09a580a5442b4aa902d7fddb9e6a9a"
+    },
+    {
+      "path": "apps/simulation/src/config_hunting_material_recovery.rs",
+      "bytes": 19589,
+      "sha256": "29158a85995eec99f67d361f6268f4c29033a7ec7f13de73e2252ad21c4364d2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_item_conversion.rs",
+      "bytes": 7351,
+      "sha256": "6b6af1b545cbda75fdfe9cff4b44a2712f1fdddb36be6196843b55e7079fdd57"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_item_conversion_outflow_tests.rs",
+      "bytes": 15293,
+      "sha256": "100731445c3987a34481edb99e4b4d1d3dc433398a9d6cd61ca64ab1e2d1a735"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_item_conversion_tests.rs",
+      "bytes": 19663,
+      "sha256": "e6496732466e56d93dadd1ef44f9481fede305a946d4bc844b17f33dc6d450da"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_material.rs",
+      "bytes": 29019,
+      "sha256": "257870c32d36080e79ad26332f29b1efd5a9ce7f2bef8d7e53a2e8ffd6c14cf3"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_material_plan.rs",
+      "bytes": 12252,
+      "sha256": "c23aa1e059a9a158175120dbffb77fb607e25a43a44830b1c7b8dd5785bf59d6"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_material_plan_tests.rs",
+      "bytes": 21521,
+      "sha256": "8684ba96aebabaf4ed1e3d8a2ef7f731c8eb28a69bf63715e0458b7cbfafcee2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_material_tests.rs",
+      "bytes": 41096,
+      "sha256": "ce9ee07806d1131b7776ed7f0de0d2605a85ac661ebd351148b5fdcde6a8cfa3"
+    },
+    {
+      "path": "config/hunting-material-valuations.json",
+      "bytes": 113,
+      "sha256": "83e27043d01be3dd0b1eba3c1aac7122174b7c708e9ba4212154f73fc968f2c4"
+    },
+    {
+      "path": "fixtures/hunting-material-vectors.json",
+      "bytes": 7129,
+      "sha256": "7103424a1fe2c9fd3948a811acfb5d8484f94d806a2e58b9443446de4a2aa5f7"
+    },
+    {
+      "path": "infra/postgres/migrations/0026_hunting_material_conversions.sql",
+      "bytes": 8477,
+      "sha256": "8b3c32c4f85caee705fa769c21025204f348f58b71c325a235129baedd32a7d0"
+    },
+    {
+      "path": "infra/postgres/migrations/0027_hunting_material_observations.sql",
+      "bytes": 9926,
+      "sha256": "3167b7a9db91040cb1cd316e81597b66dfe8ac943c9b4880b4c093a66d8276a7"
+    },
+    {
+      "path": "packages/economy-policy/src/material.rs",
+      "bytes": 7321,
+      "sha256": "d777cbb2879f58bf42bd22d1a84ac852dc336a4d185971394e48f770ea39a351"
+    },
+    {
+      "path": "packages/economy-policy/src/material_tests.rs",
+      "bytes": 7501,
+      "sha256": "563e79d81f99145b2b460c74c2b9798b6d176995e028372b0e69e096ccdc370e"
+    },
+    {
+      "path": "packages/economy-service/src/material.rs",
+      "bytes": 30599,
+      "sha256": "9551a99aab756893b1574d66546e1ca5f167cdd450df0f1dbecc00cbb0a01778"
+    },
+    {
+      "path": "packages/economy-service/src/material_export.rs",
+      "bytes": 14330,
+      "sha256": "da3a4d15c32c4bcf798ca6bd330ddc47a8aa2bd4d0f37d8887d27ade0603448e"
+    },
+    {
+      "path": "packages/economy-service/tests/postgres_material.rs",
+      "bytes": 44495,
+      "sha256": "6675da9ff6dfedbbfe3a12c29d7f437ef48a644b0c22a7cd772a99b9992983ea"
+    },
+    {
+      "path": "packages/economy-service/tests/postgres_material_export.rs",
+      "bytes": 41694,
+      "sha256": "b591afe570a137ec038d16818a39be6a8a99b65aa8a4ddc290dbac33c595f2c8"
+    },
+    {
+      "path": "scripts/test_hunting_material_model.py",
+      "bytes": 6034,
+      "sha256": "f20edd79bd5aae86759330dea1762d3972d309b5f0049809c4013e242b4a3ec5"
+    },
+    {
+      "path": "apps/game-client/client-wire/src/lib.rs",
+      "bytes": 108245,
+      "sha256": "22fb5527be01f3f4aa217a1177db5a15d81bc13e839334bd0d93f456d77387e7"
+    },
+    {
+      "path": "apps/gateway/src/lib.rs",
+      "bytes": 11320,
+      "sha256": "83e7b660ec7f414b36c226f5311d188c7ab02df97b0469f2a0c4347b6ce7015e"
+    },
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "bytes": 1271490,
+      "sha256": "ef55675a1607725898bd85fbb7c9cbda83f47f3f2cbd5d0d907f83c089c0bd97"
+    },
+    {
+      "path": "apps/gateway/src/session.rs",
+      "bytes": 108526,
+      "sha256": "480ffa27b3815ca2b4a0071d97bd54b785bf953f8fb77dab83928764a80302b5"
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "bytes": 809574,
+      "sha256": "ee7d523ad2ec2904ead57d5a506fda1118ad1500393df2f12e2ddd00b278b73d"
+    },
+    {
+      "path": "apps/gateway/src/web_hunting_repair_network_tests.rs",
+      "bytes": 50177,
+      "sha256": "e0e59101cf164622c7475bdd63df1c3b69409425df93384dc03a453b06fb079d"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 304589,
+      "sha256": "a2f4228ab52d5553db5cc1429a189145b08e148e3d85e395c44dd12dc4a5209c"
+    },
+    {
+      "path": "apps/simulation/src/db_projection.rs",
+      "bytes": 33941,
+      "sha256": "3066dfae68040127b6c2c0c23f0078db076776da2c8950a2f6e82549db5f5e75"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "bytes": 5887,
+      "sha256": "21abe762c0b76c2eb539fa1ad1d853a23d4590d065aebfaa829f2b1e987a659a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/equipment.rs",
+      "bytes": 116156,
+      "sha256": "7e818475a576c24d143f44826a65fb9b03dc69ca204a86b358a6dc75a47239eb"
+    },
+    {
+      "path": "apps/simulation/src/runtime/fishing.rs",
+      "bytes": 32501,
+      "sha256": "02171429f8ee4b54fd7b384725406998991c1bcdca08983700e7f75c93bddd54"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_merge.rs",
+      "bytes": 12193,
+      "sha256": "1a8ab14d7ace8b15a99db077f02f95d9635fc5498602ff565401d06c8679757a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_item_binding.rs",
+      "bytes": 13691,
+      "sha256": "21ff5abe1d5ad3dfab5ca31d77f5ea0a6e4741f8567d95938c7456fed3747bc0"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_repair.rs",
+      "bytes": 35450,
+      "sha256": "36fc9dee0c941c6a950d01b17a2a0b32855132eec38e0dece0cc702e823ca127"
+    },
+    {
+      "path": "apps/simulation/src/runtime/inventory.rs",
+      "bytes": 190402,
+      "sha256": "5180bf79d9c8d1ea3dc6701b8c756f0f674774f0ed737c1faf7012494ec97036"
+    },
+    {
+      "path": "apps/simulation/src/runtime/items.rs",
+      "bytes": 169267,
+      "sha256": "b57cf2f70e9546fcbe279153356d3249469cf39b4750da75962de565a57be03d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/mod.rs",
+      "bytes": 7620,
+      "sha256": "f93c5de147ab3947a4ae67a04d526e60fff749a0941a5357dc12a3f3892fab45"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc.rs",
+      "bytes": 51944,
+      "sha256": "ba7e8a9e4737c5f1003eaafb92f1dba01e9062e9c5f3c86cfab63dbcfd38f17e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_script.rs",
+      "bytes": 131084,
+      "sha256": "f5bb7ae4cc4a5b9faab59ea071bdb1cfa84420d9405b04335ff8d3e4074333f3"
+    },
+    {
+      "path": "apps/simulation/src/runtime/packets.rs",
+      "bytes": 405815,
+      "sha256": "ab9160a70b7836e9fbc64297959376f2bd80985931fe3c3b0551786805a4ff6f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/refine_oven.rs",
+      "bytes": 15495,
+      "sha256": "29b471397d6ea2f8233776c9a3a4a7895415bbb322d3f2b7002a60f1fffb7df7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/save.rs",
+      "bytes": 166484,
+      "sha256": "5ca28e4044a26d67fa7cb8247000410a99932d575d10565c60a596ebc3855dab"
+    },
+    {
+      "path": "apps/simulation/src/runtime/stage5.rs",
+      "bytes": 226314,
+      "sha256": "598e4fe8e8a3f2201f09c469517d8f7cc85e7497c664df9adc4b6c65c42c126e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/tests.rs",
+      "bytes": 2433544,
+      "sha256": "9c6ebb3c19be4a9a9b5d6ce375aa9f6a685684048757e9106e0e23ba4286967f"
+    },
+    {
+      "path": "apps/simulation/src/world_runtime.rs",
+      "bytes": 67943,
+      "sha256": "bcd02faf2b51564041852344a5cb69f513118216efe163a4057783149700aced"
+    },
+    {
+      "path": "packages/economy-policy/src/lib.rs",
+      "bytes": 11660,
+      "sha256": "b3e90ebd3acc3c518baae7dd4dafd92e36df1b90e9a99a10bc11fc3ed7a9bdfb"
+    },
+    {
+      "path": "packages/economy-service/src/debit.rs",
+      "bytes": 11494,
+      "sha256": "55194e6296b8f57760f301c19c68109e3588b49f6f2b55454fec29d65d92c7b0"
+    },
+    {
+      "path": "packages/economy-service/src/export.rs",
+      "bytes": 27146,
+      "sha256": "d9567ef4ba32eeeb211181d7c03c8961393282abe2499027ccc4c2e76b141946"
+    },
+    {
+      "path": "packages/economy-service/src/lib.rs",
+      "bytes": 1738,
+      "sha256": "7cc380ac9fed5896a90ad3408256b8024ecf034703552423af9a597396bd2685"
+    },
+    {
+      "path": "packages/economy-service/src/store.rs",
+      "bytes": 49293,
+      "sha256": "2e9b78f1b67dc2b9954597016cdbbd8a72c2592ba0c75994e89e3a3713cb0b4c"
+    },
+    {
+      "path": "packages/economy-service/src/types.rs",
+      "bytes": 8175,
+      "sha256": "d86fc7575392e6268e5cd85ce7d53ae9bf5c8b5ab903eef8fcec747a29011a94"
+    },
+    {
+      "path": "packages/economy-service/tests/postgres_authority.rs",
+      "bytes": 18311,
+      "sha256": "5b8f011fa4036c95dc132eaf716ad7d2ce4fd61c0899c8c868495bf3769c11f7"
+    },
+    {
+      "path": "packages/economy-service/tests/postgres_export.rs",
+      "bytes": 19221,
+      "sha256": "7ed9a9432ef3182ac6e83fbf5383f439d437df473bf8bb058dc3d5a701d2da74"
+    },
+    {
+      "path": "scripts/hunting_economy_model.py",
+      "bytes": 13691,
+      "sha256": "464e8dc96ba886a49689e05e9a753f15276d87304f6580b86d1aeb2ef3983ee3"
+    },
+    {
+      "path": "infra/economy-observability/CONTRACT.zh-CN.md",
+      "bytes": 11907,
+      "sha256": "0fea8d355578688ee099a280e79249794aee2db9a473e94a693f11a945bfeab3"
+    },
+    {
+      "path": "infra/economy-observability/EXPORT.zh-CN.md",
+      "bytes": 5437,
+      "sha256": "758289ad092b3515e75375f15be48c80b2386e4ff45303ab3f725f346610064f"
+    },
+    {
+      "path": "infra/economy-observability/README.zh-CN.md",
+      "bytes": 10009,
+      "sha256": "e84d463ec5604d26f4285375fd10f1fedc15b31f3e3364de5c1eda008c604621"
+    },
+    {
+      "path": "infra/economy-observability/fixtures/alert-cases.json",
+      "bytes": 9830,
+      "sha256": "b5e612a1a230877e62aa24c85d40f05c23d1b9fee6d4fede9bcf69309db7dbe9"
+    },
+    {
+      "path": "infra/economy-observability/generate.py",
+      "bytes": 18955,
+      "sha256": "b9ccdce72065b9e7650ad74d7c42de55d9f47603c9329723950e5a6f645f35e5"
+    },
+    {
+      "path": "infra/economy-observability/grafana/dashboards/hunting-permit.json",
+      "bytes": 35150,
+      "sha256": "a4ebc99ae79a52c58c21b17997fb4d53f109fe83069868835d6d6475d805f03f"
+    },
+    {
+      "path": "infra/economy-observability/grafana/provisioning/alerting/economy-rules.yaml",
+      "bytes": 21907,
+      "sha256": "df4cba423bfbf2e4f80e60febd6070eab154a8974408b9b9495153de08155b73"
+    },
+    {
+      "path": "infra/economy-observability/sql/alerts/data_integrity.sql",
+      "bytes": 3213,
+      "sha256": "9d50f87ed81ad1fb30b451b207665af780db7fb8ac2d995448361bcfcde59128"
+    },
+    {
+      "path": "infra/economy-observability/tests/grafana_native_acceptance.py",
+      "bytes": 30295,
+      "sha256": "b59da2273b3e8497d93c7cc45b9e8bb72f9907a8a7ca0f533afecc085555d3b3"
+    },
+    {
+      "path": "infra/economy-observability/tests/postgres_acceptance.py",
+      "bytes": 18344,
+      "sha256": "ae06ac7ce84fad518c366dad5a605deffed1e9a18aa31f7db7eaba606d994af2"
+    },
+    {
+      "path": "infra/economy-observability/tests/postgres_extra_assertions.sql",
+      "bytes": 16460,
+      "sha256": "2f13fe6a3edfbcba63c1cc8fcc9b2d3b66a7fb605b9ed7c763463f2876445062"
+    },
+    {
+      "path": "infra/economy-observability/verify.py",
+      "bytes": 19201,
+      "sha256": "99a50ad0d5d0ac82ff4f8c3e30c3298bd8a65b0ed1a1fa4bffa036ed0ba7877b"
+    },
+    {
+      "path": "docs/AGENT-TASK-QUEUE.md",
+      "bytes": 1003645,
+      "sha256": "26b9af7516f00707905c912d933abdc32c898cef158977ee820737d7757f2221"
+    },
+    {
+      "path": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 1122202,
+      "sha256": "ae82bfcaa4d10b0eabd8491f71106542b1f9e975725d3a0ba0ec6bf387ab8430"
+    },
+    {
+      "path": "docs/BACKEND-1TO1-PROGRESS.md",
+      "bytes": 622470,
+      "sha256": "da6f6c3df4df116b412a2f0a818504e30758c22a63ccaece64cafe070c6180c0"
+    },
+    {
+      "path": "docs/CRYSTAL-SERVER-PARITY.md",
+      "bytes": 563004,
+      "sha256": "13c1eee7808f2fa4fc705156051411ba887d4d51a2cdc44e8fb28541623ed633"
+    },
+    {
+      "path": "docs/HUNTING-PERMIT-ECONOMY.md",
+      "bytes": 51996,
+      "sha256": "f51788c3eac562d7442b7bbf7c561b610e9e70e76060c7493e0320d8fbf9661a"
+    },
+    {
+      "path": "docs/HUNTING-SOURCE-INTEGRATION.md",
+      "bytes": 38068,
+      "sha256": "593869af1bb0d47585578fa5ebfa2dca75ae1708d472843239cbe4bc37585174"
+    },
+    {
+      "path": "docs/AGENT-ORCHESTRATION.md",
+      "bytes": 385823,
+      "sha256": "0a93f1e9136a580f17451fde040109c588389a31761f5f4c9b86c32e331d3c30"
+    },
+    {
+      "path": "docs/HUNTING-MATERIAL-CONVERSION.md",
+      "bytes": 4462,
+      "sha256": "8815b2af082ff942b62543905ab98216d4787913fb7fbfbbfbe2edcbee96388d"
+    }
+  ],
+  "tests": {
+    "pure": [
+      {
+        "name": "policy",
+        "path": "C:/mir2-build/hunting-permit-economy-target/debug/deps/hunting-material-policy-131.exe",
+        "status": 0,
+        "signal": null,
+        "elapsedMs": 22,
+        "log": "C:/mir2-build/hunting-material-policy-131.log",
+        "tail": [
+          "test material::tests::material_shared_valuation_vectors_are_strict_and_canonical ... ok",
+          "",
+          "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        ]
+      },
+      {
+        "name": "service",
+        "path": "C:/mir2-build/hunting-permit-economy-target/debug/deps/hunting-material-service-131.exe",
+        "status": 0,
+        "signal": null,
+        "elapsedMs": 23,
+        "log": "C:/mir2-build/hunting-material-service-131.log",
+        "tail": [
+          "test store::zero::tests::zero_fee_source_identity_shares_positive_slot_and_conflicts_on_payload ... ok",
+          "",
+          "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        ]
+      }
+    ],
+    "economyFinalUnique": 42,
+    "economyResults": [
+      {
+        "test": "postgres_material_balance_quota_source_cas_capacity_and_bad_proof_fail_atomically",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2262,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_balance_quota_source_cas_capacity_and_bad_proof_fail_atomically.log",
+        "summary": [
+          "test postgres_material_balance_quota_source_cas_capacity_and_bad_proof_fail_atomically ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 2.24s"
+        ]
+      },
+      {
+        "test": "postgres_material_before_commit_fault_rolls_back_source_and_all_economy_writes",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 460,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_before_commit_fault_rolls_back_source_and_all_economy_writes.log",
+        "summary": [
+          "test postgres_material_before_commit_fault_rolls_back_source_and_all_economy_writes ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.45s"
+        ]
+      },
+      {
+        "test": "postgres_material_history_immutability_and_quote_result_ledger_foreign_keys",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 480,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_history_immutability_and_quote_result_ledger_foreign_keys.log",
+        "summary": [
+          "test postgres_material_history_immutability_and_quote_result_ledger_foreign_keys ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.47s"
+        ]
+      },
+      {
+        "test": "postgres_material_lost_commit_ack_query_and_confirm_replay_do_not_charge_or_mutate_twice",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 469,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_lost_commit_ack_query_and_confirm_replay_do_not_charge_or_mutate_twice.log",
+        "summary": [
+          "test postgres_material_lost_commit_ack_query_and_confirm_replay_do_not_charge_or_mutate_twice ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.46s"
+        ]
+      },
+      {
+        "test": "postgres_material_quote_retry_conflict_and_current_actor_authorization",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 657,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_quote_retry_conflict_and_current_actor_authorization.log",
+        "summary": [
+          "test postgres_material_quote_retry_conflict_and_current_actor_authorization ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.64s"
+        ]
+      },
+      {
+        "test": "postgres_material_same_quote_concurrent_confirmations_return_one_immutable_outcome",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 516,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_same_quote_concurrent_confirmations_return_one_immutable_outcome.log",
+        "summary": [
+          "test postgres_material_same_quote_concurrent_confirmations_return_one_immutable_outcome ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.50s"
+        ]
+      },
+      {
+        "test": "postgres_material_two_instances_compete_for_the_last_real_permit_stock",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 649,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_two_instances_compete_for_the_last_real_permit_stock.log",
+        "summary": [
+          "test postgres_material_two_instances_compete_for_the_last_real_permit_stock ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.64s"
+        ]
+      },
+      {
+        "test": "postgres_material_valuation_registration_empty_and_missing_are_fail_closed",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 486,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_valuation_registration_empty_and_missing_are_fail_closed.log",
+        "summary": [
+          "test postgres_material_valuation_registration_empty_and_missing_are_fail_closed ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.47s"
+        ]
+      },
+      {
+        "test": "postgres_material_valuation_version_and_aba_invalidate_only_new_confirmation",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 467,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_valuation_version_and_aba_invalidate_only_new_confirmation.log",
+        "summary": [
+          "test postgres_material_valuation_version_and_aba_invalidate_only_new_confirmation ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.45s"
+        ]
+      },
+      {
+        "test": "postgres_material_whole_and_partial_debit_existing_unbound_without_minting_coins",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 507,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_whole_and_partial_debit_existing_unbound_without_minting_coins.log",
+        "summary": [
+          "test postgres_material_whole_and_partial_debit_existing_unbound_without_minting_coins ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.49s"
+        ]
+      },
+      {
+        "test": "postgres_zero_fee_source_atomic_without_wallet_or_burn_and_immutable_replay",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 343,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_atomic_without_wallet_or_burn_and_immutable_replay.log",
+        "summary": [
+          "test postgres_zero_fee_source_atomic_without_wallet_or_burn_and_immutable_replay ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.33s"
+        ]
+      },
+      {
+        "test": "postgres_zero_fee_source_authorization_precedes_receipts_and_disabled_gap_recovery",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 295,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_authorization_precedes_receipts_and_disabled_gap_recovery.log",
+        "summary": [
+          "test postgres_zero_fee_source_authorization_precedes_receipts_and_disabled_gap_recovery ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.28s"
+        ]
+      },
+      {
+        "test": "postgres_zero_fee_source_owner_and_recreated_character_are_isolated",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 289,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_owner_and_recreated_character_are_isolated.log",
+        "summary": [
+          "test postgres_zero_fee_source_owner_and_recreated_character_are_isolated ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.28s"
+        ]
+      },
+      {
+        "test": "postgres_zero_fee_source_rollbacks_and_unknown_recover_original_slot",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 275,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_rollbacks_and_unknown_recover_original_slot.log",
+        "summary": [
+          "test postgres_zero_fee_source_rollbacks_and_unknown_recover_original_slot ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.26s"
+        ]
+      },
+      {
+        "test": "postgres_zero_fee_source_shares_slot_with_positive_debit_in_both_directions",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 286,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_shares_slot_with_positive_debit_in_both_directions.log",
+        "summary": [
+          "test postgres_zero_fee_source_shares_slot_with_positive_debit_in_both_directions ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.27s"
+        ]
+      },
+      {
+        "test": "postgres_zero_fee_source_timeouts_are_local_and_allow_original_retry",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 465,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_timeouts_are_local_and_allow_original_retry.log",
+        "summary": [
+          "test postgres_zero_fee_source_timeouts_are_local_and_allow_original_retry ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.45s"
+        ]
+      },
+      {
+        "test": "postgres_material_export_closed_history_accounts_permits_fee_without_coin_inflow",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 388,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_export_closed_history_accounts_permits_fee_without_coin_inflow.log",
+        "summary": [
+          "test postgres_material_export_closed_history_accounts_permits_fee_without_coin_inflow ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.38s"
+        ]
+      },
+      {
+        "test": "postgres_material_export_current_api_consumption_reconciles_live_pool",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 409,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_export_current_api_consumption_reconciles_live_pool.log",
+        "summary": [
+          "test postgres_material_export_current_api_consumption_reconciles_live_pool ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.40s"
+        ]
+      },
+      {
+        "test": "postgres_material_export_exact_ceiling_preserves_small_remainders_with_large_valid_ratio",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 901,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_export_exact_ceiling_preserves_small_remainders_with_large_valid_ratio.log",
+        "summary": [
+          "test postgres_material_export_exact_ceiling_preserves_small_remainders_with_large_valid_ratio ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.89s"
+        ]
+      },
+      {
+        "test": "postgres_material_export_legacy_payload_zero_semantics_and_v2_ack_preserve_v1_history",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 372,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_export_legacy_payload_zero_semantics_and_v2_ack_preserve_v1_history.log",
+        "summary": [
+          "test postgres_material_export_legacy_payload_zero_semantics_and_v2_ack_preserve_v1_history ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.36s"
+        ]
+      },
+      {
+        "test": "postgres_material_export_rejects_missing_orphan_and_wrong_fee_without_partial_publish",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1167,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_material_export_rejects_missing_orphan_and_wrong_fee_without_partial_publish.log",
+        "summary": [
+          "test postgres_material_export_rejects_missing_orphan_and_wrong_fee_without_partial_publish ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.15s"
+        ]
+      },
+      {
+        "test": "postgres_export_changed_closed_day_burn_aggregate_refuses_ack",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 443,
+        "log": "C:/mir2-build/hunting-material-pg-142-postgres_export_changed_closed_day_burn_aggregate_refuses_ack.log",
+        "summary": [
+          "test postgres_export_changed_closed_day_burn_aggregate_refuses_ack ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.35s"
+        ]
+      },
+      {
+        "test": "postgres_export_cursor_corruption_refuses_ack_and_can_retry_after_repair",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 353,
+        "log": "C:/mir2-build/hunting-material-pg-142-postgres_export_cursor_corruption_refuses_ack_and_can_retry_after_repair.log",
+        "summary": [
+          "test postgres_export_cursor_corruption_refuses_ack_and_can_retry_after_repair ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.34s"
+        ]
+      },
+      {
+        "test": "postgres_export_failure_rolls_back_target_receipt_and_ack",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 439,
+        "log": "C:/mir2-build/hunting-material-pg-142-postgres_export_failure_rolls_back_target_receipt_and_ack.log",
+        "summary": [
+          "test postgres_export_failure_rolls_back_target_receipt_and_ack ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.43s"
+        ]
+      },
+      {
+        "test": "postgres_export_is_partial_exact_and_restart_idempotent",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 430,
+        "log": "C:/mir2-build/hunting-material-pg-142-postgres_export_is_partial_exact_and_restart_idempotent.log",
+        "summary": [
+          "test postgres_export_is_partial_exact_and_restart_idempotent ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.42s"
+        ]
+      },
+      {
+        "test": "postgres_export_live_permit_stock_corruption_refuses_ack",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 343,
+        "log": "C:/mir2-build/hunting-material-pg-142-postgres_export_live_permit_stock_corruption_refuses_ack.log",
+        "summary": [
+          "test postgres_export_live_permit_stock_corruption_refuses_ack ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.33s"
+        ]
+      },
+      {
+        "test": "postgres_export_lock_timeout_is_bounded_and_preserves_pending_work",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 576,
+        "log": "C:/mir2-build/hunting-material-pg-142-postgres_export_lock_timeout_is_bounded_and_preserves_pending_work.log",
+        "summary": [
+          "test postgres_export_lock_timeout_is_bounded_and_preserves_pending_work ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.56s"
+        ]
+      },
+      {
+        "test": "postgres_export_multiple_workers_create_one_version_and_one_ack",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 391,
+        "log": "C:/mir2-build/hunting-material-pg-142-postgres_export_multiple_workers_create_one_version_and_one_ack.log",
+        "summary": [
+          "test postgres_export_multiple_workers_create_one_version_and_one_ack ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.38s"
+        ]
+      },
+      {
+        "test": "postgres_export_preserves_a_traceable_richer_revision",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 318,
+        "log": "C:/mir2-build/hunting-material-pg-142-postgres_export_preserves_a_traceable_richer_revision.log",
+        "summary": [
+          "test postgres_export_preserves_a_traceable_richer_revision ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.31s"
+        ]
+      },
+      {
+        "test": "postgres_export_recovers_previously_acked_event_without_own_consumer_receipt",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 306,
+        "log": "C:/mir2-build/hunting-material-pg-142-postgres_export_recovers_previously_acked_event_without_own_consumer_receipt.log",
+        "summary": [
+          "test postgres_export_recovers_previously_acked_event_without_own_consumer_receipt ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.29s"
+        ]
+      },
+      {
+        "test": "postgres_export_unknown_commit_recovers_without_duplicate_revision",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 404,
+        "log": "C:/mir2-build/hunting-material-pg-142-postgres_export_unknown_commit_recovers_without_duplicate_revision.log",
+        "summary": [
+          "test postgres_export_unknown_commit_recovers_without_duplicate_revision ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.39s"
+        ]
+      },
+      {
+        "test": "postgres_bound_debit_burn_atomic_source_replay_and_digest_conflict",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 289,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_atomic_source_replay_and_digest_conflict.log",
+        "summary": [
+          "test postgres_bound_debit_burn_atomic_source_replay_and_digest_conflict ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.28s"
+        ]
+      },
+      {
+        "test": "postgres_bound_debit_burn_authorization_precedes_receipts_and_recovery_ignores_disabled_gap",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 302,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_authorization_precedes_receipts_and_recovery_ignores_disabled_gap.log",
+        "summary": [
+          "test postgres_bound_debit_burn_authorization_precedes_receipts_and_recovery_ignores_disabled_gap ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.29s"
+        ]
+      },
+      {
+        "test": "postgres_bound_debit_burn_competing_sources_cannot_overspend",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 427,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_competing_sources_cannot_overspend.log",
+        "summary": [
+          "test postgres_bound_debit_burn_competing_sources_cannot_overspend ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.42s"
+        ]
+      },
+      {
+        "test": "postgres_bound_debit_burn_same_source_key_is_isolated_by_owner_and_incarnation",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 302,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_same_source_key_is_isolated_by_owner_and_incarnation.log",
+        "summary": [
+          "test postgres_bound_debit_burn_same_source_key_is_isolated_by_owner_and_incarnation ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.29s"
+        ]
+      },
+      {
+        "test": "postgres_bound_debit_burn_source_failure_commit_fault_and_original_lookup",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 300,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_source_failure_commit_fault_and_original_lookup.log",
+        "summary": [
+          "test postgres_bound_debit_burn_source_failure_commit_fault_and_original_lookup ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.29s"
+        ]
+      },
+      {
+        "test": "postgres_bound_debit_burn_timeouts_are_bounded_local_and_recoverable",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 710,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_timeouts_are_bounded_local_and_recoverable.log",
+        "summary": [
+          "test postgres_bound_debit_burn_timeouts_are_bounded_local_and_recoverable ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.70s"
+        ]
+      },
+      {
+        "test": "postgres_bounded_maintenance_and_authorization_reset_pool_session_timeouts",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 351,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_bounded_maintenance_and_authorization_reset_pool_session_timeouts.log",
+        "summary": [
+          "test postgres_bounded_maintenance_and_authorization_reset_pool_session_timeouts ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.34s"
+        ]
+      },
+      {
+        "test": "postgres_competing_conversions_never_overspend_one_global_pool",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 185,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_competing_conversions_never_overspend_one_global_pool.log",
+        "summary": [
+          "test postgres_competing_conversions_never_overspend_one_global_pool ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.17s"
+        ]
+      },
+      {
+        "test": "postgres_conversion_is_atomic_idempotent_and_incarnation_bound",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 133,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_conversion_is_atomic_idempotent_and_incarnation_bound.log",
+        "summary": [
+          "test postgres_conversion_is_atomic_idempotent_and_incarnation_bound ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.12s"
+        ]
+      },
+      {
+        "test": "postgres_multiday_settlement_cap_decay_and_duplicate_workers",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 194,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_multiday_settlement_cap_decay_and_duplicate_workers.log",
+        "summary": [
+          "test postgres_multiday_settlement_cap_decay_and_duplicate_workers ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.18s"
+        ]
+      },
+      {
+        "test": "postgres_trusted_source_rollback_replay_and_history_are_enforced",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 120,
+        "log": "C:/mir2-build/hunting-material-pg-140-postgres_trusted_source_rollback_replay_and_history_are_enforced.log",
+        "summary": [
+          "test postgres_trusted_source_rollback_replay_and_history_are_enforced ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.11s"
+        ]
+      }
+    ],
+    "simulationPure": [
+      {
+        "test": "runtime::hunting_material_plan::tests::hunting_material_plan_full_actual_bag_allows_whole_and_refuses_partial_without_merging",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 659,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_full_actual_bag_allows_whole_and_refuses_partial_without_merging.log",
+        "summary": [
+          "test runtime::hunting_material_plan::tests::hunting_material_plan_full_actual_bag_allows_whole_and_refuses_partial_without_merging ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.64s"
+        ]
+      },
+      {
+        "test": "runtime::hunting_material_plan::tests::hunting_material_plan_partial_retains_bound_remainder_and_allocates_separate_full_output",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 666,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_partial_retains_bound_remainder_and_allocates_separate_full_output.log",
+        "summary": [
+          "test runtime::hunting_material_plan::tests::hunting_material_plan_partial_retains_bound_remainder_and_allocates_separate_full_output ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.65s"
+        ]
+      },
+      {
+        "test": "runtime::hunting_material_plan::tests::hunting_material_plan_refuses_legacy_equipment_other_restrictions_children_and_wrong_owner",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1008,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_refuses_legacy_equipment_other_restrictions_children_and_wrong_owner.log",
+        "summary": [
+          "test runtime::hunting_material_plan::tests::hunting_material_plan_refuses_legacy_equipment_other_restrictions_children_and_wrong_owner ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.99s"
+        ]
+      },
+      {
+        "test": "runtime::hunting_material_plan::tests::hunting_material_plan_refuses_uid_and_slot_ambiguity_across_custody",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 633,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_refuses_uid_and_slot_ambiguity_across_custody.log",
+        "summary": [
+          "test runtime::hunting_material_plan::tests::hunting_material_plan_refuses_uid_and_slot_ambiguity_across_custody ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.61s"
+        ]
+      },
+      {
+        "test": "runtime::hunting_material_plan::tests::hunting_material_plan_revalidates_full_preimage_and_typed_authority_before_publish",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 657,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_revalidates_full_preimage_and_typed_authority_before_publish.log",
+        "summary": [
+          "test runtime::hunting_material_plan::tests::hunting_material_plan_revalidates_full_preimage_and_typed_authority_before_publish ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.64s"
+        ]
+      },
+      {
+        "test": "runtime::hunting_material_plan::tests::hunting_material_plan_whole_preserves_full_carrier_and_uid_without_live_mutation",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 662,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_whole_preserves_full_carrier_and_uid_without_live_mutation.log",
+        "summary": [
+          "test runtime::hunting_material_plan::tests::hunting_material_plan_whole_preserves_full_carrier_and_uid_without_live_mutation ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.64s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_conversion::outflow_tests::hunting_converted_npc_sell_rejects_root_and_hidden_child_without_any_custody_or_gold_change",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1389,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_converted_npc_sell_rejects_root_and_hidden_child_without_any_custody_or_gold_change.log",
+        "summary": [
+          "test runtime::items::hunting_item_conversion::outflow_tests::hunting_converted_npc_sell_rejects_root_and_hidden_child_without_any_custody_or_gold_change ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 1.37s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_conversion::outflow_tests::hunting_converted_player_drop_shared_pickup_preserves_full_source_across_accounts",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 967,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_converted_player_drop_shared_pickup_preserves_full_source_across_accounts.log",
+        "summary": [
+          "test runtime::items::hunting_item_conversion::outflow_tests::hunting_converted_player_drop_shared_pickup_preserves_full_source_across_accounts ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.94s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_conversion::outflow_tests::hunting_converted_shared_trade_offer_delivery_preserves_provenance_across_accounts",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 954,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_converted_shared_trade_offer_delivery_preserves_provenance_across_accounts.log",
+        "summary": [
+          "test runtime::items::hunting_item_conversion::outflow_tests::hunting_converted_shared_trade_offer_delivery_preserves_provenance_across_accounts ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.93s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_conversion::tests::hunting_item_conversion_equip_remove_and_wire_identity_keep_provenance",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 683,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_equip_remove_and_wire_identity_keep_provenance.log",
+        "summary": [
+          "test runtime::items::hunting_item_conversion::tests::hunting_item_conversion_equip_remove_and_wire_identity_keep_provenance ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.66s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_conversion::tests::hunting_item_conversion_legacy_grants_do_not_use_converted_stack_capacity",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 638,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_legacy_grants_do_not_use_converted_stack_capacity.log",
+        "summary": [
+          "test runtime::items::hunting_item_conversion::tests::hunting_item_conversion_legacy_grants_do_not_use_converted_stack_capacity ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.62s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_conversion::tests::hunting_item_conversion_merge_only_matches_the_same_lot_and_split_keeps_its_origin",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 653,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_merge_only_matches_the_same_lot_and_split_keeps_its_origin.log",
+        "summary": [
+          "test runtime::items::hunting_item_conversion::tests::hunting_item_conversion_merge_only_matches_the_same_lot_and_split_keeps_its_origin ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.63s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_conversion::tests::hunting_item_conversion_mixed_roots_and_hidden_children_fail_before_reconstruction",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 642,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_mixed_roots_and_hidden_children_fail_before_reconstruction.log",
+        "summary": [
+          "test runtime::items::hunting_item_conversion::tests::hunting_item_conversion_mixed_roots_and_hidden_children_fail_before_reconstruction ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.62s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_conversion::tests::hunting_item_conversion_only_replaces_a_verified_plain_bound_root",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 641,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_only_replaces_a_verified_plain_bound_root.log",
+        "summary": [
+          "test runtime::items::hunting_item_conversion::tests::hunting_item_conversion_only_replaces_a_verified_plain_bound_root ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.62s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_conversion::tests::hunting_item_conversion_same_realm_new_owner_can_use_and_load_all_carriers",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 660,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_same_realm_new_owner_can_use_and_load_all_carriers.log",
+        "summary": [
+          "test runtime::items::hunting_item_conversion::tests::hunting_item_conversion_same_realm_new_owner_can_use_and_load_all_carriers ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.63s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_conversion::tests::hunting_item_conversion_strict_provenance_and_unchanged_legacy_bound_shapes",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 638,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_strict_provenance_and_unchanged_legacy_bound_shapes.log",
+        "summary": [
+          "test runtime::items::hunting_item_conversion::tests::hunting_item_conversion_strict_provenance_and_unchanged_legacy_bound_shapes ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.62s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_keeps_legacy_none_and_rejects_overbudget_trees",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 649,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_character_load_keeps_legacy_none_and_rejects_overbudget_trees.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_keeps_legacy_none_and_rejects_overbudget_trees ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.63s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_refuses_foreign_or_missing_realm_for_every_collection",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 634,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_character_load_refuses_foreign_or_missing_realm_for_every_collection.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_refuses_foreign_or_missing_realm_for_every_collection ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.61s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_refuses_wrong_identity_and_hidden_bound_children",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 645,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_character_load_refuses_wrong_identity_and_hidden_bound_children.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_refuses_wrong_identity_and_hidden_bound_children ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.63s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_uses_verified_actor_without_selected_session",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 631,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_character_load_uses_verified_actor_without_selected_session.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_uses_verified_actor_without_selected_session ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.61s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_equipment_roundtrip_keeps_tag_and_rejects_wrong_owner",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 629,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_equipment_roundtrip_keeps_tag_and_rejects_wrong_owner.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_equipment_roundtrip_keeps_tag_and_rejects_wrong_owner ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.61s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_full_capacity_rolls_back_staged_partial_merges",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 618,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_full_capacity_rolls_back_staged_partial_merges.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_full_capacity_rolls_back_staged_partial_merges ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.60s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_grants_separate_legacy_and_exact_binding_identities",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 634,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_grants_separate_legacy_and_exact_binding_identities.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_grants_separate_legacy_and_exact_binding_identities ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.60s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_ordinary_potion_self_use_keeps_enforcement_without_policy",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 609,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_ordinary_potion_self_use_keeps_enforcement_without_policy.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_ordinary_potion_self_use_keeps_enforcement_without_policy ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.58s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_owner_witness_is_required_even_when_policy_is_disabled",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 603,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_owner_witness_is_required_even_when_policy_is_disabled.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_owner_witness_is_required_even_when_policy_is_disabled ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.58s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_registry_attachment_is_not_a_realm_or_incarnation_grant",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 617,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_registry_attachment_is_not_a_realm_or_incarnation_grant.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_registry_attachment_is_not_a_realm_or_incarnation_grant ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.60s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_registry_refuses_hidden_bound_child_and_cross_character_attach",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 644,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_registry_refuses_hidden_bound_child_and_cross_character_attach.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_registry_refuses_hidden_bound_child_and_cross_character_attach ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.62s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_registry_refuses_sealed_shell_with_bound_inventory_or_equipment",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 637,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_registry_refuses_sealed_shell_with_bound_inventory_or_equipment.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_registry_refuses_sealed_shell_with_bound_inventory_or_equipment ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.62s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_same_owner_hero_moves_keep_tag_and_wrong_owner_is_refused",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 629,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_same_owner_hero_moves_keep_tag_and_wrong_owner_is_refused.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_same_owner_hero_moves_keep_tag_and_wrong_owner_is_refused ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.61s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_split_and_personal_storage_preserve_tag_with_unique_ids",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 637,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_split_and_personal_storage_preserve_tag_with_unique_ids.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_split_and_personal_storage_preserve_tag_with_unique_ids ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.62s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_strict_marker_and_legacy_shape",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 644,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_strict_marker_and_legacy_shape.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_strict_marker_and_legacy_shape ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.62s"
+        ]
+      },
+      {
+        "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_wire_hydration_preserves_root_but_refuses_bound_children",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 630,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_wire_hydration_preserves_root_but_refuses_bound_children.log",
+        "summary": [
+          "test runtime::items::hunting_item_binding::tests::hunting_item_binding_wire_hydration_preserves_root_but_refuses_bound_children ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.61s"
+        ]
+      },
+      {
+        "test": "runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_dynamic_command_cannot_hide_a_later_take_or_goto",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 917,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_npc_dynamic_command_cannot_hide_a_later_take_or_goto.log",
+        "summary": [
+          "test runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_dynamic_command_cannot_hide_a_later_take_or_goto ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.90s"
+        ]
+      },
+      {
+        "test": "runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_exchange_preflight_rejects_cross_goto_before_any_gold_or_legacy_input",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 638,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_npc_exchange_preflight_rejects_cross_goto_before_any_gold_or_legacy_input.log",
+        "summary": [
+          "test runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_exchange_preflight_rejects_cross_goto_before_any_gold_or_legacy_input ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.62s"
+        ]
+      },
+      {
+        "test": "runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_ordinary_sell_never_pays_gold_or_loses_custody",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1325,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_npc_ordinary_sell_never_pays_gold_or_loses_custody.log",
+        "summary": [
+          "test runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_ordinary_sell_never_pays_gold_or_loses_custody ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 1.30s"
+        ]
+      },
+      {
+        "test": "runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_seal_preflight_rejects_hero_custody_before_prior_gold_action",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 985,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_npc_seal_preflight_rejects_hero_custody_before_prior_gold_action.log",
+        "summary": [
+          "test runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_seal_preflight_rejects_hero_custody_before_prior_gold_action ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.96s"
+        ]
+      },
+      {
+        "test": "runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_take_is_atomic_and_false_stops_the_following_give",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 643,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_npc_take_is_atomic_and_false_stops_the_following_give.log",
+        "summary": [
+          "test runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_take_is_atomic_and_false_stops_the_following_give ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.63s"
+        ]
+      },
+      {
+        "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_death_penalty_keeps_bound_inventory_and_equipment_trees",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1726,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_death_penalty_keeps_bound_inventory_and_equipment_trees.log",
+        "summary": [
+          "test runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_death_penalty_keeps_bound_inventory_and_equipment_trees ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 1.71s"
+        ]
+      },
+      {
+        "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_final_shared_projection_rejects_either_full_offer_before_gold",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1795,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_final_shared_projection_rejects_either_full_offer_before_gold.log",
+        "summary": [
+          "test runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_final_shared_projection_rejects_either_full_offer_before_gold ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 1.78s"
+        ]
+      },
+      {
+        "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_fishing_cast_and_late_reel_never_consume_or_strip_bound_inputs",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2112,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_fishing_cast_and_late_reel_never_consume_or_strip_bound_inputs.log",
+        "summary": [
+          "test runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_fishing_cast_and_late_reel_never_consume_or_strip_bound_inputs ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 2.09s"
+        ]
+      },
+      {
+        "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_guild_packets_reject_deposit_and_withdrawal_before_both_sides_change",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1698,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_guild_packets_reject_deposit_and_withdrawal_before_both_sides_change.log",
+        "summary": [
+          "test runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_guild_packets_reject_deposit_and_withdrawal_before_both_sides_change ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 1.68s"
+        ]
+      },
+      {
+        "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_hero_transfer_preserves_same_owner_and_rejects_new_incarnation",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1042,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_hero_transfer_preserves_same_owner_and_rejects_new_incarnation.log",
+        "summary": [
+          "test runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_hero_transfer_preserves_same_owner_and_rejects_new_incarnation ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 1.02s"
+        ]
+      },
+      {
+        "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_legacy_trade_and_consignment_are_still_real_successes",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1145,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_legacy_trade_and_consignment_are_still_real_successes.log",
+        "summary": [
+          "test runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_legacy_trade_and_consignment_are_still_real_successes ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 1.13s"
+        ]
+      },
+      {
+        "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_market_buy_and_sold_receipt_never_debit_or_mint_old_gold",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1718,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_market_buy_and_sold_receipt_never_debit_or_mint_old_gold.log",
+        "summary": [
+          "test runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_market_buy_and_sold_receipt_never_debit_or_mint_old_gold ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 1.70s"
+        ]
+      },
+      {
+        "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_rental_deposit_and_final_confirm_leave_both_custodians_intact",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1816,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_rental_deposit_and_final_confirm_leave_both_custodians_intact.log",
+        "summary": [
+          "test runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_rental_deposit_and_final_confirm_leave_both_custodians_intact ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 1.80s"
+        ]
+      },
+      {
+        "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_shared_trade_confirmation_rechecks_a_late_binding",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1010,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_shared_trade_confirmation_rechecks_a_late_binding.log",
+        "summary": [
+          "test runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_shared_trade_confirmation_rechecks_a_late_binding ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.99s"
+        ]
+      },
+      {
+        "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_trade_consign_drop_and_mail_reject_full_tree_when_disabled",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 3405,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_trade_consign_drop_and_mail_reject_full_tree_when_disabled.log",
+        "summary": [
+          "test runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_trade_consign_drop_and_mail_reject_full_tree_when_disabled ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 3.39s"
+        ]
+      },
+      {
+        "test": "runtime::shared_guilds::bank::hunting_binding_tests::hunting_bound_shared_guild_bank_real_transaction_rejects_full_tree_without_changing_either_owner",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 958,
+        "log": "C:/mir2-build/hunting-material-sim-146-hunting_bound_shared_guild_bank_real_transaction_rejects_full_tree_without_changing_either_owner.log",
+        "summary": [
+          "test runtime::shared_guilds::bank::hunting_binding_tests::hunting_bound_shared_guild_bank_real_transaction_rejects_full_tree_without_changing_either_owner ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2274 filtered out; finished in 0.94s"
+        ]
+      }
+    ],
+    "simulationPg": [
+      {
+        "test": "runtime::hunting_material::tests::hunting_material_postgres_ack_lost_original_query_publishes_once",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 187284,
+        "log": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_ack_lost_original_query_publishes_once.log",
+        "summary": [
+          "test runtime::hunting_material::tests::hunting_material_postgres_ack_lost_original_query_publishes_once ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2280 filtered out; finished in 186.95s"
+        ]
+      },
+      {
+        "test": "runtime::hunting_material::tests::hunting_material_postgres_actual_kit_whole_partial_cold_login_and_original_query",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 275323,
+        "log": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_actual_kit_whole_partial_cold_login_and_original_query.log",
+        "summary": [
+          "test runtime::hunting_material::tests::hunting_material_postgres_actual_kit_whole_partial_cold_login_and_original_query ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2280 filtered out; finished in 275.29s"
+        ]
+      },
+      {
+        "test": "runtime::hunting_material::tests::hunting_material_postgres_before_commit_rollback_and_known_absent_never_auto_confirm",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 186346,
+        "log": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_before_commit_rollback_and_known_absent_never_auto_confirm.log",
+        "summary": [
+          "test runtime::hunting_material::tests::hunting_material_postgres_before_commit_rollback_and_known_absent_never_auto_confirm ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2280 filtered out; finished in 186.32s"
+        ]
+      },
+      {
+        "test": "runtime::hunting_material::tests::hunting_material_postgres_mutation_revision_price_funds_and_quota_reject_without_debit",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 96227,
+        "log": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_mutation_revision_price_funds_and_quota_reject_without_debit.log",
+        "summary": [
+          "test runtime::hunting_material::tests::hunting_material_postgres_mutation_revision_price_funds_and_quota_reject_without_debit ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2280 filtered out; finished in 96.20s"
+        ]
+      },
+      {
+        "test": "runtime::hunting_material::tests::hunting_material_postgres_normal_logout_reconciles_pending_original_before_save",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 277046,
+        "log": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_normal_logout_reconciles_pending_original_before_save.log",
+        "summary": [
+          "test runtime::hunting_material::tests::hunting_material_postgres_normal_logout_reconciles_pending_original_before_save ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2280 filtered out; finished in 277.02s"
+        ]
+      },
+      {
+        "test": "runtime::hunting_material::tests::hunting_material_postgres_unsafe_commit_refences_retires_and_cold_loads_without_overwrite",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 276387,
+        "log": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_unsafe_commit_refences_retires_and_cold_loads_without_overwrite.log",
+        "summary": [
+          "test runtime::hunting_material::tests::hunting_material_postgres_unsafe_commit_refences_retires_and_cold_loads_without_overwrite ... ok",
+          "",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2280 filtered out; finished in 276.36s"
+        ]
+      }
+    ],
+    "wire": {
+      "code": 0,
+      "elapsedMs": 255,
+      "log": "C:/mir2-build/hunting-material-wire-148.log",
+      "binary": "C:/mir2-build/hunting-permit-economy-target/debug/deps/mir2-client-wire-material-148.exe",
+      "summary": [
+        "test tests::schema_value_decode_unit_enum_compatibility_matches_serde ... ok",
+        "",
+        "test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s"
+      ]
+    },
+    "gatewayPure": [
+      {
+        "label": "pure",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1537,
+        "args": [
+          "hunting",
+          "--test-threads=1"
+        ],
+        "log": "C:/mir2-build/hunting-material-gateway-157-pure.log",
+        "summary": [
+          "test zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_guards_direct_session_dispatch_and_keeps_auth_precedence ... ok",
+          "test zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_rejects_programmatic_execute_replication_and_promotion ... ok",
+          "test zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_rejects_serve_before_accepting ... ok",
+          "",
+          "test result: ok. 35 passed; 0 failed; 16 ignored; 0 measured; 920 filtered out; finished in 1.16s"
+        ]
+      }
+    ],
+    "python": {
+      "status": 0,
+      "signal": null,
+      "log": "C:/mir2-build/hunting-material-python-143.log"
+    },
+    "physicalWs": {
+      "status": "passed",
+      "uniqueTests": 3,
+      "physicalSchemas": 5,
+      "saveQueueLimit": 1,
+      "normalCasesBinary": "Gateway188 copied189",
+      "nativeResumeBinary": "Gateway206 copied207",
+      "results": [
+        {
+          "label": "hunting_material_network_postgres_actual_kit_whole_partial_snapshot_query_and_cold_login",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 144199,
+          "args": [
+            "web::web_hunting_repair_network_tests::material_network::hunting_material_network_postgres_actual_kit_whole_partial_snapshot_query_and_cold_login",
+            "--exact",
+            "--ignored",
+            "--nocapture",
+            "--test-threads=1"
+          ],
+          "log": "C:/mir2-build/hunting-material-network-189-hunting_material_network_postgres_actual_kit_whole_partial_snapshot_query_and_cold_login.log",
+          "summary": [
+            "running 1 test",
+            "test web::web_hunting_repair_network_tests::material_network::hunting_material_network_postgres_actual_kit_whole_partial_snapshot_query_and_cold_login ... ok",
+            "",
+            "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 970 filtered out; finished in 143.76s"
+          ]
+        },
+        {
+          "label": "hunting_material_network_postgres_missing_price_fee_funds_and_permits_leave_assets_unchanged",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 288582,
+          "args": [
+            "web::web_hunting_repair_network_tests::material_network::hunting_material_network_postgres_missing_price_fee_funds_and_permits_leave_assets_unchanged",
+            "--exact",
+            "--ignored",
+            "--nocapture",
+            "--test-threads=1"
+          ],
+          "log": "C:/mir2-build/hunting-material-network-189-hunting_material_network_postgres_missing_price_fee_funds_and_permits_leave_assets_unchanged.log",
+          "summary": [
+            "running 1 test",
+            "test web::web_hunting_repair_network_tests::material_network::hunting_material_network_postgres_missing_price_fee_funds_and_permits_leave_assets_unchanged ... ok",
+            "",
+            "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 970 filtered out; finished in 288.55s"
+          ]
+        },
+        {
+          "label": "hunting_material_network_postgres_unread_commit_raw_resume_original_query_and_cold_login_once",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 162994,
+          "args": [
+            "web::web_hunting_repair_network_tests::material_network::hunting_material_network_postgres_unread_commit_raw_resume_original_query_and_cold_login_once",
+            "--exact",
+            "--ignored",
+            "--nocapture",
+            "--test-threads=1"
+          ],
+          "log": "C:/mir2-build/hunting-material-network-207-hunting_material_network_postgres_unread_commit_raw_resume_original_query_and_cold_login_once.log",
+          "summary": [
+            "[save-recovery] status=saved transport=web-teardown count=1 detail=immutable drained checkpoint committed before teardown",
+            "web reconnect grace retained session for repairnet_user/0 for 15s",
+            "ok",
+            "",
+            "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 970 filtered out; finished in 162.59s"
+          ]
+        }
+      ]
+    },
+    "adjacent": {
+      "status": "passed",
+      "topLevelTests": 3,
+      "actualPgTests": 2,
+      "results": [
+        {
+          "label": "hunting_repair_empty_teardown_is_not_proof_of_retirement",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 116,
+          "args": [
+            "runtime::hunting_repair::tests::hunting_repair_empty_teardown_is_not_proof_of_retirement",
+            "--exact",
+            "--nocapture",
+            "--test-threads=1"
+          ],
+          "log": "C:/mir2-build/hunting-material-adjacent-161-hunting_repair_empty_teardown_is_not_proof_of_retirement.log",
+          "summary": [
+            "running 1 test",
+            "test runtime::hunting_repair::tests::hunting_repair_empty_teardown_is_not_proof_of_retirement ... ok",
+            "",
+            "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2280 filtered out; finished in 0.10s"
+          ]
+        },
+        {
+          "label": "hunting_repair_postgres_teardown_queries_original_before_capturing_or_saving",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 6727,
+          "args": [
+            "runtime::hunting_repair::tests::hunting_repair_postgres_teardown_queries_original_before_capturing_or_saving",
+            "--exact",
+            "--ignored",
+            "--nocapture",
+            "--test-threads=1"
+          ],
+          "log": "C:/mir2-build/hunting-material-adjacent-161-hunting_repair_postgres_teardown_queries_original_before_capturing_or_saving.log",
+          "summary": [
+            "running 1 test",
+            "test runtime::hunting_repair::tests::hunting_repair_postgres_teardown_queries_original_before_capturing_or_saving ... ok",
+            "",
+            "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2280 filtered out; finished in 6.70s"
+          ]
+        },
+        {
+          "label": "hunting_repair_postgres_precommit_rollback_and_unknown_changed_item_actual_logout",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 4764,
+          "args": [
+            "runtime::hunting_repair::tests::hunting_repair_postgres_precommit_rollback_and_unknown_changed_item_actual_logout",
+            "--exact",
+            "--ignored",
+            "--nocapture",
+            "--test-threads=1"
+          ],
+          "log": "C:/mir2-build/hunting-material-adjacent-161-hunting_repair_postgres_precommit_rollback_and_unknown_changed_item_actual_logout.log",
+          "summary": [
+            "running 1 test",
+            "test runtime::hunting_repair::tests::hunting_repair_postgres_precommit_rollback_and_unknown_changed_item_actual_logout ... ok",
+            "",
+            "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2280 filtered out; finished in 4.74s"
+          ]
+        }
+      ]
+    },
+    "biOffline": {
+      "status": "passed",
+      "cases": 47,
+      "assertions": 87,
+      "artifactChecks": 230,
+      "artifact": "C:/mir2-build/hunting-material-bi-162-offline.json"
+    },
+    "biPg": {
+      "status": "passed",
+      "postgres_executed": true,
+      "exit_code": 0,
+      "synthetic_realm_prefix": "hunting-observer-test-3896c1c4d8a4400f",
+      "all_fixture_changes_rolled_back": true,
+      "grafana_import_verified": false,
+      "notifications_sent": false,
+      "synthetic_fixture_cases": 42,
+      "expected_rule_values": 71,
+      "observation_columns": 44,
+      "material_view_installed_under_rollback": true,
+      "exporter_worker_executed": false
+    }
+  },
+  "retainedFailures": [
+    {
+      "artifact": "C:/mir2-build/hunting-material-sim-results-134.json",
+      "finding": "New provenance split could allocate UID zero; fixed allocator for provenance only; 146 all48 passed"
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-pg-results-140.json",
+      "finding": "Old export fixture reapplied41-column view over44; isolated per-processschema; 142 all10 passed"
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-pg-results-151.json",
+      "finding": "Accept closes actual NPC dialog; test reopens ordinary Jane beforeFinish; 155 all6 passed"
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-network-results-158.json",
+      "finding": "Full Crystal debug StartGame exceeded old10sec test budget; material-only120sec wait, productionTTL30 and old repair10 unchanged"
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-network-results-172.json",
+      "finding": "Normal template quest grants omit optionalUserItem metadata; fixture now matches canonical Crystal key and checks captured index if present"
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-network-results-180.json",
+      "finding": "Samephysical ordinaryLogOut retains original account identity; fixture no longer requires fabricated reissuedgrant, retains actual firstlogin events and selects samecharacter again"
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-network-results-189.json",
+      "finding": "First two cases pass; native fixture tried resume family after explicitLogOut which disables native resume on that physicalconnection. Fixed ONLY native setup to ordinaryDisconnect+freshphysicalLogin+realnewgrant+capability beforeStartGame; kept policy/grace15sec/TTL30 unchanged. Onlynativecase rerun207; all3unique pass."
+    }
+  ],
+  "numericProof": "C:/mir2-build/hunting-material-numeric-proof-138.json",
+  "protectedFiles": [
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-portable-statistics-repair01.json",
+      "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473",
+      "expected": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+      "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b",
+      "expected": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json",
+      "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd",
+      "expected": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd"
+    },
+    {
+      "path": "apps/web/tsconfig.json",
+      "sha256": "70145b1787f5dea10c830730d9a6968f226bf8e1145602c8a9c964856a44f2ec",
+      "expected": "70145b1787f5dea10c830730d9a6968f226bf8e1145602c8a9c964856a44f2ec"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182",
+      "expected": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/lib/typescript.js",
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675",
+      "expected": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675"
+    }
+  ],
+  "limits": [
+    "Tests use isolated loopback synthetic starting positions/prices/permit history/fee funding; actual ordinary Jane kit grant, no remote assets",
+    "Network tests use save queue limit1 and do not prove default asynchronous save races",
+    "No new Windows EXE/GUI acceptance; phase16 Runtime/Platform/Bevy WIP excluded from phase15",
+    "Grafana configs and SQL verified; no new Grafana import/browser or notification delivery",
+    "No full realm stock/market/player/income coverage, official pricing/admin rollout, mining/planting/full burn sources or production rollout",
+    "Not one binary/full source closure/full workspace; final simulation test whitespace formatting after build154, network fixture fixes rebuilt178; build152 overlapped gateway writes and is not final proof",
+    "Legacy old gold unchanged; no Docker/WSL/VM, system or remote changes; no Candidate percentage change",
+    "Normal samephysical LogOut retains authenticated account but explicitly disables its resume family; native-resume acceptance therefore begins with ordinary fresh physical login after kitsetup, no policy reset or fabricated grant."
+  ],
+  "review": [
+    {
+      "reviewer": "/root/material_final_audit",
+      "scope": "Phase15 ordinary teardown/source preimage/cold load/shared owner/Converted transfer",
+      "result": "No actionable loss/dupe/stale-source bypass found; code review only"
+    },
+    {
+      "reviewer": "/root/material_final_audit",
+      "scope": "Phase15 export/BI",
+      "result": "Found old gold conservation equation incorrectly using total fee after material inclusion; fixed12BI files, offline162+actualPG179 pass"
+    }
+  ],
+  "verificationStatus": "passed within declared scope",
+  "format": {
+    "code": 0,
+    "files": [
+      "apps/game-client/client-wire/src/hunting_material.rs",
+      "apps/game-client/client-wire/src/hunting_material_tests.rs",
+      "apps/gateway/src/hunting_material_browser.rs",
+      "apps/gateway/src/hunting_material_browser_tests.rs",
+      "apps/gateway/src/web_hunting_material_network_tests.rs",
+      "apps/simulation/src/config_hunting_material.rs",
+      "apps/simulation/src/config_hunting_material_recovery.rs",
+      "apps/simulation/src/runtime/hunting_item_conversion.rs",
+      "apps/simulation/src/runtime/hunting_item_conversion_outflow_tests.rs",
+      "apps/simulation/src/runtime/hunting_item_conversion_tests.rs",
+      "apps/simulation/src/runtime/hunting_material.rs",
+      "apps/simulation/src/runtime/hunting_material_plan.rs",
+      "apps/simulation/src/runtime/hunting_material_plan_tests.rs",
+      "apps/simulation/src/runtime/hunting_material_tests.rs",
+      "packages/economy-policy/src/material.rs",
+      "packages/economy-policy/src/material_tests.rs",
+      "packages/economy-service/src/material.rs",
+      "packages/economy-service/src/material_export.rs",
+      "packages/economy-service/tests/postgres_material.rs",
+      "packages/economy-service/tests/postgres_material_export.rs"
+    ],
+    "output": ""
+  },
+  "builds": [
+    {
+      "artifact": "C:/mir2-build/hunting-material-core-build-result-130.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 3227,
+        "log": "C:/mir2-build/hunting-material-core-build-130.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-economy-policy",
+          "-p",
+          "mir2-economy-service",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_economy_policy-145e46ae00e4ae25.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_economy_service-47c3d833220a1c9d.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-pg-build-result-135.json",
+      "result": {
+        "code": 101,
+        "signal": null,
+        "elapsedMs": 5734,
+        "log": "C:/mir2-build/hunting-material-pg-build-135.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-economy-service",
+          "--tests",
+          "--features",
+          "test-support",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_economy_service-ef400980ccd79e17.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_bound_debit_burn-6fc9d6802a2762a1.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-pg-build-result-136.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 8282,
+        "log": "C:/mir2-build/hunting-material-pg-build-136.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-economy-service",
+          "--tests",
+          "--features",
+          "test-support",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_economy_service-ef400980ccd79e17.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_export-0c1f5c48c25fc5c1.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_material_export-1075ad671fe68c05.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_zero_fee_source-7e4baecc45b2443d.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_material-05749d8cf0dd8b29.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_bound_debit_burn-6fc9d6802a2762a1.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_authority-18a2f8999762febe.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-pg-build-result-139.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 4840,
+        "log": "C:/mir2-build/hunting-material-pg-build-139.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-economy-service",
+          "--tests",
+          "--features",
+          "test-support",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_economy_service-ef400980ccd79e17.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_material-05749d8cf0dd8b29.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_zero_fee_source-7e4baecc45b2443d.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_material_export-1075ad671fe68c05.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_export-0c1f5c48c25fc5c1.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_bound_debit_burn-6fc9d6802a2762a1.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_authority-18a2f8999762febe.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-pg-build-result-141.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 1714,
+        "log": "C:/mir2-build/hunting-material-pg-build-141.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-economy-service",
+          "--tests",
+          "--features",
+          "test-support",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_economy_service-ef400980ccd79e17.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_zero_fee_source-7e4baecc45b2443d.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_material_export-1075ad671fe68c05.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_bound_debit_burn-6fc9d6802a2762a1.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_material-05749d8cf0dd8b29.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_authority-18a2f8999762febe.exe",
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\postgres_export-0c1f5c48c25fc5c1.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-sim-build-result-132.json",
+      "result": {
+        "code": 101,
+        "signal": null,
+        "elapsedMs": 47943,
+        "log": "C:/mir2-build/hunting-material-sim-build-132.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": []
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-sim-build-result-133.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 133045,
+        "log": "C:/mir2-build/hunting-material-sim-build-133.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_simulation-789d56e516add984.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-sim-build-result-144.json",
+      "result": {
+        "code": 101,
+        "signal": null,
+        "elapsedMs": 46290,
+        "log": "C:/mir2-build/hunting-material-sim-build-144.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": []
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-sim-build-result-145.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 120400,
+        "log": "C:/mir2-build/hunting-material-sim-build-145.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_simulation-789d56e516add984.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-sim-build-result-149.json",
+      "result": {
+        "code": 101,
+        "signal": null,
+        "elapsedMs": 42601,
+        "log": "C:/mir2-build/hunting-material-sim-build-149.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": []
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-sim-build-result-150.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 71001,
+        "log": "C:/mir2-build/hunting-material-sim-build-150.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_simulation-789d56e516add984.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-sim-build-result-154.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 26868,
+        "log": "C:/mir2-build/hunting-material-sim-build-154.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-simulation",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_simulation-789d56e516add984.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-wire-build-result-147.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 4036,
+        "log": "C:/mir2-build/hunting-material-wire-build-147.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "--manifest-path",
+          "apps/game-client/client-wire/Cargo.toml",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_client_wire-0009b2ec46fb7edc.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-gateway-build-result-152.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 234782,
+        "log": "C:/mir2-build/hunting-material-gateway-build-152.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_gateway-67cbdf0f2e685907.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-gateway-build-result-156.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 86687,
+        "log": "C:/mir2-build/hunting-material-gateway-build-156.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_gateway-67cbdf0f2e685907.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-gateway-build-result-171.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 35983,
+        "log": "C:/mir2-build/hunting-material-gateway-build-171.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_gateway-67cbdf0f2e685907.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-gateway-build-result-178.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 46831,
+        "log": "C:/mir2-build/hunting-material-gateway-build-178.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_gateway-67cbdf0f2e685907.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-gateway-build-result-188.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 36223,
+        "log": "C:/mir2-build/hunting-material-gateway-build-188.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_gateway-67cbdf0f2e685907.exe"
+        ]
+      }
+    },
+    {
+      "artifact": "C:/mir2-build/hunting-material-gateway-build-result-206.json",
+      "result": {
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 27425,
+        "log": "C:/mir2-build/hunting-material-gateway-build-206.log",
+        "args": [
+          "+1.89.0",
+          "test",
+          "-p",
+          "mir2-gateway",
+          "--lib",
+          "--no-run",
+          "--locked",
+          "--offline",
+          "-j",
+          "2",
+          "--target-dir",
+          "C:/mir2-build/hunting-permit-economy-target",
+          "--message-format=json-render-diagnostics"
+        ],
+        "binaries": [
+          "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_gateway-67cbdf0f2e685907.exe"
+        ]
+      }
+    }
+  ],
+  "nativePhase16ExcludedPaths": [
+    "apps/game-client/runtime/**",
+    "apps/game-client/platform-windows/**",
+    "apps/game-client/client-bevy/**"
+  ],
+  "artifactPins": [
+    {
+      "path": "C:/mir2-build/hunting-material-policy-131.log",
+      "bytes": 751,
+      "sha256": "1a70403f96749e8d32a516296d9715adfbddd65cbbc58ea108165111fa57de0b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-service-131.log",
+      "bytes": 1711,
+      "sha256": "0873836f327ebe64ebd79ad46442089c8b68ed4c28ec59381c814d1228f426f0"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_balance_quota_source_cas_capacity_and_bad_proof_fail_atomically.log",
+      "bytes": 206,
+      "sha256": "80192d4789daa4e21a091055984dee49f1ec27f859c0f296cec97e13825863e9"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_before_commit_fault_rolls_back_source_and_all_economy_writes.log",
+      "bytes": 203,
+      "sha256": "a32d50596571b649fb565f53a6e6eb5952af5c273b6517496a77f23d8b64d995"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_history_immutability_and_quote_result_ledger_foreign_keys.log",
+      "bytes": 200,
+      "sha256": "f4fe2227247ca3cd5d5d2caa7a8ba3e9b2141d0a351886dce652f5a371d25304"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_lost_commit_ack_query_and_confirm_replay_do_not_charge_or_mutate_twice.log",
+      "bytes": 213,
+      "sha256": "0b10cb90d117dff14f541e7a5dcf3e45f2a6e8eb5bfa8afac073beaa8ff77936"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_quote_retry_conflict_and_current_actor_authorization.log",
+      "bytes": 195,
+      "sha256": "09c0bf8a96c4ad3e69c3a5c3b9c75a40afe5e9108c53c5daf1cbafe2ae519a89"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_same_quote_concurrent_confirmations_return_one_immutable_outcome.log",
+      "bytes": 207,
+      "sha256": "ae2beb9561b7898451dafbf4720065a3356bf8cbf57465d85cbe9ce261b658ca"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_two_instances_compete_for_the_last_real_permit_stock.log",
+      "bytes": 195,
+      "sha256": "39e4482170ee8f3d70afe1ec952b2e83da61e726f812cf2f0789a715a64f0d4f"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_valuation_registration_empty_and_missing_are_fail_closed.log",
+      "bytes": 199,
+      "sha256": "ea8a075525b093fdadac68598f2413e490a41ac55e322c41f4b7509fb0b8ba3d"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_valuation_version_and_aba_invalidate_only_new_confirmation.log",
+      "bytes": 201,
+      "sha256": "1e8faa1842a0e04b34341bbae9d71a7d624d7eac0f394da58ccf9bc8b9995c2f"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_whole_and_partial_debit_existing_unbound_without_minting_coins.log",
+      "bytes": 205,
+      "sha256": "c7e065dc3e4974a406a56cba671790b52f4c75898d9a0f9f6fb10bf26ccac07c"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_atomic_without_wallet_or_burn_and_immutable_replay.log",
+      "bytes": 200,
+      "sha256": "af1ae2fb8b3a30315c546b0cb9345f82c2cfef1018494963320f0dd943e24d65"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_authorization_precedes_receipts_and_disabled_gap_recovery.log",
+      "bytes": 207,
+      "sha256": "5f67255013bb692ee89f9e0b797777a60c4f6d542f4034118892a3d593a60871"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_owner_and_recreated_character_are_isolated.log",
+      "bytes": 192,
+      "sha256": "170b29b2c8cc697e5427864eb960595fa7530e9c447419765e07e1f97659a581"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_rollbacks_and_unknown_recover_original_slot.log",
+      "bytes": 193,
+      "sha256": "74e35170cd0af6834dce56206d6b6666d15282cd387d44541df57be98ffdf9e3"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_shares_slot_with_positive_debit_in_both_directions.log",
+      "bytes": 200,
+      "sha256": "4f2c0601f884185bf97141a78326c047eaa026b73f7896bffa1629129be360f3"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_zero_fee_source_timeouts_are_local_and_allow_original_retry.log",
+      "bytes": 193,
+      "sha256": "5e202e1be9f01551ffecc8fc2eb0a700dc79d4fe002bcd20896a15cbed1014b1"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_export_closed_history_accounts_permits_fee_without_coin_inflow.log",
+      "bytes": 205,
+      "sha256": "a593af181534bc0b28fc9bea7b0de3081f0908ce8bd77301f4d8840108ca2df3"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_export_current_api_consumption_reconciles_live_pool.log",
+      "bytes": 194,
+      "sha256": "a0ba432fc3bc8ebf5fa5f8ec10e011573c218600bf88e49fe70013039e09f410"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_export_exact_ceiling_preserves_small_remainders_with_large_valid_ratio.log",
+      "bytes": 213,
+      "sha256": "f1b22baef644347254011509eaf5f6284b9692be608e1e212b98284c426b4e74"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_export_legacy_payload_zero_semantics_and_v2_ack_preserve_v1_history.log",
+      "bytes": 210,
+      "sha256": "3554ba098923e55ba35941f6e14ab0e9379295cf4361c5c2ba88432a0cd17d6e"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_material_export_rejects_missing_orphan_and_wrong_fee_without_partial_publish.log",
+      "bytes": 210,
+      "sha256": "1b8c7e1c10051dd4d59d2a7244d6258761104427b5fe7c96df18e334d12d54aa"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-142-postgres_export_changed_closed_day_burn_aggregate_refuses_ack.log",
+      "bytes": 186,
+      "sha256": "6007256a8f1b3fda22b58f3d28c693be12e962573791ff7de9b3ae4bf4cd02e8"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-142-postgres_export_cursor_corruption_refuses_ack_and_can_retry_after_repair.log",
+      "bytes": 197,
+      "sha256": "debc1a14380d82a99824528b336a3381627677440d7e902d3a3fbbb925d4e204"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-142-postgres_export_failure_rolls_back_target_receipt_and_ack.log",
+      "bytes": 182,
+      "sha256": "2e7be7de8aa2105c92d0ed7dc78786270cf744285123a68f7385726c7cf54010"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-142-postgres_export_is_partial_exact_and_restart_idempotent.log",
+      "bytes": 180,
+      "sha256": "f537ed33d1460fad4ad8b97b1d4be7d19f972c7a4b9c2610637097f857735a1a"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-142-postgres_export_live_permit_stock_corruption_refuses_ack.log",
+      "bytes": 181,
+      "sha256": "6487a3eb1e12c3529c9bc98a077522df7a7fd630bcc7ccef6ff39ad6a302a0bb"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-142-postgres_export_lock_timeout_is_bounded_and_preserves_pending_work.log",
+      "bytes": 191,
+      "sha256": "11f0ef0aae97e6ea36012584dab919539b4ba37311f51603dcfe8f5729c5d28c"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-142-postgres_export_multiple_workers_create_one_version_and_one_ack.log",
+      "bytes": 188,
+      "sha256": "feaac25534958f48adaa133d9748af6bd22f686ac7b3a927c2bd2617f1b463f6"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-142-postgres_export_preserves_a_traceable_richer_revision.log",
+      "bytes": 178,
+      "sha256": "787487658bcae99efc4f9f38d772fc540e1c548d11d0da1eff8fc3f012302ddf"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-142-postgres_export_recovers_previously_acked_event_without_own_consumer_receipt.log",
+      "bytes": 201,
+      "sha256": "84d2371e643162769cabf7e51baecfe16bd2b2d07a70c3dcc32f6b3d734d1236"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-142-postgres_export_unknown_commit_recovers_without_duplicate_revision.log",
+      "bytes": 191,
+      "sha256": "33d7291bfdf170a8cb7c033651c8b35155628993d9079ee54faf16c20d6e4c03"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_atomic_source_replay_and_digest_conflict.log",
+      "bytes": 191,
+      "sha256": "75066a778a6970a59122c02274a90e11243bff8e89af39934470e3b4e3409317"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_authorization_precedes_receipts_and_recovery_ignores_disabled_gap.log",
+      "bytes": 216,
+      "sha256": "54300edfe1f51f3dfeea8fed57ce8d8342f13304e28e4a4dc0fa7f78c69327e4"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_competing_sources_cannot_overspend.log",
+      "bytes": 185,
+      "sha256": "c91d5f6fc01919cb6f9328b1b66eda2d56e11e75654cf7f94596456cbc8f4e3b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_same_source_key_is_isolated_by_owner_and_incarnation.log",
+      "bytes": 203,
+      "sha256": "2cd9f1e8f1af97d5b66b89e15db536172bed1dd953a8f55a1ae6d01812553712"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_source_failure_commit_fault_and_original_lookup.log",
+      "bytes": 198,
+      "sha256": "6835edaa58e58ba138348389d64d2578857487248935c1f20859cff7687ea0fe"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_bound_debit_burn_timeouts_are_bounded_local_and_recoverable.log",
+      "bytes": 193,
+      "sha256": "0fc6228a22c37465500fea515f429c036de5a32a730d990f4505072c567b49ee"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_bounded_maintenance_and_authorization_reset_pool_session_timeouts.log",
+      "bytes": 199,
+      "sha256": "5f23cd0446984cf48eedd0aa72ac463e71b026ffebaf2a3a157db2e828ddbaf9"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_competing_conversions_never_overspend_one_global_pool.log",
+      "bytes": 187,
+      "sha256": "55c652540dcf89f6ed108b674c03dd457d5281197e28a09fe0bcb708e5d4eda9"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_conversion_is_atomic_idempotent_and_incarnation_bound.log",
+      "bytes": 187,
+      "sha256": "9e2814995f1553e471c60864dfd7df86a11d26ae21d2f1afea5b1e37e103bd05"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_multiday_settlement_cap_decay_and_duplicate_workers.log",
+      "bytes": 185,
+      "sha256": "64dc4f68f4a9edeb1a7fdb968ce41833766a263aaee60ccb5d72261d04dee243"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-140-postgres_trusted_source_rollback_replay_and_history_are_enforced.log",
+      "bytes": 189,
+      "sha256": "32b23ffaa8bdc7b6088b81ae7ee1e59bd6f5d5a6874cbb00bb5fc28c78cded65"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_full_actual_bag_allows_whole_and_refuses_partial_without_merging.log",
+      "bytes": 253,
+      "sha256": "99de4c109bbe10f7599cc4b1953b2057fb3657b65bfa6d9f9e8054b5c27d35ba"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_partial_retains_bound_remainder_and_allocates_separate_full_output.log",
+      "bytes": 255,
+      "sha256": "02726bd0c4825a5f22c28a49915b345a89de047573b11d1b3ca5ef42875c6a4d"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_refuses_legacy_equipment_other_restrictions_children_and_wrong_owner.log",
+      "bytes": 257,
+      "sha256": "4e285b1dbbe263e8560f19617ae90136332e9857f3278143296ed29a7c13f4d8"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_refuses_uid_and_slot_ambiguity_across_custody.log",
+      "bytes": 234,
+      "sha256": "a9605126f88faa13ef460740399c212aa9156e03c63e6ad15b5d61e51b805fb4"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_revalidates_full_preimage_and_typed_authority_before_publish.log",
+      "bytes": 249,
+      "sha256": "2b0bd15b945816eeaa0b3d2e6e6245a0117c3925be51f8b3eccb437095ab1a30"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_material_plan_whole_preserves_full_carrier_and_uid_without_live_mutation.log",
+      "bytes": 247,
+      "sha256": "3b7c3de63194facb46e34a16d04cafa1a604fc4e6a6aaa4d54f91d3926271c44"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_converted_npc_sell_rejects_root_and_hidden_child_without_any_custody_or_gold_change.log",
+      "bytes": 275,
+      "sha256": "11f8cd37c7e3b81e221fb39f7cb4d026544d8f10605e42b59e816ce753d4ff1a"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_converted_player_drop_shared_pickup_preserves_full_source_across_accounts.log",
+      "bytes": 265,
+      "sha256": "ee73cc49620162ffcf25bbf716c55c99b22e835c7a75a5a33f507fb1fab4e0d5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_converted_shared_trade_offer_delivery_preserves_provenance_across_accounts.log",
+      "bytes": 266,
+      "sha256": "dc946e74f6422532f2102b90b195d651c28174f0311491574cb79dd957710f24"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_equip_remove_and_wire_identity_keep_provenance.log",
+      "bytes": 246,
+      "sha256": "c77bc964bbbb37a88b7446b880457b85297f52989cc9ed313ba9b8c991094264"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_legacy_grants_do_not_use_converted_stack_capacity.log",
+      "bytes": 249,
+      "sha256": "359be5d5798b76eb18b47338604b011d386c42f7fa5c6ac27210db201ce0d35f"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_merge_only_matches_the_same_lot_and_split_keeps_its_origin.log",
+      "bytes": 258,
+      "sha256": "ded792a55292bf0a218ea14b5edf666c20fd1c8a2500fa2ee1c753e598bda749"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_mixed_roots_and_hidden_children_fail_before_reconstruction.log",
+      "bytes": 258,
+      "sha256": "1408318bd2e3fbdf5947f0c00be980ee1eac402ebbee7224f758ca58c01d5009"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_only_replaces_a_verified_plain_bound_root.log",
+      "bytes": 241,
+      "sha256": "991c3b62a897b8e53984cc5b4dfc4112c6fd550f6fca49f3abf622d59c0a7e3f"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_same_realm_new_owner_can_use_and_load_all_carriers.log",
+      "bytes": 250,
+      "sha256": "8f584416071d6c12064d5a1bfd7ad32b04b5a1416e09ed636379ecc1067b2b4b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_conversion_strict_provenance_and_unchanged_legacy_bound_shapes.log",
+      "bytes": 251,
+      "sha256": "276e25b0b7a8eb1c749eb2e5dc5dafc6814d17c17a4061e2814d88ae1e1f20f0"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_character_load_keeps_legacy_none_and_rejects_overbudget_trees.log",
+      "bytes": 255,
+      "sha256": "f6c76ca8051213f1ca4cb59a677a033bfe125334e4f852262925ca039f2aee6c"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_character_load_refuses_foreign_or_missing_realm_for_every_collection.log",
+      "bytes": 262,
+      "sha256": "9bc16349817232ac9d88c3f55aca496984c31838e940b483f11721d95a43988e"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_character_load_refuses_wrong_identity_and_hidden_bound_children.log",
+      "bytes": 257,
+      "sha256": "259af016a681b47e6047295c11e7ecc89caacf61a52e9251d9a4d7430a06808e"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_character_load_uses_verified_actor_without_selected_session.log",
+      "bytes": 253,
+      "sha256": "2f046010244976cefaf42399630e078ae9bb698b417ed065b32ef8c7e8861249"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_equipment_roundtrip_keeps_tag_and_rejects_wrong_owner.log",
+      "bytes": 247,
+      "sha256": "62e28e77198fe8d31a54c3ebbd00c70dd41aeef3261e6a3101f78da0b39119ae"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_full_capacity_rolls_back_staged_partial_merges.log",
+      "bytes": 240,
+      "sha256": "75aa791b9c96604797113097bed87b48b8b970518d2d32e1b5620a4bf80a8207"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_grants_separate_legacy_and_exact_binding_identities.log",
+      "bytes": 245,
+      "sha256": "ed9e133fd998b72641a5b607267c974d58c24e148bf0831dd939968f43ce4d13"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_ordinary_potion_self_use_keeps_enforcement_without_policy.log",
+      "bytes": 251,
+      "sha256": "6c114e59455060b904f4f0996c5db584052832809cd8966fd3ee6524734bd913"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_owner_witness_is_required_even_when_policy_is_disabled.log",
+      "bytes": 248,
+      "sha256": "a6eeea5924fcbfb25f9f1d919d6b4aa1fd021c6d1f526f422d2017979d321f48"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_registry_attachment_is_not_a_realm_or_incarnation_grant.log",
+      "bytes": 249,
+      "sha256": "46e6274e6a7a4d2154ee4cab4b670c681adc6857ac6cf3c967b7eabc2185bfaa"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_registry_refuses_hidden_bound_child_and_cross_character_attach.log",
+      "bytes": 256,
+      "sha256": "9e0ac06d9102856d2fa247050b0e94b9f4268e57345e0d0bf2c84c24a32d76cd"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_registry_refuses_sealed_shell_with_bound_inventory_or_equipment.log",
+      "bytes": 257,
+      "sha256": "a0a152c39a6d5d54abbc9250135409194e8c03128299fa549c5957ac42bad425"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_same_owner_hero_moves_keep_tag_and_wrong_owner_is_refused.log",
+      "bytes": 251,
+      "sha256": "a4e1c0689d5f6ecb61cb008303d77ef220b47cde9cbf7286b80329308430af93"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_split_and_personal_storage_preserve_tag_with_unique_ids.log",
+      "bytes": 249,
+      "sha256": "3bdea6298e813b056dd191be57d5fed82b1f5a266ce71583a7019957c6900192"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_strict_marker_and_legacy_shape.log",
+      "bytes": 224,
+      "sha256": "b4055f4440b946bb393fe1bbb74027fafcf41a8abb42b4fc80c12584fb70e2fb"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_item_binding_wire_hydration_preserves_root_but_refuses_bound_children.log",
+      "bytes": 250,
+      "sha256": "3674de4ce5af3252c77ce991e12d8dbcad22b513e585d882a21e6a6a1982eba5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_npc_dynamic_command_cannot_hide_a_later_take_or_goto.log",
+      "bytes": 239,
+      "sha256": "aeefb044b9c3cb2cbb224abb5181ccd22b3a6778174d19738faf563d084f00f1"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_npc_exchange_preflight_rejects_cross_goto_before_any_gold_or_legacy_input.log",
+      "bytes": 260,
+      "sha256": "e6ad5b1afaae77645c2eca7387938d7d038b868ad78de3ece79cbdc3e272f3c5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_npc_ordinary_sell_never_pays_gold_or_loses_custody.log",
+      "bytes": 237,
+      "sha256": "6f8766a464b4e9505b5828701a6279a1fd140aa83171deffeacc27fb1e78cae7"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_npc_seal_preflight_rejects_hero_custody_before_prior_gold_action.log",
+      "bytes": 251,
+      "sha256": "d3f3979c98e9b0fa4b5ee78ae9431de611252359a95e57fd8da005da770aa585"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_npc_take_is_atomic_and_false_stops_the_following_give.log",
+      "bytes": 240,
+      "sha256": "cbf1cd991fafb9662e742e93d302c14f7a5ee841222b6bff74ad4ea3e88ce39b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_death_penalty_keeps_bound_inventory_and_equipment_trees.log",
+      "bytes": 251,
+      "sha256": "35175938dd3fbca238cc5aac1a58cde95cbc0eeb23bfcfa52c0feb5d647bed87"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_final_shared_projection_rejects_either_full_offer_before_gold.log",
+      "bytes": 257,
+      "sha256": "723d8c6586e0e8a0ebc599495515b5a1a21b31ead3ca64f18e23b39aef84921a"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_fishing_cast_and_late_reel_never_consume_or_strip_bound_inputs.log",
+      "bytes": 258,
+      "sha256": "7ecf24c7e626637d42f2c26d99ecfb7e702fde6da608cdd7550748eb7068eb79"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_guild_packets_reject_deposit_and_withdrawal_before_both_sides_change.log",
+      "bytes": 264,
+      "sha256": "355686d19eb65b67245f077215bfb1cdfccb68b5dc39e4886327f108fd6a67a5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_hero_transfer_preserves_same_owner_and_rejects_new_incarnation.log",
+      "bytes": 258,
+      "sha256": "a0c233c770bcff5df5164a25f11e98d3c58bec9062e5546c89af37ab90828e0f"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_legacy_trade_and_consignment_are_still_real_successes.log",
+      "bytes": 249,
+      "sha256": "094db3d3100eaa41a2086b9e6937903e85db05e0969c01be15e1f210da680d92"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_market_buy_and_sold_receipt_never_debit_or_mint_old_gold.log",
+      "bytes": 252,
+      "sha256": "26c1a559fb9553f5efeb4c7911df7548106354bbc4f6e6642ed74bc7aab74dd3"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_rental_deposit_and_final_confirm_leave_both_custodians_intact.log",
+      "bytes": 257,
+      "sha256": "1bfc5f23df01671e8c935207abc446786318732f97a8e0c06a40635d62201eb5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_shared_trade_confirmation_rechecks_a_late_binding.log",
+      "bytes": 245,
+      "sha256": "41cefd05a67a29dbbd184d1ef885662870359b6893f31f6e840a063ed98f30c1"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_outflow_trade_consign_drop_and_mail_reject_full_tree_when_disabled.log",
+      "bytes": 254,
+      "sha256": "d4a99900175e9b6cd55c71e51ac7243da226cbd4ce3d2f5c366169b1daf219a4"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-146-hunting_bound_shared_guild_bank_real_transaction_rejects_full_tree_without_changing_either_owner.log",
+      "bytes": 277,
+      "sha256": "f77e9cf4ff6a5c2a17d4b03de88657b578c944878efacd220a9691d9a71c264f"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_ack_lost_original_query_publishes_once.log",
+      "bytes": 228,
+      "sha256": "83c5dc4a91dfe76a58d08d5ea3c340051200653d9d93b80e5db4e73dacf8e666"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_actual_kit_whole_partial_cold_login_and_original_query.log",
+      "bytes": 244,
+      "sha256": "2822bdbb662b1300064e6257f34f5a34e6d01fada550e411022e4a77a177c551"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_before_commit_rollback_and_known_absent_never_auto_confirm.log",
+      "bytes": 248,
+      "sha256": "46b90837c74c6968fa11d84ed2fc0785795811fae6774eea325fdea340a84067"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_mutation_revision_price_funds_and_quota_reject_without_debit.log",
+      "bytes": 249,
+      "sha256": "f216b4c545ab74185b267a0b55f79472f492d4bcb645b13d87becd561c71ae45"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_normal_logout_reconciles_pending_original_before_save.log",
+      "bytes": 243,
+      "sha256": "aac8dff254bdffb88327d01f347ac71ff4b5322c3771438900302270a0c7f37a"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-155-hunting_material_postgres_unsafe_commit_refences_retires_and_cold_loads_without_overwrite.log",
+      "bytes": 253,
+      "sha256": "2e79e9a0da400736768dad8420d2ce0bc188d5e4827f8ceb87413000f5a00ac7"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-wire-148.log",
+      "bytes": 4152,
+      "sha256": "b6ce57f690634d7f0f762ca88ae2bf61342eff80150ea6ef9a2d5aa44050b5ae"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-157-pure.log",
+      "bytes": 7754,
+      "sha256": "de19f349884adecbc969eb980b322c0108a9fbc3b9e13f3de0099208d31d25ea"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-python-143.log",
+      "bytes": 2894,
+      "sha256": "62cc9893e326170a599d17bfb7efc4fe4238ac118b3c1544d3bb16311859823c"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-network-189-hunting_material_network_postgres_actual_kit_whole_partial_snapshot_query_and_cold_login.log",
+      "bytes": 274,
+      "sha256": "af572adcdd5b4f7722f13c4be91bae37f7a4648b060f8718d6a773b946f968a8"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-network-189-hunting_material_network_postgres_missing_price_fee_funds_and_permits_leave_assets_unchanged.log",
+      "bytes": 278,
+      "sha256": "9b81a4b7804a0b9f737950a7a05a00966013fdd159a830dc352519232f59f02d"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-network-207-hunting_material_network_postgres_unread_commit_raw_resume_original_query_and_cold_login_once.log",
+      "bytes": 565,
+      "sha256": "41408c483f340a1132146f77733484744baa485aa4428cb2a35b68486bffd202"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-adjacent-161-hunting_repair_empty_teardown_is_not_proof_of_retirement.log",
+      "bytes": 216,
+      "sha256": "11f3ff8a8ec45ba4c0993ff0116d6c42f39a1e1904153b5c769514e68787ccac"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-adjacent-161-hunting_repair_postgres_teardown_queries_original_before_capturing_or_saving.log",
+      "bytes": 236,
+      "sha256": "af155abf4651643dec6f78686fe71214216908e32843db2b9fefd396ac6ba08a"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-adjacent-161-hunting_repair_postgres_precommit_rollback_and_unknown_changed_item_actual_logout.log",
+      "bytes": 241,
+      "sha256": "5a141b9e6aea5cb6e98e554aff0936364e1f9eeeef5a8aaea370616df3849b2f"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-bi-162-offline.json",
+      "bytes": 3806,
+      "sha256": "c662bcb2386844f487708bda6706b8163ed05509dec2c0a6dbd9657731693ce5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-results-134.json",
+      "bytes": 479,
+      "sha256": "1388ff559176e36b639dcbc057aacdf1d161606d6cd866bb0cd6129232199097"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-results-140.json",
+      "bytes": 21407,
+      "sha256": "357033bd20a273ee63ba1194ab38d6630e1cb2a796d9777ab89300e34ab642eb"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-results-151.json",
+      "bytes": 563,
+      "sha256": "998129cec19c91445ed438220a4f85344bab897f3f9e436c71bb75da057f1e1a"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-network-results-158.json",
+      "bytes": 915,
+      "sha256": "5e662eea1756a95a5b783f3fc77da42d83902dc1fb285e75af65f134a525c5a4"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-network-results-172.json",
+      "bytes": 915,
+      "sha256": "4c557166b7a3acaa51044683d4e8a9969c936ad2f09b4e275d5a5234495c25a9"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-network-results-180.json",
+      "bytes": 915,
+      "sha256": "4b390292df03bb50d7358ecdece13541651b008efab5ed6f36247303122d2ed9"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-network-results-189.json",
+      "bytes": 2777,
+      "sha256": "c76e6be47ba04929567c69f50364d6c674edaf27d9f34cb5e9f93c47b0a8eb30"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-numeric-proof-138.json",
+      "bytes": 55,
+      "sha256": "0c1d20bea991e77df33079f50b4f70978920b805942d8d1d3cab1e28e6b4edd9"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-core-build-result-130.json",
+      "bytes": 668,
+      "sha256": "24d68d9a4d91d79dfefa0fff0c069ce0b28b412bf61dc628b7332e15d49f54eb"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-core-build-130.log",
+      "bytes": 72406,
+      "sha256": "9d8196c41a2ca24f6113bf308fb1f1fb5a7b567b0259e7f6d0ff3e53f269af47"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-build-result-135.json",
+      "bytes": 677,
+      "sha256": "fc67f87fb1abae24eec224a85a81d957cafc181f01342038fc5e9c00bf4a7cb9"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-build-135.log",
+      "bytes": 74805,
+      "sha256": "a97cc93fafde6eb7c6491cc76f27131fcc111b5ed7a5e2fff984443758ba10b0"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-build-result-136.json",
+      "bytes": 1208,
+      "sha256": "0c1205474c85491fe049552f8d9e278b2181f5ab06d63a29147a71ee236cbb0a"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-build-136.log",
+      "bytes": 79148,
+      "sha256": "173baf4e05e955d7a46696ecceb2c082f9307ff5593b38f958fe78b184ae615b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-build-result-139.json",
+      "bytes": 1208,
+      "sha256": "857d073642217cf912491d2d3b522ce66537f433f310eaf5cb5cfd63c8930a6a"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-build-139.log",
+      "bytes": 79151,
+      "sha256": "459ba810b781aef2fe7be038099cac6562d46790efeb6a9272be497fc811f11b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-build-result-141.json",
+      "bytes": 1208,
+      "sha256": "6a93cdc56959d7e1a9694e1ac6a5967fe34a67f6ff79b168c8b63a7847113b5f"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-pg-build-141.log",
+      "bytes": 79144,
+      "sha256": "20f6cf3eb736719cedd4a70699876548511a4502ea0aa9bd61645fdd6c38dfaa"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-result-132.json",
+      "bytes": 413,
+      "sha256": "e30cdd9c98b7758ed0865b48e84c8c2e2ee161463d83e4c5c055fde8dc1462c6"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-132.log",
+      "bytes": 160337,
+      "sha256": "1f8743ee635a02e7db2df6bdf15e28d3046ffc94e8491f18fc45035174dfa16e"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-result-133.json",
+      "bytes": 516,
+      "sha256": "6e62aa7ee39669dd76df7b0ee87d17c8277254b492ad5191011c281fa745a66b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-133.log",
+      "bytes": 193172,
+      "sha256": "018c92dd7562d0c78911557407c609d6007e57d227e0d1e587316624da3d5dc4"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-result-144.json",
+      "bytes": 413,
+      "sha256": "e7b99f4e9d5446b93bd552315013e87cd9e6c01a05a7091a7cbb17a2f668f809"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-144.log",
+      "bytes": 162864,
+      "sha256": "86e73b508ed140bf89f69aae468175cc73a36591cad38148538c869a148edae5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-result-145.json",
+      "bytes": 516,
+      "sha256": "7d3cb11efd135411a7b91396470dfc13f96a8c0295e9c1ed83b431c73e1322ce"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-145.log",
+      "bytes": 194291,
+      "sha256": "d9d6317d8d8af03529be13038a8d1b91b464e6421d7affdcd2ed1dc3b63379bb"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-result-149.json",
+      "bytes": 413,
+      "sha256": "27c098503d29b84faf3f5f3e4d306002e096f3686dbc3fcdf472e6c6a564b0d7"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-149.log",
+      "bytes": 159251,
+      "sha256": "03d6362f8bce0a84178a223d9597573e35bd205be7b226d85bc3314f9b53f862"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-result-150.json",
+      "bytes": 515,
+      "sha256": "6be07ec41cfbc6b08080dbd69dcf3e06326ae74218f59420becd7c821ad2737c"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-150.log",
+      "bytes": 193513,
+      "sha256": "0c608a30fbfdc474745c6be410cae16c661eca19cb0fd545f07f4d3a561e6743"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-result-154.json",
+      "bytes": 515,
+      "sha256": "7f48c452441899e3e17afd11d5f4f2b3edbfd2a6eb9d3fc5f624385a2bcf4611"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-sim-build-154.log",
+      "bytes": 193351,
+      "sha256": "147a5dac72126a1144f59b0d84b0899069f13856cc78bedb1d98d8d3f435f02e"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-wire-build-result-147.json",
+      "bytes": 553,
+      "sha256": "913dc196beea9b747e953a55dbbc8e66c65acf714bbfedc69d999475e1b0ada1"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-wire-build-147.log",
+      "bytes": 18203,
+      "sha256": "2b79bebce52cfa3d36fa7467760b7bff4a3920d3583404b070843dfa1da19fa7"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-result-152.json",
+      "bytes": 514,
+      "sha256": "5fa66f13be809f0a7e9372e3bc1d4f765790ab37e002bd756f7d785b4487a6e3"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-152.log",
+      "bytes": 344223,
+      "sha256": "da4b134a19e1808b0984d33aeef0d94a0c57e866c28ce0bb489a3cce4ff0bb20"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-result-156.json",
+      "bytes": 513,
+      "sha256": "efdb7a4f47606df1d3d3db5aac87efd74d612be25a4d9352453e6686c5a4d423"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-156.log",
+      "bytes": 343591,
+      "sha256": "94fe156ff2a0c9fbca07833ee46c5e2395f6987b117757c718eab99317eef975"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-result-171.json",
+      "bytes": 513,
+      "sha256": "e4e00deeaf603fe99a498e4de2968d2a8ede42a10d7619015a4a6ae0a82228f1"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-171.log",
+      "bytes": 343591,
+      "sha256": "73b4068a4fc5ad88825f06a5dcf4d959f26c1ddaedae248e0307c0ba469c33ca"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-result-178.json",
+      "bytes": 513,
+      "sha256": "b61e7a88466583a4c609c134032c3a35d00eddd6da22874be40453a9c026c14e"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-178.log",
+      "bytes": 343591,
+      "sha256": "5ff703cdeeecfe1081c7d24bab17ebd085040e55d232d8556c0aa8470d722835"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-result-188.json",
+      "bytes": 513,
+      "sha256": "7248706949b673e2ceac7fc574bddd8c8e9b81db55a2f90c0fb70611b4197db5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-188.log",
+      "bytes": 343591,
+      "sha256": "9c99436dbec48b3a01849653f6fc7a6ec512e31f4553ad47fb712a15e5cfa516"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-result-206.json",
+      "bytes": 513,
+      "sha256": "eca1a81b0477c93af7a0aea6012276490fb06c11ab46d17579dea93eb1728966"
+    },
+    {
+      "path": "C:/mir2-build/hunting-material-gateway-build-206.log",
+      "bytes": 343591,
+      "sha256": "c4a9c901babf99dd22d1f3c6e70f87abdc1209addcbb9b6b136343292db00a49"
+    }
+  ]
+}

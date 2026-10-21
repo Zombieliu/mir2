@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+## 第十五阶段后端验证与第十六阶段准备（2026-10-21）
+
+Root独占已释放生产源码、串行Cargo/PG/Git、最终证据与进度文档。阶段十四基线bd41069e01；阶段十五主服6项PG/11schema、真实WS3项/5schema及相邻修理退出3项均通过，正在提交限定后端/BI写集。WS189前两项及207恢复分开记证，不称同一个二进制。默认关闭、K=0.1、原生PG30/Cargo jobs2，无Docker/WSL/虚拟机或远程修改，六个保护输入和外来QA保留。
+
+BI修正已释放，Root实际PG42案例/71规则值通过，全部ROLLBACK。第十六阶段Runtime及Bevy写集已释放给Root：真实FIFO/Applied/三lane退休22项新增测试正待Runtime210；Bevy实际控件及模型/旧修理38项已在197通过。material_final_audit已明确由只读转Platform代码worker，为apps/game-client/platform-windows/**唯一写者，接独立metadata/SourceTracker、实际producer/发送和完整Applied；不运行Cargo/PG/Git、不编辑lockfiles或Runtime/Bevy。Root独占整合审计、所有Cargo/PG/Git及锁文件；首次完整entry仅建立绑定，下一份新完整producer才发布材料来源，禁止晚重放首帧。第十六阶段Runtime/Platform/Bevy变化全部排除第十五阶段提交。
+
+材料E只扣许可/手续费，fee才计销毁；缺价格拒绝。Root将在物理WS/BI最终验收后更新证据并提交限定写集，随后接真实Windows producer/Applied/三lane仲裁/界面。原生实机前仍须computer-use技能。完整goal保持active，不把库测试当GUI，不提高Candidate。以下保留各阶段历史范围。
+
 ## 第十四阶段：首个真实绑定物品来源与冷加载保护（2026-10-21）
 
 现有 newcomer-v2 NPC3 Jane 的 2110001 任务已接真实绑定物品来源：保留原职业武器/药水、100金币及100EXP设计，完整物品 checkpoint 与绑定金币共用一次 PG 提交。新增严格 v1 服务端 realm/账号/角色 index/PG incarnation/source 标记；旧 None 仍省略序列化、不重新分类。发放先完整规划，绑定与旧栈或不同来源不混堆；普通用药、穿卸装备、个人仓库、拆分及同角色 Hero 保留标记并核所有者。

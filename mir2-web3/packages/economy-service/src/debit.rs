@@ -9,7 +9,7 @@ fn validate_debit_burn(burn: &TrustedBurn, source_digest: &str) -> EconomyResult
     token(&burn.source_kind, "source_kind", 128)?;
     token(&burn.source_key, "source_key", 256)?;
     token(source_digest, "source_digest", 256)?;
-    if burn.source_kind == "conversion_fee"
+    if matches!(burn.source_kind.as_str(), "conversion_fee" | "material_conversion_fee")
         || burn.gold_equivalent == 0
         || burn.valuation_version != BOUND_GOLD_FACE_VALUE_VALUATION_VERSION
     {

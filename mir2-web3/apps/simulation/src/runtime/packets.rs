@@ -9256,6 +9256,15 @@ impl SimulationSession {
         buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
         purchase_outcome: Option<&mut Option<NpcPurchaseProcessingOutcome>>,
     ) -> Result<Vec<ServerPacket>, String> {
+        if matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut)
+            && self.prepare_hunting_repair_teardown()?
+        {
+            // Recovery retired this World. Its former inventory must never be
+            // saved by the ordinary personal-session teardown below.
+            return Ok(if matches!(packet, ClientPacket::LogOut) {
+                vec![ServerPacket::LogOutSuccess { characters: Vec::new() }]
+            } else { Vec::new() });
+        }
         if matches!(
             packet,
             ClientPacket::Disconnect | ClientPacket::LogOut | ClientPacket::StartGame { .. }

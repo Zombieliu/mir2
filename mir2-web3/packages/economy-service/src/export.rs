@@ -12,11 +12,16 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 
-pub const DAILY_METRIC_CONSUMER_VERSION: &str = "hunting-daily-new-wallet-diagnostics-v1";
+#[path = "material_export.rs"]
+mod material;
+
+pub const DAILY_METRIC_CONSUMER_VERSION: &str = "hunting-daily-new-wallet-diagnostics-v2";
 pub const METRIC_EXPORT_MIGRATION_SQL: &str =
     include_str!("../../../infra/postgres/migrations/0019_hunting_economy_metric_exports.sql");
 pub const OBSERVATION_MIGRATION_SQL: &str =
     include_str!("../../../infra/postgres/migrations/0017_hunting_economy_observability.sql");
+pub const MATERIAL_OBSERVATION_MIGRATION_SQL: &str =
+    include_str!("../../../infra/postgres/migrations/0027_hunting_material_observations.sql");
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -147,13 +152,10 @@ fn validate_plan(receipt: &SettlementReceipt, policy: &Policy) -> EconomyResult<
     let cap = u128::from(policy.baseline_daily_mint_atoms)
         * u128::from(policy.daily_mint_cap_multiplier.numerator)
         / u128::from(policy.daily_mint_cap_multiplier.denominator);
-    let fee = receipt
-        .gross_conversion_gold
-        .checked_sub(receipt.net_unbound_gold_inflow)
-        .ok_or(EconomyError::CorruptHistory("metric_conversion_net"))?;
+    let (consumed_atoms, fee) = material::combined_conversion_totals(receipt)?;
     if !unsigned_decimal(&receipt.bound_gold_stock)
         || !unsigned_decimal(&receipt.unbound_gold_stock)
-        || receipt.consumed_atoms != receipt.gross_conversion_gold
+        || receipt.consumed_atoms != consumed_atoms
         || fee > receipt.burns.daily
         || receipt.burns.total()? != plan.destruction_gold_equivalent
         || cap != u128::from(plan.daily_mint_cap_atoms)
@@ -239,17 +241,12 @@ fn validate_source(
     let latest=tx.query_one("SELECT receipt_json FROM hunting_economy_settlements WHERE realm_id=$1 AND business_day=$2", &[&realm,&through]).map_err(db)?;
     let latest: SettlementReceipt = serde_json::from_value(latest.get("receipt_json"))
         .map_err(|_| EconomyError::CorruptHistory("metric_latest_receipt"))?;
-    let post=tx.query_one("SELECT COALESCE(sum(consumed_atoms),0)::text AS consumed FROM hunting_economy_conversions WHERE realm_id=$1 AND business_day>$2", &[&realm,&through]).map_err(db)?;
+    let post = material::post_settlement_consumption(tx, realm, through)?;
     let live_stock: u64 = u64::try_from(state.get::<_, i64>("stock_atoms"))
         .map_err(|_| EconomyError::CorruptHistory("metric_live_pool_stock"))?;
     if latest.realm_id != realm
         || latest.business_day != through
-        || latest
-            .plan
-            .next_pool
-            .stock_atoms
-            .checked_sub(amount(&post, "consumed")?)
-            != Some(live_stock)
+        || latest.plan.next_pool.stock_atoms.checked_sub(post) != Some(live_stock)
     {
         return Err(EconomyError::CorruptHistory("metric_live_pool_stock"));
     }
@@ -303,11 +300,12 @@ fn validate_source(
     let flow = tx.query_one("SELECT COALESCE(sum(gross_gold),0)::text AS gross,COALESCE(sum(net_gold),0)::text AS net,COALESCE(sum(fee_gold),0)::text AS fee,COALESCE(sum(consumed_atoms),0)::text AS consumed FROM hunting_economy_conversions WHERE realm_id=$1 AND business_day=$2", &[&realm,&receipt.business_day]).map_err(db)?;
     if amount(&flow, "gross")? != receipt.gross_conversion_gold
         || amount(&flow, "net")? != receipt.net_unbound_gold_inflow
-        || amount(&flow, "consumed")? != receipt.consumed_atoms
+        || amount(&flow, "consumed")? != receipt.gross_conversion_gold
         || amount(&flow, "fee")? != receipt.gross_conversion_gold - receipt.net_unbound_gold_inflow
     {
         return Err(EconomyError::CorruptHistory("metric_conversion_aggregate"));
     }
+    material::validate_material_flow(tx, realm, &receipt)?;
     let mut burns = crate::BurnTotals::default();
     for row in tx.query("SELECT layer,sum(gold_equivalent)::text AS amount FROM hunting_economy_burn_events WHERE realm_id=$1 AND business_day=$2 GROUP BY layer", &[&realm,&receipt.business_day]).map_err(db)? {
         match row.get::<_,String>("layer").as_str() {
@@ -324,7 +322,8 @@ fn validate_source(
     if bad_fee {
         return Err(EconomyError::CorruptHistory("metric_conversion_fee_burn"));
     }
-    let wrong_rate:bool=tx.query_one("SELECT EXISTS(SELECT 1 FROM hunting_economy_conversions WHERE realm_id=$1 AND business_day=$2 AND fee_gold::numeric IS DISTINCT FROM ceil(gross_gold::numeric * $3::text::numeric / $4::text::numeric))", &[&realm,&receipt.business_day,&policy.conversion_fee.numerator.to_string(),&policy.conversion_fee.denominator.to_string()]).map_err(db)?.get(0);
+    // Exact positive-integer ceiling, without numeric / rounding first.
+    let wrong_rate:bool=tx.query_one("SELECT EXISTS(SELECT 1 FROM hunting_economy_conversions WHERE realm_id=$1 AND business_day=$2 AND fee_gold::numeric IS DISTINCT FROM div(gross_gold::numeric * $3::text::numeric + $4::text::numeric - 1, $4::text::numeric))", &[&realm,&receipt.business_day,&policy.conversion_fee.numerator.to_string(),&policy.conversion_fee.denominator.to_string()]).map_err(db)?.get(0);
     if wrong_rate {
         return Err(EconomyError::CorruptHistory("metric_conversion_fee_rate"));
     }
@@ -438,7 +437,8 @@ fn export_impl(
 
 /// Write a bounded batch of incomplete new-wallet diagnostics to the durable
 /// PostgreSQL daily time series. Repeated calls/restarts are idempotent. Does not
-/// settle days or mutate game assets. Requires migrations 0016,0017,0019.
+/// settle days or mutate game assets. Requires the economy migrations through
+/// 0027, including both monetary and material conversion ledgers.
 pub fn export_daily_metrics(
     client: &mut Client,
     realm: &str,
@@ -526,6 +526,8 @@ mod tests {
             consumed_atoms: 0,
             gross_conversion_gold: 0,
             net_unbound_gold_inflow: 0,
+            material_conversion_gold_equivalent: 0,
+            material_conversion_fee_unbound_gold: 0,
             bound_gold_stock: "27670116110564327421".into(),
             unbound_gold_stock: "0".into(),
         };

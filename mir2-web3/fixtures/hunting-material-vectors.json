@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "fixture_only": true,
+  "valid_valuations": [
+    {
+      "name": "empty_configuration_is_valid_but_prices_nothing",
+      "input": { "schema_version": 1, "valuation_version": "fixture-empty-v1", "entries": [] },
+      "expected": { "schema_version": 1, "valuation_version": "fixture-empty-v1", "entries": [] }
+    },
+    {
+      "name": "entries_are_canonicalized_in_index_order",
+      "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 1002, "unit_gold": 51 }, { "item_index": 1001, "unit_gold": 1 }] },
+      "expected": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 1001, "unit_gold": 1 }, { "item_index": 1002, "unit_gold": 51 }] }
+    }
+  ],
+  "invalid_valuations": [
+    { "name": "schema_zero", "input": { "schema_version": 0, "valuation_version": "fixture-v1", "entries": [] } },
+    { "name": "unsupported_schema", "input": { "schema_version": 2, "valuation_version": "fixture-v1", "entries": [] } },
+    { "name": "unknown_root_field", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [], "market_fallback": true } },
+    { "name": "missing_entries", "input": { "schema_version": 1, "valuation_version": "fixture-v1" } },
+    { "name": "missing_version", "input": { "schema_version": 1, "entries": [] } },
+    { "name": "empty_version", "input": { "schema_version": 1, "valuation_version": "", "entries": [] } },
+    { "name": "space_version", "input": { "schema_version": 1, "valuation_version": " fixture-v1", "entries": [] } },
+    { "name": "control_version", "input": { "schema_version": 1, "valuation_version": "fixture\u0000v1", "entries": [] } },
+    { "name": "duplicate_index", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 1001, "unit_gold": 1 }, { "item_index": 1001, "unit_gold": 2 }] } },
+    { "name": "zero_index", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 0, "unit_gold": 1 }] } },
+    { "name": "negative_index", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": -1, "unit_gold": 1 }] } },
+    { "name": "index_exceeds_i32", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 2147483648, "unit_gold": 1 }] } },
+    { "name": "zero_unit_gold", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 1001, "unit_gold": 0 }] } },
+    { "name": "unit_gold_exceeds_pg_limit", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 1001, "unit_gold": 9223372036854775808 }] } },
+    { "name": "negative_unit_gold", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 1001, "unit_gold": -1 }] } },
+    { "name": "fractional_unit_gold", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 1001, "unit_gold": 1.5 }] } },
+    { "name": "string_unit_gold", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 1001, "unit_gold": "1" }] } },
+    { "name": "boolean_index", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": true, "unit_gold": 1 }] } },
+    { "name": "unknown_entry_field", "input": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 1001, "unit_gold": 1, "npc_fallback": true }] } }
+  ],
+  "invalid_json": [
+    { "name": "duplicate_schema_field", "input": "{\"schema_version\":1,\"schema_version\":1,\"valuation_version\":\"fixture-v1\",\"entries\":[]}" },
+    { "name": "duplicate_price_field", "input": "{\"schema_version\":1,\"valuation_version\":\"fixture-v1\",\"entries\":[{\"item_index\":1001,\"unit_gold\":1,\"unit_gold\":2}]}" },
+    { "name": "escaped_duplicate_schema_field", "input": "{\"schema_version\":1,\"schema_vers\\u0069on\":1,\"valuation_version\":\"fixture-v1\",\"entries\":[]}" },
+    { "name": "unpaired_surrogate_version", "input": "{\"schema_version\":1,\"valuation_version\":\"fixture-\\ud800\",\"entries\":[]}" },
+    { "name": "malformed_json", "input": "{" }
+  ],
+  "quotes": [
+    { "name": "whole_value", "unit_gold": 100, "quantity": 10, "expected": { "gold_equivalent": 1000, "license_atoms_debit": 1000, "fee_unbound_gold": 20 } },
+    { "name": "one_gold_rounds_up", "unit_gold": 1, "quantity": 1, "expected": { "gold_equivalent": 1, "license_atoms_debit": 1, "fee_unbound_gold": 1 } },
+    { "name": "ceil_after_total_valuation", "unit_gold": 51, "quantity": 2, "expected": { "gold_equivalent": 102, "license_atoms_debit": 102, "fee_unbound_gold": 3 } },
+    { "name": "one_permit_valuation_without_gold_credit", "unit_gold": 1000, "quantity": 1000, "expected": { "gold_equivalent": 1000000, "license_atoms_debit": 1000000, "fee_unbound_gold": 20000 } },
+    { "name": "pg_bigint_boundary", "unit_gold": 9223372036854775807, "quantity": 1, "expected": { "gold_equivalent": 9223372036854775807, "license_atoms_debit": 9223372036854775807, "fee_unbound_gold": 184467440737095517 } },
+    { "name": "versioned_fee_ratio_is_used", "unit_gold": 101, "quantity": 3, "policy_override": { "conversion_fee": { "numerator": 3, "denominator": 100 } }, "expected": { "gold_equivalent": 303, "license_atoms_debit": 303, "fee_unbound_gold": 10 } }
+  ],
+  "invalid_quotes": [
+    { "name": "zero_price", "unit_gold": 0, "quantity": 1, "expected_error": "invalid_valuation" },
+    { "name": "zero_quantity", "unit_gold": 1, "quantity": 0, "expected_error": "invalid_amount" },
+    { "name": "price_exceeds_pg_limit", "unit_gold": 9223372036854775808, "quantity": 1, "expected_error": "overflow" },
+    { "name": "total_exceeds_pg_limit", "unit_gold": 9223372036854775807, "quantity": 2, "expected_error": "overflow" },
+    { "name": "multiplication_exceeds_u64", "unit_gold": 9223372036854775807, "quantity": 18446744073709551615, "expected_error": "overflow" },
+    { "name": "quantity_exceeds_pg_total", "unit_gold": 1, "quantity": 9223372036854775808, "expected_error": "overflow" }
+  ],
+  "unconfigured_quotes": [
+    { "name": "empty_catalog_has_no_default_price", "valuations": { "schema_version": 1, "valuation_version": "fixture-empty-v1", "entries": [] }, "item_index": 1001, "quantity": 1, "expected_error": "unconfigured_material" },
+    { "name": "other_catalog_entry_is_not_a_fallback", "valuations": { "schema_version": 1, "valuation_version": "fixture-v1", "entries": [{ "item_index": 1001, "unit_gold": 1 }] }, "item_index": 1002, "quantity": 1, "expected_error": "unconfigured_material" }
+  ],
+  "split_batches": [
+    { "name": "rounding_cannot_be_reduced_by_split", "unit_gold": 51, "quantities": [1, 1], "expected_combined_fee": 3, "expected_split_fee": 4 },
+    { "name": "equal_whole_fees", "unit_gold": 1, "quantities": [50, 50], "expected_combined_fee": 2, "expected_split_fee": 2 },
+    { "name": "split_keeps_total_permit_debit", "unit_gold": 3, "quantities": [17, 17], "expected_combined_fee": 3, "expected_split_fee": 4 }
+  ]
+}

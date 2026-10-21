@@ -15,7 +15,11 @@ pub enum EconomyError {
         current_day: i64,
     },
     InsufficientBoundGold,
+    InsufficientUnboundGold,
     InsufficientPermits,
+    MaterialValuationUnavailable,
+    MaterialQuoteExpired,
+    MaterialQuoteChanged,
     Unauthenticated,
     AccountUnavailable,
     CharacterNotFound,
@@ -225,9 +229,19 @@ pub struct SettlementReceipt {
     pub consumed_atoms: u64,
     pub gross_conversion_gold: u64,
     pub net_unbound_gold_inflow: u64,
+    /// Materials change denomination without minting coins. Omitted zeroes
+    /// preserve every historical settlement JSON/digest from before this source.
+    #[serde(default, skip_serializing_if = "zero_amount")]
+    pub material_conversion_gold_equivalent: u64,
+    #[serde(default, skip_serializing_if = "zero_amount")]
+    pub material_conversion_fee_unbound_gold: u64,
     /// Exact decimal totals; the sum of many BIGINT wallets may exceed BIGINT.
     pub bound_gold_stock: String,
     pub unbound_gold_stock: String,
+}
+
+fn zero_amount(value: &u64) -> bool {
+    *value == 0
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

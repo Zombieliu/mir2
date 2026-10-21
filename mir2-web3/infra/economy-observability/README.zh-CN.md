@@ -27,7 +27,7 @@ python infra/economy-observability/verify.py
 
 ## 受控部署接线
 
-先应用0016/0017迁移并提供真实完整日数据；未接入价格、画像和收益必须保留NULL。当前新经济wallet的求和仅覆盖新钱包，不等于旧金币、托管和邮件已纳入，因此完整覆盖资格默认false、全服存量为NULL，不能把旧 `gold` 字段复制成两份。
+先应用0016/0017/0019/0026/0027迁移并提供真实完整日数据；未接入价格、画像和收益必须保留NULL。当前新经济wallet的求和仅覆盖新钱包，不等于旧金币、托管和邮件已纳入，因此完整覆盖资格默认false、全服存量为NULL，不能把旧 `gold` 字段复制成两份。
 
 为Grafana创建独立只读登录角色，设置查询超时和 `default_transaction_read_only=on`，只授予所需schema的USAGE和两个视图的SELECT。不授予游戏账本写权限或原始玩家表读取权限。账号创建和授权属于数据库管理步骤，不在本包自动执行。
 
@@ -61,16 +61,16 @@ Contact point默认使用Grafana标准Webhook格式，不能把钉钉或企业�
 
 ## 隔离PostgreSQL验收
 
-先由父级集成在本地隔离验收库应用0016/0017，不能指向生产库。`tests/postgres_acceptance.py` 从进程环境继承 `PGPASSWORD`，不读取密码文件。可通过 `MIR2_PSQL_BIN` 指向本机psql，连接配置使用 `PGHOST`、`PGPORT`、`PGDATABASE`、`PGUSER`；脚本只接受loopback IP和 `mir2_hunting_acceptance_` 前缀库。
+先由父级集成在本地隔离验收库应用0016/0017，不能指向生产库。`tests/postgres_acceptance.py` 在同一ROLLBACK事务内建立0019及实际0027视图，核对全部44列的顺序；不会重放0017来缩减已有44列视图。脚本从进程环境继承 `PGPASSWORD`，不读取密码文件。可通过 `MIR2_PSQL_BIN` 指向本机psql，连接配置使用 `PGHOST`、`PGPORT`、`PGDATABASE`、`PGUSER`；脚本只接受loopback IP和 `mir2_hunting_acceptance_` 前缀库。
 
 ```text
 python infra/economy-observability/tests/postgres_acceptance.py --render-only <review-output.sql>
 python infra/economy-observability/tests/postgres_acceptance.py
 ```
 
-第一条只构造SQL，不连接或读取凭据。第二条需由父级显式注入测试凭据后执行，结果写 `postgres-validation-result.json`。随机 `hunting-observer-test-` 前缀隔离所有fixture；临时NOLOGIN角色仅获得两个view的SELECT，验证基础wallet不可读及INSERT/UPDATE/DELETE拒绝。全部角色、grant和数据在同一事务ROLLBACK，不删除或修改他人数据。
+第一条只构造SQL，不连接或读取凭据。第二条需由父级显式注入测试凭据后执行，结果默认写 `postgres-validation-result.json`；可用 `--output <fresh-result.json>` 保存新轮次，离线verify也支持该参数。随机 `hunting-observer-test-` 前缀隔离所有fixture；临时NOLOGIN角色仅获得两个view的SELECT，验证基础wallet不可读及INSERT/UPDATE/DELETE拒绝。全部view/schema变更、角色、grant和数据在同一事务ROLLBACK，不删除或修改他人数据。
 
-脚本把五份实际告警SQL原文嵌入验收，不用测试假表遮蔽public视图。覆盖四项严格阈值、缺日、缺基准、没有任何历史的已配置服、04:00/跨月、不可变版本、完整覆盖资格、真实形状成交与画像数据、负收益及月度估值。物理schema不允许重复日/零基准，改测约束拒绝；手续费由receipt毛额减净额派生，改测守恒恒等式，不通过伪造重复行或无效配置绕过约束。
+脚本把五份实际告警SQL原文嵌入验收，不用测试假表遮蔽public视图。覆盖四项严格阈值、缺日、缺基准、没有任何历史的已配置服、04:00/跨月、不可变版本、完整覆盖资格、真实形状成交与画像数据、负收益及月度估值。另有金币+材料、纯材料、v1/v2旧payload证明、缺失/未知consumer/不匹配payload/显式null及材料许可/费用异常案例。旧payload证明行明确为合成的view级输入，不是实际导出worker执行；worker原子ACK另由service PG测试验证。物理schema不允许重复日/零基准，改测约束拒绝；view派生的金币费用与总费用分别核对，不把材料费用错误加入金币毛额恒等式。
 
 未运行该真实数据库脚本前，不得把render-only或离线模型通过写成PostgreSQL验收通过。
 
