@@ -1,5 +1,17 @@
 # Windows 原生可玩闭环验收清单
 
+## 第十二阶段：Windows 原生修理恢复与重登（2026-10-21）
+
+EXE75/Gateway73已在实机77轮完成以下有界玩家流程，见[阶段十二证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)。
+
+- 普通登录/StartGame、真实NPC与Bag报价6，单次Confirm；测试proxy仅省略一份已提交owner回执，随后Pending主动Close。
+- 物理断线1次、resume 1次，手动原Query 1次完成；普通logout后启动全新EXE进程78轮，以普通Login/StartGame确认新钱包999994/0与旧gold 1234。
+- PG独立终核结果/销毁各1条、金额6、耐久970/970、save_version17/revision16。UI未显示耐久数字，不能把PG读数当作UI数值验收。
+
+主证据为77轮7张截图，另有76轮次证据4张和66轮失败3张，共14张；旧EXE59/缺map造成的66轮恢复失败保留。两个客户端及Gateway/proxy均正常退出0，19541/19542无listener。此处Gateway未冷启，未强制服务端Unknown，不等同完整源码/资源闭包、签名候选包或整款游戏人类验收。
+
+mapIndex、原恢复身份/角色和完整producer实际入队守卫已修；Native43/43（含4项新增恢复）、SimMap5/5、Gateway普通5/5、物理WS1/1及真实PG1/1分别通过，不累加历史计数。不提高Crystal/Candidate百分比，完整goal active、默认关闭、K=0.1及0.72/1.08许可保持。材料传播/估值（待用户定义）、种植挖矿等来源、维护/轻PVP/沙巴克销毁、全服市场画像收益、通知及迁移发布仍开放；无Docker、远程资产修改或旧金币重分类。下方旧QA记录保留当时范围。
+
 ## 第九阶段当前实机审计：修理报价已达，成功确认待验（2026-10-21）
 
 新EXE59已真实启动，经普通登录/StartGame/NPC/Repair、Bag拖入获得服务端6绑定金币报价；真实只读钱包为绑定1,000,000、非绑定0。第一次显式Close后0扣款，顶X点击尝试不计作已关闭。第二次报价到OKAY约97秒，超过原30秒TTL，拒绝且未发Confirm；停服后独立psql仍为0结果/0销毁、绑定1,000,000、旧gold 1234、Bag100/1000、save_version15/revision14，见`C:/mir2-build/hunting-native-pg-final-after-deadline-56.json`。未声称原生成功扣款、Pending原Query、断线、最终冷登录或候选包验收。

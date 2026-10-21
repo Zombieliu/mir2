@@ -425,6 +425,12 @@ impl NativeHuntingRepairGateway {
         }
         Ok(observed)
     }
+    pub(super) fn resume_identity(
+        &self,
+        now_ms: u64,
+    ) -> Option<crate::hunting_repair_connection::NativeResumeIdentity> {
+        self.connection.resume_identity(now_ms)
+    }
     pub(super) fn blocks_purchase(&self) -> bool {
         self.client.model().phase == HuntingRepairPhase::Pending
             || self.confirm_prepared
@@ -993,6 +999,7 @@ mod tests {
     use futures_util::Sink;
     use std::task::{Context, Poll};
     include!("native_hunting_repair_inventory_tests.rs");
+    include!("hunting_repair_resume_tests.rs");
 
     #[derive(Default)]
     struct SinkState {

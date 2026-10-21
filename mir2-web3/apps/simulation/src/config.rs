@@ -7632,6 +7632,9 @@ pub struct WorldSnapshot {
     pub tick: u64,
     pub map_title: Option<String>,
     pub map_file_name: Option<String>,
+    /// Current authoritative map identity; absent before a character is selected.
+    #[serde(default)]
+    pub map_index: Option<i32>,
     pub in_safe_zone: bool,
     pub light_setting: u8,
     pub player_object_id: Option<u32>,

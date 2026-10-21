@@ -1,5 +1,13 @@
 # 狩猎许可经济实现与验收
 
+## 第十二阶段：Windows 原生修理恢复与重登（2026-10-21）
+
+修理来源已获EXE75/Gateway73原生实机恢复证据：77轮真实NPC/Bag报价6、单Confirm；测试proxy省略一份已提交owner回执，Pending主动Close后物理断线/resume各1次，手动原Query 1次完成。普通logout后新EXE进程78轮普通Login/StartGame显示新钱包999994/0、旧gold 1234。独立PG终核结果/销毁各1条、金额6、耐久970/970、save_version17/revision16。见[阶段十二证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)。
+
+修复涵盖mapIndex、原恢复身份/角色及完整producer成功入gameplay队列后重新发布owner。Native43/43（含4项新增）、SimMap5/5、Gateway普通5/5、物理WS1/1和真实PG1/1分别通过，不累加旧轮筛选。旧66轮恢复失败保留；两个客户端与Gateway/proxy退出0，19541/19542无listener。此处是客户端新进程重登，Gateway未冷启，未强制服务端Unknown，UI未显示耐久数字；不是完整源码/资源闭包或签名候选包验收。
+
+K=0.1、基准每日0.72/硬上限1.08许可、默认关闭及完整goal active保持，不提高Crystal/Candidate百分比。材料传播/估值（待用户定义）、种植挖矿等真实来源、维护/轻PVP/沙巴克销毁、全服市场画像收益、通知与迁移发布继续开放。无Docker、远程资产修改或旧金币重分类；下方旧结论保留历史范围。
+
 ## 第十一阶段：真实日常委托来源（2026-10-21）
 
 现有NPC24新人日常委托已支持三选二+bonus绑定金币；三种组合各11,000基础绑定金币/20,000基础EXP，旧gold不变。独立DB午夜日槽、canonical整组资格、完整奖励同事务、最多一次跨期重规划与原日恢复已通过14项新增PG、31项既有PG、21项普通回归，见[阶段十一证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。

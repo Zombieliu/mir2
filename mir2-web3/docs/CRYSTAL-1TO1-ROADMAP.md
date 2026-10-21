@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 第十二阶段：Windows 原生修理恢复与重登（2026-10-21）
+
+本服定制经济已建立EXE75/Gateway73的有界原生实机证据：真实NPC报价6、单Confirm、已提交回执省略后的Pending Close、物理resume及手动原Query完成，随后新EXE进程普通重登。新钱包999994/0、旧gold 1234保持；PG终核结果/销毁各1条、金额6、耐久970/970。见[阶段十二证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)。
+
+Native43/43、SimMap5/5、Gateway普通5/5、物理WS1/1、真实PG1/1各自限定，不与历史计数相加。Gateway未冷启，未强制服务端Unknown，UI未显示耐久数字；不据七个源文件的验证推断完整源码/资源闭包、签名候选包或新增Crystal/Candidate资格。旧66轮恢复失败保留。
+
+完整goal active、默认关闭、K=0.1及0.72/1.08许可保持；材料传播/估值（待用户定义）、其余真实来源、完整三层销毁、全服市场画像收益、通知及迁移发布继续开放。无Docker、远程资产修改或旧金币重分类。下方旧路线文字保留历史范围。
+
 ## 第十一阶段：真实日常委托来源（2026-10-21）
 
 本服定制经济已支持现有NPC24日常三选二+bonus的原子绑定入账、独立DB午夜日槽、整组资格和原日恢复。新增PG14/14、邻接PG31/31、普通回归21/21；普通NPC路径覆盖三种组合及冷登录，未宣称物理战斗或玩家GUI。见[阶段十一限定证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。不增加Crystal/Candidate百分比。Windows成功扣费已有新实机证明，物理resume仍待修复验收，其他经济主线及goal继续开放，默认关闭、无Docker。

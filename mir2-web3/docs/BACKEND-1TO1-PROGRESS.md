@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+## 第十二阶段：Windows 原生修理恢复与重登（2026-10-21）
+
+权威WorldSnapshot现携带兼容旧JSON的可选mapIndex；恢复仅接受原realm/account/session/有效期与角色见证，并在完整producer成功进入gameplay队列后发布新连接owner/context。接收端关闭不能被当作bootstrap成功。Native43/43（含4项新增恢复）、SimMap5/5、Gateway普通5/5、物理WS1/1、真实PG1/1分别通过，见[阶段十二证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)，不与历史计数相加。
+
+EXE75/Gateway73实机77轮以单Confirm收费6，测试proxy省略一份已提交owner回执；Pending Close后断线/resume各1次，手动原Query 1次完成。普通logout及新EXE进程78轮重登后，新钱包999994/0、旧gold 1234保持。PG独立终核结果/销毁各1条、金额6、耐久970/970、save_version17/revision16。两客户端与Gateway/proxy均退出0，19541/19542无listener；旧66轮恢复失败保留。
+
+这是客户端新进程重登，Gateway未冷启，未强制服务端Unknown；UI未显示耐久数字，耐久仅由PG确认。验证仅覆盖本轮七个源文件，不构成完整源码/资源闭包、签名候选包或新增Crystal/Candidate资格。goal active、默认关闭、K=0.1及0.72/1.08许可保持；材料传播/估值（待用户定义）、种植挖矿等来源、维护/轻PVP/沙巴克销毁、全服市场画像收益、通知及迁移发布未完成。无Docker、远程资产修改或旧金币重分类。以下旧记录保留历史范围。
+
 ## 第十一阶段：真实日常委托来源（2026-10-21）
 
 NPC24日常来源复用完整checkpoint/Guild writer，新增0025不可变日槽；业务唯一键含角色代际/任务/UTC+8日，不含digest或金额。私有DB时间cap绑定原账号/版本，锁后fresh clock判期；仅PeriodChanged最多一次完整重规划，Unknown始终查原日。14新增PG、31既有PG、21普通回归通过，含全回滚、并发同槽、定义冲突、高水位/legacy保守拒绝、原请求/丢Session恢复及三组选二+bonus冷登录，见[阶段十一证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。

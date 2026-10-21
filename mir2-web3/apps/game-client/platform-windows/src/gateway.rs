@@ -1771,6 +1771,9 @@ struct NativeResumeClientState {
     expires_at_ms: Option<u64>,
     generation: Option<u64>,
     character_index: Option<i32>,
+    owner_identity: Option<crate::hunting_repair_connection::NativeResumeIdentity>,
+    connection_identity: Option<crate::hunting_repair_connection::NativeResumeIdentity>,
+    resumed_owner_accepted: bool,
     reconnect_started_at: Option<Instant>,
     retry_attempt: u32,
 }
@@ -1786,6 +1789,8 @@ impl std::fmt::Debug for NativeResumeClientState {
             .field("expires_at_ms", &self.expires_at_ms)
             .field("generation", &self.generation)
             .field("character_index", &self.character_index)
+            .field("owner_identity", &self.owner_identity.as_ref().map(|_| "<private>"))
+            .field("connection_identity", &self.connection_identity.as_ref().map(|_| "<private>"))
             .field("reconnect_started_at", &self.reconnect_started_at)
             .field("retry_attempt", &self.retry_attempt)
             .finish()
@@ -1840,8 +1845,58 @@ impl NativeResumeClientState {
         self.expires_at_ms = None;
         self.generation = None;
         self.character_index = None;
+        self.owner_identity = None;
+        self.connection_identity = None;
+        self.resumed_owner_accepted = false;
         self.reconnect_started_at = None;
         self.retry_attempt = 0;
+    }
+
+    fn observe_connection_identity(
+        &mut self,
+        identity: crate::hunting_repair_connection::NativeResumeIdentity,
+        phase: ConnectionPhase,
+        context: &GatewaySessionContext,
+    ) -> bool {
+        if !identity.is_live(gateway_unix_ms()) {
+            return false;
+        }
+        if phase == ConnectionPhase::Normal {
+            if context.account_id.as_deref().is_none_or(|account| {
+                !identity.account_id().eq_ignore_ascii_case(account)
+            }) {
+                return false;
+            }
+            // A new authenticated session cannot inherit an older session's
+            // reconnect credential or selected-character witness.
+            if self.owner_identity.as_ref().is_some_and(|owner| owner != &identity) {
+                self.clear();
+            }
+            self.owner_identity = Some(identity.clone());
+        } else if self.owner_identity.as_ref() != Some(&identity) {
+            return false;
+        }
+        self.connection_identity = Some(identity);
+        true
+    }
+
+    fn has_current_resume_owner(&self, character_index: Option<i32>) -> bool {
+        self.owner_identity.as_ref().is_some_and(|owner| {
+            owner.is_live(gateway_unix_ms())
+                && self.connection_identity.as_ref() == Some(owner)
+                && character_index.is_some_and(|index| index >= 0)
+                && character_index == self.character_index
+        })
+    }
+
+    fn publish_resumed_context(&self, context: &mut GatewaySessionContext) -> bool {
+        if !self.resumed_owner_accepted || !self.has_current_resume_owner(self.character_index) {
+            return false;
+        }
+        let owner = self.connection_identity.as_ref().expect("checked resume identity");
+        context.account_id = Some(owner.account_id().to_owned());
+        context.character_index = self.character_index;
+        true
     }
 
     fn begin_reconnect(&mut self) {
@@ -4202,6 +4257,11 @@ where
         }
     };
     tokio::pin!(resume_timeout);
+    // Evidence from a prior socket never authenticates this physical reader.
+    // The original owner stays private until a matching fresh grant, accepted
+    // sessionResumed and full authoritative producer have all arrived.
+    resume_state.connection_identity = None;
+    resume_state.resumed_owner_accepted = false;
     let mut context = GatewaySessionContext { mail_stream: Some(mail_stream), ..Default::default() };
     let mut gameplay_adapter = NativeGameplayAdapter::default();
     gameplay_adapter.set_generation(generation);
@@ -4465,6 +4525,16 @@ where
                                 // Owner frames bypass all ordinary number/date
                                 // decoders, packet cursors and movement overlays.
                                 if hunting_repairs.observe_connection(text,gameplay_adapter.command_fence.as_ref())? {
+                                    if gameplay_adapter.command_fence.is_some()
+                                        && text_kind(text).as_deref() == Some("identitySession")
+                                    {
+                                        let Some(identity) = hunting_repairs.resume_identity(gateway_unix_ms()) else {
+                                            return Ok(InboundDisposition::ResumeRejected);
+                                        };
+                                        if !resume_state.observe_connection_identity(identity,*phase,&context) {
+                                            return Ok(InboundDisposition::ResumeRejected);
+                                        }
+                                    }
                                     return Ok(InboundDisposition::Applied);
                                 }
                                 if hunting_repair_gateway::claims_owner_frame(text){
@@ -4488,6 +4558,7 @@ where
                                 }
                                 hunting_repairs.before_ordinary_frame(text);
                                 npc_purchases.before_ordinary_frame(text);
+                                let was_resumed = *phase == ConnectionPhase::Resumed;
                                 let disposition = handle_gateway_text_for_connection(
                                     text,
                                     &mut snapshot_log_counter,
@@ -4511,6 +4582,12 @@ where
                                     gate,
                                     push_world_state,
                                 )?;
+                                if was_resumed && *phase == ConnectionPhase::Normal
+                                    && gameplay_adapter.command_fence.is_some()
+                                    && !resume_state.publish_resumed_context(&mut context)
+                                {
+                                    return Ok(InboundDisposition::ResumeRejected);
+                                }
                                 npc_purchases.after_ordinary_frame(text,*phase,connection_bootstrap_sent);
                                 // Consume exactly the same authoritative
                                 // envelope that drove the gameplay bridge.
@@ -4743,9 +4820,15 @@ where
             return Ok(InboundDisposition::Applied);
         }
         InboundEvent::SessionResumed(event) if *phase == ConnectionPhase::AwaitingResume => {
+            if gameplay_adapter.command_fence.is_some()
+                && !resume_state.has_current_resume_owner(event.character_index)
+            {
+                return Ok(InboundDisposition::ResumeRejected);
+            }
             if !resume_state.accept_resumed_generation(event.generation) {
                 return Ok(InboundDisposition::ResumeRejected);
             }
+            resume_state.resumed_owner_accepted = true;
             resume_state.character_index = event.character_index.or(resume_state.character_index);
             if !*resume_scene_reset_sent {
                 apply_reconnect_reset_policy(session_resumed_reset_policy());
@@ -4783,6 +4866,13 @@ where
             return Ok(InboundDisposition::Applied);
         }
         _ => {}
+    }
+
+    if *phase == ConnectionPhase::Resumed
+        && gameplay_adapter.command_fence.is_some()
+        && !resume_state.has_current_resume_owner(resume_state.character_index)
+    {
+        return Ok(InboundDisposition::ResumeRejected);
     }
 
     if let InboundEvent::GameShopReceipt(receipt) = &parsed {
@@ -4850,6 +4940,10 @@ where
                 context.character_index
             };
             if let Some(character) = resumed_character_from_snapshot(payload, character_index) {
+                // Save the selected role only at a verified complete entry,
+                // never from an unacknowledged outbound StartGame or a replayed
+                // credential delivered while that request is still pending.
+                resume_state.character_index = character_index.filter(|index| *index >= 0);
                 let _ = shell_events.send_event(ShellGatewayEvent::PlayerBootstrapped { character });
                 *connection_bootstrap_sent = true;
             }
@@ -5332,10 +5426,9 @@ where
                 npc_buy_shop_delivery=Some((shop,delivered,false));
             }
 
-            if world_ingest==WorldSnapshotIngestOutcome::Applied && ui_ingest&&map_ingest&&entity_ingest&&skill_ingest {
+            let complete_producer=world_ingest==WorldSnapshotIngestOutcome::Applied && ui_ingest&&map_ingest&&entity_ingest&&skill_ingest;
+            if complete_producer {
                 attach_native_producer_provenance(&mut owned_gameplay_snapshot,gameplay_adapter,&payload,&ui_model,&map_model,&entity_model,Some(&skill_source_model),true)?;
-                gameplay_adapter.last_full_producer_stamp=owned_gameplay_snapshot.command_stamp;
-                gameplay_adapter.last_full_producer_models=owned_gameplay_snapshot.producer_models.clone();
             }
             if let (Some(owner),Some(fence),Some(stamp))=(hero_raw_owner.as_ref(),gameplay_adapter.command_fence.as_ref(),owned_gameplay_snapshot.command_stamp) {
                 if let Some(update)=fence.prepare_hero_owner(stamp,owner)? {
@@ -5351,7 +5444,22 @@ where
             }
             // Legacy adapters preserve established fixture delivery; production never
             // presents a backpressured snapshot as an applied producer grant.
-            if gameplay_adapter.command_fence.is_none() || owned_gameplay_snapshot.command_stamp.is_some(){let _=gameplay_events.send(owned_gameplay_snapshot);}
+            let producer_stamp=owned_gameplay_snapshot.command_stamp;
+            let producer_models=owned_gameplay_snapshot.producer_models.clone();
+            if gameplay_adapter.command_fence.is_none() || producer_stamp.is_some(){
+                // Runtime world/read-model queues alone are insufficient. The
+                // main-thread complete producer must actually enter its own
+                // queue before bootstrap can authorize this connection.
+                gameplay_events.send(owned_gameplay_snapshot)
+                    .map_err(|_|"native gameplay producer delivery unavailable".to_owned())?;
+                if complete_producer {
+                    gameplay_adapter.last_full_producer_stamp=producer_stamp;
+                    gameplay_adapter.last_full_producer_models=producer_models;
+                }
+            } else if complete_producer {
+                gameplay_adapter.last_full_producer_stamp=None;
+                gameplay_adapter.last_full_producer_models=None;
+            }
             Ok(world_ingest)
         }
         "packet" => {

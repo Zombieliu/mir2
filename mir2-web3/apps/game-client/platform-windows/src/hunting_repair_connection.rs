@@ -155,6 +155,30 @@ struct Identity {
     session: String,
     expires: u64,
 }
+
+/// Non-bearer identity evidence from this physical reader's strict handshake.
+/// It cannot authenticate a request; reconnect compares it with the original
+/// accepted session before publishing a new owner context.
+#[derive(Clone, PartialEq, Eq)]
+pub(crate) struct NativeResumeIdentity {
+    realm: String,
+    account: String,
+    session: String,
+    expires: u64,
+}
+impl fmt::Debug for NativeResumeIdentity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("NativeResumeIdentity(<private>)")
+    }
+}
+impl NativeResumeIdentity {
+    pub(crate) fn account_id(&self) -> &str {
+        &self.account
+    }
+    pub(crate) fn is_live(&self, now_ms: u64) -> bool {
+        now_ms < self.expires
+    }
+}
 impl fmt::Debug for Identity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Identity(<private>)")
@@ -219,6 +243,18 @@ impl HuntingRepairConnection {
                 .identity
                 .as_ref()
                 .is_some_and(|i| i.account.eq_ignore_ascii_case(account) && now_ms < i.expires)
+    }
+    pub(crate) fn resume_identity(&self, now_ms: u64) -> Option<NativeResumeIdentity> {
+        if self.blocked {
+            return None;
+        }
+        let identity = self.identity.as_ref().filter(|identity| now_ms < identity.expires)?;
+        Some(NativeResumeIdentity {
+            realm: self.realm.as_ref()?.clone(),
+            account: identity.account.clone(),
+            session: identity.session.clone(),
+            expires: identity.expires,
+        })
     }
     /// Only a physical socket's original reader may call this method.
     pub fn observe(&mut self, raw: &str) -> Result<bool> {

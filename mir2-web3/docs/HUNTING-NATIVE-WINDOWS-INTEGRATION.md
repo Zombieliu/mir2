@@ -1,5 +1,15 @@
 # 狩猎经济：Windows 原生客户端接入
 
+## 第十二阶段：Windows 原生修理恢复与重登（2026-10-21）
+
+当前EXE75/Gateway73已完成有界实机链：77轮普通登录/StartGame、真实NPC及Bag报价6、单Confirm；测试proxy只省略一份已提交owner回执，Pending主动Close后物理断线1次/resume 1次，手动原Query 1次完成。普通logout后，以全新EXE进程78轮普通Login/StartGame确认新钱包999994/0、旧gold 1234。独立PG终核结果/销毁各1条、金额6、Bag耐久970/970、save_version17/revision16。详见[阶段十二证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)。
+
+源修复为可选权威mapIndex、原realm/account/session/原有效期与角色的恢复见证，以及完整producer成功进入gameplay队列后才重新发布owner/context。接收端关闭不会完成bootstrap，旧owner和未决Confirm不被重发。Native43/43（含4项新增）、SimMap5/5、Gateway普通5/5、物理WS1/1、真实PG1/1分别通过，不与旧轮计数相加。当前真实Gateway的legacy与hunting登录/恢复均使用identity grant，不按缺失grant推断legacy降级。
+
+截图证据分为77轮主证据7张、76轮次证据4张、66轮失败3张，共14张；旧EXE59/缺map的66轮恢复失败保留。UI未显示耐久数字，970/970仅以PG核对；本轮客户端是新进程，Gateway未冷启，未强制服务端Unknown。两个客户端及Gateway/proxy均退出0，19541/19542无listener。七个源文件的有界验证不等于完整源码/资源闭包或签名候选包。
+
+完整goal active、默认关闭、K=0.1及0.72/1.08许可保持，不提高Crystal/Candidate百分比。材料传播/估值（待用户定义）、其余来源、维护/轻PVP/沙巴克销毁、全服市场画像收益、通知及迁移发布仍开放。无Docker、远程资产修改或旧金币重分类；下方原阶段及Source文字保留历史范围。
+
 ## 第九阶段当前审计：原生报价已达，成功确认待验（2026-10-21）
 
 生产独立repair source gate已修复真实命名equip slot、合法缺省UID及严格raw字段presence/dup检查，实际完整inventory hash参与身份；原buy gate逐字未改。Host60实际39/39，其中5项rich-source包含真实丰富库存形状；正向路径已到Quote→合法当前30秒Quoted→单Confirm实际TestSink→Pending→原Query Unknown仍Pending。这不是GUI或物理WebSocket收费验收。producer60b的7案例/1项测试、UI58的17/17、Runtime50的repair15及邻接41分别保留；不与43/44历史计数累加。

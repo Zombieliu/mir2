@@ -1,0 +1,552 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-21",
+  "phase": 12,
+  "parentCommit": "bf08190be0e028dfc1e8a43379832b23cae4b10b",
+  "scope": "Native Windows Bevy repair paid-confirm, Pending Close, physical resume, original Query and fresh client-process ordinary login",
+  "goalStatus": "active",
+  "enabledByDefault": false,
+  "productionDeployment": false,
+  "formula": {
+    "k": "0.1",
+    "baselineDailyBurnGold": "7200000",
+    "baselinePermits": "0.72",
+    "dailyPermitCap": "1.08",
+    "permitGoldCapacity": "1000000",
+    "conversionFee": "ceil(2% of converted gold)"
+  },
+  "changes": [
+    {
+      "files": [
+        "apps/simulation/src/config.rs",
+        "apps/simulation/src/runtime/packets.rs"
+      ],
+      "change": "WorldSnapshot.mapIndex uses current authoritative World map, None before role selection; legitimate map 0 remains Some(0); old JSON defaults None."
+    },
+    {
+      "files": [
+        "apps/game-client/platform-windows/src/gateway.rs",
+        "apps/game-client/platform-windows/src/hunting_repair_connection.rs",
+        "apps/game-client/platform-windows/src/hunting_repair_gateway.rs"
+      ],
+      "change": "Compare a fresh physical-reader grant with the original non-bearer realm/account/session/expiry, require accepted resumed role and successfully enqueued full producer before publishing new connection owner context. Socket loss revokes the old actor; Pending recovery permits only explicit original Query."
+    }
+  ],
+  "review": {
+    "reviewer": "/root/daily_quest_contract",
+    "result": "No remaining actionable defect; producer enqueue P2 closed before final tests.",
+    "producerOrdering": "gameplay_events.send success precedes last_full_producer_* publication; dropped receiver terminates reader and revokes owner."
+  },
+  "sourcePins": [
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 710469,
+      "sha256": "9557436de07e71a51084062e0466505ebcc2b69a83a2554be2b5fcd31a169dcd"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_repair_connection.rs",
+      "bytes": 26104,
+      "sha256": "e5e7ab5ffe23a3bebb3eece53a02e2571449cfa63d1cc1fdbe7723b6dd29e640"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_repair_gateway.rs",
+      "bytes": 62138,
+      "sha256": "4258a7d45fd9c639fdea07590200769c511c4a4e1cf15a3ce5849a59fa328a34"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_repair_resume_tests.rs",
+      "bytes": 25384,
+      "sha256": "e94c8c2cfeabd6d73acd12775f0de4c21e7c55267df80b2d1fa77336760f02cd"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 303344,
+      "sha256": "dbc5ef078a7c6313391abbaa96ecaaff91cc5c25c82fd6110166eeeec32f66e8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/packets.rs",
+      "bytes": 403253,
+      "sha256": "e94daf435a3a6aef8592979e16c48589427c3f6a1235f9d203a7799359d98fb7"
+    },
+    {
+      "path": "apps/simulation/src/runtime/world_snapshot_identity_tests.rs",
+      "bytes": 5007,
+      "sha256": "23c582fca6de7dda1aeaf03084025e69261baa713c726616ecae1a03756f6459"
+    }
+  ],
+  "sourcePinsUnchangedSinceTestsAndGui": true,
+  "binaries": [
+    {
+      "path": "C:/mir2-build/hunting-native-windows-target/debug/deps/mir2_platform_windows-hunting-native-75.exe",
+      "bytes": 107120128,
+      "sha256": "fc123c720ea2b91321bd62101a2c936c112a2b69bba74abd8c0e49c1c930ce7e"
+    },
+    {
+      "path": "C:/mir2-build/hunting-native-windows-target/debug/deps/mir2_platform_windows-hunting-resume-74.exe",
+      "bytes": 130556416,
+      "sha256": "f63651fc0dde7053b858f83b0af74e33a0e78d7b974648950f145155b1af8af5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-permit-economy-target/debug/deps/mir2_gateway-hunting-resume-73.exe",
+      "bytes": 143881216,
+      "sha256": "559d4d111fced3f862b2409da5e55c3676c2d65807583c42dc7013d1043f4229"
+    },
+    {
+      "path": "C:/mir2-build/hunting-permit-economy-target/debug/deps/mir2_simulation-hunting-map-69.exe",
+      "bytes": 97397760,
+      "sha256": "ec2d9e9be15f736ada8a642f6db5efeebf0caa790e8e8b5a599273939d2d98a1"
+    }
+  ],
+  "tests": [
+    {
+      "suite": "Simulation authoritative map identity",
+      "passed": 5,
+      "failed": 0,
+      "log": "C:/mir2-build/hunting-world-map-tests-69.log"
+    },
+    {
+      "suite": "Native hunting repair adjacent",
+      "passed": 43,
+      "failed": 0,
+      "includesNewResumeTests": 4,
+      "log": "C:/mir2-build/hunting-native-hunting-adjacent-74.log",
+      "newTests": "C:/mir2-build/hunting-native-resume-tests-74.log",
+      "coverage": [
+        "original identity and expiry / current socket grant / accepted same role",
+        "missing fresh map cannot complete owner",
+        "actual command_channel(8) and two physical WebSockets, Pending Close + backpressure + explicit original Query, no business replay",
+        "closed gameplay receiver prevents new bootstrap/context/Query/Confirm"
+      ]
+    },
+    {
+      "suite": "Gateway resume identity grant pure",
+      "passed": 5,
+      "failed": 0,
+      "defaultIgnoredPostgres": 1,
+      "log": "C:/mir2-build/hunting-gateway-resume-grants-73.log"
+    },
+    {
+      "suite": "Gateway actual physical resume",
+      "passed": 1,
+      "failed": 0,
+      "log": "C:/mir2-build/hunting-gateway-physical-resume-73.log"
+    },
+    {
+      "suite": "Gateway current PG session original lifetime",
+      "passed": 1,
+      "failed": 0,
+      "log": "C:/mir2-build/hunting-resume-grant-pg-results-73b.json"
+    }
+  ],
+  "builds": {
+    "simulation": {
+      "rust": "1.89.0",
+      "log": "C:/mir2-build/hunting-map-build-69.log",
+      "exit": 0,
+      "existingWarnings": 96
+    },
+    "gateway": {
+      "rust": "1.89.0",
+      "log": "C:/mir2-build/hunting-gateway-resume-build-73.log",
+      "exit": 0,
+      "existingWarnings": 5
+    },
+    "nativeTest": {
+      "rust": "1.95.0",
+      "log": "C:/mir2-build/hunting-native-resume-build-74.log",
+      "exit": 0,
+      "existingWarnings": 16
+    },
+    "nativeProduct": {
+      "rust": "1.95.0",
+      "profile": "normal optimized dev product EXE, not test entry",
+      "log": "C:/mir2-build/hunting-native-game-build-75.log",
+      "exit": 0,
+      "existingWarnings": 42
+    },
+    "resourceLimits": "Native Windows, locked/offline Cargo serial jobs=2, isolated target dirs; no Docker/WSL/VM or virtualization changes"
+  },
+  "primaryGui": {
+    "fixtureRound": 77,
+    "freshProcessRound": 78,
+    "realm": "native-repair-browser-77",
+    "schema": "repair_network_264136_1792569576697857500_0",
+    "credentials": "synthetic local fixture only; not included",
+    "steps": [
+      "ordinary protocol login/StartGame in actual EXE75; real NPC and Bag source",
+      "server Quote bound fee 6, one timely Confirm with original 30s TTL",
+      "test proxy omits exactly one committed owner reply",
+      "explicit Pending Close, one controlled physical disconnect and one accepted resume",
+      "manual original Query displays Repair completed; bound 999994 / unbound 0",
+      "ordinary Alt+x YES to character select, Alt+F4; first EXE exits 0",
+      "new EXE process with fresh cwd and same local account, ordinary protocol login/StartGame; actual Repair/Bag displays bound 999994/unbound 0 and legacy gold 1234, no new Quote/Confirm",
+      "ordinary logout then close fresh EXE; exits 0"
+    ],
+    "transport": {
+      "kind": "isolated native single committed owner omission and optional physical break",
+      "upstream": "ws://127.0.0.1:19541/ws",
+      "listen": "ws://127.0.0.1:19542/ws",
+      "connections": 3,
+      "confirms": 1,
+      "queries": 1,
+      "resumes": 1,
+      "omitted": 1,
+      "breaks": 1,
+      "forwardedServerFrames": 415,
+      "clientTypes": {
+        "clientCapabilities": 3,
+        "keepAlive": 28,
+        "clientVersion": 2,
+        "login": 2,
+        "startGame": 2,
+        "npcPurchaseOwner": 3,
+        "requestIntelligentCreatureUpdates": 3,
+        "interact": 2,
+        "selectNpcDialog": 2,
+        "huntingRepairOwner": 3,
+        "resumeSession": 1,
+        "walk": 3,
+        "logOut": 2,
+        "pickUpTile": 1
+      },
+      "serverTypes": {
+        "realmInfo": 3,
+        "packet": 328,
+        "worldSnapshot": 20,
+        "identitySession": 3,
+        "resumeCredential": 37,
+        "npcPurchaseOwner": 3,
+        "huntingRepairOwner": 2,
+        "sessionResumed": 1
+      },
+      "startedAt": "2026-10-21T07:59:36.690Z",
+      "state": "stopped",
+      "omittedAt": "2026-10-21T08:03:29.214Z",
+      "brokenAt": "2026-10-21T08:03:54.983Z",
+      "reason": "explicit stop",
+      "stoppedAt": "2026-10-21T08:11:09.082Z"
+    },
+    "postgresAfterFreshClientProcess": {
+      "recordedAt": "2026-10-21T08:11:08.919Z",
+      "label": "after-cold-native-process",
+      "schema": "repair_network_264136_1792569576697857500_0",
+      "bag_max": 970,
+      "burn_gold": "6",
+      "bound_gold": "999994",
+      "burn_count": 1,
+      "bag_current": 970,
+      "legacy_gold": 1234,
+      "result_count": 1,
+      "save_version": 17,
+      "saved_revision": 16
+    },
+    "postgresAfterServiceStop": {
+      "recordedAt": "2026-10-21T08:16:34.544Z",
+      "label": "after-stopped-native-process",
+      "schema": "repair_network_264136_1792569576697857500_0",
+      "bag_max": 970,
+      "burn_gold": "6",
+      "bound_gold": "999994",
+      "burn_count": 1,
+      "bag_current": 970,
+      "legacy_gold": 1234,
+      "result_count": 1,
+      "save_version": 17,
+      "saved_revision": 16
+    },
+    "processExits": {
+      "firstClient": {
+        "code": 0,
+        "exitedAt": "2026-10-21T08:04:41.482Z"
+      },
+      "freshClient": {
+        "code": 0,
+        "exitedAt": "2026-10-21T08:07:37.460Z"
+      },
+      "gateway": {
+        "code": 0,
+        "signal": null
+      },
+      "proxy": {
+        "code": 0,
+        "signal": null
+      }
+    },
+    "cleanup": {
+      "ports19541And19542Listening": false,
+      "postgresBaselineServiceLeftRunning": true,
+      "otherGamesOperated": false
+    },
+    "screenshots": [
+      {
+        "path": "docs/generated/hunting-economy/native-windows-20261021-cold-process-logout-77.png",
+        "bytes": 81444,
+        "sha256": "a7bce31091a38d9484989756493d4dc3ff7e0c330715d4e6c517b06fbeb352aa"
+      },
+      {
+        "path": "docs/generated/hunting-economy/native-windows-20261021-cold-process-wallet-77.png",
+        "bytes": 285825,
+        "sha256": "c127536e2ad54a8ab0a89d39f9dc07af7addc64198a2ca5f19204d12ecc394cf"
+      },
+      {
+        "path": "docs/generated/hunting-economy/native-windows-20261021-logout-77.png",
+        "bytes": 81927,
+        "sha256": "65ca3e6f0bbb7c51e0b65f20cfa094aa0c6bd7f88406492426690746a26d72e0"
+      },
+      {
+        "path": "docs/generated/hunting-economy/native-windows-20261021-paid-pending-77.png",
+        "bytes": 287014,
+        "sha256": "dabc5bcbe5922e6551854e2c75f4a4c180df4e2a236ae1589b8fdddc2452e89a"
+      },
+      {
+        "path": "docs/generated/hunting-economy/native-windows-20261021-pending-close-77.png",
+        "bytes": 300714,
+        "sha256": "697067c923ba8970debf30ecd2b45a89e644668e097ed8b11ae268a0c033ae46"
+      },
+      {
+        "path": "docs/generated/hunting-economy/native-windows-20261021-query-completed-77.png",
+        "bytes": 303269,
+        "sha256": "19b5e0457b820378e9b970045c65093bc5269a40e3339a7c5eae671f0d94ac4b"
+      },
+      {
+        "path": "docs/generated/hunting-economy/native-windows-20261021-resume-pending-77.png",
+        "bytes": 301072,
+        "sha256": "c9266a5933bfa72834db2ab21e965a581cc96d528c2d8197eaf6a8f3776f7623"
+      }
+    ]
+  },
+  "secondaryGui": {
+    "fixtureRound": 76,
+    "passed": true,
+    "confirms": 1,
+    "omittedCommittedReplies": 1,
+    "queries": 1,
+    "physicalBreaks": 1,
+    "resumeRequests": 2,
+    "postgres": {
+      "recordedAt": "2026-10-21T07:57:56.920Z",
+      "label": "after-query-logout",
+      "schema": "repair_network_262532_1792568236990260100_0",
+      "bag_max": 970,
+      "burn_gold": "6",
+      "bound_gold": "999994",
+      "burn_count": 1,
+      "bag_current": 970,
+      "legacy_gold": 1234,
+      "result_count": 1,
+      "save_version": 12,
+      "saved_revision": 11
+    },
+    "exits": {
+      "client": 0,
+      "gateway": 0,
+      "proxy": 0
+    },
+    "screenshots": [
+      {
+        "path": "docs/generated/hunting-economy/native-windows-20261021-logout-76.png",
+        "bytes": 81866,
+        "sha256": "5596663288cccb62e7817dbcf5388ee245c4d931ce0c389cabdb06a98a59bf32"
+      },
+      {
+        "path": "docs/generated/hunting-economy/native-windows-20261021-pending-close-76.png",
+        "bytes": 301253,
+        "sha256": "6e7897f6dc2f3078fe54f407738b28fe714b253ad9e72fedf8cdf4c4f132437e"
+      },
+      {
+        "path": "docs/generated/hunting-economy/native-windows-20261021-query-completed-76.png",
+        "bytes": 305177,
+        "sha256": "e3ba49f2349a978f87cd84392c8331eca38364244d4949debb5c888b77bf929e"
+      },
+      {
+        "path": "docs/generated/hunting-economy/native-windows-20261021-resume-pending-76.png",
+        "bytes": 302188,
+        "sha256": "37bc016bf4fbb4ae7122c3e21b954f3819c4b9a2286879d08f1d25ae7dfc55a6"
+      }
+    ]
+  },
+  "retainedFailures": [
+    {
+      "round": 66,
+      "kind": "Product defect before this fix",
+      "detail": "Old EXE59/Gateway46 paid fee 6 once, then physical resume timed out with missing mapIndex and restored context. Its PG remains one burn/result, bound999994, oldgold1234 and durability970/970. Gateway cleanup fixture assertion exited101; do not claim all processes normal0 for this negative run.",
+      "postgres": {
+        "recordedAt": "2026-10-21T06:38:58.702Z",
+        "label": "after-stopped-resume-failure",
+        "schema": "repair_network_257608_1792563715974903900_0",
+        "bag_max": 970,
+        "burn_gold": "6",
+        "bound_gold": "999994",
+        "burn_count": 1,
+        "bag_current": 970,
+        "legacy_gold": 1234,
+        "result_count": 1,
+        "save_version": 10,
+        "saved_revision": 9
+      },
+      "screenshots": [
+        {
+          "path": "docs/generated/hunting-economy/native-windows-20261021-paid-pending-66.png",
+          "bytes": 285533,
+          "sha256": "d0dce592ec15105c9fc51c2a49f867a02a1e360bcc0e787c0ab037030d7eef80"
+        },
+        {
+          "path": "docs/generated/hunting-economy/native-windows-20261021-pending-close-66.png",
+          "bytes": 302420,
+          "sha256": "8ae700b932d10606954c88401568ff4b84799aa05112ea70423d360dca25bbab"
+        },
+        {
+          "path": "docs/generated/hunting-economy/native-windows-20261021-resume-timeout-66.png",
+          "bytes": 316929,
+          "sha256": "ed27efe60fa7d45ea459b4875b04ae7798d674f20ff3d52e6806a3a2d828fd94"
+        }
+      ]
+    },
+    {
+      "round": 72,
+      "kind": "Test fixture ordering",
+      "detail": "Premature NPCRepair before full initial actor bootstrap was correctly retired. Fixture changed to ordinary Interact -> NpcResponse -> SelectRepair -> NPCRepair/full inventory plus explicit runtime backpressure marker; production guards unchanged.",
+      "log": "C:/mir2-build/hunting-native-resume-tests-72.log"
+    },
+    {
+      "round": 73,
+      "kind": "PG harness configuration",
+      "detail": "First isolated PG runner omitted explicit synthetic identity secret/pepper; corrected 73b supplies the established test-only configuration and passes.",
+      "log": "C:/mir2-build/hunting-resume-grant-pg-results-73.json"
+    },
+    {
+      "round": 76,
+      "kind": "Expired quote",
+      "detail": "Slow root GUI actions exceeded unchanged30s Quote TTL; Confirm was refused and no charge occurred, before fast GUI re-run succeeded."
+    },
+    {
+      "round": 76,
+      "kind": "Artifact path correction",
+      "detail": "Four owned screenshots initially saved outside managed tree were copied into correct worktree, SHA verified, and only the exact owned duplicates moved to recoverable C:/mir2-build/hunting-native-original-artifact-quarantine-76. No unrelated file moved/deleted."
+    },
+    {
+      "kind": "Post-stop facts harness invocation",
+      "detail": "First facts command omitted required committed mode and failed its argument assertion before DB work; corrected explicit mode passed."
+    }
+  ],
+  "localEvidenceLogs": [
+    {
+      "path": "C:/mir2-build/hunting-map-build-69.log",
+      "bytes": 39555,
+      "sha256": "41e2e8350414894cb7208c72fdd8378bc5f5ac7ae153501aeceb52c20ec0b153"
+    },
+    {
+      "path": "C:/mir2-build/hunting-world-map-tests-69.log",
+      "bytes": 783,
+      "sha256": "84d8391b1cd83442212b983988c0c51234515754f9588edda895cb0c8eaee309"
+    },
+    {
+      "path": "C:/mir2-build/hunting-native-resume-build-74.log",
+      "bytes": 52718,
+      "sha256": "6b825460aa88733051cae305d01ecc895ed5e74591dfed70ae40baab6073df90"
+    },
+    {
+      "path": "C:/mir2-build/hunting-native-resume-tests-74.log",
+      "bytes": 1738,
+      "sha256": "c978ca6175d20880a95490756b849fc44ae06e8a9c0f04342e1b89fe955a58e0"
+    },
+    {
+      "path": "C:/mir2-build/hunting-native-hunting-adjacent-74.log",
+      "bytes": 5289,
+      "sha256": "17be1d74da525ff731aae21315e60ccbef104e59f48454552da0065bd4938e7b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-gateway-resume-build-73.log",
+      "bytes": 37089,
+      "sha256": "c708061b9c20b0abf7b06985ede1e7b31d28b6920d67b8d7bfcfe1b97c9f3c45"
+    },
+    {
+      "path": "C:/mir2-build/hunting-gateway-resume-grants-73.log",
+      "bytes": 942,
+      "sha256": "a2c8f4eaa0fdf12650ed18aee2ac465a3797ba87544821714883cbc7b0a1b57d"
+    },
+    {
+      "path": "C:/mir2-build/hunting-gateway-physical-resume-73.log",
+      "bytes": 225,
+      "sha256": "f05160b727e82cabadff4f5658290a8dba564aaef485eb1ebfd604bcf51cf6de"
+    },
+    {
+      "path": "C:/mir2-build/hunting-resume-grant-pg-results-73b.json",
+      "bytes": 332,
+      "sha256": "23fb062d7c4956f8c1a631a9a4ffb99001705fc083aaf7e0b44f9d717b6bf5f0"
+    },
+    {
+      "path": "C:/mir2-build/hunting-native-game-build-75.log",
+      "bytes": 59246,
+      "sha256": "a0b3a2486a032bd8daf659053af05f5bea5f49a45961a17373fa72e354fc78cd"
+    },
+    {
+      "path": "C:/mir2-build/hunting-native-transport-77.json",
+      "bytes": 1102,
+      "sha256": "183fcb4f88b4d2dafbdbea3b6c28170fa18ed1adb733288535d56983fdb90bf8"
+    },
+    {
+      "path": "C:/mir2-build/hunting-native-pg-after-cold-native-process-77.json",
+      "bytes": 340,
+      "sha256": "9b4a827063eaba1e3f94456f8d354a2815230339bbb6c88960b1f22fb7af8fe1"
+    },
+    {
+      "path": "C:/mir2-build/hunting-native-pg-after-query-logout-76.json",
+      "bytes": 333,
+      "sha256": "10e53611f7926dbdc751c2f85c8e4ff2b4a5dd8803556239dab9e4a85538c37b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-native-pg-after-stopped-resume-failure-66.json",
+      "bytes": 342,
+      "sha256": "a71d7eaee06b17a9007b6044a4acdb137cf7477f65087eb8a2e174b23663f592"
+    }
+  ],
+  "protectedInputs": [
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-portable-statistics-repair01.json",
+      "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473",
+      "unchanged": true
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+      "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b",
+      "unchanged": true
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json",
+      "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd",
+      "unchanged": true
+    },
+    {
+      "path": "apps/web/tsconfig.json",
+      "sha256": "70145b1787f5dea10c830730d9a6968f226bf8e1145602c8a9c964856a44f2ec",
+      "unchanged": true
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182",
+      "unchanged": true
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/lib/typescript.js",
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675",
+      "unchanged": true
+    }
+  ],
+  "limitations": [
+    "43 native tests include the four new tests; counts are not added to older rounds or full-workspace totals.",
+    "Physical loss test omits one known committed owner reply; it is not forced server OutcomeUnknown.",
+    "Fresh process78 is a new client process; Gateway was not restarted.",
+    "GUI did not display numeric durability; 970/970 is independently verified in PG.",
+    "Not a signed/shipped Candidate package, full asset/source closure, whole-client/browser/mobile or production acceptance. Old r22 asset root and older phase9 pins remain historical.",
+    "Quote generic selection wording and top-X closure remain limited UX/open checks; explicit Close is proven.",
+    "No remote login/account/asset operation, old gold reclassification, Docker, WSL, VM, virtualization or other-game change."
+  ],
+  "remaining": [
+    "bound material custody propagation and valuation (user clarification pending; no dependent material conversion implemented)",
+    "real planting/mining and remaining gameplay rewards",
+    "full maintenance/light-PVP/Shabak authoritative burns",
+    "whole-server market/player/earnings metrics and actual configured notification delivery",
+    "old asset migration, release checks and final human frontend acceptance"
+  ]
+}

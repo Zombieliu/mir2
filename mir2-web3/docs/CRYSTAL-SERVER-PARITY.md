@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+## 第十二阶段：Windows 原生修理恢复与重登（2026-10-21）
+
+修理恢复的有界Windows实机链已验证：EXE75/Gateway73真实NPC报价6及单Confirm，已提交回执被测试proxy省略后Pending Close，物理断线/resume各1次、手动原Query 1次；普通logout后新EXE进程普通重登。新钱包999994/0、旧gold 1234保持，PG结果/销毁各1条、金额6、耐久970/970、save_version17/revision16。见[阶段十二证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)。
+
+Native43/43、SimMap5/5、Gateway普通5/5、物理WS1/1与真实PG1/1不相加为历史总数。Gateway未冷启，未强制服务端Unknown，UI未显示耐久数字；七个源文件的验证不代表完整源码/资源闭包或签名候选包，旧66轮恢复失败仍保留。本服定制经济不增加Crystal闭合项或Candidate百分比。
+
+完整goal active、默认关闭、K=0.1及0.72/1.08许可保持；材料传播/估值（待用户定义）、其余来源、维护/轻PVP/沙巴克销毁、全服市场画像收益、通知及迁移发布继续开放。无Docker、远程资产修改或旧金币重分类；以下较早文字保留历史范围。
+
 ## 第十一阶段：真实日常委托来源（2026-10-21）
 
 现有newcomer-v1 NPC24三选二+bonus已获得每日独立领取槽、完整存档/EXP/Guild/绑定金币同事务及原日未知结果恢复。新增PG14、既有PG31、普通回归21通过，见[限定证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。不改变原玩法额度或Crystal/Candidate资格，未证明物理玩家任务/全服覆盖。Windows实机收费6已建立，物理resume仍在独立修复；完整goal active、默认关闭、K=0.1，无Docker与远程资产修改。

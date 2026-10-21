@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+## 第十二阶段：Windows 原生修理恢复与重登（2026-10-21）
+
+Windows原生有界修理链已完成：EXE75/Gateway73实机77轮真实NPC/Bag报价6、单Confirm、测试proxy省略一份已提交回执、Pending Close、物理断线/resume各1次、手动原Query 1次；普通logout后新EXE进程78轮普通Login/StartGame的钱包999994/0、旧gold 1234保持。独立PG结果/销毁各1条、金额6、耐久970/970、save_version17/revision16。见[阶段十二证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)。
+
+Native43/43（含新增4项）、SimMap5/5、Gateway普通5/5、物理WS1/1、真实PG1/1按各自范围记录，不累加历史筛选。恢复身份/角色、mapIndex与完整producer实际入队守卫已修；旧66轮失败保留。客户端、Gateway/proxy已正常退出0，19541/19542无listener。Gateway未冷启、未强制服务端Unknown，UI耐久数字未验；当前不代表完整源码/资源闭包或签名候选包。
+
+下一队列：材料传播与估值（待用户定义）、种植/挖矿等真实来源、维护/轻PVP/沙巴克销毁、全服市场画像收益、通知与迁移发布。完整goal active、默认关闭、K=0.1及0.72/1.08许可保持，不提高Crystal/Candidate百分比；无Docker、远程资产修改或旧金币重分类。下方旧队列保留当时范围。
+
 ## 第十一阶段：真实日常委托来源（2026-10-21）
 
 NPC24 newcomer-v1 日常委托已接齐 2100001..4；三组选二 + bonus 的真实普通NPC/kill-progress/冷登录用例通过，每组11,000基础绑定金币与20,000基础EXP，旧gold不变。新增PG14、邻接PG31、普通回归21通过；夹具、时限及基线修复均保留在[阶段十一证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。

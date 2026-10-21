@@ -6850,6 +6850,10 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
             .selected_character
             .as_ref()
             .map(|_| map.current_map.file_name.clone()),
+        map_index: session
+            .selected_character
+            .as_ref()
+            .map(|_| map.current_map.map_index),
         in_safe_zone: player_entity(world)
             .and_then(|entity| entity_position(world, entity))
             .map(|position| is_safe_zone_point(config, map, &position))
@@ -10767,3 +10771,7 @@ mod mail_status_transaction_tests {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "world_snapshot_identity_tests.rs"]
+mod world_snapshot_identity_tests;

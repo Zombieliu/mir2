@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+## 第十二阶段：Windows 原生修理恢复与重登（2026-10-21）
+
+本轮已补权威 snapshot 的 mapIndex、原恢复身份/角色见证，以及完整 producer 成功进入 gameplay 队列后才重新发布 owner。Native 43/43（含4项新增恢复）、SimMap 5/5、Gateway普通5/5、物理WS 1/1及真实PG 1/1分别通过，不与旧轮次计数相加。详见[阶段十二证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)。
+
+EXE75/Gateway73 的实机77轮完成真实NPC/Bag报价6、单Confirm；测试proxy只省略一份已提交owner回执，Pending主动Close后物理断线1次、resume 1次，再手动原Query 1次完成。普通logout后，全新EXE进程78轮普通Login/StartGame显示新钱包999994/0、旧gold 1234。独立PG终核结果/销毁各1条、金额6、耐久970/970、save_version17/revision16。两个客户端与Gateway/proxy均退出0，19541/19542无listener；旧66轮恢复失败证据保留。
+
+此处是新客户端进程重登，Gateway未冷启；未强制服务端Unknown，UI未显示耐久数字，耐久以PG为证。七个源文件的有界验证不等于完整源码/资源闭包或签名候选包，不提高Crystal/Candidate百分比。goal active、默认关闭、K=0.1及0.72/1.08许可保持；不用Docker，不改远程资产或重分类旧金币。下一队列仍有材料传播/估值（待用户定义）、种植挖矿等来源、维护/轻PVP/沙巴克销毁、全服市场画像收益、通知与迁移发布。以下旧段落保留历史范围。
+
 ## 第十一阶段：真实日常委托来源（2026-10-21）
 
 现有 newcomer-v1 NPC24 的四项日常来源已接同 PG 完整奖励/绑定入账；保留三选二 + bonus、UTC+8 午夜周期，与经济 04:00 分离。私有 DB period、整组 canonical 资格、独立每日不可变槽及原日恢复均已落地。14 项新增 PG、31 项既有 PG、21 项普通回归通过，见[阶段十一证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。

@@ -1,5 +1,13 @@
 # 狩猎经济：真实游戏来源接入计划
 
+## 第十二阶段：Windows 原生修理恢复与重登（2026-10-21）
+
+现有真实修理来源的原生恢复入口已补齐：权威snapshot提供mapIndex；新连接重新核对原身份/角色，完整producer实际入gameplay队列后才恢复owner/context，接收端关闭即终止当前连接。Pending账本仍只允许手动原Query，不自动再次Confirm。Native43/43（含4项新增）、SimMap5/5、Gateway普通5/5、物理WS1/1及真实PG1/1按各自范围通过，见[阶段十二证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)，不与历史计数相加。
+
+EXE75/Gateway73实机77轮真实NPC/Bag报价6、单Confirm；测试proxy仅省略一份已提交owner回执。Pending Close、物理断线/resume各1次后，手动原Query 1次完成；普通logout后新EXE进程78轮普通重登显示新钱包999994/0、旧gold 1234。独立PG终核结果/销毁各1条、金额6、耐久970/970、save_version17/revision16。两个客户端与Gateway/proxy均正常退出0，19541/19542无listener；旧66轮缺map导致的恢复失败保留。
+
+此处Gateway未冷启，未强制服务端Unknown，UI未显示耐久数字；七个源文件的有界验证不代表完整源码/资源闭包、签名候选包或全服资产覆盖。一次性/现有日常委托与修理等既有来源之外，材料传播/估值（待用户定义）、种植挖矿等产出、维护/轻PVP/沙巴克销毁、全服市场画像收益、通知及迁移发布仍待完成。goal active、默认关闭、K=0.1及0.72/1.08许可保持；不提高Crystal/Candidate百分比，无Docker、远程资产修改或旧金币重分类。下方旧计划保留历史范围。
+
 ## 第十一阶段：真实日常委托来源（2026-10-21）
 
 已接现有 newcomer-v1 NPC24 2100001..4，三选二+bonus、DB UTC+8午夜周期与原经济04:00分离。完整任务/EXP/Guild/checkpoint、绑定credit、receipt/outbox同事务；0025日槽不含digest/金额，原未决fence保存原日。锁后重读DB时间，跨期只允许一次完整freshcap+shadow重规划。14新增PG、31既有PG、21普通回归通过，实际普通NPC/kill-progress与冷登录覆盖三种两项组合，见[阶段十一证据](generated/hunting-economy/acceptance-20261021-daily-quest-source.json)。
