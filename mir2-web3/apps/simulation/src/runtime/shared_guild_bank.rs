@@ -43,7 +43,8 @@ fn reject_personal_collision(item: &UserItem, resources: &InventoryResource) -> 
     Ok(())
 }
 fn may_store(state: &ItemState) -> Result<(), String> {
-    if items::item_has_crystal_or_rental_bind_flag(state, crystal_compat::CRYSTAL_BIND_DONT_STORE) {
+    if items::hunting_item_binding::has_bound(state)
+        || items::item_has_crystal_or_rental_bind_flag(state, crystal_compat::CRYSTAL_BIND_DONT_STORE) {
         Err("item cannot enter guild storage".into())
     } else {
         Ok(())
@@ -323,3 +324,37 @@ impl crate::SimulationSession {
 #[cfg(test)]
 #[path = "shared_guild_item_tests.rs"]
 mod tests;
+
+
+#[cfg(test)]
+mod hunting_binding_tests {
+    use super::*;
+    use super::super::super::items::hunting_item_binding::HuntingItemBinding;
+    #[test]
+    fn hunting_bound_shared_guild_bank_real_transaction_rejects_full_tree_without_changing_either_owner() {
+        for nested in [false,true] {
+            let mut session=super::super::tests::session();
+            session.grant_shared_guild_creation_from_npc();session.submit_shared_guild_name("BoundBank").unwrap();
+            session.app.world_mut().resource_mut::<RuntimeConfigResource>().config.hunting_economy_realm=Some("bound-bank-test".into());
+            session.app.world_mut().resource_mut::<SessionResource>().hunting_character_incarnation=Some("pg-character-v1:44444444-4444-4444-8444-444444444444".into());
+            let mut state=items::embedded_item_state_from_template(&mir2_game_data::crystal_item_by_name("Dagger").unwrap(),crate::ItemContainer::Bag1,8);
+            state.unique_id=95_001;
+            if nested {
+                let mut child=items::embedded_item_state_from_template(&mir2_game_data::crystal_item_by_name("BronzeBell").unwrap(),crate::ItemContainer::Bag1,0);child.unique_id=95_002;
+                let mut wire=items::try_user_item_from_item_state(&state).unwrap();wire.slots=vec![None,Some(items::try_user_item_from_item_state(&child).unwrap())];
+                state=items::try_item_state_from_user_item(state,&wire).unwrap();
+            }
+            let binding=HuntingItemBinding::for_current_owner(session.app.world(),"quest-once-v1:2110001:reward:0").unwrap();
+            if nested {state.socketed[0].economic_binding=Some(binding);} else {state.economic_binding=Some(binding);}
+            session.app.world_mut().resource_mut::<InventoryResource>().inventory_items=vec![state];
+            // No producer realm is required for the outflow prohibition.
+            session.app.world_mut().resource_mut::<RuntimeConfigResource>().config.hunting_economy_realm=None;
+            let inventory=serde_json::to_value(&session.app.world().resource::<InventoryResource>().inventory_items).unwrap();
+            let config=session.app.world().resource::<RuntimeConfigResource>().config.clone();
+            let before=serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap();
+            let error=session.change_shared_guild_item(0,8,0).unwrap_err();assert!(error.contains("item cannot enter guild storage"),"{error}");
+            assert_eq!(serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap(),before);
+            assert_eq!(serde_json::to_value(&session.app.world().resource::<InventoryResource>().inventory_items).unwrap(),inventory);
+        }
+    }
+}

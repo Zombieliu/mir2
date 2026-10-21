@@ -78,7 +78,8 @@ pub(super) fn stage5_market_settlement(gross: u32) -> MarketSettlement {
 }
 
 pub(super) fn stage5_trade_item_can_enter(item: &ItemState) -> bool {
-    !item_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_TRADE)
+    !super::items::hunting_item_binding::has_bound(item)
+        && !item_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_TRADE)
         && item
             .soul_bound_id
             .is_none_or(|soul_bound_id| soul_bound_id < 0)

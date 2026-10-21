@@ -2763,6 +2763,13 @@ pub(super) fn pick_up_ground_drop(world: &mut World, object_id: u32) -> Vec<Serv
     }
 }
 
+fn ground_drop_economic_owner_allows(world: &World, drop: &GroundDropSnapshot) -> bool {
+    let GroundDropLootSnapshot::InventoryItem { key, exact_item: Some(payload), .. } = &drop.loot else { return true; };
+    if payload.server_state.is_none() { return true; }
+    ground_drop_custody::decode(payload, key, drop.quantity)
+        .is_some_and(|item| super::items::hunting_item_binding::belongs_to_current_owner(world, &item))
+}
+
 pub(super) fn drop_gold_impl(world: &mut World, amount: u32) -> Vec<ServerPacket> {
     let Some(player) = player_entity(world) else {
         return Vec::new();
@@ -2848,7 +2855,8 @@ pub(super) fn drop_item_packet(
         return vec![failed_packet];
     }
 
-    if item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_DROP) {
+    if super::items::hunting_item_binding::has_bound(&item)
+        || item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_DROP) {
         return vec![failed_packet];
     }
 
@@ -2958,6 +2966,7 @@ pub(super) fn drop_player_death_penalty(world: &mut World) -> Vec<ServerPacket> 
             .iter()
             .filter(|item| {
                 matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+                    && !super::items::hunting_item_binding::has_bound(item)
                     && !item_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_DROP)
             })
             .map(|item| PlayerDeathDropCandidate::Inventory(super::items::item_unique_id(item)))
@@ -2965,7 +2974,8 @@ pub(super) fn drop_player_death_penalty(world: &mut World) -> Vec<ServerPacket> 
         let mut equipment = resources
             .equipment_items
             .iter()
-            .filter(|item| !equipment_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_DROP))
+            .filter(|item| !super::items::hunting_item_binding::equipment_has_bound(item)
+                && !equipment_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_DROP))
             .filter_map(|item| {
                 equipment_slot_unique_id(item.slot).map(PlayerDeathDropCandidate::Equipment)
             })
@@ -3024,7 +3034,8 @@ fn drop_player_death_inventory_item(world: &mut World, unique_id: u64) -> Vec<Se
         return Vec::new();
     };
     let item = world.resource::<InventoryResource>().inventory_items[index].clone();
-    if item.quantity == 0 || item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_DROP) {
+    if item.quantity == 0 || super::items::hunting_item_binding::has_bound(&item)
+        || item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_DROP) {
         return Vec::new();
     }
     let destroy_on_drop = crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_DESTROY_ON_DROP);
@@ -3091,7 +3102,8 @@ fn drop_player_death_equipment(world: &mut World, unique_id: u64) -> Vec<ServerP
         return Vec::new();
     };
     let equipment = world.resource::<InventoryResource>().equipment_items[index].clone();
-    if equipment_has_crystal_or_rental_bind_flag(&equipment, CRYSTAL_BIND_DONT_DROP) {
+    if super::items::hunting_item_binding::equipment_has_bound(&equipment)
+        || equipment_has_crystal_or_rental_bind_flag(&equipment, CRYSTAL_BIND_DONT_DROP) {
         return Vec::new();
     }
     let destroy_on_drop = crystal_item_has_bind_flag(&equipment.key, CRYSTAL_BIND_DESTROY_ON_DROP);
@@ -3295,6 +3307,7 @@ impl SimulationSession {
             .find(|item| item_matches_inventory_unique_id(item, unique_id))?;
         let quantity = u32::from(count);
         if quantity > item.quantity
+            || super::items::hunting_item_binding::has_bound(item)
             || item_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_DROP)
         {
             return None;
@@ -3428,6 +3441,9 @@ impl SimulationSession {
     pub fn can_commit_shared_ground_drop_pickup(&self, drop: &GroundDropSnapshot) -> bool {
         let world = self.app.world();
         if !is_in_world(world) {
+            return false;
+        }
+        if !ground_drop_economic_owner_allows(world, drop) {
             return false;
         }
         match &drop.loot {
@@ -3636,6 +3652,9 @@ impl SimulationSession {
             return SharedAccountInventoryTransactionReceipt::ground_drop_pickup(false, Vec::new());
         }
 
+        if !ground_drop_economic_owner_allows(world, drop) {
+            return SharedAccountInventoryTransactionReceipt::ground_drop_pickup(false, Vec::new());
+        }
         match &drop.loot {
             GroundDropLootSnapshot::Gold { amount } => {
                 if !can_gain_gold(world.resource::<PlayerRuntimeResource>(), *amount) {

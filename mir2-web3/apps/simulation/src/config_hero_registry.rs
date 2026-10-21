@@ -167,6 +167,7 @@ pub(super) fn validate_read_view(store: &super::AccountStore) -> Result<(), Stri
     let mut all_ids = BTreeSet::new();
     for hero in store.shared_heroes.values() {
         let ids=crate::runtime::validate_shared_hero_carriers(&hero.state)?;
+        crate::runtime::validate_hunting_hero_binding_custody(hero)?;
         if matches!(hero.custody,SharedHeroCustody::Released){continue;}
         for id in ids {
             if !all_ids.insert(id) { return Err("item UID duplicated across registry Heroes".into()); }

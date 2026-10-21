@@ -753,6 +753,88 @@ pub(super) fn run_crystal_npc_script(
     run_crystal_npc_script_impl(world, context, &script, start_label)
 }
 
+// An exchange may cross GOTO sections and put TAKEGOLD/GIVE before TAKEITEM.
+// Inspect its reachable action graph before executing any line. This deliberately
+// refuses only an exchange which can reference a held Bound input; ordinary
+// dialogue and transactions involving unrelated legacy items remain available.
+fn npc_action_references_bound_input(
+    world: &World,
+    raw: &str,
+    state: &CrystalNpcExecutionState,
+) -> bool {
+    let inventory = world.resource::<InventoryResource>();
+    let command_is_dynamic = raw.split_whitespace().next()
+        .is_some_and(|word| word.contains('%') || word.contains("<$"));
+    if command_is_dynamic && (inventory.inventory_items.iter().any(super::items::hunting_item_binding::has_bound)
+        || npc_hero_contains_bound(world)) {
+        // MOV may change the command itself after this preflight. Its current
+        // expansion is not evidence that the later action is harmless.
+        return true;
+    }
+    let line = resolve_crystal_npc_runtime_tokens(world, raw, state);
+    let mut words = line.split_whitespace();
+    let command = words.next().unwrap_or_default();
+    if command.eq_ignore_ascii_case("SEALHERO") { return npc_hero_contains_bound(world); }
+    if !command.eq_ignore_ascii_case("TAKEITEM") { return false; }
+    let dynamic = raw.contains('%') || raw.contains("<$");
+    let key = words.next().map(normalize_crystal_item_key);
+    inventory.inventory_items.iter().any(|item| {
+        super::items::hunting_item_binding::has_bound(item)
+            && (dynamic || key.as_ref().is_some_and(|key| item.key.eq_ignore_ascii_case(key)))
+    })
+}
+
+fn npc_section_bound_exchange(
+    world: &World,
+    section: &CrystalNpcSection,
+    state: &CrystalNpcExecutionState,
+) -> bool {
+    let mut action = false;
+    section.lines.iter().any(|raw| {
+        let line = raw.trim();
+        if line.starts_with('#') {
+            action = line.eq_ignore_ascii_case("#ACT") || line.eq_ignore_ascii_case("#ELSEACT");
+            return false;
+        }
+        action && !line.starts_with(';') && npc_action_references_bound_input(world, line, state)
+    })
+}
+
+fn npc_script_bound_exchange(
+    world: &World,
+    script: &CrystalNpcScript,
+    start_label: &str,
+    state: &CrystalNpcExecutionState,
+) -> bool {
+    let mut pending = vec![start_label.to_string()];
+    let mut visited = std::collections::BTreeSet::new();
+    while let Some(label) = pending.pop() {
+        let Some(section) = crystal_npc_section(script, &label) else { continue; };
+        if !visited.insert(section.label.to_ascii_lowercase()) { continue; }
+        if npc_section_bound_exchange(world, section, state) { return true; }
+        let mut action = false;
+        for raw in &section.lines {
+            let line = raw.trim();
+            if line.starts_with('#') {
+                action = line.eq_ignore_ascii_case("#ACT") || line.eq_ignore_ascii_case("#ELSEACT");
+                continue;
+            }
+            if !action || line.starts_with(';') { continue; }
+            let resolved = resolve_crystal_npc_runtime_tokens(world, line, state);
+            let mut words = resolved.split_whitespace();
+            if !words.next().is_some_and(|word| word.eq_ignore_ascii_case("GOTO") || word.eq_ignore_ascii_case("GROUPGOTO")) { continue; }
+            if line.contains('%') || line.contains("<$") {
+                // A preceding MOV/CALC may change a dynamic jump. Every section
+                // is a candidate, rather than approving from its stale value.
+                pending.extend(script.sections.iter().map(|section| section.label.clone()));
+            } else if let Some(target) = words.next() {
+                pending.push(parse_crystal_label_target(target).0);
+            }
+        }
+    }
+    false
+}
+
 pub(super) fn run_crystal_npc_script_impl(
     world: &mut World,
     context: &NpcInteractionContext,
@@ -771,6 +853,9 @@ pub(super) fn run_crystal_npc_script_impl(
         ..CrystalNpcExecutionState::default()
     };
 
+    if npc_script_bound_exchange(world, script, start_label, &execution_state) {
+        return Some(CrystalNpcRunResult { dialog: None, packets: Vec::new() });
+    }
     for _ in 0..CRYSTAL_NPC_MAX_SECTION_HOPS {
         let section = crystal_npc_section(&script, &label)?;
         execution_state.section_label = Some(section.label.clone());
@@ -885,6 +970,10 @@ pub(super) fn execute_crystal_npc_section(
     execution_state: &mut CrystalNpcExecutionState,
 ) -> CrystalNpcSectionOutcome {
     let mut outcome = CrystalNpcSectionOutcome::default();
+    if npc_section_bound_exchange(world, section, execution_state) {
+        outcome.close_dialog = true;
+        return outcome;
+    }
     let mut mode = CrystalNpcParseMode::None;
     let mut if_conditions = Vec::new();
     let mut if_result = None;
@@ -2062,8 +2151,11 @@ pub(super) fn execute_crystal_npc_action_line(
             CrystalNpcActionControl::Continue
         }
         "TAKEITEM" => {
-            let _ = crystal_npc_take_item(world, &parts[1..]);
-            CrystalNpcActionControl::Continue
+            if crystal_npc_take_item(world, &parts[1..]) {
+                CrystalNpcActionControl::Continue
+            } else {
+                CrystalNpcActionControl::Close
+            }
         }
         "GIVEITEM" => {
             crystal_npc_give_item(world, &parts[1..]);
@@ -2431,6 +2523,10 @@ pub(super) fn crystal_npc_restore_remote_group_members(
     }
 }
 
+#[cfg(test)]
+#[path = "hunting_item_npc_tests.rs"]
+mod hunting_item_npc_tests;
+
 pub(super) fn crystal_npc_take_item(world: &mut World, parts: &[&str]) -> bool {
     let (item_name, mut quantity) = match parts {
         [item_name] => (*item_name, 1),
@@ -2443,6 +2539,17 @@ pub(super) fn crystal_npc_take_item(world: &mut World, parts: &[&str]) -> bool {
         _ => return false,
     };
     let item_key = normalize_crystal_item_key(item_name);
+    // Build the complete debit before removing a single stack. An unavailable
+    // or Bound input must not leave a partial TAKE or enable following GIVE.
+    {
+        let resources = world.resource::<InventoryResource>();
+        let mut available = 0_u64;
+        for item in resources.inventory_items.iter().filter(|item| item.key.eq_ignore_ascii_case(&item_key)) {
+            if super::items::hunting_item_binding::has_bound(item) { return false; }
+            available = available.saturating_add(u64::from(item.quantity));
+        }
+        if u64::from(quantity) > available { return false; }
+    }
     let mut resources = world.resource_mut::<InventoryResource>();
 
     for index in (0..resources.inventory_items.len()).rev() {
@@ -3225,7 +3332,13 @@ pub(super) fn crystal_npc_revive_hero(world: &mut World) {
     });
 }
 
+fn npc_hero_contains_bound(world: &World) -> bool {
+    let hero = world.resource::<HeroInventoryResource>();
+    hero.items.iter().chain(&hero.equipment).any(super::items::hunting_item_binding::has_bound)
+}
+
 pub(super) fn crystal_npc_seal_hero(world: &mut World) {
+    if npc_hero_contains_bound(world) { return; }
     let had_hero = world
         .resource_mut::<Stage5SystemsResource>()
         .stage5_systems

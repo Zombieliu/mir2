@@ -68,6 +68,10 @@ fn replace(inv: &mut InventoryResource, hero: &mut HeroInventoryResource, grid: 
 pub(in crate::runtime) fn merge_item(world: &mut World, from: MirGridType, to: MirGridType, source: u64, target: u64) -> Vec<ServerPacket> {
     let ack=|success| ServerPacket::MergeItem{grid_from:from,grid_to:to,id_from:source,id_to:target,success};
     if source==0 || target==0 || source==target || !ready(world,false) { return vec![ack(false)]; }
+    if (from==MirGridType::Fishing || to==MirGridType::Fishing)
+        && world.resource::<InventoryResource>().equipment_items.iter().any(|item|
+            item.slot==crate::EquipmentSlot::Weapon && super::super::items::hunting_item_binding::equipment_has_bound(item))
+    { return vec![ack(false)]; }
     if matches!(from,MirGridType::Storage)||matches!(to,MirGridType::Storage) {
         if !super::super::npc::active_crystal_storage_service(world)||storage_locked(world) {return vec![ack(false)];}
     }

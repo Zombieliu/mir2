@@ -459,6 +459,7 @@ pub(super) fn push_crystal_npc_buy_back_item(
     player_name: &str,
     item: &ItemState,
 ) {
+    if super::items::hunting_item_binding::has_bound(item) { return; }
     let buy_back_item = NpcBuyBackItemState {
         item: user_item_from_item_state(item),
         expires_at_binary_datetime: future_binary_datetime_minutes(
@@ -1315,6 +1316,9 @@ pub(super) fn sell_item_impl(world: &mut World, unique_id: u64, count: u16) -> V
         }
 
         let mut item = resources.inventory_items[index].clone();
+        if super::items::hunting_item_binding::has_bound(&item) {
+            return vec![failed_packet];
+        }
         item.quantity = requested;
         let template = crystal_item_template_for_item_key(&item.key);
 

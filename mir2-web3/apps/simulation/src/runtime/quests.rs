@@ -1234,7 +1234,9 @@ fn complete_crystal_quest(
     let _ = super::leveling::apply_experience_gain(world, i64::from(reward_exp));
 
     for reward in fixed_rewards.iter().chain(selected_reward.iter()) {
-        grant_crystal_quest_reward_item(world, reward);
+        if !grant_crystal_quest_reward_item(world, reward) {
+            return false;
+        }
     }
     if let Some(template) = effective_crystal_quest_template_by_id(world, info.index) {
         take_crystal_quest_task_items(world, &template);
@@ -1309,13 +1311,24 @@ fn crystal_quest_reward_slots_needed<'a>(
         .sum()
 }
 
-fn grant_crystal_quest_reward_item(world: &mut World, reward: &QuestItemReward) {
+fn grant_crystal_quest_reward_item(world: &mut World, reward: &QuestItemReward) -> bool {
     // Crystal's reward loop runs only while count > 0.
     if reward.count == 0 {
-        return;
+        return true;
     }
     let quantity = u32::from(reward.count);
     let key = crystal_quest_reward_item_key(&reward.item);
+    if let Some(binding) = super::hunting_quests::bound_reward_binding(world) {
+        return super::inventory::gain_hunting_bound_item(
+            world,
+            &key,
+            &reward.item.name,
+            reward.item.tooltip.as_deref().unwrap_or("Original Crystal quest reward."),
+            quantity,
+            u16::from(reward.item.weight),
+            &binding,
+        ).is_some();
+    }
     add_or_increment_item(
         world,
         ItemContainer::Bag1,
@@ -1330,6 +1343,7 @@ fn grant_crystal_quest_reward_item(world: &mut World, reward: &QuestItemReward) 
         quantity,
         u16::from(reward.item.weight),
     );
+    true
 }
 
 fn crystal_quest_reward_item_key(item: &ItemInfo) -> String {

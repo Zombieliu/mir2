@@ -49,6 +49,8 @@ use super::resources::{
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct EquipmentState {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(super) economic_binding: Option<super::items::hunting_item_binding::HuntingItemBinding>,
     pub(super) key: String,
     pub(super) slot: EquipmentSlot,
     #[serde(default = "default_equipment_quantity")]
@@ -545,6 +547,7 @@ pub(super) fn slugify_name(name: &str) -> String {
 pub(super) fn equipment_template_to_state(template: &EquipmentTemplate) -> EquipmentState {
     let slot = equipment_slot_from_template(&template.slot);
     EquipmentState {
+        economic_binding: None,
         key: equipment_state_key(slot, &template.name),
         slot,
         quantity: 1,
@@ -679,6 +682,7 @@ fn crystal_start_equipment(item_index: i32, slot: EquipmentSlot) -> EquipmentSta
     let defence = crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_AC);
 
     EquipmentState {
+        economic_binding: None,
         key,
         slot,
         quantity: 1,
@@ -841,6 +845,7 @@ pub(super) fn item_state_from_equipment_state(
     upsert_user_item_stat(&mut added_stats, 15, equipment.added_luck);
 
     ItemState {
+        economic_binding: equipment.economic_binding,
         key: equipment.key,
         name: equipment.name,
         icon: equipment.icon,
@@ -897,6 +902,7 @@ pub(super) fn equipment_state_from_item_state(
         })
     });
     EquipmentState {
+        economic_binding: item.economic_binding.clone(),
         key: item.key.clone(),
         slot,
         quantity: item.quantity,
@@ -1277,6 +1283,9 @@ pub(super) fn try_equip_item(
         };
         let index = unique_item_index_for_protocol_reference(source_items, grid, unique_id)?;
         let mut item = source_items[index].clone();
+        if !super::items::hunting_item_binding::belongs_to_current_owner(world, &item) {
+            return None;
+        }
         validated_item_state_user_item(&item)?;
         if !item_state_can_equip_to_slot(&item, target_slot) {
             return None;
@@ -1298,6 +1307,11 @@ pub(super) fn try_equip_item(
             .equipment_items
             .iter()
             .find(|item| item.slot == target_slot);
+        if replaced.is_some_and(|item|
+            !super::items::hunting_item_binding::equipment_belongs_to_current_owner(world, item))
+        {
+            return None;
+        }
         // A legacy slot-derived return must not take the identity of an item
         // currently held by market/refine. Reject before removing either item.
         if replaced.is_some_and(|existing| {
@@ -1433,6 +1447,9 @@ pub(super) fn remove_equipped_item_impl(
     unique_id: u64,
     to: i32,
 ) -> Vec<ServerPacket> {
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return vec![ServerPacket::RemoveItem { grid, unique_id, to, success: false }];
+    }
     let failed_packet = ServerPacket::RemoveItem {
         grid,
         unique_id,
@@ -1539,6 +1556,11 @@ fn item_state_with_socket_inserted(
     socket_item: &ItemState,
     to: i32,
 ) -> Option<ItemState> {
+    if super::items::hunting_item_binding::has_bound(host)
+        || super::items::hunting_item_binding::has_bound(socket_item)
+    {
+        return None;
+    }
     let target = usize::try_from(to).ok()?;
     let mut host_user_item = validated_item_state_user_item(host)?;
     if target >= host_user_item.slots.len() || host_user_item.slots[target].is_some() {
@@ -1570,6 +1592,9 @@ fn item_state_with_socket_removed(
     destination_container: ItemContainer,
     destination_slot: u8,
 ) -> Option<(ItemState, ItemState)> {
+    if super::items::hunting_item_binding::has_bound(host) {
+        return None;
+    }
     let mut host_user_item = validated_item_state_user_item(host)?;
     let mut matching_slots = host_user_item
         .slots
@@ -1873,6 +1898,9 @@ pub(super) fn equip_slot_item_impl(
     grid_to: MirGridType,
     to_unique_id: u64,
 ) -> Vec<ServerPacket> {
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return vec![ServerPacket::EquipSlotItem { grid, unique_id, to, grid_to, success: false }];
+    }
     let failed = ServerPacket::EquipSlotItem {
         grid,
         unique_id,
@@ -1996,6 +2024,9 @@ pub(super) fn remove_equipped_slot_item_impl(
     to: i32,
     from_unique_id: u64,
 ) -> Vec<ServerPacket> {
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return vec![ServerPacket::RemoveSlotItem { grid, grid_to, unique_id, to, success: false }];
+    }
     let failed_packet = ServerPacket::RemoveSlotItem {
         grid,
         grid_to,

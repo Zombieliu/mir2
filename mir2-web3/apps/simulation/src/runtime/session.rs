@@ -1738,7 +1738,8 @@ fn build_shared_item_rental_item_offer(world: &World) -> Option<SharedItemRental
     let rental = world.resource::<ItemRentalResource>();
     let active = rental.active.as_ref()?;
     let item = active.deposited_item.as_ref()?;
-    if !active.item_locked || validate_committed_item_state_carrier(item).is_err() {
+    if !active.item_locked || validate_committed_item_state_carrier(item).is_err()
+        || super::items::hunting_item_binding::has_bound(item) {
         return None;
     }
 
@@ -1786,6 +1787,9 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
         // offered slot after it was deposited. If the live item's id no longer
         // matches what was deposited, refuse to build the offer.
         if trade.offered_unique_ids.get(trade_slot).copied() != Some(item_unique_id(item)) {
+            return None;
+        }
+        if !super::social_economy::stage5_trade_item_can_enter(item) {
             return None;
         }
         let item_state_json = serde_json::to_string(item).ok()?;
@@ -1874,6 +1878,8 @@ fn apply_shared_trade_offer(
             return trade_offer_delivery_failed_packets(world, rollback);
         };
         if validate_committed_item_state_carrier(&item).is_err()
+            || (!rollback && super::items::hunting_item_binding::has_bound(&item))
+            || (rollback && !super::items::hunting_item_binding::belongs_to_current_owner(world, &item))
             || offered_item.key != item.key
             || offered_item.unique_id != item_unique_id(&item)
         {
@@ -1991,6 +1997,17 @@ fn apply_shared_trade_settlement_projection(
         return Err("trade projection identity does not match the active character".to_string());
     }
 
+    // The durable receipt is not permission to move newly tagged custody.
+    // Revalidate both complete offers before any debit or incoming old gold.
+    for offer in [own_offer, incoming_offer] {
+        for offered in &offer.items {
+            let item: ItemState = serde_json::from_str(&offered.item_state_json)
+                .map_err(|_| "invalid trade projection item".to_string())?;
+            if super::items::hunting_item_binding::has_bound(&item) {
+                return Err("bound custody cannot cross a trade settlement".into());
+            }
+        }
+    }
     let (outgoing_items_debited, outgoing_gold_held) = {
         let systems = world.resource::<Stage5SystemsResource>();
         match systems.stage5_systems.trade.as_ref() {
@@ -2049,6 +2066,7 @@ fn apply_shared_trade_settlement_projection(
                 .find(|item| item_unique_id(item) == offered_item.unique_id)
                 .ok_or_else(|| "trade projection outgoing item is unavailable".to_string())?;
             if offered_item.key != item.key
+                || super::items::hunting_item_binding::has_bound(item)
                 || validate_committed_item_state_carrier(item).is_err()
                 || serde_json::to_string(item).ok().as_deref()
                     != Some(offered_item.item_state_json.as_str())
@@ -2069,6 +2087,7 @@ fn apply_shared_trade_settlement_projection(
         let mut item = serde_json::from_str::<ItemState>(&offered_item.item_state_json)
             .map_err(|error| format!("decode trade projection item: {error}"))?;
         if validate_committed_item_state_carrier(&item).is_err()
+            || super::items::hunting_item_binding::has_bound(&item)
             || offered_item.key != item.key
             || offered_item.unique_id != item_unique_id(&item)
             || staged_inventory
@@ -2225,7 +2244,8 @@ fn apply_shared_item_rental_delivery(
     else {
         return vec![ServerPacket::CancelItemRental];
     };
-    if validate_committed_item_state_carrier(&agreement_item).is_err()
+    if super::items::hunting_item_binding::has_bound(&agreement_item)
+        || validate_committed_item_state_carrier(&agreement_item).is_err()
         || agreement.item.item_id != item_unique_id(&agreement_item)
         || agreement.item.item_name != agreement_item.name
         || !shared_rental_delivery_matches_active_state(world, delivery)

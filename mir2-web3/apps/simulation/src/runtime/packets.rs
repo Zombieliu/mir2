@@ -246,6 +246,10 @@ const MAIL_GOLD_COST_PER_1K: u32 = 100;
 const MAIL_INSURANCE_PERCENT: u32 = 5;
 const MAIL_BIND_NO_MAIL: i16 = 16_384;
 
+#[cfg(test)]
+#[path = "hunting_item_outflow_tests.rs"]
+mod hunting_item_outflow_tests;
+
 fn stage5_mail_item_allowed(item: &ItemState) -> bool {
     exact_mail_item_state_is_valid(item)
         && stage5_trade_item_can_enter(item)
@@ -1448,7 +1452,7 @@ fn transfer_hero_item_packet(world:&mut World,from:i32,to:i32)->Vec<ServerPacket
     if !is_valid_inventory_slot(from_slot,inventory.inventory_capacity) || hero.items.iter().any(|item|item.slot==to_slot) {return vec![failure];}
     let Some(index)=inventory.inventory_items.iter().position(|item|inventory_item_matches_index(item,from_slot)) else {return vec![failure];};
     let mut item=inventory.inventory_items[index].clone();
-    if stage5_trade_reserves_item(world,&item) || item_has_crystal_or_rental_bind_flag(&item,CRYSTAL_BIND_NO_HERO) {return vec![failure];}
+    if stage5_trade_reserves_item(world,&item) || item_has_crystal_or_rental_bind_flag(&item,CRYSTAL_BIND_NO_HERO) || !super::items::hunting_item_binding::belongs_to_current_owner(world,&item) {return vec![failure];}
     if item_unique_id(&item)==0 && item.user_item_metadata.is_none() && item.socketed.is_empty() {
         // Legacy slot-zero roots have no global identity. Promote only this
         // staged root before crossing custody; an exact sidecar UID is never
@@ -1483,7 +1487,9 @@ fn take_back_hero_item_packet(world:&mut World,from:i32,to:i32)->Vec<ServerPacke
     let Some(from_slot)=u8::try_from(from).ok().filter(|slot|*slot<hero.capacity) else {return vec![failure];};
     let Some(to_slot)=u8::try_from(to).ok() else {return vec![failure];};
     let Some(index)=hero.items.iter().position(|item|item.slot==from_slot) else {return vec![failure];};
-    let item=hero.items.remove(index);
+    let item=hero.items[index].clone();
+    if !super::items::hunting_item_binding::belongs_to_current_owner(world,&item) {return vec![failure];}
+    hero.items.remove(index);
     let Ok(held)=super::item_custody::reserved_ids(&world.resource::<Stage5SystemsResource>().stage5_systems) else {return vec![failure];};
     if super::hero_inventory::reject_cross_custody_ids(&item,&held).is_err() {return vec![failure];}
     let Some((mut inventory,_))=super::item_custody::plan_return(world.resource::<InventoryResource>(),&item,Some(to_slot),false) else {return vec![failure];};
@@ -1547,6 +1553,9 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
     };
     if super::item_custody::refresh(world).is_err() {return hero_use_item_failed(unique_id);}
     let item = world.resource::<HeroInventoryResource>().items[hero_item_index].clone();
+    if !super::items::hunting_item_binding::belongs_to_current_owner(world, &item) {
+        return hero_use_item_failed(unique_id);
+    }
     let ack = Some((unique_id, MirGridType::HeroInventory));
     let item_template = crystal_item_template_for_item_key(&item.key);
     let mut packets = Vec::new();
@@ -3328,7 +3337,8 @@ fn stage5_guild_storage_item_packet(
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             };
             let item = world.resource::<InventoryResource>().inventory_items[item_index].clone();
-            if item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_STORE)
+            if super::items::hunting_item_binding::has_bound(&item)
+                || item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_STORE)
                 || validate_committed_item_state_carrier(&item).is_err()
             {
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
@@ -3419,6 +3429,9 @@ fn stage5_guild_storage_item_packet(
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             };
             let mut prepared_item = stored.state.clone();
+            if super::items::hunting_item_binding::has_bound(&prepared_item) {
+                return vec![stage5_guild_storage_failure(change_type, from, to)];
+            }
             prepared_item.container = container;
             prepared_item.slot = slot;
             normalize_incoming_item_tree_unique_ids(
@@ -4199,6 +4212,9 @@ fn stage5_consign_item_packet(
             success: false,
         }];
     }
+    if super::items::hunting_item_binding::has_bound(&item) {
+        return vec![ServerPacket::ConsignItem { unique_id, success: false }];
+    }
     let pending_refine_uid = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -4324,6 +4340,9 @@ pub(super) fn stage5_market_buy_packet(
     else {
         return vec![ServerPacket::MarketFail { reason: 7 }];
     };
+    if super::items::hunting_item_binding::has_bound(&item) {
+        return vec![ServerPacket::MarketFail { reason: 7 }];
+    }
     let Some((inventory, changed)) =
         item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, true)
     else {
@@ -4380,6 +4399,12 @@ pub(super) fn stage5_market_get_back_packet(
     {
         return vec![ServerPacket::MarketFail { reason: 7 }];
     }
+    if listing.sold && listing.item_state_json.as_deref().is_some_and(|encoded| {
+        item_custody::decode(&listing.item_key, encoded)
+            .map_or(true, |item| super::items::hunting_item_binding::has_bound(&item))
+    }) {
+        return vec![ServerPacket::MarketFail { reason: 7 }];
+    }
     let packets = if listing.sold {
         let settlement = stage5_market_settlement(listing.price);
         let Some(gold) = world
@@ -4413,6 +4438,9 @@ pub(super) fn stage5_market_get_back_packet(
         else {
             return vec![ServerPacket::MarketFail { reason: 7 }];
         };
+        if !super::items::hunting_item_binding::belongs_to_current_owner(world, &item) {
+            return vec![ServerPacket::MarketFail { reason: 7 }];
+        }
         let Some((inventory, changed)) =
             item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, true)
         else {
@@ -4497,6 +4525,9 @@ fn stage5_deposit_refine_item_packet(world: &mut World, from: i32, to: i32) -> V
         return failure();
     };
     let item = inventory.inventory_items[index].clone();
+    if super::items::hunting_item_binding::has_bound(&item) {
+        return failure();
+    }
     let Some(encoded) = item_custody::encode(&item) else {
         return failure();
     };
@@ -4552,6 +4583,9 @@ fn stage5_retrieve_refine_item_packet(world: &mut World, from: i32, to: i32) -> 
     else {
         return failure();
     };
+    if !super::items::hunting_item_binding::belongs_to_current_owner(world, &item) {
+        return failure();
+    }
     let Some((inventory, _)) = item_custody::plan_return(
         world.resource::<InventoryResource>(),
         &item,
@@ -4583,6 +4617,13 @@ fn stage5_refine_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
         .refine
         .slots
         .clone();
+    // Validate the whole return before the first slot changes custody.
+    for (slot, key) in &slots {
+        let encoded = world.resource::<Stage5SystemsResource>().stage5_systems.refine.item_states.get(slot);
+        if let Some(item) = encoded.and_then(|encoded| item_custody::decode(key, encoded).ok()) {
+            if !super::items::hunting_item_binding::belongs_to_current_owner(world, &item) { return Vec::new(); }
+        }
+    }
     let mut packets = Vec::new();
     for (slot, key) in slots {
         let encoded = world

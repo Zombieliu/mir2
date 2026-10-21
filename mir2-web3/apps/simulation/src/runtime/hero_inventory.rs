@@ -101,6 +101,9 @@ pub(super) fn move_item(
 ) -> Vec<mir2_protocol::ServerPacket> {
     use mir2_protocol::{MirGridType, ServerPacket};
     let mut success = false;
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return vec![ServerPacket::MoveItem { grid: MirGridType::HeroInventory, from, to, success }];
+    }
     let ready = world
         .resource::<super::resources::Stage5SystemsResource>()
         .stage5_systems
@@ -229,7 +232,8 @@ fn ready(world: &bevy_ecs::world::World, require_alive: bool) -> bool {
         .hero
         .as_ref()
         .is_some_and(|hero| hero.spawned);
-    spawned
+    super::items::hunting_item_binding::inventory_belongs_to_current_owner(world)
+        && spawned
         && super::components::hero_entity(world).is_some_and(|entity| {
             !require_alive
                 || world

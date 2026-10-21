@@ -16,6 +16,7 @@ use super::resources::{
 };
 use super::save::{active_session_mutating_account_id, snapshot_active_character_save};
 use super::session::SimulationSession;
+use super::items::hunting_item_binding::HuntingItemBinding;
 
 #[derive(Resource)]
 struct RejectionPacket(ServerPacket);
@@ -52,6 +53,58 @@ struct PreparedQuest {
     shadow: SimulationSession,
     before: CharacterSaveRecord,
     planned: CharacterSaveRecord,
+    item_projection: Option<PendingQuestItemProjection>,
+}
+
+const BOUND_KIT_QUEST: i32 = 2_110_001;
+
+#[derive(Resource, Clone)]
+struct BoundQuestRewards(HuntingItemBinding);
+
+pub(super) fn bound_reward_binding(world: &World) -> Option<HuntingItemBinding> {
+    world.get_resource::<BoundQuestRewards>().map(|value| value.0.clone())
+}
+
+/// A successful ordinary StartGame has loaded the complete canonical character.
+/// A retained preimage belongs to its previous actor, never to this new load.
+/// Retained socket resume does not call this hook.
+pub(super) fn complete_character_load(world: &mut World) {
+    world.remove_resource::<PendingQuestItemProjection>();
+    world.remove_resource::<RejectionPacket>();
+}
+
+/// Private live-actor preimage, retained across an unknown result. Neither an
+/// immutable historical checkpoint nor a later canonical revision can replace
+/// this proof that no inventory change occurred before publication.
+#[derive(Resource, Clone)]
+struct PendingQuestItemProjection {
+    quest_id: i32,
+    account: String,
+    character_index: i32,
+    incarnation: String,
+    revision: u64,
+    before_image: Vec<u8>,
+    planned: InventoryResource,
+    after: CharacterSaveRecord,
+}
+
+fn inventory_image(inventory: &InventoryResource) -> Result<Vec<u8>, String> {
+    serde_json::to_vec(&(
+        &inventory.reserved_item_unique_ids,
+        inventory.inventory_capacity,
+        &inventory.inventory_items,
+        &inventory.belt_items,
+        &inventory.storage_items,
+        &inventory.equipment_items,
+        inventory.storage_size,
+        inventory.has_expanded_storage,
+        inventory.expanded_storage_expiry_time_binary_datetime,
+        inventory.expanded_storage_expiry_notice_pending,
+        inventory.storage_unlocked,
+        inventory.storage_sent,
+        inventory.storage_has_password,
+        inventory.storage_password_last_set_binary_datetime,
+    )).map_err(|_| "quest inventory preimage cannot be encoded".into())
 }
 
 /// A stable definition digest deliberately excludes revision, transient EXP
@@ -63,14 +116,17 @@ fn source_definition(world: &World, quest_id: i32) -> Result<(String, u64), Stri
     let template = quests::effective_crystal_quest_template_by_id(world, quest_id)
         .ok_or_else(|| UNSUPPORTED.to_owned())?;
     let daily = quests::is_hunting_newcomer_daily_quest(world, quest_id);
+    let bound_items = quest_id == BOUND_KIT_QUEST
+        && world.resource::<QuestResource>().newcomer_v2_cadence
+        && info.rewards_fixed_item.iter().any(|reward| reward.count > 0);
     if (quests::quest_has_recurrence(world, quest_id) && !daily)
         || (daily && (info.quest_type != 1 || info.npc_index != 24 || info.finish_npc_index != 24))
         || (!daily && !matches!(info.quest_type, 0 | 3))
         || info.reward_gold == 0
-        || info
+        || (!bound_items && info
             .rewards_fixed_item
             .iter()
-            .any(|reward| reward.count > 0)
+            .any(|reward| reward.count > 0))
         || !info.rewards_select_item.is_empty()
         || !template.carry_items.is_empty()
         || !template.item_tasks.is_empty()
@@ -79,6 +135,8 @@ fn source_definition(world: &World, quest_id: i32) -> Result<(String, u64), Stri
     }
     let domain = if daily {
         "hunting-newcomer-daily-quest-definition-v1"
+    } else if bound_items {
+        "hunting-once-bound-kit-definition-v1"
     } else {
         "hunting-once-quest-definition-v1"
     };
@@ -169,6 +227,20 @@ fn prepare_with_daily_time(
     );
     super::shared_guild_experience::begin_owned_hunting_preparation(shadow.app.world_mut());
 
+    let bound_items = quest_id == BOUND_KIT_QUEST
+        && world.resource::<QuestResource>().newcomer_v2_cadence;
+    if bound_items {
+        let (digest, _) = source_definition(world, quest_id)?;
+        let binding = HuntingItemBinding::for_current_owner(
+            world, &format!("quest-once-v1:{quest_id}:{digest}"),
+        )?;
+        // Preserve only the realm identity for private bound-item planning.
+        // The fork still owns an isolated account image and no PG writer.
+        shadow.app.world_mut().resource_mut::<RuntimeConfigResource>()
+            .config.hunting_economy_realm = config.hunting_economy_realm.clone();
+        shadow.app.world_mut().insert_resource(BoundQuestRewards(binding));
+    }
+
     if let Some(now_ms) = database_time_ms {
         let period = quests::quest_recurrence::daily_period_at(now_ms);
         // OS refresh may already have advanced a live calendar. It cannot be
@@ -245,9 +317,10 @@ fn prepare_with_daily_time(
     let after = snapshot_active_character_save(shadow.app.world())
         .ok_or_else(|| "prepared quest checkpoint missing".to_owned())?;
     if after.gold != before.gold
-        || after.inventory_items_json != before.inventory_items_json
-        || after.belt_items_json != before.belt_items_json
+        || (!bound_items && (after.inventory_items_json != before.inventory_items_json
+            || after.belt_items_json != before.belt_items_json))
         || after.equipment_items_json != before.equipment_items_json
+        || after.storage_items_json != before.storage_items_json
     {
         return Err("unsupported quest attempted an item or legacy gold mutation".into());
     }
@@ -264,10 +337,29 @@ fn prepare_with_daily_time(
     planned.credit = after.credit;
     planned.quest_states_json = after.quest_states_json;
     planned.guild_experience_journal = after.guild_experience_journal;
+    let item_projection = if bound_items {
+        planned.inventory_items_json = after.inventory_items_json;
+        planned.belt_items_json = after.belt_items_json;
+        let session = world.resource::<SessionResource>();
+        Some(PendingQuestItemProjection {
+            quest_id,
+            account: active_session_mutating_account_id(session)
+                .ok_or("bound quest owner missing")?,
+            character_index: session.selected_character.as_ref()
+                .ok_or("bound quest character missing")?.index,
+            incarnation: session.hunting_character_incarnation.clone()
+                .ok_or("bound quest incarnation missing")?,
+            revision: before.revision,
+            before_image: inventory_image(world.resource::<InventoryResource>())?,
+            planned: shadow.app.world().resource::<InventoryResource>().clone(),
+            after: planned.clone(),
+        })
+    } else { None };
     Ok(PreparedQuest {
         shadow,
         before,
         planned,
+        item_projection,
     })
 }
 
@@ -279,6 +371,7 @@ struct PersonalProjection {
     credit: u32,
     revision: u64,
     journal: crate::config::GuildExperienceJournal,
+    inventory: Option<InventoryResource>,
 }
 
 impl PersonalProjection {
@@ -308,6 +401,7 @@ impl PersonalProjection {
             credit: save.credit,
             revision: save.revision,
             journal: save.guild_experience_journal.clone(),
+            inventory: None,
         })
     }
 
@@ -366,6 +460,9 @@ impl PersonalProjection {
             runtime.max_experience = self.max_experience;
             runtime.credit = self.credit;
         }
+        if let Some(inventory) = self.inventory {
+            *world.resource_mut::<InventoryResource>() = inventory;
+        }
         world
             .entity_mut(player)
             .get_mut::<CharacterBody>()
@@ -395,7 +492,27 @@ fn publish(
     expected_revision: u64,
     fresh_before: Option<&CharacterSaveRecord>,
 ) -> Result<(), String> {
-    let projection = PersonalProjection::decode(world, &commit.checkpoint)?;
+    let mut projection = PersonalProjection::decode(world, &commit.checkpoint)?;
+    if commit.source_quest_id() == BOUND_KIT_QUEST {
+        let pending = world.get_resource::<PendingQuestItemProjection>()
+            .ok_or("bound quest publication needs a fresh complete character load")?;
+        let session = world.resource::<SessionResource>();
+        if pending.quest_id != commit.source_quest_id()
+            || pending.revision != expected_revision
+            || active_session_mutating_account_id(session).as_deref() != Some(pending.account.as_str())
+            || session.selected_character.as_ref().map(|value| value.index) != Some(pending.character_index)
+            || session.hunting_character_incarnation.as_deref() != Some(pending.incarnation.as_str())
+            || inventory_image(world.resource::<InventoryResource>())? != pending.before_image
+            || commit.checkpoint.inventory_items_json != pending.after.inventory_items_json
+            || commit.checkpoint.belt_items_json != pending.after.belt_items_json
+            || commit.checkpoint.equipment_items_json != pending.after.equipment_items_json
+            || commit.checkpoint.storage_items_json != pending.after.storage_items_json
+            || commit.checkpoint.inventory_capacity != pending.after.inventory_capacity
+        {
+            return Err("bound quest inventory baseline or original reward changed; reload required".into());
+        }
+        projection.inventory = Some(pending.planned.clone());
+    }
     projection.apply(
         world,
         expected_revision,
@@ -404,7 +521,11 @@ fn publish(
         } else {
             fresh_before
         },
-    )
+    )?;
+    if commit.source_quest_id() == BOUND_KIT_QUEST {
+        world.remove_resource::<PendingQuestItemProjection>();
+    }
+    Ok(())
 }
 
 /// Called only after the ordinary request's NPC/diary authorization. This does
@@ -422,7 +543,22 @@ pub(super) fn recover_original_request(
     let index = session.selected_character.as_ref()?.index;
     let revision = session.active_save_revision()?;
     match config.recover_pending_hunting_quest_source(&account, &witness, index, quest_id) {
-        Ok(None) => None,
+        Ok(None) => {
+            // Only a writable, resolved original request can discard its local
+            // preimage. A foreign or still-uncertain fence must retain it.
+            let resolved = config.ensure_account_store_writable().is_ok()
+                && world.get_resource::<PendingQuestItemProjection>().is_some_and(|pending| {
+                    pending.quest_id == quest_id
+                        && pending.account == account
+                        && pending.character_index == index
+                        && pending.incarnation == witness
+                        && pending.revision == revision
+                });
+            if resolved {
+                world.remove_resource::<PendingQuestItemProjection>();
+            }
+            None
+        }
         Ok(Some(commit)) => match publish(world, &commit, revision, None) {
             Ok(()) => Some(vec![
                 ServerPacket::ChangeQuest {
@@ -439,7 +575,7 @@ pub(super) fn recover_original_request(
                 },
             ]),
             Err(detail) => {
-                config.freeze_hunting_quest_publication(detail);
+                config.freeze_hunting_quest_commit_publication(&commit, detail);
                 Some(vec![message_packet(RELOAD_REQUIRED)])
             }
         },
@@ -551,6 +687,12 @@ pub(super) fn complete_if_configured(
             Ok(source) => source,
             Err(_) => return Some(reject(world, UNAVAILABLE)),
         };
+        if let Some(projection) = prepared.item_projection.clone() {
+            if world.contains_resource::<PendingQuestItemProjection>() {
+                return Some(reject(world, RECOVERING));
+            }
+            world.insert_resource(projection);
+        }
         #[cfg(test)]
         let committed = match world.remove_resource::<HuntingQuestTestFault>() {
             Some(fault) => config.publish_hunting_quest_source_with_test_fault(&source, fault.0),
@@ -564,7 +706,7 @@ pub(super) fn complete_if_configured(
                     match publish(world, &commit, before.revision, Some(&before)) {
                         Ok(()) => true,
                         Err(detail) => {
-                            config.freeze_hunting_quest_publication(detail);
+                            config.freeze_hunting_quest_commit_publication(&commit, detail);
                             reject(world, RELOAD_REQUIRED)
                         }
                     },
@@ -572,6 +714,7 @@ pub(super) fn complete_if_configured(
             }
             Err(HuntingSourceError::PeriodChanged) if daily && attempt == 0 => continue,
             Err(HuntingSourceError::PeriodChanged | HuntingSourceError::Rejected(_)) => {
+                world.remove_resource::<PendingQuestItemProjection>();
                 return Some(reject(world, UNAVAILABLE));
             }
             Err(HuntingSourceError::OutcomeUnknown(_))

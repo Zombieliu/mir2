@@ -21,6 +21,7 @@ mod hero_registry_carriers;
 mod hero_registry_scan;
 pub(crate) use hero_registry_scan::validate_shared_hero_physical_custody;
 pub(crate) use hero_registry_validation::validate_shared_hero_carriers;
+pub(crate) use hero_registry_validation::validate_hunting_hero_binding_custody;
 mod hero_stats;
 mod hunting_quests;
 mod inventory;

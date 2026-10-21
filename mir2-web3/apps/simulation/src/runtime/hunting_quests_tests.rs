@@ -864,3 +864,6 @@ mod guild_tests;
 
 #[path = "hunting_daily_quests_tests.rs"]
 mod daily_tests;
+
+#[path = "hunting_item_quest_tests.rs"]
+mod bound_item_tests;

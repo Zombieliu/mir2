@@ -67,8 +67,27 @@ struct FishingReelOutcome {
     cancel_autocast: bool,
 }
 
+// Fishing currently reconstructs the equipped attachment tree through UserItem
+// and grants fresh legacy loot. Bound inputs must be rejected before either
+// wear or consumption, rather than losing their private custody in that path.
+fn fishing_inputs_are_unbound(world: &World) -> bool {
+    let inventory = world.resource::<InventoryResource>();
+    if inventory.equipment_items.iter().filter(|item| item.slot == EquipmentSlot::Weapon)
+        .any(super::items::hunting_item_binding::equipment_has_bound)
+        || world.resource::<FishingResource>().slot_items.iter().flatten()
+            .any(super::items::hunting_item_binding::has_bound) {
+        return false;
+    }
+    if !fishing_slot_model_available(world) {
+        return inventory.inventory_items.iter().chain(&inventory.belt_items)
+            .find(|item| item_is_fishing_bait(item))
+            .is_none_or(|item| !super::items::hunting_item_binding::has_bound(item));
+    }
+    true
+}
+
 pub(super) fn fishing_cast_impl(world: &mut World, cast_out: bool) -> Vec<ServerPacket> {
-    if !is_in_world(world) {
+    if !is_in_world(world) || !fishing_inputs_are_unbound(world) {
         return Vec::new();
     }
     sync_fishing_slots_from_equipment(world);
@@ -108,7 +127,7 @@ pub(super) fn fishing_change_autocast_impl(
     world: &mut World,
     auto_cast: bool,
 ) -> Vec<ServerPacket> {
-    if !is_in_world(world) {
+    if !is_in_world(world) || !fishing_inputs_are_unbound(world) {
         return Vec::new();
     }
     sync_fishing_slots_from_equipment(world);
@@ -126,7 +145,8 @@ pub(super) fn fishing_change_autocast_impl(
 }
 
 pub(super) fn tick_fishing(world: &mut World, packets: &mut Vec<ServerPacket>) {
-    if !is_in_world(world) || !world.resource::<FishingResource>().fishing {
+    if !is_in_world(world) || !world.resource::<FishingResource>().fishing
+        || !fishing_inputs_are_unbound(world) {
         return;
     }
     sync_fishing_slots_from_equipment(world);
@@ -194,6 +214,7 @@ fn sync_fishing_attribute_from_map(world: &mut World) {
 }
 
 fn begin_fishing_cast(world: &mut World, packets: &mut Vec<ServerPacket>) -> bool {
+    if !fishing_inputs_are_unbound(world) { return false; }
     sync_fishing_attribute_from_map(world);
     if !fishing_rod_and_point_are_valid(world) {
         reject_fishing(world);
@@ -354,6 +375,7 @@ fn sync_fishing_slots_from_equipment(world: &mut World) {
 /// FishingResource is a transient view; the equipped rod owns every child.
 /// Also used by fixtures migrating old sidecar-only fishing state.
 pub(super) fn persist_fishing_slots_to_equipment(world: &mut World) -> bool {
+    if !fishing_inputs_are_unbound(world) { return false; }
     let Some((index, carrier, mut user_item)) = equipped_fishing_slot_carrier(world) else {
         return !has_crystal_fishing_slot_carrier(world);
     };
@@ -588,6 +610,9 @@ fn fishing_update_packet(world: &World) -> ServerPacket {
 }
 
 fn complete_fishing_reel(world: &mut World) -> FishingReelOutcome {
+    if !fishing_inputs_are_unbound(world) {
+        return FishingReelOutcome { packets: Vec::new(), cancel_autocast: true };
+    }
     if world.resource::<FishingResource>().progress_percent > 99 {
         let mut fishing = world.resource_mut::<FishingResource>();
         fishing.chance_counter = fishing.chance_counter.saturating_add(1);

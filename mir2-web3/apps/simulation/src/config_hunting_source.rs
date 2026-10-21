@@ -12,6 +12,26 @@ use std::sync::atomic::Ordering;
 pub(crate) struct HuntingQuestCommit {
     pub checkpoint: CharacterSaveRecord,
     pub credit: Idempotent<BoundCreditReceipt>,
+    publication: HuntingQuestPublication,
+}
+
+/// Private proof retained after the database result is known. A runtime that
+/// cannot safely apply the complete reward may fence that same original source
+/// for ordinary login recovery; it cannot adopt another failure's freeze.
+#[derive(Clone)]
+struct HuntingQuestPublication {
+    binding: SharedAccountStore,
+    fence: HuntingSourceFence,
+}
+impl fmt::Debug for HuntingQuestPublication {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("HuntingQuestPublication(<private>)")
+    }
+}
+impl HuntingQuestCommit {
+    pub(crate) fn source_quest_id(&self) -> i32 {
+        self.publication.fence.quest_id
+    }
 }
 
 #[derive(Debug)]
@@ -353,6 +373,32 @@ impl SimulationConfig {
 
     pub(crate) fn freeze_hunting_quest_publication(&self, detail: String) -> String {
         self.freeze_account_store_writes(detail)
+    }
+
+    pub(crate) fn freeze_hunting_quest_commit_publication(
+        &self,
+        commit: &HuntingQuestCommit,
+        detail: String,
+    ) -> String {
+        let seal = &commit.publication;
+        let expected = &seal.fence;
+        if !std::sync::Arc::ptr_eq(&seal.binding, &self.account_store)
+            || self.hunting_economy_realm.as_deref() != Some(expected.realm.as_str())
+            || self.account_store_database_url.as_deref()
+                .is_none_or(|url| database_binding(url) != expected.database_binding)
+        {
+            return self.freeze_account_store_writes(detail);
+        }
+        let (reason, epoch, newly_frozen) = self.freeze_account_store_writes_with_epoch(detail);
+        if newly_frozen {
+            if let Ok(mut slot) = self.hunting_source_fence.lock() {
+                let mut fence = expected.clone();
+                fence.reason = reason.clone();
+                fence.epoch = epoch;
+                *slot = Some(fence);
+            }
+        }
+        reason
     }
 
     fn fence_hunting_source_operation(
@@ -891,7 +937,29 @@ impl SimulationConfig {
         } else {
             source.checkpoint().clone()
         };
-        let commit = HuntingQuestCommit { checkpoint, credit };
+        let commit = HuntingQuestCommit {
+            checkpoint,
+            credit,
+            publication: HuntingQuestPublication {
+                binding: self.account_store.clone(),
+                fence: HuntingSourceFence {
+                    realm: source.realm.clone(),
+                    database_binding: database_binding(&source.database_url),
+                    owner: WalletOwner {
+                        account_id: source.account.clone(),
+                        character_index: source.index,
+                        incarnation: source.expected_incarnation.clone(),
+                    },
+                    quest_id: source.quest_id,
+                    slot: source.slot,
+                    source_digest: source.source_digest.clone(),
+                    amount: source.amount,
+                    guilds: source.plan.guilds.keys().cloned().collect(),
+                    reason: String::new(),
+                    epoch: 0,
+                },
+            },
+        };
         #[cfg(test)]
         if test_fault == 3 {
             let detail = self.fence_hunting_source_operation(
@@ -1341,7 +1409,14 @@ impl SimulationConfig {
                         detail: "hunting committed owner checkpoint unavailable".into(),
                     });
                 };
-                Some(HuntingQuestCommit { checkpoint, credit })
+                Some(HuntingQuestCommit {
+                    checkpoint,
+                    credit,
+                    publication: HuntingQuestPublication {
+                        binding: self.account_store.clone(),
+                        fence: fence.clone(),
+                    },
+                })
             }
             None => {
                 if original.borrow().is_some() {

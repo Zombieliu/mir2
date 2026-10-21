@@ -67,8 +67,14 @@ use super::skills::{
     client_magic_for_skill_state, crystal_book_skill_state, crystal_magic_for_skill_key, SkillState,
 };
 
+#[path = "hunting_item_binding.rs"]
+pub(in crate::runtime) mod hunting_item_binding;
+use self::hunting_item_binding::HuntingItemBinding;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct ItemState {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(super) economic_binding: Option<HuntingItemBinding>,
     pub(super) key: String,
     pub(super) name: String,
     pub(super) icon: u16,
@@ -914,6 +920,7 @@ pub(super) fn embedded_item_state_from_template(
     slot: u8,
 ) -> ItemState {
     ItemState {
+        economic_binding: None,
         key: crystal_item_key_for_template(template),
         name: template.name.clone(),
         icon: template.image,
@@ -958,6 +965,11 @@ fn hydrate_user_item_into_state(
     nodes: &mut usize,
     captured_socket_position: Option<u8>,
 ) -> Result<ItemState, UserItemCarrierError> {
+    if state.socketed.iter().any(hunting_item_binding::has_bound) {
+        return Err(UserItemCarrierError::SocketMapping {
+            reason: "wire hydration would discard a bound child instance",
+        });
+    }
     validate_item_state_key_for_exact_index(&state, item.item_index)?;
     enter_user_item_node(depth, nodes, budget)?;
     check_user_item_collections(
@@ -2091,6 +2103,11 @@ pub(super) fn combine_item_impl(
         }
 
         let source_item = resources.inventory_items[from_index].clone();
+        if hunting_item_binding::has_bound(&source_item)
+            || hunting_item_binding::has_bound(&resources.inventory_items[to_index])
+        {
+            return vec![failed_packet];
+        }
         let from_slot = source_item.slot;
         let to_slot = resources.inventory_items[to_index].slot;
         let target_unique_id = item_unique_id(&resources.inventory_items[to_index]);
@@ -2588,6 +2605,9 @@ pub(super) fn craft_item_impl(
                     .durability_current
                     .unwrap_or(0),
             );
+            if hunting_item_binding::has_bound(&resources.inventory_items[inv_index]) {
+                return fail();
+            }
             if current_dura / 1000 < craft_count {
                 return fail();
             }
@@ -2614,6 +2634,9 @@ pub(super) fn craft_item_impl(
             used_slots.push(slot);
 
             let item = &resources.inventory_items[inv_index];
+            if hunting_item_binding::has_bound(item) {
+                return fail();
+            }
             // Durability requirement: ingredient.CurrentDura < MaxDura && > item.CurrentDura.
             if ingredient.current_dura < ingredient.max_dura
                 && u32::from(ingredient.current_dura)
@@ -2975,6 +2998,9 @@ pub(super) fn use_item(
     key: &str,
     packet_ack: Option<(u64, MirGridType)>,
 ) -> Vec<ServerPacket> {
+    if !hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new());
+    }
     if let Some(packets) = toggle_mount_ride_from_use_item(world, packet_ack) {
         return packets;
     }
@@ -2991,9 +3017,24 @@ pub(super) fn use_item(
     let Some(item) = item_at_use_location(world.resource::<InventoryResource>(), location) else {
         return prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new());
     };
+    if !hunting_item_binding::belongs_to_current_owner(world, &item) {
+        return prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new());
+    }
     let mut packets = Vec::new();
     let item_template = crystal_item_template_for_item_key(&item.key);
     let dynamic_item_template = crystal_item_template_for_dynamic_key(&item.key);
+    if hunting_item_binding::has_bound(&item) {
+        let ordinary_potion = item_template.as_ref().or(dynamic_item_template.as_ref())
+            .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_POTION
+                && template.shape == CRYSTAL_POTION_SHAPE_NORMAL);
+        let ordinary_equipment = item.equip_slot.is_some()
+            && item.socketed.is_empty()
+            && !item.user_item_metadata.as_ref().is_some_and(|metadata|
+                metadata.slots.iter().any(Option::is_some));
+        if !ordinary_potion && !ordinary_equipment {
+            return prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new());
+        }
+    }
     let is_resurrection_scroll = item_template.as_ref().is_some_and(|template| {
         template.item_type == CRYSTAL_ITEM_TYPE_SCROLL
             && template.shape == CRYSTAL_SCROLL_SHAPE_RESURRECTION

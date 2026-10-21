@@ -468,6 +468,9 @@ pub(super) fn deposit_rental_item_impl(world: &mut World, from: i32, to: i32) ->
         let resources = world.resource::<InventoryResource>();
         resources.inventory_items[item_index].clone()
     };
+    if super::items::hunting_item_binding::has_bound(&item) {
+        return failure;
+    }
     if item.rental_binding_flags != 0
         && (item_has_rental_bind_flag(&item, CRYSTAL_BIND_UNABLE_TO_RENT)
             || item_has_rental_bind_flag(&item, CRYSTAL_BIND_DONT_STORE))
@@ -544,7 +547,8 @@ pub(super) fn retrieve_rental_item_impl(
     let Some(mut item) = item else {
         return packets;
     };
-    if validate_committed_item_state_carrier(&item).is_err() {
+    if validate_committed_item_state_carrier(&item).is_err()
+        || !super::items::hunting_item_binding::belongs_to_current_owner(world, &item) {
         return packets;
     }
     item.container = container;
@@ -576,7 +580,8 @@ pub(super) fn cancel_item_rental_impl(world: &mut World) -> Vec<ServerPacket> {
         return Vec::new();
     };
     let prepared_item = if let Some(mut item) = active.deposited_item.clone() {
-        if validate_committed_item_state_carrier(&item).is_err() {
+        if validate_committed_item_state_carrier(&item).is_err()
+            || !super::items::hunting_item_binding::belongs_to_current_owner(world, &item) {
             return Vec::new();
         }
         let destination = active
@@ -646,6 +651,9 @@ pub(super) fn cancel_item_rental_impl(world: &mut World) -> Vec<ServerPacket> {
 }
 
 pub(super) fn item_rental_lock_fee_impl(world: &mut World) -> Vec<ServerPacket> {
+    if world.resource::<ItemRentalResource>().active.as_ref()
+        .and_then(|active| active.deposited_item.as_ref())
+        .is_some_and(super::items::hunting_item_binding::has_bound) { return Vec::new(); }
     let mut rental = world.resource_mut::<ItemRentalResource>();
     let Some(active) = rental.active.as_mut() else {
         return Vec::new();
@@ -672,6 +680,9 @@ pub(super) fn item_rental_lock_fee_impl(world: &mut World) -> Vec<ServerPacket> 
 }
 
 pub(super) fn item_rental_lock_item_impl(world: &mut World) -> Vec<ServerPacket> {
+    if world.resource::<ItemRentalResource>().active.as_ref()
+        .and_then(|active| active.deposited_item.as_ref())
+        .is_some_and(super::items::hunting_item_binding::has_bound) { return Vec::new(); }
     let mut rental = world.resource_mut::<ItemRentalResource>();
     let Some(active) = rental.active.as_mut() else {
         return Vec::new();
@@ -698,6 +709,11 @@ pub(super) fn item_rental_lock_item_impl(world: &mut World) -> Vec<ServerPacket>
 }
 
 pub(super) fn confirm_item_rental_impl(world: &mut World) -> Vec<ServerPacket> {
+    // Bound custody cannot turn an invalid lock/fee state into cancellation
+    // writes before the final-settlement prohibition is checked.
+    if world.resource::<ItemRentalResource>().active.as_ref()
+        .and_then(|active| active.deposited_item.as_ref())
+        .is_some_and(super::items::hunting_item_binding::has_bound) { return Vec::new(); }
     let active = {
         let rental = world.resource::<ItemRentalResource>();
         let Some(active) = rental.active.as_ref() else {
@@ -721,6 +737,7 @@ pub(super) fn confirm_item_rental_impl(world: &mut World) -> Vec<ServerPacket> {
     if validate_committed_item_state_carrier(&item).is_err() {
         return Vec::new();
     }
+    if super::items::hunting_item_binding::has_bound(&item) { return Vec::new(); }
     if crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_UNABLE_TO_RENT)
         || item_has_rental_bind_flag(&item, CRYSTAL_BIND_UNABLE_TO_RENT)
     {

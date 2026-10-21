@@ -652,7 +652,8 @@ pub(super) fn stage5_claim_mail_authoritative(
             .map_err(|_| Stage5MailClaimError::InvalidExactItemState)?;
         if parsed
             .iter()
-            .any(|item| validate_exact_stage5_item_state(item).is_err())
+            .any(|item| validate_exact_stage5_item_state(item).is_err()
+                || !super::items::hunting_item_binding::belongs_to_current_owner(world, item))
         {
             return Err(Stage5MailClaimError::InvalidExactItemState);
         }
@@ -1408,6 +1409,7 @@ fn game_shop_attachment_states_json(
             gem_count: 0,
             identified: None,
             soul_bound_id: None,
+            economic_binding: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,
@@ -4907,6 +4909,10 @@ impl SimulationSession {
             .get(2)
             .map(|value| CurrencyKind::from_arg(value))
             .unwrap_or(CurrencyKind::Gold);
+        if self.app.world().resource::<InventoryResource>().inventory_items.iter()
+            .any(|item| item.key == item_key && super::items::hunting_item_binding::has_bound(item)) {
+            return Vec::new();
+        }
         let seller = stage5_player_name(self.app.world());
         let mut stage5 = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
         let id = stage5
@@ -5656,6 +5662,7 @@ impl SimulationSession {
             gem_count: 0,
             identified: None,
             soul_bound_id: None,
+            economic_binding: None,
             sealed_expiry_time_binary_datetime: 0,
             sealed_next_time_binary_datetime: 0,
             rental_binding_flags: 0,

@@ -1,0 +1,2430 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-21",
+  "phase": 14,
+  "parentCommit": "a2375be11a704f8b5a0fe9b5fff48477007c8da9",
+  "goalStatus": "active",
+  "enabledByDefault": false,
+  "scope": "First real bound-item quest reward, private full-custody propagation, outflow rejection, original source recovery and cold-load ownership fence",
+  "formulaUnchanged": {
+    "k": "0.1",
+    "baselinePermits": "0.72",
+    "dailyPermitCap": "1.08"
+  },
+  "userMaterialDecision": {
+    "date": "2026-10-21",
+    "source": "explicit user reply in this chat",
+    "materialValuation": "planner-configured fixed gold equivalent",
+    "permitUsage": "valueGold * quantity in permit atoms: 1 gold equivalent = 1 atom; 1 unit permit = 1,000,000 atoms",
+    "fee": "ceil(total gold equivalent * 2 / 100), debited from player unbound gold and destroyed in the same authoritative transaction",
+    "unconfigured": "refuse conversion; no invented prices",
+    "requiredFollowthrough": [
+      "versioned server-side valuation configuration",
+      "full exact item ownership/quantity/custody proof",
+      "permit stock and unbound fee wallet checked and debited atomically with character asset conversion",
+      "immutable conversion receipt and burn/outbox; idempotent original request recovery",
+      "same versioned integer formulas in Rust and Python",
+      "actual game client flow and readonly Grafana accounting"
+    ]
+  },
+  "productionChanges": [
+    {
+      "paths": [
+        "runtime/hunting_item_binding.rs",
+        "runtime/items.rs",
+        "runtime/equipment.rs",
+        "runtime/inventory.rs"
+      ],
+      "change": "Strict server-only version1 immutable realm/account/index/PG incarnation/source binding; None skip retains legacy. All-or-none staged bound grant, full provenance stack equality, owner-safe ordinary use/equip/storage/split and hydration protection."
+    },
+    {
+      "paths": [
+        "runtime/hunting_quests.rs",
+        "runtime/quests.rs",
+        "config_hunting_source.rs"
+      ],
+      "change": "Existing newcomer-v2 quest2110001 actual Jane3 fixed class rewards and bound100 gold share the same full-checkpoint PG transaction. Private exact inventory preimage guards publication; immutable original source seal refences unsafe known commit for normal login; only complete successful StartGame retires previous actor pending."
+    },
+    {
+      "paths": [
+        "runtime/save.rs",
+        "runtime/hero_registry_validation.rs",
+        "config_hero_registry.rs"
+      ],
+      "change": "Verified DB witness plus account/realm validate all six saved personal/Hero item trees before any load or passive stats. Policy flag can be disabled while original realm remains. Sealed Hero cannot carry Bound; Attached checks account/index plus runtime original owner."
+    },
+    {
+      "paths": [
+        "runtime/packets.rs",
+        "runtime/social_economy.rs",
+        "runtime/session.rs",
+        "runtime/npc.rs",
+        "runtime/npc_script.rs",
+        "runtime/rental.rs",
+        "runtime/shared_guild_bank.rs",
+        "runtime/drops.rs",
+        "runtime/refine_oven.rs",
+        "runtime/fishing.rs",
+        "runtime/hero_inventory.rs",
+        "runtime/hero_merge.rs",
+        "runtime/stage5.rs"
+      ],
+      "change": "Bound root or hidden child refuses trade/mail/consign/market sell/NPC sell/rental/guild storage/drop/death transfer and unsupported transformations before side effects; final confirmations recheck. NPC related TAKE graph preflights before earlier side effects; failed TAKE stops later GIVE. Owner-safe returns remain supported."
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "apps/simulation/src/config_hero_registry.rs",
+      "bytes": 13450,
+      "sha256": "dc6ea22f01b5a68eda48482e8724b94ef3ab2c975468a3e0d06a3b5a9725340c"
+    },
+    {
+      "path": "apps/simulation/src/config_hunting_source.rs",
+      "bytes": 61463,
+      "sha256": "e045cc00bd300ac8fd01b0a9c55ffdca746c550e2f83af36f00d75d760cdfd9b"
+    },
+    {
+      "path": "apps/simulation/src/runtime/drops.rs",
+      "bytes": 174351,
+      "sha256": "1f6ffea2e7bf47066428e2d3d758cee3bfd3197c345cac20d1cf3b92f11197c9"
+    },
+    {
+      "path": "apps/simulation/src/runtime/equipment.rs",
+      "bytes": 115711,
+      "sha256": "6d4991a00e3a6ede2f09b2489fb6ff860dd604a4a53f8a3395237adf8ea3d64e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/fishing.rs",
+      "bytes": 32459,
+      "sha256": "2bc80e2ad6dc702c91587eda685899e8782923a2455b1eafeeb7b8f76fc25df2"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_inventory.rs",
+      "bytes": 38922,
+      "sha256": "aa1e93cf2eaf50061ead01a44496745d9904c2e3e6a370f18c0f51e968ce59f8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_merge.rs",
+      "bytes": 12179,
+      "sha256": "cb6587a70218cc77f3d7348931600e3e98a07443fb39704b4e39acd48b2189c4"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hero_registry_validation.rs",
+      "bytes": 2804,
+      "sha256": "69b3deee57ccb85abf170c3c0e1e72f7014038d586d18580903abd4af7f1bd35"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_quests.rs",
+      "bytes": 30840,
+      "sha256": "ab730e447f6731f9b45112dbec49495b1a132d82e78b4359a17e840c7e9ca60b"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_quests_tests.rs",
+      "bytes": 35618,
+      "sha256": "73313abd937fe042f40f8a27fcac1826e4bbf8033adc2cb171a39c655e26f223"
+    },
+    {
+      "path": "apps/simulation/src/runtime/inventory.rs",
+      "bytes": 189512,
+      "sha256": "120b58debe3df02f6d14abb2557c313906396b9bbaee6632635bbe62abd6579a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/items.rs",
+      "bytes": 168089,
+      "sha256": "4ab5f392a3ce13b7013a8af8fa5bdae7e0708f90700dbdf5a98eb79f7e7be36a"
+    },
+    {
+      "path": "apps/simulation/src/runtime/mod.rs",
+      "bytes": 7310,
+      "sha256": "40990dc9f1082f5c183b1c1c4d10a3f144df536e248867527d54e2da65b3c35d"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc.rs",
+      "bytes": 51916,
+      "sha256": "e375e8c1734f6a72d5a974d321125522c4790becfb81cef07226f3edd01fd065"
+    },
+    {
+      "path": "apps/simulation/src/runtime/npc_script.rs",
+      "bytes": 130930,
+      "sha256": "060efef578e3fecd98a5c7230334352bab541ef1ae5bd3e27275e93401607372"
+    },
+    {
+      "path": "apps/simulation/src/runtime/packets.rs",
+      "bytes": 405335,
+      "sha256": "e0cbba55028f53c9b5b02151743da04eb72d6a87ed30a85678a67bc9bf72c4f6"
+    },
+    {
+      "path": "apps/simulation/src/runtime/quests.rs",
+      "bytes": 82181,
+      "sha256": "639d38f046d3c6d07d400b1b13c7412285df4b80111657f17958200fe4b94cc8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/refine_oven.rs",
+      "bytes": 15453,
+      "sha256": "79051a51332cc4faa1e3fc7a5dd8f2bdb1b93c4e0c0a710d123759bb4c21a933"
+    },
+    {
+      "path": "apps/simulation/src/runtime/rental.rs",
+      "bytes": 27248,
+      "sha256": "5eb65c4470f4612dd3ac7385d3dcd0287c6c244745121a1539fc15eb08389c55"
+    },
+    {
+      "path": "apps/simulation/src/runtime/save.rs",
+      "bytes": 166402,
+      "sha256": "2554f25c4dcafee7c51687100304ccbfdf9dfa56820365a22c8d07c9c0ea5b4f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/session.rs",
+      "bytes": 92288,
+      "sha256": "48de786ee272f78f6babe45be90b55903db9e885db6823589eeef168de0473ad"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_guild_bank.rs",
+      "bytes": 16852,
+      "sha256": "5a8cf492d21b69639fe1f9b8a4c118c22e535e16a79e888881c83c24fccd014f"
+    },
+    {
+      "path": "apps/simulation/src/runtime/social_economy.rs",
+      "bytes": 3352,
+      "sha256": "d93be1f55997f29f3224fc8fd02288c83b4d02d804ee244c0d00ee296aebcb3b"
+    },
+    {
+      "path": "apps/simulation/src/runtime/stage5.rs",
+      "bytes": 226236,
+      "sha256": "c4fdabd6ac5ab775575cf5cb9395221c1f01d2b22599966de445a708c60837c3"
+    },
+    {
+      "path": "apps/simulation/src/runtime/tests.rs",
+      "bytes": 2432582,
+      "sha256": "54d7dc43e6c5c0e298334f97151f7a5141da1b456c9c3d8f17546fc7bed1fbe3"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_item_binding.rs",
+      "bytes": 11175,
+      "sha256": "47bf6ac1d45927bd834379ae06b777620a416d5ceddc1b9442eef9df470bed13"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_item_binding_tests.rs",
+      "bytes": 31838,
+      "sha256": "77d749d4e7d3d7931b7f41163628c7dfd041fd222417dc633229bab9c08544d5"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_item_npc_tests.rs",
+      "bytes": 12338,
+      "sha256": "3677e71c32a059ad0e5e1e03dfb8754374a5b9bd9cf3b764dfb3f9650ae9b860"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_item_outflow_tests.rs",
+      "bytes": 27754,
+      "sha256": "6820eeb6720b779e19eea502c2af3a6ac0d609c56e0f7d185fb8f2111ce39064"
+    },
+    {
+      "path": "apps/simulation/src/runtime/hunting_item_quest_tests.rs",
+      "bytes": 25569,
+      "sha256": "211029eb499e8944b864998191135291e4b3df40a6fef7debad51b4a1d4530a7"
+    }
+  ],
+  "sourcePinsUnchangedAfterFinalBuilds": true,
+  "verificationStages": {
+    "main": "Sim98/103 used for first7 PG and186 regression; final new-outflow fixture in103. Main guards passed before the cold-load delta.",
+    "coldLoadDelta": "Sim115 adds load ownership preflight,4 pure tests and1 real PG test. It reruns all32 new pure, three-class real PG positive,11 legacy-save+2 Hero load cases; Gateway118 recompiles and reruns26. Main immutable transaction code unchanged."
+  },
+  "binaries": [
+    {
+      "path": "C:/mir2-build/hunting-permit-economy-target/debug/deps/mir2_simulation-hunting-binding-98.exe",
+      "bytes": 102204928,
+      "sha256": "904027490a4da81f87626161dd7d97617a7176c7a70baf99fadd1e7a2348963c"
+    },
+    {
+      "path": "C:/mir2-build/hunting-permit-economy-target/debug/deps/mir2_simulation-hunting-binding-103.exe",
+      "bytes": 102206976,
+      "sha256": "77fa26a5b876fdf5ae8c7b32f73956d6e740bc5ca554d92f0a1717b5b107037b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-permit-economy-target/debug/deps/mir2_simulation-hunting-binding-115.exe",
+      "bytes": 102280192,
+      "sha256": "f2ae1344b4693e48fcc3cf36f7b108f9f8860a426242f021cdac47d1c7e7c3be"
+    },
+    {
+      "path": "C:/mir2-build/hunting-permit-economy-target/debug/deps/mir2_gateway-hunting-binding-118.exe",
+      "bytes": 148324864,
+      "sha256": "07717c752d9669c46564f223ccfc08028b89f5312941b8b4652523a0242130c7"
+    }
+  ],
+  "builds": {
+    "simulation": {
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 33868,
+      "log": "C:/mir2-build/hunting-binding-build-115.log",
+      "args": [
+        "+1.89.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "--no-run",
+        "--locked",
+        "--offline",
+        "-j",
+        "2",
+        "--target-dir",
+        "C:/mir2-build/hunting-permit-economy-target",
+        "--message-format=json-render-diagnostics"
+      ],
+      "binaries": [
+        "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_simulation-789d56e516add984.exe"
+      ]
+    },
+    "gateway": {
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 47351,
+      "log": "C:/mir2-build/hunting-binding-gateway-build-118.log",
+      "args": [
+        "+1.89.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "--no-run",
+        "--locked",
+        "--offline",
+        "-j",
+        "2",
+        "--target-dir",
+        "C:/mir2-build/hunting-permit-economy-target",
+        "--message-format=json-render-diagnostics"
+      ],
+      "binaries": [
+        "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_gateway-67cbdf0f2e685907.exe"
+      ]
+    },
+    "rust": "1.89.0",
+    "mode": "native Windows, locked/offline, root-only serial Cargo, jobs2, dedicated C target, stack64MiB",
+    "warnings": {
+      "simulationLibTest": 98,
+      "gatewaySimulationDependency": 93,
+      "gatewayLibTest": 5
+    }
+  },
+  "tests": {
+    "uniquePassed": 272,
+    "newUnique": 40,
+    "postgresUnique": 15,
+    "suiteCounts": {
+      "bindingNew": 32,
+      "simulationRegression": 186,
+      "legacyLoad": 11,
+      "heroLoad": 2,
+      "newPg": 8,
+      "oldPg": 7,
+      "gateway": 26
+    },
+    "suites": {
+      "bindingNew": [
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_keeps_legacy_none_and_rejects_overbudget_trees",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 610,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_character_load_keeps_legacy_none_and_rejects_overbudget_trees.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_refuses_foreign_or_missing_realm_for_every_collection",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 601,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_character_load_refuses_foreign_or_missing_realm_for_every_collection.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_refuses_wrong_identity_and_hidden_bound_children",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 599,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_character_load_refuses_wrong_identity_and_hidden_bound_children.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_character_load_uses_verified_actor_without_selected_session",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 590,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_character_load_uses_verified_actor_without_selected_session.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_equipment_roundtrip_keeps_tag_and_rejects_wrong_owner",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 582,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_equipment_roundtrip_keeps_tag_and_rejects_wrong_owner.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_full_capacity_rolls_back_staged_partial_merges",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 595,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_full_capacity_rolls_back_staged_partial_merges.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_grants_separate_legacy_and_exact_binding_identities",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 589,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_grants_separate_legacy_and_exact_binding_identities.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_ordinary_potion_self_use_keeps_enforcement_without_policy",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 582,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_ordinary_potion_self_use_keeps_enforcement_without_policy.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_owner_witness_is_required_even_when_policy_is_disabled",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 584,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_owner_witness_is_required_even_when_policy_is_disabled.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_registry_attachment_is_not_a_realm_or_incarnation_grant",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 582,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_registry_attachment_is_not_a_realm_or_incarnation_grant.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_registry_refuses_hidden_bound_child_and_cross_character_attach",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 588,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_registry_refuses_hidden_bound_child_and_cross_character_attach.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_registry_refuses_sealed_shell_with_bound_inventory_or_equipment",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 599,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_registry_refuses_sealed_shell_with_bound_inventory_or_equipment.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_same_owner_hero_moves_keep_tag_and_wrong_owner_is_refused",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 597,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_same_owner_hero_moves_keep_tag_and_wrong_owner_is_refused.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_split_and_personal_storage_preserve_tag_with_unique_ids",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 585,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_split_and_personal_storage_preserve_tag_with_unique_ids.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_strict_marker_and_legacy_shape",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 593,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_strict_marker_and_legacy_shape.log"
+        },
+        {
+          "test": "runtime::items::hunting_item_binding::tests::hunting_item_binding_wire_hydration_preserves_root_but_refuses_bound_children",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 590,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_item_binding_wire_hydration_preserves_root_but_refuses_bound_children.log"
+        },
+        {
+          "test": "runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_dynamic_command_cannot_hide_a_later_take_or_goto",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 866,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_npc_dynamic_command_cannot_hide_a_later_take_or_goto.log"
+        },
+        {
+          "test": "runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_exchange_preflight_rejects_cross_goto_before_any_gold_or_legacy_input",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 581,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_npc_exchange_preflight_rejects_cross_goto_before_any_gold_or_legacy_input.log"
+        },
+        {
+          "test": "runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_ordinary_sell_never_pays_gold_or_loses_custody",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1202,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_npc_ordinary_sell_never_pays_gold_or_loses_custody.log"
+        },
+        {
+          "test": "runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_seal_preflight_rejects_hero_custody_before_prior_gold_action",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 865,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_npc_seal_preflight_rejects_hero_custody_before_prior_gold_action.log"
+        },
+        {
+          "test": "runtime::npc_script::hunting_item_npc_tests::hunting_bound_npc_take_is_atomic_and_false_stops_the_following_give",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 585,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_npc_take_is_atomic_and_false_stops_the_following_give.log"
+        },
+        {
+          "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_death_penalty_keeps_bound_inventory_and_equipment_trees",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1425,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_outflow_death_penalty_keeps_bound_inventory_and_equipment_trees.log"
+        },
+        {
+          "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_final_shared_projection_rejects_either_full_offer_before_gold",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1426,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_outflow_final_shared_projection_rejects_either_full_offer_before_gold.log"
+        },
+        {
+          "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_fishing_cast_and_late_reel_never_consume_or_strip_bound_inputs",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1721,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_outflow_fishing_cast_and_late_reel_never_consume_or_strip_bound_inputs.log"
+        },
+        {
+          "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_guild_packets_reject_deposit_and_withdrawal_before_both_sides_change",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1415,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_outflow_guild_packets_reject_deposit_and_withdrawal_before_both_sides_change.log"
+        },
+        {
+          "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_hero_transfer_preserves_same_owner_and_rejects_new_incarnation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 862,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_outflow_hero_transfer_preserves_same_owner_and_rejects_new_incarnation.log"
+        },
+        {
+          "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_legacy_trade_and_consignment_are_still_real_successes",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 863,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_outflow_legacy_trade_and_consignment_are_still_real_successes.log"
+        },
+        {
+          "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_market_buy_and_sold_receipt_never_debit_or_mint_old_gold",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1416,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_outflow_market_buy_and_sold_receipt_never_debit_or_mint_old_gold.log"
+        },
+        {
+          "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_rental_deposit_and_final_confirm_leave_both_custodians_intact",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1406,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_outflow_rental_deposit_and_final_confirm_leave_both_custodians_intact.log"
+        },
+        {
+          "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_shared_trade_confirmation_rechecks_a_late_binding",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 863,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_outflow_shared_trade_confirmation_rechecks_a_late_binding.log"
+        },
+        {
+          "test": "runtime::packets::hunting_item_outflow_tests::hunting_bound_outflow_trade_consign_drop_and_mail_reject_full_tree_when_disabled",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 2528,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_outflow_trade_consign_drop_and_mail_reject_full_tree_when_disabled.log"
+        },
+        {
+          "test": "runtime::shared_guilds::bank::hunting_binding_tests::hunting_bound_shared_guild_bank_real_transaction_rejects_full_tree_without_changing_either_owner",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 736,
+          "log": "C:/mir2-build/hunting-binding-pure-116-hunting_bound_shared_guild_bank_real_transaction_rejects_full_tree_without_changing_either_owner.log"
+        }
+      ],
+      "simulationRegression": [
+        {
+          "test": "npc_purchase_journal::tests::terminal_rejection_is_retained_and_checkpoint_revision_is_required",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 16,
+          "log": "C:/mir2-build/hunting-binding-regression-102-terminal_rejection_is_retained_and_checkpoint_revision_is_required.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_custody::tests::ground_custody_death_inventory_and_equipment_capture_full_state",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 903,
+          "log": "C:/mir2-build/hunting-binding-regression-102-ground_custody_death_inventory_and_equipment_capture_full_state.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_custody::tests::ground_custody_failed_capture_keeps_normal_and_death_sources_unchanged",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 630,
+          "log": "C:/mir2-build/hunting-binding-regression-102-ground_custody_failed_capture_keeps_normal_and_death_sources_unchanged.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_custody::tests::ground_custody_full_inventory_and_recursive_uid_collision_preserve_shared_source",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 959,
+          "log": "C:/mir2-build/hunting-binding-regression-102-ground_custody_full_inventory_and_recursive_uid_collision_preserve_shared_source.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_custody::tests::ground_custody_invalid_present_carriers_never_fall_back_or_mutate_either_custodian",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 4240,
+          "log": "C:/mir2-build/hunting-binding-regression-102-ground_custody_invalid_present_carriers_never_fall_back_or_mutate_either_custodian.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_custody::tests::ground_custody_none_keeps_legacy_payload_bytes_and_legacy_pickup",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 38,
+          "log": "C:/mir2-build/hunting-binding-regression-102-ground_custody_none_keeps_legacy_payload_bytes_and_legacy_pickup.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_custody::tests::ground_custody_normal_drop_shared_claim_logout_cold_login_preserves_recursive_state",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1199,
+          "log": "C:/mir2-build/hunting-binding-regression-102-ground_custody_normal_drop_shared_claim_logout_cold_login_preserves_recursive_state.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_custody::tests::ground_custody_partial_drop_assigns_new_uid_and_preserves_server_fields",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 897,
+          "log": "C:/mir2-build/hunting-binding-regression-102-ground_custody_partial_drop_assigns_new_uid_and_preserves_server_fields.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_custody::tests::ground_custody_same_wire_different_server_identity_never_merges",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 39,
+          "log": "C:/mir2-build/hunting-binding-regression-102-ground_custody_same_wire_different_server_identity_never_merges.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_custody::tests::ground_custody_unsafe_nested_partial_drop_rejects_before_inventory_removal",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 597,
+          "log": "C:/mir2-build/hunting-binding-regression-102-ground_custody_unsafe_nested_partial_drop_rejects_before_inventory_removal.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::ambiguous_legacy_display_name_fails_closed_without_inventory_mutation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 597,
+          "log": "C:/mir2-build/hunting-binding-regression-102-ambiguous_legacy_display_name_fails_closed_without_inventory_mutation.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::assigned_ground_drop_stack_merges_when_bag_is_full",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 38,
+          "log": "C:/mir2-build/hunting-binding-regression-102-assigned_ground_drop_stack_merges_when_bag_is_full.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::assigned_ground_drop_uid_collision_fails_closed_without_mutation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 38,
+          "log": "C:/mir2-build/hunting-binding-regression-102-assigned_ground_drop_uid_collision_fails_closed_without_mutation.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::assigned_zero_uid_fails_the_same_preflight_used_before_durable_commit",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 39,
+          "log": "C:/mir2-build/hunting-binding-regression-102-assigned_zero_uid_fails_the_same_preflight_used_before_durable_commit.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::exact_ground_drop_multi_stack_pickup_emits_each_changed_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 475,
+          "log": "C:/mir2-build/hunting-binding-regression-102-exact_ground_drop_multi_stack_pickup_emits_each_changed_stack.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::exact_ground_drop_schema_round_trips_and_old_json_defaults_to_legacy",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 36,
+          "log": "C:/mir2-build/hunting-binding-regression-102-exact_ground_drop_schema_round_trips_and_old_json_defaults_to_legacy.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::legacy_display_name_key_freezes_and_inserts_as_canonical_exact_item",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 592,
+          "log": "C:/mir2-build/hunting-binding-regression-102-legacy_display_name_key_freezes_and_inserts_as_canonical_exact_item.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::legacy_drop_full_bag_partial_stack_preserves_frozen_metadata",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 469,
+          "log": "C:/mir2-build/hunting-binding-regression-102-legacy_drop_full_bag_partial_stack_preserves_frozen_metadata.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::local_pickup_preserves_frozen_identity_without_rerolling_metadata",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 590,
+          "log": "C:/mir2-build/hunting-binding-regression-102-local_pickup_preserves_frozen_identity_without_rerolling_metadata.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::malformed_exact_payload_fails_preflight_without_inventory_mutation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 36,
+          "log": "C:/mir2-build/hunting-binding-regression-102-malformed_exact_payload_fails_preflight_without_inventory_mutation.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::partial_player_drop_roundtrip_reuses_source_stack_without_uid_duplication",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 582,
+          "log": "C:/mir2-build/hunting-binding-regression-102-partial_player_drop_roundtrip_reuses_source_stack_without_uid_duplication.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::shared_pickup_preserves_frozen_identity_without_rerolling_metadata",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 460,
+          "log": "C:/mir2-build/hunting-binding-regression-102-shared_pickup_preserves_frozen_identity_without_rerolling_metadata.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::shared_quest_pickup_preserves_exact_identity",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 582,
+          "log": "C:/mir2-build/hunting-binding-regression-102-shared_quest_pickup_preserves_exact_identity.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::unassigned_exact_stack_merges_when_the_bag_has_no_empty_slot",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 36,
+          "log": "C:/mir2-build/hunting-binding-regression-102-unassigned_exact_stack_merges_when_the_bag_has_no_empty_slot.log"
+        },
+        {
+          "test": "runtime::drops::ground_drop_identity_tests::whole_player_drop_roundtrip_preserves_assigned_uid_tree",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 582,
+          "log": "C:/mir2-build/hunting-binding-regression-102-whole_player_drop_roundtrip_preserves_assigned_uid_tree.log"
+        },
+        {
+          "test": "runtime::equipment::npc_item_price_tests::crystal_sale_divides_after_multiplying_selected_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 37,
+          "log": "C:/mir2-build/hunting-binding-regression-102-crystal_sale_divides_after_multiplying_selected_stack.log"
+        },
+        {
+          "test": "runtime::equipment_storage_merge_tests::equipment_merge_rejects_stale_uid_without_mutating_stacks",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 466,
+          "log": "C:/mir2-build/hunting-binding-regression-102-equipment_merge_rejects_stale_uid_without_mutating_stacks.log"
+        },
+        {
+          "test": "runtime::hero_stats::tests::hero_stats_mir_combinations_stack_by_actual_equipment_slot",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 17,
+          "log": "C:/mir2-build/hunting-binding-regression-102-hero_stats_mir_combinations_stack_by_actual_equipment_slot.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_bonus_replans_its_two_claim_prerequisite_at_midnight",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 47173,
+          "log": "C:/mir2-build/hunting-binding-regression-102-hunting_daily_quest_bonus_replans_its_two_claim_prerequisite_at_midnight.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_definition_supports_only_the_real_item_free_board",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 17605,
+          "log": "C:/mir2-build/hunting-binding-regression-102-hunting_daily_quest_definition_supports_only_the_real_item_free_board.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_shadow_rejects_group_future_and_legacy_calendar_evidence",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 130540,
+          "log": "C:/mir2-build/hunting-binding-regression-110-hunting_daily_quest_shadow_rejects_group_future_and_legacy_calendar_evidence.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_shadow_uses_exact_utc8_midnight_without_live_mutation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 57481,
+          "log": "C:/mir2-build/hunting-binding-regression-110-hunting_daily_quest_shadow_uses_exact_utc8_midnight_without_live_mutation.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::hunting_quest_definition_supports_real_once_templates_and_stable_digest",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 478,
+          "log": "C:/mir2-build/hunting-binding-regression-110-hunting_quest_definition_supports_real_once_templates_and_stable_digest.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::hunting_quest_fresh_level_up_refills_current_caps_after_real_time_buff_expires",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 474,
+          "log": "C:/mir2-build/hunting-binding-regression-110-hunting_quest_fresh_level_up_refills_current_caps_after_real_time_buff_expires.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::hunting_quest_missing_incarnation_refuses_without_legacy_gold_or_bag_full",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 468,
+          "log": "C:/mir2-build/hunting-binding-regression-110-hunting_quest_missing_incarnation_refuses_without_legacy_gold_or_bag_full.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::hunting_quest_projection_cannot_bless_a_later_complete_checkpoint_revision",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 947,
+          "log": "C:/mir2-build/hunting-binding-regression-110-hunting_quest_projection_cannot_bless_a_later_complete_checkpoint_revision.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::hunting_quest_projection_preserves_zone_damage_mana_and_death_without_replaying_heal",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1353,
+          "log": "C:/mir2-build/hunting-binding-regression-110-hunting_quest_projection_preserves_zone_damage_mana_and_death_without_replaying_heal.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::hunting_quest_shadow_preparation_has_no_live_projection_or_authority",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 479,
+          "log": "C:/mir2-build/hunting-binding-regression-110-hunting_quest_shadow_preparation_has_no_live_projection_or_authority.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::hunting_quest_shadow_preserves_existing_pool_context_when_reward_does_not_level",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 472,
+          "log": "C:/mir2-build/hunting-binding-regression-110-hunting_quest_shadow_preserves_existing_pool_context_when_reward_does_not_level.log"
+        },
+        {
+          "test": "runtime::hunting_repair::tests::hunting_repair_projection_later_checkpoint_cannot_bless_stale_inventory",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 526,
+          "log": "C:/mir2-build/hunting-binding-regression-110-hunting_repair_projection_later_checkpoint_cannot_bless_stale_inventory.log"
+        },
+        {
+          "test": "runtime::intelligent_creature_item_tests::creature_knapsack_stacks_duration_preserves_first_stats_and_consumes_once",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 471,
+          "log": "C:/mir2-build/hunting-binding-regression-110-creature_knapsack_stacks_duration_preserves_first_stats_and_consumes_once.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::belt_move_grid_decodes_crystal_raw_slots_without_changing_normalized_bag_slots",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 25,
+          "log": "C:/mir2-build/hunting-binding-regression-110-belt_move_grid_decodes_crystal_raw_slots_without_changing_normalized_bag_slots.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::belt_move_grid_missing_source_is_transactional",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 34,
+          "log": "C:/mir2-build/hunting-binding-regression-110-belt_move_grid_missing_source_is_transactional.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::belt_move_grid_moves_bag_item_to_empty_belt_without_changing_identity_or_quantity",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 35,
+          "log": "C:/mir2-build/hunting-binding-regression-110-belt_move_grid_moves_bag_item_to_empty_belt_without_changing_identity_or_quantity.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::belt_move_grid_swaps_occupied_belt_and_bag_slots_without_loss_or_duplication",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 34,
+          "log": "C:/mir2-build/hunting-binding-regression-110-belt_move_grid_swaps_occupied_belt_and_bag_slots_without_loss_or_duplication.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::default_optional_rental_or_sealed_presence_rejects_merge",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 36,
+          "log": "C:/mir2-build/hunting-binding-regression-110-default_optional_rental_or_sealed_presence_rejects_merge.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::equipped_root_uids_are_reserved_for_allocation_and_incoming_rekeys",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 35,
+          "log": "C:/mir2-build/hunting-binding-regression-110-equipped_root_uids_are_reserved_for_allocation_and_incoming_rekeys.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::exact_item_index_difference_rejects_merge",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 36,
+          "log": "C:/mir2-build/hunting-binding-regression-110-exact_item_index_difference_rejects_merge.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::fresh_and_equipment_metadata_only_children_cannot_reuse_existing_uids",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 37,
+          "log": "C:/mir2-build/hunting-binding-regression-110-fresh_and_equipment_metadata_only_children_cannot_reuse_existing_uids.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::fully_compatible_across_merge_succeeds",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 34,
+          "log": "C:/mir2-build/hunting-binding-regression-110-fully_compatible_across_merge_succeeds.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::fully_compatible_within_merge_succeeds",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 35,
+          "log": "C:/mir2-build/hunting-binding-regression-110-fully_compatible_within_merge_succeeds.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::known_healing_metadata_only_fills_legacy_missing_values",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 33,
+          "log": "C:/mir2-build/hunting-binding-regression-110-known_healing_metadata_only_fills_legacy_missing_values.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::known_healing_metadata_preserves_crystal_checkpoint_roundtrip",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 35,
+          "log": "C:/mir2-build/hunting-binding-regression-110-known_healing_metadata_preserves_crystal_checkpoint_roundtrip.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::live_socket_authority_difference_rejects_merge",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 36,
+          "log": "C:/mir2-build/hunting-binding-regression-110-live_socket_authority_difference_rejects_merge.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::metadata_difference_rejects_across_merge_without_mutation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 37,
+          "log": "C:/mir2-build/hunting-binding-regression-110-metadata_difference_rejects_across_merge_without_mutation.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::metadata_difference_rejects_within_merge_without_mutation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 36,
+          "log": "C:/mir2-build/hunting-binding-regression-110-metadata_difference_rejects_within_merge_without_mutation.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::metadata_only_child_uids_participate_in_usage_high_water_and_normalization",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 37,
+          "log": "C:/mir2-build/hunting-binding-regression-110-metadata_only_child_uids_participate_in_usage_high_water_and_normalization.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::move_item_packet_belt_grid_moves_raw_bag_slot_to_belt",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 37,
+          "log": "C:/mir2-build/hunting-binding-regression-110-move_item_packet_belt_grid_moves_raw_bag_slot_to_belt.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::nested_item_uid_or_count_difference_rejects_merge",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 38,
+          "log": "C:/mir2-build/hunting-binding-regression-110-nested_item_uid_or_count_difference_rejects_merge.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::normalization_preserves_metadata_exact_zero_and_rekeys_legacy_zero",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 37,
+          "log": "C:/mir2-build/hunting-binding-regression-110-normalization_preserves_metadata_exact_zero_and_rekeys_legacy_zero.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::normalization_rekeys_cross_container_zero_and_nonzero_collisions_globally",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 35,
+          "log": "C:/mir2-build/hunting-binding-regression-110-normalization_rekeys_cross_container_zero_and_nonzero_collisions_globally.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::seeded_legacy_packet_items_remain_addressable_after_global_normalization",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 35,
+          "log": "C:/mir2-build/hunting-binding-regression-110-seeded_legacy_packet_items_remain_addressable_after_global_normalization.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::split_conversion_error_preserves_inventory_and_storage_state",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 114,
+          "log": "C:/mir2-build/hunting-binding-regression-110-split_conversion_error_preserves_inventory_and_storage_state.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::split_rejects_nested_socket_identity_without_mutation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 38,
+          "log": "C:/mir2-build/hunting-binding-regression-110-split_rejects_nested_socket_identity_without_mutation.log"
+        },
+        {
+          "test": "runtime::inventory::stack_identity_tests::storage_split_rejects_nested_socket_identity_without_mutation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 114,
+          "log": "C:/mir2-build/hunting-binding-regression-110-storage_split_rejects_nested_socket_identity_without_mutation.log"
+        },
+        {
+          "test": "runtime::items::item_identity_roundtrip_tests::committed_validator_rejects_zero_root_child_and_real_stack_overflow",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 37,
+          "log": "C:/mir2-build/hunting-binding-regression-110-committed_validator_rejects_zero_root_child_and_real_stack_overflow.log"
+        },
+        {
+          "test": "runtime::mentor_reward_tests::mentor_bank_receipt_retry_is_once_and_checkpoint_rollback_restores_sequence",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 25,
+          "log": "C:/mir2-build/hunting-binding-regression-110-mentor_bank_receipt_retry_is_once_and_checkpoint_rollback_restores_sequence.log"
+        },
+        {
+          "test": "runtime::mentor_reward_tests::mentor_source_checkpoint_and_both_banks_roll_back_on_persist_failure",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 116,
+          "log": "C:/mir2-build/hunting-binding-regression-110-mentor_source_checkpoint_and_both_banks_roll_back_on_persist_failure.log"
+        },
+        {
+          "test": "runtime::npc::gold_trade_capacity_tests::npc_gold_trade_full_roster_legacy_lookalike_stack_supplies_no_merge_slack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 549,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_gold_trade_full_roster_legacy_lookalike_stack_supplies_no_merge_slack.log"
+        },
+        {
+          "test": "runtime::npc::gold_trade_capacity_tests::npc_gold_trade_multiple_belt_and_bag_stacks_absorb_exact_purchase_delta",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 535,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_gold_trade_multiple_belt_and_bag_stacks_absorb_exact_purchase_delta.log"
+        },
+        {
+          "test": "runtime::npc::gold_trade_capacity_tests::npc_gold_trade_partial_multiple_stack_absorption_without_remainder_cell_rolls_back",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 546,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_gold_trade_partial_multiple_stack_absorption_without_remainder_cell_rolls_back.log"
+        },
+        {
+          "test": "runtime::npc::pearl_tests::pearl_full_bag_and_belt_stack_slack_cannot_debit_or_overlap",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 531,
+          "log": "C:/mir2-build/hunting-binding-regression-110-pearl_full_bag_and_belt_stack_slack_cannot_debit_or_overlap.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_all_primary_branches_capture_actual_currency_source_and_delivery",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1372,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_all_primary_branches_capture_actual_currency_source_and_delivery.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_insufficient_currency_is_rejected_without_reusing_previous_commit",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 527,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_insufficient_currency_is_rejected_without_reusing_previous_commit.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_known_resale_commit_survives_postprocessing_failure_or_panic",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1954,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_known_resale_commit_survives_postprocessing_failure_or_panic.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_missing_capture_or_precommit_panic_is_unknown_and_does_not_debit",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 526,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_missing_capture_or_precommit_panic_is_unknown_and_does_not_debit.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_pearl_used_fallback_keeps_currency_and_source_orthogonal",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 520,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_pearl_used_fallback_keeps_currency_and_source_orthogonal.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_admitted_count_is_clamped_and_removes_legacy_whole_entry",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1376,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_resale_admitted_count_is_clamped_and_removes_legacy_whole_entry.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_delivery_matches_valid_old_gain_carrier",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1371,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_resale_delivery_matches_valid_old_gain_carrier.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_invalid_source_or_roster_never_debits_or_removes_stock",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1944,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_resale_invalid_source_or_roster_never_debits_or_removes_stock.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_resale_stack_slack_without_free_cells_cannot_overwrite_inventory",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 817,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_resale_stack_slack_without_free_cells_cannot_overwrite_inventory.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_session_and_runtime_require_authentication_and_start_game",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 716,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_session_and_runtime_require_authentication_and_start_game.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_unsupported_runtime_never_executes_legacy_fallback",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 111,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_unsupported_runtime_never_executes_legacy_fallback.log"
+        },
+        {
+          "test": "runtime::npc_purchase_outcome::tests::npc_purchase_zero_resale_selector_is_not_reconstructed_from_template_index",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 530,
+          "log": "C:/mir2-build/hunting-binding-regression-110-npc_purchase_zero_resale_selector_is_not_reconstructed_from_template_index.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::actual_delete_and_recreate_retires_old_actor_and_recovery_key",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 702,
+          "log": "C:/mir2-build/hunting-binding-regression-110-actual_delete_and_recreate_retires_old_actor_and_recovery_key.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::actual_durable_mentor_credit_merge_publishes_level_xp_roster_and_complete_stage5",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 627,
+          "log": "C:/mir2-build/hunting-binding-regression-110-actual_durable_mentor_credit_merge_publishes_level_xp_roster_and_complete_stage5.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::actual_external_mail_is_merged_into_complete_purchase_checkpoint_and_published_live",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 625,
+          "log": "C:/mir2-build/hunting-binding-regression-110-actual_external_mail_is_merged_into_complete_purchase_checkpoint_and_published_live.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::ambiguous_rename_freezes_stale_cache_and_query_but_actual_file_retains_terminal_result",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 688,
+          "log": "C:/mir2-build/hunting-binding-regression-110-ambiguous_rename_freezes_stale_cache_and_query_but_actual_file_retains_terminal_result.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::committed_empty_checkpoint_reopens_without_demo_wallet_or_container_reseeding_before_actor",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1108,
+          "log": "C:/mir2-build/hunting-binding-regression-110-committed_empty_checkpoint_reopens_without_demo_wallet_or_container_reseeding_before_actor.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::conflicting_nonce_tuple_foreign_actor_and_missing_query_never_write_or_debit",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 613,
+          "log": "C:/mir2-build/hunting-binding-regression-110-conflicting_nonce_tuple_foreign_actor_and_missing_query_never_write_or_debit.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::durable_duplicate_original_id_has_empty_packets_without_second_wallet_delivery_or_stock_change",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1719,
+          "log": "C:/mir2-build/hunting-binding-regression-110-durable_duplicate_original_id_has_empty_packets_without_second_wallet_delivery_or_stock_change.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::durable_purchase_five_actual_currency_source_branches_share_full_file_checkpoint",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 2583,
+          "log": "C:/mir2-build/hunting-binding-regression-110-durable_purchase_five_actual_currency_source_branches_share_full_file_checkpoint.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::durable_terminal_rejection_advances_revision_without_economic_debit",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 632,
+          "log": "C:/mir2-build/hunting-binding-regression-110-durable_terminal_rejection_advances_revision_without_economic_debit.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::durable_zero_raw_resale_selector_survives_actual_file_journal_and_recovery",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 629,
+          "log": "C:/mir2-build/hunting-binding-regression-110-durable_zero_raw_resale_selector_survives_actual_file_journal_and_recovery.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::failed_logout_or_disconnect_save_retires_authority_while_preserving_original_recovery_state",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 2025,
+          "log": "C:/mir2-build/hunting-binding-regression-110-failed_logout_or_disconnect_save_retires_authority_while_preserving_original_recovery_state.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::genuine_new_session_producer_queries_original_scope_but_cannot_execute_it",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1157,
+          "log": "C:/mir2-build/hunting-binding-regression-110-genuine_new_session_producer_queries_original_scope_but_cannot_execute_it.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::legacy_missing_journal_enables_persistent_actor_and_ordinary_save_keeps_history",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 649,
+          "log": "C:/mir2-build/hunting-binding-regression-110-legacy_missing_journal_enables_persistent_actor_and_ordinary_save_keeps_history.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::legacy_revision_zero_demo_checkpoint_still_seeds_missing_wallet_and_containers",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1690,
+          "log": "C:/mir2-build/hunting-binding-regression-110-legacy_revision_zero_demo_checkpoint_still_seeds_missing_wallet_and_containers.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::older_complete_checkpoint_cannot_roll_back_committed_purchase_or_actor",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 622,
+          "log": "C:/mir2-build/hunting-binding-regression-110-older_complete_checkpoint_cannot_roll_back_committed_purchase_or_actor.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::owner_tests::owner_actual_checkpoint_replica_apply_mirrors_complete_state_without_reexecution_or_source_writes",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 2094,
+          "log": "C:/mir2-build/hunting-binding-regression-110-owner_actual_checkpoint_replica_apply_mirrors_complete_state_without_reexecution_or_source_writes.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::owner_tests::owner_actual_purchase_and_exact_replay_preserve_receipt_and_full_live_authority",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 2469,
+          "log": "C:/mir2-build/hunting-binding-regression-110-owner_actual_purchase_and_exact_replay_preserve_receipt_and_full_live_authority.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::owner_tests::owner_authentication_epoch_and_enrollment_preflight_leave_actual_source_unchanged",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 866,
+          "log": "C:/mir2-build/hunting-binding-regression-110-owner_authentication_epoch_and_enrollment_preflight_leave_actual_source_unchanged.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::owner_tests::owner_begin_same_epoch_is_stable_idempotent_and_reports_verified_complete_revision",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 619,
+          "log": "C:/mir2-build/hunting-binding-regression-110-owner_begin_same_epoch_is_stable_idempotent_and_reports_verified_complete_revision.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::owner_tests::owner_capability_requires_real_durable_source_and_refuses_memory_runtime",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 577,
+          "log": "C:/mir2-build/hunting-binding-regression-110-owner_capability_requires_real_durable_source_and_refuses_memory_runtime.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::owner_tests::owner_current_revision_and_journal_cannot_certify_unpublished_wallet_or_delivery",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1021,
+          "log": "C:/mir2-build/hunting-binding-regression-110-owner_current_revision_and_journal_cannot_certify_unpublished_wallet_or_delivery.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::owner_tests::owner_epoch_change_requires_begin_and_recovers_original_identity_without_old_scope_execution",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 662,
+          "log": "C:/mir2-build/hunting-binding-regression-110-owner_epoch_change_requires_begin_and_recovers_original_identity_without_old_scope_execution.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::owner_tests::owner_failed_begin_and_failed_logout_or_disconnect_retire_authority_without_losing_recovery",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 2398,
+          "log": "C:/mir2-build/hunting-binding-regression-110-owner_failed_begin_and_failed_logout_or_disconnect_retire_authority_without_losing_recovery.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::owner_tests::owner_partial_or_stale_live_publication_cannot_certify_recovered_receipt_revision",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 618,
+          "log": "C:/mir2-build/hunting-binding-regression-110-owner_partial_or_stale_live_publication_cannot_certify_recovered_receipt_revision.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::owner_tests::owner_quote_and_original_id_query_never_write_file_revision_or_live_state",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 609,
+          "log": "C:/mir2-build/hunting-binding-regression-110-owner_quote_and_original_id_query_never_write_file_revision_or_live_state.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::owner_tests::owner_replica_refuses_source_truth_apply_and_older_foreign_or_rewritten_actual_history",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1497,
+          "log": "C:/mir2-build/hunting-binding-regression-110-owner_replica_refuses_source_truth_apply_and_older_foreign_or_rewritten_actual_history.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::postcommit_error_and_panic_preserve_exact_receipt_for_original_id_query",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1059,
+          "log": "C:/mir2-build/hunting-binding-regression-110-postcommit_error_and_panic_preserve_exact_receipt_for_original_id_query.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::prepublication_faults_preserve_live_file_stock_carrier_and_buyback_expiry",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 960,
+          "log": "C:/mir2-build/hunting-binding-regression-110-prepublication_faults_preserve_live_file_stock_carrier_and_buyback_expiry.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::revision_and_journal_capacity_exhaustion_fail_closed_before_live_purchase",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1489,
+          "log": "C:/mir2-build/hunting-binding-regression-110-revision_and_journal_capacity_exhaustion_fail_closed_before_live_purchase.log"
+        },
+        {
+          "test": "runtime::npc_purchase_transaction::tests::wellformed_wrong_catalog_currency_or_source_rejects_without_removing_resale_stock",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 3705,
+          "log": "C:/mir2-build/hunting-binding-regression-110-wellformed_wrong_catalog_currency_or_source_rejects_without_removing_resale_stock.log"
+        },
+        {
+          "test": "runtime::player_weights::tests::player_weights_count_real_bag_belt_and_single_weight_stacks",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 35,
+          "log": "C:/mir2-build/hunting-binding-regression-110-player_weights_count_real_bag_belt_and_single_weight_stacks.log"
+        },
+        {
+          "test": "runtime::save::skill_cooldown_restore_tests::same_session_checkpoint_restore_preserves_active_skill_cooldown",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 589,
+          "log": "C:/mir2-build/hunting-binding-regression-110-same_session_checkpoint_restore_preserves_active_skill_cooldown.log"
+        },
+        {
+          "test": "runtime::session::repair_mutation::tests::repair_mutation_checkpoint_resource_restore_cannot_rewind_witness",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 36,
+          "log": "C:/mir2-build/hunting-binding-regression-110-repair_mutation_checkpoint_resource_restore_cannot_rewind_witness.log"
+        },
+        {
+          "test": "runtime::session::repair_mutation::tests::repair_mutation_real_checkpoint_restore_retires_witness_without_changing_clock",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 475,
+          "log": "C:/mir2-build/hunting-binding-regression-110-repair_mutation_real_checkpoint_restore_retires_witness_without_changing_clock.log"
+        },
+        {
+          "test": "runtime::session::tests::add_or_increment_item_keeps_crystal_non_stackables_single_count",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 598,
+          "log": "C:/mir2-build/hunting-binding-regression-110-add_or_increment_item_keeps_crystal_non_stackables_single_count.log"
+        },
+        {
+          "test": "runtime::session::tests::add_or_increment_item_respects_crystal_stack_size",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 603,
+          "log": "C:/mir2-build/hunting-binding-regression-110-add_or_increment_item_respects_crystal_stack_size.log"
+        },
+        {
+          "test": "runtime::session::tests::collect_parcel_silently_rejects_unknown_zero_and_overstack_exact_items_atomically",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1225,
+          "log": "C:/mir2-build/hunting-binding-regression-110-collect_parcel_silently_rejects_unknown_zero_and_overstack_exact_items_atomically.log"
+        },
+        {
+          "test": "runtime::session::tests::crystal_drop_item_packet_reduces_stack_and_spawns_ground_item",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 600,
+          "log": "C:/mir2-build/hunting-binding-regression-110-crystal_drop_item_packet_reduces_stack_and_spawns_ground_item.log"
+        },
+        {
+          "test": "runtime::session::tests::crystal_drop_search_respects_drop_stack_size_limit",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 596,
+          "log": "C:/mir2-build/hunting-binding-regression-110-crystal_drop_search_respects_drop_stack_size_limit.log"
+        },
+        {
+          "test": "runtime::session::tests::crystal_pickup_packet_collects_ground_drop_on_current_cell",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 608,
+          "log": "C:/mir2-build/hunting-binding-regression-110-crystal_pickup_packet_collects_ground_drop_on_current_cell.log"
+        },
+        {
+          "test": "runtime::session::tests::crystal_pickup_packet_ignores_adjacent_ground_drop",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 589,
+          "log": "C:/mir2-build/hunting-binding-regression-110-crystal_pickup_packet_ignores_adjacent_ground_drop.log"
+        },
+        {
+          "test": "runtime::session::tests::delete_item_packet_reduces_or_removes_inventory_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 607,
+          "log": "C:/mir2-build/hunting-binding-regression-110-delete_item_packet_reduces_or_removes_inventory_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::drop_item_packet_splits_stack_like_crystal",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 604,
+          "log": "C:/mir2-build/hunting-binding-regression-110-drop_item_packet_splits_stack_like_crystal.log"
+        },
+        {
+          "test": "runtime::session::tests::durable_trade_projection_replays_pretrade_checkpoint_once",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 658,
+          "log": "C:/mir2-build/hunting-binding-regression-110-durable_trade_projection_replays_pretrade_checkpoint_once.log"
+        },
+        {
+          "test": "runtime::session::tests::game_shop_five_stack_boundary_claims_exact_total_and_sixth_stack_rejects",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 642,
+          "log": "C:/mir2-build/hunting-binding-regression-110-game_shop_five_stack_boundary_claims_exact_total_and_sixth_stack_rejects.log"
+        },
+        {
+          "test": "runtime::session::tests::ground_drop_expires_after_crystal_item_timeout",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 599,
+          "log": "C:/mir2-build/hunting-binding-regression-110-ground_drop_expires_after_crystal_item_timeout.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_belt_to_inventory_grid_combines_quantities_for_crystal_belt_stackables",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 476,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_belt_to_inventory_grid_combines_quantities_for_crystal_belt_stackables.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_full_target_stack_is_ack_only_and_preserves_matching_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 485,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_full_target_stack_is_ack_only_and_preserves_matching_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 485,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_inventory_to_belt_grid_combines_quantities_for_crystal_belt_stackables",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 472,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_inventory_to_belt_grid_combines_quantities_for_crystal_belt_stackables.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_inventory_to_belt_grid_rejects_non_beltable_stack_ack_only",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 477,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_inventory_to_belt_grid_rejects_non_beltable_stack_ack_only.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_inventory_to_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 473,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_inventory_to_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_inventory_to_fishing_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 477,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_inventory_to_fishing_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_inventory_to_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 476,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_inventory_to_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_inventory_to_refine_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 780,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_inventory_to_refine_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_inventory_to_trade_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 480,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_inventory_to_trade_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_mismatched_stack_is_ack_only_and_preserves_inventory",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 471,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_mismatched_stack_is_ack_only_and_preserves_inventory.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_missing_source_is_ack_only_and_preserves_matching_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 470,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_missing_source_is_ack_only_and_preserves_matching_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_refine_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 465,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_refine_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::merge_item_packet_trade_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 473,
+          "log": "C:/mir2-build/hunting-binding-regression-110-merge_item_packet_trade_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::pickup_can_stack_into_full_inventory_when_stack_has_room",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 600,
+          "log": "C:/mir2-build/hunting-binding-regression-110-pickup_can_stack_into_full_inventory_when_stack_has_room.log"
+        },
+        {
+          "test": "runtime::session::tests::pickup_preserves_ground_drop_when_inventory_is_full",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 611,
+          "log": "C:/mir2-build/hunting-binding-regression-110-pickup_preserves_ground_drop_when_inventory_is_full.log"
+        },
+        {
+          "test": "runtime::session::tests::sell_item_full_stack_at_gold_cap_succeeds_with_zero_gold_gain",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 521,
+          "log": "C:/mir2-build/hunting-binding-regression-110-sell_item_full_stack_at_gold_cap_succeeds_with_zero_gold_gain.log"
+        },
+        {
+          "test": "runtime::session::tests::sell_item_partial_stack_rejects_when_gold_cap_would_overflow",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 471,
+          "log": "C:/mir2-build/hunting-binding-regression-110-sell_item_partial_stack_rejects_when_gold_cap_would_overflow.log"
+        },
+        {
+          "test": "runtime::session::tests::shared_ground_drop_pickup_advances_matching_crystal_item_task",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 597,
+          "log": "C:/mir2-build/hunting-binding-regression-110-shared_ground_drop_pickup_advances_matching_crystal_item_task.log"
+        },
+        {
+          "test": "runtime::session::tests::shared_ground_drop_pickup_commit_reports_gold_commit_and_cap_reject",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 473,
+          "log": "C:/mir2-build/hunting-binding-regression-110-shared_ground_drop_pickup_commit_reports_gold_commit_and_cap_reject.log"
+        },
+        {
+          "test": "runtime::session::tests::shared_ground_drop_projection_persists_marker_and_replays_once",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 621,
+          "log": "C:/mir2-build/hunting-binding-regression-110-shared_ground_drop_projection_persists_marker_and_replays_once.log"
+        },
+        {
+          "test": "runtime::session::tests::shared_ground_drop_projection_save_failure_rolls_back_and_retries_once",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 632,
+          "log": "C:/mir2-build/hunting-binding-regression-110-shared_ground_drop_projection_save_failure_rolls_back_and_retries_once.log"
+        },
+        {
+          "test": "runtime::session::tests::split_item_packet_belt_grid_does_not_emit_extra_chat_or_mutate_matching_belt_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 470,
+          "log": "C:/mir2-build/hunting-binding-regression-110-split_item_packet_belt_grid_does_not_emit_extra_chat_or_mutate_matching_belt_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::split_item_packet_hero_inventory_grid_does_not_mutate_matching_player_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 593,
+          "log": "C:/mir2-build/hunting-binding-regression-110-split_item_packet_hero_inventory_grid_does_not_mutate_matching_player_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::split_item_packet_zero_count_is_ack_only_and_preserves_matching_stack",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 474,
+          "log": "C:/mir2-build/hunting-binding-regression-110-split_item_packet_zero_count_is_ack_only_and_preserves_matching_stack.log"
+        },
+        {
+          "test": "runtime::session::tests::storage_merge_item_stack_caps_at_crystal_stack_size",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 593,
+          "log": "C:/mir2-build/hunting-binding-regression-110-storage_merge_item_stack_caps_at_crystal_stack_size.log"
+        },
+        {
+          "test": "runtime::session::tests::storage_merge_item_stack_combines_quantities",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 594,
+          "log": "C:/mir2-build/hunting-binding-regression-110-storage_merge_item_stack_combines_quantities.log"
+        },
+        {
+          "test": "runtime::session::tests::storage_split_item_stack_creates_new_storage_slot",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 594,
+          "log": "C:/mir2-build/hunting-binding-regression-110-storage_split_item_stack_creates_new_storage_slot.log"
+        },
+        {
+          "test": "runtime::session::tests::use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting_stats",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 604,
+          "log": "C:/mir2-build/hunting-binding-regression-110-use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting_stats.log"
+        },
+        {
+          "test": "runtime::shared_guilds::experience_tests::guild_xp_shared_kill_full_checkpoint_receipt_survives_failure_and_relogin",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 794,
+          "log": "C:/mir2-build/hunting-binding-regression-110-guild_xp_shared_kill_full_checkpoint_receipt_survives_failure_and_relogin.log"
+        },
+        {
+          "test": "runtime::stage5::stage5_item_carrier_validation_tests::stage5_guild_storage_rejects_metadata_only_zero_and_overstack_children_without_mutation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 40,
+          "log": "C:/mir2-build/hunting-binding-regression-110-stage5_guild_storage_rejects_metadata_only_zero_and_overstack_children_without_mutation.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::checkpoint_state_root_authenticates_removed_object_tombstones",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 94,
+          "log": "C:/mir2-build/hunting-binding-regression-110-checkpoint_state_root_authenticates_removed_object_tombstones.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::complete_zone_checkpoint_rejects_valid_json_with_changed_state",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 97,
+          "log": "C:/mir2-build/hunting-binding-regression-110-complete_zone_checkpoint_rejects_valid_json_with_changed_state.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::complete_zone_checkpoint_restores_authoritative_and_derived_state",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 100,
+          "log": "C:/mir2-build/hunting-binding-regression-110-complete_zone_checkpoint_restores_authoritative_and_derived_state.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::exact_ground_drop_identity_is_checkpointed_and_state_root_protected",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 100,
+          "log": "C:/mir2-build/hunting-binding-regression-110-exact_ground_drop_identity_is_checkpointed_and_state_root_protected.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::ground_drop_authority_allocators_fail_closed_at_u64_exhaustion",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 98,
+          "log": "C:/mir2-build/hunting-binding-regression-110-ground_drop_authority_allocators_fail_closed_at_u64_exhaustion.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::legacy_checkpoint_missing_monster_disposition_fails_closed",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 340,
+          "log": "C:/mir2-build/hunting-binding-regression-110-legacy_checkpoint_missing_monster_disposition_fails_closed.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::legacy_v1_ground_drop_fixture_rebuilds_authority_from_legacy_payload_only",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 97,
+          "log": "C:/mir2-build/hunting-binding-regression-110-legacy_v1_ground_drop_fixture_rebuilds_authority_from_legacy_payload_only.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::legacy_v1_restore_ignores_injected_v2_ground_drop_authority_fields",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 96,
+          "log": "C:/mir2-build/hunting-binding-regression-110-legacy_v1_restore_ignores_injected_v2_ground_drop_authority_fields.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::legacy_v1_v2_v3_v4_exact_drop_without_custody_keeps_roots_and_rejects_injection",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 122,
+          "log": "C:/mir2-build/hunting-binding-regression-110-legacy_v1_v2_v3_v4_exact_drop_without_custody_keeps_roots_and_rejects_injection.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::legacy_v2_checkpoint_verifies_old_root_then_reanchors_pending_ticket_key",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 95,
+          "log": "C:/mir2-build/hunting-binding-regression-110-legacy_v2_checkpoint_verifies_old_root_then_reanchors_pending_ticket_key.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::legacy_v3_checkpoint_ignores_forward_respawn_and_live_sync_rehydrates_policy",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 105,
+          "log": "C:/mir2-build/hunting-binding-regression-110-legacy_v3_checkpoint_ignores_forward_respawn_and_live_sync_rehydrates_policy.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::legacy_v3_dead_monster_policy_hydration_never_revives_immediately",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 101,
+          "log": "C:/mir2-build/hunting-binding-regression-110-legacy_v3_dead_monster_policy_hydration_never_revives_immediately.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::online_player_receives_world_event_monster_spawn_packet",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 101,
+          "log": "C:/mir2-build/hunting-binding-regression-110-online_player_receives_world_event_monster_spawn_packet.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::verified_world_checkpoint_keeps_v2_ground_drop_authority_validation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 94,
+          "log": "C:/mir2-build/hunting-binding-regression-110-verified_world_checkpoint_keeps_v2_ground_drop_authority_validation.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::verified_world_checkpoint_reanchors_a_module_dependent_state_root",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 97,
+          "log": "C:/mir2-build/hunting-binding-regression-110-verified_world_checkpoint_reanchors_a_module_dependent_state_root.log"
+        },
+        {
+          "test": "runtime::zone::runtime::checkpoint::tests::world_event_monster_without_player_is_authoritative_and_checkpointed",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 513,
+          "log": "C:/mir2-build/hunting-binding-regression-110-world_event_monster_without_player_is_authoritative_and_checkpointed.log"
+        },
+        {
+          "test": "runtime::zone::runtime::entity_combat::tests::native_entity_green_uses_monster_duration_and_survives_source_corpse_checkpoint",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 108,
+          "log": "C:/mir2-build/hunting-binding-regression-110-native_entity_green_uses_monster_duration_and_survives_source_corpse_checkpoint.log"
+        },
+        {
+          "test": "runtime::zone::runtime::entity_combat::tests::native_entity_slow_survives_corpse_checkpoint_and_restores_info_speeds_on_expiry",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 102,
+          "log": "C:/mir2-build/hunting-binding-regression-110-native_entity_slow_survives_corpse_checkpoint_and_restores_info_speeds_on_expiry.log"
+        },
+        {
+          "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_cleans_stale_owner_and_retained_phantom",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 219,
+          "log": "C:/mir2-build/hunting-binding-regression-110-creature_host_checkpoint_cleans_stale_owner_and_retained_phantom.log"
+        },
+        {
+          "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_commits_actor_seed_and_rejects_tampering",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 220,
+          "log": "C:/mir2-build/hunting-binding-regression-110-creature_host_checkpoint_commits_actor_seed_and_rejects_tampering.log"
+        },
+        {
+          "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_preserves_pending_timer_rng_and_in_flight_receipt",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 224,
+          "log": "C:/mir2-build/hunting-binding-regression-110-creature_host_checkpoint_preserves_pending_timer_rng_and_in_flight_receipt.log"
+        },
+        {
+          "test": "runtime::zone::runtime::kirin_snow_ai::life_clear_tests::adoption_preserves_lethal_hit_lifecycle_clears_and_checkpoint",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 113,
+          "log": "C:/mir2-build/hunting-binding-regression-110-adoption_preserves_lethal_hit_lifecycle_clears_and_checkpoint.log"
+        },
+        {
+          "test": "runtime::zone::runtime::soulfire_practice_tests::fireball_practice_pending_metadata_survives_checkpoint_and_legacy_defaults_only_soulfire",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 220,
+          "log": "C:/mir2-build/hunting-binding-regression-110-fireball_practice_pending_metadata_survives_checkpoint_and_legacy_defaults_only_soulfire.log"
+        },
+        {
+          "test": "runtime::zone::runtime::soulfire_practice_tests::soulfire_practice_pending_cast_metadata_survives_zone_checkpoint",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 220,
+          "log": "C:/mir2-build/hunting-binding-regression-110-soulfire_practice_pending_cast_metadata_survives_zone_checkpoint.log"
+        },
+        {
+          "test": "runtime::zone::runtime::status_poison::tests::independent_control_clocks_survive_checkpoint_and_do_not_extend_each_other",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 95,
+          "log": "C:/mir2-build/hunting-binding-regression-110-independent_control_clocks_survive_checkpoint_and_do_not_extend_each_other.log"
+        }
+      ],
+      "legacyLoad": [
+        {
+          "test": "runtime::save::character_save_item_validation_tests::duplicate_exact_equipment_root_uid_rejects_start_game_atomically",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 534,
+          "log": "C:/mir2-build/hunting-binding-load-122-duplicate_exact_equipment_root_uid_rejects_start_game_atomically.log"
+        },
+        {
+          "test": "runtime::save::character_save_item_validation_tests::legacy_candidate_key_with_conflicting_exact_index_is_rejected",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 36,
+          "log": "C:/mir2-build/hunting-binding-load-122-legacy_candidate_key_with_conflicting_exact_index_is_rejected.log"
+        },
+        {
+          "test": "runtime::save::character_save_item_validation_tests::legacy_candidate_keys_migrate_across_stage5_item_carriers",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 37,
+          "log": "C:/mir2-build/hunting-binding-load-122-legacy_candidate_keys_migrate_across_stage5_item_carriers.log"
+        },
+        {
+          "test": "runtime::save::character_save_item_validation_tests::legal_legacy_item_save_without_metadata_carrier_still_applies",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 115,
+          "log": "C:/mir2-build/hunting-binding-load-122-legal_legacy_item_save_without_metadata_carrier_still_applies.log"
+        },
+        {
+          "test": "runtime::save::character_save_item_validation_tests::oversized_item_carrier_start_game_returns_result_two_without_partial_state",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 504,
+          "log": "C:/mir2-build/hunting-binding-load-122-oversized_item_carrier_start_game_returns_result_two_without_partial_state.log"
+        },
+        {
+          "test": "runtime::save::character_save_item_validation_tests::six_legacy_candidate_keys_migrate_once_to_exact_crystal_templates",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 36,
+          "log": "C:/mir2-build/hunting-binding-load-122-six_legacy_candidate_keys_migrate_once_to_exact_crystal_templates.log"
+        },
+        {
+          "test": "runtime::save::character_save_item_validation_tests::start_game_legacy_item_migration_is_persisted_and_idempotent",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 166,
+          "log": "C:/mir2-build/hunting-binding-load-122-start_game_legacy_item_migration_is_persisted_and_idempotent.log"
+        },
+        {
+          "test": "runtime::save::character_save_item_validation_tests::zero_quantity_persisted_inventory_rejects_start_game_atomically",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 499,
+          "log": "C:/mir2-build/hunting-binding-load-122-zero_quantity_persisted_inventory_rejects_start_game_atomically.log"
+        },
+        {
+          "test": "runtime::save::save_fail_closed_tests::legacy_password_migration_persistence_failure_rejects_login_and_keeps_live_password",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 345,
+          "log": "C:/mir2-build/hunting-binding-load-122-legacy_password_migration_persistence_failure_rejects_login_and_keeps_live_password.log"
+        },
+        {
+          "test": "runtime::save::save_fail_closed_tests::start_game_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 110,
+          "log": "C:/mir2-build/hunting-binding-load-122-start_game_without_account_identity_is_rejected_and_does_not_mutate_account_store.log"
+        },
+        {
+          "test": "runtime::save::skill_cooldown_restore_tests::legacy_absolute_skill_deadline_expires_instead_of_becoming_an_hour_cooldown",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 572,
+          "log": "C:/mir2-build/hunting-binding-load-122-legacy_absolute_skill_deadline_expires_instead_of_becoming_an_hour_cooldown.log"
+        }
+      ],
+      "heroLoad": [
+        {
+          "test": "runtime::hero_inventory::legacy_migration_tests::hero_custody_legacy_zero_migration_commits_once_and_survives_relogin",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 489,
+          "log": "C:/mir2-build/hunting-binding-hero-123-hero_custody_legacy_zero_migration_commits_once_and_survives_relogin.log"
+        },
+        {
+          "test": "runtime::hero_inventory::tests::hero_custody_equipment_exact_carrier_survives_save_preflight_relogin",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 492,
+          "log": "C:/mir2-build/hunting-binding-hero-123-hero_custody_equipment_exact_carrier_survives_save_preflight_relogin.log"
+        }
+      ],
+      "newPg": [
+        {
+          "test": "runtime::hunting_quests::tests::bound_item_tests::hunting_bound_kit_postgres_actual_npc_claim_all_three_classes_and_cold_login",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 338925,
+          "log": "C:/mir2-build/hunting-binding-pg-117-hunting_bound_kit_postgres_actual_npc_claim_all_three_classes_and_cold_login.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::bound_item_tests::hunting_bound_kit_postgres_changed_live_inventory_refences_original_for_login",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 69477,
+          "log": "C:/mir2-build/hunting-binding-pg-101-hunting_bound_kit_postgres_changed_live_inventory_refences_original_for_login.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::bound_item_tests::hunting_bound_kit_postgres_common_rollback_publishes_no_items_or_wallet_then_retries",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 63132,
+          "log": "C:/mir2-build/hunting-binding-pg-101-hunting_bound_kit_postgres_common_rollback_publishes_no_items_or_wallet_then_retries.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::bound_item_tests::hunting_bound_kit_postgres_full_legacy_bag_does_not_consume_partial_reward",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 49001,
+          "log": "C:/mir2-build/hunting-binding-pg-101-hunting_bound_kit_postgres_full_legacy_bag_does_not_consume_partial_reward.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::bound_item_tests::hunting_bound_kit_postgres_same_session_login_and_second_character_clear_old_pending",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 92563,
+          "log": "C:/mir2-build/hunting-binding-pg-101-hunting_bound_kit_postgres_same_session_login_and_second_character_clear_old_pending.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::bound_item_tests::hunting_bound_kit_postgres_unknown_absent_original_request_can_claim_once",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 68436,
+          "log": "C:/mir2-build/hunting-binding-pg-101-hunting_bound_kit_postgres_unknown_absent_original_request_can_claim_once.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::bound_item_tests::hunting_bound_kit_postgres_unknown_committed_original_request_projects_once",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 101999,
+          "log": "C:/mir2-build/hunting-binding-pg-101-hunting_bound_kit_postgres_unknown_committed_original_request_projects_once.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::bound_item_tests::hunting_bound_kit_postgres_equipped_cold_load_rejects_realm_switch_but_allows_policy_disable",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 144900,
+          "log": "C:/mir2-build/hunting-binding-pg-117-hunting_bound_kit_postgres_equipped_cold_load_rejects_realm_switch_but_allows_policy_disable.log"
+        }
+      ],
+      "oldPg": [
+        {
+          "test": "runtime::hunting_quests::tests::hunting_quest_postgres_real_finish_and_call_npc_share_atomic_once_source",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 3785,
+          "log": "C:/mir2-build/hunting-binding-old-pg-104-hunting_quest_postgres_real_finish_and_call_npc_share_atomic_once_source.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::hunting_quest_postgres_original_packet_recovers_unknown_and_worker_loss_with_shared_guild",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 6515,
+          "log": "C:/mir2-build/hunting-binding-old-pg-104-hunting_quest_postgres_original_packet_recovers_unknown_and_worker_loss_with_shared_guild.log"
+        },
+        {
+          "test": "config::hunting_source::login_recovery_tests::hunting_source_postgres_login_refresh_cannot_clear_foreign_rebound_or_other_account_fence",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 1182,
+          "log": "C:/mir2-build/hunting-binding-old-pg-104-hunting_source_postgres_login_refresh_cannot_clear_foreign_rebound_or_other_account_fence.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_postgres_normal_board_two_options_bonus_and_cold_login",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 310787,
+          "log": "C:/mir2-build/hunting-binding-old-pg-104-hunting_daily_quest_postgres_normal_board_two_options_bonus_and_cold_login.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_postgres_original_unknown_request_keeps_reward_and_vitals",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 163837,
+          "log": "C:/mir2-build/hunting-binding-old-pg-104-hunting_daily_quest_postgres_original_unknown_request_keeps_reward_and_vitals.log"
+        },
+        {
+          "test": "runtime::hunting_quests::tests::daily_tests::hunting_daily_quest_postgres_source_rollback_publishes_no_partial_reward",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 61673,
+          "log": "C:/mir2-build/hunting-binding-old-pg-104-hunting_daily_quest_postgres_source_rollback_publishes_no_partial_reward.log"
+        },
+        {
+          "test": "runtime::hunting_repair::tests::hunting_repair_postgres_real_npc_quote_confirm_query_debits_and_repairs_once",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 2006,
+          "log": "C:/mir2-build/hunting-binding-old-pg-104-hunting_repair_postgres_real_npc_quote_confirm_query_debits_and_repairs_once.log"
+        }
+      ],
+      "gateway": [
+        {
+          "test": "hunting_clock::tests::disabled_needs_no_database_realm_or_policy",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 358,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-disabled_needs_no_database_realm_or_policy.log"
+        },
+        {
+          "test": "hunting_clock::tests::enabled_requires_explicit_realm_and_postgres_authority",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 14,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-enabled_requires_explicit_realm_and_postgres_authority.log"
+        },
+        {
+          "test": "hunting_clock::tests::hunting_game_source_binding_is_disabled_by_default_and_requires_one_authority",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 88,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_game_source_binding_is_disabled_by_default_and_requires_one_authority.log"
+        },
+        {
+          "test": "hunting_clock::tests::hunting_source_topology_rejects_replication_before_source_activation",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 15,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_source_topology_rejects_replication_before_source_activation.log"
+        },
+        {
+          "test": "hunting_repair_browser::tests::actual_owner_turn_retains_captured_commit_after_guard_release_failure_without_reread",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 274,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-actual_owner_turn_retains_captured_commit_after_guard_release_failure_without_reread.log"
+        },
+        {
+          "test": "hunting_repair_browser::tests::immutable_free_receipt_has_no_historical_wallet_projection",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 15,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-immutable_free_receipt_has_no_historical_wallet_projection.log"
+        },
+        {
+          "test": "hunting_repair_browser::tests::owner_turn_snapshot_is_immutable_and_oversize_keeps_original_commit",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 300,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-owner_turn_snapshot_is_immutable_and_oversize_keeps_original_commit.log"
+        },
+        {
+          "test": "hunting_repair_browser::tests::real_gateway_boundary_requires_current_account_and_local_owner_guard",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 110,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-real_gateway_boundary_requires_current_account_and_local_owner_guard.log"
+        },
+        {
+          "test": "hunting_repair_browser::tests::unknown_retains_original_query_without_closing_or_packets",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 15,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-unknown_retains_original_query_without_closing_or_packets.log"
+        },
+        {
+          "test": "hunting_repair_browser::tests::unsupported_paths_never_execute_and_unknown_preserves_same_session_for_query",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 126,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-unsupported_paths_never_execute_and_unknown_preserves_same_session_for_query.log"
+        },
+        {
+          "test": "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_registry_rejects_factory_that_drops_runtime_authority",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 133,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_source_programmatic_registry_rejects_factory_that_drops_runtime_authority.log"
+        },
+        {
+          "test": "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_registry_rejects_unknown_factory_before_create",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 142,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_source_programmatic_registry_rejects_unknown_factory_before_create.log"
+        },
+        {
+          "test": "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_rpc_reads_prelogin_and_rebound_runtime_authority",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 122,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_source_programmatic_rpc_reads_prelogin_and_rebound_runtime_authority.log"
+        },
+        {
+          "test": "routing::hunting_source_programmatic_guard_tests::hunting_source_programmatic_rpc_rejects_before_every_legacy_transport_entry",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 543,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_source_programmatic_rpc_rejects_before_every_legacy_transport_entry.log"
+        },
+        {
+          "test": "tcp::hunting_source_programmatic_entry_tests::hunting_source_programmatic_public_entrypoints_reject_before_startup",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 136,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_source_programmatic_public_entrypoints_reject_before_startup.log"
+        },
+        {
+          "test": "web::hunting_economy::tests::hunting_http_handlers_require_bearer_and_default_config_never_connects",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 111,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_http_handlers_require_bearer_and_default_config_never_connects.log"
+        },
+        {
+          "test": "web::hunting_economy::tests::identity_bearer_never_uses_cookies_and_revoked_token_cannot_authorize",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 20,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-identity_bearer_never_uses_cookies_and_revoked_token_cannot_authorize.log"
+        },
+        {
+          "test": "web::hunting_economy::tests::strict_http_conversion_parser_and_exact_decimal_range",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 15,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-strict_http_conversion_parser_and_exact_decimal_range.log"
+        },
+        {
+          "test": "web::hunting_economy::tests::wallet_projection_preserves_integers_beyond_javascript_precision",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 14,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-wallet_projection_preserves_integers_beyond_javascript_precision.log"
+        },
+        {
+          "test": "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_encoding_failure_publishes_nothing",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 336,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_repair_dispatch_encoding_failure_publishes_nothing.log"
+        },
+        {
+          "test": "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_snapshot_finishes_original_packets",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 294,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_repair_dispatch_snapshot_finishes_original_packets.log"
+        },
+        {
+          "test": "web::tests::npc_purchase_dispatch_tests::hunting_repair_dispatch_without_snapshot_keeps_owner_first",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 21,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_repair_dispatch_without_snapshot_keeps_owner_first.log"
+        },
+        {
+          "test": "web::tests::realm_info_hunting_repair_mode_is_required_by_source_binding",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 103,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-realm_info_hunting_repair_mode_is_required_by_source_binding.log"
+        },
+        {
+          "test": "zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_guards_direct_session_dispatch_and_keeps_auth_precedence",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 127,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_source_zone_host_containment_guards_direct_session_dispatch_and_keeps_auth_precedence.log"
+        },
+        {
+          "test": "zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_rejects_programmatic_execute_replication_and_promotion",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 92,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_source_zone_host_containment_rejects_programmatic_execute_replication_and_promotion.log"
+        },
+        {
+          "test": "zone_rpc::hunting_source_replication_containment_tests::hunting_source_zone_host_containment_rejects_serve_before_accepting",
+          "code": 0,
+          "signal": null,
+          "elapsedMs": 111,
+          "log": "C:/mir2-build/hunting-binding-gateway-tests-124-hunting_source_zone_host_containment_rejects_serve_before_accepting.log"
+        }
+      ]
+    },
+    "rustfmtNewFiles": {
+      "code": 0,
+      "files": [
+        "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/hunting_item_binding.rs",
+        "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/hunting_item_binding_tests.rs",
+        "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/hunting_item_npc_tests.rs",
+        "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/hunting_item_outflow_tests.rs",
+        "C:/Users/Administrator/.codex/worktrees/hunting-permit-economy/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/hunting_item_quest_tests.rs"
+      ]
+    }
+  },
+  "priorFailuresPreserved": [
+    {
+      "artifact": "hunting-binding-build-result-90.json",
+      "reason": "Test DisplayName generic .into type inference; fixed literal only."
+    },
+    {
+      "artifacts": [
+        "hunting-binding-pure-results-92.json",
+        "hunting-binding-pure-results-93.json",
+        "hunting-binding-pure-results-99.json"
+      ],
+      "reason": "Synthetic sell fixture overlapped NPC, raw fishing rod half-hydrated, later AOI not flushed; repaired fixtures retain real positive and zero-write negative behavior."
+    },
+    {
+      "artifact": "hunting-binding-pg-results-94.json",
+      "reason": "Five assertions incorrectly required legacy Bag/Belt implicit UIDs to be globally unique; final asserts fresh Bound UID nonzero and distinct from Bag/Belt roots while legacy remains byte-identical. Full-bag fixture filled only40 rather than actual capacity; final fills both bags."
+    },
+    {
+      "artifact": "hunting-binding-regression-results-102.json",
+      "reason": "One existing four-case daily calendar test exceeded120s and was terminated; unchanged test passes in130.52s under600s allowance (110)."
+    }
+  ],
+  "limits": [
+    "Only newcomer-v2 quest2110001 fixed items are a new real source; other item quests, mining and planting remain unsupported by the hunting source adapter.",
+    "Unsupported bound-input NPC exchanges/refine/fishing refuse before any change; this does not claim inherited-binding recipe support or global NPC multi-step ACID.",
+    "Real PG tests use isolated schemas, synthetic starting profile/position/account and ordinary NPC/Finish/Equip/Login/StartGame code; they are not physical WS or Windows GUI tests.",
+    "No new Windows EXE/GUI/signed package acceptance; phase12 native repair evidence retained.",
+    "Raw sidecarless legacy BlueFishingRod equipment conversion may retain inconsistent slot width; normalized fishing fixtures test the new binding gates. That older ordinary-equip issue remains separately open.",
+    "Material conversion valuation now decided by user, but the material transaction, explicit Converted provenance, quote protocol, native game UI and settlement/export changes are not implemented by this phase.",
+    "Full mining/planting and other sources, three-layer burn coverage, market execution history/profiles/earnings, notifications and rollout remain open."
+  ],
+  "nextSourcePlan": {
+    "source": "existing newcomer-v2 2110003 fixed skillbook and MP rewards",
+    "continuousAcceptance": "2110001 bound kit -> 2110002 ordinary eligible-weapon diary gold source -> 2110003 actual Shared Zone Scarecrow2/RakingCat2 -> bound book ordinary use -> 2110004 actual class skill+Oma2 and gold claim",
+    "constraints": [
+      "preserve 2110001 digest domain",
+      "normal NPC0 diary authorization",
+      "strict owner and valid no-child bound skillbook use; failure no consume",
+      "no personal kill helper or forced Ready in shared integration",
+      "2110005 TownTeleport/SpiritSword remains next unsupported boundary"
+    ],
+    "miningFindings": {
+      "gateway": "main.rs uses with_crystal_world_runtime; config.rs mine_zones empty",
+      "routing": "targetless Attack returns correction, never personal try_mine",
+      "harvest": "real shared corpse entry exists but pending harvest grant lacks shared durable unique source; requires corpse incarnation/claim/confirm, not grant-only patch"
+    }
+  },
+  "protectedInputs": [
+    {
+      "path": "apps/web/tsconfig.json",
+      "sha256": "70145b1787f5dea10c830730d9a6968f226bf8e1145602c8a9c964856a44f2ec",
+      "unchanged": true
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182",
+      "unchanged": true
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/lib/typescript.js",
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675",
+      "unchanged": true
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-portable-statistics-repair01.json",
+      "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473",
+      "unchanged": true
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+      "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b",
+      "unchanged": true
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json",
+      "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd",
+      "unchanged": true
+    }
+  ],
+  "noDockerWslVm": true,
+  "noRemoteAssetChanges": true,
+  "noLegacyGoldReclassification": true,
+  "noCandidatePercentageIncrease": true,
+  "artifactPins": [
+    {
+      "path": "C:/mir2-build/hunting-binding-build-result-90.json",
+      "bytes": 407,
+      "sha256": "64d3cc5e6cd88a950031337e3f7368aa9b5c5f1a164a4458ed18c4c03a65f39f"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-build-result-98.json",
+      "bytes": 509,
+      "sha256": "e53b67b6fc74dc5a5db71ba4de91dfb04ac55c8f3dcbc211e13ccde95b5bd3e4"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-build-result-103.json",
+      "bytes": 510,
+      "sha256": "09c666e914d6bef4318c3cf252ca7cf49f4be233813d5457a878b91e88e459df"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-build-result-115.json",
+      "bytes": 510,
+      "sha256": "11b65e960b421a2db7da0e296ff2a25635cd56846acabbfacbf4d0312c413602"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-gateway-build-result-118.json",
+      "bytes": 512,
+      "sha256": "5eb6084ac96eb4de670ecf82394b04b2afbe155cbba8998e5b16d4caeb4f8ed9"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-pure-results-92.json",
+      "bytes": 4966,
+      "sha256": "6758ca22f7959458d71419d02ef29715553a955b11ac46df5fa98ecdf1c4be96"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-pure-results-93.json",
+      "bytes": 4813,
+      "sha256": "4cb3c1d54a32355005a55d17fc3cb109beb966220915d11fd2ba9d1909316e58"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-pure-results-99.json",
+      "bytes": 6665,
+      "sha256": "39261bd3026e853d8ca5bcc4847a102d6f3ec8419584dbf8114af409745c69d9"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-pure-results-116.json",
+      "bytes": 10895,
+      "sha256": "83970356602b05874aacdf77faaaa3c1ed9f3aa52333d1db04d28cee2429dffc"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-pg-results-94.json",
+      "bytes": 2061,
+      "sha256": "6bfc573d656f91b3fb047182601318d3d5358afed71daa7b7ac0f90f3c1472c6"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-pg-results-101.json",
+      "bytes": 2414,
+      "sha256": "3e04eca6ba384d76d9ea1086a6b708a9f71065886bdb30df44e469fa4299a930"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-pg-results-104.json",
+      "bytes": 2377,
+      "sha256": "9294af108e03281132a674373a9d691ddac2178b145956ba7f3d267bda1ee74d"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-pg-results-117.json",
+      "bytes": 719,
+      "sha256": "a10fe63fb96ae20ef909e37a75fa7afd6b0682f8e79e7b062d11c815dc88bb5d"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-regression-results-102.json",
+      "bytes": 9936,
+      "sha256": "a9ccfc20bbdd07cd815eab259508667fc46e9079d2ad9a07758305771a41b38c"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-regression-results-110.json",
+      "bytes": 50567,
+      "sha256": "a0cdb9bcf40f20b55810a92e38664874edbd4265f294aaff3b1dc7ea382953bb"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-load-results-122.json",
+      "bytes": 3564,
+      "sha256": "1d363eee9730cf0838ac1ab1b03839f300dbbcb0c115ba9db765b07961ce72db"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-hero-results-123.json",
+      "bytes": 634,
+      "sha256": "15ace38b8205a9fec822e3acea5bf635195bf14f2eae8b5d1ee51e1ed777d7aa"
+    },
+    {
+      "path": "C:/mir2-build/hunting-binding-gateway-results-124.json",
+      "bytes": 8312,
+      "sha256": "ef77daeff072bd41dfea142906ed2ef582db2b3375476ffb230b86be8b788100"
+    }
+  ]
+}

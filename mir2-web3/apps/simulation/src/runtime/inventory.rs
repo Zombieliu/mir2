@@ -59,6 +59,7 @@ fn seed_item(
     heal_mp: i32,
 ) -> ItemState {
     ItemState {
+        economic_binding: None,
         key: key.to_string(),
         name: name.to_string(),
         icon: item_icon_for_key(key),
@@ -126,6 +127,7 @@ pub(super) fn crystal_start_inventory_items(character: &CharacterRecord) -> Vec<
                 .tooltip
                 .unwrap_or_else(|| "Crystal start item.".to_string());
             ItemState {
+                economic_binding: None,
                 key,
                 name: template.name,
                 icon: template.image,
@@ -1808,7 +1810,8 @@ pub(super) fn additional_slots_needed_for_item_quantity(
             for item in resources
                 .belt_items
                 .iter()
-                .filter(|item| item.key == key && item.quantity < max_stack)
+                .filter(|item| item.key == key && item.quantity < max_stack
+                    && !super::items::hunting_item_binding::has_bound(item))
             {
                 let available = max_stack.saturating_sub(item.quantity);
                 remaining = remaining.saturating_sub(available);
@@ -1819,6 +1822,7 @@ pub(super) fn additional_slots_needed_for_item_quantity(
         }
         for item in resources.inventory_items.iter().filter(|item| {
             item.key == key && item_containers_stack_together(item.container, container)
+                && !super::items::hunting_item_binding::has_bound(item)
         }) {
             let available = max_stack.saturating_sub(item.quantity);
             remaining = remaining.saturating_sub(available);
@@ -2092,6 +2096,7 @@ pub(super) fn plan_npc_resale_or_pearl_gain(
         .next()?;
     let (added_attack, added_defence) = super::items::user_item_added_attack_defence(source);
     let item = ItemState {
+        economic_binding: None,
         key: key.clone(),
         name: template.name.clone(),
         icon: item_icon_for_key(&key),
@@ -2163,6 +2168,67 @@ fn ground_drop_user_item_uids_are_assigned(item: &UserItem) -> bool {
             .iter()
             .flatten()
             .all(ground_drop_user_item_uids_are_assigned)
+}
+
+/// Trusted source grants construct the bound identity before capacity planning.
+/// Stage all merges and allocations; no live collection changes on failure.
+#[allow(clippy::too_many_arguments)]
+pub(in crate::runtime) fn gain_hunting_bound_item(
+    world: &mut World,
+    key: &str,
+    name: &str,
+    description: &str,
+    quantity: u32,
+    weight: u16,
+    binding: &super::items::hunting_item_binding::HuntingItemBinding,
+) -> Option<Vec<ItemState>> {
+    if quantity == 0 || !binding.is_current_owner(world)
+        || !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world)
+    {
+        return None;
+    }
+    let template = crystal_item_template_for_item_key(key)?;
+    let mut canonical = embedded_item_state_from_template(&template, ItemContainer::Bag1, 0);
+    canonical.key = key.into();
+    canonical.name = name.into();
+    canonical.description = description.into();
+    canonical.weight = weight;
+    canonical.economic_binding = Some(binding.clone());
+    validate_committed_item_state_carrier(&canonical).ok()?;
+    let max_stack = u32::from(template.stack_size.max(1));
+    let mut remaining = quantity;
+    let mut changed = Vec::new();
+    let mut staged = world.resource::<InventoryResource>().clone();
+    if max_stack > 1 {
+        for existing in staged.belt_items.iter_mut().chain(&mut staged.inventory_items) {
+            if !matches!(existing.container, ItemContainer::Belt | ItemContainer::Bag1 | ItemContainer::Bag2)
+                || existing.quantity >= max_stack
+                || !item_stack_identity_compatible(existing, &canonical)
+            { continue; }
+            let added = remaining.min(max_stack - existing.quantity);
+            if added == 0 { break; }
+            existing.quantity += added;
+            remaining -= added;
+            validate_committed_item_state_carrier(existing).ok()?;
+            changed.push(existing.clone());
+        }
+    }
+    while remaining > 0 {
+        let (container, slot) = crystal_empty_add_item_slots(&staged, ItemContainer::Bag1, key)
+            .into_iter().next()?;
+        let mut item = canonical.clone();
+        item.container = container;
+        item.slot = slot;
+        item.quantity = remaining.min(max_stack);
+        normalize_fresh_item_tree_unique_ids(&staged, &mut item, &[]);
+        validate_committed_item_state_carrier(&item).ok()?;
+        if container == ItemContainer::Belt { staged.belt_items.push(item.clone()); }
+        else { staged.inventory_items.push(item.clone()); }
+        remaining -= item.quantity;
+        changed.push(item);
+    }
+    *world.resource_mut::<InventoryResource>() = staged;
+    Some(changed)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -2438,6 +2504,9 @@ pub(super) fn can_gain_exact_ground_drop_item(
     expected_quantity: u32,
     payload: &GroundDropItemPayload,
 ) -> bool {
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return false;
+    }
     plan_exact_ground_drop_item(
         world.resource::<InventoryResource>(),
         container,
@@ -2448,7 +2517,8 @@ pub(super) fn can_gain_exact_ground_drop_item(
         expected_quantity,
         payload,
     )
-    .is_some()
+    .is_some_and(|(_, items)| items.iter().all(|item|
+        super::items::hunting_item_binding::belongs_to_current_owner(world, item)))
 }
 
 #[cfg(test)]
@@ -2488,6 +2558,9 @@ pub(super) fn add_exact_ground_drop_items(
     expected_quantity: u32,
     payload: &GroundDropItemPayload,
 ) -> Option<Vec<ItemState>> {
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return None;
+    }
     let (staged, changed_items) = {
         let resources = world.resource::<InventoryResource>();
         plan_exact_ground_drop_item(
@@ -2501,6 +2574,11 @@ pub(super) fn add_exact_ground_drop_items(
             payload,
         )?
     };
+    if changed_items.iter().any(|item|
+        !super::items::hunting_item_binding::belongs_to_current_owner(world, item))
+    {
+        return None;
+    }
     *world.resource_mut::<InventoryResource>() = staged;
     Some(changed_items)
 }
@@ -2650,7 +2728,8 @@ pub(super) fn add_or_increment_item_with_random_metadata(
             for existing in resources
                 .belt_items
                 .iter_mut()
-                .filter(|item| item.key == key && item.quantity < max_stack)
+                .filter(|item| item.key == key && item.quantity < max_stack
+                    && !super::items::hunting_item_binding::has_bound(item))
             {
                 let added = remaining.min(max_stack - existing.quantity);
                 if added == 0 {
@@ -2666,6 +2745,7 @@ pub(super) fn add_or_increment_item_with_random_metadata(
         }
         for existing in resources.inventory_items.iter_mut().filter(|item| {
             item.key == key
+                && !super::items::hunting_item_binding::has_bound(item)
                 && item_containers_stack_together(item.container, container)
                 && item.quantity < max_stack
         }) {
@@ -2701,6 +2781,7 @@ pub(super) fn add_or_increment_item_with_random_metadata(
             },
         };
         let item = ItemState {
+            economic_binding: None,
             key: key.to_string(),
             name: name.to_string(),
             icon: item_icon_for_key(key),
@@ -3007,6 +3088,9 @@ pub(super) fn remove_item_destination(
 }
 
 pub(super) fn store_item_impl(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return vec![ServerPacket::StoreItem { from, to, success: false }];
+    }
     let failed_packet = ServerPacket::StoreItem {
         from,
         to,
@@ -3077,6 +3161,9 @@ pub(super) fn store_item_impl(world: &mut World, from: i32, to: i32) -> Vec<Serv
 }
 
 pub(super) fn take_back_item_impl(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return vec![ServerPacket::TakeBackItem { from, to, success: false }];
+    }
     let failed_packet = ServerPacket::TakeBackItem {
         from,
         to,
@@ -3147,6 +3234,9 @@ pub(super) fn move_item_impl(
     from: i32,
     to: i32,
 ) -> Vec<ServerPacket> {
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return vec![ServerPacket::MoveItem { grid, from, to, success: false }];
+    }
     if grid == MirGridType::HeroInventory {
         return super::hero_inventory::move_item(world, from, to);
     }
@@ -3343,6 +3433,16 @@ pub(super) fn merge_item_impl(
     id_from: u64,
     id_to: u64,
 ) -> Vec<ServerPacket> {
+    if (grid_from == MirGridType::Fishing || grid_to == MirGridType::Fishing)
+        && world.resource::<InventoryResource>().equipment_items.iter()
+            .any(|item| item.slot == EquipmentSlot::Weapon
+                && super::items::hunting_item_binding::equipment_has_bound(item))
+    {
+        return vec![ServerPacket::MergeItem { grid_from, grid_to, id_from, id_to, success: false }];
+    }
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return vec![ServerPacket::MergeItem { grid_from, grid_to, id_from, id_to, success: false }];
+    }
     if matches!(
         grid_from,
         MirGridType::HeroInventory | MirGridType::HeroEquipment
@@ -3846,6 +3946,7 @@ fn item_state_functional_identity_compatible(left: &ItemState, right: &ItemState
         let left_metadata = left.user_item_metadata.as_ref();
         let right_metadata = right.user_item_metadata.as_ref();
         if left.key != right.key
+            || left.economic_binding != right.economic_binding
             || left.name != right.name
             || left.icon != right.icon
             || left.description != right.description
@@ -3980,6 +4081,9 @@ pub(super) fn split_item_impl(
     unique_id: u64,
     count: u16,
 ) -> Vec<ServerPacket> {
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return vec![ServerPacket::SplitItem1 { grid, unique_id, count, success: false }];
+    }
     let failed_packet = ServerPacket::SplitItem1 {
         grid,
         unique_id,
@@ -4031,7 +4135,9 @@ pub(super) fn split_item_impl(
             // the empty slot is therefore the canonical ID even when another
             // grid uses the same numeric value.
             let preferred = default_item_unique_id(split.container, next_slot);
-            split.unique_id = if resources.reserved_item_unique_ids.contains(&preferred) {
+            split.unique_id = if super::items::hunting_item_binding::has_bound(&split)
+                || resources.reserved_item_unique_ids.contains(&preferred)
+            {
                 allocate_item_unique_id(&resources, split.container, next_slot)
             } else {
                 preferred
@@ -4108,6 +4214,9 @@ pub(super) fn delete_item_impl(
     count: u16,
     _hero_inventory: bool,
 ) -> Vec<ServerPacket> {
+    if !super::items::hunting_item_binding::inventory_belongs_to_current_owner(world) {
+        return Vec::new();
+    }
     if current_player_is_dead(world) {
         return vec![ServerPacket::DeleteItem { unique_id, count }];
     }
@@ -4420,6 +4529,7 @@ mod stack_identity_tests {
         user_item_unique_id: Option<u64>,
     ) -> EquipmentState {
         EquipmentState {
+            economic_binding: None,
             key: "uid-reservation-equipment".to_string(),
             slot,
             quantity: 1,

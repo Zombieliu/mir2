@@ -187,6 +187,7 @@ fn add_credit_token(session: &mut SimulationSession, token_number: u8, slot: u8)
     let key = format!("credit-token-{token_number}");
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        economic_binding: None,
         key,
         name: format!("Credit Token {token_number}"),
         icon: super::item_icon_for_key("credit-token-1"),
@@ -226,6 +227,7 @@ fn add_credit_token(session: &mut SimulationSession, token_number: u8, slot: u8)
 fn add_benediction_oil(session: &mut SimulationSession, slot: u8) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        economic_binding: None,
         key: "benediction-oil".to_string(),
         name: "Benediction Oil".to_string(),
         icon: super::item_icon_for_key("benediction-oil"),
@@ -265,6 +267,7 @@ fn add_benediction_oil(session: &mut SimulationSession, slot: u8) {
 fn add_weapon_oil(session: &mut SimulationSession, key: &str, name: &str, slot: u8) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        economic_binding: None,
         key: key.to_string(),
         name: name.to_string(),
         icon: super::item_icon_for_key(key),
@@ -311,6 +314,7 @@ fn add_repairable_inventory_item(
 ) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        economic_binding: None,
         key: key.to_string(),
         name: name.to_string(),
         icon: super::item_icon_for_key(key),
@@ -356,6 +360,7 @@ fn add_inventory_test_item(
 ) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        economic_binding: None,
         key: key.to_string(),
         name: name.to_string(),
         icon: super::item_icon_for_key(key),
@@ -472,6 +477,7 @@ fn assert_unlocked_storage_open_packets(packets: &[ServerPacket]) {
 fn add_seal_source_test_item(session: &mut SimulationSession, slot: u8, quantity: u32) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        economic_binding: None,
         key: "stage5-seal-source".to_string(),
         name: "Stage 5 Seal Source".to_string(),
         icon: super::item_icon_for_key("stage5-seal-source"),
@@ -511,6 +517,7 @@ fn add_seal_source_test_item(session: &mut SimulationSession, slot: u8, quantity
 fn add_socket_source_test_item(session: &mut SimulationSession, slot: u8, quantity: u32) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        economic_binding: None,
         key: "stage5-socket-source".to_string(),
         name: "Stage 5 Socket Source".to_string(),
         icon: super::item_icon_for_key("stage5-socket-source"),
@@ -759,6 +766,7 @@ fn equip_crystal_item_with_quantity(
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.equipment_items.retain(|item| item.slot != slot);
     resources.equipment_items.push(super::EquipmentState {
+        economic_binding: None,
         key: key.clone(),
         slot,
         quantity,
@@ -801,6 +809,7 @@ fn equip_test_mount(session: &mut SimulationSession, shape: u16) {
         .resource_mut::<InventoryResource>()
         .equipment_items
         .push(super::EquipmentState {
+            economic_binding: None,
             key: "test-mount".to_string(),
             slot: EquipmentSlot::Mount,
             quantity: 1,
@@ -869,6 +878,7 @@ fn add_inventory_crystal_item_with_metadata(
     let key = super::crystal_item_key_for_template(&template);
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        economic_binding: None,
         key: key.clone(),
         name: template.name.clone(),
         icon: super::item_icon_for_key(&key),
@@ -943,6 +953,7 @@ fn fishing_slot_item_state(
     let key = super::crystal_item_key_for_template(&template);
     let default_durability = (template.durability > 0).then_some(template.durability);
     ItemState {
+        economic_binding: None,
         key: key.clone(),
         name: template.name.clone(),
         icon: super::item_icon_for_key(&key),
@@ -1060,6 +1071,7 @@ fn equip_bengal_tiger_with_socket_slots(session: &mut SimulationSession, socket_
 fn add_belt_test_item(session: &mut SimulationSession, key: &str, name: &str, slot: u8) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.belt_items.push(ItemState {
+        economic_binding: None,
         key: key.to_string(),
         name: name.to_string(),
         icon: super::item_icon_for_key(key),
@@ -1098,6 +1110,7 @@ fn add_belt_test_item(session: &mut SimulationSession, key: &str, name: &str, sl
 
 fn quest_test_item(slot: u8, unique_id: u64) -> ItemState {
     ItemState {
+        economic_binding: None,
         key: "crystal-item-876".to_string(),
         name: "SkyStingerEgg".to_string(),
         icon: super::item_icon_for_key("crystal-item-876"),
@@ -1148,6 +1161,7 @@ fn fill_all_bag_slots(session: &mut SimulationSession) {
             ItemContainer::Bag2
         };
         resources.inventory_items.push(ItemState {
+            economic_binding: None,
             key: key.clone(),
             name: template.name.clone(),
             icon,
@@ -1195,6 +1209,7 @@ fn add_equippable_test_item(
 ) {
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        economic_binding: None,
         key: key.to_string(),
         name: name.to_string(),
         icon: super::item_icon_for_key(key),
@@ -29074,6 +29089,7 @@ fn crystal_npc_checkitem_takeitem_and_move_with_coordinates_execute_together() {
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.push(ItemState {
+            economic_binding: None,
             key: "time-stone-piece".to_string(),
             name: "Time Stone Piece".to_string(),
             icon: super::item_icon_for_key("time-stone-piece"),
@@ -29151,6 +29167,7 @@ fn crystal_npc_giveitem_adds_reward_to_inventory() {
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.push(ItemState {
+            economic_binding: None,
             key: "premiumpass-1d".to_string(),
             name: "PremiumPass[1d]".to_string(),
             icon: super::item_icon_for_key("premiumpass-1d"),
@@ -30629,6 +30646,7 @@ fn quest_turn_in_full_bag_preserves_quest_state_and_rewards() {
     {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.push(ItemState {
+            economic_binding: None,
             key: "crystal-item-876".to_string(),
             name: "SkyStingerEgg".to_string(),
             icon: super::item_icon_for_key("crystal-item-876"),
@@ -34804,6 +34822,7 @@ fn sell_item_packet_removes_item_and_adds_gold_without_duplication() {
             item.slot,
             item.key.clone(),
             super::crystal_sell_value_for_item(&ItemState {
+                economic_binding: None,
                 quantity: 1,
                 ..item.clone()
             }),
@@ -34872,6 +34891,7 @@ fn sell_item_packet_uses_unique_id_when_it_differs_from_slot() {
             .expect("bronze helmet should exist");
         item.unique_id = 9_003;
         let expected_gold = super::crystal_sell_value_for_item(&ItemState {
+            economic_binding: None,
             quantity: 1,
             ..item.clone()
         });
@@ -35938,6 +35958,7 @@ fn pickup_allows_overweight_item_like_crystal() {
         let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
         resources.inventory_items.clear();
         resources.inventory_items.push(ItemState {
+            economic_binding: None,
             key: "weight-stone".to_string(),
             name: "Weight Stone".to_string(),
             icon: 1,
@@ -38320,6 +38341,7 @@ fn use_item_packet_dynamic_crystal_food_feeds_equipped_mount() {
             .resource_mut::<InventoryResource>()
             .equipment_items
             .push(super::EquipmentState {
+                economic_binding: None,
                 key: "test-mount".to_string(),
                 slot: EquipmentSlot::Mount,
                 quantity: 1,
@@ -38408,6 +38430,7 @@ fn use_item_packet_equipped_mount_toggles_riding_state() {
         .resource_mut::<InventoryResource>()
         .equipment_items
         .push(super::EquipmentState {
+            economic_binding: None,
             key: "test-mount".to_string(),
             slot: EquipmentSlot::Mount,
             quantity: 1,
@@ -39290,6 +39313,7 @@ fn fill_bag1_for_split_test(session: &mut SimulationSession, excluded_slot: u8) 
             continue;
         }
         resources.inventory_items.push(ItemState {
+            economic_binding: None,
             key: format!("split-fill-{slot}"),
             name: format!("Split Fill {slot}"),
             icon: super::item_icon_for_key("crystal-item-990"),
@@ -40449,6 +40473,7 @@ fn remove_slot_item_packet_socket_grid_does_not_treat_parent_equipment_as_slot_i
 /// `socket_slots`, `cursed`, `equip_slot`) on the returned value.
 fn socket_test_item_state(key: &str, unique_id: u64) -> ItemState {
     ItemState {
+        economic_binding: None,
         key: key.to_string(),
         name: key.to_string(),
         icon: super::item_icon_for_key("crystal-item-1135"),
@@ -41779,6 +41804,7 @@ fn add_recipe_item(session: &mut SimulationSession, item_index: i32, slot: u8, q
     let durability = (template.durability > 0).then_some(template.durability);
     let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
     resources.inventory_items.push(ItemState {
+        economic_binding: None,
         key: key.clone(),
         name: template.name.clone(),
         icon: super::item_icon_for_key(&key),

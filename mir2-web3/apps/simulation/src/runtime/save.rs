@@ -3881,6 +3881,14 @@ impl SimulationSession {
             }
         };
 
+        if super::items::hunting_item_binding::validate_character_load(
+            self.app.world(), &save, &account_id, hunting_incarnation.as_deref(),
+        ).is_err() {
+            return vec![ServerPacket::StartGame {
+                result: 2,
+                resolution: 0,
+            }];
+        }
         if apply_character_save(self.app.world_mut(), &save).is_err() {
             return vec![ServerPacket::StartGame {
                 result: 2,
@@ -3891,6 +3899,7 @@ impl SimulationSession {
             .world_mut()
             .resource_mut::<SessionResource>()
             .hunting_character_incarnation = hunting_incarnation;
+        super::hunting_quests::complete_character_load(self.app.world_mut());
         super::hunting_repair::bind_start_game_authority(self.app.world_mut());
         refresh_runtime_map_collision(self.app.world_mut());
         if recover_out_of_bounds_loaded_transform(self.app.world_mut()) {

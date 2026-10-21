@@ -235,6 +235,7 @@ pub(super) fn start(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
         return failed();
     };
     if !refine_is_weapon(&item)
+        || super::items::hunting_item_binding::has_bound(&item)
         || wire.refine_added != 0
         || item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_DONT_UPGRADE)
         || !item_custody::can_take(inventory, &item)
@@ -257,6 +258,9 @@ pub(super) fn start(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
     let Ok(ingredients) = ingredients else {
         return failed();
     };
+    if ingredients.iter().any(super::items::hunting_item_binding::has_bound) {
+        return failed();
+    }
     let config = &world.resource::<RuntimeConfigResource>().config;
     let Some(cost) = u32::try_from(refine_weapon_required(&item))
         .ok()
@@ -349,6 +353,9 @@ fn collect_ready(world: &mut World) -> Vec<ServerPacket> {
     else {
         return failed();
     };
+    if !super::items::hunting_item_binding::belongs_to_current_owner(world, &item) {
+        return failed();
+    }
     let Some((inventory, changed)) =
         item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, false)
     else {
@@ -387,6 +394,7 @@ pub(super) fn check(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
         return failed();
     };
     let mut item = inventory.inventory_items[index].clone();
+    if super::items::hunting_item_binding::has_bound(&item) { return failed(); }
     let Ok(wire) = try_user_item_from_item_state(&item) else {
         return failed();
     };
