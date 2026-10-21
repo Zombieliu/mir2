@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 第十阶段：任务来源登录恢复（2026-10-21）
+
+本服定制经济补齐一次性任务 Unknown/lost Session 的普通登录恢复：原槽与经济回执双证据、当前完整 checkpoint/角色名一致性、完整 fence/epoch 归属均通过后，才刷新当前镜像并解除自身冻结。新增 PG 9/9、既有 PG 22/22、普通回归 8/8 通过，见[限定证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。这不增加 Crystal/Candidate 百分比。每日任务、Windows 成功扣费完整实机链及其余经济主线仍开放，goal active、默认关闭、无 Docker。
+
 ## 第九阶段当前范围：原生修理已报价，成功收费未验（2026-10-21）
 
 新EXE59已实际启动并经普通登录/StartGame/NPC/Repair、Bag拖入取得服务端费用6。首次显式Close后无收费；第二次报价到OKAY约97秒，超过原30秒TTL，拒绝且未发Confirm。停服后独立psql仍为0结果/0销毁、绑定1,000,000、旧gold 1234、Bag100/1000、save_version15/revision14，见`C:/mir2-build/hunting-native-pg-final-after-deadline-56.json`；不能声称原生Confirm、Pending原Query、断线或最终冷登录完成。顶X关闭未验，Quoted通用选择文案仍待改善。

@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## 第十阶段：任务来源登录恢复（2026-10-21）
+
+任务来源恢复现在可在原 Session 丢失后通过普通登录刷新触发，依赖原私有 fence 与双份不可变证据，不执行奖励；只加载当前角色/账户/Guild 状态，正常密码、封禁及代际授权仍执行。新增 PG 9/9、既有 PG 22/22、普通回归 8/8，见[本轮证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。这是定制经济恢复修复，不增加 Crystal/Candidate 资格。每日任务及 Windows 成功收费至冷登录实机链尚未完成，完整 goal active、默认关闭，无 Docker 或远程资产修改。
+
 ## 第九阶段当前审计边界（2026-10-21）
 
 新EXE59普通登录/StartGame/NPC/Repair及Bag拖入已拿到服务端6绑定金币报价；显式Close后无收费。第二次报价至OKAY约97秒，超过原30秒TTL，拒绝且未发Confirm。停服后独立psql保持0结果/0销毁、绑定1,000,000、旧gold 1234、Bag100/1000、save_version15/revision14，见`C:/mir2-build/hunting-native-pg-final-after-deadline-56.json`；成功Confirm、Pending原Query、断线和最终冷登录尚未建立原生实机证明。

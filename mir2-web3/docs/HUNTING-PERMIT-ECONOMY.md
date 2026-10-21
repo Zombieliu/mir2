@@ -1,5 +1,11 @@
 # 狩猎许可经济实现与验收
 
+## 第十阶段：任务来源登录恢复（2026-10-21）
+
+一次性任务入账结果不明且原 Session 丢失后，普通登录刷新现能核对原私有领取槽与经济回执，仅加载当前完整存档和最新 Guild 状态后解自身冻结。密码、封禁、UUID 与外来 fence 隔离保持；不一致存档继续冻结。新增 PG 9/9、既有 PG 22/22、普通回归 8/8 通过，见[本轮证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。没有 schema 或客户端变更。
+
+下一项为现有 NPC24 每日三选二/bonus 的 DB 周期入账；尚未实现。Windows 成功扣费、原 Query、断线至冷登录实机闭环仍开放，其他来源、材料、完整销毁/指标与通知/迁移发布未完成。完整 goal active，默认关闭、K=0.1 与 0.72/1.08 许可保持，不用 Docker、不改远程资产。
+
 ## 第九阶段当前审计：原生已报价，未成功收费（2026-10-21）
 
 独立repair原始完整库存source gate已修复，支持真实命名装备位和合法缺省UID，同时保留严格raw presence/dup与actual inventory hash；buy gate逐字不变。Host60的39/39含5项rich-source，正向Quote→合法当前30秒Quoted→单Confirm实际TestSink→Pending→原Query Unknown仍Pending只证明限定host路径，不是GUI或物理WS收费。producer60b为7案例/1测试，UI58为17/17；Runtime50的repair15/邻接41、Gateway46恢复纯5+物理WS1、PG45当前会话/撤销/原有效期1项保留，各轮不累计。

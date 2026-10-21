@@ -5005,10 +5005,11 @@ impl SimulationConfig {
         let Some(database_url) = self.account_store_database_url.as_deref() else {
             return Err("postgres account source is unavailable".to_string());
         };
-        // Reconcile only this account's exact private repair fence before the
+        // Reconcile only this account's exact private source fence before the
         // refresh loader takes the persistence lock. New Login/StartGame must
         // then load current canonical data and perform normal authorization.
         self.reconcile_hunting_repair_before_account_refresh(account_id)?;
+        self.reconcile_hunting_quest_before_account_refresh(account_id)?;
         self.refresh_account_store_account_with_loader(account_id, || {
             load_account_from_postgres(database_url.to_string(), account_id.to_string())
         })

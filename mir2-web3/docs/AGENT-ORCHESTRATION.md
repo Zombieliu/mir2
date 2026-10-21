@@ -1,5 +1,11 @@
 # Agent Orchestration
 
+## 第十阶段：任务来源登录恢复（2026-10-21）
+
+登录刷新现在先核对原任务来源的私有 fence、原领取槽和原经济回执，仅在证据完整时刷新当前 canonical 镜像并解除自身冻结。不会重发奖励或跳过密码、封禁、角色代际校验。Root 串行完成 9 项新增 PG、22 项既有 PG 和 8 项普通回归，详见[本轮证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。
+
+下一实施项是现有 newcomer-v1 NPC24 每日三选二与 bonus：保持 UTC+8 午夜重置，使用 DB 周期和独立每日领取槽，原未决查询保留原日。Windows 第九阶段的成功扣费、原 Query、断线及冷登录实机验收仍开放。完整 goal active、默认关闭、K=0.1；不运行 Docker/WSL/虚拟机，不修改远程资产或其他工作区。
+
 ## 第九阶段当前审计：Windows 原生报价与确认边界（2026-10-21）
 
 独立repair原始库存source gate已修复，保留真实命名装备位、合法缺省UID、严格raw字段/重复键检查及actual inventory hash；原buy gate逐字保持。Host60实际39/39（含5项rich-source）、producer60b的7个输入案例/1项测试、UI58的17/17通过。正向Quote→当前30秒Quoted→单次Confirm实际TestSink→Pending→原Query Unknown仍Pending属于受控host测试，不是GUI或物理WebSocket收费验收；43/44及其它筛选结果不累加。

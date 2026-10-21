@@ -71,7 +71,7 @@ impl fmt::Debug for PreparedHuntingQuestSource {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct HuntingSourceFence {
     realm: String,
     database_binding: String,
@@ -838,6 +838,213 @@ impl SimulationConfig {
         Ok(commit)
     }
 
+    /// Trusted account-refresh recovery, never a player-selected historical
+    /// owner or a source execution. A lost Session must not strand this exact
+    /// source's freeze; subsequent Login/StartGame still authorize CURRENT data.
+    pub(crate) fn reconcile_hunting_quest_before_account_refresh(
+        &self,
+        account: &str,
+    ) -> Result<(), String> {
+        let fence = self
+            .hunting_source_fence
+            .lock()
+            .map_err(|_| "quest refresh recovery fence unavailable")?
+            .clone();
+        let Some(fence) = fence else {
+            return Ok(());
+        };
+        if fence.owner.account_id != account
+            || self.hunting_economy_realm.as_deref() != Some(fence.realm.as_str())
+            || self
+                .account_store_database_url
+                .as_deref()
+                .is_none_or(|url| database_binding(url) != fence.database_binding)
+        {
+            return Ok(());
+        }
+        {
+            let state = self
+                .account_store_write_state
+                .lock()
+                .map_err(|_| "quest refresh recovery write state unavailable")?;
+            if self.account_store_freeze_epoch.load(Ordering::Acquire) != fence.epoch
+                || !matches!(&*state,AccountStoreWriteState::Frozen{reason} if reason==&fence.reason)
+            {
+                return Ok(());
+            }
+        }
+        // Release all probe guards before taking the normal persistence order.
+        // No public refresh/recover helper may be called while holding state.
+        let _persist = self
+            .account_store_persist_lock
+            .lock()
+            .map_err(|_| "quest refresh recovery persistence lock unavailable")?;
+        let (realm, url) = self.hunting_source_binding()?;
+        if realm != fence.realm || database_binding(url) != fence.database_binding {
+            return Ok(());
+        }
+        let mut state = self
+            .account_store_write_state
+            .lock()
+            .map_err(|_| "quest refresh recovery write state unavailable")?;
+        if self.account_store_freeze_epoch.load(Ordering::Acquire) != fence.epoch
+            || !matches!(&*state,AccountStoreWriteState::Frozen{reason} if reason==&fence.reason)
+            || self
+                .hunting_source_fence
+                .lock()
+                .map_err(|_| "quest refresh recovery fence unavailable")?
+                .as_ref()
+                != Some(&fence)
+        {
+            return Ok(());
+        }
+
+        let current = RefCell::new(None::<LockedImage>);
+        let original = RefCell::new(None::<CharacterSaveRecord>);
+        let missing_account_guilds = RefCell::new((
+            AccountStoreSourceVersions::default(),
+            BTreeMap::<String, Option<SharedGuildRecord>>::new(),
+        ));
+        let result = with_account_store_postgres_client(url, |client| {
+            Ok(economy::lookup_bound_credit_authorized_with_timeouts(
+                client,
+                realm,
+                &source_key(fence.quest_id),
+                &fence.source_digest,
+                fence.amount,
+                2000,
+                10000,
+                |tx, _clock| {
+                    for id in &fence.guilds {
+                        tx.query_one(
+                            "SELECT pg_advisory_xact_lock(hashtextextended($1,735891))",
+                            &[id],
+                        )
+                        .map_err(source_db)?;
+                        tx.query_opt(
+                            "SELECT guild_id FROM shared_guilds WHERE guild_id=$1 FOR UPDATE",
+                            &[id],
+                        )
+                        .map_err(source_db)?;
+                    }
+                    // This image may be banned, absent, or a new incarnation.
+                    // Only the private fence authorizes the historical lookup.
+                    let image = lock_and_load(
+                        tx,
+                        account,
+                        fence.owner.character_index,
+                        None,
+                        fence.guilds.iter().cloned(),
+                        true,
+                    )?;
+                    if let Some(image) = image.as_ref() {
+                        if !image.owner.incarnation.is_empty() {
+                            let save = image.account.saves.get(&image.owner.character_index)
+                                .ok_or(EconomyError::CorruptHistory("quest_current_checkpoint"))?;
+                            let row = tx.query_opt(
+                                "SELECT s.snapshot_json,c.character_name FROM character_saves s JOIN characters c USING(account_id,character_index) WHERE s.account_id=$1 AND s.character_index=$2",
+                                &[&account,&fence.owner.character_index],
+                            ).map_err(source_db)?.ok_or(EconomyError::CorruptHistory("quest_current_checkpoint"))?;
+                            if row.get::<_, Value>("snapshot_json")
+                                != to_json(save).map_err(|_| EconomyError::CorruptHistory("quest_current_checkpoint"))?
+                                || row.get::<_, String>("character_name") != save.character.name
+                            {
+                                return Err(EconomyError::CorruptHistory("quest_current_checkpoint"));
+                            }
+                        }
+                    } else {
+                        // The original Guild changes can outlive an account.
+                        // Refresh their latest images even when it was removed.
+                        let mut guilds = missing_account_guilds.borrow_mut();
+                        for id in &fence.guilds {
+                            let row = tx.query_opt(
+                                "SELECT raw_json,store_version FROM shared_guilds WHERE guild_id=$1",
+                                &[id],
+                            ).map_err(source_db)?;
+                            let image = if let Some(row) = row {
+                                guilds.0.guilds.insert(id.clone(), row.get("store_version"));
+                                Some(serde_json::from_value(row.get("raw_json"))
+                                    .map_err(|_| EconomyError::CorruptHistory("guild_checkpoint"))?)
+                            } else {
+                                None
+                            };
+                            guilds.1.insert(id.clone(), image);
+                        }
+                    }
+                    *original.borrow_mut() = load_original_checkpoint(
+                        tx, realm, &fence.owner, fence.quest_id,
+                        &fence.source_digest, fence.amount,
+                    )?;
+                    *current.borrow_mut() = image;
+                    Ok(fence.owner.clone())
+                },
+            ))
+        })
+        .map_err(|_| "quest original refresh recovery remains unresolved".to_string())?
+        .map_err(|_| "quest original refresh recovery remains unresolved".to_string())?;
+        if result.is_some() != original.borrow().is_some() {
+            return Err("quest original refresh recovery has incomplete source evidence".into());
+        }
+        if let Some(receipt) = result {
+            let (key, digest) = economy::bound_credit_operation_identity(
+                realm,
+                &fence.owner,
+                &source_key(fence.quest_id),
+                &fence.source_digest,
+                fence.amount,
+            )
+            .map_err(|_| "quest original refresh recovery identity invalid")?;
+            if receipt.realm_id != realm
+                || receipt.owner != fence.owner
+                || receipt.source_key != source_key(fence.quest_id)
+                || receipt.bound_gold_credit != fence.amount
+                || receipt.operation_key != key
+                || receipt.request_digest != digest
+            {
+                return Err("quest original refresh recovery receipt identity changed".into());
+            }
+        }
+        let mut live = self
+            .account_store
+            .lock()
+            .map_err(|_| "quest refresh recovery mirror unavailable")?;
+        let mut slot = self
+            .hunting_source_fence
+            .lock()
+            .map_err(|_| "quest refresh recovery fence unavailable")?;
+        if self.account_store_freeze_epoch.load(Ordering::Acquire) != fence.epoch
+            || !matches!(&*state,AccountStoreWriteState::Frozen{reason} if reason==&fence.reason)
+            || slot.as_ref() != Some(&fence)
+        {
+            return Err("quest refresh recovery was superseded by another fence".into());
+        }
+        let mut staged = live.clone();
+        staged.source_account_versions.remove(account);
+        staged.source_save_versions.remove(account);
+        let (versions, guilds) = if let Some(image) = current.into_inner() {
+            staged.accounts.insert(account.into(), image.account);
+            (image.versions, image.guilds)
+        } else {
+            staged.accounts.remove(account);
+            missing_account_guilds.into_inner()
+        };
+        for (id, guild) in guilds {
+            if let Some(guild) = guild {
+                staged.shared_guilds.insert(id, guild);
+            } else {
+                staged.shared_guilds.remove(&id);
+                staged.source_guild_versions.remove(&id);
+            }
+        }
+        staged.merge_source_versions(versions);
+        staged.normalize_next_character_index();
+        *live = staged;
+        *state = AccountStoreWriteState::Writable;
+        *slot = None;
+        self.guild_clock_updates.fetch_add(1, Ordering::AcqRel);
+        Ok(())
+    }
+
     /// Packet recovery uses only the digest and amount saved by the original
     /// trusted source. A later catalog edit must not redefine an uncertain
     /// operation. This probe never grants authority to release another fence.
@@ -1093,3 +1300,7 @@ impl SimulationConfig {
 #[cfg(test)]
 #[path = "config_hunting_source_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "config_hunting_source_login_tests.rs"]
+mod login_recovery_tests;

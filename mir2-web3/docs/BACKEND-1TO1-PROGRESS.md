@@ -1,5 +1,11 @@
 # Backend 1:1 Progress
 
+## 第十阶段：任务来源登录恢复（2026-10-21）
+
+普通账号刷新已接任务来源原单恢复，处理已提交/已回滚、丢失 Session、后续 canonical 存档、停用政策、删除或重建角色、密码/封禁、半证据、外来 fence、锁超时，以及真实 Guild 变化后删除账号的最新镜像/版本。存档 raw_json 与 snapshot/name 不一致时保持冻结。9 项新增 PG、22 项既有 PG、8 项普通回归通过，见[本轮证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。
+
+未修改 schema、客户端或远程资产，不扩大为全服覆盖或 Crystal 1:1 新闭合项；每日任务仍待 DB 周期与独立槽接入，Windows 完整收费/恢复实机链未闭合。默认关闭、goal active，不用 Docker。
+
 ## 第九阶段当前审计：原生报价，不扩大后端覆盖结论（2026-10-21）
 
 Gateway46恢复身份补发纯5项及真实物理WS1项通过，PG45的1项证明重读当前会话、撤销拒绝及原expiry不延长。新EXE59普通登录/StartGame/NPC/Repair、Bag拖入已取得服务端费用6；首次显式Close未收费，第二次OKAY距报价约97秒，超过30秒TTL，拒绝且无Confirm。停服后独立psql仍见0结果/0销毁、绑定1,000,000、旧gold 1234、Bag100/1000、save_version15/revision14，见`C:/mir2-build/hunting-native-pg-final-after-deadline-56.json`；这不是新原生成功提交或冷登录验收。

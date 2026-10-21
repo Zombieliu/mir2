@@ -1,5 +1,11 @@
 # 狩猎经济：真实游戏来源接入计划
 
+## 第十阶段：任务来源登录恢复（2026-10-21）
+
+已补一次性任务结果不明、原 Session 丢失后的登录恢复：只核对原槽/回执，验证当前完整 checkpoint 与角色名后刷新最新账户/Guild 镜像，不重放奖励；证据缺失、不一致或外来 fence 均保留冻结。新增 PG 9/9、既有任务/修理 PG 22/22、普通回归 8/8 通过，见[本轮证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。第九阶段 Windows 接线和实际报价证据见[原生审计](generated/hunting-economy/acceptance-20261021-repair-native-windows.json)，成功收费完整实机链仍待。
+
+下一来源限定现有 newcomer-v1 NPC24 2100001..4，保持每日三选二 + bonus（11,000 基础绑定金币、20,000 基础 EXP）和 UTC+8 00:00 重置。拟采用 DB 时钟私有 period capability、独立每日不可变领取槽、canonical 高水位/旧存档保守校验、锁内午夜复验与最多一次完整重规划；Unknown 必须保存原 period。该来源当前尚未实现，不更改经济 04:00 结算。goal active、默认关闭、K=0.1；无 Docker/WSL/虚拟机或远程资产变更。
+
 ## 第八阶段：浏览器恢复核对与 Windows 原生优先（2026-10-20）
 
 浏览器已用本机隔离 Axum/PG 的合成账号完成普通登录/StartGame、真实 NPC 服务、Bag 拖入、服务端报价 6 绑定金币及一次 Confirm。测试 transport 仅省略一次已提交 owner 回执；Pending 主动 Close 后仍可原 Query。独立 psql 在 Query 后、普通 Alt+x 退出后及服务停止后均核对：结果/销毁各 1 条、扣费/销毁 6、绑定余额 999994、旧 gold 1234、Bag 耐久 970/970。该路径不是强制服务端 OutcomeUnknown，本轮未重新登录验证。见 [第八阶段证据](generated/hunting-economy/acceptance-20261020-repair-browser.json)。

@@ -1,5 +1,11 @@
 # Agent Task Queue
 
+## 第十阶段：任务来源登录恢复（2026-10-21）
+
+已修复一次性任务入账结果不明且原 Session 丢失后，新登录被旧冻结阻挡的问题。仅核对原私有来源证据并加载当前状态；9 项新增 PG、22 项任务/修理邻接 PG、8 项普通回归通过，见[本轮证据](generated/hunting-economy/acceptance-20261021-quest-login-recovery.json)。
+
+下一项接现有 NPC24 每日三选二 + bonus，独立每日槽、DB UTC+8 午夜周期、锁内复验和原日恢复；当前尚未实现。Windows 原生成功扣费至冷登录闭环及其余真实来源、材料、完整三层销毁、全服指标与通知/迁移发布继续开放。goal active，默认关闭，不用 Docker。下方第九阶段及更早文字保留各自历史范围。
+
 ## 第九阶段当前队列：隔离环境已结束，成功确认留待新一轮（2026-10-21）
 
 新EXE59已通过普通登录/StartGame/NPC/Repair和Bag拖入，实际得到服务端费用6；第一次显式Close未收费，顶X尝试不能当作已关闭。第二次报价到OKAY约97秒，超过30秒TTL，正常拒绝且未发Confirm。停服后独立psql仍为0结果/0销毁、绑定1,000,000、旧gold 1234、Bag100/1000、save_version15/revision14，见`C:/mir2-build/hunting-native-pg-final-after-deadline-56.json`；尚无成功扣款或原生完整闭环。
