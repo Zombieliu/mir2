@@ -1,0 +1,459 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-21",
+  "phase": 13,
+  "parentCommit": "a4bc32f461e6ae8e014d16af7691740a30600de7",
+  "goalStatus": "active",
+  "enabledByDefault": false,
+  "scope": "Full server ItemState custody for existing ordinary/death ground-item transfer; prerequisite for future economic material binding",
+  "formulaUnchanged": {
+    "k": "0.1",
+    "baselinePermits": "0.72",
+    "dailyPermitCap": "1.08"
+  },
+  "productionChanges": [
+    {
+      "paths": [
+        "apps/simulation/src/config.rs",
+        "apps/simulation/src/lib.rs"
+      ],
+      "change": "Optional GroundDropItemPayload.serverState stores version1 full ItemState Value. None is omitted to retain old payload/digest bytes; outer custody rejects unknown fields."
+    },
+    {
+      "paths": [
+        "apps/simulation/src/runtime/drops.rs",
+        "apps/simulation/src/runtime/ground_drop_custody.rs"
+      ],
+      "change": "Real ordinary and death inventory/equipment from_state path captures before deleting the source; Shared DropItem preflight uses the same capture. Plain partial stacks clear IDs for authoritative allocation; unsafe nested partial split refuses."
+    },
+    {
+      "paths": [
+        "apps/simulation/src/runtime/inventory.rs"
+      ],
+      "change": "Present carrier must pass bounded exact known-shape roundtrip, committed tree validation and canonical key/count/full UserItem/UID equality; invalid Some never falls back. Whole assigned UID collision refuses before merge. Full server identity participates in stack comparison; incoming full state cannot be silently changed by normalization. Fresh nested allocation updates matching socket identity evidence."
+    }
+  ],
+  "limits": {
+    "version": 1,
+    "maxStateBytes": 262144,
+    "maxJsonDepth": 64,
+    "maxJsonNodes": 32768,
+    "unknownOrDroppedKnownShapeFields": "refuse present carrier; no template fallback",
+    "legacyNone": "original path retained without economic reclassification"
+  },
+  "sourcePins": [
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 304047,
+      "sha256": "fb5fe52bf706cf2d0d7be4087d30e715cd8a04087f7b384dc65d74436dd06b45"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "bytes": 5702,
+      "sha256": "b83359555d2efab4a57f2e7543b27f937634932a81b26b4f4505106fe7b83ded"
+    },
+    {
+      "path": "apps/simulation/src/runtime/drops.rs",
+      "bytes": 173218,
+      "sha256": "92eb8b65fe450c01e409aa2e6b9b0e0c604650117b3d6041f9a3e3914ae2bbe0"
+    },
+    {
+      "path": "apps/simulation/src/runtime/inventory.rs",
+      "bytes": 184299,
+      "sha256": "03c3836fb1681696fe0a2a304c0e13b1e87afa1f3e40a8681e3c8d3d9a36aa2b"
+    },
+    {
+      "path": "apps/simulation/src/runtime/ground_drop_custody.rs",
+      "bytes": 9062,
+      "sha256": "d5e21ea02be88d0b4ddf9e7ec969b0332e1f52675022a46e499541174fb31acf"
+    },
+    {
+      "path": "apps/simulation/src/runtime/ground_drop_custody_tests.rs",
+      "bytes": 25168,
+      "sha256": "453eec37c6d30879facc49fcccd663dc4fbfa3a10ecd15ddfa06792c48af1f2e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "bytes": 80348,
+      "sha256": "0ba3ea54d4a2453f3f572fd1495cdb0305427cbe09b43f55c68ea425e096d406"
+    },
+    {
+      "path": "apps/gateway/src/zone_rpc.rs",
+      "bytes": 336455,
+      "sha256": "06f51c213eabd209952139cbbe894979718af65a3b5ae8cdf0debe6a51cf3f15"
+    },
+    {
+      "path": "apps/gateway/src/spectator.rs",
+      "bytes": 49432,
+      "sha256": "80e68b598eadbd482e8c0948acb678124ff6aec40c2a19afe625ae0b11ac567a"
+    }
+  ],
+  "sourceUnchangedAcrossBuildAndTests": true,
+  "binaries": [
+    {
+      "path": "C:/mir2-build/hunting-permit-economy-target/debug/deps/mir2_simulation-hunting-custody-80.exe",
+      "bytes": 101627904,
+      "sha256": "627e36a7ab26af72a9df00e409a88f3d3e950cfe979244d670b6b387c2471faf"
+    },
+    {
+      "path": "C:/mir2-build/hunting-permit-economy-target/debug/deps/mir2_gateway-hunting-custody-82.exe",
+      "bytes": 148142080,
+      "sha256": "b1d3b48dcc9291a55f8ab13bff175f7e90dbf42f37a56824e6e526b7e5cc53d3"
+    }
+  ],
+  "builds": {
+    "simulation": {
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 75772,
+      "log": "C:/mir2-build/hunting-custody-build-80.log",
+      "args": [
+        "+1.89.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "--no-run",
+        "--locked",
+        "--offline",
+        "-j",
+        "2",
+        "--target-dir",
+        "C:/mir2-build/hunting-permit-economy-target",
+        "--message-format=json-render-diagnostics"
+      ],
+      "binaries": [
+        "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_simulation-789d56e516add984.exe"
+      ]
+    },
+    "gateway": {
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 127657,
+      "log": "C:/mir2-build/hunting-custody-gateway-build-82.log",
+      "args": [
+        "+1.89.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "--no-run",
+        "--locked",
+        "--offline",
+        "-j",
+        "2",
+        "--target-dir",
+        "C:/mir2-build/hunting-permit-economy-target",
+        "--message-format=json-render-diagnostics"
+      ],
+      "binaries": [
+        "C:/mir2-build/hunting-permit-economy-target\\debug\\deps\\mir2_gateway-67cbdf0f2e685907.exe"
+      ]
+    },
+    "rust": "1.89.0",
+    "mode": "native Windows Cargo locked/offline, one Cargo at a time, jobs2, dedicated C target, compiler stack64MiB"
+  },
+  "tests": {
+    "uniquePassed": 67,
+    "failed": 0,
+    "defaultIgnoredExecuted": 0,
+    "newTests": 10,
+    "simulation": {
+      "newCustody": 9,
+      "existingGroundIdentity": 15,
+      "checkpoint": 16,
+      "stackIdentity": 24,
+      "total": 64
+    },
+    "gateway": {
+      "internalRpcAndZoneBase": 2,
+      "spectatorLiveAndReplay": 1,
+      "total": 3
+    },
+    "newCustodyResult": {
+      "code": 0,
+      "signal": null,
+      "elapsedMs": 7290,
+      "log": "C:/mir2-build/hunting-custody-tests-81.log",
+      "summary": [
+        "test runtime::drops::ground_drop_custody::tests::ground_custody_death_inventory_and_equipment_capture_full_state ... ok",
+        "test runtime::drops::ground_drop_custody::tests::ground_custody_failed_capture_keeps_normal_and_death_sources_unchanged ... ok",
+        "test runtime::drops::ground_drop_custody::tests::ground_custody_full_inventory_and_recursive_uid_collision_preserve_shared_source ... ok",
+        "test runtime::drops::ground_drop_custody::tests::ground_custody_invalid_present_carriers_never_fall_back_or_mutate_either_custodian ... ok",
+        "test runtime::drops::ground_drop_custody::tests::ground_custody_none_keeps_legacy_payload_bytes_and_legacy_pickup ... ok",
+        "test runtime::drops::ground_drop_custody::tests::ground_custody_normal_drop_shared_claim_logout_cold_login_preserves_recursive_state ... ok",
+        "test runtime::drops::ground_drop_custody::tests::ground_custody_partial_drop_assigns_new_uid_and_preserves_server_fields ... ok",
+        "test runtime::drops::ground_drop_custody::tests::ground_custody_same_wire_different_server_identity_never_merges ... ok",
+        "test runtime::drops::ground_drop_custody::tests::ground_custody_unsafe_nested_partial_drop_rejects_before_inventory_removal ... ok",
+        "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 2210 filtered out; finished in 7.27s"
+      ]
+    },
+    "adjacentResult": [
+      {
+        "filter": "runtime::drops::ground_drop_identity_tests::",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 2781,
+        "log": "C:/mir2-build/hunting-custody-adjacent-83-1.log",
+        "summary": [
+          "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 2204 filtered out; finished in 2.76s"
+        ]
+      },
+      {
+        "filter": "runtime::zone::runtime::checkpoint::tests::",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 759,
+        "log": "C:/mir2-build/hunting-custody-adjacent-83-2.log",
+        "summary": [
+          "test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 2203 filtered out; finished in 0.74s"
+        ]
+      },
+      {
+        "filter": "runtime::inventory::stack_identity_tests::",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 125,
+        "log": "C:/mir2-build/hunting-custody-adjacent-83-3.log",
+        "summary": [
+          "test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 2195 filtered out; finished in 0.11s"
+        ]
+      }
+    ],
+    "gatewayResult": [
+      {
+        "filter": "zone_rpc::exact_ground_drop_snapshot_tests::",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 665,
+        "log": "C:/mir2-build/hunting-custody-gateway-tests-84-1.log",
+        "summary": [
+          "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 957 filtered out; finished in 0.31s"
+        ]
+      },
+      {
+        "filter": "spectator::tests::spectator_live_and_replay_redact_exact_ground_item_identity",
+        "code": 0,
+        "signal": null,
+        "elapsedMs": 598,
+        "log": "C:/mir2-build/hunting-custody-gateway-tests-84-2.log",
+        "summary": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 958 filtered out; finished in 0.58s"
+        ]
+      }
+    ],
+    "executedTests": [
+      "runtime::drops::ground_drop_custody::tests::ground_custody_death_inventory_and_equipment_capture_full_state",
+      "runtime::drops::ground_drop_custody::tests::ground_custody_failed_capture_keeps_normal_and_death_sources_unchanged",
+      "runtime::drops::ground_drop_custody::tests::ground_custody_full_inventory_and_recursive_uid_collision_preserve_shared_source",
+      "runtime::drops::ground_drop_custody::tests::ground_custody_invalid_present_carriers_never_fall_back_or_mutate_either_custodian",
+      "runtime::drops::ground_drop_custody::tests::ground_custody_none_keeps_legacy_payload_bytes_and_legacy_pickup",
+      "runtime::drops::ground_drop_custody::tests::ground_custody_normal_drop_shared_claim_logout_cold_login_preserves_recursive_state",
+      "runtime::drops::ground_drop_custody::tests::ground_custody_partial_drop_assigns_new_uid_and_preserves_server_fields",
+      "runtime::drops::ground_drop_custody::tests::ground_custody_same_wire_different_server_identity_never_merges",
+      "runtime::drops::ground_drop_custody::tests::ground_custody_unsafe_nested_partial_drop_rejects_before_inventory_removal",
+      "runtime::drops::ground_drop_identity_tests::ambiguous_legacy_display_name_fails_closed_without_inventory_mutation",
+      "runtime::drops::ground_drop_identity_tests::assigned_ground_drop_stack_merges_when_bag_is_full",
+      "runtime::drops::ground_drop_identity_tests::assigned_ground_drop_uid_collision_fails_closed_without_mutation",
+      "runtime::drops::ground_drop_identity_tests::assigned_zero_uid_fails_the_same_preflight_used_before_durable_commit",
+      "runtime::drops::ground_drop_identity_tests::exact_ground_drop_multi_stack_pickup_emits_each_changed_stack",
+      "runtime::drops::ground_drop_identity_tests::exact_ground_drop_schema_round_trips_and_old_json_defaults_to_legacy",
+      "runtime::drops::ground_drop_identity_tests::legacy_display_name_key_freezes_and_inserts_as_canonical_exact_item",
+      "runtime::drops::ground_drop_identity_tests::legacy_drop_full_bag_partial_stack_preserves_frozen_metadata",
+      "runtime::drops::ground_drop_identity_tests::local_pickup_preserves_frozen_identity_without_rerolling_metadata",
+      "runtime::drops::ground_drop_identity_tests::malformed_exact_payload_fails_preflight_without_inventory_mutation",
+      "runtime::drops::ground_drop_identity_tests::partial_player_drop_roundtrip_reuses_source_stack_without_uid_duplication",
+      "runtime::drops::ground_drop_identity_tests::shared_pickup_preserves_frozen_identity_without_rerolling_metadata",
+      "runtime::drops::ground_drop_identity_tests::shared_quest_pickup_preserves_exact_identity",
+      "runtime::drops::ground_drop_identity_tests::unassigned_exact_stack_merges_when_the_bag_has_no_empty_slot",
+      "runtime::drops::ground_drop_identity_tests::whole_player_drop_roundtrip_preserves_assigned_uid_tree",
+      "runtime::zone::runtime::checkpoint::tests::checkpoint_state_root_authenticates_removed_object_tombstones",
+      "runtime::zone::runtime::checkpoint::tests::complete_zone_checkpoint_rejects_valid_json_with_changed_state",
+      "runtime::zone::runtime::checkpoint::tests::complete_zone_checkpoint_restores_authoritative_and_derived_state",
+      "runtime::zone::runtime::checkpoint::tests::exact_ground_drop_identity_is_checkpointed_and_state_root_protected",
+      "runtime::zone::runtime::checkpoint::tests::ground_drop_authority_allocators_fail_closed_at_u64_exhaustion",
+      "runtime::zone::runtime::checkpoint::tests::legacy_checkpoint_missing_monster_disposition_fails_closed",
+      "runtime::zone::runtime::checkpoint::tests::legacy_v1_ground_drop_fixture_rebuilds_authority_from_legacy_payload_only",
+      "runtime::zone::runtime::checkpoint::tests::legacy_v1_restore_ignores_injected_v2_ground_drop_authority_fields",
+      "runtime::zone::runtime::checkpoint::tests::legacy_v1_v2_v3_v4_exact_drop_without_custody_keeps_roots_and_rejects_injection",
+      "runtime::zone::runtime::checkpoint::tests::legacy_v2_checkpoint_verifies_old_root_then_reanchors_pending_ticket_key",
+      "runtime::zone::runtime::checkpoint::tests::legacy_v3_checkpoint_ignores_forward_respawn_and_live_sync_rehydrates_policy",
+      "runtime::zone::runtime::checkpoint::tests::legacy_v3_dead_monster_policy_hydration_never_revives_immediately",
+      "runtime::zone::runtime::checkpoint::tests::online_player_receives_world_event_monster_spawn_packet",
+      "runtime::zone::runtime::checkpoint::tests::verified_world_checkpoint_keeps_v2_ground_drop_authority_validation",
+      "runtime::zone::runtime::checkpoint::tests::verified_world_checkpoint_reanchors_a_module_dependent_state_root",
+      "runtime::zone::runtime::checkpoint::tests::world_event_monster_without_player_is_authoritative_and_checkpointed",
+      "runtime::inventory::stack_identity_tests::belt_move_grid_decodes_crystal_raw_slots_without_changing_normalized_bag_slots",
+      "runtime::inventory::stack_identity_tests::belt_move_grid_missing_source_is_transactional",
+      "runtime::inventory::stack_identity_tests::belt_move_grid_moves_bag_item_to_empty_belt_without_changing_identity_or_quantity",
+      "runtime::inventory::stack_identity_tests::belt_move_grid_swaps_occupied_belt_and_bag_slots_without_loss_or_duplication",
+      "runtime::inventory::stack_identity_tests::default_optional_rental_or_sealed_presence_rejects_merge",
+      "runtime::inventory::stack_identity_tests::equipped_root_uids_are_reserved_for_allocation_and_incoming_rekeys",
+      "runtime::inventory::stack_identity_tests::exact_item_index_difference_rejects_merge",
+      "runtime::inventory::stack_identity_tests::fresh_and_equipment_metadata_only_children_cannot_reuse_existing_uids",
+      "runtime::inventory::stack_identity_tests::fully_compatible_across_merge_succeeds",
+      "runtime::inventory::stack_identity_tests::fully_compatible_within_merge_succeeds",
+      "runtime::inventory::stack_identity_tests::known_healing_metadata_only_fills_legacy_missing_values",
+      "runtime::inventory::stack_identity_tests::known_healing_metadata_preserves_crystal_checkpoint_roundtrip",
+      "runtime::inventory::stack_identity_tests::live_socket_authority_difference_rejects_merge",
+      "runtime::inventory::stack_identity_tests::metadata_difference_rejects_across_merge_without_mutation",
+      "runtime::inventory::stack_identity_tests::metadata_difference_rejects_within_merge_without_mutation",
+      "runtime::inventory::stack_identity_tests::metadata_only_child_uids_participate_in_usage_high_water_and_normalization",
+      "runtime::inventory::stack_identity_tests::move_item_packet_belt_grid_moves_raw_bag_slot_to_belt",
+      "runtime::inventory::stack_identity_tests::nested_item_uid_or_count_difference_rejects_merge",
+      "runtime::inventory::stack_identity_tests::normalization_preserves_metadata_exact_zero_and_rekeys_legacy_zero",
+      "runtime::inventory::stack_identity_tests::normalization_rekeys_cross_container_zero_and_nonzero_collisions_globally",
+      "runtime::inventory::stack_identity_tests::seeded_legacy_packet_items_remain_addressable_after_global_normalization",
+      "runtime::inventory::stack_identity_tests::split_conversion_error_preserves_inventory_and_storage_state",
+      "runtime::inventory::stack_identity_tests::split_rejects_nested_socket_identity_without_mutation",
+      "runtime::inventory::stack_identity_tests::storage_split_rejects_nested_socket_identity_without_mutation",
+      "zone_rpc::exact_ground_drop_snapshot_tests::internal_world_snapshot_rpc_roundtrip_is_lossless_but_client_view_is_redacted",
+      "zone_rpc::exact_ground_drop_snapshot_tests::zone_base_snapshot_roundtrip_retains_exact_identity_and_digest_covers_metadata",
+      "spectator::tests::spectator_live_and_replay_redact_exact_ground_item_identity"
+    ]
+  },
+  "verifiedBehavior": [
+    "Ordinary ClientPacket::DropItem captures recursive existing ItemState; actual ZoneRuntime issues claim ticket; personal pickup followed by explicit Zone Commit removes the shared object.",
+    "Normal LogOut persists the complete account file. A fresh config and Session normal Login/StartGame restore server-only functional fields and recursive socket state.",
+    "12 present-invalid carrier variants refuse both preflight and commit, without inventory mutation; explicit Cancel retains shared source.",
+    "Full inventory and nested UID collision refuse, preserving both custodians.",
+    "Partial ordinary stack receives a distinct nonzero UID and keeps server fields; unsafe nested partial split refuses before removing inventory.",
+    "Same UserItem wire with different server-only functional identity does not merge; outer display aliases do not overwrite full carrier names/descriptions.",
+    "Existing death inventory/equipment penalty helpers capture state, and failed capture leaves sources untouched.",
+    "None payload has old JSON bytes; synthesized old-shaped v1/v2/v3/v4 checkpoints restore and old-root injection of Some rejects.",
+    "Private full bytes participate in Zone checkpoint roots and ZoneBase digest; internal JSON and MessagePack RPC retain them. Client view and spectator live/replay remove enclosing exactItem and private marker."
+  ],
+  "independentReview": {
+    "reviewer": "/root/quest_recovery_final_review",
+    "result": "No remaining actionable production defect in nine-file delta; scope limits independently checked."
+  },
+  "localEvidence": [
+    {
+      "path": "C:/mir2-build/hunting-custody-build-result-80.json",
+      "bytes": 509,
+      "sha256": "f3d7acc693102076b286ed5d61c818923cb16306a5a1f91e8a4d614ef7fe8ef4"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-build-80.log",
+      "bytes": 192299,
+      "sha256": "12fa70d5b1801f09a1bb51376c725d7cca5d5386af72202ce26b3714af1d2d8b"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-tests-result-81.json",
+      "bytes": 1459,
+      "sha256": "709c584c2e4ba2b2f3970ab23e2da37db2726769cb9e9fbc7b57268be4ed4744"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-tests-81.log",
+      "bytes": 1279,
+      "sha256": "17ff7ad83d3a3fe21d736d1e13aa81f66c7e654aaa257cd71466fac9d60bfa84"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-adjacent-results-83.json",
+      "bytes": 958,
+      "sha256": "1848c4e6773f892113e002eecefcff8a4dbc624cd0fa85ba6e49ca479867d0a8"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-adjacent-83-1.log",
+      "bytes": 1910,
+      "sha256": "f654f2caab3f45e5538ee974996c19802e2581878e8a19060a0438b2e2469377"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-adjacent-83-2.log",
+      "bytes": 2075,
+      "sha256": "f6988545b796fe36ff29ed4d707272ff18edfc14ab603eea82c769e12a227256"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-adjacent-83-3.log",
+      "bytes": 2864,
+      "sha256": "f5bba6ac4bcc130019a3faed48d919ad9da554911707ff477dd3da8ba2042c38"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-gateway-build-result-82.json",
+      "bytes": 512,
+      "sha256": "56e245bb60cc84f36c6ab03b2188460ed8a6e0dd7d97d20294209aa13ae29b81"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-gateway-build-82.log",
+      "bytes": 342355,
+      "sha256": "2840a482b3f73789c462c9548d777553c059975cc2f1e3695c1a0bd6aba8e7fe"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-gateway-tests-result-84.json",
+      "bytes": 680,
+      "sha256": "b97c92318f65e87eded2489036770b3613be7c30b3229e0f423174ae3b6d70c5"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-gateway-tests-84-1.log",
+      "bytes": 384,
+      "sha256": "0374e8e0f26b14724e094fa09521e75c394f222c9fccac2efff8a72c1658b929"
+    },
+    {
+      "path": "C:/mir2-build/hunting-custody-gateway-tests-84-2.log",
+      "bytes": 204,
+      "sha256": "d0b05114a3715576fe56cfb7ec1f97d35c99148a21316b1be0660a8f58552c4d"
+    }
+  ],
+  "protectedInputs": [
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source77-portable-statistics-repair01.json",
+      "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473",
+      "unchanged": true
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json",
+      "sha256": "094752e8c9bd272176682ea95232df5d9572dcb392e707c6ed7ae9cbddae8c5b",
+      "unchanged": true
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-worker-diagnostic-manifest01.json",
+      "sha256": "fca6c9df22589cc837201b513a899a8f794a769a05c3a7946b8d6229c3f569bd",
+      "unchanged": true
+    },
+    {
+      "path": "apps/web/tsconfig.json",
+      "sha256": "70145b1787f5dea10c830730d9a6968f226bf8e1145602c8a9c964856a44f2ec",
+      "unchanged": true
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182",
+      "unchanged": true
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/lib/typescript.js",
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675",
+      "unchanged": true
+    }
+  ],
+  "retainedFixtures": {
+    "newFileStoreDirectories": "Kept in OS temp for inspection; no recursive cleanup added.",
+    "spectatorTempRoot": "C:\\mir2-build\\hunting-custody-spectator-temp-84",
+    "spectatorCleanupScope": "Existing test removes only its newly constructed fixed-prefix/numeric-timestamp child inside independently resolved fresh task temp root; task root retained."
+  },
+  "scopeLimits": [
+    "This does not mint bound materials or add classification/valuation/material conversion/permit consumption.",
+    "Claim, pickup, Commit and Cancel are explicitly separate fixture operations; no Gateway/PG joint atomic economic claim, physical WebSocket or new PG test is claimed.",
+    "File SourceOfTruth cold config/Session is covered; no new real Windows GUI or fresh product EXE package is produced here. Phase12 native GUI acceptance remains historical at a4bc32f461.",
+    "Death coverage calls the existing penalty helpers; it is not full PvP death combat acceptance.",
+    "Outer display preservation is exercised through the pickup planner. Existing full shared quest-route test still uses None; no new Some full quest route acceptance.",
+    "Checkpoint/RPC fixtures use opaque markers to check byte preservation, roots and redaction, not valid Some business-state checkpoint recovery.",
+    "Old-format checkpoint fixtures are synthesized using existing legacy root implementations; this is not a production migration or cross-version rollout.",
+    "Focused/adjacent tests are not full workspace, full shared gameplay, full asset/source closure, signed Candidate or production acceptance."
+  ],
+  "remaining": [
+    "Add authoritative economic material binding and prevent every transfer/sale/buyback/mail/storage/crafting outflow from washing it.",
+    "Material valuation and fee funding remain pending user definition; do not implement dependent conversion by assumption.",
+    "Shared mining has no current attack-to-mine entry; planting/mining and other new sources still need persistent authoritative claim and complete inventory commit.",
+    "Full maintenance/light-PVP/Shabak burn sources, whole-server market/player/earnings statistics, configured notification delivery and migration/release gates remain open."
+  ],
+  "constraints": {
+    "dockerWslVmUsed": false,
+    "virtualizationChanged": false,
+    "remoteAccountOrAssetsModified": false,
+    "legacyGoldReclassified": false,
+    "otherGamesOperated": false,
+    "candidateOrCrystalPercentageIncreased": false
+  },
+  "harnessNote": "Initial history-check helper stopped on a nonzero Git child before staging; precise cause was not retained. Explicit full parent revision and 8MiB output buffer then verified all seven historical tails unchanged. No source or product test changed."
+}

@@ -2195,11 +2195,18 @@ fn plan_exact_ground_drop_item(
         .map(|_| key.to_string())
         .unwrap_or_else(|| crystal_item_key_for_template(&template));
 
-    let mut base = embedded_item_state_from_template(&template, container, preferred_slot);
-    base.key = canonical_key.clone();
-    base.name = name.to_string();
-    base.description = description.to_string();
-    let mut canonical = try_item_state_from_user_item(base, &payload.item).ok()?;
+    let full_custody = payload.server_state.is_some();
+    let mut canonical = if full_custody {
+        // A present private carrier is all-or-nothing. Never reconstruct from
+        // the public protocol if its version, shape or exact identity fails.
+        super::drops::ground_drop_custody::decode(payload, &canonical_key, expected_quantity)?
+    } else {
+        let mut base = embedded_item_state_from_template(&template, container, preferred_slot);
+        base.key = canonical_key.clone();
+        base.name = name.to_string();
+        base.description = description.to_string();
+        try_item_state_from_user_item(base, &payload.item).ok()?
+    };
     canonical.container = container;
     canonical.slot = preferred_slot;
 
@@ -2209,6 +2216,16 @@ fn plan_exact_ground_drop_item(
     }
 
     let mut staged = resources.clone();
+    if full_custody && payload.uid_assigned {
+        let mut pending = vec![&payload.item];
+        let mut seen = BTreeSet::new();
+        while let Some(item) = pending.pop() {
+            if !seen.insert(item.unique_id) || inventory_unique_id_is_used(resources, item.unique_id) {
+                return None;
+            }
+            pending.extend(item.slots.iter().flatten());
+        }
+    }
     if payload.uid_assigned {
         if max_stack > 1 {
             let mut merge_capacity = 0_u32;
@@ -2221,6 +2238,7 @@ fn plan_exact_ground_drop_item(
                             item.key == canonical_key
                                 && item.quantity < max_stack
                                 && item_stack_identity_compatible(item, &canonical)
+                                && (!full_custody || super::drops::ground_drop_custody::stack_identity_matches(item, &canonical))
                         })
                         .map(|item| max_stack.saturating_sub(item.quantity))
                         .sum::<u32>(),
@@ -2235,6 +2253,7 @@ fn plan_exact_ground_drop_item(
                             && item_containers_stack_together(item.container, container)
                             && item.quantity < max_stack
                             && item_stack_identity_compatible(item, &canonical)
+                            && (!full_custody || super::drops::ground_drop_custody::stack_identity_matches(item, &canonical))
                     })
                     .map(|item| max_stack.saturating_sub(item.quantity))
                     .sum::<u32>(),
@@ -2251,6 +2270,7 @@ fn plan_exact_ground_drop_item(
                         item.key == canonical_key
                             && item.quantity < max_stack
                             && item_stack_identity_compatible(item, &canonical)
+                            && (!full_custody || super::drops::ground_drop_custody::stack_identity_matches(item, &canonical))
                     }) {
                         let added = remaining.min(max_stack - existing.quantity);
                         if added == 0 {
@@ -2270,6 +2290,7 @@ fn plan_exact_ground_drop_item(
                         && item_containers_stack_together(item.container, container)
                         && item.quantity < max_stack
                         && item_stack_identity_compatible(item, &canonical)
+                        && (!full_custody || super::drops::ground_drop_custody::stack_identity_matches(item, &canonical))
                 }) {
                     let added = remaining.min(max_stack - existing.quantity);
                     if added == 0 {
@@ -2288,8 +2309,16 @@ fn plan_exact_ground_drop_item(
         }
 
         let exact_before = try_user_item_from_item_state(&canonical).ok()?;
+        let state_before = full_custody
+            .then(|| serde_json::to_value(&canonical).ok())
+            .flatten();
+        if full_custody && state_before.is_none() {
+            return None;
+        }
         normalize_incoming_item_tree_unique_ids(resources, &mut canonical, &[]);
-        if try_user_item_from_item_state(&canonical).ok()? != exact_before {
+        if try_user_item_from_item_state(&canonical).ok()? != exact_before
+            || (full_custody && serde_json::to_value(&canonical).ok() != state_before)
+        {
             return None;
         }
         let (item_container, slot) =
@@ -2326,6 +2355,7 @@ fn plan_exact_ground_drop_item(
                 item.key == canonical_key
                     && item.quantity < max_stack
                     && item_stack_identity_compatible(item, &canonical)
+                        && (!full_custody || super::drops::ground_drop_custody::stack_identity_matches(item, &canonical))
             }) {
                 let added = remaining.min(max_stack - existing.quantity);
                 if added == 0 {
@@ -2345,6 +2375,7 @@ fn plan_exact_ground_drop_item(
                 && item_containers_stack_together(item.container, container)
                 && item.quantity < max_stack
                 && item_stack_identity_compatible(item, &canonical)
+                    && (!full_custody || super::drops::ground_drop_custody::stack_identity_matches(item, &canonical))
         }) {
             let added = remaining.min(max_stack - existing.quantity);
             if added == 0 {
@@ -2381,6 +2412,9 @@ fn plan_exact_ground_drop_item(
         item.slot = slot;
         item.quantity = remaining.min(max_stack);
         normalize_fresh_item_tree_unique_ids(&staged, &mut item, &[]);
+        if full_custody {
+            super::drops::ground_drop_custody::refresh_reallocated_socket_ids(&mut item)?;
+        }
         validate_committed_item_state_carrier(&item).ok()?;
         if item_container == ItemContainer::Belt {
             staged.belt_items.push(item.clone());

@@ -55,6 +55,9 @@ use super::session::{
     system_message_key_args,
 };
 
+#[path = "ground_drop_custody.rs"]
+pub(in crate::runtime) mod ground_drop_custody;
+
 #[derive(Component, Clone, Debug, Default)]
 pub(super) struct PendingHarvestDrops {
     pub(super) drops: Vec<ResolvedDropTemplate>,
@@ -288,6 +291,7 @@ fn ground_drop_item_payload_from_resolved(
     Some(GroundDropItemPayload {
         item,
         uid_assigned: false,
+        server_state: None,
     })
 }
 
@@ -296,16 +300,7 @@ fn ground_drop_item_payload_from_state(
     quantity: u32,
     preserve_uid: bool,
 ) -> Option<GroundDropItemPayload> {
-    let mut state = state.clone();
-    state.quantity = quantity;
-    let mut item = try_user_item_from_item_state(&state).ok()?;
-    if !preserve_uid {
-        clear_ground_drop_user_item_uids(&mut item);
-    }
-    Some(GroundDropItemPayload {
-        item,
-        uid_assigned: preserve_uid,
-    })
+    ground_drop_custody::capture(state, quantity, preserve_uid)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -3305,6 +3300,7 @@ impl SimulationSession {
             return None;
         }
         if !crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_DESTROY_ON_DROP) {
+            ground_drop_item_payload_from_state(item, quantity, quantity == item.quantity)?;
             let player = player_entity(world)?;
             let position = entity_position(world, player)?;
             crystal_ground_drop_position(world, &position, CRYSTAL_PLAYER_DROP_ITEM_RANGE)?;

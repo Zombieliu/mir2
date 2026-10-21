@@ -1179,6 +1179,10 @@ mod tests {
                 show_group_pickup: false,
                 exact_item: Some(GroundDropItemPayload {
                     uid_assigned: true,
+                    server_state: Some(mir2_simulation::GroundDropItemCustody {
+                        version: 1,
+                        state: json!({"privateSpectatorMarker": 731}),
+                    }),
                     item: UserItem {
                         unique_id: 88_101,
                         item_index: 222,
@@ -1302,12 +1306,14 @@ mod tests {
         assert!(frame.world["groundDrops"][0]["loot"]
             .get("exactItem")
             .is_none());
+        assert!(!serde_json::to_string(&frame.world).unwrap().contains("privateSpectatorMarker"));
         let replay = hub
             .load_replay(&frame.recording_id, true, u64::MAX)
             .unwrap();
         assert!(replay[0].world["groundDrops"][0]["loot"]
             .get("exactItem")
             .is_none());
+        assert!(!serde_json::to_string(&replay[0].world).unwrap().contains("privateSpectatorMarker"));
         fs::remove_dir_all(data_dir).ok();
     }
 

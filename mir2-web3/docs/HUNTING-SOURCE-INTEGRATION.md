@@ -1,5 +1,21 @@
 # 狩猎经济：真实游戏来源接入计划
 
+## 第十三阶段：共享地面完整实例 custody（2026-10-21）
+
+完整实例载体已接入现有 drops/inventory 与共享地面传递链，是后续绑定材料传播的前置保障，尚未新增经济产出来源。
+
+GroundDrop 的可选 v1 `serverState` 保存完整服务端 ItemState。普通玩家丢弃（含安全的部分数量）及死亡库存/装备掉落均在删除源物品前实际捕获；拾取对 Some 载体执行有界结构、精确已知字段形状、canonical key/count/UID/完整 UserItem 对照，非法、未知字段、超限或不一致直接拒绝，不回退模板。部分掉落清理完整实例/元数据中的待分配 UID，需新建接收栈时由既有 allocator 分配新 UID；有嵌套身份而不能安全拆分时拒绝。合栈须完整服务端功能身份一致，同 wire 但不同服务端字段不能合并。
+
+None 序列化省略，保留旧 checkpoint v1/v2/v3/v4 的 root 与原 ground-drop digest 版本/域；内部 JSON、MessagePack、ZoneBase 保留载体，客户端视图及 spectator 删除整个 `exactItem`。没有新增材料绑定、矿产/种植产出、估值或许可转换入口，也没有新增客户端包或材料经济字段。
+
+Root 串行验证 Sim build80、Gateway build82 成功（Sim 保留 96 条既有警告）；Sim 新增9项（81）、原 ground identity 15项、checkpoint 16项（含新增兼容1项）及 stack 24项（83）共64项，Gateway RPC 2项及 spectator 1项（84）共3项，合计67项唯一测试通过：新增10项、既有/增强57项。本轮没有新增 PG 或 GUI 执行。见[阶段十三证据](generated/hunting-economy/acceptance-20261021-ground-item-custody.json)。
+
+测试边界：真实普通 DropItem 后，显式分别调用 Zone Claim、个人 Pickup、Zone Commit/Cancel，并验证满包、UID冲突、载体不匹配时双边不变；这不是 Gateway/PG 一体原子 claim 证明。完整递归实例经过普通 LogOut，再由全新文件配置/Session 普通 Login/StartGame 冷加载；仅证明文件存储边界。死亡测试直接调用既有 penalty helper，不是完整 PVP 致死链。Quest 仅验证 planner 的外层显示别名不覆盖 Some 内原实例字段，原 shared quest 掉落仍为 None。checkpoint/RPC 的 Some 使用 opaque marker 验证保留、摘要和擦除，不是合法 Some 的业务恢复验收。
+
+第十二阶段 Windows 实机验收提交 `a4bc32f461` 及其[原生恢复证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)原样保留，本轮不追加 Windows/客户端实机结论。完整 goal active、默认关闭、K=0.1、基准每日0.72/硬上限1.08许可保持；不提高 Candidate/Crystal 百分比。不运行 Docker/WSL/虚拟机，不修改远程资产或重分类旧 gold。
+
+剩余队列：材料绑定传播及交易/邮件/NPC/合成等出站约束、材料估值与解绑定规则（待用户定义）；共享挖矿/种植及其他真实来源；日常/轻PVP/沙巴克三层完整销毁；全服市场、画像与收益；通知送达及迁移发布。下方第十二阶段及更早正文保留历史范围，不能按旧段落推断本轮完成度。
+
 ## 第十二阶段：Windows 原生修理恢复与重登（2026-10-21）
 
 现有真实修理来源的原生恢复入口已补齐：权威snapshot提供mapIndex；新连接重新核对原身份/角色，完整producer实际入gameplay队列后才恢复owner/context，接收端关闭即终止当前连接。Pending账本仍只允许手动原Query，不自动再次Confirm。Native43/43（含4项新增）、SimMap5/5、Gateway普通5/5、物理WS1/1及真实PG1/1按各自范围通过，见[阶段十二证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)，不与历史计数相加。

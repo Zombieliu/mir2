@@ -6966,6 +6966,10 @@ mod exact_ground_drop_snapshot_tests {
                 exact_item: Some(GroundDropItemPayload {
                     item,
                     uid_assigned: true,
+                    server_state: Some(mir2_simulation::GroundDropItemCustody {
+                        version: 1,
+                        state: serde_json::json!({"privateTransportMarker": 731}),
+                    }),
                 }),
             },
         });
@@ -6990,6 +6994,7 @@ mod exact_ground_drop_snapshot_tests {
 
         let internal = serde_json::to_value(&snapshot).expect("internal snapshot encodes");
         assert!(internal["groundDrops"][0]["loot"]["exactItem"].is_object());
+        assert_eq!(internal["groundDrops"][0]["loot"]["exactItem"]["serverState"]["state"]["privateTransportMarker"], 731);
         let client = serde_json::to_value(snapshot.client_view()).expect("client view encodes");
         assert!(client["groundDrops"][0]["loot"].get("exactItem").is_none());
     }
@@ -7010,6 +7015,12 @@ mod exact_ground_drop_snapshot_tests {
             snapshot_digest(&zone_state).expect("original digest"),
             snapshot_digest(&changed).expect("changed digest")
         );
+
+        let mut private_changed = zone_state.clone();
+        let GroundDropLootSnapshot::InventoryItem { exact_item: Some(payload), .. } =
+            &mut private_changed.ground_drops[0].loot else { panic!("private exact carrier"); };
+        payload.server_state.as_mut().unwrap().state["privateTransportMarker"] = serde_json::json!(732);
+        assert_ne!(snapshot_digest(&zone_state).unwrap(), snapshot_digest(&private_changed).unwrap());
 
         let durable = durable_session_snapshot(zone_state.clone());
         assert!(durable.ground_drops.is_empty());

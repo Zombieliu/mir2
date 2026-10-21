@@ -1003,6 +1003,12 @@ mod tests {
                 gm_made: true,
             },
             uid_assigned: true,
+            // Opaque transport fixture: checkpoint code authenticates all
+            // private bytes; only the pickup boundary interprets ItemState.
+            server_state: Some(crate::config::GroundDropItemCustody {
+                version: 1,
+                state: serde_json::json!({"privateCheckpointMarker": 731}),
+            }),
         };
         let snapshot = GroundDropSnapshot {
             object_id: 91,
@@ -1106,6 +1112,87 @@ mod tests {
         let error = ZoneRuntime::restore_checkpoint(&tampered)
             .expect_err("identity tamper must fail state-root verification");
         assert!(error.contains("state root mismatch"), "{error}");
+
+        let mut checkpoint: ZoneRuntimeCheckpoint =
+            serde_json::from_slice(&bytes).expect("original checkpoint JSON");
+        let GroundDropLootSnapshot::InventoryItem {
+            exact_item: Some(exact_item), ..
+        } = &mut checkpoint.ground_drops.get_mut(&91).unwrap().drop.loot else {
+            panic!("private checkpoint carrier");
+        };
+        exact_item.server_state.as_mut().unwrap().state["privateCheckpointMarker"] =
+            serde_json::json!(732);
+        let tampered = serde_json::to_vec(&checkpoint).unwrap();
+        let error = ZoneRuntime::restore_checkpoint(&tampered)
+            .expect_err("private custody tamper must fail state-root verification");
+        assert!(error.contains("state root mismatch"), "{error}");
+    }
+
+    #[test]
+    fn legacy_v1_v2_v3_v4_exact_drop_without_custody_keeps_roots_and_rejects_injection() {
+        let template = mir2_game_data::crystal_item_by_name("Dagger").unwrap();
+        let mut item = crate::runtime::items::embedded_item_state_from_template(
+            &template, crate::config::ItemContainer::Bag1, 8,
+        );
+        item.unique_id = 92_001;
+        let mut exact_item = crate::runtime::drops::ground_drop_custody::capture(&item, 1, true).unwrap();
+        exact_item.server_state = None;
+        let mut drop = checkpoint_gold_drop(301);
+        drop.name = item.name.clone();
+        drop.loot = GroundDropLootSnapshot::InventoryItem {
+            key: item.key.clone(), name: item.name.clone(), description: item.description.clone(),
+            weight: item.weight, durability_current: item.durability_current,
+            durability_max: item.durability_max, added_attack: item.added_attack,
+            added_defence: item.added_defence, added_stats: item.added_stats.clone(),
+            cursed: item.cursed, socket_slots: item.socket_slots, show_group_pickup: false,
+            exact_item: Some(exact_item),
+        };
+        let mut runtime = ZoneRuntime::new(ZoneKey::for_map("legacy-exact-custody"));
+        let stored = runtime.new_zone_ground_drop(drop.clone(), None).unwrap();
+        let old_digest = stored.payload_digest.clone();
+        runtime.ground_drops.insert(drop.object_id, stored);
+        let mut canonical = drop.clone();
+        canonical.ownership_remaining_ticks = None;
+        let legacy_json = serde_json::to_vec(&canonical).unwrap();
+        assert!(!String::from_utf8_lossy(&legacy_json).contains("serverState"));
+        // This is the unchanged old v1 digest formula over old-shaped bytes.
+        let mut old_hasher = Sha256::new();
+        old_hasher.update(b"obelisk.mir2.ground-drop.v1\0");
+        old_hasher.update(&legacy_json);
+        assert_eq!(old_digest, hex_lower(&old_hasher.finalize()));
+
+        for version in [1, 2, 3, 4] {
+            let root = match version {
+                1 => runtime.legacy_canonical_state_root(),
+                2 => runtime.legacy_v2_canonical_state_root(),
+                3 => runtime.legacy_v3_canonical_state_root(),
+                4 => runtime.canonical_state_root(),
+                _ => unreachable!(),
+            }.unwrap();
+            let mut fixture: serde_json::Value =
+                serde_json::from_slice(&runtime.checkpoint_bytes().unwrap()).unwrap();
+            fixture["version"] = serde_json::json!(version);
+            fixture["state_root"] = serde_json::json!(root);
+            assert!(fixture["ground_drops"]["301"]["drop"]["loot"]["exactItem"]
+                .get("serverState").is_none());
+            if version == 1 {
+                let object = fixture.as_object_mut().unwrap();
+                object.remove("next_ground_drop_generation");
+                object.remove("next_ground_drop_claim_id");
+                let stored = fixture["ground_drops"]["301"].as_object_mut().unwrap();
+                stored.remove("drop_generation"); stored.remove("payload_digest");
+            }
+            let bytes = serde_json::to_vec(&fixture).unwrap();
+            let restored = ZoneRuntime::restore_checkpoint(&bytes)
+                .unwrap_or_else(|error| panic!("old exact v{version} checkpoint: {error}"));
+            assert_eq!(restored.ground_drops[&301].drop, drop);
+            assert_eq!(restored.ground_drops[&301].payload_digest, old_digest);
+            fixture["ground_drops"]["301"]["drop"]["loot"]["exactItem"]["serverState"] =
+                serde_json::json!({"version": 1, "state": {"attack": 919}});
+            let error = ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&fixture).unwrap())
+                .expect_err("forward private state is authenticated even for an old checkpoint");
+            assert!(error.contains("state root mismatch"), "v{version}: {error}");
+        }
     }
 
     #[test]

@@ -6517,6 +6517,20 @@ pub struct GroundDropItemPayload {
     /// False means the payload still needs an authoritative UID before commit.
     #[serde(default)]
     pub uid_assigned: bool,
+    /// Private complete gameplay custody. Client views remove the enclosing
+    /// exactItem; absence retains the pre-custody checkpoint/digest encoding.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub server_state: Option<GroundDropItemCustody>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct GroundDropItemCustody {
+    pub version: u8,
+    /// Runtime validates the exact known ItemState shape before using this.
+    /// Keeping Value prevents an older serde reader from silently discarding
+    /// a future server-only field before its version/shape can be checked.
+    pub state: Value,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
