@@ -7,6 +7,8 @@ use crate::{
 pub mod delivery;
 #[path = "download.rs"]
 mod download;
+#[path = "installed_scan.rs"]
+mod installed_scan;
 use anyhow::{ensure, Context, Result};
 pub use download::DownloadProgress;
 use std::{
@@ -1069,18 +1071,14 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
     let mut scan = LocalPhase::new(root, status, "checking-installed", new.file_count, (20, 30));
     let old_files = old.map();
     let new_files = new.map();
-    let mut pending = vec![];
     let mut removed = vec![];
     // Hash on update, not on each launch. Missing/corrupted assets are repaired.
-    for (index, entry) in new.files.iter().enumerate() {
-        if index % 256 == 0 {
-            ensure!(!status.cancelled(), "update cancelled");
-        }
-        if !safe::matches(&safe::target(&root.join("game"), &entry.path)?, entry)? {
-            pending.push(entry.clone());
-        }
-        scan.advance(index + 1);
-    }
+    let pending = installed_scan::scan(&root.join("game"), &new.files, status, |completed| {
+        scan.advance(completed);
+    })?
+    .into_iter()
+    .map(|index| new.files[index].clone())
+    .collect::<Vec<_>>();
     scan.finish();
     drop(scan);
     for (path, old_entry) in &old_files {
