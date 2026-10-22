@@ -47,11 +47,39 @@ impl Fixture {
     fn command(&mut self,id:&str,operation:Op)->StoneWorkshopCommand {
         StoneWorkshopCommand {request_id:id.into(),expected_inventory_revision:self.view().inventory_revision,operation}
     }
-    fn seal(&mut self) -> u64 {
-        let uid=self.session.app.world().resource::<InventoryResource>().inventory_items[0].unique_id;
-        let c=self.command("seal",Op::Seal{uid});
-        self.session.execute_stone_workshop(c).unwrap();
-        self.view().stones[0].serial.parse().unwrap()
+    // Historical fixture only: recreate an already-issued v1 MiningWorkshop
+    // record through the authority API. No production Seal bypass exists.
+    fn legacy_sealed_fixture(&mut self) -> u64 {
+        let (o, active) = owner(self.session.app.world()).unwrap();
+        let mut inventory = self.session.app.world().resource::<InventoryResource>().clone();
+        let row = &mut inventory.inventory_items[0];
+        let wire = try_user_item_from_item_state(row).unwrap();
+        let grade = source_grade(wire.item_index).unwrap();
+        let registry = self.config.account_store.lock().unwrap().sealed_stones.clone();
+        let serial = registry.next_serial().unwrap();
+        let command = StoneWorkshopCommand { request_id: "seal".into(),
+            expected_inventory_revision: active.revision, operation: Op::Seal { uid: row.unique_id } };
+        let mint = StoneMintRequest { owner: o.clone(), request_id: command.request_id.clone(), serial,
+            carrier_uid: row.unique_id, source_template_id: wire.item_index,
+            raw_template_id: raw_index(grade), raw_weight: 4, grade, binding: binding(row).unwrap(),
+            source: StoneSource { kind: StoneSourceKind::MiningWorkshop, source_version: "v1".into(),
+                event_id: request_event(&o, &command).unwrap() } };
+        let StoneMintPreparation::Change(plan) = registry.prepare_mint(&StoneCatalog::v1(), &mint, 1234).unwrap()
+            else { panic!("historical fixture must be fresh") };
+        *row = reclassify(row, mint.raw_template_id, Some(serial)).unwrap();
+        let mut save = active.clone();
+        save.inventory_items_json = encode_state_vec(&inventory.inventory_items);
+        save.revision += 1;
+        validate_character_save_record(&save).unwrap();
+        self.config.commit_account_store_transaction_with_stones(&[o.account_id.clone()], &[serial], |store| {
+            assert_eq!(store.sealed_stones, registry);
+            store.sealed_stones = plan.next_registry;
+            store.accounts.get_mut(&o.account_id).unwrap().saves.insert(save.character.index, save.clone());
+            Ok(())
+        }).unwrap();
+        self.session.restore_active_character_checkpoint(&save).unwrap();
+        self.session.interact(self.npc);
+        serial
     }
     fn action(&mut self,id:&str,appraise:bool) -> StoneWorkshopCommand {
         let stone=self.view().stones[0].clone();
@@ -74,7 +102,10 @@ impl SimulationSession {
     // fixture without adding any production constructor or global opt-in.
     #[cfg(test)]
     pub(crate) fn stone_world_runtime_test_fixture() -> (Self, PathBuf) {
-        let fixture = Fixture::new("world-command", 824);
+        let mut fixture = mined_stone_tests::mined_fixture("world-command");
+        let (_, swing) = mined_stone_tests::raw_swing(&fixture, RAW_STONE_ROUGH);
+        fixture.session.apply_shared_mining_swing(&swing).unwrap();
+        mined_stone_tests::return_to_workshop(&mut fixture);
         (fixture.session, fixture.path)
     }
 }
@@ -138,8 +169,9 @@ fn assert_final_stone_page(session: &SimulationSession, packets: &[ServerPacket]
     assert_eq!(pages, vec![&expected]);
 }
 
-fn open_public_ore_page(f: &mut Fixture) {
-    for prefix in ["@stone:v1:home", "@stone:v1:list:ore:", "@stone:v1:ore:"] {
+fn open_public_stone_page(f: &mut Fixture) {
+    f.legacy_sealed_fixture();
+    for prefix in ["@stone:v1:home", "@stone:v1:list:stone:", "@stone:v1:stone:"] {
         let target = displayed_link(&f.session, prefix);
         let packets = f.session.select_npc_dialog_target(&target);
         assert_final_stone_page(&f.session, &packets);
@@ -148,14 +180,13 @@ fn open_public_ore_page(f: &mut Fixture) {
 }
 
 #[test]
-fn stone_public_file_source_accepts_first_seal_appraise_cut_quotes_after_final_revision() {
+fn stone_public_file_source_accepts_first_legacy_appraise_cut_quotes_after_final_revision() {
     let mut f = Fixture::new("public-source", 824);
-    open_public_ore_page(&mut f);
+    open_public_stone_page(&mut f);
     let initial = f.live();
     let actor = initial.npc_purchase_journal.as_ref().unwrap().actor;
     let mut old_seal = None;
     for (index, prefix, fee) in [
-        (0, "@stone:v1:seal:", 0),
         (1, "@stone:v1:appraise:", 100),
         (2, "@stone:v1:cut:", 1500),
     ] {
@@ -165,7 +196,7 @@ fn stone_public_file_source_accepts_first_seal_appraise_cut_quotes_after_final_r
             target.rsplit(':').nth(1).unwrap().parse::<u64>(),
             Ok(before.revision)
         );
-        if index == 0 {
+        if index == 1 {
             old_seal = Some(target.clone());
         }
         // The exact first displayed quote must work. No refresh, retry or
@@ -234,8 +265,8 @@ fn stone_public_file_source_accepts_first_seal_appraise_cut_quotes_after_final_r
 #[test]
 fn stone_public_known_file_failure_requotes_without_debit_and_first_retry_succeeds() {
     let mut f = Fixture::new("public-known-failure", 824);
-    open_public_ore_page(&mut f);
-    let target = displayed_link(&f.session, "@stone:v1:seal:");
+    open_public_stone_page(&mut f);
+    let target = displayed_link(&f.session, "@stone:v1:appraise:");
     let before = f.live();
     let bytes = fs::read(&f.path).unwrap();
     f.config
@@ -251,11 +282,11 @@ fn stone_public_known_file_failure_requotes_without_debit_and_first_retry_succee
         ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
     )));
     assert_final_stone_page(&f.session, &packets);
-    let retry = displayed_link(&f.session, "@stone:v1:seal:");
+    let retry = displayed_link(&f.session, "@stone:v1:appraise:");
     assert_eq!(retry, target);
     let packets = f.session.select_npc_dialog_target(&retry);
     assert_eq!(f.live().revision, before.revision + 2);
-    assert_eq!(f.live().gold, before.gold);
+    assert_eq!(f.live().gold, before.gold - 100);
     assert_eq!(f.view().stones.len(), 1);
     assert_final_stone_page(&f.session, &packets);
     f.assert_checkpoint();
@@ -264,8 +295,8 @@ fn stone_public_known_file_failure_requotes_without_debit_and_first_retry_succee
 #[test]
 fn stone_public_unknown_file_commit_never_publishes_new_quotes_or_retries() {
     let mut f = Fixture::new("public-unknown", 824);
-    open_public_ore_page(&mut f);
-    let target = displayed_link(&f.session, "@stone:v1:seal:");
+    open_public_stone_page(&mut f);
+    let target = displayed_link(&f.session, "@stone:v1:appraise:");
     let before = f.live();
     f.config.inject_account_store_transaction_fault(
         AccountStoreTransactionFault::AfterFileRenameBeforeDirectorySync,
@@ -303,8 +334,9 @@ fn stone_public_unknown_file_commit_never_publishes_new_quotes_or_retries() {
     let store = f.disk();
     let saved = &store.accounts["demo"].saves[&0];
     assert_eq!(saved.revision, before.revision + 1);
-    assert_eq!(saved.gold, before.gold);
-    assert_ne!(saved.inventory_items_json, before.inventory_items_json);
+    assert_eq!(saved.gold, before.gold - 100);
+    assert_eq!(saved.inventory_items_json, before.inventory_items_json);
+    assert_eq!(store.sealed_stones.records().next().unwrap().lifecycle(), StoneLifecycle::Appraised);
     let mut late = Vec::new();
     super::super::atelier_npc::publish_pending(&mut f.session, &mut late);
     assert!(late.is_empty());
@@ -324,8 +356,10 @@ fn stone_public_unknown_file_commit_never_publishes_new_quotes_or_retries() {
 #[test]
 fn stone_outer_source_failure_discards_the_nested_page_after_one_economic_commit() {
     let mut f = Fixture::new("public-outer-failure", 824);
-    open_public_ore_page(&mut f);
-    let target = displayed_link(&f.session, "@stone:v1:seal:");
+    open_public_stone_page(&mut f);
+    let target = displayed_link(&f.session, "@stone:v1:appraise:");
+    let previous_targets: Vec<_> = f.session.app.world().resource::<NpcStateResource>()
+        .active_npc_dialog.as_ref().unwrap().links.iter().map(|link| link.target.clone()).collect();
     let before_revision = f.live().revision;
     let before = f.session.begin_npc_dialog_source_command(false).unwrap();
     assert!(before.is_some());
@@ -335,7 +369,7 @@ fn stone_outer_source_failure_discards_the_nested_page_after_one_economic_commit
         .iter()
         .any(|packet| matches!(packet, ServerPacket::NPCResponse { .. })));
     assert_eq!(f.live().revision, before_revision + 1);
-    assert!(f
+    assert_eq!(f
         .session
         .app
         .world()
@@ -345,7 +379,7 @@ fn stone_outer_source_failure_discards_the_nested_page_after_one_economic_commit
         .unwrap()
         .links
         .iter()
-        .all(|link| !link.target.starts_with("@stone:v1:appraise:")));
+        .map(|link| link.target.clone()).collect::<Vec<_>>(), previous_targets);
     let committed = fs::read(&f.path).unwrap();
     f.config
         .inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforeFileRename);
@@ -416,11 +450,12 @@ fn stone_pending_page_cannot_reopen_after_exit_replacement_or_leaving_npc_range(
 }
 
 #[test]
-fn stone_real_npc_dialog_drives_seal_appraise_cut_and_rejects_stale_click() {
+fn stone_real_npc_dialog_drives_legacy_appraise_cut_and_rejects_stale_click() {
     let mut f=Fixture::new("npc",824);
+    f.legacy_sealed_fixture();
     let next=|s:&SimulationSession,prefix:&str|s.app.world().resource::<NpcStateResource>().active_npc_dialog
         .as_ref().unwrap().links.iter().find(|l|l.target.starts_with(prefix)).unwrap().target.clone();
-    for prefix in ["@stone:v1:home","@stone:v1:list:ore:","@stone:v1:ore:","@stone:v1:seal:"] {
+    for prefix in ["@stone:v1:home","@stone:v1:list:stone:","@stone:v1:stone:"] {
         let t=next(&f.session,prefix);f.session.select_npc_dialog_target_impl(&t);
     }
     assert_eq!(f.view().stones.len(),1);
@@ -440,7 +475,7 @@ fn stone_real_npc_dialog_drives_seal_appraise_cut_and_rejects_stale_click() {
 fn stone_three_grades_pay_frozen_fees_and_keep_real_uid_binding_and_slot() {
     for (ore,grade) in [(824,StoneGrade::Rough),(826,StoneGrade::Fine),(827,StoneGrade::Precious)] {
         let mut f=Fixture::new("grades",ore);
-        let serial=f.seal();let before=f.view().stones[0].clone();assert_eq!(before.grade,grade);
+        let serial=f.legacy_sealed_fixture();let before=f.view().stones[0].clone();assert_eq!(before.grade,grade);
         assert_eq!(before.possibilities.iter().map(|p|u32::from(p.basis_points)).sum::<u32>(),10_000);
         let expected=f.disk().sealed_stones.record(serial).unwrap().private_output().clone();
         let appraisal=f.action("appraise",true);f.session.execute_stone_workshop(appraisal).unwrap();
@@ -456,7 +491,7 @@ fn stone_three_grades_pay_frozen_fees_and_keep_real_uid_binding_and_slot() {
 }
 #[test]
 fn stone_exact_cut_replay_after_inventory_and_gold_change_never_delivers_twice() {
-    let mut f=Fixture::new("replay",826);f.seal();let cut=f.action("cut",false);
+    let mut f=Fixture::new("replay",826);f.legacy_sealed_fixture();let cut=f.action("cut",false);
     f.session.execute_stone_workshop(cut.clone()).unwrap();
     f.session.app.world_mut().resource_mut::<InventoryResource>().inventory_items.clear();
     f.session.app.world_mut().resource_mut::<PlayerRuntimeResource>().gold=0;
@@ -467,7 +502,7 @@ fn stone_exact_cut_replay_after_inventory_and_gold_change_never_delivers_twice()
 }
 #[test]
 fn stone_changed_operation_with_original_request_id_is_rejected() {
-    let mut f=Fixture::new("conflict",824);f.seal();let a=f.action("original",true);
+    let mut f=Fixture::new("conflict",824);f.legacy_sealed_fixture();let a=f.action("original",true);
     f.session.execute_stone_workshop(a.clone()).unwrap();let before=fs::read(&f.path).unwrap();
     let mut changed=f.action("original",false);changed.expected_inventory_revision=a.expected_inventory_revision;
     assert_eq!(f.session.execute_stone_workshop(changed).unwrap_err(),Error::Rejected(StoneError::RequestConflict));
@@ -475,7 +510,7 @@ fn stone_changed_operation_with_original_request_id_is_rejected() {
 }
 #[test]
 fn stone_full_bag_cut_replaces_source_without_requiring_a_free_slot() {
-    let mut f=Fixture::new("full",824);f.seal();
+    let mut f=Fixture::new("full",824);f.legacy_sealed_fixture();
     let filler=mir2_game_data::crystal_item_manifest().items.into_iter().find(|t|t.weight==0 && t.slots==0 && t.stack_size==1).unwrap();
     {
         let mut inv=f.session.app.world_mut().resource_mut::<InventoryResource>();inv.inventory_capacity=46;
@@ -489,7 +524,7 @@ fn stone_full_bag_cut_replaces_source_without_requiring_a_free_slot() {
 }
 #[test]
 fn stone_insufficient_gold_keeps_same_sealed_instance_and_registry() {
-    let mut f=Fixture::new("gold",827);f.seal();
+    let mut f=Fixture::new("gold",827);f.legacy_sealed_fixture();
     f.session.app.world_mut().resource_mut::<PlayerRuntimeResource>().gold=0;f.session.save_active_character().unwrap();
     let before=fs::read(&f.path).unwrap();let a=f.action("no-gold",false);
     assert_eq!(f.session.execute_stone_workshop(a).unwrap_err(),Error::Rejected(StoneError::InsufficientGold));
@@ -497,7 +532,7 @@ fn stone_insufficient_gold_keeps_same_sealed_instance_and_registry() {
 }
 #[test]
 fn stone_locked_carrier_cannot_cut_and_raw_stone_cannot_lose_reference_on_ground() {
-    let mut f=Fixture::new("custody",824);f.seal();let cut=f.action("locked",false);let before=fs::read(&f.path).unwrap();
+    let mut f=Fixture::new("custody",824);f.legacy_sealed_fixture();let cut=f.action("locked",false);let before=fs::read(&f.path).unwrap();
     assert!(f.session.shared_inventory_item_drop(120_000_001,1,false).is_none());
     let item=f.session.app.world().resource::<InventoryResource>().inventory_items[0].clone();
     f.session.app.world_mut().resource_mut::<InventoryResource>().reserved_item_unique_ids.insert(item.unique_id);
@@ -506,7 +541,7 @@ fn stone_locked_carrier_cannot_cut_and_raw_stone_cannot_lose_reference_on_ground
 }
 #[test]
 fn stone_known_file_failure_preserves_live_money_and_allows_original_retry() {
-    let mut f=Fixture::new("failure",826);f.seal();let cut=f.action("persist-cut",false);
+    let mut f=Fixture::new("failure",826);f.legacy_sealed_fixture();let cut=f.action("persist-cut",false);
     let before=fs::read(&f.path).unwrap();let live=f.live();
     f.config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforeFileRename);
     assert_eq!(f.session.execute_stone_workshop(cut.clone()).unwrap_err(),Error::AuthorityRejected);
@@ -516,7 +551,7 @@ fn stone_known_file_failure_preserves_live_money_and_allows_original_retry() {
 }
 #[test]
 fn stone_unknown_file_commit_preserves_durable_cut_and_fences_all_followup_writes() {
-    let mut f=Fixture::new("unknown",826);let serial=f.seal();let cut=f.action("unknown-cut",false);let live=f.live();
+    let mut f=Fixture::new("unknown",826);let serial=f.legacy_sealed_fixture();let cut=f.action("unknown-cut",false);let live=f.live();
     f.config.inject_account_store_transaction_fault(AccountStoreTransactionFault::AfterFileRenameBeforeDirectorySync);
     assert_eq!(f.session.execute_stone_workshop(cut.clone()).unwrap_err(),Error::OutcomeUnknown);
     assert!(f.config.ensure_account_store_writable().is_err());assert!(f.session.save_active_character().is_err());
@@ -531,7 +566,7 @@ fn stone_unknown_file_commit_preserves_durable_cut_and_fences_all_followup_write
 }
 #[test]
 fn stone_save_reload_keeps_original_secret_and_physical_reference() {
-    let mut f=Fixture::new("reload",827);let serial=f.seal();let frozen=f.disk().sealed_stones.record(serial).unwrap().clone();
+    let mut f=Fixture::new("reload",827);let serial=f.legacy_sealed_fixture();let frozen=f.disk().sealed_stones.record(serial).unwrap().clone();
     let path=f.path.clone();let npc=f.npc;
     // Retire every old authority handle. The next config must load the durable
     // file rather than sharing the original in-memory account store.
@@ -578,7 +613,7 @@ fn stone_save_reload_keeps_original_secret_and_physical_reference() {
 #[test]
 fn stone_ordinary_account_scope_and_restore_cannot_rewind_secret_or_cut_tombstone() {
     let mut f=Fixture::new("restore",824);let old=f.path.with_file_name("before.json");f.config.backup_account_store(&old).unwrap();
-    f.seal();let cut=f.action("cut",false);f.session.execute_stone_workshop(cut).unwrap();let committed=fs::read(&f.path).unwrap();
+    f.legacy_sealed_fixture();let cut=f.action("cut",false);f.session.execute_stone_workshop(cut).unwrap();let committed=fs::read(&f.path).unwrap();
     assert!(f.config.commit_account_store_transaction(&["demo".into()],|s|{s.sealed_stones=StoneRegistry::default();Ok(())}).is_err());
     assert!(f.config.restore_account_store_from_backup(&old).is_err());assert_eq!(fs::read(&f.path).unwrap(),committed);
 }
@@ -605,3 +640,6 @@ fn stone_material_outputs_and_raw_templates_are_real_catalog_rows() {
         assert_eq!(t.stack_size,1);assert_eq!(t.price,0);assert!(!t.can_mine);
     }
 }
+
+#[path="mined_stone_tests.rs"]
+mod mined_stone_tests;

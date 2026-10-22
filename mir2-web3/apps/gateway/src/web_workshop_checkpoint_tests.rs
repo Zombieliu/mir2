@@ -1,8 +1,12 @@
-// Real Axum/TCP WebSocket + Shared Zone + File Source. Controlled initial ore
-// fixtures do not claim natural acquisition or add a production grant ingress.
+// Real Axum/TCP WebSocket + Shared Zone + File Source. Stone setup uses a
+// controlled PickAxe/map wall and genuine Zone mining capability, never a raw
+// carrier or registry grant. Atelier retains its controlled initial copper.
 mod workshop_checkpoint_websocket_tests {
     use super::*;
-    use mir2_simulation::{AccountStoreTransactionFault, CharacterSaveRecord, SimulationSession};
+    use mir2_simulation::{
+        AccountStoreTransactionFault, CharacterSaveRecord, SimulationSession, ZoneBounds,
+        ZoneCollision, ZoneCommand, ZoneKey, ZoneRuntime,
+    };
     use std::{ffi::OsString, fs, path::PathBuf};
 
     struct Environment(Vec<(&'static str, Option<OsString>)>);
@@ -149,7 +153,8 @@ mod workshop_checkpoint_websocket_tests {
         {
             // Only initial isolated Source fixture preparation. All displayed
             // NPC navigation and economic mutations below use ordinary JSON.
-            let ore = mir2_game_data::crystal_item_by_index(824).unwrap();
+            let ore =
+                mir2_game_data::crystal_item_by_index(if atelier { 824 } else { 836 }).unwrap();
             let mut store = config.account_store.lock().unwrap();
             let account = store.accounts.get_mut("WorkshopSocket").unwrap();
             account
@@ -168,17 +173,155 @@ mod workshop_checkpoint_websocket_tests {
             } else {
                 Point { x: 302, y: 222 }
             };
-            save.inventory_items_json = (0..3).map(|slot| json!({
-                "key":"crystal-item-824","name":"CopperOre","icon":ore.image,"slot":slot,
-                "unique_id":9000001u64+slot,"container":"bag1","quantity":1,"description":"Source ore fixture",
-                "durability_current":3000,"durability_max":ore.durability,"weight":ore.weight,"equip_slot":null,
+            save.inventory_items_json = (0..if atelier { 3 } else { 1 }).map(|slot| json!({
+                "key":format!("crystal-item-{}", if atelier { 824 } else { 836 }),"name":if atelier { "CopperOre" } else { ore.name.as_str() },"icon":ore.image,"slot":slot,
+                "unique_id":9000001u64+slot,"container":"bag1","quantity":1,"description":if atelier { "Source ore fixture" } else { "Controlled mining PickAxe fixture" },
+                "durability_current":if atelier { 3000 } else { ore.durability },"durability_max":ore.durability,"weight":ore.weight,"equip_slot":if atelier { None::<&str> } else { Some("weapon") },
                 "attack":0,"defence":0,"heal_hp":0,"heal_mp":0,
-                "user_item_metadata":{"item_index":824}
+                "user_item_metadata":{"item_index":if atelier { 824 } else { 836 }}
             }).to_string()).collect();
             save.belt_items_json.clear();
         }
         config.save_account_store().unwrap();
+        if !atelier {
+            prepare_mined_raw(config, index);
+        }
         index
+    }
+
+    fn prepare_mined_raw(config: &SimulationConfig, index: i32) {
+        let mut source = SimulationSession::new(config.clone());
+        source
+            .try_handle_packet(ClientPacket::Login {
+                account_id: "WorkshopSocket".into(),
+                password: "WorkshopPass123".into(),
+            })
+            .unwrap();
+        source
+            .try_handle_packet(ClientPacket::StartGame {
+                character_index: index,
+            })
+            .unwrap();
+        let equipped = source
+            .try_handle_packet(ClientPacket::EquipItem {
+                grid: mir2_protocol::MirGridType::Inventory,
+                unique_id: 9_000_001,
+                to: 0,
+            })
+            .unwrap();
+        assert!(equipped
+            .iter()
+            .any(|p| matches!(p, ServerPacket::EquipItem { success: true, .. })));
+        let mut mining = source.active_character_checkpoint().unwrap();
+        mining.map_file_name = "D401".into();
+        mining.map_title = "DeadMineEntrance".into();
+        mining.position = Point { x: 24, y: 181 };
+        mining.direction = mir2_protocol::MirDirection::Up;
+        source.restore_active_character_checkpoint(&mining).unwrap();
+        source.save_active_character().unwrap();
+        source.begin_stone_workshops().unwrap();
+        let join = source
+            .active_zone_join_snapshot("workshop-source-mining")
+            .unwrap();
+        let sid = join.session_id.clone();
+        let mut zone = ZoneRuntime::new_with_collision(
+            ZoneKey::for_map("D401"),
+            ZoneCollision::unbounded()
+                .with_bounds(ZoneBounds::new(0, 511, 0, 511))
+                .with_blocked_cells([Point { x: 24, y: 180 }]),
+        );
+        zone.handle(ZoneCommand::Join(join));
+        // Join deliberately does not authorize combat/harvest. Match the
+        // Gateway's authoritative_zone_combat_commands using the live personal
+        // snapshot; missing admission fields must fail rather than default.
+        let snapshot = source.world_snapshot();
+        let player = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer)
+            .unwrap();
+        let attack_blocked = snapshot.active_buffs.iter().any(|buff| {
+            matches!(
+                buff.key.as_str(),
+                "crystal-paralysis" | "crystal-dazed" | "crystal-frozen" | "crystal-blindness"
+            )
+        });
+        zone.handle(ZoneCommand::sync_player_combat_state(
+            sid.clone(),
+            player.class.unwrap(),
+            player.has_class_weapon.unwrap(),
+            player.riding_mount.unwrap(),
+            player.can_mount_attack.unwrap(),
+            player.dead || snapshot.player_hp.unwrap() <= 0,
+            attack_blocked,
+            player.fishing.unwrap(),
+        ));
+        zone.handle(ZoneCommand::UpdatePlayerCombatStats {
+            session_id: sid.clone(),
+            stats: source.zone_player_combat_stats(),
+        });
+        let mut now = (SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as u64)
+            .saturating_add(10_000);
+        assert!(
+            zone.player_harvest_admitted(&sid, now),
+            "trusted source must admit mining"
+        );
+        let tool = source.shared_mining_tool().unwrap();
+        let mut refilled = false;
+        for _ in 0..5 {
+            let swing = zone
+                .prepare_mining_swing(&sid, mir2_protocol::MirDirection::Up, &tool, now)
+                .unwrap();
+            assert_eq!(swing.tool_damage(), 0);
+            assert!(source.apply_shared_mining_swing(&swing).unwrap().is_empty());
+            assert!(zone.commit_mining_swing(&swing).is_some());
+            let state: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
+            let spot = &state["mining"]["spots"]["24,180"];
+            if spot["stones_left"].as_u64().unwrap() > 0 {
+                refilled = true;
+                break;
+            }
+            now = spot["regen_at_ms"].as_u64().unwrap() + 1;
+        }
+        assert!(refilled, "bounded source mining refill");
+        let mut mined = false;
+        for _ in 0..8192 {
+            now = now.saturating_add(tool.attack_delay_ms.max(550));
+            let swing = zone
+                .prepare_mining_swing(&sid, mir2_protocol::MirDirection::Up, &tool, now)
+                .unwrap();
+            if swing.raw_stone_template_id() != Some(50001) {
+                continue;
+            }
+            let packets = source.apply_shared_mining_swing(&swing).unwrap();
+            assert!(zone.commit_mining_swing(&swing).is_some());
+            assert_eq!(
+                packets
+                    .iter()
+                    .filter(|p| matches!(p,
+                ServerPacket::GainedItem { item } if item.item_index == 50001))
+                    .count(),
+                1
+            );
+            mined = true;
+            break;
+        }
+        assert!(
+            mined,
+            "bounded natural source rates must produce rough raw stone"
+        );
+        let mut workshop = source.active_character_checkpoint().unwrap();
+        workshop.map_file_name = "0".into();
+        workshop.map_title = "BichonProvince".into();
+        workshop.position = Point { x: 302, y: 222 };
+        source
+            .restore_active_character_checkpoint(&workshop)
+            .unwrap();
+        source.save_active_character().unwrap();
+        source.try_handle_packet(ClientPacket::LogOut).unwrap();
     }
 
     fn expected_page(dialog: &Value, action: &str) -> bool {
@@ -193,10 +336,9 @@ mod workshop_checkpoint_websocket_tests {
             })
         };
         match action {
-            "@stone:v1:home" | "@stone:v1:cut:" => has("@stone:v1:list:ore:"),
-            "@stone:v1:list:ore:" => has("@stone:v1:ore:"),
-            "@stone:v1:ore:" => has("@stone:v1:seal:"),
-            "@stone:v1:seal:" => has("@stone:v1:appraise:"),
+            "@stone:v1:home" | "@stone:v1:cut:" => has("@stone:v1:list:stone:"),
+            "@stone:v1:list:stone:" => has("@stone:v1:stone:"),
+            "@stone:v1:stone:" => has("@stone:v1:appraise:"),
             "@stone:v1:appraise:" => links.iter().any(|link| {
                 link["target"].as_str().is_some_and(|s| {
                     s.starts_with("@stone:v1:cut:") && s.split(':').nth(4) == Some("1")
@@ -396,9 +538,9 @@ mod workshop_checkpoint_websocket_tests {
             );
             for l in dialog["links"].as_array().unwrap() {
                 let target = l["target"].as_str().unwrap();
+                assert!(!target.starts_with("@stone:v1:seal:"));
                 page.push(format!("<{}/{}>", l["text"].as_str().unwrap(), target));
                 if [
-                    "@stone:v1:seal:",
                     "@stone:v1:appraise:",
                     "@stone:v1:cut:",
                     "@atelier:v1:craft:",
@@ -441,7 +583,7 @@ mod workshop_checkpoint_websocket_tests {
                 .iter()
                 .find_map(|link| {
                     let target = link["target"].as_str()?;
-                    ["@stone:v1:seal:", "@stone:v1:appraise:", "@stone:v1:cut:"]
+                    ["@stone:v1:appraise:", "@stone:v1:cut:"]
                         .iter()
                         .any(|p| target.starts_with(p))
                         .then(|| target.rsplit(':').nth(1).unwrap().parse::<u64>().unwrap())
@@ -496,15 +638,23 @@ mod workshop_checkpoint_websocket_tests {
         let _lock = ENV_LOCK.get_or_init(|| Mutex::new(())).lock().unwrap();
         let _env = Environment::enter(false);
         let mut f = Fixture::new(false, false).await;
+        let raw = f
+            .saved()
+            .inventory_items_json
+            .iter()
+            .map(|row| serde_json::from_str::<Value>(row).unwrap())
+            .find(|item| item["stone_serial"].as_u64().is_some())
+            .unwrap();
+        let uid = raw["unique_id"].as_u64().unwrap();
         f.interact(19).await;
-        for p in ["@stone:v1:home", "@stone:v1:list:ore:", "@stone:v1:ore:"] {
+        for p in [
+            "@stone:v1:home",
+            "@stone:v1:list:stone:",
+            "@stone:v1:stone:",
+        ] {
             f.choose(p).await;
         }
-        for (p, fee) in [
-            ("@stone:v1:seal:", 0),
-            ("@stone:v1:appraise:", 100),
-            ("@stone:v1:cut:", 1500),
-        ] {
+        for (p, fee) in [("@stone:v1:appraise:", 100), ("@stone:v1:cut:", 1500)] {
             let before = f.saved();
             let observed = f.choose(p).await;
             assert_eq!(
@@ -518,9 +668,9 @@ mod workshop_checkpoint_websocket_tests {
                 .inventory_items_json
                 .iter()
                 .map(|row| serde_json::from_str::<Value>(row).unwrap())
-                .find(|item| item["unique_id"].as_u64() == Some(9000001))
+                .find(|item| item["unique_id"].as_u64() == Some(uid))
                 .unwrap();
-            assert_eq!(carrier["slot"], 0);
+            assert_eq!(carrier["slot"], raw["slot"]);
             assert_eq!(carrier["quantity"], 1);
             if p == "@stone:v1:cut:" {
                 assert!(carrier["stone_serial"].is_null());
@@ -571,11 +721,13 @@ mod workshop_checkpoint_websocket_tests {
         let _env = Environment::enter(true);
         let mut f = Fixture::new(false, true).await;
         f.interact(19).await;
-        for p in ["@stone:v1:home", "@stone:v1:list:ore:", "@stone:v1:ore:"] {
+        for p in [
+            "@stone:v1:home",
+            "@stone:v1:list:stone:",
+            "@stone:v1:stone:",
+        ] {
             f.choose(p).await;
         }
-        f.idle_checkpoint().await;
-        f.choose("@stone:v1:seal:").await;
         f.idle_checkpoint().await;
         f.choose("@stone:v1:appraise:").await;
         f.idle_checkpoint().await;
@@ -595,10 +747,10 @@ mod workshop_checkpoint_websocket_tests {
             let mut f = Fixture::new(false, false).await;
             f.interact(19).await;
             f.choose("@stone:v1:home").await;
-            f.choose("@stone:v1:list:ore:").await;
+            f.choose("@stone:v1:list:stone:").await;
             let before = f.saved();
             let bytes = fs::read(&f.path).unwrap();
-            let target = f.target("@stone:v1:ore:");
+            let target = f.target("@stone:v1:stone:");
             f.config.inject_account_store_transaction_fault(fault);
             send_test_websocket_json(
                 &mut f.socket,

@@ -91,9 +91,9 @@ fn title(language: LanguageCode) -> &'static str {
 }
 fn grade_name(language: LanguageCode, grade: StoneGrade) -> &'static str {
     match grade {
-        StoneGrade::Rough => text(language, "Rough raw stone", "粗糙原石", "Pedra bruta comum", "Piedra bruta común"),
-        StoneGrade::Fine => text(language, "Fine raw stone", "精致原石", "Pedra bruta refinada", "Piedra bruta fina"),
-        StoneGrade::Precious => text(language, "Precious raw stone", "珍贵原石", "Pedra bruta preciosa", "Piedra bruta preciosa"),
+        StoneGrade::Rough => text(language, "Unknown raw stone (rough)", "未知原石（粗糙）", "Pedra bruta desconhecida (comum)", "Piedra bruta desconocida (común)"),
+        StoneGrade::Fine => text(language, "Unknown raw stone (fine)", "未知原石（精致）", "Pedra bruta desconhecida (refinada)", "Piedra bruta desconocida (fina)"),
+        StoneGrade::Precious => text(language, "Unknown raw stone (precious)", "未知原石（珍贵）", "Pedra bruta desconhecida (preciosa)", "Piedra bruta desconocida (preciosa)"),
     }
 }
 fn material_name(language: LanguageCode, material: StoneMaterial) -> &'static str {
@@ -104,14 +104,6 @@ fn material_name(language: LanguageCode, material: StoneMaterial) -> &'static st
         StoneMaterial::BraveryGem => text(language, "Bravery gem", "勇气宝石", "Gema da coragem", "Gema de valentía"),
         StoneMaterial::MagicGem => text(language, "Magic gem", "魔法宝石", "Gema mágica", "Gema mágica"),
         StoneMaterial::SoulGem => text(language, "Soul gem", "灵魂宝石", "Gema da alma", "Gema del alma"),
-    }
-}
-fn ore_name(language: LanguageCode, template: i32) -> &'static str {
-    match template {
-        824 => material_name(language, StoneMaterial::Copper),
-        826 => material_name(language, StoneMaterial::Silver),
-        827 => text(language, "Gold ore", "金矿", "Minério de ouro", "Mineral de oro"),
-        _ => text(language, "Ore", "矿石", "Minério", "Mineral"),
     }
 }
 fn gold_label(language: LanguageCode) -> &'static str {
@@ -145,6 +137,12 @@ enum Page { Home, List(Items, u64), Ore(u64), Stone(u64) }
 pub(super) struct DeferredPage(Page);
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum Target { Page(Page), Action(StoneWorkshopCommand) }
+/// Keep old target syntax readable for compatibility, but never authorize a
+/// new player conversion from an ordinary ore or an old displayed quote.
+fn retired_ore_target(target: &Target) -> bool {
+    matches!(target, Target::Page(Page::List(Items::Ore, _) | Page::Ore(_))
+        | Target::Action(StoneWorkshopCommand { operation: StoneWorkshopOperation::Seal { .. }, .. }))
+}
 fn parse_target(target: &str) -> Option<Target> {
     if target.len() > MAX_TARGET_BYTES || !target.starts_with(PREFIX) { return None; }
     let parts: Vec<_> = target.split(':').collect();
@@ -241,9 +239,9 @@ pub(super) fn decorate_dialog(world: &World, dialog: &mut ActiveNpcDialogState) 
         || dialog.title == title(current_language(world))
     { return; }
     let language = current_language(world);
-    dialog.body.push(text(language, "Seal mined ore, appraise raw stones, or cut them into materials.",
-        "可将矿石封成原石，鉴定线索或切割获得材料。", "Sele minérios, avalie pedras brutas ou corte-as para obter materiais.",
-        "Sella minerales, evalúa piedras brutas o córtalas para obtener materiales.").into());
+    dialog.body.push(text(language, "Mine unknown raw stones, then cut them here. Appraisal is optional.",
+        "挖矿可直接获得未知原石，可在此直接切割，鉴定为可选操作。", "Obtenha pedras brutas desconhecidas na mineração e corte-as aqui. A avaliação é opcional.",
+        "Extrae piedras brutas desconocidas y córtalas aquí. La evaluación es opcional.").into());
     dialog.links.push(link(title(language), HOME));
 }
 
@@ -307,9 +305,12 @@ fn add_home(dialog: &mut ActiveNpcDialogState, language: LanguageCode) {
 }
 fn possibilities_body(language: LanguageCode, stone: &PublicStone) -> Vec<String> {
     let mut body = vec![format!("{} · #{}", grade_name(language, stone.grade), stone.uid),
-        text(language, "The result was sealed when this stone was created. Cutting does not reroll it.",
-            "结果在原石生成时已封存，切割不会重新抽取。", "O resultado foi fixado ao criar a pedra. O corte não sorteia novamente.",
-            "El resultado se fijó al crear la piedra. El corte no vuelve a sortearlo.").into(),
+        text(language, "Cutting consumes the raw stone and gives you one material.",
+            "切割消耗原石，获得一件材料。", "O corte consome a pedra bruta e entrega um material.",
+            "El corte consume la piedra bruta y te entrega un material.").into(),
+        text(language, "Appraisal is optional. You can cut this stone directly.",
+            "鉴定为可选操作，也可直接切割此原石。", "A avaliação é opcional. Pode cortar esta pedra diretamente.",
+            "La evaluación es opcional. Puedes cortar esta piedra directamente.").into(),
         text(language, "Possible materials (generation probabilities):", "可能产物（生成概率）：",
             "Materiais possíveis (probabilidades na criação):", "Materiales posibles (probabilidades al crear):").into()];
     for row in &stone.possibilities {
@@ -335,56 +336,35 @@ fn render_page(active: &ActiveNpcDialogState, language: LanguageCode, view: &Sto
     let mut dialog = base_dialog(active, language);
     dialog.body.push(format!("{}: {}", gold_label(language), view.gold));
     match page {
-        Page::Home => {
-            dialog.body.push(text(language, "One Bag ore becomes one raw stone of the matching grade. No gold is charged to seal it.",
-                "一块背包矿石可封成对应档位的原石，封存不收取金币。", "Um minério da Bolsa vira uma pedra bruta da classe correspondente. Selar não custa ouro.",
-                "Un mineral de la Bolsa se convierte en una piedra de su categoría. Sellar no cuesta oro.").into());
-            dialog.body.push(text(language, "Copper → Rough · Silver → Fine · Gold → Precious", "铜矿 → 粗糙 · 银矿 → 精致 · 金矿 → 珍贵",
-                "Cobre → Comum · Prata → Refinada · Ouro → Preciosa", "Cobre → Común · Plata → Fina · Oro → Preciosa").into());
-            dialog.body.push(text(language, "Appraisal gives a broad clue. Cutting consumes the raw stone and yields its fixed material in your Bag.",
-                "鉴定仅提供粗略线索；切割消耗原石，将固定产物放入背包。", "A avaliação dá um indício geral. O corte consome a pedra e coloca o material fixado na Bolsa.",
-                "La evaluación da una pista general. El corte consume la piedra y coloca su material fijo en la Bolsa.").into());
-            dialog.links.push(link(format!("{} ({})", text(language, "Seal Bag ore", "封存背包矿石", "Selar minério da Bolsa", "Sellar mineral de la Bolsa"), view.ores.len()), format!("{PREFIX}list:ore:0")));
-            dialog.links.push(link(format!("{} ({})", text(language, "Manage Bag raw stones", "管理背包原石", "Gerir pedras brutas da Bolsa", "Gestionar piedras de la Bolsa"), view.stones.len()), format!("{PREFIX}list:stone:0")));
+        // Deferred legacy pages may survive a menu refresh. They render the
+        // new home page and can never publish a new ore/sealing action.
+        Page::Home | Page::List(Items::Ore, _) | Page::Ore(_) => {
+            dialog.body.push(text(language, "Mining can uncover unknown raw stones. Bring them here for appraisal or cutting.",
+                "挖矿时有机会获得未知原石，带到这里鉴定或切割。", "A mineração pode revelar pedras brutas desconhecidas. Traga-as aqui para avaliar ou cortar.",
+                "Al minar puedes encontrar piedras brutas desconocidas. Tráelas aquí para evaluarlas o cortarlas.").into());
+            dialog.body.push(text(language, "Appraisal is optional and gives only a broad clue. You can cut directly: cutting consumes the raw stone and gives you one material in your Bag.",
+                "鉴定为可选操作，仅提供粗略线索；也可直接切割，消耗原石并获得一件材料，放入背包。", "A avaliação é opcional e dá apenas um indício geral. Pode cortar diretamente: o corte consome a pedra bruta e entrega um material na Bolsa.",
+                "La evaluación es opcional y solo da una pista general. Puedes cortar directamente: el corte consume la piedra bruta y entrega un material en tu Bolsa.").into());
+            dialog.links.push(link(format!("{} ({})", text(language, "Bag unknown raw stones", "背包未知原石", "Pedras brutas desconhecidas na Bolsa", "Piedras brutas desconocidas en la Bolsa"), view.stones.len()), format!("{PREFIX}list:stone:0")));
         },
-        Page::List(kind, requested) => {
-            let count = match kind { Items::Ore => view.ores.len(), Items::Stone => view.stones.len() };
+        Page::List(Items::Stone, requested) => {
+            let count = view.stones.len();
             let last_page = count.saturating_sub(1) / PAGE_SIZE;
             let index = (requested as usize).min(last_page);
             let start = index * PAGE_SIZE;
             dialog.body.push(format!("{} {}/{}", text(language, "Page", "页", "Página", "Página"), index + 1, last_page + 1));
             if count == 0 {
-                dialog.body.push(text(language, "No eligible items in your Bag. Ore must be one unlocked physical item.",
-                    "背包中没有可用物品，矿石必须为未锁定的单件实体物品。", "Não há itens elegíveis na Bolsa. O minério deve ser um item físico desbloqueado.",
-                    "No hay objetos válidos en la Bolsa. El mineral debe ser un objeto físico sin bloquear.").into());
+                dialog.body.push(text(language, "No available raw stones in your Bag. Mine unknown raw stones and bring them here.",
+                    "背包中没有可用原石，请挖矿获得未知原石后带来。", "Não há pedras brutas disponíveis na Bolsa. Obtenha pedras brutas desconhecidas na mineração e traga-as aqui.",
+                    "No hay piedras brutas disponibles en tu Bolsa. Extrae piedras brutas desconocidas y tráelas aquí.").into());
             }
-            match kind {
-                Items::Ore => for ore in view.ores.iter().skip(start).take(PAGE_SIZE) {
-                    dialog.links.push(link(format!("{} → {} · #{}", ore_name(language, ore.template_id), grade_name(language, ore.grade), ore.uid),
-                        format!("{PREFIX}ore:{}:{}", ore.uid, view.inventory_revision)));
-                },
-                Items::Stone => for stone in view.stones.iter().skip(start).take(PAGE_SIZE) {
-                    dialog.links.push(link(format!("{} · #{}", grade_name(language, stone.grade), stone.uid),
-                        format!("{PREFIX}stone:{}:{}:{}", stone.serial, stone.revision, view.inventory_revision)));
-                },
+            for stone in view.stones.iter().skip(start).take(PAGE_SIZE) {
+                dialog.links.push(link(format!("{} · #{}", grade_name(language, stone.grade), stone.uid),
+                    format!("{PREFIX}stone:{}:{}:{}", stone.serial, stone.revision, view.inventory_revision)));
             }
-            let kind_name = match kind { Items::Ore => "ore", Items::Stone => "stone" };
+            let kind_name = "stone";
             if index > 0 { dialog.links.push(link(text(language, "Previous", "上一页", "Anterior", "Anterior"), format!("{PREFIX}list:{kind_name}:{}", index - 1))); }
             if index < last_page { dialog.links.push(link(text(language, "Next", "下一页", "Seguinte", "Siguiente"), format!("{PREFIX}list:{kind_name}:{}", index + 1))); }
-            add_home(&mut dialog, language);
-        },
-        Page::Ore(uid) => {
-            if let Some(ore) = view.ores.iter().find(|ore| canonical_decimal(&ore.uid, true) == Some(uid)) {
-                dialog.body.push(format!("{} ×1 · #{} → {}", ore_name(language, ore.template_id), ore.uid, grade_name(language, ore.grade)));
-                dialog.body.push(text(language, "Sealing consumes this ore and keeps its physical Bag slot. Its hidden result is fixed now.",
-                    "封存将消耗此矿石并沿用背包位置，此时固定隐藏结果。", "Selar consome este minério e mantém o espaço na Bolsa. O resultado oculto é fixado agora.",
-                    "Sellar consume este mineral y conserva su espacio en la Bolsa. El resultado oculto se fija ahora.").into());
-                dialog.body.push(text(language, "Sealing fee: 0 Gold. Review the raw stone before paying to appraise or cut it.",
-                    "封存费用：0 金币。封存后可查看原石，再决定是否付费鉴定或切割。", "Custo de selar: 0 Ouro. Consulte a pedra antes de pagar pela avaliação ou pelo corte.",
-                    "Coste de sellar: 0 Oro. Consulta la piedra antes de pagar para evaluarla o cortarla.").into());
-                dialog.links.push(link(text(language, "Seal this ore", "封存此矿石", "Selar este minério", "Sellar este mineral"), action_target(view, StoneWorkshopOperation::Seal { uid })));
-            } else { dialog.body.push(error_notice(language, &StoneWorkshopError::Rejected(StoneError::InvalidPossession)).into()); }
-            dialog.links.push(link(text(language, "Back to ore", "返回矿石列表", "Voltar aos minérios", "Volver a los minerales"), format!("{PREFIX}list:ore:0")));
             add_home(&mut dialog, language);
         },
         Page::Stone(serial) => {
@@ -490,7 +470,7 @@ fn current_command(view: &StoneWorkshopView, command: &StoneWorkshopCommand) -> 
         || command.request_id != quote_request_id(&view.owner, command.expected_inventory_revision, &command.operation)
     { return false; }
     match command.operation {
-        StoneWorkshopOperation::Seal { uid } => view.ores.iter().any(|ore| canonical_decimal(&ore.uid, true) == Some(uid)),
+        StoneWorkshopOperation::Seal { .. } => false,
         StoneWorkshopOperation::Appraise { serial, expected_stone_revision } | StoneWorkshopOperation::Cut { serial, expected_stone_revision } =>
             view.stones.iter().any(|stone| canonical_decimal(&stone.serial, true) == Some(serial)
                 && canonical_decimal(&stone.revision, false) == Some(expected_stone_revision)),
@@ -556,6 +536,13 @@ pub(super) fn handle_target(
         );
         return Some(vec![system_message(notice)]);
     };
+    if retired_ore_target(&parsed) {
+        let notice = text(language, "Ordinary ore can no longer be sealed. Mine unknown raw stones, then choose optional appraisal or direct cutting.",
+            "普通矿石不能再封存，请挖矿获得未知原石，再选择鉴定或直接切割。", "Minérios comuns não podem mais ser selados. Obtenha pedras brutas desconhecidas na mineração e escolha avaliar ou cortar diretamente.",
+            "El mineral común ya no se puede sellar. Extrae piedras brutas desconocidas y elige evaluarlas o cortarlas directamente.");
+        set_dialog(session.app.world_mut(), notice_dialog(&active, language, notice));
+        return Some(vec![system_message(notice)]);
+    }
     let view = match session.stone_workshop_view() {
         Ok(view) if valid_view(&view) => view,
         _ => {
@@ -708,17 +695,52 @@ mod tests {
     }
     #[test]
     fn eighty_physical_items_are_paginated_three_at_a_time_and_keep_original_links() {
-        let view = view(80);
+        let mut view = view(0);
+        view.stones = (1..=80_u64).map(|id| {
+            let mut stone = stone(); stone.uid = (1000 + id).to_string(); stone.serial = id.to_string(); stone
+        }).collect();
         assert!(valid_view(&view));
         let mut seen = BTreeSet::new();
         for page in 0..=MAX_PAGE {
-            let dialog = render_page(&active(), LanguageCode::English, &view, Page::List(Items::Ore, page), None);
-            let choices: Vec<_> = dialog.links.iter().filter(|link| link.target.starts_with("@stone:v1:ore:")).collect();
+            let dialog = render_page(&active(), LanguageCode::English, &view, Page::List(Items::Stone, page), None);
+            let choices: Vec<_> = dialog.links.iter().filter(|link| link.target.starts_with("@stone:v1:stone:")).collect();
             assert!(!choices.is_empty() && choices.len() <= 3);
             for link in choices { assert!(seen.insert(link.target.clone())); }
             for target in ["@Buy", "@Main", "@Exit"] { assert!(dialog.links.iter().any(|link| link.target == target)); }
         }
         assert_eq!(seen.len(), 80);
+    }
+    #[test]
+    fn raw_stone_home_and_legacy_pages_never_publish_new_ore_or_seal_links() {
+        let mut view = view(1); view.stones.push(stone());
+        let mut active = active();
+        let seal = action_target(&view, StoneWorkshopOperation::Seal { uid: 1 });
+        active.links.push(link("old ore", "@stone:v1:list:ore:0"));
+        active.links.push(link("old quote", &seal));
+        for language in [LanguageCode::English, LanguageCode::ChineseSimplified, LanguageCode::Portuguese, LanguageCode::Spanish] {
+            for page in [Page::Home, Page::List(Items::Ore, 0), Page::Ore(1)] {
+                let dialog = render_page(&active, language, &view, page, None);
+                assert_eq!(dialog.title, title(language));
+                assert_eq!(dialog.footer, base_dialog(&active, language).footer);
+                let targets: Vec<_> = dialog.links.iter().filter(|link| is_workshop_target(&link.target)).map(|link| link.target.as_str()).collect();
+                assert_eq!(targets, vec!["@stone:v1:list:stone:0"]);
+            }
+        }
+        let home = render_page(&active, LanguageCode::ChineseSimplified, &view, Page::Home, None);
+        assert!(home.body.iter().any(|line| line.contains("挖矿时有机会获得未知原石")));
+        assert!(home.body.iter().any(|line| line.contains("鉴定为可选操作") && line.contains("直接切割")));
+        assert!(home.body.iter().any(|line| line.contains("消耗原石并获得一件材料")));
+        assert!(!home.body.iter().any(|line| line.contains("封存") || line.contains("固定")));
+        // Syntax remains compatible, but the handler's explicit retirement
+        // gate and current-command fence both deny a fresh ordinary-ore seal.
+        for target in ["@stone:v1:list:ore:0", "@stone:v1:ore:1:7", seal.as_str()] {
+            assert!(retired_ore_target(&parse_target(target).unwrap()));
+        }
+        let Some(Target::Action(command)) = parse_target(&seal) else { panic!("legacy seal syntax"); };
+        assert!(!current_command(&view, &command));
+        for target in [HOME, "@stone:v1:list:stone:0"] {
+            assert!(!retired_ore_target(&parse_target(target).unwrap()));
+        }
     }
     #[test]
     fn stone_detail_shows_six_exact_probabilities_frozen_fees_and_only_coarse_clue() {
@@ -731,6 +753,10 @@ mod tests {
         assert!(dialog.body.iter().any(|line| line.contains("100") && line.contains("1500")));
         assert!(dialog.body.iter().any(|line| line.contains("Not appraised")));
         assert_eq!(dialog.links.iter().filter(|link| link.target.starts_with("@stone:v1:appraise:")).count(), 1);
+        assert_eq!(dialog.links.iter().filter(|link| link.target.starts_with("@stone:v1:cut:")).count(), 1);
+        assert!(dialog.body.iter().any(|line| line.contains("Appraisal is optional") && line.contains("cut this stone directly")));
+        assert!(dialog.body.iter().any(|line| line.contains("Cutting consumes the raw stone and gives you one material")));
+        assert!(!dialog.body.iter().any(|line| line.contains("fixed") || line.contains("reroll")));
         view.stones[0].lifecycle = StoneLifecycle::Appraised;
         view.stones[0].revision = "1".into(); view.stones[0].appraisal_clue = Some(mir2_production::StoneClue::Crystalline);
         let dialog = render_page(&active(), LanguageCode::English, &view, Page::Stone(u64::MAX), None);

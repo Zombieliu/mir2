@@ -79,6 +79,10 @@ const MONSTERS: &[(&str, &str, &str)] = &[
 ];
 
 const NAMES: &[(&str, &str)] = &[
+    // Stable catalog identities also cover raw stones in older saves.
+    ("RoughRawStone", "未知原石（粗糙）"),
+    ("FineRawStone", "未知原石（精致）"),
+    ("PreciousRawStone", "未知原石（珍贵）"),
     // Exact Assassin/Archer and five-class growth reward identities.
     ("BackStep", "后撤步"),
     ("BlackIronCrowSwords", "黑铁鸦双剑"),
@@ -267,6 +271,18 @@ const NPCS: &[(&str, &str)] = &[
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn raw_stone_display_names_keep_stable_catalog_keys_and_unknown_contents() {
+        for (key, display) in [
+            ("RoughRawStone", "未知原石（粗糙）"),
+            ("FineRawStone", "未知原石（精致）"),
+            ("PreciousRawStone", "未知原石（珍贵）"),
+        ] {
+            assert_eq!(name(key), display);
+            assert_eq!(known_name(&key.to_lowercase()), None);
+            assert_eq!(name(&format!(" {key} ")), format!(" {key} "));
+        }
+    }
     #[test]
     fn exact_names_keep_known_npc_variants_and_unknown_input_bytes() {
         assert_eq!(name("Amulet"), "护身符");

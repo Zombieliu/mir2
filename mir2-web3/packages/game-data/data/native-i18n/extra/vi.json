@@ -1,4 +1,8 @@
 {
+  "content.item.50001.name": "Đá thô bí ẩn (thô)",
+  "content.item.50002.name": "Đá thô bí ẩn (tinh)",
+  "content.item.50003.name": "Đá thô bí ẩn (quý)",
+  "content.item.rawStone.tooltip": "Nhận trực tiếp khi khai khoáng. Mang đến xưởng đá để giám định nếu muốn hoặc cắt ngay. Vật phẩm bên trong đã được xác định.",
   "client.AC": "AC + {0}~{1}",
   "client.AccessoryItems": "Trang sức",
   "client.AccountBannedReasonDuration": " Tài khoản này bị cấm.\n\n Lý do: {0}\nExpryDate: {1}\n Thời gian: {2:#,##0} Giờ, {3} Phút, {4} giây",

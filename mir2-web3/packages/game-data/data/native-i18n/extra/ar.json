@@ -1,4 +1,8 @@
 {
+  "content.item.50001.name": "حجر خام مجهول (خشن)",
+  "content.item.50002.name": "حجر خام مجهول (جيد)",
+  "content.item.50003.name": "حجر خام مجهول (نفيس)",
+  "content.item.rawStone.tooltip": "يُستخرج مباشرة من التعدين. خذه إلى ورشة الأحجار للتقييم الاختياري أو القطع مباشرة. محتواه محدد مسبقًا.",
   "client.AC": "AC + {0}~{1}",
   "client.AccessoryItems": "إكسسوارات",
   "client.AccountBannedReasonDuration": "هذا الحساب محظور\n\nالسبب: {0}\nالفائض: {1}\nالمدة: {2:#,##0} ساعة، {3} دقيقة، {4} ثانية",

@@ -46,7 +46,8 @@ fn assert_final_page(runtime: &InProcessWorldRuntime, path: &Path, packets: &[Se
     expected.extend(dialog.body);
     for link in dialog.links {
         expected.push(format!("<{}/{}>", link.text, link.target));
-        if ["@stone:v1:seal:", "@stone:v1:appraise:", "@stone:v1:cut:"]
+        assert!(!link.target.starts_with("@stone:v1:seal:"));
+        if ["@stone:v1:appraise:", "@stone:v1:cut:"]
             .iter()
             .any(|prefix| link.target.starts_with(prefix))
         {
@@ -68,25 +69,39 @@ fn assert_final_page(runtime: &InProcessWorldRuntime, path: &Path, packets: &[Se
 }
 
 #[test]
-fn stone_world_command_file_source_accepts_first_seal_appraise_cut_quotes_after_outer_source() {
+fn stone_world_command_file_source_accepts_mined_raw_appraise_cut_quotes_after_outer_source() {
     let (session, path) = SimulationSession::stone_world_runtime_test_fixture();
     let mut runtime = InProcessWorldRuntime { session };
     let initial = runtime.active_character_checkpoint().unwrap();
     let actor = initial.npc_purchase_journal.as_ref().unwrap().actor;
-    for prefix in ["@stone:v1:home", "@stone:v1:list:ore:", "@stone:v1:ore:"] {
+    let raw: serde_json::Value = initial
+        .inventory_items_json
+        .iter()
+        .map(|row| serde_json::from_str::<serde_json::Value>(row).unwrap())
+        .find(|item| item["stone_serial"].as_u64().is_some())
+        .unwrap();
+    let uid = raw["unique_id"].as_u64().unwrap();
+    let serial = raw["stone_serial"].as_u64().unwrap();
+    assert_eq!(raw["key"], "crystal-item-50001");
+    let store: AccountStore = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+    assert_eq!(
+        store.sealed_stones.record(serial).unwrap().lifecycle(),
+        StoneLifecycle::Sealed
+    );
+    for prefix in [
+        "@stone:v1:home",
+        "@stone:v1:list:stone:",
+        "@stone:v1:stone:",
+    ] {
         let target = displayed_link(&runtime, prefix);
         let packets = runtime
             .execute(WorldCommand::SelectNpcDialog { target })
             .unwrap();
         assert_final_page(&runtime, &path, &packets);
     }
-
-    let mut old_seal = None;
-    let mut serial = None;
-    for (index, prefix, fee) in [
-        (0, "@stone:v1:seal:", 0),
-        (1, "@stone:v1:appraise:", 100),
-        (2, "@stone:v1:cut:", 1500),
+    for (prefix, fee, lifecycle) in [
+        ("@stone:v1:appraise:", 100, StoneLifecycle::Appraised),
+        ("@stone:v1:cut:", 1500, StoneLifecycle::Cut),
     ] {
         let target = displayed_link(&runtime, prefix);
         let before = runtime.active_character_checkpoint().unwrap();
@@ -94,11 +109,7 @@ fn stone_world_command_file_source_accepts_first_seal_appraise_cut_quotes_after_
             target.rsplit(':').nth(1).unwrap().parse::<u64>(),
             Ok(before.revision)
         );
-        if index == 0 {
-            old_seal = Some(target.clone());
-        }
-        // Every link must work on its first ordinary command, with no private
-        // economic call, regenerated quote or retry between these three steps.
+        // First ordinary displayed quote, with no private economic call or retry.
         let packets = runtime
             .execute(WorldCommand::SelectNpcDialog { target })
             .unwrap();
@@ -106,63 +117,55 @@ fn stone_world_command_file_source_accepts_first_seal_appraise_cut_quotes_after_
         assert_eq!(saved.revision, before.revision + 2);
         assert_eq!(saved.gold, before.gold - fee);
         assert_eq!(saved.npc_purchase_journal.as_ref().unwrap().actor, actor);
-        assert_eq!(saved.inventory_items_json.len(), 1);
-        let item: serde_json::Value = serde_json::from_str(&saved.inventory_items_json[0]).unwrap();
-        assert_eq!(item["unique_id"].as_u64(), Some(120_000_001));
-        assert_eq!(item["slot"].as_u64(), Some(0));
-        // Inspect only the public physical carrier and lifecycle, never the
-        // sealed result before cutting.
-        if index == 0 {
-            serial = item["stone_serial"].as_u64();
-            assert!(serial.is_some());
-        }
-        let store: AccountStore = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
-        let lifecycle = store
-            .sealed_stones
-            .record(serial.unwrap())
-            .unwrap()
-            .lifecycle();
         assert_eq!(
-            lifecycle,
-            [
-                StoneLifecycle::Sealed,
-                StoneLifecycle::Appraised,
-                StoneLifecycle::Cut
-            ][index]
+            saved.inventory_items_json.len(),
+            initial.inventory_items_json.len()
         );
-        if index == 2 {
+        let item = saved
+            .inventory_items_json
+            .iter()
+            .map(|row| serde_json::from_str::<serde_json::Value>(row).unwrap())
+            .find(|item| item["unique_id"].as_u64() == Some(uid))
+            .unwrap();
+        assert_eq!(item["slot"], raw["slot"]);
+        let store: AccountStore = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+        assert_eq!(
+            store.sealed_stones.record(serial).unwrap().lifecycle(),
+            lifecycle
+        );
+        if lifecycle == StoneLifecycle::Cut {
             assert!(item["stone_serial"].is_null());
             assert!(packets.iter().any(|packet| matches!(packet,
-                ServerPacket::GainedItem { item } if item.unique_id == 120_000_001
+                ServerPacket::GainedItem { item } if item.unique_id == uid
                     && StoneMaterial::ALL.iter().any(|material| material.template_id() == item.item_index))));
-        }
-        if fee == 0 {
-            assert!(!packets
-                .iter()
-                .any(|packet| matches!(packet, ServerPacket::LoseGold { .. })));
         } else {
-            assert_eq!(
-                packets
-                    .iter()
-                    .filter(|packet| matches!(packet,
-                ServerPacket::LoseGold { gold } if *gold == fee))
-                    .count(),
-                1
-            );
+            assert_eq!(item["stone_serial"].as_u64(), Some(serial));
         }
+        assert_eq!(
+            packets
+                .iter()
+                .filter(|packet| matches!(packet,
+            ServerPacket::LoseGold { gold } if *gold == fee))
+                .count(),
+            1
+        );
         assert_final_page(&runtime, &path, &packets);
     }
     assert_eq!(durable(&path).gold, initial.gold - 1600);
-
-    let bytes = fs::read(&path).unwrap();
+    // A formerly valid ordinary-player verb cannot turn ore into another raw
+    // stone, even with current inventory and save revision values.
     let before = runtime.active_character_checkpoint().unwrap();
+    let bytes = fs::read(&path).unwrap();
+    let old_seal = format!(
+        "@stone:v1:seal:{uid}:{}:stone-{}",
+        before.revision,
+        "a".repeat(64)
+    );
     let packets = runtime
-        .execute(WorldCommand::SelectNpcDialog {
-            target: old_seal.unwrap(),
-        })
+        .execute(WorldCommand::SelectNpcDialog { target: old_seal })
         .unwrap();
-    assert!(!packets.iter().any(|packet| matches!(
-        packet,
+    assert!(!packets.iter().any(|p| matches!(
+        p,
         ServerPacket::LoseGold { .. } | ServerPacket::GainedItem { .. }
     )));
     assert_eq!(fs::read(&path).unwrap(), bytes);

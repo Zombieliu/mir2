@@ -26,7 +26,31 @@ pub(super) fn extend(items: &mut Vec<CrystalItemTemplate>) {
         t.can_mine = false;
         t.slots = 0;
         t.stats.clear();
-        t.tooltip = Some("Bring this sealed stone to a mining workshop. Its contents are fixed.".into());
+        t.tooltip = Some("Obtained directly from mining. Bring it to a stone workshop for optional appraisal or direct cutting. Its contents are fixed.".into());
         items.push(t);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn raw_stone_catalog_keeps_identity_and_real_icon_with_direct_mining_guidance() {
+        let copper = crate::crystal_item_by_index(824).unwrap();
+        for (index, name) in RAW_STONE_INDICES.into_iter().zip([
+            "RoughRawStone", "FineRawStone", "PreciousRawStone",
+        ]) {
+            let stone = crate::crystal_item_by_index(index).unwrap();
+            assert_eq!(stone.name, name);
+            assert_eq!(stone.image, copper.image);
+            assert_eq!(stone.stack_size, 1);
+            assert_eq!(stone.weight, 4);
+            assert_eq!(stone.price, 0);
+            assert!(!stone.need_identify);
+            let tooltip = stone.tooltip.as_deref().unwrap();
+            assert!(tooltip.contains("directly from mining"));
+            assert!(tooltip.contains("optional appraisal or direct cutting"));
+        }
     }
 }

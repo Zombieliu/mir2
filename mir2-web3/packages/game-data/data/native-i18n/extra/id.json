@@ -1,4 +1,8 @@
 {
+  "content.item.50001.name": "Batu mentah misterius (kasar)",
+  "content.item.50002.name": "Batu mentah misterius (halus)",
+  "content.item.50003.name": "Batu mentah misterius (berharga)",
+  "content.item.rawStone.tooltip": "Didapat langsung dari menambang. Bawa ke bengkel batu untuk penilaian opsional atau langsung dipotong. Isinya sudah ditentukan.",
   "client.AC": "AC + {0}~{1}",
   "client.AccessoryItems": "Aksesori",
   "client.AccountBannedReasonDuration": "Akun ini dilarang.\n\nAlasan: {0}\nExpiryDate: {1}\nDurasi: {2:#,##0} Jam, {3} Menit, {4} Detik",

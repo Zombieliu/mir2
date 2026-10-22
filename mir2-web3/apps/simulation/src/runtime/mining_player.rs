@@ -81,6 +81,31 @@ impl SimulationSession {
         if swing.durability_damage == 0 {
             return Ok(Vec::new());
         }
+        if super::stones::workshop_enabled(self.app.world()) {
+            if let Some(index) = swing.raw_stone {
+                let template = mir2_game_data::crystal_item_by_index(index)
+                    .ok_or("raw stone template unavailable")?;
+                let key = crystal_item_key_for_template(&template);
+                let inventory = self.app.world().resource::<InventoryResource>();
+                let destination = crystal_empty_add_item_slots(inventory, ItemContainer::Bag1, &key)
+                    .into_iter().find(|(container, _)| matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2));
+                let allowed = self.app.world().resource::<RuntimeConfigResource>().config
+                    .item_is_allowed(&template.name);
+                // Stone custody requires an actual bag cell; never mint a
+                // registry record for a skipped payout or a belt-only space.
+                if let Some(destination) = destination.filter(|_| allowed) {
+                    self.begin_stone_workshops().map_err(|e| format!("mining actor unavailable: {e:?}"))?;
+                    let checkpoint = self.active_character_checkpoint().ok_or("mining checkpoint unavailable")?;
+                    let (position, direction) = swing.player_transform();
+                    self.force_authoritative_player_transform(position, direction);
+                    let result = self.apply_mined_raw_stone(swing, index, destination);
+                    if result.is_err() {
+                        self.restore_active_character_checkpoint(&checkpoint)?;
+                    }
+                    return result;
+                }
+            }
+        }
         let checkpoint = self
             .active_character_checkpoint()
             .ok_or("mining checkpoint unavailable")?;

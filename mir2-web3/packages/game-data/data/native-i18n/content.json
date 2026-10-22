@@ -1,6 +1,52 @@
 {
   "entries": [
     {
+      "key": "content.item.50001.name",
+      "en": "Unknown Raw Stone (Rough)",
+      "zh-TW": "未知原石（粗糙）",
+      "pt-BR": "Pedra bruta desconhecida (comum)",
+      "aliases": [
+        "RoughRawStone",
+        "Rough raw stone",
+        "Unknown raw stone (rough)",
+        "未知原石（粗糙）"
+      ]
+    },
+    {
+      "key": "content.item.50002.name",
+      "en": "Unknown Raw Stone (Fine)",
+      "zh-TW": "未知原石（精緻）",
+      "pt-BR": "Pedra bruta desconhecida (refinada)",
+      "aliases": [
+        "FineRawStone",
+        "Fine raw stone",
+        "Unknown raw stone (fine)",
+        "未知原石（精致）"
+      ]
+    },
+    {
+      "key": "content.item.50003.name",
+      "en": "Unknown Raw Stone (Precious)",
+      "zh-TW": "未知原石（珍貴）",
+      "pt-BR": "Pedra bruta desconhecida (preciosa)",
+      "aliases": [
+        "PreciousRawStone",
+        "Precious raw stone",
+        "Unknown raw stone (precious)",
+        "未知原石（珍贵）"
+      ]
+    },
+    {
+      "key": "content.item.rawStone.tooltip",
+      "en": "Obtained directly from mining. Bring it to a stone workshop for optional appraisal or direct cutting. Its contents are fixed.",
+      "zh-TW": "挖礦可直接獲得。帶到原石工坊後，可選擇鑑定或直接切割，內含產物已固定。",
+      "pt-BR": "Obtida diretamente na mineração. Leve-a à oficina de pedras para avaliação opcional ou corte direto. Seu conteúdo já está fixado.",
+      "aliases": [
+        "Obtained directly from mining. Bring it to a stone workshop for optional appraisal or direct cutting. Its contents are fixed.",
+        "Bring this sealed stone to a mining workshop. Its contents are fixed."
+      ]
+    },
+    {
       "key": "content.item.1.name",
       "en": "Spirit Blade",
       "zh-TW": "靈魂刀",

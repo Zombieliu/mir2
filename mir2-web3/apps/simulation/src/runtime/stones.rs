@@ -1,6 +1,5 @@
-//! Durable ore -> sealed stone -> real material reclassification.
-//! No UserItem UID is issued. One actual carried instance keeps its UID while
-//! its template changes; the independent stone serial owns the private result.
+//! Mining issues a raw-stone carrier and freezes its private result atomically.
+//! Existing workshop stones retain their frozen result and original carrier UID.
 use super::components::current_player_is_dead;
 use super::inventory::free_bag_slots;
 use super::items::{embedded_item_state_from_template, try_item_state_from_user_item,
@@ -12,7 +11,7 @@ use super::resources::{is_in_world, InventoryResource, NpcStateResource, PlayerR
 use super::save::{active_session_mutating_account_id, encode_state_vec,
     merge_persisted_mail_into_character_save, snapshot_active_character_save, validate_character_save_record};
 use super::session::SimulationSession;
-use super::stone_npc::{StoneOreView, StoneWorkshopCommand, StoneWorkshopError as Error,
+use super::stone_npc::{StoneWorkshopCommand, StoneWorkshopError as Error,
     StoneWorkshopExecution, StoneWorkshopOperation as Op, StoneWorkshopView};
 use crate::{AccountStoreDatabaseMode, CharacterSaveRecord, ItemContainer};
 use bevy_ecs::prelude::{Resource, World};
@@ -26,6 +25,28 @@ use sha2::{Digest, Sha256};
 
 #[derive(Resource)]
 struct WorkshopEnabled;
+
+// Failed, definitely-uncommitted attempts retain their exact hidden result and
+// issued UID. Never evict a failed event and silently draw it again.
+#[derive(Clone)]
+struct PendingMinedStone {
+    owner: StoneOwner,
+    inventory_revision: u64,
+    registry: StoneRegistry,
+    next_registry: StoneRegistry,
+    mint: StoneMintRequest,
+    item: ItemState,
+}
+#[derive(Resource, Default)]
+struct PendingMinedStones(std::collections::BTreeMap<String, PendingMinedStone>);
+
+fn mined_uid_floor(store: &crate::AccountStore, active: &CharacterSaveRecord) -> Result<u64, String> {
+    use super::item_uid_issuance::historical_uid_floor;
+    Ok(historical_uid_floor(&serde_json::to_value(store).map_err(|e| e.to_string())?, 0)?
+        .max(historical_uid_floor(&serde_json::to_value(active).map_err(|e| e.to_string())?, 0)?)
+        // Includes cut tombstones: their carriers may already have left custody.
+        .max(store.sealed_stones.records().map(|r| r.carrier_uid()).max().unwrap_or(0)))
+}
 
 fn source_config(world: &World) -> Result<crate::SimulationConfig, Error> {
     let c = world.resource::<RuntimeConfigResource>().config.clone();
@@ -73,10 +94,12 @@ fn binding(item: &ItemState) -> Result<StoneBinding, Error> {
     let wire = try_user_item_from_item_state(item).map_err(|_| Error::AuthorityRejected)?;
     Ok(StoneBinding { flags: crystal_item_bind_for_item_key(&item.key), soul_bound_id: wire.soul_bound_id })
 }
+#[cfg(test)]
 fn source_grade(index: i32) -> Option<StoneGrade> {
     match index { 824 => Some(StoneGrade::Rough), 826 => Some(StoneGrade::Fine),
         827 => Some(StoneGrade::Precious), _ => None }
 }
+#[cfg(test)]
 fn raw_index(grade: StoneGrade) -> i32 {
     match grade { StoneGrade::Rough => RAW_STONE_ROUGH, StoneGrade::Fine => RAW_STONE_FINE,
         StoneGrade::Precious => RAW_STONE_PRECIOUS }
@@ -122,6 +145,7 @@ fn uniform_roll() -> u16 {
     let bound = u32::MAX - u32::MAX % 10_000;
     loop { let n = OsRng.next_u32(); if n < bound { return (n % 10_000) as u16; } }
 }
+#[cfg(test)]
 fn request_event(owner: &StoneOwner, command: &StoneWorkshopCommand) -> Result<String, Error> {
     let encoded = serde_json::to_vec(&("stone-workshop-source-v1", owner,
         &command.request_id)).map_err(|_| Error::InvalidRequest)?;
@@ -140,6 +164,167 @@ impl SimulationSession {
         self.app.world_mut().insert_resource(WorkshopEnabled);
         Ok(())
     }
+    /// Only a trusted shared-Zone swing can reach this producer. The caller has
+    /// checked identity/tool and admitted a bag cell, then initialized the actor.
+    pub(super) fn apply_mined_raw_stone(
+        &mut self,
+        swing: &super::zone::ZoneMiningSwing,
+        index: i32,
+        destination: (ItemContainer, u8),
+    ) -> Result<Vec<ServerPacket>, String> {
+        use super::item_uid_issuance::{issue_for_staged_inventory, ItemUidIssuance};
+        let fail = |e: Error| format!("mined stone authority: {e:?}");
+        let cfg = source_config(self.app.world()).map_err(fail)?;
+        let (o, active) = owner(self.app.world()).map_err(fail)?;
+        cfg.refresh_sealed_stone_authority()?;
+        let event = swing.raw_stone_event_id();
+        let registry = cfg.account_store.lock().map_err(|_| "stone authority lock poisoned")?
+            .sealed_stones.clone();
+        // The event is the idempotency key, not an allocated UID or a new roll.
+        if let Some(original) = registry.mint_request(&o, &event).map_err(|e| e.to_string())? {
+            if original.source.kind != StoneSourceKind::Mining
+                || original.source.event_id != event || original.raw_template_id != index {
+                return Err("mined stone event conflicts with its durable receipt".into());
+            }
+            return Ok(Vec::new());
+        }
+        let mut inventory = self.app.world().resource::<InventoryResource>().clone();
+        let plan = if let Some(p) = self.app.world().get_resource::<PendingMinedStones>()
+            .and_then(|p| p.0.get(&event)).cloned() {
+            if p.owner != o || p.inventory_revision != active.revision || p.registry != registry
+                || p.item.container != destination.0 || p.item.slot != destination.1
+                || p.mint.raw_template_id != index {
+                return Err("mined stone pending event requires its original checkpoint".into());
+            }
+            p
+        } else {
+            if self.app.world().get_resource::<PendingMinedStones>()
+                .is_some_and(|p| p.0.len() >= 1024) {
+                return Err("mined stone unresolved event capacity reached".into());
+            }
+            let grade = match index {
+                RAW_STONE_ROUGH => StoneGrade::Rough,
+                RAW_STONE_FINE => StoneGrade::Fine,
+                RAW_STONE_PRECIOUS => StoneGrade::Precious,
+                _ => return Err("unrecognized mined raw stone".into()),
+            };
+            let template = crystal_item_by_index(index).ok_or("raw stone template unavailable")?;
+            let tool = inventory.equipment_items.iter()
+                .find(|item| item.slot == crate::EquipmentSlot::Weapon)
+                .and_then(super::equipment::user_item_from_equipment_state)
+                .ok_or("mining source tool unavailable")?;
+            let floor = {
+                let store = cfg.account_store.lock().map_err(|_| "stone authority lock poisoned")?;
+                mined_uid_floor(&store, &active)?
+            };
+            super::item_uid_issuance::refresh_world_history_floor(self.app.world())?;
+            let issuance_floor = match &inventory.item_uid_issuance {
+                ItemUidIssuance::Durable(allocator) => floor.max(allocator.issued_through().map_err(|e| e.to_string())?),
+                _ => floor,
+            };
+            let candidate = crate::monthly_card::skip_monthly_card_reserved_unique_id(
+                issuance_floor.checked_add(1).ok_or("mined item UID exhausted")?);
+            // Raise the real issuer before issue; never map an issued number to
+            // a different, unissued one after crossing permanent replay IDs.
+            inventory.item_uid_issuance.raise_floor(candidate - 1)?;
+            let uid = match &inventory.item_uid_issuance {
+                ItemUidIssuance::Legacy => candidate,
+                _ => issue_for_staged_inventory(&inventory, crate::UserItemUidReason::Mining,
+                    destination.0, destination.1)?,
+            };
+            if uid <= floor || crate::monthly_card::monthly_card_item_uid_is_reserved(uid) {
+                return Err("mined item UID must exceed retained history outside reserved replay IDs".into());
+            }
+            let serial = registry.next_serial().map_err(|e| e.to_string())?;
+            let mut item = embedded_item_state_from_template(&template, destination.0, destination.1);
+            item.unique_id = uid;
+            item.stone_serial = Some(serial);
+            validate_committed_item_state_carrier(&item).map_err(|e| e.to_string())?;
+            let mint = StoneMintRequest { owner: o.clone(), request_id: event.clone(), serial,
+                carrier_uid: uid, source_template_id: tool.item_index, raw_template_id: index,
+                raw_weight: item.weight, grade, binding: binding(&item).map_err(fail)?,
+                source: StoneSource { kind: StoneSourceKind::Mining, source_version: "v1".into(),
+                    event_id: event.clone() } };
+            let StoneMintPreparation::Change(prepared) = registry.prepare_mint(&StoneCatalog::v1(),
+                &mint, uniform_roll()).map_err(|e| e.to_string())?
+                else { return Err("unexpected mined stone replay during preparation".into()); };
+            let p = PendingMinedStone { owner: o.clone(), inventory_revision: active.revision,
+                registry: registry.clone(), next_registry: prepared.next_registry, mint, item };
+            self.app.world_mut().get_resource_or_insert_with(PendingMinedStones::default)
+                .0.insert(event.clone(), p.clone());
+            p
+        };
+        inventory.inventory_items.push(plan.item.clone());
+        let weapon = inventory.equipment_items.iter_mut()
+            .find(|item| item.slot == crate::EquipmentSlot::Weapon).ok_or("mining tool disappeared")?;
+        weapon.durability_current = weapon.durability_current.saturating_sub(swing.durability_damage);
+        let current_dura = weapon.durability_current;
+        let mut save = active.clone();
+        save.inventory_items_json = encode_state_vec(&inventory.inventory_items);
+        save.equipment_items_json = encode_state_vec(&inventory.equipment_items);
+        if current_dura == 0 {
+            // A broken pick loses its stat bonuses. Compute against staged gear
+            // without publishing it or changing live vitals before persistence.
+            let world = self.app.world_mut();
+            let original = std::mem::replace(&mut *world.resource_mut::<InventoryResource>(), inventory.clone());
+            let caps = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| super::stats::player_stats(world)));
+            *world.resource_mut::<InventoryResource>() = original;
+            let caps = caps.map_err(|_| "mined tool stat preparation failed")?;
+            save.max_hp = caps.max_hp().max(1);
+            save.max_mp = caps.max_mp().max(0);
+            save.hp = save.hp.min(save.max_hp);
+            save.mp = save.mp.min(save.max_mp);
+        }
+        let wire = try_user_item_from_item_state(&plan.item).map_err(|e| e.to_string())?;
+        let template = crystal_item_by_index(index).ok_or("raw stone template unavailable")?;
+        let mut packets = vec![ServerPacket::NewItemInfo { info: item_info_from_crystal_template(template) },
+            ServerPacket::GainedItem { item: wire },
+            ServerPacket::DuraChanged { unique_id: swing.tool.unique_id, current_dura }];
+        let commit = std::panic::catch_unwind(std::panic::AssertUnwindSafe(||
+            cfg.commit_account_store_transaction_with_stones(&[o.account_id.clone()], &[plan.mint.serial], |store| {
+                if store.sealed_stones != plan.registry {
+                    return Err("mined stone authority advanced; retry original event after recovery".into());
+                }
+                if plan.mint.carrier_uid <= mined_uid_floor(store, &active)? {
+                    return Err("mined item UID no longer exceeds retained history".into());
+                }
+                let durable = store.accounts.get(&o.account_id).and_then(|a| a.saves.get(&save.character.index))
+                    .ok_or("mining checkpoint disappeared")?;
+                if durable.revision != active.revision || durable.npc_purchase_journal.as_ref().map(|j| j.actor)
+                    != active.npc_purchase_journal.as_ref().map(|j| j.actor) {
+                    return Err("mining actor or inventory revision changed".into());
+                }
+                merge_persisted_mail_into_character_save(&mut save, durable)?;
+                save.revision = durable.revision.checked_add(1).ok_or("mining checkpoint revision exhausted")?;
+                validate_character_save_record(&save)?;
+                let publication = PreparedCheckpointMerge::new(self.app.world(), &save)?;
+                store.sealed_stones = plan.next_registry.clone();
+                store.accounts.get_mut(&o.account_id).ok_or("mining account disappeared")?
+                    .saves.insert(save.character.index, save.clone());
+                Ok(publication)
+            })
+        ));
+        let publication = match commit {
+            Ok(Ok(p)) => p,
+            Ok(Err(e)) if cfg.ensure_account_store_writable().is_ok() => return Err(e),
+            _ => return Err("mined stone outcome unknown; authority frozen pending recovery".into()),
+        };
+        *self.app.world_mut().resource_mut::<InventoryResource>() = inventory;
+        publication.apply(self.app.world_mut());
+        if !self.app.world_mut().resource_mut::<SessionResource>()
+            .advance_active_save_revision(active.revision, save.revision) {
+            return Err("mined stone committed; live revision publication failed".into());
+        }
+        self.app.world_mut().resource_mut::<PendingMinedStones>().0.remove(&event);
+        super::stats::refresh_player_stats(self.app.world_mut());
+        if swing.durability_damage >= swing.tool.durability {
+            if let Some(vitals) = super::components::player_entity(self.app.world())
+                .and_then(|entity| super::components::entity_player_vitals(self.app.world(), entity)) {
+                packets.push(ServerPacket::HealthChanged { hp: vitals.hp, mp: vitals.mp });
+            }
+        }
+        Ok(packets)
+    }
     pub(super) fn stone_workshop_view(&mut self) -> Result<StoneWorkshopView, Error> {
         if !workshop_allowed(self.app.world()) { return Err(Error::Unavailable); }
         self.begin_stone_workshops()?;
@@ -157,13 +342,8 @@ impl SimulationSession {
             max_weight: super::stats::player_stats(self.app.world()).bag_weight().max(0) as u64 };
         let store = cfg.account_store.lock().map_err(|_| Error::AuthorityRejected)?;
         let stones = store.sealed_stones.public_view(&context)?;
-        let ores = inv.inventory_items.iter().filter(|i| plain(i) && i.stone_serial.is_none()
-            && !inv.reserved_item_unique_ids.contains(&i.unique_id)).filter_map(|i| {
-                let wire = try_user_item_from_item_state(i).ok()?;
-                Some(StoneOreView { uid: i.unique_id.to_string(), template_id: wire.item_index,
-                    grade: source_grade(wire.item_index)? })
-            }).collect();
-        Ok(StoneWorkshopView { owner: o, inventory_revision: active.revision, ores, stones, gold: active.gold })
+        Ok(StoneWorkshopView { owner: o, inventory_revision: active.revision,
+            ores: Vec::new(), stones, gold: active.gold })
     }
     pub(super) fn execute_stone_workshop(&mut self, command: StoneWorkshopCommand)
         -> Result<StoneWorkshopExecution, Error>
@@ -194,6 +374,9 @@ impl SimulationSession {
             }
             return Ok(StoneWorkshopExecution { packets: Vec::new(), replayed: true, public_result: String::new() });
         }
+        // Old mint receipts stay replayable; ordinary ore is no longer a public
+        // mint input. New raw stones come only from the authoritative mining path.
+        if action.is_none() { return Err(Error::InvalidRequest); }
         if command.expected_inventory_revision != active.revision { return Err(Error::StaleInventory); }
         let mut inventory = self.app.world().resource::<InventoryResource>().clone();
         let witnesses = possessions(self.app.world(), &o)?;
@@ -218,22 +401,7 @@ impl SimulationSession {
             }
             (a.stone_serial, plan.next_registry, plan.gold_debit, result, replaced)
         } else {
-            let Op::Seal { uid } = command.operation else { return Err(Error::InvalidRequest); };
-            let row = inventory.inventory_items.iter_mut().find(|i| i.unique_id==uid
-                && i.stone_serial.is_none()).ok_or(Error::InvalidRequest)?;
-            if inventory.reserved_item_unique_ids.contains(&uid) { return Err(Error::InvalidRequest); }
-            let wire = try_user_item_from_item_state(row).map_err(|_| Error::AuthorityRejected)?;
-            let grade = source_grade(wire.item_index).ok_or(Error::InvalidRequest)?;
-            let serial = registry.next_serial()?;
-            let mint = StoneMintRequest { owner: o.clone(), request_id: command.request_id.clone(),
-                serial, carrier_uid: uid, source_template_id: wire.item_index,
-                raw_template_id: raw_index(grade), raw_weight: 4, grade, binding: binding(row)?,
-                source: StoneSource { kind: StoneSourceKind::MiningWorkshop, source_version: "v1".into(),
-                    event_id: request_event(&o, &command)? } };
-            let StoneMintPreparation::Change(plan) = registry.prepare_mint(&StoneCatalog::v1(), &mint, uniform_roll())?
-                else { return Err(Error::AuthorityRejected); };
-            *row = reclassify(row, mint.raw_template_id, Some(serial))?;
-            (serial, plan.next_registry, 0, String::new(), Some(row.clone()))
+            return Err(Error::InvalidRequest);
         };
         let debit = u32::try_from(gold_debit).map_err(|_| Error::AuthorityRejected)?;
         let gold = active.gold.checked_sub(debit).ok_or(Error::InvalidRequest)?;

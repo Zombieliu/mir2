@@ -1120,3 +1120,6 @@ fn mining_source_ore_sells_at_purity_price_and_unloaded_pick_repairs_normally() 
     assert_eq!(tool.durability_current, Some(expected_max));
     assert_eq!(tool.durability_max, Some(expected_max));
 }
+
+#[path = "mined_stone_tests.rs"]
+mod mined_stone_tests;

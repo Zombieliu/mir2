@@ -54,7 +54,6 @@ fn checkpoint_preserves_economy(runtime: &mut InProcessWorldRuntime, path: &Path
     let dialog = runtime.world_snapshot().active_npc_dialog.unwrap();
     for option in dialog.links {
         if [
-            "@stone:v1:seal:",
             "@stone:v1:appraise:",
             "@stone:v1:cut:",
             "@atelier:v1:craft:",
@@ -76,15 +75,15 @@ fn checkpoint_preserves_economy(runtime: &mut InProcessWorldRuntime, path: &Path
 fn workshop_checkpoint_file_stone_quotes_survive_additional_full_saves_without_reexecution() {
     let (session, path) = SimulationSession::stone_world_runtime_test_fixture();
     let mut runtime = InProcessWorldRuntime { session };
-    for prefix in ["@stone:v1:home", "@stone:v1:list:ore:", "@stone:v1:ore:"] {
+    for prefix in [
+        "@stone:v1:home",
+        "@stone:v1:list:stone:",
+        "@stone:v1:stone:",
+    ] {
         choose(&mut runtime, prefix);
     }
     let initial = saved(&path);
-    for (prefix, fee) in [
-        ("@stone:v1:seal:", 0),
-        ("@stone:v1:appraise:", 100),
-        ("@stone:v1:cut:", 1500),
-    ] {
+    for (prefix, fee) in [("@stone:v1:appraise:", 100), ("@stone:v1:cut:", 1500)] {
         checkpoint_preserves_economy(&mut runtime, &path);
         let before = saved(&path);
         let packets = choose(&mut runtime, prefix);

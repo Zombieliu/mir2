@@ -2,6 +2,7 @@
 //! server capability, never a client command; personal inventory commits first.
 use super::*;
 use mir2_game_data::{crystal_mine_set, crystal_mining_item, crystal_mining_map};
+use sha2::{Digest, Sha256};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ZoneMiningTool {
@@ -50,6 +51,9 @@ pub struct ZoneMiningSwing {
     pub(crate) object_id: u32,
     pub(crate) tool: ZoneMiningTool,
     pub(crate) ore: Option<ZoneMinedOre>,
+    /// Optional server-side workshop extension. Ordinary ore rolls are untouched;
+    /// the personal session admits this candidate only when workshops are enabled.
+    pub(crate) raw_stone: Option<i32>,
     pub(crate) durability_damage: u16,
     session_id: SessionId,
     position: Point,
@@ -74,6 +78,28 @@ impl ZoneMiningSwing {
     }
     pub fn ore(&self) -> Option<&ZoneMinedOre> {
         self.ore.as_ref()
+    }
+    /// A server ticket's optional workshop payout, not an instruction from clients.
+    pub fn raw_stone_template_id(&self) -> Option<i32> {
+        self.raw_stone
+    }
+    pub(crate) fn raw_stone_event_id(&self) -> String {
+        let encoded = serde_json::to_vec(&(
+            "mined-raw-stone-v1",
+            &self.account_id,
+            self.character_index,
+            &self.session_id,
+            self.object_id,
+            &self.position,
+            &self.wall,
+            self.now_ms,
+            self.sequence,
+        ))
+        .expect("mining event has only primitive serializable fields");
+        Sha256::digest(encoded)
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect()
     }
 }
 
@@ -131,6 +157,7 @@ impl ZoneRuntime {
         let mut hit = false;
         let mut durability_damage = 0;
         let mut ore = None;
+        let mut raw_stone = None;
         if after.stones_left > 0 {
             after.stones_left -= 1;
             hit = (roll(0x10, 100) as i32)
@@ -176,6 +203,10 @@ impl ZoneRuntime {
                                 current_dura: dura,
                             });
                         }
+                    } else {
+                        // Fill previously empty payout slots only. All imported
+                        // ore slots, purity rolls and mining timing stay intact.
+                        raw_stone = raw_stone_for_empty_slot(slot);
                     }
                 }
             }
@@ -191,6 +222,7 @@ impl ZoneRuntime {
             object_id: player.object_id,
             tool: tool.clone(),
             ore,
+            raw_stone,
             durability_damage,
             session_id: session_id.clone(),
             position: player.position.clone(),
@@ -221,6 +253,9 @@ impl ZoneRuntime {
             || fresh.sequence != swing.sequence
             || fresh.before != swing.before
             || fresh.after != swing.after
+            || fresh.ore != swing.ore
+            || fresh.raw_stone != swing.raw_stone
+            || fresh.durability_damage != swing.durability_damage
         {
             return None;
         }
@@ -327,5 +362,40 @@ impl ZoneRuntime {
         }
         self.mining.effects = pending;
         out
+    }
+}
+
+fn raw_stone_for_empty_slot(slot: u16) -> Option<i32> {
+    match slot {
+        57..=72 => Some(mir2_game_data::RAW_STONE_ROUGH),
+        73..=78 => Some(mir2_game_data::RAW_STONE_FINE),
+        79..=80 => Some(mir2_game_data::RAW_STONE_PRECIOUS),
+        _ => None,
+    }
+}
+
+#[cfg(test)]
+mod raw_stone_tests {
+    use super::*;
+
+    #[test]
+    fn raw_stones_fill_only_unused_slots_without_replacing_imported_ore() {
+        let expected = [16, 6, 2];
+        for mine_index in 1..=2 {
+            let set = crystal_mine_set(mine_index).unwrap();
+            let mut counts = [0; 3];
+            for slot in 0..set.total_slots {
+                if let Some(index) = raw_stone_for_empty_slot(slot) {
+                    assert!(set
+                        .drops
+                        .iter()
+                        .all(|drop| slot < drop.min_slot || slot > drop.max_slot));
+                    counts[(index - mir2_game_data::RAW_STONE_ROUGH) as usize] += 1;
+                }
+            }
+            assert_eq!(counts, expected);
+        }
+        assert!(raw_stone_for_empty_slot(56).is_none());
+        assert!(raw_stone_for_empty_slot(81).is_none());
     }
 }
