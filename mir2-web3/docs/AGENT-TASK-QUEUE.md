@@ -1,5 +1,9 @@
 # Agent Task Queue
 
+## 原石独立20%掉落（2026-10-22，自定义玩法）
+
+原石改为每次有库存且准入有效的挥镐独立20%，三档16:6:2；普通矿roll、纯度和节奏保留，可同镐双产出。Simulation原石82通过（含15项采矿原石）、原采矿5通过；Gateway采矿12和真实WebSocket checkpoint4均通过，最后源码零漂移，分组不重复累计。成对新版已打开30级隔离角色，GUI自然获得新未知原石；Bill完整GUI和用户最终人工结论仍待。旧普通矿封存继续停用；开包采矿保留。本轮不提升1:1比例或全项目Candidate100，不代表公网发布。详见[新规则与证据](SLG-HIGH-YIELD-RAW-STONES-20261022.zh-CN.md)。下方0.5%/空槽及旧构建状态保留为历史时点。
+
 ## 当前专项：挖矿直接掉未知原石（2026-10-22）
 
 Native1166通过/0失败/7既有忽略；Simulation原石77通过（含10项新增采矿原石）；Gateway采矿11通过（含3项新增原石），真实WebSocket checkpoint4通过；GameData73通过/1既有忽略、ClientCore名称1通过，最终Run均sourceDrift为空。成对产品22d9ad已构建并打开30级隔离角色；自然原石及工坊GUI、最终人工验收待完成。普通矿交Alice制作；新原石交Bill鉴定或直接切割，不再封存。用户授权的本机环境升级已完成，桌面30级快捷方式已指新版；原石自然GUI待玩家继续验收。来源及历史失败见[本轮说明](SLG-MINED-RAW-STONES-20261022.zh-CN.md)与[收据](generated/player-qa/mined-raw-stones-20261022/outcomes.json)。自定义玩法不提升原版1:1比例，Candidate100=false；下方为历史队列时点。
