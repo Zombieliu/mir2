@@ -1,0 +1,1100 @@
+{
+  "schema": "mir2.player-mining-jewelry-acceptance.v1",
+  "dateLocal": "2026-10-18",
+  "timezone": "Asia/Shanghai",
+  "source": {
+    "head": "55e50e27f7f4af82f0cea679d49aa1e65a245930",
+    "runtime": "runtime07",
+    "accountBackend": "FileSource",
+    "mode": "ordinary protocol, not GUI",
+    "scope": "Initial copper chain on original runtime07; not retagged to repair HEAD."
+  },
+  "status": "local_ordinary_protocol_validated_copper_jewelry_and_repaired_silver_to_actual_jade",
+  "acceptedScope": "Original Copper824 to CopperRing404 equipped and persisted; repaired first-attempt Silver826 appraise/cut to actual JadeCrystal904, fresh WebSocket relogin and clean service stop. No GUI/SilverBracelet/PG/deployment acceptance.",
+  "controlledPrerequisites": {
+    "level": 12,
+    "initialGold": 10000,
+    "initialGoldWasNaturallyEarned": false,
+    "itemGrants": [],
+    "appliedBeforeThisAcceptance": true
+  },
+  "ordinaryPickaxe": {
+    "itemIndex": 836,
+    "uniqueId": "54788115",
+    "purchaseGold": 2500,
+    "balanceAfterPurchase": 7500,
+    "preexistingOrdinaryPurchase": true
+  },
+  "mining": {
+    "runId": "mining01",
+    "status": "passed",
+    "map": "D401",
+    "position": {
+      "x": 24,
+      "y": 181
+    },
+    "ordinaryAttackDirectionCount": 106,
+    "goldBefore": 7500,
+    "goldAfter": 7500,
+    "gains": [
+      {
+        "itemIndex": 824,
+        "uniqueId": "54788116",
+        "quantity": 1,
+        "purity": 9,
+        "currentDura": 9000
+      },
+      {
+        "itemIndex": 826,
+        "uniqueId": "4",
+        "quantity": 1,
+        "purity": 13,
+        "currentDura": 13000
+      }
+    ],
+    "beforeSnapshotHadTheseOres": false,
+    "itemGrants": []
+  },
+  "stoneChain": {
+    "npc": {
+      "name": "Bill",
+      "objectId": 19,
+      "map": "0"
+    },
+    "input": {
+      "itemIndex": 824,
+      "uniqueId": "54788116"
+    },
+    "sealed": {
+      "itemIndex": 50001,
+      "uniqueId": "54788116",
+      "serial": "1",
+      "serialEvidence": "Publicly displayed NPC menu target in workshops03/raw-stone-list.json",
+      "goldFee": 0
+    },
+    "appraised": {
+      "runId": "workshops03",
+      "goldFee": 100,
+      "goldAfter": 7400
+    },
+    "firstCut": {
+      "runId": "workshops03",
+      "status": "rejected_stale_quote",
+      "goldBefore": 7400,
+      "goldAfter": 7400,
+      "feeCharged": 0,
+      "rawStoneStillPresent": true
+    },
+    "refreshedCut": {
+      "runId": "workshops04",
+      "status": "passed_after_explicit_current_page_refresh",
+      "goldFee": 1500,
+      "goldAfter": 5900,
+      "outputItemIndex": 824,
+      "outputUniqueId": "54788116"
+    },
+    "privateSealedOutcomeRead": false
+  },
+  "jewelry": {
+    "npc": {
+      "name": "Alice",
+      "objectId": 33,
+      "map": "0"
+    },
+    "runId": "jewelry01",
+    "recipe": "copper-ring",
+    "goldFee": 300,
+    "goldAfter": 5600,
+    "output": {
+      "itemIndex": 404,
+      "uniqueId": "54788116"
+    },
+    "craftObserved": true,
+    "runCompletedSuccessfully": false,
+    "loggingFailure": "BigInt serialization after Equip; Equip command is absent from events. Root reports it was sent, and relogin01 independently confirms persisted equipment."
+  },
+  "relogin": {
+    "runId": "relogin01",
+    "status": "passed",
+    "ring": {
+      "itemIndex": 404,
+      "uniqueId": "54788116",
+      "slot": "ringLeft"
+    },
+    "gold": 5600,
+    "statChanges": [
+      {
+        "name": "MaxDC",
+        "crystalStat": 5,
+        "before": 10,
+        "after": 11
+      }
+    ],
+    "ordinaryRelogin": true,
+    "coldProcessRestartValidated": false,
+    "postgresValidated": false
+  },
+  "ledger": [
+    {
+      "action": "controlled initial gold",
+      "delta": null,
+      "balance": 10000
+    },
+    {
+      "action": "ordinary pickaxe purchase",
+      "delta": -2500,
+      "balance": 7500
+    },
+    {
+      "action": "natural mining and movement",
+      "delta": 0,
+      "balance": 7500
+    },
+    {
+      "action": "seal",
+      "delta": 0,
+      "balance": 7500
+    },
+    {
+      "action": "appraise",
+      "delta": -100,
+      "balance": 7400
+    },
+    {
+      "action": "first stale cut refused",
+      "delta": 0,
+      "balance": 7400
+    },
+    {
+      "action": "cut after refresh",
+      "delta": -1500,
+      "balance": 5900
+    },
+    {
+      "action": "copper ring craft",
+      "delta": -300,
+      "balance": 5600
+    },
+    {
+      "action": "equip and ordinary relogin",
+      "delta": 0,
+      "balance": 5600
+    },
+    {
+      "action": "runtime08 silver seal",
+      "delta": 0,
+      "balance": 5600
+    },
+    {
+      "action": "runtime08 first appraise",
+      "delta": -250,
+      "balance": 5350
+    },
+    {
+      "action": "runtime08 idle stability",
+      "delta": 0,
+      "balance": 5350
+    },
+    {
+      "action": "runtime08 first cut to actual JadeCrystal904",
+      "delta": -2500,
+      "balance": 2850
+    },
+    {
+      "action": "runtime08 fresh WebSocket relogin",
+      "delta": 0,
+      "balance": 2850
+    }
+  ],
+  "failureHistory": [
+    {
+      "runId": "workshops01",
+      "classification": "script_wait_condition",
+      "message": "Awaited packet timeout",
+      "gold": 7500
+    },
+    {
+      "runId": "workshops02",
+      "classification": "script_public_shape_assumption",
+      "message": "seal did not attach public serial",
+      "gold": 7500,
+      "sealActuallyPersisted": true
+    },
+    {
+      "runId": "workshops03",
+      "classification": "real_product_stale_quote",
+      "message": "cut did not replace raw-stone template",
+      "gold": 7400,
+      "noCharge": true
+    },
+    {
+      "runId": "jewelry01",
+      "classification": "script_bigint_logging_exception_after_equip",
+      "equipEventsRecordAvailable": false,
+      "persistenceIndependentlyConfirmedBy": "relogin01"
+    }
+  ],
+  "protocolAudit": {
+    "loggedCommandCountsByRun": {
+      "mining01": {
+        "commandCounts": {
+          "clientVersion": 1,
+          "login": 1,
+          "startGame": 1,
+          "keepAlive": 110,
+          "walk": 37,
+          "run": 70,
+          "attackDirection": 106,
+          "logOut": 1
+        },
+        "firstUtc": "2026-10-17T20:03:34.743Z",
+        "lastUtc": "2026-10-17T20:07:10.965Z"
+      },
+      "workshops01": {
+        "commandCounts": {
+          "clientVersion": 1,
+          "login": 1,
+          "startGame": 1,
+          "keepAlive": 192,
+          "walk": 17,
+          "run": 173,
+          "interact": 1,
+          "logOut": 1
+        },
+        "firstUtc": "2026-10-17T20:16:52.966Z",
+        "lastUtc": "2026-10-17T20:19:24.391Z"
+      },
+      "workshops02": {
+        "commandCounts": {
+          "clientVersion": 1,
+          "login": 1,
+          "startGame": 1,
+          "keepAlive": 11,
+          "interact": 1,
+          "selectNpcDialog": 4,
+          "logOut": 1
+        },
+        "firstUtc": "2026-10-17T20:22:23.505Z",
+        "lastUtc": "2026-10-17T20:22:43.510Z"
+      },
+      "workshops03": {
+        "commandCounts": {
+          "clientVersion": 1,
+          "login": 1,
+          "startGame": 1,
+          "keepAlive": 13,
+          "interact": 1,
+          "selectNpcDialog": 5,
+          "logOut": 1
+        },
+        "firstUtc": "2026-10-17T20:28:00.782Z",
+        "lastUtc": "2026-10-17T20:28:30.277Z"
+      },
+      "workshops04": {
+        "commandCounts": {
+          "clientVersion": 1,
+          "login": 1,
+          "startGame": 1,
+          "keepAlive": 11,
+          "interact": 1,
+          "selectNpcDialog": 4,
+          "logOut": 1
+        },
+        "firstUtc": "2026-10-17T20:37:47.049Z",
+        "lastUtc": "2026-10-17T20:38:10.007Z"
+      },
+      "jewelry01": {
+        "commandCounts": {
+          "clientVersion": 1,
+          "login": 1,
+          "startGame": 1,
+          "keepAlive": 29,
+          "run": 21,
+          "walk": 3,
+          "interact": 1,
+          "selectNpcDialog": 3
+        },
+        "firstUtc": "2026-10-17T21:05:02.910Z",
+        "lastUtc": "2026-10-17T21:05:36.362Z"
+      },
+      "relogin01": {
+        "commandCounts": {
+          "clientVersion": 1,
+          "login": 1,
+          "startGame": 1,
+          "keepAlive": 2,
+          "logOut": 1
+        },
+        "firstUtc": "2026-10-17T21:17:16.152Z",
+        "lastUtc": "2026-10-17T21:17:37.161Z"
+      }
+    },
+    "itemGrants": [],
+    "directGameplayStateEdits": false,
+    "moveToUsed": false,
+    "stage5OrQaCommandsUsed": false,
+    "credentialValuesPublished": false,
+    "sealedPrivateOutcomeRead": false,
+    "unloggedEquipCaveat": "jewelry01 logging failed after sending Equip; final public equipped state is confirmed by relogin01.",
+    "runtime08EconomicCommandsSentCount": 3,
+    "runtime08ReloginEconomicCommandsSentCount": 0
+  },
+  "evidence": {
+    "storage": "Original allowed results/events/public snapshots remain ignored local evidence; this file persists sanitized facts and hashes, not complete logs.",
+    "manifest": [
+      {
+        "id": "mining01/mining-result.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/mining01/mining-result.json",
+        "bytes": 410,
+        "sha256": "cf63e5e868496fb65ba1ba96f7435cbcb358f03bb251f13a9948388164e71b5c"
+      },
+      {
+        "id": "mining01/mine-ready.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/mining01/mine-ready.json",
+        "bytes": 5676,
+        "sha256": "0630af70bdc515d72935fa6b22c091867d69f26c63334d11a57154cc1f182a0d"
+      },
+      {
+        "id": "mining01/natural-ores-ready.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/mining01/natural-ores-ready.json",
+        "bytes": 6298,
+        "sha256": "f68bd5c42265514295ce7667d74a91aa5e443557ebeed48dd4ee4953879ea96d"
+      },
+      {
+        "id": "mining01/events.jsonl",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/mining01/events.jsonl",
+        "bytes": 399971,
+        "sha256": "29b2baff946262b9eb7a59918a7df2f49f1f59bb844cd21b684fbc56c52ca2be"
+      },
+      {
+        "id": "workshops01/events.jsonl",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/workshops01/events.jsonl",
+        "bytes": 86289,
+        "sha256": "fd6fd39dc55c4ac541c1adfff2098dbd60c20eebaea2c52c81fe26994c26ef29"
+      },
+      {
+        "id": "workshops02/events.jsonl",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/workshops02/events.jsonl",
+        "bytes": 39824,
+        "sha256": "42daec39db721d17cd788767a34383bdc8873033eab0413afa93ce6d7824631c"
+      },
+      {
+        "id": "workshops02/copper-seal-quote.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/workshops02/copper-seal-quote.json",
+        "bytes": 7225,
+        "sha256": "d97cefe69a9f0e4b888bd73fa49f7d0d203f4d8554fef20914fe19bdcaca1dc9"
+      },
+      {
+        "id": "workshops03/events.jsonl",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/workshops03/events.jsonl",
+        "bytes": 45102,
+        "sha256": "edf9979b15e6c35bc883f53283e8111f53251e6bc19b012d02891758b2e9e1c4"
+      },
+      {
+        "id": "workshops03/copper-appraised.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/workshops03/copper-appraised.json",
+        "bytes": 7494,
+        "sha256": "f1b532089eb0f7214107310fc03db3b53f58f40599f94d66e934aac330f33d35"
+      },
+      {
+        "id": "workshops03/copper-cut.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/workshops03/copper-cut.json",
+        "bytes": 7518,
+        "sha256": "3903ab2b0e284f73b37b3b58bb619647467acc80f6bf619f465e5a596629ecf4"
+      },
+      {
+        "id": "workshops04/events.jsonl",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/workshops04/events.jsonl",
+        "bytes": 39068,
+        "sha256": "010aeb5e530e646a16a6aad4b573c37902227c2df30a853a2c97b99cb6f55eb1"
+      },
+      {
+        "id": "workshops04/copper-cut.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/workshops04/copper-cut.json",
+        "bytes": 7224,
+        "sha256": "00a0d51115185d680922e6207df8a4038bf83e34d13df6d3536099188ec1656d"
+      },
+      {
+        "id": "workshops04/stone-chain-result.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/workshops04/stone-chain-result.json",
+        "bytes": 6996,
+        "sha256": "d99075470d51491a65752b52d1ed27e0fcf4b16168eb9ce63c40dcc8503e0343"
+      },
+      {
+        "id": "jewelry01/events.jsonl",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/jewelry01/events.jsonl",
+        "bytes": 40151,
+        "sha256": "123bf27641bc4e379d909afbef39643fde88cc31b11111be0e5b40b0f9cd0c42"
+      },
+      {
+        "id": "jewelry01/copper-ring-made.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/jewelry01/copper-ring-made.json",
+        "bytes": 6977,
+        "sha256": "087df033590388b794b27cca3a84c5f70b387622f1d189eb163c6f05d7bda5a2"
+      },
+      {
+        "id": "relogin01/events.jsonl",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/relogin01/events.jsonl",
+        "bytes": 15521,
+        "sha256": "d4ab890968627e6c6042f2b5633b2694d8f4a14d9a85a584bd7d9aa1e51ff1d4"
+      },
+      {
+        "id": "relogin01/result.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/relogin01/result.json",
+        "bytes": 1498,
+        "sha256": "edf976154100b355e4512fccab2e3216363a58aba190a246a851bb90a8910c58"
+      },
+      {
+        "id": "relogin01/ring-and-stats-persisted.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/relogin01/ring-and-stats-persisted.json",
+        "bytes": 6009,
+        "sha256": "3e3770efe2d70262b75605bf59a990658b6ae293f979a054e99695fc10646dd1"
+      },
+      {
+        "id": "workshops03/raw-stone-list.json",
+        "path": ".mir2-player-qa/fashion-shopfix-20261017/scripted-acceptance-20261018/workshops03/raw-stone-list.json",
+        "bytes": 6771,
+        "sha256": "394a20e3f311843146918153c4389989f0e94755f343333684c57d303daf5d52"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/scripted-acceptance-20261018/silver02/result.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/scripted-acceptance-20261018/silver02/result.json",
+        "bytes": 58387,
+        "sha256": "6a9a28fa90a6abfb7787df2cf2883ad645e27d36e409c11941776a98e0839c2e"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/scripted-acceptance-20261018/silver-relogin02/result.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/scripted-acceptance-20261018/silver-relogin02/result.json",
+        "bytes": 1801,
+        "sha256": "e3be6d8d2c97ba6a9474604248d08202b3df7d87f105ea0b0d0e9cbe59c3a8a6"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/protocol-acceptance01/final-post-silver-relogin-state.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/protocol-acceptance01/final-post-silver-relogin-state.json",
+        "bytes": 6599,
+        "sha256": "1052c9f3aa02a504cdbeb8055950ab7c6ce60b8b9cc656c44c724eaa8b43ab9a"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/final-public-state-audit01.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/final-public-state-audit01.json",
+        "bytes": 790,
+        "sha256": "a05836cd5966ae5f3b11d0d58850510636ef572d15b671f717a59478ebedccbe"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/runtime08/migration-receipt.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/runtime08/migration-receipt.json",
+        "bytes": 3509,
+        "sha256": "76fbc38cb4b5eca93da913f5bb2988520f5f54344d6ff04c58cefe99a57a5617"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/runtime08/stop-receipt.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/runtime08/stop-receipt.json",
+        "bytes": 2609,
+        "sha256": "c5fe47afc59a77683c637eb8af51b078e1e9cb42a00d27d9d1418e5590384fe6"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/regression-coverage-gap01.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/regression-coverage-gap01.json",
+        "bytes": 18817,
+        "sha256": "3f24516836448aa79988b27280edd7b3eeccc26c33d95f944bbeb65e0610413e"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/validation-pipeline01.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/validation-pipeline01.json",
+        "bytes": 859,
+        "sha256": "7db2d7e669b3f335e4f9807ffe5b66f83571f4b022251c05ad256b77910b9a89"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/validation-pipeline02.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/validation-pipeline02.json",
+        "bytes": 859,
+        "sha256": "7e3f4e7f89e63bc3837a8db18dc87e7f8fd7d7de7dc6d888cde0bbf5c3e375fe"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/validation-pipeline03.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/validation-pipeline03.json",
+        "bytes": 266,
+        "sha256": "0b4e5fc710496db628c130c611c7a344716e3a60c12a33fa9d89340c6c12d204"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/validation-pipeline04.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/validation-pipeline04.json",
+        "bytes": 1560,
+        "sha256": "77c2530a0f2d5136548dcb56fbddfed0ef70a2a71b7bc8d12b67d8102949de69"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/validation-pipeline05.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/validation-pipeline05.json",
+        "bytes": 1451,
+        "sha256": "99f781aa8d7bae0375e9f743d866e5162c29980722ddf070c670f012d9044fe2"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/simulation-focused02/result.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/simulation-focused02/result.json",
+        "bytes": 569,
+        "sha256": "264c347e0d2cbee1df768a3c74afaf810b312840422915df4237c574b36aa52e"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/simulation-focused02/receipt-audit.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/simulation-focused02/receipt-audit.json",
+        "bytes": 349,
+        "sha256": "d9c0bcdb16fcb77d1cd6d909c0fe810a9b0403c8b825fd3b5cdfe1e39d84ac96"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/simulation-focused02/cargo.log",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/simulation-focused02/cargo.log",
+        "bytes": 44809,
+        "sha256": "a7842e49f74e765fa6899590cd6c012f34403cb1910dedd01f66a86bff4ba17c"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/gateway-focused04/result.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/gateway-focused04/result.json",
+        "bytes": 566,
+        "sha256": "3b992ea081d2a38b92840d8e3e0d194c1d8ca4702fc14362523a36306837a440"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/gateway-focused04/receipt-audit.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/gateway-focused04/receipt-audit.json",
+        "bytes": 348,
+        "sha256": "956e7fdff9d3ec86a85e78f88f96136af7e2d6cb070eb017b508c3eda22252f8"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/gateway-focused04/cargo.log",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/gateway-focused04/cargo.log",
+        "bytes": 54795,
+        "sha256": "3ce835c1bcbcefef26f35ab6a310c8ed7e92a3c3609c0bc5de0e352af02f801e"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/simulation-regression04/result.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/simulation-regression04/result.json",
+        "bytes": 569,
+        "sha256": "6ca29aec91d70fad2a91baf0897daa0f8d925f18743b340230c01ae887a96e39"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/simulation-regression04/receipt-audit.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/simulation-regression04/receipt-audit.json",
+        "bytes": 349,
+        "sha256": "2b508baa81dfb7abd8bf076bf4079dd1cbcd7df31fb6a81df664ac1bd466e5e6"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/simulation-regression04/cargo.log",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/simulation-regression04/cargo.log",
+        "bytes": 52903,
+        "sha256": "5e796cfa91d192f6ec1deb8aca21360e4be2672b79c94936de668642dda7306c"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/simulation-coverage-gap05/result.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/simulation-coverage-gap05/result.json",
+        "bytes": 569,
+        "sha256": "2f9e276a4f30ad5d49f4b97444befa755ff8cdffd0b02dd6ce377994492abcda"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/simulation-coverage-gap05/receipt-audit.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/simulation-coverage-gap05/receipt-audit.json",
+        "bytes": 348,
+        "sha256": "76266af7acd7cd1185a2c4f97a86e94d0cd6fbc13a5a54c3c72392bcdd7047a3"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/simulation-coverage-gap05/cargo.log",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/simulation-coverage-gap05/cargo.log",
+        "bytes": 45392,
+        "sha256": "c3448b7e672f3097e86814a2358c4650c0583bee2c6b1fb71a2e485c7a134c00"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/gateway-regression05/result.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/gateway-regression05/result.json",
+        "bytes": 566,
+        "sha256": "4ad37ae2281c56d0637218a39fcc7abb5a547a275016419d57cc960405210b91"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/gateway-regression05/receipt-audit.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/gateway-regression05/receipt-audit.json",
+        "bytes": 348,
+        "sha256": "9b7d348455aceb7801f38d45dace1941a90408b7e4f845809fa407e1b9640c1f"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/gateway-regression05/cargo.log",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/gateway-regression05/cargo.log",
+        "bytes": 55216,
+        "sha256": "a6f0532a3cae4cd090ab2c36729fbd9e042cc8425b262083c4312ec1cab35235"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/gateway-build04/result.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/gateway-build04/result.json",
+        "bytes": 781,
+        "sha256": "6bbe908fffc1905369370592541cfd46592b3cf67971c7524090bcd4cf6ed247"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/gateway-build04/receipt-audit.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/gateway-build04/receipt-audit.json",
+        "bytes": 338,
+        "sha256": "8042088303653902be17f851166295159ca61dbac538848879d8aa7512610750"
+      },
+      {
+        "id": "workshop-checkpoint-20261018/final-validation-audit01.json",
+        "path": ".mir2-player-qa/workshop-checkpoint-20261018/final-validation-audit01.json",
+        "bytes": 12788,
+        "sha256": "5dead511cea7d87dcda5e47ec199abba98df6d44d10f198fa54f058a2c112dd7"
+      }
+    ]
+  },
+  "limits": {
+    "guiAccepted": false,
+    "fashionAccepted": false,
+    "fullPlayerAcceptance": false,
+    "postgresAccepted": false,
+    "deployed": false,
+    "onlineDeploymentPaused": true,
+    "candidate100": false,
+    "overallPercentageChanged": false,
+    "silverBraceletAccepted": false,
+    "localProtocolRepairAccepted": true
+  },
+  "currentProtocolSource": {
+    "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+    "runtime": "runtime08",
+    "compiledInputCount": 1456,
+    "accountBackend": "FileSource",
+    "mode": "ordinary protocol; no GUI"
+  },
+  "silverRevalidation": {
+    "sourceHead": "95146ae328b243465c91b368dbe076d9eaa457b2",
+    "runtime": "runtime08",
+    "result": "stone-pass",
+    "jewelryStatus": "notApplicable",
+    "migration": {
+      "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+      "migrationParentHead": "55e50e27f7f4af82f0cea679d49aa1e65a245930",
+      "parentProcessExited": true,
+      "parentExitCode": 0,
+      "parentLogsComplete": true,
+      "fullDatabaseByteCopy": true,
+      "databaseParsed": false,
+      "databaseFieldsEdited": false,
+      "sealedOutcomesRead": false,
+      "oldDatabaseOrCredentialsModified": false,
+      "registrationSent": false,
+      "itemGoldLevelPositionGrants": false,
+      "credentialsPrinted": false,
+      "deployed": false,
+      "source": {
+        "length": 32975,
+        "sha256": "996373275de31301a8fce44cab2385860009eaf6dd5f851c7066d84eafce6496"
+      },
+      "destination": {
+        "length": 32975,
+        "sha256": "996373275de31301a8fce44cab2385860009eaf6dd5f851c7066d84eafce6496"
+      }
+    },
+    "initial": {
+      "itemIndex": 826,
+      "uniqueId": "4",
+      "purity": 13,
+      "gold": 5600,
+      "naturallyMinedIn": "mining01 on 55e50e27"
+    },
+    "sealed": {
+      "itemIndex": 50002,
+      "uniqueId": "4",
+      "serial": "2",
+      "fee": 0,
+      "gold": 5600
+    },
+    "appraised": {
+      "firstAttempt": true,
+      "fee": 250,
+      "gold": 5350
+    },
+    "idle": {
+      "elapsedMs": 3202,
+      "queueLimit": 1,
+      "worldsObserved": 0,
+      "dirtyCheckpointClaimed": false,
+      "scope": "Idle stability only; dirty idle checkpoint covered separately by Gateway regression."
+    },
+    "cut": {
+      "firstAttempt": true,
+      "fee": 2500,
+      "gold": 2850,
+      "output": {
+        "itemIndex": 904,
+        "uniqueId": "4",
+        "quantity": 1
+      },
+      "outcomeSource": "Ordinary public GainedItem and owner inventory after Cut.",
+      "privateOutcomeRead": false
+    },
+    "noEconomicRetry": true,
+    "economicCommandsSentCount": 3,
+    "itemGrants": [],
+    "directGameplayStateEdits": false,
+    "jewelry": {
+      "status": "notApplicable",
+      "reason": "Actual Cut material was JadeCrystal904, not Copper or Silver; no SilverBracelet crafted."
+    }
+  },
+  "silverRelogin": {
+    "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+    "status": "stone-relogin-pass-jewelry-notApplicable",
+    "gold": 2850,
+    "carrier": {
+      "uniqueId": "4",
+      "key": "crystal-item-904",
+      "itemIndex": 904,
+      "quantity": 1,
+      "slot": 4,
+      "container": "bag1",
+      "stoneSerial": null
+    },
+    "existingRing": {
+      "uniqueId": "54788116",
+      "key": "crystal-item-404",
+      "itemIndex": 404,
+      "quantity": 1,
+      "slot": "ringLeft",
+      "durabilityCurrent": 5000,
+      "durabilityMax": 5000,
+      "stoneSerial": null,
+      "attack": 1,
+      "defence": 0
+    },
+    "difference": [],
+    "jewelry": {
+      "status": "notApplicable",
+      "reason": "The natural public Cut result is not Copper or Silver.",
+      "materialIndex": 904
+    },
+    "normalColdWebSocketLogin": true,
+    "economicCommandsSent": [],
+    "itemGrants": [],
+    "directGameplayStateEdits": false,
+    "sealedOutcomeReads": false,
+    "guiUsed": false,
+    "deployed": false,
+    "MaxDC": 11
+  },
+  "publicFinalState": {
+    "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+    "gold": 2850,
+    "ring": {
+      "itemIndex": 404,
+      "uniqueId": "54788116",
+      "slot": "ringLeft"
+    },
+    "carrier": {
+      "itemIndex": 904,
+      "uniqueId": "4",
+      "quantity": 1
+    },
+    "MaxDC": 11,
+    "publicSeenSerials": [
+      "1",
+      "2"
+    ],
+    "stoneLifecycle": [
+      {
+        "serial": "1",
+        "carrierUid": "54788116",
+        "lifecycle": "cut",
+        "revision": "2"
+      },
+      {
+        "serial": "2",
+        "carrierUid": "4",
+        "lifecycle": "cut",
+        "revision": "2"
+      }
+    ],
+    "publicAuditAccepted": true,
+    "noHiddenOutcomeFieldsRead": true,
+    "snapshotDatabaseSha256": "c0e8da2207b60f8fa64d79e5d392779d56428e28b49b2611cb10a5288cd770c2"
+  },
+  "runtime08Stop": {
+    "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+    "exited": true,
+    "disposed": true,
+    "exitCode": 0,
+    "logsComplete": true,
+    "evidencePreparationFailed": false,
+    "cleanFilePublicationAfter": true,
+    "oldStateAndCredentialsUnchanged": true,
+    "accountStoreModifiedByHelper": false,
+    "sourceRowsMatched": 1456,
+    "deployed": false,
+    "finalStateSha256": "be8b6f17cd2225d5a52de3a37475ff01ca897a03a55afb3d63a7ffc90966233e"
+  },
+  "repairValidation": {
+    "productFixCommit": "4ef821c50ac0802b87f7a171efefd6f126a2dbd2",
+    "validatedHead": "95146ae328b243465c91b368dbe076d9eaa457b2",
+    "testOnlyFollowups": [
+      {
+        "head": "9e4c822ce42cad6667f83af245b9d08dd76876bf",
+        "scope": "public API fixture"
+      },
+      {
+        "head": "2f6dfc05d405690e96ce31bea115eda19f97e610",
+        "scope": "valid diverse recovery key"
+      },
+      {
+        "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+        "scope": "offline Source fixture, local60s ack, idle baseline"
+      }
+    ],
+    "productSourceUnchangedSinceFixAsReviewedByRoot": true,
+    "simulationSourceAndTestsUnchangedAfterFocused02AsReviewedByRoot": true,
+    "gatewayBuild": {
+      "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "sourceDrift": [],
+      "declaredInputs": 1456,
+      "artifact": {
+        "length": 123378688,
+        "sha256": "e7255fdbc946469fda038e57674fa38922121e82e19eff0ed2eb3b74c05d5b57"
+      },
+      "auditAccepted": true
+    },
+    "regressions": [
+      {
+        "runId": "simulation-focused02",
+        "head": "9e4c822ce42cad6667f83af245b9d08dd76876bf",
+        "exitCode": 0,
+        "receiptAccepted": true,
+        "declaredInputs": 1456,
+        "sourceDrift": [],
+        "auditAccepted": true,
+        "sourceRowsMatched": 1456,
+        "lifecycleComplete": true,
+        "summaries": [
+          "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 2955 filtered out; finished in 97.93s"
+        ],
+        "passedNameCount": 4,
+        "nonpassingNames": [],
+        "names": [
+          "world_runtime::workshop_checkpoint_tests::workshop_checkpoint_after_exit_cannot_reopen_a_previously_published_page",
+          "world_runtime::workshop_checkpoint_tests::workshop_checkpoint_file_atelier_wear_clear_quotes_survive_additional_full_saves",
+          "world_runtime::workshop_checkpoint_tests::workshop_checkpoint_file_failure_invalidates_quotes_without_a_later_resurrection",
+          "world_runtime::workshop_checkpoint_tests::workshop_checkpoint_file_stone_quotes_survive_additional_full_saves_without_reexecution"
+        ]
+      },
+      {
+        "runId": "gateway-focused04",
+        "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+        "exitCode": 0,
+        "receiptAccepted": true,
+        "declaredInputs": 1456,
+        "sourceDrift": [],
+        "auditAccepted": true,
+        "sourceRowsMatched": 1456,
+        "lifecycleComplete": true,
+        "summaries": [
+          "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1180 filtered out; finished in 117.71s"
+        ],
+        "passedNameCount": 4,
+        "nonpassingNames": [],
+        "names": [
+          "web::tests::workshop_checkpoint_websocket_tests::workshop_checkpoint_real_websocket_file_forced_save_keeps_atelier_wear_clear_current",
+          "web::tests::workshop_checkpoint_websocket_tests::workshop_checkpoint_real_websocket_file_forced_save_keeps_first_stone_quotes_current",
+          "web::tests::workshop_checkpoint_websocket_tests::workshop_checkpoint_real_websocket_file_save_failure_never_sends_success_quotes",
+          "web::tests::workshop_checkpoint_websocket_tests::workshop_checkpoint_real_websocket_idle_file_save_republishes_before_first_cut"
+        ]
+      },
+      {
+        "runId": "simulation-regression04",
+        "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+        "exitCode": 0,
+        "receiptAccepted": true,
+        "declaredInputs": 1456,
+        "sourceDrift": [],
+        "auditAccepted": true,
+        "sourceRowsMatched": 1456,
+        "lifecycleComplete": true,
+        "summaries": [
+          "test result: ok. 74 passed; 0 failed; 0 ignored; 0 measured; 2885 filtered out; finished in 1019.26s"
+        ],
+        "passedNameCount": 74,
+        "nonpassingNames": []
+      },
+      {
+        "runId": "simulation-coverage-gap05",
+        "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+        "exitCode": 0,
+        "receiptAccepted": true,
+        "declaredInputs": 1456,
+        "sourceDrift": [],
+        "auditAccepted": true,
+        "sourceRowsMatched": 1456,
+        "lifecycleComplete": true,
+        "summaries": [
+          "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 2948 filtered out; finished in 3.00s"
+        ],
+        "passedNameCount": 11,
+        "nonpassingNames": []
+      },
+      {
+        "runId": "gateway-regression05",
+        "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+        "exitCode": 0,
+        "receiptAccepted": true,
+        "declaredInputs": 1456,
+        "sourceDrift": [],
+        "auditAccepted": true,
+        "sourceRowsMatched": 1456,
+        "lifecycleComplete": true,
+        "summaries": [
+          "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 1174 filtered out; finished in 66.13s"
+        ],
+        "passedNameCount": 10,
+        "nonpassingNames": []
+      }
+    ],
+    "dirtyIdleCheckpointEvidence": "Gateway real WebSocket regression, not the runtime08 idle stability pause.",
+    "acceptedForLocalOrdinaryProtocol": true,
+    "fullPlayerAcceptance": false,
+    "coverage": {
+      "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+      "pipeline04State": "failed-count",
+      "pipeline05State": "complete",
+      "originalExpectedCount": 83,
+      "initialPassedUnique": 74,
+      "gapPassedUnique": 11,
+      "intersection": [],
+      "finalUnionCount": 85,
+      "missingOriginal": [],
+      "newBeyondOriginal": [
+        "world_runtime::workshop_checkpoint_tests::workshop_checkpoint_file_atelier_wear_clear_quotes_survive_additional_full_saves",
+        "world_runtime::workshop_checkpoint_tests::workshop_checkpoint_file_stone_quotes_survive_additional_full_saves_without_reexecution"
+      ],
+      "gapNamesMatchPlan": true,
+      "finalNames": [
+        "config::config_refresh_fail_closed_tests::full_restore_plan_emits_account_save_tombstones_and_global_reset",
+        "config::config_refresh_fail_closed_tests::legacy_account_save_publishes_save_tombstone_and_preserves_untouched_metadata",
+        "config::config_refresh_fail_closed_tests::legacy_full_save_publishes_account_tombstone_then_recreates_with_expected_none",
+        "config::config_refresh_fail_closed_tests::retained_account_save_delete_is_a_versioned_tombstone",
+        "config::config_stone_schema_tests::future_schema_eleven_with_each_existing_ledger_is_rejected_without_rewriting",
+        "config::config_stone_schema_tests::future_schema_without_economy_ledgers_is_also_rejected",
+        "config::config_stone_schema_tests::old_schema_six_or_nine_cannot_import_a_valid_nonempty_stone_registry",
+        "config::config_stone_schema_tests::schema_nine_activity_file_migrates_without_reopening_claims",
+        "config::config_stone_schema_tests::schema_nine_applied_billing_file_migrates_without_losing_payment_receipts",
+        "config::config_stone_schema_tests::schema_nine_combined_ledgers_preserve_the_complete_file_image_after_migration",
+        "config::config_stone_schema_tests::schema_nine_monthly_item_file_migrates_without_resetting_activation_history",
+        "config::config_stone_schema_tests::schema_ten_still_rejects_cross_account_reuse_of_a_provider_payment",
+        "config::conquest_account_fences::tests::conquest_mirror_account_tombstone_still_fences_every_original_save",
+        "config::stone_authority::tests::stone_receipt_requires_exact_increment_and_rejects_unscoped_versions",
+        "config::stone_authority::tests::stone_source_metadata_and_empty_or_duplicate_identity_scope_are_rejected",
+        "runtime::atelier::tests::atelier_ambiguous_file_commit_fences_writes_without_live_success_or_automatic_retry",
+        "runtime::atelier::tests::atelier_failed_file_commit_keeps_whole_checkpoint_then_original_request_can_succeed",
+        "runtime::atelier::tests::atelier_fashion_unlock_duplicate_wear_and_clear_never_change_equipment_or_stats",
+        "runtime::atelier::tests::atelier_file_cold_restart_preserves_unlock_private_receipt_and_replay_without_second_debit",
+        "runtime::atelier::tests::atelier_full_bag_reclassification_keeps_the_original_slot_uid_and_soul_binding",
+        "runtime::atelier::tests::atelier_gold_or_second_material_shortage_has_no_partial_debit",
+        "runtime::atelier::tests::atelier_jade_fashion_consumes_both_exact_materials_once_without_making_armour",
+        "runtime::atelier::tests::atelier_locked_rented_sealed_or_foreign_bound_materials_are_not_offered",
+        "runtime::atelier::tests::atelier_old_revision_changed_request_and_fabricated_recipe_never_consume",
+        "runtime::atelier::tests::atelier_outer_source_failure_discards_the_nested_pending_page_without_retry",
+        "runtime::atelier::tests::atelier_pending_page_cannot_reopen_after_exit_replacement_or_leaving_npc_range",
+        "runtime::atelier::tests::atelier_public_source_craft_wear_clear_links_bind_the_final_complete_checkpoint",
+        "runtime::atelier::tests::atelier_real_alice_links_make_original_jewellery_then_normal_equip",
+        "runtime::atelier::tests::atelier_receipts_reject_tampering_and_eviction_never_revives_an_old_quote",
+        "runtime::atelier::tests::atelier_requires_the_exact_current_displayed_link_even_for_an_otherwise_valid_quote",
+        "runtime::atelier::tests::atelier_same_request_replays_but_cross_character_cannot_spend_or_recover_it",
+        "runtime::atelier::tests::atelier_unknown_dialog_has_only_exit_and_no_success_or_replacement_quote",
+        "runtime::atelier::tests::atelier_wrong_npc_out_of_range_and_dead_owners_cannot_execute_displayed_quote",
+        "runtime::intelligent_creature_item_tests::creature_blackstone_ordinary_use_consumes_once_and_does_not_invent_rewards",
+        "runtime::intelligent_creature_item_tests::creature_blackstone_uses_mail_when_bag_is_full_and_does_not_repeat_same_second",
+        "runtime::intelligent_creature_item_tests::creature_maintenance_uses_seconds_food_protection_expiry_and_blackstone_reward",
+        "runtime::intelligent_creatures::uid_tests::empty_blackstone_retires_high_source_in_history_without_minting_a_reward",
+        "runtime::mining::uid_tests::failed_mine_issuance_keeps_stones_pickaxe_and_inventory",
+        "runtime::quests::newcomer_progression_tests::later_milestones_keep_their_existing_gold_only_contract",
+        "runtime::quests::newcomer_progression_tests::milestone_finish_rechecks_level_and_keeps_the_gold_reward_permanent",
+        "runtime::quests::newcomer_progression_tests::milestone_reward_finish_is_atomic_when_the_bag_is_full",
+        "runtime::quests::newcomer_progression_tests::milestone_rewards_are_server_resolved_for_every_class_and_gender_and_pay_once",
+        "runtime::session::tests::casting_stonetrap_spawns_friendly_trap_with_extra",
+        "runtime::session::tests::crystal_mining_swing_emits_mine_effect_and_depletes_stone",
+        "runtime::session::tests::hostile_monster_prefers_stone_trap_over_other_friendly_summon_targets",
+        "runtime::session::tests::intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses",
+        "runtime::session::tests::intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone",
+        "runtime::session::tests::stonetrap_ignores_incoming_damage_and_keeps_full_health",
+        "runtime::session::tests::zuma_monster_wake_spreads_to_nearby_stoned_zuma",
+        "runtime::stone_npc::tests::displayed_command_is_bound_to_current_inventory_and_public_stone_revision",
+        "runtime::stone_npc::tests::duplicate_carriers_bad_decimal_and_forged_material_probabilities_are_not_rendered",
+        "runtime::stone_npc::tests::eighty_physical_items_are_paginated_three_at_a_time_and_keep_original_links",
+        "runtime::stone_npc::tests::exact_target_parser_roundtrips_max_u64_and_refuses_ambiguous_inputs",
+        "runtime::stone_npc::tests::four_supported_languages_render_localized_workshop_and_failure_notices",
+        "runtime::stone_npc::tests::only_two_actual_whitelisted_script_locations_are_approved",
+        "runtime::stone_npc::tests::quote_binds_owner_incarnation_item_operation_and_both_revisions",
+        "runtime::stone_npc::tests::seal_and_appraisal_success_never_forward_an_incidental_private_result_string",
+        "runtime::stone_npc::tests::stone_detail_shows_six_exact_probabilities_frozen_fees_and_only_coarse_clue",
+        "runtime::stone_npc::tests::unknown_result_page_has_no_action_or_automatic_refresh_links",
+        "runtime::stones::tests::stone_changed_operation_with_original_request_id_is_rejected",
+        "runtime::stones::tests::stone_exact_cut_replay_after_inventory_and_gold_change_never_delivers_twice",
+        "runtime::stones::tests::stone_full_bag_cut_replaces_source_without_requiring_a_free_slot",
+        "runtime::stones::tests::stone_insufficient_gold_keeps_same_sealed_instance_and_registry",
+        "runtime::stones::tests::stone_known_file_failure_preserves_live_money_and_allows_original_retry",
+        "runtime::stones::tests::stone_locked_carrier_cannot_cut_and_raw_stone_cannot_lose_reference_on_ground",
+        "runtime::stones::tests::stone_material_outputs_and_raw_templates_are_real_catalog_rows",
+        "runtime::stones::tests::stone_ordinary_account_scope_and_restore_cannot_rewind_secret_or_cut_tombstone",
+        "runtime::stones::tests::stone_out_of_range_fabricated_and_parenthesized_npc_targets_cannot_mutate",
+        "runtime::stones::tests::stone_outer_source_failure_discards_the_nested_page_after_one_economic_commit",
+        "runtime::stones::tests::stone_pending_page_cannot_reopen_after_exit_replacement_or_leaving_npc_range",
+        "runtime::stones::tests::stone_public_file_source_accepts_first_seal_appraise_cut_quotes_after_final_revision",
+        "runtime::stones::tests::stone_public_known_file_failure_requotes_without_debit_and_first_retry_succeeds",
+        "runtime::stones::tests::stone_public_unknown_file_commit_never_publishes_new_quotes_or_retries",
+        "runtime::stones::tests::stone_real_npc_dialog_drives_seal_appraise_cut_and_rejects_stale_click",
+        "runtime::stones::tests::stone_save_reload_keeps_original_secret_and_physical_reference",
+        "runtime::stones::tests::stone_three_grades_pay_frozen_fees_and_keep_real_uid_binding_and_slot",
+        "runtime::stones::tests::stone_unknown_file_commit_preserves_durable_cut_and_fences_all_followup_writes",
+        "runtime::zone::runtime::checkpoint::tests::checkpoint_state_root_authenticates_removed_object_tombstones",
+        "runtime::zone::runtime::entity_combat::tests::indexed_stone_trap_decoy_keeps_exact_distance_and_id_order",
+        "runtime::zone::runtime::entity_combat::tests::native_entity_struck_skips_resist_uses_zero_attacker_and_respects_stone_trap",
+        "world_runtime::atelier_tests::atelier_world_command_craft_wear_clear_accepts_each_first_displayed_quote_after_outer_source",
+        "world_runtime::stone_tests::stone_world_command_file_source_accepts_first_seal_appraise_cut_quotes_after_outer_source",
+        "world_runtime::tests::grant_onchain_ore_rebroadcasts_vein_stage_from_chain_stones",
+        "world_runtime::workshop_checkpoint_tests::workshop_checkpoint_file_atelier_wear_clear_quotes_survive_additional_full_saves",
+        "world_runtime::workshop_checkpoint_tests::workshop_checkpoint_file_stone_quotes_survive_additional_full_saves_without_reexecution"
+      ]
+    },
+    "finalValidationAudit": {
+      "path": ".mir2-player-qa/workshop-checkpoint-20261018/final-validation-audit01.json",
+      "sha256": "5dead511cea7d87dcda5e47ec199abba98df6d44d10f198fa54f058a2c112dd7",
+      "accepted": true
+    }
+  },
+  "repairFailureHistory": [
+    {
+      "qa": "workshop-checkpoint-20261018",
+      "pipeline": "pipeline01",
+      "head": "4ef821c50ac0802b87f7a171efefd6f126a2dbd2",
+      "state": "failed",
+      "reason": "Gateway compile E0624; earlier Simulation result separately valid."
+    },
+    {
+      "qa": "workshop-checkpoint-20261018",
+      "pipeline": "pipeline02",
+      "head": "9e4c822ce42cad6667f83af245b9d08dd76876bf",
+      "state": "failed",
+      "reason": "Recovery-key fixture validation failure and cascade."
+    },
+    {
+      "qa": "workshop-checkpoint-20261018",
+      "pipeline": "pipeline03",
+      "head": "2f6dfc05d405690e96ce31bea115eda19f97e610",
+      "state": "failed",
+      "reason": "10s test boot timeout and live File fixture race."
+    },
+    {
+      "qa": "workshop-checkpoint-20261018",
+      "pipeline": "pipeline04",
+      "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+      "state": "failed-count",
+      "reason": "74 tests passed; narrow filter covered72 old +2 new, omitted11 old broad-filter matches."
+    },
+    {
+      "qa": "workshop-checkpoint-20261018",
+      "pipeline": "pipeline05",
+      "head": "95146ae328b243465c91b368dbe076d9eaa457b2",
+      "state": "complete",
+      "reason": "Only missing11 and adjacent Gateway10 executed; union85 covers old83 plus2 new. Original Guard unchanged."
+    }
+  ]
+}

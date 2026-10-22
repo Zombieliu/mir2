@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "recordedUtc": "2026-10-21T15:44:02.174380+00:00",
+  "error": "'path'",
+  "schema": "mir2.native-leisure-public-guard-audit.v1",
+  "run": "pet-ui-focused01",
+  "rawAuditSha256": "771fc3e63538a81157346e1e695761f1909c44b7a985717e87123c2906631fc7",
+  "independentRawProbeAndNonceChecked": true,
+  "sourceManifestSha256": "eb09513b23437eb45b1a6b9e625cd8fd9a32a3b6db584e9e2226a0db84f97a57"
+}

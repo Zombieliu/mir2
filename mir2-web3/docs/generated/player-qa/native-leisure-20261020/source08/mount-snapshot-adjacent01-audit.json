@@ -1,0 +1,12 @@
+{
+  "accepted": true,
+  "recordedUtc": "2026-10-21T02:54:18.941176+00:00",
+  "nonce": "f0478da4099b476485e6b633ae890e59",
+  "childPid": 248768,
+  "remainingBytes": 456479227904,
+  "monotonicFreshnessMs": 29.635899999999992,
+  "conservativeWallFreshnessMs": 78,
+  "sourceRowsMatched": 1460,
+  "exitCode": 0,
+  "lifecycleComplete": true
+}

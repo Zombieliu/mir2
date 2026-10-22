@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.local-stone-build.v1",
+  "kind": "gateway",
+  "head": "830395cbe42c040c492fae85eeab5907ed7861e7",
+  "startedUtc": "2026-10-21T02:56:58.2947451Z",
+  "finishedUtc": "2026-10-21T02:58:22.3216764Z",
+  "exitCode": 0,
+  "receiptAccepted": true,
+  "receiptError": null,
+  "productAccepted": true,
+  "sourceSnapshotSha256": "d8b4381f7e893e15811448d62580be70cfd4306a771c6b9b7f1bb97917fdcae8",
+  "declaredInputs": 1460,
+  "sourceDrift": [],
+  "artifact": {
+    "path": "mir2-gateway.exe",
+    "length": 123383296,
+    "sha256": "52ce516fe0c6605b82c594b8a2d85944916fc0839b33fd0424763947f98bf202"
+  },
+  "gameStarted": false,
+  "gatewayStarted": false,
+  "deployed": false,
+  "publicArchive": {
+    "rawResultSha256": "870830852f9280acefee12b73b0ff5b2c45a6dff752ceda253ccd1668245e2fe",
+    "absoluteArtifactPathOmitted": true,
+    "cargoLogSha256": "87b47458e052584d4973652d4cbe26193176912713eab1562af03105c2361ce9",
+    "gameplayAcceptanceClaimed": false
+  }
+}

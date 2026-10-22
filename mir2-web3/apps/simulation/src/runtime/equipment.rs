@@ -772,33 +772,69 @@ pub(super) fn replace_equipment(world: &mut World, next: EquipmentState) {
     super::stats::refresh_player_stats(world);
 }
 
-/// Rebuild Crystal `MountInfo.CanAttack` input from the authoritative equipped
-/// mount and its embedded `MountSlot.Bells` item. The client never supplies this
-/// predicate directly.
+/// Rebuild Crystal mount capabilities from the authoritative protocol slots.
+/// Live socket children are compact; their Vec indexes are not MountSlot indexes.
 pub(super) fn refresh_mount_resource_from_equipment(world: &mut World) {
-    let (mount_type, has_bells) = world
+    let (mount_type, has_saddle, has_reins, has_bells) = world
         .resource::<InventoryResource>()
         .equipment_items
         .iter()
         .find(|item| item.slot == EquipmentSlot::Mount)
-        .map(|mount| {
+        .and_then(|mount| {
+            let item = user_item_from_equipment_state(mount)?;
+            let template = mir2_game_data::crystal_item_by_index(item.item_index)?;
+            if template.item_type != CRYSTAL_ITEM_TYPE_MOUNT || item.current_dura == 0 {
+                return None;
+            }
             let mount_type = mount
                 .shape
                 .and_then(|shape| i16::try_from(shape).ok())
-                .unwrap_or_else(|| i16::try_from(mount.icon).unwrap_or(0));
-            let has_bells = mount.socketed.iter().any(|item| {
-                crystal_item_template_for_item_key(&item.key)
-                    .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_BELLS)
-            });
-            (mount_type, has_bells)
+                .unwrap_or(template.shape);
+            let has_attachment = |slot: usize, item_type: u8| {
+                item.slots
+                    .get(slot)
+                    .and_then(Option::as_ref)
+                    .and_then(|item| mir2_game_data::crystal_item_by_index(item.item_index))
+                    .is_some_and(|template| template.item_type == item_type)
+            };
+            // Crystal Shared/Enums.cs: Reins=0, Bells=1, Saddle=2.
+            Some((
+                mount_type,
+                has_attachment(2, 24),
+                has_attachment(0, 22),
+                has_attachment(1, CRYSTAL_ITEM_TYPE_BELLS),
+            ))
         })
-        .unwrap_or((-1, false));
+        .unwrap_or((-1, false, false, false));
+    let may_ride = mount_type >= 0
+        && has_saddle
+        && !current_map_disallows_mount(world)
+        && (!current_map_requires_bridle(world) || has_reins);
     let mut mount = world.resource_mut::<MountResource>();
     mount.mount_type = mount_type;
+    mount.has_saddle = has_saddle;
+    mount.has_reins = has_reins;
     mount.has_bells = has_bells;
-    if mount_type < 0 {
+    if !may_ride {
         mount.riding_mount = false;
     }
+}
+
+pub(super) fn refresh_mount_with_packets(world: &mut World) -> Vec<ServerPacket> {
+    let previous = {
+        let mount = world.resource::<MountResource>();
+        (mount.mount_type, mount.riding_mount)
+    };
+    refresh_mount_resource_from_equipment(world);
+    let mount = world.resource::<MountResource>();
+    if previous == (mount.mount_type, mount.riding_mount) {
+        return Vec::new();
+    }
+    vec![ServerPacket::MountUpdate {
+        object_id: current_player_object_id(world).unwrap_or_default(),
+        mount_type: mount.mount_type,
+        riding_mount: mount.riding_mount,
+    }]
 }
 
 pub(super) fn item_state_from_equipment_state(
@@ -986,21 +1022,28 @@ pub(super) fn damage_weapon_durability(
 pub(super) fn damage_worn_durability(world: &mut World, current_tick: u64) -> Vec<ServerPacket> {
     let amount = crystal_worn_durability_loss(current_tick);
     let mut packets = Vec::new();
-    let mut resources = world.resource_mut::<InventoryResource>();
-
-    for item in resources
-        .equipment_items
-        .iter_mut()
-        .filter(|item| item.slot != EquipmentSlot::Weapon)
+    let mut mount_broke = false;
     {
-        if damage_equipment_item(item, amount) {
-            if let Some(unique_id) = equipment_slot_unique_id(item.slot) {
-                packets.push(ServerPacket::DuraChanged {
-                    unique_id,
-                    current_dura: item.durability_current,
-                });
+        let mut resources = world.resource_mut::<InventoryResource>();
+
+        for item in resources
+            .equipment_items
+            .iter_mut()
+            .filter(|item| item.slot != EquipmentSlot::Weapon)
+        {
+            if damage_equipment_item(item, amount) {
+                mount_broke |= item.slot == EquipmentSlot::Mount && item.durability_current == 0;
+                if let Some(unique_id) = equipment_slot_unique_id(item.slot) {
+                    packets.push(ServerPacket::DuraChanged {
+                        unique_id,
+                        current_dura: item.durability_current,
+                    });
+                }
             }
         }
+    }
+    if mount_broke {
+        packets.extend(refresh_mount_with_packets(world));
     }
 
     packets
@@ -1156,31 +1199,27 @@ pub(super) fn toggle_mount_ride_from_use_item(
     if Some(unique_id) != equipment_slot_unique_id(EquipmentSlot::Mount) {
         return None;
     }
-    let Some(mount) = world
+    refresh_mount_resource_from_equipment(world);
+    if !world
         .resource::<InventoryResource>()
         .equipment_items
         .iter()
-        .find(|equipment| equipment.slot == EquipmentSlot::Mount)
-        .cloned()
-    else {
+        .any(|equipment| equipment.slot == EquipmentSlot::Mount)
+    {
         return Some(vec![ServerPacket::UseItem {
             unique_id,
             success: false,
             grid: MirGridType::Equipment,
         }]);
-    };
-    let mount_type = mount
-        .shape
-        .and_then(|shape| i16::try_from(shape).ok())
-        .unwrap_or_else(|| i16::try_from(mount.icon).unwrap_or(0));
+    }
     let map_disallows_mount = current_map_disallows_mount(world);
     let map_requires_bridle = current_map_requires_bridle(world);
     let (riding_mount, mount_type) = {
         let mut mount_resource = world.resource_mut::<MountResource>();
-        mount_resource.mount_type = mount_type;
         let wants_ride = !mount_resource.riding_mount;
         let can_ride = !wants_ride
-            || (mount_resource.has_saddle
+            || (mount_resource.mount_type >= 0
+                && mount_resource.has_saddle
                 && !map_disallows_mount
                 && (!map_requires_bridle || mount_resource.has_reins));
         mount_resource.riding_mount = wants_ride && can_ride;
@@ -1204,27 +1243,23 @@ pub(super) fn toggle_mount_ride_from_use_item(
 /// when no mount is equipped (Crystal's `ToggleRide` early-returns), and it honours
 /// the same saddle / map-disallows / bridle gates as the use-item ride toggle.
 pub(super) fn gm_toggle_ride(world: &mut World) -> Vec<ServerPacket> {
-    let Some(mount) = world
+    refresh_mount_resource_from_equipment(world);
+    if !world
         .resource::<InventoryResource>()
         .equipment_items
         .iter()
-        .find(|equipment| equipment.slot == EquipmentSlot::Mount)
-        .cloned()
-    else {
+        .any(|equipment| equipment.slot == EquipmentSlot::Mount)
+    {
         return Vec::new();
-    };
-    let mount_type = mount
-        .shape
-        .and_then(|shape| i16::try_from(shape).ok())
-        .unwrap_or_else(|| i16::try_from(mount.icon).unwrap_or(0));
+    }
     let map_disallows_mount = current_map_disallows_mount(world);
     let map_requires_bridle = current_map_requires_bridle(world);
     let (riding_mount, mount_type) = {
         let mut mount_resource = world.resource_mut::<MountResource>();
-        mount_resource.mount_type = mount_type;
         let wants_ride = !mount_resource.riding_mount;
         let can_ride = !wants_ride
-            || (mount_resource.has_saddle
+            || (mount_resource.mount_type >= 0
+                && mount_resource.has_saddle
                 && !map_disallows_mount
                 && (!map_requires_bridle || mount_resource.has_reins));
         mount_resource.riding_mount = wants_ride && can_ride;
@@ -1268,7 +1303,7 @@ pub(super) fn try_equip_item(
         source_container,
         source_item,
         replaced_cursed,
-        refresh_packets,
+        mut refresh_packets,
     ) = {
         let resources = world.resource::<InventoryResource>();
         let source_items = match grid {
@@ -1392,7 +1427,7 @@ pub(super) fn try_equip_item(
             .resource_mut::<PlayerPermissionResource>()
             .unlock_curse = false;
     }
-    refresh_mount_resource_from_equipment(world);
+    refresh_packets.extend(refresh_mount_with_packets(world));
 
     Some(EquipItemMutationResult { refresh_packets })
 }
@@ -1416,13 +1451,22 @@ pub(super) fn equip_item_impl(
         return vec![failed_packet];
     };
 
-    let mut packets = result.refresh_packets;
+    let mut packets = Vec::new();
+    let mut mount_updates = Vec::new();
+    for packet in result.refresh_packets {
+        if matches!(packet, ServerPacket::MountUpdate { .. }) {
+            mount_updates.push(packet);
+        } else {
+            packets.push(packet);
+        }
+    }
     packets.push(ServerPacket::EquipItem {
         grid,
         unique_id,
         to,
         success: true,
     });
+    packets.extend(mount_updates);
     refresh_mount_resource_from_equipment(world);
     super::stats::refresh_player_stats(world);
     packets
@@ -1507,14 +1551,15 @@ pub(super) fn remove_equipped_item_impl(
         consume_curse_unlock_after_success(world, removed_cursed);
     }
 
-    refresh_mount_resource_from_equipment(world);
-    super::stats::refresh_player_stats(world);
-    vec![ServerPacket::RemoveItem {
+    let mut packets = vec![ServerPacket::RemoveItem {
         grid,
         unique_id,
         to,
         success: true,
-    }]
+    }];
+    packets.extend(refresh_mount_with_packets(world));
+    super::stats::refresh_player_stats(world);
+    packets
 }
 
 fn crystal_item_removal_allowed(
@@ -1706,8 +1751,13 @@ fn equip_mount_slot_item_impl(
     to: i32,
     to_unique_id: u64,
 ) -> bool {
+    let Some(expected_type) = [22, CRYSTAL_ITEM_TYPE_BELLS, 24, 25, 26]
+        .get(usize::try_from(to).unwrap_or(usize::MAX))
+        .copied()
+    else {
+        return false;
+    };
     if !matches!(grid, MirGridType::Inventory | MirGridType::Storage)
-        || to != 1
         || (grid == MirGridType::Storage
             && (!active_crystal_storage_service(world) || storage_locked(world)))
     {
@@ -1723,8 +1773,18 @@ fn equip_mount_slot_item_impl(
         };
         let source_index = unique_item_index_for_protocol_reference(source_items, grid, unique_id)?;
         let source = &source_items[source_index];
+        if (grid == MirGridType::Storage
+            && !super::inventory::is_valid_storage_slot(resources, source.slot))
+            || super::packets::stage5_trade_reserves_item(world, source)
+            || resources
+                .reserved_item_unique_ids
+                .contains(&source.unique_id)
+            || resources.reserved_item_unique_ids.contains(&to_unique_id)
+        {
+            return None;
+        }
         let source_template = crystal_item_template_for_item_key(&source.key)?;
-        if source_template.item_type != CRYSTAL_ITEM_TYPE_BELLS
+        if source_template.item_type != expected_type
             || crystal_item_requirement_rejection_key(world, resources, &source_template).is_some()
         {
             return None;
@@ -1738,6 +1798,12 @@ fn equip_mount_slot_item_impl(
             .iter()
             .find(|item| item.slot == EquipmentSlot::Mount)?;
         let mount_user_item = user_item_from_equipment_state(mount)?;
+        if resources
+            .reserved_item_unique_ids
+            .contains(&mount_user_item.unique_id)
+        {
+            return None;
+        }
         let legacy_mount_reference = equipment_slot_unique_id(EquipmentSlot::Mount);
         if mount_user_item.unique_id != to_unique_id && legacy_mount_reference != Some(to_unique_id)
         {
@@ -1775,8 +1841,6 @@ fn equip_mount_slot_item_impl(
     };
     next_resources.equipment_items[mount_index] = next_mount;
     *world.resource_mut::<InventoryResource>() = next_resources;
-    refresh_mount_resource_from_equipment(world);
-    super::stats::refresh_player_stats(world);
     true
 }
 
@@ -1893,13 +1957,18 @@ pub(super) fn equip_slot_item_impl(
         if !success {
             return vec![failed];
         }
-        return vec![ServerPacket::EquipSlotItem {
+        let mut packets = vec![ServerPacket::EquipSlotItem {
             grid,
             unique_id,
             to,
             grid_to,
             success: true,
         }];
+        if grid_to == MirGridType::Mount {
+            packets.extend(refresh_mount_with_packets(world));
+            super::stats::refresh_player_stats(world);
+        }
+        return packets;
     }
     if !matches!(grid, MirGridType::Inventory | MirGridType::Storage)
         || !matches!(grid_to, MirGridType::Socket | MirGridType::Inventory)
@@ -2042,6 +2111,14 @@ pub(super) fn remove_equipped_slot_item_impl(
                 let Some(host_user_item) = user_item_from_equipment_state(host) else {
                     return vec![failed_packet];
                 };
+                if resources
+                    .reserved_item_unique_ids
+                    .contains(&host_user_item.unique_id)
+                    || resources.reserved_item_unique_ids.contains(&from_unique_id)
+                    || resources.reserved_item_unique_ids.contains(&unique_id)
+                {
+                    return vec![failed_packet];
+                }
                 if host_user_item.unique_id != from_unique_id
                     && equipment_slot_unique_id(EquipmentSlot::Mount) != Some(from_unique_id)
                 {
@@ -2123,6 +2200,10 @@ pub(super) fn remove_equipped_slot_item_impl(
         let Some(removed_user_item) = validated_item_state_user_item(&removed) else {
             return vec![failed_packet];
         };
+        if grid == MirGridType::Mount && super::packets::stage5_trade_reserves_item(world, &removed)
+        {
+            return vec![failed_packet];
+        }
         if removed_user_item.wedding_ring != -1
             || !crystal_item_removal_allowed(
                 world,
@@ -2148,15 +2229,16 @@ pub(super) fn remove_equipped_slot_item_impl(
     }
     *world.resource_mut::<InventoryResource>() = next_resources;
     consume_curse_unlock_after_success(world, removed_cursed);
-    refresh_mount_resource_from_equipment(world);
-    super::stats::refresh_player_stats(world);
-    vec![ServerPacket::RemoveSlotItem {
+    let mut packets = vec![ServerPacket::RemoveSlotItem {
         grid,
         grid_to,
         unique_id,
         to,
         success: true,
-    }]
+    }];
+    packets.extend(refresh_mount_with_packets(world));
+    super::stats::refresh_player_stats(world);
+    packets
 }
 
 pub(super) fn active_crystal_repair_service(

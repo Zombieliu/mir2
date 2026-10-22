@@ -1,0 +1,13 @@
+{
+  "recordedUtc": "2026-10-21T09:55:27.521Z",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\mir2-web3\\.mir2-player-qa\\leisure-owned-a1f834ad906c40bc93c1bd0a33d630cc\\runtime-controlled05\\client\\mir2-platform-windows.exe",
+    "id": 50595832,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "dada2287b751f00a6b3233d5e4cfb5a295fdfe6c4061aa3794436241cc42f98c",
+  "note": "Existing starterCandle x1 bag3, durability8/8 selected ordinaryDropAll; BabyPig active nearby, Gold1307660. This bounded pickup check uses player-owned dropped item, not monsterloot or spawnedgift.",
+  "source": "Explicit Sky observation passed by caller; screenshot closure state not used"
+}

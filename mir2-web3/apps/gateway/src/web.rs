@@ -9165,15 +9165,34 @@ fn responses_change_player_progression(responses: &[ServerPacket]) -> bool {
     })
 }
 
+fn responses_change_inventory_or_mount_state(responses: &[ServerPacket]) -> bool {
+    responses.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::GainedItem { .. }
+                | ServerPacket::DeleteItem { .. }
+                | ServerPacket::DuraChanged { .. }
+                | ServerPacket::MountUpdate { .. }
+        )
+    })
+}
+
 fn low_latency_responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
     // A portal may complete on Walk/Run or a later Tick. Its destination needs
     // a complete producer source before Native can authorize the new scene.
     responses_begin_zone_bootstrap(responses)
         || responses_change_quest_state(responses)
         || responses_change_player_progression(responses)
+        // Tick can mutate nested attachments; ordinary @ride changes the
+        // server-derived mount and weapon sprite libraries. Native needs the
+        // authoritative complete snapshot for either change.
+        || responses_change_inventory_or_mount_state(responses)
 }
 
 fn responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
+    if responses_change_inventory_or_mount_state(responses) {
+        return true;
+    }
     responses.iter().any(|packet| {
         matches!(
             packet,
@@ -13146,6 +13165,7 @@ mod tests {
     include!("web_monthly_card_tests.rs");
     include!("web_mining_tests.rs");
     include!("web_map_bootstrap_tests.rs");
+    include!("web_tick_item_snapshot_tests.rs");
     include!("web_workshop_checkpoint_tests.rs");
 
     fn snapshot_test_spectator(enabled: bool) -> crate::spectator::SpectatorHub {

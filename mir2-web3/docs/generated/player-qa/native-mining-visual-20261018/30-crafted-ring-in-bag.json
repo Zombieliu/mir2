@@ -1,0 +1,14 @@
+{
+  "recordedUtc": "2026-10-19T06:44:54.171Z",
+  "screenshotId": "screenshot-0",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\.mir2-player-qa\\workshop-checkpoint-20261018\\visual-20261018\\runtime11\\client01\\mir2-platform-windows.exe",
+    "id": 13505828,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "1d7c90acc969d259463490d9504523bf5e02eb39efd5e920a3ac90feed90a103",
+  "note": "New CopperRing visible in Bag slot1 replacing consumed cut Copper, tooltip DC0-1, Lv3, Durability5/5, Gold5150. Existing old ring remains equipped until next action.",
+  "source": "Actual Sky screenshot saved as durable visual acceptance evidence"
+}

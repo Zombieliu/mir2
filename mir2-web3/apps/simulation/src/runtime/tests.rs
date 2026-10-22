@@ -635,8 +635,8 @@ fn attach_real_bronze_bell_fixture(session: &mut SimulationSession, unique_id: u
         "RedTiger must expose MountSlot.Bells"
     );
     assert!(
-        mount.socketed.is_empty(),
-        "fixture mount must start without Bells"
+        mount.socketed.len() == 1 && mount.socketed[0].key == "crystal-item-782",
+        "fixture mount must start with its real Saddle and without Bells"
     );
     mount.socketed.push(bells);
     unique_id
@@ -684,6 +684,27 @@ fn equip_crystal_mount_with_optional_bells_and_ride(
             ..
         }
     )));
+
+    let saddle_id = grant_real_crystal_item(session, "Saddle", 32);
+    let equip_saddle = session.handle_packet(ClientPacket::EquipSlotItem {
+        grid: MirGridType::Inventory,
+        unique_id: saddle_id,
+        to: 2,
+        grid_to: MirGridType::Mount,
+        to_unique_id: 13,
+    });
+    assert!(
+        equip_saddle.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::EquipSlotItem {
+                to: 2,
+                grid_to: MirGridType::Mount,
+                success: true,
+                ..
+            }
+        )),
+        "real Saddle equip failed: {equip_saddle:?}"
+    );
 
     let bells_id = with_bells.then(|| equip_crystal_bells_to_mount(session, 31));
 
@@ -802,45 +823,49 @@ fn equip_crystal_item_with_quantity(
 }
 
 fn equip_test_mount(session: &mut SimulationSession, shape: u16) {
+    let template = mir2_game_data::crystal_item_by_name("BengalTiger").unwrap();
+    let carrier = crate::runtime::items::embedded_item_state_from_template(
+        &template,
+        ItemContainer::Bag1,
+        13,
+    );
+    let mut mount =
+        crate::runtime::equipment::equipment_state_from_item_state(&carrier, EquipmentSlot::Mount);
+    // Preserve this appearance fixture's requested shape while using genuine item custody.
+    mount.shape = Some(shape);
     session
         .app
         .world_mut()
         .resource_mut::<InventoryResource>()
         .equipment_items
-        .push(super::EquipmentState {
-            key: "test-mount".to_string(),
-            slot: EquipmentSlot::Mount,
-            quantity: 1,
-            awake_type: 0,
-            awake_values: Vec::new(),
-            name: "Test Mount".to_string(),
-            icon: super::equipment_icon_for_slot_and_name(EquipmentSlot::Mount, "Test Mount"),
-            shape: Some(shape),
-            description: "Mount used by Crystal ride tests.".to_string(),
-            durability_current: 5000,
-            durability_max: 5000,
-            grade: ItemGrade::None,
-            added_attack: 0,
-            added_defence: 0,
-            added_luck: 0,
-            added_stats: Vec::new(),
-            socketed: Vec::new(),
-            user_item_metadata: None,
-            user_item_unique_id: None,
-            cursed: false,
-            socket_slots: 0,
-            gem_count: 0,
-            identified: None,
-            soul_bound_id: None,
-            sealed_expiry_time_binary_datetime: 0,
-            sealed_next_time_binary_datetime: 0,
-            rental_binding_flags: 0,
-            rental_owner_name: String::new(),
-            rental_expiry_binary_datetime: 0,
-            rental_locked: false,
-            attack: 0,
-            defence: 0,
-        });
+        .push(mount);
+    set_test_mount_slot_fixture(session, 2, Some("Saddle"));
+}
+
+fn set_test_mount_slot_fixture(session: &mut SimulationSession, slot: usize, name: Option<&str>) {
+    let child = name.map(|name| take_real_crystal_item_state(session, name, 32));
+    let mut resources = session.app.world_mut().resource_mut::<InventoryResource>();
+    let mount = resources
+        .equipment_items
+        .iter_mut()
+        .find(|item| item.slot == EquipmentSlot::Mount)
+        .expect("fixture mount");
+    let shape = mount.shape;
+    let mut wire = crate::runtime::equipment::user_item_from_equipment_state(mount).unwrap();
+    wire.slots[slot] = child
+        .as_ref()
+        .map(crate::runtime::items::user_item_from_item_state);
+    let carrier = crate::runtime::equipment::item_state_from_equipment_state(
+        mount.clone(),
+        ItemContainer::Bag1,
+        13,
+    );
+    let carrier = crate::runtime::items::try_item_state_from_user_item(carrier, &wire).unwrap();
+    *mount =
+        crate::runtime::equipment::equipment_state_from_item_state(&carrier, EquipmentSlot::Mount);
+    mount.shape = shape;
+    drop(resources);
+    crate::runtime::equipment::refresh_mount_resource_from_equipment(session.app.world_mut());
 }
 
 fn add_inventory_crystal_item_with_socket_slots(
@@ -6835,10 +6860,19 @@ fn legacy_zero_and_duplicate_embedded_unique_ids_normalize_deterministically() {
             mount.socket_slots > 1,
             "RedTiger must expose MountSlot.Bells"
         );
-        assert_eq!(mount.socketed.len(), 1, "one legal Bells occupant expected");
-        assert_eq!(mount.socketed[0].key, "crystal-item-778");
-        mount.socketed[0].slot = 1;
-        mount.socketed[0].unique_id = 0;
+        assert_eq!(
+            mount.socketed.len(),
+            2,
+            "real Saddle and one legal Bells occupant expected"
+        );
+        let bells = mount
+            .socketed
+            .iter_mut()
+            .find(|item| item.key == "crystal-item-778")
+            .unwrap();
+        assert_eq!(bells.key, "crystal-item-778");
+        bells.slot = 1;
+        bells.unique_id = 0;
     }
     assert!(session.save_active_character().is_ok());
     drop(session);
@@ -38508,45 +38542,7 @@ fn use_item_packet_equipped_mount_toggles_riding_state() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    session
-        .app
-        .world_mut()
-        .resource_mut::<InventoryResource>()
-        .equipment_items
-        .push(super::EquipmentState {
-            key: "test-mount".to_string(),
-            slot: EquipmentSlot::Mount,
-            quantity: 1,
-            awake_type: 0,
-            awake_values: Vec::new(),
-            name: "Test Mount".to_string(),
-            icon: super::equipment_icon_for_slot_and_name(EquipmentSlot::Mount, "Test Mount"),
-            shape: Some(12),
-            description: "Mount used by Crystal ride tests.".to_string(),
-            durability_current: 5000,
-            durability_max: 5000,
-            grade: ItemGrade::None,
-            added_attack: 0,
-            added_defence: 0,
-            added_luck: 0,
-            added_stats: Vec::new(),
-            socketed: Vec::new(),
-            user_item_metadata: None,
-            user_item_unique_id: None,
-            cursed: false,
-            socket_slots: 0,
-            gem_count: 0,
-            identified: None,
-            soul_bound_id: None,
-            sealed_expiry_time_binary_datetime: 0,
-            sealed_next_time_binary_datetime: 0,
-            rental_binding_flags: 0,
-            rental_owner_name: String::new(),
-            rental_expiry_binary_datetime: 0,
-            rental_locked: false,
-            attack: 0,
-            defence: 0,
-        });
+    equip_test_mount(&mut session, 12);
     let object_id = current_player_object_id(session.app.world()).expect("player object id");
 
     assert_eq!(
@@ -38668,11 +38664,7 @@ fn use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates() {
             }
         )));
 
-    session
-        .app
-        .world_mut()
-        .resource_mut::<MountResource>()
-        .has_reins = true;
+    set_test_mount_slot_fixture(&mut session, 0, Some("LeatherBridle"));
     assert!(session
         .handle_packet(ClientPacket::UseItem {
             unique_id: 13,
@@ -38687,11 +38679,7 @@ fn use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates() {
             }
         )));
 
-    session
-        .app
-        .world_mut()
-        .resource_mut::<MountResource>()
-        .has_saddle = false;
+    set_test_mount_slot_fixture(&mut session, 2, None);
     let dismount_packets = session.handle_packet(ClientPacket::UseItem {
         unique_id: 13,
         grid: MirGridType::Equipment,
@@ -38744,6 +38732,7 @@ fn transfer_onto_no_mount_map_force_dismounts_player() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
 
     // Mount up on the (mount-allowed) starting map.
+    equip_test_mount(&mut session, 12);
     {
         let mut mount = session.app.world_mut().resource_mut::<MountResource>();
         mount.mount_type = 12;
@@ -38775,6 +38764,7 @@ fn transfer_onto_mount_allowed_map_keeps_player_mounted() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    equip_test_mount(&mut session, 12);
     {
         let mut mount = session.app.world_mut().resource_mut::<MountResource>();
         mount.mount_type = 12;
@@ -40862,9 +40852,18 @@ fn incoming_item_tree_paths_normalize_nested_ids_and_remain_save_load_stable() {
                 mount.socket_slots > 1,
                 "RedTiger must expose MountSlot.Bells"
             );
-            assert_eq!(mount.socketed.len(), 1, "one legal Bells occupant expected");
-            mount.socketed[0].slot = 1;
-            mount.socketed[0].unique_id = 88_000;
+            assert_eq!(
+                mount.socketed.len(),
+                2,
+                "real Saddle and one legal Bells occupant expected"
+            );
+            let bells = mount
+                .socketed
+                .iter_mut()
+                .find(|item| item.key == "crystal-item-778")
+                .unwrap();
+            bells.slot = 1;
+            bells.unique_id = 88_000;
         }
         assert_eq!(
             reserved_bells_id, 88_000,

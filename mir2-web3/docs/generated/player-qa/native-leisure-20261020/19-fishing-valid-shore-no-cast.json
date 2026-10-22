@@ -1,0 +1,13 @@
+{
+  "recordedUtc": "2026-10-20T21:04:09.047Z",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\mir2-web3\\.mir2-player-qa\\leisure-owned-a1f834ad906c40bc93c1bd0a33d630cc\\runtime-controlled01\\client\\mir2-platform-windows.exe",
+    "id": 26741894,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "05c329100f3c61f14fa8c9c9c7c41449a58d53fba3fb4ffd0a11757ce7e07032",
+  "note": "Controlled LeisureQA100 Lv100 at map0 340,242; all five rod slots equipped, bait10; ordinary water click did not cast. Native lowercase movement versus TitleCase fishing direction mismatch identified by source review; no catch claimed.",
+  "source": "Actual Sky screenshot saved as durable visual acceptance evidence"
+}

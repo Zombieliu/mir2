@@ -1,0 +1,23 @@
+[
+  {
+    "file": "93-ordinary-mining-natural-silver-ore-purity17.jpg",
+    "sha256": "f0386653966d7fb931958277fee9be9f357e6868940839bda9990d29cc8d26ab",
+    "recordedUtc": "2026-10-22T04:20:45.194Z",
+    "note": "Natural mining succeeded in D40124,181; SilverOre x1 inventoryslot3 tooltip purity17, sale2937, Gold805160. No item grant or hidden result inspection.",
+    "actualPixelsIndependentlyViewed": true
+  },
+  {
+    "file": "94-ordinary-mining-natural-copper-ore-purity7.jpg",
+    "sha256": "8f5ab2a1107712cb3f03c1e25ddf2120318472f18dfd8cebb499214be6dd6c6f",
+    "recordedUtc": "2026-10-22T04:48:36.09Z",
+    "note": "Second natural mining result CopperOre x1 inventoryslot13 purity7 sale462 at D40123,179, Gold805160; reserved as JadeGalaDress Copper material.",
+    "actualPixelsIndependentlyViewed": true
+  },
+  {
+    "file": "95-ordinary-mining-return-disconnect.jpg",
+    "sha256": "48b0503b35e04c5da6317a6e72a8098b3cbab97f1d7edc76cd68d213564013a6",
+    "recordedUtc": "2026-10-22T05:08:37.073Z",
+    "note": "While ordinary moving from D40124,180 toward exit, client shows gateway read WebSocket protocol error Connection reset. Cause and save completeness not yet established.",
+    "actualPixelsIndependentlyViewed": true
+  }
+]

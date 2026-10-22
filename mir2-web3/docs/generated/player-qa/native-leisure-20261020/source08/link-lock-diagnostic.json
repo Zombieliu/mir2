@@ -1,0 +1,9 @@
+{
+  "reason": "Read-only Windows RestartManager identifies running DeltaForce PID242940 holding old gateway test executable. No process stopped or file moved/deleted.",
+  "failedRun": "mount-snapshot01",
+  "failure": "LNK1104, zero tests executed, sourceDrift[]",
+  "change": "gateway-tests only: per-package debug=1 changes test artifact identity, retains same Rust code/tests and original CargoGuard gates",
+  "callerSha": "e1a6cffcbbb1512089b96ca18b6d0696f4b547ac6be50ec40bdcc1580de0cfc5",
+  "source": "frozen-source08.json",
+  "deployed": false
+}

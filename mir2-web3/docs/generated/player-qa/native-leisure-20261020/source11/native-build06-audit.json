@@ -1,0 +1,17 @@
+{
+  "accepted": true,
+  "recordedUtc": "2026-10-21T16:47:06.204731+00:00",
+  "nonce": "b12074dd71c6448a9e148b7cd74f809c",
+  "childPid": 285712,
+  "remainingBytes": 420708802560,
+  "monotonicFreshnessMs": 30.52929999999992,
+  "conservativeWallFreshnessMs": 75,
+  "sourceRowsMatched": 1461,
+  "exitCode": 0,
+  "lifecycleComplete": true,
+  "schema": "mir2.native-leisure-public-guard-audit.v1",
+  "run": "native-build06",
+  "rawAuditSha256": "2a3185d6a32ead6a754de2271fbcf0b2b4dd88e0b85221eef7d4345a3a0afda9",
+  "independentRawProbeAndNonceChecked": true,
+  "sourceManifestSha256": "9e7b794b57fbedcfc7f11629d58bdf9f093cf17ea21bb34b09abb1b024bd9e5a"
+}

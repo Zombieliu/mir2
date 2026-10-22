@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.local-stone-build.v1",
+  "kind": "native",
+  "head": "830395cbe42c040c492fae85eeab5907ed7861e7",
+  "startedUtc": "2026-10-21T02:59:14.4791153Z",
+  "finishedUtc": "2026-10-21T02:59:17.4583081Z",
+  "exitCode": 0,
+  "receiptAccepted": true,
+  "receiptError": null,
+  "productAccepted": true,
+  "sourceSnapshotSha256": "8030a6443a1663eee21c713755d9c6024eb6a0f962de0da13a8e3032ba0879d2",
+  "declaredInputs": 1460,
+  "sourceDrift": [],
+  "artifact": {
+    "path": "mir2-platform-windows.exe",
+    "length": 131212288,
+    "sha256": "e676311c88f173f05c1cb62b6d5923e243bbe755ed15211ba04135dc01e4b7e0"
+  },
+  "gameStarted": false,
+  "gatewayStarted": false,
+  "deployed": false,
+  "publicArchive": {
+    "rawResultSha256": "d515d329ba59ffcd0c3c8614f0b6efb1997deed30a459c9a82d43563c997a44d",
+    "absoluteArtifactPathOmitted": true,
+    "cargoLogSha256": "05f3ebde434a5ac43f0db4c09f9f7684053d628c195cb5f4da11778029a8fb24",
+    "gameplayAcceptanceClaimed": false
+  }
+}

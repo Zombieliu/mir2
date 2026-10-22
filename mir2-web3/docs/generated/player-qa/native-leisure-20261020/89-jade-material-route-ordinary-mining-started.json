@@ -1,0 +1,13 @@
+{
+  "recordedUtc": "2026-10-22T03:43:14.331Z",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\mir2-web3\\.mir2-player-qa\\leisure-owned-a1f834ad906c40bc93c1bd0a33d630cc\\runtime-controlled07\\client\\mir2-platform-windows.exe",
+    "id": 4985536,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "218a1b43feef3160759381ef1e800b39281c252db37827e9381a7e8dfb627669",
+  "note": "Ordinary current-map click navigation reached mine via0(663215)→D401(24,181). PickAxe equipped; first left-wall click turned, second ordinary click began continuous mining animation. No ore outcome claimed yet, Gold805160.",
+  "source": "Explicit Sky observation passed by caller; screenshot closure state not used"
+}

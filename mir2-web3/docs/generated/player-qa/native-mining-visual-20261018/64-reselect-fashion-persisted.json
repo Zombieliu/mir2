@@ -1,0 +1,14 @@
+{
+  "recordedUtc": "2026-10-19T10:57:14.144Z",
+  "screenshotId": "screenshot-0",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\.mir2-player-qa\\workshop-checkpoint-20261018\\visual-20261018\\runtime11\\client02\\mir2-platform-windows.exe",
+    "id": 4592934,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "5554acf9753a24e1f80e258d3374cf6df18f11d2b753a0a00f49107808a40dfc",
+  "note": "After ordinary save/reselect, Alice crafting workshop responds normally, Gold1900, Remove fashion displayed with Traveler still selected; StatsII unchanged. Confirms selected wardrobe persistence via ordinary UI.",
+  "source": "Actual Sky screenshot saved as durable visual acceptance evidence"
+}

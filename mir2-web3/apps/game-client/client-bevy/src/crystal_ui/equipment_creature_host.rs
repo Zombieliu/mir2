@@ -30,6 +30,56 @@ pub(super) struct MenuHint;
 fn contains(rect: CrystalRect, p: Vec2) -> bool {
     rect.contains(p.x, p.y)
 }
+#[derive(SystemParam)]
+pub(super) struct ItemInspectorPointer<'w, 's> {
+    nodes: Query<
+        'w,
+        's,
+        (
+            &'static Node,
+            &'static ComputedNode,
+            &'static bevy::ui::UiGlobalTransform,
+            &'static bevy::ui::ComputedUiTargetCamera,
+            Option<&'static Visibility>,
+            Option<&'static InheritedVisibility>,
+            Option<&'static bevy::ui::CalculatedClip>,
+        ),
+        With<OverlayInspect>,
+    >,
+    cameras: Query<'w, 's, (&'static Camera, &'static bevy::camera::RenderTarget)>,
+}
+impl ItemInspectorPointer<'_, '_> {
+    fn covers(&self, window_entity: Entity, window: &Window) -> bool {
+        let Some(cursor) = window.physical_cursor_position() else {
+            return false;
+        };
+        self.nodes.iter().any(|(style, node, transform, target, visibility, inherited, clip)| {
+            if style.display == Display::None
+                || visibility.is_some_and(|v| *v == Visibility::Hidden)
+                || !inherited.is_some_and(|v| v.get())
+            {
+                return false;
+            }
+            let Some((camera, render_target)) = target.get().and_then(|e| self.cameras.get(e).ok()) else {
+                return false;
+            };
+            if !camera.is_active
+                || !matches!(
+                    render_target.normalize(Some(window_entity)),
+                    Some(bevy::camera::NormalizedRenderTarget::Window(w)) if w.entity() == window_entity
+                )
+            {
+                return false;
+            }
+            // UI layout and Bevy picking use physical pixels relative to the
+            // target camera's viewport, not Crystal's logical 1024x768 stage.
+            let point = cursor
+                - camera.physical_viewport_rect().map(|r| r.min.as_vec2()).unwrap_or_default();
+            node.contains_point(*transform, point)
+                && clip.is_none_or(|clip| clip.clip.contains(point))
+        })
+    }
+}
 pub fn modal(state: &NativePlayerUiState) -> bool {
     state.equipment_dialogs.notice.is_some()
         || state.creature.input.is_some()
@@ -243,7 +293,8 @@ pub(super) fn process(
     inventory: Res<InventoryModel>,
     shell: Option<Res<NativeShellModel>>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
-    windows: Query<&Window, With<PrimaryWindow>>,
+    windows: Query<(Entity, &Window), With<PrimaryWindow>>,
+    inspector: ItemInspectorPointer,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
     time: Option<Res<Time>>,
     mut chat: Option<ResMut<crate::chat::ChatModel>>,
@@ -256,14 +307,17 @@ pub(super) fn process(
         *host = Default::default();
         return;
     }
+    // A false request only unsubscribes. Fetch unknown ownership through the
+    // normal true request once an ordinary open has been requested in-game.
     if state.creature.bootstrap_allowed
+        && state.creature.requested_open
         && !state.creature.data_received
         && !state.creature.bootstrap_pending
     {
         if enqueue(
             &mut state,
             &mut intents,
-            ClientPacket::RequestIntelligentCreatureUpdates { update: false },
+            ClientPacket::RequestIntelligentCreatureUpdates { update: true },
         ) {
             state.creature.bootstrap_pending = true;
         }
@@ -271,6 +325,17 @@ pub(super) fn process(
     if state.creature.data_received && state.creature.requested_open {
         state.creature.requested_open = false;
         toggle(&mut state, &mut intents, 2, now);
+        if !state.creature.open
+            && !enqueue(
+                &mut state,
+                &mut intents,
+                ClientPacket::RequestIntelligentCreatureUpdates { update: false },
+            )
+        {
+            // An authoritative empty list shows the normal notice. Finish
+            // that attempted open's subscription once queue capacity returns.
+            state.creature.requested_open = true;
+        }
     }
     if let Some(packet) = state.equipment_dialogs.sync_equipment(&inventory) {
         enqueue(&mut state, &mut intents, packet);
@@ -292,7 +357,7 @@ pub(super) fn process(
     {
         host.selected = None;
     }
-    let (Some(mouse), Ok(window)) = (mouse, windows.single()) else {
+    let (Some(mouse), Ok((window_entity, window))) = (mouse, windows.single()) else {
         return;
     };
     if !window.focused {
@@ -344,6 +409,15 @@ pub(super) fn process(
         || state.trade_dialog.message.is_some()
     {
         host.drag = None;
+        host.text_selecting = false;
+        return;
+    }
+    if !modal(&state) && inspector.covers(window_entity, window) {
+        // The inspector is painted above the ordinary equipment/creature
+        // windows. Yield only its measured, visible surface so the existing
+        // overlay button path retains all item ownership and pending guards.
+        host.drag = None;
+        host.pressed = None;
         host.text_selecting = false;
         return;
     }
@@ -633,6 +707,10 @@ pub fn close_general(
         enqueue(state, intents, packet);
     }
 }
+#[cfg(test)]
+#[path = "equipment_creature_input_tests.rs"]
+mod input_tests;
+
 #[cfg(test)]
 mod tests {
     use super::*;

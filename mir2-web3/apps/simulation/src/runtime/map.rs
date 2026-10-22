@@ -13,9 +13,9 @@ use mir2_game_data::{
 use mir2_protocol::{ChatType, MapInformation, MirDirection, Point, ServerPacket};
 
 use super::components::{
-    current_player_object_id, entity_position, player_entity, CharacterBody, DisplayName, Facing,
-    Hero, Monster, MonsterAgent, MonsterCombatStats, MonsterVitals, Npc, NpcAgent, ObjectId,
-    PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef, WorldObject,
+    entity_position, player_entity, CharacterBody, DisplayName, Facing, Hero, Monster,
+    MonsterAgent, MonsterCombatStats, MonsterVitals, Npc, NpcAgent, ObjectId, PlayerVitals,
+    Position, RemotePlayer, SelfPlayer, SpawnSlotRef, WorldObject,
 };
 use super::crystal_compat::DEFAULT_CRYSTAL_CLIENT_ROOT;
 use super::map_events::{authorized_map_coordinate_transfers, crystal_map_coordinate_source_cells};
@@ -827,7 +827,7 @@ pub(super) fn relocate_player_to_map(
         });
     }
     despawn_stage5_hero_for_no_hero_map(world, &mut packets);
-    dismount_for_no_mount_map(world, &mut packets);
+    refresh_mount_after_map_transfer(world, &mut packets);
     // On-chain veins re-render on map transfer too (M4): unlike P0 spots — which
     // re-broadcast their stage on every swing — chain veins only update on a chain
     // settlement, so entering their map mid-session must seed the last known tier.
@@ -846,37 +846,32 @@ pub(super) fn relocate_player_to_map(
     packets
 }
 
-/// Crystal force-dismounts a player when they enter a map flagged `NoMount`.
-/// Mirror that on map transfer: if the destination map disallows mounts and the
-/// player is currently riding, clear the ride and emit `MountUpdate` so the
-/// client (and any AOI observers, once the gateway rebroadcasts it) drops the
-/// mount visual.
-fn dismount_for_no_mount_map(world: &mut World, packets: &mut Vec<ServerPacket>) {
-    if !current_map_disallows_mount(world) {
+/// Reuse Crystal mount eligibility after the destination map is authoritative.
+/// The same equipment projection handles NoMount, NeedBridle and missing custody.
+fn refresh_mount_after_map_transfer(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    if !world.resource::<MountResource>().riding_mount {
         return;
     }
-    let was_riding = {
-        let mut mount = world.resource_mut::<MountResource>();
-        let was_riding = mount.riding_mount;
-        mount.riding_mount = false;
-        was_riding
-    };
-    if !was_riding {
+    packets.extend(super::equipment::refresh_mount_with_packets(world));
+    if world.resource::<MountResource>().riding_mount {
         return;
     }
-    let mount_type = world.resource::<MountResource>().mount_type;
-    packets.push(ServerPacket::MountUpdate {
-        object_id: current_player_object_id(world).unwrap_or_default(),
-        mount_type,
-        riding_mount: false,
-    });
-    let language = super::session::current_language(world);
-    packets.push(ServerPacket::Chat {
-        message: localized_text_or_fallback(
-            language,
+    let (key, fallback) = if current_map_disallows_mount(world) {
+        (
             "server.MountNotAllowedOnMap",
             "Mounts are not allowed on this map. You have dismounted.",
-        ),
+        )
+    } else if current_map_requires_bridle(world) && !world.resource::<MountResource>().has_reins {
+        (
+            "server.YouCannotRideWithoutBridle",
+            "You cannot ride here without a bridle.",
+        )
+    } else {
+        return;
+    };
+    let language = super::session::current_language(world);
+    packets.push(ServerPacket::Chat {
+        message: localized_text_or_fallback(language, key, fallback),
         chat_type: ChatType::System,
     });
 }

@@ -2,7 +2,7 @@
 //! acquisition or GUI acceptance; no production debug or item-grant API is added.
 use super::super::components::{player_entity, PlayerVitals};
 use super::*;
-use crate::{AccountStore, AccountStoreTransactionFault, SimulationConfig};
+use crate::{AccountStore, AccountStoreTransactionFault, EquipmentSlot, SimulationConfig};
 use mir2_protocol::{ClientPacket, MirClass, MirDirection, MirGender, MirGridType, Point};
 use std::{
     fs,
@@ -544,6 +544,90 @@ fn atelier_jade_fashion_consumes_both_exact_materials_once_without_making_armour
     assert!(f.session.execute_atelier(command).unwrap().replayed);
     assert_eq!(fs::read(&f.path).unwrap(), bytes);
     f.assert_checkpoint();
+}
+
+#[test]
+fn atelier_jade_public_file_cold_restart_keeps_cosmetic_selection_and_real_equipment() {
+    // Controlled two-material File fixture; this is ordinary NPC protocol
+    // verification, not natural acquisition, an actual GUI or PostgreSQL run.
+    let mut f = Fixture::new("jade-public-cold", 824);
+    let mut crystal = embedded_item_state_from_template(
+        &crystal_item_by_index(904).unwrap(), ItemContainer::Bag1, 1,
+    );
+    crystal.unique_id = ORE_UID + 1;
+    let armour = crystal_item_by_index(319).unwrap();
+    let equipment: super::super::equipment::EquipmentState = serde_json::from_value(serde_json::json!({
+        "key":"crystal-item-319","slot":EquipmentSlot::Armour,
+        "name":armour.name,"icon":armour.image,"shape":armour.shape,
+        "description":"Controlled owned real armour", "durability_current":armour.durability,
+        "durability_max":armour.durability,"user_item_unique_id":ORE_UID+2,
+        "user_item_metadata":{"item_index":319},"attack":0,"defence":0
+    })).unwrap();
+    {
+        let mut inventory=f.session.app.world_mut().resource_mut::<InventoryResource>();
+        inventory.inventory_items.push(crystal);
+        inventory.equipment_items.push(equipment);
+    }
+    super::super::stats::refresh_player_stats(f.session.app.world_mut());
+    f.session.save_active_character().unwrap();
+    f.session.interact(33);
+    let packets=f.session.select_npc_dialog_target("@atelier:v1:home");
+    assert_final_page(&f.session,&packets);
+    let recipe=displayed_link(&f.session,"@atelier:v1:recipe:jade-gala");
+    let packets=f.session.select_npc_dialog_target(&recipe);
+    assert_final_page(&f.session,&packets);
+    let craft=displayed_link(&f.session,"@atelier:v1:craft:jade-gala:");
+    let packets=f.session.select_npc_dialog_target(&craft);
+    assert_final_page(&f.session,&packets);
+    assert!(packets.iter().any(|p|matches!(p,ServerPacket::LoseGold{gold:1500})));
+    assert_eq!(packets.iter().filter(|p|matches!(p,ServerPacket::DeleteItem{count:1,..})).count(),2);
+    assert!(!packets.iter().any(|p|matches!(p,ServerPacket::GainedItem{..})));
+    assert!(f.session.app.world().resource::<InventoryResource>().inventory_items.is_empty());
+    f.assert_checkpoint();
+    let before_stats=stats(&f.session);
+    let physical = |session: &SimulationSession| {
+        let s=session.world_snapshot();
+        serde_json::json!({"equipment":s.equipment_items,"inventory":s.inventory_items,
+            "belt":s.belt_items,"weights":s.player_weights,"weight":s.current_weight,"gold":s.gold})
+    };
+    let expected=physical(&f.session);
+    assert_eq!(expected["gold"],8500);
+    let mut selected_image=None;
+    for (prefix, selected) in [("@atelier:v1:wear:jade-gala:",Some("jade-gala")),("@atelier:v1:clear:",None),("@atelier:v1:wear:jade-gala:",Some("jade-gala"))] {
+        let target=displayed_link(&f.session,prefix);
+        let packets=f.session.select_npc_dialog_target(&target);
+        assert_final_page(&f.session,&packets);
+        assert!(packets.iter().any(|p|matches!(p,ServerPacket::PlayerUpdate{..})));
+        assert!(!packets.iter().any(|p|matches!(p,ServerPacket::LoseGold{..}|ServerPacket::GainedItem{..})));
+        let save=f.session.active_character_checkpoint().unwrap();
+        assert_eq!(systems(&save).unwrap().appearance.selected_fashion.as_deref(),selected);
+        assert_eq!(stats(&f.session),before_stats);
+        assert_eq!(physical(&f.session),expected);
+        let image=f.session.world_snapshot().cosmetic_armour_image;
+        assert_eq!(image.is_some(),selected.is_some());
+        if selected.is_some(){selected_image=image;}
+        f.assert_checkpoint();
+    }
+    let unchanged=fs::read(&f.path).unwrap();
+    f.session.select_npc_dialog_target(&craft);
+    assert_eq!(fs::read(&f.path).unwrap(),unchanged);
+    f.session.try_handle_packet(ClientPacket::LogOut).unwrap();
+    let path=f.path.clone();
+    drop(f);
+    let config=SimulationConfig::default().with_crystal_world_runtime().with_account_store_path(&path);
+    let mut session=login(config);
+    let save=session.active_character_checkpoint().unwrap();
+    let appearance=systems(&save).unwrap().appearance;
+    assert!(appearance.owned_fashions.contains("jade-gala"));
+    assert_eq!(appearance.selected_fashion.as_deref(),Some("jade-gala"));
+    assert_eq!(session.world_snapshot().cosmetic_armour_image,selected_image);
+    assert_eq!(stats(&session),before_stats);
+    assert_eq!(physical(&session),expected);
+    session.interact(33);
+    let before=fs::read(&path).unwrap();
+    session.select_npc_dialog_target(&craft);
+    assert_eq!(fs::read(&path).unwrap(),before);
+    assert_eq!(physical(&session),expected);
 }
 
 #[test]

@@ -1,0 +1,92 @@
+{
+  "schema": "mir2.native-leisure-public-gui70-72-audit.v1",
+  "reviewer": "recovery06",
+  "rawAuditSha256": "0ced531735b54a1ca8426e88fdcfd76560391d1f3a9438ba6b992ab0716ec09f",
+  "evidence": [
+    {
+      "image": "70-pet-pickup-controlled-own-candle-baseline.jpg",
+      "metadata": "70-pet-pickup-controlled-own-candle-baseline.json",
+      "sha256": "dada2287b751f00a6b3233d5e4cfb5a295fdfe6c4061aa3794436241cc42f98c",
+      "metadataSha256": "29cc0ef9c2f14345d52d59665792e2bd15aa96689f5e6572ae30fbdffc1a761c",
+      "imageBytes": 158104,
+      "note": "Existing starterCandle x1 bag3, durability8/8 selected ordinaryDropAll; BabyPig active nearby, Gold1307660. This bounded pickup check uses player-owned dropped item, not monsterloot or spawnedgift.",
+      "recordedUtc": "2026-10-21T09:55:27.521Z",
+      "captureStatus": "accepted_bounded_visual_content",
+      "visualEvidenceUsable": true,
+      "imageIsDuplicate": false,
+      "rawMetadataPreserved": true,
+      "noteProvenance": "Root ordinary live sequence plus independently viewed actual pixels; visual audit limits prevail over wider note wording",
+      "visualAudit": {
+        "method": "actual local view_image for every image; explicit-observation digest matched to raw metadata",
+        "supports": "Inn15,16; LeisureQA100; Gold1307660; Candle x1 inventoryslot3 with durability8/8; ItemActions pre-drop baseline.",
+        "limits": "Completed DropAll/ground-drop/pet pickup/follow/save are not shown. Self-drop return would not establish monster-loot pickup.",
+        "metadataImageDigestMatches": true,
+        "qaPublicImageAndMetadataCopiesMatch": true,
+        "sequenceNotClaimedFromSingleFrame": true,
+        "nonTargetWindowOrOtherChatOverlayObserved": false,
+        "targetRuntime": "runtime-controlled05"
+      }
+    },
+    {
+      "image": "71-pet-cold-reentry-panel-bootstrap-blocked.jpg",
+      "metadata": "71-pet-cold-reentry-panel-bootstrap-blocked.json",
+      "sha256": "a441a8df783493fb2f3dff1b9bbb9962c2473f18b0cbd2a533474a0fa6ddfc47",
+      "metadataSha256": "aabcce27fc8b0e5964d2b675348e5971df351d56ec56fed27b3135dac86af3a0",
+      "imageBytes": 153413,
+      "note": "runtime06 normal cold reentry: LeisureQA100 Inn15,16, BabyPig world actor and Gold1307660 retained, food and Candle absent. E and ordinary menu Creature button did not open dialog; not a pickup/save-loop pass.",
+      "recordedUtc": "2026-10-21T15:23:21.513Z",
+      "captureStatus": "accepted_bounded_visual_content",
+      "visualEvidenceUsable": true,
+      "imageIsDuplicate": false,
+      "rawMetadataPreserved": true,
+      "noteProvenance": "Root ordinary live sequence plus independently viewed actual pixels; visual audit limits prevail over wider note wording",
+      "visualAudit": {
+        "method": "actual local view_image for every image; explicit-observation digest matched to raw metadata",
+        "supports": "Cold runtime06 world frame shows BabyPig actor and owner label, Inn15,16 and Gold1307660; side menu visible while creature dialog absent.",
+        "limits": "Bag is closed: food/Candle absence is not proved by this image. Failed E/menu sequence comes from Root live observations; no full pet metadata/pickup/follow/save pass.",
+        "metadataImageDigestMatches": true,
+        "qaPublicImageAndMetadataCopiesMatch": true,
+        "sequenceNotClaimedFromSingleFrame": true,
+        "nonTargetWindowOrOtherChatOverlayObserved": false,
+        "targetRuntime": "runtime-controlled06"
+      }
+    },
+    {
+      "image": "72-pet-runtime06-normal-save-character-select.jpg",
+      "metadata": "72-pet-runtime06-normal-save-character-select.json",
+      "sha256": "3bf7faa619159dc8f586d82e443e7733a26db83b811319bea2848de5943a91f9",
+      "metadataSha256": "327abd5c4d7615c340966994f841c40852f47a533481780e358b7f4e918738eb",
+      "imageBytes": 80930,
+      "note": "runtime06 ordinary Alt+x Yes completed to actual CharacterSelect before planned source repair; controlled LeisureQA100 retained. No pet pickup pass claimed.",
+      "recordedUtc": "2026-10-21T15:28:53.509Z",
+      "captureStatus": "accepted_bounded_visual_content",
+      "visualEvidenceUsable": true,
+      "imageIsDuplicate": false,
+      "rawMetadataPreserved": true,
+      "noteProvenance": "Root ordinary live sequence plus independently viewed actual pixels; visual audit limits prevail over wider note wording",
+      "visualAudit": {
+        "method": "actual local view_image for every image; explicit-observation digest matched to raw metadata",
+        "supports": "Actual CharacterSelect shows LeisureQA100, Warrior, level100 after Root ordinary Alt+x/Yes sequence.",
+        "limits": "This proves visible CharacterSelect, not a pet pickup/full-save loop. Subsequent normal runtime06 exit is separately supported by actual lifecycle receipts.",
+        "metadataImageDigestMatches": true,
+        "qaPublicImageAndMetadataCopiesMatch": true,
+        "sequenceNotClaimedFromSingleFrame": true,
+        "nonTargetWindowOrOtherChatOverlayObserved": false,
+        "targetRuntime": "runtime-controlled06"
+      }
+    }
+  ],
+  "actualLocalPixelViews": 3,
+  "uniqueDigests": 3,
+  "sourceManifest": "frozen-source08.json",
+  "range70": "pre-drop baseline only",
+  "range71": "cold world pet actor/map/gold only; dialog bootstrap blocked",
+  "range72": "normal actual CharacterSelect only; lifecycle separately verified",
+  "frame71BagClosed": true,
+  "frame71FoodOrCandleAbsenceProved": false,
+  "petPickupAccepted": false,
+  "petFollowAccepted": false,
+  "petFullSaveLoopAccepted": false,
+  "legacyInvalid20To29RemainInvalid": true,
+  "privateAuthorityParsed": false
+}

@@ -1,0 +1,14 @@
+{
+  "recordedUtc": "2026-10-19T07:45:57.676Z",
+  "screenshotId": "screenshot-0",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\.mir2-player-qa\\workshop-checkpoint-20261018\\visual-20261018\\runtime11\\client02\\mir2-platform-windows.exe",
+    "id": 4592934,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "df88cdd7614a0e8be6b0604e977779cf6eb2ce63aded441f978a39b0e66e9ff1",
+  "note": "client02 persisted Bag/C data visible but ordinary Bill interaction and map request no response; B remains loading with empty NPC list. No new Seal submitted after checking Silver14.",
+  "source": "Actual Sky screenshot saved as durable visual acceptance evidence"
+}

@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "recordedUtc": "2026-10-21T15:58:59.405771+00:00",
+  "error": "child failed",
+  "schema": "mir2.native-leisure-public-guard-audit.v1",
+  "run": "pet-ui-focused04",
+  "rawAuditSha256": "8b38f992a2574b2a0ccdcda70e446ed2449d93437f8474faa099f32e42d7bf7f",
+  "independentRawProbeAndNonceChecked": true,
+  "sourceManifestSha256": "e67756d1f7172f77dc4bf78a41ea20943cdfdc834d050a71d72eb1aec5019adc"
+}

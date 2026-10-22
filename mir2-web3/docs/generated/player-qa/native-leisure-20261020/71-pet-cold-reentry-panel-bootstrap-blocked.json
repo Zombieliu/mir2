@@ -1,0 +1,13 @@
+{
+  "recordedUtc": "2026-10-21T15:23:21.513Z",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\mir2-web3\\.mir2-player-qa\\leisure-owned-a1f834ad906c40bc93c1bd0a33d630cc\\runtime-controlled06\\client\\mir2-platform-windows.exe",
+    "id": 1643350,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "a441a8df783493fb2f3dff1b9bbb9962c2473f18b0cbd2a533474a0fa6ddfc47",
+  "note": "runtime06 normal cold reentry: LeisureQA100 Inn15,16, BabyPig world actor and Gold1307660 retained, food and Candle absent. E and ordinary menu Creature button did not open dialog; not a pickup/save-loop pass.",
+  "source": "Explicit Sky observation passed by caller; screenshot closure state not used"
+}

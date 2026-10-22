@@ -1,0 +1,24 @@
+{
+  "schema": "mir2.leisure-source-review.v1",
+  "head": "830395cbe42c040c492fae85eeab5907ed7861e7",
+  "reviewedUtc": "2026-10-21T02:42:01.5276022Z",
+  "reviewer": "Root",
+  "independentReviewer": "/root/pets_mount_route",
+  "inputs": 1460,
+  "changedExistingInputs": [
+    "mir2-web3/apps/gateway/src/web_tick_item_snapshot_tests.rs",
+    "mir2-web3/apps/gateway/src/web.rs"
+  ],
+  "addedInputs": [],
+  "other1458InputsUnchanged": true,
+  "priorRuntimeStopAccepted": true,
+  "acceptedForGuardedTestsAndIsolatedGui": true,
+  "review": [
+    "GUI45 single Ride stays on foot; GUI46 ordinary Mary refresh reveals tiger without another toggle.",
+    "Shared predicate includes MountUpdate, both flush modes keep existing gates, one authoritative snapshot per batch, no economy/schema/auth changes.",
+    "New GM0 in-memory ordinary equip/attach/@ride test exercises actual response and production WebSocket flush on/off in both modes; existing five fishing tests retained.",
+    "Native derives mount and weapon sprite libraries from authoritative complete snapshot, no client-invented appearance."
+  ],
+  "guiAcceptance": false,
+  "deployed": false
+}

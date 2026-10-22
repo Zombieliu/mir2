@@ -1,0 +1,14 @@
+{
+  "recordedUtc": "2026-10-19T06:54:15.514Z",
+  "screenshotId": "screenshot-0",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\.mir2-player-qa\\workshop-checkpoint-20261018\\visual-20261018\\runtime11\\client01\\mir2-platform-windows.exe",
+    "id": 13505828,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "b8e47fb627e62df4694413c2ace74fab8d8250886233e9ad3902916881a25118",
+  "note": "After normal Equip on new Bag slot1 CopperRing, left ring slot shows CopperRing DC0-1 Durability5/5; Bag old-ring swap to be checked; no right-slot claim.",
+  "source": "Actual Sky screenshot saved as durable visual acceptance evidence"
+}

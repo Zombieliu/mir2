@@ -11,6 +11,8 @@ mod crystal_compat;
 mod door;
 mod drops;
 mod equipment;
+#[cfg(test)]
+mod mount_attachment_tests;
 mod experience_rates;
 pub use experience_rates::apply_crystal_experience_rates;
 mod player_weights;

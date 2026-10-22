@@ -1,0 +1,42 @@
+{
+  "schema": "mir2.leisure-controlled-bootstrap-outcome.v1",
+  "recordedUtc": "2026-10-20T18:53:54.280Z",
+  "status": "passed_controlled_bootstrap",
+  "noOrdinaryGrowthClaim": true,
+  "controlledBootstrap": true,
+  "publicReceipt": {
+    "beltStacks": 0,
+    "controlledBootstrap": true,
+    "defaultFixturePreserved": true,
+    "equipmentStacks": 0,
+    "gold": 5000000,
+    "inventoryStacks": 4,
+    "level": 100,
+    "noDemoFallbackLogin": true,
+    "noOrdinaryGrowthClaim": true,
+    "storageStacks": 0,
+    "uniqueNewQaAccount": true
+  },
+  "sourceReceipt": {
+    "head": "830395cbe42c040c492fae85eeab5907ed7861e7",
+    "declaredInputs": 1458,
+    "frozenSourceSha256": "c56826b2c8de6252d0508bdd06b302f4a00a96d9b88eb41f6f48e2c4b8452424",
+    "reviewedSourceSha256": "c56826b2c8de6252d0508bdd06b302f4a00a96d9b88eb41f6f48e2c4b8452424",
+    "reviewedBytesEqual": true,
+    "sourceSnapshotSha256": "3ee84bb08c79eefb83d3949aa0cf10ad9383bf21b0ffa7a5727c10e161589e2f",
+    "buildResultSha256": "2a24ce90ad055b53491bd103377bae06073db32228a8804282f8233bc084cfdd",
+    "receiptAccepted": true
+  },
+  "sourceAfterAccepted": true,
+  "externalAclBeforeAndAfterAccepted": true,
+  "markerPolicy": "readonly; current user and SYSTEM only",
+  "privateCredentialsPublished": false,
+  "grantsBeyondControlledLevelGold": false,
+  "priorFailedAttemptsRetained": 2,
+  "helperFix": "directory read+write sharing permits normal atomic File store publication, still denies directory replacement",
+  "actualIoRegressionTests": 7,
+  "gatewayBuild": "gateway-build03",
+  "nativeBuild": "native-build02",
+  "guiStarted": false,
+  "scope": "offline normal NewAccount/Login/NewCharacter/StartGame, typed controlled level/gold, normal CAS save and new Session Login/StartGame; ordinary items and GUI remain pending"
+}

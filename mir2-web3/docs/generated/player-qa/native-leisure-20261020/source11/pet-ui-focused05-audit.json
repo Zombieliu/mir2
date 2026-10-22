@@ -1,0 +1,17 @@
+{
+  "accepted": true,
+  "recordedUtc": "2026-10-21T16:19:47.602320+00:00",
+  "nonce": "b68ca76b70044526b9e9941482024a89",
+  "childPid": 280900,
+  "remainingBytes": 420989923328,
+  "monotonicFreshnessMs": 29.467799999999897,
+  "conservativeWallFreshnessMs": 78,
+  "sourceRowsMatched": 1461,
+  "exitCode": 0,
+  "lifecycleComplete": true,
+  "schema": "mir2.native-leisure-public-guard-audit.v1",
+  "run": "pet-ui-focused05",
+  "rawAuditSha256": "6225eabb0755c44a468c7d9ed51d1598e315f32cc5219510766262c4f3dc8313",
+  "independentRawProbeAndNonceChecked": true,
+  "sourceManifestSha256": "9e7b794b57fbedcfc7f11629d58bdf9f093cf17ea21bb34b09abb1b024bd9e5a"
+}

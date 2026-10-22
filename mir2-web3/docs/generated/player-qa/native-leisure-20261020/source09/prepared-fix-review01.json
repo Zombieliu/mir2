@@ -1,0 +1,118 @@
+{
+  "schema": "mir2.native-leisure-public-source09-prepared.v1",
+  "reviewer": "recovery06",
+  "checkedUtc": "2026-10-21T15:45:39.489482+00:00",
+  "sourceManifestSha256": "eb09513b23437eb45b1a6b9e625cd8fd9a32a3b6db584e9e2226a0db84f97a57",
+  "priorManifestSha256": "8acb91c0c1670bbd35390a97e1355fee16682730237ac2097afcf6ef54fbf121",
+  "head": "830395cbe42c040c492fae85eeab5907ed7861e7",
+  "sourceRowsMatched": 1461,
+  "sourceDifferences": [],
+  "changedExisting": [
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog_render.rs",
+      "before": {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/creature_dialog_render.rs",
+        "length": 26565,
+        "sha256": "295a5cf8f7c7d4a476afc5f5f570777762808383b15cc9a8f9a7c9aa0c9868eb"
+      },
+      "after": {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/creature_dialog_render.rs",
+        "length": 28561,
+        "sha256": "4b68482393a42fc0dfa8a12421a9039af53b8c4a2f2a520bfb9ab09c67e7098d"
+      }
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs",
+      "before": {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs",
+        "length": 25057,
+        "sha256": "94a905bb9bfd24f08d97c1bd56a0a36313f83deffdcc01c4054176f42b3feed1"
+      },
+      "after": {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs",
+        "length": 28234,
+        "sha256": "5f6505d1401247088bd905c1bf7da44d4eefb2129678018e575d9ec70b2d363c"
+      }
+    }
+  ],
+  "added": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/equipment_creature_input_tests.rs",
+      "length": 36678,
+      "sha256": "ea086cb56d36451af16117952010dedf5fa8144d35f59ff5944b9c14fec6b362"
+    }
+  ],
+  "removed": [],
+  "unchangedExistingCount": 1458,
+  "matchesAppliedStaging07LeafDigests": true,
+  "newTestsPrepared": 24,
+  "preparedTestsAllPresentInActualProductSource": true,
+  "newTestsExecutedByAudit": false,
+  "wrapper11Sha256": "1887f543b1169fca966e913641a9c61ac1f8ae1369f411e527854162ff9314f0",
+  "wrapper10Sha256": "e1a6cffcbbb1512089b96ca18b6d0696f4b547ac6be50ec40bdcc1580de0cfc5",
+  "wrapperLogicalChangesOnly": [
+    "frozen-source08.json -> frozen-source09.json",
+    "one explicit declaration of equipment_creature_input_tests.rs"
+  ],
+  "wrapperLineEndingChange": {
+    "oldCRLF": 104,
+    "oldLF": 106,
+    "newCRLF": 0,
+    "newLF": 107,
+    "normalizedComparisonExact": true
+  },
+  "initialByteComparisonFailureRetainedInToolOutput": "First audit stopped before writing any result because wrapper10 mixed CRLF/LF and wrapper11 LF; only the comparison was corrected to normalize and explicitly record endings.",
+  "originalGuardAndAuditorLogicUntouched": true,
+  "nativeTestsRootReportedRunning": "pet-ui-focused01",
+  "actualResultInspectedOrAcceptedByThisAudit": false,
+  "pairedSource09BuildsAccepted": false,
+  "source09GuiReverified": false,
+  "normalResumeSourceClosureCompatibility": {
+    "status": "needs Root resolution before helper04 launch",
+    "reviewPathPresent": false,
+    "reviewSha256Present": false,
+    "reason": "Existing normal helper SourceClosure requires frozen.review.path and frozen.review.sha256; current source09 metadata has neither. No helper or manifest was edited by this audit."
+  },
+  "sourceProductEdited": false,
+  "cargoInvoked": false,
+  "runtimeStarted": false,
+  "privateAuthorityOrCredentialsParsed": false,
+  "candidate100": false,
+  "humanAccepted": false,
+  "status": "applied_frozen_24_tests_prepared_no_completed_execution_result_gui_pending",
+  "rawIndependentClosureWrapperReviewSha256": "548478e5d99d2df9825914522218062568d2398ab9598411e367b3be36830be6",
+  "preparedTestNames": [
+    "baby_pig_caption_uses_semi_auto_range_and_omits_disabled_mouse_in_all_locales",
+    "semi_auto_caption_reads_its_own_range_when_auto_range_differs",
+    "mouse_caption_is_independent_of_semi_auto_enablement",
+    "creature_overlap_real_food_use_yields_without_drag_or_local_consumption",
+    "creature_overlap_measured_inspector_honors_scale_viewport_translation_and_width",
+    "creature_overlap_drop_confirmation_cancel_close_and_pending_remain_two_step",
+    "creature_overlap_outside_surface_still_drags_and_entering_cancels_old_drag",
+    "creature_overlap_hidden_or_clipped_inspector_does_not_reserve_its_old_rectangle",
+    "creature_overlap_outside_inspector_keeps_lower_creature_and_equipment_buttons",
+    "creature_overlap_item_amount_modal_still_blocks_inspector_use",
+    "creature_overlap_higher_creature_notice_and_input_keep_modal_ownership",
+    "creature_overlap_use_rechecks_stale_uid_and_mail_lock_after_paint",
+    "creature_overlap_use_keeps_equipment_destination_pending_guard",
+    "creature_overlap_host_clears_gesture_on_blur_without_yielding_input",
+    "creature_overlap_host_rejects_other_window_or_inactive_camera_geometry",
+    "creature_bootstrap_fetches_unknown_list_only_after_allowed_ordinary_open",
+    "creature_bootstrap_requested_open_waits_for_gameplay_admission",
+    "creature_bootstrap_real_typed_list_opens_then_normal_toggle_close_can_repeat",
+    "creature_bootstrap_real_empty_list_shows_notice_and_unsubscribes_once",
+    "creature_bootstrap_full_queue_releases_pending_and_retries_requested_fetch",
+    "creature_bootstrap_unsent_fetch_uses_original_release_and_retries_without_local_list",
+    "creature_bootstrap_empty_reply_unsubscribe_retries_queue_capacity_then_stops",
+    "creature_bootstrap_nonempty_reply_queue_rejection_does_not_strand_open_request",
+    "creature_bootstrap_new_session_defaults_do_not_reuse_previous_owned_list_or_pending"
+  ],
+  "testExecutionStatusAtThisDocumentationUpdate": "Root native-tests pet-ui-focused01 reported running; no completed result recorded here",
+  "testsPassedClaimed": false,
+  "pairedBuildsAccepted": false,
+  "ordinaryGuiReverified": false,
+  "applicationHistoryReportedByRoot": [
+    "First git -C subdirectory application was a no-op detected by leaf hash assertions.",
+    "Subsequent outer-root git apply --directory=mir2-web3 applied the expected three leaves; independent actual product hashes now match staging07."
+  ]
+}

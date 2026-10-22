@@ -925,7 +925,7 @@ impl MountResource {
         Self {
             mount_type: -1,
             riding_mount: false,
-            has_saddle: true,
+            has_saddle: false,
             has_reins: false,
             has_bells: false,
         }

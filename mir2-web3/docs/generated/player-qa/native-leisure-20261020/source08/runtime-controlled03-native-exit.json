@@ -1,0 +1,32 @@
+{
+  "schema": "mir2.native-leisure-public-child-exit.v1",
+  "runtime": "runtime-controlled03",
+  "rawReceiptSha256": "b4a0bdd265d80942c5df807037d467e4074bfc8fecd6e2f12507e28db3b30522",
+  "kind": "native",
+  "head": "830395cbe42c040c492fae85eeab5907ed7861e7",
+  "pid": 257572,
+  "exited": true,
+  "disposed": true,
+  "exitCode": 0,
+  "exitBits": "0",
+  "logsComplete": true,
+  "shutdownSent": false,
+  "forcedTerminationUsed": false,
+  "artifactSha256": "e676311c88f173f05c1cb62b6d5923e243bbe755ed15211ba04135dc01e4b7e0",
+  "recordedUtc": "2026-10-21T02:30:52.726298Z",
+  "gameplayAcceptanceClaimed": false,
+  "stdout": {
+    "actualDigestMatched": true,
+    "fileName": "native.stdout.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "contentsPublished": false,
+    "length": 0
+  },
+  "stderr": {
+    "actualDigestMatched": true,
+    "fileName": "native.stderr.log",
+    "sha256": "9e8cca112213583b928b0e4bc5b2b1d9b3971d73e7986a5cc55e8390e7232123",
+    "contentsPublished": false,
+    "length": 678142486
+  }
+}

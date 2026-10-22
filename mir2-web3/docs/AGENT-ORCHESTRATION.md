@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+## 休闲分支收尾协调与提交后恢复（2026-10-22）
+
+本轮休闲树由单一代码worker完成定向验证，Root统一审查、stage/commit/push及远端SHA核验；原主工作树不动。helper 5、玉晶普通协议/File冷Session 1、宠物Gateway 5共11项通过，实际范围见[当前验收摘要](generated/player-qa/native-leisure-20261020/closeout-20261022.json)。用户继续授权后，Computer Use首个`list_windows`仍返回`physicalEsc`，当前停止GUI输入的原因是控制器持续Esc，非权限不足；不循环重试或绕过该停止信号。剩余普通GUI与100% Candidate边界见[队列](AGENT-TASK-QUEUE.md)。3000000金币helper仅测试/构建通过，实际隔离存档尚未修改。
+
+提交后同字节恢复须生成**新**来源证明与恢复计划，保留旧文件不动：读取新Git HEAD，对`frozen-closeout03`的1462行逐项核验长度/SHA；全相同才可记录“仅提交身份改变，源码字节未变”。新冻结清单与独立复核绑定新HEAD和原清单SHA，历史source11产品构建继续绑定原HEAD `830395cbe42c040c492fae85eeab5907ed7861e7`，并保留“1460行不变、仅新增QA example和cfg(test)测试”的有限沿用说明，不伪称新HEAD重新构建或重跑。任何生产行变化须回到相应构建/测试流程。
+
+新的resume helper须分开校验当前Git HEAD与历史构建/stop的HEAD：当前SourceClosure匹配新提交；Build核验原source11的完整快照、Guard回执和实际EXE；CheckPriorStop固定核验runtime07原HEAD、原0/0收束和原store SHA。恢复计划通过只读哈希、ACL、独占锁和现有authority/secret指纹重新绑定当前文件，禁止以新HEAD替换旧回执中的历史身份。未执行top-up时继续使用原store SHA；若Root执行已批准的一次性Gold-only操作，则单独绑定公开top-up回执的after SHA/length，而旧stop仍校验before SHA/length。新preflight明确历史产品沿用、当前提交身份和受控金币来源，再由Root启动。此次只记录恢复方法，未生成会启动的进程、未修改实际存档；无需为doc/提交身份变化重复Cargo。
+
 ## PR #255 最后功能回归与远端 CI 收据（2026-10-16，北京时间）
 
 Gateway persistence 的普通 starter 与原版 Q1–Q4、掉落/采集、奖励及保存重登完整 target 已实际 **5/5，0 failed / ignored，194.40s**。最后改动仅测试墙钟调度和接受回执观察，生产行为及 80/600/54 原预算保持；前后失败/通过、fixture SHA 和命令见[Gateway 收据](generated/player-qa/recharge-readiness-20261015/gateway-action-timing-20261016.json)。父提交 `56ee8627` 的 Home、真实 Docker/Compose、四平台 DeveloperEnv、Handoff 完整 Web、跨平台构建及 Stripe/Mining/Activities 真实 PostgreSQL/故障注入收据已通过；Candidate Linux 成功，记录时父提交 Windows 仍在运行。最终新 SHA CI 与合入以 [PR #255](https://github.com/Zombieliu/mir2/pull/255) 为准，父提交结果不转记到新 SHA。

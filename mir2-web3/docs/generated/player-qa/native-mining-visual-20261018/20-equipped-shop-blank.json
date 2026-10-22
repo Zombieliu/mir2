@@ -1,0 +1,14 @@
+{
+  "recordedUtc": "2026-10-18T15:26:39.279Z",
+  "screenshotId": "screenshot-0",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\.mir2-player-qa\\workshop-checkpoint-20261018\\visual-20261018\\runtime10\\client02-diagnostic\\mir2-platform-windows.exe",
+    "id": 9765616,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "b5e731a907f75f7254bd07f10ecc9be2236de8f37fb96aa5a26562f2825e7541",
+  "note": "Reproduced ordinary Vincent View/@BuySell three times on current Native4d1f. NPC text closes, only Bag visible; no buy/sell service controls. Natural cut Copper retained, Gold100. Source review found strict inventory source gate rejects actual named EquipmentItemSnapshot slots, no grants or transaction attempted.",
+  "source": "Actual Sky screenshot saved as durable visual acceptance evidence"
+}

@@ -1,5 +1,74 @@
 # Backend 1:1 Progress
 
+<!-- leisure-closeout-20261022:start -->
+## 休闲代码定向验收与玉晶 File 冷重入（2026-10-22）
+
+本次以 `frozen-closeout03` 的1462项输入完成11项新的有界回归：金币前置helper 5/5、玉晶礼服普通协议与File冷Session 1/1、宠物Gateway 5/5；三个测试Run及helper构建均Guard exit0、receipt/product/audit接受、sourceDrift为空。相对source11仅新增离线QA helper与改变`cfg(test)`的atelier测试文件，其余1460项逐字节不变；source11既有37项宠物UI回归及Native06/Gateway07产品构建只按原范围继承，未声称重新构建产品。
+
+玉晶新用例使用受控Copper824和JadeCrystal904材料，经当前真实Alice显示链接制作、扣1500金币，普通穿上/清除/再穿保持256项属性、真实装备UID和重量不变；正常LogOut后丢弃旧Session/config，以全新File配置Login/StartGame保留解锁、选中、金币8500及材料消耗。旧未显示craft链接拒绝且无二扣；该新用例不单独冒称验证receipt replay。宠物五项覆盖共享拾取、自动金币拾取、物品过滤、鼠标距离和保存失败后的正常重登录恢复；不是完整GUI跨图或冷服持久化。
+
+普通GUI的93–94已独立看图确认自然SilverOre×1（纯度17）及CopperOre×1（纯度7），均金币805160；95显示WebSocket reset，根因未知。runtime-controlled07后来正常0/0收束、日志完整、1461项source11未变，无强杀，但矿石冷重入仍需新GUI核对。玉晶材料和成品自然GUI、宠物拾取/活动跨图/完整设置冷保存仍待；新增SLG不纳入本轮。金币追加helper只允许同一隔离角色Gold增加3000000及revision递增，含旧SHA、独占锁、reconciliation拒绝、一次性意图和typed读回；构建测试通过不等于实际执行，实际由Root独立核ACL后执行并另留回执。Candidate100、真PG、platinum集成、部署与全局Accepted均未提升。
+
+证据：[休闲验收记录](NATIVE-LEISURE-ACCEPTANCE-20261020.zh-CN.md)、[当前具名测试与来源摘要](generated/player-qa/native-leisure-20261020/closeout-20261022.json)、[93–95逐图核验](generated/player-qa/native-leisure-20261020/mining-gui93-95-audit-20261022.json)。下方历史记录保留对应时点状态；当前以本段及新回执为准。
+<!-- leisure-closeout-20261022:end -->
+
+<!-- leisure-mount-snapshot-20261021:start -->
+## source08骑乘snapshot修复及BengalTiger+Saddle普通GUI有界通过（2026-10-21）
+
+source07的45–46仍保留单次Ride不刷新、普通NPC交互后才骑虎的失败证据。source08将MountUpdate加入两种flush共用的完整snapshot判定；1460项冻结SHA `8acb91c0c1670bbd35390a97e1355fee16682730237ac2097afcf6ef54fbf121`，只改既有web.rs和ticktests，其余1458未变。mount-snapshot02为1/0/0（31.63秒）、adjacent01为6/0/0（109.76秒）、low-latency01为7/0/0（30.32秒），1包含在6内，union13非14。通过Run与gateway-build06/native-build05均Guard exit0、receipt/product/audit接受、1460输入、sourceDrift[]，实际EXE指纹匹配；原01 LNK1104、exit101、零执行及只读占用诊断保留，caller10仅选gateway-tests package debug=1独立artifact，原Guard未改，未停进程或删除移动文件。
+
+runtime-controlled04 preflight已核对同File权威/原密钥、source08、真实build06/05配对和95项资产，原preflight SHA `1999db8d2ec02012468c45e84a8b9606b0f1910c618a09116fb3241f2f90a378`。47–55九图均独立看图、actual/meta SHA匹配且互异。47冷进程保留虎、鞍slot2、Gold4781660并正常步行；48/49普通J骑上及下马收到异步响应后自动显示，无NPC/重登/移动刷新；50普通M骑乘、51普通GO TO移动；52–54 Kyle/Denzel各2000金币正常往返map4吉龍城与map0比奇，返回296222/Gold4777660仍骑虎。53自然Orc遮部分虎，只接受可见前身/腿部及现场联证范围。55普通AltX/Yes/CharacterSelect/StartGame后虎20000/20000、鞍和金币保留，仅同进程transient骑乘，不声明riding flag冷持久。
+
+坐骑标`passed_bounded_ordinary_gui_loop`，范围是source07普通购买/装备加source08后续owner实机；只BengalTiger+Saddle和四可见附件格，不外推全部wire槽/变体、AOI/observer、NoMount撤骑或最终人类验收。runtime04后续中断，原退出码、正常关停及日志收束未知，不补写停服通过；56另证同权威05恢复虎/鞍、忠诚度、已保存位置296222和往返后金币4777660，新Session正常步行，不声明riding flag冷持久。05仍运行，post-exit待实际收束；source07/runtime03的正常0/0关闭不沿用给04或05。source07钓鱼34–40有界通过，旧20–29继续invalid；其他休闲及新增SLG接线仍未完成，Goal/Candidate100/真PG/部署及全局Accepted不升。
+
+证据：[报告](NATIVE-LEISURE-ACCEPTANCE-20261020.zh-CN.md)、[source08具名测试/构建及失败历史](generated/player-qa/native-leisure-20261020/source08/validation01.json)、[04 preflight](generated/player-qa/native-leisure-20261020/source08/runtime-controlled04-preflight.json)、[47–55逐图审计](generated/player-qa/native-leisure-20261020/source08/mount-gui47-55-audit01.json)。旧validation01的pending旗标保留构建时点，实际GUI另记新回执，不改写旧源结果。
+<!-- leisure-mount-snapshot-20261021:end -->
+<!-- leisure-fishing-item-snapshot-20261021:start -->
+## Gateway item-trigger snapshot与相邻有界回归（2026-10-21）
+
+低延迟item-event flush现复用一般路径的完整snapshot判定。实际Tick与AutoCast的获物、耗尽删除、嵌套浮漂耐久变化先发正常数据包再投影最新完整状态；仅进度FishingUpdate仍走仅包路径，不额外触发snapshot。此处为Gateway状态投影补齐，不改钓鱼经济或持久化Schema。
+
+实际`fishing-tick01`为5/0/0（79.48秒）、`fishing-tick-adjacent01`为7/0/0（29.87秒）、`fishing-tick-calendar01`为1/0/0（0.00秒）；三Run的完整具名union为13，均原Guard exit0、1460项输入、receipt/product接受、sourceDrift[]，无失败或忽略。范围包含真实Tick/AutoCast的批量、鱼饵耗尽、耐久、实际鱼获与仅进度事件，以及既有低延迟、地图/任务bootstrap和日历相邻路径。
+
+绑定`frozen-source07` SHA `ac7a142cdbbe10f577650e6d86fc20fcc38de85f18f17a1eab0a1c19196a00e9`；相对source06仅Gateway `web.rs`变化并新增独立`web_tick_item_snapshot_tests.rs`，其余1458项未变。`native-build04`与`gateway-build05`配对构建均原Guard接受、exit0、1460项输入、0 drift，实际EXE哈希和长度已对回执；随后runtime-controlled03已完成普通钓鱼有界GUI闭环和正常0/0收束、source07 post-exit核对。
+
+实际范围、完整用例和指纹见[休闲验收记录](NATIVE-LEISURE-ACCEPTANCE-20261020.zh-CN.md)与[公开outcomes](generated/player-qa/native-leisure-20261020/outcomes.json)。20–29号图片继续保留为`invalid_duplicate_capture`；source06售鱼现场观察不充当source07新图。source07有效34–40证明SwordFish新获、报价出售和同进程保存重选角；30仅属此前Walleye售后冷重入，不补成SwordFish冷重启。其他休闲GUI仍待完成，新增SLG补丁仅在外层QA准备、未应用。原全局比例和Accepted状态不升，Goal未完成、Candidate100=false，真PostgreSQL未跑、未部署。
+<!-- leisure-fishing-item-snapshot-20261021:end -->
+
+<!-- leisure-mount-regression-20261021:start -->
+## 坐骑权威附件、撤骑与保存回归（2026-10-21）
+
+五附件严格对应wire槽0–4（Reins／Bells／Saddle／Ribbon／Mask），普通装备／移除保留ACK、Storage服务范围与锁、级别／绑定、精确UID和保管限制，并覆盖保存重载。真实Mount须正耐久；缺Saddle、NeedBridle缺Reins、NoMount或实际磨损1→0时清除能力、撤骑并发MountUpdate。跨图小钩子复用同一投影；未改Schema、经济规则、伤害公式、概率或耐久消耗量。
+
+原Guard实际接受：focused03为19/0/0、1457输入；后续冻结04为1458输入，adjacent01为52/0/0，extra01–04为1/0/0、2/0/0、1/0/0、1/0/0，均0 source drift。52包含该19，六Run的完整具名union为57。初次编译零执行与focused02的16通过／1失败保留；后者为已有仓库槽0/1被夹具误用，修复仅让正向测试使用空槽2→3，未放宽产品guard。
+
+这些57项仍是原源码／普通协议回归；后续source07/08的BengalTiger+Saddle普通GUI有界通过另见上节，不转记本段旧回执为新源码执行。`crystal_full`隔离服不代表platinum集成、真PostgreSQL或线上通过，Candidate100及整体比例不变。详见[休闲验收记录](NATIVE-LEISURE-ACCEPTANCE-20261020.zh-CN.md)与[公开outcomes](generated/player-qa/native-leisure-20261020/outcomes.json)。
+<!-- leisure-mount-regression-20261021:end -->
+
+<!-- mining-jewelry-protocol-20261018:start -->
+## 挖矿与工坊普通协议复验完成，GUI/PG仍未验（2026-10-18）
+
+初链55e50/runtime07已自然挖矿并完成铜矿→鉴定/切割→CopperRing404→装备重登。修复后 `95146ae328b243465c91b368dbe076d9eaa457b2` / runtime08沿用完整字节迁移的天然Silver826 UID4，首次Appraise250、等待后首次Cut2500均成功，实际产物JadeCrystal904×1；首饰分支notApplicable，未造银镯。新WS重登保持UID4玉晶、原ringLeft、Gold2850、MaxDC11，随后正常stdin停服、日志完整，未发物品或读取隐藏outcome。完整证据见[协议专项报告](PLAYER-MINING-TO-JEWELRY-ACCEPTANCE-20261018.zh-CN.md)与[脱敏outcomes](generated/player-qa/mining-jewelry-20261018/outcomes.json)。
+
+新Gateway focused4/0/0及相邻10/0/0、Simulation回归74/0/0和仅补漏11/0/0均绑定95146/1456行0drift；具名union85完整覆盖旧83+新2。pipeline04的failed-count保留，pipeline05 complete，未降低Guard或覆盖门槛。Simulation focused4/0/0实际绑定9e4，之后该源/测试未改。Gateway build04 exit0/accepted。协议3202ms等待仅记idle稳定性，不冒称dirty checkpoint；强制保存另有Gateway回归证据。
+
+此为脚本普通协议验收，不回填为整链GUI成功；历史GUI停点保留。线上暂停未部署、PG未跑、时装/最终人类验收开放；Candidate100=false，总体百分比与Accepted状态不变。
+<!-- mining-jewelry-protocol-20261018:end -->
+
+<!-- stone-source-quote-20261017:start -->
+## 原石公开报价与 outer Source 保存顺序回归（2026-10-17）
+
+原石页复用现有制作工坊 deferred 队列，保留 owner/generation 与当前已显示菜单校验；outer Source 最终保存后重新读取公开 view 生成报价。不猜 revision `+2`，不删除第二次保存，不放宽 CAS。OutcomeUnknown 最终页无可执行报价；已知 File 故障重报价、旧链接拒绝，以及退出/菜单替换/离开 NPC 范围后的 pending 清理均有回归。
+
+实际执行源仍为 `55e50e27f7f4af82f0cea679d49aa1e65a245930`、1454 编译输入：pipeline03 的 `stone-unknown-focused03` **1/0/0**（2954 filtered）、`stone-regression03` **64/0/0**（2891 filtered，6 个新增用例具名通过）、`atelier-regression03` **19/0/0**（2936 filtered）均 exit 0、原 Guard/audit accepted、0 drift。Unknown 单例已包含在 Stone64 内。pipeline03 整体仍保留 `failed-count`：`gateway-atelier03` 实际零测试、1180 filtered，不能计入通过。计数均为 passed/failed/ignored。
+
+pipeline04 五阶段已 complete：`gateway-regression04` **10/0/0**（low_latency 7 + shared appearance 3）、`native-runtime-final04` **356/0/2**、`native-host-full04` **1140/0/7**；原有 ignored 保留。`native-build04`、`gateway-build04` 均 exit 0、原 Guard/audit accepted、1454 行、0 drift，最终 paired preflight 已成功。Gateway10 为相邻回归范围。本机原始证据在 ignored `.mir2-player-qa/fashion-shopfix-20261017/validation-pipeline03.json`、`validation-pipeline04.json` 及各 Run 的 result/audit/cargo.log，不能替代整体玩家验收。
+
+历史GUI停点（2026-10-17）：runtime07/client01在Lv12/Gold10000前置下正常购买PickAxe836（UID54788115），Gold10000→7500；装备后普通大地图寻路到D401(24,181)，挖墙耐久10000→9993，当时0矿。用户随后改用普通协议脚本验收，最新自然矿石、铜戒指及修复复验见[2026-10-18协议专项](PLAYER-MINING-TO-JEWELRY-ACCEPTANCE-20261018.zh-CN.md)。[原生记录](NATIVE-WORKSHOP-PLAYER-ACCEPTANCE-20261017.zh-CN.md)保留当时GUI范围；协议结果不回填为整链GUI通过。
+
+线上部署暂停、未部署；真 PostgreSQL 未验，`Candidate100=false`，总体百分比及 Accepted 状态不变。下方旧失败、各自 SHA 的测试/构建与 Archer 历史原文保留。
+<!-- stone-source-quote-20261017:end -->
+
 <!-- fashion-crafting-20261017:start -->
 ## 制作工坊：有界回归与配套构建完成（2026-10-17）
 

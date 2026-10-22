@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+## 当前队列：休闲代码验收收尾，剩余普通GUI待控制器恢复（2026-10-22）
+
+当前休闲分支的钓鱼刷新、坐骑附件/撤骑、宠物窗口输入修复已有各自冻结源码下的测试和有界GUI证据；本轮另通过金币前置helper 5项、玉晶普通Alice链接制作/穿脱/File冷Session 1项、宠物Gateway共享拾取/过滤/保存失败重登5项，共11项当前源定向回归。Guard均接受、1462项输入零漂移；source11产品闭包仅新增QA example和修改`cfg(test)`测试，其余1460项字节不变。详见[当前休闲记录](NATIVE-LEISURE-ACCEPTANCE-20261020.zh-CN.md)及[具名测试摘要](generated/player-qa/native-leisure-20261020/closeout-20261022.json)。Root负责明确文件集的提交、推送和实际远端核验，不能把计划写成已推送。
+
+用户继续授权后，Computer Use的首个`list_windows`仍返回`physicalEsc`；本轮因此停止GUI输入，是控制器持续返回Esc，非缺少用户授权或文件权限。已通过的普通GUI范围继续有效，剩余队列是：核对自然银矿/铜矿冷恢复；宠物普通拾取、活动跨图和完整设置冷保存；玉晶自然材料与成品外观/保存。玉晶和宠物本轮协议fixture结果不替代这些GUI步骤。追加3000000金币仅helper测试和构建通过，真实存档未修改；后续仍需Root按已批准的Gold-only一次性路径核ACL并留回执。
+
+提交后旧resume helper会因Git HEAD围栏拒绝启动。先按[协调文档的提交后恢复规则](AGENT-ORCHESTRATION.md)生成新的同字节来源证明、恢复计划和helper，再继续普通GUI；不改写旧测试/构建/stop回执，也不关闭HEAD校验。新增SLG、真PG、platinum发布及全项目Candidate100不在本轮完成范围。下方旧队列保留历史时点，不作为当前停点。
+
 <!-- fashion-crafting-20261017:start -->
 ## 当前有界队列：制作工坊待GUI/真PG验收（2026-10-17）
 

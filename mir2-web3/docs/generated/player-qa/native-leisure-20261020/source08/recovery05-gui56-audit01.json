@@ -1,0 +1,55 @@
+{
+  "schema": "mir2.native-leisure-recovery-gui56-audit.v1",
+  "runtime": "runtime-controlled05",
+  "sourceManifest": "frozen-source08.json",
+  "evidence": {
+    "image": "56-interruption-recovery05-mount-gold-preserved.jpg",
+    "metadata": "56-interruption-recovery05-mount-gold-preserved.json",
+    "sha256": "e789fc7f99d0a70bf7e97566391632f7c4784c90e04b6b809f572ba4ce222c53",
+    "metadataSha256": "78dcb988d512ddb127ae6738b9b5d0d4b0dfba667eac9ea759512d042c4ecbdf",
+    "imageBytes": 293926,
+    "note": "After interrupted runtime04 (no exit/stop receipts), normal same-authority Gateway startup05 restores last saved map0(296222), Gold4777660, Tiger loyalty20000/20000 and Saddle slot2. Fresh-session foot stance. Later unsaved walk302254 not retained; no new purchases/grants or backup authority.",
+    "recordedUtc": "2026-10-21T06:15:22.268Z",
+    "captureStatus": "accepted_bounded_visual_content",
+    "visualEvidenceUsable": true,
+    "imageIsDuplicate": false,
+    "rawMetadataPreserved": true,
+    "noteProvenance": "Root ordinary live sequence plus independently viewed actual pixels",
+    "visualAudit": {
+      "method": "actual local view_image; explicit-observation file SHA matched to raw metadata",
+      "supports": "LeisureQA100 inBichonProvince296222,Gold4777660;Tigerpanel20000/20000,Saddle thirdvisiblecell,worldplayeronfoot.",
+      "limits": "Single frame shows current state only. Interrupted04/new05 same-authority startup requires independent metadata/preflight and Root live sequence. Does not prove normal prior exit, complete log drain, full inventory or durable riding flag. Unsaved302254 walk not retained is a Root sequence observation.",
+      "metadataImageDigestMatches": true,
+      "qaPublicImageAndMetadataCopiesMatch": true,
+      "sequenceNotClaimedFromSingleFrame": true
+    }
+  },
+  "rawPreflightReceiptSha256": "1bb1c2a448f0715f771fdae1672e5a91c64a4f90083e6637392129c09c6f101b",
+  "publicPreflight": "runtime-controlled05-preflight.json",
+  "priorClosure": "unknown_interrupted_runtime-controlled04",
+  "observedGold": 4777660,
+  "observedMap": "0",
+  "observedPosition": [
+    296,
+    222
+  ],
+  "mount": "BengalTiger",
+  "loyalty": "20000/20000",
+  "saddleWireSlot": 2,
+  "freshSessionFootStanceObserved": true,
+  "ordinaryRoundtripPaidBalanceAndEquippedMountRecovered": true,
+  "ridingFlagColdPersistenceClaimed": false,
+  "allInventoryColdPersistenceClaimed": false,
+  "unsavedLaterWalk": {
+    "position": [
+      302,
+      254
+    ],
+    "retained": false,
+    "source": "Root prior live control sequence; no normal save for this later walk"
+  },
+  "privateStoreParsed": false,
+  "newGrants": false,
+  "goalComplete": false,
+  "candidate100": false
+}

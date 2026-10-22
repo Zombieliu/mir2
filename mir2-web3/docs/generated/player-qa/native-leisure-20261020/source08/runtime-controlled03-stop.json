@@ -1,0 +1,52 @@
+{
+  "schema": "mir2.native-leisure-public-stop.v1",
+  "runtime": "runtime-controlled03",
+  "sourceManifest": "frozen-source07.json",
+  "rawStopReceiptSha256": "ab806719cfd5a0057ee8e4a86b94f602a6141aecdc89fc5c2bda73b00dc995f3",
+  "head": "830395cbe42c040c492fae85eeab5907ed7861e7",
+  "frozenSourceSha256": "ac7a142cdbbe10f577650e6d86fc20fcc38de85f18f17a1eab0a1c19196a00e9",
+  "sourceRowsMatched": 1460,
+  "sourceUnchanged": true,
+  "normalNativeExit": true,
+  "gatewayExit": true,
+  "gatewayShutdownSent": true,
+  "gatewayExitCode": 0,
+  "nativeExitCode": 0,
+  "gatewayLogsComplete": true,
+  "nativeLogsComplete": true,
+  "sameExistingAuthority": true,
+  "sameExistingSecrets": true,
+  "accountParsed": false,
+  "helperEditedAccount": false,
+  "privatePinsUnchanged": true,
+  "assetsUnchanged": true,
+  "preparationOrLifecycleFailed": false,
+  "forcedTerminationUsed": false,
+  "controlledBootstrap": true,
+  "noOrdinaryGrowthClaim": true,
+  "contentProfile": "crystal_full",
+  "releaseProfileAcceptanceClaimed": false,
+  "gameplayAcceptanceClaimed": false,
+  "stoppedUtc": "2026-10-21T02:30:56.0386168Z",
+  "childExitReceipts": [
+    {
+      "rawReceiptSha256": "5f4d9f4bf19198463b3493fb2dcfc58483072c59c0ec850cdcc3f892c8066b60",
+      "logsDigestMatched": true,
+      "file": "runtime-controlled03-gateway-exit.json",
+      "exitCode": 0,
+      "sha256": "28ab0b87b389dc3196f27eda462b9c0d9bfdc89996b73923166086189a0d4952",
+      "kind": "gateway",
+      "logsComplete": true
+    },
+    {
+      "rawReceiptSha256": "b4a0bdd265d80942c5df807037d467e4074bfc8fecd6e2f12507e28db3b30522",
+      "logsDigestMatched": true,
+      "file": "runtime-controlled03-native-exit.json",
+      "exitCode": 0,
+      "sha256": "7464aa60e84952053ea6fadafa956fbd33cc71666c910e694f40d7644ffbfbc9",
+      "kind": "native",
+      "logsComplete": true
+    }
+  ],
+  "privateStateAndRecoveryRowsOmitted": true
+}

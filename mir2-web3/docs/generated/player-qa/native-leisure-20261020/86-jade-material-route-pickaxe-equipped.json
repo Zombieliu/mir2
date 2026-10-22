@@ -1,0 +1,13 @@
+{
+  "recordedUtc": "2026-10-22T00:53:08.658Z",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\mir2-web3\\.mir2-player-qa\\leisure-owned-a1f834ad906c40bc93c1bd0a33d630cc\\runtime-controlled07\\client\\mir2-platform-windows.exe",
+    "id": 4985536,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "81950a698387844afcff897deb90e6059ff799cf11f41d1f5e26c943ab6b5473",
+  "note": "Ordinary Equip replaced fishing rod with PickAxe; Character equipment weapon cell and paperdoll show pickaxe, Tiger mount item retained, Gold805160. Natural ore gathering still pending.",
+  "source": "Explicit Sky observation passed by caller; screenshot closure state not used"
+}

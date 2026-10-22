@@ -1,0 +1,173 @@
+{
+  "schema": "mir2.leisure-closeout-public.v1",
+  "recordedUtc": "2026-10-22T06:26:55.1613871Z",
+  "baseHead": "830395cbe42c040c492fae85eeab5907ed7861e7",
+  "scope": "Bounded current code validation; controlled fixture protocol tests are distinct from ordinary GUI acceptance.",
+  "source": {
+    "manifest": "frozen-closeout03.json",
+    "sha256": "ea5282c1711124238e469e659dda60f7ef78b2c9612ee835aaba22ac899c628a",
+    "inputs": 1462,
+    "priorManifest": "frozen-source11.json",
+    "priorSha256": "9e7b794b57fbedcfc7f11629d58bdf9f093cf17ea21bb34b09abb1b024bd9e5a",
+    "unchangedRows": 1460,
+    "changedRows": [
+      "mir2-web3/apps/simulation/src/runtime/atelier_tests.rs"
+    ],
+    "addedRows": [
+      "mir2-web3/apps/simulation/examples/top_up_leisure_acceptance.rs"
+    ],
+    "productionModuleChangeFromSource11": false
+  },
+  "runs": [
+    {
+      "runId": "topup-tests03",
+      "kind": "seed-example-tests",
+      "finishedUtc": "2026-10-22T06:17:37.5799302Z",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "productAccepted": true,
+      "auditAccepted": true,
+      "declaredInputs": 1462,
+      "sourceDrift": [],
+      "sourceSnapshotSha256": "348dec37f454bbb88ede2b25253a52a59df94c129658bda35a28cdca146ce3f1",
+      "resultSha256": "07b90825a43b895786ed6d148702e190489f91b61c9c6f2947e8746a2933aac6",
+      "receiptAuditSha256": "c58c0a6e528d85bca2e3401115ee8c94a045dc7b72ab8d2a6691e9b3eb1b2dae",
+      "cargoLogSha256": "ee1ae4da7965db888fece7ebcdf73a31c250b81931635443a870e5891782b271",
+      "testNames": [
+        "offline::tests::exact_gold_and_revision_successor_preserves_every_other_serialized_field",
+        "offline::tests::existing_exclusive_lock_blocks_second_writer",
+        "offline::tests::pending_file_authority_refuses_before_attempt_or_mutation",
+        "offline::tests::real_repository_cas_readback_and_write_once_retry",
+        "offline::tests::refuses_wrong_identity_privilege_and_overflow"
+      ],
+      "testResult": [
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s"
+      ],
+      "artifactSha256": null,
+      "artifactLength": 0
+    },
+    {
+      "runId": "topup-build01",
+      "kind": "seed-example",
+      "finishedUtc": "2026-10-22T06:17:53.5524382Z",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "productAccepted": true,
+      "auditAccepted": true,
+      "declaredInputs": 1462,
+      "sourceDrift": [],
+      "sourceSnapshotSha256": "fd67c7a520aa81c650408f35bbbfe68d39221ac8311ccf6ac311f335c54389ab",
+      "resultSha256": "4b13b625af70f90c6551082834de63a7543157681d33abcf8089b7fd97200f50",
+      "receiptAuditSha256": "8abd482f0e54b2e45f7f4579ac6d85add12d949fe7126e84af4374bfe5b98385",
+      "cargoLogSha256": "7c744d537545563ed3d9af8ea228773b64f709bd13a842b4c52ff6a944cfdcdb",
+      "testNames": [],
+      "testResult": [],
+      "artifactSha256": "2a9aebfa4716214093dc984032079257015394b37f44bada670a19baae9a584d",
+      "artifactLength": 14806016
+    },
+    {
+      "runId": "jade-file01",
+      "kind": "simulation-tests",
+      "finishedUtc": "2026-10-22T06:20:39.9497766Z",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "productAccepted": true,
+      "auditAccepted": true,
+      "declaredInputs": 1462,
+      "sourceDrift": [],
+      "sourceSnapshotSha256": "5de6c2eedc9b917e04006b79a0a67189b1f97677dc0ecabe9f7ec01763f3cd04",
+      "resultSha256": "3ab70e48c267b80c3ea60e97922557e389fa8660aa2d0cccd7580ffb97f7b93f",
+      "receiptAuditSha256": "ad1f3a39311770986590b9c47180755fe52ee54fa58effe8d1a85b7a79c5c403",
+      "cargoLogSha256": "820f1901b9fdcde653ea628737bcf96c7dbecdf79318234d33fbf7c3e85c0b14",
+      "testNames": [
+        "runtime::atelier::tests::atelier_jade_public_file_cold_restart_keeps_cosmetic_selection_and_real_equipment"
+      ],
+      "testResult": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2978 filtered out; finished in 35.94s"
+      ],
+      "artifactSha256": null,
+      "artifactLength": 0
+    },
+    {
+      "runId": "pet-protocol01",
+      "kind": "gateway-tests",
+      "finishedUtc": "2026-10-22T06:24:01.3984423Z",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "productAccepted": true,
+      "auditAccepted": true,
+      "declaredInputs": 1462,
+      "sourceDrift": [],
+      "sourceSnapshotSha256": "9f51e1aedfec2401bc9845ef73ed5cc7e9e6b56f5fd66c98ba9d76e1f3485a3b",
+      "resultSha256": "66dadf4e9381c9476e540bd8a560ad8f8ac465749ed955373842e609c6cbddcb",
+      "receiptAuditSha256": "5912d5be4fca76f62ee0d926f884b2c5fe1aa70c01ffe457fc3b72fc7b5fffee",
+      "cargoLogSha256": "a8c04e0c485e2b42f20c40ab9e0adecb5c8098111223ccdad0f7f5cc73079f1b",
+      "testNames": [
+        "routing::tests::creature_authority_tests::creature_failed_operation_wallet_save_recovers_after_normal_relogin_once",
+        "routing::tests::creature_authority_tests::creature_mouse_pickup_rejects_remote_tile_and_baby_pig_can_pick_nearby",
+        "routing::tests::shared_in_process_registry_intelligent_creature_auto_picks_remote_shared_gold",
+        "routing::tests::shared_in_process_registry_intelligent_creature_filter_blocks_remote_shared_item",
+        "routing::tests::shared_in_process_registry_intelligent_creature_picks_up_remote_shared_gold"
+      ],
+      "testResult": [
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1185 filtered out; finished in 26.74s"
+      ],
+      "artifactSha256": null,
+      "artifactLength": 0
+    }
+  ],
+  "distinctFreshTests": 11,
+  "jade": {
+    "controlledMaterials": [
+      "Copper824 x1",
+      "JadeCrystal904 x1"
+    ],
+    "ordinaryDisplayedAliceLinks": true,
+    "goldBefore": 10000,
+    "goldAfter": 8500,
+    "wearClearWear": true,
+    "all256StatsEquipmentUidWeightUnchanged": true,
+    "normalLogoutNewFileConfigNewSession": true,
+    "ownedSelectedGoldMaterialsPersist": true,
+    "staleUndisplayedCraftRejectedWithoutDebit": true,
+    "newTestClaimsReceiptReplay": false,
+    "naturalGuiAcceptance": false
+  },
+  "pet": {
+    "sharedPickupMouseRangeAutoPickupFilterAndFailedSaveRelogin": true,
+    "fullGuiCrossMapColdServerAcceptance": false
+  },
+  "topup": {
+    "helperTests": 5,
+    "helperBuilt": true,
+    "actualAccountMutationByThisWorker": false,
+    "executionReservedForRoot": true,
+    "controlledGoldOnly": 3000000,
+    "ordinaryIncomeClaimed": false
+  },
+  "historicalProductPair": {
+    "source": "source11",
+    "nativeRun": "native-build06",
+    "gatewayRun": "gateway-build07",
+    "nativeSha256": "c196eebfd0584243d609d596868a9f239cf2ab570e7d868c6d12c396bcd372a7",
+    "gatewaySha256": "52ce516fe0c6605b82c594b8a2d85944916fc0839b33fd0424763947f98bf202",
+    "petUiDistinctTests": 37,
+    "newQaExampleAndCfgTestFileNotInProductBuild": true
+  },
+  "runtime07Stop": {
+    "stoppedUtc": "2026-10-22T05:26:03.6490843Z",
+    "receiptSha256": "d5d654183ab3348c75c1d7b1f3b48c55db41131e8812273561da19b4f7d0de34",
+    "nativeExitCode": 0,
+    "gatewayExitCode": 0,
+    "logsComplete": true,
+    "source11Unchanged": true,
+    "forceKillUsed": false,
+    "doesNotProveMineralColdRecovery": true
+  },
+  "miningGuiEvidence": "mining-gui93-95-audit-20261022.json",
+  "remaining": [
+    "Natural JadeCrystal and jade-gala GUI creation/appearance/save",
+    "Pet ordinary GUI pickup and active cross-map/full settings cold persistence",
+    "Global Candidate100, PostgreSQL, platinum integration and deployment remain outside this closeout"
+  ]
+}

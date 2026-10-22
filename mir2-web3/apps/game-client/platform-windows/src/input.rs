@@ -4092,7 +4092,12 @@ pub fn mouse_world_interaction_system(
                     "Left",
                     "UpLeft",
                 ];
-                if let Some(raw_direction) = COMPASS.iter().position(|value| *value == direction) {
+                let direction_index = |value: &str| {
+                    COMPASS
+                        .iter()
+                        .position(|candidate| candidate.eq_ignore_ascii_case(value))
+                };
+                if let Some(raw_direction) = direction_index(direction) {
                     let water =
                         fishing_water_target(origin, raw_direction as u8).and_then(|cell| {
                             Some(FishingWaterCell {
@@ -4104,9 +4109,17 @@ pub fn mouse_world_interaction_system(
                                 )?,
                             })
                         });
-                    let facing_matches = entity_direction == direction;
+                    let facing_matches = entities
+                        .entities
+                        .iter()
+                        .find(|entity| {
+                            entity.kind == EntityKind::SelfPlayer && entity.object_id == object_id
+                        })
+                        .and_then(|entity| entity.direction.as_deref())
+                        .and_then(direction_index)
+                        .map(|facing| facing == raw_direction);
                     // Turning keeps its original precedence over the pose checks.
-                    let pose = facing_matches
+                    let pose = (facing_matches == Some(true))
                         .then(|| presentation.self_equipment_pose(&object_id))
                         .flatten();
                     let facts = FishingClickFacts {
@@ -4117,7 +4130,7 @@ pub fn mouse_world_interaction_system(
                         walk_blocked: [Some(true); 3],
                         rod_present: Some(ui.equipment_dialogs.rod.is_some()),
                         water,
-                        facing_matches: Some(facing_matches),
+                        facing_matches,
                         standing: pose.map(|p| p.0),
                         fishing: Some(ui.equipment_dialogs.fishing),
                         transform_type: pose.map(|p| p.1),
@@ -5035,6 +5048,9 @@ mod tests {
     }
     mod mining_input_tests {
         include!("mining_input_tests.rs");
+    }
+    mod fishing_world_click_tests {
+        include!("fishing_world_click_tests.rs");
     }
     mod hotkey_intent_tests {
         include!("hotkey_intent_tests.rs");

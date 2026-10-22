@@ -1,0 +1,13 @@
+{
+  "recordedUtc": "2026-10-21T19:54:20.244Z",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\mir2-web3\\.mir2-player-qa\\leisure-owned-a1f834ad906c40bc93c1bd0a33d630cc\\runtime-controlled07\\client\\mir2-platform-windows.exe",
+    "id": 4985536,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "bc880a7d3ed7a672500a5e92dcc22bc248b3f2f8725d327391a8351e4e3ffa8a",
+  "note": "Ordinary Inn6,9 side exit reached map0(328264). E list retains BabyPig+Kitten and Gold807660; selected Kitten now shows Summon, so active map-follow is not established. No pickup/save-loop pass inferred.",
+  "source": "Explicit Sky observation passed by caller; screenshot closure state not used"
+}

@@ -1,0 +1,14 @@
+{
+  "recordedUtc": "2026-10-19T08:01:35.718Z",
+  "screenshotId": "screenshot-0",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\.mir2-player-qa\\workshop-checkpoint-20261018\\visual-20261018\\runtime11\\client02\\mir2-platform-windows.exe",
+    "id": 4592934,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "fff746bed149c9b1f349cc693c8871b1df1229006febfdee1bb240ae4d2edc81",
+  "note": "Same client02 normal Alt+x Yes then CharacterSelect StartGame recovered ordinary Bill interaction; no code/env/server restart/state edits. Root now continues from fresh menu.",
+  "source": "Actual Sky screenshot saved as durable visual acceptance evidence"
+}

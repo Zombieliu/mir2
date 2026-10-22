@@ -1,0 +1,20 @@
+{
+  "schema": "mir2.native-jewelry-fashion-evidence-review.v1",
+  "recordedUtc": "2026-10-19T11:48:38.257Z",
+  "result": "passed",
+  "screenshotMetadataPairs": 50,
+  "newPairs": 22,
+  "publicFiles": 100,
+  "archiveMatchesOriginals": true,
+  "allImageHashesMatchMetadataAndManifest": true,
+  "documentLinksChecked": 12,
+  "proofReferencesChecked": 17,
+  "independentReadOnlyReview": "passed; no blockers; scope wording clarified from naturally mined copper to naturally mined silver ore cut to copper",
+  "sourceTestAttributionPreserved": true,
+  "persistenceScope": "same client process: Alt+x, Yes, CharacterSelect, StartGame",
+  "newClientProcessVerified": false,
+  "serverRestartVerified": false,
+  "postgreSQLVerified": false,
+  "productCodeEdited": false,
+  "productTestsRunThisContinuation": false
+}

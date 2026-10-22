@@ -1,0 +1,13 @@
+{
+  "recordedUtc": "2026-10-22T01:06:42.645Z",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\mir2-web3\\.mir2-player-qa\\leisure-owned-a1f834ad906c40bc93c1bd0a33d630cc\\runtime-controlled07\\client\\mir2-platform-windows.exe",
+    "id": 4985536,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "2b5f98ff48f88e078cdef35ce7492436d78e8fc0aa2ef7b6b43356b2d7557e58",
+  "note": "Ordinary Alt+x Yes reached actual CharacterSelect after Kitten purchase/follow and PickAxe equip; runtime07 source11. No pickup pass inferred.",
+  "source": "Explicit Sky observation passed by caller; screenshot closure state not used"
+}

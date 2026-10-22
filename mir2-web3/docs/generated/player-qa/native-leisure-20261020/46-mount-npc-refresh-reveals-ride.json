@@ -1,0 +1,13 @@
+{
+  "recordedUtc": "2026-10-21T02:29:22.023Z",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\mir2-web3\\.mir2-player-qa\\leisure-owned-a1f834ad906c40bc93c1bd0a33d630cc\\runtime-controlled03\\client\\mir2-platform-windows.exe",
+    "id": 48105902,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "c1db72bfdf5ff0bdd403ae347d09ba168b3e67bf331ac891e61729d155b7830c",
+  "note": "After 45 single Ride click and no second toggle, ordinary Mary NPC interaction refreshed world: Tiger and mounted player now visible at same 351,279. Confirms delayed visual refresh path; ride appearance immediate acceptance remains failed pending fix.",
+  "source": "Explicit Sky observation passed by caller; screenshot closure state not used"
+}

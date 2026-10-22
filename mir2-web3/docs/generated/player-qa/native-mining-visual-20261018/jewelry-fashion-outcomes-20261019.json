@@ -1,0 +1,500 @@
+{
+  "schema": "mir2.native-jewelry-fashion-visual-acceptance.v1",
+  "recordedUtc": "2026-10-19T11:12:41.627Z",
+  "status": "passed_bounded_gui",
+  "scope": "Naturally mined silver ore cut to copper, then crafted left CopperRing; Traveler unlock/wear/remove, unchanged combat stats, ordinary logout/character-reselect persistence",
+  "character": "QaCraft18",
+  "head": "830395cbe42c040c492fae85eeab5907ed7861e7",
+  "native": {
+    "length": 131211776,
+    "sha256": "95b321888264d78d5e1925ccd241e998a81514d69bd86f4a419789fa6886da45",
+    "launch": "runtime11/client02/launch.json",
+    "sourceRowsMatched": 1456
+  },
+  "tests": {
+    "newProductTestsRun": false,
+    "reason": "GUI-only continuation; no product code changed; historical tests remain bound to their original heads"
+  },
+  "jewelry": {
+    "recipe": "Copper ore x1 +300 Gold",
+    "goldBefore": 5450,
+    "goldAfter": 5150,
+    "equippedSlot": 7,
+    "tooltip": {
+      "DC": "0-1",
+      "requiredLevel": 3,
+      "durability": "5/5",
+      "weight": 1
+    },
+    "oldRingInBag": true,
+    "proof": [
+      "29-natural-copper-ring-crafted.jpg",
+      "30-crafted-ring-in-bag.jpg",
+      "31-crafted-ring-equipped.jpg",
+      "57-old-copper-ring-bag.jpg",
+      "58-new-copper-ring-equipped.jpg"
+    ]
+  },
+  "traveler": {
+    "recipe": "Copper ore x1 +500 Gold",
+    "secondSilver": {
+      "publicCarrier": "6",
+      "sealFee": 0,
+      "appraiseFee": 250,
+      "cutFee": 2500,
+      "actualOutput": "Copper ore",
+      "goldBefore": 5150,
+      "goldAfter": 2400
+    },
+    "goldBefore": 2400,
+    "goldAfter": 1900,
+    "unlocked": true,
+    "selected": true,
+    "actualArmourRestored": true,
+    "visualControl": {
+      "reason": "Traveler shares BaseDress(M) shape1 and StateItem60; real armour was ordinarily unequipped for controlled comparison",
+      "sameActualEquipment": true,
+      "worldChanged": true,
+      "paperdollChanged": true,
+      "combatStatsUnchanged": true,
+      "proof": [
+        "52-unarmoured-fashion-on.jpg",
+        "53-unarmoured-fashion-on-stats.jpg",
+        "54-unarmoured-fashion-off-stats.jpg",
+        "55-unarmoured-fashion-off-character.jpg",
+        "56-unarmoured-fashion-reworn-character.jpg"
+      ]
+    }
+  },
+  "combatBaseline": {
+    "HP": "111/111",
+    "MP": "53/53",
+    "AC": "2-3",
+    "MAC": "0-1",
+    "DC": "2-11",
+    "MC": "0-0",
+    "SC": "0-0",
+    "criticalChance": "0%",
+    "criticalDamage": 0,
+    "attackSpeed": 0,
+    "accuracy": 5,
+    "agility": 15,
+    "luck": 0
+  },
+  "statsII": {
+    "experience": "0%",
+    "bagWeight": "16/98",
+    "equipmentWeight": "6/22",
+    "handWeight": "10/23",
+    "allDisplayedResistanceRecoveryAndElementBonuses": 0
+  },
+  "unarmouredControl": {
+    "AC": "0-1",
+    "MAC": "0-0",
+    "otherCombatStats": "identical before/after fashion toggle"
+  },
+  "persistence": {
+    "method": "Ordinary Alt+x, visible Yes, character selection, StartGame in same client process",
+    "gold": 1900,
+    "bagRetained": true,
+    "equipmentRetained": true,
+    "statsRetained": true,
+    "selectedFashionRetained": true,
+    "npcInteractionResponsive": true,
+    "newClientProcess": false,
+    "serverRestart": false,
+    "proof": [
+      "59-ordinary-character-reselect.jpg",
+      "60-reselect-bag-gold.jpg",
+      "61-reselect-equipment.jpg",
+      "62-reselect-stats1.jpg",
+      "63-reselect-stats2.jpg",
+      "64-reselect-fashion-persisted.jpg",
+      "65-final-equipped-fashion.jpg"
+    ]
+  },
+  "final": {
+    "map": "0",
+    "position": {
+      "x": 321,
+      "y": 267
+    },
+    "gold": 1900,
+    "actualEquipment": [
+      "PickAxe",
+      "BaseDress(M)",
+      "CopperRing left"
+    ],
+    "fashion": "Traveler"
+  },
+  "limits": {
+    "silverBracelet": "not exercised: natural cuts produced copper",
+    "jadeGala": "not exercised",
+    "coldProcessRestart": false,
+    "serverRestart": false,
+    "postgreSQL": false,
+    "deployed": false,
+    "candidate100": false,
+    "finalHumanAcceptance": false
+  },
+  "safety": {
+    "guiOnly": true,
+    "noCredentialOutput": true,
+    "noCharacterSaveEdits": true,
+    "noItemGoldLevelOrPositionGrants": true,
+    "noQaAdminOrTeleportCommands": true,
+    "noPrivateSealedOutcomeReads": true
+  },
+  "evidence": [
+    {
+      "image": "15-workshop-entry-visible.jpg",
+      "metadata": "15-workshop-entry-visible.json",
+      "sha256": "b9d1b9d3c942664082003bd5aa5661f90df83d98ada789fdcbe56dd522531982",
+      "recordedUtc": "2026-10-18T11:34:49.991Z",
+      "note": "Bill ordinary menu after one normal down-scroll displays Stone workshop; prior Special Repair observation corrected. User confirmed no other operator and GUI resumed."
+    },
+    {
+      "image": "16-silver-sealed.jpg",
+      "metadata": "16-silver-sealed.json",
+      "sha256": "29abb436de9c2f0591fe32268d2bc23d19a431a54c0ceb2d7388f61c8bdbe1e3",
+      "recordedUtc": "2026-10-18T11:47:35.898Z",
+      "note": "Natural SilverOre UID54788117 sealed by ordinary displayed option. Public UI says Ore sealed, Fine raw stone UID54788117 in Bag; Gold2850 unchanged. No hidden outcome read."
+    },
+    {
+      "image": "17-silver-appraised.jpg",
+      "metadata": "17-silver-appraised.json",
+      "sha256": "85ee6c68b56d88813853d8415ad9383aa464a76967a79143f972a97e4f1ba5b8",
+      "recordedUtc": "2026-10-18T12:27:06.643Z",
+      "note": "Ordinary displayed Appraise250 executed once on natural carrier UID54788117. Public UI Appraisal completed and Gold2850 to2600."
+    },
+    {
+      "image": "18-public-metal-clue.jpg",
+      "metadata": "18-public-metal-clue.json",
+      "sha256": "9fc9d65d6683eb397e8e56c4f5177abfef56a2b0af69d46df5e8412eabd9dd04",
+      "recordedUtc": "2026-10-18T12:29:05.277Z",
+      "note": "Public paid appraisal clue for natural raw stone UID54788117: Metallic: copper or silver. Read only the ordinary NPC clue, no private sealed outcome."
+    },
+    {
+      "image": "19-silver-cut-copper.jpg",
+      "metadata": "19-silver-cut-copper.json",
+      "sha256": "d2b47f85286a9e5bffa5f1155abc49bfadf85ce2c444133e98ac1d3795403beb",
+      "recordedUtc": "2026-10-18T12:33:07.572Z",
+      "note": "First ordinary Cut2500 on the appraised natural stone UID54788117 succeeded. Public UI Cutting completed, Copper ore in Bag. Gold2600 to100. No economic retry or private outcome read."
+    },
+    {
+      "image": "20-equipped-shop-blank.jpg",
+      "metadata": "20-equipped-shop-blank.json",
+      "sha256": "b5e731a907f75f7254bd07f10ecc9be2236de8f37fb96aa5a26562f2825e7541",
+      "recordedUtc": "2026-10-18T15:26:39.279Z",
+      "note": "Reproduced ordinary Vincent View/@BuySell three times on current Native4d1f. NPC text closes, only Bag visible; no buy/sell service controls. Natural cut Copper retained, Gold100. Source review found strict inventory source gate rejects actual named EquipmentItemSnapshot slots, no grants or transaction attempted."
+    },
+    {
+      "image": "21-saved-before-shop-fix.jpg",
+      "metadata": "21-saved-before-shop-fix.json",
+      "sha256": "20f712c817e430f172195228ed4e472cd0d0f7d4587628a3547705a114b8a5ad",
+      "recordedUtc": "2026-10-18T15:30:55.614Z",
+      "note": "Normal Alt+x followed by visible Yes returned QaCraft18 to CharacterSelect. Existing Gold100 and cut material saved through normal logout before a bounded equipment-slot parsing fix; no grants."
+    },
+    {
+      "image": "22-fixed-shop-visible.jpg",
+      "metadata": "22-fixed-shop-visible.json",
+      "sha256": "51df9c0496d8458e7d6c9661bc78513d2eedcaf3887aacf29624ae49566600bd",
+      "recordedUtc": "2026-10-18T21:55:30.375Z",
+      "note": "runtime11 client01 HEAD830395cb: ordinary Vincent View now paints buy list and Sell handoff, Gold100; no sale yet."
+    },
+    {
+      "image": "23-black-iron-sale-quote.jpg",
+      "metadata": "23-black-iron-sale-quote.json",
+      "sha256": "0f63d249ef6afdfce4637d3646aa4afcb7030ba415070577173cfe1e6a6a115f",
+      "recordedUtc": "2026-10-18T21:57:53.451Z",
+      "note": "Natural BlackIron purity10 dragged into Vincent sale slot, visible quote1500 Gold; current Gold100, no confirm yet."
+    },
+    {
+      "image": "24-black-iron-sold.jpg",
+      "metadata": "24-black-iron-sold.json",
+      "sha256": "532ca660a052f291ecb0c6d979dedf3858f6920afc07ad42494ae2df7e2f08f3",
+      "recordedUtc": "2026-10-18T21:58:43.639Z",
+      "note": "Confirmed natural BlackIron purity10 sale: item removed from Bag slot5 and Gold100 to1600 (+1500), ordinary Vincent transaction."
+    },
+    {
+      "image": "25-second-black-iron-sold.jpg",
+      "metadata": "25-second-black-iron-sold.json",
+      "sha256": "dc624e19cda8e38c9f05f33dbd21a3c9d25d49904bce62f175070b5fa241d3f6",
+      "recordedUtc": "2026-10-18T22:02:13.176Z",
+      "note": "Natural BlackIron purity6 sold through quote1350 and Confirm, Gold1600 to2950; Bag slot7 now empty."
+    },
+    {
+      "image": "26-silver-sale-quote.jpg",
+      "metadata": "26-silver-sale-quote.json",
+      "sha256": "356ca763ba825c26f26928288c5594b2f90177fc92ab15c7007c8ea146872542",
+      "recordedUtc": "2026-10-18T22:03:57.375Z",
+      "note": "Natural excess Silver purity10 ordinary sale quote2500 Gold, before Confirm; Gold2950. Two other natural silver ores and cut Copper retained."
+    },
+    {
+      "image": "27-silver-sold.jpg",
+      "metadata": "27-silver-sold.json",
+      "sha256": "72f52826b86db15e445e41c1f95ba00716b8dfe4da0059d49711923e961d2f6e",
+      "recordedUtc": "2026-10-18T22:04:50.754Z",
+      "note": "Natural excess Silver purity10 sale completed, Gold2950 to5450 (+2500); Bag row2col1 empty; cut Copper retained."
+    },
+    {
+      "image": "28-natural-copper-ring-recipe.jpg",
+      "metadata": "28-natural-copper-ring-recipe.json",
+      "sha256": "4d768482b75d59a52ae7dad3afa968fa4d3a13888c9d8653647964c9c2b9447f",
+      "recordedUtc": "2026-10-19T06:34:46.801Z",
+      "note": "Alice Copper ring recipe visible Copper ore x1 and300 Gold, current5450; only freshly GUI-cut Copper UID54788117 retained from natural Silver. Before Make."
+    },
+    {
+      "image": "29-natural-copper-ring-crafted.jpg",
+      "metadata": "29-natural-copper-ring-crafted.json",
+      "sha256": "edccfb4d8563cb844c9d284c25b59b9557c7713ff05b1a4b8828c5d24f996420",
+      "recordedUtc": "2026-10-19T06:36:44.210Z",
+      "note": "Alice completed Copper ring once, Gold5450 to5150 (-300). New product must be inspected separately from pre-existing equipped ring UID54788116."
+    },
+    {
+      "image": "30-crafted-ring-in-bag.jpg",
+      "metadata": "30-crafted-ring-in-bag.json",
+      "sha256": "1d7c90acc969d259463490d9504523bf5e02eb39efd5e920a3ac90feed90a103",
+      "recordedUtc": "2026-10-19T06:44:54.171Z",
+      "note": "New CopperRing visible in Bag slot1 replacing consumed cut Copper, tooltip DC0-1, Lv3, Durability5/5, Gold5150. Existing old ring remains equipped until next action."
+    },
+    {
+      "image": "31-crafted-ring-equipped.jpg",
+      "metadata": "31-crafted-ring-equipped.json",
+      "sha256": "b8e47fb627e62df4694413c2ace74fab8d8250886233e9ad3902916881a25118",
+      "recordedUtc": "2026-10-19T06:54:15.514Z",
+      "note": "After normal Equip on new Bag slot1 CopperRing, left ring slot shows CopperRing DC0-1 Durability5/5; Bag old-ring swap to be checked; no right-slot claim."
+    },
+    {
+      "image": "32-pre-fashion-stats-baseline.jpg",
+      "metadata": "32-pre-fashion-stats-baseline.json",
+      "sha256": "28a17e3ec00c113a0826526615ba573b1435b9a3cf3c8e49132ad37afd1bef71",
+      "recordedUtc": "2026-10-19T06:56:36.243Z",
+      "note": "After new-ring default left-slot equip baseline: HP111/111 MP53/53 AC2-3 MAC0-1 DC2-11 MC0-0 SC0-0 crit0%, critdamage0 attackspeed0 accuracy+5 agility+15 luck0; no fashion yet, Gold5150."
+    },
+    {
+      "image": "33-second-natural-silver-choice.jpg",
+      "metadata": "33-second-natural-silver-choice.json",
+      "sha256": "b28ee4acda445333596d2c5a3fa538c0adc8692763a8fb2ddba1098572c061cb",
+      "recordedUtc": "2026-10-19T07:07:03.397Z",
+      "note": "Ordinary Seal Bag ore lists two remaining naturally mined Silver carriers public IDs #6 and#8, Gold5150. Select first #6 without reading hidden outcome."
+    },
+    {
+      "image": "34-session-disconnected-on-second-seal.jpg",
+      "metadata": "34-session-disconnected-on-second-seal.json",
+      "sha256": "960733206cf447c4c8dcf9db943fd74f346fcc2ca5825ebbdf9bc5581cf921a8",
+      "recordedUtc": "2026-10-19T07:08:02.303Z",
+      "note": "After one ordinary Seal Silver #6 click, client disconnected session resume unavailable. Outcome unknown: no retry/grant/reseed. Need gateway diagnostics and persisted state recovery."
+    },
+    {
+      "image": "35-relogin-silver-still-unsealed.jpg",
+      "metadata": "35-relogin-silver-still-unsealed.json",
+      "sha256": "df63101165029940466c9f2f569b3945196d267df3229308851f98d07963516f",
+      "recordedUtc": "2026-10-19T07:27:27.630Z",
+      "note": "client02 ordinary authenticated Login/StartGame recovered same QaCraft18 at303222 Gold5150; Bag slot6 tooltip still Silver purity14, so prior unknown Seal did not transform it. New ring plus old-ring Bag retained visually."
+    },
+    {
+      "image": "36-relogin-world-request-stalled.jpg",
+      "metadata": "36-relogin-world-request-stalled.json",
+      "sha256": "df88cdd7614a0e8be6b0604e977779cf6eb2ce63aded441f978a39b0e66e9ff1",
+      "recordedUtc": "2026-10-19T07:45:57.676Z",
+      "note": "client02 persisted Bag/C data visible but ordinary Bill interaction and map request no response; B remains loading with empty NPC list. No new Seal submitted after checking Silver14."
+    },
+    {
+      "image": "37-normal-character-selection.jpg",
+      "metadata": "37-normal-character-selection.json",
+      "sha256": "6cc78d9045a4694e10f091a45677eec8cd7b54c5c2d968bae69ec69d4916a7ad",
+      "recordedUtc": "2026-10-19T07:52:22.023Z",
+      "note": "client02 ordinary Alt+x confirm returned CharacterSelect QaCraft18 Lv12, no new auth or state edits."
+    },
+    {
+      "image": "38-reselect-restores-interaction.jpg",
+      "metadata": "38-reselect-restores-interaction.json",
+      "sha256": "fff746bed149c9b1f349cc693c8871b1df1229006febfdee1bb240ae4d2edc81",
+      "recordedUtc": "2026-10-19T08:01:35.718Z",
+      "note": "Same client02 normal Alt+x Yes then CharacterSelect StartGame recovered ordinary Bill interaction; no code/env/server restart/state edits. Root now continues from fresh menu."
+    },
+    {
+      "image": "39-second-silver-sealed.jpg",
+      "metadata": "39-second-silver-sealed.json",
+      "sha256": "a305af3b652f912d568bbeaba695773a96cc5eb1dcfe61bf96223d420f6e94f9",
+      "recordedUtc": "2026-10-19T08:20:54.832Z",
+      "note": "After recovery ordinary Seal this ore confirmed on public carrier#6, Gold5150 unchanged, Fine raw stone#6; no hidden result read. Prior33-34 selection was review link before Seal confirm."
+    },
+    {
+      "image": "40-second-silver-appraised.jpg",
+      "metadata": "40-second-silver-appraised.json",
+      "sha256": "cb420fed86f5b01d25c148bfb09d588f8437068f200af41d090ee560ec1ff4b0",
+      "recordedUtc": "2026-10-19T08:30:12.259Z",
+      "note": "Fine raw stone public#6 appraised once fee250, Gold5150 to4900; appraise completed."
+    },
+    {
+      "image": "41-second-silver-public-clue.jpg",
+      "metadata": "41-second-silver-public-clue.json",
+      "sha256": "64cf4b36b26b449688032ddd908c35c1536d9f2950057d7535d7eb29fd924ca7",
+      "recordedUtc": "2026-10-19T08:33:09.104Z",
+      "note": "Public appraisal clue Fine#6 Metallic: copper or silver. No material revealed before cutting."
+    },
+    {
+      "image": "42-second-silver-cut-copper.jpg",
+      "metadata": "42-second-silver-cut-copper.json",
+      "sha256": "f9eb53a97d27f65bb409abef31a7bb2cb76d317a374f143ced9d17d91805c96c",
+      "recordedUtc": "2026-10-19T08:39:06.072Z",
+      "note": "Fine public#6 cut once fee2500, Gold4900 to2400; visible Cutting completed Copper ore. Natural second Copper can fund Traveler attire; no reroll/retry."
+    },
+    {
+      "image": "44-traveler-crafted.jpg",
+      "metadata": "44-traveler-crafted.json",
+      "sha256": "cde605ffd65c081a6125253c3cd087040f403e837aa207ca871fef573fdd461c",
+      "recordedUtc": "2026-10-19T09:38:08.018Z",
+      "note": "Actual ordinary Alice Make completed. Gold2400 to1900; copper icon removed from bag; Wear Traveler attire now unlocked; no new armour item shown."
+    },
+    {
+      "image": "45-fashion-before-wear-character.jpg",
+      "metadata": "45-fashion-before-wear-character.json",
+      "sha256": "f159d54c749e22379ca0d29761fafcb58126877acecb6b49c0722b613b431c27",
+      "recordedUtc": "2026-10-19T09:39:45.572Z",
+      "note": "Traveler crafted but not worn. Ordinary Character shows white/blue actual armour appearance and equipped left ring; gold1900."
+    },
+    {
+      "image": "46-before-wear-armour-tooltip.jpg",
+      "metadata": "46-before-wear-armour-tooltip.json",
+      "sha256": "6575fb2cc0cfd2b3c05c5bd40fbaa84c3988f7b09857c40e996d5a61bdd345ab",
+      "recordedUtc": "2026-10-19T09:41:26.795Z",
+      "note": "Actual equipped BaseDress(M), equipment slot1. Tooltip: cloth male, ordinary armour, weight5,durability5/5,AC2-2,MAC0-1,required level1."
+    },
+    {
+      "image": "47-before-wear-stats1.jpg",
+      "metadata": "47-before-wear-stats1.json",
+      "sha256": "c11932a9f1296028340310c1ab540986c2cd2300387501cdb72fbf82d1a18fcf",
+      "recordedUtc": "2026-10-19T09:44:57.301Z",
+      "note": "Before wear HP111/111 MP53/53 AC2-3 MAC0-1 DC2-11 MC0-0 SC0-0 critical0% criticaldamage0 attackspeed0 accuracy+5 agility+15 luck0. Gold1900."
+    },
+    {
+      "image": "48-before-wear-stats2.jpg",
+      "metadata": "48-before-wear-stats2.json",
+      "sha256": "b4c2ee8eab07c75b08260d43e97fa45cffa741721c687bc18fbd1b07044919b2",
+      "recordedUtc": "2026-10-19T09:45:53.261Z",
+      "note": "Before wear exp0%,bagweight16/98,equipmentweight6/22,handweight10/23,magicresist0,poisonresist0,healthrecover0,manarecover0,poisonrecover0,holy0,ice0,poisonattack0."
+    },
+    {
+      "image": "49-traveler-worn-character.jpg",
+      "metadata": "49-traveler-worn-character.json",
+      "sha256": "5f9d602f7fb6f35e750f3bd4539438e07c9967535caa9c61b295a8940ae364d5",
+      "recordedUtc": "2026-10-19T09:47:53.169Z",
+      "note": "After ordinary Wear: menu changed to Remove fashion and Gold1900 unchanged. Character and world appearance visually remain white/blue at this settled capture; appearance change not yet accepted."
+    },
+    {
+      "image": "50-traveler-worn-stats1.jpg",
+      "metadata": "50-traveler-worn-stats1.json",
+      "sha256": "3dcd5760076b6fa99cef820df65e650e725b686bb9cafd3cf4ca536952c5478a",
+      "recordedUtc": "2026-10-19T09:53:15.644Z",
+      "note": "Actual armour equipped +Traveler selected: all combat stats identical to47: HP111/111 MP53/53 AC2-3 MAC0-1 DC2-11 MC0 SC0 crit0 attackspeed0 accuracy5 agility15 luck0."
+    },
+    {
+      "image": "51-traveler-worn-stats2.jpg",
+      "metadata": "51-traveler-worn-stats2.json",
+      "sha256": "b8a63a3c17c8f31aea99459ff18dc71b24773d7f7f63507968dfb1a35da9e6c2",
+      "recordedUtc": "2026-10-19T09:54:32.295Z",
+      "note": "Traveler selected with real armour: all StatsII unchanged against48, bag16/98 equip6/22 hand10/23 and all displayed bonus0."
+    },
+    {
+      "image": "52-unarmoured-fashion-on.jpg",
+      "metadata": "52-unarmoured-fashion-on.json",
+      "sha256": "785f4d2652c585e63db87d9aadf936c8eeaf2d8600246a1b7bdac4f67acff14f",
+      "recordedUtc": "2026-10-19T09:59:08.231Z",
+      "note": "Real armour slot now empty after ordinary Unequip; Traveler remains selected; world and paperdoll still clothed white/blue. Gold1900."
+    },
+    {
+      "image": "53-unarmoured-fashion-on-stats.jpg",
+      "metadata": "53-unarmoured-fashion-on-stats.json",
+      "sha256": "67a29655f1fb4bd9afcec523aaf570f2d158fea484c8b1dbf22dc0e81cd6af90",
+      "recordedUtc": "2026-10-19T10:00:29.665Z",
+      "note": "No real armour, fashion on: HP111/111 MP53/53 AC0-1 MAC0-0 DC2-11 MC0 SC0 crit0 attackspeed0 accuracy5 agility15 luck0. Defence change caused by actual armour unequip."
+    },
+    {
+      "image": "54-unarmoured-fashion-off-stats.jpg",
+      "metadata": "54-unarmoured-fashion-off-stats.json",
+      "sha256": "dddc7b8eab3f1dc08e0b642ca9748de7d7167da71f1007575b56153072b3ce78",
+      "recordedUtc": "2026-10-19T10:01:51.507Z",
+      "note": "No real armour, fashion off: world body changed to bare torso; combat stats identical to53 including AC0-1 MAC0-0 DC2-11. Gold1900 unchanged."
+    },
+    {
+      "image": "55-unarmoured-fashion-off-character.jpg",
+      "metadata": "55-unarmoured-fashion-off-character.json",
+      "sha256": "4d422e9efcc3f5264cf661d9b93283df2a1a3141e6f693a1df87b5c829ae521c",
+      "recordedUtc": "2026-10-19T10:03:16.487Z",
+      "note": "No real armour and fashion off: both world body and paperdoll are visibly unclothed; real armour slot empty and ring/weapon unchanged."
+    },
+    {
+      "image": "56-unarmoured-fashion-reworn-character.jpg",
+      "metadata": "56-unarmoured-fashion-reworn-character.json",
+      "sha256": "b90cb0f99594e84683928b1fc96775b1661ace164a6e3775a4bb14515c7a9a48",
+      "recordedUtc": "2026-10-19T10:04:53.817Z",
+      "note": "Keeping actual armour empty, ordinary Wear restores Traveler white/blue clothes on world and paperdoll; no gold charge,1900. Confirms visible fashion override."
+    },
+    {
+      "image": "57-old-copper-ring-bag.jpg",
+      "metadata": "57-old-copper-ring-bag.json",
+      "sha256": "d71fb9c7f739ecf0dc145c3bc37d1817001d6d548e422fb2cebccbe3b6a9f2ba",
+      "recordedUtc": "2026-10-19T10:11:16.036Z",
+      "note": "After original armour restored, previous CopperRing remains in bag inventoryslot1; tooltip weight1 dura5/5 DC0-1 level3 sell250. Gold1900."
+    },
+    {
+      "image": "58-new-copper-ring-equipped.jpg",
+      "metadata": "58-new-copper-ring-equipped.json",
+      "sha256": "85177dcb58b39f1fbd943a583e89049ae76525483b5906b49d096ebfaa329290",
+      "recordedUtc": "2026-10-19T10:21:02.123Z",
+      "note": "Crafted CopperRing remains equipped at equipmentslot7; tooltip DC0-1,level3,dura5/5,weight1. Actual original BaseDress is back in armour slot; Traveler selected."
+    },
+    {
+      "image": "59-ordinary-character-reselect.jpg",
+      "metadata": "59-ordinary-character-reselect.json",
+      "sha256": "0e7b227cdc366c6c5a7d3595a2bd5e12ebbfad5cc4fe1a38b1cae20f55587920",
+      "recordedUtc": "2026-10-19T10:30:51.814Z",
+      "note": "Ordinary Alt+x/Yes returned to character selection QaCraft18 level12; no restart or state mutation."
+    },
+    {
+      "image": "60-reselect-bag-gold.jpg",
+      "metadata": "60-reselect-bag-gold.json",
+      "sha256": "6d5d13c436c83e3e583a637d9fdb005c7f7e00abe700a7f508a10586f5d72c59",
+      "recordedUtc": "2026-10-19T10:41:11.880Z",
+      "note": "After ordinary save/reselect/StartGame: gold1900 and same six visible bag entries incl previous CopperRing; copper consumed; position321,267."
+    },
+    {
+      "image": "61-reselect-equipment.jpg",
+      "metadata": "61-reselect-equipment.json",
+      "sha256": "184ea46972e004a51a3c430930a6c66f434c4a170e50c3f34f429c20c9447336",
+      "recordedUtc": "2026-10-19T10:44:13.014Z",
+      "note": "After save/reselect actual BaseDress, PickAxe and crafted left CopperRing remain equipped. White/blue body alone cannot prove fashion selection because real armour shares art."
+    },
+    {
+      "image": "62-reselect-stats1.jpg",
+      "metadata": "62-reselect-stats1.json",
+      "sha256": "9760d655da340bd9def6a7dea53a484f5fb7d44d7087fe990bfca721a8c43fca",
+      "recordedUtc": "2026-10-19T10:47:16.400Z",
+      "note": "After normal reentry, baseline fully restored HP111/111 MP53/53 AC2-3 MAC0-1 DC2-11 MC0 SC0 crit0 attackspeed0 accuracy5 agility15 luck0."
+    },
+    {
+      "image": "63-reselect-stats2.jpg",
+      "metadata": "63-reselect-stats2.json",
+      "sha256": "dda1b0f0bb88b5353091031cc7e28074311938e96f4c00a3b016b0fd96cfb833",
+      "recordedUtc": "2026-10-19T10:50:42.857Z",
+      "note": "After reentry StatsII matches48/51: exp0%,bag16/98,equip6/22,hand10/23,all displayed resistance/recovery/elemental bonuses0."
+    },
+    {
+      "image": "64-reselect-fashion-persisted.jpg",
+      "metadata": "64-reselect-fashion-persisted.json",
+      "sha256": "5554acf9753a24e1f80e258d3374cf6df18f11d2b753a0a00f49107808a40dfc",
+      "recordedUtc": "2026-10-19T10:57:14.144Z",
+      "note": "After ordinary save/reselect, Alice crafting workshop responds normally, Gold1900, Remove fashion displayed with Traveler still selected; StatsII unchanged. Confirms selected wardrobe persistence via ordinary UI."
+    },
+    {
+      "image": "65-final-equipped-fashion.jpg",
+      "metadata": "65-final-equipped-fashion.json",
+      "sha256": "ae8645deba18e4787e526db7916ea8b2fb14f64f6957015f8d4b00ea34fb4565",
+      "recordedUtc": "2026-10-19T10:57:15.221Z",
+      "note": "Final ordinary GUI: QaCraft18, actual original BaseDress+PickAxe+crafted left CopperRing equipped, Traveler selected (Remove fashion),Gold1900,map0 position321,267."
+    }
+  ]
+}

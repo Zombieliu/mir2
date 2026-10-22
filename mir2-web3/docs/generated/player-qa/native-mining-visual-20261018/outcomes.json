@@ -1,0 +1,156 @@
+{
+  "schema": "mir2.native-player-visual-acceptance-public.v1",
+  "recordedUtc": "2026-10-18T08:02:37.891Z",
+  "status": "partial",
+  "head": "4d1f0ec80069c6ad77a97243ec6e307a60de4d4d",
+  "productionFixCommit": "945f396edd6fb1646fef63d63e147ce5832b55d9",
+  "testImportCommit": "4d1f0ec80069c6ad77a97243ec6e307a60de4d4d",
+  "testReceipt": {
+    "run": "native-autohit-host02",
+    "head": "4d1f0ec80069c6ad77a97243ec6e307a60de4d4d",
+    "exitCode": 0,
+    "receiptAccepted": true,
+    "declaredInputs": 1456,
+    "sourceDriftCount": 0,
+    "artifact": null,
+    "sha256": "abe0333c88862be017c8183eaca016ddd31f99e4518472adabef062355c76967"
+  },
+  "windowsTests": {
+    "passed": 1149,
+    "failed": 0,
+    "ignored": 7,
+    "miningTests": [
+      "input::mining_input::tests::mining_auto_hit_cold_click_refuses_missing_authority_actor_tool_or_wall",
+      "input::mining_input::tests::mining_auto_hit_paces_and_survives_release_without_accumulating_intents",
+      "input::mining_input::tests::mining_auto_hit_same_frame_pulse_turns_then_needs_an_aligned_new_click",
+      "input::mining_input::tests::mining_auto_hit_shift_keeps_forced_attack_held_and_separate",
+      "input::mining_input::tests::mining_auto_hit_uses_real_down_grid_instead_of_the_release_cursor",
+      "input::mining_input::tests::mining_empty_shift_attacks_and_wall_requires_usable_tool",
+      "input::mining_input::tests::mining_gesture_survives_wear_but_not_weapon_or_map_changes",
+      "input::mining_input::tests::mining_hold_cancels_on_death_swap_map_or_transform_and_never_rearms_old_press",
+      "input::mining_input::tests::mining_requires_real_equipped_source_and_working_durability",
+      "input::tests::mining_input_tests::mining_auto_hit_bridge_epoch_or_permission_failure_retires_the_established_gesture",
+      "input::tests::mining_input_tests::mining_auto_hit_native_alt_pulse_preserves_harvest_precedence_over_shift_and_mining",
+      "input::tests::mining_input_tests::mining_auto_hit_native_cancellation_never_rearms_after_owner_ui_tool_or_focus_recovers",
+      "input::tests::mining_input_tests::mining_auto_hit_native_pulse_requires_world_press_origin_and_empty_down_tile",
+      "input::tests::mining_input_tests::mining_auto_hit_native_pulse_turns_then_needs_authoritative_ack_and_new_click",
+      "input::tests::mining_input_tests::mining_native_bridge_forwards_only_latest_current_gesture_without_spell",
+      "input::tests::mining_input_tests::mining_native_manual_input_or_ui_cancels_unsent_swing_immediately",
+      "input::tests::mining_input_tests::mining_native_saturated_sender_never_retains_an_old_directional_attack"
+    ]
+  },
+  "builds": [
+    {
+      "run": "native-autohit01",
+      "head": "4d1f0ec80069c6ad77a97243ec6e307a60de4d4d",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "declaredInputs": 1456,
+      "sourceDriftCount": 0,
+      "artifact": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\mir2-platform-windows.exe",
+        "length": 131210752,
+        "sha256": "996126afff0620c072c8a72e3192b992b30bbd5dbd02a1a406972b9c320f02fa"
+      },
+      "sha256": "f842829a4c44c316317811ab0e30b9c3734e1a511dab053511f6b8abe37da5c0"
+    },
+    {
+      "run": "gateway-autohit01",
+      "head": "4d1f0ec80069c6ad77a97243ec6e307a60de4d4d",
+      "exitCode": 0,
+      "receiptAccepted": true,
+      "declaredInputs": 1456,
+      "sourceDriftCount": 0,
+      "artifact": {
+        "path": "E:\\mir2-player-journey\\work\\local-stone-qa-20261016-round2\\target\\debug\\mir2-gateway.exe",
+        "length": 123378688,
+        "sha256": "e7255fdbc946469fda038e57674fa38922121e82e19eff0ed2eb3b74c05d5b57"
+      },
+      "sha256": "c55dd50ffac2a08a56640de332a0c1e519776d96aed4e0ebe15115376780583a"
+    }
+  ],
+  "source": {
+    "declaredInputs": 1456,
+    "driftCount": 0,
+    "freezeSha256": "825fee9b7552e71f98a4359a96a4538b81174f027474a26421614b4b2a030d89",
+    "reviewSha256": "5221219af883c6d863b83b052e35a856785e4fe287a110301cbc2c599c75cde2"
+  },
+  "gui": {
+    "naturalMining": true,
+    "ordinaryMineTravel": true,
+    "ordinaryReturnToTown": true,
+    "naturalOres": {
+      "silver": [
+        19,
+        14,
+        11,
+        10
+      ],
+      "blackIron": [
+        10,
+        6
+      ]
+    },
+    "gold": 2850,
+    "currentMap": "0",
+    "position": {
+      "x": 303,
+      "y": 222
+    },
+    "appraisal": false,
+    "cutting": false,
+    "jewelryCrafting": false,
+    "fashionAppearanceOnly": false,
+    "finalReLogin": false
+  },
+  "screenshots": [
+    {
+      "file": "10-natural-silver-ore.jpg",
+      "bytes": 164869,
+      "sha256": "5c66143301555d8570c6e6a22ad0f6f74b542b62396f80d169b304db3c7b25e9"
+    },
+    {
+      "file": "11-natural-black-iron.jpg",
+      "bytes": 167507,
+      "sha256": "4fd6debb7381dc531df01ccef504295f74aa0ddce956a8f103e72d11adfde416"
+    },
+    {
+      "file": "13-six-natural-ores.jpg",
+      "bytes": 172476,
+      "sha256": "e385dac94f53f0b17594c0620c527a43e736d1bad95900c0403a041ec983cdbb"
+    }
+  ],
+  "observationCorrections": [
+    {
+      "observation": "14-workshop-link-opens-refine",
+      "correctedKind": "Special Repair",
+      "actualTarget": "@SRepair",
+      "explanation": "Bill footer Special is plain text. Clicked ordinary Special Repair option; actual Stone workshop entry is below nine visible rows and requires scrolling. No quote submitted, no code routing bug established."
+    }
+  ],
+  "unresolved": [
+    "runtime10/client01 ordinary world input response was not established; cause unknown. Same binary works in subsequent client02 with existing read-only diagnostic sinks.",
+    "Repeated external Chrome focus takeover prevents reliable game actions; input paused pending user clarification."
+  ],
+  "preservedFailures": [
+    {
+      "run": "native-autohit-host01",
+      "exitCode": 101,
+      "testsRun": 0,
+      "reason": "New test missing CommandSource trait import; repaired by test-only current commit."
+    }
+  ],
+  "scope": {
+    "localFileBackend": true,
+    "normalGameplayOnly": true,
+    "newItemOrGoldGrants": false,
+    "sealedOutcomesRead": false,
+    "originalWorkspaceModified": false,
+    "fullVisualAcceptance": false,
+    "postgresVerified": false,
+    "deployed": false,
+    "candidate100": false
+  },
+  "privateEvidenceRoot": ".mir2-player-qa/workshop-checkpoint-20261018/visual-20261018",
+  "privateProgressReceipt": "visual-acceptance-progress01.json"
+}

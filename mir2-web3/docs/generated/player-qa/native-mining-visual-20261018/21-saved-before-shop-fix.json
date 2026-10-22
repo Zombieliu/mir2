@@ -1,0 +1,14 @@
+{
+  "recordedUtc": "2026-10-18T15:30:55.614Z",
+  "screenshotId": "screenshot-0",
+  "window": {
+    "app": "process:C:\\Users\\Administrator\\.codex\\worktrees\\local-stone-qa-20261016\\mir2-player-journey\\.mir2-player-qa\\workshop-checkpoint-20261018\\visual-20261018\\runtime10\\client02-diagnostic\\mir2-platform-windows.exe",
+    "id": 9765616,
+    "title": "numeron-legend of rebirth"
+  },
+  "width": 1026,
+  "height": 800,
+  "sha256": "20f712c817e430f172195228ed4e472cd0d0f7d4587628a3547705a114b8a5ad",
+  "note": "Normal Alt+x followed by visible Yes returned QaCraft18 to CharacterSelect. Existing Gold100 and cut material saved through normal logout before a bounded equipment-slot parsing fix; no grants.",
+  "source": "Actual Sky screenshot saved as durable visual acceptance evidence"
+}

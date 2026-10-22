@@ -1,0 +1,24 @@
+{
+  "schema": "mir2.local-stone-build.v1",
+  "kind": "gateway-tests",
+  "head": "830395cbe42c040c492fae85eeab5907ed7861e7",
+  "startedUtc": "2026-10-21T02:42:30.9476166Z",
+  "finishedUtc": "2026-10-21T02:44:21.9927889Z",
+  "exitCode": 101,
+  "receiptAccepted": false,
+  "receiptError": "CargoGuard receipt audit failed.",
+  "productAccepted": true,
+  "sourceSnapshotSha256": "979fbe5a12475ebe1a548744eb2f8a7fd440eea16407b40f0adf40cf75910e79",
+  "declaredInputs": 1460,
+  "sourceDrift": [],
+  "artifact": null,
+  "gameStarted": false,
+  "gatewayStarted": false,
+  "deployed": false,
+  "publicArchive": {
+    "rawResultSha256": "aeaad6c14574df72ce438f1014300180e6739f984bc82e0607abd5500acd0262",
+    "absoluteArtifactPathOmitted": true,
+    "cargoLogSha256": "e81ac250cd24c209d72106c4d048b16d2dcac7f28d148d8dcdebc04d8c10f9cb",
+    "gameplayAcceptanceClaimed": false
+  }
+}

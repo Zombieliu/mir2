@@ -144,9 +144,35 @@ fn pickup_items_text(semi: &str, mouse: &str) -> String {
     )
 }
 
+fn pickup_rules_text(rules: &mir2_protocol::IntelligentCreatureRules) -> String {
+    let auto_label = crate::native_i18n::key("game.creature.pickup.auto", "auto");
+    let semi_label = crate::native_i18n::key("game.creature.pickup.semi_auto", "semi-auto");
+    let mouse_label = crate::native_i18n::key("game.creature.pickup.mouse", "mouse");
+    let semi = if rules.semi_auto_pickup_enabled {
+        format!(
+            "{0}x{0} {1}{semi_label}{2}",
+            rules.semi_auto_pickup_range,
+            if rules.auto_pickup_enabled {
+                format!("{auto_label}/")
+            } else {
+                String::new()
+            },
+            if rules.mouse_pickup_enabled { ", " } else { "" }
+        )
+    } else {
+        String::new()
+    };
+    let mouse = if rules.mouse_pickup_enabled {
+        format!("{0}x{0} {mouse_label}", rules.mouse_pickup_range)
+    } else {
+        String::new()
+    };
+    pickup_items_text(&semi, &mouse)
+}
+
 #[cfg(test)]
 mod pickup_text_tests {
-    use super::pickup_items_text;
+    use super::{pickup_items_text, pickup_rules_text};
     use crate::native_i18n::{with_locale, Locale};
 
     #[test]
@@ -167,6 +193,65 @@ mod pickup_text_tests {
                 assert!(!pickup_items_text("", "").contains("{0}"));
             });
         }
+    }
+
+    fn baby_pig_rules() -> mir2_protocol::IntelligentCreatureRules {
+        mir2_protocol::IntelligentCreatureRules {
+            minimal_fullness: 4000,
+            mouse_pickup_enabled: false,
+            mouse_pickup_range: 0,
+            auto_pickup_enabled: false,
+            auto_pickup_range: 0,
+            semi_auto_pickup_enabled: true,
+            semi_auto_pickup_range: 3,
+            can_produce_blackstone: false,
+        }
+    }
+
+    #[test]
+    fn baby_pig_caption_uses_semi_auto_range_and_omits_disabled_mouse_in_all_locales() {
+        for locale in [
+            Locale::English,
+            Locale::TraditionalChinese,
+            Locale::BrazilianPortuguese,
+        ] {
+            with_locale(locale, || {
+                let caption = pickup_rules_text(&baby_pig_rules());
+                assert!(caption.contains("3x3"), "{caption}");
+                assert!(!caption.contains("0x0"), "{caption}");
+                assert!(
+                    !caption.contains(&crate::native_i18n::key(
+                        "game.creature.pickup.mouse",
+                        "mouse"
+                    )),
+                    "{caption}"
+                );
+            });
+        }
+    }
+
+    #[test]
+    fn semi_auto_caption_reads_its_own_range_when_auto_range_differs() {
+        let mut rules = baby_pig_rules();
+        rules.auto_pickup_enabled = true;
+        rules.auto_pickup_range = 2;
+        rules.semi_auto_pickup_range = 5;
+        let caption = pickup_rules_text(&rules);
+        assert!(caption.contains("5x5"), "{caption}");
+        assert!(!caption.contains("2x2"), "{caption}");
+    }
+
+    #[test]
+    fn mouse_caption_is_independent_of_semi_auto_enablement() {
+        let mut rules = baby_pig_rules();
+        rules.semi_auto_pickup_enabled = false;
+        rules.mouse_pickup_enabled = true;
+        rules.mouse_pickup_range = 7;
+        let caption = pickup_rules_text(&rules);
+        assert!(caption.contains("7x7"), "{caption}");
+        assert!(!caption.contains("3x3"), "{caption}");
+        rules.mouse_pickup_enabled = false;
+        assert!(!pickup_rules_text(&rules).contains("7x7"));
     }
 }
 fn clip(
@@ -444,32 +529,9 @@ pub fn render(
                 };
                 label(p, &expire, 140.0, 85.0, 350.0, 21.0, false, TEXT);
                 let rules = &pet.creature_rules;
-                let auto_label = crate::native_i18n::key("game.creature.pickup.auto", "auto");
-                let semi_label =
-                    crate::native_i18n::key("game.creature.pickup.semi_auto", "semi-auto");
-                let mouse_label = crate::native_i18n::key("game.creature.pickup.mouse", "mouse");
-                let semi = if rules.semi_auto_pickup_enabled {
-                    format!(
-                        "{0}x{0} {1}{semi_label}{2}",
-                        rules.auto_pickup_range,
-                        if rules.auto_pickup_enabled {
-                            format!("{auto_label}/")
-                        } else {
-                            String::new()
-                        },
-                        if rules.mouse_pickup_enabled { ", " } else { "" }
-                    )
-                } else {
-                    String::new()
-                };
-                let mouse = if rules.semi_auto_pickup_enabled {
-                    format!("{0}x{0} {mouse_label}", rules.mouse_pickup_range)
-                } else {
-                    String::new()
-                };
                 label(
                     p,
-                    &pickup_items_text(&semi, &mouse),
+                    &pickup_rules_text(rules),
                     19.0,
                     161.0,
                     350.0,
