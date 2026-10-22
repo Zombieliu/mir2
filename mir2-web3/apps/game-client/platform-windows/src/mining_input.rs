@@ -3,6 +3,19 @@
 
 use mir2_client_bevy::inventory::InventoryModel;
 
+/// The ordinary bag is a passive view of incoming ore. Keep every modal,
+/// transaction and drag guard, including the separate item-action inspector.
+/// `inventory_open()` also includes storage/NPC/mail services, so it cannot
+/// be used for this exception.
+pub(crate) fn ui_blocks_mining(
+    ui: &mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState,
+) -> bool {
+    !matches!(
+        ui.core.panel,
+        mir2_ui_core::state::UiPanel::None | mir2_ui_core::state::UiPanel::Inventory
+    ) || ui.blocks_world_action(false, false)
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct EquippedMiningTool {
     pub unique_id: u64,

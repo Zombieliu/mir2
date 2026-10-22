@@ -305,14 +305,385 @@ fn auto_hit_app(
 
 fn clear_pointer_edges(app: &mut bevy::prelude::App) {
     let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
-    mouse.clear_just_pressed(MouseButton::Left);
-    mouse.clear_just_released(MouseButton::Left);
+    for button in [MouseButton::Left, MouseButton::Right] {
+        mouse.clear_just_pressed(button);
+        mouse.clear_just_released(button);
+    }
 }
 
 fn pulse_at_wall(app: &mut bevy::prelude::App) {
     ordered_pointer_motion(app, bevy::prelude::Vec2::new(456., 368.));
     ordered_pointer_button(app, MouseButton::Left, true);
     ordered_pointer_button(app, MouseButton::Left, false);
+}
+
+// UI ownership tests run just beyond the level-12 deadline. At the third
+// exact 1232 ms step, elapsed_secs_f64() * 1000 is 3695.9999999999995 while
+// the prior deadline is 3696. Keep exact cadence assertions in the dedicated
+// AutoHit pacing tests below; this 1 ms margin does not change production time.
+const MINING_UI_TICK_MS: u64 = 1233;
+
+#[track_caller]
+fn assert_only_mining_swing(
+    app: &bevy::prelude::App,
+    receiver: &std::sync::mpsc::Receiver<GatewayCommand>,
+    context: &str,
+) {
+    let received = receiver.try_recv();
+    let movement = app.world().resource::<WorldPointerMovementState>();
+    assert!(matches!(&received, Ok(GatewayCommand::Wire(
+        NativeOutboundCommand::AttackDirection { direction, spell: None })) if direction == "left"),
+        "{context}: expected mining swing, got {received:?}; gesture={:?}, now_ms={:?}, deadline_ms={:?}",
+        movement.directional_attack,
+        movement_now_ms(Some(app.world().resource::<bevy::prelude::Time>()), None),
+        movement.next_attack_request_at_ms);
+    assert!(
+        receiver.try_recv().is_err(),
+        "{context}: bag input must not emit an additional world interaction"
+    );
+}
+
+fn arm_mining(
+    app: &mut bevy::prelude::App,
+    receiver: &std::sync::mpsc::Receiver<GatewayCommand>,
+) -> u64 {
+    pulse_at_wall(app);
+    app.update();
+    assert_only_mining_swing(app, receiver, "arm AutoHit");
+    clear_pointer_edges(app);
+    app.world()
+        .resource::<WorldPointerMovementState>()
+        .directional_attack
+        .as_ref()
+        .unwrap()
+        .id
+}
+
+#[test]
+fn mining_inventory_native_bindings_toggle_and_close_preserve_the_same_auto_hit() {
+    for (function, key, remap) in [
+        ("Inventory", KeyCode::F9, false),
+        ("Inventory2", KeyCode::KeyI, false),
+        ("Inventory2", KeyCode::KeyB, true),
+        ("Closeall", KeyCode::Escape, false),
+        ("Closeall", KeyCode::KeyB, true),
+    ] {
+        let (mut app, receiver) = auto_hit_app("left");
+        let id = arm_mining(&mut app, &receiver);
+        if remap {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            ui.keyboard
+                .bindings
+                .retain(|binding| binding.function == function);
+            ui.keyboard.bindings[0].key = "B".into();
+        }
+        // Input runs before the UI applies the binding. Test both the opening
+        // edge (None) and closing edge (Inventory), then its resulting state.
+        let panels = if function == "Closeall" {
+            vec![mir2_ui_core::state::UiPanel::Inventory]
+        } else {
+            vec![
+                mir2_ui_core::state::UiPanel::None,
+                mir2_ui_core::state::UiPanel::Inventory,
+            ]
+        };
+        for panel in panels {
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .core
+                .panel = panel;
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(key);
+            advance_movement_clock(&mut app, MINING_UI_TICK_MS);
+            app.update();
+            assert_only_mining_swing(
+                &app,
+                &receiver,
+                &format!("binding {function} {key:?} remap={remap} panel={panel:?}: key down"),
+            );
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .reset_all();
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .core
+                .panel = if panel == mir2_ui_core::state::UiPanel::None {
+                mir2_ui_core::state::UiPanel::Inventory
+            } else {
+                mir2_ui_core::state::UiPanel::None
+            };
+            advance_movement_clock(&mut app, MINING_UI_TICK_MS);
+            app.update();
+            assert_only_mining_swing(
+                &app,
+                &receiver,
+                &format!(
+                    "binding {function} {key:?} remap={remap} panel={panel:?}: resulting UI state"
+                ),
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .directional_attack
+                    .as_ref()
+                    .unwrap()
+                    .id,
+                id,
+                "{function} {key:?}"
+            );
+        }
+        if function == "Closeall" {
+            // The same Closeall binding with no bag is a stop/menu action.
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(key);
+            app.update();
+            assert!(app
+                .world()
+                .resource::<WorldPointerMovementState>()
+                .directional_attack
+                .is_none());
+            assert!(receiver.try_recv().is_err());
+        }
+    }
+}
+
+#[test]
+fn mining_inventory_native_open_bag_allows_outside_start_and_passive_item_hover() {
+    let (mut app, receiver) = auto_hit_app("left");
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::Inventory;
+    let id = arm_mining(&mut app, &receiver);
+    // The hover producer shields bag items from world targeting. AutoHit keeps
+    // its established direction even with no world tile/entity under the mouse.
+    ordered_pointer_motion(&mut app, bevy::prelude::Vec2::new(25., 50.));
+    auto_hit_scene(&mut app, "D401", "left", (-1., -1.));
+    advance_movement_clock(&mut app, MINING_UI_TICK_MS);
+    app.update();
+    assert_only_mining_swing(&app, &receiver, "passive bag item hover");
+    assert_eq!(
+        app.world()
+            .resource::<WorldPointerMovementState>()
+            .directional_attack
+            .as_ref()
+            .unwrap()
+            .id,
+        id
+    );
+}
+
+#[test]
+fn mining_inventory_native_ui_owned_pointer_never_becomes_a_world_hold() {
+    for (button, point, panel) in [
+        (
+            MouseButton::Left,
+            bevy::prelude::Vec2::new(25., 50.),
+            mir2_ui_core::state::UiPanel::Inventory,
+        ),
+        (
+            MouseButton::Right,
+            bevy::prelude::Vec2::new(25., 50.),
+            mir2_ui_core::state::UiPanel::Inventory,
+        ),
+        (
+            MouseButton::Left,
+            bevy::prelude::Vec2::new(938., 702.),
+            mir2_ui_core::state::UiPanel::None,
+        ),
+        (
+            MouseButton::Left,
+            bevy::prelude::Vec2::new(305., 10.),
+            mir2_ui_core::state::UiPanel::Inventory,
+        ),
+    ] {
+        let (mut app, receiver) = auto_hit_app("left");
+        let id = arm_mining(&mut app, &receiver);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = panel;
+        ordered_pointer_motion(&mut app, point);
+        ordered_pointer_button(&mut app, button, true);
+        // Same-frame down in the bag/HUD followed by a world cursor must still
+        // belong to the UI; later held frames must not become right-click run.
+        ordered_pointer_motion(&mut app, bevy::prelude::Vec2::new(456., 368.));
+        for frame in 0..2 {
+            advance_movement_clock(&mut app, MINING_UI_TICK_MS);
+            app.update();
+            assert_only_mining_swing(
+                &app,
+                &receiver,
+                &format!("pointer {button:?} origin={point:?} panel={panel:?}: held frame {frame}"),
+            );
+            assert!(
+                app.world()
+                    .resource::<ButtonInput<MouseButton>>()
+                    .pressed(button),
+                "UI must retain its original input"
+            );
+            clear_pointer_edges(&mut app);
+        }
+        ordered_pointer_button(&mut app, button, false);
+        advance_movement_clock(&mut app, MINING_UI_TICK_MS);
+        app.update();
+        assert_only_mining_swing(
+            &app,
+            &receiver,
+            &format!("pointer {button:?} origin={point:?} panel={panel:?}: release"),
+        );
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .directional_attack
+                .as_ref()
+                .unwrap()
+                .id,
+            id
+        );
+        assert!(app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .pending
+            .is_empty());
+    }
+}
+
+#[test]
+fn mining_inventory_native_world_down_cannot_borrow_a_bag_release_and_ui_cannot_arm() {
+    for already_mining in [false, true] {
+        let (mut app, receiver) = auto_hit_app("left");
+        if already_mining {
+            arm_mining(&mut app, &receiver);
+        }
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::Inventory;
+        let bag = bevy::prelude::Vec2::new(25., 50.);
+        let wall = bevy::prelude::Vec2::new(456., 368.);
+        ordered_pointer_motion(&mut app, if already_mining { wall } else { bag });
+        ordered_pointer_button(&mut app, MouseButton::Left, true);
+        ordered_pointer_motion(&mut app, if already_mining { bag } else { wall });
+        ordered_pointer_button(&mut app, MouseButton::Left, false);
+        advance_movement_clock(&mut app, 1232);
+        app.update();
+        assert!(receiver.try_recv().is_err());
+        assert!(app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .directional_attack
+            .is_none());
+        clear_pointer_edges(&mut app);
+        ordered_pointer_motion(&mut app, wall);
+        advance_movement_clock(&mut app, 1232);
+        app.update();
+        assert!(receiver.try_recv().is_err());
+    }
+}
+
+#[test]
+fn mining_inventory_native_modal_transaction_and_rebound_other_action_still_cancel() {
+    for case in ["inspect", "move", "trade", "otherBinding"] {
+        let (mut app, receiver) = auto_hit_app("left");
+        arm_mining(&mut app, &receiver);
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            ui.core.panel = mir2_ui_core::state::UiPanel::Inventory;
+            match case {
+                "inspect" => {
+                    ui.inspect = Some(mir2_client_bevy::crystal_ui::overlays::ItemInspect {
+                        container: 0,
+                        slot: 0,
+                        unique_id: Some(900),
+                        key: "ore".into(),
+                        name: "Ore".into(),
+                        quantity: 1,
+                    })
+                }
+                "move" => {
+                    ui.inventory_operation = Some(
+                        mir2_client_bevy::crystal_ui::overlays::InventoryOperationDraft::Move {
+                            source_slot: 0,
+                            unique_id: 900,
+                        },
+                    )
+                }
+                "trade" => ui.trade_dialog.open = true,
+                "otherBinding" => {
+                    ui.keyboard
+                        .bindings
+                        .retain(|binding| binding.function == "Inventory2");
+                    ui.keyboard.bindings[0].function = "Options".into();
+                }
+                _ => unreachable!(),
+            }
+        }
+        if case == "otherBinding" {
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(KeyCode::KeyI);
+        }
+        advance_movement_clock(&mut app, 1232);
+        app.update();
+        assert!(receiver.try_recv().is_err(), "{case}");
+        assert!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .directional_attack
+                .is_none(),
+            "{case}"
+        );
+    }
+}
+
+#[test]
+fn mining_inventory_bridge_preserves_bag_but_rechecks_late_transaction_guards() {
+    for transaction in [false, true] {
+        let (mut app, receiver) = app_with_mining_gesture();
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            ui.core.panel = mir2_ui_core::state::UiPanel::Inventory;
+            if transaction {
+                ui.inventory_operation = Some(
+                    mir2_client_bevy::crystal_ui::overlays::InventoryOperationDraft::Move {
+                        source_slot: 0,
+                        unique_id: 900,
+                    },
+                );
+            }
+        }
+        // Deliberately omit the input system: a guard that changes after input
+        // queued a swing must still be enforced by the actual sender.
+        app.add_systems(
+            bevy::prelude::Update,
+            crate::gameplay_bridge::forward_quest_ui_intents,
+        );
+        app.update();
+        if transaction {
+            assert!(receiver.try_recv().is_err());
+            assert!(app
+                .world()
+                .resource::<WorldPointerMovementState>()
+                .directional_attack
+                .is_none());
+        } else {
+            assert!(matches!(receiver.try_recv().unwrap(), GatewayCommand::Wire(
+                NativeOutboundCommand::AttackDirection { direction, spell: None }) if direction == "right"));
+            assert!(receiver.try_recv().is_err());
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .directional_attack
+                    .as_ref()
+                    .unwrap()
+                    .id,
+                7
+            );
+        }
+    }
 }
 
 #[test]
@@ -535,7 +906,7 @@ fn mining_auto_hit_native_cancellation_never_rearms_after_owner_ui_tool_or_focus
                 app.world_mut()
                     .resource_mut::<NativePlayerUiState>()
                     .core
-                    .panel = mir2_ui_core::state::UiPanel::Inventory
+                    .panel = mir2_ui_core::state::UiPanel::Storage
             }
             "blur" => {
                 let world = app.world_mut();

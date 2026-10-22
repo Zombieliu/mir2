@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 普通背包不中断挖矿（2026-10-22）
+
+按本轮玩家反馈，Native普通背包开关、悬停和背包内指针输入保留已建立的AutoHit；开包时也可从未遮挡的矿壁开始挖矿。UI点击不透传世界，模态/交易/拖拽及角色状态保护继续有效。完整host回归1166通过、0失败、7项既有忽略；新构建及窗口复验待补。[修复与验收记录](NATIVE-MINING-OPEN-BAG-20261022.zh-CN.md)。不改变服务端概率/节奏或全项目Candidate/Accepted状态。
+
 <!-- leisure-closeout-20261022:start -->
 ## 休闲代码定向验收与玉晶 File 冷重入（2026-10-22）
 

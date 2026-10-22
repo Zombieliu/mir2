@@ -3250,10 +3250,9 @@ pub fn forward_quest_ui_intents(
         .is_some_and(|gesture| {
             world_actions_blocked
                 || (gesture.mining()
-                    && player_ui_state.as_deref().is_some_and(|ui| {
-                        ui.core.panel != mir2_ui_core::state::UiPanel::None
-                            || ui.blocks_gameplay_keys()
-                    }))
+                    && player_ui_state
+                        .as_deref()
+                        .is_some_and(crate::input::mining_input::ui_blocks_mining))
                 || !read_model
                     .as_deref()
                     .is_some_and(|model| model.player.max_hp > 0 && model.player.hp > 0)

@@ -703,6 +703,9 @@ pub struct WorldPointerMovementState {
     next_harvest_request_at_ms: f64,
     directional_attack: Option<mining_input::DirectionalAttackGesture>,
     directional_attack_epoch: u64,
+    /// Left/right gestures that began in the bag while AutoHit was running.
+    /// Their held/release frames remain UI-owned even after leaving the bag.
+    mining_inventory_pointer: [bool; 2],
     pending: VecDeque<PendingSelfMove>,
     movement_stall_reported: bool,
     self_object_id: Option<String>,
@@ -1225,6 +1228,33 @@ fn cursor_over_native_hud_button(window: &Window, minimap_expanded: bool) -> boo
     [mail, big_map, spec::hud::MINIMAP_TOGGLE.rect]
         .into_iter()
         .any(|rect| rect.contains(x, y))
+}
+
+fn mining_inventory_pointer_at(
+    window: &Window,
+    ui: &NativePlayerUiState,
+    point: Option<bevy::prelude::Vec2>,
+) -> bool {
+    if !window.focused || mining_input::ui_blocks_mining(ui) {
+        return false;
+    }
+    let Some(point) = point.filter(|point| point.is_finite()) else {
+        return false;
+    };
+    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
+        window.resolution.width(),
+        window.resolution.height(),
+    );
+    if !transform.contains_physical_point(point.x, point.y) {
+        return false;
+    }
+    let (x, y) = transform.physical_to_logical(point.x, point.y);
+    let size = mir2_client_bevy::crystal_ui::panel_layouts::INVENTORY_PANEL_SIZE;
+    spec::hud::INVENTORY.rect.contains(x, y)
+        || (ui.core.panel == mir2_ui_core::state::UiPanel::Inventory
+            && (ui.inventory_window.left..ui.inventory_window.left + size.width as f32)
+                .contains(&x)
+            && (ui.inventory_window.top..ui.inventory_window.top + size.height as f32).contains(&y))
 }
 
 /// Read the previous completed Bevy UI layout before the current press can
@@ -2530,6 +2560,43 @@ pub fn mouse_world_interaction_system(
     let press_origins = pointer_edges.read(windows.single().ok().map(|(entity, _)| entity));
     let keys = keyboard.keys();
     let modifiers = keyboard.modifiers();
+    let mining_auto_hit = movement
+        .directional_attack
+        .as_ref()
+        .is_some_and(|gesture| gesture.mining());
+    // Suppress only the world copy of a bag-owned gesture; the UI still sees
+    // the original ButtonInput. Classify at the true down position, never the
+    // final cursor after a coalesced down/move/up. Retain ownership until up so
+    // right-clicking the bag cannot turn into a run when the cursor leaves it.
+    let mut world_mouse = (*mouse).clone();
+    for (index, button, origin) in [
+        (0, MouseButton::Left, press_origins.left),
+        (1, MouseButton::Right, press_origins.right),
+    ] {
+        if mouse.just_pressed(button) {
+            movement.mining_inventory_pointer[index] = mining_auto_hit
+                && windows.single().ok().is_some_and(|(_, window)| {
+                    player_ui.as_deref().is_some_and(|ui| {
+                        mining_inventory_pointer_at(
+                            window,
+                            ui,
+                            if press_origins.ordered {
+                                origin
+                            } else {
+                                window.cursor_position()
+                            },
+                        )
+                    })
+                });
+        }
+        if movement.mining_inventory_pointer[index] {
+            world_mouse.reset(button);
+        }
+        if !mouse.pressed(button) {
+            movement.mining_inventory_pointer[index] = false;
+        }
+    }
+    let mouse = &world_mouse;
     let mut left_pressed = mouse.just_pressed(MouseButton::Left);
     let mut right_pressed = mouse.just_pressed(MouseButton::Right);
     let pointer_held = mouse.pressed(MouseButton::Left) || mouse.pressed(MouseButton::Right);
@@ -2538,27 +2605,27 @@ pub fn mouse_world_interaction_system(
     let left_click_pulse = left_pressed && left_released && !mouse.pressed(MouseButton::Left);
     let right_click_pulse = right_pressed && right_released && !mouse.pressed(MouseButton::Right);
     let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
-    let mining_auto_hit = movement
-        .directional_attack
-        .as_ref()
-        .is_some_and(|gesture| gesture.mining());
     let cancels_directional_attack = (!mouse.pressed(MouseButton::Left) && !mining_auto_hit)
         || (mining_auto_hit
             && (mouse.get_just_pressed().next().is_some()
-                || player_ui.as_deref().is_some_and(|ui| {
-                    ui.core.panel != mir2_ui_core::state::UiPanel::None || ui.blocks_gameplay_keys()
-                })
+                || player_ui
+                    .as_deref()
+                    .is_some_and(mining_input::ui_blocks_mining)
                 || keys.is_some_and(|keys| {
                     keys.get_just_pressed().any(|key| {
-                        player_ui
-                            .as_deref()
-                            .is_some_and(|ui| key_owned_by_binding(&ui.keyboard, keys, *key))
+                        player_ui.as_deref().is_some_and(|ui| {
+                            key_owned_by_binding(&ui.keyboard, keys, *key)
+                                && !mining_inventory_key(ui, keys, *key)
+                        })
                     })
                 })))
         || mouse.pressed(MouseButton::Right)
         || modifiers.alt
         || keys.is_some_and(|keys| {
-            keys.just_pressed(KeyCode::Escape)
+            (keys.just_pressed(KeyCode::Escape)
+                && !player_ui
+                    .as_deref()
+                    .is_some_and(|ui| mining_inventory_key(ui, keys, KeyCode::Escape)))
                 || walk_key_map().iter().any(|(key, _)| {
                     keys.pressed(*key)
                         && player_ui
@@ -3228,7 +3295,13 @@ pub fn mouse_world_interaction_system(
     // directional key own the frame so a ready auto-path step cannot be sent
     // immediately before the keyboard command and then be coalesced away by
     // the Gateway's latest-intent slot.
-    if keys.is_some_and(|keys| keys.just_pressed(KeyCode::Escape)) {
+    if keys.is_some_and(|keys| {
+        keys.just_pressed(KeyCode::Escape)
+            && !(mining_auto_hit
+                && player_ui
+                    .as_deref()
+                    .is_some_and(|ui| mining_inventory_key(ui, keys, KeyCode::Escape)))
+    }) {
         // The Big Map owns Escape in the later UI update and closes there.
         // Keep its running map route; Escape with no map panel remains the
         // ordinary movement cancellation below.
@@ -3549,9 +3622,9 @@ pub fn mouse_world_interaction_system(
                 origin: entity_position,
                 owner_stamp,
                 owner_ready,
-                mining_ui_open: player_ui.as_deref().is_some_and(|ui| {
-                    ui.core.panel != mir2_ui_core::state::UiPanel::None || ui.blocks_gameplay_keys()
-                }),
+                mining_ui_open: player_ui
+                    .as_deref()
+                    .is_some_and(mining_input::ui_blocks_mining),
                 press_grid,
                 press_grid_empty,
                 inventory: inventory.as_deref(),
@@ -4944,6 +5017,44 @@ pub fn keyboard_skill_system(
             spell_target_lock: lock,
         }));
     }
+}
+
+/// Follow function bindings, including user remaps and logical key names.
+/// A conflicting action on the same chord must retain its cancellation.
+fn mining_inventory_key(
+    ui: &NativePlayerUiState,
+    keys: &ButtonInput<KeyCode>,
+    key: KeyCode,
+) -> bool {
+    use mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::host::{key_name, modifiers};
+    if mining_input::ui_blocks_mining(ui) {
+        return false;
+    }
+    let Some(name) = ui
+        .keyboard
+        .logical_names
+        .get(&format!("{key:?}"))
+        .cloned()
+        .or_else(|| key_name(key))
+    else {
+        return false;
+    };
+    let mut matched = false;
+    for binding in ui
+        .keyboard
+        .bindings
+        .iter()
+        .filter(|binding| binding.matches(&name, modifiers(keys)))
+    {
+        if !matches!(binding.function.as_str(), "Inventory" | "Inventory2")
+            && !(binding.function == "Closeall"
+                && ui.core.panel == mir2_ui_core::state::UiPanel::Inventory)
+        {
+            return false;
+        }
+        matched = true;
+    }
+    matched
 }
 
 fn key_owned_by_binding(
