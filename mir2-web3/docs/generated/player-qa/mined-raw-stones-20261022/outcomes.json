@@ -1,0 +1,603 @@
+{
+  "recordedUtc": "2026-10-22T15:11:52.925376+00:00",
+  "scope": "User-authorized mined raw stone gameplay; ordinary ore seal retired",
+  "testHead": "21af23e5f2270eb4f7327756278768719f787fd5",
+  "productSourceHead": "22d9ad5c5aa6fd7b20a0e0717cf2ef2f07b2f456",
+  "passedRuns": [
+    {
+      "run": "20261022T142015813276Z-native-test",
+      "result": {
+        "exitCode": 0,
+        "elapsedSeconds": 282.19,
+        "sourceDrift": [],
+        "head": "969e43d49561d9823d060a585a5421640bbbd067",
+        "kind": "test",
+        "package": "native",
+        "filter": ""
+      },
+      "counts": {
+        "passed": 1166,
+        "failed": 0,
+        "ignored": 7
+      },
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "--manifest-path",
+        "apps/game-client/platform-windows/Cargo.toml",
+        "",
+        "--",
+        "--test-threads=1"
+      ],
+      "trackedSourceInputs": 574,
+      "currentSourceDifferences": [],
+      "invocationSha256": "2fd3b328bc849d77f617097c2f6343485f7ff7528f75957e46e389c7d2c2dffa",
+      "resultSha256": "b74c9905e4bfaf150e2223c686c71d50628125011282f47deb46b85f990718f4",
+      "logSha256": "05f73b201712252050ffe5c07434c637961ca66119507e335d58f3fce0ceb62c",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T142015813276Z-native-test\\cargo.log"
+    },
+    {
+      "run": "20261022T145423452023Z-mir2-simulation-test",
+      "result": {
+        "exitCode": 0,
+        "elapsedSeconds": 268.45,
+        "sourceDrift": [],
+        "head": "22d9ad5c5aa6fd7b20a0e0717cf2ef2f07b2f456",
+        "kind": "test",
+        "package": "mir2-simulation",
+        "filter": "stone"
+      },
+      "counts": {
+        "passed": 77,
+        "failed": 0,
+        "ignored": 0
+      },
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "stone",
+        "--",
+        "--test-threads=4",
+        "--nocapture"
+      ],
+      "trackedSourceInputs": 617,
+      "currentSourceDifferences": [],
+      "invocationSha256": "313c96b0a697c31e04daf1a12a7bf8d5229d881009b70fb2f7cc903d7243133f",
+      "resultSha256": "b75dfe5686270084cbf2d5e7e83ff85f7bf22b514bec4657e788fc7191895a3e",
+      "logSha256": "7878f998a5607742bb2f24bfb1aa61e32997ef227ca34873c5ae493e1ae23548",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T145423452023Z-mir2-simulation-test\\cargo.log"
+    },
+    {
+      "run": "20261022T144537224427Z-mir2-game-data-test",
+      "result": {
+        "exitCode": 0,
+        "elapsedSeconds": 6.75,
+        "sourceDrift": [],
+        "head": "969e43d49561d9823d060a585a5421640bbbd067",
+        "kind": "test",
+        "package": "mir2-game-data",
+        "filter": ""
+      },
+      "counts": {
+        "passed": 73,
+        "failed": 0,
+        "ignored": 1
+      },
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "-p",
+        "mir2-game-data",
+        "--lib",
+        "",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "trackedSourceInputs": 103,
+      "currentSourceDifferences": [],
+      "invocationSha256": "5671bd7bc563b5290148d74dd4deded65864fb247616dd3567041d005aa9d02e",
+      "resultSha256": "f4d8b77cf8f83644caddc27bd83b983111c56a84c62ec3f23051f0f672aec1b2",
+      "logSha256": "0f08866617f4d80314fbff60ccaf90669977093b09add0475325da8e1fd6e7bc",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T144537224427Z-mir2-game-data-test\\cargo.log"
+    },
+    {
+      "run": "20261022T144356395931Z-client-core-test",
+      "result": {
+        "exitCode": 0,
+        "elapsedSeconds": 25.36,
+        "sourceDrift": [],
+        "head": "969e43d49561d9823d060a585a5421640bbbd067",
+        "kind": "test",
+        "package": "client-core",
+        "filter": "raw_stone"
+      },
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      },
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "--manifest-path",
+        "apps/game-client/client-core/Cargo.toml",
+        "--lib",
+        "raw_stone",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "trackedSourceInputs": 574,
+      "currentSourceDifferences": [],
+      "invocationSha256": "52e95e55a90c6080a2838f681cdfe0ad93a4b8fb38ce569959b5b1906080cdc5",
+      "resultSha256": "4359e7060e19da07447c66aa485afecef12a2d2bea0d584371e620930ebd4651",
+      "logSha256": "f1d02d41787398c5f3f2a557f289d04c81070b79eba940ad06034e53ea1b936e",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T144356395931Z-client-core-test\\cargo.log"
+    },
+    {
+      "run": "20261022T150217906574Z-mir2-gateway-test",
+      "result": {
+        "exitCode": 0,
+        "elapsedSeconds": 405.05,
+        "sourceDrift": [],
+        "head": "21af23e5f2270eb4f7327756278768719f787fd5",
+        "kind": "test",
+        "package": "mir2-gateway",
+        "filter": "mining_tests"
+      },
+      "counts": {
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0
+      },
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "mining_tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "trackedSourceInputs": 824,
+      "currentSourceDifferences": [],
+      "invocationSha256": "a6cdb4a4b9e95d4e07b3c095cbfd858d4dabde63a3437fc9fe8306be0f23bf96",
+      "resultSha256": "d6a9e6de651a4f45ef75dd2595235037f76764b9fa9849c7b18f7882eec4fe61",
+      "logSha256": "d795f6de014735a655f20105b0cdbc4ad5048a2e9a9f1ded4aa233f9594a3d36",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T150217906574Z-mir2-gateway-test\\cargo.log"
+    },
+    {
+      "run": "20261022T150217906448Z-mir2-gateway-test",
+      "result": {
+        "exitCode": 0,
+        "elapsedSeconds": 224.43,
+        "sourceDrift": [],
+        "head": "21af23e5f2270eb4f7327756278768719f787fd5",
+        "kind": "test",
+        "package": "mir2-gateway",
+        "filter": "workshop_checkpoint"
+      },
+      "counts": {
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0
+      },
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "workshop_checkpoint",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "trackedSourceInputs": 824,
+      "currentSourceDifferences": [],
+      "invocationSha256": "6f344204337840e3dcc2a2bafd0ffe4ae53f407de974ed95e3dc7a22e32ca42e",
+      "resultSha256": "c8fcaf56aac7492415288e3d6daf91e30504f38d12a375bfa84bd8eadac57f12",
+      "logSha256": "b58f0202aaefe554e01374c265e8c45f4f335a0aa98870f313db873664438dd0",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T150217906448Z-mir2-gateway-test\\cargo.log"
+    }
+  ],
+  "countsAreSeparateGroups": true,
+  "overlap": "10 mined-stone tests are included in Simulation 77; 3 new Gateway raw-stone tests are included in mining 11. Earlier 9/76 runs are superseded, not added.",
+  "diagnosticRunsNotAcceptance": [
+    {
+      "run": "20261022T142007184142Z-native-test",
+      "result": {
+        "exitCode": 101,
+        "elapsedSeconds": 1.68,
+        "sourceDrift": [],
+        "head": "969e43d49561d9823d060a585a5421640bbbd067",
+        "kind": "test",
+        "package": "native",
+        "filter": ""
+      },
+      "counts": null,
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "--manifest-path",
+        "apps/game-client/platform-windows/Cargo.toml",
+        "--lib",
+        "",
+        "--",
+        "--test-threads=1"
+      ],
+      "trackedSourceInputs": 574,
+      "currentSourceDifferences": [],
+      "invocationSha256": "f1da91e0af0fef90f5ba91ae8670bdbbc0cfb1d7cc82866bae54f590f1b4c24a",
+      "resultSha256": "fe3280bd6bc522794c8cb9ac28b94711c7e1354f4ec8f54973fc8af31a2ef90d",
+      "logSha256": "fcad680189747fa5472fb84de5a492617c70b7cc28fe458346d7cce0c330e47a",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T142007184142Z-native-test\\cargo.log"
+    },
+    {
+      "run": "20261022T142259804062Z-mir2-simulation-test",
+      "result": {
+        "exitCode": 101,
+        "elapsedSeconds": 149.85,
+        "sourceDrift": [
+          "mir2-web3/apps/simulation/src/runtime/mined_stone_tests.rs",
+          "mir2-web3/apps/simulation/src/runtime/stones.rs"
+        ],
+        "head": "969e43d49561d9823d060a585a5421640bbbd067",
+        "kind": "test",
+        "package": "mir2-simulation",
+        "filter": "stone"
+      },
+      "counts": null,
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "stone",
+        "--",
+        "--test-threads=1"
+      ],
+      "trackedSourceInputs": 617,
+      "currentSourceDifferences": [
+        "mir2-web3/apps/simulation/src/runtime/mined_stone_tests.rs",
+        "mir2-web3/apps/simulation/src/runtime/mining_player.rs",
+        "mir2-web3/apps/simulation/src/runtime/stones.rs",
+        "mir2-web3/apps/simulation/src/runtime/stones_tests.rs"
+      ],
+      "invocationSha256": "830b7b8aadb73b815871463f8b32de15281683706e63c1c0350e6cff784e4da8",
+      "resultSha256": "402373e4ac5f2941e95d2fe5b96c9928aaa3af291f53c4a47c1115770a1c3134",
+      "logSha256": "708bc41d49e430d71c010763faf6b395d2e92944c97dd2cfeff7c58372ba8421",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T142259804062Z-mir2-simulation-test\\cargo.log"
+    },
+    {
+      "run": "20261022T142656139881Z-mir2-simulation-test",
+      "result": {
+        "exitCode": 101,
+        "elapsedSeconds": 662.16,
+        "sourceDrift": [
+          "mir2-web3/apps/simulation/src/runtime/mined_stone_tests.rs",
+          "mir2-web3/apps/simulation/src/runtime/stones_tests.rs"
+        ],
+        "head": "969e43d49561d9823d060a585a5421640bbbd067",
+        "kind": "test",
+        "package": "mir2-simulation",
+        "filter": "stone"
+      },
+      "counts": {
+        "passed": 65,
+        "failed": 11,
+        "ignored": 0
+      },
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "stone",
+        "--",
+        "--test-threads=1"
+      ],
+      "trackedSourceInputs": 617,
+      "currentSourceDifferences": [
+        "mir2-web3/apps/simulation/src/runtime/mined_stone_tests.rs",
+        "mir2-web3/apps/simulation/src/runtime/mining_player.rs",
+        "mir2-web3/apps/simulation/src/runtime/stones_tests.rs"
+      ],
+      "invocationSha256": "a9a8ce3acae86696536be4d01273f101c3e3a47f8ee19cc9e8c4d66c82cb68ec",
+      "resultSha256": "2315a20bdce46a352d05f3965b65f721bc32b2a5dd8bd9c1102c381b75b63641",
+      "logSha256": "065f14f2262467329a1e88b28c340f12958d60689edf7bcd9a598d83243ed95c",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T142656139881Z-mir2-simulation-test\\cargo.log"
+    },
+    {
+      "run": "20261022T144208933606Z-mir2-gateway-test",
+      "result": {
+        "exitCode": 101,
+        "elapsedSeconds": 419.44,
+        "sourceDrift": [
+          "mir2-web3/apps/gateway/src/routing/tests/mined_stone_tests.rs"
+        ],
+        "head": "969e43d49561d9823d060a585a5421640bbbd067",
+        "kind": "test",
+        "package": "mir2-gateway",
+        "filter": "mining_tests"
+      },
+      "counts": {
+        "passed": 8,
+        "failed": 3,
+        "ignored": 0
+      },
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "mining_tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "trackedSourceInputs": 824,
+      "currentSourceDifferences": [
+        "mir2-web3/apps/gateway/src/routing/tests/mined_stone_tests.rs",
+        "mir2-web3/apps/simulation/src/runtime/mined_stone_tests.rs",
+        "mir2-web3/apps/simulation/src/runtime/mining_player.rs"
+      ],
+      "invocationSha256": "c208e4b04b3fcaee50260fa92976d11ad49591e750e455a3e82ca1d161e0bb78",
+      "resultSha256": "7e9deb53037e3721b277680f042a88cdde1694191e81ff6f2392a61c8ed997d0",
+      "logSha256": "59b2f91bb0dd44e1190671fb19566c738d51af0cc53e92941ea0a052e9226541",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T144208933606Z-mir2-gateway-test\\cargo.log"
+    },
+    {
+      "run": "20261022T145423434309Z-mir2-gateway-test",
+      "result": {
+        "exitCode": 101,
+        "elapsedSeconds": 451.86,
+        "sourceDrift": [
+          "mir2-web3/apps/gateway/src/routing/tests/mined_stone_tests.rs"
+        ],
+        "head": "22d9ad5c5aa6fd7b20a0e0717cf2ef2f07b2f456",
+        "kind": "test",
+        "package": "mir2-gateway",
+        "filter": "mining_tests"
+      },
+      "counts": {
+        "passed": 9,
+        "failed": 2,
+        "ignored": 0
+      },
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "mining_tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "trackedSourceInputs": 824,
+      "currentSourceDifferences": [
+        "mir2-web3/apps/gateway/src/routing/tests/mined_stone_tests.rs"
+      ],
+      "invocationSha256": "8c48d2689f1368286e0d174a37ab0c31bc86e2c4625f7311faeee18c3dd91f24",
+      "resultSha256": "ac58b7fcc9a76061ff8f9d462334e05d6c498389e323dc13f684affa65deeba2",
+      "logSha256": "7065f73f180b0b475a1ccdb80fad7850f23032eeabb5b7806225dca35d8742a3",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T145423434309Z-mir2-gateway-test\\cargo.log"
+    }
+  ],
+  "pairedManifest": {
+    "sourceHead": "22d9ad5c5aa6fd7b20a0e0717cf2ef2f07b2f456",
+    "sharedSourceInputsEqual": 103,
+    "native": {
+      "path": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T145423452405Z-native-build\\mir2-platform-windows.exe",
+      "sha256": "05e2f58bf0b66576f817cf0fc153ebcb8d7cdcb3bceab3e42f549d3dd7fb8a34",
+      "bytes": 131193344,
+      "installed": "C:\\mir2-build\\mined-raw-stones-20261022\\client\\mir2-platform-windows.exe",
+      "buildResult": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T145423452405Z-native-build\\result.json"
+    },
+    "gateway": {
+      "path": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T145423432963Z-mir2-gateway-build\\mir2-gateway.exe",
+      "sha256": "595a89eb2841d40c7a0007a0c0132cdea90ba27ab873c8d53527100196f3d57b",
+      "bytes": 115652096,
+      "installed": "C:\\mir2-build\\mined-raw-stones-20261022\\server\\mir2-gateway.exe",
+      "buildResult": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T145423432963Z-mir2-gateway-build\\result.json"
+    }
+  },
+  "buildRuns": [
+    {
+      "run": "20261022T145423452405Z-native-build",
+      "result": {
+        "exitCode": 0,
+        "elapsedSeconds": 140.84,
+        "sourceDrift": [],
+        "head": "22d9ad5c5aa6fd7b20a0e0717cf2ef2f07b2f456",
+        "kind": "build",
+        "package": "native",
+        "filter": "",
+        "artifact": {
+          "path": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T145423452405Z-native-build\\mir2-platform-windows.exe",
+          "sha256": "05e2f58bf0b66576f817cf0fc153ebcb8d7cdcb3bceab3e42f549d3dd7fb8a34",
+          "bytes": 131193344
+        }
+      },
+      "counts": null,
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "build",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "--manifest-path",
+        "apps/game-client/platform-windows/Cargo.toml"
+      ],
+      "trackedSourceInputs": 574,
+      "currentSourceDifferences": [],
+      "invocationSha256": "0079360d34e4d06e73c7eb273a950cc8cf84f2b29a92236f0f43cebd62db7041",
+      "resultSha256": "1d972cc8b5235647f8fd2637ce18134eaf229b850c61bbb5a65873d07ee1702d",
+      "logSha256": "5cf1c3f4d7a27ef7ffea43ce646745eebeec527b62ce1c133d41520d4161efd7",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T145423452405Z-native-build\\cargo.log"
+    },
+    {
+      "run": "20261022T145423432963Z-mir2-gateway-build",
+      "result": {
+        "exitCode": 0,
+        "elapsedSeconds": 194.21,
+        "sourceDrift": [],
+        "head": "22d9ad5c5aa6fd7b20a0e0717cf2ef2f07b2f456",
+        "kind": "build",
+        "package": "mir2-gateway",
+        "filter": "",
+        "artifact": {
+          "path": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T145423432963Z-mir2-gateway-build\\mir2-gateway.exe",
+          "sha256": "595a89eb2841d40c7a0007a0c0132cdea90ba27ab873c8d53527100196f3d57b",
+          "bytes": 115652096
+        }
+      },
+      "counts": null,
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "build",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "8",
+        "-p",
+        "mir2-gateway",
+        "--bin",
+        "mir2-gateway"
+      ],
+      "trackedSourceInputs": 824,
+      "currentSourceDifferences": [
+        "mir2-web3/apps/gateway/src/routing/tests/mined_stone_tests.rs"
+      ],
+      "invocationSha256": "ddd40be438b4f4c2723ba8864f813d83e7924626735335ed1118cb5c007d9f27",
+      "resultSha256": "873487714e1a2a3bd596a7ba46d1b85b6d0e6e1a8dffb41b90e01a2658587896",
+      "logSha256": "ce731a787f025d556ec7c4473700cc1b85eabd12815af057a54330daa9599ab9",
+      "localLog": "C:\\mir2-build\\mined-raw-stones-20261022\\builds\\20261022T145423432963Z-mir2-gateway-build\\cargo.log"
+    }
+  ],
+  "productVsLaterHead": "21af23 changes only Gateway test Exit casing; documentation commits are not product rebuilds.",
+  "oldGatewayNormalStop": {
+    "utc": "2026-10-22T14:55:25.444759+00:00",
+    "pid": 291432,
+    "exitCode": 0,
+    "normalShutdownSent": true,
+    "readyReached": true,
+    "originalStoreStillUnchanged": true,
+    "copyStoreSha256After": "c30ccae02fab8387f9897c5681e448c3b3bf5b229f14b0b451b2bffbc3416252"
+  },
+  "runtime": {
+    "root": "C:\\mir2-build\\mined-raw-stones-20261022",
+    "gatewayPid": 264684,
+    "nativePid": 290324,
+    "character": "LeisureQA100",
+    "level": 30,
+    "map": "D401",
+    "position": [
+      39,
+      178
+    ],
+    "gold": 805160,
+    "initialFreeBagSlots": 23,
+    "lastObservedFreeBagSlots": 21,
+    "session": "20261022T150208959127Z",
+    "desktopShortcutUpdated": true,
+    "sourceStoreCopiedWithoutEditing": true,
+    "copiedStoreSha256": "c30ccae02fab8387f9897c5681e448c3b3bf5b229f14b0b451b2bffbc3416252"
+  },
+  "gui": {
+    "observed": [
+      "Normal login retains level30 and old materials",
+      "Inventory stays open while mining",
+      "Natural SilverOre purity8 and BlackIronOre purity17; free slots23 to21"
+    ],
+    "naturalRawStoneDropObserved": false,
+    "rawStoneWorkshopGuiCompleted": false,
+    "noQaItemInjection": true,
+    "screenshots": [
+      {
+        "path": "01-new-client-retains-mined-materials.png",
+        "sha256": "d955a3cfb5b570ffbe9058dd43ce04967c7e6538cdf6c247ff991e4c5ab8c59b",
+        "bytes": 240085
+      },
+      {
+        "path": "02-open-bag-natural-black-iron-purity17.png",
+        "sha256": "d41efde2ac19be7c3b7edb79e5c026cf52941aa9a5303fd1d88b97407f3f8666",
+        "bytes": 245085
+      }
+    ],
+    "limits": "Controlled protocol candidate-time tests do not replace natural GUI drop or final human acceptance."
+  },
+  "candidate100": false,
+  "humanAccepted": false,
+  "publicDeployment": false,
+  "postgresqlAccepted": false
+}

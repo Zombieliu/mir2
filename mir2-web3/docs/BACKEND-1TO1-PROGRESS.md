@@ -2,7 +2,7 @@
 
 ## 挖矿直接获得未知原石（2026-10-22，自定义玩法）
 
-普通矿石不再通过玩家封存转换；共享Zone在原有空槽提供原石候选，个人会话一次提交载体、矿镐损耗、角色checkpoint与原石登记。原石来源沿用Mining类型，旧结果/费用/墓碑兼容；新Seal拒绝，旧已完成回执仅幂等重放。Native1166通过/7既有忽略，新原石定向9/9通过；扩展stone、真实网关与窗口复验待补。[记录](SLG-MINED-RAW-STONES-20261022.zh-CN.md)。这是自定义玩法调整，原版parity比例、PostgreSQL与公网部署均不据此宣布通过。
+普通矿石不再通过玩家封存转换；共享Zone在原有空槽提供原石候选，个人会话一次提交载体、矿镐损耗、角色checkpoint与原石登记。原石来源沿用Mining类型，旧结果/费用/墓碑兼容；新Seal拒绝，旧已完成回执仅幂等重放。Native1166通过/0失败/7既有忽略；Simulation原石77通过（含10项新增采矿原石）；Gateway采矿11通过（含3项新增原石），真实WebSocket checkpoint4通过；GameData73通过/1既有忽略、ClientCore名称1通过，最终Run均sourceDrift为空。成对产品22d9ad已构建并打开30级隔离角色；自然原石及工坊GUI、最终人工验收待完成。[记录](SLG-MINED-RAW-STONES-20261022.zh-CN.md)。这是自定义玩法调整，原版parity比例、PostgreSQL与公网部署均不据此宣布通过。
 
 <!-- leisure-closeout-20261022:start -->
 ## 休闲代码定向验收与玉晶 File 冷重入（2026-10-22）

@@ -14,8 +14,16 @@
 
 ## 验证状态
 
-Windows Native完整host回归1166通过、0失败、7项既有忽略，包含原先开背包持续挖矿的输入回归。新原石定向9项通过、0失败、0忽略，覆盖真实Zone票据、三档原石事务、确定失败后原结果重试、未知提交冻结、满包、UID不可用/月卡保留段、断镐血量、旧封存拒绝与历史回执、File冷Session重登后直接切割。测试使用受控位置/装备和时间寻找正常规则候选，不能计作自然GUI产出。两个通过Run的记录来源分别为 `20261022T142015813276Z-native-test`、`20261022T143907560663Z-mir2-simulation-test`，sourceDrift均为空。
+Windows Native完整host回归1166通过、0失败、7项既有忽略，包含开背包持续挖矿的输入回归。最终Simulation stone过滤回归77通过、0失败、0忽略，包含10项新增采矿原石测试：真实Zone票据、三档事务、确定失败后固定结果重试、未知提交冻结、满包、UID与月卡保留段、断镐血量、旧封存拒绝及历史回执、File冷Session直接切割，以及platinum旧白名单下扩展显式开关。10项是77项的子集。GameData全库73通过、0失败、1项既有忽略；ClientCore名称回归1/1通过。通过Run的命令、源码指纹及日志摘要见[结构化收据](generated/player-qa/mined-raw-stones-20261022/outcomes.json)。
 
-首轮Native调用误指定仅库测试而包无lib，保留命令拒绝记录；首轮Simulation编译记录保留新增测试字段名误用的失败。后续76项stone回归的中途旧源码Run为65通过/11失败：10项源于测试场景Join后未同步可信战斗准入，另1项为旧封存流程断言未随鉴定场景更新；已修夹具同步和旧页targets完整相等断言，生产准入未放宽。该Run执行中有测试源码调整，sourceDrift明确记录，不当作最终合格证据。
+Gateway采矿11项全部通过，包含原有8项及真实原D401路径新增3项，覆盖普通买镐配装、真实Zone采矿→File冷登录→Bill鉴定/切割，以及确定失败/未知提交两类故障。真实TCP/WebSocket workshop_checkpoint四项全部通过，覆盖首次原石加工报价、idle checkpoint、保存故障不发成功报价和Atelier回归。两组最终sourceDrift均为空。协议测试使用受控位置、装备和候选时间，不能计作自然GUI产出，也不是PostgreSQL验收。
 
-修订后完整stone过滤回归76通过、0失败、0忽略（包含上述新原石9项，不重复累计），执行233.32秒，sourceDrift为空；覆盖既有存档和两条WorldRuntime外层checkpoint路径。GameData全库73通过、0失败、1项既有忽略；ClientCore新增名称回归1/1通过。真实Gateway/WS、构建及本机窗口复验继续进行中，最终结果待补。新流程属于自定义玩法，不提升 Crystal 原版1:1完成率，不代表公网发布或用户最终人工验收。
+失败历史保留：首轮Native误指定无lib包；首轮Simulation测试字段误用；中途stone为65通过/11失败（10项夹具未同步可信战斗准入，1项旧封存页断言），修复夹具而不放宽生产准入。首轮Gateway 8通过/3失败暴露platinum旧白名单实际拦截扩展原石，产品提交22d9ad仅在已显式开启工坊时精确放行三种原石；第二轮9通过/2失败是故障夹具将实际小写@exit写成@Exit，后续只修测试，仍发送实际显示链接。执行中源码漂移的Run明确作为诊断保留，不当作最终通过证据。
+
+## 本机交付与人工操作
+
+Native与Gateway均由产品提交 `22d9ad5c5aa6fd7b20a0e0717cf2ef2f07b2f456` 实际构建，exit0且sourceDrift为空，103项共享输入逐项一致；后续21af23仅修Gateway测试，文档提交不冒称重新构建产品。成对清单为 `C:/mir2-build/mined-raw-stones-20261022/manifest.json`。Native SHA256 `05e2f58bf0b66576f817cf0fc153ebcb8d7cdcb3bceab3e42f549d3dd7fb8a34`；Gateway SHA256 `595a89eb2841d40c7a0007a0c0132cdea90ba27ab873c8d53527100196f3d57b`。
+
+旧角色与网关均正常保存退出后，将最新隔离存档原样复制到新目录，复制前后SHA256为 `c30ccae02fab8387f9897c5681e448c3b3bf5b229f14b0b451b2bffbc3416252`，旧存档未覆盖。新环境普通登录30级LeisureQA100，D401(39,178)、金币805160，保留旧材料。桌面“01 挖矿制作钓鱼验收 - 30级”已指向新版 `C:/mir2-build/mined-raw-stones-20261022/start-client.ps1`；当前本机网关与Native均运行新配对。
+
+实际窗口已观察背包打开持续挥镐并自然新增普通银矿（纯度8）、黑铁矿（纯度17），背包空格23→21，见[自然黑铁矿截图](generated/player-qa/mined-raw-stones-20261022/02-open-bag-natural-black-iron-purity17.png)。自然原石掉落、工坊完整GUI及用户最终人工结论仍待，不提前勾选。玩家下一步可继续挖矿，获得“未知原石”后回比奇Bill(302,221)鉴定或直接切割；普通铜矿交Alice(321,265)按既有配方制作，不再封存。新流程属于自定义玩法，不提升Crystal原版1:1完成率；Candidate100=false、humanAccepted=false，尚未公网发布。

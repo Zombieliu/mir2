@@ -1,5 +1,9 @@
 # Agent Task Queue
 
+## 当前专项：挖矿直接掉未知原石（2026-10-22）
+
+Native1166通过/0失败/7既有忽略；Simulation原石77通过（含10项新增采矿原石）；Gateway采矿11通过（含3项新增原石），真实WebSocket checkpoint4通过；GameData73通过/1既有忽略、ClientCore名称1通过，最终Run均sourceDrift为空。成对产品22d9ad已构建并打开30级隔离角色；自然原石及工坊GUI、最终人工验收待完成。普通矿交Alice制作；新原石交Bill鉴定或直接切割，不再封存。用户授权的本机环境升级已完成，桌面30级快捷方式已指新版；原石自然GUI待玩家继续验收。来源及历史失败见[本轮说明](SLG-MINED-RAW-STONES-20261022.zh-CN.md)与[收据](generated/player-qa/mined-raw-stones-20261022/outcomes.json)。自定义玩法不提升原版1:1比例，Candidate100=false；下方为历史队列时点。
+
 ## 当前队列：休闲代码验收收尾，剩余普通GUI待控制器恢复（2026-10-22）
 
 当前休闲分支的钓鱼刷新、坐骑附件/撤骑、宠物窗口输入修复已有各自冻结源码下的测试和有界GUI证据；本轮另通过金币前置helper 5项、玉晶普通Alice链接制作/穿脱/File冷Session 1项、宠物Gateway共享拾取/过滤/保存失败重登5项，共11项当前源定向回归。Guard均接受、1462项输入零漂移；source11产品闭包仅新增QA example和修改`cfg(test)`测试，其余1460项字节不变。详见[当前休闲记录](NATIVE-LEISURE-ACCEPTANCE-20261020.zh-CN.md)及[具名测试摘要](generated/player-qa/native-leisure-20261020/closeout-20261022.json)。Root负责明确文件集的提交、推送和实际远端核验，不能把计划写成已推送。

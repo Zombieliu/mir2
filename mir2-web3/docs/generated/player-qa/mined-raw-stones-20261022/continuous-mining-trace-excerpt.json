@@ -1,0 +1,52 @@
+{
+  "source": "C:\\mir2-build\\mined-raw-stones-20261022\\sessions\\20261022T150208959127Z\\movement-trace.jsonl",
+  "capturedUtc": "2026-10-22T15:11:52.924157+00:00",
+  "miningQueueCount": 449,
+  "events": [
+    {
+      "atMs": 117064.2231,
+      "capturedAtUnixMs": 1792681447542,
+      "direction": "up",
+      "gestureId": 1,
+      "mining": true,
+      "objectId": "1000",
+      "processId": 290324,
+      "schema": "mir2.windows.native-movement-trace.v1",
+      "type": "directionalAttackQueued"
+    },
+    {
+      "atMs": 579459.2931,
+      "capturedAtUnixMs": 1792681909932,
+      "direction": "up",
+      "gestureId": 1,
+      "mining": true,
+      "objectId": "1000",
+      "processId": 290324,
+      "schema": "mir2.windows.native-movement-trace.v1",
+      "type": "directionalAttackQueued"
+    },
+    {
+      "atMs": 580502.0118,
+      "capturedAtUnixMs": 1792681910982,
+      "direction": "up",
+      "gestureId": 1,
+      "mining": true,
+      "objectId": "1000",
+      "processId": 290324,
+      "schema": "mir2.windows.native-movement-trace.v1",
+      "type": "directionalAttackQueued"
+    },
+    {
+      "atMs": 581540.3672,
+      "capturedAtUnixMs": 1792681912014,
+      "direction": "up",
+      "gestureId": 1,
+      "mining": true,
+      "objectId": "1000",
+      "processId": 290324,
+      "schema": "mir2.windows.native-movement-trace.v1",
+      "type": "directionalAttackQueued"
+    }
+  ],
+  "limit": "Client trace confirms repeated input under one gesture, not an authoritative award receipt."
+}
