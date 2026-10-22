@@ -109,6 +109,29 @@ fn mined_stone_three_grades_atomically_save_carrier_frozen_result_and_tool_wear(
 }
 
 #[test]
+fn mined_stone_platinum_profile_requires_workshop_opt_in_for_extension_award() {
+    for enabled in [false, true] {
+        let mut f = mined_fixture("platinum-opt-in");
+        f.config = f.config.clone().with_platinum_176_profile();
+        f.session.app.world_mut().resource_mut::<RuntimeConfigResource>().config = f.config.clone();
+        if !enabled { f.session.app.world_mut().remove_resource::<WorkshopEnabled>(); }
+        assert_eq!(workshop_enabled(f.session.app.world()), enabled,
+            "disabled fixture requires no process-wide MIR2_STONE_WORKSHOPS opt-in");
+        let raw = crystal_item_by_index(RAW_STONE_ROUGH).unwrap();
+        assert!(!f.config.item_is_allowed(&raw.name), "imported whitelist must remain unchanged");
+        let (_, swing) = raw_swing(&f, RAW_STONE_ROUGH);
+        let before = f.live();
+        let packets = f.session.apply_shared_mining_swing(&swing).unwrap();
+        assert_eq!(packets.iter().filter(|p| matches!(p,
+            ServerPacket::GainedItem { item } if item.item_index == RAW_STONE_ROUGH)).count(), usize::from(enabled));
+        assert_eq!(f.disk().sealed_stones.records().count(), usize::from(enabled));
+        assert_eq!(f.live().gold, before.gold);
+        assert_ne!(f.live().equipment_items_json, before.equipment_items_json);
+        f.assert_checkpoint();
+    }
+}
+
+#[test]
 fn mined_stone_known_failure_reuses_exact_uid_and_frozen_draw_on_retry() {
     let mut f = mined_fixture("known");
     let (mut zone, swing) = raw_swing(&f, RAW_STONE_ROUGH);

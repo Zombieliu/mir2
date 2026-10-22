@@ -83,17 +83,21 @@ impl SimulationSession {
         }
         if super::stones::workshop_enabled(self.app.world()) {
             if let Some(index) = swing.raw_stone {
+                if !mir2_game_data::RAW_STONE_INDICES.contains(&index) {
+                    return Err("unrecognized workshop mining extension".into());
+                }
                 let template = mir2_game_data::crystal_item_by_index(index)
                     .ok_or("raw stone template unavailable")?;
                 let key = crystal_item_key_for_template(&template);
                 let inventory = self.app.world().resource::<InventoryResource>();
                 let destination = crystal_empty_add_item_slots(inventory, ItemContainer::Bag1, &key)
                     .into_iter().find(|(container, _)| matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2));
-                let allowed = self.app.world().resource::<RuntimeConfigResource>().config
-                    .item_is_allowed(&template.name);
                 // Stone custody requires an actual bag cell; never mint a
                 // registry record for a skipped payout or a belt-only space.
-                if let Some(destination) = destination.filter(|_| allowed) {
+                // The explicit server workshop opt-in admits these three
+                // extension indices even when the imported profile predates
+                // them. Ordinary ore still uses its normal profile gate below.
+                if let Some(destination) = destination {
                     self.begin_stone_workshops().map_err(|e| format!("mining actor unavailable: {e:?}"))?;
                     let checkpoint = self.active_character_checkpoint().ok_or("mining checkpoint unavailable")?;
                     let (position, direction) = swing.player_transform();
