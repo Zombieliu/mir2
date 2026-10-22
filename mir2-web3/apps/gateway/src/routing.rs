@@ -14437,6 +14437,14 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn execute_zone_native_mining(&mut self, direction: MirDirection) -> Vec<ServerPacket> {
+        self.execute_zone_native_mining_with_clock(direction, Self::zone_now_ms)
+    }
+
+    fn execute_zone_native_mining_with_clock(
+        &mut self,
+        direction: MirDirection,
+        now_ms: impl FnOnce() -> u64,
+    ) -> Vec<ServerPacket> {
         let Some(session) = self.current_zone_session_id() else {
             return Vec::new();
         };
@@ -14447,7 +14455,7 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(mut packets) = self.sync_authoritative_zone_combat_state(&session) else {
             return self.authoritative_zone_owner_correction();
         };
-        let now_ms = Self::zone_now_ms();
+        let now_ms = now_ms();
         let Some(key) = self.current_presence_key() else {
             return packets;
         };
@@ -14486,7 +14494,10 @@ impl SharedInProcessZoneSessionRuntime {
                 .zone_manager
                 .commit_mining_swing(&session, &swing)
                 .expect("single-writer mining capability changed during personal commit");
-            if swing.tool_damage() >= tool.durability {
+            // Optional raw stones can wear the pick even when the ordinary
+            // mining hit missed. Inspect the committed equipment so skipped
+            // raw payouts (disabled/full) do not falsely remove its stats.
+            if self.inner.shared_mining_tool().is_none() {
                 // Breaking the pick removes its stats immediately. Do this
                 // before releasing the writer lock; the native attack path
                 // deliberately skips broad personal→Zone snapshot refreshes.

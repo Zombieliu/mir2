@@ -6,13 +6,70 @@ use super::inventory::{add_or_increment_item_with_random_metadata, crystal_empty
 use super::items::{
     crystal_item_key_for_template, crystal_item_stat_value, crystal_item_template_for_item_key,
 };
-use super::resources::{is_in_world, InventoryResource, RuntimeConfigResource, SessionResource};
+use super::resources::{InventoryResource, RuntimeConfigResource, SessionResource, is_in_world};
 use super::session::SimulationSession;
 use super::zone::{ZoneMiningSwing, ZoneMiningTool};
 use crate::config::{EquipmentSlot, ItemContainer};
 use bevy_ecs::prelude::World;
 use mir2_game_data::crystal_item_by_name;
 use mir2_protocol::ServerPacket;
+
+/// Stage the unchanged ordinary-ore constructor against isolated inventory.
+/// It chooses its usual bag/belt cell before the optional raw-stone payout.
+pub(super) fn stage_shared_mining_ore(
+    world: &World,
+    swing: &ZoneMiningSwing,
+) -> Result<(InventoryResource, Option<super::items::ItemState>), String> {
+    let inventory = world.resource::<InventoryResource>().clone();
+    let Some(ore) = &swing.ore else {
+        return Ok((inventory, None));
+    };
+    let Some(template) = crystal_item_by_name(&ore.item_name) else {
+        return Ok((inventory, None));
+    };
+    let key = crystal_item_key_for_template(&template);
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let destination = crystal_empty_add_item_slots(&inventory, ItemContainer::Bag1, &key)
+        .into_iter()
+        .next()
+        .or_else(|| {
+            crystal_empty_add_item_slots(&inventory, ItemContainer::Belt, &key)
+                .into_iter()
+                .next()
+        });
+    let Some((container, slot)) = destination.filter(|_| config.item_is_allowed(&template.name))
+    else {
+        return Ok((inventory, None));
+    };
+    let random =
+        super::drops::crystal_random_drop_stats(&template, swing.now_ms(), swing.object_id, 0);
+    let mut staged = World::new();
+    staged.insert_resource(inventory);
+    let item = add_or_increment_item_with_random_metadata(
+        &mut staged,
+        container,
+        &key,
+        &template.name,
+        template.tooltip.as_deref().unwrap_or(""),
+        slot,
+        1,
+        u16::from(template.weight),
+        Some(ore.current_dura),
+        Some(template.durability.saturating_add(random.durability_bonus)),
+        random.added_attack,
+        random.added_defence,
+        random.added_stats,
+        random.cursed,
+        template.slots.saturating_add(random.socket_slots),
+    );
+    super::items::validate_committed_item_state_carrier(&item).map_err(|e| e.to_string())?;
+    Ok((
+        staged
+            .remove_resource::<InventoryResource>()
+            .expect("staged inventory exists"),
+        Some(item),
+    ))
+}
 
 pub(super) fn mining_tool(world: &World) -> Option<ZoneMiningTool> {
     if !is_in_world(world) {
@@ -78,8 +135,16 @@ impl SimulationSession {
         {
             return Err("mining character or equipped tool changed before commit".to_string());
         }
-        if swing.durability_damage == 0 {
-            return Ok(Vec::new());
+        // An unknown raw-only commit can leave the live tool unchanged. Do
+        // not let workshop availability or a zero ordinary hit bypass its
+        // durable write fence and advance the shared mining ticket.
+        self.app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .ensure_account_store_writable()?;
+        if swing.raw_stone.is_some() && swing.raw_tool_damage() == 0 {
+            return Err("raw-stone mining ticket must include tool wear".into());
         }
         if super::stones::workshop_enabled(self.app.world()) {
             if let Some(index) = swing.raw_stone {
@@ -89,26 +154,43 @@ impl SimulationSession {
                 let template = mir2_game_data::crystal_item_by_index(index)
                     .ok_or("raw stone template unavailable")?;
                 let key = crystal_item_key_for_template(&template);
-                let inventory = self.app.world().resource::<InventoryResource>();
-                let destination = crystal_empty_add_item_slots(inventory, ItemContainer::Bag1, &key)
-                    .into_iter().find(|(container, _)| matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2));
+                let (inventory, ordinary) = stage_shared_mining_ore(self.app.world(), swing)?;
+                let destination =
+                    crystal_empty_add_item_slots(&inventory, ItemContainer::Bag1, &key)
+                        .into_iter()
+                        .find(|(container, _)| {
+                            matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2)
+                        });
                 // Stone custody requires an actual bag cell; never mint a
                 // registry record for a skipped payout or a belt-only space.
                 // The explicit server workshop opt-in admits these three
                 // extension indices even when the imported profile predates
                 // them. Ordinary ore still uses its normal profile gate below.
                 if let Some(destination) = destination {
-                    self.begin_stone_workshops().map_err(|e| format!("mining actor unavailable: {e:?}"))?;
-                    let checkpoint = self.active_character_checkpoint().ok_or("mining checkpoint unavailable")?;
+                    self.begin_stone_workshops()
+                        .map_err(|e| format!("mining actor unavailable: {e:?}"))?;
+                    let checkpoint = self
+                        .active_character_checkpoint()
+                        .ok_or("mining checkpoint unavailable")?;
                     let (position, direction) = swing.player_transform();
                     self.force_authoritative_player_transform(position, direction);
-                    let result = self.apply_mined_raw_stone(swing, index, destination);
-                    if result.is_err() {
-                        self.restore_active_character_checkpoint(&checkpoint)?;
+                    match self.apply_mined_raw_stone(swing, index, destination, inventory, ordinary)
+                    {
+                        Ok(Some(packets)) => return Ok(packets),
+                        Ok(None) => {
+                            // Known exhausted ledger: settle ordinary mining below.
+                            self.restore_active_character_checkpoint(&checkpoint)?;
+                        }
+                        Err(error) => {
+                            self.restore_active_character_checkpoint(&checkpoint)?;
+                            return Err(error);
+                        }
                     }
-                    return result;
                 }
             }
+        }
+        if swing.durability_damage == 0 {
+            return Ok(Vec::new());
         }
         let checkpoint = self
             .active_character_checkpoint()

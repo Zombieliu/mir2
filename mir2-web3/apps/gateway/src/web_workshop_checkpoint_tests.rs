@@ -276,6 +276,7 @@ mod workshop_checkpoint_websocket_tests {
                 .prepare_mining_swing(&sid, mir2_protocol::MirDirection::Up, &tool, now)
                 .unwrap();
             assert_eq!(swing.tool_damage(), 0);
+            assert!(swing.raw_stone_template_id().is_none());
             assert!(source.apply_shared_mining_swing(&swing).unwrap().is_empty());
             assert!(zone.commit_mining_swing(&swing).is_some());
             let state: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
@@ -293,7 +294,9 @@ mod workshop_checkpoint_websocket_tests {
             let swing = zone
                 .prepare_mining_swing(&sid, mir2_protocol::MirDirection::Up, &tool, now)
                 .unwrap();
-            if swing.raw_stone_template_id() != Some(50001) {
+            // This checkpoint fixture needs one raw carrier; dual-drop atomicity
+            // is covered against the original D401 wall in routing tests.
+            if swing.raw_stone_template_id() != Some(50001) || swing.ore().is_some() {
                 continue;
             }
             let packets = source.apply_shared_mining_swing(&swing).unwrap();

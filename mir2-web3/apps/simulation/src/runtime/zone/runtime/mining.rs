@@ -54,6 +54,7 @@ pub struct ZoneMiningSwing {
     /// Optional server-side workshop extension. Ordinary ore rolls are untouched;
     /// the personal session admits this candidate only when workshops are enabled.
     pub(crate) raw_stone: Option<i32>,
+    pub(crate) raw_durability_damage: u16,
     pub(crate) durability_damage: u16,
     session_id: SessionId,
     position: Point,
@@ -75,6 +76,10 @@ impl ZoneMiningSwing {
     }
     pub fn tool_damage(&self) -> u16 {
         self.durability_damage
+    }
+    /// Applied only if the optional raw-stone payout is actually admitted.
+    pub fn raw_tool_damage(&self) -> u16 {
+        self.raw_durability_damage
     }
     pub fn ore(&self) -> Option<&ZoneMinedOre> {
         self.ore.as_ref()
@@ -158,17 +163,29 @@ impl ZoneRuntime {
         let mut durability_damage = 0;
         let mut ore = None;
         let mut raw_stone = None;
+        let mut raw_durability_damage = 0;
         if after.stones_left > 0 {
             after.stones_left -= 1;
+            // Separate workshop roll: neither ordinary mining accuracy/drop
+            // bonuses nor its ore/purity roll changes this fixed 20% extension.
+            raw_stone = raw_stone_for_roll(roll(0x90, 100), roll(0xa0, 24));
             hit = (roll(0x10, 100) as i32)
                 < i32::from(set.hit_rate).saturating_add(tool.accuracy.saturating_mul(10));
-            if hit {
+            if hit || raw_stone.is_some() {
                 let damage = 5 + roll(0x30, 15) as i32;
-                durability_damage = if tool.strong > 0 {
+                let damage = if tool.strong > 0 {
                     (damage - tool.strong).max(1)
                 } else {
                     damage
                 } as u16;
+                if hit {
+                    durability_damage = damage;
+                }
+                if raw_stone.is_some() {
+                    raw_durability_damage = damage;
+                }
+            }
+            if hit {
                 if (roll(0x20, 100) as i32)
                     < i32::from(set.drop_rate).saturating_add(tool.mine_rate_percent)
                 {
@@ -203,10 +220,6 @@ impl ZoneRuntime {
                                 current_dura: dura,
                             });
                         }
-                    } else {
-                        // Fill previously empty payout slots only. All imported
-                        // ore slots, purity rolls and mining timing stay intact.
-                        raw_stone = raw_stone_for_empty_slot(slot);
                     }
                 }
             }
@@ -223,6 +236,7 @@ impl ZoneRuntime {
             tool: tool.clone(),
             ore,
             raw_stone,
+            raw_durability_damage,
             durability_damage,
             session_id: session_id.clone(),
             position: player.position.clone(),
@@ -255,6 +269,7 @@ impl ZoneRuntime {
             || fresh.after != swing.after
             || fresh.ore != swing.ore
             || fresh.raw_stone != swing.raw_stone
+            || fresh.raw_durability_damage != swing.raw_durability_damage
             || fresh.durability_damage != swing.durability_damage
         {
             return None;
@@ -365,11 +380,14 @@ impl ZoneRuntime {
     }
 }
 
-fn raw_stone_for_empty_slot(slot: u16) -> Option<i32> {
-    match slot {
-        57..=72 => Some(mir2_game_data::RAW_STONE_ROUGH),
-        73..=78 => Some(mir2_game_data::RAW_STONE_FINE),
-        79..=80 => Some(mir2_game_data::RAW_STONE_PRECIOUS),
+fn raw_stone_for_roll(chance: u64, grade: u64) -> Option<i32> {
+    if chance >= 20 {
+        return None;
+    }
+    match grade {
+        0..=15 => Some(mir2_game_data::RAW_STONE_ROUGH),
+        16..=21 => Some(mir2_game_data::RAW_STONE_FINE),
+        22..=23 => Some(mir2_game_data::RAW_STONE_PRECIOUS),
         _ => None,
     }
 }
@@ -379,23 +397,18 @@ mod raw_stone_tests {
     use super::*;
 
     #[test]
-    fn raw_stones_fill_only_unused_slots_without_replacing_imported_ore() {
-        let expected = [16, 6, 2];
-        for mine_index in 1..=2 {
-            let set = crystal_mine_set(mine_index).unwrap();
-            let mut counts = [0; 3];
-            for slot in 0..set.total_slots {
-                if let Some(index) = raw_stone_for_empty_slot(slot) {
-                    assert!(set
-                        .drops
-                        .iter()
-                        .all(|drop| slot < drop.min_slot || slot > drop.max_slot));
+    fn raw_stones_have_twenty_percent_independent_roll_and_preserve_grade_weights() {
+        let mut counts = [0; 3];
+        for chance in 0..100 {
+            for grade in 0..24 {
+                if let Some(index) = raw_stone_for_roll(chance, grade) {
                     counts[(index - mir2_game_data::RAW_STONE_ROUGH) as usize] += 1;
                 }
             }
-            assert_eq!(counts, expected);
         }
-        assert!(raw_stone_for_empty_slot(56).is_none());
-        assert!(raw_stone_for_empty_slot(81).is_none());
+        assert_eq!(counts, [20 * 16, 20 * 6, 20 * 2]);
+        assert_eq!(counts.iter().sum::<usize>(), 100 * 24 / 5);
+        assert!(raw_stone_for_roll(20, 0).is_none());
+        assert!(raw_stone_for_roll(0, 24).is_none());
     }
 }
