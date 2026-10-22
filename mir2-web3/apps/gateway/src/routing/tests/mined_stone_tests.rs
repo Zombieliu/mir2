@@ -61,17 +61,40 @@ fn raw_carrier(save: &mir2_simulation::CharacterSaveRecord) -> Value {
 }
 
 fn choose(runtime: &mut SharedInProcessZoneSessionRuntime, prefix: &str) -> Vec<ServerPacket> {
-    let dialog = runtime.inner.world_snapshot().active_npc_dialog.unwrap();
+    let dialog = runtime
+        .inner
+        .world_snapshot()
+        .active_npc_dialog
+        .unwrap_or_else(|| panic!("missing NPC dialog while choosing {prefix}"));
     assert!(!dialog
         .links
         .iter()
         .any(|link| link.target.starts_with("@stone:v1:seal:")));
+    let targets: Vec<_> = dialog
+        .links
+        .iter()
+        .map(|link| link.target.as_str())
+        .collect();
     let target = dialog
         .links
-        .into_iter()
-        .find(|link| link.target.starts_with(prefix))
-        .unwrap()
-        .target;
+        .iter()
+        .find(|link| {
+            // Imported merchant scripts may spell @exit in lowercase. Send the
+            // exact displayed bytes; economic stone targets remain case-sensitive.
+            if prefix == "@Exit" {
+                link.target.eq_ignore_ascii_case(prefix)
+            } else {
+                link.target.starts_with(prefix)
+            }
+        })
+        .unwrap_or_else(|| {
+            panic!(
+                "missing NPC link {prefix}; title={:?}, npc={}, actual targets={targets:?}",
+                dialog.title, dialog.npc_object_id
+            )
+        })
+        .target
+        .clone();
     runtime
         .execute(WorldCommand::SelectNpcDialog { target })
         .unwrap()
