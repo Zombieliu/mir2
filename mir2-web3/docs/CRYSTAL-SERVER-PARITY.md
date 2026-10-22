@@ -1,5 +1,11 @@
 # Crystal Server Parity
 
+## 第十六阶段续验：材料恢复与保存交接（2026-10-22）
+
+新增原生恢复交接以旧连接私有标记等待保存结果，未保存的Session不能恢复；成功发布仍由原reserve/commit唯一消费。撤权、过期、保存失败和journal停止等待，原TTL不延长。Gateway265现成二进制新执行交接14、原生恢复20、保存失败15、异常退出5项全部通过；268真实WS/PG三项通过整栈/部分转换、三类拒绝资产不变及未读提交后的原单恢复/冷登录，见[阶段十六证据](generated/hunting-economy/acceptance-20261022-native-material.json)。
+
+Windows材料Runtime123/Bevy44/Host110既有最终测试由28项当前输入SHA匹配限定承接；Root真实GUI另完成红药10单Confirm、丢已提交回执、Pending Close、早到8,417ms断线恢复及原Query完成，PG为1单/fee25/许可原子1250。用户physical Escape使后续Yes点击被电脑工具拒绝，正常退出、部分GUI和冷EXE重登未完成；6图及脱敏事实只接受上述限定范围，不扩称完整实机闭环。默认关闭、正式价格空白名单、K=0.1和0.72/1.08许可保持；无新Crystal/Candidate、发布或部署结论。
+
 ## 第十五阶段：固定估值材料转换（2026-10-21）
 
 用户已选策划固定估值、手续费扣现有非绑定金币。主服现已实现普通 Bag 的 Bound 根整栈/部分转换：总估值 E 只扣 E 许可原子及 ceil(2%E) 非绑手续费，不生成金币；完整物品 checkpoint、钱包、许可、fee 销毁与不可变结果同 PG 提交。原单 Query、未决普通退出及冷登录恢复已接，旧 gold 不改，正式价格白名单为空且默认关闭。详见[材料服务端合同/伪代码](HUNTING-MATERIAL-CONVERSION.md)。

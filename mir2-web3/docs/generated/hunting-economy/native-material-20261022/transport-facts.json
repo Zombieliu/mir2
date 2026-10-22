@@ -1,0 +1,41 @@
+{
+  "capturedAt": "2026-10-22T06:57:32.055Z",
+  "stateAtCapture": "ready",
+  "dropMode": "after-commit",
+  "connections": 2,
+  "confirms": 1,
+  "queries": 1,
+  "resumes": 1,
+  "omittedCommittedReplies": 1,
+  "physicalBreaks": 1,
+  "clientTypes": {
+    "clientCapabilities": 2,
+    "keepAlive": 158,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "npcPurchaseOwner": 3,
+    "requestIntelligentCreatureUpdates": 2,
+    "huntingMaterialOwner": 3,
+    "resumeSession": 1
+  },
+  "serverTypes": {
+    "realmInfo": 2,
+    "packet": 303,
+    "worldSnapshot": 8,
+    "identitySession": 2,
+    "resumeCredential": 227,
+    "npcPurchaseOwner": 3,
+    "huntingMaterialOwner": 2,
+    "sessionResumed": 1
+  },
+  "startedAt": "2026-10-22T06:17:00.178Z",
+  "omittedAt": "2026-10-22T06:20:02.946Z",
+  "brokenAt": "2026-10-22T06:21:23.496Z",
+  "requestedResume": {
+    "at": "2026-10-22T06:21:23.704Z",
+    "credentialSha256": "6d19d781a14939de3473af42b0ec6a1a3a8408fad04a2771910013ae744519d3"
+  },
+  "credentialValuesIncluded": false,
+  "originalTransportWasNotStoppedByArchiving": true
+}

@@ -1,0 +1,97 @@
+{
+  "at": "2026-10-22T06:23:29.135Z",
+  "label": "after-query",
+  "isolatedSyntheticFixture": true,
+  "revision": 17,
+  "saveVersion": 18,
+  "boundGold": "100",
+  "unboundGold": "97975",
+  "legacyGold": 0,
+  "stockAtoms": "971550",
+  "resultCount": 1,
+  "materialCount": 1,
+  "materialFeeBurnCount": 1,
+  "materialFeeGold": "25",
+  "burnFeeGold": "25",
+  "consumedAtoms": "1250",
+  "inventoryStringsSha256": "dd3f96c1d47c3ff39c4e526d9c20f0871df31bb830e99c5784536c4d97607e04",
+  "conversions": [
+    {
+      "itemIndex": 658,
+      "quantity": "10",
+      "feeGold": "25",
+      "consumedAtoms": "1250",
+      "goldEquivalent": "1250",
+      "valuationVersion": "synthetic-material-network-prices-v1",
+      "quoteIdSha256": "8408012b68d485386096eba18fa6b5df7d6313374656357a028bf98d6f2b7ae9",
+      "operationKeySha256": "4184ded584d14a98485b4406982fd19c967d3aa45dd1fe226c17c64879fad6cc"
+    }
+  ],
+  "inventory": [
+    {
+      "uid": "0",
+      "key": "crystal-item-221",
+      "quantity": 1,
+      "container": "bag1",
+      "slot": 0,
+      "bound": false,
+      "converted": false
+    },
+    {
+      "uid": "1",
+      "key": "crystal-item-317",
+      "quantity": 1,
+      "container": "bag1",
+      "slot": 1,
+      "bound": false,
+      "converted": false
+    },
+    {
+      "uid": "2",
+      "key": "crystal-item-658",
+      "quantity": 1,
+      "container": "bag1",
+      "slot": 2,
+      "bound": false,
+      "converted": false
+    },
+    {
+      "uid": "3",
+      "key": "crystal-item-722",
+      "quantity": 1,
+      "container": "bag1",
+      "slot": 3,
+      "bound": false,
+      "converted": false
+    },
+    {
+      "uid": "5",
+      "key": "crystal-item-221",
+      "quantity": 1,
+      "container": "bag1",
+      "slot": 4,
+      "bound": true,
+      "converted": false
+    },
+    {
+      "uid": "6",
+      "key": "crystal-item-658",
+      "quantity": 10,
+      "container": "bag1",
+      "slot": 5,
+      "bound": false,
+      "converted": true
+    },
+    {
+      "uid": "7",
+      "key": "crystal-item-659",
+      "quantity": 10,
+      "container": "bag1",
+      "slot": 6,
+      "bound": true,
+      "converted": false
+    }
+  ],
+  "accountSchemaAndRawOperationIdentifiersIncluded": false,
+  "boundary": "This is a read-only fact check after original Query. Normal logout, final server shutdown and cold native login were not completed."
+}

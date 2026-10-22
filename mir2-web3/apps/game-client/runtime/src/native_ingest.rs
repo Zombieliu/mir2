@@ -64,8 +64,14 @@ pub(crate) enum NativeInboundMessage {
     NpcEconomyBundle(crate::npc_purchase_economy::NativeNpcEconomyBundle),
     /// Independent repair owner checkpoint; the same indivisible FIFO barrier.
     HuntingRepairBundle(crate::hunting_repair_economy::NativeHuntingRepairBundle),
+    /// Material receipt application uses this same indivisible owner FIFO.
+    #[cfg(feature = "native-npc-economy")]
+    HuntingMaterialBundle(crate::hunting_material_economy::NativeHuntingMaterialBundle),
     /// Read-only host presentation. It never acknowledges complete application.
     HuntingRepairModel(String),
+    /// Each accepted host presentation delivery is consumed once, even equal
+    /// Pending values. Never a complete-model application proof.
+    HuntingMaterialModel(String),
     WorldState(String),
     EntityRenderState(String),
     EffectRenderState(String),
@@ -139,6 +145,8 @@ struct NativeInboundBuffer {
     active: bool,
     npc_economy_gate: Option<crate::npc_purchase_economy::NativeNpcEconomyGate>,
     hunting_repair_gate: Option<crate::hunting_repair_economy::NativeHuntingRepairGate>,
+    #[cfg(feature = "native-npc-economy")]
+    hunting_material_gate: Option<crate::hunting_material_economy::NativeHuntingMaterialGate>,
     pending: VecDeque<NativeInboundMessage>,
     /// Highest-priority single-slot receipt reserve. It is outside the normal
     /// critical FIFO so no snapshot/ACK/social flood can evict it.
@@ -176,6 +184,8 @@ impl NativeInboundBuffer {
         match &message {
             NativeInboundMessage::NpcEconomyBundle(bundle) if !bundle.is_current() => return false,
             NativeInboundMessage::HuntingRepairBundle(bundle) if !bundle.is_current() => return false,
+            #[cfg(feature = "native-npc-economy")]
+            NativeInboundMessage::HuntingMaterialBundle(bundle) if !bundle.is_current() => return false,
             _ => {}
         }
         if let NativeInboundMessage::MailServiceStreamStarted(marker) = &message {
@@ -199,7 +209,7 @@ impl NativeInboundBuffer {
         if message_bytes > max_message_bytes {
             return false;
         }
-        if matches!(message, NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_))
+        if is_owner_bundle(&message)
             && self.message_count() >= MAX_NATIVE_MESSAGES { return false; }
         // Ordinary traffic leaves room for the tagged terminal Cost reserve.
         // Its epoch is retained/accounted even under payload byte pressure.
@@ -220,7 +230,7 @@ impl NativeInboundBuffer {
         // A bundle seals dedicated terminal payloads into the normal FIFO.
         // Cost's dedicated representation is smaller than MailServiceDelivery;
         // reserve that materialization delta before any eviction or mutation.
-        if matches!(message, NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_)) {
+        if is_owner_bundle(&message) {
             let sealed_bytes = self.mail_terminal_tail.iter().fold(self.pending_bytes(), |bytes, terminal|
                 bytes.saturating_add(native_message_bytes(terminal).saturating_sub(mail_reserved_bytes(terminal))));
             if sealed_bytes.saturating_add(message_bytes) > max_buffer_bytes { return false; }
@@ -318,10 +328,9 @@ impl NativeInboundBuffer {
                 .pending
                 .iter()
                 .rposition(|queued| {
-                    matches!(
+                    is_owner_bundle(queued) || matches!(
                         queued,
                         NativeInboundMessage::DataReset
-                            | NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_)
                             | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
                             | NativeInboundMessage::SceneReset
                     )
@@ -398,13 +407,20 @@ impl NativeInboundBuffer {
             }
             self.hunting_repair_gate = Some(bundle.gate().clone());
         }
+        #[cfg(feature = "native-npc-economy")]
+        if let NativeInboundMessage::HuntingMaterialBundle(bundle) = &message {
+            if let Some(previous) = &self.hunting_material_gate {
+                if !previous.same_gate(bundle.gate()) { previous.retire(); }
+            }
+            self.hunting_material_gate = Some(bundle.gate().clone());
+        }
         if let NativeInboundMessage::NpcEconomyBundle(bundle) = &message {
             if let Some(previous) = &self.npc_economy_gate {
                 if !previous.same_gate(bundle.gate()) { previous.retire(); }
             }
             self.npc_economy_gate = Some(bundle.gate().clone());
         }
-        if matches!(&message, NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_)) {
+        if is_owner_bundle(&message) {
             // Seal all earlier dedicated reserves into the prefix. Subsequent
             // reserves remain outside the FIFO until this barrier is consumed.
             if let Some(marker) = self.mail_stream_marker.take() {
@@ -424,9 +440,13 @@ impl NativeInboundBuffer {
     fn retire_npc_economy(&mut self) {
         if let Some(gate) = self.npc_economy_gate.take() { gate.retire(); }
         if let Some(gate) = self.hunting_repair_gate.take() { gate.retire(); }
+        #[cfg(feature = "native-npc-economy")]
+        if let Some(gate) = self.hunting_material_gate.take() { gate.retire(); }
         for message in &self.pending {
             if let NativeInboundMessage::NpcEconomyBundle(bundle) = message { bundle.retire(); }
             if let NativeInboundMessage::HuntingRepairBundle(bundle) = message { bundle.retire(); }
+            #[cfg(feature = "native-npc-economy")]
+            if let NativeInboundMessage::HuntingMaterialBundle(bundle) = message { bundle.retire(); }
         }
     }
 
@@ -450,10 +470,10 @@ impl NativeInboundBuffer {
         let mut evicted=Vec::new();
         for (index,message) in self.pending.iter().enumerate() {
             if retained_bytes<=target_bytes {break;}
-            if !is_operation_ack(message) && !matches!(message,NativeInboundMessage::MailService(_)|NativeInboundMessage::MailQuoteReceipt(_)|NativeInboundMessage::MailSendReceipt(_)|NativeInboundMessage::MailSendAcknowledgement(_)
+            if !is_operation_ack(message) && !is_owner_bundle(message) && !is_material_model(message) && !matches!(message,NativeInboundMessage::MailService(_)|NativeInboundMessage::MailQuoteReceipt(_)|NativeInboundMessage::MailSendReceipt(_)|NativeInboundMessage::MailSendAcknowledgement(_)
                 | NativeInboundMessage::DataReset | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
                 | NativeInboundMessage::SceneReset | NativeInboundMessage::MailServiceStreamStarted(_)
-                | NativeInboundMessage::GameShopReceipt(_) | NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_)) {
+                | NativeInboundMessage::GameShopReceipt(_)) {
                 retained_bytes=retained_bytes.saturating_sub(native_message_bytes(message));
                 evicted.push(index);
             }
@@ -583,10 +603,11 @@ impl NativeInboundBuffer {
         let Some(index) = self.pending.iter().position(|message| {
             !is_operation_ack(message)
                 && !is_protected_mail_terminal(message)
+                && !is_owner_bundle(message)
+                && !is_material_model(message)
                 && !matches!(
                     message,
                     NativeInboundMessage::DataReset
-                        | NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_)
                         | NativeInboundMessage::GameShopReceipt(_)
                         | NativeInboundMessage::MailServiceStreamStarted(_)
                         | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
@@ -602,10 +623,11 @@ impl NativeInboundBuffer {
     fn evict_oldest_non_boundary(&mut self) -> bool {
         let Some(index) = self.pending.iter().position(|message| {
             !is_protected_mail_terminal(message)
+                && !is_owner_bundle(message)
+                && !is_material_model(message)
                 && !matches!(
                     message,
                     NativeInboundMessage::DataReset
-                        | NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_)
                         | NativeInboundMessage::GameShopReceipt(_)
                         | NativeInboundMessage::MailServiceStreamStarted(_)
                         | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
@@ -635,6 +657,8 @@ fn make_buffer() -> Arc<Mutex<NativeInboundBuffer>> {
         active: true,
         npc_economy_gate: None,
         hunting_repair_gate: None,
+        #[cfg(feature = "native-npc-economy")]
+        hunting_material_gate: None,
         pending: VecDeque::new(),
         game_shop_receipt: None,
         mail_cost_reserve: None,
@@ -695,6 +719,31 @@ fn is_coalescible_snapshot(message: &NativeInboundMessage) -> bool {
     )
 }
 
+/// One classifier owns every complete-model FIFO barrier, including optional
+/// material support. Ordinary typed and dedicated-terminal drains use it too.
+fn is_owner_bundle(message: &NativeInboundMessage) -> bool {
+    match message {
+        NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_) => true,
+        #[cfg(feature = "native-npc-economy")]
+        NativeInboundMessage::HuntingMaterialBundle(_) => true,
+        _ => false,
+    }
+}
+
+fn is_material_model(message: &NativeInboundMessage) -> bool {
+    matches!(message, NativeInboundMessage::HuntingMaterialModel(_))
+}
+
+fn retire_owner_bundle(message: &NativeInboundMessage) {
+    match message {
+        NativeInboundMessage::NpcEconomyBundle(bundle) => bundle.retire(),
+        NativeInboundMessage::HuntingRepairBundle(bundle) => bundle.retire(),
+        #[cfg(feature = "native-npc-economy")]
+        NativeInboundMessage::HuntingMaterialBundle(bundle) => bundle.retire(),
+        _ => {},
+    }
+}
+
 fn same_coalescing_slot(left: &NativeInboundMessage, right: &NativeInboundMessage) -> bool {
     match (left, right) {
         (NativeInboundMessage::HeroOwnerSnapshot(left),NativeInboundMessage::HeroOwnerSnapshot(right))=>left.same_source(right),
@@ -732,10 +781,10 @@ fn same_coalescing_slot(left: &NativeInboundMessage, right: &NativeInboundMessag
 }
 
 fn is_critical_message(message: &NativeInboundMessage) -> bool {
-    matches!(
+    is_owner_bundle(message) || matches!(
         message,
         NativeInboundMessage::InventoryOperationAck(_)
-            | NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_)
+            | NativeInboundMessage::HuntingMaterialModel(_)
             | NativeInboundMessage::DataReset
             | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
             | NativeInboundMessage::SceneReset
@@ -769,9 +818,12 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
     match message {
         NativeInboundMessage::NpcEconomyBundle(bundle) => bundle.retained_bytes(),
         NativeInboundMessage::HuntingRepairBundle(bundle) => bundle.retained_bytes(),
+        #[cfg(feature = "native-npc-economy")]
+        NativeInboundMessage::HuntingMaterialBundle(bundle) => bundle.retained_bytes(),
         NativeInboundMessage::HeroOwnerSnapshot(update)=>update.retained_bytes(),
         NativeInboundMessage::WorldState(json)
         | NativeInboundMessage::HuntingRepairModel(json)
+        | NativeInboundMessage::HuntingMaterialModel(json)
         | NativeInboundMessage::EntityRenderState(json)
         | NativeInboundMessage::EffectRenderState(json)
         | NativeInboundMessage::LightingRenderState(json)
@@ -831,6 +883,21 @@ pub fn push_native_hunting_repair_bundle(bundle: crate::hunting_repair_economy::
 pub fn push_native_hunting_repair_model(json: String) -> bool {
     if json.len() > 64 * 1024 || serde_json::from_str::<mir2_client_bevy::hunting_repair::HuntingRepairModel>(&json).is_err() { return false; }
     send_native(NativeInboundMessage::HuntingRepairModel(json))
+}
+
+/// Actual producer admission into the same protected owner FIFO. `true` is not
+/// Applied; the Windows owner must retain its original opaque candidate until
+/// the exclusive complete-model commit produces its matching private proof.
+#[cfg(feature = "native-npc-economy")]
+pub fn push_native_hunting_material_bundle(bundle: crate::hunting_material_economy::NativeHuntingMaterialBundle) -> bool {
+    send_native(NativeInboundMessage::HuntingMaterialBundle(bundle))
+}
+
+/// One bounded host presentation delivery. This has no application authority
+/// and is never coalesced, including equal Pending acknowledgements.
+pub fn push_native_hunting_material_model(json: String) -> bool {
+    if json.len() > 64 * 1024 || serde_json::from_str::<mir2_client_bevy::hunting_material::HuntingMaterialModel>(&json).is_err() { return false; }
+    send_native(NativeInboundMessage::HuntingMaterialModel(json))
 }
 
 pub fn push_native_npc_economy_bundle(bundle: crate::npc_purchase_economy::NativeNpcEconomyBundle) -> bool {
@@ -1125,7 +1192,7 @@ impl NativeInbound {
                 .expect("native inbound mutex should not be poisoned");
 
             let mut matched = Vec::new();
-            let barrier_pending = state.pending.iter().any(|message| matches!(message, NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_)));
+            let barrier_pending = state.pending.iter().any(|message| is_owner_bundle(message));
             if let Some(marker) = if barrier_pending { None } else { state.mail_stream_marker.take() } {
                 let message = NativeInboundMessage::MailServiceStreamStarted(marker);
                 if matches(&message) { matched.push(message); }
@@ -1144,7 +1211,7 @@ impl NativeInbound {
             while let Some(message) = state.pending.pop_front() {
                 // A typed consumer must not skip the complete checkpoint and
                 // drain a later model before the exclusive bundle consumer.
-                if matches!(message, NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_)) {
+                if is_owner_bundle(&message) {
                     retained.push_back(message);
                     retained.append(&mut state.pending);
                     mail_blocked = true;
@@ -1195,6 +1262,16 @@ impl NativeInbound {
         }
     }
 
+    #[cfg(feature = "native-npc-economy")]
+    pub(crate) fn take_hunting_material_front(&self) -> Option<crate::hunting_material_economy::NativeHuntingMaterialBundle> {
+        let mut state = self.buffer.lock().ok()?;
+        if !matches!(state.pending.front(), Some(NativeInboundMessage::HuntingMaterialBundle(_))) { return None; }
+        match state.pending.pop_front()? {
+            NativeInboundMessage::HuntingMaterialBundle(bundle) => Some(bundle),
+            _ => unreachable!(),
+        }
+    }
+
     /// Drop typed models queued before reset barriers.
     ///
     /// A WebSocket task can enqueue a periodic snapshot immediately before a
@@ -1212,15 +1289,21 @@ impl NativeInbound {
         for message in state.pending.drain(..) {
             match &message {
                 NativeInboundMessage::DataReset => {
-                    retained.retain(|queued| !is_resettable_data_message(queued));
+                    retained.retain(|queued| {
+                        if is_resettable_data_message(queued) {retire_owner_bundle(queued);false}else{true}
+                    });
                     retained.push_back(message);
                 }
                 NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_) => {
-                    retained.retain(|queued| !is_resettable_data_message(queued));
+                    retained.retain(|queued| {
+                        if is_resettable_data_message(queued) {retire_owner_bundle(queued);false}else{true}
+                    });
                     retained.push_back(message);
                 }
                 NativeInboundMessage::SceneReset => {
-                    retained.retain(|queued| !is_scene_resettable_message(queued));
+                    retained.retain(|queued| {
+                        if is_scene_resettable_message(queued) {retire_owner_bundle(queued);false}else{true}
+                    });
                     retained.push_back(message);
                 }
                 _ => retained.push_back(message),
@@ -1253,12 +1336,12 @@ impl Drop for NativeInbound {
 }
 
 fn is_scene_resettable_message(message: &NativeInboundMessage) -> bool {
-    matches!(
+    is_owner_bundle(message) || matches!(
         message,
         NativeInboundMessage::WorldState(_)
             | NativeInboundMessage::HuntingRepairModel(_)
+            | NativeInboundMessage::HuntingMaterialModel(_)
             | NativeInboundMessage::HeroOwnerSnapshot(_)
-            | NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_)
             | NativeInboundMessage::EntityRenderState(_)
             | NativeInboundMessage::EffectRenderState(_)
             | NativeInboundMessage::LightingRenderState(_)
@@ -1271,12 +1354,12 @@ fn is_scene_resettable_message(message: &NativeInboundMessage) -> bool {
 
 fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
     if is_protected_mail_terminal(message) { return false; }
-    matches!(
+    is_owner_bundle(message) || matches!(
         message,
         NativeInboundMessage::WorldState(_)
             | NativeInboundMessage::HuntingRepairModel(_)
+            | NativeInboundMessage::HuntingMaterialModel(_)
             | NativeInboundMessage::HeroOwnerSnapshot(_)
-            | NativeInboundMessage::NpcEconomyBundle(_) | NativeInboundMessage::HuntingRepairBundle(_)
             | NativeInboundMessage::EntityRenderState(_)
             | NativeInboundMessage::EffectRenderState(_)
             | NativeInboundMessage::LightingRenderState(_)
@@ -1310,6 +1393,10 @@ fn is_process_lifetime_asset_message(message: &NativeInboundMessage) -> bool {
     matches!(message, NativeInboundMessage::EntityRenderAtlas { .. })
 }
 
+#[cfg(all(test, feature = "native-npc-economy"))]
+#[path = "hunting_material_ingest_tests.rs"]
+mod hunting_material_tests;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1329,6 +1416,8 @@ mod tests {
             active: true,
             npc_economy_gate: None,
             hunting_repair_gate: None,
+            #[cfg(feature = "native-npc-economy")]
+            hunting_material_gate: None,
             pending: VecDeque::new(),
             game_shop_receipt: None,
             mail_cost_reserve: None,

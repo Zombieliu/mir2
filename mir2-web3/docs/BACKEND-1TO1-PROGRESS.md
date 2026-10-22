@@ -1,5 +1,11 @@
 # Backend 1:1 Progress
 
+## 第十六阶段续验：原生恢复等待旧连接保存（2026-10-22）
+
+原生恢复现在可等待同一私有family/角色/Session的旧连接完成保存交接，Saving标记不持有可恢复Session；只有成功保存发布后才进入原reserve/commit路径。凭证代际、授权revision、撤权和有效期仍校验，失败/journal/unwind终止等待，不延长TTL。固定10秒是调度预算，未声称同步身份存储I/O的严格总墙钟上限。
+
+复用最新Gateway265实际执行新增交接14/14、原生恢复20/20、Web保存失败15/15、异常退出持久化5/5。268真实WS/PG整栈/部分与冷登录、拒绝无变化、未读提交raw断线/resume/原Query/新配置冷登录三项通过。Windows270/271/272另完成整栈10单Confirm、丢已提交回执后早到8,417ms恢复及原Query；PG核1单/fee25/许可原子1250，见[阶段十六证据](generated/hunting-economy/acceptance-20261022-native-material.json)。用户physical Escape随后停止电脑控制，正常logout确认、部分GUI及冷EXE登录未完成；不得扩称完整GUI或强制服务端Unknown。本服定制不增加Crystal闭合项，仍默认关闭、正式价格空白名单、无部署。限定diff检查此前通过；全文件rustfmt基线81段/当前93段差异保留，未重写大文件。
+
 ## 第十五阶段：固定估值材料转换（2026-10-21）
 
 用户已选策划固定估值、手续费扣现有非绑定金币。主服现已实现普通 Bag 的 Bound 根整栈/部分转换：总估值 E 只扣 E 许可原子及 ceil(2%E) 非绑手续费，不生成金币；完整物品 checkpoint、钱包、许可、fee 销毁与不可变结果同 PG 提交。原单 Query、未决普通退出及冷登录恢复已接，旧 gold 不改，正式价格白名单为空且默认关闭。详见[材料服务端合同/伪代码](HUNTING-MATERIAL-CONVERSION.md)。

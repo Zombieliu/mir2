@@ -1,5 +1,15 @@
 # Windows 原生可玩闭环验收清单
 
+## 第十六阶段：Windows 材料转换最后实机核对（2026-10-22）
+
+普通Bag选材料、数量、服务端Quote、单Confirm、Pending关闭与原Query的接线已有最终Runtime123/Bevy44/Host110项通过；28项当前源码/锁文件与244证据SHA一致，限定承接EXE234，不是完整资源闭包。最新Gateway265新增交接14、相邻恢复20、保存失败15、异常退出5项实际通过，268真实WS/PG三项全部通过。详见[阶段十六证据](generated/hunting-economy/acceptance-20261022-native-material.json)。
+
+Root在隔离270/271/272夹具已完成普通Login/StartGame、Bag红药10整栈服务端报价及单Confirm；代理省略一份已提交owner回执后Pending Close，随后物理断线与自动resume，手动原Query显示Material conversion completed。resume请求在1792650083704ms到达，旧连接保存并发布retained于1792650092121ms，真实提前8,417ms。代理确认Confirm/Query/resume/省略/断线各1次；PG独立核结果/转换/手续费销毁各1条、fee25、许可原子1250、非绑97975、绑定100、旧gold0，save_version18/revision17。
+
+6张原始截图、脱敏meta、代理事实、恢复时间线和PG事实在[native-material-20261022](generated/hunting-economy/native-material-20261022/archive-manifest.json)。图06记录蓝药3/10报价本地拒绝：两种药都配置价格，但Committed Applied后需要下一份新完整普通库存source；没有新Quote/Confirm进入socket，不算部分转换通过。旧262的4,134ms竞态失败保留。
+
+用户physical Escape停止电脑控制。Root先以Alt+x打开Return to character selection?确认框（未保存该屏幕），后续Yes点击被工具拒绝，没有继续控制。正常退出、最终进程清理、部分GUI转换与全新EXE重登均未完成，fixture/进程未由归档操作改变。当前只接受上述整栈/早到恢复/原Query限定实机范围，不宣称完整材料GUI闭环。测试省略已提交回执不等于强制服务端OutcomeUnknown。仍默认关闭、不提高Candidate/Crystal百分比；第十二阶段修理实机结论原样保留。
+
 ## 第十二阶段：Windows 原生修理恢复与重登（2026-10-21）
 
 EXE75/Gateway73已在实机77轮完成以下有界玩家流程，见[阶段十二证据](generated/hunting-economy/acceptance-20261021-native-repair-resume.json)。

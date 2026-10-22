@@ -13,6 +13,8 @@ pub mod skill_bars;
 mod skill_page;
 #[path = "npc_item_service.rs"]
 mod npc_item_service;
+#[path = "hunting_material_service.rs"]
+mod hunting_material_service;
 #[path = "big_map_coordinates.rs"]
 mod big_map_coordinates;
 
@@ -42,6 +44,7 @@ use crate::game_shop::{
 };
 use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
 use crate::hunting_repair::{HuntingRepairInput, HuntingRepairMode, HuntingRepairModel, HuntingRepairPhase, HuntingRepairUi};
+use crate::hunting_material::HuntingMaterialModel;
 use crate::mail::{
     mail_claim_enabled, mail_date_label, mail_delete_enabled, MailAttachment, MailMessage,
     MailModel, MailOperationKind, MailPageCursor, MAX_MAIL_ATTACHMENTS,
@@ -728,6 +731,7 @@ impl NpcServiceUiEpoch {
 #[derive(Debug, Clone, Resource, PartialEq)]
 pub struct NativePlayerUiState {
     pub(crate) hunting_repair_ui: HuntingRepairUi,
+    pub(crate) hunting_material_ui: hunting_material_service::MaterialServiceUi,
     npc_service_takeover_epoch: NpcServiceUiEpoch,
     pub mail_draft_clock: MailDraftClock,
     /// A shared revocation handle; the attempt slot remains owned by the queue.
@@ -1352,6 +1356,7 @@ impl Default for NativePlayerUiState {
     fn default() -> Self {
         Self {
             hunting_repair_ui: HuntingRepairUi::default(),
+            hunting_material_ui: hunting_material_service::MaterialServiceUi::default(),
             npc_service_takeover_epoch: NpcServiceUiEpoch::default(),
             mail_draft_clock: MailDraftClock::default(),
             npc_gold_buy_gate: None,
@@ -1999,6 +2004,8 @@ impl NativePlayerUiState {
     pub fn reset_session(&mut self) {
         self.withdraw_bound_npc_gold_buy();
         let npc_gold_buy_gate = self.npc_gold_buy_gate.clone();
+        let mut hunting_material_ui = std::mem::take(&mut self.hunting_material_ui);
+        hunting_material_ui.withdraw_display();
         let mail_clock=self.mail_draft_clock.clone();mail_clock.advance();
         let options = self.core.options.clone();
         let chat_settings = self.core.chat_settings;
@@ -2007,6 +2014,7 @@ impl NativePlayerUiState {
         keyboard.spell_target_lock = false;
         keyboard.hide();
         *self = Self::default();
+        self.hunting_material_ui = hunting_material_ui;
         self.mail_draft_clock=mail_clock;
         self.npc_gold_buy_gate = npc_gold_buy_gate;
         self.keyboard = keyboard;
@@ -2023,6 +2031,8 @@ impl NativePlayerUiState {
     ) {
         self.withdraw_bound_npc_gold_buy();
         let npc_gold_buy_gate = self.npc_gold_buy_gate.clone();
+        let mut hunting_material_ui = std::mem::take(&mut self.hunting_material_ui);
+        hunting_material_ui.withdraw_display();
         let mail_clock=self.mail_draft_clock.clone();mail_clock.advance();
         let options = self.core.options.clone();
         let chat_settings = self.core.chat_settings;
@@ -2030,6 +2040,7 @@ impl NativePlayerUiState {
         keyboard.spell_target_lock = false;
         keyboard.hide();
         *self = Self::default();
+        self.hunting_material_ui = hunting_material_ui;
         self.mail_draft_clock=mail_clock;
         self.npc_gold_buy_gate = npc_gold_buy_gate;
         self.keyboard = keyboard;
@@ -2451,6 +2462,10 @@ pub enum NativePlayerUiIntent {
     HuntingRepairConfirm { quote_id: String },
     HuntingRepairQuery { quote_id: String },
     HuntingRepairClose,
+    HuntingMaterialQuote { unique_id: u64, quantity: u64 },
+    HuntingMaterialConfirm { quote_id: String },
+    HuntingMaterialQuery { quote_id: String },
+    HuntingMaterialClose,
     // Storage
     StoreItem {
         request_id: String,
@@ -2545,7 +2560,9 @@ impl NativePlayerUiIntent {
             | Self::MailLockItem { .. }
             | Self::NpcGoldBuy { .. } => None,
             Self::HuntingRepairQuote { .. } | Self::HuntingRepairConfirm { .. }
-            | Self::HuntingRepairQuery { .. } | Self::HuntingRepairClose => None,
+            | Self::HuntingRepairQuery { .. } | Self::HuntingRepairClose
+            | Self::HuntingMaterialQuote { .. } | Self::HuntingMaterialConfirm { .. }
+            | Self::HuntingMaterialQuery { .. } | Self::HuntingMaterialClose => None,
             Self::ClaimMail { mail_id } => Some(PendingOperationKey::ClaimMail(*mail_id)),
             Self::SendMail {
                 recipient,
@@ -2853,6 +2870,10 @@ impl NativePlayerUiIntentQueue {
                 | NativePlayerUiIntent::HuntingRepairConfirm { .. }
                 | NativePlayerUiIntent::HuntingRepairQuery { .. }
                 | NativePlayerUiIntent::HuntingRepairClose
+                | NativePlayerUiIntent::HuntingMaterialQuote { .. }
+                | NativePlayerUiIntent::HuntingMaterialConfirm { .. }
+                | NativePlayerUiIntent::HuntingMaterialQuery { .. }
+                | NativePlayerUiIntent::HuntingMaterialClose
         )
             && (self.intents.len() >= MAX_QUEUED || self.intents.iter().any(|queued| queued == &intent))
         {
@@ -2882,6 +2903,10 @@ impl NativePlayerUiIntentQueue {
                     | NativePlayerUiIntent::HuntingRepairConfirm { .. }
                     | NativePlayerUiIntent::HuntingRepairQuery { .. }
                     | NativePlayerUiIntent::HuntingRepairClose
+                    | NativePlayerUiIntent::HuntingMaterialQuote { .. }
+                    | NativePlayerUiIntent::HuntingMaterialConfirm { .. }
+                    | NativePlayerUiIntent::HuntingMaterialQuery { .. }
+                    | NativePlayerUiIntent::HuntingMaterialClose
                     | NativePlayerUiIntent::GetRanking { .. }
                     | NativePlayerUiIntent::InspectRanking { .. }
                     | NativePlayerUiIntent::AddFriend { .. }
@@ -2904,6 +2929,10 @@ impl NativePlayerUiIntentQueue {
                         | NativePlayerUiIntent::HuntingRepairConfirm { .. }
                         | NativePlayerUiIntent::HuntingRepairQuery { .. }
                         | NativePlayerUiIntent::HuntingRepairClose
+                        | NativePlayerUiIntent::HuntingMaterialQuote { .. }
+                        | NativePlayerUiIntent::HuntingMaterialConfirm { .. }
+                        | NativePlayerUiIntent::HuntingMaterialQuery { .. }
+                        | NativePlayerUiIntent::HuntingMaterialClose
                         | NativePlayerUiIntent::GetRanking { .. }
                         | NativePlayerUiIntent::InspectRanking { .. }
                         | NativePlayerUiIntent::AddFriend { .. }
@@ -3591,6 +3620,14 @@ enum OverlayButton {
     ShopSRepair,
     HuntingRepairQuery,
     HuntingRepairClose,
+    HuntingMaterialOne,
+    HuntingMaterialQuantityDec,
+    HuntingMaterialQuantityInc,
+    HuntingMaterialAll,
+    HuntingMaterialQuote,
+    HuntingMaterialConfirm,
+    HuntingMaterialQuery,
+    HuntingMaterialClose,
     ShopQuantityInc,
     ShopQuantityDec,
     ShopPageUp,
@@ -3970,6 +4007,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<NativeUiIntentQueue>()
             .init_resource::<ShopModel>()
             .init_resource::<HuntingRepairModel>()
+            .init_resource::<HuntingMaterialModel>()
             .init_resource::<GameShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<crate::storage::StorageUiFeedback>()
@@ -4030,6 +4068,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 Update,
                 (
                     npc_item_service::sync_hunting_model,
+                    hunting_material_service::sync_model,
                     sync_big_map_ui,
                     sync_local_panel_models,
                     sync_npc_dialog_inventory_location,
@@ -4114,6 +4153,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 (
                     (
                         render_overlays,
+                        hunting_material_service::render_recovery,
                         big_map_coordinates::update,
                         game_shop_dialog::render_confirmation_system,
                     )
@@ -4811,6 +4851,7 @@ fn spawn_overlay_root(mut commands: Commands) {
                 },
                 BackgroundColor(PANEL_BG),
             ));
+            hunting_material_service::spawn_recovery_root(root);
             root.spawn((
                 OverlayDeath,
                 GlobalZIndex(OVERLAY_DEATH_Z),
@@ -8006,6 +8047,7 @@ pub(crate) fn process_overlay_keyboard(
     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Closeall") {
         if state.core.panel != mir2_ui_core::state::UiPanel::None
             || state.hunting_repair_ui.recovery_visible()
+            || state.hunting_material_ui.guard.recovery_visible()
             || state.inspect.is_some()
             || state.help_open()
             || state.equipment_dialogs.mount_open
@@ -8025,6 +8067,7 @@ pub(crate) fn process_overlay_keyboard(
                 time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64),
             );
             npc_item_service::close_hunting_repair(&mut state, &mut intents);
+            hunting_material_service::close(&mut state, &mut intents);
             let trade = std::mem::take(&mut state.trade_dialog);
             state.close_all_windows();
             state.trade_dialog = trade;
@@ -8583,6 +8626,7 @@ fn process_overlay_buttons(
                     time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64),
                 );
                 npc_item_service::close_hunting_repair(&mut state, &mut intents);
+                hunting_material_service::close(&mut state, &mut intents);
                 state.close_windows();
                 state.shop_quantity = 1;
                 if let Some(skill_binding) = skill_binding.as_deref_mut() {
@@ -8649,6 +8693,7 @@ fn process_overlay_buttons(
                 state.help.next_page();
             }
             OverlayButton::CloseInspect => {
+                hunting_material_service::close(&mut state, &mut intents);
                 state.inspect = None;
                 state.inventory_operation = None;
                 state.drop_confirmation = None;
@@ -10392,6 +10437,26 @@ fn process_overlay_buttons(
             }
             OverlayButton::HuntingRepairQuery => {
                 npc_item_service::query_hunting_repair(&mut state, &mut intents);
+            }
+            OverlayButton::HuntingMaterialOne | OverlayButton::HuntingMaterialQuantityDec
+            | OverlayButton::HuntingMaterialQuantityInc | OverlayButton::HuntingMaterialAll => {
+                let locked = inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui);
+                hunting_material_service::adjust_quantity(&mut state, &inventory, action, locked);
+            }
+            OverlayButton::HuntingMaterialQuote => {
+                let locked = inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui);
+                hunting_material_service::request_quote(&mut state, &inventory, &mut intents, locked);
+            }
+            OverlayButton::HuntingMaterialConfirm => {
+                let locked = inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui);
+                hunting_material_service::confirm(&mut state, &inventory, &mut intents, locked,
+                    hunting_material_service::now_ms());
+            }
+            OverlayButton::HuntingMaterialQuery => {
+                hunting_material_service::query(&mut state, &mut intents);
+            }
+            OverlayButton::HuntingMaterialClose => {
+                hunting_material_service::close(&mut state, &mut intents);
             }
             OverlayButton::HuntingRepairClose => {
                 npc_item_service::close_hunting_repair(&mut state, &mut intents);
@@ -14586,6 +14651,9 @@ fn render_inspect(
         let mail_locked = parcel.is_some_and(|parcel| {
             inspected_bag_item_is_mail_locked(state, inventory, parcel)
         });
+        if inspect.container == 0 {
+            hunting_material_service::render_inspect(parent, state, inventory, mail_locked);
+        }
         let use_enabled = !mail_locked && inspected_use_intent(state, inventory).is_some();
         overlay_button(parent, "Use (U)", OverlayButton::UseInspected, use_enabled);
         if inspect.container == 2 {

@@ -33,6 +33,8 @@ mod native_fonts;
 mod native_protocol;
 mod npc_purchase_client;
 mod hunting_repair_client;
+mod hunting_material_client;
+mod hunting_material_connection;
 mod hunting_repair_connection;
 mod npc_purchase_projection;
 mod session_config;

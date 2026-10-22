@@ -45,6 +45,7 @@ pub mod game_shop;
 pub mod hero_model;
 pub mod hero_ingress;
 pub mod hunting_repair;
+pub mod hunting_material;
 #[cfg(feature = "native-ui")]
 pub mod hud;
 pub mod inventory;

@@ -614,6 +614,7 @@ impl NativeHuntingRepairGateway {
             || !NativeCommandFence::matches(&state, stamp, NativeCommandScope::World)
             || state.npc_entry_pending
             || state.hunting_repair_mode != HuntingRepairMode::HuntingV1
+            || !matches!(action,HuntingRepairCommand::Query{..}) && state.hunting_material_busy
         {
             drop(state);
             self.reject("ownerChanged");
@@ -644,7 +645,9 @@ impl NativeHuntingRepairGateway {
         }
         // No purchase state lock is acquired while holding the physical fence.
         drop(state);
-        if !self.purchase_suspended {
+        // A retained original Query must remain available independently of a
+        // different lane's Pending operation; it never takes charge ownership.
+        if !matches!(action,HuntingRepairCommand::Query{..}) && !self.purchase_suspended {
             if !purchases.suspend_for_repair() {
                 self.reject("purchasePending");
                 return None;
@@ -703,6 +706,7 @@ impl NativeHuntingRepairGateway {
                 if matches!(&dispatch.request.action, wire::Action::Confirm { .. }) {
                     self.confirm_prepared = true;
                 }
+                if let Ok(mut state)=owned.fence.0.lock(){state.hunting_repair_busy=self.blocks_purchase();}
                 self.notice = None;
                 self.publish(true);
                 Some(dispatch)
@@ -746,6 +750,7 @@ impl NativeHuntingRepairGateway {
             .send_with_budget(sink, owned, dispatch, &mut budget)
             .await;
         self.confirm_prepared = false;
+        if let Ok(mut state)=owned.fence.0.lock(){state.hunting_repair_busy=self.blocks_purchase();}
         self.publish(true);
         outcome
     }
@@ -777,6 +782,7 @@ impl NativeHuntingRepairGateway {
                 || !NativeCommandFence::matches(&state, owned.stamp, NativeCommandScope::World)
                 || state.hunting_repair_mode != HuntingRepairMode::HuntingV1
                 || state.npc_entry_pending
+                || !matches!(&owned.command,GatewayCommand::HuntingRepair(HuntingRepairCommand::Query{..})) && state.hunting_material_busy
                 || !Self::final_source_matches(&state, owned)
             {
                 return std::task::Poll::Ready(None);
@@ -811,6 +817,7 @@ impl NativeHuntingRepairGateway {
                 || !NativeCommandFence::matches(&state, owned.stamp, NativeCommandScope::World)
                 || state.hunting_repair_mode != HuntingRepairMode::HuntingV1
                 || state.npc_entry_pending
+                || !matches!(&owned.command,GatewayCommand::HuntingRepair(HuntingRepairCommand::Query{..})) && state.hunting_material_busy
                 || !Self::final_source_matches(&state, owned)
                 || budget.expired()
                 || self.binding.as_ref().is_none_or(|(stamp, actor)| {
@@ -1354,6 +1361,28 @@ mod tests {
         let request = wire::parse_client_request(&state.frames[1]).unwrap();
         assert!(matches!(request.action, wire::Action::Query {quote_id: id} if id == quote_id()));
         assert_eq!(f.gateway.client.model().phase, HuntingRepairPhase::Pending);
+    }
+
+    #[tokio::test]
+    async fn native_hunting_repair_host_original_query_preserves_true_other_lane_pending() {
+        let mut f=ready();seed_quote(&mut f);let (confirm,dispatch)=confirm(&mut f);
+        let mut sink=TestSink::default();
+        assert!(matches!(f.gateway.send(&mut sink,&confirm,dispatch).await,NativeSinkCommit::Flushed));
+        f.gateway.reset_entry();
+        f.gateway.tick(&GatewaySessionContext{account_id:Some("synthetic-player".into()),character_index:Some(0),..Default::default()},
+            &f.fence,Some(f.stamp),ConnectionPhase::Normal,true,&mut f.purchases).unwrap();
+        assert_eq!(f.gateway.client.model().phase,HuntingRepairPhase::Pending);assert!(!f.gateway.purchase_suspended);
+        f.purchases=npc_purchase_gateway::pending_purchase_fixture();assert!(!f.purchases.suspend_for_repair());
+        f.fence.0.lock().unwrap().hunting_material_busy=true;
+        let query=own_action(&f,HuntingRepairCommand::Query{quote_id:quote_id()});
+        let dispatch=f.gateway.prepare(&query,&mut f.purchases).expect("original repair Query bypasses new charge arbitration");
+        assert!(!f.gateway.purchase_suspended);
+        assert!(matches!(f.gateway.send(&mut sink,&query,dispatch).await,NativeSinkCommit::Flushed));
+        assert!(!f.purchases.suspend_for_repair());assert!(f.fence.0.lock().unwrap().hunting_material_busy);
+        assert_eq!(f.gateway.client.model().phase,HuntingRepairPhase::Pending);
+        let frames=&sink.0.lock().unwrap().frames;assert_eq!(frames.len(),2);
+        assert!(matches!(wire::parse_client_request(&frames[0]).unwrap().action,wire::Action::Confirm{..}));
+        assert!(matches!(wire::parse_client_request(&frames[1]).unwrap().action,wire::Action::Query{..}));
     }
 
     #[tokio::test]

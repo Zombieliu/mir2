@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-22",
+  "phase": 16,
+  "parentCommit": "1350bfb700eb5df8ebfa06b9f251579fb1e3d9d4",
+  "scope": "Windows ordinary Bag material conversion and native resume waiting for closing-owner persistence",
+  "goalStatus": "active",
+  "enabledByDefault": false,
+  "productionDeployment": false,
+  "sourceEvidence": {
+    "currentScopedPins": "C:/mir2-build/hunting-material-source-pins-273.json",
+    "carriedNativePins": "C:/mir2-build/hunting-material-source-pins-244.json",
+    "nativeFilesCompared": 28,
+    "nativeFilesMatching": 28,
+    "completeSourceOrResourceClosure": false,
+    "gatewayBuild": "C:/mir2-build/hunting-material-gateway-build-result-265.json",
+    "gatewayBinarySha256": "9cc491b565d777de3c894ac3ab79c068bb2d23247121711faf81fa1130377573",
+    "nativeBuild": "C:/mir2-build/hunting-material-native-exe-build-result-234.json",
+    "nativeBinarySha256": "f7b99dd20280dcd75f5e0eeedaad1a25d32e535a24da2c5087adeff16d962b6f"
+  },
+  "carriedNativeTests": [
+    { "suite": "Runtime222", "passed": 123, "failed": 0, "evidence": "C:/mir2-build/hunting-material-runtime-results-222.json" },
+    { "suite": "BevyUI221", "passed": 44, "failed": 0, "evidence": "C:/mir2-build/hunting-material-ui-test-result-221.json" },
+    { "suite": "WindowsHost233", "passed": 110, "failed": 0, "evidence": "C:/mir2-build/hunting-material-host-results-233.json" }
+  ],
+  "freshGatewayTests": [
+    { "suite": "native resume handoff", "passed": 14, "failed": 0, "evidence": "C:/mir2-build/hunting-native-handoff-tests-266.log" },
+    { "suite": "existing native resume", "passed": 20, "failed": 0, "evidence": "C:/mir2-build/hunting-native-resume-adjacent-tests-267.log" },
+    { "suite": "web save fail closed", "passed": 15, "failed": 0, "evidence": "C:/mir2-build/hunting-native-save-adjacent-tests-269.log" },
+    { "suite": "abnormal teardown persistence", "passed": 5, "failed": 0, "evidence": "C:/mir2-build/hunting-native-teardown-adjacent-tests-269.log" }
+  ],
+  "physicalWsPostgres": {
+    "status": "passed",
+    "passed": 3,
+    "failed": 0,
+    "elapsedMs": [74909, 148128, 86405],
+    "evidence": "C:/mir2-build/hunting-material-network-results-268.json",
+    "scenarios": [
+      "actual kit whole/partial conversion, full snapshot, original query and fresh-config cold login",
+      "missing price, empty unbound wallet and empty permit stock preserve assets",
+      "unread committed owner reply, raw disconnect, native resume, original query and fresh-config cold login"
+    ],
+    "boundary": "The existing raw-resume test waits for the saved retained owner before reconnecting. Early-arrival handoff scheduling is separately covered by the 14 focused tests and the limited native GUI run archived below."
+  },
+  "handoffContract": {
+    "identity": "Private exact resume family, account, character, gateway session, identity session and source connection; current revocation revision and expiry are rechecked.",
+    "custody": "The closing socket owns only a Saving/Published/Aborted marker. Saving is never a restorable session. Saved publication still uses the existing reservation and atomic commit path.",
+    "failure": "Failed/journaled persistence, guard unwind, revocation and expiry stop waiting. An aborted waiter cannot become successful on a later save.",
+    "wait": "One fixed ten-second scheduling budget with 250ms identity rechecks; no credential or lease TTL extension. Synchronous identity-store I/O is not claimed to have a strict total ten-second wall-clock bound."
+  },
+  "gui": {
+    "status": "limited-verified-user-interrupted",
+    "archive": "native-material-20261022/archive-manifest.json",
+    "screenshots": 6,
+    "acceptedScope": "Ordinary Login/StartGame, whole red-potion stack quantity 10, one Confirm, one omitted committed owner reply, Pending Close, physical disconnect, automatic early resume and one original Query showing completion.",
+    "requestPrecededRetentionMs": 8417,
+    "timeline": "native-material-20261022/resume-timeline.json",
+    "transportFacts": "native-material-20261022/transport-facts.json",
+    "postgresFacts": "native-material-20261022/postgres-after-query.json",
+    "databaseResult": { "conversions": 1, "results": 1, "feeBurns": 1, "feeGold": "25", "permitAtomsConsumed": "1250", "unboundGold": "97975", "boundGold": "100", "legacyGold": 0, "saveVersion": 18, "revision": 17 },
+    "interruption": "native-material-20261022/interruption.json",
+    "stopReason": "User physical Escape stopped computer use. Root had opened the Alt+x return-to-character-selection confirmation; the following Yes click was denied. No further computer use was performed.",
+    "normalLogoutConfirmed": false,
+    "coldNativeLoginCompleted": false,
+    "partialNativeConversionCompleted": false,
+    "partialAttempt": "Blue-potion quantity 3/10 was refused locally before a new Quote reached the socket. Both potion types have fixture prices; after Committed Applied the next Quote requires a new complete ordinary inventory source. No second Confirm or partial conversion occurred.",
+    "gatewayLauncher": "C:/mir2-build/hunting-material-native-gateway-270.cjs",
+    "proxyLauncher": "C:/mir2-build/hunting-material-native-proxy-271.cjs",
+    "nativeLauncher": "C:/mir2-build/hunting-material-native-game-272.cjs",
+    "preparedScriptsOnly": false,
+    "proxyMode": "Explicit after-commit mode permits one physical break only after one Confirm and one omitted committed owner reply, before any Query. Default diagnostic mode permits no material confirmation.",
+    "previousFailure": "C:/mir2-build/hunting-native-resume-diagnosis-262.json"
+  },
+  "checks": {
+    "scopedGitDiffCheck": "passed",
+    "gatewayRustfmtCheck": "failed: existing HEAD web.rs has 81 formatting diff sections; current three-file check has 93 sections. No whole-file formatting rewrite was applied.",
+    "rustfmtEvidence": "C:/mir2-build/hunting-material-rustfmt-check-273.log",
+    "rustfmtBaselineEvidence": "C:/mir2-build/hunting-web-rustfmt-baseline-check-273.log"
+  },
+  "limitations": [
+    "The user-interrupted GUI run proves only the archived whole-stack/early-resume/original-Query scope. Partial native conversion, ordinary logout, final process cleanup and a fresh native-process login remain unverified.",
+    "Focused handoff scheduling uses in-process identity/cache and real personal Session persistence/retain/prepare/commit; it is not a PostgreSQL or GUI fault-injection test.",
+    "The 14 tests manually exercise failure handoff signals; adjacent save/journal tests separately cover persistence failures.",
+    "No forced server OutcomeUnknown is claimed by the omitted committed owner reply.",
+    "Official material valuation whitelist remains empty and the economy remains disabled by default.",
+    "No Docker, WSL, virtual machine, remote deployment, signed candidate package or Candidate/Crystal percentage increase."
+  ]
+}

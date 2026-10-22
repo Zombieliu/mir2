@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-22T06:21:22.592Z",
+  "note": "Single GUI Confirm; isolated proxy intentionally omitted exactly one committed owner response. UI retains Pending and only original Query, no second Confirm.",
+  "path": "hunting-gui-20261022-03-pending-single-confirm.png",
+  "sha256": "2d6dfc99bbf4484de90250d102294ad0bd18b502fd5f288cfd0c5e096293adde",
+  "windowTitle": "numeron-legend of rebirth",
+  "syntheticIsolatedFixture": true
+}

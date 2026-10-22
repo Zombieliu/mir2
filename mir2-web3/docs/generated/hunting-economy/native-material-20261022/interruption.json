@@ -1,0 +1,18 @@
+{
+  "cause": "userPhysicalEscape",
+  "reportedBy": "Root computer-use controller",
+  "observedBeforeInterruption": "Alt+x displayed Return to character selection?; no screenshot was saved for this dialog.",
+  "deniedAction": "Clicking Yes was rejected by the computer-use tool after the physical Escape stop.",
+  "computerUseResumed": false,
+  "normalLogoutConfirmed": false,
+  "coldNativeLoginPerformed": false,
+  "partialNativeConversionPerformed": false,
+  "fixtureOrProcessChangedByArchiving": false,
+  "acceptedScope": "One whole red-potion stack conversion, one omitted committed reply, one early physical resume, and one original Query with independent PostgreSQL facts.",
+  "remainingScope": [
+    "Normal logout and final process cleanup",
+    "New native-process ordinary login persistence",
+    "Partial native conversion with a new complete inventory source"
+  ],
+  "partialQuoteBoundary": "Blue-potion quantity 3/10 was rejected locally before a new Quote reached the socket. Both potion types have configured fixture prices; after Committed Applied the client requires a new complete ordinary inventory producer."
+}

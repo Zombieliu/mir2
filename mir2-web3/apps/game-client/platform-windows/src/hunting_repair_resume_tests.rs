@@ -8,7 +8,9 @@ fn resume_test_realm() -> Value {
 }
 
 fn resume_test_grant(account: &str, session: &str, expires: u64) -> Value {
-    json!({"type":"identitySession","token":"synthetic-native-test-token",
+    // Synthetic unsigned segments with the real issuer's canonical base64url
+    // payload/HMAC shape; this fixture does not claim token verification.
+    json!({"type":"identitySession","token":format!("e30.{}", "A".repeat(43)),
         "session":{"accountId":account,"sessionId":session,"expiresAtMs":expires,
             "revokedAtMs":null}})
 }

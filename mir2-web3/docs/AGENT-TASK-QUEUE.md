@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+## 第十六阶段续验：材料客户端与保存交接（2026-10-22）
+
+Windows普通Bag材料Quote/Confirm/原Query接线的28项源码/锁文件与244证据一致，限定承接Runtime123、Bevy44、Host110项通过。最新Gateway265新执行交接14、原生恢复20、保存失败15、异常退出持久化5项全部通过；268真实WS/PG整栈与部分转换、拒绝无资产变化、未读提交后raw断线/resume/原Query及新配置冷登录三项全部通过。详见[阶段十六证据](generated/hunting-economy/acceptance-20261022-native-material.json)。
+
+本轮Windows限定实机已通过红药10整栈单Confirm→省略committed回执→Pending Close→一次断线/早到resume→原Query完成；请求早于保存发布8,417ms，PG为1单/fee25/许可原子1250。6图及脱敏事实已归档。蓝药3/10报价因尚无下一份完整普通库存source在客户端拒绝，没有第二次Quote/Confirm。
+
+未完队列：部分转换GUI、新完整来源后继续转换、普通保存退出及冷EXE重登。用户physical Escape停止电脑控制，Root在Alt+x确认框后的Yes点击被工具拒绝，不能继续桌面或宣称正常退出；当前仅提交已验证的有界源码/证据。全文件rustfmt历史及当前格式差异保留，限定diff检查此前通过。正式价格白名单仍为空、经济默认关闭，不提高Crystal/Candidate；其它来源、三层销毁、全服市场画像收益、通知与迁移发布仍开放。以下旧段落保留历史范围。
+
 ## 第十五阶段：固定估值材料转换（2026-10-21）
 
 用户已选策划固定估值、手续费扣现有非绑定金币。主服现已实现普通 Bag 的 Bound 根整栈/部分转换：总估值 E 只扣 E 许可原子及 ceil(2%E) 非绑手续费，不生成金币；完整物品 checkpoint、钱包、许可、fee 销毁与不可变结果同 PG 提交。原单 Query、未决普通退出及冷登录恢复已接，旧 gold 不改，正式价格白名单为空且默认关闭。详见[材料服务端合同/伪代码](HUNTING-MATERIAL-CONVERSION.md)。

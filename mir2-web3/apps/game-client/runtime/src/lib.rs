@@ -28,6 +28,8 @@ pub mod native_ingest;
 pub mod npc_purchase_economy;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod hunting_repair_economy;
+#[cfg(all(not(target_arch = "wasm32"), feature = "native-npc-economy"))]
+pub mod hunting_material_economy;
 #[cfg(target_arch = "wasm32")]
 #[path = "native_ingest_wasm.rs"]
 mod native_ingest;
@@ -2014,6 +2016,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
     app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
     #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(Update, (ingest_pending_hunting_repair_model,
+        ingest_pending_hunting_material_model,
         npc_purchase_economy::apply_pending_native_npc_economy).chain()
         .after(ingest_pending_chat_line)
         .after(ingest_pending_lighting_render_state)
@@ -2845,6 +2848,38 @@ fn ingest_pending_hunting_repair_model(world:&mut World) {
                 world.insert_resource(model);
             }else{ eprintln!("[runtime] invalid native hunting repair model"); }
         }
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Resource, Default)]
+struct NativeHuntingMaterialModelGeneration(Option<(u64,u64)>);
+
+/// Consume one real host delivery per frame. Equal Pending deliveries must
+/// each advance Changed once, rather than coalescing them or fabricating an
+/// observe acknowledgement on every frame with no incoming model.
+#[cfg(not(target_arch = "wasm32"))]
+fn ingest_pending_hunting_material_model(world:&mut World) {
+    use mir2_client_bevy::hunting_material::HuntingMaterialModel;
+    let generation=(world.get_resource::<SessionResetRevision>().map_or(0,|r|r.0),
+        world.get_resource::<SceneResetRevision>().map_or(0,|r|r.0));
+    if world.get_resource::<NativeHuntingMaterialModelGeneration>().and_then(|tracker|tracker.0)!=Some(generation) {
+        world.insert_resource(HuntingMaterialModel::default());
+        world.insert_resource(NativeHuntingMaterialModelGeneration(Some(generation)));
+    }
+    let mut selected=false;
+    let mut delivery=None;
+    if let Some(native)=world.get_resource::<native_ingest::NativeInbound>() {
+        native.drain_matching(|message| {
+            if !selected && matches!(message,native_ingest::NativeInboundMessage::HuntingMaterialModel(_)) {
+                selected=true;true
+            }else{false}
+        },|message|delivery=Some(message));
+    }
+    if let Some(native_ingest::NativeInboundMessage::HuntingMaterialModel(json))=delivery {
+        if let Ok(model)=serde_json::from_str::<HuntingMaterialModel>(&json) {
+            world.insert_resource(model);
+        }else{eprintln!("[runtime] invalid native hunting material model");}
     }
 }
 

@@ -1,0 +1,163 @@
+{
+  "at": "2026-10-22T06:14:42.6829171Z",
+  "phase": 16,
+  "scope": "Windows material client and native resume save handoff; scoped source pins only",
+  "files": [
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hunting_material_service.rs",
+      "bytes": 17875,
+      "sha256": "c92ee41624060e653c4da3a85ba79ccbc171abb7801ce96240d0fe95473de4af"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hunting_material_service_tests.rs",
+      "bytes": 27279,
+      "sha256": "3f23fb1e7389d96cbc6dd167bab782e0d936b8d31d30786031e6b8f2ec85656d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 886939,
+      "sha256": "b4cd177381ad7c8f6efc5e0706f536042fbfb979fbc0267ffc43be963f9681e4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hunting_material.rs",
+      "bytes": 12210,
+      "sha256": "ae1f791b820b8ad882887d37bacbc0c31884f65b20442e1c39e5407ac26ead1b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hunting_material_tests.rs",
+      "bytes": 16559,
+      "sha256": "342901c0b6aa00684024e34d059c5f22b608a16ec6b5d3d8725ba0fd43007090"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 4994,
+      "sha256": "2c17773c44b00447af81572f8834be06835cd21f16eb28c8f250b523bf700de9"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.lock",
+      "bytes": 148948,
+      "sha256": "19a422a3b27838c4be57ae49d8e7828d412145dd30ed830998c5e1df478b1a51"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 365470,
+      "sha256": "7419f3212ec6428917f1f44f2096af9e867d332566de1b105af0aea668d78c3f"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 715736,
+      "sha256": "dad6269af5202bd94802c5dfcd0a905e22c3bb910c14c94fb9c71e4df159651b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_material_client.rs",
+      "bytes": 41504,
+      "sha256": "0746c3adec48fa18226f8af3f9bd91a4d32e4f1247591cc2fcaad415329eb918"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_material_client_tests.rs",
+      "bytes": 33654,
+      "sha256": "ffe126bc1f74a736aade37197ed7512d95c4fafb647cfac39b7a30ac382c2ece"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_material_connection.rs",
+      "bytes": 19899,
+      "sha256": "572e74cbfc5a980f372477c4649d5178cb2164d22ffd0c4c7846c7892c217ffb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_material_connection_tests.rs",
+      "bytes": 14805,
+      "sha256": "43728c024f8607c7e500e1a1660215ea4e069d0492d8de195dc0e97a00916a74"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_material_gateway.rs",
+      "bytes": 33132,
+      "sha256": "b18af69ef6678d7005b9f87e0b7b0db94433bebbcf5b966913f36475b0c62a32"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_material_gateway_tests.rs",
+      "bytes": 31679,
+      "sha256": "45ec704702c10c0efa1990d96b401b395c2fe1acdc52ad6583232872259e08c1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_repair_gateway.rs",
+      "bytes": 64683,
+      "sha256": "bdea29b8c4808cd8773f055337409f2ceebe24889c44477e0d50bb4ef8b225a8"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hunting_repair_resume_tests.rs",
+      "bytes": 25541,
+      "sha256": "22950f15155f9cfddf0e1a507dc24e6e15a4c1a3688e37545c2ece3affc27d4f"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "bytes": 19925,
+      "sha256": "360f92a4449d7e96804f268c2775908248434c67ded02ea7e7db8576355115b3"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+      "bytes": 83398,
+      "sha256": "078a34db9d4eb58f0265c4405072e53b337cc8f61bfada8954f5b0baea9d6ae4"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.lock",
+      "bytes": 126073,
+      "sha256": "b0f9d2735354edecd6a86eaec63a5959f3428c0851cb5743825344ac8f376796"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.toml",
+      "bytes": 1535,
+      "sha256": "aa5e1bc0cbba0d23648f1f64536aa4e27ec0edeeefd8cc804463e55039e16af9"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hunting_material_economy.rs",
+      "bytes": 25063,
+      "sha256": "22b3e00e75a85df74f296ac6cb012830bfeaafdb70feb0ab27be61775e31a155"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hunting_material_economy_tests.rs",
+      "bytes": 31201,
+      "sha256": "cef2877a0c3695261815e9298ae89e3992c49c637bd7fcfbd05227a2780715ab"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hunting_material_ingest_tests.rs",
+      "bytes": 20289,
+      "sha256": "e5d5bbe6a396efa6804c26b99c4e13b63c0ff56f7125a678d1f7cd00181f5463"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hunting_repair_economy.rs",
+      "bytes": 25238,
+      "sha256": "c00f0734e6b5a7f8be459a02e6df972da57ba4028627b6ec5a73af5ed756a407"
+    },
+    {
+      "path": "apps/game-client/runtime/src/lib.rs",
+      "bytes": 439898,
+      "sha256": "48c6ac228e98eae89fca9d43f103371ab18e7fe669dd07deb185497d236429db"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 146855,
+      "sha256": "86e6c701d484c72a47c5b5ccb8514ced530ef7dd1dcfcfc4ccddbc0cfebe3f3f"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "bytes": 132529,
+      "sha256": "9651eec016b931d6d6adcc8a5ccdb676f7be464c4ef5c10440893313218c92a4"
+    },
+    {
+      "path": "apps/gateway/src/web_hunting_material_network_tests.rs",
+      "bytes": 56579,
+      "sha256": "3dbac21a33fc60cfe41a473641500e1a5746038dc8993874b678d342c30e9fde"
+    },
+    {
+      "path": "apps/gateway/src/web.rs",
+      "bytes": 827734,
+      "sha256": "a98a8b652d0b7051882caf1b1517560180a95dd53fde4cb26e7e5c738d8dc33f"
+    },
+    {
+      "path": "apps/gateway/src/web_native_resume_handoff_tests.rs",
+      "bytes": 22218,
+      "sha256": "52de28ee267a5b22c245d50889d7385821443980bdc232f3720e365337ce6032"
+    }
+  ],
+  "completeSourceOrResourceClosure": false
+}

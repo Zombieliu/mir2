@@ -1,0 +1,12 @@
+{
+  "physicalBreakAt": "2026-10-22T06:21:23.496Z",
+  "resumeRequestedAt": "2026-10-22T06:21:23.704Z",
+  "resumeRequestedUnixMs": 1792650083704,
+  "savedOwnerRetainedUnixMs": 1792650092121,
+  "savedOwnerRetainedAt": "2026-10-22T06:21:32.121Z",
+  "requestPrecededRetentionMs": 8417,
+  "savedTeardownObserved": true,
+  "successfulSessionResumedEvents": 1,
+  "completeGatewayLogIncluded": false,
+  "limitation": "Server-side save completion timing and the real early request establish the reproduced ordering; this is not a measurement of a strict total-I/O ten-second deadline."
+}

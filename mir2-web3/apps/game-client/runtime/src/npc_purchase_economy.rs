@@ -1009,6 +1009,8 @@ fn equipment_slot(value: Option<&Value>) -> Result<u64, NativeNpcEconomyError> {
 /// Exclusive system: all ordinary consumers finish the prefix before this
 /// barrier can commit. No later ordinary model drains until the next frame.
 pub(crate) fn apply_pending_native_npc_economy(world: &mut World) {
+    #[cfg(feature = "native-npc-economy")]
+    crate::hunting_material_economy::clear_stale_native_hunting_material_source(world);
     let revision = world.get_resource::<mir2_client_bevy::pending_operations::SessionResetRevision>().map_or(0, |r| r.0);
     let scene_revision=world.get_resource::<crate::SceneResetRevision>().map_or(0,|r|r.0);
     if world.get_resource::<NativeNpcEconomySource>().is_some_and(|s| s.reset_revision != revision || s.scene_revision != scene_revision)
@@ -1042,6 +1044,8 @@ fn apply_bundle(world: &mut World, bundle: NativeNpcEconomyBundle) -> bool {
     }else{None};
     preserve_current_hero_presentation(world,&bundle,&mut decoded.hero);
     crate::hunting_repair_economy::clear_native_hunting_repair_source(world);
+    #[cfg(feature = "native-npc-economy")]
+    crate::hunting_material_economy::clear_native_hunting_material_source(world);
     let owner=commit_complete_owner_models(world,decoded,bundle.hero_owner_gate.clone());
     let reset_revision=world.get_resource::<mir2_client_bevy::pending_operations::SessionResetRevision>().map_or(0,|r|r.0);
     let scene_revision=world.get_resource::<crate::SceneResetRevision>().map_or(0,|r|r.0);

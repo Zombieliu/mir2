@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-22",
+  "files": [
+    {
+      "path": "hunting-gui-20261022-01-bag-baseline.png",
+      "bytes": 304602,
+      "sha256": "db267995affde2f09a763ac87708c6c3a27cb30a7922b2d8c3d39aaa101d8c4b"
+    },
+    {
+      "path": "hunting-gui-20261022-01-bag-baseline.png.json",
+      "bytes": 413,
+      "sha256": "3039ae651086e935773a96d37feac839c25134da57e1ced82258c30ae3cff491"
+    },
+    {
+      "path": "hunting-gui-20261022-02-quote-ten.png",
+      "bytes": 285908,
+      "sha256": "bc7b7eab644ac714fc0c93f65a26ac3330db8962d56928d80176d048e9c8fa99"
+    },
+    {
+      "path": "hunting-gui-20261022-02-quote-ten.png.json",
+      "bytes": 406,
+      "sha256": "47d645c6ee7db2d9d38ddf8003ee8ed030f760fcbdf113a60d04ebb66e7e6307"
+    },
+    {
+      "path": "hunting-gui-20261022-03-pending-single-confirm.png",
+      "bytes": 287492,
+      "sha256": "2d6dfc99bbf4484de90250d102294ad0bd18b502fd5f288cfd0c5e096293adde"
+    },
+    {
+      "path": "hunting-gui-20261022-03-pending-single-confirm.png.json",
+      "bytes": 436,
+      "sha256": "62d3c680f91e3bf2448b55b6b3f21738f6a6396f7c7b7e6fc960fa73a8b76725"
+    },
+    {
+      "path": "hunting-gui-20261022-04-resumed-pending.png",
+      "bytes": 288205,
+      "sha256": "a958bc8b26fc6c5a9551bb69b883dc7f6f567d16f5d9c64e47035e1958acec5a"
+    },
+    {
+      "path": "hunting-gui-20261022-04-resumed-pending.png.json",
+      "bytes": 442,
+      "sha256": "6ad71dd72a552dcd3aa5d95f0f647db76a18fc8373b795e578d34c256f353f18"
+    },
+    {
+      "path": "hunting-gui-20261022-05-original-query-completed.png",
+      "bytes": 289416,
+      "sha256": "d6ba78bcaca7301ba209b3dbc3dfe8a5872bba11d9a7e8dd9cafb415a6238db8"
+    },
+    {
+      "path": "hunting-gui-20261022-05-original-query-completed.png.json",
+      "bytes": 402,
+      "sha256": "cb42ec098a9873e86df164b378946c8a251a52692dd2f9525692d2cb2242884a"
+    },
+    {
+      "path": "hunting-gui-20261022-06-blue-partial-refused.png",
+      "bytes": 292354,
+      "sha256": "f900ac303e7aa8688b83b809f607b6bd951ace4bff78e87eedcd49018bfb5de3"
+    },
+    {
+      "path": "hunting-gui-20261022-06-blue-partial-refused.png.json",
+      "bytes": 417,
+      "sha256": "b1ce6f5af4d4e72ac9ac6f1a9c38d7618fd4cf6a75da3e9b2d8dbdf22e6ff659"
+    },
+    {
+      "path": "interruption.json",
+      "bytes": 1130,
+      "sha256": "3af768cc2305a8e89441db2781f40abf94c10582319a43dd0e17dfefed4ee8a0"
+    },
+    {
+      "path": "postgres-after-query.json",
+      "bytes": 2360,
+      "sha256": "3afa8173b87d8b8f490b7a82e2a14c5d5d803e6a2cb5c5ca6a214e1f82748acd"
+    },
+    {
+      "path": "resume-timeline.json",
+      "bytes": 578,
+      "sha256": "1802a7b453a514f0d01e41fe297ea35aa2f6377c6396c4dc1cda6976b5593aee"
+    },
+    {
+      "path": "source-pins.json",
+      "bytes": 6148,
+      "sha256": "cb1d0cc56a4d76263dae65f85282357a020d6e67573d40b140fedc026285acb1"
+    },
+    {
+      "path": "transport-facts.json",
+      "bytes": 1089,
+      "sha256": "54a9dcb6080bc8d08f1dedbf7ea3b3fa4a0ae343c0143261049fc82ba3fbfc58"
+    }
+  ],
+  "credentialValuesIncluded": false
+}

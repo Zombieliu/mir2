@@ -37,7 +37,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::net::TcpListener;
 use tokio::sync::{
-    mpsc, Mutex as AsyncMutex, OwnedSemaphorePermit, RwLock as AsyncRwLock, Semaphore,
+    mpsc, watch, Mutex as AsyncMutex, OwnedSemaphorePermit, RwLock as AsyncRwLock, Semaphore,
 };
 use tokio::task::JoinHandle;
 use tokio::time::MissedTickBehavior;
@@ -662,11 +662,78 @@ struct ReconnectSessionStore {
 #[derive(Debug, Default)]
 struct ReconnectSessionState {
     sessions: HashMap<GatewaySessionCacheKey, ReconnectSessionLease>,
+    native_handoffs: HashMap<ResumeFamilyId, Arc<NativeResumeHandoff>>,
     credentials: ResumeCredentialRegistry,
     account_auth_revisions: HashMap<String, u64>,
     identity_session_auth_revisions: HashMap<String, u64>,
     account_revocations_in_progress: HashMap<String, usize>,
     identity_session_revocations_in_progress: HashMap<String, usize>,
+}
+
+const NATIVE_RESUME_HANDOFF_MAX_WAIT: Duration = Duration::from_secs(10);
+const NATIVE_RESUME_HANDOFF_RECHECK: Duration = Duration::from_millis(250);
+
+#[derive(Debug)]
+struct NativeResumeHandoff {
+    binding: ResumeBinding,
+    changed: watch::Sender<NativeResumeHandoffProgress>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum NativeResumeHandoffProgress {
+    Saving,
+    Published,
+    Aborted,
+}
+
+/// Only the closing socket owns this marker. It never contains a restorable
+/// Session: persistence and the existing retained-lease publication must finish
+/// before a waiting socket can attempt the ordinary reservation/commit path.
+struct NativeResumeHandoffGuard<'a> {
+    store: &'a ReconnectSessionStore,
+    handoff: Arc<NativeResumeHandoff>,
+}
+
+impl NativeResumeHandoffGuard<'_> {
+    fn stop_waiting(&self) {
+        self.handoff
+            .changed
+            .send_replace(NativeResumeHandoffProgress::Aborted);
+    }
+}
+
+impl Drop for NativeResumeHandoffGuard<'_> {
+    fn drop(&mut self) {
+        let mut state = self
+            .store
+            .state
+            .lock()
+            .expect("gateway reconnect session store mutex should not be poisoned");
+        if state
+            .native_handoffs
+            .get(&self.handoff.binding.family_id)
+            .is_some_and(|current| Arc::ptr_eq(current, &self.handoff))
+        {
+            state
+                .native_handoffs
+                .remove(&self.handoff.binding.family_id);
+        }
+        drop(state);
+        self.handoff.changed.send_if_modified(|progress| {
+            if *progress == NativeResumeHandoffProgress::Saving {
+                *progress = NativeResumeHandoffProgress::Aborted;
+                true
+            } else {
+                false
+            }
+        });
+    }
+}
+
+enum NativeResumeHandoffReadiness {
+    Retained,
+    Saving(ResumeBinding, watch::Receiver<NativeResumeHandoffProgress>),
+    Unavailable,
 }
 
 #[derive(Debug)]
@@ -774,6 +841,7 @@ struct NativeResumeConnectionState {
     family_id: Option<ResumeFamilyId>,
     minimum_generation: u64,
     last_issued_at_ms: Option<u64>,
+    last_issued_binding: Option<ResumeBinding>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -851,6 +919,53 @@ struct NativeClientCapabilities {
     durable_npc_purchase_owner_v1: bool,
 }
 
+// Private GUI acceptance diagnostics only. Stages contain no credential,
+// account, session, family or other identity; production has no logging path.
+#[cfg(test)]
+#[derive(Clone, Copy)]
+enum NativeGuiResumeDiagnosticStage {
+    StoreRetained,
+    SocketIneligible,
+    PrepareBindingMissing,
+    PrepareIdentityInactive,
+    PrepareReserveMissing,
+    CommitUnavailable,
+    CommitIdentityUnavailable,
+    IdentityGrantReissueFailed,
+    HandoffUnavailable,
+}
+
+#[cfg(test)]
+fn native_gui_resume_diagnostics_enabled() -> bool {
+    std::env::var("MIR2_HUNTING_NATIVE_GUI_DIAGNOSTICS").as_deref() == Ok("1")
+}
+
+#[cfg(test)]
+fn native_gui_resume_diagnostic_at(stage: NativeGuiResumeDiagnosticStage, at_ms: u64) {
+    if !native_gui_resume_diagnostics_enabled() {
+        return;
+    }
+    let stage = match stage {
+        NativeGuiResumeDiagnosticStage::StoreRetained => "store_retained",
+        NativeGuiResumeDiagnosticStage::SocketIneligible => "socket_ineligible",
+        NativeGuiResumeDiagnosticStage::PrepareBindingMissing => "prepare_binding_missing",
+        NativeGuiResumeDiagnosticStage::PrepareIdentityInactive => "prepare_identity_inactive",
+        NativeGuiResumeDiagnosticStage::PrepareReserveMissing => "prepare_reserve_missing",
+        NativeGuiResumeDiagnosticStage::CommitUnavailable => "commit_unavailable",
+        NativeGuiResumeDiagnosticStage::CommitIdentityUnavailable => "commit_identity_unavailable",
+        NativeGuiResumeDiagnosticStage::IdentityGrantReissueFailed => "identity_grant_reissue_failed",
+        NativeGuiResumeDiagnosticStage::HandoffUnavailable => "handoff_unavailable",
+    };
+    eprintln!("[native-gui-resume] stage={stage} unix_ms={at_ms}");
+}
+
+#[cfg(test)]
+fn native_gui_resume_diagnostic(stage: NativeGuiResumeDiagnosticStage) {
+    if native_gui_resume_diagnostics_enabled() {
+        native_gui_resume_diagnostic_at(stage, gateway_unix_ms());
+    }
+}
+
 impl NativeResumeConnectionState {
     fn new() -> Self {
         Self {
@@ -860,6 +975,7 @@ impl NativeResumeConnectionState {
             family_id: None,
             minimum_generation: 1,
             last_issued_at_ms: None,
+            last_issued_binding: None,
         }
     }
 
@@ -869,6 +985,7 @@ impl NativeResumeConnectionState {
             store.revoke_resume_family(&family_id);
         }
         self.last_issued_at_ms = None;
+        self.last_issued_binding = None;
     }
 
     fn reset_for_authenticated_login(&mut self) {
@@ -876,6 +993,7 @@ impl NativeResumeConnectionState {
         self.family_id = None;
         self.minimum_generation = 1;
         self.last_issued_at_ms = None;
+        self.last_issued_binding = None;
     }
 
     fn should_rotate(&self, now_ms: u64, force: bool) -> bool {
@@ -1086,6 +1204,124 @@ impl Drop for BackgroundRouteRefreshTask {
 }
 
 impl ReconnectSessionStore {
+    fn binding_authorization_is_current(
+        state: &ReconnectSessionState,
+        binding: &ResumeBinding,
+    ) -> bool {
+        binding.auth_revision
+            == Self::auth_revision_locked(state, &binding.account_id, &binding.identity_session_id)
+            && !Self::auth_revocation_in_progress_locked(
+                state,
+                &binding.account_id,
+                &binding.identity_session_id,
+            )
+            && !Self::auth_revision_blocked_locked(
+                state,
+                &binding.account_id,
+                &binding.identity_session_id,
+            )
+    }
+
+    fn begin_native_resume_handoff<'a>(
+        &'a self,
+        native: &NativeResumeConnectionState,
+        session: &GatewaySession,
+        now_ms: u64,
+    ) -> Option<NativeResumeHandoffGuard<'a>> {
+        let binding = native.last_issued_binding.as_ref()?;
+        let active = session.active_identity()?;
+        if !native.opted_in
+            || !native.resume_allowed
+            || native.family_id.as_ref() != Some(&binding.family_id)
+            || binding.gateway_session_id != session.session_id()
+            || binding.account_id != active.account_id
+            || binding.character_index != active.character_index
+            || binding.source_connection_nonce != native.connection_nonce
+            || binding.identity_expires_at_ms <= now_ms
+        {
+            return None;
+        }
+        let mut state = self
+            .state
+            .lock()
+            .expect("gateway reconnect session store mutex should not be poisoned");
+        Self::purge_expired_locked(&mut state);
+        if !state.credentials.contains_binding(binding, now_ms)
+            || !Self::binding_authorization_is_current(&state, binding)
+            || state.native_handoffs.contains_key(&binding.family_id)
+        {
+            return None;
+        }
+        let (changed, _) = watch::channel(NativeResumeHandoffProgress::Saving);
+        let handoff = Arc::new(NativeResumeHandoff {
+            binding: binding.clone(),
+            changed,
+        });
+        state
+            .native_handoffs
+            .insert(binding.family_id.clone(), Arc::clone(&handoff));
+        Some(NativeResumeHandoffGuard {
+            store: self,
+            handoff,
+        })
+    }
+
+    fn native_resume_handoff_readiness(
+        &self,
+        credential: &ResumeCredential,
+        now_ms: u64,
+    ) -> NativeResumeHandoffReadiness {
+        let mut state = self
+            .state
+            .lock()
+            .expect("gateway reconnect session store mutex should not be poisoned");
+        Self::purge_expired_locked(&mut state);
+        let Some(binding) = state
+            .credentials
+            .binding_for_credential(credential.as_str(), now_ms)
+        else {
+            return NativeResumeHandoffReadiness::Unavailable;
+        };
+        if binding.identity_expires_at_ms <= now_ms
+            || !Self::binding_authorization_is_current(&state, &binding)
+        {
+            return NativeResumeHandoffReadiness::Unavailable;
+        }
+        let key = GatewaySessionCacheKey {
+            account_id: binding.account_id.clone(),
+            character_index: binding.character_index,
+        };
+        if let Some(lease) = state.sessions.get(&key) {
+            return if lease.expires_at > Instant::now()
+                && lease.session.session_id() == binding.gateway_session_id
+                && lease.resume_family_id.as_ref() == Some(&binding.family_id)
+            {
+                NativeResumeHandoffReadiness::Retained
+            } else {
+                NativeResumeHandoffReadiness::Unavailable
+            };
+        }
+        let Some(handoff) = state.native_handoffs.get(&binding.family_id) else {
+            return NativeResumeHandoffReadiness::Unavailable;
+        };
+        // Rotation keeps two generations. Either still-live generation may
+        // wait, but every non-temporal authority field must match exactly.
+        let expected = &handoff.binding;
+        if binding.family_id != expected.family_id
+            || binding.account_id != expected.account_id
+            || binding.character_index != expected.character_index
+            || binding.gateway_session_id != expected.gateway_session_id
+            || binding.identity_session_id != expected.identity_session_id
+            || binding.identity_expires_at_ms != expected.identity_expires_at_ms
+            || binding.auth_revision != expected.auth_revision
+            || binding.source_connection_nonce != expected.source_connection_nonce
+            || *handoff.changed.borrow() != NativeResumeHandoffProgress::Saving
+        {
+            return NativeResumeHandoffReadiness::Unavailable;
+        }
+        NativeResumeHandoffReadiness::Saving(binding, handoff.changed.subscribe())
+    }
+
     fn auth_revision_locked(
         state: &ReconnectSessionState,
         account_id: &str,
@@ -1165,6 +1401,9 @@ impl ReconnectSessionStore {
             .expect("gateway reconnect session store mutex should not be poisoned");
         Self::advance_revision(&mut state.account_auth_revisions, &account_id);
         Self::increment_in_progress(&mut state.account_revocations_in_progress, &account_id);
+        for handoff in state.native_handoffs.values().filter(|handoff| handoff.binding.account_id == account_id) {
+            handoff.changed.send_replace(NativeResumeHandoffProgress::Aborted);
+        }
         drop(state);
         IdentityRevocationFence {
             store: self,
@@ -1190,6 +1429,9 @@ impl ReconnectSessionStore {
                 &mut state.identity_session_revocations_in_progress,
                 session_id,
             );
+            for handoff in state.native_handoffs.values().filter(|handoff| &handoff.binding.identity_session_id == session_id) {
+                handoff.changed.send_replace(NativeResumeHandoffProgress::Aborted);
+            }
         }
         drop(state);
         IdentityRevocationFence {
@@ -1216,11 +1458,19 @@ impl ReconnectSessionStore {
         ttl: Duration,
     ) {
         let expires_at = Instant::now() + ttl.max(Duration::from_millis(1));
+        #[cfg(test)]
+        let trace_retained = native_gui_resume_diagnostics_enabled();
         let mut state = self
             .state
             .lock()
             .expect("gateway reconnect session store mutex should not be poisoned");
         Self::purge_expired_locked(&mut state);
+        let published_handoff = resume_family_id.as_ref()
+            .and_then(|family| state.native_handoffs.get(family))
+            .filter(|handoff| handoff.binding.gateway_session_id == session.session_id()
+                && handoff.binding.account_id == key.account_id
+                && handoff.binding.character_index == key.character_index)
+            .cloned();
         let replaced = state.sessions.insert(
             key,
             ReconnectSessionLease {
@@ -1233,6 +1483,26 @@ impl ReconnectSessionStore {
         );
         if let Some(family_id) = replaced.and_then(|lease| lease.resume_family_id) {
             state.credentials.revoke_family(&family_id);
+        }
+        // A waiter only wakes here; it must still reserve the saved lease and
+        // revalidate all authorization through the existing commit path.
+        if let Some(handoff) = published_handoff {
+            handoff.changed.send_if_modified(|progress| {
+                if *progress == NativeResumeHandoffProgress::Saving {
+                    *progress = NativeResumeHandoffProgress::Published;
+                    true
+                } else { false }
+            });
+        }
+        #[cfg(test)]
+        {
+            // Capture the completed insertion's time under its existing lock.
+            // Environment and stderr checks run outside the state mutex.
+            let retained_at_ms = trace_retained.then(gateway_unix_ms);
+            drop(state);
+            if let Some(at_ms) = retained_at_ms {
+                native_gui_resume_diagnostic_at(NativeGuiResumeDiagnosticStage::StoreRetained, at_ms);
+            }
         }
     }
 
@@ -1499,11 +1769,12 @@ impl ReconnectSessionStore {
     }
 
     fn revoke_resume_family(&self, family_id: &ResumeFamilyId) {
-        self.state
-            .lock()
-            .expect("gateway reconnect session store mutex should not be poisoned")
-            .credentials
-            .revoke_family(family_id);
+        let mut state = self.state.lock()
+            .expect("gateway reconnect session store mutex should not be poisoned");
+        state.credentials.revoke_family(family_id);
+        if let Some(handoff) = state.native_handoffs.get(family_id) {
+            handoff.changed.send_replace(NativeResumeHandoffProgress::Aborted);
+        }
     }
 
     fn revoke_account_reconnects(&self, account_id: &str) {
@@ -1512,6 +1783,9 @@ impl ReconnectSessionStore {
             .lock()
             .expect("gateway reconnect session store mutex should not be poisoned");
         Self::advance_revision(&mut state.account_auth_revisions, account_id);
+        for handoff in state.native_handoffs.values().filter(|handoff| handoff.binding.account_id == account_id) {
+            handoff.changed.send_replace(NativeResumeHandoffProgress::Aborted);
+        }
         let revoked_families = state
             .sessions
             .iter()
@@ -4621,8 +4895,15 @@ async fn handle_socket(
         }
         return;
     }
-    let persistence_outcome =
-        persist_web_session_before_teardown(&mut session, &mut save_queue).await;
+    // This exact closing socket advertises only that persistence is in flight.
+    // No waiting socket can access its Session until the saved retained lease
+    // is published below. Every early return drops and signals the marker.
+    let _resume_handoff = tokio::task::block_in_place(|| {
+        state.reconnect_sessions.begin_native_resume_handoff(&native_resume, &session, gateway_unix_ms())
+    });
+    let persistence_outcome = persist_web_session_before_teardown_with_handoff(
+        &mut session, &mut save_queue, _resume_handoff.as_ref(),
+    ).await;
     let recovery_account_id = tokio::task::block_in_place(|| {
         session
             .active_identity()
@@ -4742,9 +5023,18 @@ fn apply_teardown_persistence_to_resume(
     should_retain_reconnect_session(persistence_outcome, native_resume.resume_allowed)
 }
 
+#[cfg(test)]
 async fn persist_web_session_before_teardown(
     session: &mut GatewaySession,
+    save_queue: &mut WebSessionSaveQueue,
+) -> WebTeardownPersistenceOutcome {
+    persist_web_session_before_teardown_with_handoff(session, save_queue, None).await
+}
+
+async fn persist_web_session_before_teardown_with_handoff(
+    session: &mut GatewaySession,
     _save_queue: &mut WebSessionSaveQueue,
+    handoff: Option<&NativeResumeHandoffGuard<'_>>,
 ) -> WebTeardownPersistenceOutcome {
     let mut retry_delay = Duration::from_millis(100);
     loop {
@@ -4763,6 +5053,7 @@ async fn persist_web_session_before_teardown(
                 return WebTeardownPersistenceOutcome::Saved;
             }
             Ok(GatewayTeardownPersistenceOutcome::Journaled { already_durable }) => {
+                if let Some(handoff) = handoff { handoff.stop_waiting(); }
                 crate::session::save_recovery::record_persistence_status(
                     crate::session::save_recovery::PersistenceStatus::Journaled,
                     "web-teardown",
@@ -4783,6 +5074,10 @@ async fn persist_web_session_before_teardown(
             ),
             Err(error) => eprintln!("web teardown persistence panicked: {error}"),
         }
+        // Keep the existing fail-closed save/journal retry loop, but never keep
+        // a recovery socket waiting on a persistence attempt already known to
+        // have failed. A subsequent real save still uses normal publication.
+        if let Some(handoff) = handoff { handoff.stop_waiting(); }
         crate::session::save_recovery::record_persistence_status(
             crate::session::save_recovery::PersistenceStatus::Fatal,
             "web-teardown",
@@ -5527,7 +5822,12 @@ async fn handle_socket_work(
                             && !authenticated
                             && active_session_permit.is_none()
                             && tokio::task::block_in_place(|| session.active_identity()).is_none();
-                        let prepared = if eligible {
+                        let handoff_ready = if eligible {
+                            await_native_resume_handoff(
+                                reconnect_sessions.as_ref(), session_cache.as_ref(), &identity, &credential,
+                            ).await.is_ok()
+                        } else { false };
+                        let prepared = if eligible && handoff_ready {
                             tokio::task::block_in_place(|| {
                                 validate_and_prepare_native_resume(
                                     reconnect_sessions.as_ref(),
@@ -5554,6 +5854,8 @@ async fn handle_socket_work(
                                 )
                             })
                         } else {
+                            #[cfg(test)]
+                            native_gui_resume_diagnostic(if eligible { NativeGuiResumeDiagnosticStage::HandoffUnavailable } else { NativeGuiResumeDiagnosticStage::SocketIneligible });
                             Err(NativeResumePrepareError::Unavailable)
                         };
                         let (reservation, verified, prepared_zone_registration) = match prepared {
@@ -5580,6 +5882,13 @@ async fn handle_socket_work(
                                 gateway_unix_ms(),
                             )
                         });
+                        #[cfg(test)]
+                        if let Err(error) = &committed {
+                            native_gui_resume_diagnostic(match error {
+                                NativeResumeCommitError::Unavailable => NativeGuiResumeDiagnosticStage::CommitUnavailable,
+                                NativeResumeCommitError::IdentityUnavailable => NativeGuiResumeDiagnosticStage::CommitIdentityUnavailable,
+                            });
+                        }
                         let Ok((restored, binding, verified, prepared_zone_registration)) =
                             committed
                         else {
@@ -5602,6 +5911,8 @@ async fn handle_socket_work(
                             )
                         });
                         let Ok(resumed_identity_grant) = resumed_identity_grant else {
+                            #[cfg(test)]
+                            native_gui_resume_diagnostic(NativeGuiResumeDiagnosticStage::IdentityGrantReissueFailed);
                             drop(prepared_zone_registration);
                             drop(restored);
                             if send_resume_rejected(&sender).await.is_err() {
@@ -5624,6 +5935,7 @@ async fn handle_socket_work(
                         native_resume.family_id = None;
                         native_resume.minimum_generation = binding.generation.saturating_add(1);
                         native_resume.last_issued_at_ms = None;
+                        native_resume.last_issued_binding = None;
                         _injection_registration = Some(crate::inject::InjectionRegistration::new(
                             injector.clone(),
                             &binding.account_id,
@@ -9557,6 +9869,101 @@ fn reissue_native_resume_identity_grant(
     Ok(grant)
 }
 
+async fn await_native_resume_handoff(
+    store: &ReconnectSessionStore,
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    credential: &ResumeCredential,
+) -> Result<(), NativeResumePrepareError> {
+    await_native_resume_handoff_with_budget(
+        store,
+        credential,
+        NATIVE_RESUME_HANDOFF_MAX_WAIT,
+        gateway_unix_ms,
+        |binding, now_ms| {
+            tokio::task::block_in_place(|| {
+                native_resume_identity_is_active(
+                    session_cache,
+                    identity,
+                    &VerifiedIdentitySession {
+                        account_id: binding.account_id.clone(),
+                        session_id: binding.identity_session_id.clone(),
+                        expires_at_ms: binding.identity_expires_at_ms,
+                    },
+                    now_ms,
+                )
+            })
+        },
+    )
+    .await
+}
+
+async fn await_native_resume_handoff_with_budget(
+    store: &ReconnectSessionStore,
+    credential: &ResumeCredential,
+    budget: Duration,
+    mut clock: impl FnMut() -> u64,
+    mut identity_is_active: impl FnMut(&ResumeBinding, u64) -> bool,
+) -> Result<(), NativeResumePrepareError> {
+    let deadline = tokio::time::Instant::now() + budget.min(NATIVE_RESUME_HANDOFF_MAX_WAIT);
+    let mut waited = false;
+    let mut original_signal: Option<watch::Receiver<NativeResumeHandoffProgress>> = None;
+    loop {
+        // A notification is never authority. Re-read the private marker,
+        // credential, authorization revision and retained lease each time.
+        let now_ms = clock();
+        if original_signal
+            .as_ref()
+            .is_some_and(|signal| *signal.borrow() == NativeResumeHandoffProgress::Aborted)
+        {
+            return Err(NativeResumePrepareError::Unavailable);
+        }
+        if waited && tokio::time::Instant::now() >= deadline {
+            return Err(NativeResumePrepareError::Unavailable);
+        }
+        let readiness = store.native_resume_handoff_readiness(credential, now_ms);
+        match readiness {
+            NativeResumeHandoffReadiness::Retained => {
+                // The complete prepare/commit path below performs a fresh
+                // shared-authority check; this is only a readiness witness.
+                if original_signal
+                    .as_ref()
+                    .is_some_and(|signal| *signal.borrow() == NativeResumeHandoffProgress::Aborted)
+                {
+                    return Err(NativeResumePrepareError::Unavailable);
+                }
+                return Ok(());
+            }
+            NativeResumeHandoffReadiness::Unavailable => {
+                return Err(NativeResumePrepareError::Unavailable)
+            }
+            NativeResumeHandoffReadiness::Saving(binding, mut changed) => {
+                if original_signal.is_none() {
+                    original_signal = Some(changed.clone());
+                }
+                if !identity_is_active(&binding, now_ms) {
+                    return Err(NativeResumePrepareError::Unavailable);
+                }
+                let now_ms = clock();
+                let expiry_ms = binding.expires_at_ms.min(binding.identity_expires_at_ms);
+                if expiry_ms <= now_ms || tokio::time::Instant::now() >= deadline {
+                    return Err(NativeResumePrepareError::Unavailable);
+                }
+                let next_check =
+                    NATIVE_RESUME_HANDOFF_RECHECK.min(Duration::from_millis(expiry_ms - now_ms));
+                waited = true;
+                tokio::select! {
+                    _ = tokio::time::sleep_until(deadline) => return Err(NativeResumePrepareError::Unavailable),
+                    _ = tokio::time::sleep(next_check) => {},
+                    result = changed.changed() => {
+                        if result.is_err() { return Err(NativeResumePrepareError::Unavailable); }
+                    },
+                }
+            }
+        }
+    }
+}
+
 fn validate_and_prepare_native_resume<'a, PreparedZone>(
     reconnect_sessions: &'a ReconnectSessionStore,
     session_cache: &dyn crate::cache::GatewaySessionCache,
@@ -9573,20 +9980,28 @@ fn validate_and_prepare_native_resume<'a, PreparedZone>(
     ),
     NativeResumePrepareError,
 > {
-    let binding = reconnect_sessions
-        .resume_binding(credential, now_ms)
-        .ok_or(NativeResumePrepareError::Unavailable)?;
+    let binding = reconnect_sessions.resume_binding(credential, now_ms);
+    #[cfg(test)]
+    if binding.is_none() {
+        native_gui_resume_diagnostic(NativeGuiResumeDiagnosticStage::PrepareBindingMissing);
+    }
+    let binding = binding.ok_or(NativeResumePrepareError::Unavailable)?;
     let verified = VerifiedIdentitySession {
         account_id: binding.account_id.clone(),
         session_id: binding.identity_session_id.clone(),
         expires_at_ms: binding.identity_expires_at_ms,
     };
     if !native_resume_identity_is_active(session_cache, identity, &verified, now_ms) {
+        #[cfg(test)]
+        native_gui_resume_diagnostic(NativeGuiResumeDiagnosticStage::PrepareIdentityInactive);
         return Err(NativeResumePrepareError::Unavailable);
     }
-    let reservation = reconnect_sessions
-        .reserve_by_credential(credential, &binding, now_ms)
-        .ok_or(NativeResumePrepareError::Unavailable)?;
+    let reservation = reconnect_sessions.reserve_by_credential(credential, &binding, now_ms);
+    #[cfg(test)]
+    if reservation.is_none() {
+        native_gui_resume_diagnostic(NativeGuiResumeDiagnosticStage::PrepareReserveMissing);
+    }
+    let reservation = reservation.ok_or(NativeResumePrepareError::Unavailable)?;
     prepare_route(reservation.session()).map_err(NativeResumePrepareError::Route)?;
     let prepared_zone =
         prepare_zone(reservation.session()).map_err(NativeResumePrepareError::Zone)?;
@@ -9838,6 +10253,7 @@ async fn maybe_issue_native_resume_credential(
     native_resume.family_id = Some(issued.binding.family_id.clone());
     native_resume.minimum_generation = issued.binding.generation.saturating_add(1);
     native_resume.last_issued_at_ms = Some(now_ms);
+    native_resume.last_issued_binding = Some(issued.binding.clone());
     send_resume_credential(sender, &issued).await?;
     Ok(true)
 }
@@ -12808,6 +13224,10 @@ mod web_hunting_repair_network_tests;
 #[cfg(test)]
 #[path = "web_resume_identity_grant_tests.rs"]
 mod web_resume_identity_grant_tests;
+
+#[cfg(test)]
+#[path = "web_native_resume_handoff_tests.rs"]
+mod web_native_resume_handoff_tests;
 
 #[cfg(test)]
 mod tests {

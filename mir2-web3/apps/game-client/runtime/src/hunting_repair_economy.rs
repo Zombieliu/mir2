@@ -334,7 +334,10 @@ pub(crate) fn apply_pending_native_hunting_repair(world: &mut World) {
         .and_then(|native| native.take_hunting_repair_front());
     if let Some(bundle) = bundle {
         let _ = apply_native_hunting_repair_bundle(world, bundle);
+        return;
     }
+    #[cfg(feature = "native-npc-economy")]
+    crate::hunting_material_economy::apply_pending_native_hunting_material(world);
 }
 
 /// Exclusive application for the real main-thread World. This deliberately
@@ -364,6 +367,8 @@ pub fn apply_native_hunting_repair_bundle(
     let commit = || {
         preserve_repair_hero_presentation(world, &mut decoded, hero_gate.as_ref());
         retire_purchase_source_for_repair(world);
+        #[cfg(feature = "native-npc-economy")]
+        crate::hunting_material_economy::clear_native_hunting_material_source(world);
         if let Some(prior) = world.remove_resource::<NativeHuntingRepairSource>() {
             if !prior.gate.same_gate(&bundle.gate) {
                 prior.gate.retire();

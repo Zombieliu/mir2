@@ -1119,3 +1119,292 @@ async fn hunting_material_network_postgres_unread_commit_raw_resume_original_que
     cold.wait_empty(kit.index).await;
     cold.stop().await;
 }
+
+// Like the parent repair fixture, controls must be fresh direct files in the
+// explicitly supplied private directory. Credentials inherit that directory's
+// private Windows ACL; Unix additionally creates their file with mode 0600.
+fn material_control_path(variable: &str) -> PathBuf {
+    let configured = PathBuf::from(
+        std::env::var_os(variable).expect("explicit native material control file required"),
+    );
+    assert!(
+        configured.is_absolute(),
+        "absolute material control file required"
+    );
+    let configured_root = PathBuf::from(
+        std::env::var_os("MIR2_HUNTING_BROWSER_CONTROL_DIR")
+            .expect("explicit private fixture control directory required"),
+    );
+    assert!(
+        configured_root.is_absolute(),
+        "absolute private control directory required"
+    );
+    let root = configured_root
+        .canonicalize()
+        .expect("private control directory must exist");
+    let parent = configured
+        .parent()
+        .unwrap()
+        .canonicalize()
+        .expect("control parent must exist");
+    assert_eq!(
+        parent, root,
+        "material control must be directly inside private directory"
+    );
+    let name = configured
+        .file_name()
+        .and_then(|name| name.to_str())
+        .expect("ASCII control filename required");
+    assert!(
+        name.starts_with("hunting-material-native-")
+            && name
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || b"._-".contains(&byte)),
+        "bounded native material control filename required"
+    );
+    let resolved = parent.join(name);
+    assert!(
+        !resolved
+            .try_exists()
+            .expect("material control path check failed"),
+        "native material control file must be new"
+    );
+    resolved
+}
+
+fn material_fixture_facts(facts: &MaterialFacts) -> Value {
+    json!({"wallet":facts.wallet,"realm":facts.realm,"materialConversions":facts.conversions,
+        "materialResults":facts.results,"materialFeeBurns":facts.fee_burns,
+        "materialFeeGold":facts.fee_sum.to_string(),"materialConsumedAtoms":facts.consumed.to_string()})
+}
+
+fn material_fixture_save_summary(save: &CharacterSaveRecord) -> Value {
+    use sha2::Digest;
+    let digest = |value: &Value| {
+        let bytes = sha2::Sha256::digest(serde_json::to_vec(value).unwrap());
+        let hex: String = bytes.iter().map(|byte| format!("{byte:02x}")).collect();
+        format!("sha256:{hex}")
+    };
+    let items = saved_items(save);
+    let material_items: Vec<_> = items.iter().filter(|item|
+        item["economic_binding"].is_object() || item["economic_conversion"].is_object()).map(|item|
+        json!({"uniqueId":number(&item["unique_id"]).to_string(),"key":item["key"],
+            "quantity":item["quantity"],"container":item["container"],"slot":item["slot"],
+            "bound":item["economic_binding"].is_object(),"converted":item["economic_conversion"].is_object()})).collect();
+    json!({"revision":save.revision,"legacyGold":save.gold,"mapFileName":save.map_file_name,
+        "position":save.position,"inventoryRoots":save.inventory_items_json.len(),
+        "beltRoots":save.belt_items_json.len(),"storageRoots":save.storage_items_json.len(),
+        "equipmentRoots":save.equipment_items_json.len(),"materialItems":material_items,
+        "typedCheckpointSha256":digest(&serde_json::to_value(save).unwrap()),
+        "exactInventoryStringsSha256":digest(&serde_json::to_value(&save.inventory_items_json).unwrap())})
+}
+
+/// Bounded isolated main-server fixture for the actual Windows EXE. Items are
+/// earned through ordinary Jane Accept/Finish, moved Belt-to-Bag normally and
+/// saved by ordinary LogOut. Prices, permit funding and fee funding are
+/// explicitly synthetic; no bound instance or identity grant is fabricated.
+/// The fixture uses SAVE_QUEUE_LIMIT=1, not the default asynchronous queue.
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[ignore = "holds isolated loopback PostgreSQL/Shared Zone for an actual Windows material GUI run"]
+async fn hunting_material_network_postgres_windows_gui_fixture() {
+    let bind: SocketAddr = std::env::var("MIR2_HUNTING_MATERIAL_GUI_ADDR")
+        .expect("explicit native material listener required")
+        .parse()
+        .expect("valid native material listener required");
+    assert!(
+        bind.ip().is_loopback() && bind.port() != 0,
+        "fixed loopback material listener required"
+    );
+    let ready_path = material_control_path("MIR2_HUNTING_MATERIAL_GUI_READY_FILE");
+    let stop_path = material_control_path("MIR2_HUNTING_MATERIAL_GUI_STOP_FILE");
+    let credentials_path = material_control_path("MIR2_HUNTING_MATERIAL_GUI_CREDENTIALS_FILE");
+    assert_ne!(ready_path, stop_path);
+    assert_ne!(ready_path, credentials_path);
+    assert_ne!(stop_path, credentials_path);
+    let seconds = std::env::var("MIR2_HUNTING_MATERIAL_GUI_SECONDS")
+        .map(|value| {
+            value
+                .parse::<u64>()
+                .expect("material fixture lifetime must be seconds")
+        })
+        .unwrap_or(20 * 60);
+    assert!(
+        (1..=7200).contains(&seconds),
+        "material fixture lifetime must be between 1 and 7200 seconds"
+    );
+    let origin = local_origin();
+    let db = Database::new();
+    let server = Server::start_with_config(&db, bind, material_config(&db)).await;
+    let mut kit = actual_kit(&db, &server, false).await;
+    material_prices(&db, false);
+    material_permits(&db);
+    material_fee_funds(&db, kit.index, false);
+    // actual_kit already exercised an ordinary save/re-entry. Save once more
+    // after funding, then close authenticated transport and revoke its resume
+    // family normally. The real EXE must establish fresh Login/StartGame.
+    material_logout(&mut kit.socket).await;
+    disconnect(&mut kit.socket).await;
+    drop(kit.socket);
+    server.wait_empty(kit.index).await;
+    let initial = db.checkpoint(kit.index);
+    assert_eq!(initial.gold, 0);
+    assert_eq!(initial.map_file_name, "0");
+    let initial_facts = material_facts(&db, kit.index);
+    assert_eq!(initial_facts.wallet.bound_gold, 100);
+    assert!(initial_facts.wallet.unbound_gold > 0 && initial_facts.realm.pool.stock_atoms > 0);
+    assert_eq!(
+        (
+            initial_facts.conversions,
+            initial_facts.results,
+            initial_facts.fee_burns
+        ),
+        (0, 0, 0)
+    );
+    let materials: Vec<_> = ["(HP)DrugSmall", "(MP)DrugSmall"]
+        .into_iter()
+        .map(|name| {
+            let item = potion(&initial, name);
+            assert_eq!(item["quantity"], 10);
+            json!({"uniqueId":number(&item["unique_id"]).to_string(),"itemIndex":
+            mir2_game_data::crystal_item_by_name(name).unwrap().item_index,"name":name,
+            "quantity":item["quantity"],"container":item["container"],"slot":item["slot"]})
+        })
+        .collect();
+    let mut options = std::fs::OpenOptions::new();
+    options.write(true).create_new(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    let mut credentials_file = options
+        .open(&credentials_path)
+        .expect("new private synthetic credentials file required");
+    write_browser_status(
+        &mut credentials_file,
+        &json!({"accountId":ACCOUNT,"password":PASSWORD}),
+    );
+    drop(credentials_file);
+    let expires_at_ms = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis()
+        .checked_add(u128::from(seconds) * 1000)
+        .unwrap();
+    let mut ready = json!({"version":"hunting-material-native-fixture-v1","status":"ready",
+        "processId":std::process::id(),"schema":db.schema,"realm":db.realm,
+        "gatewayHttpUrl":format!("http://{}",server.address),"gatewayWsUrl":format!("ws://{}/ws",server.address),
+        "publicOrigin":origin,"accountId":ACCOUNT,"character":{"index":kit.index,"name":"MaterialNetHero"},
+        "spawn":{"mapFileName":initial.map_file_name,"position":initial.position,"npcObjectId":JANE},
+        "materials":materials,"valuationVersion":PRICE_VERSION,"syntheticUnitGold":UNIT_GOLD.to_string(),
+        "fundingClassification":"synthetic-price-permit-burn-and-new-credit-conversion-for-fee-only",
+        "preparation":"ordinary-Jane-2110001-then-LogOut-and-Disconnect; fresh-EXE-Login-required",
+        "saveQueueLimit":1,"initialFacts":material_fixture_facts(&initial_facts),
+        "initialSavedSummary":material_fixture_save_summary(&initial),
+        "credentialsFile":credentials_path.to_string_lossy(),"stopFile":stop_path.to_string_lossy(),
+        "expiresAtMs":u64::try_from(expires_at_ms).unwrap()});
+    let mut ready_file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&ready_path)
+        .expect("new native material ready file required");
+    write_browser_status(&mut ready_file, &ready);
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(seconds);
+    let reason = loop {
+        match std::fs::symlink_metadata(&stop_path) {
+            Ok(metadata) => {
+                assert!(
+                    metadata.is_file() && !metadata.file_type().is_symlink(),
+                    "material stop marker must be a plain file"
+                );
+                break "stopFile";
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => panic!("material stop marker check failed"),
+        }
+        if tokio::time::Instant::now() >= deadline {
+            break "deadline";
+        }
+        assert!(
+            !server.task.is_finished(),
+            "material fixture listener ended before stop"
+        );
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    };
+    ready["status"] = json!("stopping");
+    ready["stopReason"] = json!(reason);
+    write_browser_status(&mut ready_file, &ready);
+    // Only stop this private listener and revoke this fixture's exact account.
+    // Real handler teardown persists before capacity reaches zero; a stopped
+    // listener or received snapshot alone is never evidence of a saved actor.
+    server.task.abort();
+    let revocation = server.reconnect.begin_account_identity_revocation(ACCOUNT);
+    if server.capacity.status().current_ws_connections != 0 {
+        outside_runtime(|| {
+            let identity = crate::identity::IdentityService::from_env(Some(db.url.clone()))
+                .unwrap_or_else(|_| panic!("material shutdown identity unavailable"));
+            let sessions = identity
+                .list_account_session_ids(ACCOUNT)
+                .unwrap_or_else(|_| panic!("material shutdown sessions unavailable"));
+            identity
+                .revoke_all_account_sessions(ACCOUNT, "material_native_fixture_shutdown")
+                .unwrap_or_else(|_| panic!("material shutdown revocation failed"));
+            for session in sessions {
+                server
+                    .cache
+                    .revoke_identity_session(&session, 120)
+                    .unwrap_or_else(|_| panic!("material shutdown cache revocation failed"));
+            }
+        });
+    }
+    let closed = tokio::time::timeout(Duration::from_secs(30), async {
+        while server.capacity.status().current_ws_connections != 0 {
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+    })
+    .await;
+    if closed.is_err() {
+        ready["status"] = json!("shutdownUnproven");
+        write_browser_status(&mut ready_file, &ready);
+        panic!("material fixture did not prove real socket teardown before deadline");
+    }
+    let key = GatewaySessionCacheKey {
+        account_id: ACCOUNT.into(),
+        character_index: kit.index,
+    };
+    if let Some(retired) = server.reconnect.take(&key) {
+        outside_runtime(|| {
+            assert_eq!(
+                crate::cache::remove_owned_session_cache(server.cache.as_ref(), &retired.session),
+                Some(key)
+            );
+            drop(retired);
+        });
+    } else {
+        // InMemoryGatewaySessionCache keeps an expired route record after the
+        // retained Session has been purged. This is fixture shutdown cleanup,
+        // not evidence that ordinary logout or production purge removed it.
+        let status = server.capacity.status();
+        assert_eq!(status.current_ws_connections, 0);
+        assert_eq!(status.current_active_sessions, 0);
+        assert_eq!(status.current_reconnect_leases, 0);
+        assert_eq!(server.reconnect.len(), 0);
+        if let Some(record) = server.cache.get(&key) {
+            let owner = record.route_lease_owner.as_deref().expect("expired fixture route owner");
+            assert_eq!(record.gateway_session_id.as_deref(), Some(owner));
+            assert!(record.route_lease_expires_at_ms.is_some_and(|expiry| expiry < crate::web::gateway_unix_ms()));
+            assert!(server.cache.release_owned_session_route(&key, owner, &record.character_name)
+                .expect("release exact expired fixture route"));
+            ready["expiredFixtureRouteCleanup"] = json!(true);
+        }
+    }
+    server.wait_empty(kit.index).await;
+    let saved = db.checkpoint(kit.index);
+    ready["status"] = json!("stopped");
+    ready["finalFacts"] = material_fixture_facts(&material_facts(&db, kit.index));
+    ready["finalSavedSummary"] = material_fixture_save_summary(&saved);
+    ready["socketTeardownProven"] = json!(true);
+    write_browser_status(&mut ready_file, &ready);
+    drop(revocation);
+    server.stop().await;
+}

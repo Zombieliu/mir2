@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 第十六阶段续验：Windows 材料转换与保存交接（2026-10-22）
+
+普通Bag材料转换客户端接线已通过限定源码核对和Runtime123/Bevy44/Host110项既有最终测试；28项当前源码/锁文件与244证据一致。新Gateway保存交接14项、原生恢复20项、保存失败15项、异常退出持久化5项全部通过。最新265二进制的268真实WS/PG三项已重新通过，覆盖整栈/部分转换、三类资产不变拒绝、未读提交的原Query恢复和新配置冷登录，见[阶段十六证据](generated/hunting-economy/acceptance-20261022-native-material.json)。
+
+Windows限定实机另通过红药10整栈单Confirm、丢一份committed回执、Pending Close、提前8,417ms到达的resume和一次原Query完成；PG确认1单/fee25/许可原子1250，6张截图及脱敏事实已归档。蓝药3/10因缺下一份完整普通库存source本地拒绝，未发送新Quote/Confirm。随后用户physical Escape停止电脑控制，Alt+x确认框的Yes点击被工具拒绝；部分转换、正常退出及冷EXE登录仍未验，不能称完整GUI通过。默认关闭、正式价格白名单为空、K=0.1及0.72/1.08许可保持；无新发布、签名候选包或Crystal/Candidate百分比。全文件rustfmt保留基线及当前格式差异，限定git diff检查此前通过。
+
 ## 第十五阶段：固定估值材料转换（2026-10-21）
 
 用户已选策划固定估值、手续费扣现有非绑定金币。主服现已实现普通 Bag 的 Bound 根整栈/部分转换：总估值 E 只扣 E 许可原子及 ceil(2%E) 非绑手续费，不生成金币；完整物品 checkpoint、钱包、许可、fee 销毁与不可变结果同 PG 提交。原单 Query、未决普通退出及冷登录恢复已接，旧 gold 不改，正式价格白名单为空且默认关闭。详见[材料服务端合同/伪代码](HUNTING-MATERIAL-CONVERSION.md)。

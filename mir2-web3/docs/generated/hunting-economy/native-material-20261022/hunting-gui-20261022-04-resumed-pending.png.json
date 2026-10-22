@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-22T06:22:47.379Z",
+  "note": "After one physical transport break, same client automatically resumed. Proxy records sessionResumed once; pending original conversion remains and Confirm count stays one.",
+  "path": "hunting-gui-20261022-04-resumed-pending.png",
+  "sha256": "a958bc8b26fc6c5a9551bb69b883dc7f6f567d16f5d9c64e47035e1958acec5a",
+  "windowTitle": "numeron-legend of rebirth",
+  "syntheticIsolatedFixture": true
+}

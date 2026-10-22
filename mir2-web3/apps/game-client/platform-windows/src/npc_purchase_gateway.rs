@@ -67,7 +67,8 @@ impl UiSource {
         Some(source.clone())
     }
     fn matches(&self, state: &NativeCommandFenceState, owned: &OwnedGatewayCommand) -> bool {
-        owned_current(state, owned) && state.npc_gold_buy.ready(owned.stamp)
+        owned_current(state, owned) && !state.hunting_repair_busy && !state.hunting_material_busy
+            && state.npc_gold_buy.ready(owned.stamp)
             && self.revision == state.npc_gold_buy.revision && self.shop == state.npc_gold_buy.shop
             && state.npc_gold_buy.snapshot_dialog.as_ref() == Some(&self.parent)
             && state.npc_gold_buy.inventory.as_ref().and_then(|model| serde_json::to_value(model).ok()).as_ref() == Some(&self.inventory)
@@ -125,6 +126,12 @@ pub(super) struct NativeNpcPurchaseGateway {
     needs_world: bool,
     map_file_name: Option<String>,
 }
+
+/// Uses the existing real client/owned sender fixture to retain an entered
+/// purchase. Only host recovery tests may borrow this independently pending
+/// lane; no production state or boolean Pending shortcut is exposed.
+#[cfg(test)]
+pub(super) fn pending_purchase_fixture()->NativeNpcPurchaseGateway{tests::pending_purchase_fixture()}
 impl NativeNpcPurchaseGateway {
     pub(super) fn new() -> Result<Self,String> {
         Ok(Self { client: NativeNpcPurchaseClient::new().ok_or("Native purchase host IDs exhausted")?,
@@ -373,11 +380,19 @@ pub(super) fn publish_applied_ui_source(fence: &NativeCommandFence, stamp: Nativ
 pub(super) fn with_applied_ui_source<R>(fence:&NativeCommandFence,stamp:NativeCommandStamp,
     projection:&NativeNpcEconomyProjection,after:impl FnOnce(&mut NativeCommandFenceState)->R)->Result<R,String>
 {
+    let mut state = fence.0.lock().map_err(|_| "Native purchase owner fence poisoned")?;
+    synchronize_applied_ui_source(&mut state,stamp,projection)?;
+    Ok(after(&mut state))
+}
+
+/// Caller holds the physical owner fence and has reauthorized the independent
+/// Runtime Applied proof. This contains no queue admission or gate acquisition.
+pub(super) fn synchronize_applied_ui_source(state:&mut NativeCommandFenceState,stamp:NativeCommandStamp,
+    projection:&NativeNpcEconomyProjection)->Result<(),String>{
     let inventory: mir2_client_bevy::inventory::InventoryModel = serde_json::from_str(&projection.inventory_json).map_err(|error| error.to_string())?;
     let shop: mir2_client_bevy::shop::ShopModel = serde_json::from_str(&projection.shop_json).map_err(|error| error.to_string())?;
     let owner: Value = serde_json::from_str(&projection.owner_json).map_err(|error| error.to_string())?;
-    let mut state = fence.0.lock().map_err(|_| "Native purchase owner fence poisoned")?;
-    if !NativeCommandFence::matches(&state,stamp,NativeCommandScope::World) { return Err("Stale Native purchase full Applied".into()); }
+    if !NativeCommandFence::matches(state,stamp,NativeCommandScope::World) { return Err("Stale Native purchase full Applied".into()); }
     state.npc_gold_buy.sync_owner(stamp);
     let mut original = state.npc_gold_buy.inventory.clone(); if let Some(model) = &mut original { model.npc_gold_trade_capacity = None; }
     let mut economic = inventory.clone(); economic.npc_gold_trade_capacity = None;
@@ -389,7 +404,7 @@ pub(super) fn with_applied_ui_source<R>(fence:&NativeCommandFence,stamp:NativeCo
     state.npc_gold_buy.dialog_retired_since_snapshot = false;
     state.npc_gold_buy.inventory_ready = true; state.npc_gold_buy.shop_ready = true;
     for waker in state.waiters.values() { waker.wake_by_ref(); }
-    Ok(after(&mut state))
+    Ok(())
 }
 
 /// No UI sequence/gate claim occurs for Begin/Quote/Query. The exact physical
@@ -407,9 +422,11 @@ where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
     struct Waiter(NativeCommandFence);
     impl Drop for Waiter { fn drop(&mut self) { if let Ok(mut state) = self.0.0.lock() { state.waiters.remove(&0); } } }
     let waiter = Waiter(fence.clone());
+    let readonly_query=matches!(&dispatch.request.action,wire::Action::Query{..});
     let ready = await_native_write_phase(budget,|cx| {
         let Ok(mut state) = fence.0.lock() else { return std::task::Poll::Ready(None); };
-        if !NativeCommandFence::matches(&state,stamp,NativeCommandScope::World) { return std::task::Poll::Ready(None); }
+        if !NativeCommandFence::matches(&state,stamp,NativeCommandScope::World)
+            || !readonly_query && (state.hunting_repair_busy || state.hunting_material_busy) { return std::task::Poll::Ready(None); }
         // Command sequences are nonzero; zero is the sole owner's control waiter.
         state.waiters.insert(0,cx.waker().clone());
         drop(state);
@@ -424,7 +441,8 @@ where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
     }
     let started = {
         let Ok(state) = fence.0.lock() else { return NativeSinkCommit::DefinitelyUnsent; };
-        if !NativeCommandFence::matches(&state,stamp,NativeCommandScope::World) { return NativeSinkCommit::DefinitelyUnsent; }
+        if !NativeCommandFence::matches(&state,stamp,NativeCommandScope::World)
+            || !readonly_query && (state.hunting_repair_busy || state.hunting_material_busy) { return NativeSinkCommit::DefinitelyUnsent; }
         if budget.expired() {return NativeSinkCommit::Unavailable(NATIVE_TRANSPORT_TIMEOUT_ERROR.into());}
         Pin::new(&mut *sink).start_send(Message::Text(dispatch.body.into()))
     };
@@ -454,6 +472,7 @@ where S: futures_util::Sink<Message> + Unpin, S::Error: std::fmt::Display {
             return std::task::Poll::Ready(None);
         }
         state.waiters.insert(held.owned.sequence,cx.waker().clone());
+        drop(state);
         Pin::new(&mut *sink).poll_ready(cx).map(Some)
     }).await;
     drop(waiter);
@@ -651,6 +670,60 @@ mod tests {
         assert!(gateway.binding_stamp.is_some());
         assert!(!gateway.entered_ui.is_empty());
         assert_eq!(sink.0.lock().unwrap().frames.len(),2);
+    }
+    pub(super) fn pending_purchase_fixture()->NativeNpcPurchaseGateway {
+        let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready();
+        let ui=ui_gate(&fence,stamp);let mut sink=LocalSink::default();
+        let owned=owned_buy(&sender,&mut receiver,&fence,stamp,&ui);
+        quote_local(&mut gateway,owned,&fence,&mut sink);
+        assert_eq!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Flushed));
+        assert!(gateway.client.pending_current().is_some());assert!(!gateway.entered_ui.is_empty());
+        assert_eq!(sink.0.lock().unwrap().frames.len(),2);
+        gateway
+    }
+    #[test]
+    fn native_npc_gateway_original_query_crosses_other_busy_lanes_without_reissuing_purchase() {
+        let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready();
+        let ui=ui_gate(&fence,stamp);let mut sink=LocalSink::default();
+        quote_local(&mut gateway,owned_buy(&sender,&mut receiver,&fence,stamp,&ui),&fence,&mut sink);
+        sink.0.lock().unwrap().start_error=true;
+        assert!(matches!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::Unknown(_))));
+        let pending=gateway.client.pending_current().unwrap();
+        let original=wire::parse_client_request(&sink.0.lock().unwrap().frames[1]).unwrap().action.operation().unwrap().clone();
+        assert_eq!(gateway.entered_ui.len(),1);assert!(ui.feedback().pending);
+        sink.0.lock().unwrap().start_error=false;
+        {let mut state=fence.0.lock().unwrap();state.hunting_repair_busy=true;state.hunting_material_busy=true;}
+        let (dispatch,query_stamp)=gateway.recovery_if_ready().unwrap().expect("original readonly recovery");
+        assert_eq!(query_stamp,stamp);assert!(matches!(&dispatch.request.action,wire::Action::Query{..}));
+        assert_eq!(dispatch.request.action.operation(),Some(&original));
+        assert_eq!(control_local(&mut sink,&fence,query_stamp,dispatch).now_or_never().unwrap(),NativeSinkCommit::Flushed);
+        let retained=gateway.client.pending_current().unwrap();assert_eq!(retained.key,pending.key);assert_eq!(retained.intent,pending.intent);
+        assert_eq!(gateway.entered_ui.len(),1);assert!(ui.feedback().pending);assert!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap().is_none());
+        let frames=&sink.0.lock().unwrap().frames;assert_eq!(frames.len(),3);
+        assert!(matches!(wire::parse_client_request(&frames[0]).unwrap().action,wire::Action::Quote{..}));
+        assert!(matches!(wire::parse_client_request(&frames[1]).unwrap().action,wire::Action::Purchase{..}));
+        assert!(matches!(wire::parse_client_request(&frames[2]).unwrap().action,wire::Action::Query{..}));
+        let state=fence.0.lock().unwrap();assert!(state.hunting_repair_busy&&state.hunting_material_busy);
+    }
+    #[test]
+    fn native_npc_gateway_other_busy_lanes_still_block_new_begin_quote_and_purchase() {
+        for begin in [true,false] {
+            let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready();let mut sink=LocalSink::default();
+            let (dispatch,control_stamp)=if begin {
+                gateway.disconnect();gateway.open_connection().unwrap();gateway.entry_allowed=true;gateway.needs_world=false;
+                gateway.begin_if_ready(Some(&fence),Some(stamp),ConnectionPhase::Normal,true,Some("0")).unwrap().unwrap()
+            }else{
+                let ui=ui_gate(&fence,stamp);gateway.quote(owned_buy(&sender,&mut receiver,&fence,stamp,&ui)).unwrap()
+            };
+            {let mut state=fence.0.lock().unwrap();state.hunting_repair_busy=true;state.hunting_material_busy=true;}
+            assert_eq!(control_local(&mut sink,&fence,control_stamp,dispatch).now_or_never().unwrap(),NativeSinkCommit::DefinitelyUnsent);
+            assert!(sink.0.lock().unwrap().frames.is_empty());assert!(gateway.client.pending_current().is_none());
+        }
+        let (mut gateway,sender,mut receiver,fence,stamp,_world)=ready();let ui=ui_gate(&fence,stamp);let mut sink=LocalSink::default();
+        quote_local(&mut gateway,owned_buy(&sender,&mut receiver,&fence,stamp,&ui),&fence,&mut sink);
+        {let mut state=fence.0.lock().unwrap();state.hunting_repair_busy=true;state.hunting_material_busy=true;}
+        assert_eq!(purchase_local(&mut gateway,&mut sink).now_or_never().unwrap(),Some(NativeSinkCommit::DefinitelyUnsent));
+        assert!(gateway.client.pending_current().is_none());assert!(gateway.entered_ui.is_empty());assert_eq!(sink.0.lock().unwrap().frames.len(),1);
     }
     fn ready_profile(source:&Value)->(NativeNpcPurchaseGateway,GatewayCommandSender,GatewayCommandReceiver,NativeCommandFence,NativeCommandStamp,bevy::prelude::World) {
         let (sender,receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();let stamp=fence.test_world_ready(3,0);

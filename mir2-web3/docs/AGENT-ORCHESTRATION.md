@@ -1,6 +1,22 @@
 # Agent Orchestration
 
-## 第十五阶段后端验证与第十六阶段准备（2026-10-21）
+## 第十六阶段续验：Windows 材料接线与原生保存交接（2026-10-22）
+
+阶段十五基线仍为1350bfb700。当前Windows普通Bag材料转换接线的28项源码/锁文件与244证据逐项SHA一致，限定承接Runtime222的123/123、Bevy221的44/44、Host233的110/110及EXE234；不称完整资源闭包。Gateway265现成测试二进制新执行保存交接14/14、原生恢复20/20、Web保存失败15/15、异常退出持久化5/5全部通过。真实WS/原生PG268三项也全部通过：整栈/部分转换与冷登录、缺价格/余额/许可不变、未读提交回执后raw断线/resume/原Query/冷登录。未运行新Cargo，PG测试串行完成，构建及PG槽已释放。
+
+保存交接使用旧连接独占的私有Saving/Published/Aborted标记；保存后才允许原reserve/commit路径获取Session，撤权、过期、失败及journal路径终止等待，不延长原凭证。10秒是单次调度等待预算，不声称同步身份存储I/O也受严格总墙钟上限约束。14项是进程内调度/实际Session保存测试，268的物理恢复先等retained；本轮Windows实机另证明请求提前8,417ms到达仍成功恢复。
+
+Root已完成270/271/272限定实机链：红药10整栈单Confirm，代理省略一份committed回执，Pending Close后一次raw断线，自动resume及原Query显示完成；PG独立确认结果/转换/销毁各1条、fee25、许可原子1250、非绑97975、绑定100、旧gold0。6张截图与脱敏代理/时间线/PG事实已归档，见[阶段十六续验](generated/hunting-economy/acceptance-20261022-native-material.json)。蓝药3/10第二次报价因缺新完整普通库存source在客户端拒绝，未发送Quote或Confirm，不能算部分转换通过。
+
+用户physical Escape停止电脑控制；Root只打开了Alt+x角色选择确认框，随后Yes点击被工具拒绝，没有确认正常退出或冷EXE重登，不得继续操作桌面或冒称完整GUI闭环。fixture/进程未由归档操作改变。限定git diff --check此前通过；全文件rustfmt仍失败，HEAD基线web.rs已有81段格式差异，当前限定检查93段，未扩大格式重写。外来QA、生成资源及tsconfig不纳入本轮。仍默认关闭、正式估值白名单为空、K=0.1与0.72/1.08许可不变；无Docker/WSL或部署，不提高Crystal/Candidate百分比。以下旧阶段状态保留历史范围。
+
+## 第十六阶段：Windows 材料转换整合验收中（2026-10-21）
+
+第十五阶段限定后端/BI写集80文件已提交1350bfb700，逐个Git blob回读与工作树规范化内容一致。第十六阶段Runtime、Bevy、Platform和独立GUI夹具源码均已释放给Root；当前只有Root可以修改和整合，所有Cargo/PG/Git串行。只读worker可研究下一任务来源，不得改冻结写集。28项本轮源码/锁文件已记入221限定哈希证据；不是完整发布资源闭包。
+
+Runtime210的123项与Bevy219的43项通过；随后增加拥堵后等值投递重试及商城凭证专用reset保留材料角色缓存，旧结果不冒充这两项修复的最终验证。正在串行执行UI221、Runtime222、Host223、EXE224与Gateway225；此前Host220仅首轮整合编译。完成真实EXE/普通背包/单Confirm/原单Query/断线及冷进程登录前，不宣称材料GUI通过。第一份完整entry仅建绑定，下一份新完整producer才允许材料来源；Committed Applied后亦须下一份新完整普通producer，不从回执晚重构来源。
+
+保留默认关闭、K=0.1、每日0.72/硬上限1.08许可、原生PG30/Cargo jobs2，无Docker/WSL/虚拟机、系统虚拟化变更或远程资产修改。六项保护输入及外来QA保持；完整goal active，不提高Candidate/Crystal百分比。下文保留历史状态，不代表当前worker所有权。
 
 Root独占已释放生产源码、串行Cargo/PG/Git、最终证据与进度文档。阶段十四基线bd41069e01；阶段十五主服6项PG/11schema、真实WS3项/5schema及相邻修理退出3项均通过，正在提交限定后端/BI写集。WS189前两项及207恢复分开记证，不称同一个二进制。默认关闭、K=0.1、原生PG30/Cargo jobs2，无Docker/WSL/虚拟机或远程修改，六个保护输入和外来QA保留。
 

@@ -16,7 +16,7 @@ default = ["webgl2"]
 webgl2 = ["bevy/webgl2"]
 webgpu = ["bevy/webgpu"]
 native-font-atlas-telemetry = ["bevy/bevy_text"]
-native-npc-economy = ["dep:mir2-game-data", "dep:mir2-protocol"]
+native-npc-economy = ["dep:mir2-game-data", "dep:mir2-protocol", "dep:mir2-client-wire"]
 web-item-tooltip = [
   "mir2-client-bevy/item-tooltip",
   "dep:mir2-game-data",
@@ -46,6 +46,7 @@ console_error_panic_hook = "0.1.7"
 js-sys = "0.3.72"
 mir2-client-bevy = { path = "../client-bevy" }
 mir2-client-core = { path = "../client-core" }
+mir2-client-wire = { path = "../client-wire", optional = true }
 mir2-game-data = { path = "../../../packages/game-data", optional = true }
 mir2-protocol = { path = "../../../packages/protocol", optional = true }
 serde = { version = "1", features = ["derive"] }
