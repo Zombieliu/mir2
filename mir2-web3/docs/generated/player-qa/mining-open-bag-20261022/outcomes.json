@@ -1,0 +1,113 @@
+{
+  "recordedUtc": "2026-10-22T12:48:59.056648+00:00",
+  "scope": "Local isolated Native mining while ordinary inventory stays open",
+  "sourceCommit": "64769fc70401dc5a1926f9c6e6bab3739b45ca45",
+  "branch": "codex/mining-open-bag-20261022",
+  "artifact": {
+    "sha256": "2a2179f3789145833f3fbcf69430ed84d66aa059e81eed46d32b7095c760ab36",
+    "bytes": 131188224
+  },
+  "tests": {
+    "passed": 1166,
+    "failed": 0,
+    "ignoredExisting": 7,
+    "run": "C:\\mir2-build\\mining-open-bag-20261022\\builds\\20261022T123000591837Z-test",
+    "resultSha256": "3009ab2a3ccafe8464e4ad7c93c1e8a71da2fb8ae6055bb9d475f2d9d2f64dbc",
+    "logSha256": "9b93c561fc7d4f1576bf7246f215ba36ace3ae0e2ba855f4778cbb1fe537eabb",
+    "recordedHeadBeforeCommit": "62312e4766ece0a8b77c9241df64fc0725e89141",
+    "trackedLocalSourceInputs": 572,
+    "testBuildCurrentSourceHashesEqual": true
+  },
+  "build": {
+    "run": "C:\\mir2-build\\mining-open-bag-20261022\\builds\\20261022T123313049279Z-build",
+    "resultSha256": "b044cdcd85e20756d7072c69d450ee9b867914944322954d0bc861c9290b77f3",
+    "sourceDrift": []
+  },
+  "gui": {
+    "observer": "assistant via real Windows UI",
+    "character": "LeisureQA100",
+    "level": 30,
+    "map": "D401",
+    "initialPosition": [
+      38,
+      178
+    ],
+    "finalPosition": [
+      39,
+      178
+    ],
+    "nativePid": 291160,
+    "gatewayPid": 291432,
+    "bagFreeSlots": [
+      33,
+      32,
+      31
+    ],
+    "goldBeforeAndAfter": 805160,
+    "newNaturalItems": [
+      {
+        "name": "BlackIronOre",
+        "purity": 12
+      },
+      {
+        "name": "BlackIronOre",
+        "purity": 10
+      }
+    ],
+    "secondOreAppearedWithoutClosingInventory": true,
+    "inventoryTogglePreservedMining": true,
+    "tooltipHoverPreservedMining": true,
+    "ordinaryWalkStoppedMining": true,
+    "saveReentry": "Normal Alt+X / Yes / character select / StartGame in same Native and gateway processes; both new ores retained",
+    "coldProcessRestartVerified": false,
+    "qaItemsInjected": false,
+    "session": "C:\\mir2-build\\mining-open-bag-20261022\\sessions\\20261022T123537-be2b1e0f"
+  },
+  "queueEvidence": {
+    "file": "mining-queue-excerpt.json",
+    "sha256": "b8398b26d1d59b58110eb7b4b39723b0d10587639dfc32c6a23ed8fd1321851e",
+    "entries": 30,
+    "spanMs": 30063.774,
+    "sameGesture": true,
+    "meaning": "Client continuity only; natural loot is separately observed in GUI"
+  },
+  "screenshots": [
+    {
+      "file": "01-bag-before.png",
+      "sha256": "74a31fa7ab168d3629a4b61a1a79aaf425185e4b6c7275731c55f20461d899e1",
+      "bytes": 239965
+    },
+    {
+      "file": "02-new-ore-after-bag-toggle.png",
+      "sha256": "1c8629e79dccdcdb2c90c75915803bdacd4c21e1ed698bd306db3690db217b16",
+      "bytes": 243402
+    },
+    {
+      "file": "03-second-ore-with-bag-continuously-open.png",
+      "sha256": "b61ac79fadc741a4b9b5b021b385753b4030db8e5e43f2ef2f72d48db2c0b112",
+      "bytes": 242751
+    },
+    {
+      "file": "04-black-iron-purity-12.png",
+      "sha256": "94af4c51bfc4322575041665fca53a7cd366733270e72eb13abf166666e637dc",
+      "bytes": 240839
+    },
+    {
+      "file": "05-black-iron-purity-10.png",
+      "sha256": "4d567468e96d7f3cc2bfe4d3345263b5b78252516653d731e57734d27d596e9f",
+      "bytes": 240353
+    },
+    {
+      "file": "06-ores-preserved-after-save-reentry.png",
+      "sha256": "84a892e4093dfbc7e79ba008d19f5c4d42448e6c0002b150ffec9f0543bff538",
+      "bytes": 235126
+    },
+    {
+      "file": "07-tooltip-while-mining.png",
+      "sha256": "97ba54f6a6c6e72bb5162921dfd70484a15cf49031b7d3641db5705d27ef7163",
+      "bytes": 240458
+    }
+  ],
+  "humanAccepted": false,
+  "publicDeploymentPerformed": false
+}
