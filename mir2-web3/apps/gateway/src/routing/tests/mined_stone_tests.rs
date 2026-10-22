@@ -91,7 +91,7 @@ fn assert_dual_packets(
 ) {
     let ore_index = mir2_game_data::crystal_item_by_name(&swing.ore().unwrap().item_name)
         .unwrap()
-        .index;
+    .item_index;
     let gained: Vec<_> = packets
         .iter()
         .filter_map(|p| match p {
