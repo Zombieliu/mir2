@@ -27,7 +27,7 @@ export function capacityPolicy(options = {}) {
   const native = activityMode === 'native';
   const stages = String(options.stages ?? (profile === 'probe' ? '1,2' : '10,20,30,40,50')).split(',').map(Number);
   if (!stages.length || stages.length > 15 || stages.some((n, i) => !Number.isInteger(n) || n < 1 ||
-      n > (profile === 'probe' ? 5 : 100) || (i && n <= stages[i - 1]))) throw new Error('Stages must increase, with an absolute maximum of 100 actors');
+      n > (profile === 'probe' ? 10 : 100) || (i && n <= stages[i - 1]))) throw new Error('Stages must increase, with an absolute maximum of 100 actors');
   const stageSeconds = Number(options.stageSeconds ?? (profile === 'probe' ? 30 : 300));
   const soakSeconds = Number(options.soakSeconds ?? (profile === 'probe' ? 30 : 3600));
   const wallSeconds = Number(options.wallSeconds ?? (profile === 'probe' ? 1800 : 10800));

@@ -659,7 +659,7 @@ mod tests {
             serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
         // The current checkpoint contract includes mining (v7). Reanchoring
         // a v4 file must still retire legacy claim authority and forced hits.
-        assert_eq!(reanchored["version"], 7);
+        assert_eq!(reanchored["version"], 8);
         assert!(reanchored["native_monsters"]["201"]
             .get("experience_owner")
             .is_none());

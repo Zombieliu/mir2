@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
   assessMeasurements, movementDiagnosticMayContinue, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
-import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments } from './playtest-capacity-soak.mjs';
+import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 
@@ -39,6 +39,24 @@ test('capacity policy has finite ceilings and never quietly relaxes fixed gates'
   assert.equal(capacityPolicy({ profile: 'probe' }).fullAcceptanceEligible, false);
   assert.throws(() => parseArguments(['--password', 'secret']), /Unknown/);
   assert.throws(() => parseArguments(['--stages', '10', '--stages', '100']), /repeated/);
+});
+
+test('ten ordinary native probe actors retain every fixed gate and cannot qualify for formal acceptance', () => {
+  const options = { profile: 'probe', activityMode: 'native', stages: '10', combatActors: 1,
+    stageSeconds: 30, soakSeconds: 360, resumeSamples: 0, saveSamples: 0 };
+  const ten = capacityPolicy(options), five = capacityPolicy({ ...options, stages: '5' });
+  assert.deepEqual(ten.stages, [10]);
+  assert.equal(ten.fullAcceptanceEligible, false);
+  assert.equal(capacityPolicy({ ...options, stageSeconds: 300, soakSeconds: 7200 }).fullAcceptanceEligible, false,
+    'even a long probe remains ineligible for formal capacity acceptance');
+  for (const field of Object.keys(five).filter(field => field !== 'stages')) assert.deepEqual(ten[field], five[field], field);
+  assert.equal(ten.minimumCombatAttacksPerMinute, 18);
+  assert.equal(ten.minimumCombatHitsPerMinute, 12);
+  assert.throws(() => capacityPolicy({ ...options, stages: '11' }), /Stages must increase/);
+  assert.throws(() => capacityPolicy({ ...options, stageSeconds: 19 }), /duration bounds/);
+  assert.throws(() => capacityPolicy({ ...options, soakSeconds: 19 }), /duration bounds/);
+  assert.equal(capacityPolicy({ profile: 'standard', activityMode: 'native', stages: '100', combatActors: 10 }).stages[0], 100);
+  assert.throws(() => capacityPolicy({ profile: 'standard', stages: '101' }), /Stages must increase/);
 });
 
 test('movement diagnostic can measure 50 active actors but never qualifies as mixed gameplay acceptance', () => {
@@ -145,6 +163,78 @@ function huntFixture(monsters, peerMonsters = monsters) {
 }
 const huntMonster = (objectId, name, x, y = 5) => ({ objectId, kind: 'monster', name, x, y, hp: 20 });
 
+function scoutFixture() {
+  const fixture = huntFixture([]), { client, peer } = fixture;
+  client.combatCluster = { observerHomes: [{ x: 5, y: 9 }, { x: 20, y: 5 }], observerNames: new Set([peer.label]), patrolSpan: 2 };
+  client.combatScoutCursor = 1;
+  return fixture;
+}
+
+test('native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home', () => {
+  const { client, owner, context } = scoutFixture();
+  client.snapshot.entities.push({ objectId: 3000, kind: 'remotePlayer', x: 20, y: 5 });
+  const plan = selectNativeAction(client, context);
+  assert.equal(plan.scouting, true); assert.equal(plan.scoutHomeIndex, 1);
+  assert.ok(['walk', 'run'].includes(plan.command.type));
+  assert.notDeepEqual(plan.navigation.goal, { x: 20, y: 5 }, 'an occupied observer home is never forced as the goal');
+  const route = findProtocolWalkPath({ map: context.map, start: owner, target: plan.navigation.goal,
+    dynamicObstacles: client.snapshot.entities.filter(e => e.objectId !== owner.objectId), maxExpanded: 4000 });
+  assert.ok(route.length > 8); assert.ok(route.every(point => insideCombatCoverage(client.combatCluster, point)));
+});
+
+test('native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches', () => {
+  for (const block of ['coverage-gap', 'transfer', 'terrain']) {
+    const { client, context } = scoutFixture();
+    if (block === 'coverage-gap') client.combatCluster.observerHomes = [{ x: 5, y: 9 }, { x: 50, y: 5 }];
+    else if (block === 'transfer') client.snapshot.mapTransfers = [{ bounds: { minX: 10, maxX: 10, minY: 0, maxY: 79 } }];
+    else for (let y = 0; y < context.map.height; y++) context.map.blocked[y * context.map.width + 10] = 1;
+    client.navigationAttempts = []; client.navigationAttemptCount = 0;
+    const plan = selectNativeAction(client, context);
+    assert.notEqual(plan?.scoutHomeIndex, 1, block);
+    assert.ok(client.navigationAttemptCount <= 5, 'at most four failed scout routes plus the original fallback attempt');
+    assert.equal(client.chaseDeferrals.size, 0); assert.equal(client.failedTargets.size, 0);
+  }
+});
+
+test('native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets', () => {
+  const { client, owner, context } = scoutFixture(), plan = selectNativeAction(client, context), origin = { ...owner }, now = Date.now();
+  const pursuit = { objectId: 900, confirmedMoves: 39, visited: new Map([['1,1', 2]]) };
+  client.combatPursuit = pursuit; client.failedTargets.set(901, { until: Infinity }); client.chaseDeferrals.set(902, { until: now + 30000 });
+  const receipt = { packet: 'UserLocation', sequence: 1, payload: { ...plan.target } };
+  recordCombatScoutMovement(client, context, plan, origin, receipt, 'corrected', now);
+  recordCombatScoutMovement(client, context, plan, origin, { ...receipt, payload: origin }, 'success', now);
+  assert.equal(client.combatScout.confirmedMoves, 0);
+  Object.assign(owner, plan.target); recordCombatScoutMovement(client, context, plan, origin, receipt, 'success', now);
+  recordCombatScoutMovement(client, context, plan, origin, receipt, 'success', now + 1000);
+  assert.equal(client.combatScout.confirmedMoves, 1);
+  assert.equal(client.combatPursuit, pursuit); assert.equal(pursuit.confirmedMoves, 39);
+  assert.equal(client.failedTargets.get(901).until, Infinity); assert.equal(client.chaseDeferrals.has(902), true);
+});
+
+test('native scout advances its finite waypoint on real position loops, movement budget and time budget', () => {
+  for (const reason of ['route-loop', 'movement-budget', 'time-budget']) {
+    const { client, owner, context, rows } = scoutFixture(), now = Date.now();
+    const original = selectNativeAction(client, context), scout = client.combatScout;
+    if (reason === 'route-loop') scout.visited.set(`${original.target.x},${original.target.y}`, 2);
+    if (reason === 'movement-budget') scout.confirmedMoves = 23;
+    if (reason === 'time-budget') scout.startedAt = now - 20000;
+    const origin = { ...owner }; Object.assign(owner, original.target);
+    recordCombatScoutMovement(client, context, original, origin,
+      { packet: 'UserLocation', sequence: 1, payload: { ...owner } }, 'success', now);
+    assert.equal(client.combatScout, null); assert.equal(client.combatScoutCursor, 0); assert.equal(rows.at(-1).reason, reason);
+    assert.equal(client.failedTargets.size, 0); assert.equal(client.chaseDeferrals.size, 0);
+  }
+});
+
+test('native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds', () => {
+  const { client, peer, owner, context } = scoutFixture(); assert.equal(selectNativeAction(client, context).scouting, true);
+  const target = huntMonster(900, 'Scarecrow', 6); client.snapshot.entities.push(target); peer.snapshot.entities.push(target); owner.direction = 'Right';
+  const plan = selectNativeAction(client, context);
+  assert.equal(plan.command.type, 'attack'); assert.equal(plan.command.objectId, 900); assert.equal(plan.scouting, undefined);
+  assert.equal(context.policy.minimumCombatAttacksPerMinute, 18); assert.equal(context.policy.minimumCombatHitsPerMinute, 12);
+  assert.equal(nativeCadence(client.snapshot, 'attack', context.policy).intervalMs, 1436);
+});
+
 test('native hunt prioritizes a legal adjacent target visible to both peers over an unwitnessed nearer candidate', () => {
   const hidden = huntMonster(900, 'Deer', 6), adjacent = huntMonster(901, 'Scarecrow', 6, 6);
   const { client, owner, context } = huntFixture([hidden, adjacent], [adjacent]); owner.direction = 'DownRight';
@@ -171,6 +261,132 @@ function acknowledgeEscapingTarget(fixture, target, at, sequence) {
   recordCombatPursuitMovement(client, context, plan, origin, receipt, 'success', at);
   return { plan, origin, receipt };
 }
+
+test('native hunt follows confirmed A* detour progress even while Chebyshev distance initially increases', () => {
+  const target = huntMonster(900, 'Scarecrow', 1), fixture = huntFixture([target]);
+  const { client, owner, context } = fixture;
+  for (let y = 0; y <= 10; y++) context.map.blocked[y * context.map.width + 4] = 1;
+  const now = Date.now(), initialDistance = Math.max(Math.abs(owner.x - target.x), Math.abs(owner.y - target.y));
+  let movedAway = false, attacked = false;
+  for (let sequence = 1; sequence <= 30; sequence++) {
+    const plan = selectNativeAction(client, context);
+    if (plan.command.type === 'turn') { owner.direction = plan.command.direction; continue; }
+    if (plan.command.type === 'attack') { attacked = true; break; }
+    assert.equal(plan.chaseTargetId, target.objectId);
+    assert.ok(Number.isInteger(plan.navigation.remainingSteps));
+    const origin = { ...owner }; Object.assign(owner, plan.target);
+    movedAway ||= Math.max(Math.abs(owner.x - target.x), Math.abs(owner.y - target.y)) > initialDistance;
+    recordCombatPursuitMovement(client, context, plan, origin,
+      { packet: 'UserLocation', sequence, payload: { ...owner } }, 'success', now + sequence * 650);
+    assert.ok(client.combatPursuit, 'a decreasing routed distance must survive a necessary detour');
+    assert.equal(client.chaseDeferrals.size, 0);
+  }
+  assert.equal(movedAway, true); assert.equal(attacked, true);
+});
+
+test('native hunt does not credit a newly planned route when the target moves during each authoritative step', () => {
+  const target = huntMonster(900, 'Deer', 10), fixture = huntFixture([target]), now = Date.now();
+  for (let sequence = 1; sequence <= 4; sequence++) {
+    const { plan } = acknowledgeEscapingTarget(fixture, target, now + sequence * 650, sequence);
+    assert.ok(plan.navigation.remainingSteps > 0, 'fixture uses an actual A* route');
+  }
+  assert.equal(fixture.client.combatPursuit, null);
+  assert.equal(fixture.rows.at(-1).reason, 'no-progress');
+});
+
+test('native hunt cannot turn real blocking corrections into detour progress or successful movement evidence', () => {
+  const target = huntMonster(900, 'Deer', 10), fixture = huntFixture([target]);
+  const { client, owner, context } = fixture, now = Date.now(), plan = selectNativeAction(client, context);
+  for (let sequence = 1; sequence <= 8; sequence++) {
+    recordCombatPursuitMovement(client, context, plan, { ...owner },
+      { packet: 'UserLocation', sequence, payload: { ...owner } }, 'corrected', now + sequence * 1000);
+  }
+  assert.equal(client.combatPursuit.confirmedMoves, 0); assert.equal(client.combatPursuit.routeProgress, undefined);
+  for (let y = 0; y < context.map.height; y++) context.map.blocked[y * context.map.width + 7] = 1;
+  const blocked = selectNativeAction(client, context);
+  assert.equal(blocked?.chaseTargetId, undefined); assert.equal(client.combatPursuit, null);
+  assert.equal(client.chaseDeferrals.size, 0, 'a blocked plan provides no authoritative movement to defer from');
+  assert.equal(context.policy.minimumCombatHitsPerMinute, 12);
+});
+
+test('native hunt defers an authoritative position loop even when replanned routes claim progress', () => {
+  const target = huntMonster(900, 'Deer', 10), fixture = huntFixture([target]);
+  const { client, owner, context, rows } = fixture; selectNativeAction(client, context); const now = Date.now();
+  for (let sequence = 1; sequence <= 5; sequence++) {
+    const origin = { ...owner }, actual = { x: sequence % 2 ? 6 : 5, y: 5 };
+    const plan = { command: { type: 'walk', direction: sequence % 2 ? 'Right' : 'Left' },
+      first: actual, target: actual, chaseTargetId: 900, chaseTargetPoint: { ...target },
+      navigation: { goal: { x: 9, y: 5 }, remainingSteps: 20 - sequence } };
+    Object.assign(owner, actual);
+    recordCombatPursuitMovement(client, context, plan, origin,
+      { packet: 'UserLocation', sequence, payload: actual }, 'success', now + sequence * 100);
+  }
+  assert.equal(client.combatPursuit, null); assert.equal(rows.at(-1).reason, 'route-loop');
+  assert.equal(rows.at(-1).confirmedMoves, 5); assert.equal(client.chaseDeferrals.size, 1);
+});
+
+test('native hunt retains confirmed loop evidence across genuinely blocked replans and ordinary fallback patrol ACKs', () => {
+  const target = huntMonster(900, 'Deer', 10), fixture = huntFixture([target]);
+  const { client, owner, context, rows } = fixture; const now = Date.now();
+  let sequence = 0, chaseLanding;
+  for (let cycle = 0; cycle < 3; cycle++) {
+    const plan = selectNativeAction(client, context), origin = { ...owner };
+    assert.equal(plan.chaseTargetId, 900); Object.assign(owner, plan.target);
+    chaseLanding ??= { ...owner }; assert.equal(owner.x, chaseLanding.x); assert.equal(owner.y, chaseLanding.y);
+    recordCombatPursuitMovement(client, context, plan, origin,
+      { packet: 'UserLocation', sequence: ++sequence, payload: { ...owner } }, 'success', now + cycle * 2000);
+    if (cycle === 2) break;
+    const pursuit = client.combatPursuit, moves = pursuit.confirmedMoves;
+    for (let y = 4; y <= 6; y++) for (let x = 9; x <= 11; x++) context.map.blocked[y * context.map.width + x] = 1;
+    const fallback = selectNativeAction(client, context), fallbackOrigin = { ...owner };
+    assert.equal(fallback.chaseTargetId, undefined); assert.equal(client.combatPursuit, pursuit);
+    // Restore the previous real owner origin using the same ordinary planner;
+    // this is an actual acknowledged fallback step, not an invented chase ACK.
+    client.targetCursor = 3;
+    const homePlan = selectNativeAction(client, context);
+    assert.ok(['walk', 'run'].includes(homePlan.command.type));
+    assert.deepEqual(homePlan.target, { x: origin.x, y: origin.y });
+    Object.assign(owner, homePlan.target);
+    recordCombatPursuitMovement(client, context, homePlan, fallbackOrigin,
+      { packet: 'UserLocation', sequence: ++sequence, payload: { ...owner } }, 'success', now + cycle * 2000 + 750);
+    assert.equal(pursuit.confirmedMoves, moves, 'fallback patrol cannot manufacture chase progress');
+    for (let y = 4; y <= 6; y++) for (let x = 9; x <= 11; x++) context.map.blocked[y * context.map.width + x] = 0;
+  }
+  assert.equal(client.combatPursuit, null); assert.equal(rows.at(-1).reason, 'route-loop');
+  assert.equal(rows.at(-1).confirmedMoves, 3); assert.equal(client.chaseDeferrals.size, 1);
+});
+
+test('native hunt keeps finite movement and time budgets despite continually decreasing replanned route lengths', () => {
+  for (const budget of ['movement-budget', 'time-budget']) {
+    const target = huntMonster(900, 'Deer', 10), fixture = huntFixture([target]);
+    const { client, owner, context, rows } = fixture; selectNativeAction(client, context); const now = Date.now();
+    client.combatPursuit.confirmedMoves = budget === 'movement-budget' ? 39 : 0;
+    client.combatPursuit.startedAt = budget === 'time-budget' ? now - 30000 : now;
+    const plan = selectNativeAction(client, context), origin = { ...owner }; Object.assign(owner, plan.target);
+    recordCombatPursuitMovement(client, context, plan, origin,
+      { packet: 'UserLocation', sequence: 1, payload: { ...owner } }, 'success', now);
+    assert.equal(client.combatPursuit, null); assert.equal(rows.at(-1).reason, budget);
+    assert.equal(rows.at(-1).attacksSent, 0);
+  }
+});
+
+test('native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history', () => {
+  const target = huntMonster(900, 'Deer', 10), fixture = huntFixture([target]);
+  const { client, context } = fixture; selectNativeAction(client, context); const now = Date.now();
+  Object.assign(client.combatPursuit, { startedAt: now, lastMovementAt: now + 2000, activeElapsedMs: 20000,
+    confirmedMoves: 39, routeInitialized: true, routeProgress: { key: 'old-route', bestRemaining: 2 } });
+  client.combatPursuitPausedAt = now + 10000;
+  client.combatPursuit.visited.set('6,5', 1);
+  const restored = new CapacityClient('ws://127.0.0.1:1/ws', actor(0), context);
+  restored.snapshot = structuredClone(client.snapshot); restored.sequence = 100;
+  restoreCombatPursuit(client, restored, context, now + 40000);
+  assert.equal(restored.combatPursuit.activeElapsedMs, 30000, 'online waiting after the last ACK remains charged');
+  assert.equal(restored.combatPursuit.startedAt, now + 40000);
+  assert.equal(restored.combatPursuit.confirmedMoves, 39);
+  assert.equal(restored.combatPursuit.routeProgress, null);
+  assert.notEqual(restored.combatPursuit.visited, client.combatPursuit.visited);
+  assert.equal(restored.combatPursuit.visited.get('6,5'), 1);
+});
 
 test('native hunt defers a repeatedly escaping unattacked target for30s then selects another without touching attack quarantine', () => {
   const fleeing = huntMonster(900, 'Deer', 10), alternate = huntMonster(901, 'Scarecrow', 18);
@@ -1371,6 +1587,8 @@ test('slow real socket acknowledgements expose offered-load gaps instead of sile
     const report = await runCapacity(runOptions(realm, directory));
     assert.equal(report.ok, false); assert.match(report.error, /Stage 1 did not satisfy/);
     assert.equal(report.stages.length, 1); assert.equal(report.stages[0].passed, false);
+    assert.equal(report.phaseWindows.at(-1).completed, true, 'a completed measured interval may still fail its quality gates');
+    assert.equal(report.phaseWindows.at(-1).endedAtMs, report.stages[0].endedAtMs);
     assert.ok(report.metrics.walk.status.busy > 0); assert.ok(report.metrics.walk.fromSend.p95Ms >= 1750);
     assert.deepEqual(report.cleanupErrors, []); assert.equal(realm.types.filter(item => item.type === 'logOut').length, 1);
   } finally { await realm.close(); }
@@ -1440,6 +1658,14 @@ test('a complete bounded socket probe produces real movement samples but cannot 
     assert.equal(report.acceptedControlledActors, null); assert.equal(report.capacityUpperBound, null);
     assert.equal(report.nativeResume.length, 1); assert.equal(report.nativeResume[0].replayRejected, true);
     assert.equal(report.nativeResume[0].loginFallback, false); assert.equal(report.savedVerification[0].status, 'passed');
+    const raw = (await fs.readFile(report.reportPath.replace(/\.report\.json$/, '.samples.jsonl'), 'utf8')).trim().split('\n').map(line => JSON.parse(line));
+    assert.equal(report.phaseWindows.length, 4); assert.ok(report.phaseWindows.every(phase => phase.completed && phase.endedAtMs >= phase.startedAtMs));
+    assert.deepEqual(raw.filter(row => row.type === 'phaseEnded').map(({ type, at, ...phase }) => phase), report.phaseWindows);
+    for (const stage of report.stages) {
+      const phase = report.phaseWindows.find(window => window.name === stage.name);
+      assert.equal(stage.startedAtMs, phase.startedAtMs); assert.equal(stage.endedAtMs, phase.endedAtMs);
+    }
+    assert.ok(report.density.sampleCount > 0); assert.ok(raw.filter(row => row.type === 'coverage').every(row => row.density?.samplingIntervalMs === 1000));
     for (const item of realm.types) assert.ok(realm.types.filter(other => other.at > item.at - 1000 && other.at <= item.at).length <= 3, 'at most 3 commands per actor in any rolling second');
   } finally { await realm.close(); }
 }));

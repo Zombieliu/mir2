@@ -246,7 +246,7 @@ fn unknown_partition_is_rejected_before_zone_or_session_mutation() {
 }
 
 #[test]
-fn directory_is_derived_after_v2_and_v3_restore_without_checkpoint_changes() {
+fn directory_is_derived_after_v4_restore_without_duplicate_checkpoint_topology() {
     let key = ZoneKey::for_map("p1-checkpoint-contract");
     let session = SessionId::new("restored-player");
     let mut manager = ZoneManager::new();
@@ -263,17 +263,13 @@ fn directory_is_derived_after_v2_and_v3_restore_without_checkpoint_changes() {
         "directory queries are read-only projections"
     );
     let checkpoint: serde_json::Value = serde_json::from_slice(&original).unwrap();
-    assert_eq!(checkpoint["version"], 3);
+    assert_eq!(checkpoint["version"], 4);
     assert!(checkpoint.get("partitions").is_none());
     assert!(checkpoint.get("topology_revision").is_none());
-    for version in [2, 3] {
-        let mut fixture = checkpoint.clone();
-        fixture["version"] = version.into();
-        if version == 2 {
-            fixture.as_object_mut().unwrap().remove("state_root");
-        }
-        let restored =
-            ZoneManager::restore_checkpoint(&serde_json::to_vec(&fixture).unwrap()).unwrap();
+    {
+        // Exact legacy v2/v3 shapes are covered in zone_manager_admission_contract;
+        // relabeling v4 would inject uncommitted admission fields into old data.
+        let restored = ZoneManager::restore_checkpoint(&original).unwrap();
         assert_eq!(restored.partition_directory(), directory);
         assert_eq!(
             restored.partition_for_session(&session),

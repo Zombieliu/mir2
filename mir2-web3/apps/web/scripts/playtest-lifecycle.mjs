@@ -2,9 +2,16 @@
 // Every pass needs live packet receipts and current state. This is not visual,
 // two-computer, cross-Cell, durable-failover or capacity acceptance.
 import { createNavigator } from './quest-agent/protocol-play.mjs';
+import { planProtocolNavigation } from './quest-agent/protocol-navigation.mjs';
 import { hasAuthoritativePlayerDeath, observedPlayerHp } from './quest-agent/protocol-observation.mjs';
 
 export const FULL_LIFECYCLE_CHECKS = ['sharedKill', 'sharedDrop', 'uniquePickup', 'playerDeath', 'townRevive'];
+// Witnessed ordinary route, not a teleport or an assertion that these cells are
+// currently free. Each segment is planned again against terrain and live AOI.
+export const WESTERN_EXPOSURE_CORRIDOR = Object.freeze([[288, 617], [286, 617], [285, 616], [284, 616],
+  [282, 616], [283, 615], [283, 614], [284, 613], [284, 612], [286, 612], [287, 611],
+  [289, 611], [291, 611], [292, 611], [293, 610], [294, 610], [294, 609],
+  [296, 607], [298, 605], [299, 604], [299, 602], [299, 600]].map(([x, y]) => Object.freeze({ x, y })));
 // Deer/Hen require Crystal's ordinary corpse-harvest path. A kill alone is
 // deliberately not used as their loot proof by this pickup-focused profile.
 export const isLifecycleLootTarget = entity => entity?.kind === 'monster' &&
@@ -27,10 +34,102 @@ const uid = value => (Number.isSafeInteger(value) && value > 0) ||
 export function validateLifecycleCommand(command) {
   if (command?.type === 'pickUp' && Object.keys(command).sort().join(',') === 'objectId,type' && id(command.objectId)) return;
   if (command?.type === 'townRevive' && Object.keys(command).join(',') === 'type') return;
+  if (command?.type === 'attack' && Object.keys(command).sort().join(',') === 'objectId,type' && id(command.objectId)) return;
+  if (command?.type === 'useItem' && Object.keys(command).sort().join(',') === 'grid,type,uniqueId' &&
+      command.grid === 'inventory' && Number.isSafeInteger(command.uniqueId) && command.uniqueId > 0) return;
+  if (command?.type === 'equipItem' && Object.keys(command).sort().join(',') === 'grid,to,type,uniqueId' &&
+      command.grid === 'inventory' && Number.isSafeInteger(command.uniqueId) && command.uniqueId > 0 && command.to === 1) return;
   if (command?.type === 'removeItem' && Object.keys(command).sort().join(',') === 'grid,to,type,uniqueId' &&
       command.grid === 'inventory' && Number.isSafeInteger(command.uniqueId) && command.uniqueId > 0 &&
       Number.isInteger(command.to) && command.to >= 0 && command.to < 40) return;
-  throw new Error('Invalid ordinary lifecycle command; exact pickup, town revival or safe inventory unequip fields are required');
+  throw new Error('Invalid ordinary lifecycle command; exact ordinary pickup, attack, held-item use, town revival or armour equipment fields are required');
+}
+
+export function lifecycleExposureTargets(snapshot) {
+  const owner = self({ snapshot });
+  if (!owner) return [];
+  return (snapshot.entities ?? []).filter(entity => entity.kind === 'monster' &&
+    ['HookingCat', 'RakingCat'].includes(entity.name) && id(entity.objectId) && !entity.dead &&
+    Number(entity.hp) > 0 && Number.isInteger(entity.x) && Number.isInteger(entity.y) &&
+    entity.disposition !== 'friendly' && !entity.ownerName && !(Number(entity.masterObjectId) > 0) &&
+    distance(owner, entity) <= 18)
+    .sort((a, b) => distance(owner, a) - distance(owner, b) || a.objectId - b.objectId);
+}
+
+function exposureObstacles(snapshot) {
+  const owner = self({ snapshot });
+  const obstacles = (snapshot.entities ?? []).filter(entity => entity.objectId !== owner?.objectId && !entity.dead);
+  for (const transfer of snapshot.mapTransfers ?? []) {
+    const bounds = transfer.bounds;
+    if (!bounds || ![bounds.minX, bounds.maxX, bounds.minY, bounds.maxY].every(Number.isInteger) ||
+        bounds.maxX - bounds.minX > 100 || bounds.maxY - bounds.minY > 100) continue;
+    for (let y = bounds.minY; y <= bounds.maxY; y++) for (let x = bounds.minX; x <= bounds.maxX; x++) obstacles.push({ x, y });
+  }
+  return obstacles;
+}
+
+export function planExposureSegment(snapshot, map, target, radius = 0) {
+  if (!Number.isInteger(target?.x) || !Number.isInteger(target?.y) || ![0, 1].includes(radius)) return null;
+  const owner = self({ snapshot });
+  if (!owner) return null;
+  const plan = planProtocolNavigation({ map, start: owner, target, desiredDistance: radius,
+    dynamicObstacles: exposureObstacles(snapshot), maxExpanded: 5000 });
+  return plan && plan.path.length <= 81 ? plan : null;
+}
+
+export function exposureCorridorEntry(snapshot, map) {
+  if (String(snapshot?.mapFileName) !== '0') return null;
+  return WESTERN_EXPOSURE_CORRIDOR.map((target, index) => ({ target, index,
+    plan: planExposureSegment(snapshot, map, target, exposureObstacles(snapshot).some(entity => samePoint(point(entity), target)) ? 1 : 0) }))
+    .filter(entry => entry.plan)
+    .sort((a, b) => a.plan.path.length - b.plan.path.length || a.index - b.index)[0] ?? null;
+}
+
+// Current generic wild-monster acquisition is dx<=8 && dy<=6. AOI is wider.
+// This guides the observer outside cats' acquisition rectangle while retaining
+// an owner-relative <=10-tile observation position; it grants no server rights.
+export const outsideExposureAggro = (position, cats) => cats.every(cat =>
+  Math.abs(position.x - cat.x) > 8 || Math.abs(position.y - cat.y) > 6);
+
+export function planExposureObserver(snapshot, victim, cats, map) {
+  const observer = self({ snapshot });
+  if (!observer || !victim || !cats.length) return null;
+  if (distance(observer, victim) <= 10 && outsideExposureAggro(observer, cats)) {
+    return { target: point(observer), plan: { path: [point(observer)], steps: [] } };
+  }
+  const targets = [];
+  for (const radius of [8, 10]) for (const [dx, dy] of [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]]) {
+    const target = { x: victim.x + radius * dx, y: victim.y + radius * dy };
+    if (!outsideExposureAggro(target, cats)) continue;
+    const plan = planExposureSegment(snapshot, map, target);
+    if (plan && plan.path.every((position, index, path) => index === 0 || cats.every(cat =>
+      outsideExposureAggro(path[index - 1], [cat]) ? outsideExposureAggro(position, [cat]) :
+        distance(position, cat) >= distance(path[index - 1], cat)))) targets.push({ target, plan });
+  }
+  return targets.sort((a, b) => a.plan.path.length - b.plan.path.length)[0] ?? null;
+}
+
+export async function useHeldExposureHpPotion(client, deadline) {
+  await client.refresh();
+  const before = client.snapshot;
+  if (hasAuthoritativePlayerDeath(before)) return null;
+  const hp = observedPlayerHp(before), maximum = Number(before.playerMaxHp);
+  if (!(maximum > 0) || hp >= maximum * .6) return null;
+  const item = before.inventoryItems?.find(value => /^\(hp\)drugsmall$/i.test(String(value.name)) &&
+    Number.isSafeInteger(value.uniqueId) && value.uniqueId > 0 && Number(value.quantity ?? value.count ?? 0) > 0);
+  if (!item) return null;
+  const quantity = Number(item.quantity ?? item.count), cursor = client.sequence;
+  if (!Number.isSafeInteger(quantity)) throw new Error('Held small HP potion quantity is not exact');
+  const command = { type: 'useItem', grid: 'inventory', uniqueId: item.uniqueId };
+  validateLifecycleCommand(command);
+  const receipt = await client.request(command, 'UseItem', remaining(deadline, 8000));
+  if (receipt.sequence <= cursor || receipt.payload?.success !== true || receipt.payload.uniqueId !== item.uniqueId ||
+      String(receipt.payload.grid).toLowerCase() !== 'inventory') throw new Error('Held small HP potion lacks an exact fresh UseItem receipt');
+  await client.refresh();
+  const after = client.snapshot.inventoryItems?.find(value => value.uniqueId === item.uniqueId);
+  if (quantity - Number(after?.quantity ?? after?.count ?? 0) !== 1) throw new Error('Held small HP potion consumption was not confirmed by the fresh inventory');
+  return { uniqueId: item.uniqueId, name: item.name, beforeQuantity: quantity,
+    afterQuantity: quantity - 1, receipt: receipt.sequence, phase: 'approach-only' };
 }
 
 export function sharedKillEvidence(clients, combat) {
@@ -208,6 +307,28 @@ export async function prepareOrdinaryExposure(client, deadline) {
   return { armourRemoved: true, uniqueId: armour.uniqueId, to, receipt: receipt.sequence };
 }
 
+export async function restoreOrdinaryExposure(client, exposure, deadline) {
+  if (!exposure?.armourRemoved) return { restored: false, reason: 'No armour was removed' };
+  await client.refresh();
+  const item = client.snapshot.inventoryItems?.find(value => value.uniqueId === exposure.uniqueId);
+  if (!item) return { restored: false, reason: 'Original armour UID is absent from the current Bag; no replacement or grant used' };
+  if (hasAuthoritativePlayerDeath(client.snapshot)) throw new Error('Cannot restore armour on a corpse');
+  const command = { type: 'equipItem', grid: 'inventory', uniqueId: item.uniqueId, to: 1 }, cursor = client.sequence;
+  validateLifecycleCommand(command);
+  const receipt = await client.request(command, 'EquipItem', remaining(deadline, 8000));
+  if (receipt.sequence <= cursor || receipt.payload?.success !== true || receipt.payload.uniqueId !== item.uniqueId ||
+      receipt.payload.to !== 1 || String(receipt.payload.grid).toLowerCase() !== 'inventory') {
+    throw new Error('Ordinary armour restoration lacks an exact fresh EquipItem receipt');
+  }
+  await client.refresh();
+  if (!client.snapshot.equipmentItems?.some(value => value.uniqueId === item.uniqueId &&
+      (value.slot === 'armour' || value.equipSlot === 'armour')) ||
+      client.snapshot.inventoryItems?.some(value => value.uniqueId === item.uniqueId)) {
+    throw new Error('Fresh state did not confirm restoration of the same armour UID');
+  }
+  return { restored: true, uniqueId: item.uniqueId, receipt: receipt.sequence };
+}
+
 function notRun(reason) {
   const error = new Error(reason); error.code = 'LIFECYCLE_NOT_RUN'; throw error;
 }
@@ -233,10 +354,14 @@ export async function runLifecycleChecks({ clients, combat, loadMap, deadline, o
     return results;
   }
   const navigators = clients.map(client => createNavigator(client, { loadCollisionMap: loadMap, movementResponseTimeoutMs: 5000 }));
-  const navigate = async (index, target, radius, until) => {
+  const navigate = async (index, target, radius, until, options = {}) => {
     const result = await navigators[index](target, radius, () => Date.now() >= until, {
       maxSuccessfulSteps: 45, maxAttempts: 60, maxNoPathRefreshes: 2,
-      beforeMovement() { if (Date.now() >= until) throw new Error('Ordinary lifecycle navigation deadline expired'); },
+      ...options,
+      beforeMovement(details) {
+        if (Date.now() >= until) throw new Error('Ordinary lifecycle navigation deadline expired');
+        return options.beforeMovement?.(details);
+      },
     });
     if (!result.reached) throw new Error('Ordinary lifecycle navigation did not reach its current target');
     return result;
@@ -311,41 +436,131 @@ export async function runLifecycleChecks({ clients, combat, loadMap, deadline, o
     if (clients.some(client => observedPlayerHp(client.snapshot) <= 0)) notRun('A participant lacks a confirmed living owner state before the encounter');
     const map = String(clients[0].snapshot?.mapFileName);
     if (String(clients[1].snapshot?.mapFileName) !== map) notRun('Participants are not on the same map');
-    const monster = (clients[0].snapshot?.entities ?? []).filter(entity => entity.kind === 'monster' &&
-      ['HookingCat', 'RakingCat'].includes(entity.name) && !entity.dead && Number(entity.hp) > 0 &&
-      distance(self(clients[0]), entity) <= 18)
-      .sort((a, b) => distance(self(clients[0]), a) - distance(self(clients[0]), b))[0];
-    if (!monster) notRun('No ordinary live HookingCat/RakingCat is visible; no spawn, QA grant, PvP or teleport fallback');
-    const until = Date.now() + remaining(deadline, 90000);
-    const exposure = await prepareOrdinaryExposure(clients[0], until);
-    await navigate(1, monster, 4, until);
     const observerId = clients[1].snapshot?.entities?.find(entity => entity.name === self(clients[0])?.name)?.objectId;
     if (!id(observerId)) notRun('Observer does not currently see the ordinary victim actor');
     deathContext = { names: clients.map(client => self(client).name), cursors: clients.map(client => client.sequence),
       observerId, mapFileName: map, initialAlive: true };
-    try { await navigate(0, monster, 1, until); }
-    catch (error) {
-      // Death can occur on the final physical step. Keep that genuine shared
-      // receipt; a navigation exception alone is never evidence of death.
-      if (!playerDeathEvidence(clients, deathContext)) throw error;
-    }
-    const adjacentMonster = clients[0].snapshot?.entities?.find(entity =>
-      entity.objectId === monster.objectId && !entity.dead && distance(self(clients[0]), entity) <= 1);
-    if (adjacentMonster && !hasAuthoritativePlayerDeath(clients[0].snapshot)) {
-      clients[0].send({ type: 'attack', objectId: monster.objectId });
-    }
-    const evidence = await clients[0].wait(() => playerDeathEvidence(clients, deathContext),
-      'owner Death and the same observer ObjectDied during ordinary monster exposure', remaining(until, 90000));
-    return { ...evidence, exposure, encounteredMonster: { objectId: monster.objectId, name: monster.name },
-      causeScope: 'Ordinary encounter exposure; public Death does not identify a unique killing source.' };
+    const until = Date.now() + remaining(deadline, 330000), approachUntil = Math.min(until, Date.now() + 150000);
+    const exposure = { navigation: [], unavailableHints: [], provocations: [], samples: [], supplies: [] };
+    const proof = () => playerDeathEvidence(clients, deathContext);
+    const refresh = async () => {
+      await Promise.all(clients.map(client => client.refresh()));
+      if (clients.some(client => client.failure || client.closed)) throw new Error('Participant transport failed during ordinary exposure');
+      if (clients.some(client => String(client.snapshot?.mapFileName) !== map)) throw new Error('Ordinary exposure unexpectedly changed map');
+      if (hasAuthoritativePlayerDeath(clients[1].snapshot)) throw new Error('The observing participant died during ordinary exposure');
+    };
+    const move = async (index, target, radius = 0, options = {}) => {
+      const plan = planExposureSegment(clients[index].snapshot, await loadMap(map), target, radius);
+      if (!plan) return false;
+      const cursor = clients[index].sequence, before = point(self(clients[index]));
+      try { await navigate(index, target, radius, until, { autoUseSupplies: false, maxSuccessfulSteps: 80, maxAttempts: 120, ...options }); }
+      catch (error) {
+        exposure.navigation.push({ actor: index, target, radius, fromSequence: cursor, throughSequence: clients[index].sequence,
+          before, after: point(self(clients[index])), error: error.message, preflightPath: plan.path });
+        if (!proof()) throw error;
+        return true;
+      }
+      exposure.navigation.push({ actor: index, target, radius, fromSequence: cursor, throughSequence: clients[index].sequence,
+        before, after: point(self(clients[index])), preflightPath: plan.path });
+      return true;
+    };
+    const followObserver = async () => {
+      if (proof() || hasAuthoritativePlayerDeath(clients[0].snapshot)) return;
+      const cats = [...new Map(clients.flatMap(client => lifecycleExposureTargets(client.snapshot))
+        .map(cat => [cat.objectId, cat])).values()];
+      if (!cats.length) {
+        if (distance(self(clients[0]), self(clients[1])) > 6) {
+          await navigate(1, self(clients[0]), 6, until, { autoUseSupplies: false });
+        }
+        return;
+      }
+      const observerPlan = planExposureObserver(clients[1].snapshot, self(clients[0]), cats, await loadMap(map));
+      if (!observerPlan) throw new Error('No current walkable observer position outside cats\' acquisition range and within AOI');
+      if (observerPlan.plan.steps.length && !await move(1, observerPlan.target, 0, {
+        beforeMovement({ from, physicalCells }) {
+          const currentCats = [...new Map(clients.flatMap(client => lifecycleExposureTargets(client.snapshot))
+            .map(cat => [cat.objectId, cat])).values()];
+          for (const cat of currentCats) for (const cell of physicalCells) {
+            if (outsideExposureAggro(from, [cat]) ? !outsideExposureAggro(cell, [cat]) : distance(cell, cat) < distance(from, cat)) {
+              throw new Error('Observer movement would approach or reenter a current cat acquisition rectangle');
+            }
+          }
+        },
+      })) throw new Error('The safe observer destination became unavailable before movement');
+    };
+    const advance = async (target, radius = 0) => {
+      const plan = planExposureSegment(clients[0].snapshot, await loadMap(map), target, radius);
+      if (!plan) return false;
+      if (plan.path.length > 1 && !await move(0, plan.path[Math.min(3, plan.path.length - 1)])) return false;
+      await refresh(); await followObserver(); return true;
+    };
+    try {
+      exposure.armour = await prepareOrdinaryExposure(clients[0], until);
+      const potion = await useHeldExposureHpPotion(clients[0], until);
+      if (potion) exposure.supplies.push(potion);
+      await refresh();
+      if (!lifecycleExposureTargets(clients[0].snapshot).length && !proof()) {
+        const entry = exposureCorridorEntry(clients[0].snapshot, await loadMap(map));
+        if (!entry) notRun('No currently observed ordinary cat and no bounded map-0 western corridor path; no privileged fallback');
+        exposure.corridorEntry = { index: entry.index, preflightPath: entry.plan.path };
+        for (const target of WESTERN_EXPOSURE_CORRIDOR.slice(entry.index)) {
+          if (proof() || lifecycleExposureTargets(clients[0].snapshot).some(cat => distance(self(clients[0]), cat) <= 6)) break;
+          const occupied = exposureObstacles(clients[0].snapshot).some(entity => samePoint(point(entity), target)), radius = occupied ? 1 : 0;
+          for (let segment = 0; segment < 27 && distance(self(clients[0]), target) > radius && Date.now() < approachUntil; segment++) {
+            if (proof() || !await advance(target, radius)) {
+              if (!proof()) exposure.unavailableHints.push({ target, radius, reason: 'No complete path against current public occupancy' });
+              break;
+            }
+          }
+        }
+      }
+      if (!proof() && !lifecycleExposureTargets(clients[0].snapshot).length) notRun('No fresh ordinary live cats after the bounded western approach');
+      const provoked = new Set(), exposureUntil = Math.min(until, Date.now() + 180000);
+      while (Date.now() < exposureUntil) {
+        if (proof()) return { ...proof(), exposure, causeScope: 'Ordinary cat exposure; public Death does not identify a unique killing source.' };
+        await refresh();
+        if (proof()) break;
+        if (hasAuthoritativePlayerDeath(clients[0].snapshot)) {
+          await clients[0].wait(proof, 'owner Death and the same observer ObjectDied', remaining(exposureUntil, 3000));
+          break;
+        }
+        await followObserver();
+        const target = lifecycleExposureTargets(clients[0].snapshot).find(cat => !provoked.has(cat.objectId));
+        if (target && provoked.size < 2) {
+          for (let segment = 0; segment < 12 && !proof() && Date.now() < exposureUntil; segment++) {
+            const current = lifecycleExposureTargets(clients[0].snapshot).find(cat => cat.objectId === target.objectId);
+            if (!current || distance(self(clients[0]), current) <= 1 || !await advance(current, 1)) break;
+          }
+          await refresh();
+          const current = lifecycleExposureTargets(clients[0].snapshot).find(cat => cat.objectId === target.objectId && distance(self(clients[0]), cat) <= 1);
+          if (current && !hasAuthoritativePlayerDeath(clients[0].snapshot)) {
+            const command = { type: 'attack', objectId: current.objectId };
+            validateLifecycleCommand(command); clients[0].send(command); provoked.add(current.objectId);
+            exposure.provocations.push({ objectId: current.objectId, name: current.name, location: point(current),
+              actor: point(self(clients[0])), commandSequence: clients[0].sequence });
+            await onAttempt?.({ phase: 'ordinary-cat-exposure', evidence: structuredClone(exposure) });
+          }
+        }
+        exposure.samples.push({ cursors: clients.map(client => client.sequence), hp: clients.map(client => observedPlayerHp(client.snapshot)),
+          actor: point(self(clients[0])), observer: point(self(clients[1])), currentCats: lifecycleExposureTargets(clients[0].snapshot).map(cat => ({ objectId: cat.objectId, ...point(cat) })) });
+        if (proof()) break;
+        await sleep(500);
+      }
+      const evidence = proof();
+      if (!evidence) throw new Error('No paired owner Death and observer ObjectDied within the bounded ordinary two-cat exposure');
+      return { ...evidence, exposure, causeScope: 'Ordinary cat exposure; public Death does not identify a unique killing source.' };
+    } catch (error) { error.evidence = { ...exposure, ...(error.evidence ?? {}) }; throw error; }
   });
   await check('townRevive', async () => {
     if (!death) notRun('No passed player death evidence; townRevive is never sent to a living actor');
     const cursors = clients.map(client => client.sequence), until = Date.now() + remaining(deadline, 10000);
     await clients[0].request({ type: 'townRevive' }, 'Revived', remaining(until, 8000));
     await Promise.all(clients.map(client => client.refresh()));
-    return clients[0].wait(() => townReviveEvidence(clients, deathContext, cursors),
+    const evidence = await clients[0].wait(() => townReviveEvidence(clients, deathContext, cursors),
       'fresh revived owner state and source-map observer lifecycle', remaining(until, 8000));
+    const armourRestoration = await restoreOrdinaryExposure(clients[0], death.exposure.armour,
+      Date.now() + remaining(deadline, 10000));
+    return { ...evidence, armourRestoration };
   });
   return results;
 }

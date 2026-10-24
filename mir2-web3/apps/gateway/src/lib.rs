@@ -61,6 +61,7 @@ pub mod topology;
 pub mod web;
 pub mod world_director;
 pub mod zone_lease;
+pub mod zone_metrics;
 pub mod zone_replication;
 pub mod zone_rpc;
 

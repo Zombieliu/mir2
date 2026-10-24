@@ -6,7 +6,10 @@
 //! authority cache; cold restore therefore cannot activate a snapshot's owner.
 
 use super::*;
-use mir2_simulation::{PartitionKey, ZonePartitionDescriptor};
+use mir2_simulation::{
+    LogicalWorldId, ManagerAdmissionReceipt, PartitionKey, WorldPartitionKey,
+    ZonePartitionDescriptor,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct PartitionRouteBinding {
@@ -25,6 +28,13 @@ impl PartitionRouteBinding {
 
     pub fn execution_domain(&self) -> &ZoneId {
         &self.execution_domain
+    }
+
+    pub fn global_partition_key(&self) -> Result<WorldPartitionKey, String> {
+        Ok(WorldPartitionKey::new(
+            LogicalWorldId::legacy_execution_domain(self.execution_domain.as_str())?,
+            self.descriptor.partition.clone(),
+        ))
     }
 }
 
@@ -119,6 +129,36 @@ fn route_for_partition(
 }
 
 impl HostedZoneOwnerCommandClient {
+    /// Inspect the canonical simulation admission stream. RPC journal/economy
+    /// sequences are distinct and must never be relabelled as game ActionIds.
+    pub fn last_partition_admission(
+        &self,
+        lease: &ZoneOwnerLease,
+    ) -> Result<Option<ManagerAdmissionReceipt>, String> {
+        let authority = self
+            .owner_lease_authority
+            .as_ref()
+            .ok_or("partition admission observation requires a lease authority")?;
+        authority.validate_owner_lease(lease)?;
+        let runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "hosted runtime mutex poisoned")?;
+        let shared = runtime
+            .as_ref()
+            .ok_or("runtime handed off")?
+            .as_ref()
+            .as_any()
+            .downcast_ref::<SharedInProcessZoneSessionRuntime>()
+            .ok_or("runtime has no shared admission stream")?;
+        validate_execution_domain(&shared.inventory_zone_id, lease.zone_id())?;
+        let state = shared
+            .zone_state
+            .lock()
+            .map_err(|_| "shared admission mutex poisoned")?;
+        Ok(state.zone_manager.last_admitted_action().cloned())
+    }
+
     /// Resolve an existing logical partition under a freshly validated lease.
     /// The command path's original lease checks remain the mutation authority.
     pub fn partition_binding(
@@ -554,5 +594,66 @@ mod tests {
             .partition_route(&partition)
             .unwrap_err()
             .contains("ambiguous logical partition"));
+        let global = factory.global_partition_directory().unwrap();
+        assert_eq!(global.rows().len(), 2);
+        assert_ne!(global.rows()[0].key, global.rows()[1].key);
+        for row in global.rows() {
+            assert_eq!(row.key.partition(), &partition);
+            assert_eq!(
+                factory.global_partition_route(&row.key).unwrap().as_ref(),
+                Some(row)
+            );
+        }
+        assert_eq!(factory.active_zone_count(), 2);
+    }
+
+    #[test]
+    fn partition_binding_admission_is_stable_across_owner_handoff_and_cold_restore() {
+        let source = factory();
+        let domain = ZoneId::new("p1-admission-owner-domain");
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let first = authority.handoff_zone_owner(&domain, "host-a");
+        let hosted = HostedZoneOwnerCommandClient::with_owner_lease_authority(
+            source.create_runtime(GatewayConfig::default(), &domain),
+            authority.clone(),
+        );
+        assert!(hosted.last_partition_admission(&first).unwrap().is_none());
+        join_player(&hosted, &first);
+        let before = hosted.last_partition_admission(&first).unwrap().unwrap();
+        let binding = hosted.active_partition_binding(&first).unwrap().unwrap();
+        assert_eq!(
+            before.id().world(),
+            binding.route().global_partition_key().unwrap().world()
+        );
+        assert_eq!(before.id().zone(), &binding.route().partition().zone);
+        assert!(before.id().source_sequence() > 0);
+        let current = authority.handoff_zone_owner(&domain, "host-b");
+        assert!(hosted
+            .last_partition_admission(&first)
+            .unwrap_err()
+            .contains("stale zone owner lease"));
+        assert_eq!(
+            hosted.last_partition_admission(&current).unwrap(),
+            Some(before.clone())
+        );
+        let checkpoint = source.checkpoint_bytes().unwrap();
+        let restored = factory();
+        restored.install_checkpoint_bytes(&checkpoint).unwrap();
+        let cold_host = HostedZoneOwnerCommandClient::with_owner_lease_authority(
+            restored.create_runtime(GatewayConfig::default(), &domain),
+            authority,
+        );
+        assert_eq!(
+            cold_host.last_partition_admission(&current).unwrap(),
+            Some(before)
+        );
+        assert!(cold_host
+            .active_partition_binding(&current)
+            .unwrap()
+            .is_none());
+        assert_eq!(
+            restored.global_partition_directory().unwrap(),
+            source.global_partition_directory().unwrap()
+        );
     }
 }

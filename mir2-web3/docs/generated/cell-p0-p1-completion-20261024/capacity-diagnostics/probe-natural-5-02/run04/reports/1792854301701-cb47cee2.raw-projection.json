@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792854301701-cb47cee2",
+  "rawBytes": 2015827,
+  "rawSha256": "565f982cb7d0fa51b2341ac3a9fe041e4f65cb1c67ebac34aafa53783318fb78",
+  "rawRows": 3250,
+  "monitorSummary": {
+    "count": 216,
+    "validCount": 0,
+    "invalidCount": 216,
+    "stoppedCount": 0,
+    "complete": false,
+    "firstSampledAtMs": null,
+    "lastSampledAtMs": null,
+    "maxGapMs": 0,
+    "maxRawLineBytes": 3643,
+    "first": null,
+    "last": null,
+    "phaseBrackets": []
+  },
+  "phaseEvents": [],
+  "failureEvents": [],
+  "finishedEvents": [
+    {
+      "type": "finished",
+      "ok": false,
+      "playableCapacityAccepted": false
+    }
+  ]
+}

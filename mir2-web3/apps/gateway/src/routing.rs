@@ -31,6 +31,9 @@ mod npc_population_binding;
 #[path = "routing/partition_binding.rs"]
 mod partition_binding;
 pub use partition_binding::{PartitionExecutionBinding, PartitionOwnerRef, PartitionRouteBinding};
+#[path = "routing/partition_directory.rs"]
+mod partition_directory;
+pub use partition_directory::{GlobalPartitionDirectoryRow, GlobalPartitionDirectorySnapshot};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::fmt;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -3368,7 +3371,7 @@ struct SharedTradeLinks {
     unlocks: Vec<(ZonePresenceKey, SharedTradePeer)>,
 }
 const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 3;
-const SHARED_ZONE_FACTORY_CHECKPOINT_VERSION: u32 = 2;
+const SHARED_ZONE_FACTORY_CHECKPOINT_VERSION: u32 = 3;
 const MAX_PENDING_ZONE_PACKETS_PER_PLAYER: usize =
     crate::zone_rpc::DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES;
 
@@ -3657,9 +3660,11 @@ struct SharedInProcessZoneStateCheckpoint {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct SharedInProcessZoneFactoryCheckpoint {
     version: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    partition_directory: Option<GlobalPartitionDirectorySnapshot>,
     zones: BTreeMap<ZoneId, SharedInProcessZoneStateCheckpoint>,
 }
 
@@ -3722,7 +3727,7 @@ impl SharedInProcessZoneStateCheckpoint {
             }
         }
         self.unresolved_ground_drop_settlements = unresolved_ground.into_values().collect();
-        zone_manager.leave_all_sessions();
+        zone_manager.clear_sessions_for_cold_world();
         self.zone_manager_bytes = zone_manager.checkpoint_bytes()?;
 
         let player_object_ids = self
@@ -7554,8 +7559,11 @@ impl SharedInProcessZoneRuntimeFactory {
         let (movement_sender, movement_receiver) =
             sync_channel(SHARED_ZONE_MOVEMENT_INGRESS_CAPACITY);
         drop(movement_receiver);
+        let mut initial_state = SharedInProcessZoneState::new();
+        partition_directory::bind_manager_world(&mut initial_state.zone_manager, zone_id)
+            .expect("finite Zone fixture requires a canonical logical world");
         let resources = SharedInProcessZoneResources {
-            zone_state: Arc::new(Mutex::new(SharedInProcessZoneState::new())),
+            zone_state: Arc::new(Mutex::new(initial_state)),
             movement_sender,
             tick_count: Arc::new(AtomicU64::new(0)),
             autonomous_ticks_enabled: Arc::new(AtomicBool::new(false)),
@@ -7700,6 +7708,7 @@ impl SharedInProcessZoneRuntimeFactory {
         }
         serde_json::to_vec(&SharedInProcessZoneFactoryCheckpoint {
             version: SHARED_ZONE_FACTORY_CHECKPOINT_VERSION,
+            partition_directory: Some(partition_directory::directory_from_checkpoints(&zones)?),
             zones,
         })
         .map_err(|error| format!("failed to encode shared Zone factory checkpoint: {error}"))
@@ -7724,6 +7733,7 @@ impl SharedInProcessZoneRuntimeFactory {
         }
         serde_json::to_vec(&SharedInProcessZoneFactoryCheckpoint {
             version: SHARED_ZONE_FACTORY_CHECKPOINT_VERSION,
+            partition_directory: Some(partition_directory::directory_from_checkpoints(&zones)?),
             zones,
         })
         .map_err(|error| format!("failed to encode shared Zone world checkpoint: {error}"))
@@ -7747,6 +7757,7 @@ impl SharedInProcessZoneRuntimeFactory {
         }
         serde_json::to_vec(&SharedInProcessZoneFactoryCheckpoint {
             version: SHARED_ZONE_FACTORY_CHECKPOINT_VERSION,
+            partition_directory: Some(partition_directory::directory_from_checkpoints(&zones)?),
             zones,
         })
         .map_err(|error| {
@@ -7792,17 +7803,14 @@ impl SharedInProcessZoneRuntimeFactory {
         &self,
         checkpoint: SharedInProcessZoneFactoryCheckpoint,
     ) -> Result<usize, String> {
-        if checkpoint.version != SHARED_ZONE_FACTORY_CHECKPOINT_VERSION {
-            return Err(format!(
-                "unsupported shared Zone factory checkpoint version {}, expected {}",
-                checkpoint.version, SHARED_ZONE_FACTORY_CHECKPOINT_VERSION
-            ));
-        }
+        checkpoint.validate_partition_directory()?;
 
         let zone_count = checkpoint.zones.len();
         let mut restored_states = BTreeMap::new();
         for (zone_id, zone_checkpoint) in checkpoint.zones {
-            restored_states.insert(zone_id, SharedInProcessZoneState::restore(zone_checkpoint)?);
+            let mut restored = SharedInProcessZoneState::restore(zone_checkpoint)?;
+            partition_directory::bind_manager_world(&mut restored.zone_manager, &zone_id)?;
+            restored_states.insert(zone_id, restored);
         }
 
         let mut staged_resources = BTreeMap::new();
@@ -7861,12 +7869,7 @@ impl SharedInProcessZoneRuntimeFactory {
         &self,
         checkpoint: SharedInProcessZoneFactoryCheckpoint,
     ) -> Result<usize, String> {
-        if checkpoint.version != SHARED_ZONE_FACTORY_CHECKPOINT_VERSION {
-            return Err(format!(
-                "unsupported shared Zone factory checkpoint version {}, expected {}",
-                checkpoint.version, SHARED_ZONE_FACTORY_CHECKPOINT_VERSION
-            ));
-        }
+        checkpoint.validate_partition_directory()?;
         let checkpoint_zone_ids = checkpoint.zones.keys().cloned().collect::<BTreeSet<_>>();
         let current_zone_ids = self
             .zones
@@ -7883,8 +7886,16 @@ impl SharedInProcessZoneRuntimeFactory {
         }
 
         let zone_count = checkpoint.zones.len();
+        // Decode and verify every domain before changing any existing resource.
+        // Keep the resource Arcs so already attached session runtimes still
+        // observe the installed state.
+        let mut restored_states = BTreeMap::new();
         for (zone_id, zone_checkpoint) in checkpoint.zones {
-            let restored = SharedInProcessZoneState::restore(zone_checkpoint)?;
+            let mut restored = SharedInProcessZoneState::restore(zone_checkpoint)?;
+            partition_directory::bind_manager_world(&mut restored.zone_manager, &zone_id)?;
+            restored_states.insert(zone_id, restored);
+        }
+        for (zone_id, restored) in restored_states {
             let resources = self.resources_for_zone(&zone_id);
             *resources
                 .zone_state
@@ -9759,7 +9770,10 @@ impl SharedInProcessZoneResources {
         mutation_capture: Arc<Mutex<Option<SharedZoneMutationCapture>>>,
         autonomous_ticks_enabled: bool,
     ) -> Self {
-        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut initial_state = SharedInProcessZoneState::new();
+        partition_directory::bind_manager_world(&mut initial_state.zone_manager, zone_id)
+            .expect("shared Zone requires a canonical logical execution-domain identity");
+        let zone_state = Arc::new(Mutex::new(initial_state));
         let tick_count = Arc::new(AtomicU64::new(0));
         let autonomous_ticks_enabled = Arc::new(AtomicBool::new(autonomous_ticks_enabled));
         let movement_sender = spawn_shared_zone_owner_with_cadence_and_counter(
@@ -9903,11 +9917,21 @@ fn shared_zone_owner_loop(
                     continue;
                 }
                 let now_ms = shared_gateway_now_ms();
-                run_shared_zone_owner_tick(&zone_state, now_ms, maintenance_due)
-                    .and_then(|()| (capture.observer)(&zone_id, now_ms))
+                run_shared_zone_owner_tick_with_deadline(
+                    &zone_state,
+                    now_ms,
+                    maintenance_due,
+                    Some(next_tick),
+                )
+                .and_then(|()| (capture.observer)(&zone_id, now_ms))
             } else {
                 let now_ms = shared_gateway_now_ms();
-                run_shared_zone_owner_tick(&zone_state, now_ms, maintenance_due)
+                run_shared_zone_owner_tick_with_deadline(
+                    &zone_state,
+                    now_ms,
+                    maintenance_due,
+                    Some(next_tick),
+                )
             };
             if let Err(error) = result {
                 eprintln!("shared zone cadence stopped: {error}");
@@ -9983,6 +10007,23 @@ fn run_shared_zone_owner_tick(
     now_ms: u64,
     maintenance: bool,
 ) -> Result<(), String> {
+    run_shared_zone_owner_tick_with_deadline(zone_state, now_ms, maintenance, None)
+}
+
+struct SharedZoneWorkMetric(Instant);
+
+impl Drop for SharedZoneWorkMetric {
+    fn drop(&mut self) {
+        crate::zone_metrics::record_zone_work(self.0.elapsed());
+    }
+}
+
+fn run_shared_zone_owner_tick_with_deadline(
+    zone_state: &Arc<Mutex<SharedInProcessZoneState>>,
+    now_ms: u64,
+    maintenance: bool,
+    maintenance_deadline: Option<Instant>,
+) -> Result<(), String> {
     let authority = zone_state
         .lock()
         .map_err(|_| "shared zone presence mutex is poisoned")?
@@ -9995,29 +10036,60 @@ fn run_shared_zone_owner_tick(
                 if state.any_teardown_fenced() {
                     return Ok(());
                 }
+                let _work_metric = SharedZoneWorkMetric(Instant::now());
                 shared_experience_profiles::rebase_locked_zone_experience_authority(
                     &mut state, rebase,
                 )?;
-                run_shared_zone_owner_tick_locked(&mut state, now_ms, maintenance)
+                run_shared_zone_owner_tick_locked(
+                    &mut state,
+                    now_ms,
+                    maintenance,
+                    maintenance_deadline,
+                )
             });
         }
     }
     let mut zone_state = zone_state
         .lock()
         .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
-    run_shared_zone_owner_tick_locked(&mut zone_state, now_ms, maintenance)
+    if zone_state.any_teardown_fenced() {
+        return Ok(());
+    }
+    let _work_metric = SharedZoneWorkMetric(Instant::now());
+    run_shared_zone_owner_tick_locked(&mut zone_state, now_ms, maintenance, maintenance_deadline)
 }
 
 fn run_shared_zone_owner_tick_locked(
     zone_state: &mut SharedInProcessZoneState,
     now_ms: u64,
     maintenance: bool,
+    maintenance_deadline: Option<Instant>,
 ) -> Result<(), String> {
     // A teardown checkpoint must observe a quiescent Zone, so pause all
     // autonomous maintenance and movement mutations while any player is
     // frozen; explicit teardown performs one final fenced drain itself.
     if zone_state.any_teardown_fenced() {
         return Ok(());
+    }
+    let work_started = Instant::now();
+    if let Some(deadline) = maintenance_deadline.filter(|_| maintenance) {
+        crate::zone_metrics::record_deadline_lag(
+            crate::zone_metrics::DeadlineKind::OwnerTick,
+            work_started.saturating_duration_since(deadline),
+        );
+    }
+    if let Some(due_ms) = zone_state.zone_manager.next_pending_movement_deadline_ms() {
+        let observed_ms = if maintenance_deadline.is_some() {
+            shared_gateway_now_ms()
+        } else {
+            now_ms
+        };
+        if due_ms <= observed_ms {
+            crate::zone_metrics::record_deadline_lag(
+                crate::zone_metrics::DeadlineKind::PendingMovement,
+                Duration::from_millis(observed_ms - due_ms),
+            );
+        }
     }
     // Give owner movement acknowledgements the first available socket slot.
     // Dispatching a dense monster tick first can refill the bounded channel
@@ -14470,6 +14542,22 @@ impl SharedInProcessZoneSessionRuntime {
                 drop(state);
                 return self.authoritative_zone_owner_correction();
             };
+            // Personal durability/item persistence precedes these Zone commits.
+            // Reject sequence exhaustion before that durable mutation, while
+            // the same writer lock prevents another admission using the slots.
+            let admission_count = if swing.tool_damage() >= tool.durability {
+                4
+            } else {
+                1
+            };
+            if state
+                .zone_manager
+                .ensure_admission_capacity(admission_count)
+                .is_err()
+            {
+                drop(state);
+                return self.authoritative_zone_owner_correction();
+            }
             // Cadence damage can land after ingress drained its owner events.
             // Snapshot the current Zone vitals while the same writer lock is
             // held, so the durable personal award never saves pre-hit HP.
@@ -18892,11 +18980,13 @@ mod tests {
         let mut candidate: SharedInProcessZoneFactoryCheckpoint =
             serde_json::from_slice(&factory.world_checkpoint_bytes().unwrap()).unwrap();
         let normal_zone = ZoneId::new("atomic-normal");
-        let normal_checkpoint = candidate
-            .zones
-            .get(&replica_zone)
-            .expect("the replica checkpoint must exist")
-            .clone();
+        // Each logical domain has its own committed identity. Construct a
+        // genuine second domain instead of relabelling the replica's image.
+        let normal_factory = SharedInProcessZoneRuntimeFactory::new();
+        normal_factory.resources_for_zone(&normal_zone);
+        let mut normal_image: SharedInProcessZoneFactoryCheckpoint =
+            serde_json::from_slice(&normal_factory.world_checkpoint_bytes().unwrap()).unwrap();
+        let normal_checkpoint = normal_image.zones.remove(&normal_zone).unwrap();
         candidate
             .zones
             .insert(normal_zone.clone(), normal_checkpoint);

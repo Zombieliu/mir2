@@ -15,6 +15,11 @@ pub use npc_purchase_owner::{
 };
 pub mod user_item_uid;
 mod world_runtime;
+pub use runtime::zone::ManagerAdmissionReceipt;
+pub use runtime::zone::{
+    EffectEnvelope, EffectReplayReceipt, EntityLifeRef, LogicalWorldId, PayloadDigest,
+    StableActionId, WorldMapEffectOwner, WorldPartitionKey,
+};
 
 #[cfg(any(test, feature = "test-support"))]
 pub use config::AccountStoreTransactionFault;

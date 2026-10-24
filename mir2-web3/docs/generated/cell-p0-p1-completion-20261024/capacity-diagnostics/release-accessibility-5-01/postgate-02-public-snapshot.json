@@ -1,0 +1,108 @@
+{
+  "at": "2026-10-24T16:00:44.586Z",
+  "source": "Ordinary Login/StartGame/clientVersion snapshot; no gameplay mutation or teleport",
+  "capacityAcceptanceEligible": false,
+  "actor": "Ld7b3a602",
+  "map": "0",
+  "owner": {
+    "x": 255,
+    "y": 672,
+    "hp": 44,
+    "dead": false
+  },
+  "entityKinds": {
+    "npc": 1,
+    "selfPlayer": 1,
+    "monster": 7
+  },
+  "publicEntities": [
+    {
+      "kind": "npc",
+      "objectId": 9,
+      "name": "Sailor_Rupert",
+      "x": 251,
+      "y": 677,
+      "hp": null,
+      "dead": false,
+      "disposition": "neutral",
+      "ownerName": null
+    },
+    {
+      "kind": "monster",
+      "objectId": 206504,
+      "name": "Deer",
+      "x": 268,
+      "y": 668,
+      "hp": 0,
+      "dead": true,
+      "disposition": "neutral",
+      "ownerName": null
+    },
+    {
+      "kind": "monster",
+      "objectId": 206513,
+      "name": "Deer",
+      "x": 256,
+      "y": 667,
+      "hp": 21,
+      "dead": false,
+      "disposition": "neutral",
+      "ownerName": null
+    },
+    {
+      "kind": "monster",
+      "objectId": 206522,
+      "name": "Deer",
+      "x": 241,
+      "y": 657,
+      "hp": 25,
+      "dead": false,
+      "disposition": "neutral",
+      "ownerName": null
+    },
+    {
+      "kind": "monster",
+      "objectId": 206624,
+      "name": "Scarecrow",
+      "x": 259,
+      "y": 682,
+      "hp": 20,
+      "dead": false,
+      "disposition": "hostile",
+      "ownerName": null
+    },
+    {
+      "kind": "monster",
+      "objectId": 206639,
+      "name": "Scarecrow",
+      "x": 253,
+      "y": 672,
+      "hp": 0,
+      "dead": true,
+      "disposition": "hostile",
+      "ownerName": null
+    },
+    {
+      "kind": "monster",
+      "objectId": 206642,
+      "name": "Scarecrow",
+      "x": 265,
+      "y": 666,
+      "hp": 0,
+      "dead": true,
+      "disposition": "hostile",
+      "ownerName": null
+    },
+    {
+      "kind": "monster",
+      "objectId": 206648,
+      "name": "Scarecrow",
+      "x": 257,
+      "y": 664,
+      "hp": 0,
+      "dead": true,
+      "disposition": "hostile",
+      "ownerName": null
+    }
+  ]
+}

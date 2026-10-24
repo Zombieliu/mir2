@@ -9,6 +9,7 @@ import { pathToFileURL } from 'node:url';
 import { PlaytestClient, outsideRepository, validateEndpoint, observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { NativeResumeClient, validateResumeControl, assertResumeEvidence, assertReplayRejected, resumeFingerprint } from './playtest-native-resume-smoke.mjs';
 import { CATALOG_GZIP_CAPABILITY } from './playtest-catalog-transport.mjs';
+import { PublicDensity, beginCapacityPhase, finishCapacityPhase } from './playtest-capacity-observability.mjs';
 import { CommandBudget, SafetyStop } from './playtest-load-smoke.mjs';
 import { loadProtocolCollisionMap, findProtocolWalkPath, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
 import { hasAuthoritativePlayerDeath } from './quest-agent/protocol-observation.mjs';
@@ -32,6 +33,8 @@ const REJECTED_WALK_CELL_LIMIT = 16;
 const REJECTED_WALK_CELL_TTL_MS = 3000;
 const COMBAT_CHASE_DEFERRAL_LIMIT = 16;
 const COMBAT_CHASE_DEFERRAL_MS = 30000;
+const COMBAT_CHASE_MAX_MOVES = 40;
+const COMBAT_CHASE_MAX_MS = 30000;
 
 // Deliberately select public identity/position fields. Never copy a packet or
 // snapshot wholesale into the persistent diagnostic stream.
@@ -111,6 +114,7 @@ export class CapacityClient extends NativeResumeClient {
     this.budget = context.accountBudgets.get(account.accountId);
     this.bytes = { sent: 0, received: 0 }; this.recentSecrets = []; this.movementCount = 0; this.targetCursor = 0; this.failedTargets = new Map();
     this.combatPursuit = null; this.chaseDeferrals = new Map();
+    this.combatScout = null; this.combatScoutCursor = 0;
     this.evidencePending = new Set(); this.nativeRunPrimedUntil = 0;
     this.lifecycleConnection = context.nextLifecycleConnection = (context.nextLifecycleConnection ?? 0) + 1;
     this.lifecycleNames = new Set([this.label, ...(context.pool?.accounts ?? []).slice(0, 100).map(item => item.name)].filter(name => typeof name === 'string'));
@@ -148,6 +152,7 @@ export class CapacityClient extends NativeResumeClient {
     super.observe(message);
     if (['MapInformation', 'MapChanged'].includes(message.packet)) {
       this.combatPursuit = null; this.chaseDeferrals.clear();
+      this.combatScout = null; this.combatScoutCursor = 0;
     }
     if (lifecycle) this.recordPlayerLifecycle(message, before, orphanMotion);
     if (ownerTransform) {
@@ -463,7 +468,7 @@ function recordMovementCorrection(client, context, owner, plan, actual, phase, r
   }
   return avoidance;
 }
-function movement(client, target, map) {
+function movement(client, target, map, routeAllowed) {
   const owner = self(client), occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead)
     .concat(rejectedWalkObstacles(client));
   const blocked = (reason, nextStep) => {
@@ -477,16 +482,18 @@ function movement(client, target, map) {
   };
   const route = findProtocolWalkPath({ map, start: owner, target, dynamicObstacles: occupied, maxExpanded: 4000 });
   if (!route) return blocked('no-path-or-expansion-limit');
+  if (routeAllowed && !route.every(routeAllowed)) return blocked('route-outside-scout-coverage-or-transfer');
   if (route.length < 2) return blocked('already-at-target');
   const first = route[1];
   if ((client.snapshot.mapTransfers ?? []).some(transfer => inside(first, transfer.bounds))) return blocked('next-step-transfer', first);
   const direction = directionOf(owner, first); if (!direction) return blocked('invalid-unit-step', first);
+  const navigation = { goal: lifecyclePoint(target), remainingSteps: route.length - 1 };
   const wantsRun = client.context?.policy.activityMode === 'native' ? performance.now() < client.nativeRunPrimedUntil : client.movementCount % 10 === 9;
   if (wantsRun && route.length > 2 && route[2].x - first.x === first.x - owner.x && route[2].y - first.y === first.y - owner.y &&
       !(client.snapshot.mapTransfers ?? []).some(transfer => inside(route[2], transfer.bounds))) {
-    return { command: { type: 'run', direction }, target: route[2], first };
+    return { command: { type: 'run', direction }, target: route[2], first, navigation };
   }
-  return { command: { type: 'walk', direction }, target: first, first };
+  return { command: { type: 'walk', direction }, target: first, first, navigation };
 }
 function patrol(client, context, home = client.home) {
   const owner = self(client), map = context.map;
@@ -589,13 +596,15 @@ function rememberCombatTarget(client, target, now = Date.now()) {
   if (client.combatPursuit?.objectId !== target.objectId || client.combatPursuit.mapFileName !== mapFileName) {
     client.combatPursuit = { objectId: target.objectId, name: target.name, mapFileName,
       bestDistance: distance(self(client), target), lastProgressAt: now, nonImprovingMoves: 0,
-      lastReceiptSequence: client.sequence, attackSent: false };
+      lastReceiptSequence: client.sequence, attackSent: false, targetPoint: lifecyclePoint(target),
+      startedAt: now, activeElapsedMs: 0, confirmedMoves: 0, visited: new Map() };
   }
 }
 
 // Progress is measured only at a successful, nonzero authoritative movement
 // receipt. Selecting a plan, waiting, turning, or a corrected step proves none.
 export function recordCombatPursuitMovement(client, context, plan, origin, receipt, status, now = Date.now()) {
+  recordCombatScoutMovement(client, context, plan, origin, receipt, status, now);
   const pursuit = client.combatPursuit, actual = receipt?.payload, kind = plan.command.type;
   if (context.policy?.activityMode !== 'native' || !pursuit || pursuit.attackSent || status !== 'success' ||
       !['walk', 'run'].includes(kind) || pursuit.objectId !== plan.chaseTargetId ||
@@ -605,20 +614,47 @@ export function recordCombatPursuitMovement(client, context, plan, origin, recei
   const target = combatCandidates(client, context, now).find(entity => entity.objectId === pursuit.objectId);
   if (!target) { client.combatPursuit = null; return; }
   pursuit.lastReceiptSequence = receipt.sequence;
+  pursuit.confirmedMoves++;
+  pursuit.lastMovementAt = now;
+  const visitKey = `${actual.x},${actual.y}`, visits = (pursuit.visited.get(visitKey) ?? 0) + 1;
+  pursuit.visited.set(visitKey, visits);
+  const targetStable = distance(target, plan.chaseTargetPoint ?? {}) === 0 && distance(target, pursuit.targetPoint) === 0;
+  const navigation = plan.navigation;
+  let routeImproved = false;
+  if (targetStable && lifecyclePoint(navigation?.goal) && Number.isInteger(navigation.remainingSteps) && navigation.remainingSteps > 0) {
+    const consumed = kind === 'run' && distance(actual, plan.first) !== 0 ? 2 : 1;
+    const remaining = navigation.remainingSteps - consumed, key = `${target.x},${target.y}:${navigation.goal.x},${navigation.goal.y}`;
+    const prior = pursuit.routeProgress;
+    if (!prior || prior.key !== key) {
+      // Only the first path can use its pre-move length as a baseline. A new
+      // goal after replanning cannot manufacture progress on every ACK.
+      routeImproved = !prior && !pursuit.routeInitialized && remaining >= 0 && remaining < navigation.remainingSteps;
+      pursuit.routeProgress = { key, bestRemaining: remaining };
+    } else if (remaining >= 0 && remaining < prior.bestRemaining) {
+      routeImproved = true; prior.bestRemaining = remaining;
+    }
+    pursuit.routeInitialized = true;
+  } else pursuit.routeProgress = null;
+  pursuit.targetPoint = lifecyclePoint(target);
   const currentDistance = distance(actual, target);
-  if (currentDistance < pursuit.bestDistance) {
-    pursuit.bestDistance = currentDistance; pursuit.lastProgressAt = now; pursuit.nonImprovingMoves = 0; return;
-  }
-  pursuit.nonImprovingMoves++;
+  const improved = currentDistance < pursuit.bestDistance || routeImproved;
+  pursuit.bestDistance = Math.min(pursuit.bestDistance, currentDistance);
+  if (improved) { pursuit.lastProgressAt = now; pursuit.nonImprovingMoves = 0; }
+  else pursuit.nonImprovingMoves++;
   const elapsedMs = now - pursuit.lastProgressAt;
-  if (pursuit.nonImprovingMoves < 2 || (pursuit.nonImprovingMoves < 4 && elapsedMs < 6000)) return;
+  const pursuitMs = pursuit.activeElapsedMs + Math.max(0, now - pursuit.startedAt);
+  const reason = visits >= 3 ? 'route-loop' : pursuit.confirmedMoves >= COMBAT_CHASE_MAX_MOVES ? 'movement-budget' :
+    pursuitMs >= COMBAT_CHASE_MAX_MS ? 'time-budget' :
+    pursuit.nonImprovingMoves >= 2 && (pursuit.nonImprovingMoves >= 4 || elapsedMs >= 6000) ? 'no-progress' : null;
+  if (!reason) return;
   const deferred = client.chaseDeferrals ??= new Map();
   for (const [id, entry] of deferred) if (entry.until <= now || entry.mapFileName !== pursuit.mapFileName) deferred.delete(id);
   if (deferred.size >= COMBAT_CHASE_DEFERRAL_LIMIT) deferred.delete(deferred.keys().next().value);
   deferred.set(pursuit.objectId, { mapFileName: pursuit.mapFileName, until: now + COMBAT_CHASE_DEFERRAL_MS });
   context.writer?.add({ type: 'combatChaseDeferred', actor: client.label, phase: context.phase, at: now,
     targetId: pursuit.objectId, mapFileName: pursuit.mapFileName, nonImprovingMoves: pursuit.nonImprovingMoves,
-    elapsedMs, ttlMs: COMBAT_CHASE_DEFERRAL_MS, actual: lifecyclePoint(actual), target: lifecyclePoint(target), attacksSent: 0 });
+    elapsedMs, pursuitMs, confirmedMoves: pursuit.confirmedMoves, reason,
+    ttlMs: COMBAT_CHASE_DEFERRAL_MS, actual: lifecyclePoint(actual), target: lifecyclePoint(target), attacksSent: 0 });
   client.combatPursuit = null;
 }
 
@@ -631,8 +667,12 @@ export function restoreCombatPursuit(original, restored, context, now = Date.now
     ? combatCandidates(restored, context, now).find(entity => entity.objectId === pursuit.objectId && entity.name === pursuit.name) : null;
   // Resume retains the choice and attack-written state, but offline time and a
   // previous socket's receipt sequence cannot count as new chase evidence.
+  const pausedAt = Math.min(now, Math.max(original.combatPursuitPausedAt ?? now, pursuit?.lastMovementAt ?? 0));
   restored.combatPursuit = target ? { ...pursuit, bestDistance: distance(self(restored), target),
-    lastProgressAt: now, nonImprovingMoves: 0, lastReceiptSequence: restored.sequence } : null;
+    lastProgressAt: now, nonImprovingMoves: 0, lastReceiptSequence: restored.sequence,
+    activeElapsedMs: pursuit.activeElapsedMs + Math.max(0, pausedAt - pursuit.startedAt),
+    startedAt: now, lastMovementAt: now, targetPoint: lifecyclePoint(target), routeProgress: null,
+    visited: new Map(pursuit.visited) } : null;
 }
 
 function returnToCombatCoverage(client, context) {
@@ -643,6 +683,63 @@ function returnToCombatCoverage(client, context) {
     const plan = patrol(client, context, home);
     if (plan && (recovering || (insideCombatCoverage(cluster, plan.first) && insideCombatCoverage(cluster, plan.target)))) return plan;
   }
+  return null;
+}
+
+function advanceCombatScout(client, context, reason, now) {
+  const scout = client.combatScout;
+  if (!scout) return;
+  client.combatScoutCursor = (scout.homeIndex + 1) % client.combatCluster.observerHomes.length;
+  context.writer?.add({ type: 'combatScoutAdvanced', actor: client.label, phase: context.phase, at: now,
+    reason, homeIndex: scout.homeIndex, confirmedMoves: scout.confirmedMoves, elapsedMs: now - scout.startedAt });
+  client.combatScout = null;
+}
+
+export function recordCombatScoutMovement(client, context, plan, origin, receipt, status, now = Date.now()) {
+  const scout = client.combatScout, actual = receipt?.payload, kind = plan.command.type;
+  if (context.policy?.activityMode !== 'native' || !scout || !plan.scouting || scout.homeIndex !== plan.scoutHomeIndex ||
+      scout.mapFileName !== String(client.snapshot.mapFileName) || status !== 'success' || !['walk', 'run'].includes(kind) ||
+      receipt?.packet !== 'UserLocation' || receipt.sequence <= scout.lastReceiptSequence || !lifecyclePoint(actual) ||
+      distance(origin, actual) === 0 || !(distance(actual, plan.target) === 0 || (kind === 'run' && distance(actual, plan.first) === 0))) return;
+  scout.lastReceiptSequence = receipt.sequence; scout.confirmedMoves++;
+  const key = `${actual.x},${actual.y}`, visits = (scout.visited.get(key) ?? 0) + 1; scout.visited.set(key, visits);
+  const reason = visits >= 3 ? 'route-loop' : scout.confirmedMoves >= 24 ? 'movement-budget' : now - scout.startedAt >= 20000 ? 'time-budget' :
+    distance(actual, scout.goal) === 0 ? 'waypoint-reached' : null;
+  if (reason) advanceCombatScout(client, context, reason, now);
+}
+
+function scoutCombatCoverage(client, context, now = Date.now()) {
+  const cluster = client.combatCluster, owner = self(client);
+  if (!cluster?.observerHomes?.length || client.pending || !insideCombatCoverage(cluster, owner)) return null;
+  if (client.combatScout?.mapFileName !== String(client.snapshot.mapFileName)) client.combatScout = null;
+  if (client.combatScout && now - client.combatScout.startedAt >= 20000) advanceCombatScout(client, context, 'time-budget', now);
+  const occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead).concat(rejectedWalkObstacles(client));
+  const allowed = point => insideCombatCoverage(cluster, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
+  const initialCursor = client.combatScout?.homeIndex ?? client.combatScoutCursor ?? 0;
+  let searches = 0;
+  searchHomes: for (let offset = 0; offset < Math.min(4, cluster.observerHomes.length); offset++) {
+    const homeIndex = (initialCursor + offset) % cluster.observerHomes.length, home = cluster.observerHomes[homeIndex];
+    const goals = STEPS.map(([dx, dy]) => ({ x: home.x + dx, y: home.y + dy }))
+      .filter(goal => distance(goal, owner) > 0 && protocolMapCellIsWalkable(context.map, goal) && allowed(goal) &&
+        !occupied.some(entity => entity.x === goal.x && entity.y === goal.y))
+      .sort((a, b) => distance(a, owner) - distance(b, owner));
+    if (client.combatScout?.homeIndex === homeIndex) goals.sort((a, b) => Number(distance(b, client.combatScout.goal) === 0) - Number(distance(a, client.combatScout.goal) === 0));
+    for (const goal of goals) {
+      if (searches++ >= 4) break searchHomes;
+      const plan = movement(client, goal, context.map, allowed);
+      if (!plan) continue;
+      if (!client.combatScout || client.combatScout.homeIndex !== homeIndex) {
+        client.combatScout = { mapFileName: String(client.snapshot.mapFileName), homeIndex, goal, startedAt: now,
+          confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map() };
+      } else client.combatScout.goal = goal;
+      client.combatScoutCursor = homeIndex;
+      return { ...plan, scouting: true, scoutHomeIndex: homeIndex };
+    }
+  }
+  // Failed paths never become movement evidence. The next legal opportunity
+  // can consider another finite observer waypoint while normal fallback keeps
+  // its original blocked/latency/offered-load accounting.
+  client.combatScoutCursor = (initialCursor + 1) % cluster.observerHomes.length;
   return null;
 }
 
@@ -697,12 +794,16 @@ function combatPlan(client, context) {
       const plan = movement(client, destination, context.map);
       if (plan && insideCombatCoverage(client.combatCluster, plan.first) && insideCombatCoverage(client.combatCluster, plan.target)) {
         if (native && !client.pending) rememberCombatTarget(client, target);
-        return { ...plan, hunting: target.name, ...(native ? { chaseTargetId: target.objectId } : {}) };
+        return { ...plan, hunting: target.name, ...(native ? { chaseTargetId: target.objectId, chaseTargetPoint: lifecyclePoint(target) } : {}) };
       }
     }
-    if (native && !client.pending && client.combatPursuit?.objectId === target.objectId) client.combatPursuit = null;
+    // A temporarily unavailable path must not erase real chase ACKs. Otherwise
+    // chase / fallback-patrol / chase can revisit one cell forever while each
+    // replan resets the loop and finite pursuit budgets.
+    if (native && !client.pending && client.combatPursuit?.objectId === target.objectId &&
+        client.combatPursuit.confirmedMoves === 0) client.combatPursuit = null;
   }
-  return returnToCombatCoverage(client, context);
+  return (native ? scoutCombatCoverage(client, context) : null) ?? returnToCombatCoverage(client, context);
 }
 
 function recordCombatArrival(client, context) {
@@ -782,7 +883,8 @@ async function action(client, context, planned, preparedPlan) {
   }
   if (kind === 'attack') context.targetClaims.set(command.objectId, client.label);
   const row = { actor: client.label, phase, kind, plannedGameplay: true, scheduledAtMs: plannedAt, sentAtMs: sentAt,
-    plannedTarget: plan.target, targetId: command.objectId, hunting: plan.hunting, chaseTargetId: plan.chaseTargetId, ...nativeMeta,
+    plannedTarget: plan.target, targetId: command.objectId, hunting: plan.hunting, chaseTargetId: plan.chaseTargetId,
+    ...(plan.scouting ? { scouting: true, scoutHomeIndex: plan.scoutHomeIndex } : {}), ...nativeMeta,
     ...(native && client.role === 'combat' ? { declaredHome: client.home, initialCombatTransit: Boolean(plan.initialCombatTransit),
       targetPosition: plan.targetEntity ? { x: plan.targetEntity.x, y: plan.targetEntity.y } : undefined } : {}) };
   try {
@@ -990,7 +1092,9 @@ async function settleClients(context) {
 
 async function measure(context, name, seconds) {
   context.phase = name; context.current = new Measurements(); context.window = new Measurements(); context.aoi.reset();
-  const started = Date.now(), deadline = started + seconds * 1000, windows = [];
+  const phase = beginCapacityPhase(context, name, 'measurement', context.clients.filter(client => client.ready).length);
+  try {
+  const started = phase.startedAtMs, deadline = started + seconds * 1000, windows = [];
   let nextWindow = started + 60000, windowStart = started;
   while (Date.now() < deadline) {
     context.guard.assert(); await sleep(100);
@@ -1008,10 +1112,13 @@ async function measure(context, name, seconds) {
   const fanout = Object.entries(assessment.metrics).filter(([kind]) => kind.startsWith('fanout-'));
   const fanoutPassed = fanout.every(([, value]) => (value.status.timeout ?? 0) / Math.max(1, value.count) < .01 && value.fromSend.p95Ms <= 1000);
   const output = { name, controlledActors: actors.length, completed: true, ...assessment, fanoutPassed,
-    rollingWindows: windows, passed: assessment.passed && fanoutPassed && windows.every(window => window.passed) };
+    rollingWindows: windows, startedAtMs: started, endedAtMs: Date.now(),
+    passed: assessment.passed && fanoutPassed && windows.every(window => window.passed) };
+  finishCapacityPhase(context, phase, true, output.endedAtMs);
   context.writer.add({ type: 'stageComplete', stage: output });
   context.current = null; context.window = null; context.phase = 'ramp';
   return output;
+  } finally { finishCapacityPhase(context, phase, false); }
 }
 
 export async function awaitPendingActions(clients) {
@@ -1025,7 +1132,7 @@ export async function awaitPendingActions(clients) {
 }
 
 async function resumeActor(original, context) {
-  original.paused = true; context.continuous.pause(original.label);
+  original.paused = true; original.combatPursuitPausedAt = Date.now(); context.continuous.pause(original.label);
   await awaitPendingActions(context.clients);
   await original.refresh();
   const before = resumeFingerprint(original.snapshot, original.label);
@@ -1106,8 +1213,9 @@ export async function runCapacity(options) {
     },
     onFailure: reason => { if (policy.profile !== 'movement') guard.stop(reason); },
   });
-  const report = { schemaVersion: 1, runId, endpoint, policy, startedAt: new Date().toISOString(), stages: [], nativeResume: [], savedVerification: [],
+  const report = { schemaVersion: 1, runId, endpoint, policy, startedAt: new Date().toISOString(), stages: [], nativeResume: [], savedVerification: [], phaseWindows: [],
     ordinaryAccountsOnly: true, visualAccepted: false, capacityUpperBound: null, acceptanceScope: 'One real egress, ordinary same-map movement/AOI and the explicitly declared combat subgroup' };
+  context.phaseWindows = report.phaseWindows; context.density = new PublicDensity();
   const lag = monitorEventLoopDelay({ resolution: 20 }); lag.enable();
   let timer, sampler, draining = false, driverLagFailures = 0, initialMemoryAt, finalStage, lockFile, lock;
   const onSignal = () => guard.stop('Operator requested normal load drain');
@@ -1158,7 +1266,7 @@ export async function runCapacity(options) {
           active: client.ready && !client.paused && !client.closed && client.inGame && Boolean(self(client)) })));
         const aoi = context.aoi.sample(context.clients);
         context.continuous.observeAoi(aoi, context.phase);
-        writer.add({ type: 'coverage', phase: context.phase, at: Date.now(), aoi, driver }); lag.reset();
+        writer.add({ type: 'coverage', phase: context.phase, at: Date.now(), aoi, driver, density: context.density.sample(context.clients) }); lag.reset();
         report.peakControlledActors = Math.max(report.peakControlledActors ?? 0, aoi.activeOwners);
       } catch (error) { if (!(error instanceof SafetyStop)) guard.stop(error.message); }
     }, 1000);
@@ -1166,6 +1274,8 @@ export async function runCapacity(options) {
     const combatIndices = new Set(Array.from({ length: policy.combatActors }, (_, i) => Math.floor((i + .5) * policy.stages.at(-1) / policy.combatActors)));
     for (const count of policy.stages) {
       context.phase = 'ramp';
+      const bootstrap = beginCapacityPhase(context, `bootstrap-${count}`, 'bootstrap', count);
+      try {
       while (context.clients.length < count) {
         guard.assert(); const index = context.clients.length;
         const client = new CapacityClient(endpoint, context.pool.accounts[index], context); context.allClients.push(client);
@@ -1203,6 +1313,8 @@ export async function runCapacity(options) {
         await guard.afterAdmission(Date.now());
       }
       await settleClients(context);
+      finishCapacityPhase(context, bootstrap, true);
+      } finally { finishCapacityPhase(context, bootstrap, false); }
       const stage = await measure(context, `stage-${count}`, policy.stageSeconds); report.stages.push(stage);
       options.onProgress?.({ stage: stage.name, passed: stage.passed });
       report.highestMeasuredStage = count;
@@ -1262,6 +1374,7 @@ export async function runCapacity(options) {
     report.finishedAt = new Date().toISOString(); report.safetyStopped = guard.stopped; report.safetyReason = guard.reason;
     report.cleanupErrors = context.cleanupErrors; report.metrics = aggregate.summary(); report.samples = aggregate.samples;
     report.continuousAcceptance = context.continuous.summary();
+    report.density = context.density.summary();
     report.peakServerActive = guard.peakServerActive; report.bytes = context.allClients.reduce((sum, client) => ({ sent: sum.sent + client.bytes.sent, received: sum.received + client.bytes.received }), { sent: 0, received: 0 });
     report.bytesDefinition = 'Physical WebSocket payload bytes, including catalog batch/gzip headers and excluding WebSocket/TLS framing';
     report.activityMode = policy.activityMode;

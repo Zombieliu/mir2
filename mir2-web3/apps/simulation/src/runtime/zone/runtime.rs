@@ -64,6 +64,7 @@ use crate::runtime::map_events::{
 
 pub(super) mod armadillo_ai;
 mod checkpoint;
+mod combat_random;
 #[cfg(any(test, feature = "test-support"))]
 mod crowded_fixture;
 mod experience_ownership;
@@ -364,6 +365,8 @@ pub(super) struct ZonePlayerFiniteControlPoisonClock {
 // (the derive was vestigial). See docs/L2-ECS-ZONE-DESIGN.md.
 #[derive(Debug)]
 pub struct ZoneRuntime {
+    // One replayable business-random stream; never a client-selected seed.
+    combat_random: combat_random::AuthoritativeCombatRandom,
     five_class_skills: five_class_skills::FiveClassSkillState,
     five_class_pvp: five_class_pvp::FiveClassPvpState,
     // Live operation clock for Source friendly trap visibility; never recovered online.
@@ -672,6 +675,18 @@ impl ZoneRuntime {
         Self::new_with_collision(key, collision)
     }
 
+    /// Only the manager's committed map-birth stream may supply this seed.
+    /// Restoring an existing map retains its own committed draw position.
+    pub(super) fn new_with_combat_seed(key: ZoneKey, seed: [u8; 32]) -> Self {
+        let collision = ZoneCollision::for_map(&key.map_file_name);
+        Self::new_with_collision_config_and_random(
+            key,
+            collision,
+            authoritative_zone_npc_teleport_config(),
+            combat_random::AuthoritativeCombatRandom::from_seed(seed),
+        )
+    }
+
     /// L2 step-1 invariant: the ECS player mirror must exactly match the
     /// authoritative `players` map (same sessions, object ids, and positions).
     /// Returns true when they agree. Test-only; the mirror is not yet read by
@@ -707,7 +722,22 @@ impl ZoneRuntime {
         collision: ZoneCollision,
         npc_teleport_config: ZoneNpcTeleportConfig,
     ) -> Self {
+        Self::new_with_collision_config_and_random(
+            key,
+            collision,
+            npc_teleport_config,
+            combat_random::AuthoritativeCombatRandom::fresh(),
+        )
+    }
+
+    fn new_with_collision_config_and_random(
+        key: ZoneKey,
+        collision: ZoneCollision,
+        npc_teleport_config: ZoneNpcTeleportConfig,
+        combat_random: combat_random::AuthoritativeCombatRandom,
+    ) -> Self {
         Self {
+            combat_random,
             mining: mining::ZoneMiningState::default(),
             five_class_skills: five_class_skills::FiveClassSkillState::default(),
             five_class_pvp: five_class_pvp::FiveClassPvpState::default(),
@@ -776,10 +806,11 @@ impl ZoneRuntime {
     /// AOI grids are derived mirrors, so they are rebuilt from the cloned
     /// authoritative maps instead of requiring `bevy_ecs::World: Clone`.
     fn transaction_fork(&self) -> Self {
-        let mut fork = Self::new_with_collision_and_npc_teleport_config(
+        let mut fork = Self::new_with_collision_config_and_random(
             self.key.clone(),
             self.collision.clone(),
             self.npc_teleport_config.clone(),
+            self.combat_random.clone(),
         );
         fork.players = self.players.clone();
         fork.five_class_skills = self.five_class_skills.clone();

@@ -1,0 +1,85 @@
+{
+  "scope": "Final Node source and frozen new Gateway release/data; bounded strict native5 viability gate, not capacity acceptance",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 102939,
+      "sha256": "bcac9f576e0302e2160fd58891905c1b7cb7f6cbada6329583e7e525f9a90e28"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 36587,
+      "sha256": "57ed24a66b065a758694b3bef7d99ce54ae6081d9d1b6e09672d8bc93dd522d4"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "apps/web/scripts/playtest-native-resume-smoke.mjs",
+      "bytes": 20058,
+      "sha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2"
+    },
+    {
+      "file": "apps/web/scripts/playtest-load-smoke.mjs",
+      "bytes": 38588,
+      "sha256": "3dc4d65c2e514a075e11a84799ac3f1fafbfcb8df51fefbc648dc3a3c24f7fc0"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "file": "apps/web/scripts/playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "file": "packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-accessibility-5-01/native-5-gate-01/scenario.json",
+      "bytes": 18978,
+      "sha256": "60e5ccba87112fb4ae998320f7f8c1458168a4ac0db86a27d2bfaca4f8542d3f"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-accessibility-5-01/accessibility-south-openfield.json",
+      "bytes": 117101,
+      "sha256": "88dc67d637cdf22f7723c24ae8f5b1b1e91934300ebdef71553266f26d88bcd3"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/backend-source-frozen.json",
+      "bytes": 6582,
+      "sha256": "ce83e56f3d1dfa0475b8ff22ab0852a4731210bbe3f29b1cfc4ef1718002699e"
+    }
+  ]
+}

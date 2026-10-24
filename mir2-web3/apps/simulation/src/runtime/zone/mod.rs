@@ -1,6 +1,11 @@
 mod aoi;
 mod aoi_grid;
 mod collision;
+mod contract;
+pub use contract::{
+    EffectEnvelope, EffectReplayReceipt, EntityLifeRef, LogicalWorldId, PayloadDigest,
+    StableActionId, WorldMapEffectOwner, WorldPartitionKey,
+};
 mod ecs;
 mod experience;
 pub use experience::{
@@ -26,7 +31,7 @@ mod intelligent_creatures;
 pub use intelligent_creatures::{CreatureOperation, CreatureOwner, CreaturePickupIntent};
 
 pub use collision::{ZoneBounds, ZoneCollision};
-pub use manager::{ZoneManager, ZoneNpcPopulationReadSet};
+pub use manager::{ManagerAdmissionReceipt, ZoneManager, ZoneNpcPopulationReadSet};
 pub use partition::{
     CellCoord, CellSize, MapEffectOwnerRef, PartitionId, PartitionKey, PartitionLocation,
     TopologyRevision, ZonePartitionDescriptor,

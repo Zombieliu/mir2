@@ -201,6 +201,7 @@ impl Drop for PendingSerialAction {
 struct QueuedSocketInput {
     input: Option<ParsedSocketInput>,
     queued_at: Instant,
+    received_at: Instant,
     _pending: PendingSerialAction,
     _buffered_bytes: OwnedSemaphorePermit,
 }
@@ -210,10 +211,12 @@ impl QueuedSocketInput {
         input: ParsedSocketInput,
         pending_count: Arc<AtomicUsize>,
         buffered_bytes: OwnedSemaphorePermit,
+        received_at: Instant,
     ) -> Self {
         Self {
             input: Some(input),
             queued_at: Instant::now(),
+            received_at,
             _pending: PendingSerialAction::new(pending_count),
             _buffered_bytes: buffered_bytes,
         }
@@ -2401,6 +2404,26 @@ enum SessionAction {
     Tick,
 }
 
+fn request_metrics_class(action: &SessionAction) -> crate::zone_metrics::RequestClass {
+    match action {
+        SessionAction::Packet(
+            ClientPacket::Walk { .. } | ClientPacket::Run { .. } | ClientPacket::Turn { .. },
+        ) => crate::zone_metrics::RequestClass::MovementAdmission,
+        SessionAction::PasskeyLogin { .. }
+        | SessionAction::Packet(
+            ClientPacket::NewAccount { .. }
+            | ClientPacket::ChangePassword { .. }
+            | ClientPacket::Login { .. }
+            | ClientPacket::NewCharacter { .. }
+            | ClientPacket::DeleteCharacter { .. }
+            | ClientPacket::StartGame { .. }
+            | ClientPacket::LogOut
+            | ClientPacket::Disconnect,
+        ) => crate::zone_metrics::RequestClass::Lifecycle,
+        _ => crate::zone_metrics::RequestClass::Immediate,
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum QuestOperationRequest {
     AcceptQuest {
@@ -2470,6 +2493,7 @@ struct HealthResponse {
     ai_live: crate::ai_live::AiLiveMetrics,
     channel_identity: ChannelIdentityRegistryStatus,
     identity_backend: &'static str,
+    zone_metrics: crate::zone_metrics::ZoneMetricsSnapshot,
 }
 
 #[derive(Debug, Serialize)]
@@ -2911,6 +2935,7 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         ai_live: state.ai_live.metrics(),
         channel_identity: channel_identity_status,
         identity_backend: state.identity.backend_label(),
+        zone_metrics: crate::zone_metrics::snapshot(),
     })
 }
 
@@ -4914,6 +4939,7 @@ fn zone_movement_packet_for_action(action: &SessionAction) -> Option<ClientPacke
 
 async fn try_handle_zone_movement_from_reader(
     action: &SessionAction,
+    received_at: Instant,
     sender: &SharedWebSocketSender,
     movement_ingress: &SharedZoneMovementIngressSlot,
     serial_execution_gate: &SharedSerialExecutionGate,
@@ -4941,15 +4967,34 @@ async fn try_handle_zone_movement_from_reader(
     let Some(call) = movement_drain.begin() else {
         return Err("socket movement ingress has ended".to_string());
     };
-    let execution = tokio::task::spawn_blocking(move || {
+    let execution = match tokio::task::spawn_blocking(move || {
         let _call = call;
         ingress.try_execute(packet)
     })
     .await
-    .map_err(|error| format!("zone movement ingress task failed: {error}"))??;
+    {
+        Ok(Ok(execution)) => execution,
+        result => {
+            crate::zone_metrics::record_request(
+                crate::zone_metrics::RequestClass::MovementAdmission,
+                received_at.elapsed(),
+                false,
+            );
+            return Err(match result {
+                Ok(Err(error)) => error,
+                Err(error) => format!("zone movement ingress task failed: {error}"),
+                Ok(Ok(_)) => unreachable!(),
+            });
+        }
+    };
     let Some(execution) = execution else {
         return Ok(false);
     };
+    crate::zone_metrics::record_request(
+        crate::zone_metrics::RequestClass::MovementAdmission,
+        received_at.elapsed(),
+        true,
+    );
     let responses = execution.packets;
     log_move_action(move_log, &responses);
     for packet in responses {
@@ -5161,6 +5206,7 @@ fn spawn_socket_reader(
                     return;
                 }
             };
+            let received_at = Instant::now();
             if message.len() > WEBSOCKET_MAX_MESSAGE_BYTES {
                 return;
             }
@@ -5180,6 +5226,7 @@ fn spawn_socket_reader(
                             invalid_browser_command_input(&message, &error),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
                         )))
                         .await
                         .is_err()
@@ -5204,6 +5251,7 @@ fn spawn_socket_reader(
                             parsed,
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
                         )))
                         .await
                         .is_err()
@@ -5218,6 +5266,7 @@ fn spawn_socket_reader(
                             ParsedSocketInput::ClientCapabilities(capabilities),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
                         )))
                         .await
                         .is_err()
@@ -5232,6 +5281,7 @@ fn spawn_socket_reader(
                             ParsedSocketInput::ResumeSession(request.credential),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
                         )))
                         .await
                         .is_err()
@@ -5251,6 +5301,7 @@ fn spawn_socket_reader(
                                 ParsedSocketInput::ProtocolError(error),
                                 Arc::clone(&reader_pending_count),
                                 message_permit,
+                                received_at,
                             )))
                             .await
                             .is_err()
@@ -5273,6 +5324,7 @@ fn spawn_socket_reader(
                             input,
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
                         )))
                         .await
                         .is_err()
@@ -5293,6 +5345,7 @@ fn spawn_socket_reader(
             }
             match try_handle_zone_movement_from_reader(
                 &action,
+                received_at,
                 &sender,
                 &movement_ingress,
                 &serial_execution_gate,
@@ -5310,6 +5363,7 @@ fn spawn_socket_reader(
                             ParsedSocketInput::ProtocolError(error),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
                         )))
                         .await
                         .is_err()
@@ -5328,6 +5382,7 @@ fn spawn_socket_reader(
                     },
                     Arc::clone(&reader_pending_count),
                     message_permit,
+                    received_at,
                 )))
                 .await
                 .is_err()
@@ -6216,6 +6271,7 @@ async fn handle_socket_work(
                         tokio::task::block_in_place(|| session.supports_magic_key_assignment(*spell, *key, *old_key)),
                     _ => false,
                 };
+                let request_class = request_metrics_class(&action);
                 let execution_result = match catch_gateway_panic("web session action", || {
                     let _slow_stage = GatewaySlowStage::start("session_action.execute");
                     tokio::task::block_in_place(|| {
@@ -6240,8 +6296,12 @@ async fn handle_socket_work(
                         }
                     })
                 }) {
-                    Ok(Ok(execution)) => execution,
+                    Ok(Ok(execution)) => {
+                        crate::zone_metrics::record_request(request_class, queued_input.received_at.elapsed(), true);
+                        execution
+                    },
                     Ok(Err(error)) => {
+                        crate::zone_metrics::record_request(request_class, queued_input.received_at.elapsed(), false);
                         release_pending_start_game_route_lease(
                             session_cache.as_ref(),
                             session,
@@ -6279,6 +6339,7 @@ async fn handle_socket_work(
                         continue;
                     }
                     Err(error) => {
+                        crate::zone_metrics::record_request(request_class, queued_input.received_at.elapsed(), false);
                         release_pending_start_game_route_lease(
                             session_cache.as_ref(),
                             session,
@@ -18730,6 +18791,7 @@ mod tests {
                     .clone()
                     .try_acquire_owned()
                     .expect("test input byte permit should be available"),
+                std::time::Instant::now(),
             );
             assert_eq!(pending.load(std::sync::atomic::Ordering::Acquire), 1);
             assert_eq!(bytes.available_permits(), 0);

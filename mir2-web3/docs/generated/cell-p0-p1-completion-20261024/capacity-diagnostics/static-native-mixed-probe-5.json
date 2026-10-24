@@ -1,0 +1,67 @@
+{
+  "mapFileName": "0",
+  "anchors": [
+    {
+      "x": 311,
+      "y": 581
+    },
+    {
+      "x": 315,
+      "y": 581
+    },
+    {
+      "x": 319,
+      "y": 581
+    },
+    {
+      "x": 311,
+      "y": 585
+    },
+    {
+      "x": 315,
+      "y": 585
+    }
+  ],
+  "monsterNames": [
+    "Scarecrow",
+    "Hen",
+    "Deer",
+    "HookingCat",
+    "RakingCat"
+  ],
+  "generated": {
+    "staticOnly": true,
+    "spacing": 4,
+    "origin": {
+      "x": 288,
+      "y": 616
+    },
+    "center": {
+      "x": 315,
+      "y": 585
+    },
+    "actors": 5,
+    "patrolFootprint": "3x3 clear, non-overlapping cells excluding known stationary NPCs",
+    "stationaryNpcCount": 46,
+    "meanVisiblePeers": 4,
+    "minimumVisiblePeers": 4,
+    "maximumVisiblePeers": 4,
+    "limitation": "Static collision and doorway planning only; no login, movement, live occupancy, monster supply or performance acceptance",
+    "naturalMonsterSupplyTested": false,
+    "intendedUse": "5-actor native probe only; one ordinary fighter and four public AOI witnesses; live supply not yet accepted"
+  },
+  "patrolSpan": 2,
+  "combatClusters": [
+    {
+      "combatActorIndices": [
+        2
+      ],
+      "movementActorIndices": [
+        0,
+        1,
+        3,
+        4
+      ]
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "mapFileName": "0",
+  "anchors": [
+    {
+      "x": 252,
+      "y": 625
+    },
+    {
+      "x": 258,
+      "y": 631
+    },
+    {
+      "x": 265,
+      "y": 636
+    },
+    {
+      "x": 289,
+      "y": 625
+    },
+    {
+      "x": 261,
+      "y": 643
+    }
+  ],
+  "patrolSpan": 2,
+  "monsterNames": [
+    "Deer",
+    "Scarecrow"
+  ],
+  "combatClusters": [
+    {
+      "combatActorIndices": [
+        2
+      ],
+      "movementActorIndices": [
+        0,
+        1,
+        3,
+        4
+      ]
+    }
+  ],
+  "generated": {
+    "staticOnly": true,
+    "observedNaturalTargets": [
+      {
+        "name": "Deer",
+        "x": 256,
+        "y": 621,
+        "covered": true
+      },
+      {
+        "name": "Scarecrow",
+        "x": 257,
+        "y": 642,
+        "covered": true
+      },
+      {
+        "name": "Scarecrow",
+        "x": 258,
+        "y": 640,
+        "covered": true
+      },
+      {
+        "name": "Scarecrow",
+        "x": 258,
+        "y": 641,
+        "covered": true
+      },
+      {
+        "name": "Scarecrow",
+        "x": 286,
+        "y": 628,
+        "covered": true
+      },
+      {
+        "name": "Scarecrow",
+        "x": 286,
+        "y": 623,
+        "covered": true
+      },
+      {
+        "name": "Scarecrow",
+        "x": 287,
+        "y": 616,
+        "covered": true
+      },
+      {
+        "name": "Deer",
+        "x": 288,
+        "y": 624,
+        "covered": true
+      }
+    ],
+    "staticProof": {
+      "homes": [
+        {
+          "x": 252,
+          "y": 625
+        },
+        {
+          "x": 258,
+          "y": 631
+        },
+        {
+          "x": 265,
+          "y": 636
+        },
+        {
+          "x": 289,
+          "y": 625
+        },
+        {
+          "x": 261,
+          "y": 643
+        }
+      ],
+      "visitedCells": 10125,
+      "mapCells": 490000,
+      "footprintCells": 45
+    },
+    "sourcePublicSnapshot": "C:/mir2-build/p01-completion-20261024/probe-natural-5-02/ordinary-public-snapshot.json",
+    "sustainableSupplyAccepted": false
+  }
+}
