@@ -10,7 +10,7 @@
 - [独立复核](protocol-full-lifecycle/1792854504282-92969528.independent-audit.json)：双端死亡 ID/地点匹配、命令白名单、凭据脱敏、冻结源码和二进制摘要核对。进程正常退出、两端口释放及六项连接计数归零只证明本次进程/连接清理。
 - P1 simulation 合同 **26/26**、manager 单元 **16/16**；网关恢复/交接/经济等相邻回归 **113 passed / 1 ignored**，忽略项需要独立 PostgreSQL 测试库。冻结后的网关合同及指标复核 **24/24**。
 - 冻结源码的 simulation 安全、跨图掉落、死亡与共享 Zone 相邻回归重新通过 **254 项不同测试**：[默认配置 251 项](validation/p01-simulation-adjacent-frozen-default.log)，再以 `test-support` 跑[死亡/在线参考 5 项](validation/p01-simulation-death-frozen-reference.log)，其中两项与默认配置重复，不重复计数。
-- 容量工具最终相关回归 [111/111](validation/capacity-probe10-boundary-complete-tests.log)、证据校验器 [14/14](validation/evidence-verifier-root-final-03.log)；27 个受影响 Rust 文件的[只读格式检查](validation/p01-rustfmt-check.json)通过。
+- 容量工具最终相关回归 [111/111](validation/capacity-probe10-boundary-complete-tests.log)、证据校验器加固后 [14/14](validation/evidence-verifier-input-closure-04.log)；27 个受影响 Rust 文件的[只读格式检查](validation/p01-rustfmt-check.json)通过。校验器同时拒绝冻结清单外新增/改动的 Rust/Cargo 输入；选择历史 backend commit 不放宽当前生命周期驱动的原始摘要校验。
 
 本轮实际 Release SHA-256：`99bca561822a2d02bd4a012546c228923f3f34e6612612085d6caed9f82ee50d`。受影响 Rust/Cargo 输入摘要：`470606cf18810178f75e488dd0b6ad9c4c75e346113c6e7bd594afc7f45d86ac`，基线 commit `68f810b442321ae66360a2be18e31dc309efdaf7`。
 
@@ -34,7 +34,11 @@
 
 [既有 7 轮失败探针](capacity-diagnostics/collection-verification.json)保持原始报告和原始数据摘要，容量通过数为 **0**。旧开发版指标不满足当前 v2 的部分明确保留为无效观测；新 Release 的失败也不因工具修复而追认通过。现有 100 人预备场景的合法观察域、持续供给尚未满足，不能直接启动正式长跑。
 
-新增 10 人诊断只将 `probe` 人数上限从 5 扩至 10，标准模式上限 100 及全部活动/时延/滚动门槛不变；`probe` 即使延长时长也不能取得正式容量标记。新的连通 9 观察者场景只通过静态筛选，真实 10 人可行性运行尚待执行。
+新增 10 人诊断只将 `probe` 人数上限从 5 扩至 10，标准模式上限 100 及全部活动/时延/滚动门槛不变；`probe` 即使延长时长也不能取得正式容量标记。新的连通 9 观察者场景已执行真实 10 人可行性诊断：第一次被旧探针人数上限在登录前拒绝；修复工具后的第二次在 bootstrap 38.846 秒、驱动完成 9 人准入时，因进程 IO 操作数连续三次超过原有 100,000/s 保护阈值停止，没有进入测量阶段，不能列为容量通过。
+
+三个超限采样窗中，写操作占比超过 99.2%，约 101,205—102,517 次/s，平均 2.73—4.34 字节/次；同期写字节约 0.26—0.42 MiB/s，CPU 约 0.38—0.92 逻辑核等价时间。Windows 进程 IO 计数覆盖文件、网络及设备，不等于物理磁盘 IOPS。这次停止不证明机器算力或 9 人容量已耗尽；原始失败仍保留。
+
+观战 JSONL 原先直接向 File 序列化，每个小片段都触发写调用。现用 64 KiB 缓冲、显式 flush，并在错误路径避免 Drop 隐式重试；不改变帧内容、录制开关或资源保护阈值。[冻结 lockfile 下相关回归 16/16](validation/p0-spectator-buffer-locked-tests.log)验证字节、追加顺序及短写/中断/编码/写入/flush 失败。256,873 字节测试帧的底层 Write 调用从 139,341 次降到 4 次；这是测试计数，不能当作真实进程 IO 改善结论。新 Release 构建和同场景复测待完成；上述完整 16/16 生命周期仍对应旧 Release `99bca561…`。
 
 ## 本轮范围
 

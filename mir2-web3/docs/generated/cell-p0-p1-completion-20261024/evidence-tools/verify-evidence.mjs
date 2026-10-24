@@ -394,6 +394,15 @@ export async function verifyBackend(root, workspace, commit) {
   check(pin.schemaVersion === 1 && pin.files?.length === 32 && pin.frozenSourceManifestSha256 === frozen.sourceManifestSha256 &&
     pin.frozenGitBase === frozen.gitBase && sha(Buffer.from(JSON.stringify(pin.files))) === pin.normalizedManifestSha256, 'Invalid normalized code pin binding');
   if (commit) check(/^[a-f0-9]{40}$/.test(commit), 'Historical backend commit must be a full 40-character SHA');
+  check(/^[a-f0-9]{40}$/.test(frozen.gitBase), 'Frozen backend base must be an immutable Git commit');
+  const backendInput = name => name.startsWith('mir2-web3/') && (name.endsWith('.rs') ||
+    /(?:^|\/)Cargo\.(?:toml|lock)$/.test(name) || name.startsWith('mir2-web3/.cargo/'));
+  const changed = git(workspace, ['diff', '--name-only', '-z', frozen.gitBase, ...(commit ? [commit] : []), '--', 'mir2-web3'])
+    .toString('utf8').split('\0').filter(backendInput);
+  if (!commit) changed.push(...git(workspace, ['ls-files', '--others', '--exclude-standard', '-z', '--', 'mir2-web3'])
+    .toString('utf8').split('\0').filter(backendInput));
+  const declared = new Set(frozen.files.map(row => row.path));
+  check(changed.every(name => declared.has(name)), 'Backend inputs outside the frozen manifest changed; select the matching historical commit');
   for (const [index, row] of frozen.files.entries()) {
     const normal = pin.files[index];
     check(safeRelative(row.path) && /^mir2-web3\/(?:apps\/(?:gateway|simulation)\/.*\.rs|(?:.*\/)?Cargo\.(?:toml|lock)|\.cargo\/.*)$/.test(row.path) &&

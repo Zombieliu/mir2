@@ -153,6 +153,9 @@ test('explicit historical Git blobs preserve the 32 frozen code inputs after wor
     `core.hooksPath=${path.join(workspace, 'empty-hooks')}`, ...args], { cwd: workspace, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] });
   try {
     const root = path.join(workspace, 'evidence'); await fs.mkdir(path.join(root, 'evidence-tools'), { recursive: true });
+    git(['init', '--quiet']);
+    git(['-c', 'user.name=Verifier Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '--allow-empty', '--quiet', '-m', 'Immutable base fixture']);
+    const base = git(['rev-parse', 'HEAD']).toString().trim();
     await fs.writeFile(path.join(workspace, '.gitattributes'), '* text eol=lf\n');
     const files = [], normalized = [];
     for (let index = 0; index < 32; index++) {
@@ -162,15 +165,25 @@ test('explicit historical Git blobs preserve the 32 frozen code inputs after wor
       files.push({ path: relative, bytes: raw.length, sha256: digest(raw) });
       normalized.push({ path: relative, rawBytes: raw.length, rawSha256: digest(raw), lfBytes: lf.length, lfSha256: digest(lf) });
     }
-    const frozen = { schemaVersion: 1, files, sourceManifestSha256: digest(Buffer.from(JSON.stringify(files))), gitBase: 'b'.repeat(40) };
+    const frozen = { schemaVersion: 1, files, sourceManifestSha256: digest(Buffer.from(JSON.stringify(files))), gitBase: base };
     const pin = { schemaVersion: 1, files: normalized, frozenSourceManifestSha256: frozen.sourceManifestSha256,
       frozenGitBase: frozen.gitBase, normalizedManifestSha256: digest(Buffer.from(JSON.stringify(normalized))),
       releaseBuild: { profile: 'release', sha256: 'a'.repeat(64), sourceManifestSha256: frozen.sourceManifestSha256 } };
     const pinFile = path.join(root, 'evidence-tools/normalized-code-pin.json');
     await fs.writeFile(path.join(root, 'backend-source-frozen.json'), JSON.stringify(frozen)); await fs.writeFile(pinFile, JSON.stringify(pin));
-    git(['init', '--quiet']); git(['add', '--all']); git(['-c', 'user.name=Verifier Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '--quiet', '-m', 'Frozen code fixture']);
+    git(['add', '--all']); git(['-c', 'user.name=Verifier Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '--quiet', '-m', 'Frozen code fixture']);
     const commit = git(['rev-parse', 'HEAD']).toString().trim();
     await verifyBackend(root, workspace);
+    const extra = 'mir2-web3/apps/gateway/src/new_recording_writer.rs';
+    await fs.mkdir(path.dirname(path.join(workspace, extra)), { recursive: true });
+    await fs.writeFile(path.join(workspace, extra), '// unlisted backend input\n');
+    await assert.rejects(verifyBackend(root, workspace), /outside the frozen manifest/);
+    await verifyBackend(root, workspace, commit);
+    git(['add', '--', extra]);
+    git(['-c', 'user.name=Verifier Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '--quiet', '-m', 'Additional backend input fixture']);
+    const laterCommit = git(['rev-parse', 'HEAD']).toString().trim();
+    await assert.rejects(verifyBackend(root, workspace, laterCommit), /outside the frozen manifest/);
+    await fs.unlink(path.join(workspace, extra));
     await fs.writeFile(path.join(workspace, files[0].path), '// later P2 edit\n');
     await assert.rejects(verifyBackend(root, workspace), /differs from release freeze/);
     await verifyBackend(root, workspace, commit);
