@@ -39,6 +39,7 @@ async fn transport_close_reader_ends_stalled_real_socket_work() {
                                 writer_terminal,
                                 reader_drain,
                                 "close-reader-fixture".to_owned(),
+                                None,
                             );
                             let _occupied = sender.lock_for_test().await;
                             ready.send(()).unwrap();

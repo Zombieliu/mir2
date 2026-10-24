@@ -182,6 +182,238 @@ enum ParsedSocketInput {
     ProtocolError(String),
 }
 
+const SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER: u64 = 9_007_199_254_740_991;
+const SOCKET_DIAGNOSTIC_PHASE_BITS: u32 = 8;
+const SOCKET_DIAGNOSTIC_MAX_START_US: u64 = u64::MAX >> SOCKET_DIAGNOSTIC_PHASE_BITS;
+static NEXT_SOCKET_DIAGNOSTIC_ID: AtomicU64 = AtomicU64::new(1);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(u8)]
+enum SocketDiagnosticPhase {
+    SelectWait = 1,
+    Input,
+    InputGate,
+    InputOwnerHeartbeat,
+    Chat,
+    Injection,
+    Spectator,
+    AiLive,
+    RuntimeTick,
+    IdentityCache,
+    IdentityDatabase,
+    ResumeCredential,
+    OwnerHeartbeat,
+    TickGate,
+    Preflight,
+}
+
+impl SocketDiagnosticPhase {
+    fn label(self) -> &'static str {
+        match self {
+            Self::SelectWait => "select_wait",
+            Self::Input => "input",
+            Self::InputGate => "input_gate",
+            Self::InputOwnerHeartbeat => "input_owner_heartbeat",
+            Self::Chat => "chat",
+            Self::Injection => "injection",
+            Self::Spectator => "spectator",
+            Self::AiLive => "ai_live",
+            Self::RuntimeTick => "runtime_tick",
+            Self::IdentityCache => "identity_cache",
+            Self::IdentityDatabase => "identity_database",
+            Self::ResumeCredential => "resume_credential",
+            Self::OwnerHeartbeat => "owner_heartbeat",
+            Self::TickGate => "tick_gate",
+            Self::Preflight => "preflight",
+        }
+    }
+
+    fn unpack(value: u64) -> Option<Self> {
+        match value & 0xff {
+            1 => Some(Self::SelectWait),
+            2 => Some(Self::Input),
+            3 => Some(Self::InputGate),
+            4 => Some(Self::InputOwnerHeartbeat),
+            5 => Some(Self::Chat),
+            6 => Some(Self::Injection),
+            7 => Some(Self::Spectator),
+            8 => Some(Self::AiLive),
+            9 => Some(Self::RuntimeTick),
+            10 => Some(Self::IdentityCache),
+            11 => Some(Self::IdentityDatabase),
+            12 => Some(Self::ResumeCredential),
+            13 => Some(Self::OwnerHeartbeat),
+            14 => Some(Self::TickGate),
+            15 => Some(Self::Preflight),
+            _ => None,
+        }
+    }
+
+    fn pack(self, start_us: u64) -> Option<u64> {
+        (start_us <= SOCKET_DIAGNOSTIC_MAX_START_US)
+            .then(|| (start_us << SOCKET_DIAGNOSTIC_PHASE_BITS) | u64::from(self as u8))
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum SocketDiagnosticInputClass {
+    Move,
+    AttackV2,
+    Other,
+}
+
+impl SocketDiagnosticInputClass {
+    fn for_input(input: &ParsedSocketInput) -> Self {
+        match input {
+            ParsedSocketInput::AttackV2(_) => Self::AttackV2,
+            ParsedSocketInput::Action {
+                action:
+                    SessionAction::Packet(
+                        ClientPacket::Walk { .. }
+                        | ClientPacket::Run { .. }
+                        | ClientPacket::Turn { .. },
+                    ),
+                ..
+            } => Self::Move,
+            _ => Self::Other,
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::Move => "move",
+            Self::AttackV2 => "attack_v2",
+            Self::Other => "other",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct SocketQueuedDiagnostic {
+    phase: SocketDiagnosticPhase,
+    phase_elapsed_ms: u64,
+    input_class: SocketDiagnosticInputClass,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct SocketSlowContext {
+    connection: u64,
+    queued: Option<SocketQueuedDiagnostic>,
+}
+
+struct SocketDiagnosticState {
+    connection: u64,
+    origin: Instant,
+    // One main-task writer and reader-task snapshots. Phase and start must be
+    // one atomic value; two independent atomics would allow a torn observation.
+    phase_and_start: AtomicU64,
+}
+
+type SocketDiagnostics = Option<Arc<SocketDiagnosticState>>;
+
+fn allocate_socket_diagnostics(enabled: bool, counter: &AtomicU64) -> SocketDiagnostics {
+    if !enabled {
+        return None;
+    }
+    let connection = counter
+        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |next| {
+            (next != 0 && next <= SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER).then(|| next + 1)
+        })
+        .ok()?;
+    Some(Arc::new(SocketDiagnosticState {
+        connection,
+        origin: Instant::now(),
+        phase_and_start: AtomicU64::new(SocketDiagnosticPhase::SelectWait.pack(0)?),
+    }))
+}
+
+impl SocketDiagnosticState {
+    fn now_us(&self) -> Option<u64> {
+        let now = u64::try_from(self.origin.elapsed().as_micros()).ok()?;
+        (now <= SOCKET_DIAGNOSTIC_MAX_START_US).then_some(now)
+    }
+
+    fn context(&self) -> SocketSlowContext {
+        SocketSlowContext {
+            connection: self.connection,
+            queued: None,
+        }
+    }
+
+    fn queued_context(&self, input: &ParsedSocketInput) -> Option<SocketSlowContext> {
+        let packed = self.phase_and_start.load(Ordering::Acquire);
+        // Read the clock after the atomic so a newer phase cannot be paired
+        // with an older observation time. Overflow omits context, never wraps.
+        let now_us = self.now_us()?;
+        self.context_from_snapshot(packed, now_us, SocketDiagnosticInputClass::for_input(input))
+    }
+
+    fn context_from_snapshot(
+        &self,
+        packed: u64,
+        now_us: u64,
+        input_class: SocketDiagnosticInputClass,
+    ) -> Option<SocketSlowContext> {
+        if now_us > SOCKET_DIAGNOSTIC_MAX_START_US {
+            return None;
+        }
+        let phase = SocketDiagnosticPhase::unpack(packed)?;
+        let elapsed_us = now_us.checked_sub(packed >> SOCKET_DIAGNOSTIC_PHASE_BITS)?;
+        Some(SocketSlowContext {
+            connection: self.connection,
+            queued: Some(SocketQueuedDiagnostic {
+                phase,
+                phase_elapsed_ms: elapsed_us / 1_000,
+                input_class,
+            }),
+        })
+    }
+}
+
+struct SocketDiagnosticPhaseGuard {
+    state: Arc<SocketDiagnosticState>,
+    previous: u64,
+    slow_stage: Option<GatewaySlowStage>,
+}
+
+impl SocketDiagnosticPhaseGuard {
+    fn enter(
+        diagnostics: &SocketDiagnostics,
+        phase: SocketDiagnosticPhase,
+        label: Option<&'static str>,
+    ) -> Option<Self> {
+        let state = diagnostics.as_ref()?;
+        let packed = phase.pack(state.now_us()?)?;
+        let previous = state.phase_and_start.swap(packed, Ordering::AcqRel);
+        Some(Self {
+            state: Arc::clone(state),
+            previous,
+            slow_stage: label.map(|label| GatewaySlowStage::for_socket(label, diagnostics)),
+        })
+    }
+}
+
+impl Drop for SocketDiagnosticPhaseGuard {
+    fn drop(&mut self) {
+        // Include any synchronous slow-log write in the observed phase until
+        // it really finishes. Child scopes retain the parent's original start.
+        drop(self.slow_stage.take());
+        let restored = if SocketDiagnosticPhase::unpack(self.previous)
+            == Some(SocketDiagnosticPhase::SelectWait)
+        {
+            self.state
+                .now_us()
+                .and_then(|now| SocketDiagnosticPhase::SelectWait.pack(now))
+                .unwrap_or(0)
+        } else {
+            self.previous
+        };
+        self.state
+            .phase_and_start
+            .store(restored, Ordering::Release);
+    }
+}
+
 struct PendingSerialAction {
     pending_count: Arc<AtomicUsize>,
 }
@@ -203,6 +435,7 @@ struct QueuedSocketInput {
     input: Option<ParsedSocketInput>,
     queued_at: Instant,
     received_at: Instant,
+    diagnostic_context: Option<SocketSlowContext>,
     _pending: PendingSerialAction,
     _buffered_bytes: OwnedSemaphorePermit,
 }
@@ -213,11 +446,16 @@ impl QueuedSocketInput {
         pending_count: Arc<AtomicUsize>,
         buffered_bytes: OwnedSemaphorePermit,
         received_at: Instant,
+        diagnostics: &SocketDiagnostics,
     ) -> Self {
+        let diagnostic_context = diagnostics
+            .as_ref()
+            .and_then(|state| state.queued_context(&input));
         Self {
             input: Some(input),
             queued_at: Instant::now(),
             received_at,
+            diagnostic_context,
             _pending: PendingSerialAction::new(pending_count),
             _buffered_bytes: buffered_bytes,
         }
@@ -235,6 +473,7 @@ pub(crate) struct GatewaySlowStage {
     label: &'static str,
     started_at: Instant,
     threshold: Option<Duration>,
+    context: Option<SocketSlowContext>,
 }
 
 impl GatewaySlowStage {
@@ -247,7 +486,40 @@ impl GatewaySlowStage {
             label,
             started_at,
             threshold: gateway_slow_stage_threshold(),
+            context: None,
         }
+    }
+
+    fn for_socket(label: &'static str, diagnostics: &SocketDiagnostics) -> Self {
+        let mut stage = Self::start(label);
+        stage.context = diagnostics.as_ref().map(|state| state.context());
+        stage
+    }
+
+    fn log_line(&self, elapsed: Duration) -> String {
+        let mut line = format!(
+            "[gateway-slow-stage] stage={} duration_ms={}",
+            self.label,
+            elapsed.as_millis()
+        );
+        let context = self.context.filter(|context| {
+            self.label != "socket_input.queue_residence" || context.queued.is_some()
+        });
+        if let Some(context) = context {
+            line.push_str(&format!(" connection={}", context.connection));
+            if let Some(queued) = context
+                .queued
+                .filter(|_| self.label == "socket_input.queue_residence")
+            {
+                line.push_str(&format!(
+                    " queued_phase={} phase_elapsed_ms={} input_class={}",
+                    queued.phase.label(),
+                    queued.phase_elapsed_ms,
+                    queued.input_class.label()
+                ));
+            }
+        }
+        line
     }
 }
 
@@ -258,11 +530,7 @@ impl Drop for GatewaySlowStage {
         };
         let elapsed = self.started_at.elapsed();
         if elapsed >= threshold {
-            eprintln!(
-                "[gateway-slow-stage] stage={} duration_ms={}",
-                self.label,
-                elapsed.as_millis()
-            );
+            eprintln!("{}", self.log_line(elapsed));
         }
     }
 }
@@ -5021,6 +5289,7 @@ fn spawn_zone_outbound_sender(
     serial_execution_gate: SharedSerialExecutionGate,
     active_registration_id: Arc<AtomicU64>,
     failure_signal: tokio::sync::watch::Sender<u64>,
+    diagnostics: SocketDiagnostics,
 ) -> ZoneOutboundSenderTask {
     let handle = tokio::spawn(async move {
         loop {
@@ -5045,7 +5314,8 @@ fn spawn_zone_outbound_sender(
             // A cadence may enqueue the first new-epoch ACK between registration
             // preparation and activation while bootstrap holds the write gate.
             // Judge the epoch only after bootstrap/activation has completed.
-            let serial_gate_wait = GatewaySlowStage::start("serial_gate.zone_outbound_wait");
+            let serial_gate_wait =
+                GatewaySlowStage::for_socket("serial_gate.zone_outbound_wait", &diagnostics);
             let _serial_execution = serial_execution_gate.read().await;
             drop(serial_gate_wait);
             if active_registration_id.load(Ordering::Acquire) != registration_id {
@@ -5181,6 +5451,7 @@ fn spawn_socket_reader(
     terminal: transport::TransportSignal,
     movement_drain: Arc<transport::MovementDrain>,
     session_id: String,
+    diagnostics: SocketDiagnostics,
 ) -> (
     mpsc::Receiver<SocketInbound>,
     SocketReaderTask,
@@ -5234,6 +5505,7 @@ fn spawn_socket_reader(
                             Arc::clone(&reader_pending_count),
                             message_permit,
                             received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5255,6 +5527,7 @@ fn spawn_socket_reader(
                             Arc::clone(&reader_pending_count),
                             message_permit,
                             received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5278,6 +5551,7 @@ fn spawn_socket_reader(
                             Arc::clone(&reader_pending_count),
                             message_permit,
                             received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5293,6 +5567,7 @@ fn spawn_socket_reader(
                             Arc::clone(&reader_pending_count),
                             message_permit,
                             received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5308,6 +5583,7 @@ fn spawn_socket_reader(
                             Arc::clone(&reader_pending_count),
                             message_permit,
                             received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5328,6 +5604,7 @@ fn spawn_socket_reader(
                                 Arc::clone(&reader_pending_count),
                                 message_permit,
                                 received_at,
+                                &diagnostics,
                             )))
                             .await
                             .is_err()
@@ -5351,6 +5628,7 @@ fn spawn_socket_reader(
                             Arc::clone(&reader_pending_count),
                             message_permit,
                             received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5390,6 +5668,7 @@ fn spawn_socket_reader(
                             Arc::clone(&reader_pending_count),
                             message_permit,
                             received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5409,6 +5688,7 @@ fn spawn_socket_reader(
                     Arc::clone(&reader_pending_count),
                     message_permit,
                     received_at,
+                    &diagnostics,
                 )))
                 .await
                 .is_err()
@@ -5596,6 +5876,10 @@ async fn handle_socket_work(
     terminal: transport::TransportSignal,
     movement_drain: Arc<transport::MovementDrain>,
 ) {
+    let diagnostics = allocate_socket_diagnostics(
+        gateway_slow_stage_threshold().is_some(),
+        &NEXT_SOCKET_DIAGNOSTIC_ID,
+    );
     let (sender, receiver) = socket.split();
     let sender = Arc::new(transport::SocketSender::new(sender, terminal.clone()));
     if sender
@@ -5692,6 +5976,7 @@ async fn handle_socket_work(
         Arc::clone(&serial_execution_gate),
         Arc::clone(&active_zone_outbound_registration_id),
         overload_tx,
+        diagnostics.clone(),
     );
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
@@ -5704,6 +5989,7 @@ async fn handle_socket_work(
         terminal,
         movement_drain,
         session.session_id().to_owned(),
+        diagnostics.clone(),
     );
 
     loop {
@@ -5711,6 +5997,9 @@ async fn handle_socket_work(
             biased;
 
             socket_input = socket_inputs.recv() => {
+                let _input_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Input, Some("socket_turn.input"),
+                );
                 let mut queued_input = match socket_input {
                     Some(SocketInbound::Queued(input)) => input,
                     Some(SocketInbound::Closed) | None => return,
@@ -5719,13 +6008,23 @@ async fn handle_socket_work(
                         return;
                     }
                 };
-                drop(GatewaySlowStage::since(
+                let mut queue_stage = GatewaySlowStage::since(
                     "socket_input.queue_residence",
                     queued_input.queued_at,
-                ));
-                let serial_gate_wait = GatewaySlowStage::start("serial_gate.input_wait");
+                );
+                queue_stage.context = queued_input.diagnostic_context;
+                drop(queue_stage);
+                let input_gate_phase = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::InputGate, None,
+                );
+                let serial_gate_wait = GatewaySlowStage::for_socket("serial_gate.input_wait", &diagnostics);
                 let _serial_execution = serial_execution_gate.write().await;
                 drop(serial_gate_wait);
+                drop(input_gate_phase);
+                let input_owner_heartbeat = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::InputOwnerHeartbeat,
+                    Some("socket_turn.input_owner_heartbeat"),
+                );
                 if let Err(error) = catch_gateway_panic("web zone owner command heartbeat", || {
                     tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
                 })
@@ -5734,6 +6033,7 @@ async fn handle_socket_work(
                     let _ = send_error_message(&sender, &error).await;
                     continue;
                 }
+                drop(input_owner_heartbeat);
                 let parsed_input = queued_input.take_input();
                 let mut npc_purchase_request = None;
                 let mut native_attack_request = None;
@@ -6773,6 +7073,9 @@ async fn handle_socket_work(
                 }
             }
             broadcast = recv_optional_chat(&mut chat_presence) => {
+                let _chat_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Chat, Some("socket_turn.chat"),
+                );
                 match broadcast {
                     Ok(packet) => {
                         if send_server_packet(&sender, &packet).await.is_err() {
@@ -6786,6 +7089,9 @@ async fn handle_socket_work(
                 }
             }
             maybe_injection = inject_rx.recv() => {
+                let _injection_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Injection, Some("socket_turn.injection"),
+                );
                 let Some(crate::inject::InjectionMessage { command, reply }) = maybe_injection else {
                     continue;
                 };
@@ -6866,6 +7172,9 @@ async fn handle_socket_work(
                 let _ = reply.send(crate::inject::InjectionOutcome { packet_count });
             }
             _ = spectator_publish_tick.tick(), if spectator.config().enabled => {
+                let _spectator_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Spectator, Some("socket_turn.spectator"),
+                );
                 let result = tokio::task::block_in_place(|| {
                     publish_spectator_frame_if_enabled(&spectator, || {
                         session.active_identity().map(|_| session.world_snapshot())
@@ -6876,6 +7185,9 @@ async fn handle_socket_work(
                 }
             }
             _ = ai_live_tick.tick(), if authenticated => {
+                let _ai_live_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::AiLive, Some("socket_turn.ai_live"),
+                );
                 let status = ai_live.status();
                 let game_overlay_ready = status.distribution.channels.iter().any(|channel| {
                     channel.channel
@@ -6918,6 +7230,9 @@ async fn handle_socket_work(
                     _ = monthly_access_tick.tick(), if monthly_access_enabled && active_session_permit.is_some() => {},
                 }
             } => {
+                let _runtime_tick_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::RuntimeTick, Some("runtime_tick.total"),
+                );
                 let now = Instant::now();
                 if authenticated
                     && now.duration_since(last_identity_revocation_check) >= Duration::from_secs(5)
@@ -6931,7 +7246,14 @@ async fn handle_socket_work(
                         let _ = send_error_message(&sender, "identity session expired").await;
                         return;
                     }
-                    match session_cache.identity_session_is_revoked(&verified.session_id) {
+                    let identity_revocation = {
+                        let _identity_cache = SocketDiagnosticPhaseGuard::enter(
+                            &diagnostics, SocketDiagnosticPhase::IdentityCache,
+                            Some("runtime_tick.identity_cache"),
+                        );
+                        session_cache.identity_session_is_revoked(&verified.session_id)
+                    };
+                    match identity_revocation {
                         Ok(false) => {}
                         Ok(true) => {
                             let _ = send_error_message(&sender, "identity session was revoked").await;
@@ -6950,9 +7272,14 @@ async fn handle_socket_work(
                         >= Duration::from_secs(60)
                     {
                         last_identity_database_check = now;
+                        let identity_database = SocketDiagnosticPhaseGuard::enter(
+                            &diagnostics, SocketDiagnosticPhase::IdentityDatabase,
+                            Some("runtime_tick.identity_database"),
+                        );
                         let database_check = tokio::task::block_in_place(|| {
                             identity.touch_session(verified)
                         });
+                        drop(identity_database);
                         if let Err(error) = database_check {
                             let _ = send_error_message(
                                 &sender,
@@ -6963,6 +7290,10 @@ async fn handle_socket_work(
                         }
                     }
                 }
+                let resume_credential = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::ResumeCredential,
+                    Some("runtime_tick.resume_credential"),
+                );
                 if maybe_issue_native_resume_credential(
                     &sender,
                     reconnect_sessions.as_ref(),
@@ -6979,21 +7310,36 @@ async fn handle_socket_work(
                 {
                     return;
                 }
+                drop(resume_credential);
+                let owner_heartbeat = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::OwnerHeartbeat,
+                    Some("runtime_tick.owner_heartbeat"),
+                );
                 if let Err(error) = catch_gateway_panic("web zone owner heartbeat", || {
                     tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
                 }).and_then(|result| result.map(|_| ())) {
                     let _ = send_error_message(&sender, &error).await;
                     return;
                 }
+                drop(owner_heartbeat);
+                let preflight = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Preflight, Some("runtime_tick.preflight"),
+                );
                 let monthly_expiry_pending = session.monthly_card_expiry_pending(authenticated_account_id.as_deref());
                 if now < runtime_tick_deferred_until && !monthly_expiry_pending
                     && !session.has_pending_shared_personal_work() {
                     continue;
                 }
+                drop(preflight);
                 // Tick can complete a queued portal movement and rebuild the
                 // viewport. Serialize its bootstrap/re-registration/flush just
                 // like a player action so live ACKs cannot precede the landing.
+                let tick_gate_phase = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::TickGate,
+                    Some("runtime_tick.serial_gate_wait"),
+                );
                 let _serial_execution = serial_execution_gate.write().await;
+                drop(tick_gate_phase);
                 let monthly_expiry_route = monthly_expiry_pending
                     .then(|| tokio::task::block_in_place(|| OwnedSessionRoute::capture(session))).flatten();
                 let responses = match catch_gateway_panic("web session tick", || {
@@ -18921,6 +19267,7 @@ mod tests {
                     .try_acquire_owned()
                     .expect("test input byte permit should be available"),
                 std::time::Instant::now(),
+                &None,
             );
             assert_eq!(pending.load(std::sync::atomic::Ordering::Acquire), 1);
             assert_eq!(bytes.available_permits(), 0);
@@ -19035,6 +19382,281 @@ mod tests {
             ))
             .is_none()
         );
+    }
+
+    mod socket_diagnostics_tests {
+        use super::super::{
+            allocate_socket_diagnostics, GatewaySlowStage, ParsedSocketInput, QueuedSocketInput,
+            SessionAction, SocketDiagnosticInputClass as InputClass,
+            SocketDiagnosticPhase as Phase, SocketDiagnosticPhaseGuard, SocketSlowContext,
+            SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER, SOCKET_DIAGNOSTIC_MAX_START_US,
+        };
+        use mir2_protocol::{ClientPacket, MirDirection};
+        use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+        use std::sync::{Arc, Barrier};
+        use std::time::{Duration, Instant};
+
+        fn stage(context: Option<SocketSlowContext>) -> GatewaySlowStage {
+            GatewaySlowStage {
+                label: "socket_input.queue_residence",
+                started_at: Instant::now(),
+                threshold: None,
+                context,
+            }
+        }
+
+        #[test]
+        fn disabled_and_exhausted_ids_have_no_state_or_counter_wrap() {
+            let disabled = AtomicU64::new(7);
+            assert!(allocate_socket_diagnostics(false, &disabled).is_none());
+            assert_eq!(disabled.load(Ordering::Relaxed), 7);
+            assert!(SocketDiagnosticPhaseGuard::enter(
+                &None,
+                Phase::Input,
+                Some("socket_turn.input")
+            )
+            .is_none());
+
+            let counter = AtomicU64::new(SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER);
+            let last = allocate_socket_diagnostics(true, &counter).unwrap();
+            assert_eq!(last.connection, SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER);
+            assert_eq!(
+                counter.load(Ordering::Relaxed),
+                SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER + 1
+            );
+            for _ in 0..3 {
+                assert!(allocate_socket_diagnostics(true, &counter).is_none());
+                assert_eq!(
+                    counter.load(Ordering::Relaxed),
+                    SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER + 1
+                );
+            }
+            assert!(allocate_socket_diagnostics(true, &AtomicU64::new(0)).is_none());
+        }
+
+        #[test]
+        fn legacy_and_scoped_log_grammar_are_exact_and_safe() {
+            assert_eq!(
+                stage(None).log_line(Duration::from_millis(53)),
+                "[gateway-slow-stage] stage=socket_input.queue_residence duration_ms=53"
+            );
+            let mut scoped = stage(Some(SocketSlowContext {
+                connection: 17,
+                queued: None,
+            }));
+            scoped.label = "serial_gate.input_wait";
+            assert_eq!(
+                scoped.log_line(Duration::from_millis(53)),
+                "[gateway-slow-stage] stage=serial_gate.input_wait duration_ms=53 connection=17"
+            );
+            assert_eq!(
+                stage(Some(SocketSlowContext {
+                    connection: 17,
+                    queued: None
+                }))
+                .log_line(Duration::from_millis(53)),
+                "[gateway-slow-stage] stage=socket_input.queue_residence duration_ms=53"
+            );
+            let state = allocate_socket_diagnostics(true, &AtomicU64::new(17)).unwrap();
+            let context = state
+                .context_from_snapshot(
+                    Phase::Spectator.pack(10_000).unwrap(),
+                    65_999,
+                    InputClass::AttackV2,
+                )
+                .unwrap();
+            assert_eq!(stage(Some(context)).log_line(Duration::from_millis(3356)),
+                "[gateway-slow-stage] stage=socket_input.queue_residence duration_ms=3356 connection=17 queued_phase=spectator phase_elapsed_ms=55 input_class=attack_v2");
+            assert!(SOCKET_DIAGNOSTIC_MAX_START_US / 1000 < SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER);
+        }
+
+        #[test]
+        fn packed_phase_boundaries_omit_invalid_or_overflowed_observations() {
+            let state = allocate_socket_diagnostics(true, &AtomicU64::new(1)).unwrap();
+            for phase in [
+                Phase::SelectWait,
+                Phase::Input,
+                Phase::InputGate,
+                Phase::InputOwnerHeartbeat,
+                Phase::Chat,
+                Phase::Injection,
+                Phase::Spectator,
+                Phase::AiLive,
+                Phase::RuntimeTick,
+                Phase::IdentityCache,
+                Phase::IdentityDatabase,
+                Phase::ResumeCredential,
+                Phase::OwnerHeartbeat,
+                Phase::TickGate,
+                Phase::Preflight,
+            ] {
+                let packed = phase.pack(SOCKET_DIAGNOSTIC_MAX_START_US).unwrap();
+                assert_eq!(Phase::unpack(packed), Some(phase));
+                let context = state
+                    .context_from_snapshot(
+                        packed,
+                        SOCKET_DIAGNOSTIC_MAX_START_US,
+                        InputClass::Other,
+                    )
+                    .unwrap();
+                assert_eq!(context.queued.unwrap().phase_elapsed_ms, 0);
+            }
+            assert!(Phase::Input
+                .pack(SOCKET_DIAGNOSTIC_MAX_START_US + 1)
+                .is_none());
+            assert!(state
+                .context_from_snapshot(0, 0, InputClass::Other)
+                .is_none());
+            assert!(state
+                .context_from_snapshot(Phase::Input.pack(10).unwrap(), 9, InputClass::Other)
+                .is_none());
+            assert!(state
+                .context_from_snapshot(
+                    Phase::Input.pack(0).unwrap(),
+                    SOCKET_DIAGNOSTIC_MAX_START_US + 1,
+                    InputClass::Other
+                )
+                .is_none());
+        }
+
+        #[test]
+        fn atomic_snapshots_never_pair_one_phase_with_another_start() {
+            let state = allocate_socket_diagnostics(true, &AtomicU64::new(1)).unwrap();
+            let input = Phase::Input.pack(1000).unwrap();
+            let spectator = Phase::Spectator.pack(2000).unwrap();
+            state.phase_and_start.store(input, Ordering::Release);
+            let barrier = Arc::new(Barrier::new(2));
+            let writer_state = Arc::clone(&state);
+            let writer_barrier = Arc::clone(&barrier);
+            let writer = std::thread::spawn(move || {
+                writer_barrier.wait();
+                for i in 0..10_000 {
+                    writer_state.phase_and_start.store(
+                        if i % 2 == 0 { input } else { spectator },
+                        Ordering::Release,
+                    );
+                }
+            });
+            barrier.wait();
+            for _ in 0..10_000 {
+                let packed = state.phase_and_start.load(Ordering::Acquire);
+                let queued = state
+                    .context_from_snapshot(packed, 4000, InputClass::Other)
+                    .unwrap()
+                    .queued
+                    .unwrap();
+                assert!(matches!(
+                    (queued.phase, queued.phase_elapsed_ms),
+                    (Phase::Input, 3) | (Phase::Spectator, 2)
+                ));
+            }
+            writer.join().unwrap();
+        }
+
+        #[test]
+        fn nested_and_early_exit_phases_restore_parent_then_select_idle() {
+            let diagnostics = allocate_socket_diagnostics(true, &AtomicU64::new(1));
+            let state = diagnostics.as_ref().unwrap();
+            {
+                let _turn =
+                    SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::RuntimeTick, None);
+                let parent = state.phase_and_start.load(Ordering::Acquire);
+                for _ in 0..2 {
+                    let _child =
+                        SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::Preflight, None);
+                    assert_eq!(
+                        Phase::unpack(state.phase_and_start.load(Ordering::Acquire)),
+                        Some(Phase::Preflight)
+                    );
+                    continue;
+                }
+                assert_eq!(state.phase_and_start.load(Ordering::Acquire), parent);
+                fn early_return(diagnostics: &super::super::SocketDiagnostics) {
+                    let _child =
+                        SocketDiagnosticPhaseGuard::enter(diagnostics, Phase::IdentityCache, None);
+                }
+                early_return(&diagnostics);
+                assert_eq!(state.phase_and_start.load(Ordering::Acquire), parent);
+            }
+            assert_eq!(
+                Phase::unpack(state.phase_and_start.load(Ordering::Acquire)),
+                Some(Phase::SelectWait)
+            );
+        }
+
+        #[test]
+        fn queued_input_preserves_enqueue_phase_and_serial_lifetime_without_payload() {
+            let diagnostics = allocate_socket_diagnostics(true, &AtomicU64::new(17));
+            let state = diagnostics.as_ref().unwrap();
+            let pending = Arc::new(AtomicUsize::new(0));
+            let bytes = Arc::new(tokio::sync::Semaphore::new(1));
+            let queued;
+            {
+                let _spectator =
+                    SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::Spectator, None);
+                queued = QueuedSocketInput::new(
+                    ParsedSocketInput::ProtocolError("must-not-appear-in-diagnostics".to_owned()),
+                    Arc::clone(&pending),
+                    Arc::clone(&bytes).try_acquire_owned().unwrap(),
+                    Instant::now(),
+                    &diagnostics,
+                );
+            }
+            let _input = SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::Input, None);
+            assert_eq!(
+                Phase::unpack(state.phase_and_start.load(Ordering::Acquire)),
+                Some(Phase::Input)
+            );
+            let context = queued.diagnostic_context.unwrap();
+            assert_eq!(context.queued.unwrap().phase, Phase::Spectator);
+            assert_eq!(context.queued.unwrap().input_class, InputClass::Other);
+            let line = stage(Some(context)).log_line(Duration::from_millis(60));
+            assert!(line.ends_with(" input_class=other"));
+            assert!(!line.contains("must-not-appear"));
+            assert_eq!(pending.load(Ordering::Acquire), 1);
+            assert_eq!(bytes.available_permits(), 0);
+            drop(queued);
+            assert_eq!(pending.load(Ordering::Acquire), 0);
+            assert_eq!(bytes.available_permits(), 1);
+        }
+
+        #[test]
+        fn input_class_uses_only_static_command_variants() {
+            let attack = crate::attack_protocol::parse_attack_v2(
+                r#"{"type":"attackV2","protocolVersion":2,"requestId":"12345","objectId":7654321}"#,
+            )
+            .unwrap();
+            assert_eq!(
+                InputClass::for_input(&ParsedSocketInput::AttackV2(attack)),
+                InputClass::AttackV2
+            );
+            for packet in [
+                ClientPacket::Walk {
+                    direction: MirDirection::Up,
+                },
+                ClientPacket::Run {
+                    direction: MirDirection::Down,
+                },
+                ClientPacket::Turn {
+                    direction: MirDirection::Left,
+                },
+            ] {
+                assert_eq!(
+                    InputClass::for_input(&ParsedSocketInput::Action {
+                        action: SessionAction::Packet(packet),
+                        quest_operation_request: None,
+                        skill_key_request: None,
+                    }),
+                    InputClass::Move
+                );
+            }
+            assert_eq!(
+                InputClass::for_input(&ParsedSocketInput::ClientCapabilities(vec![
+                    "not-logged".into()
+                ])),
+                InputClass::Other
+            );
+        }
     }
 
     #[test]

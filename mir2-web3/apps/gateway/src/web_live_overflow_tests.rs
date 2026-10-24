@@ -49,6 +49,7 @@ async fn health_sender_socket_case(
                             gate.clone(),
                             active.clone(),
                             failure_tx,
+                            None,
                         );
                         let decision = Arc::new(std::sync::atomic::AtomicUsize::new(1));
                         let outbound = SharedZoneLiveOutbound::new(
@@ -191,6 +192,7 @@ async fn owner_ack_order_web_sender_waits_for_prepared_registration_activation()
                         Arc::clone(&gate),
                         Arc::clone(&active),
                         watch::channel(0).0,
+                        None,
                     );
                     let location = |x| ServerPacket::UserLocation {
                         location: mir2_protocol::UserLocation {
@@ -337,6 +339,7 @@ async fn live_overflow_cancels_stalled_real_websocket_writer_and_closes_transpor
                                 writer_terminal,
                                 Arc::new(transport::MovementDrain::default()),
                                 "overflow-transport-fixture".to_owned(),
+                                None,
                             );
                             // A permanently occupied writer lock models a stalled
                             // send. The control path must not acquire this lock.

@@ -2,7 +2,7 @@
 
 本记录接续 [前轮证据](../cell-preproduction-p0-p1-20261024/README.md)，保留前轮失败和 `14 passed / 2 not_run` 原始完整报告。本轮报告独立保存，不改写旧结论。
 
-当前 P1 工程合同验证通过，P0 容量场景仍在校准，P2 尚未启动。固定 Cell 的晋级仍以完整 P0 基线为前提。
+当前 P1 工程合同验证通过，P0 正式容量尚未通过，仍在定位测量中的网关排队停顿；P2 尚未启动。固定 Cell 的晋级仍以完整 P0 基线为前提。
 
 ## 已有新鲜结果
 
@@ -66,7 +66,15 @@ V2 后端对应提交 `461f1d85eed6309a55a88bd79a0022f7b97febe4`、[39 项输入
 
 正式 03 `1792873511986-56c2dbe6` 仅启用已有 50ms 慢阶段日志，游戏二进制、九输入驱动、场景、资源及验收门槛不变。[原结果仍为失败](capacity-formal-native-v2-ladder-03/collection-verification.json)：2 人阶段 300.045 秒通过，扩容到 8 人时，角色 `Lc7785700` 的 60.486 秒跨阶段窗口为真实 39 Walk / 38 个两格 Run，38/77=49.35% 低于原 50%；全部 80 次机会完成，0 timeout/correction，latency/fanout 均通过。这是活动供给失败，未复现正式 02 的 25 人停顿。新增日志采集完整、59 行只含阶段名/耗时/接收时刻；原始 stderr 不公开。两次正式失败均经正常退出、六计数归零及端口释放核验，不能因清理成功升格为容量通过。
 
-随后仅修改 native 已 priming 的巡逻回退选择：在原四个目标中优先合法两步 Run，无候选仍保留原首个 Walk；原快路径、4000 节点 A*、全部原障碍、传送/对角检查、750ms 机会和原分母保持。新增 7 个测试覆盖 8 种场景，[完整回归 145/145](validation/patrol-run-preference-capacity-regression-v1.log)、[定向 7/7](validation/patrol-run-preference-focused-v1.log)及[相邻 24/24](validation/patrol-run-preference-focused-v2.log)通过；[新九输入冻结清单](capacity-patrol-run-preference-driver-frozen-v1.json)绑定对应源码及测试，[独立复核](validation/patrol-run-preference-independent-review-v1.json)确认其他七输入、后端及原断言保持。更多原目标搜索可能增加工具开销，仍受原事件循环及活动门槛约束；这不追认正式 03，也不证明已解决正式 02 的服务端停顿。P0 仍未完成，P2 继续冻结；下一轮探针及正式测量必须使用新冻结驱动。
+随后仅修改 native 已 priming 的巡逻回退选择：在原四个目标中优先合法两步 Run，无候选仍保留原首个 Walk；原快路径、4000 节点 A*、全部原障碍、传送/对角检查、750ms 机会和原分母保持。新增 7 个测试覆盖 8 种场景，[完整回归 145/145](validation/patrol-run-preference-capacity-regression-v1.log)、[定向 7/7](validation/patrol-run-preference-focused-v1.log)及[相邻 24/24](validation/patrol-run-preference-focused-v2.log)通过；[新九输入冻结清单](capacity-patrol-run-preference-driver-frozen-v1.json)绑定对应源码及测试，[独立复核](validation/patrol-run-preference-independent-review-v1.json)确认其他七输入、后端及原断言保持。更多原目标搜索可能增加工具开销，仍受原事件循环及活动门槛约束；这不追认正式 03，也不证明已解决正式 02 的服务端停顿。对应提交 `0998105c30f35502b8b569b82fb7942a5d356c89` 已[推送核验](validation/patrol-checkpoint-push-verification-v1.json)。
+
+第七次探针 `1792878747018-da931241` 使用该九输入驱动及相同 `461f/855b` 后端，[原结果仍为失败](capacity-native10-v2-patrol-diagnostics/public-verification.json)：2/10 人分别完成 300.064/300.047 秒，五个窗口均通过；360.098 秒 soak 的六个完整窗口中仅五个通过。[独立诊断](capacity-native10-v2-patrol-analysis/README-v1.md)核对战斗角色最后 51.358 秒连续窗口：50 次机会仅完成 46 次，92% 低于原 95%；22 次实际起手及正伤害不抵消该失败。一次 V2 请求在 901.5ms 未获关联起手回执、下一次 Walk 在 2025.45ms 未获位置 ACK，均早于停止约 36–39 秒，不是清理追加，也不是普通已起手未命中。同期公开慢段记录 3356/2132ms 入站队列等待；没有连接标识，不能仅凭时间相容将某条慢日志严格归到某个请求。原始 28,640 行、484 个有效嵌入监测、128 行完整慢段及 4,044 帧录像的摘要均保留，正常清理不升格失败。
+
+[源码边界复核](validation/probe07-socket-queue-source-review-v1.json)确认 queue residence 从输入对象构造计至主循环取出，早于该输入的 writer gate/业务执行；排队输入还会使后续移动退回串行路径。当前 ZoneWork 仅计取得锁后的 owner tick 工作，不覆盖所有玩家命令、快照锁及等待，不能据其低值排除全部 Zone 路径。原 formal04 [硬门禁准确拒绝](validation/probe07-failed-formal04-gate-check-v1.json)此次失败，未准备或启动。
+
+计时盲区现已补匿名连接序号、主循环阶段与入队时的阶段快照，仅诊断启用时分配每连接固定状态；13 个新增静态标签、15 个阶段覆盖整次分支、身份缓存/数据库、恢复凭证、心跳、preflight 与锁等待。旧 27 标签格式保持；新公开行只有 3/4/7 个固定字段，不记录账号、会话令牌、请求内容或游戏 ActionId。入队阶段仅说明该瞬间的位置，不能当作整段排队的因果证明；耗时包括等待和调度，也不能当 CPU 时间。日志与诊断会有额外开销，不声明零开销或已修复停顿。
+
+[对应源码验证](socket-queue-diagnostics-validation-v1.json)为新增诊断 [7/7](validation/p0-socket-diagnostics-focused-v2.log)、[相邻 159 passed / 2 原有 ignored](validation/p0-socket-diagnostics-adjacent-v1.log)及 [36 项 Rust 只读格式检查](validation/p0-socket-diagnostics-rustfmt36-v1.json)。首轮四处旧测试构造器缺参数的编译错误[原日志](validation/p0-socket-diagnostics-focused-v1.log)及源码前像保留；仅补四个 `None`，原断言不变，新构建闭包据实由 39 扩至 41。[新采集器](socket-queue-slow-stage-helper-v1/freeze-v1.json)保留原 14 场景并增加 11 项边界测试，[25/25](socket-queue-slow-stage-helper-v1/synthetic-tests-v1.log) 通过；原 8KiB 行、1MiB 写队列、32MiB 总量及失败停测/EOF/finish 门槛保持。新源码尚待独立 Release、普通完整生命周期和新探针，不能复用 `855b` 冒充新构建。P0 仍未完成，P2 继续冻结。
 
 ## 本轮范围
 

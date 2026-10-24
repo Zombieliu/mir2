@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "reviewKind": "Independent bounded source-only review; no tests, build, realm, capture or source mutation",
+  "source": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/gateway/src/web.rs",
+    "bytes": 855687,
+    "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+  },
+  "result": "No blocking issue found in the reviewed diagnostics diff. This is neither fresh compilation evidence nor lifecycle/capacity acceptance.",
+  "reviewedBoundaries": [
+    {
+      "area": "Atomic phase observation",
+      "lines": [184, 302, 336, 353, 383],
+      "finding": "One AtomicU64 packs the phase discriminator and phase-start microseconds. Main task writes through the guard; the reader snapshots with Acquire before reading the clock, so a phase cannot be combined with another phase's start. Checked subtraction and packing bounds omit invalid observations."
+    },
+    {
+      "area": "RAII and early exits",
+      "lines": [390, 407, 6000, 6024, 7233, 7250, 7275, 7293, 7314, 7325, 7337],
+      "finding": "Nested scopes restore their exact parent start; branch continue/return unwinds guards. Restoring SelectWait starts a fresh idle clock. The child slow log is dropped while the child phase is still visible, so its synchronous logging cost is not silently labeled idle. Existing branch, gate and actual gameplay call order is preserved."
+    },
+    {
+      "area": "Disabled path",
+      "lines": [314, 436, 448, 383, 527, 545, 5879],
+      "finding": "Disabled allocation returns None before ID mutation or Arc creation. Guard entry returns before clock/atomic work, queued diagnostic context is an inline None, cloning None adds no Arc allocation, and threshold-free Drop never formats a log string. There are still additional branches and a larger inline queued-input representation; zero CPU or zero structure size overhead is not claimed. The existing threshold is cached by OnceLock."
+    },
+    {
+      "area": "Identifier and privacy",
+      "lines": [184, 277, 314, 497, 19437, 19586, 19629],
+      "finding": "The process-wide counter is opaque and non-security-sensitive; it has no role in identity, routing, auth or gameplay. IDs remain at most JavaScript's safe-integer bound and exhaustion omits context without wrapping. Emitted data is limited to static stage/phase/input-class labels, elapsed numbers and the opaque connection number. No account, secret, payload, target/object ID or AttackV2 requestId is emitted."
+    },
+    {
+      "area": "Queue and action semantics",
+      "lines": [448, 455, 6011, 6017, 6021, 5314],
+      "finding": "The enqueue snapshot is retained inline on the queued input; the queue timer still ends before this input awaits the serial write gate. Context addition neither changes pending-action/byte permits nor reorders command execution, transport sends, save, snapshot or Zone ownership work. Other serial-gate logs receive only the same safe connection context."
+    },
+    {
+      "area": "Existing tests",
+      "lines": [19267, 19387],
+      "finding": "The pre-existing queued-input test adds the new None constructor argument and retains its assertions. Seven new focused tests cover disabled/counter exhaustion, exact log grammar/privacy, packed boundaries, atomic snapshot coherence, RAII restoration, inline queue lifetime and static input classes. They were read only by this reviewer; their execution belongs to root's separate validation record."
+    }
+  ],
+  "limitations": [
+    "queued_phase and phase_elapsed_ms describe the main task when that input's diagnostic context was captured at enqueue. They are not a time history or proof that the entire later queue residence was spent in that one phase.",
+    "Enabled synchronous stderr output, phase clock reads, atomics and Arc reference-count changes add instrumentation cost. Diagnostic runs must preserve the enabled threshold and public-helper configuration as frozen inputs, and must not claim zero measurement perturbation.",
+    "The connection counter helps correlate new server records; it is not the driver's private connection identity, a requestId, a player identity or a causal mapping by itself.",
+    "Source review does not reclassify any original07 timeout or establish its upstream root cause. The original07 failure and later full lifecycle/capacity gates remain unchanged."
+  ],
+  "mutations": {
+    "trackedSourceWritten": false,
+    "testExecuted": false,
+    "buildExecuted": false,
+    "realmStarted": false,
+    "capacityAccepted": false
+  }
+}

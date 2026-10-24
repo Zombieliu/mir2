@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "reasons": [],
+  "stopRequested": false,
+  "stderrEnded": true,
+  "writerFinished": true,
+  "rowsQueued": 128,
+  "bytesQueued": 11008,
+  "maxBufferedLineBytes": 109,
+  "lineLimitBytes": 8192,
+  "totalLimitBytes": 33554432,
+  "writeLimitBytes": 1048576,
+  "writeHighWaterMarkBytes": 1048576,
+  "maxQueuedWriteBytes": 350,
+  "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label allowlist. observedAtMs is the launcher receive clock, not server span start/end. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall.",
+  "thresholdMs": 50,
+  "dataFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\slow-stage-public.jsonl"
+}

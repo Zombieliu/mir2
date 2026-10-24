@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-24T21:32:02.090Z",
+  "repositoryBaselineCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "scope": "Native-only primed patrol fallback selection among the existing four corner routes. The original fast shortcut remains unchanged; select a legal existing Run before falling back to the original first Walk.",
+  "writerFiles": [
+    "apps/web/scripts/playtest-capacity-soak.mjs",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "sourceSha256": "8c29818d96fc7d0974d248fe7b4f140812385216cc98b04a0712fecfe25385b7",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 130681,
+      "sha256": "79d30e3994703eeef902fdd79feac1e7ce76c8b0255baecb0824f5d7d51fc4e6"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 188151,
+      "sha256": "97fb8b09087958dc8ee8f15094011e04a56e087af6bc5cfdfeee4d2fcd5554f9"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "previousFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-movement-coordination-driver-frozen-v1.json",
+    "bytes": 7765,
+    "sha256": "61273b4e6aed7ceb3c8cbb04324d0892a560ae7f0bc2de4edfc22d3e13266853"
+  },
+  "preimageManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\patrol-run-preference-preimage-v1\\manifest.json",
+    "bytes": 918,
+    "sha256": "9104ff5e1aa850be1d83e86e300fb0907e799f5239450122f4e1b04295303fac"
+  },
+  "focused": {
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "durationMs": 137.0068,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\patrol-run-preference-focused-v1.log",
+      "bytes": 2032,
+      "sha256": "20f129e6a9f02d4b39b6f94d61e460dd019afc588c46626e1cd225ebdaa3f2d2"
+    }
+  },
+  "adjacentFocused": {
+    "passed": 24,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "durationMs": 181.3885,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\patrol-run-preference-focused-v2.log",
+      "bytes": 7044,
+      "sha256": "6b54876a43aa0717460cf0c23f7afcd3234f8ed3e403498747dbefaeeecbb9cf"
+    }
+  },
+  "fullRegression": {
+    "passed": 145,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "durationMs": 310323.9201,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\patrol-run-preference-capacity-regression-v1.log",
+      "bytes": 40532,
+      "sha256": "5d21323abf07b7d58c25cf834bbfd16101e7a7cf5b1b468a9b2fd14f09c5a1cf"
+    },
+    "exactSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-patrol-run-preference-full-regression-source-pins-v1.json",
+      "bytes": 2796,
+      "sha256": "cf2c2fe3d2309d5a89669e8a9727eaab985044d6e2225bda69383cfedf3cce1d"
+    },
+    "exactSourceSha256": "8c29818d96fc7d0974d248fe7b4f140812385216cc98b04a0712fecfe25385b7"
+  },
+  "nativePatrolPlanning": {
+    "scope": "Native primed patrol fallback only; original fast path and at most four existing corner targets remain.",
+    "maximumFallbackCornerTargets": 4,
+    "pathExpansionLimit": 4000,
+    "selectionRule": "Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.",
+    "primingRule": "Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain."
+  },
+  "illustrativeObservedGeometry": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal03-analysis\\four-corner-choice-fixture-v1.json",
+    "bytes": 29370,
+    "sha256": "976ea7d458b680e149525d4da9ae965eb78ed5de8a244a85276a0537c458c53d"
+  },
+  "invariants": {
+    "nativeCadenceMs": 750,
+    "pathExpansionLimit": 4000,
+    "maximumExistingFallbackTargets": 4,
+    "attacksPerMinute": 18,
+    "positiveHitsPerMinute": 12,
+    "minimumMovementRunRatio": 0.5,
+    "timeoutExclusive": 0.01,
+    "maximumCorrectionRatio": 0.05,
+    "originalFastPathUnchanged": true,
+    "baselineAndUnprimedFirstPathUnchanged": true,
+    "coreUnchanged": true,
+    "productionCodeChanged": false,
+    "sharedLifecycleDriversChanged": false,
+    "scenarioOrPolicyChanged": false,
+    "authoritativeMovementOrSnapshotsChanged": false,
+    "oldFailureReclassified": false,
+    "opportunityDenominatorOrCadenceChanged": false
+  },
+  "functionalVerificationOnly": true,
+  "capacityAccepted": false,
+  "newProbeStarted": false,
+  "ownedRealmStarted": false,
+  "diffCheckPassed": true,
+  "limitations": [
+    "The two real-map geometry fixtures project a small number of observed Scarecrows. They are not a reconstruction of formal03 send-time owner AOI or every navigation obstacle.",
+    "The same existing per-route 4000-node planner, collision union, diagonal side checks, transfer avoidance, route coverage and real Run priming remain. If every route lacks a legal Run, the original first Walk is retained and the original activity threshold may still fail.",
+    "Scanning more successful existing corner routes can allocate or consume more CPU than returning the first Walk. The bounded search is not a claim of zero overhead; original driver-lag and activity gates apply in future real runs.",
+    "Real socket fixtures and Node/CIM functional tests are not a gameplay realm, physical-machine capacity result or production acceptance. The earlier formal03 failure remains failed.",
+    "A future fresh probe and formal ladder require independently frozen scenario, admission, backend and release evidence. No server rebuild is implied by this driver-only change."
+  ]
+}

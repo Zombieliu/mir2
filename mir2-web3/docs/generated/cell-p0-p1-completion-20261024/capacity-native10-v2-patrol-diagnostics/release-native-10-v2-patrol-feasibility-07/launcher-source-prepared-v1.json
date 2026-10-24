@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-24T21:22:44.883Z",
+  "state": "templates-only-awaiting-final-source",
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "backendBinarySha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+  "backendInputs": 39,
+  "driverSourceCommit": null,
+  "driverSourceSha256": null,
+  "driverFrozenFile": "C:\\mir2-build\\p01-completion-20261024\\capacity-patrol-run-preference-driver-frozen-v1.json",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\collect-public.mjs",
+      "bytes": 36561,
+      "sha256": "7e298fd03dd6e5778053e1a571d73fa29a0d1502af64bc616aee4c85041a04a4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\driver-report-contract.mjs",
+      "bytes": 2636,
+      "sha256": "417130054b53b55320c93b49140804827a01a7095f4c8bbc7205dbab097ee37d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\input-lib.mjs",
+      "bytes": 14186,
+      "sha256": "de4489e3864ad0ceef0623f6ef759184dc30ecb3deaefa46d214610afbf0e616"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\prepare-inputs.mjs",
+      "bytes": 10522,
+      "sha256": "302b203b6ae9fc096bc565027bae956d75a47bc4bf83c133f446abdcb3797afb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\run-owned.mjs",
+      "bytes": 17247,
+      "sha256": "f47e3e2cb6ac4626800ae2933f54865440d1826299cbbd68538079fd3cc247e4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\slow-stage-public.mjs",
+      "bytes": 7767,
+      "sha256": "2c2f72385d9c9db25237e4c98aa56375639f6a0b8f82bd2602ce04684a0b607c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\slow-stage-public.test.mjs",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\verify-public.mjs",
+      "bytes": 15403,
+      "sha256": "a9783a05d920f629a93708ac27cd8ae560f1a678ea367f0cf9aa77e5209b7b4f"
+    }
+  ],
+  "sourceSha256": "7e2de551a4b9a6135b67a08ad9ac9697bd0936d56baef93c96f35649b01f94e2",
+  "sameOriginalFiles": [
+    {
+      "name": "scenario.json",
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\scenario.json",
+        "bytes": 1362,
+        "sha256": "701a2a3e30c1b963653af1a767f5af290e15fef207a7359cc90492cf5e496921"
+      },
+      "copy": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\scenario.json",
+        "bytes": 1362,
+        "sha256": "701a2a3e30c1b963653af1a767f5af290e15fef207a7359cc90492cf5e496921"
+      }
+    },
+    {
+      "name": "resource-profile.json",
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\resource-profile.json",
+        "bytes": 1194,
+        "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+      },
+      "copy": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\resource-profile.json",
+        "bytes": 1194,
+        "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+      }
+    }
+  ],
+  "slowStageValidation": {
+    "sameSourceAndTestBytes": true,
+    "samePrior14PassLogBytes": true,
+    "testRerun": false,
+    "originalValidationRoot": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03",
+    "pins": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\slow-stage-public.mjs",
+        "bytes": 7767,
+        "sha256": "2c2f72385d9c9db25237e4c98aa56375639f6a0b8f82bd2602ce04684a0b607c"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\slow-stage-public.test.mjs",
+        "bytes": 10310,
+        "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\slow-stage-public-test.log",
+        "bytes": 3196,
+        "sha256": "e27260963c3a8b1c83a6ce52c6acf5b9ae6b6e628f213064fa5f4f3348534bf3"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\slow-stage-public-test-v2.log",
+        "bytes": 3462,
+        "sha256": "c9be6ee159c6caaf5a7922adef4e36e0c8ac6b492cef5027dad3770228bc7494"
+      }
+    ]
+  },
+  "syntax": {
+    "passed": true,
+    "nodeScripts": 10,
+    "powershellScripts": 2,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\launcher-syntax-check-template-v1.log",
+      "bytes": 644,
+      "sha256": "3133f286665b65b36e8cfe26cc7efaafaa628e216a2831b2e5c8e971baa84c61"
+    }
+  },
+  "policyUnchangedExceptExplicitProbeExtension": true,
+  "formalPolicyExact": false,
+  "policy": {
+    "profile": "probe",
+    "activityMode": "native",
+    "movementIntervalMs": 750,
+    "stages": [
+      2,
+      10
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 360,
+    "wallSeconds": 3600,
+    "layout": "dispersed",
+    "combatActors": 1,
+    "resumeSamples": 0,
+    "saveSamples": 0,
+    "commandsPerSecond": 3,
+    "intentionIntervalMs": 750,
+    "variableActionCadence": true,
+    "maximumSendLatenessMs": 250,
+    "movementP95Ms": 750,
+    "chatP95Ms": 1000,
+    "actionTimeoutMs": 2000,
+    "timeoutExclusive": 0.01,
+    "maximumMissedPlanRatio": 0.05,
+    "maximumCorrectionRatio": 0.05,
+    "minimumMovesPerMinute": 30,
+    "minimumCombatHitsPerMinute": 12,
+    "minimumCombatAttacksPerMinute": 18,
+    "aoiRange": 16,
+    "aoiGraceMs": 1000,
+    "nativeChatIntervalMs": 30000,
+    "nativeTurnIntervalMs": 60000,
+    "minimumNativeRunRatio": 0.5,
+    "minimumNativeCellsPerMinute": 80,
+    "maximumEvidenceInFlight": 4,
+    "maximumMemorySlopeMiBPerHour": 32,
+    "memoryWarmupSeconds": 300,
+    "maximumDriverLagP99Ms": 250,
+    "fullAcceptanceEligible": false
+  },
+  "gate": null,
+  "finalSourceFreezePending": true,
+  "finalDriverReportLiteralPending": true,
+  "finalReadonlyQAPending": true,
+  "productImportsExecuted": false,
+  "prepareExecuted": false,
+  "seederExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}
