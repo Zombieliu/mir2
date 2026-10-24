@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.production-private-cache.v1",
+  "createdUtc": "2026-10-08T23:21:18.0711489Z",
+  "source": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\target",
+  "destination": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\target",
+  "copiedNonExecutableFiles": 2353,
+  "copiedBytes": 2285980194,
+  "skippedExecutables": 35,
+  "sourceDeleted": false,
+  "userGameClosed": false,
+  "sourceAndDestinationWithinWorkspace": true,
+  "cacheBytesNotIndividuallyHashed": true
+}

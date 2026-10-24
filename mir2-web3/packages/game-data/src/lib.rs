@@ -2270,6 +2270,9 @@ pub fn starter_server_data() -> StarterServerData {
         .clone()
 }
 
+mod stone_items;
+ pub use stone_items::{RAW_STONE_ROUGH, RAW_STONE_FINE, RAW_STONE_PRECIOUS, RAW_STONE_INDICES};
+
 pub fn crystal_item_manifest() -> CrystalItemManifest {
     crystal_item_manifest_ref().clone()
 }
@@ -2278,8 +2281,11 @@ pub fn crystal_item_manifest() -> CrystalItemManifest {
 pub fn crystal_item_manifest_ref() -> &'static CrystalItemManifest {
     static CRYSTAL_ITEM_MANIFEST: OnceLock<CrystalItemManifest> = OnceLock::new();
     CRYSTAL_ITEM_MANIFEST.get_or_init(|| {
-        serde_json::from_str(include_str!("../data/generated/crystal_item_manifest.json"))
-            .expect("crystal item manifest json should be valid")
+        let mut manifest: CrystalItemManifest = serde_json::from_str(include_str!("../data/generated/crystal_item_manifest.json"))
+            .expect("crystal item manifest json should be valid");
+        stone_items::extend(&mut manifest.items);
+        manifest.total_items = manifest.items.len();
+        manifest
     })
 }
 

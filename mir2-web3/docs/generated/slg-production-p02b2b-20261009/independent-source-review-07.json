@@ -1,0 +1,88 @@
+{
+  "schema": "mir2.production-independent-source-review.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-08T18:40:23.3218754Z",
+  "acceptedForFocusedTests": true,
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\authored-source-07.json",
+  "authoredSourceSha256": "f32c18325c6f77bb583eb28fc29fd509b2fdebc25c4a9edd36cdd0e7f7119f09",
+  "authoredFileCount": 2,
+  "shaAndLengthMismatches": 0,
+  "authoredFiles": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "sha256": "8400a25e3767fcffdcd8dad5a2d1c9cd62ebed78c25b38f7ef8ba2781875d151",
+      "length": 194377
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/exact_drop_uid_tests.rs",
+      "sha256": "283d58cfd546a4573297de51813d94f5025d96dd8e6834acda5e353d84daa7ab",
+      "length": 19188
+    }
+  ],
+  "baselineCommit": "488ec6f034182977fec03ad2952cccfd76b06eb2",
+  "priorReviewPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\independent-source-review-06.json",
+  "priorReviewSha256": "76e3465c8437a5a9ee030b2884223e8efec7e7bcf9df1cb856d141ebf6a16bd2",
+  "productInventoryUnchangedFromSource06": true,
+  "inverseFixtureDeltaMatchesSource06Bytes": true,
+  "allPreviousElevenTestsAndOriginalAssertionsUnchanged": true,
+  "positiveMergePlanAssertionsAdded": true,
+  "testFunctionCount": 11,
+  "confirmedBlockingFindings": [],
+  "rawFinal": "Accepted for original CargoGuard focused retry. Actual Source06 focus executed eleven tests: ten passed, absorbed custody retirement failed because returned UID was 6000000 rather than the asserted existing stack UID400001. Existing functional stack identity requires equal descriptions at inventory.rs3933; carried() inherited template.tooltip while preview/collect explicitly used drop uid test. Source07 fixes only the new fixture by sharing DROP_DESCRIPTION, without changing product inventory.rs or the identity comparator. Added pure-plan positive proofs now require no fresh location and existing stack UID/count before the full-capacity failure and merge-only fence scenarios; custody fixtures additionally assert functional compatibility. Removing exactly these fixture corrections/additional positive proofs restores Source06 test-file SHA256 and length, proving all original assertions and eleven test functions remain unchanged. Both current source hashes and lengths match the new frozen Source07 manifest. No Source07 execution result is asserted.",
+  "runnerReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\run-check.ps1",
+    "sha256": "9f96537915ec22b8685c7e38180a636149f45663bd990696c831926080b79343",
+    "priorRunnerPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\run-check-06.ps1",
+    "priorRunnerSha256": "76c018ce15c35513f9dfb31024b3f2700b23ff6c3c1242089b7d67936dd8ccef",
+    "inverseByteMatch": true,
+    "delta": "Only independent-source-review-06.json to independent-source-review-07.json reference",
+    "originalToolPinsChecked": 7,
+    "originalToolPinMismatches": 0,
+    "mode": "real-cargo",
+    "probeMode": "actual",
+    "thresholdBytes": 53687091200,
+    "freshnessMs": 2000,
+    "postChildPolicy": "B",
+    "cacheRelocated": false
+  },
+  "historicalFailedRun": {
+    "resultPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\drop-uid-tests-01\\result.json",
+    "resultSha256": "1bf634414184c3ddd82c670a1a392ead6546cf3c9b7bc403b692751829fb74fe",
+    "logPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\drop-uid-tests-01\\cargo.log",
+    "logSha256": "49f237579a3ee8b3be5b2d5a1e2df3b6d9865d0d8fbd33ae860ad28cfefaf61a",
+    "actualLogPinMatches": true,
+    "exitCode": 101,
+    "passed": 10,
+    "failed": 1,
+    "ignored": 0,
+    "executedTests": 11,
+    "declaredInputs": 461,
+    "sourceDriftCount": 0,
+    "failedTest": "absorbed_custody_source_raises_retired_id_floor_without_minting",
+    "actualUid": 6000000,
+    "expectedUid": 400001,
+    "childCompleted": true,
+    "childExited": true,
+    "childDisposed": true,
+    "policy": "B"
+  },
+  "relinkProbe": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\relink-probe-07.json",
+    "sha256": "9040b8635c67c2f5ec034242dc7906e9753ffe1bbaf6360653fe068148cbb747",
+    "reportedExclusiveWriteOpenSucceeded": true,
+    "noMigration": true,
+    "userGameClosed": false,
+    "oldArtifactsRemoved": false
+  },
+  "limits": [
+    "Focus retry permission only, not a final passing result.",
+    "Controlled File opt-in personal exact pickup and in-memory inventory publication; UID timing remains pickup-time.",
+    "Normal memory-account logout/relogin is not atomic durable account publication.",
+    "Partial drop origin reason still MonsterDrop in this slice.",
+    "No shared/PG durable claim receipts or unknown-publication reconciliation, all issuer migration, full external census, public gateway, UI, installer or rollout acceptance.",
+    "Source05 static rejection and actual Source06 10-pass/1-fail execution remain preserved and excluded from any final success total."
+  ],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noSourceEdits": true
+}

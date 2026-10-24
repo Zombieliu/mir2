@@ -1,0 +1,98 @@
+{
+  "schema": "mir2.production-independent-failure-exploration.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-09T00:20:09.1385970+00:00",
+  "classification": "Existing protected routing fixture assumes config.spawn although active town bind is imported safe-zone center; no causal reward-box product regression identified.",
+  "actualResultAccepted": false,
+  "actualFailure": {
+    "run": "use-item-regression-01",
+    "exitCode": 101,
+    "passed": 46,
+    "failed": 1,
+    "ignored": 0,
+    "name": "runtime::session::tests::use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll",
+    "line": 37792,
+    "actualPosition": {
+      "x": 328,
+      "y": 264
+    },
+    "expectedPosition": {
+      "x": 330,
+      "y": 270
+    },
+    "resultPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\use-item-regression-01\\result.json",
+    "resultSha256": "ddf52369a61a9712b159dd3fd3dca474418fbc35cae1e8fa966ceb82d3fa6877",
+    "logPath": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\use-item-regression-01\\cargo.log",
+    "logSha256": "cdc08d7bfee6712d53dabc01ba4900de91a9f5f657aa68def3b3ca5bec777d49",
+    "rawFailureMustRemain": true
+  },
+  "baselineCommit": "78d3abecb887d0e2c447d06e8224e7670486758e",
+  "failedTestsArchive": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2c-20261009\\authored-bytes-01\\mir2-web3\\apps\\simulation\\src\\runtime\\tests.rs",
+    "sha256": "4e2f941822068c6a4108a1e7b57378b220b94433ad0d72e4a648f3896a5dea56",
+    "length": 2431698,
+    "canonicalBlob": "5cacfa129630cb1f0e1518294561d599a6475f6a",
+    "parentBlob": "5cacfa129630cb1f0e1518294561d599a6475f6a",
+    "matchesFailedRunSnapshotAndParent": true
+  },
+  "protectedCurrentPins": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/movement.rs",
+      "canonicalCurrentBlob": "ad4eed6c9d4177162971e70310645d5c506763d6",
+      "parentBlob": "ad4eed6c9d4177162971e70310645d5c506763d6",
+      "matches": true,
+      "sha256": "d5336b4ff122e9f4cdf005350fcaeef2a49ab6687cbb3bc4fb5b3bd09ec01ca7"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/map.rs",
+      "canonicalCurrentBlob": "014b59e6446aed4bf2347a200128938d848e7864",
+      "parentBlob": "014b59e6446aed4bf2347a200128938d848e7864",
+      "matches": true,
+      "sha256": "033dc58683075939152fa4134cc89c3b12a22c706cf731767baa4cdf1a3bb72b"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "canonicalCurrentBlob": "feee579c70afec6cd3bad154b91d349c8def2712",
+      "parentBlob": "feee579c70afec6cd3bad154b91d349c8def2712",
+      "matches": true,
+      "sha256": "8c375841f8e49ac970fafc4c3fbf93443a4c39872955165eeb46e0b0509ac1e6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "canonicalCurrentBlob": "bf135e364ceaa0ed6564888c3fe82f9f71dbae04",
+      "parentBlob": "bf135e364ceaa0ed6564888c3fe82f9f71dbae04",
+      "matches": true,
+      "sha256": "b6651bd7cb9a094a2c1dc526b24f7dcb763c47108fe292e4dca058466e261eae"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/save.rs",
+      "canonicalCurrentBlob": "74f559fcf0d002c2abb7a08841aa30f693aa4379",
+      "parentBlob": "74f559fcf0d002c2abb7a08841aa30f693aa4379",
+      "matches": true,
+      "sha256": "342fdc12cba69a42236bde6b8fdaf168e17a41d075526e0876c6ef7a47abfb45"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "canonicalCurrentBlob": "2d8c7437cb4745fe8a9b14f158f63fe808f66538",
+      "parentBlob": "2d8c7437cb4745fe8a9b14f158f63fe808f66538",
+      "matches": true,
+      "sha256": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3"
+    }
+  ],
+  "currentTestsParentClean": false,
+  "currentTestsNote": "Root applied the separately recorded exact fixture insertion while this read-only exploration was being completed. Failed original bytes are checked via authored-bytes-01; current tests.rs is correctly an authored Source02 path.",
+  "behavior": {
+    "notRandomized": true,
+    "townRoute": "movement.rs:203-225 returns the current allowed bind_point exactly; absent/invalid binding falls back to config map/spawn.",
+    "originalCrystal": "PlayerObject.cs:5944-5945 calls Teleport(Envir.GetMap(BindMapIndex), BindLocation); SetBindSafeZone at1064-1067 stores the safe-zone center. HumanObject.cs:2480-2485 invokes it after accepted movement.",
+    "safeZone": "Imported map0 center(328,264), size10 contains configured spawn(330,270) and test helper destination(333,272).",
+    "fixtureHelper": "tests.rs:1268-1275 only inserts ECS Position and does not itself set binding.",
+    "recovery": "save.rs:2744 seeds absent saved binding from config;2778-2781 refreshes absent legacy binding from restored observed safe-zone location. map.rs:732 also refreshes after relocation.",
+    "unrelatedProductBranch": "items.rs:2809-2822 Scroll shape1 calls town_teleport_packets, outside changed intelligent-creature shape21/25 branch."
+  },
+  "recommendedFixtureRepair": "Pin this one template-scroll routing test bind_point to CharacterBindPoint(config.map.file_name,spawn) after its position setup. Retain exact position, UserLocation, successful UseItem and no-Chat assertions and normal latest-safe-zone product policy.",
+  "rawFinal": "Failure is preserved as actual46pass/1fail. Analysis supports a protected fixture precondition mismatch rather than randomized teleport or new reward-box behavior. No baseline Cargo execution, product fix or blanket test success is claimed.",
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noProductOrTestEdits": true
+}

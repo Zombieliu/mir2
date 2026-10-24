@@ -1,0 +1,4510 @@
+[
+  {
+    "library": "AArmour/00",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/00|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/00|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/01",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/01|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/01|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/02",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/02|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/02|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/09",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/09|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/09|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/10",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/10|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/10|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/11",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/11|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/11|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/12",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/12|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/12|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/13",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "AArmour/13|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/13|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/14",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "AArmour/14|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/14|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/15",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "AArmour/15|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/15|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/19",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/19|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/19|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/20",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/20|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/20|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/21",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/21|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/21|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/22",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/22|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/22|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/23",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/23|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/23|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/24",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/24|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/24|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/28",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "AArmour/28|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/28|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/29",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/29|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/29|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/30",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/30|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/30|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/34",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "AArmour/34|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/34|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/51",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "AArmour/51|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/51|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/52",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "AArmour/52|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/52|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/53",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "AArmour/53|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/53|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/57",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/57|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/57|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AArmour/58",
+    "family": "AArmour",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AArmour/58|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AArmour/58|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/00",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/00|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/00|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/01",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/01|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/01|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/02",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/02|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/02|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/09",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/09|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/09|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/10",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/10|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/10|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/11",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/11|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/11|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/12",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/12|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/12|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/19",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/19|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/19|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/29",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/29|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/29|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/30",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/30|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/30|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/35",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/35|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/35|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/36",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/36|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/36|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/37",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/37|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/37|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/38",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/38|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/38|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/39",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/39|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/39|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/40",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "ARArmour/40|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/40|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/41",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/41|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/41|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/54",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "ARArmour/54|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/54|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/55",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "ARArmour/55|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/55|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/56",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "ARArmour/56|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/56|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/57",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/57|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/57|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARArmour/58",
+    "family": "ARArmour",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARArmour/58|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARArmour/58|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/00",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/00|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/00|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/00 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/00 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/00 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/01",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/01|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/01|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/01 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/01 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/01 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/02",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "ARWeapon/02|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/02|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/02 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "ARWeapon/02 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/02 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/03",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/03|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/03|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/03 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/03 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/03 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/04",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/04|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/04|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/04 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/04 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/04 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/05",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/05|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/05|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/05 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/05 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/05 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/06",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "ARWeapon/06|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/06|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/06 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "ARWeapon/06 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/06 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/07",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/07|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/07|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/07 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/07 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/07 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/08",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/08|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/08|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/08 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/08 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/08 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/09",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/09|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/09|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/09 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/09 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/09 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/10",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/10|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/10|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/10 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/10 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/10 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/11",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/11|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/11|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/11 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/11 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/11 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/12",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/12|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/12|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/12 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/12 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/12 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/13",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/13|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/13|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/13 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/13 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/13 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/14",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "ARWeapon/14|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/14|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/14 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "ARWeapon/14 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/14 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/15",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/15|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/15|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/15 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/15 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/15 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/16",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/16|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/16|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/16 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/16 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/16 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/17",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/17|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/17|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/17 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/17 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/17 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/18",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/18|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/18|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/18 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/18 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/18 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/19",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/19|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/19|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/19 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/19 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/19 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/20",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/20|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/20|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/20 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/20 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/20 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/21",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/21|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/21|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/21 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/21 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/21 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/22",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/22|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/22|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/22 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/22 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/22 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/23",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/23|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/23|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/23 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/23 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/23 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/24",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/24|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/24|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/24 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/24 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/24 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/25",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/25|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/25|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/25 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/25 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/25 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/26",
+    "family": "ARWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/26|0|Standing,Spell,Struck,Die,Dead,AttackRange3",
+      "ARWeapon/26|416|Standing,Spell,Struck,Die,Dead,AttackRange3"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "ARWeapon/26 S",
+    "family": "ARWeapon",
+    "frameSlots": 704,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "ARWeapon/26 S|0|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump",
+      "ARWeapon/26 S|352|WalkingBow,RunningBow,AttackRange1,AttackRange2,AttackRange3,Jump"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/00 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/00 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/00 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/00 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/00 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/00 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/00 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/00 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/01 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/01 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/01 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/01 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/01 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/01 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/01 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/01 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/02 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/02 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/02 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/02 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/02 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/02 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/02 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/02 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/03 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/03 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/03 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/03 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/03 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/03 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/03 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/03 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/04 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/04 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/04 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/04 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/04 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/04 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/04 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/04 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/05 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/05 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/05 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/05 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/05 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/05 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/05 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/05 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/06 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/06 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/06 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/06 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/06 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/06 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/06 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/06 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/07 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/07 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/07 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/07 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/07 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/07 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/07 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/07 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/08 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/08 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/08 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/08 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/08 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/08 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/08 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/08 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/09 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/09 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/09 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/09 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/09 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/09 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/09 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/09 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/10 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/10 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/10 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/10 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/10 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/10 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/10 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/10 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/11 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/11 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/11 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/11 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/11 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/11 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/11 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/11 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/12 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "AWeapon/12 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/12 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/12 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/12 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "AWeapon/12 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/12 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/12 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/13 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/13 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/13 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/13 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/13 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/13 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/13 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/13 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/14 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/14 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/14 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/14 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/14 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/14 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/14 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/14 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/15 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/15 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/15 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/15 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/15 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/15 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/15 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/15 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/16 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/16 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/16 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/16 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/16 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/16 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/16 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/16 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/17 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/17 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/17 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/17 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/17 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/17 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/17 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/17 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/18 L",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/18 L|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/18 L|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/18 L|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "AWeapon/18 R",
+    "family": "AWeapon",
+    "frameSlots": 1024,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "AWeapon/18 R|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash",
+      "AWeapon/18 R|512|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead,Attack4,Sneak,Dash"
+    ],
+    "supplementalMotionKeys": [
+      "AWeapon/18 R|416|DeadCommonOffset"
+    ],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/00",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/00|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/00|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/01",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/01|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/01|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/02",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/02|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/02|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/03",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/03|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/03|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/04",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/04|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/04|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/05",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/05|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/05|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/06",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/06|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/06|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/07",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/07|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/07|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/08",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/08|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/08|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/09",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/09|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/09|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/10",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/10|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/10|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/11",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/11|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/11|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/12",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/12|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/12|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/13",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/13|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/13|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/14",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/14|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/14|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/15",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/15|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/15|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/16",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/16|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/16|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/17",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/17|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/17|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/18",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/18|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/18|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/19",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/19|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/19|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/20",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/20|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/20|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/21",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/21|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/21|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/22",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/22|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/22|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/23",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/23|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/23|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/24",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/24|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/24|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/25",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/25|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/25|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/26",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/26|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/26|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/27",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/27|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/27|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/28",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/28|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/28|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/29",
+    "family": "CArmour",
+    "frameSlots": 8080,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/29|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/29|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/30",
+    "family": "CArmour",
+    "frameSlots": 6464,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/30|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/30|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/31",
+    "family": "CArmour",
+    "frameSlots": 6464,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/31|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/31|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/32",
+    "family": "CArmour",
+    "frameSlots": 6464,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/32|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/32|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/33",
+    "family": "CArmour",
+    "frameSlots": 6464,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/33|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/33|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/34",
+    "family": "CArmour",
+    "frameSlots": 6464,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/34|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/34|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/35",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/35|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/35|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/36",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/36|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/36|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/37",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/37|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/37|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/38",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/38|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/38|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/39",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/39|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/39|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/40",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/40|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/40|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/41",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/41|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/41|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/42",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/42|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/42|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/43",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/43|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/43|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/44",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/44|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/44|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/45",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/45|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/45|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/46",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/46|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/46|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/47",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/47|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/47|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/48",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/48|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/48|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/49",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/49|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/49|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/50",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/50|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/50|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/51",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/51|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/51|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/52",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/52|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/52|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/53",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/53|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/53|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/54",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/54|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/54|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/55",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/55|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/55|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/56",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CArmour/56|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/56|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/57",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/57|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/57|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CArmour/58",
+    "family": "CArmour",
+    "frameSlots": 1616,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CArmour/58|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CArmour/58|808|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/00",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/00|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/00|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/01",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/01|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/01|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/02",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/02|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/02|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/03",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/03|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/03|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/04",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/04|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/04|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/05",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/05|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/05|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/06",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/06|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/06|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/07",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/07|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/07|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/08",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/08|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/08|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/09",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/09|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/09|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/10",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/10|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/10|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/11",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/11|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/11|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/12",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/12|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/12|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/13",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/13|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/13|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/14",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/14|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/14|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/15",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/15|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/15|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/16",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/16|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/16|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/17",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/17|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/17|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/18",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/18|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/18|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/19",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/19|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/19|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/20",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/20|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/20|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/21",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/21|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/21|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/22",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/22|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/22|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/23",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/23|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/23|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/24",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/24|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/24|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/25",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/25|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/25|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/26",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/26|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/26|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/27",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/27|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/27|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/28",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/28|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/28|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/29",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/29|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/29|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/30",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/30|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/30|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/31",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/31|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/31|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/32",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/32|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/32|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/33",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/33|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/33|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/34",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/34|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/34|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/35",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/35|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/35|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/36",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/36|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/36|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/37",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/37|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/37|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/38",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/38|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/38|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/39",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/39|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/39|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/40",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/40|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/40|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/41",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/41|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/41|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/42",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/42|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/42|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/43",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/43|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/43|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/44",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/44|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/44|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/45",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/45|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/45|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/46",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/46|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/46|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/47",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/47|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/47|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/48",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/48|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/48|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/49",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/49|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/49|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/50",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/50|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/50|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/51",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/51|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/51|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/52",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/52|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/52|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/53",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/53|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/53|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/54",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/54|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/54|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/55",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/55|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/55|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/56",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/56|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/56|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/57",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/57|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/57|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/58",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/58|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/58|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/59",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/59|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/59|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/60",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/60|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/60|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/61",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/61|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/61|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/62",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/62|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/62|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/63",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/63|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/63|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/64",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/64|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/64|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/65",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/65|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/65|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/66",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/66|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/66|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/67",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/67|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/67|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/68",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/68|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/68|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/69",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/69|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/69|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/70",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/70|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/70|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/71",
+    "family": "CWeapon",
+    "frameSlots": 831,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/71|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/71|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      false
+    ],
+    "allResourceReferencesReady": false
+  },
+  {
+    "library": "CWeapon/72",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": false,
+    "motionKeysMaleFemale": [
+      "CWeapon/72|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/72|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/73",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/73|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/73|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/74",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/74|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/74|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/75",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/75|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/75|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/76",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/76|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/76|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/77",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/77|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/77|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  },
+  {
+    "library": "CWeapon/78",
+    "family": "CWeapon",
+    "frameSlots": 832,
+    "referencedByCurrentTemplates": true,
+    "motionKeysMaleFemale": [
+      "CWeapon/78|0|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead",
+      "CWeapon/78|416|Standing,Walking,Running,Attack1,Attack2,Attack3,Spell,Struck,Die,Dead"
+    ],
+    "supplementalMotionKeys": [],
+    "resourceReadyMaleFemale": [
+      true,
+      true
+    ],
+    "allResourceReferencesReady": true
+  }
+]

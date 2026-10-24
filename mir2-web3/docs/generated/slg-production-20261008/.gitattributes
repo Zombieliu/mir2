@@ -1,0 +1,3 @@
+# Preserve original test receipts, logs and nonce bytes.
+** -text
+.gitattributes text eol=lf

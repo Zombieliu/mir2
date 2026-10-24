@@ -1,0 +1,1021 @@
+{
+  "schema": "mir2.production-creature-box-actual-audit.v1",
+  "createdUtc": "2026-10-09T00:54:26.1846939Z",
+  "accepted": true,
+  "actualPassingExecutions": 186.0,
+  "distinctNamedPassingTests": 177,
+  "newUniqueTests": 8,
+  "newTestNames": [
+    "runtime::intelligent_creatures::uid_tests::actual_box_mints_above_retired_source_and_preserves_complete_reward_on_relogin",
+    "runtime::intelligent_creatures::uid_tests::reward_sessions_share_one_authority_even_when_their_source_slots_are_reused",
+    "runtime::intelligent_creatures::uid_tests::corrupt_authority_keeps_box_and_emits_no_success_or_reward",
+    "runtime::intelligent_creatures::uid_tests::exhausted_authority_never_falls_back_to_the_removed_source_or_slot",
+    "runtime::intelligent_creatures::uid_tests::unavailable_and_fenced_rewards_cannot_consume_the_box",
+    "runtime::intelligent_creatures::uid_tests::wrong_configured_authority_cannot_mutate_either_store_or_consume_the_box",
+    "runtime::intelligent_creatures::uid_tests::empty_blackstone_retires_high_source_in_history_without_minting_a_reward",
+    "runtime::intelligent_creatures::uid_tests::stale_source_reference_is_rejected_before_history_floor_or_inventory_changes"
+  ],
+  "checks": [
+    {
+      "run": "creature-reward-tests-02",
+      "actualPassingExecutions": 8,
+      "declaredInputs": 462,
+      "sourceDrift": 0,
+      "remainingCBytes": "101077487616",
+      "freshnessUpperBoundMs": 86.7619,
+      "nonce": "4184205a21cc468da762e33ab25ad0ee",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "creature-regression-02",
+      "actualPassingExecutions": 55,
+      "declaredInputs": 462,
+      "sourceDrift": 0,
+      "remainingCBytes": "99498610688",
+      "freshnessUpperBoundMs": 72.6088,
+      "nonce": "ef6223b168e5435680ea5c68c11c9cef",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "use-item-regression-02",
+      "actualPassingExecutions": 47,
+      "declaredInputs": 462,
+      "sourceDrift": 0,
+      "remainingCBytes": "100720230400",
+      "freshnessUpperBoundMs": 88.7862,
+      "nonce": "6cd9e3ad43af44709fa55cf15671eda1",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "uid-file-regression-01",
+      "actualPassingExecutions": 17,
+      "declaredInputs": 462,
+      "sourceDrift": 0,
+      "remainingCBytes": "99494006784",
+      "freshnessUpperBoundMs": 72.0532,
+      "nonce": "12b6e0fe996a45c6b0978b0fb945dd3c",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    },
+    {
+      "run": "save-regression-01",
+      "actualPassingExecutions": 59,
+      "declaredInputs": 462,
+      "sourceDrift": 0,
+      "remainingCBytes": "98492534784",
+      "freshnessUpperBoundMs": 74.7295,
+      "nonce": "2e98f7498d734bfeb6fb3a47018dfbe2",
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0
+    }
+  ],
+  "roster": [
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::actual_box_mints_above_retired_source_and_preserves_complete_reward_on_relogin",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::corrupt_authority_keeps_box_and_emits_no_success_or_reward",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::empty_blackstone_retires_high_source_in_history_without_minting_a_reward",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::exhausted_authority_never_falls_back_to_the_removed_source_or_slot",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::reward_sessions_share_one_authority_even_when_their_source_slots_are_reused",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::stale_source_reference_is_rejected_before_history_floor_or_inventory_changes",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::unavailable_and_fenced_rewards_cannot_consume_the_box",
+      "result": "ok"
+    },
+    {
+      "run": "creature-reward-tests-02",
+      "test": "runtime::intelligent_creatures::uid_tests::wrong_configured_authority_cannot_mutate_either_store_or_consume_the_box",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::buffs::buff_duration::tests::creature_duration_clone_preserves_anchor_and_monotonic_expiry",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::buffs::buff_duration::tests::creature_duration_serialization_preserves_remaining_and_legacy_absence",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_attack_operation_receipt_is_persisted_and_not_repeated_after_dismiss",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_attack_wallet_and_receipt_rollback_together_on_save_failure",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_blackstone_ordinary_use_consumes_once_and_does_not_invent_rewards",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_blackstone_uses_mail_when_bag_is_full_and_does_not_repeat_same_second",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_box_selection_uses_minimum_score_first_tie_and_shipped_tables",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_dynamic_wonder_drugs_preserve_all_seven_original_three_tier_values",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_knapsack_stacks_duration_preserves_first_stats_and_consumes_once",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_maintenance_uses_seconds_food_protection_expiry_and_blackstone_reward",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_ordinary_use_item_acquires_all_shipped_eggs_and_duplicate_preserves_item",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_real_duration_ignores_movement_ticks_and_expires_before_maintenance",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_real_duration_relogin_keeps_remaining_not_full_duration",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_real_duration_world_snapshot_uses_clock_not_legacy_tick_deadline",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_strongbox_reuses_only_freed_slot_once_and_preserves_reward_on_relogin",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_template_handler_accepts_all_fifteen_original_pet_types",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_updates_subscription_controls_periodic_packets_without_stopping_maintenance",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_wonder_drug_uses_instance_stats_and_rejects_second_use_without_consumption",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::reward_rate_wonder_drug_changes_shared_experience_award_and_authoritative_drop_stats",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::actual_box_mints_above_retired_source_and_preserves_complete_reward_on_relogin",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::corrupt_authority_keeps_box_and_emits_no_success_or_reward",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::empty_blackstone_retires_high_source_in_history_without_minting_a_reward",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::exhausted_authority_never_falls_back_to_the_removed_source_or_slot",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::reward_sessions_share_one_authority_even_when_their_source_slots_are_reused",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::stale_source_reference_is_rejected_before_history_floor_or_inventory_changes",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::unavailable_and_fenced_rewards_cannot_consume_the_box",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::intelligent_creatures::uid_tests::wrong_configured_authority_cannot_mutate_either_store_or_consume_the_box",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::session::tests::intelligent_creature_filter_applies_category_and_grade_rules",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::session::tests::intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::session::tests::intelligent_creature_packets_update_state_and_pick_up_ground_gold",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::session::tests::intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::session_lightweight_snapshot_tests::lightweight_active_intelligent_creature_matches_full_snapshot_selection",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::attack_precedes_pickup_by_500ms_and_transaction_is_not_reissued",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::automatic_search_origin_is_pet_and_blocked_adjacent_drop_can_be_collected",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::disappeared_or_no_longer_eligible_target_cancels_pending_attack",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::follows_owner_and_recalls_using_remove_appear_without_blocking",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::idle_variants_follow_source_types_and_ten_second_cooldown",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::injected_seed_replays_obstacle_rotation_and_supports_both_directions",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::lifecycle_removal_is_once_and_stale_session_cannot_keep_actor_alive",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::maintenance_sync_preserves_pending_manual_pickup_but_policy_and_hunger_cancel",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::mouse_command_remains_delayed_even_when_pet_is_in_automatic_mode",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::moves_on_cadence_and_never_catches_up_a_stale_queue",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::rejects_foreign_owner_distant_mouse_and_starved_requests",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::rename_updates_aoi_appearance_and_rejects_foreign_owner",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::intelligent_creatures::tests::validates_catalog_and_accepts_all_fifteen_types_including_zero",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_cleans_stale_owner_and_retained_phantom",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_commits_actor_seed_and_rejects_tampering",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_preserves_pending_timer_rng_and_in_flight_receipt",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_death_leave_and_restriction_remove_actor",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_follows_owner_and_forks_actor_state",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_forged_candidate_cannot_bypass_ownership_or_filter",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_manager_owner_scoped_delivery_preserves_other_owner_and_offline_receipts",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_one_operation_and_intent_until_settlement_then_dismiss_invalidates",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_reconnected_identity_recovers_old_session_operation_without_cross_character_access",
+      "result": "ok"
+    },
+    {
+      "run": "creature-regression-02",
+      "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_two_clients_receive_real_nonblocking_aoi_actor",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::intelligent_creature_item_tests::creature_ordinary_use_item_acquires_all_shipped_eggs_and_duplicate_preserves_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::crystal_use_item_packet_consumes_belt_slot",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::crystal_use_item_packet_consumes_inventory_slot",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::hero_inventory_use_item_consumes_potion_and_restores_hero_health",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::inventory_use_item_equips_metadata_backed_exact_zero_from_nonzero_slot",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_ancient_banga_green_grants_free_map_shout",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_ancient_banga_purple_grants_free_server_shout",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_belt_equipment_rejects_without_runtime_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_credit_token_emits_localized_hint_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_book_learns_skill_when_eligible",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_book_rejects_duplicate_known_skill",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_book_rejects_low_level_with_localized_message",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_book_rejects_wrong_class_with_localized_message",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_equipment_allows_modeled_max_mc_requirement",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_crystal_equipment_rejects_low_max_dc_requirement",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dead_player_ack_fails_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dead_player_resurrection_scroll_rejects_on_no_reincarnation_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dead_player_resurrection_scroll_revives_and_consumes_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_apple_applies_multiple_template_buffs",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_credit_token_emits_localized_hint_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_dungeon_escape_rejects_on_no_escape_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_dungeon_escape_teleports_same_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_food_feeds_equipped_mount",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_food_requires_equipped_mount",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_gt_invite_consumes_without_active_effect",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_gt_teleport_consumes_without_teleporting",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_impact_drug_stacks_duration_without_resetting_stats",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_normal_potion_queues_timed_restore",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_potion_rejects_on_no_drug_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_random_teleport_rejects_on_no_random_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_random_teleport_teleports_same_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_repair_oils_respect_weapon_repair_binds",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_repair_oils_use_template_scroll_shapes",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_sun_potion_applies_template_hp_and_mp",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_equipped_mount_toggles_riding_state",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_equipping_need_identify_item_emits_refresh_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_hero_inventory_grid_does_not_mutate_matching_player_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_missing_inventory_item_rejects_without_runtime_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_mystery_water_unlocks_cursed_removal_and_consumes_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_mystery_water_when_already_unlocked_ack_fails_and_keeps_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_rejects_gender_locked_equipment_with_crystal_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_resurrection_scroll_while_alive_hint_chats_and_preserves_item",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_static_potion_rejects_on_no_drug_map",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_unusable_inventory_item_rejects_without_runtime_chat",
+      "result": "ok"
+    },
+    {
+      "run": "use-item-regression-02",
+      "test": "runtime::session::tests::use_item_packet_uses_inventory_unique_id_when_duplicate_keys_exist",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "concurrent_child_processes_share_the_file_authority",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "concurrent_threads_issue_one_contiguous_set",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "corrupt_truncated_and_unknown_state_fail_closed",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "exhaustion_never_wraps_or_reuses_zero",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "first_uid_is_one_and_restart_is_monotonic",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "floor_raise_refuses_generation_overflow_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "initialize_new_refuses_existing_state",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "missing_state_after_initialization_fails_closed",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "nonzero_initial_floor_issues_floor_plus_one",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "open_existing_refuses_missing_state",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "parent_directory_components_are_rejected",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "raise_floor_is_monotonic_durable_and_restart_safe",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "replacing_authority_directory_is_detected_fail_closed",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "replacing_lock_file_is_detected_fail_closed",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "symbolic_link_state_is_never_followed",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "windows_file_id_info_detects_recreated_lock_identity",
+      "result": "ok"
+    },
+    {
+      "run": "uid-file-regression-01",
+      "test": "windows_rejects_unc_verbatim_unc_and_device_paths_before_io",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::committed_zero_quantity_persisted_roots_and_children_reject_atomically",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::crystal_buff_state_survives_save_preflight_and_apply",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::crystal_inventory_capacity_controls_bag2_and_user_information_raw_slots",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::duplicate_exact_equipment_root_uid_rejects_start_game_atomically",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::legacy_candidate_key_with_conflicting_exact_index_is_rejected",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::legacy_candidate_keys_migrate_across_stage5_item_carriers",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::legal_legacy_item_save_without_metadata_carrier_still_applies",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_item_carrier_rejects_before_mutating_the_world",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_npc_buy_back_json_rejects_before_world_session_or_disk_changes",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_quest_and_skill_state_fail_preflight_instead_of_clearing",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::malformed_stage5_json_rejects_before_mutating_world_or_session",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::overbudget_mail_attachment_is_rejected_before_disk_or_world_changes",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::overbudget_npc_used_goods_item_rejects_before_world_session_or_disk_changes",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::oversized_item_carrier_start_game_returns_result_two_without_partial_state",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::six_legacy_candidate_keys_migrate_once_to_exact_crystal_templates",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::start_game_legacy_item_migration_is_persisted_and_idempotent",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::zero_quantity_live_inventory_rejects_active_save_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::character_save_item_validation_tests::zero_quantity_persisted_inventory_rejects_start_game_atomically",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::account_creation_persistence_failure_returns_crystal_failure_and_rolls_back_live_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::active_snapshot_without_account_identity_is_rejected",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_account_switch_with_colliding_index_cannot_refresh_foreign_mail",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_cross_account_send_mail_commits_sender_and_exact_target",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_identity_still_commits_mail_transaction_and_full_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::canonical_select_missing_character_returns_crystal_result_two_without_mutation",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::delete_character_persistence_failure_keeps_character",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::delete_character_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::disconnect_persistence_failure_still_clears_gm_permissions",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::existing_only_passkey_login_does_not_provision_missing_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::first_time_passkey_provision_is_durable_and_locked",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_all_private_mail_transactions",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_normal_revision_full_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_stale_revision_full_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::gm_password_binding_login_switch_and_successful_disconnect_clear_permissions",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::in_game_character_lifecycle_requests_are_silent_and_leave_world_and_store_unchanged",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::legacy_password_migration_persistence_failure_rejects_login_and_keeps_live_password",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::legal_gm_and_ranking_paths_sync_exact_authorized_levels",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::local_missing_account_start_returns_none_without_recreating_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::malformed_empty_and_switched_identities_cannot_reuse_gm_or_leak_private_packets",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::new_character_persistence_failure_returns_crystal_failure_and_keeps_roster",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::new_character_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::noncanonical_bound_identity_cannot_alias_or_mutate_either_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::noncanonical_live_identity_cannot_read_merge_or_mutate_either_mailbox",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::passkey_provision_persistence_failure_rolls_back_live_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::password_change_persistence_failure_returns_crystal_failure_and_keeps_old_hash",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::recovery_password_reset_persistence_failure_keeps_old_hash",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::send_mail_target_durable_identity_mismatch_is_silent_and_atomic",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::source_of_truth_start_requires_authoritative_refresh_and_does_not_recreate_account",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::standard_and_passkey_recovery_preflight_fail_closed_for_source_states",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::start_game_without_account_identity_is_rejected_and_does_not_mutate_account_store",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::start_normalization_persistence_failure_returns_crystal_failure_and_keeps_live_save",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::save_fail_closed_tests::trusted_select_account_for_recovery_still_starts_game",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::durable_cooldown_rebase_uses_elapsed_wall_time_and_authoritative_cap",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::inactive_skill_encoding_is_deterministic_across_wall_clock_samples",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::legacy_absolute_skill_deadline_expires_instead_of_becoming_an_hour_cooldown",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::new_session_restore_rebases_remaining_skill_cooldown_and_keeps_progression",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::skill_cooldown_restore_tests::same_session_checkpoint_restore_preserves_active_skill_cooldown",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::stale_mail_status_merge_tests::stale_snapshot_can_only_strengthen_mail_lock",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::stale_mail_status_merge_tests::stale_snapshot_cannot_remove_newer_durable_mail_lock",
+      "result": "ok"
+    },
+    {
+      "run": "save-regression-01",
+      "test": "runtime::save::stale_mail_status_merge_tests::stale_unlocked_snapshot_cannot_delete_newer_durable_locked_mail",
+      "result": "ok"
+    }
+  ],
+  "liveGameplayAccepted": false,
+  "accountAtomicPersistenceAccepted": false,
+  "allIssuerMigrationAccepted": false,
+  "postgresAccepted": false
+}

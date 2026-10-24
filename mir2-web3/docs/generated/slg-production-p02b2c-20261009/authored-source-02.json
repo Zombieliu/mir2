@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.production-authored-source.v1",
+  "parent": "78d3abecb887d0e2c447d06e8224e7670486758e",
+  "createdUtc": "2026-10-09T00:10:32.540076+00:00",
+  "files": [
+    {
+      "path": "mir2-web3/apps/simulation/src/user_item_uid.rs",
+      "sha256": "5335ced4868a62f8eb59f0d816a76459e0d57a4c23959c0164c8fdce64106b41",
+      "length": 43402
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creatures.rs",
+      "sha256": "b271a9ebbd24419f8ce5938580aac484330c319725b0b6cefc05d3c3d36e6523",
+      "length": 24237
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/creature_reward_uid_tests.rs",
+      "sha256": "aba96d0cd4e60deb3d51b4e6eb4749ceab7e3525d5e5403ebe6ae52e603d833f",
+      "length": 9230
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/tests.rs",
+      "sha256": "7b843fe5b126c5a2ef9cade04d0647dce47ac85542634fa7e88cdfa69f8f6fe7",
+      "length": 2432244
+    }
+  ]
+}

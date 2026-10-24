@@ -2008,7 +2008,7 @@ pub(crate) struct QuestInputModels<'w> {
 }
 
 #[derive(SystemParam)]
-struct JourneyRenderModels<'w> {
+struct JourneyRenderModels<'w, 's> {
     locale: Res<'w, QuestPresentationLocale>,
     #[cfg(not(feature = "native-ui"))]
     host_context: Option<Res<'w, crate::portable_quest_ui::QuestUiHostContext>>,
@@ -2017,6 +2017,8 @@ struct JourneyRenderModels<'w> {
     #[cfg(not(feature = "native-ui"))]
     compact_last_build: ResMut<'w, QuestCompactLastBuild>,
     presentation: Option<Res<'w, QuestUiPresentation>>,
+    workshop_geometry: crate::stone_workshop_ui::StoneWorkshopGeometry<'w, 's>,
+    workshop_layout: Local<'s, Option<Option<QuestLogRect>>>,
     completed: Res<'w, CompletedQuestTracker>,
     guidance: Res<'w, QuestGuidance>,
     catalog: Res<'w, NewcomerJourneyCatalog>,
@@ -3275,6 +3277,9 @@ fn render_quest_ui(
 
     let quest_log_open = is_quest_log_open_state(Some(&player_ui));
     let mobile = journey_models.presentation.as_deref().and_then(|value| value.mobile_layout());
+    let workshop_rect = crate::stone_workshop_ui::sidebar_rect(&dialog,
+        journey_models.workshop_geometry.presentation(journey_models.presentation.as_deref().copied()));
+    let workshop_layout_changed = *journey_models.workshop_layout != Some(workshop_rect);
     #[cfg(not(feature = "native-ui"))]
     let compact_stamp = journey_models.presentation.as_deref()
         .zip(journey_models.host_context.as_deref())
@@ -3319,11 +3324,13 @@ fn render_quest_ui(
         && !npc_nav.is_changed()
         && !player_ui.is_changed()
         && !journey_models.presentation.as_ref().is_some_and(|value| value.is_changed())
+        && !workshop_layout_changed
         && !compact_stamp_changed
     {
         return;
     }
 
+    *journey_models.workshop_layout = Some(workshop_rect);
     #[cfg(not(feature = "native-ui"))]
     if compact_stamp_changed { journey_models.compact_last_build.0 = compact_stamp; }
     #[cfg(not(feature = "native-ui"))]
@@ -3418,6 +3425,17 @@ fn render_quest_ui(
         };
         if is_dialog.is_some() {
             if let Some(layout) = mobile { place_mobile_sheet(&mut panel_node, layout); }
+            else {
+                let rect = workshop_rect.unwrap_or(QuestLogRect::new(0.0, 0.0, 440.0, 224.0));
+                panel_node.left = Val::Px(rect.left);
+                panel_node.top = Val::Px(rect.top);
+                panel_node.width = Val::Px(rect.width);
+                panel_node.height = Val::Px(rect.height);
+                panel_node.min_width = Val::Px(rect.width);
+                panel_node.max_width = Val::Px(rect.width);
+                panel_node.min_height = Val::Px(rect.height);
+                panel_node.max_height = Val::Px(rect.height);
+            }
             #[cfg(not(feature = "native-ui"))]
             set_compact_panel_stamp(&mut commands, panel_entity, compact_stamp, MobileQuestSheet::Dialog);
         }
@@ -8873,6 +8891,104 @@ mod tests {
         assert_eq!(roots.iter(app.world()).count(), 1);
     }
 
+    fn workshop_dialog_for_layout() -> NpcDialogModel {
+        let mut dialog = NpcDialogModel::default();
+        dialog.apply(crate::quest_model::NpcDialogUpdate {
+            npc_object_id: 2000,
+            npc_name: Some("Bill".into()),
+            lines: vec!["Stone workshop".into(), "Gold: 9000".into(),
+                "Materials and raw stones stay in your physical Bag.".into()],
+            options: ["@stone:v1:list:stone:0", "@Main", "@Exit"].into_iter()
+                .map(|target| crate::quest_model::NpcDialogOption {
+                    option_id: target.into(), label: "server link".into(), enabled: true,
+                }).collect(),
+            open: true, replace: true,
+        });
+        dialog
+    }
+
+    fn rendered_npc_rect(app: &mut App) -> QuestLogRect {
+        let world = app.world_mut();
+        let (node, focus) = world.query_filtered::<(&Node, &FocusPolicy), With<NpcDialogPanel>>()
+            .single(world).expect("the actual NPC panel");
+        assert_eq!(node.display, Display::Flex);
+        assert!(matches!(focus, FocusPolicy::Block));
+        let (Val::Px(left), Val::Px(top), Val::Px(width), Val::Px(height)) =
+            (node.left, node.top, node.width, node.height) else { panic!("pixel panel bounds") };
+        QuestLogRect::new(left, top, width, height)
+    }
+
+    #[test]
+    fn workshop_render_uses_real_native_geometry_and_keeps_modal_current_links() {
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default());
+        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+        app.insert_resource(bevy::prelude::UiScale(2.0));
+        let mut window = Window::default();
+        window.resolution.set(2048.0, 1536.0);
+        let primary = app.world_mut().spawn((window, bevy::window::PrimaryWindow)).id();
+        app.add_plugins(Mir2QuestUiPlugin);
+        app.insert_resource(workshop_dialog_for_layout());
+        app.update();
+        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(568.0, 16.0, 440.0, 224.0));
+        let world = app.world_mut();
+        assert_eq!(world.query_filtered::<&Node, With<QuestUiModalBlocker>>()
+            .single(world).unwrap().display, Display::Flex);
+        assert!(blocks_gameplay_input(None, world.resource::<NpcDialogModel>()));
+        assert!(is_world_click_blocked_for_quest(None, world.resource::<NpcDialogModel>(), false));
+        let target = "@stone:v1:list:stone:0";
+        let button = world.query::<(Entity, &QuestUiButton)>().iter(world)
+            .find_map(|(entity, action)| matches!(action,
+                QuestUiButton::SelectNpcDialog { target: actual } if actual == target).then_some(entity))
+            .expect("a rendered opaque workshop link");
+        world.entity_mut(button).insert(Interaction::Pressed);
+        app.update();
+        assert_eq!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
+            vec![QuestUiIntent::SelectNpcDialog { target: target.into() }]);
+
+        // No dialog update: a native window change must invalidate the layout cache.
+        app.world_mut().get_mut::<Window>(primary).unwrap().resolution.set(2560.0, 1536.0);
+        app.update();
+        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(824.0, 16.0, 440.0, 224.0));
+        app.world_mut().resource_mut::<NpcDialogModel>().lines[0].text = "Blacksmith".into();
+        app.update();
+        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(0.0, 0.0, 440.0, 224.0));
+        assert!(blocks_gameplay_input(None, app.world().resource::<NpcDialogModel>()));
+
+        app.insert_resource(workshop_dialog_for_layout());
+        app.world_mut().remove_resource::<bevy::prelude::UiScale>();
+        app.update();
+        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(0.0, 0.0, 440.0, 224.0));
+    }
+
+    #[test]
+    fn workshop_render_preserves_host_mobile_sheet_and_restores_ordinary_bounds() {
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default());
+        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+        app.add_plugins(Mir2QuestUiPlugin);
+        app.insert_resource(workshop_dialog_for_layout());
+        let touch = QuestUiPresentation { logical_width: 1664.0, logical_height: 768.0,
+            stage_css_scale: 0.507, touch: true };
+        app.insert_resource(touch);
+        app.update();
+        assert_eq!(rendered_npc_rect(&mut app), touch.mobile_layout().unwrap().panel);
+        let desktop = QuestUiPresentation { logical_width: 1280.0, logical_height: 720.0,
+            stage_css_scale: 1.0, touch: false };
+        app.insert_resource(desktop);
+        app.update();
+        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(824.0, 16.0, 440.0, 224.0));
+        // Unknown receipts expose only Merchant/Exit. They keep the ordinary modal panel.
+        app.world_mut().resource_mut::<NpcDialogModel>().options.remove(0);
+        app.update();
+        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(0.0, 0.0, 440.0, 224.0));
+        assert!(is_world_click_blocked_for_quest(None, app.world().resource::<NpcDialogModel>(), false));
+        app.insert_resource(workshop_dialog_for_layout());
+        app.insert_resource(QuestUiPresentation { logical_width: f32::NAN, ..desktop });
+        app.update();
+        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(0.0, 0.0, 440.0, 224.0));
+    }
+
     #[test]
     fn fixed_and_selectable_quest_rewards_are_both_rich_hover_targets() {
         use crate::inventory::{
@@ -11125,6 +11241,53 @@ mod mobile_layout_tests {
     fn presentation() -> QuestUiPresentation {
         QuestUiPresentation { logical_width: 1664.0, logical_height: 768.0,
             stage_css_scale: 0.507, touch: true }
+    }
+
+    #[test]
+    fn workshop_portable_tree_uses_supplied_right_sidebar_and_keeps_touch_sheet() {
+        let mut app = computed_app(1024, 512.0, false);
+        app.world_mut().resource_mut::<QuestUiHostContext>().quest_log_open = false;
+        let mut dialog = NpcDialogModel::default();
+        dialog.apply(crate::quest_model::NpcDialogUpdate {
+            npc_object_id: 2000, npc_name: Some("Bill".into()),
+            lines: vec!["Stone workshop".into(),
+                "Materials and raw stones stay in your physical Bag.".into()],
+            options: ["@stone:v1:list:stone:0", "@Main", "@Exit"].into_iter()
+                .map(|target| crate::quest_model::NpcDialogOption {
+                    option_id: target.into(), label: "server link".into(), enabled: true,
+                }).collect(),
+            open: true, replace: true,
+        });
+        app.insert_resource(dialog);
+        app.world_mut().resource_mut::<QuestUiPresentation>().touch = false;
+        app.update();
+        {
+            let world = app.world_mut();
+            let (node, computed, transform) = world
+                .query_filtered::<(&Node, &ComputedNode, &bevy::ui::UiGlobalTransform), With<NpcDialogPanel>>()
+                .single(world).expect("the shared renderer's laid-out NPC panel");
+            assert_eq!((node.left, node.top), (Val::Px(568.0), Val::Px(16.0)));
+            assert_eq!(computed.size(), Vec2::new(440.0, 224.0));
+            let bounds = compact_rect(computed, transform);
+            assert!((bounds.min - Vec2::new(568.0, 16.0)).length() < 0.01);
+            assert!(blocks_gameplay_input(None, world.resource::<NpcDialogModel>()));
+        }
+        app.world_mut().resource_mut::<NpcDialogModel>().options.remove(0);
+        app.update();
+        {
+            let world = app.world_mut();
+            let node = world.query_filtered::<&Node, With<NpcDialogPanel>>().single(world).unwrap();
+            assert_eq!((node.left, node.top), (Val::Px(0.0), Val::Px(0.0)));
+        }
+        app.world_mut().resource_mut::<QuestUiPresentation>().touch = true;
+        app.update();
+        let world = app.world_mut();
+        let layout = world.resource::<QuestUiPresentation>().mobile_layout().unwrap();
+        let node = world.query_filtered::<&Node, With<NpcDialogPanel>>().single(world).unwrap();
+        assert_eq!((node.left, node.top, node.width, node.height),
+            (Val::Px(layout.panel.left), Val::Px(layout.panel.top),
+                Val::Px(layout.panel.width), Val::Px(layout.panel.height)));
+        assert_eq!(node.display, Display::Flex);
     }
 
     #[test]

@@ -1,0 +1,176 @@
+{
+  "schema": "mir2.production-independent-issuer-exploration.v1",
+  "reviewer": "/root/production_review",
+  "createdUtc": "2026-10-08T23:16:05.0191610Z",
+  "baselineCommit": "78d3abecb887d0e2c447d06e8224e7670486758e",
+  "recommendation": "Creature reward box selected fresh output only: shape21 BlackStone and shape25 Strongbox",
+  "acceptedForFocusedTests": false,
+  "preparationOnly": true,
+  "existingFixedResultReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\independent-result-review.json",
+    "sha256": "91b70fd531c21e98cc8d27c46658700ec29cc689dc05af58dc78b0373bb56cc5",
+    "mustRemainUnchanged": true
+  },
+  "minimalAuthoredPaths": [
+    "mir2-web3/apps/simulation/src/runtime/intelligent_creatures.rs",
+    "mir2-web3/apps/simulation/src/user_item_uid.rs",
+    "mir2-web3/apps/simulation/src/runtime/intelligent_creature_uid_tests.rs"
+  ],
+  "integrationPoints": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creatures.rs",
+      "function": "use_creature_special_item",
+      "line": 9,
+      "role": "Actual item-type36 shape21/25 route; special path owns source consumption once, caller must not double consume."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creatures.rs",
+      "function": "use_creature_reward_box",
+      "line": 550,
+      "role": "Clone at561; validate selected source reference at569; stage decrement/removal572-575; normal reward selection578; original empty/no-space publication587/611; infallible local reward UID640; single live replacement653."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance.rs",
+      "function": "refresh_world_history_floor",
+      "line": 118,
+      "role": "Reuse unchanged with original live world before source publication; verifies same configured authority and writable account then scans complete store/current active save."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_uid_issuance.rs",
+      "function": "issue_for_staged_inventory",
+      "line": 191,
+      "role": "Durable one-root issuance through same handle; Unavailable/Fenced errors; no slot/local fallback on trusted failure."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "function": "allocate_item_unique_id_avoiding",
+      "line": 1323,
+      "role": "Keep existing Legacy path, including source reserve argument; generic FreshGrant planner alone would lose retired-source avoiding or final arbitrary Belt fallback semantics."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/user_item_uid.rs",
+      "type": "UserItemUidReason",
+      "line": 73,
+      "role": "Add non_exhaustive CreatureRewardBox reason; current File authority does not persist the reason, so this is not a File schema migration."
+    }
+  ],
+  "originalCrystalFindings": [
+    {
+      "path": "Crystal/Server/MirObjects/PlayerObject.cs",
+      "line": 6162,
+      "finding": "Shape21 consumes source first, sends successful UseItem response, then calls BlackstoneRewardItem and returns."
+    },
+    {
+      "path": "Crystal/Server/MirObjects/PlayerObject.cs",
+      "line": 6226,
+      "finding": "Shape25 likewise consumes before calling StrongboxRewardItem; break then common use tail historically double-consumed; keep existing Rust one-consume fix."
+    },
+    {
+      "path": "Crystal/Server/MirObjects/PlayerObject.cs",
+      "line": 12318,
+      "finding": "Strongbox independently samples each row score divided by DropRate, minimum score wins; empty result reports NothingFound; dynamic shape26 WonderDrug uses box tier; otherwise fresh selected item is regenerated as random drop."
+    },
+    {
+      "path": "Crystal/Server/MirObjects/PlayerObject.cs",
+      "line": 12348,
+      "finding": "No bag free cell reports NoMoreSpace after source already consumed. Original does not refund the box. New UID/authority/carrier failure is a separate infrastructure/content failure and must not publish source consumption."
+    },
+    {
+      "path": "Crystal/Server/MirObjects/PlayerObject.cs",
+      "line": 12357,
+      "finding": "Blackstone minimum sampled score picks CreateDropItem; empty table/result is silent, and NoMoreSpace likewise occurs after source consumption."
+    },
+    {
+      "path": "Crystal/Server/MirEnvir/Envir.cs",
+      "line": 4396,
+      "finding": "Fresh item creates a new global UID, durability and expiry; CreateDropItem4413 additionally assigns random durability/stats and identification. Preserve current frozen RNG and dynamic reward fields; only final selected output UID is migrated."
+    }
+  ],
+  "requiredOrder": [
+    "Reject Unavailable/Fenced policy before any source consumption publication, including legitimate empty/no-space branches; default Legacy normal gateway behavior remains unchanged.",
+    "Validate original source location/UID reference against the live inventory, then refresh original live-world UID history while high source/descendant IDs remain visible. Missing/mismatched/unwritable configured authority returns failure without live replacement.",
+    "Clone and stage source consumption; preserve existing normal table/draw ordering, random fields, dynamic WonderDrug stats and current slot/fallback rules.",
+    "For legitimate empty result or reachable NoMoreSpace, preserve established source consumption/message behavior after successful authority/history preflight; mint no fresh output.",
+    "For a selected deliverable fresh item, complete bounded carrier checks before mint. Durable uses existing trusted issuer with CreatureRewardBox; Legacy retains allocator_avoiding with source reserve.",
+    "After mint, validate/build exact final wire, append to staged inventory, then replace live inventory once and emit GainedItem/UseItem success. Any binding, issuer, conversion or validation failure returns false and discards stage; burned UID is not reused."
+  ],
+  "proposedTests": [
+    {
+      "name": "file_strongbox_reuses_freed_cell_with_new_uid_above_high_source",
+      "purpose": "Actual UseItem preserves one consumption/reward, never reuses source root even if source exceeds allocator seed, packet equals final stored carrier."
+    },
+    {
+      "name": "file_blackstone_empty_reward_consumes_once_and_retires_high_source_floor",
+      "purpose": "Use real empty Blackstone table behavior; success consumes exactly once, zero GainedItem/new UID, authority floor still records retired source. Do not assert rollback for legitimate empty result."
+    },
+    {
+      "name": "uid_authority_failure_preserves_box_and_emits_no_success",
+      "purpose": "Corrupt File, then actual item use: inventory/source/mail/wallet unchanged, no UseItem success or GainedItem, no local fallback."
+    },
+    {
+      "name": "exhausted_uid_rejects_selected_reward_without_consumption",
+      "purpose": "Exhausted u64 authority at selected reward returns failure and leaves original source intact."
+    },
+    {
+      "name": "shadow_fence_and_binding_mismatch_reject_all_publication",
+      "purpose": "Unavailable/Fenced and mismatched config authority reject reward and empty/no-space retirement, not only fresh mint."
+    },
+    {
+      "name": "two_sessions_share_one_reward_box_authority",
+      "purpose": "Same server-supplied handle yields distinct File UIDs without changing independent source custody."
+    },
+    {
+      "name": "no_space_preserves_established_consumption_without_mint",
+      "purpose": "Must first prove the intended existing NoMoreSpace branch is reachable in the controlled fixture. Normal one-unit box removal frees a cell and existing arbitrary Belt fallback also frees source Belt; avoid a vacuous full-bag fixture or silently treating malformed stacked source as normal gameplay."
+    },
+    {
+      "name": "final_dynamic_carrier_survives_normal_memory_account_relogin",
+      "purpose": "Preserve chosen WonderDrug/random stats, exact packet UID and final stored wire through normal save/logout/relogin; clarify memory AccountStore scope, not atomic File account transaction."
+    }
+  ],
+  "existingAssertionsToKeep": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creature_item_tests.rs",
+      "line": 625,
+      "name": "creature_strongbox_reuses_only_freed_slot_once_and_preserves_reward_on_relogin",
+      "assertions": "One success, one reward, source UID gone, bag count unchanged, freed slot0 reused, exact wire preserved on reload."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creature_item_tests.rs",
+      "line": 711,
+      "name": "creature_blackstone_ordinary_use_consumes_once_and_does_not_invent_rewards",
+      "assertions": "Preserve existing empty reward consumption; do not manufacture rewards when source table is empty."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creature_item_tests.rs",
+      "line": 564,
+      "name": "selection_and_dynamic_reward_tests",
+      "assertions": "Keep sampling-score/tie/DropRate selection and dynamic WonderDrug stat fixtures."
+    }
+  ],
+  "knownLimits": [
+    "Current Rust reward-slot code permits any empty Belt fallback; original Crystal reward methods first require a free Inventory cell. This UID slice keeps existing behavior and must not claim that difference is newly 1:1 accepted.",
+    "Only final selected fresh reward mints under this contract; original Crystal selection can allocate discarded candidates earlier, so full discarded-candidate UID timing parity is not claimed.",
+    "Periodic produce_blackstone342-416 and exact Stage5 mail claim713 still use local helpers; excluded from this round. Mail claim is whole attachment custody and must not be silently passed through fresh reissue.",
+    "NPC GIVEITEM script2068 follows already-applied TAKEGOLD2057/TAKEITEM2064 and always continues; swapping helper alone would not establish complete script atomicity. Excluded.",
+    "Generic grant/normalize, other issuers, full external UID census, account atomic commit/unknown publication, Postgres, shared receipts, normal gateway, UI/installers remain open; default public authority binding stays disabled.",
+    "Source-return/custody objects never use CreatureRewardBox or get a newly minted root; this is only the new selected output."
+  ],
+  "sourcePinsRead": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/intelligent_creatures.rs",
+      "sha256": "07a00b3214b0801ac36c3c7f3eb00e161d18525a7dfd91f2273418c1a68d392d"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/item_grants.rs",
+      "sha256": "c1d8522d7dc848cdc3b63eb6ef93b8a81050ee4974b5194bb2f431ba56394a1a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stage5.rs",
+      "sha256": "bf2556bb355e0afff5a996c684d72737a49489a430f66e5b82cd51ce6a4212e2"
+    }
+  ],
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noProductSourceEdits": true
+}

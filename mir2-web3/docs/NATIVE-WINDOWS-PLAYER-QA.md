@@ -1,5 +1,13 @@
 # Windows 原生可玩闭环验收清单
 
+## R23：已实际启动，分辨率与九语基础显示已检查；游戏内验收待登入（2026-10-10）
+
+用户现已授权操作游戏。本机正常启动器首次更新因四个资源404失败并回落R19；按既有清单补齐772163B后，重试实际激活sequence18/R23，安装EXE及四项资源完整哈希匹配。签名、清单、feed和网关/Caddy进程保持，未发布本制作加工/赌石分支。逐文件检查仍耗时6分54秒，性能问题尚未解决。
+
+实际切换1024×768自动→1280×960并恢复；登入前九语标签均已逐个观察，俄语/越南语长按钮在边界内换行。16张有效窗口截图已保存。客户端恢复繁中和自动模式，空登入页等待用户手动登入；没有自动执行账号认证，没有进入游戏世界，22项玩法仍not_run，不代表Candidate100或人类前端验收完成。旧构建记录和其他正文保留，各自证据范围不能合并。
+
+完整记录：[本轮原生实机记录](NATIVE-PLAY-ACCEPTANCE-20261010.md)、[实际结果](generated/native-play-acceptance-20261010/acceptance-result.json)、[证据索引](generated/native-play-acceptance-20261010/evidence-index.json)。
+
 ## Source50：新完整 Web 包已构建，Sharp 入口兼容修复；实玩待验证（2026-10-09）
 
 最新完整 Web 已更新为 Source49 Next＋Source50 Thin，包含当前共享 UI 与九类任务动作源码；本轮不新增界面操作。Source49 完整 Core/PUI/NPC 三包和 WebGPU、WebGL2、共享 WebGL2 三 renderer 均由原 builder 实际编译并通过 metadata/name/normalized ABI、原 WASM/JS/default-gzip 预算及不可变发布；静态 WASM 校验获本次“继续”授权，没有实例化游戏。Core 三次和 renderer 四次 Cargo 严格串行、原50GiB/2000ms/15000ms及PolicyB保持，均完成、退出并释放。

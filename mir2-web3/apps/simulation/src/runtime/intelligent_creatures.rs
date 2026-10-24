@@ -569,6 +569,16 @@ fn use_creature_reward_box(
     if item_unique_id(current) != item_unique_id(source) {
         return (false, vec![]);
     }
+    // Keep the live source in the complete history scan before even an empty
+    // or no-space result can retire it. Bound issuance failures cannot consume
+    // the box or publish a reward; Legacy retains its original behavior.
+    if matches!(
+        staged.item_uid_issuance,
+        super::item_uid_issuance::ItemUidIssuance::Unavailable
+            | super::item_uid_issuance::ItemUidIssuance::Fenced
+    ) || super::item_uid_issuance::refresh_world_history_floor(world).is_err() {
+        return (false, vec![]);
+    }
     if current.quantity > 1 {
         current.quantity -= 1;
     } else {
@@ -637,8 +647,22 @@ fn use_creature_reward_box(
         item.cursed = random.cursed;
         item.socket_slots = random.socket_slots;
     }
-    item.unique_id =
-        allocate_item_unique_id_avoiding(&staged, container, slot, std::slice::from_ref(source));
+    // Validate the frozen complete reward before asking the authority for an
+    // ID. Only Legacy may use local allocation, which must still avoid the
+    // removed source; the bound path never falls back after any error.
+    if try_user_item_from_item_state(&item).is_err() {
+        return (false, vec![]);
+    }
+    item.unique_id = match &staged.item_uid_issuance {
+        super::item_uid_issuance::ItemUidIssuance::Legacy =>
+            allocate_item_unique_id_avoiding(&staged, container, slot, std::slice::from_ref(source)),
+        _ => match super::item_uid_issuance::issue_for_staged_inventory(
+            &staged, crate::UserItemUidReason::CreatureRewardBox, container, slot,
+        ) {
+            Ok(uid) => uid,
+            Err(_) => return (false, vec![]),
+        },
+    };
     let Ok(carrier) = try_user_item_from_item_state(&item) else {
         // Invalid server content cannot consume the box without a deliverable item.
         return (false, vec![]);
@@ -653,3 +677,7 @@ fn use_creature_reward_box(
     *world.resource_mut::<InventoryResource>() = staged;
     (true, vec![ServerPacket::GainedItem { item: carrier }])
 }
+
+#[cfg(test)]
+#[path = "creature_reward_uid_tests.rs"]
+mod uid_tests;

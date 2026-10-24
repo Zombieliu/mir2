@@ -1,5 +1,6 @@
 mod config;
 pub mod db_projection;
+pub use mir2_production as production;
 mod runtime;
 pub mod npc_purchase_journal;
 pub mod npc_purchase_owner;
@@ -38,6 +39,9 @@ pub use config::{
     WorldItemSnapshot, WorldItemTooltipSource, WorldSnapshot, WorldSnapshotClientView,
 };
 pub use runtime::{
+    PersonalProductionState, PersonalProductionConfig, PersonalProductionFacility,
+    ProductionDurableExecution, ProductionDurableError,
+    StoneWorkshopError,
     RankingInspectIdentity, RankingInspectOnlineProjection, RankingInspectPresence, RankingInspectRequest,
     SharedMonsterKillCommitFailure,
     NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBuyBeforeExecution,

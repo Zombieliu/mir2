@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/013-r23-locale-id.jpg",
+  "purpose": "Indonesian basic labels visible inside controls; game-text acceptance pending.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 318850,
+  "sha256": "51ddb9e86c976e99c2aabbacd49e35b29acea5f7e7ca162ba1484d43bb3dc959",
+  "recordedUtc": "2026-10-09T18:52:13.668Z"
+}

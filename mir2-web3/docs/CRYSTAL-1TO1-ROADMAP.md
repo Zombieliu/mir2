@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 新增本服100级成长边界（2026-10-19，北京时间）
+
+用户确定人物100级封顶、满级开放新增SLG。规则见[100级成长与SLG](LEVEL100-SLG-PROGRESSION.zh-CN.md)，资源依据见[五职业装备盘点](EQUIPMENT-LEVEL100-SLG-AUDIT-20261019.zh-CN.md)。当前已完成来源检查和820个分档候选位置；71–100级模板、数值与普通获取仍需补齐，共用或复用造型不算独立套装。运行代码仍为原经验表上限，生产默认未开放。
+
+该方向属于本服定制配置，须与Crystal1:1基线分开验证。原版500项经验来源和已完成的packet/行为证据保留；新增100级门槛、SLG及装备规划均不能计作本轮已完成的1:1行为验收。下一步及测试边界见[任务队列](AGENT-TASK-QUEUE.md)。
+
 ## 三个聊天的代码进度整理（2026-10-14，北京时间）
 
 已核对 Windows、玩法、充值三个聊天及各自工作树/真实远端。NPC/活动合并网关 a045b4327f 与五职业配套网关 ea0d3e3661 已补推；活动部署修复 e09ad2940f 已提交推送，新增 Python20 项、网站 Node29 项全部通过。
@@ -173,6 +179,26 @@ Root 在获准的本地独立 Web 包（19205）通过普通登录/StartGame、�
 
 证据：[Source53 本地实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source53-local-cache-actual01.json)、[Source54 实际 Rust 回归](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source54-schedule-rust-actual01.json)。以下旧轮次按历史保留。
 
+## 原石工坊：代码候选已实现，默认关闭，未发布（2026-10-09）
+
+本轮自定义玩法已接通真实铜/银/金矿、三档原石、可选粗鉴定和金币切割，Bill（比奇 0，302,221）与 Bruce（盟重武器店 0159，5,9）的原 NPC 对话提供入口。服务器封存时固定隐藏结果、费用和概率版本；原格保留 UID 替换真实材料，金币/库存/注册表/回执同一权威存档事务，原请求重放不重复扣款或发货。完整物品载体保留引用，旧丢地/死亡掉落及普通卖原石路径拒绝，避免丢失引用。
+
+桌面工坊已接右侧栏及背包避让，普通 NPC、小窗口和移动端保持原布局；仍遵守原 NPC 全局模态，不代表移动输入改造。默认 MIR2_STONE_WORKSHOPS 未启用；File 单权威或 PG 单权威可走生产代码，内存和 File＋PG 镜像拒绝。PG 迁移 0015 仅源码，未实际运行。
+
+最终原 Guard 串行 12 次：448 次通过、431 个不同通过测试、53 个新增、21 次忽略、0 次最终失败；完整 Windows 编译检查 exit0。新 File 测试实际释放全部权威句柄并两次从磁盘重开，原结果和回执保持；不是外部服务重启验收。输入与原政策已独立核验，历史失败/磁盘门槛拒绝及完整 nonce 保留，忽略项和 PG 条件早退不算真实 PG 成功。
+
+上线待办：真实 PG、双账号原石转交、真实网关与客户端画面、九语言与独立图标、提交未知维护恢复、1,024 永久记录容量/归档、匹配安装包和部署。本轮无游戏窗口/截图/安装包/服务器重启，不宣布玩家可用，不增加 Crystal 原版 1:1 覆盖率；overallPercentage 未据此上调，Candidate100=false。
+
+证据：[玩法与限制](SLG-STONE-WORKSHOP.zh-CN.md)、[独立实际验收](generated/slg-stone-workshop-20261009/independent-result-review-01.json)、[248 份原始副本](generated/slg-stone-workshop-20261009/raw-evidence.json)。本轮提交同时保留已提交制作加工父版本和已提交客户端父版本，当前未提交的其他工作正文仍保留且不混入。
+
+## 制作加工 P02b-2c：宠物奖励箱可信发行，限定回归通过（2026-10-09）
+
+BlackStone 与 Strongbox 使用同一可信 File 物品编号服务。先验证源箱子、刷新仍含源箱子的完整历史，再准备奖励；有效完整载体取得新编号后，箱子消耗和奖励一起发布。服务缺失、冻结、损坏、耗尽或配置不匹配时，箱子和背包保持原状，不发送成功或领奖包。原版空奖励与空间不足的箱子消耗行为、正常随机奖励及既有快捷栏回退保持。
+
+最终原串行 CargoGuard：新奖励箱、召唤物、道具使用、File编号与保存回归，8＋55＋47＋17＋59＝186次通过，177个不同具名测试，8项新增，0失败/ignored。五次 Source02 调用的462个声明输入前后及最终匹配，458个受保护输入与生产父提交78d3abe匹配；4个作者输入含一处旧回城卷测试夹具。原工具、50GiB/2000ms门槛及PolicyB保持。Source01的8/8、55/55和原道具回归46通过/1失败作为历史保留，不叠加通过数；后者旧夹具已绑定真实安全区却断言出生点，只显式固定该夹具绑定点，所有原断言和实际回城规则保持。
+
+本批仅完成奖励箱个人同步发放与File UID保护；重登测试使用内存账号库，不是完整账号原子持久事务。周期黑石邮件、领取保管身份、其他发行者、全量历史盘点、Postgres及未知提交协调仍开放。原背包满时检查与快捷栏回退的差异未在本批扩大修改。默认绑定、公共配方、正常网关与安装包未切换，未执行UI/玩家验收，不提高整体parity验收比例。详见[实现进度](SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md)与[本批原始验证](generated/slg-production-p02b2c-20261009/README.md)。以下各批为历史。
+
 ## Source50：新完整 Web 包已构建，Sharp 入口兼容修复；实玩待验证（2026-10-09）
 
 最新完整 Web 已更新为 Source49 Next＋Source50 Thin，包含当前共享 UI 与九类任务动作源码；本轮不新增界面操作。Source49 完整 Core/PUI/NPC 三包和 WebGPU、WebGL2、共享 WebGL2 三 renderer 均由原 builder 实际编译并通过 metadata/name/normalized ABI、原 WASM/JS/default-gzip 预算及不可变发布；静态 WASM 校验获本次“继续”授权，没有实例化游戏。Core 三次和 renderer 四次 Cargo 严格串行、原50GiB/2000ms/15000ms及PolicyB保持，均完成、退出并释放。
@@ -184,6 +210,22 @@ Source50 原 Thin --skipBuild true 实际 exit0，38463ms，55303项完整当前
 继续遵守“继续代码，暂不操作界面”：真实资源初始化、登录→任务/战斗→保存退出重登、移动真机及人类前端验收仍未执行；省略媒体的不可变资源origin和覆盖仍待真实验证，构建成功不证明在线可玩。Matrix11仍103 shared＋206 legacy＋8 common，309/317≈97.5%仅有界代码记录，overallPercentage=null、Candidate100=false、goal未完成，无可信可玩日期。用户主4932B tsconfig保留；外来Cargo/simulation/后端及制作加工文档正文保留且排除本轮提交。
 
 证据：[本轮交付](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-build-delivery01.json)、[64份原始记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-build-raw-evidence02.json)、[完整Thin实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-full-actual01.json)、[实际产物复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-full-actual-independent-review01.json)、[依赖及警告复核](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source50-thin-dependency-actual-review01.json)、[Source47实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source47-publication01.json)。本轮提交推送随后另存真实记录，下方原正文及其他工作保持。
+
+## 制作加工 P02b-2b：个人掉落拾取发行与保管，限定回归通过（2026-10-09）
+
+掉落容量预览现在只生成完整临时方案，不发行编号或抬高持久下限。受控 File 模式在确认整批容量后，经同一可信服务为每个新根物品及嵌套物品编号，再一次发布库存；半途失败保留原背包和地面物品。完整保管返回保留原始载体及 UID，冲突在合堆前拒绝；完全吸收时保留目标堆 UID，已退休来源编号仍计入历史下限。成功包只携带最终编号和数量。
+
+最终原串行 CargoGuard：新测试11＋掉落21＋背包48＋拾取29＋存档59＝168次通过，151个不同具名测试，11项新增，0失败/ignored。五次调用的461个声明输入前后及最终匹配，459个受保护输入与生产父提交488ec6f匹配。原工具、50GiB/2000ms门槛及PolicyB保持。早期10通过/1失败的描述不一致夹具仅修正描述并增加正向合并证明；静态拒绝、串行未启动与汇总脚本错误保留，不计最终通过数。
+
+本批只完成个人拾取同步库存与File UID保护；退出重登测试使用内存账号库，不代表账号完整原子持久事务。新掉落仍在拾取时编号，尚未对齐Crystal生成时机或部分丢弃来源；共享持久认领、Postgres、其他发行者、完整历史盘点和未知提交协调仍开放。默认绑定、公共配方、正常网关和安装包未切换，未执行UI/玩家验收，不提高整体parity验收比例。详见[实现进度](SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md)与[本批原始验证](generated/slg-production-p02b2b-20261009/README.md)。以下各批为历史。
+
+## 制作加工 P02b-2a：任务、采矿和钓鱼发放迁移，限定回归通过（2026-10-09）
+
+新物品整批先检查真实模板、身份、数量及合法 Bag/Belt/Quest 格位，再经同一可信 UID 服务编号，全部成功后发布库存。任务携带物品和奖励失败不推进阶段、不扣任务物品、不加金币或经验；采矿编号失败不耗矿点或损坏镐；钓鱼编号失败停止自动垂钓，不发成功事件或额外收杆损耗。已有施放成本保留。绑定、诅咒或不同属性不能合堆；新堆及后续同批合并只发送最终数量，不能覆盖占用格或退回局部编号。
+
+最终原串行 CargoGuard 8＋任务115＋采矿9＋钓鱼23＋购买35＋制作18＝208次通过，204个不同具名测试，16项新增，0失败/ignored。来源03的460个声明输入在六次调用前后及最终重核匹配，451个受保护输入与生产父提交4644753匹配。原50GiB/2000ms门槛和PolicyB保持；独立复核确认全部完成、退出和释放。早期编译失败（0测试）、错误药品夹具4通过/4失败及两次未启动Cargo的串行拒绝完整保留，不计最终通过数；修复未削弱业务断言。
+
+这完成限定的新发行迁移和同步库存整批发布，尚不是任务/采矿/钓鱼完整账号原子持久事务。P02b整体仍开放：掉落、通用add/normalize、特殊脚本/GM、邮件/商城/兑换、初始及Hero等发行者，完整历史盘点、Postgres与未知提交协调仍待完成。默认绑定、公共配方和正常网关未开启，未启动游戏、重启服务或替换安装包；采集、种植、作坊和侧栏界面仍待接线，不提高整体parity验收比例。详见[实现进度](SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md)与[原始验证](generated/slg-production-p02b2a-20261008/README.md)。
 
 ## Source47：构建配置副本入口通过严格类型检查；完整 Web 包待生成（2026-10-09）
 
@@ -210,6 +252,14 @@ next.config.ts 新增可选 MIR2_NEXT_TSCONFIG_PATH，未设置时保留原行�
 Core/PUI/NPC只按56个相关源文件＋4个控制文件未变及18份产物pin限定保留Source33静态候选，旧完整workspace不承接。Windows EXE需要fresh编译；完整renderer metadata/name/ABI/defaultgzip/init、不可变发布与Next/Thin打包仍待完成。最新完整Web仍Source25，尚不含Source26–45。功能记录309/317≈97.5%含旧实现；共享分类103/317≈32.5%也不是总体进度。overallPercentage=null、Candidate100=false、goal active，可玩日期未知；继续代码且暂不操作界面，登录/任务/战斗/保存/重登与移动、人类验收未执行。
 
 证据：[本轮实际结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-finite-result01.json)、[74份原始记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-raw-evidence01.json)、[最小交付输入审阅](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source45-delivery-input-review01.json)、[Source44实际推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source44-publication01.json)。Source44远端ad6f915a693e1322b69afeed926f36318caefdb4已核验；本轮随后单独记录实际提交推送。用户tsconfig及外来后端/文档正文保留并排除本轮提交，下方历史保留。
+
+## 制作加工 P02b-1：购买、拆分和制作共用物品编号，限定回归通过（2026-10-08）
+
+新增可信服务器配置绑定，把暂存 NPC 购买、背包/仓库拆分和个人制作接到同一持久 File UID 分配器；克隆只共享服务句柄，不复制发行游标。发行前抬高完整账号历史、当前实例及数字保管预留的下限，包含已经完全合并到旧堆、只剩购买回执的 incomingUniqueId；货架选择编号不当历史实例。拆分先成功分配再扣原数量，分配器缺失、损坏或耗尽时拒绝操作。存档不保存服务绑定，隔离重放不能经本批路径发行，错误替换或移除已绑定服务永久冻结新发行；原请求仍可查询已保存回执。
+
+原串行 CargoGuard 实际 UID11＋制作18＋NPC35＋存档59＋背包37＋File分配器17＝177项通过，0失败/ignored；19项新唯一测试，来源05的455个声明输入在每次调用前后及最终重核匹配。早期编译失败和文件占用链接失败各一次（皆0测试）、拆分测试9通过/1失败、制作测试16通过/2失败、背包测试35通过/2失败的原记录完整保留；最后一组发现并修正 Legacy 裸World无配置时的实际崩溃，并补持久绑定配置缺失/不匹配的拒绝测试。之前通过记录也按最终来源重新运行，不叠加通过数；文件占用后仅迁移编译缓存目录，原Guard和测试条件保持，未关闭用户游戏。
+
+这只完成 P02b-1 受控接线，不代表全服 UID 迁移或作坊可玩：默认配置和正常网关未启用新绑定，公共目录仍禁用。任务/脚本奖励、掉落、邮件、采矿/钓鱼、初始物品等发行者仍须迁移；外部世界与历史编号全量盘点、旧重复编号处理、Postgres单一权威和未知提交显式协调仍是上线条件。正常采集、种植、比奇/盟重作坊与侧栏界面未落地；未启游戏、重启网关、部署服务或更新安装包，不提升 parity 验收比例。详见[代码进度](SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md)和[完整验证记录](generated/slg-production-p02b-20261008/README.md)。
 
 ## Source44：Hero 共享页面及输入接线通过有限验证；新版完整包仍待交付（2026-10-08）
 
@@ -249,6 +299,14 @@ Matrix11仍103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现�
 
 证据：[实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-finite-result01.json)、[49份完整原始文件与25nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-raw-evidence01.json)、[首次失败与修复](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source42-historical-failures01.json)、[Source41实际提交推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-publication01.json)。Source41已核验推送1ff247c37bb9c420cfff6b5e7c280691fe949c02；本轮Git发布以随后实际记录为准。下方保留历史。
 
+## 制作加工 P02a：个人背包事务完成限定验证，正式入口待接线（2026-10-08）
+
+新增受信任 Session 适配器：以持久角色 actor 绑定订单，将真实背包/快捷栏扣料、金币、离线订单及回执放入同一完整角色事务；领取/取消先检查整批空间和负重，提交成功后才更新 World 与发送物品包。普通保存和恢复保护已提交历史，严格存档/账本版本阻止旧会话覆盖。退款保留绑定与原始载体，拆出新实例使用持久 Crafting UID；原购买、即时合成和精炼入口保持。
+
+原 CargoGuard 下实际规则19＋新事务15＋原购买30＋存档59＝123项通过，0失败/ignored；15项新增均为受控 Session/File 源测试，覆盖重登、重复请求、双会话 CAS、满包、超重、矿石纯度、黑铁保护、高 UID 装备及写盘故障。合成材料绑定是隔离夹具，不是正常玩家材料获取或双客户端实机验收。
+
+P02a 已完成；P02b 仍需全物品发行者统一 UID 权威、Postgres故障验收和未知提交显式协调。当前适配器已接持久分配器并从完整存档抬高编号，但现有其他发行路径仍使用局部编号，不能因此宣称全服 UID 已迁移；未知写盘结果继续冻结，不能仅重开缓存解除。正常目录仍禁用，无 NPC/网关玩家路由；采集、种植、建筑、食品和公共工坊尚待接线。本轮未启游戏、重启网关或发布新安装包，不提高原版 parity 的验收比例。详见[制作加工代码进度](SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md)和[本轮实际验证](generated/slg-production-p02-20261008/README.md)。
+
 ## Source41：Page Hero 原始数据接线通过代码回归；完整可玩包仍未交付（2026-10-08）
 
 Page 现持有有界原始帧尾队列和 Runtime 原 checkpoint 字符串，首次物理消息 performance 时钟在应用前捕获；不把 Hero snapshot 经过 JS 重编码。实际验证通过的 NPC purchase owner 回调以独立关联 tuple 加原文进入严格 Rust 接口，保留精确 u64/i64、noHero 清除和 receipt FIFO。Socket/connection/session、renderer run 与 scene 分开；恢复 held checkpoint 后按顺序补齐完整尾队列，未完成旧帧不可被后帧越过。Renderer 缺失/故障保留 Page custody，换图直接 activate；同步跨 scene 重入明确拒绝。
@@ -262,6 +320,10 @@ Page 现持有有界原始帧尾队列和 Runtime 原 checkpoint 字符串，首
 Matrix11保持103 shared＋206 legacy＋8 common：309/317≈97.5%仅含旧实现的功能记录覆盖，103/317≈32.5%仅shared分类覆盖；overallPercentage=null、Candidate100=false、goal active。最新完整Web仍Source25 Next08/Thin08，不含Source26–41；公开manifest和用户tsconfig未替换。未改后端/共享Zone/协议parity，其他制作加工/Cargo/simulation/production工作保持且排除本轮提交。登录→任务/战斗→保存→重登、移动真机及玩家验收not-run；继续遵守“继续代码，暂不操作界面”，尚无可信试玩日期。原metadata/name/normalizedABI/defaultgzip/初始化/源码匹配门槛保留，未绕过原helper WASM API限制。
 
 证据：[本轮实际有限结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-finite-result02.json)、[完整原始71文件与35nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-raw-evidence01.json)、[晚期其他任务源码资格](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-late-foreign-qualification01.json)、[历史失败与修正记录](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source41-historical-failures01.json)、[Source40真实提交推送](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-publication01.json)。Source40已核验推送8e64c987849137b56a67fda4b64f18b0645917eb；本轮Git发布以随后实际结果为准。下方旧记录保留为历史。
+
+## 制作加工 P01：规则代码及限定验证完成，正式入口待接线（2026-10-08）
+
+新增 `mir2-production` 同步模块并接入 simulation 编译：组合配方、全链材料/设施开放条件、批量缺料计划、服务器离线工期、直接投入退款、精确重试与有界记录恢复已通过 19/19 测试；simulation cargo check 实际 exit 0。当前只生成经济事务方案，不代表真实扣料、发物品或多人领取已经落地。内置新材料/配方继续禁用；个人持久事务、资源正常获取、共用作坊 NPC、客户端、建造/食品闭环和行会公共资产仍待完成。本批不增加 Crystal 1:1 已验收比例，也未重启服务或发布安装包。详见[制作加工代码进度](SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md)及[实际检查记录](generated/slg-production-20261008/README.md)。
 
 ## Source40：Web Runtime Hero 接入通过有限回归；Page 与新包仍待完成（2026-10-08）
 

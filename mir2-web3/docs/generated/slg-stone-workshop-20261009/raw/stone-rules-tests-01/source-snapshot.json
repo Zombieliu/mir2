@@ -1,0 +1,87 @@
+{
+  "schema": "mir2.production-source.v1",
+  "scope": "production-tests",
+  "createdUtc": "2026-10-09T12:09:05.7752321Z",
+  "files": [
+    {
+      "path": "mir2-web3/.cargo/config.toml",
+      "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab",
+      "length": 30
+    },
+    {
+      "path": "mir2-web3/apps/simulation/Cargo.toml",
+      "sha256": "08b31c58ae6a8fd3fdfd1770f9ab5ea0f79737558ee01c49ade5af9d5c803a99",
+      "length": 798
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "sha256": "63b4b7d06f36c8df6f61ed47185b9fbb9aef8518bdfe69e7c6a2cb8d31daef35",
+      "length": 5664
+    },
+    {
+      "path": "mir2-web3/Cargo.lock",
+      "sha256": "54f4c64476586de50687a24c145581c12b86dd0d5a545fd627ef7b56e03ddbe2",
+      "length": 240650
+    },
+    {
+      "path": "mir2-web3/Cargo.toml",
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac",
+      "length": 365
+    },
+    {
+      "path": "mir2-web3/docs/SLG-PRODUCTION-CATALOG.v0.2.json",
+      "sha256": "55b94756f535a50b1cf6031cb6f88ae1c6aa03741acb911d436cafe8d042d1a8",
+      "length": 6619
+    },
+    {
+      "path": "mir2-web3/packages/production/Cargo.toml",
+      "sha256": "2aa3f4cef57e4ea73a3f15afa602b89cdbc97f03f485902a02d44d2e875e109a",
+      "length": 264
+    },
+    {
+      "path": "mir2-web3/packages/production/README.md",
+      "sha256": "f5500db5c44b4b3de881814e4f3db1455f713a12ed7ca7ad1ffe0b7710f49189",
+      "length": 3793
+    },
+    {
+      "path": "mir2-web3/packages/production/src/catalog.rs",
+      "sha256": "b5781ee8a285714c605c91dbf40b79820fb405c93f2bcaa84f1e3bbe9672c0f8",
+      "length": 9901
+    },
+    {
+      "path": "mir2-web3/packages/production/src/jobs.rs",
+      "sha256": "fd1ed35fc43e24f530e39bfcdc3b53886563f850483751e97925ecc7b4a17ed4",
+      "length": 22932
+    },
+    {
+      "path": "mir2-web3/packages/production/src/lib.rs",
+      "sha256": "a54d9cf7bf37ee70eb78b2b63fe1f7cc8dff4591757977e67fcc929cdb29cb9a",
+      "length": 1815
+    },
+    {
+      "path": "mir2-web3/packages/production/src/planning.rs",
+      "sha256": "fcc97c5867c0dff917548218b4df20a34ce74c6c95fdd3f314ea8177322f8f35",
+      "length": 6325
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones_tests.rs",
+      "sha256": "5c042a8f58ed1c39d508c380b5af3b2720e442a20876367104c4cdc7c829616c",
+      "length": 35603
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones.rs",
+      "sha256": "321b1b600491dc80a3929292ee38f6ef46b5d40847ef4c5cb7939e9afa4ee16d",
+      "length": 40474
+    },
+    {
+      "path": "mir2-web3/packages/production/tests/production.rs",
+      "sha256": "3a766cede2b0ee4c2d3869f2f6212e19bccf86e25919ef08fc5db58a1469cdb5",
+      "length": 23231
+    },
+    {
+      "path": "mir2-web3/rust-toolchain.toml",
+      "sha256": "667a93776d9bb1bb4a17b8839e365d26ed380807de5b44f664c87af73bb0bd87",
+      "length": 113
+    }
+  ]
+}

@@ -1,5 +1,10 @@
 # Agent Resume Handoff
 
+> Current resume entry: [AGENT-CURRENT.md](AGENT-CURRENT.md) and
+> [AGENT-ORCHESTRATION.md](AGENT-ORCHESTRATION.md), then only task-specific source
+> and evidence. The dated material below is historical reference; do not load it
+> in full or treat its paths, ports, PIDs, test counts or model choices as current.
+
 > Latest map-render handoff: 2026-07-13. The visible Bichon rectangles came from
 > opaque black matte pixels in packed object atlases plus a browser-incompatible
 > additive alpha equation. The runtime now routes all object-like libraries,
@@ -329,32 +334,28 @@
 > Latest sync: R159 completed. Trainer immediate damage reporting now routes through Crystal `server.PetInflictedDamageDps` with localized `server.You` actor; modeled `Physical Agility` damage type and DPS value are preserved. Validation: focused trainer test 1/1, `cargo +1.89.0 fmt --check`, and full `mir2-simulation` 638/638. Active backend round is R160; backend/server parity estimate is 99.70%.
 
 
-Last updated: 2026-04-28
+Original handoff baseline: 2026-04-28 (historical)
 
-Purpose: this file is the restart-safe handoff for continuing the autonomous Crystal / Mir2 1:1 push after the Codex session is closed, the machine is rebooted, or chat context is lost. A new session should not depend on prior chat history; read this file plus the queue/run-log docs and continue from the active round.
+Purpose: retain dated Crystal / Mir2 checkpoints and their evidence for targeted
+historical lookup. Resume through [current context](AGENT-CURRENT.md) and
+[coordination](AGENT-ORCHESTRATION.md); this file and the full queue/run-log are
+not mandatory startup reading. Historical active-round instructions below do
+not override the present user task or current coordination policy.
 
 ## Resume Order
 
-1. Open `E:\mir2\mir2-web3`.
-2. Read these files first:
-   - `docs/AGENT-RESUME-HANDOFF.md`
-   - `docs/AGENT-ORCHESTRATION.md`
-   - `docs/AGENT-TASK-QUEUE.md`
-   - `docs/AGENT-RUN-LOG.md`
-   - `docs/CRYSTAL-1TO1-ROADMAP.md`
-   - `docs/BACKEND-1TO1-PROGRESS.md`
-   - `docs/PARITY-TRUTH-AUDIT.md`
-   - `docs/WINDOWS-CONTINUATION.md`
-   - `docs/POST-1TO1-EVOLUTION-PLAN.md`
-   - `docs/TECH-MODERNIZATION-RFC.md`
-   - `docs/ARCHITECTURE-ADOPTION-PLAN.md`
-   - `docs/PLATFORM-CLIENT-STRATEGY.md`
-   - `docs/ADMIN-OPERATIONS-ARCHITECTURE.md`
-3. Treat `docs/AGENT-TASK-QUEUE.md` as the source of truth for the active round.
-4. Continue autonomously from the active round. Do not repeat completed rounds unless tests or code inspection show a regression.
-5. Use subagents only for clearly bounded parallel work. Keep one writer per high-conflict file.
+1. Resolve `mir2-web3` relative to the actual repository root on this machine.
+2. Read [current context](AGENT-CURRENT.md) and
+   [coordination](AGENT-ORCHESTRATION.md) once per working context. Small bounded
+   tasks need only their affected files and local instructions.
+3. Resume the user's current task. For general queue advancement, find the newest
+   relevant task section in [the queue](AGENT-TASK-QUEUE.md); do not read all logs.
+4. Read only task-specific source and evidence. Dated checkpoints below are not
+   fresh validation and do not mandate old toolchains, services or full builds.
+5. Preserve other work, keep one writer per high-conflict file and use bounded
+   parallel work only when it helps. Do not repeat completed rounds without cause.
 
-## Current Checkpoint
+## Historical Checkpoint
 
 - Active parity round: `2026-04-28-R301`
 - Active product-evolution continuation: after `2026-04-28-R246`.

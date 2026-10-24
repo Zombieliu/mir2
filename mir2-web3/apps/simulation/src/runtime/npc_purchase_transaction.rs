@@ -130,7 +130,7 @@ pub(super) fn protect_npc_purchase_journal(save: &mut CharacterSaveRecord, durab
 
 /// Only the established complete-save merge fields are projected onto live
 /// clones. Refine/skill timers retain their current runtime clock domain.
-struct PreparedCheckpointMerge {
+pub(super) struct PreparedCheckpointMerge {
     stage5: Stage5SystemsState,
     equipment: Vec<super::equipment::EquipmentState>,
     character: crate::CharacterRecord,
@@ -140,7 +140,7 @@ struct PreparedCheckpointMerge {
     level_changed: bool,
 }
 impl PreparedCheckpointMerge {
-    fn new(world: &World, save: &CharacterSaveRecord) -> Result<Self, String> {
+    pub(super) fn new(world: &World, save: &CharacterSaveRecord) -> Result<Self, String> {
         let merged = match save.stage5_systems_json.as_deref() {
             Some(encoded) => serde_json::from_str::<Stage5SystemsState>(encoded).map_err(|error| error.to_string())?,
             None => Stage5SystemsState::default(),
@@ -160,7 +160,7 @@ impl PreparedCheckpointMerge {
         Ok(Self { stage5, equipment, character: save.character.clone(), experience: save.experience,
             max_experience: save.max_experience, player, level_changed: body.level != save.character.level })
     }
-    fn apply(self, world: &mut World) {
+    pub(super) fn apply(self, world: &mut World) {
         world.resource_mut::<Stage5SystemsResource>().stage5_systems = self.stage5;
         world.resource_mut::<InventoryResource>().equipment_items = self.equipment;
         {

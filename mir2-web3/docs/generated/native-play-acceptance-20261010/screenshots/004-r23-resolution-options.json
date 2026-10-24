@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/004-r23-resolution-options.jpg",
+  "purpose": "Actual non-authentication display menu lists resolution choices and disables resolutions that cannot fit this display.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 294749,
+  "sha256": "aeccf76d804895d83d1004e4e66b3493971b20b1bd4eb7d52286918a5c322175",
+  "recordedUtc": "2026-10-09T18:19:45.759Z"
+}

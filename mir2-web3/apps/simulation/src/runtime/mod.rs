@@ -23,6 +23,8 @@ pub(crate) use hero_registry_scan::validate_shared_hero_physical_custody;
 pub(crate) use hero_registry_validation::validate_shared_hero_carriers;
 mod hero_stats;
 mod inventory;
+mod item_grants;
+pub(crate) mod item_uid_issuance;
 #[cfg(test)]
 mod storage_rental_tests;
 #[cfg(test)]
@@ -44,6 +46,12 @@ pub use npc_gold_buy_outcome::{NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBu
 mod npc_purchase_outcome;
 mod npc_purchase_transaction;
 mod npc_purchase_snapshot;
+mod production;
+mod stones;
+mod stone_npc;
+pub use stone_npc::StoneWorkshopError;
+pub use production::{PersonalProductionState, PersonalProductionConfig, PersonalProductionFacility,
+    ProductionDurableExecution, ProductionDurableError};
 pub use npc_purchase_transaction::{NpcPurchaseProducer, NpcPurchaseReceipt, NpcPurchaseDurableExecution, NpcPurchaseDurableError};
 pub use npc_purchase_outcome::{NpcPurchaseRequest, NpcPurchaseCurrency, NpcPurchaseSource,
     NpcPurchaseRejection, NpcPurchaseBeforeExecution, NpcPurchaseProcessingOutcome,

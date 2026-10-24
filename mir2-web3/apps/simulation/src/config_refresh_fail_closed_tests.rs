@@ -164,6 +164,8 @@ fn postgres_deleted_account_cannot_be_recreated_by_stale_save() {
         game_shop_global_purchases: BTreeMap::new(),
         accounts,
         shared_guilds: BTreeMap::new(),
+        sealed_stones: Default::default(),
+        source_stone_version: None,
         shared_heroes: BTreeMap::new(),
         hero_id_high_watermark: 0,
         source_hero_versions: BTreeMap::new(),
@@ -213,6 +215,8 @@ fn authoritative_test_store(accounts: BTreeMap<String, AccountRecord>) -> Accoun
         game_shop_global_purchases: BTreeMap::new(),
         accounts,
         shared_guilds: BTreeMap::new(),
+        sealed_stones: Default::default(),
+        source_stone_version: None,
         shared_heroes: BTreeMap::new(),
         hero_id_high_watermark: 0,
         source_hero_versions: BTreeMap::new(),
@@ -874,6 +878,7 @@ fn alpha_repository_probe_outcome(
 ) -> AccountStoreRepositorySave {
     AccountStoreRepositorySave {
         clock: None,
+        stones: None,
         guild_versions: BTreeMap::new(),
         heroes: Default::default(),
         account_versions: BTreeMap::from([("alpha".to_string(), account_version)]),

@@ -1,0 +1,9 @@
+{
+  "schema": "mir2.production-independent-review.v1",
+  "reviewer": "/root/production_review",
+  "acceptedForFocusedTests": true,
+  "reviewedUtc": "2026-10-08T07:02:17.1961645Z",
+  "rawFinal": "Confirmed: the current source reserves encoded terminal-receipt space and receipt-count capacity for every running job, both during restore and before returning a prepared change. The near-limit regression also stays within the per-lot custody bounds.\n\nNo remaining blocker for focused testing through the original CargoGuard. This acceptance covers the preparation-only crate; real inventory commits, gameplay routes and durable archival remain pending.\n\nRead-only review; no Cargo or UI run.",
+  "noCargoRun": true,
+  "noUiRun": true
+}

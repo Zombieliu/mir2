@@ -1,0 +1,46 @@
+[
+  {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_client_bevy-8bdeff6706524811.pdb",
+    "logicalBytes": 1442844672,
+    "beforeSha256": "3ee6446ab0b21dc3027b35e6489515dbb3a0278cf80f82b93167ca1dcfd65a04",
+    "afterSha256": "3ee6446ab0b21dc3027b35e6489515dbb3a0278cf80f82b93167ca1dcfd65a04",
+    "beforeAllocatedBytes": 1442844672,
+    "afterAllocatedBytes": 522567680,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,442,844,672 total bytes of data are stored in 522,567,680 bytes.\r\nThe compression ratio is 2.8 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-build\\p1-native-20261007\\debug\\deps\\mir2_client_bevy-b391d075045f3b6c.pdb",
+    "logicalBytes": 1428459520,
+    "beforeSha256": "9aee0d1cba9bb9c7005635ef9fe30df633fab38862ce2c0ebd277b6484eef5b5",
+    "afterSha256": "9aee0d1cba9bb9c7005635ef9fe30df633fab38862ce2c0ebd277b6484eef5b5",
+    "beforeAllocatedBytes": 1428459520,
+    "afterAllocatedBytes": 523726848,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-build\\p1-native-20261007\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,428,459,520 total bytes of data are stored in 523,726,848 bytes.\r\nThe compression ratio is 2.7 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\mir2_client_bevy-91bd920759008e45.pdb",
+    "logicalBytes": 1427681280,
+    "beforeSha256": "5973f8fe6e7bfb519c2c2041120d31edf67435e4b1904c2f809d5f7d33532f82",
+    "afterSha256": "5973f8fe6e7bfb519c2c2041120d31edf67435e4b1904c2f809d5f7d33532f82",
+    "beforeAllocatedBytes": 1427681280,
+    "afterAllocatedBytes": 519495680,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-build\\platform-windows-r33-tests\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,427,681,280 total bytes of data are stored in 519,495,680 bytes.\r\nThe compression ratio is 2.7 to 1.\r\n",
+    "stderr": ""
+  },
+  {
+    "path": "C:\\mir2-build\\gateway-tests-r51\\debug\\deps\\mir2_client_bevy-da12aa03c55a69b6.pdb",
+    "logicalBytes": 1424887808,
+    "beforeSha256": "57cbd999934b03313dabe1de8dfb8c62aef8625e3a58bf922f0deb60f24bb18a",
+    "afterSha256": "57cbd999934b03313dabe1de8dfb8c62aef8625e3a58bf922f0deb60f24bb18a",
+    "beforeAllocatedBytes": 1424887808,
+    "afterAllocatedBytes": 521027584,
+    "exitCode": 0,
+    "stdout": "\r\n Compressing files in C:\\mir2-build\\gateway-tests-r51\\debug\\deps\\\r\n\r\n\r\n1 files within 1 directories were compressed.\r\n1,424,887,808 total bytes of data are stored in 521,027,584 bytes.\r\nThe compression ratio is 2.7 to 1.\r\n",
+    "stderr": ""
+  }
+]

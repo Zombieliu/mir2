@@ -637,3 +637,6 @@ fn actual_delete_and_recreate_retires_old_actor_and_recovery_key() {
 
 #[path = "npc_purchase_owner_tests.rs"]
 mod owner_tests;
+
+#[path = "npc_purchase_uid_tests.rs"]
+mod uid_tests;

@@ -1,0 +1,79 @@
+{
+  "schema": "mir2.native-play-installed-update.v1",
+  "version": {
+    "schema": "mir2.windows.candidate-version.v4",
+    "candidate": "WN-CANDIDATE-20261009-invited-23",
+    "gitRevision": "faefb69671272843958f68781b4f8ca2f4014522",
+    "worktreeDirty": false,
+    "worktreeStatusScope": "git-status-z+diff+all-untracked-content-v2",
+    "worktreeStatusSha256": "92BD1B73C15759EECE6459FB19B2E765ECC4E40F19215E7264C77F32A7C2CA9B",
+    "buildAttestationSha256": "62254955D4376366DFDBE2976C93BCAF4A688CCA8E6B283AC1ED61B5AB85FF90",
+    "buildCompletedUtc": "2026-10-09T04:16:50.6533537+00:00",
+    "exeName": "mir2-platform-windows.exe",
+    "exeSha256": "CF7BDB16AD307A744A910F3E17B7D21C78482E556676788BAB7B0682913171E1",
+    "exeSizeBytes": 111343104,
+    "packageManifestSchema": "mir2.windows.package-manifest.v4",
+    "packageManifestSha256": "2012C0163C8EC418ED09ED9D3953337DB1A246BB1B2D3191ABE6B0BA485EB03E",
+    "packageManifestAggregateSha256": "22099D148839F5A850C188AEF40A81F6FF7A71892CF2A35C90256A662B1484CA",
+    "packageManifestFileCount": 154579,
+    "packageFileCount": 154583,
+    "releaseStatementSchema": "mir2.windows.release-statement.v1",
+    "signatureFormat": "CMS/PKCS7-detached",
+    "staged": true,
+    "builtByPackagingScript": false,
+    "clientOnly": true,
+    "accepted": false
+  },
+  "exe": {
+    "path": "D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "size": 111343104,
+    "sha256": "cf7bdb16ad307a744a910f3e17b7d21c78482e556676788bab7b0682913171e1"
+  },
+  "assets": [
+    {
+      "path": "D:\\Mir2Invite\\game\\mir2-assets\\generated\\native-map-keyed\\coverage-audit.json",
+      "length": 723520,
+      "sha256": "014c18e1e49666877ebcda9e21935c22b46d8950aa2bd1b35a67824946cae42b",
+      "passed": true
+    },
+    {
+      "path": "D:\\Mir2Invite\\game\\mir2-assets\\generated\\native-map-keyed\\resource-input-provenance.json",
+      "length": 32275,
+      "sha256": "e8ca68605b5c27e925476cae6e055cceb9552157075d6e45b8aa9d4cb76f05a8",
+      "passed": true
+    },
+    {
+      "path": "D:\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\1002.png",
+      "length": 15671,
+      "sha256": "72f73b42bc7b95a91144fe0f135ede2ad343fbfed488c75095f98ed427caf497",
+      "passed": true
+    },
+    {
+      "path": "D:\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\18.png",
+      "length": 697,
+      "sha256": "3b8a6097b20b32fc1bb8d371efdefffe564af7bf1c75bc098bfd10be097c02ad",
+      "passed": true
+    }
+  ],
+  "updateEvent": {
+    "detail": {
+      "activated": true,
+      "candidate": "WN-CANDIDATE-20261009-invited-23",
+      "changedGameFiles": 7,
+      "delivery": {
+        "bundles": 0,
+        "fallbacks": 0,
+        "patches": 0
+      },
+      "downloadedBytes": 772163,
+      "downloadedFiles": 4,
+      "sequence": 18,
+      "wireBytes": 42880824
+    },
+    "event": "update",
+    "time": 1791569562
+  },
+  "updaterLogSha256": "b6794f69013410ef2b8a50fafba2f5fd7afce844d65b542d0610f7fe5cd00af5",
+  "installedVerified": true,
+  "nativeGameplayAccepted": false
+}

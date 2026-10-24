@@ -227,6 +227,7 @@ impl SimulationSession {
         super::mining::rebuild_mine_spots(app.world_mut());
         app.insert_resource(super::hazard::MapHazardResource::default());
         let mut inventory = InventoryResource::new(BASE_STORAGE_SLOTS);
+        inventory.item_uid_issuance = config.item_uid_issuance.clone();
         inventory.inventory_capacity = CRYSTAL_MAX_INVENTORY_CAPACITY;
         inventory.inventory_items = seed_inventory_items();
         inventory.belt_items = seed_belt_items();
@@ -271,6 +272,8 @@ impl SimulationSession {
             .resource_mut::<RuntimeConfigResource>()
             .config
             .rebind_account_store_from(authoritative);
+        let issuance = self.app.world().resource::<RuntimeConfigResource>().config.item_uid_issuance.clone();
+        self.app.world_mut().resource_mut::<InventoryResource>().item_uid_issuance = issuance;
     }
 
     pub fn set_language(&mut self, language: LanguageCode) {
@@ -1866,6 +1869,11 @@ fn apply_shared_trade_offer(
             &mut item,
             &staged_inventory,
         );
+        // A sealed stone's registry refers to the original physical UID.
+        // Legacy collision repair must not turn it into a different carrier.
+        if item.stone_serial.is_some() && item.unique_id != offered_item.unique_id {
+            return trade_offer_delivery_failed_packets(world, rollback);
+        }
         let Ok(user_item) = try_user_item_from_item_state(&item) else {
             return trade_offer_delivery_failed_packets(world, rollback);
         };

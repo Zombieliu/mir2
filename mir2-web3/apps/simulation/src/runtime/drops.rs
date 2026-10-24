@@ -296,6 +296,10 @@ fn ground_drop_item_payload_from_state(
     quantity: u32,
     preserve_uid: bool,
 ) -> Option<GroundDropItemPayload> {
+    // This ground wire carries UserItem only, not the private registry reference.
+    // Keep raw stones in full-state custody (bag/storage/trade) until ground
+    // custody can preserve that reference, including death drops.
+    if state.stone_serial.is_some() { return None; }
     let mut state = state.clone();
     state.quantity = quantity;
     let mut item = try_user_item_from_item_state(&state).ok()?;
@@ -2849,7 +2853,7 @@ pub(super) fn drop_item_packet(
 
     let item = world.resource::<InventoryResource>().inventory_items[index].clone();
     let requested = u32::from(count);
-    if requested == 0 || requested > item.quantity {
+    if requested == 0 || requested > item.quantity || item.stone_serial.is_some() {
         return vec![failed_packet];
     }
 
@@ -2963,6 +2967,7 @@ pub(super) fn drop_player_death_penalty(world: &mut World) -> Vec<ServerPacket> 
             .iter()
             .filter(|item| {
                 matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+                    && item.stone_serial.is_none()
                     && !item_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_DROP)
             })
             .map(|item| PlayerDeathDropCandidate::Inventory(super::items::item_unique_id(item)))
@@ -3299,7 +3304,7 @@ impl SimulationSession {
             .iter()
             .find(|item| item_matches_inventory_unique_id(item, unique_id))?;
         let quantity = u32::from(count);
-        if quantity > item.quantity
+        if quantity > item.quantity || item.stone_serial.is_some()
             || item_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_DONT_DROP)
         {
             return None;

@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "mining-regression",
+  "startedUtc": "2026-10-08T16:38:41.0585245Z",
+  "finishedUtc": "2026-10-08T16:38:45.8801806Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "mining",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "e92fc7d834d39f772ab9105caaf83bae1ed26c636962dfd6bd2bf3593c690219",
+  "declaredInputs": 460,
+  "sourceDrift": [],
+  "cargoLogSha256": "443e964910ed76c08bd8cf19b636c1f3e382f37d1580b3ae304897cbb2546306",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

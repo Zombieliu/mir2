@@ -4801,6 +4801,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mir2-production"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+]
+
+[[package]]
 name = "mir2-protocol"
 version = "0.1.0"
 dependencies = [
@@ -4820,6 +4829,7 @@ dependencies = [
  "flate2",
  "libc",
  "mir2-game-data",
+ "mir2-production",
  "mir2-protocol",
  "postgres",
  "rand_core 0.6.4",
