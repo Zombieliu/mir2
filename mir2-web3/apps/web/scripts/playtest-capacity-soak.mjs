@@ -36,6 +36,10 @@ const COMBAT_CHASE_DEFERRAL_MS = 30000;
 const COMBAT_CHASE_MAX_MOVES = 40;
 const COMBAT_CHASE_MAX_MS = 30000;
 export const PENDING_ATTACK_PACKET_LIMIT = 64;
+export const ATTACK_OUTCOME_CAPABILITY = 'nativeAttackOutcomeV1';
+const MAX_ATTACK_REQUEST_ID = 18446744073709551615n;
+const ATTACK_RESULT_CODES = { unavailable: new Set(['unsupported', 'executionUnavailable', 'authenticationRequired', 'requestIdNotFresh']),
+  unknown: new Set(['outcomeUnknown', 'previousOutcomeUnknown']) };
 const ATTACK_TRACE_PACKETS = new Set(['ObjectAttack', 'ObjectWalk', 'ObjectRun', 'ObjectTurn', 'ObjectStruck',
   'DamageIndicator', 'ObjectHealth', 'ObjectDied', 'ObjectRevive', 'ObjectRemove', 'ObjectTeleportOut']);
 
@@ -54,6 +58,26 @@ function attackTraceLife(entity) {
     ...Object.fromEntries(['hp', 'maxHp'].filter(key => Number.isFinite(entity[key])).map(key => [key, entity[key]])) };
 }
 
+export function attackResultsMode(value = 'legacy') {
+  if (!['legacy', 'v2'].includes(value)) throw new Error('Attack results must be legacy or v2');
+  return value;
+}
+
+function validAttackRequestId(value) {
+  return typeof value === 'string' && /^[1-9][0-9]{0,19}$/.test(value) && BigInt(value) <= MAX_ATTACK_REQUEST_ID;
+}
+
+export function matchAttackResultV2(events, request) {
+  const matches = events.filter(event => event.type === 'attackResultV2' && event.protocolVersion === 2 &&
+    event.requestId === request.requestId && event.objectId === request.objectId &&
+    validAttackRequestId(event.requestId) && ['launched', 'notLaunched', 'unavailable', 'unknown'].includes(event.result) &&
+    (['launched', 'notLaunched'].includes(event.result) ? event.code === undefined : ATTACK_RESULT_CODES[event.result].has(event.code)));
+  // Identical cache replays are harmless. Conflicting results are never used
+  // to choose the more favourable outcome or to credit damage.
+  if (new Set(matches.map(event => `${event.result}:${event.code ?? ''}`)).size > 1) throw new Error('Conflicting correlated attackV2 outcomes');
+  return matches[0] ?? null;
+}
+
 export function beginPendingAttackEvidence(client, observer, owner, target, sentAtMs, cursor, observerCursor) {
   if (client.pendingAttackEvidence) throw new Error('Only one pending attack evidence window per actor');
   const trace = { actor: client.label, phase: client.context.phase, connection: client.lifecycleConnection,
@@ -69,10 +93,20 @@ export function beginPendingAttackEvidence(client, observer, owner, target, sent
 // These receipts are diagnostic only: neither a same-coordinate UserLocation
 // nor target movement proves that this particular attack was rejected.
 export function recordPendingAttackPacket(client, event) {
-  if (event.direction !== 'received' || event.type !== 'packet') return;
+  if (event.direction !== 'received' || !['packet', 'attackResultV2'].includes(event.type)) return;
   for (const trace of client.pendingAttackPacketTraces ?? []) {
     const receiver = trace.receivers.find(entry => entry.client === client), payload = event.payload ?? {};
     if (!trace.active || !receiver || event.sequence <= receiver.cursor || event.monotonicMs < trace.sentAtMs) continue;
+    if (event.type === 'attackResultV2') {
+      if (receiver.role !== 'owner' || event.objectId !== trace.target?.objectId || !validAttackRequestId(event.requestId) ||
+          event.protocolVersion !== 2 || !['launched', 'notLaunched', 'unavailable', 'unknown'].includes(event.result)) continue;
+      trace.packetCount++;
+      if (trace.packets.length < PENDING_ATTACK_PACKET_LIMIT) trace.packets.push({ receiver: 'owner', sequence: event.sequence,
+        monotonicMs: event.monotonicMs, atMs: Date.now(), type: 'attackResultV2', protocolVersion: 2,
+        requestId: event.requestId, objectId: event.objectId, result: event.result,
+        ...(ATTACK_RESULT_CODES[event.result]?.has(event.code) ? { code: event.code } : {}) });
+      continue;
+    }
     const ownerLocation = receiver.role === 'owner' && event.packet === 'UserLocation';
     if (!ownerLocation && (!ATTACK_TRACE_PACKETS.has(event.packet) ||
         ![receiver.attackerId, trace.target?.objectId].filter(Number.isInteger).includes(payload.objectId))) continue;
@@ -98,6 +132,7 @@ export function finishPendingAttackEvidence(client, context, outcome) {
   context.writer?.add({ type: 'pendingAttackEvidence', actor: trace.actor, phase: trace.phase, connection: trace.connection,
     at: endedAtWallMs, sentAtMs: trace.sentAtMs, sentAtWallMs: trace.sentAtWallMs, sendCursor: trace.sendCursor,
     endedAtMs: endAtMs, endedAtWallMs, owner: trace.owner, target: trace.target, outcome,
+    ...(trace.requestId ? { protocolVersion: 2, requestId: trace.requestId } : {}),
     maximumPackets: PENDING_ATTACK_PACKET_LIMIT, packetCount: trace.packetCount, truncated: trace.packetCount > trace.packets.length,
     packets: trace.packets, rule: 'Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting.' });
 }
@@ -183,6 +218,8 @@ export class CapacityClient extends NativeResumeClient {
     this.rejectedWalkCells = new Map(); this.movementCorrectionStreak = false; this.movementCorrectionRows = 0;
     this.selfTransformRows = 0;
     this.pendingAttackPacketTraces = new Set(); this.pendingAttackEvidence = null;
+    this.attackResults = attackResultsMode(context.attackResults);
+    this.attackV2Supported = false; this.attackV2Sequence = 0n; this.lastSentAttackV2 = 0n;
   }
   record(direction, value) {
     // Never retain worldSnapshot arrays in event history, nor an ever-growing
@@ -274,15 +311,37 @@ export class CapacityClient extends NativeResumeClient {
     this.lifecycleRows++;
   }
   send(command) {
+    if (command?.type === 'attack' && this.attackResults === 'v2') throw new Error('Legacy attack is forbidden in attack-results v2 mode');
+    if (command?.type === 'attackV2') {
+      if (this.attackResults !== 'v2' || !this.attackV2Supported || command.protocolVersion !== 2 ||
+          Object.keys(command).sort().join(',') !== 'objectId,protocolVersion,requestId,type' || !validAttackRequestId(command.requestId) ||
+          BigInt(command.requestId) <= this.lastSentAttackV2 || !Number.isInteger(command.objectId) || command.objectId <= 0 || command.objectId > 4294967295) {
+        throw new Error('Invalid or unsupported attackV2 request; no legacy fallback');
+      }
+      if (!this.draining) this.context.guard.assert();
+      this.budget.reserve(); this.bytes.sent += Buffer.byteLength(JSON.stringify(command));
+      this.lastSentAttackV2 = BigInt(command.requestId); this.record('sent', command); this.ws.send(JSON.stringify(command));
+      return;
+    }
     if (!this.draining) this.context.guard.assert();
     this.budget.reserve(); this.bytes.sent += Buffer.byteLength(JSON.stringify(command));
     PlaytestClient.prototype.send.call(this, command);
   }
   control(command) {
-    validateResumeControl(command);
+    const v2Capabilities = this.attackResults === 'v2' && command?.type === 'clientCapabilities' &&
+      Object.keys(command).sort().join(',') === 'capabilities,type' &&
+      JSON.stringify(command.capabilities) === JSON.stringify(['nativeResumeV1', CATALOG_GZIP_CAPABILITY, ATTACK_OUTCOME_CAPABILITY]);
+    if (!v2Capabilities) validateResumeControl(command);
     if (!this.draining) this.context.guard.assert();
     this.budget.reserve(); this.bytes.sent += Buffer.byteLength(JSON.stringify(command));
-    NativeResumeClient.prototype.control.call(this, command);
+    if (v2Capabilities) {
+      this.record('sent', command); this.ws.send(JSON.stringify(command)); this.catalogGzipOptedIn = true;
+    } else NativeResumeClient.prototype.control.call(this, command);
+  }
+  nextAttackV2(objectId) {
+    if (!this.attackV2Supported) throw new Error('attackV2 capability not confirmed; no legacy fallback');
+    if (++this.attackV2Sequence > MAX_ATTACK_REQUEST_ID) throw new Error('attackV2 request id exhausted; no retry');
+    return { type: 'attackV2', protocolVersion: 2, requestId: this.attackV2Sequence.toString(), objectId };
   }
   async pace() {
     while (this.budget.remainingWait()) {
@@ -318,7 +377,15 @@ export class CapacityClient extends NativeResumeClient {
     const promise = super.connect();
     this.ws.addEventListener('message', event => { this.bytes.received += Buffer.byteLength(event.data); });
     try { await promise; } finally { clearInterval(this.timer); }
-    await this.pace(); this.control({ type: 'clientCapabilities', capabilities: ['nativeResumeV1', CATALOG_GZIP_CAPABILITY] });
+    const cursor = this.sequence;
+    await this.pace(); this.control({ type: 'clientCapabilities', capabilities: ['nativeResumeV1', CATALOG_GZIP_CAPABILITY,
+      ...(this.attackResults === 'v2' ? [ATTACK_OUTCOME_CAPABILITY] : [])] });
+    if (this.attackResults === 'v2') {
+      await this.wait(() => this.events.find(event => event.direction === 'received' && event.sequence > cursor &&
+        event.type === 'attackCapabilitiesV2' && event.protocolVersion === 2 && event.capability === ATTACK_OUTCOME_CAPABILITY &&
+        event.supported === true && event.scope === 'connection'), 'confirmed attackV2 capability; no legacy fallback', 15000);
+      this.attackV2Supported = true;
+    }
   }
   async refresh() { await this.pace(); return PlaytestClient.prototype.refresh.call(this); }
   async logout() {
@@ -995,14 +1062,20 @@ async function action(client, context, planned, preparedPlan) {
     ...(plan.scouting ? { scouting: true, scoutHomeIndex: plan.scoutHomeIndex } : {}), ...nativeMeta,
     ...(native && client.role === 'combat' ? { declaredHome: client.home, initialCombatTransit: Boolean(plan.initialCombatTransit),
       targetPosition: plan.targetEntity ? { x: plan.targetEntity.x, y: plan.targetEntity.y } : undefined } : {}) };
+  const v2Attack = kind === 'attack' && client.attackResults === 'v2';
+  if (v2Attack) row.attackResults = 'v2';
   let attackOutcome = 'unresolved';
   try {
     client.waitReason = ['attack', 'chat'].includes(kind) ? 'evidence-wait' : 'owner-ack-wait';
     if (kind === 'attack') beginPendingAttackEvidence(client, plan.observer, owner,
       plan.targetEntity ?? client.snapshot.entities.find(entity => entity.objectId === command.objectId), sentAt, cursor, observerCursor);
-    client.send(command);
+    const wireCommand = v2Attack ? client.nextAttackV2(command.objectId) : command;
+    if (v2Attack) { row.requestId = wireCommand.requestId; client.pendingAttackEvidence.requestId = wireCommand.requestId; }
+    client.send(wireCommand);
+    if (v2Attack) row.attackRequestSent = true;
     if (native && kind === 'attack') {
-      rememberCombatTarget(client, plan.targetEntity); client.combatPursuit.attackSent = true;
+      rememberCombatTarget(client, plan.targetEntity);
+      if (!v2Attack) client.combatPursuit.attackSent = true;
     }
     if (native && kind === 'attack') recordHuntAttempt(client, owner, row.targetPosition);
     if (native) {
@@ -1011,9 +1084,24 @@ async function action(client, context, planned, preparedPlan) {
       if (kind === 'turn') client.nextNativeTurnAt = sentAt + context.policy.nativeTurnIntervalMs;
     }
     const receipt = await client.wait(() => {
-      const own = fresh(client, cursor, sentAt), rejection = own.find(event => event.type === 'error');
+      const own = fresh(client, cursor, sentAt).filter(event => !v2Attack || event.monotonicMs <= sentAt + 900);
+      const rejection = own.find(event => event.type === 'error');
       if (rejection) { const error = new Error('Public gameplay command rejected'); error.code = 'PUBLIC_COMMAND_REJECTED'; throw error; }
-      if (kind === 'attack') return verifiedCombatHit(own, fresh(plan.observer, observerCursor, sentAt), command.objectId, owner.objectId, plan.peerAttackerId);
+      if (kind === 'attack') {
+        if (v2Attack) {
+          const result = matchAttackResultV2(own, wireCommand);
+          if (!result) return null;
+          row.attackResult = result.result;
+          if (['unavailable', 'unknown'].includes(result.result)) {
+            const error = new Error(`attackV2 ${result.result}: ${result.code}; no retry`);
+            error.terminalAttackResult = true; throw error;
+          }
+          if (result.result === 'notLaunched') return { ...result, notLaunched: true };
+          if (native && client.combatPursuit?.objectId === command.objectId) client.combatPursuit.attackSent = true;
+        }
+        return verifiedCombatHit(own, fresh(plan.observer, observerCursor, sentAt)
+          .filter(event => !v2Attack || event.monotonicMs <= sentAt + 900), command.objectId, owner.objectId, plan.peerAttackerId);
+      }
       if (kind === 'chat') {
         const peer = observers[0]?.peer ?? client, after = observers[0]?.cursor ?? cursor;
         return fresh(peer, after, sentAt).find(event => ['ObjectChat', 'Chat'].includes(event.packet) &&
@@ -1021,7 +1109,7 @@ async function action(client, context, planned, preparedPlan) {
       }
       return own.find(event => event.packet === 'UserLocation');
     }, `${kind} authoritative acknowledgement`, kind === 'attack' ? 900 : context.policy.actionTimeoutMs);
-    let status = 'success';
+    let status = receipt.notLaunched ? 'not-launched' : 'success';
     if (['walk', 'run'].includes(kind)) {
       const actual = receipt.payload;
       if (!(actual.x === plan.target.x && actual.y === plan.target.y) &&
@@ -1037,8 +1125,10 @@ async function action(client, context, planned, preparedPlan) {
       damage: receipt.damage, sharedHealthVerified: receipt.sharedHealthVerified, healthPercent: receipt.healthPercent });
     if (kind === 'attack') {
       attackOutcome = status;
-      client.failedTargets.delete(command.objectId);
-      if (native) { client.combatHunting.positiveHits++; client.combatHunting.totalDamage += receipt.damage; }
+      if (status === 'success') {
+        client.failedTargets.delete(command.objectId);
+        if (native) { client.combatHunting.positiveHits++; client.combatHunting.totalDamage += receipt.damage; }
+      }
     }
     if (kind === 'chat') context.add({ actor: client.label, phase, kind: observers.length ? 'peerChat' : 'selfChat', status: 'success', latencyMs: receipt.monotonicMs - sentAt });
     if (status === 'success' && ['walk', 'run', 'turn', 'chat'].includes(kind)) {
@@ -1066,7 +1156,8 @@ async function action(client, context, planned, preparedPlan) {
       } else await verifyObservers();
     }
   } catch (error) {
-    const swung = kind === 'attack' && fresh(client, cursor, sentAt).some(event => event.packet === 'ObjectAttack' && event.payload?.objectId === owner.objectId);
+    const swung = kind === 'attack' && (v2Attack ? row.attackResult === 'launched' :
+      fresh(client, cursor, sentAt).some(event => event.packet === 'ObjectAttack' && event.payload?.objectId === owner.objectId));
     if (kind === 'attack' && !(error instanceof SafetyStop)) {
       const prior = client.failedTargets.get(command.objectId);
       // The protocol has no strike request ID. Even an observed swing followed
@@ -1084,7 +1175,7 @@ async function action(client, context, planned, preparedPlan) {
       latencyMs: performance.now() - sentAt, plannedLatencyMs: performance.now() - plannedAt, error: sanitize(error.message, client.secrets),
       targetStillAdjacent: kind === 'attack' ? client.snapshot.entities.some(entity => entity.objectId === command.objectId && !entity.dead && distance(entity, self(client)) === 1) : undefined,
       ambiguousTargetQuarantined: kind === 'attack' && native && !(error instanceof SafetyStop) });
-    if (error instanceof SafetyStop || client.closed) throw error;
+    if (error instanceof SafetyStop || client.closed || error.terminalAttackResult) throw error;
   } finally {
     client.waitReason = null;
     if (kind === 'attack') {
@@ -1311,12 +1402,12 @@ async function drain(client, context) {
 
 export async function runCapacity(options) {
   if (options.realm !== 'isolated') throw new Error('--realm isolated is required');
-  const endpoint = validateEndpoint(options.endpoint), policy = capacityPolicy(options);
+  const endpoint = validateEndpoint(options.endpoint), policy = capacityPolicy(options), attackResults = attackResultsMode(options.attackResults);
   if (!options.accountsFile || !options.monitor || !options.output) throw new Error('--accounts-file, --monitor and --output are required');
   const output = outsideRepository(options.output); await fs.mkdir(output, { recursive: true });
   const runId = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`, writer = new BoundedEvidence(path.join(output, `${runId}.samples.jsonl`));
   const guard = new CapacityMonitor(options.monitor, writer), aggregate = new Measurements();
-  const context = { endpoint, policy, runId, writer, guard, aggregate, clients: [], allClients: [], targetClaims: new Map(),
+  const context = { endpoint, policy, attackResults, runId, writer, guard, aggregate, clients: [], allClients: [], targetClaims: new Map(),
     aoi: new AoiCoverage(), phase: 'preflight', cleanupErrors: [], monsterNames: WEAK_MONSTERS,
     add(sample) {
       const row = { at: Date.now(), phase: this.phase, ...sample };
@@ -1334,6 +1425,9 @@ export async function runCapacity(options) {
   });
   const report = { schemaVersion: 1, runId, endpoint, policy, startedAt: new Date().toISOString(), stages: [], nativeResume: [], savedVerification: [], phaseWindows: [],
     ordinaryAccountsOnly: true, visualAccepted: false, capacityUpperBound: null, acceptanceScope: 'One real egress, ordinary same-map movement/AOI and the explicitly declared combat subgroup' };
+  if (attackResults === 'v2') Object.defineProperty(report, 'attackResults', { enumerable: true,
+    value: Object.freeze({ mode: 'v2', capability: ATTACK_OUTCOME_CAPABILITY,
+      rule: 'No legacy fallback. Activity attacks count correlated launched outcomes only; hits still require the original dual-end damage/health evidence. Hunting attempts are offered requests, not launched attacks.' }) });
   context.phaseWindows = report.phaseWindows; context.density = new PublicDensity();
   const lag = monitorEventLoopDelay({ resolution: 20 }); lag.enable();
   let timer, sampler, draining = false, driverLagFailures = 0, initialMemoryAt, finalStage, lockFile, lock;
@@ -1554,7 +1648,8 @@ export async function runCapacity(options) {
 export function parseArguments(args) {
   const result = {}, allowed = new Set(['realm', 'endpoint', 'accountsFile', 'monitor', 'output', 'profile', 'stages', 'stageSeconds', 'soakSeconds',
     'wallSeconds', 'layout', 'combatActors', 'resumeSamples', 'saveSamples', 'mapRoot', 'loginNotBefore', 'scenarioFile',
-    'activityMode', 'movementIntervalMs', 'generateScenario', 'scenarioMap', 'scenarioOrigin', 'scenarioCenter', 'scenarioCount']);
+    'activityMode', 'movementIntervalMs', 'generateScenario', 'scenarioMap', 'scenarioOrigin', 'scenarioCenter', 'scenarioCount', 'attackResults']);
+  args = args.flatMap(value => value.startsWith('--attack-results=') ? ['--attack-results', value.slice('--attack-results='.length)] : [value]);
   for (let i = 0; i < args.length; i += 2) {
     if (!args[i].startsWith('--') || args[i + 1] == null) throw new Error('Arguments must use --name value');
     const key = args[i].slice(2).replace(/-([a-z])/g, (_, char) => char.toUpperCase());

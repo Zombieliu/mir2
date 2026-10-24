@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
   assessMeasurements, movementDiagnosticMayContinue, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
-import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments } from './playtest-capacity-soak.mjs';
+import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 
@@ -162,6 +162,70 @@ function huntFixture(monsters, peerMonsters = monsters) {
   return { client, peer, owner, context, rows, actions };
 }
 const huntMonster = (objectId, name, x, y = 5) => ({ objectId, kind: 'monster', name, x, y, hp: 20 });
+
+test('attack results v2 is explicit, preserves capability flags and issues strictly increasing bounded decimal IDs without fallback', () => {
+  assert.equal(attackResultsMode(), 'legacy'); assert.equal(attackResultsMode('v2'), 'v2');
+  assert.throws(() => attackResultsMode('auto')); assert.equal(parseArguments(['--attack-results=v2']).attackResults, 'v2');
+  assert.throws(() => parseArguments(['--attack-results=v2', '--attack-results', 'legacy']), /repeated/);
+  const fixture = huntFixture([]), { context } = fixture, sent = [];
+  context.attackResults = 'v2'; const client = new CapacityClient('ws://127.0.0.1:1/ws', actor(0), context);
+  client.ws = { send: data => sent.push(JSON.parse(data)) };
+  assert.throws(() => client.nextAttackV2(900), /not confirmed/);
+  client.control({ type: 'clientCapabilities', capabilities: ['nativeResumeV1', 'serverCatalogGzipV1', ATTACK_OUTCOME_CAPABILITY] });
+  assert.deepEqual(sent[0].capabilities, ['nativeResumeV1', 'serverCatalogGzipV1', ATTACK_OUTCOME_CAPABILITY]);
+  assert.throws(() => client.send({ type: 'attack', objectId: 900 }), /forbidden/);
+  client.attackV2Supported = true;
+  const first = client.nextAttackV2(900); assert.equal(first.requestId, '1'); client.send(first);
+  assert.throws(() => client.send(first), /Invalid/);
+  for (const requestId of ['0', '01', '-1', '18446744073709551616']) assert.throws(() => client.send({ ...first, requestId }), /Invalid/);
+  assert.throws(() => client.send({ ...first, requestId: '2', objectId: 0 }), /Invalid/);
+  client.attackV2Sequence = 18446744073709551614n;
+  const last = client.nextAttackV2(900); client.send(last); assert.equal(last.requestId, '18446744073709551615');
+  assert.throws(() => client.nextAttackV2(900), /exhausted/);
+  assert.equal(sent.filter(row => row.type === 'attackV2').length, 2);
+});
+
+test('attackResultV2 matching rejects wrong IDs, malformed versions/results and conflicting cache replays', () => {
+  const request = { requestId: '1', objectId: 900 }, good = { type: 'attackResultV2', protocolVersion: 2, ...request, result: 'launched' };
+  for (const change of [{ requestId: '2' }, { requestId: '01' }, { objectId: 901 }, { protocolVersion: 1 },
+    { result: 'success' }, { code: 'extra' }, { result: 'unknown', code: 'private-error' }]) assert.equal(matchAttackResultV2([{ ...good, ...change }], request), null);
+  assert.equal(matchAttackResultV2([good, { ...good }], request), good);
+  assert.throws(() => matchAttackResultV2([good, { ...good, result: 'notLaunched' }], request), /Conflicting/);
+});
+
+test('V2 admission measurements keep legacy counters unchanged and never dilute movement corrections or credit unlaunched damage', () => {
+  const policy = capacityPolicy({ profile: 'probe', activityMode: 'native', stages: '2', combatActors: 1 });
+  const legacy = { actor: 'fighter', kind: 'attack', status: 'success', damage: 3, sharedHealthVerified: true,
+    nativeOpportunity: true, plannedGameplay: true, plannedIntervalMs: 1422, latencyMs: 1, plannedLatencyMs: 1 };
+  const a = new Measurements(); a.add(legacy); assert.equal(a.actors.get('fighter').attacks, 1);
+  assert.equal(Object.hasOwn(a.summary().attack, 'attackV2Requests'), false);
+  const rows = new Measurements(), v2 = { ...legacy, attackResults: 'v2', attackRequestSent: true };
+  rows.add({ ...v2, attackResult: 'notLaunched', status: 'not-launched' });
+  rows.add({ ...v2, status: 'timeout' });
+  rows.add({ ...v2, attackResult: 'launched', status: 'miss' });
+  rows.add({ ...v2, attackResult: 'launched' });
+  const activity = rows.actors.get('fighter');
+  assert.equal(activity.attacks, 2); assert.equal(activity.hits, 1); assert.equal(activity.nativeCompleted, 2);
+  assert.equal(activity.nativeOpportunities, 4); assert.equal(rows.summary().attack.attackV2Requests, 4);
+  for (let i = 0; i < 96; i++) rows.add({ ...v2, attackResult: 'launched' });
+  for (let i = 0; i < 10; i++) rows.add({ actor: 'mover', kind: 'walk', status: i ? 'success' : 'corrected',
+    plannedGameplay: true, nativeOpportunity: true, plannedIntervalMs: 750, latencyMs: 1, plannedLatencyMs: 1 });
+  const verdict = assessMeasurements(rows, [{ name: 'fighter', role: 'combat' }, { name: 'mover', role: 'movement' }], 60, policy, { requireChat: false });
+  assert.equal(verdict.attackRejectionRatio, .01); assert.equal(verdict.movementCorrectionRatio, .1); assert.equal(verdict.correctionRatio, .1);
+  const rejected = new Measurements(); for (let i = 0; i < 20; i++) rejected.add({ ...v2,
+    attackResult: i < 2 ? 'notLaunched' : 'launched', status: i < 2 ? 'not-launched' : 'success' });
+  const rejectedVerdict = assessMeasurements(rejected, [{ name: 'fighter', role: 'combat' }], 60, policy, { requireChat: false });
+  assert.equal(rejectedVerdict.attackRejectionRatio, .1); assert.equal(rejectedVerdict.passed, false);
+  for (const denied of [2, 3]) {
+    const gate = new ContinuousAcceptance(policy); gate.join('fighter', 'combat', 0);
+    for (let i = 0; i < 40; i++) gate.add({ ...v2, attackResult: i < denied ? 'notLaunched' : 'launched',
+      status: i < denied ? 'not-launched' : 'success' }, i * 1422 + 100);
+    gate.sync([{ name: 'fighter', active: true }], 60000);
+    const window = gate.actors.get('fighter').lastWindow;
+    assert.equal(window.attackRejectionRatio, denied / 40); assert.equal(window.correctionRatio, denied / 40);
+    assert.equal(window.passed, denied === 2, 'the original inclusive5% boundary and native completion gate both apply');
+  }
+});
 
 function declaredObservers(homes, observers) {
   return { observerHomes: homes, observerNames: new Set(observers.map(peer => peer.label)), patrolSpan: 2,
@@ -1716,6 +1780,12 @@ test('missing monitor prevents private-account reads, login and all gameplay', a
   const report = await runCapacity({ realm: 'isolated', endpoint: 'ws://127.0.0.1:1/ws', accountsFile: path.join(directory, 'private', 'absent.json'),
     monitor: path.join(directory, 'absent-monitor.json'), output: path.join(directory, 'reports'), profile: 'probe' });
   assert.equal(report.ok, false); assert.equal(report.safetyStopped, true); assert.deepEqual(report.bytes, { sent: 0, received: 0 });
+  assert.equal(Object.hasOwn(report, 'attackResults'), false, 'default legacy report shape stays unchanged');
+  const v2 = await runCapacity({ realm: 'isolated', endpoint: 'ws://127.0.0.1:1/ws', accountsFile: path.join(directory, 'private', 'absent.json'),
+    monitor: path.join(directory, 'absent-monitor.json'), output: path.join(directory, 'v2-reports'), profile: 'probe', attackResults: 'v2' });
+  assert.equal(v2.attackResults.mode, 'v2'); assert.equal(Object.isFrozen(v2.attackResults), true);
+  assert.equal(Object.getOwnPropertyDescriptor(v2, 'attackResults').writable, false);
+  assert.deepEqual(v2.bytes, { sent: 0, received: 0 });
   await assert.rejects(fs.stat(path.join(directory, 'private')), /ENOENT/);
 }));
 
@@ -1830,7 +1900,26 @@ for (const { movementIntervalMs, patrolSpan } of [{ movementIntervalMs: 650 }, {
   } finally { await realm.close(); }
 }));
 
-for (const { lateFirstHit, sparseStats, noSwingFirstHit } of [{ lateFirstHit: false, sparseStats: false }, { lateFirstHit: true, sparseStats: false }, { lateFirstHit: false, sparseStats: true }, { noSwingFirstHit: true }]) test(noSwingFirstHit
+test('attack-results v2 fails closed against a legacy server after the original15s capability deadline', async () => {
+  const server = new WebSocketServer({ host: '127.0.0.1', port: 0 }); await new Promise(resolve => server.once('listening', resolve));
+  const commands = [], { context } = huntFixture([]); context.attackResults = 'v2';
+  server.on('connection', socket => { socket.send(JSON.stringify({ type: 'packet', packet: 'Connected', payload: {} }));
+    socket.on('message', data => { const input = JSON.parse(data); commands.push(input);
+      if (input.type === 'clientVersion') socket.send(JSON.stringify({ type: 'packet', packet: 'ClientVersion', payload: {} })); }); });
+  const client = new CapacityClient(`ws://127.0.0.1:${server.address().port}/ws`, actor(0), context), started = performance.now();
+  try {
+    await assert.rejects(client.connect(), /attackV2 capability; no legacy fallback/);
+    assert.ok(performance.now() - started >= 14900); assert.equal(client.attackV2Supported, false);
+    assert.equal(commands.filter(command => ['attack', 'attackV2', 'login'].includes(command.type)).length, 0);
+    assert.deepEqual(commands.find(command => command.type === 'clientCapabilities').capabilities,
+      ['nativeResumeV1', 'serverCatalogGzipV1', ATTACK_OUTCOME_CAPABILITY]);
+  } finally { client.draining = true; await client.close(); for (const socket of server.clients) socket.terminate(); await new Promise(resolve => server.close(resolve)); }
+});
+
+for (const { lateFirstHit, sparseStats, noSwingFirstHit, v2Outcome } of [{ lateFirstHit: false, sparseStats: false }, { lateFirstHit: true, sparseStats: false }, { lateFirstHit: false, sparseStats: true }, { noSwingFirstHit: true },
+  ...['launched', 'notLaunched', 'missing', 'wrong-id', 'late', 'launched-no-damage', 'unavailable', 'unknown'].map(v2Outcome => ({ v2Outcome }))]) test(v2Outcome
+  ? `attack-results v2 real socket ${v2Outcome} preserves explicit admission, damage and failure accounting`
+  : noSwingFirstHit
   ? 'native real sockets keep same-position correction and target movement diagnostic while the actual900ms timeout still fails the1percent gate'
   : lateFirstHit
   ? 'native real sockets never reclaim an unresolved attack target when old damage arrives after the prior retry window'
@@ -1848,7 +1937,10 @@ for (const { lateFirstHit, sparseStats, noSwingFirstHit } of [{ lateFirstHit: fa
       inventoryItems: [], equipmentItems: [] } }));
     send(socket, 'Connected', {});
     socket.on('message', data => {
-      const input = JSON.parse(data); commands.push({ index, type: input.type, at: performance.now() });
+      const input = JSON.parse(data); commands.push({ index, type: input.type, at: performance.now(),
+        ...(input.type === 'attackV2' ? { requestId: input.requestId } : {}) });
+      if (input.type === 'clientCapabilities' && input.capabilities.includes(ATTACK_OUTCOME_CAPABILITY)) socket.send(JSON.stringify({
+        type: 'attackCapabilitiesV2', protocolVersion: 2, capability: ATTACK_OUTCOME_CAPABILITY, supported: true, scope: 'connection' }));
       if (input.type === 'clientVersion') { send(socket, 'ClientVersion', {}); snapshot(); }
       if (input.type === 'login') { index = input.accountId === actor(0).accountId ? 0 : 1; send(socket, 'LoginSuccess', { characters: [{ index, name: actor(index).name }] }); }
       if (input.type === 'startGame') {
@@ -1863,7 +1955,7 @@ for (const { lateFirstHit, sparseStats, noSwingFirstHit } of [{ lateFirstHit: fa
         send(socket, 'UserLocation', { ...payload.location, direction: input.direction });
         for (const [id, peer] of active) if (id !== index) setTimeout(() => send(peer.socket, input.type === 'run' ? 'ObjectRun' : 'ObjectWalk', payload), 900);
       }
-      if (input.type === 'attack') {
+      if (['attack', 'attackV2'].includes(input.type)) {
         const owner = active.get(index);
         if (noSwingFirstHit) {
           send(socket, 'UserLocation', { x: owner.player.x, y: owner.player.y, direction: owner.player.direction });
@@ -1887,14 +1979,22 @@ for (const { lateFirstHit, sparseStats, noSwingFirstHit } of [{ lateFirstHit: fa
             send(peer.socket, 'ObjectHealth', { objectId: 900, percent: monster.hp });
           }
         };
-        if (!lateFirstHit) deliver();
+        if (v2Outcome) {
+          if (v2Outcome !== 'launched-no-damage') deliver();
+          const result = ['unavailable', 'unknown', 'notLaunched'].includes(v2Outcome) ? v2Outcome : 'launched';
+          const response = { type: 'attackResultV2', protocolVersion: 2,
+            requestId: v2Outcome === 'wrong-id' ? (BigInt(input.requestId) + 1n).toString() : input.requestId,
+            objectId: input.objectId, result, ...(result === 'unavailable' ? { code: 'executionUnavailable' } : result === 'unknown' ? { code: 'outcomeUnknown' } : {}) };
+          if (v2Outcome === 'late') setTimeout(() => { if (socket.readyState === 1) socket.send(JSON.stringify(response)); }, 1100);
+          else if (v2Outcome !== 'missing') socket.send(JSON.stringify(response));
+        } else if (!lateFirstHit) deliver();
         else if (commands.filter(command => command.type === 'attack').length === 1) setTimeout(deliver, 4500);
       }
       if (input.type === 'logOut') { active.delete(index); send(socket, 'LogOutSuccess', { characters: [] }); }
     });
   });
   const policy = capacityPolicy({ profile: 'probe', activityMode: 'native', movementIntervalMs: 650, stages: '2', combatActors: 1 });
-  const context = { endpoint, policy, runId: 'native-wire-fixture', phase: 'native-wire-fixture', clients: [],
+  const context = { endpoint, policy, ...(v2Outcome ? { attackResults: 'v2' } : {}), runId: 'native-wire-fixture', phase: 'native-wire-fixture', clients: [],
     map: { width: 32, height: 32, blocked: new Uint8Array(1024) }, mapName: '0', monsterNames: ['Hen'], targetClaims: new Map(),
     guard: { assert() {}, stop: error => errors.push(error) }, writer: { add: row => evidence.push(row) }, add: row => rows.push(row) };
   const clients = [0, 1].map(index => new CapacityClient(endpoint, actor(index), context)); context.clients = clients;
@@ -1910,7 +2010,7 @@ for (const { lateFirstHit, sparseStats, noSwingFirstHit } of [{ lateFirstHit: fa
       cluster.observerNames.add(clients[0].label); cluster.observerBindings[0].name = clients[0].label; clients[1].combatCluster = cluster;
     }
     const start = performance.now() + 1200; for (const client of clients) client.plan = new NativePlan(start);
-    if (lateFirstHit || noSwingFirstHit) {
+    if (lateFirstHit || noSwingFirstHit || v2Outcome) {
       // Timers can wake a fraction early. Reach the real monotonic deadline
       // before offering the single attack; never advance the production clock.
       for (let attempts = 0; attempts < 100 && performance.now() < start; attempts++) {
@@ -1919,6 +2019,33 @@ for (const { lateFirstHit, sparseStats, noSwingFirstHit } of [{ lateFirstHit: fa
       assert.ok(performance.now() >= start, 'bounded fixture wait reaches the actual legal deadline');
       offerNativeAction(clients[1], context); assert.ok(clients[1].pending); await clients[1].pending;
       assert.equal(rows.filter(row => row.kind === 'attack').length, 1);
+      if (v2Outcome) {
+        const actual = rows.find(row => row.kind === 'attack'), measured = new Measurements(); measured.add(actual);
+        const trace = evidence.find(row => row.type === 'pendingAttackEvidence'), activity = measured.actors.get(clients[1].label);
+        const status = v2Outcome === 'launched' ? 'success' : v2Outcome === 'notLaunched' ? 'not-launched' :
+          v2Outcome === 'launched-no-damage' ? 'miss' : ['unavailable', 'unknown'].includes(v2Outcome) ? 'error' : 'timeout';
+        assert.equal(actual.status, status); assert.equal(trace.outcome, status); assert.equal(trace.requestId, '1');
+        assert.equal(actual.attackRequestSent, true); assert.equal(measured.summary().attack.attackV2Requests, 1);
+        assert.equal(activity.attacks, ['launched', 'launched-no-damage'].includes(v2Outcome) ? 1 : 0);
+        assert.equal(activity.hits, v2Outcome === 'launched' ? 1 : 0);
+        assert.equal(activity.nativeCompleted, ['launched', 'launched-no-damage'].includes(v2Outcome) ? 1 : 0);
+        assert.equal(commands.filter(command => command.type === 'attack').length, 0);
+        if (['missing', 'wrong-id', 'late', 'launched-no-damage'].includes(v2Outcome)) {
+          assert.ok(actual.latencyMs >= 890 && actual.latencyMs < 1800);
+          assert.equal(clients[1].failedTargets.get(900).until, Infinity);
+          assert.equal(actual.ambiguousTargetQuarantined, true);
+        }
+        if (v2Outcome === 'late') { await sleep(350); assert.equal(rows.find(row => row.kind === 'attack').status, 'timeout'); }
+        if (v2Outcome === 'launched') {
+          await sleep(Math.max(1, clients[1].plan.nextAt - performance.now() + 30));
+          offerNativeAction(clients[1], context); await clients[1].pending;
+          assert.deepEqual(commands.filter(command => command.type === 'attackV2').map(command => command.requestId), ['1', '2']);
+          assert.equal(rows.filter(row => row.kind === 'attack' && row.status === 'success').length, 2);
+        } else assert.equal(commands.filter(command => command.type === 'attackV2').length, 1, 'unknown/denied results are never retried by this opportunity');
+        assert.equal(errors.length, ['unavailable', 'unknown'].includes(v2Outcome) ? 1 : 0);
+        for (const client of clients) assert.equal(client.pendingAttackPacketTraces.size, 0);
+        return;
+      }
       assert.equal(rows.find(row => row.kind === 'attack').ambiguousTargetQuarantined, true);
       if (noSwingFirstHit) {
         const actual = rows.find(row => row.kind === 'attack'), trace = evidence.find(row => row.type === 'pendingAttackEvidence');

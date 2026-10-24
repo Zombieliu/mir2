@@ -362,12 +362,58 @@ pub struct WorldCommandExecution {
     pub game_shop_purchase_outcome: Option<GameShopPurchaseOutcome>,
 }
 
+/// Whether this exact synchronous ordinary melee command launched a swing.
+/// A launched swing is not proof of a hit or of positive damage.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NativeAttackAdmission {
+    Launched,
+    NotLaunched,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct NativeAttackExecution {
+    pub execution: WorldCommandExecution,
+    pub admission: NativeAttackAdmission,
+}
+
+/// Unsupported and preflight failures prove no attack was dispatched. An
+/// execution/transport failure after entering the pipeline is conservative:
+/// callers must not relabel it as rejection or retry the attack elsewhere.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum NativeAttackError {
+    Unsupported,
+    BeforeExecution(String),
+    Unknown(String),
+}
+
+impl std::fmt::Display for NativeAttackError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Unsupported => formatter.write_str("typed ordinary attack is unsupported"),
+            Self::BeforeExecution(detail) => write!(formatter, "attack not executed: {detail}"),
+            Self::Unknown(detail) => write!(formatter, "attack result is unknown: {detail}"),
+        }
+    }
+}
+
+impl std::error::Error for NativeAttackError {}
+
 pub trait WorldRuntime: Send + Sync {
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
 
     fn on_connect(&self) -> Vec<ServerPacket>;
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String>;
+
+    /// Dedicated opt-in seam. Old/private runtimes must not silently execute a
+    /// generic attack and infer its admission from compatibility packets.
+    fn execute_production_attack_requiring_typed_outcome(
+        &mut self,
+        _authenticated: bool,
+        _object_id: u32,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        Err(NativeAttackError::Unsupported)
+    }
     fn execute_with_outcome(
         &mut self,
         command: WorldCommand,

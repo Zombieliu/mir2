@@ -1,5 +1,6 @@
 pub mod ai_distribution;
 pub mod ai_live;
+pub mod attack_protocol;
 mod auth;
 pub mod beta;
 mod browser_commands;

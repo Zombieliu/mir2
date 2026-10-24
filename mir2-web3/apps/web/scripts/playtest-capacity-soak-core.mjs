@@ -161,7 +161,13 @@ export class Measurements {
     this.samples++;
     if (!this.metrics.has(sample.kind)) this.metrics.set(sample.kind, { count: 0, status: {}, sent: new Histogram(), planned: new Histogram() });
     const metric = this.metrics.get(sample.kind); metric.count++; metric.status[sample.status] = (metric.status[sample.status] ?? 0) + 1;
-    if (['success', 'corrected', 'positive-unobserved', 'miss'].includes(sample.status)) { metric.sent.add(sample.latencyMs); metric.planned.add(sample.plannedLatencyMs); }
+    if (['success', 'corrected', 'positive-unobserved', 'miss', 'not-launched'].includes(sample.status)) { metric.sent.add(sample.latencyMs); metric.planned.add(sample.plannedLatencyMs); }
+    const v2Attack = sample.kind === 'attack' && sample.attackResults === 'v2';
+    const launched = v2Attack && sample.attackRequestSent === true && sample.attackResult === 'launched';
+    if (v2Attack && sample.attackRequestSent === true) {
+      metric.attackV2Requests = (metric.attackV2Requests ?? 0) + 1;
+      if (sample.status === 'not-launched' && sample.attackResult === 'notLaunched') metric.attackV2NotLaunched = (metric.attackV2NotLaunched ?? 0) + 1;
+    }
     if (!this.actors.has(sample.actor)) this.actors.set(sample.actor, { plans: 0, gaps: 0, moves: 0, attacks: 0, hits: 0, damage: 0, lastSuccessAt: 0,
       runs: 0, cells: 0, nativeOpportunities: 0, nativeCompleted: 0, offeredDurationMs: 0, evidenceWaits: 0, ownerAckWaits: 0, unknownPacing: 0 });
     const actor = this.actors.get(sample.actor);
@@ -171,20 +177,21 @@ export class Measurements {
       actor.moves++; actor.cells += sample.movedCells ?? 1;
       if (sample.kind === 'run' && sample.movedCells > 1) actor.runs++;
     }
-    if (sample.kind === 'attack' && !['plan-gap', 'busy', 'budget-gap', 'navigation-blocked', 'action-locked', 'evidence-wait', 'owner-ack-wait'].includes(sample.status)) actor.attacks++;
+    if (sample.kind === 'attack' && (v2Attack ? launched : !['plan-gap', 'busy', 'budget-gap', 'navigation-blocked', 'action-locked', 'evidence-wait', 'owner-ack-wait'].includes(sample.status))) actor.attacks++;
     if (sample.nativeOpportunity) {
       actor.nativeOpportunities++; actor.offeredDurationMs += sample.plannedIntervalMs ?? 0;
       if (sample.pacingKnown === false) actor.unknownPacing++;
-      if (['success', 'miss'].includes(sample.status)) actor.nativeCompleted++;
+      if (['success', 'miss'].includes(sample.status) && (!v2Attack || launched)) actor.nativeCompleted++;
       if (sample.status === 'evidence-wait') actor.evidenceWaits++;
       if (sample.status === 'owner-ack-wait') actor.ownerAckWaits++;
     }
-    if (sample.kind === 'attack' && sample.status === 'success' && sample.damage > 0 && sample.sharedHealthVerified) { actor.hits++; actor.damage += sample.damage; }
-    if (sample.status === 'success' && (['walk', 'run'].includes(sample.kind) || (sample.kind === 'attack' && sample.damage > 0))) actor.lastSuccessAt = sample.at;
+    if (sample.kind === 'attack' && sample.status === 'success' && (!v2Attack || launched) && sample.damage > 0 && sample.sharedHealthVerified) { actor.hits++; actor.damage += sample.damage; }
+    if (sample.status === 'success' && (['walk', 'run'].includes(sample.kind) || (sample.kind === 'attack' && (!v2Attack || launched) && sample.damage > 0))) actor.lastSuccessAt = sample.at;
   }
   summary() {
     return Object.fromEntries([...this.metrics].map(([kind, value]) => [kind, { count: value.count, status: value.status,
-      fromSend: value.sent.summary(), fromPlan: value.planned.summary() }]));
+      fromSend: value.sent.summary(), fromPlan: value.planned.summary(), ...(value.attackV2Requests ? {
+        attackV2Requests: value.attackV2Requests, attackV2NotLaunched: value.attackV2NotLaunched ?? 0 } : {}) }]));
   }
 }
 
@@ -221,6 +228,8 @@ export function assessMeasurements(measurements, actors, seconds, policy, { requ
   const timeoutRatio = (counts.timeout ?? 0) / Math.max(1, attempts);
   const moveCount = (metrics.walk?.count ?? 0) + (metrics.run?.count ?? 0);
   const corrections = (metrics.walk?.status.corrected ?? 0) + (metrics.run?.status.corrected ?? 0);
+  const attackRejectionRatio = (metrics.attack?.attackV2NotLaunched ?? 0) / Math.max(1, metrics.attack?.attackV2Requests ?? 0);
+  const correctionRatio = Math.max(corrections / Math.max(1, moveCount), attackRejectionRatio);
   const moveMetrics = ['walk', 'run'].map(kind => metrics[kind]).filter(Boolean);
   const movementPassed = moveCount > 0 && moveMetrics.every(metric => metric.fromSend.p95Ms != null && metric.fromSend.p95Ms <= policy.movementP95Ms && metric.fromPlan.p95Ms <= policy.movementP95Ms + policy.maximumSendLatenessMs);
   const chatPassed = policy.activityMode === 'native'
@@ -230,9 +239,10 @@ export function assessMeasurements(measurements, actors, seconds, policy, { requ
   const combatExpected = actors.some(actor => actor.role === 'combat');
   const combatCovered = combatExpected && activity.filter(actor => actor.role === 'combat').every(actor => actor.passed);
   return { passed: activity.length > 0 && activity.every(actor => actor.passed) && movementPassed && chatPassed &&
-    timeoutRatio < policy.timeoutExclusive && corrections / Math.max(1, moveCount) <= policy.maximumCorrectionRatio &&
+    timeoutRatio < policy.timeoutExclusive && correctionRatio <= policy.maximumCorrectionRatio &&
     !['error', 'rejected', 'transportError'].some(status => counts[status]) && (aoi == null || (aoi.samples > 0 && aoi.persistentMissing === 0 && aoi.ghosts === 0 && aoi.duplicates === 0)),
-  seconds, activity, timeoutRatio, correctionRatio: corrections / Math.max(1, moveCount), movementPassed, chatPassed,
+  seconds, activity, timeoutRatio, correctionRatio, ...(metrics.attack?.attackV2Requests ? {
+    movementCorrectionRatio: corrections / Math.max(1, moveCount), attackRejectionRatio } : {}), movementPassed, chatPassed,
   combatCoverage: combatCovered ? 'shared-positive-damage' : combatExpected ? 'scenario-insufficient' : 'not-requested', metrics, aoi };
 }
 
@@ -315,6 +325,7 @@ export class ContinuousAcceptance {
     const movement = ['walk', 'run'].map(kind => metrics[kind]).filter(Boolean);
     const movementCount = movement.reduce((sum, metric) => sum + metric.count, 0);
     const corrections = movement.reduce((sum, metric) => sum + (metric.status.corrected ?? 0), 0);
+    const attackRejectionRatio = (metrics.attack?.attackV2NotLaunched ?? 0) / Math.max(1, metrics.attack?.attackV2Requests ?? 0);
     const enoughDuration = seconds >= 20;
     const rate = count => count * 60 / Math.max(seconds, .001);
     const progressed = rate(activity.moves) >= this.policy.minimumMovesPerMinute ||
@@ -328,7 +339,8 @@ export class ContinuousAcceptance {
       (metric.status.timeout ?? 0) / Math.max(1, metric.count) < this.policy.timeoutExclusive && (!metric.fromSend.count || metric.fromSend.p95Ms <= this.policy.chatP95Ms));
     const verdict = { actor: actor.name, role: actor.role, phases: [...actor.phases], seconds, final,
       activityDurationSufficient: enoughDuration, activity, nativeActivity, activityPassed, latencyPassed, fanoutPassed,
-      timeoutRatio: timeouts / Math.max(1, total), correctionRatio: corrections / Math.max(1, movementCount), metrics };
+      timeoutRatio: timeouts / Math.max(1, total), correctionRatio: Math.max(corrections / Math.max(1, movementCount), attackRejectionRatio),
+      ...(metrics.attack?.attackV2Requests ? { movementCorrectionRatio: corrections / Math.max(1, movementCount), attackRejectionRatio } : {}), metrics };
     verdict.passed = activityPassed && latencyPassed && fanoutPassed && verdict.timeoutRatio < this.policy.timeoutExclusive &&
       verdict.correctionRatio <= this.policy.maximumCorrectionRatio;
     if (!enoughDuration) this.shortSegments++;

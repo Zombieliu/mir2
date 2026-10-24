@@ -10,7 +10,7 @@
 - 新候选[独立复核](protocol-full-lifecycle-spectator-buffer-827d4c8/1792862312544-c2d8342e.independent-audit.json)：346 条 sent 均为普通指令，双端死亡/复活及击杀/掉落/拾取原收据一致，33 个 backend 输入及 6 个驱动原始摘要一致，六个实际私密值未见于公开产物。进程正常退出、两端口释放及六项连接计数归零只证明本次进程/连接清理。独立录像目录 367 帧 published=persisted，0 dropped/recordingErrors。
 - P1 simulation 合同 **26/26**、manager 单元 **16/16**；网关恢复/交接/经济等相邻回归 **113 passed / 1 ignored**，忽略项需要独立 PostgreSQL 测试库。冻结后的网关合同及指标复核 **24/24**。
 - 冻结源码的 simulation 安全、跨图掉落、死亡与共享 Zone 相邻回归重新通过 **254 项不同测试**：[默认配置 251 项](validation/p01-simulation-adjacent-frozen-default.log)，再以 `test-support` 跑[死亡/在线参考 5 项](validation/p01-simulation-death-frozen-reference.log)，其中两项与默认配置重复，不重复计数。
-- 容量工具最终相关回归 [111/111](validation/capacity-probe10-boundary-complete-tests.log)、证据校验器新增独立 Release 绑定后 [15/15](validation/evidence-verifier-additional-release-05.log)；27 个受影响 Rust 文件的[只读格式检查](validation/p01-rustfmt-check.json)通过。校验器同时拒绝冻结清单外新增/改动的 Rust/Cargo 输入；选择历史 backend commit 不放宽当前生命周期驱动的原始摘要校验。后续 Release 逐个核验其独立 Git 输入及二进制绑定，不能继承旧构建凭证。
+- 容量工具在新增 V2 前已有 [111/111](validation/capacity-probe10-boundary-complete-tests.log) 回归；本轮 V2 完整回归为 [129/129](validation/attack-v2-driver-capacity-regression-v1.log)，随后仅将零目标 ID 的预发送检查收紧并补一条断言，[4/4 focused](validation/attack-v2-driver-final-boundary-focused-v7.log) 通过。[冻结清单](capacity-attack-v2-driver-frozen-v1.json)分别绑定完整测试源码及最终两行差分，不把历史全量测试冒充最终源码全量测试。证据校验器新增独立 Release 绑定后 [15/15](validation/evidence-verifier-additional-release-metadata-06.log)；原 27 个受影响 Rust 文件的[只读格式检查](validation/p01-rustfmt-check.json)记录保留，不覆盖后续新增源码。校验器拒绝冻结清单外新增/改动的 Rust/Cargo 输入；选择历史 backend commit 不放宽当前生命周期驱动的原始摘要校验。后续 Release 逐个核验其独立 Git 输入及二进制绑定，不能继承旧构建凭证。
 
 原 32 输入基线的实际 Release SHA-256：`99bca561822a2d02bd4a012546c228923f3f34e6612612085d6caed9f82ee50d`。受影响 Rust/Cargo 输入摘要：`470606cf18810178f75e488dd0b6ad9c4c75e346113c6e7bd594afc7f45d86ac`，基线 commit `68f810b442321ae66360a2be18e31dc309efdaf7`。录像 IO 修复后的最终候选另行冻结为 33 输入/`187775…`，见下文；两次完整功能证据分别绑定各自构建。
 
@@ -47,6 +47,10 @@
 第三次仍为 **failed**：一名观察者的 runs/moves=15/38（39.47%）低于原 50% 要求；其原生操作均完成、无 timeout/correction，战斗角色 30 秒有 16 次正伤害，其余活动检查通过。活怪占格导致巡逻绕行，不能据此宣布服务器 10 人容量失败或通过；没有进入 360 秒 soak。[第三次原件与离散 IO 诊断](capacity-native10-buffered-diagnostics/collection-verification.json)独立归档。
 
 第四次仅将观察者 4 的 home 从 `(252,645)` 改为 `(246,646)`。原 30 秒阶段真实通过：战斗角色 17 次攻击/17 次正伤害，观察者 4 的 Run 比 34/38（89.47%），九名观察者均通过，AOI 740/740、missing/ghost/duplicate=0。随后严格连续窗口因一次 attack timeout 失败：该角色 55 次操作中 1 timeout（1.818% ≥ 原 1% 门槛）；soak 只运行 38.828 秒，未完成六个窗口，[最终报告仍为失败](capacity-native10-home-adjusted-diagnostics/collection-verification.json)。邻帧显示 Deer 在攻击附近从相邻格移远，支持准入时超距拒绝的候选解释；未保留无歧义拒绝收据前，不改写 timeout 或宣称服务端过载。557 帧 published=persisted、0 录制错，进程/端口及六项连接状态正常清理。
+
+新增普通攻击 [V2 同步结果合同](../../NATIVE-ATTACK-OUTCOME-V2.md)用于明确关联本次请求与实际起手结果。旧攻击协议保持原行为；V2 需要有效认证及真实共享 Zone actor，经 owner/执行域检查，连接内请求 ID 在变更前预留。只有本次权威执行的原始结果可以给出 `launched/notLaunched`；丢响应、执行错误或来源不明的空包仍不能冒称拒绝。起手回执不代替原双端正伤害证据，900ms、1% 超时及 5% 纠正门槛保持；V2 未起手比例另以其请求数独立计算并应用原 5% 门槛。第四次旧失败不回写。
+
+V2 与原恢复、交接、经济、移动及 owner 相邻用例统一验收为 [157 passed / 2 ignored](validation/p01-typed-attack-and-adjacent-final-04.log)，407.14 秒，无失败。两个忽略项分别需要独立 PostgreSQL 库和显式真实网络场景输入，不计为通过。[验证记录](native-attack-v2-validation.json)保留前序失败及原因：RPC 显式认证预检已修复；旧远程攻击夹具原先只改个人位置并过早要求命中，现仅修真实共享 Zone 的三格落点、合法 Focus 命中条件及 700ms 结算时刻，双端原断言保留。生产战斗规则和时序未改变。[本轮全部 31 个受影响 Rust 文件只读格式检查](validation/p01-native-attack-v2-rustfmt-check.json)通过。上述是工程回归，新的 Release 生命周期与容量探针尚待执行。
 
 ## 本轮范围
 

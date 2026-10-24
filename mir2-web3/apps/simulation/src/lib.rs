@@ -99,9 +99,10 @@ pub use runtime::{
 };
 pub use world_runtime::{
     validate_production_player_command, CharacterHandoffCheckpoint, CharacterHandoffClockWitness,
-    CharacterHandoffCommitment, InProcessWorldRuntime, NativeGameShopGiftRequest,
-    NativeGameShopPurchaseRequest, WorldCommand, WorldCommandExecution, WorldCommandKind,
-    WorldCommandOutcome, WorldRuntime, ZoneRuntimeHandle, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
+    CharacterHandoffCommitment, InProcessWorldRuntime, NativeAttackAdmission, NativeAttackError,
+    NativeAttackExecution, NativeGameShopGiftRequest, NativeGameShopPurchaseRequest, WorldCommand,
+    WorldCommandExecution, WorldCommandKind, WorldCommandOutcome, WorldRuntime, ZoneRuntimeHandle,
+    NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
 };
 
 pub use runtime::apply_crystal_experience_rates;

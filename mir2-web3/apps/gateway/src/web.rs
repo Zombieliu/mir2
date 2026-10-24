@@ -171,6 +171,7 @@ enum ParsedSocketInput {
         skill_key_request: Option<SkillKeyRequest>,
     },
     ClientCapabilities(Vec<String>),
+    AttackV2(crate::attack_protocol::AttackV2Request),
     NpcPurchaseOwner(mir2_client_wire::ClientRequest),
     ResumeSession(ResumeCredential),
     ResumeRejected,
@@ -1643,6 +1644,14 @@ enum BrowserCommand {
         request_id: u64,
     },
     ClientVersion,
+    AttackV2 {
+        #[serde(rename = "protocolVersion")]
+        protocol_version: u16,
+        #[serde(rename = "requestId")]
+        request_id: String,
+        #[serde(rename = "objectId")]
+        object_id: u32,
+    },
     ClientCapabilities {
         capabilities: Vec<String>,
     },
@@ -5148,20 +5157,18 @@ fn refresh_zone_live_outbound(
 }
 
 fn invalid_browser_command_input(message: &str, error: &serde_json::Error) -> ParsedSocketInput {
-    let recognized_resume = serde_json::from_str::<Value>(message)
+    let recognized_type = serde_json::from_str::<Value>(message)
         .ok()
         .and_then(|value| {
             value
                 .get("type")
                 .and_then(Value::as_str)
                 .map(str::to_string)
-        })
-        .as_deref()
-        == Some("resumeSession");
-    if recognized_resume {
-        ParsedSocketInput::ResumeRejected
-    } else {
-        ParsedSocketInput::ProtocolError(format!("invalid command: {error}"))
+        });
+    match recognized_type.as_deref() {
+        Some("resumeSession") => ParsedSocketInput::ResumeRejected,
+        Some("attackV2") => ParsedSocketInput::ProtocolError("invalid attackV2 request".into()),
+        _ => ParsedSocketInput::ProtocolError(format!("invalid command: {error}")),
     }
 }
 
@@ -5237,6 +5244,25 @@ fn spawn_socket_reader(
                 }
             };
             let command = match command {
+                BrowserCommand::AttackV2 { .. } => {
+                    let parsed = match crate::attack_protocol::parse_attack_v2(&message) {
+                        Ok(request) => ParsedSocketInput::AttackV2(request),
+                        Err(error) => ParsedSocketInput::ProtocolError(error),
+                    };
+                    if input_tx
+                        .send(SocketInbound::Queued(QueuedSocketInput::new(
+                            parsed,
+                            Arc::clone(&reader_pending_count),
+                            message_permit,
+                            received_at,
+                        )))
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    continue;
+                }
                 BrowserCommand::NpcPurchaseOwner { .. } => {
                     // Reparse the original bytes with duplicate/unknown-field
                     // rejection; never dispatch a Value-normalized request.
@@ -5603,6 +5629,7 @@ async fn handle_socket_work(
     let mut active_identity_session: Option<VerifiedIdentitySession> = None;
     let mut native_game_shop = NativeGameShopConnectionState::default();
     let mut npc_purchase = crate::npc_purchase_browser::BrowserNpcPurchaseConnection::default();
+    let mut native_attack = crate::attack_protocol::AttackV2Connection::default();
     let mut server_catalog_gzip_v1 = false;
     let mut first_post_resume_identity_check_pending = false;
     let mut last_identity_revocation_check = Instant::now();
@@ -5709,8 +5736,11 @@ async fn handle_socket_work(
                 }
                 let parsed_input = queued_input.take_input();
                 let mut npc_purchase_request = None;
+                let mut native_attack_request = None;
                 let (action, quest_operation_request, skill_key_request) = match parsed_input {
                     ParsedSocketInput::ClientCapabilities(capabilities) => {
+                        let attack_capability_requested = capabilities.iter()
+                            .any(|capability| capability == "nativeAttackOutcomeV1");
                         match validate_native_client_capabilities(&capabilities) {
                             Ok(capabilities) => {
                                 if native_resume.opted_in && !capabilities.native_resume_v1 {
@@ -5728,6 +5758,10 @@ async fn handle_socket_work(
                                 if !native_game_shop.opted_in && !native_game_shop.gift_opted_in {
                                     native_game_shop.pending = None;
                                 }
+                                if attack_capability_requested && sender.send(Message::Text(json!({
+                                    "type":"attackCapabilitiesV2", "protocolVersion":2,
+                                    "capability":"nativeAttackOutcomeV1", "supported":true, "scope":"connection",
+                                }).to_string().into())).await.is_err() { return; }
                             }
                             Err(error) => {
                                 if send_error_message(&sender, &error).await.is_err() {
@@ -5879,6 +5913,11 @@ async fn handle_socket_work(
                         npc_purchase_request = Some(request);
                         (None, None, None)
                     }
+                    ParsedSocketInput::AttackV2(request) => {
+                        let object_id = request.object_id;
+                        native_attack_request = Some(request);
+                        (Some(SessionAction::Attack { object_id }), None, None)
+                    }
                     ParsedSocketInput::Action {
                         action,
                         quest_operation_request,
@@ -5918,6 +5957,28 @@ async fn handle_socket_work(
                 }
                 if !first_post_resume_identity_check_pending {
                     socket_authenticated.store(authenticated, Ordering::Release);
+                }
+                if let Some(request) = native_attack_request.as_ref() {
+                    let prepared = catch_gateway_panic("attackV2 authorization", || {
+                        tokio::task::block_in_place(|| {
+                            let identity_valid = authenticated && active_identity_session.as_ref()
+                                .zip(authenticated_account_id.as_deref())
+                                .is_some_and(|(verified, account_id)| verified.account_id == account_id
+                                    && native_resume_identity_is_active(session_cache.as_ref(), &identity, verified, gateway_unix_ms()));
+                            let actor = if identity_valid { session.active_identity().filter(|actor|
+                                Some(actor.account_id.as_str()) == authenticated_account_id.as_deref()) } else { None };
+                            native_attack.prepare(request, identity_valid, actor.as_ref())
+                        })
+                    });
+                    match prepared {
+                        Ok(crate::attack_protocol::PreparedAttack::Execute) => {}
+                        Ok(crate::attack_protocol::PreparedAttack::Reply(frame)) => {
+                            let unknown = frame["result"] == "unknown";
+                            if sender.send(Message::Text(frame.to_string().into())).await.is_err() || unknown { return; }
+                            continue;
+                        }
+                        Err(_) => return,
+                    }
                 }
                 if let Some(request) = npc_purchase_request {
                     let dispatch = tokio::task::block_in_place(|| {
@@ -6272,10 +6333,22 @@ async fn handle_socket_work(
                     _ => false,
                 };
                 let request_class = request_metrics_class(&action);
+                let mut native_attack_admission = None;
+                let mut native_attack_error = None;
                 let execution_result = match catch_gateway_panic("web session action", || {
                     let _slow_stage = GatewaySlowStage::start("session_action.execute");
                     tokio::task::block_in_place(|| {
-                        if let Some(request) = native_game_shop_request.as_ref() {
+                        if let Some(request) = native_attack_request.as_ref() {
+                            match session.execute_production_attack_requiring_typed_outcome(request.object_id, authenticated) {
+                                Ok(result) => {
+                                    native_attack_admission = Some(result.admission);
+                                    Ok((result.execution.packets, None))
+                                }
+                                Err(error) => {
+                                    let detail = error.to_string(); native_attack_error = Some(error); Err(detail)
+                                }
+                            }
+                        } else if let Some(request) = native_game_shop_request.as_ref() {
                             execute_native_game_shop_handler_seam(session, request).map(|dispatch| {
                                 (dispatch.normal_packets, Some(dispatch.post_execution))
                             })
@@ -6307,6 +6380,12 @@ async fn handle_socket_work(
                             session,
                             pending_start_game_route_lease.as_ref(),
                         );
+                        if let Some(request) = native_attack_request.as_ref() {
+                            let error = native_attack_error.take().unwrap_or_else(|| mir2_simulation::NativeAttackError::Unknown(error));
+                            let frame = crate::attack_protocol::error_frame(request, &error);
+                            let _ = sender.send(Message::Text(frame.to_string().into())).await;
+                            return;
+                        }
                         if native_game_shop_request.is_some() {
                             eprintln!(
                                 "native GameShop execution failed with unknown commit state; closing socket: {error}"
@@ -6345,6 +6424,12 @@ async fn handle_socket_work(
                             session,
                             pending_start_game_route_lease.as_ref(),
                         );
+                        if let Some(request) = native_attack_request.as_ref() {
+                            let frame = crate::attack_protocol::error_frame(request,
+                                &mir2_simulation::NativeAttackError::Unknown("execution panicked".into()));
+                            let _ = sender.send(Message::Text(frame.to_string().into())).await;
+                            return;
+                        }
                         if native_game_shop_request.is_some() {
                             eprintln!(
                                 "native GameShop execution panicked with unknown commit state; closing socket without receipt: {error}"
@@ -6431,7 +6516,7 @@ async fn handle_socket_work(
                 )
                 .await
                 {
-                    if native_game_shop_request.is_some() {
+                    if native_game_shop_request.is_some() || native_attack_request.is_some() {
                         eprintln!(
                             "native GameShop post-execution identity finalization failed; closing without receipt: {error}"
                         );
@@ -6582,7 +6667,7 @@ async fn handle_socket_work(
                         &mut _zone_live_outbound_registration,
                     )
                 }) {
-                    if native_game_shop_request.is_some() {
+                    if native_game_shop_request.is_some() || native_attack_request.is_some() {
                         eprintln!(
                             "native GameShop post-execution Zone registration failed; closing without receipt: {error}"
                         );
@@ -6611,7 +6696,7 @@ async fn handle_socket_work(
                     .await
                 };
                 if let Err(error) = flush_result {
-                    if native_game_shop_request.is_some() {
+                    if native_game_shop_request.is_some() || native_attack_request.is_some() {
                         eprintln!(
                             "native GameShop post-execution flush failed; closing without receipt: {error}"
                         );
@@ -6673,6 +6758,14 @@ async fn handle_socket_work(
                         &background_route_refresh_record,
                         session,
                     );
+                }
+                if let Some(request) = native_attack_request.as_ref() {
+                    let Some(admission) = native_attack_admission else { return; };
+                    let frame = tokio::task::block_in_place(|| {
+                        native_attack.complete(request, admission, session.active_identity().as_ref())
+                    });
+                    let Ok(frame) = frame else { return; };
+                    if sender.send(Message::Text(frame.to_string().into())).await.is_err() { return; }
                 }
                 if let Some(duration) = runtime_tick_defer_duration {
                     runtime_tick_deferred_until = Instant::now() + duration;
@@ -8141,6 +8234,7 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         })),
         BrowserCommand::ClientCapabilities { .. }
         | BrowserCommand::ResumeSession(_)
+        | BrowserCommand::AttackV2 { .. }
         | BrowserCommand::NpcPurchaseOwner { .. } => Err(
             "native resume control commands must be handled before gameplay dispatch".to_string(),
         ),
@@ -14009,6 +14103,41 @@ mod tests {
         let observed = with_env_var(NAME, Some("recovered"), || std::env::var(NAME).unwrap());
         assert_eq!(observed, "recovered");
         assert_eq!(std::env::var_os(NAME), previous);
+    }
+
+    #[test]
+    fn attack_v2_socket_tag_cannot_fall_back_to_legacy_gameplay_dispatch() {
+        let raw = r#"{"type":"attackV2","protocolVersion":2,"requestId":"1","objectId":7}"#;
+        let command: super::BrowserCommand = serde_json::from_str(raw).unwrap();
+        assert!(super::browser_command_to_action(command).is_err());
+        assert_eq!(
+            crate::attack_protocol::parse_attack_v2(raw)
+                .unwrap()
+                .object_id,
+            7
+        );
+        for raw in [
+            r#"{"type":"attackV2","type":"attack","protocolVersion":2,"requestId":"1","objectId":7}"#,
+            r#"{"type":"attack","type":"attackV2","protocolVersion":2,"requestId":"1","objectId":7}"#,
+        ] {
+            assert!(serde_json::from_str::<super::BrowserCommand>(raw).is_err());
+        }
+        let legacy: super::BrowserCommand =
+            serde_json::from_str(r#"{"type":"attack","objectId":7}"#).unwrap();
+        assert!(matches!(
+            super::browser_command_to_action(legacy).unwrap(),
+            super::SessionAction::Attack { object_id: 7 }
+        ));
+    }
+
+    #[test]
+    fn attack_v2_socket_reparses_original_bytes_and_rejects_unknown_fields() {
+        let raw = r#"{"type":"attackV2","protocolVersion":2,"requestId":"1","objectId":7,"moveTo":{"x":1,"y":2}}"#;
+        assert!(matches!(
+            serde_json::from_str::<super::BrowserCommand>(raw).unwrap(),
+            super::BrowserCommand::AttackV2 { .. }
+        ));
+        assert!(crate::attack_protocol::parse_attack_v2(raw).is_err());
     }
 
     #[test]

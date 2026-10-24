@@ -55,19 +55,20 @@ use mir2_simulation::{
     zone_ground_drop_snapshots_for_monster_at_tick, ActiveSessionIdentity,
     CharacterHandoffCheckpoint, CharacterHandoffCommitment, CharacterSaveRecord,
     ChatPacketPreparation, GameShopPurchaseOutcome, GroundDropClaimTicket, GroundDropLootSnapshot,
-    GroundDropSnapshot, InProcessWorldRuntime, NpcGoldBuyBeforeExecution,
-    NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingOutcome,
-    NpcGoldBuyRequest, RankingInspectIdentity, RankingInspectOnlineProjection,
-    RankingInspectPresence, SessionId, SharedAccountInventoryTransactionKind,
-    SharedAccountInventoryTransactionReceipt, SharedInventoryItemDrop, SharedItemRentalAgreement,
-    SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
-    SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand,
-    WorldCommandExecution, WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind,
-    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot,
-    ZoneBossRewardAudit, ZoneCommand, ZoneJourneyEventReceipt, ZoneKey, ZoneMagicPracticeReceipt,
-    ZoneMagicPracticeSpell, ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward,
-    ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneRuntimeHandle,
-    ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
+    GroundDropSnapshot, InProcessWorldRuntime, NativeAttackAdmission, NativeAttackError,
+    NativeAttackExecution, NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingError,
+    NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingOutcome, NpcGoldBuyRequest,
+    RankingInspectIdentity, RankingInspectOnlineProjection, RankingInspectPresence, SessionId,
+    SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
+    SharedInventoryItemDrop, SharedItemRentalAgreement, SharedItemRentalDelivery,
+    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
+    SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand, WorldCommandExecution,
+    WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot,
+    WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot, ZoneBossRewardAudit, ZoneCommand,
+    ZoneJourneyEventReceipt, ZoneKey, ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell,
+    ZoneManager, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+    ZoneNativeMonsterSnapshot, ZoneOutbound, ZoneRuntimeHandle, ZoneVitalSettlement,
+    CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -339,6 +340,14 @@ pub trait ZoneOwnerLeaseAuthority: Send + Sync {
 pub type SharedZoneOwnerLeaseAuthority = Arc<dyn ZoneOwnerLeaseAuthority>;
 
 pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
+    fn execute_production_attack_requiring_typed_outcome(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        _request: ZoneOwnerCommandRequest,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        Err(NativeAttackError::Unsupported)
+    }
+
     fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool {
         false
     }
@@ -529,6 +538,13 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
 pub type SharedZoneOwnerCommandClient = Arc<dyn ZoneOwnerCommandClient>;
 
 pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
+    fn execute_production_attack_requiring_typed_outcome(
+        &self,
+        _request: ZoneOwnerCommandRequest,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        Err(NativeAttackError::Unsupported)
+    }
+
     fn supports_durable_npc_purchase_owner(&self) -> bool {
         false
     }
@@ -674,6 +690,15 @@ impl RpcZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for RpcZoneOwnerCommandClient {
+    fn execute_production_attack_requiring_typed_outcome(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        self.transport
+            .execute_production_attack_requiring_typed_outcome(request)
+    }
+
     fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool {
         self.transport.supports_durable_npc_purchase_owner()
     }
@@ -933,7 +958,102 @@ impl InProcessZoneOwnerCommandClient {
     }
 }
 
+/// Keep the same trusted execution context as ordinary production commands.
+/// This leaf is shared by local and hosted typed routes; transport correlation
+/// never becomes an economy identity or a saved runtime field.
+fn execute_typed_native_attack_runtime(
+    runtime: &mut ZoneRuntimeHandle,
+    request: ZoneOwnerCommandRequest,
+) -> Result<NativeAttackExecution, NativeAttackError> {
+    let object_id = match (request.mode(), request.command()) {
+        (
+            ZoneOwnerCommandMode::ProductionPlayer {
+                authenticated: true,
+            },
+            WorldCommand::Attack { object_id },
+        ) => *object_id,
+        _ => {
+            return Err(NativeAttackError::BeforeExecution(
+                "typed attack requires an authenticated ordinary Attack request".into(),
+            ))
+        }
+    };
+    mir2_simulation::validate_production_player_command(true, request.command())
+        .map_err(NativeAttackError::BeforeExecution)?;
+    partition_binding::validate_runtime_execution_domain(runtime, request.owner_lease())
+        .map_err(NativeAttackError::BeforeExecution)?;
+    let context = if let Some(sequence) = request.source_sequence() {
+        Some(SharedAccountInventoryExecutionContext {
+            zone_id: request.owner_lease().zone_id().clone(),
+            fencing_generation: request.owner_lease().fencing_token(),
+            source_sequence: sequence,
+            created_at_ms: shared_gateway_now_ms(),
+            external_commit_authorized: true,
+        })
+    } else if let Some(shared) = runtime
+        .as_mut()
+        .as_any_mut()
+        .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+    {
+        Some(
+            shared
+                .next_in_process_economy_execution_context(request.owner_lease())
+                .ok_or_else(|| {
+                    NativeAttackError::BeforeExecution(
+                        "typed attack source sequence is exhausted".into(),
+                    )
+                })?,
+        )
+    } else {
+        None
+    };
+    let binding = npc_population_binding::accepted_execution_binding(
+        request.owner_lease(),
+        request.mode(),
+        context.as_ref().map(|context| context.source_sequence),
+        true,
+    );
+    let _execution_scope = if let Some(shared) = runtime
+        .as_mut()
+        .as_any_mut()
+        .downcast_mut::<SharedInProcessZoneSessionRuntime>(
+    ) {
+        let scope = shared
+            .begin_npc_owner_execution_scope(binding)
+            .map_err(NativeAttackError::BeforeExecution)?;
+        shared.set_economy_execution_context(context);
+        Some(scope)
+    } else {
+        None
+    };
+    let result = crate::session::catch_gateway_panic("typed ordinary attack runtime", || {
+        runtime.execute_production_attack_requiring_typed_outcome(true, object_id)
+    })
+    .unwrap_or_else(|detail| Err(NativeAttackError::Unknown(detail)));
+    if let Some(shared) = runtime
+        .as_mut()
+        .as_any_mut()
+        .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+    {
+        shared.set_economy_execution_context(None);
+    }
+    result
+}
+
 impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
+    fn execute_production_attack_requiring_typed_outcome(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority
+                .validate_owner_lease(request.owner_lease())
+                .map_err(NativeAttackError::BeforeExecution)?;
+        }
+        execute_typed_native_attack_runtime(runtime, request)
+    }
+
     fn prepare_character_handoff(
         &self,
         runtime: &mut ZoneRuntimeHandle,
@@ -1220,6 +1340,28 @@ impl fmt::Debug for HostedZoneOwnerCommandClient {
 }
 
 impl HostedZoneOwnerCommandClient {
+    pub fn execute_production_attack_requiring_typed_outcome(
+        &self,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority
+                .validate_owner_lease(request.owner_lease())
+                .map_err(NativeAttackError::BeforeExecution)?;
+        }
+        let mut runtime = self.runtime.lock().map_err(|_| {
+            NativeAttackError::BeforeExecution(
+                "zone owner hosted runtime mutex was poisoned".into(),
+            )
+        })?;
+        let runtime = runtime.as_mut().ok_or_else(|| {
+            NativeAttackError::BeforeExecution(
+                "zone owner hosted runtime was already handed off".into(),
+            )
+        })?;
+        execute_typed_native_attack_runtime(runtime, request)
+    }
+
     pub(crate) fn npc_purchase_owner_checkpoint_with_lease(
         &self,
         lease: &ZoneOwnerLease,
@@ -1716,6 +1858,16 @@ impl HostedZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
+    fn execute_production_attack_requiring_typed_outcome(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        HostedZoneOwnerCommandClient::execute_production_attack_requiring_typed_outcome(
+            self, request,
+        )
+    }
+
     fn supports_durable_npc_purchase_owner(&self, _runtime: &ZoneRuntimeHandle) -> bool {
         HostedZoneOwnerCommandClient::supports_durable_npc_purchase_owner(self)
     }
@@ -1862,6 +2014,15 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
+    fn execute_production_attack_requiring_typed_outcome(
+        &self,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        HostedZoneOwnerCommandClient::execute_production_attack_requiring_typed_outcome(
+            self, request,
+        )
+    }
+
     fn prepare_character_handoff(
         &self,
         lease: &ZoneOwnerLease,
@@ -10855,6 +11016,22 @@ impl SharedInProcessZoneSessionRuntime {
         packets
     }
 
+    fn try_cancel_pending_zone_player_movement(&mut self) -> Result<Vec<ServerPacket>, String> {
+        let session_id = self
+            .current_zone_session_id()
+            .ok_or("typed attack lost its movement session")?;
+        let packets = self.try_dispatch_zone_player_command_observing_outbounds(
+            ZoneCommand::CancelPendingMovement { session_id },
+            None,
+        )?;
+        self.movement_ingress
+            .session_state
+            .lock()
+            .map_err(|_| "typed attack movement session mutex poisoned")?
+            .pending_zone_player_movement = false;
+        Ok(packets)
+    }
+
     fn refresh_replica_zone_binding(&mut self) -> Result<(), String> {
         let Some(identity) = self.inner.active_identity() else {
             return Ok(());
@@ -12488,12 +12665,43 @@ impl SharedInProcessZoneSessionRuntime {
         tick_after_command: bool,
         observe: Option<&mut dyn FnMut(&[ZoneOutbound])>,
     ) -> Vec<ServerPacket> {
-        let (mut packets, ground_drop_claims, monster_kill_awards, player_damages, player_heals) =
-            self.dispatch_zone_player_command_collecting_claims_observing_outbounds(
+        let (packets, ground_drop_claims, monster_kill_awards, player_damages, player_heals) = self
+            .dispatch_zone_player_command_collecting_claims_observing_outbounds(
                 command,
                 tick_after_command,
                 observe,
             );
+        self.finish_zone_player_command_dispatch(
+            packets,
+            ground_drop_claims,
+            monster_kill_awards,
+            player_damages,
+            player_heals,
+        )
+    }
+
+    fn try_dispatch_zone_player_command_observing_outbounds(
+        &mut self,
+        command: ZoneCommand,
+        observe: Option<&mut dyn FnMut(&[ZoneOutbound])>,
+    ) -> Result<Vec<ServerPacket>, String> {
+        let (packets, claims, awards, damages, heals) = self
+            .try_dispatch_zone_player_commands_collecting_claims_observing_outbounds(
+                vec![command],
+                observe,
+                true,
+            )?;
+        Ok(self.finish_zone_player_command_dispatch(packets, claims, awards, damages, heals))
+    }
+
+    fn finish_zone_player_command_dispatch(
+        &mut self,
+        mut packets: Vec<ServerPacket>,
+        ground_drop_claims: Vec<GroundDropClaimTicket>,
+        monster_kill_awards: Vec<ZoneMonsterKillAward>,
+        player_damages: Vec<QueuedZoneVitalDelta>,
+        player_heals: Vec<i32>,
+    ) -> Vec<ServerPacket> {
         self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
@@ -12567,7 +12775,7 @@ impl SharedInProcessZoneSessionRuntime {
     fn dispatch_zone_player_commands_collecting_claims_observing_outbounds(
         &mut self,
         commands: Vec<ZoneCommand>,
-        mut observe: Option<&mut dyn FnMut(&[ZoneOutbound])>,
+        observe: Option<&mut dyn FnMut(&[ZoneOutbound])>,
     ) -> (
         Vec<ServerPacket>,
         Vec<GroundDropClaimTicket>,
@@ -12575,8 +12783,36 @@ impl SharedInProcessZoneSessionRuntime {
         Vec<QueuedZoneVitalDelta>,
         Vec<i32>,
     ) {
+        self.try_dispatch_zone_player_commands_collecting_claims_observing_outbounds(
+            commands, observe, false,
+        )
+        .unwrap_or_else(|error| {
+            eprintln!("[shared-source-admission] {error}");
+            (Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new())
+        })
+    }
+
+    fn try_dispatch_zone_player_commands_collecting_claims_observing_outbounds(
+        &mut self,
+        commands: Vec<ZoneCommand>,
+        mut observe: Option<&mut dyn FnMut(&[ZoneOutbound])>,
+        strict: bool,
+    ) -> Result<
+        (
+            Vec<ServerPacket>,
+            Vec<GroundDropClaimTicket>,
+            Vec<ZoneMonsterKillAward>,
+            Vec<QueuedZoneVitalDelta>,
+            Vec<i32>,
+        ),
+        String,
+    > {
         let Some(key) = self.current_presence_key() else {
-            return (Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new());
+            return if strict {
+                Err("typed attack lost its shared Zone presence".into())
+            } else {
+                Ok((Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new()))
+            };
         };
         let mut issuer = |rebase: Option<
             &shared_experience_profiles::ExperienceAuthorityRebase<'_>,
@@ -12606,6 +12842,9 @@ impl SharedInProcessZoneSessionRuntime {
                     .any(|command| matches!(command, ZoneCommand::CancelPendingMovement { .. }));
                 for command in commands.iter().cloned() {
                     if zone_state.command_mutates_teardown_fence(&command) {
+                        if strict {
+                            return Err("typed attack owner is fenced for teardown".into());
+                        }
                         continue;
                     }
                     let creature_settlement = match &command {
@@ -12618,7 +12857,27 @@ impl SharedInProcessZoneSessionRuntime {
                             .map(|actor| (session_id.clone(), actor, ticket.object_id)),
                         _ => None,
                     };
-                    outbounds.extend(zone_state.zone_manager.handle(command));
+                    if strict {
+                        let session = match &command {
+                            ZoneCommand::SyncPlayerCombatState { session_id, .. }
+                            | ZoneCommand::UpdatePlayerCombatStats { session_id, .. }
+                            | ZoneCommand::PlayerAttackObject { session_id, .. }
+                            | ZoneCommand::PlayerAttackMaterializedObject { session_id, .. }
+                            | ZoneCommand::CancelPendingMovement { session_id } => session_id,
+                            _ => return Err("unsupported typed attack dispatch command".into()),
+                        };
+                        let partition = zone_state
+                            .zone_manager
+                            .partition_for_session(session)
+                            .ok_or("typed attack command has no authoritative partition")?;
+                        outbounds.extend(
+                            zone_state
+                                .zone_manager
+                                .handle_for_partition(partition, command)?,
+                        );
+                    } else {
+                        outbounds.extend(zone_state.zone_manager.handle(command));
+                    }
                     if let Some((session_id, actor, drop_id)) = creature_settlement {
                         zone_state.zone_manager.settle_intelligent_creature_pickup(
                             &session_id,
@@ -12670,22 +12929,16 @@ impl SharedInProcessZoneSessionRuntime {
             monster_kill_awards,
             player_damages,
             player_heals,
-        ) = match issued {
-            Ok(issued) => issued,
-            Err(error) => {
-                eprintln!("[shared-source-admission] {error}");
-                return (Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new());
-            }
-        };
+        ) = issued?;
         self.apply_zone_transform(transform);
         self.apply_zone_shout_consume(shout_consume);
-        (
+        Ok((
             packets,
             ground_drop_claims,
             monster_kill_awards,
             player_damages,
             player_heals,
-        )
+        ))
     }
 
     fn settle_pending_zone_vitals_before_save(&mut self) {
@@ -14613,12 +14866,29 @@ impl SharedInProcessZoneSessionRuntime {
 
     fn execute_zone_native_player_attack(
         &mut self,
-        mut attack: ZoneNativePlayerAttack,
+        attack: ZoneNativePlayerAttack,
     ) -> Vec<ServerPacket> {
+        self.execute_zone_native_player_attack_observing(attack, None)
+            .expect("legacy native attack dispatch retains its infallible packet contract")
+    }
+
+    fn execute_zone_native_player_attack_observing(
+        &mut self,
+        mut attack: ZoneNativePlayerAttack,
+        mut admission: Option<&mut Option<NativeAttackAdmission>>,
+    ) -> Result<Vec<ServerPacket>, String> {
         let is_player_target = attack.is_player_target;
         let Some(session_id) = self.current_zone_session_id() else {
-            return Vec::new();
+            return if admission.is_some() {
+                Err("typed attack lost its shared actor before dispatch".into())
+            } else {
+                Ok(Vec::new())
+            };
         };
+        if admission.is_some() && !matches!(&attack.kind, ZoneNativePlayerAttackKind::Melee { .. })
+        {
+            return Err("typed ordinary attack requires the melee dispatcher".into());
+        }
         let action_session = session_id.clone();
         // Native Magic bypasses the personal packet handler. Keep its trusted
         // finite-status admission before materialization, item spend or Zone
@@ -14629,7 +14899,10 @@ impl SharedInProcessZoneSessionRuntime {
                 ZoneNativePlayerAttackKind::Magic { cast: true, .. }
             ) && self.inner.zone_magic_cast_blocked_by_status()
         {
-            return self.authoritative_zone_owner_correction();
+            if let Some(admission) = admission.as_deref_mut() {
+                *admission = Some(NativeAttackAdmission::NotLaunched);
+            }
+            return Ok(self.authoritative_zone_owner_correction());
         }
         let now_ms = Self::zone_now_ms();
         let trusted_physical_monster_target = self
@@ -14655,16 +14928,32 @@ impl SharedInProcessZoneSessionRuntime {
         ) && !is_player_target
             && !trusted_physical_monster_target
         {
-            return self.authoritative_zone_owner_correction();
+            if let Some(admission) = admission.as_deref_mut() {
+                *admission = Some(NativeAttackAdmission::NotLaunched);
+            }
+            return Ok(self.authoritative_zone_owner_correction());
         }
         let mut packets = if matches!(
             &attack.kind,
             ZoneNativePlayerAttackKind::Melee { .. } | ZoneNativePlayerAttackKind::Range { .. }
         ) {
-            let Some(packets) = self.sync_authoritative_zone_combat_state(&session_id) else {
-                return self.authoritative_zone_owner_correction();
-            };
-            packets
+            if admission.is_some() {
+                let commands = self
+                    .authoritative_zone_combat_commands(&session_id)
+                    .ok_or("typed attack trusted combat state is unavailable")?;
+                let mut packets = Vec::new();
+                for command in commands {
+                    packets.extend(
+                        self.try_dispatch_zone_player_command_observing_outbounds(command, None)?,
+                    );
+                }
+                packets
+            } else {
+                let Some(packets) = self.sync_authoritative_zone_combat_state(&session_id) else {
+                    return Ok(self.authoritative_zone_owner_correction());
+                };
+                packets
+            }
         } else {
             Vec::new()
         };
@@ -14688,7 +14977,7 @@ impl SharedInProcessZoneSessionRuntime {
                     .shared_skill_item_consumption_components(*spell)
                     .is_none()
             {
-                return Vec::new();
+                return Ok(Vec::new());
             }
             if gateway_zone_magic_requires_item_consumption(*spell)
                 && self.zone_native_player_attack_requires_item_consumption(&session_id, &attack)
@@ -14697,14 +14986,14 @@ impl SharedInProcessZoneSessionRuntime {
                     .damage
                     .saturating_add(gateway_zone_magic_item_damage_bonus(*spell));
                 if !self.zone_native_player_attack_would_be_accepted(&session_id, &attack, now_ms) {
-                    return Vec::new();
+                    return Ok(Vec::new());
                 }
                 let Some(identity) = self.inner.active_identity() else {
-                    return Vec::new();
+                    return Ok(Vec::new());
                 };
                 let Some(components) = self.inner.shared_skill_item_consumption_components(*spell)
                 else {
-                    return Vec::new();
+                    return Ok(Vec::new());
                 };
                 let request_id = self.next_shared_economy_request_id();
                 let receipt =
@@ -14717,7 +15006,7 @@ impl SharedInProcessZoneSessionRuntime {
                         },
                     });
                 if !receipt.committed {
-                    return Vec::new();
+                    return Ok(Vec::new());
                 }
                 packets.extend(receipt.packets);
             }
@@ -14883,11 +15172,25 @@ impl SharedInProcessZoneSessionRuntime {
         };
         // Acceptance belongs to this authoritative command's original result.
         // Routing it into a full live channel must not revoke skill/item spend.
-        let mut dispatched = self.dispatch_zone_player_command_observing_outbounds(
-            command,
-            false,
-            Some(&mut observe),
-        );
+        let mut dispatched = if admission.is_some() {
+            if actor_id.is_none() || melee_spell_to_commit.is_none() {
+                return Err("typed attack lost its exact actor or spell before dispatch".into());
+            }
+            self.try_dispatch_zone_player_command_observing_outbounds(command, Some(&mut observe))?
+        } else {
+            self.dispatch_zone_player_command_observing_outbounds(
+                command,
+                false,
+                Some(&mut observe),
+            )
+        };
+        if let Some(admission) = admission.as_deref_mut() {
+            *admission = Some(if melee_accepted {
+                NativeAttackAdmission::Launched
+            } else {
+                NativeAttackAdmission::NotLaunched
+            });
+        }
         if focus_accepted {
             dispatched.extend(self.inner.commit_zone_focus_attack());
         }
@@ -14963,7 +15266,7 @@ impl SharedInProcessZoneSessionRuntime {
         } else {
             packets.extend(dispatched);
         }
-        packets
+        Ok(packets)
     }
 
     fn zone_native_player_attack_would_be_accepted(
@@ -16885,11 +17188,36 @@ pub(crate) fn runtime_has_pending_shared_personal_work(runtime: &dyn WorldRuntim
         })
 }
 
+fn finish_native_attack_execution(
+    execution: Result<WorldCommandExecution, String>,
+    admission: Option<NativeAttackAdmission>,
+) -> Result<NativeAttackExecution, NativeAttackError> {
+    let execution = execution.map_err(NativeAttackError::Unknown)?;
+    let admission = admission.ok_or_else(|| {
+        NativeAttackError::Unknown(
+            "typed attack completed without an authoritative launch decision".into(),
+        )
+    })?;
+    Ok(NativeAttackExecution {
+        execution,
+        admission,
+    })
+}
+
 impl SharedInProcessZoneSessionRuntime {
     fn execute_shared_pipeline(
         &mut self,
         command: WorldCommand,
+        npc_gold_buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
+    ) -> Result<Vec<ServerPacket>, String> {
+        self.execute_shared_pipeline_observing_attack(command, npc_gold_buy_outcome, None)
+    }
+
+    fn execute_shared_pipeline_observing_attack(
+        &mut self,
+        command: WorldCommand,
         mut npc_gold_buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
+        mut native_attack_admission: Option<&mut Option<NativeAttackAdmission>>,
     ) -> Result<Vec<ServerPacket>, String> {
         if !matches!(
             &command,
@@ -17400,7 +17728,11 @@ impl SharedInProcessZoneSessionRuntime {
         let mut command_packets = if blocks_durable_trade_mutation {
             trade_item_failure.clone().into_iter().collect()
         } else if unavailable_shared_target {
-            if self.has_bound_zone_player() {
+            if let Some(admission) = native_attack_admission.as_deref_mut() {
+                let packets = self.try_cancel_pending_zone_player_movement()?;
+                *admission = Some(NativeAttackAdmission::NotLaunched);
+                packets
+            } else if self.has_bound_zone_player() {
                 // The native sender may have discarded an unsent movement
                 // step at this attack boundary. Rejecting a vanished target
                 // still cancels earlier Zone movement and acknowledges the
@@ -17510,7 +17842,14 @@ impl SharedInProcessZoneSessionRuntime {
         } else if shared_harvest_direction.is_some() {
             self.execute_personal_command(command)?
         } else if let Some(attack) = zone_native_player_attack {
-            self.execute_zone_native_player_attack(attack)
+            if native_attack_admission.is_some() {
+                self.execute_zone_native_player_attack_observing(
+                    attack,
+                    native_attack_admission.as_deref_mut(),
+                )?
+            } else {
+                self.execute_zone_native_player_attack(attack)
+            }
         } else if let Some(direction) = zone_mining_direction {
             self.execute_zone_native_mining(direction)
         } else if matches!(
@@ -17978,6 +18317,48 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             },
             game_shop_purchase_outcome: self.last_game_shop_purchase_outcome.take(),
         })
+    }
+
+    fn execute_production_attack_requiring_typed_outcome(
+        &mut self,
+        authenticated: bool,
+        object_id: u32,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        if !authenticated {
+            return Err(NativeAttackError::BeforeExecution(
+                "typed attack requires authentication".into(),
+            ));
+        }
+        let command = WorldCommand::Attack { object_id };
+        mir2_simulation::validate_production_player_command(authenticated, &command)
+            .map_err(NativeAttackError::BeforeExecution)?;
+        // These two opt-in seams share the exact account/character, registered
+        // session, map, actor-id and teardown-fence invariants. No NPC command
+        // or private fallback is executed by this validation.
+        self.validate_durable_npc_actor()
+            .map_err(NativeAttackError::BeforeExecution)?;
+        if object_id == 0 {
+            return Err(NativeAttackError::BeforeExecution(
+                "typed ordinary attack requires a nonzero target".into(),
+            ));
+        }
+        let mut admission = None;
+        let execution =
+            crate::session::catch_gateway_panic("typed ordinary attack pipeline", || {
+                self.execute_shared_pipeline_observing_attack(command, None, Some(&mut admission))
+            })
+            .and_then(|result| result)
+            .map(|packets| WorldCommandExecution {
+                outcome: WorldCommandOutcome {
+                    command_kind: mir2_simulation::WorldCommandKind::Attack,
+                    packet_count: packets.len(),
+                    snapshot_tick: self.current_tick(),
+                    active_identity: self.active_identity(),
+                },
+                packets,
+                game_shop_purchase_outcome: None,
+            });
+        finish_native_attack_execution(execution, admission)
     }
 
     fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
@@ -18823,6 +19204,8 @@ mod tests {
     mod mining_tests;
     #[path = "movement_deadline_tests.rs"]
     mod movement_deadline_tests;
+    #[path = "native_attack_outcome_tests.rs"]
+    mod native_attack_outcome_tests;
     #[path = "native_target_lifecycle_transport_tests.rs"]
     mod native_target_lifecycle_transport_tests;
     #[path = "ordered_economy_replay_tests.rs"]
@@ -29812,8 +30195,29 @@ mod tests {
             &[("WoodenBow", mir2_simulation::EquipmentSlot::Weapon, 1)],
         );
         start_new_runtime(&mut second, "second-range", "Blade");
-        let target = first
+        // A learned Source Focus proc makes the three-tile arrow chance
+        // 2 * (100 - 11 * 3) = 134%, so this routing fixture requires a hit
+        // without depending on a wall-clock accuracy roll. Level 50 retains
+        // real class/weapon statistics against the ordinary starter target.
+        let mut save = first.inner.active_character_checkpoint().unwrap();
+        save.character.level = 50;
+        save.skill_states_json = vec![serde_json::json!({
+            "key": "focus", "name": "Focus", "description": "", "level": 3,
+            "experience": 0, "cooldown_ticks": 0, "cooldown_ends_at": 0
+        })
+        .to_string()];
+        first
             .inner
+            .restore_active_character_checkpoint(&save)
+            .unwrap();
+        for _ in 0..128 {
+            if first.inner.zone_range_attack_profile().0 == Spell::Focus {
+                break;
+            }
+            first.inner.execute(WorldCommand::Tick).unwrap();
+        }
+        assert_eq!(first.inner.zone_range_attack_profile().0, Spell::Focus);
+        let target = first
             .world_snapshot()
             .entities
             .into_iter()
@@ -29823,19 +30227,75 @@ mod tests {
                     && entity.hp.is_some_and(|hp| hp > 1)
             })
             .expect("starter scene should expose a live monster");
-        let attacker_position = Point {
-            x: target.x.saturating_sub(3),
-            y: target.y,
-        };
+        // Fixture placement must enter the actual shared Zone. Select one
+        // legal three-tile origin around the fixed target; private transforms
+        // cannot override collision corrections or the shared authority.
+        let session = first.current_zone_session_id().unwrap();
+        let mut rejected_origins = Vec::new();
+        let (attacker_position, direction) = [
+            (MirDirection::Right, 1, 0),
+            (MirDirection::Down, 0, 1),
+            (MirDirection::Left, -1, 0),
+            (MirDirection::Up, 0, -1),
+            (MirDirection::DownRight, 1, 1),
+            (MirDirection::DownLeft, -1, 1),
+            (MirDirection::UpLeft, -1, -1),
+            (MirDirection::UpRight, 1, -1),
+        ]
+        .into_iter()
+        .find_map(|(direction, dx, dy)| {
+            let requested = Point {
+                x: target.x - dx * 3,
+                y: target.y - dy * 3,
+            };
+            first.dispatch_zone_player_command(
+                ZoneCommand::SyncPlayerTransform {
+                    session_id: session.clone(),
+                    position: requested.clone(),
+                    direction,
+                },
+                false,
+            );
+            let actual = zone_state
+                .lock()
+                .unwrap()
+                .zone_manager
+                .player_transform(&session)
+                .unwrap()
+                .0;
+            if actual != requested {
+                rejected_origins.push((requested, actual));
+                return None;
+            }
+            assert_eq!(
+                (target.x - actual.x).abs().max((target.y - actual.y).abs()),
+                3
+            );
+            Some((actual, direction))
+        })
+        .unwrap_or_else(|| panic!("no legal three-tile range origin: {rejected_origins:?}"));
         first
             .inner
-            .force_authoritative_player_transform(attacker_position.clone(), MirDirection::Right);
+            .force_authoritative_player_transform(attacker_position.clone(), direction);
         first.sync_zone_snapshot();
         second.sync_zone_snapshot();
+        let key = first.current_presence_key().unwrap();
+        let before = {
+            let state = zone_state.lock().unwrap();
+            (
+                state.zone_manager.player_transform(&session),
+                state
+                    .zone_manager
+                    .native_monster_snapshots(&ZoneKey::for_map("0"))
+                    .into_iter()
+                    .find(|monster| monster.object_id == target.object_id),
+            )
+        };
+        let stats = first.inner.zone_player_combat_stats();
 
         let launch_packets = first
             .execute(WorldCommand::ClientPacket(ClientPacket::RangeAttack {
-                direction: MirDirection::Right,
+                direction,
                 location: attacker_position,
                 target_id: target.object_id,
                 target_location: Point {
@@ -29844,10 +30304,11 @@ mod tests {
                 },
             }))
             .expect("range attack should execute");
+        let launched_at_upper_bound = shared_gateway_now_ms();
 
         assert!(launch_packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::RangeAttack { target_id, .. } if *target_id == target.object_id
+            ServerPacket::RangeAttack { target_id, spell: Spell::Focus, .. } if *target_id == target.object_id
         )));
         assert!(launch_packets.iter().any(|packet| matches!(
             packet,
@@ -29857,18 +30318,36 @@ mod tests {
             .iter()
             .any(|packet| matches!(packet, ServerPacket::ObjectHealth { .. })));
 
-        super::run_shared_zone_cadence_tick(&zone_state, shared_gateway_now_ms())
-            .expect("Zone cadence should resolve the range attack");
+        // Three-tile arrows settle 550 + 3 * 50 = 700ms after launch.
+        // Sampling after launch then advancing the existing logical cadence
+        // by that delay reaches the real due time without a wall-clock sleep.
+        super::run_shared_zone_cadence_tick(
+            &zone_state,
+            launched_at_upper_bound.saturating_add(700),
+        )
+        .expect("Zone cadence should resolve the range attack");
+        let after = {
+            let state = zone_state.lock().unwrap();
+            (
+                state
+                    .zone_manager
+                    .native_monster_snapshots(&ZoneKey::for_map("0"))
+                    .into_iter()
+                    .find(|monster| monster.object_id == target.object_id),
+                state.pending_zone_packets.get(&key).cloned(),
+            )
+        };
         let owner_tick_packets = first
             .execute(WorldCommand::Tick)
             .expect("owner personal tick should drain Zone results");
+        let observer_packets = second
+            .execute(WorldCommand::Tick)
+            .expect("observer tick should execute");
+        eprintln!("range fixture target={target:?} stats={stats:?} launch_upper={launched_at_upper_bound} impact_tick={} before={before:?} after={after:?} launch={launch_packets:?} owner={owner_tick_packets:?} observer={observer_packets:?}", launched_at_upper_bound.saturating_add(700));
         assert!(owner_tick_packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ObjectStruck { info } if info.object_id == target.object_id
         )));
-        let observer_packets = second
-            .execute(WorldCommand::Tick)
-            .expect("observer tick should execute");
         assert!(observer_packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::ObjectRangeAttack { info } if info.target_id == target.object_id
