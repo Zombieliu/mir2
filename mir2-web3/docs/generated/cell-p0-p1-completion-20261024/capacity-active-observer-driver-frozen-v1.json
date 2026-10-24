@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-24T17:52:49.686Z",
+  "scope": "Only actual active declared movement-observer coverage, preserved finite pursuit/scout restore budgets and bounded per-pending observed packet diagnostics. No outcome reclassification, backend/core/gameplay/threshold/cadence change. No new capacity probe started.",
+  "repositoryBaselineCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "writerFiles": [
+    "apps/web/scripts/playtest-capacity-soak.mjs",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "focused": {
+    "passed": 26,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 267.7689,
+    "log": {
+      "file": "C:/mir2-build/p01-completion-20261024/driver-active-observer-focused-v5.log",
+      "bytes": 7684,
+      "sha256": "81ac97d65078f0ec53239a7d836f8243ccfbf4eb1a5358abbf61d7948afec60b"
+    }
+  },
+  "adjacentComplete": {
+    "passed": 117,
+    "failed": 0,
+    "skipped": 0,
+    "durationMs": 262302.0578,
+    "log": {
+      "file": "C:/mir2-build/p01-completion-20261024/driver-active-observer-capacity-regression-v2.log",
+      "bytes": 32486,
+      "sha256": "ed92ad40d247693377146524048fbcc4f330631163c4c6c6a03aaad6340189ba"
+    }
+  },
+  "previousFrozenManifest": {
+    "file": "C:/mir2-build/p01-completion-20261024/capacity-probe10-source-frozen.json",
+    "bytes": 2516,
+    "sha256": "2635ee67e0bcfb82b829a538b864691e10dc5249ef6080d9a175cf0454e9852e"
+  },
+  "sourceSha256": "6c7c3f004b14f3643e38e95880fa0fe904ff55d73f45f7afc2d68270f3cc3aea",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 36588,
+      "sha256": "1e067f87fd9cbb2a2c370823ccca1d3c6046b23e45e7c5e6108d5d883f347bcc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 116977,
+      "sha256": "09b2c5e56d8d0d0a2f58861f762b617583178a65ee068b41d6e063aa621b6d70"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 155138,
+      "sha256": "e098a1995d82dfb93c8e5de3b4485c79c615340ac4012f50767cb5812e39f858"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "capacityAccepted": false,
+  "newProbeStarted": false,
+  "diffCheckPassed": true,
+  "allOwnedRealmsStopped": true,
+  "limitations": [
+    "The packet trace contains only protocol-observed fields; no server entity incarnation is present or inferred. A same-coordinate UserLocation is diagnostic and never substitutes for an explicit rejection receipt.",
+    "An explicit cluster with zero active observers has empty coverage. Active views keep the original declared home/index binding, independent of fighter distance and current observer position.",
+    "Actual900ms no-swing/no-damage timeout remains timeout, permanent quarantine and original1/55 timeout ratio failure remain asserted in real WebSocket fixture."
+  ]
+}

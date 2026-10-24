@@ -35,12 +35,71 @@ const COMBAT_CHASE_DEFERRAL_LIMIT = 16;
 const COMBAT_CHASE_DEFERRAL_MS = 30000;
 const COMBAT_CHASE_MAX_MOVES = 40;
 const COMBAT_CHASE_MAX_MS = 30000;
+export const PENDING_ATTACK_PACKET_LIMIT = 64;
+const ATTACK_TRACE_PACKETS = new Set(['ObjectAttack', 'ObjectWalk', 'ObjectRun', 'ObjectTurn', 'ObjectStruck',
+  'DamageIndicator', 'ObjectHealth', 'ObjectDied', 'ObjectRevive', 'ObjectRemove', 'ObjectTeleportOut']);
 
 // Deliberately select public identity/position fields. Never copy a packet or
 // snapshot wholesale into the persistent diagnostic stream.
 function lifecyclePoint(value) {
   if (!value || !Number.isFinite(value.x) || !Number.isFinite(value.y)) return null;
   return { x: value.x, y: value.y };
+}
+
+function attackTraceLife(entity) {
+  if (!entity) return null;
+  return { ...(Number.isInteger(entity.objectId) ? { objectId: entity.objectId } : {}),
+    ...(lifecyclePoint(entity) ?? {}),
+    ...(typeof entity.dead === 'boolean' ? { dead: entity.dead } : {}),
+    ...Object.fromEntries(['hp', 'maxHp'].filter(key => Number.isFinite(entity[key])).map(key => [key, entity[key]])) };
+}
+
+export function beginPendingAttackEvidence(client, observer, owner, target, sentAtMs, cursor, observerCursor) {
+  if (client.pendingAttackEvidence) throw new Error('Only one pending attack evidence window per actor');
+  const trace = { actor: client.label, phase: client.context.phase, connection: client.lifecycleConnection,
+    sentAtMs, sentAtWallMs: Date.now(), sendCursor: cursor, owner: attackTraceLife(owner), target: attackTraceLife(target),
+    receivers: [{ client, cursor, role: 'owner', attackerId: owner.objectId }], packets: [], packetCount: 0, active: true };
+  if (observer && observer !== client) trace.receivers.push({ client: observer, cursor: observerCursor,
+    role: 'observer', attackerId: observedPlayerId(observer, client.label) });
+  for (const receiver of trace.receivers) (receiver.client.pendingAttackPacketTraces ??= new Set()).add(trace);
+  client.pendingAttackEvidence = trace;
+  return trace;
+}
+
+// These receipts are diagnostic only: neither a same-coordinate UserLocation
+// nor target movement proves that this particular attack was rejected.
+export function recordPendingAttackPacket(client, event) {
+  if (event.direction !== 'received' || event.type !== 'packet') return;
+  for (const trace of client.pendingAttackPacketTraces ?? []) {
+    const receiver = trace.receivers.find(entry => entry.client === client), payload = event.payload ?? {};
+    if (!trace.active || !receiver || event.sequence <= receiver.cursor || event.monotonicMs < trace.sentAtMs) continue;
+    const ownerLocation = receiver.role === 'owner' && event.packet === 'UserLocation';
+    if (!ownerLocation && (!ATTACK_TRACE_PACKETS.has(event.packet) ||
+        ![receiver.attackerId, trace.target?.objectId].filter(Number.isInteger).includes(payload.objectId))) continue;
+    trace.packetCount++;
+    if (trace.packets.length >= PENDING_ATTACK_PACKET_LIMIT) continue;
+    const projected = { ...Object.fromEntries(['objectId', 'attackerId', 'damage', 'percent', 'hp', 'maxHp']
+      .filter(key => Number.isFinite(payload[key])).map(key => [key, payload[key]])),
+      ...(lifecyclePoint(payload) ?? {}), ...(lifecyclePoint(payload.location) ? { location: lifecyclePoint(payload.location) } : {}),
+      ...(typeof payload.dead === 'boolean' ? { dead: payload.dead } : {}),
+      ...(STEPS.some(([, , direction]) => direction === payload.direction) ? { direction: payload.direction } : {}) };
+    trace.packets.push({ receiver: receiver.role, sequence: event.sequence, monotonicMs: event.monotonicMs,
+      atMs: Date.now(), packet: event.packet, payload: projected });
+  }
+}
+
+export function finishPendingAttackEvidence(client, context, outcome) {
+  const trace = client.pendingAttackEvidence;
+  if (!trace) return;
+  trace.active = false;
+  for (const receiver of trace.receivers) receiver.client.pendingAttackPacketTraces.delete(trace);
+  client.pendingAttackEvidence = null;
+  const endAtMs = performance.now(), endedAtWallMs = Date.now();
+  context.writer?.add({ type: 'pendingAttackEvidence', actor: trace.actor, phase: trace.phase, connection: trace.connection,
+    at: endedAtWallMs, sentAtMs: trace.sentAtMs, sentAtWallMs: trace.sentAtWallMs, sendCursor: trace.sendCursor,
+    endedAtMs: endAtMs, endedAtWallMs, owner: trace.owner, target: trace.target, outcome,
+    maximumPackets: PENDING_ATTACK_PACKET_LIMIT, packetCount: trace.packetCount, truncated: trace.packetCount > trace.packets.length,
+    packets: trace.packets, rule: 'Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting.' });
 }
 function lifecyclePlayer(entity, names) {
   if (!entity || !names.has(entity.name) || !Number.isInteger(entity.objectId)) return null;
@@ -123,6 +182,7 @@ export class CapacityClient extends NativeResumeClient {
     this.navigationBlocked = false; this.navigationBlockedRows = 0;
     this.rejectedWalkCells = new Map(); this.movementCorrectionStreak = false; this.movementCorrectionRows = 0;
     this.selfTransformRows = 0;
+    this.pendingAttackPacketTraces = new Set(); this.pendingAttackEvidence = null;
   }
   record(direction, value) {
     // Never retain worldSnapshot arrays in event history, nor an ever-growing
@@ -134,6 +194,7 @@ export class CapacityClient extends NativeResumeClient {
     if (event.type === 'worldSnapshot') event.payload = { mapFileName: this.snapshot?.mapFileName,
       playerObjectId: this.snapshot?.playerObjectId, entities: self(this) ? [{ ...self(this) }] : [] };
     this.events.push(event); if (this.events.length > 2048) this.events.splice(0, 256);
+    recordPendingAttackPacket(this, event);
     if (event.type === 'error') this.context.writer.add({ type: 'serverError', actor: this.label, event });
     return event;
   }
@@ -372,7 +433,8 @@ export function validateNativeCombatClusters(definitions, homes, combatIndices, 
       used.add(index); if (combat) fighters.add(index);
     }
     const cluster = { combatActorIndices: [...combatActorIndices], movementActorIndices: [...movementActorIndices], patrolSpan,
-      observerHomes: movementActorIndices.map(index => homes[index]), observerNames: new Set() };
+      observerHomes: movementActorIndices.map(index => homes[index]), observerNames: new Set(),
+      observerBindings: movementActorIndices.map((actorIndex, homeIndex) => ({ actorIndex, homeIndex, home: homes[actorIndex] })) };
     if (combatActorIndices.some(index => !insideCombatCoverage(cluster, homes[index]))) throw new Error('Combat home lacks declared observer coverage');
     return cluster;
   });
@@ -383,6 +445,25 @@ export function validateNativeCombatClusters(definitions, homes, combatIndices, 
 export function insideCombatCoverage(cluster, point) {
   return !cluster || cluster.observerHomes.some(home => Math.max(Math.abs(point.x - home.x), Math.abs(point.x - home.x - cluster.patrolSpan),
     Math.abs(point.y - home.y), Math.abs(point.y - home.y - cluster.patrolSpan)) <= 14);
+}
+
+// Declared homes are immutable geometry. Only an actually active, living
+// movement observer can make its own declared home available to this cohort.
+// In particular, an explicit cluster with no active observer is closed, not
+// the unrestricted null-cluster case. No range-to-fighter filter belongs here.
+export function activeCombatCoverage(client, context) {
+  const cluster = client.combatCluster;
+  if (!cluster) return null;
+  const entries = (cluster.observerBindings ?? []).flatMap(binding => {
+    if (typeof binding.name !== 'string' || typeof client.snapshot.mapFileName !== 'string') return [];
+    const observer = context.clients.find(other => other !== client && other.label === binding.name &&
+      cluster.observerNames.has(other.label) && other.role === 'movement' && other.ready === true && other.inGame === true &&
+      !other.closed && !other.paused && !other.draining && other.snapshot?.mapFileName === client.snapshot.mapFileName);
+    const presence = observer && self(observer);
+    return presence && lifecyclePoint(presence) && !hasAuthoritativePlayerDeath(observer.snapshot)
+      ? [{ ...binding, observer }] : [];
+  });
+  return { patrolSpan: cluster.patrolSpan, observerHomes: entries.map(entry => entry.home), entries };
 }
 
 export function spacingFourScenario(map, origin, center, count, mapFileName, transfers = [], stationaryObstacles = []) {
@@ -495,7 +576,7 @@ function movement(client, target, map, routeAllowed) {
   }
   return { command: { type: 'walk', direction }, target: first, first, navigation };
 }
-function patrol(client, context, home = client.home) {
+function patrol(client, context, home = client.home, routeAllowed) {
   const owner = self(client), map = context.map;
   // A live obstacle can push a native actor outside its 3x3 patrol. Returning
   // only to home then traps it if that one corner is occupied; try the same
@@ -520,7 +601,8 @@ function patrol(client, context, home = client.home) {
       if (length < 2 || (deltaX && deltaY && Math.abs(deltaX) !== Math.abs(deltaY))) continue;
       const x = Math.sign(deltaX), y = Math.sign(deltaY), target = { x: owner.x + 2 * x, y: owner.y + 2 * y };
       const first = { x: owner.x + x, y: owner.y + y };
-      if (!clear(first) || !clear(target) || doorway(first) || doorway(target)) continue;
+      if (!clear(first) || !clear(target) || doorway(first) || doorway(target) ||
+          (routeAllowed && (!routeAllowed(owner) || !routeAllowed(first) || !routeAllowed(target)))) continue;
       if (x && y && [{ x: owner.x + x, y: owner.y }, { x: owner.x, y: owner.y + y },
         { x: first.x + x, y: first.y }, { x: first.x, y: first.y + y }].some(point => !clear(point))) continue;
       client.targetCursor = index;
@@ -534,7 +616,7 @@ function patrol(client, context, home = client.home) {
     const index = ((context.policy?.activityMode === 'native' ? initialCursor : client.targetCursor) + offset) % points.length, [dx, dy] = points[index];
     const target = { x: home.x + dx, y: home.y + dy };
     if (distance(owner, target) === 0) { client.targetCursor = (index + 1) % points.length; continue; }
-    const plan = movement(client, target, map);
+    const plan = movement(client, target, map, routeAllowed);
     if (plan) { client.targetCursor = index; return plan; }
   }
   return null;
@@ -572,22 +654,30 @@ function nearbyObservers(client, context, margin = 16) {
     other.snapshot?.mapFileName === client.snapshot.mapFileName && self(other) && distance(self(other), self(client)) <= margin);
 }
 function combatObservers(client, context) {
-  return nearbyObservers(client, context).filter(other => !client.combatCluster || client.combatCluster.observerNames.has(other.label));
+  const coverage = activeCombatCoverage(client, context);
+  return nearbyObservers(client, context).filter(other => !coverage || coverage.entries.some(entry => entry.observer === other));
 }
 function ordinaryCombatMonster(entity, context) {
   return entity?.kind === 'monster' && !entity.dead && Number(entity.hp ?? 1) > 0 &&
     String(entity.disposition ?? '').trim().toLowerCase() !== 'friendly' && !String(entity.ownerName ?? '').trim() &&
     WEAK_MONSTERS.includes(entity.name) && context.monsterNames.includes(entity.name);
 }
-export function combatCandidates(client, context, now = Date.now()) {
-  const owner = self(client);
-  const observed = client.combatCluster ? new Set(combatObservers(client, context).flatMap(other => other.snapshot.entities.map(entity => entity.objectId))) : null;
-  return client.snapshot.entities.filter(entity => ordinaryCombatMonster(entity, context) && distance(entity, owner) <= 16 &&
-    insideCombatCoverage(client.combatCluster, entity) &&
+function availableCombatTarget(client, context, entity, now) {
+  return ordinaryCombatMonster(entity, context) && distance(entity, self(client)) <= 16 &&
     (client.failedTargets.get(entity.objectId)?.until ?? 0) <= now &&
     (context.policy?.activityMode !== 'native' || client.chaseDeferrals?.get(entity.objectId)?.mapFileName !== String(client.snapshot.mapFileName) ||
       client.chaseDeferrals.get(entity.objectId).until <= now) &&
-    (!context.targetClaims.has(entity.objectId) || context.targetClaims.get(entity.objectId) === client.label))
+    (!context.targetClaims.has(entity.objectId) || context.targetClaims.get(entity.objectId) === client.label);
+}
+function livePursuitTarget(client, context, pursuit = client.combatPursuit, now = Date.now()) {
+  return pursuit?.mapFileName === String(client.snapshot.mapFileName) ? client.snapshot.entities.find(entity =>
+    entity.objectId === pursuit.objectId && entity.name === pursuit.name && availableCombatTarget(client, context, entity, now)) : null;
+}
+export function combatCandidates(client, context, now = Date.now()) {
+  const owner = self(client);
+  const coverage = activeCombatCoverage(client, context);
+  const observed = client.combatCluster ? new Set(combatObservers(client, context).flatMap(other => other.snapshot.entities.map(entity => entity.objectId))) : null;
+  return client.snapshot.entities.filter(entity => availableCombatTarget(client, context, entity, now) && insideCombatCoverage(coverage, entity))
     .sort((a, b) => (observed ? Number(observed.has(b.objectId)) - Number(observed.has(a.objectId)) : 0) || distance(a, owner) - distance(b, owner));
 }
 
@@ -611,7 +701,7 @@ export function recordCombatPursuitMovement(client, context, plan, origin, recei
       pursuit.mapFileName !== String(client.snapshot.mapFileName) || receipt.packet !== 'UserLocation' ||
       receipt.sequence <= pursuit.lastReceiptSequence || !lifecyclePoint(actual) || distance(origin, actual) === 0 ||
       !(distance(actual, plan.target) === 0 || (kind === 'run' && distance(actual, plan.first) === 0))) return;
-  const target = combatCandidates(client, context, now).find(entity => entity.objectId === pursuit.objectId);
+  const target = livePursuitTarget(client, context, pursuit, now);
   if (!target) { client.combatPursuit = null; return; }
   pursuit.lastReceiptSequence = receipt.sequence;
   pursuit.confirmedMoves++;
@@ -663,25 +753,33 @@ export function restoreCombatPursuit(original, restored, context, now = Date.now
   restored.chaseDeferrals = new Map([...(original.chaseDeferrals ?? [])].filter(([, entry]) =>
     entry.until > now && entry.mapFileName === String(restored.snapshot.mapFileName)).slice(-COMBAT_CHASE_DEFERRAL_LIMIT));
   const pursuit = original.combatPursuit;
-  const target = pursuit && pursuit.mapFileName === String(restored.snapshot.mapFileName)
-    ? combatCandidates(restored, context, now).find(entity => entity.objectId === pursuit.objectId && entity.name === pursuit.name) : null;
+  const target = livePursuitTarget(restored, context, pursuit, now);
   // Resume retains the choice and attack-written state, but offline time and a
   // previous socket's receipt sequence cannot count as new chase evidence.
-  const pausedAt = Math.min(now, Math.max(original.combatPursuitPausedAt ?? now, pursuit?.lastMovementAt ?? 0));
+  const pausedAt = Math.min(now, Math.max(original.combatPursuitPausedAt ?? now, pursuit?.lastMovementAt ?? 0,
+    original.combatScout?.lastMovementAt ?? 0));
   restored.combatPursuit = target ? { ...pursuit, bestDistance: distance(self(restored), target),
     lastProgressAt: now, nonImprovingMoves: 0, lastReceiptSequence: restored.sequence,
     activeElapsedMs: pursuit.activeElapsedMs + Math.max(0, pausedAt - pursuit.startedAt),
     startedAt: now, lastMovementAt: now, targetPoint: lifecyclePoint(target), routeProgress: null,
     visited: new Map(pursuit.visited) } : null;
+  const scout = original.combatScout;
+  restored.combatScoutCursor = original.combatScoutCursor;
+  restored.combatScout = scout?.mapFileName === String(restored.snapshot.mapFileName) ? { ...scout,
+    activeElapsedMs: (scout.activeElapsedMs ?? 0) + Math.max(0, pausedAt - scout.startedAt),
+    startedAt: now, lastMovementAt: now, lastReceiptSequence: restored.sequence, visited: new Map(scout.visited) } : null;
 }
 
-function returnToCombatCoverage(client, context) {
+function returnToCombatCoverage(client, context, coverage = activeCombatCoverage(client, context)) {
   const owner = self(client), cluster = client.combatCluster;
   if (!cluster) return patrol(client, context);
-  const recovering = !insideCombatCoverage(cluster, owner);
-  for (const home of [client.home, ...cluster.observerHomes].sort((a, b) => distance(a, owner) - distance(b, owner))) {
-    const plan = patrol(client, context, home);
-    if (plan && (recovering || (insideCombatCoverage(cluster, plan.first) && insideCombatCoverage(cluster, plan.target)))) return plan;
+  if (!coverage.entries.length) return null;
+  const recovering = !insideCombatCoverage(coverage, owner);
+  const homes = [client.home, ...coverage.observerHomes].filter(home => insideCombatCoverage(coverage, home));
+  const allowed = point => insideCombatCoverage(coverage, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
+  for (const home of homes.sort((a, b) => distance(a, owner) - distance(b, owner))) {
+    const plan = patrol(client, context, home, recovering ? undefined : allowed);
+    if (plan && (recovering || (insideCombatCoverage(coverage, plan.first) && insideCombatCoverage(coverage, plan.target)))) return plan;
   }
   return null;
 }
@@ -691,7 +789,8 @@ function advanceCombatScout(client, context, reason, now) {
   if (!scout) return;
   client.combatScoutCursor = (scout.homeIndex + 1) % client.combatCluster.observerHomes.length;
   context.writer?.add({ type: 'combatScoutAdvanced', actor: client.label, phase: context.phase, at: now,
-    reason, homeIndex: scout.homeIndex, confirmedMoves: scout.confirmedMoves, elapsedMs: now - scout.startedAt });
+    reason, homeIndex: scout.homeIndex, confirmedMoves: scout.confirmedMoves,
+    elapsedMs: (scout.activeElapsedMs ?? 0) + now - scout.startedAt });
   client.combatScout = null;
 }
 
@@ -701,24 +800,31 @@ export function recordCombatScoutMovement(client, context, plan, origin, receipt
       scout.mapFileName !== String(client.snapshot.mapFileName) || status !== 'success' || !['walk', 'run'].includes(kind) ||
       receipt?.packet !== 'UserLocation' || receipt.sequence <= scout.lastReceiptSequence || !lifecyclePoint(actual) ||
       distance(origin, actual) === 0 || !(distance(actual, plan.target) === 0 || (kind === 'run' && distance(actual, plan.first) === 0))) return;
-  scout.lastReceiptSequence = receipt.sequence; scout.confirmedMoves++;
+  scout.lastReceiptSequence = receipt.sequence; scout.confirmedMoves++; scout.lastMovementAt = now;
   const key = `${actual.x},${actual.y}`, visits = (scout.visited.get(key) ?? 0) + 1; scout.visited.set(key, visits);
-  const reason = visits >= 3 ? 'route-loop' : scout.confirmedMoves >= 24 ? 'movement-budget' : now - scout.startedAt >= 20000 ? 'time-budget' :
+  const reason = visits >= 3 ? 'route-loop' : scout.confirmedMoves >= 24 ? 'movement-budget' :
+    (scout.activeElapsedMs ?? 0) + now - scout.startedAt >= 20000 ? 'time-budget' :
     distance(actual, scout.goal) === 0 ? 'waypoint-reached' : null;
   if (reason) advanceCombatScout(client, context, reason, now);
 }
 
-function scoutCombatCoverage(client, context, now = Date.now()) {
+function scoutCombatCoverage(client, context, now = Date.now(), coverage = activeCombatCoverage(client, context)) {
   const cluster = client.combatCluster, owner = self(client);
-  if (!cluster?.observerHomes?.length || client.pending || !insideCombatCoverage(cluster, owner)) return null;
+  if (!cluster?.observerHomes?.length || !coverage.entries.length || client.pending || !insideCombatCoverage(coverage, owner)) return null;
   if (client.combatScout?.mapFileName !== String(client.snapshot.mapFileName)) client.combatScout = null;
-  if (client.combatScout && now - client.combatScout.startedAt >= 20000) advanceCombatScout(client, context, 'time-budget', now);
+  if (client.combatScout && (client.combatScout.activeElapsedMs ?? 0) + now - client.combatScout.startedAt >= 20000) advanceCombatScout(client, context, 'time-budget', now);
   const occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead).concat(rejectedWalkObstacles(client));
-  const allowed = point => insideCombatCoverage(cluster, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
+  const allowed = point => insideCombatCoverage(coverage, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
   const initialCursor = client.combatScout?.homeIndex ?? client.combatScoutCursor ?? 0;
   let searches = 0;
-  searchHomes: for (let offset = 0; offset < Math.min(4, cluster.observerHomes.length); offset++) {
-    const homeIndex = (initialCursor + offset) % cluster.observerHomes.length, home = cluster.observerHomes[homeIndex];
+  searchHomes: for (let offset = 0; offset < cluster.observerHomes.length; offset++) {
+    const homeIndex = (initialCursor + offset) % cluster.observerHomes.length;
+    const binding = coverage.entries.find(entry => entry.homeIndex === homeIndex);
+    if (!binding) continue;
+    const home = binding.home;
+    // A temporarily inactive declared waypoint must not reset a different
+    // waypoint's existing finite clock, ACK count or position-loop budget.
+    if (client.combatScout && client.combatScout.homeIndex !== homeIndex) continue;
     const goals = STEPS.map(([dx, dy]) => ({ x: home.x + dx, y: home.y + dy }))
       .filter(goal => distance(goal, owner) > 0 && protocolMapCellIsWalkable(context.map, goal) && allowed(goal) &&
         !occupied.some(entity => entity.x === goal.x && entity.y === goal.y))
@@ -730,7 +836,7 @@ function scoutCombatCoverage(client, context, now = Date.now()) {
       if (!plan) continue;
       if (!client.combatScout || client.combatScout.homeIndex !== homeIndex) {
         client.combatScout = { mapFileName: String(client.snapshot.mapFileName), homeIndex, goal, startedAt: now,
-          confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map() };
+          activeElapsedMs: 0, confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map() };
       } else client.combatScout.goal = goal;
       client.combatScoutCursor = homeIndex;
       return { ...plan, scouting: true, scoutHomeIndex: homeIndex };
@@ -762,7 +868,8 @@ function combatPlan(client, context) {
     }
     recordCombatArrival(client, context);
   }
-  if (!insideCombatCoverage(client.combatCluster, owner)) return returnToCombatCoverage(client, context);
+  const coverage = activeCombatCoverage(client, context);
+  if (!insideCombatCoverage(coverage, owner)) return returnToCombatCoverage(client, context, coverage);
   for (const [id, failure] of client.failedTargets) if (failure.until < Date.now() - 30000) client.failedTargets.delete(id);
   let candidates = combatCandidates(client, context);
   const observers = combatObservers(client, context);
@@ -773,7 +880,7 @@ function combatPlan(client, context) {
     const pursuit = client.combatPursuit;
     const selected = pursuit?.mapFileName === String(client.snapshot.mapFileName)
       ? candidates.find(target => target.objectId === pursuit.objectId && target.name === pursuit.name) : null;
-    if (!selected) client.combatPursuit = null;
+    if (!selected && !livePursuitTarget(client, context, pursuit)) client.combatPursuit = null;
     const adjacent = candidates.filter(target => distance(owner, target) === 1 && witness(target));
     candidates = [...new Set([...(selected && adjacent.includes(selected) ? [selected] : []), ...adjacent,
       ...(selected ? [selected] : []), ...candidates])];
@@ -790,9 +897,10 @@ function combatPlan(client, context) {
     const adjacent = STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy }))
       .sort((a, b) => distance(a, owner) - distance(b, owner));
     for (const destination of adjacent) {
-      if (!insideCombatCoverage(client.combatCluster, destination)) continue;
-      const plan = movement(client, destination, context.map);
-      if (plan && insideCombatCoverage(client.combatCluster, plan.first) && insideCombatCoverage(client.combatCluster, plan.target)) {
+      if (!insideCombatCoverage(coverage, destination)) continue;
+      const plan = movement(client, destination, context.map, point => insideCombatCoverage(coverage, point) &&
+        !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds)));
+      if (plan && insideCombatCoverage(coverage, plan.first) && insideCombatCoverage(coverage, plan.target)) {
         if (native && !client.pending) rememberCombatTarget(client, target);
         return { ...plan, hunting: target.name, ...(native ? { chaseTargetId: target.objectId, chaseTargetPoint: lifecyclePoint(target) } : {}) };
       }
@@ -803,7 +911,7 @@ function combatPlan(client, context) {
     if (native && !client.pending && client.combatPursuit?.objectId === target.objectId &&
         client.combatPursuit.confirmedMoves === 0) client.combatPursuit = null;
   }
-  return (native ? scoutCombatCoverage(client, context) : null) ?? returnToCombatCoverage(client, context);
+  return (native ? scoutCombatCoverage(client, context, Date.now(), coverage) : null) ?? returnToCombatCoverage(client, context, coverage);
 }
 
 function recordCombatArrival(client, context) {
@@ -887,8 +995,11 @@ async function action(client, context, planned, preparedPlan) {
     ...(plan.scouting ? { scouting: true, scoutHomeIndex: plan.scoutHomeIndex } : {}), ...nativeMeta,
     ...(native && client.role === 'combat' ? { declaredHome: client.home, initialCombatTransit: Boolean(plan.initialCombatTransit),
       targetPosition: plan.targetEntity ? { x: plan.targetEntity.x, y: plan.targetEntity.y } : undefined } : {}) };
+  let attackOutcome = 'unresolved';
   try {
     client.waitReason = ['attack', 'chat'].includes(kind) ? 'evidence-wait' : 'owner-ack-wait';
+    if (kind === 'attack') beginPendingAttackEvidence(client, plan.observer, owner,
+      plan.targetEntity ?? client.snapshot.entities.find(entity => entity.objectId === command.objectId), sentAt, cursor, observerCursor);
     client.send(command);
     if (native && kind === 'attack') {
       rememberCombatTarget(client, plan.targetEntity); client.combatPursuit.attackSent = true;
@@ -925,6 +1036,7 @@ async function action(client, context, planned, preparedPlan) {
     context.add({ ...row, status, latencyMs: receipt.monotonicMs - sentAt, plannedLatencyMs: receipt.monotonicMs - plannedAt,
       damage: receipt.damage, sharedHealthVerified: receipt.sharedHealthVerified, healthPercent: receipt.healthPercent });
     if (kind === 'attack') {
+      attackOutcome = status;
       client.failedTargets.delete(command.objectId);
       if (native) { client.combatHunting.positiveHits++; client.combatHunting.totalDamage += receipt.damage; }
     }
@@ -967,12 +1079,19 @@ async function action(client, context, planned, preparedPlan) {
         else client.failedTargets.delete(client.failedTargets.keys().next().value);
       }
     }
-    context.add({ ...row, status: actionFailureStatus(error, swung, client.closed),
+    attackOutcome = actionFailureStatus(error, swung, client.closed);
+    context.add({ ...row, status: attackOutcome,
       latencyMs: performance.now() - sentAt, plannedLatencyMs: performance.now() - plannedAt, error: sanitize(error.message, client.secrets),
       targetStillAdjacent: kind === 'attack' ? client.snapshot.entities.some(entity => entity.objectId === command.objectId && !entity.dead && distance(entity, self(client)) === 1) : undefined,
       ambiguousTargetQuarantined: kind === 'attack' && native && !(error instanceof SafetyStop) });
     if (error instanceof SafetyStop || client.closed) throw error;
-  } finally { client.waitReason = null; if (kind === 'attack' && context.targetClaims.get(command.objectId) === client.label) context.targetClaims.delete(command.objectId); }
+  } finally {
+    client.waitReason = null;
+    if (kind === 'attack') {
+      try { finishPendingAttackEvidence(client, context, attackOutcome); }
+      finally { if (context.targetClaims.get(command.objectId) === client.label) context.targetClaims.delete(command.objectId); }
+    }
+  }
 }
 
 async function auxiliary(client, context) {
@@ -1294,7 +1413,10 @@ export async function runCapacity(options) {
             report.scenario.explicitNativeHomes = { visitedCells: proof.visitedCells, mapCells: proof.mapCells, footprintCells: proof.footprintCells };
           } else context.homes = chooseHomes(context.map, self(client), policy.stages.at(-1), policy.layout, client.snapshot.mapTransfers ?? [], scenario.anchors ?? [], policy.activityMode === 'native' ? 3 : 1, stationaryObstacles);
           context.combatClusters = validateNativeCombatClusters(scenario.combatClusters, context.homes, combatIndices, context.patrolSpan);
-          for (const cluster of context.combatClusters) cluster.observerNames = new Set(cluster.movementActorIndices.map(index => context.pool.accounts[index].name));
+          for (const cluster of context.combatClusters) {
+            cluster.observerNames = new Set(cluster.movementActorIndices.map(index => context.pool.accounts[index].name));
+            for (const binding of cluster.observerBindings) binding.name = context.pool.accounts[binding.actorIndex].name;
+          }
           if (context.combatClusters.length) report.scenario.combatClusters = context.combatClusters.map(cluster => ({ combatActorIndices: cluster.combatActorIndices,
             movementActorIndices: cluster.movementActorIndices, observerFootprintCoverageRadius: 14 }));
           report.scenario.mapFileName = context.mapName; report.scenario.anchors = context.homes;
