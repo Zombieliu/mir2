@@ -764,6 +764,14 @@ impl ZoneRuntime {
         }
     }
 
+    /// Preserve a live state, including its trusted online identities, for an
+    /// in-process deterministic reference experiment. This is not checkpoint
+    /// recovery or ownership admission and is absent from production builds.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn fork_for_deterministic_reference(&self) -> Self {
+        self.transaction_fork()
+    }
+
     /// Fork the complete Zone state for an all-or-nothing command. The ECS and
     /// AOI grids are derived mirrors, so they are rebuilt from the cloned
     /// authoritative maps instead of requiring `bevy_ecs::World: Clone`.

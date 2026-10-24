@@ -1,0 +1,9 @@
+{
+  "schema": "mir2.production-protected-parent-qualification.v1",
+  "createdUtc": "2026-10-08T13:48:53.1046418Z",
+  "parent": "fde81a0de5084d02b3daaa30bac4d4f1fde411f4",
+  "declaredProtectedInputs": 441,
+  "gitCleanFiltersUsed": true,
+  "mismatchCount": 0,
+  "mismatches": []
+}

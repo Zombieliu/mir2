@@ -14,6 +14,7 @@ use sha2::{Digest, Sha256};
 const PARALLEL_TICK_MIN_ZONES: usize = 4;
 const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 3;
 
+use super::partition::{PartitionId, PartitionKey, PartitionLocation, ZonePartitionDescriptor};
 use super::runtime::ZoneRuntime;
 use super::types::{
     GroundDropClaimTicket, SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneMonsterKillAward,
@@ -62,6 +63,61 @@ impl ZoneManagerCheckpoint {
 }
 
 impl ZoneManager {
+    /// In-process reference fork, not cold deserialization or owner admission.
+    /// Retains the same online identity namespace and next-identity counters so
+    /// execution strategies can compare full outputs and committed state.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn fork_for_deterministic_reference(&self) -> Self {
+        Self {
+            zones: self
+                .zones
+                .iter()
+                .map(|(key, runtime)| (key.clone(), runtime.fork_for_deterministic_reference()))
+                .collect(),
+            session_zones: self.session_zones.clone(),
+            online_identities: self.online_identities.clone(),
+        }
+    }
+
+    /// The initial directory has no independently mutable state: each retained
+    /// ZoneRuntime owns partition zero. Checkpoint v2/v3 therefore reconstruct
+    /// the exact same directory without changing their committed bytes.
+    pub fn partition_directory(&self) -> Vec<ZonePartitionDescriptor> {
+        self.zones
+            .keys()
+            .cloned()
+            .map(ZonePartitionDescriptor::whole_zone)
+            .collect()
+    }
+
+    pub fn partition_for_key(&self, key: &ZoneKey) -> Option<PartitionKey> {
+        self.zones
+            .contains_key(key)
+            .then(|| PartitionKey::whole_zone(key.clone()))
+    }
+
+    pub fn partition_for_session(&self, session_id: &SessionId) -> Option<PartitionKey> {
+        self.partition_for_key(self.session_zones.get(session_id)?)
+    }
+
+    pub fn partition_descriptor(&self, key: &ZoneKey) -> Option<ZonePartitionDescriptor> {
+        self.partition_for_key(key)
+            .map(|partition| ZonePartitionDescriptor::whole_zone(partition.zone))
+    }
+
+    /// Resolves geometry only; this query does not authorize a move or prove a
+    /// tile walkable. The existing Zone collision/occupancy rules still do that.
+    pub fn partition_at(&self, key: &ZoneKey, position: &Point) -> Option<PartitionLocation> {
+        Some(self.partition_descriptor(key)?.locate(position))
+    }
+
+    pub fn zone_for_partition(&self, partition: &PartitionKey) -> Option<&ZoneRuntime> {
+        if partition.partition_id != PartitionId::WHOLE_ZONE {
+            return None;
+        }
+        self.zones.get(&partition.zone)
+    }
+
     fn online_snapshot(&self) -> OnlinePresenceSnapshot {
         self.zones
             .values()
@@ -699,10 +755,10 @@ impl ZoneManager {
             | ZoneCommand::OpenDoor { session_id, .. }
             | ZoneCommand::ConfigureHazards { session_id, .. }
             | ZoneCommand::TickPlayerMovement { session_id, .. } => {
-                let Some(key) = self.session_zones.get(session_id).cloned() else {
+                let Some(partition) = self.partition_for_session(session_id) else {
                     return Vec::new();
                 };
-                self.handle_for_key(key, command)
+                self.handle_single_partition(partition, command)
             }
             ZoneCommand::Tick { now_ms } => self.tick_all(*now_ms),
         }
@@ -714,7 +770,8 @@ impl ZoneManager {
     /// process restart. The Gateway owns session recovery; the Zone manager only
     /// contributes persistent map/world state to those checkpoints.
     pub fn zone_key_for_session(&self, session_id: &SessionId) -> Option<ZoneKey> {
-        self.session_zones.get(session_id).cloned()
+        self.partition_for_session(session_id)
+            .map(|partition| partition.zone)
     }
 
     pub fn detached_ground_drop_claim_ticket_is_canonical(
@@ -807,6 +864,32 @@ impl ZoneManager {
     }
 
     pub fn handle_for_key(&mut self, key: ZoneKey, command: ZoneCommand) -> Vec<ZoneOutbound> {
+        self.handle_single_partition(PartitionKey::whole_zone(key), command)
+    }
+
+    /// Trusted internal dispatch, never a client-selected partition. Unknown
+    /// partitions fail before creating a Zone, changing membership or emitting
+    /// packets. Partition zero preserves the existing handle_for_key behavior.
+    pub fn handle_for_partition(
+        &mut self,
+        partition: PartitionKey,
+        command: ZoneCommand,
+    ) -> Result<Vec<ZoneOutbound>, String> {
+        if partition.partition_id != PartitionId::WHOLE_ZONE {
+            return Err(format!(
+                "unsupported partition {} in whole-Zone topology",
+                partition.partition_id.0
+            ));
+        }
+        Ok(self.handle_single_partition(partition, command))
+    }
+
+    fn handle_single_partition(
+        &mut self,
+        partition: PartitionKey,
+        command: ZoneCommand,
+    ) -> Vec<ZoneOutbound> {
+        let key = partition.zone;
         // All Join entry points share this transfer path. Carry the same online
         // player's receipt clock before removing its old Zone incarnation;
         // otherwise map changes restart sequences at one under the same ID.
@@ -997,7 +1080,7 @@ impl ZoneManager {
     }
 
     pub fn zone(&self, key: &ZoneKey) -> Option<&ZoneRuntime> {
-        self.zones.get(key)
+        self.zone_for_partition(&self.partition_for_key(key)?)
     }
 
     pub fn prepare_mining_swing(
@@ -1086,8 +1169,8 @@ impl ZoneManager {
     }
 
     pub fn player_transform(&self, session_id: &SessionId) -> Option<(Point, MirDirection)> {
-        let key = self.session_zones.get(session_id)?;
-        let zone = self.zones.get(key)?;
+        let partition = self.partition_for_session(session_id)?;
+        let zone = self.zone_for_partition(&partition)?;
         Some((
             zone.player_position(session_id)?,
             zone.player_direction(session_id)?,

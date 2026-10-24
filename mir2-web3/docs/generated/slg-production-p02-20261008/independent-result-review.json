@@ -1,0 +1,26 @@
+{
+  "schema": "mir2.production-independent-result-review.v2",
+  "reviewer": "/root/production_review",
+  "accepted": true,
+  "reviewedUtc": "2026-10-08T09:48:35.3417471Z",
+  "authoredSourceSha256": "1aefac3905ebb04d4f3669ac3eb961ab3d9035e2f7011fa0f78b0fd6067c642e",
+  "testCounts": {
+    "production": 19,
+    "personalTransactions": 15,
+    "npc": 30,
+    "save": 59,
+    "total": 123,
+    "failed": 0,
+    "ignored": 0
+  },
+  "declaredInputRowsRechecked": 1370,
+  "sourceDrift": 0,
+  "perCallToolAndAuthorityPins": 11,
+  "allOriginalGuardLifecyclePassed": true,
+  "minimumCRemainingBytes": 221967093760,
+  "conservativeFreshnessUpperBoundMs": 863.8625,
+  "scope": "Controlled Session/File production and existing NPC/save regressions only.",
+  "rawFinal": "Actual result audit accepted without differences: all four runs 19+15+30+59 pass, 0 failed/ignored, original FORWARD/actualGetVolumeC/PolicyB/completed/exited/disposed/exit0. 1370 declared source rows and 11 tool/authority pins per call match. C min221967093760 B; sample-begin conservative bound max863.8625ms. Original authored-source SHA unchanged. Two serial preflights never spawned Cargo/guard/probe and are not product failures. Public routes/material bindings, Postgres, global all-issuer UID authority, unknown-publication reconciliation, UI and installers remain unverified.",
+  "noCargoRunByReviewer": true,
+  "noUiRun": true
+}

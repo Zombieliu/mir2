@@ -4,9 +4,80 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { NativeResumeClient, assertReplayRejected, assertResumeEvidence,
-  matchesOwnerStep, resumeFingerprint, validateResumeControl } from './playtest-native-resume-smoke.mjs';
+  matchesOwnerStep, resumeFingerprint, validateResumeControl, resumeReadinessState,
+  waitForRetainedReadiness, fetchResumeHealth } from './playtest-native-resume-smoke.mjs';
 
 const ticket = Buffer.alloc(32, 17).toString('base64url');
+const emptyCapacity = { currentWsConnections: 0, currentActiveSessions: 0, currentReconnectLeases: 0,
+  currentLoginInFlight: 0, currentNewCharacterInFlight: 0, currentStartGameInFlight: 0 };
+const health = overrides => ({ capacity: { ...emptyCapacity, ...overrides } });
+const liveTicket = expiresAtMs => ({ credential: ticket, generation: 1, expiresAtMs });
+
+test('retained readiness retries only real preparing counters and never sends or consumes a resume ticket', async () => {
+  let clock = 1000, calls = 0;
+  const observed = [];
+  const result = await waitForRetainedReadiness({ endpoint: 'ws://127.0.0.1:17410/ws',
+    baseline: emptyCapacity, ticket: liveTicket(30000), ticketUseCount: 0,
+    now: () => clock, pause: async ms => { clock += ms; }, onSample: sample => observed.push(sample),
+    fetchHealth: async () => ++calls === 1
+      ? health({ currentWsConnections: 1, currentActiveSessions: 1 })
+      : health({ currentActiveSessions: 1, currentReconnectLeases: 1 }) });
+  assert.equal(calls, 2);
+  assert.equal(result.elapsedMs, 250);
+  assert.equal(result.ticketUseCount, 0);
+  assert.equal(observed.length, 2);
+  assert.deepEqual(observed.map(value => value.currentReconnectLeases), [0, 1]);
+  assert.doesNotMatch(JSON.stringify(result), new RegExp(ticket));
+});
+
+test('readiness timeout, credential expiry and discarded owner never invent successful resume readiness', async () => {
+  for (const expiresAtMs of [30000, 1750]) {
+    let clock = 1000, calls = 0;
+    await assert.rejects(waitForRetainedReadiness({ endpoint: 'ws://127.0.0.1:17410/ws',
+      baseline: emptyCapacity, ticket: liveTicket(expiresAtMs), ticketUseCount: 0, timeoutMs: 1000,
+      now: () => clock, pause: async ms => { clock += ms; },
+      fetchHealth: async () => { calls++; return health({ currentActiveSessions: 1 }); } }),
+    expiresAtMs === 30000 ? /timed out/ : /expired/);
+    assert.ok(calls <= 4, 'only the bounded preparing polls are eligible');
+  }
+  let calls = 0;
+  await assert.rejects(waitForRetainedReadiness({ endpoint: 'ws://127.0.0.1:17410/ws',
+    baseline: emptyCapacity, ticket: liveTicket(30000), ticketUseCount: 0, now: () => 1000,
+    fetchHealth: async () => { calls++; return health({}); } }), /sole original disconnected owner/);
+  assert.equal(calls, 1, 'discarded owner is terminal, not a transient retry');
+});
+
+test('invalid, expired or used tickets and nonisolated baselines fail before any readiness request', async () => {
+  let calls = 0;
+  const base = { endpoint: 'ws://127.0.0.1:17410/ws', baseline: emptyCapacity,
+    ticket: liveTicket(30000), ticketUseCount: 0, now: () => 1000,
+    fetchHealth: async () => { calls++; return health({ currentActiveSessions: 1, currentReconnectLeases: 1 }); } };
+  for (const override of [{ ticket: { ...liveTicket(30000), credential: 'invalid' } },
+    { ticket: liveTicket(999) }, { ticket: { ...liveTicket(30000), generation: 0 } },
+    { ticketUseCount: 1 }, { baseline: { ...emptyCapacity, currentActiveSessions: 1 } }, { timeoutMs: 10001 }]) {
+    await assert.rejects(waitForRetainedReadiness({ ...base, ...override }));
+  }
+  assert.equal(calls, 0);
+});
+
+test('missing counters, concurrent users and public HTTP authentication failures are never retried', async () => {
+  assert.throws(() => resumeReadinessState({ capacity: {} }), /complete nonnegative/);
+  for (const overrides of [{ currentActiveSessions: 2 }, { currentActiveSessions: 1, currentReconnectLeases: 2 },
+    { currentActiveSessions: 1, currentWsConnections: 2 }, { currentActiveSessions: 1, currentLoginInFlight: 1 }]) {
+    let calls = 0;
+    await assert.rejects(waitForRetainedReadiness({ endpoint: 'ws://127.0.0.1:17410/ws',
+      baseline: emptyCapacity, ticket: liveTicket(30000), ticketUseCount: 0, now: () => 1000,
+      fetchHealth: async () => { calls++; return health(overrides); } }), /sole original disconnected owner/);
+    assert.equal(calls, 1);
+  }
+  const originalFetch = globalThis.fetch;
+  let fetchCalls = 0;
+  globalThis.fetch = async () => { fetchCalls++; return { ok: false, status: 401 }; };
+  try {
+    await assert.rejects(fetchResumeHealth('ws://127.0.0.1:17410/ws'), /HTTP rejected: 401/);
+    assert.equal(fetchCalls, 1);
+  } finally { globalThis.fetch = originalFetch; }
+});
 async function removeFixtureDirectory(directory) {
   const resolved = path.resolve(directory);
   assert.equal(path.dirname(resolved), path.resolve(os.tmpdir()));

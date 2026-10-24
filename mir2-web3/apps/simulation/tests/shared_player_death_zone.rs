@@ -120,15 +120,16 @@ fn owner_damaged(out: &[ZoneOutbound]) -> bool {
 }
 
 #[test]
-fn native_melee_kills_once_and_checkpoint_preserves_exact_outbound_order() {
+#[cfg(feature = "test-support")]
+fn native_melee_kills_once_and_live_reference_preserves_exact_outbound_order() {
     let mut zone = fixture(0, 9000, 50, false);
     zone.tick(3000);
-    let mut restored = ZoneRuntime::restore_checkpoint(&zone.checkpoint_bytes().unwrap()).unwrap();
+    let mut restored = zone.fork_for_deterministic_reference();
     let out = zone.tick(3600);
     let replay = restored.tick(3600);
     assert_eq!(
         out, replay,
-        "legal checkpoint replay preserves every authoritative outbound"
+        "the same live reference preserves every authoritative outbound"
     );
     assert_eq!(
         zone.canonical_state_root().unwrap(),
@@ -190,6 +191,7 @@ fn gm_never_die_leaves_authoritative_hp_unchanged() {
 }
 
 #[test]
+#[cfg(feature = "test-support")]
 fn hugger_periodic_poison_kills_and_cannot_cross_player_revival() {
     let mut selected = None;
     for id in 9100..9164 {
@@ -205,18 +207,19 @@ fn hugger_periodic_poison_kills_and_cannot_cross_player_revival() {
         }
     }
     let mut zone = selected.expect("real Hugger poison branch");
-    let mut restored = ZoneRuntime::restore_checkpoint(&zone.checkpoint_bytes().unwrap()).unwrap();
+    let mut restored = zone.fork_for_deterministic_reference();
     let death = zone.tick(2502);
     assert_eq!(death, restored.tick(2502));
     assert_death_delivery(&death);
     assert_eq!(zone.player_vitals(&SessionId::new("owner")).unwrap().0, 0);
-    zone.handle(ZoneCommand::SyncPlayerVitals {
+    zone.handle(ZoneCommand::SyncPlayerVitalsAndLife {
         session_id: SessionId::new("owner"),
         hp: 400,
         max_hp: 400,
         mp: 100,
+        dead: false,
     });
-    let mut zone = ZoneRuntime::restore_checkpoint(&zone.checkpoint_bytes().unwrap()).unwrap();
+    let mut zone = zone.fork_for_deterministic_reference();
     for now in [2503, 4503, 6504, 8505, 10506] {
         let out = zone.tick(now);
         assert_eq!(zone.player_vitals(&SessionId::new("owner")).unwrap().0, 400);
@@ -231,7 +234,8 @@ fn hugger_periodic_poison_kills_and_cannot_cross_player_revival() {
 }
 
 #[test]
-fn regeneration_receipts_survive_checkpoint_and_stamp_the_current_life() {
+#[cfg(feature = "test-support")]
+fn regeneration_receipts_survive_live_reference_and_stamp_the_current_life() {
     let mut zone = ZoneRuntime::new(ZoneKey::for_map(MAP));
     let mut player = join("owner", PLAYER, 21, 40, false);
     player.max_hp = 100;
@@ -242,7 +246,7 @@ fn regeneration_receipts_survive_checkpoint_and_stamp_the_current_life() {
     assert!(value["players"]["owner"]
         .get("vital_receipt_sequence")
         .is_none());
-    let restored = ZoneRuntime::restore_checkpoint(&pristine).unwrap();
+    let restored = zone.fork_for_deterministic_reference();
     assert_eq!(
         zone.canonical_state_root().unwrap(),
         restored.canonical_state_root().unwrap()
@@ -276,13 +280,14 @@ fn regeneration_receipts_survive_checkpoint_and_stamp_the_current_life() {
         max_hp: 100,
         mp: 100,
     });
-    zone.handle(ZoneCommand::SyncPlayerVitals {
+    zone.handle(ZoneCommand::SyncPlayerVitalsAndLife {
         session_id: SessionId::new("owner"),
         hp: 50,
         max_hp: 100,
         mp: 100,
+        dead: false,
     });
-    let mut restored = ZoneRuntime::restore_checkpoint(&zone.checkpoint_bytes().unwrap()).unwrap();
+    let mut restored = zone.fork_for_deterministic_reference();
     let pulse = zone.tick(8001);
     assert_eq!(pulse, restored.tick(8001));
     let next = pulse
@@ -301,4 +306,42 @@ fn regeneration_receipts_survive_checkpoint_and_stamp_the_current_life() {
         ),
         (50, 54, 1, 2)
     );
+}
+
+#[test]
+fn cold_checkpoint_verifies_original_root_and_revokes_online_health_authority() {
+    let mut zone = fixture(0, 9000, 50, false);
+    zone.tick(3000);
+    let bytes = zone.checkpoint_bytes().unwrap();
+    let original_root = zone.canonical_state_root().unwrap();
+    let mut tampered: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+    tampered["players"]["owner"]["hp"] = serde_json::json!(49);
+    assert!(
+        ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&tampered).unwrap())
+            .unwrap_err()
+            .contains("state root mismatch")
+    );
+
+    // Cold checkpoint decoding and retained live execution are different
+    // contracts. Verify original bytes first, then revoke online admission.
+    let mut cold = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
+    let recovered: serde_json::Value =
+        serde_json::from_slice(&cold.checkpoint_bytes().unwrap()).unwrap();
+    assert!(recovered["online_presence"].as_object().unwrap().is_empty());
+    assert_ne!(cold.canonical_state_root().unwrap(), original_root);
+    assert_eq!(
+        cold.player_vitals(&SessionId::new("owner")),
+        zone.player_vitals(&SessionId::new("owner"))
+    );
+    let live = zone.tick(3600);
+    let recovered = cold.tick(3600);
+    assert!(live
+        .iter()
+        .any(|event| matches!(event, ZoneOutbound::OwnerHealthChanged { .. })));
+    assert!(!recovered
+        .iter()
+        .any(|event| matches!(event, ZoneOutbound::OwnerHealthChanged { .. })));
+    assert_death_delivery(&recovered);
+    assert_eq!(cold.player_vitals(&SessionId::new("owner")).unwrap().0, 0);
+    assert!(owner_damaged(&recovered), "cold recovery retains canonical damage settlement but cannot mint an online health receipt");
 }

@@ -134,6 +134,8 @@ pub mod quest_route_search;
 pub mod quest_supplies;
 #[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod quest_ui;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+pub mod stone_workshop_ui;
 pub mod read_model;
 pub mod shop;
 #[cfg(feature = "native-ui")]

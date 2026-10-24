@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/006-r23-resolution-restored.jpg",
+  "purpose": "Automatic1024x768 restored after1280x960 actual UI check.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 316920,
+  "sha256": "c39f82b255d73eb0a7fe412f9e478b65fc6589b48a671b09c3b8592585804e1c",
+  "recordedUtc": "2026-10-09T18:25:08.225Z"
+}

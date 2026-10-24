@@ -100,7 +100,15 @@
     ".next-web-windows-catchup-20261007-03/types/**/*.ts",
     ".next-web-windows-catchup-20261007-03/dev/types/**/*.ts",
     ".next-web-windows-catchup-20261007-04/types/**/*.ts",
-    ".next-web-windows-catchup-20261007-04/dev/types/**/*.ts"
+    ".next-web-windows-catchup-20261007-04/dev/types/**/*.ts",
+    ".next-web-windows-catchup-20261007-05/types/**/*.ts",
+    ".next-web-windows-catchup-20261007-05/dev/types/**/*.ts",
+    ".next-web-windows-catchup-20261007-06/types/**/*.ts",
+    ".next-web-windows-catchup-20261007-06/dev/types/**/*.ts",
+    ".next-web-windows-catchup-20261007-07/types/**/*.ts",
+    ".next-web-windows-catchup-20261007-07/dev/types/**/*.ts",
+    ".next-web-windows-catchup-20261007-08/types/**/*.ts",
+    ".next-web-windows-catchup-20261007-08/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

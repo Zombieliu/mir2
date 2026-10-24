@@ -1,0 +1,607 @@
+{
+  "scope": "105 static source samples only; identical sample pixels do not prove identical full animation sequences, and different samples do not prove unique complete sets.",
+  "samples": 105,
+  "distinctSampleFingerprints": 60,
+  "duplicateGroups": [
+    {
+      "slot": "weapon",
+      "gender": "Male",
+      "samplePixelSha256": "f8f5e53e43e69fd68e752e15a01ce3f7cab55e12a156997a4323b1f60b8f2491",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "weapon",
+          "sourceItemIndex": 233,
+          "sourceName": "HellYamaBlade1"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "weapon",
+          "sourceItemIndex": 234,
+          "sourceName": "HellYamaBlade2"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "weapon",
+          "sourceItemIndex": 235,
+          "sourceName": "HellYamaBlade3"
+        }
+      ]
+    },
+    {
+      "slot": "weapon",
+      "gender": "Male",
+      "samplePixelSha256": "f7fcb9d913a8c808efad563dd4aad859f9c6c2d1f84a03b1c6d29585fdd70d73",
+      "members": [
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "weapon",
+          "sourceItemIndex": 1412,
+          "sourceName": "GonRyunHolyLightSword(聖)2"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "weapon",
+          "sourceItemIndex": 1413,
+          "sourceName": "GonRyunHolyLightSword(聖)3"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Male",
+      "samplePixelSha256": "7a8e73b6a68f0d6f3ff9b3e263381163450b93dd420721b58da795d57c8dfc97",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 343,
+          "sourceName": "SteelArmour(M)"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 343,
+          "sourceName": "SteelArmour(M)"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 343,
+          "sourceName": "SteelArmour(M)"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Male",
+      "samplePixelSha256": "1225cc4d0e0729c013bd2d23359186860a68fac99c57d23167767ed4e11d6c9f",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 363,
+          "sourceName": "BlueDarkArmour(M)"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 363,
+          "sourceName": "BlueDarkArmour(M)"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 363,
+          "sourceName": "BlueDarkArmour(M)"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Male",
+      "samplePixelSha256": "c2c4f0c686965b0b2c75be72ed4e9ede184f3bb9a30dc4c2770641975b519df3",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 141,
+          "sourceName": "TarragonArmour(M)1"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 142,
+          "sourceName": "TarragonArmour(M)2"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 143,
+          "sourceName": "TarragonArmour(M)3"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 145,
+          "sourceName": "TarragonArmour(M)5"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Male",
+      "samplePixelSha256": "8ceae12778349d0c79fda5f382b1574ae8852acc8fe16eb185fefd0179ad0074",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 153,
+          "sourceName": "RaidersArmour(M)1"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 154,
+          "sourceName": "RaidersArmour(M)2"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 155,
+          "sourceName": "RaidersArmour(M)3"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 157,
+          "sourceName": "RaidersArmour(M)5"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Male",
+      "samplePixelSha256": "32b069e23e2fad6cbf44284ce0609aa5073c973f0d10fca8616dac3f4000fd30",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1582,
+          "sourceName": "Gonryunyongdrama(寶)(M)1"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1583,
+          "sourceName": "Gonryunyongdrama(寶)(M)2"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1584,
+          "sourceName": "Gonryunyongdrama(寶)(M)3"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1586,
+          "sourceName": "Gonryunyongdrama(寶)(M)5"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Male",
+      "samplePixelSha256": "f98f284d1a0a80b7ad93d4525c75588c3ae40cf3e9e7bbd82cd337ac08027821",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1607,
+          "sourceName": "Gonryunyongdrama(聖)(M)1"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1607,
+          "sourceName": "Gonryunyongdrama(聖)(M)1"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1608,
+          "sourceName": "Gonryunyongdrama(聖)(M)2"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1608,
+          "sourceName": "Gonryunyongdrama(聖)(M)2"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1609,
+          "sourceName": "Gonryunyongdrama(聖)(M)3"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1609,
+          "sourceName": "Gonryunyongdrama(聖)(M)3"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1611,
+          "sourceName": "Gonryunyongdrama(聖)(M)5"
+        },
+        {
+          "class": "Archer",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1611,
+          "sourceName": "Gonryunyongdrama(聖)(M)5"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Male",
+      "samplePixelSha256": "4dc8829a6657fe712fd99d0d41863554a0eb7065aa16308d4827e0e66da39805",
+      "members": [
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1610,
+          "sourceName": "Gonryunyongdrama(聖)(M)4"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Male",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1610,
+          "sourceName": "Gonryunyongdrama(聖)(M)4"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Female",
+      "samplePixelSha256": "556866de778074dedf16ba13269ac3e738d17df7fc095c83215ccb163802f10e",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 344,
+          "sourceName": "SteelArmour(F)"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 344,
+          "sourceName": "SteelArmour(F)"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 40,
+          "slot": "armour",
+          "sourceItemIndex": 344,
+          "sourceName": "SteelArmour(F)"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Female",
+      "samplePixelSha256": "8a17ff9c8ce0f2d86223a059cb55b8665a7756cf73ddb94545a8cc750e9d82ea",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 364,
+          "sourceName": "BlueDarkArmour(F)"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 364,
+          "sourceName": "BlueDarkArmour(F)"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 50,
+          "slot": "armour",
+          "sourceItemIndex": 364,
+          "sourceName": "BlueDarkArmour(F)"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Female",
+      "samplePixelSha256": "825adee09bfe4f4f444e3bd575445978d72c72ec75acf3d31a1db25f4fa3746f",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 147,
+          "sourceName": "TarragonArmour(F)1"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 148,
+          "sourceName": "TarragonArmour(F)2"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 149,
+          "sourceName": "TarragonArmour(F)3"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 60,
+          "slot": "armour",
+          "sourceItemIndex": 151,
+          "sourceName": "TarragonArmour(F)5"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Female",
+      "samplePixelSha256": "abc1657d12d1305bf699113453ca4c268d07bfbe700a2297fb5699a4ee846a61",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 159,
+          "sourceName": "RaidersArmour(F)1"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 160,
+          "sourceName": "RaidersArmour(F)2"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 161,
+          "sourceName": "RaidersArmour(F)3"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 70,
+          "slot": "armour",
+          "sourceItemIndex": 163,
+          "sourceName": "RaidersArmour(F)5"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Female",
+      "samplePixelSha256": "e54a6de27d6ef9b70e484247d3819859028723c87a7d4bfadafb652cc49ccd79",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1576,
+          "sourceName": "Gonryunyongdrama(寶)(F)1"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1577,
+          "sourceName": "Gonryunyongdrama(寶)(F)2"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1578,
+          "sourceName": "Gonryunyongdrama(寶)(F)3"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 80,
+          "slot": "armour",
+          "sourceItemIndex": 1580,
+          "sourceName": "Gonryunyongdrama(寶)(F)5"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Female",
+      "samplePixelSha256": "26f7087af4866ca6cdb3883153619aac0c254d3d5e103649c37c5cf4724f6491",
+      "members": [
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1601,
+          "sourceName": "Gonryunyongdrama(聖)(F)1"
+        },
+        {
+          "class": "Warrior",
+          "gender": "Female",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1601,
+          "sourceName": "Gonryunyongdrama(聖)(F)1"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1602,
+          "sourceName": "Gonryunyongdrama(聖)(F)2"
+        },
+        {
+          "class": "Wizard",
+          "gender": "Female",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1602,
+          "sourceName": "Gonryunyongdrama(聖)(F)2"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1603,
+          "sourceName": "Gonryunyongdrama(聖)(F)3"
+        },
+        {
+          "class": "Taoist",
+          "gender": "Female",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1603,
+          "sourceName": "Gonryunyongdrama(聖)(F)3"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1605,
+          "sourceName": "Gonryunyongdrama(聖)(F)5"
+        },
+        {
+          "class": "Archer",
+          "gender": "Female",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1605,
+          "sourceName": "Gonryunyongdrama(聖)(F)5"
+        }
+      ]
+    },
+    {
+      "slot": "armour",
+      "gender": "Female",
+      "samplePixelSha256": "463e2a9dd927255f0a079cd090d5cef8874a2b594d04b3aa152d2bb1c97d4107",
+      "members": [
+        {
+          "class": "Assassin",
+          "gender": "Female",
+          "targetLevel": 90,
+          "slot": "armour",
+          "sourceItemIndex": 1604,
+          "sourceName": "Gonryunyongdrama(聖)(F)4"
+        },
+        {
+          "class": "Assassin",
+          "gender": "Female",
+          "targetLevel": 100,
+          "slot": "armour",
+          "sourceItemIndex": 1604,
+          "sourceName": "Gonryunyongdrama(聖)(F)4"
+        }
+      ]
+    }
+  ]
+}

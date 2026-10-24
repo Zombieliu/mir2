@@ -841,6 +841,7 @@ pub(super) fn item_state_from_equipment_state(
     upsert_user_item_stat(&mut added_stats, 15, equipment.added_luck);
 
     ItemState {
+        stone_serial: None,
         key: equipment.key,
         name: equipment.name,
         icon: equipment.icon,

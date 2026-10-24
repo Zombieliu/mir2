@@ -15,6 +15,65 @@ const REQUIRED = ['ordinaryLogin', 'stepBeforeDrop', 'uncleanTransportLoss', 'na
 const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 const self = snapshot => (snapshot?.entities ?? []).find(entity =>
   Number(entity.objectId) === Number(snapshot.playerObjectId));
+const CAPACITY_FIELDS = ['currentWsConnections', 'currentActiveSessions', 'currentReconnectLeases',
+  'currentLoginInFlight', 'currentNewCharacterInFlight', 'currentStartGameInFlight'];
+
+export function resumeReadinessState(health) {
+  const state = Object.fromEntries(CAPACITY_FIELDS.map(key => [key, health?.capacity?.[key]]));
+  if (Object.values(state).some(value => !Number.isSafeInteger(value) || value < 0)) {
+    throw new Error('Public resume readiness lacks complete nonnegative capacity counters');
+  }
+  return state;
+}
+
+export async function fetchResumeHealth(endpoint) {
+  const url = new URL(validateEndpoint(endpoint));
+  url.protocol = url.protocol === 'wss:' ? 'https:' : 'http:';
+  url.pathname = '/health';
+  const response = await fetch(url, { signal: AbortSignal.timeout(2000) });
+  if (!response.ok) throw new Error('Public resume readiness HTTP rejected: ' + response.status);
+  return response.json();
+}
+
+// The gateway persists the departed owner before publishing its retained
+// lease. Wait on that real public state instead of guessing a disk-save time.
+// No resumeSession is sent here, so rejection/expiry/replay is never retried.
+export async function waitForRetainedReadiness({ endpoint, ticket, baseline, ticketUseCount,
+  fetchHealth = fetchResumeHealth, now = Date.now, pause = sleep, onSample, timeoutMs = 10000 }) {
+  validateResumeControl({ type: 'resumeSession', credential: ticket?.credential });
+  if (ticketUseCount !== 0) throw new Error('A used or replayed native resume ticket is never eligible for readiness retry');
+  if (!Number.isSafeInteger(ticket?.generation) || ticket.generation < 1 ||
+      !Number.isSafeInteger(ticket?.expiresAtMs) || ticket.expiresAtMs <= now()) {
+    throw new Error('Native resume ticket is invalid or expired before readiness');
+  }
+  if (!baseline || CAPACITY_FIELDS.some(key => baseline[key] !== 0)) {
+    throw new Error('Native resume readiness requires an initially drained isolated realm');
+  }
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10000) {
+    throw new Error('Native resume readiness budget must be at most 10000 milliseconds');
+  }
+  const startedAt = now(), deadline = Math.min(startedAt + timeoutMs, ticket.expiresAtMs);
+  const samples = [];
+  while (now() < deadline) {
+    const state = resumeReadinessState(await fetchHealth(endpoint));
+    const sample = { elapsedMs: now() - startedAt, ...state };
+    samples.push(sample); onSample?.(sample);
+    if (state.currentActiveSessions !== 1 || state.currentReconnectLeases > 1 ||
+        state.currentWsConnections > 1 || state.currentLoginInFlight !== 0 ||
+        state.currentNewCharacterInFlight !== 0 || state.currentStartGameInFlight !== 0) {
+      throw new Error('Public readiness does not describe the sole original disconnected owner; no ticket sent');
+    }
+    if (state.currentReconnectLeases === 1 && state.currentWsConnections === 0) {
+      if (now() >= deadline) break;
+      return { elapsedMs: now() - startedAt, samples, ticketUseCount: 0,
+        scope: 'One retained original owner on an initially empty isolated realm; no resume rejection is retried.' };
+    }
+    await pause(Math.min(250, Math.max(0, deadline - now())));
+  }
+  throw new Error(now() >= ticket.expiresAtMs
+    ? 'Native resume ticket expired while awaiting retained readiness'
+    : 'Native resume retained readiness timed out; no resume ticket was sent');
+}
 
 export function validateResumeControl(command) {
   const keys = Object.keys(command).sort().join(',');
@@ -166,6 +225,11 @@ export async function runNativeResume(options) {
     options.onProgress?.({ check: key, status: 'passed' });
   };
   try {
+    const baseline = resumeReadinessState(await fetchResumeHealth(endpoint));
+    if (CAPACITY_FIELDS.some(key => baseline[key] !== 0)) {
+      throw new Error('Native resume starts only on a drained isolated realm');
+    }
+    report.resumeReadinessBaseline = baseline;
     const first = makeClient('original');
     await first.connect();
     first.control({ type: 'clientCapabilities', capabilities: [PROTOCOL] });
@@ -180,7 +244,11 @@ export async function runNativeResume(options) {
     await first.loseTransport();
     check('uncleanTransportLoss', { logoutSent: false, closed: first.closed,
       priorGeneration: originalTicket.generation, latestOwnerState: before });
-    await sleep(1000); // Allow the closed transport to enter retained-session state.
+    report.resumeReadinessSamples = [];
+    report.resumeReadiness = await waitForRetainedReadiness({ endpoint, ticket: originalTicket, baseline,
+      ticketUseCount: clients.flatMap(client => client.events).filter(event =>
+        event.direction === 'sent' && event.type === 'resumeSession').length,
+      onSample: sample => report.resumeReadinessSamples.push(sample) });
 
     const resumed = makeClient('resumed');
     await resumed.connect();

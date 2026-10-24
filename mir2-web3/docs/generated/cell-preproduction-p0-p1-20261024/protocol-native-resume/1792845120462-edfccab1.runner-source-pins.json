@@ -1,0 +1,7 @@
+{
+  "scope": "Source used by the sole repaired real native run; full lifecycle source remains frozen.",
+  "sha256": {
+    "mir2-web3/apps/web/scripts/playtest-native-resume-smoke.mjs": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2",
+    "mir2-web3/apps/web/scripts/playtest-native-resume-smoke.test.mjs": "77429ef5ec8a2b28c171af74c877ef39a89bb6292efb6e1df3deb5599c42731e"
+  }
+}

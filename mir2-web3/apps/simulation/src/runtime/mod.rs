@@ -25,6 +25,8 @@ mod hero_registry_scan;
 mod hero_registry_validation;
 pub(crate) use hero_registry_scan::validate_shared_hero_physical_custody;
 pub(crate) use hero_registry_validation::validate_shared_hero_carriers;
+mod item_grants;
+pub(crate) mod item_uid_issuance;
 #[cfg(test)]
 mod equipment_storage_merge_tests;
 mod hero_stats;
@@ -55,6 +57,14 @@ pub use npc_gold_buy_outcome::{
 mod npc_purchase_outcome;
 mod npc_purchase_snapshot;
 mod npc_purchase_transaction;
+mod production;
+mod stones;
+mod stone_npc;
+pub use stone_npc::StoneWorkshopError;
+pub use production::{
+    PersonalProductionConfig, PersonalProductionFacility, PersonalProductionState,
+    ProductionDurableError, ProductionDurableExecution,
+};
 pub use npc_purchase_outcome::{
     NpcPurchaseBeforeExecution, NpcPurchaseCurrency, NpcPurchaseProcessingError,
     NpcPurchaseProcessingExecution, NpcPurchaseProcessingOutcome, NpcPurchaseRejection,
@@ -163,8 +173,10 @@ pub use session::{
 };
 pub use stage5::{GameShopPurchaseExecution, GameShopPurchaseFailure, GameShopPurchaseOutcome};
 pub use zone::{
-    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, CreatureOperation,
-    CreatureOwner, CreaturePickupIntent, GroundDropClaimTicket, PlayerId, SessionId,
+    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, CellCoord, CellSize,
+    CreatureOperation, CreatureOwner, CreaturePickupIntent, GroundDropClaimTicket,
+    MapEffectOwnerRef, PartitionId, PartitionKey, PartitionLocation, PlayerId, SessionId,
+    TopologyRevision, ZonePartitionDescriptor,
     ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
     ZoneExperiencePartner, ZoneExperienceProfile, ZoneExperienceRateBuff, ZoneExperienceRateSource,
     ZoneExperienceRateStat, ZoneExperienceSelection, ZoneFiveClassPracticeReceipt,

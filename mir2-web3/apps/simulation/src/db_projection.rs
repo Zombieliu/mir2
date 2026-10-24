@@ -87,6 +87,10 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0016_shared_conquest_authority",
         include_str!("../../../infra/postgres/migrations/0016_shared_conquest_authority.sql"),
     ),
+    (
+        "0017_sealed_stone_authority",
+        include_str!("../../../infra/postgres/migrations/0017_sealed_stone_authority.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.

@@ -13,6 +13,7 @@ import {
   resumeCredentials,
   chatLatencyCheck, authenticate, usingClient,
 } from './playtest-multiplayer-smoke.mjs';
+import { FULL_LIFECYCLE_CHECKS } from './playtest-lifecycle.mjs';
 
 const { Server: WebSocketServer } = createRequire(import.meta.url)('next/dist/compiled/ws');
 
@@ -204,6 +205,50 @@ test('skipped or failed map/combat/persistence checks can never create an overal
   assert.equal(report.loadAccepted, false);
   assert.equal(finishReport({ checks: all(), error: 'unexpected harness failure' }).ok, false);
   assert.equal(finishReport({ checks: all(), cleanupErrors: ['logout was not acknowledged'] }).ok, false);
+});
+
+test('full lifecycle is explicit and requires every new real-event check as well as the existing core', async () => {
+  const core = ['authGuards', 'twoAccounts', 'mutualVisibility', 'movement', 'turn', 'chat', 'chatLatency',
+    'sharedCombat', 'mapRoundTrip', 'logout', 'reloginPersistence'];
+  const checks = () => Object.fromEntries([...core, ...FULL_LIFECYCLE_CHECKS].map(key => [key, { status: 'passed' }]));
+  assert.equal(finishReport({ checks: checks() }).fullLifecyclePassed, false, 'legacy default stays core');
+  const complete = finishReport({ profile: 'full-lifecycle', checks: checks() });
+  assert.equal(complete.ok, true);
+  assert.equal(complete.fullLifecyclePassed, true);
+  assert.equal(complete.visualAccepted, false);
+  assert.equal(complete.loadAccepted, false);
+  assert.deepEqual(complete.requiredChecks, [...core, ...FULL_LIFECYCLE_CHECKS]);
+  for (const key of [...core, ...FULL_LIFECYCLE_CHECKS]) for (const status of ['not_run', 'failed', 'skipped', 'running']) {
+    const value = checks(); value[key].status = status;
+    const report = finishReport({ profile: 'full-lifecycle', checks: value });
+    assert.equal(report.ok, false, key + ': ' + status);
+    assert.equal(report.fullLifecyclePassed, false);
+  }
+  assert.equal(finishReport({ profile: 'unknown', checks: checks() }).ok, false);
+  await assert.rejects(runPlaytest({ endpoint: 'ws://127.0.0.1:19810/ws', realm: 'isolated',
+    profile: 'unknown', output: 'unused', privateDir: 'unused' }), /--profile must be core or full-lifecycle/);
+});
+
+test('added lifecycle commands reach the wire only with their exact ordinary parameter shape', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'playtest-lifecycle-wire-'));
+  const output = path.join(dir, 'trace.jsonl');
+  try {
+    const wire = [], client = new PlaytestClient('ws://127.0.0.1:19810/ws', 'test', output);
+    client.ws = { send: raw => wire.push(JSON.parse(raw)) };
+    for (const command of [{ type: 'pickUp', objectId: 0 }, { type: 'pickUp', objectId: '5000' },
+      { type: 'pickUp', objectId: 5000, accountId: 'other' }, { type: 'townRevive', map: 'crystal:0:1:1' },
+      { type: 'removeItem', grid: 'inventory', uniqueId: 1, to: 0, force: true },
+      { type: 'removeItem', grid: 'inventory', uniqueId: 1, to: 40 }]) {
+      assert.throws(() => client.send(command), /Invalid ordinary lifecycle command/);
+    }
+    assert.equal(client.sequence, 0, 'invalid actions are neither recorded as sent nor written');
+    client.send({ type: 'pickUp', objectId: 5000 });
+    client.send({ type: 'townRevive' });
+    client.send({ type: 'removeItem', grid: 'inventory', uniqueId: 1, to: 0 });
+    await client.writeQueue;
+    assert.deepEqual(wire, [{ type: 'pickUp', objectId: 5000 }, { type: 'townRevive' },
+      { type: 'removeItem', grid: 'inventory', uniqueId: 1, to: 0 }]);
+  } finally { await fs.unlink(output).catch(error => { if (error.code !== 'ENOENT') throw error; }); await fs.rmdir(dir); }
 });
 
 test('wire allowlist blocks teleport, grants, passkey impersonation and raw world mutation', async () => {

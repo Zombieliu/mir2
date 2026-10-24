@@ -1,0 +1,12 @@
+{
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceSnapshot": {
+    "sha256": "2c6f91a5a6519759340d91316a0e40e76ab2096cc751f2a4253b849193ddf63e"
+  },
+  "independentSourceReview": {
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\independent-source-review-06.json",
+    "sha256": "76e3465c8437a5a9ee030b2884223e8efec7e7bcf9df1cb856d141ebf6a16bd2"
+  },
+  "scope": "Controlled File fresh exact drop pickup, pure capacity preview and preserved custody identities. Ground creation timing, account atomic persistence, shared durable claims, other issuers, census, Postgres, gateway/UI/installers are not accepted."
+}

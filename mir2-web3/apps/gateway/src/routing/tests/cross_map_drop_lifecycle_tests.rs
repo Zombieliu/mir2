@@ -462,14 +462,22 @@ fn ordinary_walk_source_route_and_carried_poison_award_are_source_bound() {
         .iter()
         .map(|byte| format!("{byte:02x}"))
         .collect();
+    // The current source pin adds the five imported gameplay map-rule flags.
+    // D001/D002 retain all prior route/respawn fields and all five flags are
+    // false. This prepared two-map route does not accept unrelated map rules.
     assert_eq!(
         hash,
-        "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3"
+        "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
     );
     let source: serde_json::Value = serde_json::from_slice(bytes).unwrap();
     let maps = source["maps"].as_array().unwrap();
     let a = maps.iter().find(|m| m["map_file_name"] == SOURCE).unwrap();
     let b = maps.iter().find(|m| m["map_file_name"] == DEST).unwrap();
+    for map in [a, b] {
+        for flag in ["fight", "no_fight", "no_experience", "no_group", "no_pets"] {
+            assert_eq!(map[flag], json!(false), "unexpected {flag} in {}", map["map_file_name"]);
+        }
+    }
     assert_eq!(
         a["movements"][0],
         json!({"map_index":40,"source":{"x":30,"y":328},"destination":{"x":34,"y":323},"need_hole":false,"need_move":false,"conquest_index":0,"show_on_big_map":true,"icon":34})

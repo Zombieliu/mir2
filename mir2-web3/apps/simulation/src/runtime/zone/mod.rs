@@ -16,6 +16,7 @@ pub use owner_health::{ZoneOwnerHealthChange, ZoneOwnerHealthCursor};
 mod five_class_receipts;
 mod movement;
 mod packets;
+mod partition;
 mod replay;
 mod replication;
 mod runtime;
@@ -26,6 +27,10 @@ pub use intelligent_creatures::{CreatureOperation, CreatureOwner, CreaturePickup
 
 pub use collision::{ZoneBounds, ZoneCollision};
 pub use manager::{ZoneManager, ZoneNpcPopulationReadSet};
+pub use partition::{
+    CellCoord, CellSize, MapEffectOwnerRef, PartitionId, PartitionKey, PartitionLocation,
+    TopologyRevision, ZonePartitionDescriptor,
+};
 pub use replay::{
     gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, ZoneInput, ZoneOutput,
     ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,

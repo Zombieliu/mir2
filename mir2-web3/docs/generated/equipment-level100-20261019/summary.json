@@ -1,0 +1,968 @@
+{
+  "schema": "mir2-equipment-level100-audit/1",
+  "generatedAt": "2026-10-18T16:41:10.455724+00:00",
+  "scope": "Current local imported templates and packed resources; source-based availability, not gameplay acceptance.",
+  "productDecision": {
+    "classes": [
+      "Warrior",
+      "Wizard",
+      "Taoist",
+      "Assassin",
+      "Archer"
+    ],
+    "maxLevel": 100,
+    "slgUnlockLevel": 100,
+    "implementationStatus": "planning_only"
+  },
+  "totalImportedItems": 1628,
+  "coreEquipmentTemplates": 964,
+  "levelBins": [
+    {
+      "minLevel": 1,
+      "maxLevel": 40,
+      "templates": 443,
+      "allBindingsResourceReady": 443,
+      "bySlot": {
+        "weapon": 113,
+        "helmet": 21,
+        "necklace": 56,
+        "bracelet": 59,
+        "ring": 63,
+        "armour": 96,
+        "belt": 17,
+        "boots": 18
+      }
+    },
+    {
+      "minLevel": 41,
+      "maxLevel": 50,
+      "templates": 171,
+      "allBindingsResourceReady": 171,
+      "bySlot": {
+        "boots": 14,
+        "belt": 7,
+        "helmet": 12,
+        "armour": 48,
+        "bracelet": 45,
+        "weapon": 21,
+        "ring": 18,
+        "necklace": 6
+      }
+    },
+    {
+      "minLevel": 51,
+      "maxLevel": 60,
+      "templates": 226,
+      "allBindingsResourceReady": 226,
+      "bySlot": {
+        "bracelet": 23,
+        "ring": 46,
+        "belt": 25,
+        "necklace": 31,
+        "armour": 24,
+        "helmet": 24,
+        "boots": 24,
+        "weapon": 29
+      }
+    },
+    {
+      "minLevel": 61,
+      "maxLevel": 70,
+      "templates": 77,
+      "allBindingsResourceReady": 77,
+      "bySlot": {
+        "weapon": 15,
+        "ring": 20,
+        "bracelet": 18,
+        "necklace": 12,
+        "armour": 12
+      }
+    },
+    {
+      "minLevel": 71,
+      "maxLevel": 80,
+      "templates": 0,
+      "allBindingsResourceReady": 0,
+      "bySlot": {}
+    },
+    {
+      "minLevel": 81,
+      "maxLevel": 90,
+      "templates": 0,
+      "allBindingsResourceReady": 0,
+      "bySlot": {}
+    },
+    {
+      "minLevel": 91,
+      "maxLevel": 100,
+      "templates": 0,
+      "allBindingsResourceReady": 0,
+      "bySlot": {}
+    }
+  ],
+  "attributeRequiredTemplates": 41,
+  "defaultProfile": {
+    "id": "platinum_176",
+    "acceptanceLevel": 50,
+    "allowedClasses": [
+      "Warrior",
+      "Wizard",
+      "Taoist"
+    ],
+    "equipmentTemplates": 85
+  },
+  "resourceLibraryFamilies": {
+    "AArmour": 25,
+    "ARArmour": 22,
+    "ARWeapon": 54,
+    "AWeapon": 38,
+    "CArmour": 59,
+    "CWeapon": 79
+  },
+  "fullPackLibraryCount": 1440,
+  "manifestCountChecked": 280,
+  "manifestErrors": {},
+  "pngPagesChecked": 567,
+  "pngBytesChecked": 670308052,
+  "pngPageStatuses": {
+    "ok": 567
+  },
+  "uniqueFrameReferences": 216244,
+  "frameStatuses": {
+    "ok": 216243,
+    "frame_out_of_range": 1
+  },
+  "motionBindingsChecked": 592,
+  "motionBindingsWithGaps": 1,
+  "reserveLibrariesNotReferencedByCurrentTemplates": 62,
+  "reserveLibrariesWithMotionGaps": 1,
+  "allBindingsResourceReadyTemplates": 964,
+  "templatesWithNameEncodingIssue": 0,
+  "templatesWithRawDropTableReference": 403,
+  "auxiliaryWearableCountsNotInCoreSlots": {
+    "8": 4,
+    "11": 34,
+    "12": 28
+  },
+  "candidateAllocationStatuses": {
+    "verified_source_candidate": 788,
+    "reuse_existing_world_shape": 22,
+    "reuse_existing_icon_id": 10
+  },
+  "candidateAllocationCount": 820,
+  "readinessByClassGenderSlot": [
+    {
+      "class": "Warrior",
+      "gender": "Male",
+      "slot": "weapon",
+      "templates": 93,
+      "resourceReady": 93,
+      "rawImageIds": 65,
+      "rawShapeIds": 59,
+      "effectiveShapeIdsAt100": 59
+    },
+    {
+      "class": "Warrior",
+      "gender": "Male",
+      "slot": "armour",
+      "templates": 51,
+      "resourceReady": 51,
+      "rawImageIds": 28,
+      "rawShapeIds": 24,
+      "effectiveShapeIdsAt100": 24
+    },
+    {
+      "class": "Warrior",
+      "gender": "Male",
+      "slot": "helmet",
+      "templates": 41,
+      "resourceReady": 41,
+      "rawImageIds": 28,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Warrior",
+      "gender": "Male",
+      "slot": "necklace",
+      "templates": 93,
+      "resourceReady": 93,
+      "rawImageIds": 74,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Warrior",
+      "gender": "Male",
+      "slot": "bracelet",
+      "templates": 101,
+      "resourceReady": 101,
+      "rawImageIds": 80,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Warrior",
+      "gender": "Male",
+      "slot": "ring",
+      "templates": 122,
+      "resourceReady": 122,
+      "rawImageIds": 92,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Warrior",
+      "gender": "Male",
+      "slot": "belt",
+      "templates": 33,
+      "resourceReady": 33,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Warrior",
+      "gender": "Male",
+      "slot": "boots",
+      "templates": 36,
+      "resourceReady": 36,
+      "rawImageIds": 23,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Warrior",
+      "gender": "Female",
+      "slot": "weapon",
+      "templates": 93,
+      "resourceReady": 93,
+      "rawImageIds": 65,
+      "rawShapeIds": 59,
+      "effectiveShapeIdsAt100": 59
+    },
+    {
+      "class": "Warrior",
+      "gender": "Female",
+      "slot": "armour",
+      "templates": 51,
+      "resourceReady": 51,
+      "rawImageIds": 28,
+      "rawShapeIds": 24,
+      "effectiveShapeIdsAt100": 24
+    },
+    {
+      "class": "Warrior",
+      "gender": "Female",
+      "slot": "helmet",
+      "templates": 41,
+      "resourceReady": 41,
+      "rawImageIds": 28,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Warrior",
+      "gender": "Female",
+      "slot": "necklace",
+      "templates": 93,
+      "resourceReady": 93,
+      "rawImageIds": 74,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Warrior",
+      "gender": "Female",
+      "slot": "bracelet",
+      "templates": 101,
+      "resourceReady": 101,
+      "rawImageIds": 80,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Warrior",
+      "gender": "Female",
+      "slot": "ring",
+      "templates": 122,
+      "resourceReady": 122,
+      "rawImageIds": 92,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Warrior",
+      "gender": "Female",
+      "slot": "belt",
+      "templates": 33,
+      "resourceReady": 33,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Warrior",
+      "gender": "Female",
+      "slot": "boots",
+      "templates": 36,
+      "resourceReady": 36,
+      "rawImageIds": 23,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Male",
+      "slot": "weapon",
+      "templates": 92,
+      "resourceReady": 92,
+      "rawImageIds": 64,
+      "rawShapeIds": 58,
+      "effectiveShapeIdsAt100": 58
+    },
+    {
+      "class": "Wizard",
+      "gender": "Male",
+      "slot": "armour",
+      "templates": 51,
+      "resourceReady": 51,
+      "rawImageIds": 28,
+      "rawShapeIds": 24,
+      "effectiveShapeIdsAt100": 24
+    },
+    {
+      "class": "Wizard",
+      "gender": "Male",
+      "slot": "helmet",
+      "templates": 41,
+      "resourceReady": 41,
+      "rawImageIds": 28,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Male",
+      "slot": "necklace",
+      "templates": 93,
+      "resourceReady": 93,
+      "rawImageIds": 76,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Male",
+      "slot": "bracelet",
+      "templates": 101,
+      "resourceReady": 101,
+      "rawImageIds": 82,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Male",
+      "slot": "ring",
+      "templates": 122,
+      "resourceReady": 122,
+      "rawImageIds": 94,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Male",
+      "slot": "belt",
+      "templates": 33,
+      "resourceReady": 33,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Male",
+      "slot": "boots",
+      "templates": 36,
+      "resourceReady": 36,
+      "rawImageIds": 23,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Female",
+      "slot": "weapon",
+      "templates": 92,
+      "resourceReady": 92,
+      "rawImageIds": 64,
+      "rawShapeIds": 58,
+      "effectiveShapeIdsAt100": 58
+    },
+    {
+      "class": "Wizard",
+      "gender": "Female",
+      "slot": "armour",
+      "templates": 51,
+      "resourceReady": 51,
+      "rawImageIds": 28,
+      "rawShapeIds": 24,
+      "effectiveShapeIdsAt100": 24
+    },
+    {
+      "class": "Wizard",
+      "gender": "Female",
+      "slot": "helmet",
+      "templates": 41,
+      "resourceReady": 41,
+      "rawImageIds": 28,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Female",
+      "slot": "necklace",
+      "templates": 93,
+      "resourceReady": 93,
+      "rawImageIds": 76,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Female",
+      "slot": "bracelet",
+      "templates": 101,
+      "resourceReady": 101,
+      "rawImageIds": 82,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Female",
+      "slot": "ring",
+      "templates": 122,
+      "resourceReady": 122,
+      "rawImageIds": 94,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Female",
+      "slot": "belt",
+      "templates": 33,
+      "resourceReady": 33,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Wizard",
+      "gender": "Female",
+      "slot": "boots",
+      "templates": 36,
+      "resourceReady": 36,
+      "rawImageIds": 23,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Male",
+      "slot": "weapon",
+      "templates": 92,
+      "resourceReady": 92,
+      "rawImageIds": 64,
+      "rawShapeIds": 58,
+      "effectiveShapeIdsAt100": 58
+    },
+    {
+      "class": "Taoist",
+      "gender": "Male",
+      "slot": "armour",
+      "templates": 51,
+      "resourceReady": 51,
+      "rawImageIds": 28,
+      "rawShapeIds": 24,
+      "effectiveShapeIdsAt100": 24
+    },
+    {
+      "class": "Taoist",
+      "gender": "Male",
+      "slot": "helmet",
+      "templates": 41,
+      "resourceReady": 41,
+      "rawImageIds": 28,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Male",
+      "slot": "necklace",
+      "templates": 93,
+      "resourceReady": 93,
+      "rawImageIds": 76,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Male",
+      "slot": "bracelet",
+      "templates": 101,
+      "resourceReady": 101,
+      "rawImageIds": 82,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Male",
+      "slot": "ring",
+      "templates": 122,
+      "resourceReady": 122,
+      "rawImageIds": 94,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Male",
+      "slot": "belt",
+      "templates": 33,
+      "resourceReady": 33,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Male",
+      "slot": "boots",
+      "templates": 36,
+      "resourceReady": 36,
+      "rawImageIds": 23,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Female",
+      "slot": "weapon",
+      "templates": 92,
+      "resourceReady": 92,
+      "rawImageIds": 64,
+      "rawShapeIds": 58,
+      "effectiveShapeIdsAt100": 58
+    },
+    {
+      "class": "Taoist",
+      "gender": "Female",
+      "slot": "armour",
+      "templates": 51,
+      "resourceReady": 51,
+      "rawImageIds": 28,
+      "rawShapeIds": 24,
+      "effectiveShapeIdsAt100": 24
+    },
+    {
+      "class": "Taoist",
+      "gender": "Female",
+      "slot": "helmet",
+      "templates": 41,
+      "resourceReady": 41,
+      "rawImageIds": 28,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Female",
+      "slot": "necklace",
+      "templates": 93,
+      "resourceReady": 93,
+      "rawImageIds": 76,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Female",
+      "slot": "bracelet",
+      "templates": 101,
+      "resourceReady": 101,
+      "rawImageIds": 82,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Female",
+      "slot": "ring",
+      "templates": 122,
+      "resourceReady": 122,
+      "rawImageIds": 94,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Female",
+      "slot": "belt",
+      "templates": 33,
+      "resourceReady": 33,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Taoist",
+      "gender": "Female",
+      "slot": "boots",
+      "templates": 36,
+      "resourceReady": 36,
+      "rawImageIds": 23,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Male",
+      "slot": "weapon",
+      "templates": 46,
+      "resourceReady": 46,
+      "rawImageIds": 30,
+      "rawShapeIds": 30,
+      "effectiveShapeIdsAt100": 27
+    },
+    {
+      "class": "Assassin",
+      "gender": "Male",
+      "slot": "armour",
+      "templates": 37,
+      "resourceReady": 37,
+      "rawImageIds": 21,
+      "rawShapeIds": 17,
+      "effectiveShapeIdsAt100": 17
+    },
+    {
+      "class": "Assassin",
+      "gender": "Male",
+      "slot": "helmet",
+      "templates": 35,
+      "resourceReady": 35,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Male",
+      "slot": "necklace",
+      "templates": 92,
+      "resourceReady": 92,
+      "rawImageIds": 75,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Male",
+      "slot": "bracelet",
+      "templates": 101,
+      "resourceReady": 101,
+      "rawImageIds": 82,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Male",
+      "slot": "ring",
+      "templates": 122,
+      "resourceReady": 122,
+      "rawImageIds": 94,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Male",
+      "slot": "belt",
+      "templates": 33,
+      "resourceReady": 33,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Male",
+      "slot": "boots",
+      "templates": 36,
+      "resourceReady": 36,
+      "rawImageIds": 23,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Female",
+      "slot": "weapon",
+      "templates": 46,
+      "resourceReady": 46,
+      "rawImageIds": 30,
+      "rawShapeIds": 30,
+      "effectiveShapeIdsAt100": 27
+    },
+    {
+      "class": "Assassin",
+      "gender": "Female",
+      "slot": "armour",
+      "templates": 37,
+      "resourceReady": 37,
+      "rawImageIds": 21,
+      "rawShapeIds": 17,
+      "effectiveShapeIdsAt100": 17
+    },
+    {
+      "class": "Assassin",
+      "gender": "Female",
+      "slot": "helmet",
+      "templates": 35,
+      "resourceReady": 35,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Female",
+      "slot": "necklace",
+      "templates": 92,
+      "resourceReady": 92,
+      "rawImageIds": 75,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Female",
+      "slot": "bracelet",
+      "templates": 101,
+      "resourceReady": 101,
+      "rawImageIds": 82,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Female",
+      "slot": "ring",
+      "templates": 122,
+      "resourceReady": 122,
+      "rawImageIds": 94,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Female",
+      "slot": "belt",
+      "templates": 33,
+      "resourceReady": 33,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Assassin",
+      "gender": "Female",
+      "slot": "boots",
+      "templates": 36,
+      "resourceReady": 36,
+      "rawImageIds": 23,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Male",
+      "slot": "weapon",
+      "templates": 51,
+      "resourceReady": 51,
+      "rawImageIds": 37,
+      "rawShapeIds": 36,
+      "effectiveShapeIdsAt100": 33
+    },
+    {
+      "class": "Archer",
+      "gender": "Male",
+      "slot": "armour",
+      "templates": 38,
+      "resourceReady": 38,
+      "rawImageIds": 22,
+      "rawShapeIds": 18,
+      "effectiveShapeIdsAt100": 18
+    },
+    {
+      "class": "Archer",
+      "gender": "Male",
+      "slot": "helmet",
+      "templates": 35,
+      "resourceReady": 35,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Male",
+      "slot": "necklace",
+      "templates": 92,
+      "resourceReady": 92,
+      "rawImageIds": 75,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Male",
+      "slot": "bracelet",
+      "templates": 101,
+      "resourceReady": 101,
+      "rawImageIds": 82,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Male",
+      "slot": "ring",
+      "templates": 122,
+      "resourceReady": 122,
+      "rawImageIds": 94,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Male",
+      "slot": "belt",
+      "templates": 33,
+      "resourceReady": 33,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Male",
+      "slot": "boots",
+      "templates": 36,
+      "resourceReady": 36,
+      "rawImageIds": 23,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Female",
+      "slot": "weapon",
+      "templates": 51,
+      "resourceReady": 51,
+      "rawImageIds": 37,
+      "rawShapeIds": 36,
+      "effectiveShapeIdsAt100": 33
+    },
+    {
+      "class": "Archer",
+      "gender": "Female",
+      "slot": "armour",
+      "templates": 38,
+      "resourceReady": 38,
+      "rawImageIds": 22,
+      "rawShapeIds": 18,
+      "effectiveShapeIdsAt100": 18
+    },
+    {
+      "class": "Archer",
+      "gender": "Female",
+      "slot": "helmet",
+      "templates": 35,
+      "resourceReady": 35,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Female",
+      "slot": "necklace",
+      "templates": 92,
+      "resourceReady": 92,
+      "rawImageIds": 75,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Female",
+      "slot": "bracelet",
+      "templates": 101,
+      "resourceReady": 101,
+      "rawImageIds": 82,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Female",
+      "slot": "ring",
+      "templates": 122,
+      "resourceReady": 122,
+      "rawImageIds": 94,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Female",
+      "slot": "belt",
+      "templates": 33,
+      "resourceReady": 33,
+      "rawImageIds": 22,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    },
+    {
+      "class": "Archer",
+      "gender": "Female",
+      "slot": "boots",
+      "templates": 36,
+      "resourceReady": 36,
+      "rawImageIds": 23,
+      "rawShapeIds": null,
+      "effectiveShapeIdsAt100": null
+    }
+  ],
+  "limits": [
+    "A template count includes class/level variants and is not a count of unique art sets.",
+    "Source noDraw is recorded separately from missing/corrupt assets.",
+    "Candidate allocations reuse source pixels; no item requirements, stats, drops, saves or production switches were changed.",
+    "Allocation statuses track identifier reuse within each class/gender/slot progression, not unique pixels or unique full sets; shared art across classes remains possible.",
+    "Slot planning represents one design per bracelet/ring type, not both worn copies.",
+    "Raw drop-table references do not prove live spawning or ordinary attainability; dynamic class/level variants may be reached through origin templates.",
+    "Only equipment and core/special unmounted actions were audited; riding, fishing, hair, wings, effects, map, monster and skill completeness remain separate.",
+    "At100 effective variants follow Crystal GetRealItem; raw name, image and requirement stay separately recorded.",
+    "This is full-pack local availability, not Thin package delivery or ordinary game UI/combat validation."
+  ],
+  "inputFilesPinned": 860,
+  "inputHashesStableAfterAudit": true
+}

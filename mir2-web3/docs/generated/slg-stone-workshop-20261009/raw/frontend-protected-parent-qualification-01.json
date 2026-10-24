@@ -1,0 +1,39 @@
+{
+  "schema": "mir2.stone-frontend-protected.v1",
+  "productionParent": "07c7a55b2d834f097ead83e6f8f600ba82e4d683",
+  "frontendParent": "12880592d68a498921c25b8bc8d4ebdebc909ed1",
+  "declared": 728,
+  "authored": 6,
+  "protected": 722,
+  "requiredCommittedFrontendDependencies": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/hero_action_basis.rs",
+      "blob": "8180050cbedf73ab76bc25bf6311d4fd82b4d691",
+      "source": "12880592d68a498921c25b8bc8d4ebdebc909ed1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/hero_ingress.rs",
+      "blob": "8c0d6c656b22679bd3546f8de1a456dfbcda7ed0",
+      "source": "12880592d68a498921c25b8bc8d4ebdebc909ed1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/hero_source_witness.rs",
+      "blob": "a2389148fa708b36fed1d6e18be82aae690b891b",
+      "source": "12880592d68a498921c25b8bc8d4ebdebc909ed1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_hero_ui.rs",
+      "blob": "c7b18c19710f322c313ed0dbf6e9e49259ab16c5",
+      "source": "12880592d68a498921c25b8bc8d4ebdebc909ed1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/hero_ui_host.rs",
+      "blob": "3b5beaaa894d99f167f3da4d0b2785fbf95fa292",
+      "source": "12880592d68a498921c25b8bc8d4ebdebc909ed1"
+    }
+  ],
+  "unmatchedCount": 0,
+  "unmatched": [],
+  "method": "Canonical Git clean blobs; unchanged production parent plus explicit committed frontend dependency carry",
+  "createdUtc": "2026-10-09T15:32:09.3828753Z"
+}

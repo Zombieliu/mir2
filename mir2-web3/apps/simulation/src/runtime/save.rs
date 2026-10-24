@@ -264,6 +264,7 @@ fn snapshot_active_character_save_at(
         default_npc_events: super::default_npc_events::capture(world),
         guild_experience_journal: super::shared_guild_experience::snapshot(world),
         npc_purchase_journal: session.npc_purchase_journal.clone(),
+        personal_production: session.personal_production.clone(),
         revision,
         character,
         map_file_name: map.current_map.file_name.clone(),
@@ -1328,8 +1329,9 @@ pub(super) fn merge_persisted_mail_into_character_save(
 ) -> Result<bool, String> {
     let journal_changed =
         super::npc_purchase_transaction::protect_npc_purchase_journal(save, persisted_save)?;
+    let production_changed = super::production::protect_checkpoint(save, persisted_save)?;
     let Some(persisted_state) = persisted_save.stage5_systems_json.as_deref() else {
-        return Ok(journal_changed);
+        return Ok(journal_changed || production_changed);
     };
     let persisted_systems = serde_json::from_str::<Stage5SystemsState>(persisted_state)
         .map_err(|error| format!("failed to decode persisted stage5 mail: {error}"))?;
@@ -1363,7 +1365,12 @@ pub(super) fn merge_persisted_mail_into_character_save(
         .extend(persisted_systems.economy_projection_event_ids);
     let markers_changed = systems.economy_projection_event_ids.len() != marker_count;
     let mail_changed = merge_external_stage5_mail(&mut systems.mail, persisted_systems.mail)?;
-    if !journal_changed && !markers_changed && !mail_changed && !mentor_changed && !marriage_changed
+    if !journal_changed
+        && !production_changed
+        && !markers_changed
+        && !mail_changed
+        && !mentor_changed
+        && !marriage_changed
     {
         return Ok(false);
     }
@@ -2756,6 +2763,7 @@ fn decode_and_validate_character_save(
 ) -> Result<DecodedCharacterSavePreflight, String> {
     save.saved_pets.validate_canonical()?;
     save.default_npc_events.validate()?;
+    super::production::validate_checkpoint(save)?;
     if let Some(journal) = &save.npc_purchase_journal {
         journal
             .validate_for(
@@ -2895,6 +2903,9 @@ fn apply_character_save_with_timing(
             );
         }
     }
+    if matches!(skill_timing_restore, SkillTimingRestore::PreserveSameSession) {
+        super::production::validate_restore(world.resource::<SessionResource>().personal_production.as_ref(), save)?;
+    }
     let now_ms = unix_now_ms();
     let skill_states = skill_states
         .into_iter()
@@ -2920,6 +2931,8 @@ fn apply_character_save_with_timing(
         }
     }
     let mut restored_inventory = world.resource::<InventoryResource>().clone();
+    restored_inventory.item_uid_issuance = world.resource::<RuntimeConfigResource>().config.item_uid_issuance.clone();
+    restored_inventory.item_uid_issuance.raise_serialized_floor(save)?;
     restored_inventory.reserved_item_unique_ids.clear();
     restored_inventory.inventory_capacity = save.inventory_capacity;
     restored_inventory.inventory_items = inventory_items;
@@ -2940,6 +2953,7 @@ fn apply_character_save_with_timing(
         session.selected_character = Some(save.character.clone());
         session.bind_active_save_revision(save.revision);
         session.npc_purchase_journal = save.npc_purchase_journal.clone();
+        session.personal_production = save.personal_production.clone();
         session.npc_purchase_producer = None;
         session.npc_purchase_owner_epoch = None;
         session.activate_ranking_inspect();

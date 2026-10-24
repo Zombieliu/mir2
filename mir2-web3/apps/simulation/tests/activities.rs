@@ -345,7 +345,10 @@ fn activities_file_commit_preserves_claim_across_reload_without_save_mutation() 
         .load(config.default_character.clone())
         .unwrap();
     let account = &loaded.accounts["demo"];
-    assert_eq!(loaded.schema_version, 9);
+    assert_eq!(
+        loaded.schema_version,
+        mir2_simulation::billing::BILLING_SCHEMA_VERSION,
+    );
     assert_eq!(
         account.activities.as_ref().unwrap().claims["closed-v1-lv50"].claimed_at_ms,
         NOW
@@ -365,7 +368,10 @@ fn activities_schema8_without_new_authority_fields_migrates_without_data_loss() 
     let loaded = FileAccountStoreRepository::new(&file)
         .load(config.default_character.clone())
         .unwrap();
-    assert_eq!(loaded.schema_version, 9);
+    assert_eq!(
+        loaded.schema_version,
+        mir2_simulation::billing::BILLING_SCHEMA_VERSION,
+    );
     assert_eq!(
         loaded.accounts["demo"].saves[&config.default_character.index]
             .character

@@ -1,0 +1,1245 @@
+    Checking mir2-client-core v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-core)
+    Checking mir2-ui-core v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\ui-core)
+    Checking mir2-game-data v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\game-data)
+    Checking mir2-client-bevy v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: unused imports: `experience_label` and `key_label`
+ --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\skill_page.rs:3:59
+  |
+3 | use crate::crystal_ui::skill_page_shared::{SkillPagePlan, experience_label, key_label};
+  |                                                           ^^^^^^^^^^^^^^^^  ^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused imports: `GAME_SHOP_QUANTITY_MAX` and `GAME_SHOP_QUANTITY_MIN`
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:40:58
+   |
+40 |     GameShopModel, GameShopPaymentType, GameShopRequest, GAME_SHOP_QUANTITY_MAX,
+   |                                                          ^^^^^^^^^^^^^^^^^^^^^^
+41 |     GAME_SHOP_QUANTITY_MIN,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `item_icon_path`
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:43:51
+   |
+43 | use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
+   |                                                   ^^^^^^^^^^^^^^
+
+warning: unused import: `mail_date_label`
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:45:25
+   |
+45 |     mail_claim_enabled, mail_date_label, mail_delete_enabled, MailAttachment, MailMessage,
+   |                         ^^^^^^^^^^^^^^^
+
+warning: unused import: `shop_buy_enabled`
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:66:5
+   |
+66 |     shop_buy_enabled, shop_buy_enabled_with_pearls, shop_buy_item_command, shop_buy_quantity_max,
+   |     ^^^^^^^^^^^^^^^^
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:72:5
+   |
+72 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `storage_remove_password_enabled`, `storage_set_password_enabled`, and `storage_unlock_enabled`
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:78:5
+   |
+78 |     storage_remove_password_enabled, storage_set_password_enabled, storage_unlock_enabled,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `super::*`
+ --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\mail_list.rs:2:5
+  |
+2 | use super::*;
+  |     ^^^^^^^^
+
+warning: unused imports: `BagPaintGridViewport as OverlayInventoryGridViewport`, `inventory_second_tab_index`, `inventory_weight_bar_asset`, and `inventory_weight_bar_width`
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:103:26
+    |
+103 |     format_crystal_gold, inventory_second_tab_index, inventory_weight_bar_asset,
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+104 |     inventory_weight_bar_width, BagPaintGridViewport as OverlayInventoryGridViewport,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `GAME_SHOP_CELL_SIZE`, `GAME_SHOP_COLUMN_STEP`, `GAME_SHOP_GRID_ORIGIN`, `GAME_SHOP_PAGE_COLUMNS`, `GAME_SHOP_ROW_STEP`, `INVENTORY_WEIGHT_BAR_ORIGIN`, `INVENTORY_WEIGHT_BAR_SIZE`, `SKILL_ROW_ORIGIN`, `SKILL_ROW_SIZE`, and `SKILL_ROW_STEP_Y`
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:118:5
+    |
+118 |     GAME_SHOP_CELL_SIZE, GAME_SHOP_COLUMN_STEP, GAME_SHOP_GRID_ORIGIN, GAME_SHOP_PAGE_COLUMNS,
+    |     ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+119 |     GAME_SHOP_PAGE_SIZE as CRYSTAL_GAME_SHOP_PAGE_SIZE, GAME_SHOP_PANEL_SIZE, GAME_SHOP_ROW_STEP,
+    |                                                                               ^^^^^^^^^^^^^^^^^^
+...
+123 |     INVENTORY_PAGE_SIZE, INVENTORY_PANEL_ORIGIN, INVENTORY_PANEL_SIZE, INVENTORY_WEIGHT_BAR_ORIGIN,
+    |                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+124 |     INVENTORY_WEIGHT_BAR_SIZE, SKILL_PAGE_SIZE, SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^                                     ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^
+125 |     SKILL_ROW_STEP_Y,
+    |     ^^^^^^^^^^^^^^^^
+
+warning: unused import: `CrystalFrameSpec`
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:128:38
+    |
+128 | use super::spec::{CrystalButtonSpec, CrystalFrameSpec, CrystalRect};
+    |                                      ^^^^^^^^^^^^^^^^
+
+warning: unused import: `assignment_label`
+ --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\skill_assign_dialog.rs:2:61
+  |
+2 | use crate::crystal_ui::skill_page_shared::{SkillPageAction, assignment_label};
+  |                                                             ^^^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unnecessary parentheses around `if` condition
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:7795:8
+     |
+7795 |     if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |        ^
+7796 |         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                  ^
+     |
+help: remove these parentheses
+     |
+7795 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+7796 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+warning: unused import: `super::character_stats::class_image_index as crystal_character_class_image_index`
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:12294:5
+      |
+12294 | use super::character_stats::class_image_index as crystal_character_class_image_index;
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around type
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\skill_page_shared.rs:67:20
+   |
+67 |     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+   |                    ^                                   ^
+   |
+help: remove these parentheses
+   |
+67 -     let mut rects: (Vec<(SkillPageAction, CrystalRect)>) = (1..=16)
+67 +     let mut rects: Vec<(SkillPageAction, CrystalRect)> = (1..=16)
+   |
+
+warning: variable does not need to be mutable
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:1051:5
+     |
+1051 |     mut pending: ResMut<PendingOperations>,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:6928:17
+     |
+6928 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:6929:28
+     |
+6929 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:6929:28
+     |
+6929 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:7366:18
+     |
+7366 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:8070:25
+     |
+8070 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:8071:36
+     |
+8071 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:8052:5
+     |
+8052 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:8071:36
+     |
+8071 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:11485:9
+      |
+11485 |         skill_binding,
+      |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:11486:9
+      |
+11486 |         skill_persistence,
+      |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: unused variable: `nearby`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:2191:5
+     |
+2191 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `overlays::OverlayInventory` is more private than the item `render_order`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\hero_cross_inventory.rs:302:1
+     |
+ 302 | / pub fn render_order(
+ 303 | |     mut commands: Commands,
+ 304 | |     state: Res<NativePlayerUiState>,
+ 305 | |     panels: Query<Entity, With<OverlayInventory>>,
+ 306 | | ) {
+     | |_^ function `render_order` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayInventory` is only usable at visibility `pub(self)`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:3189:1
+     |
+3189 | struct OverlayInventory;
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_dialog::render::render`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\hero_dialog_render.rs:228:1
+     |
+ 228 | / pub fn render(
+ 229 | |     mut commands: Commands,
+ 230 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 231 | |     old: Query<Entity, With<HeroRoot>>,
+...    |
+ 236 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+ 237 | | ) {
+     | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:3186:1
+     |
+3186 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `skill_bars::host::render`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\skill_bars_host.rs:131:1
+     |
+ 131 | / pub fn render(
+ 132 | |     mut commands: Commands,
+ 133 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 134 | |     old: Query<Entity, With<SkillBarRoot>>,
+...    |
+ 138 | |     assets: Option<Res<AssetServer>>,
+ 139 | | ) {
+     | |_^ function `skill_bars::host::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:3186:1
+     |
+3186 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::render`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\hero_buff_hud.rs:121:1
+     |
+ 121 | / pub fn render(
+ 122 | |     mut commands: Commands,
+ 123 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 124 | |     old: Query<Entity, With<HeroBuffRoot>>,
+...    |
+ 127 | |     assets: Option<Res<AssetServer>>,
+ 128 | | ) {
+     | |_^ function `hero_buff_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:3186:1
+     |
+3186 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::hint`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\hero_buff_hud.rs:213:1
+     |
+ 213 | / pub fn hint(
+ 214 | |     mut commands: Commands,
+ 215 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 216 | |     old: Query<(Entity, &ComputedNode), With<HeroBuffHint>>,
+...    |
+ 219 | |     shell: Res<NativeShellModel>,
+ 220 | | ) {
+     | |_^ function `hero_buff_hud::hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:3186:1
+     |
+3186 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `overlays::status_hud::render`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\status_hud.rs:407:1
+     |
+ 407 | / pub fn render(
+ 408 | |     mut commands: Commands,
+ 409 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 410 | |     old: Query<Entity, With<StatusRoot>>,
+...    |
+ 414 | |     assets: Option<Res<AssetServer>>,
+ 415 | | ) {
+     | |_^ function `overlays::status_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:3186:1
+     |
+3186 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `render_hint`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\status_hud.rs:685:1
+     |
+ 685 | / pub fn render_hint(
+ 686 | |     mut commands: Commands,
+ 687 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 688 | |     old: Query<(Entity, &ComputedNode), With<StatusHint>>,
+...    |
+ 691 | |     shell: Res<NativeShellModel>,
+ 692 | | ) {
+     | |_^ function `render_hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:3186:1
+     |
+3186 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_frame` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\hud.rs:450:4
+    |
+450 | fn spawn_frame(
+    |    ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `spawn_frame_at` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\hud.rs:482:4
+    |
+482 | fn spawn_frame_at(
+    |    ^^^^^^^^^^^^^^
+
+warning: function `spawn_vertical_centered_text` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\hud.rs:754:4
+    |
+754 | fn spawn_vertical_centered_text<T: Component>(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `TEXT` is never used
+ --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\mail_editor.rs:8:7
+  |
+8 | const TEXT: Color = Color::srgb(0.95, 0.92, 0.82);
+  |       ^^^^
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\mail_editor.rs:15:18
+   |
+15 | pub(crate) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `render` and `render_at` are never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\mail_editor.rs:464:19
+    |
+ 75 | impl MailLetterEditor {
+    | --------------------- methods in this implementation
+...
+464 |     pub(crate) fn render(&self, parent: &mut ChildSpawnerCommands) {
+    |                   ^^^^^^
+...
+468 |     pub(crate) fn render_at(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect) {
+    |                   ^^^^^^^^^
+
+warning: multiple variants are never constructed
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:3390:5
+     |
+3361 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+3390 |     OptionsMusicVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3391 |     OptionsMusicVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3392 |     OptionsSoundVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3393 |     OptionsSoundVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3394 |     ToggleInventory,
+     |     ^^^^^^^^^^^^^^^
+3395 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+3396 |     ToggleShop,
+     |     ^^^^^^^^^^
+3397 |     ToggleNpcShop,
+     |     ^^^^^^^^^^^^^
+3398 |     ToggleStorage,
+     |     ^^^^^^^^^^^^^
+...
+3401 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+3406 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+3425 |     GroupInviteNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3426 |     GroupInviteNameSubmit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3429 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+3433 |     GuildRecruitNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3437 |     GuildCancelNoticeEdit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+3438 |     SelectGuildMember(u8),
+     |     ^^^^^^^^^^^^^^^^^
+3439 |     GuildKickMember(u8),
+3440 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+3443 |     GuildAssignNextRank,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3452 |     GuildRankNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+...
+3502 |     ClaimMail(u64),
+     |     ^^^^^^^^^
+...
+3515 |     MailGoldInc,
+     |     ^^^^^^^^^^^
+3516 |     MailGoldFocus,
+3517 |     MailGoldDec,
+     |     ^^^^^^^^^^^
+3518 |     AddMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^
+3519 |     RemoveMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^^^^
+...
+3547 |     ShopConfirm,
+     |     ^^^^^^^^^^^
+3548 |     ShopCancel,
+     |     ^^^^^^^^^^
+3549 |     SelectBagForSell(u32),
+     |     ^^^^^^^^^^^^^^^^
+3550 |     SelectBagForRepair(u32),
+     |     ^^^^^^^^^^^^^^^^^^
+3551 |     // Cash shop
+3552 |     SelectGameShopGood(i32),
+     |     ^^^^^^^^^^^^^^^^^^
+...
+3555 |     GameShopBuy,
+     |     ^^^^^^^^^^^
+3556 |     GameShopQuantityInc,
+     |     ^^^^^^^^^^^^^^^^^^^
+3557 |     GameShopQuantityDec,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3562 |     SelectBagForStore(u32),
+     |     ^^^^^^^^^^^^^^^^^
+...
+3565 |     StorageDeposit,
+     |     ^^^^^^^^^^^^^^
+3566 |     StorageWithdraw,
+     |     ^^^^^^^^^^^^^^^
+...
+3569 |     StorageRemovePassword,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `crystal_character_guild_label` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:12295:4
+      |
+12295 | fn crystal_character_guild_label(ui:&UiReadModel)->String {super::character_stats::guild_label(&ui.player)}
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `overlay_compact_item_button` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:12782:4
+      |
+12782 | fn overlay_compact_item_button(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `overlay_clickable_text_at` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:14374:4
+      |
+14374 | fn overlay_clickable_text_at(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_chat_draft` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:14581:4
+      |
+14581 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+      |    ^^^^^^^^^^^^^^^^^
+
+warning: function `render_mail_compose` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:14697:4
+      |
+14697 | fn render_mail_compose(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `native_game_shop_page_entries` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:15437:4
+      |
+15437 | fn native_game_shop_page_entries(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `storage_expiry_label` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:15478:4
+      |
+15478 | fn storage_expiry_label(binary_datetime: i64) -> Option<String> {
+      |    ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `inventory_cell_stack_label` is never used
+     --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:15786:4
+      |
+15786 | fn inventory_cell_stack_label(item: &ItemModel) -> String {
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `reserve_quote`, `commit_quote`, `reject_unsent_quote`, and `invalidate_quote` are never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\mail_parcel.rs:90:19
+    |
+ 60 | impl MailParcelUi {
+    | ----------------- methods in this implementation
+...
+ 90 |     pub(super) fn reserve_quote(&mut self,draft:&mir2_ui_core::state::MailComposeDraft,inventory:&InventoryModel,now:u64)->Option<F...
+    |                   ^^^^^^^^^^^^^
+...
+ 99 |     pub(super) fn commit_quote(&mut self,current:&Fingerprint){self.ledger.enter_quote(current);}
+    |                   ^^^^^^^^^^^^
+100 |     pub(super) fn reject_unsent_quote(&mut self){self.ledger.cancel_unsent_quote();}
+    |                   ^^^^^^^^^^^^^^^^^^^
+...
+110 |     pub(super) fn invalidate_quote(&mut self){self.ledger.invalidate_quote()}
+    |                   ^^^^^^^^^^^^^^^^
+
+warning: field `0` is never read
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\options_volume.rs:28:38
+   |
+28 | pub(super) struct OptionsVolumeTrack(pub(super) VolumeChannel);
+   |                   ------------------ ^^^^^^^^^^^^^^^^^^^^^^^^
+   |                   |
+   |                   field in this struct
+   |
+   = help: consider removing this field
+
+warning: field `0` is never read
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\options_volume.rs:31:38
+   |
+31 | pub(super) struct OptionsVolumeThumb(pub(super) VolumeChannel);
+   |                   ------------------ ^^^^^^^^^^^^^^^^^^^^^^^^
+   |                   |
+   |                   field in this struct
+   |
+   = help: consider removing this field
+
+warning: function `apply_source_key` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\skill_assign_dialog.rs:20:4
+   |
+20 | fn apply_source_key(skills: &mut SkillModel, id: u32, key: u8) {
+   |    ^^^^^^^^^^^^^^^^
+
+warning: fields `side` and `slot` are never read
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\trade_dialog.rs:359:9
+    |
+358 | pub(super) struct TradeCell {
+    |                   --------- fields in this struct
+359 |     pub side: TradeSide,
+    |         ^^^^
+360 |     pub slot: usize,
+    |         ^^^^
+
+warning: field `0` is never read
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\trade_dialog.rs:363:29
+    |
+363 | pub(super) struct TradeName(pub TradeSide);
+    |                   --------- ^^^^^^^^^^^^^
+    |                   |
+    |                   field in this struct
+    |
+    = help: consider removing this field
+
+warning: field `0` is never read
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\trade_dialog.rs:365:29
+    |
+365 | pub(super) struct TradeGold(pub TradeSide);
+    |                   --------- ^^^^^^^^^^^^^
+    |                   |
+    |                   field in this struct
+    |
+    = help: consider removing this field
+
+warning: constant `BUTTON_BG` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:37:7
+   |
+37 | const BUTTON_BG: Color = Color::srgba(0.29, 0.19, 0.11, 1.0);
+   |       ^^^^^^^^^
+
+warning: constant `BUTTON_HIGHLIGHT` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:38:7
+   |
+38 | const BUTTON_HIGHLIGHT: Color = Color::srgb(0.82, 0.63, 0.23);
+   |       ^^^^^^^^^^^^^^^^
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:39:7
+   |
+39 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: constant `AUX_CHANGE_PASSWORD_PANEL` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:49:7
+   |
+49 | const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:353:5
+    |
+347 | pub(crate) enum NativeShellButton {
+    |                 ----------------- variants in this enum
+...
+353 |     CycleClass,
+    |     ^^^^^^^^^^
+354 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+362 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+363 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_field` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:2058:4
+     |
+2058 | fn spawn_aux_field(
+     |    ^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_text_button` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:2128:4
+     |
+2128 | fn spawn_aux_text_button(
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:2181:4
+     |
+2181 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:2217:4
+     |
+2217 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:2254:4
+     |
+2254 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: associated function `from_quest` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_journey.rs:652:8
+    |
+651 | impl JourneyStep {
+    | ---------------- associated function in this implementation
+652 |     fn from_quest(quest: &Quest, route: Option<&JourneyQuestOverride>) -> Self {
+    |        ^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:78:7
+   |
+78 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter` and `QuestHelp` are never constructed
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:1196:5
+     |
+1151 | pub(crate) enum QuestUiButton {
+     |                 ------------- variants in this enum
+...
+1196 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1199 |     QuestHelp,
+     |     ^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `explicit_quest_dialog_button` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:4767:4
+     |
+4767 | fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `wrap_guidance_hint` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:5586:4
+     |
+5586 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `quest_detail_lines` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:5658:4
+     |
+5658 | fn quest_detail_lines(quest: &Quest, guidance: Option<&QuestGuidance>, class_name: &str) -> Vec<QuestDetailLine> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `quest_list_message_lines` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:5748:4
+     |
+5748 | fn quest_list_message_lines(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:7701:4
+     |
+7701 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest,
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:7893:4
+     |
+7893 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line_raw` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:7903:4
+     |
+7903 | fn tracker_title_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_body_line_raw` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:7917:4
+     |
+7917 | fn tracker_body_line_raw(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `intent_from_button` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:8065:4
+     |
+8065 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:6927:9
+     |
+6927 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:6928:9
+     |
+6928 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:6929:9
+     |
+6929 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:8069:17
+     |
+8069 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:8070:17
+     |
+8070 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:8071:17
+     |
+8071 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: `mir2-client-bevy` (lib) generated 86 warnings (run `cargo fix --lib -p mir2-client-bevy` to apply 34 suggestions)
+    Checking mir2-bevy-runtime v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\runtime)
+warning: unused imports: `CombatController`, `CombatEdge`, `CombatOutput`, and `CombatSnapshot`
+ --> E:\mir2-player-journey\mir2-web3\apps\game-client\runtime\src\combat_input_host.rs:2:38
+  |
+2 | use mir2_client_bevy::combat_input::{CombatController, CombatEdge, CombatOutput, CombatSnapshot};
+  |                                      ^^^^^^^^^^^^^^^^  ^^^^^^^^^^  ^^^^^^^^^^^^  ^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `self_camera_offset_for_applied_center` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\runtime\src\lib.rs:6179:4
+     |
+6179 | fn self_camera_offset_for_applied_center(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `owner_item` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\runtime\src\npc_purchase_economy.rs:210:4
+    |
+210 | fn owner_item(raw: &Value, container: u8, slot: u64) -> Result<ItemModel, NativeNpcEconomyError> {
+    |    ^^^^^^^^^^
+
+warning: struct `WebGl2SharedUiPrototype` is never constructed
+ --> E:\mir2-player-journey\mir2-web3\apps\game-client\runtime\src\webgl2_shared_ui.rs:8:19
+  |
+8 | pub(crate) struct WebGl2SharedUiPrototype;
+  |                   ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `startup_ui_mode` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\runtime\src\webgl2_shared_ui.rs:24:15
+   |
+24 | pub(crate) fn startup_ui_mode(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `first_raw_value_is` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\runtime\src\webgl2_shared_ui.rs:54:4
+   |
+54 | fn first_raw_value_is(raw_search: &str, name: &str, expected: &str) -> bool {
+   |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `first_raw_value` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\runtime\src\webgl2_shared_ui.rs:58:4
+   |
+58 | fn first_raw_value<'a>(raw_search: &'a str, name: &str) -> Option<(&'a str, &'a str)> {
+   |    ^^^^^^^^^^^^^^^
+
+warning: function `first_ui_request` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\runtime\src\webgl2_shared_ui.rs:72:4
+   |
+72 | fn first_ui_request(raw_search: &str, name: &str, strict_raw: bool) -> bool {
+   |    ^^^^^^^^^^^^^^^^
+
+warning: function `decoded_key_is` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\runtime\src\webgl2_shared_ui.rs:83:4
+   |
+83 | fn decoded_key_is(raw: &str, target: &str) -> bool {
+   |    ^^^^^^^^^^^^^^
+
+warning: function `hex` is never used
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\runtime\src\webgl2_shared_ui.rs:113:4
+    |
+113 | fn hex(value: u8) -> Option<u8> {
+    |    ^^^
+
+warning: `mir2-bevy-runtime` (lib) generated 10 warnings (run `cargo fix --lib -p mir2-bevy-runtime` to apply 1 suggestion)
+    Checking mir2-client-wire v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-wire)
+    Checking mir2-platform-windows v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\platform-windows)
+warning: unused imports: `EditorOwner` and `friend_clipboard_target`
+   --> src\clipboard.rs:245:31
+    |
+245 |     editor_mut, editor_owner, friend_clipboard_target, sync_draft, EditorOwner,
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^              ^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `Time`
+  --> src\entity_presentation.rs:11:51
+   |
+11 | use bevy::prelude::{Query, Res, ResMut, Resource, Time, Window, With};
+   |                                                   ^^^^
+
+warning: unused import: `bevy::input::ButtonInput`
+  --> src\gameplay_bridge.rs:13:5
+   |
+13 | use bevy::input::ButtonInput;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `KeyCode`
+  --> src\gameplay_bridge.rs:14:31
+   |
+14 | use bevy::prelude::{Commands, KeyCode, Res, ResMut, Resource};
+   |                               ^^^^^^^
+
+warning: type `EffectFrameMeta` is more private than the item `Animation::frames`
+   --> src\effects.rs:622:5
+    |
+622 |     pub frames: Vec<EffectFrameMeta>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `Animation::frames` is reachable at visibility `pub(crate)`
+    |
+note: but type `EffectFrameMeta` is only usable at visibility `pub(self)`
+   --> src\effects.rs:460:1
+    |
+460 | struct EffectFrameMeta {
+    | ^^^^^^^^^^^^^^^^^^^^^^
+    = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `EffectFrameMeta` is more private than the item `Animation::frame_at`
+   --> src\effects.rs:641:5
+    |
+641 |     pub(crate) fn frame_at(&self, elapsed_ms: u64) -> Option<&EffectFrameMeta> {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ method `Animation::frame_at` is reachable at visibility `pub(crate)`
+    |
+note: but type `EffectFrameMeta` is only usable at visibility `pub(self)`
+   --> src\effects.rs:460:1
+    |
+460 | struct EffectFrameMeta {
+    | ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `EffectSpec` is more private than the item `EffectCatalog::resolve_animation`
+   --> src\effects.rs:804:5
+    |
+804 | /     pub(crate) fn resolve_animation(
+805 | |         &self,
+806 | |         entry: &EffectSpec,
+807 | |         direction: u32,
+808 | |         value: u32,
+809 | |     ) -> Option<Animation> {
+    | |__________________________^ method `EffectCatalog::resolve_animation` is reachable at visibility `pub(crate)`
+    |
+note: but type `EffectSpec` is only usable at visibility `pub(self)`
+   --> src\effects.rs:541:1
+    |
+541 | struct EffectSpec {
+    | ^^^^^^^^^^^^^^^^^
+
+warning: function `build_entity_render_state_with_poses` is never used
+    --> src\atlas.rs:1121:15
+     |
+1121 | pub(crate) fn build_entity_render_state_with_poses(
+     |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `paste_shortcut_pressed` is never used
+  --> src\clipboard.rs:49:4
+   |
+49 | fn paste_shortcut_pressed<'a>(
+   |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: fields `direction`, `base`, and `end` are never read
+   --> src\effects.rs:526:5
+    |
+525 | struct DirectionRange {
+    |        -------------- fields in this struct
+526 |     direction: i64,
+    |     ^^^^^^^^^
+527 |     base: i64,
+    |     ^^^^
+528 |     end: i64,
+    |     ^^^
+    |
+    = note: `DirectionRange` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: fields `value`, `base`, and `end` are never read
+   --> src\effects.rs:534:5
+    |
+533 | struct ValueRange {
+    |        ---------- fields in this struct
+534 |     value: i64,
+    |     ^^^^^
+535 |     base: i64,
+    |     ^^^^
+536 |     end: i64,
+    |     ^^^
+    |
+    = note: `ValueRange` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: fields `spell_id`, `effect_id`, `direction_ranges`, `value_ranges`, and `provenance` are never read
+   --> src\effects.rs:545:5
+    |
+541 | struct EffectSpec {
+    |        ---------- fields in this struct
+...
+545 |     spell_id: Option<u32>,
+    |     ^^^^^^^^
+...
+549 |     effect_id: Option<u32>,
+    |     ^^^^^^^^^
+...
+564 |     direction_ranges: Option<Vec<DirectionRange>>,
+    |     ^^^^^^^^^^^^^^^^
+...
+570 |     value_ranges: Option<Vec<ValueRange>>,
+    |     ^^^^^^^^^^^^
+...
+588 |     provenance: Option<Value>,
+    |     ^^^^^^^^^^
+    |
+    = note: `EffectSpec` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: fields `started_at` and `persistent_object_id` are never read
+    --> src\effects.rs:1192:5
+     |
+1180 | struct EffectInstance {
+     |        -------------- fields in this struct
+...
+1192 |     started_at: u64,
+     |     ^^^^^^^^^^
+...
+1195 |     persistent_object_id: Option<u32>,
+     |     ^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `EffectInstance` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: method `tick` is never used
+    --> src\effects.rs:3859:19
+     |
+1393 | impl NativeEffects {
+     | ------------------ method in this implementation
+...
+3859 |     pub(crate) fn tick(&mut self, now_ms: u64) -> Option<String> {
+     |                   ^^^^
+
+warning: function `damage_floater_entries` is never used
+   --> src\entity_overlays.rs:732:4
+    |
+732 | fn damage_floater_entries(
+    |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `damage_floater_entries_with_motion` is never used
+   --> src\entity_overlays.rs:740:4
+    |
+740 | fn damage_floater_entries_with_motion(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `overlay_entries` is never used
+   --> src\entity_overlays.rs:853:4
+    |
+853 | fn overlay_entries(
+    |    ^^^^^^^^^^^^^^^
+
+warning: function `overlay_entries_with_motion` is never used
+   --> src\entity_overlays.rs:907:4
+    |
+907 | fn overlay_entries_with_motion(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `has_active_motion`, `sync_pending_payload_with`, `render_state_if_changed`, and `render_state_if_changed_with` are never used
+    --> src\entity_presentation.rs:298:19
+     |
+ 106 | impl NativeEntityPresentation {
+     | ----------------------------- methods in this implementation
+...
+ 298 |     pub(crate) fn has_active_motion(&self, now_ms: u64) -> bool {
+     |                   ^^^^^^^^^^^^^^^^^
+...
+ 560 |     fn sync_pending_payload_with<F>(&mut self, now_ms: u64, catalog_for: F)
+     |        ^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+1024 |     fn render_state_if_changed(&mut self, now_ms: u64, effect_visible: bool) -> Option<Value> {
+     |        ^^^^^^^^^^^^^^^^^^^^^^^
+...
+1046 |     fn render_state_if_changed_with<F>(
+     |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `send_guild_storage_gold_change` is never used
+    --> src\gameplay_bridge.rs:2242:8
+     |
+2242 | pub fn send_guild_storage_gold_change(
+     |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `send_guild_storage_item_change` is never used
+    --> src\gameplay_bridge.rs:2254:8
+     |
+2254 | pub fn send_guild_storage_item_change(
+     |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `wait_for_retry_or_leave` is never used
+    --> src\gateway.rs:3480:10
+     |
+3480 | async fn wait_for_retry_or_leave<R: CommandSource>(
+     |          ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variants `Preserve` and `Data` are never constructed
+    --> src\gateway.rs:4510:5
+     |
+4509 | enum ReconnectResetPolicy {
+     |      -------------------- variants in this enum
+4510 |     Preserve,
+     |     ^^^^^^^^
+4511 |     Scene,
+4512 |     Data,
+     |     ^^^^
+     |
+     = note: `ReconnectResetPolicy` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: function `transport_loss_reset_policy` is never used
+    --> src\gateway.rs:4557:4
+     |
+4557 | fn transport_loss_reset_policy(has_live_credential: bool) -> ReconnectResetPolicy {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `terminal_failure_reset_policy` is never used
+    --> src\gateway.rs:4569:4
+     |
+4569 | fn terminal_failure_reset_policy() -> ReconnectResetPolicy {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `handle_gateway_text` is never used
+    --> src\gateway.rs:4827:4
+     |
+4827 | fn handle_gateway_text(
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `push_native_skill_model_from_world` is never used
+    --> src\gateway.rs:7231:4
+     |
+7231 | fn push_native_skill_model_from_world(payload: &Value) -> Result<bool, String> {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `push_native_skill_model_with` is never used
+    --> src\gateway.rs:7238:4
+     |
+7238 | fn push_native_skill_model_with(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `optional_non_empty_string_value` is never used
+    --> src\gateway.rs:7806:4
+     |
+7806 | fn optional_non_empty_string_value(value: Option<&Value>) -> Value {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `transform_ui_read_model` is never used
+    --> src\gateway.rs:7817:4
+     |
+7817 | fn transform_ui_read_model(payload: &Value) -> Value {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `transform_ui_read_model_from_user_information` is never used
+    --> src\gateway.rs:7935:4
+     |
+7935 | fn transform_ui_read_model_from_user_information(payload: &Value) -> Value {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `is_pointer_captured_for_movement` is never used
+    --> src\input.rs:1086:8
+     |
+1086 | pub fn is_pointer_captured_for_movement(
+     |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `direction_to_delta` is never used
+    --> src\input.rs:3892:4
+     |
+3892 | fn direction_to_delta(direction: &str) -> (i32, i32) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: method `cell_blocks_movement` is never used
+   --> src\map_parser.rs:137:8
+    |
+119 | impl ParsedMapCache {
+    | ------------------- method in this implementation
+...
+137 |     fn cell_blocks_movement(&mut self, key: &str, x: i32, y: i32) -> Option<bool> {
+    |        ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `resolve_map_tile_draws` is never used
+   --> src\map_parser.rs:613:8
+    |
+613 | pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
+    |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `retains_cell` is never used
+    --> src\map_parser.rs:1169:19
+     |
+1125 | impl MapViewport {
+     | ---------------- method in this implementation
+...
+1169 |     pub(crate) fn retains_cell(self, x: i32, y: i32) -> bool {
+     |                   ^^^^^^^^^^^^
+
+warning: function `map_cell_blocks_movement` is never used
+    --> src\map_parser.rs:1557:8
+     |
+1557 | pub fn map_cell_blocks_movement(map_file_name: &str, x: i32, y: i32) -> Option<bool> {
+     |        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `fishing_attribute` is never used
+    --> src\map_parser.rs:2822:15
+     |
+2822 | pub(crate) fn fishing_attribute(map_file_name: &str, x: i32, y: i32) -> Option<u8> {
+     |               ^^^^^^^^^^^^^^^^^
+
+warning: function `capture_light_state_for_map` is never used
+   --> src\lighting.rs:165:15
+    |
+165 | pub(crate) fn capture_light_state_for_map(map_file_name: &str) -> Option<String> {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `capture_light_state_slug` is never used
+   --> src\lighting.rs:175:4
+    |
+175 | fn capture_light_state_slug(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `token` is never read
+  --> src\npc_purchase_client.rs:22:9
+   |
+21 | pub struct Dispatch {
+   |            -------- field in this struct
+22 |     pub token: ConnectionToken,
+   |         ^^^^^
+   |
+   = note: `Dispatch` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: method `enter` is never used
+   --> src\npc_purchase_client.rs:147:12
+    |
+ 71 | impl NativeNpcPurchaseClient {
+    | ---------------------------- method in this implementation
+...
+147 |     pub fn enter(&mut self, token: ConnectionToken, binding: PurchaseBinding,
+    |            ^^^^^
+
+warning: `mir2-platform-windows` (bin "mir2-platform-windows") generated 42 warnings (run `cargo fix --bin "mir2-platform-windows" -p mir2-platform-windows` to apply 4 suggestions)
+    Finished `dev` profile [optimized + debuginfo] target(s) in 20.33s

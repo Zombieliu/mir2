@@ -17,8 +17,11 @@ use mir2_protocol::{
 
 use super::crystal_compat::GUIDE_QUEST_ID;
 use super::equipment::{equipment_template_to_state, replace_equipment};
+use super::item_grants::{FreshItemGrant, prepare_world_grants};
+#[cfg(test)]
+use super::inventory::add_or_increment_item;
 use super::inventory::{
-    add_or_increment_item, additional_slots_needed_for_item_quantity, can_gain_item_quantity,
+    additional_slots_needed_for_item_quantity, can_gain_item_quantity,
     free_bag_slots,
 };
 use super::items::{
@@ -75,6 +78,10 @@ mod quest_reconcile_tests;
 #[cfg(test)]
 #[path = "quest_endpoint_identity_tests.rs"]
 mod quest_endpoint_identity_tests;
+
+#[cfg(test)]
+#[path = "quest_uid_tests.rs"]
+mod uid_tests;
 
 const CRYSTAL_NORMAL_QUEST_MIN_LEVEL: i32 = 1;
 const CRYSTAL_NORMAL_QUEST_MAX_LEVEL: i32 = 45;
@@ -1066,7 +1073,9 @@ fn begin_quest_impl(world: &mut World, quest_id: i32) -> QuestStage {
         return next_stage;
     }
 
-    grant_crystal_carry_items(world, &template);
+    if !grant_crystal_carry_items(world, &template) {
+        return QuestStage::Available;
+    }
     let next_stage = if crystal_quest_has_progress_tasks(&template) {
         QuestStage::InProgress
     } else {
@@ -1106,10 +1115,14 @@ fn crystal_quest_has_progress_tasks(template: &CrystalQuestPacketTemplate) -> bo
         || !template.flag_tasks.is_empty()
 }
 
-fn grant_crystal_carry_items(world: &mut World, template: &CrystalQuestPacketTemplate) {
-    for task in &template.carry_items {
-        grant_crystal_quest_task_item(world, task, u32::from(task.count.max(1)));
-    }
+fn grant_crystal_carry_items(world: &mut World, template: &CrystalQuestPacketTemplate) -> bool {
+    let grants = template.carry_items.iter().map(|task|
+        crystal_quest_task_grant(task, u32::from(task.count.max(1)))
+    ).collect::<Result<Vec<_>, _>>();
+    let Ok(grants) = grants else { return false; };
+    let Ok(plan) = prepare_world_grants(world, &grants) else { return false; };
+    *world.resource_mut::<InventoryResource>() = plan.inventory;
+    true
 }
 
 pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
@@ -1153,6 +1166,9 @@ fn complete_quest_with_selection_impl(
     let Some(quest) = quest_template_by_id(quest_id) else {
         return false;
     };
+    let Some(reward_gold) = world.resource::<PlayerRuntimeResource>().gold.checked_add(quest.completion_rewards.gold) else {
+        return false;
+    };
     {
         let resources = world.resource::<InventoryResource>();
         let needed_slots = quest
@@ -1172,13 +1188,30 @@ fn complete_quest_with_selection_impl(
             return false;
         }
     }
-    {
-        let mut resources = world.resource_mut::<InventoryResource>();
-        resources
-            .inventory_items
-            .retain(|item| item.key != quest.quest_item.key);
+    let grants = quest.completion_rewards.items.iter().map(|item| FreshItemGrant::plain(
+        ItemContainer::Bag1, &item.key, &item.name, &item.description,
+        item.preferred_slot, item.quantity, item.weight, crate::UserItemUidReason::QuestReward,
+    )).collect::<Result<Vec<_>, _>>();
+    let Ok(grants) = grants else { return false; };
+    let Ok(mut plan) = prepare_world_grants(world, &grants) else { return false; };
+    let mut equipment_rewards = Vec::new();
+    for template in &quest.completion_rewards.equipment {
+        let mut equipment = equipment_template_to_state(template);
+        // Legacy fixture equipment keeps its old identity convention. Trusted
+        // live bindings must issue before any quest or currency is published.
+        if !matches!(plan.inventory.item_uid_issuance, super::item_uid_issuance::ItemUidIssuance::Legacy) {
+            if super::equipment::user_item_from_equipment_state(&equipment).is_none() { return false; }
+            let Ok(uid) = super::item_uid_issuance::issue_for_staged_inventory(
+                &plan.inventory, crate::UserItemUidReason::QuestReward, ItemContainer::Bag1, 0,
+            ) else { return false; };
+            equipment.user_item_unique_id = Some(uid);
+            plan.inventory.reserved_item_unique_ids.insert(uid);
+        }
+        equipment_rewards.push(equipment);
     }
-    world.resource_mut::<PlayerRuntimeResource>().gold += quest.completion_rewards.gold;
+    plan.inventory.inventory_items.retain(|item| item.key != quest.quest_item.key);
+    *world.resource_mut::<InventoryResource>() = plan.inventory;
+    world.resource_mut::<PlayerRuntimeResource>().gold = reward_gold;
     if let Some(quest) = world
         .resource_mut::<QuestResource>()
         .quests
@@ -1190,20 +1223,8 @@ fn complete_quest_with_selection_impl(
     }
     quest_recurrence::record_quest_completion(world, quest_id);
 
-    for item in quest.completion_rewards.items {
-        add_or_increment_item(
-            world,
-            ItemContainer::Bag1,
-            &item.key,
-            &item.name,
-            &item.description,
-            item.preferred_slot,
-            item.quantity,
-            item.weight,
-        );
-    }
-    for equipment in quest.completion_rewards.equipment {
-        replace_equipment(world, equipment_template_to_state(&equipment));
+    for equipment in equipment_rewards {
+        replace_equipment(world, equipment);
     }
     true
 }
@@ -1226,6 +1247,12 @@ fn complete_crystal_quest(
         return false;
     }
 
+    let grants = fixed_rewards.iter().chain(selected_reward.iter()).filter(|reward| reward.count > 0)
+        .map(crystal_quest_reward_grant).collect::<Result<Vec<_>, _>>();
+    let Ok(grants) = grants else { return false; };
+    let Ok(plan) = prepare_world_grants(world, &grants) else { return false; };
+    *world.resource_mut::<InventoryResource>() = plan.inventory;
+
     {
         let mut player = world.resource_mut::<PlayerRuntimeResource>();
         player.gold = player.gold.saturating_add(info.reward_gold);
@@ -1243,9 +1270,6 @@ fn complete_crystal_quest(
     };
     let _ = super::leveling::apply_experience_gain(world, i64::from(reward_exp));
 
-    for reward in fixed_rewards.iter().chain(selected_reward.iter()) {
-        grant_crystal_quest_reward_item(world, reward);
-    }
     if let Some(template) = effective_crystal_quest_template_by_id(world, info.index) {
         take_crystal_quest_task_items(world, &template);
     }
@@ -1312,27 +1336,22 @@ fn crystal_quest_reward_slots_needed<'a>(
         .sum()
 }
 
+#[cfg(test)]
 fn grant_crystal_quest_reward_item(world: &mut World, reward: &QuestItemReward) {
     // Crystal's reward loop runs only while count > 0.
     if reward.count == 0 {
         return;
     }
-    let quantity = u32::from(reward.count);
-    let key = crystal_quest_reward_item_key(&reward.item);
-    add_or_increment_item(
-        world,
-        ItemContainer::Bag1,
-        &key,
-        &reward.item.name,
-        reward
-            .item
-            .tooltip
-            .as_deref()
-            .unwrap_or("Original Crystal quest reward."),
-        0,
-        quantity,
-        u16::from(reward.item.weight),
-    );
+    let Ok(grant) = crystal_quest_reward_grant(reward) else { return; };
+    let _ = super::item_grants::publish_world_grants(world, &[grant]);
+}
+
+fn crystal_quest_reward_grant(reward: &QuestItemReward) -> Result<FreshItemGrant, String> {
+    FreshItemGrant::plain(
+        ItemContainer::Bag1, &crystal_quest_reward_item_key(&reward.item), &reward.item.name,
+        reward.item.tooltip.as_deref().unwrap_or("Original Crystal quest reward."),
+        0, u32::from(reward.count), u16::from(reward.item.weight), crate::UserItemUidReason::QuestReward,
+    )
 }
 
 fn crystal_quest_reward_item_key(item: &ItemInfo) -> String {
@@ -1353,11 +1372,10 @@ fn crystal_quest_task_item_key(task: &CrystalQuestItemTaskTemplate) -> String {
         .unwrap_or_else(|| normalize_crystal_item_key(&task.item_name))
 }
 
-fn grant_crystal_quest_task_item(
-    world: &mut World,
+fn crystal_quest_task_grant(
     task: &CrystalQuestItemTaskTemplate,
     quantity: u32,
-) {
+) -> Result<FreshItemGrant, String> {
     let quantity = quantity.max(1);
     let key = crystal_quest_task_item_key(task);
     let (name, description, weight) = crystal_item_by_index(task.item_index)
@@ -1377,8 +1395,7 @@ fn grant_crystal_quest_task_item(
                 1,
             )
         });
-    add_or_increment_item(
-        world,
+    FreshItemGrant::plain(
         ItemContainer::Quest,
         &key,
         &name,
@@ -1386,7 +1403,8 @@ fn grant_crystal_quest_task_item(
         0,
         quantity,
         weight,
-    );
+        crate::UserItemUidReason::QuestCarryItem,
+    )
 }
 
 fn take_crystal_quest_task_items(world: &mut World, template: &CrystalQuestPacketTemplate) {

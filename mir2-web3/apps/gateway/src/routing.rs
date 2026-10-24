@@ -28,6 +28,9 @@ use owner_health::{LocalOwnerHealthValidator, PendingOwnerPresentation};
 pub(crate) use owner_health::{OwnerHealthDelivery, OwnerHealthValidator};
 #[path = "routing/npc_population_binding.rs"]
 mod npc_population_binding;
+#[path = "routing/partition_binding.rs"]
+mod partition_binding;
+pub use partition_binding::{PartitionExecutionBinding, PartitionOwnerRef, PartitionRouteBinding};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::fmt;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -1115,6 +1118,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
         if let Some(authority) = &self.owner_lease_authority {
             authority.validate_owner_lease(request.owner_lease())?;
         }
+        partition_binding::validate_runtime_execution_domain(runtime, request.owner_lease())?;
         let _slow_stage = GatewaySlowStage::start("zone_owner.in_process.execute_request");
         let mode = request.mode();
         let economy_context = if matches!(
@@ -1648,6 +1652,7 @@ impl HostedZoneOwnerCommandClient {
             request.source_sequence(),
             external_commit_authorized,
         );
+        let partition_lease = request.owner_lease().clone();
         let command = request.into_command();
         let runtime_lock_wait = GatewaySlowStage::start("zone_owner.hosted.runtime_lock_wait");
         let mut runtime = self
@@ -1658,6 +1663,7 @@ impl HostedZoneOwnerCommandClient {
         let Some(runtime) = runtime.as_mut() else {
             return Err("zone owner hosted runtime was already handed off".to_string());
         };
+        partition_binding::validate_runtime_execution_domain(runtime, &partition_lease)?;
         let _npc_execution_scope = if let Some(runtime) = runtime
             .as_mut()
             .as_any_mut()

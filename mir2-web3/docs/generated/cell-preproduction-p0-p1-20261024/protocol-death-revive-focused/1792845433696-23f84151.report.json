@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792845433696-23f84151",
+  "endpoint": "ws://127.0.0.1:17410/ws",
+  "sourceReport": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-preproduction-p0-p1-20261024\\protocol-full-lifecycle\\1792844742353-ccf6fb6e.core-projection.report.json",
+  "startedAt": "2026-10-24T12:37:13.699Z",
+  "scope": "one-bounded-real-ordinary-two-socket-death-and-town-revive-continuation",
+  "totalBudgetMs": 480000,
+  "exposureBudgetMs": 180000,
+  "checks": {
+    "ordinaryTwoLogin": {
+      "status": "passed",
+      "evidence": {
+        "actors": [
+          {
+            "name": "Af85551a6",
+            "characterIndex": 3,
+            "objectId": 1000,
+            "mapFileName": "0",
+            "x": 300,
+            "y": 623,
+            "direction": "Up"
+          },
+          {
+            "name": "Bf85551a6",
+            "characterIndex": 4,
+            "objectId": 1000,
+            "mapFileName": "0",
+            "x": 301,
+            "y": 626,
+            "direction": "Down"
+          }
+        ],
+        "before": [
+          {
+            "name": "Af85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 300,
+            "y": 623,
+            "hp": 18,
+            "maxHp": 18,
+            "dead": false
+          },
+          {
+            "name": "Bf85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 301,
+            "y": 626,
+            "hp": 18,
+            "maxHp": 18,
+            "dead": false
+          }
+        ]
+      }
+    },
+    "armourRemoval": {
+      "status": "passed",
+      "evidence": {
+        "armourRemoved": true,
+        "uniqueId": 1,
+        "to": 0,
+        "receipt": 658,
+        "owner": {
+          "name": "Af85551a6",
+          "objectId": 1000,
+          "map": "0",
+          "x": 300,
+          "y": 623,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        }
+      }
+    },
+    "ordinaryApproach": {
+      "status": "failed",
+      "error": "No walk path on 0 from 300,617 to 299,610"
+    },
+    "logout": {
+      "status": "passed",
+      "evidence": [
+        {
+          "actor": 0,
+          "receipt": 731
+        },
+        {
+          "actor": 1,
+          "receipt": 686
+        }
+      ]
+    },
+    "realmDrain": {
+      "status": "passed"
+    },
+    "sharedDeath": {
+      "status": "not_run",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "townRevive": {
+      "status": "not_run",
+      "reason": "An earlier prerequisite did not complete"
+    }
+  },
+  "samples": [],
+  "provocations": [],
+  "fullLifecycleAccepted": false,
+  "visualAccepted": false,
+  "loadAccepted": false,
+  "routeWitness": "Earlier real ordinary map-0 UserLocation trail north toward 299,600; fresh live cats alone supply attack IDs.",
+  "initialCapacity": {
+    "maxWsConnections": null,
+    "maxActiveSessions": null,
+    "maxReconnectLeases": null,
+    "maxLoginInFlight": null,
+    "maxNewCharacterInFlight": null,
+    "maxStartGameInFlight": null,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "navigation": [
+    {
+      "actor": 0,
+      "target": {
+        "x": 299,
+        "y": 616
+      },
+      "radius": 1,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 300,
+        "y": 623,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 300,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 664,
+      "throughSequence": 694,
+      "successfulSteps": 6
+    },
+    {
+      "actor": 1,
+      "target": {
+        "ai": null,
+        "canMountAttack": true,
+        "class": "Warrior",
+        "dazed": false,
+        "dead": false,
+        "direction": "Up",
+        "disposition": "friendly",
+        "fishing": false,
+        "gender": "Male",
+        "hasClassWeapon": false,
+        "hp": 18,
+        "kind": "selfPlayer",
+        "level": 1,
+        "light": 38,
+        "maxHp": 18,
+        "name": "Af85551a6",
+        "nameColourArgb": -1,
+        "objectId": 1000,
+        "ownerName": null,
+        "questIds": [],
+        "ridingMount": false,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "CArmour/00",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": "CHair/00",
+          "mountFrameOffset": null,
+          "mountLibrary": null,
+          "weaponFrameOffset": 0,
+          "weaponLibrary": "CWeapon/00",
+          "weaponLibrarySecondary": null
+        },
+        "transformType": -1,
+        "wingEffect": 0,
+        "x": 300,
+        "y": 617
+      },
+      "radius": 5,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 301,
+        "y": 626,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 300,
+        "y": 622,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 633,
+      "throughSequence": 661,
+      "successfulSteps": 4
+    }
+  ],
+  "error": "Witnessed ordinary route did not complete",
+  "armourRestoration": {
+    "receipt": 723,
+    "equipped": true
+  },
+  "finalCapacity": {
+    "maxWsConnections": null,
+    "maxActiveSessions": null,
+    "maxReconnectLeases": null,
+    "maxLoginInFlight": null,
+    "maxNewCharacterInFlight": null,
+    "maxStartGameInFlight": null,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "ok": false,
+  "finishedAt": "2026-10-24T12:37:57.333Z"
+}

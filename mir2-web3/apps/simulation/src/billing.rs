@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{AccountRecord, AccountStore, CharacterSaveRecord, SimulationConfig};
 
-pub const BILLING_SCHEMA_VERSION: u16 = 9;
+pub const BILLING_SCHEMA_VERSION: u16 = 10;
 const MAX_ORDERS_PER_ACCOUNT: usize = 4_096;
 const MAX_REVIEW_EVENTS_PER_ORDER: usize = 128;
 pub(crate) const BILLING_COMMIT_OUTCOME_UNKNOWN: &str = "BILLING_COMMIT_OUTCOME_UNKNOWN";
