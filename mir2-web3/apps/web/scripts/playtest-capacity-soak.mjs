@@ -715,7 +715,7 @@ function movement(client, target, map, routeAllowed) {
   }
   return { command: { type: 'walk', direction }, target: first, first, navigation };
 }
-function patrol(client, context, home = client.home, routeAllowed) {
+export function patrol(client, context, home = client.home, routeAllowed) {
   const owner = self(client), map = context.map;
   // A live obstacle can push a native actor outside its 3x3 patrol. Returning
   // only to home then traps it if that one corner is occupied; try the same
@@ -747,6 +747,8 @@ function patrol(client, context, home = client.home, routeAllowed) {
       return { command: { type: 'run', direction: directionOf(owner, first) }, first, target };
     }
   }
+  const preferRun = native && performance.now() < client.nativeRunPrimedUntil;
+  let firstWalk;
   for (let offset = 0; offset < points.length; offset++) {
     // Native patrol advances exactly one corner. Mutating the starting cursor
     // inside this loop used to skip a corner and endlessly cut across NPCs.
@@ -755,8 +757,15 @@ function patrol(client, context, home = client.home, routeAllowed) {
     const target = { x: home.x + dx, y: home.y + dy };
     if (distance(owner, target) === 0) { client.targetCursor = (index + 1) % points.length; continue; }
     const plan = movement(client, target, map, routeAllowed);
-    if (plan) { client.targetCursor = index; return plan; }
+    if (!plan) continue;
+    // A detour can leave the actor one step from this corner while another
+    // original corner already has two legal straight steps. Inspect only the
+    // same four native targets; movement() retains its4000-node path and all
+    // collision/transfer/route checks. Never turn a Walk into a forced Run.
+    if (!preferRun || plan.command.type === 'run') { client.targetCursor = index; return plan; }
+    firstWalk ??= { plan, index };
   }
+  if (firstWalk) { client.targetCursor = firstWalk.index; return firstWalk.plan; }
   return null;
 }
 
@@ -1505,6 +1514,11 @@ export async function runCapacity(options) {
   if (policy.activityMode === 'native') Object.defineProperty(report, 'navigationCoordination', { enumerable: true,
     value: Object.freeze({ scope: 'Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.',
       maximumHintCellsPerConnection: NAVIGATION_HINT_MAX_CELLS, blockedOpportunityRule: 'A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain.' }) });
+  if (policy.activityMode === 'native') Object.defineProperty(report, 'nativePatrolPlanning', { enumerable: true,
+    value: Object.freeze({ scope: 'Native primed patrol fallback only; original fast path and at most four existing corner targets remain.',
+      maximumFallbackCornerTargets: 4, pathExpansionLimit: 4000,
+      selectionRule: 'Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.',
+      primingRule: 'Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain.' }) });
   if (attackResults === 'v2') Object.defineProperty(report, 'attackResults', { enumerable: true,
     value: Object.freeze({ mode: 'v2', capability: ATTACK_OUTCOME_CAPABILITY,
       rule: 'No legacy fallback. Activity attacks count correlated launched outcomes only; hits still require the original dual-end damage/health evidence. Hunting attempts are offered requests, not launched attacks.' }) });

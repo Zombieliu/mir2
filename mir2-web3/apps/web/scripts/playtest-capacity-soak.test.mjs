@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
   assessMeasurements, movementDiagnosticMayContinue, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
-import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
+import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 
@@ -309,6 +309,103 @@ test('native fast patrol and normal A* both avoid controlled in-flight Run cells
   const walk = selectNativeAction(a, context); assert.ok(walk); assert.equal(navigationPlanIsClear(a, walk), true);
   assert.equal(JSON.stringify(a.snapshot), before, 'coordination never injects entities or authoritative positions');
   releaseNavigationHint(b, hint);
+});
+
+function patrolFallbackFixture(options = {}) {
+  const fixture = navigationFixture(), { clients: [client], context } = fixture;
+  const home = options.home ?? { x: 5, y: 5 }, origin = options.origin ?? { x: 7, y: 4 };
+  const blocked = options.obstacles ?? [{ x: 6, y: 5 }, { x: 6, y: 6 }, { x: 5, y: 6 }];
+  const owner = { ...client.snapshot.entities[0], ...origin };
+  client.snapshot.entities = [owner, ...blocked.map((point, index) => ({ objectId: 900 + index, kind: 'monster', name: 'Scarecrow', hp: 20, ...point }))];
+  Object.assign(client, { home, targetCursor: options.cursor ?? 0, nativeRunPrimedUntil: Infinity });
+  Object.assign(context, { map: options.map ?? context.map, patrolSpan: 2, clients: [client] });
+  return { ...fixture, client, owner };
+}
+
+test('native primed fallback chooses a real Run from an existing corner under two observed approximate Scarecrow arrangements', async () => {
+  const map = await loadProtocolCollisionMap('0');
+  // These nearby public positions approximate two formal03 frames. They are
+  // portable obstacle fixtures, not a reconstruction of its send-time AOI.
+  for (const setup of [
+    { origin: { x: 254, y: 670 }, cursor: 0, obstacles: [{ x: 253, y: 671 }, { x: 253, y: 672 }, { x: 252, y: 672 }],
+      oldGoal: { x: 254, y: 671 }, goal: { x: 254, y: 673 }, first: { x: 254, y: 671 }, target: { x: 254, y: 672 }, cursorAfter: 1 },
+    { origin: { x: 252, y: 674 }, cursor: 2, obstacles: [{ x: 252, y: 671 }, { x: 254, y: 672 }, { x: 253, y: 673 }],
+      oldGoal: { x: 252, y: 673 }, goal: { x: 254, y: 671 }, first: { x: 252, y: 673 }, target: { x: 252, y: 672 }, cursorAfter: 0 },
+  ]) {
+    const { client, context, owner } = patrolFallbackFixture({ ...setup, map, home: { x: 252, y: 671 } });
+    const oldFirstRoute = findProtocolWalkPath({ map, start: owner, target: setup.oldGoal,
+      dynamicObstacles: client.snapshot.entities.slice(1), maxExpanded: 4000 });
+    assert.equal(oldFirstRoute.length, 2, 'the original first feasible corner really offers only one Walk step');
+    const before = JSON.stringify(client.snapshot), plan = patrol(client, context);
+    assert.equal(plan.command.type, 'run'); assert.deepEqual(plan.first, setup.first); assert.deepEqual(plan.target, setup.target);
+    assert.deepEqual(plan.navigation.goal, setup.goal); assert.equal(client.targetCursor, setup.cursorAfter);
+    assert.equal(navigationPlanIsClear(client, plan), true); assert.equal(JSON.stringify(client.snapshot), before);
+  }
+});
+
+test('native primed fallback keeps the original first Walk when no original corner route has a legal Run', () => {
+  const { client, context, owner } = patrolFallbackFixture({ origin: { x: 5, y: 5 } });
+  const goals = [{ x: 7, y: 5 }, { x: 7, y: 7 }, { x: 5, y: 7 }, { x: 5, y: 5 }];
+  for (const target of goals.filter(point => point.x !== owner.x || point.y !== owner.y)) {
+    const route = findProtocolWalkPath({ map: context.map, start: owner, target, dynamicObstacles: client.snapshot.entities.slice(1), maxExpanded: 4000 });
+    assert.ok(route?.length >= 2);
+    assert.ok(route.length < 3 || route[2].x - route[1].x !== route[1].x - owner.x || route[2].y - route[1].y !== route[1].y - owner.y);
+  }
+  const plan = patrol(client, context);
+  assert.equal(plan.command.type, 'walk'); assert.deepEqual(plan.target, { x: 5, y: 4 }); assert.equal(client.targetCursor, 0);
+});
+
+test('native fallback does not prefer later Run routes when unprimed and leaves baseline first-path selection unchanged', () => {
+  for (const mode of ['native', 'baseline']) {
+    const { client, context } = patrolFallbackFixture();
+    if (mode === 'native') client.nativeRunPrimedUntil = 0;
+    else { context.policy = capacityPolicy({ profile: 'probe', activityMode: 'baseline', stages: '2' }); client.movementCount = 9; }
+    const plan = patrol(client, context);
+    assert.equal(plan.command.type, 'walk', mode); assert.deepEqual(plan.target, { x: 7, y: 5 }, mode); assert.equal(client.targetCursor, 0);
+  }
+});
+
+test('native fallback Run preference retains controlled-owner and pending-path obstacles without changing snapshots', () => {
+  for (const mode of ['owner', 'hint']) {
+    const { client, context, clients: [, peer] } = patrolFallbackFixture();
+    peer.snapshot.entities = [{ ...peer.snapshot.entities[0], x: 7, y: mode === 'owner' ? 6 : 8 }];
+    context.clients = [client, peer];
+    const hint = mode === 'hint' ? claimNavigationHint(peer, { command: { type: 'run', direction: 'Up' }, first: { x: 7, y: 7 }, target: { x: 7, y: 6 } }) : null;
+    if (mode === 'hint') assert.ok(hint);
+    const before = JSON.stringify(client.snapshot), plan = patrol(client, context);
+    assert.ok(plan); assert.notDeepEqual(plan.target, { x: 7, y: 6 }); assert.equal(navigationPlanIsClear(client, plan), true);
+    assert.equal(JSON.stringify(client.snapshot), before); releaseNavigationHint(peer, hint);
+  }
+});
+
+test('native fallback Run preference retains diagonal side-cell collision checks', () => {
+  const { client, context } = patrolFallbackFixture({ origin: { x: 3, y: 3 }, cursor: 1, obstacles: [] });
+  const direct = patrol(client, context); assert.equal(direct.command.type, 'run'); assert.deepEqual(direct.target, { x: 5, y: 5 });
+  client.targetCursor = 1; context.map.blocked[3 * context.map.width + 4] = 1;
+  const blockedSide = patrol(client, context); assert.ok(blockedSide); assert.notDeepEqual(blockedSide.target, direct.target);
+  assert.equal(navigationPlanIsClear(client, blockedSide), true);
+  assert.ok(movementHintCells({ x: 3, y: 3 }, blockedSide).every(point => protocolMapCellIsWalkable(context.map, point)));
+});
+
+test('native fallback Run preference cannot enter a transfer in its first or second step', () => {
+  for (const y of [5, 6]) {
+    const { client, context } = patrolFallbackFixture();
+    client.snapshot.mapTransfers = [{ bounds: { minX: 7, maxX: 7, minY: y, maxY: y } }];
+    const plan = patrol(client, context); assert.ok(plan);
+    assert.ok([plan.first, plan.target].every(point => point.x !== 7 || point.y !== y));
+    assert.equal(navigationPlanIsClear(client, plan), true);
+  }
+});
+
+test('native fallback Run preference retains routeAllowed on the complete route to each original goal', () => {
+  const { client, context, owner } = patrolFallbackFixture(), allowed = point => point.y <= 6;
+  const rejectedGoal = findProtocolWalkPath({ map: context.map, start: owner, target: { x: 7, y: 7 },
+    dynamicObstacles: client.snapshot.entities.slice(1), maxExpanded: 4000 });
+  assert.ok(rejectedGoal.slice(0, 3).every(allowed)); assert.equal(rejectedGoal.every(allowed), false);
+  const plan = patrol(client, context, client.home, allowed); assert.ok(plan); assert.notDeepEqual(plan.navigation.goal, { x: 7, y: 7 });
+  const accepted = findProtocolWalkPath({ map: context.map, start: owner, target: plan.navigation.goal,
+    dynamicObstacles: client.snapshot.entities.slice(1), maxExpanded: 4000 });
+  assert.ok(accepted.every(allowed)); assert.equal(navigationPlanIsClear(client, plan), true);
 });
 
 test('attack results v2 is explicit, preserves capability flags and issues strictly increasing bounded decimal IDs without fallback', () => {
@@ -2060,6 +2157,10 @@ for (const { movementIntervalMs, patrolSpan } of [{ movementIntervalMs: 650 }, {
     const chats = realm.types.filter(item => item.type === 'chat');
     for (let i = 1; i < chats.length; i++) assert.ok(chats[i].at - chats[i - 1].at >= 30000);
     assert.equal(report.nativeLoadScope.singleUnacknowledgedMovement, true); assert.equal(report.playableCapacityAccepted, false);
+    assert.equal(Object.isFrozen(report.nativePatrolPlanning), true);
+    assert.equal(report.nativePatrolPlanning.maximumFallbackCornerTargets, 4); assert.equal(report.nativePatrolPlanning.pathExpansionLimit, 4000);
+    assert.equal(Object.getOwnPropertyDescriptor(report, 'nativePatrolPlanning').writable, false);
+    assert.throws(() => { report.nativePatrolPlanning.maximumFallbackCornerTargets = 5; }, TypeError);
     assert.equal(report.continuousAcceptance.passed, true); assert.deepEqual(report.cleanupErrors, []);
   } finally { await realm.close(); }
 }));
