@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 const root=path.resolve(process.argv[2]);
 const read=async file=>JSON.parse(await fs.readFile(path.join(root,file),'utf8'));
 let hashChecks=0;
@@ -32,9 +33,25 @@ const currentSources=await read('review-source-pins.json');
 const repositoryRoot=path.resolve(root,'../../../..');
 for(const pin of currentSources.files){
   const bytes=await fs.readFile(path.join(repositoryRoot,pin.file));
-  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),pin.sha256,pin.file);
+  const rawSha=crypto.createHash('sha256').update(bytes).digest('hex');
+  if(rawSha!==pin.sha256){
+    const normalized=crypto.createHash('sha256').update(bytes.toString('utf8').replace(/\r\n/g,'\n')).digest('hex');
+    assert.equal(normalized,pin.lfNormalizedSha256,pin.file);
+  }
   hashChecks++;
 }
-const result={verifiedAtUtc:new Date().toISOString(),hashChecks,reportCounts:{originalFull:counts(full),native:counts(native),separateFocusedDeathRevive:counts(focused)},originalFullUnchangedAndIncomplete:true,redactionManifestsVerified:3,scope:'Independent hash/report-status verification. Known-secret scans themselves were performed by the evidence worker; no private credentials are loaded by this verifier.'};
-await fs.writeFile(path.join(root,'evidence-verification.json'),JSON.stringify(result,null,2)+'\n');
+let committedEvidenceFiles=0;
+if(process.argv.includes('--git-blobs')){
+  const relative=path.relative(repositoryRoot,root).replaceAll('\\','/');
+  const listed=spawnSync('git',['-c','gc.auto=0','-c','maintenance.auto=false','ls-files','--',relative],{cwd:repositoryRoot,encoding:'utf8'});
+  assert.equal(listed.status,0);
+  for(const file of listed.stdout.trim().split('\n').filter(Boolean)){
+    const blob=spawnSync('git',['-c','gc.auto=0','-c','maintenance.auto=false','cat-file','blob',`HEAD:${file}`],{cwd:repositoryRoot,maxBuffer:64*1024*1024});
+    assert.equal(blob.status,0,file);
+    assert.deepEqual(blob.stdout,await fs.readFile(path.join(repositoryRoot,file)),file);
+    committedEvidenceFiles++;
+  }
+}
+const result={verifiedAtUtc:new Date().toISOString(),hashChecks,committedEvidenceFiles,reportCounts:{originalFull:counts(full),native:counts(native),separateFocusedDeathRevive:counts(focused)},originalFullUnchangedAndIncomplete:true,redactionManifestsVerified:3,scope:'Independent hash/report-status verification. Source-only CRLF/LF variants use explicit normalized pins; recorded evidence bytes never normalize. Known-secret scans themselves were performed by the evidence worker; no private credentials are loaded by this verifier.'};
+if(!process.argv.includes('--read-only')) await fs.writeFile(path.join(root,'evidence-verification.json'),JSON.stringify(result,null,2)+'\n');
 console.log(JSON.stringify(result));
