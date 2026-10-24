@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-24T18:51:46.569Z",
+  "profile": "release",
+  "sourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "baseCommit": "68f810b442321ae66360a2be18e31dc309efdaf7",
+  "backendSourceManifest": "C:/mir2-build/p01-completion-20261024/backend-source-native-attack-v2.json",
+  "backendInputCount": 39,
+  "sourceManifestSha256": "7970dee9448ffc7fb2d4751024a25a4a0cc84fa133c1b915dfe9fff1b03a9495",
+  "sourceManifestFileSha256": "94c7ee1b121fac0634212989638d7c451e8ce89343b3bf23a9d940d7365f289d",
+  "binary": {
+    "path": "C:/mir2-build/cell-preproduction-p0-p1-20261024/target/release/mir2-gateway.exe",
+    "bytes": 87323136,
+    "sha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f"
+  },
+  "buildLog": {
+    "path": "C:/mir2-build/cell-preproduction-p0-p1-20261024/p0-native-attack-v2-release-build.log",
+    "bytes": 57090,
+    "sha256": "53107fba40692e490d4b63356815ff2fb12cf1cbce6637169ada395a0423a5ef"
+  },
+  "scope": "Opt-in ordinary attack launch-result V2 candidate. Independent source and binary binding; build success is not lifecycle or capacity acceptance."
+}

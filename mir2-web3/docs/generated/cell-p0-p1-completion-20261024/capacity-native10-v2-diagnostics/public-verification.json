@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T19:05:55.922Z",
+  "runId": "1792867932194-8f125fe4",
+  "method": "Independent read-only public inventory, explicit-copy raw SHA, external raw/monitor/recording SHA, structural credential-field scan and frozen verifier status/projection round trip.",
+  "originalCopiesVerified": 33,
+  "publicFilesVerifiedBeforeThisReceipt": 37,
+  "publicJsonFilesStructurallyChecked": 28,
+  "externalArchivesVerified": 3,
+  "rawBytes": 6526962,
+  "rawSha256": "0af342b13ce094882af03b8ff2b57b7adb1ab57c613fbb41ee0a765b09043d06",
+  "rawRows": 11100,
+  "invalidRawMonitorRows": 0,
+  "originalFailurePreserved": true,
+  "capacityAccepted": false,
+  "privateSecretValuesReadOrClaimedChecked": false,
+  "finalIndexCreated": false,
+  "existingTopicsModified": false
+}

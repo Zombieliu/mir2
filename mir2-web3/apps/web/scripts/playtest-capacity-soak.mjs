@@ -217,6 +217,7 @@ export class CapacityClient extends NativeResumeClient {
     this.navigationBlocked = false; this.navigationBlockedRows = 0;
     this.rejectedWalkCells = new Map(); this.movementCorrectionStreak = false; this.movementCorrectionRows = 0;
     this.selfTransformRows = 0;
+    this.navigationHint = null; this.navigationClosing = false;
     this.pendingAttackPacketTraces = new Set(); this.pendingAttackEvidence = null;
     this.attackResults = attackResultsMode(context.attackResults);
     this.attackV2Supported = false; this.attackV2Sequence = 0n; this.lastSentAttackV2 = 0n;
@@ -248,6 +249,12 @@ export class CapacityClient extends NativeResumeClient {
     const ownerTransform = message.type === 'packet' && typeof message.packet === 'string';
     const beforeSelf = ownerTransform ? selfTransform(this.snapshot) : null;
     super.observe(message);
+    const navigationHint = this.navigationHint, navigationReceipt = this.events.at(-1);
+    if (navigationHint && ((message.packet === 'UserLocation' && navigationReceipt.sequence > navigationHint.sendCursor &&
+        navigationReceipt.monotonicMs >= navigationHint.sentAtMs) || ['MapInformation', 'MapChanged'].includes(message.packet) ||
+        this.snapshot?.mapFileName !== navigationHint.mapFileName || !lifecyclePoint(self(this)) || hasAuthoritativePlayerDeath(this.snapshot))) {
+      releaseNavigationHint(this, navigationHint);
+    }
     if (['MapInformation', 'MapChanged'].includes(message.packet)) {
       this.combatPursuit = null; this.chaseDeferrals.clear();
       this.combatScout = null; this.combatScoutCursor = 0;
@@ -375,6 +382,7 @@ export class CapacityClient extends NativeResumeClient {
   }
   async connect() {
     const promise = super.connect();
+    this.ws.addEventListener('close', () => releaseNavigationHint(this, this.navigationHint));
     this.ws.addEventListener('message', event => { this.bytes.received += Buffer.byteLength(event.data); });
     try { await promise; } finally { clearInterval(this.timer); }
     const cursor = this.sequence;
@@ -388,6 +396,12 @@ export class CapacityClient extends NativeResumeClient {
     }
   }
   async refresh() { await this.pace(); return PlaytestClient.prototype.refresh.call(this); }
+  async close() {
+    this.navigationClosing = true;
+    const hint = this.navigationHint; releaseNavigationHint(this, hint);
+    try { return await super.close(); }
+    finally { releaseNavigationHint(this, hint); }
+  }
   async logout() {
     if (!this.inGame) return null;
     const ack = await this.request({ type: 'logOut' }, 'LogOutSuccess', 5000); this.inGame = false; return ack;
@@ -518,17 +532,20 @@ export function insideCombatCoverage(cluster, point) {
 // movement observer can make its own declared home available to this cohort.
 // In particular, an explicit cluster with no active observer is closed, not
 // the unrestricted null-cluster case. No range-to-fighter filter belongs here.
+function activeGameplayOwner(client, mapFileName) {
+  if (typeof mapFileName !== 'string' || client.ready !== true || client.inGame !== true || client.closed || client.paused ||
+      client.draining || client.navigationClosing || client.snapshot?.mapFileName !== mapFileName) return null;
+  const owner = self(client);
+  return lifecyclePoint(owner) && !hasAuthoritativePlayerDeath(client.snapshot) ? owner : null;
+}
 export function activeCombatCoverage(client, context) {
   const cluster = client.combatCluster;
   if (!cluster) return null;
   const entries = (cluster.observerBindings ?? []).flatMap(binding => {
     if (typeof binding.name !== 'string' || typeof client.snapshot.mapFileName !== 'string') return [];
     const observer = context.clients.find(other => other !== client && other.label === binding.name &&
-      cluster.observerNames.has(other.label) && other.role === 'movement' && other.ready === true && other.inGame === true &&
-      !other.closed && !other.paused && !other.draining && other.snapshot?.mapFileName === client.snapshot.mapFileName);
-    const presence = observer && self(observer);
-    return presence && lifecyclePoint(presence) && !hasAuthoritativePlayerDeath(observer.snapshot)
-      ? [{ ...binding, observer }] : [];
+      cluster.observerNames.has(other.label) && other.role === 'movement' && activeGameplayOwner(other, client.snapshot.mapFileName));
+    return observer ? [{ ...binding, observer }] : [];
   });
   return { patrolSpan: cluster.patrolSpan, observerHomes: entries.map(entry => entry.home), entries };
 }
@@ -616,9 +633,64 @@ function recordMovementCorrection(client, context, owner, plan, actual, phase, r
   }
   return avoidance;
 }
+export const NAVIGATION_HINT_MAX_CELLS = 7;
+export function movementHintCells(origin, plan) {
+  const first = lifecyclePoint(plan?.first), target = lifecyclePoint(plan?.target), start = lifecyclePoint(origin), kind = plan?.command?.type;
+  if (!start || !first || !target || !['walk', 'run'].includes(kind)) return null;
+  const dx = first.x - start.x, dy = first.y - start.y, steps = kind === 'run' ? 2 : 1;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) !== 1 || target.x !== start.x + steps * dx || target.y !== start.y + steps * dy ||
+      plan.command.direction !== directionOf(start, first)) return null;
+  const cells = new Map([[`${start.x},${start.y}`, start]]);
+  const add = point => cells.set(`${point.x},${point.y}`, point);
+  for (let step = 1; step <= steps; step++) {
+    const before = { x: start.x + (step - 1) * dx, y: start.y + (step - 1) * dy };
+    add({ x: start.x + step * dx, y: start.y + step * dy });
+    if (dx && dy) { add({ x: before.x + dx, y: before.y }); add({ x: before.x, y: before.y + dy }); }
+  }
+  return [...cells.values()];
+}
+// These are conservative tool-local navigation hints, never authoritative
+// occupancy or AOI. Keep every original AOI obstacle, including stale peer cells.
+export function navigationObstacles(client) {
+  const owner = self(client), context = client.context, mapFileName = client.snapshot?.mapFileName;
+  const occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead).concat(rejectedWalkObstacles(client));
+  if (context?.policy?.activityMode !== 'native') return occupied;
+  const clients = context?.clients ?? [];
+  if (clients.length > 100) throw new Error('Controlled navigation cohort exceeds the original100 actor ceiling');
+  for (const other of clients) {
+    if (other === client) continue; // Every receiver may independently own ID1000.
+    const actual = activeGameplayOwner(other, mapFileName);
+    if (!actual) continue;
+    occupied.push(lifecyclePoint(actual));
+    const hint = other.navigationHint;
+    if (hint?.mapFileName === mapFileName && hint.connection === other.lifecycleConnection) occupied.push(...hint.cells);
+  }
+  return occupied;
+}
+export function navigationPlanIsClear(client, plan, map = client.context.map) {
+  if (client.context?.policy?.activityMode !== 'native') return true;
+  if (typeof client.snapshot?.mapFileName !== 'string' || (client.context.mapName != null && client.snapshot.mapFileName !== client.context.mapName)) return false;
+  const origin = lifecyclePoint(self(client)), cells = movementHintCells(origin, plan);
+  if (!cells) return false;
+  const occupied = new Set(navigationObstacles(client).map(point => `${point.x},${point.y}`));
+  // An ordinary spawn can be shared; as in A*, allow leaving its origin.
+  return cells.every(point => (point.x === origin.x && point.y === origin.y) ||
+    (protocolMapCellIsWalkable(map, point) && !occupied.has(`${point.x},${point.y}`)));
+}
+export function claimNavigationHint(client, plan, sentAtMs = performance.now()) {
+  if (client.context?.policy?.activityMode !== 'native' || client.navigationHint || !activeGameplayOwner(client, client.snapshot?.mapFileName)) return null;
+  const origin = lifecyclePoint(self(client)), cells = movementHintCells(origin, plan);
+  if (!cells || cells.length > NAVIGATION_HINT_MAX_CELLS) return null;
+  const hint = Object.freeze({ connection: client.lifecycleConnection, mapFileName: client.snapshot.mapFileName, kind: plan.command.type,
+    origin: Object.freeze(origin), first: Object.freeze(lifecyclePoint(plan.first)), target: Object.freeze(lifecyclePoint(plan.target)), cells: Object.freeze(cells.map(Object.freeze)),
+    sendCursor: client.sequence, sentAtMs });
+  client.navigationHint = hint; return hint;
+}
+export function releaseNavigationHint(client, hint) {
+  if (hint && client.navigationHint === hint) client.navigationHint = null;
+}
 function movement(client, target, map, routeAllowed) {
-  const owner = self(client), occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead)
-    .concat(rejectedWalkObstacles(client));
+  const owner = self(client), occupied = navigationObstacles(client);
   const blocked = (reason, nextStep) => {
     if (client.navigationAttempts) {
       client.navigationAttemptCount++;
@@ -657,8 +729,7 @@ function patrol(client, context, home = client.home, routeAllowed) {
     // Prefer an ordinary clear two-cell corner over a one-two-one detour to a
     // blocked edge. Check the exact same two steps and diagonal side cells as
     // A*, without allocating another full-map search for each of four corners.
-    const occupied = new Set(client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead).concat(rejectedWalkObstacles(client))
-      .map(entity => `${entity.x},${entity.y}`));
+    const occupied = new Set(navigationObstacles(client).map(entity => `${entity.x},${entity.y}`));
     const clear = point => protocolMapCellIsWalkable(map, point) && !occupied.has(`${point.x},${point.y}`);
     const doorway = point => (client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
     for (let offset = 0; offset < points.length; offset++) {
@@ -880,7 +951,7 @@ function scoutCombatCoverage(client, context, now = Date.now(), coverage = activ
   if (!cluster?.observerHomes?.length || !coverage.entries.length || client.pending || !insideCombatCoverage(coverage, owner)) return null;
   if (client.combatScout?.mapFileName !== String(client.snapshot.mapFileName)) client.combatScout = null;
   if (client.combatScout && (client.combatScout.activeElapsedMs ?? 0) + now - client.combatScout.startedAt >= 20000) advanceCombatScout(client, context, 'time-budget', now);
-  const occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead).concat(rejectedWalkObstacles(client));
+  const occupied = navigationObstacles(client);
   const allowed = point => insideCombatCoverage(coverage, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
   const initialCursor = client.combatScout?.homeIndex ?? client.combatScoutCursor ?? 0;
   let searches = 0;
@@ -1031,7 +1102,7 @@ export function selectNativeAction(client, context, now = performance.now()) {
   return client.role === 'combat' ? combatPlan(client, context) : patrol(client, context);
 }
 
-async function action(client, context, planned, preparedPlan) {
+export async function action(client, context, planned, preparedPlan) {
   const phase = context.phase, owner = { ...self(client) }, plannedAt = planned.due;
   const native = context.policy.activityMode === 'native';
   const nativeMeta = native ? { nativeOpportunity: true, plannedIntervalMs: planned.intervalMs, pacingKnown: planned.cadence.pacingKnown,
@@ -1064,8 +1135,13 @@ async function action(client, context, planned, preparedPlan) {
       targetPosition: plan.targetEntity ? { x: plan.targetEntity.x, y: plan.targetEntity.y } : undefined } : {}) };
   const v2Attack = kind === 'attack' && client.attackResults === 'v2';
   if (v2Attack) row.attackResults = 'v2';
-  let attackOutcome = 'unresolved';
+  let attackOutcome = 'unresolved', navigationHint;
   try {
+    if (native && ['walk', 'run'].includes(kind)) {
+      if (!navigationPlanIsClear(client, plan, context.map) || !(navigationHint = claimNavigationHint(client, plan, sentAt))) {
+        context.add({ ...row, status: 'navigation-blocked', navigationCoordinationConflict: true }); return;
+      }
+    }
     client.waitReason = ['attack', 'chat'].includes(kind) ? 'evidence-wait' : 'owner-ack-wait';
     if (kind === 'attack') beginPendingAttackEvidence(client, plan.observer, owner,
       plan.targetEntity ?? client.snapshot.entities.find(entity => entity.objectId === command.objectId), sentAt, cursor, observerCursor);
@@ -1177,6 +1253,7 @@ async function action(client, context, planned, preparedPlan) {
       ambiguousTargetQuarantined: kind === 'attack' && native && !(error instanceof SafetyStop) });
     if (error instanceof SafetyStop || client.closed || error.terminalAttackResult) throw error;
   } finally {
+    releaseNavigationHint(client, navigationHint);
     client.waitReason = null;
     if (kind === 'attack') {
       try { finishPendingAttackEvidence(client, context, attackOutcome); }
@@ -1425,6 +1502,9 @@ export async function runCapacity(options) {
   });
   const report = { schemaVersion: 1, runId, endpoint, policy, startedAt: new Date().toISOString(), stages: [], nativeResume: [], savedVerification: [], phaseWindows: [],
     ordinaryAccountsOnly: true, visualAccepted: false, capacityUpperBound: null, acceptanceScope: 'One real egress, ordinary same-map movement/AOI and the explicitly declared combat subgroup' };
+  if (policy.activityMode === 'native') Object.defineProperty(report, 'navigationCoordination', { enumerable: true,
+    value: Object.freeze({ scope: 'Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.',
+      maximumHintCellsPerConnection: NAVIGATION_HINT_MAX_CELLS, blockedOpportunityRule: 'A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain.' }) });
   if (attackResults === 'v2') Object.defineProperty(report, 'attackResults', { enumerable: true,
     value: Object.freeze({ mode: 'v2', capability: ATTACK_OUTCOME_CAPABILITY,
       rule: 'No legacy fallback. Activity attacks count correlated launched outcomes only; hits still require the original dual-end damage/health evidence. Hunting attempts are offered requests, not launched attacks.' }) });

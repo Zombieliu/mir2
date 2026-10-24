@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
   assessMeasurements, movementDiagnosticMayContinue, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
-import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments } from './playtest-capacity-soak.mjs';
+import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 
@@ -153,7 +153,7 @@ function huntFixture(monsters, peerMonsters = monsters) {
   const client = new CapacityClient('ws://127.0.0.1:1/ws', actor(0), context);
   const owner = { ...nativeSnapshot().entities[0], name: client.label };
   client.snapshot = { ...nativeSnapshot(), entities: [owner, ...monsters] };
-  Object.assign(client, { inGame: true, home: { x: 5, y: 5 }, role: 'combat', combatArrival: { at: 1 },
+  Object.assign(client, { ready: true, inGame: true, home: { x: 5, y: 5 }, role: 'combat', combatArrival: { at: 1 },
     nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity, nativeRunPrimedUntil: 0 });
   const peer = { label: actor(1).name, inGame: true, ready: true, role: 'movement', snapshot: { mapFileName: '0', playerObjectId: 1000,
     entities: [{ objectId: 1000, kind: 'player', name: actor(1).name, x: 5, y: 9 },
@@ -162,6 +162,154 @@ function huntFixture(monsters, peerMonsters = monsters) {
   return { client, peer, owner, context, rows, actions };
 }
 const huntMonster = (objectId, name, x, y = 5) => ({ objectId, kind: 'monster', name, x, y, hp: 20 });
+
+function navigationFixture() {
+  const samples = [], sent = [], policy = capacityPolicy({ profile: 'probe', activityMode: 'native', stages: '2' });
+  const context = { policy, phase: 'stage-2', mapName: '0', map: { width: 30, height: 30, blocked: new Uint8Array(900) }, clients: [], targetClaims: new Map(),
+    writer: { add() {} }, add: row => samples.push(row), guard: { assert() {}, stop(reason) { throw new Error(reason); } } };
+  const clients = [0, 1].map(index => {
+    const client = new CapacityClient('ws://127.0.0.1:1/ws', actor(index), context);
+    const owner = { ...nativeSnapshot().entities[0], name: client.label, x: 5 + 2 * index, y: 5, hp: 30, maxHp: 30 };
+    Object.assign(client, { snapshot: { ...nativeSnapshot(), entities: [owner] }, ready: true, inGame: true, role: 'movement', home: { x: owner.x, y: owner.y },
+      nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity, plan: new NativePlan(performance.now()) });
+    client.ws = { readyState: 0, send: data => sent.push({ client, command: JSON.parse(data) }), close() { this.readyState = 3; client.closed = true; } };
+    return client;
+  });
+  context.clients = clients;
+  for (const [index, client] of clients.entries()) client.snapshot.entities.push({ ...clients[1 - index].snapshot.entities[0], objectId: 50000 + 1 - index });
+  const planned = () => ({ due: performance.now(), intervalMs: 750, cadence: { intervalMs: 750, cooldownMs: 600, pacingKnown: true } });
+  const ack = (client, point, kind = 'walk', direction = 'Right') => {
+    client.observe({ type: 'packet', packet: 'UserLocation', payload: { ...point, direction } });
+    const receipt = client.events.at(-1), objectId = 50000 + clients.indexOf(client);
+    for (const peer of clients.filter(other => other !== client)) peer.observe({ type: 'packet', packet: kind === 'run' ? 'ObjectRun' : 'ObjectWalk', payload: { objectId, location: point, direction } });
+    return receipt;
+  };
+  return { context, clients, samples, sent, planned, ack };
+}
+const walkPlan = (x, y, direction) => ({ command: { type: 'walk', direction }, first: { x, y }, target: { x, y } });
+
+test('navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots', () => {
+  const { clients: [a, b], context } = navigationFixture(), saved = JSON.stringify(b.snapshot);
+  assert.equal(a.attackResults, 'legacy', 'native movement coordination also works with the original attack protocol');
+  a.observe({ type: 'packet', packet: 'UserLocation', payload: { x: 5, y: 6, direction: 'Down' } });
+  const occupied = navigationObstacles(b), contains = (x, y) => occupied.some(point => point.x === x && point.y === y);
+  assert.equal(contains(5, 5), true, 'original stale AOI position is retained'); assert.equal(contains(5, 6), true, 'latest real owner receipt is additionally used');
+  assert.equal(contains(7, 5), false, 'self exclusion uses client identity despite both owner IDs1000'); assert.equal(JSON.stringify(b.snapshot), saved);
+  const hint = claimNavigationHint(a, walkPlan(6, 6, 'Right'));
+  assert.ok(hint); assert.equal(navigationObstacles(b).some(point => point.x === 6 && point.y === 6), true);
+  for (const inactive of ['closed', 'paused', 'draining', 'navigationClosing', 'not-ready', 'not-in-game', 'map', 'dead', 'retired']) {
+    const original = { ready: a.ready, inGame: a.inGame, map: a.snapshot.mapFileName, dead: a.snapshot.entities[0].dead };
+    if (inactive === 'not-ready') a.ready = false; else if (inactive === 'not-in-game') a.inGame = false;
+    else if (inactive === 'map') a.snapshot.mapFileName = '1'; else if (inactive === 'dead') a.snapshot.entities[0].dead = true;
+    else if (inactive === 'retired') { context.clients = [b]; context.allClients = [a, b]; } else a[inactive] = true;
+    assert.equal(navigationObstacles(b).some(point => point.x === 6 && point.y === 6), false, inactive);
+    Object.assign(a, { ready: original.ready, inGame: original.inGame, closed: false, paused: false, draining: false, navigationClosing: false });
+    a.snapshot.mapFileName = original.map; a.snapshot.entities[0].dead = original.dead; context.clients = [a, b];
+  }
+  releaseNavigationHint(a, hint); assert.equal(a.navigationHint, null);
+  const connectedHint = claimNavigationHint(a, walkPlan(6, 6, 'Right'));
+  a.lifecycleConnection++;
+  assert.equal(navigationObstacles(b).some(point => point.x === 6 && point.y === 6), false, 'another connection never inherits the prior pending path');
+  releaseNavigationHint(a, connectedHint);
+  context.clients = Array(101).fill(a); assert.throws(() => navigationObstacles(b), /100 actor ceiling/);
+});
+
+test('navigation coordination is native-only and preserves the baseline obstacle and send path', () => {
+  const { clients: [a, b], context } = navigationFixture();
+  context.policy = capacityPolicy({ profile: 'probe', activityMode: 'baseline', stages: '2' });
+  a.observe({ type: 'packet', packet: 'UserLocation', payload: { x: 5, y: 6, direction: 'Down' } });
+  const occupied = navigationObstacles(b);
+  assert.equal(occupied.some(point => point.x === 5 && point.y === 5), true);
+  assert.equal(occupied.some(point => point.x === 5 && point.y === 6), false);
+  assert.equal(claimNavigationHint(a, walkPlan(6, 6, 'Right')), null);
+  assert.equal(navigationPlanIsClear(b, walkPlan(5, 5, 'Left')), true, 'the original baseline selection/ACK path gains no new pre-send gate');
+});
+
+test('navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection', () => {
+  const { clients: [a, b] } = navigationFixture();
+  const diagonal = { command: { type: 'run', direction: 'DownRight' }, first: { x: 6, y: 6 }, target: { x: 7, y: 7 } };
+  const cells = movementHintCells({ x: 5, y: 5 }, diagonal);
+  assert.equal(cells.length, NAVIGATION_HINT_MAX_CELLS); assert.deepEqual(cells.map(point => `${point.x},${point.y}`).sort(), ['5,5', '5,6', '6,5', '6,6', '6,7', '7,6', '7,7']);
+  assert.equal(movementHintCells({ x: 5, y: 5 }, { ...diagonal, command: { type: 'run', direction: 'Right' } }), null);
+  assert.equal(movementHintCells({ x: 5, y: 5 }, { ...diagonal, target: { x: 9, y: 9 } }), null);
+  const hint = claimNavigationHint(a, diagonal); assert.ok(Object.isFrozen(hint.cells));
+  assert.equal(claimNavigationHint(a, walkPlan(6, 5, 'Right')), null); assert.equal(a.navigationHint, hint);
+  releaseNavigationHint(a, {}); assert.equal(a.navigationHint, hint, 'unrelated or old token cannot remove it');
+  assert.equal(navigationPlanIsClear(b, walkPlan(6, 6, 'DownLeft')), false, 'peer first/intermediate is blocked');
+  assert.equal(navigationPlanIsClear(b, walkPlan(6, 5, 'Left')), false, 'peer diagonal side cell is also hinted');
+  releaseNavigationHint(a, hint);
+  a.snapshot.entities[0].x = 6; a.snapshot.entities[0].y = 5;
+  assert.equal(navigationPlanIsClear(b, { command: { type: 'run', direction: 'DownLeft' }, first: { x: 6, y: 6 }, target: { x: 5, y: 7 } }), false, 'latest true owner on a diagonal side cell blocks Run');
+});
+
+test('navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity', async () => {
+  const { clients: [a, b], context, samples, sent, planned, ack } = navigationFixture();
+  let resolve; a.wait = () => new Promise(done => { resolve = done; });
+  const first = action(a, context, planned(), walkPlan(6, 5, 'Right'));
+  assert.equal(sent.length, 1); assert.ok(a.navigationHint);
+  await action(b, context, planned(), walkPlan(6, 5, 'Left'));
+  assert.equal(sent.length, 1, 'later prepared plan cannot be sent to the already hinted destination');
+  const blocked = samples.find(row => row.actor === b.label); assert.equal(blocked.status, 'navigation-blocked'); assert.equal(blocked.nativeOpportunity, true); assert.equal(blocked.plannedGameplay, true);
+  const measured = new Measurements(); measured.add(blocked); assert.equal(measured.actors.get(b.label).nativeOpportunities, 1); assert.equal(measured.actors.get(b.label).nativeCompleted, 0);
+  assert.equal(assessMeasurements(measured, [{ name: b.label, role: 'movement' }], 1, context.policy, { requireChat: false }).passed, false);
+  const receipt = ack(a, { x: 6, y: 5 }); assert.equal(a.navigationHint, null, 'fresh real UserLocation releases the pending path before the waiter finishes');
+  resolve(receipt); await first; await Promise.all(a.evidencePending);
+  assert.equal(navigationPlanIsClear(b, walkPlan(6, 5, 'Left')), false, 'actual acknowledged owner position continues to block the destination after hint release');
+});
+
+test('navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry', async () => {
+  const { clients: [a], context, planned, ack } = navigationFixture(); let resolve;
+  a.wait = () => new Promise(done => { resolve = done; });
+  const running = action(a, context, planned(), walkPlan(6, 5, 'Right')), old = a.navigationHint;
+  const receipt = ack(a, { x: 6, y: 5 }), fresh = claimNavigationHint(a, walkPlan(6, 6, 'Down'));
+  assert.ok(fresh); assert.notEqual(old, fresh); resolve(receipt); await running; await Promise.all(a.evidencePending);
+  assert.equal(a.navigationHint, fresh, 'the old action finally only releases its own identity token');
+  a.observe({ type: 'worldSnapshot', payload: { ...a.snapshot, mapFileName: '1' } }); assert.equal(a.navigationHint, null);
+  a.snapshot.mapFileName = '0'; const deathHint = claimNavigationHint(a, walkPlan(6, 6, 'Down')); assert.ok(deathHint);
+  a.observe({ type: 'packet', packet: 'ObjectDied', payload: { objectId: 1000 } }); assert.equal(a.navigationHint, null);
+  a.snapshot.entities[0].dead = false; a.snapshot.playerHp = 30;
+  const closeHint = claimNavigationHint(a, walkPlan(6, 6, 'Down')); assert.ok(closeHint); await a.close(); assert.equal(a.navigationHint, null);
+});
+
+test('navigation hints release on send errors and real owner timeouts without suppressing old failure counters', async () => {
+  for (const reason of ['send', 'timeout']) {
+    const { clients: [a], context, samples, planned } = navigationFixture();
+    if (reason === 'send') a.ws.send = () => { throw new Error('send failed'); };
+    else a.wait = async () => { throw new Error('walk authoritative acknowledgement timed out'); };
+    await action(a, context, planned(), walkPlan(6, 5, 'Right'));
+    assert.equal(a.navigationHint, null); assert.equal(samples[0].status, reason === 'send' ? 'error' : 'timeout');
+    assert.equal(samples[0].nativeOpportunity, true);
+    const measured = new Measurements(); measured.add(samples[0]);
+    assert.equal(measured.actors.get(a.label).nativeCompleted, 0);
+    assert.equal(assessMeasurements(measured, [{ name: a.label, role: 'movement' }], 1, context.policy, { requireChat: false }).passed, false);
+  }
+});
+
+test('navigation hints release on a same-position owner receipt while the original movement correction still fails acceptance', async () => {
+  const { clients: [a], context, samples, planned } = navigationFixture(); let resolve;
+  a.wait = () => new Promise(done => { resolve = done; });
+  const running = action(a, context, planned(), walkPlan(6, 5, 'Right'));
+  assert.ok(a.navigationHint);
+  a.observe({ type: 'packet', packet: 'UserLocation', payload: { x: 5, y: 5, direction: 'Right' } });
+  assert.equal(a.navigationHint, null);
+  resolve(a.events.at(-1)); await running;
+  assert.equal(samples[0].status, 'corrected'); assert.deepEqual(samples[0].actual, { x: 5, y: 5 });
+  const measured = new Measurements(); measured.add(samples[0]);
+  const verdict = assessMeasurements(measured, [{ name: a.label, role: 'movement' }], 1, context.policy, { requireChat: false });
+  assert.equal(verdict.correctionRatio, 1); assert.equal(verdict.passed, false);
+  assert.equal(measured.actors.get(a.label).nativeCompleted, 0);
+});
+
+test('native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched', () => {
+  const { clients: [a, b], context } = navigationFixture();
+  const before = JSON.stringify(a.snapshot), hint = claimNavigationHint(b, { command: { type: 'run', direction: 'Left' }, first: { x: 6, y: 5 }, target: { x: 5, y: 5 } });
+  assert.ok(hint); a.nativeRunPrimedUntil = performance.now() + 10000;
+  const fast = selectNativeAction(a, context); assert.ok(fast); assert.notDeepEqual(fast.target, { x: 7, y: 5 }); assert.equal(navigationPlanIsClear(a, fast), true);
+  a.nativeRunPrimedUntil = 0;
+  const walk = selectNativeAction(a, context); assert.ok(walk); assert.equal(navigationPlanIsClear(a, walk), true);
+  assert.equal(JSON.stringify(a.snapshot), before, 'coordination never injects entities or authoritative positions');
+  releaseNavigationHint(b, hint);
+});
 
 test('attack results v2 is explicit, preserves capability flags and issues strictly increasing bounded decimal IDs without fallback', () => {
   assert.equal(attackResultsMode(), 'legacy'); assert.equal(attackResultsMode('v2'), 'v2');
@@ -378,6 +526,22 @@ test('native scout uses ordinary covered adjacent goals to explore another decla
   const route = findProtocolWalkPath({ map: context.map, start: owner, target: plan.navigation.goal,
     dynamicObstacles: client.snapshot.entities.filter(e => e.objectId !== owner.objectId), maxExpanded: 4000 });
   assert.ok(route.length > 8); assert.ok(route.every(point => insideCombatCoverage(client.combatCluster, point)));
+});
+
+test('native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot', () => {
+  const { client, secondPeer, context } = scoutFixture(); secondPeer.context = context;
+  const first = selectNativeAction(client, context), goal = first.navigation.goal;
+  assert.equal(first.scouting, true);
+  const origin = selfFor(secondPeer), directions = [[-1, -1, 'UpLeft'], [0, -1, 'Up'], [1, -1, 'UpRight'], [-1, 0, 'Left'],
+    [1, 0, 'Right'], [-1, 1, 'DownLeft'], [0, 1, 'Down'], [1, 1, 'DownRight']];
+  const direction = directions.find(([dx, dy]) => origin.x + dx === goal.x && origin.y + dy === goal.y)?.[2];
+  assert.ok(direction);
+  const before = JSON.stringify(client.snapshot), hint = claimNavigationHint(secondPeer, walkPlan(goal.x, goal.y, direction));
+  assert.ok(hint);
+  const next = selectNativeAction(client, context);
+  assert.equal(next.scouting, true); assert.notDeepEqual(next.navigation.goal, goal);
+  assert.equal(JSON.stringify(client.snapshot), before);
+  releaseNavigationHint(secondPeer, hint);
 });
 
 test('native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches', () => {
@@ -977,7 +1141,7 @@ test('native navigation diagnostics retain the first blocked streak with bounded
   const nearby = Array.from({ length: 80 }, (_, index) => ({ objectId: 10000 + index, kind: 'monster', name: 'Deer', x: 9, y: 6 }));
   client.snapshot = { ...nativeSnapshot(), entities: [owner, ...blockers, ...nearby,
     { objectId: 88888, kind: 'monster', name: 'ignored-dead', x: 8, y: 6, dead: true }] };
-  Object.assign(client, { home: { x: 5, y: 5 }, role: 'movement', nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity });
+  Object.assign(client, { ready: true, inGame: true, home: { x: 5, y: 5 }, role: 'movement', nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity });
   const offer = async () => {
     client.plan = new NativePlan(performance.now()); offerNativeAction(client, context, performance.now()); await client.pending;
   };
@@ -1021,7 +1185,7 @@ test('native corrected Walk detours around the refused first cell until expiry w
   const client = new CapacityClient('ws://127.0.0.1:1/ws', actor(0), context);
   const owner = { ...nativeSnapshot().entities[0], name: client.label, x: 8, y: 5 };
   client.snapshot = { ...nativeSnapshot(), entities: [owner] };
-  Object.assign(client, { home: { x: 5, y: 5 }, role: 'movement', targetCursor: 3, nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity });
+  Object.assign(client, { ready: true, inGame: true, home: { x: 5, y: 5 }, role: 'movement', targetCursor: 3, nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity });
   client.send = command => client.events.push({ direction: 'received', type: 'packet', packet: 'UserLocation',
     sequence: ++client.sequence, monotonicMs: performance.now(), payload: { x: owner.x, y: owner.y, direction: command.direction } });
   const offer = async () => { client.plan = new NativePlan(performance.now()); offerNativeAction(client, context); await client.pending; };
@@ -1052,7 +1216,7 @@ test('native correction avoidance never guesses a Run blocker and keeps a bounde
   client.snapshot = { ...nativeSnapshot(), entities: [owner, ...Array.from({ length: 80 }, (_, index) => ({
     objectId: 900 + index, kind: 'monster', name: 'never-copy-name', x: 10, y: 7, dead: Boolean(index % 2),
     password: 'private-password', inventory: ['private-inventory'] }))] };
-  Object.assign(client, { home: { x: 5, y: 5 }, role: 'movement', targetCursor: 3, nativeRunPrimedUntil: Infinity,
+  Object.assign(client, { ready: true, inGame: true, home: { x: 5, y: 5 }, role: 'movement', targetCursor: 3, nativeRunPrimedUntil: Infinity,
     nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity });
   client.send = command => client.events.push({ direction: 'received', type: 'packet', packet: 'UserLocation',
     sequence: ++client.sequence, monotonicMs: performance.now(), payload: { x: owner.x, y: owner.y, direction: command.direction } });

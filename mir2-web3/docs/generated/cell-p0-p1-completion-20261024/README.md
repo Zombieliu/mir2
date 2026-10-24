@@ -50,7 +50,15 @@
 
 新增普通攻击 [V2 同步结果合同](../../NATIVE-ATTACK-OUTCOME-V2.md)用于明确关联本次请求与实际起手结果。旧攻击协议保持原行为；V2 需要有效认证及真实共享 Zone actor，经 owner/执行域检查，连接内请求 ID 在变更前预留。只有本次权威执行的原始结果可以给出 `launched/notLaunched`；丢响应、执行错误或来源不明的空包仍不能冒称拒绝。起手回执不代替原双端正伤害证据，900ms、1% 超时及 5% 纠正门槛保持；V2 未起手比例另以其请求数独立计算并应用原 5% 门槛。第四次旧失败不回写。
 
-V2 与原恢复、交接、经济、移动及 owner 相邻用例统一验收为 [157 passed / 2 ignored](validation/p01-typed-attack-and-adjacent-final-04.log)，407.14 秒，无失败。两个忽略项分别需要独立 PostgreSQL 库和显式真实网络场景输入，不计为通过。[验证记录](native-attack-v2-validation.json)保留前序失败及原因：RPC 显式认证预检已修复；旧远程攻击夹具原先只改个人位置并过早要求命中，现仅修真实共享 Zone 的三格落点、合法 Focus 命中条件及 700ms 结算时刻，双端原断言保留。生产战斗规则和时序未改变。[本轮全部 31 个受影响 Rust 文件只读格式检查](validation/p01-native-attack-v2-rustfmt-check.json)通过。上述是工程回归，新的 Release 生命周期与容量探针尚待执行。
+V2 与原恢复、交接、经济、移动及 owner 相邻用例统一验收为 [157 passed / 2 ignored](validation/p01-typed-attack-and-adjacent-final-04.log)，407.14 秒，无失败。两个忽略项分别需要独立 PostgreSQL 库和显式真实网络场景输入，不计为通过。[验证记录](native-attack-v2-validation.json)保留前序失败及原因：RPC 显式认证预检已修复；旧远程攻击夹具原先只改个人位置并过早要求命中，现仅修真实共享 Zone 的三格落点、合法 Focus 命中条件及 700ms 结算时刻，双端原断言保留。生产战斗规则和时序未改变。最初格式清单只列 31 个文件，遗漏三个新增模块；随后按完整构建清单对[全部 34 个 Rust 输入重新只读检查](validation/p01-native-attack-v2-rustfmt-all34-check.json)，全部通过，旧清单保留。
+
+V2 后端对应提交 `461f1d85eed6309a55a88bd79a0022f7b97febe4`、[39 项输入](backend-source-native-attack-v2.json)和[独立 Release](release-native-attack-v2.json)，二进制 SHA-256 为 `855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f`。该提交已快进推送到独立分支，原分支保持不变，见[远端复核](native-attack-v2-checkpoint-push-verification.json)。该版新鲜双普通客户端完整闭环为 **16/16**，[独立原始协议审计](protocol-full-lifecycle-native-attack-v2/1792868332300-ff0decb3.independent-audit.json)核对 354 条普通发出指令、真实死亡复活、击杀掉落与唯一拾取、跨图及退出重登；首次未掉落尝试保留，未拼接不同运行的结果。双方退出后六项连接状态为零，独立 PID/端口复核及正常 exit 0 通过。该闭环沿用旧普通攻击驱动，V2 起手回执另由容量探针验证。
+
+第五次 10 人 V2 探针 `1792867932194-8f125fe4` 仍为 **failed**：[30 秒阶段通过，soak 仅运行 219.218 秒](capacity-native10-v2-diagnostics/collection-verification.json)，原始三次战斗角色窗口中两次通过，未完成六个窗口。失败窗口中 30 次 V2 请求均起手并有双端真实正伤害，0 未起手、0 超时；移动为 19 次中的 2 次原地纠正，10.526% 超过原 5% 门槛。原判定不改写。
+
+[两次移动的独立时序分析](capacity-native10-v2-analysis/diagnostic-v1.json)显示，观察者 4 分别早约 1.36/1.55ms 发向同一落点 `(248,646)`；fighter 发出时观察者自己的 ACK 尚未到达。纠正时可见占位和相邻录像帧与并发争格相符；缺完整移动逐包追踪及服务端拒因，不声称精确服务器提交/广播顺序。已有规划器阻挡已观测玩家，问题是同一驱动中多个控制器的在途意图尚未互相可见。
+
+现已为 native 活动模式补受控客户端的保守导航协调：原 AOI 障碍与真实接收的同图活跃客户端位置、每连接最多一条且最多七格的在途提示取并集；发包前同步复核并登记。提示不修改权威占格或快照，同位置 ACK 仍是纠正，冲突不发送仍计入原计划机会。原节奏、超时、5% 纠正及攻击/正伤害门槛不变。[最终九输入冻结清单](capacity-movement-coordination-driver-frozen-v1.json)绑定[完整回归 138/138](validation/movement-coordination-capacity-regression-v2.log)与[定向 13/13](validation/movement-coordination-focused-v4.log)，全部为最终源码。首轮 134 passed / 4 failed 的[原日志](validation/movement-coordination-capacity-regression-v1.log)和[测试前像](validation/movement-coordination-regression-v1-test-preimage.mjs)保留；仅补四处旧测试夹具的已进场初始化，原断言保留。后端 39 输入、普通生命周期六驱动和容量门槛 core 均未改动，继续复用 `461f1d85…` 的真实 Release，不把 Node 驱动的新提交冒充重新构建。第六次真实重测和正式阶梯尚未启动，P0 及 P2 晋级状态不变。
 
 ## 本轮范围
 

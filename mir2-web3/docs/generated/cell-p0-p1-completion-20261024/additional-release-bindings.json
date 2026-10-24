@@ -4,6 +4,10 @@
     {
       "manifest": "backend-source-spectator-buffer-827d4c8.json",
       "build": "release-spectator-buffer-827d4c8.json"
+    },
+    {
+      "manifest": "backend-source-native-attack-v2.json",
+      "build": "release-native-attack-v2.json"
     }
   ]
 }

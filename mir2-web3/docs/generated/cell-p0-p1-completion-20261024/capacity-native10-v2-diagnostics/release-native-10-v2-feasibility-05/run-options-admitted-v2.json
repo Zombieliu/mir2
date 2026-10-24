@@ -1,0 +1,20 @@
+{
+  "realm": "isolated",
+  "endpoint": "ws://127.0.0.1:17510/ws",
+  "profile": "probe",
+  "activityMode": "native",
+  "stages": "10",
+  "stageSeconds": 30,
+  "soakSeconds": 360,
+  "combatActors": 1,
+  "resumeSamples": 0,
+  "saveSamples": 0,
+  "wallSeconds": 1800,
+  "scenarioFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\scenario.json",
+  "scope": "Fresh ordinary ten-player V2 feasibility probe, not formal capacity acceptance. Original04 scene bytes and all30s/360s/native18/12/50%Run/900ms/1%timeout/5%correction/resource guards retained. Only current active-observer coverage, bounded packet trace and explicit typed attack results are new driver behavior.",
+  "attackResults": "v2",
+  "loginNotBefore": "2026-10-24T18:52:01.909Z",
+  "repositoryCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "admissionLedgerScope": "Fresh File realm; zero prior Login; persistent original auth ledger and serialized ordinary NewCharacter; no limiter changes",
+  "spectatorDataDir": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\recordings"
+}
