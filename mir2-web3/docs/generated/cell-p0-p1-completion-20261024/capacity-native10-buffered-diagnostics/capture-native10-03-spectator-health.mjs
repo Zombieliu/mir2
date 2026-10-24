@@ -1,0 +1,8 @@
+import fs from 'node:fs/promises';import path from 'node:path';
+const root='C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-03',phase=process.argv[2];
+if(!['before','after'].includes(phase))throw new Error('Require before or after phase');
+const response=await fetch('http://127.0.0.1:17510/health',{signal:AbortSignal.timeout(5000),redirect:'error'});if(!response.ok)throw new Error('Health failed');const body=await response.json(),s=body.spectator;
+if(!s||s.recordingEnabled!==true)throw new Error('Default spectator recording is not enabled');const fields=['activeViewers','activeMaps','bufferedFrames','publishedFramesTotal','persistedFramesTotal','droppedFramesTotal','recordingErrorsTotal'],metrics={recordingEnabled:s.recordingEnabled};for(const key of fields){if(!Number.isSafeInteger(s[key])||s[key]<0)throw new Error('Public spectator counter invalid');metrics[key]=s[key];}
+const normalize=p=>path.resolve(p).replaceAll('\\','/').toLowerCase();if(normalize(s.dataDir)!==normalize(root+'/recordings'))throw new Error('Spectator recording directory differs');
+const record={schemaVersion:1,phase,observedAtMs:Date.now(),scope:'Whitelisted public health counters from this owned fresh realm only; no entity or replay payload',sourceCommit:'827d4c8b52066d033a2f18941be80c97b337d6de',gatewayPid:JSON.parse((await fs.readFile(root+'/realm-process.json','utf8')).replace(/^\uFEFF/,'')).pid,defaultEnabledExpectedFromFrozenSource:true,defaultPublicExpectedFromFrozenSource:true,dataDir:root+'/recordings',dataDirMatches:true,metrics};
+await fs.writeFile(root+'/spectator-health-'+phase+'.json',JSON.stringify(record,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({phase,metrics,dataDirMatches:true}));

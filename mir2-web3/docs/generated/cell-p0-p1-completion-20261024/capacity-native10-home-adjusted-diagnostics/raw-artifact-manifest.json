@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "kind": "capacity-samples-jsonl",
+      "runId": "1792862572246-34eb80be",
+      "report": "capacity-native10-home-adjusted-diagnostics/release-native-10-feasibility-04/reports/1792862572246-34eb80be.report.json",
+      "path": "release-native-10-feasibility-04/reports/1792862572246-34eb80be.samples.jsonl",
+      "bytes": 2539399,
+      "sha256": "05165aa99e90e962c6ed2321a9602a87305b0d5e5e96a41edd1e6d5e633472b2",
+      "projection": "capacity-native10-home-adjusted-diagnostics/release-native-10-feasibility-04/reports/1792862572246-34eb80be.raw-projection.json"
+    }
+  ]
+}

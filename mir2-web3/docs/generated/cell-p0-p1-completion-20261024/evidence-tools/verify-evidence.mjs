@@ -286,6 +286,8 @@ export function verifyOwnedRealm(realm, run, frozen) {
     ['freshRealm', 'capacityCleanup', 'normalOwnedShutdown', 'portsAfterStop'].every(key => realm.checks?.[key] === 'passed'), 'Owned process/connection cleanup is incomplete');
   check(['finalAccepted', 'visualAccepted', 'twoComputerAccepted', 'capacityAccepted'].every(key => realm[key] === false), 'Owned functional realm overclaims acceptance');
   check(realm.release?.profile === 'release' && realm.release.sha256 === frozen.releaseBuild.sha256 && realm.release.backendSourceAggregate === frozen.sourceManifestSha256, 'Release/source pin mismatch');
+  if (frozen.sourceCommit) check(realm.release.sourceCommit === frozen.sourceCommit && realm.release.backendInputCount === frozen.files.length &&
+    realm.release.backendSourceManifestFileSha256 === frozen.manifestFileSha256, 'Additional release provenance metadata mismatch');
   check(int(realm.pid) && realm.pid > 0 && realm.processIdentity?.pid === realm.pid &&
     realm.processIdentity.executable.replace(/\\/g, '/').toLowerCase() === realm.release.executable.replace(/\\/g, '/').toLowerCase(), 'Owned PID executable mismatch');
   check(realm.listenerOwnership?.length === 2 && realm.listenerOwnership.every(row => row.pid === realm.pid && row.address === '127.0.0.1') &&
@@ -417,6 +419,39 @@ export async function verifyBackend(root, workspace, commit) {
   return { ...frozen, releaseBuild: pin.releaseBuild };
 }
 
+// A later release has its own immutable source/build binding. It cannot replace
+// the original 32-input lifecycle proof or inherit its binary digest.
+export async function verifyAdditionalRelease(root, workspace, binding) {
+  check(safeRelative(binding?.manifest) && safeRelative(binding?.build), 'Invalid additional release paths');
+  const manifestBytes = await fs.readFile(path.join(root, binding.manifest));
+  const frozen = JSON.parse(manifestBytes.toString('utf8').replace(/^\uFEFF/, ''));
+  const build = await readJson(path.join(root, binding.build));
+  check(frozen.schemaVersion === 1 && /^[a-f0-9]{40}$/.test(frozen.gitBase) && /^[a-f0-9]{40}$/.test(frozen.sourceCommit) &&
+    frozen.trackedTreeClean === true && Array.isArray(frozen.files) && frozen.files.length > 0 && frozen.files.length <= 2048,
+  'Invalid additional release source manifest');
+  check(sha(Buffer.from(JSON.stringify(frozen.files))) === frozen.sourceManifestSha256 && build.schemaVersion === 1 &&
+    build.profile === 'release' && build.sourceCommit === frozen.sourceCommit && build.sourceManifestSha256 === frozen.sourceManifestSha256 &&
+    build.sourceManifestFileSha256 === sha(manifestBytes) && int(build.binary?.bytes) && build.binary.bytes > 0 &&
+    /^[a-f0-9]{64}$/.test(build.binary.sha256), 'Additional release/source digest mismatch');
+  const backendInput = name => name.startsWith('mir2-web3/') && (name.endsWith('.rs') ||
+    /(?:^|\/)Cargo\.(?:toml|lock)$/.test(name) || name.startsWith('mir2-web3/.cargo/'));
+  const declared = new Set();
+  for (const row of frozen.files) {
+    check(safeRelative(row.path) && backendInput(row.path) && !declared.has(row.path) && int(row.bytes) &&
+      /^[a-f0-9]{64}$/.test(row.sha256) && /^[a-f0-9]{64}$/.test(row.gitBlobLfSha256), 'Invalid or duplicate additional backend input');
+    declared.add(row.path);
+    const blob = git(workspace, ['cat-file', 'blob', `${frozen.sourceCommit}:${row.path}`]);
+    check(sha(blob) === row.gitBlobLfSha256, 'Additional release differs from its immutable Git blob');
+    // Raw capture length/hash stay bound to the manifest file digest; Git code
+    // blobs are verified separately, without normalizing any raw evidence.
+  }
+  const changed = git(workspace, ['diff', '--name-only', '-z', frozen.gitBase, frozen.sourceCommit, '--', 'mir2-web3'])
+    .toString('utf8').split('\0').filter(backendInput);
+  check(changed.every(name => declared.has(name)), 'Additional release has undeclared backend inputs');
+  return { ...frozen, manifestFileSha256: sha(manifestBytes),
+    releaseBuild: { profile: 'release', sha256: build.binary.sha256, sourceManifestSha256: frozen.sourceManifestSha256 } };
+}
+
 export async function verifyTopic({ root, indexFile, workspace, backendCommit, requireCapacity = false, archiveRoot }) {
   const files = await verifyInventory(root, indexFile), names = new Set(files.map(row => row.path));
   const relativeRoot = path.relative(workspace, root).split(path.sep).join('/'); check(safeRelative(relativeRoot), 'Topic must be inside its Git workspace');
@@ -425,6 +460,17 @@ export async function verifyTopic({ root, indexFile, workspace, backendCommit, r
   for (const file of tracked) if (path.resolve(workspace, file) !== indexFile) check(names.has(path.posix.relative(relativeRoot, file)), 'Committed/staged evidence is missing from the index');
   const frozen = await verifyBackend(root, workspace, backendCommit);
   const read = name => { check(names.has(name), 'Required evidence is missing from the index'); return readJson(path.join(root, name)); };
+  const releases = new Map([[frozen.sourceManifestSha256, frozen]]);
+  if (names.has('additional-release-bindings.json')) {
+    const bindings = await read('additional-release-bindings.json');
+    check(bindings.schemaVersion === 1 && Array.isArray(bindings.releases) && bindings.releases.length <= 16, 'Invalid additional release bindings');
+    for (const binding of bindings.releases) {
+      check(names.has(binding.manifest) && names.has(binding.build), 'Additional release files missing from index');
+      const release = await verifyAdditionalRelease(root, workspace, binding);
+      check(!releases.has(release.sourceManifestSha256), 'Duplicate release source binding');
+      releases.set(release.sourceManifestSha256, release);
+    }
+  }
   const lines = async name => {
     check(names.has(name), 'Required raw trace/samples missing from index');
     return (await fs.readFile(path.join(root, name), 'utf8')).trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
@@ -454,7 +500,9 @@ export async function verifyTopic({ root, indexFile, workspace, backendCommit, r
       for (const candidate of names) if (candidate.endsWith('.realm-evidence.json')) { const value = await read(candidate); if (value.playtest?.runId === run.runId) realms.push({ name: candidate, value }); }
       check(realms.length === 1, 'Full lifecycle needs exactly one matching owned realm record');
       const { name: realmName, value: realm } = realms[0];
-      verifyOwnedRealm(realm, run, frozen);
+      const matchingRelease = releases.get(realm.release?.backendSourceAggregate);
+      check(matchingRelease, 'Functional run has no matching immutable release/source binding');
+      verifyOwnedRealm(realm, run, matchingRelease);
       const metrics = await read(realmName.replace(/\.realm-evidence\.json$/, '.zone-metrics.json'));
       same(metrics.baseline, realm.baselineHealth.zone_metrics); same(metrics.after, realm.afterHealth.zone_metrics);
       for (const key of CLASS) {
@@ -488,7 +536,8 @@ export async function verifyTopic({ root, indexFile, workspace, backendCommit, r
   check(archivedFiles === archived.size, 'Raw archive manifest points to a non-capacity report');
   check(fullRuns > 0, 'No fresh complete 16-check lifecycle run');
   if (requireCapacity) check(capacityAccepted > 0, 'No accepted standard/native capacity report; P0 capacity remains pending');
-  return { files: files.length, frozenBackendFiles: 32, historicalBackendPins: backendCommit ? 32 : 0, fullRuns,
+  return { files: files.length, frozenBackendFiles: 32, historicalBackendPins: backendCommit ? 32 : 0,
+    additionalReleases: releases.size - 1, additionalBackendInputs: [...releases.values()].slice(1).reduce((sum, value) => sum + value.files.length, 0), fullRuns,
     failedReportsPreserved, capacityReports, capacityAccepted, archivedFiles, archivedRows, archivedMonitorRows, invalidMonitorRows };
 }
 

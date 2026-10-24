@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "hashMode": "raw-bytes",
+  "scope": "Actual runtime/audit outputs were originally written directly into this independent repository subtree; this records their first bytes and identical external backup mirrors. Five prepared public source/profile files were copied in unchanged. No private store, credentials, ledger or recording content was copied.",
+  "originalOutputCount": 13,
+  "preparedPublicSourceCopies": 5,
+  "files": [
+    {
+      "file": "1792862312544-c2d8342e.audit-source.mjs",
+      "bytes": 9083,
+      "sha256": "5b850e360dad1ce81aa3cc50b97e4b148c2f60d95dc3da651bdc14a4a2b999e3",
+      "origin": "Prepared external public source: audit-owned-full.mjs",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862312544-c2d8342e.audit-source.mjs"
+    },
+    {
+      "file": "1792862312544-c2d8342e.cleanup-verification.json",
+      "bytes": 1753,
+      "sha256": "1f266b87641cbc371f1495f99dfb39871de9e793e3791665b3ec48094287757c",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862312544-c2d8342e.cleanup-verification.json"
+    },
+    {
+      "file": "1792862312544-c2d8342e.independent-audit.json",
+      "bytes": 1698,
+      "sha256": "8b0c4cea862c308a1b9c9a2339a4c562468fe9d02fa247908ab31f0af85fb1f9",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862312544-c2d8342e.independent-audit.json"
+    },
+    {
+      "file": "1792862312544-c2d8342e.initialize-private-source.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77",
+      "origin": "Prepared external public source: initialize-fresh-private.ps1",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862312544-c2d8342e.initialize-private-source.ps1"
+    },
+    {
+      "file": "1792862312544-c2d8342e.preparation.json",
+      "bytes": 2297,
+      "sha256": "4f28760f8052f923cb5996d4537c4ecf8605bf04cc9db59938581994e02fd8f1",
+      "origin": "Prepared external public source: preparation.json",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862312544-c2d8342e.preparation.json"
+    },
+    {
+      "file": "1792862312544-c2d8342e.profile.json",
+      "bytes": 2370,
+      "sha256": "84c0b58f6ab5a7a3db24e0f5aa46054c99d1b8f40adb8e6487c6748a6216152c",
+      "origin": "Prepared external public source: full-lifecycle-profile.json",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862312544-c2d8342e.profile.json"
+    },
+    {
+      "file": "1792862312544-c2d8342e.realm-evidence.json",
+      "bytes": 34787,
+      "sha256": "8f0793c6c9ce84d0a61c6d730653b526b3f38488159fb8575cda8df45f7f4893",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862312544-c2d8342e.realm-evidence.json"
+    },
+    {
+      "file": "1792862312544-c2d8342e.runner-source.mjs",
+      "bytes": 15052,
+      "sha256": "1e11eb3e28fb0fe548b02a868ef227ad45510032a6772955d5398a1765e8d254",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862312544-c2d8342e.runner-source.mjs"
+    },
+    {
+      "file": "1792862312544-c2d8342e.source-manifest-verification.json",
+      "bytes": 524,
+      "sha256": "2e061bb51706f4ed116bf0aec212c4c00f84440cbff563412928d056fedc0f46",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862312544-c2d8342e.source-manifest-verification.json"
+    },
+    {
+      "file": "1792862312544-c2d8342e.zone-metrics.json",
+      "bytes": 23599,
+      "sha256": "5b5220b787d67fc300d2a572dc2e914ff5d827e56428ece28317c6ab4269e5f8",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862312544-c2d8342e.zone-metrics.json"
+    },
+    {
+      "file": "1792862315921-325d69ed-a.trace.jsonl",
+      "bytes": 1006108,
+      "sha256": "cca3ab1b6b31086f180245297bf725e7232a6df7db775ab274d0dfe086e2e838",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862315921-325d69ed-a.trace.jsonl"
+    },
+    {
+      "file": "1792862315921-325d69ed-b.trace.jsonl",
+      "bytes": 925121,
+      "sha256": "806e99d239e9ffeef060e9671252f8192e31e0e513fe10b3d3e57afcc0156a79",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862315921-325d69ed-b.trace.jsonl"
+    },
+    {
+      "file": "1792862315921-325d69ed-guard-newCharacter.trace.jsonl",
+      "bytes": 3479,
+      "sha256": "2a15bfa6962b3814d65b4a3fae9e0e3400f9e136ded9153294b2a6fb455d10cb",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862315921-325d69ed-guard-newCharacter.trace.jsonl"
+    },
+    {
+      "file": "1792862315921-325d69ed-guard-startGame.trace.jsonl",
+      "bytes": 3442,
+      "sha256": "01e766ba266b8d1cc9f3d302461338314593f8f6121fa54bb5ed244f9908cb21",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862315921-325d69ed-guard-startGame.trace.jsonl"
+    },
+    {
+      "file": "1792862315921-325d69ed-relogin-0.trace.jsonl",
+      "bytes": 684266,
+      "sha256": "a4bfaf52309f7f42b3bf56290b98a8e74ce1b89e5bd4e1485bb549353ce781fd",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862315921-325d69ed-relogin-0.trace.jsonl"
+    },
+    {
+      "file": "1792862315921-325d69ed-relogin-1.trace.jsonl",
+      "bytes": 680203,
+      "sha256": "f4fa44f4a670642e2327afe9d4419e960f1a4ba20d643409aa91717397ff90da",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862315921-325d69ed-relogin-1.trace.jsonl"
+    },
+    {
+      "file": "1792862315921-325d69ed.report.json",
+      "bytes": 104745,
+      "sha256": "0cfc5ab04e6a7ab9eceb7f27bfee24d1f0b98173f7fc0d4881f942e351fc5ff2",
+      "origin": "Original run/audit output written directly into this public subtree",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/1792862315921-325d69ed.report.json"
+    },
+    {
+      "file": "frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5",
+      "origin": "Prepared external public source: frozen-audit-support.mjs",
+      "externalMirror": "full-lifecycle-spectator-buffer-827d/public-originals/frozen-audit-support.mjs"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-24T17:03:16.7734946Z",
+  "profile": "release",
+  "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "sourceManifestSha256": "d8936d2f2b77bfcf2f9b84c8ecc1d5c3ad37f095abe73836ed785ad852dcd5ea",
+  "sourceManifestFileSha256": "c6cd3a1cfa0a02bb1a709d937b85457be72def4a61c5fa50a3a7768a2b2ebc1f",
+  "binary": {
+    "path": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\release\\mir2-gateway.exe",
+    "bytes": 87128576,
+    "sha256": "187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c"
+  },
+  "buildLog": {
+    "path": "C:/mir2-build/cell-preproduction-p0-p1-20261024/p0-spectator-buffer-release-build.log",
+    "bytes": 56261,
+    "sha256": "1b4a86e0570a3dd06cced283c9506d47ae157cc1be10e8954029aeb339e7992b"
+  },
+  "scope": "New buffered spectator Release. Old full-lifecycle proof remains pinned to old Release; no capacity acceptance inferred from build."
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-24T17:01:26.019Z",
+  "commit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "parent": "38194647a59bc356259e442b3f837e8c231e279d",
+  "method": "Read-only diff/source/committed-log review. No test, build, service, load or source mutation performed.",
+  "blockingFindings": [],
+  "checks": [
+    "Same spectator source implementation reviewed as the approved fixed-buffer patch.",
+    "Successful helper path serializes unchanged JSON, writes one newline, then explicitly flushes before Ok.",
+    "A write/encoding/flush Err is preserved; into_parts consumes the buffer without a Drop flush retry or a second hidden flush.",
+    "Fixed 64KiB buffer bounds new buffering; large serialization fragments may bypass it, so not every underlying write is capped at64KiB.",
+    "Partial failed appends remain possible; no new atomic append or fsync durability guarantee.",
+    "Committed locked/offline log records16 passing spectator and adjacent web tests; reviewed, not re-executed.",
+    "Cargo.lock blob is byte-identical to the parent38194647 commit.",
+    "Input closure detects tracked Rust/Cargo/.cargo modifications plus unignored untracked matching paths outside the32 declared pins, for either current workspace or explicit historical Git comparison.",
+    "Historical selection still checks declared LF-normalized blobs and does not waive current lifecycle driver raw source pins."
+  ],
+  "scopeLimits": [
+    "Input closure is the explicitly selected repository Rust/Cargo/.cargo scope; it is not a complete hermetic attestation of toolchains, environment, ignored generated files, embedded non-Rust assets or external dependencies.",
+    "CountingWriter fixture is not a measured process IO reduction; new Release same-scene validation remains required."
+  ],
+  "hashes": {
+    "spectatorGitBlobSha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f",
+    "cargoLockGitBlobSha256": "ad3c52ac44ccf0b2e53086414e63118a6239fccab2d00eae0b90048a9f51c4df",
+    "verifierGitBlobSha256": "f37a22f67fe4fb29663dbc28bc697854b15e8d35c6323f5e11f6ef5a86d7b013"
+  }
+}

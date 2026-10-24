@@ -5,7 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { inventory, verifyInventory, verifyBackend, verifyFullLifecycle, verifyOwnedRealm, verifyHistogram, verifyCapacityStatus, verifyPublicTrace,
+import { inventory, verifyInventory, verifyBackend, verifyAdditionalRelease, verifyFullLifecycle, verifyOwnedRealm, verifyHistogram, verifyCapacityStatus, verifyPublicTrace,
   streamCapacitySamples, resolveArchivedFile, makeCapacityProjection, STREAM_LIMITS } from './verify-evidence.mjs';
 
 const proof = new URL('../protocol-full-lifecycle/', import.meta.url);
@@ -50,6 +50,15 @@ test('raw traces reject omitted receipts, privileged commands and unredacted cre
 test('owned realm cleanup proves only the recorded loopback PID and six zero connection counters', () => {
   const frozen = { releaseBuild: { sha256: realm.release.sha256 }, sourceManifestSha256: realm.release.backendSourceAggregate };
   verifyOwnedRealm(realm, run, frozen);
+  const laterFrozen = { ...frozen, sourceCommit: 'a'.repeat(40), files: Array(33).fill({}), manifestFileSha256: 'c'.repeat(64) };
+  const laterRealm = structuredClone(realm);
+  Object.assign(laterRealm.release, { sourceCommit: laterFrozen.sourceCommit, backendInputCount: 33,
+    backendSourceManifestFileSha256: laterFrozen.manifestFileSha256 });
+  verifyOwnedRealm(laterRealm, run, laterFrozen);
+  for (const [key, value] of [['sourceCommit', 'd'.repeat(40)], ['backendInputCount', 32], ['backendSourceManifestFileSha256', 'e'.repeat(64)]]) {
+    const changed = structuredClone(laterRealm); changed.release[key] = value;
+    assert.throws(() => verifyOwnedRealm(changed, run, laterFrozen), /provenance metadata/);
+  }
   for (const mutate of [value => { value.afterHealth.capacity.currentReconnectLeases = 1; },
     value => { delete value.baselineHealth.capacity.currentActiveSessions; }, value => { value.listenerOwnership[0].pid++; },
     value => { value.listenerOwnership[0].address = '0.0.0.0'; }, value => { value.processIdentity.executable = 'other.exe'; },
@@ -193,6 +202,57 @@ test('explicit historical Git blobs preserve the 32 frozen code inputs after wor
   } finally {
     assert.equal(path.dirname(path.resolve(workspace)), path.resolve(os.tmpdir()));
     assert.ok(path.basename(workspace).startsWith('mir2-evidence-backend-'));
+    await fs.rm(workspace, { recursive: true, force: true });
+  }
+});
+
+test('a later release binds its own Git inputs and binary without replacing the old lifecycle source proof', async () => {
+  const workspace = await fs.mkdtemp(path.join(os.tmpdir(), 'mir2-evidence-later-release-'));
+  const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+  const git = args => execFileSync('git', ['-c', 'core.autocrlf=false', '-c', 'commit.gpgsign=false', '-c',
+    `core.hooksPath=${path.join(workspace, 'empty-hooks')}`, ...args], { cwd: workspace, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] });
+  const commit = message => { git(['add', '--all']); git(['-c', 'user.name=Verifier Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '--quiet', '-m', message]); return git(['rev-parse', 'HEAD']).toString().trim(); };
+  try {
+    const root = path.join(workspace, 'evidence'); await fs.mkdir(root);
+    git(['init', '--quiet']);
+    git(['-c', 'user.name=Verifier Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '--allow-empty', '--quiet', '-m', 'base']);
+    const base = git(['rev-parse', 'HEAD']).toString().trim();
+    const relative = 'mir2-web3/apps/gateway/src/recording.rs', raw = Buffer.from('// buffered recording\n');
+    await fs.mkdir(path.dirname(path.join(workspace, relative)), { recursive: true }); await fs.writeFile(path.join(workspace, relative), raw);
+    const sourceCommit = commit('later recording release');
+    const files = [{ path: relative, bytes: raw.length, sha256: digest(raw), gitBlobLfSha256: digest(raw) }];
+    const manifest = { schemaVersion: 1, gitBase: base, sourceCommit, trackedTreeClean: true, files,
+      sourceManifestSha256: digest(Buffer.from(JSON.stringify(files))) };
+    const binding = { manifest: 'source.json', build: 'release.json' };
+    const build = { schemaVersion: 1, profile: 'release', sourceCommit, sourceManifestSha256: manifest.sourceManifestSha256,
+      binary: { bytes: 1024, sha256: 'b'.repeat(64) } };
+    const write = async (source = manifest, release = build) => {
+      const bytes = Buffer.from(JSON.stringify(source)); await fs.writeFile(path.join(root, binding.manifest), bytes);
+      await fs.writeFile(path.join(root, binding.build), JSON.stringify({ ...release, sourceManifestFileSha256: digest(bytes) }));
+    };
+    await write();
+    const verified = await verifyAdditionalRelease(root, workspace, binding);
+    assert.equal(verified.releaseBuild.sha256, 'b'.repeat(64)); assert.equal(verified.sourceCommit, sourceCommit);
+    await fs.writeFile(path.join(workspace, relative), '// future fixed Cell change\n');
+    await verifyAdditionalRelease(root, workspace, binding);
+    await assert.rejects(verifyAdditionalRelease(root, workspace, { ...binding, manifest: '../source.json' }), /paths/);
+    await write(manifest, { ...build, sourceCommit: base }); await assert.rejects(verifyAdditionalRelease(root, workspace, binding), /digest mismatch/);
+    const wrong = structuredClone(manifest); wrong.files[0].gitBlobLfSha256 = '0'.repeat(64);
+    wrong.sourceManifestSha256 = digest(Buffer.from(JSON.stringify(wrong.files)));
+    await write(wrong, { ...build, sourceManifestSha256: wrong.sourceManifestSha256 });
+    await assert.rejects(verifyAdditionalRelease(root, workspace, binding), /Git blob/);
+    const extra = path.join(workspace, 'mir2-web3/apps/gateway/src/unlisted.rs'); await fs.writeFile(extra, '// new input\n');
+    const later = commit('unlisted backend input');
+    const omitted = { ...manifest, sourceCommit: later };
+    // Preserve the original file in the new commit so only the omitted input fails.
+    omitted.files = [{ ...files[0], bytes: Buffer.byteLength('// future fixed Cell change\n'), sha256: digest(Buffer.from('// future fixed Cell change\n')),
+      gitBlobLfSha256: digest(Buffer.from('// future fixed Cell change\n')) }];
+    omitted.sourceManifestSha256 = digest(Buffer.from(JSON.stringify(omitted.files)));
+    await write(omitted, { ...build, sourceCommit: later, sourceManifestSha256: omitted.sourceManifestSha256 });
+    await assert.rejects(verifyAdditionalRelease(root, workspace, binding), /undeclared backend inputs/);
+  } finally {
+    assert.equal(path.dirname(path.resolve(workspace)), path.resolve(os.tmpdir()));
+    assert.ok(path.basename(workspace).startsWith('mir2-evidence-later-release-'));
     await fs.rm(workspace, { recursive: true, force: true });
   }
 });

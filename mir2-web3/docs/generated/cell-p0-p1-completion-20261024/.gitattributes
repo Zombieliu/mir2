@@ -1,4 +1,6 @@
 # Keep raw evidence bytes; recognize CRLF without suppressing whitespace checks.
 * -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
-# Cargo's raw receipt ends with an empty line; retain the original bytes.
-validation/p0-spectator-buffer-locked-tests.log whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+# Raw Cargo/Node receipts include blank diagnostic lines; retain their bytes.
+validation/*.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+# Recorded PowerShell launchers include a final blank line.
+**/start-release-native-10-feasibility-*.ps1 whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T17:28:47.786Z",
+  "method": "File-only size/SHA/redaction/exact-copy and frozen verifier streaming/status/projection API; no test suite/build/service/load.",
+  "runId": "1792862572246-34eb80be",
+  "originalCopies": 22,
+  "originalCopyBytes": 134650,
+  "raw": {
+    "bytes": 2539399,
+    "sha256": "05165aa99e90e962c6ed2321a9602a87305b0d5e5e96a41edd1e6d5e633472b2",
+    "rows": 4502,
+    "monitorCount": 63,
+    "validMonitorCount": 63,
+    "invalidMonitorCount": 0,
+    "stoppedMonitorCount": 0,
+    "maxGapMs": 7939
+  },
+  "run": {
+    "runId": "1792862572246-34eb80be",
+    "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+    "gatewaySha256": "187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c",
+    "realGameplayAttempt": true,
+    "report": "release-native-10-feasibility-04/reports/1792862572246-34eb80be.report.json",
+    "raw": "release-native-10-feasibility-04/reports/1792862572246-34eb80be.samples.jsonl",
+    "peakControlledActors": 10,
+    "completedStageSeconds": 30,
+    "stagePassed": true,
+    "soakIntervalSeconds": 38.828,
+    "soakCompleted": false,
+    "completed60SecondSoakWindows": 0,
+    "capacityAccepted": false,
+    "formalRunStarted": false,
+    "stop": "Original continuous timeout ratio1/55=0.0181818 >=0.01; combat activity/native/latency/fanout passed but single unacknowledged attack retained as timeout. No completed60s soak window.",
+    "allSixCleanupCountersZero": true,
+    "allOwnedProcessesStopped": true
+  },
+  "spectator": {
+    "frames": 557,
+    "bytes": 30819971,
+    "errors": 0,
+    "persistedCounterMatchesFiles": true
+  },
+  "capacityAccepted": 0,
+  "rootIndexUpdated": false
+}

@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "hashMode": "raw-bytes",
+  "scope": "Exact catalog-authorized public files plus the catalog itself; no private/store/ledger/accounts/recordings content was read or copied.",
+  "catalogSha256": "085cdf44207c9977c8794daa08f4eb6fda4e8d681c9d4550873f49025ed14430",
+  "files": [
+    {
+      "path": "capacity-native10-diagnostics/canonical-spawn-mirror-crosscheck.json",
+      "source": "canonical-spawn-mirror-crosscheck.json",
+      "bytes": 3945,
+      "sha256": "54567a1166bac91e404789bcfe75fdddb257f6d65af7d2a436e1955f159827bd"
+    },
+    {
+      "path": "capacity-native10-diagnostics/capacity-probe10-boundary-complete-tests.log",
+      "source": "capacity-probe10-boundary-complete-tests.log",
+      "bytes": 30718,
+      "sha256": "98a1a690a06a239f7441195244b25cdf5df9e56e18b06a85996fb5b8b0e22308"
+    },
+    {
+      "path": "capacity-native10-diagnostics/capacity-probe10-boundary-focused-tests.log",
+      "source": "capacity-probe10-boundary-focused-tests.log",
+      "bytes": 616,
+      "sha256": "11dc643f5b306bd90dc99617966ef056ccbada51595ad6ec94ddbe2ac23700b4"
+    },
+    {
+      "path": "capacity-native10-diagnostics/capacity-probe10-source-frozen.json",
+      "source": "capacity-probe10-source-frozen.json",
+      "bytes": 2516,
+      "sha256": "2635ee67e0bcfb82b829a538b864691e10dc5249ef6080d9a175cf0454e9852e"
+    },
+    {
+      "path": "capacity-native10-diagnostics/native-10-candidate-static-readiness-v1.json",
+      "source": "native-10-candidate-static-readiness-v1.json",
+      "bytes": 3793,
+      "sha256": "65b67ea904b9654dac8ac892feae1c33d1a12107dfac9944d05299d77be6ec2b"
+    },
+    {
+      "path": "capacity-native10-diagnostics/native-10-io-guard-diagnostics-v2.json",
+      "source": "native-10-io-guard-diagnostics-v2.json",
+      "bytes": 118820,
+      "sha256": "44bff493770454209dae3ef5c530ce6184c7cb227632a76edafb9e61690d5d21"
+    },
+    {
+      "path": "capacity-native10-diagnostics/native10-public-artifact-catalog.json",
+      "source": "native10-public-artifact-catalog.json",
+      "bytes": 11151,
+      "sha256": "085cdf44207c9977c8794daa08f4eb6fda4e8d681c9d4550873f49025ed14430"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/gateway-build-pin.json",
+      "source": "release-native-10-feasibility-01/gateway-build-pin.json",
+      "bytes": 618,
+      "sha256": "e2c03d4cf52005de19844d228c2495694a773d999c91519ad2d3673767ff9739"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/preflight-probe-limit-rejection.json",
+      "source": "release-native-10-feasibility-01/preflight-probe-limit-rejection.json",
+      "bytes": 1074,
+      "sha256": "2adf6a603c117507c704565fe4b943e0347af71044d70e59a9e57238cedf3c89"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/provisioning.json",
+      "source": "release-native-10-feasibility-01/provisioning.json",
+      "bytes": 282,
+      "sha256": "556fdd5acc451cc628c3eb506cbf6295bdfb05506e217caabdb0169bf1042fc4"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/realm-cleanup.json",
+      "source": "release-native-10-feasibility-01/realm-cleanup.json",
+      "bytes": 1040,
+      "sha256": "5362481d6b8cfdefbb8dcde7e8afa20758237c48d7b2c252d18ab9a61db718ba"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/realm-process.json",
+      "source": "release-native-10-feasibility-01/realm-process.json",
+      "bytes": 793,
+      "sha256": "74849761dc1fbc40649aad4c99461a829ff046bbae1f99371264a9f53b78a00f"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/resource-profile.json",
+      "source": "release-native-10-feasibility-01/resource-profile.json",
+      "bytes": 1179,
+      "sha256": "1aa9590dde0267289ef2e0190ded88a8a30588459bccbf0865007e843ee278ae"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/run-options-admitted-v2.json",
+      "source": "release-native-10-feasibility-01/run-options-admitted-v2.json",
+      "bytes": 890,
+      "sha256": "3ea06604705c4393e554dd1d236cc9b9dad10d76db459940426c013bd8b2b30d"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/run-options.json",
+      "source": "release-native-10-feasibility-01/run-options.json",
+      "bytes": 645,
+      "sha256": "e686ef1efd705dd137aecd90e899ed9ff58c9e71c9dca80ce0a89be178817eb3"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/scenario.json",
+      "source": "release-native-10-feasibility-01/scenario.json",
+      "bytes": 1176,
+      "sha256": "33e20d0ba000003398e3cac5a09be7859b739b0d10ba17544160a0ca86a69450"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/source-pins-admitted-v3.json",
+      "source": "release-native-10-feasibility-01/source-pins-admitted-v3.json",
+      "bytes": 5022,
+      "sha256": "09a65b5eb2b79116a0eaae2f5a9f5c627d5948ba9d9e79ef874bbe39e0f746a5"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/source-pins-launcher-v2.json",
+      "source": "release-native-10-feasibility-01/source-pins-launcher-v2.json",
+      "bytes": 4787,
+      "sha256": "4962cee05e0d7d7acf67b653643ffcefe1d226ff712a12f845759e71bbc45b2a"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/source-pins.json",
+      "source": "release-native-10-feasibility-01/source-pins.json",
+      "bytes": 4306,
+      "sha256": "dcdf669b250ee39d49b20ae3e5541bc8b78caefb135c7fbe0f199fb4c0ad7b88"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/gateway-build-pin.json",
+      "source": "release-native-10-feasibility-02/gateway-build-pin.json",
+      "bytes": 618,
+      "sha256": "fb141a28f1b502a9cd4f274ea7763ba2f83d3747c50aa3d812c9b236fadaa615"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/provisioning.json",
+      "source": "release-native-10-feasibility-02/provisioning.json",
+      "bytes": 282,
+      "sha256": "556fdd5acc451cc628c3eb506cbf6295bdfb05506e217caabdb0169bf1042fc4"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/realm-cleanup.json",
+      "source": "release-native-10-feasibility-02/realm-cleanup.json",
+      "bytes": 1094,
+      "sha256": "5760821e053db6db8dfb7ebb143d96ce3fcf855f207e0b6112686c6ed165c443"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/realm-process.json",
+      "source": "release-native-10-feasibility-02/realm-process.json",
+      "bytes": 793,
+      "sha256": "323bfa1fa65e4471d228b196cd600081a68083bd455b5737eb10c4125360175f"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/reports/1792859765238-d670d739.report.json",
+      "source": "release-native-10-feasibility-02/reports/1792859765238-d670d739.report.json",
+      "bytes": 18669,
+      "sha256": "1de11b8e97a1dcd81996ce3422516cd2909336b979a5a22b7aec989a6eb39a2e"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/resource-profile.json",
+      "source": "release-native-10-feasibility-02/resource-profile.json",
+      "bytes": 1179,
+      "sha256": "9379e369bb2630a398e2fb1f678202a4c9d4929a916b5d7ef4a8c9aa98297715"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/run-options-admitted-v2.json",
+      "source": "release-native-10-feasibility-02/run-options-admitted-v2.json",
+      "bytes": 1020,
+      "sha256": "4ebf928590d8e4e9ec7e621ed7edfd479217b67fe947b667d7ebe9a079de07bf"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/run-options.json",
+      "source": "release-native-10-feasibility-02/run-options.json",
+      "bytes": 699,
+      "sha256": "0a97a6825c42056904b57d7aaf7c19016c7f1ab409572943a7f1d74137260f14"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/scenario.json",
+      "source": "release-native-10-feasibility-02/scenario.json",
+      "bytes": 1176,
+      "sha256": "33e20d0ba000003398e3cac5a09be7859b739b0d10ba17544160a0ca86a69450"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/source-pins-checkpoint-v2.json",
+      "source": "release-native-10-feasibility-02/source-pins-checkpoint-v2.json",
+      "bytes": 5700,
+      "sha256": "934c1137d64b1ea1e4580986984ee47832ca97c7f9726006a726d658d63dc26c"
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/source-pins.json",
+      "source": "release-native-10-feasibility-02/source-pins.json",
+      "bytes": 4360,
+      "sha256": "ce4651ce5f3d9dbd472c3d815a02604dc59ed03548727a7268db676e4be87700"
+    },
+    {
+      "path": "capacity-native10-diagnostics/start-release-native-10-feasibility-01.ps1",
+      "source": "start-release-native-10-feasibility-01.ps1",
+      "bytes": 3873,
+      "sha256": "0e5a8984217a239c1110af87652da3b47aa30ee04ab7dcb5fbbfa3ff9b3fa124"
+    },
+    {
+      "path": "capacity-native10-diagnostics/start-release-native-10-feasibility-02.ps1",
+      "source": "start-release-native-10-feasibility-02.ps1",
+      "bytes": 3873,
+      "sha256": "f34e3a3bf69d980c3fcac7fc582cb68721ff39368e2f53a4565cb3b9e688b7e4"
+    }
+  ]
+}

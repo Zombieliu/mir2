@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "releases": [
+    {
+      "manifest": "backend-source-spectator-buffer-827d4c8.json",
+      "build": "release-spectator-buffer-827d4c8.json"
+    }
+  ]
+}

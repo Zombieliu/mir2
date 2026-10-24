@@ -6,13 +6,13 @@
 
 ## 已有新鲜结果
 
-- [同一次普通双客户端完整生命周期](protocol-full-lifecycle/1792854507439-f411ed33.report.json)：**16/16 passed、fullLifecyclePassed=true**。使用两个新普通账号；包含共同击杀、共享掉落及唯一拾取、死亡/城镇复活、跨图、退出重登。首次没有掉落的真实击杀尝试保留。
-- [独立复核](protocol-full-lifecycle/1792854504282-92969528.independent-audit.json)：双端死亡 ID/地点匹配、命令白名单、凭据脱敏、冻结源码和二进制摘要核对。进程正常退出、两端口释放及六项连接计数归零只证明本次进程/连接清理。
+- 最终候选 `187775…` 的[同一次普通双客户端完整生命周期](protocol-full-lifecycle-spectator-buffer-827d4c8/1792862315921-325d69ed.report.json)：**16/16 passed、fullLifecyclePassed=true**。使用两个新普通账号；包含共同击杀、共享掉落及唯一拾取、死亡/城镇复活、跨图、退出重登。旧 `99bc…` 的[16/16](protocol-full-lifecycle/1792854507439-f411ed33.report.json)及首次没有掉落的真实击杀尝试仍保留。
+- 新候选[独立复核](protocol-full-lifecycle-spectator-buffer-827d4c8/1792862312544-c2d8342e.independent-audit.json)：346 条 sent 均为普通指令，双端死亡/复活及击杀/掉落/拾取原收据一致，33 个 backend 输入及 6 个驱动原始摘要一致，六个实际私密值未见于公开产物。进程正常退出、两端口释放及六项连接计数归零只证明本次进程/连接清理。独立录像目录 367 帧 published=persisted，0 dropped/recordingErrors。
 - P1 simulation 合同 **26/26**、manager 单元 **16/16**；网关恢复/交接/经济等相邻回归 **113 passed / 1 ignored**，忽略项需要独立 PostgreSQL 测试库。冻结后的网关合同及指标复核 **24/24**。
 - 冻结源码的 simulation 安全、跨图掉落、死亡与共享 Zone 相邻回归重新通过 **254 项不同测试**：[默认配置 251 项](validation/p01-simulation-adjacent-frozen-default.log)，再以 `test-support` 跑[死亡/在线参考 5 项](validation/p01-simulation-death-frozen-reference.log)，其中两项与默认配置重复，不重复计数。
-- 容量工具最终相关回归 [111/111](validation/capacity-probe10-boundary-complete-tests.log)、证据校验器加固后 [14/14](validation/evidence-verifier-input-closure-04.log)；27 个受影响 Rust 文件的[只读格式检查](validation/p01-rustfmt-check.json)通过。校验器同时拒绝冻结清单外新增/改动的 Rust/Cargo 输入；选择历史 backend commit 不放宽当前生命周期驱动的原始摘要校验。
+- 容量工具最终相关回归 [111/111](validation/capacity-probe10-boundary-complete-tests.log)、证据校验器新增独立 Release 绑定后 [15/15](validation/evidence-verifier-additional-release-05.log)；27 个受影响 Rust 文件的[只读格式检查](validation/p01-rustfmt-check.json)通过。校验器同时拒绝冻结清单外新增/改动的 Rust/Cargo 输入；选择历史 backend commit 不放宽当前生命周期驱动的原始摘要校验。后续 Release 逐个核验其独立 Git 输入及二进制绑定，不能继承旧构建凭证。
 
-本轮实际 Release SHA-256：`99bca561822a2d02bd4a012546c228923f3f34e6612612085d6caed9f82ee50d`。受影响 Rust/Cargo 输入摘要：`470606cf18810178f75e488dd0b6ad9c4c75e346113c6e7bd594afc7f45d86ac`，基线 commit `68f810b442321ae66360a2be18e31dc309efdaf7`。
+原 32 输入基线的实际 Release SHA-256：`99bca561822a2d02bd4a012546c228923f3f34e6612612085d6caed9f82ee50d`。受影响 Rust/Cargo 输入摘要：`470606cf18810178f75e488dd0b6ad9c4c75e346113c6e7bd594afc7f45d86ac`，基线 commit `68f810b442321ae66360a2be18e31dc309efdaf7`。录像 IO 修复后的最终候选另行冻结为 33 输入/`187775…`，见下文；两次完整功能证据分别绑定各自构建。
 
 ## 采样含义
 
@@ -38,7 +38,15 @@
 
 三个超限采样窗中，写操作占比超过 99.2%，约 101,205—102,517 次/s，平均 2.73—4.34 字节/次；同期写字节约 0.26—0.42 MiB/s，CPU 约 0.38—0.92 逻辑核等价时间。Windows 进程 IO 计数覆盖文件、网络及设备，不等于物理磁盘 IOPS。这次停止不证明机器算力或 9 人容量已耗尽；原始失败仍保留。
 
-观战 JSONL 原先直接向 File 序列化，每个小片段都触发写调用。现用 64 KiB 缓冲、显式 flush，并在错误路径避免 Drop 隐式重试；不改变帧内容、录制开关或资源保护阈值。[冻结 lockfile 下相关回归 16/16](validation/p0-spectator-buffer-locked-tests.log)验证字节、追加顺序及短写/中断/编码/写入/flush 失败。256,873 字节测试帧的底层 Write 调用从 139,341 次降到 4 次；这是测试计数，不能当作真实进程 IO 改善结论。新 Release 构建和同场景复测待完成；上述完整 16/16 生命周期仍对应旧 Release `99bca561…`。
+观战 JSONL 原先直接向 File 序列化，每个小片段都触发写调用。现用 64 KiB 缓冲、显式 flush，并在错误路径避免 Drop 隐式重试；不改变帧内容、录制开关或资源保护阈值。[冻结 lockfile 下相关回归 16/16](validation/p0-spectator-buffer-locked-tests.log)验证字节、追加顺序及短写/中断/编码/写入/flush 失败。256,873 字节测试帧的底层 Write 调用从 139,341 次降到 4 次；这是测试计数，不能当作真实进程 IO 改善结论。
+
+缓冲修复对应源码提交 `827d4c8b52066d033a2f18941be80c97b337d6de`；[33 个受影响输入](backend-source-spectator-buffer-827d4c8.json)单独冻结，未覆盖旧 32 输入凭证。[新 Release](release-spectator-buffer-827d4c8.json) SHA-256 为 `187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c`，构建通过。
+
+第三次同 10 人诊断 `1792861674728-9774b6b8` 已完成准入及 30 秒测量，原资源保护未触发。实际运行的 51 个完整进程采样区间内，总 IO 操作数最高 2,840.63/s；两端都至少 9 活跃会话的 33 区间最高总 IO 802.85/s、写操作 13.78/s；30 秒测量区间最高总 IO 202.62/s、写操作 8.24/s。结束后的空闲采样不参加比较；这些是离散区间采样，不是瞬时峰值。独立录像目录实际 397 帧、22,583,696 字节，published=persisted=397、recordingErrors=0。相比旧版准入窗口中约 10 万次/s 的碎写，修复有实际观测支持。
+
+第三次仍为 **failed**：一名观察者的 runs/moves=15/38（39.47%）低于原 50% 要求；其原生操作均完成、无 timeout/correction，战斗角色 30 秒有 16 次正伤害，其余活动检查通过。活怪占格导致巡逻绕行，不能据此宣布服务器 10 人容量失败或通过；没有进入 360 秒 soak。[第三次原件与离散 IO 诊断](capacity-native10-buffered-diagnostics/collection-verification.json)独立归档。
+
+第四次仅将观察者 4 的 home 从 `(252,645)` 改为 `(246,646)`。原 30 秒阶段真实通过：战斗角色 17 次攻击/17 次正伤害，观察者 4 的 Run 比 34/38（89.47%），九名观察者均通过，AOI 740/740、missing/ghost/duplicate=0。随后严格连续窗口因一次 attack timeout 失败：该角色 55 次操作中 1 timeout（1.818% ≥ 原 1% 门槛）；soak 只运行 38.828 秒，未完成六个窗口，[最终报告仍为失败](capacity-native10-home-adjusted-diagnostics/collection-verification.json)。邻帧显示 Deer 在攻击附近从相邻格移远，支持准入时超距拒绝的候选解释；未保留无歧义拒绝收据前，不改写 timeout 或宣称服务端过载。557 帧 published=persisted、0 录制错，进程/端口及六项连接状态正常清理。
 
 ## 本轮范围
 

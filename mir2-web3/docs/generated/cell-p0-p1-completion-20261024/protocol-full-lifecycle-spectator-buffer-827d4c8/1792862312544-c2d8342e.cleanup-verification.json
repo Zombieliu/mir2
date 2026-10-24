@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "realmStamp": "1792862312544-c2d8342e",
+  "runId": "1792862315921-325d69ed",
+  "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "backendSourceAggregate": "d8936d2f2b77bfcf2f9b84c8ecc1d5c3ad37f095abe73836ed785ad852dcd5ea",
+  "backendInputCount": 33,
+  "binarySha256": "187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c",
+  "processState": {
+    "pid": 49556,
+    "pidStillPresent": false,
+    "checkedAtUtc": "2026-10-24T17:21:33.9550421+00:00",
+    "ownedPortListeners": []
+  },
+  "normalShutdown": {
+    "code": 0,
+    "signal": null
+  },
+  "sixCapacityFields": [
+    "currentWsConnections",
+    "currentActiveSessions",
+    "currentReconnectLeases",
+    "currentLoginInFlight",
+    "currentNewCharacterInFlight",
+    "currentStartGameInFlight"
+  ],
+  "beforeCapacity": {
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "afterCapacity": {
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "spectator": {
+    "recordingEnabled": true,
+    "publishedFramesTotal": 367,
+    "persistedFramesTotal": 367,
+    "recordingErrorsTotal": 0,
+    "droppedFramesTotal": 0,
+    "freshIndependentDirectoryMatchesOwnedRealm": true,
+    "source": "Original pre-shutdown public health; no private recording content inspected"
+  },
+  "scope": "Owned PID, two loopback ports, six connection counters and recording health only. Not a global ghost census, native UI, capacity or performance acceptance."
+}
