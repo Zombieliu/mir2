@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "state": "final-static-scene-bound-not-executed",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "driverSourceSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+  "probeScene": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-ordinary-two-name-span4-halo-10-v1.json",
+    "bytes": 804,
+    "sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c"
+  },
+  "formalScene": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-ordinary-two-name-span4-halo-100-v1.json",
+    "bytes": 5844,
+    "sha256": "19c80f2722a9fc992f6834304c4fc5bf54f2fe86dbcf7c53887589d11aa9f8fb"
+  },
+  "analysis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-validation-v2.json",
+    "bytes": 420058,
+    "sha256": "462f11fe28b7c42096256c525c2282bb80813e461efaf7f1bbeb9748adc18fae"
+  },
+  "readiness": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-readiness-v2.json",
+    "bytes": 17944,
+    "sha256": "6bd5c05fa4b9474c5d5f77935b126ff3a7c47accac9909dd25d18c6267749284"
+  },
+  "staticClosure": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-ordinary-two-name-span4-100-proposal-v1.json",
+      "bytes": 5844,
+      "sha256": "6c0b3f01a2de64ab912a3668a30a57a1e538a7fdd61d91189549611022924739"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-span4-static-proposal-v1.json",
+      "bytes": 367881,
+      "sha256": "d7117aa2b5cb354a23b2b0691ab673576b491c4b3c8bb5fc2a0992fa779b751e"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-span4-static-proposal-v1.mjs",
+      "bytes": 17567,
+      "sha256": "00924e5400a013d101bf92594ada35a96080a338e75d4dedfc1e400140da45c9"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 132218,
+      "sha256": "c3a12cfa80dc55cf591ecaaa0031b4cabe9acc7f175a3a8de511df76d3630e55"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-author-v1.mjs",
+      "bytes": 20655,
+      "sha256": "41316723c8dbc1010a1e9e643dea7616b6088bf8611a9f3dd4fc461538c07167"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\rebind-halo-static-v2.mjs",
+      "bytes": 6815,
+      "sha256": "05c9f30aeb655289c753c846402e91955a87e9d8a214b13b33418f2dec2620e4"
+    }
+  ],
+  "staticOnly": true,
+  "dynamicSupplyVerified": false,
+  "capacityAccepted": false,
+  "scope": "Root-approved different span4 scene; fresh v2 geometry/source validation. Historical target-path/conditional supply calculations remain explicitly historical. No live scene pass is inherited."
+}

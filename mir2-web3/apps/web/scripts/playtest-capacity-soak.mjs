@@ -12,9 +12,10 @@ import { CATALOG_GZIP_CAPABILITY } from './playtest-catalog-transport.mjs';
 import { PublicDensity, beginCapacityPhase, finishCapacityPhase } from './playtest-capacity-observability.mjs';
 import { CommandBudget, SafetyStop } from './playtest-load-smoke.mjs';
 import { loadProtocolCollisionMap, findProtocolWalkPath, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
-import { hasAuthoritativePlayerDeath } from './quest-agent/protocol-observation.mjs';
+import { hasAuthoritativePlayerDeath, observedPlayerHp } from './quest-agent/protocol-observation.mjs';
 import { selfActionBlockMask } from './quest-agent/protocol-status.mjs';
 import { equipStarterGear } from './quest-agent/protocol-play.mjs';
+import { startEmergencyHpRecovery } from './quest-agent/protocol-loadout.mjs';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Measurements, assessMeasurements, movementDiagnosticMayContinue,
   AoiCoverage, ContinuousAcceptance, NativePlan, nativeCadence, verifiedCombatHit, BoundedEvidence, CapacityMonitor, memoryTrend, self, distance, sleep, sanitize, fingerprint } from './playtest-capacity-soak-core.mjs';
 
@@ -206,6 +207,11 @@ export class CapacityClient extends NativeResumeClient {
     context.accountBudgets ??= new Map();
     if (!context.accountBudgets.has(account.accountId)) context.accountBudgets.set(account.accountId, new CommandBudget());
     this.budget = context.accountBudgets.get(account.accountId);
+    if (context.policy?.activityMode === 'native') {
+      context.accountRestorativeUses ??= new Map();
+      if (!context.accountRestorativeUses.has(account.accountId)) context.accountRestorativeUses.set(account.accountId, Object.create(null));
+      this.journeyRestorativeUseAt = context.accountRestorativeUses.get(account.accountId);
+    }
     this.bytes = { sent: 0, received: 0 }; this.recentSecrets = []; this.movementCount = 0; this.targetCursor = 0; this.failedTargets = new Map();
     this.combatPursuit = null; this.chaseDeferrals = new Map();
     this.combatScout = null; this.combatScoutCursor = 0;
@@ -249,6 +255,7 @@ export class CapacityClient extends NativeResumeClient {
     const ownerTransform = message.type === 'packet' && typeof message.packet === 'string';
     const beforeSelf = ownerTransform ? selfTransform(this.snapshot) : null;
     super.observe(message);
+    recordNativeHpRecoveryEvidence(this, message, this.events.at(-1));
     const navigationHint = this.navigationHint, navigationReceipt = this.events.at(-1);
     if (navigationHint && ((message.packet === 'UserLocation' && navigationReceipt.sequence > navigationHint.sendCursor &&
         navigationReceipt.monotonicMs >= navigationHint.sentAtMs) || ['MapInformation', 'MapChanged'].includes(message.packet) ||
@@ -828,14 +835,26 @@ export function combatCandidates(client, context, now = Date.now()) {
     .sort((a, b) => (observed ? Number(observed.has(b.objectId)) - Number(observed.has(a.objectId)) : 0) || distance(a, owner) - distance(b, owner));
 }
 
+function newCombatPursuit(client, target, now, origin = self(client), cursor = client.sequence) {
+  return { objectId: target.objectId, name: target.name, mapFileName: String(client.snapshot.mapFileName),
+    bestDistance: distance(origin, target), lastProgressAt: now, nonImprovingMoves: 0,
+    lastReceiptSequence: cursor, attackSent: false, targetPoint: lifecyclePoint(target),
+    startedAt: now, activeElapsedMs: 0, confirmedMoves: 0, visited: new Map() };
+}
 function rememberCombatTarget(client, target, now = Date.now()) {
   const mapFileName = String(client.snapshot.mapFileName);
   if (client.combatPursuit?.objectId !== target.objectId || client.combatPursuit.mapFileName !== mapFileName) {
-    client.combatPursuit = { objectId: target.objectId, name: target.name, mapFileName,
-      bestDistance: distance(self(client), target), lastProgressAt: now, nonImprovingMoves: 0,
-      lastReceiptSequence: client.sequence, attackSent: false, targetPoint: lifecyclePoint(target),
-      startedAt: now, activeElapsedMs: 0, confirmedMoves: 0, visited: new Map() };
+    client.combatPursuit = newCombatPursuit(client, target, now);
   }
+}
+function postStrikeChaseSegment(client, context, plan, origin, cursor, now = Date.now()) {
+  const previous = client.combatPursuit;
+  if (context.policy?.activityMode !== 'native' || !previous?.attackSent ||
+      !['walk', 'run'].includes(plan.command.type) || previous.objectId !== plan.chaseTargetId ||
+      previous.mapFileName !== String(client.snapshot.mapFileName) || !lifecyclePoint(plan.target) ||
+      distance(origin, plan.target) === 0) return null;
+  const target = livePursuitTarget(client, context, previous, now);
+  return target ? { previous, next: newCombatPursuit(client, target, now, origin, cursor) } : null;
 }
 
 // Progress is measured only at a successful, nonzero authoritative movement
@@ -1006,6 +1025,19 @@ export function stableFanoutRange(kind, policy) {
   if (policy?.activityMode === 'native') return kind === 'chat' ? 8 : 6;
   return kind === 'chat' ? 14 : 12;
 }
+function nativeAttackWitness(client, context, target) {
+  const owner = self(client), range = stableFanoutRange('attack', context.policy);
+  return combatObservers(client, context).map(observer => {
+    const peer = activeGameplayOwner(observer, client.snapshot.mapFileName);
+    const attackerId = observedPlayerId(observer, client.label);
+    const attacker = observer.snapshot.entities.find(entity => entity.objectId === attackerId && entity.name === client.label && entity.dead !== true);
+    const observedTarget = observer.snapshot.entities.find(entity => entity.objectId === target.objectId &&
+      entity.name === target.name && ordinaryCombatMonster(entity, context));
+    const separation = peer ? Math.max(distance(peer, owner), distance(peer, target)) : Infinity;
+    return peer && attacker && observedTarget && Number.isInteger(attackerId) && separation <= range
+      ? { observer, separation } : null;
+  }).filter(Boolean).sort((a, b) => a.separation - b.separation)[0]?.observer ?? null;
+}
 function combatPlan(client, context) {
   const owner = self(client), native = context.policy?.activityMode === 'native';
   if (context.policy?.activityMode === 'native' && !client.combatArrival) {
@@ -1020,9 +1052,8 @@ function combatPlan(client, context) {
   for (const [id, failure] of client.failedTargets) if (failure.until < Date.now() - 30000) client.failedTargets.delete(id);
   let candidates = combatCandidates(client, context);
   const observers = combatObservers(client, context);
-  const witness = target => observers.find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId &&
-    (!native || (ordinaryCombatMonster(entity, context) && entity.name === target.name))) &&
-    (!native || Number.isInteger(observedPlayerId(other, client.label))));
+  const witness = target => native ? nativeAttackWitness(client, context, target) :
+    observers.find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId));
   if (native) {
     const pursuit = client.combatPursuit;
     const selected = pursuit?.mapFileName === String(client.snapshot.mapFileName)
@@ -1130,6 +1161,17 @@ export async function action(client, context, planned, preparedPlan) {
   }
   const command = plan.command, kind = command.type;
   if (client.budget.remainingWait()) { context.add({ actor: client.label, phase, kind, status: 'budget-gap', plannedGameplay: true, ...nativeMeta }); return; }
+  if (native && kind === 'attack') {
+    const target = client.snapshot.entities.find(entity => entity.objectId === command.objectId && ordinaryCombatMonster(entity, context));
+    const observer = target && nativeAttackWitness(client, context, target);
+    if (!observer) {
+      context.add({ actor: client.label, phase, kind, status: 'evidence-wait', plannedGameplay: true,
+        attackWitnessUnavailable: true, ...nativeMeta }); return;
+    }
+    // Re-resolve both the receiver's actor namespace and its cursor immediately
+    // before this send. A prepared observer may have moved since selection.
+    plan = { ...plan, targetEntity: target, observer, peerAttackerId: observedPlayerId(observer, client.label) };
+  }
   const observers = nearbyObservers(client, context, stableFanoutRange(kind, context.policy)).map(peer => ({ peer, cursor: peer.sequence,
     objectId: observedPlayerId(peer, client.label) }));
   const observerCursor = plan.observer?.sequence, cursor = client.sequence, sentAt = performance.now();
@@ -1156,7 +1198,11 @@ export async function action(client, context, planned, preparedPlan) {
       plan.targetEntity ?? client.snapshot.entities.find(entity => entity.objectId === command.objectId), sentAt, cursor, observerCursor);
     const wireCommand = v2Attack ? client.nextAttackV2(command.objectId) : command;
     if (v2Attack) { row.requestId = wireCommand.requestId; client.pendingAttackEvidence.requestId = wireCommand.requestId; }
+    // A launched strike ends its previous chase. Only a new, actually sent
+    // movement can begin another segment; selecting or rejecting a plan cannot.
+    const postStrike = postStrikeChaseSegment(client, context, plan, owner, cursor);
     client.send(wireCommand);
+    if (postStrike && client.combatPursuit === postStrike.previous) client.combatPursuit = postStrike.next;
     if (v2Attack) row.attackRequestSent = true;
     if (native && kind === 'attack') {
       rememberCombatTarget(client, plan.targetEntity);
@@ -1293,6 +1339,103 @@ async function auxiliary(client, context) {
   }
 }
 
+const NATIVE_HP_REUSE_MS = 6000, NATIVE_HP_EVIDENCE_MS = 2000;
+function exactNativeHp(snapshot) {
+  const value = snapshot?.playerHp ?? snapshot?.entities?.find(entity => entity.objectId === snapshot.playerObjectId)?.hp;
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+function heldNativeHpItem(snapshot) {
+  for (const item of [...(snapshot?.beltItems ?? []), ...(snapshot?.inventoryItems ?? [])]) {
+    const uniqueId = Number(item.uniqueId), quantity = Number(item.quantity ?? 1);
+    if (/^\(hp\)drug/i.test(String(item.name)) && Number.isSafeInteger(uniqueId) && uniqueId >= 0 &&
+        Number.isSafeInteger(quantity) && quantity > 0) return { uniqueId, quantity,
+      grid: String(item.container).toLowerCase() === 'belt' ? 'belt' : 'inventory' };
+  }
+  return null;
+}
+function nativeHpNotice(client, context, reason) {
+  const notices = client.nativeHpRecoveryNotices ??= new Set();
+  if (notices.has(reason)) return;
+  notices.add(reason);
+  context.writer?.add({ type: 'nativeHpRecovery', actor: client.label, phase: context.phase, at: Date.now(), status: 'not-sent', reason });
+}
+function recordNativeHpRecoveryEvidence(client, message, receipt) {
+  const pending = client.hpRecoveryEvidence;
+  if (!pending || receipt?.direction !== 'received' || receipt.sequence <= pending.cursor ||
+      receipt.monotonicMs < pending.sentAtMs || receipt.monotonicMs > pending.deadlineMs) return;
+  const owner = self(client), snapshot = client.snapshot;
+  if (!owner || owner.objectId !== pending.ownerObjectId || owner.name !== pending.ownerName ||
+      snapshot.mapFileName !== pending.mapFileName) { pending.failure = 'owner-changed'; return; }
+  if (hasAuthoritativePlayerDeath(snapshot)) { pending.failure = 'owner-dead'; return; }
+  if (message.type === 'error') { pending.failure = 'public-error'; return; }
+  const proof = { sequence: receipt.sequence, monotonicMs: receipt.monotonicMs };
+  if (message.packet === 'UseItem' && Number(message.payload?.uniqueId) === pending.uniqueId &&
+      String(message.payload?.grid).toLowerCase() === pending.grid) {
+    if (message.payload.success !== true) pending.failure = 'rejected';
+    else pending.ack = proof;
+  }
+  if (message.type === 'worldSnapshot' || message.packet === 'HealthChanged') {
+    const hp = exactNativeHp(snapshot);
+    if (hp != null && hp > pending.hpBefore) pending.hpIncrease = { ...proof, hp };
+  }
+  // Only a complete, freshly received inventory can prove removal. Missing
+  // arrays and later snapshots outside the original deadline prove nothing.
+  if (message.type === 'worldSnapshot' && Array.isArray(snapshot.beltItems) && Array.isArray(snapshot.inventoryItems)) {
+    const item = [...snapshot.beltItems, ...snapshot.inventoryItems].find(item => Number(item.uniqueId) === pending.uniqueId);
+    const quantity = item ? Number(item.quantity ?? 1) : 0;
+    if (Number.isSafeInteger(quantity) && quantity >= 0 && quantity < pending.quantityBefore) pending.consumption = { ...proof, quantity };
+  }
+}
+
+// This auxiliary operation neither pauses nor completes a native opportunity.
+// Its ordinary send still reserves the account's original three-command budget.
+export function offerNativeHpRecovery(client, context) {
+  if (context.policy?.activityMode !== 'native' || client.pending || client.auxPending || client.hpRecoveryPending || client.hpRecoveryEvidence) return null;
+  const owner = activeGameplayOwner(client, context.mapName);
+  if (!owner) return null;
+  const hp = exactNativeHp(client.snapshot), maximum = client.snapshot.playerMaxHp;
+  if (!(hp > 0) || !Number.isFinite(maximum) || !(maximum > 0)) { nativeHpNotice(client, context, 'unknown-exact-health'); return null; }
+  if (observedPlayerHp(client.snapshot) / maximum > .6) return null;
+  const item = heldNativeHpItem(client.snapshot);
+  if (!item) { nativeHpNotice(client, context, 'no-held-hp-item'); return null; }
+  const now = performance.now(), lastUse = Number(client.journeyRestorativeUseAt?.hp);
+  if (Number.isFinite(lastUse) && now - lastUse < NATIVE_HP_REUSE_MS) return null;
+  if (client.budget.remainingWait()) { nativeHpNotice(client, context, 'command-budget'); return null; }
+  const sentAtMs = performance.now(), pending = { ...item, quantityBefore: item.quantity, hpBefore: hp,
+    ownerObjectId: owner.objectId, ownerName: owner.name, mapFileName: client.snapshot.mapFileName,
+    cursor: client.sequence, sentAtMs, deadlineMs: sentAtMs + NATIVE_HP_EVIDENCE_MS };
+  client.hpRecoveryEvidence = pending;
+  const row = { type: 'nativeHpRecovery', actor: client.label, phase: context.phase, at: Date.now(),
+    uniqueId: item.uniqueId, grid: item.grid, hpBefore: hp, maximumHp: maximum };
+  try {
+    const dose = startEmergencyHpRecovery(client, { hpThreshold: .6, restorativeReuseDelayMs: NATIVE_HP_REUSE_MS, now })[0];
+    if (!dose) { client.hpRecoveryEvidence = null; nativeHpNotice(client, context, 'helper-declined'); return null; }
+    if (Number(dose.uniqueId) !== item.uniqueId || dose.command.grid !== item.grid) throw new Error('HP helper item did not match the held-item proof');
+    context.writer?.add({ ...row, status: 'sent' });
+  } catch {
+    client.hpRecoveryEvidence = null;
+    context.writer?.add({ ...row, status: 'send-failed' });
+    context.guard.stop('Ordinary HP recovery send failed'); return null;
+  }
+  const operation = client.wait(() => {
+    if (pending.failure) { const error = new Error('Ordinary HP recovery failed'); error.hpRecoveryFailure = pending.failure; throw error; }
+    return pending.ack && (pending.consumption || pending.hpIncrease) ? pending : null;
+  }, 'ordinary HP acknowledgement and effect', NATIVE_HP_EVIDENCE_MS).then(proof => {
+    context.writer?.add({ ...row, at: Date.now(), status: 'verified', acknowledgement: proof.ack,
+      consumed: Boolean(proof.consumption), consumption: proof.consumption ?? null,
+      hpIncreaseObserved: Boolean(proof.hpIncrease), hpIncrease: proof.hpIncrease ?? null });
+  }).catch(error => {
+    const status = error instanceof SafetyStop ? 'cancelled' : error.hpRecoveryFailure ?? 'timeout';
+    context.writer?.add({ ...row, at: Date.now(), status });
+    if (!(error instanceof SafetyStop)) context.guard.stop(`Ordinary HP recovery ${status}`);
+  }).finally(() => {
+    if (client.hpRecoveryEvidence === pending) client.hpRecoveryEvidence = null;
+    if (client.hpRecoveryPending === operation) client.hpRecoveryPending = null;
+  });
+  client.hpRecoveryPending = operation;
+  return operation;
+}
+
 function initializePlan(client, context, startAt) {
   client.plan = context.policy.activityMode === 'native' ? new NativePlan(startAt) : new FixedPlan(startAt);
   client.nextNativeChatAt = startAt + 5000; client.nextNativeTurnAt = startAt + context.policy.nativeTurnIntervalMs;
@@ -1338,6 +1481,7 @@ function startEngine(context) {
           }).finally(() => { client.pending = null; });
           }
         }
+        offerNativeHpRecovery(client, context);
         if (!client.pending && !client.auxPending && (Date.now() >= client.nextRtt || Date.now() >= client.nextRefresh)) {
           client.auxPending = auxiliary(client, context).catch(error => context.guard.stop(`Auxiliary transport failed: ${error.message}`))
             .finally(() => { client.auxPending = null; });
@@ -1433,7 +1577,7 @@ export async function measure(context, name, seconds, { now = Date.now, sleep: w
 export async function awaitPendingActions(clients) {
   // Capture once. New actions may continue for unpaused actors, but any old
   // observer obligation must finish before its planned transport is removed.
-  const pending = clients.flatMap(client => [client.pending, client.auxPending, ...(client.evidencePending ?? [])]).filter(Boolean);
+  const pending = clients.flatMap(client => [client.pending, client.auxPending, client.hpRecoveryPending, ...(client.evidencePending ?? [])]).filter(Boolean);
   await Promise.allSettled(pending);
   // A captured owner action can create its independent fanout waiter just
   // before resolving. Include that waiter before transport teardown as well.
@@ -1489,7 +1633,7 @@ async function resumeActor(original, context) {
 
 async function drain(client, context) {
   client.paused = true; context.continuous?.pause(client.label);
-  await Promise.allSettled([client.pending, client.auxPending].filter(Boolean));
+  await Promise.allSettled([client.pending, client.auxPending, client.hpRecoveryPending].filter(Boolean));
   client.draining = true;
   let state;
   try { if (client.inGame && !client.closed) { await client.refresh(); state = fingerprint(client); } }
@@ -1538,6 +1682,16 @@ export async function runCapacity(options) {
       maximumFallbackCornerTargets: 4, pathExpansionLimit: 4000,
       selectionRule: 'Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.',
       primingRule: 'Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain.' }) });
+  if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeHpMaintenance', { enumerable: true,
+    value: Object.freeze({ scope: 'Already-held ordinary HP potions only; no MP, purchase, grants or revival.',
+      hpThreshold: .6, reuseDelayMs: NATIVE_HP_REUSE_MS, evidenceDeadlineMs: NATIVE_HP_EVIDENCE_MS,
+      commandBudgetPerSecond: 3, rule: 'Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.',
+      activityRule: 'Independent auxiliary promise; native opportunities continue and HP maintenance never credits movement, attack or native completion.' }) });
+  if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeAttackWitness', { enumerable: true,
+    value: Object.freeze({ scope: 'New native attack witness selection; the original full AOI membership range remains16.',
+      maximumOwnerAndTargetDistance: stableFanoutRange('attack', policy),
+      rule: 'Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.',
+      damageRule: 'Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged.' }) });
   if (attackResults === 'v2') Object.defineProperty(report, 'attackResults', { enumerable: true,
     value: Object.freeze({ mode: 'v2', capability: ATTACK_OUTCOME_CAPABILITY,
       rule: 'No legacy fallback. Activity attacks count correlated launched outcomes only; hits still require the original dual-end damage/health evidence. Hunting attempts are offered requests, not launched attacks.' }) });

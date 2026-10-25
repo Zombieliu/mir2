@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
   assessMeasurements, movementDiagnosticMayContinue, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
-import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
+import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, offerNativeHpRecovery, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 
@@ -162,6 +162,278 @@ function huntFixture(monsters, peerMonsters = monsters) {
   return { client, peer, owner, context, rows, actions };
 }
 const huntMonster = (objectId, name, x, y = 5) => ({ objectId, kind: 'monster', name, x, y, hp: 20 });
+
+function hpRecoveryFixture(grid = 'inventory') {
+  const fixture = huntFixture([]), { client, owner, context } = fixture, commands = [], stops = [];
+  Object.assign(owner, { hp: 3, maxHp: 24, dead: false });
+  Object.assign(client.snapshot, { playerHp: 3, playerMaxHp: 24, beltItems: [], inventoryItems: [] });
+  client.snapshot[grid === 'belt' ? 'beltItems' : 'inventoryItems'].push({ uniqueId: 901, name: '(HP)DrugSmall', quantity: 2, container: grid });
+  context.guard.stop = reason => stops.push(reason);
+  client.ws = { send: data => commands.push(JSON.parse(data)) };
+  const packet = (name, payload) => client.observe({ type: 'packet', packet: name, payload });
+  const inventory = (quantity, complete = true) => {
+    const snapshot = structuredClone(client.snapshot);
+    snapshot.beltItems = []; snapshot.inventoryItems = [];
+    if (quantity > 0) snapshot[grid === 'belt' ? 'beltItems' : 'inventoryItems'].push({ uniqueId: 901, name: '(HP)DrugSmall', quantity, container: grid });
+    if (!complete) delete snapshot.inventoryItems;
+    client.observe({ type: 'worldSnapshot', payload: snapshot });
+  };
+  const immediateWait = () => { client.wait = async (predicate, label, deadline) => {
+    assert.equal(deadline, 2000); const result = predicate();
+    if (!result) throw new Error(`timed out waiting for ${label}`); return result;
+  }; };
+  return { ...fixture, commands, stops, packet, inventory, immediateWait };
+}
+
+for (const grid of ['inventory', 'belt']) test(`native HP maintenance verifies ordinary ${grid} UID consumption without inventing healing or activity`, async () => {
+  const f = hpRecoveryFixture(grid), { client, context, rows, commands, stops } = f;
+  client.ws.send = data => { commands.push(JSON.parse(data)); f.packet('UseItem', { uniqueId: 901, grid, success: true }); f.inventory(1); };
+  await offerNativeHpRecovery(client, context);
+  assert.deepEqual(commands, [{ type: 'useItem', uniqueId: 901, grid }]); assert.deepEqual(stops, []);
+  const proof = rows.find(row => row.type === 'nativeHpRecovery' && row.status === 'verified');
+  assert.equal(proof.consumed, true); assert.equal(proof.hpIncreaseObserved, false); assert.equal(proof.hpIncrease, null);
+  assert.equal(proof.consumption.quantity, 1); assert.equal(client.snapshot.playerHp, 3); assert.deepEqual(f.actions, []);
+  assert.equal(client.hpRecoveryPending, null); assert.equal(client.hpRecoveryEvidence, null);
+  assert.equal(offerNativeHpRecovery(client, context), null); assert.equal(commands.length, 1, 'same held stack cannot bypass the six-second cooldown');
+  const restored = new CapacityClient('ws://127.0.0.1:1/ws', client.account, context);
+  assert.equal(restored.journeyRestorativeUseAt, client.journeyRestorativeUseAt, 'resume shares the per-account monotonic cooldown');
+  Object.assign(restored, { ready: true, inGame: true, snapshot: structuredClone(client.snapshot), ws: client.ws });
+  assert.equal(offerNativeHpRecovery(restored, context), null); assert.equal(commands.length, 1);
+});
+
+test('native HP maintenance requires the matching successful ACK as well as a fresh exact HP increase', async () => {
+  const f = hpRecoveryFixture(), { client, context, commands, rows } = f;
+  client.ws.send = data => { commands.push(JSON.parse(data)); f.packet('HealthChanged', { hp: 8, maxHp: 24 });
+    f.packet('UseItem', { uniqueId: 901, grid: 'Inventory', success: true }); };
+  await offerNativeHpRecovery(client, context);
+  const proof = rows.find(row => row.status === 'verified');
+  assert.equal(proof.consumed, false); assert.equal(proof.hpIncreaseObserved, true); assert.equal(proof.hpIncrease.hp, 8);
+  assert.equal(proof.acknowledgement.sequence > proof.hpIncrease.sequence, true, 'real effect may arrive before its ACK');
+  assert.equal(commands.length, 1); assert.deepEqual(f.actions, []);
+});
+
+for (const failure of ['rejected', 'wrong-uid', 'wrong-grid', 'ack-only', 'effect-only', 'incomplete-inventory', 'late-proof']) {
+  test(`native HP maintenance ${failure} cannot credit recovery and fails closed`, async () => {
+    const f = hpRecoveryFixture(), { client, context, commands, rows, stops } = f; f.immediateWait();
+    if (failure === 'late-proof') {
+      const record = client.record.bind(client);
+      client.record = (direction, message) => { const event = record(direction, message);
+        if (direction === 'received') event.monotonicMs += 2001; return event; };
+    }
+    client.ws.send = data => {
+      commands.push(JSON.parse(data));
+      if (failure !== 'effect-only') f.packet('UseItem', { uniqueId: failure === 'wrong-uid' ? 902 : 901,
+        grid: failure === 'wrong-grid' ? 'Belt' : 'Inventory', success: failure !== 'rejected' });
+      if (failure !== 'ack-only') f.inventory(0, failure !== 'incomplete-inventory');
+    };
+    await offerNativeHpRecovery(client, context);
+    assert.equal(commands.length, 1); assert.equal(stops.length, 1); assert.equal(rows.some(row => row.status === 'verified'), false);
+    assert.equal(rows.at(-1).status, failure === 'rejected' ? 'rejected' : 'timeout'); assert.deepEqual(f.actions, []);
+  });
+}
+
+test('native HP maintenance keeps unknown health, missing supplies and exhausted command budget bounded and never sends MP', () => {
+  for (const reason of ['unknown-exact-health', 'no-held-hp-item', 'command-budget']) {
+    const f = hpRecoveryFixture(), { client, context, rows, commands } = f;
+    if (reason === 'unknown-exact-health') { delete client.snapshot.playerHp; delete f.owner.hp; }
+    if (reason === 'no-held-hp-item') client.snapshot.inventoryItems = [{ uniqueId: 902, name: '(MP)DrugSmall', quantity: 1 }];
+    if (reason === 'command-budget') for (let n = 0; n < 3; n++) client.budget.reserve();
+    for (let n = 0; n < 100; n++) assert.equal(offerNativeHpRecovery(client, context), null);
+    assert.equal(commands.length, 0); assert.equal(rows.length, 1); assert.equal(rows[0].reason, reason); assert.deepEqual(f.actions, []);
+  }
+  const dead = hpRecoveryFixture(); dead.owner.dead = true; dead.client.snapshot.playerHp = 0;
+  assert.equal(offerNativeHpRecovery(dead.client, dead.context), null); assert.equal(dead.commands.length, 0);
+});
+
+test('native HP pending evidence does not pause native movement and drain captures the existing dose', async () => {
+  const f = hpRecoveryFixture(), { client, peer, context, commands, rows } = f;
+  peer.paused = true; client.role = 'movement'; client.plan = new NativePlan(performance.now());
+  client.ws.send = data => { const command = JSON.parse(data); commands.push(command);
+    if (['walk', 'run'].includes(command.type)) {
+      const delta = { Up: [0, -1], Right: [1, 0], Down: [0, 1], Left: [-1, 0] }[command.direction];
+      assert.ok(delta); f.packet('UserLocation', { x: f.owner.x + delta[0] * (command.type === 'run' ? 2 : 1),
+        y: f.owner.y + delta[1] * (command.type === 'run' ? 2 : 1), direction: command.direction });
+    }
+  };
+  const dose = offerNativeHpRecovery(client, context); assert.ok(dose); let drained = false;
+  const drain = awaitPendingActions([client]).then(() => { drained = true; });
+  offerNativeAction(client, context); await client.pending;
+  assert.ok(f.actions.some(row => ['walk', 'run'].includes(row.kind) && row.status === 'success' && row.nativeOpportunity));
+  assert.equal(drained, false); assert.equal(commands.length, 2); assert.equal(client.budget.sent.length, 2);
+  f.packet('UseItem', { uniqueId: 901, grid: 'Inventory', success: true }); f.inventory(1);
+  await dose; await drain; assert.equal(drained, true); assert.equal(rows.filter(row => row.status === 'verified').length, 1);
+  const measurements = new Measurements(); for (const row of f.actions) measurements.add({ ...row, at: 1 });
+  const activity = measurements.actors.get(client.label);
+  assert.equal(activity.plans, 1); assert.equal(activity.nativeOpportunities, 1); assert.equal(activity.nativeCompleted, 1);
+  assert.equal(activity.attacks, 0); assert.equal(activity.hits, 0);
+});
+
+async function acknowledgeSentChase(fixture, moveTarget = true, prepared = undefined) {
+  const { client, peer, owner, context } = fixture;
+  peer.paused = true; client.plan = { sent() {} };
+  const plan = prepared ?? selectNativeAction(client, context), origin = { ...owner };
+  assert.ok(['walk', 'run'].includes(plan.command.type));
+  client.send = command => {
+    assert.equal(command.type, plan.command.type);
+    if (moveTarget) {
+      const target = client.snapshot.entities.find(entity => entity.objectId === plan.chaseTargetId);
+      target.x += plan.target.x - origin.x; target.y += plan.target.y - origin.y;
+    }
+    client.observe({ type: 'packet', packet: 'UserLocation', payload: { ...plan.target, direction: command.direction } });
+  };
+  await action(client, context, { due: performance.now(), cadence: { cooldownMs: 600, intervalMs: 750, pacingKnown: true } }, plan);
+  return plan;
+}
+
+test('native post-strike same-target chase starts once at a real send and again obeys nonprogress limits', async () => {
+  const f = huntFixture([huntMonster(900, 'Deer', 10)]), { client, context, rows } = f;
+  selectNativeAction(client, context); const old = client.combatPursuit;
+  Object.assign(old, { attackSent: true, confirmedMoves: 39, startedAt: Date.now() - 90000 });
+  await acknowledgeSentChase(f);
+  const segment = client.combatPursuit;
+  assert.notEqual(segment, old); assert.equal(segment.attackSent, false); assert.equal(segment.confirmedMoves, 1);
+  for (let n = 0; n < 20; n++) selectNativeAction(client, context);
+  assert.equal(client.combatPursuit, segment); assert.equal(segment.confirmedMoves, 1, 'replans cannot reset or consume its budget');
+  for (let n = 0; n < 3; n++) await acknowledgeSentChase(f);
+  assert.equal(client.combatPursuit, null); assert.equal(rows.at(-1).reason, 'no-progress');
+  assert.equal(rows.at(-1).confirmedMoves, 4); assert.equal(client.chaseDeferrals.has(900), true);
+});
+
+for (const reason of ['movement-budget', 'time-budget', 'route-loop']) test(`native post-strike segment retains the original ${reason} boundary`, async () => {
+  const f = huntFixture([huntMonster(900, 'Deer', 10)]), { client, context, rows } = f;
+  selectNativeAction(client, context); client.combatPursuit.attackSent = true;
+  await acknowledgeSentChase(f);
+  const segment = client.combatPursuit, plan = selectNativeAction(client, context);
+  if (reason === 'movement-budget') segment.confirmedMoves = 39;
+  if (reason === 'time-budget') segment.startedAt = Date.now() - 30000;
+  if (reason === 'route-loop') segment.visited.set(`${plan.target.x},${plan.target.y}`, 2);
+  await acknowledgeSentChase(f, true, plan);
+  assert.equal(client.combatPursuit, null); assert.equal(rows.at(-1).reason, reason);
+  assert.equal(client.chaseDeferrals.size, 1); assert.equal(client.failedTargets.size, 0);
+});
+
+test('native post-strike planning, pending work, budget gaps, navigation rejection and failed sends never reset a chase', async () => {
+  for (const boundary of ['standing', 'pending', 'budget', 'navigation', 'send-failed']) {
+    const target = huntMonster(900, 'Deer', boundary === 'standing' ? 6 : 10), f = huntFixture([target]);
+    const { client, context } = f; const plan = selectNativeAction(client, context), old = client.combatPursuit;
+    old.attackSent = true; old.confirmedMoves = 37;
+    if (boundary === 'pending') client.pending = Promise.resolve();
+    for (let n = 0; n < 5; n++) selectNativeAction(client, context);
+    assert.equal(client.combatPursuit, old);
+    if (['budget', 'navigation', 'send-failed'].includes(boundary)) {
+      client.plan = { sent() {} }; client.send = () => { throw new Error('synthetic send failure'); };
+      if (boundary === 'budget') for (let n = 0; n < 3; n++) client.budget.reserve();
+      if (boundary === 'navigation') context.map.blocked[plan.first.y * context.map.width + plan.first.x] = 1;
+      await action(client, context, { due: performance.now(), cadence: { cooldownMs: 600 } }, plan);
+    }
+    assert.equal(client.combatPursuit, old); assert.equal(old.attackSent, true); assert.equal(old.confirmedMoves, 37);
+  }
+});
+
+function attackWitnessFixture() {
+  const target = huntMonster(900, 'Deer', 31, 30), f = huntFixture([target]), { client, peer, owner, context } = f;
+  Object.assign(owner, { x: 30, y: 30, direction: 'Right' }); client.home = { x: 30, y: 30 };
+  Object.assign(peer.snapshot.entities[0], { x: 15, y: 30 });
+  Object.assign(peer.snapshot.entities[1], { x: 30, y: 30 });
+  const near = { label: actor(6).name, inGame: true, ready: true, role: 'movement', sequence: 80, events: [],
+    snapshot: { mapFileName: '0', playerObjectId: 1000, entities: [
+      { objectId: 1000, name: actor(6).name, kind: 'player', x: 25, y: 30, hp: 24, dead: false },
+      { ...owner, objectId: 50006 }, structuredClone(target) ] } };
+  context.clients = [client, peer, near];
+  return { ...f, near, target };
+}
+
+test('native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection', () => {
+  const f = attackWitnessFixture(); let plan = selectNativeAction(f.client, f.context);
+  assert.equal(plan.command.type, 'attack'); assert.equal(plan.observer, f.near); assert.equal(plan.peerAttackerId, 50006);
+  for (const missing of ['target', 'attacker', 'dead', 'wrong-map', 'not-ready']) {
+    const g = attackWitnessFixture();
+    if (missing === 'target') g.near.snapshot.entities = g.near.snapshot.entities.filter(entity => entity.objectId !== 900);
+    if (missing === 'attacker') g.near.snapshot.entities = g.near.snapshot.entities.filter(entity => entity.name !== g.client.label);
+    if (missing === 'dead') g.near.snapshot.entities[0].dead = true;
+    if (missing === 'wrong-map') g.near.snapshot.mapFileName = 'other';
+    if (missing === 'not-ready') g.near.ready = false;
+    plan = selectNativeAction(g.client, g.context);
+    assert.ok(['walk', 'run'].includes(plan.command.type), missing); assert.equal(plan.observer, undefined, missing);
+  }
+});
+
+test('native attack witness uses nearest eligible peer with original order on equal separation', () => {
+  const f = attackWitnessFixture(), second = structuredClone(f.near);
+  second.label = actor(7).name; second.snapshot.entities[0].name = second.label; f.context.clients.push(second);
+  assert.equal(selectNativeAction(f.client, f.context).observer, f.near);
+  second.snapshot.entities[0].x = 28;
+  assert.equal(selectNativeAction(f.client, f.context).observer, second);
+});
+
+test('native attack witness is reselected with its current namespace and cursor immediately before the real send', async () => {
+  const f = attackWitnessFixture(), { client, context, near, owner, target, actions } = f;
+  const first = structuredClone(near); first.label = actor(7).name; first.snapshot.entities[0].name = first.label;
+  first.snapshot.entities[0].x = 28; first.snapshot.entities[1].objectId = 50007;
+  context.clients.splice(1, 0, first);
+  const plan = selectNativeAction(client, context); assert.equal(plan.observer, first);
+  first.snapshot.entities[0].x = 15; client.plan = { sent() {} }; let actualReceiver;
+  const peerPacket = (packet, payload) => near.events.push({ direction: 'received', type: 'packet', packet, payload,
+    sequence: ++near.sequence, monotonicMs: performance.now() });
+  client.send = command => {
+    assert.equal(command.type, 'attack'); actualReceiver = client.pendingAttackEvidence.receivers.find(receiver => receiver.role === 'observer');
+    for (const [packet, extra] of [['ObjectStruck', { attackerId: owner.objectId }], ['DamageIndicator', { damage: 2 }], ['ObjectHealth', { percent: 90 }]]) {
+      client.observe({ type: 'packet', packet, payload: { objectId: target.objectId, ...extra } });
+      peerPacket(packet, { objectId: target.objectId, ...extra, ...(packet === 'ObjectStruck' ? { attackerId: 50006 } : {}) });
+    }
+  };
+  await action(client, context, { due: performance.now(), cadence: { cooldownMs: 600, intervalMs: 750, pacingKnown: true } }, plan);
+  assert.equal(actualReceiver.client, near); assert.equal(actualReceiver.cursor, 80); assert.equal(actualReceiver.attackerId, 50006);
+  assert.equal(actions.find(row => row.kind === 'attack').status, 'success'); assert.equal(actions.find(row => row.kind === 'attack').sharedHealthVerified, true);
+});
+
+test('native attack witness loss before send retains the original incomplete opportunity without a fake attack', async () => {
+  const f = attackWitnessFixture(), { client, context, near, actions } = f, sent = [], metrics = new Measurements();
+  const plan = selectNativeAction(client, context); assert.equal(plan.observer, near);
+  near.snapshot.entities[0].x = 15; client.send = command => sent.push(command); client.plan = { sent() {} };
+  await action(client, context, { due: performance.now(), intervalMs: 750,
+    cadence: { cooldownMs: 600, intervalMs: 750, pacingKnown: true } }, plan);
+  assert.equal(sent.length, 0); assert.equal(actions.length, 1); assert.equal(actions[0].status, 'evidence-wait');
+  metrics.add({ ...actions[0], at: 1 }); const counts = metrics.actors.get(client.label);
+  assert.equal(counts.nativeOpportunities, 1); assert.equal(counts.nativeCompleted, 0); assert.equal(counts.plans, 1);
+  assert.equal(counts.attacks, 0); assert.equal(counts.hits, 0);
+  client.plan = new NativePlan(performance.now());
+  offerNativeAction(client, context);
+  assert.equal(sent.length, 1); assert.ok(['walk', 'run'].includes(sent[0].type));
+  await Promise.resolve(); assert.equal(actions.length, 1, 'planning and sending a fallback do not prove movement');
+  const [dx, dy] = { Up: [0, -1], UpRight: [1, -1], Right: [1, 0], DownRight: [1, 1],
+    Down: [0, 1], DownLeft: [-1, 1], Left: [-1, 0], UpLeft: [-1, -1] }[sent[0].direction];
+  const owner = client.snapshot.entities.find(entity => entity.objectId === 1000), amount = sent[0].type === 'run' ? 2 : 1;
+  client.observe({ type: 'packet', packet: 'UserLocation', payload: { x: owner.x + dx * amount, y: owner.y + dy * amount,
+    direction: sent[0].direction } });
+  await client.pending;
+  assert.equal(actions[1].status, 'success'); assert.equal(actions[1].nativeOpportunity, true);
+  metrics.add({ ...actions[1], at: 2 });
+  assert.equal(counts.nativeOpportunities, 2); assert.equal(counts.nativeCompleted, 1); assert.equal(counts.attacks, 0); assert.equal(counts.hits, 0);
+});
+
+test('native initial no-witness selection can use another genuinely witnessed adjacent target', () => {
+  const f = attackWitnessFixture(), alternate = huntMonster(901, 'Scarecrow', 30, 31);
+  f.client.snapshot.entities.push(alternate); f.owner.direction = 'Down';
+  f.near.snapshot.entities = f.near.snapshot.entities.filter(entity => entity.objectId !== 900);
+  f.near.snapshot.entities.push(structuredClone(alternate));
+  const plan = selectNativeAction(f.client, f.context);
+  assert.equal(plan.command.type, 'attack'); assert.equal(plan.command.objectId, 901); assert.equal(plan.observer, f.near);
+});
+
+test('native initial no-witness target with no approach route retains the original bounded scout fallback', () => {
+  const f = attackWitnessFixture(), { client, near, owner, context } = f;
+  near.snapshot.entities = near.snapshot.entities.filter(entity => entity.objectId !== 900);
+  client.combatCluster = { observerHomes: [{ x: 25, y: 30 }], patrolSpan: 2, observerNames: new Set([near.label]),
+    observerBindings: [{ actorIndex: 6, homeIndex: 0, home: { x: 25, y: 30 }, name: near.label }] };
+  context.clients = [client, near];
+  for (let y = 29; y <= 31; y++) for (let x = 30; x <= 32; x++) {
+    if (x !== owner.x || y !== owner.y) context.map.blocked[y * context.map.width + x] = 1;
+  }
+  const plan = selectNativeAction(client, context);
+  assert.equal(plan.scouting, true); assert.ok(['walk', 'run'].includes(plan.command.type)); assert.equal(plan.chaseTargetId, undefined);
+  assert.equal(context.policy.minimumCombatAttacksPerMinute, 18); assert.equal(context.policy.minimumCombatHitsPerMinute, 12);
+});
 
 function navigationFixture() {
   const samples = [], sent = [], policy = capacityPolicy({ profile: 'probe', activityMode: 'native', stages: '2' });
@@ -1400,7 +1672,7 @@ test('native combat walks the real village-to-forest route before hunting, witho
   // Arrival is a one-time requirement. After a chase, a reachable adjacent
   // monster with a real observer must not force the fighter back home again.
   Object.assign(owner, { x: 280, y: 557, direction: 'Right' }); Object.assign(hen, { x: 281, y: 557 });
-  const peer = { label: 'peer', inGame: true, snapshot: { mapFileName: '0', playerObjectId: 1000, entities: [
+  const peer = { label: 'peer', inGame: true, ready: true, role: 'movement', home: { x: 279, y: 557 }, snapshot: { mapFileName: '0', playerObjectId: 1000, entities: [
     { objectId: 1000, kind: 'player', name: 'peer', x: 279, y: 557 }, { ...owner, objectId: 50001 }, { ...hen }] } };
   context.clients.push(peer);
   assert.equal(selectNativeAction(client, context, 0).command.type, 'attack');
@@ -1420,6 +1692,7 @@ test('native pending evidence is recorded separately and never sends another att
     nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity, plan: new NativePlan(0), pending: Promise.resolve(), waitReason: 'evidence-wait', evidencePending: new Set() };
   client.snapshot.entities.push({ objectId: 900, kind: 'monster', name: 'Hen', x: 6, y: 5, hp: 5 });
   const peer = observer('peer', 5, [entity('fighter', 5, 50001), { objectId: 900, name: 'Hen', kind: 'monster', x: 6, y: 5, hp: 5 }]);
+  peer.ready = true;
   context.clients = [client, peer]; client.inGame = true;
   offerNativeAction(client, context, 0);
   assert.equal(rows.length, 1); assert.equal(rows[0].status, 'evidence-wait'); assert.equal(rows[0].kind, 'attack');

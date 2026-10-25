@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "result": "no-blocking-findings-for-final-two-fixture-initializations",
+  "scope": "Independent read-only narrow review of two legacy fixture setups. No tests, product module imports, services, loads, scenes or source changes by this reviewer.",
+  "priorReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-survival-pursuit-witness-independent-review-addendum-v1.json",
+    "bytes": 7220,
+    "sha256": "2c29f6ba1095180cd5d3062e555e22284453fefb6601d1da89889c9702b64e5b"
+  },
+  "sourceFiles": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d",
+      "unchangedFromTimingFreeze": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 216899,
+      "sha256": "4280e97d90981f75d37ed15c5d395d3d0129f3d5d213310ad7fc134429e25097",
+      "unchangedFromTimingFreeze": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964",
+      "unchangedFromTimingFreeze": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974",
+      "unchangedFromTimingFreeze": true
+    }
+  ],
+  "expectedFinalAggregateSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+  "productionMainUnchanged": true,
+  "fixtureDelta": [
+    {
+      "test": "native combat walks the real village-to-forest route before hunting, without requiring an observer to arrive",
+      "change": "Existing ordinary observer peer now explicitly has ready:true, role:'movement', home:{x:279,y:557} matching its existing actual self279557.",
+      "reason": "The new active-witness contract requires a ready real gameplay peer; making it ready also means the existing actorsReachedScenario assertion must see its actual movement role/home.",
+      "assertionsChanged": false
+    },
+    {
+      "test": "native pending evidence is recorded separately and never sends another attack into an ambiguous hit window",
+      "change": "Existing already in-game observer peer is explicitly ready:true.",
+      "reason": "The pending-action evidence-wait assertion still requires an actual eligible witness so selection remains attack, rather than changing the asserted behavior to a fallback walk.",
+      "assertionsChanged": false
+    }
+  ],
+  "exactInverseProof": {
+    "previousFinalTestBytes": 216821,
+    "previousFinalTestSha256": "dbf345725668b465fd2c94472f25a224d3f0b381e6684241579026e41077950f",
+    "inverseTwoFixtureInitializationsBytes": 216821,
+    "inverseTwoFixtureInitializationsSha256": "dbf345725668b465fd2c94472f25a224d3f0b381e6684241579026e41077950f",
+    "inverseIsExactPreviousFinalTest": true,
+    "originalTimingCommit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+    "originalGitPath": "mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "originalTestBytes": 196852,
+    "originalTestSha256": "2235d9e7d55f0bfa1b78bce3b6ad493cd6cfba2fbe329e551502d2a53ab367cf",
+    "restorationMethod": "In memory only: undo these two fixture setup additions, remove the new hpRecoveryFixture-through-witness test/helper block and remove the single new offerNativeHpRecovery import. Result is byte-identical to the original30ba timing-driver test blob.",
+    "restoredBytes": 196852,
+    "restoredSha256": "2235d9e7d55f0bfa1b78bce3b6ad493cd6cfba2fbe329e551502d2a53ab367cf",
+    "restoredEqualsOriginalBlob": true
+  },
+  "historicalTestAccounting": {
+    "original152TestBodyUnchanged": false,
+    "originalAssertionsUnchanged": true,
+    "explanation": "The original body now includes the two explicit fixture setup additions; it must not be described as entirely unchanged. Every original assertion and flow restores exactly after reversing only those additions.",
+    "writerReportedFullV1": {
+      "total": 175,
+      "passed": 173,
+      "failed": 2,
+      "accepted": false
+    },
+    "writerReportedIntermediateFixtureFailurePreserved": true,
+    "writerReportedFocusedFinal": 25,
+    "writerReportedAdjacentFinal": 53,
+    "writerReportedFullV2": {
+      "total": 175,
+      "passed": 175,
+      "failed": 0,
+      "exactFinalNineAggregateSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+      "independentlyRerunByReviewer": false
+    },
+    "reviewerExecutedTests": false
+  },
+  "limitations": [
+    "This narrow addendum does not turn the preserved full-v1 failures into passes.",
+    "The eventual full-v2 raw source pins and logs must certify the final nine inputs independently of this static review.",
+    "No new live native workload or capacity acceptance is established here."
+  ],
+  "priorMetadataCorrection": {
+    "artifact": {
+      "file": "C:/mir2-build/p01-completion-20261024/native-survival-pursuit-witness-fixture-review-addendum-v1.json",
+      "bytes": 5820,
+      "sha256": "ac42f1cb0f152baf56ae2356f0fd53c57c5c30e5894fdfcfcc472b1caa8989b1"
+    },
+    "reason": "Correct both fixture labels to their exact existing test titles; this changes no source inverse proof or review conclusion."
+  }
+}

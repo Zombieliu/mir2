@@ -2,7 +2,7 @@
 
 本记录接续 [前轮证据](../cell-preproduction-p0-p1-20261024/README.md)，保留前轮失败和 `14 passed / 2 not_run` 原始完整报告。本轮报告独立保存，不改写旧结论。
 
-当前 P1 工程合同验证通过，P0 正式容量尚未通过。此前网关排队停顿仍待定位；最新第八轮因合法碰撞阻挡而未能提供足量活动，不能算作同一停顿的复现。P2 尚未启动，固定 Cell 的晋级仍以完整 P0 基线为前提。
+当前 P1 工程合同验证通过，P0 正式容量尚未通过。此前网关排队停顿仍待定位；最新第九轮因战斗活动不足及真实角色死亡失败，不能算作同一停顿的复现。P2 尚未启动，固定 Cell 的晋级仍以完整 P0 基线为前提。
 
 ## 已有新鲜结果
 
@@ -82,7 +82,15 @@ V2 后端对应提交 `461f1d85eed6309a55a88bd79a0022f7b97febe4`、[39 项输入
 
 [新场景的静态准入](capacity-span4-halo-scene-v1/README.md)检查了每个 5×5 巡逻区及外围一格的静态退路；2/10/25/50/100 前缀都有连通观察域和静态目标路径。外围仍可能有动态怪物，战斗供给只是条件估计。与原 span2 场景相比，前 10/25/50 的静态中心邻近对增加，全 100 的邻近对减少约 20%，因此必须另测真实 AOI 密度，不能称完全等价负载；新场景不继承旧探针的通过。
 
-测量脚本现从上个窗口的真实关闭时刻起等满至少 60 秒，并在原配置时长之外保证足够完整窗口。`seconds` 保留配置合同，`measuredSeconds` 记录真实时长并用于活动率分母，长停顿不补造多个窗口，尾段仍保留整体和连续判定。新增六组边界后的[完整回归 151/151](capacity-phase-window-timing-v1/full-v1.log)通过；随后仅一行将聊天的二值触发条件保留为原配置时长，防止 30 秒短探针被几毫秒抖动额外要求聊天。最终版本的[定向 7/7](capacity-phase-window-timing-v1/final-focused-v1.log)和[相邻 25/25](capacity-phase-window-timing-v1/final-adjacent-v1.log)通过，[最终差分](capacity-phase-window-timing-v1/final-compatibility-delta-v1.json)明确区分全量版本与最终版本，不称最终原始九输入已重新跑完整回归。[新九输入清单](capacity-phase-window-timing-driver-frozen-v1.json)另行冻结，旧清单不改写。新场景尚未实测，不放宽时长、95% 完成率或任何战斗门槛。P0 仍未完成，P2 继续冻结。
+测量脚本现从上个窗口的真实关闭时刻起等满至少 60 秒，并在原配置时长之外保证足够完整窗口。`seconds` 保留配置合同，`measuredSeconds` 记录真实时长并用于活动率分母，长停顿不补造多个窗口，尾段仍保留整体和连续判定。新增六组边界后的[完整回归 151/151](capacity-phase-window-timing-v1/full-v1.log)通过；随后仅一行将聊天的二值触发条件保留为原配置时长，防止 30 秒短探针被几毫秒抖动额外要求聊天。最终版本的[定向 7/7](capacity-phase-window-timing-v1/final-focused-v1.log)和[相邻 25/25](capacity-phase-window-timing-v1/final-adjacent-v1.log)通过，[最终差分](capacity-phase-window-timing-v1/final-compatibility-delta-v1.json)明确区分全量版本与最终版本，不称最终原始九输入已重新跑完整回归。[新九输入清单](capacity-phase-window-timing-driver-frozen-v1.json)另行冻结，旧清单不改写。该驱动已随 `30ba328ad3d1b1eb46e51540cb1880d66eba3ee1` [推送核验](validation/phase-window-checkpoint-push-verification-v1.json)。
+
+第九轮 `1792891029840-02155527` 使用同一 `4688/a430` 后端、该测量驱动及 span4 halo 场景，[原结果仍为失败](capacity-native10-v2-halo-diagnostics/public-verification.json)。2 人实际 300.301 秒、五个完整窗口通过；10 人只测量约 170.484 秒。其第二个 60.036 秒完整窗口中，战斗角色全部 79 次机会完成、0 timeout/correction，但仅 1 次真实起手和双端正伤害，低于原每分钟 18/12，且该失败早于死亡保护约 50 秒。其后公开服务端快照差分确认同名角色最终 HP 为 0 并死亡；致命攻击者未知。三帧投影不是致命原始协议事件，[独立分析及来源边界](capacity-native10-v2-halo-analysis/README.md)保留。soak、恢复、保存与后验收均未执行；[正式 06 门禁](capacity-native10-v2-halo-analysis/formal06-expected09-rejection-v1.json)实际拒绝此失败，未准备正式账户或进程。
+
+该轮原始 14,021 行、292 个有效嵌入监控、295 行独立监控、105 行完整慢段及 2,111 帧外置录像均有原始摘要。正常退出、六项连接计数归零与[独立 PID/端口清理](capacity-native10-v2-halo-analysis/probe09-root-independent-cleanup-v1.json)不升格失败。分析还发现三处压测客户端缺口：原生循环未消费已有普通 HP 药；首次命中后的追逐没有重新启用原 40 步/30 秒限制；攻击选择了 AOI 边缘观察者，合法 Run 随即使攻击双方移出可见范围。最后一项缺少观察端伤害证据，原双端未命中与隔离判定保留，不冒称物理攻击未命中。后续仅在同场景修复客户端并重新实测；不放宽时长、95% 完成率、死亡停止或任何战斗门槛。P0 仍未完成，P2 继续冻结。
+
+原生压测客户端现只通过普通 `useItem` 消费已持有的 HP 药，并要求新鲜匹配回执及库存减少或精确 HP 增加；药品消耗不冒称回血，也不增加活动完成数。恢复仍共享原账号每秒三条命令预算，六秒复用间隔跨重连保留。已起手攻击后的新追逐移动实际发送成功，才重启原有 40 步/30 秒追逐预算，重规划、转身或阻挡不重置。攻击选择真实双对象可见且双方距离均不超过六格的最近活跃观察者，发包前再次核验；初选无观察者仍可正常寻路，已准备攻击临发送失证则不发送、不计完成。AOI、双端正伤害、900ms 期限及歧义隔离规则保持。
+
+上述最终九输入版本的[完整回归 175/175](capacity-native-survival-pursuit-witness-v1/full-v2.log)、[定向 25/25](capacity-native-survival-pursuit-witness-v1/focused-v5.log)及[相邻 53/53](capacity-native-survival-pursuit-witness-v1/adjacent-v4.log)通过，[冻结清单](capacity-native-survival-pursuit-witness-driver-frozen-v1.json)分别绑定原始日志和精确源码。第一次完整回归 173 passed / 2 failed、随后局部夹具检查的失败均保留；最终仅在两个旧夹具中补齐活跃观察者初始化，原断言及流程不删改，[精确差分证明](capacity-native-survival-pursuit-witness-v1/test-assertion-fixture-preservation-v2.json)和[独立复核](capacity-native-survival-pursuit-witness-v1/native-survival-pursuit-witness-fixture-review-addendum-v2.json)可追溯。后端 41 输入与已有 Release 未改动。普通自然回血、升级及一枚初始药能否维持两小时战斗仍为未知，[生存预研](capacity-native-survival-pursuit-witness-v1/native-two-hour-survival-prestudy-v1.json)只列真实机制与成本，不替代容量实测。
 
 ## 本轮范围
 

@@ -1,0 +1,389 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T01:30:55.268Z",
+  "hashMode": "raw-bytes",
+  "scope": "Exact explicit public allowlist only. Full capacity raw, monitor raw and recording payload remain external. No private/store/credentials/EXE payload copied.",
+  "files": [
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/gateway-build-pin.json",
+      "source": "release-native-10-v2-halo-feasibility-09/gateway-build-pin.json",
+      "bytes": 1329,
+      "sha256": "625a16b188cf7d9c5464c5917058322ac06629aaaf163e4efe551ad833f5b9e0"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/source-pins.json",
+      "source": "release-native-10-v2-halo-feasibility-09/source-pins.json",
+      "bytes": 34551,
+      "sha256": "59565e96ad259bd4d2a4d643a5e8121ac01ca50516d9f5c6387ab11352d8605b"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/source-pins-admitted-v2.json",
+      "source": "release-native-10-v2-halo-feasibility-09/source-pins-admitted-v2.json",
+      "bytes": 34775,
+      "sha256": "ab3fdf708a4b27ebd7eb77e20dfdaf9af11c341fea429789438c0e2bca44b2ac"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/realm-process.json",
+      "source": "release-native-10-v2-halo-feasibility-09/realm-process.json",
+      "bytes": 1976,
+      "sha256": "d97162afceb1bcdd4cdc71c0c70481295893a19d200be38cc6df4e0bc1dac9bc"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/realm-cleanup.json",
+      "source": "release-native-10-v2-halo-feasibility-09/realm-cleanup.json",
+      "bytes": 3149,
+      "sha256": "4923d6553ba68c1e54020a89b226a09e6749506ae7c98aec83f90b8b1a360f08"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/slow-stage-public.jsonl",
+      "source": "release-native-10-v2-halo-feasibility-09/slow-stage-public.jsonl",
+      "bytes": 9365,
+      "sha256": "947f5b7c458feda741cd722d96ed44c301b77b752a664e0592c9dc9df595d165"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/slow-stage-public-status.json",
+      "source": "release-native-10-v2-halo-feasibility-09/slow-stage-public-status.json",
+      "bytes": 1011,
+      "sha256": "b2cebd0b4c561c88546a554eea1e5f5772cdedac30d745cd1413f1a8b58b131c"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/slow-stage-diagnostics-config.json",
+      "source": "release-native-10-v2-halo-feasibility-09/slow-stage-diagnostics-config.json",
+      "bytes": 3963,
+      "sha256": "0e6b211a78c02fdf94a415a5a3ea7ecd8b7cdc9fdf0a6e25a746a75a59f2d885"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/slow-stage-public.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/slow-stage-public.test.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/synthetic-tests-v1.log",
+      "source": "release-native-10-v2-halo-feasibility-09/synthetic-tests-v1.log",
+      "bytes": 6131,
+      "sha256": "f9a3757f968410a1e60ce48abcc9296c5a4014407e418608974034db1c67449b"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/slow-stage-helper-freeze-v1.json",
+      "source": "release-native-10-v2-halo-feasibility-09/slow-stage-helper-freeze-v1.json",
+      "bytes": 4235,
+      "sha256": "875ecbb07a386d339fc2e5f78f62dd9804dde7a5ad93a6114c01c34a3fd2b29d"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/slow-stage-schema-contract.json",
+      "source": "release-native-10-v2-halo-feasibility-09/slow-stage-schema-contract.json",
+      "bytes": 7923,
+      "sha256": "a566d2357976ce4ec0a14c92da2e8f1490e724c527dcb757be46e3c6642ea6f6"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/legacy14-original.mjs.txt",
+      "source": "release-native-10-v2-halo-feasibility-09/legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/candidate-release-binding.json",
+      "source": "release-native-10-v2-halo-feasibility-09/candidate-release-binding.json",
+      "bytes": 6226,
+      "sha256": "4fc77802a6f610ca3408d23cf08c95b423079cada2e30b36b94834563d0122c1"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/full16-gate.json",
+      "source": "release-native-10-v2-halo-feasibility-09/full16-gate.json",
+      "bytes": 4772,
+      "sha256": "243b4cd5760c4317fca07983c9b0c356b29d9180eb2e05dc97e8e06e94e6ce7c"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/slow-stage-row-contract.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/verify-full16-gate.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/verify-full16-gate.mjs",
+      "bytes": 4660,
+      "sha256": "32455188735a191a4c6635b2d4342ef0ffb46d6afb4917c8906301f37e3e0d0c"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/socket-build-source-lib.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/socket-build-source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/driver-evidence-contract.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/driver-evidence-contract.mjs",
+      "bytes": 2115,
+      "sha256": "aa603cf55fd9e2763c2e769b933485ffdb4431a7fa4ef8d6905d904d0c56cf11"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/scene-binding.json",
+      "source": "release-native-10-v2-halo-feasibility-09/scene-binding.json",
+      "bytes": 4331,
+      "sha256": "d2a3a9e01ba1da80941fecf7d1d4b60dd6cb7992661101454f03f02b91f123d8"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/scene-contract.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/scene-contract.mjs",
+      "bytes": 7883,
+      "sha256": "9e4798588fb6506b1f358f6c0844a1e6a2098d6e53242e3ebcf290e9cfd848f6"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/backend-driver-source-guard.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/backend-driver-source-guard.mjs",
+      "bytes": 1748,
+      "sha256": "444cf6501ce72eb51f465fac540fe96f196ff30259791586e17fa635a0dc108a"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/measured-phase-contract.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/resource-profile.json",
+      "source": "release-native-10-v2-halo-feasibility-09/resource-profile.json",
+      "bytes": 1194,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/run-options.json",
+      "source": "release-native-10-v2-halo-feasibility-09/run-options.json",
+      "bytes": 2933,
+      "sha256": "808d96b12a44d37f39dd6a7058495ad6ae04802af6dec3a25ba899a7d3a91ee5"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/run-options-admitted-v2.json",
+      "source": "release-native-10-v2-halo-feasibility-09/run-options-admitted-v2.json",
+      "bytes": 3541,
+      "sha256": "a0edad4453ac81de86e5021b8729203f04a83ad304c3f1de91d584e0937a83ba"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/scenario.json",
+      "source": "release-native-10-v2-halo-feasibility-09/scenario.json",
+      "bytes": 804,
+      "sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/scenario-prefix-readiness.json",
+      "source": "release-native-10-v2-halo-feasibility-09/scenario-prefix-readiness.json",
+      "bytes": 17944,
+      "sha256": "6bd5c05fa4b9474c5d5f77935b126ff3a7c47accac9909dd25d18c6267749284"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/provisioning.json",
+      "source": "release-native-10-v2-halo-feasibility-09/provisioning.json",
+      "bytes": 330,
+      "sha256": "8e6998c671da917a36c0b8ce511ab62da153b4f79c087543822c4db2a1c171b4"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/spectator-health-before.json",
+      "source": "release-native-10-v2-halo-feasibility-09/spectator-health-before.json",
+      "bytes": 655,
+      "sha256": "519b84dd8e871315c86fa41eb5f15cff3ea4f3b321f5cc9b99f781d6f041b887"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/monitor-options.json",
+      "source": "release-native-10-v2-halo-feasibility-09/monitor-options.json",
+      "bytes": 700,
+      "sha256": "899842af21cdd00e1cc67e648e133e1836523520524d74e352123206897a27c9"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/monitor-process.json",
+      "source": "release-native-10-v2-halo-feasibility-09/monitor-process.json",
+      "bytes": 223,
+      "sha256": "843e171536465979d0b5c5ebde6fc5debf2fb3e3772ae778445b41685bb082a7"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/launcher-source-frozen-v1.json",
+      "source": "release-native-10-v2-halo-feasibility-09/launcher-source-frozen-v1.json",
+      "bytes": 18552,
+      "sha256": "29d2fa876e6f61025d237fe267fe9b5c19388bd13abb292e8c141b0b12542cd5"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/launcher-source-prepared-v1.json",
+      "source": "release-native-10-v2-halo-feasibility-09/launcher-source-prepared-v1.json",
+      "bytes": 1892,
+      "sha256": "af5cd048d6124f244b42f572db736a4adf560d933511f160b6156e22529c43ea"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/driver-report-contract.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/driver-report-contract.mjs",
+      "bytes": 5972,
+      "sha256": "d13244434dde33866c5f06903ed655b48bb765a4bbf1ca8ce5dd9e85f4cf3536"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/preparation-plan.json",
+      "source": "release-native-10-v2-halo-feasibility-09/preparation-plan.json",
+      "bytes": 1892,
+      "sha256": "af5cd048d6124f244b42f572db736a4adf560d933511f160b6156e22529c43ea"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/report-provenance.json",
+      "source": "release-native-10-v2-halo-feasibility-09/report-provenance.json",
+      "bytes": 2899,
+      "sha256": "425bcde207db01136e967b6a12921f0b778adab104a892a265961ae2eee8a1c2"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/static-preparation-verification.json",
+      "source": "release-native-10-v2-halo-feasibility-09/static-preparation-verification.json",
+      "bytes": 3046,
+      "sha256": "b5348a47322541dcb5043186332349e9bd5c062a4c10f43724ef11a282d21d77"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/source-guard-readonly-verification.json",
+      "source": "release-native-10-v2-halo-feasibility-09/source-guard-readonly-verification.json",
+      "bytes": 3075,
+      "sha256": "b2da826e656db04ea275ba03cd91c0f1b827419eacdb399c4c7f5f481ae238a0"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/initialize-private.ps1",
+      "source": "release-native-10-v2-halo-feasibility-09/initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/input-lib.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/input-lib.mjs",
+      "bytes": 14620,
+      "sha256": "b0b9c191cc6fc6e2a89f0f478524e078aaf414d7215368e6d6b590e32873d014"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/prepare-inputs.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/prepare-inputs.mjs",
+      "bytes": 10453,
+      "sha256": "aaccb82dc0d8d44235306cf0dc5beff6a2f5f4101a2c27cc511338842e637645"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/run-owned.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/run-owned.mjs",
+      "bytes": 17869,
+      "sha256": "831c45cf074bfe7855a6d80729b0a770b09515c3e3bcbdab776d977c632fbb88"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/monitor-owned.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/request-stop.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/recover-drained-owned.ps1",
+      "source": "release-native-10-v2-halo-feasibility-09/recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/reports/1792891029840-02155527.report.json",
+      "source": "release-native-10-v2-halo-feasibility-09/reports/1792891029840-02155527.report.json",
+      "bytes": 75433,
+      "sha256": "1cb07e72c7341b1d200c3145e4799604c0737c4a59c38f48ebf7100046106819"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/launcher-syntax-check.log",
+      "source": "release-native-10-v2-halo-feasibility-09/launcher-syntax-check.log",
+      "bytes": 1543,
+      "sha256": "a40e5b81b875cf11efc96ce9b330a243ed58d82e8db3ef952072916fcc4cfe48"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/spectator-health-after.json",
+      "source": "release-native-10-v2-halo-feasibility-09/spectator-health-after.json",
+      "bytes": 663,
+      "sha256": "37f7f57915bd33b0e2c617a2e3e29eeb3eb7e7201efb6a1793dd396dde27477e"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-socket-diagnostics-v1.json",
+      "source": "release-socket-diagnostics-v1.json",
+      "bytes": 1920,
+      "sha256": "cdcf7ec17ffbdb7ef1a8c529deaf8d8dd957d16a8129315390760e910a4b9c3f"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/backend-source-socket-diagnostics-v1.json",
+      "source": "backend-source-socket-diagnostics-v1.json",
+      "bytes": 14000,
+      "sha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/socket-diagnostics-v1-build-receipt.json",
+      "source": "socket-diagnostics-v1-build-receipt.json",
+      "bytes": 2095,
+      "sha256": "36181ed0755c44bafd676f44bda8a33c72f958777660fb649686f0119478eabd"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/capacity-phase-window-timing-driver-frozen-v1.json",
+      "source": "capacity-phase-window-timing-driver-frozen-v1.json",
+      "bytes": 15970,
+      "sha256": "39c163a36a713f8c2bbf500eeaff0fe095a1b3848726345745a6f26372a177c3"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/partition-ordinary-two-name-span4-halo-10-v1.json",
+      "source": "partition-ordinary-two-name-span4-halo-10-v1.json",
+      "bytes": 804,
+      "sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/partition-ordinary-two-name-span4-halo-100-v1.json",
+      "source": "partition-ordinary-two-name-span4-halo-100-v1.json",
+      "bytes": 5844,
+      "sha256": "19c80f2722a9fc992f6834304c4fc5bf54f2fe86dbcf7c53887589d11aa9f8fb"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/partition-span4-halo-static-validation-v2.json",
+      "source": "partition-span4-halo-static-validation-v2.json",
+      "bytes": 420058,
+      "sha256": "462f11fe28b7c42096256c525c2282bb80813e461efaf7f1bbeb9748adc18fae"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/partition-span4-halo-static-readiness-v2.json",
+      "source": "partition-span4-halo-static-readiness-v2.json",
+      "bytes": 17944,
+      "sha256": "6bd5c05fa4b9474c5d5f77935b126ff3a7c47accac9909dd25d18c6267749284"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/collect-release-native-10-v2-halo-feasibility-09-recordings-metadata.json",
+      "source": "collect-release-native-10-v2-halo-feasibility-09-recordings-metadata.json",
+      "bytes": 1230,
+      "sha256": "d9d32a857bc4169423be55ba0f980f09482edd13c183f36b493e3cd1e1ee37ea"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/collect-release-native-10-v2-halo-feasibility-09-monitor-endpoints.json",
+      "source": "collect-release-native-10-v2-halo-feasibility-09-monitor-endpoints.json",
+      "bytes": 4699,
+      "sha256": "254f7d464878839ce7a46775599b39d4e4efc9f1df6c51a34ef6d2707dfbea29"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/collect-public.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/collect-public.mjs",
+      "bytes": 38823,
+      "sha256": "3015fa85fcc1f4a3b90bbc1edf05958230968b1644ec890014554ca6cbd868ef"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/verify-public.mjs",
+      "source": "release-native-10-v2-halo-feasibility-09/verify-public.mjs",
+      "bytes": 16952,
+      "sha256": "304225eba712464b5aca3e002b06d823bc6cec071c3eb041a5fcd322b39a056c"
+    },
+    {
+      "path": "capacity-native10-v2-halo-diagnostics/collect-release-native-10-v2-halo-feasibility-09-public-artifact-catalog.json",
+      "source": "collect-release-native-10-v2-halo-feasibility-09-public-artifact-catalog.json",
+      "bytes": 24083,
+      "sha256": "5841f52c01f2768a5a2ee6109713a84a7b8cd7299d84a2f4adf5a7ab66acd507"
+    }
+  ],
+  "allOriginalCopiesByteEqual": true,
+  "structurallyUnredactedSensitiveJsonFields": 0,
+  "privateSecretValuesReadOrClaimedChecked": false
+}

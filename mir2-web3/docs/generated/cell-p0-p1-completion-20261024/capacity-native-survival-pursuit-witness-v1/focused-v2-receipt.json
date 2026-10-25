@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "args": [
+    "--test",
+    "--test-name-pattern=native HP|native post-strike|native attack witness",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "startedAtMs": 1792894661688,
+  "elapsedMs": 160,
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "sourcePins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143634,
+      "sha256": "bf09e909102776d3911b9fa581f38f2817bff7214c47e388132f539eb8a91229"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 214369,
+      "sha256": "560d44791a8d4e33bd149c06c3ccabe4ea7820768c328593effa1227ad1a11ed"
+    }
+  ],
+  "log": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v2.log",
+    "bytes": 5269,
+    "sha256": "41aa96cf24f3baa6ed6d1b6a540031e6e21edcce6d6ca7a9f9d5ae36e9b98d1a"
+  }
+}

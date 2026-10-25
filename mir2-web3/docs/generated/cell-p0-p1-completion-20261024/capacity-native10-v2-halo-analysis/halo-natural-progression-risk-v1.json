@@ -1,0 +1,824 @@
+{
+  "schemaVersion": 1,
+  "scope": "Bounded readonly conditional native damage/experience supply risk; no gameplay run, scenario/source edit, or capacity decision.",
+  "capacityAccepted": false,
+  "sourcePins": {
+    "stats": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\stats.rs",
+      "bytes": 31065,
+      "sha256": "4e075d9af585560c0db0fadb29a75610e217858bcbc766e6e2ef4f1d04335ece"
+    },
+    "leveling": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\leveling.rs",
+      "bytes": 15932,
+      "sha256": "a2c16667440e9e53a1145d663243fb2d97ca54ce5a42c1532b02618653cd9e0c"
+    },
+    "zone": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8"
+    },
+    "experience": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\experience.rs",
+      "bytes": 27325,
+      "sha256": "4f0fc16a9fcff965e4666b32110dee679e37ab8cd4433a34ffb8f28152948505"
+    },
+    "experienceProfile": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_experience_profile.rs",
+      "bytes": 75946,
+      "sha256": "fe7767bec9d255e9fbf6e727bc7ab9a380f29166417f3c2a50085e0083ace190"
+    },
+    "config": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+      "bytes": 342825,
+      "sha256": "9f1315fb16d48e4b19cdfd1d9c1e8c2acab9fb9458eb0ce96e5fa5674261dde5"
+    },
+    "inventory": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\inventory.rs",
+      "bytes": 190859,
+      "sha256": "69a73ae6d83b7a232ff635e0cc4cb128d7cc78b0f51db6e258eaf77208591fca"
+    },
+    "equipDriver": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    "items": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_item_manifest.json",
+      "bytes": 1589543,
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+    },
+    "monsters": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    "respawns": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    "profile": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\content_profiles\\platinum_176.json",
+      "bytes": 47571,
+      "sha256": "7ee7a6de1c253e8ba3831e3455d6ba0c59bc9dc00ef90841947d5ec58989395d"
+    }
+  },
+  "staticValidation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-validation-v2.json",
+    "bytes": 420058,
+    "sha256": "462f11fe28b7c42096256c525c2282bb80813e461efaf7f1bbeb9748adc18fae"
+  },
+  "rawProbe08": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\reports\\1792885245847-0368d2eb.samples.jsonl",
+    "bytes": 17808660,
+    "rows": 28609,
+    "sha256": "a42c137132dd966434a46e735dafdd9fd53dd63d6f97983c06ea7f265b4286dc"
+  },
+  "helper": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\analyze-halo-natural-progression-risk-v1.mjs",
+    "bytes": 12624,
+    "sha256": "0b0322ae27dfecd2c01401db767b9f0762bd8e7fa4bf9627013972d23ba9d49e"
+  },
+  "sourceReferences": {
+    "warriorBaseDc": {
+      "file": "apps/simulation/src/runtime/stats.rs",
+      "line": 232
+    },
+    "baseStatFormula": {
+      "file": "apps/simulation/src/runtime/stats.rs",
+      "line": 184
+    },
+    "ordinaryAuthoritativeDamage": {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 16748
+    },
+    "autoLevelLoop": {
+      "file": "apps/simulation/src/runtime/leveling.rs",
+      "line": 170
+    },
+    "defaultWorldExperienceRate": {
+      "file": "apps/simulation/src/config.rs",
+      "line": 4298
+    },
+    "tierMultiplier": {
+      "file": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "line": 696
+    },
+    "levelDifferencePenalty": {
+      "file": "apps/simulation/src/runtime/zone/experience.rs",
+      "line": 191
+    }
+  },
+  "nativeModel": {
+    "class": "Warrior",
+    "startingWeapon": "WoodenSword",
+    "startingWeaponDc": {
+      "min": 2,
+      "max": 4
+    },
+    "baseMinAndMaxDc": "floor(level/5), added to weapon and any real equipment/buffs; not a forced damage value.",
+    "targetTemplates": [
+      {
+        "name": "Deer",
+        "hp": 25,
+        "minAc": 0,
+        "maxAc": 0,
+        "level": 12,
+        "rawExperience": 18
+      },
+      {
+        "name": "Scarecrow",
+        "hp": 20,
+        "minAc": 0,
+        "maxAc": 0,
+        "level": 10,
+        "rawExperience": 15
+      }
+    ],
+    "experienceTiers": [
+      {
+        "minLevel": 1,
+        "maxLevel": 21,
+        "multiplier": 2
+      },
+      {
+        "minLevel": 22,
+        "maxLevel": 35,
+        "multiplier": 3
+      },
+      {
+        "minLevel": 36,
+        "maxLevel": 50,
+        "multiplier": 4
+      }
+    ],
+    "worldRateDefault": 1,
+    "qaNaturalExperienceMultiplierDefault": 1,
+    "normalStartupWeapon": "Normal NewCharacter start_item manifest, then ordinary equipItem. The capacity driver does not auto-buy or replace it on level-up.",
+    "assumptions": [
+      "No added DC/Luck/critical/percentage buffs, weapon remains equipped with its original effective stats; ordinary target AC0.",
+      "Expected hits use independent uniform integer attack-power draws solely as a conditional ideal estimate, not a real RNG replay.",
+      "No target healing or movement replenishment beyond canonical target slots; every slot is fully utilized immediately at original fixed respawn delay.",
+      "Hit chance, failedTargets quarantine, chase/observer coverage and actual allocation can reduce realized supply."
+    ]
+  },
+  "conditionalPrefixMatrix": [
+    {
+      "actors": 2,
+      "fighters": 0,
+      "targets": 0,
+      "requiredPositiveHitsPerMinute": 0,
+      "ratesByLevel": [
+        {
+          "level": 1,
+          "assumedMinDc": 2,
+          "assumedMaxDc": 4,
+          "cumulativeNativeExperienceToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "minimumDcUpperHitCountPerMinute": 0,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 0
+        },
+        {
+          "level": 5,
+          "assumedMinDc": 3,
+          "assumedMaxDc": 5,
+          "cumulativeNativeExperienceToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "minimumDcUpperHitCountPerMinute": 0,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 0
+        },
+        {
+          "level": 10,
+          "assumedMinDc": 4,
+          "assumedMaxDc": 6,
+          "cumulativeNativeExperienceToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "minimumDcUpperHitCountPerMinute": 0,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 0
+        },
+        {
+          "level": 15,
+          "assumedMinDc": 5,
+          "assumedMaxDc": 7,
+          "cumulativeNativeExperienceToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "minimumDcUpperHitCountPerMinute": 0,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 0
+        },
+        {
+          "level": 20,
+          "assumedMinDc": 6,
+          "assumedMaxDc": 8,
+          "cumulativeNativeExperienceToLevel": 456900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "minimumDcUpperHitCountPerMinute": 0,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 0
+        },
+        {
+          "level": 25,
+          "assumedMinDc": 7,
+          "assumedMaxDc": 9,
+          "cumulativeNativeExperienceToLevel": 1896900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "minimumDcUpperHitCountPerMinute": 0,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 0
+        },
+        {
+          "level": 30,
+          "assumedMinDc": 8,
+          "assumedMaxDc": 10,
+          "cumulativeNativeExperienceToLevel": 7296900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "minimumDcUpperHitCountPerMinute": 0,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 0
+        }
+      ]
+    },
+    {
+      "actors": 10,
+      "fighters": 1,
+      "targets": 20,
+      "requiredPositiveHitsPerMinute": 12,
+      "ratesByLevel": [
+        {
+          "level": 1,
+          "assumedMinDc": 2,
+          "assumedMaxDc": 4,
+          "cumulativeNativeExperienceToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 40.27131766900433,
+          "minimumDcUpperHitCountPerMinute": 59.33333333333334,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 7356
+        },
+        {
+          "level": 5,
+          "assumedMinDc": 3,
+          "assumedMaxDc": 5,
+          "cumulativeNativeExperienceToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 30.775755728293458,
+          "minimumDcUpperHitCountPerMinute": 41.19999999999999,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 5108
+        },
+        {
+          "level": 10,
+          "assumedMinDc": 4,
+          "assumedMaxDc": 6,
+          "cumulativeNativeExperienceToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 25.000457247370836,
+          "minimumDcUpperHitCountPerMinute": 31.33333333333333,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 3884
+        },
+        {
+          "level": 15,
+          "assumedMinDc": 5,
+          "assumedMaxDc": 7,
+          "cumulativeNativeExperienceToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 21.553909465020578,
+          "minimumDcUpperHitCountPerMinute": 23.066666666666677,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 2860
+        },
+        {
+          "level": 20,
+          "assumedMinDc": 6,
+          "assumedMaxDc": 8,
+          "cumulativeNativeExperienceToLevel": 456900,
+          "idealUniformExpectedPositiveHitsPerMinute": 18.411522633744855,
+          "minimumDcUpperHitCountPerMinute": 23.066666666666677,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 2860
+        },
+        {
+          "level": 25,
+          "assumedMinDc": 7,
+          "assumedMaxDc": 9,
+          "cumulativeNativeExperienceToLevel": 1896900,
+          "idealUniformExpectedPositiveHitsPerMinute": 16.898765432098763,
+          "minimumDcUpperHitCountPerMinute": 18.13333333333333,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 2248
+        },
+        {
+          "level": 30,
+          "assumedMinDc": 8,
+          "assumedMaxDc": 10,
+          "cumulativeNativeExperienceToLevel": 7296900,
+          "idealUniformExpectedPositiveHitsPerMinute": 14.745679012345674,
+          "minimumDcUpperHitCountPerMinute": 18.13333333333333,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 2248
+        }
+      ]
+    },
+    {
+      "actors": 25,
+      "fighters": 2,
+      "targets": 62,
+      "requiredPositiveHitsPerMinute": 24,
+      "ratesByLevel": [
+        {
+          "level": 1,
+          "assumedMinDc": 2,
+          "assumedMaxDc": 4,
+          "cumulativeNativeExperienceToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 126.02093427743307,
+          "minimumDcUpperHitCountPerMinute": 186.08333333333343,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 23073
+        },
+        {
+          "level": 5,
+          "assumedMinDc": 3,
+          "assumedMaxDc": 5,
+          "cumulativeNativeExperienceToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 96.28999136310513,
+          "minimumDcUpperHitCountPerMinute": 129.15000000000012,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 16014
+        },
+        {
+          "level": 10,
+          "assumedMinDc": 4,
+          "assumedMaxDc": 6,
+          "cumulativeNativeExperienceToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 78.2178783721994,
+          "minimumDcUpperHitCountPerMinute": 98.58333333333329,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 12222
+        },
+        {
+          "level": 15,
+          "assumedMinDc": 5,
+          "assumedMaxDc": 7,
+          "cumulativeNativeExperienceToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 67.35267489711936,
+          "minimumDcUpperHitCountPerMinute": 72.21666666666661,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 8955
+        },
+        {
+          "level": 20,
+          "assumedMinDc": 6,
+          "assumedMaxDc": 8,
+          "cumulativeNativeExperienceToLevel": 456900,
+          "idealUniformExpectedPositiveHitsPerMinute": 57.69238683127565,
+          "minimumDcUpperHitCountPerMinute": 72.21666666666661,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 8955
+        },
+        {
+          "level": 25,
+          "assumedMinDc": 7,
+          "assumedMaxDc": 9,
+          "cumulativeNativeExperienceToLevel": 1896900,
+          "idealUniformExpectedPositiveHitsPerMinute": 52.828395061728386,
+          "minimumDcUpperHitCountPerMinute": 56.93333333333339,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 7059
+        },
+        {
+          "level": 30,
+          "assumedMinDc": 8,
+          "assumedMaxDc": 10,
+          "cumulativeNativeExperienceToLevel": 7296900,
+          "idealUniformExpectedPositiveHitsPerMinute": 45.79382716049387,
+          "minimumDcUpperHitCountPerMinute": 56.93333333333339,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 7059
+        }
+      ]
+    },
+    {
+      "actors": 50,
+      "fighters": 5,
+      "targets": 115,
+      "requiredPositiveHitsPerMinute": 60,
+      "ratesByLevel": [
+        {
+          "level": 1,
+          "assumedMinDc": 2,
+          "assumedMaxDc": 4,
+          "cumulativeNativeExperienceToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 230.98960530582568,
+          "minimumDcUpperHitCountPerMinute": 341.2499999999998,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 42334
+        },
+        {
+          "level": 5,
+          "assumedMinDc": 3,
+          "assumedMaxDc": 5,
+          "cumulativeNativeExperienceToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 176.48759843519798,
+          "minimumDcUpperHitCountPerMinute": 236.81666666666686,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 29379
+        },
+        {
+          "level": 10,
+          "assumedMinDc": 4,
+          "assumedMaxDc": 6,
+          "cumulativeNativeExperienceToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 143.36259716506626,
+          "minimumDcUpperHitCountPerMinute": 180.9166666666668,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 22441
+        },
+        {
+          "level": 15,
+          "assumedMinDc": 5,
+          "assumedMaxDc": 7,
+          "cumulativeNativeExperienceToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 123.41440329218103,
+          "minimumDcUpperHitCountPerMinute": 132.3833333333333,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 16424
+        },
+        {
+          "level": 20,
+          "assumedMinDc": 6,
+          "assumedMaxDc": 8,
+          "cumulativeNativeExperienceToLevel": 456900,
+          "idealUniformExpectedPositiveHitsPerMinute": 105.77880658436216,
+          "minimumDcUpperHitCountPerMinute": 132.3833333333333,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 16424
+        },
+        {
+          "level": 25,
+          "assumedMinDc": 7,
+          "assumedMaxDc": 9,
+          "cumulativeNativeExperienceToLevel": 1896900,
+          "idealUniformExpectedPositiveHitsPerMinute": 96.80987654320971,
+          "minimumDcUpperHitCountPerMinute": 104.43333333333315,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 12955
+        },
+        {
+          "level": 30,
+          "assumedMinDc": 8,
+          "assumedMaxDc": 10,
+          "cumulativeNativeExperienceToLevel": 7296900,
+          "idealUniformExpectedPositiveHitsPerMinute": 83.79382716049366,
+          "minimumDcUpperHitCountPerMinute": 104.43333333333315,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 12955
+        }
+      ]
+    },
+    {
+      "actors": 100,
+      "fighters": 10,
+      "targets": 126,
+      "requiredPositiveHitsPerMinute": 120,
+      "ratesByLevel": [
+        {
+          "level": 1,
+          "assumedMinDc": 2,
+          "assumedMaxDc": 4,
+          "cumulativeNativeExperienceToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 250.37831919880713,
+          "minimumDcUpperHitCountPerMinute": 369.7499999999998,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 45882
+        },
+        {
+          "level": 5,
+          "assumedMinDc": 3,
+          "assumedMaxDc": 5,
+          "cumulativeNativeExperienceToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 191.30730579688083,
+          "minimumDcUpperHitCountPerMinute": 256.6166666666669,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 31844
+        },
+        {
+          "level": 10,
+          "assumedMinDc": 4,
+          "assumedMaxDc": 6,
+          "cumulativeNativeExperienceToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 155.40169181527202,
+          "minimumDcUpperHitCountPerMinute": 195.9166666666668,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 24308
+        },
+        {
+          "level": 15,
+          "assumedMinDc": 5,
+          "assumedMaxDc": 7,
+          "cumulativeNativeExperienceToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 133.80699588477364,
+          "minimumDcUpperHitCountPerMinute": 143.48333333333323,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 17806
+        },
+        {
+          "level": 20,
+          "assumedMinDc": 6,
+          "assumedMaxDc": 8,
+          "cumulativeNativeExperienceToLevel": 456900,
+          "idealUniformExpectedPositiveHitsPerMinute": 114.63065843621412,
+          "minimumDcUpperHitCountPerMinute": 143.48333333333323,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 17806
+        },
+        {
+          "level": 25,
+          "assumedMinDc": 7,
+          "assumedMaxDc": 9,
+          "cumulativeNativeExperienceToLevel": 1896900,
+          "idealUniformExpectedPositiveHitsPerMinute": 104.95432098765401,
+          "minimumDcUpperHitCountPerMinute": 113.13333333333306,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 14038
+        },
+        {
+          "level": 30,
+          "assumedMinDc": 8,
+          "assumedMaxDc": 10,
+          "cumulativeNativeExperienceToLevel": 7296900,
+          "idealUniformExpectedPositiveHitsPerMinute": 90.94938271604931,
+          "minimumDcUpperHitCountPerMinute": 113.13333333333306,
+          "minimumDcUpperTwoHourHitCountWithInitialStock": 14038
+        }
+      ]
+    }
+  ],
+  "closed126SlotXpModel": {
+    "killCapacityPerMinute": 30.34999999999996,
+    "baseExperiencePerMinuteAfterLevel1to21Tier2": 1043,
+    "twoHours": {
+      "minutes": 120,
+      "rawKillCountUpperIncludingInitial": 3768,
+      "experienceUpperAtTier2IncludingInitial": 129444
+    },
+    "entire18000SecondBudget": {
+      "minutes": 300,
+      "rawKillCountUpperIncludingInitial": 9231,
+      "experienceUpperAtTier2IncludingInitial": 317184
+    },
+    "experienceNeededToLevel20": 456900,
+    "experienceNeededToLevel25": 1896900,
+    "scope": "An intentionally overgenerous conditional upper bound assigning all126 canonical slot rewards to one fresh player, initial stock plus ideal immediate respawns, tier2 until level20, no other sources/positive bonuses. It is not a bound on live wandering or the full map510slots. Existing level-difference reductions would lower XP."
+  },
+  "probe08Observed": {
+    "firstAttack": {
+      "line": 4541,
+      "at": 1792885627442,
+      "phase": "settle",
+      "level": 1,
+      "status": "success",
+      "requestId": "1",
+      "result": "launched",
+      "targetId": 206639,
+      "damage": 3,
+      "hunting": "Scarecrow"
+    },
+    "lastAttack": {
+      "line": 28511,
+      "at": 1792886306536,
+      "phase": "soak",
+      "level": 5,
+      "status": "success",
+      "requestId": "350",
+      "result": "launched",
+      "targetId": 206642,
+      "damage": 3,
+      "hunting": "Scarecrow"
+    },
+    "observedAttackElapsedMinutes": 11.318233333333334,
+    "totalAttackActions": 350,
+    "levels": [
+      {
+        "level": 1,
+        "count": 29,
+        "launched": 29,
+        "positiveHits": 29,
+        "totalObservedPositiveDamage": 80,
+        "damageHistogram": {
+          "1": 2,
+          "2": 13,
+          "3": 4,
+          "4": 10
+        },
+        "first": {
+          "line": 4541,
+          "at": 1792885627442,
+          "phase": "settle",
+          "level": 1,
+          "status": "success",
+          "requestId": "1",
+          "result": "launched",
+          "targetId": 206639,
+          "damage": 3,
+          "hunting": "Scarecrow"
+        },
+        "last": {
+          "line": 6263,
+          "at": 1792885675118,
+          "phase": "stage-10",
+          "level": 1,
+          "status": "success",
+          "requestId": "29",
+          "result": "launched",
+          "targetId": 206624,
+          "damage": 2,
+          "hunting": "Scarecrow"
+        }
+      },
+      {
+        "level": 2,
+        "count": 49,
+        "launched": 49,
+        "positiveHits": 49,
+        "totalObservedPositiveDamage": 135,
+        "damageHistogram": {
+          "1": 1,
+          "2": 21,
+          "3": 16,
+          "4": 11
+        },
+        "first": {
+          "line": 6444,
+          "at": 1792885680331,
+          "phase": "stage-10",
+          "level": 2,
+          "status": "success",
+          "requestId": "30",
+          "result": "launched",
+          "targetId": 206501,
+          "damage": 3,
+          "hunting": "Deer"
+        },
+        "last": {
+          "line": 9829,
+          "at": 1792885777111,
+          "phase": "stage-10",
+          "level": 2,
+          "status": "success",
+          "requestId": "78",
+          "result": "launched",
+          "targetId": 206620,
+          "damage": 1,
+          "hunting": "Scarecrow"
+        }
+      },
+      {
+        "level": 3,
+        "count": 69,
+        "launched": 69,
+        "positiveHits": 69,
+        "totalObservedPositiveDamage": 210,
+        "damageHistogram": {
+          "1": 2,
+          "2": 22,
+          "3": 16,
+          "4": 29
+        },
+        "first": {
+          "line": 9902,
+          "at": 1792885779230,
+          "phase": "stage-10",
+          "level": 3,
+          "status": "success",
+          "requestId": "79",
+          "result": "launched",
+          "targetId": 206614,
+          "damage": 4,
+          "hunting": "Scarecrow"
+        },
+        "last": {
+          "line": 14102,
+          "at": 1792885899025,
+          "phase": "stage-10",
+          "level": 3,
+          "status": "success",
+          "requestId": "147",
+          "result": "launched",
+          "targetId": 206701,
+          "damage": 2,
+          "hunting": "Deer"
+        }
+      },
+      {
+        "level": 4,
+        "count": 97,
+        "launched": 97,
+        "positiveHits": 97,
+        "totalObservedPositiveDamage": 265,
+        "damageHistogram": {
+          "1": 2,
+          "2": 44,
+          "3": 29,
+          "4": 22
+        },
+        "first": {
+          "line": 14355,
+          "at": 1792885905726,
+          "phase": "stage-10",
+          "level": 4,
+          "status": "success",
+          "requestId": "148",
+          "result": "launched",
+          "targetId": 206528,
+          "damage": 4,
+          "hunting": "Deer"
+        },
+        "last": {
+          "line": 20920,
+          "at": 1792886092011,
+          "phase": "soak",
+          "level": 4,
+          "status": "success",
+          "requestId": "244",
+          "result": "launched",
+          "targetId": 206712,
+          "damage": 1,
+          "hunting": "Deer"
+        }
+      },
+      {
+        "level": 5,
+        "count": 106,
+        "launched": 106,
+        "positiveHits": 105,
+        "totalObservedPositiveDamage": 386,
+        "damageHistogram": {
+          "1": 2,
+          "2": 5,
+          "3": 44,
+          "4": 28,
+          "5": 26
+        },
+        "first": {
+          "line": 21035,
+          "at": 1792886094925,
+          "phase": "soak",
+          "level": 5,
+          "status": "success",
+          "requestId": "245",
+          "result": "launched",
+          "targetId": 206648,
+          "damage": 3,
+          "hunting": "Scarecrow"
+        },
+        "last": {
+          "line": 28511,
+          "at": 1792886306536,
+          "phase": "soak",
+          "level": 5,
+          "status": "success",
+          "requestId": "350",
+          "result": "launched",
+          "targetId": 206642,
+          "damage": 3,
+          "hunting": "Scarecrow"
+        }
+      }
+    ],
+    "deathTraces": 46,
+    "selectedDeathFirstAndLast": [
+      {
+        "line": 4953,
+        "at": 1792885638195,
+        "requestId": "8",
+        "targetId": 206639,
+        "receivers": [
+          "observer",
+          "owner"
+        ]
+      },
+      {
+        "line": 28306,
+        "at": 1792886300199,
+        "requestId": "346",
+        "targetId": 206639,
+        "receivers": [
+          "observer",
+          "owner"
+        ]
+      }
+    ],
+    "levelScope": "cadence.level is the actual own snapshot level captured when planning; damage is only positive dual-end-confirmed damage. Death traces count recorded ObjectDied, not inferred HP0. No raw LevelChanged/GainExperience packet trace is available here."
+  },
+  "conclusion": {
+    "noUnconditionalTwoHourD10FailureEstablished": true,
+    "starterWeaponDamageBands": "Levels1-4 DC2-4;5-9 DC3-5;10-14 DC4-6;15-19 DC5-7;20-24 DC6-8;25-29 DC7-9;30-34 DC8-10. Merely reaching MaxDC10 is level30, not level5.",
+    "conditionalPressure": "With all10 fighters holding starter gear, level20-24 ideal random positive-hit supply is about114.63/min<120; all level25+ minimumDC7 closed126slot no-healing model has at most113.13/min steady,14038 hits including initial stock over120min<14400 required.",
+    "progressionRisk": "Under the closed126slot/defaulttier/no-other-XP model even all rewards assigned to a single fresh actor within the entire18000s budget do not reach the level20 threshold; ordinary equal allocation is much slower. This makes automaticD10 within2h unsupported, not impossible under other live XP sources or a larger replenishing target pool.",
+    "observed": "Probe08 actual level/damage distributions above are the reference; isolated3/5 damage at level5 is consistent with starterDC3-5 and materially below thelevel20-30 pressure bands.",
+    "monitoring": "During09/formal record actual cadence.level distribution, confirmed damage quantiles, attacks/hits and per-window live supply; do not infer DC from level alone if equipment/buffs change. Static expected supply does not guarantee any60s window."
+  },
+  "unusedAlternativeTemplates": [
+    {
+      "name": "Hen",
+      "hp": 5,
+      "minDc": 1,
+      "maxDc": 1,
+      "level": 2,
+      "rawExperience": 9,
+      "scope": "LowerHP5 worsens highdamage hit supply; not a supply fix."
+    },
+    {
+      "name": "HookingCat",
+      "hp": 30,
+      "minDc": 2,
+      "maxDc": 4,
+      "level": 13,
+      "rawExperience": 23,
+      "scope": "HP30/32 can raise hits per target but is hostileDC2-4; static template only, no safe home/coverage/survival proof and no scene change authorized."
+    },
+    {
+      "name": "RakingCat",
+      "hp": 32,
+      "minDc": 2,
+      "maxDc": 4,
+      "level": 13,
+      "rawExperience": 27,
+      "scope": "HP30/32 can raise hits per target but is hostileDC2-4; static template only, no safe home/coverage/survival proof and no scene change authorized."
+    }
+  ],
+  "limitations": [
+    "Current09 may run independently; this analysis does not delay, authorize, pass or alter it.",
+    "The canonical126 is a statically reachable target set, not a closed live-world census. Wander, respawn positions, active observer routes and outsider targets can change the actual pool.",
+    "Guild/partner/buff XP, party shares, quests, other kills, equipment changes and existing starting XP can invalidate the conditional progression bound. None was synthesized or disabled.",
+    "Critical or added DC can reach pressure bands earlier than pure levels; zero/blocked/missed hits are not positive damage.",
+    "This is not a promise of two-hour supply, an unconditional capacity failure, a request to lock XP, or authority to change content/thresholds."
+  ]
+}
