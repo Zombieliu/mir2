@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T07:55:46.760Z",
+  "scope": "Independent lightweight original/public byte closure, source-after pins, correction-preimage/HPselfcheck bindings and README/link inspection. No29MBraw, recording, product test or authoring rerun.",
+  "checksPassed": true,
+  "runId": "1792912711217-e7ea81f2",
+  "copyProvenance": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-compact-wire-followup-13-analysis/copy-provenance-v1.json",
+    "bytes": 11439,
+    "sha256": "fc4054375f5edb56a28fcaea2c4e6249d4be1790d516b94d256df43bfb379ac4"
+  },
+  "originalCopiesVerified": 35,
+  "originalCopyBytes": 694890,
+  "publicFilesVerified": 37,
+  "authoredExtras": [
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-compact-wire-followup-13-analysis/README.md",
+      "bytes": 1546,
+      "sha256": "65ad9c5dc5862711c66428e6590b6d4cb83f26acbb55df5aab8c9b973c33bec5"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-compact-wire-followup-13-analysis/copy-provenance-v1.json",
+      "bytes": 11439,
+      "sha256": "fc4054375f5edb56a28fcaea2c4e6249d4be1790d516b94d256df43bfb379ac4"
+    }
+  ],
+  "copies": [
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-root-independent-cleanup-v1.json",
+      "copy": "probe13-root-independent-cleanup-v1.json",
+      "bytes": 325,
+      "sha256": "65d12c6cc75ef1e0b774597100ef203145e9cab55526754eb45b97fedfcc9420"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-collection-first-refusal-coordinator-record-v1.json",
+      "copy": "probe13-collection-first-refusal-coordinator-record-v1.json",
+      "bytes": 1759,
+      "sha256": "0bc75124640e0fe2ec28740892a6fb826fde8e0db32bdf14e2fd1f05c17fc0ff"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/compact-probe13-independent-review-v1/preseal-review-checklist-v1.json",
+      "copy": "compact-probe13-independent-review-v1/preseal-review-checklist-v1.json",
+      "bytes": 8267,
+      "sha256": "dd93c91bd5c312f5862effad2761d80fe9d2bbeb8b4acc23af60a1381949527b"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/compact-probe13-independent-review-v1/preseal-independent-review-v1.json",
+      "copy": "compact-probe13-independent-review-v1/preseal-independent-review-v1.json",
+      "bytes": 9594,
+      "sha256": "02d1a915864d687ac2da1c230cbe97dcd612c3ca15773ee12c81e333e0dffef0"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/compact-probe13-collection-independent-review-v2/review-v2.json",
+      "copy": "compact-probe13-collection-independent-review-v2/review-v2.json",
+      "bytes": 8896,
+      "sha256": "a6ade1027296cb35863d677b556cf453bae29a26495e62d00deeb566cbd6fc52"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verify-ended-probe13.mjs",
+      "copy": "probe13-independent-verification-v1/verify-ended-probe13.mjs",
+      "bytes": 23135,
+      "sha256": "daa1cc795bff12d850294f7507128b924e4d3ac5821e84f7753575e5e4f25f18"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verification-preparation-v1.json",
+      "copy": "probe13-independent-verification-v1/verification-preparation-v1.json",
+      "bytes": 3616,
+      "sha256": "684551892ee71850759d53521ff44e9fe4d11ca16d71031db03e71d43c5e7b9c"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verify-ended-probe13-v2.mjs",
+      "copy": "probe13-independent-verification-v1/verify-ended-probe13-v2.mjs",
+      "bytes": 22979,
+      "sha256": "803ecb952cc18854dda6c39726a5aa0401f956e878d878fc50b5c5bb207c3575"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verification-preparation-v2.json",
+      "copy": "probe13-independent-verification-v1/verification-preparation-v2.json",
+      "bytes": 3594,
+      "sha256": "1498f3b6977b612534e7d9523f8e515d8187adbe6d6bd9e5f556d1c4bc158608"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-contract-v2.mjs",
+      "copy": "probe13-independent-verification-v1/hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-v2-selfcheck.mjs",
+      "copy": "probe13-independent-verification-v1/hp-proof-v2-selfcheck.mjs",
+      "bytes": 3490,
+      "sha256": "b12118b6490e356a61fbaebbf05a66e9889e49f9708685eedbde1298791c7a06"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-v2-selfcheck.log",
+      "copy": "probe13-independent-verification-v1/hp-proof-v2-selfcheck.log",
+      "bytes": 1184,
+      "sha256": "5e31f16a8330e2087de26c60f6d1d853fd4023ecb66713abe6c7df376263608f"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-v2-selfcheck-receipt.json",
+      "copy": "probe13-independent-verification-v1/hp-proof-v2-selfcheck-receipt.json",
+      "bytes": 3595,
+      "sha256": "10c80885160b9d5b1d46e21fa038dc2bd9acd0b9197e7ba61985a190baa73b78"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/audit-closed-raw-windows-v1.mjs",
+      "copy": "probe13-independent-verification-v1/audit-closed-raw-windows-v1.mjs",
+      "bytes": 5748,
+      "sha256": "dd2fe39b2b17614507feb97676d345dd703520c62358aabe45fd31540c1ba831"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/raw-window-contract-audit-v1.json",
+      "copy": "probe13-independent-verification-v1/raw-window-contract-audit-v1.json",
+      "bytes": 8549,
+      "sha256": "a32477d9b72843fdcc04847cc0148bb56d1f035bf7e29bd3438ae8e4cecddac1"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/final-verification.json",
+      "copy": "probe13-independent-verification-v1/final-verification.json",
+      "bytes": 359693,
+      "sha256": "c96b6cc7fbc960592f60c0b81dac3fc4d43238d424a2bfaf968d5528165e946c"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/preimages-v1/verify-ended-probe13.mjs.txt",
+      "copy": "probe13-independent-verification-v1/preimages-v1/verify-ended-probe13.mjs.txt",
+      "bytes": 23135,
+      "sha256": "daa1cc795bff12d850294f7507128b924e4d3ac5821e84f7753575e5e4f25f18"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/preimages-v1/verification-preparation-v1.json",
+      "copy": "probe13-independent-verification-v1/preimages-v1/verification-preparation-v1.json",
+      "bytes": 3616,
+      "sha256": "684551892ee71850759d53521ff44e9fe4d11ca16d71031db03e71d43c5e7b9c"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/preimages-v1/manifest.json",
+      "copy": "probe13-independent-verification-v1/preimages-v1/manifest.json",
+      "bytes": 1279,
+      "sha256": "d52c8938619a7a7f34fc2fa98d195379f6d536a6ac527059349e6fdebdb84363"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/window-schema-diagnosis-v1.json",
+      "copy": "posthoc13-collection-v2/window-schema-diagnosis-v1.json",
+      "bytes": 16790,
+      "sha256": "7193078d534f99e93adda4779da1d42ee2cddaf36f102d834ff6b4f2b4651926"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/verify-public-v2.mjs",
+      "copy": "posthoc13-collection-v2/verify-public-v2.mjs",
+      "bytes": 19177,
+      "sha256": "0d44c606d100aee65b90b585cf43e1372fe515ca57a6f93044fd39bda6e22f94"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/verify-public-v1.mjs.txt",
+      "copy": "posthoc13-collection-v2/verify-public-v1.mjs.txt",
+      "bytes": 18677,
+      "sha256": "1c2840a88445e6c0fadff04a675bb34fceacc137253f9ca59f2b3097c54e6b54"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/synthetic-v2.log",
+      "copy": "posthoc13-collection-v2/synthetic-v2.log",
+      "bytes": 1433,
+      "sha256": "4e83d2c923798c108a4aa4ef6dea8e88d652cf57fc5492f0828ded362ebf2821"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/synthetic-v2.json",
+      "copy": "posthoc13-collection-v2/synthetic-v2.json",
+      "bytes": 2436,
+      "sha256": "84281aad639ecdca95696ac2e1ff87963e43b252d49b4856f4b4d4bb3cae2315"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/source-mutation-proof-v2.json",
+      "copy": "posthoc13-collection-v2/source-mutation-proof-v2.json",
+      "bytes": 22301,
+      "sha256": "0f27ffabcf386fe896d10c84a7b6670a91a84106e098e6a27db9cd53c826e1b7"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/posthoc-source-frozen-v2.json",
+      "copy": "posthoc13-collection-v2/posthoc-source-frozen-v2.json",
+      "bytes": 3980,
+      "sha256": "2efbafd38a518da087384a5680ca269ed7213df664fd586da81ab06b496de3f4"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/passed-probe-window-contract.test.mjs",
+      "copy": "posthoc13-collection-v2/passed-probe-window-contract.test.mjs",
+      "bytes": 3366,
+      "sha256": "7ab914ff3e0ed491b8b897b3099efd3ab4ad6613d452ec0e70351b092a8ceb58"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/passed-probe-window-contract.mjs",
+      "copy": "posthoc13-collection-v2/passed-probe-window-contract.mjs",
+      "bytes": 3040,
+      "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/diagnose-window-schema.mjs",
+      "copy": "posthoc13-collection-v2/diagnose-window-schema.mjs",
+      "bytes": 2391,
+      "sha256": "ced265a07d6b8ba577ce4dc834e09e7f9865dc843c0cd6540f5408c9e31820e0"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/create-coordinator-bindings-v1.mjs",
+      "copy": "posthoc13-collection-v2/create-coordinator-bindings-v1.mjs",
+      "bytes": 1888,
+      "sha256": "0cba80e76d1d863e136140d6d573e05c3bf26672cb2e38eb1c228668c8923918"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/coordinator-bindings-v1.json",
+      "copy": "posthoc13-collection-v2/coordinator-bindings-v1.json",
+      "bytes": 1520,
+      "sha256": "1834ca6e29c60171337e672b3ad3cd2bcfcf32e8eb7bfa9227fb94d76b495608"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/collect-public-v2.mjs",
+      "copy": "posthoc13-collection-v2/collect-public-v2.mjs",
+      "bytes": 42746,
+      "sha256": "df55f9cd3997daab72e18e59ade3b8169b74ddbd7d68d2fa00994396cf430645"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/collect-public-v1.mjs.txt",
+      "copy": "posthoc13-collection-v2/collect-public-v1.mjs.txt",
+      "bytes": 41613,
+      "sha256": "70cf1fdd3a1194efb39ac9d3dfce77d0c52d9f44383110e4f23b83cf0db87571"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/posthoc13-collection-v2/build-derived-collectors-v2.mjs",
+      "copy": "posthoc13-collection-v2/build-derived-collectors-v2.mjs",
+      "bytes": 9545,
+      "sha256": "fb7c7373c867441e0ef2d44b87b6d65c6e5fdb84d85123d1b26294b5cb89f9e7"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/archive-probe13-independent-evidence-v1.mjs",
+      "copy": "archive-probe13-independent-evidence-v1.mjs",
+      "bytes": 6889,
+      "sha256": "23b605e879503ccc647c8c05db4458e284acbb8f8251c631c6cd886e4889d5f5"
+    }
+  ],
+  "finalVerification": {
+    "copy": "probe13-independent-verification-v1/final-verification.json",
+    "bytes": 359693,
+    "sha256": "c96b6cc7fbc960592f60c0b81dac3fc4d43238d424a2bfaf968d5528165e946c",
+    "verifierRevision": 2,
+    "independentVerificationPassed": true,
+    "probePassed": true,
+    "capacityAccepted": false
+  },
+  "sourceAfterBindingsVerified": true,
+  "hpPureSelfcheckReceipt": {
+    "copy": "probe13-independent-verification-v1/hp-proof-v2-selfcheck-receipt.json",
+    "tests": 13,
+    "passed": 13,
+    "failed": 0,
+    "rerun": false
+  },
+  "readme": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-compact-wire-followup-13-analysis/README.md",
+    "bytes": 1546,
+    "sha256": "65ad9c5dc5862711c66428e6590b6d4cb83f26acbb55df5aab8c9b973c33bec5"
+  },
+  "linksVerified": [
+    {
+      "relative": "../capacity-native10-v2-compact-wire-followup-13-diagnostics/public-verification.json",
+      "target": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-compact-wire-followup-13-diagnostics/public-verification.json"
+    }
+  ],
+  "scopeVerified": [
+    "5/5/6 andshortprobe passage are aformalprecondition only.",
+    "Posthoc collector correction andfirstrefusal provenance are distinguished from originalstderr andruntime.",
+    "ZeroHP events do notclaim realdose orcontinuoussurvival.",
+    "Old未执行v1preimages/source9/runtime/report/raw remainunchanged; this audit only reads35explicitpublicfiles.",
+    "Historical25playerstall andcompact12corrections remain unresolved; no P2implementation accepted."
+  ],
+  "privateDataRead": false,
+  "rawOrRecordingRescanned": false,
+  "sourceOrPublicEvidenceModified": false,
+  "capacityAccepted": false
+}

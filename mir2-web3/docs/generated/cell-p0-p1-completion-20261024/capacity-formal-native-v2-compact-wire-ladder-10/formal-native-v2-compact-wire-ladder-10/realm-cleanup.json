@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "scope": "Owned formal-profile process cleanup only. Driver report and complete raw verifier adjudicate capacity separately; no forced normal-exit claim.",
+  "sourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+  "sha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+  "capacityAccepted": null,
+  "capacityAcceptanceAdjudicated": false,
+  "formalStarted": true,
+  "checks": {
+    "sixCountersZero": true,
+    "monitorTerminalPreserved": true,
+    "monitorStoppedBeforeGateway": true,
+    "monitorExitZero": true,
+    "normalOwnedShutdown": true,
+    "processAbsent": true,
+    "portsFree": true
+  },
+  "pid": 70212,
+  "ownedExe": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\bin\\mir2-gateway.exe",
+  "processIdentityBefore": {
+    "created": "10/25/2026 16:00:10",
+    "pid": 70212,
+    "exe": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\bin\\mir2-gateway.exe"
+  },
+  "driverPlayableCapacityAccepted": false,
+  "report": {
+    "reportPath": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\reports\\1792915219265-d3bcff63.report.json",
+    "runId": "1792915219265-d3bcff63",
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "ok": false,
+    "playableCapacityAccepted": false,
+    "error": "Stage 25 did not satisfy the fixed activity, latency or coverage gates"
+  },
+  "wireDiagnostics": {
+    "identity": {
+      "version": "v2",
+      "manifest": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+        "bytes": 10830,
+        "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+      },
+      "review": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+        "bytes": 6809,
+        "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+      },
+      "sourceSha256": "a3d938d2b9e92d97e445ca930640ccf1c838271d827efd45d11ff970f44cab49",
+      "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+      "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+      "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+      "wrapperTests": 28,
+      "core187CoversWrapper": false,
+      "terminalFile": "compact-navigation-wire-terminal.json",
+      "terminalOutsideRaw": true,
+      "existingWriter": {
+        "defaultMaxBufferedBytes": 4194304,
+        "addMayRecordFailureAndReturn": true,
+        "durableRowsRequireRawCrosscheck": true
+      }
+    },
+    "terminal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\compact-navigation-wire-terminal.json",
+      "bytes": 5089,
+      "sha256": "194435859c32411e2b349924245147f53c1023b0a0f2e040455d72729fadb10a"
+    },
+    "statusCapturePhase": "before-uninstall-after-runCapacity-settled",
+    "uninstallSucceeded": true,
+    "uninstallFailed": false,
+    "terminalOutsideRaw": true
+  },
+  "preStopCapacity": {
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "monitorExit": {
+    "code": 0,
+    "signal": null
+  },
+  "monitorTerminal": {
+    "sampledAt": 1792916290684,
+    "stop": true,
+    "reason": "Operator requested load drain"
+  },
+  "gatewayExit": {
+    "code": 0,
+    "signal": null
+  },
+  "slowStageDiagnostics": {
+    "schemaVersion": 1,
+    "complete": true,
+    "reasons": [],
+    "stopRequested": false,
+    "stderrEnded": true,
+    "writerFinished": true,
+    "rowsQueued": 1218,
+    "bytesQueued": 110687,
+    "maxBufferedLineBytes": 148,
+    "lineLimitBytes": 8192,
+    "totalLimitBytes": 33554432,
+    "writeLimitBytes": 1048576,
+    "writeHighWaterMarkBytes": 1048576,
+    "maxQueuedWriteBytes": 1539,
+    "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label/phase/class allowlists. observedAtMs is the launcher receive clock, not server span start/end. connection is an opaque diagnostic counter, never identity or an action/request ID; queuedPhase and phaseElapsedMs were sampled when the input was queued. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall."
+  },
+  "remainingOwnedPortListeners": [],
+  "stoppedAtUtc": "2026-10-25T08:18:15.232Z"
+}

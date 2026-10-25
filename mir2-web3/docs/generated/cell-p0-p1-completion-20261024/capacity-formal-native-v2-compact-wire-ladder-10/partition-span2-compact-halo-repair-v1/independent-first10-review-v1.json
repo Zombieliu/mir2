@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:38:08.264Z",
+  "reviewer": "capacity_baseline",
+  "scope": "Independent bounded static review; no service, test suite, product import, A* search or gameplay execution.",
+  "verdict": {
+    "tenPlayerStaticBlockingFound": false,
+    "tenPlayerCandidateSuitableForFreshProbe": true,
+    "authorizesRun": false,
+    "pairedFull100Ready": false,
+    "accepted": false,
+    "capacityAccepted": false
+  },
+  "actualIndependentChecks": {
+    "artifactPins": [
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/review-proposal-v1.json",
+        "bytes": 188641,
+        "sha256": "31f59618df57aec60811a32c39c0cf76a5244d8cc4af844a017bff6220cdfb54"
+      },
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-10-compact-v2.json",
+        "bytes": 804,
+        "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+      },
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-100-compact-v2.json",
+        "bytes": 5844,
+        "sha256": "db9031fa25c4d6666dd11911792bbefd8652fe5ff30e3b5c21c692a0e6c1a299"
+      },
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validation-compact-v2-final-v2.json",
+        "bytes": 9263181,
+        "sha256": "38e2dcd3516fde45b299a6a63df58ccfb42ed5bafcb1b0e64471c4616b7a7d4a"
+      },
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/conditional-level-supply-final-v2.json",
+        "bytes": 50855,
+        "sha256": "464506dbfd043d46588cd2e34ca3b0687dbc0db4b2fb710fca4b5be3ae568f7c"
+      },
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/conditional-level-supply-final-v2.mjs",
+        "bytes": 8380,
+        "sha256": "3bbd555c1f2a5ae49383b7f5a63a9e202bb28267e0b8becc990f0e7cbf7f836c"
+      },
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/prefix-scout-cost-compact-v2.json",
+        "bytes": 50125,
+        "sha256": "c3ebf125f897253c41bec51c0c6fab737e0ff60345141c61ffa3ffe635487c55"
+      },
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validation-nearest-ordered-final-v3.json",
+        "bytes": 7233814,
+        "sha256": "358e1eb027306424d82324147374e9eb9d11d190a98cc86b9934ac536869a8de"
+      },
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/prefix-scout-cost-nearest-final-v3.json",
+        "bytes": 58602,
+        "sha256": "d997af8375ba508f9b87ec833da239a542681ca0cc32ea3342d666df599ca1d0"
+      }
+    ],
+    "sourcePins": [
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+        "bytes": 18249,
+        "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+        "bytes": 144416,
+        "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+        "bytes": 6799671,
+        "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+        "bytes": 397117,
+        "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+        "bytes": 313945,
+        "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+        "bytes": 512762,
+        "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/monsters.rs",
+        "bytes": 107777,
+        "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+      },
+      {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+        "bytes": 99414,
+        "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+      },
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+        "bytes": 11368,
+        "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+      },
+      {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validate-candidate.mjs",
+        "bytes": 11177,
+        "sha256": "29a256fca718bfcc39987c68b37a0cf613f7adc98e2223bd48b9904777bc944b"
+      }
+    ],
+    "first10AnchorsExact": true,
+    "type100Dimensions": {
+      "width": 700,
+      "height": 700
+    },
+    "bodyChecks": 900,
+    "uniqueBodyCells": 900,
+    "haloChecks": 2500,
+    "uniqueHaloCells": 2102,
+    "witnessGoalChecks": 1530,
+    "savedTenPlayerPathsChecked": 28,
+    "pathCellsChecked": 399,
+    "stepsChecked": 371,
+    "diagonalStaticAndRepresentativeHomeChecks": true,
+    "crossPrefixOccupiedGoals": 0,
+    "conditionalDpRecalculations": [
+      {
+        "actors": 10,
+        "level": 1,
+        "minDc": 2,
+        "maxDc": 4,
+        "idealExpectedPositiveHitsPerMinute": 57.722063220564465,
+        "requiredLaunchedPerMinute": 18,
+        "requiredPositiveHitsPerMinute": 12,
+        "liveSupplyProven": false
+      },
+      {
+        "actors": 10,
+        "level": 5,
+        "minDc": 3,
+        "maxDc": 5,
+        "idealExpectedPositiveHitsPerMinute": 44.093522328913274,
+        "requiredLaunchedPerMinute": 18,
+        "requiredPositiveHitsPerMinute": 12,
+        "liveSupplyProven": false
+      },
+      {
+        "actors": 10,
+        "level": 10,
+        "minDc": 4,
+        "maxDc": 6,
+        "idealExpectedPositiveHitsPerMinute": 35.8161865569273,
+        "requiredLaunchedPerMinute": 18,
+        "requiredPositiveHitsPerMinute": 12,
+        "liveSupplyProven": false
+      },
+      {
+        "actors": 10,
+        "level": 15,
+        "minDc": 5,
+        "maxDc": 7,
+        "idealExpectedPositiveHitsPerMinute": 30.78765432098765,
+        "requiredLaunchedPerMinute": 18,
+        "requiredPositiveHitsPerMinute": 12,
+        "liveSupplyProven": false
+      },
+      {
+        "actors": 100,
+        "level": 1,
+        "minDc": 2,
+        "maxDc": 4,
+        "idealExpectedPositiveHitsPerMinute": 257.8010948847881,
+        "requiredLaunchedPerMinute": 180,
+        "requiredPositiveHitsPerMinute": 120,
+        "liveSupplyProven": false
+      },
+      {
+        "actors": 100,
+        "level": 5,
+        "minDc": 3,
+        "maxDc": 5,
+        "idealExpectedPositiveHitsPerMinute": 196.98065335568765,
+        "requiredLaunchedPerMinute": 180,
+        "requiredPositiveHitsPerMinute": 120,
+        "liveSupplyProven": false
+      },
+      {
+        "actors": 100,
+        "level": 10,
+        "minDc": 4,
+        "maxDc": 6,
+        "idealExpectedPositiveHitsPerMinute": 160.01051668952903,
+        "requiredLaunchedPerMinute": 180,
+        "requiredPositiveHitsPerMinute": 120,
+        "liveSupplyProven": false
+      },
+      {
+        "actors": 100,
+        "level": 15,
+        "minDc": 5,
+        "maxDc": 7,
+        "idealExpectedPositiveHitsPerMinute": 137.78436213991768,
+        "requiredLaunchedPerMinute": 180,
+        "requiredPositiveHitsPerMinute": 120,
+        "liveSupplyProven": false
+      }
+    ]
+  },
+  "sourceReview": {
+    "files": [
+      "static-lib.mjs",
+      "validate-candidate.mjs",
+      "conditional-level-supply-final-v2.mjs",
+      "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "apps/web/scripts/playtest-capacity-soak.mjs"
+    ],
+    "findings": [
+      "All-nine static witness geometry uses one declared observer and the same prospective attack tile for every body position; it is not a union of different witnesses or tiles.",
+      "Actual driver additionally requires active living same-map peer and real dual-object snapshots; static geometry cannot establish those live facts.",
+      "Original 4000-expansion A* and full-route coverage/transfer checks are present in the author producer. Saved 28 first10 paths were directly validated without rerunning search.",
+      "External route helper omits an active-home obstacle equal to its goal. No saved accepted per-fighter path goal in any prefix equals another active observer home, so this exception does not affect reviewed reported outputs. No generalized path-planner claim is made.",
+      "Body excludes authored canonical initial occupancy and danger rectangles in the reviewed producer; direct independent terrain checks do not independently regenerate all canonical monsters or future occupancy."
+    ]
+  },
+  "reportedResultsReviewed": {
+    "tenPlayerCanonicalConservativeTargets": 28,
+    "deer": 21,
+    "scarecrow": 7,
+    "representativeSecondScoutCircuitSteps": 97,
+    "currentSpan4Comparison": {
+      "targets": 8,
+      "deer": 5,
+      "scarecrow": 3,
+      "secondCircuitSteps": 92
+    },
+    "routeLengthComparison": "97 is longer than 92; no shorter-route claim.",
+    "staticSafetyPassed": true,
+    "authorOriginal100ScoutFailedAtObserver": 50,
+    "authorNearestSuffix100ScoutFailedAtObserver": 92,
+    "continuousSuffixRejected": "Combat home lacks declared observer coverage",
+    "hundredScope": "Original80-file package remains immutable. Root separately authorized bounded repair in another directory; it is pending and is not reviewed or approved here."
+  },
+  "supplyLimitations": [
+    "Positive-hit model is an optimistic conditional starter-gear calculation, not actual continuous supply, allocation or survival acceptance.",
+    "18 launched attacks per fighter per minute and 12 dual-positive hits are independent gates. 137.78 ideal positive hits/min at 100 actors and level15 exceeds120 but does not prove180 launched/min. It also does not itself prove launched failure.",
+    "Natural movement, respawn/corpse eligibility, observed snapshot membership, competition, miss probability, attack cadence, path cost, dynamic body blocking, potion use, durability, learning/buffs and level progression require real execution.",
+    "Closed-pool XP bounds are conditional on the enumerated pool and optimistic allocation; they do not bound other XP or global progression."
+  ],
+  "verificationLimits": {
+    "noAStarRerun": true,
+    "noBootstrapOrBfsRerun": true,
+    "noLiveSupplyProof": true,
+    "noNew100Readiness": true,
+    "noFull80InventoryHash": true,
+    "noProductionCapacityAcceptance": true,
+    "noProductOrSceneMutation": true,
+    "noPrivateDataRead": true
+  },
+  "publicSafe": true
+}

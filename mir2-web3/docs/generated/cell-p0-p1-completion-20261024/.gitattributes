@@ -9,3 +9,7 @@ capacity-native-witness-approach-v1/adjacent-v1.log whitespace=-blank-at-eol,-bl
 capacity-native-witness-approach-v1/adjacent-v2.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
 # Recorded PowerShell launchers include a final blank line.
 **/start-release-native-10-feasibility-*.ps1 whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+# Keep the exact padded blank lines in these original failed Node receipts.
+capacity-native-chase-preference-validation-v1/native-chase-preference-tests-v1/focused-green-v1.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+capacity-native-chase-preference-validation-v1/native-chase-preference-verification-v1/old-red-v1.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+capacity-native-navigation-wire-diagnostics-v1/blocked-v1/tests-v1-failed.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol

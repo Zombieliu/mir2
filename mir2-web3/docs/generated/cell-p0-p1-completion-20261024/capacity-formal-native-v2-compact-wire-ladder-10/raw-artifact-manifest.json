@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "kind": "capacity-samples-jsonl",
+      "runId": "1792915219265-d3bcff63",
+      "report": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/reports/1792915219265-d3bcff63.report.json",
+      "path": "formal-native-v2-compact-wire-ladder-10/reports/1792915219265-d3bcff63.samples.jsonl",
+      "bytes": 52027120,
+      "sha256": "67a1bbb25857c3f049f95a60b9dd3a6d42d8748a2fde33bf9cb15fe4e59d3837",
+      "projection": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/reports/1792915219265-d3bcff63.raw-projection.json"
+    }
+  ]
+}

@@ -1,0 +1,4749 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T08:39:08.607Z",
+  "runId": "1792915219265-d3bcff63",
+  "inputs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-combat-supply-analysis-v1\\selected-native-and-packet-rows-v1.json",
+      "bytes": 2507485,
+      "sha256": "fb4cdb179bf411c8b768d6cd758cacff291c655857703b3f77948c54717830f0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal10-combat-supply-analysis-v1\\attack-gap-paths-v1.json",
+      "bytes": 227785,
+      "sha256": "8c351b4a9bb2a0e60354215545a2716d9eab80cf51592b0c5c5318fb86421b51"
+    }
+  ],
+  "originalRawReread": false,
+  "scope": "Conservative same-target approach ACK-span overlap, using actual interleaved movement receipts and no inferred complete candidate/witness state.",
+  "perWindow": [
+    {
+      "windowIndex": 1,
+      "actor": "L8bf3a205",
+      "nativeOpportunities": 57,
+      "attacks": 27,
+      "moves": 27,
+      "scoutMoves": 5,
+      "chaseMoves": 22,
+      "fallbackMoves": 0,
+      "scoutHomeIndices": [
+        2,
+        3
+      ],
+      "witnessUnavailableEvents": 0,
+      "navigationBlockedEvents": 0
+    },
+    {
+      "windowIndex": 1,
+      "actor": "L8bf3a20f",
+      "nativeOpportunities": 51,
+      "attacks": 32,
+      "moves": 15,
+      "scoutMoves": 0,
+      "chaseMoves": 15,
+      "fallbackMoves": 0,
+      "scoutHomeIndices": [],
+      "witnessUnavailableEvents": 0,
+      "navigationBlockedEvents": 0
+    },
+    {
+      "windowIndex": 2,
+      "actor": "L8bf3a205",
+      "nativeOpportunities": 57,
+      "attacks": 28,
+      "moves": 24,
+      "scoutMoves": 0,
+      "chaseMoves": 24,
+      "fallbackMoves": 0,
+      "scoutHomeIndices": [],
+      "witnessUnavailableEvents": 0,
+      "navigationBlockedEvents": 0
+    },
+    {
+      "windowIndex": 2,
+      "actor": "L8bf3a20f",
+      "nativeOpportunities": 48,
+      "attacks": 35,
+      "moves": 8,
+      "scoutMoves": 0,
+      "chaseMoves": 8,
+      "fallbackMoves": 0,
+      "scoutHomeIndices": [],
+      "witnessUnavailableEvents": 0,
+      "navigationBlockedEvents": 0
+    },
+    {
+      "windowIndex": 3,
+      "actor": "L8bf3a205",
+      "nativeOpportunities": 65,
+      "attacks": 17,
+      "moves": 44,
+      "scoutMoves": 28,
+      "chaseMoves": 16,
+      "fallbackMoves": 0,
+      "scoutHomeIndices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "witnessUnavailableEvents": 0,
+      "navigationBlockedEvents": 0
+    },
+    {
+      "windowIndex": 3,
+      "actor": "L8bf3a20f",
+      "nativeOpportunities": 61,
+      "attacks": 22,
+      "moves": 35,
+      "scoutMoves": 20,
+      "chaseMoves": 15,
+      "fallbackMoves": 0,
+      "scoutHomeIndices": [
+        0,
+        1
+      ],
+      "witnessUnavailableEvents": 0,
+      "navigationBlockedEvents": 0
+    },
+    {
+      "windowIndex": 4,
+      "actor": "L8bf3a205",
+      "nativeOpportunities": 69,
+      "attacks": 14,
+      "moves": 51,
+      "scoutMoves": 21,
+      "chaseMoves": 30,
+      "fallbackMoves": 0,
+      "scoutHomeIndices": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "witnessUnavailableEvents": 0,
+      "navigationBlockedEvents": 0
+    },
+    {
+      "windowIndex": 4,
+      "actor": "L8bf3a20f",
+      "nativeOpportunities": 68,
+      "attacks": 14,
+      "moves": 51,
+      "scoutMoves": 24,
+      "chaseMoves": 27,
+      "fallbackMoves": 0,
+      "scoutHomeIndices": [
+        2,
+        3,
+        4
+      ],
+      "witnessUnavailableEvents": 0,
+      "navigationBlockedEvents": 0
+    },
+    {
+      "windowIndex": 5,
+      "actor": "L8bf3a205",
+      "nativeOpportunities": 65,
+      "attacks": 19,
+      "moves": 38,
+      "scoutMoves": 0,
+      "chaseMoves": 38,
+      "fallbackMoves": 0,
+      "scoutHomeIndices": [],
+      "witnessUnavailableEvents": 0,
+      "navigationBlockedEvents": 0
+    },
+    {
+      "windowIndex": 5,
+      "actor": "L8bf3a20f",
+      "nativeOpportunities": 62,
+      "attacks": 20,
+      "moves": 37,
+      "scoutMoves": 1,
+      "chaseMoves": 36,
+      "fallbackMoves": 0,
+      "scoutHomeIndices": [
+        5
+      ],
+      "witnessUnavailableEvents": 0,
+      "navigationBlockedEvents": 0
+    }
+  ],
+  "overlappingChaseSpans": [
+    {
+      "targetId": 206634,
+      "overlapStartedAtMonotonicMs": 961446.0979,
+      "overlapEndedAtMonotonicMs": 967445.9841,
+      "overlapSeconds": 5.99988619999995,
+      "first": {
+        "actor": "L8bf3a205",
+        "ackCount": 12,
+        "from": {
+          "line": 61837,
+          "receiptLine": 61830,
+          "at": 1792916165817,
+          "sentAtMs": 960485.0944,
+          "ackMonotonicMs": 960489.1619,
+          "sequence": 12453,
+          "kind": "walk",
+          "before": {
+            "x": 240,
+            "y": 601
+          },
+          "after": {
+            "x": 240,
+            "y": 600
+          },
+          "plannedTarget": {
+            "x": 240,
+            "y": 600
+          }
+        },
+        "to": {
+          "line": 63254,
+          "receiptLine": 63246,
+          "at": 1792916174052,
+          "sentAtMs": 968713.2944,
+          "ackMonotonicMs": 968714.0222,
+          "sequence": 12763,
+          "kind": "walk",
+          "before": {
+            "x": 253,
+            "y": 588
+          },
+          "after": {
+            "x": 254,
+            "y": 587
+          },
+          "plannedTarget": {
+            "x": 254,
+            "y": 587
+          }
+        },
+        "closedBy": "turn-break-conservative"
+      },
+      "second": {
+        "actor": "L8bf3a20f",
+        "ackCount": 9,
+        "from": {
+          "line": 62003,
+          "receiptLine": 62002,
+          "at": 1792916166783,
+          "sentAtMs": 961443.5048,
+          "ackMonotonicMs": 961446.0979,
+          "sequence": 6617,
+          "kind": "walk",
+          "before": {
+            "x": 242,
+            "y": 574
+          },
+          "after": {
+            "x": 243,
+            "y": 575
+          },
+          "plannedTarget": {
+            "x": 243,
+            "y": 575
+          }
+        },
+        "to": {
+          "line": 63060,
+          "receiptLine": 63054,
+          "at": 1792916172784,
+          "sentAtMs": 967444.2313,
+          "ackMonotonicMs": 967445.9841,
+          "sequence": 6817,
+          "kind": "run",
+          "before": {
+            "x": 251,
+            "y": 583
+          },
+          "after": {
+            "x": 253,
+            "y": 585
+          },
+          "plannedTarget": {
+            "x": 253,
+            "y": 585
+          }
+        },
+        "closedBy": "attack-send"
+      },
+      "nearTimeOwnerPositionPairs": [
+        {
+          "firstLine": 61837,
+          "firstReceiptLine": 61830,
+          "firstSequence": 12453,
+          "firstAt": 1792916165817,
+          "firstPosition": {
+            "x": 240,
+            "y": 600
+          },
+          "secondLine": 62003,
+          "secondReceiptLine": 62002,
+          "secondSequence": 6617,
+          "secondAt": 1792916166783,
+          "secondPosition": {
+            "x": 243,
+            "y": 575
+          },
+          "monotonicDifferenceMs": 956.9360000001034,
+          "ownerPositionChebyshevDistance": 25
+        },
+        {
+          "firstLine": 61960,
+          "firstReceiptLine": 61952,
+          "firstSequence": 12469,
+          "firstAt": 1792916166569,
+          "firstPosition": {
+            "x": 242,
+            "y": 598
+          },
+          "secondLine": 62003,
+          "secondReceiptLine": 62002,
+          "secondSequence": 6617,
+          "secondAt": 1792916166783,
+          "secondPosition": {
+            "x": 243,
+            "y": 575
+          },
+          "monotonicDifferenceMs": 213.2687000000151,
+          "ownerPositionChebyshevDistance": 23
+        },
+        {
+          "firstLine": 61960,
+          "firstReceiptLine": 61952,
+          "firstSequence": 12469,
+          "firstAt": 1792916166569,
+          "firstPosition": {
+            "x": 242,
+            "y": 598
+          },
+          "secondLine": 62136,
+          "secondReceiptLine": 62125,
+          "secondSequence": 6641,
+          "secondAt": 1792916167553,
+          "secondPosition": {
+            "x": 245,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 984.514099999913,
+          "ownerPositionChebyshevDistance": 21
+        },
+        {
+          "firstLine": 62070,
+          "firstReceiptLine": 62062,
+          "firstSequence": 12504,
+          "firstAt": 1792916167307,
+          "firstPosition": {
+            "x": 243,
+            "y": 597
+          },
+          "secondLine": 62003,
+          "secondReceiptLine": 62002,
+          "secondSequence": 6617,
+          "secondAt": 1792916166783,
+          "secondPosition": {
+            "x": 243,
+            "y": 575
+          },
+          "monotonicDifferenceMs": 523.2740999999223,
+          "ownerPositionChebyshevDistance": 22
+        },
+        {
+          "firstLine": 62070,
+          "firstReceiptLine": 62062,
+          "firstSequence": 12504,
+          "firstAt": 1792916167307,
+          "firstPosition": {
+            "x": 243,
+            "y": 597
+          },
+          "secondLine": 62136,
+          "secondReceiptLine": 62125,
+          "secondSequence": 6641,
+          "secondAt": 1792916167553,
+          "secondPosition": {
+            "x": 245,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 247.9712999999756,
+          "ownerPositionChebyshevDistance": 20
+        },
+        {
+          "firstLine": 62222,
+          "firstReceiptLine": 62210,
+          "firstSequence": 12531,
+          "firstAt": 1792916168049,
+          "firstPosition": {
+            "x": 244,
+            "y": 597
+          },
+          "secondLine": 62136,
+          "secondReceiptLine": 62125,
+          "secondSequence": 6641,
+          "secondAt": 1792916167553,
+          "secondPosition": {
+            "x": 245,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 496.62100000004284,
+          "ownerPositionChebyshevDistance": 20
+        },
+        {
+          "firstLine": 62222,
+          "firstReceiptLine": 62210,
+          "firstSequence": 12531,
+          "firstAt": 1792916168049,
+          "firstPosition": {
+            "x": 244,
+            "y": 597
+          },
+          "secondLine": 62281,
+          "secondReceiptLine": 62275,
+          "secondSequence": 6671,
+          "secondAt": 1792916168307,
+          "secondPosition": {
+            "x": 246,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 259.2894999999553,
+          "ownerPositionChebyshevDistance": 20
+        },
+        {
+          "firstLine": 62222,
+          "firstReceiptLine": 62210,
+          "firstSequence": 12531,
+          "firstAt": 1792916168049,
+          "firstPosition": {
+            "x": 244,
+            "y": 597
+          },
+          "secondLine": 62401,
+          "secondReceiptLine": 62400,
+          "secondSequence": 6689,
+          "secondAt": 1792916169040,
+          "secondPosition": {
+            "x": 248,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 987.9906999999657,
+          "ownerPositionChebyshevDistance": 20
+        },
+        {
+          "firstLine": 62360,
+          "firstReceiptLine": 62355,
+          "firstSequence": 12558,
+          "firstAt": 1792916168818,
+          "firstPosition": {
+            "x": 244,
+            "y": 596
+          },
+          "secondLine": 62281,
+          "secondReceiptLine": 62275,
+          "secondSequence": 6671,
+          "secondAt": 1792916168307,
+          "secondPosition": {
+            "x": 246,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 515.3265000000829,
+          "ownerPositionChebyshevDistance": 19
+        },
+        {
+          "firstLine": 62360,
+          "firstReceiptLine": 62355,
+          "firstSequence": 12558,
+          "firstAt": 1792916168818,
+          "firstPosition": {
+            "x": 244,
+            "y": 596
+          },
+          "secondLine": 62401,
+          "secondReceiptLine": 62400,
+          "secondSequence": 6689,
+          "secondAt": 1792916169040,
+          "secondPosition": {
+            "x": 248,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 213.37469999992754,
+          "ownerPositionChebyshevDistance": 19
+        },
+        {
+          "firstLine": 62360,
+          "firstReceiptLine": 62355,
+          "firstSequence": 12558,
+          "firstAt": 1792916168818,
+          "firstPosition": {
+            "x": 244,
+            "y": 596
+          },
+          "secondLine": 62529,
+          "secondReceiptLine": 62523,
+          "secondSequence": 6708,
+          "secondAt": 1792916169774,
+          "secondPosition": {
+            "x": 248,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 947.7450999999419,
+          "ownerPositionChebyshevDistance": 17
+        },
+        {
+          "firstLine": 62485,
+          "firstReceiptLine": 62479,
+          "firstSequence": 12583,
+          "firstAt": 1792916169558,
+          "firstPosition": {
+            "x": 246,
+            "y": 596
+          },
+          "secondLine": 62401,
+          "secondReceiptLine": 62400,
+          "secondSequence": 6689,
+          "secondAt": 1792916169040,
+          "secondPosition": {
+            "x": 248,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 521.8564000000479,
+          "ownerPositionChebyshevDistance": 19
+        },
+        {
+          "firstLine": 62485,
+          "firstReceiptLine": 62479,
+          "firstSequence": 12583,
+          "firstAt": 1792916169558,
+          "firstPosition": {
+            "x": 246,
+            "y": 596
+          },
+          "secondLine": 62529,
+          "secondReceiptLine": 62523,
+          "secondSequence": 6708,
+          "secondAt": 1792916169774,
+          "secondPosition": {
+            "x": 248,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 212.51399999996647,
+          "ownerPositionChebyshevDistance": 17
+        },
+        {
+          "firstLine": 62485,
+          "firstReceiptLine": 62479,
+          "firstSequence": 12583,
+          "firstAt": 1792916169558,
+          "firstPosition": {
+            "x": 246,
+            "y": 596
+          },
+          "secondLine": 62660,
+          "secondReceiptLine": 62652,
+          "secondSequence": 6734,
+          "secondAt": 1792916170552,
+          "secondPosition": {
+            "x": 250,
+            "y": 581
+          },
+          "monotonicDifferenceMs": 997.0583000000333,
+          "ownerPositionChebyshevDistance": 15
+        },
+        {
+          "firstLine": 62602,
+          "firstReceiptLine": 62595,
+          "firstSequence": 12615,
+          "firstAt": 1792916170304,
+          "firstPosition": {
+            "x": 246,
+            "y": 594
+          },
+          "secondLine": 62529,
+          "secondReceiptLine": 62523,
+          "secondSequence": 6708,
+          "secondAt": 1792916169774,
+          "secondPosition": {
+            "x": 248,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 530.7454000000143,
+          "ownerPositionChebyshevDistance": 15
+        },
+        {
+          "firstLine": 62602,
+          "firstReceiptLine": 62595,
+          "firstSequence": 12615,
+          "firstAt": 1792916170304,
+          "firstPosition": {
+            "x": 246,
+            "y": 594
+          },
+          "secondLine": 62660,
+          "secondReceiptLine": 62652,
+          "secondSequence": 6734,
+          "secondAt": 1792916170552,
+          "secondPosition": {
+            "x": 250,
+            "y": 581
+          },
+          "monotonicDifferenceMs": 253.79890000005253,
+          "ownerPositionChebyshevDistance": 13
+        }
+      ],
+      "nearTimeOwnerPositionPairsTotal": 26,
+      "positionPairsTruncated": true,
+      "attacksOnThisTargetInMeasuredStage": [
+        {
+          "line": 63181,
+          "at": 1792916173647,
+          "actor": "L8bf3a20f",
+          "requestId": "111",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 63430,
+          "at": 1792916175037,
+          "actor": "L8bf3a20f",
+          "requestId": "112",
+          "status": "success",
+          "damage": 2
+        },
+        {
+          "line": 63520,
+          "at": 1792916175648,
+          "actor": "L8bf3a205",
+          "requestId": "289",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 63739,
+          "at": 1792916177046,
+          "actor": "L8bf3a205",
+          "requestId": "290",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 63775,
+          "at": 1792916177231,
+          "actor": "L8bf3a20f",
+          "requestId": "113",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 63986,
+          "at": 1792916178382,
+          "actor": "L8bf3a205",
+          "requestId": "291",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 64010,
+          "at": 1792916178648,
+          "actor": "L8bf3a20f",
+          "requestId": "114",
+          "status": "success",
+          "damage": 1
+        }
+      ]
+    },
+    {
+      "targetId": 206615,
+      "overlapStartedAtMonotonicMs": 1022437.116,
+      "overlapEndedAtMonotonicMs": 1027049.6516,
+      "overlapSeconds": 4.612535599999945,
+      "first": {
+        "actor": "L8bf3a205",
+        "ackCount": 9,
+        "from": {
+          "line": 72163,
+          "receiptLine": 72162,
+          "at": 1792916226393,
+          "sentAtMs": 1021051.7209,
+          "ackMonotonicMs": 1021052.7236,
+          "sequence": 14516,
+          "kind": "walk",
+          "before": {
+            "x": 229,
+            "y": 581
+          },
+          "after": {
+            "x": 230,
+            "y": 581
+          },
+          "plannedTarget": {
+            "x": 230,
+            "y": 581
+          }
+        },
+        "to": {
+          "line": 73214,
+          "receiptLine": 73212,
+          "at": 1792916232380,
+          "sentAtMs": 1027047.1519,
+          "ackMonotonicMs": 1027049.6516,
+          "sequence": 14700,
+          "kind": "walk",
+          "before": {
+            "x": 243,
+            "y": 572
+          },
+          "after": {
+            "x": 244,
+            "y": 571
+          },
+          "plannedTarget": {
+            "x": 244,
+            "y": 571
+          }
+        },
+        "closedBy": "turn-break-conservative"
+      },
+      "second": {
+        "actor": "L8bf3a20f",
+        "ackCount": 8,
+        "from": {
+          "line": 72421,
+          "receiptLine": 72419,
+          "at": 1792916227780,
+          "sentAtMs": 1022408.1829,
+          "ackMonotonicMs": 1022437.116,
+          "sequence": 8389,
+          "kind": "run",
+          "before": {
+            "x": 229,
+            "y": 582
+          },
+          "after": {
+            "x": 231,
+            "y": 582
+          },
+          "plannedTarget": {
+            "x": 231,
+            "y": 582
+          }
+        },
+        "to": {
+          "line": 73331,
+          "receiptLine": 73324,
+          "at": 1792916233005,
+          "sentAtMs": 1027664.1323,
+          "ackMonotonicMs": 1027666.457,
+          "sequence": 8546,
+          "kind": "walk",
+          "before": {
+            "x": 242,
+            "y": 572
+          },
+          "after": {
+            "x": 243,
+            "y": 571
+          },
+          "plannedTarget": {
+            "x": 243,
+            "y": 571
+          }
+        },
+        "closedBy": "turn-break-conservative"
+      },
+      "nearTimeOwnerPositionPairs": [
+        {
+          "firstLine": 72305,
+          "firstReceiptLine": 72303,
+          "firstSequence": 14531,
+          "firstAt": 1792916227123,
+          "firstPosition": {
+            "x": 232,
+            "y": 581
+          },
+          "secondLine": 72421,
+          "secondReceiptLine": 72419,
+          "secondSequence": 8389,
+          "secondAt": 1792916227780,
+          "secondPosition": {
+            "x": 231,
+            "y": 582
+          },
+          "monotonicDifferenceMs": 653.1765000000596,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 72440,
+          "firstReceiptLine": 72433,
+          "firstSequence": 14553,
+          "firstAt": 1792916227873,
+          "firstPosition": {
+            "x": 234,
+            "y": 581
+          },
+          "secondLine": 72421,
+          "secondReceiptLine": 72419,
+          "secondSequence": 8389,
+          "secondAt": 1792916227780,
+          "secondPosition": {
+            "x": 231,
+            "y": 582
+          },
+          "monotonicDifferenceMs": 98.49709999992047,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 72440,
+          "firstReceiptLine": 72433,
+          "firstSequence": 14553,
+          "firstAt": 1792916227873,
+          "firstPosition": {
+            "x": 234,
+            "y": 581
+          },
+          "secondLine": 72528,
+          "secondReceiptLine": 72524,
+          "secondSequence": 8408,
+          "secondAt": 1792916228489,
+          "secondPosition": {
+            "x": 233,
+            "y": 580
+          },
+          "monotonicDifferenceMs": 625.8665000000037,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 72559,
+          "firstReceiptLine": 72553,
+          "firstSequence": 14586,
+          "firstAt": 1792916228643,
+          "firstPosition": {
+            "x": 236,
+            "y": 579
+          },
+          "secondLine": 72421,
+          "secondReceiptLine": 72419,
+          "secondSequence": 8389,
+          "secondAt": 1792916227780,
+          "secondPosition": {
+            "x": 231,
+            "y": 582
+          },
+          "monotonicDifferenceMs": 868.876500000013,
+          "ownerPositionChebyshevDistance": 5
+        },
+        {
+          "firstLine": 72559,
+          "firstReceiptLine": 72553,
+          "firstSequence": 14586,
+          "firstAt": 1792916228643,
+          "firstPosition": {
+            "x": 236,
+            "y": 579
+          },
+          "secondLine": 72528,
+          "secondReceiptLine": 72524,
+          "secondSequence": 8408,
+          "secondAt": 1792916228489,
+          "secondPosition": {
+            "x": 233,
+            "y": 580
+          },
+          "monotonicDifferenceMs": 144.51290000008885,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 72559,
+          "firstReceiptLine": 72553,
+          "firstSequence": 14586,
+          "firstAt": 1792916228643,
+          "firstPosition": {
+            "x": 236,
+            "y": 579
+          },
+          "secondLine": 72670,
+          "secondReceiptLine": 72665,
+          "secondSequence": 8437,
+          "secondAt": 1792916229255,
+          "secondPosition": {
+            "x": 234,
+            "y": 580
+          },
+          "monotonicDifferenceMs": 611.340899999952,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 72687,
+          "firstReceiptLine": 72685,
+          "firstSequence": 14608,
+          "firstAt": 1792916229373,
+          "firstPosition": {
+            "x": 238,
+            "y": 577
+          },
+          "secondLine": 72528,
+          "secondReceiptLine": 72524,
+          "secondSequence": 8408,
+          "secondAt": 1792916228489,
+          "secondPosition": {
+            "x": 233,
+            "y": 580
+          },
+          "monotonicDifferenceMs": 876.5206999999937,
+          "ownerPositionChebyshevDistance": 5
+        },
+        {
+          "firstLine": 72687,
+          "firstReceiptLine": 72685,
+          "firstSequence": 14608,
+          "firstAt": 1792916229373,
+          "firstPosition": {
+            "x": 238,
+            "y": 577
+          },
+          "secondLine": 72670,
+          "secondReceiptLine": 72665,
+          "secondSequence": 8437,
+          "secondAt": 1792916229255,
+          "secondPosition": {
+            "x": 234,
+            "y": 580
+          },
+          "monotonicDifferenceMs": 120.66689999995288,
+          "ownerPositionChebyshevDistance": 4
+        },
+        {
+          "firstLine": 72687,
+          "firstReceiptLine": 72685,
+          "firstSequence": 14608,
+          "firstAt": 1792916229373,
+          "firstPosition": {
+            "x": 238,
+            "y": 577
+          },
+          "secondLine": 72811,
+          "secondReceiptLine": 72805,
+          "secondSequence": 8458,
+          "secondAt": 1792916229989,
+          "secondPosition": {
+            "x": 236,
+            "y": 578
+          },
+          "monotonicDifferenceMs": 620.5105000000913,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 72843,
+          "firstReceiptLine": 72842,
+          "firstSequence": 14638,
+          "firstAt": 1792916230123,
+          "firstPosition": {
+            "x": 240,
+            "y": 575
+          },
+          "secondLine": 72670,
+          "secondReceiptLine": 72665,
+          "secondSequence": 8437,
+          "secondAt": 1792916229255,
+          "secondPosition": {
+            "x": 234,
+            "y": 580
+          },
+          "monotonicDifferenceMs": 873.2097999999532,
+          "ownerPositionChebyshevDistance": 6
+        },
+        {
+          "firstLine": 72843,
+          "firstReceiptLine": 72842,
+          "firstSequence": 14638,
+          "firstAt": 1792916230123,
+          "firstPosition": {
+            "x": 240,
+            "y": 575
+          },
+          "secondLine": 72811,
+          "secondReceiptLine": 72805,
+          "secondSequence": 8458,
+          "secondAt": 1792916229989,
+          "secondPosition": {
+            "x": 236,
+            "y": 578
+          },
+          "monotonicDifferenceMs": 132.0323999999091,
+          "ownerPositionChebyshevDistance": 4
+        },
+        {
+          "firstLine": 72843,
+          "firstReceiptLine": 72842,
+          "firstSequence": 14638,
+          "firstAt": 1792916230123,
+          "firstPosition": {
+            "x": 240,
+            "y": 575
+          },
+          "secondLine": 72954,
+          "secondReceiptLine": 72947,
+          "secondSequence": 8478,
+          "secondAt": 1792916230734,
+          "secondPosition": {
+            "x": 238,
+            "y": 576
+          },
+          "monotonicDifferenceMs": 612.7053000000305,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 72972,
+          "firstReceiptLine": 72970,
+          "firstSequence": 14657,
+          "firstAt": 1792916230887,
+          "firstPosition": {
+            "x": 242,
+            "y": 573
+          },
+          "secondLine": 72811,
+          "secondReceiptLine": 72805,
+          "secondSequence": 8458,
+          "secondAt": 1792916229989,
+          "secondPosition": {
+            "x": 236,
+            "y": 578
+          },
+          "monotonicDifferenceMs": 894.403399999952,
+          "ownerPositionChebyshevDistance": 6
+        },
+        {
+          "firstLine": 72972,
+          "firstReceiptLine": 72970,
+          "firstSequence": 14657,
+          "firstAt": 1792916230887,
+          "firstPosition": {
+            "x": 242,
+            "y": 573
+          },
+          "secondLine": 72954,
+          "secondReceiptLine": 72947,
+          "secondSequence": 8478,
+          "secondAt": 1792916230734,
+          "secondPosition": {
+            "x": 238,
+            "y": 576
+          },
+          "monotonicDifferenceMs": 149.6657000000123,
+          "ownerPositionChebyshevDistance": 4
+        },
+        {
+          "firstLine": 72972,
+          "firstReceiptLine": 72970,
+          "firstSequence": 14657,
+          "firstAt": 1792916230887,
+          "firstPosition": {
+            "x": 242,
+            "y": 573
+          },
+          "secondLine": 73071,
+          "secondReceiptLine": 73064,
+          "secondSequence": 8508,
+          "secondAt": 1792916231512,
+          "secondPosition": {
+            "x": 240,
+            "y": 574
+          },
+          "monotonicDifferenceMs": 624.7761999999639,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 73088,
+          "firstReceiptLine": 73083,
+          "firstSequence": 14676,
+          "firstAt": 1792916231642,
+          "firstPosition": {
+            "x": 243,
+            "y": 572
+          },
+          "secondLine": 72954,
+          "secondReceiptLine": 72947,
+          "secondSequence": 8478,
+          "secondAt": 1792916230734,
+          "secondPosition": {
+            "x": 238,
+            "y": 576
+          },
+          "monotonicDifferenceMs": 895.0045000000391,
+          "ownerPositionChebyshevDistance": 5
+        }
+      ],
+      "nearTimeOwnerPositionPairsTotal": 21,
+      "positionPairsTruncated": true,
+      "attacksOnThisTargetInMeasuredStage": [
+        {
+          "line": 73495,
+          "at": 1792916234234,
+          "actor": "L8bf3a205",
+          "requestId": "303",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 73568,
+          "at": 1792916234568,
+          "actor": "L8bf3a20f",
+          "requestId": "125",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 73694,
+          "at": 1792916235368,
+          "actor": "L8bf3a205",
+          "requestId": "304",
+          "status": "success",
+          "damage": 5
+        },
+        {
+          "line": 73801,
+          "at": 1792916236013,
+          "actor": "L8bf3a20f",
+          "requestId": "126",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 73922,
+          "at": 1792916236724,
+          "actor": "L8bf3a205",
+          "requestId": "305",
+          "status": "success",
+          "damage": 4
+        }
+      ]
+    },
+    {
+      "targetId": 206338,
+      "overlapStartedAtMonotonicMs": 1010269.9095,
+      "overlapEndedAtMonotonicMs": 1014013.6102,
+      "overlapSeconds": 3.743700700000045,
+      "first": {
+        "actor": "L8bf3a205",
+        "ackCount": 6,
+        "from": {
+          "line": 70295,
+          "receiptLine": 70290,
+          "at": 1792916215600,
+          "sentAtMs": 1010267.3776,
+          "ackMonotonicMs": 1010269.9095,
+          "sequence": 14209,
+          "kind": "walk",
+          "before": {
+            "x": 240,
+            "y": 585
+          },
+          "after": {
+            "x": 239,
+            "y": 585
+          },
+          "plannedTarget": {
+            "x": 239,
+            "y": 585
+          }
+        },
+        "to": {
+          "line": 70950,
+          "receiptLine": 70947,
+          "at": 1792916219350,
+          "sentAtMs": 1014011.7417,
+          "ackMonotonicMs": 1014013.6102,
+          "sequence": 14341,
+          "kind": "run",
+          "before": {
+            "x": 231,
+            "y": 583
+          },
+          "after": {
+            "x": 229,
+            "y": 581
+          },
+          "plannedTarget": {
+            "x": 229,
+            "y": 581
+          }
+        },
+        "closedBy": "turn-break-conservative"
+      },
+      "second": {
+        "actor": "L8bf3a20f",
+        "ackCount": 10,
+        "from": {
+          "line": 70218,
+          "receiptLine": 70212,
+          "at": 1792916215271,
+          "sentAtMs": 1009931.5013,
+          "ackMonotonicMs": 1009933.6488,
+          "sequence": 8069,
+          "kind": "run",
+          "before": {
+            "x": 242,
+            "y": 579
+          },
+          "after": {
+            "x": 240,
+            "y": 579
+          },
+          "plannedTarget": {
+            "x": 240,
+            "y": 579
+          }
+        },
+        "to": {
+          "line": 71391,
+          "receiptLine": 71387,
+          "at": 1792916222028,
+          "sentAtMs": 1016689.209,
+          "ackMonotonicMs": 1016691.1647,
+          "sequence": 8252,
+          "kind": "walk",
+          "before": {
+            "x": 228,
+            "y": 580
+          },
+          "after": {
+            "x": 228,
+            "y": 581
+          },
+          "plannedTarget": {
+            "x": 228,
+            "y": 581
+          }
+        },
+        "closedBy": "attack-send"
+      },
+      "nearTimeOwnerPositionPairs": [
+        {
+          "firstLine": 70295,
+          "firstReceiptLine": 70290,
+          "firstSequence": 14209,
+          "firstAt": 1792916215600,
+          "firstPosition": {
+            "x": 239,
+            "y": 585
+          },
+          "secondLine": 70218,
+          "secondReceiptLine": 70212,
+          "secondSequence": 8069,
+          "secondAt": 1792916215271,
+          "secondPosition": {
+            "x": 240,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 336.26069999998435,
+          "ownerPositionChebyshevDistance": 6
+        },
+        {
+          "firstLine": 70295,
+          "firstReceiptLine": 70290,
+          "firstSequence": 14209,
+          "firstAt": 1792916215600,
+          "firstPosition": {
+            "x": 239,
+            "y": 585
+          },
+          "secondLine": 70348,
+          "secondReceiptLine": 70345,
+          "secondSequence": 8091,
+          "secondAt": 1792916216041,
+          "secondPosition": {
+            "x": 238,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 430.1811999999918,
+          "ownerPositionChebyshevDistance": 6
+        },
+        {
+          "firstLine": 70415,
+          "firstReceiptLine": 70411,
+          "firstSequence": 14230,
+          "firstAt": 1792916216349,
+          "firstPosition": {
+            "x": 237,
+            "y": 585
+          },
+          "secondLine": 70348,
+          "secondReceiptLine": 70345,
+          "secondSequence": 8091,
+          "secondAt": 1792916216041,
+          "secondPosition": {
+            "x": 238,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 307.8839000000153,
+          "ownerPositionChebyshevDistance": 6
+        },
+        {
+          "firstLine": 70415,
+          "firstReceiptLine": 70411,
+          "firstSequence": 14230,
+          "firstAt": 1792916216349,
+          "firstPosition": {
+            "x": 237,
+            "y": 585
+          },
+          "secondLine": 70485,
+          "secondReceiptLine": 70480,
+          "secondSequence": 8114,
+          "secondAt": 1792916216782,
+          "secondPosition": {
+            "x": 236,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 436.41990000009537,
+          "ownerPositionChebyshevDistance": 6
+        },
+        {
+          "firstLine": 70561,
+          "firstReceiptLine": 70556,
+          "firstSequence": 14260,
+          "firstAt": 1792916217121,
+          "firstPosition": {
+            "x": 235,
+            "y": 585
+          },
+          "secondLine": 70485,
+          "secondReceiptLine": 70480,
+          "secondSequence": 8114,
+          "secondAt": 1792916216782,
+          "secondPosition": {
+            "x": 236,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 333.57689999998547,
+          "ownerPositionChebyshevDistance": 6
+        },
+        {
+          "firstLine": 70561,
+          "firstReceiptLine": 70556,
+          "firstSequence": 14260,
+          "firstAt": 1792916217121,
+          "firstPosition": {
+            "x": 235,
+            "y": 585
+          },
+          "secondLine": 70613,
+          "secondReceiptLine": 70602,
+          "secondSequence": 8142,
+          "secondAt": 1792916217524,
+          "secondPosition": {
+            "x": 234,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 406.45269999990705,
+          "ownerPositionChebyshevDistance": 6
+        },
+        {
+          "firstLine": 70682,
+          "firstReceiptLine": 70676,
+          "firstSequence": 14284,
+          "firstAt": 1792916217868,
+          "firstPosition": {
+            "x": 233,
+            "y": 585
+          },
+          "secondLine": 70613,
+          "secondReceiptLine": 70602,
+          "secondSequence": 8142,
+          "secondAt": 1792916217524,
+          "secondPosition": {
+            "x": 234,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 345.1028000001097,
+          "ownerPositionChebyshevDistance": 6
+        },
+        {
+          "firstLine": 70682,
+          "firstReceiptLine": 70676,
+          "firstSequence": 14284,
+          "firstAt": 1792916217868,
+          "firstPosition": {
+            "x": 233,
+            "y": 585
+          },
+          "secondLine": 70725,
+          "secondReceiptLine": 70723,
+          "secondSequence": 8161,
+          "secondAt": 1792916218274,
+          "secondPosition": {
+            "x": 232,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 405.45739999995567,
+          "ownerPositionChebyshevDistance": 6
+        },
+        {
+          "firstLine": 70818,
+          "firstReceiptLine": 70808,
+          "firstSequence": 14307,
+          "firstAt": 1792916218614,
+          "firstPosition": {
+            "x": 231,
+            "y": 583
+          },
+          "secondLine": 70725,
+          "secondReceiptLine": 70723,
+          "secondSequence": 8161,
+          "secondAt": 1792916218274,
+          "secondPosition": {
+            "x": 232,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 343.2456999999704,
+          "ownerPositionChebyshevDistance": 4
+        },
+        {
+          "firstLine": 70818,
+          "firstReceiptLine": 70808,
+          "firstSequence": 14307,
+          "firstAt": 1792916218614,
+          "firstPosition": {
+            "x": 231,
+            "y": 583
+          },
+          "secondLine": 70878,
+          "secondReceiptLine": 70877,
+          "secondSequence": 8185,
+          "secondAt": 1792916219008,
+          "secondPosition": {
+            "x": 231,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 418.3871999999974,
+          "ownerPositionChebyshevDistance": 4
+        },
+        {
+          "firstLine": 70950,
+          "firstReceiptLine": 70947,
+          "firstSequence": 14341,
+          "firstAt": 1792916219350,
+          "firstPosition": {
+            "x": 229,
+            "y": 581
+          },
+          "secondLine": 70878,
+          "secondReceiptLine": 70877,
+          "secondSequence": 8185,
+          "secondAt": 1792916219008,
+          "secondPosition": {
+            "x": 231,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 316.99300000001676,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 70950,
+          "firstReceiptLine": 70947,
+          "firstSequence": 14341,
+          "firstAt": 1792916219350,
+          "firstPosition": {
+            "x": 229,
+            "y": 581
+          },
+          "secondLine": 71009,
+          "secondReceiptLine": 71003,
+          "secondSequence": 8205,
+          "secondAt": 1792916219762,
+          "secondPosition": {
+            "x": 230,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 416.3710999999894,
+          "ownerPositionChebyshevDistance": 2
+        }
+      ],
+      "nearTimeOwnerPositionPairsTotal": 12,
+      "positionPairsTruncated": false,
+      "attacksOnThisTargetInMeasuredStage": [
+        {
+          "line": 71207,
+          "at": 1792916220920,
+          "actor": "L8bf3a205",
+          "requestId": "299",
+          "status": "success",
+          "damage": 5
+        },
+        {
+          "line": 71457,
+          "at": 1792916222342,
+          "actor": "L8bf3a205",
+          "requestId": "300",
+          "status": "success",
+          "damage": 5
+        },
+        {
+          "line": 71541,
+          "at": 1792916222840,
+          "actor": "L8bf3a20f",
+          "requestId": "122",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 71684,
+          "at": 1792916223740,
+          "actor": "L8bf3a205",
+          "requestId": "301",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 71770,
+          "at": 1792916224240,
+          "actor": "L8bf3a20f",
+          "requestId": "123",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 71917,
+          "at": 1792916225017,
+          "actor": "L8bf3a205",
+          "requestId": "302",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 72032,
+          "at": 1792916225672,
+          "actor": "L8bf3a20f",
+          "requestId": "124",
+          "status": "success",
+          "damage": 2
+        }
+      ]
+    },
+    {
+      "targetId": 206649,
+      "overlapStartedAtMonotonicMs": 1032727.4081,
+      "overlapEndedAtMonotonicMs": 1036442.3091,
+      "overlapSeconds": 3.7149009999999545,
+      "first": {
+        "actor": "L8bf3a205",
+        "ackCount": 6,
+        "from": {
+          "line": 74100,
+          "receiptLine": 74099,
+          "at": 1792916238035,
+          "sentAtMs": 1032694.4144,
+          "ackMonotonicMs": 1032695.7509,
+          "sequence": 14841,
+          "kind": "walk",
+          "before": {
+            "x": 244,
+            "y": 571
+          },
+          "after": {
+            "x": 244,
+            "y": 572
+          },
+          "plannedTarget": {
+            "x": 244,
+            "y": 572
+          }
+        },
+        "to": {
+          "line": 74759,
+          "receiptLine": 74758,
+          "at": 1792916241781,
+          "sentAtMs": 1036440.0489,
+          "ackMonotonicMs": 1036442.3091,
+          "sequence": 14939,
+          "kind": "run",
+          "before": {
+            "x": 239,
+            "y": 576
+          },
+          "after": {
+            "x": 239,
+            "y": 578
+          },
+          "plannedTarget": {
+            "x": 239,
+            "y": 578
+          }
+        },
+        "closedBy": "turn-break-conservative"
+      },
+      "second": {
+        "actor": "L8bf3a20f",
+        "ackCount": 6,
+        "from": {
+          "line": 74108,
+          "receiptLine": 74102,
+          "at": 1792916238057,
+          "sentAtMs": 1032725.5118,
+          "ackMonotonicMs": 1032727.4081,
+          "sequence": 8674,
+          "kind": "walk",
+          "before": {
+            "x": 243,
+            "y": 571
+          },
+          "after": {
+            "x": 243,
+            "y": 572
+          },
+          "plannedTarget": {
+            "x": 243,
+            "y": 572
+          }
+        },
+        "to": {
+          "line": 74768,
+          "receiptLine": 74764,
+          "at": 1792916241812,
+          "sentAtMs": 1036472.5136,
+          "ackMonotonicMs": 1036474.8422,
+          "sequence": 8775,
+          "kind": "walk",
+          "before": {
+            "x": 238,
+            "y": 577
+          },
+          "after": {
+            "x": 238,
+            "y": 578
+          },
+          "plannedTarget": {
+            "x": 238,
+            "y": 578
+          }
+        },
+        "closedBy": "attack-send"
+      },
+      "nearTimeOwnerPositionPairs": [
+        {
+          "firstLine": 74100,
+          "firstReceiptLine": 74099,
+          "firstSequence": 14841,
+          "firstAt": 1792916238035,
+          "firstPosition": {
+            "x": 244,
+            "y": 572
+          },
+          "secondLine": 74108,
+          "secondReceiptLine": 74102,
+          "secondSequence": 8674,
+          "secondAt": 1792916238057,
+          "secondPosition": {
+            "x": 243,
+            "y": 572
+          },
+          "monotonicDifferenceMs": 31.65720000001602,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 74100,
+          "firstReceiptLine": 74099,
+          "firstSequence": 14841,
+          "firstAt": 1792916238035,
+          "firstPosition": {
+            "x": 244,
+            "y": 572
+          },
+          "secondLine": 74243,
+          "secondReceiptLine": 74238,
+          "secondSequence": 8694,
+          "secondAt": 1792916238807,
+          "secondPosition": {
+            "x": 243,
+            "y": 573
+          },
+          "monotonicDifferenceMs": 774.1325000000652,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 74231,
+          "firstReceiptLine": 74230,
+          "firstSequence": 14860,
+          "firstAt": 1792916238776,
+          "firstPosition": {
+            "x": 244,
+            "y": 571
+          },
+          "secondLine": 74108,
+          "secondReceiptLine": 74102,
+          "secondSequence": 8674,
+          "secondAt": 1792916238057,
+          "secondPosition": {
+            "x": 243,
+            "y": 572
+          },
+          "monotonicDifferenceMs": 709.7807999999495,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 74231,
+          "firstReceiptLine": 74230,
+          "firstSequence": 14860,
+          "firstAt": 1792916238776,
+          "firstPosition": {
+            "x": 244,
+            "y": 571
+          },
+          "secondLine": 74243,
+          "secondReceiptLine": 74238,
+          "secondSequence": 8694,
+          "secondAt": 1792916238807,
+          "secondPosition": {
+            "x": 243,
+            "y": 573
+          },
+          "monotonicDifferenceMs": 32.69450000009965,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 74231,
+          "firstReceiptLine": 74230,
+          "firstSequence": 14860,
+          "firstAt": 1792916238776,
+          "firstPosition": {
+            "x": 244,
+            "y": 571
+          },
+          "secondLine": 74378,
+          "secondReceiptLine": 74365,
+          "secondSequence": 8711,
+          "secondAt": 1792916239548,
+          "secondPosition": {
+            "x": 241,
+            "y": 575
+          },
+          "monotonicDifferenceMs": 776.4249000001,
+          "ownerPositionChebyshevDistance": 4
+        },
+        {
+          "firstLine": 74358,
+          "firstReceiptLine": 74354,
+          "firstSequence": 14879,
+          "firstAt": 1792916239522,
+          "firstPosition": {
+            "x": 243,
+            "y": 572
+          },
+          "secondLine": 74243,
+          "secondReceiptLine": 74238,
+          "secondSequence": 8694,
+          "secondAt": 1792916238807,
+          "secondPosition": {
+            "x": 243,
+            "y": 573
+          },
+          "monotonicDifferenceMs": 712.5786999999546,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 74358,
+          "firstReceiptLine": 74354,
+          "firstSequence": 14879,
+          "firstAt": 1792916239522,
+          "firstPosition": {
+            "x": 243,
+            "y": 572
+          },
+          "secondLine": 74378,
+          "secondReceiptLine": 74365,
+          "secondSequence": 8711,
+          "secondAt": 1792916239548,
+          "secondPosition": {
+            "x": 241,
+            "y": 575
+          },
+          "monotonicDifferenceMs": 31.15170000004582,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 74358,
+          "firstReceiptLine": 74354,
+          "firstSequence": 14879,
+          "firstAt": 1792916239522,
+          "firstPosition": {
+            "x": 243,
+            "y": 572
+          },
+          "secondLine": 74500,
+          "secondReceiptLine": 74496,
+          "secondSequence": 8737,
+          "secondAt": 1792916240330,
+          "secondPosition": {
+            "x": 239,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 809.1321999999927,
+          "ownerPositionChebyshevDistance": 5
+        },
+        {
+          "firstLine": 74481,
+          "firstReceiptLine": 74479,
+          "firstSequence": 14898,
+          "firstAt": 1792916240268,
+          "firstPosition": {
+            "x": 241,
+            "y": 574
+          },
+          "secondLine": 74378,
+          "secondReceiptLine": 74365,
+          "secondSequence": 8711,
+          "secondAt": 1792916239548,
+          "secondPosition": {
+            "x": 241,
+            "y": 575
+          },
+          "monotonicDifferenceMs": 719.3531999998959,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 74481,
+          "firstReceiptLine": 74479,
+          "firstSequence": 14898,
+          "firstAt": 1792916240268,
+          "firstPosition": {
+            "x": 241,
+            "y": 574
+          },
+          "secondLine": 74500,
+          "secondReceiptLine": 74496,
+          "secondSequence": 8737,
+          "secondAt": 1792916240330,
+          "secondPosition": {
+            "x": 239,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 58.62730000005104,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 74481,
+          "firstReceiptLine": 74479,
+          "firstSequence": 14898,
+          "firstAt": 1792916240268,
+          "firstPosition": {
+            "x": 241,
+            "y": 574
+          },
+          "secondLine": 74632,
+          "secondReceiptLine": 74626,
+          "secondSequence": 8756,
+          "secondAt": 1792916241064,
+          "secondPosition": {
+            "x": 238,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 791.9518000000389,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 74619,
+          "firstReceiptLine": 74618,
+          "firstSequence": 14923,
+          "firstAt": 1792916241032,
+          "firstPosition": {
+            "x": 239,
+            "y": 576
+          },
+          "secondLine": 74500,
+          "secondReceiptLine": 74496,
+          "secondSequence": 8737,
+          "secondAt": 1792916240330,
+          "secondPosition": {
+            "x": 239,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 701.340899999952,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 74619,
+          "firstReceiptLine": 74618,
+          "firstSequence": 14923,
+          "firstAt": 1792916241032,
+          "firstPosition": {
+            "x": 239,
+            "y": 576
+          },
+          "secondLine": 74632,
+          "secondReceiptLine": 74626,
+          "secondSequence": 8756,
+          "secondAt": 1792916241064,
+          "secondPosition": {
+            "x": 238,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 31.98360000003595,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 74619,
+          "firstReceiptLine": 74618,
+          "firstSequence": 14923,
+          "firstAt": 1792916241032,
+          "firstPosition": {
+            "x": 239,
+            "y": 576
+          },
+          "secondLine": 74768,
+          "secondReceiptLine": 74764,
+          "secondSequence": 8775,
+          "secondAt": 1792916241812,
+          "secondPosition": {
+            "x": 238,
+            "y": 578
+          },
+          "monotonicDifferenceMs": 781.9070000000065,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 74759,
+          "firstReceiptLine": 74758,
+          "firstSequence": 14939,
+          "firstAt": 1792916241781,
+          "firstPosition": {
+            "x": 239,
+            "y": 578
+          },
+          "secondLine": 74632,
+          "secondReceiptLine": 74626,
+          "secondSequence": 8756,
+          "secondAt": 1792916241064,
+          "secondPosition": {
+            "x": 238,
+            "y": 577
+          },
+          "monotonicDifferenceMs": 717.39029999997,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 74759,
+          "firstReceiptLine": 74758,
+          "firstSequence": 14939,
+          "firstAt": 1792916241781,
+          "firstPosition": {
+            "x": 239,
+            "y": 578
+          },
+          "secondLine": 74768,
+          "secondReceiptLine": 74764,
+          "secondSequence": 8775,
+          "secondAt": 1792916241812,
+          "secondPosition": {
+            "x": 238,
+            "y": 578
+          },
+          "monotonicDifferenceMs": 32.53310000000056,
+          "ownerPositionChebyshevDistance": 1
+        }
+      ],
+      "nearTimeOwnerPositionPairsTotal": 16,
+      "positionPairsTruncated": false,
+      "attacksOnThisTargetInMeasuredStage": [
+        {
+          "line": 74892,
+          "at": 1792916242649,
+          "actor": "L8bf3a20f",
+          "requestId": "127",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 74991,
+          "at": 1792916243356,
+          "actor": "L8bf3a205",
+          "requestId": "306",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 75111,
+          "at": 1792916244046,
+          "actor": "L8bf3a20f",
+          "requestId": "128",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 75232,
+          "at": 1792916244746,
+          "actor": "L8bf3a205",
+          "requestId": "307",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 75325,
+          "at": 1792916245435,
+          "actor": "L8bf3a20f",
+          "requestId": "129",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 75562,
+          "at": 1792916246838,
+          "actor": "L8bf3a205",
+          "requestId": "308",
+          "status": "success",
+          "damage": 3
+        }
+      ]
+    },
+    {
+      "targetId": 206622,
+      "overlapStartedAtMonotonicMs": 1063734.6344,
+      "overlapEndedAtMonotonicMs": 1066753.9387,
+      "overlapSeconds": 3.01930429999996,
+      "first": {
+        "actor": "L8bf3a205",
+        "ackCount": 5,
+        "from": {
+          "line": 79213,
+          "receiptLine": 79205,
+          "at": 1792916269067,
+          "sentAtMs": 1063733.5489,
+          "ackMonotonicMs": 1063734.6344,
+          "sequence": 15800,
+          "kind": "walk",
+          "before": {
+            "x": 248,
+            "y": 582
+          },
+          "after": {
+            "x": 248,
+            "y": 583
+          },
+          "plannedTarget": {
+            "x": 248,
+            "y": 583
+          }
+        },
+        "to": {
+          "line": 79743,
+          "receiptLine": 79736,
+          "at": 1792916272082,
+          "sentAtMs": 1066747.3636,
+          "ackMonotonicMs": 1066753.9387,
+          "sequence": 15920,
+          "kind": "walk",
+          "before": {
+            "x": 246,
+            "y": 588
+          },
+          "after": {
+            "x": 246,
+            "y": 589
+          },
+          "plannedTarget": {
+            "x": 246,
+            "y": 589
+          }
+        },
+        "closedBy": "turn-break-conservative"
+      },
+      "second": {
+        "actor": "L8bf3a20f",
+        "ackCount": 6,
+        "from": {
+          "line": 79101,
+          "receiptLine": 79099,
+          "at": 1792916268489,
+          "sentAtMs": 1063116.1654,
+          "ackMonotonicMs": 1063153.0394,
+          "sequence": 9484,
+          "kind": "walk",
+          "before": {
+            "x": 246,
+            "y": 579
+          },
+          "after": {
+            "x": 247,
+            "y": 580
+          },
+          "plannedTarget": {
+            "x": 247,
+            "y": 580
+          }
+        },
+        "to": {
+          "line": 79751,
+          "receiptLine": 79750,
+          "at": 1792916272211,
+          "sentAtMs": 1066869.9691,
+          "ackMonotonicMs": 1066876.1766,
+          "sequence": 9628,
+          "kind": "walk",
+          "before": {
+            "x": 245,
+            "y": 588
+          },
+          "after": {
+            "x": 245,
+            "y": 589
+          },
+          "plannedTarget": {
+            "x": 245,
+            "y": 589
+          }
+        },
+        "closedBy": "attack-send"
+      },
+      "nearTimeOwnerPositionPairs": [
+        {
+          "firstLine": 79213,
+          "firstReceiptLine": 79205,
+          "firstSequence": 15800,
+          "firstAt": 1792916269067,
+          "firstPosition": {
+            "x": 248,
+            "y": 583
+          },
+          "secondLine": 79101,
+          "secondReceiptLine": 79099,
+          "secondSequence": 9484,
+          "secondAt": 1792916268489,
+          "secondPosition": {
+            "x": 247,
+            "y": 580
+          },
+          "monotonicDifferenceMs": 581.5950000002049,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 79213,
+          "firstReceiptLine": 79205,
+          "firstSequence": 15800,
+          "firstAt": 1792916269067,
+          "firstPosition": {
+            "x": 248,
+            "y": 583
+          },
+          "secondLine": 79225,
+          "secondReceiptLine": 79223,
+          "secondSequence": 9507,
+          "secondAt": 1792916269217,
+          "secondPosition": {
+            "x": 247,
+            "y": 582
+          },
+          "monotonicDifferenceMs": 138.95059999986552,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 79213,
+          "firstReceiptLine": 79205,
+          "firstSequence": 15800,
+          "firstAt": 1792916269067,
+          "firstPosition": {
+            "x": 248,
+            "y": 583
+          },
+          "secondLine": 79344,
+          "secondReceiptLine": 79340,
+          "secondSequence": 9535,
+          "secondAt": 1792916269967,
+          "secondPosition": {
+            "x": 245,
+            "y": 584
+          },
+          "monotonicDifferenceMs": 894.0511999998707,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 79327,
+          "firstReceiptLine": 79326,
+          "firstSequence": 15836,
+          "firstAt": 1792916269810,
+          "firstPosition": {
+            "x": 246,
+            "y": 585
+          },
+          "secondLine": 79225,
+          "secondReceiptLine": 79223,
+          "secondSequence": 9507,
+          "secondAt": 1792916269217,
+          "secondPosition": {
+            "x": 247,
+            "y": 582
+          },
+          "monotonicDifferenceMs": 599.627300000051,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 79327,
+          "firstReceiptLine": 79326,
+          "firstSequence": 15836,
+          "firstAt": 1792916269810,
+          "firstPosition": {
+            "x": 246,
+            "y": 585
+          },
+          "secondLine": 79344,
+          "secondReceiptLine": 79340,
+          "secondSequence": 9535,
+          "secondAt": 1792916269967,
+          "secondPosition": {
+            "x": 245,
+            "y": 584
+          },
+          "monotonicDifferenceMs": 155.47329999995418,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 79327,
+          "firstReceiptLine": 79326,
+          "firstSequence": 15836,
+          "firstAt": 1792916269810,
+          "firstPosition": {
+            "x": 246,
+            "y": 585
+          },
+          "secondLine": 79465,
+          "secondReceiptLine": 79464,
+          "secondSequence": 9569,
+          "secondAt": 1792916270713,
+          "secondPosition": {
+            "x": 245,
+            "y": 586
+          },
+          "monotonicDifferenceMs": 903.3825000000652,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 79447,
+          "firstReceiptLine": 79446,
+          "firstSequence": 15870,
+          "firstAt": 1792916270551,
+          "firstPosition": {
+            "x": 246,
+            "y": 587
+          },
+          "secondLine": 79344,
+          "secondReceiptLine": 79340,
+          "secondSequence": 9535,
+          "secondAt": 1792916269967,
+          "secondPosition": {
+            "x": 245,
+            "y": 584
+          },
+          "monotonicDifferenceMs": 591.4081999999471,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 79447,
+          "firstReceiptLine": 79446,
+          "firstSequence": 15870,
+          "firstAt": 1792916270551,
+          "firstPosition": {
+            "x": 246,
+            "y": 587
+          },
+          "secondLine": 79465,
+          "secondReceiptLine": 79464,
+          "secondSequence": 9569,
+          "secondAt": 1792916270713,
+          "secondPosition": {
+            "x": 245,
+            "y": 586
+          },
+          "monotonicDifferenceMs": 156.5010000001639,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 79447,
+          "firstReceiptLine": 79446,
+          "firstSequence": 15870,
+          "firstAt": 1792916270551,
+          "firstPosition": {
+            "x": 246,
+            "y": 587
+          },
+          "secondLine": 79625,
+          "secondReceiptLine": 79622,
+          "secondSequence": 9603,
+          "secondAt": 1792916271453,
+          "secondPosition": {
+            "x": 245,
+            "y": 588
+          },
+          "monotonicDifferenceMs": 895.6552000001539,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 79616,
+          "firstReceiptLine": 79615,
+          "firstSequence": 15900,
+          "firstAt": 1792916271324,
+          "firstPosition": {
+            "x": 246,
+            "y": 588
+          },
+          "secondLine": 79465,
+          "secondReceiptLine": 79464,
+          "secondSequence": 9569,
+          "secondAt": 1792916270713,
+          "secondPosition": {
+            "x": 245,
+            "y": 586
+          },
+          "monotonicDifferenceMs": 624.2005000000354,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 79616,
+          "firstReceiptLine": 79615,
+          "firstSequence": 15900,
+          "firstAt": 1792916271324,
+          "firstPosition": {
+            "x": 246,
+            "y": 588
+          },
+          "secondLine": 79625,
+          "secondReceiptLine": 79622,
+          "secondSequence": 9603,
+          "secondAt": 1792916271453,
+          "secondPosition": {
+            "x": 245,
+            "y": 588
+          },
+          "monotonicDifferenceMs": 114.95369999995455,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 79616,
+          "firstReceiptLine": 79615,
+          "firstSequence": 15900,
+          "firstAt": 1792916271324,
+          "firstPosition": {
+            "x": 246,
+            "y": 588
+          },
+          "secondLine": 79751,
+          "secondReceiptLine": 79750,
+          "secondSequence": 9628,
+          "secondAt": 1792916272211,
+          "secondPosition": {
+            "x": 245,
+            "y": 589
+          },
+          "monotonicDifferenceMs": 875.3812999997754,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 79743,
+          "firstReceiptLine": 79736,
+          "firstSequence": 15920,
+          "firstAt": 1792916272082,
+          "firstPosition": {
+            "x": 246,
+            "y": 589
+          },
+          "secondLine": 79625,
+          "secondReceiptLine": 79622,
+          "secondSequence": 9603,
+          "secondAt": 1792916271453,
+          "secondPosition": {
+            "x": 245,
+            "y": 588
+          },
+          "monotonicDifferenceMs": 638.1896999999881,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 79743,
+          "firstReceiptLine": 79736,
+          "firstSequence": 15920,
+          "firstAt": 1792916272082,
+          "firstPosition": {
+            "x": 246,
+            "y": 589
+          },
+          "secondLine": 79751,
+          "secondReceiptLine": 79750,
+          "secondSequence": 9628,
+          "secondAt": 1792916272211,
+          "secondPosition": {
+            "x": 245,
+            "y": 589
+          },
+          "monotonicDifferenceMs": 122.23789999983273,
+          "ownerPositionChebyshevDistance": 1
+        }
+      ],
+      "nearTimeOwnerPositionPairsTotal": 14,
+      "positionPairsTruncated": false,
+      "attacksOnThisTargetInMeasuredStage": [
+        {
+          "line": 79866,
+          "at": 1792916273043,
+          "actor": "L8bf3a20f",
+          "requestId": "139",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 79981,
+          "at": 1792916273648,
+          "actor": "L8bf3a205",
+          "requestId": "316",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 80122,
+          "at": 1792916274448,
+          "actor": "L8bf3a20f",
+          "requestId": "140",
+          "status": "success",
+          "damage": 2
+        },
+        {
+          "line": 80226,
+          "at": 1792916275047,
+          "actor": "L8bf3a205",
+          "requestId": "317",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 80332,
+          "at": 1792916275830,
+          "actor": "L8bf3a20f",
+          "requestId": "141",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 80546,
+          "at": 1792916277136,
+          "actor": "L8bf3a205",
+          "requestId": "318",
+          "status": "success",
+          "damage": 4
+        }
+      ]
+    },
+    {
+      "targetId": 206539,
+      "overlapStartedAtMonotonicMs": 1073111.2567,
+      "overlapEndedAtMonotonicMs": 1075588.4598,
+      "overlapSeconds": 2.4772031000000423,
+      "first": {
+        "actor": "L8bf3a205",
+        "ackCount": 6,
+        "from": {
+          "line": 80774,
+          "receiptLine": 80769,
+          "at": 1792916278448,
+          "sentAtMs": 1073108.7386,
+          "ackMonotonicMs": 1073111.2567,
+          "sequence": 16140,
+          "kind": "walk",
+          "before": {
+            "x": 246,
+            "y": 589
+          },
+          "after": {
+            "x": 246,
+            "y": 590
+          },
+          "plannedTarget": {
+            "x": 246,
+            "y": 590
+          }
+        },
+        "to": {
+          "line": 81404,
+          "receiptLine": 81394,
+          "at": 1792916282217,
+          "sentAtMs": 1076881.6912,
+          "ackMonotonicMs": 1076882.6828,
+          "sequence": 16279,
+          "kind": "walk",
+          "before": {
+            "x": 249,
+            "y": 597
+          },
+          "after": {
+            "x": 249,
+            "y": 598
+          },
+          "plannedTarget": {
+            "x": 249,
+            "y": 598
+          }
+        },
+        "closedBy": "turn-break-conservative"
+      },
+      "second": {
+        "actor": "L8bf3a20f",
+        "ackCount": 6,
+        "from": {
+          "line": 80583,
+          "receiptLine": 80580,
+          "at": 1792916277212,
+          "sentAtMs": 1071860.2944,
+          "ackMonotonicMs": 1071890.7439,
+          "sequence": 9815,
+          "kind": "walk",
+          "before": {
+            "x": 245,
+            "y": 589
+          },
+          "after": {
+            "x": 245,
+            "y": 590
+          },
+          "plannedTarget": {
+            "x": 245,
+            "y": 590
+          }
+        },
+        "to": {
+          "line": 81210,
+          "receiptLine": 81200,
+          "at": 1792916280921,
+          "sentAtMs": 1075584.8807,
+          "ackMonotonicMs": 1075588.4598,
+          "sequence": 9948,
+          "kind": "run",
+          "before": {
+            "x": 246,
+            "y": 596
+          },
+          "after": {
+            "x": 248,
+            "y": 598
+          },
+          "plannedTarget": {
+            "x": 248,
+            "y": 598
+          }
+        },
+        "closedBy": "turn-break-conservative"
+      },
+      "nearTimeOwnerPositionPairs": [
+        {
+          "firstLine": 80774,
+          "firstReceiptLine": 80769,
+          "firstSequence": 16140,
+          "firstAt": 1792916278448,
+          "firstPosition": {
+            "x": 246,
+            "y": 590
+          },
+          "secondLine": 80703,
+          "secondReceiptLine": 80693,
+          "secondSequence": 9844,
+          "secondAt": 1792916277946,
+          "secondPosition": {
+            "x": 245,
+            "y": 592
+          },
+          "monotonicDifferenceMs": 490.9821000001393,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 80774,
+          "firstReceiptLine": 80769,
+          "firstSequence": 16140,
+          "firstAt": 1792916278448,
+          "firstPosition": {
+            "x": 246,
+            "y": 590
+          },
+          "secondLine": 80820,
+          "secondReceiptLine": 80817,
+          "secondSequence": 9871,
+          "secondAt": 1792916278691,
+          "secondPosition": {
+            "x": 245,
+            "y": 593
+          },
+          "monotonicDifferenceMs": 246.81119999988005,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 80774,
+          "firstReceiptLine": 80769,
+          "firstSequence": 16140,
+          "firstAt": 1792916278448,
+          "firstPosition": {
+            "x": 246,
+            "y": 590
+          },
+          "secondLine": 80929,
+          "secondReceiptLine": 80917,
+          "secondSequence": 9898,
+          "secondAt": 1792916279435,
+          "secondPosition": {
+            "x": 245,
+            "y": 595
+          },
+          "monotonicDifferenceMs": 999.5485000000335,
+          "ownerPositionChebyshevDistance": 5
+        },
+        {
+          "firstLine": 80881,
+          "firstReceiptLine": 80873,
+          "firstSequence": 16164,
+          "firstAt": 1792916279219,
+          "firstPosition": {
+            "x": 246,
+            "y": 592
+          },
+          "secondLine": 80820,
+          "secondReceiptLine": 80817,
+          "secondSequence": 9871,
+          "secondAt": 1792916278691,
+          "secondPosition": {
+            "x": 245,
+            "y": 593
+          },
+          "monotonicDifferenceMs": 523.0076000001281,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 80881,
+          "firstReceiptLine": 80873,
+          "firstSequence": 16164,
+          "firstAt": 1792916279219,
+          "firstPosition": {
+            "x": 246,
+            "y": 592
+          },
+          "secondLine": 80929,
+          "secondReceiptLine": 80917,
+          "secondSequence": 9898,
+          "secondAt": 1792916279435,
+          "secondPosition": {
+            "x": 245,
+            "y": 595
+          },
+          "monotonicDifferenceMs": 229.72970000002533,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 80881,
+          "firstReceiptLine": 80873,
+          "firstSequence": 16164,
+          "firstAt": 1792916279219,
+          "firstPosition": {
+            "x": 246,
+            "y": 592
+          },
+          "secondLine": 81071,
+          "secondReceiptLine": 81067,
+          "secondSequence": 9922,
+          "secondAt": 1792916280179,
+          "secondPosition": {
+            "x": 246,
+            "y": 596
+          },
+          "monotonicDifferenceMs": 959.4535000000615,
+          "ownerPositionChebyshevDistance": 4
+        },
+        {
+          "firstLine": 81015,
+          "firstReceiptLine": 80993,
+          "firstSequence": 16195,
+          "firstAt": 1792916279965,
+          "firstPosition": {
+            "x": 246,
+            "y": 594
+          },
+          "secondLine": 80929,
+          "secondReceiptLine": 80917,
+          "secondSequence": 9898,
+          "secondAt": 1792916279435,
+          "secondPosition": {
+            "x": 245,
+            "y": 595
+          },
+          "monotonicDifferenceMs": 514.564000000013,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 81015,
+          "firstReceiptLine": 80993,
+          "firstSequence": 16195,
+          "firstAt": 1792916279965,
+          "firstPosition": {
+            "x": 246,
+            "y": 594
+          },
+          "secondLine": 81071,
+          "secondReceiptLine": 81067,
+          "secondSequence": 9922,
+          "secondAt": 1792916280179,
+          "secondPosition": {
+            "x": 246,
+            "y": 596
+          },
+          "monotonicDifferenceMs": 215.1598000000231,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 81015,
+          "firstReceiptLine": 80993,
+          "firstSequence": 16195,
+          "firstAt": 1792916279965,
+          "firstPosition": {
+            "x": 246,
+            "y": 594
+          },
+          "secondLine": 81210,
+          "secondReceiptLine": 81200,
+          "secondSequence": 9948,
+          "secondAt": 1792916280921,
+          "secondPosition": {
+            "x": 248,
+            "y": 598
+          },
+          "monotonicDifferenceMs": 963.0905999999959,
+          "ownerPositionChebyshevDistance": 4
+        },
+        {
+          "firstLine": 81167,
+          "firstReceiptLine": 81150,
+          "firstSequence": 16218,
+          "firstAt": 1792916280708,
+          "firstPosition": {
+            "x": 247,
+            "y": 595
+          },
+          "secondLine": 81071,
+          "secondReceiptLine": 81067,
+          "secondSequence": 9922,
+          "secondAt": 1792916280179,
+          "secondPosition": {
+            "x": 246,
+            "y": 596
+          },
+          "monotonicDifferenceMs": 530.6087999998126,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 81167,
+          "firstReceiptLine": 81150,
+          "firstSequence": 16218,
+          "firstAt": 1792916280708,
+          "firstPosition": {
+            "x": 247,
+            "y": 595
+          },
+          "secondLine": 81210,
+          "secondReceiptLine": 81200,
+          "secondSequence": 9948,
+          "secondAt": 1792916280921,
+          "secondPosition": {
+            "x": 248,
+            "y": 598
+          },
+          "monotonicDifferenceMs": 217.3220000001602,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 81298,
+          "firstReceiptLine": 81288,
+          "firstSequence": 16245,
+          "firstAt": 1792916281449,
+          "firstPosition": {
+            "x": 249,
+            "y": 597
+          },
+          "secondLine": 81210,
+          "secondReceiptLine": 81200,
+          "secondSequence": 9948,
+          "secondAt": 1792916280921,
+          "secondPosition": {
+            "x": 248,
+            "y": 598
+          },
+          "monotonicDifferenceMs": 526.7593999998644,
+          "ownerPositionChebyshevDistance": 1
+        }
+      ],
+      "nearTimeOwnerPositionPairsTotal": 12,
+      "positionPairsTruncated": false,
+      "attacksOnThisTargetInMeasuredStage": [
+        {
+          "line": 32332,
+          "at": 1792915987342,
+          "actor": "L8bf3a20f",
+          "requestId": "22",
+          "status": "success",
+          "damage": 2
+        },
+        {
+          "line": 32560,
+          "at": 1792915988831,
+          "actor": "L8bf3a20f",
+          "requestId": "23",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 81472,
+          "at": 1792916282522,
+          "actor": "L8bf3a20f",
+          "requestId": "142",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 81678,
+          "at": 1792916283734,
+          "actor": "L8bf3a205",
+          "requestId": "319",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 81711,
+          "at": 1792916283928,
+          "actor": "L8bf3a20f",
+          "requestId": "143",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 81870,
+          "at": 1792916285146,
+          "actor": "L8bf3a205",
+          "requestId": "320",
+          "status": "success",
+          "damage": 5
+        },
+        {
+          "line": 81917,
+          "at": 1792916285345,
+          "actor": "L8bf3a20f",
+          "requestId": "144",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 82119,
+          "at": 1792916286544,
+          "actor": "L8bf3a205",
+          "requestId": "321",
+          "status": "success",
+          "damage": 4
+        }
+      ]
+    },
+    {
+      "targetId": 206517,
+      "overlapStartedAtMonotonicMs": 995306.1769,
+      "overlapEndedAtMonotonicMs": 997552.3565,
+      "overlapSeconds": 2.246179600000032,
+      "first": {
+        "actor": "L8bf3a205",
+        "ackCount": 9,
+        "from": {
+          "line": 67641,
+          "receiptLine": 67640,
+          "at": 1792916200230,
+          "sentAtMs": 994889.523,
+          "ackMonotonicMs": 994891.2165,
+          "sequence": 13700,
+          "kind": "run",
+          "before": {
+            "x": 247,
+            "y": 590
+          },
+          "after": {
+            "x": 245,
+            "y": 590
+          },
+          "plannedTarget": {
+            "x": 245,
+            "y": 590
+          }
+        },
+        "to": {
+          "line": 68671,
+          "receiptLine": 68670,
+          "at": 1792916206225,
+          "sentAtMs": 1000886.0491,
+          "ackMonotonicMs": 1000886.8896,
+          "sequence": 13933,
+          "kind": "walk",
+          "before": {
+            "x": 233,
+            "y": 582
+          },
+          "after": {
+            "x": 232,
+            "y": 581
+          },
+          "plannedTarget": {
+            "x": 232,
+            "y": 581
+          }
+        },
+        "closedBy": "attack-send"
+      },
+      "second": {
+        "actor": "L8bf3a20f",
+        "ackCount": 4,
+        "from": {
+          "line": 67718,
+          "receiptLine": 67715,
+          "at": 1792916200630,
+          "sentAtMs": 995289.813,
+          "ackMonotonicMs": 995306.1769,
+          "sequence": 7690,
+          "kind": "run",
+          "before": {
+            "x": 240,
+            "y": 579
+          },
+          "after": {
+            "x": 238,
+            "y": 579
+          },
+          "plannedTarget": {
+            "x": 238,
+            "y": 579
+          }
+        },
+        "to": {
+          "line": 68122,
+          "receiptLine": 68121,
+          "at": 1792916202891,
+          "sentAtMs": 997551.4881,
+          "ackMonotonicMs": 997552.3565,
+          "sequence": 7759,
+          "kind": "run",
+          "before": {
+            "x": 234,
+            "y": 579
+          },
+          "after": {
+            "x": 232,
+            "y": 579
+          },
+          "plannedTarget": {
+            "x": 232,
+            "y": 579
+          }
+        },
+        "closedBy": "turn-break-conservative"
+      },
+      "nearTimeOwnerPositionPairs": [
+        {
+          "firstLine": 67641,
+          "firstReceiptLine": 67640,
+          "firstSequence": 13700,
+          "firstAt": 1792916200230,
+          "firstPosition": {
+            "x": 245,
+            "y": 590
+          },
+          "secondLine": 67718,
+          "secondReceiptLine": 67715,
+          "secondSequence": 7690,
+          "secondAt": 1792916200630,
+          "secondPosition": {
+            "x": 238,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 414.96039999998175,
+          "ownerPositionChebyshevDistance": 11
+        },
+        {
+          "firstLine": 67757,
+          "firstReceiptLine": 67756,
+          "firstSequence": 13724,
+          "firstAt": 1792916200968,
+          "firstPosition": {
+            "x": 243,
+            "y": 590
+          },
+          "secondLine": 67718,
+          "secondReceiptLine": 67715,
+          "secondSequence": 7690,
+          "secondAt": 1792916200630,
+          "secondPosition": {
+            "x": 238,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 324.55590000003576,
+          "ownerPositionChebyshevDistance": 11
+        },
+        {
+          "firstLine": 67757,
+          "firstReceiptLine": 67756,
+          "firstSequence": 13724,
+          "firstAt": 1792916200968,
+          "firstPosition": {
+            "x": 243,
+            "y": 590
+          },
+          "secondLine": 67831,
+          "secondReceiptLine": 67826,
+          "secondSequence": 7714,
+          "secondAt": 1792916201401,
+          "secondPosition": {
+            "x": 236,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 426.00820000004023,
+          "ownerPositionChebyshevDistance": 11
+        },
+        {
+          "firstLine": 67897,
+          "firstReceiptLine": 67893,
+          "firstSequence": 13752,
+          "firstAt": 1792916201710,
+          "firstPosition": {
+            "x": 241,
+            "y": 588
+          },
+          "secondLine": 67831,
+          "secondReceiptLine": 67826,
+          "secondSequence": 7714,
+          "secondAt": 1792916201401,
+          "secondPosition": {
+            "x": 236,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 314.4221999999136,
+          "ownerPositionChebyshevDistance": 9
+        },
+        {
+          "firstLine": 67897,
+          "firstReceiptLine": 67893,
+          "firstSequence": 13752,
+          "firstAt": 1792916201710,
+          "firstPosition": {
+            "x": 241,
+            "y": 588
+          },
+          "secondLine": 67983,
+          "secondReceiptLine": 67982,
+          "secondSequence": 7741,
+          "secondAt": 1792916202145,
+          "secondPosition": {
+            "x": 234,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 428.6669000000693,
+          "ownerPositionChebyshevDistance": 9
+        },
+        {
+          "firstLine": 68044,
+          "firstReceiptLine": 68038,
+          "firstSequence": 13782,
+          "firstAt": 1792916202487,
+          "firstPosition": {
+            "x": 241,
+            "y": 586
+          },
+          "secondLine": 67983,
+          "secondReceiptLine": 67982,
+          "secondSequence": 7741,
+          "secondAt": 1792916202145,
+          "secondPosition": {
+            "x": 234,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 351.8665000000037,
+          "ownerPositionChebyshevDistance": 7
+        },
+        {
+          "firstLine": 68044,
+          "firstReceiptLine": 68038,
+          "firstSequence": 13782,
+          "firstAt": 1792916202487,
+          "firstPosition": {
+            "x": 241,
+            "y": 586
+          },
+          "secondLine": 68122,
+          "secondReceiptLine": 68121,
+          "secondSequence": 7759,
+          "secondAt": 1792916202891,
+          "secondPosition": {
+            "x": 232,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 400.65989999996964,
+          "ownerPositionChebyshevDistance": 9
+        },
+        {
+          "firstLine": 68171,
+          "firstReceiptLine": 68169,
+          "firstSequence": 13808,
+          "firstAt": 1792916203232,
+          "firstPosition": {
+            "x": 239,
+            "y": 586
+          },
+          "secondLine": 68122,
+          "secondReceiptLine": 68121,
+          "secondSequence": 7759,
+          "secondAt": 1792916202891,
+          "secondPosition": {
+            "x": 232,
+            "y": 579
+          },
+          "monotonicDifferenceMs": 343.90320000005886,
+          "ownerPositionChebyshevDistance": 7
+        }
+      ],
+      "nearTimeOwnerPositionPairsTotal": 8,
+      "positionPairsTruncated": false,
+      "attacksOnThisTargetInMeasuredStage": [
+        {
+          "line": 68403,
+          "at": 1792916204542,
+          "actor": "L8bf3a20f",
+          "requestId": "118",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 68618,
+          "at": 1792916205854,
+          "actor": "L8bf3a20f",
+          "requestId": "119",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 68816,
+          "at": 1792916207059,
+          "actor": "L8bf3a205",
+          "requestId": "296",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 68992,
+          "at": 1792916208028,
+          "actor": "L8bf3a20f",
+          "requestId": "120",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 69056,
+          "at": 1792916208412,
+          "actor": "L8bf3a205",
+          "requestId": "297",
+          "status": "success",
+          "damage": 5
+        },
+        {
+          "line": 69222,
+          "at": 1792916209445,
+          "actor": "L8bf3a20f",
+          "requestId": "121",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 69299,
+          "at": 1792916209819,
+          "actor": "L8bf3a205",
+          "requestId": "298",
+          "status": "success",
+          "damage": 2
+        }
+      ]
+    },
+    {
+      "targetId": 206646,
+      "overlapStartedAtMonotonicMs": 974581.6813,
+      "overlapEndedAtMonotonicMs": 975856.9226,
+      "overlapSeconds": 1.2752412999999942,
+      "first": {
+        "actor": "L8bf3a205",
+        "ackCount": 3,
+        "from": {
+          "line": 64219,
+          "receiptLine": 64207,
+          "at": 1792916179735,
+          "sentAtMs": 974360.9781,
+          "ackMonotonicMs": 974413.6885,
+          "sequence": 12961,
+          "kind": "walk",
+          "before": {
+            "x": 254,
+            "y": 587
+          },
+          "after": {
+            "x": 254,
+            "y": 586
+          },
+          "plannedTarget": {
+            "x": 254,
+            "y": 586
+          }
+        },
+        "to": {
+          "line": 64454,
+          "receiptLine": 64443,
+          "at": 1792916181195,
+          "sentAtMs": 975854.6937,
+          "ackMonotonicMs": 975856.9226,
+          "sequence": 13011,
+          "kind": "run",
+          "before": {
+            "x": 254,
+            "y": 584
+          },
+          "after": {
+            "x": 254,
+            "y": 582
+          },
+          "plannedTarget": {
+            "x": 254,
+            "y": 582
+          }
+        },
+        "closedBy": "attack-send"
+      },
+      "second": {
+        "actor": "L8bf3a20f",
+        "ackCount": 3,
+        "from": {
+          "line": 64238,
+          "receiptLine": 64237,
+          "at": 1792916179917,
+          "sentAtMs": 974575.6109,
+          "ackMonotonicMs": 974581.6813,
+          "sequence": 7067,
+          "kind": "walk",
+          "before": {
+            "x": 253,
+            "y": 585
+          },
+          "after": {
+            "x": 253,
+            "y": 584
+          },
+          "plannedTarget": {
+            "x": 253,
+            "y": 584
+          }
+        },
+        "to": {
+          "line": 64488,
+          "receiptLine": 64486,
+          "at": 1792916181410,
+          "sentAtMs": 976069.4529,
+          "ackMonotonicMs": 976072.3353,
+          "sequence": 7116,
+          "kind": "run",
+          "before": {
+            "x": 253,
+            "y": 583
+          },
+          "after": {
+            "x": 253,
+            "y": 581
+          },
+          "plannedTarget": {
+            "x": 253,
+            "y": 581
+          }
+        },
+        "closedBy": "scout-movement"
+      },
+      "nearTimeOwnerPositionPairs": [
+        {
+          "firstLine": 64219,
+          "firstReceiptLine": 64207,
+          "firstSequence": 12961,
+          "firstAt": 1792916179735,
+          "firstPosition": {
+            "x": 254,
+            "y": 586
+          },
+          "secondLine": 64238,
+          "secondReceiptLine": 64237,
+          "secondSequence": 7067,
+          "secondAt": 1792916179917,
+          "secondPosition": {
+            "x": 253,
+            "y": 584
+          },
+          "monotonicDifferenceMs": 167.99280000000726,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 64219,
+          "firstReceiptLine": 64207,
+          "firstSequence": 12961,
+          "firstAt": 1792916179735,
+          "firstPosition": {
+            "x": 254,
+            "y": 586
+          },
+          "secondLine": 64358,
+          "secondReceiptLine": 64357,
+          "secondSequence": 7094,
+          "secondAt": 1792916180657,
+          "secondPosition": {
+            "x": 253,
+            "y": 583
+          },
+          "monotonicDifferenceMs": 904.7866999999387,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 64320,
+          "firstReceiptLine": 64315,
+          "firstSequence": 12984,
+          "firstAt": 1792916180437,
+          "firstPosition": {
+            "x": 254,
+            "y": 584
+          },
+          "secondLine": 64238,
+          "secondReceiptLine": 64237,
+          "secondSequence": 7067,
+          "secondAt": 1792916179917,
+          "secondPosition": {
+            "x": 253,
+            "y": 584
+          },
+          "monotonicDifferenceMs": 521.9300999999978,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 64320,
+          "firstReceiptLine": 64315,
+          "firstSequence": 12984,
+          "firstAt": 1792916180437,
+          "firstPosition": {
+            "x": 254,
+            "y": 584
+          },
+          "secondLine": 64358,
+          "secondReceiptLine": 64357,
+          "secondSequence": 7094,
+          "secondAt": 1792916180657,
+          "secondPosition": {
+            "x": 253,
+            "y": 583
+          },
+          "monotonicDifferenceMs": 214.8637999999337,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 64320,
+          "firstReceiptLine": 64315,
+          "firstSequence": 12984,
+          "firstAt": 1792916180437,
+          "firstPosition": {
+            "x": 254,
+            "y": 584
+          },
+          "secondLine": 64488,
+          "secondReceiptLine": 64486,
+          "secondSequence": 7116,
+          "secondAt": 1792916181410,
+          "secondPosition": {
+            "x": 253,
+            "y": 581
+          },
+          "monotonicDifferenceMs": 968.7238999999827,
+          "ownerPositionChebyshevDistance": 3
+        },
+        {
+          "firstLine": 64454,
+          "firstReceiptLine": 64443,
+          "firstSequence": 13011,
+          "firstAt": 1792916181195,
+          "firstPosition": {
+            "x": 254,
+            "y": 582
+          },
+          "secondLine": 64358,
+          "secondReceiptLine": 64357,
+          "secondSequence": 7094,
+          "secondAt": 1792916180657,
+          "secondPosition": {
+            "x": 253,
+            "y": 583
+          },
+          "monotonicDifferenceMs": 538.4474000000628,
+          "ownerPositionChebyshevDistance": 1
+        },
+        {
+          "firstLine": 64454,
+          "firstReceiptLine": 64443,
+          "firstSequence": 13011,
+          "firstAt": 1792916181195,
+          "firstPosition": {
+            "x": 254,
+            "y": 582
+          },
+          "secondLine": 64488,
+          "secondReceiptLine": 64486,
+          "secondSequence": 7116,
+          "secondAt": 1792916181410,
+          "secondPosition": {
+            "x": 253,
+            "y": 581
+          },
+          "monotonicDifferenceMs": 215.41269999998622,
+          "ownerPositionChebyshevDistance": 1
+        }
+      ],
+      "nearTimeOwnerPositionPairsTotal": 7,
+      "positionPairsTruncated": false,
+      "attacksOnThisTargetInMeasuredStage": [
+        {
+          "line": 64601,
+          "at": 1792916182198,
+          "actor": "L8bf3a205",
+          "requestId": "292",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 64825,
+          "at": 1792916183429,
+          "actor": "L8bf3a205",
+          "requestId": "293",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 64858,
+          "at": 1792916183731,
+          "actor": "L8bf3a20f",
+          "requestId": "115",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 65100,
+          "at": 1792916185130,
+          "actor": "L8bf3a20f",
+          "requestId": "116",
+          "status": "success",
+          "damage": 2
+        },
+        {
+          "line": 65149,
+          "at": 1792916185534,
+          "actor": "L8bf3a205",
+          "requestId": "294",
+          "status": "success",
+          "damage": 4
+        },
+        {
+          "line": 65332,
+          "at": 1792916186576,
+          "actor": "L8bf3a20f",
+          "requestId": "117",
+          "status": "success",
+          "damage": 2
+        },
+        {
+          "line": 65379,
+          "at": 1792916186951,
+          "actor": "L8bf3a205",
+          "requestId": "295",
+          "status": "success",
+          "damage": 3
+        }
+      ]
+    },
+    {
+      "targetId": 206600,
+      "overlapStartedAtMonotonicMs": 1042830.3333,
+      "overlapEndedAtMonotonicMs": 1042953.0915,
+      "overlapSeconds": 0.12275819999992382,
+      "first": {
+        "actor": "L8bf3a205",
+        "ackCount": 5,
+        "from": {
+          "line": 75790,
+          "receiptLine": 75787,
+          "at": 1792916248163,
+          "sentAtMs": 1042827.5748,
+          "ackMonotonicMs": 1042830.3333,
+          "sequence": 15109,
+          "kind": "walk",
+          "before": {
+            "x": 239,
+            "y": 578
+          },
+          "after": {
+            "x": 238,
+            "y": 578
+          },
+          "plannedTarget": {
+            "x": 238,
+            "y": 578
+          }
+        },
+        "to": {
+          "line": 76272,
+          "receiptLine": 76270,
+          "at": 1792916251159,
+          "sentAtMs": 1045817.9679,
+          "ackMonotonicMs": 1045818.9,
+          "sequence": 15202,
+          "kind": "walk",
+          "before": {
+            "x": 235,
+            "y": 575
+          },
+          "after": {
+            "x": 234,
+            "y": 575
+          },
+          "plannedTarget": {
+            "x": 234,
+            "y": 575
+          }
+        },
+        "closedBy": "turn-break-conservative"
+      },
+      "second": {
+        "actor": "L8bf3a20f",
+        "ackCount": 3,
+        "from": {
+          "line": 75546,
+          "receiptLine": 75543,
+          "at": 1792916246806,
+          "sentAtMs": 1041465.2389,
+          "ackMonotonicMs": 1041467.3518,
+          "sequence": 8906,
+          "kind": "walk",
+          "before": {
+            "x": 238,
+            "y": 578
+          },
+          "after": {
+            "x": 237,
+            "y": 578
+          },
+          "plannedTarget": {
+            "x": 237,
+            "y": 578
+          }
+        },
+        "to": {
+          "line": 75800,
+          "receiptLine": 75794,
+          "at": 1792916248292,
+          "sentAtMs": 1042951.3213,
+          "ackMonotonicMs": 1042953.0915,
+          "sequence": 8955,
+          "kind": "run",
+          "before": {
+            "x": 236,
+            "y": 578
+          },
+          "after": {
+            "x": 234,
+            "y": 576
+          },
+          "plannedTarget": {
+            "x": 234,
+            "y": 576
+          }
+        },
+        "closedBy": "turn-break-conservative"
+      },
+      "nearTimeOwnerPositionPairs": [
+        {
+          "firstLine": 75790,
+          "firstReceiptLine": 75787,
+          "firstSequence": 15109,
+          "firstAt": 1792916248163,
+          "firstPosition": {
+            "x": 238,
+            "y": 578
+          },
+          "secondLine": 75671,
+          "secondReceiptLine": 75670,
+          "secondSequence": 8938,
+          "secondAt": 1792916247551,
+          "secondPosition": {
+            "x": 236,
+            "y": 578
+          },
+          "monotonicDifferenceMs": 617.8380000001052,
+          "ownerPositionChebyshevDistance": 2
+        },
+        {
+          "firstLine": 75790,
+          "firstReceiptLine": 75787,
+          "firstSequence": 15109,
+          "firstAt": 1792916248163,
+          "firstPosition": {
+            "x": 238,
+            "y": 578
+          },
+          "secondLine": 75800,
+          "secondReceiptLine": 75794,
+          "secondSequence": 8955,
+          "secondAt": 1792916248292,
+          "secondPosition": {
+            "x": 234,
+            "y": 576
+          },
+          "monotonicDifferenceMs": 122.75819999992382,
+          "ownerPositionChebyshevDistance": 4
+        },
+        {
+          "firstLine": 75913,
+          "firstReceiptLine": 75912,
+          "firstSequence": 15132,
+          "firstAt": 1792916248911,
+          "firstPosition": {
+            "x": 238,
+            "y": 577
+          },
+          "secondLine": 75800,
+          "secondReceiptLine": 75794,
+          "secondSequence": 8955,
+          "secondAt": 1792916248292,
+          "secondPosition": {
+            "x": 234,
+            "y": 576
+          },
+          "monotonicDifferenceMs": 620.327500000014,
+          "ownerPositionChebyshevDistance": 4
+        }
+      ],
+      "nearTimeOwnerPositionPairsTotal": 3,
+      "positionPairsTruncated": false,
+      "attacksOnThisTargetInMeasuredStage": [
+        {
+          "line": 76053,
+          "at": 1792916249841,
+          "actor": "L8bf3a20f",
+          "requestId": "130",
+          "status": "success",
+          "damage": 2
+        },
+        {
+          "line": 76274,
+          "at": 1792916251237,
+          "actor": "L8bf3a20f",
+          "requestId": "131",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 76533,
+          "at": 1792916252654,
+          "actor": "L8bf3a20f",
+          "requestId": "132",
+          "status": "success",
+          "damage": 2
+        },
+        {
+          "line": 76754,
+          "at": 1792916254022,
+          "actor": "L8bf3a20f",
+          "requestId": "133",
+          "status": "success",
+          "damage": 3
+        },
+        {
+          "line": 77009,
+          "at": 1792916255564,
+          "actor": "L8bf3a20f",
+          "requestId": "134",
+          "status": "success",
+          "damage": 2
+        },
+        {
+          "line": 77221,
+          "at": 1792916256918,
+          "actor": "L8bf3a20f",
+          "requestId": "135",
+          "status": "success",
+          "damage": 2
+        },
+        {
+          "line": 77460,
+          "at": 1792916258355,
+          "actor": "L8bf3a20f",
+          "requestId": "136",
+          "status": "success",
+          "damage": 2
+        },
+        {
+          "line": 77672,
+          "at": 1792916259740,
+          "actor": "L8bf3a20f",
+          "requestId": "137",
+          "status": "success",
+          "damage": 2
+        },
+        {
+          "line": 77893,
+          "at": 1792916261146,
+          "actor": "L8bf3a20f",
+          "requestId": "138",
+          "status": "success",
+          "damage": 2
+        }
+      ]
+    }
+  ],
+  "observedChaseEpisodeCount": 46,
+  "exactCloseChasePairs": 214,
+  "closeChasePairSample": [
+    {
+      "targetId": 206634,
+      "firstLine": 61837,
+      "secondLine": 62003,
+      "separationMs": 966
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 61837,
+      "secondLine": 62136,
+      "separationMs": 1736
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 61960,
+      "secondLine": 62003,
+      "separationMs": 214
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 61960,
+      "secondLine": 62136,
+      "separationMs": 984
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 61960,
+      "secondLine": 62281,
+      "separationMs": 1738
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62003,
+      "secondLine": 62070,
+      "separationMs": 524
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62003,
+      "secondLine": 62222,
+      "separationMs": 1266
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62070,
+      "secondLine": 62136,
+      "separationMs": 246
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62070,
+      "secondLine": 62281,
+      "separationMs": 1000
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62070,
+      "secondLine": 62401,
+      "separationMs": 1733
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62136,
+      "secondLine": 62222,
+      "separationMs": 496
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62136,
+      "secondLine": 62360,
+      "separationMs": 1265
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62222,
+      "secondLine": 62281,
+      "separationMs": 258
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62222,
+      "secondLine": 62401,
+      "separationMs": 991
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62222,
+      "secondLine": 62529,
+      "separationMs": 1725
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62281,
+      "secondLine": 62360,
+      "separationMs": 511
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62281,
+      "secondLine": 62485,
+      "separationMs": 1251
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62281,
+      "secondLine": 62602,
+      "separationMs": 1997
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62360,
+      "secondLine": 62401,
+      "separationMs": 222
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62360,
+      "secondLine": 62529,
+      "separationMs": 956
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62360,
+      "secondLine": 62660,
+      "separationMs": 1734
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62401,
+      "secondLine": 62485,
+      "separationMs": 518
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62401,
+      "secondLine": 62602,
+      "separationMs": 1264
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62485,
+      "secondLine": 62529,
+      "separationMs": 216
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62485,
+      "secondLine": 62660,
+      "separationMs": 994
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62485,
+      "secondLine": 62795,
+      "separationMs": 1723
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62529,
+      "secondLine": 62602,
+      "separationMs": 530
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62529,
+      "secondLine": 62747,
+      "separationMs": 1290
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62602,
+      "secondLine": 62660,
+      "separationMs": 248
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62602,
+      "secondLine": 62795,
+      "separationMs": 977
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62602,
+      "secondLine": 62924,
+      "separationMs": 1721
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62660,
+      "secondLine": 62747,
+      "separationMs": 512
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62660,
+      "secondLine": 62872,
+      "separationMs": 1252
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62747,
+      "secondLine": 62795,
+      "separationMs": 217
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62747,
+      "secondLine": 62924,
+      "separationMs": 961
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62747,
+      "secondLine": 63060,
+      "separationMs": 1720
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62795,
+      "secondLine": 62872,
+      "separationMs": 523
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62795,
+      "secondLine": 63020,
+      "separationMs": 1287
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62872,
+      "secondLine": 62924,
+      "separationMs": 221
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62872,
+      "secondLine": 63060,
+      "separationMs": 980
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62924,
+      "secondLine": 63020,
+      "separationMs": 543
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 62924,
+      "secondLine": 63124,
+      "separationMs": 1283
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 63020,
+      "secondLine": 63060,
+      "separationMs": 216
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 63060,
+      "secondLine": 63124,
+      "separationMs": 524
+    },
+    {
+      "targetId": 206634,
+      "firstLine": 63060,
+      "secondLine": 63254,
+      "separationMs": 1268
+    },
+    {
+      "targetId": 206646,
+      "firstLine": 64219,
+      "secondLine": 64238,
+      "separationMs": 182
+    },
+    {
+      "targetId": 206646,
+      "firstLine": 64219,
+      "secondLine": 64358,
+      "separationMs": 922
+    },
+    {
+      "targetId": 206646,
+      "firstLine": 64219,
+      "secondLine": 64488,
+      "separationMs": 1675
+    },
+    {
+      "targetId": 206646,
+      "firstLine": 64238,
+      "secondLine": 64320,
+      "separationMs": 520
+    },
+    {
+      "targetId": 206646,
+      "firstLine": 64238,
+      "secondLine": 64454,
+      "separationMs": 1278
+    },
+    {
+      "targetId": 206646,
+      "firstLine": 64320,
+      "secondLine": 64358,
+      "separationMs": 220
+    },
+    {
+      "targetId": 206646,
+      "firstLine": 64320,
+      "secondLine": 64488,
+      "separationMs": 973
+    },
+    {
+      "targetId": 206646,
+      "firstLine": 64358,
+      "secondLine": 64454,
+      "separationMs": 538
+    },
+    {
+      "targetId": 206646,
+      "firstLine": 64454,
+      "secondLine": 64488,
+      "separationMs": 215
+    },
+    {
+      "targetId": 206646,
+      "firstLine": 64454,
+      "secondLine": 64743,
+      "separationMs": 1736
+    },
+    {
+      "targetId": 206517,
+      "firstLine": 67641,
+      "secondLine": 67718,
+      "separationMs": 400
+    },
+    {
+      "targetId": 206517,
+      "firstLine": 67641,
+      "secondLine": 67831,
+      "separationMs": 1171
+    },
+    {
+      "targetId": 206517,
+      "firstLine": 67641,
+      "secondLine": 67983,
+      "separationMs": 1915
+    },
+    {
+      "targetId": 206517,
+      "firstLine": 67718,
+      "secondLine": 67757,
+      "separationMs": 338
+    },
+    {
+      "targetId": 206517,
+      "firstLine": 67718,
+      "secondLine": 67897,
+      "separationMs": 1080
+    },
+    {
+      "targetId": 206517,
+      "firstLine": 67718,
+      "secondLine": 68044,
+      "separationMs": 1857
+    },
+    {
+      "targetId": 206517,
+      "firstLine": 67757,
+      "secondLine": 67831,
+      "separationMs": 433
+    },
+    {
+      "targetId": 206517,
+      "firstLine": 67757,
+      "secondLine": 67983,
+      "separationMs": 1177
+    },
+    {
+      "targetId": 206517,
+      "firstLine": 67757,
+      "secondLine": 68122,
+      "separationMs": 1923
+    }
+  ],
+  "closeChasePairSampleTruncated": true,
+  "correctionToV1Summary": "summary-v1 closeChasePairCount was a bounded64 sample length, not an exhaustive total. This derived document computes the exact pair total from the complete selected actions without rereading raw.",
+  "longGapTargetExitCases": [
+    {
+      "actor": "L8bf3a205",
+      "gapSeconds": 29.9,
+      "from": {
+        "at": 1792916145748,
+        "line": 58435,
+        "targetId": 206521,
+        "edge": null
+      },
+      "to": {
+        "at": 1792916175648,
+        "line": 63520,
+        "targetId": 206634,
+        "edge": null
+      },
+      "previousRequestId": "288",
+      "nextRequestId": "289",
+      "previousTrace": {
+        "line": 58436,
+        "requestId": "288",
+        "owner": {
+          "objectId": 1000,
+          "x": 261,
+          "y": 607,
+          "dead": false,
+          "hp": 44,
+          "maxHp": 44
+        },
+        "target": {
+          "objectId": 206521,
+          "x": 261,
+          "y": 608,
+          "dead": false,
+          "hp": 8,
+          "maxHp": 25
+        },
+        "outcome": "success",
+        "packetCount": 12,
+        "truncated": false,
+        "targetTerminalPackets": [
+          {
+            "receiver": "owner",
+            "packet": "ObjectDied",
+            "sequence": 12045,
+            "atMs": 1792916145721,
+            "payload": {
+              "objectId": 206521,
+              "location": {
+                "x": 261,
+                "y": 608
+              },
+              "direction": "Up"
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "ObjectDied",
+            "sequence": 8203,
+            "atMs": 1792916145721,
+            "payload": {
+              "objectId": 206521,
+              "location": {
+                "x": 261,
+                "y": 608
+              },
+              "direction": "Up"
+            }
+          }
+        ],
+        "targetHealthPackets": [
+          {
+            "receiver": "owner",
+            "packet": "ObjectStruck",
+            "sequence": 12042,
+            "payload": {
+              "objectId": 206521,
+              "attackerId": 1000,
+              "location": {
+                "x": 261,
+                "y": 608
+              },
+              "direction": "Up"
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "DamageIndicator",
+            "sequence": 12043,
+            "payload": {
+              "objectId": 206521,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "ObjectHealth",
+            "sequence": 12044,
+            "payload": {
+              "objectId": 206521,
+              "percent": 0
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "ObjectStruck",
+            "sequence": 8200,
+            "payload": {
+              "objectId": 206521,
+              "attackerId": 50005,
+              "location": {
+                "x": 261,
+                "y": 608
+              },
+              "direction": "Up"
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "DamageIndicator",
+            "sequence": 8201,
+            "payload": {
+              "objectId": 206521,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "ObjectHealth",
+            "sequence": 8202,
+            "payload": {
+              "objectId": 206521,
+              "percent": 0
+            }
+          }
+        ]
+      },
+      "moves": 36,
+      "scoutMoves": 22,
+      "chaseMoves": 14
+    },
+    {
+      "actor": "L8bf3a20f",
+      "gapSeconds": 27.71,
+      "from": {
+        "at": 1792916110817,
+        "line": 52593,
+        "targetId": 206503,
+        "edge": null
+      },
+      "to": {
+        "at": 1792916138527,
+        "line": 57258,
+        "targetId": 206532,
+        "edge": null
+      },
+      "previousRequestId": "92",
+      "nextRequestId": "93",
+      "previousTrace": {
+        "line": 52594,
+        "requestId": "92",
+        "owner": {
+          "objectId": 1000,
+          "x": 234,
+          "y": 618,
+          "dead": false,
+          "hp": 28,
+          "maxHp": 30
+        },
+        "target": {
+          "objectId": 206503,
+          "x": 234,
+          "y": 619,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 25
+        },
+        "outcome": "success",
+        "packetCount": 12,
+        "truncated": false,
+        "targetTerminalPackets": [
+          {
+            "receiver": "observer",
+            "packet": "ObjectDied",
+            "sequence": 6979,
+            "atMs": 1792916110809,
+            "payload": {
+              "objectId": 206503,
+              "location": {
+                "x": 234,
+                "y": 619
+              },
+              "direction": "Up"
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "ObjectDied",
+            "sequence": 5025,
+            "atMs": 1792916110810,
+            "payload": {
+              "objectId": 206503,
+              "location": {
+                "x": 234,
+                "y": 619
+              },
+              "direction": "Up"
+            }
+          }
+        ],
+        "targetHealthPackets": [
+          {
+            "receiver": "observer",
+            "packet": "ObjectStruck",
+            "sequence": 6976,
+            "payload": {
+              "objectId": 206503,
+              "attackerId": 50015,
+              "location": {
+                "x": 234,
+                "y": 619
+              },
+              "direction": "Up"
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "DamageIndicator",
+            "sequence": 6977,
+            "payload": {
+              "objectId": 206503,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "ObjectHealth",
+            "sequence": 6978,
+            "payload": {
+              "objectId": 206503,
+              "percent": 0
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "ObjectStruck",
+            "sequence": 5022,
+            "payload": {
+              "objectId": 206503,
+              "attackerId": 1000,
+              "location": {
+                "x": 234,
+                "y": 619
+              },
+              "direction": "Up"
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "DamageIndicator",
+            "sequence": 5023,
+            "payload": {
+              "objectId": 206503,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "ObjectHealth",
+            "sequence": 5024,
+            "payload": {
+              "objectId": 206503,
+              "percent": 0
+            }
+          }
+        ]
+      },
+      "moves": 33,
+      "scoutMoves": 20,
+      "chaseMoves": 13
+    },
+    {
+      "actor": "L8bf3a205",
+      "gapSeconds": 20.108,
+      "from": {
+        "at": 1792916186951,
+        "line": 65379,
+        "targetId": 206646,
+        "edge": null
+      },
+      "to": {
+        "at": 1792916207059,
+        "line": 68816,
+        "targetId": 206517,
+        "edge": null
+      },
+      "previousRequestId": "295",
+      "nextRequestId": "296",
+      "previousTrace": {
+        "line": 65380,
+        "requestId": "295",
+        "owner": {
+          "objectId": 1000,
+          "x": 254,
+          "y": 582,
+          "dead": false,
+          "hp": 44,
+          "maxHp": 44
+        },
+        "target": {
+          "objectId": 206646,
+          "x": 254,
+          "y": 581,
+          "dead": false,
+          "hp": 9,
+          "maxHp": 20
+        },
+        "outcome": "success",
+        "packetCount": 12,
+        "truncated": false,
+        "targetTerminalPackets": [
+          {
+            "receiver": "owner",
+            "packet": "ObjectDied",
+            "sequence": 13197,
+            "atMs": 1792916186919,
+            "payload": {
+              "objectId": 206646,
+              "location": {
+                "x": 254,
+                "y": 581
+              },
+              "direction": "Down"
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "ObjectDied",
+            "sequence": 9661,
+            "atMs": 1792916186920,
+            "payload": {
+              "objectId": 206646,
+              "location": {
+                "x": 254,
+                "y": 581
+              },
+              "direction": "Down"
+            }
+          }
+        ],
+        "targetHealthPackets": [
+          {
+            "receiver": "owner",
+            "packet": "ObjectStruck",
+            "sequence": 13194,
+            "payload": {
+              "objectId": 206646,
+              "attackerId": 1000,
+              "location": {
+                "x": 254,
+                "y": 581
+              },
+              "direction": "Down"
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "DamageIndicator",
+            "sequence": 13195,
+            "payload": {
+              "objectId": 206646,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "ObjectHealth",
+            "sequence": 13196,
+            "payload": {
+              "objectId": 206646,
+              "percent": 0
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "ObjectStruck",
+            "sequence": 9658,
+            "payload": {
+              "objectId": 206646,
+              "attackerId": 50005,
+              "location": {
+                "x": 254,
+                "y": 581
+              },
+              "direction": "Down"
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "DamageIndicator",
+            "sequence": 9659,
+            "payload": {
+              "objectId": 206646,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "ObjectHealth",
+            "sequence": 9660,
+            "payload": {
+              "objectId": 206646,
+              "percent": 0
+            }
+          }
+        ]
+      },
+      "moves": 25,
+      "scoutMoves": 16,
+      "chaseMoves": 9
+    },
+    {
+      "actor": "L8bf3a20f",
+      "gapSeconds": 17.966,
+      "from": {
+        "at": 1792916186576,
+        "line": 65332,
+        "targetId": 206646,
+        "edge": null
+      },
+      "to": {
+        "at": 1792916204542,
+        "line": 68403,
+        "targetId": 206517,
+        "edge": null
+      },
+      "previousRequestId": "117",
+      "nextRequestId": "118",
+      "previousTrace": {
+        "line": 65333,
+        "requestId": "117",
+        "owner": {
+          "objectId": 1000,
+          "x": 253,
+          "y": 581,
+          "dead": false,
+          "hp": 30,
+          "maxHp": 30
+        },
+        "target": {
+          "objectId": 206646,
+          "x": 254,
+          "y": 581,
+          "dead": false,
+          "hp": 11,
+          "maxHp": 20
+        },
+        "outcome": "success",
+        "packetCount": 10,
+        "truncated": false,
+        "targetTerminalPackets": [],
+        "targetHealthPackets": [
+          {
+            "receiver": "observer",
+            "packet": "ObjectStruck",
+            "sequence": 9192,
+            "payload": {
+              "objectId": 206646,
+              "attackerId": 50015,
+              "location": {
+                "x": 254,
+                "y": 581
+              },
+              "direction": "Down"
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "DamageIndicator",
+            "sequence": 9193,
+            "payload": {
+              "objectId": 206646,
+              "damage": 2
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "ObjectHealth",
+            "sequence": 9194,
+            "payload": {
+              "objectId": 206646,
+              "percent": 15
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "ObjectStruck",
+            "sequence": 7280,
+            "payload": {
+              "objectId": 206646,
+              "attackerId": 1000,
+              "location": {
+                "x": 254,
+                "y": 581
+              },
+              "direction": "Down"
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "DamageIndicator",
+            "sequence": 7281,
+            "payload": {
+              "objectId": 206646,
+              "damage": 2
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "ObjectHealth",
+            "sequence": 7282,
+            "payload": {
+              "objectId": 206646,
+              "percent": 15
+            }
+          }
+        ]
+      },
+      "moves": 21,
+      "scoutMoves": 17,
+      "chaseMoves": 4
+    },
+    {
+      "actor": "L8bf3a20f",
+      "gapSeconds": 13.395,
+      "from": {
+        "at": 1792916209445,
+        "line": 69222,
+        "targetId": 206517,
+        "edge": null
+      },
+      "to": {
+        "at": 1792916222840,
+        "line": 71541,
+        "targetId": 206338,
+        "edge": null
+      },
+      "previousRequestId": "121",
+      "nextRequestId": "122",
+      "previousTrace": {
+        "line": 69223,
+        "requestId": "121",
+        "owner": {
+          "objectId": 1000,
+          "x": 232,
+          "y": 579,
+          "dead": false,
+          "hp": 30,
+          "maxHp": 30
+        },
+        "target": {
+          "objectId": 206517,
+          "x": 231,
+          "y": 580,
+          "dead": false,
+          "hp": 14,
+          "maxHp": 25
+        },
+        "outcome": "success",
+        "packetCount": 10,
+        "truncated": false,
+        "targetTerminalPackets": [],
+        "targetHealthPackets": [
+          {
+            "receiver": "observer",
+            "packet": "ObjectStruck",
+            "sequence": 12198,
+            "payload": {
+              "objectId": 206517,
+              "attackerId": 50015,
+              "location": {
+                "x": 231,
+                "y": 580
+              },
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "DamageIndicator",
+            "sequence": 12199,
+            "payload": {
+              "objectId": 206517,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "observer",
+            "packet": "ObjectHealth",
+            "sequence": 12200,
+            "payload": {
+              "objectId": 206517,
+              "percent": 8
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "ObjectStruck",
+            "sequence": 7909,
+            "payload": {
+              "objectId": 206517,
+              "attackerId": 1000,
+              "location": {
+                "x": 231,
+                "y": 580
+              },
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "DamageIndicator",
+            "sequence": 7910,
+            "payload": {
+              "objectId": 206517,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "owner",
+            "packet": "ObjectHealth",
+            "sequence": 7911,
+            "payload": {
+              "objectId": 206517,
+              "percent": 8
+            }
+          }
+        ]
+      },
+      "moves": 16,
+      "scoutMoves": 6,
+      "chaseMoves": 10
+    }
+  ],
+  "limitations": [
+    "An approach span is the interval between its first and last actually correlated successful chase ACK. Non-chat unrelated actions conservatively break it. It does not claim knowledge of every internal selection between receipts.",
+    "Owner-position distances compare actual receipts no more than1000ms apart, not a simultaneous authoritative world snapshot or exact target distance. Target position at chase decision is not persisted.",
+    "Shared IDs and overlapping observed effort establish duplicated pursuit effort; they do not prove that reservation alone would satisfy the18/12 window workload or remove all supply/witness gaps.",
+    "The original targetClaims map protects actual pending attack sends, not the entire approach. No overlapping same-target attack intervals were observed in the complete stage projection."
+  ],
+  "capacityAccepted": false,
+  "sourceChanged": false
+}

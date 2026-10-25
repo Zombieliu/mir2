@@ -1,0 +1,23 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+const base='C:/mir2-build/p01-completion-20261024',root=path.join(base,'formal-native-v2-compact-wire-ladder-10');
+const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+const pin=async file=>{const b=await fs.readFile(file);return{file,bytes:b.length,sha256:sha(b)}};
+const receiptFile=path.join(base,'compact-wire-formal10-preseal-input-check-v2.json'),receipt=JSON.parse(await fs.readFile(receiptFile,'utf8'));
+const file=path.join(root,'verify-probe13-collected-evidence.mjs'),before=await fs.readFile(file),oldPin=receipt.reviewedFiles.find(p=>p.file===file);
+assert.deepEqual(await pin(file),oldPin);
+const preimage=path.join(base,'compact-wire-formal10-preseal-helper-v2.mjs.txt');
+await fs.writeFile(preimage,before,{flag:'wx'});
+const importLine="import {isHpMaintenanceEvidence} from './hp-maintenance-status-schema.mjs';\n";
+const old="!Array.isArray(receipt.hp.observedStatuses)||typeof receipt.hp.successProofChecked!=='boolean'",replacement='!isHpMaintenanceEvidence(receipt.hp)';
+assert.equal(before.toString('utf8').split(old).length-1,1);
+const after=importLine+before.toString('utf8').replace(old,replacement);
+assert.ok(Buffer.from(after.slice(importLine.length).replace(replacement,old)).equals(before));
+await fs.writeFile(file,after);
+let preserved=0;for(const p of receipt.reviewedFiles){if(p.file!==file){assert.deepEqual(await pin(p.file),p);preserved++;}}
+const delta={schemaVersion:1,recordedAt:new Date().toISOString(),scope:'Unsealed formal10 pure public HP status-count schema correction; no proof or game outcome is invented.',oldPreseal:await pin(receiptFile),originalSource:oldPin,preservedPreimage:await pin(preimage),newSource:await pin(file),newSchema:await pin(path.join(root,'hp-maintenance-status-schema.mjs')),syntheticTest:await pin(path.join(base,'compact-wire-formal10-hp-status-schema.test.mjs')),logicalChange:'Actual hp.observedStatuses is a finite status-to-nonnegative-safeint dictionary, including empty {}; verifiedEventsChecked equals verified count, successProofChecked means n>0, and noVerifiedDoseObserved means n===0.',sourceChanges:[{kind:'new-pure-schema-import',text:importLine},{kind:'replace-predicate',before:old,after:replacement}],exactInverseRestoresOriginalBytes:true,otherPreviousLocalInputsUnchanged:preserved,originalPolicyUnchanged:true,originalGameplayThresholdsUnchanged:true,zeroVerifiedDosesAllowed:true,doesNotReplayMissingSendCursorOrDeadline:true,diagnosticCompletenessNotGameplayGate:true,sourceGuardExecuted:false,gateInvoked:false,liveProbeRawRead:false,realmStarted:false,sealed:false};
+const deltaFile=path.join(base,'compact-wire-formal10-schema-normalization-v3.json');
+await fs.writeFile(deltaFile,JSON.stringify(delta,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({delta:await pin(deltaFile),source:await pin(file),preserved}));

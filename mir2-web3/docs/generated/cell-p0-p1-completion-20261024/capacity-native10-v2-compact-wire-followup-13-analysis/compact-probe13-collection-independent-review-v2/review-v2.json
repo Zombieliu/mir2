@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T07:44:16.1021698Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "scope": "Independent read-only source and small-artifact audit of posthoc13 collection revision2, not execution of collection or independent full gameplay/capacity adjudication.",
+  "runId": "1792912711217-e7ea81f2",
+  "freeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\posthoc-source-frozen-v2.json",
+    "bytes": 3980,
+    "sha256": "2efbafd38a518da087384a5680ca269ed7213df664fd586da81ab06b496de3f4"
+  },
+  "proof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\source-mutation-proof-v2.json",
+    "bytes": 22301,
+    "sha256": "0f27ffabcf386fe896d10c84a7b6670a91a84106e098e6a27db9cd53c826e1b7"
+  },
+  "derivedSources": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\collect-public-v2.mjs",
+      "bytes": 42746,
+      "sha256": "df55f9cd3997daab72e18e59ade3b8169b74ddbd7d68d2fa00994396cf430645"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\verify-public-v2.mjs",
+      "bytes": 19177,
+      "sha256": "0d44c606d100aee65b90b585cf43e1372fe515ca57a6f93044fd39bda6e22f94"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\passed-probe-window-contract.mjs",
+      "bytes": 3040,
+      "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+    }
+  ],
+  "syntheticReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\synthetic-v2.json",
+    "bytes": 2436,
+    "sha256": "84281aad639ecdca95696ac2e1ff87963e43b252d49b4856f4b4d4bb3cae2315"
+  },
+  "independentWindowAudit": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe13-independent-verification-v1\\raw-window-contract-audit-v1.json",
+    "bytes": 8549,
+    "sha256": "a32477d9b72843fdcc04847cc0148bb56d1f035bf7e29bd3438ae8e4cecddac1"
+  },
+  "originalFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\launcher-source-frozen-v1.json",
+    "bytes": 21217,
+    "sha256": "51d48e8d641a17f389776f24dd1fc4a9b7ba61cb2d5465a5a1055820215789f0"
+  },
+  "originalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\reports\\1792912711217-e7ea81f2.report.json",
+    "bytes": 324347,
+    "sha256": "2843083724cd658254f6eab39370148cb360786e0819c7f25fa7acad5744be7f"
+  },
+  "genericApi": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\evidence-tools\\verify-evidence.mjs",
+    "bytes": 46895,
+    "sha256": "5d7033ea574537d9fbf01ee271a3fae4e7b40ca677e7c9aacb5ee76e6c33fe58"
+  },
+  "sourceIntegrity": {
+    "newListedRawPins": 12,
+    "newListedRawPinsVerified": 12,
+    "originalRuntimeFiles": 46,
+    "originalRuntimeFilesVerifiedUnchanged": 46,
+    "rawPinMismatches": 0,
+    "newSourceAggregate": "fae9a637348251a82f228a8a1ffb2d4707bd340608e350aba8d9225ca5b1ff20",
+    "exactInverse": [
+      {
+        "file": "collect-public-v2.mjs",
+        "rules": 13,
+        "restoresOriginalRawBytes": true,
+        "preservedPreimageExact": true
+      },
+      {
+        "file": "verify-public-v2.mjs",
+        "rules": 10,
+        "restoresOriginalRawBytes": true,
+        "preservedPreimageExact": true
+      }
+    ],
+    "runtimeFrozenSourcesEdited": false,
+    "genericApiEdited": false,
+    "oldFailureOutputsEdited": false,
+    "originalReportEdited": false,
+    "originalRawEdited": false
+  },
+  "cause": {
+    "originalCollectorLine": 261,
+    "genericSelectorLine": 28,
+    "genericSelectedRaw": [
+      "stageComplete",
+      "phaseStarted",
+      "phaseEnded",
+      "continuousFailure",
+      "safetyStop",
+      "finished"
+    ],
+    "windowNotPartOfGenericProjection": true,
+    "oldSuccessOnlyWindowFilterWouldAlwaysReturnZero": true,
+    "isCollectorSchemaBugNotShortActualWindow": true,
+    "failureTranscript": "Root reported original rejection before any public writes. No standalone original stderr file exists; this review does not invent a transcript or claim a later authored account is original shell output."
+  },
+  "supplementalWindowContract": {
+    "extraRawPassesAdded": 0,
+    "maximumRetainedRows": 16,
+    "retainedPhaseCounts": {
+      "stage-2": 5,
+      "stage-10": 5,
+      "soak": 6
+    },
+    "onlyEnabledForOriginalReportOkTrue": true,
+    "fixedPhaseEnumerationAndOrder": true,
+    "firstBoundaryEqualsOriginalPhaseStart": true,
+    "followingBoundaryEqualsPreviousActualWindowEnd": true,
+    "clocksRequireNonnegativeCanonicalSafeIntegers": true,
+    "actualWindowMinimumMs": 60000,
+    "windowMustEndInsideOriginalPhase": true,
+    "rawAndReportStartEndExact": true,
+    "rawAndReportSecondsEqualActualElapsed": true,
+    "reportCumulativeElapsedEqualsOriginalPhaseClock": true,
+    "assessmentPassedMustBeTrue": true,
+    "entireRawAssessmentDeepEqualsOriginalReportAfterRemovingOnlyWindowTimeMetadata": true,
+    "retainedProjectionOnlyFixedPhaseClocksAndSecondsPassed": true,
+    "missingExtraReorderedUnknownShortOrAlteredAssessmentRejected": true,
+    "allOriginalSuccessConditionsRetained": true,
+    "originalPhaseAndMonitorVerifierStillCalled": true,
+    "noSyntheticWindowCreation": true,
+    "noRawOrReportRewrite": true
+  },
+  "staticPathAndProvenance": {
+    "newImportsResolveOnlyFixedUnchangedOriginalDependencies": true,
+    "originalSafetyPublicPathRealpathAndNoOverwriteRulesPreserved": true,
+    "publicAllowlistOnly13NamedPosthocFilesAndOneIndependentAuditAdded": true,
+    "originalPrivateAndRecordingPayloadExclusionsPreserved": true,
+    "newCatalogScopeExplicitPosthocRevision2": true,
+    "probeCapacityAcceptedRemainsFalse": true,
+    "rawVerifierAcceptedRequiredFalse": true,
+    "formalRunStartedRemainsFalse": true,
+    "unlistedAncillaryScriptsNotImportedOrReviewed": true
+  },
+  "syntheticEvidence": {
+    "sourceBeforeAfterRawExact": true,
+    "tapTests": 6,
+    "tapPass": 6,
+    "tapFail": 0,
+    "tapCancelled": 0,
+    "tapSkipped": 0,
+    "scope": "Clock/schema boundary tests only. Reviewer inspected source, TAP and pins and did not rerun tests or import target modules.",
+    "cases": [
+      "Valid16-row projection leaves inputs unchanged",
+      "59.999s cannot pass even if report agrees",
+      "Same passed flag with changed assessment rejected",
+      "Missing extra reordered rows rejected",
+      "Unknown phase or substituted clock rejected",
+      "Unrelated phase events ignored"
+    ]
+  },
+  "closedRunWindowEvidence": {
+    "origin": "Capacity worker separately streamed closed raw; reviewer read and pinned its small audit, not the29MBraw.",
+    "rawIdentity": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-compact-wire-feasibility-13/reports/1792912711217-e7ea81f2.samples.jsonl",
+      "bytes": 29072097,
+      "sha256": "83a7a56df6780212dd7a4671f3fd9bb1ee721cba5ad473e91f86c8c04bd13152",
+      "rows": 41088,
+      "unchangedDuringRead": true
+    },
+    "phaseCounts": [
+      5,
+      5,
+      6
+    ],
+    "actualPhaseSeconds": [
+      300.301,
+      300.119,
+      360.406
+    ],
+    "minimumWindowSeconds": 60.006,
+    "allRawReportAssessmentsExact": true,
+    "fullIndependentGameplayVerificationPerformedByThisReviewer": false
+  },
+  "verdict": {
+    "readOnlyStaticReviewPassed": true,
+    "blockingFindings": [],
+    "eligibleForRootAuthorizedCollectionExecution": true,
+    "collectorExecutedByReviewer": false,
+    "independentFullRunVerifiedByReviewer": false,
+    "formalPreconditionPassed": null,
+    "formalPrepareOrRunAuthorized": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Authorized": false
+  },
+  "limits": [
+    "The parent must authorize and execute the derived collector/public verifier. A static pass is not a claim that either has run successfully.",
+    "Separate full independent gameplay replay, HP evidence schema/proof repair and original normalcleanup still govern any later formal10 admission.",
+    "Original runtime46 freeze, core187 tests, wrapper28 tests and adapter8 tests retain their distinct scopes. This new6-case synthetic suite validates only minute-window schema and clocks.",
+    "No raw or recording payload was rescanned by this reviewer. No services, accounts, preparation, sourceguard, build, product modules or tests were run.",
+    "This probe has no formal capacity acceptance. Original100actor180launch/120hit and two-hour durability/supply risks,25actor stall and886-step/24ACK20s routing remain pending."
+  ]
+}

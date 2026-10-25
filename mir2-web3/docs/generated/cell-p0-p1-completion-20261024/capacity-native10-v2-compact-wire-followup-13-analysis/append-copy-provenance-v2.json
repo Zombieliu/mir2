@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T07:56:25.4754093Z",
+  "method": "Append one explicit independent-review source copy; prior 35-source manifest and originals unchanged",
+  "source": "C:/mir2-build/p01-completion-20261024/probe13-public-independent-closure-v1.json",
+  "copy": "public-closure-independent-review-v1.json",
+  "bytes": 14283,
+  "sha256": "680b0587433f7444c803ca9cb745a4551d06d4fc43c3bb83a92fe16d476300ee",
+  "capacityAccepted": false
+}

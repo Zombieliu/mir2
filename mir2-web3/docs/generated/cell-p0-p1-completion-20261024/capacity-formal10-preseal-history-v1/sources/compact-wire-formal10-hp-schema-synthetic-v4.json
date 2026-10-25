@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T07:47:06.415Z",
+  "endedAt": "2026-10-25T07:47:06.512Z",
+  "scope": "Pure status dictionary and evidence-shape validation only; no fake full game-pass data or live raw was used.",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--test",
+    "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-hp-status-schema.test.mjs"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "tests": 11,
+  "passed": 11,
+  "failed": 0,
+  "sourceBefore": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\hp-maintenance-status-schema.mjs",
+      "bytes": 1509,
+      "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-hp-status-schema.test.mjs",
+      "bytes": 4621,
+      "sha256": "6ee740d98b171f1080dbceebf400ccd1002bd1212df73dd7aeb95413d6b339fa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-probe13-collected-evidence.mjs",
+      "bytes": 13659,
+      "sha256": "be17670e9203446fe40be75282bef05d43895dabba36fc2c19b7cfd8558f9c2a"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\hp-maintenance-status-schema.mjs",
+      "bytes": 1509,
+      "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-hp-status-schema.test.mjs",
+      "bytes": 4621,
+      "sha256": "6ee740d98b171f1080dbceebf400ccd1002bd1212df73dd7aeb95413d6b339fa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-probe13-collected-evidence.mjs",
+      "bytes": 13659,
+      "sha256": "be17670e9203446fe40be75282bef05d43895dabba36fc2c19b7cfd8558f9c2a"
+    }
+  ],
+  "sourceUnchanged": true,
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-hp-schema-synthetic-v4.log",
+    "bytes": 2540,
+    "sha256": "0c8c972ae009c4c50c50777fc08e48f5a66704cd00e9f517159c1ddc24f8edf5"
+  },
+  "originalGameplayThresholdsUnchanged": true,
+  "zeroVerifiedDosesAllowed": true,
+  "noClaimOfCursorOrTwoSecondWindowReplay": true,
+  "liveProbeRawRead": false,
+  "gateInvoked": false,
+  "realmStarted": false
+}

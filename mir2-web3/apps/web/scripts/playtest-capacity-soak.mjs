@@ -36,6 +36,7 @@ const COMBAT_CHASE_DEFERRAL_LIMIT = 16;
 const COMBAT_CHASE_DEFERRAL_MS = 30000;
 const COMBAT_CHASE_MAX_MOVES = 40;
 const COMBAT_CHASE_MAX_MS = 30000;
+const RECENT_CHASE_PREFERENCE_MS = 3000;
 export const PENDING_ATTACK_PACKET_LIMIT = 64;
 export const ATTACK_OUTCOME_CAPABILITY = 'nativeAttackOutcomeV1';
 const MAX_ATTACK_REQUEST_ID = 18446744073709551615n;
@@ -839,7 +840,8 @@ function newCombatPursuit(client, target, now, origin = self(client), cursor = c
   return { objectId: target.objectId, name: target.name, mapFileName: String(client.snapshot.mapFileName),
     bestDistance: distance(origin, target), lastProgressAt: now, nonImprovingMoves: 0,
     lastReceiptSequence: cursor, attackSent: false, targetPoint: lifecyclePoint(target),
-    startedAt: now, activeElapsedMs: 0, confirmedMoves: 0, visited: new Map() };
+    startedAt: now, activeElapsedMs: 0, confirmedMoves: 0, visited: new Map(),
+    coordinationFirstReceiptMonoMs: null, coordinationLastReceiptMonoMs: null };
 }
 function rememberCombatTarget(client, target, now = Date.now()) {
   const mapFileName = String(client.snapshot.mapFileName);
@@ -872,6 +874,18 @@ export function recordCombatPursuitMovement(client, context, plan, origin, recei
   pursuit.lastReceiptSequence = receipt.sequence;
   pursuit.confirmedMoves++;
   pursuit.lastMovementAt = now;
+  // Only the authoritative receipt's own clock can establish this optional
+  // planning preference. Processing an old ACK does not refresh its age.
+  const receiptMonoMs = receipt.monotonicMs, previousMonoMs = pursuit.coordinationLastReceiptMonoMs;
+  if (Number.isFinite(receiptMonoMs) && receiptMonoMs >= 0 &&
+      (!Number.isFinite(previousMonoMs) || receiptMonoMs >= previousMonoMs)) {
+    if (!Number.isFinite(previousMonoMs) || receiptMonoMs - previousMonoMs > RECENT_CHASE_PREFERENCE_MS ||
+        !Number.isFinite(pursuit.coordinationFirstReceiptMonoMs) || pursuit.coordinationFirstReceiptMonoMs < 0 ||
+        pursuit.coordinationFirstReceiptMonoMs > previousMonoMs) pursuit.coordinationFirstReceiptMonoMs = receiptMonoMs;
+    pursuit.coordinationLastReceiptMonoMs = receiptMonoMs;
+  } else {
+    pursuit.coordinationFirstReceiptMonoMs = null; pursuit.coordinationLastReceiptMonoMs = null;
+  }
   const visitKey = `${actual.x},${actual.y}`, visits = (pursuit.visited.get(visitKey) ?? 0) + 1;
   pursuit.visited.set(visitKey, visits);
   const targetStable = distance(target, plan.chaseTargetPoint ?? {}) === 0 && distance(target, pursuit.targetPoint) === 0;
@@ -928,6 +942,7 @@ export function restoreCombatPursuit(original, restored, context, now = Date.now
     lastProgressAt: now, nonImprovingMoves: 0, lastReceiptSequence: restored.sequence,
     activeElapsedMs: pursuit.activeElapsedMs + Math.max(0, pausedAt - pursuit.startedAt),
     startedAt: now, lastMovementAt: now, targetPoint: lifecyclePoint(target), routeProgress: null,
+    coordinationFirstReceiptMonoMs: null, coordinationLastReceiptMonoMs: null,
     visited: new Map(pursuit.visited) } : null;
   const scout = original.combatScout;
   restored.combatScoutCursor = original.combatScoutCursor;
@@ -1038,7 +1053,27 @@ function nativeAttackWitness(client, context, target, owner = self(client)) {
       ? { observer, separation } : null;
   }).filter(Boolean).sort((a, b) => a.separation - b.separation)[0]?.observer ?? null;
 }
-function combatPlan(client, context) {
+function recentNativePursuitLeaders(context, mapFileName, nowMonoMs) {
+  const leaders = new Map();
+  if (!Number.isFinite(nowMonoMs) || nowMonoMs < 0) return leaders;
+  for (const hunter of context.clients) {
+    if (hunter.role !== 'combat' || typeof hunter.label !== 'string' || !activeGameplayOwner(hunter, mapFileName)) continue;
+    const pursuit = hunter.combatPursuit;
+    if (!pursuit || pursuit.attackSent || pursuit.mapFileName !== mapFileName) continue;
+    const first = pursuit.coordinationFirstReceiptMonoMs, last = pursuit.coordinationLastReceiptMonoMs;
+    if (!Number.isFinite(first) || !Number.isFinite(last) || first < 0 || first > last ||
+        last > nowMonoMs || nowMonoMs - last > RECENT_CHASE_PREFERENCE_MS) continue;
+    const target = hunter.snapshot.entities.find(entity => entity.objectId === pursuit.objectId && entity.name === pursuit.name);
+    if (!target || !availableCombatTarget(hunter, context, target, Date.now())) continue;
+    const prior = leaders.get(pursuit.objectId);
+    if (!prior || first < prior.firstReceiptMonoMs || (first === prior.firstReceiptMonoMs && hunter.label < prior.label)) {
+      leaders.set(pursuit.objectId, { label: hunter.label, firstReceiptMonoMs: first });
+    }
+  }
+  return leaders;
+}
+
+function combatPlan(client, context, nowMonoMs = performance.now()) {
   const owner = self(client), native = context.policy?.activityMode === 'native';
   if (context.policy?.activityMode === 'native' && !client.combatArrival) {
     if (distance(owner, client.home) !== 0) {
@@ -1072,6 +1107,14 @@ function combatPlan(client, context) {
     const adjacent = candidates.filter(target => distance(owner, target) === 1 && witness(target));
     candidates = [...new Set([...(selected && adjacent.includes(selected) ? [selected] : []), ...adjacent,
       ...(selected ? [selected] : []), ...candidates])];
+    // Reorder only the original four-candidate window. A claimed target with
+    // the only usable path remains a fallback within the same search budget.
+    // This is a group planning preference, never an exclusive combat claim.
+    const leaders = recentNativePursuitLeaders(context, client.snapshot.mapFileName, nowMonoMs);
+    const immediate = new Set(adjacent.map(target => target.objectId));
+    const priority = target => immediate.has(target.objectId) ? 0 :
+      leaders.has(target.objectId) && leaders.get(target.objectId).label !== client.label ? 2 : 1;
+    candidates = candidates.slice(0, 4).sort((a, b) => priority(a) - priority(b));
   }
   for (const target of candidates.slice(0, 4)) {
     const observer = witness(target);
@@ -1149,7 +1192,7 @@ export function selectNativeAction(client, context, now = performance.now()) {
   client.navigationAttempts = context.policy?.activityMode === 'native' ? [] : null; client.navigationAttemptCount = 0;
   if (now >= client.nextNativeChatAt) return { command: { type: 'chat', message: `capacity ${context.runId} ${client.label} ${client.plan.index + 1}` } };
   if (now >= client.nextNativeTurnAt && client.role !== 'combat') return { command: { type: 'turn', direction: self(client).direction === 'Up' ? 'Right' : 'Up' } };
-  return client.role === 'combat' ? combatPlan(client, context) : patrol(client, context);
+  return client.role === 'combat' ? combatPlan(client, context, now) : patrol(client, context);
 }
 
 export async function action(client, context, planned, preparedPlan) {
@@ -1697,6 +1740,13 @@ export async function runCapacity(options) {
       hpThreshold: .6, reuseDelayMs: NATIVE_HP_REUSE_MS, evidenceDeadlineMs: NATIVE_HP_EVIDENCE_MS,
       commandBudgetPerSecond: 3, rule: 'Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.',
       activityRule: 'Independent auxiliary promise; native opportunities continue and HP maintenance never credits movement, attack or native completion.' }) });
+  if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeChasePreference', { enumerable: true,
+    value: Object.freeze({ freshReceiptMs: RECENT_CHASE_PREFERENCE_MS,
+      scope: 'Client-side preference within the original first4 candidates, not an exclusive claim or a capacity result.',
+      evidenceRule: 'Only fresh matching nonzero chase UserLocation receipts establish monotonic first/last ACK priority; active living same-map fighters and live targets only.',
+      selectionRule: 'Keep adjacent witnessed attacks first, then prefer targets without an earlier recent pursuer; retain every original first4 candidate and path fallback.',
+      budgetRule: 'Original4-target/8-goal/4000-node searches, cadence, offered/completed accounting and finite chase budgets are unchanged.',
+      restoreRule: 'Resume clears receipt preference only; original chase elapsed time, ACK count and visited positions remain.' }) });
   if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeAttackWitness', { enumerable: true,
     value: Object.freeze({ scope: 'New native attack witness selection; the original full AOI membership range remains16.',
       maximumOwnerAndTargetDistance: stableFanoutRange('attack', policy),
