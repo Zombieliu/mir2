@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "state": "final-static-scene-bound-not-executed",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "6e05932000740abc88997db9496c57b301e0a4a9",
+  "driverSourceSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+  "staticOnly": true,
+  "dynamicSupplyVerified": false,
+  "capacityAccepted": false,
+  "probeScene": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-ordinary-two-name-span4-halo-10-v1.json",
+    "bytes": 804,
+    "sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c"
+  },
+  "formalScene": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-ordinary-two-name-span4-halo-100-v1.json",
+    "bytes": 5844,
+    "sha256": "19c80f2722a9fc992f6834304c4fc5bf54f2fe86dbcf7c53887589d11aa9f8fb"
+  },
+  "analysis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-validation-v3.json",
+    "bytes": 420086,
+    "sha256": "8be09cc4cbd02a099d0fdf9ae46b966c5985ad7ffb04ab86856011e0f6c7a231"
+  },
+  "readiness": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-readiness-v3.json",
+    "bytes": 17982,
+    "sha256": "82dc6e22f13786f4d3eb94c4978ca46695fcf3bde23cf84a8c68618fe2282105"
+  },
+  "staticClosure": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-ordinary-two-name-span4-100-proposal-v1.json",
+      "bytes": 5844,
+      "sha256": "6c0b3f01a2de64ab912a3668a30a57a1e538a7fdd61d91189549611022924739"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-span4-static-proposal-v1.json",
+      "bytes": 367881,
+      "sha256": "d7117aa2b5cb354a23b2b0691ab673576b491c4b3c8bb5fc2a0992fa779b751e"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-span4-static-proposal-v1.mjs",
+      "bytes": 17567,
+      "sha256": "00924e5400a013d101bf92594ada35a96080a338e75d4dedfc1e400140da45c9"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-author-v1.mjs",
+      "bytes": 20655,
+      "sha256": "41316723c8dbc1010a1e9e643dea7616b6088bf8611a9f3dd4fc461538c07167"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\rebind-halo-static-v3.mjs",
+      "bytes": 7620,
+      "sha256": "957544131c6c015c53d5745abebdcb2c19c9742038e9ab397a2a4cdf428ab34c"
+    }
+  ],
+  "scope": "Same approved v1 canonical scene bytes. v3 fresh2500/4900/BFS checks bind the new final driver; canonical paths and conditional supply explicitly reuse historical v1, without live supply or survival acceptance."
+}

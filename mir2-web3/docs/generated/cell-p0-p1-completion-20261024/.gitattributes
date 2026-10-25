@@ -5,5 +5,7 @@ validation/*.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-e
 # Original Node assertion failures include padded blank diagnostic lines.
 capacity-native-survival-pursuit-witness-v1/focused-v4.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
 capacity-native-survival-pursuit-witness-v1/full-v1.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+capacity-native-witness-approach-v1/adjacent-v1.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+capacity-native-witness-approach-v1/adjacent-v2.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
 # Recorded PowerShell launchers include a final blank line.
 **/start-release-native-10-feasibility-*.ps1 whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol

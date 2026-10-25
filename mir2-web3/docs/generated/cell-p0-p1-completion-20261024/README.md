@@ -2,7 +2,7 @@
 
 本记录接续 [前轮证据](../cell-preproduction-p0-p1-20261024/README.md)，保留前轮失败和 `14 passed / 2 not_run` 原始完整报告。本轮报告独立保存，不改写旧结论。
 
-当前 P1 工程合同验证通过，P0 正式容量尚未通过。此前网关排队停顿仍待定位；最新第九轮因战斗活动不足及真实角色死亡失败，不能算作同一停顿的复现。P2 尚未启动，固定 Cell 的晋级仍以完整 P0 基线为前提。
+当前 P1 工程合同验证通过，P0 正式容量尚未通过。此前网关排队停顿仍待定位；最新第十轮完成 2/10 人各五分钟，但逐分钟攻击供给不足，不能算作同一停顿的复现。P2 尚未启动，固定 Cell 的晋级仍以完整 P0 基线为前提。
 
 ## 已有新鲜结果
 
@@ -91,6 +91,14 @@ V2 后端对应提交 `461f1d85eed6309a55a88bd79a0022f7b97febe4`、[39 项输入
 原生压测客户端现只通过普通 `useItem` 消费已持有的 HP 药，并要求新鲜匹配回执及库存减少或精确 HP 增加；药品消耗不冒称回血，也不增加活动完成数。恢复仍共享原账号每秒三条命令预算，六秒复用间隔跨重连保留。已起手攻击后的新追逐移动实际发送成功，才重启原有 40 步/30 秒追逐预算，重规划、转身或阻挡不重置。攻击选择真实双对象可见且双方距离均不超过六格的最近活跃观察者，发包前再次核验；初选无观察者仍可正常寻路，已准备攻击临发送失证则不发送、不计完成。AOI、双端正伤害、900ms 期限及歧义隔离规则保持。
 
 上述最终九输入版本的[完整回归 175/175](capacity-native-survival-pursuit-witness-v1/full-v2.log)、[定向 25/25](capacity-native-survival-pursuit-witness-v1/focused-v5.log)及[相邻 53/53](capacity-native-survival-pursuit-witness-v1/adjacent-v4.log)通过，[冻结清单](capacity-native-survival-pursuit-witness-driver-frozen-v1.json)分别绑定原始日志和精确源码。第一次完整回归 173 passed / 2 failed、随后局部夹具检查的失败均保留；最终仅在两个旧夹具中补齐活跃观察者初始化，原断言及流程不删改，[精确差分证明](capacity-native-survival-pursuit-witness-v1/test-assertion-fixture-preservation-v2.json)和[独立复核](capacity-native-survival-pursuit-witness-v1/native-survival-pursuit-witness-fixture-review-addendum-v2.json)可追溯。后端 41 输入与已有 Release 未改动。普通自然回血、升级及一枚初始药能否维持两小时战斗仍为未知，[生存预研](capacity-native-survival-pursuit-witness-v1/native-two-hour-survival-prestudy-v1.json)只列真实机制与成本，不替代容量实测。
+
+第十轮 `1792898022018-efb7a76a` 使用已推送的 `6e05932000740abc88997db9496c57b301e0a4a9`、同一 halo 场景及原 `4688/a430` 后端，[独立公开核验](capacity-native10-v2-halo-followup-10-diagnostics/public-verification.json)确认原结果为失败。2/10 人分别完整测量 300.224/300.342 秒，各有五个至少 60 秒的窗口；10 人战斗角色起手/双端正伤害依次为 24/24、14/14、28/28、7/7、15/15，第二、四、五窗低于原门槛。战斗角色共 320/320 次机会完成、88 次实际起手及双端正伤害；不能用全阶段均值或完成率抵消逐窗失败。soak、恢复、保存及后验收未发生。
+
+该轮原始 21,101 行、361 个全部有效的嵌入监控及外置 2,579 帧录像均有完整摘要，未将尾部进度投影冒充全量验收。[实际正式 07 门禁与独立清理](capacity-native10-v2-halo-followup-10-analysis/README.md)保留：失败探针被正确拒绝，未准备正式账号或启动正式进程。原生追逐保护已真实触发；进一步诊断将对照实际观察者位置与路径落点，不能据此宣布服务器容量上限或历史排队问题已解决。
+
+第十轮[完整诊断](capacity-native10-v2-halo-followup-10-analysis/README.md)确认最长两次起手相隔 49.428 秒，期间有 62 次成功移动、15 次探索；四段追逐延期时，九名观察者各自真实 `UserLocation` 均不能形成六格见证。旧第三次落点访问保护已正常生效；不是把 40 步/30 秒预算缩短。单次决策的完整 AOI 和所有 A* 前沿没有记录，诊断不补造这些状态，也不认定历史服务器停顿根因。
+
+客户端现先为原生追逐筛选可形成真实见证的攻击邻格：观察者必须当前活跃、存活、同图，真实快照含双方，且目标与未来攻击落点距观察者实际位置均不超过六格。不可行目标继续其他候选及原探索；仍最多四个路径目标、每目标八邻格与 4000 节点 A*。实际发包仍使用当前 owner 位置重新见证，预进场行走和非原生模式保持。最终[定向 12/12](capacity-native-witness-approach-v1/focused-v2.log)、[相邻 88/88](capacity-native-witness-approach-v1/adjacent-v3.log)及[完整 187/187](capacity-native-witness-approach-v1/full-v1.log)通过，[新冻结清单](capacity-native-witness-approach-driver-frozen-v1.json)绑定同一九输入的前后哈希。旧夹具缺少真实见证条件的失败日志和原始前像保留，最终只补必要夹具输入，原断言与控制流程有[精确逆变换证明](capacity-native-witness-approach-v1/fixture-preservation-v1.json)和[独立复核](capacity-native-witness-approach-v1/native-witness-approach-independent-review-v1.json)。重复见证检查在 100 人场景的 CPU 成本仍待实测；这些回归不升格为容量通过。
 
 ## 本轮范围
 

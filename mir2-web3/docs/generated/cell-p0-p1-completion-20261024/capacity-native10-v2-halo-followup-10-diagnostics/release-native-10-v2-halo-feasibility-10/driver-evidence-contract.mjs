@@ -1,0 +1,22 @@
+import fs from 'node:fs/promises';import path from 'node:path';import {base,project,read,sha,samePath,git} from './input-lib.mjs';
+import {EXPECTED_DRIVER_SOURCE_SHA256} from './driver-report-contract.mjs';
+export async function verifyDriverEvidenceBasis(frozen,assertPin){
+ if(frozen.sourceSha256!==EXPECTED_DRIVER_SOURCE_SHA256||frozen.fullRegression?.finalSourceFullRegressionPerformed!==true||frozen.capacityAccepted!==false||frozen.newProbeStarted!==false)throw Error('Final native survival driver evidence scope differs');
+ const pins=[],seen=new Set();
+ const add=async p=>{if(!p||typeof p.file!=='string'||!path.isAbsolute(p.file)||!Number.isSafeInteger(p.bytes)||p.bytes<1||!/^[a-f0-9]{64}$/.test(p.sha256??''))throw Error('Invalid driver evidence pin');const real=await fs.realpath(p.file),rel=path.relative(await fs.realpath(base),real);if(!rel||path.isAbsolute(rel)||rel.split(/[\\/]/).some(x=>x==='..'||/^(?:private|store|recordings|bin)$/i.test(x))||!samePath(real,p.file))throw Error('Evidence must be explicit nonprivate external files');if(!seen.has(p.file)){await assertPin(p);seen.add(p.file);pins.push(p);}};
+ const recurse=async v=>{if(!v||typeof v!=='object')return;if(typeof v.file==='string'&&path.isAbsolute(v.file)&&Number.isSafeInteger(v.bytes)&&typeof v.sha256==='string'){await add(v);return;}for(const x of Object.values(v))await recurse(x);};
+ for(const [key,count]of [['focused',25],['adjacentFocused',53],['fullRegression',175]]){
+  const run=frozen[key];if(run?.passed!==count||run.failed!==0||run.skipped!==0||run.cancelled!==0||run.exactSourceSha256!==frozen.sourceSha256)throw Error('Final exact-source test result differs: '+key);
+  await add(run.log);await add(run.receipt);const receipt=await read(run.receipt.file),log=await fs.readFile(run.log.file,'utf8');
+  if(receipt.exitCode!==0||receipt.signal||receipt.error||!new RegExp('^# tests '+count+'\\r?$','m').test(log)||!new RegExp('^# pass '+count+'\\r?$','m').test(log)||!/^# fail 0\r?$/m.test(log)||!/^# cancelled 0\r?$/m.test(log)||!/^# skipped 0\r?$/m.test(log))throw Error('Actual successful test receipt/footer differs: '+key);
+  if(key==='fullRegression'){
+   await add(run.exactSourceManifest);const src=await read(run.exactSourceManifest.file);
+   if(src.sourceSha256!==frozen.sourceSha256||sha(JSON.stringify(src.files))!==src.sourceSha256||JSON.stringify(src.files)!==JSON.stringify(frozen.files)||receipt.sourceSha256!==src.sourceSha256||receipt.sourceSha256After!==src.sourceSha256||receipt.sourcePinsUnchangedAfterRun!==true||receipt.counts?.tests!==175||receipt.counts.pass!==175||receipt.counts.fail!==0||receipt.counts.skipped!==0||receipt.counts.cancelled!==0||JSON.stringify(receipt.exactSourceManifest)!==JSON.stringify(run.exactSourceManifest)||JSON.stringify(receipt.log)!==JSON.stringify(run.log))throw Error('Full175 was not run on the exact final nine inputs');
+  }else if(!Array.isArray(receipt.sourcePins)||receipt.sourcePins.length!==2||receipt.sourcePins.some(p=>!frozen.files.some(f=>JSON.stringify(f)===JSON.stringify(p)))||JSON.stringify(receipt.log)!==JSON.stringify(run.log))throw Error('Final focused/adjacent source fixtures differ');
+ }
+ for(const key of ['independentReview','independentInitialReview','independentLivenessReview','historicalFixtureReview','historicalRuns','finalFixturePreservation','historicalUnmodifiedTestProof','evidenceArtifacts'])await recurse(frozen[key]);
+ const helper=frozen.reusedOrdinaryHpHelper,relative='apps/web/scripts/quest-agent/protocol-loadout.mjs',expected=path.join(project,relative);
+ if(!helper||!samePath(helper.file??'',expected)||helper.export!=='startEmergencyHpRecovery'||helper.sourceModified!==false||helper.alreadyInExistingTransitiveImportClosure!==true||!samePath(await fs.realpath(expected),expected))throw Error('Ordinary HP helper must be the exact existing project import');
+ await assertPin(helper);const helperRaw=await fs.readFile(expected);if(sha(Buffer.from(helperRaw.toString('utf8').replace(/\r\n/g,'\n')))!==sha(git(['show',git(['rev-parse','HEAD']).toString('utf8').trim()+':mir2-web3/'+relative])))throw Error('Ordinary HP helper differs from committed code');
+ return{schemaVersion:1,scope:'Final25 focused,53 adjacent and175 full on the exact final nine inputs. Historical failed173/175 remains historical; no capacity or realm acceptance.',exactSourceSha256:frozen.sourceSha256,fullRegressionPerformedOnFinalSource:true,focusedPassed:25,adjacentPassed:53,fullPassed:175,capacityAccepted:false,pins};
+}

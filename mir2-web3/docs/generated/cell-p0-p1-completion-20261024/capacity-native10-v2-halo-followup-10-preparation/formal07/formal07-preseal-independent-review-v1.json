@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T03:18:50.662Z",
+  "scope": "Independent bounded static formal07 preseal review, plus raw-byte verification of probe10 final static launcher metadata. No product module evaluation, tests, sourceguard, preparation, gates or live-run evidence reads.",
+  "state": "no-blocking-finding-to-seal-formal07-pending-final-launcher-closure",
+  "presealReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal07-preseal-input-check-v1.json",
+    "bytes": 12719,
+    "sha256": "0ec45dc6a92b902b790cbd53fedee8cb1967383b16e139d4f6df30cfb97f3249"
+  },
+  "reviewedLocalFiles": 33,
+  "reviewedSourceSha256": "b3bfd94f3e3aee72b4522267150733cc991da5cd0a6368e6f185854101107d38",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "6e05932000740abc88997db9496c57b301e0a4a9",
+  "driverSourceSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-survival-pursuit-witness-driver-frozen-v1.json",
+    "bytes": 28714,
+    "sha256": "4bac2cca1a8cb6eca3432ebc22add873456ce38a7f33b81f39998d88befe3063"
+  },
+  "identicalToReviewedProbe10Contracts": [
+    "driver-report-contract.mjs",
+    "driver-evidence-contract.mjs",
+    "measured-phase-contract.mjs",
+    "scene-contract.mjs",
+    "slow-stage-public.mjs",
+    "slow-stage-row-contract.mjs",
+    "backend-driver-source-guard.mjs"
+  ],
+  "formalPolicyIdenticalToPreviousFormal06": true,
+  "formalScenarioRawIdenticalToFormal06": true,
+  "formalResourceProfileRawIdenticalToOriginalBaseline": true,
+  "actualAdmissionCaps": [
+    128,
+    100,
+    100,
+    4,
+    1,
+    2
+  ],
+  "tokioWorkers": 4,
+  "slowStageThresholdMs": 50,
+  "measuredCohorts": [
+    2,
+    10,
+    25,
+    50,
+    100
+  ],
+  "configuredStageSeconds": 300,
+  "soakSeconds": 7200,
+  "resumeSamples": 5,
+  "saveSamples": 5,
+  "postResumeObservationSeconds": 60,
+  "findings": [],
+  "checkedBoundaries": [
+    "Preparation explicitly binds both new lowerCamel HP/witness declarations before mutation; helper/project versus external evidence boundaries match already-reviewed probe10.",
+    "Fresh gate names only probe10 and demands exact41 backend/release, current final9 and driver6e059, source closure, original report SHA/provenance and both immutable new declarations.",
+    "Fresh gate requires actual completed300/300/360 intervals, 5/5/6 passing windows each at least60s, original strict18/12/900ms/double-end evidence policy, monitor continuity and complete scoped diagnostics.",
+    "Fresh gate requires original normal owned exit, six zero current counters, process absence, free ports and stopped monitor; passing probe remains capacityAccepted=false.",
+    "Formal collectors preserve the original full seven-phase order, five300s cohorts plus7200s soak and60s post-resume interval; raw verdict, complete diagnostics and normal cleanup independently gate any accepted result.",
+    "Partial/failed original reports remain raw-byte evidence; public child/catalog/provenance consistently select formal-native-v2-halo-ladder-07 and do not copy private stores or raw recording payloads."
+  ],
+  "probe10FinalStaticVerification": {
+    "launcherFreeze": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\launcher-source-frozen-v1.json",
+      "bytes": 14218,
+      "sha256": "53118191cde95819ca8ca06bbe6873f2919809ac78094ff3b1a9678beff71a75"
+    },
+    "sourceguardReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\source-guard-readonly-verification.json",
+      "bytes": 1512,
+      "sha256": "82ffd71533f21a89f9ff20e8cd48624cdfe5723ed53c4c0c694773bf9347065c"
+    },
+    "localPinsVerified": 36,
+    "scripts": 19,
+    "sourceSha256": "64fb8cd16539e7d8fc20a4b65be12b368b588a58b5be1dbed8cc0920db8a94fb",
+    "sourceguardReexecuted": false,
+    "liveRunOutputsRead": false
+  },
+  "reviewedContracts": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-07\\collect-public.mjs",
+      "bytes": 39526,
+      "sha256": "8bb41d1ba2c6ffb50a7fb1ab6843dc8287d2fd6e5bc1430d6ffa2b57f4358695"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-07\\driver-evidence-contract.mjs",
+      "bytes": 4501,
+      "sha256": "8c5e28c4b07c360eb99d9158fec243466d9cecb56655b73b858f65bb3559f429"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-07\\driver-report-contract.mjs",
+      "bytes": 8690,
+      "sha256": "57c8cd9db231aa11cbbbe307e3c9b474b0b5b424f6907a90407c6d0f367ce355"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-07\\input-lib.mjs",
+      "bytes": 14635,
+      "sha256": "30cc677b0701666ca89e4552f3a1809c75d97749d4eda7585f7127f8903ba6aa"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-07\\prepare-inputs.mjs",
+      "bytes": 10969,
+      "sha256": "4a49987ce2f0c3e4f7274b9a9f6f868ff631468d331f95d8c7f04ca98eae119d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-07\\run-owned.mjs",
+      "bytes": 18120,
+      "sha256": "b8082ae384d245c037aace3c8f985346b846bac98d009db24ba6ba0e324b5697"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-07\\verify-feasibility-gate.mjs",
+      "bytes": 18299,
+      "sha256": "f1bb3704d5f20ea30be9b7d361a7d70c16997c63d795b85a4201f5ddfd996d1d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-07\\verify-public.mjs",
+      "bytes": 17110,
+      "sha256": "9d5a448df5d7f2dd302497cff55297c173e9f7b141b841ee20f167302f93bb35"
+    }
+  ],
+  "productModulesEvaluated": false,
+  "sourceguardExecutedByReviewer": false,
+  "testsRerunByReviewer": false,
+  "gateExecuted": false,
+  "prepareExecuted": false,
+  "realmStartedByReviewer": false,
+  "capacityAccepted": false,
+  "limitations": [
+    "This covers the pinned formal07 preseal33-file state; final sealed closure/sourceguard still require their own metadata check.",
+    "No claim about the outcome of the currently running probe10, formal feasibility or P0 acceptance."
+  ]
+}

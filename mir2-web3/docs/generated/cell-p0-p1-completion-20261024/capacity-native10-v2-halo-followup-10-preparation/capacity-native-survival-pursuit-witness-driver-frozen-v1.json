@@ -1,0 +1,644 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T02:56:10.318Z",
+  "repositoryBaselineCommit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "scope": "Final native ordinary HP maintenance, bounded post-strike chase segment, and stable real attack-witness driver fix. Functional regression only; no new capacity run or acceptance.",
+  "writerFiles": [
+    "apps/web/scripts/playtest-capacity-soak.mjs",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "sourceSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 216899,
+      "sha256": "4280e97d90981f75d37ed15c5d395d3d0129f3d5d213310ad7fc134429e25097"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "previousFrozenManifest": {
+    "file": "C:/mir2-build/p01-completion-20261024/capacity-phase-window-timing-driver-frozen-v1.json",
+    "bytes": 15970,
+    "sha256": "39c163a36a713f8c2bbf500eeaff0fe095a1b3848726345745a6f26372a177c3"
+  },
+  "preimageManifest": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/preimage-manifest-v1.json",
+    "bytes": 3135,
+    "sha256": "ee3d6644c4d9777ba4d4b47bc1cd05f98323c1ecf2fceef39d925b8d03942e54"
+  },
+  "preimages": [
+    {
+      "source": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "target": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/playtest-capacity-soak.mjs.preimage.txt",
+      "bytes": 132218,
+      "sha256": "c3a12cfa80dc55cf591ecaaa0031b4cabe9acc7f175a3a8de511df76d3630e55"
+    },
+    {
+      "source": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "target": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/playtest-capacity-soak.test.mjs.preimage.txt",
+      "bytes": 196852,
+      "sha256": "2235d9e7d55f0bfa1b78bce3b6ad493cd6cfba2fbe329e551502d2a53ab367cf"
+    }
+  ],
+  "preLivenessManifest": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/pre-liveness-manifest-v1.json",
+    "bytes": 837,
+    "sha256": "dc2fcea6f8ce812da6f7abf6291cc871bbd90c17f4430978dfdd480c9e941f0e"
+  },
+  "historicalRuns": [
+    {
+      "name": "focused-v1",
+      "passed": 19,
+      "failed": 2,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 123.458,
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v1.log",
+        "bytes": 7668,
+        "sha256": "c846ac2322f05f677c8b3b57fedd309efbd7dba9d5a787a1f0c6045d6a260934"
+      },
+      "receipt": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v1-receipt.json",
+        "bytes": 897,
+        "sha256": "2c4cc0805d7cc32ef9568a60a195e9f85b3aeb421a86d26e17fec6666c856925"
+      },
+      "exactSourceSha256": null,
+      "scope": "New fixture used an undefined endpoint; original failed log and source preimage retained."
+    },
+    {
+      "name": "focused-v2",
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 130.0607,
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v2.log",
+        "bytes": 5269,
+        "sha256": "41aa96cf24f3baa6ed6d1b6a540031e6e21edcce6d6ca7a9f9d5ae36e9b98d1a"
+      },
+      "receipt": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v2-receipt.json",
+        "bytes": 897,
+        "sha256": "3fcab1173af72f6c795013c7d6481f03a1c3ded24c8eb2507524c1913aa53126"
+      },
+      "exactSourceSha256": null,
+      "scope": "Passed initial product before liveness correction; not final source."
+    },
+    {
+      "name": "adjacent-v1",
+      "passed": 51,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 282.6116,
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v1.log",
+        "bytes": 14458,
+        "sha256": "89b72ba8901adf8df3c519545c7b34e81cac734ae32a8b37ca96941ae674fb66"
+      },
+      "receipt": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v1-receipt.json",
+        "bytes": 1163,
+        "sha256": "947263293c389e9247fbf89987c62a2f0e249385db953366f86cac8c0299067d"
+      },
+      "exactSourceSha256": null,
+      "scope": "Passed initial product before liveness correction; not final source."
+    },
+    {
+      "name": "focused-v3",
+      "passed": 23,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 173.4528,
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v3.log",
+        "bytes": 5777,
+        "sha256": "f99f486aa78e59af9684562ce626247e34288df3d22068f99d97db213634e7ae"
+      },
+      "receipt": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v3-receipt.json",
+        "bytes": 923,
+        "sha256": "c825fbc52cc04d025e0876c47eac1621534abc6491633af942f1863d9e9d1cab"
+      },
+      "exactSourceSha256": null,
+      "scope": "Passed liveness correction before old fixture initialization."
+    },
+    {
+      "name": "adjacent-v2",
+      "passed": 51,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 289.7777,
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v2.log",
+        "bytes": 14454,
+        "sha256": "26d25b4e7f502b673d3a3a7674d82846c3468dfba77e1ba174f904e805723fc0"
+      },
+      "receipt": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v2-receipt.json",
+        "bytes": 1163,
+        "sha256": "cdb84c9c1f993417b495273f488a9940de8e5be5e0b8b5a8131dcf4380f8d879"
+      },
+      "exactSourceSha256": null,
+      "scope": "Passed liveness correction before old fixture initialization."
+    },
+    {
+      "name": "full-v1",
+      "passed": 173,
+      "failed": 2,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 310573.8666,
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1.log",
+        "bytes": 49003,
+        "sha256": "2531c1d882980c9cd9d0d592a0445cfb17138d1860d2d51fa5313bf3772e66f9"
+      },
+      "receipt": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1-receipt.json",
+        "bytes": 1419,
+        "sha256": "292e1c5572eab393df6dacd1610a2ba8a56506b5feddbe40f39749dd6f43a507"
+      },
+      "exactSourceSha256": "e26e612b9e6493d5dc7d8340c5aa5ae4a3af507bbe812303bbdaa918d1dcf000",
+      "scope": "Failed two old fixtures missing active ready state; original full log, exact raw9 manifest and two source preimages retained."
+    },
+    {
+      "name": "focused-v4",
+      "passed": 24,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 277.8378,
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v4.log",
+        "bytes": 7094,
+        "sha256": "edd5cf36cda1aeb92c33a228f2c8865ad8711c3b44ca527ac5c975a3880c211b"
+      },
+      "receipt": {
+        "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v4-receipt.json",
+        "bytes": 969,
+        "sha256": "527f426cbf80d1c168288cb855e23f5ef16f272cfa36935c690ece7767bf2d95"
+      },
+      "exactSourceSha256": null,
+      "scope": "Adding ready exposed the forest observer fixture also lacked its movement role and actual home; failure retained."
+    }
+  ],
+  "focused": {
+    "passed": 25,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "durationMs": 257.8325,
+    "log": {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v5.log",
+      "bytes": 6348,
+      "sha256": "81f7a4d47ee48fbbc9627412a81b7139a2023919ceaa93b923ad89e4818d4523"
+    },
+    "receipt": {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v5-receipt.json",
+      "bytes": 969,
+      "sha256": "509ae9ef40a04be831e60b3f16dc7333f43d700d51c314904caa1f7a13a340f6"
+    },
+    "exactSourceSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298"
+  },
+  "adjacentFocused": {
+    "passed": 53,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "durationMs": 356.5919,
+    "log": {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v4.log",
+      "bytes": 15023,
+      "sha256": "29095b6fefd1c32b6e2bb589ca3e89be578bff8ac8628249e4facc54f8fbc9a1"
+    },
+    "receipt": {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v4-receipt.json",
+      "bytes": 1209,
+      "sha256": "00125bad9307b4084060ea52f7508ca534adc7a618487a4375c389676e69bf12"
+    },
+    "exactSourceSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298"
+  },
+  "fullRegression": {
+    "passed": 175,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "durationMs": 310623.9312,
+    "log": {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v2.log",
+      "bytes": 47276,
+      "sha256": "c0335bb31c428a1dd7233eab77397db345a6647b3153c6ff7d8c24c0c715cab6"
+    },
+    "receipt": {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v2-receipt.json",
+      "bytes": 1419,
+      "sha256": "fb7b9f3600453b2f131d3eaca2fac839077622ddcd300156229de485824a4a24"
+    },
+    "exactSourceSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+    "exactSourceManifest": {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v2-source-pins.json",
+      "bytes": 2042,
+      "sha256": "7fb9311df8f33895bda027ce5b8eaec532659ed28492f5f2a9b357830b92e7b9"
+    },
+    "finalSourceFullRegressionPerformed": true,
+    "sourcePinsUnchangedAfterRun": true,
+    "scope": "All four original Node test files, covering the exact final nine input files; functional synthetic/loopback regression only."
+  },
+  "finalFixturePreservation": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/test-assertion-fixture-preservation-v2.json",
+    "bytes": 4598,
+    "sha256": "c717c369fa23247b9696381790ca0a101697b2e8a87e23f1c0a26cf4a3dbd1aa"
+  },
+  "historicalUnmodifiedTestProof": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/test-body-preservation-v1.json",
+    "bytes": 2776,
+    "sha256": "0a21fc80ea122a46be239cd737f6caa4c34c7d3c09b78097e4064add7b6988fe"
+  },
+  "oldTestBodiesCompletelyUnmodified": false,
+  "allOldAssertionsAndControlFlowPreservedExceptExplicitFixtureInitializers": true,
+  "authorizedOldFixtureAdditions": [
+    {
+      "test": "native combat walks the real village-to-forest route before hunting, without requiring an observer to arrive",
+      "fields": {
+        "ready": true,
+        "role": "movement",
+        "home": {
+          "x": 279,
+          "y": 557
+        }
+      },
+      "basis": "Actual observer self is279,557; same map with attacker+target at distances1/2; ready actors also require a coherent movement home for the original settle assertion"
+    },
+    {
+      "test": "native pending evidence is recorded separately and never sends another attack into an ambiguous hit window",
+      "fields": {
+        "ready": true
+      },
+      "basis": "Actual self5,5, attacker5,5 and target6,5; same map and both objects already present"
+    }
+  ],
+  "otherSevenRawInputsUnchanged": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "independentReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-survival-pursuit-witness-fixture-review-addendum-v2.json",
+    "bytes": 6454,
+    "sha256": "c9817a4463de611a418b0a05c7b97a47836ebfc1830ae48a430512fcb86a43e9"
+  },
+  "independentInitialReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-survival-pursuit-witness-independent-review-v1.json",
+    "bytes": 7601,
+    "sha256": "71cd161545e17dd9af6d4ff5e1ad39fb15bdecea39226b1dd1a28a25b189667e"
+  },
+  "independentLivenessReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-survival-pursuit-witness-independent-review-addendum-v1.json",
+    "bytes": 7220,
+    "sha256": "2c29f6ba1095180cd5d3062e555e22284453fefb6601d1da89889c9702b64e5b"
+  },
+  "historicalFixtureReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-survival-pursuit-witness-fixture-review-addendum-v1.json",
+    "bytes": 5820,
+    "sha256": "ac42f1cb0f152baf56ae2356f0fd53c57c5c30e5894fdfcfcc472b1caa8989b1"
+  },
+  "reusedOrdinaryHpHelper": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs",
+    "bytes": 33042,
+    "sha256": "43479cb8d2fe7f4d3feefff13d0a2b4291112d3971629bfc07ae3bfee28f14f2",
+    "export": "startEmergencyHpRecovery",
+    "sourceModified": false,
+    "alreadyInExistingTransitiveImportClosure": true
+  },
+  "measurementClock": {
+    "scope": "All measurement phases; seconds retains configured duration and measuredSeconds is actual elapsed wall time.",
+    "minimumCompleteWindowMs": 60000,
+    "completeWindowCountRule": "At least floor(configured seconds / 60) complete windows, each starting at the previous actual close, plus the full configured phase duration.",
+    "durationRule": "Activity and rate assessment use actual measuredSeconds; no short window is relabelled as sixty seconds or duplicated after a stall.",
+    "partialWindowRule": "The final partial minute remains in whole-phase and continuous assessment, without counting as a complete rolling window."
+  },
+  "nativePatrolPlanning": {
+    "scope": "Native primed patrol fallback only; original fast path and at most four existing corner targets remain.",
+    "maximumFallbackCornerTargets": 4,
+    "pathExpansionLimit": 4000,
+    "selectionRule": "Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.",
+    "primingRule": "Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain."
+  },
+  "nativeHpMaintenance": {
+    "scope": "Already-held ordinary HP potions only; no MP, purchase, grants or revival.",
+    "hpThreshold": 0.6,
+    "reuseDelayMs": 6000,
+    "evidenceDeadlineMs": 2000,
+    "commandBudgetPerSecond": 3,
+    "rule": "Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.",
+    "activityRule": "Independent auxiliary promise; native opportunities continue and HP maintenance never credits movement, attack or native completion."
+  },
+  "nativeAttackWitness": {
+    "scope": "New native attack witness selection; the original full AOI membership range remains16.",
+    "maximumOwnerAndTargetDistance": 6,
+    "rule": "Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.",
+    "damageRule": "Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged."
+  },
+  "invariants": {
+    "ordinaryProtocolOnly": true,
+    "nativeOnlyChanges": true,
+    "sharedCommandBudgetPerSecond": 3,
+    "hpCooldownClock": "performance.now; per-account shared state across same-process native resume",
+    "hpOwnerAndHeldUidRequired": true,
+    "hpProofBoundedScalarStateOnly": true,
+    "hpUnknownOrNoItemNeverCreditsSuccess": true,
+    "hpAuxiliaryNeverCompletesNativeOpportunity": true,
+    "deathStillStops": true,
+    "postStrikeSegmentStartsOnlyAfterValidatedMovementSendSuccess": true,
+    "standingPendingOrReplanningNeverResetsSegment": true,
+    "chaseMovementAckRulesUnchanged": true,
+    "chaseLimits": {
+      "confirmedMoves": 40,
+      "onlineMilliseconds": 30000,
+      "positionVisits": 3,
+      "nonImprovingMoves": 4,
+      "earlyNoProgressMilliseconds": 6000
+    },
+    "initialNoWitnessUsesOriginalMovementOtherCandidateScoutAndReturnFallback": true,
+    "preparedAttackLosingWitnessIsIncompleteEvidenceWaitWithoutSend": true,
+    "fullAoiRange": 16,
+    "dualEndDamageRequired": true,
+    "attackEvidenceDeadlineMs": 900,
+    "ambiguousAttackQuarantineUnchanged": true,
+    "minimumAttacksPerFighterMinute": 18,
+    "minimumPositiveHitsPerFighterMinute": 12,
+    "allOtherAcceptanceThresholdsUnchanged": true,
+    "noBackendOrOtherSevenDriverInputChanges": true
+  },
+  "evidenceArtifacts": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v1-receipt.json",
+      "bytes": 1163,
+      "sha256": "947263293c389e9247fbf89987c62a2f0e249385db953366f86cac8c0299067d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v1.log",
+      "bytes": 14458,
+      "sha256": "89b72ba8901adf8df3c519545c7b34e81cac734ae32a8b37ca96941ae674fb66"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v2-receipt.json",
+      "bytes": 1163,
+      "sha256": "cdb84c9c1f993417b495273f488a9940de8e5be5e0b8b5a8131dcf4380f8d879"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v2.log",
+      "bytes": 14454,
+      "sha256": "26d25b4e7f502b673d3a3a7674d82846c3468dfba77e1ba174f904e805723fc0"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v4-receipt.json",
+      "bytes": 1209,
+      "sha256": "00125bad9307b4084060ea52f7508ca534adc7a618487a4375c389676e69bf12"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v4.log",
+      "bytes": 15023,
+      "sha256": "29095b6fefd1c32b6e2bb589ca3e89be578bff8ac8628249e4facc54f8fbc9a1"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v1-failed-test-source.mjs.txt",
+      "bytes": 214363,
+      "sha256": "80810d0bb3bcd28a486fa229809bb8e634cce88b34540c160b7d47de42a31484"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v1-receipt.json",
+      "bytes": 897,
+      "sha256": "2c4cc0805d7cc32ef9568a60a195e9f85b3aeb421a86d26e17fec6666c856925"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v1.log",
+      "bytes": 7668,
+      "sha256": "c846ac2322f05f677c8b3b57fedd309efbd7dba9d5a787a1f0c6045d6a260934"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v2-receipt.json",
+      "bytes": 897,
+      "sha256": "3fcab1173af72f6c795013c7d6481f03a1c3ded24c8eb2507524c1913aa53126"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v2.log",
+      "bytes": 5269,
+      "sha256": "41aa96cf24f3baa6ed6d1b6a540031e6e21edcce6d6ca7a9f9d5ae36e9b98d1a"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v3-receipt.json",
+      "bytes": 923,
+      "sha256": "c825fbc52cc04d025e0876c47eac1621534abc6491633af942f1863d9e9d1cab"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v3.log",
+      "bytes": 5777,
+      "sha256": "f99f486aa78e59af9684562ce626247e34288df3d22068f99d97db213634e7ae"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v4-failed-test-source.mjs.txt",
+      "bytes": 216855,
+      "sha256": "a3a6ce1729800ddd6553ddc475afba20c75cf733080a49bfec31c8acc2275c87"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v4-receipt.json",
+      "bytes": 969,
+      "sha256": "527f426cbf80d1c168288cb855e23f5ef16f272cfa36935c690ece7767bf2d95"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v4.log",
+      "bytes": 7094,
+      "sha256": "edd5cf36cda1aeb92c33a228f2c8865ad8711c3b44ca527ac5c975a3880c211b"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v5-receipt.json",
+      "bytes": 969,
+      "sha256": "509ae9ef40a04be831e60b3f16dc7333f43d700d51c314904caa1f7a13a340f6"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v5.log",
+      "bytes": 6348,
+      "sha256": "81f7a4d47ee48fbbc9627412a81b7139a2023919ceaa93b923ad89e4818d4523"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1-failed-playtest-capacity-soak.mjs.txt",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1-failed-playtest-capacity-soak.test.mjs.txt",
+      "bytes": 216821,
+      "sha256": "dbf345725668b465fd2c94472f25a224d3f0b381e6684241579026e41077950f"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1-failed-source-preimages.json",
+      "bytes": 1034,
+      "sha256": "7f1160682d25d1d3d1f9e4e749dd5ed5263c4853e01a879182a6ed75ab54a652"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1-receipt.json",
+      "bytes": 1419,
+      "sha256": "292e1c5572eab393df6dacd1610a2ba8a56506b5feddbe40f39749dd6f43a507"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1-source-pins.json",
+      "bytes": 2042,
+      "sha256": "1f5f9b72e94f37983c07176a3f1e1d4550ef04d6931030aa608f0593c9001438"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v1.log",
+      "bytes": 49003,
+      "sha256": "2531c1d882980c9cd9d0d592a0445cfb17138d1860d2d51fa5313bf3772e66f9"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v2-receipt.json",
+      "bytes": 1419,
+      "sha256": "fb7b9f3600453b2f131d3eaca2fac839077622ddcd300156229de485824a4a24"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v2-source-pins.json",
+      "bytes": 2042,
+      "sha256": "7fb9311df8f33895bda027ce5b8eaec532659ed28492f5f2a9b357830b92e7b9"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v2.log",
+      "bytes": 47276,
+      "sha256": "c0335bb31c428a1dd7233eab77397db345a6647b3153c6ff7d8c24c0c715cab6"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/implementation-review-v1.json",
+      "bytes": 3362,
+      "sha256": "a4d309c312692f6475528784a8fc3396ca37aefc742fe32c9681d576ed0c7866"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/playtest-capacity-soak.mjs.preimage.txt",
+      "bytes": 132218,
+      "sha256": "c3a12cfa80dc55cf591ecaaa0031b4cabe9acc7f175a3a8de511df76d3630e55"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/playtest-capacity-soak.test.mjs.preimage.txt",
+      "bytes": 196852,
+      "sha256": "2235d9e7d55f0bfa1b78bce3b6ad493cd6cfba2fbe329e551502d2a53ab367cf"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/pre-liveness-manifest-v1.json",
+      "bytes": 837,
+      "sha256": "dc2fcea6f8ce812da6f7abf6291cc871bbd90c17f4430978dfdd480c9e941f0e"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/pre-liveness-playtest-capacity-soak.mjs.txt",
+      "bytes": 143634,
+      "sha256": "bf09e909102776d3911b9fa581f38f2817bff7214c47e388132f539eb8a91229"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/pre-liveness-playtest-capacity-soak.test.mjs.txt",
+      "bytes": 214369,
+      "sha256": "560d44791a8d4e33bd149c06c3ccabe4ea7820768c328593effa1227ad1a11ed"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/preimage-manifest-v1.json",
+      "bytes": 3135,
+      "sha256": "ee3d6644c4d9777ba4d4b47bc1cd05f98323c1ecf2fceef39d925b8d03942e54"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/test-assertion-fixture-preservation-v2.json",
+      "bytes": 4598,
+      "sha256": "c717c369fa23247b9696381790ca0a101697b2e8a87e23f1c0a26cf4a3dbd1aa"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/test-body-preservation-v1.json",
+      "bytes": 2776,
+      "sha256": "0a21fc80ea122a46be239cd737f6caa4c34c7d3c09b78097e4064add7b6988fe"
+    }
+  ],
+  "diffCheckPassed": true,
+  "functionalVerificationOnly": true,
+  "capacityAccepted": false,
+  "newProbeStarted": false,
+  "ownedRealmStarted": false,
+  "newSceneCreated": false,
+  "sourceCommittedByThisTask": false,
+  "limitations": [
+    "Synthetic and loopback Node tests do not establish live capacity, two-hour supply or survival, native frontend acceptance, or P0 completion.",
+    "Historical probe09 failures and all failed test attempts remain unchanged.",
+    "The previous152-case source needs only the two explicitly listed fixture initializations reversed to recover its exact original assertions and control flow; complete byte identity is not claimed for final old test bodies.",
+    "The six-cell witness rule is new attack selection; earlier static fourteen-cell combat coverage target counts are not proof of live stable-witness supply."
+  ]
+}

@@ -268,9 +268,23 @@ test('native HP pending evidence does not pause native movement and drain captur
   assert.equal(activity.attacks, 0); assert.equal(activity.hits, 0);
 });
 
+function prepareHuntWitness(fixture, target) {
+  const { client, peer, owner } = fixture;
+  assert.equal(peer.ready, true); assert.equal(peer.inGame, true);
+  assert.ok(peer.snapshot.entities.some(entity => entity.objectId === target.objectId));
+  const attacker = peer.snapshot.entities.find(entity => entity.name === client.label);
+  assert.ok(attacker);
+  // These pursuit fixtures model a moving ordinary observer as well as the
+  // escaping target, so they continue testing budgets with valid witnesses.
+  Object.assign(peer.snapshot.entities[0], { x: target.x + 2, y: target.y });
+  Object.assign(attacker, { x: owner.x, y: owner.y });
+  peer.paused = false; peer.events ??= []; peer.sequence ??= 0;
+}
+
 async function acknowledgeSentChase(fixture, moveTarget = true, prepared = undefined) {
   const { client, peer, owner, context } = fixture;
-  peer.paused = true; client.plan = { sent() {} };
+  prepareHuntWitness(fixture, client.snapshot.entities.find(entity => entity.objectId === client.combatPursuit.objectId));
+  client.plan = { sent() {} };
   const plan = prepared ?? selectNativeAction(client, context), origin = { ...owner };
   assert.ok(['walk', 'run'].includes(plan.command.type));
   client.send = command => {
@@ -434,6 +448,95 @@ test('native initial no-witness target with no approach route retains the origin
   assert.equal(plan.scouting, true); assert.ok(['walk', 'run'].includes(plan.command.type)); assert.equal(plan.chaseTargetId, undefined);
   assert.equal(context.policy.minimumCombatAttacksPerMinute, 18); assert.equal(context.policy.minimumCombatHitsPerMinute, 12);
 });
+
+function approachWitnessFixture(ownerPoint, targetPoint, peerPoints, targetId = 900) {
+  const target = huntMonster(targetId, 'Deer', targetPoint.x, targetPoint.y), f = huntFixture([target]);
+  Object.assign(f.owner, ownerPoint); f.client.home = { ...ownerPoint };
+  f.context.map = { width: 320, height: 700, blocked: new Uint8Array(320 * 700) };
+  const peers = peerPoints.map(([x, y], index) => ({ label: actor(index + 10).name, ready: true, inGame: true, role: 'movement',
+    snapshot: { mapFileName: '0', playerObjectId: 1000, entities: [
+      { objectId: 1000, name: actor(index + 10).name, kind: 'player', x, y, hp: 30, dead: false },
+      { ...f.owner, objectId: 50010 + index }, structuredClone(target) ] } }));
+  f.context.clients = [f.client, ...peers];
+  f.client.combatCluster = { observerHomes: peerPoints.map(([x, y]) => ({ x, y })), patrolSpan: 4,
+    observerNames: new Set(peers.map(peer => peer.label)), observerBindings: peers.map((peer, index) => ({
+      actorIndex: index + 10, homeIndex: index, home: { x: peerPoints[index][0], y: peerPoints[index][1] }, name: peer.label })) };
+  return { ...f, target, peers };
+}
+
+// Exact ordinary owner/target/peer positions from the four probe10 deferrals.
+// The open map models geometry only; it does not replace the original terrain
+// or assert the per-decision AOI content that was not retained by that run.
+for (const geometry of [
+  { targetId: 206513, owner: { x: 274, y: 661 }, target: { x: 274, y: 662 }, peers:
+    [[265, 654], [273, 672], [277, 672], [261, 650], [259, 665], [256, 669], [255, 663], [255, 651], [254, 669]] },
+  { targetId: 206704, owner: { x: 282, y: 663 }, target: { x: 282, y: 662 }, peers:
+    [[273, 670], [276, 671], [267, 654], [259, 653], [257, 665], [256, 672], [255, 666], [253, 673], [253, 655]] },
+  { targetId: 206507, owner: { x: 283, y: 665 }, target: { x: 283, y: 666 }, peers:
+    [[278, 673], [273, 670], [267, 654], [259, 653], [257, 668], [256, 663], [255, 671], [255, 666], [255, 653]] },
+  { targetId: 206715, owner: { x: 285, y: 665 }, target: { x: 284, y: 665 }, peers:
+    [[276, 671], [273, 672], [265, 654], [260, 665], [259, 668], [259, 651], [255, 664], [254, 655], [251, 669]] },
+]) test(`native witnessed approach avoids the probe10 unobservable ${geometry.targetId} neighbour loop`, () => {
+  const f = approachWitnessFixture(geometry.owner, geometry.target, geometry.peers, geometry.targetId);
+  const plan = selectNativeAction(f.client, f.context);
+  assert.ok(['walk', 'run'].includes(plan.command.type)); assert.equal(plan.scouting, true);
+  assert.equal(plan.chaseTargetId, undefined); assert.equal(f.client.combatPursuit, null);
+  assert.equal(f.client.chaseDeferrals.size, 0); assert.equal(f.client.failedTargets.size, 0);
+  assert.equal(f.context.policy.minimumCombatAttacksPerMinute, 18); assert.equal(f.context.policy.minimumCombatHitsPerMinute, 12);
+});
+
+test('native witnessed approach skips cheap ineligible targets before the original four path-target limit', () => {
+  const monsters = [6, 7, 8, 9].map((x, i) => huntMonster(900 + i, 'Deer', x));
+  const alternate = huntMonster(905, 'Scarecrow', 12), f = huntFixture([...monsters, alternate]);
+  Object.assign(f.peer.snapshot.entities[0], { x: 18, y: 5 });
+  const plan = selectNativeAction(f.client, f.context);
+  assert.ok(['walk', 'run'].includes(plan.command.type)); assert.equal(plan.chaseTargetId, 905);
+  const peer = f.peer.snapshot.entities[0], goal = plan.navigation.goal;
+  assert.ok(Math.max(Math.abs(peer.x - f.owner.x), Math.abs(peer.y - f.owner.y)) > 6,
+    'a future attack tile may be witnessed before the current owner enters the six-cell range');
+  assert.ok(Math.max(Math.abs(peer.x - goal.x), Math.abs(peer.y - goal.y)) <= 6);
+  assert.ok(Math.max(Math.abs(peer.x - alternate.x), Math.abs(peer.y - alternate.y)) <= 6);
+  assert.equal(plan.command.type, 'walk'); assert.equal(f.client.combatPursuit.objectId, 905);
+});
+
+for (const unavailable of ['not-ready', 'dead', 'wrong-map', 'missing-attacker', 'missing-target']) {
+  test(`native witnessed approach rejects a ${unavailable} observer without replacing real membership with distance`, () => {
+    const f = huntFixture([huntMonster(900, 'Deer', 10)]);
+    if (unavailable === 'not-ready') f.peer.ready = false;
+    if (unavailable === 'dead') f.peer.snapshot.entities[0].dead = true;
+    if (unavailable === 'wrong-map') f.peer.snapshot.mapFileName = 'other';
+    if (unavailable === 'missing-attacker') f.peer.snapshot.entities = f.peer.snapshot.entities.filter(e => e.name !== f.client.label);
+    if (unavailable === 'missing-target') f.peer.snapshot.entities = f.peer.snapshot.entities.filter(e => e.objectId !== 900);
+    const plan = selectNativeAction(f.client, f.context);
+    assert.ok(['walk', 'run'].includes(plan.command.type)); assert.equal(plan.chaseTargetId, undefined);
+    assert.equal(f.client.combatPursuit, null); assert.equal(f.actions.length, 0);
+  });
+}
+
+test('native witnessed approach retains the original four path targets and eight adjacent destinations', () => {
+  const monsters = [2, 4, 6, 8].map((y, i) => huntMonster(900 + i, 'Deer', 10, y));
+  const alternate = huntMonster(905, 'Scarecrow', 11), f = huntFixture([...monsters, alternate]);
+  Object.assign(f.peer.snapshot.entities[0], { x: 9, y: 5 });
+  for (const monster of monsters) for (let y = monster.y - 1; y <= monster.y + 1; y++) for (let x = 9; x <= 11; x++) {
+    f.context.map.blocked[y * f.context.map.width + x] = 1;
+  }
+  const plan = selectNativeAction(f.client, f.context);
+  assert.equal(plan.chaseTargetId, undefined, 'the fifth eligible target does not expand the original search budget');
+  assert.ok(f.client.navigationAttemptCount <= 36, 'at most32 target paths plus the original four-corner fallback');
+  assert.equal(f.client.navigationAttempts.some(attempt => attempt.target.x === 12), false);
+});
+
+test('native witnessed approach metadata is immutable and does not start gameplay without its original monitor', async () => withDirectory(async directory => {
+  const report = await runCapacity({ realm: 'isolated', endpoint: 'ws://127.0.0.1:1/ws',
+    accountsFile: path.join(directory, 'private', 'absent.json'), monitor: path.join(directory, 'absent-monitor.json'),
+    output: path.join(directory, 'reports'), profile: 'probe', activityMode: 'native' });
+  assert.equal(report.ok, false); assert.equal(Object.isFrozen(report.nativeAttackWitness), true);
+  assert.match(report.nativeAttackWitness.approachRule, /actual snapshot contains both attacker and target/);
+  assert.match(report.nativeAttackWitness.approachRule, /prospective attack tile/);
+  assert.equal(Object.getOwnPropertyDescriptor(report, 'nativeAttackWitness').writable, false);
+  assert.throws(() => { report.nativeAttackWitness.approachRule = 'ignore membership'; }, TypeError);
+  assert.deepEqual(report.bytes, { sent: 0, received: 0 });
+}));
 
 function navigationFixture() {
   const samples = [], sent = [], policy = capacityPolicy({ profile: 'probe', activityMode: 'native', stages: '2' });
@@ -821,6 +924,8 @@ test('scout keeps its declared index and finite ACK/online budgets through obser
 test('temporary observer coverage loss and restore do not wash a live pursuit movement budget', () => {
   const { client, owner, secondPeer, context, rows } = scoutFixture(), now = Date.now(); owner.x = 17;
   const target = huntMonster(900, 'Deer', 30); client.snapshot.entities.push(target);
+  secondPeer.snapshot.entities[0].x = 25;
+  secondPeer.snapshot.entities.push({ ...owner, objectId: 50002 }, target);
   const first = selectNativeAction(client, context); assert.equal(first.chaseTargetId, 900);
   client.combatPursuit.confirmedMoves = 39; client.combatPursuitPausedAt = now;
   const restored = new CapacityClient('ws://127.0.0.1:1/ws', actor(0), context);
@@ -987,6 +1092,7 @@ test('native hunt keeps its selected reachable target when another nonadjacent m
 
 function acknowledgeEscapingTarget(fixture, target, at, sequence) {
   const { client, owner, context } = fixture;
+  prepareHuntWitness(fixture, target);
   const plan = selectNativeAction(client, context), origin = { ...owner };
   assert.ok(['walk', 'run'].includes(plan.command.type)); assert.equal(plan.chaseTargetId, target.objectId);
   const dx = plan.target.x - owner.x, dy = plan.target.y - owner.y;
@@ -1175,7 +1281,7 @@ test('native hunt distance improvement resets futile-chase evidence and already 
 
 test('native hunt movement hook keeps all corrected and successful actions in the original denominator', async () => {
   const target = huntMonster(900, 'Deer', 10), fixture = huntFixture([target]), { client, peer, owner, context, actions, rows } = fixture;
-  peer.paused = true; let corrected = true, planned;
+  prepareHuntWitness(fixture, target); let corrected = true, planned;
   client.send = command => {
     if (!corrected) {
       const dx = planned.target.x - owner.x, dy = planned.target.y - owner.y;
@@ -1185,6 +1291,7 @@ test('native hunt movement hook keeps all corrected and successful actions in th
       monotonicMs: performance.now(), payload: { x: owner.x, y: owner.y, direction: command.direction } });
   };
   const offer = async () => {
+    prepareHuntWitness(fixture, target);
     client.nativeRunPrimedUntil = 0; planned = selectNativeAction(client, context);
     client.plan = new NativePlan(performance.now()); offerNativeAction(client, context); await client.pending;
   };

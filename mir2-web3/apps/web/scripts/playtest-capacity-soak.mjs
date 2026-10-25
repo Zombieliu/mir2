@@ -1025,8 +1025,8 @@ export function stableFanoutRange(kind, policy) {
   if (policy?.activityMode === 'native') return kind === 'chat' ? 8 : 6;
   return kind === 'chat' ? 14 : 12;
 }
-function nativeAttackWitness(client, context, target) {
-  const owner = self(client), range = stableFanoutRange('attack', context.policy);
+function nativeAttackWitness(client, context, target, owner = self(client)) {
+  const range = stableFanoutRange('attack', context.policy);
   return combatObservers(client, context).map(observer => {
     const peer = activeGameplayOwner(observer, client.snapshot.mapFileName);
     const attackerId = observedPlayerId(observer, client.label);
@@ -1054,7 +1054,17 @@ function combatPlan(client, context) {
   const observers = combatObservers(client, context);
   const witness = target => native ? nativeAttackWitness(client, context, target) :
     observers.find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId));
+  const approaches = native ? new Map() : null;
   if (native) {
+    // An approach must lead to a genuinely witnessed strike, rather than
+    // orbiting an adjacent monster that no current observer can witness.
+    // These eight cheap geometry/membership checks do not expand path budgets.
+    candidates = candidates.filter(target => {
+      const destinations = STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy }))
+        .filter(destination => insideCombatCoverage(coverage, destination) && nativeAttackWitness(client, context, target, destination));
+      approaches.set(target.objectId, destinations);
+      return destinations.length > 0;
+    });
     const pursuit = client.combatPursuit;
     const selected = pursuit?.mapFileName === String(client.snapshot.mapFileName)
       ? candidates.find(target => target.objectId === pursuit.objectId && target.name === pursuit.name) : null;
@@ -1072,7 +1082,7 @@ function combatPlan(client, context) {
       return { command: { type: 'attack', objectId: target.objectId }, targetEntity: target, observer, hunting: target.name,
         peerAttackerId: observedPlayerId(observer, client.label) };
     }
-    const adjacent = STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy }))
+    const adjacent = (native ? approaches.get(target.objectId) : STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy })))
       .sort((a, b) => distance(a, owner) - distance(b, owner));
     for (const destination of adjacent) {
       if (!insideCombatCoverage(coverage, destination)) continue;
@@ -1691,6 +1701,7 @@ export async function runCapacity(options) {
     value: Object.freeze({ scope: 'New native attack witness selection; the original full AOI membership range remains16.',
       maximumOwnerAndTargetDistance: stableFanoutRange('attack', policy),
       rule: 'Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.',
+      approachRule: 'Native approach paths require a current active living same-map observer whose actual snapshot contains both attacker and target and whose actual position is within6 of the target and prospective attack tile; otherwise continue other eligible targets or ordinary scouting.',
       damageRule: 'Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged.' }) });
   if (attackResults === 'v2') Object.defineProperty(report, 'attackResults', { enumerable: true,
     value: Object.freeze({ mode: 'v2', capability: ATTACK_OUTCOME_CAPABILITY,

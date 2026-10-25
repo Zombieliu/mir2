@@ -1,0 +1,6385 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792898022018-efb7a76a",
+  "endpoint": "ws://127.0.0.1:17510/ws",
+  "policy": {
+    "profile": "probe",
+    "activityMode": "native",
+    "movementIntervalMs": 750,
+    "stages": [
+      2,
+      10
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 360,
+    "wallSeconds": 3600,
+    "layout": "dispersed",
+    "combatActors": 1,
+    "resumeSamples": 0,
+    "saveSamples": 0,
+    "commandsPerSecond": 3,
+    "intentionIntervalMs": 750,
+    "variableActionCadence": true,
+    "maximumSendLatenessMs": 250,
+    "movementP95Ms": 750,
+    "chatP95Ms": 1000,
+    "actionTimeoutMs": 2000,
+    "timeoutExclusive": 0.01,
+    "maximumMissedPlanRatio": 0.05,
+    "maximumCorrectionRatio": 0.05,
+    "minimumMovesPerMinute": 30,
+    "minimumCombatHitsPerMinute": 12,
+    "minimumCombatAttacksPerMinute": 18,
+    "aoiRange": 16,
+    "aoiGraceMs": 1000,
+    "nativeChatIntervalMs": 30000,
+    "nativeTurnIntervalMs": 60000,
+    "minimumNativeRunRatio": 0.5,
+    "minimumNativeCellsPerMinute": 80,
+    "maximumEvidenceInFlight": 4,
+    "maximumMemorySlopeMiBPerHour": 32,
+    "memoryWarmupSeconds": 300,
+    "maximumDriverLagP99Ms": 250,
+    "fullAcceptanceEligible": false
+  },
+  "startedAt": "2026-10-25T03:13:42.018Z",
+  "stages": [
+    {
+      "name": "stage-2",
+      "controlledActors": 2,
+      "completed": true,
+      "passed": true,
+      "seconds": 300,
+      "activity": [
+        {
+          "actor": "L25081f00",
+          "role": "movement",
+          "plans": 400,
+          "gaps": 0,
+          "moves": 385,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792898356588,
+          "runs": 359,
+          "cells": 744,
+          "nativeOpportunities": 400,
+          "nativeCompleted": 400,
+          "offeredDurationMs": 300000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.9324675324675324,
+            "cellsPerMinute": 148.68897889575783,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 300000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L25081f01",
+          "role": "movement",
+          "plans": 400,
+          "gaps": 0,
+          "moves": 385,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792898356870,
+          "runs": 365,
+          "cells": 750,
+          "nativeOpportunities": 400,
+          "nativeCompleted": 400,
+          "offeredDurationMs": 300000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.948051948051948,
+            "cellsPerMinute": 149.88808356427202,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 300000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        }
+      ],
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "movementPassed": true,
+      "chatPassed": true,
+      "combatCoverage": "not-requested",
+      "metrics": {
+        "run": {
+          "count": 724,
+          "status": {
+            "success": 724
+          },
+          "fromSend": {
+            "count": 724,
+            "p50Ms": 1,
+            "p95Ms": 2,
+            "p99Ms": 5,
+            "maxMs": 4.834499999997206
+          },
+          "fromPlan": {
+            "count": 724,
+            "p50Ms": 18,
+            "p95Ms": 32,
+            "p99Ms": 35,
+            "maxMs": 39.35129999999481
+          }
+        },
+        "fanout-run": {
+          "count": 526,
+          "status": {
+            "success": 526
+          },
+          "fromSend": {
+            "count": 526,
+            "p50Ms": 1,
+            "p95Ms": 3,
+            "p99Ms": 3,
+            "maxMs": 5.960599999991246
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "rtt": {
+          "count": 51,
+          "status": {
+            "success": 51
+          },
+          "fromSend": {
+            "count": 51,
+            "p50Ms": 1,
+            "p95Ms": 1,
+            "p99Ms": 2,
+            "maxMs": 1.8630000000121072
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "chat": {
+          "count": 20,
+          "status": {
+            "success": 20
+          },
+          "fromSend": {
+            "count": 20,
+            "p50Ms": 1,
+            "p95Ms": 1,
+            "p99Ms": 1,
+            "maxMs": 0.8181000000040513
+          },
+          "fromPlan": {
+            "count": 20,
+            "p50Ms": 26,
+            "p95Ms": 33,
+            "p99Ms": 33,
+            "maxMs": 32.21829999999318
+          }
+        },
+        "peerChat": {
+          "count": 20,
+          "status": {
+            "success": 20
+          },
+          "fromSend": {
+            "count": 20,
+            "p50Ms": 1,
+            "p95Ms": 1,
+            "p99Ms": 1,
+            "maxMs": 0.8181000000040513
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "fanout-chat": {
+          "count": 20,
+          "status": {
+            "success": 20
+          },
+          "fromSend": {
+            "count": 20,
+            "p50Ms": 1,
+            "p95Ms": 1,
+            "p99Ms": 1,
+            "maxMs": 0.8181000000040513
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "walk": {
+          "count": 46,
+          "status": {
+            "success": 46
+          },
+          "fromSend": {
+            "count": 46,
+            "p50Ms": 1,
+            "p95Ms": 2,
+            "p99Ms": 4,
+            "maxMs": 3.675500000012107
+          },
+          "fromPlan": {
+            "count": 46,
+            "p50Ms": 23,
+            "p95Ms": 32,
+            "p99Ms": 44,
+            "maxMs": 43.83989999999176
+          }
+        },
+        "fanout-walk": {
+          "count": 32,
+          "status": {
+            "success": 32
+          },
+          "fromSend": {
+            "count": 32,
+            "p50Ms": 1,
+            "p95Ms": 2,
+            "p99Ms": 3,
+            "maxMs": 2.2884999999660067
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "refresh": {
+          "count": 10,
+          "status": {
+            "success": 10
+          },
+          "fromSend": {
+            "count": 10,
+            "p50Ms": 4,
+            "p95Ms": 5,
+            "p99Ms": 5,
+            "maxMs": 4.4636999999929685
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "turn": {
+          "count": 10,
+          "status": {
+            "success": 10
+          },
+          "fromSend": {
+            "count": 10,
+            "p50Ms": 1,
+            "p95Ms": 4,
+            "p99Ms": 4,
+            "maxMs": 3.8879000000015367
+          },
+          "fromPlan": {
+            "count": 10,
+            "p50Ms": 22,
+            "p95Ms": 31,
+            "p99Ms": 31,
+            "maxMs": 30.866299999994226
+          }
+        },
+        "fanout-turn": {
+          "count": 7,
+          "status": {
+            "success": 7
+          },
+          "fromSend": {
+            "count": 7,
+            "p50Ms": 1,
+            "p95Ms": 3,
+            "p99Ms": 3,
+            "maxMs": 2.4421000000147615
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        }
+      },
+      "aoi": {
+        "samples": 298,
+        "expectedPairs": 596,
+        "observedPairs": 596,
+        "persistentMissing": 0,
+        "ghosts": 0,
+        "duplicates": 0,
+        "minimumCoverage": 1,
+        "maximumExpectedPerObserver": 1
+      },
+      "fanoutPassed": true,
+      "measuredSeconds": 300.224,
+      "rollingWindows": [
+        {
+          "elapsedSeconds": 60.002,
+          "startedAtMs": 1792898057035,
+          "endedAtMs": 1792898117037,
+          "passed": true,
+          "seconds": 60.002,
+          "activity": [
+            {
+              "actor": "L25081f00",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898116588,
+              "runs": 71,
+              "cells": 148,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.922077922077922,
+                "cellsPerMinute": 147.99506683110562,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f01",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898116868,
+              "runs": 72,
+              "cells": 149,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.935064935064935,
+                "cellsPerMinute": 148.99503349888337,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            }
+          ],
+          "timeoutRatio": 0,
+          "correctionRatio": 0,
+          "movementPassed": true,
+          "chatPassed": true,
+          "combatCoverage": "not-requested",
+          "metrics": {
+            "run": {
+              "count": 143,
+              "status": {
+                "success": 143
+              },
+              "fromSend": {
+                "count": 143,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 4,
+                "maxMs": 4.295700000002398
+              },
+              "fromPlan": {
+                "count": 143,
+                "p50Ms": 17,
+                "p95Ms": 33,
+                "p99Ms": 36,
+                "maxMs": 39.35129999999481
+              }
+            },
+            "fanout-run": {
+              "count": 97,
+              "status": {
+                "success": 97
+              },
+              "fromSend": {
+                "count": 97,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 6,
+                "maxMs": 5.960599999991246
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "rtt": {
+              "count": 11,
+              "status": {
+                "success": 11
+              },
+              "fromSend": {
+                "count": 11,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.43839999999909196
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "chat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.6828999999997905
+              },
+              "fromPlan": {
+                "count": 4,
+                "p50Ms": 27,
+                "p95Ms": 30,
+                "p99Ms": 30,
+                "maxMs": 29.699799999994866
+              }
+            },
+            "peerChat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.6828999999997905
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "fanout-chat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.6828999999997905
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "walk": {
+              "count": 11,
+              "status": {
+                "success": 11
+              },
+              "fromSend": {
+                "count": 11,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 2,
+                "maxMs": 1.1790000000037253
+              },
+              "fromPlan": {
+                "count": 11,
+                "p50Ms": 26,
+                "p95Ms": 44,
+                "p99Ms": 44,
+                "maxMs": 43.83989999999176
+              }
+            },
+            "fanout-walk": {
+              "count": 6,
+              "status": {
+                "success": 6
+              },
+              "fromSend": {
+                "count": 6,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 2,
+                "maxMs": 1.2180999999982305
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "refresh": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 4,
+                "p95Ms": 5,
+                "p99Ms": 5,
+                "maxMs": 4.4636999999929685
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "turn": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.5063999999983935
+              },
+              "fromPlan": {
+                "count": 2,
+                "p50Ms": 2,
+                "p95Ms": 31,
+                "p99Ms": 31,
+                "maxMs": 30.61359999999695
+              }
+            },
+            "fanout-turn": {
+              "count": 1,
+              "status": {
+                "success": 1
+              },
+              "fromSend": {
+                "count": 1,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.5578999999997905
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            }
+          }
+        },
+        {
+          "elapsedSeconds": 120.053,
+          "startedAtMs": 1792898117037,
+          "endedAtMs": 1792898177088,
+          "passed": true,
+          "seconds": 60.051,
+          "activity": [
+            {
+              "actor": "L25081f00",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898176607,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.87175900484587,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f01",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898176856,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.87175900484587,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            }
+          ],
+          "timeoutRatio": 0,
+          "correctionRatio": 0,
+          "movementPassed": true,
+          "chatPassed": true,
+          "combatCoverage": "not-requested",
+          "metrics": {
+            "run": {
+              "count": 148,
+              "status": {
+                "success": 148
+              },
+              "fromSend": {
+                "count": 148,
+                "p50Ms": 1,
+                "p95Ms": 4,
+                "p99Ms": 5,
+                "maxMs": 4.834499999997206
+              },
+              "fromPlan": {
+                "count": 148,
+                "p50Ms": 19,
+                "p95Ms": 32,
+                "p99Ms": 35,
+                "maxMs": 34.74460000000545
+              }
+            },
+            "fanout-run": {
+              "count": 100,
+              "status": {
+                "success": 100
+              },
+              "fromSend": {
+                "count": 100,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 3.147899999981746
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "rtt": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.4377999999996973
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "chat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.6885000000038417
+              },
+              "fromPlan": {
+                "count": 4,
+                "p50Ms": 24,
+                "p95Ms": 33,
+                "p99Ms": 33,
+                "maxMs": 32.21829999999318
+              }
+            },
+            "peerChat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.6885000000038417
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "fanout-chat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.6885000000038417
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "walk": {
+              "count": 6,
+              "status": {
+                "success": 6
+              },
+              "fromSend": {
+                "count": 6,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.5017999999981839
+              },
+              "fromPlan": {
+                "count": 6,
+                "p50Ms": 21,
+                "p95Ms": 30,
+                "p99Ms": 30,
+                "maxMs": 29.995300000009593
+              }
+            },
+            "fanout-walk": {
+              "count": 5,
+              "status": {
+                "success": 5
+              },
+              "fromSend": {
+                "count": 5,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.6019999999844003
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "refresh": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 4,
+                "p95Ms": 4,
+                "p99Ms": 4,
+                "maxMs": 3.921200000011595
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "turn": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.4952999999804888
+              },
+              "fromPlan": {
+                "count": 2,
+                "p50Ms": 17,
+                "p95Ms": 22,
+                "p99Ms": 22,
+                "maxMs": 21.335499999986496
+              }
+            },
+            "fanout-turn": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.7908999999926891
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            }
+          }
+        },
+        {
+          "elapsedSeconds": 180.098,
+          "startedAtMs": 1792898177088,
+          "endedAtMs": 1792898237133,
+          "passed": true,
+          "seconds": 60.045,
+          "activity": [
+            {
+              "actor": "L25081f00",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898236589,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.8868348738446,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f01",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898236868,
+              "runs": 73,
+              "cells": 150,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.948051948051948,
+                "cellsPerMinute": 149.88758431176618,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            }
+          ],
+          "timeoutRatio": 0,
+          "correctionRatio": 0,
+          "movementPassed": true,
+          "chatPassed": true,
+          "combatCoverage": "not-requested",
+          "metrics": {
+            "run": {
+              "count": 147,
+              "status": {
+                "success": 147
+              },
+              "fromSend": {
+                "count": 147,
+                "p50Ms": 1,
+                "p95Ms": 4,
+                "p99Ms": 5,
+                "maxMs": 4.331299999990733
+              },
+              "fromPlan": {
+                "count": 147,
+                "p50Ms": 18,
+                "p95Ms": 32,
+                "p99Ms": 35,
+                "maxMs": 34.471099999995204
+              }
+            },
+            "fanout-run": {
+              "count": 118,
+              "status": {
+                "success": 118
+              },
+              "fromSend": {
+                "count": 118,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.8096000000077765
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "rtt": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 2,
+                "maxMs": 1.8630000000121072
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "chat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.8181000000040513
+              },
+              "fromPlan": {
+                "count": 4,
+                "p50Ms": 13,
+                "p95Ms": 31,
+                "p99Ms": 31,
+                "maxMs": 30.862200000003213
+              }
+            },
+            "peerChat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.8181000000040513
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "fanout-chat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.8181000000040513
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "walk": {
+              "count": 7,
+              "status": {
+                "success": 7
+              },
+              "fromSend": {
+                "count": 7,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.8004000000073574
+              },
+              "fromPlan": {
+                "count": 7,
+                "p50Ms": 24,
+                "p95Ms": 36,
+                "p99Ms": 36,
+                "maxMs": 35.805999999982305
+              }
+            },
+            "fanout-walk": {
+              "count": 6,
+              "status": {
+                "success": 6
+              },
+              "fromSend": {
+                "count": 6,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 2,
+                "maxMs": 1.0261000000173226
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "refresh": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 4,
+                "p95Ms": 5,
+                "p99Ms": 5,
+                "maxMs": 4.458299999998417
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "turn": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.5120999999926426
+              },
+              "fromPlan": {
+                "count": 2,
+                "p50Ms": 29,
+                "p95Ms": 31,
+                "p99Ms": 31,
+                "maxMs": 30.866299999994226
+              }
+            },
+            "fanout-turn": {
+              "count": 1,
+              "status": {
+                "success": 1
+              },
+              "fromSend": {
+                "count": 1,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.522400000016205
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            }
+          }
+        },
+        {
+          "elapsedSeconds": 240.151,
+          "startedAtMs": 1792898237133,
+          "endedAtMs": 1792898297186,
+          "passed": true,
+          "seconds": 60.053,
+          "activity": [
+            {
+              "actor": "L25081f00",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898296610,
+              "runs": 72,
+              "cells": 149,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.935064935064935,
+                "cellsPerMinute": 148.86849949211532,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f01",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898296860,
+              "runs": 72,
+              "cells": 149,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.935064935064935,
+                "cellsPerMinute": 148.86849949211532,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            }
+          ],
+          "timeoutRatio": 0,
+          "correctionRatio": 0,
+          "movementPassed": true,
+          "chatPassed": true,
+          "combatCoverage": "not-requested",
+          "metrics": {
+            "run": {
+              "count": 144,
+              "status": {
+                "success": 144
+              },
+              "fromSend": {
+                "count": 144,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 4,
+                "maxMs": 3.9702999999863096
+              },
+              "fromPlan": {
+                "count": 144,
+                "p50Ms": 19,
+                "p95Ms": 32,
+                "p99Ms": 33,
+                "maxMs": 35.00479999999516
+              }
+            },
+            "fanout-run": {
+              "count": 117,
+              "status": {
+                "success": 117
+              },
+              "fromSend": {
+                "count": 117,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.5573999999905936
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "rtt": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.5592999999935273
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "chat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.6888999999791849
+              },
+              "fromPlan": {
+                "count": 4,
+                "p50Ms": 29,
+                "p95Ms": 33,
+                "p99Ms": 33,
+                "maxMs": 32.0278999999864
+              }
+            },
+            "peerChat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.6888999999791849
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "fanout-chat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.6888999999791849
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "walk": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.6781999999948312
+              },
+              "fromPlan": {
+                "count": 10,
+                "p50Ms": 14,
+                "p95Ms": 32,
+                "p99Ms": 32,
+                "maxMs": 31.485799999994924
+              }
+            },
+            "fanout-walk": {
+              "count": 8,
+              "status": {
+                "success": 8
+              },
+              "fromSend": {
+                "count": 8,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.7844000000040978
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "refresh": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 4,
+                "p95Ms": 5,
+                "p99Ms": 5,
+                "maxMs": 4.15480000001844
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "turn": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 1,
+                "p95Ms": 4,
+                "p99Ms": 4,
+                "maxMs": 3.8879000000015367
+              },
+              "fromPlan": {
+                "count": 2,
+                "p50Ms": 9,
+                "p95Ms": 25,
+                "p99Ms": 25,
+                "maxMs": 24.793799999984913
+              }
+            },
+            "fanout-turn": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.4421000000147615
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            }
+          }
+        },
+        {
+          "elapsedSeconds": 300.224,
+          "startedAtMs": 1792898297186,
+          "endedAtMs": 1792898357259,
+          "passed": true,
+          "seconds": 60.073,
+          "activity": [
+            {
+              "actor": "L25081f00",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898356588,
+              "runs": 68,
+              "cells": 145,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.8831168831168831,
+                "cellsPerMinute": 144.82379771278278,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f01",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898356870,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.81650658365655,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            }
+          ],
+          "timeoutRatio": 0,
+          "correctionRatio": 0,
+          "movementPassed": true,
+          "chatPassed": true,
+          "combatCoverage": "not-requested",
+          "metrics": {
+            "run": {
+              "count": 142,
+              "status": {
+                "success": 142
+              },
+              "fromSend": {
+                "count": 142,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 5,
+                "maxMs": 4.227199999964796
+              },
+              "fromPlan": {
+                "count": 142,
+                "p50Ms": 15,
+                "p95Ms": 30,
+                "p99Ms": 31,
+                "maxMs": 32.12369999999646
+              }
+            },
+            "fanout-run": {
+              "count": 94,
+              "status": {
+                "success": 94
+              },
+              "fromSend": {
+                "count": 94,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 3,
+                "maxMs": 2.3898000000044703
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "rtt": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.658800000033807
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "chat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.656299999973271
+              },
+              "fromPlan": {
+                "count": 4,
+                "p50Ms": 25,
+                "p95Ms": 31,
+                "p99Ms": 31,
+                "maxMs": 30.62369999999646
+              }
+            },
+            "peerChat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.656299999973271
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "fanout-chat": {
+              "count": 4,
+              "status": {
+                "success": 4
+              },
+              "fromSend": {
+                "count": 4,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.656299999973271
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "walk": {
+              "count": 12,
+              "status": {
+                "success": 12
+              },
+              "fromSend": {
+                "count": 12,
+                "p50Ms": 1,
+                "p95Ms": 4,
+                "p99Ms": 4,
+                "maxMs": 3.675500000012107
+              },
+              "fromPlan": {
+                "count": 12,
+                "p50Ms": 22,
+                "p95Ms": 30,
+                "p99Ms": 30,
+                "maxMs": 29.972300000023097
+              }
+            },
+            "fanout-walk": {
+              "count": 7,
+              "status": {
+                "success": 7
+              },
+              "fromSend": {
+                "count": 7,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.2884999999660067
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "refresh": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 4,
+                "p95Ms": 4,
+                "p99Ms": 4,
+                "maxMs": 3.869600000034552
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "turn": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.5795999999972992
+              },
+              "fromPlan": {
+                "count": 2,
+                "p50Ms": 15,
+                "p95Ms": 25,
+                "p99Ms": 25,
+                "maxMs": 24.747199999983422
+              }
+            },
+            "fanout-turn": {
+              "count": 1,
+              "status": {
+                "success": 1
+              },
+              "fromSend": {
+                "count": 1,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.46629999997094274
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            }
+          }
+        }
+      ],
+      "startedAtMs": 1792898057035,
+      "endedAtMs": 1792898357259
+    },
+    {
+      "name": "stage-10",
+      "controlledActors": 10,
+      "completed": true,
+      "passed": false,
+      "seconds": 300,
+      "activity": [
+        {
+          "actor": "L25081f00",
+          "role": "movement",
+          "plans": 401,
+          "gaps": 0,
+          "moves": 386,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792898715100,
+          "runs": 369,
+          "cells": 755,
+          "nativeOpportunities": 401,
+          "nativeCompleted": 401,
+          "offeredDurationMs": 300750,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.9559585492227979,
+            "cellsPerMinute": 150.8280560161416,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 300750,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L25081f01",
+          "role": "movement",
+          "plans": 400,
+          "gaps": 0,
+          "moves": 385,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792898714633,
+          "runs": 369,
+          "cells": 754,
+          "nativeOpportunities": 400,
+          "nativeCompleted": 400,
+          "offeredDurationMs": 300000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.9584415584415584,
+            "cellsPerMinute": 150.6282837565176,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 300000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L25081f02",
+          "role": "movement",
+          "plans": 401,
+          "gaps": 0,
+          "moves": 386,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792898714944,
+          "runs": 371,
+          "cells": 757,
+          "nativeOpportunities": 401,
+          "nativeCompleted": 401,
+          "offeredDurationMs": 300750,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.961139896373057,
+            "cellsPerMinute": 151.22760053538966,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 300750,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L25081f03",
+          "role": "movement",
+          "plans": 401,
+          "gaps": 0,
+          "moves": 386,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792898715007,
+          "runs": 371,
+          "cells": 757,
+          "nativeOpportunities": 401,
+          "nativeCompleted": 401,
+          "offeredDurationMs": 300750,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.961139896373057,
+            "cellsPerMinute": 151.22760053538966,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 300750,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L25081f04",
+          "role": "movement",
+          "plans": 400,
+          "gaps": 0,
+          "moves": 385,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792898714821,
+          "runs": 367,
+          "cells": 752,
+          "nativeOpportunities": 400,
+          "nativeCompleted": 400,
+          "offeredDurationMs": 300000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.9532467532467532,
+            "cellsPerMinute": 150.2287392372695,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 300000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L25081f05",
+          "role": "combat",
+          "plans": 320,
+          "gaps": 0,
+          "moves": 217,
+          "attacks": 88,
+          "hits": 88,
+          "damage": 258,
+          "lastSuccessAt": 1792898713898,
+          "runs": 95,
+          "cells": 312,
+          "nativeOpportunities": 320,
+          "nativeCompleted": 320,
+          "offeredDurationMs": 299136,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.4377880184331797,
+            "cellsPerMinute": 62.328945002696926,
+            "positiveHitsPerMinute": 17.57995884691452,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 299136,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": false
+        },
+        {
+          "actor": "L25081f06",
+          "role": "movement",
+          "plans": 400,
+          "gaps": 0,
+          "moves": 384,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792898714852,
+          "runs": 366,
+          "cells": 750,
+          "nativeOpportunities": 400,
+          "nativeCompleted": 398,
+          "offeredDurationMs": 300000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 0.995,
+            "runRatio": 0.953125,
+            "cellsPerMinute": 149.82919471802145,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 300000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L25081f07",
+          "role": "movement",
+          "plans": 400,
+          "gaps": 0,
+          "moves": 386,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792898714633,
+          "runs": 370,
+          "cells": 756,
+          "nativeOpportunities": 400,
+          "nativeCompleted": 400,
+          "offeredDurationMs": 300000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.9585492227979274,
+            "cellsPerMinute": 151.02782827576564,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 300000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L25081f08",
+          "role": "movement",
+          "plans": 401,
+          "gaps": 0,
+          "moves": 386,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792898715038,
+          "runs": 369,
+          "cells": 755,
+          "nativeOpportunities": 401,
+          "nativeCompleted": 401,
+          "offeredDurationMs": 300750,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.9559585492227979,
+            "cellsPerMinute": 150.8280560161416,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 300750,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L25081f09",
+          "role": "movement",
+          "plans": 400,
+          "gaps": 0,
+          "moves": 385,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792898714726,
+          "runs": 370,
+          "cells": 755,
+          "nativeOpportunities": 400,
+          "nativeCompleted": 400,
+          "offeredDurationMs": 300000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.961038961038961,
+            "cellsPerMinute": 150.8280560161416,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 300000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        }
+      ],
+      "timeoutRatio": 0,
+      "correctionRatio": 0.0005422993492407809,
+      "movementCorrectionRatio": 0.0005422993492407809,
+      "attackRejectionRatio": 0,
+      "movementPassed": true,
+      "chatPassed": true,
+      "combatCoverage": "scenario-insufficient",
+      "metrics": {
+        "run": {
+          "count": 3419,
+          "status": {
+            "success": 3417,
+            "corrected": 2
+          },
+          "fromSend": {
+            "count": 3419,
+            "p50Ms": 1,
+            "p95Ms": 5,
+            "p99Ms": 6,
+            "maxMs": 9.581699999980628
+          },
+          "fromPlan": {
+            "count": 3419,
+            "p50Ms": 17,
+            "p95Ms": 31,
+            "p99Ms": 35,
+            "maxMs": 43.79290000000037
+          }
+        },
+        "fanout-run": {
+          "count": 4444,
+          "status": {
+            "success": 4444
+          },
+          "fromSend": {
+            "count": 4444,
+            "p50Ms": 1,
+            "p95Ms": 3,
+            "p99Ms": 5,
+            "maxMs": 27.728100000007544
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "walk": {
+          "count": 269,
+          "status": {
+            "success": 269
+          },
+          "fromSend": {
+            "count": 269,
+            "p50Ms": 1,
+            "p95Ms": 3,
+            "p99Ms": 6,
+            "maxMs": 18.969399999943562
+          },
+          "fromPlan": {
+            "count": 269,
+            "p50Ms": 19,
+            "p95Ms": 35,
+            "p99Ms": 41,
+            "maxMs": 40.85600000002887
+          }
+        },
+        "rtt": {
+          "count": 253,
+          "status": {
+            "success": 253
+          },
+          "fromSend": {
+            "count": 253,
+            "p50Ms": 1,
+            "p95Ms": 1,
+            "p99Ms": 4,
+            "maxMs": 4.79680000001099
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "attack": {
+          "count": 88,
+          "status": {
+            "success": 88
+          },
+          "fromSend": {
+            "count": 88,
+            "p50Ms": 49,
+            "p95Ms": 109,
+            "p99Ms": 120,
+            "maxMs": 119.954800000065
+          },
+          "fromPlan": {
+            "count": 88,
+            "p50Ms": 66,
+            "p95Ms": 127,
+            "p99Ms": 143,
+            "maxMs": 142.94209999998566
+          },
+          "attackV2Requests": 88,
+          "attackV2NotLaunched": 0
+        },
+        "chat": {
+          "count": 98,
+          "status": {
+            "success": 98
+          },
+          "fromSend": {
+            "count": 98,
+            "p50Ms": 2,
+            "p95Ms": 5,
+            "p99Ms": 14,
+            "maxMs": 13.161100000026636
+          },
+          "fromPlan": {
+            "count": 98,
+            "p50Ms": 20,
+            "p95Ms": 33,
+            "p99Ms": 40,
+            "maxMs": 39.32890000002226
+          }
+        },
+        "peerChat": {
+          "count": 94,
+          "status": {
+            "success": 94
+          },
+          "fromSend": {
+            "count": 94,
+            "p50Ms": 2,
+            "p95Ms": 4,
+            "p99Ms": 14,
+            "maxMs": 13.161100000026636
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "fanout-chat": {
+          "count": 208,
+          "status": {
+            "success": 208
+          },
+          "fromSend": {
+            "count": 208,
+            "p50Ms": 2,
+            "p95Ms": 4,
+            "p99Ms": 14,
+            "maxMs": 28.447199999995064
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "refresh": {
+          "count": 50,
+          "status": {
+            "success": 50
+          },
+          "fromSend": {
+            "count": 50,
+            "p50Ms": 6,
+            "p95Ms": 8,
+            "p99Ms": 10,
+            "maxMs": 9.213799999910407
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "turn": {
+          "count": 50,
+          "status": {
+            "success": 50
+          },
+          "fromSend": {
+            "count": 50,
+            "p50Ms": 1,
+            "p95Ms": 3,
+            "p99Ms": 5,
+            "maxMs": 4.984800000034738
+          },
+          "fromPlan": {
+            "count": 50,
+            "p50Ms": 20,
+            "p95Ms": 31,
+            "p99Ms": 32,
+            "maxMs": 31.539999999979045
+          }
+        },
+        "fanout-turn": {
+          "count": 68,
+          "status": {
+            "success": 68
+          },
+          "fromSend": {
+            "count": 68,
+            "p50Ms": 1,
+            "p95Ms": 3,
+            "p99Ms": 4,
+            "maxMs": 3.4206000000122003
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "fanout-walk": {
+          "count": 260,
+          "status": {
+            "success": 260
+          },
+          "fromSend": {
+            "count": 260,
+            "p50Ms": 1,
+            "p95Ms": 3,
+            "p99Ms": 4,
+            "maxMs": 4.794400000013411
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "selfChat": {
+          "count": 4,
+          "status": {
+            "success": 4
+          },
+          "fromSend": {
+            "count": 4,
+            "p50Ms": 2,
+            "p95Ms": 7,
+            "p99Ms": 7,
+            "maxMs": 6.680099999997765
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        }
+      },
+      "aoi": {
+        "samples": 298,
+        "expectedPairs": 15326,
+        "observedPairs": 15325,
+        "persistentMissing": 0,
+        "ghosts": 0,
+        "duplicates": 0,
+        "minimumCoverage": 0.9821428571428571,
+        "maximumExpectedPerObserver": 9
+      },
+      "fanoutPassed": true,
+      "measuredSeconds": 300.342,
+      "rollingWindows": [
+        {
+          "elapsedSeconds": 60.032,
+          "startedAtMs": 1792898414806,
+          "endedAtMs": 1792898474838,
+          "passed": true,
+          "seconds": 60.032,
+          "activity": [
+            {
+              "actor": "L25081f00",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898474342,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.91950959488273,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f01",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898474619,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.91950959488273,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f02",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898474216,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.91950959488273,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f03",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898474247,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.91950959488273,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f04",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898474838,
+              "runs": 73,
+              "cells": 150,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.948051948051948,
+                "cellsPerMinute": 149.92004264392324,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f05",
+              "role": "combat",
+              "plans": 58,
+              "gaps": 0,
+              "moves": 30,
+              "attacks": 24,
+              "hits": 24,
+              "damage": 67,
+              "lastSuccessAt": 1792898474681,
+              "runs": 9,
+              "cells": 39,
+              "nativeOpportunities": 58,
+              "nativeCompleted": 58,
+              "offeredDurationMs": 59936,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.3,
+                "cellsPerMinute": 38.97921108742005,
+                "positiveHitsPerMinute": 23.98720682302772,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 59936,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f06",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898474838,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.91950959488273,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f07",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898473877,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.91950959488273,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f08",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898474278,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.91950959488273,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f09",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898474713,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.91950959488273,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            }
+          ],
+          "timeoutRatio": 0,
+          "correctionRatio": 0,
+          "movementCorrectionRatio": 0,
+          "attackRejectionRatio": 0,
+          "movementPassed": true,
+          "chatPassed": true,
+          "combatCoverage": "shared-positive-damage",
+          "metrics": {
+            "run": {
+              "count": 674,
+              "status": {
+                "success": 674
+              },
+              "fromSend": {
+                "count": 674,
+                "p50Ms": 1,
+                "p95Ms": 4,
+                "p99Ms": 6,
+                "maxMs": 8.647200000006706
+              },
+              "fromPlan": {
+                "count": 674,
+                "p50Ms": 17,
+                "p95Ms": 31,
+                "p99Ms": 35,
+                "maxMs": 37.07569999998668
+              }
+            },
+            "fanout-run": {
+              "count": 849,
+              "status": {
+                "success": 849
+              },
+              "fromSend": {
+                "count": 849,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 5,
+                "maxMs": 9.42319999996107
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "walk": {
+              "count": 49,
+              "status": {
+                "success": 49
+              },
+              "fromSend": {
+                "count": 49,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 5,
+                "maxMs": 4.138500000000931
+              },
+              "fromPlan": {
+                "count": 49,
+                "p50Ms": 21,
+                "p95Ms": 33,
+                "p99Ms": 35,
+                "maxMs": 34.744799999985844
+              }
+            },
+            "rtt": {
+              "count": 53,
+              "status": {
+                "success": 53
+              },
+              "fromSend": {
+                "count": 53,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 5,
+                "maxMs": 4.140599999984261
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "attack": {
+              "count": 24,
+              "status": {
+                "success": 24
+              },
+              "fromSend": {
+                "count": 24,
+                "p50Ms": 49,
+                "p95Ms": 95,
+                "p99Ms": 96,
+                "maxMs": 95.21179999999003
+              },
+              "fromPlan": {
+                "count": 24,
+                "p50Ms": 63,
+                "p95Ms": 114,
+                "p99Ms": 119,
+                "maxMs": 118.59599999996135
+              },
+              "attackV2Requests": 24,
+              "attackV2NotLaunched": 0
+            },
+            "chat": {
+              "count": 20,
+              "status": {
+                "success": 20
+              },
+              "fromSend": {
+                "count": 20,
+                "p50Ms": 2,
+                "p95Ms": 4,
+                "p99Ms": 14,
+                "maxMs": 13.161100000026636
+              },
+              "fromPlan": {
+                "count": 20,
+                "p50Ms": 16,
+                "p95Ms": 39,
+                "p99Ms": 40,
+                "maxMs": 39.32890000002226
+              }
+            },
+            "peerChat": {
+              "count": 19,
+              "status": {
+                "success": 19
+              },
+              "fromSend": {
+                "count": 19,
+                "p50Ms": 2,
+                "p95Ms": 14,
+                "p99Ms": 14,
+                "maxMs": 13.161100000026636
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "fanout-chat": {
+              "count": 43,
+              "status": {
+                "success": 43
+              },
+              "fromSend": {
+                "count": 43,
+                "p50Ms": 2,
+                "p95Ms": 4,
+                "p99Ms": 15,
+                "maxMs": 14.315200000011828
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "refresh": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 5,
+                "p95Ms": 7,
+                "p99Ms": 7,
+                "maxMs": 6.277300000016112
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "turn": {
+              "count": 11,
+              "status": {
+                "success": 11
+              },
+              "fromSend": {
+                "count": 11,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.814200000022538
+              },
+              "fromPlan": {
+                "count": 11,
+                "p50Ms": 23,
+                "p95Ms": 31,
+                "p99Ms": 31,
+                "maxMs": 30.734900000039488
+              }
+            },
+            "fanout-turn": {
+              "count": 16,
+              "status": {
+                "success": 16
+              },
+              "fromSend": {
+                "count": 16,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 2,
+                "maxMs": 1.3291999999783002
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "fanout-walk": {
+              "count": 60,
+              "status": {
+                "success": 60
+              },
+              "fromSend": {
+                "count": 60,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.7396999999764375
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "selfChat": {
+              "count": 1,
+              "status": {
+                "success": 1
+              },
+              "fromSend": {
+                "count": 1,
+                "p50Ms": 2,
+                "p95Ms": 2,
+                "p99Ms": 2,
+                "maxMs": 1.413300000014715
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            }
+          }
+        },
+        {
+          "elapsedSeconds": 120.12,
+          "startedAtMs": 1792898474838,
+          "endedAtMs": 1792898534926,
+          "passed": false,
+          "seconds": 60.088,
+          "activity": [
+            {
+              "actor": "L25081f00",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898534342,
+              "runs": 73,
+              "cells": 150,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.948051948051948,
+                "cellsPerMinute": 149.78032219411529,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f01",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898534603,
+              "runs": 73,
+              "cells": 150,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.948051948051948,
+                "cellsPerMinute": 149.78032219411529,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f02",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898534201,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.7788576754094,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f03",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898534262,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.7788576754094,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f04",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898534818,
+              "runs": 73,
+              "cells": 150,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.948051948051948,
+                "cellsPerMinute": 149.78032219411529,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f05",
+              "role": "combat",
+              "plans": 67,
+              "gaps": 0,
+              "moves": 50,
+              "attacks": 14,
+              "hits": 14,
+              "damage": 45,
+              "lastSuccessAt": 1792898534372,
+              "runs": 15,
+              "cells": 65,
+              "nativeOpportunities": 67,
+              "nativeCompleted": 67,
+              "offeredDurationMs": 59658,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.3,
+                "cellsPerMinute": 64.90480628411663,
+                "positiveHitsPerMinute": 13.979496738117428,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 59658,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": false
+            },
+            {
+              "actor": "L25081f06",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 75,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898534849,
+              "runs": 68,
+              "cells": 143,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 78,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 0.975,
+                "runRatio": 0.9066666666666666,
+                "cellsPerMinute": 142.79057382505658,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f07",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 78,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898534633,
+              "runs": 75,
+              "cells": 153,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.9615384615384616,
+                "cellsPerMinute": 152.7759286379976,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f08",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898534294,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.7788576754094,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f09",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898534724,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.7788576754094,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            }
+          ],
+          "timeoutRatio": 0,
+          "correctionRatio": 0.002688172043010753,
+          "movementCorrectionRatio": 0.002688172043010753,
+          "attackRejectionRatio": 0,
+          "movementPassed": true,
+          "chatPassed": true,
+          "combatCoverage": "scenario-insufficient",
+          "metrics": {
+            "run": {
+              "count": 675,
+              "status": {
+                "success": 673,
+                "corrected": 2
+              },
+              "fromSend": {
+                "count": 675,
+                "p50Ms": 1,
+                "p95Ms": 5,
+                "p99Ms": 6,
+                "maxMs": 6.070100000011735
+              },
+              "fromPlan": {
+                "count": 675,
+                "p50Ms": 18,
+                "p95Ms": 32,
+                "p99Ms": 35,
+                "maxMs": 38.78409999998985
+              }
+            },
+            "fanout-run": {
+              "count": 773,
+              "status": {
+                "success": 773
+              },
+              "fromSend": {
+                "count": 773,
+                "p50Ms": 1,
+                "p95Ms": 4,
+                "p99Ms": 6,
+                "maxMs": 27.728100000007544
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "rtt": {
+              "count": 50,
+              "status": {
+                "success": 50
+              },
+              "fromSend": {
+                "count": 50,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 3,
+                "maxMs": 2.6895999999833293
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "walk": {
+              "count": 69,
+              "status": {
+                "success": 69
+              },
+              "fromSend": {
+                "count": 69,
+                "p50Ms": 1,
+                "p95Ms": 4,
+                "p99Ms": 6,
+                "maxMs": 5.2387999999918975
+              },
+              "fromPlan": {
+                "count": 69,
+                "p50Ms": 17,
+                "p95Ms": 30,
+                "p99Ms": 40,
+                "maxMs": 39.098600000026636
+              }
+            },
+            "fanout-walk": {
+              "count": 43,
+              "status": {
+                "success": 43
+              },
+              "fromSend": {
+                "count": 43,
+                "p50Ms": 1,
+                "p95Ms": 4,
+                "p99Ms": 5,
+                "maxMs": 4.794400000013411
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "attack": {
+              "count": 14,
+              "status": {
+                "success": 14
+              },
+              "fromSend": {
+                "count": 14,
+                "p50Ms": 64,
+                "p95Ms": 114,
+                "p99Ms": 114,
+                "maxMs": 113.18920000002254
+              },
+              "fromPlan": {
+                "count": 14,
+                "p50Ms": 81,
+                "p95Ms": 143,
+                "p99Ms": 143,
+                "maxMs": 142.94209999998566
+              },
+              "attackV2Requests": 14,
+              "attackV2NotLaunched": 0
+            },
+            "chat": {
+              "count": 19,
+              "status": {
+                "success": 19
+              },
+              "fromSend": {
+                "count": 19,
+                "p50Ms": 2,
+                "p95Ms": 7,
+                "p99Ms": 7,
+                "maxMs": 6.680099999997765
+              },
+              "fromPlan": {
+                "count": 19,
+                "p50Ms": 24,
+                "p95Ms": 33,
+                "p99Ms": 33,
+                "maxMs": 32.37679999996908
+              }
+            },
+            "peerChat": {
+              "count": 18,
+              "status": {
+                "success": 18
+              },
+              "fromSend": {
+                "count": 18,
+                "p50Ms": 2,
+                "p95Ms": 5,
+                "p99Ms": 5,
+                "maxMs": 4.779500000004191
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "fanout-chat": {
+              "count": 39,
+              "status": {
+                "success": 39
+              },
+              "fromSend": {
+                "count": 39,
+                "p50Ms": 2,
+                "p95Ms": 5,
+                "p99Ms": 29,
+                "maxMs": 28.447199999995064
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "refresh": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 6,
+                "p95Ms": 8,
+                "p99Ms": 8,
+                "maxMs": 7.598899999982677
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "turn": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 1,
+                "p95Ms": 5,
+                "p99Ms": 5,
+                "maxMs": 4.984800000034738
+              },
+              "fromPlan": {
+                "count": 10,
+                "p50Ms": 14,
+                "p95Ms": 32,
+                "p99Ms": 32,
+                "maxMs": 31.539999999979045
+              }
+            },
+            "fanout-turn": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 1,
+                "p95Ms": 4,
+                "p99Ms": 4,
+                "maxMs": 3.4206000000122003
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "selfChat": {
+              "count": 1,
+              "status": {
+                "success": 1
+              },
+              "fromSend": {
+                "count": 1,
+                "p50Ms": 7,
+                "p95Ms": 7,
+                "p99Ms": 7,
+                "maxMs": 6.680099999997765
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            }
+          }
+        },
+        {
+          "elapsedSeconds": 180.216,
+          "startedAtMs": 1792898534926,
+          "endedAtMs": 1792898595022,
+          "passed": true,
+          "seconds": 60.096,
+          "activity": [
+            {
+              "actor": "L25081f00",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898594343,
+              "runs": 73,
+              "cells": 150,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.948051948051948,
+                "cellsPerMinute": 149.76038338658148,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f01",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898594619,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.758785942492,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f02",
+              "role": "movement",
+              "plans": 81,
+              "gaps": 0,
+              "moves": 78,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898594959,
+              "runs": 75,
+              "cells": 153,
+              "nativeOpportunities": 81,
+              "nativeCompleted": 81,
+              "offeredDurationMs": 60750,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.9615384615384616,
+                "cellsPerMinute": 152.7555910543131,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60750,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f03",
+              "role": "movement",
+              "plans": 81,
+              "gaps": 0,
+              "moves": 78,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898594990,
+              "runs": 75,
+              "cells": 153,
+              "nativeOpportunities": 81,
+              "nativeCompleted": 81,
+              "offeredDurationMs": 60750,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.9615384615384616,
+                "cellsPerMinute": 152.7555910543131,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60750,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f04",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898594833,
+              "runs": 73,
+              "cells": 150,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.948051948051948,
+                "cellsPerMinute": 149.76038338658148,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f05",
+              "role": "combat",
+              "plans": 54,
+              "gaps": 0,
+              "moves": 22,
+              "attacks": 28,
+              "hits": 28,
+              "damage": 86,
+              "lastSuccessAt": 1792898594312,
+              "runs": 12,
+              "cells": 34,
+              "nativeOpportunities": 54,
+              "nativeCompleted": 54,
+              "offeredDurationMs": 59316,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.5454545454545454,
+                "cellsPerMinute": 33.94568690095847,
+                "positiveHitsPerMinute": 27.95527156549521,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 59316,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f06",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898594834,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.758785942492,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f07",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898594649,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.758785942492,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f08",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898594280,
+              "runs": 73,
+              "cells": 150,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.948051948051948,
+                "cellsPerMinute": 149.76038338658148,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f09",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898594712,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.758785942492,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            }
+          ],
+          "timeoutRatio": 0,
+          "correctionRatio": 0,
+          "movementCorrectionRatio": 0,
+          "attackRejectionRatio": 0,
+          "movementPassed": true,
+          "chatPassed": true,
+          "combatCoverage": "shared-positive-damage",
+          "metrics": {
+            "run": {
+              "count": 677,
+              "status": {
+                "success": 677
+              },
+              "fromSend": {
+                "count": 677,
+                "p50Ms": 1,
+                "p95Ms": 5,
+                "p99Ms": 6,
+                "maxMs": 5.988800000050105
+              },
+              "fromPlan": {
+                "count": 677,
+                "p50Ms": 16,
+                "p95Ms": 31,
+                "p99Ms": 36,
+                "maxMs": 41.18640000000596
+              }
+            },
+            "fanout-run": {
+              "count": 859,
+              "status": {
+                "success": 859
+              },
+              "fromSend": {
+                "count": 859,
+                "p50Ms": 1,
+                "p95Ms": 4,
+                "p99Ms": 5,
+                "maxMs": 26.71440000005532
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "rtt": {
+              "count": 50,
+              "status": {
+                "success": 50
+              },
+              "fromSend": {
+                "count": 50,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 2,
+                "maxMs": 1.8886999998940155
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "chat": {
+              "count": 20,
+              "status": {
+                "success": 20
+              },
+              "fromSend": {
+                "count": 20,
+                "p50Ms": 2,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.5093999999808148
+              },
+              "fromPlan": {
+                "count": 20,
+                "p50Ms": 17,
+                "p95Ms": 32,
+                "p99Ms": 33,
+                "maxMs": 32.75079999992158
+              }
+            },
+            "peerChat": {
+              "count": 20,
+              "status": {
+                "success": 20
+              },
+              "fromSend": {
+                "count": 20,
+                "p50Ms": 2,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.5093999999808148
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "fanout-chat": {
+              "count": 40,
+              "status": {
+                "success": 40
+              },
+              "fromSend": {
+                "count": 40,
+                "p50Ms": 2,
+                "p95Ms": 2,
+                "p99Ms": 3,
+                "maxMs": 2.5093999999808148
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "attack": {
+              "count": 28,
+              "status": {
+                "success": 28
+              },
+              "fromSend": {
+                "count": 28,
+                "p50Ms": 64,
+                "p95Ms": 111,
+                "p99Ms": 113,
+                "maxMs": 112.30299999995623
+              },
+              "fromPlan": {
+                "count": 28,
+                "p50Ms": 83,
+                "p95Ms": 133,
+                "p99Ms": 135,
+                "maxMs": 134.4603000000352
+              },
+              "attackV2Requests": 28,
+              "attackV2NotLaunched": 0
+            },
+            "walk": {
+              "count": 40,
+              "status": {
+                "success": 40
+              },
+              "fromSend": {
+                "count": 40,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.5412999999243766
+              },
+              "fromPlan": {
+                "count": 40,
+                "p50Ms": 18,
+                "p95Ms": 35,
+                "p99Ms": 41,
+                "maxMs": 40.85600000002887
+              }
+            },
+            "fanout-walk": {
+              "count": 57,
+              "status": {
+                "success": 57
+              },
+              "fromSend": {
+                "count": 57,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.72019999998156
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "refresh": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 5,
+                "p95Ms": 6,
+                "p99Ms": 6,
+                "maxMs": 5.983799999929033
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "turn": {
+              "count": 11,
+              "status": {
+                "success": 11
+              },
+              "fromSend": {
+                "count": 11,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.8752000000094995
+              },
+              "fromPlan": {
+                "count": 11,
+                "p50Ms": 20,
+                "p95Ms": 30,
+                "p99Ms": 30,
+                "maxMs": 29.015699999872595
+              }
+            },
+            "fanout-turn": {
+              "count": 15,
+              "status": {
+                "success": 15
+              },
+              "fromSend": {
+                "count": 15,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.861299999989569
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            }
+          }
+        },
+        {
+          "elapsedSeconds": 240.309,
+          "startedAtMs": 1792898595022,
+          "endedAtMs": 1792898655115,
+          "passed": false,
+          "seconds": 60.093,
+          "activity": [
+            {
+              "actor": "L25081f00",
+              "role": "movement",
+              "plans": 81,
+              "gaps": 0,
+              "moves": 78,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898655100,
+              "runs": 75,
+              "cells": 153,
+              "nativeOpportunities": 81,
+              "nativeCompleted": 81,
+              "offeredDurationMs": 60750,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.9615384615384616,
+                "cellsPerMinute": 152.76321701362886,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60750,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f01",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898654603,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.7663122160651,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f02",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898654944,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.7663122160651,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f03",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898655006,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.7663122160651,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f04",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898654822,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.7663122160651,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f05",
+              "role": "combat",
+              "plans": 74,
+              "gaps": 0,
+              "moves": 65,
+              "attacks": 7,
+              "hits": 7,
+              "damage": 20,
+              "lastSuccessAt": 1792898654414,
+              "runs": 32,
+              "cells": 97,
+              "nativeOpportunities": 74,
+              "nativeCompleted": 74,
+              "offeredDurationMs": 60106,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.49230769230769234,
+                "cellsPerMinute": 96.84988268184314,
+                "positiveHitsPerMinute": 6.989166791473216,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60106,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": false
+            },
+            {
+              "actor": "L25081f06",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898654852,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.7663122160651,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f07",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898654634,
+              "runs": 73,
+              "cells": 150,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.948051948051948,
+                "cellsPerMinute": 149.7678598172832,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f08",
+              "role": "movement",
+              "plans": 81,
+              "gaps": 0,
+              "moves": 78,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898655038,
+              "runs": 74,
+              "cells": 152,
+              "nativeOpportunities": 81,
+              "nativeCompleted": 81,
+              "offeredDurationMs": 60750,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.9487179487179487,
+                "cellsPerMinute": 151.76476461484697,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60750,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f09",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898654726,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.7663122160651,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            }
+          ],
+          "timeoutRatio": 0,
+          "correctionRatio": 0,
+          "movementCorrectionRatio": 0,
+          "attackRejectionRatio": 0,
+          "movementPassed": true,
+          "chatPassed": true,
+          "combatCoverage": "scenario-insufficient",
+          "metrics": {
+            "run": {
+              "count": 698,
+              "status": {
+                "success": 698
+              },
+              "fromSend": {
+                "count": 698,
+                "p50Ms": 1,
+                "p95Ms": 5,
+                "p99Ms": 7,
+                "maxMs": 7.311699999962002
+              },
+              "fromPlan": {
+                "count": 698,
+                "p50Ms": 17,
+                "p95Ms": 31,
+                "p99Ms": 35,
+                "maxMs": 43.79290000000037
+              }
+            },
+            "fanout-run": {
+              "count": 1012,
+              "status": {
+                "success": 1012
+              },
+              "fromSend": {
+                "count": 1012,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 5,
+                "maxMs": 7.689599999925122
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "rtt": {
+              "count": 50,
+              "status": {
+                "success": 50
+              },
+              "fromSend": {
+                "count": 50,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 5,
+                "maxMs": 4.79680000001099
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "chat": {
+              "count": 20,
+              "status": {
+                "success": 20
+              },
+              "fromSend": {
+                "count": 20,
+                "p50Ms": 2,
+                "p95Ms": 2,
+                "p99Ms": 6,
+                "maxMs": 5.034800000023097
+              },
+              "fromPlan": {
+                "count": 20,
+                "p50Ms": 20,
+                "p95Ms": 30,
+                "p99Ms": 31,
+                "maxMs": 30.151199999963865
+              }
+            },
+            "peerChat": {
+              "count": 20,
+              "status": {
+                "success": 20
+              },
+              "fromSend": {
+                "count": 20,
+                "p50Ms": 2,
+                "p95Ms": 2,
+                "p99Ms": 6,
+                "maxMs": 5.034800000023097
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "fanout-chat": {
+              "count": 44,
+              "status": {
+                "success": 44
+              },
+              "fromSend": {
+                "count": 44,
+                "p50Ms": 2,
+                "p95Ms": 6,
+                "p99Ms": 6,
+                "maxMs": 5.111200000043027
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "walk": {
+              "count": 62,
+              "status": {
+                "success": 62
+              },
+              "fromSend": {
+                "count": 62,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 19,
+                "maxMs": 18.969399999943562
+              },
+              "fromPlan": {
+                "count": 62,
+                "p50Ms": 23,
+                "p95Ms": 39,
+                "p99Ms": 41,
+                "maxMs": 40.816800000029616
+              }
+            },
+            "fanout-walk": {
+              "count": 59,
+              "status": {
+                "success": 59
+              },
+              "fromSend": {
+                "count": 59,
+                "p50Ms": 1,
+                "p95Ms": 4,
+                "p99Ms": 4,
+                "maxMs": 3.8404999999329448
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "attack": {
+              "count": 7,
+              "status": {
+                "success": 7
+              },
+              "fromSend": {
+                "count": 7,
+                "p50Ms": 32,
+                "p95Ms": 48,
+                "p99Ms": 48,
+                "maxMs": 47.04879999998957
+              },
+              "fromPlan": {
+                "count": 7,
+                "p50Ms": 40,
+                "p95Ms": 69,
+                "p99Ms": 69,
+                "maxMs": 68.41159999999218
+              },
+              "attackV2Requests": 7,
+              "attackV2NotLaunched": 0
+            },
+            "refresh": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 6,
+                "p95Ms": 9,
+                "p99Ms": 9,
+                "maxMs": 8.068800000008196
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "turn": {
+              "count": 9,
+              "status": {
+                "success": 9
+              },
+              "fromSend": {
+                "count": 9,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.7404000000096858
+              },
+              "fromPlan": {
+                "count": 9,
+                "p50Ms": 23,
+                "p95Ms": 31,
+                "p99Ms": 31,
+                "maxMs": 30.805500000016764
+              }
+            },
+            "fanout-turn": {
+              "count": 13,
+              "status": {
+                "success": 13
+              },
+              "fromSend": {
+                "count": 13,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 2,
+                "maxMs": 1.8185999999986961
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            }
+          }
+        },
+        {
+          "elapsedSeconds": 300.342,
+          "startedAtMs": 1792898655115,
+          "endedAtMs": 1792898715148,
+          "passed": false,
+          "seconds": 60.033,
+          "activity": [
+            {
+              "actor": "L25081f00",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898715100,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.9169956523912,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f01",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898714633,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.9169956523912,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f02",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898714944,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.9169956523912,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f03",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898715007,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.9169956523912,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f04",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898714821,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.9169956523912,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f05",
+              "role": "combat",
+              "plans": 67,
+              "gaps": 0,
+              "moves": 50,
+              "attacks": 15,
+              "hits": 15,
+              "damage": 40,
+              "lastSuccessAt": 1792898713898,
+              "runs": 27,
+              "cells": 77,
+              "nativeOpportunities": 67,
+              "nativeCompleted": 67,
+              "offeredDurationMs": 60120,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.54,
+                "cellsPerMinute": 76.95767327969617,
+                "positiveHitsPerMinute": 14.991754535005747,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60120,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": false
+            },
+            {
+              "actor": "L25081f06",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 78,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898714852,
+              "runs": 76,
+              "cells": 154,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.9743589743589743,
+                "cellsPerMinute": 153.91534655939233,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f07",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898714633,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.9169956523912,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f08",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898715038,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.9169956523912,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            },
+            {
+              "actor": "L25081f09",
+              "role": "movement",
+              "plans": 80,
+              "gaps": 0,
+              "moves": 77,
+              "attacks": 0,
+              "hits": 0,
+              "damage": 0,
+              "lastSuccessAt": 1792898714726,
+              "runs": 74,
+              "cells": 151,
+              "nativeOpportunities": 80,
+              "nativeCompleted": 80,
+              "offeredDurationMs": 60000,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "unknownPacing": 0,
+              "nativeActivity": {
+                "passed": true,
+                "completionRatio": 1,
+                "runRatio": 0.961038961038961,
+                "cellsPerMinute": 150.9169956523912,
+                "positiveHitsPerMinute": 0,
+                "evidenceWaits": 0,
+                "ownerAckWaits": 0,
+                "offeredDurationMs": 60000,
+                "unknownPacing": 0,
+                "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+              },
+              "passed": true
+            }
+          ],
+          "timeoutRatio": 0,
+          "correctionRatio": 0,
+          "movementCorrectionRatio": 0,
+          "attackRejectionRatio": 0,
+          "movementPassed": true,
+          "chatPassed": true,
+          "combatCoverage": "scenario-insufficient",
+          "metrics": {
+            "walk": {
+              "count": 49,
+              "status": {
+                "success": 49
+              },
+              "fromSend": {
+                "count": 49,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 2,
+                "maxMs": 1.013399999937974
+              },
+              "fromPlan": {
+                "count": 49,
+                "p50Ms": 20,
+                "p95Ms": 33,
+                "p99Ms": 37,
+                "maxMs": 36.03859999997076
+              }
+            },
+            "fanout-walk": {
+              "count": 41,
+              "status": {
+                "success": 41
+              },
+              "fromSend": {
+                "count": 41,
+                "p50Ms": 1,
+                "p95Ms": 2,
+                "p99Ms": 2,
+                "maxMs": 1.371199999935925
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "rtt": {
+              "count": 50,
+              "status": {
+                "success": 50
+              },
+              "fromSend": {
+                "count": 50,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 2,
+                "maxMs": 1.040500000002794
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "run": {
+              "count": 695,
+              "status": {
+                "success": 695
+              },
+              "fromSend": {
+                "count": 695,
+                "p50Ms": 1,
+                "p95Ms": 5,
+                "p99Ms": 6,
+                "maxMs": 9.581699999980628
+              },
+              "fromPlan": {
+                "count": 695,
+                "p50Ms": 17,
+                "p95Ms": 31,
+                "p99Ms": 32,
+                "maxMs": 33.461200000019744
+              }
+            },
+            "fanout-run": {
+              "count": 951,
+              "status": {
+                "success": 951
+              },
+              "fromSend": {
+                "count": 951,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 5,
+                "maxMs": 10.697399999946356
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "attack": {
+              "count": 15,
+              "status": {
+                "success": 15
+              },
+              "fromSend": {
+                "count": 15,
+                "p50Ms": 47,
+                "p95Ms": 120,
+                "p99Ms": 120,
+                "maxMs": 119.954800000065
+              },
+              "fromPlan": {
+                "count": 15,
+                "p50Ms": 58,
+                "p95Ms": 127,
+                "p99Ms": 127,
+                "maxMs": 126.72120000002906
+              },
+              "attackV2Requests": 15,
+              "attackV2NotLaunched": 0
+            },
+            "chat": {
+              "count": 19,
+              "status": {
+                "success": 19
+              },
+              "fromSend": {
+                "count": 19,
+                "p50Ms": 2,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.5953999999910593
+              },
+              "fromPlan": {
+                "count": 19,
+                "p50Ms": 23,
+                "p95Ms": 33,
+                "p99Ms": 33,
+                "maxMs": 32.20070000004489
+              }
+            },
+            "peerChat": {
+              "count": 17,
+              "status": {
+                "success": 17
+              },
+              "fromSend": {
+                "count": 17,
+                "p50Ms": 2,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.5953999999910593
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "fanout-chat": {
+              "count": 42,
+              "status": {
+                "success": 42
+              },
+              "fromSend": {
+                "count": 42,
+                "p50Ms": 2,
+                "p95Ms": 2,
+                "p99Ms": 3,
+                "maxMs": 2.7524999999441206
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "refresh": {
+              "count": 10,
+              "status": {
+                "success": 10
+              },
+              "fromSend": {
+                "count": 10,
+                "p50Ms": 5,
+                "p95Ms": 10,
+                "p99Ms": 10,
+                "maxMs": 9.213799999910407
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "turn": {
+              "count": 9,
+              "status": {
+                "success": 9
+              },
+              "fromSend": {
+                "count": 9,
+                "p50Ms": 1,
+                "p95Ms": 1,
+                "p99Ms": 1,
+                "maxMs": 0.8347999999532476
+              },
+              "fromPlan": {
+                "count": 9,
+                "p50Ms": 13,
+                "p95Ms": 25,
+                "p99Ms": 25,
+                "maxMs": 24.554000000003725
+              }
+            },
+            "fanout-turn": {
+              "count": 14,
+              "status": {
+                "success": 14
+              },
+              "fromSend": {
+                "count": 14,
+                "p50Ms": 1,
+                "p95Ms": 3,
+                "p99Ms": 3,
+                "maxMs": 2.752199999988079
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            },
+            "selfChat": {
+              "count": 2,
+              "status": {
+                "success": 2
+              },
+              "fromSend": {
+                "count": 2,
+                "p50Ms": 2,
+                "p95Ms": 2,
+                "p99Ms": 2,
+                "maxMs": 1.381900000036694
+              },
+              "fromPlan": {
+                "count": 0,
+                "p50Ms": null,
+                "p95Ms": null,
+                "p99Ms": null,
+                "maxMs": 0
+              }
+            }
+          }
+        }
+      ],
+      "startedAtMs": 1792898414806,
+      "endedAtMs": 1792898715148
+    }
+  ],
+  "nativeResume": [],
+  "savedVerification": [],
+  "phaseWindows": [
+    {
+      "name": "bootstrap-2",
+      "kind": "bootstrap",
+      "targetActors": 2,
+      "startedAtMs": 1792898022052,
+      "endedAtMs": 1792898057035,
+      "completed": true
+    },
+    {
+      "name": "stage-2",
+      "kind": "measurement",
+      "targetActors": 2,
+      "startedAtMs": 1792898057035,
+      "endedAtMs": 1792898357259,
+      "completed": true
+    },
+    {
+      "name": "bootstrap-10",
+      "kind": "bootstrap",
+      "targetActors": 10,
+      "startedAtMs": 1792898357261,
+      "endedAtMs": 1792898414806,
+      "completed": true
+    },
+    {
+      "name": "stage-10",
+      "kind": "measurement",
+      "targetActors": 10,
+      "startedAtMs": 1792898414806,
+      "endedAtMs": 1792898715148,
+      "completed": true
+    }
+  ],
+  "ordinaryAccountsOnly": true,
+  "visualAccepted": false,
+  "capacityUpperBound": null,
+  "acceptanceScope": "One real egress, ordinary same-map movement/AOI and the explicitly declared combat subgroup",
+  "measurementClock": {
+    "scope": "All measurement phases; seconds retains configured duration and measuredSeconds is actual elapsed wall time.",
+    "minimumCompleteWindowMs": 60000,
+    "completeWindowCountRule": "At least floor(configured seconds / 60) complete windows, each starting at the previous actual close, plus the full configured phase duration.",
+    "durationRule": "Activity and rate assessment use actual measuredSeconds; no short window is relabelled as sixty seconds or duplicated after a stall.",
+    "partialWindowRule": "The final partial minute remains in whole-phase and continuous assessment, without counting as a complete rolling window."
+  },
+  "navigationCoordination": {
+    "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+    "maximumHintCellsPerConnection": 7,
+    "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+  },
+  "nativePatrolPlanning": {
+    "scope": "Native primed patrol fallback only; original fast path and at most four existing corner targets remain.",
+    "maximumFallbackCornerTargets": 4,
+    "pathExpansionLimit": 4000,
+    "selectionRule": "Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.",
+    "primingRule": "Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain."
+  },
+  "nativeHpMaintenance": {
+    "scope": "Already-held ordinary HP potions only; no MP, purchase, grants or revival.",
+    "hpThreshold": 0.6,
+    "reuseDelayMs": 6000,
+    "evidenceDeadlineMs": 2000,
+    "commandBudgetPerSecond": 3,
+    "rule": "Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.",
+    "activityRule": "Independent auxiliary promise; native opportunities continue and HP maintenance never credits movement, attack or native completion."
+  },
+  "nativeAttackWitness": {
+    "scope": "New native attack witness selection; the original full AOI membership range remains16.",
+    "maximumOwnerAndTargetDistance": 6,
+    "rule": "Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.",
+    "damageRule": "Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged."
+  },
+  "attackResults": {
+    "mode": "v2",
+    "capability": "nativeAttackOutcomeV1",
+    "rule": "No legacy fallback. Activity attacks count correlated launched outcomes only; hits still require the original dual-end damage/health evidence. Hunting attempts are offered requests, not launched attacks."
+  },
+  "provisioning": [
+    "admin-provisioned-file-account-only"
+  ],
+  "registrationLoadTested": false,
+  "simultaneousLoginBurstTested": false,
+  "mixedClassCombatTested": false,
+  "baselineActiveSessions": 0,
+  "initialLoginNotBefore": "2026-10-25T03:13:42.051Z",
+  "scenario": {
+    "layout": "dispersed",
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "combatActors": 1,
+    "patrolSpan": 4,
+    "explicitNativeHomes": {
+      "visitedCells": 13587,
+      "mapCells": 490000,
+      "footprintCells": 250
+    },
+    "combatClusters": [
+      {
+        "combatActorIndices": [
+          5
+        ],
+        "movementActorIndices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          7,
+          8,
+          9
+        ],
+        "observerFootprintCoverageRadius": 14
+      }
+    ],
+    "mapFileName": "0",
+    "anchors": [
+      {
+        "x": 251,
+        "y": 669
+      },
+      {
+        "x": 256,
+        "y": 668
+      },
+      {
+        "x": 251,
+        "y": 663
+      },
+      {
+        "x": 256,
+        "y": 661
+      },
+      {
+        "x": 251,
+        "y": 651
+      },
+      {
+        "x": 261,
+        "y": 669
+      },
+      {
+        "x": 264,
+        "y": 650
+      },
+      {
+        "x": 269,
+        "y": 669
+      },
+      {
+        "x": 275,
+        "y": 670
+      },
+      {
+        "x": 259,
+        "y": 650
+      }
+    ],
+    "knownStationaryNpcCount": 46
+  },
+  "peakControlledActors": 10,
+  "highestMeasuredStage": 10,
+  "highestPassedStage": 2,
+  "error": "Stage 10 did not satisfy the fixed activity, latency or coverage gates",
+  "finishedAt": "2026-10-25T03:25:16.820Z",
+  "safetyStopped": false,
+  "cleanupErrors": [],
+  "metrics": {
+    "login": {
+      "count": 10,
+      "status": {
+        "success": 10
+      },
+      "fromSend": {
+        "count": 10,
+        "p50Ms": 54,
+        "p95Ms": 79,
+        "p99Ms": 79,
+        "maxMs": 78.6478000000352
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "newCharacter": {
+      "count": 10,
+      "status": {
+        "success": 10
+      },
+      "fromSend": {
+        "count": 10,
+        "p50Ms": 32,
+        "p95Ms": 33,
+        "p99Ms": 33,
+        "maxMs": 32.072099999990314
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "startGame": {
+      "count": 10,
+      "status": {
+        "success": 10
+      },
+      "fromSend": {
+        "count": 10,
+        "p50Ms": 965,
+        "p95Ms": 1017,
+        "p99Ms": 1017,
+        "maxMs": 1016.4748
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "bootstrap": {
+      "count": 10,
+      "status": {
+        "success": 10
+      },
+      "fromSend": {
+        "count": 10,
+        "p50Ms": 2260,
+        "p95Ms": 2370,
+        "p99Ms": 2370,
+        "maxMs": 2363.664999999999
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "walk": {
+      "count": 424,
+      "status": {
+        "budget-gap": 10,
+        "success": 414
+      },
+      "fromSend": {
+        "count": 414,
+        "p50Ms": 1,
+        "p95Ms": 3,
+        "p99Ms": 5,
+        "maxMs": 18.969399999943562
+      },
+      "fromPlan": {
+        "count": 414,
+        "p50Ms": 20,
+        "p95Ms": 35,
+        "p99Ms": 40,
+        "maxMs": 43.83989999999176
+      }
+    },
+    "run": {
+      "count": 4672,
+      "status": {
+        "success": 4670,
+        "corrected": 2
+      },
+      "fromSend": {
+        "count": 4672,
+        "p50Ms": 1,
+        "p95Ms": 5,
+        "p99Ms": 6,
+        "maxMs": 21.75250000000233
+      },
+      "fromPlan": {
+        "count": 4672,
+        "p50Ms": 17,
+        "p95Ms": 31,
+        "p99Ms": 35,
+        "maxMs": 43.79290000000037
+      }
+    },
+    "fanout-walk": {
+      "count": 352,
+      "status": {
+        "success": 352
+      },
+      "fromSend": {
+        "count": 352,
+        "p50Ms": 1,
+        "p95Ms": 3,
+        "p99Ms": 4,
+        "maxMs": 4.794400000013411
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "rtt": {
+      "count": 354,
+      "status": {
+        "success": 354
+      },
+      "fromSend": {
+        "count": 354,
+        "p50Ms": 1,
+        "p95Ms": 1,
+        "p99Ms": 4,
+        "maxMs": 4.79680000001099
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "chat": {
+      "count": 138,
+      "status": {
+        "success": 138
+      },
+      "fromSend": {
+        "count": 138,
+        "p50Ms": 2,
+        "p95Ms": 3,
+        "p99Ms": 7,
+        "maxMs": 13.161100000026636
+      },
+      "fromPlan": {
+        "count": 138,
+        "p50Ms": 20,
+        "p95Ms": 33,
+        "p99Ms": 39,
+        "maxMs": 39.32890000002226
+      }
+    },
+    "peerChat": {
+      "count": 131,
+      "status": {
+        "success": 131
+      },
+      "fromSend": {
+        "count": 131,
+        "p50Ms": 2,
+        "p95Ms": 3,
+        "p99Ms": 6,
+        "maxMs": 13.161100000026636
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "fanout-chat": {
+      "count": 259,
+      "status": {
+        "success": 259
+      },
+      "fromSend": {
+        "count": 259,
+        "p50Ms": 2,
+        "p95Ms": 3,
+        "p99Ms": 14,
+        "maxMs": 28.447199999995064
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "fanout-run": {
+      "count": 5433,
+      "status": {
+        "success": 5433
+      },
+      "fromSend": {
+        "count": 5433,
+        "p50Ms": 1,
+        "p95Ms": 3,
+        "p99Ms": 5,
+        "maxMs": 27.728100000007544
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "selfChat": {
+      "count": 7,
+      "status": {
+        "success": 7
+      },
+      "fromSend": {
+        "count": 7,
+        "p50Ms": 2,
+        "p95Ms": 7,
+        "p99Ms": 7,
+        "maxMs": 6.680099999997765
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "refresh": {
+      "count": 62,
+      "status": {
+        "success": 62
+      },
+      "fromSend": {
+        "count": 62,
+        "p50Ms": 5,
+        "p95Ms": 7,
+        "p99Ms": 10,
+        "maxMs": 9.213799999910407
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "turn": {
+      "count": 64,
+      "status": {
+        "success": 64
+      },
+      "fromSend": {
+        "count": 64,
+        "p50Ms": 1,
+        "p95Ms": 3,
+        "p99Ms": 5,
+        "maxMs": 4.984800000034738
+      },
+      "fromPlan": {
+        "count": 64,
+        "p50Ms": 20,
+        "p95Ms": 31,
+        "p99Ms": 32,
+        "maxMs": 31.539999999979045
+      }
+    },
+    "fanout-turn": {
+      "count": 81,
+      "status": {
+        "success": 81
+      },
+      "fromSend": {
+        "count": 81,
+        "p50Ms": 1,
+        "p95Ms": 3,
+        "p99Ms": 4,
+        "maxMs": 3.4206000000122003
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "attack": {
+      "count": 97,
+      "status": {
+        "success": 97
+      },
+      "fromSend": {
+        "count": 97,
+        "p50Ms": 49,
+        "p95Ms": 109,
+        "p99Ms": 120,
+        "maxMs": 119.954800000065
+      },
+      "fromPlan": {
+        "count": 97,
+        "p50Ms": 67,
+        "p95Ms": 127,
+        "p99Ms": 143,
+        "maxMs": 142.94209999998566
+      },
+      "attackV2Requests": 97,
+      "attackV2NotLaunched": 0
+    },
+    "logOut": {
+      "count": 10,
+      "status": {
+        "success": 10
+      },
+      "fromSend": {
+        "count": 10,
+        "p50Ms": 296,
+        "p95Ms": 317,
+        "p99Ms": 317,
+        "maxMs": 316.75639999995474
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    }
+  },
+  "samples": 12124,
+  "continuousAcceptance": {
+    "passed": true,
+    "failureCount": 0,
+    "firstFailure": null,
+    "assessedWindows": 72,
+    "shortSegments": 0,
+    "shortSegmentRule": "Under 20 active seconds: protocol/latency/error gates still apply; no activity-rate claim",
+    "actors": [
+      {
+        "name": "L25081f00",
+        "role": "movement",
+        "activeSeconds": 690.5957244000001,
+        "plannedPauseSeconds": 1.6690296000000089,
+        "assessedWindows": 12
+      },
+      {
+        "name": "L25081f01",
+        "role": "movement",
+        "activeSeconds": 686.6189900999999,
+        "plannedPauseSeconds": 1.6690296000000089,
+        "assessedWindows": 12
+      },
+      {
+        "name": "L25081f02",
+        "role": "movement",
+        "activeSeconds": 355.5715333,
+        "plannedPauseSeconds": 1.6690296000000089,
+        "assessedWindows": 6
+      },
+      {
+        "name": "L25081f03",
+        "role": "movement",
+        "activeSeconds": 351.8117045000001,
+        "plannedPauseSeconds": 1.6690296000000089,
+        "assessedWindows": 6
+      },
+      {
+        "name": "L25081f04",
+        "role": "movement",
+        "activeSeconds": 348.2763843,
+        "plannedPauseSeconds": 1.6690296000000089,
+        "assessedWindows": 6
+      },
+      {
+        "name": "L25081f05",
+        "role": "combat",
+        "activeSeconds": 344.1825231,
+        "plannedPauseSeconds": 1.6690296000000089,
+        "assessedWindows": 6
+      },
+      {
+        "name": "L25081f06",
+        "role": "movement",
+        "activeSeconds": 340.0938143,
+        "plannedPauseSeconds": 1.6690296000000089,
+        "assessedWindows": 6
+      },
+      {
+        "name": "L25081f07",
+        "role": "movement",
+        "activeSeconds": 336.58571680000006,
+        "plannedPauseSeconds": 1.6690296000000089,
+        "assessedWindows": 6
+      },
+      {
+        "name": "L25081f08",
+        "role": "movement",
+        "activeSeconds": 332.473611,
+        "plannedPauseSeconds": 1.6690296000000089,
+        "assessedWindows": 6
+      },
+      {
+        "name": "L25081f09",
+        "role": "movement",
+        "activeSeconds": 328.33458310000003,
+        "plannedPauseSeconds": 1.6690296000000089,
+        "assessedWindows": 6
+      }
+    ]
+  },
+  "density": {
+    "samplingIntervalMs": 1000,
+    "scope": "Observed independent maxima at nominal 1000ms sampling cadence, not exhaustive peaks. total counts snapshot.entities; groundDropsReported counts snapshot.groundDrops separately and is not added to total. Maxima may come from different observers.",
+    "sampleCount": 687,
+    "maps": [
+      {
+        "mapFileName": "0",
+        "maxCohortActive": 10,
+        "maxCohortCombatActive": 1,
+        "observerSamples": 4082,
+        "maxVisible": {
+          "total": 33,
+          "players": 10,
+          "monsters": 21,
+          "npcs": 9,
+          "other": 0,
+          "groundDropsReported": 2
+        }
+      }
+    ]
+  },
+  "peakServerActive": 10,
+  "bytes": {
+    "sent": 209630,
+    "received": 24236449
+  },
+  "bytesDefinition": "Physical WebSocket payload bytes, including catalog batch/gzip headers and excluding WebSocket/TLS framing",
+  "activityMode": "native",
+  "actorActivity": [
+    {
+      "actor": "L25081f00",
+      "plans": 921,
+      "gaps": 1,
+      "moves": 886,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792898715100,
+      "runs": 826,
+      "cells": 1712,
+      "nativeOpportunities": 921,
+      "nativeCompleted": 920,
+      "offeredDurationMs": 690750,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L25081f01",
+      "plans": 915,
+      "gaps": 1,
+      "moves": 880,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792898714633,
+      "runs": 833,
+      "cells": 1713,
+      "nativeOpportunities": 915,
+      "nativeCompleted": 914,
+      "offeredDurationMs": 686250,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L25081f02",
+      "plans": 474,
+      "gaps": 1,
+      "moves": 456,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792898714944,
+      "runs": 434,
+      "cells": 890,
+      "nativeOpportunities": 474,
+      "nativeCompleted": 473,
+      "offeredDurationMs": 355500,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L25081f03",
+      "plans": 469,
+      "gaps": 1,
+      "moves": 451,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792898715007,
+      "runs": 426,
+      "cells": 877,
+      "nativeOpportunities": 469,
+      "nativeCompleted": 468,
+      "offeredDurationMs": 351750,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L25081f04",
+      "plans": 464,
+      "gaps": 1,
+      "moves": 446,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792898714821,
+      "runs": 420,
+      "cells": 866,
+      "nativeOpportunities": 464,
+      "nativeCompleted": 463,
+      "offeredDurationMs": 348000,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L25081f05",
+      "plans": 371,
+      "gaps": 1,
+      "moves": 254,
+      "attacks": 97,
+      "hits": 97,
+      "damage": 280,
+      "lastSuccessAt": 1792898713898,
+      "runs": 125,
+      "cells": 379,
+      "nativeOpportunities": 371,
+      "nativeCompleted": 370,
+      "offeredDurationMs": 343560,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L25081f06",
+      "plans": 453,
+      "gaps": 1,
+      "moves": 434,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792898714852,
+      "runs": 406,
+      "cells": 840,
+      "nativeOpportunities": 453,
+      "nativeCompleted": 450,
+      "offeredDurationMs": 339750,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L25081f07",
+      "plans": 448,
+      "gaps": 1,
+      "moves": 431,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792898714633,
+      "runs": 407,
+      "cells": 838,
+      "nativeOpportunities": 448,
+      "nativeCompleted": 447,
+      "offeredDurationMs": 336000,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L25081f08",
+      "plans": 443,
+      "gaps": 1,
+      "moves": 426,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792898715038,
+      "runs": 396,
+      "cells": 822,
+      "nativeOpportunities": 443,
+      "nativeCompleted": 442,
+      "offeredDurationMs": 332250,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L25081f09",
+      "plans": 437,
+      "gaps": 1,
+      "moves": 420,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792898714726,
+      "runs": 397,
+      "cells": 817,
+      "nativeOpportunities": 437,
+      "nativeCompleted": 436,
+      "offeredDurationMs": 327750,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    }
+  ],
+  "nativeLoadScope": {
+    "movementIntervalMs": 750,
+    "movementMinimumMs": 600,
+    "singleUnacknowledgedMovement": true,
+    "attackFormula": "max(max(550,1400-60*AttackSpeed-min(14*level,370)),600)+50ms",
+    "nativeVsZoneFloorDifference": "Native 550ms floor and Zone 600ms floor remain unchanged; this driver respects both",
+    "chatIntervalMs": 30000,
+    "maximumObserverEvidenceInFlight": 4,
+    "actionFanoutProbeRange": 6,
+    "chatFanoutProbeRange": 8,
+    "fullAoiMembershipRange": 16,
+    "evidenceWaitMeaning": "Instrumentation wait stays in offered-load denominator; insufficient coverage does not establish server overload",
+    "ambiguousAttackRule": "Unverified attacks permanently quarantine that actor/target pair for this run; more than 64 such targets stops the test",
+    "continuousRunningRule": "The Run ratio and cell-rate gates also apply throughout ramp, anchor travel and ordinary login-window waits",
+    "limitations": [
+      "Warrior starter melee only",
+      "No caster AOE, summons or cross-map raid proof",
+      "No native GPU/render acceptance",
+      "No simultaneous auth burst or automatic revival"
+    ]
+  },
+  "combatScenario": {
+    "rule": "First reach the declared home by ordinary Walk/Run, then hunt; initial transit stays in continuous activity and stage measurement starts only after arrival",
+    "searchRadiusFromCurrentPosition": 16,
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "huntingRangeMeaning": "Actual attack positions; chasing may leave the initial home. Authored spawns do not prove live target supply",
+    "actors": [
+      {
+        "actor": "L25081f05",
+        "declaredHome": {
+          "x": 261,
+          "y": 669
+        },
+        "arrival": {
+          "at": 1792898397199,
+          "phase": "settle",
+          "mapFileName": "0",
+          "declaredHome": {
+            "x": 261,
+            "y": 669
+          },
+          "actual": {
+            "x": 261,
+            "y": 669
+          },
+          "authoritativeSequence": 1093,
+          "activeElapsedMs": 26232.16750000004
+        },
+        "hunting": {
+          "attempts": 97,
+          "positiveHits": 97,
+          "totalDamage": 280,
+          "firstAt": 1792898399434,
+          "ownerBounds": {
+            "minX": 250,
+            "maxX": 271,
+            "minY": 648,
+            "maxY": 670
+          },
+          "targetBounds": {
+            "minX": 249,
+            "maxX": 270,
+            "minY": 647,
+            "maxY": 671
+          },
+          "maximumTargetDistanceFromHome": 22,
+          "lastAt": 1792898713823
+        }
+      }
+    ]
+  },
+  "boundedStorage": {
+    "retainedMonitorSamples": 233,
+    "maximumMonitorSamples": 1201,
+    "monitorTimeBucketMs": 3000,
+    "rawMonitorSamples": 361,
+    "maximumEventsPerConnection": 2048,
+    "writerMaximumBufferedBytes": 65736,
+    "writerLimitBytes": 4194304,
+    "movementCorrection": {
+      "maximumRejectedWalkCells": 16,
+      "rejectedWalkCellTtlMs": 3000,
+      "maximumNearbyOccupants": 32,
+      "rows": 2,
+      "rule": "First correction per uninterrupted movement streak; unchanged-owner Walk temporarily avoids its single refused cell without changing failure accounting"
+    },
+    "navigationBlocked": {
+      "maximumAttempts": 40,
+      "maximumNearbyOccupants": 32,
+      "rows": 0,
+      "rule": "First blocked action opportunity until a successful movement acknowledgement; ordinary blocked opportunities remain counted"
+    },
+    "selfTransform": {
+      "rows": 5084,
+      "rule": "Only public packets changing owner coordinates; fixed position/direction fields streamed through the existing writer, no retained aggregate"
+    },
+    "playerLifecycle": {
+      "maximumIdentitiesPerConnection": 256,
+      "maximumProjectionPlayers": 256,
+      "rows": 4811,
+      "identityEvictions": 0,
+      "unchangedSnapshotsOmitted": 257,
+      "movementRule": "Ordinary movement is not copied; retain only the first known-player movement while its projection is absent, until reappearance"
+    }
+  },
+  "diagnosticCompleted": false,
+  "ok": false,
+  "movementCapacityAccepted": false,
+  "combatCapacityAccepted": false,
+  "playableCapacityAccepted": false,
+  "acceptedControlledActors": null,
+  "reportPath": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\reports\\1792898022018-efb7a76a.report.json"
+}

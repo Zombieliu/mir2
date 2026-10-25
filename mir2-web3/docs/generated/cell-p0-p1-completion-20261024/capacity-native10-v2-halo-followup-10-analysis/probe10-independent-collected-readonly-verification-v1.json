@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T03:39:37.325Z",
+  "runId": "1792898022018-efb7a76a",
+  "method": "Independent read-only public inventory, explicit-copy raw SHA, external raw/monitor/recording SHA, structural credential-field scan and frozen verifier status/projection round trip.",
+  "originalCopiesVerified": 64,
+  "publicFilesVerifiedBeforeThisReceipt": 69,
+  "publicJsonFilesStructurallyChecked": 46,
+  "externalArchivesVerified": 3,
+  "rawBytes": 13028051,
+  "rawSha256": "79510b349b2f1c70092fcad4bbc5ed79b76f14a4ceb3811b02704ff11e786b68",
+  "rawRows": 21101,
+  "invalidRawMonitorRows": 0,
+  "originalVerdictPreserved": true,
+  "reportOk": false,
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "6e05932000740abc88997db9496c57b301e0a4a9",
+  "rawVerifierAccepted": false,
+  "normalProcessCleanup": true,
+  "diagnosticsComplete": true,
+  "normalOwnedCleanup": true,
+  "capacityAccepted": false,
+  "privateSecretValuesReadOrClaimedChecked": false,
+  "finalIndexCreated": false,
+  "existingTopicsModified": false,
+  "posthocReadOnlyRerun": true,
+  "originalVerifierUnmodified": true,
+  "publicFilesModified": false,
+  "originalVerification": {
+    "bytes": 1080,
+    "sha256": "0e7e50fde8f28a31bbffb16be89e46e2965f7b5cd187c30b8b27fe1de59a0d46"
+  },
+  "publicFilesIncludingOriginalVerification": 69,
+  "sourceDerivation": {
+    "bytes": 1344,
+    "sha256": "133e4cfaa1caf23029eb77ab1ff18853294bf87c6a9e8a063d0c570aca96d165"
+  }
+}

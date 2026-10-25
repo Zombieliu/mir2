@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T03:10:59.721Z",
+  "scope": "Independent bounded static review of probe10 preseal contracts, collectors and exact reviewed input pins; no product modules, preparation, services, builds or tests executed.",
+  "state": "no-blocking-finding-to-seal-pending-final-launcher-closure",
+  "presealReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe10-preseal-input-check-v1.json",
+    "bytes": 12697,
+    "sha256": "8ca34466cd0cad30cabbc032c3f8df8f157739818a96129bb3177c9a89d204b8"
+  },
+  "reviewedLocalFiles": 32,
+  "reviewedSourceSha256": "643d239e07eac9c3665a08cc460010a2cecde8330516714330cdd1fc930e2913",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-survival-pursuit-witness-driver-frozen-v1.json",
+    "bytes": 28714,
+    "sha256": "4bac2cca1a8cb6eca3432ebc22add873456ce38a7f33b81f39998d88befe3063"
+  },
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "6e05932000740abc88997db9496c57b301e0a4a9",
+  "driverSourceSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+  "reviewedContracts": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\collect-public.mjs",
+      "bytes": 39374,
+      "sha256": "882b36debd651483bbee071bbe531bf3c2248f0a71ce527e433dd848f2128e36"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\driver-evidence-contract.mjs",
+      "bytes": 4501,
+      "sha256": "8c5e28c4b07c360eb99d9158fec243466d9cecb56655b73b858f65bb3559f429"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\driver-report-contract.mjs",
+      "bytes": 8690,
+      "sha256": "57c8cd9db231aa11cbbbe307e3c9b474b0b5b424f6907a90407c6d0f367ce355"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\input-lib.mjs",
+      "bytes": 14632,
+      "sha256": "295f84e678b61342cb35b3b83d4c4b01b82d7b86528c5a1af258d066e7450d01"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\prepare-inputs.mjs",
+      "bytes": 10669,
+      "sha256": "ab8fbb3d15dcd7e5d5fb6f03023020d915ad896fdd408701e7d64be9292201fe"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\run-owned.mjs",
+      "bytes": 17967,
+      "sha256": "7a119ef3682996a39e162ca3a96ae5954c2af2d0004353b47ef8b3eca007c039"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\verify-public.mjs",
+      "bytes": 17281,
+      "sha256": "e3c5cae89dcd5a824d8a9beece43ebc3b38ac4655875f22159d05c6b23076399"
+    }
+  ],
+  "resolvedFindings": [
+    {
+      "finding": "Prepare synthetic report used upper-case shorthand property names.",
+      "resolution": "Explicit nativeHpMaintenance/nativeAttackWitness keys now match exact producer/frozen/report declarations."
+    },
+    {
+      "finding": "Existing project HP helper was wrongly recursed as external evidence.",
+      "resolution": "Helper is checked separately against the canonical existing project import, immutable helper flags, raw pin and current committed Git LF bytes; external evidence containment remains strict."
+    }
+  ],
+  "findings": [],
+  "nonblockingNotes": [
+    "Inherited Passing09 error message text does not select paths or change verdict; actual child/catalog/realm/report identities are probe10.",
+    "New metadata says no-witness opportunities incomplete in prepared-attack context; initial selection may continue original valid movement/other-target/scout fallback, as implemented and tested."
+  ],
+  "checkedBoundaries": [
+    "Exact backend468/driver6e059 separation and final9 c792 manifest binding.",
+    "Final25/53/175 log and receipt raw pins validated without rerunning suites; historical failed175 run remains historical.",
+    "Exact lowerCamel declarations checked through synthetic prepare, final report, sidecar, catalog and independent collector verifier.",
+    "Probe public target is only capacity-native10-v2-halo-followup-10-diagnostics; public whitelist excludes private stores and recording payload copies.",
+    "Probe remains capacityAccepted=false; original300/300/360 configured and actual measured phase/window minimums, raw proof roundtrip and cleanup/diagnostics checks remain.",
+    "Partial/failed reports retain original bytes; public collector does not rewrite original business verdict."
+  ],
+  "finalFocusedPassedAuthorReceipt": 25,
+  "finalAdjacentPassedAuthorReceipt": 53,
+  "finalFullPassedAuthorReceipt": 175,
+  "testsRerunByReviewer": false,
+  "productModulesEvaluated": false,
+  "sourceguardExecutedByReviewer": false,
+  "prepareExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "limitations": [
+    "This receipt covers the pinned preseal32-file state; later final launcher freeze and source guard must be checked separately.",
+    "No new live workload, survival, witness supply, capacity or P0 acceptance is claimed."
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25T03:37:45.898Z",
+  "method": "Actual immutable formal07 verifyRelease + collectDriverInputs + verifyFeasibilityGate invocation; no prepare entry point or process spawn.",
+  "command": [
+    "node",
+    "C:\\mir2-build\\p01-completion-20261024\\check-formal07-failed10-gate-v1.mjs"
+  ],
+  "exitCode": 0,
+  "accepted": false,
+  "actualError": {
+    "name": "Error",
+    "message": "Real coordinated probe10 has not passed; a probe remains ineligible for capacity acceptance"
+  },
+  "expectedFailedReportRejection": true,
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\reports\\1792898022018-efb7a76a.report.json",
+    "bytes": 189046,
+    "sha256": "cf8b864372f5c402aea8544c8a3987ffbcdca876b7ad978d47ab8d91ee56a48c"
+  },
+  "runId": "1792898022018-efb7a76a",
+  "reportOk": false,
+  "reportPlayableCapacityAccepted": false,
+  "driverSourceCommit": "6e05932000740abc88997db9496c57b301e0a4a9",
+  "gate": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-07\\verify-feasibility-gate.mjs",
+    "bytes": 18299,
+    "sha256": "f1bb3704d5f20ea30be9b7d361a7d70c16997c63d795b85a4201f5ddfd996d1d"
+  },
+  "before": [
+    {
+      "name": "private",
+      "absent": true
+    },
+    {
+      "name": "bin",
+      "absent": true
+    },
+    {
+      "name": "reports",
+      "absent": true
+    },
+    {
+      "name": "recordings",
+      "absent": true
+    },
+    {
+      "name": "preparation.lock",
+      "absent": true
+    },
+    {
+      "name": "execution.lock",
+      "absent": true
+    },
+    {
+      "name": "source-pins.json",
+      "absent": true
+    }
+  ],
+  "after": [
+    {
+      "name": "private",
+      "absent": true
+    },
+    {
+      "name": "bin",
+      "absent": true
+    },
+    {
+      "name": "reports",
+      "absent": true
+    },
+    {
+      "name": "recordings",
+      "absent": true
+    },
+    {
+      "name": "preparation.lock",
+      "absent": true
+    },
+    {
+      "name": "execution.lock",
+      "absent": true
+    },
+    {
+      "name": "source-pins.json",
+      "absent": true
+    }
+  ],
+  "formalPrepared": false,
+  "sourceConfigNotCreated": true,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T03:19:57.104Z",
+  "state": "final-source-bound-not-executed",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "backendRebuilt": false,
+  "driverSourceCommit": "6e05932000740abc88997db9496c57b301e0a4a9",
+  "driverSourceSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-survival-pursuit-witness-driver-frozen-v1.json",
+    "bytes": 28714,
+    "sha256": "4bac2cca1a8cb6eca3432ebc22add873456ce38a7f33b81f39998d88befe3063"
+  },
+  "actualAdmissionCaps": [
+    128,
+    100,
+    100,
+    4,
+    1,
+    2
+  ],
+  "sourceConfigNotYet": true,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "verifiedAt": "2026-10-25T03:19:59.887Z",
+  "passed": true,
+  "backendSourceUnchangedSinceBuild": true,
+  "rebuildPerformed": false,
+  "backendSourceAggregate": "57ea1cde0ab22a03a50d1e9c7e20fdcd8a2060d1cb7922a2ad2cee91e55f5d96",
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87370240,
+    "sha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d"
+  },
+  "full16RunId": "1792884517374-04264602",
+  "driverClosurePins": 74,
+  "sceneSourceSha256": "6f76ce116c984b42c2747da19cbc82f615853a6796b5f9b052236cd716f6fb46",
+  "readOnly": true,
+  "newProbeGateNotExecuted": true
+}
