@@ -31,7 +31,15 @@ const storageAdapter = transpileModule(new URL("../lib/storage-gateway-adapter.t
   if (id === "./mail-parcel-gateway-adapter") return parcelAdapter;
   throw new Error(`Unexpected storage dependency ${id}`);
 });
-const mailPackets = transpileModule(new URL("../lib/extended-server-packets.ts", import.meta.url));
+const { BagBeltMoveDispatcher } = transpileModule(new URL("../lib/bag-belt-move-dispatcher.ts", import.meta.url), (id) => {
+  assert.equal(id, "./mail-parcel-gateway-adapter");
+  return parcelAdapter;
+});
+const purchaseClient = transpileModule(new URL("../lib/npc-purchase-client.ts", import.meta.url));
+const mailPackets = transpileModule(new URL("../lib/extended-server-packets.ts", import.meta.url), (id) => {
+  assert.equal(id, "./npc-purchase-client");
+  return purchaseClient;
+});
 const mailUi = transpileModule(new URL("../lib/bevy-mail-ui.ts", import.meta.url), (id) => {
   assert.equal(id, "./extended-server-packets");
   return mailPackets;
@@ -68,7 +76,7 @@ function actualRuntime() {
 const pageUrl = new URL("../app/page.tsx", import.meta.url);
 const pageSource = readFileSync(pageUrl, "utf8");
 const syntax = ts.createSourceFile(fileURLToPath(pageUrl), pageSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const names = ["cancelMailParcel","setMailboxOpen","syncEquipmentSnapshot", "suspendEquipmentConnection", "rejectEquipmentCommand", "currentEquipmentOwner", "itemCommandRequiresOwner", "send", "sendRaw", "moveItem", "useItem", "dispatchBevyBagIntent", "dispatchBevyCharacterIntent", "setShowInventory"];
+const names = ["cancelMailParcel","setMailboxOpen","syncEquipmentSnapshot", "suspendEquipmentConnection", "rejectEquipmentCommand", "currentEquipmentOwner", "itemCommandRequiresOwner", "parityItemMutationAllowed", "socialItemMutationAllowed", "send", "sendRaw", "moveItem", "useItem", "dispatchBevyBagIntent", "dispatchBevyCharacterIntent", "setShowInventory"];
 const declarations = new Map();
 function visit(node) {
   if (ts.isFunctionDeclaration(node) && node.name && names.includes(node.name.text)) {
@@ -78,7 +86,12 @@ function visit(node) {
 }
 visit(syntax);
 assert.deepEqual([...declarations.keys()].sort(), [...names].sort(), "page gate declarations changed");
-const pageFunctions = names.map((name) => declarations.get(name)).join("\n");
+const loginUrl = new URL("../lib/client-login-runtime.ts", import.meta.url);
+const loginAst = ts.createSourceFile(fileURLToPath(loginUrl), readFileSync(loginUrl, "utf8"), ts.ScriptTarget.Latest, true);
+const authClassifiers = loginAst.statements.filter(node => ts.isFunctionDeclaration(node)
+  && ["preauthCommandKind", "isSensitiveGatewayCommand"].includes(node.name?.text)).map(node => node.getText(loginAst).replace(/^export /, ""));
+assert.equal(authClassifiers.length, 2);
+const pageFunctions = names.map((name) => declarations.get(name)).concat(authClassifiers).join("\n");
 const pageJavaScript = ts.transpileModule(pageFunctions, {
   fileName: "page-gates.ts",
   compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 },
@@ -110,6 +123,20 @@ function harness({ item = bagItem(4), worldState = world(item), cachedSnapshot =
   class CustomEvent { constructor(type, options) { this.type = type; this.detail = options.detail; } }
   const spellsWithdrawalsRef = { current: 0 };
   const scope = {
+    // These adjacent domains are dormant: no service, gesture or proof exists.
+    // The actual shared mutation gates below still run against empty custody.
+    npcPearlSendEpochRef: { current: 0 }, npcPurchaseClientRef: { current: null },
+    npcPurchaseEconomicSourceRef: { current: null }, npcPurchaseDisplaySourceRef: { current: null },
+    npcPearlShopSourceRef: { current: { retire() {} } },
+    retireWorldFishingGesture() {}, worldFishingSourceRef: { current: { retire() {} } }, worldFishingCommitRef: { current: null },
+    heroOperationsRef: { current: { pending: null } }, mailCollectBarrierRef: { current: null },
+    bagBeltMovesRef: { current: new BagBeltMoveDispatcher() }, bagBeltInventoryReadyRef: { current: null },
+    socialItemOperationsRef: { current: { pending: null } },
+    storageRentalRef: { current: { retire() {} } }, setStorageRentalPrompt() {},
+    retireSocialRequests() {}, retireSocialItemConnection() {},
+    npcGoldBuyInventoryRef: { current: { invalidate() {} } }, npcRepairAuthorityRef: { current: { invalidateInventory() {} } },
+    storageUiIngressRef: { current: null }, retireNpcShopService() {},
+    ownedTooltipEpochRef: { current: { bag: {}, character: {} } }, endStorageService() {},
     combatIngressRef:{current:null},mailIngressRef:{current:null},mailDispatcherRef:{current:null},mailRawRef:{current:null},mailOpenRef:{current:false},mailReadAttemptRef:{current:null},mailCompatRef:{current:null},setMailCompatibility:()=>{},setShowMail:()=>{},
     // This adjacent fixture initializes the real existing equipment bridge.
     // Mail is legitimately idle/unavailable here; its adapter gate is actual
@@ -187,6 +214,49 @@ test("unknown bag metadata refuses Use, and Equip refuses a missing ledger", () 
   const missing = harness({ controller: null });
   assert.equal(missing.send({ type: "equipItem", grid: "inventory", uniqueId: 4, to: 0 }), false);
   assert.equal(missing.sent.length, 0);
+});
+
+test("weapon replacement reaches the socket and the real ledger releases after ACK plus the swapped snapshot", () => {
+  const item = { ...bagItem(4, { info: { item_type: 1 } }), key: "crystal-item-1", name: "木剑" };
+  const weapon = { slot: "weapon", uniqueId: 8, authoritativeUniqueId: 8 };
+  const worldState = { ...world(item), equipmentItems: [weapon] };
+  const cachedSnapshot = { capacity: 46, placements: [
+    { uniqueId: 4, container: 0, slot: 4 }, { uniqueId: 8, container: 2, slot: 0 },
+  ] };
+  const controller = new EquipmentSessionController(actualRuntime());
+  assert.equal(controller.establishBaseline({ ...session, startGameConfirmed: true, complete: true, snapshot: cachedSnapshot }).ok, true);
+  const page = harness({ item, worldState, cachedSnapshot, controller });
+  assert.equal(page.send({ type: "useItem", grid: "inventory", uniqueId: 4 }), true);
+  assert.deepEqual(page.sent, [{ type: "equipItem", uniqueId: 4, grid: "inventory", to: 0 }]);
+  assert.equal(controller.applyAck({ ...session, operation: { kind: "equip", uniqueId: 4, grid: "inventory", to: 0 }, success: true }).matched, true);
+  assert.equal(controller.status().pending, 1);
+  assert.equal(controller.observeSnapshot({ ...session, complete: true, snapshot: { capacity: 46, placements: [
+    { uniqueId: 8, container: 0, slot: 4 }, { uniqueId: 4, container: 2, slot: 0 },
+  ] } }).pending, 0);
+});
+
+test("React Use and native Equip/Use all choose the current free ring hand through the real send gate", () => {
+  const owner = { ...session, owner: "bevy", runGeneration: 1, ownerRevision: 1, modelRevision: 2, presentationRevision: 3 };
+  for (const existing of [null, "ringLeft", "ringRight"]) {
+    for (const action of ["reactUse", "equipItem", "useItem"]) {
+      const item = { ...bagItem(0, { info: { item_type: 7 } }), slot: 0,
+        key: "crystal-item-404", name: "铜戒指", icon: 1, quantity: 1, description: "", equipSlot: "ringLeft" };
+      const equipped = existing ? [{ slot: existing, uniqueId: 8, authoritativeUniqueId: 8, key: "crystal-item-404", quantity: 1, name: "铜戒指",
+        icon: 1, description: "", durabilityCurrent: 1, durabilityMax: 1, attack: 0, defence: 0 }] : [];
+      const worldState = { ...world(item), inventoryCapacity: 54, maxBagSlots: 48, gold: 200, equipmentItems: equipped };
+      const cachedSnapshot = { capacity: 54, placements: [{ uniqueId: 0, container: 0, slot: 0 },
+        ...equipped.map(equipped => ({ uniqueId: 8, container: 2, slot: equipped.slot === "ringLeft" ? 7 : 8 })),
+      ] };
+      const controller = new EquipmentSessionController(actualRuntime());
+      assert.equal(controller.establishBaseline({ ...session, startGameConfirmed: true, complete: true, snapshot: cachedSnapshot }).ok, true);
+      controller.setOwnerRevision(1);
+      const page = harness({ item, worldState, cachedSnapshot, controller, renderOwner: owner });
+      if (action === "reactUse") assert.equal(page.send({ type: "useItem", uniqueId: 0, grid: "inventory" }), true);
+      else assert.equal(page.dispatchBevyBagIntent({ ...owner, intentSequence: 1, type: action,
+        source: { container: 0, slot: 0, uniqueId: 0 } }).accepted, true, `${action}: ${existing}`);
+      assert.deepEqual(page.sent, [{ type: "equipItem", uniqueId: 0, grid: "inventory", to: existing === "ringRight" ? 7 : 8 }], `${action}: ${existing}`);
+    }
+  }
 });
 
 test("mount Use proves the current instance but emits only Crystal wire slot 13", () => {
@@ -347,8 +417,8 @@ test("actual raw send rechecks the original Bevy token and live host after synch
   }
 });
 
-test("retired compatibility bag callbacks cannot submit Drop, Merge, Split, Sell or storage operations", () => {
-  for (const type of ["dropItem", "mergeItem", "splitItem", "sellItem", "dropGold", "storeItemV2", "takeBackItemV2"]) {
+test("retired compatibility bag callbacks cannot submit Drop, Merge, Split or Sell", () => {
+  for (const type of ["dropItem", "mergeItem", "splitItem", "sellItem", "dropGold"]) {
     const command = { type, uniqueId: 4, from: 0, to: 4, count: 1 };
     const allowed = harness();
     assert.equal(allowed.send(command), true, `current owner: ${type}`);
@@ -361,6 +431,19 @@ test("retired compatibility bag callbacks cannot submit Drop, Merge, Split, Sell
     current.onAction(() => { current.scope.equipmentBagOwnerRef.current.ownerRevision++; });
     assert.equal(current.send({ type }), false, `final gate: ${type}`);
     assert.deepEqual(current.sent, []);
+  }
+});
+
+test("storage compatibility callbacks require a storage proof for current and stale owners", () => {
+  for (const type of ["storeItemV2", "takeBackItemV2"]) {
+    const command = { type, uniqueId: 4, from: 0, to: 4, count: 1 };
+    const current = harness();
+    assert.equal(current.send(command), false, `missing storage proof: ${type}`);
+    assert.deepEqual(current.sent, []);
+    const stale = harness();
+    stale.scope.equipmentBagOwnerRef.current = { ...session, runGeneration: 1, ownerRevision: 1, owner: "bevy" };
+    assert.equal(stale.send(command), false, `stale compatibility owner: ${type}`);
+    assert.deepEqual(stale.sent, []);
   }
 });
 

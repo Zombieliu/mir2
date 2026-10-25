@@ -1,5 +1,6 @@
-import type { DisplayItem, EquipmentSlot } from "./original-client-types";
+import type { DisplayEquipmentItem, DisplayItem, EquipmentSlot } from "./original-client-types";
 import { originalAssetPath } from "../../lib/asset-url";
+import { classifyEquipmentUse } from "../../lib/equipment-gateway-adapter";
 import itemLibraryMeta from "../../public/original-ui/Items/meta.json";
 
 const AVAILABLE_ORIGINAL_ITEM_ICONS = new Set(
@@ -86,9 +87,35 @@ export function equipmentSlotForItemKey(key: string): EquipmentSlot | null {
   return null;
 }
 
+const EQUIPMENT_SLOT_NAMES: readonly EquipmentSlot[] = [
+  "weapon", "armour", "helmet", "torch", "necklace", "braceletLeft", "braceletRight",
+  "ringLeft", "ringRight", "amulet", "belt", "boots", "stone", "mount",
+];
+
+type InventoryEquipmentSource = Pick<DisplayItem, "key" | "name" | "equipSlot"> & {
+  tooltipSource?: unknown;
+};
+
 export function equipmentSlotForItem(
-  item: Pick<DisplayItem, "key" | "name" | "equipSlot">,
+  item: InventoryEquipmentSource,
+  equipmentItems: readonly Pick<DisplayEquipmentItem, "slot">[] = [],
 ): EquipmentSlot | null {
-  if (item.equipSlot) return item.equipSlot;
-  return equipmentSlotForItemKey(`${item.key} ${item.name}`);
+  const classification = classifyEquipmentUse(item, equipmentItems);
+  if (classification.kind === "equipment") return EQUIPMENT_SLOT_NAMES[classification.to] ?? null;
+  if (classification.kind === "ordinary") return null;
+  const fallback = equipmentSlotForItemKey(`${item.key} ${item.name}`);
+  if (!fallback) return null;
+  const legacy = classifyEquipmentUse({ equipSlot: fallback }, equipmentItems);
+  return legacy.kind === "equipment" ? EQUIPMENT_SLOT_NAMES[legacy.to] ?? null : null;
+}
+
+export function inventoryItemCanStack(item: InventoryEquipmentSource): boolean {
+  if (equipmentSlotForItem(item)) return false;
+  const source = item.tooltipSource as { info?: { stack_size?: unknown } } | null | undefined;
+  const stackSize = source?.info?.stack_size;
+  return typeof stackSize !== "number" || (Number.isInteger(stackSize) && stackSize > 1);
+}
+
+export function inventoryItemCanSplit(item: InventoryEquipmentSource & Pick<DisplayItem, "quantity">): boolean {
+  return Number.isInteger(item.quantity) && item.quantity > 1 && inventoryItemCanStack(item);
 }

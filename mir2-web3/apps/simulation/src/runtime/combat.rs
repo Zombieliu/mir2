@@ -64,6 +64,10 @@ mod warrior_preparation_tests;
 #[path = "zone_melee_passive_progression_tests.rs"]
 mod zone_melee_passive_progression_tests;
 
+#[cfg(test)]
+#[path = "combat_halfmoon_profile_tests.rs"]
+mod combat_halfmoon_profile_tests;
+
 #[allow(deprecated)]
 pub(super) fn attack_target_in_direction(world: &World, direction: MirDirection) -> Option<u32> {
     attack_target_in_direction_at_distance(world, direction, 1)
@@ -3201,13 +3205,16 @@ impl SimulationSession {
         let active_spell = if requested_spell != Spell::None {
             requested_spell
         } else {
+            // Crystal overwrites its earlier attack choice as it checks the
+            // active techniques. An armed passive or Thrusting must not hide
+            // the player's enabled HalfMoon stance.
             [
                 Spell::FlamingSword,
-                Spell::Slaying,
                 Spell::TwinDrakeBlade,
-                Spell::Thrusting,
                 Spell::CrossHalfMoon,
                 Spell::HalfMoon,
+                Spell::Thrusting,
+                Spell::Slaying,
             ]
             .into_iter()
             .find(|spell| skill_toggle_state(world, *spell))

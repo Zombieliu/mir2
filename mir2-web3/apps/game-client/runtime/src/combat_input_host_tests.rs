@@ -19,7 +19,7 @@ fn host_clock_snapshot() -> CombatSnapshot {
         learned: vec![], actors: vec![player, target], timing: vec![],
         click_targets: vec![CrystalWorldClickTarget { kind: EntityKind::Monster,
             object_id: 4, x: 11, y: 10, dead: Some(false), ai: Some(0), harvestable: Some(false) }],
-        selected_object_id: Some(4), hovered_object_id: Some("4".into()), cursor: None,
+        selected_object_id: Some(4), force_attack: false, hovered_object_id: Some("4".into()), cursor: None,
         class: Some("Warrior".into()), has_class_weapon: Some(true), riding_mount: Some(false),
         fishing: Some(false), dazed: Some(false), motion_remaining_ms: 0, movement_ready: true,
         planning_position: None, neighbours: vec![], spell_lock_key: "None".into(),

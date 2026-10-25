@@ -2877,6 +2877,16 @@ pub fn mouse_world_interaction_system(
                 movement.attack_target = Some(object_id);
             }
         }
+        // Keep the native pursuit controller, but require held Shift for players.
+        if modifiers.shift && !modifiers.alt {
+            if let Some(object_id) = entities.entities.iter().find(|entity| {
+                entity.kind == EntityKind::Player
+                    && Some(entity.object_id.as_str()) == presentation.hovered_object_id()
+            }).and_then(|entity| entity.object_id.parse::<u32>().ok()).filter(|id| *id != 0) {
+                movement.stop_hold(now_ms, "playerAttackTarget");
+                movement.attack_target = Some(object_id);
+            }
+        }
         if movement.attack_target.is_none() {
             if let Some(intent) = hovered_world_intent(presentation.hovered_object_id(), &entities)
                 .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
@@ -2958,7 +2968,7 @@ pub fn mouse_world_interaction_system(
     }
 
     if let Some(target_id) = movement.attack_target {
-        if modifiers.alt || modifiers.shift {
+        if modifiers.alt {
             movement.attack_target = None;
             if let Some(queue) = queue.as_deref_mut() {
                 queue.clear_attack_intents();
@@ -2968,8 +2978,11 @@ pub fn mouse_world_interaction_system(
         }
         let target = entities.entities.iter().find(|entity| {
             entity.object_id.parse::<u32>().ok() == Some(target_id)
-                && entity.kind == EntityKind::Monster
-                && !entity.name.ends_with(')')
+                && match entity.kind {
+                    EntityKind::Player => modifiers.shift,
+                    EntityKind::Monster => !modifiers.shift && !entity.name.ends_with(')'),
+                    _ => false,
+                }
         });
         let valid = click_state.as_deref().is_none_or(|state| {
             state.targets.get(&target_id).is_some_and(|target| {
@@ -3938,6 +3951,9 @@ fn walk_key_map() -> [(KeyCode, &'static str); 8] {
 
 #[cfg(test)]
 mod tests {
+    mod native_player_attack_input_tests {
+        include!("native_player_attack_input_tests.rs");
+    }
     mod big_map_input_tests {
         include!("big_map_input_tests.rs");
     }

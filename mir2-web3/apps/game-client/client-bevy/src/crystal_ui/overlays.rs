@@ -84,6 +84,8 @@ use crate::storage::{
 };
 
 use super::amount_input::{AmountKeyAction, CrystalAmountInput};
+#[path = "native_inventory_double_click.rs"]
+mod native_inventory_double_click;
 #[path = "mail_reader_drag.rs"]
 mod mail_reader_drag;
 #[path = "mail_compose_drag.rs"]
@@ -543,10 +545,17 @@ pub(crate) struct InventoryItemDrag {
     source_slot: u32,
     unique_id: u64,
     start: Vec2,
+    moved: bool,
 }
 
 #[derive(Resource, Debug, Clone, Copy)]
 struct InventoryBeltDiagnostics(bool);
+
+#[derive(SystemParam)]
+struct InventoryPointerControls<'w> {
+    diagnostics: Option<Res<'w, InventoryBeltDiagnostics>>,
+    settings: Option<Res<'w, hero_dialog::pointer::HeroPointerSettings>>,
+}
 
 #[derive(Default, Resource)]
 struct StorageInventoryPlacement {
@@ -748,6 +757,7 @@ pub struct NativePlayerUiState {
     pub split_count: u16,
     pub inventory_operation: Option<InventoryOperationDraft>,
     pub(crate) inventory_item_drag: Option<InventoryItemDrag>,
+    pub(crate) inventory_item_click: Option<native_inventory_double_click::BagItemClick>,
     /// StorageDialog can coexist with CharacterDialog. Keep this host-local
     /// visibility bit separate from the exclusive core panel so both source
     /// frames remain reachable without replacing the warehouse.
@@ -1352,6 +1362,7 @@ impl Default for NativePlayerUiState {
             split_count: 1,
             inventory_operation: None,
             inventory_item_drag: None,
+            inventory_item_click: None,
             storage_equipment_visible: false,
             equipment_item_drag: None,
             inventory_item_pointer_consumed: false,
@@ -1528,6 +1539,7 @@ impl NativePlayerUiState {
     }
 
     pub fn toggle_inventory(&mut self) {
+        self.inventory_item_click = None;
         // The visible bag belongs to the open NPC service. Do not replace its
         // modal panel with Inventory; toggle the independently closable bag.
         if self.npc_shop_open() {
@@ -1839,6 +1851,7 @@ impl NativePlayerUiState {
         self.inspect = None;
         self.inventory_operation = None;
         self.inventory_item_drag = None;
+        self.inventory_item_click = None;
         self.storage_equipment_visible = false;
         self.equipment_item_drag = None;
         self.selected_skill_id = None;
@@ -5580,6 +5593,7 @@ fn inventory_item_drag_at_cursor(
         source_slot,
         unique_id,
         start,
+        moved: false,
     })
 }
 
@@ -5942,6 +5956,7 @@ fn finish_inventory_item_drag(
     intents: &mut NativePlayerUiIntentQueue,
     pending: &mut PendingOperations,
     diagnostics: Option<&InventoryBeltDiagnostics>,
+    double_click_ms: u64,
 ) {
     if let Some(parcel)=parcel.as_deref_mut(){parcel.bind_draft_clock(state.mail_draft_clock.clone());}
     let Some(drag) = state.inventory_item_drag.take() else {
@@ -5952,15 +5967,18 @@ fn finish_inventory_item_drag(
     let Some(source) = inventory.items_in(0).into_iter().find(|item| {
         item.slot == drag.source_slot && item_unique_id(item) == Some(drag.unique_id)
     }) else {
+        state.inventory_item_click = None;
         return;
     };
     if parcel
         .as_deref()
         .is_some_and(|parcel| parcel.blocks_item(drag.unique_id))
     {
+        state.inventory_item_click = None;
         return;
     }
     let Some(cursor) = cursor else {
+        state.inventory_item_click = None;
         belt_diagnostic(diagnostics, || "drag release without cursor".to_owned());
         return;
     };
@@ -5968,9 +5986,16 @@ fn finish_inventory_item_drag(
         state.inspect = Some(inspect_from_item(source));
         state.split_count = 1;
         state.drop_confirmation = None;
+        if !drag.moved {
+            native_inventory_double_click::short_click(state, inventory, source, cursor,
+                crate::hero_model::hero_clock_ms(), double_click_ms, parcel.as_deref(), intents, pending);
+        } else {
+            state.inventory_item_click = None;
+        }
         belt_diagnostic(diagnostics, || "drag release below threshold".to_owned());
         return;
     }
+    state.inventory_item_click = None;
     state.inspect = None;
     if parcel_active {
         if let Some(parcel) = parcel.as_deref_mut() {
@@ -6200,8 +6225,11 @@ fn process_inventory_item_drag(
     mut ordered_reader: Local<bevy::ecs::message::MessageCursor<bevy::window::WindowEvent>>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
     mut pending: ResMut<PendingOperations>,
-    diagnostics: Option<Res<InventoryBeltDiagnostics>>,
+    controls: InventoryPointerControls,
 ) {
+    let InventoryPointerControls { diagnostics, settings } = controls;
+    let double_click_ms = settings.as_deref().copied().unwrap_or_default().double_click_ms;
+    native_inventory_double_click::invalidate(&mut state, &inventory, parcel.as_deref(), &pending);
     state.inventory_item_pointer_consumed = false;
     let ordered_events: Vec<_> = ordered
         .as_ref()
@@ -6229,6 +6257,7 @@ fn process_inventory_item_drag(
         || state.inventory_operation.is_some()
         || state.trade_dialog.open
     {
+        state.inventory_item_click = None;
         state.inventory_item_drag = None;
         state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
@@ -6237,6 +6266,7 @@ fn process_inventory_item_drag(
         return;
     }
     let (Some(mouse), Some(belt)) = (mouse, belt) else {
+        state.inventory_item_click = None;
         state.inventory_item_drag = None;
         state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
@@ -6245,6 +6275,7 @@ fn process_inventory_item_drag(
         return;
     };
     let Ok((window_entity, window)) = windows.single() else {
+        state.inventory_item_click = None;
         state.inventory_item_drag = None;
         state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
@@ -6253,6 +6284,7 @@ fn process_inventory_item_drag(
         return;
     };
     if !window.focused {
+        state.inventory_item_click = None;
         state.inventory_item_drag = None;
         state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
@@ -6286,8 +6318,10 @@ fn process_inventory_item_drag(
             match event {
                 WindowEvent::CursorMoved(event) if event.window == window_entity => {
                     cursor = Some(cursor_logical(window, event.position));
+                    native_inventory_double_click::motion(&mut state, cursor);
                 }
                 WindowEvent::CursorLeft(event) if event.window == window_entity => {
+                    state.inventory_item_click = None;
                     cursor = None;
                     state.inventory_item_drag = None;
                     state.equipment_item_drag = None;
@@ -6295,6 +6329,12 @@ fn process_inventory_item_drag(
                         storage_ui.storage_item_drag = None;
                     }
                     belt_diagnostic(diagnostics.as_deref(), || "drag cursor left".to_owned());
+                }
+                WindowEvent::WindowFocused(event) if event.window == window_entity && !event.focused => {
+                    state.inventory_item_click = None;
+                    state.inventory_item_drag = None;
+                    state.equipment_item_drag = None;
+                    if let Some(storage_ui) = storage_ui.as_deref_mut() { storage_ui.storage_item_drag = None; }
                 }
                 WindowEvent::MouseButtonInput(event)
                     if event.window == window_entity && event.button == MouseButton::Left =>
@@ -6309,6 +6349,7 @@ fn process_inventory_item_drag(
                                     start,
                                 )
                             });
+                            if state.inventory_item_drag.is_none() { state.inventory_item_click = None; }
                             state.equipment_item_drag = None;
                             if let Some(storage_ui) = storage_ui.as_deref_mut() {
                                 storage_ui.storage_item_drag = if state.inventory_item_drag.is_none() {
@@ -6352,6 +6393,7 @@ fn process_inventory_item_drag(
                                 &mut intents,
                                 &mut pending,
                                 diagnostics.as_deref(),
+                                double_click_ms,
                             );
                             if let (Some(storage), Some(storage_ui)) =
                                 (storage.as_deref(), storage_ui.as_deref_mut())
@@ -6379,6 +6421,8 @@ fn process_inventory_item_drag(
                         }
                     }
                 }
+                WindowEvent::MouseButtonInput(event) if event.window == window_entity
+                    && event.state == ButtonState::Pressed => { state.inventory_item_click = None; }
                 _ => {}
             }
         }
@@ -6386,12 +6430,14 @@ fn process_inventory_item_drag(
         return;
     }
 
+    if mouse.just_pressed(MouseButton::Right) { state.inventory_item_click = None; }
     if mouse.just_pressed(MouseButton::Left) {
         let start = cursor_path.first().copied().or(cursor);
         state.inventory_item_drag =
             start.and_then(|start| {
                 inventory_item_drag_at_cursor(&state, &inventory, parcel.as_deref(), start)
             });
+        if state.inventory_item_drag.is_none() { state.inventory_item_click = None; }
         state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
             storage_ui.storage_item_drag = if state.inventory_item_drag.is_none() {
@@ -6412,6 +6458,10 @@ fn process_inventory_item_drag(
         }
     }
 
+    for point in &cursor_path {
+        native_inventory_double_click::motion(&mut state, Some(*point));
+    }
+
     if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
         finish_inventory_item_drag(
             &mut state,
@@ -6426,6 +6476,7 @@ fn process_inventory_item_drag(
             &mut intents,
             &mut pending,
             diagnostics.as_deref(),
+            double_click_ms,
         );
         if let (Some(storage), Some(storage_ui)) = (storage.as_deref(), storage_ui.as_deref_mut()) {
             finish_storage_item_drag(
@@ -9211,27 +9262,7 @@ fn process_overlay_buttons(
                 );
             }
             OverlayButton::UseInspected => {
-                if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
-                    if let Some(item) = inspected_use_item(&state, &inventory) {
-                        if item.container == 0 {
-                            if let Some(to) = reliable_equipment_destination(item) {
-                                if let Some(mut plan) = inspected_exact_selection(&state, &inventory)
-                                    .and_then(|selection| crate::bag_ui::plan_equipment(
-                                        &inventory, selection, &pending)) {
-                                    plan.to = to;
-                                    if intents.push_pending_intent(&mut pending,
-                                        native_equipment_intent(plan)) {
-                                        state.inspect = None;
-                                    }
-                                }
-                                continue;
-                            }
-                        }
-                        if let Some(intent) = inspected_use_intent(&state, &inventory) {
-                            intents.push_intent(intent);
-                        }
-                    }
-                }
+                use_inspected_item(&mut state, &inventory, Some(parcel_ui), &mut intents, &mut pending);
             }
             OverlayButton::EquipInspected => {
                 if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
@@ -10527,6 +10558,29 @@ fn inspected_use_intent(
         slot: u8::try_from(item.slot).ok(),
         grid: Some(container_name(item.container).to_owned()),
     })
+}
+
+fn use_inspected_item(state: &mut NativePlayerUiState, inventory: &InventoryModel,
+    parcel: Option<&mail_parcel::MailParcelUi>, intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations) {
+    if parcel.is_some_and(|parcel| inspected_bag_item_is_mail_locked(state, inventory, parcel)) { return; }
+    let Some(item) = inspected_use_item(state, inventory) else { return; };
+    if item.container == 0 {
+        if let Some(mut to) = reliable_equipment_destination(item) {
+            // Crystal auto-use fills the right ring cell first, then the left.
+            // Explicit EquipInspected continues to honor its chosen destination.
+            if matches!(to, 7 | 8) {
+                to = if inventory.items.iter().any(|equipped| equipped.container == 2 && equipped.slot == 8) { 7 } else { 8 };
+            }
+            if let Some(mut plan) = inspected_exact_selection(state, inventory)
+                .and_then(|selection| crate::bag_ui::plan_equipment(inventory, selection, pending)) {
+                plan.to = to;
+                if intents.push_pending_intent(pending, native_equipment_intent(plan)) { state.inspect = None; }
+            }
+            return;
+        }
+    }
+    if let Some(intent) = inspected_use_intent(state, inventory) { intents.push_intent(intent); }
 }
 
 fn inspected_equip_intent(
@@ -17665,6 +17719,7 @@ mod tests {
                 source_slot: 2,
                 unique_id: 7,
                 start: Vec2::new(465.0, 40.0),
+                moved: false,
             });
         }
         {
@@ -17746,7 +17801,7 @@ mod tests {
             state.inventory_window.left = 588.0;
             state.inventory_window.top = 24.0;
             state.inventory_item_drag = Some(InventoryItemDrag {
-                source_slot: 2, unique_id: 7, start: Vec2::new(588.0, 24.0),
+                source_slot: 2, unique_id: 7, start: Vec2::new(588.0, 24.0), moved: false,
             });
         }
         app.update();

@@ -62,6 +62,7 @@ import type { ItemActionRef, DisplayItem, DisplayEquipmentItem } from "./compone
 import type { MailPresentation } from "./components/original-client-mail-window";
 import { useBevyCombatInput } from "../lib/use-bevy-combat-input";
 import type { CombatRuntime,CombatProof,CombatFacts,CombatActor,CombatAction,CombatOwner } from "../lib/bevy-combat-input";
+import { supportsForcedPlayerAttack } from "../lib/bevy-combat-input";
 import { sameSpellsOwner, type SpellsRuntime, type SpellsIntent, type SpellsProof, type SpellsOutcome, type SpellsOwner, type SpellsRawSnapshot } from "../lib/bevy-spells-ui";
 import { projectCharacterModel } from "../lib/bevy-character-model";
 import { type CharacterRuntime, type CharacterIntent, type CharacterCommandProof, type EquipmentOwnerProof as SharedEquipmentOwnerProof } from "../lib/bevy-character-ui";
@@ -106,7 +107,7 @@ import {
   CRYSTAL_HELP_STATE_STORAGE_KEY, DEFAULT_CRYSTAL_HELP_STATE, defaultCrystalKeyBindings,
   CRYSTAL_CHAT_SETTINGS_STORAGE_KEY, parseCrystalChatSettings, serializeCrystalChatSettings,
   parsePlayerUiPreferences, serializePlayerUiPreferences, parseCrystalKeyBindings, serializeCrystalKeyBindings,
-  parseCrystalHelpState, serializeCrystalHelpState, applyCrystalSkillMode, playerUiPreferencesAudioSettings,
+  parseCrystalHelpState, serializeCrystalHelpState, applyCrystalSkillMode, playerUiPreferencesAudioSettings, displayCrystalKeyBinding,
   type PlayerUiPreferences, type CrystalKeyBinding, type CrystalHelpWindowState,
 } from "../lib/player-ui-preferences";
 import { setOriginalAudioSettings } from "../lib/original-audio";
@@ -757,6 +758,7 @@ type GatewayKnownSkill = {
   description: string;
   spell?: string | null;
   castKind?: "passive" | "toggle" | "self" | "target" | "ground" | "direction";
+  canUse?: boolean;
   offensive?: boolean;
   level?: number;
   experience?: number;
@@ -1132,6 +1134,7 @@ type KnownSkill = {
   description: string;
   spell?: string | null;
   castKind?: "passive" | "toggle" | "self" | "target" | "ground" | "direction";
+  canUse?: boolean;
   offensive?: boolean;
   level?: number;
   experience?: number;
@@ -2242,6 +2245,7 @@ export default function HomePage() {
   const combatBaselineSourceRef=useRef<{socket:WebSocket;session:object;connectionGeneration:number;sessionGeneration:number;
     sceneRevision:number;snapshotVersion:number;snapshot:Pick<GatewayWorldSnapshot,"playerObjectId"|"knownSkills"|"entities"|"mapFileName">}|null>(null);
   const combatPointerRef=useRef<{cursor:[number,number]|null;hovered:string|null;lock:boolean}>({cursor:null,hovered:null,lock:false});
+  const combatForceAttackRef = useRef(false);
   const combatModePhysicalRef = useRef<{ socket: WebSocket; connectionGeneration: number; sessionGeneration: number; generation: number } | null>(null);
   const combatModeRawRef = useRef<{ owner: CombatModeOwner; revision: number; attackMode: number | null; petMode: number | null } | null>(null);
   const combatModeRevisionRef = useRef(0);
@@ -2981,6 +2985,23 @@ export default function HomePage() {
     window.addEventListener("blur", cancel);
     return () => { window.removeEventListener("keydown", down, true); window.removeEventListener("keyup", up, true);
       window.removeEventListener("blur", cancel); };
+  }, []);
+  useEffect(() => {
+    const observeCombatShiftDown = (event: KeyboardEvent) => {
+      if (event.key === "Shift" || event.code === "ShiftLeft" || event.code === "ShiftRight" || event.shiftKey)
+        setCombatForceAttack(true);
+    };
+    const observeCombatShiftUp = (event: KeyboardEvent) => setCombatForceAttack(event.shiftKey);
+    const cancel = () => cancelCombatInput();
+    const hidden = () => { if (document.visibilityState !== "visible") cancel(); };
+    window.addEventListener("keydown", observeCombatShiftDown, true); window.addEventListener("keyup", observeCombatShiftUp, true);
+    window.addEventListener("blur", cancel); window.addEventListener("pagehide", cancel);
+    document.addEventListener("visibilitychange", hidden);
+    return () => {
+      window.removeEventListener("keydown", observeCombatShiftDown, true); window.removeEventListener("keyup", observeCombatShiftUp, true);
+      window.removeEventListener("blur", cancel); window.removeEventListener("pagehide", cancel);
+      document.removeEventListener("visibilitychange", hidden); cancel();
+    };
   }, []);
   // A draft and every retained callback belong to one physical connection and scene.
   useEffect(() => {
@@ -6240,7 +6261,7 @@ export default function HomePage() {
     // cells and receipts cannot own the next character; request IDs stay spent.
     pendingStorageRequestsRef.current.clear();
     setMailboxOpen(false);mailRawRef.current=null;
-    combatIngressRef.current?.withdraw();combatRawRef.current=null;combatBaselineSourceRef.current=null;combatMastersRef.current.clear();combatPointerRef.current={cursor:null,hovered:null,lock:false};
+    combatIngressRef.current?.withdraw();combatRawRef.current=null;combatBaselineSourceRef.current=null;combatMastersRef.current.clear();combatPointerRef.current={cursor:null,hovered:null,lock:false};combatForceAttackRef.current=false;
     spellsIngressRef.current?.withdraw();
     spellsRawSnapshotRef.current=null;
     equipmentHostSuspendReasonRef.current = "connectionUnavailable";
@@ -6325,7 +6346,7 @@ export default function HomePage() {
         if (item.slot !== "mount" || command.slot !== 13) return rejectEquipmentCommand("invalidIdentity");
         return sendRaw({ type: "useItem", grid: "equipment", slot: 13 }, options);
       }
-      const classification = classifyEquipmentUse(item);
+      const classification = classifyEquipmentUse(item, worldRef.current.equipmentItems);
       if (grid === "inventory" && classification.kind === "equipment") {
         command = { type: "equipItem", uniqueId, grid, to: classification.to };
       } else {
@@ -8412,6 +8433,19 @@ export default function HomePage() {
     return true;
   }
 
+  function setCombatForceAttack(held: boolean) {
+    if (combatForceAttackRef.current === held) return;
+    combatForceAttackRef.current = held;
+    if (!held && worldRef.current.entities.some(entity => entity.objectId === worldRef.current.selectedObjectId && entity.kind === "player"))
+      cancelLockedMonsterAttack();
+    combatIngressRef.current?.fresh();
+  }
+
+  function cancelCombatInput() {
+    combatForceAttackRef.current = false;
+    cancelLockedMonsterAttack();
+  }
+
   function cancelLockedMonsterAttack() {
     if(combatIngressRef.current?.supported())combatIngressRef.current.edge({type:"cancel"});
     if (!lockedMonsterAttackRef.current) {
@@ -8482,6 +8516,8 @@ export default function HomePage() {
   lockedMonsterAttackTickRef.current = continueLockedMonsterAttack;
 
   function lockMonsterAttack(objectId: string) {
+    const currentTarget = worldRef.current.entities.find(entity => entity.objectId === objectId);
+    if (currentTarget?.kind === "player" && (!combatForceAttackRef.current || !supportsForcedPlayerAttack(runtimeRef.current))) return;
     if(combatIngressRef.current?.supported()){
       lockedMonsterAttackRef.current=null;pendingNpcInteractRef.current=null;pendingPickupRef.current=null;pendingTransferRef.current=null;
       pendingOnchainMineRef.current=false;stopOnchainMining();
@@ -10332,7 +10368,7 @@ export default function HomePage() {
       return;
     }
     if (skill.castKind === "toggle" && skill.spell) {
-      send({ type: "spellToggle", spell: skill.spell, toggleState: 1 });
+      send({ type: "spellToggle", spell: skill.spell, toggleState: skill.canUse === true ? 0 : 1 });
       return;
     }
     if (skill.castKind === "direction") {
@@ -10455,6 +10491,17 @@ export default function HomePage() {
       catch { return "outcomeUnknown"; }
     },
   });
+  function selectAttackMode(mode: number) {
+    if (!Number.isInteger(mode) || mode < 0 || mode > 5) return;
+    const functions = ["AttackmodePeace", "AttackmodeGroup", "AttackmodeGuild", "AttackmodeEnemyguild", "AttackmodeRedbrown", "AttackmodeAll"];
+    combatModeHostRef.current?.request(functions[mode]);
+  }
+  function readCombatModeControls() {
+    const source = readCombatModeSource();
+    const binding = crystalKeyBindingsRef.current.find(entry => entry.function === "ChangeAttackmode");
+    return { mode: source?.attackMode ?? null, shortcut: binding ? displayCrystalKeyBinding(binding) : "",
+      enabled: source?.enabled === true && combatModeHostRef.current?.supported() === true, onSelectMode: selectAttackMode };
+  }
   function readCurrentSkillBarDocument(): { rows: readonly CrystalSkillBarRow[]; sourceKey: string | null } | null {
     const current = worldRef.current, raw = combatRawRef.current, runtime = runtimeRef.current;
     const owner = currentSpellsOwner(Number(current.playerObjectId));
@@ -12423,6 +12470,21 @@ export default function HomePage() {
       return;
     }
 
+    if (entity.kind === "player") {
+      if (!combatForceAttackRef.current) {
+        cancelLockedMonsterAttack();
+        appendLog("已选中玩家。先选择合适的攻击模式，再按住 Shift + 左键点击玩家攻击。", "system", "hint");
+        return;
+      }
+      if (!supportsForcedPlayerAttack(runtimeRef.current)) {
+        cancelLockedMonsterAttack();
+        appendLog("当前客户端尚未支持玩家攻击，请更新客户端后再试。", "system", "hint");
+        return;
+      }
+      lockMonsterAttack(objectId);
+      return;
+    }
+
     if (entity.kind !== "monster") {
       cancelLockedMonsterAttack();
     }
@@ -12630,7 +12692,7 @@ export default function HomePage() {
       return { accepted: moveItem(item, intent.target.slot % 40, intent.target.slot < 40 ? "bag1" : "bag2", token) };
     }
     if (intent.type === "equipItem") {
-      const classification = classifyEquipmentUse(item);
+      const classification = classifyEquipmentUse(item, current.equipmentItems);
       return { accepted: classification.kind === "equipment" && send({ type: "equipItem", grid: "inventory",
         uniqueId: source.uniqueId, to: classification.to }, { ownerToken: token }) };
     }
@@ -13355,8 +13417,19 @@ export default function HomePage() {
         spellsRawSnapshotRef.current={snapshot:captured,owner:{...owner}};
         spellsIngressRef.current?.observeSnapshot(captured,owner);
       }
-    } else if(event.type==="packet"&&event.packet&&["Magic","MagicCast","MagicDelay"].includes(event.packet)) {
-      questSkillsBaselineCurrentRef.current = false;
+    } else if(event.type==="packet"&&event.packet&&["Magic","MagicCast","MagicDelay","SpellToggle"].includes(event.packet)) {
+      if(event.packet!=="SpellToggle")questSkillsBaselineCurrentRef.current = false;
+      if(event.packet==="SpellToggle"){
+        const payload=event.payload??{},baseline=readCurrentCombatBaseline();
+        if(baseline&&(payload.objectId===0||payload.objectId===baseline.owner.playerObjectId)&&typeof payload.spell==="string"&&payload.spell.length>0&&payload.spell.length<=128
+          &&typeof payload.canUse==="boolean"&&Array.isArray(baseline.snapshot.knownSkills)
+          &&baseline.snapshot.knownSkills.filter(skill=>skill&&typeof skill==="object"&&skill.spell===payload.spell).length===1){
+          // The detached physical source also feeds a later controller owner.
+          // Preserve its current ACK state without relabeling the cached owner.
+          const source=combatBaselineSourceRef.current;
+          if(source)source.snapshot.knownSkills=baseline.snapshot.knownSkills.map(skill=>skill&&typeof skill==="object"&&skill.spell===payload.spell?{...skill,canUse:payload.canUse as boolean}:skill);
+        }
+      }
       const owner=currentSpellsOwner(spellsRawSnapshotRef.current?.snapshot.playerObjectId??null);
       if(owner)spellsIngressRef.current?.observePacket(event.packet,event.payload??{},owner);
       const combatOwner=currentSpellsOwner(Number(worldRef.current.playerObjectId));
@@ -15044,8 +15117,8 @@ export default function HomePage() {
         break;
       }
       case "SpellToggle": {
-        const objectId = stringifyId(payload.objectId);
-        if (objectId === "0" || objectId === worldRef.current.playerObjectId) {
+        const objectId = payload.objectId;
+        if (Number.isSafeInteger(objectId) && (objectId === 0 || String(objectId) === worldRef.current.playerObjectId) && typeof payload.canUse === "boolean") {
           const spell = stringOrFallback(payload.spell, "");
           const canUse = payload.canUse === true;
           if (spell) {
@@ -15053,7 +15126,7 @@ export default function HomePage() {
               ...current,
               knownSkills: current.knownSkills.map((skill) =>
                 skillMatchesCrystalSpell(skill, spell)
-                  ? { ...skill, castKind: canUse ? skill.castKind ?? "toggle" : "passive" }
+                  ? { ...skill, canUse }
                   : skill,
               ),
             }));
@@ -15521,6 +15594,9 @@ export default function HomePage() {
       }
       case "ChangeAMode": {
         captureCombatModeReceipt("ChangeAMode", payload.mode);
+        const mode = numberOrUndefined(payload.mode);
+        if (mode !== undefined && Number.isInteger(mode) && mode >= 0 && mode <= 5 && currentCombatModeOwner())
+          updateWorld(current => ({ ...current, stage5Systems: { ...current.stage5Systems, attackMode: mode } }));
         const message = attackModeChatMessage(numberOrUndefined(payload.mode) ?? Number.NaN);
         if (message && !gameEntryChatOverrideActiveRef.current) {
           appendLog(t(message.localizationKey, [], message.fallback), "system", "hint");
@@ -18032,6 +18108,7 @@ export default function HomePage() {
       description: skill.description,
       spell: skill.spell ?? null,
       castKind: skill.castKind,
+      canUse: skill.canUse,
       offensive: skill.offensive,
       level: skill.level,
       experience: skill.experience,
@@ -19548,7 +19625,7 @@ export default function HomePage() {
       }
       return lockMonsterAttack(selectedEntity.objectId);
     }
-    if (selectedEntity.kind === "npc") return activateEntity(selectedEntity.objectId);
+    if (selectedEntity.kind === "npc" || selectedEntity.kind === "player") return activateEntity(selectedEntity.objectId);
     sendCrystalTurn(directionToward(self, selectedEntity));
   };
   const onPrimaryTargetAction = useCallback(() => onPrimaryTargetActionRef.current(), []);
@@ -19856,13 +19933,13 @@ export default function HomePage() {
       const facts:CombatFacts={map:current.mapFileName,enabled:screenRef.current==="game"&&current.connected&&initialSceneAssetsReadyRef.current&&visible&&!editing&&!modal&&equipmentHostSuspendReasonRef.current===null&&document.visibilityState==="visible"&&document.hasFocus(),
         player:actor(self),hp:current.playerHp??self.hp??0,maxHp:current.playerMaxHp??self.maxHp??0,mp:current.playerMp??0,level:self.level??0,attackSpeed:current.playerCrystalStats?.find(s=>s.stat===14)?.value??0,actors,
         clickTargets:current.entities.map(e=>({kind:e.kind,objectId:Number(e.objectId),x:e.x,y:e.y,dead:typeof e.dead==="boolean"?e.dead:null,ai:e.ai??null,harvestable:typeof sources.get(e.objectId)?.harvestable==="boolean"?sources.get(e.objectId)!.harvestable as boolean:null})),
-        selectedObjectId:current.selectedObjectId?Number(current.selectedObjectId):null,hoveredObjectId:combatPointerRef.current.hovered,cursor:combatPointerRef.current.cursor,
+        selectedObjectId:current.selectedObjectId?Number(current.selectedObjectId):null,forceAttack:combatForceAttackRef.current,hoveredObjectId:combatPointerRef.current.hovered,cursor:combatPointerRef.current.cursor,
         class:self.classKey??null,hasClassWeapon:flag("hasClassWeapon"),ridingMount:flag("ridingMount"),fishing:flag("fishing"),dazed:flag("dazed"),
         motionRemainingMs:Math.max(0,Math.min(0xffffffff,Math.ceil(Math.max(self.attackUntil??0,self.movementUntil??0,nextMoveSendAtRef.current)-now))),movementReady:!isMovementBusy(),planningPosition:plan?[plan.targetX,plan.targetY]:null,neighbours,spellLockKey:crystalKeyBindingsRef.current.find(binding => binding.function === "TargetSpellLockOn")?.key ?? "None",pointerSpellLock:combatPointerRef.current.lock,bindings:crystalKeyBindingsRef.current.filter(binding => /^Bar[12]Skill[1-8]$/.test(binding.function))};
       return {owner,facts};
     },onWire:dispatchBevyCombat,onApproach:(x,y)=>moveToTile(x,y,"run","direction","locked-monster"),onClear:()=>{
       lockedMonsterAttackRef.current=null;
-      if(combatApproachIntentRef.current&&queuedMoveIntentRef.current===combatApproachIntentRef.current)queuedMoveIntentRef.current=null;
+      if(combatApproachIntentRef.current&&queuedMoveIntentRef.current===combatApproachIntentRef.current){queuedMoveIntentRef.current=null;movementPlanRef.current=null;}
       combatApproachIntentRef.current=null;
     }});
   combatIngressRef.current=bevyCombatInput;
@@ -20259,9 +20336,9 @@ export default function HomePage() {
       onRepairItem={repairItem}
       onSpecialRepairItem={specialRepairItem}
       onCastSkill={castSkill}
-      onCombatKey={(action,repeat)=>({supported:bevyCombatInput.supported(),handled:bevyCombatInput.supported()&&bevyCombatInput.edge({...action,repeat})})}
+      onCombatKey={(action,repeat)=>{setCombatForceAttack(action.modifiers.shift);return {supported:bevyCombatInput.supported(),handled:bevyCombatInput.supported()&&bevyCombatInput.edge({...action,repeat})};}}
       onCombatPointer={(cursor,hovered)=>{combatPointerRef.current={...combatPointerRef.current,cursor,hovered};}}
-      onCombatCancel={cancelLockedMonsterAttack}
+      onCombatCancel={cancelCombatInput}
       onCombatUiHeld={bevyCombatInput.setUiHeld}
       onClaimMail={claimMail}
       onDeleteMail={deleteMail}
@@ -20276,6 +20353,7 @@ export default function HomePage() {
       onTurnCashPreview={(direction, right) => renderedCashPreviewSource ? turnCashPreview(renderedCashPreviewSource, direction, right) : null}
       onGameShopVisibilityChange={open => {cashShopOpenRef.current = open; renderParityServices(n => n + 1);}}
       crystalKeyBindings={crystalKeyBindings}
+      combatModes={readCombatModeControls()}
       playerUiPreferences={playerUiPreferences}
       questNameTargetObjectIds={new Set((bevyQuestUi.readLiveQuestNameTargets() ?? []).map(String))}
       dropViewHeld={dropViewHeld}
@@ -21756,6 +21834,7 @@ function crystalReviveActionDurationMs(entity: WorldEntity) {
 
 function skillMatchesCrystalSpell(skill: KnownSkill, spell: string) {
   const normalizedSpell = normalizeCrystalToken(spell);
+  if (typeof skill.spell === "string" && skill.spell) return normalizeCrystalToken(skill.spell) === normalizedSpell;
   return normalizeCrystalToken(skill.key) === normalizedSpell || normalizeCrystalToken(skill.name) === normalizedSpell;
 }
 

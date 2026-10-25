@@ -88,12 +88,26 @@ export function equipmentGatewayOperation(command: Record<string, unknown>): Equ
   return { kind, uniqueId, grid, to: command.to };
 }
 
-/** Type metadata identifies gear; names and image numbers never do. */
-export function classifyEquipmentUse(item: { equipSlot?: unknown; tooltipSource?: unknown }):
+/** Type metadata identifies gear; paired slots prefer the first empty hand. */
+export function classifyEquipmentUse(
+  item: { equipSlot?: unknown; tooltipSource?: unknown },
+  equipmentItems: readonly Pick<EquipmentItem, "slot">[] = [],
+):
   { kind: "equipment"; to: number } | { kind: "ordinary" } | { kind: "unknown" } {
+  const destination = (preferred: number) => {
+    // Crystal's automatic ring Use chooses the right hand when empty and
+    // otherwise the left hand, including replacement when both are occupied.
+    if (preferred === 7 || preferred === 8) {
+      return equipmentItems.some((equipped) => equipped.slot.toLowerCase() === "ringright") ? 7 : 8;
+    }
+    const alternate = preferred === 5 ? 6 : preferred === 6 ? 5 : null;
+    if (alternate === null) return preferred;
+    const occupied = new Set(equipmentItems.map((equipped) => SLOT_INDEX[equipped.slot.toLowerCase()]));
+    return occupied.has(preferred) && !occupied.has(alternate) ? alternate : preferred;
+  };
   if (typeof item.equipSlot === "string") {
     const to = SLOT_INDEX[item.equipSlot.toLowerCase()];
-    if (integer(to)) return { kind: "equipment", to };
+    if (integer(to)) return { kind: "equipment", to: destination(to) };
   }
   const source = item.tooltipSource;
   const type = record(source) && record(source.info) ? source.info.item_type : undefined;
@@ -102,7 +116,7 @@ export function classifyEquipmentUse(item: { equipSlot?: unknown; tooltipSource?
   const destinations: Readonly<Record<number, number>> = {
     1: 0, 2: 1, 4: 2, 5: 4, 6: 5, 7: 7, 8: 9, 9: 10, 10: 11, 11: 12, 12: 3, 19: 13,
   };
-  return destinations[type] === undefined ? { kind: "ordinary" } : { kind: "equipment", to: destinations[type] };
+  return destinations[type] === undefined ? { kind: "ordinary" } : { kind: "equipment", to: destination(destinations[type]) };
 }
 
 type CurrentItems = {

@@ -93,7 +93,7 @@ mod web {
     }
     #[wasm_bindgen(js_name=getMir2CombatInputCapabilities)]
     pub fn capabilities() -> String {
-        serde_json::json!({"schemaVersion":1,"combatInputAbiVersion":1,"combatIntentAbiVersion":1,"compiled":true,"startup":STARTED.with(Cell::get)}).to_string()
+        serde_json::json!({"schemaVersion":1,"combatInputAbiVersion":2,"combatIntentAbiVersion":1,"compiled":true,"startup":STARTED.with(Cell::get)}).to_string()
     }
     #[wasm_bindgen(js_name=setMir2CombatInputSnapshot)]
     pub fn snapshot(json: &str) -> bool {

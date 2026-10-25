@@ -19,6 +19,8 @@ import {
   applyOriginalItemIconFallback,
   equipmentSlotForItem,
   formatBinaryDateTimeLabel,
+  inventoryItemCanSplit,
+  inventoryItemCanStack,
   originalItemIconPath,
 } from "./original-client-inventory-utils";
 import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
@@ -143,6 +145,10 @@ export function InventoryWindow({
   const [pendingGoldDrop, setPendingGoldDrop] = useState(false);
   const [goldDropAmount, setGoldDropAmount] = useState("100");
   const bagBeltActivationGenerationRef = useRef(0);
+  const inventoryPointerActivationRef = useRef<{
+    item: ItemActionRef; at: number; used: boolean; moved: boolean;
+  } | null>(null);
+  useLayoutEffect(() => { inventoryPointerActivationRef.current = null; }, [activeTab, repairMode, deleteMode, sellMode, storageMode]);
   useLayoutEffect(() => { bagBeltActivationGenerationRef.current++; }, [activeTab, world.inventoryItems, repairMode, deleteMode, sellMode, storageMode, pendingMoveItem, pendingSplitItem, pendingGoldDrop, contextMenu]);
 
   useEffect(() => {
@@ -404,7 +410,8 @@ export function InventoryWindow({
         return;
       }
 
-      if (pendingMoveItem.key === item.key && pendingMoveItem.container === item.container) {
+      if (pendingMoveItem.key === item.key && pendingMoveItem.container === item.container
+        && inventoryItemCanStack(pendingMoveItem) && inventoryItemCanStack(item)) {
         onMergeItem(
           {
             uniqueId: pendingMoveItem.uniqueId,
@@ -439,7 +446,7 @@ export function InventoryWindow({
       return;
     }
 
-    const equipSlot = equipmentSlotForItem(item);
+    const equipSlot = equipmentSlotForItem(item, world.equipmentItems);
     if (equipSlot) {
       onEquipItem(
         {
@@ -460,6 +467,45 @@ export function InventoryWindow({
         container: item.container,
       });
     }
+    return true;
+  }
+
+  function sameInventoryActionItem(item: ItemActionRef, other: ItemActionRef) {
+    return item.uniqueId === other.uniqueId && item.authoritativeUniqueId === other.authoritativeUniqueId
+      && item.container === other.container && item.slot === other.slot && item.key === other.key;
+  }
+
+  function activateInventoryItemFromPointer(item: DisplayItem) {
+    if (repairMode) return;
+    const at = Date.now();
+    const previous = inventoryPointerActivationRef.current;
+    // The compatibility bag already uses items on a short primary click. The
+    // second half of a double-click must not send that operation again, even
+    // when Bag-to-Belt consumes the browser's mouse events and runs its callback.
+    if (!pendingMoveItem && storageMode === null && !deleteMode && !sellMode
+      && previous && sameInventoryActionItem(item, previous.item)
+      && at >= previous.at && at - previous.at <= 500 && (previous.used || previous.moved)) return;
+    const moved = Boolean(pendingMoveItem && !sameInventoryActionItem(item, pendingMoveItem));
+    const used = activateInventoryItem(item) === true;
+    inventoryPointerActivationRef.current = { item: { key: item.key, uniqueId: item.uniqueId,
+      authoritativeUniqueId: item.authoritativeUniqueId, slot: item.slot, container: item.container }, at, used, moved };
+  }
+
+  function activateInventoryItemDoubleClick(item: DisplayItem) {
+    if (repairMode || deleteMode || sellMode || storageMode !== null || activeTab === "quest"
+      || pendingSplitItem || pendingGoldDrop || contextMenu || mailItemLocked(item)) return;
+    const previous = inventoryPointerActivationRef.current;
+    const at = Date.now();
+    if (!previous || !sameInventoryActionItem(item, previous.item)
+      || at < previous.at || at - previous.at > 500 || previous.used || previous.moved) return;
+    const current = world.inventoryItems.filter(candidate => sameInventoryActionItem(item, candidate));
+    if (current.length !== 1) return;
+    // A first click on the picked-up source merely cancels Move. Double-click
+    // still uses that instance, independently of React's pending state update.
+    setPendingMoveItem(null);
+    setPendingSplitItem(null);
+    inventoryPointerActivationRef.current = { ...previous, used: true };
+    runContextAction(current[0], equipmentSlotForItem(current[0], world.equipmentItems) ? "equip" : "use");
   }
 
   function confirmSellItem(item: DisplayItem) {
@@ -514,8 +560,9 @@ export function InventoryWindow({
   function confirmSplitItem(item: DisplayItem) {
     if (repairMode) return;
     if(mailItemLocked(item))return;
+    if (!inventoryItemCanSplit(item)) return;
     const count = Number.parseInt(splitCount, 10);
-    if (!Number.isFinite(count) || count <= 0) {
+    if (!Number.isFinite(count) || count <= 0 || count >= item.quantity) {
       return;
     }
     (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
@@ -568,7 +615,7 @@ export function InventoryWindow({
     };
     switch (action) {
       case "equip": {
-        const equipSlot = equipmentSlotForItem(item);
+        const equipSlot = equipmentSlotForItem(item, world.equipmentItems);
         if (equipSlot) {
           onEquipItem(ref, equipSlot);
         }
@@ -583,6 +630,7 @@ export function InventoryWindow({
         setDeleteFeedback(`${t("ui.moveItem", [], "Move")}: ${item.name}`);
         break;
       case "split":
+        if (!inventoryItemCanSplit(item)) break;
         setPendingSplitItem(item);
         setSplitCount("1");
         setPendingMoveItem(null);
@@ -771,7 +819,7 @@ export function InventoryWindow({
               onPointerLeave={event => { if (event.pointerType === "touch" || document.activeElement !== event.currentTarget) tooltip.release(item, event.currentTarget); }}
               onFocus={event => tooltip.activate(item, event.currentTarget)}
               onBlur={event => { if (!event.currentTarget.matches(":hover")) tooltip.release(item, event.currentTarget); }}
-              onPointerCancel={event => tooltip.release(item, event.currentTarget)}
+              onPointerCancel={event => { inventoryPointerActivationRef.current = null; tooltip.release(item, event.currentTarget); }}
               onPointerDown={(event) => {
                 if (event.pointerType === "touch") { tooltip.activate(item, event.currentTarget); event.stopPropagation(); }
                 if (repairMode) {
@@ -783,22 +831,29 @@ export function InventoryWindow({
                   const activationGeneration = bagBeltActivationGenerationRef.current;
                   if ((activeTab === "bag1" || activeTab === "bag2") && !deleteMode && !sellMode && storageMode === null
                     && !pendingMoveItem && !pendingSplitItem && !pendingGoldDrop && !contextMenu && !mailItemLocked(item)
-                    && onBagBeltPointerDown?.(event, item, () => { if (bagBeltActivationGenerationRef.current === activationGeneration) activateInventoryItem(item); })) consumedRepairPointerRef.current.add(event.currentTarget);
+                    && onBagBeltPointerDown?.(event, item, () => { if (bagBeltActivationGenerationRef.current === activationGeneration) activateInventoryItemFromPointer(item); })) consumedRepairPointerRef.current.add(event.currentTarget);
                 }
               }}
               onMouseDown={(event) => {
                 if (event.button !== 0) return;
                 event.preventDefault();
                 if (consumedRepairPointerRef.current.has(event.currentTarget) || repairMode) return;
-                activateInventoryItem(item);
+                if (event.detail > 1) return;
+                activateInventoryItemFromPointer(item);
               }}
               onClick={(event) => {
                 if (repairMode) { event.preventDefault(); return; }
                 if (event.detail !== 0) return;
                 activateInventoryItem(item);
               }}
+              onDoubleClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                activateInventoryItemDoubleClick(item);
+              }}
 	              onContextMenu={(event) => {
 	                event.preventDefault();
+                    inventoryPointerActivationRef.current = null;
 	                if (repairMode) return;
 	                if (storageMode === "store" && item.container !== "storage") {
 	                  setPendingMoveItem(item);
@@ -893,7 +948,7 @@ export function InventoryWindow({
             x={contextMenu.x}
             y={contextMenu.y}
             canEquip={Boolean(equipmentSlotForItem(contextMenu.item))}
-            canSplit={contextMenu.item.quantity > 1}
+            canSplit={inventoryItemCanSplit(contextMenu.item)}
             onAction={(action) => runContextAction(contextMenu.item, action)}
             onClose={() => setContextMenu(null)}
           />
@@ -1207,7 +1262,7 @@ export function InventoryWindow({
 	                    if (storageMode !== null) {
 	                      return;
 	                    }
-	                    if (item.quantity > 1) {
+	                    if (inventoryItemCanSplit(item)) {
 	                      setPendingSplitItem(item);
                       setSplitCount("1");
                       setPendingMoveItem(null);

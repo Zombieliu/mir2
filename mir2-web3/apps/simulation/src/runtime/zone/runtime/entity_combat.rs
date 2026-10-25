@@ -1788,10 +1788,11 @@ impl ZoneRuntime {
                         .then(|| id.clone())
                 })
                 .collect();
-            let destination = offset_point(&m.position, direction, 1);
-            if !self.can_native_monster_occupy(object_id, &destination) {
+            let Some((direction, destination)) =
+                self.native_monster_chase_step(object_id, &m.position, &target.position, direction)
+            else {
                 return Some(self.turn_native_monster(object_id, direction, now));
-            }
+            };
             let live = self.native_monsters.get_mut(&object_id)?;
             live.position = destination.clone();
             live.direction = direction;

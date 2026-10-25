@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+## 玩家反馈修复（2026-10-25）
+
+戒指自动选择右空槽/否则左槽、怪物MoveTo受阻转向和ItemObject.Drop扩圈散落已对照原版并通过本轮回归；共享地图209/209。详见[本轮证据与边界](GAMEPLAY-BUGFIXES-20261025.zh-CN.md)，未提升全局Candidate/Accepted状态。
+
+追加半月：自动招式顺序、方向寻敌扇形及侧选300ms结算经新增回归通过；MP逐次攻击结算仍是明确范围外，不能据此称完整技能对齐。详见[本轮追加证据](GAMEPLAY-BUGFIXES-20261025.zh-CN.md#追加半月弯刀不可用)。
+
+追加PvP：既有ChangeAMode至共享Zone的生产规则未改；新增真实双会话3项回归及既有2项确认全体伤害、和平与安全区门禁。Web/Windows分别修客户端攻击入口，不能由共享服务器推定两端UI相同；[有界证据](GAMEPLAY-BUGFIXES-20261025.zh-CN.md#追加双击穿戴攻击玩家与两端共用边界)。
+
 ## Root owned Source78 authenticated Spells bootstrap and ordinary reentry QA (2026-10-12 Beijing)
 
 - Resolved: the packaged empty Spells page no longer falls back to the React table. The first public refusal was baseline-missing. Source review found that the initial Bag ownership revision can invalidate the earlier owner-qualified Spells cache before the new Host's one-time bootstrap. Page now bootstraps from the existing authenticated physical snapshot witness, preserving socket/session/scene/version/self/map checks and rejecting missing/null/nonarray/oversize learned data. It does not retag old cache, invent an empty list or replay an old ACK; live ACK and send-proof gates are unchanged.

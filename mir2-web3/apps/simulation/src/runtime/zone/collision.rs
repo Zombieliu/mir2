@@ -124,6 +124,10 @@ impl ZoneCollision {
         self.bounds
     }
 
+    pub(crate) fn is_ground_drop_blocked(&self, point: &Point) -> bool {
+        self.is_blocked(point) || self.transfer_source_cells.contains(&(point.x, point.y))
+    }
+
     pub(crate) fn is_player_movement_blocked(&self, point: &Point) -> bool {
         // A direct-movement transfer source is always steppable by a player:
         // stepping onto it immediately fires the map transfer, so it must bypass
@@ -145,5 +149,22 @@ impl ZoneCollision {
         }
 
         self.blocked_cells.contains(&(point.x, point.y))
+    }
+}
+
+#[cfg(test)]
+mod ground_drop_tests {
+    use super::*;
+
+    #[test]
+    fn ground_drop_collision_excludes_transfer_sources_and_walls() {
+        let mut collision = ZoneCollision::unbounded()
+            .with_bounds(ZoneBounds::new(0, 5, 0, 5))
+            .with_blocked_cells([Point { x: 1, y: 1 }]);
+        collision.transfer_source_cells.insert((2, 2));
+        assert!(collision.is_ground_drop_blocked(&Point { x: 1, y: 1 }));
+        assert!(collision.is_ground_drop_blocked(&Point { x: 2, y: 2 }));
+        assert!(collision.is_ground_drop_blocked(&Point { x: 6, y: 2 }));
+        assert!(!collision.is_ground_drop_blocked(&Point { x: 3, y: 3 }));
     }
 }

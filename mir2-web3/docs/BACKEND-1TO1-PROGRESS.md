@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+## 玩家反馈修复（2026-10-25）
+
+双戒指自动选槽、共享怪物受阻转向和掉落扩圈选点已通过本轮针对性及邻接回归；共享地图集成209/209。武器原子交换及UID保留同时回归。范围、命令和限制集中记录于[本轮证据](GAMEPLAY-BUGFIXES-20261025.zh-CN.md)，不推断全项目完成度或线上已生效。
+
+追加半月修复：已开启半月不被刺杀/攻杀覆盖，方向攻击按权威半月范围寻敌，侧选目标统一延迟结算。真实客户端攻击至共享伤害等5项网关回归、技能优先级2项及共享地图/刺杀邻接检查通过；[证据及未发布边界](GAMEPLAY-BUGFIXES-20261025.zh-CN.md#追加半月弯刀不可用)。
+
+追加玩家攻击验证：既有生产模式链路以真实双会话客户端包新增3项回归，确认全体模式可造成伤害、和平与双方安全区拒绝；既有PvP2项通过。本次新增为测试和客户端入口，未改生产模式规则；[证据及两端接线边界](GAMEPLAY-BUGFIXES-20261025.zh-CN.md#追加双击穿戴攻击玩家与两端共用边界)。
+
 ## Root owned Source78 authenticated Spells bootstrap and ordinary reentry QA (2026-10-12 Beijing)
 
 - Resolved: the packaged empty Spells page no longer falls back to the React table. The first public refusal was baseline-missing. Source review found that the initial Bag ownership revision can invalidate the earlier owner-qualified Spells cache before the new Host's one-time bootstrap. Page now bootstraps from the existing authenticated physical snapshot witness, preserving socket/session/scene/version/self/map checks and rejecting missing/null/nonarray/oversize learned data. It does not retag old cache, invent an empty list or replay an old ACK; live ACK and send-proof gates are unchanged.
