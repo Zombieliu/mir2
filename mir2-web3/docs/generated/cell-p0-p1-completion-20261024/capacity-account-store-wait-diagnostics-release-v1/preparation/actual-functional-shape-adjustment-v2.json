@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "scope": "Draft not sealed/executed; normalize actual producer schema and absolute ref separators only",
+  "before": {
+    "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-before-actual-functional-v2.mjs.txt",
+    "bytes": 21543,
+    "sha256": "a5591bd8524fc4e9f715c4f76136aeb71983dcd7aa8f0022d5fb92a5f663d1a3"
+  },
+  "after": {
+    "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-v1.mjs",
+    "bytes": 23031,
+    "sha256": "831a38ce052b11258d48a5946d95173cb299304ec7d7e210e7eb9bec050b57ef"
+  },
+  "rules": [
+    {
+      "label": "canonical absolute external references",
+      "from": "function repositoryPins(values){",
+      "to": "function sameReference(a,b){return typeof a?.path==='string'&&typeof b?.path==='string'&&path.resolve(a.path).toLowerCase()===path.resolve(b.path).toLowerCase()&&a.bytes===b.bytes&&a.sha256===b.sha256;}\nfunction repositoryPins(values){"
+    },
+    {
+      "label": "fixed ref separator equivalence",
+      "from": "!same(binding.sourceCandidate,SOURCE_CANDIDATE)||!same(binding.driverFrozenManifest,DRIVER_FROZEN)",
+      "to": "!sameReference(binding.sourceCandidate,SOURCE_CANDIDATE)||!sameReference(binding.driverFrozenManifest,DRIVER_FROZEN)"
+    },
+    {
+      "label": "actual Root source beforeafter and candidate binding",
+      "from": "validation.checks?.rustFocusedPassed!==true",
+      "to": "!sameReference(validation.sourceCandidate,SOURCE_CANDIDATE)||validation.rustSourceBeforeAfterIdentical!==true||validation.currentSourcePinsMatch!==true||validation.checks?.rustFocusedPassed!==true"
+    },
+    {
+      "label": "consume six distinct raw adjacent logs without invented merged log",
+      "from": "seen.add(check.kind);const {bytes:logBytes}=await exactExternalReference(check.log);await exactExternalReference(check.receipt,{json:true});\n    if(check.kind!=='rustfmt'){const log=logBytes.toString('utf8'),names=new Set([...log.matchAll(/^test ([^\\r\\n]+) \\.\\.\\. ok\\r?$/gm)].map(m=>m[1]));if(names.size!==expected[check.kind]||/^test [^\\r\\n]+ \\.\\.\\. (?:FAILED|ignored)\\r?$/m.test(log))throw Error('Actual Rust log test names/counts disagree with summary');for(const name of names){if(rustNames.has(name))throw Error('Focused and adjacent Rust evidence must form22 distinct tests');rustNames.add(name);}}",
+      "to": "seen.add(check.kind);await exactExternalReference(check.receipt,{json:true});const logRefs=check.kind==='rustAdjacent'?check.logs:[check.log];if(!Array.isArray(logRefs)||!logRefs.length||(check.kind==='rustAdjacent'&&(logRefs.length!==6||check.aggregateOfSixCases!==true||check.diagnosticsEnabledThresholdMs!==1)))throw Error('Adjacent evidence must be the actual six raw logs at1ms; other checks one raw log');const logs=[];for(const ref of logRefs){const {bytes}=await exactExternalReference(ref);logs.push(bytes.toString('utf8'));}if(check.kind==='rustAdjacent')await exactExternalReference(check.testInventory);\n    if(check.kind!=='rustfmt'){const names=new Set();for(const log of logs){for(const match of log.matchAll(/^test ([^\\r\\n]+) \\.\\.\\. ok\\r?$/gm))names.add(match[1]);if(/^test [^\\r\\n]+ \\.\\.\\. (?:FAILED|ignored)\\r?$/m.test(log))throw Error('Rust log has a failed or ignored selected test');}const reported=validation.distinctRust?.[check.kind==='rustFocused'?'focusedNames':'adjacentNames'];if(names.size!==expected[check.kind]||!same([...names].sort(),reported))throw Error('Actual Rust log distinct test names/counts disagree with summary');for(const name of names){if(rustNames.has(name))throw Error('Focused and adjacent Rust evidence must form22 distinct tests');rustNames.add(name);}}"
+    },
+    {
+      "label": "exact actual22 inventory",
+      "from": "if(rustNames.size!==22)throw Error('Actual Rust union must contain22 distinct passed tests');",
+      "to": "if(rustNames.size!==22||validation.distinctRust?.selected!==22||validation.distinctRust.passed!==22||validation.distinctRust.failed!==0||validation.distinctRust.ignored!==0||validation.distinctRust.focusedCount!==3||validation.distinctRust.adjacentCount!==19||!same([...rustNames].sort(),validation.distinctRust.allNames))throw Error('Actual Rust union must contain22 distinct passed tests');"
+    },
+    {
+      "label": "explicit unchanged Node historical namespace",
+      "from": "historical?.reexecutedHere!==false||",
+      "to": "historical?.driverCodeCommit!==DRIVER_COMMIT||historical.reexecutedHere!==false||historical.originalFailed!==0||historical.nodeInputCount!==9||"
+    },
+    {
+      "label": "historical exact ref canonical separator",
+      "from": "!same(historical.driverFrozenManifest,DRIVER_FROZEN)",
+      "to": "!sameReference(historical.driverFrozenManifest,DRIVER_FROZEN)"
+    }
+  ],
+  "actualSourceCaptureExecuted": false,
+  "actualBuildExecuted": false
+}

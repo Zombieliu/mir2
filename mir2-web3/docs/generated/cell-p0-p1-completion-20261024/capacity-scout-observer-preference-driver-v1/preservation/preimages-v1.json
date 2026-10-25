@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "head": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "files": [
+    {
+      "path": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+      "bytes": 149057,
+      "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+    },
+    {
+      "path": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 243920,
+      "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966"
+    }
+  ]
+}

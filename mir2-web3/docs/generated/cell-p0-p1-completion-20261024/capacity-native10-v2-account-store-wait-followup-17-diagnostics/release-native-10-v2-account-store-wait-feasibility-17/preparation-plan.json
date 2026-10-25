@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_BOUND_UNSEALED_NOT_EXECUTED",
+  "root": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17",
+  "backendInputCount": 50,
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "coreCodeEvidenceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "full16": {
+    "runId": "1792955151058-4afb2f09",
+    "realmStamp": "1792955142379-1d2b2111",
+    "audit": {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.independent-audit.json",
+      "bytes": 1750,
+      "sha256": "e3628a5a32e822fdeac680ccc73375719b4d37675f3eb2398e0adc718d8b201a"
+    },
+    "sentCommandCount": 341
+  },
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "sealed": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "ordinaryAccountPoolSize": 100,
+  "maximumControlledActors": 10,
+  "initialStoreComparison": "Matches Formal12 initial100 empty account count only, not its later evolving store or admitted concurrency.",
+  "phaseContract": {
+    "stages": [
+      2,
+      10
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 360,
+    "completeWindows": [
+      5,
+      5,
+      6
+    ],
+    "actualMinimumWindowSeconds": 60,
+    "denominator": "actual measuredSeconds"
+  },
+  "postSeedAcl": "private exactly owner1; recordings exactly owner+SYSTEM2, readonly observed after seeding.",
+  "separateStoreDataset": true,
+  "storeContributesToGameAcceptance": false,
+  "extraDiagnosticsCosts": "Each capture has its own8KiB line/1MiB prewrite queue/32MiB public cap; allocations/write work remain inside existing resource/lag guards.",
+  "policyScenarioResourceUnchanged": true,
+  "node210ReusedNotRerun": true,
+  "rootOSObservation": "Root actual stdout observed PID61164 absent and17600/17610 free; no disk OS proof exists or is invented here."
+}

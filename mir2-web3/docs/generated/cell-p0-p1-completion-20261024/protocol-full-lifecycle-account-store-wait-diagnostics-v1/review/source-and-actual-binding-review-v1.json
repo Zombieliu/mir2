@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T19:04:57.523Z",
+  "scope": "Independent static prepared/full16 source and actual metadata binding review. No template import/finalize, test, ACL action, registration, private read, binary rehash or process launch.",
+  "prepared": {
+    "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/template-prepared-v2.json",
+    "bytes": 6578,
+    "sha256": "9cc5fec52fc9663ed93bf16bfed234b90794c081f021a558c213f2a7f6570bda"
+  },
+  "verifiedFiles": 13,
+  "sourceSha256": "816c07fe9bf8fed0017aefaf1c2f5293108d8fefa5c2cb1e90449f25a3942f96",
+  "derivation": {
+    "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/derivation-proof-v1.json",
+    "bytes": 9523,
+    "sha256": "49cf065ce4457e34e5c76646b50a2fd791126fc38504711bc1ef6ba1a498abe6"
+  },
+  "actualBinding": {
+    "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/actual-binding-provenance-v2.json",
+    "bytes": 3425,
+    "sha256": "46fd075680b9d96fa1ec3a1aeb5737505362aec67eb7fff42f97edac965fc371"
+  },
+  "candidate": {
+    "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/candidate-release-binding-v1.json",
+    "bytes": 1772,
+    "sha256": "f24a3543f225cf8c846b3bef32923978875b1ba5ca6b726f906ef264356fe080"
+  },
+  "sourceLibrary": {
+    "file": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-v1.mjs",
+    "bytes": 23031,
+    "sha256": "831a38ce052b11258d48a5946d95173cb299304ec7d7e210e7eb9bec050b57ef"
+  },
+  "actualRelease": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "actualReleaseIndependentStreamHashReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/actual-source-release-independent-review-v1.json",
+    "bytes": 2841,
+    "sha256": "d30b70166aba33c4e141aebecb4c8a28fb09546e6a4fc2aedf6de42aaed995eb"
+  },
+  "checks": {
+    "allThirteenCurrentPinsAndAggregateMatch": true,
+    "allFiveRuntimeSourceInverseRawExact": true,
+    "onlyNamedBackend44To50AndIdentityChanges": true,
+    "originalFiftyMillisecondThresholdUnchanged": true,
+    "twoNeutralToolsRawExact": true,
+    "sixRepositoryDriversRawExact": true,
+    "twoPendingMetadataPreimagesPreserved": true,
+    "onlyProfileScopeBinaryAndCandidateActualRefsChanged": true,
+    "actualC743Source50ReleaseDae1PinsMatch": true,
+    "originalLocationStrict50LibraryPinnedBeforeDynamicImport": true,
+    "nullOrPendingCandidateRefusesBeforeDriverImportAclAndRuntime": true,
+    "originalFull16NineHundredSecondsTwoAccountsSixZeroNormalShutdownRetained": true,
+    "noRuntimeStatePresentAtReview": true
+  },
+  "syntax": {
+    "sameSixSourcesAuthorChecked": true,
+    "reviewerDidNotRepeatSyntaxOrExecute": true
+  },
+  "notes": [
+    "Historical357 ordinary commands are not a required future exact count. No new count or full16 pass exists yet.",
+    "Store-only capture is not wired into this full16 template. Original complete private stdout/stderr behavior remains; the second Store dataset belongs to the separate capacity launcher.",
+    "The retained strict50 library keeps new Rust commit c743 separate from unchanged historical Node d240/210 evidence."
+  ],
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForRootFinalizeAndFreshRun": true,
+    "blockingFindingIds": [],
+    "finalizationExecutedByReviewer": false,
+    "fullLifecyclePassed": false,
+    "capacityAccepted": false,
+    "p0Accepted": false
+  }
+}

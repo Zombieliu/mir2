@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T20:59:29.957Z",
+  "runId": "1792959622496-365f0175",
+  "copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-observation-v1\\analyze-v2.mjs",
+        "bytes": 8016,
+        "sha256": "5a7787f5fef6ca2e8a11ec16ef94caa0b2ba74aef6cc938c06dc5e251b73212b"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-local-resource-observation-v1\\analyze-v2.mjs",
+        "bytes": 8016,
+        "sha256": "5a7787f5fef6ca2e8a11ec16ef94caa0b2ba74aef6cc938c06dc5e251b73212b"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-observation-v1\\analysis-v2.json",
+        "bytes": 13719,
+        "sha256": "26b2b7e43cdb0df3056d19bfdf5fe89272ef3751f51b8b081089bb4e48310c04"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-local-resource-observation-v1\\analysis-v2.json",
+        "bytes": 13719,
+        "sha256": "26b2b7e43cdb0df3056d19bfdf5fe89272ef3751f51b8b081089bb4e48310c04"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-independent-review-v1\\review-v2.json",
+        "bytes": 6082,
+        "sha256": "16687d5c51b445a6ec153f277225ed2c5081b831d58f2be09f10753d99945e01"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-local-resource-observation-v1\\review-v2.json",
+        "bytes": 6082,
+        "sha256": "16687d5c51b445a6ec153f277225ed2c5081b831d58f2be09f10753d99945e01"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-observation-v1\\analyze-v1.mjs",
+        "bytes": 6974,
+        "sha256": "5ee10b87af205f701effeca3ccb8e2fc795e407928299d187ddbf3733a6491b3"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-local-resource-observation-v1\\history\\analyze-v1.mjs",
+        "bytes": 6974,
+        "sha256": "5ee10b87af205f701effeca3ccb8e2fc795e407928299d187ddbf3733a6491b3"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-local-resource-observation-v1\\analysis-v1.json",
+        "bytes": 10799,
+        "sha256": "075716b6d8f86a7908dbee736fccf690fff92196d2764d0c0d9cbbf8e1168871"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-local-resource-observation-v1\\history\\analysis-v1-invalid.json",
+        "bytes": 10799,
+        "sha256": "075716b6d8f86a7908dbee736fccf690fff92196d2764d0c0d9cbbf8e1168871"
+      }
+    }
+  ],
+  "originalGameVerdictModified": false,
+  "capacityAccepted": false,
+  "scope": "Five exact public copies; history v1 invalid, only v2 valid. Source raw monitor remains external."
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "library": {
+    "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-v1.mjs",
+    "bytes": 23031,
+    "sha256": "831a38ce052b11258d48a5946d95173cb299304ec7d7e210e7eb9bec050b57ef"
+  },
+  "adapter": "projection-build-source-lib.mjs",
+  "expectedBackendInputCount": 50
+}

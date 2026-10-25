@@ -2,7 +2,7 @@
 
 本记录接续 [前轮证据](../cell-preproduction-p0-p1-20261024/README.md)，保留前轮失败和 `14 passed / 2 not_run` 原始完整报告。本轮报告独立保存，不改写旧结论。
 
-当前 P1 工程合同验证通过，P0 正式容量尚未通过。提交 `d2407fb8` 的独立 44 输入 Release `1980…` 已完成新鲜普通双客户端完整闭环 16/16，第十六轮 2/10 人加六分钟探测通过。正式 11 曾完成 2/10/25 人阶段后在 31 人扩容期间失败；新正式 12 在首个 2 人阶段因共享移动 owner 等待超过五秒提前失败，同期存在 6.5 秒 cadence 与 spectator 等待，实际锁/IO 持有者仍待证明。原失败、正常清理和独立一致性验证分别保留；50/100 人及两小时长稳尚未完成，不能据此认定机器容量上限。P2 尚未启动，固定 Cell 晋级仍以完整 P0 基线为前提。
+当前 P1 工程合同验证通过，P0 正式容量尚未通过，P2 尚未启动。提交 `c743122a` 的新 50 输入 Release `dae1…` 已完成普通双客户端完整生命周期 16/16，第十七轮 2/10 人加六分钟探测通过。正式 13 完成 2/10 人阶段后，在 25 人阶段因两个完整分钟窗口的战斗供给不足失败；本阶段 218 次实际攻击均成功、零超时。此前正式 11/12 失败、原门槛及正常清理证据保留，原五秒等待的实际持有者仍未证明。50/100 人及两小时长稳尚未完成，不能据此认定机器容量上限；固定 Cell 晋级仍以完整 P0 基线为前提。
 
 ## 已有新鲜结果
 
@@ -146,11 +146,33 @@ V2 后端对应提交 `461f1d85eed6309a55a88bd79a0022f7b97febe4`、[39 项输入
 
 [移动 owner 超时取证](capacity-formal12-movement-owner-timeout-analysis-v1/README.md)确认两个连接收到 `shared zone movement owner timed out after 5000ms`。两角色均有 Run/Walk 超时，另一次 RTT 超时只属于 actor01。错误和晚到位置更新不能唯一归到最后一条 Walk。同一时段公开记录出现 6.5 秒 `zone_cadence.total`、最长 4.899 秒 spectator 等待，owner 工作累计计数一度不变；未建立 CPU/内存耗尽或碰撞拒绝结论。源码盘点区分 writable-state 等待、AccountStore 锁、事务持锁和 File 同步 IO；实际持有者尚未证明，下一步补足诊断再修复。旧失败及原时限保持，P0 正式接受数仍为零，固定 Cell 未开始。
 
-## 移动 owner 等待诊断增量（新构建与复测待执行）
+## 移动 owner 等待诊断增量与新构建复测
 
 [七文件计时与实际验证](capacity-account-store-wait-diagnostics-v1/README.md)仅补可关闭的标量计时：区分 writable-state、持久化协调锁、AccountStore、File writer、序列化、临时文件同步、替换、发布标记及行会时钟阶段。原有锁、事务、文件操作、10 秒行会时钟、30 秒租约和游戏时限保持；内部 span 只收集固定槽数据，选定业务 guard 退出后才输出。未接入调用者及未完成等待仍是盲区，不能把没有日志解释为没有等待。
 
-新增 3 项检查通过；启用诊断后，File authority、行会时钟、持久化失败、经验身份和行会隔离的 **19 项不同相邻检查通过**，合计 **22 passed / 0 failed / 0 ignored**。七个源码输入在实际运行前后相同，七文件只读格式检查通过；这不是全工作区测试。Node 九输入原始摘要未改，原 210 项凭证按对应源码复用，没有宣称重新运行。存储慢段采用独立数据集与验证器，不混入旧慢段或游戏通过计数；该增量尚未产生新 Release、完整闭环或容量结果。P0 未验收、固定 Cell 未开始。
+新增 3 项检查通过；启用诊断后，File authority、行会时钟、持久化失败、经验身份和行会隔离的 **19 项不同相邻检查通过**，合计 **22 passed / 0 failed / 0 ignored**。七个源码输入在实际运行前后相同，七文件只读格式检查通过；这不是全工作区测试。正式 13 使用的 Node 九输入仍绑定 `d2407fb8 / 5ba…`，对应 210 项历史凭证按其源码复用，没有宣称重新运行。存储慢段采用独立数据集与验证器，不混入旧慢段或游戏通过计数。
+
+[新 50 输入 Release](capacity-account-store-wait-diagnostics-release-v1/README.md)绑定后端 `c743122a`，二进制 `dae1…`；[普通完整生命周期](protocol-full-lifecycle-account-store-wait-diagnostics-v1/README.md)实际 **16/16 passed**、341 次普通发送，正常退出与六项计数归零。第十七轮实际完成 2/10 人各 300 秒及 360 秒 soak，完整窗口为 5/5/6；[ended 独立核验](capacity-probe17-ended-verification-analysis-v1/README.md)通过，[准备与采集恢复历史](capacity-probe17-preparation-recovery-history-v1/README.md)原样保留。独立 Store 数据集有 [7 条有效记录](capacity-native10-v2-account-store-wait-followup-17-store-diagnostics/store-public-verification.json)，该轮未复现原五秒等待；这不证明根因已修复。
+
+## 正式 13：25 人战斗供给未达标
+
+[正式原报告与采集](capacity-formal-native-v2-account-store-wait-ladder-13/README.md)保留 2/10 人通过、25 人未通过的原结论。25 人实际持续 300.254 秒，五个完整窗口为通过/通过/失败/失败/通过；两个 fighter 的攻击供给低于每分钟 18 次门槛，其中 actor05 的命中供给也低于按实际窗口时长计算的每分钟 12 次门槛。218 次实际攻击均成功，零 timeout、零 not-launched；移动、聊天、fanout 通过，阶段均值和 233 个连续窗口通过不能替代两个失败完整窗口。
+
+[有界失败分析](capacity-formal13-native-supply-failure-analysis-v1/README.md)定位到约 31–32 秒攻击空档，动作主要用于侦察与追击。原始记录没有逐决策 peer snapshot/候选池，不能据此确认目标耗尽、路径错误或未利用 peer 线索就是本轮根因。[独立 Store 验证](capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics/README.md)确认 106 条完整有效记录；最长已完成 Store 跨度 265ms 出现在通过窗口，失败两窗分别最多 99ms、无 ≥50ms 记录。未完成、低于阈值及未接入调用仍有盲区，嵌套跨度不能相加。
+
+本轮正常清理及独立 OS 核对通过，50/100 人、两小时 soak、保存与恢复均未执行。P0 未通过，P2 未启动；下一步修正侦察规划并按原门槛复测，保留原失败。
+
+当前基线采用本机 i9-13900KF（24 个物理核、32 个逻辑处理器）、64GB 内存和 Windows 11；网关与协议负载客户端共机、loopback、File 存储，网关配置 4 个 Tokio worker，未施加四核云主机硬配额。目标为 100 人在线两小时、10 人持续战斗及其余角色移动/聊天/AOI；当前结果不承诺该目标已通过、100 人同时激战、云服务器规格、公网带宽上限或 N+1。
+
+[本轮资源采样与独立复算](capacity-formal13-local-resource-observation-v1/README.md)覆盖 542 个监控样本，2/10/25 人阶段分别选入 153/152/148 个。25 人阶段网关 CPU 采样 p95 为 1.113 个逻辑核当量、峰值 3.806，私有内存峰值 1871.8MiB；这些样本不改变战斗供给失败结论，也不证明两小时内存平台或硬件上限。主机 NIC 计数及进程 IO 的口径与限制单独列明。
+
+## 侦察路点改动：工具回归通过，实际负载待复测
+
+[侦察选择源码与回归](capacity-scout-observer-preference-driver-v1/README.md)为新 waypoint 增加当前 active observer 所见普通怪物线索。先找到原循环路线作为回退，仅用剩余预算试提示路线，总路径搜索仍最多四次；提示失败保留原可行路线。已建立 scout 的时间、ACK 与 visited 不重置，20 秒/24 ACK/三次访问及原追击预算保持。peer 线索只引导普通移动，攻击仍须 owner 实见目标、原双端 witness 和 900ms 证据。
+
+原 210 项测试源码完整保留，新增九项聚焦覆盖；同次四个测试入口、九个输入的完整回归实际 **219/219 passed、0 failed、0 skipped**，前后九源摘要一致，独审通过。九项聚焦包含在 219 中，不重复相加；这证明工具行为回归，不证明本机战斗供给已改善。原始 Formal13 缺少逐决策 peer 候选池，不能把该规划缺口称为它已证明或已修复的根因。
+
+后端 Rust 50 输入未变；后续复用原 `c743122a / dae1…` 构建，分别绑定新客户端提交与当前执行 HEAD，并逐项证明当前完整后端闭包与原构建一致。原 Release 的 `d2407fb8` 客户端构建依据保留为历史，不替代新九输入的 219 项证据；普通完整生命周期的六个驱动也独立校验。新普通生命周期、2/10/25/50/100 阶梯与两小时验收仍待实际执行，P0 未通过、P2 未开始。
 
 ## 本轮范围
 

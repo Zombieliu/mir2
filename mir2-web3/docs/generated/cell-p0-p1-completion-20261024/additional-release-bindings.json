@@ -20,6 +20,10 @@
     {
       "manifest": "backend-source-attack-deadline-diagnostics-v1.json",
       "build": "release-attack-deadline-diagnostics-v1.json"
+    },
+    {
+      "manifest": "capacity-account-store-wait-diagnostics-release-v1/backend-source-account-store-wait-diagnostics-v1.json",
+      "build": "capacity-account-store-wait-diagnostics-release-v1/release-account-store-wait-diagnostics-v1.json"
     }
   ]
 }

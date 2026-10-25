@@ -37,6 +37,10 @@ const COMBAT_CHASE_DEFERRAL_MS = 30000;
 const COMBAT_CHASE_MAX_MOVES = 40;
 const COMBAT_CHASE_MAX_MS = 30000;
 const RECENT_CHASE_PREFERENCE_MS = 3000;
+const COMBAT_SCOUT_HINT_OBSERVER_LIMIT = 100;
+const COMBAT_SCOUT_HINT_ENTITY_LIMIT = 2048;
+const COMBAT_SCOUT_HINT_LIMIT = 4;
+const COMBAT_SCOUT_SELECTION_ROW_LIMIT = 32;
 export const PENDING_ATTACK_PACKET_LIMIT = 64;
 export const ATTACK_OUTCOME_CAPABILITY = 'nativeAttackOutcomeV1';
 const MAX_ATTACK_REQUEST_ID = 18446744073709551615n;
@@ -706,8 +710,8 @@ export function claimNavigationHint(client, plan, sentAtMs = performance.now()) 
 export function releaseNavigationHint(client, hint) {
   if (hint && client.navigationHint === hint) client.navigationHint = null;
 }
-function movement(client, target, map, routeAllowed) {
-  const owner = self(client), occupied = navigationObstacles(client);
+function movement(client, target, map, routeAllowed, planningObstacles) {
+  const owner = self(client), occupied = planningObstacles ?? navigationObstacles(client);
   const blocked = (reason, nextStep) => {
     if (client.navigationAttempts) {
       client.navigationAttemptCount++;
@@ -998,6 +1002,50 @@ export function recordCombatScoutMovement(client, context, plan, origin, receipt
   if (reason) advanceCombatScout(client, context, reason, now);
 }
 
+function combatScoutHints(client, context, coverage, initialCursor, fallbackHomeIndex, now, allowed, occupied) {
+  const hints = [], cluster = client.combatCluster, range = stableFanoutRange('attack', context.policy);
+  let truncated = cluster.observerHomes.length > COMBAT_SCOUT_HINT_OBSERVER_LIMIT;
+  for (let offset = 0; offset < Math.min(cluster.observerHomes.length, COMBAT_SCOUT_HINT_OBSERVER_LIMIT); offset++) {
+    const homeIndex = (initialCursor + offset) % cluster.observerHomes.length;
+    if (homeIndex === fallbackHomeIndex) continue;
+    const binding = coverage.entries.find(entry => entry.homeIndex === homeIndex);
+    if (!binding) continue;
+    const observer = activeGameplayOwner(binding.observer, client.snapshot.mapFileName);
+    if (!observer) continue;
+    const entities = binding.observer.snapshot.entities;
+    truncated ||= entities.length > COMBAT_SCOUT_HINT_ENTITY_LIMIT;
+    for (let index = 0; index < Math.min(entities.length, COMBAT_SCOUT_HINT_ENTITY_LIMIT); index++) {
+      const target = entities[index], point = lifecyclePoint(target), id = target?.objectId;
+      if (!Number.isInteger(id) || id <= 0 || id > 0xffffffff || !point || !Number.isInteger(point.x) || !Number.isInteger(point.y) ||
+          !ordinaryCombatMonster(target, context) || !allowed(point) || distance(observer, point) > range ||
+          (client.failedTargets.get(id)?.until ?? 0) > now ||
+          (client.chaseDeferrals?.get(id)?.mapFileName === String(client.snapshot.mapFileName) && client.chaseDeferrals.get(id).until > now) ||
+          (context.targetClaims.has(id) && context.targetClaims.get(id) !== client.label)) continue;
+      const attackTile = STEPS.map(([dx, dy]) => ({ x: point.x + dx, y: point.y + dy })).find(tile =>
+        allowed(tile) && protocolMapCellIsWalkable(context.map, tile) && distance(observer, tile) <= range &&
+        !occupied.some(entity => entity.x === tile.x && entity.y === tile.y));
+      if (!attackTile) continue;
+      // Peer-only knowledge can suggest a waypoint, never add an owner AOI
+      // entity or bypass the real two-snapshot witness at attack selection/send.
+      hints.push({ homeIndex, objectId: id, target: point, observer: lifecyclePoint(observer), attackTile });
+      break;
+    }
+    if (hints.length === COMBAT_SCOUT_HINT_LIMIT) { truncated = true; break; }
+  }
+  return { hints, truncated };
+}
+
+function recordCombatScoutSelection(client, context, selection, now) {
+  if (!context.writer) return;
+  let diagnostic = client.combatScoutSelectionDiagnostic;
+  if (!diagnostic || diagnostic.phase !== context.phase) diagnostic = client.combatScoutSelectionDiagnostic = { phase: context.phase, rows: 0 };
+  if (diagnostic.rows >= COMBAT_SCOUT_SELECTION_ROW_LIMIT) return;
+  diagnostic.rows++;
+  context.writer.add({ type: 'combatScoutSelection', actor: client.label, phase: context.phase, at: now,
+    ...(diagnostic.rows === COMBAT_SCOUT_SELECTION_ROW_LIMIT ? { truncated: true, rowLimit: COMBAT_SCOUT_SELECTION_ROW_LIMIT } :
+      { ...selection, truncated: false }) });
+}
+
 function scoutCombatCoverage(client, context, now = Date.now(), coverage = activeCombatCoverage(client, context)) {
   const cluster = client.combatCluster, owner = self(client);
   if (!cluster?.observerHomes?.length || !coverage.entries.length || client.pending || !insideCombatCoverage(coverage, owner)) return null;
@@ -1007,30 +1055,56 @@ function scoutCombatCoverage(client, context, now = Date.now(), coverage = activ
   const allowed = point => insideCombatCoverage(coverage, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
   const initialCursor = client.combatScout?.homeIndex ?? client.combatScoutCursor ?? 0;
   let searches = 0;
-  searchHomes: for (let offset = 0; offset < cluster.observerHomes.length; offset++) {
-    const homeIndex = (initialCursor + offset) % cluster.observerHomes.length;
+  const findPlan = (homeIndex, hinted = false) => {
     const binding = coverage.entries.find(entry => entry.homeIndex === homeIndex);
-    if (!binding) continue;
+    if (!binding) return null;
     const home = binding.home;
     // A temporarily inactive declared waypoint must not reset a different
     // waypoint's existing finite clock, ACK count or position-loop budget.
-    if (client.combatScout && client.combatScout.homeIndex !== homeIndex) continue;
+    if (client.combatScout && client.combatScout.homeIndex !== homeIndex) return null;
     const goals = STEPS.map(([dx, dy]) => ({ x: home.x + dx, y: home.y + dy }))
       .filter(goal => distance(goal, owner) > 0 && protocolMapCellIsWalkable(context.map, goal) && allowed(goal) &&
         !occupied.some(entity => entity.x === goal.x && entity.y === goal.y))
       .sort((a, b) => distance(a, owner) - distance(b, owner));
     if (client.combatScout?.homeIndex === homeIndex) goals.sort((a, b) => Number(distance(b, client.combatScout.goal) === 0) - Number(distance(a, client.combatScout.goal) === 0));
     for (const goal of goals) {
-      if (searches++ >= 4) break searchHomes;
-      const plan = movement(client, goal, context.map, allowed);
+      if (searches >= 4) return null;
+      searches++;
+      const plan = hinted ? movement(client, goal, context.map, allowed, occupied) : movement(client, goal, context.map, allowed);
       if (!plan) continue;
-      if (!client.combatScout || client.combatScout.homeIndex !== homeIndex) {
-        client.combatScout = { mapFileName: String(client.snapshot.mapFileName), homeIndex, goal, startedAt: now,
-          activeElapsedMs: 0, confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map() };
-      } else client.combatScout.goal = goal;
-      client.combatScoutCursor = homeIndex;
-      return { ...plan, scouting: true, scoutHomeIndex: homeIndex };
+      return { plan, homeIndex, goal };
     }
+    return null;
+  };
+  let fallback = null;
+  for (let offset = 0; offset < cluster.observerHomes.length && searches < 4; offset++) {
+    fallback = findPlan((initialCursor + offset) % cluster.observerHomes.length);
+    if (fallback) break;
+  }
+  if (fallback) {
+    let selected = fallback, hint = null, hintScan = null;
+    const fallbackSearches = searches;
+    if (!client.combatScout && searches < 4) {
+      hintScan = combatScoutHints(client, context, coverage, initialCursor, fallback.homeIndex, now, allowed, occupied);
+      for (const candidate of hintScan.hints) {
+        const preferred = findPlan(candidate.homeIndex, true);
+        if (preferred) { selected = preferred; hint = candidate; break; }
+        if (searches >= 4) break;
+      }
+    }
+    const { plan, homeIndex, goal } = selected;
+    if (!client.combatScout) {
+      client.combatScout = { mapFileName: String(client.snapshot.mapFileName), homeIndex, goal, startedAt: now,
+        activeElapsedMs: 0, confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map() };
+    } else client.combatScout.goal = goal;
+    client.combatScoutCursor = homeIndex;
+    if (hintScan?.hints.length) recordCombatScoutSelection(client, context, {
+      reason: hint ? 'observer-target-waypoint' : 'cyclic-fallback', fallbackHomeIndex: fallback.homeIndex,
+      selectedHomeIndex: homeIndex, pathSearches: searches, hintPathSearches: searches - fallbackSearches,
+      hintScanTruncated: hintScan.truncated,
+      ...(hint ? { hintTargetId: hint.objectId, hintTarget: hint.target, actualObserver: hint.observer,
+        potentialAttackTile: hint.attackTile } : {}) }, now);
+    return { ...plan, scouting: true, scoutHomeIndex: homeIndex };
   }
   // Failed paths never become movement evidence. The next legal opportunity
   // can consider another finite observer waypoint while normal fallback keeps

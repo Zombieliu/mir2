@@ -1,0 +1,717 @@
+{
+  "schemaVersion": 1,
+  "analyzedAt": "2026-10-25T20:44:14.239Z",
+  "runId": "1792959622496-365f0175",
+  "scope": "Bounded read-only completed diagnostic analysis. Only the ended67266-byte base slow-stage dataset,23083-byte Store-only dataset/status and relevant report/source metadata were read. No original capacity raw, monitor history, recording, executable, test, build, service or production source was modified or replayed.",
+  "sourceIdentity": {
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "sourceConfigSha256": "64f56f7d39a78ea83987f3347a8b3380f708de30080b3c9dfa04193683709e94",
+    "backendInputCount": 50,
+    "storeSourceIdentity": {
+      "schemaVersion": 1,
+      "dataset": "account-store",
+      "storeOnly": true,
+      "manifest": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\source-freeze-v1.json",
+        "bytes": 4628,
+        "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+      },
+      "review": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+        "bytes": 6459,
+        "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+      },
+      "sourceSha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+      "helperSha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7",
+      "validatorSha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262",
+      "separateFromBaseThreeFourSeven": true,
+      "contributesToGameAcceptance": false
+    }
+  },
+  "evidence": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\reports\\1792959622496-365f0175.report.json",
+      "bytes": 423293,
+      "sha256": "3f167a5fde64e43a0a64a77b41fea9651edaa4deb6a585128065b5626f13be26"
+    },
+    "cleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\realm-cleanup.json",
+      "bytes": 6409,
+      "sha256": "48ee7d0f03a5f9649cb1b1d0da5279251c479745f65071fbd32de75ec8235577"
+    },
+    "provenance": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\report-provenance.json",
+      "bytes": 7637,
+      "sha256": "c7360830336aadf5571a165f18f58d7f9facb0c770328c61c2d34370704d4c35"
+    },
+    "preparedSources": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\source-pins.json",
+      "bytes": 167649,
+      "sha256": "242edddda787fb565f720723cbca72a584e90b13fbb6a38c9b8b2c1aad9dbf91"
+    },
+    "backendSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    "sevenSourceCandidate": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-account-store-diagnostics-v1\\source-candidate-v1.json",
+      "bytes": 6682,
+      "sha256": "fe037243485836fae250965c710b8096dcf10e7d254d75c4533b0241569912e7"
+    },
+    "producerAndCallerSources": [
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_account_store_diagnostics.rs",
+        "bytes": 10863,
+        "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4",
+        "sourcePath": "apps/simulation/src/config_account_store_diagnostics.rs"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\lib.rs",
+        "bytes": 7191,
+        "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3",
+        "sourcePath": "apps/simulation/src/lib.rs"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+        "bytes": 347044,
+        "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d",
+        "sourcePath": "apps/simulation/src/config.rs"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_file_authority.rs",
+        "bytes": 24828,
+        "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff",
+        "sourcePath": "apps/simulation/src/config_file_authority.rs"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_shared_guilds.rs",
+        "bytes": 53319,
+        "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0",
+        "sourcePath": "apps/simulation/src/config_shared_guilds.rs"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config_guild_clock_driver.rs",
+        "bytes": 22968,
+        "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8",
+        "sourcePath": "apps/simulation/src/config_guild_clock_driver.rs"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_experience_profile.rs",
+        "bytes": 76309,
+        "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab",
+        "sourcePath": "apps/simulation/src/runtime/shared_experience_profile.rs"
+      }
+    ],
+    "baseDataset": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\slow-stage-public.jsonl",
+      "bytes": 67266,
+      "sha256": "f9b0280498abf5a8fd0fa243162f1b8d16930899a38f52944b18f70382b46e59"
+    },
+    "baseStatus": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\slow-stage-public-status.json",
+      "bytes": 1019,
+      "sha256": "427a8424a7cb616cdd989a13d52ae944a6d4c3f181a2fa62c1d24d0ec8f5803c"
+    },
+    "baseHelper": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    "storeDataset": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\store-stage-public.jsonl",
+      "bytes": 23083,
+      "sha256": "927baeb695360376d15ade2f3fa8a7dd5d873fcc33ca329e456d807268ee56d8"
+    },
+    "storeStatus": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\store-stage-public-status.json",
+      "bytes": 2589,
+      "sha256": "7e09a7aced29a9ca2bc195528559f4c2453c570b96096679ef43c2942bc1c382"
+    }
+  },
+  "validation": {
+    "all14StoreStagesAnd5OperationsFromPinnedProducer": true,
+    "exact10PublicStoreFields": true,
+    "allStoreIntegersJsSafeAndFloorEndpointChecksPassed": true,
+    "baseOnlyOriginal3_4_7FieldsAndFixedAllowlist": true,
+    "bothEndedEofStatusRowsBytesMatch": true,
+    "bothCapturesComplete": true,
+    "storeSourceIdentityMatchesPreparedAndProvenance": true,
+    "sevenProducerCallerRawPinsMatchSourceCandidateAnd50Manifest": true,
+    "sourceFilesAggregateRecomputed": true
+  },
+  "terminal": {
+    "reportOk": false,
+    "error": "Stage 25 did not satisfy the fixed activity, latency or coverage gates",
+    "stages": [
+      {
+        "name": "stage-2",
+        "measuredSeconds": 300.259,
+        "passed": true
+      },
+      {
+        "name": "stage-10",
+        "measuredSeconds": 300.261,
+        "passed": true
+      },
+      {
+        "name": "stage-25",
+        "measuredSeconds": 300.254,
+        "passed": false
+      }
+    ],
+    "continuousFailureCount": 0,
+    "capacityAccepted": false
+  },
+  "counts": {
+    "baseRows": 715,
+    "storeRows": 106,
+    "storeUniqueTraces": 97,
+    "byStage": {
+      "account_store.writable_wait": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null
+      },
+      "account_store.persist_wait": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null
+      },
+      "account_store.store_wait": {
+        "rows": 89,
+        "maximumCompletedDurationMs": 255
+      },
+      "account_store.store_held": {
+        "rows": 8,
+        "maximumCompletedDurationMs": 265
+      },
+      "account_store.file_writer_wait": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null
+      },
+      "account_store.serialize": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null
+      },
+      "account_store.temp_write_sync": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null
+      },
+      "account_store.atomic_replace": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null
+      },
+      "account_store.marker_wait": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null
+      },
+      "account_store.marker_state_wait": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null
+      },
+      "account_store.marker_begin_sync": {
+        "rows": 8,
+        "maximumCompletedDurationMs": 259
+      },
+      "account_store.marker_settle_sync": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null
+      },
+      "account_store.driver_wait": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null
+      },
+      "account_store.driver_held": {
+        "rows": 1,
+        "maximumCompletedDurationMs": 99
+      }
+    },
+    "byOperation": {
+      "experience_admission": {
+        "rows": 9,
+        "maximumCompletedDurationMs": 214
+      },
+      "guild_lookup": {
+        "rows": 80,
+        "maximumCompletedDurationMs": 255
+      },
+      "save": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null
+      },
+      "transaction": {
+        "rows": 14,
+        "maximumCompletedDurationMs": 265
+      },
+      "guild_clock": {
+        "rows": 3,
+        "maximumCompletedDurationMs": 99
+      }
+    }
+  },
+  "stage25Windows": [
+    {
+      "index": 1,
+      "startedAtMs": 1792960394310,
+      "endedAtMs": 1792960454327,
+      "seconds": 60.017,
+      "passed": true,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "storeRowsByReceiveClock": 36,
+      "maximumCompletedStoreMs": 265,
+      "baseRowsByReceiveClock": 149,
+      "maximumCompletedBaseMs": 316,
+      "combat": [
+        {
+          "actor": "L8b25a105",
+          "attacks": 31,
+          "hits": 31,
+          "moves": 17,
+          "completed": 53,
+          "offered": 53,
+          "passed": true
+        },
+        {
+          "actor": "L8b25a10f",
+          "attacks": 23,
+          "hits": 23,
+          "moves": 33,
+          "completed": 59,
+          "offered": 59,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "startedAtMs": 1792960454327,
+      "endedAtMs": 1792960514428,
+      "seconds": 60.101,
+      "passed": true,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "storeRowsByReceiveClock": 15,
+      "maximumCompletedStoreMs": 129,
+      "baseRowsByReceiveClock": 61,
+      "maximumCompletedBaseMs": 223,
+      "combat": [
+        {
+          "actor": "L8b25a105",
+          "attacks": 29,
+          "hits": 29,
+          "moves": 22,
+          "completed": 56,
+          "offered": 56,
+          "passed": true
+        },
+        {
+          "actor": "L8b25a10f",
+          "attacks": 32,
+          "hits": 32,
+          "moves": 15,
+          "completed": 52,
+          "offered": 52,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "startedAtMs": 1792960514428,
+      "endedAtMs": 1792960574462,
+      "seconds": 60.034,
+      "passed": false,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "storeRowsByReceiveClock": 26,
+      "maximumCompletedStoreMs": 99,
+      "baseRowsByReceiveClock": 41,
+      "maximumCompletedBaseMs": 118,
+      "combat": [
+        {
+          "actor": "L8b25a105",
+          "attacks": 11,
+          "hits": 11,
+          "moves": 58,
+          "completed": 71,
+          "offered": 71,
+          "passed": false
+        },
+        {
+          "actor": "L8b25a10f",
+          "attacks": 14,
+          "hits": 14,
+          "moves": 51,
+          "completed": 67,
+          "offered": 67,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "startedAtMs": 1792960574462,
+      "endedAtMs": 1792960634544,
+      "seconds": 60.082,
+      "passed": false,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "storeRowsByReceiveClock": 0,
+      "maximumCompletedStoreMs": null,
+      "baseRowsByReceiveClock": 11,
+      "maximumCompletedBaseMs": 78,
+      "combat": [
+        {
+          "actor": "L8b25a105",
+          "attacks": 12,
+          "hits": 12,
+          "moves": 53,
+          "completed": 70,
+          "offered": 70,
+          "passed": false
+        },
+        {
+          "actor": "L8b25a10f",
+          "attacks": 16,
+          "hits": 16,
+          "moves": 46,
+          "completed": 66,
+          "offered": 66,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "startedAtMs": 1792960634544,
+      "endedAtMs": 1792960694564,
+      "seconds": 60.02,
+      "passed": true,
+      "timeoutRatio": 0,
+      "correctionRatio": 0.0005461496450027307,
+      "storeRowsByReceiveClock": 20,
+      "maximumCompletedStoreMs": 142,
+      "baseRowsByReceiveClock": 62,
+      "maximumCompletedBaseMs": 184,
+      "combat": [
+        {
+          "actor": "L8b25a105",
+          "attacks": 23,
+          "hits": 23,
+          "moves": 34,
+          "completed": 61,
+          "offered": 61,
+          "passed": true
+        },
+        {
+          "actor": "L8b25a10f",
+          "attacks": 27,
+          "hits": 27,
+          "moves": 25,
+          "completed": 57,
+          "offered": 57,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "completedHolderEvidence": {
+    "holderRows": 8,
+    "nestedMarkerChecks": [
+      {
+        "traceId": 9518,
+        "operation": "transaction",
+        "storeHeldMs": 67,
+        "markerBeginSyncMs": 61,
+        "markerMaximumInsideHeld": true
+      },
+      {
+        "traceId": 14221,
+        "operation": "transaction",
+        "storeHeldMs": 95,
+        "markerBeginSyncMs": 89,
+        "markerMaximumInsideHeld": true
+      },
+      {
+        "traceId": 56608,
+        "operation": "transaction",
+        "storeHeldMs": 191,
+        "markerBeginSyncMs": 185,
+        "markerMaximumInsideHeld": true
+      },
+      {
+        "traceId": 63275,
+        "operation": "transaction",
+        "storeHeldMs": 204,
+        "markerBeginSyncMs": 198,
+        "markerMaximumInsideHeld": true
+      },
+      {
+        "traceId": 72143,
+        "operation": "transaction",
+        "storeHeldMs": 265,
+        "markerBeginSyncMs": 259,
+        "markerMaximumInsideHeld": true
+      },
+      {
+        "traceId": 77168,
+        "operation": "transaction",
+        "storeHeldMs": 129,
+        "markerBeginSyncMs": 123,
+        "markerMaximumInsideHeld": true
+      },
+      {
+        "traceId": 98915,
+        "operation": "guild_clock",
+        "storeHeldMs": 99,
+        "markerBeginSyncMs": 85,
+        "markerMaximumInsideHeld": true
+      },
+      {
+        "traceId": 128755,
+        "operation": "transaction",
+        "storeHeldMs": 142,
+        "markerBeginSyncMs": 126,
+        "markerMaximumInsideHeld": true
+      }
+    ],
+    "largestEpisode": {
+      "traceId": 72143,
+      "observationClockMs": 1792960445654,
+      "operation": "transaction",
+      "rows": [
+        {
+          "observedAtMs": 1792960445654,
+          "stage": "account_store.store_held",
+          "durationMs": 265,
+          "operation": "transaction",
+          "traceId": 72143,
+          "startedUnixMs": 1792960445390,
+          "maxStartUs": 1,
+          "maxEndUs": 265306,
+          "samples": 1,
+          "totalUs": 265305
+        },
+        {
+          "observedAtMs": 1792960445654,
+          "stage": "account_store.marker_begin_sync",
+          "durationMs": 259,
+          "operation": "transaction",
+          "traceId": 72143,
+          "startedUnixMs": 1792960445390,
+          "maxStartUs": 1166,
+          "maxEndUs": 260525,
+          "samples": 1,
+          "totalUs": 259358
+        }
+      ],
+      "nearbyStoreWaitCount": 20,
+      "nearbyStoreWaitMaximumMs": 255,
+      "nearbyStoreWaitExamples": [
+        {
+          "observedAtMs": 1792960445655,
+          "stage": "account_store.store_wait",
+          "durationMs": 255,
+          "operation": "guild_lookup",
+          "traceId": 72148,
+          "startedUnixMs": 1792960445401,
+          "maxStartUs": 0,
+          "maxEndUs": 255066,
+          "samples": 1,
+          "totalUs": 255066
+        },
+        {
+          "observedAtMs": 1792960445654,
+          "stage": "account_store.store_wait",
+          "durationMs": 254,
+          "operation": "guild_lookup",
+          "traceId": 72144,
+          "startedUnixMs": 1792960445401,
+          "maxStartUs": 0,
+          "maxEndUs": 254483,
+          "samples": 1,
+          "totalUs": 254483
+        },
+        {
+          "observedAtMs": 1792960445654,
+          "stage": "account_store.store_wait",
+          "durationMs": 254,
+          "operation": "guild_lookup",
+          "traceId": 72145,
+          "startedUnixMs": 1792960445401,
+          "maxStartUs": 0,
+          "maxEndUs": 254445,
+          "samples": 1,
+          "totalUs": 254444
+        },
+        {
+          "observedAtMs": 1792960445654,
+          "stage": "account_store.store_wait",
+          "durationMs": 254,
+          "operation": "guild_lookup",
+          "traceId": 72146,
+          "startedUnixMs": 1792960445401,
+          "maxStartUs": 0,
+          "maxEndUs": 254424,
+          "samples": 1,
+          "totalUs": 254424
+        }
+      ],
+      "nearbyBaseRows": 45,
+      "nearbyBaseExamples": [
+        {
+          "observedAtMs": 1792960445680,
+          "stage": "socket_turn.input",
+          "durationMs": 316,
+          "connection": 6
+        },
+        {
+          "observedAtMs": 1792960445680,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 316,
+          "connection": 6
+        },
+        {
+          "observedAtMs": 1792960445713,
+          "stage": "socket_turn.spectator",
+          "durationMs": 313,
+          "connection": 10
+        },
+        {
+          "observedAtMs": 1792960445673,
+          "stage": "session_action.flush",
+          "durationMs": 293,
+          "connection": 6
+        },
+        {
+          "observedAtMs": 1792960445675,
+          "stage": "socket_turn.spectator",
+          "durationMs": 275,
+          "connection": 21
+        },
+        {
+          "observedAtMs": 1792960445676,
+          "stage": "socket_turn.spectator",
+          "durationMs": 275,
+          "connection": 1
+        }
+      ],
+      "definition": "Same operation trace proves these completed timer intervals are nested. Other trace and base records are correlated by launcher receive time only, not an ownership/request join."
+    },
+    "guildClockExample": {
+      "traceId": 98915,
+      "rows": [
+        {
+          "observedAtMs": 1792960555012,
+          "stage": "account_store.store_held",
+          "durationMs": 99,
+          "operation": "guild_clock",
+          "traceId": 98915,
+          "startedUnixMs": 1792960554913,
+          "maxStartUs": 3,
+          "maxEndUs": 99178,
+          "samples": 1,
+          "totalUs": 99175
+        },
+        {
+          "observedAtMs": 1792960555012,
+          "stage": "account_store.marker_begin_sync",
+          "durationMs": 85,
+          "operation": "guild_clock",
+          "traceId": 98915,
+          "startedUnixMs": 1792960554913,
+          "maxStartUs": 175,
+          "maxEndUs": 85303,
+          "samples": 1,
+          "totalUs": 85128
+        },
+        {
+          "observedAtMs": 1792960555012,
+          "stage": "account_store.driver_held",
+          "durationMs": 99,
+          "operation": "guild_clock",
+          "traceId": 98915,
+          "startedUnixMs": 1792960554913,
+          "maxStartUs": 0,
+          "maxEndUs": 99190,
+          "samples": 1,
+          "totalUs": 99190
+        }
+      ]
+    }
+  },
+  "sourceSemantics": [
+    {
+      "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+      "lines": [
+        115,
+        121,
+        122,
+        123,
+        141,
+        154,
+        174,
+        206
+      ],
+      "meaning": "Monotonic offsets are relative to a record; wall anchor is captured separately. Emit occurs from outer Record Drop after guards. Only completed maxima meeting50ms are emitted; one slot also records aggregated count/total."
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "lines": [
+        5270,
+        5278,
+        5285,
+        5453
+      ],
+      "meaning": "transaction StoreHeld starts after live AccountStore lock and surrounds the publication/persistence path; no operation outcome or identity is logged."
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "lines": [
+        263,
+        265,
+        267,
+        268
+      ],
+      "meaning": "MarkerBeginSync measures publication marker seek/write/sync_all. A long timer covers this code path; it is not a diagnosis of the underlying filesystem/OS cause."
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "lines": [
+        1302,
+        1304,
+        1310
+      ],
+      "meaning": "guild_lookup StoreWait measures account_store.lock acquisition; StoreHeld records the following owner-record lookup."
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_driver.rs",
+      "lines": [
+        37,
+        44,
+        71
+      ],
+      "meaning": "guild_clock DriverHeld and StoreHeld are nested coordinator and live-store scopes."
+    }
+  ],
+  "findings": [
+    "Largest completed Store episode is transaction trace72143: store_held265ms with marker_begin_sync259ms inside the same measured held interval. Nearby guild_lookup waits254–255ms and base input/outbound waits up to316ms share the receive-time cluster. This is evidence of a completed publication-marker/Store contention episode, not a named holder or root-cause diagnosis.",
+    "All8 emitted StoreHeld maxima have an emitted MarkerBeginSync maximum nested within the same operation trace. Seven are transaction operations and one is guild_clock. Durations across these nested stages must not be added.",
+    "The265ms episode falls in stage25 window1, which passed. Failed window3 has completed Store maximum99ms (guild_clock); failed window4 has no>=50ms completed Store rows. Combat launches/hits are11/14 and12/16 respectively with all reported native opportunities completed and zero window timeout ratio. These observations do not establish Store wait as the cause of the attack-supply failures.",
+    "The106 emitted Store maxima are all<=265ms and715 base maxima all<=932ms. No5-second completed instrumented Store span was reproduced; this is not proof that every holder/path or unfinished wait was absent."
+  ],
+  "limits": [
+    "50ms threshold is left-censoring; zero rows is not zero work/wait. Only completed instrumented scopes emit; aborted, unfinished and uninstrumented legacy callers remain outside this evidence.",
+    "startedUnixMs is a separately sampled wall anchor and maxStartUs/maxEndUs are monotonic offsets. Across traces, derived wall intervals are approximate; receiver observedAtMs is not an authoritative start/end, lock owner, request ID, actor identity or exact event ordering.",
+    "Within one record, durationMs is the floored maximum occurrence, while samples and totalUs aggregate same-stage occurrences. Endpoint microsecond truncation can add1us; nested spans overlap and cannot be summed.",
+    "Rows do not record successful transaction outcome, account, owner or mutex identity. Concurrent-looking traces cannot uniquely identify who held a particular lock for another waiter.",
+    "This analysis preserves original report failure and policy. It does not adjudicate a new game threshold, capacity/P0 acceptance, host capacity or an automatic remediation."
+  ],
+  "originalFailurePreserved": true,
+  "rootCauseEstablished": false,
+  "productionSourceChanged": false,
+  "testsOrBuildExecuted": false,
+  "p0Accepted": false,
+  "p2Started": false
+}

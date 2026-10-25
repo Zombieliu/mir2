@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T16:30:02.685Z",
+  "scope": "Read-only prepared-source review. No entrypoint import, target module evaluation, captureSource, Git source guard, build, release capture, behavior tests or realm was executed by this reviewer.",
+  "preparation": {
+    "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/prepared-v1.json",
+    "bytes": 7234,
+    "sha256": "002b6ee01de9fc5f60b4d21d95883ca9904b2365bc370cd5fd5481257786c4ee"
+  },
+  "reviewedInputs": [
+    {
+      "file": "source-lib-v1.mjs",
+      "bytes": 16541,
+      "sha256": "9f8832afcb8ff2d0ef2f01c54679e5252e13675115c4c3a4e9d645162bad56f1"
+    },
+    {
+      "file": "pin-build-source-v1.mjs",
+      "bytes": 906,
+      "sha256": "9c2bb5502f3f9d6eadd7146daf670c5a2d88372da6518e198a82e8abaac385cc"
+    },
+    {
+      "file": "build-release-v1.mjs",
+      "bytes": 4904,
+      "sha256": "864ab65942cebd22edab689bab3eb46222fb38e42e0ec5124d4c22d3c3cbdbf1"
+    },
+    {
+      "file": "capture-release-v1.mjs",
+      "bytes": 3492,
+      "sha256": "7e6f40d82f785a397ef24022cccb53f92e30eac1ddc18f1d5296afbb598e545f"
+    },
+    {
+      "file": "prepare-entrypoints-v1.mjs",
+      "bytes": 4717,
+      "sha256": "2939c504f293248e8320e0acca7bc403e2cd4dcc52e91d3499b5b93003aa6243"
+    },
+    {
+      "file": "entrypoint-derivation-v1.json",
+      "bytes": 5817,
+      "sha256": "28b68650ab94aa627651e7d7c0ff7451df77aac7ef492fb12c7b4d0d4cd5c582"
+    },
+    {
+      "file": "final-source-binding-v1.json",
+      "bytes": 192,
+      "sha256": "678463e39a418a376ffa786c44733ce0096ebfe2e4e503470907e3e2007ba7db"
+    },
+    {
+      "file": "source-and-parameter-schema-v1.json",
+      "bytes": 3002,
+      "sha256": "2a773f037d4db999454f8564171a3f6acebb77ab38a0977af5cdb905558e774f"
+    },
+    {
+      "file": "slow-stage-scoped-draft-v1.json",
+      "bytes": 1000,
+      "sha256": "bd518cf5ed1328bc9511a97fc5b19c08031cfb6bea4f4774f40f71743358850e"
+    },
+    {
+      "file": "README.md",
+      "bytes": 3186,
+      "sha256": "ccee84531a2c4a639844e317d08766757ea237df21f1afd0d7df4b76385c5029"
+    },
+    {
+      "file": "prepare-metadata-v1.mjs",
+      "bytes": 4935,
+      "sha256": "5dcb9281abf053937b699fdaaa497168430e8b2c67e16ebe37f65a2026700646"
+    }
+  ],
+  "sourceAggregate": "c619a33b49dc8a25f8b2c99f11deaaae177df30c3c06d29aee60fb9f1cf8d7a0",
+  "knownActualValidation": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-attack-deadline-functional-validation-v1.json",
+    "bytes": 7819,
+    "sha256": "cb1aaf30818ca430e5ee8fe942d36675a9690e36abcd2f4248717ed6c8686dea"
+  },
+  "knownActualValidationReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-attack-deadline-functional-independent-review-v1.json",
+    "bytes": 4103,
+    "sha256": "a596e20d0ca8a0275fa675c8ef3e15f972c8be7c776b5d513dfec6ebe87bb552"
+  },
+  "proof": {
+    "allElevenPreparedPinsAndAggregateExact": true,
+    "threeEntryInverseProofsActuallyChecked": true,
+    "fixtureOnlyNoneFunctionLiteralExactPreviousLibrary": true,
+    "pendingBindingAllRequiredActualFieldsNull": true
+  },
+  "review": {
+    "sourceClosure": "Direct5c2/44 baseline raw manifest is strong-pinned by bytes/SHA/commit/aggregate. 68f→newHEAD closure must be exactly44. 5c2→newHEAD backend delta must be exactlyweb.rs, all other43 raw and Git LF hashes exact; raw is compared to committed objects through real Git attributes without rewriting.",
+    "treeGuards": "Future capture rejects old or wrong HEAD, tracked dirty state, ignored-inclusive untracked backend inputs, symlink/nonregular/outside backend sources and tree changes during capture. Preserved four-None fixture inverse remains exact.",
+    "validation": "Final binding must name the new committed HEAD and exactweb pin, actual Root functional receipt and new same-HEAD Node9 freeze. Actual Root3-check schema consumes rustFocused8/nodeRegression210/rustfmt1 with exact pinned log/receipt references; Node9 raw aggregate and current Git-filtered blobs are separately validated.",
+    "build": "Mechanical entry inverses preserve installed1.95.0/VS amd64 MSVC, locked/offline/Release/jobs4, actual merged log+exit, requireFrozen before/after and manifest byte identity, source-failure rejection, fresh mtime, COPYFILE_EXCL immutable binary and capture rechecks. Distinct outputs and binary SHA rejection include d879/a430/855b.",
+    "pendingBarrier": "All actual binding fields are null and state is PENDING. captureSource first resolves finalBinding, so current source cannot be captured or built. Prepared syntax evidence is not execution permission or a produced new artifact.",
+    "diagnosticConsumer": "slow-stage-scoped-draft-v1.json only declares future allowlist expansion of the five existing labels. It does not implement or modify the old frozen parser; a separately frozen updated consumer remains necessary for a new load."
+  },
+  "findings": [],
+  "verdict": {
+    "preparedSourceContractPassed": true,
+    "blockingFindingIds": [],
+    "eligibleForRootFinalBindingAfterActualCommitAndNewFreeze": true,
+    "eligibleForCaptureNow": false,
+    "eligibleForBuildNow": false,
+    "eligibleForRealmNow": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2ImplementationPermitted": false
+  }
+}

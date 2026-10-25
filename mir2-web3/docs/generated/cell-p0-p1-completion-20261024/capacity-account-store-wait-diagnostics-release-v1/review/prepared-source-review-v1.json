@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T18:56:24.021Z",
+  "scope": "Prepared-only static source/schema and raw-closure review. No import, capture, build, Cargo, gate or source modification.",
+  "preparation": {
+    "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/prepared-v1.json",
+    "bytes": 4381,
+    "sha256": "b34689e8d2196899b0382e4336baa0ffededd6444cebec3c73eafcbac9f9601c"
+  },
+  "checkedInputCount": 14,
+  "checkedInputs": [
+    {
+      "path": "source-lib-v1.mjs",
+      "bytes": 23031,
+      "sha256": "831a38ce052b11258d48a5946d95173cb299304ec7d7e210e7eb9bec050b57ef",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-v1.mjs"
+    },
+    {
+      "path": "pin-build-source-v1.mjs",
+      "bytes": 981,
+      "sha256": "cbae8b80108e56e9549d771e9d29aaaa9012f845946a16a33c12ca5ccdc04a9f",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/pin-build-source-v1.mjs"
+    },
+    {
+      "path": "build-release-v1.mjs",
+      "bytes": 4969,
+      "sha256": "258cd1db150e433c7d6be30335d514509272400c047bb6edd632aa9c7d26b14f",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/build-release-v1.mjs"
+    },
+    {
+      "path": "capture-release-v1.mjs",
+      "bytes": 3693,
+      "sha256": "948fd449ca36a48d4d88aa11ecc0ecc0e3622bdcab5808b4c7ef17f0a14bcfa7",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/capture-release-v1.mjs"
+    },
+    {
+      "path": "final-source-binding-v1.json",
+      "bytes": 2105,
+      "sha256": "dec3448773688cbcb3f15f23c2fff94caa0c45ab2ed477ea3404c9e0ed92813a",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/final-source-binding-v1.json.before-actual-v2.txt"
+    },
+    {
+      "path": "source-derivation-plan-v1.json",
+      "bytes": 3198,
+      "sha256": "2fa2f931e07f144435f50bb6fccc1c5275d08ac5ad2439ef12a6d35c5925271a",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-derivation-plan-v1.json"
+    },
+    {
+      "path": "source-lib-draft-v1.mjs.txt",
+      "bytes": 15663,
+      "sha256": "c997b93bacf3080f723415324a258820b07033c7bdca5d2a02950b38ec45e1f3",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-draft-v1.mjs.txt"
+    },
+    {
+      "path": "source-library-derivation-rules-v1.json",
+      "bytes": 13471,
+      "sha256": "8450640a99b55ef165837ac5412af4d16c9b2e5186da0b2b343899142916ffd4",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-library-derivation-rules-v1.json"
+    },
+    {
+      "path": "functional-binding-validator-draft-v1.mjs.txt",
+      "bytes": 5801,
+      "sha256": "c297201b10206d7f749186dd317a5636312ba9e3538883190350862deeb20993",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/functional-binding-validator-draft-v1.mjs.txt"
+    },
+    {
+      "path": "source-lib-before-actual-functional-v2.mjs.txt",
+      "bytes": 21543,
+      "sha256": "a5591bd8524fc4e9f715c4f76136aeb71983dcd7aa8f0022d5fb92a5f663d1a3",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-before-actual-functional-v2.mjs.txt"
+    },
+    {
+      "path": "actual-functional-shape-adjustment-v2.json",
+      "bytes": 4896,
+      "sha256": "072e89fc2985e80ccb923e1eba9ee51d855a824501ced49b1b80c7e902bc2099",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/actual-functional-shape-adjustment-v2.json"
+    },
+    {
+      "path": "required-root-binding-fields-v1.json",
+      "bytes": 1091,
+      "sha256": "b953cd1bcf560e50160f36ecb1996a0a601c48c2e0774b85846721f0522025c9",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/required-root-binding-fields-v1.json.before-actual-v2.txt"
+    },
+    {
+      "path": "entrypoint-derivation-v1.json",
+      "bytes": 34823,
+      "sha256": "497377c21d01b4f60cbb45210c74edda8ea6e5be6f7161215815afa4a1f0b64e",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/entrypoint-derivation-v1.json"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2799,
+      "sha256": "8b0595b53d1861dbb66c95c9bcfe661151718dec6da960fb1c6cc6e330c3d3fd",
+      "readPath": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/README.md.before-actual-v2.txt"
+    }
+  ],
+  "sourceSha256": "be6cb385691e4a5e3f700468afe78ff21a1996f124c49c88267eae5b3b5c70de",
+  "sourceDerivationProofs": [
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/source-lib-v1.mjs",
+        "bytes": 16541,
+        "sha256": "9f8832afcb8ff2d0ef2f01c54679e5252e13675115c4c3a4e9d645162bad56f1"
+      },
+      "target": {
+        "path": "source-lib-v1.mjs",
+        "bytes": 23031,
+        "sha256": "831a38ce052b11258d48a5946d95173cb299304ec7d7e210e7eb9bec050b57ef"
+      },
+      "hunks": 10,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/pin-build-source-v1.mjs",
+        "bytes": 906,
+        "sha256": "9c2bb5502f3f9d6eadd7146daf670c5a2d88372da6518e198a82e8abaac385cc"
+      },
+      "target": {
+        "path": "pin-build-source-v1.mjs",
+        "bytes": 981,
+        "sha256": "cbae8b80108e56e9549d771e9d29aaaa9012f845946a16a33c12ca5ccdc04a9f"
+      },
+      "hunks": 1,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/build-release-v1.mjs",
+        "bytes": 4904,
+        "sha256": "864ab65942cebd22edab689bab3eb46222fb38e42e0ec5124d4c22d3c3cbdbf1"
+      },
+      "target": {
+        "path": "build-release-v1.mjs",
+        "bytes": 4969,
+        "sha256": "258cd1db150e433c7d6be30335d514509272400c047bb6edd632aa9c7d26b14f"
+      },
+      "hunks": 3,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-diagnostics-release-v1/capture-release-v1.mjs",
+        "bytes": 3492,
+        "sha256": "7e6f40d82f785a397ef24022cccb53f92e30eac1ddc18f1d5296afbb598e545f"
+      },
+      "target": {
+        "path": "capture-release-v1.mjs",
+        "bytes": 3693,
+        "sha256": "948fd449ca36a48d4d88aa11ecc0ecc0e3622bdcab5808b4c7ef17f0a14bcfa7"
+      },
+      "hunks": 3,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    }
+  ],
+  "checks": {
+    "preparedRawPinsMatch": true,
+    "proof4ForwardInverseExact": true,
+    "oldManifest44Exact": true,
+    "onlyOldLibChanges": true,
+    "sixAdditionalPaths": true,
+    "expectedClosure50": true,
+    "other43RawAndBaselineGitLfCompared": true,
+    "currentSevenCandidatePinsMatch": true,
+    "fourNoneHelperUnchanged": true,
+    "functionalSummaryActual22AndFmt7Shape": true,
+    "actualSuccessRegexNamesMatched": [
+      {
+        "kind": "rustFocused",
+        "matched": 3
+      },
+      {
+        "kind": "rustAdjacent",
+        "matched": 19
+      }
+    ],
+    "historicalNodeDriverD240210Separated": true,
+    "pendingRefusesBeforeGitOrOutput": true,
+    "ignoredInclusiveUntrackedRejectionRetained": true,
+    "gitFilterAndCommittedObjectEqualityRetained": true,
+    "beforeAfterSourceAndBuildLogBindingRetained": true,
+    "vs195OfflineLockedJobs4Retained": true,
+    "immutableExclusiveCopyAndOldBinaryRejectionRetained": true
+  },
+  "actualFunctionalValidation": {
+    "path": "C:/mir2-build/p01-completion-20261024/root-account-store-wait-diagnostics-functional-validation-v1.json",
+    "bytes": 12175,
+    "sha256": "1ad0420e74d363088b20dca95cebbb7c84b035e1edf5d0472a185d8bd81dea57"
+  },
+  "limitations": [
+    "Prepared v1 remains PENDING/null. Root must provide actual new committed HEAD, exact functional ref and reviewed final binding before capture/build.",
+    "Four node --check results are author metadata read back; not independently rerun.",
+    "Source checks compare bounded current source inputs and immutable baseline only; no source manifest was captured or build performed.",
+    "Original Node210 is unchanged historical d240 evidence, not a fresh Node run. No Release/full16/capacity acceptance is asserted."
+  ],
+  "verdict": {
+    "preparedSourceContractPassed": true,
+    "eligibleForRootFinalBinding": true,
+    "eligibleForCaptureOrBuildNow": false,
+    "blockingFindingIds": []
+  }
+}

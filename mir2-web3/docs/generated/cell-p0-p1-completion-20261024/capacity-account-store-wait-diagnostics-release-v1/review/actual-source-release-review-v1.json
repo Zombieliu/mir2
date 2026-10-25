@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T19:03:12.819Z",
+  "scope": "Independent read-only completed build/Release/source-product and immutable executable stream-hash review. No capture, Cargo/build, test, process or realm run by reviewer.",
+  "release": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "sourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+  },
+  "sourceManifestSha256": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+  "actualBuildReceipt": {
+    "file": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-v1-build-receipt.json",
+    "bytes": 2453,
+    "sha256": "146df0a5be29ddacf114f0574ef0cf0500666d23ffbae3dfa533eaf229263936"
+  },
+  "actualBuildLog": {
+    "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-account-store-wait-diagnostics-v1-release-build.log",
+    "bytes": 56033,
+    "sha256": "64e6c04e66681b8486cd29bd401faaec7d7cdd7fad61f3395b2defa7b9f0e864"
+  },
+  "independentBinary": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87396864,
+    "sha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+    "streamed": true,
+    "regularNonSymlink": true,
+    "stableSizeAndMtimeAcrossHash": true,
+    "expectedImmutablePath": true,
+    "distinctFromAllFourPriorBinaries": true
+  },
+  "checks": {
+    "actualRootOwnedBuildExit0": true,
+    "completeReleaseLogFinishedWithoutErrorLine": true,
+    "installedRustCargo195OfflineLockedReleaseJobs4": true,
+    "visualStudioX64LinkerRecorded": true,
+    "actualBuildReceiptBeforeAfterSourceUnchanged": true,
+    "current50RawStillMatchFrozenManifestAfterBuild": true,
+    "currentCommittedHeadTrackedClean": true,
+    "buildReceiptBinaryAndImmutableReleasePinsAgree": true,
+    "newRustC743SeparatedFromHistoricalNodeD240": true,
+    "actualNew22RustFmt7AndHistorical210NodeRemainDistinct": true
+  },
+  "actualDurationMs": 196728,
+  "earlierSourceReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/actual-source-manifest-independent-review-v1.json",
+    "bytes": 3211,
+    "sha256": "ab2c8078f4d25d59e63f10ff0015236e353bc02930f3e9dff970614796abdda4"
+  },
+  "verdict": {
+    "actualSourceAndReleasePassed": true,
+    "blockingFindingIds": [],
+    "eligibleForFreshFull16Binding": true,
+    "fullLifecyclePassed": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Started": false
+  }
+}

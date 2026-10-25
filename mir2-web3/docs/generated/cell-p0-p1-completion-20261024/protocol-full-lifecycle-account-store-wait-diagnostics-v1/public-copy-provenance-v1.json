@@ -1,0 +1,519 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T19:19:19.638Z",
+  "publicChild": "protocol-full-lifecycle-account-store-wait-diagnostics-v1",
+  "copyCount": 38,
+  "totalCopiedBytes": 3652321,
+  "files": [
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.audit-source.mjs",
+        "bytes": 9078,
+        "sha256": "4a4f2679a7b306194ea904d4535c9fe7af2618623075caf4d53c70ac851c2241"
+      },
+      "destination": "public/1792955142379-1d2b2111.audit-source.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.audit-source.mjs",
+        "bytes": 9078,
+        "sha256": "4a4f2679a7b306194ea904d4535c9fe7af2618623075caf4d53c70ac851c2241"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.backend-source.json",
+        "bytes": 41831,
+        "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+      },
+      "destination": "public/1792955142379-1d2b2111.backend-source.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.backend-source.json",
+        "bytes": 41831,
+        "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.independent-audit.json",
+        "bytes": 1750,
+        "sha256": "e3628a5a32e822fdeac680ccc73375719b4d37675f3eb2398e0adc718d8b201a"
+      },
+      "destination": "public/1792955142379-1d2b2111.independent-audit.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.independent-audit.json",
+        "bytes": 1750,
+        "sha256": "e3628a5a32e822fdeac680ccc73375719b4d37675f3eb2398e0adc718d8b201a"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.prepared-profile.json",
+        "bytes": 4391,
+        "sha256": "907e150b27a0d0f82e2f4d411d49587a038a5e9ec9c031073a8d30d534bca3f4"
+      },
+      "destination": "public/1792955142379-1d2b2111.prepared-profile.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.prepared-profile.json",
+        "bytes": 4391,
+        "sha256": "907e150b27a0d0f82e2f4d411d49587a038a5e9ec9c031073a8d30d534bca3f4"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.realm-evidence.json",
+        "bytes": 34998,
+        "sha256": "273164b8f1529b2198bfdf02c7d1261bb1f06be73d869772a8674b1bb041edf6"
+      },
+      "destination": "public/1792955142379-1d2b2111.realm-evidence.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.realm-evidence.json",
+        "bytes": 34998,
+        "sha256": "273164b8f1529b2198bfdf02c7d1261bb1f06be73d869772a8674b1bb041edf6"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.release-input.json",
+        "bytes": 3343,
+        "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+      },
+      "destination": "public/1792955142379-1d2b2111.release-input.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.release-input.json",
+        "bytes": 3343,
+        "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.runner-source.mjs",
+        "bytes": 14401,
+        "sha256": "80114e86736d4b21eeb05a5efeed0bbe772d0602e454a21d1c3c6ba43ce139be"
+      },
+      "destination": "public/1792955142379-1d2b2111.runner-source.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.runner-source.mjs",
+        "bytes": 14401,
+        "sha256": "80114e86736d4b21eeb05a5efeed0bbe772d0602e454a21d1c3c6ba43ce139be"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.source-manifest-verification.json",
+        "bytes": 575,
+        "sha256": "26543564c191eec9304d5a4516fd41cb10eed73be5fa94e8d992915b97636dc0"
+      },
+      "destination": "public/1792955142379-1d2b2111.source-manifest-verification.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.source-manifest-verification.json",
+        "bytes": 575,
+        "sha256": "26543564c191eec9304d5a4516fd41cb10eed73be5fa94e8d992915b97636dc0"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.zone-metrics.json",
+        "bytes": 23596,
+        "sha256": "8018ce18bcb0289bfb36d526bfa82e07e4f318b71351dbf32bb7377c5ed4c898"
+      },
+      "destination": "public/1792955142379-1d2b2111.zone-metrics.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955142379-1d2b2111.zone-metrics.json",
+        "bytes": 23596,
+        "sha256": "8018ce18bcb0289bfb36d526bfa82e07e4f318b71351dbf32bb7377c5ed4c898"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-a.trace.jsonl",
+        "bytes": 979881,
+        "sha256": "2895002c9d164f9f3fa98686aeb954669b8672438cd9f76bb9ca588a8532586e"
+      },
+      "destination": "public/1792955151058-4afb2f09-a.trace.jsonl",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-a.trace.jsonl",
+        "bytes": 979881,
+        "sha256": "2895002c9d164f9f3fa98686aeb954669b8672438cd9f76bb9ca588a8532586e"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-b.trace.jsonl",
+        "bytes": 907129,
+        "sha256": "5ff17d001249454d2eeabb1b67c7b398c25a6a14b58ecd5d06fceb8831eda2b9"
+      },
+      "destination": "public/1792955151058-4afb2f09-b.trace.jsonl",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-b.trace.jsonl",
+        "bytes": 907129,
+        "sha256": "5ff17d001249454d2eeabb1b67c7b398c25a6a14b58ecd5d06fceb8831eda2b9"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-guard-newCharacter.trace.jsonl",
+        "bytes": 3479,
+        "sha256": "d8f1513ce5c26c6baa26f1e8bb33fefac4701fadd2b96561ecb697bfc3975c0d"
+      },
+      "destination": "public/1792955151058-4afb2f09-guard-newCharacter.trace.jsonl",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-guard-newCharacter.trace.jsonl",
+        "bytes": 3479,
+        "sha256": "d8f1513ce5c26c6baa26f1e8bb33fefac4701fadd2b96561ecb697bfc3975c0d"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-guard-startGame.trace.jsonl",
+        "bytes": 3441,
+        "sha256": "c14ee46b55c9f4d7f950ef330845b28cc2a44cc95e246ac088740e7a6823ee00"
+      },
+      "destination": "public/1792955151058-4afb2f09-guard-startGame.trace.jsonl",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-guard-startGame.trace.jsonl",
+        "bytes": 3441,
+        "sha256": "c14ee46b55c9f4d7f950ef330845b28cc2a44cc95e246ac088740e7a6823ee00"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-relogin-0.trace.jsonl",
+        "bytes": 685108,
+        "sha256": "1e19da8a0f0955b367f8439f5b9f0c7b25bd4a77b82826f332742ff16da490a9"
+      },
+      "destination": "public/1792955151058-4afb2f09-relogin-0.trace.jsonl",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-relogin-0.trace.jsonl",
+        "bytes": 685108,
+        "sha256": "1e19da8a0f0955b367f8439f5b9f0c7b25bd4a77b82826f332742ff16da490a9"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-relogin-1.trace.jsonl",
+        "bytes": 681056,
+        "sha256": "a55b572942796dfb2134b405b0942941ad477cbef970a4f2c9980aac846a4a2b"
+      },
+      "destination": "public/1792955151058-4afb2f09-relogin-1.trace.jsonl",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09-relogin-1.trace.jsonl",
+        "bytes": 681056,
+        "sha256": "a55b572942796dfb2134b405b0942941ad477cbef970a4f2c9980aac846a4a2b"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09.report.json",
+        "bytes": 104551,
+        "sha256": "93ff28d507413635fc12a2732be7f7a8ce8a577843de96338102c05b4ba79461"
+      },
+      "destination": "public/1792955151058-4afb2f09.report.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public/1792955151058-4afb2f09.report.json",
+        "bytes": 104551,
+        "sha256": "93ff28d507413635fc12a2732be7f7a8ce8a577843de96338102c05b4ba79461"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/run-owned-full.mjs",
+        "bytes": 14401,
+        "sha256": "80114e86736d4b21eeb05a5efeed0bbe772d0602e454a21d1c3c6ba43ce139be"
+      },
+      "destination": "preparation/run-owned-full.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/run-owned-full.mjs",
+        "bytes": 14401,
+        "sha256": "80114e86736d4b21eeb05a5efeed0bbe772d0602e454a21d1c3c6ba43ce139be"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/audit-owned-full.mjs",
+        "bytes": 9078,
+        "sha256": "4a4f2679a7b306194ea904d4535c9fe7af2618623075caf4d53c70ac851c2241"
+      },
+      "destination": "preparation/audit-owned-full.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/audit-owned-full.mjs",
+        "bytes": 9078,
+        "sha256": "4a4f2679a7b306194ea904d4535c9fe7af2618623075caf4d53c70ac851c2241"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/verify-inputs.mjs",
+        "bytes": 9407,
+        "sha256": "5960387fcf51d6d4b3be202839861727fcc44209a7eda9e8460804f080d9f8bd"
+      },
+      "destination": "preparation/verify-inputs.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/verify-inputs.mjs",
+        "bytes": 9407,
+        "sha256": "5960387fcf51d6d4b3be202839861727fcc44209a7eda9e8460804f080d9f8bd"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/finalize-launcher-inputs.mjs",
+        "bytes": 2038,
+        "sha256": "12e7392145acca4098f8586fb6e820ae99932b4514ed335975088945b76d1c06"
+      },
+      "destination": "preparation/finalize-launcher-inputs.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/finalize-launcher-inputs.mjs",
+        "bytes": 2038,
+        "sha256": "12e7392145acca4098f8586fb6e820ae99932b4514ed335975088945b76d1c06"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/projection-build-source-lib.mjs",
+        "bytes": 242,
+        "sha256": "16e2848ce480761686481efcfc2d723471dbea466b3dfa6f3c6a350bce3d35fe"
+      },
+      "destination": "preparation/projection-build-source-lib.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/projection-build-source-lib.mjs",
+        "bytes": 242,
+        "sha256": "16e2848ce480761686481efcfc2d723471dbea466b3dfa6f3c6a350bce3d35fe"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      },
+      "destination": "preparation/frozen-audit-support.mjs",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/initialize-fresh-private.ps1",
+        "bytes": 1643,
+        "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+      },
+      "destination": "preparation/initialize-fresh-private.ps1",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/initialize-fresh-private.ps1",
+        "bytes": 1643,
+        "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/full-lifecycle-profile.json",
+        "bytes": 4391,
+        "sha256": "907e150b27a0d0f82e2f4d411d49587a038a5e9ec9c031073a8d30d534bca3f4"
+      },
+      "destination": "preparation/full-lifecycle-profile.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/full-lifecycle-profile.json",
+        "bytes": 4391,
+        "sha256": "907e150b27a0d0f82e2f4d411d49587a038a5e9ec9c031073a8d30d534bca3f4"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/candidate-release-binding-v1.json",
+        "bytes": 1772,
+        "sha256": "f24a3543f225cf8c846b3bef32923978875b1ba5ca6b726f906ef264356fe080"
+      },
+      "destination": "preparation/candidate-release-binding-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/candidate-release-binding-v1.json",
+        "bytes": 1772,
+        "sha256": "f24a3543f225cf8c846b3bef32923978875b1ba5ca6b726f906ef264356fe080"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/derivation-proof-v1.json",
+        "bytes": 9523,
+        "sha256": "49cf065ce4457e34e5c76646b50a2fd791126fc38504711bc1ef6ba1a498abe6"
+      },
+      "destination": "preparation/derivation-proof-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/derivation-proof-v1.json",
+        "bytes": 9523,
+        "sha256": "49cf065ce4457e34e5c76646b50a2fd791126fc38504711bc1ef6ba1a498abe6"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/README.md",
+        "bytes": 2019,
+        "sha256": "0112caa2e14641c1c1c9c0aaff26a91b4c99feb0ecaa0a07a7b7ad5e88798ff2"
+      },
+      "destination": "preparation/README.md",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/README.md",
+        "bytes": 2019,
+        "sha256": "0112caa2e14641c1c1c9c0aaff26a91b4c99feb0ecaa0a07a7b7ad5e88798ff2"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/actual-binding-provenance-v2.json",
+        "bytes": 3425,
+        "sha256": "46fd075680b9d96fa1ec3a1aeb5737505362aec67eb7fff42f97edac965fc371"
+      },
+      "destination": "preparation/actual-binding-provenance-v2.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/actual-binding-provenance-v2.json",
+        "bytes": 3425,
+        "sha256": "46fd075680b9d96fa1ec3a1aeb5737505362aec67eb7fff42f97edac965fc371"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/README-ACTUAL-v2.md",
+        "bytes": 999,
+        "sha256": "ff39719e96ff9bc1ea913176a43430fa6f19fd78668d0c47a094ff83d6676bee"
+      },
+      "destination": "preparation/README-ACTUAL-v2.md",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/README-ACTUAL-v2.md",
+        "bytes": 999,
+        "sha256": "ff39719e96ff9bc1ea913176a43430fa6f19fd78668d0c47a094ff83d6676bee"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/template-prepared-v1.json",
+        "bytes": 5088,
+        "sha256": "3f04eb5b5578ec7d518d2c4909e3d56257b786e5d74fb0fa2a356012806aaacf"
+      },
+      "destination": "preparation/template-pending-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/template-pending-v1.json",
+        "bytes": 5088,
+        "sha256": "3f04eb5b5578ec7d518d2c4909e3d56257b786e5d74fb0fa2a356012806aaacf"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/template-prepared-v2.json",
+        "bytes": 6578,
+        "sha256": "9cc5fec52fc9663ed93bf16bfed234b90794c081f021a558c213f2a7f6570bda"
+      },
+      "destination": "preparation/template-actual-v2.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/template-actual-v2.json",
+        "bytes": 6578,
+        "sha256": "9cc5fec52fc9663ed93bf16bfed234b90794c081f021a558c213f2a7f6570bda"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/launcher-final-binding-v1.json",
+        "bytes": 1690,
+        "sha256": "946a450296973ed380b1dad6ac0617d53705719c174ce5568026b7cf66a47682"
+      },
+      "destination": "preparation/launcher-final-binding-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/launcher-final-binding-v1.json",
+        "bytes": 1690,
+        "sha256": "946a450296973ed380b1dad6ac0617d53705719c174ce5568026b7cf66a47682"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/full-lifecycle-profile.json.before-actual-v2.txt",
+        "bytes": 4372,
+        "sha256": "c35157bb216a15a7385b3ad432141333da71f9833bf34236ca2b19d54fea974b"
+      },
+      "destination": "preparation/pending-preimages/full-lifecycle-profile.json.txt",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/pending-preimages/full-lifecycle-profile.json.txt",
+        "bytes": 4372,
+        "sha256": "c35157bb216a15a7385b3ad432141333da71f9833bf34236ca2b19d54fea974b"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/candidate-release-binding-v1.json.before-actual-v2.txt",
+        "bytes": 977,
+        "sha256": "a87fb54fdd3440305f4500035b99d2de582b773573809ffb9c32ec0c520d26c3"
+      },
+      "destination": "preparation/pending-preimages/candidate-release-binding-v1.json.txt",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/preparation/pending-preimages/candidate-release-binding-v1.json.txt",
+        "bytes": 977,
+        "sha256": "a87fb54fdd3440305f4500035b99d2de582b773573809ffb9c32ec0c520d26c3"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-independent-review-v1.json",
+        "bytes": 3735,
+        "sha256": "70f00b0892b22cf2cee88095e459967ae7e3ff415d8a80864b392e8f9f358da2"
+      },
+      "destination": "review/source-and-actual-binding-review-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/review/source-and-actual-binding-review-v1.json",
+        "bytes": 3735,
+        "sha256": "70f00b0892b22cf2cee88095e459967ae7e3ff415d8a80864b392e8f9f358da2"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-full16-actual-terminal-independent-facts-v1.json",
+        "bytes": 7468,
+        "sha256": "8929b6ce485ee10b30cf4d66d24c0148ee394c1564d540fbee005fcbb944ba63"
+      },
+      "destination": "review/actual-terminal-facts-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/review/actual-terminal-facts-v1.json",
+        "bytes": 7468,
+        "sha256": "8929b6ce485ee10b30cf4d66d24c0148ee394c1564d540fbee005fcbb944ba63"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/full16-actual-prerequisite-v1.json",
+        "bytes": 4677,
+        "sha256": "644597aa08abc083d7d0108ee6361b898991a2527b39feb494efdfd3b6aaba46"
+      },
+      "destination": "full16-actual-prerequisite-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/full16-actual-prerequisite-v1.json",
+        "bytes": 4677,
+        "sha256": "644597aa08abc083d7d0108ee6361b898991a2527b39feb494efdfd3b6aaba46"
+      }
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-release-full16-public-archive-v1/protocol-full-lifecycle-account-store-wait-diagnostics-v1-whitelist-v1.json",
+        "bytes": 13618,
+        "sha256": "07e4e1888f2726beff35ecb7d525eced150b7d1bfceafa766bdca1e6d34c8d5f"
+      },
+      "destination": "public-whitelist-v1.json",
+      "public": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/public-whitelist-v1.json",
+        "bytes": 13618,
+        "sha256": "07e4e1888f2726beff35ecb7d525eced150b7d1bfceafa766bdca1e6d34c8d5f"
+      }
+    }
+  ],
+  "readme": {
+    "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/protocol-full-lifecycle-account-store-wait-diagnostics-v1/README.md",
+    "bytes": 2619,
+    "sha256": "56cf1a0e08c4f62bcf3aed93ef3cddfc69479309131fafa094c2cb7fd8672e19"
+  },
+  "relativeLinksChecked": 12,
+  "relativeLinksAllExist": true,
+  "allCopiesReadBackRawExact": true,
+  "privateFilesCopied": false,
+  "binariesCopied": false,
+  "recordingsCopied": false,
+  "newRustInputFilesCreated": false,
+  "auditOrTestsOrGameExecutedByArchive": false,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Frozen": true
+}

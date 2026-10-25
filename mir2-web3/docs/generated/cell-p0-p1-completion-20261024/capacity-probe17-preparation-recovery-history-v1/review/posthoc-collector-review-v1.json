@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T19:57:41.688Z",
+  "scope": "Read-only post-run collector delta review. No target import, collector/verifier execution, raw/monitor/recording parse, binary hash, gameplay replay or source mutation.",
+  "original": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\collect-public.mjs",
+    "bytes": 43717,
+    "sha256": "fa890d028335d38b7bce79806e88f379522723031806dd263fbf8feade55513b"
+  },
+  "derived": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\collect-public-current50-v2.mjs",
+    "bytes": 43753,
+    "sha256": "c9f20b36990fb2ed92462360bfad9df4a9798c5f96bc5ab31f36037c5baf473c"
+  },
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\collect-public-current50-v2-derivation-v1.json",
+    "bytes": 5732,
+    "sha256": "1419117bfdf61dbb57d1bebe8c3c742463a42149266f1f8cfd626819853b953c"
+  },
+  "runtimeFrozen": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\launcher-source-frozen-v1.json",
+    "bytes": 33193,
+    "sha256": "6c5610464c3ddf69c607ad882b36e42b316fbe1f8dab17c38c0457b591db5b16"
+  },
+  "currentReleaseMetadata": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-account-store-wait-diagnostics-v1.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-v1-build-receipt.json",
+      "bytes": 2453,
+      "sha256": "146df0a5be29ddacf114f0574ef0cf0500666d23ffbae3dfa533eaf229263936"
+    }
+  ],
+  "checks": {
+    "sevenTransformationsCountedAndPositionsMatched": true,
+    "forwardAndInverseRawExact": true,
+    "threeCurrent50BasenamesOnly": true,
+    "threeRemovedMissingHistoricalEntriesNotInFrozen69": true,
+    "originalCollectorStillMatchesRuntimeFreeze": true,
+    "selfAndDerivationIncludedInExplicitPublicSources": true,
+    "unchangedGameWindowAndVerdictCode": true,
+    "unchangedPrivacyAndPathGuards": true
+  },
+  "limitations": [
+    "Original first collector exit1 is coordinator-observed; no original stdout/stderr file was captured.",
+    "This review author did not run the derived collector or independently replay raw gameplay.",
+    "Deletion covers only three missing unsealed historical names; the complete runtime frozen69 source closure remains required."
+  ],
+  "verdict": {
+    "collectorSourceContractPassed": true,
+    "eligibleForRootExecution": true,
+    "blockingFindingIds": []
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}
