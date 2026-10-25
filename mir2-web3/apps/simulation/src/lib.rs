@@ -1,6 +1,7 @@
 pub mod activities;
 pub mod billing;
 mod config;
+mod config_account_store_diagnostics;
 pub mod conquest;
 pub mod crystal_health;
 pub mod db_projection;

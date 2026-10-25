@@ -146,6 +146,12 @@ V2 后端对应提交 `461f1d85eed6309a55a88bd79a0022f7b97febe4`、[39 项输入
 
 [移动 owner 超时取证](capacity-formal12-movement-owner-timeout-analysis-v1/README.md)确认两个连接收到 `shared zone movement owner timed out after 5000ms`。两角色均有 Run/Walk 超时，另一次 RTT 超时只属于 actor01。错误和晚到位置更新不能唯一归到最后一条 Walk。同一时段公开记录出现 6.5 秒 `zone_cadence.total`、最长 4.899 秒 spectator 等待，owner 工作累计计数一度不变；未建立 CPU/内存耗尽或碰撞拒绝结论。源码盘点区分 writable-state 等待、AccountStore 锁、事务持锁和 File 同步 IO；实际持有者尚未证明，下一步补足诊断再修复。旧失败及原时限保持，P0 正式接受数仍为零，固定 Cell 未开始。
 
+## 移动 owner 等待诊断增量（新构建与复测待执行）
+
+[七文件计时与实际验证](capacity-account-store-wait-diagnostics-v1/README.md)仅补可关闭的标量计时：区分 writable-state、持久化协调锁、AccountStore、File writer、序列化、临时文件同步、替换、发布标记及行会时钟阶段。原有锁、事务、文件操作、10 秒行会时钟、30 秒租约和游戏时限保持；内部 span 只收集固定槽数据，选定业务 guard 退出后才输出。未接入调用者及未完成等待仍是盲区，不能把没有日志解释为没有等待。
+
+新增 3 项检查通过；启用诊断后，File authority、行会时钟、持久化失败、经验身份和行会隔离的 **19 项不同相邻检查通过**，合计 **22 passed / 0 failed / 0 ignored**。七个源码输入在实际运行前后相同，七文件只读格式检查通过；这不是全工作区测试。Node 九输入原始摘要未改，原 210 项凭证按对应源码复用，没有宣称重新运行。存储慢段采用独立数据集与验证器，不混入旧慢段或游戏通过计数；该增量尚未产生新 Release、完整闭环或容量结果。P0 未验收、固定 Cell 未开始。
+
 ## 本轮范围
 
 - P0：普通双客户端完整生命周期、可复跑的本机容量规格与场景、服务端延迟及逐核/进程/网络/存储资源证据。

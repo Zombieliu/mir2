@@ -9,6 +9,7 @@ use super::zone::{
     ZoneChatProfile, ZoneExperiencePartner, ZoneExperienceProfile, ZoneExperienceRateBuff,
     ZoneExperienceRateSource, ZoneExperienceRateStat, ZoneGuildExperienceMembership, ZoneKey,
 };
+use crate::config_account_store_diagnostics::{Operation, Record, Stage};
 use crate::{AccountStore, SimulationConfig, Stage5FriendIdentity, Stage5SystemsState};
 use bevy_ecs::prelude::{Resource, World};
 use std::collections::{BTreeMap, BTreeSet};
@@ -507,12 +508,16 @@ impl SimulationConfig {
             ) -> Result<(), String>,
         ) -> Result<T, String>,
     ) -> Result<T, String> {
-        self.ensure_account_store_writable()?;
+        let diagnostics = Record::new(Operation::ExperienceAdmission);
+        self.ensure_account_store_writable_with_diagnostics(Some(&diagnostics))?;
+        let store_wait = diagnostics.span(Stage::StoreWait);
         let store = self
             .account_store
             .lock()
             .map_err(|_| "experience profile authority mutex poisoned")?;
-        self.ensure_account_store_writable()?;
+        drop(store_wait);
+        let _store_held = diagnostics.span(Stage::StoreHeld);
+        self.ensure_account_store_writable_with_diagnostics(Some(&diagnostics))?;
         let refresh = |actor: &Stage5FriendIdentity,
                        profile: &mut Option<ZoneExperienceProfile>,
                        chat: &mut ZoneChatProfile| {

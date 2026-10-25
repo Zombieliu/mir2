@@ -1,3 +1,7 @@
+use crate::config_account_store_diagnostics::{
+    measure as diagnostic_measure, Operation as DiagnosticOperation, Record as DiagnosticRecord,
+    Stage as DiagnosticStage,
+};
 use crate::conquest::{ConquestPolicy, SharedConquestRecord};
 use std::collections::{BTreeMap, BTreeSet};
 use std::env;
@@ -339,6 +343,15 @@ impl AccountStore {
         path: &Path,
         fault: Option<AccountStoreFileCommitFault>,
     ) -> Result<(), AccountStoreFileCommitError> {
+        self.save_to_path_with_diagnostics(path, fault, None)
+    }
+
+    fn save_to_path_with_diagnostics(
+        &self,
+        path: &Path,
+        fault: Option<AccountStoreFileCommitFault>,
+        diagnostics: Option<&DiagnosticRecord>,
+    ) -> Result<(), AccountStoreFileCommitError> {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).map_err(|error| {
                 AccountStoreFileCommitError::not_committed(io::Error::new(
@@ -351,18 +364,23 @@ impl AccountStore {
             })?;
         }
 
-        let data = serde_json::to_string_pretty(self).map_err(|error| {
+        let data = diagnostic_measure(diagnostics, DiagnosticStage::Serialize, || {
+            serde_json::to_string_pretty(self)
+        })
+        .map_err(|error| {
             AccountStoreFileCommitError::not_committed(io::Error::new(
                 io::ErrorKind::InvalidData,
                 format!("failed to encode account store: {error}"),
             ))
         })?;
-        write_file_atomically(path, data.as_bytes(), fault).map_err(|error| {
-            error.with_context(format!(
-                "failed to atomically write account store {}",
-                path.display()
-            ))
-        })
+        write_file_atomically_with_diagnostics(path, data.as_bytes(), fault, diagnostics).map_err(
+            |error| {
+                error.with_context(format!(
+                    "failed to atomically write account store {}",
+                    path.display()
+                ))
+            },
+        )
     }
 
     fn with_default_account(mut self, default_character: CharacterRecord) -> Self {
@@ -1214,7 +1232,16 @@ impl FileAccountStoreRepository {
         store: &AccountStore,
         fault: Option<AccountStoreFileCommitFault>,
     ) -> Result<AccountStoreRepositorySave, AccountStoreFileCommitError> {
-        save_account_store_snapshot_to_path(store, &self.path, fault)?;
+        self.save_with_commit_outcome_and_diagnostics(store, fault, None)
+    }
+
+    fn save_with_commit_outcome_and_diagnostics(
+        &self,
+        store: &AccountStore,
+        fault: Option<AccountStoreFileCommitFault>,
+        diagnostics: Option<&DiagnosticRecord>,
+    ) -> Result<AccountStoreRepositorySave, AccountStoreFileCommitError> {
+        save_account_store_snapshot_to_path(store, &self.path, fault, diagnostics)?;
         Ok(AccountStoreRepositorySave::default())
     }
 }
@@ -1638,16 +1665,29 @@ fn write_file_atomically(
     data: &[u8],
     fault: Option<AccountStoreFileCommitFault>,
 ) -> Result<(), AccountStoreFileCommitError> {
+    write_file_atomically_with_diagnostics(path, data, fault, None)
+}
+
+fn write_file_atomically_with_diagnostics(
+    path: &Path,
+    data: &[u8],
+    fault: Option<AccountStoreFileCommitFault>,
+    diagnostics: Option<&DiagnosticRecord>,
+) -> Result<(), AccountStoreFileCommitError> {
     let parent = path.parent().unwrap_or_else(|| Path::new("."));
     fs::create_dir_all(parent).map_err(AccountStoreFileCommitError::not_committed)?;
 
     let temp_path = atomic_temp_path(path);
-    let prepare_result = (|| -> io::Result<()> {
-        let mut file = File::create(&temp_path)?;
-        file.write_all(data)?;
-        file.write_all(b"\n")?;
-        file.sync_all()
-    })();
+    let prepare_result = diagnostic_measure(
+        diagnostics,
+        DiagnosticStage::TempWriteSync,
+        || -> io::Result<()> {
+            let mut file = File::create(&temp_path)?;
+            file.write_all(data)?;
+            file.write_all(b"\n")?;
+            file.sync_all()
+        },
+    );
     if let Err(error) = prepare_result {
         let _ = fs::remove_file(&temp_path);
         return Err(AccountStoreFileCommitError::not_committed(error));
@@ -1661,7 +1701,9 @@ fn write_file_atomically(
         )));
     }
 
-    match replace_file_atomically_with_retry(&temp_path, path, fault) {
+    match diagnostic_measure(diagnostics, DiagnosticStage::AtomicReplace, || {
+        replace_file_atomically_with_retry(&temp_path, path, fault)
+    }) {
         Ok(()) => Ok(()),
         Err(error) => {
             if !error.is_commit_outcome_unknown() {
@@ -4702,9 +4744,17 @@ impl SimulationConfig {
     }
 
     pub(crate) fn ensure_account_store_writable(&self) -> Result<(), String> {
-        let state = self.account_store_write_state.lock().map_err(|_| {
-            "account-store write-state mutex poisoned; writes are blocked".to_string()
-        })?;
+        self.ensure_account_store_writable_with_diagnostics(None)
+    }
+
+    pub(crate) fn ensure_account_store_writable_with_diagnostics(
+        &self,
+        diagnostics: Option<&DiagnosticRecord>,
+    ) -> Result<(), String> {
+        let state = diagnostic_measure(diagnostics, DiagnosticStage::WritableWait, || {
+            self.account_store_write_state.lock()
+        })
+        .map_err(|_| "account-store write-state mutex poisoned; writes are blocked".to_string())?;
         match &*state {
             AccountStoreWriteState::Writable => Ok(()),
             AccountStoreWriteState::Frozen { reason } => Err(format!(
@@ -4769,6 +4819,13 @@ impl SimulationConfig {
     fn begin_file_publication(
         &self,
     ) -> Result<Option<file_authority::PublicationGuard<'_>>, String> {
+        self.begin_file_publication_with_diagnostics(None)
+    }
+
+    fn begin_file_publication_with_diagnostics(
+        &self,
+        diagnostics: Option<&DiagnosticRecord>,
+    ) -> Result<Option<file_authority::PublicationGuard<'_>>, String> {
         match self.account_store_path.as_deref() {
             Some(path) => {
                 let authority = self
@@ -4776,7 +4833,9 @@ impl SimulationConfig {
                     .as_ref()
                     .filter(|authority| authority.owns(self, path))
                     .ok_or("publication requires the path's shared File authority")?;
-                authority.begin_publication().map(Some)
+                authority
+                    .begin_publication_with_diagnostics(diagnostics)
+                    .map(Some)
             }
             None => Ok(None),
         }
@@ -4787,6 +4846,15 @@ impl SimulationConfig {
         path: &Path,
         store: &AccountStore,
     ) -> Result<AccountStoreRepositorySave, AccountStoreFileCommitError> {
+        self.save_file_account_store_with_diagnostics(path, store, None)
+    }
+
+    fn save_file_account_store_with_diagnostics(
+        &self,
+        path: &Path,
+        store: &AccountStore,
+        diagnostics: Option<&DiagnosticRecord>,
+    ) -> Result<AccountStoreRepositorySave, AccountStoreFileCommitError> {
         if !self
             .file_authority
             .as_ref()
@@ -4795,7 +4863,11 @@ impl SimulationConfig {
             return Err(AccountStoreFileCommitError::not_committed(io::Error::new(io::ErrorKind::PermissionDenied,"file write requires the path's shared authority; isolated replay must rebind before saving")));
         }
         let fault = self.take_account_store_file_commit_fault();
-        FileAccountStoreRepository::new(path).save_with_commit_outcome(store, fault)
+        FileAccountStoreRepository::new(path).save_with_commit_outcome_and_diagnostics(
+            store,
+            fault,
+            diagnostics,
+        )
     }
 
     fn save_account_store_mutation_plan_to_repository(
@@ -4907,17 +4979,23 @@ impl SimulationConfig {
             &AccountStoreMutationPlan,
         ) -> Result<AccountStoreSourceVersions, String>,
     {
+        let diagnostics = DiagnosticRecord::new(DiagnosticOperation::Save);
+        let persist_wait = diagnostics.span(DiagnosticStage::PersistWait);
         let _persist_guard = self
             .account_store_persist_lock
             .lock()
             .map_err(|_| "account store persist mutex poisoned".to_string())?;
-        self.ensure_account_store_writable()?;
+        drop(persist_wait);
+        self.ensure_account_store_writable_with_diagnostics(Some(&diagnostics))?;
         self.ensure_file_writer_binding()?;
         let store = {
+            let store_wait = diagnostics.span(DiagnosticStage::StoreWait);
             let store = self
                 .account_store
                 .lock()
                 .expect("account store mutex should not be poisoned");
+            drop(store_wait);
+            let _store_held = diagnostics.span(DiagnosticStage::StoreHeld);
             store.clone()
         };
         let account_ids = if let Some(account_id) = scoped_account_id {
@@ -4942,12 +5020,14 @@ impl SimulationConfig {
                 && scoped_account_id.is_none(),
         );
 
-        let publication = self.begin_file_publication()?;
+        let publication = self.begin_file_publication_with_diagnostics(Some(&diagnostics))?;
         if let Some(path) = self.account_store_path.as_deref() {
-            if let Err(error) = self.save_file_account_store(path, &store) {
+            if let Err(error) =
+                self.save_file_account_store_with_diagnostics(path, &store, Some(&diagnostics))
+            {
                 if !error.is_commit_outcome_unknown() {
                     if let Some(publication) = publication {
-                        publication.settle()?;
+                        publication.settle_with_diagnostics(Some(&diagnostics))?;
                     }
                 }
                 return Err(self.map_file_commit_error(error));
@@ -4972,7 +5052,7 @@ impl SimulationConfig {
             }
         }
         if let Some(publication) = publication {
-            publication.settle()?;
+            publication.settle_with_diagnostics(Some(&diagnostics))?;
         }
         Ok(())
     }
@@ -5187,16 +5267,22 @@ impl SimulationConfig {
         #[cfg(test)]
         self.record_account_store_transaction_scope(scope);
 
+        let diagnostics = DiagnosticRecord::new(DiagnosticOperation::Transaction);
+        let persist_wait = diagnostics.span(DiagnosticStage::PersistWait);
         let _persist_guard = self
             .account_store_persist_lock
             .lock()
             .map_err(|_| "account store persist mutex poisoned".to_string())?;
-        self.ensure_account_store_writable()?;
+        drop(persist_wait);
+        self.ensure_account_store_writable_with_diagnostics(Some(&diagnostics))?;
         self.ensure_file_writer_binding()?;
+        let store_wait = diagnostics.span(DiagnosticStage::StoreWait);
         let mut live_store = self
             .account_store
             .lock()
             .map_err(|_| "account store mutex poisoned".to_string())?;
+        drop(store_wait);
+        let _store_held = diagnostics.span(DiagnosticStage::StoreHeld);
         let original_store = live_store.clone();
         crate::billing::validate_complete_store(&original_store)?;
         let mut staged_store = original_store.clone();
@@ -5364,7 +5450,7 @@ impl SimulationConfig {
             mutation_plan.global_stock.is_some(),
         );
         let mut postgres_versions = None;
-        let publication = self.begin_file_publication()?;
+        let publication = self.begin_file_publication_with_diagnostics(Some(&diagnostics))?;
 
         match (
             self.account_store_path.as_deref(),
@@ -5386,7 +5472,7 @@ impl SimulationConfig {
                         // must retain its publication marker for recovery.
                         if self.ensure_account_store_writable().is_ok() {
                             if let Some(publication) = publication {
-                                publication.settle()?;
+                                publication.settle_with_diagnostics(Some(&diagnostics))?;
                             }
                         }
                         return Err(error);
@@ -5422,7 +5508,11 @@ impl SimulationConfig {
                     staged_store.guild_clock = Some(clock.record.clone());
                     staged_store.source_guild_clock_version = Some(clock.version);
                 }
-                if let Err(file_error) = self.save_file_account_store(path, &staged_store) {
+                if let Err(file_error) = self.save_file_account_store_with_diagnostics(
+                    path,
+                    &staged_store,
+                    Some(&diagnostics),
+                ) {
                     if file_error.is_commit_outcome_unknown() {
                         return Err(self.map_file_commit_error(file_error));
                     }
@@ -5479,15 +5569,15 @@ impl SimulationConfig {
                                 stone_authority::validate_receipt(&compensation_plan,&compensated).map_err(|error|self.freeze_account_store_writes(error))?;
                                 if let Some(clock)=compensated.clock.as_ref(){hero_restored.guild_clock=Some(clock.record.clone());hero_restored.source_guild_clock_version=Some(clock.version);}
                                 apply_account_store_mutation_source_versions(&mut hero_restored,&compensation_plan,compensated.into_source_versions());
-                                if let Err(error)=self.save_file_account_store(path,&hero_restored){return Err(self.freeze_account_store_writes(format!("Hero compensation committed in PostgreSQL but File publication failed: {error}")));}
+                                if let Err(error)=self.save_file_account_store_with_diagnostics(path,&hero_restored,Some(&diagnostics)){return Err(self.freeze_account_store_writes(format!("Hero compensation committed in PostgreSQL but File publication failed: {error}")));}
                                 *live_store=hero_restored;
                             } else if mutation_plan.clock.is_some(){
                                 let Some(clock)=compensated.clock else{return Err(self.freeze_account_store_writes("clock restore compensation omitted its durable receipt".into()));};
                                 let mut restored=original_store.clone();restored.guild_clock=Some(clock.record);restored.source_guild_clock_version=Some(clock.version);
-                                if let Err(error)=self.save_file_account_store(path,&restored){return Err(self.freeze_account_store_writes(format!("clock restore business rollback succeeded in PostgreSQL, but fenced File compensation failed: {error}")));}
+                                if let Err(error)=self.save_file_account_store_with_diagnostics(path,&restored,Some(&diagnostics)){return Err(self.freeze_account_store_writes(format!("clock restore business rollback succeeded in PostgreSQL, but fenced File compensation failed: {error}")));}
                                 *live_store=restored;
                             }
-                            if let Some(publication) = publication { publication.settle()?; }
+                            if let Some(publication) = publication { publication.settle_with_diagnostics(Some(&diagnostics))?; }
                             Err(file_error.to_string())
                         },
                         Err(rollback_error)=>Err(self.freeze_account_store_writes(format!("file account-store write was not committed ({file_error}), but postgres mirror compensation failed: {rollback_error}"))),
@@ -5495,10 +5585,14 @@ impl SimulationConfig {
                 }
             }
             (Some(path), None) => {
-                if let Err(error) = self.save_file_account_store(path, &staged_store) {
+                if let Err(error) = self.save_file_account_store_with_diagnostics(
+                    path,
+                    &staged_store,
+                    Some(&diagnostics),
+                ) {
                     if !error.is_commit_outcome_unknown() {
                         if let Some(publication) = publication {
-                            publication.settle()?;
+                            publication.settle_with_diagnostics(Some(&diagnostics))?;
                         }
                     }
                     return Err(self.map_file_commit_error(error));
@@ -5518,7 +5612,7 @@ impl SimulationConfig {
         }
 
         if let Some(publication) = publication {
-            publication.settle()?;
+            publication.settle_with_diagnostics(Some(&diagnostics))?;
         }
         if let Some(versions) = postgres_versions.as_ref() {
             if let Some(version) = versions.stones {
@@ -5977,7 +6071,9 @@ fn save_account_store_snapshot_to_path(
     store: &AccountStore,
     path: &Path,
     fault: Option<AccountStoreFileCommitFault>,
+    diagnostics: Option<&DiagnosticRecord>,
 ) -> Result<(), AccountStoreFileCommitError> {
+    let writer_wait = diagnostics.map(|record| record.span(DiagnosticStage::FileWriterWait));
     let _guard = ACCOUNT_STORE_FILE_WRITE_LOCK
         .get_or_init(|| Mutex::new(()))
         .lock()
@@ -5987,7 +6083,8 @@ fn save_account_store_snapshot_to_path(
                 "account store file write mutex poisoned",
             ))
         })?;
-    store.save_to_path_with_fault(path, fault)
+    drop(writer_wait);
+    store.save_to_path_with_diagnostics(path, fault, diagnostics)
 }
 
 fn load_account_store_from_postgres(
