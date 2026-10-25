@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T13:32:56.956Z",
+  "sourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "binarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+  "rawCopyCount": 48,
+  "rawCopyBytes": 3746281,
+  "files": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+      "destination": "backend-source-personal-monster-projection-v1.json",
+      "bytes": 32926,
+      "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\release-personal-monster-projection-v1.json",
+      "destination": "release-personal-monster-projection-v1.json",
+      "bytes": 2376,
+      "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\source-lib-v3.mjs",
+      "destination": "personal-monster-projection-release-v1/build-tools/source-lib-v3.mjs",
+      "bytes": 15618,
+      "sha256": "ffd87a222e5f04d1f61c29ee71bc69144cc90f696decf5c5aacc821817ba80fb"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\pin-build-source-v3.mjs",
+      "destination": "personal-monster-projection-release-v1/build-tools/pin-build-source-v3.mjs",
+      "bytes": 997,
+      "sha256": "40c56afaaf0ff528d5c7300c93b7aa0167672ed561ef914a4bd211300e5d3538"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\build-release-v3.mjs",
+      "destination": "personal-monster-projection-release-v1/build-tools/build-release-v3.mjs",
+      "bytes": 4895,
+      "sha256": "055254f856a71d1ffc7d0e98fc4657bc29782a7b78c534bcf31f6d58726f6642"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\capture-release-v3.mjs",
+      "destination": "personal-monster-projection-release-v1/build-tools/capture-release-v3.mjs",
+      "bytes": 3379,
+      "sha256": "ae76760c0d328982e1d52858e1fae408835188419522dd0881ddb681c74920b4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\final-source-binding-v3.json",
+      "destination": "personal-monster-projection-release-v1/build-tools/final-source-binding-v3.json",
+      "bytes": 1383,
+      "sha256": "91e3fbbeff30a19d414de3abfc9ddfbedc91d6bc74c2d4ec667ba630023ce893"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\final-source-binding-v3-pending-preimage.json",
+      "destination": "personal-monster-projection-release-v1/build-tools/final-source-binding-v3-pending-preimage.json",
+      "bytes": 456,
+      "sha256": "9ff720ea5c429b52dc52aa43fc401e131a77edc6905a5c25c8950afc97f3a6c2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\prepared-v3.json",
+      "destination": "personal-monster-projection-release-v1/build-tools/prepared-v3.json",
+      "bytes": 5882,
+      "sha256": "381ba589b9f2a8ead0c752ac39ca6dee0aed6e585a380dbf5b81263d4a06275c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-v1-build-receipt.json",
+      "destination": "personal-monster-projection-release-v1/receipts/personal-monster-projection-v1-build-receipt.json",
+      "bytes": 2373,
+      "sha256": "80e8f27189012cff6d4d594fc0f9af9dd4e194a6145559d3856e0e7f397d1f05"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-source-binding-execution-v3.json",
+      "destination": "personal-monster-projection-release-v1/receipts/root-personal-projection-source-binding-execution-v3.json",
+      "bytes": 1740,
+      "sha256": "a6935b8ce3bdcbebe25a95a12eef33a1082c68c6909749da07be153d1316e603"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-bind-personal-projection-source-v3.mjs",
+      "destination": "personal-monster-projection-release-v1/receipts/root-bind-personal-projection-source-v3.mjs",
+      "bytes": 2868,
+      "sha256": "00a3369d26e1e35e0e303cdcc71c00340c1d70a5285c5c91f8d827c33ff65809"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-prepared-independent-review-v3.json",
+      "destination": "personal-monster-projection-release-v1/receipts/personal-monster-projection-release-prepared-independent-review-v3.json",
+      "bytes": 2438,
+      "sha256": "54298ab00d2fd257411291566a334c03dd2f515057447a1045d44676dd1323ae"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-actual-independent-review-v1.json",
+      "destination": "personal-monster-projection-release-v1/receipts/personal-monster-projection-release-actual-independent-review-v1.json",
+      "bytes": 5968,
+      "sha256": "6984d9cadcb3e7e734341e1ab6f687ed2ce3b7f777e14c57757b2eb64a900d44"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-full16-final-independent-facts-v1.json",
+      "destination": "personal-monster-projection-release-v1/receipts/personal-monster-projection-full16-final-independent-facts-v1.json",
+      "bytes": 3706,
+      "sha256": "01e4a5c4df86595593fdb87ae5cbcffb4bb9cfc3522b6d555c5f25865f7010ff"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-bind-personal-projection-full16-v1.mjs",
+      "destination": "personal-monster-projection-release-v1/receipts/root-bind-personal-projection-full16-v1.mjs",
+      "bytes": 3614,
+      "sha256": "1bebcde594950760e5a0bfaa68536128f07227f22b914d6ce0a39d5df75d0b16"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-full16-actual-binding-v1.json",
+      "destination": "personal-monster-projection-release-v1/receipts/root-personal-projection-full16-actual-binding-v1.json",
+      "bytes": 2240,
+      "sha256": "429a81af6a97b7a8f50b052805f31fa48d0a24d2ba25ca99820b4d836afdb647"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\personal-projection-full16-root-independent-cleanup-v1.json",
+      "destination": "personal-monster-projection-release-v1/receipts/personal-projection-full16-root-independent-cleanup-v1.json",
+      "bytes": 288,
+      "sha256": "4b9f2783404dfb04b3765022bc3a54eaec128a767118ccfdb27d60d2223fc777"
+    },
+    {
+      "source": "C:/mir2-build/cell-preproduction-p0-p1-20261024/p0-personal-monster-projection-v1-release-build.log",
+      "destination": "personal-monster-projection-release-v1/build/p0-personal-monster-projection-v1-release-build.log",
+      "bytes": 55865,
+      "sha256": "065a9fa0ad55a19fa38f846fb152b06c4a2053b819f2192ac930529fbb782eaa"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\run-owned-full.mjs",
+      "destination": "personal-monster-projection-release-v1/full16-tools/run-owned-full.mjs",
+      "bytes": 14389,
+      "sha256": "b7ad0b746575b01a4dd0133694e07799e435859241e6d845c9aa2c66ab25e45e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\audit-owned-full.mjs",
+      "destination": "personal-monster-projection-release-v1/full16-tools/audit-owned-full.mjs",
+      "bytes": 9066,
+      "sha256": "c694d39f4d4c6c7d388d7a66c10018c339bc529326510e7b7049cf3d0f222d37"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\verify-inputs.mjs",
+      "destination": "personal-monster-projection-release-v1/full16-tools/verify-inputs.mjs",
+      "bytes": 9392,
+      "sha256": "4a8435a05bce4805ca49ad243e61f5c51369dfe6d5c9b22ef4dd9a61225c7c3c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\finalize-launcher-inputs.mjs",
+      "destination": "personal-monster-projection-release-v1/full16-tools/finalize-launcher-inputs.mjs",
+      "bytes": 2038,
+      "sha256": "df13d2a46fff49f21d147c24e4db366777ccf125338c374f1b780c7710bdc0d0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\full-lifecycle-profile.json",
+      "destination": "personal-monster-projection-release-v1/full16-tools/full-lifecycle-profile.json",
+      "bytes": 4369,
+      "sha256": "07893f55fa42af368da82061df2be5456bd6b7dc05394d9cd25a30b91d76d593"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\projection-build-source-lib.mjs",
+      "destination": "personal-monster-projection-release-v1/full16-tools/projection-build-source-lib.mjs",
+      "bytes": 239,
+      "sha256": "bc00eaa2b2c22121c0db9284bfcb79eacea6d0415edde5bd4726e3aa0a63f353"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\candidate-release-binding-v1.json",
+      "destination": "personal-monster-projection-release-v1/full16-tools/candidate-release-binding-v1.json",
+      "bytes": 1594,
+      "sha256": "8888917e353f0484779f21039d04d6747df99f8aa1f706f01e309652a59f6cfe"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\launcher-final-binding-v1.json",
+      "destination": "personal-monster-projection-release-v1/full16-tools/launcher-final-binding-v1.json",
+      "bytes": 1681,
+      "sha256": "b1f15c7210c131e58078db68fc010e3a22db925a7e86530dada138588ebc3afc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\frozen-audit-support.mjs",
+      "destination": "personal-monster-projection-release-v1/full16-tools/frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\initialize-fresh-private.ps1",
+      "destination": "personal-monster-projection-release-v1/full16-tools/initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\template-prepared-v1.json",
+      "destination": "personal-monster-projection-release-v1/full16-tools/template-prepared-v1.json",
+      "bytes": 5941,
+      "sha256": "bd3d59f920a34c650c073277e0ff0f7a5f1106e9b42113f867994b543839a432"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\candidate-release-binding-v1-pending-preimage.json",
+      "destination": "personal-monster-projection-release-v1/full16-tools/candidate-release-binding-v1-pending-preimage.json",
+      "bytes": 534,
+      "sha256": "da14ec989b21981c87739190788f767de18e7d8a9c857d3b2d1add954cbff3f0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\full-lifecycle-profile-pending-preimage-v1.json",
+      "destination": "personal-monster-projection-release-v1/full16-tools/full-lifecycle-profile-pending-preimage-v1.json",
+      "bytes": 4294,
+      "sha256": "ba6481b8798765c1ea2bc604b7da4b803af150196c41fa9e9ac6df21a97229c6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.audit-source.mjs",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934538996-4d1caf58.audit-source.mjs",
+      "bytes": 9066,
+      "sha256": "c694d39f4d4c6c7d388d7a66c10018c339bc529326510e7b7049cf3d0f222d37"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.backend-source.json",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934538996-4d1caf58.backend-source.json",
+      "bytes": 32926,
+      "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.independent-audit.json",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934538996-4d1caf58.independent-audit.json",
+      "bytes": 1747,
+      "sha256": "e2b563e24484dcc2d16d14c2c20b5a84bc5921e5bc957a7dd305e070ec429265"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.prepared-profile.json",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934538996-4d1caf58.prepared-profile.json",
+      "bytes": 4369,
+      "sha256": "07893f55fa42af368da82061df2be5456bd6b7dc05394d9cd25a30b91d76d593"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.realm-evidence.json",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934538996-4d1caf58.realm-evidence.json",
+      "bytes": 34976,
+      "sha256": "3763e933415e23d66b8594610829990e7cddfbc69ef3316d7a5a8d3fad9e97b2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.release-input.json",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934538996-4d1caf58.release-input.json",
+      "bytes": 2376,
+      "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.runner-source.mjs",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934538996-4d1caf58.runner-source.mjs",
+      "bytes": 14389,
+      "sha256": "b7ad0b746575b01a4dd0133694e07799e435859241e6d845c9aa2c66ab25e45e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.source-manifest-verification.json",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934538996-4d1caf58.source-manifest-verification.json",
+      "bytes": 572,
+      "sha256": "d4af84222c7309c7eeadf7ce185bc8b7c6452bb48bb610bcb199d43f8f59a356"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.zone-metrics.json",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934538996-4d1caf58.zone-metrics.json",
+      "bytes": 23598,
+      "sha256": "a56aae33c58dd4e27db9e6b482082b557ec20a6af465ed8ef3d01ee73533af5f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-a.trace.jsonl",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934546937-58ce6147-a.trace.jsonl",
+      "bytes": 982658,
+      "sha256": "ad78db0397399d88cf5a7c937dcc0664f7a22eadb7a8877a58e2759c985b49f7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-b.trace.jsonl",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934546937-58ce6147-b.trace.jsonl",
+      "bytes": 907904,
+      "sha256": "88841b520336c2485062d816af16cec8d324a07319283396373a845fa85beb86"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-guard-newCharacter.trace.jsonl",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934546937-58ce6147-guard-newCharacter.trace.jsonl",
+      "bytes": 3479,
+      "sha256": "c964e3a263f3a0c86b2fbe88dc6f91a2141633df772413ef24e68e594567ec2a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-guard-startGame.trace.jsonl",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934546937-58ce6147-guard-startGame.trace.jsonl",
+      "bytes": 3442,
+      "sha256": "cff0fa5526d83d5085d0614e63fda36ffecc0594f781475a5f8d5fed71ee5863"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-relogin-0.trace.jsonl",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934546937-58ce6147-relogin-0.trace.jsonl",
+      "bytes": 684246,
+      "sha256": "0cb1b176f30a26ef02955918209d3b131acc82d7deed321feddddeb2996c3fb6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-relogin-1.trace.jsonl",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934546937-58ce6147-relogin-1.trace.jsonl",
+      "bytes": 680201,
+      "sha256": "b0b292717a319e003b01afff97b21baaa9d0216421880487f8353c2540017bef"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147.report.json",
+      "destination": "protocol-full-lifecycle-personal-monster-projection-v1/1792934546937-58ce6147.report.json",
+      "bytes": 109568,
+      "sha256": "bb848946258bde31f7fe05158fc5cfa0427e7b693c0335d280d61c0c95ad947e"
+    }
+  ],
+  "all16Passed": true,
+  "capacityAccepted": false,
+  "fixedCellStarted": false,
+  "scope": "Actual fresh44 Release and one ordinary two-client full16 run; no binary, account store, secrets or recording payloads copied. Initial no-loot attempt remains in the same raw run. Source/build tools are preserved evidence, not portable launchers."
+}

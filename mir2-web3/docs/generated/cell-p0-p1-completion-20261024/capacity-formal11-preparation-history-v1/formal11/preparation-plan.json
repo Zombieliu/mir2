@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ACTUAL_SUCCESSFUL_PROBE15",
+  "formalPolicy": "Original standard/native2,10,25,50,100 each300s+7200s100actor soak+resume5/save5/post60/wall18000",
+  "accountsOnly": 100,
+  "ordinaryLoginWindowMs": 901000,
+  "admissionBudget": 25,
+  "reservedVerificationBudget": 5,
+  "futureProbe15Required": true,
+  "old13NeverSubstitutes": true,
+  "rootExecutionOrder": [
+    "bind actual ended15 evidence",
+    "independent final QA",
+    "seal",
+    "readonly guard",
+    "prepare100 ordinary accounts only",
+    "run",
+    "normal cleanup",
+    "collect",
+    "public verify",
+    "independent ended formal verification"
+  ],
+  "accountPrepared": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

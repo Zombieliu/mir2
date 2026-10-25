@@ -1,0 +1,1079 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:39:37.053Z",
+  "scope": "Same originalfirst4/4000path and all returned cells; local diagnostic only",
+  "scene": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+    "bytes": 5844,
+    "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+  },
+  "oldScene": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-100-nearest-ordered-final-v3.json",
+    "bytes": 5844,
+    "sha256": "ed268ed3b81f06d1894a2ad60689a70dbabfced752042a773551e77d8483d436"
+  },
+  "from": {
+    "x": 283,
+    "y": 542
+  },
+  "home": {
+    "x": 229,
+    "y": 534
+  },
+  "actualFirstSuccessGoal": {
+    "x": 230,
+    "y": 535
+  },
+  "attempts": [
+    {
+      "goal": {
+        "x": 230,
+        "y": 533
+      },
+      "diagnostic": {
+        "expanded": 402,
+        "limit": 4000,
+        "status": "found"
+      },
+      "steps": 53,
+      "found": true,
+      "outsideNewCoverageCells": [
+        {
+          "x": 244,
+          "y": 538
+        }
+      ],
+      "outsideOldCoverageCells": [
+        {
+          "x": 244,
+          "y": 538
+        },
+        {
+          "x": 243,
+          "y": 538
+        },
+        {
+          "x": 242,
+          "y": 538
+        }
+      ],
+      "path": [
+        {
+          "x": 283,
+          "y": 542
+        },
+        {
+          "x": 282,
+          "y": 542
+        },
+        {
+          "x": 281,
+          "y": 542
+        },
+        {
+          "x": 280,
+          "y": 542
+        },
+        {
+          "x": 279,
+          "y": 542
+        },
+        {
+          "x": 278,
+          "y": 542
+        },
+        {
+          "x": 277,
+          "y": 542
+        },
+        {
+          "x": 276,
+          "y": 542
+        },
+        {
+          "x": 275,
+          "y": 542
+        },
+        {
+          "x": 274,
+          "y": 542
+        },
+        {
+          "x": 273,
+          "y": 542
+        },
+        {
+          "x": 272,
+          "y": 542
+        },
+        {
+          "x": 271,
+          "y": 542
+        },
+        {
+          "x": 270,
+          "y": 542
+        },
+        {
+          "x": 269,
+          "y": 542
+        },
+        {
+          "x": 268,
+          "y": 542
+        },
+        {
+          "x": 267,
+          "y": 542
+        },
+        {
+          "x": 266,
+          "y": 542
+        },
+        {
+          "x": 265,
+          "y": 542
+        },
+        {
+          "x": 264,
+          "y": 542
+        },
+        {
+          "x": 263,
+          "y": 542
+        },
+        {
+          "x": 262,
+          "y": 542
+        },
+        {
+          "x": 261,
+          "y": 542
+        },
+        {
+          "x": 260,
+          "y": 542
+        },
+        {
+          "x": 259,
+          "y": 542
+        },
+        {
+          "x": 258,
+          "y": 542
+        },
+        {
+          "x": 257,
+          "y": 542
+        },
+        {
+          "x": 256,
+          "y": 542
+        },
+        {
+          "x": 255,
+          "y": 542
+        },
+        {
+          "x": 254,
+          "y": 542
+        },
+        {
+          "x": 253,
+          "y": 542
+        },
+        {
+          "x": 252,
+          "y": 542
+        },
+        {
+          "x": 251,
+          "y": 542
+        },
+        {
+          "x": 250,
+          "y": 542
+        },
+        {
+          "x": 249,
+          "y": 542
+        },
+        {
+          "x": 248,
+          "y": 542
+        },
+        {
+          "x": 247,
+          "y": 541
+        },
+        {
+          "x": 246,
+          "y": 540
+        },
+        {
+          "x": 245,
+          "y": 539
+        },
+        {
+          "x": 244,
+          "y": 538
+        },
+        {
+          "x": 243,
+          "y": 538
+        },
+        {
+          "x": 242,
+          "y": 538
+        },
+        {
+          "x": 241,
+          "y": 538
+        },
+        {
+          "x": 240,
+          "y": 538
+        },
+        {
+          "x": 239,
+          "y": 538
+        },
+        {
+          "x": 238,
+          "y": 537
+        },
+        {
+          "x": 237,
+          "y": 536
+        },
+        {
+          "x": 236,
+          "y": 535
+        },
+        {
+          "x": 235,
+          "y": 534
+        },
+        {
+          "x": 234,
+          "y": 534
+        },
+        {
+          "x": 233,
+          "y": 534
+        },
+        {
+          "x": 232,
+          "y": 534
+        },
+        {
+          "x": 231,
+          "y": 534
+        },
+        {
+          "x": 230,
+          "y": 533
+        }
+      ]
+    },
+    {
+      "goal": {
+        "x": 230,
+        "y": 534
+      },
+      "diagnostic": {
+        "expanded": 367,
+        "limit": 4000,
+        "status": "found"
+      },
+      "steps": 53,
+      "found": true,
+      "outsideNewCoverageCells": [
+        {
+          "x": 244,
+          "y": 538
+        }
+      ],
+      "outsideOldCoverageCells": [
+        {
+          "x": 244,
+          "y": 538
+        },
+        {
+          "x": 243,
+          "y": 538
+        },
+        {
+          "x": 242,
+          "y": 538
+        }
+      ],
+      "path": [
+        {
+          "x": 283,
+          "y": 542
+        },
+        {
+          "x": 282,
+          "y": 542
+        },
+        {
+          "x": 281,
+          "y": 542
+        },
+        {
+          "x": 280,
+          "y": 542
+        },
+        {
+          "x": 279,
+          "y": 542
+        },
+        {
+          "x": 278,
+          "y": 542
+        },
+        {
+          "x": 277,
+          "y": 542
+        },
+        {
+          "x": 276,
+          "y": 542
+        },
+        {
+          "x": 275,
+          "y": 542
+        },
+        {
+          "x": 274,
+          "y": 542
+        },
+        {
+          "x": 273,
+          "y": 542
+        },
+        {
+          "x": 272,
+          "y": 542
+        },
+        {
+          "x": 271,
+          "y": 542
+        },
+        {
+          "x": 270,
+          "y": 542
+        },
+        {
+          "x": 269,
+          "y": 542
+        },
+        {
+          "x": 268,
+          "y": 542
+        },
+        {
+          "x": 267,
+          "y": 542
+        },
+        {
+          "x": 266,
+          "y": 542
+        },
+        {
+          "x": 265,
+          "y": 542
+        },
+        {
+          "x": 264,
+          "y": 542
+        },
+        {
+          "x": 263,
+          "y": 542
+        },
+        {
+          "x": 262,
+          "y": 542
+        },
+        {
+          "x": 261,
+          "y": 542
+        },
+        {
+          "x": 260,
+          "y": 542
+        },
+        {
+          "x": 259,
+          "y": 542
+        },
+        {
+          "x": 258,
+          "y": 542
+        },
+        {
+          "x": 257,
+          "y": 542
+        },
+        {
+          "x": 256,
+          "y": 542
+        },
+        {
+          "x": 255,
+          "y": 542
+        },
+        {
+          "x": 254,
+          "y": 542
+        },
+        {
+          "x": 253,
+          "y": 542
+        },
+        {
+          "x": 252,
+          "y": 542
+        },
+        {
+          "x": 251,
+          "y": 542
+        },
+        {
+          "x": 250,
+          "y": 542
+        },
+        {
+          "x": 249,
+          "y": 542
+        },
+        {
+          "x": 248,
+          "y": 542
+        },
+        {
+          "x": 247,
+          "y": 541
+        },
+        {
+          "x": 246,
+          "y": 540
+        },
+        {
+          "x": 245,
+          "y": 539
+        },
+        {
+          "x": 244,
+          "y": 538
+        },
+        {
+          "x": 243,
+          "y": 538
+        },
+        {
+          "x": 242,
+          "y": 538
+        },
+        {
+          "x": 241,
+          "y": 538
+        },
+        {
+          "x": 240,
+          "y": 538
+        },
+        {
+          "x": 239,
+          "y": 538
+        },
+        {
+          "x": 238,
+          "y": 537
+        },
+        {
+          "x": 237,
+          "y": 536
+        },
+        {
+          "x": 236,
+          "y": 535
+        },
+        {
+          "x": 235,
+          "y": 534
+        },
+        {
+          "x": 234,
+          "y": 534
+        },
+        {
+          "x": 233,
+          "y": 534
+        },
+        {
+          "x": 232,
+          "y": 534
+        },
+        {
+          "x": 231,
+          "y": 534
+        },
+        {
+          "x": 230,
+          "y": 534
+        }
+      ]
+    },
+    {
+      "goal": {
+        "x": 230,
+        "y": 535
+      },
+      "diagnostic": {
+        "expanded": 332,
+        "limit": 4000,
+        "status": "found"
+      },
+      "steps": 53,
+      "found": true,
+      "outsideNewCoverageCells": [],
+      "outsideOldCoverageCells": [],
+      "path": [
+        {
+          "x": 283,
+          "y": 542
+        },
+        {
+          "x": 282,
+          "y": 542
+        },
+        {
+          "x": 281,
+          "y": 542
+        },
+        {
+          "x": 280,
+          "y": 542
+        },
+        {
+          "x": 279,
+          "y": 542
+        },
+        {
+          "x": 278,
+          "y": 542
+        },
+        {
+          "x": 277,
+          "y": 542
+        },
+        {
+          "x": 276,
+          "y": 542
+        },
+        {
+          "x": 275,
+          "y": 542
+        },
+        {
+          "x": 274,
+          "y": 542
+        },
+        {
+          "x": 273,
+          "y": 542
+        },
+        {
+          "x": 272,
+          "y": 542
+        },
+        {
+          "x": 271,
+          "y": 542
+        },
+        {
+          "x": 270,
+          "y": 542
+        },
+        {
+          "x": 269,
+          "y": 542
+        },
+        {
+          "x": 268,
+          "y": 542
+        },
+        {
+          "x": 267,
+          "y": 542
+        },
+        {
+          "x": 266,
+          "y": 542
+        },
+        {
+          "x": 265,
+          "y": 542
+        },
+        {
+          "x": 264,
+          "y": 542
+        },
+        {
+          "x": 263,
+          "y": 542
+        },
+        {
+          "x": 262,
+          "y": 542
+        },
+        {
+          "x": 261,
+          "y": 542
+        },
+        {
+          "x": 260,
+          "y": 542
+        },
+        {
+          "x": 259,
+          "y": 542
+        },
+        {
+          "x": 258,
+          "y": 542
+        },
+        {
+          "x": 257,
+          "y": 542
+        },
+        {
+          "x": 256,
+          "y": 542
+        },
+        {
+          "x": 255,
+          "y": 542
+        },
+        {
+          "x": 254,
+          "y": 542
+        },
+        {
+          "x": 253,
+          "y": 542
+        },
+        {
+          "x": 252,
+          "y": 542
+        },
+        {
+          "x": 251,
+          "y": 542
+        },
+        {
+          "x": 250,
+          "y": 542
+        },
+        {
+          "x": 249,
+          "y": 542
+        },
+        {
+          "x": 248,
+          "y": 542
+        },
+        {
+          "x": 247,
+          "y": 542
+        },
+        {
+          "x": 246,
+          "y": 542
+        },
+        {
+          "x": 245,
+          "y": 542
+        },
+        {
+          "x": 244,
+          "y": 542
+        },
+        {
+          "x": 243,
+          "y": 542
+        },
+        {
+          "x": 242,
+          "y": 542
+        },
+        {
+          "x": 241,
+          "y": 542
+        },
+        {
+          "x": 240,
+          "y": 542
+        },
+        {
+          "x": 239,
+          "y": 542
+        },
+        {
+          "x": 238,
+          "y": 542
+        },
+        {
+          "x": 237,
+          "y": 542
+        },
+        {
+          "x": 236,
+          "y": 541
+        },
+        {
+          "x": 235,
+          "y": 540
+        },
+        {
+          "x": 234,
+          "y": 539
+        },
+        {
+          "x": 233,
+          "y": 538
+        },
+        {
+          "x": 232,
+          "y": 537
+        },
+        {
+          "x": 231,
+          "y": 536
+        },
+        {
+          "x": 230,
+          "y": 535
+        }
+      ]
+    },
+    {
+      "goal": {
+        "x": 229,
+        "y": 533
+      },
+      "diagnostic": {
+        "expanded": 410,
+        "limit": 4000,
+        "status": "found"
+      },
+      "steps": 54,
+      "found": true,
+      "outsideNewCoverageCells": [
+        {
+          "x": 244,
+          "y": 538
+        }
+      ],
+      "outsideOldCoverageCells": [
+        {
+          "x": 244,
+          "y": 538
+        },
+        {
+          "x": 243,
+          "y": 538
+        },
+        {
+          "x": 242,
+          "y": 538
+        }
+      ],
+      "path": [
+        {
+          "x": 283,
+          "y": 542
+        },
+        {
+          "x": 282,
+          "y": 542
+        },
+        {
+          "x": 281,
+          "y": 542
+        },
+        {
+          "x": 280,
+          "y": 542
+        },
+        {
+          "x": 279,
+          "y": 542
+        },
+        {
+          "x": 278,
+          "y": 542
+        },
+        {
+          "x": 277,
+          "y": 542
+        },
+        {
+          "x": 276,
+          "y": 542
+        },
+        {
+          "x": 275,
+          "y": 542
+        },
+        {
+          "x": 274,
+          "y": 542
+        },
+        {
+          "x": 273,
+          "y": 542
+        },
+        {
+          "x": 272,
+          "y": 542
+        },
+        {
+          "x": 271,
+          "y": 542
+        },
+        {
+          "x": 270,
+          "y": 542
+        },
+        {
+          "x": 269,
+          "y": 542
+        },
+        {
+          "x": 268,
+          "y": 542
+        },
+        {
+          "x": 267,
+          "y": 542
+        },
+        {
+          "x": 266,
+          "y": 542
+        },
+        {
+          "x": 265,
+          "y": 542
+        },
+        {
+          "x": 264,
+          "y": 542
+        },
+        {
+          "x": 263,
+          "y": 542
+        },
+        {
+          "x": 262,
+          "y": 542
+        },
+        {
+          "x": 261,
+          "y": 542
+        },
+        {
+          "x": 260,
+          "y": 542
+        },
+        {
+          "x": 259,
+          "y": 542
+        },
+        {
+          "x": 258,
+          "y": 542
+        },
+        {
+          "x": 257,
+          "y": 542
+        },
+        {
+          "x": 256,
+          "y": 542
+        },
+        {
+          "x": 255,
+          "y": 542
+        },
+        {
+          "x": 254,
+          "y": 542
+        },
+        {
+          "x": 253,
+          "y": 542
+        },
+        {
+          "x": 252,
+          "y": 542
+        },
+        {
+          "x": 251,
+          "y": 542
+        },
+        {
+          "x": 250,
+          "y": 542
+        },
+        {
+          "x": 249,
+          "y": 542
+        },
+        {
+          "x": 248,
+          "y": 542
+        },
+        {
+          "x": 247,
+          "y": 541
+        },
+        {
+          "x": 246,
+          "y": 540
+        },
+        {
+          "x": 245,
+          "y": 539
+        },
+        {
+          "x": 244,
+          "y": 538
+        },
+        {
+          "x": 243,
+          "y": 538
+        },
+        {
+          "x": 242,
+          "y": 538
+        },
+        {
+          "x": 241,
+          "y": 538
+        },
+        {
+          "x": 240,
+          "y": 538
+        },
+        {
+          "x": 239,
+          "y": 538
+        },
+        {
+          "x": 238,
+          "y": 537
+        },
+        {
+          "x": 237,
+          "y": 536
+        },
+        {
+          "x": 236,
+          "y": 535
+        },
+        {
+          "x": 235,
+          "y": 534
+        },
+        {
+          "x": 234,
+          "y": 534
+        },
+        {
+          "x": 233,
+          "y": 534
+        },
+        {
+          "x": 232,
+          "y": 534
+        },
+        {
+          "x": 231,
+          "y": 534
+        },
+        {
+          "x": 230,
+          "y": 533
+        },
+        {
+          "x": 229,
+          "y": 533
+        }
+      ]
+    }
+  ],
+  "importantBoundary": "A moved home changes both coverage and the exact shortest-route destination. Do not claim every originally uncovered cell became covered; this proof checks the actual new returned path.",
+  "sourcePins": [
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+      "bytes": 11368,
+      "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/protocol-navigation-counted.mjs",
+      "bytes": 18581,
+      "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/prove-repaired-leg-v4.mjs",
+      "bytes": 3000,
+      "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284"
+    }
+  ],
+  "accepted": false,
+  "capacityAccepted": false
+}

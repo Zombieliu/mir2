@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T16:12:15.065Z",
+  "scope": "Bounded source-only ordinary attackV2 latency/owner-observer scheduling review; no capacity limit adjudication.",
+  "sourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "sourcePins": [
+    {
+      "file": "apps/gateway/src/web.rs",
+      "bytes": 855687,
+      "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+    },
+    {
+      "file": "apps/gateway/src/web_transport.rs",
+      "bytes": 15354,
+      "sha256": "dc8c7ac981d937e252b9d9f9b0ab3f4563215deb652a4c15444bf96df536d496"
+    },
+    {
+      "file": "apps/gateway/src/web_packet_batch.rs",
+      "bytes": 10941,
+      "sha256": "f429ca6fb1c69375ce79e4f6ce4cef533606eed1ce34bbb3f98b4f4f85899166"
+    },
+    {
+      "file": "apps/gateway/src/web/catalog_transport.rs",
+      "bytes": 30738,
+      "sha256": "f5fcafd24f4662283d9d8a3d94cabf62724d4565294fff02ddc1aed9b4aeab8c"
+    },
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "file": "apps/gateway/src/session.rs",
+      "bytes": 112616,
+      "sha256": "ef6bcedb2bee850de6461f0352c930f4be9f50197cae088d6d64286b3bd2fb6c"
+    },
+    {
+      "file": "apps/gateway/src/attack_protocol.rs",
+      "bytes": 11818,
+      "sha256": "6d230edd0fd1903b411cb05ffb2cef8d0c2852fafc3ae3b0a568a6745923a7f6"
+    },
+    {
+      "file": "apps/gateway/src/zone_metrics.rs",
+      "bytes": 18356,
+      "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "fact": "Typed Attack is executed synchronously. The browser result is not sent at the launch decision: execution returns, then identity/registration processing and the complete ordinary flush run, then complete(request,admission,identity) and sender.send occur.",
+      "source": [
+        {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "6216-6219,6638-6675,6812-6823,6959-7003,7062-7068"
+        }
+      ]
+    },
+    {
+      "id": "F2",
+      "fact": "The main input branch holds its per-connection serial write gate from6021 through the final typed send. Live Zone output on the same connection acquires a read gate at5319. Current-owner ordered viewport packets are enqueued rather than returned as personal direct responses; observers use separate per-connection gates. Thus observers can receive the launch/hit before owner output, while owner live output waits for the remaining same-input work.",
+      "source": [
+        {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "6000-6023,5285-5357,7062-7074"
+        },
+        {
+          "file": "apps/gateway/src/routing.rs",
+          "lines": "5216-5237,5263-5286,5747-5752,12831-12908"
+        }
+      ]
+    },
+    {
+      "id": "F3",
+      "fact": "Attack is currently not low_latency, and its default should_snapshot and should_save booleans are true. Its flush sends responses, refreshes external mail, sends an authoritative snapshot, requests/executes a debounced save and refreshes routing before the typed receipt. Request-save can synchronously persist after its1.5s default debounce or64 request cap; checkpoint defaults15s.",
+      "source": [
+        {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "6406-6409,9439-9449,9571-9581,8069-8082,7529-7607,1244-1259,1285-1323"
+        }
+      ]
+    },
+    {
+      "id": "F4",
+      "fact": "The in-process typed path does not independently return an early queue admission receipt: it directly enters the runtime, shared pipeline and synchronous shared-Zone mutex/partition dispatch. The scoped launch observer sees this command raw outbounds before routing, then post-dispatch reward/practice/journey and reconciliation/tail work can continue before runtime returns. The existing900ms client deadline is not a corresponding900ms server execution deadline.",
+      "source": [
+        {
+          "file": "apps/gateway/src/routing.rs",
+          "lines": "964-1032,1043-1055,12700-12721,12831-12924,15173-15230,17981-18177,18360-18399"
+        },
+        {
+          "file": "apps/gateway/src/session.rs",
+          "lines": "848-879"
+        }
+      ]
+    },
+    {
+      "id": "F5",
+      "fact": "Ordinary typed reply absence has explicit fail-closed branches: pre-dispatch heartbeat failure sends a generic error and continues before classifying AttackV2; authorization panic closes; runtime failure attempts a matching typed error then closes; post-execution identity/registration/flush errors close without a typed receipt; absent admission or failed request/actor completion closes. The socket sender also permits up to10s lock+write time, not900ms. These are possible mechanisms, not evidence any occurred for req367.",
+      "source": [
+        {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "6028-6035,6261-6280,6683-6687,6727-6731,6819-6823,6970-6974,6999-7003,7062-7068"
+        },
+        {
+          "file": "apps/gateway/src/web_transport.rs",
+          "lines": "10,134-162"
+        },
+        {
+          "file": "apps/gateway/src/attack_protocol.rs",
+          "lines": "143-169"
+        }
+      ]
+    }
+  ],
+  "metrics": {
+    "covered": [
+      {
+        "label": "socket_input.queue_residence",
+        "interpretation": "Before acquiring input write gate; includes connection plus queued-phase/class sampled at enqueue. Phase indicates what was active when queued, not a unique request identity.",
+        "source": {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "6011-6016"
+        }
+      },
+      {
+        "label": "serial_gate.input_wait",
+        "interpretation": "Per-connection input write-gate wait.",
+        "source": {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "6017-6023"
+        }
+      },
+      {
+        "label": "socket_turn.input",
+        "interpretation": "Per-connection entire input turn; includes execution, flush and typed result write.",
+        "source": {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "6000-6002,7062-7074"
+        }
+      },
+      {
+        "label": "serial_gate.zone_outbound_wait",
+        "interpretation": "Owner/observer live-sender read-gate wait on its own connection. Matching input/wait durations are compatible with same-input blocking but do not prove which internal substage.",
+        "source": {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "5317-5320"
+        }
+      },
+      {
+        "label": "session_action.execute/shared_session.predrain/inner_execute/reconcile/tail",
+        "interpretation": "Execution subdivisions exist, but legacy labels lack connection/request ID. Shared stages include relevant synchronous work/lock waits within their spans.",
+        "source": [
+          {
+            "file": "apps/gateway/src/web.rs",
+            "lines": "6638-6671"
+          },
+          {
+            "file": "apps/gateway/src/routing.rs",
+            "lines": "17632,17739,17981,18177"
+          }
+        ]
+      },
+      {
+        "label": "session_action.flush/flush.responses/flush.external_state/snapshot.build_and_send/flush.save",
+        "interpretation": "Existing post-execute subdivisions; all lack connection/request ID. The final typed complete/send has no dedicated subspan.",
+        "source": {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "6980-6997,7547-7575,9665"
+        }
+      }
+    ],
+    "limits": [
+      "record_request is recorded at6673/6677 before the post-execution flush and final typed send, so its request histogram is not ingress-to-typed-receipt latency.",
+      "ZoneWork timers start only after acquiring shared Zone mutex in owner-tick paths, and do not measure the entire ordinary command or every mutex wait; short ZoneWork buckets cannot exclude a slow attack input turn.",
+      "zone_cadence.total starts after the earlier movement-deadline Zone lock lookup; it is not a universal shared-lock timer.",
+      "Slow-stage output is thresholded and emitted on guard drop. Public observedAtMs is collector receipt time, not an exact server execution start/end timestamp. Missing lines do not prove absence of a delay.",
+      "Batch response write diagnostics separately expose counts/serialization/lock/feed/flush durations under gateway-response-write, but that prefix is not the current strict public slow-stage projection."
+    ],
+    "source": [
+      {
+        "file": "apps/gateway/src/web.rs",
+        "lines": "472-535,6673-6677"
+      },
+      {
+        "file": "apps/gateway/src/routing.rs",
+        "lines": "10036-10049,10182-10220"
+      },
+      {
+        "file": "apps/gateway/src/web_packet_batch.rs",
+        "lines": "63-74"
+      }
+    ]
+  },
+  "minimalCandidateReview": {
+    "notRecommended": "Adding Attack only to is_low_latency_action is unsafe: flush early return skips external state refresh, save request/checkpoint and route refresh even if should_save stays true. Fast snapshot recognition also differs from ordinary visibility/health/map predicates.",
+    "candidate": "Smallest conservative server-side candidate for Root evaluation: keep Attack non-low-latency, serial gate, typed-result ordering, all save/error/identity behavior; only avoid the unconditional per-Attack full snapshot while retaining response-triggered snapshots. If doing so, add GainExperience and LevelChanged to the ordinary snapshot requirement because currently the unconditional Attack snapshot covers them; preserve existing health, visibility, quest and map cases. This does not assert snapshot is the measured bottleneck or promise all receipts under900ms.",
+    "other": "Shortening the serial gate alone lets owner FIFO progress sooner but leaves the typed receipt after the complete flush; it cannot alone guarantee the900ms typed result. It also changes bootstrap/epoch/owner-health presentation ordering and is a larger proof obligation.",
+    "adjacentExistingTests": [
+      {
+        "name": "low_latency_xp_only_kill_and_level_up_force_authoritative_snapshot",
+        "source": {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "15212"
+        }
+      },
+      {
+        "name": "quest_calendar_changes_force_snapshot_even_on_idle_actions",
+        "source": {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "15167"
+        }
+      },
+      {
+        "name": "visibility_packets_force_snapshot",
+        "source": {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "21978"
+        }
+      },
+      {
+        "name": "web_session_save_queue_debounces_until_due_or_limit",
+        "source": {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "19966"
+        }
+      },
+      {
+        "name": "web_session_save_queue_flushes_on_checkpoint_and_close",
+        "source": {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "20001"
+        }
+      },
+      {
+        "name": "web_session_route_refresh_throttles_low_latency_updates",
+        "source": {
+          "file": "apps/gateway/src/web.rs",
+          "lines": "20057"
+        }
+      }
+    ],
+    "requiredNewFocusedChecks": "If Root adopts a candidate: ordinary nonlethal Attack avoids only redundant snapshot; XP-only kill/level/quest/visibility still refresh; save dirty/debounce/limit/close unchanged; post-execute errors still fail closed; typed request/actor association and observer/owner FIFO unchanged."
+  },
+  "evidenceBoundary": {
+    "rawRunRead": false,
+    "liveRunRead": false,
+    "privateDataRead": false,
+    "sourceEdited": false,
+    "testsExecuted": false,
+    "realmStarted": false,
+    "actualFailurePreserved": true,
+    "capacityLimitInferred": false,
+    "reportedReq366And367Correlation": "Coordinator/worker messages only; this source review did not independently read the actualraw/slowstage. Observed observer-before-owner is compatible with the reviewed mechanism, but req367 trace ending before later slow-stage receipt does not establish never-reply or an exact substage cause."
+  }
+}

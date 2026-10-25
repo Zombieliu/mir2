@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T16:18:47.910Z",
+  "scope": "Transparent test-count correction only; original static source verdict and raw-byte proofs retained.",
+  "priorReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-independent-review-v1.json",
+    "bytes": 7102,
+    "sha256": "33279fc5a562af27b791a15081bb90c3e4de03ee91a30cceae24a808c6512124"
+  },
+  "correction": {
+    "oldMainTestFileCases": 175,
+    "oldAllFourFileSuiteTotal": 200,
+    "oldOtherThreeFileCases": 25,
+    "newMainTestFileCases": 185,
+    "newIntendedAllFourFileSuiteTotal": 210,
+    "originalRawPrefixClaim": "The original 238892-byte main.test prefix is exactly preserved, but it contains the historical 175 main-file cases, not all 200 aggregate cases. Prior property oldTwoHundredTestRawPrefixExact and prose old 200-test raw prefix should be read with this correction.",
+    "initialFullSuiteStatus": "Root initially described the running invocation as full210. Its actual completed footer is main185 only; it is preliminary evidence, not one complete210 invocation.",
+    "independentlyObservedPreliminaryFooter": {
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-v1/deadline-driver-full-suite-v1.log",
+        "bytes": 51148,
+        "sha256": "87436298254515774234874a6fa49df36e36a2a0d45d0991087bf9838103f75a"
+      },
+      "tests": 185,
+      "passed": 185,
+      "failed": 0
+    },
+    "missingBeforeManifest": "No independent 9-input before manifest was captured for that preliminary main185 invocation. Mid-run review pins are point-in-time source observations and are not relabeled as an execution before manifest.",
+    "nextRun": "Root will perform a separate complete four-file210 invocation with genuine 9-input before/after manifest and actual exit receipt. Only that new invocation may supply final full210 verification."
+  },
+  "verdict": {
+    "sourceReviewUnchanged": true,
+    "oldMain175PrefixRawExact": true,
+    "blockingFindingIds": [],
+    "full210Certified": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2ImplementationPermitted": false
+  }
+}

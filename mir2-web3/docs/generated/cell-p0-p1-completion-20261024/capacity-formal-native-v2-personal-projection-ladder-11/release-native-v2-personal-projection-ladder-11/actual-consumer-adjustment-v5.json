@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 5,
+  "scope": "Actual prepared15 aggregate7bb9 replaces historical13 f80a; source manifest9 and actual executor with before/after/log/final raw pins are required. No changed thresholds or gameplay statistics.",
+  "mutations": [
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\formal-template-contract.mjs",
+        "bytes": 1182,
+        "sha256": "9d64f672d92379f244555e36917190b7c075df4f73a7d6f3fe7da98a7db61bcc"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\formal-template-contract.mjs",
+        "bytes": 1209,
+        "sha256": "34dc2f1b682f6eac51da6903d0622213dd7183ba153d82740d610b09bb876d91"
+      },
+      "preimage": "before-actual-consumer-v5/formal-template-contract.mjs.txt"
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-feasibility-gate.mjs",
+        "bytes": 19629,
+        "sha256": "efc8aaaa35593ebeeeb6101a9b37ea1eab979db7cb50bf44c1d75da082398898"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-feasibility-gate.mjs",
+        "bytes": 19629,
+        "sha256": "aa1ced36fc018d66423ec3fa553dac439c22d02512a57f0935342eea10e95d4a"
+      },
+      "preimage": "before-actual-consumer-v5/verify-feasibility-gate.mjs.txt"
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-probe15-collected-evidence.mjs",
+        "bytes": 14700,
+        "sha256": "c7a92a70c2a5685ac91a5196cf53bbf0b9a043578c9f85f61a910e19b7d9dff4"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-probe15-collected-evidence.mjs",
+        "bytes": 16139,
+        "sha256": "1d1c3cbfddd78af53cfdd5c27f05c6df832e31407f32a52782b123a3b6e41f6a"
+      },
+      "preimage": "before-actual-consumer-v5/verify-probe15-collected-evidence.mjs.txt"
+    }
+  ],
+  "actualGateExecuted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "scope": "Original formal10 policy/resource/scene/146window and corrected HP schema; reviewed Probe15 shared44 modules. Historical copies are evidence, not actual Probe15 success.",
+  "policyBasis": "policy-basis-v1.json",
+  "runtimeDerivation": "runtime-derivation-v1.json",
+  "currentEvidenceNamespaces": "evidence-namespace-correction-v3.json",
+  "knownReleaseFull16Copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\candidate-release-binding.json",
+        "bytes": 7642,
+        "sha256": "a05d0eb72534699f88a23c1f65dab768efc96c6ba33f47b6d44b07cdd4b45164"
+      },
+      "destination": "candidate-release-binding.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\candidate-release-binding.json",
+        "bytes": 1105,
+        "sha256": "f6efb9908fe31fffca62feb8c6d8b75ebbe765839df9fbe48f2d6ffb73c4c28b"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\current-driver-binding.json",
+        "bytes": 2764,
+        "sha256": "770981cd2f4e277370167de0d62ab26cfd8656745209a8ae00484bdbcfe30184"
+      },
+      "destination": "current-driver-binding.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\current-driver-binding.json",
+        "bytes": 2623,
+        "sha256": "835298a1a2b36824b7a9df0749986e4524873c73352da34e8eaa39d2038a8f49"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\scene-binding.json",
+        "bytes": 6703,
+        "sha256": "495d81afa7d827a2e78c586ac1aac42c80eb935a3a23fb2c574efb1085dedfd6"
+      },
+      "destination": "scene-binding.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\scene-binding.json",
+        "bytes": 6627,
+        "sha256": "3050bcbb16388dda6efe98f805f7f289647c41140c1dcee94322b0c3ad3ccd40"
+      },
+      "rawExact": true
+    }
+  ]
+}

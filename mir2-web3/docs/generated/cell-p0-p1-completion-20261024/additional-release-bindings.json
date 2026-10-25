@@ -12,6 +12,10 @@
     {
       "manifest": "backend-source-socket-diagnostics-v1.json",
       "build": "release-socket-diagnostics-v1.json"
+    },
+    {
+      "manifest": "backend-source-personal-monster-projection-v1.json",
+      "build": "release-personal-monster-projection-v1.json"
     }
   ]
 }

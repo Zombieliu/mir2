@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "baselineReviewedSourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-chase-preference-feasibility-14\\launcher-source-frozen-v1.json",
+    "bytes": 19769,
+    "sha256": "0d994e2c1d097de3b732543f06c3cf9787dcc56b1c3b74fa497b4b2c2cca65d7"
+  },
+  "baselineInputCount": 73,
+  "mechanicalDerivations": [
+    {
+      "name": "prepare-inputs.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-chase-preference-feasibility-14\\prepare-inputs.mjs",
+        "bytes": 11505,
+        "sha256": "34435610714b44c9d7d73cd6734a15473622600c35a6b858c9788dd9b076fd54"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\prepare-inputs.mjs",
+        "bytes": 11514,
+        "sha256": "dab6308f8fe083411742e6edb66dddde0d540f94c01799c0e22afbba7824976e"
+      },
+      "rules": [
+        {
+          "from": "socket-diagnostics-v1-build-receipt.json",
+          "to": "personal-monster-projection-v1-build-receipt.json",
+          "count": 1
+        }
+      ],
+      "exactRawInverse": true
+    },
+    {
+      "name": "run-owned.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-chase-preference-feasibility-14\\run-owned.mjs",
+        "bytes": 19727,
+        "sha256": "6fd4eaf8be4a99dc2095cd2a137cdfba85ad3638b8703e631ece4fc01f9be547"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\run-owned.mjs",
+        "bytes": 19733,
+        "sha256": "0863cd82a5f4d791ba90926be7157eae02e78ba0e06282a5dd6aa9bb13b9a3a6"
+      },
+      "rules": [
+        {
+          "from": "owned-native-chase-preference-probe14-ready",
+          "to": "owned-native-personal-projection-probe15-ready",
+          "count": 1
+        },
+        {
+          "from": "release-native-10-v2-chase-preference-feasibility-14",
+          "to": "release-native-10-v2-personal-projection-feasibility-15",
+          "count": 1
+        }
+      ],
+      "exactRawInverse": true
+    },
+    {
+      "name": "collect-public.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-chase-preference-feasibility-14\\collect-public.mjs",
+        "bytes": 43524,
+        "sha256": "227d1576b48b434d97ba40b078bac6523d1023bb02a2ab8bdb450d012b3e76a5"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\collect-public.mjs",
+        "bytes": 43587,
+        "sha256": "1e5aeec56a8c82fec4d8b7ebae09e4d4c3d6b4ef469322bb0f17b0618640e5f9"
+      },
+      "rules": [
+        {
+          "from": "release-native-10-v2-chase-preference-feasibility-14",
+          "to": "release-native-10-v2-personal-projection-feasibility-15",
+          "count": 9
+        },
+        {
+          "from": "capacity-native10-v2-chase-preference-followup-14-diagnostics",
+          "to": "capacity-native10-v2-personal-projection-followup-15-diagnostics",
+          "count": 1
+        },
+        {
+          "from": "Probe14",
+          "to": "Probe15",
+          "count": 3
+        },
+        {
+          "from": "Passing14",
+          "to": "Passing15",
+          "count": 3
+        },
+        {
+          "from": "probe14",
+          "to": "probe15",
+          "count": 1
+        },
+        {
+          "from": "New14collection",
+          "to": "New15collection",
+          "count": 1
+        },
+        {
+          "from": "const backendSourceCommit = '46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b';",
+          "to": "const backendSourceCommit = DRIVER_BINDING.backendSourceCommit;",
+          "count": 1
+        },
+        {
+          "from": "const backendBinarySha256 = 'a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d';",
+          "to": "const backendBinarySha256 = DRIVER_BINDING.backendBinarySha256;",
+          "count": 1
+        },
+        {
+          "from": "manifest.files?.length !== 41",
+          "to": "manifest.files?.length !== 44",
+          "count": 1
+        },
+        {
+          "from": "import {assertFinalDriverBinding,DRIVER_FREEZE_FILE} from './driver-binding-contract.mjs';",
+          "to": "import {assertFinalDriverBinding,DRIVER_FREEZE_FILE,DRIVER_BINDING} from './driver-binding-contract.mjs';",
+          "count": 1
+        },
+        {
+          "from": "release-socket-diagnostics-v1.json",
+          "to": "release-personal-monster-projection-v1.json",
+          "count": 2
+        },
+        {
+          "from": "backend-source-socket-diagnostics-v1.json",
+          "to": "backend-source-personal-monster-projection-v1.json",
+          "count": 3
+        },
+        {
+          "from": "socket-diagnostics-v1-build-receipt.json",
+          "to": "personal-monster-projection-v1-build-receipt.json",
+          "count": 1
+        },
+        {
+          "from": "socket-build-source-lib.mjs",
+          "to": "projection-build-source-lib.mjs",
+          "count": 1
+        }
+      ],
+      "exactRawInverse": true
+    },
+    {
+      "name": "verify-public.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-chase-preference-feasibility-14\\verify-public.mjs",
+        "bytes": 19222,
+        "sha256": "e4c2da22023272e417e12fe5e9892e915bfdbb06b7b27b11bf4e19ae14902042"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\verify-public.mjs",
+        "bytes": 19241,
+        "sha256": "c4680a6c665b2e109b40532ea12dbbf1c37333978aaff01bddb63d8f827ea3bf"
+      },
+      "rules": [
+        {
+          "from": "release-native-10-v2-chase-preference-feasibility-14",
+          "to": "release-native-10-v2-personal-projection-feasibility-15",
+          "count": 3
+        },
+        {
+          "from": "capacity-native10-v2-chase-preference-followup-14-diagnostics",
+          "to": "capacity-native10-v2-personal-projection-followup-15-diagnostics",
+          "count": 1
+        },
+        {
+          "from": "import {assertFinalDriverBinding,DRIVER_FREEZE_FILE} from './driver-binding-contract.mjs';",
+          "to": "import {assertFinalDriverBinding,DRIVER_FREEZE_FILE,DRIVER_BINDING} from './driver-binding-contract.mjs';",
+          "count": 1
+        },
+        {
+          "from": "assert.equal(catalog.run.backendSourceCommit, '46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b');",
+          "to": "assert.equal(catalog.run.backendSourceCommit, DRIVER_BINDING.backendSourceCommit);",
+          "count": 1
+        }
+      ],
+      "exactRawInverse": true
+    }
+  ],
+  "draftGenerationRefusals": {
+    "count": 2,
+    "reason": "Overlapping identity token in draft generator; partial source only, no target import or runtime.",
+    "originalStderrFileCaptured": false
+  }
+}

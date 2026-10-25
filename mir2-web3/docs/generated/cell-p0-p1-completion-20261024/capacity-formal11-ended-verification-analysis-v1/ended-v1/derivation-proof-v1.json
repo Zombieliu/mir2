@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T15:39:09.152Z",
+  "scope": "Mechanical fresh-formal11 ended verifier only, derived from Root-selected formal10 v4; no live run access or runtime mutation.",
+  "derivations": [
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal10-independent-verification-v1/verify-ended-formal10-v4.mjs",
+        "bytes": 28111,
+        "sha256": "f5cc63dc6587e50673ac984c541390f0a415f4fb19e7371d957c43dbac0747c7"
+      },
+      "target": {
+        "path": "verify-ended-formal11-v1.mjs",
+        "bytes": 29032,
+        "sha256": "6d4dbe1fb92027ea514c70b5d59055fbd89b73e345ebb774105ef69297aae69e"
+      },
+      "rules": [
+        {
+          "purpose": "Fresh formal root",
+          "from": "const REALM='formal-native-v2-compact-wire-ladder-10';",
+          "to": "const REALM='release-native-v2-personal-projection-ladder-11';",
+          "count": 1
+        },
+        {
+          "purpose": "Fresh public child",
+          "from": "const CHILD='capacity-formal-native-v2-compact-wire-ladder-10';",
+          "to": "const CHILD='capacity-formal-native-v2-personal-projection-ladder-11';",
+          "count": 1
+        },
+        {
+          "purpose": "Fresh output directory",
+          "from": "formal10-independent-verification-v1",
+          "to": "formal11-independent-verification-v1",
+          "count": 1
+        },
+        {
+          "purpose": "Local contract name",
+          "from": "from './formal-contract-v2.mjs'",
+          "to": "from './formal-contract-v1.mjs'",
+          "count": 1
+        },
+        {
+          "purpose": "Exact actual run only",
+          "from": "assert.equal(report.runId,RUN);",
+          "to": "assert.equal(RUN,'1792942371568-1e322224');assert.equal(report.runId,RUN);",
+          "count": 1
+        },
+        {
+          "purpose": "Actual cleanup source",
+          "from": "formal10-root-independent-cleanup-v1.json",
+          "to": "formal11-root-independent-cleanup-v1.json",
+          "count": 2
+        },
+        {
+          "purpose": "Exact Node evidence and six declarations",
+          "from": " const cleanupKeys=",
+          "to": " const freezeName='capacity-native-chase-preference-driver-frozen-v1.json',freezePin=await pin(BASE,freezeName);assert.equal(freezePin.bytes,19099);assert.equal(freezePin.sha256,'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef');const frozen=await read(BASE,freezeName);\r\n assert.equal(frozen.driverSourceCommit,'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd');assert.equal(frozen.sourceSha256,'db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7');\r\n const metadata={};for(const key of ['navigationCoordination','nativePatrolPlanning','measurementClock','nativeHpMaintenance','nativeAttackWitness','nativeChasePreference']){assert.ok(frozen[key]&&typeof frozen[key]==='object');for(const value of[report,catalog.run,sidecar])assert.deepEqual(value[key],frozen[key],key);metadata[key]=frozen[key];}\r\n const cleanupKeys=",
+          "count": 1
+        },
+        {
+          "purpose": "Bind Node evidence pin in result",
+          "from": "const pins={report:",
+          "to": "const pins={nodeDriverEvidence:freezePin,report:",
+          "count": 1
+        },
+        {
+          "purpose": "Current execution and backend identities",
+          "from": " assert.equal(catalog.run.backendSourceCommit,'46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b');assert.equal(catalog.run.driverSourceCommit,'4cab00893b861395b63906b1b8183a021d397cdb');assert.equal(catalog.run.coreCodeEvidenceCommit,'6d70d02d0bc390156b77a3e48acee714fc87cda3');assert.equal(catalog.run.driverSourceSha256,'05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073');assert.equal(catalog.run.gatewaySha256,'a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d');assert.equal(catalog.run.backendInputCount,41);assert.equal(catalog.run.scene10Sha256,'a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba');assert.equal(catalog.run.scene100Sha256,'f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205');",
+          "to": " assert.equal(catalog.run.backendSourceCommit,'5c2e713863d3e9556a92f856b11df2396c73b137');assert.equal(catalog.run.driverSourceCommit,'5c2e713863d3e9556a92f856b11df2396c73b137');assert.equal(catalog.run.coreCodeEvidenceCommit,'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd');assert.equal(catalog.run.driverSourceSha256,'db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7');assert.equal(catalog.run.gatewaySha256,'d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756');assert.equal(catalog.run.backendInputCount,44);assert.equal(catalog.run.scene10Sha256,'a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba');assert.equal(catalog.run.scene100Sha256,'f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205');",
+          "count": 1
+        },
+        {
+          "purpose": "Actual prepared source config",
+          "from": "3c49fdaddd4d59b2ac0cb8159b50e52ecd2a2edc746b773623f40a038d06c162",
+          "to": "edab91a9dd170c19c601ea6c260480657a85f51a7929d09f7a6df7208b6343dd",
+          "count": 1
+        },
+        {
+          "purpose": "Actual79 source seal",
+          "from": " const launcher=await read(dir,`${REALM}/launcher-source-frozen-v1.json`);assert.equal(launcher.files.length,51);assert.deepEqual(await pin(dir,`${REALM}/launcher-source-frozen-v1.json`),{path:`${REALM}/launcher-source-frozen-v1.json`,bytes:23133,sha256:'c4b83227e99e9a3b131e3ea80d77afb6afde0c128de7b179c383f451be023724'});assert.equal(crypto.createHash('sha256').update(JSON.stringify(launcher.files)).digest('hex'),launcher.sourceSha256);assert.equal(launcher.sourceSha256,'377b206576d506dfd396f718030b833c78398a2f827792225e5f334d58992972');",
+          "to": " const launcher=await read(dir,`${REALM}/launcher-source-frozen-v1.json`);assert.equal(launcher.files.length,79);assert.deepEqual(await pin(dir,`${REALM}/launcher-source-frozen-v1.json`),{path:`${REALM}/launcher-source-frozen-v1.json`,bytes:35724,sha256:'7e78691a3dcb22fdb053e3b028cadeb0aef1b03c7af06f31981e2cd58c09b048'});assert.equal(crypto.createHash('sha256').update(JSON.stringify(launcher.files)).digest('hex'),launcher.sourceSha256);assert.equal(launcher.sourceSha256,'e82cfbdc8b5bf9c240b343d2c04b6a99d7fa90b9377056df7a8430d5f56da4df');",
+          "count": 1
+        },
+        {
+          "purpose": "Result backend inputs",
+          "from": "backendInputs:41",
+          "to": "backendInputs:44",
+          "count": 1
+        },
+        {
+          "purpose": "Expose exact declarations",
+          "from": "},phaseChecks,wireDiagnostics",
+          "to": "},phaseChecks,metadata,wireDiagnostics",
+          "count": 1
+        }
+      ],
+      "exactRawInverse": true
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal10-independent-verification-v1/formal-contract-v2.mjs",
+        "bytes": 6103,
+        "sha256": "5aa9f0057bacf899270b14619d0168148c07323f97065aff8c56bf14cf227b4c"
+      },
+      "target": {
+        "path": "formal-contract-v1.mjs",
+        "bytes": 6103,
+        "sha256": "0f0dcf7daacdc19b9e5397b80ce836f4f3e3bd274b8ca4f32513e8aee6798152"
+      },
+      "rules": [
+        {
+          "purpose": "Explicit formal11 CLI",
+          "from": "--verify-ended-formal10",
+          "to": "--verify-ended-formal11",
+          "count": 1
+        },
+        {
+          "purpose": "Explicit formal11 error",
+          "from": "'Explicit ended-formal10 flag and originalrunID required'",
+          "to": "'Explicit ended-formal11 flag and originalrunID required'",
+          "count": 1
+        },
+        {
+          "purpose": "Actual gateway PID",
+          "from": "value.gatewayPid,70212",
+          "to": "value.gatewayPid,58172",
+          "count": 1
+        },
+        {
+          "purpose": "Actual monitor PID",
+          "from": "value.monitorPid,68764",
+          "to": "value.monitorPid,69080",
+          "count": 1
+        }
+      ],
+      "exactRawInverse": true
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/probe15-independent-verification-v1/run-ended-probe15-v1.mjs",
+        "bytes": 2257,
+        "sha256": "3c5731662e415db08e7a97add7f2bef7b98dd5ce317a41ce488d3f87a12827b7"
+      },
+      "target": {
+        "path": "run-ended-formal11-v1.mjs",
+        "bytes": 2259,
+        "sha256": "1ae5f984f247e5341dca5302165a2444cfba17e1cb980db8a6a6440c290a27c7"
+      },
+      "rules": [
+        {
+          "purpose": "Explicit formal11 CLI",
+          "from": "--verify-ended-probe15",
+          "to": "--verify-ended-formal11",
+          "count": 1
+        },
+        {
+          "purpose": "Final formal11 verifier module",
+          "from": "verify-ended-probe15-v1.mjs",
+          "to": "verify-ended-formal11-v1.mjs",
+          "count": 1
+        }
+      ],
+      "exactRawInverse": true
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/probe15-independent-verification-v1/seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "target": {
+        "path": "seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "rules": [],
+      "exactRawInverse": true
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal10-independent-verification-v1/hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "target": {
+        "path": "hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "rules": [],
+      "exactRawInverse": true
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal10-independent-verification-v1/expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      "target": {
+        "path": "expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      "rules": [],
+      "exactRawInverse": true
+    }
+  ],
+  "originalPolicyRawUnchanged": true,
+  "originalHpProofRawUnchanged": true,
+  "actualRunRead": false,
+  "toolSealed": false,
+  "actualVerificationExecuted": false,
+  "successAndFailureBranchesPreserved": true,
+  "all146RequiredOnlyForOriginalPassedFormal": true,
+  "completeMinuteWindows": 146,
+  "originalReadlineTrustBoundary": "Frozen producer SHA-bound archives only; readline allocates a full line before checking the original64MiB line cap. This does not claim adversarial-input memory safety.",
+  "namespace": {
+    "runtimeAndBackend": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "backendInputs": 44,
+    "nodeCodeEvidence": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "nodeSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "wireHistoricalCodeEvidence": "6d70d02d0bc390156b77a3e48acee714fc87cda3"
+  },
+  "noProductSourceChanged": true,
+  "noRealmsOrAccountsStarted": true
+}

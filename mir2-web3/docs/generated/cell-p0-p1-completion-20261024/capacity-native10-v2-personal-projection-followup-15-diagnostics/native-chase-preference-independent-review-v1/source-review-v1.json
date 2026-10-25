@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T08:56:14.4037878Z",
+  "scope": "Independent read-only review of the new native chase planning preference main-source change only. Test writer is independent; no tests, product imports, realm, source writes or raw scans were performed.",
+  "mainSource": {
+    "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+    "bytes": 148409,
+    "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+  },
+  "mutationProof": {
+    "path": "C:/mir2-build/p01-completion-20261024/native-chase-preference-main-mutation-v1.json",
+    "bytes": 6417,
+    "sha256": "6c0d95fbcdb5f9a035da54bff5920cc47f8834daa8bb3eb0e8a8bafc05942291"
+  },
+  "independentInverse": {
+    "rules": 8,
+    "occurrencesPerAfter": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "inverseRawBytes": 144416,
+    "inverseRawSha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42",
+    "normalizationPerformed": false,
+    "exactOriginalBytesRecovered": true,
+    "gitDiffAddedLines": 53,
+    "gitDiffRemovedLines": 3
+  },
+  "sourceFindings": [
+    {
+      "id": "C1",
+      "lines": "1056-1075",
+      "result": "pass",
+      "evidence": "The ephemeral leaders Map is derived only from context.clients, including self. activeGameplayOwner rejects unready, out-of-game, closed, paused, draining, navigationClosing, wrong-map, missing or dead owners. Role must be combat; pursuit must match map, remain not attackSent and retain an available ordinary matching ID/name target."
+    },
+    {
+      "id": "C2",
+      "lines": "1056-1075",
+      "result": "pass",
+      "evidence": "Finite nonnegative first/last receipt clocks, first<=last<=now and age<=3000ms are required. A single deterministic earliest firstReceiptMonoMs / lexical actor label leader is chosen per target; including self prevents both established contenders from yielding to each other."
+    },
+    {
+      "id": "C3",
+      "lines": "865-891",
+      "result": "pass",
+      "evidence": "Original native, actual-success, move-kind, same target/map, UserLocation, new sequence, nonzero displacement and planned first/target matching gates execute before coordination changes. The fields use receipt.monotonicMs, not delayed processing time. Invalid/backward mono clears preference; a gap greater than3000ms starts a new recent streak."
+    },
+    {
+      "id": "C4",
+      "lines": "1110-1120",
+      "result": "pass",
+      "evidence": "The original candidate ordering, geometry membership filter and selected/adjacent precedence execute first. Only the original first4 candidate window is stably reordered by adjacent actual witness / no earlier other pursuer / earlier other pursuer. No original member is removed, and all original path alternatives remain inside the same4-target search window."
+    },
+    {
+      "id": "C5",
+      "lines": "1110-1147",
+      "result": "pass",
+      "evidence": "Adjacent witnessed attacks remain rank0 before movement candidates. Reordering is not a hard claim or an unavailable-target filter. If no unclaimed route works, the original claimed route is still attempted before original scout/return fallback. No extra target,8-neighbor or4000-node search budget is added."
+    },
+    {
+      "id": "C6",
+      "lines": "839-858,938-948",
+      "result": "pass",
+      "evidence": "New pursuits initialize preference fields null, so an actual post-strike segment begins without copied priority. Restore explicitly overrides spread fields with null while retaining the previous confirmedMoves/visited and existing active elapsed accounting. Original finite chase rules are unchanged."
+    },
+    {
+      "id": "C7",
+      "lines": "1189-1196,1743-1751",
+      "result": "pass",
+      "evidence": "The existing monotonic planning time is passed into combatPlan; non-native behavior has no leaders ranking. A separate frozen nativeChasePreference declaration is added. Exact inverse shows the five previous declaration bodies, all metrics, status, evidence, timing and threshold code remain byte-identical."
+    }
+  ],
+  "overlapEvidence": {
+    "source": {
+      "path": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/overlapping-chase-v2.mjs",
+      "bytes": 8459,
+      "sha256": "0d440d7ffad9600a790d45c8592a749b0d054c90a03eed083e5c07d5f232d9e0"
+    },
+    "proof": {
+      "path": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/overlapping-chase-proof-v2.json",
+      "bytes": 122773,
+      "sha256": "7942e2af32745103e71a2f318fb318b9c320e0542cf1816ccc09f6974a46b106"
+    },
+    "review": "The source binds successful chase actions to actual actor UserLocation position/time receipts, conservatively breaks spans on non-chat unrelated actions, and intersects same-target first-to-last ACK spans between two actors. This is stronger than sequential shared IDs.",
+    "spans": 9,
+    "longestSeconds": 5.99988619999995,
+    "longestActorAckCounts": [
+      12,
+      9
+    ],
+    "nearTimePairCount": 214,
+    "nearTimePairSampleLimit": 64,
+    "limitations": "ACK spans do not expose every internal decision or simultaneous authoritative position. Duplicated pursuit effort is observed; it does not prove this preference supplies18 launches/12 positive hits or fixes every workload gap."
+  },
+  "pendingValidation": [
+    "Focused tests must exercise equal-first-clock label ordering symmetrically, expiry and renewed streak, delayed/duplicate/invalid receipt, inactive and old connection exclusions.",
+    "Cover original first4 membership with pathless unclaimed alternatives and the original claimed route fallback; adjacent actual witness attack must still win.",
+    "Restore and post-strike clear preference only; unchanged chase ACK/time/visited limits and native opportunity accounting still require the existing and new regression suites."
+  ],
+  "verdict": {
+    "sourceContractPassed": true,
+    "blockingFindingIds": [],
+    "testSuiteRunByReviewer": false,
+    "fullDriverRegressionPassedByThisReview": false,
+    "newCapacityRunPerformed": false,
+    "capacityAccepted": false,
+    "p2ImplementationPermitted": false
+  },
+  "limitations": [
+    "Only the main source and bounded existing public overlap proof were reviewed; the test module was not reviewed or executed in this receipt.",
+    "Before either contender gets a qualifying real ACK, both may still choose the same target. This is a3-second selection preference, not an exclusive reservation, fairness guarantee or new authoritative mechanic.",
+    "No100-player CPU claim is established. The additional bounded client/snapshot scan has not been benchmarked by this review.",
+    "No original failed result, public evidence, runtime rule or scenario was changed."
+  ]
+}

@@ -1,0 +1,845 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Root-authorized actual binding only. No sourceguard, seal, provisioning or runtime was executed. Original preparedPENDING artifacts and four JSON preimages are preserved.",
+  "head": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "nodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "nodeSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "mutations": [
+    {
+      "name": "current-driver-binding.json",
+      "pendingPreimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-preimages-v1\\current-driver-binding.json.pending.txt",
+        "bytes": 2623,
+        "sha256": "835298a1a2b36824b7a9df0749986e4524873c73352da34e8eaa39d2038a8f49"
+      },
+      "actual": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\current-driver-binding.json",
+        "bytes": 2764,
+        "sha256": "770981cd2f4e277370167de0d62ab26cfd8656745209a8ae00484bdbcfe30184"
+      },
+      "before": {
+        "schemaVersion": 1,
+        "state": "PENDING_FRESH44_BACKEND_AND_FULL16",
+        "driverSourceCommit": null,
+        "coreCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+        "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+        "driverFrozenFile": "C:/mir2-build/p01-completion-20261024/capacity-native-chase-preference-driver-frozen-v1.json",
+        "driverManifestBytes": 19099,
+        "driverManifestSha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef",
+        "currentEvidence": [
+          {
+            "tests": 13,
+            "receipt": {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\red-green-receipt-v1.json",
+              "bytes": 5650,
+              "sha256": "395e3285af4b73f95efd1c4bc1ac185bd968315587c5b7978508a6cc3b4b4fef"
+            },
+            "log": {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\current-green-v1.log",
+              "bytes": 3691,
+              "sha256": "eb89dda9485646b250fdfeee3f08d8374af0f90498c4f1d435e74853a312c853"
+            }
+          },
+          {
+            "tests": 200,
+            "receipt": {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-receipt-v1.json",
+              "bytes": 4682,
+              "sha256": "5e71b6dbf69c9ed79e085c41a61946d2dcaed7d0b81cb6060123b46d4a8a1b7a"
+            },
+            "log": {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-v1.log",
+              "bytes": 53991,
+              "sha256": "702c6c80eb52ec008dbdd3c18a8a578749d99ffd84e4163b7b527ed6de36554e"
+            }
+          }
+        ],
+        "staticGeometryCompatibilityProof": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\scene-driver-compatibility-proof-v1.json",
+          "bytes": 1936,
+          "sha256": "de4e8d981233d0fb5422a7d5469ed6c905d3632f5161a19b5b74384d3eb21059"
+        },
+        "historicalWrapperEvidence": {
+          "coreCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+          "documentationCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+          "coreFullTests": 187,
+          "wrapperTests": 28,
+          "adapterTests": 8,
+          "notCurrent200Coverage": true
+        },
+        "rootExecutionApproval": false,
+        "accountPrepared": false,
+        "binaryCopied": false,
+        "realmStarted": false,
+        "sealed": false,
+        "capacityAccepted": false,
+        "backendSourceCommit": null,
+        "backendBinarySha256": null,
+        "driverFreezeRole": "Historical b84d Node9/db4e and13/200 validation only. Any468/backend/full16 fields inside that freeze are historical, never the active Probe15 backend binding."
+      },
+      "after": {
+        "schemaVersion": 1,
+        "state": "FINAL_FRESH44_BACKEND_UNCHANGED_NODE9",
+        "driverSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+        "coreCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+        "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+        "driverFrozenFile": "C:/mir2-build/p01-completion-20261024/capacity-native-chase-preference-driver-frozen-v1.json",
+        "driverManifestBytes": 19099,
+        "driverManifestSha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef",
+        "currentEvidence": [
+          {
+            "tests": 13,
+            "receipt": {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\red-green-receipt-v1.json",
+              "bytes": 5650,
+              "sha256": "395e3285af4b73f95efd1c4bc1ac185bd968315587c5b7978508a6cc3b4b4fef"
+            },
+            "log": {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\current-green-v1.log",
+              "bytes": 3691,
+              "sha256": "eb89dda9485646b250fdfeee3f08d8374af0f90498c4f1d435e74853a312c853"
+            }
+          },
+          {
+            "tests": 200,
+            "receipt": {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-receipt-v1.json",
+              "bytes": 4682,
+              "sha256": "5e71b6dbf69c9ed79e085c41a61946d2dcaed7d0b81cb6060123b46d4a8a1b7a"
+            },
+            "log": {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\native-chase-preference-verification-v1\\full-current-v1.log",
+              "bytes": 53991,
+              "sha256": "702c6c80eb52ec008dbdd3c18a8a578749d99ffd84e4163b7b527ed6de36554e"
+            }
+          }
+        ],
+        "staticGeometryCompatibilityProof": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\scene-driver-compatibility-proof-v1.json",
+          "bytes": 1936,
+          "sha256": "de4e8d981233d0fb5422a7d5469ed6c905d3632f5161a19b5b74384d3eb21059"
+        },
+        "historicalWrapperEvidence": {
+          "coreCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+          "documentationCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+          "coreFullTests": 187,
+          "wrapperTests": 28,
+          "adapterTests": 8,
+          "notCurrent200Coverage": true
+        },
+        "rootExecutionApproval": false,
+        "accountPrepared": false,
+        "binaryCopied": false,
+        "realmStarted": false,
+        "sealed": false,
+        "capacityAccepted": false,
+        "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+        "backendBinarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+        "driverFreezeRole": "Historical b84d Node9/db4e and13/200 validation only. Any468/backend/full16 fields inside that freeze are historical, never the active Probe15 backend binding."
+      },
+      "exactRawPendingReconstruction": true
+    },
+    {
+      "name": "candidate-release-binding.json",
+      "pendingPreimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-preimages-v1\\candidate-release-binding.json.pending.txt",
+        "bytes": 1105,
+        "sha256": "f6efb9908fe31fffca62feb8c6d8b75ebbe765839df9fbe48f2d6ffb73c4c28b"
+      },
+      "actual": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\candidate-release-binding.json",
+        "bytes": 7642,
+        "sha256": "a05d0eb72534699f88a23c1f65dab768efc96c6ba33f47b6d44b07cdd4b45164"
+      },
+      "before": {
+        "schemaVersion": 1,
+        "state": "PENDING_FRESH44_RELEASE_AND_FULL16",
+        "backendSourceCommit": null,
+        "backendInputCount": 44,
+        "backendSourceAggregate": null,
+        "releaseRecord": null,
+        "backendSourceManifest": null,
+        "binary": null,
+        "buildReceipt": null,
+        "buildLog": null,
+        "rootFunctionalValidation": null,
+        "full16": {
+          "state": "pending",
+          "audit": null,
+          "files": null
+        },
+        "driverSourceCommit": null,
+        "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+        "coreCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+        "driverFrozenManifest": {
+          "file": "C:/mir2-build/p01-completion-20261024/capacity-native-chase-preference-driver-frozen-v1.json",
+          "bytes": 19099,
+          "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+        },
+        "prepareExecuted": false,
+        "realmStarted": false,
+        "capacityAccepted": false,
+        "driverFreezeRole": "Historical b84d Node9/db4e and13/200 validation only. Any468/backend/full16 fields inside that freeze are historical, never the active Probe15 backend binding."
+      },
+      "after": {
+        "schemaVersion": 1,
+        "state": "new44-release-and-full16-bound-not-executed",
+        "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+        "backendInputCount": 44,
+        "backendSourceAggregate": "6276d11a740e956cf8e3d316362a49900f1c761d9ffcdfd462cb7394056f7828",
+        "releaseRecord": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\release-personal-monster-projection-v1.json",
+          "bytes": 2376,
+          "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+        },
+        "backendSourceManifest": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+          "bytes": 32926,
+          "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+        },
+        "binary": {
+          "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\bin\\mir2-gateway.exe",
+          "bytes": 87363072,
+          "sha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756"
+        },
+        "buildReceipt": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-v1-build-receipt.json",
+          "bytes": 2373,
+          "sha256": "80e8f27189012cff6d4d594fc0f9af9dd4e194a6145559d3856e0e7f397d1f05"
+        },
+        "buildLog": {
+          "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-personal-monster-projection-v1-release-build.log",
+          "bytes": 55865,
+          "sha256": "065a9fa0ad55a19fa38f846fb152b06c4a2053b819f2192ac930529fbb782eaa"
+        },
+        "rootFunctionalValidation": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-functional-validation-v1.json",
+          "bytes": 13454,
+          "sha256": "94d58944d2a441bd1c3358a11a356fca9323f8aa88027af4cb988bf58ccc72b8"
+        },
+        "full16": {
+          "state": "passed",
+          "audit": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.independent-audit.json",
+            "bytes": 1747,
+            "sha256": "e2b563e24484dcc2d16d14c2c20b5a84bc5921e5bc957a7dd305e070ec429265"
+          },
+          "files": [
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.audit-source.mjs",
+              "bytes": 9066,
+              "sha256": "c694d39f4d4c6c7d388d7a66c10018c339bc529326510e7b7049cf3d0f222d37"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.backend-source.json",
+              "bytes": 32926,
+              "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.independent-audit.json",
+              "bytes": 1747,
+              "sha256": "e2b563e24484dcc2d16d14c2c20b5a84bc5921e5bc957a7dd305e070ec429265"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.prepared-profile.json",
+              "bytes": 4369,
+              "sha256": "07893f55fa42af368da82061df2be5456bd6b7dc05394d9cd25a30b91d76d593"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.realm-evidence.json",
+              "bytes": 34976,
+              "sha256": "3763e933415e23d66b8594610829990e7cddfbc69ef3316d7a5a8d3fad9e97b2"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.release-input.json",
+              "bytes": 2376,
+              "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.runner-source.mjs",
+              "bytes": 14389,
+              "sha256": "b7ad0b746575b01a4dd0133694e07799e435859241e6d845c9aa2c66ab25e45e"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.source-manifest-verification.json",
+              "bytes": 572,
+              "sha256": "d4af84222c7309c7eeadf7ce185bc8b7c6452bb48bb610bcb199d43f8f59a356"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.zone-metrics.json",
+              "bytes": 23598,
+              "sha256": "a56aae33c58dd4e27db9e6b482082b557ec20a6af465ed8ef3d01ee73533af5f"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-a.trace.jsonl",
+              "bytes": 982658,
+              "sha256": "ad78db0397399d88cf5a7c937dcc0664f7a22eadb7a8877a58e2759c985b49f7"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-b.trace.jsonl",
+              "bytes": 907904,
+              "sha256": "88841b520336c2485062d816af16cec8d324a07319283396373a845fa85beb86"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-guard-newCharacter.trace.jsonl",
+              "bytes": 3479,
+              "sha256": "c964e3a263f3a0c86b2fbe88dc6f91a2141633df772413ef24e68e594567ec2a"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-guard-startGame.trace.jsonl",
+              "bytes": 3442,
+              "sha256": "cff0fa5526d83d5085d0614e63fda36ffecc0594f781475a5f8d5fed71ee5863"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-relogin-0.trace.jsonl",
+              "bytes": 684246,
+              "sha256": "0cb1b176f30a26ef02955918209d3b131acc82d7deed321feddddeb2996c3fb6"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147-relogin-1.trace.jsonl",
+              "bytes": 680201,
+              "sha256": "b0b292717a319e003b01afff97b21baaa9d0216421880487f8353c2540017bef"
+            },
+            {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934546937-58ce6147.report.json",
+              "bytes": 109568,
+              "sha256": "bb848946258bde31f7fe05158fc5cfa0427e7b693c0335d280d61c0c95ad947e"
+            }
+          ],
+          "rootIndependentCleanup": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\personal-projection-full16-root-independent-cleanup-v1.json",
+            "bytes": 288,
+            "sha256": "4b9f2783404dfb04b3765022bc3a54eaec128a767118ccfdb27d60d2223fc777"
+          }
+        },
+        "driverSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+        "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+        "coreCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+        "driverFrozenManifest": {
+          "file": "C:/mir2-build/p01-completion-20261024/capacity-native-chase-preference-driver-frozen-v1.json",
+          "bytes": 19099,
+          "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+        },
+        "prepareExecuted": false,
+        "realmStarted": false,
+        "capacityAccepted": false,
+        "driverFreezeRole": "Historical b84d Node9/db4e and13/200 validation only. Any468/backend/full16 fields inside that freeze are historical, never the active Probe15 backend binding.",
+        "backendRebuildPerformed": true
+      },
+      "exactRawPendingReconstruction": true
+    },
+    {
+      "name": "scene-binding.json",
+      "pendingPreimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-preimages-v1\\scene-binding.json.pending.txt",
+        "bytes": 6627,
+        "sha256": "3050bcbb16388dda6efe98f805f7f289647c41140c1dcee94322b0c3ad3ccd40"
+      },
+      "actual": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\scene-binding.json",
+        "bytes": 6703,
+        "sha256": "495d81afa7d827a2e78c586ac1aac42c80eb935a3a23fb2c574efb1085dedfd6"
+      },
+      "before": {
+        "schemaVersion": 1,
+        "boundAt": "2026-10-25T05:55:15.098Z",
+        "state": "final-compact-static-scene-bound-not-executed",
+        "profile": "ordinary-native-span2-five-by-five-static-halo-v1",
+        "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+        "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+        "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+        "rootApprovedFreshProbe": true,
+        "formalCapacityApproved": false,
+        "staticOnly": true,
+        "dynamicSupplyVerified": false,
+        "capacityAccepted": false,
+        "probeScene": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+          "bytes": 804,
+          "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+        },
+        "formalScene": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+          "bytes": 5844,
+          "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+        },
+        "analysis": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\review-summary-v4.json",
+          "bytes": 20628,
+          "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+        },
+        "collection": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\collection-manifest-v4.json",
+          "bytes": 7084,
+          "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+        },
+        "validation": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-repaired-v4.json",
+          "bytes": 7220826,
+          "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+        },
+        "staticSourceClosure": [
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+            "bytes": 18249,
+            "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+            "bytes": 144416,
+            "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+            "bytes": 6799671,
+            "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+            "bytes": 397117,
+            "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+            "bytes": 313945,
+            "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+            "bytes": 512762,
+            "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/monsters.rs",
+            "bytes": 107777,
+            "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+            "bytes": 99414,
+            "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+          },
+          {
+            "file": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+            "bytes": 11368,
+            "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+          },
+          {
+            "file": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+            "bytes": 11508,
+            "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+          }
+        ],
+        "independentFirst10": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-first10-review-v1.json",
+          "bytes": 11639,
+          "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+        },
+        "independent100": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-repair-review-v1.json",
+          "bytes": 13583,
+          "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+        },
+        "reviewAddendum": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-repair-summary-review-addendum-v1.json",
+          "bytes": 3473,
+          "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa"
+        },
+        "scope": "Historical immutable compact scene safety/A*/geometry evidence is reused unchanged. Original468/6d/05c below identify only that historical static study. Active Probe15 backend/execution remain null until root binds fresh44 Release/full16; no live supply or acceptance is inherited.",
+        "explicitSceneChanges": {
+          "patrolSpan": [
+            4,
+            2
+          ],
+          "body": [
+            "5x5",
+            "3x3"
+          ],
+          "staticHalo": [
+            "7x7",
+            "5x5"
+          ],
+          "homes": "New compact pair; only nearest-v3 actor92 repair moves227531 to229534, first10 byte-exact."
+        },
+        "unchangedRuntime": {
+          "map": "0",
+          "monsterNames": [
+            "Deer",
+            "Scarecrow"
+          ],
+          "freshWarrior": true,
+          "grants": false,
+          "spawnRulesModified": false,
+          "trafficThresholdsModified": false,
+          "resourceProfileModified": false,
+          "backendRebuilt": false
+        },
+        "liveRisks": [
+          "100representative tour886unitsteps is not an actual complete online tour.",
+          "53..65unitstep legs can exceed the original24ACK/20s waypoint advance boundary; no budget is changed.",
+          "Conditional positive-hit supply does not prove180 launched attacks/120 positive hits per minute or2h progression."
+        ],
+        "historicalStaticEvidenceOnly": true,
+        "activeBackendSourceCommit": null,
+        "activeDriverSourceCommit": null
+      },
+      "after": {
+        "schemaVersion": 1,
+        "boundAt": "2026-10-25T05:55:15.098Z",
+        "state": "final-compact-static-scene-bound-not-executed",
+        "profile": "ordinary-native-span2-five-by-five-static-halo-v1",
+        "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+        "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+        "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+        "rootApprovedFreshProbe": true,
+        "formalCapacityApproved": false,
+        "staticOnly": true,
+        "dynamicSupplyVerified": false,
+        "capacityAccepted": false,
+        "probeScene": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-10-repaired-v4.json",
+          "bytes": 804,
+          "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+        },
+        "formalScene": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+          "bytes": 5844,
+          "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+        },
+        "analysis": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\review-summary-v4.json",
+          "bytes": 20628,
+          "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+        },
+        "collection": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\collection-manifest-v4.json",
+          "bytes": 7084,
+          "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+        },
+        "validation": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\validation-repaired-v4.json",
+          "bytes": 7220826,
+          "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+        },
+        "staticSourceClosure": [
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+            "bytes": 18249,
+            "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+            "bytes": 144416,
+            "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+            "bytes": 6799671,
+            "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+            "bytes": 397117,
+            "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+            "bytes": 313945,
+            "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+            "bytes": 512762,
+            "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/monsters.rs",
+            "bytes": 107777,
+            "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+          },
+          {
+            "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+            "bytes": 99414,
+            "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+          },
+          {
+            "file": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+            "bytes": 11368,
+            "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+          },
+          {
+            "file": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+            "bytes": 11508,
+            "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+          }
+        ],
+        "independentFirst10": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-first10-review-v1.json",
+          "bytes": 11639,
+          "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+        },
+        "independent100": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\independent-repair-review-v1.json",
+          "bytes": 13583,
+          "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+        },
+        "reviewAddendum": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-halo-repair-summary-review-addendum-v1.json",
+          "bytes": 3473,
+          "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa"
+        },
+        "scope": "Historical immutable compact scene safety/A*/geometry evidence is reused unchanged. Original468/6d/05c below identify only that historical static study. Active Probe15 backend/execution remain null until root binds fresh44 Release/full16; no live supply or acceptance is inherited.",
+        "explicitSceneChanges": {
+          "patrolSpan": [
+            4,
+            2
+          ],
+          "body": [
+            "5x5",
+            "3x3"
+          ],
+          "staticHalo": [
+            "7x7",
+            "5x5"
+          ],
+          "homes": "New compact pair; only nearest-v3 actor92 repair moves227531 to229534, first10 byte-exact."
+        },
+        "unchangedRuntime": {
+          "map": "0",
+          "monsterNames": [
+            "Deer",
+            "Scarecrow"
+          ],
+          "freshWarrior": true,
+          "grants": false,
+          "spawnRulesModified": false,
+          "trafficThresholdsModified": false,
+          "resourceProfileModified": false,
+          "backendRebuilt": false
+        },
+        "liveRisks": [
+          "100representative tour886unitsteps is not an actual complete online tour.",
+          "53..65unitstep legs can exceed the original24ACK/20s waypoint advance boundary; no budget is changed.",
+          "Conditional positive-hit supply does not prove180 launched attacks/120 positive hits per minute or2h progression."
+        ],
+        "historicalStaticEvidenceOnly": true,
+        "activeBackendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+        "activeDriverSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137"
+      },
+      "exactRawPendingReconstruction": true
+    },
+    {
+      "name": "preparation-plan.json",
+      "pendingPreimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-preimages-v1\\preparation-plan.json.pending.txt",
+        "bytes": 2214,
+        "sha256": "258c53ea7102cad8ced1091a8659b816e56c7a3f796b11fd1bf1f3602e31cfd4"
+      },
+      "actual": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\preparation-plan.json",
+        "bytes": 3741,
+        "sha256": "74de1cc14a7b637c9745eb11322ae3ced3b6d4d088049ad265324c5e89d20d9f"
+      },
+      "before": {
+        "schemaVersion": 1,
+        "state": "PREPARED_PENDING_ACTUAL_FRESH44_RELEASE_FULL16_BINDING",
+        "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15",
+        "activeBackendSourceCommit": null,
+        "activeExecutionSourceCommit": null,
+        "backendInputCount": 44,
+        "actualNodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+        "nodeSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+        "nodeFocusedPassed": 13,
+        "nodeFullPassed": 200,
+        "historicalWrapper": {
+          "coreFull": 187,
+          "wrapper": 28,
+          "adapter": 8
+        },
+        "futureRequired": {
+          "manifest": null,
+          "release": null,
+          "binary": null,
+          "rootFunctionalValidation": null,
+          "freshFull16": null,
+          "launcherFreeze": null,
+          "readonlySourceGuard": null
+        },
+        "workload": {
+          "stages": [
+            2,
+            10
+          ],
+          "stageSeconds": 300,
+          "soakSeconds": 360,
+          "requiredCompleteWindows": [
+            5,
+            5,
+            6
+          ],
+          "wallSeconds": 3600,
+          "movementIntervalMs": 750,
+          "caps": [
+            24,
+            10,
+            10,
+            4,
+            1,
+            2
+          ],
+          "tokioWorkers": 4,
+          "slowStageThresholdMs": 50,
+          "attackResults": "v2",
+          "scenarioSameAs14": true,
+          "resourcesSameAs14": true,
+          "policySameAs14": true
+        },
+        "beforeProvisioning": [
+          "Root actual fresh44 backend/execution HEAD, Release/build/manifest/rootvalidation pins",
+          "Exact matching new full-lifecycle-personal-monster-projection-v1 passed audit/report/realm/source/pairedraw artifact pins",
+          "Bind known b84d Node9 evidence separately from the new runtime HEAD",
+          "Independent final preseal QA, wx source seal and actual readonly sourceguard",
+          "Separate root account and owned-run authorization"
+        ],
+        "accountPrepared": false,
+        "binaryCopied": false,
+        "realmStarted": false,
+        "sealed": false,
+        "capacityAccepted": false,
+        "risks": [
+          "Compact100 representative886steps and24ACK/20s waypoint budget are unchanged.",
+          "Conditional hit supply does not prove180launch/120hit each minute or two-hour capacity.",
+          "A singlefighter10-player probe does not certify25-player conflict reduction or complete formal100 capacity."
+        ]
+      },
+      "after": {
+        "schemaVersion": 1,
+        "state": "ACTUAL44_SOURCE_RELEASE_FULL16_BOUND_FOR_INDEPENDENT_PRESEAL",
+        "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15",
+        "activeBackendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+        "activeExecutionSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+        "backendInputCount": 44,
+        "actualNodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+        "nodeSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+        "nodeFocusedPassed": 13,
+        "nodeFullPassed": 200,
+        "historicalWrapper": {
+          "coreFull": 187,
+          "wrapper": 28,
+          "adapter": 8
+        },
+        "futureRequired": {
+          "manifest": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+            "bytes": 32926,
+            "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+          },
+          "release": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\release-personal-monster-projection-v1.json",
+            "bytes": 2376,
+            "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+          },
+          "binary": {
+            "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\bin\\mir2-gateway.exe",
+            "bytes": 87363072,
+            "sha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756"
+          },
+          "rootFunctionalValidation": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-functional-validation-v1.json",
+            "bytes": 13454,
+            "sha256": "94d58944d2a441bd1c3358a11a356fca9323f8aa88027af4cb988bf58ccc72b8"
+          },
+          "freshFull16": {
+            "audit": {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.independent-audit.json",
+              "bytes": 1747,
+              "sha256": "e2b563e24484dcc2d16d14c2c20b5a84bc5921e5bc957a7dd305e070ec429265"
+            },
+            "rootIndependentCleanup": {
+              "file": "C:\\mir2-build\\p01-completion-20261024\\personal-projection-full16-root-independent-cleanup-v1.json",
+              "bytes": 288,
+              "sha256": "4b9f2783404dfb04b3765022bc3a54eaec128a767118ccfdb27d60d2223fc777"
+            }
+          },
+          "launcherFreeze": null,
+          "readonlySourceGuard": null
+        },
+        "workload": {
+          "stages": [
+            2,
+            10
+          ],
+          "stageSeconds": 300,
+          "soakSeconds": 360,
+          "requiredCompleteWindows": [
+            5,
+            5,
+            6
+          ],
+          "wallSeconds": 3600,
+          "movementIntervalMs": 750,
+          "caps": [
+            24,
+            10,
+            10,
+            4,
+            1,
+            2
+          ],
+          "tokioWorkers": 4,
+          "slowStageThresholdMs": 50,
+          "attackResults": "v2",
+          "scenarioSameAs14": true,
+          "resourcesSameAs14": true,
+          "policySameAs14": true
+        },
+        "beforeProvisioning": [
+          "Root actual fresh44 backend/execution HEAD, Release/build/manifest/rootvalidation pins",
+          "Exact matching new full-lifecycle-personal-monster-projection-v1 passed audit/report/realm/source/pairedraw artifact pins",
+          "Bind known b84d Node9 evidence separately from the new runtime HEAD",
+          "Independent final preseal QA, wx source seal and actual readonly sourceguard",
+          "Separate root account and owned-run authorization"
+        ],
+        "accountPrepared": false,
+        "binaryCopied": false,
+        "realmStarted": false,
+        "sealed": false,
+        "capacityAccepted": false,
+        "risks": [
+          "Compact100 representative886steps and24ACK/20s waypoint budget are unchanged.",
+          "Conditional hit supply does not prove180launch/120hit each minute or two-hour capacity.",
+          "A singlefighter10-player probe does not certify25-player conflict reduction or complete formal100 capacity."
+        ]
+      },
+      "exactRawPendingReconstruction": true
+    }
+  ],
+  "actualRelease": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-personal-monster-projection-v1.json",
+    "bytes": 2376,
+    "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+  },
+  "actualManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+    "bytes": 32926,
+    "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52"
+  },
+  "actualAudit": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-personal-monster-projection-v1\\public\\1792934538996-4d1caf58.independent-audit.json",
+    "bytes": 1747,
+    "sha256": "e2b563e24484dcc2d16d14c2c20b5a84bc5921e5bc957a7dd305e070ec429265"
+  },
+  "actualRootCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\personal-projection-full16-root-independent-cleanup-v1.json",
+    "bytes": 288,
+    "sha256": "4b9f2783404dfb04b3765022bc3a54eaec128a767118ccfdb27d60d2223fc777"
+  },
+  "publicFull16FilesHashed": 16,
+  "binaryRawRehashedByThisBinder": false,
+  "binaryHashBasis": "Actual immutable Release/build receipt and prior root full16 audit; the authorized readonly guard will hash the actual executable before any account preparation.",
+  "sourceGuardExecuted": false,
+  "sealExecuted": false,
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "realmStarted": false
+}

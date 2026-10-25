@@ -2,12 +2,12 @@
 
 本记录接续 [前轮证据](../cell-preproduction-p0-p1-20261024/README.md)，保留前轮失败和 `14 passed / 2 not_run` 原始完整报告。本轮报告独立保存，不改写旧结论。
 
-当前 P1 工程合同验证通过，P0 正式容量尚未通过。第十三轮 2/10 人及六分钟持续战斗探测通过；正式 10 随后在 25 人阶段因实际攻击供给不足失败。客户端追逐偏好修复通过 200 项回归后，第十四轮又在 2 人阶段因移动纠偏超限失败。现已修复真实个人可见性同步向共享 Zone 输出混入怪物旧位置及移除包的边界，203 项相关 Rust 检查和 39 项格式检查通过；新 Release、普通双客户端完整闭环及容量复测尚未执行。50/100 人及两小时持续测试未执行。此前服务端排队停顿仍待定位，本轮未复现该停顿。P2 尚未启动，固定 Cell 的晋级仍以完整 P0 基线为前提。
+当前 P1 工程合同验证通过，P0 正式容量尚未通过。个人怪物投影修复已提交为 `5c2e7138`，其独立 44 输入 Release `d879…` 通过新鲜普通双客户端完整闭环 16/16，第十五轮 2/10 人加六分钟探测通过。正式 11 的 2/10/25 人阶段各完成 300 秒；扩容至 31 个客户端时，因一个连续窗口的两次攻击超时失败，50 人阶段未完成，100 人及两小时长稳未执行。有界取证确认一次驱动轮询漏读，另一次 owner 窗口证据缺失仍待定位；后续边界修复通过同次 210 项 Node 回归，按连接耗时诊断通过 8 项 Rust 聚焦检查，新 Release 及负载复测仍待执行。原失败保留，不能据此认定机器容量上限。P2 尚未启动，固定 Cell 的晋级仍以完整 P0 基线为前提。
 
 ## 已有新鲜结果
 
-- 当前后端 `a430…` 的[同一次普通双客户端完整生命周期](full-lifecycle-socket-diagnostics-v1/1792884517374-04264602.report.json)：**16/16 passed、fullLifecyclePassed=true**。使用两个新普通账号；包含共同击杀、共享掉落及唯一拾取、死亡/城镇复活、跨图、退出重登。此前 `855b…` 的[16/16](protocol-full-lifecycle-native-attack-v2/1792868335684-26912ebe.report.json)、`187775…` 的[16/16](protocol-full-lifecycle-spectator-buffer-827d4c8/1792862315921-325d69ed.report.json)、`99bc…` 的[16/16](protocol-full-lifecycle/1792854507439-f411ed33.report.json)及首次没有掉落的真实击杀尝试分别保留。
-- 当前后端[独立复核](full-lifecycle-socket-diagnostics-v1/1792884512369-f0f261da.independent-audit.json)：353 条 sent 均为普通指令，双端死亡/复活及击杀/掉落/拾取原收据一致，41 个 backend 输入及 6 个驱动原始摘要一致，实际私密值未见于公开产物。进程正常退出、两端口释放及六项连接计数归零只证明本次进程/连接清理；不代替人数或长稳验收。
+- 已构建后端 `d879…` 的[同一次普通双客户端完整生命周期](protocol-full-lifecycle-personal-monster-projection-v1/1792934546937-58ce6147.report.json)：**16/16 passed、fullLifecyclePassed=true**。使用两个新普通账号；包含共同击杀、共享掉落及唯一拾取、死亡/城镇复活、跨图、退出重登。此前 `a430…` 的[16/16](full-lifecycle-socket-diagnostics-v1/1792884517374-04264602.report.json)、`855b…` 的[16/16](protocol-full-lifecycle-native-attack-v2/1792868335684-26912ebe.report.json)、`187775…` 的[16/16](protocol-full-lifecycle-spectator-buffer-827d4c8/1792862315921-325d69ed.report.json)、`99bc…` 的[16/16](protocol-full-lifecycle/1792854507439-f411ed33.report.json)及首次没有掉落的真实击杀尝试分别保留。
+- `d879…` 后端[独立复核](protocol-full-lifecycle-personal-monster-projection-v1/1792934538996-4d1caf58.independent-audit.json)：354 条 sent 均为普通指令，双端死亡/复活及击杀/掉落/拾取原收据一致，44 个 backend 输入及生命周期驱动原始摘要一致，实际私密值未见于公开产物。进程正常退出、两端口释放及六项连接计数归零只证明本次进程/连接清理；不代替人数或长稳验收。后续诊断源码变更需要另行构建和验证。
 - P1 simulation 合同 **26/26**、manager 单元 **16/16**；网关恢复/交接/经济等相邻回归 **113 passed / 1 ignored**，忽略项需要独立 PostgreSQL 测试库。冻结后的网关合同及指标复核 **24/24**。
 - 冻结源码的 simulation 安全、跨图掉落、死亡与共享 Zone 相邻回归重新通过 **254 项不同测试**：[默认配置 251 项](validation/p01-simulation-adjacent-frozen-default.log)，再以 `test-support` 跑[死亡/在线参考 5 项](validation/p01-simulation-death-frozen-reference.log)，其中两项与默认配置重复，不重复计数。
 - 容量工具在新增 V2 前已有 [111/111](validation/capacity-probe10-boundary-complete-tests.log) 回归；本轮 V2 完整回归为 [129/129](validation/attack-v2-driver-capacity-regression-v1.log)，随后仅将零目标 ID 的预发送检查收紧并补一条断言，[4/4 focused](validation/attack-v2-driver-final-boundary-focused-v7.log) 通过。[冻结清单](capacity-attack-v2-driver-frozen-v1.json)分别绑定完整测试源码及最终两行差分，不把历史全量测试冒充最终源码全量测试。证据校验器新增独立 Release 绑定后 [15/15](validation/evidence-verifier-additional-release-metadata-06.log)；原 27 个受影响 Rust 文件的[只读格式检查](validation/p01-rustfmt-check.json)记录保留，不覆盖后续新增源码。校验器拒绝冻结清单外新增/改动的 Rust/Cargo 输入；选择历史 backend commit 不放宽当前生命周期驱动的原始摘要校验。后续 Release 逐个核验其独立 Git 输入及二进制绑定，不能继承旧构建凭证。
@@ -122,9 +122,19 @@ V2 后端对应提交 `461f1d85eed6309a55a88bd79a0022f7b97febe4`、[39 项输入
 
 第十四轮 `1792923531277-bc2bda2e` 使用已推送 `b84d5d02` 的新驱动、原场景、后端与验收门槛，[实际结果为失败](capacity-native10-v2-chase-preference-followup-14-diagnostics/public-verification.json)。2 人阶段只运行 272.682 秒，四个完整测量窗已记录，未完成 300 秒；独立连续窗口 60.182 秒内 77 次移动有 4 次纠偏，5.19% 超过原 5% 上限。全程五次纠偏，10 人和 soak 未执行。[结束后独审](capacity-native10-v2-chase-preference-followup-14-analysis/README.md)核真 4,314 行原始记录及正常清理，同时保留 probePassed/capacityAccepted=false，不补造阶段或接受结果。
 
-[逐连接有界取证](capacity-native10-v2-chase-preference-followup-14-movement-analysis/README.md)显示：同一怪物 `206613` 先被 `ObjectRemove` 从客户端缓存删除，随后仍以相邻格位置发送攻击包；另一次 `ObjectMonster` 把其已移动位置覆盖为原始出生位置。五次失败移动均有当前发送与后续原地 ACK，未见前一次超时悬挂链。记录证明包与客户端缓存不一致，尚不能单凭客户端记录确定服务器内部碰撞拒因。原纠偏统计、失败证据和门槛保持。正式 11 尚未准备或启动，P0 仍未通过，P2 继续冻结。
+[逐连接有界取证](capacity-native10-v2-chase-preference-followup-14-movement-analysis/README.md)显示：同一怪物 `206613` 先被 `ObjectRemove` 从客户端缓存删除，随后仍以相邻格位置发送攻击包；另一次 `ObjectMonster` 把其已移动位置覆盖为原始出生位置。五次失败移动均有当前发送与后续原地 ACK，未见前一次超时悬挂链。记录证明包与客户端缓存不一致，尚不能单凭客户端记录确定服务器内部碰撞拒因。原纠偏统计、失败证据和门槛保持；该轮结束时正式 11 尚未启动，后续独立实际执行见下一节。P0 仍未通过，P2 继续冻结。
 
-[个人投影修复与验证](capacity-personal-monster-projection-fix-v1/README.md)用真实个人可见性生成链复现了上述输出边界：三个共享移动同步入口及纯个人 journey state 同步现在只过滤共享 Zone 保留的原生无主怪物个人投影；通用混合输出仍保留真实 Zone 移除，宠物及正常退休、重进场路径保持。新增 9 项检查通过，原实现有对应断言失败。相邻检查中的六处旧夹具/期望失败均在原提交复现后按真实地形、死亡处理与 viewport FIFO 合同维护，未改生产时序、伤害或门槛。最终有界合并为 **203 passed / 0 failed / 2 环境依赖 ignored**，39 个 Rust 输入只读格式检查通过；它不是全工作区测试结论。九输入 Node 驱动原始摘要保持，旧完整 200 项结果仍只绑定其对应源码。新 44 输入后端必须另构建并完成新鲜完整闭环和容量复测，当前不得沿用旧 Release 的通过记录。
+[个人投影修复与验证](capacity-personal-monster-projection-fix-v1/README.md)用真实个人可见性生成链复现了上述输出边界：三个共享移动同步入口及纯个人 journey state 同步现在只过滤共享 Zone 保留的原生无主怪物个人投影；通用混合输出仍保留真实 Zone 移除，宠物及正常退休、重进场路径保持。新增 9 项检查通过，原实现有对应断言失败。相邻检查中的六处旧夹具/期望失败均在原提交复现后按真实地形、死亡处理与 viewport FIFO 合同维护，未改生产时序、伤害或门槛。最终有界合并为 **203 passed / 0 failed / 2 环境依赖 ignored**，39 个 Rust 输入只读格式检查通过；它不是全工作区测试结论。此次 Rust 修复时九输入 Node 驱动原始摘要保持，旧完整 200 项结果仍只绑定其对应源码；对应新 44 输入 Release、完整闭环及容量实测见下一节。
+
+## 第十五轮探测与正式 11
+
+个人投影修复后的[独立构建与完整闭环归档](personal-monster-projection-release-v1/README.md)绑定 `5c2e7138`、44 个 Rust/Cargo 输入和新二进制 `d879…`。[第十五轮实际探测及结束后独审](capacity-native10-v2-personal-projection-followup-15-analysis/README.md)确认 2/10 人阶段各超过 300 秒，六分钟持续测试完成，132 个连续窗口均通过，原始 41,301 行记录有摘要绑定。它是 probe，`capacityAccepted=false`；未用药不证明两小时生存能力。
+
+[正式 11 的实际终态与验证历史](capacity-formal11-ended-verification-analysis-v1/README.md)保留 `1792942371568-1e322224` 的失败。2/10/25 人阶段分别为 300.304/300.294/300.188 秒，各五个完整测量窗通过；扩容至 31 个客户端后，一个 60.321 秒连续窗口内 75 次机会有两次攻击超时，2/75 超过原严格 1% 门槛。50 人阶段未完成，100 人、两小时持续测试及后续恢复/保存抽样未执行。正常清理和结束后校验通过不改变游戏失败；首次结束验证工具的 catalog 文件名错误及其 v2 修正、真实执行日志均保留，没有改名或覆盖原始 catalog。[启动准备历史](capacity-formal11-preparation-history-v1/README.md)另行保留。
+
+[两次攻击超时的有界取证](capacity-formal11-attack-timeout-analysis-v1/README.md)确认：请求 366 的精确 launched 及双方伤害证据均在原 900 毫秒内记录，驱动下一次轮询越过截止点后直接超时；请求 367 的窗口内只有观察端伤害，不能推断 owner 永不回应或补造晚包。该连接的输入排队和出站门锁等待有真实慢段支持，现有全局子段缺少连接标识，尚不能唯一归因。修复只为 V2 增加一次同步最终证据读取，原双端时间边界和请求匹配不变；新增按连接耗时诊断保持服务器行为不变。其新源码验证与后续实测分别绑定，原正式失败不重算。正式场景目标仍为本机 100 人、其中 10 人持续战斗，其余移动/聊天/AOI，并完成两小时；它不等于 100 人同时激战或云服务器容量。
+
+[驱动边界修复与实际验证](capacity-attack-deadline-poll-fix-v1/README.md)保留新增 10 项在旧实现的 7 失败/3 通过及修复后的 10/10。最终同一次四文件检查 **210/210 通过**，九个原始输入在运行前后相同；此前单独的主文件 185 项和相邻 25 项运行保留，不合并冒充同一次全量。888/900 毫秒证据可读取，900 毫秒后的 typed 或任一端伤害、错误请求编号仍拒绝；普通 wait、停止、连接失败和关闭语义保留。[服务端诊断增量](capacity-correlated-slow-stage-validation-v1/README.md)仅关联五个既有慢段的连接上下文，8 项检查含原 7 项及新增 1 项，格式检查通过；其余 43 个后端输入与 `5c2e7138` 清单原始摘要一致。新诊断 Release 和后续负载尚未执行，不沿用 `d879…` 作为该增量的构建凭证。
 
 ## 本轮范围
 

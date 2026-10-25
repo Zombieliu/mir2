@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_COMMITTED_BACKEND_SOURCE",
+  "sourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "sourcePins": [
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+      "bytes": 30917,
+      "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "bytes": 28187,
+      "sha256": "0f21bfd95760a94f189c6b95567b0e65f1a0018cf88e90b2342ff753010a7279"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+      "bytes": 13491,
+      "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716"
+    }
+  ],
+  "rootFunctionalValidation": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-functional-validation-v1.json",
+    "bytes": 13454,
+    "sha256": "94d58944d2a441bd1c3358a11a356fca9323f8aa88027af4cb988bf58ccc72b8"
+  }
+}

@@ -3052,3 +3052,82 @@ test('native chase preference leaves baseline candidate choice and every declare
   for (const field of ['minimumNativeRunRatio', 'maximumMissedPlanRatio', 'maximumCorrectionRatio', 'movementP95Ms',
     'maximumDriverLagP99Ms']) assert.equal(original[field], f.context.policy[field]);
 });
+
+for (const [boundary, ownerAt, observerAt, typedAt, requestId, expected] of [
+  ['already recorded before the final poll', 888, 478, 888, '1', 'success'],
+  ['the inclusive 900ms boundary', 900, 478, 900, '1', 'success'],
+  ['a typed result after 900ms', 888, 478, 901, '1', 'timeout'],
+  ['owner damage after 900ms', 901, 478, 888, '1', 'miss'],
+  ['observer damage after 900ms', 888, 901, 888, '1', 'miss'],
+  ['a different request id before 900ms', 888, 478, 888, '2', 'timeout'],
+]) test(`V2 deadline evidence handles ${boundary} without extending the receipt window`, async t => {
+  const base = 1700000000000;
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: base });
+  t.mock.method(performance, 'now', () => Date.now() - base);
+  const target = huntMonster(900, 'Deer', 6), f = huntFixture([target]);
+  const { client, peer, owner, context, actions, rows } = f;
+  Object.assign(client, { attackResults: 'v2', attackV2Supported: true, plan: { sent() {} } });
+  Object.assign(peer, { events: [], sequence: 0 });
+  const packetGroup = (receiver, attackerId) => {
+    for (const [packet, extra] of [['ObjectStruck', { attackerId }], ['DamageIndicator', { damage: 3 }], ['ObjectHealth', { percent: 85 }]]) {
+      const message = { type: 'packet', packet, payload: { objectId: target.objectId, ...extra } };
+      if (receiver === client) client.observe(message);
+      else {
+        const event = { ...message, direction: 'received', sequence: ++receiver.sequence, monotonicMs: performance.now() };
+        receiver.events.push(event); recordPendingAttackPacket(receiver, event);
+      }
+    }
+  };
+  let sent = 0;
+  client.send = command => {
+    sent++; assert.equal(command.type, 'attackV2'); assert.equal(command.requestId, '1');
+    setTimeout(() => client.observe({ type: 'attackResultV2', protocolVersion: 2,
+      requestId, objectId: target.objectId, result: 'launched' }), typedAt);
+    setTimeout(() => packetGroup(client, owner.objectId), ownerAt);
+    setTimeout(() => packetGroup(peer, 50001), observerAt);
+  };
+  const plan = selectNativeAction(client, context); assert.equal(plan.command.type, 'attack');
+  const pending = action(client, context, { due: 0, cadence: { cooldownMs: 600, intervalMs: 750, pacingKnown: true } }, plan);
+  // The previous poll wakes at 880ms. Evidence can arrive at 888/900/901ms,
+  // but the next poll resumes at 903ms: no extra observation wait is allowed.
+  t.mock.timers.tick(478); t.mock.timers.tick(402); await Promise.resolve();
+  t.mock.timers.tick(8); t.mock.timers.tick(12); t.mock.timers.tick(1); t.mock.timers.tick(2);
+  await pending;
+  const actual = actions.find(row => row.kind === 'attack'), trace = rows.find(row => row.type === 'pendingAttackEvidence');
+  assert.equal(sent, 1); assert.equal(actual.status, expected); assert.equal(trace.outcome, expected);
+  assert.equal(trace.truncated, false); assert.equal(trace.requestId, '1');
+  assert.equal(client.pendingAttackPacketTraces.size, 0); assert.equal(peer.pendingAttackPacketTraces.size, 0);
+  assert.equal(context.targetClaims.size, 0);
+  if (expected === 'success') {
+    assert.equal(actual.latencyMs, Math.max(ownerAt, observerAt)); assert.ok(actual.latencyMs <= 900);
+    assert.equal(actual.sharedHealthVerified, true); assert.equal(actual.damage, 3);
+    assert.equal(client.failedTargets.size, 0);
+  } else {
+    assert.equal(actual.latencyMs, 903); assert.equal(actual.sharedHealthVerified, undefined);
+    assert.equal(client.failedTargets.get(target.objectId).until, Infinity);
+    assert.equal(actual.ambiguousTargetQuarantined, true);
+  }
+});
+
+for (const boundary of ['ordinary wait', 'guard', 'failure', 'closed'])
+  test(`V2 final evidence read preserves ${boundary} failure semantics`, async t => {
+    const base = 1700000000000;
+    t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: base });
+    let available = false, finalReads = 0, stopped = false;
+    const client = { context: { guard: { assert() { if (stopped) throw new Error('guard stopped'); } } } };
+    const receipt = { monotonicMs: 888 }, predicate = () => available ? receipt : null;
+    const finalPredicate = () => { finalReads++; return predicate(); };
+    const pending = CapacityClient.prototype.wait.call(client, predicate, 'bounded receipt', 900,
+      boundary === 'ordinary wait' ? undefined : finalPredicate).then(value => ({ value }), error => ({ error }));
+    setTimeout(() => {
+      available = true;
+      if (boundary === 'guard') stopped = true;
+      if (boundary === 'failure') client.failure = new Error('socket failed');
+      if (boundary === 'closed') client.closed = true;
+    }, 888);
+    t.mock.timers.tick(880); await Promise.resolve(); t.mock.timers.tick(8); t.mock.timers.tick(15);
+    const actual = await pending;
+    assert.ok(actual.error); assert.equal(finalReads, 0);
+    assert.match(actual.error.message, boundary === 'ordinary wait' ? /timed out/ :
+      boundary === 'guard' ? /guard stopped/ : boundary === 'failure' ? /socket failed/ : /transport closed/);
+  });

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicitly pin and publicly retain the actual original-location source library and binding; gameplay/policy unchanged.",
+  "changes": [
+    {
+      "file": "prepare-inputs.mjs",
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\template-adjustment-preimages-v1\\prepare-inputs.mjs.before-library-pin.txt",
+        "bytes": 11514,
+        "sha256": "dab6308f8fe083411742e6edb66dddde0d540f94c01799c0e22afbba7824976e"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\prepare-inputs.mjs",
+        "bytes": 11638,
+        "sha256": "537984744fa34a108a90d817f935f8ad9915bd7e60da08bd86db6ea685da5364"
+      },
+      "from": "path.join(root,'candidate-release-binding.json'), path.join(root, 'launcher-syntax-check.log')",
+      "to": "path.join(root,'candidate-release-binding.json'), path.join(root,'backend-library-binding.json'), path.join(base,'personal-monster-projection-release-v1/source-lib-v3.mjs'), path.join(root, 'launcher-syntax-check.log')",
+      "exactRawInverse": true
+    },
+    {
+      "file": "collect-public.mjs",
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\template-adjustment-preimages-v1\\collect-public.mjs.before-library-pin.txt",
+        "bytes": 43587,
+        "sha256": "1e5aeec56a8c82fec4d8b7ebae09e4d4c3d6b4ef469322bb0f17b0618640e5f9"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\collect-public.mjs",
+        "bytes": 43619,
+        "sha256": "002dd233a5e6c3a6188d32db1f317d09519d537dc1b8bb6f28acad692bad144e"
+      },
+      "from": "'candidate-release-binding.json', 'full16-gate.json'",
+      "to": "'candidate-release-binding.json', 'backend-library-binding.json', 'full16-gate.json'",
+      "exactRawInverse": true
+    }
+  ]
+}

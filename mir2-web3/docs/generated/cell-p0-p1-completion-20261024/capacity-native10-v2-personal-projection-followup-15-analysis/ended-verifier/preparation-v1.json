@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_PREPARED_ENDED_ONLY_NOT_EXECUTED",
+  "preparedAt": "2026-10-25T14:25:56.133Z",
+  "root": "C:/mir2-build/p01-completion-20261024/probe15-independent-verification-v1",
+  "files": [
+    {
+      "path": "verify-ended-probe15-v1.mjs",
+      "bytes": 28031,
+      "sha256": "eedc2a98058cfca8ffaf1120d8e8f5b8518ff595e1ef250309845475f0063704"
+    },
+    {
+      "path": "probe-contract-v1.mjs",
+      "bytes": 5820,
+      "sha256": "9a1843d910cbe4503859bd00d7c9fec77217d2229db9e31d0c9fe5ef005f278b"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "path": "run-ended-probe15-v1.mjs",
+      "bytes": 2257,
+      "sha256": "3c5731662e415db08e7a97add7f2bef7b98dd5ce317a41ce488d3f87a12827b7"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-proof-v1.json",
+      "bytes": 7237,
+      "sha256": "3f8235de28d3ecf988a061e98e506d117858a81dd68d29e415fc7a8147d5435c"
+    }
+  ],
+  "sourceSha256": "d5466532d7f29bb6627ef474b05ee6966eba76cab87662e66f3be30433dbc0d7",
+  "syntax": {
+    "nodeCheckPassed": 5,
+    "targetImportsExecuted": false,
+    "rawRunRead": false,
+    "behaviorTestsExecuted": false
+  },
+  "expectedRunId": "1792937158876-b61ec943",
+  "expectedGatewayPid": 63108,
+  "expectedMonitorPid": 58736,
+  "expectedRuntime": {
+    "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "driverSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "backendInputs": 44,
+    "binarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+    "coreCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "wireHistoricalCoreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3"
+  },
+  "expectedResult": {
+    "file": "final-verification.json",
+    "schemaVersion": 1,
+    "verifierRevision": 2,
+    "independentVerificationPassed": "true only after actual closed raw/public/source/cleanup verification",
+    "probePassed": "actual original report + strict full5/5/6>=60s + no stop/failure; false remains legitimate",
+    "capacityAccepted": false,
+    "rawVerifierAccepted": false,
+    "formalPreconditionOnly": true,
+    "pins": "relative path/bytes/sha256; roots are actual public child or external evidence base as in14",
+    "hp": "ten-status count dictionary; verifiedEventsChecked n / successProofChecked(n>0) / noVerifiedDoseObserved(n===0)",
+    "wireDiagnostics": "present/sourceValid/countsMatch/uninstallSucceeded independent of bounded diagnostic complete; sourceIdentity exact three keys; fullSourceIdentity retains historical6d role"
+  },
+  "sourceSeal": {
+    "file": "tool-source-frozen-v1.json",
+    "schemaVersion": 1,
+    "filesShape": "{path:relative-local-source-name,bytes,sha256}",
+    "filesAfterRootSeal": 9,
+    "includes": "seven prepared source/proof files + preparation-v1.json + copied independent-review-v1.json",
+    "requiresReviewVerdict": {
+      "toolSourceContractPassed": true,
+      "eligibleForRootSealing": true,
+      "blockingFindingIds": []
+    }
+  },
+  "rootSealEntry": "seal-tool-source-v1.mjs --seal-reviewed-tool-source --prepared-sha256=<this rawSHA> --review-file=<actualreview> --review-sha256=<actualreview rawSHA>",
+  "rootEndedEntry": "run-ended-probe15-v1.mjs --seal-sha256=<actualtoolseal rawSHA> --verify-ended-probe15 --run=1792937158876-b61ec943",
+  "mustWaitFor": "Root ended notification, original collector/public verifier success and root independent OS cleanup proof; no final receipt is created before execution.",
+  "actualVerificationExecuted": false,
+  "actualVerificationResult": null,
+  "toolSourceSealed": false,
+  "capacityAccepted": false,
+  "privateDataRead": false,
+  "gameSourceChanged": false,
+  "frozenProbe15SourceChanged": false
+}

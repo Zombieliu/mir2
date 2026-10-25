@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T15:43:03.4267974Z",
+  "scope": "Bounded static review of the external ended-only Formal11 verifier and Root-only tool sealing/runner workflow; runtime79 inputs and ongoing run are untouched.",
+  "verdict": {
+    "toolSourceContractPassed": true,
+    "eligibleForRootSealing": true,
+    "blockingFindingIds": [],
+    "actualVerificationExecutedByReviewer": false,
+    "formalPassAdjudicated": false,
+    "capacityAcceptedByThisReview": false,
+    "P0Accepted": false,
+    "P2Authorized": false
+  },
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\preparation-v1.json",
+    "bytes": 6718,
+    "sha256": "cfdfdd4051a88dfcc1010bb36582e30afa4a035818e9de801ae3f959cd7ab7ed"
+  },
+  "sourceClosure": {
+    "files": [
+      {
+        "path": "verify-ended-formal11-v1.mjs",
+        "bytes": 29032,
+        "sha256": "6d4dbe1fb92027ea514c70b5d59055fbd89b73e345ebb774105ef69297aae69e"
+      },
+      {
+        "path": "formal-contract-v1.mjs",
+        "bytes": 6103,
+        "sha256": "0f0dcf7daacdc19b9e5397b80ce836f4f3e3bd274b8ca4f32513e8aee6798152"
+      },
+      {
+        "path": "hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      {
+        "path": "expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      {
+        "path": "run-ended-formal11-v1.mjs",
+        "bytes": 2259,
+        "sha256": "1ae5f984f247e5341dca5302165a2444cfba17e1cb980db8a6a6440c290a27c7"
+      },
+      {
+        "path": "seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      {
+        "path": "derivation-proof-v1.json",
+        "bytes": 11358,
+        "sha256": "6e185c890c696eab45365ed44e094a4deb2f5cd9f81dd69db08b25974e2ba9fb"
+      }
+    ],
+    "inputCount": 7,
+    "bytes": 57445,
+    "sourceSha256": "3ae42bc3e5e60a3818dc7bc0bf0ab0949cd9be6e903a92b87724b8a6e9805eb7",
+    "allCurrentRawPinsMatched": true,
+    "futureRootSealedInputCount": 9
+  },
+  "exactDerivation": {
+    "proof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\derivation-proof-v1.json",
+      "bytes": 11358,
+      "sha256": "6e185c890c696eab45365ed44e094a4deb2f5cd9f81dd69db08b25974e2ba9fb"
+    },
+    "mainRules": 13,
+    "contractRules": 4,
+    "runnerRules": 2,
+    "allDeclaredOccurrenceCountsChecked": true,
+    "allForwardTransformationsAndInverseOriginalBytesExact": true,
+    "unchangedRawCopies": [
+      "seal-tool-source-v1.mjs",
+      "hp-proof-contract-v2.mjs",
+      "expected-formal-policy-v1.json"
+    ],
+    "sourceMain": "formal10-independent-verification-v1/verify-ended-formal10-v4.mjs",
+    "sourceMainSha256": "f5cc63dc6587e50673ac984c541390f0a415f4fb19e7371d957c43dbac0747c7",
+    "method": "Literal replacements applied and reversed in memory after checking source/target raw SHA and bytes. No target imported or executed."
+  },
+  "identityReview": {
+    "expectedRunId": "1792942371568-1e322224",
+    "backendAndExecutionCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "backendInputCount": 44,
+    "binarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+    "nodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "nodeSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "wireHistoricalCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "runtimeLauncherInputs": 79,
+    "runtimeLauncherBytes": 35724,
+    "runtimeLauncherSha256": "7e78691a3dcb22fdb053e3b028cadeb0aef1b03c7af06f31981e2cd58c09b048",
+    "runtimeLauncherAggregate": "e82cfbdc8b5bf9c240b343d2c04b6a99d7fa90b9377056df7a8430d5f56da4df",
+    "preparedSourceConfigSha256": "edab91a9dd170c19c601ea6c260480657a85f51a7929d09f7a6df7208b6343dd",
+    "expectedGatewayPid": 58172,
+    "expectedMonitorPid": 69080,
+    "liveRuntimeMetadataReadByReviewer": false
+  },
+  "sourceFindings": [],
+  "behaviorReview": [
+    "Original policy JSON is byte-identical to formal10-v4 input. Success alone requires exactly five2/10/25/50/100 cohorts configured300s,100-person7200s soak and60s post-resume;146 actual complete>=60s windows,5resume and5saved-verification samples.",
+    "Whole-phase activity/native rates use measuredSeconds and are independently compared with raw counters. The configured seconds remain contractual fields; actual elapsed bounds and report/raw assessments remain exact.",
+    "The original failure/partial branch is preserved byte-for-byte except identity/declaration additions. Missing future phases/windows are not fabricated or promoted; complete seven-phase/146-window assertions run only for report.ok.",
+    "The separately SHA-bound19099B/db4e Node freeze provides all six exact immutable declarations in report,catalog.run and sidecar. It is historical Node code evidence and does not replace the new5c2e/44/d879 backend execution identity or claim200 tests covered Rust changes.",
+    "Exact preserved HP proof dictionary distinguishes consumption and healing. Zero verified events must remain successProofChecked=false,verifiedEventsChecked=0,noVerifiedDoseObserved=true; no fabricated dose or continuous HP claim.",
+    "Wire source/terminal/counters/uninstall/sequence are verified separately; normal diagnostic truncation does not add ACK or damage credit or become a new game gate. Historical wire6d evidence remains distinct.",
+    "Root OS cleanup uses the exact formal11 run and58172/69080 PIDs, absent processes/free ports, empty arrays,readOnlyIndependentCheck=true,capacityAccepted=false and a valid verifiedAt timestamp.",
+    "Final capacityAccepted is derived only after actual ended verification from original rawVerifierAccepted AND full formalPassed AND normalOwnedCleanup. The tool explicitly leaves Root P0,production andP2 decisions unadjudicated."
+  ],
+  "boundedReplayReview": {
+    "archiveMaxBytes": 68719476736,
+    "jsonMaxBytes": 268435456,
+    "rawRowCap": 50000000,
+    "lineByteCap": 67108864,
+    "minuteWindowCap": 146,
+    "continuousWindowCap": 40000,
+    "phaseEventCap": 128,
+    "actorCap": 100,
+    "statusKeysPerKindCap": 128,
+    "stringLengthCap": 80,
+    "memoryBuckets": 1201,
+    "memoryBucketMs": 3000,
+    "unchangedFromReviewedFormal10V4": true,
+    "trustedFrozenProducerAndShaManifestScope": true
+  },
+  "memoryAndTelemetryLimitations": [
+    "The original memory trend arithmetic replays a matching retained suffix of the1201x3s ring. initialMemoryAt is not recorded, so exact millisecond warmup cutoff is not independently proven; original >=1800s duration and <=32MiB/hr criteria remain.",
+    "readline materializes a full line before the subsequent64MiB line check. This tool is restricted to original frozen-producer SHA/bytes-bound archives; it does not claim adversarial overlong-line memory safety.",
+    "Inside-phase cumulative histogram differences retain unknown/overflow/saturation handling. They do not prove exact phase maxima or ingress-to-authoritative-outbound P99; no new hard server SLO is created."
+  ],
+  "rootControlReview": {
+    "toolSealer": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    "runner": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\run-ended-formal11-v1.mjs",
+      "bytes": 2259,
+      "sha256": "1ae5f984f247e5341dca5302165a2444cfba17e1cb980db8a6a6440c290a27c7"
+    },
+    "sealerRawExactPreviouslyReviewedEnded15": true,
+    "requiresExplicitFourArgumentRootSeal": true,
+    "requiresPreparationAndReviewRawSha": true,
+    "requiresExactReviewVerdictAndPreparationSha": true,
+    "usesWxOnly": true,
+    "runnerRequiresExplicitSealShaAndEndedRun": true,
+    "runnerChecksSealedSourcesBeforeAndAfter": true,
+    "runnerPreservesNonzeroStatus": true,
+    "noProvisioningOrRealmPath": true,
+    "mustWaitForEndedCollectorPublicVerificationAndRootCleanup": true
+  },
+  "validationScope": {
+    "reviewerRanSyntaxOrBehaviorTests": false,
+    "authorReportedSyntaxChecks": 5,
+    "targetImportsExecuted": false,
+    "rawMonitorOrRecordingRead": false,
+    "privateDataRead": false,
+    "cargoOrServiceOperations": false,
+    "frozenRuntimeOrProductSourceModified": false,
+    "onlyNewExternalReviewWritten": true,
+    "actualFinalVerificationReceiptConsumed": false
+  }
+}

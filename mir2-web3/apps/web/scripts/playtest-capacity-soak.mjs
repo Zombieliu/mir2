@@ -364,7 +364,7 @@ export class CapacityClient extends NativeResumeClient {
       await sleep(Math.min(50, this.budget.remainingWait()));
     }
   }
-  async wait(predicate, label, timeoutMs = 15000) {
+  async wait(predicate, label, timeoutMs = 15000, deadlinePredicate = null) {
     const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
       if (!this.draining) this.context.guard.assert();
@@ -372,6 +372,15 @@ export class CapacityClient extends NativeResumeClient {
       const result = predicate(); if (result) return result;
       if (this.closed) throw new Error(`${this.label} transport closed during ${label}`);
       await sleep(20);
+    }
+    // V2 attacks provide a timestamp-bounded predicate. Read evidence already
+    // recorded by the deadline even if this polling timer resumes just after
+    // it; do not wait again or change ordinary request timeout semantics.
+    if (deadlinePredicate) {
+      if (!this.draining) this.context.guard.assert();
+      if (this.failure) throw this.failure;
+      if (this.closed) throw new Error(`${this.label} transport closed during ${label}`);
+      const result = deadlinePredicate(); if (result) return result;
     }
     throw new Error(`${this.label} timed out waiting for ${label}`);
   }
@@ -1267,7 +1276,7 @@ export async function action(client, context, planned, preparedPlan) {
       if (kind === 'chat') client.nextNativeChatAt = sentAt + context.policy.nativeChatIntervalMs;
       if (kind === 'turn') client.nextNativeTurnAt = sentAt + context.policy.nativeTurnIntervalMs;
     }
-    const receipt = await client.wait(() => {
+    const acknowledgement = () => {
       const own = fresh(client, cursor, sentAt).filter(event => !v2Attack || event.monotonicMs <= sentAt + 900);
       const rejection = own.find(event => event.type === 'error');
       if (rejection) { const error = new Error('Public gameplay command rejected'); error.code = 'PUBLIC_COMMAND_REJECTED'; throw error; }
@@ -1292,7 +1301,9 @@ export async function action(client, context, planned, preparedPlan) {
           String(event.payload?.text ?? event.payload?.message ?? '').includes(command.message));
       }
       return own.find(event => event.packet === 'UserLocation');
-    }, `${kind} authoritative acknowledgement`, kind === 'attack' ? 900 : context.policy.actionTimeoutMs);
+    };
+    const receipt = await client.wait(acknowledgement, `${kind} authoritative acknowledgement`,
+      kind === 'attack' ? 900 : context.policy.actionTimeoutMs, v2Attack ? acknowledgement : null);
     let status = receipt.notLaunched ? 'not-launched' : 'success';
     if (['walk', 'run'].includes(kind)) {
       const actual = receipt.payload;

@@ -1,0 +1,3762 @@
+{
+  "schemaVersion": 1,
+  "scope": "Two timeout action rows and at most12 neighboring same-actor rows each; raw line numbers and line-content hashes are diagnostic evidence, not new acceptance.",
+  "runId": "1792942371568-1e322224",
+  "actor": "L9fe97305",
+  "report": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\reports\\1792942371568-1e322224.report.json",
+    "bytes": 436729,
+    "sha256": "08f558c26ef0faf557e3a8fe5b84d50db39f1b388de1b47beb603eda604ee46e"
+  },
+  "raw": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\reports\\1792942371568-1e322224.samples.jsonl",
+    "bytes": 68831794,
+    "sha256": "2a0a9def47282a9c02c3b46500782cb09dcf7ee0684c3638e862ecaf331cdc78",
+    "rows": 115596
+  },
+  "originalRawManifest": {
+    "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-personal-projection-ladder-11\\raw-artifact-manifest.json",
+    "bytes": 698,
+    "sha256": "8449bf92df05ee2bdf872b2357e6af6719f239043a44b935130881645bf549e8"
+  },
+  "firstFailure": {
+    "reason": "Continuous activity window failed, regardless of the measured stage",
+    "evidence": {
+      "actor": "L9fe97305",
+      "role": "combat",
+      "phases": [
+        "ramp"
+      ],
+      "seconds": 60.3209375,
+      "final": false,
+      "activityDurationSufficient": true,
+      "activity": {
+        "plans": 75,
+        "gaps": 0,
+        "moves": 62,
+        "attacks": 5,
+        "hits": 5,
+        "damage": 20,
+        "lastSuccessAt": 1792943624775,
+        "runs": 31,
+        "cells": 93,
+        "nativeOpportunities": 75,
+        "nativeCompleted": 73,
+        "offeredDurationMs": 60562,
+        "evidenceWaits": 0,
+        "ownerAckWaits": 0,
+        "unknownPacing": 0
+      },
+      "nativeActivity": {
+        "passed": true,
+        "completionRatio": 0.9733333333333334,
+        "runRatio": 0.5,
+        "cellsPerMinute": 92.50519357395598,
+        "positiveHitsPerMinute": 4.973397503976128,
+        "evidenceWaits": 0,
+        "ownerAckWaits": 0,
+        "offeredDurationMs": 60562,
+        "unknownPacing": 0,
+        "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+      },
+      "activityPassed": true,
+      "latencyPassed": true,
+      "fanoutPassed": true,
+      "timeoutRatio": 0.02666666666666667,
+      "correctionRatio": 0,
+      "movementCorrectionRatio": 0,
+      "attackRejectionRatio": 0,
+      "metrics": {
+        "attack": {
+          "count": 7,
+          "status": {
+            "success": 5,
+            "timeout": 2
+          },
+          "fromSend": {
+            "count": 5,
+            "p50Ms": 269,
+            "p95Ms": 379,
+            "p99Ms": 379,
+            "maxMs": 378.41190000018105
+          },
+          "fromPlan": {
+            "count": 5,
+            "p50Ms": 293,
+            "p95Ms": 404,
+            "p99Ms": 404,
+            "maxMs": 403.1857000000309
+          },
+          "attackV2Requests": 7,
+          "attackV2NotLaunched": 0
+        },
+        "walk": {
+          "count": 31,
+          "status": {
+            "success": 31
+          },
+          "fromSend": {
+            "count": 31,
+            "p50Ms": 6,
+            "p95Ms": 168,
+            "p99Ms": 365,
+            "maxMs": 364.5686000001151
+          },
+          "fromPlan": {
+            "count": 31,
+            "p50Ms": 29,
+            "p95Ms": 197,
+            "p99Ms": 371,
+            "maxMs": 370.23589999997057
+          }
+        },
+        "fanout-walk": {
+          "count": 101,
+          "status": {
+            "success": 101
+          },
+          "fromSend": {
+            "count": 101,
+            "p50Ms": 6,
+            "p95Ms": 60,
+            "p99Ms": 117,
+            "maxMs": 903.6718000001274
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "run": {
+          "count": 31,
+          "status": {
+            "success": 31
+          },
+          "fromSend": {
+            "count": 31,
+            "p50Ms": 5,
+            "p95Ms": 38,
+            "p99Ms": 58,
+            "maxMs": 57.85730000003241
+          },
+          "fromPlan": {
+            "count": 31,
+            "p50Ms": 30,
+            "p95Ms": 56,
+            "p99Ms": 70,
+            "maxMs": 69.6938000000082
+          }
+        },
+        "fanout-run": {
+          "count": 88,
+          "status": {
+            "success": 88
+          },
+          "fromSend": {
+            "count": 88,
+            "p50Ms": 5,
+            "p95Ms": 49,
+            "p99Ms": 75,
+            "maxMs": 74.94860000000335
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "turn": {
+          "count": 4,
+          "status": {
+            "success": 4
+          },
+          "fromSend": {
+            "count": 4,
+            "p50Ms": 3,
+            "p95Ms": 498,
+            "p99Ms": 498,
+            "maxMs": 497.86779999989085
+          },
+          "fromPlan": {
+            "count": 4,
+            "p50Ms": 23,
+            "p95Ms": 502,
+            "p99Ms": 502,
+            "maxMs": 501.64629999990575
+          }
+        },
+        "fanout-turn": {
+          "count": 6,
+          "status": {
+            "success": 6
+          },
+          "fromSend": {
+            "count": 6,
+            "p50Ms": 2,
+            "p95Ms": 234,
+            "p99Ms": 234,
+            "maxMs": 233.8071999999229
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "chat": {
+          "count": 2,
+          "status": {
+            "success": 2
+          },
+          "fromSend": {
+            "count": 2,
+            "p50Ms": 8,
+            "p95Ms": 40,
+            "p99Ms": 40,
+            "maxMs": 39.11170000000857
+          },
+          "fromPlan": {
+            "count": 2,
+            "p50Ms": 22,
+            "p95Ms": 54,
+            "p99Ms": 54,
+            "maxMs": 53.39699999988079
+          }
+        },
+        "peerChat": {
+          "count": 2,
+          "status": {
+            "success": 2
+          },
+          "fromSend": {
+            "count": 2,
+            "p50Ms": 8,
+            "p95Ms": 40,
+            "p99Ms": 40,
+            "maxMs": 39.11170000000857
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "fanout-chat": {
+          "count": 10,
+          "status": {
+            "success": 10
+          },
+          "fromSend": {
+            "count": 10,
+            "p50Ms": 40,
+            "p95Ms": 69,
+            "p99Ms": 69,
+            "maxMs": 68.19500000006519
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        }
+      },
+      "passed": false
+    }
+  },
+  "wholeActorRowsObserved": 3648,
+  "actorRowsTruncated": false,
+  "headerRowsTruncated": false,
+  "typeCounts": {
+    "monitor": 587,
+    "phaseStarted": 7,
+    "action": 26162,
+    "coverage": 1246,
+    "playerLifecycle": 41795,
+    "admitted": 31,
+    "selfTransform": 21979,
+    "fanoutDistribution": 17170,
+    "compactNavigationWire": 5598,
+    "phaseEnded": 7,
+    "continuousWindow": 316,
+    "window": 15,
+    "stageComplete": 3,
+    "movementCorrection": 4,
+    "combatArrival": 3,
+    "pendingAttackEvidence": 626,
+    "combatScoutAdvanced": 35,
+    "combatChaseDeferred": 3,
+    "authWindowWait": 6,
+    "continuousFailure": 1,
+    "safetyStop": 1,
+    "finished": 1
+  },
+  "timeouts": [
+    {
+      "line": 113687,
+      "lineSha256": "fecc01c0918d7a034cbfd04ebc26c2bf9e70404723e6c7dde8fe21355c740561",
+      "row": {
+        "type": "action",
+        "at": 1792943616928,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "attack",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1264033.2475,
+        "sentAtMs": 1264049.626,
+        "targetId": 206618,
+        "hunting": "Scarecrow",
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 1366,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 1366,
+          "cooldownMs": 1316,
+          "pacingKnown": true,
+          "nativeAttackMs": 1316,
+          "zoneAttackFloorMs": 600,
+          "level": 6,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "targetPosition": {
+          "x": 230,
+          "y": 567
+        },
+        "attackResults": "v2",
+        "requestId": "366",
+        "attackRequestSent": true,
+        "status": "timeout",
+        "latencyMs": 903.5084999999963,
+        "plannedLatencyMs": 919.8885999999475,
+        "error": "L9fe97305 timed out waiting for attack authoritative acknowledgement",
+        "targetStillAdjacent": false,
+        "ambiguousTargetQuarantined": true
+      }
+    },
+    {
+      "line": 115087,
+      "lineSha256": "cc9b00baaabb9f4ba3c4982947a81ea95382ba8eb4bfcb79a3ade3300201824f",
+      "row": {
+        "type": "action",
+        "at": 1792943624311,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "attack",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1271399.2475,
+        "sentAtMs": 1271410.8212,
+        "targetId": 206304,
+        "hunting": "Deer",
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 1366,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 1366,
+          "cooldownMs": 1316,
+          "pacingKnown": true,
+          "nativeAttackMs": 1316,
+          "zoneAttackFloorMs": 600,
+          "level": 6,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "targetPosition": {
+          "x": 226,
+          "y": 565
+        },
+        "attackResults": "v2",
+        "requestId": "367",
+        "attackRequestSent": true,
+        "status": "timeout",
+        "latencyMs": 924.3884000000544,
+        "plannedLatencyMs": 935.9629999999888,
+        "error": "L9fe97305 timed out waiting for attack authoritative acknowledgement",
+        "targetStillAdjacent": true,
+        "ambiguousTargetQuarantined": true
+      }
+    }
+  ],
+  "selectedActorRows": [
+    {
+      "line": 112851,
+      "lineSha256": "b751e3825a3c07d472f06442a796e34a2dd0387e9c875f0d5954789c843cf7de",
+      "row": {
+        "type": "pendingAttackEvidence",
+        "actor": "L9fe97305",
+        "phase": "ramp",
+        "connection": 6,
+        "at": 1792943612099,
+        "sentAtMs": 1259966.0237,
+        "sentAtWallMs": 1792943611940,
+        "sendCursor": 21471,
+        "endedAtMs": 1260124.8123,
+        "endedAtWallMs": 1792943612099,
+        "owner": {
+          "objectId": 1000,
+          "x": 229,
+          "y": 566,
+          "dead": false,
+          "hp": 51,
+          "maxHp": 51
+        },
+        "target": {
+          "objectId": 206618,
+          "x": 230,
+          "y": 567,
+          "dead": false,
+          "hp": 20,
+          "maxHp": 20
+        },
+        "outcome": "success",
+        "protocolVersion": 2,
+        "requestId": "363",
+        "maximumPackets": 64,
+        "packetCount": 10,
+        "truncated": false,
+        "packets": [
+          {
+            "receiver": "observer",
+            "sequence": 3231,
+            "monotonicMs": 1260062.2804,
+            "atMs": 1792943612037,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 50005,
+              "location": {
+                "x": 229,
+                "y": 566
+              },
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3232,
+            "monotonicMs": 1260098.3378,
+            "atMs": 1792943612073,
+            "packet": "ObjectStruck",
+            "payload": {
+              "objectId": 206618,
+              "attackerId": 50005,
+              "location": {
+                "x": 230,
+                "y": 567
+              },
+              "direction": "UpLeft"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3233,
+            "monotonicMs": 1260098.3775,
+            "atMs": 1792943612073,
+            "packet": "DamageIndicator",
+            "payload": {
+              "objectId": 206618,
+              "damage": 5
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3234,
+            "monotonicMs": 1260098.4057,
+            "atMs": 1792943612073,
+            "packet": "ObjectHealth",
+            "payload": {
+              "objectId": 206618,
+              "percent": 50
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21475,
+            "monotonicMs": 1260124.3777,
+            "atMs": 1792943612099,
+            "type": "attackResultV2",
+            "protocolVersion": 2,
+            "requestId": "363",
+            "objectId": 206618,
+            "result": "launched"
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21476,
+            "monotonicMs": 1260124.448,
+            "atMs": 1792943612099,
+            "packet": "UserLocation",
+            "payload": {
+              "x": 229,
+              "y": 566,
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21477,
+            "monotonicMs": 1260124.4848,
+            "atMs": 1792943612099,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 1000,
+              "location": {
+                "x": 229,
+                "y": 566
+              },
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21478,
+            "monotonicMs": 1260124.5053,
+            "atMs": 1792943612099,
+            "packet": "ObjectStruck",
+            "payload": {
+              "objectId": 206618,
+              "attackerId": 1000,
+              "location": {
+                "x": 230,
+                "y": 567
+              },
+              "direction": "UpLeft"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21479,
+            "monotonicMs": 1260124.5175,
+            "atMs": 1792943612099,
+            "packet": "DamageIndicator",
+            "payload": {
+              "objectId": 206618,
+              "damage": 5
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21480,
+            "monotonicMs": 1260124.5292,
+            "atMs": 1792943612099,
+            "packet": "ObjectHealth",
+            "payload": {
+              "objectId": 206618,
+              "percent": 50
+            }
+          }
+        ],
+        "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+      }
+    },
+    {
+      "line": 113042,
+      "lineSha256": "a22a73b3fa943452c59a828512550067774dfa20f6d86b52e10a40dad5780b80",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943613226,
+        "sequence": 21490,
+        "monotonicMs": 1261251.4061,
+        "phase": "ramp",
+        "source": "ObjectRemove",
+        "peer": {
+          "objectId": 50018,
+          "name": "L9fe9730i"
+        },
+        "beforePresent": true,
+        "afterPresent": false,
+        "identitySource": "projection-before",
+        "wire": {
+          "objectId": 50018
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [
+            {
+              "objectId": 50018,
+              "name": "L9fe9730i",
+              "x": 245,
+              "y": 578
+            }
+          ],
+          "count": 6,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [],
+          "count": 5,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 113086,
+      "lineSha256": "9bf6606b1aa9e53b98854532922fc70253cc534fc863715653aa5e800514d002",
+      "row": {
+        "type": "action",
+        "at": 1792943613491,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "attack",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1261301.2475,
+        "sentAtMs": 1261311.672,
+        "targetId": 206618,
+        "hunting": "Scarecrow",
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 1366,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 1366,
+          "cooldownMs": 1316,
+          "pacingKnown": true,
+          "nativeAttackMs": 1316,
+          "zoneAttackFloorMs": 600,
+          "level": 6,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "targetPosition": {
+          "x": 230,
+          "y": 567
+        },
+        "attackResults": "v2",
+        "requestId": "364",
+        "attackRequestSent": true,
+        "attackResult": "launched",
+        "status": "success",
+        "latencyMs": 180.17639999999665,
+        "plannedLatencyMs": 190.60089999996126,
+        "damage": 4,
+        "sharedHealthVerified": true,
+        "healthPercent": 30
+      }
+    },
+    {
+      "line": 113087,
+      "lineSha256": "ffb78bd238217807f6a2974b49a3116dd50099fb43a1cc18c876062e3c5f0d1f",
+      "row": {
+        "type": "pendingAttackEvidence",
+        "actor": "L9fe97305",
+        "phase": "ramp",
+        "connection": 6,
+        "at": 1792943613491,
+        "sentAtMs": 1261311.672,
+        "sentAtWallMs": 1792943613286,
+        "sendCursor": 21490,
+        "endedAtMs": 1261516.7231,
+        "endedAtWallMs": 1792943613491,
+        "owner": {
+          "objectId": 1000,
+          "x": 229,
+          "y": 566,
+          "dead": false,
+          "hp": 51,
+          "maxHp": 51
+        },
+        "target": {
+          "objectId": 206618,
+          "x": 230,
+          "y": 567,
+          "dead": false,
+          "hp": 15,
+          "maxHp": 20
+        },
+        "outcome": "success",
+        "protocolVersion": 2,
+        "requestId": "364",
+        "maximumPackets": 64,
+        "packetCount": 10,
+        "truncated": false,
+        "packets": [
+          {
+            "receiver": "observer",
+            "sequence": 3251,
+            "monotonicMs": 1261418.0805,
+            "atMs": 1792943613392,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 50005,
+              "location": {
+                "x": 229,
+                "y": 566
+              },
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21493,
+            "monotonicMs": 1261464.8299,
+            "atMs": 1792943613439,
+            "type": "attackResultV2",
+            "protocolVersion": 2,
+            "requestId": "364",
+            "objectId": 206618,
+            "result": "launched"
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21494,
+            "monotonicMs": 1261464.879,
+            "atMs": 1792943613439,
+            "packet": "UserLocation",
+            "payload": {
+              "x": 229,
+              "y": 566,
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21495,
+            "monotonicMs": 1261464.9029,
+            "atMs": 1792943613439,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 1000,
+              "location": {
+                "x": 229,
+                "y": 566
+              },
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21497,
+            "monotonicMs": 1261491.7872,
+            "atMs": 1792943613466,
+            "packet": "ObjectStruck",
+            "payload": {
+              "objectId": 206618,
+              "attackerId": 1000,
+              "location": {
+                "x": 230,
+                "y": 567
+              },
+              "direction": "UpLeft"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21498,
+            "monotonicMs": 1261491.8043,
+            "atMs": 1792943613466,
+            "packet": "DamageIndicator",
+            "payload": {
+              "objectId": 206618,
+              "damage": 4
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21499,
+            "monotonicMs": 1261491.8135,
+            "atMs": 1792943613466,
+            "packet": "ObjectHealth",
+            "payload": {
+              "objectId": 206618,
+              "percent": 30
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3253,
+            "monotonicMs": 1261491.8323,
+            "atMs": 1792943613466,
+            "packet": "ObjectStruck",
+            "payload": {
+              "objectId": 206618,
+              "attackerId": 50005,
+              "location": {
+                "x": 230,
+                "y": 567
+              },
+              "direction": "UpLeft"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3254,
+            "monotonicMs": 1261491.8408,
+            "atMs": 1792943613466,
+            "packet": "DamageIndicator",
+            "payload": {
+              "objectId": 206618,
+              "damage": 4
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3255,
+            "monotonicMs": 1261491.8484,
+            "atMs": 1792943613466,
+            "packet": "ObjectHealth",
+            "payload": {
+              "objectId": 206618,
+              "percent": 30
+            }
+          }
+        ],
+        "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+      }
+    },
+    {
+      "line": 113132,
+      "lineSha256": "7b04f5b13100e230699cece2dfdf4e6902b9f896827db8a9591a910fda9506f5",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943613619,
+        "sequence": 21501,
+        "monotonicMs": 1261644.8215,
+        "phase": "ramp",
+        "source": "ObjectPlayer",
+        "peer": {
+          "objectId": 50017,
+          "name": "L9fe9730h"
+        },
+        "beforePresent": false,
+        "afterPresent": true,
+        "identitySource": "packet",
+        "wire": {
+          "objectId": 50017,
+          "name": "L9fe9730h",
+          "x": 244,
+          "y": 581
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [],
+          "count": 5,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [
+            {
+              "objectId": 50017,
+              "name": "L9fe9730h",
+              "x": 244,
+              "y": 581
+            }
+          ],
+          "count": 6,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 113283,
+      "lineSha256": "43fd614022fa78c43a10af3df3b7f2c9591a38c2e9cfa97c6e05f8851c80f7d0",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943614573,
+        "sequence": 21509,
+        "monotonicMs": 1262598.3128,
+        "phase": "ramp",
+        "source": "ObjectRemove",
+        "peer": {
+          "objectId": 50017,
+          "name": "L9fe9730h"
+        },
+        "beforePresent": true,
+        "afterPresent": false,
+        "identitySource": "projection-before",
+        "wire": {
+          "objectId": 50017
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [
+            {
+              "objectId": 50017,
+              "name": "L9fe9730h",
+              "x": 244,
+              "y": 581
+            }
+          ],
+          "count": 6,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [],
+          "count": 5,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 113358,
+      "lineSha256": "0a1c32d57ca602994ac68e7128d545e017d9883e6b5a695a41c25cfaeeeb85af",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943614960,
+        "sequence": 21515,
+        "monotonicMs": 1262985.7692,
+        "phase": "ramp",
+        "source": "worldSnapshot",
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [
+            {
+              "objectId": 1000,
+              "name": "L9fe97305",
+              "x": 229,
+              "y": 566
+            },
+            {
+              "objectId": 50002,
+              "name": "L9fe97302",
+              "x": 232,
+              "y": 578
+            },
+            {
+              "objectId": 50003,
+              "name": "L9fe97303",
+              "x": 239,
+              "y": 578
+            },
+            {
+              "objectId": 50024,
+              "name": "L9fe9730o",
+              "x": 245,
+              "y": 571
+            },
+            {
+              "objectId": 50026,
+              "name": "L9fe9730q",
+              "x": 232,
+              "y": 563
+            }
+          ],
+          "count": 5,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [
+            {
+              "objectId": 1000,
+              "name": "L9fe97305",
+              "x": 229,
+              "y": 566
+            },
+            {
+              "objectId": 50002,
+              "name": "L9fe97302",
+              "x": 232,
+              "y": 578
+            },
+            {
+              "objectId": 50003,
+              "name": "L9fe97303",
+              "x": 239,
+              "y": 578
+            },
+            {
+              "objectId": 50018,
+              "name": "L9fe9730i",
+              "x": 245,
+              "y": 580
+            },
+            {
+              "objectId": 50024,
+              "name": "L9fe9730o",
+              "x": 245,
+              "y": 571
+            },
+            {
+              "objectId": 50026,
+              "name": "L9fe9730q",
+              "x": 232,
+              "y": 563
+            }
+          ],
+          "count": 6,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 113372,
+      "lineSha256": "22bf216af9cb9d56354ee774987156e7059e5185b6b9d1e969be1ae5e5e8bb3c",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943615045,
+        "sequence": 21517,
+        "monotonicMs": 1263070.3097,
+        "phase": "ramp",
+        "source": "ObjectPlayer",
+        "peer": {
+          "objectId": 50018,
+          "name": "L9fe9730i"
+        },
+        "beforePresent": true,
+        "afterPresent": true,
+        "identitySource": "packet",
+        "wire": {
+          "objectId": 50018,
+          "name": "L9fe9730i",
+          "x": 245,
+          "y": 580
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [
+            {
+              "objectId": 50018,
+              "name": "L9fe9730i",
+              "x": 245,
+              "y": 580
+            }
+          ],
+          "count": 6,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [
+            {
+              "objectId": 50018,
+              "name": "L9fe9730i",
+              "x": 245,
+              "y": 580
+            }
+          ],
+          "count": 6,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 113373,
+      "lineSha256": "6157df41f554629d4b962e02405487e6e7979ae8349160539778420e02357d04",
+      "row": {
+        "type": "action",
+        "at": 1792943615071,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "attack",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1262667.2475,
+        "sentAtMs": 1262692.0213,
+        "targetId": 206618,
+        "hunting": "Scarecrow",
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 1366,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 1366,
+          "cooldownMs": 1316,
+          "pacingKnown": true,
+          "nativeAttackMs": 1316,
+          "zoneAttackFloorMs": 600,
+          "level": 6,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "targetPosition": {
+          "x": 230,
+          "y": 567
+        },
+        "attackResults": "v2",
+        "requestId": "365",
+        "attackRequestSent": true,
+        "attackResult": "launched",
+        "status": "success",
+        "latencyMs": 378.41190000018105,
+        "plannedLatencyMs": 403.1857000000309,
+        "damage": 3,
+        "sharedHealthVerified": true,
+        "healthPercent": 15
+      }
+    },
+    {
+      "line": 113374,
+      "lineSha256": "dca5e051895c7c1e7683a7ccf2c2289c1868b96703aceac965118f05b574781b",
+      "row": {
+        "type": "pendingAttackEvidence",
+        "actor": "L9fe97305",
+        "phase": "ramp",
+        "connection": 6,
+        "at": 1792943615071,
+        "sentAtMs": 1262692.0213,
+        "sentAtWallMs": 1792943614666,
+        "sendCursor": 21513,
+        "endedAtMs": 1263097.0849,
+        "endedAtWallMs": 1792943615071,
+        "owner": {
+          "objectId": 1000,
+          "x": 229,
+          "y": 566,
+          "dead": false,
+          "hp": 51,
+          "maxHp": 51
+        },
+        "target": {
+          "objectId": 206618,
+          "x": 230,
+          "y": 567,
+          "dead": false,
+          "hp": 10,
+          "maxHp": 20
+        },
+        "outcome": "success",
+        "protocolVersion": 2,
+        "requestId": "365",
+        "maximumPackets": 64,
+        "packetCount": 10,
+        "truncated": false,
+        "packets": [
+          {
+            "receiver": "observer",
+            "sequence": 3275,
+            "monotonicMs": 1262914.7977,
+            "atMs": 1792943614889,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 50005,
+              "location": {
+                "x": 229,
+                "y": 566
+              },
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3276,
+            "monotonicMs": 1262984.8714,
+            "atMs": 1792943614959,
+            "packet": "ObjectStruck",
+            "payload": {
+              "objectId": 206618,
+              "attackerId": 50005,
+              "location": {
+                "x": 230,
+                "y": 567
+              },
+              "direction": "UpLeft"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3277,
+            "monotonicMs": 1262984.8866,
+            "atMs": 1792943614959,
+            "packet": "DamageIndicator",
+            "payload": {
+              "objectId": 206618,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3278,
+            "monotonicMs": 1262984.8957,
+            "atMs": 1792943614959,
+            "packet": "ObjectHealth",
+            "payload": {
+              "objectId": 206618,
+              "percent": 15
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21516,
+            "monotonicMs": 1263069.5379,
+            "atMs": 1792943615044,
+            "type": "attackResultV2",
+            "protocolVersion": 2,
+            "requestId": "365",
+            "objectId": 206618,
+            "result": "launched"
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21518,
+            "monotonicMs": 1263070.3634,
+            "atMs": 1792943615045,
+            "packet": "UserLocation",
+            "payload": {
+              "x": 229,
+              "y": 566,
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21520,
+            "monotonicMs": 1263070.3929,
+            "atMs": 1792943615045,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 1000,
+              "location": {
+                "x": 229,
+                "y": 566
+              },
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21521,
+            "monotonicMs": 1263070.4084,
+            "atMs": 1792943615045,
+            "packet": "ObjectStruck",
+            "payload": {
+              "objectId": 206618,
+              "attackerId": 1000,
+              "location": {
+                "x": 230,
+                "y": 567
+              },
+              "direction": "UpLeft"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21522,
+            "monotonicMs": 1263070.4204,
+            "atMs": 1792943615045,
+            "packet": "DamageIndicator",
+            "payload": {
+              "objectId": 206618,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21523,
+            "monotonicMs": 1263070.4332,
+            "atMs": 1792943615045,
+            "packet": "ObjectHealth",
+            "payload": {
+              "objectId": 206618,
+              "percent": 15
+            }
+          }
+        ],
+        "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+      }
+    },
+    {
+      "line": 113615,
+      "lineSha256": "09c44c9f8a8169d41601402f83c43581285550442ac68d0eeb0b51be355af913",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943616581,
+        "sequence": 21532,
+        "monotonicMs": 1264606.1493,
+        "phase": "ramp",
+        "source": "worldSnapshot",
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [
+            {
+              "objectId": 1000,
+              "name": "L9fe97305",
+              "x": 229,
+              "y": 566
+            },
+            {
+              "objectId": 50002,
+              "name": "L9fe97302",
+              "x": 232,
+              "y": 578
+            },
+            {
+              "objectId": 50003,
+              "name": "L9fe97303",
+              "x": 239,
+              "y": 580
+            },
+            {
+              "objectId": 50018,
+              "name": "L9fe9730i",
+              "x": 245,
+              "y": 578
+            },
+            {
+              "objectId": 50024,
+              "name": "L9fe9730o",
+              "x": 243,
+              "y": 571
+            },
+            {
+              "objectId": 50026,
+              "name": "L9fe9730q",
+              "x": 232,
+              "y": 561
+            }
+          ],
+          "count": 6,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [
+            {
+              "objectId": 1000,
+              "name": "L9fe97305",
+              "x": 229,
+              "y": 566
+            },
+            {
+              "objectId": 50002,
+              "name": "L9fe97302",
+              "x": 233,
+              "y": 578
+            },
+            {
+              "objectId": 50003,
+              "name": "L9fe97303",
+              "x": 237,
+              "y": 580
+            },
+            {
+              "objectId": 50024,
+              "name": "L9fe9730o",
+              "x": 243,
+              "y": 571
+            },
+            {
+              "objectId": 50026,
+              "name": "L9fe9730q",
+              "x": 234,
+              "y": 561
+            }
+          ],
+          "count": 5,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 113684,
+      "lineSha256": "757bc3ff99c0f69b98a9c095345ad09f0983269f14f2d2e944dd78205ebdd73e",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943616912,
+        "sequence": 21538,
+        "monotonicMs": 1264938.0612,
+        "phase": "ramp",
+        "source": "ObjectRemove",
+        "peer": {
+          "objectId": 50018,
+          "name": "L9fe9730i"
+        },
+        "beforePresent": false,
+        "afterPresent": false,
+        "identitySource": "bounded-identity-cache",
+        "wire": {
+          "objectId": 50018
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [],
+          "count": 5,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 566
+          },
+          "players": [],
+          "count": 5,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 113687,
+      "lineSha256": "fecc01c0918d7a034cbfd04ebc26c2bf9e70404723e6c7dde8fe21355c740561",
+      "row": {
+        "type": "action",
+        "at": 1792943616928,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "attack",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1264033.2475,
+        "sentAtMs": 1264049.626,
+        "targetId": 206618,
+        "hunting": "Scarecrow",
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 1366,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 1366,
+          "cooldownMs": 1316,
+          "pacingKnown": true,
+          "nativeAttackMs": 1316,
+          "zoneAttackFloorMs": 600,
+          "level": 6,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "targetPosition": {
+          "x": 230,
+          "y": 567
+        },
+        "attackResults": "v2",
+        "requestId": "366",
+        "attackRequestSent": true,
+        "status": "timeout",
+        "latencyMs": 903.5084999999963,
+        "plannedLatencyMs": 919.8885999999475,
+        "error": "L9fe97305 timed out waiting for attack authoritative acknowledgement",
+        "targetStillAdjacent": false,
+        "ambiguousTargetQuarantined": true
+      }
+    },
+    {
+      "line": 113688,
+      "lineSha256": "96cc7c52d78b5a304ebc0a0fbeb8cba169691cc868058517520276a65907ab27",
+      "row": {
+        "type": "pendingAttackEvidence",
+        "actor": "L9fe97305",
+        "phase": "ramp",
+        "connection": 6,
+        "at": 1792943616928,
+        "sentAtMs": 1264049.626,
+        "sentAtWallMs": 1792943616024,
+        "sendCursor": 21529,
+        "endedAtMs": 1264953.2738,
+        "endedAtWallMs": 1792943616928,
+        "owner": {
+          "objectId": 1000,
+          "x": 229,
+          "y": 566,
+          "dead": false,
+          "hp": 51,
+          "maxHp": 51
+        },
+        "target": {
+          "objectId": 206618,
+          "x": 230,
+          "y": 567,
+          "dead": false,
+          "hp": 3,
+          "maxHp": 20
+        },
+        "outcome": "timeout",
+        "protocolVersion": 2,
+        "requestId": "366",
+        "maximumPackets": 64,
+        "packetCount": 12,
+        "truncated": false,
+        "packets": [
+          {
+            "receiver": "observer",
+            "sequence": 3294,
+            "monotonicMs": 1264468.9476,
+            "atMs": 1792943616443,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 50005,
+              "location": {
+                "x": 229,
+                "y": 566
+              },
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3295,
+            "monotonicMs": 1264527.8205,
+            "atMs": 1792943616502,
+            "packet": "ObjectStruck",
+            "payload": {
+              "objectId": 206618,
+              "attackerId": 50005,
+              "location": {
+                "x": 230,
+                "y": 567
+              },
+              "direction": "UpLeft"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3296,
+            "monotonicMs": 1264527.8366,
+            "atMs": 1792943616502,
+            "packet": "DamageIndicator",
+            "payload": {
+              "objectId": 206618,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3297,
+            "monotonicMs": 1264527.8455,
+            "atMs": 1792943616502,
+            "packet": "ObjectHealth",
+            "payload": {
+              "objectId": 206618,
+              "percent": 0
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3298,
+            "monotonicMs": 1264527.8558,
+            "atMs": 1792943616502,
+            "packet": "ObjectDied",
+            "payload": {
+              "objectId": 206618,
+              "location": {
+                "x": 230,
+                "y": 567
+              },
+              "direction": "UpLeft"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21533,
+            "monotonicMs": 1264937.9542,
+            "atMs": 1792943616912,
+            "type": "attackResultV2",
+            "protocolVersion": 2,
+            "requestId": "366",
+            "objectId": 206618,
+            "result": "launched"
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21535,
+            "monotonicMs": 1264938.0233,
+            "atMs": 1792943616912,
+            "packet": "UserLocation",
+            "payload": {
+              "x": 229,
+              "y": 566,
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21539,
+            "monotonicMs": 1264938.1324,
+            "atMs": 1792943616913,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 1000,
+              "location": {
+                "x": 229,
+                "y": 566
+              },
+              "direction": "DownRight"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21540,
+            "monotonicMs": 1264938.1499,
+            "atMs": 1792943616913,
+            "packet": "ObjectStruck",
+            "payload": {
+              "objectId": 206618,
+              "attackerId": 1000,
+              "location": {
+                "x": 230,
+                "y": 567
+              },
+              "direction": "UpLeft"
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21541,
+            "monotonicMs": 1264938.1618,
+            "atMs": 1792943616913,
+            "packet": "DamageIndicator",
+            "payload": {
+              "objectId": 206618,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21542,
+            "monotonicMs": 1264938.1752,
+            "atMs": 1792943616913,
+            "packet": "ObjectHealth",
+            "payload": {
+              "objectId": 206618,
+              "percent": 0
+            }
+          },
+          {
+            "receiver": "owner",
+            "sequence": 21543,
+            "monotonicMs": 1264938.1884,
+            "atMs": 1792943616913,
+            "packet": "ObjectDied",
+            "payload": {
+              "objectId": 206618,
+              "location": {
+                "x": 230,
+                "y": 567
+              },
+              "direction": "UpLeft"
+            }
+          }
+        ],
+        "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+      }
+    },
+    {
+      "line": 113801,
+      "lineSha256": "270b8370240f841335d8d61e1f6a64cd14ab2341c18d6fd602892aafda0bf357",
+      "row": {
+        "type": "selfTransform",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943617419,
+        "sequence": 21553,
+        "monotonicMs": 1265444.7996,
+        "phase": "ramp",
+        "source": "UserLocation",
+        "mapFileName": "0",
+        "wire": {
+          "x": 229,
+          "y": 565,
+          "direction": "Up"
+        },
+        "before": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 229,
+            "y": 566
+          },
+          "direction": "DownRight"
+        },
+        "after": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 229,
+            "y": 565
+          },
+          "direction": "Up"
+        }
+      }
+    },
+    {
+      "line": 113805,
+      "lineSha256": "38d452cf5a98a613700513d00ed553fcc61b7c716b4ec643dc1a648e9a6262a2",
+      "row": {
+        "type": "action",
+        "at": 1792943617426,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "walk",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1265399.2475,
+        "sentAtMs": 1265432.0832,
+        "plannedTarget": {
+          "x": 229,
+          "y": 565
+        },
+        "scouting": true,
+        "scoutHomeIndex": 23,
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "actual": {
+          "x": 229,
+          "y": 565
+        },
+        "direction": "Up",
+        "movedCells": 1,
+        "status": "success",
+        "latencyMs": 12.7164000000339,
+        "plannedLatencyMs": 45.55209999997169
+      }
+    },
+    {
+      "line": 113806,
+      "lineSha256": "189b461e0fd8b9abb80118581d9887e7649db123f3c1c76ce849e73fa17b9050",
+      "row": {
+        "type": "fanoutDistribution",
+        "actor": "L9fe97305",
+        "phase": "ramp",
+        "kind": "walk",
+        "expected": 1,
+        "delivered": 1,
+        "latencyUpperBoundsMs": [
+          [
+            13,
+            1
+          ]
+        ],
+        "at": 1792943617426
+      }
+    },
+    {
+      "line": 113882,
+      "lineSha256": "fc1cbcbc539318c622ea8769b88734ed9dd7429fb8eab6ee9f970eb67a903cf2",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943617900,
+        "sequence": 21558,
+        "monotonicMs": 1265924.6541,
+        "phase": "ramp",
+        "source": "ObjectPlayer",
+        "peer": {
+          "objectId": 50018,
+          "name": "L9fe9730i"
+        },
+        "beforePresent": false,
+        "afterPresent": true,
+        "identitySource": "packet",
+        "wire": {
+          "objectId": 50018,
+          "name": "L9fe9730i",
+          "x": 245,
+          "y": 580
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 565
+          },
+          "players": [],
+          "count": 5,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 565
+          },
+          "players": [
+            {
+              "objectId": 50018,
+              "name": "L9fe9730i",
+              "x": 245,
+              "y": 580
+            }
+          ],
+          "count": 6,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 113919,
+      "lineSha256": "422733069feed7602dd8a08008bf0143022fde68c987855f5f92aa5579113542",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943618127,
+        "sequence": 21562,
+        "monotonicMs": 1266151.3503,
+        "phase": "ramp",
+        "source": "ObjectPlayer",
+        "peer": {
+          "objectId": 50017,
+          "name": "L9fe9730h"
+        },
+        "beforePresent": false,
+        "afterPresent": true,
+        "identitySource": "packet",
+        "wire": {
+          "objectId": 50017,
+          "name": "L9fe9730h",
+          "x": 244,
+          "y": 581
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 565
+          },
+          "players": [],
+          "count": 6,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 565
+          },
+          "players": [
+            {
+              "objectId": 50017,
+              "name": "L9fe9730h",
+              "x": 244,
+              "y": 581
+            }
+          ],
+          "count": 7,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 113965,
+      "lineSha256": "46e98d9d9cbd348ef5890aa7aa83348a2e6cfccb85c1cc39d4b7d163693d7f2f",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943618322,
+        "sequence": 21565,
+        "monotonicMs": 1266345.9092,
+        "phase": "ramp",
+        "source": "ObjectRemove",
+        "peer": {
+          "objectId": 50018,
+          "name": "L9fe9730i"
+        },
+        "beforePresent": true,
+        "afterPresent": false,
+        "identitySource": "projection-before",
+        "wire": {
+          "objectId": 50018
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 565
+          },
+          "players": [
+            {
+              "objectId": 50018,
+              "name": "L9fe9730i",
+              "x": 245,
+              "y": 580
+            }
+          ],
+          "count": 7,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 229,
+            "y": 565
+          },
+          "players": [],
+          "count": 6,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 113966,
+      "lineSha256": "8ef5d7cfea691caf36331f51a40f82f1e26a155d2d7af653928eceaedd216c4b",
+      "row": {
+        "type": "selfTransform",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943618322,
+        "sequence": 21566,
+        "monotonicMs": 1266345.935,
+        "phase": "ramp",
+        "source": "UserLocation",
+        "mapFileName": "0",
+        "wire": {
+          "x": 228,
+          "y": 565,
+          "direction": "Left"
+        },
+        "before": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 229,
+            "y": 565
+          },
+          "direction": "Up"
+        },
+        "after": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 228,
+            "y": 565
+          },
+          "direction": "Left"
+        }
+      }
+    },
+    {
+      "line": 113967,
+      "lineSha256": "e6d29d1c113209974a60701098b08f785d9cb3ad628b7fd40a0167b7363b22ec",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943618322,
+        "sequence": 21567,
+        "monotonicMs": 1266345.954,
+        "phase": "ramp",
+        "source": "ObjectRemove",
+        "peer": {
+          "objectId": 50024,
+          "name": "L9fe9730o"
+        },
+        "beforePresent": true,
+        "afterPresent": false,
+        "identitySource": "projection-before",
+        "wire": {
+          "objectId": 50024
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 228,
+            "y": 565
+          },
+          "players": [
+            {
+              "objectId": 50024,
+              "name": "L9fe9730o",
+              "x": 245,
+              "y": 571
+            }
+          ],
+          "count": 6,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 228,
+            "y": 565
+          },
+          "players": [],
+          "count": 5,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 113974,
+      "lineSha256": "99990d4594ea6a06ff16c000f3b6bf2764f17620ffef290cd0a714b44004b0ed",
+      "row": {
+        "type": "action",
+        "at": 1792943618325,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "walk",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1266149.2475,
+        "sentAtMs": 1266178.292,
+        "plannedTarget": {
+          "x": 228,
+          "y": 565
+        },
+        "hunting": "Deer",
+        "chaseTargetId": 206304,
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "actual": {
+          "x": 228,
+          "y": 565
+        },
+        "direction": "Left",
+        "movedCells": 1,
+        "status": "success",
+        "latencyMs": 167.64300000015646,
+        "plannedLatencyMs": 196.6875
+      }
+    },
+    {
+      "line": 113975,
+      "lineSha256": "da8f89fb78094d39f739df01afa2f587eb68de9bf359ba8e865481aed2a77a8d",
+      "row": {
+        "type": "fanoutDistribution",
+        "actor": "L9fe97305",
+        "phase": "ramp",
+        "kind": "walk",
+        "expected": 1,
+        "delivered": 1,
+        "latencyUpperBoundsMs": [
+          [
+            117,
+            1
+          ]
+        ],
+        "at": 1792943618325
+      }
+    },
+    {
+      "line": 114075,
+      "lineSha256": "8a23a16a119a4b8b828390ceab9a85db43d19a9bc5acfbafcb0037866faf9b1c",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943619008,
+        "sequence": 21572,
+        "monotonicMs": 1267032.0386,
+        "phase": "ramp",
+        "source": "ObjectPlayer",
+        "peer": {
+          "objectId": 50024,
+          "name": "L9fe9730o"
+        },
+        "beforePresent": false,
+        "afterPresent": true,
+        "identitySource": "packet",
+        "wire": {
+          "objectId": 50024,
+          "name": "L9fe9730o",
+          "x": 243,
+          "y": 571
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 228,
+            "y": 565
+          },
+          "players": [],
+          "count": 5,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 228,
+            "y": 565
+          },
+          "players": [
+            {
+              "objectId": 50024,
+              "name": "L9fe9730o",
+              "x": 243,
+              "y": 571
+            }
+          ],
+          "count": 6,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 114314,
+      "lineSha256": "755283bb94db62032ed0d6ebc64a16cd37481006c5ce72b94c076f49f09be8c7",
+      "row": {
+        "type": "combatScoutAdvanced",
+        "actor": "L9fe97305",
+        "phase": "ramp",
+        "at": 1792943620400,
+        "reason": "time-budget",
+        "homeIndex": 23,
+        "confirmedMoves": 6,
+        "elapsedMs": 21068
+      }
+    },
+    {
+      "line": 114325,
+      "lineSha256": "b1e857b7c905f8bc2bcf8bfacb91e083fcb9591375cedbbeb869ab1e166d94d4",
+      "row": {
+        "type": "selfTransform",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943620427,
+        "sequence": 21587,
+        "monotonicMs": 1268450.7715,
+        "phase": "ramp",
+        "source": "UserLocation",
+        "mapFileName": "0",
+        "wire": {
+          "x": 227,
+          "y": 565,
+          "direction": "Down"
+        },
+        "before": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 227,
+            "y": 564
+          },
+          "direction": "DownLeft"
+        },
+        "after": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 227,
+            "y": 565
+          },
+          "direction": "Down"
+        }
+      }
+    },
+    {
+      "line": 114326,
+      "lineSha256": "80e873e6b4f58a45035d38fbf831638d1b5ec5b6ddd6009ef7adbbe381b5b7b4",
+      "row": {
+        "type": "action",
+        "at": 1792943620427,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "walk",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1268399.2475,
+        "sentAtMs": 1268425.2582,
+        "plannedTarget": {
+          "x": 227,
+          "y": 565
+        },
+        "scouting": true,
+        "scoutHomeIndex": 24,
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "actual": {
+          "x": 227,
+          "y": 565
+        },
+        "direction": "Down",
+        "movedCells": 1,
+        "status": "success",
+        "latencyMs": 25.513299999991432,
+        "plannedLatencyMs": 51.523999999975786
+      }
+    },
+    {
+      "line": 114390,
+      "lineSha256": "c4994d743b70f10644f65d8c832d186d202faec2d42ec6c9218987a6eeeae9a1",
+      "row": {
+        "type": "action",
+        "at": 1792943620766,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "refresh",
+        "status": "success",
+        "latencyMs": 261.1766999999527
+      }
+    },
+    {
+      "line": 114455,
+      "lineSha256": "ffc1c3a3af980570aa4262a252a6c6d5368563702fe5bfee54877850f22e0414",
+      "row": {
+        "type": "selfTransform",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943621145,
+        "sequence": 21599,
+        "monotonicMs": 1269169.5861,
+        "phase": "ramp",
+        "source": "UserLocation",
+        "mapFileName": "0",
+        "wire": {
+          "x": 227,
+          "y": 566,
+          "direction": "Down"
+        },
+        "before": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 227,
+            "y": 565
+          },
+          "direction": "Down"
+        },
+        "after": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 227,
+            "y": 566
+          },
+          "direction": "Down"
+        }
+      }
+    },
+    {
+      "line": 114457,
+      "lineSha256": "415e2081f3faf4f7149890162e6e35d8149cc32a6f90e3069d3abb01f443d24e",
+      "row": {
+        "type": "action",
+        "at": 1792943621159,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "walk",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1269149.2475,
+        "sentAtMs": 1269160.7251,
+        "plannedTarget": {
+          "x": 227,
+          "y": 566
+        },
+        "scouting": true,
+        "scoutHomeIndex": 24,
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "actual": {
+          "x": 227,
+          "y": 566
+        },
+        "direction": "Down",
+        "movedCells": 1,
+        "status": "success",
+        "latencyMs": 8.861000000033528,
+        "plannedLatencyMs": 20.338599999900907
+      }
+    },
+    {
+      "line": 114570,
+      "lineSha256": "1519b768daa23ef1e86320ccad1639c4c95ab71417aa00b2ba13226a07759b86",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943621696,
+        "sequence": 21604,
+        "monotonicMs": 1269720.3733,
+        "phase": "ramp",
+        "source": "ObjectPlayer",
+        "peer": {
+          "objectId": 50024,
+          "name": "L9fe9730o"
+        },
+        "beforePresent": false,
+        "afterPresent": true,
+        "identitySource": "packet",
+        "wire": {
+          "objectId": 50024,
+          "name": "L9fe9730o",
+          "x": 243,
+          "y": 571
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 227,
+            "y": 566
+          },
+          "players": [],
+          "count": 4,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 227,
+            "y": 566
+          },
+          "players": [
+            {
+              "objectId": 50024,
+              "name": "L9fe9730o",
+              "x": 243,
+              "y": 571
+            }
+          ],
+          "count": 5,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 114646,
+      "lineSha256": "0b81964de925d55e7e01a7a162ffa7de51e896c77fcb8334d6e7337df4c39d28",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943621997,
+        "sequence": 21609,
+        "monotonicMs": 1270021.0996,
+        "phase": "ramp",
+        "source": "ObjectRemove",
+        "peer": {
+          "objectId": 50024,
+          "name": "L9fe9730o"
+        },
+        "beforePresent": true,
+        "afterPresent": false,
+        "identitySource": "projection-before",
+        "wire": {
+          "objectId": 50024
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 227,
+            "y": 566
+          },
+          "players": [
+            {
+              "objectId": 50024,
+              "name": "L9fe9730o",
+              "x": 243,
+              "y": 571
+            }
+          ],
+          "count": 5,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 227,
+            "y": 566
+          },
+          "players": [],
+          "count": 4,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 114647,
+      "lineSha256": "f84e0141d4d403260c5e4fcd2692740c757be764d50c1221737c0415a9f9c66e",
+      "row": {
+        "type": "selfTransform",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943621997,
+        "sequence": 21610,
+        "monotonicMs": 1270021.1619,
+        "phase": "ramp",
+        "source": "UserLocation",
+        "mapFileName": "0",
+        "wire": {
+          "x": 226,
+          "y": 566,
+          "direction": "Left"
+        },
+        "before": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 227,
+            "y": 566
+          },
+          "direction": "Down"
+        },
+        "after": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 226,
+            "y": 566
+          },
+          "direction": "Left"
+        }
+      }
+    },
+    {
+      "line": 114649,
+      "lineSha256": "679e68324131c6ec6bacc7a257da7734656fad4b4b3ac3b61fffe9563920b4bf",
+      "row": {
+        "type": "action",
+        "at": 1792943622021,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "walk",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1269899.2475,
+        "sentAtMs": 1269919.3967,
+        "plannedTarget": {
+          "x": 226,
+          "y": 566
+        },
+        "scouting": true,
+        "scoutHomeIndex": 24,
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "actual": {
+          "x": 226,
+          "y": 566
+        },
+        "direction": "Left",
+        "movedCells": 1,
+        "status": "success",
+        "latencyMs": 101.76520000002347,
+        "plannedLatencyMs": 121.91439999989234
+      }
+    },
+    {
+      "line": 114796,
+      "lineSha256": "d7fb8376f0141c6899bae026111221660eda5f696e559933f3572bcec64a95d5",
+      "row": {
+        "type": "action",
+        "at": 1792943622677,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "turn",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1270649.2475,
+        "sentAtMs": 1270679.3514,
+        "hunting": "Deer",
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 350,
+          "pacingKnown": true
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "status": "success",
+        "latencyMs": 13.134700000053272,
+        "plannedLatencyMs": 43.238600000040606
+      }
+    },
+    {
+      "line": 114797,
+      "lineSha256": "c7a6fb95fc1d35357c9b14565d4a8154a6d940d4636c2742e5f09c98456dbfdd",
+      "row": {
+        "type": "fanoutDistribution",
+        "actor": "L9fe97305",
+        "phase": "ramp",
+        "kind": "turn",
+        "expected": 1,
+        "delivered": 1,
+        "latencyUpperBoundsMs": [
+          [
+            14,
+            1
+          ]
+        ],
+        "at": 1792943622677
+      }
+    },
+    {
+      "line": 115087,
+      "lineSha256": "cc9b00baaabb9f4ba3c4982947a81ea95382ba8eb4bfcb79a3ade3300201824f",
+      "row": {
+        "type": "action",
+        "at": 1792943624311,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "attack",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1271399.2475,
+        "sentAtMs": 1271410.8212,
+        "targetId": 206304,
+        "hunting": "Deer",
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 1366,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 1366,
+          "cooldownMs": 1316,
+          "pacingKnown": true,
+          "nativeAttackMs": 1316,
+          "zoneAttackFloorMs": 600,
+          "level": 6,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "targetPosition": {
+          "x": 226,
+          "y": 565
+        },
+        "attackResults": "v2",
+        "requestId": "367",
+        "attackRequestSent": true,
+        "status": "timeout",
+        "latencyMs": 924.3884000000544,
+        "plannedLatencyMs": 935.9629999999888,
+        "error": "L9fe97305 timed out waiting for attack authoritative acknowledgement",
+        "targetStillAdjacent": true,
+        "ambiguousTargetQuarantined": true
+      }
+    },
+    {
+      "line": 115088,
+      "lineSha256": "ed3058c2a93f8e754e639a044ea467373ceccc97085aa11e3d83933fd7fcbd6f",
+      "row": {
+        "type": "pendingAttackEvidence",
+        "actor": "L9fe97305",
+        "phase": "ramp",
+        "connection": 6,
+        "at": 1792943624311,
+        "sentAtMs": 1271410.8212,
+        "sentAtWallMs": 1792943623387,
+        "sendCursor": 21619,
+        "endedAtMs": 1272335.3058,
+        "endedAtWallMs": 1792943624311,
+        "owner": {
+          "objectId": 1000,
+          "x": 226,
+          "y": 566,
+          "dead": false,
+          "hp": 51,
+          "maxHp": 51
+        },
+        "target": {
+          "objectId": 206304,
+          "x": 226,
+          "y": 565,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25
+        },
+        "outcome": "timeout",
+        "protocolVersion": 2,
+        "requestId": "367",
+        "maximumPackets": 64,
+        "packetCount": 5,
+        "truncated": false,
+        "packets": [
+          {
+            "receiver": "observer",
+            "sequence": 3390,
+            "monotonicMs": 1272026.5515,
+            "atMs": 1792943624002,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 50005,
+              "location": {
+                "x": 226,
+                "y": 566
+              },
+              "direction": "Up"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3392,
+            "monotonicMs": 1272026.6027,
+            "atMs": 1792943624002,
+            "packet": "ObjectStruck",
+            "payload": {
+              "objectId": 206304,
+              "attackerId": 50005,
+              "location": {
+                "x": 226,
+                "y": 565
+              },
+              "direction": "DownLeft"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3393,
+            "monotonicMs": 1272026.617,
+            "atMs": 1792943624002,
+            "packet": "DamageIndicator",
+            "payload": {
+              "objectId": 206304,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3394,
+            "monotonicMs": 1272026.6324,
+            "atMs": 1792943624002,
+            "packet": "ObjectHealth",
+            "payload": {
+              "objectId": 206304,
+              "percent": 88
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 3395,
+            "monotonicMs": 1272026.6476,
+            "atMs": 1792943624002,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 206304,
+              "location": {
+                "x": 226,
+                "y": 565
+              },
+              "direction": "Down"
+            }
+          }
+        ],
+        "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+      }
+    },
+    {
+      "line": 115202,
+      "lineSha256": "1bffb66c0941ee3e940f8bc9d4e32745be9ed803d2dc7dc26995f1e6b28b59ef",
+      "row": {
+        "type": "selfTransform",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943624748,
+        "sequence": 21640,
+        "monotonicMs": 1272772.0116,
+        "phase": "ramp",
+        "source": "UserLocation",
+        "mapFileName": "0",
+        "wire": {
+          "x": 225,
+          "y": 567,
+          "direction": "DownLeft"
+        },
+        "before": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 226,
+            "y": 566
+          },
+          "direction": "Up"
+        },
+        "after": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 225,
+            "y": 567
+          },
+          "direction": "DownLeft"
+        }
+      }
+    },
+    {
+      "line": 115203,
+      "lineSha256": "cf8e8c84430c7d3bad484ccbd95a4b1057320e59127eb4a15e89af2c8f810e10",
+      "row": {
+        "type": "action",
+        "at": 1792943624775,
+        "phase": "ramp",
+        "actor": "L9fe97305",
+        "kind": "walk",
+        "plannedGameplay": true,
+        "scheduledAtMs": 1272765.2475,
+        "sentAtMs": 1272770.0469,
+        "plannedTarget": {
+          "x": 225,
+          "y": 567
+        },
+        "scouting": true,
+        "scoutHomeIndex": 24,
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 750,
+        "pacingKnown": true,
+        "cadence": {
+          "intervalMs": 750,
+          "cooldownMs": 600,
+          "pacingKnown": true
+        },
+        "declaredHome": {
+          "x": 239,
+          "y": 596
+        },
+        "initialCombatTransit": false,
+        "actual": {
+          "x": 225,
+          "y": 567
+        },
+        "direction": "DownLeft",
+        "movedCells": 1,
+        "status": "success",
+        "latencyMs": 1.9647000001277775,
+        "plannedLatencyMs": 6.76410000002943
+      }
+    },
+    {
+      "line": 115321,
+      "lineSha256": "35a5853ac6bcf4135d3af38440579058fbf5658c3f3ef8cfe279709511bcd461",
+      "row": {
+        "type": "continuousWindow",
+        "actor": "L9fe97305",
+        "role": "combat",
+        "phases": [
+          "ramp"
+        ],
+        "seconds": 60.3209375,
+        "final": false,
+        "activityDurationSufficient": true,
+        "activity": {
+          "plans": 75,
+          "gaps": 0,
+          "moves": 62,
+          "attacks": 5,
+          "hits": 5,
+          "damage": 20,
+          "lastSuccessAt": 1792943624775,
+          "runs": 31,
+          "cells": 93,
+          "nativeOpportunities": 75,
+          "nativeCompleted": 73,
+          "offeredDurationMs": 60562,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0
+        },
+        "nativeActivity": {
+          "passed": true,
+          "completionRatio": 0.9733333333333334,
+          "runRatio": 0.5,
+          "cellsPerMinute": 92.50519357395598,
+          "positiveHitsPerMinute": 4.973397503976128,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 60562,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "activityPassed": true,
+        "latencyPassed": true,
+        "fanoutPassed": true,
+        "timeoutRatio": 0.02666666666666667,
+        "correctionRatio": 0,
+        "movementCorrectionRatio": 0,
+        "attackRejectionRatio": 0,
+        "metrics": {
+          "attack": {
+            "count": 7,
+            "status": {
+              "success": 5,
+              "timeout": 2
+            },
+            "fromSend": {
+              "count": 5,
+              "p50Ms": 269,
+              "p95Ms": 379,
+              "p99Ms": 379,
+              "maxMs": 378.41190000018105
+            },
+            "fromPlan": {
+              "count": 5,
+              "p50Ms": 293,
+              "p95Ms": 404,
+              "p99Ms": 404,
+              "maxMs": 403.1857000000309
+            },
+            "attackV2Requests": 7,
+            "attackV2NotLaunched": 0
+          },
+          "walk": {
+            "count": 31,
+            "status": {
+              "success": 31
+            },
+            "fromSend": {
+              "count": 31,
+              "p50Ms": 6,
+              "p95Ms": 168,
+              "p99Ms": 365,
+              "maxMs": 364.5686000001151
+            },
+            "fromPlan": {
+              "count": 31,
+              "p50Ms": 29,
+              "p95Ms": 197,
+              "p99Ms": 371,
+              "maxMs": 370.23589999997057
+            }
+          },
+          "fanout-walk": {
+            "count": 101,
+            "status": {
+              "success": 101
+            },
+            "fromSend": {
+              "count": 101,
+              "p50Ms": 6,
+              "p95Ms": 60,
+              "p99Ms": 117,
+              "maxMs": 903.6718000001274
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "run": {
+            "count": 31,
+            "status": {
+              "success": 31
+            },
+            "fromSend": {
+              "count": 31,
+              "p50Ms": 5,
+              "p95Ms": 38,
+              "p99Ms": 58,
+              "maxMs": 57.85730000003241
+            },
+            "fromPlan": {
+              "count": 31,
+              "p50Ms": 30,
+              "p95Ms": 56,
+              "p99Ms": 70,
+              "maxMs": 69.6938000000082
+            }
+          },
+          "fanout-run": {
+            "count": 88,
+            "status": {
+              "success": 88
+            },
+            "fromSend": {
+              "count": 88,
+              "p50Ms": 5,
+              "p95Ms": 49,
+              "p99Ms": 75,
+              "maxMs": 74.94860000000335
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "turn": {
+            "count": 4,
+            "status": {
+              "success": 4
+            },
+            "fromSend": {
+              "count": 4,
+              "p50Ms": 3,
+              "p95Ms": 498,
+              "p99Ms": 498,
+              "maxMs": 497.86779999989085
+            },
+            "fromPlan": {
+              "count": 4,
+              "p50Ms": 23,
+              "p95Ms": 502,
+              "p99Ms": 502,
+              "maxMs": 501.64629999990575
+            }
+          },
+          "fanout-turn": {
+            "count": 6,
+            "status": {
+              "success": 6
+            },
+            "fromSend": {
+              "count": 6,
+              "p50Ms": 2,
+              "p95Ms": 234,
+              "p99Ms": 234,
+              "maxMs": 233.8071999999229
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 8,
+              "p95Ms": 40,
+              "p99Ms": 40,
+              "maxMs": 39.11170000000857
+            },
+            "fromPlan": {
+              "count": 2,
+              "p50Ms": 22,
+              "p95Ms": 54,
+              "p99Ms": 54,
+              "maxMs": 53.39699999988079
+            }
+          },
+          "peerChat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 8,
+              "p95Ms": 40,
+              "p99Ms": 40,
+              "maxMs": 39.11170000000857
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-chat": {
+            "count": 10,
+            "status": {
+              "success": 10
+            },
+            "fromSend": {
+              "count": 10,
+              "p50Ms": 40,
+              "p95Ms": 69,
+              "p99Ms": 69,
+              "maxMs": 68.19500000006519
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          }
+        },
+        "passed": false,
+        "at": 1792943625427
+      }
+    },
+    {
+      "line": 115368,
+      "lineSha256": "f8ea6593e580c982928d92d9d0a810a854fd35548c554463d50d9101b38f4018",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943626180,
+        "sequence": 21645,
+        "monotonicMs": 1274204.1441,
+        "phase": "drain",
+        "source": "ObjectRemove",
+        "peer": {
+          "objectId": 50003,
+          "name": "L9fe97303"
+        },
+        "beforePresent": true,
+        "afterPresent": false,
+        "identitySource": "projection-before",
+        "wire": {
+          "objectId": 50003
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 225,
+            "y": 567
+          },
+          "players": [
+            {
+              "objectId": 50003,
+              "name": "L9fe97303",
+              "x": 239,
+              "y": 578
+            }
+          ],
+          "count": 4,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 225,
+            "y": 567
+          },
+          "players": [],
+          "count": 3,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 115369,
+      "lineSha256": "42cf039ab0a2895b46a2012989e76bbee351b1018af231de5bd2c0d35bc434d7",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943626180,
+        "sequence": 21646,
+        "monotonicMs": 1274204.2032,
+        "phase": "drain",
+        "source": "ObjectRemove",
+        "peer": {
+          "objectId": 50002,
+          "name": "L9fe97302"
+        },
+        "beforePresent": true,
+        "afterPresent": false,
+        "identitySource": "projection-before",
+        "wire": {
+          "objectId": 50002
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 225,
+            "y": 567
+          },
+          "players": [
+            {
+              "objectId": 50002,
+              "name": "L9fe97302",
+              "x": 232,
+              "y": 578
+            }
+          ],
+          "count": 3,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 225,
+            "y": 567
+          },
+          "players": [],
+          "count": 2,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 115404,
+      "lineSha256": "a04ed9475b06c8625cecfd0b8cc58156a2f62b54bbea3e4004142e0fc13f5698",
+      "row": {
+        "type": "playerLifecycle",
+        "actor": "L9fe97305",
+        "connection": 6,
+        "at": 1792943626768,
+        "sequence": 21656,
+        "monotonicMs": 1274792.1393,
+        "phase": "drain",
+        "source": "worldSnapshot",
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L9fe97305",
+            "x": 225,
+            "y": 567
+          },
+          "players": [
+            {
+              "objectId": 1000,
+              "name": "L9fe97305",
+              "x": 225,
+              "y": 567
+            },
+            {
+              "objectId": 50026,
+              "name": "L9fe9730q",
+              "x": 232,
+              "y": 563
+            }
+          ],
+          "count": 2,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": null,
+          "playerObjectId": null,
+          "self": null,
+          "players": [],
+          "count": 0,
+          "truncated": false
+        }
+      }
+    },
+    {
+      "line": 115405,
+      "lineSha256": "ad06d91c1f6f1224beb3f5241fff2f8858eff42e5961d12f744ae938191e2cb9",
+      "row": {
+        "type": "action",
+        "at": 1792943626768,
+        "phase": "drain",
+        "actor": "L9fe97305",
+        "kind": "logOut",
+        "status": "success",
+        "latencyMs": 329.9391999999061
+      }
+    },
+    {
+      "line": 115570,
+      "lineSha256": "d441e98aaf1054c1e9a22bce0ce6beb728bd8dc46ce0bd0f6003b0427b235e9d",
+      "row": {
+        "type": "continuousWindow",
+        "actor": "L9fe97305",
+        "role": "combat",
+        "phases": [],
+        "seconds": 0.031223399999784306,
+        "final": true,
+        "activityDurationSufficient": false,
+        "activity": {
+          "plans": 0,
+          "gaps": 0,
+          "moves": 0,
+          "attacks": 0,
+          "hits": 0
+        },
+        "nativeActivity": {
+          "passed": true,
+          "completionRatio": 0,
+          "runRatio": 0,
+          "cellsPerMinute": 0,
+          "positiveHitsPerMinute": 0,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 0,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "activityPassed": true,
+        "latencyPassed": true,
+        "fanoutPassed": true,
+        "timeoutRatio": 0,
+        "correctionRatio": 0,
+        "metrics": {},
+        "passed": true,
+        "at": 1792943629517
+      }
+    }
+  ],
+  "selectedHeaders": [
+    {
+      "line": 10,
+      "lineSha256": "d3546046cf17f20404327928de504e6e2b1e490bab9e7e6d89dead0546f7bbe1",
+      "row": {
+        "type": "admitted",
+        "at": 1792942374112,
+        "actor": "L9fe97300",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 42,
+      "lineSha256": "6d3cc44392e7aa0dc03ed6736cee47c91c8f78d6e361b233059fd735d665b0eb",
+      "row": {
+        "type": "admitted",
+        "at": 1792942379672,
+        "actor": "L9fe97301",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 4441,
+      "lineSha256": "1002b6bd9a7bcd9bc215b1e55f75cea320cb443c92b7179530bd7d7cd06b74f0",
+      "row": {
+        "type": "admitted",
+        "at": 1792942708695,
+        "actor": "L9fe97302",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 4500,
+      "lineSha256": "afa200ec1a0df71cd868d8508f550f0b46258ac686d6f004fa54f085f8e4d4a3",
+      "row": {
+        "type": "admitted",
+        "at": 1792942711429,
+        "actor": "L9fe97303",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 4596,
+      "lineSha256": "a4020a6203b50a415119f37907ae0a8358dea8fe1763d4a22d0f5fa3a1660f6c",
+      "row": {
+        "type": "admitted",
+        "at": 1792942715463,
+        "actor": "L9fe97304",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 4733,
+      "lineSha256": "6e966d90d220552c5a1dabcf30f51240435af2457f081bfbe717a31b8cbc690c",
+      "row": {
+        "type": "admitted",
+        "at": 1792942720116,
+        "actor": "L9fe97305",
+        "role": "combat"
+      }
+    },
+    {
+      "line": 4861,
+      "lineSha256": "1339db175deeb129a37f121f9d000b012e76c496b68ccccbde30280832e2d260",
+      "row": {
+        "type": "admitted",
+        "at": 1792942724115,
+        "actor": "L9fe97306",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 5017,
+      "lineSha256": "b3b9f97a3123df8414bd646e2d7395fadb4454fe686e54edac187ae8aa9f48f4",
+      "row": {
+        "type": "admitted",
+        "at": 1792942728280,
+        "actor": "L9fe97307",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 5197,
+      "lineSha256": "383da2c986612570f035dd0b63e00e4023c81db9908194d682eb5871c809df39",
+      "row": {
+        "type": "admitted",
+        "at": 1792942732940,
+        "actor": "L9fe97308",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 5405,
+      "lineSha256": "7227beffddeefbe3d7aa161af00e856d77adda2fe78a867ee215881f124e0096",
+      "row": {
+        "type": "admitted",
+        "at": 1792942736977,
+        "actor": "L9fe97309",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 22228,
+      "lineSha256": "a1e8e7cd0c83c4b8960846e0b2905f7ac3210350bb08f498dc457fada8f5c341",
+      "row": {
+        "type": "admitted",
+        "at": 1792943063293,
+        "actor": "L9fe9730a",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 22457,
+      "lineSha256": "ee290069f4cf79691868d138a87850ff2d62c3284717eec9ca904ec2d0f49f75",
+      "row": {
+        "type": "admitted",
+        "at": 1792943067125,
+        "actor": "L9fe9730b",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 22722,
+      "lineSha256": "59134208539908fcc957c75ad294c4ceff4ec6cf47701ef14e2bcc27fb69e3f7",
+      "row": {
+        "type": "admitted",
+        "at": 1792943071187,
+        "actor": "L9fe9730c",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 23004,
+      "lineSha256": "3b147de28ec69a0c1b63b0d0b3cb90b98ad88dfa20c29b8523014b4f7e287ee7",
+      "row": {
+        "type": "admitted",
+        "at": 1792943075228,
+        "actor": "L9fe9730d",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 23326,
+      "lineSha256": "4665b2a475f417ff923edbdafd4c241b2ae9300862821c80b7128c69d2dd432b",
+      "row": {
+        "type": "admitted",
+        "at": 1792943079405,
+        "actor": "L9fe9730e",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 23614,
+      "lineSha256": "c1223eef3127f58db8663e5443fb466c7dc842625deefc39d5bff3cfd2c66666",
+      "row": {
+        "type": "admitted",
+        "at": 1792943082901,
+        "actor": "L9fe9730f",
+        "role": "combat"
+      }
+    },
+    {
+      "line": 24006,
+      "lineSha256": "31c9b7a2654ca6227e627c3037236662fa3a25125c26532ac6453cc77f349de3",
+      "row": {
+        "type": "admitted",
+        "at": 1792943087556,
+        "actor": "L9fe9730g",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 24369,
+      "lineSha256": "92736cfcfa4809ad8d29fb1a70c1045f1b20d0f2318fdef73b1a8157508233f4",
+      "row": {
+        "type": "admitted",
+        "at": 1792943091566,
+        "actor": "L9fe9730h",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 24830,
+      "lineSha256": "027c0c09fc2ecff80cb0e4cac264eb50e14570b755fda7a4c0f66be9690d003c",
+      "row": {
+        "type": "admitted",
+        "at": 1792943095639,
+        "actor": "L9fe9730i",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 25269,
+      "lineSha256": "875b7c8a83610732846b632044972b88d15b622fdfa0bca923e867416e461e84",
+      "row": {
+        "type": "admitted",
+        "at": 1792943099632,
+        "actor": "L9fe9730j",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 25763,
+      "lineSha256": "16e0af4ce007d86f7e80b198ce95a56c7dad68afd834aefffc5835832f2ce195",
+      "row": {
+        "type": "admitted",
+        "at": 1792943103732,
+        "actor": "L9fe9730k",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 26365,
+      "lineSha256": "7465889c3468a1c6ddcd3269ce2d2f41a449dfa9d03ff79d84ee8436153c4bc6",
+      "row": {
+        "type": "admitted",
+        "at": 1792943108362,
+        "actor": "L9fe9730l",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 26997,
+      "lineSha256": "9018905356b97de6ded7179e3d3eaa5da1e9947b3baca3ed82255448d039cb1d",
+      "row": {
+        "type": "admitted",
+        "at": 1792943112878,
+        "actor": "L9fe9730m",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 27597,
+      "lineSha256": "0262001b6a99dbb3901dfba71d8fff49dc12b8f407327426f007bb853ce2c9e3",
+      "row": {
+        "type": "admitted",
+        "at": 1792943116916,
+        "actor": "L9fe9730n",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 28305,
+      "lineSha256": "a0fe46949bcb9265c27a747c1ce520b38b97c644600ca9df51a8461c6a8956f7",
+      "row": {
+        "type": "admitted",
+        "at": 1792943121516,
+        "actor": "L9fe9730o",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 83334,
+      "lineSha256": "d93acfec239ddbe1da527bf660368c290df29a4f97c5a1179b6ce1c574c68189",
+      "row": {
+        "type": "admitted",
+        "at": 1792943450621,
+        "actor": "L9fe9730p",
+        "role": "combat"
+      }
+    },
+    {
+      "line": 83927,
+      "lineSha256": "76fa11c7331b16ffa727540f8455c5f5f53ed643a3156052262d97d138fef071",
+      "row": {
+        "type": "admitted",
+        "at": 1792943453995,
+        "actor": "L9fe9730q",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 112535,
+      "lineSha256": "40e3bbca6212ccbf28a1fb28c6bb9c9c884e9773fb2a6b209dd7375d57544ac3",
+      "row": {
+        "type": "admitted",
+        "at": 1792943610461,
+        "actor": "L9fe9730r",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 113327,
+      "lineSha256": "a7001a3721c1269d7766be8d9bc6367258fd229921fbb033f575f9dc215893bf",
+      "row": {
+        "type": "admitted",
+        "at": 1792943614739,
+        "actor": "L9fe9730s",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 114202,
+      "lineSha256": "38d6f2c68b5fe9a68aa9c415ff0246ef96fcc898038d88a18a1d4431b58c14c2",
+      "row": {
+        "type": "admitted",
+        "at": 1792943619930,
+        "actor": "L9fe9730t",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 115114,
+      "lineSha256": "4e758ec4e7b1d29205e0be1f93167a4d5b8460cb8021ee84a63481e08c75ccb6",
+      "row": {
+        "type": "admitted",
+        "at": 1792943624391,
+        "actor": "L9fe9730u",
+        "role": "movement"
+      }
+    },
+    {
+      "line": 115322,
+      "lineSha256": "fab061dd713cfda0f6dce1cb2918d797dc9dda13f4025d5ac100ba789d5705b0",
+      "row": {
+        "type": "continuousFailure",
+        "at": 1792943625427,
+        "reason": "Continuous activity window failed, regardless of the measured stage"
+      }
+    },
+    {
+      "line": 115323,
+      "lineSha256": "8e255ea0f6b3f6bfcaf44bf68110060a297382c3dd7663842f2db5d57a9c50a7",
+      "row": {
+        "type": "safetyStop",
+        "at": 1792943625427,
+        "reason": "Continuous activity window failed, regardless of the measured stage"
+      }
+    },
+    {
+      "line": 115334,
+      "lineSha256": "2ee2a55ed449d90ad2dfca3c39270a1a363e9060dc7efe7df0db2d969d976c50",
+      "row": {
+        "type": "phaseEnded",
+        "at": 1792943625457,
+        "name": "bootstrap-50",
+        "startedAtMs": 1792943448036,
+        "endedAtMs": 1792943625457,
+        "completed": false
+      }
+    },
+    {
+      "line": 115596,
+      "lineSha256": "9ec9f3ee393f78d217243c73e6cf12efe8cdebff24013579d577cc65aa097af6",
+      "row": {
+        "type": "finished"
+      }
+    }
+  ],
+  "originalVerdictPreserved": true,
+  "capacityAccepted": false
+}

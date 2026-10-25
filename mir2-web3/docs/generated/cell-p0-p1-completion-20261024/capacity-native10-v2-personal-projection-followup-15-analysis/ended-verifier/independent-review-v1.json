@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T14:27:06.8559691Z",
+  "scope": "Bounded read-only static review of Probe15 ended-verification producer, contract, runner and Root-only source sealer. No actual run adjudication.",
+  "verdict": {
+    "toolSourceContractPassed": true,
+    "eligibleForRootSealing": true,
+    "blockingFindingIds": [],
+    "actualVerificationExecutedByReviewer": false,
+    "probePassAdjudicated": false,
+    "capacityAccepted": false,
+    "P2Authorized": false
+  },
+  "preparation": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\preparation-v1.json",
+    "bytes": 4243,
+    "sha256": "84ea2c9cce40bb392cffc8b60e007c61d4c797ff4d7f59719b7745d0de497a5a"
+  },
+  "checkedSourceClosure": {
+    "files": [
+      {
+        "path": "verify-ended-probe15-v1.mjs",
+        "bytes": 28031,
+        "sha256": "eedc2a98058cfca8ffaf1120d8e8f5b8518ff595e1ef250309845475f0063704"
+      },
+      {
+        "path": "probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "9a1843d910cbe4503859bd00d7c9fec77217d2229db9e31d0c9fe5ef005f278b"
+      },
+      {
+        "path": "hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      {
+        "path": "expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      {
+        "path": "run-ended-probe15-v1.mjs",
+        "bytes": 2257,
+        "sha256": "3c5731662e415db08e7a97add7f2bef7b98dd5ce317a41ce488d3f87a12827b7"
+      },
+      {
+        "path": "seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      {
+        "path": "derivation-proof-v1.json",
+        "bytes": 7237,
+        "sha256": "3f8235de28d3ecf988a061e98e506d117858a81dd68d29e415fc7a8147d5435c"
+      }
+    ],
+    "inputCount": 7,
+    "totalBytes": 52008,
+    "sourceSha256": "d5466532d7f29bb6627ef474b05ee6966eba76cab87662e66f3be30433dbc0d7",
+    "allRawPinsMatched": true,
+    "uniqueRegularLocalFiles": true
+  },
+  "derivationReview": {
+    "proof": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\derivation-proof-v1.json",
+      "bytes": 7237,
+      "sha256": "3f8235de28d3ecf988a061e98e506d117858a81dd68d29e415fc7a8147d5435c"
+    },
+    "mainRules": 15,
+    "contractRules": 4,
+    "runnerRules": 2,
+    "allForwardTransformationsExact": true,
+    "allInverseTransformationsExact": true,
+    "unchangedRawCopies": [
+      "hp-proof-contract-v2.mjs",
+      "expected-probe-policy-v1.json"
+    ],
+    "source14OriginalBytesMatched": true,
+    "method": "Read source bytes and apply the declared literal replacements in memory, then reverse in the opposite order. No target module imported or executed."
+  },
+  "identityReview": {
+    "runId": "1792937158876-b61ec943",
+    "backendAndExecutionCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "backendInputs": 44,
+    "binarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+    "nodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "node9SourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "wireHistoricalCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "runtimeLauncherInputs": 80,
+    "runtimeLauncherSha256": "0ceaf9d7c051d9e56fc2b94103b53c21eb11b8b60760e9e718475e17ce60e473",
+    "sourceConfigSha256": "7bb9aeaaf29fbf0aa0f051b70a3388fa06877cf65ed3b2f64957a77a1e595022",
+    "gatewayPid": 63108,
+    "monitorPid": 58736,
+    "pidSource": "Only the two small public process metadata JSON files were read; reviewer did not query or operate live processes."
+  },
+  "behaviorReview": [
+    "Full success requires original stage-2/stage-10/soak 300/300/360 configuration, actual measuredSeconds >= configured, and 5/5/6 contiguous real windows each >=60 seconds; no shorter-profile promotion.",
+    "Whole-phase activity/native-rate checks use measuredSeconds; minute checks use actual window.seconds. Original policy is deep-equal and original 18 launch/12 positive, movement, correction, timeout and dual-endpoint receipt gates are not lowered.",
+    "Failed or partial reports retain their original verdict. Complete three-stage/16-window shape is success-only; partial boundaries and already-recorded windows are replayed without fabricating missing stages.",
+    "HP uses the exact preserved ten-status proof contract. Zero events means verifiedEventsChecked=0, successProofChecked=false and noVerifiedDoseObserved=true; it does not prove any actual dose or healing.",
+    "Wire source/terminal/counters/uninstall and strictly increasing sequence are checked separately. Truncation/diagnostic completeness never creates gameplay ACK, damage credit or capacity acceptance.",
+    "Root cleanup requires schema1, the actual run and fixed gateway/monitor PIDs, absent processes/free ports, empty arrays, readOnlyIndependentCheck=true and capacityAccepted=false; proof must exist before actual verification.",
+    "Type/kind/status/actor strings and dictionary cardinality, actor maps, windows and phase records retain the inherited bounded replay limits. Probe memory output does not certify the formal two-hour memory-slope contract."
+  ],
+  "rootControlReview": {
+    "sealer": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    "explicitFourArgumentInvocation": true,
+    "preparationShaRequired": true,
+    "sourcePinsCheckedBeforeWx": true,
+    "reviewVerdictAndPreparationShaRequired": true,
+    "publicReviewRegularNonsymlinkContainment": true,
+    "sourceSealIncludesReviewAndPreparation": true,
+    "sealDoesNotImportVerifierOrReadRun": true,
+    "runnerNeedsExplicitSealAndEndedRun": true,
+    "runnerChecksSourcesBeforeAndAfter": true,
+    "actualCollectorCleanupAndEndedNotificationRequired": true
+  },
+  "validationScope": {
+    "sourceRead": true,
+    "rawPinAndLiteralInverseChecksPerformed": true,
+    "authorReportedNodeSyntaxChecks": 5,
+    "reviewerRanSyntaxOrBehaviorTests": false,
+    "productImportsExecuted": false,
+    "actualVerifierExecuted": false,
+    "liveRawOrMonitorRead": false,
+    "privateDataRead": false,
+    "serviceOrAccountOperations": false,
+    "trackedOrFrozenInputsChanged": false,
+    "newFilesWritten": [
+      "this independent static review only"
+    ]
+  },
+  "limitations": [
+    "The stream reader trusts the existing frozen-producer/raw SHA and byte manifest. readline aggregates a line before the subsequent 64MiB line check; this review does not claim an adversarial overlong-line memory bound.",
+    "No actual Probe15 final report, complete raw, monitor, public collection or root cleanup proof was consumed by this review. This receipt cannot replace the ended-only verifier result or a fresh formal capacity run.",
+    "The advertised 5 syntax checks are producer metadata, not fresh tests executed by this reviewer. No extra benchmark, product test or service was started."
+  ]
+}

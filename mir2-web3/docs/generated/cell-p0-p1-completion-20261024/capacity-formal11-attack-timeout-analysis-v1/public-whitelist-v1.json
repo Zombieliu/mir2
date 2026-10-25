@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit immutable public diagnostic sources; no original raw/monitor/slow file, private data, binary or recording payload is copied.",
+  "runId": "1792942371568-1e322224",
+  "files": [
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\select-timeouts-v1.mjs",
+      "bytes": 4303,
+      "sha256": "ea4bcb8ecf2772176cfc07ca6751fab412796a053f55dd6baf87cea2f35d5bfc"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\selected-timeouts-v1.json",
+      "bytes": 99083,
+      "sha256": "6d0630e628de3d3f9d44f1de5b1be08e602c8157bdcdbc7b0d6534650885b0ba"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\correlate-telemetry-v1.mjs",
+      "bytes": 7597,
+      "sha256": "2c3f1eb58523120eccebf6d4529a9f5cf1d0cfa2793b6770d88077cc8503ac2a"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\telemetry-correlation-v1.json",
+      "bytes": 318013,
+      "sha256": "984f255b74fe7899c92d170d20f6ecde3654aaeb68edb00f29f5268e3a1529f9"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\select-input-stage-spans-v1.mjs",
+      "bytes": 2790,
+      "sha256": "4afc4c6a35d70e7f937c4bfa5c134128a8fb7b394c0a77a18f0d6d4700699b01"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\input-stage-spans-v1.json",
+      "bytes": 187622,
+      "sha256": "985b073ea98a5c926679ffda17e88a97fe61a1c336ea18e9b1bced8532b804ce"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\finalize-summary-v1.mjs",
+      "bytes": 9983,
+      "sha256": "c3b14408e941b532c5516109173157f87b5106cd84a9aeb26cc61a6e9fddfc52"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\source-assertions-v1.json",
+      "bytes": 5398,
+      "sha256": "55eccfaeb87fb98b7a8e5fb478179ce2722feb68eec2b54093ac5e53ff82ce9d"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\summary-v1.json",
+      "bytes": 112262,
+      "sha256": "0b50431970201261b5f78ed3deda8ffd4b239b3b500187997c6af00f73f11288"
+    }
+  ],
+  "originalInputs": {
+    "report": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\reports\\1792942371568-1e322224.report.json",
+      "bytes": 436729,
+      "sha256": "08f558c26ef0faf557e3a8fe5b84d50db39f1b388de1b47beb603eda604ee46e"
+    },
+    "raw": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\reports\\1792942371568-1e322224.samples.jsonl",
+      "bytes": 68831794,
+      "sha256": "2a0a9def47282a9c02c3b46500782cb09dcf7ee0684c3638e862ecaf331cdc78",
+      "rows": 115596
+    },
+    "originalPublicRawManifest": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-personal-projection-ladder-11\\raw-artifact-manifest.json",
+      "bytes": 698,
+      "sha256": "8449bf92df05ee2bdf872b2357e6af6719f239043a44b935130881645bf549e8"
+    },
+    "selected": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\selected-timeouts-v1.json",
+      "bytes": 99083,
+      "sha256": "6d0630e628de3d3f9d44f1de5b1be08e602c8157bdcdbc7b0d6534650885b0ba"
+    },
+    "telemetry": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\telemetry-correlation-v1.json",
+      "bytes": 318013,
+      "sha256": "984f255b74fe7899c92d170d20f6ecde3654aaeb68edb00f29f5268e3a1529f9"
+    },
+    "inputStageSpans": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\input-stage-spans-v1.json",
+      "bytes": 187622,
+      "sha256": "985b073ea98a5c926679ffda17e88a97fe61a1c336ea18e9b1bced8532b804ce"
+    },
+    "historicalSourceAssertions": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-attack-timeout-analysis-v1\\source-assertions-v1.json",
+      "bytes": 5398,
+      "sha256": "55eccfaeb87fb98b7a8e5fb478179ce2722feb68eec2b54093ac5e53ff82ce9d"
+    },
+    "driverFreeze": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-chase-preference-driver-frozen-v1.json",
+      "bytes": 19099,
+      "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+    },
+    "rootIndependentCleanup": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal11-root-independent-cleanup-v1.json",
+      "bytes": 324,
+      "sha256": "18c777e45d9742bf73152560778ab36f614b031f68d7df2e0bc2b8847fa31460"
+    }
+  },
+  "capacityAccepted": false,
+  "originalVerdictPreserved": true
+}

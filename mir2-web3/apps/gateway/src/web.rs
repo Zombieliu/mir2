@@ -6636,7 +6636,7 @@ async fn handle_socket_work(
                 let mut native_attack_admission = None;
                 let mut native_attack_error = None;
                 let execution_result = match catch_gateway_panic("web session action", || {
-                    let _slow_stage = GatewaySlowStage::start("session_action.execute");
+                    let _slow_stage = GatewaySlowStage::for_socket("session_action.execute", &diagnostics);
                     tokio::task::block_in_place(|| {
                         if let Some(request) = native_attack_request.as_ref() {
                             match session.execute_production_attack_requiring_typed_outcome(request.object_id, authenticated) {
@@ -6978,7 +6978,7 @@ async fn handle_socket_work(
                 }
 
                 let flush_result = {
-                    let _slow_stage = GatewaySlowStage::start("session_action.flush");
+                    let _slow_stage = GatewaySlowStage::for_socket("session_action.flush", &diagnostics);
                     flush_session_updates(
                         &sender,
                         session,
@@ -7343,7 +7343,7 @@ async fn handle_socket_work(
                 let monthly_expiry_route = monthly_expiry_pending
                     .then(|| tokio::task::block_in_place(|| OwnedSessionRoute::capture(session))).flatten();
                 let responses = match catch_gateway_panic("web session tick", || {
-                    let _slow_stage = GatewaySlowStage::start("runtime_tick.execute");
+                    let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.execute", &diagnostics);
                     tokio::task::block_in_place(|| {
                         session
                             .execute_with_outcome(WorldCommand::Tick)
@@ -7396,7 +7396,7 @@ async fn handle_socket_work(
                 }
                 if responses.is_empty() {
                     let checkpoint_result = {
-                        let _slow_stage = GatewaySlowStage::start("runtime_tick.save_checkpoint");
+                        let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.save_checkpoint", &diagnostics);
                         save_queue.checkpoint(now, || {
                             tokio::task::block_in_place(|| {
                                 catch_gateway_panic("web save_active_character", || {
@@ -7413,7 +7413,7 @@ async fn handle_socket_work(
                     continue;
                 }
                 let flush_result = {
-                    let _slow_stage = GatewaySlowStage::start("runtime_tick.flush");
+                    let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.flush", &diagnostics);
                     flush_session_updates(
                         &sender,
                         session,
@@ -19468,6 +19468,41 @@ mod tests {
             assert_eq!(stage(Some(context)).log_line(Duration::from_millis(3356)),
                 "[gateway-slow-stage] stage=socket_input.queue_residence duration_ms=3356 connection=17 queued_phase=spectator phase_elapsed_ms=55 input_class=attack_v2");
             assert!(SOCKET_DIAGNOSTIC_MAX_START_US / 1000 < SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER);
+        }
+
+        #[test]
+        fn execution_flush_and_tick_stages_distinguish_connections_without_payload() {
+            let counter = AtomicU64::new(17);
+            let first = allocate_socket_diagnostics(true, &counter);
+            let second = allocate_socket_diagnostics(true, &counter);
+            let elapsed = Duration::from_millis(53);
+            for label in [
+                "session_action.execute",
+                "session_action.flush",
+                "runtime_tick.execute",
+                "runtime_tick.save_checkpoint",
+                "runtime_tick.flush",
+            ] {
+                let first_stage = GatewaySlowStage::for_socket(label, &first);
+                let second_stage = GatewaySlowStage::for_socket(label, &second);
+                let disabled = GatewaySlowStage::for_socket(label, &None);
+                assert_eq!(
+                    first_stage.log_line(elapsed),
+                    format!("[gateway-slow-stage] stage={label} duration_ms=53 connection=17")
+                );
+                assert_eq!(
+                    second_stage.log_line(elapsed),
+                    format!("[gateway-slow-stage] stage={label} duration_ms=53 connection=18")
+                );
+                assert_eq!(
+                    disabled.log_line(elapsed),
+                    format!("[gateway-slow-stage] stage={label} duration_ms=53")
+                );
+                assert_eq!(first_stage.threshold, disabled.threshold);
+                assert_eq!(second_stage.threshold, disabled.threshold);
+                assert!(first_stage.context.as_ref().unwrap().queued.is_none());
+                assert!(second_stage.context.as_ref().unwrap().queued.is_none());
+            }
         }
 
         #[test]
