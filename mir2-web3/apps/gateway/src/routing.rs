@@ -11162,7 +11162,7 @@ impl SharedInProcessZoneSessionRuntime {
         // Commit its journey evidence here and retain the owner projection for
         // that Tick, so comparing the already-updated mirror cannot lose it.
         if previous_position.is_some() && previous_position != self.inner.local_player_position() {
-            let packets = self.inner.commit_zone_journey_reposition();
+            let packets = self.commit_personal_zone_journey_reposition();
             if !packets.is_empty() {
                 self.zone_state
                     .lock()
@@ -11924,7 +11924,9 @@ impl SharedInProcessZoneSessionRuntime {
         if should_join_zone && admission == ZoneSnapshotAdmission::Ordinary {
             // The authoritative map/bootstrap snapshot establishes the first
             // trusted state at which V2 checkpoint conditions may be refreshed.
-            packets.extend(self.inner.commit_zone_journey_state());
+            let mut personal = self.inner.commit_zone_journey_state();
+            self.suppress_personal_zone_journey_projections(&mut personal);
+            packets.extend(personal);
         }
         self.apply_zone_shout_consume(shout_consume);
         self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
@@ -12401,7 +12403,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_transform(transform);
         if completed_authoritative_position_change {
             let _stage = GatewaySlowStage::start("shared_session.predrain.journey_reposition");
-            packets.extend(self.inner.commit_zone_journey_reposition());
+            packets.extend(self.commit_personal_zone_journey_reposition());
         }
         let mut deferred_monster_spawns = Vec::new();
         if defer_unowned_monster_spawns {
@@ -14369,6 +14371,42 @@ impl SharedInProcessZoneSessionRuntime {
     /// corpse incarnation. Do not publish that lossy personal ObjectMonster as
     /// a live replacement for the authoritative shared object. Owner-controlled
     /// pets and first admission remain eligible for their normal paths.
+    fn commit_personal_zone_journey_reposition(&mut self) -> Vec<ServerPacket> {
+        let mut personal = self.inner.commit_zone_journey_reposition();
+        self.suppress_personal_zone_journey_projections(&mut personal);
+        personal
+    }
+
+    // Only freshly finalized personal journey output may use this boundary.
+    // Generic command results can also contain genuine Zone AOI removals.
+    fn suppress_personal_zone_journey_projections(&self, packets: &mut Vec<ServerPacket>) {
+        self.suppress_personal_retained_monster_projections(packets);
+        if !packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ObjectRemove { .. }))
+        {
+            return;
+        }
+        let Some(map_file_name) = self.inner.current_map_file_name() else {
+            return;
+        };
+        let zone_state = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        let Some(zone) = zone_state
+            .zone_manager
+            .zone(&ZoneKey::for_map(&map_file_name))
+        else {
+            return;
+        };
+        packets.retain(|packet| {
+            !matches!(packet, ServerPacket::ObjectRemove { object_id }
+                if zone.retains_object_id(*object_id)
+                    && zone.native_monster_is_unowned(*object_id) == Some(true))
+        });
+    }
+
     fn suppress_personal_retained_monster_projections(&self, packets: &mut Vec<ServerPacket>) {
         // Most serialized commands do not project monsters. Avoid rebuilding
         // the full personal world snapshot on that hot path merely to discover
@@ -15772,7 +15810,7 @@ impl SharedInProcessZoneSessionRuntime {
                 let mut packets = execution.packets;
                 if matches!(packet, ClientPacket::Walk { .. } | ClientPacket::Run { .. }) {
                     if accepted_walk_or_run {
-                        packets.extend(self.inner.commit_zone_journey_reposition());
+                        packets.extend(self.commit_personal_zone_journey_reposition());
                     }
                     packets.extend(self.sync_newly_active_private_monsters_to_zone());
                 }

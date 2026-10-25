@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T10:24:31.281Z",
+  "state": "PREPARED_FOR_STATIC_REVIEW_ONLY_NOT_EXECUTED",
+  "derivedFromActualCorrectedFormalV4": true,
+  "sources": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/formal10-independent-verification-v1/verify-ended-formal10-v4.mjs",
+      "bytes": 28111,
+      "sha256": "f5cc63dc6587e50673ac984c541390f0a415f4fb19e7371d957c43dbac0747c7"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/formal10-independent-verification-v1/formal-contract-v2.mjs",
+      "bytes": 6103,
+      "sha256": "5aa9f0057bacf899270b14619d0168148c07323f97065aff8c56bf14cf227b4c"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/run-options.json",
+      "bytes": 2820,
+      "sha256": "4676c3c511106571313f44f8906d9e9e45a69dde34c8474577cf805b920607e7"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-chase-preference-feasibility-14/launcher-source-frozen-v1.json",
+      "bytes": 19769,
+      "sha256": "0d994e2c1d097de3b732543f06c3cf9787dcc56b1c3b74fa497b4b2c2cca65d7"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/capacity-native-chase-preference-driver-frozen-v1.json",
+      "bytes": 19099,
+      "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+    }
+  ],
+  "changes": [
+    "local probe contract",
+    "realm identity",
+    "public child",
+    "output root",
+    "actual probe policy and immutable six report contracts",
+    "probe resume bound",
+    "raw bounded probe windows",
+    "probe phase bound",
+    "zero probe resume report",
+    "prepared source config",
+    "actual sealed launcher pin",
+    "no untested formal memory replay",
+    "probe pass shape only after actual success",
+    "probe scope verdict",
+    "result probe scope",
+    "result actual immutable metadata",
+    "probe memory claim",
+    "probe true-window scope note",
+    "probe result note",
+    "runner public returned field",
+    "drop unused formal memory state",
+    "drop formal memory monitor ring",
+    "three probe phase shape",
+    "probe bound counts",
+    "probe success no resume or save",
+    "actual owned gateway",
+    "actual owned monitor"
+  ],
+  "syntax": [
+    {
+      "path": "verify-ended-probe14-v1.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "path": "probe-contract-v1.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "path": "run-ended-probe14-v1.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "productOrSchemaTestsRun": false,
+  "gameVerifierInvoked": false,
+  "liveRawOrMonitorRead": false,
+  "runStarted": false,
+  "privateDataRead": false,
+  "scope": "Independent ended-only original probe14 counter replay, actual measuredSeconds, failed preservation and original16 windows; no capacity acceptance. HP zero verified events proves neither dosing nor continuous survival. Wire completeness remains diagnostic.",
+  "limitations": [
+    "Only frozen-producer SHA/size-bound trusted archives are processed. Node readline aggregates a line before its64MiB limit check; this is not an adversarial-input memory-bound claim.",
+    "No recording payload is parsed; the frozen original collector/public verifier supplies recording byte/SHA checks.",
+    "The original activity counter replay and reported status projection are checked; protocol causality is not reconstructed from diagnostics.",
+    "No actual ended verification has been executed by this preparation script."
+  ]
+}

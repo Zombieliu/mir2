@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T08:53:29.186Z",
+  "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+  "before": {
+    "bytes": 144416,
+    "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+  },
+  "after": {
+    "bytes": 148409,
+    "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+  },
+  "ruleCount": 8,
+  "inverseRestoresOriginal": true,
+  "rules": [
+    {
+      "before": "const COMBAT_CHASE_MAX_MS = 30000;",
+      "after": "const COMBAT_CHASE_MAX_MS = 30000;\nconst RECENT_CHASE_PREFERENCE_MS = 3000;"
+    },
+    {
+      "before": "    startedAt: now, activeElapsedMs: 0, confirmedMoves: 0, visited: new Map() };",
+      "after": "    startedAt: now, activeElapsedMs: 0, confirmedMoves: 0, visited: new Map(),\n    coordinationFirstReceiptMonoMs: null, coordinationLastReceiptMonoMs: null };"
+    },
+    {
+      "before": "  pursuit.confirmedMoves++;\n  pursuit.lastMovementAt = now;",
+      "after": "  pursuit.confirmedMoves++;\n  pursuit.lastMovementAt = now;\n  // Only the authoritative receipt's own clock can establish this optional\n  // planning preference. Processing an old ACK does not refresh its age.\n  const receiptMonoMs = receipt.monotonicMs, previousMonoMs = pursuit.coordinationLastReceiptMonoMs;\n  if (Number.isFinite(receiptMonoMs) && receiptMonoMs >= 0 &&\n      (!Number.isFinite(previousMonoMs) || receiptMonoMs >= previousMonoMs)) {\n    if (!Number.isFinite(previousMonoMs) || receiptMonoMs - previousMonoMs > RECENT_CHASE_PREFERENCE_MS ||\n        !Number.isFinite(pursuit.coordinationFirstReceiptMonoMs) || pursuit.coordinationFirstReceiptMonoMs < 0 ||\n        pursuit.coordinationFirstReceiptMonoMs > previousMonoMs) pursuit.coordinationFirstReceiptMonoMs = receiptMonoMs;\n    pursuit.coordinationLastReceiptMonoMs = receiptMonoMs;\n  } else {\n    pursuit.coordinationFirstReceiptMonoMs = null; pursuit.coordinationLastReceiptMonoMs = null;\n  }"
+    },
+    {
+      "before": "    startedAt: now, lastMovementAt: now, targetPoint: lifecyclePoint(target), routeProgress: null,",
+      "after": "    startedAt: now, lastMovementAt: now, targetPoint: lifecyclePoint(target), routeProgress: null,\n    coordinationFirstReceiptMonoMs: null, coordinationLastReceiptMonoMs: null,"
+    },
+    {
+      "before": "function combatPlan(client, context) {",
+      "after": "function recentNativePursuitLeaders(context, mapFileName, nowMonoMs) {\n  const leaders = new Map();\n  if (!Number.isFinite(nowMonoMs) || nowMonoMs < 0) return leaders;\n  for (const hunter of context.clients) {\n    if (hunter.role !== 'combat' || typeof hunter.label !== 'string' || !activeGameplayOwner(hunter, mapFileName)) continue;\n    const pursuit = hunter.combatPursuit;\n    if (!pursuit || pursuit.attackSent || pursuit.mapFileName !== mapFileName) continue;\n    const first = pursuit.coordinationFirstReceiptMonoMs, last = pursuit.coordinationLastReceiptMonoMs;\n    if (!Number.isFinite(first) || !Number.isFinite(last) || first < 0 || first > last ||\n        last > nowMonoMs || nowMonoMs - last > RECENT_CHASE_PREFERENCE_MS) continue;\n    const target = hunter.snapshot.entities.find(entity => entity.objectId === pursuit.objectId && entity.name === pursuit.name);\n    if (!target || !availableCombatTarget(hunter, context, target, Date.now())) continue;\n    const prior = leaders.get(pursuit.objectId);\n    if (!prior || first < prior.firstReceiptMonoMs || (first === prior.firstReceiptMonoMs && hunter.label < prior.label)) {\n      leaders.set(pursuit.objectId, { label: hunter.label, firstReceiptMonoMs: first });\n    }\n  }\n  return leaders;\n}\n\nfunction combatPlan(client, context, nowMonoMs = performance.now()) {"
+    },
+    {
+      "before": "    candidates = [...new Set([...(selected && adjacent.includes(selected) ? [selected] : []), ...adjacent,\n      ...(selected ? [selected] : []), ...candidates])];",
+      "after": "    candidates = [...new Set([...(selected && adjacent.includes(selected) ? [selected] : []), ...adjacent,\n      ...(selected ? [selected] : []), ...candidates])];\n    // Reorder only the original four-candidate window. A claimed target with\n    // the only usable path remains a fallback within the same search budget.\n    // This is a group planning preference, never an exclusive combat claim.\n    const leaders = recentNativePursuitLeaders(context, client.snapshot.mapFileName, nowMonoMs);\n    const immediate = new Set(adjacent.map(target => target.objectId));\n    const priority = target => immediate.has(target.objectId) ? 0 :\n      leaders.has(target.objectId) && leaders.get(target.objectId).label !== client.label ? 2 : 1;\n    candidates = candidates.slice(0, 4).sort((a, b) => priority(a) - priority(b));"
+    },
+    {
+      "before": "  return client.role === 'combat' ? combatPlan(client, context) : patrol(client, context);",
+      "after": "  return client.role === 'combat' ? combatPlan(client, context, now) : patrol(client, context);"
+    },
+    {
+      "before": "  if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeAttackWitness', { enumerable: true,",
+      "after": "  if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeChasePreference', { enumerable: true,\n    value: Object.freeze({ freshReceiptMs: RECENT_CHASE_PREFERENCE_MS,\n      scope: 'Client-side preference within the original first4 candidates, not an exclusive claim or a capacity result.',\n      evidenceRule: 'Only fresh matching nonzero chase UserLocation receipts establish monotonic first/last ACK priority; active living same-map fighters and live targets only.',\n      selectionRule: 'Keep adjacent witnessed attacks first, then prefer targets without an earlier recent pursuer; retain every original first4 candidate and path fallback.',\n      budgetRule: 'Original4-target/8-goal/4000-node searches, cadence, offered/completed accounting and finite chase budgets are unchanged.',\n      restoreRule: 'Resume clears receipt preference only; original chase elapsed time, ACK count and visited positions remain.' }) });\n  if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeAttackWitness', { enumerable: true,"
+    }
+  ],
+  "backendChanged": false,
+  "thresholdsChanged": false,
+  "testsNotYetRun": true
+}

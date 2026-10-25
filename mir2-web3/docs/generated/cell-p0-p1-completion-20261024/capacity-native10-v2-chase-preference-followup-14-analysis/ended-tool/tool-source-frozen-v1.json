@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T10:24:31.283Z",
+  "state": "STATIC_PREPARATION_ONLY_PENDING_INDEPENDENT_REVIEW",
+  "files": [
+    {
+      "path": "prepare-verifier-v1.mjs",
+      "bytes": 16778,
+      "sha256": "faf8ec3c3ebb7e61fbc5f80a475c9a06f4f11812ba0982504a2c928c7fa96d35"
+    },
+    {
+      "path": "verify-ended-probe14-v1.mjs",
+      "bytes": 27982,
+      "sha256": "66486662f9be4eccccc0015ddbd3040ae5dc4b44125d1b4fe99c3a70e5222d29"
+    },
+    {
+      "path": "probe-contract-v1.mjs",
+      "bytes": 5820,
+      "sha256": "55dab5ae7ea97da1e26514dc4d8e730b53a92945e76a409a1ff4d67489fe4ae4"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "path": "run-ended-probe14-v1.mjs",
+      "bytes": 2257,
+      "sha256": "d5624b5ca5cbe4a5cd9497bab379716027576567a5a7b78d453ac3feb7e5fe8a"
+    },
+    {
+      "path": "preparation-v1.json",
+      "bytes": 3972,
+      "sha256": "83e8a47211173749dab46f49a21a4280eca13f4d0e7215728bfd9e81837ba1bb"
+    }
+  ],
+  "sourceSha256": "d9ebf60aa50e5f5377db1af223b30e4db682673fd151cc1896ce930c647d865b",
+  "actualVerificationExecuted": false,
+  "capacityAccepted": false
+}

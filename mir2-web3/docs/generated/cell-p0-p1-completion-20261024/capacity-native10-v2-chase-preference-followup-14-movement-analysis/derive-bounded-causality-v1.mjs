@@ -1,0 +1,24 @@
+import fs from 'node:fs/promises'; import path from 'node:path'; import crypto from 'node:crypto'; import assert from 'node:assert/strict';
+const directory='C:/mir2-build/p01-completion-20261024/probe14-movement-correction-analysis-v1',hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+const sourceFile=path.join(directory,'selected-corrections-v2.json'),bytes=await fs.readFile(sourceFile),selected=JSON.parse(bytes);
+const plans=[{case:1,lines:[1588,1600,1627,1631,1633,1639,1640],key:'Early separate window: local full snapshot and turns place206613 near243598, then ObjectMonster moves the cached entity to258596 before the rejected Run.'},
+ {case:2,lines:[3386,3441,3444,3461,3467,3470,3471],key:'Failing pairA:206613 walks to242599, is explicitly removed, then sends a nearby attack while absent; subsequent Run receives an unchanged owner position.'},
+ {case:3,lines:[3470,3471,3480,3481],key:'The next Walk retries242599 after the rejected Run receipt has already arrived; its own fresh UserLocation remains241599.'},
+ {case:4,lines:[3386,3840,3864,3868,3876,3884,3885],key:'Failing pairB:206613 walks to242597, is explicitly removed, then sends a nearby attack while absent; subsequent Run receives an unchanged owner position.'},
+ {case:5,lines:[3884,3885,3895,3896],key:'The next Walk retries242597 after the rejected Run receipt has already arrived; its own fresh UserLocation remains241597.'}];
+const cases=plans.map(plan=>{const item=selected.cases.find(value=>value.number===plan.case),available=[...item.preceding,...item.following,item.lastFullSnapshot].filter(Boolean),events=plan.lines.map(line=>{const row=available.find(value=>value.line===line&&value.connection===1);assert.ok(row,'Expected connection1 event missing: '+line);return row;});
+ const previousOwner=[...item.preceding].reverse().find(row=>row.connection===1&&row.source==='UserLocation'&&row.receipt?.monotonicMs<item.action.sentAtMs),send=item.matchedSend,receipt=item.matchedOwnerReceipt;
+ assert.equal(send.hint.sentAtMs,item.action.sentAtMs);assert.ok(receipt.receipt.sequence>send.hint.sendCursor);assert.ok(receipt.receipt.monotonicMs>=send.hint.sentAtMs);assert.equal(receipt.receipt.monotonicMs-item.action.sentAtMs,item.action.latencyMs);
+ return{number:item.number,insideFailingWindow:item.number>1,narrative:plan.key,action:item.action,sendLine:send.line,sendCursor:send.hint.sendCursor,sendHint:send.hint,
+  firstMatchingOwnerReceipt:{line:receipt.line,sequence:receipt.receipt.sequence,monotonicMs:receipt.receipt.monotonicMs,wire:receipt.wire,foldedOwner:receipt.after.owner},
+  previousPlannedMovement:item.previousPlannedMovements.at(-1),previousOwnerReceipt:previousOwner?{line:previousOwner.line,sequence:previousOwner.receipt.sequence,monotonicMs:previousOwner.receipt.monotonicMs,wire:previousOwner.wire}:null,
+  previousOwnerReceiptAlreadyBeforeCurrentSend:previousOwner?.receipt.monotonicMs<item.action.sentAtMs,events};});
+const result={schemaVersion:1,createdAt:new Date().toISOString(),runId:selected.runId,actor:selected.actor,source:{file:sourceFile,bytes:bytes.length,sha256:hash(bytes)},raw:selected.raw,cases,
+ conclusions:['The failed60s window contains the final four of five whole-stage corrected moves; the original failed verdict is retained.',
+ 'All five observed corrected actions have their actual diagnostic send hint and a later fresh same-connection UserLocation, matching the exact latency recorded by the original action path.',
+ 'Previous observed owner receipts had already arrived before each current send. There is no observed outstanding timeout in these preceding movements; legacy movement has no requestID, so this is strong local cursor/clock correspondence rather than a new authoritative command identity.',
+ 'For both failed pairs, an explicit206613 ObjectRemove follows a near-cell movement, and a later nearby ObjectAttack arrives while the same client no longer has that ID. The ordinary fold follows its documented removal behavior.',
+ 'The client send views were not truncated and lacked a known non-player at the first/target cells. This does not establish simultaneous authoritative occupancy or a server rejection reason.',
+ 'The earlier correction also follows a near/far206613 ObjectMonster cache relocation. The same-ID packet provenance is a concrete next source audit; a wrong authority or filtering implementation is not proven.'],
+ noSpectatorPayloadOrPrivateRead:true,noAdditionalRawRead:true,originalThresholdsUnchanged:true,capacityAccepted:false};
+await fs.writeFile(path.join(directory,'bounded-causality-v1.json'),JSON.stringify(result,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({cases:cases.length,source:result.source,events:cases.reduce((sum,item)=>sum+item.events.length,0),allFivePriorReceiptsAlreadyArrived:cases.every(item=>item.previousOwnerReceiptAlreadyBeforeCurrentSend)}));

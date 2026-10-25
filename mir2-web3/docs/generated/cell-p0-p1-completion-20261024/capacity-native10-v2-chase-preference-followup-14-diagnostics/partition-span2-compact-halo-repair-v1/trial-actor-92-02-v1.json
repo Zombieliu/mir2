@@ -1,0 +1,2240 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:35:38.822Z",
+  "actorIndex": 92,
+  "candidateNumber": 2,
+  "fromHome": {
+    "x": 227,
+    "y": 531
+  },
+  "originalHome": {
+    "x": 227,
+    "y": 531
+  },
+  "proposedHome": {
+    "x": 229,
+    "y": 534
+  },
+  "displacementFromOriginal": 3,
+  "pathRanking": {
+    "home": {
+      "x": 229,
+      "y": 534
+    },
+    "paths": [
+      {
+        "goal": {
+          "x": 230,
+          "y": 533
+        },
+        "found": true,
+        "steps": 53
+      },
+      {
+        "goal": {
+          "x": 230,
+          "y": 534
+        },
+        "found": true,
+        "steps": 53
+      },
+      {
+        "goal": {
+          "x": 230,
+          "y": 535
+        },
+        "found": true,
+        "steps": 53
+      },
+      {
+        "goal": {
+          "x": 229,
+          "y": 533
+        },
+        "found": true,
+        "steps": 54
+      }
+    ],
+    "bestOriginalPathSteps": 53
+  },
+  "localFailureRepaired": true,
+  "exactFirstTen": true,
+  "roleIndicesUnchanged": true,
+  "originalFullClusterPassed": true,
+  "affectedPrefixResult": {
+    "count": 100,
+    "passed": true,
+    "firstCircuitSteps": 825,
+    "secondCircuitSteps": 886,
+    "legs": [
+      {
+        "observerIndex": 0,
+        "from": {
+          "x": 239,
+          "y": 596
+        },
+        "goal": {
+          "x": 241,
+          "y": 597
+        },
+        "steps": 2
+      },
+      {
+        "observerIndex": 1,
+        "from": {
+          "x": 241,
+          "y": 597
+        },
+        "goal": {
+          "x": 235,
+          "y": 591
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 2,
+        "from": {
+          "x": 235,
+          "y": 591
+        },
+        "goal": {
+          "x": 233,
+          "y": 579
+        },
+        "steps": 12
+      },
+      {
+        "observerIndex": 3,
+        "from": {
+          "x": 233,
+          "y": 579
+        },
+        "goal": {
+          "x": 236,
+          "y": 579
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 4,
+        "from": {
+          "x": 236,
+          "y": 579
+        },
+        "goal": {
+          "x": 251,
+          "y": 586
+        },
+        "steps": 15
+      },
+      {
+        "observerIndex": 6,
+        "from": {
+          "x": 251,
+          "y": 586
+        },
+        "goal": {
+          "x": 256,
+          "y": 591
+        },
+        "steps": 5
+      },
+      {
+        "observerIndex": 7,
+        "from": {
+          "x": 256,
+          "y": 591
+        },
+        "goal": {
+          "x": 255,
+          "y": 608
+        },
+        "steps": 17
+      },
+      {
+        "observerIndex": 8,
+        "from": {
+          "x": 255,
+          "y": 608
+        },
+        "goal": {
+          "x": 233,
+          "y": 612
+        },
+        "steps": 22
+      },
+      {
+        "observerIndex": 9,
+        "from": {
+          "x": 233,
+          "y": 612
+        },
+        "goal": {
+          "x": 240,
+          "y": 603
+        },
+        "steps": 10
+      },
+      {
+        "observerIndex": 10,
+        "from": {
+          "x": 240,
+          "y": 603
+        },
+        "goal": {
+          "x": 240,
+          "y": 600
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 11,
+        "from": {
+          "x": 240,
+          "y": 600
+        },
+        "goal": {
+          "x": 241,
+          "y": 600
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 12,
+        "from": {
+          "x": 241,
+          "y": 600
+        },
+        "goal": {
+          "x": 245,
+          "y": 596
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 13,
+        "from": {
+          "x": 245,
+          "y": 596
+        },
+        "goal": {
+          "x": 247,
+          "y": 596
+        },
+        "steps": 2
+      },
+      {
+        "observerIndex": 14,
+        "from": {
+          "x": 247,
+          "y": 596
+        },
+        "goal": {
+          "x": 245,
+          "y": 590
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 16,
+        "from": {
+          "x": 245,
+          "y": 590
+        },
+        "goal": {
+          "x": 244,
+          "y": 585
+        },
+        "steps": 5
+      },
+      {
+        "observerIndex": 17,
+        "from": {
+          "x": 244,
+          "y": 585
+        },
+        "goal": {
+          "x": 245,
+          "y": 582
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 18,
+        "from": {
+          "x": 245,
+          "y": 582
+        },
+        "goal": {
+          "x": 246,
+          "y": 579
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 19,
+        "from": {
+          "x": 246,
+          "y": 579
+        },
+        "goal": {
+          "x": 248,
+          "y": 581
+        },
+        "steps": 2
+      },
+      {
+        "observerIndex": 20,
+        "from": {
+          "x": 248,
+          "y": 581
+        },
+        "goal": {
+          "x": 251,
+          "y": 580
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 21,
+        "from": {
+          "x": 251,
+          "y": 580
+        },
+        "goal": {
+          "x": 252,
+          "y": 581
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 22,
+        "from": {
+          "x": 252,
+          "y": 581
+        },
+        "goal": {
+          "x": 259,
+          "y": 574
+        },
+        "steps": 7
+      },
+      {
+        "observerIndex": 23,
+        "from": {
+          "x": 259,
+          "y": 574
+        },
+        "goal": {
+          "x": 250,
+          "y": 569
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 24,
+        "from": {
+          "x": 250,
+          "y": 569
+        },
+        "goal": {
+          "x": 244,
+          "y": 568
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 26,
+        "from": {
+          "x": 244,
+          "y": 568
+        },
+        "goal": {
+          "x": 233,
+          "y": 560
+        },
+        "steps": 11
+      },
+      {
+        "observerIndex": 27,
+        "from": {
+          "x": 233,
+          "y": 560
+        },
+        "goal": {
+          "x": 225,
+          "y": 568
+        },
+        "steps": 10
+      },
+      {
+        "observerIndex": 28,
+        "from": {
+          "x": 225,
+          "y": 568
+        },
+        "goal": {
+          "x": 225,
+          "y": 575
+        },
+        "steps": 7
+      },
+      {
+        "observerIndex": 29,
+        "from": {
+          "x": 225,
+          "y": 575
+        },
+        "goal": {
+          "x": 215,
+          "y": 585
+        },
+        "steps": 13
+      },
+      {
+        "observerIndex": 30,
+        "from": {
+          "x": 215,
+          "y": 585
+        },
+        "goal": {
+          "x": 213,
+          "y": 585
+        },
+        "steps": 2
+      },
+      {
+        "observerIndex": 31,
+        "from": {
+          "x": 213,
+          "y": 585
+        },
+        "goal": {
+          "x": 210,
+          "y": 585
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 32,
+        "from": {
+          "x": 210,
+          "y": 585
+        },
+        "goal": {
+          "x": 212,
+          "y": 588
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 33,
+        "from": {
+          "x": 212,
+          "y": 588
+        },
+        "goal": {
+          "x": 215,
+          "y": 595
+        },
+        "steps": 8
+      },
+      {
+        "observerIndex": 34,
+        "from": {
+          "x": 215,
+          "y": 595
+        },
+        "goal": {
+          "x": 217,
+          "y": 597
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 36,
+        "from": {
+          "x": 217,
+          "y": 597
+        },
+        "goal": {
+          "x": 226,
+          "y": 606
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 37,
+        "from": {
+          "x": 226,
+          "y": 606
+        },
+        "goal": {
+          "x": 235,
+          "y": 605
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 38,
+        "from": {
+          "x": 235,
+          "y": 605
+        },
+        "goal": {
+          "x": 238,
+          "y": 606
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 39,
+        "from": {
+          "x": 238,
+          "y": 606
+        },
+        "goal": {
+          "x": 237,
+          "y": 616
+        },
+        "steps": 10
+      },
+      {
+        "observerIndex": 40,
+        "from": {
+          "x": 237,
+          "y": 616
+        },
+        "goal": {
+          "x": 229,
+          "y": 619
+        },
+        "steps": 8
+      },
+      {
+        "observerIndex": 41,
+        "from": {
+          "x": 229,
+          "y": 619
+        },
+        "goal": {
+          "x": 218,
+          "y": 616
+        },
+        "steps": 11
+      },
+      {
+        "observerIndex": 42,
+        "from": {
+          "x": 218,
+          "y": 616
+        },
+        "goal": {
+          "x": 240,
+          "y": 632
+        },
+        "steps": 28
+      },
+      {
+        "observerIndex": 43,
+        "from": {
+          "x": 240,
+          "y": 632
+        },
+        "goal": {
+          "x": 250,
+          "y": 642
+        },
+        "steps": 10
+      },
+      {
+        "observerIndex": 44,
+        "from": {
+          "x": 250,
+          "y": 642
+        },
+        "goal": {
+          "x": 257,
+          "y": 646
+        },
+        "steps": 7
+      },
+      {
+        "observerIndex": 46,
+        "from": {
+          "x": 257,
+          "y": 646
+        },
+        "goal": {
+          "x": 255,
+          "y": 650
+        },
+        "steps": 4
+      },
+      {
+        "observerIndex": 47,
+        "from": {
+          "x": 255,
+          "y": 650
+        },
+        "goal": {
+          "x": 257,
+          "y": 652
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 48,
+        "from": {
+          "x": 257,
+          "y": 652
+        },
+        "goal": {
+          "x": 260,
+          "y": 652
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 49,
+        "from": {
+          "x": 260,
+          "y": 652
+        },
+        "goal": {
+          "x": 263,
+          "y": 652
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 50,
+        "from": {
+          "x": 263,
+          "y": 652
+        },
+        "goal": {
+          "x": 267,
+          "y": 656
+        },
+        "steps": 4
+      },
+      {
+        "observerIndex": 51,
+        "from": {
+          "x": 267,
+          "y": 656
+        },
+        "goal": {
+          "x": 268,
+          "y": 661
+        },
+        "steps": 5
+      },
+      {
+        "observerIndex": 52,
+        "from": {
+          "x": 268,
+          "y": 661
+        },
+        "goal": {
+          "x": 276,
+          "y": 662
+        },
+        "steps": 8
+      },
+      {
+        "observerIndex": 53,
+        "from": {
+          "x": 276,
+          "y": 662
+        },
+        "goal": {
+          "x": 278,
+          "y": 664
+        },
+        "steps": 2
+      },
+      {
+        "observerIndex": 54,
+        "from": {
+          "x": 278,
+          "y": 664
+        },
+        "goal": {
+          "x": 279,
+          "y": 670
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 56,
+        "from": {
+          "x": 279,
+          "y": 670
+        },
+        "goal": {
+          "x": 264,
+          "y": 675
+        },
+        "steps": 15
+      },
+      {
+        "observerIndex": 57,
+        "from": {
+          "x": 264,
+          "y": 675
+        },
+        "goal": {
+          "x": 252,
+          "y": 663
+        },
+        "steps": 12
+      },
+      {
+        "observerIndex": 58,
+        "from": {
+          "x": 252,
+          "y": 663
+        },
+        "goal": {
+          "x": 235,
+          "y": 642
+        },
+        "steps": 34
+      },
+      {
+        "observerIndex": 59,
+        "from": {
+          "x": 235,
+          "y": 642
+        },
+        "goal": {
+          "x": 226,
+          "y": 638
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 60,
+        "from": {
+          "x": 226,
+          "y": 638
+        },
+        "goal": {
+          "x": 235,
+          "y": 652
+        },
+        "steps": 14
+      },
+      {
+        "observerIndex": 61,
+        "from": {
+          "x": 235,
+          "y": 652
+        },
+        "goal": {
+          "x": 223,
+          "y": 665
+        },
+        "steps": 22
+      },
+      {
+        "observerIndex": 62,
+        "from": {
+          "x": 223,
+          "y": 665
+        },
+        "goal": {
+          "x": 227,
+          "y": 669
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 63,
+        "from": {
+          "x": 227,
+          "y": 669
+        },
+        "goal": {
+          "x": 219,
+          "y": 667
+        },
+        "steps": 8
+      },
+      {
+        "observerIndex": 64,
+        "from": {
+          "x": 219,
+          "y": 667
+        },
+        "goal": {
+          "x": 259,
+          "y": 616
+        },
+        "steps": 61
+      },
+      {
+        "observerIndex": 66,
+        "from": {
+          "x": 259,
+          "y": 616
+        },
+        "goal": {
+          "x": 272,
+          "y": 598
+        },
+        "steps": 18
+      },
+      {
+        "observerIndex": 67,
+        "from": {
+          "x": 272,
+          "y": 598
+        },
+        "goal": {
+          "x": 273,
+          "y": 595
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 68,
+        "from": {
+          "x": 273,
+          "y": 595
+        },
+        "goal": {
+          "x": 274,
+          "y": 595
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 69,
+        "from": {
+          "x": 274,
+          "y": 595
+        },
+        "goal": {
+          "x": 274,
+          "y": 596
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 70,
+        "from": {
+          "x": 274,
+          "y": 596
+        },
+        "goal": {
+          "x": 276,
+          "y": 598
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 71,
+        "from": {
+          "x": 276,
+          "y": 598
+        },
+        "goal": {
+          "x": 273,
+          "y": 599
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 72,
+        "from": {
+          "x": 273,
+          "y": 599
+        },
+        "goal": {
+          "x": 273,
+          "y": 591
+        },
+        "steps": 8
+      },
+      {
+        "observerIndex": 73,
+        "from": {
+          "x": 273,
+          "y": 591
+        },
+        "goal": {
+          "x": 274,
+          "y": 591
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 74,
+        "from": {
+          "x": 274,
+          "y": 591
+        },
+        "goal": {
+          "x": 275,
+          "y": 587
+        },
+        "steps": 4
+      },
+      {
+        "observerIndex": 76,
+        "from": {
+          "x": 275,
+          "y": 587
+        },
+        "goal": {
+          "x": 276,
+          "y": 586
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 77,
+        "from": {
+          "x": 276,
+          "y": 586
+        },
+        "goal": {
+          "x": 279,
+          "y": 587
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 78,
+        "from": {
+          "x": 279,
+          "y": 587
+        },
+        "goal": {
+          "x": 282,
+          "y": 584
+        },
+        "steps": 5
+      },
+      {
+        "observerIndex": 79,
+        "from": {
+          "x": 282,
+          "y": 584
+        },
+        "goal": {
+          "x": 285,
+          "y": 578
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 80,
+        "from": {
+          "x": 285,
+          "y": 578
+        },
+        "goal": {
+          "x": 284,
+          "y": 575
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 81,
+        "from": {
+          "x": 284,
+          "y": 575
+        },
+        "goal": {
+          "x": 282,
+          "y": 572
+        },
+        "steps": 4
+      },
+      {
+        "observerIndex": 82,
+        "from": {
+          "x": 282,
+          "y": 572
+        },
+        "goal": {
+          "x": 283,
+          "y": 572
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 83,
+        "from": {
+          "x": 283,
+          "y": 572
+        },
+        "goal": {
+          "x": 287,
+          "y": 575
+        },
+        "steps": 4
+      },
+      {
+        "observerIndex": 84,
+        "from": {
+          "x": 287,
+          "y": 575
+        },
+        "goal": {
+          "x": 290,
+          "y": 575
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 86,
+        "from": {
+          "x": 290,
+          "y": 575
+        },
+        "goal": {
+          "x": 276,
+          "y": 572
+        },
+        "steps": 14
+      },
+      {
+        "observerIndex": 87,
+        "from": {
+          "x": 276,
+          "y": 572
+        },
+        "goal": {
+          "x": 267,
+          "y": 563
+        },
+        "steps": 11
+      },
+      {
+        "observerIndex": 88,
+        "from": {
+          "x": 267,
+          "y": 563
+        },
+        "goal": {
+          "x": 255,
+          "y": 551
+        },
+        "steps": 14
+      },
+      {
+        "observerIndex": 89,
+        "from": {
+          "x": 255,
+          "y": 551
+        },
+        "goal": {
+          "x": 262,
+          "y": 544
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 90,
+        "from": {
+          "x": 262,
+          "y": 544
+        },
+        "goal": {
+          "x": 274,
+          "y": 536
+        },
+        "steps": 12
+      },
+      {
+        "observerIndex": 91,
+        "from": {
+          "x": 274,
+          "y": 536
+        },
+        "goal": {
+          "x": 283,
+          "y": 542
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 92,
+        "from": {
+          "x": 283,
+          "y": 542
+        },
+        "goal": {
+          "x": 230,
+          "y": 535
+        },
+        "steps": 53
+      },
+      {
+        "observerIndex": 93,
+        "from": {
+          "x": 230,
+          "y": 535
+        },
+        "goal": {
+          "x": 226,
+          "y": 541
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 94,
+        "from": {
+          "x": 226,
+          "y": 541
+        },
+        "goal": {
+          "x": 225,
+          "y": 549
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 96,
+        "from": {
+          "x": 225,
+          "y": 549
+        },
+        "goal": {
+          "x": 281,
+          "y": 610
+        },
+        "steps": 65
+      },
+      {
+        "observerIndex": 97,
+        "from": {
+          "x": 281,
+          "y": 610
+        },
+        "goal": {
+          "x": 287,
+          "y": 617
+        },
+        "steps": 11
+      },
+      {
+        "observerIndex": 98,
+        "from": {
+          "x": 287,
+          "y": 617
+        },
+        "goal": {
+          "x": 290,
+          "y": 623
+        },
+        "steps": 7
+      },
+      {
+        "observerIndex": 99,
+        "from": {
+          "x": 290,
+          "y": 623
+        },
+        "goal": {
+          "x": 299,
+          "y": 632
+        },
+        "steps": 10
+      },
+      {
+        "observerIndex": 0,
+        "from": {
+          "x": 299,
+          "y": 632
+        },
+        "goal": {
+          "x": 243,
+          "y": 595
+        },
+        "steps": 63
+      },
+      {
+        "observerIndex": 1,
+        "from": {
+          "x": 243,
+          "y": 595
+        },
+        "goal": {
+          "x": 235,
+          "y": 589
+        },
+        "steps": 8
+      },
+      {
+        "observerIndex": 2,
+        "from": {
+          "x": 235,
+          "y": 589
+        },
+        "goal": {
+          "x": 233,
+          "y": 579
+        },
+        "steps": 10
+      },
+      {
+        "observerIndex": 3,
+        "from": {
+          "x": 233,
+          "y": 579
+        },
+        "goal": {
+          "x": 236,
+          "y": 579
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 4,
+        "from": {
+          "x": 236,
+          "y": 579
+        },
+        "goal": {
+          "x": 251,
+          "y": 586
+        },
+        "steps": 15
+      },
+      {
+        "observerIndex": 6,
+        "from": {
+          "x": 251,
+          "y": 586
+        },
+        "goal": {
+          "x": 256,
+          "y": 591
+        },
+        "steps": 5
+      },
+      {
+        "observerIndex": 7,
+        "from": {
+          "x": 256,
+          "y": 591
+        },
+        "goal": {
+          "x": 255,
+          "y": 608
+        },
+        "steps": 17
+      },
+      {
+        "observerIndex": 8,
+        "from": {
+          "x": 255,
+          "y": 608
+        },
+        "goal": {
+          "x": 233,
+          "y": 612
+        },
+        "steps": 22
+      },
+      {
+        "observerIndex": 9,
+        "from": {
+          "x": 233,
+          "y": 612
+        },
+        "goal": {
+          "x": 240,
+          "y": 603
+        },
+        "steps": 10
+      },
+      {
+        "observerIndex": 10,
+        "from": {
+          "x": 240,
+          "y": 603
+        },
+        "goal": {
+          "x": 240,
+          "y": 600
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 11,
+        "from": {
+          "x": 240,
+          "y": 600
+        },
+        "goal": {
+          "x": 241,
+          "y": 600
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 12,
+        "from": {
+          "x": 241,
+          "y": 600
+        },
+        "goal": {
+          "x": 245,
+          "y": 596
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 13,
+        "from": {
+          "x": 245,
+          "y": 596
+        },
+        "goal": {
+          "x": 247,
+          "y": 596
+        },
+        "steps": 2
+      },
+      {
+        "observerIndex": 14,
+        "from": {
+          "x": 247,
+          "y": 596
+        },
+        "goal": {
+          "x": 245,
+          "y": 590
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 16,
+        "from": {
+          "x": 245,
+          "y": 590
+        },
+        "goal": {
+          "x": 244,
+          "y": 585
+        },
+        "steps": 5
+      },
+      {
+        "observerIndex": 17,
+        "from": {
+          "x": 244,
+          "y": 585
+        },
+        "goal": {
+          "x": 245,
+          "y": 582
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 18,
+        "from": {
+          "x": 245,
+          "y": 582
+        },
+        "goal": {
+          "x": 246,
+          "y": 579
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 19,
+        "from": {
+          "x": 246,
+          "y": 579
+        },
+        "goal": {
+          "x": 248,
+          "y": 581
+        },
+        "steps": 2
+      },
+      {
+        "observerIndex": 20,
+        "from": {
+          "x": 248,
+          "y": 581
+        },
+        "goal": {
+          "x": 251,
+          "y": 580
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 21,
+        "from": {
+          "x": 251,
+          "y": 580
+        },
+        "goal": {
+          "x": 252,
+          "y": 581
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 22,
+        "from": {
+          "x": 252,
+          "y": 581
+        },
+        "goal": {
+          "x": 259,
+          "y": 574
+        },
+        "steps": 7
+      },
+      {
+        "observerIndex": 23,
+        "from": {
+          "x": 259,
+          "y": 574
+        },
+        "goal": {
+          "x": 250,
+          "y": 569
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 24,
+        "from": {
+          "x": 250,
+          "y": 569
+        },
+        "goal": {
+          "x": 244,
+          "y": 568
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 26,
+        "from": {
+          "x": 244,
+          "y": 568
+        },
+        "goal": {
+          "x": 233,
+          "y": 560
+        },
+        "steps": 11
+      },
+      {
+        "observerIndex": 27,
+        "from": {
+          "x": 233,
+          "y": 560
+        },
+        "goal": {
+          "x": 225,
+          "y": 568
+        },
+        "steps": 10
+      },
+      {
+        "observerIndex": 28,
+        "from": {
+          "x": 225,
+          "y": 568
+        },
+        "goal": {
+          "x": 225,
+          "y": 575
+        },
+        "steps": 7
+      },
+      {
+        "observerIndex": 29,
+        "from": {
+          "x": 225,
+          "y": 575
+        },
+        "goal": {
+          "x": 215,
+          "y": 585
+        },
+        "steps": 13
+      },
+      {
+        "observerIndex": 30,
+        "from": {
+          "x": 215,
+          "y": 585
+        },
+        "goal": {
+          "x": 213,
+          "y": 585
+        },
+        "steps": 2
+      },
+      {
+        "observerIndex": 31,
+        "from": {
+          "x": 213,
+          "y": 585
+        },
+        "goal": {
+          "x": 210,
+          "y": 585
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 32,
+        "from": {
+          "x": 210,
+          "y": 585
+        },
+        "goal": {
+          "x": 212,
+          "y": 588
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 33,
+        "from": {
+          "x": 212,
+          "y": 588
+        },
+        "goal": {
+          "x": 215,
+          "y": 595
+        },
+        "steps": 8
+      },
+      {
+        "observerIndex": 34,
+        "from": {
+          "x": 215,
+          "y": 595
+        },
+        "goal": {
+          "x": 217,
+          "y": 597
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 36,
+        "from": {
+          "x": 217,
+          "y": 597
+        },
+        "goal": {
+          "x": 226,
+          "y": 606
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 37,
+        "from": {
+          "x": 226,
+          "y": 606
+        },
+        "goal": {
+          "x": 235,
+          "y": 605
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 38,
+        "from": {
+          "x": 235,
+          "y": 605
+        },
+        "goal": {
+          "x": 238,
+          "y": 606
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 39,
+        "from": {
+          "x": 238,
+          "y": 606
+        },
+        "goal": {
+          "x": 237,
+          "y": 616
+        },
+        "steps": 10
+      },
+      {
+        "observerIndex": 40,
+        "from": {
+          "x": 237,
+          "y": 616
+        },
+        "goal": {
+          "x": 229,
+          "y": 619
+        },
+        "steps": 8
+      },
+      {
+        "observerIndex": 41,
+        "from": {
+          "x": 229,
+          "y": 619
+        },
+        "goal": {
+          "x": 218,
+          "y": 616
+        },
+        "steps": 11
+      },
+      {
+        "observerIndex": 42,
+        "from": {
+          "x": 218,
+          "y": 616
+        },
+        "goal": {
+          "x": 240,
+          "y": 632
+        },
+        "steps": 28
+      },
+      {
+        "observerIndex": 43,
+        "from": {
+          "x": 240,
+          "y": 632
+        },
+        "goal": {
+          "x": 250,
+          "y": 642
+        },
+        "steps": 10
+      },
+      {
+        "observerIndex": 44,
+        "from": {
+          "x": 250,
+          "y": 642
+        },
+        "goal": {
+          "x": 257,
+          "y": 646
+        },
+        "steps": 7
+      },
+      {
+        "observerIndex": 46,
+        "from": {
+          "x": 257,
+          "y": 646
+        },
+        "goal": {
+          "x": 255,
+          "y": 650
+        },
+        "steps": 4
+      },
+      {
+        "observerIndex": 47,
+        "from": {
+          "x": 255,
+          "y": 650
+        },
+        "goal": {
+          "x": 257,
+          "y": 652
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 48,
+        "from": {
+          "x": 257,
+          "y": 652
+        },
+        "goal": {
+          "x": 260,
+          "y": 652
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 49,
+        "from": {
+          "x": 260,
+          "y": 652
+        },
+        "goal": {
+          "x": 263,
+          "y": 652
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 50,
+        "from": {
+          "x": 263,
+          "y": 652
+        },
+        "goal": {
+          "x": 267,
+          "y": 656
+        },
+        "steps": 4
+      },
+      {
+        "observerIndex": 51,
+        "from": {
+          "x": 267,
+          "y": 656
+        },
+        "goal": {
+          "x": 268,
+          "y": 661
+        },
+        "steps": 5
+      },
+      {
+        "observerIndex": 52,
+        "from": {
+          "x": 268,
+          "y": 661
+        },
+        "goal": {
+          "x": 276,
+          "y": 662
+        },
+        "steps": 8
+      },
+      {
+        "observerIndex": 53,
+        "from": {
+          "x": 276,
+          "y": 662
+        },
+        "goal": {
+          "x": 278,
+          "y": 664
+        },
+        "steps": 2
+      },
+      {
+        "observerIndex": 54,
+        "from": {
+          "x": 278,
+          "y": 664
+        },
+        "goal": {
+          "x": 279,
+          "y": 670
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 56,
+        "from": {
+          "x": 279,
+          "y": 670
+        },
+        "goal": {
+          "x": 264,
+          "y": 675
+        },
+        "steps": 15
+      },
+      {
+        "observerIndex": 57,
+        "from": {
+          "x": 264,
+          "y": 675
+        },
+        "goal": {
+          "x": 252,
+          "y": 663
+        },
+        "steps": 12
+      },
+      {
+        "observerIndex": 58,
+        "from": {
+          "x": 252,
+          "y": 663
+        },
+        "goal": {
+          "x": 235,
+          "y": 642
+        },
+        "steps": 34
+      },
+      {
+        "observerIndex": 59,
+        "from": {
+          "x": 235,
+          "y": 642
+        },
+        "goal": {
+          "x": 226,
+          "y": 638
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 60,
+        "from": {
+          "x": 226,
+          "y": 638
+        },
+        "goal": {
+          "x": 235,
+          "y": 652
+        },
+        "steps": 14
+      },
+      {
+        "observerIndex": 61,
+        "from": {
+          "x": 235,
+          "y": 652
+        },
+        "goal": {
+          "x": 223,
+          "y": 665
+        },
+        "steps": 22
+      },
+      {
+        "observerIndex": 62,
+        "from": {
+          "x": 223,
+          "y": 665
+        },
+        "goal": {
+          "x": 227,
+          "y": 669
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 63,
+        "from": {
+          "x": 227,
+          "y": 669
+        },
+        "goal": {
+          "x": 219,
+          "y": 667
+        },
+        "steps": 8
+      },
+      {
+        "observerIndex": 64,
+        "from": {
+          "x": 219,
+          "y": 667
+        },
+        "goal": {
+          "x": 259,
+          "y": 616
+        },
+        "steps": 61
+      },
+      {
+        "observerIndex": 66,
+        "from": {
+          "x": 259,
+          "y": 616
+        },
+        "goal": {
+          "x": 272,
+          "y": 598
+        },
+        "steps": 18
+      },
+      {
+        "observerIndex": 67,
+        "from": {
+          "x": 272,
+          "y": 598
+        },
+        "goal": {
+          "x": 273,
+          "y": 595
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 68,
+        "from": {
+          "x": 273,
+          "y": 595
+        },
+        "goal": {
+          "x": 274,
+          "y": 595
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 69,
+        "from": {
+          "x": 274,
+          "y": 595
+        },
+        "goal": {
+          "x": 274,
+          "y": 596
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 70,
+        "from": {
+          "x": 274,
+          "y": 596
+        },
+        "goal": {
+          "x": 276,
+          "y": 598
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 71,
+        "from": {
+          "x": 276,
+          "y": 598
+        },
+        "goal": {
+          "x": 273,
+          "y": 599
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 72,
+        "from": {
+          "x": 273,
+          "y": 599
+        },
+        "goal": {
+          "x": 273,
+          "y": 591
+        },
+        "steps": 8
+      },
+      {
+        "observerIndex": 73,
+        "from": {
+          "x": 273,
+          "y": 591
+        },
+        "goal": {
+          "x": 274,
+          "y": 591
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 74,
+        "from": {
+          "x": 274,
+          "y": 591
+        },
+        "goal": {
+          "x": 275,
+          "y": 587
+        },
+        "steps": 4
+      },
+      {
+        "observerIndex": 76,
+        "from": {
+          "x": 275,
+          "y": 587
+        },
+        "goal": {
+          "x": 276,
+          "y": 586
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 77,
+        "from": {
+          "x": 276,
+          "y": 586
+        },
+        "goal": {
+          "x": 279,
+          "y": 587
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 78,
+        "from": {
+          "x": 279,
+          "y": 587
+        },
+        "goal": {
+          "x": 282,
+          "y": 584
+        },
+        "steps": 5
+      },
+      {
+        "observerIndex": 79,
+        "from": {
+          "x": 282,
+          "y": 584
+        },
+        "goal": {
+          "x": 285,
+          "y": 578
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 80,
+        "from": {
+          "x": 285,
+          "y": 578
+        },
+        "goal": {
+          "x": 284,
+          "y": 575
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 81,
+        "from": {
+          "x": 284,
+          "y": 575
+        },
+        "goal": {
+          "x": 282,
+          "y": 572
+        },
+        "steps": 4
+      },
+      {
+        "observerIndex": 82,
+        "from": {
+          "x": 282,
+          "y": 572
+        },
+        "goal": {
+          "x": 283,
+          "y": 572
+        },
+        "steps": 1
+      },
+      {
+        "observerIndex": 83,
+        "from": {
+          "x": 283,
+          "y": 572
+        },
+        "goal": {
+          "x": 287,
+          "y": 575
+        },
+        "steps": 4
+      },
+      {
+        "observerIndex": 84,
+        "from": {
+          "x": 287,
+          "y": 575
+        },
+        "goal": {
+          "x": 290,
+          "y": 575
+        },
+        "steps": 3
+      },
+      {
+        "observerIndex": 86,
+        "from": {
+          "x": 290,
+          "y": 575
+        },
+        "goal": {
+          "x": 276,
+          "y": 572
+        },
+        "steps": 14
+      },
+      {
+        "observerIndex": 87,
+        "from": {
+          "x": 276,
+          "y": 572
+        },
+        "goal": {
+          "x": 267,
+          "y": 563
+        },
+        "steps": 11
+      },
+      {
+        "observerIndex": 88,
+        "from": {
+          "x": 267,
+          "y": 563
+        },
+        "goal": {
+          "x": 255,
+          "y": 551
+        },
+        "steps": 14
+      },
+      {
+        "observerIndex": 89,
+        "from": {
+          "x": 255,
+          "y": 551
+        },
+        "goal": {
+          "x": 262,
+          "y": 544
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 90,
+        "from": {
+          "x": 262,
+          "y": 544
+        },
+        "goal": {
+          "x": 274,
+          "y": 536
+        },
+        "steps": 12
+      },
+      {
+        "observerIndex": 91,
+        "from": {
+          "x": 274,
+          "y": 536
+        },
+        "goal": {
+          "x": 283,
+          "y": 542
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 92,
+        "from": {
+          "x": 283,
+          "y": 542
+        },
+        "goal": {
+          "x": 230,
+          "y": 535
+        },
+        "steps": 53
+      },
+      {
+        "observerIndex": 93,
+        "from": {
+          "x": 230,
+          "y": 535
+        },
+        "goal": {
+          "x": 226,
+          "y": 541
+        },
+        "steps": 6
+      },
+      {
+        "observerIndex": 94,
+        "from": {
+          "x": 226,
+          "y": 541
+        },
+        "goal": {
+          "x": 225,
+          "y": 549
+        },
+        "steps": 9
+      },
+      {
+        "observerIndex": 96,
+        "from": {
+          "x": 225,
+          "y": 549
+        },
+        "goal": {
+          "x": 281,
+          "y": 610
+        },
+        "steps": 65
+      },
+      {
+        "observerIndex": 97,
+        "from": {
+          "x": 281,
+          "y": 610
+        },
+        "goal": {
+          "x": 287,
+          "y": 617
+        },
+        "steps": 11
+      },
+      {
+        "observerIndex": 98,
+        "from": {
+          "x": 287,
+          "y": 617
+        },
+        "goal": {
+          "x": 290,
+          "y": 623
+        },
+        "steps": 7
+      },
+      {
+        "observerIndex": 99,
+        "from": {
+          "x": 290,
+          "y": 623
+        },
+        "goal": {
+          "x": 299,
+          "y": 632
+        },
+        "steps": 10
+      }
+    ],
+    "scope": "Original first4goals/original4000A*/full active14coverage/representative known home occupancy; not live ACK or capacity evidence"
+  },
+  "sourceScene": {
+    "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-100-nearest-ordered-final-v3.json",
+    "bytes": 5844,
+    "sha256": "ed268ed3b81f06d1894a2ad60689a70dbabfced752042a773551e77d8483d436"
+  },
+  "accepted": false,
+  "capacityAccepted": false
+}

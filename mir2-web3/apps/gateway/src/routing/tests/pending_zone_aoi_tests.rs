@@ -108,13 +108,25 @@ fn town_revive_discards_stale_queued_spawn_and_reentering_aoi_gets_one_fresh_spa
         );
     }
 
-    runtime
+    let mut death_packets = runtime
         .inner
         .execute(WorldCommand::ClientPacket(ClientPacket::Chat {
             message: "@DIE".to_string(),
             linked_items: Vec::new(),
         }))
         .expect("private death fixture should execute");
+    assert!(death_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Death { .. })));
+    runtime.filter_stale_owner_dead_entity_packets(&mut death_packets);
+    assert_eq!(runtime.inner.world_snapshot().player_hp, Some(0));
+    let zone_still_has_positive_hp = shared
+        .lock()
+        .expect("shared state should lock")
+        .zone_manager
+        .player_vitals(&session_id)
+        .is_some_and(|(hp, _, _)| hp > 0);
+    assert!(zone_still_has_positive_hp);
     let revive_packets = runtime
         .execute(WorldCommand::ClientPacket(ClientPacket::TownRevive))
         .expect("TownRevive should execute through the Gateway");

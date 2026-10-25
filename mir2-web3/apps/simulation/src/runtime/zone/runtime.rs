@@ -1061,6 +1061,15 @@ impl ZoneRuntime {
         self.native_monsters.contains_key(&object_id)
     }
 
+    /// Read the actual native ownership; unknown IDs are not unowned actors.
+    pub fn native_monster_is_unowned(&self, object_id: u32) -> Option<bool> {
+        self.native_monsters.get(&object_id).map(|monster| {
+            monster.owner_session_id.is_none()
+                && monster.master_object_id == 0
+                && monster.owner_player_object_id == 0
+        })
+    }
+
     /// The current lifecycle of one retained native monster. Gateway packet
     /// dequeue uses this narrow query to fence stale AOI projections without
     /// cloning every monster snapshot on an ordinary pending-packet drain.
