@@ -1,0 +1,140 @@
+name: Validate gameplay Web production build without deploying
+
+on:
+  # Register only this workflow on the reviewed release branch. No credentials.
+  push:
+    branches: [codex/gameplay-bugfix-release-20261025]
+    paths: [.github/workflows/gameplay-web-stage.yml]
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact reviewed 40-character commit SHA (must equal this dispatch ref)
+        required: true
+        type: string
+      runtime_version:
+        description: Exact reviewed bevy-<16 lowercase hex> runtime version
+        required: true
+        type: string
+      runtime_manifest_sha256:
+        description: SHA256 of the reviewed lib/generated/bevy_runtime_version.json bytes
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mir2-gameplay-web-production-build
+  cancel-in-progress: false
+
+jobs:
+  validate-bootstrap:
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 24
+      - name: Run offline workflow checks without credentials
+        working-directory: mir2-web3/apps/web
+        run: node --test scripts/test-gameplay-web-stage.mjs
+
+  build-production-only:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/gameplay-bugfix-release-20261025' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: mir2-web3/apps/web
+    env:
+      EXPECTED_COMMIT_SHA: ${{ inputs.expected_sha }}
+      EXPECTED_RUNTIME_VERSION: ${{ inputs.runtime_version }}
+      EXPECTED_RUNTIME_MANIFEST_SHA256: ${{ inputs.runtime_manifest_sha256 }}
+    steps:
+      - name: Check out the exact reviewed dispatch commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/web/package-lock.json
+
+      - name: Run offline workflow checks
+        run: node --test scripts/test-gameplay-web-stage.mjs
+
+      - name: Bind the reviewed source and derive only the local build command
+        env:
+          STAGE_CONFIG_PATH: ${{ runner.temp }}/gameplay-web-vercel-build.json
+          STAGE_IDENTITY_PATH: ${{ runner.temp }}/gameplay-web-reviewed-identity.json
+        run: node scripts/test-gameplay-web-stage.mjs --prepare
+
+      - name: Verify pinned packages and all six published runtime hashes before credentials
+        run: |
+          set -euo pipefail
+          node scripts/verify-bevy-runtime-r2-upload.mjs
+          node scripts/build-bevy-runtime-r2-release.mjs \
+            --assetVersion 20260818-main-97887dcd \
+            --objectPrefix mir2/v/20260818-main-97887dcd \
+            --assetBaseUrl https://assets.mir2.obelisk.build/mir2/v/20260818-main-97887dcd \
+            --output "$RUNNER_TEMP/gameplay-web-runtime-release.json"
+          node scripts/verify-bevy-runtime-r2-upload.mjs \
+            --releaseManifest "$RUNNER_TEMP/gameplay-web-runtime-release.json" --verifyRemote
+
+      - name: Install existing Web dependencies without Vercel credentials
+        run: npm ci
+
+      # pull is read-only. Do not print or upload the downloaded environment.
+      - name: Pull existing production environment
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN"
+          node scripts/test-gameplay-web-stage.mjs --target
+          if ! npx --yes vercel@56.4.1 pull --yes --environment=production >"$RUNNER_TEMP/gameplay-web-vercel-pull.log" 2>&1; then
+            echo 'Production environment pull failed; private output remains on the ephemeral runner.' >&2
+            exit 1
+          fi
+          node scripts/test-gameplay-web-stage.mjs --project
+
+      - name: Build the original Vercel production output
+        env:
+          STAGE_CONFIG_PATH: ${{ runner.temp }}/gameplay-web-vercel-build.json
+        run: |
+          set -euo pipefail
+          if ! npx --yes vercel@56.4.1 build --prod --yes --local-config "$STAGE_CONFIG_PATH" >"$RUNNER_TEMP/gameplay-web-vercel-build.log" 2>&1; then
+            echo 'Original production build failed; private output remains on the ephemeral runner.' >&2
+            exit 1
+          fi
+
+      - name: Apply the original Vercel output pruning
+        run: |
+          set -euo pipefail
+          if ! npm run vercel:prune-output -- --report "$RUNNER_TEMP/gameplay-web-vercel-prune.json" >"$RUNNER_TEMP/gameplay-web-vercel-prune.log" 2>&1; then
+            echo 'Original Vercel output pruning failed.' >&2
+            exit 1
+          fi
+
+      - name: Verify compiled identities and actual output leaves
+        env:
+          STAGE_IDENTITY_PATH: ${{ runner.temp }}/gameplay-web-reviewed-identity.json
+        run: node scripts/test-gameplay-web-stage.mjs --verify-build
+
+      # CLI 56.4.1 supports --skip-domain, but also submits projectSettings.
+      # This bounded workflow proves the production build only. It creates no
+      # deployment and cannot assign an alias, promote, or change a binding.
+      - name: Remove the pulled production environment from the runner
+        if: ${{ always() }}
+        run: rm -f -- .vercel/.env.production.local
