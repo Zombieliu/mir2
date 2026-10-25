@@ -388,3 +388,151 @@ test('discarded intermediate monitors still detect stop, process switches and cu
     await fs.rm(root, { recursive: true, force: true });
   }
 });
+
+// Duplicate archive compatibility exercises the same per-copy adjudicator used
+// by verifyTopic, with real lifecycle receipts and independently hashed files.
+const { verifyFullLifecycleArchives } = await import('./verify-evidence.mjs');
+async function withLifecycleArchiveCopies(callback) {
+  const workspace = await fs.mkdtemp(path.join(os.tmpdir(), 'mir2-evidence-lifecycle-copies-'));
+  const root = path.join(workspace, 'evidence'), indexFile = path.join(root, 'artifact-index.json');
+  const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+  const source = 'apps/web/scripts/ordinary-fixture.mjs', sourceBytes = Buffer.from('// ordinary source fixture\n');
+  const stamp = '1792854504282-92969528';
+  await fs.mkdir(path.dirname(path.join(workspace, 'mir2-web3', source)), { recursive: true });
+  await fs.writeFile(path.join(workspace, 'mir2-web3', source), sourceBytes);
+  const frozen = { releaseBuild: { sha256: realm.release.sha256 }, sourceManifestSha256: realm.release.backendSourceAggregate };
+  const releases = new Map([[frozen.sourceManifestSha256, frozen]]);
+  const write = async (name, bytes) => { const file = path.join(root, name); await fs.mkdir(path.dirname(file), { recursive: true }); await fs.writeFile(file, bytes); };
+  const writeJson = (name, value) => write(name, JSON.stringify(value) + '\n');
+  const addCopy = async (directory, runId = run.runId) => {
+    const copiedRun = structuredClone(run), copiedRealm = structuredClone(realm);
+    copiedRun.runId = copiedRealm.playtest.runId = runId;
+    copiedRealm.sourcePins = { [source]: digest(sourceBytes) };
+    const names = { report: `${directory}/${runId}.report.json`, realm: `${directory}/${stamp}.realm-evidence.json`,
+      metrics: `${directory}/${stamp}.zone-metrics.json`, audit: `${directory}/${stamp}.independent-audit.json`,
+      a: `${directory}/${runId}-a.trace.jsonl`, b: `${directory}/${runId}-b.trace.jsonl`, extra: `${directory}/${runId}-observer.trace.jsonl` };
+    await writeJson(names.report, copiedRun); await writeJson(names.realm, copiedRealm); await writeJson(names.metrics, metrics);
+    await writeJson(names.audit, { binarySha256: copiedRealm.release.sha256 });
+    for (const [index, label] of ['a', 'b'].entries()) await write(names[label], traces[index].map(JSON.stringify).join('\n') + '\n');
+    return names;
+  };
+  const reads = [];
+  const verify = async () => {
+    const current = await inventory(root, indexFile);
+    await fs.writeFile(indexFile, JSON.stringify({ schemaVersion: 1, hashMode: 'raw-bytes', files: current }));
+    const files = await verifyInventory(root, indexFile), names = new Set(files.map(row => row.path));
+    const read = async name => { assert.ok(names.has(name), 'copy artifact must be in the verified raw inventory'); reads.push(name); return JSON.parse(await fs.readFile(path.join(root, name), 'utf8')); };
+    const lines = async name => { assert.ok(names.has(name), 'copy trace must be in the verified raw inventory'); reads.push(name); return (await fs.readFile(path.join(root, name), 'utf8')).trim().split('\n').map(JSON.parse); };
+    return verifyFullLifecycleArchives({ files, read, lines, workspace, releases });
+  };
+  try { await callback({ root, workspace, addCopy, write, writeJson, verify, reads }); }
+  finally {
+    assert.equal(path.dirname(path.resolve(workspace)), path.resolve(os.tmpdir()));
+    assert.ok(path.basename(workspace).startsWith('mir2-evidence-lifecycle-copies-'));
+    await fs.rm(workspace, { recursive: true, force: true });
+  }
+}
+
+test('byte-identical complete lifecycle copies count once while each local copy is fully adjudicated', async () => {
+  await withLifecycleArchiveCopies(async ({ addCopy, verify, reads }) => {
+    const first = await addCopy('base/public'), second = await addCopy('standalone/public');
+    assert.deepEqual(await verify(), { fullRuns: 1, failedReportsPreserved: 0 });
+    for (const copy of [first, second]) for (const key of ['report', 'realm', 'metrics', 'audit', 'a', 'b']) assert.ok(reads.includes(copy[key]), `${key} was not checked in its own directory`);
+  });
+});
+
+test('different complete lifecycle run IDs count separately rather than accepting any global matching realm', async () => {
+  await withLifecycleArchiveCopies(async ({ addCopy, verify }) => {
+    await addCopy('first'); await addCopy('second', '1792854507439-1234abcd');
+    assert.equal((await verify()).fullRuns, 2);
+  });
+  await withLifecycleArchiveCopies(async ({ root, addCopy, writeJson, verify }) => {
+    await addCopy('first'); const failed = await addCopy('second', '1792854507439-1234abcd');
+    const value = JSON.parse(await fs.readFile(path.join(root, failed.report), 'utf8'));
+    value.ok = false; value.fullLifecyclePassed = false; value.status = 'failed'; await writeJson(failed.report, value);
+    assert.deepEqual(await verify(), { fullRuns: 1, failedReportsPreserved: 1 }, 'different-run genuine failed history remains preserved');
+  });
+});
+
+test('same-run lifecycle report copies require identical raw bytes even when parsed JSON is unchanged', async () => {
+  await withLifecycleArchiveCopies(async ({ root, addCopy, write, verify }) => {
+    await addCopy('first'); const second = await addCopy('second');
+    const bytes = await fs.readFile(path.join(root, second.report)); await write(second.report, Buffer.concat([bytes, Buffer.from(' ')]));
+    await assert.rejects(verify(), /Conflicting duplicate lifecycle report/);
+  });
+  for (const downgradeFirst of [false, true]) await withLifecycleArchiveCopies(async ({ root, addCopy, writeJson, verify }) => {
+    const first = await addCopy('first'), second = await addCopy('second'), changed = downgradeFirst ? first : second;
+    const value = JSON.parse(await fs.readFile(path.join(root, changed.report), 'utf8'));
+    value.ok = false; value.fullLifecyclePassed = false; value.status = 'failed'; await writeJson(changed.report, value);
+    await assert.rejects(verify(), /Conflicting duplicate lifecycle report/, 'ok-to-failed must not bypass the raw-copy check in either traversal order');
+  });
+});
+
+test('duplicate lifecycle realm, metrics and audit copies reject harmless-looking raw differences', async () => {
+  for (const key of ['realm', 'metrics', 'audit']) await withLifecycleArchiveCopies(async ({ root, addCopy, writeJson, verify }) => {
+    await addCopy('first'); const second = await addCopy('second');
+    const value = JSON.parse(await fs.readFile(path.join(root, second[key]), 'utf8')); value.copyAnnotation = 'different raw evidence';
+    await writeJson(second[key], value);
+    await assert.rejects(verify(), /Conflicting duplicate lifecycle artifact set/);
+  });
+});
+
+test('duplicate lifecycle traces require identical bytes and the complete same-directory trace set', async () => {
+  await withLifecycleArchiveCopies(async ({ root, addCopy, write, verify }) => {
+    await addCopy('first'); const second = await addCopy('second');
+    const events = (await fs.readFile(path.join(root, second.a), 'utf8')).trim().split('\n').map(JSON.parse);
+    events[0].copyAnnotation = 'different raw event'; await write(second.a, events.map(JSON.stringify).join('\n') + '\n');
+    await assert.rejects(verify(), /Conflicting duplicate lifecycle artifact set/);
+  });
+  await withLifecycleArchiveCopies(async ({ root, addCopy, write, verify }) => {
+    const first = await addCopy('first'), second = await addCopy('second');
+    const bytes = await fs.readFile(path.join(root, first.a));
+    const extra = (copy, label) => copy.a.replace('-a.trace.jsonl', `-${label}.trace.jsonl`);
+    for (const label of ['c', 'd', 'e', 'f']) { await write(extra(first, label), bytes); await write(extra(second, label), bytes); }
+    assert.equal((await verify()).fullRuns, 1, 'all six complete trace copies must match');
+    const changed = traces[0].map(event => ({ ...event })); changed[0].copyAnnotation = 'changed c trace';
+    await write(extra(second, 'c'), changed.map(JSON.stringify).join('\n') + '\n');
+    await assert.rejects(verify(), /Conflicting duplicate lifecycle artifact set/, 'c..f raw bytes are checked as well as a/b');
+    await write(extra(second, 'c'), bytes); await fs.unlink(path.join(root, extra(second, 'f')));
+    await assert.rejects(verify(), /Conflicting duplicate lifecycle artifact set/);
+  });
+});
+
+test('each lifecycle report requires exactly one local realm and cannot borrow from a neighbor or nested directory', async () => {
+  for (const where of ['missing', 'nested', 'duplicate']) await withLifecycleArchiveCopies(async ({ root, addCopy, write, verify }) => {
+    await addCopy('first'); const second = await addCopy('second');
+    const bytes = await fs.readFile(path.join(root, second.realm));
+    if (where === 'duplicate') await write('second/another.realm-evidence.json', bytes);
+    else {
+      await fs.unlink(path.join(root, second.realm));
+      if (where === 'nested') await write('second/nested/copy.realm-evidence.json', bytes);
+    }
+    await assert.rejects(verify(), /exactly one matching owned realm record in its report directory/);
+  });
+});
+
+test('missing local metrics, audit or paired trace is rejected despite an identical neighboring copy', async () => {
+  for (const key of ['metrics', 'audit', 'a', 'b']) await withLifecycleArchiveCopies(async ({ root, addCopy, verify }) => {
+    await addCopy('first'); const second = await addCopy('second');
+    await fs.unlink(path.join(root, second[key]));
+    await assert.rejects(verify());
+  });
+});
+
+test('duplicate compatibility preserves the original full16, cleanup, metrics, source and audit checks', async () => {
+  for (const kind of ['full16', 'cleanup', 'metrics', 'source', 'audit']) await withLifecycleArchiveCopies(async ({ root, workspace, addCopy, writeJson, verify }) => {
+    const copies = [await addCopy('first'), await addCopy('second')];
+    for (const copy of copies) {
+      const key = kind === 'full16' ? 'report' : kind === 'cleanup' ? 'realm' : kind;
+      if (kind === 'source') continue;
+      const value = JSON.parse(await fs.readFile(path.join(root, copy[key]), 'utf8'));
+      if (kind === 'full16') value.checks.townRevive.status = 'not_run';
+      if (kind === 'cleanup') value.afterHealth.capacity.currentActiveSessions = 1;
+      if (kind === 'metrics') value.classDeltas.immediateRequests.count++;
+      if (kind === 'audit') value.binarySha256 = '0'.repeat(64);
+      await writeJson(copy[key], value);
+    }
+    if (kind === 'source') await fs.writeFile(path.join(workspace, 'mir2-web3/apps/web/scripts/ordinary-fixture.mjs'), '// changed after run\n');
+    await assert.rejects(verify());
+  });
+});

@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T21:44:31.690Z",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\runtime-prepared-v3.json",
+    "bytes": 35192,
+    "sha256": "bb69fa0570cf70dfe90f40822d577312eb7d8e31c674b759c595891474dfab4b"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\root-seal-and-guard-v1.mjs",
+    "bytes": 17596,
+    "sha256": "5767d9e1af9844413cc579624cf8571fd3edc4c0f56aff1d799b2bd7688cb95d"
+  },
+  "scope": "Final bounded static actual-metadata/controller QA only. No import, guard/gate, syntax rerun, executable/backend50 capture, tests, seed or realm.",
+  "sources": {
+    "controllerPreparation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\root-controller-preparation-v1.json",
+      "bytes": 1677,
+      "sha256": "d8ac2871759b2f3d5ca7e5fdd2e6f54453049cdc29812bb590530f49998a8c9f"
+    },
+    "controllerDerivation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\root-controller-derivation-v1.json",
+      "bytes": 9141,
+      "sha256": "461e2812bc3f8cf885e3d5310e7722802c5d7f26870275753d760fc22cc4f808"
+    },
+    "actualMetadataDelta": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\actual-metadata-binding-v3.json",
+      "bytes": 8300,
+      "sha256": "ff7518e56d6d619dfdec0b6e4a59f836880826a8bcf07a90a9a2ddab0bbc0e27"
+    },
+    "priorPreparedReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-runtime-independent-review-v1\\prepared-review-v2.json",
+      "bytes": 3442,
+      "sha256": "619c04b28f713d72cb1daf6cbfec726c406cbcc86f59eea2fde36e67c60944ee"
+    },
+    "actualFull16Facts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-actual-independent-review-v1.json",
+      "bytes": 4775,
+      "sha256": "5a504f85a598fe3c67f971ce8960b90f5a8b1ded1a863a2c88b6cde071e1ae9d"
+    },
+    "actualFull16Prerequisite": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+      "bytes": 4922,
+      "sha256": "2fd5bb822e631128ff483528ea09b74cd2e4db1316107ffb5c57b579bf8d2157"
+    }
+  },
+  "closure": {
+    "localFiles": 71,
+    "externalStableInputs": 28,
+    "nonTraceRawPinsRehashed": 93,
+    "closedTraceRefsAndSizesCheckedWithoutRehash": 6,
+    "localAggregate": "e765644779bb59126f76e50430ce5f9bfddf2834533d5cfde1e08128f32af0e4",
+    "externalAggregate": "e51ab0d56c02aa90e4ee0e18b73d75e7c72c981838a9fe8a7e29389cde9ecc87",
+    "expectedSealedUniqueFiles": 114,
+    "upperLimit": 128
+  },
+  "checks": {
+    "onlySevenPreviouslyPreparedMetadataFilesChanged": true,
+    "sevenOriginalRawPreimagesPreserved": true,
+    "actualFull16AuditAndThreeIdentityRolesBound": true,
+    "actual351And16PassedReferenced": true,
+    "controllerTwentyPositionHunksPreviouslyForwardInverseExact": true,
+    "controllerUnchangedSinceStaticRead": true,
+    "controllerFull16ValidatorSupportUsesReviewedV2Pin": true,
+    "noRepositoryVsProjectApiMixup": true,
+    "reviewAndFinalPreparedApprovalFirstRefusal": true,
+    "syntaxAndAllPreSeederStaticReferencesCheckedBeforeSyntaxWxAndSeal": true,
+    "actualSyntaxLogAddedToSealedClosure": true,
+    "sourcePinsRecheckedAfterReadonlyContracts": true,
+    "rootOnlySealAndSeparateReadonlyModes": true,
+    "existingGameplayPolicyResourceSceneAnd16WindowContractsUnchanged": true,
+    "storeSeparateFromGameVerdict": true,
+    "runtimeAndFreezeOutputsCurrentlyAbsent": true
+  },
+  "limitations": [
+    "Six closed ordinary traces were not rehashed or replayed again here; their exact refs match actual full16 candidate/prerequisite and sizes. Root actual audit/binding previously hashed them, and the sealing controller strictly rehashes every final pin.",
+    "The Root controller performs actual syntax/PS AST and readonly preflight during seal. This review did not execute those modes or claim a probe18 outcome.",
+    "Initial controller construction/LF-CRLF failure and missing-file syntax refusal remain as source history; successful current Node-check is separately pinned."
+  ],
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": [],
+    "actualProbe18Passed": null,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

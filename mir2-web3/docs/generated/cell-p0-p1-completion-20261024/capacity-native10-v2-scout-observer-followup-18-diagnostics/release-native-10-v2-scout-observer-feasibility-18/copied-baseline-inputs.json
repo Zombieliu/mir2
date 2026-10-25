@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "state": "STATIC_TEMPLATE_DERIVATION_ONLY",
+  "basisManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\copy-basis-v1.json",
+    "bytes": 11350,
+    "sha256": "b65be8e061ed5012c8642384af276a239a91ac64189690574ce208894c77139d"
+  },
+  "oldRuntimeAndResultsNotCopiedAsNew": true
+}

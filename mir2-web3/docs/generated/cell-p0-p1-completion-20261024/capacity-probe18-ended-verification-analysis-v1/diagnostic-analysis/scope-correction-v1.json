@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "scope": "Narrow wording correction using already-computed phase aggregates; no raw reread or original report change.",
+  "corrects": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-run-analysis-v1\\analysis-v1.json",
+    "bytes": 61382,
+    "sha256": "209cdd663c98153631d5876b9a0bb83268aa8477fda21857930ab9f37c1c42f0"
+  },
+  "field": "limitations[1]",
+  "originalText": "Whole-run358 attacks includes ramp activity; configured phases and actual measured rates are reported separately.",
+  "correctedText": "Whole-run358 attacks includes5 phase=settle attacks plus166 stage-10 and187 soak attacks; configured phases and actual measured rates remain separate.",
+  "provenBy": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.samples.jsonl",
+    "bytes": 29612729,
+    "sha256": "ab31e2b81cf6e1fd89fabc9c9d25699c742f724fda2570140feb629ddb56444e",
+    "rows": 41154
+  },
+  "measurementExternalRowsPhaseSummary": [
+    {
+      "phase": "settle",
+      "actor": "L22b92f05",
+      "attacks": 5,
+      "hits": 5
+    }
+  ],
+  "factsCountFieldAlreadyAccurate": true,
+  "originalGameVerdictUnchanged": true,
+  "capacityAccepted": false
+}

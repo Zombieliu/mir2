@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "basis": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/root-seal-and-guard-v1.mjs",
+    "bytes": 13790,
+    "sha256": "3071738e03d5955a1dc7149dabd899fefa6d04ba4a0885f08c52863a50dc216c"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\root-seal-and-guard-v1.mjs",
+    "bytes": 17596,
+    "sha256": "5767d9e1af9844413cc579624cf8571fd3edc4c0f56aff1d799b2bd7688cb95d"
+  },
+  "rules": [
+    {
+      "at": 99,
+      "before": "import assert from 'node:assert/strict';",
+      "after": "import assert from 'node:assert/strict';\nimport {execFileSync} from 'node:child_process';"
+    },
+    {
+      "at": 324,
+      "before": "const HEAD='c743122af05faca43d9535d8c6c2a4bfb01b924f',CORE='d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16',DRIVER='5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9';",
+      "after": "const HEAD='3a6d8c862d03ded3133605472a8f38bc6258af52',CORE=HEAD,BUILD='c743122af05faca43d9535d8c6c2a4bfb01b924f',DRIVER='445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634';"
+    },
+    {
+      "at": 541,
+      "before": "full-lifecycle-account-store-wait-diagnostics-v1",
+      "after": "full-lifecycle-scout-observer-preference-v1"
+    },
+    {
+      "at": 734,
+      "before": "const FREEZE=path.join(ROOT,'launcher-source-frozen-v1.json'),GUARD=path.join(ROOT,'source-guard-readonly-verification.json');",
+      "after": "const FREEZE=path.join(ROOT,'launcher-source-frozen-v1.json'),GUARD=path.join(ROOT,'source-guard-readonly-verification.json'),SYNTAX=path.join(ROOT,'launcher-syntax-check.log');"
+    },
+    {
+      "at": 6353,
+      "before": "assert.equal(candidate.backendSourceCommit,HEAD);",
+      "after": "assert.equal(candidate.backendSourceCommit,BUILD);assert.equal(candidate.executionSourceCommit,HEAD);"
+    },
+    {
+      "at": 6983,
+      "before": "assert.equal(validated.releaseInput.sourceCommit,HEAD);",
+      "after": "assert.equal(validated.releaseInput.sourceCommit,BUILD);assert.equal(validated.releaseInput.executionSourceCommit,HEAD);assert.equal(validated.releaseInput.driverSourceCommit,CORE);"
+    },
+    {
+      "at": 13068,
+      "before": "backendSourceCommit:HEAD",
+      "after": "backendSourceCommit:BUILD,backendBuildCommit:BUILD,executionSourceCommit:HEAD"
+    },
+    {
+      "at": 10208,
+      "before": "backendSourceCommit:HEAD",
+      "after": "backendSourceCommit:BUILD,backendBuildCommit:BUILD,executionSourceCommit:HEAD"
+    },
+    {
+      "at": 7383,
+      "before": "backendSourceCommit:HEAD",
+      "after": "backendSourceCommit:BUILD,backendBuildCommit:BUILD,executionSourceCommit:HEAD"
+    },
+    {
+      "at": 7658,
+      "before": "assert.equal(binding.backendSourceCommit,HEAD);",
+      "after": "assert.equal(binding.backendSourceCommit,BUILD);assert.equal(binding.executionSourceCommit,HEAD);"
+    },
+    {
+      "at": 12035,
+      "before": "assert.equal(frozen.backendSourceCommit,HEAD);",
+      "after": "assert.equal(frozen.backendSourceCommit,BUILD);assert.equal(frozen.executionSourceCommit,HEAD);"
+    },
+    {
+      "at": 10410,
+      "before": "backendRebuilt:true",
+      "after": "backendRebuilt:false"
+    },
+    {
+      "at": 13411,
+      "before": "rebuildPerformed:true",
+      "after": "rebuildPerformed:false"
+    },
+    {
+      "at": 10880,
+      "before": "nodeCodeFullTests:210",
+      "after": "nodeCodeFullTests:219"
+    },
+    {
+      "at": 9322,
+      "before": "const args=process.argv.slice(2),mode=args[0];",
+      "after": "async function preparationReferences(){\n const files=[];for(const name of ['launcher-source-prepared-v1.json','preparation-plan.json','final-inputs-approved.json','static-preparation-verification.json','copied-baseline-inputs.json','candidate-release-binding.json','current-driver-binding.json','backend-library-binding.json','scenario.json','resource-profile.json','run-options.json','scene-binding.json','scene-driver-compatibility-proof-v1.json','scenario-prefix-readiness.json','slow-stage-diagnostics-config.json','slow-stage-schema-contract.json']){const file=path.join(ROOT,name);await safeFile(file);files.push(await pin(file));}\n const history=path.join(BASE,'release-native-10-v2-account-store-wait-feasibility-17');for(const name of ['slow-stage-public.mjs','slow-stage-public.test.mjs','synthetic-tests-v1.log','slow-stage-helper-freeze-v1.json','slow-stage-schema-contract.json','legacy14-original.mjs.txt','passed-probe-window-contract.test.mjs','wire-diagnostics-adapter.test.mjs','wire-adapter-synthetic-tests.log','wire-adapter-synthetic-tests.json']){const file=path.join(history,name);await safeFile(file);files.push(await pin(file));}\n const file=path.join(BASE,'release-native-10-v2-coordinated-feasibility-06/resource-profile.json');await safeFile(file);files.push(await pin(file));return unique(files);\n}\nfunction syntaxChecks(files){\n const checks=[],lines=[],env=Object.fromEntries(Object.entries(process.env).filter(([key])=>key.toLowerCase()!=='psmodulepath'));\n for(const p of files.filter(p=>/\\.(mjs|ps1)$/.test(p.file))){const ps=p.file.endsWith('.ps1'),literal=p.file.replaceAll(\"'\",\"''\");\n  const script=\"$ErrorActionPreference='Stop';$taskTokens=$null;$taskErrors=$null;[void][System.Management.Automation.Language.Parser]::ParseFile('\"+literal+\"',[ref]$taskTokens,[ref]$taskErrors);if($taskErrors.Count){$taskErrors|ForEach-Object {$_.Message};exit 1}\";\n  const output=execFileSync(ps?'powershell.exe':process.execPath,ps?['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')]:['--check',p.file],{encoding:'utf8',windowsHide:true,env,timeout:30000,maxBuffer:1048576});\n  checks.push({...p,kind:ps?'PowerShell-AST-only':'node--check',exitCode:0});lines.push((ps?'PSAST ':'node --check ')+p.file+' => 0'+(output?'\\n'+output:''));\n }\n assert.ok(checks.length>0&&checks.length<=128);return{checks,content:lines.join('\\n')+'\\n'};\n}\nconst args=process.argv.slice(2),mode=args[0];"
+    },
+    {
+      "at": 12053,
+      "before": "await absent([...runtime,path.basename(FREEZE),path.basename(GUARD)]);",
+      "after": "await absent([...runtime,path.basename(FREEZE),path.basename(GUARD),path.basename(SYNTAX)]);"
+    },
+    {
+      "at": 12368,
+      "before": " const checked=await checkContracts({preSeal:true}),{binding,drivers,scene,wireSource,wireIdentity,storeSource,storeIdentity}=checked;",
+      "after": " const references=await preparationReferences(),syntax=syntaxChecks(unique([...pre.files,reviewPin,...references]));\n const checked=await checkContracts({preSeal:true}),{binding,drivers,scene,wireSource,wireIdentity,storeSource,storeIdentity}=checked;"
+    },
+    {
+      "at": 12620,
+      "before": " const files=unique([...pre.files,reviewPin]);for(const entry of files)await expectedPin(entry);await absent(runtime);",
+      "after": " for(const entry of unique([...pre.files,reviewPin,...references]))await expectedPin(entry);await absent(runtime);\n await fs.writeFile(SYNTAX,syntax.content,{flag:'wx'});const syntaxLog=await pin(SYNTAX);\n const files=unique([...pre.files,reviewPin,...references,syntaxLog]);for(const entry of files)await expectedPin(entry);await absent(runtime);"
+    },
+    {
+      "at": 14117,
+      "before": "sourceConfigNotYet:true,accountsProvisioned:false",
+      "after": "syntax:{log:syntaxLog,checks:syntax.checks,targetModulesImported:false,behaviouralTestsExecuted:false},preparationReferencePins:references,sourceConfigNotYet:true,accountsProvisioned:false"
+    },
+    {
+      "at": 15565,
+      "before": "assert.deepEqual(frozen.files,unique([...pre.files,reviewPin]));",
+      "after": "const references=await preparationReferences();assert.deepEqual(frozen.preparationReferencePins,references);await expectedPin(frozen.syntax.log);assert.ok(same(frozen.syntax.log.file,SYNTAX));assert.ok(Array.isArray(frozen.syntax.checks)&&frozen.syntax.checks.length>0&&frozen.syntax.checks.every(x=>x.exitCode===0));assert.deepEqual(frozen.files,unique([...pre.files,reviewPin,...references,frozen.syntax.log]));"
+    }
+  ],
+  "exactInverseRestoresOld17Raw": true,
+  "scope": "Root controller only; no policy/gameplay or existing55 source edits. New syntax/PSAST and complete static reference checks precede prepare/seeding; log is exclusive and sealed.",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "currentNodeTests": 219,
+  "rebuildPerformed": false,
+  "constructionHistory": {
+    "initialGeneratorAbortedBeforeSourceWrite": true,
+    "reason": "LF/CRLF two-line literal mismatch",
+    "followupSyntaxCheckFailedBecauseTargetFileDidNotExist": true,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\root-controller-syntax-v1.log",
+      "bytes": 374,
+      "sha256": "465205c95906953d5c5649c306daa61cd9aba7303726379e736772dfc3a25818"
+    }
+  },
+  "actualControllerModeExecuted": false,
+  "capacityAccepted": false
+}

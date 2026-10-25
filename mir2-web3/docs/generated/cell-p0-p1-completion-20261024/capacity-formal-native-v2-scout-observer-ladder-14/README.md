@@ -1,0 +1,5 @@
+# Formal14 diagnostics
+
+Formal run `1792967155359-90bac462` failed stage 25 W4 after the 2/10 stages passed. Two fighters launched 16/18 attacks over 60.075s, below the unchanged 18/min actual-duration threshold. Stage 25 had 243 successful attacks; the whole run had 477. Stages 50/100 and the two-hour soak were not executed. The four ended consumers exited 0 while preserving the original game/report false verdict; their success is not formal acceptance or an independent per-request 900ms packet replay.
+
+See the [catalog](collect-formal-native-v2-scout-observer-ladder-14-public-artifact-catalog.json), [collection](collection-verification.json), [public verification](public-verification.json), [bounded failure analysis](../capacity-formal14-native-supply-failure-analysis-v1/README.md) and [separate Store dataset](../capacity-formal-native-v2-scout-observer-ladder-14-store-diagnostics/README.md). No unique supply, collision, Store or CPU root cause is established. Capacity/P0 acceptance is false; P2 remains frozen.

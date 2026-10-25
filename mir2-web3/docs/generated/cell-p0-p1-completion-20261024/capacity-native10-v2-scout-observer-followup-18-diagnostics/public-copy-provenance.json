@@ -1,0 +1,1235 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T22:08:15.328Z",
+  "hashMode": "raw-bytes",
+  "scope": "Exact explicit public allowlist only. Full capacity raw, monitor raw and recording payload remain external. No private/store/credentials/EXE payload copied.",
+  "files": [
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/collect-public.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/collect-public.mjs",
+      "bytes": 44381,
+      "sha256": "fb918a960d74cc2e6e9547160e11fc954be2cf12c1d5868e1dec165360816418"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/template-derivation-v1.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/template-derivation-v1.json",
+      "bytes": 24729,
+      "sha256": "9199e604e839013ec381cf818559881148fd58199ee08b50de5d1017ba5e5604"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-navigation-wire-diagnostics-v2/source-frozen-v2.json",
+      "source": "compact-navigation-wire-diagnostics-v2/source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-wire-wrapper-independent-review-v1/review-v2.json",
+      "source": "compact-wire-wrapper-independent-review-v1/review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-navigation-wire-diagnostics-v2/README.md",
+      "source": "compact-navigation-wire-diagnostics-v2/README.md",
+      "bytes": 7876,
+      "sha256": "6ad7017bb924f9f9e5dde7822f796103fb32b921e01db907daeb15ccbe6fbfa6"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-navigation-wire-diagnostics-v2/create-from-v1.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/create-from-v1.mjs",
+      "bytes": 5182,
+      "sha256": "dc675829fa7e6bb11fb2e9767a7daba83f75cb20979f80afb93dd17a3a03d4ba"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-navigation-wire-diagnostics-v2/freeze.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/freeze.mjs",
+      "bytes": 6062,
+      "sha256": "a34e328a606e86a2523d3c9920702883d7633d4610e370c6ada549fa519af973"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-navigation-wire-diagnostics-v2/run-synthetic-tests.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/run-synthetic-tests.mjs",
+      "bytes": 1982,
+      "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-navigation-wire-diagnostics-v2/tests-v1.json",
+      "source": "compact-navigation-wire-diagnostics-v2/tests-v1.json",
+      "bytes": 1711,
+      "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-navigation-wire-diagnostics-v2/tests-v1.log",
+      "source": "compact-navigation-wire-diagnostics-v2/tests-v1.log",
+      "bytes": 7111,
+      "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-navigation-wire-diagnostics-v2/v1-baseline-binding.json",
+      "source": "compact-navigation-wire-diagnostics-v2/v1-baseline-binding.json",
+      "bytes": 2021,
+      "sha256": "be83f33aefb41306d3b950810950d71e6b2ee43f72ab814be5348f856e753ccf"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-navigation-wire-diagnostics-v2/wrapper.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/wrapper.mjs",
+      "bytes": 14598,
+      "sha256": "169da7ebf4d9e7227494ece8413998baee0694519011b5528f2bae250b9fe98f"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-navigation-wire-diagnostics-v2/wrapper.test.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/wrapper.test.mjs",
+      "bytes": 21656,
+      "sha256": "216fb7fce356fbba4ee73124014270d3e968f3c68b9cd49e6c5e6c7f297abac3"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/gateway-build-pin.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/gateway-build-pin.json",
+      "bytes": 1454,
+      "sha256": "8f1ee8dc9b24201c567b1ad7ca69ca701a69c11cf19f47800c63c4dbfc8d67ab"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/source-pins.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/source-pins.json",
+      "bytes": 53781,
+      "sha256": "264781007d455c92183fc8e58cbe915a3b6b81b919681ad09b5998ddda0de5c8"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/source-pins-admitted-v2.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/source-pins-admitted-v2.json",
+      "bytes": 52954,
+      "sha256": "99bce08a1a0656ccac1ff58a7b1fdadb103399026626aee9dab658c9f18674d7"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/realm-process.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/realm-process.json",
+      "bytes": 4359,
+      "sha256": "17384e7214981375698147bfee7706104b89aa5aefa315f865aaf470a1864ff4"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/realm-cleanup.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/realm-cleanup.json",
+      "bytes": 6484,
+      "sha256": "08b62b4792fccc121d54c7888e801406d80fadd5fb7fca547e08c2d415c26a60"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/slow-stage-public.jsonl",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/slow-stage-public.jsonl",
+      "bytes": 13308,
+      "sha256": "701fd80e9cb8119e16d71d5bd3f935b3cebd744a31e168a36807c9dab5a55004"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/slow-stage-public-status.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/slow-stage-public-status.json",
+      "bytes": 1022,
+      "sha256": "e7bdd7a899ed24fdabadd5d5f9bf21fc9d20d6eea4071200d71b3dc90eb03d5e"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/slow-stage-diagnostics-config.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/slow-stage-diagnostics-config.json",
+      "bytes": 4315,
+      "sha256": "1868fd25df6bd3a9e3f2405668bf80c0f7fec5b41a9e2db95e14361fc4f2411f"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/slow-stage-public.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/slow-stage-schema-contract.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/slow-stage-schema-contract.json",
+      "bytes": 3573,
+      "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/candidate-release-binding.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/candidate-release-binding.json",
+      "bytes": 7226,
+      "sha256": "986430cfa67b2a9aea685f6a03943af9877eb65b3547b25dd97abbe43292e726"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/backend-library-binding.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/backend-library-binding.json",
+      "bytes": 1047,
+      "sha256": "0a4ae571314cd97de54d2410f2b24bdf4e88b36134f7324702555df78d3a6044"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/full16-gate.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/full16-gate.json",
+      "bytes": 4883,
+      "sha256": "a967a2c699e640afc5d11933ebb3657dd3e65ce5d4a3288bbc2f62d8af206037"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/slow-stage-row-contract.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/verify-full16-gate.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/verify-full16-gate.mjs",
+      "bytes": 5649,
+      "sha256": "cad6f1112466b41e65b4415d7c28bbf679f1f838be86af135e5a7c2fb6ae9c4d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/projection-build-source-lib.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/projection-build-source-lib.mjs",
+      "bytes": 172,
+      "sha256": "2ef575db3c6c67eb01bf743ccb178cf648d3968ed90592fa70073efbb572769a"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/driver-evidence-contract.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/driver-evidence-contract.mjs",
+      "bytes": 5863,
+      "sha256": "3fdf09eb72505ebb7933af43a4178f1f3e40cf61d671521321c7aeab001f4056"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/scene-binding.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/scene-binding.json",
+      "bytes": 6784,
+      "sha256": "a8baefebcd78812287ff25bc9b0b0eb31cb8fb2af5f27f33c925ed03d121733d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/scene-contract.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/scene-contract.mjs",
+      "bytes": 10796,
+      "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/backend-driver-source-guard.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/backend-driver-source-guard.mjs",
+      "bytes": 2675,
+      "sha256": "1d6cb996f88de6a47be1b0bedae3e1f57dd82c3aaa66eeb82dc18196061d8db5"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/measured-phase-contract.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/resource-profile.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/resource-profile.json",
+      "bytes": 1194,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/run-options.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/run-options.json",
+      "bytes": 2901,
+      "sha256": "ae07d1f3955090c976e00a7f5590c74d8dbf36695bf4378bd5c0db8e6f914c8f"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/run-options-admitted-v2.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/run-options-admitted-v2.json",
+      "bytes": 3590,
+      "sha256": "b22cb8b64089d37367be43263f1a360a9fcd634b1d5c4a462300e606ce1a5c98"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/scenario.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/scenario.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/scenario-prefix-readiness.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/provisioning.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/provisioning.json",
+      "bytes": 332,
+      "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/spectator-health-before.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/spectator-health-before.json",
+      "bytes": 665,
+      "sha256": "0932ea59b97985d45ada00631295de38546d3db4317e158ae5ae99b282b5f2e2"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/monitor-options.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/monitor-options.json",
+      "bytes": 740,
+      "sha256": "12dfdda7b9f51739e8e00cf5baba2af656842373f88c2c302010660383f923e7"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/monitor-process.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/monitor-process.json",
+      "bytes": 223,
+      "sha256": "4274511b8b3f796a0985ae9c1a64ba28016a94dfe158bd9e7e9d195317b49e76"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/launcher-source-frozen-v1.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/launcher-source-frozen-v1.json",
+      "bytes": 66405,
+      "sha256": "75f02c495ce8f328b2a4bd141e88a6d48d4a3213c6a3ba0e1d3106d1426d4ca6"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/launcher-source-prepared-v1.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/launcher-source-prepared-v1.json",
+      "bytes": 1466,
+      "sha256": "45837dc2d011ca99b6cf2a95ee925cf965ddc6290cd32b4d06a5c1582beca171"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/driver-report-contract.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/driver-report-contract.mjs",
+      "bytes": 9785,
+      "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/preparation-plan.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/preparation-plan.json",
+      "bytes": 1455,
+      "sha256": "137d1820bdb2f7caf85b64a589f191bdc6036b264923a743925f42ac41824d71"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/final-inputs-approved.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/final-inputs-approved.json",
+      "bytes": 1460,
+      "sha256": "7c3e2fc8d517e06fd121544c2a8a7be79a8d31343bd1332bb69212c46d962097"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/report-provenance.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/report-provenance.json",
+      "bytes": 7705,
+      "sha256": "3d21bb4b0b7dbea10db3737309e59fb25f0694a91807735ad89814f94f6c7d8d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/static-preparation-verification.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/static-preparation-verification.json",
+      "bytes": 1470,
+      "sha256": "1117cd927a48cf9cf9812358d4d243c32215c215f7e0246f26570f5d3ad9abb5"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/source-guard-readonly-verification.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/source-guard-readonly-verification.json",
+      "bytes": 2441,
+      "sha256": "e8e31a5a3d0457e39e655c7c5859f3cf9a9f4cfd533006b11e071e8400cb26a9"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/initialize-private.ps1",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/initialize-private.ps1",
+      "bytes": 2250,
+      "sha256": "89c89cc1b9dd964ecf049ad185c564eccbaebf49103b4d09df4cf1443d5b8c1b"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/input-lib.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/input-lib.mjs",
+      "bytes": 16967,
+      "sha256": "5ff2a5b7f9a668a8d67d88971a80de6e609b5c36f12f4d3dd5786113d6bf1eab"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/prepare-inputs.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/prepare-inputs.mjs",
+      "bytes": 14282,
+      "sha256": "b58cbad5cc20f8103bb4606ec61a4f598c8378fa64a60000e7555525031a3842"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/run-owned.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/run-owned.mjs",
+      "bytes": 21625,
+      "sha256": "02216288b48ba389c2d06006cecdaeab9f52ede99c1dd842c8ec56a4a31e8c9e"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/monitor-owned.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/monitor-owned.mjs",
+      "bytes": 1182,
+      "sha256": "204abfb6fa4000b9da770a8dbc128225ff3583caf9e7763dbedcf6b22d5adc72"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/request-stop.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/request-stop.mjs",
+      "bytes": 915,
+      "sha256": "14a5c691187006ebb50798068100d47af7ed3a6c4358c29f75b6774c79ebc90f"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/recover-drained-owned.ps1",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/recover-drained-owned.ps1",
+      "bytes": 3219,
+      "sha256": "03237263cd403fac44a47a79a9f46e796dec42a8bcd572c4bea19d3198b24368"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/reports/1792965008290-fc5e2eed.report.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/reports/1792965008290-fc5e2eed.report.json",
+      "bytes": 324303,
+      "sha256": "c9fe969068b30727250c94f67149b8d938abb493b93200041d0e94ee8abca4c7"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/launcher-syntax-check.log",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/launcher-syntax-check.log",
+      "bytes": 4770,
+      "sha256": "6e72fff0eb3e3134009bb1a6a21f5a2ba79591d392e8f6aaee673acf5593dc89"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/spectator-health-after.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/spectator-health-after.json",
+      "bytes": 673,
+      "sha256": "c2ccc2c4b7fb63134f2988f6a9ae6a6c886064bf9834c1523cc4fe06cbded339"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/copied-baseline-inputs.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/copied-baseline-inputs.json",
+      "bytes": 371,
+      "sha256": "eabb779bb4c11c5cb26ecf4bdf6a2db603a2aec69a2058ba5491db400927b82f"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/driver-binding-contract.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/driver-binding-contract.mjs",
+      "bytes": 1623,
+      "sha256": "b54e5ffd89da0f048632f8d3ee7257880f00d73b44a8cc4a7b36a21fce833f72"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/current-driver-binding.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/current-driver-binding.json",
+      "bytes": 2756,
+      "sha256": "8702d54a12dbbf2a57e841a2fab66f4ab25b884407fb13ee863c412d759817d1"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/scene-driver-compatibility.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/scene-driver-compatibility.mjs",
+      "bytes": 1550,
+      "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/scene-driver-compatibility-proof-v1.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/scene-driver-compatibility-proof-v1.json",
+      "bytes": 2535,
+      "sha256": "31941ce952a31916bb8ca14abba4647efe012a72fbf81c45e708a8d61ab2f4ef"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/native-chase-report-contract.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/native-chase-report-contract.mjs",
+      "bytes": 2266,
+      "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/passed-probe-window-contract.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/passed-probe-window-contract.mjs",
+      "bytes": 3040,
+      "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/wire-diagnostics-contract.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/wire-diagnostics-adapter.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/compact-navigation-wire-terminal.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/compact-navigation-wire-terminal.json",
+      "bytes": 5089,
+      "sha256": "61a3086c8158bcdad39107e6df6f5f42e4ef95a7dc692920a4fd2ed00c9f72fd"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-account-store-wait-diagnostics-v1.json",
+      "source": "release-account-store-wait-diagnostics-v1.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/backend-source-account-store-wait-diagnostics-v1.json",
+      "source": "backend-source-account-store-wait-diagnostics-v1.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/account-store-wait-diagnostics-v1-build-receipt.json",
+      "source": "account-store-wait-diagnostics-v1-build-receipt.json",
+      "bytes": 2453,
+      "sha256": "146df0a5be29ddacf114f0574ef0cf0500666d23ffbae3dfa533eaf229263936"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/capacity-scout-observer-preference-driver-frozen-v1.json",
+      "source": "capacity-scout-observer-preference-driver-frozen-v1.json",
+      "bytes": 9465,
+      "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/collection-manifest-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/collection-manifest-v4.json",
+      "bytes": 7084,
+      "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/actor-92-candidate-list-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/actor-92-candidate-list-v1.json",
+      "bytes": 11865,
+      "sha256": "0fbdc1f7a7dd1cb0e2836ff2ef2cf2d2f23637e1075ba3573bb82a49f903d863"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/attempt-count-correction-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/attempt-count-correction-v1.json",
+      "bytes": 987,
+      "sha256": "6072db3eac7c26b7d67928ac4455d649c6cbdd12d3e20d80209a10078f46b7e8"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/build-validation-adapters.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/build-validation-adapters.mjs",
+      "bytes": 3222,
+      "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/candidate-10-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.mjs",
+      "bytes": 8728,
+      "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/conditional-level-validation-v4.log",
+      "source": "partition-span2-compact-halo-repair-v1/conditional-level-validation-v4.log",
+      "bytes": 4757,
+      "sha256": "a5f99254e3a5c745b89a34f54f3506acd795d8e89d0ac2a961458e0a9b3aa501"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v1.mjs.txt",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v1.mjs.txt",
+      "bytes": 4731,
+      "sha256": "a46e45348b490742757b4bb3c1a17294194fbc918620baac0e3d4b4caa840b07"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v2.mjs.txt",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v2.mjs.txt",
+      "bytes": 4709,
+      "sha256": "ad7b353af37e03fcf0bb8a2a829ea908b2c35ffe89b52cb684881936bda65cc9"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/diagnose-failure.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-failure.mjs",
+      "bytes": 4795,
+      "sha256": "06360009df1b441d5555e367d7f73258e10cca7c4496abdf4eb1ead60df0961c"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/diagnose-original-run-v2.log",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-original-run-v2.log",
+      "bytes": 817,
+      "sha256": "9c13066c8bccd17626d0f233b0e7b0313e8c4649b57baf98fb2a8f449fa93243"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/diagnose-original-run-v3.log",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-original-run-v3.log",
+      "bytes": 1620,
+      "sha256": "2415609f238bf44af74bbc102f2586c33fe9e5f5f73c7f881f7d2b718ec67e55"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/diagnostic-adapter-setup-failure-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/diagnostic-adapter-setup-failure-v1.json",
+      "bytes": 344,
+      "sha256": "41064e86ccfeed611faaf654c19574e8b555a686add0d09e9c3926eacb470723"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/final-independent-review-binding-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/final-independent-review-binding-v4.json",
+      "bytes": 2272,
+      "sha256": "0317e14bc05559c610ff89620eff96cca477925c56059d0ced2effbe91c80056"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/full-static-validation-v4.log",
+      "source": "partition-span2-compact-halo-repair-v1/full-static-validation-v4.log",
+      "bytes": 821,
+      "sha256": "78942d30c23f4d5958b621ab0ae7c44c01f6a5d6da6c72e492b9080bdccf2dc6"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/full-static-validation-v5.log",
+      "source": "partition-span2-compact-halo-repair-v1/full-static-validation-v5.log",
+      "bytes": 1377,
+      "sha256": "d0d9e8e2c40929523a0ac0f47c202763a2f0131bec0b3febf73d268cb08d679c"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/independent-first10-review-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/independent-first10-review-v1.json",
+      "bytes": 11639,
+      "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/independent-repair-review-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/independent-repair-review-v1.json",
+      "bytes": 13583,
+      "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/original-failure-diagnosis-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/original-failure-diagnosis-v1.json",
+      "bytes": 20418,
+      "sha256": "b974d00a999c0a92642de89bb2d2c78ba7cd5c16a0afc6517902d682ea101a67"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/original-prefix-contracts-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/original-prefix-contracts-v4.json",
+      "bytes": 19490,
+      "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.json",
+      "bytes": 80434,
+      "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.mjs",
+      "bytes": 2887,
+      "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/prefix-scout-validation-v4.log",
+      "source": "partition-span2-compact-halo-repair-v1/prefix-scout-validation-v4.log",
+      "bytes": 1308,
+      "sha256": "6c36694e71d6dcf789edcac4aee56182eea5ad7e19fd196912b0c21d35033544"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/protocol-navigation-counted.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/protocol-navigation-counted.mjs",
+      "bytes": 18581,
+      "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/prove-repaired-leg-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/prove-repaired-leg-v4.mjs",
+      "bytes": 3000,
+      "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/repair-layout.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/repair-layout.mjs",
+      "bytes": 8094,
+      "sha256": "90f28ee99b7a8e4a1205f912046ef7a8fd792f38035fc330ab159a15127844d1"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/repair-result-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/repair-result-v1.json",
+      "bytes": 82947,
+      "sha256": "79a52f8ac854eb9d03c987f8f2a7a15c1ddded8d0751ebab9a8de58c75da748b"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/repair-run-v1.log",
+      "source": "partition-span2-compact-halo-repair-v1/repair-run-v1.log",
+      "bytes": 1776,
+      "sha256": "02091a9c9b5a200a9f3e778b7f74878aae22a9164d32cb788d63839a2779df82"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/repaired-leg-proof-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/repaired-leg-proof-v4.json",
+      "bytes": 19105,
+      "sha256": "5b52ae5354a304db24ca09d402d8ceeb6040225836418befed63ebdf839b0759"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/review-summary-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/review-summary-v4.json",
+      "bytes": 20628,
+      "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/seal-review-summary-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/seal-review-summary-v4.mjs",
+      "bytes": 9199,
+      "sha256": "9d16605e5f0e69d2949c802097f930a793d467a0b2f7e047ce6aa27cd481d9f0"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/syntax-verification-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/syntax-verification-v4.json",
+      "bytes": 3328,
+      "sha256": "9247be56b96304eab9f1dd9c3e1541dcaa1c74a1da45800a32b5ff99bd26a870"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/trial-actor-92-01-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/trial-actor-92-01-v1.json",
+      "bytes": 19398,
+      "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/trial-actor-92-02-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/trial-actor-92-02-v1.json",
+      "bytes": 37886,
+      "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/validate-prefix-contracts-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/validate-prefix-contracts-v4.mjs",
+      "bytes": 2240,
+      "sha256": "9a9c81fc4b7a6b19ec0fce72d5c4f2363128e32d7e626348e728bf87e94037cf"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+      "bytes": 11508,
+      "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/validation-adapter-provenance-v2.json",
+      "source": "partition-span2-compact-halo-repair-v1/validation-adapter-provenance-v2.json",
+      "bytes": 5649,
+      "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/partition-span2-compact-halo-repair-v1/validation-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/validation-repaired-v4.json",
+      "bytes": 7220826,
+      "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/compact-halo-repair-summary-review-addendum-v1.json",
+      "source": "compact-halo-repair-summary-review-addendum-v1.json",
+      "bytes": 3473,
+      "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.test.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.test.mjs",
+      "bytes": 22894,
+      "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/synthetic-tests-v1.log",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/synthetic-tests-v1.log",
+      "bytes": 7579,
+      "sha256": "451c97bfe087895450890a37e42f21e9f2305da127a73f9ce9857b8955bf9d37"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-helper-freeze-v1.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-helper-freeze-v1.json",
+      "bytes": 2314,
+      "sha256": "f554d0e280318f3a3624046e3344d8c3becdc7057ca261b28df99c419c283a00"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/legacy14-original.mjs.txt",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/passed-probe-window-contract.test.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/passed-probe-window-contract.test.mjs",
+      "bytes": 3366,
+      "sha256": "7ab914ff3e0ed491b8b897b3099efd3ab4ad6613d452ec0e70351b092a8ceb58"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/wire-diagnostics-adapter.test.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/wire-diagnostics-adapter.test.mjs",
+      "bytes": 7373,
+      "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/wire-adapter-synthetic-tests.log",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/wire-adapter-synthetic-tests.log",
+      "bytes": 2205,
+      "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/wire-adapter-synthetic-tests.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/wire-adapter-synthetic-tests.json",
+      "bytes": 2413,
+      "sha256": "5a6905e7ad356e1c41266d92332b1694a2f9a16a80b26b4c4951a40a8ecc9d5a"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/collect-release-native-10-v2-scout-observer-feasibility-18-recordings-metadata.json",
+      "source": "collect-release-native-10-v2-scout-observer-feasibility-18-recordings-metadata.json",
+      "bytes": 1735,
+      "sha256": "16313d151a14c7b9cea6243fe0de4a66c093a59457d41adec5280426a58c67ee"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/collect-release-native-10-v2-scout-observer-feasibility-18-monitor-endpoints.json",
+      "source": "collect-release-native-10-v2-scout-observer-feasibility-18-monitor-endpoints.json",
+      "bytes": 4710,
+      "sha256": "1e4e50c729505e5ae9d2b198aaa4e192c4fc59e898f9df496e8d059347b2f363"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/verify-public.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/verify-public.mjs",
+      "bytes": 19306,
+      "sha256": "75d405964aecb3c223cc3b57d535880c968a004955c00cac775b1f85e3393eee"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-preference-root-full-driver-receipt-v1.json",
+      "source": "scout-observer-preference-root-full-driver-receipt-v1.json",
+      "bytes": 5378,
+      "sha256": "00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-preference-root-full-driver-v1.log",
+      "source": "scout-observer-preference-root-full-driver-v1.log",
+      "bytes": 59078,
+      "sha256": "4b2d8af950ce74bd775bdb01a14aef9531ac3b6ef1ae9968573b1f7d4af95727"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-preference-root-full-driver-stderr-v1.log",
+      "source": "scout-observer-preference-root-full-driver-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/capacity-attack-deadline-driver-frozen-v1.json",
+      "source": "capacity-attack-deadline-driver-frozen-v1.json",
+      "bytes": 6759,
+      "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/capacity-native-chase-preference-driver-frozen-v1.json",
+      "source": "capacity-native-chase-preference-driver-frozen-v1.json",
+      "bytes": 19099,
+      "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-preference-v1/source-preservation-and-focused-receipt-v1.json",
+      "source": "scout-observer-preference-v1/source-preservation-and-focused-receipt-v1.json",
+      "bytes": 21049,
+      "sha256": "5177c156deabecce26c37cc4104e36ff7b22352ebf26c6b77478a4bb23fa5684"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-preference-v1/preimages/playtest-capacity-soak.mjs.txt",
+      "source": "scout-observer-preference-v1/preimages/playtest-capacity-soak.mjs.txt",
+      "bytes": 149057,
+      "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-preference-v1/preimages/playtest-capacity-soak.test.mjs.txt",
+      "source": "scout-observer-preference-v1/preimages/playtest-capacity-soak.test.mjs.txt",
+      "bytes": 243920,
+      "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-preference-independent-review-v1/review-v1.json",
+      "source": "scout-observer-preference-independent-review-v1/review-v1.json",
+      "bytes": 7980,
+      "sha256": "2ff103a69374fa6860616d566d3a22b488c3e5ebe77b000cd019b8cff9afbfbc"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-preference-independent-review-v1/full-regression-addendum-v1.json",
+      "source": "scout-observer-preference-independent-review-v1/full-regression-addendum-v1.json",
+      "bytes": 3152,
+      "sha256": "281d5faacadc10c0df2f476b9c5ed2b9ce50ddfaf4dc5e37979c4624dc08af6a"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/native-chase-preference-main-before-v1.mjs.txt",
+      "source": "native-chase-preference-main-before-v1.mjs.txt",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/actual-metadata-binding-v3.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/actual-metadata-binding-v3.json",
+      "bytes": 8300,
+      "sha256": "ff7518e56d6d619dfdec0b6e4a59f836880826a8bcf07a90a9a2ddab0bbc0e27"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/candidate-release-binding.json.before-actual-v3.txt",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/candidate-release-binding.json.before-actual-v3.txt",
+      "bytes": 2203,
+      "sha256": "40c3fa1c5edc73598df00b8655ee8a836118ffd635cde9c346396eb893f36801"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/collect-store-public.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/collect-store-public.mjs",
+      "bytes": 4681,
+      "sha256": "9fc4e834086f8c4fa8080131a3624ad77ca7eb36fb5a0895d2a693059e2f14e7"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/copy-basis-v1.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/copy-basis-v1.json",
+      "bytes": 11350,
+      "sha256": "b65be8e061ed5012c8642384af276a239a91ac64189690574ce208894c77139d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/current-driver-binding.json.before-actual-v3.txt",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/current-driver-binding.json.before-actual-v3.txt",
+      "bytes": 2769,
+      "sha256": "171d141de05c86a2b2abe5b3bbfade61a0253388323761139993d6eb1dc90461"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/driver-evidence-contract.mjs.before-lazy-refs-v4.txt",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/driver-evidence-contract.mjs.before-lazy-refs-v4.txt",
+      "bytes": 5843,
+      "sha256": "7629d35c1ff788c6db282ec834f8d471659b90526020332fe9f51b95876f900d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/driver-evidence-lazy-refs-mutation-v4.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/driver-evidence-lazy-refs-mutation-v4.json",
+      "bytes": 3797,
+      "sha256": "e9bc6471fb48856c9d8dc4d9c80e70d73bda38ebfaef7427a5627b04aaa6bc97"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/driver-evidence-lazy-refs-syntax-v4.log",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/driver-evidence-lazy-refs-syntax-v4.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/final-inputs-approved.json.before-actual-v3.txt",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/final-inputs-approved.json.before-actual-v3.txt",
+      "bytes": 616,
+      "sha256": "b579660936ebffa3f95074b865bd4c511a275d6d0c889ebf890f65d6e92e9ded"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/full16-actual-prerequisite-v1.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/full16-actual-prerequisite-v1.json",
+      "bytes": 4922,
+      "sha256": "2fd5bb822e631128ff483528ea09b74cd2e4db1316107ffb5c57b579bf8d2157"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/full16-execution-field-adaptation-v2.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/full16-execution-field-adaptation-v2.json",
+      "bytes": 2135,
+      "sha256": "4f6e4a9129b3d29ddc04304e90bf1ebc81ac1a6e0b7b4bcfadafa4e87cbb4b37"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/full16-gate-syntax-v2.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/full16-gate-syntax-v2.json",
+      "bytes": 230,
+      "sha256": "2e3e0dd9fc74be7c1f824dbc51f2d879643455a61af5d9e12d11674ecb80791a"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/full16-gate-syntax-v2.log",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/full16-gate-syntax-v2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/launcher-source-prepared-v1.json.before-actual-v3.txt",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/launcher-source-prepared-v1.json.before-actual-v3.txt",
+      "bytes": 622,
+      "sha256": "6bd100d95614c50f76068fa924bc41bcd0a5887e01d4418e19c61f0d412e8a29"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/preparation-plan.json.before-actual-v3.txt",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/preparation-plan.json.before-actual-v3.txt",
+      "bytes": 611,
+      "sha256": "ddc44e47bd0ff037260dcf36b3a7583ad81c275bb8d1f5a5e0263e4d6df76a9a"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/README-PENDING-v1.md",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/README-PENDING-v1.md",
+      "bytes": 3793,
+      "sha256": "ecd0e56b3ddc5da36e7df92fed7dff1138041b9d3fbe7dcf189ce150dff370ea"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/README-PENDING-v2.md",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/README-PENDING-v2.md",
+      "bytes": 977,
+      "sha256": "284f48b364549e907b6a785af9d064ad5c3ac7953871259fea8171cfdfac7d4d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/root-controller-derivation-v1.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/root-controller-derivation-v1.json",
+      "bytes": 9141,
+      "sha256": "461e2812bc3f8cf885e3d5310e7722802c5d7f26870275753d760fc22cc4f808"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/root-controller-preparation-v1.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/root-controller-preparation-v1.json",
+      "bytes": 1677,
+      "sha256": "d8ac2871759b2f3d5ca7e5fdd2e6f54453049cdc29812bb590530f49998a8c9f"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/root-controller-syntax-v1.log",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/root-controller-syntax-v1.log",
+      "bytes": 374,
+      "sha256": "465205c95906953d5c5649c306daa61cd9aba7303726379e736772dfc3a25818"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/root-controller-syntax-v2.log",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/root-controller-syntax-v2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/ROOT-CONTROLLER.md",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/ROOT-CONTROLLER.md",
+      "bytes": 1742,
+      "sha256": "92eedafc3e428e725cae54a63b9592d7f3aae23935bc8f63894a528cbaa65b4c"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/root-seal-and-guard-v1.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/root-seal-and-guard-v1.mjs",
+      "bytes": 17596,
+      "sha256": "5767d9e1af9844413cc579624cf8571fd3edc4c0f56aff1d799b2bd7688cb95d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/runtime-prepared-v1.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/runtime-prepared-v1.json",
+      "bytes": 20505,
+      "sha256": "eb9d1899dd5d9636b47a566da1f40cd9d6ddfb35a522b689d20b5d9a3bc048ff"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/runtime-prepared-v2.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/runtime-prepared-v2.json",
+      "bytes": 23453,
+      "sha256": "d42bcd0e5e1b16275ea4f498f8e8e8c1b16b4580ec6d6b8db7b6aec2adf00b5d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/runtime-prepared-v3.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/runtime-prepared-v3.json",
+      "bytes": 35192,
+      "sha256": "bb69fa0570cf70dfe90f40822d577312eb7d8e31c674b759c595891474dfab4b"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/scene-binding.json.before-actual-v3.txt",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/scene-binding.json.before-actual-v3.txt",
+      "bytes": 6797,
+      "sha256": "363a09a840867f3b6aa7f41b47fed2506fb11ae1b3a588725386279b555a131b"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/scope-decision-v1.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/scope-decision-v1.json",
+      "bytes": 937,
+      "sha256": "878bcc1b59f145a63052dfee9c6ffdfb5650085ad9f84a3db35ca6e48175b563"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/static-preparation-verification.json.before-actual-v3.txt",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/static-preparation-verification.json.before-actual-v3.txt",
+      "bytes": 626,
+      "sha256": "14289dfadfd3c221cf56daf8251cfd0e5a45c962919cfe25ef0240f3941ebcf4"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/store-diagnostics-contract.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/store-diagnostics-contract.mjs",
+      "bytes": 2720,
+      "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/template-syntax-check-v1.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/template-syntax-check-v1.json",
+      "bytes": 3118,
+      "sha256": "ee6ba72b88cd61e473bdc0fd64716225bf6c50eb4701b47d955bbd91a37aa896"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/template-syntax-check-v1.log",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/template-syntax-check-v1.log",
+      "bytes": 1171,
+      "sha256": "ddffc0f5a7a633ab3245073f5ba4ef57f1ad0af700c57dcc02db328c2ff99a0d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/verify-full16-gate.mjs.before-execution-fields-v2.txt",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/verify-full16-gate.mjs.before-execution-fields-v2.txt",
+      "bytes": 5281,
+      "sha256": "36cc6621feaf580d5d8c303c27b194e291d9f33576fcfe5056e7ed83de0e97ee"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/verify-store-public.mjs",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/verify-store-public.mjs",
+      "bytes": 4597,
+      "sha256": "c481733d1209b8955f20c223c50ae5fb261e4a1807e7530366af46d762b21148"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.audit-source.mjs",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.audit-source.mjs",
+      "bytes": 9481,
+      "sha256": "da2636cb33f6ce11454f45e0f684c79e98173f591c7e62bfdc0c9324794723ce"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.backend-source.json",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.backend-source.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.independent-audit.json",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.independent-audit.json",
+      "bytes": 1907,
+      "sha256": "92a72770bab2e302537eda593baf72a8cb5438a0d6956fa171e2f7e80128533f"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.prepared-profile.json",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.prepared-profile.json",
+      "bytes": 4571,
+      "sha256": "8736f7c2f3c002a8a57b972cb9d5ba6be09d83a224ffcd444b277dd49f9ade98"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.realm-evidence.json",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.realm-evidence.json",
+      "bytes": 35109,
+      "sha256": "f41f368182319ad881c960fcd59ba3150381751de6679683d8bed6fef59df0e3"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.release-input.json",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.release-input.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.runner-source.mjs",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.runner-source.mjs",
+      "bytes": 14494,
+      "sha256": "b1bf77146f5f6cdddc93198b2bf0d21ebc0ef0522ed47ec34a4a2755e2e65802"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.source-manifest-verification.json",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.source-manifest-verification.json",
+      "bytes": 717,
+      "sha256": "4c580c3b6e29e8a4bc0440698c3f007c75b7db827ae0439f51c8ccd97a79ba3d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.zone-metrics.json",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963900426-f1496383.zone-metrics.json",
+      "bytes": 23593,
+      "sha256": "d2cbe34bdf3405f4d44c480549ffbbef5e02739475e646b027f57ed719081ede"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-a.trace.jsonl",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-a.trace.jsonl",
+      "bytes": 982984,
+      "sha256": "bff94267486f19494628a7a106f45c656f90d0f0044d0d724397848afe0afe89"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-b.trace.jsonl",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-b.trace.jsonl",
+      "bytes": 908448,
+      "sha256": "9ec1ab4fb027908a5b524c8ac9095e76784d8e335bd5040f7f5519b761857a18"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-guard-newCharacter.trace.jsonl",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-guard-newCharacter.trace.jsonl",
+      "bytes": 3486,
+      "sha256": "d2349f826580d669c54c3cf1d9c801a80cf5ef84776a9de3d34dcc853403bc0d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-guard-startGame.trace.jsonl",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-guard-startGame.trace.jsonl",
+      "bytes": 3450,
+      "sha256": "c8fdf014325402531e4ec75be4725e50e151a0c6c84db15931da9297f74cdc7c"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-relogin-0.trace.jsonl",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-relogin-0.trace.jsonl",
+      "bytes": 685108,
+      "sha256": "b4ab57e86cb079273484a0a8d44299731bc82d22e6c5535e049a7737630b7e9f"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-relogin-1.trace.jsonl",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694-relogin-1.trace.jsonl",
+      "bytes": 680202,
+      "sha256": "35bf1edfa2085531587106509dff6e48c8095e4af06891217af8f07904ddf8a4"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694.report.json",
+      "source": "full-lifecycle-scout-observer-preference-v1/public/1792963911146-f4437694.report.json",
+      "bytes": 109384,
+      "sha256": "8e635a13d012553e140ddb0633771c4f1e2cb4596026a60153f0bfe5198460c7"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/probe18-root-seal-stderr-v1.log",
+      "source": "probe18-root-seal-stderr-v1.log",
+      "bytes": 1019,
+      "sha256": "8718f0345424500ff4a560cc687679a019760d2d718b2e86b9430263b340a4bf"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/probe18-root-seal-stdout-v1.log",
+      "source": "probe18-root-seal-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/probe18-runtime-independent-review-v1/preseal-independent-review-v3.json",
+      "source": "probe18-runtime-independent-review-v1/preseal-independent-review-v3.json",
+      "bytes": 4567,
+      "sha256": "d4431b1b0693ccf783d6665bfb77f60f7fde666f9bf63503f690b11ae241dced"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-full16-actual-independent-review-v1.json",
+      "source": "scout-observer-full16-actual-independent-review-v1.json",
+      "bytes": 4775,
+      "sha256": "5a504f85a598fe3c67f971ce8960b90f5a8b1ded1a863a2c88b6cde071e1ae9d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-full16-public-archive-v1/full16-actual-prerequisite-v1.json",
+      "source": "scout-observer-full16-public-archive-v1/full16-actual-prerequisite-v1.json",
+      "bytes": 4922,
+      "sha256": "2fd5bb822e631128ff483528ea09b74cd2e4db1316107ffb5c57b579bf8d2157"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-full16-root-independent-cleanup-v1.json",
+      "source": "scout-observer-full16-root-independent-cleanup-v1.json",
+      "bytes": 322,
+      "sha256": "26b848d824fea7880bd038f3e30b6b1851422c4d924bb9de3a8108c23387423a"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-preference-runtime-v1/current-execution-binding-v1.json",
+      "source": "scout-observer-preference-runtime-v1/current-execution-binding-v1.json",
+      "bytes": 1404,
+      "sha256": "665051040cc0a966cb48d0e8e46782cdb617279c537cc36953f096309ed8f18d"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-preference-runtime-v1/root-final-binding-derivation-v1.json",
+      "source": "scout-observer-preference-runtime-v1/root-final-binding-derivation-v1.json",
+      "bytes": 1524,
+      "sha256": "3b991a9acae2ef78f0fe010ce4d847cf5965f9d1b5dd5101b67c56cc5e042ba8"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/scout-observer-preference-runtime-v1/source-lib-v1.mjs",
+      "source": "scout-observer-preference-runtime-v1/source-lib-v1.mjs",
+      "bytes": 33531,
+      "sha256": "9b12d67e7e31eb0ada4550c9aceb8dd9c0e64e74892007b4ffc8d0fa710b366f"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-scout-observer-feasibility-18/runtime-prepared-v4.json",
+      "source": "release-native-10-v2-scout-observer-feasibility-18/runtime-prepared-v4.json",
+      "bytes": 38904,
+      "sha256": "9f5ed533d8883aa1f2cd16cc93a9bae5ec1b6b195e12998593801712341cc3bd"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/full-lifecycle-scout-observer-preference-v1/verify-inputs.mjs",
+      "source": "full-lifecycle-scout-observer-preference-v1/verify-inputs.mjs",
+      "bytes": 14002,
+      "sha256": "ac97e49bc729d6fef822c800b7090cddad4d41fb256da101fa1d5fef15e508cd"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/probe18-runtime-independent-review-v1/preseal-independent-review-v4.json",
+      "source": "probe18-runtime-independent-review-v1/preseal-independent-review-v4.json",
+      "bytes": 4412,
+      "sha256": "b2c4a9f7a4d440f9bf61b2fe4b79b8c3982701d1ec38a2a3927f936453b7aa50"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.mjs",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-account-store-wait-feasibility-17/slow-stage-schema-contract.json",
+      "source": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-schema-contract.json",
+      "bytes": 3573,
+      "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/release-native-10-v2-coordinated-feasibility-06/resource-profile.json",
+      "source": "release-native-10-v2-coordinated-feasibility-06/resource-profile.json",
+      "bytes": 1194,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+    },
+    {
+      "path": "capacity-native10-v2-scout-observer-followup-18-diagnostics/collect-release-native-10-v2-scout-observer-feasibility-18-public-artifact-catalog.json",
+      "source": "collect-release-native-10-v2-scout-observer-feasibility-18-public-artifact-catalog.json",
+      "bytes": 72158,
+      "sha256": "80a5baa03493b2f8d137303a28ae1f348109053881130e5de9ab6a04dcfb1cbf"
+    }
+  ],
+  "allOriginalCopiesByteEqual": true,
+  "structurallyUnredactedSensitiveJsonFields": 0,
+  "privateSecretValuesReadOrClaimedChecked": false
+}

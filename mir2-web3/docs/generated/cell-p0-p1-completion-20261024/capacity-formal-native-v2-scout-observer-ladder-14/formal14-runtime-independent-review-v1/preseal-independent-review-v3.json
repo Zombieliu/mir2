@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T22:23:08.304Z",
+  "state": "CANONICAL_SCENE_METADATA_CORRECTED_ELIGIBLE_FOR_ROOT_SEAL_RETRY",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\runtime-prepared-v3.json",
+    "bytes": 38848,
+    "sha256": "c00f3c62ee28b68b94bce5e773c4c17faeb59a79be7972bf5ab91cd3bcb588bc"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-seal-and-guard-v1.mjs",
+    "bytes": 16503,
+    "sha256": "b4440acd5a721719f064499cc67d2b135a49283b02ee965100a885f8f8e5115b"
+  },
+  "priorStaticReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-runtime-independent-review-v1\\preseal-independent-review-v2.json",
+    "bytes": 6139,
+    "sha256": "91900218503e7281202655b440efa10bcc14ed12df6b26659be381aaf4611a06"
+  },
+  "correctionProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-source-canonical-reference-proof-v1.json",
+    "bytes": 5845,
+    "sha256": "8dd450fa3911f0c3c61d34371f3526cd9286a76fe5c87dede1fa6c983899e079"
+  },
+  "actualFirstSealFailure": {
+    "stdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-seal-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-seal-stderr-v1.log",
+      "bytes": 1686,
+      "sha256": "d0e3759f74880ae535ba2770c4883c630117cac7d891571e1f110369b08a5b2e"
+    },
+    "point": "verify-feasibility-gate:81 before generated3/seal/private/seed/realm",
+    "verdict": "Real source-location aggregate mismatch; previous static review did not cover pure scene evaluation."
+  },
+  "scope": "Narrow metadata delta review plus Root-authorized actual readonly verifySceneContract evaluation for18/probe and14/formal. No mode/gate/seal/guard/prepare/test/Cargo/account/realm execution, raw scan, trace parse or binary hashing.",
+  "checks": {
+    "localPins": 63,
+    "externalPins": 54,
+    "localAggregate": "594ec27b98f0e728c61ec214306ebecd2ed0bc43b697d298e8ed78d576a621c5",
+    "externalAggregate": "366cd52e40d461131b0c82eb26a6d68d4a6a26fccc186b512bcb8e73aa775163",
+    "unchangedPinsReusePrevious112RawChecks": true,
+    "changedAndAddedRawPinsChecked": 6,
+    "onlyExistingInputChanged": "current-driver-binding.json",
+    "onlyJsonPointerChanged": "/staticGeometryCompatibilityProof/file",
+    "metadataForwardInverseRawExact": true,
+    "gateAndSceneContractRawByteUnchanged": true,
+    "allOriginalEqualityOperatorsRetained": true,
+    "controller16503AndB444HashUnchanged": true,
+    "canonicalCompatibilityProof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-driver-compatibility-proof-v1.json",
+      "bytes": 2535,
+      "sha256": "31941ce952a31916bb8ca14abba4647efe012a72fbf81c45e708a8d61ab2f4ef"
+    },
+    "canonicalProofInOriginalActuallyFrozenProbe18Closure": true,
+    "canonicalProofNowExplicitInFormalExternalClosure": true,
+    "originalLocalSameByteProofCopyRetained": true,
+    "pureSceneFunctionEvaluationExecutedHere": true,
+    "otherTargetImportOrModeExecutedHere": false,
+    "sharedSourceRows": 54,
+    "beforeOnlyDifferingSharedRow": 42,
+    "beforeDifferedOnlyAbsoluteFilePathWithEqualBytesAndSha": true,
+    "probeActualSourceSha256": "3e34b754d55e7ba0aa38b7600fb5746b80ef3cb272a2216ba88904e1a12c785d",
+    "formalBeforeSourceSha256": "eeb624ce9488be2c3ec06b5c1c7e670a62f322b5112da8a7ccc4325db7812655",
+    "formalAfterSourceSha256": "3e34b754d55e7ba0aa38b7600fb5746b80ef3cb272a2216ba88904e1a12c785d",
+    "allOrderedSharedRowsNowRawPinEqual": true,
+    "gate81Checks": {
+      "sourceAggregate": true,
+      "profile": true,
+      "processAggregate": true,
+      "probe10": true,
+      "formal100": true,
+      "analysis": true,
+      "patrol2": true,
+      "preparedAggregate": true,
+      "provenanceAggregate": true
+    },
+    "exactFirst10AnchorsAndRolesUnchanged": true,
+    "scene10A42Scene100F87Analysis1669Unchanged": true,
+    "resourceScenarioPolicyAnd146WindowRawBytesUnchanged": true,
+    "expectedFinalUniqueSealInputs": 123,
+    "sealLimit": 128,
+    "actualFresh18CompleteSourceClosureAndExecutorPreviouslyChecked": true,
+    "formalRuntimeStatesCheckedAbsent": true
+  },
+  "limits": [
+    "This is eligibility for Root seal retry and actual readonly guard only. The full checkContracts/fresh gate and actual formal run were not executed here.",
+    "Prior static review and real failed seal evidence remain unchanged; no prior failed execution is relabelled as success.",
+    "Canonical reference preserves source path identity; no source SHA comparison is dropped, relaxed, filtered or replaced by leaf-only comparison.",
+    "The formal100-actor/two-hour original policy and all original game/Store/Wire distinctions remain; no formal capacity/P0 acceptance is granted."
+  ],
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": [],
+    "capacityAccepted": false,
+    "rootExecutionRequired": true
+  }
+}

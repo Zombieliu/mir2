@@ -452,6 +452,62 @@ export async function verifyAdditionalRelease(root, workspace, binding) {
     releaseBuild: { profile: 'release', sha256: build.binary.sha256, sourceManifestSha256: frozen.sourceManifestSha256 } };
 }
 
+// Call only with the raw inventory already verified by verifyInventory. Every
+// copy is adjudicated in its own report directory before identical run IDs are
+// counted once; byte-identical reports alone cannot authorize borrowed evidence.
+export async function verifyFullLifecycleArchives({ files, read, lines, workspace, releases }) {
+  const names = new Set(files.map(row => row.path)), pins = new Map(files.map(row => [row.path, row]));
+  const reports = new Map(), copies = new Map(); let fullRuns = 0, failedReportsPreserved = 0;
+  for (const name of names) {
+    if (!name.endsWith('.report.json')) continue;
+    const run = await read(name), directory = path.posix.dirname(name);
+    if (run.profile !== 'full-lifecycle') continue;
+    check(/^\d{13}-[a-f0-9]{8}$/.test(run.runId ?? '') && path.posix.basename(name) === `${run.runId}.report.json`, 'Lifecycle report run ID/path mismatch');
+    const reportPin = pins.get(name), priorReport = reports.get(run.runId);
+    check(reportPin && int(reportPin.bytes) && /^[a-f0-9]{64}$/.test(reportPin.sha256), 'Missing indexed lifecycle report');
+    if (priorReport) check(reportPin.bytes === priorReport.bytes && reportPin.sha256 === priorReport.sha256, 'Conflicting duplicate lifecycle report');
+    else reports.set(run.runId, reportPin);
+    if (run.ok !== true) { check(run.fullLifecyclePassed !== true && run.status !== 'passed', 'Failed lifecycle report was retroactively promoted'); failedReportsPreserved++; continue; }
+    const traces = await Promise.all(['a', 'b'].map(label => lines(path.posix.join(directory, `${run.runId}-${label}.trace.jsonl`))));
+    verifyFullLifecycle(run, traces);
+    const traceNames = [...names].filter(candidate => path.posix.dirname(candidate) === directory &&
+      path.posix.basename(candidate).startsWith(`${run.runId}-`) && candidate.endsWith('.trace.jsonl'));
+    for (const traceName of traceNames) verifyPublicTrace(await lines(traceName));
+    const realms = [];
+    for (const candidate of names) if (path.posix.dirname(candidate) === directory && candidate.endsWith('.realm-evidence.json')) { const value = await read(candidate); if (value.playtest?.runId === run.runId) realms.push({ name: candidate, value }); }
+    check(realms.length === 1, 'Full lifecycle needs exactly one matching owned realm record in its report directory');
+    const { name: realmName, value: realm } = realms[0];
+    const matchingRelease = releases.get(realm.release?.backendSourceAggregate);
+    check(matchingRelease, 'Functional run has no matching immutable release/source binding');
+    verifyOwnedRealm(realm, run, matchingRelease);
+    const metrics = await read(realmName.replace(/\.realm-evidence\.json$/, '.zone-metrics.json'));
+    same(metrics.baseline, realm.baselineHealth.zone_metrics); same(metrics.after, realm.afterHealth.zone_metrics);
+    for (const key of CLASS) {
+      const before = metrics.baseline[key], after = metrics.after[key], delta = metrics.classDeltas?.[key];
+      same(delta, { count: after.duration.count - before.duration.count, successCount: after.successCount - before.successCount,
+        failureCount: after.failureCount - before.failureCount, sumUs: after.duration.sumUs - before.duration.sumUs,
+        overBudgetCount: after.duration.overBudgetCount - before.duration.overBudgetCount });
+    }
+    for (const [file, digest] of Object.entries(realm.sourcePins ?? {})) {
+      check(safeRelative(file) && /^[a-f0-9]{64}$/.test(digest), 'Invalid lifecycle driver source pin');
+      // --backend-commit selects historical Rust/Cargo inputs only. The
+      // lifecycle driver must still match its recorded raw source pin.
+      check(sha(await fs.readFile(path.join(workspace, 'mir2-web3', file))) === digest, 'Lifecycle driver changed after its recorded run');
+    }
+    const audits = [...names].filter(candidate => candidate === realmName.replace(/\.realm-evidence\.json$/, '.independent-audit.json'));
+    check(audits.length === 1 && (await read(audits[0])).binarySha256 === realm.release.sha256, 'Independent release digest mismatch');
+    const evidenceNames = [name, realmName, realmName.replace(/\.realm-evidence\.json$/, '.zone-metrics.json'), audits[0], ...traceNames];
+    const signature = evidenceNames.sort().map(file => {
+      const pin = pins.get(file); check(pin && int(pin.bytes) && /^[a-f0-9]{64}$/.test(pin.sha256), 'Missing indexed lifecycle copy artifact');
+      return { name: path.posix.basename(file), bytes: pin.bytes, sha256: pin.sha256 };
+    });
+    const prior = copies.get(run.runId);
+    if (prior) check(JSON.stringify(signature) === JSON.stringify(prior), 'Conflicting duplicate lifecycle artifact set');
+    else { copies.set(run.runId, signature); fullRuns++; }
+  }
+  return { fullRuns, failedReportsPreserved };
+}
+
 export async function verifyTopic({ root, indexFile, workspace, backendCommit, requireCapacity = false, archiveRoot }) {
   const files = await verifyInventory(root, indexFile), names = new Set(files.map(row => row.path));
   const relativeRoot = path.relative(workspace, root).split(path.sep).join('/'); check(safeRelative(relativeRoot), 'Topic must be inside its Git workspace');
@@ -487,40 +543,12 @@ export async function verifyTopic({ root, indexFile, workspace, backendCommit, r
       archived.set(entry.report, { entry, file });
     }
   }
-  let fullRuns = 0, failedReportsPreserved = 0, capacityReports = 0, capacityAccepted = 0;
+  const { fullRuns, failedReportsPreserved } = await verifyFullLifecycleArchives({ files, read, lines, workspace, releases });
+  let capacityReports = 0, capacityAccepted = 0;
   for (const name of names) {
     if (!name.endsWith('.report.json')) continue;
     const run = await read(name), directory = path.posix.dirname(name);
-    if (run.profile === 'full-lifecycle') {
-      if (run.ok !== true) { check(run.fullLifecyclePassed !== true && run.status !== 'passed', 'Failed lifecycle report was retroactively promoted'); failedReportsPreserved++; continue; }
-      const traces = await Promise.all(['a', 'b'].map(label => lines(`${directory}/${run.runId}-${label}.trace.jsonl`)));
-      verifyFullLifecycle(run, traces);
-      for (const traceName of names) if (traceName.startsWith(`${directory}/${run.runId}-`) && traceName.endsWith('.trace.jsonl')) verifyPublicTrace(await lines(traceName));
-      const realms = [];
-      for (const candidate of names) if (candidate.endsWith('.realm-evidence.json')) { const value = await read(candidate); if (value.playtest?.runId === run.runId) realms.push({ name: candidate, value }); }
-      check(realms.length === 1, 'Full lifecycle needs exactly one matching owned realm record');
-      const { name: realmName, value: realm } = realms[0];
-      const matchingRelease = releases.get(realm.release?.backendSourceAggregate);
-      check(matchingRelease, 'Functional run has no matching immutable release/source binding');
-      verifyOwnedRealm(realm, run, matchingRelease);
-      const metrics = await read(realmName.replace(/\.realm-evidence\.json$/, '.zone-metrics.json'));
-      same(metrics.baseline, realm.baselineHealth.zone_metrics); same(metrics.after, realm.afterHealth.zone_metrics);
-      for (const key of CLASS) {
-        const before = metrics.baseline[key], after = metrics.after[key], delta = metrics.classDeltas?.[key];
-        same(delta, { count: after.duration.count - before.duration.count, successCount: after.successCount - before.successCount,
-          failureCount: after.failureCount - before.failureCount, sumUs: after.duration.sumUs - before.duration.sumUs,
-          overBudgetCount: after.duration.overBudgetCount - before.duration.overBudgetCount });
-      }
-      for (const [file, digest] of Object.entries(realm.sourcePins ?? {})) {
-        check(safeRelative(file) && /^[a-f0-9]{64}$/.test(digest), 'Invalid lifecycle driver source pin');
-        // --backend-commit selects historical Rust/Cargo inputs only. The
-        // lifecycle driver must still match its recorded raw source pin.
-        check(sha(await fs.readFile(path.join(workspace, 'mir2-web3', file))) === digest, 'Lifecycle driver changed after its recorded run');
-      }
-      const audits = [...names].filter(candidate => candidate === realmName.replace(/\.realm-evidence\.json$/, '.independent-audit.json'));
-      check(audits.length === 1 && (await read(audits[0])).binarySha256 === realm.release.sha256, 'Independent release digest mismatch');
-      fullRuns++;
-    } else if (run.policy && Array.isArray(run.stages)) {
+    if (run.profile !== 'full-lifecycle' && run.policy && Array.isArray(run.stages)) {
       capacityReports++;
       const sampleName = `${directory}/${run.runId}.samples.jsonl`, external = archived.get(name);
       check(!(names.has(sampleName) && external), 'Capacity raw samples have ambiguous local/archive sources');

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH_FULL16_SOURCE_APPROVAL_AND_ROOT_SEAL",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+  "sourceFrozen": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "document": "final-inputs-approved.json",
+  "purpose": "Draft placeholder; must be finalized by Root before source sealing or any preparation."
+}

@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_PREPARED_ENDED_ONLY_NOT_EXECUTED",
+  "preparedAt": "2026-10-25T22:11:40.843Z",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1",
+  "files": [
+    {
+      "path": "verify-ended-probe18-v1.mjs",
+      "bytes": 36368,
+      "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+    },
+    {
+      "path": "probe-contract-v1.mjs",
+      "bytes": 5695,
+      "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "path": "run-ended-probe18-v1.mjs",
+      "bytes": 2257,
+      "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-v1.json",
+      "bytes": 15779,
+      "sha256": "ea5509d304431d0e7c4033e712d760f08b16bcb8ee822c74456cc2f9f17fe2ff"
+    },
+    {
+      "path": "derive-verifier-v1.mjs",
+      "bytes": 9843,
+      "sha256": "ca6816fe56b271aa9b2dcbeac64440f4edc2e4189be518ada4f8a48fa24bb9ba"
+    }
+  ],
+  "sourceSha256": "4e0ad7c6292fc13738fcaffbd29c44b9eee494505fd077a8ba02deb8866ea3d3",
+  "syntax": [
+    {
+      "file": "verify-ended-probe18-v1.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "probe-contract-v1.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "hp-proof-contract-v2.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "run-ended-probe18-v1.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "seal-tool-source-v1.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "derive-verifier-v1.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "syntaxLog": {
+    "path": "syntax-check-v1.log",
+    "bytes": 435,
+    "sha256": "1dc6594544683ffbe0693eb34a23db37f2c26d87964e41c74e6ffbb0eb2073da"
+  },
+  "actualRunId": "1792965008290-fc5e2eed",
+  "sourceCommitRoles": {
+    "backendBuild": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverAndExecution": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "nineSourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+    "actualSourceRegressionPassed": 219,
+    "nodeRegressionReexecutedHere": false
+  },
+  "expectedLauncher": {
+    "files": 121,
+    "bytes": 66405,
+    "sha256": "75f02c495ce8f328b2a4bd141e88a6d48d4a3213c6a3ba0e1d3106d1426d4ca6"
+  },
+  "preparedSourceConfigSha256": "ce15097005c6a7abd3e861b3f4b8fd1708f95d1145096d58e747462e57c87f07",
+  "currentRawSourcePinsBeforeAfterIdentical": true,
+  "toolSourceSealNotYet": true,
+  "actualVerificationExecuted": false,
+  "rawReadHere": false,
+  "productImportedOrTested": false,
+  "capacityAccepted": false,
+  "formalPreconditionOnly": true,
+  "limitations": [
+    "This source preparation checks syntax and exact textual derivation, not the run verdict.",
+    "Final verifier replays raw action counters, actual-duration whole phases and all complete windows, continuous counter windows and HP proof rows. Per-request typed/dual-positive packets within900ms are not independently replayed.",
+    "Stage2 has two movement actors and no combat actor. Expected16 measurement windows contain11 combat-role windows, not16 combat windows.",
+    "Store/Wire capture completeness remain diagnostic-only and cannot create gameplay credit.",
+    "Readline operates on trusted frozen producer and SHA-bound input; it accumulates a line before enforcing64MiB. No adversarial pre-accumulation memory bound is claimed.",
+    "No formal100/two-hour/P0/P2/production acceptance is granted by a passed fresh probe."
+  ]
+}

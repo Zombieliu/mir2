@@ -3319,3 +3319,157 @@ test('observer scout preference discarded paths reuse read-only obstacles withou
   assert.equal(rows.find(row => row.type === 'combatScoutSelection').pathSearches, 4);
   assert.equal(context.targetClaims.size, 0); assert.equal(client.combatScout.confirmedMoves, 0);
 });
+
+function antiConvergenceScoutFixture() {
+  const f = observerHintScoutFixture(), { client, context, peer, secondPeer } = f;
+  const thirdPeer = { label: actor(4).name, inGame: true, ready: true, role: 'movement', snapshot: { mapFileName: '0', playerObjectId: 1000,
+    entities: [{ objectId: 1000, name: actor(4).name, kind: 'player', x: 20, y: 15 }, huntMonster(9200, 'Deer', 20, 16)] } };
+  context.clients.push(thirdPeer);
+  client.combatCluster = declaredObservers([{ x: 5, y: 9 }, { x: 20, y: 5 }, { x: 20, y: 15 }], [peer, secondPeer, thirdPeer]);
+  const other = new CapacityClient('ws://127.0.0.1:1/ws', actor(3), context);
+  const otherOwner = { ...nativeSnapshot().entities[0], name: other.label, x: 5, y: 6 };
+  Object.assign(other, { snapshot: { ...nativeSnapshot(), entities: [otherOwner] }, ready: true, inGame: true, role: 'combat', home: { x: 5, y: 6 },
+    combatArrival: { at: 1 }, combatCluster: client.combatCluster, combatScoutCursor: 0, nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity });
+  context.clients.push(other);
+  return { ...f, thirdPeer, other, otherOwner };
+}
+
+test('scout anti-convergence prefers a distinct reachable hint after another fighter starts scouting', () => {
+  // Prove each alternative through the public planner before the contested case.
+  for (const expected of [1, 2]) {
+    const f = antiConvergenceScoutFixture();
+    (expected === 1 ? f.thirdPeer : f.secondPeer).snapshot.entities.pop();
+    const plan = selectNativeAction(f.other, f.context);
+    assert.equal(plan.scouting, true); assert.equal(plan.scoutHomeIndex, expected);
+    assert.ok(['walk', 'run'].includes(plan.command.type)); assert.equal(plan.command.objectId, undefined);
+    assert.equal(f.rows.at(-1).reason, 'observer-target-waypoint'); assert.equal(f.rows.at(-1).pathSearches, 2);
+    assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+  }
+  const f = antiConvergenceScoutFixture(), first = selectNativeAction(f.client, f.context);
+  assert.equal(first.scoutHomeIndex, 1); assert.equal(f.context.targetClaims.size, 0);
+  const firstScout = f.client.combatScout, ownerSnapshot = JSON.stringify(f.other.snapshot);
+  const second = selectNativeAction(f.other, f.context);
+  assert.equal(second.scouting, true); assert.equal(second.scoutHomeIndex, 2, 'a reachable unused waypoint must precede the occupied hint');
+  assert.equal(f.client.combatScout, firstScout); assert.equal(firstScout.confirmedMoves, 0);
+  assert.equal(f.other.combatScout.confirmedMoves, 0); assert.equal(JSON.stringify(f.other.snapshot), ownerSnapshot);
+  assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+  assert.ok(['walk', 'run'].includes(second.command.type)); assert.equal(second.command.objectId, undefined);
+  assert.equal(f.rows.at(-1).pathSearches, 2); assert.equal(f.rows.at(-1).hintPathSearches, 1);
+});
+
+
+test('scout anti-convergence ignores unavailable and expired other scouts at exact native budget boundaries', t => {
+  t.mock.timers.enable({ apis: ['Date'], now: 1700000000000 });
+  const variants = [
+    ['not ready', f => { f.client.ready = false; }], ['not in game', f => { f.client.inGame = false; }],
+    ['closed', f => { f.client.closed = true; }], ['paused', f => { f.client.paused = true; }],
+    ['draining', f => { f.client.draining = true; }], ['navigation closing', f => { f.client.navigationClosing = true; }],
+    ['wrong role', f => { f.client.role = 'movement'; }], ['dead', f => { f.owner.dead = true; }],
+    ['zero hp', f => { f.client.snapshot.playerHp = 0; }], ['other map', f => { f.client.snapshot.mapFileName = '1'; }],
+    ['scout map mismatch', f => { f.client.combatScout.mapFileName = '1'; }],
+    ['20 seconds', f => { f.client.combatScout.startedAt = Date.now() - 20000; }],
+    ['accumulated 20 seconds', f => { f.client.combatScout.activeElapsedMs = 1000; f.client.combatScout.startedAt = Date.now() - 19000; }],
+    ['24 ACKs', f => { f.client.combatScout.confirmedMoves = 24; }],
+    ['future clock', f => { f.client.combatScout.startedAt = Date.now() + 1; }],
+  ];
+  for (const [name, invalidate] of variants) {
+    const f = antiConvergenceScoutFixture(); selectNativeAction(f.client, f.context); invalidate(f);
+    const scout = f.client.combatScout, startedAt = scout.startedAt, confirmedMoves = scout.confirmedMoves;
+    const plan = selectNativeAction(f.other, f.context);
+    assert.equal(plan.scoutHomeIndex, 1, name); assert.equal(f.rows.at(-1).hintOrderChangedByActiveScoutPreference, false, name);
+    assert.equal(f.client.combatScout, scout, name); assert.equal(scout.startedAt, startedAt, name);
+    assert.equal(scout.confirmedMoves, confirmedMoves, name); assert.equal(f.context.targetClaims.size, 0, name);
+  }
+  const f = antiConvergenceScoutFixture(); selectNativeAction(f.client, f.context);
+  f.client.combatScout.startedAt = Date.now() - 19999; f.client.combatScout.confirmedMoves = 23;
+  assert.equal(selectNativeAction(f.other, f.context).scoutHomeIndex, 2, '19.999 seconds and23 ACKs still prefer another waypoint');
+});
+
+test('scout anti-convergence compares declared coordinates across clusters rather than local home indices', () => {
+  for (const sameCoordinate of [false, true]) {
+    const f = antiConvergenceScoutFixture();
+    f.client.combatCluster = declaredObservers([{ x: 5, y: 9 }, { x: 20, y: 15 }, { x: 20, y: 5 }],
+      [f.peer, f.thirdPeer, f.secondPeer]);
+    if (sameCoordinate) f.client.failedTargets.set(9200, { until: Infinity });
+    const first = selectNativeAction(f.client, f.context);
+    assert.equal(first.scoutHomeIndex, sameCoordinate ? 2 : 1);
+    const occupied = f.client.combatCluster.observerHomes[first.scoutHomeIndex];
+    assert.deepEqual(occupied, sameCoordinate ? { x: 20, y: 5 } : { x: 20, y: 15 });
+    const second = selectNativeAction(f.other, f.context);
+    assert.equal(second.scoutHomeIndex, sameCoordinate ? 2 : 1,
+      sameCoordinate ? 'different indices identifying the same waypoint conflict' : 'the same index at a different waypoint is not a conflict');
+    assert.equal(f.context.targetClaims.size, 0);
+  }
+});
+
+test('scout anti-convergence retains original hint order when all hints are shared or only one remains', () => {
+  const single = antiConvergenceScoutFixture(); single.thirdPeer.snapshot.entities.pop();
+  assert.equal(selectNativeAction(single.client, single.context).scoutHomeIndex, 1);
+  assert.equal(selectNativeAction(single.other, single.context).scoutHomeIndex, 1, 'a planning preference is not an exclusive claim');
+  assert.equal(single.rows.at(-1).hintOrderChangedByActiveScoutPreference, false);
+  const f = antiConvergenceScoutFixture();
+  assert.equal(selectNativeAction(f.client, f.context).scoutHomeIndex, 1);
+  assert.equal(selectNativeAction(f.other, f.context).scoutHomeIndex, 2);
+  const third = new CapacityClient('ws://127.0.0.1:1/ws', actor(5), f.context);
+  Object.assign(third, { snapshot: { ...nativeSnapshot(), entities: [{ ...nativeSnapshot().entities[0], name: third.label, x: 5, y: 7 }] },
+    ready: true, inGame: true, role: 'combat', home: { x: 5, y: 7 }, combatArrival: { at: 1 }, combatCluster: f.client.combatCluster,
+    combatScoutCursor: 0, nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity });
+  f.context.clients.push(third);
+  assert.equal(selectNativeAction(third, f.context).scoutHomeIndex, 1, 'all shared hints retain the original cycle order');
+  assert.equal(f.rows.at(-1).hintOrderChangedByActiveScoutPreference, false);
+  assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+});
+
+test('scout anti-convergence never resets current or other scout and pursuit state or creates gameplay credit', t => {
+  t.mock.timers.enable({ apis: ['Date'], now: 1700000000000 });
+  const f = antiConvergenceScoutFixture(); selectNativeAction(f.client, f.context);
+  const first = f.client.combatScout;
+  Object.assign(first, { startedAt: Date.now() - 19000, activeElapsedMs: 100, confirmedMoves: 23, lastReceiptSequence: 7 });
+  first.visited.set('2,2', 2); const firstVisited = first.visited;
+  const pursuit = { objectId: 9199, mapFileName: '0', confirmedMoves: 39, startedAt: Date.now() - 29000 };
+  f.client.combatPursuit = pursuit; f.client.chaseDeferrals.set(9300, { mapFileName: '0', until: Date.now() + 30000 });
+  assert.equal(selectNativeAction(f.other, f.context).scoutHomeIndex, 2);
+  assert.equal(f.client.combatScout, first); assert.equal(first.startedAt, Date.now() - 19000);
+  assert.equal(first.activeElapsedMs, 100); assert.equal(first.confirmedMoves, 23); assert.equal(first.lastReceiptSequence, 7);
+  assert.equal(first.visited, firstVisited); assert.equal(first.visited.get('2,2'), 2); assert.equal(f.client.combatPursuit, pursuit);
+  assert.equal(pursuit.confirmedMoves, 39); assert.equal(f.client.chaseDeferrals.get(9300).until, Date.now() + 30000);
+  const current = f.other.combatScout, currentVisited = current.visited;
+  Object.assign(current, { startedAt: Date.now() - 19000, activeElapsedMs: 100, confirmedMoves: 23, lastReceiptSequence: 9 });
+  current.visited.set('3,3', 2); f.client.closed = true;
+  const rowsBefore = f.rows.length, plan = selectNativeAction(f.other, f.context);
+  assert.equal(plan.scoutHomeIndex, 2); assert.equal(f.other.combatScout, current); assert.equal(current.startedAt, Date.now() - 19000);
+  assert.equal(current.activeElapsedMs, 100); assert.equal(current.confirmedMoves, 23); assert.equal(current.lastReceiptSequence, 9);
+  assert.equal(current.visited, currentVisited); assert.equal(current.visited.get('3,3'), 2); assert.equal(f.rows.length, rowsBefore);
+  assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+  assert.equal(f.context.policy.minimumCombatAttacksPerMinute, 18); assert.equal(f.context.policy.minimumCombatHitsPerMinute, 12);
+});
+
+test('scout anti-convergence failed preferred paths keep the exact cyclic fallback and four total searches', () => {
+  const baseline = antiConvergenceScoutFixture(), ranked = antiConvergenceScoutFixture();
+  for (const f of [baseline, ranked]) {
+    selectNativeAction(f.client, f.context);
+    for (let y = 0; y < f.context.map.height; y++) f.context.map.blocked[y * f.context.map.width + 10] = 1;
+  }
+  baseline.secondPeer.snapshot.entities.pop(); baseline.thirdPeer.snapshot.entities.pop();
+  const original = selectNativeAction(baseline.other, baseline.context), firstScout = ranked.client.combatScout;
+  const selected = selectNativeAction(ranked.other, ranked.context);
+  assert.deepEqual(selected, original); assert.equal(selected.scoutHomeIndex, 0);
+  assert.deepEqual(ranked.other.combatScout.goal, baseline.other.combatScout.goal);
+  assert.equal(ranked.rows.at(-1).reason, 'cyclic-fallback'); assert.equal(ranked.rows.at(-1).pathSearches, 4);
+  assert.equal(ranked.rows.at(-1).hintPathSearches, 3); assert.equal(ranked.other.navigationAttemptCount, 3);
+  assert.equal(ranked.rows.at(-1).hintOrderChangedByActiveScoutPreference, true);
+  assert.equal(ranked.client.combatScout, firstScout); assert.equal(firstScout.confirmedMoves, 0);
+  assert.equal(ranked.context.targetClaims.size, 0); assert.equal(ranked.actions.length, 0);
+});
+
+test('scout anti-convergence does not introduce distance sorting when no other scout shares a hint', () => {
+  const f = antiConvergenceScoutFixture();
+  Object.assign(f.secondPeer.snapshot.entities[0], { x: 35, y: 5 }); Object.assign(f.secondPeer.snapshot.entities[1], { x: 35, y: 6 });
+  Object.assign(f.thirdPeer.snapshot.entities[0], { x: 12, y: 5 }); Object.assign(f.thirdPeer.snapshot.entities[1], { x: 12, y: 6 });
+  const cluster = declaredObservers([{ x: 5, y: 9 }, { x: 35, y: 5 }, { x: 12, y: 5 }], [f.peer, f.secondPeer, f.thirdPeer]);
+  f.client.combatCluster = cluster; f.other.combatCluster = cluster;
+  const plan = selectNativeAction(f.other, f.context);
+  assert.equal(plan.scoutHomeIndex, 1, 'the original cyclic far hint still precedes the closer later hint');
+  assert.equal(f.rows.at(-1).hintOrderChangedByActiveScoutPreference, false); assert.equal(f.rows.at(-1).pathSearches, 2);
+  assert.equal(f.context.targetClaims.size, 0);
+});

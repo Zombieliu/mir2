@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25T21:11:31.402Z",
+  "command": "C:\\Program Files\\nodejs\\node.exe",
+  "checks": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-lib-v1.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\readonly-source-guard-v1.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "passed": true,
+  "modulesImported": false,
+  "guardExecuted": false
+}

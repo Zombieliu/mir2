@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T23:06:44.663Z",
+  "state": "BOUNDED_SOURCE_AND_FOCUSED_TEST_REVIEW_PASSED_FULL_REGRESSION_PENDING",
+  "scope": "Independent read-only review of the two stabilized Node files, all seven new public-planner tests, actual focused red/green logs, current nine raw pins, exact production inverse, prior test prefix and source declarations. No test/target module import/runtime gate/realm/Cargo/build was executed here.",
+  "sourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+  "currentMain": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+    "bytes": 155475,
+    "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+  },
+  "currentTest": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+    "bytes": 270311,
+    "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef"
+  },
+  "preservation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\source-preservation-and-focused-receipt-v1.json",
+    "bytes": 8316,
+    "sha256": "892f65a3de4d255451e686aff53384bba5a1a998a153537c2b89f314543926f3"
+  },
+  "productionMutation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\production-mutation-v1.json",
+    "bytes": 3057,
+    "sha256": "de8a3c6c059c1775039f8ce0f04327a430334aaddc72eed3c5513b844328866d"
+  },
+  "focusedRed": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-red-execution-v1.json",
+    "bytes": 1386,
+    "sha256": "052e4688bdcc7ccab30bec21463ea1584bf9d7f12ece575710acb21e31a1082b"
+  },
+  "focusedGreen": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-green-execution-v1.json",
+    "bytes": 4603,
+    "sha256": "cabe331b979c15692e5673fef90f5538b9ed000fc9f76275286a23dd942e1b9b"
+  },
+  "checks": {
+    "currentNineRawPinsExact": true,
+    "greenNineBeforeAfterRawExact": true,
+    "threeProductionHunksForwardAndInverseRawExact": true,
+    "oldMain153586RawSha99914Recovered": true,
+    "originalTest258200BytePrefixRawExact": true,
+    "intermediateRedTest261077BytePrefixRawExactInFinal": true,
+    "otherSevenSourceInputsRawExact": true,
+    "sixImmutableReportDeclarationsRawExact": true,
+    "authorNodeSyntaxChecks": 2,
+    "authorNodeSyntaxExitZero": true,
+    "authorDiffCheckExitZero": true,
+    "focusedGreenCounts": {
+      "tests": 7,
+      "pass": 7,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "redTargetCaseExitCode": 1,
+    "redFailureWasExpectedActual1VersusExpected2Assertion": true,
+    "redBothAlternativePathsPassedBeforeTargetAssertion": true,
+    "redWasNotFullNineSourceBeforeAfterReplay": true,
+    "maximumExistingHints": 4,
+    "maximumOtherClientsScanned": 100,
+    "stableUnsharedThenSharedPartitionPreservesBothInternalOrders": true,
+    "realSameMapDeclaredHomeXYComparedAcrossClusters": true,
+    "activeLivingOtherScoutRequired": true,
+    "invalidInactiveDeadOtherMapFutureClockIgnored": true,
+    "twentySecondAccumulatedElapsedBoundaryExcluded": true,
+    "twentyFourAckBoundaryExcluded": true,
+    "justInside19999msAnd23AckStillConsidered": true,
+    "noDistinctionAllSharedSingleHintKeepsOriginalOrder": true,
+    "originalFallbackFoundBeforePreference": true,
+    "originalTotalFourPathSearchBudgetPreserved": true,
+    "failedPreferredPathsReturnExactOriginalFallback": true,
+    "currentEstablishedScoutNotReplannedByNewHelper": true,
+    "noOtherScoutOrPursuitBudgetReset": true,
+    "noOwnerSnapshotOrTargetClaimsMutation": true,
+    "noNewGameplayActionSendOrCredit": true,
+    "diagnosticChangeOnlyBoundedBoolean": true,
+    "original900_18_12_95percent_80cellsCadenceAndPoliciesOutsideMutationRangesRawExact": true,
+    "recordScoutAckAndRestoreBodiesUntouched": true
+  },
+  "testCoverage": [
+    "Distinct reachable hint is preferred only after two alternative reachability preconditions.",
+    "Inactive/not-ready/closed/paused/draining/navigation-closing/dead/zero-HP/wrong-role/maps plus exact20s/24ACK/future-clock conditions.",
+    "Same-map actual coordinates across different local cluster indices.",
+    "Single hint and all-shared hints preserve old selection and are not exclusive claims.",
+    "Current and other scout/pursuit state, ACK/elapsed/visited budgets, owner snapshot and target claims stay unchanged.",
+    "Unreachable preferred paths keep original movement fallback and total four searches.",
+    "No distance sort is introduced when another active scout does not share a hint."
+  ],
+  "limitations": [
+    "The preference uses current unexpired declared combatScout plans, including zero-ACK plans and plans retained during pursuit. It is not actual arrival, present scout execution, exclusive ownership, authoritative occupancy or guaranteed target separation.",
+    "A failed send can leave an existing bounded plan until the original expiry; this preference never turns that plan into ACK/native/attack credit.",
+    "The new diagnostic boolean is not a new activity status or gameplay gate, and does not establish successful online movement.",
+    "Focused red records its intermediate test source and one actual target failure; no missing historical red nine-source manifest is invented.",
+    "The actual focused7 tests are not a full regression. Root must run the complete updated suite before committing/freezing any new current driver.",
+    "Original219 evidence is historical. No new full226, new committed driver, fresh full16/probe/formal PASS, live improvement, P0 capacity acceptance or P2 implementation is claimed.",
+    "Original Formal14 failure and all historical evidence remain unchanged."
+  ],
+  "verdict": {
+    "sourceReviewPassed": true,
+    "testQualityReviewPassed": true,
+    "focusedEvidenceConsistent": true,
+    "eligibleForRootFullRegression": true,
+    "blockingFindingIds": [],
+    "fullRegressionPerformedHere": false,
+    "capacityAccepted": false
+  }
+}

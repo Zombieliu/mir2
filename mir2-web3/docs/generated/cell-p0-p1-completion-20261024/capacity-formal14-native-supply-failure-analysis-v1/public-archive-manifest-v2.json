@@ -1,0 +1,362 @@
+{
+  "schemaVersion": 1,
+  "state": "EXPLICIT_ARCHIVE_PREPARED_NOT_COPIED",
+  "createdAt": "2026-10-25T22:56:15.738Z",
+  "runId": "1792967155359-90bac462",
+  "child": "capacity-formal14-native-supply-failure-analysis-v1",
+  "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal14-native-supply-failure-analysis-v1",
+  "sourceRoot": "C:\\mir2-build\\p01-completion-20261024",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-actual-terminal-and-consumer-facts-v1.json",
+        "bytes": 9533,
+        "sha256": "da376080e89c2958160992495b5c0730d318768114bb1a52a49c2c4fa1ba6652"
+      },
+      "destination": "facts/formal14-root-actual-terminal-and-consumer-facts-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-independent-cleanup-v1.json",
+        "bytes": 339,
+        "sha256": "21e161977cd6620075b6352815bc298b8bb9d3531cf82e2df180e45223332cc5"
+      },
+      "destination": "facts/formal14-root-independent-cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-public.mjs",
+        "bytes": 43126,
+        "sha256": "c4c1ede0b5e96c7191ff4fdd2e7cd5ab0478c89d2e601e60e5c4e2baef43c619"
+      },
+      "destination": "postcollector/collect-public.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-public-current219-v2.mjs",
+        "bytes": 43255,
+        "sha256": "9a159c251035593be4293ea2e3f3c6bf58c118db075f8572cba5f6104a071713"
+      },
+      "destination": "postcollector/collect-public-current219-v2.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\postcollector-current219-derivation-v1.json",
+        "bytes": 46971,
+        "sha256": "60677cc7aa85198f0d14c61a7c848d662d8a2b1e03518ce3dd8bd45c2e0490fb"
+      },
+      "destination": "postcollector/postcollector-current219-derivation-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-postcollector-independent-review-v1.json",
+        "bytes": 1572,
+        "sha256": "1af124d4d728a76f3318ae1add4c0be6fa62dd5a8feb97dfc2dce0ccc0d547d1"
+      },
+      "destination": "postcollector/formal14-postcollector-independent-review-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-source-canonical-reference-proof-v1.json",
+        "bytes": 5845,
+        "sha256": "8dd450fa3911f0c3c61d34371f3526cd9286a76fe5c87dede1fa6c983899e079"
+      },
+      "destination": "preparation/scene-source-canonical-reference-proof-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-runtime-independent-review-v1\\preseal-independent-review-v3.json",
+        "bytes": 5252,
+        "sha256": "c8933852e99bfb17a7f6bf98ca501628c8d2eec772376cce714140ab9a56ebc5"
+      },
+      "destination": "preparation/preseal-independent-review-v3.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-seal-stdout-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/formal14-root-seal-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-seal-stderr-v1.log",
+        "bytes": 1686,
+        "sha256": "d0e3759f74880ae535ba2770c4883c630117cac7d891571e1f110369b08a5b2e"
+      },
+      "destination": "execution/formal14-root-seal-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-seal-stdout-v2.log",
+        "bytes": 337,
+        "sha256": "30ced851675e0e9e66300fbef8808e5d5ed5da576024442d044c24990cf0ef14"
+      },
+      "destination": "execution/formal14-root-seal-stdout-v2.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-seal-stderr-v2.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/formal14-root-seal-stderr-v2.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-readonly-guard-stdout-v1.log",
+        "bytes": 315,
+        "sha256": "8ed7c4db5bbd5f49d17e2c862fddfe0581c5e56c4fdf5e2b32f532fe39a8f0b4"
+      },
+      "destination": "execution/formal14-root-readonly-guard-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-readonly-guard-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/formal14-root-readonly-guard-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-prepare-stdout-v1.log",
+        "bytes": 631,
+        "sha256": "8885f8af15b1959ed50e28bfc4fa5be5c1443f1bebf8e23cf44c70a994f67ec8"
+      },
+      "destination": "execution/formal14-root-prepare-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-prepare-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/formal14-root-prepare-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-run-stdout-v1.log",
+        "bytes": 2871,
+        "sha256": "c1a61004881217769b9659e0d643fddcc2608e4359e25255238a994b6c14eacd"
+      },
+      "destination": "execution/formal14-root-run-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-run-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/formal14-root-run-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-base-collection-stdout-v1.log",
+        "bytes": 132868,
+        "sha256": "d85389beee17b348c6810e263c3cd03ce2747959e94c4c89fe355c0a373d0469"
+      },
+      "destination": "execution/formal14-root-base-collection-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/formal14-root-base-collection-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-base-verification-stdout-v1.log",
+        "bytes": 5013,
+        "sha256": "aad3397cdbf68b30da5f74f608ae51812be940166ff498b257e30a2e147e0b5d"
+      },
+      "destination": "execution/formal14-root-base-verification-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/formal14-root-base-verification-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-store-collection-stdout-v1.log",
+        "bytes": 389,
+        "sha256": "bc705fab63cc2394451a8867b23248127123b56757cd66528ed11aa5a9d29f64"
+      },
+      "destination": "execution/formal14-root-store-collection-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/formal14-root-store-collection-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-store-verification-stdout-v1.log",
+        "bytes": 1244,
+        "sha256": "247459c8fdda4ebd1893b5c8c834e13e40b0a5f29d1a9673696c994be75043e0"
+      },
+      "destination": "execution/formal14-root-store-verification-stdout-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/formal14-root-store-verification-stderr-v1.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-native-failure-analysis-v1\\analyze-formal14-v1.mjs",
+        "bytes": 15661,
+        "sha256": "b887b23b560e797ffb36d23dde0794efb8c6d0dfc0c4b0cd714c030b539b2ef1"
+      },
+      "destination": "native/analyze-formal14-v1.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-native-failure-analysis-v1\\report-facts-v1.json",
+        "bytes": 18041,
+        "sha256": "e5e30d8a0ff7a89c6551f9508fee0b97861fcede8d686476c25b558ac60e1280"
+      },
+      "destination": "native/report-facts-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-native-failure-analysis-v1\\analysis-v1.json",
+        "bytes": 53767,
+        "sha256": "a2a9b5bf4666a86b42047f415c0990e96548c45e571f1121004e1773945f2b0d"
+      },
+      "destination": "native/analysis-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-native-failure-analysis-v1\\selected-evidence-v1.json",
+        "bytes": 133251,
+        "sha256": "689f4ead8171a7f3d12513ec48bd31b76b860ec64b4b32d9af8d950afe41b2b1"
+      },
+      "destination": "native/selected-evidence-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-store-wait-analysis-v1\\analyze-v1.mjs",
+        "bytes": 11547,
+        "sha256": "92548fdfc5cbef0aa99ec37ad1491e599b6fac850d28816e9be6bf9341ef1b40"
+      },
+      "destination": "store-analysis/analyze-v1.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-store-wait-analysis-v1\\analysis-v1.json",
+        "bytes": 22024,
+        "sha256": "935a0cba3eda258812e27d58bf7bc2139e09929f48ee7ecd8e3da4f5cdb0c31e"
+      },
+      "destination": "store-analysis/analysis-v1.json"
+    }
+  ],
+  "sourceFiles": 32,
+  "sourceBytes": 555538,
+  "orderedSourceSha256": "76ca53bf82520895d7c326316a61c3154ea7c5176dfef61589e2816a5cba1138",
+  "readme": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-native-supply-failure-public-archive-v1\\README-preview-v2.md",
+    "bytes": 3183,
+    "sha256": "2c9c7628ed0fe628b68e83fe5f2c4fb3965a2dd73453ac3d0c869d03e6c3ef40"
+  },
+  "links": [
+    {
+      "href": "native/report-facts-v1.json",
+      "plannedCopy": true
+    },
+    {
+      "href": "native/analysis-v1.json",
+      "plannedCopy": true
+    },
+    {
+      "href": "native/selected-evidence-v1.json",
+      "plannedCopy": true
+    },
+    {
+      "href": "store-analysis/analysis-v1.json",
+      "plannedCopy": true
+    },
+    {
+      "href": "facts/formal14-root-actual-terminal-and-consumer-facts-v1.json",
+      "plannedCopy": true
+    },
+    {
+      "href": "facts/formal14-root-independent-cleanup-v1.json",
+      "plannedCopy": true
+    },
+    {
+      "href": "postcollector/collect-public-current219-v2.mjs",
+      "plannedCopy": true
+    },
+    {
+      "href": "postcollector/postcollector-current219-derivation-v1.json",
+      "plannedCopy": true
+    },
+    {
+      "href": "postcollector/formal14-postcollector-independent-review-v1.json",
+      "plannedCopy": true
+    },
+    {
+      "href": "preparation/scene-source-canonical-reference-proof-v1.json",
+      "plannedCopy": true
+    },
+    {
+      "href": "../capacity-formal-native-v2-scout-observer-ladder-14/collection-verification.json",
+      "existing": true
+    },
+    {
+      "href": "../capacity-formal-native-v2-scout-observer-ladder-14/raw-artifact-manifest.json",
+      "existing": true
+    },
+    {
+      "href": "../capacity-formal-native-v2-scout-observer-ladder-14-store-diagnostics/store-public-verification.json",
+      "existing": true
+    },
+    {
+      "href": "../protocol-full-lifecycle-scout-observer-preference-v1/README.md",
+      "existing": true
+    }
+  ],
+  "limits": {
+    "singleFileBytes": 1048576,
+    "totalSourceBytes": 8388608
+  },
+  "rootApprovalRequiredBeforeCopy": true,
+  "archiveExecuted": false,
+  "actualTerminalKnown": true,
+  "formalReportOk": false,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Started": false,
+  "excluded": [
+    "whole capacity raw",
+    "monitor raw",
+    "recordings",
+    "full16 traces",
+    "binary",
+    "private store and credentials",
+    "whole base/Store package duplicate"
+  ],
+  "sourcesFrozenAndUnmodified": true,
+  "priorWhitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-native-supply-failure-public-archive-v1\\public-whitelist-v1.json",
+    "bytes": 13465,
+    "sha256": "7825183f2a3f6ad02f642d118976395be45ebe03ccdb9f64a29a743a4cb5a7b6"
+  },
+  "readmeRevision": 2,
+  "readmeChange": "Spacing and run-scoped H/219 artifact wording only; all32 source pins and factual acceptance boundaries unchanged.",
+  "rootApprovedExactSourceList": true
+}
