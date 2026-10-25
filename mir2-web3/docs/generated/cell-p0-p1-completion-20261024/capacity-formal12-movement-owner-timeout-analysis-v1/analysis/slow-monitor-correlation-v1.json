@@ -1,0 +1,982 @@
+{
+  "schemaVersion": 1,
+  "inputs": {
+    "slow": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\slow-stage-public.jsonl",
+      "bytes": 3987,
+      "sha256": "0280ab9aef5450df7ad462aa6c71045c025e42fe8a665d4baee02747173e63a9"
+    },
+    "status": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\slow-stage-public-status.json",
+      "bytes": 1013,
+      "sha256": "2e3e10089a89a56c9b412c738ca292fa0486f2f39d60765c09ec8c31c1021be1"
+    },
+    "monitor": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\monitor-history.jsonl",
+      "bytes": 641859,
+      "sha256": "66a0be2c7cd31335c5fcb8ff62946fd1d49c459045f036bfbc93bea4d94dff99"
+    }
+  },
+  "slowRows": [
+    {
+      "line": 1,
+      "row": {
+        "observedAtMs": 1792951023836,
+        "stage": "session_action.execute",
+        "durationMs": 51,
+        "connection": 1
+      }
+    },
+    {
+      "line": 2,
+      "row": {
+        "observedAtMs": 1792951023839,
+        "stage": "socket_turn.input",
+        "durationMs": 53,
+        "connection": 1
+      }
+    },
+    {
+      "line": 3,
+      "row": {
+        "observedAtMs": 1792951025708,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 939
+      }
+    },
+    {
+      "line": 4,
+      "row": {
+        "observedAtMs": 1792951025759,
+        "stage": "shared_session.tail",
+        "durationMs": 50
+      }
+    },
+    {
+      "line": 5,
+      "row": {
+        "observedAtMs": 1792951025759,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 991
+      }
+    },
+    {
+      "line": 6,
+      "row": {
+        "observedAtMs": 1792951025761,
+        "stage": "session_action.execute",
+        "durationMs": 993,
+        "connection": 1
+      }
+    },
+    {
+      "line": 7,
+      "row": {
+        "observedAtMs": 1792951025803,
+        "stage": "socket_turn.input",
+        "durationMs": 1017,
+        "connection": 1
+      }
+    },
+    {
+      "line": 8,
+      "row": {
+        "observedAtMs": 1792951027897,
+        "stage": "session_action.execute",
+        "durationMs": 50,
+        "connection": 2
+      }
+    },
+    {
+      "line": 9,
+      "row": {
+        "observedAtMs": 1792951027900,
+        "stage": "socket_turn.input",
+        "durationMs": 52,
+        "connection": 2
+      }
+    },
+    {
+      "line": 10,
+      "row": {
+        "observedAtMs": 1792951029766,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 937
+      }
+    },
+    {
+      "line": 11,
+      "row": {
+        "observedAtMs": 1792951029775,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 945
+      }
+    },
+    {
+      "line": 12,
+      "row": {
+        "observedAtMs": 1792951029776,
+        "stage": "session_action.execute",
+        "durationMs": 947,
+        "connection": 2
+      }
+    },
+    {
+      "line": 13,
+      "row": {
+        "observedAtMs": 1792951029800,
+        "stage": "socket_turn.input",
+        "durationMs": 971,
+        "connection": 2
+      }
+    },
+    {
+      "line": 14,
+      "row": {
+        "observedAtMs": 1792951162880,
+        "stage": "socket_turn.spectator",
+        "durationMs": 781,
+        "connection": 2
+      }
+    },
+    {
+      "line": 15,
+      "row": {
+        "observedAtMs": 1792951162880,
+        "stage": "socket_turn.spectator",
+        "durationMs": 781,
+        "connection": 1
+      }
+    },
+    {
+      "line": 16,
+      "row": {
+        "observedAtMs": 1792951163745,
+        "stage": "socket_turn.spectator",
+        "durationMs": 600,
+        "connection": 1
+      }
+    },
+    {
+      "line": 17,
+      "row": {
+        "observedAtMs": 1792951163745,
+        "stage": "socket_turn.spectator",
+        "durationMs": 600,
+        "connection": 2
+      }
+    },
+    {
+      "line": 18,
+      "row": {
+        "observedAtMs": 1792951167953,
+        "stage": "socket_turn.spectator",
+        "durationMs": 3157,
+        "connection": 1
+      }
+    },
+    {
+      "line": 19,
+      "row": {
+        "observedAtMs": 1792951167954,
+        "stage": "socket_turn.spectator",
+        "durationMs": 3158,
+        "connection": 2
+      }
+    },
+    {
+      "line": 20,
+      "row": {
+        "observedAtMs": 1792951171535,
+        "stage": "socket_turn.spectator",
+        "durationMs": 3324,
+        "connection": 2
+      }
+    },
+    {
+      "line": 21,
+      "row": {
+        "observedAtMs": 1792951171536,
+        "stage": "socket_turn.spectator",
+        "durationMs": 3324,
+        "connection": 1
+      }
+    },
+    {
+      "line": 22,
+      "row": {
+        "observedAtMs": 1792951176430,
+        "stage": "zone_cadence.total",
+        "durationMs": 6500
+      }
+    },
+    {
+      "line": 23,
+      "row": {
+        "observedAtMs": 1792951176435,
+        "stage": "socket_turn.spectator",
+        "durationMs": 4899,
+        "connection": 2
+      }
+    },
+    {
+      "line": 24,
+      "row": {
+        "observedAtMs": 1792951176435,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 1479,
+        "connection": 2,
+        "queuedPhase": "spectator",
+        "phaseElapsedMs": 3420,
+        "inputClass": "other"
+      }
+    },
+    {
+      "line": 25,
+      "row": {
+        "observedAtMs": 1792951176436,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 1479,
+        "connection": 2,
+        "queuedPhase": "spectator",
+        "phaseElapsedMs": 3420,
+        "inputClass": "move"
+      }
+    },
+    {
+      "line": 26,
+      "row": {
+        "observedAtMs": 1792951176436,
+        "stage": "socket_turn.spectator",
+        "durationMs": 4899,
+        "connection": 1
+      }
+    },
+    {
+      "line": 27,
+      "row": {
+        "observedAtMs": 1792951176436,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 985,
+        "connection": 1,
+        "queuedPhase": "spectator",
+        "phaseElapsedMs": 3913,
+        "inputClass": "other"
+      }
+    },
+    {
+      "line": 28,
+      "row": {
+        "observedAtMs": 1792951176436,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 986,
+        "connection": 1,
+        "queuedPhase": "spectator",
+        "phaseElapsedMs": 3913,
+        "inputClass": "move"
+      }
+    },
+    {
+      "line": 29,
+      "row": {
+        "observedAtMs": 1792951176439,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 1483,
+        "connection": 2,
+        "queuedPhase": "spectator",
+        "phaseElapsedMs": 3420,
+        "inputClass": "move"
+      }
+    },
+    {
+      "line": 30,
+      "row": {
+        "observedAtMs": 1792951176439,
+        "stage": "socket_input.queue_residence",
+        "durationMs": 989,
+        "connection": 1,
+        "queuedPhase": "spectator",
+        "phaseElapsedMs": 3913,
+        "inputClass": "move"
+      }
+    },
+    {
+      "line": 31,
+      "row": {
+        "observedAtMs": 1792951176877,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 276
+      }
+    },
+    {
+      "line": 32,
+      "row": {
+        "observedAtMs": 1792951176877,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 278
+      }
+    },
+    {
+      "line": 33,
+      "row": {
+        "observedAtMs": 1792951176877,
+        "stage": "session_action.execute",
+        "durationMs": 278,
+        "connection": 2
+      }
+    },
+    {
+      "line": 34,
+      "row": {
+        "observedAtMs": 1792951176878,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 277
+      }
+    },
+    {
+      "line": 35,
+      "row": {
+        "observedAtMs": 1792951176878,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 279
+      }
+    },
+    {
+      "line": 36,
+      "row": {
+        "observedAtMs": 1792951176878,
+        "stage": "session_action.execute",
+        "durationMs": 279,
+        "connection": 1
+      }
+    },
+    {
+      "line": 37,
+      "row": {
+        "observedAtMs": 1792951176879,
+        "stage": "socket_turn.input",
+        "durationMs": 279,
+        "connection": 2
+      }
+    },
+    {
+      "line": 38,
+      "row": {
+        "observedAtMs": 1792951176880,
+        "stage": "socket_turn.input",
+        "durationMs": 281,
+        "connection": 1
+      }
+    }
+  ],
+  "slowStatus": {
+    "schemaVersion": 1,
+    "complete": true,
+    "reasons": [],
+    "stopRequested": false,
+    "stderrEnded": true,
+    "writerFinished": true,
+    "rowsQueued": 38,
+    "bytesQueued": 3987,
+    "maxBufferedLineBytes": 148,
+    "lineLimitBytes": 8192,
+    "totalLimitBytes": 33554432,
+    "writeLimitBytes": 1048576,
+    "writeHighWaterMarkBytes": 1048576,
+    "maxQueuedWriteBytes": 438,
+    "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label/phase/class allowlists. observedAtMs is the launcher receive clock, not server span start/end. connection is an opaque diagnostic counter, never identity or an action/request ID; queuedPhase and phaseElapsedMs were sampled when the input was queued. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall.",
+    "thresholdMs": 50,
+    "dataFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\slow-stage-public.jsonl"
+  },
+  "selectedMonitor": [
+    {
+      "line": 63,
+      "type": "monitor",
+      "sampledAt": 1792951159043,
+      "stop": false,
+      "activeSessions": 2,
+      "privateBytes": 286449664,
+      "processRates": {
+        "cpuCores": 0.022760290556900726,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 146227.60290556902,
+        "otherIoBytesPerSecond": 1030.5084745762713,
+        "ioOperationsPerSecond": 81.35593220338983
+      },
+      "hostMaxLogicalCoreBusyPercent": 100,
+      "zoneWork": {
+        "count": 1356,
+        "sumUs": 431265,
+        "maxUs": 707,
+        "overBudgetCount": 0
+      },
+      "ownerTickDeadlineLag": {
+        "count": 1356,
+        "sumUs": 10812785,
+        "maxUs": 28611,
+        "overBudgetCount": 0
+      },
+      "pendingMovementDeadlineLag": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0
+      },
+      "movementAdmissions": {
+        "count": 337,
+        "sumUs": 105077,
+        "maxUs": 4853,
+        "overBudgetCount": 0,
+        "successCount": 337,
+        "failureCount": 0
+      },
+      "immediateRequests": {
+        "count": 22,
+        "sumUs": 62621,
+        "maxUs": 13555,
+        "overBudgetCount": 0,
+        "successCount": 22,
+        "failureCount": 0
+      },
+      "lifecycleRequests": {
+        "count": 6,
+        "sumUs": 2063350,
+        "maxUs": 993204,
+        "overBudgetCount": 4,
+        "successCount": 6,
+        "failureCount": 0
+      }
+    },
+    {
+      "line": 64,
+      "type": "monitor",
+      "sampledAt": 1792951161403,
+      "stop": false,
+      "activeSessions": 2,
+      "privateBytes": 289742848,
+      "processRates": {
+        "cpuCores": 0.01314116150911403,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 197170.4111911827,
+        "otherIoBytesPerSecond": 1325.9855871131836,
+        "ioOperationsPerSecond": 114.45527766002543
+      },
+      "hostMaxLogicalCoreBusyPercent": 58,
+      "zoneWork": {
+        "count": 1379,
+        "sumUs": 439301,
+        "maxUs": 707,
+        "overBudgetCount": 0
+      },
+      "ownerTickDeadlineLag": {
+        "count": 1379,
+        "sumUs": 11007793,
+        "maxUs": 28611,
+        "overBudgetCount": 0
+      },
+      "pendingMovementDeadlineLag": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0
+      },
+      "movementAdmissions": {
+        "count": 343,
+        "sumUs": 113305,
+        "maxUs": 4853,
+        "overBudgetCount": 0,
+        "successCount": 343,
+        "failureCount": 0
+      },
+      "immediateRequests": {
+        "count": 22,
+        "sumUs": 62621,
+        "maxUs": 13555,
+        "overBudgetCount": 0,
+        "successCount": 22,
+        "failureCount": 0
+      },
+      "lifecycleRequests": {
+        "count": 6,
+        "sumUs": 2063350,
+        "maxUs": 993204,
+        "overBudgetCount": 4,
+        "successCount": 6,
+        "failureCount": 0
+      }
+    },
+    {
+      "line": 65,
+      "type": "monitor",
+      "sampledAt": 1792951163746,
+      "stop": false,
+      "activeSessions": 2,
+      "privateBytes": 292065280,
+      "processRates": {
+        "cpuCores": 0,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 134444.3314692425,
+        "otherIoBytesPerSecond": 1089.9847483477376,
+        "ioOperationsPerSecond": 85.91764107778343
+      },
+      "hostMaxLogicalCoreBusyPercent": 100,
+      "zoneWork": {
+        "count": 1403,
+        "sumUs": 447651,
+        "maxUs": 707,
+        "overBudgetCount": 0
+      },
+      "ownerTickDeadlineLag": {
+        "count": 1403,
+        "sumUs": 11234266,
+        "maxUs": 28611,
+        "overBudgetCount": 0
+      },
+      "pendingMovementDeadlineLag": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0
+      },
+      "movementAdmissions": {
+        "count": 350,
+        "sumUs": 114781,
+        "maxUs": 4853,
+        "overBudgetCount": 0,
+        "successCount": 350,
+        "failureCount": 0
+      },
+      "immediateRequests": {
+        "count": 22,
+        "sumUs": 62621,
+        "maxUs": 13555,
+        "overBudgetCount": 0,
+        "successCount": 22,
+        "failureCount": 0
+      },
+      "lifecycleRequests": {
+        "count": 6,
+        "sumUs": 2063350,
+        "maxUs": 993204,
+        "overBudgetCount": 4,
+        "successCount": 6,
+        "failureCount": 0
+      }
+    },
+    {
+      "line": 66,
+      "type": "monitor",
+      "sampledAt": 1792951167973,
+      "stop": false,
+      "activeSessions": 2,
+      "privateBytes": 294772736,
+      "processRates": {
+        "cpuCores": 0,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 122050.29995385326,
+        "otherIoBytesPerSecond": 767.8818643285649,
+        "ioOperationsPerSecond": 67.83571758191049
+      },
+      "hostMaxLogicalCoreBusyPercent": 87,
+      "zoneWork": {
+        "count": 1445,
+        "sumUs": 463006,
+        "maxUs": 738,
+        "overBudgetCount": 0
+      },
+      "ownerTickDeadlineLag": {
+        "count": 1445,
+        "sumUs": 11581065,
+        "maxUs": 28611,
+        "overBudgetCount": 0
+      },
+      "pendingMovementDeadlineLag": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0
+      },
+      "movementAdmissions": {
+        "count": 361,
+        "sumUs": 117814,
+        "maxUs": 4853,
+        "overBudgetCount": 0,
+        "successCount": 361,
+        "failureCount": 0
+      },
+      "immediateRequests": {
+        "count": 22,
+        "sumUs": 62621,
+        "maxUs": 13555,
+        "overBudgetCount": 0,
+        "successCount": 22,
+        "failureCount": 0
+      },
+      "lifecycleRequests": {
+        "count": 6,
+        "sumUs": 2063350,
+        "maxUs": 993204,
+        "overBudgetCount": 4,
+        "successCount": 6,
+        "failureCount": 0
+      }
+    },
+    {
+      "line": 67,
+      "type": "monitor",
+      "sampledAt": 1792951167978,
+      "stop": false,
+      "activeSessions": 2,
+      "privateBytes": 295374848,
+      "processRates": {
+        "cpuCores": 0.015263417035942884,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 0,
+        "otherIoBytesPerSecond": 374.1999015263417,
+        "ioOperationsPerSecond": 22.156573116691284
+      },
+      "hostMaxLogicalCoreBusyPercent": 56,
+      "zoneWork": {
+        "count": 1445,
+        "sumUs": 463006,
+        "maxUs": 738,
+        "overBudgetCount": 0
+      },
+      "ownerTickDeadlineLag": {
+        "count": 1445,
+        "sumUs": 11581065,
+        "maxUs": 28611,
+        "overBudgetCount": 0
+      },
+      "pendingMovementDeadlineLag": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0
+      },
+      "movementAdmissions": {
+        "count": 361,
+        "sumUs": 117814,
+        "maxUs": 4853,
+        "overBudgetCount": 0,
+        "successCount": 361,
+        "failureCount": 0
+      },
+      "immediateRequests": {
+        "count": 22,
+        "sumUs": 62621,
+        "maxUs": 13555,
+        "overBudgetCount": 0,
+        "successCount": 22,
+        "failureCount": 0
+      },
+      "lifecycleRequests": {
+        "count": 6,
+        "sumUs": 2063350,
+        "maxUs": 993204,
+        "overBudgetCount": 4,
+        "successCount": 6,
+        "failureCount": 0
+      }
+    },
+    {
+      "line": 68,
+      "type": "monitor",
+      "sampledAt": 1792951171536,
+      "stop": false,
+      "activeSessions": 2,
+      "privateBytes": 296460288,
+      "processRates": {
+        "cpuCores": 0.02211764705882353,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 35755.76470588235,
+        "otherIoBytesPerSecond": 521.4117647058823,
+        "ioOperationsPerSecond": 38.11764705882353
+      },
+      "hostMaxLogicalCoreBusyPercent": 32,
+      "zoneWork": {
+        "count": 1464,
+        "sumUs": 470200,
+        "maxUs": 738,
+        "overBudgetCount": 0
+      },
+      "ownerTickDeadlineLag": {
+        "count": 1464,
+        "sumUs": 11745608,
+        "maxUs": 28611,
+        "overBudgetCount": 0
+      },
+      "pendingMovementDeadlineLag": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0
+      },
+      "movementAdmissions": {
+        "count": 366,
+        "sumUs": 118980,
+        "maxUs": 4853,
+        "overBudgetCount": 0,
+        "successCount": 366,
+        "failureCount": 0
+      },
+      "immediateRequests": {
+        "count": 22,
+        "sumUs": 62621,
+        "maxUs": 13555,
+        "overBudgetCount": 0,
+        "successCount": 22,
+        "failureCount": 0
+      },
+      "lifecycleRequests": {
+        "count": 6,
+        "sumUs": 2063350,
+        "maxUs": 993204,
+        "overBudgetCount": 4,
+        "successCount": 6,
+        "failureCount": 0
+      }
+    },
+    {
+      "line": 69,
+      "type": "monitor",
+      "sampledAt": 1792951174600,
+      "stop": false,
+      "activeSessions": 2,
+      "privateBytes": 296513536,
+      "processRates": {
+        "cpuCores": 0,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 0,
+        "otherIoBytesPerSecond": 231.0866574965612,
+        "ioOperationsPerSecond": 9.170105456212747
+      },
+      "hostMaxLogicalCoreBusyPercent": 100,
+      "zoneWork": {
+        "count": 1464,
+        "sumUs": 470200,
+        "maxUs": 738,
+        "overBudgetCount": 0
+      },
+      "ownerTickDeadlineLag": {
+        "count": 1464,
+        "sumUs": 11745608,
+        "maxUs": 28611,
+        "overBudgetCount": 0
+      },
+      "pendingMovementDeadlineLag": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0
+      },
+      "movementAdmissions": {
+        "count": 366,
+        "sumUs": 118980,
+        "maxUs": 4853,
+        "overBudgetCount": 0,
+        "successCount": 366,
+        "failureCount": 0
+      },
+      "immediateRequests": {
+        "count": 22,
+        "sumUs": 62621,
+        "maxUs": 13555,
+        "overBudgetCount": 0,
+        "successCount": 22,
+        "failureCount": 0
+      },
+      "lifecycleRequests": {
+        "count": 6,
+        "sumUs": 2063350,
+        "maxUs": 993204,
+        "overBudgetCount": 4,
+        "successCount": 6,
+        "failureCount": 0
+      }
+    },
+    {
+      "line": 70,
+      "type": "monitor",
+      "sampledAt": 1792951176373,
+      "stop": false,
+      "activeSessions": 2,
+      "privateBytes": 296513536,
+      "processRates": {
+        "cpuCores": 0,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 18624.141315014724,
+        "otherIoBytesPerSecond": 0,
+        "ioOperationsPerSecond": 4.906771344455349
+      },
+      "hostMaxLogicalCoreBusyPercent": 87,
+      "zoneWork": {
+        "count": 1464,
+        "sumUs": 470200,
+        "maxUs": 738,
+        "overBudgetCount": 0
+      },
+      "ownerTickDeadlineLag": {
+        "count": 1464,
+        "sumUs": 11745608,
+        "maxUs": 28611,
+        "overBudgetCount": 0
+      },
+      "pendingMovementDeadlineLag": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0
+      },
+      "movementAdmissions": {
+        "count": 368,
+        "sumUs": 10142569,
+        "maxUs": 5012080,
+        "overBudgetCount": 2,
+        "successCount": 366,
+        "failureCount": 2
+      },
+      "immediateRequests": {
+        "count": 22,
+        "sumUs": 62621,
+        "maxUs": 13555,
+        "overBudgetCount": 0,
+        "successCount": 22,
+        "failureCount": 0
+      },
+      "lifecycleRequests": {
+        "count": 6,
+        "sumUs": 2063350,
+        "maxUs": 993204,
+        "overBudgetCount": 4,
+        "successCount": 6,
+        "failureCount": 0
+      }
+    },
+    {
+      "line": 71,
+      "type": "monitor",
+      "sampledAt": 1792951176393,
+      "stop": false,
+      "activeSessions": 2,
+      "privateBytes": 296566784,
+      "processRates": {
+        "cpuCores": 0.008184143222506393,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 0,
+        "otherIoBytesPerSecond": 57.289002557544755,
+        "ioOperationsPerSecond": 3.0690537084398977
+      },
+      "hostMaxLogicalCoreBusyPercent": 58,
+      "zoneWork": {
+        "count": 1464,
+        "sumUs": 470200,
+        "maxUs": 738,
+        "overBudgetCount": 0
+      },
+      "ownerTickDeadlineLag": {
+        "count": 1464,
+        "sumUs": 11745608,
+        "maxUs": 28611,
+        "overBudgetCount": 0
+      },
+      "pendingMovementDeadlineLag": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0
+      },
+      "movementAdmissions": {
+        "count": 368,
+        "sumUs": 10142569,
+        "maxUs": 5012080,
+        "overBudgetCount": 2,
+        "successCount": 366,
+        "failureCount": 2
+      },
+      "immediateRequests": {
+        "count": 22,
+        "sumUs": 62621,
+        "maxUs": 13555,
+        "overBudgetCount": 0,
+        "successCount": 22,
+        "failureCount": 0
+      },
+      "lifecycleRequests": {
+        "count": 6,
+        "sumUs": 2063350,
+        "maxUs": 993204,
+        "overBudgetCount": 4,
+        "successCount": 6,
+        "failureCount": 0
+      }
+    },
+    {
+      "line": 72,
+      "type": "monitorStopped",
+      "sampledAt": 1792951177832,
+      "stop": true,
+      "activeSessions": 2,
+      "privateBytes": 296566784,
+      "processRates": {
+        "cpuCores": 0.008184143222506393,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 0,
+        "otherIoBytesPerSecond": 57.289002557544755,
+        "ioOperationsPerSecond": 3.0690537084398977
+      },
+      "hostMaxLogicalCoreBusyPercent": 58,
+      "zoneWork": {
+        "count": 1464,
+        "sumUs": 470200,
+        "maxUs": 738,
+        "overBudgetCount": 0
+      },
+      "ownerTickDeadlineLag": {
+        "count": 1464,
+        "sumUs": 11745608,
+        "maxUs": 28611,
+        "overBudgetCount": 0
+      },
+      "pendingMovementDeadlineLag": {
+        "count": 0,
+        "sumUs": 0,
+        "maxUs": 0,
+        "overBudgetCount": 0
+      },
+      "movementAdmissions": {
+        "count": 368,
+        "sumUs": 10142569,
+        "maxUs": 5012080,
+        "overBudgetCount": 2,
+        "successCount": 366,
+        "failureCount": 2
+      },
+      "immediateRequests": {
+        "count": 22,
+        "sumUs": 62621,
+        "maxUs": 13555,
+        "overBudgetCount": 0,
+        "successCount": 22,
+        "failureCount": 0
+      },
+      "lifecycleRequests": {
+        "count": 6,
+        "sumUs": 2063350,
+        "maxUs": 993204,
+        "overBudgetCount": 4,
+        "successCount": 6,
+        "failureCount": 0
+      }
+    }
+  ],
+  "monitorDelta": {
+    "sampleIntervalMs": 4857,
+    "zoneWorkCount": 0,
+    "ownerTickCount": 0,
+    "movementAdmissionsCount": 2,
+    "movementAdmissionsDurationSumUs": 10023589,
+    "movementAdmissionsOverBudget": 2
+  },
+  "scope": "Slow observedAtMs is launcher receive time, not authoritative span start/end. Connection numbers are opaque diagnostic counters, not request IDs; request-to-span binding is unavailable. Metrics maxUs are cumulative lifetime maxima, not per-phase maxima. CPU and I/O observations do not establish a capacity ceiling or unique cause."
+}

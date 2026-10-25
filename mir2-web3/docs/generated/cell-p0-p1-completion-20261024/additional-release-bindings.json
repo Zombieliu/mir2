@@ -16,6 +16,10 @@
     {
       "manifest": "backend-source-personal-monster-projection-v1.json",
       "build": "release-personal-monster-projection-v1.json"
+    },
+    {
+      "manifest": "backend-source-attack-deadline-diagnostics-v1.json",
+      "build": "release-attack-deadline-diagnostics-v1.json"
     }
   ]
 }

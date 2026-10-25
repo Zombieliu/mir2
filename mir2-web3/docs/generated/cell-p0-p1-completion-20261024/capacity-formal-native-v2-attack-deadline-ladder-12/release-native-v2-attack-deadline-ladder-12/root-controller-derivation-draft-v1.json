@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ACTUAL_PROBE16_FINAL_BINDING_NOT_EXECUTED",
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\root-seal-and-guard-v1.mjs",
+    "bytes": 11466,
+    "sha256": "7983d9ea1b935dd9fcfd0755c21b95614c3de66852cd14d8e865f248f20ed745"
+  },
+  "output": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\root-seal-and-guard-draft-v1.mjs",
+    "bytes": 13423,
+    "sha256": "891a68922f0b6d1b0e44bb898aa7a880431e66fe05e15f7ad8c3b7cf0a362409"
+  },
+  "mutations": [
+    {
+      "atByte": 0,
+      "from": "import fs from 'node:fs/promises';",
+      "to": "import {FORMAL12_BINDING,assertFormal12Configured} from './formal-template-contract.mjs';\nimport {execFileSync} from 'node:child_process';\nimport fs from 'node:fs/promises';"
+    },
+    {
+      "atByte": 405,
+      "from": "release-native-v2-personal-projection-ladder-11",
+      "to": "release-native-v2-attack-deadline-ladder-12"
+    },
+    {
+      "atByte": 5868,
+      "from": "release-native-10-v2-personal-projection-feasibility-15",
+      "to": "release-native-10-v2-attack-deadline-feasibility-16"
+    },
+    {
+      "atByte": 2065,
+      "from": "5c2e713863d3e9556a92f856b11df2396c73b137",
+      "to": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16"
+    },
+    {
+      "atByte": 2259,
+      "from": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+      "to": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16"
+    },
+    {
+      "atByte": 2341,
+      "from": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+      "to": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9"
+    },
+    {
+      "atByte": 6475,
+      "from": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+      "to": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318"
+    },
+    {
+      "atByte": 1952,
+      "from": "formal11",
+      "to": "formal12"
+    },
+    {
+      "atByte": 8123,
+      "from": "formal11",
+      "to": "formal12"
+    },
+    {
+      "atByte": 2788,
+      "from": "Probe15",
+      "to": "Probe16"
+    },
+    {
+      "atByte": 3280,
+      "from": "Probe15",
+      "to": "Probe16"
+    },
+    {
+      "atByte": 4238,
+      "from": "Probe15",
+      "to": "Probe16"
+    },
+    {
+      "atByte": 4320,
+      "from": "Probe15",
+      "to": "Probe16"
+    },
+    {
+      "atByte": 4400,
+      "from": "Probe15",
+      "to": "Probe16"
+    },
+    {
+      "atByte": 8193,
+      "from": "Probe15",
+      "to": "Probe16"
+    },
+    {
+      "atByte": 8710,
+      "from": "Probe15",
+      "to": "Probe16"
+    },
+    {
+      "atByte": 9432,
+      "from": "Probe15",
+      "to": "Probe16"
+    },
+    {
+      "atByte": 2856,
+      "from": "Fresh15",
+      "to": "Fresh16"
+    },
+    {
+      "atByte": 1968,
+      "from": "fresh15",
+      "to": "fresh16"
+    },
+    {
+      "atByte": 8159,
+      "from": "fresh15",
+      "to": "fresh16"
+    },
+    {
+      "atByte": 2763,
+      "from": "assert.equal(value.actualProbe16RunId,'1792937158876-b61ec943');",
+      "to": "assert.equal(value.actualProbe16RunId,FORMAL12_BINDING.probe16.runId);"
+    },
+    {
+      "atByte": 6550,
+      "from": "assert.equal(proof.runId,'1792937158876-b61ec943');",
+      "to": "assert.equal(proof.runId,FORMAL12_BINDING.probe16.runId);"
+    },
+    {
+      "atByte": 7635,
+      "from": "nodeCodeFocusedTests:13,nodeCodeFullTests:200",
+      "to": "nodeCodeFocusedTests:null,nodeCodeFullTests:210"
+    },
+    {
+      "atByte": 4463,
+      "from": "const args=process.argv.slice(2),mode=args[0];",
+      "to": "const args=process.argv.slice(2),mode=args[0];\nassertFormal12Configured(); // All modes refuse before state reads/writes until actual Ended16 PASS binding exists."
+    },
+    {
+      "atByte": 6879,
+      "from": "const scene=await(await import(pathToFileURL(path.join(root,'scene-contract.mjs')))).verifySceneContract(root,'formal'),wire=await import(pathToFileURL(path.join(root,'wire-diagnostics-contract.mjs'))),wireSource=await wire.verifyWireDiagnosticSource(),wireIdentity=wire.wireDiagnosticIdentity(wireSource);",
+      "to": "const scene=await(await import(pathToFileURL(path.join(root,'scene-contract.mjs')))).verifySceneContract(root,'formal'),wire=await import(pathToFileURL(path.join(root,'wire-diagnostics-contract.mjs'))),wireSource=await wire.verifyWireDiagnosticSource(),wireIdentity=wire.wireDiagnosticIdentity(wireSource);\n const syntaxNow=[];for(const script of [...new Set([...pre.value.files.filter(p=>p.file.endsWith('.mjs')).map(p=>p.file),fileURLToPath(import.meta.url)])]){await expectedPin(await pin(script));execFileSync(process.execPath,['--check',script],{windowsHide:true,stdio:'pipe'});syntaxNow.push({file:script,exitCode:0});}"
+    },
+    {
+      "atByte": 8740,
+      "from": "await write(path.join(root,'launcher-syntax-check.log'),{schemaVersion:1,allScriptsPassed:true,scripts:pre.value.syntax.scripts,presealReceipt:pre.pin,exactSourcesUnchangedSinceSyntaxCheck:true,repeatedDuringSeal:false,realmStarted:false});",
+      "to": "await fs.writeFile(path.join(root,'launcher-syntax-check.log'),syntaxNow.map(p=>'node --check '+p.file+': exit0').join('\\n')+'\\n',{flag:'wx'});"
+    },
+    {
+      "atByte": 4463,
+      "from": "const args=process.argv.slice(2),mode=args[0];",
+      "to": "async function assertPreparePublicReferences(){const refs=[\"launcher-source-frozen-v1.json\",\"launcher-source-prepared-v1.json\",\"preparation-plan.json\",\"final-inputs-approved.json\",\"slow-stage-diagnostics-config.json\",\"static-preparation-verification.json\",\"source-guard-readonly-verification.json\",\"synthetic-tests-v1.log\",\"slow-stage-helper-freeze-v1.json\",\"slow-stage-schema-contract.json\",\"legacy14-original.mjs.txt\",\"candidate-release-binding.json\",\"launcher-syntax-check.log\",\"wire-adapter-synthetic-tests.log\",\"wire-adapter-synthetic-tests.json\",\"copied-baseline-inputs.json\",\"scenario.json\",\"resource-profile.json\",\"run-options.json\",\"scenario-prefix-readiness.json\",\"scene-binding.json\"];for(const name of refs)await expectedPin(await pin(path.join(root,name)));for(const relative of ['capacity-attack-deadline-driver-frozen-v1.json','capacity-attack-v2-driver-frozen-v1.json','release-attack-deadline-diagnostics-v1.json','backend-source-attack-deadline-diagnostics-v1.json','attack-deadline-diagnostics-v1-build-receipt.json','formal-baseline-100/resource-profile-local-host.json'])await expectedPin(await pin(path.join(base,relative)));const log=await fs.readFile(path.join(root,'launcher-syntax-check.log'),'utf8');assert.ok(log.length&&log.includes('node --check ')&&log.includes(': exit0'));return{localReferences:refs.length,externalReferences:6,syntaxLogPresent:true};}\nconst args=process.argv.slice(2),mode=args[0];"
+    },
+    {
+      "atByte": 12937,
+      "from": "await absent(runtime);console.log(JSON.stringify({sourceGuard:",
+      "to": "await absent(runtime);const preparationReferences=await assertPreparePublicReferences();console.log(JSON.stringify({preparationReferences,sourceGuard:"
+    }
+  ],
+  "inverseRawExact": true,
+  "onlyNodeSyntaxExecuted": true,
+  "actualControllerExecuted": false,
+  "requiresActualProbe16EndedIndependentPass": true,
+  "correctProjectPreflight": "Existing sealed Probe16 input-lib.verifyRelease() supplies the exact current Release/full16; own collectDriverInputs uses input.project (mir2-web3), never its repository parent.",
+  "syntaxArtifactRule": "Root actual sealmode performs current node --check for each source before creating the syntax log; readonly guard validates every pre-seed public reference including that log.",
+  "aclRule": "Controller has no post-seeder two-principal ACL assertion and no resume mutation. Original initialization expects owner+SYSTEM before seed; ordinary seeder then owns private as owner-only1 while recordings remain2. No private state is read during source preparation.",
+  "futureToolClosurePending": true,
+  "capacityAccepted": false
+}

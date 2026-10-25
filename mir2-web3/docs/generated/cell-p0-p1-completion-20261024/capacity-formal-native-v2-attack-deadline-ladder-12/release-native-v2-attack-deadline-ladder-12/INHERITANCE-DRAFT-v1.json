@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "state": "DRAFT_PENDING_NOT_FINALIZED_NOT_SEALED",
+  "basis": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11",
+  "sourceReferencesOnly": [
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\driver-report-contract.mjs",
+      "bytes": 9598,
+      "sha256": "fe239fbe349511f717dbe476b6c3a2e53c62bfcb7da5a71d0d7bfe3be3014d08"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\native-chase-report-contract.mjs",
+      "bytes": 2266,
+      "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\formal-template-contract.mjs",
+      "bytes": 1209,
+      "sha256": "34dc2f1b682f6eac51da6903d0622213dd7183ba153d82740d610b09bb876d91"
+    },
+    {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    }
+  ],
+  "mechanicalChangesStillRequired": [
+    "New identity/catalog/raw-public names and relative pin paths",
+    "New44 source library based on current44 baseline, not old fixed-five-delta collector",
+    "Final actual driver evidence and report declaration contract",
+    "Future slow helper allowlist for source-scoped stages",
+    "Actual full16 and future probe16 complete toolseal/executor closure consumers",
+    "New Root finalize/seal/readonlyguard handoff only after actual bindings and final QA"
+  ],
+  "runtimeScriptsCopied": false,
+  "commandsReady": false,
+  "originalSourcesModified": false
+}

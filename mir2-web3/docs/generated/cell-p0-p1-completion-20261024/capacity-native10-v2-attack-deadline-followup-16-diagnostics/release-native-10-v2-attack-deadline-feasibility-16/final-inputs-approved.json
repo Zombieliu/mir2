@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ROOT_FINAL_PRESEAL_REVIEW_AND_SOURCE_SEAL",
+  "actualPrerequisitesBound": true,
+  "sourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "rootExecutionApproval": false,
+  "accountPrepared": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

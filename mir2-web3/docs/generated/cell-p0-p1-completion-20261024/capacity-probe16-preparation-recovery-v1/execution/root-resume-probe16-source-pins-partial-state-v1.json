@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-25T17:26:34.527Z",
+  "kind": "read-only-observation-of-existing-partial-preparation-before-source-pin-reconstruction",
+  "firstPreparationCompleted": false,
+  "firstPreparationFailure": "ENOENT launcher-syntax-check.log after ordinary account-only provisioning; raw actual log preserved separately",
+  "firstPreparationRawLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-prepare-actual-v1.log",
+    "bytes": 924,
+    "sha256": "5f76607cbfb3371018ba1a7df418bf200e6f3697674b437c3309d002d7e9eb84"
+  },
+  "originalPreparationSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\prepare-inputs.mjs",
+    "bytes": 11638,
+    "sha256": "33f1801a462608e385a64acfa197688cf3c73b29936e957ee3dbdde78abf5dd6"
+  },
+  "frozenSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\launcher-source-frozen-v1.json",
+    "bytes": 40976,
+    "sha256": "a22ff77e310680b4f95d0daf5cc630bdc9c899032a265eefa890212ba39e356c"
+  },
+  "readOnlyGuard": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\source-guard-readonly-verification.json",
+    "bytes": 2302,
+    "sha256": "757ff7b9fd6dcfaa809867b7192df5a24f0b47cb47524f78fd96f92d1e5510de"
+  },
+  "publicProvisioning": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\provisioning.json",
+    "bytes": 330,
+    "sha256": "8e6998c671da917a36c0b8ce511ab62da153b4f79c087543822c4db2a1c171b4"
+  },
+  "gatewayBuildPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\gateway-build-pin.json",
+    "bytes": 1375,
+    "sha256": "9982a8530ce9e931e9b4f0ea4caf46fe2b0f284cc33cdf3e516df08af3ada6c4"
+  },
+  "preparationLock": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\preparation.lock",
+    "bytes": 230,
+    "sha256": "58bec2db25faf386e24dcc74ac4eff73c1ba97804586f8fa5d55382d67367e96"
+  },
+  "syntaxCheck": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\launcher-syntax-check.log",
+    "bytes": 15666,
+    "sha256": "000af7b498805ed65a9ebb2222ec2d3f6d6cfa277b8f9eb6b10dd20fc826ff9a"
+  },
+  "existingRealOrdinaryAccounts": 10,
+  "charactersCreated": 0,
+  "gameplayGrants": 0,
+  "existingStoreModified": false,
+  "acl": {
+    "private": {
+      "allowedPrincipalCount": 1,
+      "ownerOnlyVerified": true
+    },
+    "recordings": {
+      "allowedPrincipalCount": 2,
+      "ownerOnlyVerified": true
+    }
+  },
+  "os": {
+    "reservedListenPortCount": 0,
+    "ports": [
+      17500,
+      17510
+    ],
+    "ownedGatewayProcessCount": 0,
+    "passed": true
+  },
+  "ownedExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\bin\\mir2-gateway.exe",
+    "bytes": 87371264,
+    "sha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318"
+  },
+  "node": {
+    "file": "C:\\Program Files\\nodejs\\node.exe",
+    "bytes": 85202416,
+    "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+  },
+  "seeder": {
+    "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\debug\\seed_capacity_accounts.exe",
+    "bytes": 67982336,
+    "sha256": "b261ed037a2055e6a10964554a0da8a98719b95b5017317b11e623e0ff622094"
+  },
+  "executablePinsObservedAtResumeOnly": true,
+  "privateValuesRead": false,
+  "privateMetadataChanged": false,
+  "prepareRerun": false,
+  "seederInvoked": false,
+  "realmStarted": false,
+  "sourcePinsAbsentBefore": true,
+  "executionLockAbsent": true,
+  "resumeScript": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-v3.mjs",
+    "bytes": 18943,
+    "sha256": "587e954260768c9f6f54340ca741ae8d96fe7889c22d0bceabe49ec4ecfa82bd"
+  },
+  "capacityAccepted": false
+}

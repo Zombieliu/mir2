@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T17:12:36.577Z",
+  "passed": true,
+  "runId": "1792946599345-0034c2b9",
+  "realmStamp": "1792946591077-812d0b0d",
+  "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "backendInputCount": 44,
+  "backendSourceAggregate": "13e5156025198b7c96eabad8f326138554de913abd98199da59888b23bdbe5f2",
+  "binarySha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+  "slowStageThresholdMs": 50,
+  "files": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.audit-source.mjs",
+      "bytes": 9066,
+      "sha256": "d5eab83f0649c6869dd20d7c1d3e4b8d9e63b856e18fb31d40b61669f887d893"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.backend-source.json",
+      "bytes": 35581,
+      "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.independent-audit.json",
+      "bytes": 1746,
+      "sha256": "e32baec4d1b4484afe63dfe3890aa88cfc822008ad48faa46cecdc7c751b42ad"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.prepared-profile.json",
+      "bytes": 4333,
+      "sha256": "a099b0fca2123cb75c5f781a49746c007db8803e7662b3dc12ae8a18b7356398"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.realm-evidence.json",
+      "bytes": 34980,
+      "sha256": "6fe76458e84cdac23e283e24ba388913d1872349f7f55a969f64cc26c1f2f316"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.release-input.json",
+      "bytes": 3146,
+      "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.runner-source.mjs",
+      "bytes": 14389,
+      "sha256": "dc7050c84a6b6601af6e2d94ed7df7778872d9748e2b377006e1c69b38385fb1"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.source-manifest-verification.json",
+      "bytes": 572,
+      "sha256": "b569c318c3a80134f757781b87415ec51a524f2a6fb6708169a3a9b5bb4976a4"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946591077-812d0b0d.zone-metrics.json",
+      "bytes": 23601,
+      "sha256": "de19178f7f88d39fad653057405b79d12ec918bf88473b636f6703eee4f4735a"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-a.trace.jsonl",
+      "bytes": 980261,
+      "sha256": "9b84c0deb676ad52c820d98d8d156e722cd942c22303a26da08cd90dbbcc1d5f"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-b.trace.jsonl",
+      "bytes": 904691,
+      "sha256": "401c85bb6e09799fab4f73d47d8106d8134cb20fb5136d58df6778d8b1e51d0b"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-guard-newCharacter.trace.jsonl",
+      "bytes": 3478,
+      "sha256": "c10ebf8eba6069f273ccfea0946ea204691bfec12d4c4fb162d329ec828b024b"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-guard-startGame.trace.jsonl",
+      "bytes": 3439,
+      "sha256": "67f7d62fb74dff46667894b22b5700266d8b6842375ece88bc396a5e68df2e53"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-relogin-0.trace.jsonl",
+      "bytes": 684268,
+      "sha256": "ecf3474989d3d885a12e3fbe30d563f98b8d500d258b8dad3fa09030b1556eab"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9-relogin-1.trace.jsonl",
+      "bytes": 681075,
+      "sha256": "c94599e5af708956184e016f17f834d4956e4126dd23c98041e2bd8a0e9b8f49"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-attack-deadline-diagnostics-v1/public/1792946599345-0034c2b9.report.json",
+      "bytes": 110777,
+      "sha256": "543e19e82e251161e4fae4c5344fd78a204287836819f0c3734b2b252ac02137"
+    }
+  ],
+  "capacityAccepted": false
+}

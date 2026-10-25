@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T18:16:24.245Z",
+  "passed": true,
+  "sourceCount": 8,
+  "sourceBytes": 153207,
+  "sourceDestinationRawPinsMatched": true,
+  "preVerificationFileCount": 11,
+  "finalFileCount": 12,
+  "inventory": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\analyze-v1.mjs",
+      "bytes": 11571,
+      "sha256": "25c63e05668acb44ade621d9df6fd585fd8859138abde74d3309fabf0d76dee1",
+      "relative": "analysis/analyze-v1.mjs"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\public-whitelist-v2.json",
+      "bytes": 1850,
+      "sha256": "14a359c12af0683deeeee46016bfec6daa07cf18927d8a985b3795c4b36a998f",
+      "relative": "analysis/public-whitelist-v2.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\selected-public-evidence-v1.json",
+      "bytes": 70065,
+      "sha256": "87172a39e9a2cdbf46f54305a26c840c492a56b6051c933ab24df7b30fee11e9",
+      "relative": "analysis/selected-public-evidence-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\slow-monitor-correlation-v1.json",
+      "bytes": 24478,
+      "sha256": "77b7448a2eb334ca388ff6cac1e91958e7ef86edb4e6a2f030139996409f1b19",
+      "relative": "analysis/slow-monitor-correlation-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\summary-v1.json",
+      "bytes": 21871,
+      "sha256": "428d120c06c5b88d15c62b848db149b3d9211bb2b9f0c9c90cb00a638a941cc8",
+      "relative": "analysis/summary-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\wording-clarification-v2.json",
+      "bytes": 1791,
+      "sha256": "b6318fa3984d387644eda8b9b0e74b55721c1c0ea3174129998d99a7922851d0",
+      "relative": "analysis/wording-clarification-v2.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\public-copy-receipt-v1.json",
+      "bytes": 6211,
+      "sha256": "316a1d8ad97ff598ca937d859e601f17176bf3fe212856cd158cb0f2ef37be93",
+      "relative": "public-copy-receipt-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\public-whitelist-v1.json",
+      "bytes": 4368,
+      "sha256": "5df684be68d7eb65078cdc95c19999a4dc8ba081705750099c864badeeed4ea6",
+      "relative": "public-whitelist-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\README.md",
+      "bytes": 2659,
+      "sha256": "7529eac557e249809d5f38686ad40fe86a6b128b47b7d32a5c5e92cab5874974",
+      "relative": "README.md"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\source-review\\source-review-v1.json",
+      "bytes": 9064,
+      "sha256": "b34eef666cf491189180ac5187d452b1a10c5f9012026cff6662d3318e7989e4",
+      "relative": "source-review/source-review-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\source-review\\source-review-v2.json",
+      "bytes": 12517,
+      "sha256": "143646e754e28004ab36558d95b972f49ad34a3f531e60108c3ceb31eff07a01",
+      "relative": "source-review/source-review-v2.json"
+    }
+  ],
+  "readmeRelativeLinks": 9,
+  "allLinksExist": true,
+  "privateValuesRead": false,
+  "activeRunLogsOrReportsRead": false,
+  "formalResultKnown": true,
+  "formalRunPassed": false,
+  "formalFailed": true,
+  "rootCauseEstablished": false,
+  "exactStoreHolderEstablished": false,
+  "capacityAccepted": false
+}

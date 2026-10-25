@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T17:52:03.911Z",
+  "kind": "archive-authored-metadata-correction-only",
+  "reason": "The copy helper mechanically retained the preparation-archive auxiliary newProbeResultKnown:false field in its receipt and verification. Ended16 had actually completed and its result was known; original tool/report/source bytes and all copied-source pins are unaffected.",
+  "correctedFields": [
+    {
+      "artifact": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-ended-public-archive-v1\\public-copy-receipt-v1.json",
+        "bytes": 12370,
+        "sha256": "fe6b272db8babca121e701d8033fcd5cd4da79a4b637f13eef10d7d2b4d524fd"
+      },
+      "field": "newProbeResultKnown",
+      "recordedValue": false,
+      "correctValue": true
+    },
+    {
+      "artifact": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-ended-public-archive-v1\\archive-verification-v1.json",
+        "bytes": 9536,
+        "sha256": "36c5dba9f8bbd26bb5e785d5cf003c8138f048bbfc37ca5f74c3c6dfb8d68f4f"
+      },
+      "field": "newProbeResultKnown",
+      "recordedValue": false,
+      "correctValue": true
+    }
+  ],
+  "actualRunId": "1792949214664-bea1433d",
+  "actualEvidence": {
+    "finalVerification": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\final-verification.json",
+      "bytes": 449267,
+      "sha256": "b1d786f3ae059dba0c626a6f43f74381d4a113d15e36195295d32d668dc89fa7"
+    },
+    "terminalFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-actual-terminal-independent-facts-v1.json",
+      "bytes": 8296,
+      "sha256": "ad8f4f4567238d87e317e7578e27ac20e08986c68f2e273b4ae9ba0a69846c82"
+    }
+  },
+  "newProbeResultKnown": true,
+  "probePassed": true,
+  "independentVerificationPassed": true,
+  "capacityAccepted": false,
+  "rawVerifierAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false,
+  "formal12ResultProven": false,
+  "sourceCopies": 18,
+  "sourceBytes": 583518,
+  "previousVerificationFileCountAtCreation": 22,
+  "currentPublicFileCountIncludingAddendum": 23,
+  "originalReceiptLogVerificationPreserved": true,
+  "gameSourceOrAcceptanceReexecuted": false
+}

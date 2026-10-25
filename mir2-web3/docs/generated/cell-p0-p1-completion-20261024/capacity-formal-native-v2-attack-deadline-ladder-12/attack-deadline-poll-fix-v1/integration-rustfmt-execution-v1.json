@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T16:23:41.592Z",
+  "endedAt": "2026-10-25T16:23:41.784Z",
+  "elapsedMs": 190.69559999999998,
+  "executable": "rustup.exe",
+  "args": [
+    "run",
+    "1.95.0",
+    "rustfmt",
+    "--edition",
+    "2021",
+    "--config",
+    "skip_children=true",
+    "--check",
+    "apps/gateway/src/web.rs"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "sourceBefore": {
+    "path": "mir2-web3/apps/gateway/src/web.rs",
+    "bytes": 857503,
+    "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+  },
+  "sourceAfter": {
+    "path": "mir2-web3/apps/gateway/src/web.rs",
+    "bytes": 857503,
+    "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+  },
+  "sourceBeforeAfterIdentical": true,
+  "checkedFiles": 1,
+  "log": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-poll-fix-v1\\integration-rustfmt-v1.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "capacityAccepted": false
+}

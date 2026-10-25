@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "scope": "Final ended-verifier run ID binding only; original pending draft and preparation remain unchanged.",
+  "boundAt": "2026-10-25T17:38:34.831Z",
+  "actualRunId": "1792949214664-bea1433d",
+  "sourceOfRunId": "Root observed the single original .samples.jsonl filename in reports; no active payload was read by author.",
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\verify-ended-probe16-draft-v1.mjs",
+    "bytes": 30338,
+    "sha256": "67b407e48f40f467de0bd4ec8919021b6b833c09854d5c0c11c6e9d20d11fdc8"
+  },
+  "after": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\verify-ended-probe16-v1.mjs",
+    "bytes": 30334,
+    "sha256": "9c25c810fcb979c649ed108f53e7a1ea2ec6f463dc68a627712766ee017ce8a4"
+  },
+  "rules": [
+    {
+      "from": "PENDING_ROOT_ACTUAL_RUN_ID",
+      "to": "1792949214664-bea1433d",
+      "occurrences": 1
+    }
+  ],
+  "inverseRawExact": true,
+  "pendingPreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\preparation-pending-v1.json",
+    "bytes": 3653,
+    "sha256": "34a38898ce839f1e09855abf8f970e0611f453610ef2115a71e9bfadbd6548c3"
+  },
+  "expectedGatewayPid": 65608,
+  "expectedMonitorPid": 70448,
+  "probeStillRunningAtBinding": true,
+  "probePassed": null,
+  "actualVerificationExecuted": false,
+  "capacityAccepted": false
+}

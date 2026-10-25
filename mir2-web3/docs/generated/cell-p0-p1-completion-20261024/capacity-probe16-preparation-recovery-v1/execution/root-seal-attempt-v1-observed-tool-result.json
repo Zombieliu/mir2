@@ -1,0 +1,59 @@
+{
+  "actualError": "Prepared full16 candidate profile identity differs",
+  "schemaVersion": 1,
+  "actualExitCode": 1,
+  "realmStarted": false,
+  "preparedSha256": "dd09c3db343dd150cc1de53ffd63bcfa31d2c10ee6493bfc42a633e2526a9c66",
+  "accountsCreated": 0,
+  "recordedAt": "2026-10-25T17:09:49.9171681Z",
+  "diagnosis": "Full16 validator requires input.project, the mir2-web3 project directory; input.repository is its parent",
+  "source": "Actual unredirected exec_command tool result, transcribed after execution; no original stdout/stderr file was created",
+  "controller": {
+    "sha256": "f7ae46ba51a62ce378ee786cd8d92a96bc8802a61ed0036fb80d69cdeec47060",
+    "bytes": 13330
+  },
+  "originalFailurePreserved": true,
+  "reviewSha256": "04ce576a8282d65d18b2f6599d15e64a5225b4f32f3a3401581fba5944750816",
+  "afterFailureIndependentStateCheck": [
+    {
+      "exists": false,
+      "name": "launcher-source-frozen-v1.json"
+    },
+    {
+      "exists": false,
+      "name": "source-guard-readonly-verification.json"
+    },
+    {
+      "exists": false,
+      "name": "private"
+    },
+    {
+      "exists": false,
+      "name": "bin"
+    },
+    {
+      "exists": false,
+      "name": "reports"
+    },
+    {
+      "exists": false,
+      "name": "recordings"
+    },
+    {
+      "exists": false,
+      "name": "source-pins.json"
+    },
+    {
+      "exists": false,
+      "name": "preparation.lock"
+    },
+    {
+      "exists": false,
+      "name": "execution.lock"
+    }
+  ],
+  "actualLocation": "root-seal-and-guard-v1.mjs:60 validateCandidate(input.repository,FULL16,HEAD)",
+  "actualWallTimeSeconds": 0.1670956,
+  "capacityAccepted": false,
+  "sourceFreezeCreated": false
+}

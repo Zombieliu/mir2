@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-25T17:50:01.675Z",
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v2.mjs",
+    "bytes": 10118,
+    "sha256": "4b086dbbb4759dcf4084fc055765852928e2b4c2f9c3abce0b761cdf6502c117"
+  },
+  "actualToolExitCode": 1,
+  "actual": "--bind-actual-ended16",
+  "expected": "--bind-actual-ended15",
+  "location": "bind-actual-ended16-v2.mjs:8:69",
+  "scope": "Actual exec_command assertion result before binder evidence checks or output writes; no stdout/stderr file was captured.",
+  "beforeAnyBinderOutputWrite": true,
+  "originalFailurePreserved": true,
+  "gameVerifierExecuted": false,
+  "capacityAccepted": false
+}

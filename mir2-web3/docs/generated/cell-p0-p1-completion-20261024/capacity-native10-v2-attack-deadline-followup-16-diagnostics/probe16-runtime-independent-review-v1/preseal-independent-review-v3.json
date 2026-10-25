@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T17:10:38.283Z",
+  "scope": "Final narrow read-only revision after first real v1 controller failure: correct full16 validator project-root API argument and revision companion paths; unchanged runtime-prepared-v2 retains the preceding complete runtime static review.",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\runtime-prepared-v2.json",
+    "bytes": 27071,
+    "sha256": "dd09c3db343dd150cc1de53ffd63bcfa31d2c10ee6493bfc42a633e2526a9c66"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-seal-and-guard-v2.mjs",
+    "bytes": 13330,
+    "sha256": "0378790828b92a6f585afd25013ddec7076452ffe3f3571f22e9e5d2f3e33f14"
+  },
+  "controllerPreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-controller-preparation-v2.json",
+    "bytes": 3503,
+    "sha256": "25a1ea2ad0fd6ca36fef0428189c3bcec8ebc55d25165fd9c8b34305d46bbab1"
+  },
+  "controllerReadme": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\ROOT-CONTROLLER-v2.md",
+    "bytes": 3253,
+    "sha256": "c337fb216e5256d7882102a290fd177ba7a01f1299b6d0d43ea89c8ac5859419"
+  },
+  "supportInputs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-attack-deadline-diagnostics-v1\\verify-inputs.mjs",
+      "bytes": 9392,
+      "sha256": "b715c67e7e0b3e764df11a885aff386b909d9f5dc81828eff89f51898660d395"
+    }
+  ],
+  "sourceGroups": [
+    {
+      "name": "local",
+      "files": 73,
+      "sourceSha256": "8cb460de64a615ff1291c3cb308eb2da3c33eb182a104fb2871740e4338ef638",
+      "allRawPinsMatched": true
+    },
+    {
+      "name": "external",
+      "files": 21,
+      "sourceSha256": "962ee0553658be5cfea94e4d58789ce564c163e2c10d0bd11421c7903addbc13",
+      "allRawPinsMatched": true
+    }
+  ],
+  "initialFindings": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-runtime-independent-review-v1\\initial-findings-v1.json",
+    "bytes": 2272,
+    "sha256": "d567fe1a05697d7e650bb35b8d985c0405fa0b8271c04384e5374cc97479a239"
+  },
+  "finalIdentityMutation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\final-identity-mutation-v1.json",
+    "bytes": 2225,
+    "sha256": "291539723e46fdd681993e0b1472c425d302e15c9c05d6596402232e53bc271a"
+  },
+  "resolvedFindings": [
+    {
+      "id": "F1",
+      "status": "closed",
+      "finding": "run-owned slow-stage helper SHA literal differed from actual pinned helper",
+      "resolution": "Actual helper SHA now exact; one literal replacement inverses to preserved v1 raw bytes; collector current210 text also corrected.",
+      "inverse": [
+        {
+          "file": "run-owned.mjs",
+          "replacements": 1,
+          "exactRawInverse": true
+        },
+        {
+          "file": "collect-public.mjs",
+          "replacements": 1,
+          "exactRawInverse": true
+        }
+      ]
+    },
+    {
+      "id": "F2",
+      "status": "closed",
+      "finding": "Controller v1 passed parent repository to actual full16 project-root validator API",
+      "resolution": "Only API argument input.repository→input.project plus independent PREP/README v2 path revisions; all three substitutions independently inverse to exact preserved v1 bytes."
+    }
+  ],
+  "finalDelta": {
+    "priorLocalFiles": 69,
+    "currentLocalFiles": 73,
+    "changedExistingFiles": [
+      "collect-public.mjs",
+      "run-owned.mjs"
+    ],
+    "unchangedExistingFiles": 67,
+    "addedFiles": [
+      "collect-public.mjs.before-final-identity-v1.txt",
+      "final-identity-mutation-v1.json",
+      "run-owned.mjs.before-final-identity-v1.txt",
+      "runtime-prepared-v1.json"
+    ],
+    "nodeProductTestsExecutedHere": false,
+    "authorExternalHelperTests": {
+      "tests": 30,
+      "passed": 30,
+      "failed": 0,
+      "scope": "Small external slow-stage helper, distinct from historical actual Node210; no reviewer rerun."
+    }
+  },
+  "preservedProbe15Inputs": [
+    {
+      "file": "scenario.json",
+      "rawEqualToProbe15": true,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "file": "resource-profile.json",
+      "rawEqualToProbe15": true,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+    },
+    {
+      "file": "wire-diagnostics-adapter.mjs",
+      "rawEqualToProbe15": true,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "file": "wire-diagnostics-adapter.test.mjs",
+      "rawEqualToProbe15": true,
+      "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+    },
+    {
+      "file": "wire-diagnostics-contract.mjs",
+      "rawEqualToProbe15": true,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "file": "passed-probe-window-contract.mjs",
+      "rawEqualToProbe15": true,
+      "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+    }
+  ],
+  "policyJsonEqualToProbe15": true,
+  "identity": {
+    "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "backendInputCount": 44,
+    "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+    "binarySha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+    "actualReleaseFull16Facts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-full16-actual-terminal-independent-facts-v1.json",
+      "bytes": 10820,
+      "sha256": "4fd5867e421360dca4bb5cf0ec9f5bcd9b21a364f46f0bbb3bf97d53c571f1fa"
+    },
+    "topLevelCurrentIdentityDistinctFromHistoricalWireCore": true,
+    "historicalDeclarationBasisUsedOnlyForSixImmutableDeclarations": true,
+    "currentSourceLiteralAndActual210EvidenceRecheckedByContracts": true
+  },
+  "controllerReview": {
+    "normalizedExactPreparedAndControllerReferences": true,
+    "dynamicPreparedRevisionAndArrayCounts": true,
+    "rawPinsAndAggregatesCheckedBeforeImport": true,
+    "strict44AndNewActualFull16PreflightBeforeWx": true,
+    "ownVerifyReleaseDeferredUntilSealExists": true,
+    "noPreparedReviewHashCycle": true,
+    "prospectiveSealedInputCount": 99,
+    "maximumSealedInputs": 128,
+    "separateExplicitReadonlyGuard": true,
+    "newOutputsWxOnly": true,
+    "noProvisioningOrRealmEntryPoint": true,
+    "absoluteCanonicalPublicNonSymlinkFilesRequired": true,
+    "readOnlyReviewOnly": true,
+    "correctActualValidatorProjectRootArgument": true,
+    "controllerV1EligibilitySuperseded": true
+  },
+  "runtimeContract": {
+    "probeStages": [
+      2,
+      10
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 360,
+    "trueWindowCounts": [
+      5,
+      5,
+      6
+    ],
+    "trueWindowSecondsMinimum": 60,
+    "wholePhaseActualMeasuredSeconds": true,
+    "admissionCaps": [
+      24,
+      10,
+      10,
+      4,
+      1,
+      2
+    ],
+    "tokioWorkers": 4,
+    "slowStageThresholdMs": 50,
+    "patrolSpan": 2,
+    "allOriginalGameplayGatesPreserved": true,
+    "originalCompactSceneAndResourceBytesPreserved": true,
+    "partialOrFailedRunNotPromoted": true,
+    "publicCollectorSourceClosureAndPrivacyGuardsPreserved": true,
+    "probeNeverCapacityAcceptance": true
+  },
+  "runtimeStatesObservedAbsent": [
+    "launcher-source-frozen-v1.json",
+    "source-guard-readonly-verification.json",
+    "source-pins.json",
+    "realm-process.json",
+    "private",
+    "bin",
+    "reports",
+    "recordings"
+  ],
+  "limitations": [
+    "Static/preseal approval only; root must independently execute actual seal, readonly sourceguard, prepare and run in order.",
+    "Historical Node210, wrapper28, adapter8 and helper30 scopes remain separate; no new capacity result exists.",
+    "Full16 ordinary protocol success does not certify 100-player or two-hour capacity; P0 remains pending and P2 implementation remains frozen.",
+    "Historical scene geometry compatibility is exact-body evidence; original paths/static validation were not rerun here."
+  ],
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": []
+  },
+  "sealExecutedByReviewer": false,
+  "sourceGuardExecutedByReviewer": false,
+  "accountsCreatedByReviewer": 0,
+  "realmStartedByReviewer": false,
+  "capacityAccepted": false,
+  "previousReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-runtime-independent-review-v1\\preseal-independent-review-v2.json",
+    "bytes": 8077,
+    "sha256": "04ce576a8282d65d18b2f6599d15e64a5225b4f32f3a3401581fba5944750816"
+  },
+  "controllerRevision": {
+    "derivation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-controller-v2-exact-inverse-proof.json",
+      "bytes": 1866,
+      "sha256": "62a2c6f5c07c725e44fda09c446481c2df5b8ea761c49b28ff3dc541bb6c10d0"
+    },
+    "exactUniqueSourceReplacementCount": 3,
+    "exactRawInverseToPreservedV1": true,
+    "rules": [
+      {
+        "from": "README=path.join(ROOT,'ROOT-CONTROLLER.md')",
+        "to": "README=path.join(ROOT,'ROOT-CONTROLLER-v2.md')",
+        "count": 1
+      },
+      {
+        "from": "PREP=path.join(ROOT,'root-controller-preparation-v1.json')",
+        "to": "PREP=path.join(ROOT,'root-controller-preparation-v2.json')",
+        "count": 1
+      },
+      {
+        "from": "const validated=await validator.validateCandidate(input.repository,FULL16,HEAD)",
+        "to": "const validated=await validator.validateCandidate(input.project,FULL16,HEAD)",
+        "count": 1
+      }
+    ],
+    "oldControllerAndCompanionsStillRawExact": true,
+    "actualValidatorContract": {
+      "project": "mir2-web3 root",
+      "repository": "parent directory",
+      "profileRepositoryMustEqualArgument": true,
+      "driverPinsResolvedFromArgument": true,
+      "strictSourceLibraryRepositoryDirectoryUsesSameArgument": true
+    },
+    "firstFailure": {
+      "source": "Root actual tool-result report, not a reviewer execution or captured original stderr",
+      "exitCode": 1,
+      "failedBeforeFreezeOrRuntimeCreation": true,
+      "reason": "v1 passed input.repository, while actual full16 validator requires input.project",
+      "historicalReviewEligibilitySupersededByThisRevision": true
+    }
+  }
+}
