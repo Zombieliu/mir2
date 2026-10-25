@@ -2,7 +2,7 @@
 
 本记录接续 [前轮证据](../cell-preproduction-p0-p1-20261024/README.md)，保留前轮失败和 `14 passed / 2 not_run` 原始完整报告。本轮报告独立保存，不改写旧结论。
 
-当前 P1 工程合同验证通过，P0 正式容量尚未通过。此前网关排队停顿仍待定位；最新第十轮完成 2/10 人各五分钟，但逐分钟攻击供给不足，不能算作同一停顿的复现。P2 尚未启动，固定 Cell 的晋级仍以完整 P0 基线为前提。
+当前 P1 工程合同验证通过，P0 正式容量尚未通过。此前网关排队停顿仍待定位。第十一轮逐分钟攻击供给不足；第十二轮紧凑驻点探针在两人阶段因连续移动窗口纠偏率超限停止，尚未进入 10 人。它们均不能算作此前停顿的复现。P2 尚未启动，固定 Cell 的晋级仍以完整 P0 基线为前提。
 
 ## 已有新鲜结果
 
@@ -99,6 +99,12 @@ V2 后端对应提交 `461f1d85eed6309a55a88bd79a0022f7b97febe4`、[39 项输入
 第十轮[完整诊断](capacity-native10-v2-halo-followup-10-analysis/README.md)确认最长两次起手相隔 49.428 秒，期间有 62 次成功移动、15 次探索；四段追逐延期时，九名观察者各自真实 `UserLocation` 均不能形成六格见证。旧第三次落点访问保护已正常生效；不是把 40 步/30 秒预算缩短。单次决策的完整 AOI 和所有 A* 前沿没有记录，诊断不补造这些状态，也不认定历史服务器停顿根因。
 
 客户端现先为原生追逐筛选可形成真实见证的攻击邻格：观察者必须当前活跃、存活、同图，真实快照含双方，且目标与未来攻击落点距观察者实际位置均不超过六格。不可行目标继续其他候选及原探索；仍最多四个路径目标、每目标八邻格与 4000 节点 A*。实际发包仍使用当前 owner 位置重新见证，预进场行走和非原生模式保持。最终[定向 12/12](capacity-native-witness-approach-v1/focused-v2.log)、[相邻 88/88](capacity-native-witness-approach-v1/adjacent-v3.log)及[完整 187/187](capacity-native-witness-approach-v1/full-v1.log)通过，[新冻结清单](capacity-native-witness-approach-driver-frozen-v1.json)绑定同一九输入的前后哈希。旧夹具缺少真实见证条件的失败日志和原始前像保留，最终只补必要夹具输入，原断言与控制流程有[精确逆变换证明](capacity-native-witness-approach-v1/fixture-preservation-v1.json)和[独立复核](capacity-native-witness-approach-v1/native-witness-approach-independent-review-v1.json)。重复见证检查在 100 人场景的 CPU 成本仍待实测；这些回归不升格为容量通过。
+
+第十一轮 `1792902924884-3b7017e1` 使用已推送的 `6d70d02d0bc390156b77a3e48acee714fc87cda3`、原 span4 halo 场景及同一 `4688/a430` 后端，[原始公开核验](capacity-native10-v2-halo-followup-11-diagnostics/public-verification.json)保留失败结论。2/10 人各完成五分钟；10 人战斗角色五窗起手和双端正伤害为 32/34/25/15/11，后两窗不足，虽有 296/296 次机会完成及其余九名角色移动窗口通过，也不能抵消战斗失败。最长起手间隔 49.392 秒内有 62 次成功移动，其中 53 次探索、9 次追逐；未重现此前邻格绕行。原始 20,632 行、完整监控与录像摘要、正常清理及[正式 08 实际拒绝与分析](capacity-native10-v2-halo-followup-11-analysis/README.md)分别保留；未进入 soak。
+
+随后另建[紧凑驻点静态场景](capacity-native-compact-halo-scene-v1/README.md)，明确改用 span2、3×3 本体及 5×5 静态净空。10 人共有 28 个保守可见证目标，代表探索需 97 步；100 人版本仅将 92 号观察者从 (227,531) 移至 (229,534)，接入原覆盖区内路线，保留两次局部尝试和旧候选失败。原始导航与合同检查覆盖 2/10/25/50/100 人前缀；100 人代表探索需 886 步，线上 24 ACK/20 秒推进可能提前切换航点。123 个目标的理想正伤害供给不证明每分钟 180 次实际出手，动态占位与两小时存活仍须实测。静态证据全部保持 capacityAccepted=false。
+
+第十二轮 `1792908575146-40a66fff` 使用该紧凑场景及相同九输入/后端，[实际结果仍为失败](capacity-native10-v2-compact-halo-followup-12-diagnostics/public-verification.json)。两人阶段仅运行 206.914 秒，三个完整测量窗通过，未完成 300 秒阶段。独立连续窗口 60.363 秒内 77 次移动有 4 次纠偏，4/77=5.19% 超过原 5% 上限；全程共 5 次纠偏。移动量、Run 比例、机会完成率和延迟项通过，不抵消该失败；10 人及 soak 均未执行。[独立回放与有界诊断](capacity-native10-v2-compact-halo-followup-12-analysis/README.md)核对原始 1,891 行及监控/录像摘要：几次 ACK 后局部状态与公开合并帧存在怪物成员差异，但观战合并允许跨会话延续及 15 秒残留，不能据此判定权威碰撞拒因。原始失败、[启动封存与清理](capacity-native10-v2-compact-halo-followup-12-preparation/README.md)保留；正式 09 门禁已实际拒绝此失败，历史模板永久未封存、不可运行，没有创建正式账号或进程。下一步补充有界普通包增删来源证据，不修改导航或门槛；P0 仍未通过，P2 继续冻结。
 
 ## 本轮范围
 

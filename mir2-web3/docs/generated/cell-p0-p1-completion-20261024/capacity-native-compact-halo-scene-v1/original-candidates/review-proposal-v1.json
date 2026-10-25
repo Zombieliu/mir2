@@ -1,0 +1,7723 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T05:19:08.490Z",
+  "scope": "Reviewable external static scene candidates and bounded failed suffix experiments. No live run, launcher, product edit, policy relaxation or acceptance.",
+  "parameters": {
+    "schemaVersion": 1,
+    "mapFileName": "0",
+    "patrolSpan": 2,
+    "bodySide": 3,
+    "haloSide": 5,
+    "bounds": {
+      "minX": 208,
+      "maxX": 376,
+      "minY": 512,
+      "maxY": 682
+    },
+    "origin": {
+      "x": 288,
+      "y": 616
+    },
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "actors": 100,
+    "prefixes": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "fighterIndices": [
+      5,
+      15,
+      25,
+      35,
+      45,
+      55,
+      65,
+      75,
+      85,
+      95
+    ],
+    "maxExpanded": 4000,
+    "stableWitnessRange": 6,
+    "bodyExcludesCanonicalInitialMonsters": true,
+    "initialDangerHalfWidth": 8,
+    "initialDangerHalfHeight": 6,
+    "ordinaryProtocolOnly": true,
+    "freshWarrior": true,
+    "grants": false,
+    "newSpawnRules": false,
+    "productChanges": false,
+    "attacksPerFighterMinute": 18,
+    "positiveHitsPerFighterMinute": 12,
+    "minimumNativeCompletion": 0.95,
+    "minimumRunFraction": 0.5,
+    "minimumNativeCellsPerMinute": 80,
+    "opportunityMs": 750,
+    "commandsPerSecond": 3,
+    "actualRuntimeLimitsUnchanged": {
+      "pathTargets": 4,
+      "adjacentGoals": 8,
+      "searchNodesPerPath": 4000,
+      "attackDeadlineMs": 900,
+      "chaseMoves": 40,
+      "chaseMs": 30000,
+      "visits": 3
+    },
+    "accepted": false,
+    "capacityAccepted": false,
+    "staticOnly": true
+  },
+  "productFrozen": {
+    "driverCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "backendCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "driver9DeclaredAggregate": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "actualNineRawFilesVerified": [
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+        "bytes": 37930,
+        "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+        "bytes": 144416,
+        "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+        "bytes": 224817,
+        "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+        "bytes": 4447,
+        "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+        "bytes": 5228,
+        "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+        "bytes": 21246,
+        "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+        "bytes": 10882,
+        "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+        "bytes": 6548,
+        "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+        "bytes": 6277,
+        "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+      }
+    ],
+    "trackedClean": true,
+    "driverFreezePin": {
+      "path": "C:/mir2-build/p01-completion-20261024/capacity-native-witness-approach-driver-frozen-v1.json",
+      "bytes": 41896,
+      "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada"
+    }
+  },
+  "selectedForRootReview": {
+    "tenScene": "candidate-10-compact-v2.json",
+    "tenScenePin": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-10-compact-v2.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    "firstTen": [
+      {
+        "x": 242,
+        "y": 596
+      },
+      {
+        "x": 234,
+        "y": 590
+      },
+      {
+        "x": 232,
+        "y": 578
+      },
+      {
+        "x": 237,
+        "y": 578
+      },
+      {
+        "x": 252,
+        "y": 585
+      },
+      {
+        "x": 239,
+        "y": 596
+      },
+      {
+        "x": 257,
+        "y": 590
+      },
+      {
+        "x": 255,
+        "y": 609
+      },
+      {
+        "x": 232,
+        "y": 613
+      },
+      {
+        "x": 239,
+        "y": 602
+      }
+    ],
+    "sceneAdopted": false,
+    "realProbeAuthorized": false,
+    "pairedFull100Ready": false,
+    "formalReady": false,
+    "reason": "Ten-home candidate is statically safe with better conservative6supply. Both bounded100suffix orderings still have material traversal or coverage failures; root decision is required before any new load."
+  },
+  "staticSafety": {
+    "mainScenePin": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-100-compact-v2.json",
+      "bytes": 5844,
+      "sha256": "db9031fa25c4d6666dd11911792bbefd8652fe5ff30e3b5c21c692a0e6c1a299"
+    },
+    "bodyCellsChecked": 900,
+    "haloChecks": 2500,
+    "originalFullMapBfs": true,
+    "prefixesChecked": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "prefixOnlyObservers": true,
+    "fighterIndices": [
+      5,
+      15,
+      25,
+      35,
+      45,
+      55,
+      65,
+      75,
+      85,
+      95
+    ],
+    "initialDangerAndMonsterExclusion": "Body only; full5x5halo excludes static terrain/NPC/transfer but may contain ordinary canonical monsters.",
+    "meaning": "Safety checks and prefix-selected-home connectivity pass; this is separate from full fixed-order scout traversal and natural supply."
+  },
+  "mainPrefixSupply": [
+    {
+      "count": 2,
+      "fighterIndices": [],
+      "stableTargets": 0,
+      "counts": {
+        "Deer": 0,
+        "Scarecrow": 0
+      },
+      "minimumIndividualFighterTargetPaths": 0,
+      "fixedDamageSensitivity": {
+        "1": 0,
+        "3": 0,
+        "5": 0,
+        "10": 0,
+        "15": 0,
+        "25": 0
+      },
+      "requiredPerMinute": {
+        "attacks": 0,
+        "positiveHits": 0
+      }
+    },
+    {
+      "count": 10,
+      "fighterIndices": [
+        5
+      ],
+      "stableTargets": 28,
+      "counts": {
+        "Deer": 21,
+        "Scarecrow": 7
+      },
+      "minimumIndividualFighterTargetPaths": 28,
+      "fixedDamageSensitivity": {
+        "1": 165.50000000000003,
+        "3": 59.29999999999999,
+        "5": 33.10000000000001,
+        "10": 19.3,
+        "15": 13.8,
+        "25": 6.9
+      },
+      "requiredPerMinute": {
+        "attacks": 18,
+        "positiveHits": 12
+      }
+    },
+    {
+      "count": 25,
+      "fighterIndices": [
+        5,
+        15
+      ],
+      "stableTargets": 72,
+      "counts": {
+        "Deer": 52,
+        "Scarecrow": 20
+      },
+      "minimumIndividualFighterTargetPaths": 65,
+      "fixedDamageSensitivity": {
+        "1": 427.91666666666646,
+        "3": 153.2500000000001,
+        "5": 85.58333333333333,
+        "10": 49.74999999999997,
+        "15": 35.8333333333333,
+        "25": 17.91666666666665
+      },
+      "requiredPerMinute": {
+        "attacks": 36,
+        "positiveHits": 24
+      }
+    },
+    {
+      "count": 50,
+      "fighterIndices": [
+        5,
+        15,
+        25,
+        35,
+        45
+      ],
+      "stableTargets": 110,
+      "counts": {
+        "Deer": 80,
+        "Scarecrow": 30
+      },
+      "minimumIndividualFighterTargetPaths": 104,
+      "fixedDamageSensitivity": {
+        "1": 649.1666666666672,
+        "3": 232.50000000000017,
+        "5": 129.8333333333333,
+        "10": 75.49999999999996,
+        "15": 54.33333333333326,
+        "25": 27.16666666666663
+      },
+      "requiredPerMinute": {
+        "attacks": 90,
+        "positiveHits": 60
+      }
+    },
+    {
+      "count": 100,
+      "fighterIndices": [
+        5,
+        15,
+        25,
+        35,
+        45,
+        55,
+        65,
+        75,
+        85,
+        95
+      ],
+      "stableTargets": 129,
+      "counts": {
+        "Deer": 86,
+        "Scarecrow": 43
+      },
+      "minimumIndividualFighterTargetPaths": 125,
+      "fixedDamageSensitivity": {
+        "1": 738.6666666666672,
+        "3": 264.2000000000003,
+        "5": 147.73333333333312,
+        "10": 85.20000000000006,
+        "15": 62.53333333333324,
+        "25": 31.26666666666662
+      },
+      "requiredPerMinute": {
+        "attacks": 180,
+        "positiveHits": 120
+      }
+    }
+  ],
+  "mainConditionalLevelSupply": [
+    {
+      "actors": 2,
+      "targets": 0,
+      "fighterCount": 0,
+      "requiredPositiveHitsPerMinute": 0,
+      "levels": [
+        {
+          "level": 1,
+          "ordinaryStarterMinDc": 2,
+          "ordinaryStarterMaxDc": 4,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 18,
+          "cumulativeNativeXpToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "aggregateRateMarginOverRequired": 0,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 0,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 0,
+          "idealInitialPositiveHitStock": 0,
+          "idealUniformTwoHourHitsIncludingInitial": 0,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 5,
+          "ordinaryStarterMinDc": 3,
+          "ordinaryStarterMaxDc": 5,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 44,
+          "cumulativeNativeXpToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "aggregateRateMarginOverRequired": 0,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 0,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 0,
+          "idealInitialPositiveHitStock": 0,
+          "idealUniformTwoHourHitsIncludingInitial": 0,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 10,
+          "ordinaryStarterMinDc": 4,
+          "ordinaryStarterMaxDc": 6,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 89,
+          "cumulativeNativeXpToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "aggregateRateMarginOverRequired": 0,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 0,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 0,
+          "idealInitialPositiveHitStock": 0,
+          "idealUniformTwoHourHitsIncludingInitial": 0,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 15,
+          "ordinaryStarterMinDc": 5,
+          "ordinaryStarterMaxDc": 7,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 149,
+          "cumulativeNativeXpToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 0,
+          "aggregateRateMarginOverRequired": 0,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 0,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 0,
+          "idealInitialPositiveHitStock": 0,
+          "idealUniformTwoHourHitsIncludingInitial": 0,
+          "continuousWindowSupplyProven": false
+        }
+      ]
+    },
+    {
+      "actors": 10,
+      "targets": 28,
+      "fighterCount": 1,
+      "requiredPositiveHitsPerMinute": 12,
+      "levels": [
+        {
+          "level": 1,
+          "ordinaryStarterMinDc": 2,
+          "ordinaryStarterMaxDc": 4,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 18,
+          "cumulativeNativeXpToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 57.722063220564486,
+          "aggregateRateMarginOverRequired": 45.722063220564486,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 85.49999999999999,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 45.50000000000001,
+          "idealInitialPositiveHitStock": 232.03600964171002,
+          "idealUniformTwoHourHitsIncludingInitial": 7158.6835961094475,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 5,
+          "ordinaryStarterMinDc": 3,
+          "ordinaryStarterMaxDc": 5,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 44,
+          "cumulativeNativeXpToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 44.09352232891327,
+          "aggregateRateMarginOverRequired": 32.09352232891327,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 59.29999999999999,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 33.10000000000001,
+          "idealInitialPositiveHitStock": 177.27892089620485,
+          "idealUniformTwoHourHitsIncludingInitial": 5468.501600365799,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 10,
+          "ordinaryStarterMinDc": 4,
+          "ordinaryStarterMaxDc": 6,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 89,
+          "cumulativeNativeXpToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 35.816186556927306,
+          "aggregateRateMarginOverRequired": 23.816186556927306,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 45.50000000000001,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 33.10000000000001,
+          "idealInitialPositiveHitStock": 144.00411522633746,
+          "idealUniformTwoHourHitsIncludingInitial": 4441.946502057615,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 15,
+          "ordinaryStarterMinDc": 5,
+          "ordinaryStarterMaxDc": 7,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 149,
+          "cumulativeNativeXpToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 30.787654320987638,
+          "aggregateRateMarginOverRequired": 18.787654320987638,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 33.10000000000001,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 26.200000000000006,
+          "idealInitialPositiveHitStock": 123.92592592592585,
+          "idealUniformTwoHourHitsIncludingInitial": 3818.444444444442,
+          "continuousWindowSupplyProven": false
+        }
+      ]
+    },
+    {
+      "actors": 25,
+      "targets": 72,
+      "fighterCount": 2,
+      "requiredPositiveHitsPerMinute": 24,
+      "levels": [
+        {
+          "level": 1,
+          "ordinaryStarterMinDc": 2,
+          "ordinaryStarterMaxDc": 4,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 18,
+          "cumulativeNativeXpToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 149.27417279936375,
+          "aggregateRateMarginOverRequired": 125.27417279936375,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 220.91666666666677,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 117.41666666666661,
+          "idealInitialPositiveHitStock": 593.3301119032963,
+          "idealUniformTwoHourHitsIncludingInitial": 18506.23084782694,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 5,
+          "ordinaryStarterMinDc": 3,
+          "ordinaryStarterMaxDc": 5,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 44,
+          "cumulativeNativeXpToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 114.03736727124918,
+          "aggregateRateMarginOverRequired": 90.03736727124918,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 153.2500000000001,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 85.58333333333333,
+          "idealInitialPositiveHitStock": 453.35589087029376,
+          "idealUniformTwoHourHitsIncludingInitial": 14137.839963420201,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 10,
+          "ordinaryStarterMinDc": 4,
+          "ordinaryStarterMaxDc": 6,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 89,
+          "cumulativeNativeXpToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 92.63122999542755,
+          "aggregateRateMarginOverRequired": 68.63122999542755,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 117.41666666666661,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 85.58333333333333,
+          "idealInitialPositiveHitStock": 368.2688614540465,
+          "idealUniformTwoHourHitsIncludingInitial": 11484.016460905355,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 15,
+          "ordinaryStarterMinDc": 5,
+          "ordinaryStarterMaxDc": 7,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 149,
+          "cumulativeNativeXpToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 79.66460905349791,
+          "aggregateRateMarginOverRequired": 55.66460905349791,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 85.58333333333333,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 67.6666666666667,
+          "idealInitialPositiveHitStock": 317.1358024691355,
+          "idealUniformTwoHourHitsIncludingInitial": 9876.88888888889,
+          "continuousWindowSupplyProven": false
+        }
+      ]
+    },
+    {
+      "actors": 50,
+      "targets": 110,
+      "fighterCount": 5,
+      "requiredPositiveHitsPerMinute": 60,
+      "levels": [
+        {
+          "level": 1,
+          "ordinaryStarterMinDc": 2,
+          "ordinaryStarterMaxDc": 4,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 18,
+          "cumulativeNativeXpToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 226.4498498735827,
+          "aggregateRateMarginOverRequired": 166.4498498735827,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 335.1666666666664,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 178.1666666666668,
+          "idealInitialPositiveHitStock": 907.4026467660558,
+          "idealUniformTwoHourHitsIncludingInitial": 28081.384631596036,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 5,
+          "ordinaryStarterMinDc": 3,
+          "ordinaryStarterMaxDc": 5,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 44,
+          "cumulativeNativeXpToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 172.99400497891594,
+          "aggregateRateMarginOverRequired": 112.99400497891594,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 232.50000000000017,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 129.8333333333333,
+          "idealInitialPositiveHitStock": 693.3226642280131,
+          "idealUniformTwoHourHitsIncludingInitial": 21452.60326169792,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 10,
+          "ordinaryStarterMinDc": 4,
+          "ordinaryStarterMaxDc": 6,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 89,
+          "cumulativeNativeXpToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 140.52080475537264,
+          "aggregateRateMarginOverRequired": 80.52080475537264,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 178.1666666666668,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 129.8333333333333,
+          "idealInitialPositiveHitStock": 563.196159122085,
+          "idealUniformTwoHourHitsIncludingInitial": 17425.692729766815,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 15,
+          "ordinaryStarterMinDc": 5,
+          "ordinaryStarterMaxDc": 7,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 149,
+          "cumulativeNativeXpToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 120.8436213991769,
+          "aggregateRateMarginOverRequired": 60.8436213991769,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 129.8333333333333,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 102.66666666666643,
+          "idealInitialPositiveHitStock": 484.93827160493777,
+          "idealUniformTwoHourHitsIncludingInitial": 14986.172839506147,
+          "continuousWindowSupplyProven": false
+        }
+      ]
+    },
+    {
+      "actors": 100,
+      "targets": 129,
+      "fighterCount": 10,
+      "requiredPositiveHitsPerMinute": 120,
+      "levels": [
+        {
+          "level": 1,
+          "ordinaryStarterMinDc": 2,
+          "ordinaryStarterMaxDc": 4,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 18,
+          "cumulativeNativeXpToLevel": 0,
+          "idealUniformExpectedPositiveHitsPerMinute": 257.801094884788,
+          "aggregateRateMarginOverRequired": 137.80109488478797,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 380.6666666666664,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 201.6666666666668,
+          "idealInitialPositiveHitStock": 1051.1032626387487,
+          "idealUniformTwoHourHitsIncludingInitial": 31987.234648813384,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 5,
+          "ordinaryStarterMinDc": 3,
+          "ordinaryStarterMaxDc": 5,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 44,
+          "cumulativeNativeXpToLevel": 1000,
+          "idealUniformExpectedPositiveHitsPerMinute": 196.98065335568805,
+          "aggregateRateMarginOverRequired": 76.98065335568805,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 264.2000000000003,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 147.73333333333312,
+          "idealInitialPositiveHitStock": 803.2892851699415,
+          "idealUniformTwoHourHitsIncludingInitial": 24440.967687852506,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 10,
+          "ordinaryStarterMinDc": 4,
+          "ordinaryStarterMaxDc": 6,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 89,
+          "cumulativeNativeXpToLevel": 7900,
+          "idealUniformExpectedPositiveHitsPerMinute": 160.0105166895289,
+          "aggregateRateMarginOverRequired": 40.01051668952891,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 201.6666666666668,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 147.73333333333312,
+          "idealInitialPositiveHitStock": 652.5500685871049,
+          "idealUniformTwoHourHitsIncludingInitial": 19853.812071330605,
+          "continuousWindowSupplyProven": false
+        },
+        {
+          "level": 15,
+          "ordinaryStarterMinDc": 5,
+          "ordinaryStarterMaxDc": 7,
+          "baseAccuracy": 5,
+          "baseHealthBeforeEquipmentOrBuffs": 149,
+          "cumulativeNativeXpToLevel": 76900,
+          "idealUniformExpectedPositiveHitsPerMinute": 137.78436213991765,
+          "aggregateRateMarginOverRequired": 17.784362139917647,
+          "minimumDcConditionalUpperPositiveHitsPerMinute": 147.73333333333312,
+          "maximumDcConditionalLowerPositiveHitsPerMinute": 116.46666666666636,
+          "idealInitialPositiveHitStock": 562.7160493827159,
+          "idealUniformTwoHourHitsIncludingInitial": 17096.839506172808,
+          "continuousWindowSupplyProven": false
+        }
+      ]
+    }
+  ],
+  "progression": {
+    "canonicalSlots": 129,
+    "scope": "Conditional closed129canonical-slot pool only, no external wandering-in targets/quest/other XP/positive bonuses, every slot killed immediately after due refresh; all rewards assigned to ONE actor at tier2 for the whole bound. Level penalties, shared allocation, travel and kill time omitted, so deliberately overgenerous.",
+    "twoHours": {
+      "minutes": 120,
+      "idealKillsIncludingInitial": 3881,
+      "deliberatelyOvergenerousTier2XpAssignedAllToOneFreshActor": 133266
+    },
+    "entire18000SecondBudget": {
+      "minutes": 300,
+      "idealKillsIncludingInitial": 9509,
+      "deliberatelyOvergenerousTier2XpAssignedAllToOneFreshActor": 326586
+    },
+    "requiredXpLevel20": 456900,
+    "requiredXpLevel25": 1896900,
+    "level20NotReachedEvenByThisOvergenerousClosedFiveHourModel": true
+  },
+  "comparison": {
+    "sameCurrentCanonicalAllBodyStable6": true,
+    "existingSpan4": {
+      "name": "probe09-10-11-span4-halo",
+      "scenePin": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-ordinary-two-name-span4-halo-100-v1.json",
+        "bytes": 5844,
+        "sha256": "19c80f2722a9fc992f6834304c4fc5bf54f2fe86dbcf7c53887589d11aa9f8fb"
+      },
+      "span": 4,
+      "firstTen": [
+        {
+          "x": 251,
+          "y": 669
+        },
+        {
+          "x": 256,
+          "y": 668
+        },
+        {
+          "x": 251,
+          "y": 663
+        },
+        {
+          "x": 256,
+          "y": 661
+        },
+        {
+          "x": 251,
+          "y": 651
+        },
+        {
+          "x": 261,
+          "y": 669
+        },
+        {
+          "x": 264,
+          "y": 650
+        },
+        {
+          "x": 269,
+          "y": 669
+        },
+        {
+          "x": 275,
+          "y": 670
+        },
+        {
+          "x": 259,
+          "y": 650
+        }
+      ],
+      "stableWitnessRange": 6,
+      "positionsPerObserver": 25,
+      "canonicalAllBodyPositionStableTargets": 8,
+      "targetCounts": {
+        "Deer": 5,
+        "Scarecrow": 3
+      },
+      "targetIds": [
+        206501,
+        206504,
+        206525,
+        206534,
+        206602,
+        206639,
+        206648,
+        206701
+      ],
+      "conditionalSupplyByFixedDamage": {
+        "1": 45.333333333333336,
+        "3": 16.200000000000003,
+        "5": 9.066666666666666,
+        "10": 5.2,
+        "15": 3.8666666666666663,
+        "25": 1.9333333333333331
+      },
+      "staticHaloFailures": [],
+      "originalAstarRepresentativeScout": {
+        "passed": true,
+        "failedObserverIndex": null,
+        "firstCircuitSteps": 83,
+        "secondCircuitSteps": 92,
+        "legs": [
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 261,
+              "y": 669
+            },
+            "goal": {
+              "x": 252,
+              "y": 668
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 252,
+              "y": 668
+            },
+            "goal": {
+              "x": 255,
+              "y": 669
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 255,
+              "y": 669
+            },
+            "goal": {
+              "x": 252,
+              "y": 664
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 252,
+              "y": 664
+            },
+            "goal": {
+              "x": 255,
+              "y": 662
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 255,
+              "y": 662
+            },
+            "goal": {
+              "x": 252,
+              "y": 652
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 252,
+              "y": 652
+            },
+            "goal": {
+              "x": 263,
+              "y": 651
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 263,
+              "y": 651
+            },
+            "goal": {
+              "x": 269,
+              "y": 668
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 269,
+              "y": 668
+            },
+            "goal": {
+              "x": 274,
+              "y": 671
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 274,
+              "y": 671
+            },
+            "goal": {
+              "x": 260,
+              "y": 651
+            },
+            "steps": 20
+          },
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 260,
+              "y": 651
+            },
+            "goal": {
+              "x": 251,
+              "y": 668
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 251,
+              "y": 668
+            },
+            "goal": {
+              "x": 255,
+              "y": 669
+            },
+            "steps": 4
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 255,
+              "y": 669
+            },
+            "goal": {
+              "x": 252,
+              "y": 664
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 252,
+              "y": 664
+            },
+            "goal": {
+              "x": 255,
+              "y": 662
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 255,
+              "y": 662
+            },
+            "goal": {
+              "x": 252,
+              "y": 652
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 252,
+              "y": 652
+            },
+            "goal": {
+              "x": 263,
+              "y": 651
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 263,
+              "y": 651
+            },
+            "goal": {
+              "x": 269,
+              "y": 668
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 269,
+              "y": 668
+            },
+            "goal": {
+              "x": 274,
+              "y": 671
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 274,
+              "y": 671
+            },
+            "goal": {
+              "x": 260,
+              "y": 651
+            },
+            "steps": 20
+          }
+        ]
+      },
+      "scope": "Fresh canonical geometry comparison only; historical report live spawn/actor states and old16range attack-witness rule differ. Representative scout route is not a live action/ACK count."
+    },
+    "newCompact": {
+      "name": "new-compact-draft02",
+      "scenePin": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-100-compact-v2.json",
+        "bytes": 5844,
+        "sha256": "db9031fa25c4d6666dd11911792bbefd8652fe5ff30e3b5c21c692a0e6c1a299"
+      },
+      "span": 2,
+      "firstTen": [
+        {
+          "x": 242,
+          "y": 596
+        },
+        {
+          "x": 234,
+          "y": 590
+        },
+        {
+          "x": 232,
+          "y": 578
+        },
+        {
+          "x": 237,
+          "y": 578
+        },
+        {
+          "x": 252,
+          "y": 585
+        },
+        {
+          "x": 239,
+          "y": 596
+        },
+        {
+          "x": 257,
+          "y": 590
+        },
+        {
+          "x": 255,
+          "y": 609
+        },
+        {
+          "x": 232,
+          "y": 613
+        },
+        {
+          "x": 239,
+          "y": 602
+        }
+      ],
+      "stableWitnessRange": 6,
+      "positionsPerObserver": 9,
+      "canonicalAllBodyPositionStableTargets": 28,
+      "targetCounts": {
+        "Deer": 21,
+        "Scarecrow": 7
+      },
+      "targetIds": [
+        206313,
+        206327,
+        206328,
+        206331,
+        206334,
+        206335,
+        206338,
+        206502,
+        206503,
+        206514,
+        206517,
+        206518,
+        206521,
+        206527,
+        206532,
+        206533,
+        206539,
+        206548,
+        206600,
+        206607,
+        206613,
+        206622,
+        206634,
+        206646,
+        206649,
+        206706,
+        206708,
+        206710
+      ],
+      "conditionalSupplyByFixedDamage": {
+        "1": 165.50000000000003,
+        "3": 59.29999999999999,
+        "5": 33.10000000000001,
+        "10": 19.3,
+        "15": 13.8,
+        "25": 6.9
+      },
+      "staticHaloFailures": [],
+      "originalAstarRepresentativeScout": {
+        "passed": true,
+        "failedObserverIndex": null,
+        "firstCircuitSteps": 91,
+        "secondCircuitSteps": 97,
+        "legs": [
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 239,
+              "y": 596
+            },
+            "goal": {
+              "x": 241,
+              "y": 597
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 241,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 591
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 591
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 243,
+              "y": 597
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 243,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 589
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 589
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          }
+        ]
+      },
+      "scope": "Fresh canonical geometry comparison only; historical report live spawn/actor states and old16range attack-witness rule differ. Representative scout route is not a live action/ACK count."
+    },
+    "historicalReports": [
+      {
+        "probe": "06",
+        "pin": {
+          "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-coordinated-diagnostics/release-native-10-v2-coordinated-feasibility-06/reports/1792870589933-af9ef086.report.json",
+          "bytes": 172239,
+          "sha256": "3cff9154f0ed9ea1c7b80089b144074f8b1fd86849620675d30f8c9eadb27da4"
+        },
+        "runId": "1792870589933-af9ef086",
+        "ok": true,
+        "highestPassedStage": 10,
+        "attackWitnessRule": "No new stable6 rule declared in this historical report; do not infer it",
+        "stages": [
+          {
+            "name": "stage-10",
+            "completed": true,
+            "passed": true,
+            "requestedSeconds": 30,
+            "actualSeconds": 30.093,
+            "fighters": [
+              {
+                "actor": "L85660605",
+                "attacks": 16,
+                "hits": 16,
+                "moves": 7,
+                "nativeOpportunities": 26,
+                "nativeCompleted": 26,
+                "actualHitsPerMinute": 31.901106569634134
+              }
+            ],
+            "windows": []
+          },
+          {
+            "name": "soak",
+            "completed": true,
+            "passed": true,
+            "requestedSeconds": 360,
+            "actualSeconds": 360.095,
+            "fighters": [
+              {
+                "actor": "L85660605",
+                "attacks": 186,
+                "hits": 185,
+                "moves": 101,
+                "nativeOpportunities": 316,
+                "nativeCompleted": 316,
+                "actualHitsPerMinute": 30.825198905844292
+              }
+            ],
+            "windows": [
+              {
+                "seconds": 60,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 29,
+                    "hits": 29,
+                    "moves": 21,
+                    "nativeOpportunities": 53,
+                    "nativeCompleted": 53
+                  }
+                ]
+              },
+              {
+                "seconds": 60.033,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 29,
+                    "hits": 29,
+                    "moves": 20,
+                    "nativeOpportunities": 54,
+                    "nativeCompleted": 54
+                  }
+                ]
+              },
+              {
+                "seconds": 59.981,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 32,
+                    "hits": 31,
+                    "moves": 15,
+                    "nativeOpportunities": 53,
+                    "nativeCompleted": 53
+                  }
+                ]
+              },
+              {
+                "seconds": 60.071,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 31,
+                    "hits": 31,
+                    "moves": 16,
+                    "nativeOpportunities": 53,
+                    "nativeCompleted": 53
+                  }
+                ]
+              },
+              {
+                "seconds": 60.016,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 36,
+                    "hits": 36,
+                    "moves": 9,
+                    "nativeOpportunities": 49,
+                    "nativeCompleted": 49
+                  }
+                ]
+              },
+              {
+                "seconds": 59.992,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 29,
+                    "hits": 29,
+                    "moves": 20,
+                    "nativeOpportunities": 54,
+                    "nativeCompleted": 54
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "inheritedAcceptance": false
+      },
+      {
+        "probe": "07",
+        "pin": {
+          "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/reports/1792878747018-da931241.report.json",
+          "bytes": 326916,
+          "sha256": "f1e003be92a13a195d5f958e45adb005c56823a2f7c4733842b6ae2b3e8edd02"
+        },
+        "runId": "1792878747018-da931241",
+        "ok": false,
+        "highestPassedStage": 10,
+        "attackWitnessRule": "No new stable6 rule declared in this historical report; do not infer it",
+        "stages": [
+          {
+            "name": "stage-10",
+            "completed": true,
+            "passed": true,
+            "requestedSeconds": 300,
+            "actualSeconds": 300.047,
+            "fighters": [
+              {
+                "actor": "La809f605",
+                "attacks": 135,
+                "hits": 135,
+                "moves": 119,
+                "nativeOpportunities": 279,
+                "nativeCompleted": 278,
+                "actualHitsPerMinute": 26.995770662596193
+              }
+            ],
+            "windows": [
+              {
+                "seconds": 60.069,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 27,
+                    "hits": 27,
+                    "moves": 24,
+                    "nativeOpportunities": 55,
+                    "nativeCompleted": 55
+                  }
+                ]
+              },
+              {
+                "seconds": 60.027,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 31,
+                    "hits": 31,
+                    "moves": 15,
+                    "nativeOpportunities": 52,
+                    "nativeCompleted": 52
+                  }
+                ]
+              },
+              {
+                "seconds": 59.943,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 29,
+                    "hits": 29,
+                    "moves": 21,
+                    "nativeOpportunities": 55,
+                    "nativeCompleted": 55
+                  }
+                ]
+              },
+              {
+                "seconds": 59.976,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 19,
+                    "hits": 19,
+                    "moves": 38,
+                    "nativeOpportunities": 62,
+                    "nativeCompleted": 61
+                  }
+                ]
+              },
+              {
+                "seconds": 60.029,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 29,
+                    "hits": 29,
+                    "moves": 21,
+                    "nativeOpportunities": 55,
+                    "nativeCompleted": 55
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "soak",
+            "completed": true,
+            "passed": false,
+            "requestedSeconds": 360,
+            "actualSeconds": 360.098,
+            "fighters": [
+              {
+                "actor": "La809f605",
+                "attacks": 165,
+                "hits": 165,
+                "moves": 135,
+                "nativeOpportunities": 339,
+                "nativeCompleted": 335,
+                "actualHitsPerMinute": 27.492515926220083
+              }
+            ],
+            "windows": [
+              {
+                "seconds": 60.079,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 33,
+                    "hits": 33,
+                    "moves": 11,
+                    "nativeOpportunities": 51,
+                    "nativeCompleted": 51
+                  }
+                ]
+              },
+              {
+                "seconds": 59.966,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 32,
+                    "hits": 32,
+                    "moves": 15,
+                    "nativeOpportunities": 53,
+                    "nativeCompleted": 53
+                  }
+                ]
+              },
+              {
+                "seconds": 59.954,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 27,
+                    "hits": 27,
+                    "moves": 27,
+                    "nativeOpportunities": 58,
+                    "nativeCompleted": 58
+                  }
+                ]
+              },
+              {
+                "seconds": 60.004,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 24,
+                    "hits": 24,
+                    "moves": 29,
+                    "nativeOpportunities": 59,
+                    "nativeCompleted": 59
+                  }
+                ]
+              },
+              {
+                "seconds": 60.039,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 27,
+                    "hits": 27,
+                    "moves": 24,
+                    "nativeOpportunities": 57,
+                    "nativeCompleted": 57
+                  }
+                ]
+              },
+              {
+                "seconds": 60.051,
+                "passed": false,
+                "fighters": [
+                  {
+                    "attacks": 22,
+                    "hits": 22,
+                    "moves": 29,
+                    "nativeOpportunities": 61,
+                    "nativeCompleted": 57
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "inheritedAcceptance": false
+      },
+      {
+        "probe": "08",
+        "pin": {
+          "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-socket-diagnostics/release-native-10-v2-socket-feasibility-08/reports/1792885245847-0368d2eb.report.json",
+          "bytes": 192768,
+          "sha256": "04ad88bdd4fd34a29b6b8326f68960619e0b137b6aee2eba7252a9d2866e547a"
+        },
+        "runId": "1792885245847-0368d2eb",
+        "ok": false,
+        "highestPassedStage": 10,
+        "attackWitnessRule": "No new stable6 rule declared in this historical report; do not infer it",
+        "stages": [
+          {
+            "name": "stage-10",
+            "completed": true,
+            "passed": true,
+            "requestedSeconds": 300,
+            "actualSeconds": 300.054,
+            "fighters": [
+              {
+                "actor": "La5189305",
+                "attacks": 159,
+                "hits": 159,
+                "moves": 76,
+                "nativeOpportunities": 259,
+                "nativeCompleted": 259,
+                "actualHitsPerMinute": 31.794277030134577
+              }
+            ],
+            "windows": [
+              {
+                "seconds": 60.051,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 31,
+                    "hits": 31,
+                    "moves": 14,
+                    "nativeOpportunities": 51,
+                    "nativeCompleted": 51
+                  }
+                ]
+              },
+              {
+                "seconds": 60.014,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 28,
+                    "hits": 28,
+                    "moves": 24,
+                    "nativeOpportunities": 55,
+                    "nativeCompleted": 55
+                  }
+                ]
+              },
+              {
+                "seconds": 60.022,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 34,
+                    "hits": 34,
+                    "moves": 11,
+                    "nativeOpportunities": 50,
+                    "nativeCompleted": 50
+                  }
+                ]
+              },
+              {
+                "seconds": 59.985,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 34,
+                    "hits": 34,
+                    "moves": 12,
+                    "nativeOpportunities": 51,
+                    "nativeCompleted": 51
+                  }
+                ]
+              },
+              {
+                "seconds": 59.978,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 32,
+                    "hits": 32,
+                    "moves": 15,
+                    "nativeOpportunities": 52,
+                    "nativeCompleted": 52
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "inheritedAcceptance": false
+      },
+      {
+        "probe": "10",
+        "pin": {
+          "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-halo-followup-10-diagnostics/release-native-10-v2-halo-feasibility-10/reports/1792898022018-efb7a76a.report.json",
+          "bytes": 189046,
+          "sha256": "cf8b864372f5c402aea8544c8a3987ffbcdca876b7ad978d47ab8d91ee56a48c"
+        },
+        "runId": "1792898022018-efb7a76a",
+        "ok": false,
+        "highestPassedStage": 2,
+        "attackWitnessRule": {
+          "scope": "New native attack witness selection; the original full AOI membership range remains16.",
+          "maximumOwnerAndTargetDistance": 6,
+          "rule": "Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.",
+          "damageRule": "Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged."
+        },
+        "stages": [
+          {
+            "name": "stage-10",
+            "completed": true,
+            "passed": false,
+            "requestedSeconds": 300,
+            "actualSeconds": 300.342,
+            "fighters": [
+              {
+                "actor": "L25081f05",
+                "attacks": 88,
+                "hits": 88,
+                "moves": 217,
+                "nativeOpportunities": 320,
+                "nativeCompleted": 320,
+                "actualHitsPerMinute": 17.57995884691452
+              }
+            ],
+            "windows": [
+              {
+                "seconds": 60.032,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 24,
+                    "hits": 24,
+                    "moves": 30,
+                    "nativeOpportunities": 58,
+                    "nativeCompleted": 58
+                  }
+                ]
+              },
+              {
+                "seconds": 60.088,
+                "passed": false,
+                "fighters": [
+                  {
+                    "attacks": 14,
+                    "hits": 14,
+                    "moves": 50,
+                    "nativeOpportunities": 67,
+                    "nativeCompleted": 67
+                  }
+                ]
+              },
+              {
+                "seconds": 60.096,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 28,
+                    "hits": 28,
+                    "moves": 22,
+                    "nativeOpportunities": 54,
+                    "nativeCompleted": 54
+                  }
+                ]
+              },
+              {
+                "seconds": 60.093,
+                "passed": false,
+                "fighters": [
+                  {
+                    "attacks": 7,
+                    "hits": 7,
+                    "moves": 65,
+                    "nativeOpportunities": 74,
+                    "nativeCompleted": 74
+                  }
+                ]
+              },
+              {
+                "seconds": 60.033,
+                "passed": false,
+                "fighters": [
+                  {
+                    "attacks": 15,
+                    "hits": 15,
+                    "moves": 50,
+                    "nativeOpportunities": 67,
+                    "nativeCompleted": 67
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "inheritedAcceptance": false
+      },
+      {
+        "probe": "11",
+        "pin": {
+          "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-halo-followup-11-diagnostics/release-native-10-v2-halo-feasibility-11/reports/1792902924884-3b7017e1.report.json",
+          "bytes": 190911,
+          "sha256": "b542764e07bf1b19aebb017443fd9b2a086b38fd3a64c19f82514ea0061ebac1"
+        },
+        "runId": "1792902924884-3b7017e1",
+        "ok": false,
+        "highestPassedStage": 2,
+        "attackWitnessRule": {
+          "scope": "New native attack witness selection; the original full AOI membership range remains16.",
+          "maximumOwnerAndTargetDistance": 6,
+          "rule": "Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.",
+          "approachRule": "Native approach paths require a current active living same-map observer whose actual snapshot contains both attacker and target and whose actual position is within6 of the target and prospective attack tile; otherwise continue other eligible targets or ordinary scouting.",
+          "damageRule": "Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged."
+        },
+        "stages": [
+          {
+            "name": "stage-10",
+            "completed": true,
+            "passed": false,
+            "requestedSeconds": 300,
+            "actualSeconds": 300.33,
+            "fighters": [
+              {
+                "actor": "L80cd4c05",
+                "attacks": 117,
+                "hits": 117,
+                "moves": 160,
+                "nativeOpportunities": 296,
+                "nativeCompleted": 296,
+                "actualHitsPerMinute": 23.374288282888823
+              }
+            ],
+            "windows": [
+              {
+                "seconds": 60.038,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 32,
+                    "hits": 32,
+                    "moves": 16,
+                    "nativeOpportunities": 51,
+                    "nativeCompleted": 51
+                  }
+                ]
+              },
+              {
+                "seconds": 60.069,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 34,
+                    "hits": 34,
+                    "moves": 9,
+                    "nativeOpportunities": 48,
+                    "nativeCompleted": 48
+                  }
+                ]
+              },
+              {
+                "seconds": 60.09,
+                "passed": true,
+                "fighters": [
+                  {
+                    "attacks": 25,
+                    "hits": 25,
+                    "moves": 29,
+                    "nativeOpportunities": 58,
+                    "nativeCompleted": 58
+                  }
+                ]
+              },
+              {
+                "seconds": 60.101,
+                "passed": false,
+                "fighters": [
+                  {
+                    "attacks": 15,
+                    "hits": 15,
+                    "moves": 48,
+                    "nativeOpportunities": 67,
+                    "nativeCompleted": 67
+                  }
+                ]
+              },
+              {
+                "seconds": 60.032,
+                "passed": false,
+                "fighters": [
+                  {
+                    "attacks": 11,
+                    "hits": 11,
+                    "moves": 58,
+                    "nativeOpportunities": 72,
+                    "nativeCompleted": 72
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "inheritedAcceptance": false
+      }
+    ],
+    "statement": "Current span4 first10:8conservative targets5Deer/3Scarecrow,92representative scout steps. Newcompact-v2:28targets21/7,97steps. Supply geometry improves; tour is five steps longer, so do not claim it shortened.",
+    "old31PerMinuteNotInherited": true
+  },
+  "boundedSuffixReordering": {
+    "maxOrderingHeuristics": 2,
+    "heuristics": [
+      "nearest-neighbour with original A* edge ranking",
+      "continuous12-row alternating-x frontier order"
+    ],
+    "firstTenRawByteExact": true,
+    "entire100CoordinateSetExact": true,
+    "spanAndHaloUnchanged": true,
+    "originalScoutResults": [
+      {
+        "count": 10,
+        "scoutActorIndex": 5,
+        "observerCount": 9,
+        "passed": true,
+        "failedObserverIndex": null,
+        "secondCircuitUnitWalkSteps": 97,
+        "emptyPathIdealTwoCellRunOpportunityLowerBound": 49,
+        "allWalkOpportunityUpperIllustration": 97,
+        "emptyPathIdealRunTravelSecondsLowerBound": 36.75,
+        "legs": [
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 239,
+              "y": 596
+            },
+            "goal": {
+              "x": 241,
+              "y": 597
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 241,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 591
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 591
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 243,
+              "y": 597
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 243,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 589
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 589
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          }
+        ]
+      },
+      {
+        "count": 25,
+        "scoutActorIndex": 5,
+        "observerCount": 23,
+        "passed": true,
+        "failedObserverIndex": null,
+        "secondCircuitUnitWalkSteps": 640,
+        "emptyPathIdealTwoCellRunOpportunityLowerBound": 320,
+        "allWalkOpportunityUpperIllustration": 640,
+        "emptyPathIdealRunTravelSecondsLowerBound": 240,
+        "legs": [
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 239,
+              "y": 596
+            },
+            "goal": {
+              "x": 241,
+              "y": 597
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 241,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 591
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 591
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 10,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 270,
+              "y": 598
+            },
+            "steps": 30
+          },
+          {
+            "observerIndex": 11,
+            "from": {
+              "x": 270,
+              "y": 598
+            },
+            "goal": {
+              "x": 282,
+              "y": 609
+            },
+            "steps": 14
+          },
+          {
+            "observerIndex": 12,
+            "from": {
+              "x": 282,
+              "y": 609
+            },
+            "goal": {
+              "x": 275,
+              "y": 587
+            },
+            "steps": 23
+          },
+          {
+            "observerIndex": 13,
+            "from": {
+              "x": 275,
+              "y": 587
+            },
+            "goal": {
+              "x": 284,
+              "y": 575
+            },
+            "steps": 13
+          },
+          {
+            "observerIndex": 14,
+            "from": {
+              "x": 284,
+              "y": 575
+            },
+            "goal": {
+              "x": 287,
+              "y": 617
+            },
+            "steps": 45
+          },
+          {
+            "observerIndex": 16,
+            "from": {
+              "x": 287,
+              "y": 617
+            },
+            "goal": {
+              "x": 276,
+              "y": 574
+            },
+            "steps": 46
+          },
+          {
+            "observerIndex": 17,
+            "from": {
+              "x": 276,
+              "y": 574
+            },
+            "goal": {
+              "x": 225,
+              "y": 568
+            },
+            "steps": 51
+          },
+          {
+            "observerIndex": 18,
+            "from": {
+              "x": 225,
+              "y": 568
+            },
+            "goal": {
+              "x": 290,
+              "y": 572
+            },
+            "steps": 66
+          },
+          {
+            "observerIndex": 19,
+            "from": {
+              "x": 290,
+              "y": 572
+            },
+            "goal": {
+              "x": 250,
+              "y": 569
+            },
+            "steps": 41
+          },
+          {
+            "observerIndex": 20,
+            "from": {
+              "x": 250,
+              "y": 569
+            },
+            "goal": {
+              "x": 237,
+              "y": 616
+            },
+            "steps": 47
+          },
+          {
+            "observerIndex": 21,
+            "from": {
+              "x": 237,
+              "y": 616
+            },
+            "goal": {
+              "x": 260,
+              "y": 574
+            },
+            "steps": 42
+          },
+          {
+            "observerIndex": 22,
+            "from": {
+              "x": 260,
+              "y": 574
+            },
+            "goal": {
+              "x": 241,
+              "y": 630
+            },
+            "steps": 56
+          },
+          {
+            "observerIndex": 23,
+            "from": {
+              "x": 241,
+              "y": 630
+            },
+            "goal": {
+              "x": 251,
+              "y": 640
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 24,
+            "from": {
+              "x": 251,
+              "y": 640
+            },
+            "goal": {
+              "x": 258,
+              "y": 650
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 258,
+              "y": 650
+            },
+            "goal": {
+              "x": 243,
+              "y": 597
+            },
+            "steps": 53
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 243,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 589
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 589
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 10,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 270,
+              "y": 598
+            },
+            "steps": 30
+          },
+          {
+            "observerIndex": 11,
+            "from": {
+              "x": 270,
+              "y": 598
+            },
+            "goal": {
+              "x": 282,
+              "y": 609
+            },
+            "steps": 14
+          },
+          {
+            "observerIndex": 12,
+            "from": {
+              "x": 282,
+              "y": 609
+            },
+            "goal": {
+              "x": 275,
+              "y": 587
+            },
+            "steps": 23
+          },
+          {
+            "observerIndex": 13,
+            "from": {
+              "x": 275,
+              "y": 587
+            },
+            "goal": {
+              "x": 284,
+              "y": 575
+            },
+            "steps": 13
+          },
+          {
+            "observerIndex": 14,
+            "from": {
+              "x": 284,
+              "y": 575
+            },
+            "goal": {
+              "x": 287,
+              "y": 617
+            },
+            "steps": 45
+          },
+          {
+            "observerIndex": 16,
+            "from": {
+              "x": 287,
+              "y": 617
+            },
+            "goal": {
+              "x": 276,
+              "y": 574
+            },
+            "steps": 46
+          },
+          {
+            "observerIndex": 17,
+            "from": {
+              "x": 276,
+              "y": 574
+            },
+            "goal": {
+              "x": 225,
+              "y": 568
+            },
+            "steps": 51
+          },
+          {
+            "observerIndex": 18,
+            "from": {
+              "x": 225,
+              "y": 568
+            },
+            "goal": {
+              "x": 290,
+              "y": 572
+            },
+            "steps": 66
+          },
+          {
+            "observerIndex": 19,
+            "from": {
+              "x": 290,
+              "y": 572
+            },
+            "goal": {
+              "x": 250,
+              "y": 569
+            },
+            "steps": 41
+          },
+          {
+            "observerIndex": 20,
+            "from": {
+              "x": 250,
+              "y": 569
+            },
+            "goal": {
+              "x": 237,
+              "y": 616
+            },
+            "steps": 47
+          },
+          {
+            "observerIndex": 21,
+            "from": {
+              "x": 237,
+              "y": 616
+            },
+            "goal": {
+              "x": 260,
+              "y": 574
+            },
+            "steps": 42
+          },
+          {
+            "observerIndex": 22,
+            "from": {
+              "x": 260,
+              "y": 574
+            },
+            "goal": {
+              "x": 241,
+              "y": 630
+            },
+            "steps": 56
+          },
+          {
+            "observerIndex": 23,
+            "from": {
+              "x": 241,
+              "y": 630
+            },
+            "goal": {
+              "x": 251,
+              "y": 640
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 24,
+            "from": {
+              "x": 251,
+              "y": 640
+            },
+            "goal": {
+              "x": 258,
+              "y": 650
+            },
+            "steps": 11
+          }
+        ]
+      },
+      {
+        "count": 50,
+        "scoutActorIndex": 5,
+        "observerCount": 45,
+        "passed": true,
+        "failedObserverIndex": null,
+        "secondCircuitUnitWalkSteps": 1326,
+        "emptyPathIdealTwoCellRunOpportunityLowerBound": 663,
+        "allWalkOpportunityUpperIllustration": 1326,
+        "emptyPathIdealRunTravelSecondsLowerBound": 497.25,
+        "legs": [
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 239,
+              "y": 596
+            },
+            "goal": {
+              "x": 241,
+              "y": 597
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 241,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 591
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 591
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 10,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 270,
+              "y": 598
+            },
+            "steps": 30
+          },
+          {
+            "observerIndex": 11,
+            "from": {
+              "x": 270,
+              "y": 598
+            },
+            "goal": {
+              "x": 282,
+              "y": 609
+            },
+            "steps": 14
+          },
+          {
+            "observerIndex": 12,
+            "from": {
+              "x": 282,
+              "y": 609
+            },
+            "goal": {
+              "x": 275,
+              "y": 587
+            },
+            "steps": 23
+          },
+          {
+            "observerIndex": 13,
+            "from": {
+              "x": 275,
+              "y": 587
+            },
+            "goal": {
+              "x": 284,
+              "y": 575
+            },
+            "steps": 13
+          },
+          {
+            "observerIndex": 14,
+            "from": {
+              "x": 284,
+              "y": 575
+            },
+            "goal": {
+              "x": 287,
+              "y": 617
+            },
+            "steps": 45
+          },
+          {
+            "observerIndex": 16,
+            "from": {
+              "x": 287,
+              "y": 617
+            },
+            "goal": {
+              "x": 276,
+              "y": 574
+            },
+            "steps": 46
+          },
+          {
+            "observerIndex": 17,
+            "from": {
+              "x": 276,
+              "y": 574
+            },
+            "goal": {
+              "x": 225,
+              "y": 568
+            },
+            "steps": 51
+          },
+          {
+            "observerIndex": 18,
+            "from": {
+              "x": 225,
+              "y": 568
+            },
+            "goal": {
+              "x": 290,
+              "y": 572
+            },
+            "steps": 66
+          },
+          {
+            "observerIndex": 19,
+            "from": {
+              "x": 290,
+              "y": 572
+            },
+            "goal": {
+              "x": 250,
+              "y": 569
+            },
+            "steps": 41
+          },
+          {
+            "observerIndex": 20,
+            "from": {
+              "x": 250,
+              "y": 569
+            },
+            "goal": {
+              "x": 237,
+              "y": 616
+            },
+            "steps": 47
+          },
+          {
+            "observerIndex": 21,
+            "from": {
+              "x": 237,
+              "y": 616
+            },
+            "goal": {
+              "x": 260,
+              "y": 574
+            },
+            "steps": 42
+          },
+          {
+            "observerIndex": 22,
+            "from": {
+              "x": 260,
+              "y": 574
+            },
+            "goal": {
+              "x": 241,
+              "y": 630
+            },
+            "steps": 56
+          },
+          {
+            "observerIndex": 23,
+            "from": {
+              "x": 241,
+              "y": 630
+            },
+            "goal": {
+              "x": 251,
+              "y": 640
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 24,
+            "from": {
+              "x": 251,
+              "y": 640
+            },
+            "goal": {
+              "x": 258,
+              "y": 650
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 26,
+            "from": {
+              "x": 258,
+              "y": 650
+            },
+            "goal": {
+              "x": 268,
+              "y": 661
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 27,
+            "from": {
+              "x": 268,
+              "y": 661
+            },
+            "goal": {
+              "x": 278,
+              "y": 666
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 28,
+            "from": {
+              "x": 278,
+              "y": 666
+            },
+            "goal": {
+              "x": 252,
+              "y": 663
+            },
+            "steps": 26
+          },
+          {
+            "observerIndex": 29,
+            "from": {
+              "x": 252,
+              "y": 663
+            },
+            "goal": {
+              "x": 285,
+              "y": 656
+            },
+            "steps": 35
+          },
+          {
+            "observerIndex": 30,
+            "from": {
+              "x": 285,
+              "y": 656
+            },
+            "goal": {
+              "x": 235,
+              "y": 640
+            },
+            "steps": 52
+          },
+          {
+            "observerIndex": 31,
+            "from": {
+              "x": 235,
+              "y": 640
+            },
+            "goal": {
+              "x": 226,
+              "y": 638
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 32,
+            "from": {
+              "x": 226,
+              "y": 638
+            },
+            "goal": {
+              "x": 235,
+              "y": 652
+            },
+            "steps": 14
+          },
+          {
+            "observerIndex": 33,
+            "from": {
+              "x": 235,
+              "y": 652
+            },
+            "goal": {
+              "x": 272,
+              "y": 606
+            },
+            "steps": 46
+          },
+          {
+            "observerIndex": 34,
+            "from": {
+              "x": 272,
+              "y": 606
+            },
+            "goal": {
+              "x": 221,
+              "y": 588
+            },
+            "steps": 51
+          },
+          {
+            "observerIndex": 36,
+            "from": {
+              "x": 221,
+              "y": 588
+            },
+            "goal": {
+              "x": 216,
+              "y": 585
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 37,
+            "from": {
+              "x": 216,
+              "y": 585
+            },
+            "goal": {
+              "x": 274,
+              "y": 591
+            },
+            "steps": 58
+          },
+          {
+            "observerIndex": 38,
+            "from": {
+              "x": 274,
+              "y": 591
+            },
+            "goal": {
+              "x": 216,
+              "y": 595
+            },
+            "steps": 58
+          },
+          {
+            "observerIndex": 39,
+            "from": {
+              "x": 216,
+              "y": 595
+            },
+            "goal": {
+              "x": 257,
+              "y": 616
+            },
+            "steps": 41
+          },
+          {
+            "observerIndex": 40,
+            "from": {
+              "x": 257,
+              "y": 616
+            },
+            "goal": {
+              "x": 268,
+              "y": 656
+            },
+            "steps": 40
+          },
+          {
+            "observerIndex": 41,
+            "from": {
+              "x": 268,
+              "y": 656
+            },
+            "goal": {
+              "x": 233,
+              "y": 562
+            },
+            "steps": 94
+          },
+          {
+            "observerIndex": 42,
+            "from": {
+              "x": 233,
+              "y": 562
+            },
+            "goal": {
+              "x": 265,
+              "y": 563
+            },
+            "steps": 32
+          },
+          {
+            "observerIndex": 43,
+            "from": {
+              "x": 265,
+              "y": 563
+            },
+            "goal": {
+              "x": 244,
+              "y": 558
+            },
+            "steps": 21
+          },
+          {
+            "observerIndex": 44,
+            "from": {
+              "x": 244,
+              "y": 558
+            },
+            "goal": {
+              "x": 253,
+              "y": 552
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 46,
+            "from": {
+              "x": 253,
+              "y": 552
+            },
+            "goal": {
+              "x": 262,
+              "y": 544
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 47,
+            "from": {
+              "x": 262,
+              "y": 544
+            },
+            "goal": {
+              "x": 226,
+              "y": 549
+            },
+            "steps": 38
+          },
+          {
+            "observerIndex": 48,
+            "from": {
+              "x": 226,
+              "y": 549
+            },
+            "goal": {
+              "x": 227,
+              "y": 543
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 49,
+            "from": {
+              "x": 227,
+              "y": 543
+            },
+            "goal": {
+              "x": 228,
+              "y": 532
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 228,
+              "y": 532
+            },
+            "goal": {
+              "x": 242,
+              "y": 595
+            },
+            "steps": 63
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 242,
+              "y": 595
+            },
+            "goal": {
+              "x": 235,
+              "y": 589
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 589
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 10,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 270,
+              "y": 598
+            },
+            "steps": 30
+          },
+          {
+            "observerIndex": 11,
+            "from": {
+              "x": 270,
+              "y": 598
+            },
+            "goal": {
+              "x": 282,
+              "y": 609
+            },
+            "steps": 14
+          },
+          {
+            "observerIndex": 12,
+            "from": {
+              "x": 282,
+              "y": 609
+            },
+            "goal": {
+              "x": 275,
+              "y": 587
+            },
+            "steps": 23
+          },
+          {
+            "observerIndex": 13,
+            "from": {
+              "x": 275,
+              "y": 587
+            },
+            "goal": {
+              "x": 284,
+              "y": 575
+            },
+            "steps": 13
+          },
+          {
+            "observerIndex": 14,
+            "from": {
+              "x": 284,
+              "y": 575
+            },
+            "goal": {
+              "x": 287,
+              "y": 617
+            },
+            "steps": 45
+          },
+          {
+            "observerIndex": 16,
+            "from": {
+              "x": 287,
+              "y": 617
+            },
+            "goal": {
+              "x": 276,
+              "y": 574
+            },
+            "steps": 46
+          },
+          {
+            "observerIndex": 17,
+            "from": {
+              "x": 276,
+              "y": 574
+            },
+            "goal": {
+              "x": 225,
+              "y": 568
+            },
+            "steps": 51
+          },
+          {
+            "observerIndex": 18,
+            "from": {
+              "x": 225,
+              "y": 568
+            },
+            "goal": {
+              "x": 290,
+              "y": 572
+            },
+            "steps": 66
+          },
+          {
+            "observerIndex": 19,
+            "from": {
+              "x": 290,
+              "y": 572
+            },
+            "goal": {
+              "x": 250,
+              "y": 569
+            },
+            "steps": 41
+          },
+          {
+            "observerIndex": 20,
+            "from": {
+              "x": 250,
+              "y": 569
+            },
+            "goal": {
+              "x": 237,
+              "y": 616
+            },
+            "steps": 47
+          },
+          {
+            "observerIndex": 21,
+            "from": {
+              "x": 237,
+              "y": 616
+            },
+            "goal": {
+              "x": 260,
+              "y": 574
+            },
+            "steps": 42
+          },
+          {
+            "observerIndex": 22,
+            "from": {
+              "x": 260,
+              "y": 574
+            },
+            "goal": {
+              "x": 241,
+              "y": 630
+            },
+            "steps": 56
+          },
+          {
+            "observerIndex": 23,
+            "from": {
+              "x": 241,
+              "y": 630
+            },
+            "goal": {
+              "x": 251,
+              "y": 640
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 24,
+            "from": {
+              "x": 251,
+              "y": 640
+            },
+            "goal": {
+              "x": 258,
+              "y": 650
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 26,
+            "from": {
+              "x": 258,
+              "y": 650
+            },
+            "goal": {
+              "x": 268,
+              "y": 661
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 27,
+            "from": {
+              "x": 268,
+              "y": 661
+            },
+            "goal": {
+              "x": 278,
+              "y": 666
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 28,
+            "from": {
+              "x": 278,
+              "y": 666
+            },
+            "goal": {
+              "x": 252,
+              "y": 663
+            },
+            "steps": 26
+          },
+          {
+            "observerIndex": 29,
+            "from": {
+              "x": 252,
+              "y": 663
+            },
+            "goal": {
+              "x": 285,
+              "y": 656
+            },
+            "steps": 35
+          },
+          {
+            "observerIndex": 30,
+            "from": {
+              "x": 285,
+              "y": 656
+            },
+            "goal": {
+              "x": 235,
+              "y": 640
+            },
+            "steps": 52
+          },
+          {
+            "observerIndex": 31,
+            "from": {
+              "x": 235,
+              "y": 640
+            },
+            "goal": {
+              "x": 226,
+              "y": 638
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 32,
+            "from": {
+              "x": 226,
+              "y": 638
+            },
+            "goal": {
+              "x": 235,
+              "y": 652
+            },
+            "steps": 14
+          },
+          {
+            "observerIndex": 33,
+            "from": {
+              "x": 235,
+              "y": 652
+            },
+            "goal": {
+              "x": 272,
+              "y": 606
+            },
+            "steps": 46
+          },
+          {
+            "observerIndex": 34,
+            "from": {
+              "x": 272,
+              "y": 606
+            },
+            "goal": {
+              "x": 221,
+              "y": 588
+            },
+            "steps": 51
+          },
+          {
+            "observerIndex": 36,
+            "from": {
+              "x": 221,
+              "y": 588
+            },
+            "goal": {
+              "x": 216,
+              "y": 585
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 37,
+            "from": {
+              "x": 216,
+              "y": 585
+            },
+            "goal": {
+              "x": 274,
+              "y": 591
+            },
+            "steps": 58
+          },
+          {
+            "observerIndex": 38,
+            "from": {
+              "x": 274,
+              "y": 591
+            },
+            "goal": {
+              "x": 216,
+              "y": 595
+            },
+            "steps": 58
+          },
+          {
+            "observerIndex": 39,
+            "from": {
+              "x": 216,
+              "y": 595
+            },
+            "goal": {
+              "x": 257,
+              "y": 616
+            },
+            "steps": 41
+          },
+          {
+            "observerIndex": 40,
+            "from": {
+              "x": 257,
+              "y": 616
+            },
+            "goal": {
+              "x": 268,
+              "y": 656
+            },
+            "steps": 40
+          },
+          {
+            "observerIndex": 41,
+            "from": {
+              "x": 268,
+              "y": 656
+            },
+            "goal": {
+              "x": 233,
+              "y": 562
+            },
+            "steps": 94
+          },
+          {
+            "observerIndex": 42,
+            "from": {
+              "x": 233,
+              "y": 562
+            },
+            "goal": {
+              "x": 265,
+              "y": 563
+            },
+            "steps": 32
+          },
+          {
+            "observerIndex": 43,
+            "from": {
+              "x": 265,
+              "y": 563
+            },
+            "goal": {
+              "x": 244,
+              "y": 558
+            },
+            "steps": 21
+          },
+          {
+            "observerIndex": 44,
+            "from": {
+              "x": 244,
+              "y": 558
+            },
+            "goal": {
+              "x": 253,
+              "y": 552
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 46,
+            "from": {
+              "x": 253,
+              "y": 552
+            },
+            "goal": {
+              "x": 262,
+              "y": 544
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 47,
+            "from": {
+              "x": 262,
+              "y": 544
+            },
+            "goal": {
+              "x": 226,
+              "y": 549
+            },
+            "steps": 38
+          },
+          {
+            "observerIndex": 48,
+            "from": {
+              "x": 226,
+              "y": 549
+            },
+            "goal": {
+              "x": 227,
+              "y": 543
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 49,
+            "from": {
+              "x": 227,
+              "y": 543
+            },
+            "goal": {
+              "x": 228,
+              "y": 532
+            },
+            "steps": 11
+          }
+        ]
+      },
+      {
+        "count": 100,
+        "scoutActorIndex": 5,
+        "observerCount": 90,
+        "passed": false,
+        "failedObserverIndex": 50,
+        "secondCircuitUnitWalkSteps": null,
+        "emptyPathIdealTwoCellRunOpportunityLowerBound": null,
+        "allWalkOpportunityUpperIllustration": null,
+        "emptyPathIdealRunTravelSecondsLowerBound": null,
+        "legs": [
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 239,
+              "y": 596
+            },
+            "goal": {
+              "x": 241,
+              "y": 597
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 241,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 591
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 591
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 10,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 270,
+              "y": 598
+            },
+            "steps": 30
+          },
+          {
+            "observerIndex": 11,
+            "from": {
+              "x": 270,
+              "y": 598
+            },
+            "goal": {
+              "x": 282,
+              "y": 609
+            },
+            "steps": 14
+          },
+          {
+            "observerIndex": 12,
+            "from": {
+              "x": 282,
+              "y": 609
+            },
+            "goal": {
+              "x": 275,
+              "y": 587
+            },
+            "steps": 23
+          },
+          {
+            "observerIndex": 13,
+            "from": {
+              "x": 275,
+              "y": 587
+            },
+            "goal": {
+              "x": 284,
+              "y": 575
+            },
+            "steps": 13
+          },
+          {
+            "observerIndex": 14,
+            "from": {
+              "x": 284,
+              "y": 575
+            },
+            "goal": {
+              "x": 287,
+              "y": 617
+            },
+            "steps": 45
+          },
+          {
+            "observerIndex": 16,
+            "from": {
+              "x": 287,
+              "y": 617
+            },
+            "goal": {
+              "x": 276,
+              "y": 574
+            },
+            "steps": 46
+          },
+          {
+            "observerIndex": 17,
+            "from": {
+              "x": 276,
+              "y": 574
+            },
+            "goal": {
+              "x": 225,
+              "y": 568
+            },
+            "steps": 51
+          },
+          {
+            "observerIndex": 18,
+            "from": {
+              "x": 225,
+              "y": 568
+            },
+            "goal": {
+              "x": 290,
+              "y": 572
+            },
+            "steps": 66
+          },
+          {
+            "observerIndex": 19,
+            "from": {
+              "x": 290,
+              "y": 572
+            },
+            "goal": {
+              "x": 250,
+              "y": 569
+            },
+            "steps": 41
+          },
+          {
+            "observerIndex": 20,
+            "from": {
+              "x": 250,
+              "y": 569
+            },
+            "goal": {
+              "x": 237,
+              "y": 616
+            },
+            "steps": 47
+          },
+          {
+            "observerIndex": 21,
+            "from": {
+              "x": 237,
+              "y": 616
+            },
+            "goal": {
+              "x": 260,
+              "y": 574
+            },
+            "steps": 42
+          },
+          {
+            "observerIndex": 22,
+            "from": {
+              "x": 260,
+              "y": 574
+            },
+            "goal": {
+              "x": 241,
+              "y": 630
+            },
+            "steps": 56
+          },
+          {
+            "observerIndex": 23,
+            "from": {
+              "x": 241,
+              "y": 630
+            },
+            "goal": {
+              "x": 251,
+              "y": 640
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 24,
+            "from": {
+              "x": 251,
+              "y": 640
+            },
+            "goal": {
+              "x": 258,
+              "y": 650
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 26,
+            "from": {
+              "x": 258,
+              "y": 650
+            },
+            "goal": {
+              "x": 268,
+              "y": 661
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 27,
+            "from": {
+              "x": 268,
+              "y": 661
+            },
+            "goal": {
+              "x": 278,
+              "y": 666
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 28,
+            "from": {
+              "x": 278,
+              "y": 666
+            },
+            "goal": {
+              "x": 252,
+              "y": 663
+            },
+            "steps": 26
+          },
+          {
+            "observerIndex": 29,
+            "from": {
+              "x": 252,
+              "y": 663
+            },
+            "goal": {
+              "x": 285,
+              "y": 656
+            },
+            "steps": 35
+          },
+          {
+            "observerIndex": 30,
+            "from": {
+              "x": 285,
+              "y": 656
+            },
+            "goal": {
+              "x": 235,
+              "y": 640
+            },
+            "steps": 52
+          },
+          {
+            "observerIndex": 31,
+            "from": {
+              "x": 235,
+              "y": 640
+            },
+            "goal": {
+              "x": 226,
+              "y": 638
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 32,
+            "from": {
+              "x": 226,
+              "y": 638
+            },
+            "goal": {
+              "x": 235,
+              "y": 652
+            },
+            "steps": 14
+          },
+          {
+            "observerIndex": 33,
+            "from": {
+              "x": 235,
+              "y": 652
+            },
+            "goal": {
+              "x": 272,
+              "y": 606
+            },
+            "steps": 46
+          },
+          {
+            "observerIndex": 34,
+            "from": {
+              "x": 272,
+              "y": 606
+            },
+            "goal": {
+              "x": 221,
+              "y": 588
+            },
+            "steps": 51
+          },
+          {
+            "observerIndex": 36,
+            "from": {
+              "x": 221,
+              "y": 588
+            },
+            "goal": {
+              "x": 216,
+              "y": 585
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 37,
+            "from": {
+              "x": 216,
+              "y": 585
+            },
+            "goal": {
+              "x": 274,
+              "y": 591
+            },
+            "steps": 58
+          },
+          {
+            "observerIndex": 38,
+            "from": {
+              "x": 274,
+              "y": 591
+            },
+            "goal": {
+              "x": 216,
+              "y": 595
+            },
+            "steps": 58
+          },
+          {
+            "observerIndex": 39,
+            "from": {
+              "x": 216,
+              "y": 595
+            },
+            "goal": {
+              "x": 257,
+              "y": 616
+            },
+            "steps": 41
+          },
+          {
+            "observerIndex": 40,
+            "from": {
+              "x": 257,
+              "y": 616
+            },
+            "goal": {
+              "x": 268,
+              "y": 656
+            },
+            "steps": 40
+          },
+          {
+            "observerIndex": 41,
+            "from": {
+              "x": 268,
+              "y": 656
+            },
+            "goal": {
+              "x": 233,
+              "y": 562
+            },
+            "steps": 94
+          },
+          {
+            "observerIndex": 42,
+            "from": {
+              "x": 233,
+              "y": 562
+            },
+            "goal": {
+              "x": 265,
+              "y": 563
+            },
+            "steps": 32
+          },
+          {
+            "observerIndex": 43,
+            "from": {
+              "x": 265,
+              "y": 563
+            },
+            "goal": {
+              "x": 244,
+              "y": 558
+            },
+            "steps": 21
+          },
+          {
+            "observerIndex": 44,
+            "from": {
+              "x": 244,
+              "y": 558
+            },
+            "goal": {
+              "x": 253,
+              "y": 552
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 46,
+            "from": {
+              "x": 253,
+              "y": 552
+            },
+            "goal": {
+              "x": 262,
+              "y": 544
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 47,
+            "from": {
+              "x": 262,
+              "y": 544
+            },
+            "goal": {
+              "x": 226,
+              "y": 549
+            },
+            "steps": 38
+          },
+          {
+            "observerIndex": 48,
+            "from": {
+              "x": 226,
+              "y": 549
+            },
+            "goal": {
+              "x": 227,
+              "y": 543
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 49,
+            "from": {
+              "x": 227,
+              "y": 543
+            },
+            "goal": {
+              "x": 228,
+              "y": 532
+            },
+            "steps": 11
+          }
+        ]
+      }
+    ],
+    "nearestScoutResults": [
+      {
+        "count": 10,
+        "scoutActorIndex": 5,
+        "observerCount": 9,
+        "passed": true,
+        "failedObserverIndex": null,
+        "secondCircuitUnitWalkSteps": 97,
+        "emptyPathIdealTwoCellRunOpportunityLowerBound": 49,
+        "allWalkOpportunityUpperIllustration": 97,
+        "emptyPathIdealRunTravelSecondsLowerBound": 36.75,
+        "legs": [
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 239,
+              "y": 596
+            },
+            "goal": {
+              "x": 241,
+              "y": 597
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 241,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 591
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 591
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 243,
+              "y": 597
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 243,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 589
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 589
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          }
+        ]
+      },
+      {
+        "count": 25,
+        "scoutActorIndex": 5,
+        "observerCount": 23,
+        "passed": true,
+        "failedObserverIndex": null,
+        "secondCircuitUnitWalkSteps": 172,
+        "emptyPathIdealTwoCellRunOpportunityLowerBound": 86,
+        "allWalkOpportunityUpperIllustration": 172,
+        "emptyPathIdealRunTravelSecondsLowerBound": 64.5,
+        "legs": [
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 239,
+              "y": 596
+            },
+            "goal": {
+              "x": 241,
+              "y": 597
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 241,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 591
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 591
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 10,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 240,
+              "y": 600
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 11,
+            "from": {
+              "x": 240,
+              "y": 600
+            },
+            "goal": {
+              "x": 241,
+              "y": 600
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 12,
+            "from": {
+              "x": 241,
+              "y": 600
+            },
+            "goal": {
+              "x": 245,
+              "y": 596
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 13,
+            "from": {
+              "x": 245,
+              "y": 596
+            },
+            "goal": {
+              "x": 247,
+              "y": 596
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 14,
+            "from": {
+              "x": 247,
+              "y": 596
+            },
+            "goal": {
+              "x": 245,
+              "y": 590
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 16,
+            "from": {
+              "x": 245,
+              "y": 590
+            },
+            "goal": {
+              "x": 244,
+              "y": 585
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 17,
+            "from": {
+              "x": 244,
+              "y": 585
+            },
+            "goal": {
+              "x": 245,
+              "y": 582
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 18,
+            "from": {
+              "x": 245,
+              "y": 582
+            },
+            "goal": {
+              "x": 246,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 19,
+            "from": {
+              "x": 246,
+              "y": 579
+            },
+            "goal": {
+              "x": 248,
+              "y": 581
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 20,
+            "from": {
+              "x": 248,
+              "y": 581
+            },
+            "goal": {
+              "x": 251,
+              "y": 580
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 21,
+            "from": {
+              "x": 251,
+              "y": 580
+            },
+            "goal": {
+              "x": 252,
+              "y": 581
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 22,
+            "from": {
+              "x": 252,
+              "y": 581
+            },
+            "goal": {
+              "x": 259,
+              "y": 574
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 23,
+            "from": {
+              "x": 259,
+              "y": 574
+            },
+            "goal": {
+              "x": 250,
+              "y": 569
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 24,
+            "from": {
+              "x": 250,
+              "y": 569
+            },
+            "goal": {
+              "x": 244,
+              "y": 568
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 244,
+              "y": 568
+            },
+            "goal": {
+              "x": 242,
+              "y": 595
+            },
+            "steps": 27
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 242,
+              "y": 595
+            },
+            "goal": {
+              "x": 235,
+              "y": 589
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 589
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 10,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 240,
+              "y": 600
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 11,
+            "from": {
+              "x": 240,
+              "y": 600
+            },
+            "goal": {
+              "x": 241,
+              "y": 600
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 12,
+            "from": {
+              "x": 241,
+              "y": 600
+            },
+            "goal": {
+              "x": 245,
+              "y": 596
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 13,
+            "from": {
+              "x": 245,
+              "y": 596
+            },
+            "goal": {
+              "x": 247,
+              "y": 596
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 14,
+            "from": {
+              "x": 247,
+              "y": 596
+            },
+            "goal": {
+              "x": 245,
+              "y": 590
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 16,
+            "from": {
+              "x": 245,
+              "y": 590
+            },
+            "goal": {
+              "x": 244,
+              "y": 585
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 17,
+            "from": {
+              "x": 244,
+              "y": 585
+            },
+            "goal": {
+              "x": 245,
+              "y": 582
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 18,
+            "from": {
+              "x": 245,
+              "y": 582
+            },
+            "goal": {
+              "x": 246,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 19,
+            "from": {
+              "x": 246,
+              "y": 579
+            },
+            "goal": {
+              "x": 248,
+              "y": 581
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 20,
+            "from": {
+              "x": 248,
+              "y": 581
+            },
+            "goal": {
+              "x": 251,
+              "y": 580
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 21,
+            "from": {
+              "x": 251,
+              "y": 580
+            },
+            "goal": {
+              "x": 252,
+              "y": 581
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 22,
+            "from": {
+              "x": 252,
+              "y": 581
+            },
+            "goal": {
+              "x": 259,
+              "y": 574
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 23,
+            "from": {
+              "x": 259,
+              "y": 574
+            },
+            "goal": {
+              "x": 250,
+              "y": 569
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 24,
+            "from": {
+              "x": 250,
+              "y": 569
+            },
+            "goal": {
+              "x": 244,
+              "y": 568
+            },
+            "steps": 6
+          }
+        ]
+      },
+      {
+        "count": 50,
+        "scoutActorIndex": 5,
+        "observerCount": 45,
+        "passed": true,
+        "failedObserverIndex": null,
+        "secondCircuitUnitWalkSteps": 372,
+        "emptyPathIdealTwoCellRunOpportunityLowerBound": 186,
+        "allWalkOpportunityUpperIllustration": 372,
+        "emptyPathIdealRunTravelSecondsLowerBound": 139.5,
+        "legs": [
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 239,
+              "y": 596
+            },
+            "goal": {
+              "x": 241,
+              "y": 597
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 241,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 591
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 591
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 10,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 240,
+              "y": 600
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 11,
+            "from": {
+              "x": 240,
+              "y": 600
+            },
+            "goal": {
+              "x": 241,
+              "y": 600
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 12,
+            "from": {
+              "x": 241,
+              "y": 600
+            },
+            "goal": {
+              "x": 245,
+              "y": 596
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 13,
+            "from": {
+              "x": 245,
+              "y": 596
+            },
+            "goal": {
+              "x": 247,
+              "y": 596
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 14,
+            "from": {
+              "x": 247,
+              "y": 596
+            },
+            "goal": {
+              "x": 245,
+              "y": 590
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 16,
+            "from": {
+              "x": 245,
+              "y": 590
+            },
+            "goal": {
+              "x": 244,
+              "y": 585
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 17,
+            "from": {
+              "x": 244,
+              "y": 585
+            },
+            "goal": {
+              "x": 245,
+              "y": 582
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 18,
+            "from": {
+              "x": 245,
+              "y": 582
+            },
+            "goal": {
+              "x": 246,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 19,
+            "from": {
+              "x": 246,
+              "y": 579
+            },
+            "goal": {
+              "x": 248,
+              "y": 581
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 20,
+            "from": {
+              "x": 248,
+              "y": 581
+            },
+            "goal": {
+              "x": 251,
+              "y": 580
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 21,
+            "from": {
+              "x": 251,
+              "y": 580
+            },
+            "goal": {
+              "x": 252,
+              "y": 581
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 22,
+            "from": {
+              "x": 252,
+              "y": 581
+            },
+            "goal": {
+              "x": 259,
+              "y": 574
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 23,
+            "from": {
+              "x": 259,
+              "y": 574
+            },
+            "goal": {
+              "x": 250,
+              "y": 569
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 24,
+            "from": {
+              "x": 250,
+              "y": 569
+            },
+            "goal": {
+              "x": 244,
+              "y": 568
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 26,
+            "from": {
+              "x": 244,
+              "y": 568
+            },
+            "goal": {
+              "x": 233,
+              "y": 560
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 27,
+            "from": {
+              "x": 233,
+              "y": 560
+            },
+            "goal": {
+              "x": 225,
+              "y": 568
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 28,
+            "from": {
+              "x": 225,
+              "y": 568
+            },
+            "goal": {
+              "x": 225,
+              "y": 575
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 29,
+            "from": {
+              "x": 225,
+              "y": 575
+            },
+            "goal": {
+              "x": 215,
+              "y": 585
+            },
+            "steps": 13
+          },
+          {
+            "observerIndex": 30,
+            "from": {
+              "x": 215,
+              "y": 585
+            },
+            "goal": {
+              "x": 213,
+              "y": 585
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 31,
+            "from": {
+              "x": 213,
+              "y": 585
+            },
+            "goal": {
+              "x": 210,
+              "y": 585
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 32,
+            "from": {
+              "x": 210,
+              "y": 585
+            },
+            "goal": {
+              "x": 212,
+              "y": 588
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 33,
+            "from": {
+              "x": 212,
+              "y": 588
+            },
+            "goal": {
+              "x": 215,
+              "y": 595
+            },
+            "steps": 8
+          },
+          {
+            "observerIndex": 34,
+            "from": {
+              "x": 215,
+              "y": 595
+            },
+            "goal": {
+              "x": 217,
+              "y": 597
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 36,
+            "from": {
+              "x": 217,
+              "y": 597
+            },
+            "goal": {
+              "x": 226,
+              "y": 606
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 37,
+            "from": {
+              "x": 226,
+              "y": 606
+            },
+            "goal": {
+              "x": 235,
+              "y": 605
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 38,
+            "from": {
+              "x": 235,
+              "y": 605
+            },
+            "goal": {
+              "x": 238,
+              "y": 606
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 39,
+            "from": {
+              "x": 238,
+              "y": 606
+            },
+            "goal": {
+              "x": 237,
+              "y": 616
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 40,
+            "from": {
+              "x": 237,
+              "y": 616
+            },
+            "goal": {
+              "x": 229,
+              "y": 619
+            },
+            "steps": 8
+          },
+          {
+            "observerIndex": 41,
+            "from": {
+              "x": 229,
+              "y": 619
+            },
+            "goal": {
+              "x": 218,
+              "y": 616
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 42,
+            "from": {
+              "x": 218,
+              "y": 616
+            },
+            "goal": {
+              "x": 240,
+              "y": 632
+            },
+            "steps": 28
+          },
+          {
+            "observerIndex": 43,
+            "from": {
+              "x": 240,
+              "y": 632
+            },
+            "goal": {
+              "x": 250,
+              "y": 642
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 44,
+            "from": {
+              "x": 250,
+              "y": 642
+            },
+            "goal": {
+              "x": 257,
+              "y": 646
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 46,
+            "from": {
+              "x": 257,
+              "y": 646
+            },
+            "goal": {
+              "x": 255,
+              "y": 650
+            },
+            "steps": 4
+          },
+          {
+            "observerIndex": 47,
+            "from": {
+              "x": 255,
+              "y": 650
+            },
+            "goal": {
+              "x": 257,
+              "y": 652
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 48,
+            "from": {
+              "x": 257,
+              "y": 652
+            },
+            "goal": {
+              "x": 260,
+              "y": 652
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 49,
+            "from": {
+              "x": 260,
+              "y": 652
+            },
+            "goal": {
+              "x": 263,
+              "y": 652
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 263,
+              "y": 652
+            },
+            "goal": {
+              "x": 243,
+              "y": 597
+            },
+            "steps": 55
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 243,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 589
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 589
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 10,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 240,
+              "y": 600
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 11,
+            "from": {
+              "x": 240,
+              "y": 600
+            },
+            "goal": {
+              "x": 241,
+              "y": 600
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 12,
+            "from": {
+              "x": 241,
+              "y": 600
+            },
+            "goal": {
+              "x": 245,
+              "y": 596
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 13,
+            "from": {
+              "x": 245,
+              "y": 596
+            },
+            "goal": {
+              "x": 247,
+              "y": 596
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 14,
+            "from": {
+              "x": 247,
+              "y": 596
+            },
+            "goal": {
+              "x": 245,
+              "y": 590
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 16,
+            "from": {
+              "x": 245,
+              "y": 590
+            },
+            "goal": {
+              "x": 244,
+              "y": 585
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 17,
+            "from": {
+              "x": 244,
+              "y": 585
+            },
+            "goal": {
+              "x": 245,
+              "y": 582
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 18,
+            "from": {
+              "x": 245,
+              "y": 582
+            },
+            "goal": {
+              "x": 246,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 19,
+            "from": {
+              "x": 246,
+              "y": 579
+            },
+            "goal": {
+              "x": 248,
+              "y": 581
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 20,
+            "from": {
+              "x": 248,
+              "y": 581
+            },
+            "goal": {
+              "x": 251,
+              "y": 580
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 21,
+            "from": {
+              "x": 251,
+              "y": 580
+            },
+            "goal": {
+              "x": 252,
+              "y": 581
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 22,
+            "from": {
+              "x": 252,
+              "y": 581
+            },
+            "goal": {
+              "x": 259,
+              "y": 574
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 23,
+            "from": {
+              "x": 259,
+              "y": 574
+            },
+            "goal": {
+              "x": 250,
+              "y": 569
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 24,
+            "from": {
+              "x": 250,
+              "y": 569
+            },
+            "goal": {
+              "x": 244,
+              "y": 568
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 26,
+            "from": {
+              "x": 244,
+              "y": 568
+            },
+            "goal": {
+              "x": 233,
+              "y": 560
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 27,
+            "from": {
+              "x": 233,
+              "y": 560
+            },
+            "goal": {
+              "x": 225,
+              "y": 568
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 28,
+            "from": {
+              "x": 225,
+              "y": 568
+            },
+            "goal": {
+              "x": 225,
+              "y": 575
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 29,
+            "from": {
+              "x": 225,
+              "y": 575
+            },
+            "goal": {
+              "x": 215,
+              "y": 585
+            },
+            "steps": 13
+          },
+          {
+            "observerIndex": 30,
+            "from": {
+              "x": 215,
+              "y": 585
+            },
+            "goal": {
+              "x": 213,
+              "y": 585
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 31,
+            "from": {
+              "x": 213,
+              "y": 585
+            },
+            "goal": {
+              "x": 210,
+              "y": 585
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 32,
+            "from": {
+              "x": 210,
+              "y": 585
+            },
+            "goal": {
+              "x": 212,
+              "y": 588
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 33,
+            "from": {
+              "x": 212,
+              "y": 588
+            },
+            "goal": {
+              "x": 215,
+              "y": 595
+            },
+            "steps": 8
+          },
+          {
+            "observerIndex": 34,
+            "from": {
+              "x": 215,
+              "y": 595
+            },
+            "goal": {
+              "x": 217,
+              "y": 597
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 36,
+            "from": {
+              "x": 217,
+              "y": 597
+            },
+            "goal": {
+              "x": 226,
+              "y": 606
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 37,
+            "from": {
+              "x": 226,
+              "y": 606
+            },
+            "goal": {
+              "x": 235,
+              "y": 605
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 38,
+            "from": {
+              "x": 235,
+              "y": 605
+            },
+            "goal": {
+              "x": 238,
+              "y": 606
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 39,
+            "from": {
+              "x": 238,
+              "y": 606
+            },
+            "goal": {
+              "x": 237,
+              "y": 616
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 40,
+            "from": {
+              "x": 237,
+              "y": 616
+            },
+            "goal": {
+              "x": 229,
+              "y": 619
+            },
+            "steps": 8
+          },
+          {
+            "observerIndex": 41,
+            "from": {
+              "x": 229,
+              "y": 619
+            },
+            "goal": {
+              "x": 218,
+              "y": 616
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 42,
+            "from": {
+              "x": 218,
+              "y": 616
+            },
+            "goal": {
+              "x": 240,
+              "y": 632
+            },
+            "steps": 28
+          },
+          {
+            "observerIndex": 43,
+            "from": {
+              "x": 240,
+              "y": 632
+            },
+            "goal": {
+              "x": 250,
+              "y": 642
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 44,
+            "from": {
+              "x": 250,
+              "y": 642
+            },
+            "goal": {
+              "x": 257,
+              "y": 646
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 46,
+            "from": {
+              "x": 257,
+              "y": 646
+            },
+            "goal": {
+              "x": 255,
+              "y": 650
+            },
+            "steps": 4
+          },
+          {
+            "observerIndex": 47,
+            "from": {
+              "x": 255,
+              "y": 650
+            },
+            "goal": {
+              "x": 257,
+              "y": 652
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 48,
+            "from": {
+              "x": 257,
+              "y": 652
+            },
+            "goal": {
+              "x": 260,
+              "y": 652
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 49,
+            "from": {
+              "x": 260,
+              "y": 652
+            },
+            "goal": {
+              "x": 263,
+              "y": 652
+            },
+            "steps": 3
+          }
+        ]
+      },
+      {
+        "count": 100,
+        "scoutActorIndex": 5,
+        "observerCount": 90,
+        "passed": false,
+        "failedObserverIndex": 92,
+        "secondCircuitUnitWalkSteps": null,
+        "emptyPathIdealTwoCellRunOpportunityLowerBound": null,
+        "allWalkOpportunityUpperIllustration": null,
+        "emptyPathIdealRunTravelSecondsLowerBound": null,
+        "legs": [
+          {
+            "observerIndex": 0,
+            "from": {
+              "x": 239,
+              "y": 596
+            },
+            "goal": {
+              "x": 241,
+              "y": 597
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 1,
+            "from": {
+              "x": 241,
+              "y": 597
+            },
+            "goal": {
+              "x": 235,
+              "y": 591
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 2,
+            "from": {
+              "x": 235,
+              "y": 591
+            },
+            "goal": {
+              "x": 233,
+              "y": 579
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 3,
+            "from": {
+              "x": 233,
+              "y": 579
+            },
+            "goal": {
+              "x": 236,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 4,
+            "from": {
+              "x": 236,
+              "y": 579
+            },
+            "goal": {
+              "x": 251,
+              "y": 586
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 6,
+            "from": {
+              "x": 251,
+              "y": 586
+            },
+            "goal": {
+              "x": 256,
+              "y": 591
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 7,
+            "from": {
+              "x": 256,
+              "y": 591
+            },
+            "goal": {
+              "x": 255,
+              "y": 608
+            },
+            "steps": 17
+          },
+          {
+            "observerIndex": 8,
+            "from": {
+              "x": 255,
+              "y": 608
+            },
+            "goal": {
+              "x": 233,
+              "y": 612
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 9,
+            "from": {
+              "x": 233,
+              "y": 612
+            },
+            "goal": {
+              "x": 240,
+              "y": 603
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 10,
+            "from": {
+              "x": 240,
+              "y": 603
+            },
+            "goal": {
+              "x": 240,
+              "y": 600
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 11,
+            "from": {
+              "x": 240,
+              "y": 600
+            },
+            "goal": {
+              "x": 241,
+              "y": 600
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 12,
+            "from": {
+              "x": 241,
+              "y": 600
+            },
+            "goal": {
+              "x": 245,
+              "y": 596
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 13,
+            "from": {
+              "x": 245,
+              "y": 596
+            },
+            "goal": {
+              "x": 247,
+              "y": 596
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 14,
+            "from": {
+              "x": 247,
+              "y": 596
+            },
+            "goal": {
+              "x": 245,
+              "y": 590
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 16,
+            "from": {
+              "x": 245,
+              "y": 590
+            },
+            "goal": {
+              "x": 244,
+              "y": 585
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 17,
+            "from": {
+              "x": 244,
+              "y": 585
+            },
+            "goal": {
+              "x": 245,
+              "y": 582
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 18,
+            "from": {
+              "x": 245,
+              "y": 582
+            },
+            "goal": {
+              "x": 246,
+              "y": 579
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 19,
+            "from": {
+              "x": 246,
+              "y": 579
+            },
+            "goal": {
+              "x": 248,
+              "y": 581
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 20,
+            "from": {
+              "x": 248,
+              "y": 581
+            },
+            "goal": {
+              "x": 251,
+              "y": 580
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 21,
+            "from": {
+              "x": 251,
+              "y": 580
+            },
+            "goal": {
+              "x": 252,
+              "y": 581
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 22,
+            "from": {
+              "x": 252,
+              "y": 581
+            },
+            "goal": {
+              "x": 259,
+              "y": 574
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 23,
+            "from": {
+              "x": 259,
+              "y": 574
+            },
+            "goal": {
+              "x": 250,
+              "y": 569
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 24,
+            "from": {
+              "x": 250,
+              "y": 569
+            },
+            "goal": {
+              "x": 244,
+              "y": 568
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 26,
+            "from": {
+              "x": 244,
+              "y": 568
+            },
+            "goal": {
+              "x": 233,
+              "y": 560
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 27,
+            "from": {
+              "x": 233,
+              "y": 560
+            },
+            "goal": {
+              "x": 225,
+              "y": 568
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 28,
+            "from": {
+              "x": 225,
+              "y": 568
+            },
+            "goal": {
+              "x": 225,
+              "y": 575
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 29,
+            "from": {
+              "x": 225,
+              "y": 575
+            },
+            "goal": {
+              "x": 215,
+              "y": 585
+            },
+            "steps": 13
+          },
+          {
+            "observerIndex": 30,
+            "from": {
+              "x": 215,
+              "y": 585
+            },
+            "goal": {
+              "x": 213,
+              "y": 585
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 31,
+            "from": {
+              "x": 213,
+              "y": 585
+            },
+            "goal": {
+              "x": 210,
+              "y": 585
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 32,
+            "from": {
+              "x": 210,
+              "y": 585
+            },
+            "goal": {
+              "x": 212,
+              "y": 588
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 33,
+            "from": {
+              "x": 212,
+              "y": 588
+            },
+            "goal": {
+              "x": 215,
+              "y": 595
+            },
+            "steps": 8
+          },
+          {
+            "observerIndex": 34,
+            "from": {
+              "x": 215,
+              "y": 595
+            },
+            "goal": {
+              "x": 217,
+              "y": 597
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 36,
+            "from": {
+              "x": 217,
+              "y": 597
+            },
+            "goal": {
+              "x": 226,
+              "y": 606
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 37,
+            "from": {
+              "x": 226,
+              "y": 606
+            },
+            "goal": {
+              "x": 235,
+              "y": 605
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 38,
+            "from": {
+              "x": 235,
+              "y": 605
+            },
+            "goal": {
+              "x": 238,
+              "y": 606
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 39,
+            "from": {
+              "x": 238,
+              "y": 606
+            },
+            "goal": {
+              "x": 237,
+              "y": 616
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 40,
+            "from": {
+              "x": 237,
+              "y": 616
+            },
+            "goal": {
+              "x": 229,
+              "y": 619
+            },
+            "steps": 8
+          },
+          {
+            "observerIndex": 41,
+            "from": {
+              "x": 229,
+              "y": 619
+            },
+            "goal": {
+              "x": 218,
+              "y": 616
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 42,
+            "from": {
+              "x": 218,
+              "y": 616
+            },
+            "goal": {
+              "x": 240,
+              "y": 632
+            },
+            "steps": 28
+          },
+          {
+            "observerIndex": 43,
+            "from": {
+              "x": 240,
+              "y": 632
+            },
+            "goal": {
+              "x": 250,
+              "y": 642
+            },
+            "steps": 10
+          },
+          {
+            "observerIndex": 44,
+            "from": {
+              "x": 250,
+              "y": 642
+            },
+            "goal": {
+              "x": 257,
+              "y": 646
+            },
+            "steps": 7
+          },
+          {
+            "observerIndex": 46,
+            "from": {
+              "x": 257,
+              "y": 646
+            },
+            "goal": {
+              "x": 255,
+              "y": 650
+            },
+            "steps": 4
+          },
+          {
+            "observerIndex": 47,
+            "from": {
+              "x": 255,
+              "y": 650
+            },
+            "goal": {
+              "x": 257,
+              "y": 652
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 48,
+            "from": {
+              "x": 257,
+              "y": 652
+            },
+            "goal": {
+              "x": 260,
+              "y": 652
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 49,
+            "from": {
+              "x": 260,
+              "y": 652
+            },
+            "goal": {
+              "x": 263,
+              "y": 652
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 50,
+            "from": {
+              "x": 263,
+              "y": 652
+            },
+            "goal": {
+              "x": 267,
+              "y": 656
+            },
+            "steps": 4
+          },
+          {
+            "observerIndex": 51,
+            "from": {
+              "x": 267,
+              "y": 656
+            },
+            "goal": {
+              "x": 268,
+              "y": 661
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 52,
+            "from": {
+              "x": 268,
+              "y": 661
+            },
+            "goal": {
+              "x": 276,
+              "y": 662
+            },
+            "steps": 8
+          },
+          {
+            "observerIndex": 53,
+            "from": {
+              "x": 276,
+              "y": 662
+            },
+            "goal": {
+              "x": 278,
+              "y": 664
+            },
+            "steps": 2
+          },
+          {
+            "observerIndex": 54,
+            "from": {
+              "x": 278,
+              "y": 664
+            },
+            "goal": {
+              "x": 279,
+              "y": 670
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 56,
+            "from": {
+              "x": 279,
+              "y": 670
+            },
+            "goal": {
+              "x": 264,
+              "y": 675
+            },
+            "steps": 15
+          },
+          {
+            "observerIndex": 57,
+            "from": {
+              "x": 264,
+              "y": 675
+            },
+            "goal": {
+              "x": 252,
+              "y": 663
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 58,
+            "from": {
+              "x": 252,
+              "y": 663
+            },
+            "goal": {
+              "x": 235,
+              "y": 642
+            },
+            "steps": 34
+          },
+          {
+            "observerIndex": 59,
+            "from": {
+              "x": 235,
+              "y": 642
+            },
+            "goal": {
+              "x": 226,
+              "y": 638
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 60,
+            "from": {
+              "x": 226,
+              "y": 638
+            },
+            "goal": {
+              "x": 235,
+              "y": 652
+            },
+            "steps": 14
+          },
+          {
+            "observerIndex": 61,
+            "from": {
+              "x": 235,
+              "y": 652
+            },
+            "goal": {
+              "x": 223,
+              "y": 665
+            },
+            "steps": 22
+          },
+          {
+            "observerIndex": 62,
+            "from": {
+              "x": 223,
+              "y": 665
+            },
+            "goal": {
+              "x": 227,
+              "y": 669
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 63,
+            "from": {
+              "x": 227,
+              "y": 669
+            },
+            "goal": {
+              "x": 219,
+              "y": 667
+            },
+            "steps": 8
+          },
+          {
+            "observerIndex": 64,
+            "from": {
+              "x": 219,
+              "y": 667
+            },
+            "goal": {
+              "x": 259,
+              "y": 616
+            },
+            "steps": 61
+          },
+          {
+            "observerIndex": 66,
+            "from": {
+              "x": 259,
+              "y": 616
+            },
+            "goal": {
+              "x": 272,
+              "y": 598
+            },
+            "steps": 18
+          },
+          {
+            "observerIndex": 67,
+            "from": {
+              "x": 272,
+              "y": 598
+            },
+            "goal": {
+              "x": 273,
+              "y": 595
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 68,
+            "from": {
+              "x": 273,
+              "y": 595
+            },
+            "goal": {
+              "x": 274,
+              "y": 595
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 69,
+            "from": {
+              "x": 274,
+              "y": 595
+            },
+            "goal": {
+              "x": 274,
+              "y": 596
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 70,
+            "from": {
+              "x": 274,
+              "y": 596
+            },
+            "goal": {
+              "x": 276,
+              "y": 598
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 71,
+            "from": {
+              "x": 276,
+              "y": 598
+            },
+            "goal": {
+              "x": 273,
+              "y": 599
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 72,
+            "from": {
+              "x": 273,
+              "y": 599
+            },
+            "goal": {
+              "x": 273,
+              "y": 591
+            },
+            "steps": 8
+          },
+          {
+            "observerIndex": 73,
+            "from": {
+              "x": 273,
+              "y": 591
+            },
+            "goal": {
+              "x": 274,
+              "y": 591
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 74,
+            "from": {
+              "x": 274,
+              "y": 591
+            },
+            "goal": {
+              "x": 275,
+              "y": 587
+            },
+            "steps": 4
+          },
+          {
+            "observerIndex": 76,
+            "from": {
+              "x": 275,
+              "y": 587
+            },
+            "goal": {
+              "x": 276,
+              "y": 586
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 77,
+            "from": {
+              "x": 276,
+              "y": 586
+            },
+            "goal": {
+              "x": 279,
+              "y": 587
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 78,
+            "from": {
+              "x": 279,
+              "y": 587
+            },
+            "goal": {
+              "x": 282,
+              "y": 584
+            },
+            "steps": 5
+          },
+          {
+            "observerIndex": 79,
+            "from": {
+              "x": 282,
+              "y": 584
+            },
+            "goal": {
+              "x": 285,
+              "y": 578
+            },
+            "steps": 6
+          },
+          {
+            "observerIndex": 80,
+            "from": {
+              "x": 285,
+              "y": 578
+            },
+            "goal": {
+              "x": 284,
+              "y": 575
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 81,
+            "from": {
+              "x": 284,
+              "y": 575
+            },
+            "goal": {
+              "x": 282,
+              "y": 572
+            },
+            "steps": 4
+          },
+          {
+            "observerIndex": 82,
+            "from": {
+              "x": 282,
+              "y": 572
+            },
+            "goal": {
+              "x": 283,
+              "y": 572
+            },
+            "steps": 1
+          },
+          {
+            "observerIndex": 83,
+            "from": {
+              "x": 283,
+              "y": 572
+            },
+            "goal": {
+              "x": 287,
+              "y": 575
+            },
+            "steps": 4
+          },
+          {
+            "observerIndex": 84,
+            "from": {
+              "x": 287,
+              "y": 575
+            },
+            "goal": {
+              "x": 290,
+              "y": 575
+            },
+            "steps": 3
+          },
+          {
+            "observerIndex": 86,
+            "from": {
+              "x": 290,
+              "y": 575
+            },
+            "goal": {
+              "x": 276,
+              "y": 572
+            },
+            "steps": 14
+          },
+          {
+            "observerIndex": 87,
+            "from": {
+              "x": 276,
+              "y": 572
+            },
+            "goal": {
+              "x": 267,
+              "y": 563
+            },
+            "steps": 11
+          },
+          {
+            "observerIndex": 88,
+            "from": {
+              "x": 267,
+              "y": 563
+            },
+            "goal": {
+              "x": 255,
+              "y": 551
+            },
+            "steps": 14
+          },
+          {
+            "observerIndex": 89,
+            "from": {
+              "x": 255,
+              "y": 551
+            },
+            "goal": {
+              "x": 262,
+              "y": 544
+            },
+            "steps": 9
+          },
+          {
+            "observerIndex": 90,
+            "from": {
+              "x": 262,
+              "y": 544
+            },
+            "goal": {
+              "x": 274,
+              "y": 536
+            },
+            "steps": 12
+          },
+          {
+            "observerIndex": 91,
+            "from": {
+              "x": 274,
+              "y": 536
+            },
+            "goal": {
+              "x": 283,
+              "y": 542
+            },
+            "steps": 9
+          }
+        ]
+      }
+    ],
+    "nearestSafetyAndPrefixChecksPassed": true,
+    "nearestSupply": [
+      {
+        "count": 2,
+        "fighterIndices": [],
+        "stableTargets": 0,
+        "counts": {
+          "Deer": 0,
+          "Scarecrow": 0
+        },
+        "minimumIndividualFighterTargetPaths": 0,
+        "fixedDamageSensitivity": {
+          "1": 0,
+          "3": 0,
+          "5": 0,
+          "10": 0,
+          "15": 0,
+          "25": 0
+        },
+        "requiredPerMinute": {
+          "attacks": 0,
+          "positiveHits": 0
+        }
+      },
+      {
+        "count": 10,
+        "fighterIndices": [
+          5
+        ],
+        "stableTargets": 28,
+        "counts": {
+          "Deer": 21,
+          "Scarecrow": 7
+        },
+        "minimumIndividualFighterTargetPaths": 28,
+        "fixedDamageSensitivity": {
+          "1": 165.50000000000003,
+          "3": 59.29999999999999,
+          "5": 33.10000000000001,
+          "10": 19.3,
+          "15": 13.8,
+          "25": 6.9
+        },
+        "requiredPerMinute": {
+          "attacks": 18,
+          "positiveHits": 12
+        }
+      },
+      {
+        "count": 25,
+        "fighterIndices": [
+          5,
+          15
+        ],
+        "stableTargets": 33,
+        "counts": {
+          "Deer": 24,
+          "Scarecrow": 9
+        },
+        "minimumIndividualFighterTargetPaths": 33,
+        "fixedDamageSensitivity": {
+          "1": 192.25000000000003,
+          "3": 68.85,
+          "5": 38.449999999999996,
+          "10": 22.349999999999987,
+          "15": 16.1,
+          "25": 8.05
+        },
+        "requiredPerMinute": {
+          "attacks": 36,
+          "positiveHits": 24
+        }
+      },
+      {
+        "count": 50,
+        "fighterIndices": [
+          5,
+          15,
+          25,
+          35,
+          45
+        ],
+        "stableTargets": 62,
+        "counts": {
+          "Deer": 40,
+          "Scarecrow": 22
+        },
+        "minimumIndividualFighterTargetPaths": 62,
+        "fixedDamageSensitivity": {
+          "1": 350.4999999999999,
+          "3": 125.30000000000013,
+          "5": 70.09999999999995,
+          "10": 40.29999999999997,
+          "15": 29.799999999999976,
+          "25": 14.899999999999988
+        },
+        "requiredPerMinute": {
+          "attacks": 90,
+          "positiveHits": 60
+        }
+      },
+      {
+        "count": 100,
+        "fighterIndices": [
+          5,
+          15,
+          25,
+          35,
+          45,
+          55,
+          65,
+          75,
+          85,
+          95
+        ],
+        "stableTargets": 124,
+        "counts": {
+          "Deer": 81,
+          "Scarecrow": 43
+        },
+        "minimumIndividualFighterTargetPaths": 82,
+        "fixedDamageSensitivity": {
+          "1": 705.3333333333338,
+          "3": 252.20000000000024,
+          "5": 141.0666666666665,
+          "10": 81.20000000000002,
+          "15": 59.866666666666575,
+          "25": 29.933333333333287
+        },
+        "requiredPerMinute": {
+          "attacks": 180,
+          "positiveHits": 120
+        }
+      }
+    ],
+    "nearestLevelModelPin": {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/conditional-level-supply-nearest-final-v3.json",
+      "bytes": 48409,
+      "sha256": "974c824a8b5fc99a4b9ac6212571f0c0679f6ff74f6e4d5a0553c2aae72e3ab1"
+    },
+    "nearestClosedPoolXp": {
+      "canonicalSlots": 124,
+      "scope": "Conditional closed124canonical-slot pool only, no external wandering-in targets/quest/other XP/positive bonuses, every slot killed immediately after due refresh; all rewards assigned to ONE actor at tier2 for the whole bound. Level penalties, shared allocation, travel and kill time omitted, so deliberately overgenerous.",
+      "twoHours": {
+        "minutes": 120,
+        "idealKillsIncludingInitial": 3716,
+        "deliberatelyOvergenerousTier2XpAssignedAllToOneFreshActor": 127326
+      },
+      "entire18000SecondBudget": {
+        "minutes": 300,
+        "idealKillsIncludingInitial": 9104,
+        "deliberatelyOvergenerousTier2XpAssignedAllToOneFreshActor": 312006
+      },
+      "requiredXpLevel20": 456900,
+      "requiredXpLevel25": 1896900,
+      "level20NotReachedEvenByThisOvergenerousClosedFiveHourModel": true
+    },
+    "continuousRejected": {
+      "validator": "validateNativeCombatClusters",
+      "error": "Combat home lacks declared observer coverage",
+      "logPin": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validation-continuous-ordered-final-v3.log",
+        "bytes": 993,
+        "sha256": "0e9c3bc7ffab7be5ac1e6756433d84bcb39d7e5b850b8326a0c086d101e5f2be"
+      }
+    },
+    "conclusion": "Nearest reduces25/50tour640->172 and1326->372, but100stillfails representative scout atobserver92. Continuous fails original full cluster coverage. Neither is approved as a complete100scene; no further optimization was attempted."
+  },
+  "otherCandidates": {
+    "supplyRanked30Targets123Steps": {
+      "scene": "candidate-100-v1.json",
+      "status": "retained unadopted comparison"
+    },
+    "bottomRegion17Targets59Steps": {
+      "scene": "candidate-100-compact-v3.json",
+      "status": "retained unadopted comparison, created before root selectedcompact-v2"
+    },
+    "drafts": "All ten bounded draft inputs/results, including every nonselected draft and incomplete reorder attempt, are retained in this dedicated directory."
+  },
+  "metadataCorrection": {
+    "fieldBefore": "minimumDistinctCells:80",
+    "fieldAfter": "minimumNativeCellsPerMinute:80",
+    "reason": "Original core increments cells by receipt-backed movedCells and divides by actual seconds. It does not count unique coordinates.",
+    "productChanged": false,
+    "sceneChanged": false,
+    "geometryNumericResultsExactAfterRemovingMetadata": true,
+    "levelNumericResultsExact": true,
+    "historicalSourceAlias": {
+      "originalPath": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1/static-lib.mjs",
+      "preservedOriginalPin": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib-preimage-v1.mjs.txt",
+        "bytes": 11361,
+        "sha256": "3f559db681d0c606dae4db5bdbdd4474a21ff7f8ded128ba684fcaca9bf40df6"
+      },
+      "finalSourcePin": {
+        "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+        "bytes": 11368,
+        "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+      }
+    },
+    "originalReportsPreserved": true,
+    "finalPrimaryValidation": "validation-compact-v2-final-v2.json",
+    "finalLevelModel": "conditional-level-supply-final-v2.json"
+  },
+  "requiredFutureObservations": [
+    "No old06/07/08/09/10/11 report transfers to the new scene. Old31hit/min observations also used older attack-witness/timer contracts and include sub60second windows.",
+    "Before or during a root-approved fresh attempt, use existing ordinary public snapshots/trace and density output to count actually alive/dead/removed ordinary targetIDs, actual peer owner positions and real dual-object membership; staticcanonical28is not an early live census.",
+    "Keep actual per60s attack/hit, offered/completed denominator, actual cadence.level/effective public stats, clipped positive damage, scarce heldHP recovery and per-ID kill/nextpositive-hit timing. Do not infer exact respawn without wire lifecycle.",
+    "Record actual scout/chase moves and gaps, witness-ready target counts if available from existing evidence, same-map active observers, moving occupancy corrections and original resource guards. No new synthetic objects/AOI or additional driver commands are authorized here.",
+    "Original freshprobe2/10each300+360soak/5-5-6actual>=60windows must pass before fullformal; formal remains2/10/25/50/100each300+7200soak+5resume+5save+post60. P0pending, P2notstarted."
+  ],
+  "sourcePins": [
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/monsters.rs",
+      "bytes": 107777,
+      "sha256": "ea0613506ae709059dec543e417c83ed29f33045c42d58fb0747586748afc958"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+      "bytes": 99414,
+      "sha256": "215ed254a39b89f3ac7188bedc0cdd4bf131384147869d636d735afe80a2dbd8"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/static-lib.mjs",
+      "bytes": 11368,
+      "sha256": "2cf4c12d8aaead978a569db223e1c4527a594fa1f07e535601803e447f74df19"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validate-candidate.mjs",
+      "bytes": 11177,
+      "sha256": "29a256fca718bfcc39987c68b37a0cf613f7adc98e2223bd48b9904777bc944b"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/make-review-proposal.mjs",
+      "bytes": 11247,
+      "sha256": "978a9bb32aa1fcb06b62c1b659313325f037ce169f7b47a964d50cb3f68f8686"
+    }
+  ],
+  "keyArtifacts": [
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-100-compact-v2.json",
+      "bytes": 5844,
+      "sha256": "db9031fa25c4d6666dd11911792bbefd8652fe5ff30e3b5c21c692a0e6c1a299"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-10-compact-v2.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validation-compact-v2-final-v2.json",
+      "bytes": 9263181,
+      "sha256": "38e2dcd3516fde45b299a6a63df58ccfb42ed5bafcb1b0e64471c4616b7a7d4a"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/conditional-level-supply-final-v2.json",
+      "bytes": 50855,
+      "sha256": "464506dbfd043d46588cd2e34ca3b0687dbc0db4b2fb710fca4b5be3ae568f7c"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/prefix-scout-cost-compact-final-v2.json",
+      "bytes": 50131,
+      "sha256": "0746f4901f3cbadb47b74e4ba1386c3e7bfffe24025ab278856685462509112f"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-100-nearest-ordered-final-v3.json",
+      "bytes": 5844,
+      "sha256": "ed268ed3b81f06d1894a2ad60689a70dbabfced752042a773551e77d8483d436"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-10-nearest-ordered-final-v3.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validation-nearest-ordered-final-v3.json",
+      "bytes": 7233814,
+      "sha256": "358e1eb027306424d82324147374e9eb9d11d190a98cc86b9934ac536869a8de"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/conditional-level-supply-nearest-final-v3.json",
+      "bytes": 48409,
+      "sha256": "974c824a8b5fc99a4b9ac6212571f0c0679f6ff74f6e4d5a0553c2aae72e3ab1"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/prefix-scout-cost-nearest-final-v3.json",
+      "bytes": 58602,
+      "sha256": "d997af8375ba508f9b87ec833da239a542681ca0cc32ea3342d666df599ca1d0"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-100-continuous-ordered-final-v3.json",
+      "bytes": 5844,
+      "sha256": "c28d66ef7f7de6a4855dfe416bce799b495a08cdfe73330612ab68b16c77e672"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-10-continuous-ordered-final-v3.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validation-continuous-ordered-final-v3.log",
+      "bytes": 993,
+      "sha256": "0e9c3bc7ffab7be5ac1e6756433d84bcb39d7e5b850b8326a0c086d101e5f2be"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/scene-comparison-v1.json",
+      "bytes": 52624,
+      "sha256": "70a235e6ebf994f75e1466339913645ad98c48e3eafbd9755fd262a9d3fd53c1"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/candidate-inventory-v1.json",
+      "bytes": 80949,
+      "sha256": "6af03d76e6e018f4d6a9e95ca8789b84296c7ed3a42cafbc927f6211e33ccca7"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/author-result-v1.json",
+      "bytes": 61269,
+      "sha256": "a6624c4d964a0580b1295733526b72ec17a48a20d22d8402d19efd294f482d76"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/compact-author-result-v2.json",
+      "bytes": 12090,
+      "sha256": "62e1503547242dcd31e6100c84645f4d5b48b32e2635e435e99a3e83fdc9fc6c"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/compact-author-result-v3.json",
+      "bytes": 12093,
+      "sha256": "73050b8ae9d59c11b003a626aa7df628b23336be79ac9f79a5e6b97da8de4b0c"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/suffix-nearest-order-v3.json",
+      "bytes": 28271,
+      "sha256": "b9bca8145db3550407323aef8f8d7ca9168d25ad958855b27d73f9f6ebd7de29"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/suffix-continuous-order-v3.json",
+      "bytes": 28905,
+      "sha256": "5ce6abd57024887dad2aaaaca3493d26b12c49484703eec503ff3960f12f60f8"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/suffix-nearest-completion-v3.json",
+      "bytes": 5952,
+      "sha256": "5361e827e0af5b9d17646f29b0e09d0e7cf77265f819f2d9eb958138a1bbdfc9"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/suffix-continuous-completion-v3.json",
+      "bytes": 5622,
+      "sha256": "8e34f25ce54da51e4b71e1daf69f3e3adba038e5a7c589952ba28a51c3c99c5d"
+    }
+  ],
+  "reproduction": {
+    "requires": "Same pinned repository sources/data; copy source tools into a NEW external directory before reauthoring because every output iswx/no-overwrite. Running validator alone may use a new outputbasename in this directory.",
+    "validationCommand": "node \"C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1/validate-candidate.mjs\" candidate-100-compact-v2.json validation-independent-compact-v2.json",
+    "nearestValidationCommand": "node \"C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-scene-v1/validate-candidate.mjs\" candidate-100-nearest-ordered-final-v3.json validation-independent-nearest-v3.json",
+    "caution": "Only static map/source reads and new external JSON writes. Never invoke a service, seeder, load runner or launcher. Continuous candidate validation is expected to failclosed."
+  },
+  "independentReviewPending": true,
+  "capacityAccepted": false,
+  "accepted": false
+}

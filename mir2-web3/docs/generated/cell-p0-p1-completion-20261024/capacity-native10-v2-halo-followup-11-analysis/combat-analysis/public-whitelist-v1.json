@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit public original derivative files only; no full raw, recordings, private account/store or binaries.",
+  "files": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe11-combat-analysis-v1/raw-selected-v1.json",
+      "bytes": 2374615,
+      "sha256": "cbda408c566e8719e6920a7ab99e3eb6ace9113767fe49a35626a9c9c500eced"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe11-combat-analysis-v1/stage10-window-actor-matrix-v1.json",
+      "bytes": 101623,
+      "sha256": "2261d9bc73c74458455c6659db46fdccec65c7ca4b2cfa255fc91f57c412a047"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe11-combat-analysis-v1/gap-geometry-supply-projection-v1.json",
+      "bytes": 22066,
+      "sha256": "8bccc63249e02af874742cc8600e57e5f78f54dc6cb8b15d819264598b9421ec"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe11-combat-analysis-v1/summary-v1.json",
+      "bytes": 16588,
+      "sha256": "ccbc718d32bc049757873e5bf86baa3b3d463609b2c48ec04e18e777374c28fd"
+    }
+  ]
+}

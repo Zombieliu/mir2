@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T06:16:15.8482740Z",
+  "runId": "1792908575146-40a66fff",
+  "gatewayPid": 62980,
+  "monitorPid": 58272,
+  "processes": [],
+  "listeningPorts": [],
+  "processesAbsent": true,
+  "portsFree": true,
+  "readOnlyIndependentCheck": true,
+  "capacityAccepted": false
+}

@@ -1,0 +1,431 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T06:31:22.277Z",
+  "scope": "Complete small public raw/report review plus exactly three separately authorized local spectator projections; no private data, scene change, test, service or further recording reads.",
+  "runId": "1792908575146-40a66fff",
+  "originalRaw": {
+    "path": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-compact-halo-feasibility-12/reports/1792908575146-40a66fff.samples.jsonl",
+    "bytes": 1997617,
+    "sha256": "2c0e74dfb7c3ec6a074c8620dc91a41d0f0656cc6f06f2c4779bce582f516804"
+  },
+  "report": {
+    "path": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-compact-halo-feasibility-12/reports/1792908575146-40a66fff.report.json",
+    "bytes": 25325,
+    "sha256": "7325e575a4a0d219ffb7b24729509e90b14aba3b578942336135be6d8be889c8"
+  },
+  "independentVerification": {
+    "path": "C:/mir2-build/p01-completion-20261024/probe12-independent-verification-v1/final-verification.json",
+    "bytes": 124145,
+    "sha256": "acbc8d169409420fece19f5376037ea6b61405a249f5e63434803dcae364755e"
+  },
+  "selected": {
+    "path": "C:/mir2-build/p01-completion-20261024/probe12-independent-verification-v1/selected-movement-events-v1.json",
+    "bytes": 103223,
+    "sha256": "96883d2b942c8be8360709e332bc7165e0d5043ff582f2054a4115696f76c463"
+  },
+  "sourcePins": [
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "bytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/gateway/src/spectator.rs",
+      "bytes": 58692,
+      "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f"
+    }
+  ],
+  "originalProfile": {
+    "profile": "probe",
+    "stages": [
+      2,
+      10
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 360,
+    "minimumCombatAttacksPerMinute": 18,
+    "minimumCombatHitsPerMinute": 12,
+    "minimumNativeRunRatio": 0.5,
+    "maximumCorrectionRatio": 0.05,
+    "timeoutExclusive": 0.01,
+    "activityMode": "native",
+    "intentIntervalMs": 750,
+    "commandsPerSecond": 3
+  },
+  "result": {
+    "reportOk": false,
+    "stage2Completed": false,
+    "stage2ElapsedSeconds": 206.914,
+    "completedReportStages": 0,
+    "rawCompleteMeasuredMinuteWindows": 3,
+    "rawCompleteMinuteDurations": [
+      60.008,
+      60.004,
+      60.063
+    ],
+    "allThreeMeasuredWindowsPassed": true,
+    "requiredStage2Windows": 5,
+    "stage10Started": false,
+    "soakStarted": false,
+    "formal09PreconditionPassed": false,
+    "capacityAccepted": false
+  },
+  "firstFailure": {
+    "rawLine": 1880,
+    "previousActorContinuousWindowLine": 1429,
+    "at": 1792908818649,
+    "actor": "L99367200",
+    "seconds": 60.3634656,
+    "corrected": 4,
+    "movementAttempts": 77,
+    "correctionRatio": 0.05194805194805195,
+    "maximum": 0.05,
+    "activity": {
+      "plans": 80,
+      "gaps": 0,
+      "moves": 73,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792908818220,
+      "runs": 59,
+      "cells": 132,
+      "nativeOpportunities": 80,
+      "nativeCompleted": 76,
+      "offeredDurationMs": 60000,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    "activityPassed": true,
+    "latencyPassed": true,
+    "fanoutPassed": true,
+    "timeoutRatio": 0,
+    "classification": "Original movement correction ratio failed; native activity, Run ratio, moved-cell volume, ACK latency and fanout gates passed. No native opportunity gap or timeout caused this failure."
+  },
+  "wholeRun": {
+    "correctedMovementActions": 5,
+    "firstCorrectionBelongsToPreviousPassedContinuousWindow": true,
+    "navigationBlockedActions": 0,
+    "hpMaintenanceRows": 0,
+    "attacks": 0,
+    "monster206613RawOccurrences": 0
+  },
+  "corrections": [
+    {
+      "line": 1422,
+      "at": 1792908757455,
+      "phase": "stage-2",
+      "kind": "run",
+      "origin": {
+        "x": 241,
+        "y": 596
+      },
+      "first": {
+        "x": 242,
+        "y": 596
+      },
+      "target": {
+        "x": 243,
+        "y": 596
+      },
+      "actual": {
+        "x": 241,
+        "y": 596
+      },
+      "sentDirection": "Right",
+      "ackDirection": "Right",
+      "movedCells": 0,
+      "latencyMs": 0.4078000000154134,
+      "plannedLatencyMs": 6.334200000012061,
+      "inFailingContinuousWindow": false,
+      "allPlannedCellsStaticallyWalkable": true,
+      "postReceiptDiagnosticLine": 1421,
+      "postReceiptLiveOccupantsOnPlannedCells": [],
+      "diagnosticDeduplication": "new diagnostic"
+    },
+    {
+      "line": 1448,
+      "at": 1792908760473,
+      "phase": "stage-2",
+      "kind": "run",
+      "origin": {
+        "x": 242,
+        "y": 595
+      },
+      "first": {
+        "x": 242,
+        "y": 596
+      },
+      "target": {
+        "x": 242,
+        "y": 597
+      },
+      "actual": {
+        "x": 242,
+        "y": 595
+      },
+      "sentDirection": "Down",
+      "ackDirection": "Down",
+      "movedCells": 0,
+      "latencyMs": 0.6878999999898952,
+      "plannedLatencyMs": 27.108500000002095,
+      "inFailingContinuousWindow": true,
+      "allPlannedCellsStaticallyWalkable": true,
+      "postReceiptDiagnosticLine": 1447,
+      "postReceiptLiveOccupantsOnPlannedCells": [],
+      "diagnosticDeduplication": "new diagnostic"
+    },
+    {
+      "line": 1488,
+      "at": 1792908765717,
+      "phase": "stage-2",
+      "kind": "walk",
+      "origin": {
+        "x": 241,
+        "y": 596
+      },
+      "first": {
+        "x": 242,
+        "y": 596
+      },
+      "target": {
+        "x": 242,
+        "y": 596
+      },
+      "actual": {
+        "x": 241,
+        "y": 596
+      },
+      "sentDirection": "Right",
+      "ackDirection": "Up",
+      "movedCells": 0,
+      "latencyMs": 0.4070999999821652,
+      "plannedLatencyMs": 18.597899999993388,
+      "inFailingContinuousWindow": true,
+      "allPlannedCellsStaticallyWalkable": true,
+      "postReceiptDiagnosticLine": 1487,
+      "postReceiptLiveOccupantsOnPlannedCells": [],
+      "diagnosticDeduplication": "new diagnostic"
+    },
+    {
+      "line": 1735,
+      "at": 1792908797964,
+      "phase": "stage-2",
+      "kind": "run",
+      "origin": {
+        "x": 241,
+        "y": 597
+      },
+      "first": {
+        "x": 242,
+        "y": 597
+      },
+      "target": {
+        "x": 243,
+        "y": 597
+      },
+      "actual": {
+        "x": 241,
+        "y": 597
+      },
+      "sentDirection": "Right",
+      "ackDirection": "Right",
+      "movedCells": 0,
+      "latencyMs": 0.872399999992922,
+      "plannedLatencyMs": 18.364100000006147,
+      "inFailingContinuousWindow": true,
+      "allPlannedCellsStaticallyWalkable": true,
+      "postReceiptDiagnosticLine": 1734,
+      "postReceiptLiveOccupantsOnPlannedCells": [],
+      "diagnosticDeduplication": "new diagnostic"
+    },
+    {
+      "line": 1739,
+      "at": 1792908798706,
+      "phase": "stage-2",
+      "kind": "walk",
+      "origin": {
+        "x": 241,
+        "y": 597
+      },
+      "first": {
+        "x": 242,
+        "y": 597
+      },
+      "target": {
+        "x": 242,
+        "y": 597
+      },
+      "actual": {
+        "x": 241,
+        "y": 597
+      },
+      "sentDirection": "Right",
+      "ackDirection": "Right",
+      "movedCells": 0,
+      "latencyMs": 0.5355999999737833,
+      "plannedLatencyMs": 8.862599999993108,
+      "inFailingContinuousWindow": true,
+      "allPlannedCellsStaticallyWalkable": true,
+      "postReceiptDiagnosticLine": null,
+      "postReceiptLiveOccupantsOnPlannedCells": null,
+      "diagnosticDeduplication": "No new diagnostic during same correction streak; action still counted corrected."
+    }
+  ],
+  "spectator": {
+    "projection": {
+      "path": "C:/mir2-build/p01-completion-20261024/compact12-movement-review-v1/three-public-local-frames-v1.json",
+      "bytes": 5886,
+      "sha256": "9049cc437d6f72ab6f67674b2703da69c26cd10d59a82b13ad95a6b9996c2275"
+    },
+    "recording": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-halo-feasibility-12\\recordings\\0-498030.jsonl",
+      "bytes": 36398000,
+      "sha256": "96f2e1e9ce83188a443d9de19047fd9ad8fced8a886059a276e18c56ecae7d2b",
+      "frames": 918,
+      "unchangedDuringRead": true
+    },
+    "observations": [
+      {
+        "targetAtMs": 1792908757455,
+        "frameAtMs": 1792908757346,
+        "frameSequence": 687,
+        "precedingFrameAgeMs": 109,
+        "monster206613": {
+          "kind": "monster",
+          "x": 242,
+          "y": 596,
+          "objectId": 206613,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        }
+      },
+      {
+        "targetAtMs": 1792908760473,
+        "frameAtMs": 1792908760211,
+        "frameSequence": 698,
+        "precedingFrameAgeMs": 262,
+        "monster206613": {
+          "kind": "monster",
+          "x": 242,
+          "y": 596,
+          "objectId": 206613,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        }
+      },
+      {
+        "targetAtMs": 1792908797964,
+        "frameAtMs": 1792908797875,
+        "frameSequence": 840,
+        "precedingFrameAgeMs": 89,
+        "monster206613": {
+          "kind": "monster",
+          "x": 242,
+          "y": 597,
+          "objectId": 206613,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        }
+      }
+    ],
+    "scope": "These are merged map snapshots, not this owner client AOI, per-session membership, authoritative Zone consume-time state or a movement rejection result."
+  },
+  "sourceFindings": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "lines": "230-285",
+      "fact": "CapacityClient records normal packets only in a bounded memory event list. Persistent lifecycle projections keep named controlled players only; ObjectMonster lifecycle packets are not fully retained outside an attack trace. Thus zero206613 raw occurrences does not prove it was never received."
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "lines": "200-222,249-270,372-375",
+      "fact": "Full worldSnapshot replaces the local cache. ObjectMonster/NewMonsterInfo upserts; motion only updates existing entities; ObjectRemove/TeleportOut removes. Current CapacityClient calls this fold normally; no selective monster discard is demonstrated."
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "lines": "425-478,760-844",
+      "fact": "As independently reviewed by fixed_cell_gate_audit, the shared map projection retains previous entities byID when a new session snapshot omits them; latest publisher wins and default15s stale pruning can retain entities absent from this owner snapshot. A projected monster can therefore be stale or supplied by another connection."
+    }
+  ],
+  "causality": {
+    "proven": "Five real original stationary UserLocation corrections; four in the exact failing continuous window. All intents cardinal and all checked static cells walkable. Returned positions are incompatible with claimed successful first/target movement and remain corrected.",
+    "supportedButNotProven": "The three prior merged frames put206613 on the proposed first step, while four post-ACK owner diagnostics omit it. This is consistent with a real dynamic blocker omitted from owner view OR a stale map projection. It is not enough to select either explanation.",
+    "notProven": [
+      "The server rejected specifically for occupied tile.",
+      "206613 occupied that tile when Zone consumed the command.",
+      "The owner lost an ObjectMonster/Remove packet or the driver dropped an entity.",
+      "The merged spectator entity was fresh authority rather than an older retained projection.",
+      "A scheduler, cooldown, stale UserLocation association or another fixed-rule rejection caused these particular corrections."
+    ],
+    "driverOrSceneFixJustified": false,
+    "recommendation": "Preserve current failure and obtain minimally correlated rejection evidence before changing navigation or scene again."
+  },
+  "minimalNextInstrumentationProposal": {
+    "requiresSeparateAuthorization": true,
+    "server": {
+      "optInDefaultDisabled": true,
+      "onlyRejectedWalkRun": true,
+      "correlation": "Ephemeral connection sequence and local input ordinal; no account credential or character name.",
+      "fields": [
+        "commandKind",
+        "inputOrdinal",
+        "ownerOrigin",
+        "requestedFirst",
+        "requestedDestination",
+        "actualResult",
+        "fixedReasonEnum",
+        "firstBlockedTile",
+        "blockerClass"
+      ],
+      "fixedReasonEnum": [
+        "occupied",
+        "terrain",
+        "cadence",
+        "actionLocked",
+        "other"
+      ],
+      "blockerClass": [
+        "player",
+        "monster",
+        "npc",
+        "none",
+        "unknown"
+      ],
+      "privacy": "No chat, packet dump, credentials, storage rows or personal payloads. Preserve routing, clocks, gates, counters and original decisions."
+    },
+    "client": {
+      "optionalBoundedDiagnostic": "For the same failed move, retain only already-received monster lifecycle/motion/removal and authoritative snapshot membership changes inside the original small local footprint, bounded count and timestamps; never synthesize positions or change collision/credit."
+    }
+  },
+  "limitations": [
+    "Correction diagnostics are sampled after the receipt, not at send or Zone-consumption time.",
+    "Original movement ACKs have no requestID; fast ACK timing alone cannot prove which server rejection branch ran.",
+    "No collision, correction, timeout, opportunity or Run thresholds were changed.",
+    "No stage2pass is inferred from three successful minute windows shorter than the configured300s phase."
+  ],
+  "publicSafe": true,
+  "privateDataRead": false,
+  "sourceOrSceneChanged": false,
+  "accepted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T04:41:00.610Z",
+  "scope": "Independent bounded static formal08 preseal review with probe11 final small-metadata raw closure check. No live-run raw, gate, product module, sourceguard, test or preparation was executed/read.",
+  "state": "no-blocking-finding-to-seal-formal08-pending-final-launcher-closure",
+  "presealReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal08-preseal-input-check-v1.json",
+    "bytes": 12791,
+    "sha256": "ae28924f19d85b87eb513dee11492c9b05007b5922f04960656b24796eb4e5b8"
+  },
+  "reviewedLocalFiles": 32,
+  "reviewedSourceSha256": "a4ba10e0d035451f6e699aac28f7329fa33c9302cd1a57b4921fe5b483799900",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-witness-approach-driver-frozen-v1.json",
+    "bytes": 41896,
+    "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada"
+  },
+  "identicalToReviewedProbe11Contracts": [
+    "driver-report-contract.mjs",
+    "driver-evidence-contract.mjs",
+    "measured-phase-contract.mjs",
+    "scene-contract.mjs",
+    "slow-stage-public.mjs",
+    "slow-stage-row-contract.mjs",
+    "backend-driver-source-guard.mjs"
+  ],
+  "formalPolicyIdenticalToFormal07": true,
+  "formalScenarioRawIdenticalToFormal07": true,
+  "formalResourceProfileRawIdenticalToFormal07": true,
+  "actualAdmissionCaps": [
+    128,
+    100,
+    100,
+    4,
+    1,
+    2
+  ],
+  "tokioWorkers": 4,
+  "slowStageThresholdMs": 50,
+  "measuredCohorts": [
+    2,
+    10,
+    25,
+    50,
+    100
+  ],
+  "stageSeconds": 300,
+  "soakSeconds": 7200,
+  "resumeSamples": 5,
+  "saveSamples": 5,
+  "postResumeObservationSeconds": 60,
+  "findings": [],
+  "checkedBoundaries": [
+    "Exact new6d70 driver/final9/41896-byte manifest/12-88-187 proof remain separate from immutable468 backend41/a430 release and actual full16.",
+    "Five report declarations are exact with witness approachRule; shared producer regex/evidence/path contracts equal the reviewed probe11 sources byte-for-byte.",
+    "Both prepare and run admission require only the fresh probe11 final report/raw provenance, actual300300360 intervals,5/5/6 passing60-second windows, strict original thresholds, complete diagnostics and normal owned cleanup.",
+    "Fresh probe must remain capacity-ineligible and cannot be promoted by successful cleanup or static readiness.",
+    "Formal original full seven-stage contract,5resumes/5saves/post60 and all128/100/100caps remain; report/raw verifier plus independent diagnostics/normal cleanup must all pass for acceptance.",
+    "Formal08 new public child/catalog/realm scope is consistent, failed/partial original bytes remain preserved and private stores/recording payload copies remain excluded."
+  ],
+  "probe11FinalStaticVerification": {
+    "launcherFreeze": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-11\\launcher-source-frozen-v1.json",
+      "bytes": 13975,
+      "sha256": "9275ec784473fd3a542648c70ebcd595bf42fc854290711fe0ece31fd5161b55"
+    },
+    "sourceguardReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-11\\source-guard-readonly-verification.json",
+      "bytes": 1505,
+      "sha256": "b3893b216c745d6642787074fc8001e38015e4ac3821b1d78a0970ae18a8e6ba"
+    },
+    "localPinsVerified": 35,
+    "scripts": 19,
+    "allPreseal31RawPinsRetained": true,
+    "sourceSha256": "b94bd115bf6849d9f71acd1950a7aed2aea0a6f02cb3bf113bae4ae0580c7019",
+    "sourceguardReexecuted": false,
+    "liveRunOutputsRead": false
+  },
+  "reviewedContracts": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\collect-public.mjs",
+      "bytes": 39510,
+      "sha256": "7dbf76a98585b2312692689bd7cfefa030b0dc3affb1dff3de3f31828c3327a8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\driver-evidence-contract.mjs",
+      "bytes": 4477,
+      "sha256": "a5ed6c5ae64857bd891372b87488bfa335a97c2ee8a993f8d2de130a44dbb47a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\driver-report-contract.mjs",
+      "bytes": 9234,
+      "sha256": "a038e9c186893015ed386b4140cef3927a0ad8024d85e4f6ad01d2a798eba581"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\input-lib.mjs",
+      "bytes": 14680,
+      "sha256": "05fa358a0c286cdcb3dbd879bc1049dff534bbee195810230b72b90a687caee9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\prepare-inputs.mjs",
+      "bytes": 10969,
+      "sha256": "4a49987ce2f0c3e4f7274b9a9f6f868ff631468d331f95d8c7f04ca98eae119d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\run-owned.mjs",
+      "bytes": 18120,
+      "sha256": "228df5ba91a89fd96168c4c5788c12c305c8d1eacff0d9a39b8ecdbbb41ab5b5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\verify-feasibility-gate.mjs",
+      "bytes": 18299,
+      "sha256": "34b12a6410f145fc126801e6392489540cefe500b65718461d0390a3df5e3aaf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\verify-public.mjs",
+      "bytes": 17110,
+      "sha256": "4c194df397eb582baafa846ae45c3e8b8f209b29a7b0745834efd99d994da0c9"
+    }
+  ],
+  "productModulesEvaluated": false,
+  "sourceguardExecutedByReviewer": false,
+  "testsRerunByReviewer": false,
+  "gateExecuted": false,
+  "prepareExecuted": false,
+  "realmStartedByReviewer": false,
+  "capacityAccepted": false,
+  "limitations": [
+    "This reviews the pinned formal08 preseal32-file state; later final closure/sourceguard metadata remains a separate check.",
+    "No outcome of the running probe11 or full formal capacity is inferred.",
+    "Static target readiness and187functional tests do not establish live stable-witness target supply or long-duration survival."
+  ]
+}
