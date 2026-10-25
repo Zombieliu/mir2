@@ -206,7 +206,12 @@ test("published verification checks every decoded hash and WASM storage encoding
 test("workflow binds the reviewed commit and isolates credentials behind a checked missing subset", async () => {
   const workflow = await fs.readFile(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../../.github/workflows/bevy-runtime-r2-release.yml"), "utf8");
   assert.match(workflow, /workflow_dispatch:/);
-  assert.doesNotMatch(workflow, /^  (push|pull_request):/m);
+  assert.doesNotMatch(workflow, /^  pull_request:/m);
+  assert.match(workflow, /push:\s+branches: \[codex\/gameplay-bugfix-release-20261025\]\s+paths: \[\.github\/workflows\/bevy-runtime-r2-release\.yml\]/);
+  const bootstrap = workflow.slice(workflow.indexOf("  validate-bootstrap:"), workflow.indexOf("  publish-runtime-leaves:"));
+  assert.match(bootstrap, /if: \$\{\{ github\.event_name == 'push' \}\}/);
+  assert.doesNotMatch(bootstrap, /secrets\.|upload-r2-assets|verify-bevy-runtime-r2-upload\.mjs|--verifyRemote/);
+  assert.match(workflow, /publish-runtime-leaves:\s+if: \$\{\{ github\.event_name == 'workflow_dispatch' \}\}/);
   assert.match(workflow, /ref: \$\{\{ github\.sha \}\}/);
   assert.match(workflow, /persist-credentials: false/);
   assert.match(workflow, /actions\/checkout@[0-9a-f]{40}/);
