@@ -41,7 +41,7 @@ function fixture(t) {
   return { root, stagingRoot, packageDir, wasmPath, jsPath, bin, canonical, sourceEnv: {},
     toolConfig: { bin, sha256: sha(fs.readFileSync(bin)) } };
 }
-function runner(bytes = EMPTY, onOptimize = null, optimizationArgs = ["-O1"]) {
+function runner(bytes = EMPTY, onOptimize = null, optimizationArgs = ["-O2"]) {
   return (bin, args, options) => {
     if (args.length === 1 && args[0] === "--version") return ok("wasm-opt version 131 (version_131)\n");
     assert.deepEqual(args.slice(1, -1), [...optimizationArgs, "--strip-debug", "-o"]);
@@ -103,7 +103,7 @@ test("renderer optimization uses only fixed conservative arguments and bounded h
   assert.equal(calls.length, 2);
   assert.equal(calls[0].bin, f.bin); assert.deepEqual(calls[0].args, ["--version"]);
   assert.equal(calls[1].bin, f.bin); assert.equal(calls[1].args[0], f.wasmPath);
-  assert.deepEqual(calls[1].args.slice(1, 4), ["-O1", "--strip-debug", "-o"]);
+  assert.deepEqual(calls[1].args.slice(1, 4), ["-O2", "--strip-debug", "-o"]);
   assert.equal(path.dirname(calls[1].args[4]), f.packageDir);
   for (const call of calls) {
     assert.equal(call.options.cwd, f.stagingRoot); assert.equal(call.options.shell, false);

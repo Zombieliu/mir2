@@ -56,7 +56,7 @@ export function assertClientCoreStagingRoot(stagingRoot, temporaryRoot) {
 // These profiles are private and fixed. A caller cannot select different
 // basenames, limits, arguments or a cleanup prefix through its options.
 const RENDERER_PROFILE = Object.freeze({ label: "renderer", subject: "Renderer",
-  optimizationArgs: Object.freeze(["-O1"]),
+  optimizationArgs: Object.freeze(["-O2"]),
   wasmName: "mir2_bevy_runtime_bg.wasm", jsName: "mir2_bevy_runtime.js",
   temporaryPrefix: ".mir2-bevy-opt-", temporaryPattern: /^\.mir2-bevy-opt-\d+-[a-f0-9]{12}\.wasm$/,
   resolveConfig: tool => resolveRendererWasmOptConfig({ MIR2_BEVY_WASM_OPT_BIN: tool?.bin, MIR2_BEVY_WASM_OPT_SHA256: tool?.sha256 }),
