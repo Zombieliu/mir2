@@ -114,9 +114,13 @@ jobs:
           STAGE_CONFIG_PATH: ${{ runner.temp }}/gameplay-web-vercel-build.json
         run: |
           set -euo pipefail
-          if ! npx --yes vercel@56.4.1 build --prod --yes --local-config "$STAGE_CONFIG_PATH" >"$RUNNER_TEMP/gameplay-web-vercel-build.log" 2>&1; then
-            echo 'Original production build failed; private output remains on the ephemeral runner.' >&2
-            exit 1
+          set +e
+          npx --yes vercel@56.4.1 build --prod --yes --local-config "$STAGE_CONFIG_PATH" >"$RUNNER_TEMP/gameplay-web-vercel-build.log" 2>&1
+          build_exit=$?
+          set -e
+          if [ "$build_exit" -ne 0 ]; then
+            BUILD_EXIT_CODE="$build_exit" node scripts/test-gameplay-web-stage.mjs --classify-build-failure
+            exit "$build_exit"
           fi
 
       - name: Apply the original Vercel output pruning

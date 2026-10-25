@@ -1,7 +1,7 @@
 // Offline tests plus the small, allowlisted checks used by gameplay-web-stage.yml.
 // Operational modes never serialize pulled environment files or deployment JSON.
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
@@ -75,6 +75,23 @@ export function verifyOutputLeaves(webRoot, outputRoot, leaves, runtimeManifest)
   }
 }
 
+/** The private log is data only. Return fixed categories, never matching text. */
+export function classifyBuildFailure(log, exitCode) {
+  assert.equal(typeof log, "string", "invalid diagnostic log input");
+  assert.ok(Number.isInteger(exitCode) && exitCode > 0 && exitCode <= 255, "invalid build exit code");
+  const rules = [
+    ["MISSING_AUTH", /No existing credentials|MISSING_AUTH|not authenticated|Please run [`'"]?vercel login/i],
+    ["INVALID_TOKEN", /Invalid token|specified token is not valid|invalid authentication token|invalid-token/i],
+    ["PATH_MISSING", /Root Directory[^\r\n]*(?:does not exist|not found)|rootDirectory[^\r\n]*(?:does not exist|not found)|ENOENT|no such file or directory/i],
+    ["CONFIG_INVALID", /Invalid (?:vercel\.json|configuration|config)|Could not (?:read|parse)[^\r\n]*config|Failed to parse[^\r\n]*(?:config|vercel\.json)|config(?:uration)?[^\r\n]*schema/i],
+    ["FRAMEWORK_MISSING", /No Next\.js version detected|(?:Could not|Unable to) detect[^\r\n]*framework|No framework detected|Framework[^\r\n]*not found/i],
+    ["CLI_ARGUMENT_INVALID", /unknown or unexpected option|unknown option|Unknown argument|not a valid subcommand/i],
+    ["BUILD_COMMAND_FAILED", /Command[^\r\n]*exited with (?:code|status)|Build command[^\r\n]*failed|BUILD_FAILED|Build failed|Failed to compile/i],
+  ];
+  const categories = rules.filter(([, pattern]) => pattern.test(log)).map(([category]) => category);
+  return { scope: "vercel-build-failure", exitCode, categories: categories.length ? categories : ["UNCLASSIFIED"] };
+}
+
 function expectedInputs() {
   const actualSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: WEB_ROOT, encoding: "utf8" }).trim();
   validateInputs({ expectedSha: process.env.EXPECTED_COMMIT_SHA, githubSha: process.env.GITHUB_SHA,
@@ -93,6 +110,18 @@ function identities() {
 }
 
 async function main(mode) {
+  if (mode === "--classify-build-failure") {
+    // Only the fixed private build-log filename is opened. No env-file reads.
+    const exitCode = Number(process.env.BUILD_EXIT_CODE);
+    try {
+      const log = fs.readFileSync(path.join(process.env.RUNNER_TEMP, "gameplay-web-vercel-build.log"), "utf8");
+      console.error(JSON.stringify(classifyBuildFailure(log, exitCode)));
+    } catch {
+      console.error(JSON.stringify({ scope: "vercel-build-failure", exitCode: Number.isInteger(exitCode) ? exitCode : null,
+        categories: ["DIAGNOSTIC_UNAVAILABLE"] }));
+    }
+    return;
+  }
   if (mode === "--target") {
     validateTarget(process.env.VERCEL_ORG_ID, process.env.VERCEL_PROJECT_ID);
     return;
@@ -210,8 +239,45 @@ if (process.argv.length > 2) {
     assert.match(credentialStep, /node scripts\/test-gameplay-web-stage\.mjs --target[\s\S]*npx --yes vercel@56\.4\.1 pull --yes --environment=production[\s\S]*node scripts\/test-gameplay-web-stage\.mjs --project/);
     assert.ok(workflow.indexOf("--verifyRemote") < workflow.indexOf("secrets.VERCEL_TOKEN"));
     assert.match(workflow, /npx --yes vercel@56\.4\.1 build --prod --yes --local-config "\$STAGE_CONFIG_PATH"/);
+    assert.match(workflow, /build_exit=\$\?[\s\S]*BUILD_EXIT_CODE="\$build_exit" node scripts\/test-gameplay-web-stage\.mjs --classify-build-failure[\s\S]*exit "\$build_exit"/);
     assert.match(workflow, /npm run vercel:prune-output -- --report/);
     assert.match(workflow, /node scripts\/test-gameplay-web-stage\.mjs --verify-build/);
     assert.doesNotMatch(workflow, /--token|upload-artifact|vercel@[^\s]+ (?:deploy|promote|alias|env|link)|wrangler|MIR2_R2_UPLOAD_SECRET|--force/);
+  });
+  test("private build diagnostics return only fixed categories and the exit code", () => {
+    const secret = "PRIVATE_VALUE_MUST_NEVER_APPEAR";
+    const cases = [
+      ["No existing credentials found. Please run vercel login", "MISSING_AUTH"],
+      ["Invalid token", "INVALID_TOKEN"],
+      ["Root Directory /private/value does not exist", "PATH_MISSING"],
+      ["Invalid vercel.json schema", "CONFIG_INVALID"],
+      ["No Next.js version detected", "FRAMEWORK_MISSING"],
+      ["unknown or unexpected option", "CLI_ARGUMENT_INVALID"],
+      ["Command npm run build exited with code 7", "BUILD_COMMAND_FAILED"],
+      ["unexpected unrelated message", "UNCLASSIFIED"],
+    ];
+    for (const [message, category] of cases) {
+      const result = classifyBuildFailure(`${message}: ${secret}\nTOKEN=${secret}`, 7);
+      assert.deepEqual(result, { scope: "vercel-build-failure", exitCode: 7, categories: [category] });
+      assert.ok(!JSON.stringify(result).includes(secret));
+      assert.ok(!JSON.stringify(result).includes("/private/value"));
+    }
+    assert.throws(() => classifyBuildFailure(secret, 0));
+    assert.throws(() => classifyBuildFailure(secret, 256));
+  });
+  test("diagnostic CLI never echoes a private log value or path", t => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "mir2-stage-diagnostic-"));
+    t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+    const secret = "PRIVATE_CLI_TEST_VALUE_MUST_NOT_APPEAR";
+    fs.writeFileSync(path.join(root, "gameplay-web-vercel-build.log"), `No existing credentials found: ${secret}\n/private/${secret}\n`);
+    const result = spawnSync(process.execPath, [fileURLToPath(import.meta.url), "--classify-build-failure"],
+      { env: { ...process.env, RUNNER_TEMP: root, BUILD_EXIT_CODE: "7" }, encoding: "utf8" });
+    assert.equal(result.status, 0);
+    assert.equal(result.stdout, "");
+    assert.ok(!result.stderr.includes(secret));
+    assert.ok(!result.stderr.includes(root));
+    const records = result.stderr.split(/\r?\n/).filter(line => line.startsWith('{"scope":'));
+    assert.equal(records.length, 1);
+    assert.deepEqual(JSON.parse(records[0]), { scope: "vercel-build-failure", exitCode: 7, categories: ["MISSING_AUTH"] });
   });
 }
