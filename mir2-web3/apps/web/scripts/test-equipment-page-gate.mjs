@@ -243,6 +243,49 @@ test("unknown bag metadata refuses Use, and Equip refuses a missing ledger", () 
   assert.equal(missing.sent.length, 0);
 });
 
+test("weapon replacement reaches the socket and the real ledger releases after ACK plus the swapped snapshot", () => {
+  const item = { ...bagItem(4, { info: { item_type: 1 } }), key: "crystal-item-1", name: "木剑" };
+  const weapon = { slot: "weapon", uniqueId: 8, authoritativeUniqueId: 8 };
+  const worldState = { ...world(item), equipmentItems: [weapon] };
+  const cachedSnapshot = { capacity: 46, placements: [
+    { uniqueId: 4, container: 0, slot: 4 }, { uniqueId: 8, container: 2, slot: 0 },
+  ] };
+  const controller = new EquipmentSessionController(actualRuntime());
+  assert.equal(controller.establishBaseline({ ...session, startGameConfirmed: true, complete: true, snapshot: cachedSnapshot }).ok, true);
+  const page = harness({ item, worldState, cachedSnapshot, controller });
+  assert.equal(page.send({ type: "useItem", grid: "inventory", uniqueId: 4 }), true);
+  assert.deepEqual(page.sent, [{ type: "equipItem", uniqueId: 4, grid: "inventory", to: 0 }]);
+  assert.equal(controller.applyAck({ ...session, operation: { kind: "equip", uniqueId: 4, grid: "inventory", to: 0 }, success: true }).matched, true);
+  assert.equal(controller.status().pending, 1);
+  assert.equal(controller.observeSnapshot({ ...session, complete: true, snapshot: { capacity: 46, placements: [
+    { uniqueId: 8, container: 0, slot: 4 }, { uniqueId: 4, container: 2, slot: 0 },
+  ] } }).pending, 0);
+});
+
+test("React Use and native Equip/Use all choose the current free ring hand through the real send gate", () => {
+  const owner = { ...session, owner: "bevy", runGeneration: 1, ownerRevision: 1, modelRevision: 2, presentationRevision: 3 };
+  for (const existing of [null, "ringLeft", "ringRight"]) {
+    for (const action of ["reactUse", "equipItem", "useItem"]) {
+      const item = { ...bagItem(0, { info: { item_type: 7 } }), slot: 0,
+        key: "crystal-item-404", name: "铜戒指", icon: 1, quantity: 1, description: "", equipSlot: "ringLeft" };
+      const equipped = existing ? [{ slot: existing, uniqueId: 8, authoritativeUniqueId: 8, key: "crystal-item-404", quantity: 1, name: "铜戒指",
+        icon: 1, description: "", durabilityCurrent: 1, durabilityMax: 1, attack: 0, defence: 0 }] : [];
+      const worldState = { ...world(item), inventoryCapacity: 54, maxBagSlots: 48, gold: 200, equipmentItems: equipped };
+      const cachedSnapshot = { capacity: 54, placements: [{ uniqueId: 0, container: 0, slot: 0 },
+        ...equipped.map(equipped => ({ uniqueId: 8, container: 2, slot: equipped.slot === "ringLeft" ? 7 : 8 })),
+      ] };
+      const controller = new EquipmentSessionController(actualRuntime());
+      assert.equal(controller.establishBaseline({ ...session, startGameConfirmed: true, complete: true, snapshot: cachedSnapshot }).ok, true);
+      controller.setOwnerRevision(1);
+      const page = harness({ item, worldState, cachedSnapshot, controller, renderOwner: owner });
+      if (action === "reactUse") assert.equal(page.send({ type: "useItem", uniqueId: 0, grid: "inventory" }), true);
+      else assert.equal(page.dispatchBevyBagIntent({ ...owner, intentSequence: 1, type: action,
+        source: { container: 0, slot: 0, uniqueId: 0 } }).accepted, true, `${action}: ${existing}`);
+      assert.deepEqual(page.sent, [{ type: "equipItem", uniqueId: 0, grid: "inventory", to: existing === "ringRight" ? 7 : 8 }], `${action}: ${existing}`);
+    }
+  }
+});
+
 test("mount Use proves the current instance but emits only Crystal wire slot 13", () => {
   for (const uid of [0, 27]) {
     const mount = { slot: "mount", uniqueId: uid, authoritativeUniqueId: uid };
@@ -429,6 +472,19 @@ test("retired compatibility bag callbacks cannot submit Drop, Merge, Split, Sell
     current.onAction(() => { current.scope.equipmentBagOwnerRef.current.ownerRevision++; });
     assert.equal(current.send(final.command,final.options), false, `final gate: ${type}`);
     assert.deepEqual(current.sent, []);
+  }
+});
+
+test("storage compatibility callbacks require a storage proof for current and stale owners", () => {
+  for (const type of ["storeItemV2", "takeBackItemV2"]) {
+    const command = { type, uniqueId: 4, from: 0, to: 4, count: 1 };
+    const current = harness();
+    assert.equal(current.send(command), false, `missing storage proof: ${type}`);
+    assert.deepEqual(current.sent, []);
+    const stale = harness();
+    stale.scope.equipmentBagOwnerRef.current = { ...session, runGeneration: 1, ownerRevision: 1, owner: "bevy" };
+    assert.equal(stale.send(command), false, `stale compatibility owner: ${type}`);
+    assert.deepEqual(stale.sent, []);
   }
 });
 

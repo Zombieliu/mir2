@@ -1181,15 +1181,27 @@ struct PointerLease {
     origin: BagPointerOrigin,
     start: Option<BagUiAction>,
     start_position: Vec2,
+    dragged: bool,
     source_item: Option<ItemModel>,
     belt_geometry: Option<BagBeltDropGeometry>,
     belt_items: Vec<ItemModel>,
     retired_belt_targets: HashSet<u8>,
 }
 
+const BAG_DOUBLE_CLICK_SECONDS: f64 = 0.5;
+const BAG_CLICK_SLOP_SQUARED: f32 = 16.0;
+
+struct BagItemClick {
+    source: BagSelection,
+    item: ItemModel,
+    position: Vec2,
+    at: f64,
+}
+
 #[derive(Resource, Default)]
 struct PointerState {
     lease: Option<PointerLease>,
+    last_item_click: Option<BagItemClick>,
     quarantined: HashSet<u64>,
     /// Multi-pointer gestures require real terminal edges before reuse.
     terminal_quarantined: HashMap<u64, (BagIdentity, u64)>,
@@ -1207,6 +1219,7 @@ impl Plugin for Mir2PortableBagUiPlugin {
             .init_resource::<BagUiPointerEdges>()
             .init_resource::<BagUiIntentQueue>()
             .init_resource::<PointerState>()
+            .init_resource::<Time<Real>>()
             .add_systems(Startup, spawn_bag_root)
             .add_systems(
                 Update,
@@ -1279,9 +1292,15 @@ fn apply_bag_context(
             .as_ref()
             .is_some_and(|lease| !bag_to_belt_source_current(lease, &context, &model))
     {
+        pointer.last_item_click = None;
         if let Some(lease) = pointer.lease.take() {
             pointer.quarantined.insert(lease.pointer_id);
         }
+    }
+    if pointer.last_item_click.as_ref().is_some_and(|click|
+        resolve_exact(&model.inventory, click.source) != Some(&click.item)
+            || model.blocked_unique_ids.contains(&click.source.unique_id)) {
+        pointer.last_item_click = None;
     }
     if old_identity != Some(context.identity) {
         pointer.last_sequence = 0;
@@ -1390,6 +1409,7 @@ fn logical_node_rect(
 }
 
 fn process_bag_pointer_edges(
+    time: Res<Time<Real>>,
     context: Res<BagUiHostContext>,
     model: Res<BagUiReadModel>,
     mut state: ResMut<BagUiState>,
@@ -1441,6 +1461,7 @@ fn process_bag_pointer_edges(
         }
         pointer.last_sequence = edge.sequence;
         if edge.phase == BagPointerPhase::Blur {
+            pointer.last_item_click = None;
             if let Some(lease) = pointer.lease.take() {
                 pointer.quarantined.insert(lease.pointer_id);
             }
@@ -1509,6 +1530,7 @@ fn process_bag_pointer_edges(
         match edge.phase {
             BagPointerPhase::Down => {
                 if let Some(lease) = pointer.lease.take() {
+                    pointer.last_item_click = None;
                     pointer.terminal_quarantined.insert(
                         lease.pointer_id,
                         (lease.identity, lease.presentation_revision),
@@ -1551,6 +1573,7 @@ fn process_bag_pointer_edges(
                     .cloned(),
                     _ => None,
                 };
+                if source_item.is_none() { pointer.last_item_click = None; }
                 pointer.lease = Some(PointerLease {
                     pointer_id: edge.pointer_id,
                     identity: edge.identity,
@@ -1558,6 +1581,7 @@ fn process_bag_pointer_edges(
                     origin: edge.origin,
                     start,
                     start_position: Vec2::new(edge.x, edge.y),
+                    dragged: false,
                     source_item,
                     belt_geometry: model.belt_drop_geometry.clone(),
                     belt_items: model
@@ -1585,13 +1609,21 @@ fn process_bag_pointer_edges(
                         .unwrap_or_default(),
                 });
             }
-            BagPointerPhase::Move => {}
+            BagPointerPhase::Move => {
+                if let Some(lease) = pointer.lease.as_mut().filter(|lease| lease.pointer_id == edge.pointer_id) {
+                    if Vec2::new(edge.x, edge.y).distance_squared(lease.start_position) >= BAG_CLICK_SLOP_SQUARED {
+                        lease.dragged = true;
+                        pointer.last_item_click = None;
+                    }
+                }
+            }
             BagPointerPhase::Cancel => {
                 if pointer
                     .lease
                     .as_ref()
                     .is_some_and(|lease| lease.pointer_id == edge.pointer_id)
                 {
+                    pointer.last_item_click = None;
                     pointer.lease = None;
                 }
             }
@@ -1625,6 +1657,7 @@ fn process_bag_pointer_edges(
                 );
                 // The lease is consumed before validating or queuing any callback.
                 if end.is_none() && state.detail.is_none() {
+                    pointer.last_item_click = None;
                     if let Some(kind) =
                         bag_to_belt_drop(&lease, Vec2::new(edge.x, edge.y), &context, &model)
                     {
@@ -1650,6 +1683,7 @@ fn process_bag_pointer_edges(
                 ) = (start, end)
                 {
                     if from != to {
+                        pointer.last_item_click = None;
                         let source = BagSelection {
                             container: 0,
                             slot: from,
@@ -1672,6 +1706,43 @@ fn process_bag_pointer_edges(
                     }
                 }
                 if start == end {
+                    if let BagUiAction::Paint(BagPaintAction::InspectCell { container: 0, slot, unique_id: Some(unique_id) }) = start {
+                        let source = BagSelection { container: 0, slot, unique_id };
+                        let position = Vec2::new(edge.x, edge.y);
+                        let item = resolve_exact(&model.inventory, source);
+                        let click = !lease.dragged
+                            && position.distance_squared(lease.start_position) < BAG_CLICK_SLOP_SQUARED
+                            && !context.presentation.is_some_and(|presentation| presentation.touch)
+                            && !model.blocked_unique_ids.contains(&unique_id)
+                            // Consuming a picked-up source from another cell is
+                            // a move, never the first half of target-item use.
+                            && state.move_source.is_none_or(|moving| moving == source)
+                            && item.is_some_and(|item| lease.source_item.as_ref() == Some(item));
+                        let previous = pointer.last_item_click.take();
+                        if click {
+                            let item = item.expect("validated item click");
+                            let now = time.elapsed_secs_f64();
+                            let double_click = previous.is_some_and(|previous|
+                                previous.source == source && previous.item == *item
+                                    && position.distance_squared(previous.position) < BAG_CLICK_SLOP_SQUARED
+                                    && (0.0..=BAG_DOUBLE_CLICK_SECONDS).contains(&(now - previous.at)));
+                            // Crystal clears the picked-up cell before double-click UseItem.
+                            // This also keeps the second click from becoming a move operation.
+                            if double_click {
+                                state.move_source = None;
+                                state.selected = Some(source);
+                                state.selected_quest_slot = None;
+                                let action = if item.equip_slot.is_some() { BagUiAction::Equip } else { BagUiAction::Use };
+                                activate_action(action, &context, &model, &mut state, &mut queue);
+                                continue;
+                            }
+                            pointer.last_item_click = Some(BagItemClick {
+                                source, item: item.clone(), position, at: now,
+                            });
+                        }
+                    } else {
+                        pointer.last_item_click = None;
+                    }
                     if start == BagUiAction::Inspect {
                         state.detail = selected_paint_cell(&state, &model).and_then(|cell| {
                             painted_detail(
@@ -1681,7 +1752,7 @@ fn process_bag_pointer_edges(
                     } else {
                         activate_action(start, &context, &model, &mut state, &mut queue);
                     }
-                }
+                } else { pointer.last_item_click = None; }
             }
             BagPointerPhase::Blur => unreachable!(),
         }
@@ -3459,6 +3530,7 @@ mod tests {
             .init_resource::<BagUiIntentQueue>()
             .init_resource::<BagUiPointerEdges>()
             .init_resource::<PointerState>()
+            .init_resource::<Time<Real>>()
             .add_systems(
                 Update,
                 (apply_bag_context, process_bag_pointer_edges).chain(),
@@ -3492,6 +3564,158 @@ mod tests {
             x: 100.0,
             y: 100.0,
             button: 0,
+        }
+    }
+
+    fn item_click(app: &mut App, sequence: u64) {
+        let context = app.world().resource::<BagUiHostContext>().clone();
+        app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([
+            edge(&context, sequence, BagPointerPhase::Down),
+            edge(&context, sequence + 1, BagPointerPhase::Up),
+        ]);
+        app.update();
+    }
+
+    #[test]
+    fn double_click_equips_zero_id_item_once_without_a_move_or_held_pointer() {
+        let mut app = fixture();
+        app.world_mut().resource_mut::<BagUiReadModel>().inventory.items[0].equip_slot = Some("Weapon".into());
+        item_click(&mut app, 1);
+        assert!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().is_empty());
+        app.world_mut().resource_mut::<Time<Real>>().advance_by(std::time::Duration::from_millis(150));
+        // A previously armed picked-up item must be cleared by double-click use.
+        app.world_mut().resource_mut::<BagUiState>().move_source = Some(BagSelection { container: 0, slot: 0, unique_id: 0 });
+        item_click(&mut app, 3);
+        let intents = app.world_mut().resource_mut::<BagUiIntentQueue>().drain();
+        assert_eq!(intents.len(), 1);
+        assert!(matches!(intents[0].kind, BagUiIntentKind::EquipItem { source } if source.unique_id == 0));
+        assert!(app.world().resource::<BagUiState>().move_source.is_none());
+        assert!(app.world().resource::<PointerState>().lease.is_none());
+        assert!(app.world().resource::<PointerState>().last_item_click.is_none());
+        let context = app.world().resource::<BagUiHostContext>().clone();
+        app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(edge(&context, 5, BagPointerPhase::Up));
+        app.update();
+        assert!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().is_empty());
+    }
+
+    #[test]
+    fn double_click_uses_consumable_without_equipment_intent() {
+        let mut app = fixture();
+        item_click(&mut app, 1);
+        app.world_mut().resource_mut::<BagUiHostContext>().model_revision += 1;
+        app.world_mut().resource_mut::<BagUiReadModel>().player.hp = 10;
+        app.update();
+        item_click(&mut app, 3);
+        let intents = app.world_mut().resource_mut::<BagUiIntentQueue>().drain();
+        assert_eq!(intents.len(), 1);
+        assert!(matches!(intents[0].kind, BagUiIntentKind::UseItem { source } if source.unique_id == 0));
+    }
+
+    #[test]
+    fn double_click_other_item_while_holding_move_only_moves_without_using_target() {
+        let mut app = fixture();
+        app.world_mut().resource_mut::<BagUiReadModel>().inventory.items.push(ItemModel {
+            unique_id: Some(9), slot: 1, container: 0,
+            name: "Copper Ring".into(), equip_slot: Some("RingLeft".into()), ..default()
+        });
+        app.world_mut().spawn((
+            BagUiAction::Paint(BagPaintAction::InspectCell { container: 0, slot: 1, unique_id: Some(9) }),
+            ComputedNode { size: Vec2::new(100.0, 100.0), inverse_scale_factor: 0.5, ..default() },
+            bevy::ui::UiGlobalTransform::from_xy(400.0, 200.0),
+            InheritedVisibility::VISIBLE,
+        ));
+        app.world_mut().resource_mut::<BagUiState>().move_source = Some(BagSelection {
+            container: 0, slot: 0, unique_id: 0,
+        });
+        let context = app.world().resource::<BagUiHostContext>().clone();
+        for sequence in [1, 3] {
+            let mut down = edge(&context, sequence, BagPointerPhase::Down);
+            down.x = 200.0;
+            let mut up = edge(&context, sequence + 1, BagPointerPhase::Up);
+            up.x = 200.0;
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([down, up]);
+            app.update();
+            if sequence == 1 {
+                assert!(app.world().resource::<PointerState>().last_item_click.is_none());
+            }
+        }
+        // Keep the same authoritative model before any move ACK arrives.
+        let intents = app.world_mut().resource_mut::<BagUiIntentQueue>().drain();
+        assert_eq!(intents.len(), 1);
+        assert!(matches!(intents[0].kind,
+            BagUiIntentKind::MoveItem { source, target_slot: 1 } if source.unique_id == 0));
+        assert!(app.world().resource::<BagUiState>().move_source.is_none());
+        assert!(app.world().resource::<PointerState>().lease.is_none());
+    }
+
+    #[test]
+    fn expired_or_cancelled_or_dragged_click_is_not_double_click() {
+        for case in ["expired", "cancel", "blur", "drag_return", "right_click", "owner", "layout", "closed", "touch", "blocked", "blocked_interval", "replacement", "different_position"] {
+            let mut app = fixture();
+            item_click(&mut app, 1);
+            let context = app.world().resource::<BagUiHostContext>().clone();
+            let mut sequence = 3;
+            match case {
+                "expired" => app.world_mut().resource_mut::<Time<Real>>().advance_by(std::time::Duration::from_millis(501)),
+                "cancel" | "blur" => {
+                    app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([
+                        edge(&context, 3, BagPointerPhase::Down),
+                        edge(&context, 4, if case == "cancel" { BagPointerPhase::Cancel } else { BagPointerPhase::Blur }),
+                    ]);
+                    app.update();
+                    sequence = 5;
+                }
+                "drag_return" => {
+                    let mut moved = edge(&context, 4, BagPointerPhase::Move);
+                    moved.x += 10.0;
+                    app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([
+                        edge(&context, 3, BagPointerPhase::Down), moved,
+                        edge(&context, 5, BagPointerPhase::Up),
+                    ]);
+                    app.update();
+                    sequence = 6;
+                }
+                "right_click" => {
+                    let mut down = edge(&context, 3, BagPointerPhase::Down);
+                    down.button = 2;
+                    let mut up = edge(&context, 4, BagPointerPhase::Up);
+                    up.button = 2;
+                    app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([down, up]);
+                    app.update();
+                    sequence = 5;
+                }
+                "owner" => app.world_mut().resource_mut::<BagUiHostContext>().identity.owner_revision += 1,
+                "layout" => app.world_mut().resource_mut::<BagUiHostContext>().presentation_revision += 1,
+                "closed" => {
+                    app.world_mut().resource_mut::<BagUiHostContext>().bag_open = false;
+                    app.update();
+                    app.world_mut().resource_mut::<BagUiHostContext>().bag_open = true;
+                }
+                "touch" => app.world_mut().resource_mut::<BagUiHostContext>().presentation = Some(BagUiPresentation {
+                    logical_width: 1280.0, logical_height: 720.0, stage_css_scale: 1.0, touch: true,
+                }),
+                "blocked" => { app.world_mut().resource_mut::<BagUiReadModel>().blocked_unique_ids.insert(0); }
+                "blocked_interval" => {
+                    app.world_mut().resource_mut::<BagUiReadModel>().blocked_unique_ids.insert(0);
+                    app.update();
+                    app.world_mut().resource_mut::<BagUiReadModel>().blocked_unique_ids.clear();
+                }
+                "replacement" => { app.world_mut().resource_mut::<BagUiReadModel>().inventory.items[0].name = "Different instance data".into(); }
+                "different_position" => {
+                    let mut down = edge(&context, 3, BagPointerPhase::Down);
+                    down.x += 10.0;
+                    let mut up = edge(&context, 4, BagPointerPhase::Up);
+                    up.x += 10.0;
+                    app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([down, up]);
+                    app.update();
+                    assert!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().is_empty(), "{case}");
+                    continue;
+                }
+                _ => unreachable!(),
+            }
+            item_click(&mut app, sequence);
+            assert!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().is_empty(), "{case}");
+            assert!(app.world().resource::<PointerState>().lease.is_none(), "{case}");
         }
     }
 

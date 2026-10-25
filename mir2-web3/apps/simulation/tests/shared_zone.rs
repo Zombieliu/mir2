@@ -10925,8 +10925,15 @@ fn living_native_monsters_do_not_walk_onto_the_same_tile() {
             .iter()
             .find(|monster| monster.object_id == 9100)
             .map(|monster| monster.position.clone()),
-        Some(Point { x: 333, y: 270 })
+        Some(Point { x: 332, y: 269 })
     );
+    assert!(has_packet(&outbounds, &first, |packet| matches!(
+        packet,
+        ServerPacket::ObjectWalk { movement }
+            if movement.object_id == 9100
+                && movement.position == (Point { x: 332, y: 269 })
+                && movement.direction == MirDirection::UpLeft
+    )));
 }
 
 #[test]

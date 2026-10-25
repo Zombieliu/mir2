@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';import test from 'node:test';import {readFileSync,writeFileSync} from 'node:fs';import ts from 'typescript';
 const nativeKeyboardDefaults=JSON.parse(readFileSync(new URL('../../game-client/client-bevy/src/crystal_ui/keyboard_defaults.json',import.meta.url),'utf8'));
 const cache=new Map();function load(name){if(cache.has(name))return cache.get(name);const m={exports:{}};cache.set(name,m.exports);new Function('exports','module','require',ts.transpileModule(readFileSync(new URL(`../lib/${name}.ts`,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(m.exports,m,n=>n==='../../game-client/client-bevy/src/crystal_ui/keyboard_defaults.json'?{default:nativeKeyboardDefaults}:load(n.replace('./','')));return m.exports;}
-const {CombatHost,supportsCombat,parseCombatProof}=load('bevy-combat-input');
+const {CombatHost,supportsCombat,supportsForcedPlayerAttack,parseCombatProof}=load('bevy-combat-input');
 const {defaultCrystalKeyBindings}=load('player-ui-preferences');
 test('actual Shell shortcuts precede Winit canvas cancellation and preserve capture, modal, focus and editable gates',()=>{
  const source=readFileSync(new URL('../app/original-client-shell.tsx',import.meta.url),'utf8');
@@ -12,7 +12,7 @@ test('actual Shell shortcuts precede Winit canvas cancellation and preserve capt
   ts.forEachChild(n,visit);
  }visit(ast);assert.ok(effect);assert.ok(editable);
  const listeners=[],calls=[];
- class HTMLElement{isContentEditable=false;}class HTMLInputElement extends HTMLElement{}class HTMLTextAreaElement extends HTMLElement{}class HTMLSelectElement extends HTMLElement{}
+ class HTMLElement{isContentEditable=false;closest(){return null;}}class HTMLInputElement extends HTMLElement{}class HTMLTextAreaElement extends HTMLElement{}class HTMLSelectElement extends HTMLElement{}
  const flags={capture:false,focus:true,modal:false};
  const scope={HTMLElement,HTMLInputElement,HTMLTextAreaElement,HTMLSelectElement,screen:'game',selectedEntity:null,
   world:{beltItems:[],knownSkills:[]},window:{addEventListener:(type,fn,capture)=>listeners.push({type,fn,capture:capture===true}),
@@ -126,6 +126,21 @@ test('actual learned-skill packets retire the physical combat source while cast 
  const x=combatSourceFixture();x.commit();const physical=x.scope.combatBaselineSourceRef.current;
  x.api.captureSpellsGatewayEvent({type:'packet',packet:'MagicCast',payload:{spell:'FireBall'}},1);assert.equal(x.scope.combatBaselineSourceRef.current,physical);
 });
+test('actual Page delivers current HalfMoon ACK to combat and preserves it across later controller owners',()=>{
+ const x=combatSourceFixture();x.snapshot.knownSkills=[{id:90,key:'halfMoon',spell:'HalfMoon',hotkey:16,castKind:'toggle',canUse:false}];x.commit();
+ const physical=x.scope.combatBaselineSourceRef.current,cachedOwner=x.scope.combatRawRef.current.owner;
+ x.scope.questSkillsBaselineCurrentRef.current=true;
+ for(const [payload,connection] of [[{objectId:3,spell:'HalfMoon',canUse:true},2],[{objectId:4,spell:'HalfMoon',canUse:true},1],[{objectId:'3',spell:'HalfMoon',canUse:true},1],[{objectId:3,spell:'HalfMoon',canUse:1},1],[{objectId:3,spell:4,canUse:true},1],[{objectId:3,spell:'Unknown',canUse:true},1]]){
+  x.api.captureSpellsGatewayEvent({type:'packet',packet:'SpellToggle',payload},connection);assert.equal(x.f.sent.learned[0].canUse,false);assert.equal(x.read().snapshot.knownSkills[0].canUse,false);
+ }
+ x.api.captureSpellsGatewayEvent({type:'packet',packet:'SpellToggle',payload:{objectId:3,spell:'HalfMoon',canUse:true}},1);
+ assert.equal(x.f.sent.learned[0].canUse,true);assert.equal(x.f.sent.learned[0].castKind,'toggle');assert.equal(x.read().snapshot.knownSkills[0].canUse,true);
+ assert.equal(x.scope.questSkillsBaselineCurrentRef.current,true);assert.equal(x.scope.combatBaselineSourceRef.current,physical);
+ x.f.input.owner={...x.f.input.owner,ownerRevision:1};const baseline=x.read();assert.ok(x.f.host.observeSnapshot(baseline.snapshot,baseline.owner));
+ assert.equal(x.f.sent.learned[0].canUse,true);assert.equal(x.scope.combatRawRef.current.owner,cachedOwner);
+ x.api.captureSpellsGatewayEvent({type:'packet',packet:'SpellToggle',payload:{objectId:0,spell:'HalfMoon',canUse:false}},1);
+ assert.equal(x.f.sent.learned[0].canUse,false);assert.equal(x.f.sent.learned[0].castKind,'toggle');
+});
 test('cached combat diagnostics never poll, send, withdraw or consume a proof',()=>{
  const f=fixture();let reads=0,writes=0,withdrawals=0;
  for(const key of ['getMir2CombatInputStatus','setMir2CombatInputSnapshot','setMir2CombatInputEdge','withdrawMir2CombatInputSnapshot']){
@@ -153,6 +168,39 @@ function fixture(existing){let sent=null,sink=null,now=10,frame=1,current=true,r
  return{host,input,runtime,raw,calls,captures,edges,proof,emit:p=>JSON.parse(sink(JSON.stringify({type:'wire',proof:p??proof()}))),get sent(){return sent;},get sink(){return sink;},get ready(){return ready;},get clear(){return clear;},get clearWork(){return clearWork;},set hook(v){hook=v;},set now(v){now=v;},set current(v){current=v;},set frame(v){frame=v;}};
 }
 test('independent exact combat caps preserve old fallback and recognize compiled startup waiting',()=>{const f=fixture();assert.ok(supportsCombat(f.runtime));assert.equal(supportsCombat({}),false);assert.equal(supportsCombat({...f.runtime,getMir2CombatInputCapabilities:()=>JSON.stringify({...caps,questUiAbiVersion:1})}),false);assert.ok(supportsCombat({...f.runtime,getMir2CombatInputCapabilities:()=>JSON.stringify({...caps,startup:false})}));});
+test('combat capabilities explicitly distinguish forced-player input v2 from ordinary v1',()=>{
+ const f=fixture();assert.equal(supportsForcedPlayerAttack(f.runtime),false);
+ const v2={...f.runtime,getMir2CombatInputCapabilities:()=>JSON.stringify({...caps,combatInputAbiVersion:2})};
+ assert.ok(supportsCombat(v2));assert.ok(supportsForcedPlayerAttack(v2));
+ for(const invalid of [{combatInputAbiVersion:0},{combatInputAbiVersion:3},{combatInputAbiVersion:'2'},{combatIntentAbiVersion:2},{schemaVersion:2}]){
+  const runtime={...f.runtime,getMir2CombatInputCapabilities:()=>JSON.stringify({...caps,...invalid})};
+  assert.equal(supportsCombat(runtime),false);assert.equal(supportsForcedPlayerAttack(runtime),false);
+ }
+ const runtimeSource=readFileSync(new URL('../../game-client/runtime/src/combat_input_host.rs',import.meta.url),'utf8');
+ assert.match(runtimeSource,/"combatInputAbiVersion":2,"combatIntentAbiVersion":1/);
+});
+test('new host omits forced input for strict v1 runtimes and preserves monster dispatch',()=>{
+ const f=fixture(),legacyKeys=Object.keys(f.sent).sort(),set=f.runtime.setMir2CombatInputSnapshot;
+ f.runtime.setMir2CombatInputSnapshot=json=>{
+  assert.deepEqual(Object.keys(JSON.parse(json)).sort(),legacyKeys,'legacy deny_unknown_fields schema');return set(json);
+ };
+ f.input.facts.forceAttack=true;f.input.facts.hp--;
+ f.host.tick();assert.ok(f.ready);assert.equal(Object.hasOwn(f.sent,'forceAttack'),false);
+ const sent=f.sent,captures=f.captures.length;
+ f.input.facts.forceAttack=false;f.host.tick();
+ assert.equal(f.sent,sent);assert.equal(f.captures.length,captures,'Shift release does not change the v1 model');
+ const proof=f.proof({slot:null,skillId:null,spell:null,command:{type:'attack',objectId:4}});
+ assert.equal(f.emit(proof).outcome,'confirmedSend');assert.equal(f.calls.length,1);
+});
+test('v2 receives held and released forced input while downgrade removes the field',()=>{
+ const f=fixture();let abi=2;f.runtime.getMir2CombatInputCapabilities=()=>JSON.stringify({...caps,combatInputAbiVersion:abi});
+ f.host.tick();assert.equal(f.sent.forceAttack,false);
+ f.input.facts.forceAttack=true;f.host.tick();assert.equal(f.sent.forceAttack,true);
+ const held=f.sent.modelRevision;f.input.facts.forceAttack=false;f.host.tick();
+ assert.equal(f.sent.forceAttack,false);assert.ok(f.sent.modelRevision>held);
+ f.input.facts.forceAttack=true;abi=1;f.host.tick();assert.ok(f.ready);assert.equal(Object.hasOwn(f.sent,'forceAttack'),false);
+ abi=3;f.host.tick();assert.equal(f.sent,null);assert.equal(f.ready,false);
+});
 test('actual setter and event capture preserve raw null/zero and explicit slot16',()=>{const f=fixture();assert.equal(f.sent.learned[0].icon,0);assert.equal(f.sent.learned[0].need2,null);assert.equal(f.sent.learned[0].magicName,'火球');assert.ok(f.host.edge({type:'key',key:'F1',modifiers:{ctrl:false,alt:false,shift:false,tilde:false}}));const edge=JSON.parse(f.edges.at(-1));assert.deepEqual(edge.identity,f.sent.identity);assert.equal(edge.sequence,1);assert.equal(edge.action.type,'key');
  if(process.env.MIR2_M11_COMBAT_SNAPSHOT_FIXTURE)writeFileSync(process.env.MIR2_M11_COMBAT_SNAPSHOT_FIXTURE,f.captures.at(-1),{flag:'wx'});
  if(process.env.MIR2_M11_COMBAT_EDGE_FIXTURE)writeFileSync(process.env.MIR2_M11_COMBAT_EDGE_FIXTURE,f.edges.at(-1),{flag:'wx'});
@@ -166,6 +214,16 @@ test('serialization binds plain exact command and rejects extra or malformed wir
 test('raw exact local row/spell survives only actual unique current binding',()=>{for(const rows of [[{...fixture().raw.knownSkills[0],spell:'Healing'}],[{spell:'Healing'},...fixture().raw.knownSkills],[...fixture().raw.knownSkills,...fixture().raw.knownSkills],[{...fixture().raw.knownSkills[0],hotkey:16}]]){const f=fixture();f.host.observeSnapshot({...f.raw,knownSkills:rows},f.input.owner);assert.equal(f.emit().outcome,'definitelyUnsent');}});
 for(const [name,rows] of [['nonarray',null],['oversize',Array.from({length:513},()=>({spell:'FireBall'}))]])test(`bad current ${name} stays withdrawn after 50ms; valid recover and stale bad owner cannot revoke`,()=>{const f=fixture(),old=f.input.owner;assert.ok(f.ready);assert.equal(f.host.observeSnapshot({...f.raw,knownSkills:rows},old),false);f.now=60;f.host.tick();assert.equal(f.ready,false);assert.equal(f.emit().outcome,'definitelyUnsent');assert.equal(f.calls.length,0);assert.ok(f.host.observeSnapshot(f.raw,old));assert.ok(f.ready);f.input.owner={...old,sessionGeneration:3,playerObjectId:5};f.input.facts.player.objectId='5';assert.ok(f.host.observeSnapshot({...f.raw,playerObjectId:5},f.input.owner));const before=f.sent;assert.equal(f.host.observeSnapshot({...f.raw,knownSkills:rows},old),false);f.host.tick();assert.equal(f.sent,before);assert.ok(f.ready);});
 test('actual cast clock uses current connection observation and exact nonzero actor delay',()=>{const f=fixture();assert.equal(f.host.observePacket('MagicDelay',{spell:'FireBall',delay:3400},f.input.owner),false);assert.equal(f.host.observePacket('MagicDelay',{spell:'FireBall',objectId:0,delay:3400},f.input.owner),false);f.now=100;assert.ok(f.host.observePacket('MagicCast',{spell:'FireBall'},f.input.owner));f.now=200;assert.ok(f.host.observePacket('MagicDelay',{spell:'FireBall',objectId:3,delay:3400},f.input.owner));assert.deepEqual(f.sent.timing,[{spell:'FireBall',sequence:1,observedAtMs:100,delayMs:3400}]);assert.equal(f.host.observePacket('MagicCast',{spell:'FireBall'},{...f.input.owner,sessionGeneration:9}),false);assert.equal(f.host.observePacket('Magic',{spell:'FireBall'},f.input.owner),false);assert.equal(f.host.observePacket('MagicDelay',{spell:'FireBall',objectId:4,delay:10},f.input.owner),false);f.host.observeSnapshot({...f.raw,snapshotSerial:999},f.input.owner);assert.equal(f.sent.timing[0].sequence,1);});
+test('combat HalfMoon ACK updates enabled state without changing its definition or trusting another actor/session',()=>{
+ const f=fixture();f.raw.knownSkills=[{id:90,key:'halfMoon',spell:'HalfMoon',hotkey:16,castKind:'toggle',canUse:false},{id:91,spell:'Slaying',castKind:'passive',canUse:false}];assert.ok(f.host.observeSnapshot(f.raw,f.input.owner));
+ for(const [payload,owner] of [[{objectId:4,spell:'HalfMoon',canUse:true},f.input.owner],[{objectId:3,spell:'HalfMoon',canUse:true},{...f.input.owner,sessionGeneration:9}],[{objectId:3,spell:'HalfMoon',canUse:'true'},f.input.owner],[{objectId:'3',spell:'HalfMoon',canUse:true},f.input.owner],[{objectId:3,spell:4,canUse:true},f.input.owner],[{objectId:3,spell:'Unknown',canUse:true},f.input.owner]]){
+  assert.equal(f.host.observePacket('SpellToggle',payload,owner),false);assert.equal(f.sent.learned[0].canUse,false);
+ }
+ assert.ok(f.host.observePacket('SpellToggle',{objectId:3,spell:'HalfMoon',canUse:true},f.input.owner));assert.equal(f.sent.learned[0].canUse,true);assert.equal(f.sent.learned[0].castKind,'toggle');
+ assert.equal(f.raw.knownSkills[0].canUse,false,'host retains detached authoritative rows');
+ assert.ok(f.host.observePacket('SpellToggle',{objectId:0,spell:'HalfMoon',canUse:false},f.input.owner));assert.equal(f.sent.learned[0].castKind,'toggle');
+ assert.ok(f.host.observePacket('SpellToggle',{objectId:3,spell:'Slaying',canUse:true},f.input.owner));assert.equal(f.sent.learned[1].castKind,'passive');
+});
 test('delay before first cast is metadata; repeated delay never resets real start',()=>{const f=fixture();f.raw.knownSkills[0].delayMs=200;f.host.observeSnapshot(f.raw,f.input.owner);assert.ok(f.host.observePacket('MagicDelay',{spell:'FireBall',objectId:3,delay:2200},f.input.owner));assert.deepEqual(f.sent.timing,[{spell:'FireBall',sequence:0,observedAtMs:10,delayMs:2200}]);f.now=100;assert.ok(f.host.observePacket('MagicCast',{spell:'FireBall'},f.input.owner));f.now=500;assert.ok(f.host.observePacket('MagicDelay',{spell:'FireBall',objectId:3,delay:2200},f.input.owner));assert.deepEqual(f.sent.timing,[{spell:'FireBall',sequence:1,observedAtMs:100,delayMs:2200}]);assert.equal(f.host.observePacket('MagicDelay',{spell:'FireBall',objectId:3,delay:9999},{...f.input.owner,sessionGeneration:9}),false);});
 test('confirmed owner packet metadata survives before the first complete raw model',()=>{const f=fixture();const host=new CombatHost({runtime:f.runtime,isCurrent:()=>true,read:()=>f.input,now:()=>10,onReady:()=>{},onWire:()=> 'definitelyUnsent',onApproach:()=>{},onClear:()=>{}});assert.ok(host.observePacket('MagicDelay',{spell:'FireBall',objectId:3,delay:2200},f.input.owner));assert.ok(host.observePacket('MagicCast',{spell:'FireBall'},f.input.owner));assert.ok(host.observeSnapshot(f.raw,f.input.owner));assert.deepEqual(f.sent.timing,[{spell:'FireBall',sequence:1,observedAtMs:10,delayMs:2200}]);});
 test('same-runtime HMR/late cleanup/owner replacement burn new runs without old takeover',()=>{const f=fixture(),old=f.host;let next;next=new CombatHost({runtime:f.runtime,isCurrent:()=>true,read:()=>f.input,now:()=>10,onReady:()=>{},onWire:()=> 'definitelyUnsent',onApproach:()=>{},onClear:()=>{}});next.observeSnapshot(f.raw,f.input.owner);const sink=f.sink,before=f.sent;f.input.owner={...f.input.owner,ownerRevision:1};assert.equal(old.observeSnapshot(f.raw,f.input.owner),false);old.stop();assert.equal(f.sink,sink);assert.equal(f.clear,0);assert.ok(next.run>old.run);next.observeSnapshot(f.raw,f.input.owner);assert.ok(next.run>before.identity.controllerRun);});
@@ -279,7 +337,12 @@ test('production integration captures raw before coalescing and final event proo
  const pearlGate=statements[authClaimIndex+5];
  assert.ok(ts.isIfStatement(pearlGate));assert.equal(normalized(pearlGate.expression),'options?.npcPearlBuyProof && !npcBuyDispatcher?.claimPearl(options.npcPearlBuyProof,wireCommand,serialized,socket, () => npcPearlSendCurrent(options.npcPearlBuyProof!,wireCommand,socket))');
  assert.equal(pearlGate.elseStatement,undefined);assert.ok(ts.isReturnStatement(pearlGate.thenStatement));
- assert.equal(pearlGate.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);
+ assert.equal(normalized(pearlGate.thenStatement.expression),'rejectNpcPurchaseSendGate("pearlClaimRejected")');
+ const rejectionDeclaration=statements.find(n=>ts.isVariableStatement(n)&&n.declarationList.declarations.some(d=>d.name.getText(sendAst)==='rejectNpcPurchaseSendGate'));
+ assert.ok(rejectionDeclaration,'Pearl rejection helper is a local pre-send declaration');
+ const rejectionBody=rejectionDeclaration.declarationList.declarations.find(d=>d.name.getText(sendAst)==='rejectNpcPurchaseSendGate').initializer.body;
+ assert.ok(ts.isBlock(rejectionBody));
+ const rejectReturn=rejectionBody.statements.at(-1);assert.ok(ts.isReturnStatement(rejectReturn));assert.equal(rejectReturn.expression.kind,ts.SyntaxKind.FalseKeyword);
  const rankingInspectGate=statements[authClaimIndex+6];
  assert.ok(ts.isIfStatement(rankingInspectGate));assert.equal(normalized(rankingInspectGate.expression),rankingInspectCondition);
  assert.equal(rankingInspectGate.elseStatement,undefined);assert.ok(ts.isReturnStatement(rankingInspectGate.thenStatement));
@@ -349,7 +412,8 @@ test('production integration captures raw before coalescing and final event proo
  for(const proof of ['heroProof','guildBuffProof','cashProof','creatureProof']) assert.match(normalized(appendedClaims[5].thenStatement),new RegExp('options\\?\\.'+proof));
  const npcFinalGuards=statements.slice(claimIndex+7,claimIndex+11);
  assert.equal(npcFinalGuards.length,4);
- for(const guard of npcFinalGuards){assert.ok(ts.isIfStatement(guard));assert.equal(guard.elseStatement,undefined);assert.ok(ts.isReturnStatement(guard.thenStatement));assert.equal(guard.thenStatement.expression.kind,ts.SyntaxKind.FalseKeyword);}
+ const npcFinalRejections=['rejectNpcPurchaseSendGate("legacyClaimRejected")','rejectNpcPurchaseSendGate("finalInputBlocked")','false','rejectNpcPurchaseSendGate("goldClaimRejected")'];
+ for(const [index,guard] of npcFinalGuards.entries()){assert.ok(ts.isIfStatement(guard));assert.equal(guard.elseStatement,undefined);assert.ok(ts.isReturnStatement(guard.thenStatement));assert.equal(normalized(guard.thenStatement.expression),npcFinalRejections[index]);}
  // The whole actual early admission block is retained. Mixed NPC proofs on a
  // combat command and a Buy carrying both proof kinds must never reach entry.
  const npcEarlyGuards=statements.filter(n=>ts.isIfStatement(n)&&[
@@ -369,15 +433,15 @@ test('production integration captures raw before coalescing and final event proo
  const receipt=statements[socketIndex+1];
  assert.ok(ts.isIfStatement(receipt));assert.equal(normalized(receipt.expression),'options?.npcBuyProof || options?.npcPearlBuyProof');
  assert.equal(receipt.thenStatement.getText(sendAst),'npcBuyDispatcher?.transportResult((options.npcPearlBuyProof ?? options.npcBuyProof)!, "flushed");');
- assert.equal(normalized(socketTry.catchClause.block),'{ if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof); if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof); if (options?.heroProof) heroOperationsRef.current.outcomeUnknown(options.heroProof); if (options?.cashProof) cashPurchasesRef.current.markUnknown(options.cashProof); if (options?.creatureProof) creatureOperationsRef.current.markUnknown(options.creatureProof); if (!options?.npcBuyProof && !options?.npcPearlBuyProof) throw error; npcBuyDispatcher?.transportResult((options.npcPearlBuyProof ?? options.npcBuyProof)!, "unknown"); console.error("[mir2] NPC purchase send outcome is unknown", error); return false; }');
- const npcGateCode=ts.transpileModule([...npcEarlyGuards,...npcFinalGuards,socketTry,receipt].map(n=>n.getText(sendAst)).join('\n')+'\nreturn true;',
+ assert.equal(normalized(socketTry.catchClause.block),'{ if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof); if (options?.guildBuffProof) guildBuffOperationsRef.current.outcomeUnknown(options.guildBuffProof); if (options?.heroProof) heroOperationsRef.current.outcomeUnknown(options.heroProof); if (options?.cashProof) cashPurchasesRef.current.markUnknown(options.cashProof); if (options?.creatureProof) creatureOperationsRef.current.markUnknown(options.creatureProof); if (!options?.npcBuyProof && !options?.npcPearlBuyProof) throw error; npcBuyDispatcher?.transportResult((options.npcPearlBuyProof ?? options.npcBuyProof)!, "unknown"); console.error("[mir2] NPC purchase send outcome is unknown", error); return rejectNpcPurchaseSendGate("sendUnknown"); }');
+ const npcGateCode=ts.transpileModule([rejectionDeclaration,...npcEarlyGuards,...npcFinalGuards,socketTry,receipt].map(n=>n.getText(sendAst)).join('\n')+'\nreturn true;',
   {compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
  const actualNpcGate=new Function('command','wireCommand','options','npcBuyDispatcher','legacyNpcBuyAllowed','socket','serialized','console',
-  'npcShopUiIngressRef','npcShopIntentMatchesCommand','npcShopUiSendCurrent','socketRef','WebSocket',npcGateCode);
+  'npcShopUiIngressRef','npcShopIntentMatchesCommand','npcShopUiSendCurrent','socketRef','WebSocket','recordNpcPurchaseAction','npcPurchaseSendActionRef',npcGateCode);
  const runNpcGate=(command,wireCommand,options,dispatcher,legacy,socket,serialized,console)=>actualNpcGate(
   command,wireCommand,options,dispatcher,legacy,socket,serialized,console,{current:null},
   ()=>assert.fail('idle NPC boundary cannot receive a UI intent'),()=>assert.fail('idle NPC boundary cannot run shared UI entry'),
-  {current:socket},{OPEN:1});
+  {current:socket},{OPEN:1},()=>{},{current:null});
  for(const type of ['magic','attack','rangeAttack','harvest','magicKey']){
   const calls=[],socket={send:value=>calls.push(value)},dispatcher={allows:()=>{calls.push('allows');return false;},claim:()=>{calls.push('claim');return false;},transportResult:()=>calls.push('receipt')},legacy=()=>{calls.push('legacy');return false;};
   assert.equal(runNpcGate({type},{type},{combatProof:{}},dispatcher,legacy,socket,'wire',console),true);
@@ -412,7 +476,7 @@ test('production integration captures raw before coalescing and final event proo
  // Keep the original ten-condition entry text assertion, independently of the
  // exact social/ranking AST guards above, and append only the asserted sole socket boundary.
  const entry=send.slice(send.indexOf("if(options?.mailProof?.commandType==='sendMail'"),send.indexOf('if (options?.socialReplyProof &&'))+'try { socket.send(serialized);';
- assert.match(entry.replace(/\s+/g,' ').trim(),/^if\(options\?\.mailProof\?\.commandType==='sendMail'&&\(!options\.mailProof\.compose\|\|!mailDispatcherRef\.current\?\.composer\.enterSocket\(options\.mailProof\.compose,serialized,socket\)\)\)return false; if \(options\?\.ownerToken && "surface" in options\.ownerToken && options\.ownerToken\.surface === "storage" && \(!storageIntentMatchesCommand\(options\.ownerToken\.intent, wireCommand\) \|\| storageUiIngressRef\.current\?\.claim\(options\.ownerToken\.intent\) !== true\)\) return false; if \(storageReservation\) storageReservation\.enteredSocket = true; if \(wireCommand\.type === "buyItem" && options\?\.npcLegacyBuyProof && !legacyNpcBuyAllowed\(options\.npcLegacyBuyProof, wireCommand, true\)\) return false; if \(wireCommand\.type === "buyItem" && !options\?\.npcUi && npcShopUiIngressRef\.current\?\.blocksInput\(\)\) return false; if \(options\?\.npcUi && \(!npcShopIntentMatchesCommand\(options\.npcUi\.intent, wireCommand\) \|\| npcShopUiIngressRef\.current\?\.claim\(options\.npcUi\.intent\) !== true\)\) return false; if \(options\?\.npcBuyProof && !npcBuyDispatcher\?\.claim\(options\.npcBuyProof, wireCommand, serialized, socket, options\.npcUi \? \(\) => npcShopUiSendCurrent\(options\.npcUi!, socket\) : \(\) => !npcShopUiIngressRef\.current\?\.blocksInput\(\) && socketRef\.current === socket && socket\.readyState === WebSocket\.OPEN\)\) return false; try \{ socket\.send\(serialized\);$/);
+ assert.match(entry.replace(/\s+/g,' ').trim(),/^if\(options\?\.mailProof\?\.commandType==='sendMail'&&\(!options\.mailProof\.compose\|\|!mailDispatcherRef\.current\?\.composer\.enterSocket\(options\.mailProof\.compose,serialized,socket\)\)\)return false; if \(options\?\.ownerToken && "surface" in options\.ownerToken && options\.ownerToken\.surface === "storage" && \(!storageIntentMatchesCommand\(options\.ownerToken\.intent, wireCommand\) \|\| storageUiIngressRef\.current\?\.claim\(options\.ownerToken\.intent\) !== true\)\) return false; if \(storageReservation\) storageReservation\.enteredSocket = true; if \(wireCommand\.type === "buyItem" && options\?\.npcLegacyBuyProof && !legacyNpcBuyAllowed\(options\.npcLegacyBuyProof, wireCommand, true\)\) return rejectNpcPurchaseSendGate\("legacyClaimRejected"\); if \(wireCommand\.type === "buyItem" && !options\?\.npcUi && npcShopUiIngressRef\.current\?\.blocksInput\(\)\) return rejectNpcPurchaseSendGate\("finalInputBlocked"\); if \(options\?\.npcUi && \(!npcShopIntentMatchesCommand\(options\.npcUi\.intent, wireCommand\) \|\| npcShopUiIngressRef\.current\?\.claim\(options\.npcUi\.intent\) !== true\)\) return false; if \(options\?\.npcBuyProof && !npcBuyDispatcher\?\.claim\(options\.npcBuyProof, wireCommand, serialized, socket, options\.npcUi \? \(\) => npcShopUiSendCurrent\(options\.npcUi!, socket\) : \(\) => !npcShopUiIngressRef\.current\?\.blocksInput\(\) && socketRef\.current === socket && socket\.readyState === WebSocket\.OPEN\)\) return rejectNpcPurchaseSendGate\("goldClaimRejected"\); try \{ socket\.send\(serialized\);$/);
  assert.match(s,/skillBarMatch && !combat\?\.supported/);assert.match(r,/combat_input_host::install\(&mut app\)/);
 });
 
@@ -439,6 +503,7 @@ test('actual Page HP overlay callback and combat producer block immediately befo
  const composite={get hidden(){return !worldVisible;},parentElement:stage};
  const mapImage={get complete(){return domLoaded;},get naturalWidth(){return domLoaded?48:0;},get naturalHeight(){return domLoaded?32:0;},parentElement:composite,getBoundingClientRect:()=>({width:48,height:32})};
  const deps={worldRef:{current},combatRawRef:{current:{snapshot:{entities:[],mapFileName:'D001'},owner:f.input.owner}},readCurrentCombatBaseline:()=>({snapshot:f.raw,owner:f.input.owner}),currentSpellsOwner:()=>f.input.owner,currentAuthoritativeSelf:()=>current.entities[0],combatMastersRef:{current:new Map()},document:{activeElement:null,visibilityState:'visible',hasFocus:()=>true,querySelectorAll:selector=>{selectors.push(selector);if(selector.includes('img.scene-backdrop-sprite'))return domPresent?[mapImage]:[];return [{hidden:selector.includes('quest-ui-canvas')||(selector==='.game-world-composite'?!worldVisible:!canvasVisible),parentElement:stage,getBoundingClientRect:()=>({width:10,height:10})}];}},HTMLElement:class{},getComputedStyle:surface=>({display:surface.display??'block',visibility:surface.hidden?'hidden':'visible',opacity:surface.opacity??'1'}),webGl2SharedCanvasPrototype:false,bevyHpLocalOverlayOpenRef:overlay,combatIngressRef:{current:{hasUiHeld:()=>f.host.hasUiHeld()}},npcShopService:null,npcRepairService:null,spellsIngressRef:{current:null},combatRouteCacheRef:{current:null},movementBlockedStepsRef:{current:[]},movementPlanRef:{current:null},nextMoveSendAtRef:{current:0},screenRef:{current:'game'},initialSceneAssetsReadyRef:{current:true},equipmentHostSuspendReasonRef:{current:null},combatPointerRef:{current:{hovered:null,cursor:null,lock:false}},crystalKeyBindingsRef:{current:defaultCrystalKeyBindings()},isMovementBusy:()=>false,crystalMovementWalkRoute:()=>{throw Error('unexpected route');}};
+ deps.combatForceAttackRef={current:false};
  for(const key of ['bevyQuestReactModalOpen','showQuestLog','showCharacter','showHeroPet','showGuild','showGroup','showFriends','showBonds','showRanking','showMarket','showConquest','showTrade','showBuffs','showMail','showWorldMap','showHelp','showHotkeys','showChatSettings'])deps[key]=false;
  Object.assign(deps,{heroManagementPage:null,cashShopOpenRef:{current:false},heroManagementOpenRef:{current:false},skillBarPointerHeldRef:{current:false},
   playerReferenceWindowsRef:{current:{help:false,hotkeys:false,options:false,capture:false}},

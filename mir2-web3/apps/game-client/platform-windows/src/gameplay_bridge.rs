@@ -3493,12 +3493,21 @@ pub fn forward_quest_ui_intents(
                     }
                     continue;
                 }
-                if let Some(movement) = movement.as_deref_mut() {
-                    movement.pursue_attack_target(object_id);
-                }
                 let modifiers = keyboard.modifiers();
                 let alt = modifiers.alt;
                 let shift = modifiers.shift;
+                // A queued UI target must still have the live force-attack modifier.
+                let player_target = entities.as_deref().is_some_and(|entities| {
+                    entities.entities.iter().any(|entity| entity.kind == EntityKind::Player
+                        && entity.object_id.parse::<u32>().ok() == Some(object_id))
+                }) || click_state.as_deref().and_then(|state| state.targets.get(&object_id))
+                    .is_some_and(|target| target.kind == EntityKind::Player);
+                if player_target && (!shift || alt) {
+                    continue;
+                }
+                if let Some(movement) = movement.as_deref_mut() {
+                    movement.pursue_attack_target(object_id);
+                }
                 if native_input_trace_enabled() {
                     eprintln!(
                         "[native-input-trace] forward target={object_id} native={:?} bevy={:?} merged={:?} target_state={:?}",

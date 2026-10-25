@@ -78,13 +78,21 @@ pub fn skill_ready(
     remaining_ms: impl Fn(u32) -> u32,
 ) -> Option<SkillCastSelection> {
     let selection = skills.selection_for_shortcut(slot)?;
+    // Persistent warrior stances pay on an attack, not when changing the
+    // setting. Prepared attacks such as FlamingSword still pay on activation.
+    let free_stance_toggle = selection.cast_kind.as_deref() == Some("toggle")
+        && matches!(
+            selection.spell.as_deref(),
+            Some("HalfMoon" | "CrossHalfMoon" | "Thrusting")
+        );
     if selection.cast_kind.as_deref() == Some("passive")
         || selection.cooldown_remaining_ticks > 0
         || remaining_ms(selection.skill_id) > 0
         || hp <= 0
-        || selection
-            .mp_cost
-            .is_some_and(|cost| mp < i32::try_from(cost).unwrap_or(i32::MAX))
+        || (!free_stance_toggle
+            && selection
+                .mp_cost
+                .is_some_and(|cost| mp < i32::try_from(cost).unwrap_or(i32::MAX)))
         || selection
             .spell
             .as_ref()
@@ -134,6 +142,14 @@ pub struct CombatActor {
     pub dead: bool,
     pub master_object_id: u32,
     pub ai: u8,
+}
+fn can_attack_actor(actor: &CombatActor, force_attack: bool) -> bool {
+    !actor.dead
+        && match actor.kind {
+            EntityKind::Monster => !matches!(actor.ai, 64 | 70),
+            EntityKind::Player => force_attack,
+            _ => false,
+        }
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -382,10 +398,12 @@ pub fn resolve_world_click(context: &CrystalWorldClickContext) -> Option<CombatC
     let direction = direction?;
     if context.shift {
         if context.dazed != Some(false)
-            || target.kind != EntityKind::Monster
             || target.object_id == 0
-            || target.ai == Some(70)
-            || target.ai.is_none()
+            || match target.kind {
+                EntityKind::Monster => target.ai == Some(70) || target.ai.is_none(),
+                EntityKind::Player => target.dead != Some(false),
+                _ => true,
+            }
         {
             return None;
         }
@@ -505,6 +523,10 @@ pub struct CombatSnapshot {
     pub timing: Vec<CombatTiming>,
     pub click_targets: Vec<CrystalWorldClickTarget>,
     pub selected_object_id: Option<u32>,
+    /// Crystal requires Shift to keep attacking or approaching another player.
+    /// This is only local input intent; the shared Zone applies attack-mode rules.
+    #[serde(default)]
+    pub force_attack: bool,
     pub hovered_object_id: Option<String>,
     pub cursor: Option<(i32, i32)>,
     pub class: Option<String>,
@@ -806,10 +828,7 @@ impl CombatController {
                     .actors
                     .iter()
                     .find(|a| {
-                        a.object_id == object_id.to_string()
-                            && a.kind == EntityKind::Monster
-                            && !a.dead
-                            && !matches!(a.ai, 64 | 70)
+                        a.object_id == object_id.to_string() && can_attack_actor(a, s.force_attack)
                     })
                     .map(|_| object_id);
                 if next != self.chase {
@@ -996,12 +1015,11 @@ impl CombatController {
             self.chase = None;
             return vec![CombatOutput::Clear];
         }
-        let Some(target) = s.actors.iter().find(|a| {
-            a.object_id == id.to_string()
-                && a.kind == EntityKind::Monster
-                && !a.dead
-                && !matches!(a.ai, 64 | 70)
-        }) else {
+        let Some(target) = s
+            .actors
+            .iter()
+            .find(|a| a.object_id == id.to_string() && can_attack_actor(a, s.force_attack))
+        else {
             self.chase = None;
             return vec![CombatOutput::Clear];
         };
@@ -1063,7 +1081,7 @@ impl CombatController {
                         })
                         .copied(),
                     alt: false,
-                    shift: false,
+                    shift: target.kind == EntityKind::Player && s.force_attack,
                     class: s.class.clone(),
                     has_class_weapon: s.has_class_weapon,
                     riding_mount: s.riding_mount,

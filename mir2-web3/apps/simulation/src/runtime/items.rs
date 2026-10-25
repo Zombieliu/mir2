@@ -28,7 +28,7 @@ use super::components::{
 use super::crystal_compat::*;
 use super::drops::drop_item_packet;
 use super::equipment::{
-    equip_item_impl, equipment_slot_index, feed_mount_with_crystal_food,
+    automatic_equipment_slot, equip_item_impl, equipment_slot_index, feed_mount_with_crystal_food,
     repair_equipped_weapon_with_oil, slugify_name, toggle_mount_ride_from_use_item, try_equip_item,
     try_luck_weapon, CrystalLuckWeaponOutcome, EquipmentState,
 };
@@ -3110,11 +3110,7 @@ pub(super) fn use_item(
         }
     }
 
-    let equip_slot = item.equip_slot.or_else(|| {
-        item_template
-            .as_ref()
-            .and_then(crystal_equipment_slot_for_template)
-    });
+    let equip_slot = automatic_equipment_slot(world.resource::<InventoryResource>(), &item);
     if let Some(slot) = equip_slot {
         let UseItemLocation::Inventory(_) = location else {
             return prepend_optional_packet(use_item_ack(packet_ack, false), packets);

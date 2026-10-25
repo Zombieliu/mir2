@@ -1242,6 +1242,31 @@ pub(super) struct EquipItemMutationResult {
     pub(super) refresh_packets: Vec<ServerPacket>,
 }
 
+/// Crystal's double-click ring action fills RingR first, then equips/replaces
+/// RingL. Explicit EquipItem requests still use the client's selected slot.
+pub(super) fn automatic_equipment_slot(
+    resources: &InventoryResource,
+    item: &ItemState,
+) -> Option<EquipmentSlot> {
+    let slot = item.equip_slot.or_else(|| {
+        crystal_item_template_for_item_key(&item.key)
+            .as_ref()
+            .and_then(super::items::crystal_equipment_slot_for_template)
+    })?;
+    if matches!(slot, EquipmentSlot::RingLeft | EquipmentSlot::RingRight) {
+        return Some(if resources
+            .equipment_items
+            .iter()
+            .any(|item| item.slot == EquipmentSlot::RingRight)
+        {
+            EquipmentSlot::RingLeft
+        } else {
+            EquipmentSlot::RingRight
+        });
+    }
+    Some(slot)
+}
+
 pub(super) fn try_equip_item(
     world: &mut World,
     grid: MirGridType,
@@ -2967,3 +2992,7 @@ pub(super) fn crystal_apply_added_stat_price_factor(price: f32, added_stat_count
 #[cfg(test)]
 #[path = "npc_item_price_tests.rs"]
 mod npc_item_price_tests;
+
+#[cfg(test)]
+#[path = "equipment_replacement_tests.rs"]
+mod equipment_replacement_tests;

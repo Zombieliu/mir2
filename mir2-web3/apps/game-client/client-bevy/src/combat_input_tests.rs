@@ -36,6 +36,7 @@ fn controller_snapshot() -> CombatSnapshot {
             harvestable: Some(false),
         }],
         selected_object_id: Some(4),
+        force_attack: false,
         hovered_object_id: Some("4".into()),
         cursor: Some((12, 10)),
         class: Some("Warrior".into()),
@@ -156,6 +157,131 @@ fn only_proof(outputs: Vec<CombatOutput>) -> CombatProof {
         CombatOutput::Wire { proof } => proof,
         _ => panic!("expected actual wire"),
     }
+}
+#[test]
+fn controller_player_attack_requires_held_shift_and_stops_on_release() {
+    let mut s = controller_snapshot();
+    s.actors[1].kind = EntityKind::Player;
+    s.click_targets[0].kind = EntityKind::Player;
+    s.click_targets[0].ai = None;
+    let mut c = CombatController::default();
+    assert!(c.ingest(s.clone()));
+    assert!(c
+        .edge(
+            controller_edge(&s, 1, CombatAction::Select { object_id: 4 }),
+            10
+        )
+        .1
+        .is_empty());
+
+    s.revision += 1;
+    s.model_revision += 1;
+    s.force_attack = true;
+    assert!(c.ingest(s.clone()));
+    let proof = only_proof(
+        c.edge(
+            controller_edge(&s, 2, CombatAction::Select { object_id: 4 }),
+            10,
+        )
+        .1,
+    );
+    assert_eq!(proof.target_id, Some(4));
+    assert_eq!(
+        proof.command,
+        CombatCommand::AttackDirection {
+            direction: "right".into(),
+            spell: None
+        }
+    );
+
+    s.revision += 1;
+    s.model_revision += 1;
+    s.force_attack = false;
+    assert!(c.ingest(s.clone()));
+    assert!(matches!(c.tick(11, 0).as_slice(), [CombatOutput::Clear]));
+    // Holding Shift again does not replay the previous player's attack selection.
+    s.revision += 1;
+    s.model_revision += 1;
+    s.force_attack = true;
+    assert!(c.ingest(s));
+    assert!(c.tick(2000, 0).is_empty());
+}
+
+#[test]
+fn controller_shift_player_chase_uses_reachable_neighbour_and_archer_uses_range() {
+    let mut s = controller_snapshot();
+    s.force_attack = true;
+    s.actors[1].kind = EntityKind::Player;
+    s.actors[1].x = 12;
+    s.click_targets[0].kind = EntityKind::Player;
+    s.click_targets[0].x = 12;
+    s.click_targets[0].ai = None;
+    let mut c = CombatController::default();
+    assert!(c.ingest(s.clone()));
+    assert!(matches!(
+        c.edge(
+            controller_edge(&s, 1, CombatAction::Select { object_id: 4 }),
+            10
+        )
+        .1
+        .as_slice(),
+        [CombatOutput::Approach {
+            target_id: 4,
+            x: 11,
+            y: 9,
+            ..
+        }]
+    ));
+    s.revision += 1;
+    s.model_revision += 1;
+    s.class = Some("Archer".into());
+    assert!(c.ingest(s.clone()));
+    let proof = only_proof(c.tick(10, 0));
+    assert!(matches!(
+        proof.command,
+        CombatCommand::RangeAttack {
+            target_id: 4,
+            target_x: 12,
+            target_y: 10,
+            ..
+        }
+    ));
+    assert_eq!(proof.target_id, Some(4));
+}
+
+#[test]
+fn controller_forced_attack_cannot_select_dead_self_npc_or_immune_monster() {
+    for (kind, dead, ai) in [
+        (EntityKind::Player, true, 0),
+        (EntityKind::SelfPlayer, false, 0),
+        (EntityKind::Npc, false, 0),
+        (EntityKind::Monster, false, 64),
+        (EntityKind::Monster, false, 70),
+    ] {
+        let mut s = controller_snapshot();
+        s.force_attack = true;
+        s.actors[1].kind = kind;
+        s.actors[1].dead = dead;
+        s.actors[1].ai = ai;
+        let mut c = CombatController::default();
+        assert!(c.ingest(s.clone()));
+        assert!(c
+            .edge(
+                controller_edge(&s, 1, CombatAction::Select { object_id: 4 }),
+                10
+            )
+            .1
+            .is_empty());
+        assert!(c.tick(2000, 0).is_empty());
+    }
+}
+
+#[test]
+fn controller_older_snapshot_defaults_to_no_forced_player_attack() {
+    let mut raw = serde_json::to_value(controller_snapshot()).unwrap();
+    raw.as_object_mut().unwrap().remove("forceAttack");
+    let snapshot: CombatSnapshot = serde_json::from_value(raw).unwrap();
+    assert!(!snapshot.force_attack);
 }
 #[test]
 fn controller_same_select_preserves_cadence_and_move_request_gate() {
@@ -640,6 +766,62 @@ fn controller_packet_cooldown_key16_toggle_reorder_and_unreachable_cancel() {
     ));
     assert!(c.tick(2000, 0).is_empty());
 }
+#[test]
+fn controller_persistent_warrior_stances_toggle_at_zero_mp_but_prepared_attacks_do_not() {
+    for spell in ["HalfMoon", "CrossHalfMoon", "Thrusting"] {
+        for can_use in [false, true] {
+            let mut s = controller_snapshot();
+            s.mp = 0;
+            s.learned = vec![serde_json::json!({"id":90,"spell":spell,"hotkey":16,
+                "castKind":"toggle","canUse":can_use,"mpCost":20})];
+            let mut c = CombatController::default();
+            assert!(c.ingest(s.clone()));
+            let proof = only_proof(
+                c.edge(
+                    controller_edge(
+                        &s,
+                        1,
+                        CombatAction::Slot {
+                            slot: 16,
+                            cursor: None,
+                        },
+                    ),
+                    10,
+                )
+                .1,
+            );
+            assert_eq!(
+                proof.command,
+                CombatCommand::SpellToggle {
+                    spell: spell.into(),
+                    toggle_state: if can_use { 0 } else { 1 }
+                }
+            );
+        }
+    }
+    for spell in ["FlamingSword", "TwinDrakeBlade"] {
+        let mut s = controller_snapshot();
+        s.mp = 0;
+        s.learned = vec![serde_json::json!({"id":90,"spell":spell,"hotkey":16,
+            "castKind":"toggle","canUse":false,"mpCost":20})];
+        let mut c = CombatController::default();
+        assert!(c.ingest(s.clone()));
+        assert!(c
+            .edge(
+                controller_edge(
+                    &s,
+                    1,
+                    CombatAction::Slot {
+                        slot: 16,
+                        cursor: None
+                    }
+                ),
+                10
+            )
+            .1
+            .is_empty());
+    }
+}
 fn actor(id: &str, kind: EntityKind, x: i32, y: i32) -> CombatActor {
     CombatActor {
         object_id: id.into(),
@@ -980,6 +1162,59 @@ fn world_click_requires_native_archer_flags_and_alt_precedes_shift() {
         Some(CombatCommand::Harvest { .. })
     ));
     c.riding_mount = None;
+    assert!(resolve_world_click(&c).is_none());
+}
+
+#[test]
+fn world_click_forced_player_attack_does_not_require_monster_ai() {
+    let mut c = CrystalWorldClickContext {
+        in_game: true,
+        world_actions_blocked: false,
+        player_hp: Some(10),
+        player_max_hp: Some(10),
+        player_x: 10,
+        player_y: 10,
+        target: Some(CrystalWorldClickTarget {
+            kind: EntityKind::Player,
+            object_id: 4,
+            x: 11,
+            y: 10,
+            dead: Some(false),
+            ai: None,
+            harvestable: None,
+        }),
+        alt: false,
+        shift: false,
+        class: Some("Warrior".into()),
+        has_class_weapon: Some(true),
+        riding_mount: Some(false),
+        dazed: Some(false),
+        fishing: Some(false),
+        target_in_range: Some(true),
+    };
+    assert!(resolve_world_click(&c).is_none());
+    c.shift = true;
+    assert!(matches!(
+        resolve_world_click(&c),
+        Some(CombatCommand::AttackDirection { .. })
+    ));
+    c.class = Some("Archer".into());
+    assert!(matches!(
+        resolve_world_click(&c),
+        Some(CombatCommand::RangeAttack { target_id: 4, .. })
+    ));
+    c.target_in_range = Some(false);
+    assert!(resolve_world_click(&c).is_none());
+    c.target_in_range = Some(true);
+    c.alt = true;
+    assert!(resolve_world_click(&c).is_none());
+    c.alt = false;
+    for kind in [EntityKind::Npc, EntityKind::SelfPlayer] {
+        c.target.as_mut().unwrap().kind = kind;
+        assert!(resolve_world_click(&c).is_none());
+    }
+    c.target.as_mut().unwrap().kind = EntityKind::Player;
+    c.target.as_mut().unwrap().dead = Some(true);
     assert!(resolve_world_click(&c).is_none());
 }
 

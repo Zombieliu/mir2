@@ -8710,6 +8710,28 @@ fn point_in_direction(point: &Point, direction: MirDirection) -> Point {
     }
 }
 
+fn melee_target_search_points(origin: &Point, direction: MirDirection, spell: Spell) -> Vec<Point> {
+    let front = point_in_direction(origin, direction);
+    let mut points = vec![front.clone()];
+    if spell == Spell::Thrusting {
+        points.push(point_in_direction(&front, direction));
+    } else {
+        // Match the authoritative Zone's Crystal melee footprint. Preserve the
+        // front-cell priority while allowing an armed area swing with only a
+        // side target; normal attacks never acquire those extra cells.
+        let offsets: &[i8] = match spell {
+            Spell::HalfMoon => &[-1, 1, 2],
+            Spell::CrossHalfMoon => &[-4, -3, -2, -1, 1, 2, 3],
+            _ => &[],
+        };
+        points.extend(offsets.iter().map(|offset| {
+            let rotated = (direction as i8 + offset).rem_euclid(8) as u8;
+            point_in_direction(origin, MirDirection::try_from(rotated).expect("direction modulo 8"))
+        }));
+    }
+    points
+}
+
 fn shared_harvest_scan_points(picker: &WorldEntitySnapshot, direction: MirDirection) -> Vec<Point> {
     let front = point_in_direction(
         &Point {
@@ -14230,6 +14252,17 @@ impl SharedInProcessZoneSessionRuntime {
         };
         let snapshot = self.inner.world_snapshot();
         let map_file_name = snapshot.map_file_name.as_deref()?;
+        // Resolve armed skills before directional target acquisition. A plain
+        // client Attack can carry Spell::None while HalfMoon is enabled.
+        let melee_profile = match &mut kind {
+            ZoneNativePlayerAttackKind::Melee { spell, .. } => {
+                let requested = Spell::try_from(*spell).unwrap_or(Spell::None);
+                let (active, level, damage) = self.inner.zone_melee_attack_profile(requested);
+                *spell = active as u8;
+                Some((level, damage.max(1)))
+            }
+            _ => None,
+        };
         // SelfPlayer is addressed by the owner's local scene id on the wire.
         // Rebase an explicit self-magic target before shared target lookup;
         // otherwise its SelfPlayer kind fails the remote Player/Monster gate
@@ -14244,23 +14277,11 @@ impl SharedInProcessZoneSessionRuntime {
             if let ZoneNativePlayerAttackKind::Melee { spell, .. } = &kind {
                 let origin = self.authoritative_self_entity_for_snapshot(&snapshot)?;
                 let requested_spell = Spell::try_from(*spell).unwrap_or(Spell::None);
-                let max_distance = if requested_spell == Spell::Thrusting {
-                    2
-                } else {
-                    1
-                };
-                let points = (1..=max_distance)
-                    .map(|distance| {
-                        let mut point = Point {
-                            x: origin.x,
-                            y: origin.y,
-                        };
-                        for _ in 0..distance {
-                            point = point_in_direction(&point, packet_direction?);
-                        }
-                        Some(point)
-                    })
-                    .collect::<Option<Vec<_>>>()?;
+                let points = melee_target_search_points(
+                    &Point { x: origin.x, y: origin.y },
+                    packet_direction?,
+                    requested_spell,
+                );
                 let owner_zone_object_id = self.current_zone_player_object_id().unwrap_or(0);
                 let shared_target = {
                     let zone_state = self
@@ -14395,13 +14416,7 @@ impl SharedInProcessZoneSessionRuntime {
         };
         let direction = direction?;
         let (level, damage) = match &mut kind {
-            ZoneNativePlayerAttackKind::Melee { spell, .. } => {
-                let requested_spell = Spell::try_from(*spell).unwrap_or(Spell::None);
-                let (profile_spell, profile_level, profile_damage) =
-                    self.inner.zone_melee_attack_profile(requested_spell);
-                *spell = profile_spell as u8;
-                (profile_level, profile_damage.max(1))
-            }
+            ZoneNativePlayerAttackKind::Melee { .. } => melee_profile?,
             ZoneNativePlayerAttackKind::Range { spell, .. } => {
                 let (profile_spell, profile_level, profile_damage) =
                     self.inner.zone_range_attack_profile();
@@ -18772,6 +18787,10 @@ mod tests {
     mod trade_item_edit_tests;
     #[path = "unavailable_combat_target_tests.rs"]
     mod unavailable_combat_target_tests;
+    #[path = "zone_halfmoon_routing_tests.rs"]
+    mod zone_halfmoon_routing_tests;
+    #[path = "zone_player_attack_mode_tests.rs"]
+    mod zone_player_attack_mode_tests;
     #[path = "zone_journey_event_bridge_tests.rs"]
     mod zone_journey_event_bridge_tests;
     #[path = "zone_melee_passive_progression_tests.rs"]

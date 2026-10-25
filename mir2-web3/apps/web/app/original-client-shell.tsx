@@ -9,6 +9,7 @@ import { crystalKeyNameFromBrowserEvent, matchingCrystalKeyFunctions, crystalDro
 import { crystalWindowShortcut, crystalSkillShortcutSlot } from "../lib/crystal-shortcut-actions";
 import { crystalCombatModeStopsDispatch } from "../lib/shared-combat-mode-keys";
 import { OriginalClientSkillBars } from "./components/original-client-skill-bars";
+import { OriginalClientCombatModeControls } from "./components/original-client-combat-mode-controls";
 
 import {
   memo,
@@ -518,6 +519,7 @@ export function OriginalClientShell({
   wsState,
   reconnectStatus,
   world,
+  combatModes,
   worldStore,
   selectorHud,
   player,
@@ -1490,6 +1492,8 @@ export function OriginalClientShell({
     function handleShortcutKey(event: KeyboardEvent) {
       // The Keybind capture listener owns propagation. Gameplay only yields.
       if (event.defaultPrevented || getKeybindCaptureActive?.() || document.visibilityState !== "visible" || !document.hasFocus()) return;
+      if (event.target instanceof HTMLElement && event.target.closest(".original-combat-mode-controls")
+        && ["Enter", " ", "Escape", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) return;
       if (npcShopBlocksWorldInput(false)) { stopNpcShopWorldInput(); event.preventDefault(); return; }
       if (bevyStorageUiActive || bevyStorageUiTransitioning) { event.preventDefault(); return; }
       if(bevyMailComposeReady||bevyMailComposePending){if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
@@ -4351,8 +4355,8 @@ export function OriginalClientShell({
     if (handleNpcRepairPointer(event, phase)) return;
     if (handleBagBeltPointer(event, phase)) return;
     if (heldQuestControlPointersRef.current.has(event.pointerId)) { handleSharedQuestWorldPointer(event,phase); return; }
-    // Skill DOM owns new gestures; existing canvas leases still receive their terminal edges.
-    if (phase === "down" && event.target instanceof HTMLElement && event.target.closest(".original-skill-bar")) return;
+    // DOM controls own new gestures; existing canvas leases still receive their terminal edges.
+    if (phase === "down" && event.target instanceof HTMLElement && event.target.closest(".original-skill-bar, .original-combat-mode-controls")) return;
     if(handleSharedNpcShopPointer(event,phase))return;
     if(handleSharedComposePointer(event,phase))return;
     if(handleSharedMailPointer(event,phase))return;
@@ -5294,6 +5298,9 @@ export function OriginalClientShell({
               onIdentityLinkWallet={onIdentityLinkWallet}
               onExit={onExitSelect}
             />
+          ) : null}
+          {screen === "game" && combatModes ? (
+            <OriginalClientCombatModeControls {...combatModes} inSafeZone={world.inSafeZone} />
           ) : null}
           {screen === "game"
             ? (() => {

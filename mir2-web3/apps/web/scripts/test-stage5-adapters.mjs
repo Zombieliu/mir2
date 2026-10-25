@@ -4974,7 +4974,7 @@ const repairInventorySource=readFileSync(new URL("../app/components/original-cli
 const repairInventoryAst=ts.createSourceFile("original-client-inventory-window.tsx",repairInventorySource,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
 const repairInventoryDeclarations=new Map(),repairInventoryHandlers=new Map();let repairConsumedInitializer=null;
 function visitRepairInventory(node){
-  if(ts.isFunctionDeclaration(node)&&node.name&&["mailItemLocked","activateInventoryItem"].includes(node.name.text))repairInventoryDeclarations.set(node.name.text,node.getText(repairInventoryAst));
+  if(ts.isFunctionDeclaration(node)&&node.name&&["mailItemLocked","activateInventoryItem","sameInventoryActionItem","activateInventoryItemFromPointer"].includes(node.name.text))repairInventoryDeclarations.set(node.name.text,node.getText(repairInventoryAst));
   if(ts.isVariableDeclaration(node)&&ts.isIdentifier(node.name)&&node.name.text==="consumedRepairPointerRef"){
     assert.ok(ts.isCallExpression(node.initializer));repairConsumedInitializer=node.initializer.arguments[0].getText(repairInventoryAst);
   }
@@ -4987,11 +4987,15 @@ function visitRepairInventory(node){
   }
   ts.forEachChild(node,visitRepairInventory);
 }
-visitRepairInventory(repairInventoryAst);assert.equal(repairInventoryDeclarations.size,2);assert.equal(repairInventoryHandlers.size,3);assert.ok(repairConsumedInitializer);
+visitRepairInventory(repairInventoryAst);assert.equal(repairInventoryDeclarations.size,4);assert.equal(repairInventoryHandlers.size,3);assert.ok(repairConsumedInitializer);
 const repairInventoryJs=ts.transpileModule([...repairInventoryDeclarations.values()].join("\n")+
   "\nconst consumedRepairPointerRef={current:"+repairConsumedInitializer+"};\n"+
   [...repairInventoryHandlers].map(([name,text])=>"const "+name+"="+text+";").join("\n"),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
-const repairInventoryEquipment=loadPureProductionDeclarations(new URL("../app/components/original-client-inventory-utils.ts",import.meta.url),["equipmentSlotForItemKey","equipmentSlotForItem"]);
+const repairInventoryEquipment=loadTypeScriptModule(new URL("../app/components/original-client-inventory-utils.ts",import.meta.url),{
+  "../../lib/asset-url":loadTypeScriptModule(new URL("../lib/asset-url.ts",import.meta.url)),
+  "../../lib/equipment-gateway-adapter":equipmentGateway,
+  "../../public/original-ui/Items/meta.json":{default:JSON.parse(readFileSync(new URL("../public/original-ui/Items/meta.json",import.meta.url),"utf8"))},
+});
 
 check("NPC repair actual Shell captured drag terminal owns routing geometry and successor cleanup",()=>{
   for(const variant of ["normal","outside","cancel","page","rect","DPR","hidden","screen","source","pointerType","lostcapture","successor","reentrant"]){
@@ -5107,7 +5111,7 @@ check("NPC repair actual capture listeners quarantine second pointer through com
   const inventoryTooltipScope={useRef:current=>({current}),useState:initial=>[initial,()=>{}],useEffect:callback=>{assert.equal(callback(),undefined);},window:{},document:{visibilityState:"visible"}};
   const inventoryTooltipKeys=Object.keys(inventoryTooltipScope),inventoryTooltip=new Function(...inventoryTooltipKeys,tooltipHookJs+"\nreturn useActiveItemTooltip;")(...inventoryTooltipKeys.map(key=>inventoryTooltipScope[key]))([inventoryItem]);
   const inventoryScope={repairMode:true,item:inventoryItem,tooltip:inventoryTooltip,window:{},mailLocks:[],storageMode:null,deleteMode:false,sellMode:false,pendingMoveItem:null,
-    activeTab:"bag1",bagBeltActivationGenerationRef:{current:1},pendingSplitItem:null,pendingGoldDrop:null,contextMenu:null,onBagBeltPointerDown:undefined,
+    activeTab:"bag1",bagBeltActivationGenerationRef:{current:1},inventoryPointerActivationRef:{current:null},world:{inventoryItems:[inventoryItem],equipmentItems:[]},pendingSplitItem:null,pendingGoldDrop:null,contextMenu:null,onBagBeltPointerDown:undefined,
     equipmentSlotForItem:repairInventoryEquipment.equipmentSlotForItem,onRepairPointerDown:event=>repairDowns.push(event.pointerId),onUseItem:value=>activated.push(value)};
   const inventoryKeys=Object.keys(inventoryScope),inventoryApi=new Function(...inventoryKeys,repairInventoryJs+
     "\nreturn {onPointerDown,onMouseDown,onClick,setRepair:value=>repairMode=value,consumedRepairPointerRef};")(...inventoryKeys.map(key=>inventoryScope[key]));
@@ -5302,7 +5306,7 @@ check("Actual Bag Belt Equipment tooltip events are read only and active timer c
   for(const surface of ["bag","belt","equipment"]){
     const item={uniqueId:0,itemIndex:-1,name:"Owned",icon:1,count:1},node={isConnected:true,matches:()=>false};currentItems=[item];visible=true;reader=originalReader;render();
     const eventScope={item,tooltip:nowApi,document:scope.document,repairMode:false,consumedRepairPointerRef:{current:new WeakSet()},onRepairPointerDown:()=>{actions++;},
-      activeTab:"bag1",bagBeltActivationGenerationRef:{current:1},deleteMode:false,sellMode:false,storageMode:null,pendingMoveItem:null,pendingSplitItem:null,pendingGoldDrop:null,contextMenu:null,
+      activeTab:"bag1",bagBeltActivationGenerationRef:{current:1},inventoryPointerActivationRef:{current:null},deleteMode:false,sellMode:false,storageMode:null,pendingMoveItem:null,pendingSplitItem:null,pendingGoldDrop:null,contextMenu:null,
       mailItemLocked:new Function("mailLocks",ts.transpileModule(repairInventoryDeclarations.get("mailItemLocked"),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText+"\nreturn mailItemLocked;")([]),onBagBeltPointerDown:undefined};
     const eventKeys=Object.keys(eventScope),handlers=new Function(...eventKeys,tooltipSurfaceNodes.get(surface).js+"\nreturn {onPointerEnter,onPointerLeave,onFocus,onBlur,onPointerCancel,onPointerDown};")(...eventKeys.map(key=>eventScope[key]));
     const event={pointerType:"mouse",isPrimary:true,button:0,currentTarget:node,defaultPrevented:false,stopped:false,stopPropagation(){this.stopped=true;},preventDefault(){this.defaultPrevented=true;}};

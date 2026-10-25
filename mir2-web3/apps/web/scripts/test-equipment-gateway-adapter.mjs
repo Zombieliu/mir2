@@ -76,6 +76,24 @@ test("Use classification follows original type metadata, never display names or 
   assert.deepEqual(adapter.classifyEquipmentUse({ tooltipSource: { info: { item_type: "1" } } }), { kind: "unknown" });
 });
 
+test("automatic rings follow Crystal right-then-left order and bracelets fill the empty hand", () => {
+  const ring = { tooltipSource: { info: { item_type: 7 } } };
+  const bracelet = { equipSlot: "braceletLeft" };
+  assert.deepEqual(adapter.classifyEquipmentUse(ring, []), { kind: "equipment", to: 8 });
+  assert.deepEqual(adapter.classifyEquipmentUse(ring, [{ slot: "ringLeft" }]), { kind: "equipment", to: 8 });
+  assert.deepEqual(adapter.classifyEquipmentUse(ring, [{ slot: "ringRight" }]), { kind: "equipment", to: 7 });
+  assert.deepEqual(adapter.classifyEquipmentUse(ring, [{ slot: "ringLeft" }, { slot: "ringRight" }]),
+    { kind: "equipment", to: 7 });
+  assert.deepEqual(adapter.classifyEquipmentUse(bracelet, [{ slot: "braceletLeft" }]), { kind: "equipment", to: 6 });
+  assert.deepEqual(adapter.classifyEquipmentUse({ equipSlot: "ringRight" }, [{ slot: "ringRight" }]),
+    { kind: "equipment", to: 7 });
+});
+
+test("occupied weapon destinations still request one atomic server replacement", () => {
+  assert.deepEqual(adapter.classifyEquipmentUse({ tooltipSource: { info: { item_type: 1 } } }, [{ slot: "weapon" }]),
+    { kind: "equipment", to: 0 });
+});
+
 test("current instance checks reject display-only, same-name replacement and duplicate cells", () => {
   const item = { name: "Sword", key: "sword", container: "bag1", slot: 4, uniqueId: 4, authoritativeUniqueId: 0 };
   const world = { inventoryItems: [item], beltItems: [], equipmentItems: [], storageItems: [] };

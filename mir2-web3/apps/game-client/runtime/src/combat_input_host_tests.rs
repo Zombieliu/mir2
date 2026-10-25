@@ -53,6 +53,7 @@ fn host_clock_snapshot() -> CombatSnapshot {
             harvestable: Some(false),
         }],
         selected_object_id: Some(4),
+        force_attack: false,
         hovered_object_id: Some("4".into()),
         cursor: None,
         class: Some("Warrior".into()),

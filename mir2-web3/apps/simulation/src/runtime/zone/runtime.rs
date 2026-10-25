@@ -83,6 +83,8 @@ use super::online_identity::{
 };
 use super::types::ZoneGroundDropCustody;
 use experience_ownership::{apply_native_experience_impact, NativeExperienceActor};
+mod ground_drop_placement;
+mod monster_movement;
 pub(super) mod town_archer_ai;
 use town_archer_ai::*;
 pub(super) mod great_fox_ai;
@@ -4900,6 +4902,8 @@ impl ZoneRuntime {
                     force_experience_owner: false,
                     ready_at_ms: if attack_spell == Spell::TwinDrakeBlade
                         || matches!(player.class, MirClass::Assassin | MirClass::Archer)
+                        || (matches!(attack_spell, Spell::HalfMoon | Spell::CrossHalfMoon)
+                            && area_hit.is_some_and(|(_, _, secondary)| secondary))
                     {
                         now_ms.saturating_add(300)
                     } else {
@@ -13398,10 +13402,11 @@ impl ZoneRuntime {
             {
                 return Vec::new();
             }
-            let destination = offset_point(&monster.position, direction, 1);
-            if !self.can_native_monster_occupy(object_id, &destination) {
+            let Some((direction, destination)) =
+                self.native_monster_chase_step(object_id, &monster.position, &decoy.position, direction)
+            else {
                 return self.turn_native_monster(object_id, direction, now_ms);
-            }
+            };
 
             {
                 let monster = self
@@ -13497,10 +13502,11 @@ impl ZoneRuntime {
         {
             return Vec::new();
         }
-        let destination = offset_point(&monster.position, direction, 1);
-        if !self.can_native_monster_occupy(object_id, &destination) {
+        let Some((direction, destination)) =
+            self.native_monster_chase_step(object_id, &monster.position, &target.position, direction)
+        else {
             return self.turn_native_monster(object_id, direction, now_ms);
-        }
+        };
 
         {
             let monster = self
@@ -13610,10 +13616,11 @@ impl ZoneRuntime {
             return Vec::new();
         }
 
-        let destination = offset_point(&summon.position, direction, 1);
-        if !self.can_native_monster_occupy(object_id, &destination) {
+        let Some((direction, destination)) =
+            self.native_monster_chase_step(object_id, &summon.position, &target.position, direction)
+        else {
             return self.turn_native_monster(object_id, direction, now_ms);
-        }
+        };
 
         {
             let monster = self
@@ -14467,11 +14474,17 @@ impl ZoneRuntime {
         let mut spawned = Vec::new();
         let mut packets = Vec::new();
         for mut drop in drops {
+            let origin = if drop.x == 0 && drop.y == 0 {
+                position.clone()
+            } else {
+                Point { x: drop.x, y: drop.y }
+            };
+            let Some(location) = self.native_ground_drop_position(&origin) else {
+                continue;
+            };
             drop.object_id = self.unique_object_id(drop.object_id);
-            if drop.x == 0 && drop.y == 0 {
-                drop.x = position.x;
-                drop.y = position.y;
-            }
+            drop.x = location.x;
+            drop.y = location.y;
             if drop.source_monster.is_empty() {
                 drop.source_monster = monster_name.to_string();
             }

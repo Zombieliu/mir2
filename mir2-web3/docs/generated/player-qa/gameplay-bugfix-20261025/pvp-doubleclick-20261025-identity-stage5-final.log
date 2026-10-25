@@ -1,0 +1,239 @@
+TAP version 13
+# Subtest: actual primary and double-click handlers equip once and keep zero authoritative identity
+ok 1 - actual primary and double-click handlers equip once and keep zero authoritative identity
+  ---
+  duration_ms: 2.632
+  type: 'test'
+  ...
+# Subtest: Bag-to-Belt consumed mouse events still activate a double-click once
+ok 2 - Bag-to-Belt consumed mouse events still activate a double-click once
+  ---
+  duration_ms: 0.6678
+  type: 'test'
+  ...
+# Subtest: double-click picked-up source clears Move and directly equips without a move or merge
+ok 3 - double-click picked-up source clears Move and directly equips without a move or merge
+  ---
+  duration_ms: 0.2511
+  type: 'test'
+  ...
+# Subtest: double-click cannot use a replaced instance or turn a swap into a second item action
+ok 4 - double-click cannot use a replaced instance or turn a swap into a second item action
+  ---
+  duration_ms: 0.445
+  type: 'test'
+  ...
+# Subtest: double-click keeps repair, storage, sell, delete, quest, mail and split modal behavior
+ok 5 - double-click keeps repair, storage, sell, delete, quest, mail and split modal behavior
+  ---
+  duration_ms: 0.5709
+  type: 'test'
+  ...
+# Subtest: double-click consumables use once and keyboard activation remains available
+ok 6 - double-click consumables use once and keyboard activation remains available
+  ---
+  duration_ms: 0.2625
+  type: 'test'
+  ...
+# Subtest: pointer de-duplication releases after the click window and never blocks a new special mode
+ok 7 - pointer de-duplication releases after the click window and never blocks a new special mode
+  ---
+  duration_ms: 0.2531
+  type: 'test'
+  ...
+# Subtest: localized metadata-only weapons request replacement of an occupied weapon slot
+ok 8 - localized metadata-only weapons request replacement of an occupied weapon slot
+  ---
+  duration_ms: 0.1599
+  type: 'test'
+  ...
+# Subtest: primary and context-menu ring actions choose the empty second hand
+ok 9 - primary and context-menu ring actions choose the empty second hand
+  ---
+  duration_ms: 0.2991
+  type: 'test'
+  ...
+# Subtest: ring menus omit Split and quantities cannot make equipment splittable
+ok 10 - ring menus omit Split and quantities cannot make equipment splittable
+  ---
+  duration_ms: 6.3835
+  type: 'test'
+  ...
+# Subtest: only splittable consumable stacks show Split and counts leave a remainder
+ok 11 - only splittable consumable stacks show Split and counts leave a remainder
+  ---
+  duration_ms: 0.8967
+  type: 'test'
+  ...
+# Subtest: moving identical rings requests a cell swap instead of a stack merge
+ok 12 - moving identical rings requests a cell swap instead of a stack merge
+  ---
+  duration_ms: 0.1355
+  type: 'test'
+  ...
+# Subtest: authoritative ordinary item types override misleading equipment names
+ok 13 - authoritative ordinary item types override misleading equipment names
+  ---
+  duration_ms: 0.2126
+  type: 'test'
+  ...
+# Subtest: inventory move callbacks preserve the clicked destination page through the real page planner
+ok 14 - inventory move callbacks preserve the clicked destination page through the real page planner
+  ---
+  duration_ms: 8.0051
+  type: 'test'
+  ...
+# Subtest: actual inventory handlers show a failed move only as failure and clear selection after either result
+ok 15 - actual inventory handlers show a failed move only as failure and clear selection after either result
+  ---
+  duration_ms: 13.7281
+  type: 'test'
+  ...
+# Subtest: actual page move returns its submission result for rejected bag plans and every existing grid
+ok 16 - actual page move returns its submission result for rejected bag plans and every existing grid
+  ---
+  duration_ms: 0.5964
+  type: 'test'
+  ...
+# Subtest: actual page move sends bag cells and blocks a pending equipment instance
+ok 17 - actual page move sends bag cells and blocks a pending equipment instance
+  ---
+  duration_ms: 0.2352
+  type: 'test'
+  ...
+# Subtest: actual page move blocks pending destination, old render, logout, and missing baseline
+ok 18 - actual page move blocks pending destination, old render, logout, and missing baseline
+  ---
+  duration_ms: 0.1774
+  type: 'test'
+  ...
+# Subtest: actual page move leaves non-bag routes on their existing contract
+ok 19 - actual page move leaves non-bag routes on their existing contract
+  ---
+  duration_ms: 0.2042
+  type: 'test'
+  ...
+# Subtest: actual page moves between explicit bag pages and checks the real destination pending instance
+ok 20 - actual page moves between explicit bag pages and checks the real destination pending instance
+  ---
+  duration_ms: 0.2017
+  type: 'test'
+  ...
+# Subtest: actual page rejects missing or non-bag destinations instead of inferring a source page
+ok 21 - actual page rejects missing or non-bag destinations instead of inferring a source page
+  ---
+  duration_ms: 0.1401
+  type: 'test'
+  ...
+# Subtest: bag MoveItem uses current cells rather than the server instance ID
+ok 22 - bag MoveItem uses current cells rather than the server instance ID
+  ---
+  duration_ms: 0.2084
+  type: 'test'
+  ...
+# Subtest: bag2 MoveItem offsets local cells and honors authoritative total capacity
+ok 23 - bag2 MoveItem offsets local cells and honors authoritative total capacity
+  ---
+  duration_ms: 0.2312
+  type: 'test'
+  ...
+# Subtest: cross-page bag moves use independent cells, including equal local indices, with capacity checks on both ends
+ok 24 - cross-page bag moves use independent cells, including equal local indices, with capacity checks on both ends
+  ---
+  duration_ms: 0.1823
+  type: 'test'
+  ...
+# Subtest: cross-page bag target identity must be unique and authoritative on the target page
+ok 25 - cross-page bag target identity must be unique and authoritative on the target page
+  ---
+  duration_ms: 0.0695
+  type: 'test'
+  ...
+# Subtest: bag MoveItem rejects stale, ambiguous, untrusted, or invalid source and target
+ok 26 - bag MoveItem rejects stale, ambiguous, untrusted, or invalid source and target
+  ---
+  duration_ms: 0.1145
+  type: 'test'
+  ...
+# Subtest: Crystal ResizeInventory converts whole-array sizes to bag capacity
+ok 27 - Crystal ResizeInventory converts whole-array sizes to bag capacity
+  ---
+  duration_ms: 0.0665
+  type: 'test'
+  ...
+# Subtest: missing server ID stays display-only, including second bag and belt slot aliases
+ok 28 - missing server ID stays display-only, including second bag and belt slot aliases
+  ---
+  duration_ms: 0.0873
+  type: 'test'
+  ...
+# Subtest: zero is a real server item instance ID
+ok 29 - zero is a real server item instance ID
+  ---
+  duration_ms: 0.056
+  type: 'test'
+  ...
+# Subtest: invalid and imprecise IDs cannot authorize an item command
+ok 30 - invalid and imprecise IDs cannot authorize an item command
+  ---
+  duration_ms: 0.1511
+  type: 'test'
+  ...
+# Subtest: same-slot replacement or movement invalidates a captured instance selection
+ok 31 - same-slot replacement or movement invalidates a captured instance selection
+  ---
+  duration_ms: 0.0685
+  type: 'test'
+  ...
+# Subtest: equipment slot selection rejects a replaced or untrusted occupant before instance removal
+ok 32 - equipment slot selection rejects a replaced or untrusted occupant before instance removal
+  ---
+  duration_ms: 0.0993
+  type: 'test'
+  ...
+# Subtest: remove request sends the equipped instance ID, independent of equipment and destination slots
+ok 33 - remove request sends the equipped instance ID, independent of equipment and destination slots
+  ---
+  duration_ms: 0.1458
+  type: 'test'
+  ...
+# Subtest: remove destination treats bag2 cells as unified indices and rejects a full or invalid bag
+ok 34 - remove destination treats bag2 cells as unified indices and rejects a full or invalid bag
+  ---
+  duration_ms: 0.4729
+  type: 'test'
+  ...
+# Subtest: movement snapshot authority changes survive an unchanged slot display ID
+ok 35 - movement snapshot authority changes survive an unchanged slot display ID
+  ---
+  duration_ms: 0.1183
+  type: 'test'
+  ...
+# Subtest: equipment source grid preserves storage authority without changing destination slot
+ok 36 - equipment source grid preserves storage authority without changing destination slot
+  ---
+  duration_ms: 0.0475
+  type: 'test'
+  ...
+# Subtest: storage refresh retains only packet-supplied authority
+ok 37 - storage refresh retains only packet-supplied authority
+  ---
+  duration_ms: 0.0834
+  type: 'test'
+  ...
+# stage5 adapter tests passed (506 groups)
+# Subtest: scripts\\test-stage5-adapters.mjs
+ok 3 - scripts\\test-stage5-adapters.mjs
+  ---
+  duration_ms: 2578.404
+  type: 'test'
+  ...
+1..38
+# tests 38
+# suites 0
+# pass 38
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2593.3237

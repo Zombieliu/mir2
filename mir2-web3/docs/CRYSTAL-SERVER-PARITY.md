@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+## 玩家反馈修复（2026-10-25）
+
+戒指自动选择右空槽/否则左槽、怪物MoveTo受阻转向和ItemObject.Drop扩圈散落已对照原版并通过本轮回归；共享地图209/209。详见[本轮证据与边界](GAMEPLAY-BUGFIXES-20261025.zh-CN.md)，未提升全局Candidate/Accepted状态。
+
+追加半月：自动招式顺序、方向寻敌扇形及侧选300ms结算经新增回归通过；MP逐次攻击结算仍是明确范围外，不能据此称完整技能对齐。详见[本轮追加证据](GAMEPLAY-BUGFIXES-20261025.zh-CN.md#追加半月弯刀不可用)。
+
+追加PvP：既有ChangeAMode至共享Zone的生产规则未改；新增真实双会话3项回归及既有2项确认全体伤害、和平与安全区门禁。Web/Windows分别修客户端攻击入口，不能由共享服务器推定两端UI相同；[有界证据](GAMEPLAY-BUGFIXES-20261025.zh-CN.md#追加双击穿戴攻击玩家与两端共用边界)。
+
 ## PR #255 最后功能回归与远端 CI 收据（2026-10-16，北京时间）
 
 Gateway persistence 的普通 starter 与原版 Q1–Q4、掉落/采集、奖励及保存重登完整 target 已实际 **5/5，0 failed / ignored，194.40s**。最后改动仅测试墙钟调度和接受回执观察，生产行为及 80/600/54 原预算保持；前后失败/通过、fixture SHA 和命令见[Gateway 收据](generated/player-qa/recharge-readiness-20261015/gateway-action-timing-20261016.json)。父提交 `56ee8627` 的 Home、真实 Docker/Compose、四平台 DeveloperEnv、Handoff 完整 Web、跨平台构建及 Stripe/Mining/Activities 真实 PostgreSQL/故障注入收据已通过；Candidate Linux 成功，记录时父提交 Windows 仍在运行。最终新 SHA CI 与合入以 [PR #255](https://github.com/Zombieliu/mir2/pull/255) 为准，父提交结果不转记到新 SHA。

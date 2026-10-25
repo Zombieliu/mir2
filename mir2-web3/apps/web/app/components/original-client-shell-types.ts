@@ -14,6 +14,7 @@ import type { CombatAction } from "../../lib/bevy-combat-input";
 import type { CrystalKeyBinding, PlayerUiPreferences } from "../../lib/player-ui-preferences";
 import type { CrystalWindowShortcut } from "../../lib/crystal-shortcut-actions";
 import type { SkillBarsProps, SkillBarLease } from "./original-client-skill-bars";
+import type { CombatModeControls } from "./original-client-combat-mode-controls";
 import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
 import type { SuiWalletSummary, LoginAuthControls } from "../../lib/client-login-runtime";
 import type { Mir2InputProfile } from "./original-client-device-profile";
@@ -181,6 +182,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   wsState: string;
   reconnectStatus: GatewayReconnectStatus;
   world: DisplayWorld;
+  combatModes?: CombatModeControls;
   // Render-perf Stage 5c (opt-in, flag-gated): when `selectorHud` is true the
   // game-screen HUD (GameUiScene) subscribes to this world store via
   // `useWorldSelector` instead of receiving `world` as a prop, so the memoized
