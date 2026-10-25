@@ -35893,7 +35893,18 @@ fn ground_drop_expires_after_crystal_item_timeout() {
         current_tick + super::CRYSTAL_DROP_EXPIRE_TICKS
     );
 
-    let _ = session.tick();
+    let first_tick = session.tick();
+    assert_eq!(
+        first_tick
+            .iter()
+            .filter(|packet| matches!(
+                packet,
+                ServerPacket::ObjectItem { info } if info.object_id == drop_object_id
+            ))
+            .count(),
+        1,
+        "the ordinary tick must publish the drop before its later removal"
+    );
     let tick = runtime_tick(session.app.world());
     session
         .app

@@ -89,6 +89,24 @@ fn owner_packets(outbounds: &[ZoneOutbound]) -> impl Iterator<Item = &ServerPack
     })
 }
 
+fn stable_replay_outbounds(mut outbounds: Vec<ZoneOutbound>) -> Vec<ZoneOutbound> {
+    // Each independently created Zone has a fresh online authority namespace.
+    // Compare every receipt field while normalizing only that random identity
+    // nonce; gameplay and owner-health sequence/state must remain identical.
+    for outbound in &mut outbounds {
+        if let ZoneOutbound::OwnerHealthChanged { change } = outbound {
+            let mut owner: serde_json::Value =
+                serde_json::from_str(&change.cursor.online_owner).expect("online owner identity");
+            let namespace = owner["namespace"].as_str().expect("online namespace");
+            assert_eq!(namespace.len(), 32);
+            assert!(namespace.bytes().all(|byte| byte.is_ascii_hexdigit()));
+            owner["namespace"] = "replay-namespace".into();
+            change.cursor.online_owner = serde_json::to_string(&owner).unwrap();
+        }
+    }
+    outbounds
+}
+
 #[test]
 fn blocked_chase_uses_actual_detour_direction_and_preserves_move_cooldown() {
     let mut zone = zone(vec![Point { x: 15, y: 20 }]);
@@ -128,7 +146,11 @@ fn monsters_route_around_a_wall_with_deterministic_shared_state() {
     let mut previous = position(&zone, 9_100);
     for now_ms in (0..12).map(|tick| tick * 2_000) {
         let out = zone.tick(now_ms);
-        assert_eq!(out, replay.tick(now_ms), "detour replay at {now_ms}");
+        assert_eq!(
+            stable_replay_outbounds(out),
+            stable_replay_outbounds(replay.tick(now_ms)),
+            "detour replay at {now_ms}"
+        );
         let current = position(&zone, 9_100);
         assert!(!blocked.contains(&current), "monster entered wall");
         assert!(distance(&previous, &current) <= 1, "monster skipped a tile");
@@ -236,9 +258,13 @@ fn owned_summon_and_monster_pet_target_both_detour_around_blockers() {
     zone.tick(511);
     assert_eq!(position(&zone, 9_100), Point { x: 25, y: 19 });
 
+    // Crystal's newborn lock lasts until strictly after spawn + 2000ms.
+    // Preserve that gate before testing the summon pursuit route.
+    zone.tick(2_510);
+    assert_eq!(position(&zone, pet.object_id), pet.position);
     // The owned summon must also move around its own wall while chasing that
-    // monster. Check several ticks without requiring a particular rotation side.
-    for now_ms in [811, 1_500, 2_500] {
+    // monster. Check several legal ticks without requiring a rotation side.
+    for now_ms in [2_511, 3_111, 4_511] {
         zone.tick(now_ms);
         let pet_position = position(&zone, pet.object_id);
         assert!(!blocked.contains(&pet_position));

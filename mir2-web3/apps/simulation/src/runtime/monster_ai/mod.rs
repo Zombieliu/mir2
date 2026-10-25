@@ -2779,14 +2779,16 @@ impl SimulationSession {
         &mut self,
         advance: fn(&mut World) -> Vec<ServerPacket>,
     ) -> Vec<ServerPacket> {
+        // tick finalizes once after default NPC source dispatch. Finalizing
+        // here would consume visibility transitions, then the outer pass would
+        // discard their ObjectItem/ObjectGold/ObjectRemove packets.
         if let Some(command) = take_crystal_movement_retry_if_ready(self.app.world_mut()) {
             mark_crystal_packet_action(
                 self.app.world_mut(),
                 PlayerActionKind::Move,
                 crystal_packet_move_delay_ticks(command.running),
             );
-            let packets = self.move_player_by_direction(command.direction, command.running);
-            return self.finalize_packets(packets);
+            return self.move_player_by_direction(command.direction, command.running);
         }
         if crystal_movement_retry_pending(self.app.world()) {
             advance_runtime_tick(self.app.world_mut());
@@ -2796,13 +2798,11 @@ impl SimulationSession {
                     PlayerActionKind::Move,
                     crystal_packet_move_delay_ticks(command.running),
                 );
-                let packets = self.move_player_by_direction(command.direction, command.running);
-                return self.finalize_packets(packets);
+                return self.move_player_by_direction(command.direction, command.running);
             }
-            return self.finalize_packets(Vec::new());
+            return Vec::new();
         }
-        let packets = advance(self.app.world_mut());
-        self.finalize_packets(packets)
+        advance(self.app.world_mut())
     }
 
     pub fn tick(&mut self) -> Vec<ServerPacket> {
