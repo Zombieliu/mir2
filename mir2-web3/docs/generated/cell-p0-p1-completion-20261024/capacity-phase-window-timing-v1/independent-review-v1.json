@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T00:45:22.057Z",
+  "scope": "Independent read-only source review and raw/Git byte proof for the two-file measurement timer correction. No suite, product module, service, build or realm was executed by this reviewer.",
+  "blockingFindings": [],
+  "sourceCommitAtReview": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "newDriverCommitPending": true,
+  "newNineInputFreezePending": true,
+  "currentChangedDriverInputs": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 132226,
+      "sha256": "9c8d20dcac77d401ac65e3c69e37f0105db371d08e72c288fd4ccde6fe46690a",
+      "repositoryRelative": "apps/web/scripts/playtest-capacity-soak.mjs"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+      "bytes": 195516,
+      "sha256": "870c6fa95859e325042f3a42ffcfdd91a702adcf586cf171e9a36224ad23fddb",
+      "repositoryRelative": "apps/web/scripts/playtest-capacity-soak.test.mjs"
+    }
+  ],
+  "oldNineInputFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-patrol-run-preference-driver-frozen-v1.json",
+    "bytes": 6826,
+    "sha256": "48e6b2c2dae7e82d26d2a0e95d408b863557530e363a79e4a07c2e77c21f172d"
+  },
+  "oldNineInputSourceAggregate": "8c29818d96fc7d0974d248fe7b4f140812385216cc98b04a0712fecfe25385b7",
+  "oldNineInputPins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 130681,
+      "sha256": "79d30e3994703eeef902fdd79feac1e7ce76c8b0255baecb0824f5d7d51fc4e6"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 188151,
+      "sha256": "97fb8b09087958dc8ee8f15094011e04a56e087af6bc5cfdfeee4d2fcd5554f9"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "otherSevenDriverInputsByteEqual": true,
+  "otherSevenDriverPins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "preimageManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\preimage-manifest-v1.json",
+    "bytes": 1217,
+    "sha256": "e49f56a75527c7b19484a43d65dbccdb0b677fa6313fc3cb28202969000a2056"
+  },
+  "oldTestInverse": {
+    "removedOnly": "The one added measure import name plus the inserted measurementClockFixture and six new tests before the existing idle/correction test.",
+    "newTestCount": 6,
+    "insertedBlockBytes": 7356,
+    "insertedBlockSha256": "3c971656dc067e34f00186f945bea115ed7eed1cecd301e2545ad613dec2dd8d",
+    "restoredExact468GitLf": true,
+    "restoredBytes": 188151,
+    "restoredSha256": "97fb8b09087958dc8ee8f15094011e04a56e087af6bc5cfdfeee4d2fcd5554f9",
+    "oldGitBlobSha256": "97fb8b09087958dc8ee8f15094011e04a56e087af6bc5cfdfeee4d2fcd5554f9",
+    "old145AssertionEvidence": "The complete pre-existing soak test source restores byte-for-byte to468 after only those additions are removed; the other seven frozen driver/test inputs are byte-identical. No old assertion body is changed."
+  },
+  "focusedEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\focused-v1.log",
+    "bytes": 1751,
+    "sha256": "f532a0c47c8f016538b8af9756c0fc4bbf314ec97eff88b8aa4fb23600dbb276",
+    "observedTests": 6,
+    "observedPassed": 6,
+    "observedFailed": 0,
+    "executedByThisReviewer": false,
+    "fullSuiteNotClaimed": true
+  },
+  "reviewedProperties": [
+    "Each complete window is assessed and reset from one actual captured closedAt; no nextWindow +=60000 shortens a later interval.",
+    "Phase completion requires actual configured duration and at least floor(configuredSeconds/60) complete windows; a long stalled interval closes once rather than creating multiple fictional minutes.",
+    "stage.seconds preserves configured duration; measuredSeconds exactly equals(endedAtMs-startedAtMs)/1000 and the whole-phase assessment uses that actual denominator.",
+    "The wake captures and validates the clock before asserting a latched guard, so an abort records the last current valid time without producing a window/stage completion.",
+    "Invalid or backward clocks stop; early-return/failure phase remains incomplete.",
+    "Short30s and nonminute95s profiles remain supported; partial-tail samples remain in whole-phase and continuous verdicts.",
+    "The six new fixtures include actual-rate threshold failure,300/360 jittered complete-window counts, tail failures, invalid/backward clock and stalled interval boundaries."
+  ],
+  "limitations": [
+    "Focused6/6 result is the writer-run original log, independently hashed here; no full regression or real-run acceptance is inferred.",
+    "New09/formal06 templates and newdriver commit/freeze/static-v2 remain pending their own final validation.",
+    "Historical short windows and08 failure are not rewritten or promoted."
+  ],
+  "productSourceWritten": false,
+  "productModulesImported": false,
+  "testsRun": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

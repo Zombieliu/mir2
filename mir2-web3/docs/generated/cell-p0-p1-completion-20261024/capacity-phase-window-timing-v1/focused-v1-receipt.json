@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--test",
+    "--test-name-pattern=measurement phases",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "startedAtMs": 1792888885247,
+  "endedAtMs": 1792888885383,
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "sourceBefore": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 132226,
+      "sha256": "9c8d20dcac77d401ac65e3c69e37f0105db371d08e72c288fd4ccde6fe46690a"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+      "bytes": 195516,
+      "sha256": "870c6fa95859e325042f3a42ffcfdd91a702adcf586cf171e9a36224ad23fddb"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 132226,
+      "sha256": "9c8d20dcac77d401ac65e3c69e37f0105db371d08e72c288fd4ccde6fe46690a"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+      "bytes": 195516,
+      "sha256": "870c6fa95859e325042f3a42ffcfdd91a702adcf586cf171e9a36224ad23fddb"
+    }
+  ],
+  "sourceUnchanged": true,
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\focused-v1.log",
+    "bytes": 1751,
+    "sha256": "f532a0c47c8f016538b8af9756c0fc4bbf314ec97eff88b8aa4fb23600dbb276"
+  }
+}

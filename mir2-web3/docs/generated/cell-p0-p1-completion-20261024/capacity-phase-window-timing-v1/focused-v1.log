@@ -1,0 +1,46 @@
+TAP version 13
+# Subtest: measurement phases retain five and six complete actual minutes after late then early timer jitter
+ok 1 - measurement phases retain five and six complete actual minutes after late then early timer jitter
+  ---
+  duration_ms: 14.7159
+  type: 'test'
+  ...
+# Subtest: measurement phases use actual elapsed duration for whole-phase rates while seconds keeps the profile contract
+ok 2 - measurement phases use actual elapsed duration for whole-phase rates while seconds keeps the profile contract
+  ---
+  duration_ms: 0.3431
+  type: 'test'
+  ...
+# Subtest: measurement phases preserve short probes and non-minute tails without promoting a partial window
+ok 3 - measurement phases preserve short probes and non-minute tails without promoting a partial window
+  ---
+  duration_ms: 1.2958
+  type: 'test'
+  ...
+# Subtest: measurement phases retain failed partial-minute actions in whole-phase and continuous verdicts
+ok 4 - measurement phases retain failed partial-minute actions in whole-phase and continuous verdicts
+  ---
+  duration_ms: 1.8178
+  type: 'test'
+  ...
+# Subtest: measurement phases fail closed on backward or invalid clocks without completing or inventing a window
+ok 5 - measurement phases fail closed on backward or invalid clocks without completing or inventing a window
+  ---
+  duration_ms: 0.4518
+  type: 'test'
+  ...
+# Subtest: measurement phases preserve existing stall stops and never split one stalled interval into several minute windows
+ok 6 - measurement phases preserve existing stall stops and never split one stalled interval into several minute windows
+  ---
+  duration_ms: 4.7524
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 98.2719

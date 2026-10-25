@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T00:11:06.827Z",
+  "state": "post-run-collector-revision-only-not-executed",
+  "reason": "The original frozen08 collector refused the already existing07 destination before any writes.",
+  "originalFrozenAttempt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\collect-native10-08-frozen-attempt-v1.log",
+    "bytes": 490,
+    "sha256": "e1252c35b32e6d41915e6a958d83533e434e4cdb9a76f3b45b8720fef018f549"
+  },
+  "originalRuntimeFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\launcher-source-frozen-v1.json",
+    "bytes": 12087,
+    "sha256": "d8d5cc9fe8edef50b24eea94793414099c481261dee39c1b71b18fae5c9daee1"
+  },
+  "originalRuntimePinsVerified": 29,
+  "originalFailedReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\reports\\1792885245847-0368d2eb.report.json",
+    "bytes": 192768,
+    "sha256": "04ad88bdd4fd34a29b6b8326f68960619e0b137b6aee2eba7252a9d2866e547a"
+  },
+  "formal05ExpectedRejection": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal05-expected08-rejection-v1.json",
+    "bytes": 1020,
+    "sha256": "4cbcaeff3e76bb5f0fb0c58940dcfc3d3704b87630fb513777004f90611666e4"
+  },
+  "destinationChange": {
+    "from": "capacity-native10-v2-patrol-diagnostics",
+    "to": "capacity-native10-v2-socket-diagnostics"
+  },
+  "sourceCatalogNameUnchanged": "collect-release-native-10-v2-socket-feasibility-08-public-artifact-catalog.json",
+  "externalResultPathsUnchangedAndUnique": true,
+  "collectorInvokesVerifier": false,
+  "originalFrozenScriptsUnmodified": true,
+  "old07TopicUnmodified": true,
+  "policyOrVerdictCodeChanged": false,
+  "runTimeFreezeAmended": false,
+  "revisionIsPostRunNotPreRunFrozen": true,
+  "collectors": [
+    {
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\collect-public.mjs",
+        "bytes": 37369,
+        "sha256": "2c7c80bd3e5fa431449510f3f0620788cc0eb8bf8af38ff996dba9bd2ce011f5"
+      },
+      "revised": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\collect-public-v2.mjs",
+        "bytes": 37685,
+        "sha256": "3a2c911ed512d5fc2da7d13bd209a134220447e4de98c47be121499528ccfc53"
+      },
+      "syntaxPassed": true,
+      "inverseRawBytesEqual": true,
+      "transformations": [
+        "One public child literal replacement.",
+        "Five explicitly named posthoc companions appended to public allowlist.",
+        "Written catalog scope identity corrected from patrol probe07 to socket-context probe08."
+      ]
+    },
+    {
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\verify-public.mjs",
+        "bytes": 16012,
+        "sha256": "af19ee103dae59a15bbffae3080b2cb3e613673b8a8e0fadffe4e9c1b48327cf"
+      },
+      "revised": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\verify-public-v2.mjs",
+        "bytes": 16012,
+        "sha256": "ae93ff8c25ab189217d1623e084751643c95a68fd5dcf410822f59dab88748f6"
+      },
+      "syntaxPassed": true,
+      "inverseRawBytesEqual": true,
+      "transformations": [
+        "One public child literal replacement."
+      ]
+    }
+  ],
+  "syntaxPassed": true,
+  "collectExecuted": false,
+  "verifyExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

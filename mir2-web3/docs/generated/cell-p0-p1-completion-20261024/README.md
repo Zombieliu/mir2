@@ -2,12 +2,12 @@
 
 本记录接续 [前轮证据](../cell-preproduction-p0-p1-20261024/README.md)，保留前轮失败和 `14 passed / 2 not_run` 原始完整报告。本轮报告独立保存，不改写旧结论。
 
-当前 P1 工程合同验证通过，P0 正式容量尚未通过，仍在定位测量中的网关排队停顿；P2 尚未启动。固定 Cell 的晋级仍以完整 P0 基线为前提。
+当前 P1 工程合同验证通过，P0 正式容量尚未通过。此前网关排队停顿仍待定位；最新第八轮因合法碰撞阻挡而未能提供足量活动，不能算作同一停顿的复现。P2 尚未启动，固定 Cell 的晋级仍以完整 P0 基线为前提。
 
 ## 已有新鲜结果
 
-- 当前后端 `855b…` 的[同一次普通双客户端完整生命周期](protocol-full-lifecycle-native-attack-v2/1792868335684-26912ebe.report.json)：**16/16 passed、fullLifecyclePassed=true**。使用两个新普通账号；包含共同击杀、共享掉落及唯一拾取、死亡/城镇复活、跨图、退出重登。此前 `187775…` 的[16/16](protocol-full-lifecycle-spectator-buffer-827d4c8/1792862315921-325d69ed.report.json)、`99bc…` 的[16/16](protocol-full-lifecycle/1792854507439-f411ed33.report.json)及首次没有掉落的真实击杀尝试分别保留。
-- 当前后端[独立复核](protocol-full-lifecycle-native-attack-v2/1792868332300-ff0decb3.independent-audit.json)：354 条 sent 均为普通指令，双端死亡/复活及击杀/掉落/拾取原收据一致，39 个 backend 输入及 6 个驱动原始摘要一致，实际私密值未见于公开产物。进程正常退出、两端口释放及六项连接计数归零只证明本次进程/连接清理；不代替人数或长稳验收。
+- 当前后端 `a430…` 的[同一次普通双客户端完整生命周期](full-lifecycle-socket-diagnostics-v1/1792884517374-04264602.report.json)：**16/16 passed、fullLifecyclePassed=true**。使用两个新普通账号；包含共同击杀、共享掉落及唯一拾取、死亡/城镇复活、跨图、退出重登。此前 `855b…` 的[16/16](protocol-full-lifecycle-native-attack-v2/1792868335684-26912ebe.report.json)、`187775…` 的[16/16](protocol-full-lifecycle-spectator-buffer-827d4c8/1792862315921-325d69ed.report.json)、`99bc…` 的[16/16](protocol-full-lifecycle/1792854507439-f411ed33.report.json)及首次没有掉落的真实击杀尝试分别保留。
+- 当前后端[独立复核](full-lifecycle-socket-diagnostics-v1/1792884512369-f0f261da.independent-audit.json)：353 条 sent 均为普通指令，双端死亡/复活及击杀/掉落/拾取原收据一致，41 个 backend 输入及 6 个驱动原始摘要一致，实际私密值未见于公开产物。进程正常退出、两端口释放及六项连接计数归零只证明本次进程/连接清理；不代替人数或长稳验收。
 - P1 simulation 合同 **26/26**、manager 单元 **16/16**；网关恢复/交接/经济等相邻回归 **113 passed / 1 ignored**，忽略项需要独立 PostgreSQL 测试库。冻结后的网关合同及指标复核 **24/24**。
 - 冻结源码的 simulation 安全、跨图掉落、死亡与共享 Zone 相邻回归重新通过 **254 项不同测试**：[默认配置 251 项](validation/p01-simulation-adjacent-frozen-default.log)，再以 `test-support` 跑[死亡/在线参考 5 项](validation/p01-simulation-death-frozen-reference.log)，其中两项与默认配置重复，不重复计数。
 - 容量工具在新增 V2 前已有 [111/111](validation/capacity-probe10-boundary-complete-tests.log) 回归；本轮 V2 完整回归为 [129/129](validation/attack-v2-driver-capacity-regression-v1.log)，随后仅将零目标 ID 的预发送检查收紧并补一条断言，[4/4 focused](validation/attack-v2-driver-final-boundary-focused-v7.log) 通过。[冻结清单](capacity-attack-v2-driver-frozen-v1.json)分别绑定完整测试源码及最终两行差分，不把历史全量测试冒充最终源码全量测试。证据校验器新增独立 Release 绑定后 [15/15](validation/evidence-verifier-additional-release-metadata-06.log)；原 27 个受影响 Rust 文件的[只读格式检查](validation/p01-rustfmt-check.json)记录保留，不覆盖后续新增源码。校验器拒绝冻结清单外新增/改动的 Rust/Cargo 输入；选择历史 backend commit 不放宽当前生命周期驱动的原始摘要校验。后续 Release 逐个核验其独立 Git 输入及二进制绑定，不能继承旧构建凭证。
@@ -74,7 +74,15 @@ V2 后端对应提交 `461f1d85eed6309a55a88bd79a0022f7b97febe4`、[39 项输入
 
 计时盲区现已补匿名连接序号、主循环阶段与入队时的阶段快照，仅诊断启用时分配每连接固定状态；13 个新增静态标签、15 个阶段覆盖整次分支、身份缓存/数据库、恢复凭证、心跳、preflight 与锁等待。旧 27 标签格式保持；新公开行只有 3/4/7 个固定字段，不记录账号、会话令牌、请求内容或游戏 ActionId。入队阶段仅说明该瞬间的位置，不能当作整段排队的因果证明；耗时包括等待和调度，也不能当 CPU 时间。日志与诊断会有额外开销，不声明零开销或已修复停顿。
 
-[对应源码验证](socket-queue-diagnostics-validation-v1.json)为新增诊断 [7/7](validation/p0-socket-diagnostics-focused-v2.log)、[相邻 159 passed / 2 原有 ignored](validation/p0-socket-diagnostics-adjacent-v1.log)及 [36 项 Rust 只读格式检查](validation/p0-socket-diagnostics-rustfmt36-v1.json)。首轮四处旧测试构造器缺参数的编译错误[原日志](validation/p0-socket-diagnostics-focused-v1.log)及源码前像保留；仅补四个 `None`，原断言不变，新构建闭包据实由 39 扩至 41。[新采集器](socket-queue-slow-stage-helper-v1/freeze-v1.json)保留原 14 场景并增加 11 项边界测试，[25/25](socket-queue-slow-stage-helper-v1/synthetic-tests-v1.log) 通过；原 8KiB 行、1MiB 写队列、32MiB 总量及失败停测/EOF/finish 门槛保持。新源码尚待独立 Release、普通完整生命周期和新探针，不能复用 `855b` 冒充新构建。P0 仍未完成，P2 继续冻结。
+[对应源码验证](socket-queue-diagnostics-validation-v1.json)为新增诊断 [7/7](validation/p0-socket-diagnostics-focused-v2.log)、[相邻 159 passed / 2 原有 ignored](validation/p0-socket-diagnostics-adjacent-v1.log)及 [36 项 Rust 只读格式检查](validation/p0-socket-diagnostics-rustfmt36-v1.json)。首轮四处旧测试构造器缺参数的编译错误[原日志](validation/p0-socket-diagnostics-focused-v1.log)及源码前像保留；仅补四个 `None`，原断言不变，新构建闭包据实由 39 扩至 41。[新采集器](socket-queue-slow-stage-helper-v1/freeze-v1.json)保留原 14 场景并增加 11 项边界测试，[25/25](socket-queue-slow-stage-helper-v1/synthetic-tests-v1.log) 通过；原 8KiB 行、1MiB 写队列、32MiB 总量及失败停测/EOF/finish 门槛保持。
+
+该源码已在 commit `46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b` 独立[构建 Release](release-socket-diagnostics-v1.json)，二进制 `a430…`，41 输入聚合 `57ea…`。[实际构建凭证](socket-queue-diagnostics-release-v1/socket-diagnostics-v1-build-receipt.json)及上述新鲜 16/16 均绑定此版本；[归档收据](socket-diagnostics-v1-integration-archive-receipt.json)明确区分预备工具与已执行构建，不把旧 `855b` 作为新凭证。完整生命周期的 47 条公开慢段来自退出后的严格离线提取，`observedAtMs` 是离线读取时刻，不能与容量请求作实时因果关联。
+
+第八轮 `1792885245847-0368d2eb` 使用新后端和相同九输入驱动，[原报告仍为失败](capacity-native10-v2-socket-diagnostics/public-verification.json)。2/10 人各完成 300 秒、五个窗口通过；soak 约 357 秒中止，不能称 360 秒完成。[有界分析](capacity-native10-v2-socket-analysis/README.md)证明一个 60 秒连续窗口的 80 次机会仅完成 68 次：12 次 navigation-blocked，首次完整 AOI 与同版地图证明墙、玩家和稻草人封住全部第一步；稻草人死亡后角色恢复移动。该失败窗口超时和纠正均为零，不能据此排除历史排队问题，也不能解释成服务器过载。98 条慢段采集完整、无 queue residence 记录；原始 28,609 行、530 个有效嵌入监控和外置录像摘要均保留，正常清理不升格容量。[正式 05 门禁](capacity-native10-v2-socket-diagnostics/formal05-expected08-rejection-v1.json)已实际拒绝此失败，未创建正式账户或进程。冻结采集器因误指已有 07 目录而在写入前拒绝；另建事后 v2 仅修正采集身份及白名单，原脚本、冻结和失败未改写。
+
+[新场景的静态准入](capacity-span4-halo-scene-v1/README.md)检查了每个 5×5 巡逻区及外围一格的静态退路；2/10/25/50/100 前缀都有连通观察域和静态目标路径。外围仍可能有动态怪物，战斗供给只是条件估计。与原 span2 场景相比，前 10/25/50 的静态中心邻近对增加，全 100 的邻近对减少约 20%，因此必须另测真实 AOI 密度，不能称完全等价负载；新场景不继承旧探针的通过。
+
+测量脚本现从上个窗口的真实关闭时刻起等满至少 60 秒，并在原配置时长之外保证足够完整窗口。`seconds` 保留配置合同，`measuredSeconds` 记录真实时长并用于活动率分母，长停顿不补造多个窗口，尾段仍保留整体和连续判定。新增六组边界后的[完整回归 151/151](capacity-phase-window-timing-v1/full-v1.log)通过；随后仅一行将聊天的二值触发条件保留为原配置时长，防止 30 秒短探针被几毫秒抖动额外要求聊天。最终版本的[定向 7/7](capacity-phase-window-timing-v1/final-focused-v1.log)和[相邻 25/25](capacity-phase-window-timing-v1/final-adjacent-v1.log)通过，[最终差分](capacity-phase-window-timing-v1/final-compatibility-delta-v1.json)明确区分全量版本与最终版本，不称最终原始九输入已重新跑完整回归。[新九输入清单](capacity-phase-window-timing-driver-frozen-v1.json)另行冻结，旧清单不改写。新场景尚未实测，不放宽时长、95% 完成率或任何战斗门槛。P0 仍未完成，P2 继续冻结。
 
 ## 本轮范围
 

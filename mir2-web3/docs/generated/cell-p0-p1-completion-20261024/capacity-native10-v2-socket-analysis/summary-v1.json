@@ -1,0 +1,568 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792885245847-0368d2eb",
+  "actor": "La5189302",
+  "inputPins": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\reports\\1792885245847-0368d2eb.report.json",
+      "bytes": 192768,
+      "sha256": "04ad88bdd4fd34a29b6b8326f68960619e0b137b6aee2eba7252a9d2866e547a"
+    },
+    "raw": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\reports\\1792885245847-0368d2eb.samples.jsonl",
+      "bytes": 17808660,
+      "sha256": "a42c137132dd966434a46e735dafdd9fd53dd63d6f97983c06ea7f265b4286dc",
+      "rows": 28609
+    },
+    "slowStage": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\slow-stage-public.jsonl",
+      "bytes": 8753,
+      "sha256": "9049e3ab2928fbe19860d7f9ebb85841771bf71cfaf8fbcf28c0811b6cf58f29"
+    },
+    "standaloneMonitor": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\monitor-history.jsonl",
+      "bytes": 4773507,
+      "sha256": "97e9d96589331e77c2f4df6c3e32750e76fd4b0c51de2a4614aae83103f6e872"
+    },
+    "cleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\realm-cleanup.json",
+      "bytes": 3157,
+      "sha256": "c45fd70ade72a04fab4f73608dcc5442c35a3eb173e0c099fab4d98fb09ff76b"
+    },
+    "sourcePins": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\source-pins-admitted-v2.json",
+      "bytes": 26470,
+      "sha256": "c3cc35d297cbb65e26e0c709827f7c0bda9682581934241bdbdd126ae9e3e078"
+    }
+  },
+  "selectedEvents": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\selected-events-v1.json",
+    "bytes": 398829,
+    "sha256": "cbd703e524e6de00ad75dfc0422dc61d3d466169a0aaf18334c3dd5afc774734"
+  },
+  "rawTypeCounts": {
+    "monitor": 530,
+    "phaseStarted": 5,
+    "action": 11174,
+    "coverage": 1053,
+    "playerLifecycle": 2316,
+    "admitted": 10,
+    "selfTransform": 9302,
+    "fanoutDistribution": 3705,
+    "phaseEnded": 5,
+    "continuousWindow": 133,
+    "window": 15,
+    "stageComplete": 2,
+    "combatArrival": 1,
+    "pendingAttackEvidence": 350,
+    "combatChaseDeferred": 1,
+    "movementCorrection": 3,
+    "navigationBlocked": 1,
+    "continuousFailure": 1,
+    "safetyStop": 1,
+    "finished": 1
+  },
+  "verdict": {
+    "ok": false,
+    "originalFailurePreserved": true,
+    "completedStages": [
+      {
+        "name": "stage-2",
+        "passed": true,
+        "seconds": 300
+      },
+      {
+        "name": "stage-10",
+        "passed": true,
+        "seconds": 300
+      }
+    ],
+    "soak": {
+      "name": "soak",
+      "kind": "measurement",
+      "targetActors": 10,
+      "startedAtMs": 1792885950902,
+      "endedAtMs": 1792886308140,
+      "completed": false
+    },
+    "continuousFailureCount": 1,
+    "failedWindow": {
+      "actor": "La5189302",
+      "seconds": 60.00411259999999,
+      "final": false,
+      "at": 1792886308063,
+      "previousSameActorWindowAt": 1792886248059,
+      "opportunities": 80,
+      "completed": 68,
+      "completionRatio": 0.85,
+      "gaps": 12,
+      "moves": 65,
+      "runs": 59,
+      "runRatio": 0.9076923076923077,
+      "cells": 124,
+      "activityPassed": false,
+      "latencyPassed": true,
+      "fanoutPassed": true,
+      "timeoutRatio": 0,
+      "correctionRatio": 0
+    }
+  },
+  "blockedEpisode": {
+    "count": 12,
+    "firstAt": 1792886275785,
+    "lastAt": 1792886284039,
+    "firstToLastMs": 8254,
+    "firstRecoveredAt": 1792886284816,
+    "firstToRecoveredMs": 9031,
+    "allWithinFailedWindow": true,
+    "preparedSendTimeConflictRows": 0,
+    "allBlockedRowsHaveNoSentTimestamp": true,
+    "actor02MovementCorrectionRowsWholeRun": 0
+  },
+  "exactPlanningBranch": {
+    "firstNavigationDiagnosticLine": 27475,
+    "origin": {
+      "x": 237,
+      "y": 665
+    },
+    "home": {
+      "x": 237,
+      "y": 665
+    },
+    "targetCursor": 0,
+    "attempts": [
+      {
+        "target": {
+          "x": 239,
+          "y": 665
+        },
+        "reason": "no-path-or-expansion-limit",
+        "staticWalkable": true,
+        "targetOccupied": false
+      },
+      {
+        "target": {
+          "x": 239,
+          "y": 667
+        },
+        "reason": "no-path-or-expansion-limit",
+        "staticWalkable": true,
+        "targetOccupied": false
+      },
+      {
+        "target": {
+          "x": 237,
+          "y": 667
+        },
+        "reason": "no-path-or-expansion-limit",
+        "staticWalkable": true,
+        "targetOccupied": false
+      }
+    ],
+    "attemptsTruncated": false,
+    "nearbyOccupants": [
+      {
+        "objectId": 50005,
+        "kind": "player",
+        "name": "La5189305",
+        "x": 237,
+        "y": 666
+      },
+      {
+        "objectId": 206636,
+        "kind": "monster",
+        "name": "Scarecrow",
+        "x": 238,
+        "y": 665
+      }
+    ],
+    "occupantsTruncated": false,
+    "legalExitCount": 0,
+    "explanation": "Static north and west neighbours are blocked. East contains the observed live Scarecrow; south contains the observed player. Every diagonal fails its exact side-cell rule. Thus there is no legal first step even before adding any hints or rejected cells. The primed fast path cannot send, all three non-self original corner A* routes return null, and the own-corner candidate is skipped. Native patrol returns null and records the original navigation-blocked offered opportunity. The first A* failure is true no-path, not exhaustion of4000 nodes.",
+    "scope": "The complete first snapshot proves zero exits. The other11 entries are original null-plan opportunities in the same episode; later owner/attack/death records support the same blockers remaining, but no exact full obstacle set for each of those11 decisions is claimed."
+  },
+  "coordinationAndAvoidance": {
+    "originalAoiPlayer": {
+      "objectId": 50005,
+      "kind": "player",
+      "name": "La5189305",
+      "x": 237,
+      "y": 666
+    },
+    "actualControlledOwnerArrival": {
+      "line": 27458,
+      "type": "selfTransform",
+      "actor": "La5189305",
+      "connection": 6,
+      "at": 1792886275252,
+      "sequence": 8794,
+      "monotonicMs": 1041766.0141,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 237,
+        "y": 666,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 235,
+          "y": 666
+        },
+        "direction": "Down"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 237,
+          "y": 666
+        },
+        "direction": "Right"
+      }
+    },
+    "whyHintNotRequired": "The player was already in the blocked actor original AOI and its own real UserLocation confirms237666 before the episode. Additional conservative hints could add obstacles but are unnecessary to establish this first zero-exit condition. None of12 action rows is the prepared-plan synchronous conflict branch.",
+    "avoidance": "No actor02 movementCorrection record appears anywhere in the raw run. No per-decision full hint/avoidance map is logged; absence of a hidden map is not asserted, and none is needed for the first geometry proof."
+  },
+  "recovery": {
+    "lastPreBlockActor02Movement": {
+      "line": 27451,
+      "type": "action",
+      "at": 1792886275063,
+      "phase": "soak",
+      "actor": "La5189302",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1041533.3188,
+      "sentAtMs": 1041548.4239,
+      "plannedTarget": {
+        "x": 237,
+        "y": 665
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 237,
+        "y": 665
+      },
+      "direction": "Up",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.8427999999839813,
+      "plannedLatencyMs": 15.947900000028312
+    },
+    "damageSequence": [
+      {
+        "line": 27535,
+        "at": 1792886277623,
+        "requestId": "335",
+        "targetId": 206636,
+        "damage": 3,
+        "healthPercent": 85,
+        "sharedHealthVerified": true,
+        "status": "success"
+      },
+      {
+        "line": 27580,
+        "at": 1792886279026,
+        "requestId": "336",
+        "targetId": 206636,
+        "damage": 3,
+        "healthPercent": 70,
+        "sharedHealthVerified": true,
+        "status": "success"
+      },
+      {
+        "line": 27621,
+        "at": 1792886280326,
+        "requestId": "337",
+        "targetId": 206636,
+        "damage": 3,
+        "healthPercent": 55,
+        "sharedHealthVerified": true,
+        "status": "success"
+      },
+      {
+        "line": 27665,
+        "at": 1792886281723,
+        "requestId": "338",
+        "targetId": 206636,
+        "damage": 3,
+        "healthPercent": 40,
+        "sharedHealthVerified": true,
+        "status": "success"
+      },
+      {
+        "line": 27715,
+        "at": 1792886283128,
+        "requestId": "339",
+        "targetId": 206636,
+        "damage": 3,
+        "healthPercent": 25,
+        "sharedHealthVerified": true,
+        "status": "success"
+      },
+      {
+        "line": 27759,
+        "at": 1792886284517,
+        "requestId": "340",
+        "targetId": 206636,
+        "damage": 5,
+        "healthPercent": 0,
+        "sharedHealthVerified": true,
+        "status": "success"
+      }
+    ],
+    "pairedDeathPackets": [
+      {
+        "traceLine": 27760,
+        "requestId": "340",
+        "receiver": "observer",
+        "sequence": 9223,
+        "monotonicMs": 1051006.019,
+        "atMs": 1792886284492,
+        "packet": "ObjectDied",
+        "payload": {
+          "objectId": 206636,
+          "location": {
+            "x": 238,
+            "y": 665
+          },
+          "direction": "Left"
+        }
+      },
+      {
+        "traceLine": 27760,
+        "requestId": "340",
+        "receiver": "owner",
+        "sequence": 8904,
+        "monotonicMs": 1051006.0539,
+        "atMs": 1792886284492,
+        "packet": "ObjectDied",
+        "payload": {
+          "objectId": 206636,
+          "location": {
+            "x": 238,
+            "y": 665
+          },
+          "direction": "Left"
+        }
+      }
+    ],
+    "firstRecovery": {
+      "line": 27775,
+      "type": "action",
+      "at": 1792886284816,
+      "phase": "soak",
+      "actor": "La5189302",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 1051283.3188,
+      "sentAtMs": 1051299.7778,
+      "plannedTarget": {
+        "x": 238,
+        "y": 665
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 238,
+        "y": 665
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.5360999999102205,
+      "plannedLatencyMs": 16.995099999941885
+    },
+    "laterFighterDeparture": {
+      "line": 27805,
+      "type": "selfTransform",
+      "actor": "La5189305",
+      "connection": 6,
+      "at": 1792886285794,
+      "sequence": 8918,
+      "monotonicMs": 1052308.8055,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 238,
+        "y": 666,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 237,
+          "y": 666
+        },
+        "direction": "UpRight"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 238,
+          "y": 666
+        },
+        "direction": "Right"
+      }
+    },
+    "interpretation": "Six verified hits produce20 damage and paired HP0/ObjectDied at238665. Actor02 enters that exact cell294ms later, before the player moves off237666. This is consistent with the monster death opening the east exit; original action and raw packet receipts are retained, not synthesized."
+  },
+  "slowStage": {
+    "pin": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\slow-stage-public.jsonl",
+      "bytes": 8753,
+      "sha256": "9049e3ab2928fbe19860d7f9ebb85841771bf71cfaf8fbcf28c0811b6cf58f29"
+    },
+    "rows": 98,
+    "census": [
+      {
+        "group": "bootstrap-2|socket_turn.input",
+        "count": 4,
+        "minMs": 50,
+        "maxMs": 995,
+        "atLeast500": 2
+      },
+      {
+        "group": "bootstrap-2|shared_session.inner_execute",
+        "count": 2,
+        "minMs": 918,
+        "maxMs": 918,
+        "atLeast500": 2
+      },
+      {
+        "group": "bootstrap-2|zone_owner.in_process.execute_request",
+        "count": 2,
+        "minMs": 927,
+        "maxMs": 968,
+        "atLeast500": 2
+      },
+      {
+        "group": "bootstrap-2|session_action.execute",
+        "count": 2,
+        "minMs": 928,
+        "maxMs": 970,
+        "atLeast500": 2
+      },
+      {
+        "group": "bootstrap-10|socket_turn.input",
+        "count": 15,
+        "minMs": 50,
+        "maxMs": 967,
+        "atLeast500": 8
+      },
+      {
+        "group": "bootstrap-10|shared_session.inner_execute",
+        "count": 8,
+        "minMs": 912,
+        "maxMs": 930,
+        "atLeast500": 8
+      },
+      {
+        "group": "bootstrap-10|zone_owner.in_process.execute_request",
+        "count": 8,
+        "minMs": 921,
+        "maxMs": 940,
+        "atLeast500": 8
+      },
+      {
+        "group": "bootstrap-10|session_action.execute",
+        "count": 11,
+        "minMs": 50,
+        "maxMs": 942,
+        "atLeast500": 8
+      },
+      {
+        "group": "stage-10|socket_turn.spectator",
+        "count": 1,
+        "minMs": 50,
+        "maxMs": 50,
+        "atLeast500": 0
+      },
+      {
+        "group": "soak|socket_turn.input",
+        "count": 1,
+        "minMs": 53,
+        "maxMs": 53,
+        "atLeast500": 0
+      },
+      {
+        "group": "outside-or-drain|shared_session.inner_execute",
+        "count": 10,
+        "minMs": 263,
+        "maxMs": 278,
+        "atLeast500": 0
+      },
+      {
+        "group": "outside-or-drain|zone_owner.in_process.execute_request",
+        "count": 10,
+        "minMs": 265,
+        "maxMs": 297,
+        "atLeast500": 0
+      },
+      {
+        "group": "outside-or-drain|session_action.execute",
+        "count": 10,
+        "minMs": 265,
+        "maxMs": 297,
+        "atLeast500": 0
+      },
+      {
+        "group": "outside-or-drain|socket_turn.input",
+        "count": 10,
+        "minMs": 266,
+        "maxMs": 298,
+        "atLeast500": 0
+      },
+      {
+        "group": "outside-or-drain|serial_gate.zone_outbound_wait",
+        "count": 4,
+        "minMs": 120,
+        "maxMs": 259,
+        "atLeast500": 0
+      }
+    ],
+    "queueResidenceRows": [],
+    "recordsNearBlockedEpisode": [],
+    "phaseAndTimeScope": "ObservedAt is launcher receive time. All98 rows were counted. There are zero socket_input.queue_residence records and none near this blocked episode; this does not prove all server work was free of latency or identify why another run stalled."
+  },
+  "driver": {
+    "samplesNearEpisode": 19,
+    "maxP99Ms": 38.469631,
+    "maxMs": 38.469631,
+    "originalThresholdMs": 250
+  },
+  "nextStep": {
+    "minimumReasonableChange": "Do not change the planner, occupancy, completion denominator or95% gate to turn legal body-blocking into a success. Select and freeze a scene whose full patrol routes are statically open with alternative exits, prove original role prefixes and actual observer combat coverage, then rerun a fresh gate.",
+    "span4": "Changing only span2 to4 at237665 cannot remove the first-step trap. The existing span4 proposal relocates this actor to241666 and changes many other homes, so it is a new scene rather than a repair of this result. An independent per-rectangle/route/hazard/AOI comparison is separate and must not be mistaken for dynamic occupancy acceptance."
+  },
+  "limitations": [
+    "Only the first blocked opportunity has the complete bounded local AOI/planning diagnostic.",
+    "No spectator frames were read; existing actual AOI, owner receipts and paired death packets were sufficient.",
+    "Dynamic player/monster body-blocking is valid authoritative server behavior. This failure is insufficient offered/completed workload, not proof of overload or a movement correction bug.",
+    "No model here guarantees100 players, future monster wander, two-hour supply or production capacity."
+  ],
+  "mutations": {
+    "sourceChanged": false,
+    "thresholdChanged": false,
+    "sceneChanged": false,
+    "testStarted": false,
+    "realmStarted": false,
+    "capacityAccepted": false
+  }
+}

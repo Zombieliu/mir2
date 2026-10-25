@@ -1386,35 +1386,48 @@ async function settleClients(context) {
   throw new Error('Ordinary paths did not reach the declared scenario within 180 seconds');
 }
 
-async function measure(context, name, seconds) {
+export async function measure(context, name, seconds, { now = Date.now, sleep: wait = sleep } = {}) {
   context.phase = name; context.current = new Measurements(); context.window = new Measurements(); context.aoi.reset();
-  const phase = beginCapacityPhase(context, name, 'measurement', context.clients.filter(client => client.ready).length);
+  let lastAt;
+  const readClock = () => {
+    const at = now();
+    if (!Number.isSafeInteger(at) || at < 0 || lastAt !== undefined && at < lastAt) {
+      const reason = 'Measurement phase clock is invalid or moved backward';
+      context.guard.stop(reason); context.guard.assert(); throw new SafetyStop(reason);
+    }
+    lastAt = at; return at;
+  };
+  const started = readClock();
+  const phase = beginCapacityPhase(context, name, 'measurement', context.clients.filter(client => client.ready).length, started);
   try {
-  const started = phase.startedAtMs, deadline = started + seconds * 1000, windows = [];
-  let nextWindow = started + 60000, windowStart = started;
-  while (Date.now() < deadline) {
-    context.guard.assert(); await sleep(100);
-    if (Date.now() >= nextWindow) {
+  const windows = [], minimumCompleteWindows = Math.floor(seconds / 60);
+  let ended = started, windowStart = started;
+  while (ended - started < seconds * 1000 || windows.length < minimumCompleteWindows) {
+    context.guard.assert(); await wait(100); ended = readClock(); context.guard.assert();
+    if (ended - windowStart >= 60000) {
+      const closedAt = ended;
       const assessment = assessMeasurements(context.window, context.clients.filter(client => client.ready).map(client => ({ name: client.label, role: client.role })),
-        (Date.now() - windowStart) / 1000, context.policy, { requireChat: context.clients.length > 1 });
-      windows.push({ elapsedSeconds: (Date.now() - started) / 1000, ...assessment });
-      context.writer.add({ type: 'window', phase: name, assessment });
-      context.window = new Measurements(); windowStart = Date.now(); nextWindow += 60000;
+        (closedAt - windowStart) / 1000, context.policy, { requireChat: context.clients.length > 1 });
+      windows.push({ elapsedSeconds: (closedAt - started) / 1000, startedAtMs: windowStart, endedAtMs: closedAt, ...assessment });
+      context.writer.add({ type: 'window', phase: name, startedAtMs: windowStart, endedAtMs: closedAt, assessment });
+      context.window = new Measurements(); windowStart = closedAt;
     }
   }
   const actors = context.clients.filter(client => client.ready).map(client => ({ name: client.label, role: client.role }));
-  const assessment = assessMeasurements(context.current, actors, seconds, context.policy, {
+  const measuredSeconds = (ended - started) / 1000;
+  const assessment = assessMeasurements(context.current, actors, measuredSeconds, context.policy, {
     requireChat: actors.length > 1 && (context.policy.activityMode !== 'native' || seconds * 1000 > context.policy.nativeChatIntervalMs), aoi: { ...context.aoi.stats } });
   const fanout = Object.entries(assessment.metrics).filter(([kind]) => kind.startsWith('fanout-'));
   const fanoutPassed = fanout.every(([, value]) => (value.status.timeout ?? 0) / Math.max(1, value.count) < .01 && value.fromSend.p95Ms <= 1000);
+  // seconds retains the configured profile contract; rates use actual elapsed time.
   const output = { name, controlledActors: actors.length, completed: true, ...assessment, fanoutPassed,
-    rollingWindows: windows, startedAtMs: started, endedAtMs: Date.now(),
+    seconds, measuredSeconds, rollingWindows: windows, startedAtMs: started, endedAtMs: ended,
     passed: assessment.passed && fanoutPassed && windows.every(window => window.passed) };
   finishCapacityPhase(context, phase, true, output.endedAtMs);
   context.writer.add({ type: 'stageComplete', stage: output });
   context.current = null; context.window = null; context.phase = 'ramp';
   return output;
-  } finally { finishCapacityPhase(context, phase, false); }
+  } finally { finishCapacityPhase(context, phase, false, lastAt); }
 }
 
 export async function awaitPendingActions(clients) {
@@ -1511,6 +1524,12 @@ export async function runCapacity(options) {
   });
   const report = { schemaVersion: 1, runId, endpoint, policy, startedAt: new Date().toISOString(), stages: [], nativeResume: [], savedVerification: [], phaseWindows: [],
     ordinaryAccountsOnly: true, visualAccepted: false, capacityUpperBound: null, acceptanceScope: 'One real egress, ordinary same-map movement/AOI and the explicitly declared combat subgroup' };
+  Object.defineProperty(report, 'measurementClock', { enumerable: true,
+    value: Object.freeze({ scope: 'All measurement phases; seconds retains configured duration and measuredSeconds is actual elapsed wall time.',
+      minimumCompleteWindowMs: 60000,
+      completeWindowCountRule: 'At least floor(configured seconds / 60) complete windows, each starting at the previous actual close, plus the full configured phase duration.',
+      durationRule: 'Activity and rate assessment use actual measuredSeconds; no short window is relabelled as sixty seconds or duplicated after a stall.',
+      partialWindowRule: 'The final partial minute remains in whole-phase and continuous assessment, without counting as a complete rolling window.' }) });
   if (policy.activityMode === 'native') Object.defineProperty(report, 'navigationCoordination', { enumerable: true,
     value: Object.freeze({ scope: 'Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.',
       maximumHintCellsPerConnection: NAVIGATION_HINT_MAX_CELLS, blockedOpportunityRule: 'A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain.' }) });

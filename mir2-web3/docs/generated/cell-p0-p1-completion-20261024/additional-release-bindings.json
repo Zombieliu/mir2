@@ -8,6 +8,10 @@
     {
       "manifest": "backend-source-native-attack-v2.json",
       "build": "release-native-attack-v2.json"
+    },
+    {
+      "manifest": "backend-source-socket-diagnostics-v1.json",
+      "build": "release-socket-diagnostics-v1.json"
     }
   ]
 }

@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T00:59:44.305Z",
+  "repositoryBaselineCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "scope": "Measurement phases require real complete minute windows and use actual whole-phase duration for rates. Configured seconds, original chat-trigger boundary and all load/quality thresholds remain.",
+  "writerFiles": [
+    "apps/web/scripts/playtest-capacity-soak.mjs",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "sourceSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 132218,
+      "sha256": "c3a12cfa80dc55cf591ecaaa0031b4cabe9acc7f175a3a8de511df76d3630e55"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 196852,
+      "sha256": "2235d9e7d55f0bfa1b78bce3b6ad493cd6cfba2fbe329e551502d2a53ab367cf"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "previousFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-patrol-run-preference-driver-frozen-v1.json",
+    "bytes": 6826,
+    "sha256": "48e6b2c2dae7e82d26d2a0e95d408b863557530e363a79e4a07c2e77c21f172d"
+  },
+  "preimageManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\preimage-manifest-v1.json",
+    "bytes": 1217,
+    "sha256": "e49f56a75527c7b19484a43d65dbccdb0b677fa6313fc3cb28202969000a2056"
+  },
+  "preimages": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.mjs.preimage",
+      "bytes": 130681,
+      "sha256": "79d30e3994703eeef902fdd79feac1e7ce76c8b0255baecb0824f5d7d51fc4e6",
+      "gitLfBytes": 130681,
+      "gitLfSha256": "79d30e3994703eeef902fdd79feac1e7ce76c8b0255baecb0824f5d7d51fc4e6",
+      "rawNormalizedMatchesGit": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.test.mjs.preimage",
+      "bytes": 188151,
+      "sha256": "97fb8b09087958dc8ee8f15094011e04a56e087af6bc5cfdfeee4d2fcd5554f9",
+      "gitLfBytes": 188151,
+      "gitLfSha256": "97fb8b09087958dc8ee8f15094011e04a56e087af6bc5cfdfeee4d2fcd5554f9",
+      "rawNormalizedMatchesGit": true
+    }
+  ],
+  "preFinalFocused": {
+    "passed": 6,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\focused-v1.log",
+      "bytes": 1751,
+      "sha256": "f532a0c47c8f016538b8af9756c0fc4bbf314ec97eff88b8aa4fb23600dbb276"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\focused-v1-receipt.json",
+      "bytes": 1756,
+      "sha256": "40981d55ad3a022e42915baa5e85fa8c9d69859731a47bb511acf0e7dc461f1e"
+    }
+  },
+  "preFinalAdjacent": {
+    "passed": 25,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "durationMs": 6886.1486,
+    "exactSourceSha256": "bcc53ee440624ef6831a591fb693226b7aade5a48ecbd6e502debec07d7f463b",
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\adjacent-v1.log",
+      "bytes": 6555,
+      "sha256": "3690863f349b1b0538f3688b22a920c0b444cf2b90c2e856037fdff1c050cd23"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\adjacent-v1-receipt.json",
+      "bytes": 4454,
+      "sha256": "d70eabbcedbf931d278316bff7b7c788be61981a0c492feb199d31752516aef8"
+    },
+    "exactSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\adjacent-v1-source-pins.json",
+      "bytes": 2042,
+      "sha256": "40b9d31a880ac8b432517a028b9bd52c6b625ac8f27f3fd2779a9dd356163e23"
+    }
+  },
+  "focused": {
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "durationMs": 106.6595,
+    "exactSourceSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-focused-v1.log",
+      "bytes": 2027,
+      "sha256": "e6d5b0f0f0b1bd26a0bcc0e8d76c86ff4a2e9d7402a15f44df3ddb79e6521dc8"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-focused-v1-receipt.json",
+      "bytes": 4332,
+      "sha256": "0c36a268064adea86397ab2b64aef62c23376064accc639e7e17326f2e934b06"
+    },
+    "exactSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-source-pins-v1.json",
+      "bytes": 2100,
+      "sha256": "756ed50412be324d269f7ff2d522a6e7992744c650b59c30c531f4d90b842696"
+    }
+  },
+  "adjacentFocused": {
+    "passed": 25,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "durationMs": 1367.9382,
+    "exactSourceSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-adjacent-v1.log",
+      "bytes": 6556,
+      "sha256": "a8ea941c774f35a9fe984cea909cd17ec2698bf8c03e9c3750655770ca1f0a48"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-adjacent-v1-receipt.json",
+      "bytes": 4418,
+      "sha256": "65adbdbb0c6a458cf6641160adfb3fc546279ed78466598212eb187281d566ed"
+    },
+    "exactSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-source-pins-v1.json",
+      "bytes": 2100,
+      "sha256": "756ed50412be324d269f7ff2d522a6e7992744c650b59c30c531f4d90b842696"
+    }
+  },
+  "fullRegression": {
+    "passed": 151,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "durationMs": 310482.2003,
+    "exactSourceSha256": "bcc53ee440624ef6831a591fb693226b7aade5a48ecbd6e502debec07d7f463b",
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\full-v1.log",
+      "bytes": 41297,
+      "sha256": "1aafd9926aef5b1b8db6831f1c18d8f391504cc50aba82250f66895b92a33897"
+    },
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\full-v1-receipt.json",
+      "bytes": 4502,
+      "sha256": "5cccefc8824e7bf064c3e09d912a0caf6d20bdba87e4b0156518d40125621b0f"
+    },
+    "exactSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\full-v1-source-pins.json",
+      "bytes": 2042,
+      "sha256": "6b6b5e6e7dc3c7a007223d84a51dbb808b95d760e889ed8634082298124de83e"
+    },
+    "finalSourceFullRegressionPerformed": false,
+    "scope": "Actual151 full regression used the pre-final raw9. Final source is covered by the explicit one-line compatibility delta and final7/25 checks below; not claimed as a full run on final raw9."
+  },
+  "finalCompatibilityDelta": {
+    "proof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-compatibility-delta-v1.json",
+      "bytes": 4029,
+      "sha256": "f414cace0cfafbbfc588b8c06eb49b9f0e4d6f6a4149eb8a24ed9faf5c894875"
+    },
+    "sourceBeforeSha256": "bcc53ee440624ef6831a591fb693226b7aade5a48ecbd6e502debec07d7f463b",
+    "sourceAfterSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+    "productionChangedLines": 1,
+    "preFinalSourceManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-delta-preimage-v1.json",
+      "bytes": 1474,
+      "sha256": "ab21cd3221ed4d5b19418143f49ddcdf36265d83b5445a73cf39c064e90ef143"
+    },
+    "preFinalRawFiles": [
+      {
+        "source": {
+          "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+          "bytes": 132226,
+          "sha256": "9c8d20dcac77d401ac65e3c69e37f0105db371d08e72c288fd4ccde6fe46690a"
+        },
+        "preimage": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.mjs.pre-final-full.mjs.txt",
+          "bytes": 132226,
+          "sha256": "9c8d20dcac77d401ac65e3c69e37f0105db371d08e72c288fd4ccde6fe46690a"
+        }
+      },
+      {
+        "source": {
+          "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+          "bytes": 195516,
+          "sha256": "870c6fa95859e325042f3a42ffcfdd91a702adcf586cf171e9a36224ad23fddb"
+        },
+        "preimage": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.test.mjs.pre-final-full.mjs.txt",
+          "bytes": 195516,
+          "sha256": "870c6fa95859e325042f3a42ffcfdd91a702adcf586cf171e9a36224ad23fddb"
+        }
+      }
+    ],
+    "finalFocused": {
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 106.6595,
+      "exactSourceSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-focused-v1.log",
+        "bytes": 2027,
+        "sha256": "e6d5b0f0f0b1bd26a0bcc0e8d76c86ff4a2e9d7402a15f44df3ddb79e6521dc8"
+      },
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-focused-v1-receipt.json",
+        "bytes": 4332,
+        "sha256": "0c36a268064adea86397ab2b64aef62c23376064accc639e7e17326f2e934b06"
+      },
+      "exactSourceManifest": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-source-pins-v1.json",
+        "bytes": 2100,
+        "sha256": "756ed50412be324d269f7ff2d522a6e7992744c650b59c30c531f4d90b842696"
+      }
+    },
+    "finalAdjacent": {
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 1367.9382,
+      "exactSourceSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-adjacent-v1.log",
+        "bytes": 6556,
+        "sha256": "a8ea941c774f35a9fe984cea909cd17ec2698bf8c03e9c3750655770ca1f0a48"
+      },
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-adjacent-v1-receipt.json",
+        "bytes": 4418,
+        "sha256": "65adbdbb0c6a458cf6641160adfb3fc546279ed78466598212eb187281d566ed"
+      },
+      "exactSourceManifest": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-source-pins-v1.json",
+        "bytes": 2100,
+        "sha256": "756ed50412be324d269f7ff2d522a6e7992744c650b59c30c531f4d90b842696"
+      }
+    },
+    "independentReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\independent-review-final-addendum-v1.json",
+      "bytes": 8880,
+      "sha256": "fec788c3e9ea88f4a02c53c96eb9a8e7821189fd95894aa93cf4c4b01e873444"
+    }
+  },
+  "independentReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\independent-review-v1.json",
+    "bytes": 7650,
+    "sha256": "afc5e0a372e2e36fa45f841b6dcd0c2cc5b9b286a2ea8b840778dfa0a0ca5b26"
+  },
+  "measurementClock": {
+    "scope": "All measurement phases; seconds retains configured duration and measuredSeconds is actual elapsed wall time.",
+    "minimumCompleteWindowMs": 60000,
+    "completeWindowCountRule": "At least floor(configured seconds / 60) complete windows, each starting at the previous actual close, plus the full configured phase duration.",
+    "durationRule": "Activity and rate assessment use actual measuredSeconds; no short window is relabelled as sixty seconds or duplicated after a stall.",
+    "partialWindowRule": "The final partial minute remains in whole-phase and continuous assessment, without counting as a complete rolling window."
+  },
+  "nativePatrolPlanning": {
+    "scope": "Native primed patrol fallback only; original fast path and at most four existing corner targets remain.",
+    "maximumFallbackCornerTargets": 4,
+    "pathExpansionLimit": 4000,
+    "selectionRule": "Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.",
+    "primingRule": "Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain."
+  },
+  "invariants": {
+    "nativeCadenceMs": 750,
+    "pathExpansionLimit": 4000,
+    "maximumExistingFallbackTargets": 4,
+    "attacksPerMinute": 18,
+    "positiveHitsPerMinute": 12,
+    "minimumMovementRunRatio": 0.5,
+    "timeoutExclusive": 0.01,
+    "maximumCorrectionRatio": 0.05,
+    "originalFastPathUnchanged": true,
+    "baselineAndUnprimedFirstPathUnchanged": true,
+    "coreUnchanged": true,
+    "productionCodeChanged": false,
+    "sharedLifecycleDriversChanged": false,
+    "scenarioOrPolicyChanged": false,
+    "authoritativeMovementOrSnapshotsChanged": false,
+    "oldFailureReclassified": false,
+    "opportunityDenominatorOrCadenceChanged": false,
+    "originalOtherSevenInputsUnchanged": true,
+    "configuredStageSecondsPreserved": true,
+    "actualPhaseRateDenominator": true,
+    "completeWindowMinimumMs": 60000,
+    "minimumWindows": "floor(configuredSeconds/60)",
+    "partialMinuteFailuresPreserved": true,
+    "originalConfiguredChatTriggerPreserved": true,
+    "invalidOrBackwardClockFailsClosed": true,
+    "existingGuardCheckedAfterWakeBeforeAssessment": true,
+    "clockValuesNeverRelabelledToPass": true
+  },
+  "functionalVerificationOnly": true,
+  "capacityAccepted": false,
+  "newProbeStarted": false,
+  "ownedRealmStarted": false,
+  "diffCheckPassed": true,
+  "limitations": [
+    "The original145 assertions and six new timing cases passed together as151 on pre-final bcc53 raw9. One nominal chat-trigger condition was then restored and a seventh two-actor regression was added; final raw7200 passed7 focused and25 adjacent. No full152 run on final raw9 is claimed.",
+    "Only tool timing changed. Fake-clock fixtures and socket/CIM tests do not establish gameplay or machine capacity.",
+    "Actual phases can exceed configured duration to finish the required true-minute windows. Every rate uses measuredSeconds; the original binary chat-trigger scope still uses configured seconds.",
+    "A stalled interval is never split into supposedly complete minutes. Existing guards still abort, invalid/backward clocks stop, and incomplete-tail actions remain in whole-phase and continuous acceptance.",
+    "Backend41/Release, six shared lifecycle drivers, all original failure verdicts, policy thresholds, planned action cadence and authority remain unchanged. Root scene adoption and fresh strictprobe are separate gates."
+  ]
+}

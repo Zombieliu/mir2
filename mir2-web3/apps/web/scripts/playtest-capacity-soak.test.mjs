@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
   assessMeasurements, movementDiagnosticMayContinue, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
-import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
+import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 
@@ -1439,6 +1439,122 @@ function ordinaryMovement(measurements, name, count = 60) {
   for (let i = 0; i < count; i++) measurements.add({ actor: name, kind: 'walk', status: 'success', latencyMs: 100,
     plannedLatencyMs: 120, plannedGameplay: true, at: i * 1000 });
 }
+
+function measurementClockFixture({ advance = ({ waitMs }) => waitMs, sample = () => ({}), emit = true,
+  stopAfterSleep = () => null, continuous = false, policy = capacityPolicy({ profile: 'probe', stages: '1' }), actorCount = 1, actionIntervalMs = 1000 } = {}) {
+  const started = 1000000, rows = [], samples = [];
+  let at = started, tick = 0, nextAction = started + actionIntervalMs, stopped;
+  const context = { policy, clients: Array.from({ length: actorCount }, (_, i) => ({ label: i ? 'peer' : 'mover', role: 'movement', ready: true })), aoi: new AoiCoverage(), phaseWindows: [],
+    writer: { add: row => rows.push(row) }, guard: {
+      stop(reason) { stopped ??= reason; }, assert() { if (stopped) throw new Error(stopped); },
+    } };
+  if (continuous) { context.continuous = new ContinuousAcceptance(policy); context.continuous.join('mover', 'movement', 0); }
+  const clock = { now: () => at, async sleep(waitMs) {
+    at += advance({ tick: ++tick, elapsedMs: at - started, waitMs });
+    context.aoi.stats.samples++;
+    if (emit) while (nextAction <= at) {
+      for (const client of context.clients) {
+      const row = { actor: client.label, phase: context.phase, at: nextAction, kind: 'walk', status: 'success',
+        latencyMs: 100, plannedLatencyMs: 120, plannedGameplay: true, ...sample((nextAction - started) / 1000) };
+      samples.push(row); context.current?.add(row); context.window?.add(row); context.continuous?.add(row, nextAction - started);
+      }
+      nextAction += actionIntervalMs;
+    }
+    const reason = stopAfterSleep({ tick, elapsedMs: at - started }); if (reason) context.guard.stop(reason);
+  } };
+  return { context, clock, rows, samples, elapsed: () => at - started, stopped: () => stopped };
+}
+
+test('measurement phases retain five and six complete actual minutes after late then early timer jitter', async () => {
+  for (const seconds of [300, 360]) {
+    const fixture = measurementClockFixture({ advance: ({ tick, waitMs }) => tick === 600 ? 180 : tick === 1200 ? 20 : waitMs });
+    const stage = await measure(fixture.context, 'soak', seconds, fixture.clock);
+    assert.equal(stage.seconds, seconds); assert.equal(stage.measuredSeconds, fixture.elapsed() / 1000);
+    assert.ok(stage.measuredSeconds > seconds, 'real jitter is retained rather than labelled as the configured duration');
+    assert.equal(stage.rollingWindows.length, seconds / 60); assert.equal(stage.passed, true);
+    assert.equal(stage.rollingWindows[0].seconds, 60.08);
+    let priorEnd = stage.startedAtMs;
+    for (const window of stage.rollingWindows) {
+      assert.equal(window.startedAtMs, priorEnd); assert.ok(window.seconds >= 60);
+      assert.equal(window.seconds, (window.endedAtMs - window.startedAtMs) / 1000); priorEnd = window.endedAtMs;
+    }
+    assert.equal(priorEnd, stage.endedAtMs);
+    const raw = fixture.rows.filter(row => row.type === 'window');
+    assert.deepEqual(raw.map(row => row.assessment.seconds), stage.rollingWindows.map(window => window.seconds));
+    assert.deepEqual(fixture.rows.filter(row => row.type === 'phaseEnded').map(row => [row.startedAtMs, row.endedAtMs, row.completed]),
+      [[stage.startedAtMs, stage.endedAtMs, true]]);
+  }
+});
+
+test('measurement phases use actual elapsed duration for whole-phase rates while seconds keeps the profile contract', async () => {
+  const fixture = measurementClockFixture({ advance: () => 60100, sample: second => ({ kind: second % 2 ? 'walk' : 'turn' }) });
+  const stage = await measure(fixture.context, 'stage-1', 60, fixture.clock);
+  const nominal = new Measurements(); for (const row of fixture.samples) nominal.add(row);
+  assert.equal(assessMeasurements(nominal, [{ name: 'mover', role: 'movement' }], 60, fixture.context.policy, { requireChat: false }).passed, true,
+    'the same thirty moves would pass if the additional real time were hidden in a nominal denominator');
+  assert.equal(stage.seconds, 60); assert.equal(stage.measuredSeconds, 60.1); assert.equal(stage.passed, false);
+  assert.equal(stage.rollingWindows[0].seconds, 60.1); assert.equal(stage.rollingWindows[0].passed, false);
+});
+
+test('measurement phases preserve short probes and non-minute tails without promoting a partial window', async () => {
+  for (const seconds of [30, 95]) {
+    const fixture = measurementClockFixture();
+    const stage = await measure(fixture.context, 'stage-1', seconds, fixture.clock);
+    assert.equal(stage.seconds, seconds); assert.equal(stage.measuredSeconds, seconds); assert.equal(stage.passed, true);
+    assert.equal(stage.rollingWindows.length, Math.floor(seconds / 60));
+    assert.equal(stage.metrics.walk.count, seconds, 'every tail action remains in whole-phase assessment');
+    assert.equal(fixture.context.phaseWindows[0].endedAtMs - fixture.context.phaseWindows[0].startedAtMs, seconds * 1000);
+  }
+});
+
+test('measurement phases retain the configured multi-actor native chat boundary despite positive clock jitter', async () => {
+  for (const seconds of [30, 31]) {
+    const policy = capacityPolicy({ profile: 'probe', activityMode: 'native', stages: '2', combatActors: 0 });
+    const fixture = measurementClockFixture({ policy, actorCount: 2, actionIntervalMs: 750, advance: () => seconds * 1000 + 1,
+      sample: () => ({ kind: 'run', movedCells: 2, nativeOpportunity: true, plannedIntervalMs: 750, pacingKnown: true }) });
+    const stage = await measure(fixture.context, 'stage-2', seconds, fixture.clock);
+    assert.equal(stage.controlledActors, 2); assert.equal(stage.seconds, seconds); assert.equal(stage.measuredSeconds, seconds + .001);
+    assert.ok(stage.activity.every(actor => actor.passed)); assert.equal(stage.movementPassed, true);
+    assert.equal(stage.metrics.peerChat, undefined); assert.equal(stage.chatPassed, seconds === 30);
+    assert.equal(stage.passed, seconds === 30, 'jitter never introduces a new chat gate at30; configured31 still requires real peerChat');
+    assert.equal(stage.rollingWindows.length, 0);
+  }
+});
+
+test('measurement phases retain failed partial-minute actions in whole-phase and continuous verdicts', async () => {
+  const fixture = measurementClockFixture({ continuous: true, sample: second => second > 90 ? { status: 'timeout' } : {} });
+  const stage = await measure(fixture.context, 'soak', 95, fixture.clock);
+  assert.equal(stage.rollingWindows.length, 1); assert.equal(stage.rollingWindows[0].passed, true);
+  assert.equal(stage.metrics.walk.status.timeout, 5); assert.equal(stage.passed, false);
+  fixture.context.continuous.finish(fixture.elapsed());
+  const continuous = fixture.context.continuous.summary();
+  assert.equal(continuous.passed, false); assert.equal(continuous.firstFailure.evidence.final, true);
+  assert.equal(continuous.firstFailure.evidence.metrics.walk.status.timeout, 5);
+});
+
+test('measurement phases fail closed on backward or invalid clocks without completing or inventing a window', async () => {
+  for (const badStep of [-50, NaN]) {
+    const fixture = measurementClockFixture({ advance: ({ tick }) => tick === 1 ? 100 : badStep });
+    await assert.rejects(measure(fixture.context, 'soak', 60, fixture.clock), /clock is invalid or moved backward/);
+    assert.match(fixture.stopped(), /clock/); assert.equal(fixture.context.phaseWindows[0].completed, false);
+    assert.equal(fixture.context.phaseWindows[0].endedAtMs, 1000100);
+    assert.equal(fixture.rows.filter(row => row.type === 'window' || row.type === 'stageComplete').length, 0);
+  }
+});
+
+test('measurement phases preserve existing stall stops and never split one stalled interval into several minute windows', async () => {
+  const stopped = measurementClockFixture({ emit: false, advance: () => 180000,
+    stopAfterSleep: () => 'Native driver stalled over 60 legal action opportunities' });
+  await assert.rejects(measure(stopped.context, 'soak', 180, stopped.clock), /stalled over 60 legal action opportunities/);
+  assert.equal(stopped.rows.filter(row => row.type === 'window' || row.type === 'stageComplete').length, 0);
+  assert.equal(stopped.context.phaseWindows[0].completed, false);
+  assert.equal(stopped.context.phaseWindows[0].endedAtMs, 1180000, 'a latched stop retains the current valid clock before any assessment');
+  const unlatched = measurementClockFixture({ emit: false, advance: ({ tick, waitMs }) => tick === 1 ? 180000 : waitMs });
+  const stage = await measure(unlatched.context, 'soak', 180, unlatched.clock);
+  assert.equal(stage.seconds, 180); assert.equal(stage.measuredSeconds, 300);
+  assert.deepEqual(stage.rollingWindows.map(window => window.seconds), [180, 60, 60]);
+  assert.equal(stage.passed, false); assert.ok(stage.rollingWindows.every(window => !window.passed));
+});
 test('idle, correction-only, omitted planned load and swing-only actors cannot pass as sustained players', () => {
   const p = capacityPolicy({ profile: 'probe', stages: '2' }), actors = [{ name: 'mover', role: 'movement' }];
   const good = new Measurements(); ordinaryMovement(good, 'mover');

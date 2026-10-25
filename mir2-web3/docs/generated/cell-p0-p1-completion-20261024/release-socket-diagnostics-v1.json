@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-24T23:18:20.481Z",
+  "profile": "release",
+  "sourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "baseCommit": "68f810b442321ae66360a2be18e31dc309efdaf7",
+  "backendSourceManifest": "C:\\mir2-build\\p01-completion-20261024\\backend-source-socket-diagnostics-v1.json",
+  "backendInputCount": 41,
+  "sourceManifestSha256": "57ea1cde0ab22a03a50d1e9c7e20fdcd8a2060d1cb7922a2ad2cee91e55f5d96",
+  "sourceManifestFileSha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058",
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87370240,
+    "sha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d"
+  },
+  "buildLog": {
+    "path": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-socket-diagnostics-v1-release-build.log",
+    "bytes": 55560,
+    "sha256": "b03df3d3eee471d5dd2070fbd9a59dd2057249e2c3114347e79c7dfac4f56eac"
+  },
+  "buildReceipt": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1-build-receipt.json",
+    "bytes": 2095,
+    "sha256": "36181ed0755c44bafd676f44bda8a33c72f958777660fb649686f0119478eabd"
+  },
+  "buildArguments": [
+    "+1.95.0",
+    "build",
+    "--locked",
+    "--offline",
+    "--release",
+    "-p",
+    "mir2-gateway",
+    "--bin",
+    "mir2-gateway"
+  ],
+  "toolchain": {
+    "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "cargo": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)"
+  },
+  "sourceVerifiedBeforeAndAfterBuild": true,
+  "ignoredInclusiveUntrackedBackendCount": 0,
+  "scope": "New socket queue diagnostics Release candidate. Fresh immutable executable, complete Cargo log/actual exit, explicit committed41-input source before/after binding including the two approved fixture inputs; preserves original461f/855b evidence. Build success is not lifecycle or capacity acceptance."
+}
