@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 2,
+  "version": "bevy-bfaec8acf4765c63",
+  "packages": [
+    {
+      "id": "webgpu",
+      "backend": "webgpu",
+      "packageDir": "pkg-webgpu",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": false
+    },
+    {
+      "id": "webgl2",
+      "backend": "webgl2",
+      "packageDir": "pkg-webgl2",
+      "questUiAbiVersion": 0,
+      "bagUiAbiVersion": 0,
+      "primarySharedUiCompiled": false
+    },
+    {
+      "id": "webgl2-shared",
+      "backend": "webgl2",
+      "packageDir": "pkg-webgl2-shared",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": true
+    }
+  ],
+  "files": [
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "0980887fd73fcf16570b89eb01aab41c58cd2d83726659f6164a64335d85d747"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "sha256": "15045c80f9796725eaf473bbe2a2fb4811eb21cfc4192e8f7dd44dacf54b2e26"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+      "sha256": "3a206856ab646fa905020f221e7d5a0dd7dbb8a3c56d5beca0c5572f583ed3cf"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "sha256": "54927fa6bcd2d7ad5e03d258bb5c420de64688633c87ff2b35b9e1d75bce1a89"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "sha256": "104c79bbe6a2c283fc9ab16b9b183ebf31f3fd9d803dd40aa1fc7c2e97ceed44"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "sha256": "2a3825f3eccc9d08916a524cc401f043f7b8f26262564374b3c575a1be603622"
+    }
+  ]
+}
