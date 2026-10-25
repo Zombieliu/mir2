@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { test } from "node:test";
 
 import { readClientCoreRelease } from "./lib/client-core-release-files.mjs";
+import { clientCoreCargoEnvironment } from "./build-client-core.mjs";
 
 const projectRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const webPath = "apps/web";
@@ -174,4 +175,53 @@ test("new builder rejects a legacy dual manifest without NPC Purchase before pre
   fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify(legacy));
   const result = run(root);
   assert.notEqual(result.status, 0); assert.match(result.stderr, /requires its NPC Purchase bundle/);
+});
+
+test("Cargo environment adds the actual checkout remap without mutating other environment", () => {
+  const root = path.resolve(os.tmpdir(), "checkout-root");
+  const original = Object.freeze({ KEEP: "unchanged" });
+  const environment = clientCoreCargoEnvironment(root, original);
+  assert.equal(environment.KEEP, original.KEEP);
+  assert.equal(original.CARGO_ENCODED_RUSTFLAGS, undefined);
+  assert.notEqual(environment, original);
+  assert.deepEqual(environment.CARGO_ENCODED_RUSTFLAGS.split("\x1f"), ["--remap-path-prefix=" + root + "=."]);
+});
+
+test("Cargo environment preserves effective legacy RUSTFLAGS when promoting them to encoded arguments", () => {
+  const original = Object.freeze({ RUSTFLAGS: "  -C opt-level=z\t--cfg retained_feature \n", KEEP: "value" });
+  const environment = clientCoreCargoEnvironment(projectRoot, original);
+  const flags = environment.CARGO_ENCODED_RUSTFLAGS.split("\x1f");
+  assert.deepEqual(flags.slice(0, -1), ["-C", "opt-level=z", "--cfg", "retained_feature"]);
+  assert.equal(flags.at(-1), "--remap-path-prefix=" + path.resolve(projectRoot) + "=.");
+  assert.equal(environment.RUSTFLAGS, original.RUSTFLAGS);
+  assert.equal(environment.KEEP, "value");
+});
+
+test("Cargo environment retains encoded precedence and individual arguments through a real child in a spaced checkout", (t) => {
+  const root = fs.mkdtempSync(path.join(path.resolve(os.tmpdir()), "mir2-core-env-test-"));
+  t.after(() => {
+    assert.equal(path.dirname(root), path.resolve(os.tmpdir()));
+    assert.match(path.basename(root), /^mir2-core-env-test-/);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+  const checkout = path.join(root, "checkout with spaces");
+  fs.mkdirSync(checkout);
+  const originalFlags = ["-C", "link-arg=path with spaces", "--cfg", "retained_feature"];
+  const original = Object.freeze({ CARGO_ENCODED_RUSTFLAGS: originalFlags.join("\x1f"), RUSTFLAGS: "--cfg ignored_legacy", KEEP: "child-marker" });
+  const environment = clientCoreCargoEnvironment(checkout, original);
+  const result = spawnSync(process.execPath, ["-e", 'process.stdout.write(JSON.stringify({flags:process.env.CARGO_ENCODED_RUSTFLAGS.split("\\x1f"),keep:process.env.KEEP,cwd:process.cwd()}))'],
+    { cwd: checkout, env: environment, encoding: "utf8", shell: false });
+  assert.equal(result.status, 0, result.stderr);
+  const received = JSON.parse(result.stdout);
+  assert.deepEqual(received.flags.slice(0, -1), originalFlags);
+  assert.equal(received.flags.at(-1), "--remap-path-prefix=" + checkout + "=.");
+  assert.equal(received.flags.length, originalFlags.length + 1);
+  assert.equal(received.keep, "child-marker");
+  assert.equal(received.cwd, checkout);
+  assert.equal(original.CARGO_ENCODED_RUSTFLAGS, originalFlags.join("\x1f"));
+});
+
+test("Cargo environment keeps an explicitly empty encoded setting ahead of legacy flags", () => {
+  const environment = clientCoreCargoEnvironment(projectRoot, { CARGO_ENCODED_RUSTFLAGS: "", RUSTFLAGS: "--cfg ignored_legacy" });
+  assert.deepEqual(environment.CARGO_ENCODED_RUSTFLAGS.split("\x1f"), ["--remap-path-prefix=" + path.resolve(projectRoot) + "=."]);
 });

@@ -56,11 +56,14 @@ export function assertClientCoreStagingRoot(stagingRoot, temporaryRoot) {
 // These profiles are private and fixed. A caller cannot select different
 // basenames, limits, arguments or a cleanup prefix through its options.
 const RENDERER_PROFILE = Object.freeze({ label: "renderer", subject: "Renderer",
-  optimizationArgs: Object.freeze(["-O2"]),
+  optimizationArgs: Object.freeze(["-O1"]),
   wasmName: "mir2_bevy_runtime_bg.wasm", jsName: "mir2_bevy_runtime.js",
   temporaryPrefix: ".mir2-bevy-opt-", temporaryPattern: /^\.mir2-bevy-opt-\d+-[a-f0-9]{12}\.wasm$/,
   resolveConfig: tool => resolveRendererWasmOptConfig({ MIR2_BEVY_WASM_OPT_BIN: tool?.bin, MIR2_BEVY_WASM_OPT_SHA256: tool?.sha256 }),
   assertBudget: assertRendererReleaseBudget });
+const SHARED_RENDERER_PROFILE = Object.freeze({ ...RENDERER_PROFILE,
+  optimizationArgs: Object.freeze(["-O2"]),
+});
 const CLIENT_CORE_PROFILE = Object.freeze({ label: "client-core", subject: "Client-core",
   optimizationArgs: Object.freeze(["-Oz", "--flatten", "--rereloop", "-Oz", "--converge"]),
   wasmName: "mir2_platform_web_bg.wasm", jsName: "mir2_platform_web.js",
@@ -270,9 +273,13 @@ function optimizeReleaseWasm(profile, { wasmPath, jsPath, stagingRoot, toolConfi
   return record;
 }
 
-/** Retain the renderer's existing API, limits, diagnostics and exact behavior. */
+/** A known package selects one fixed private profile, never caller-supplied passes. */
 export function optimizeRendererReleaseWasm(options) {
-  return optimizeReleaseWasm(RENDERER_PROFILE, options);
+  if (!["webgpu", "webgl2", "webgl2-shared"].includes(options?.packageId)) {
+    throw new Error("Renderer optimizer requires a known packageId: webgpu, webgl2 or webgl2-shared");
+  }
+  return optimizeReleaseWasm(options.packageId === "webgl2-shared"
+    ? SHARED_RENDERER_PROFILE : RENDERER_PROFILE, options);
 }
 export function optimizeClientCoreReleaseWasm(options) {
   return optimizeReleaseWasm(CLIENT_CORE_PROFILE, options);

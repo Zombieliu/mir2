@@ -762,18 +762,59 @@ fn owned_shinsu_pve_hits_real_hostile_line_cells() {
     // Real wild AI first establishes Target = pet before the pet can acquire
     // the hostile monster under MonsterObject.IsAttackTarget(owned pet).
     z.tick(2510);
+    let pet_target = z.native_entity_monster_ref(pet).unwrap();
+    for id in [9111, 9112] {
+        assert!(
+            z.entity_source_targets(id, &pet_target),
+            "the line target must be a real wild threat to the summoned pet"
+        );
+        // Target acquisition can legally detour the second monster around
+        // the first. This fixture tests Shinsu's two-cell line, not pursuit:
+        // restore its declared line cells and hold their AI clocks through
+        // both delayed impacts without inventing a threat relationship.
+        let movement = {
+            let monster = z.native_monsters.get_mut(&id).unwrap();
+            monster.position = point(22 + (id - 9111) as i32, 20);
+            monster.next_ai_ready_at_ms = 4500;
+            ObjectMovement {
+                object_id: id,
+                position: monster.position.clone(),
+                direction: monster.direction,
+            }
+        };
+        z.apply_zone_object_packets(&[ServerPacket::ObjectWalk { movement }], 2510);
+    }
     z.tick(2511);
     let launch = z.tick(3512);
+    assert_eq!(z.native_monsters[&pet].position, point(21, 20));
+    assert_eq!(z.native_monsters[&9111].position, point(22, 20));
+    assert_eq!(z.native_monsters[&9112].position, point(23, 20));
     assert!(launch.iter().any(|o|matches!(o,ZoneOutbound::ToMany{packets,..}if packets.iter().any(|p|matches!(p,ServerPacket::ObjectAttack{info}if info.object_id==pet)))));
     assert_eq!(
         z.owned_pet_state().unwrap().hits.len(),
         2,
         "both real line cells should be queued"
     );
-    let before = z.native_monsters[&9111].hp;
+    assert_eq!(
+        z.owned_pet_state()
+            .unwrap()
+            .hits
+            .iter()
+            .map(|hit| (hit.target.object_id(), hit.due_ms))
+            .collect::<Vec<_>>(),
+        [(9111, 4062), (9112, 4112)],
+        "the two line cells keep their distinct 550ms and 600ms impacts"
+    );
+    let before = (z.native_monsters[&9111].hp, z.native_monsters[&9112].hp);
+    z.tick(4061);
+    assert_eq!(
+        (z.native_monsters[&9111].hp, z.native_monsters[&9112].hp),
+        before,
+        "neither line cell may take damage before its delayed impact"
+    );
     let _out = z.tick(4062);
     assert!(
-        z.native_monsters[&9111].hp < before,
+        z.native_monsters[&9111].hp < before.0,
         "hits remaining {:?}, source/targets {:?}, monsters {:?}",
         z.owned_pet_state().unwrap().hits,
         z.owned_pet_state().unwrap().targets,
@@ -782,6 +823,15 @@ fn owned_shinsu_pve_hits_real_hostile_line_cells() {
             .map(|(id, m)| (*id, m.position.clone(), m.hp))
             .collect::<Vec<_>>()
     );
+    assert_eq!(z.native_monsters[&9112].hp, before.1);
+    z.tick(4111);
+    assert_eq!(z.native_monsters[&9112].hp, before.1);
+    z.tick(4112);
+    assert!(
+        z.native_monsters[&9112].hp < before.1,
+        "the second real line cell must also take its delayed damage"
+    );
+    assert!(z.owned_pet_state().unwrap().hits.is_empty());
 }
 
 #[test]

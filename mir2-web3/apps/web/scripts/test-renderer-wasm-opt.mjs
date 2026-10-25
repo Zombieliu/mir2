@@ -38,10 +38,10 @@ function fixture(t) {
     assert(relative && relative !== ".." && !relative.startsWith(".." + path.sep) && !path.isAbsolute(relative));
     fs.rmSync(absolute, { recursive: true, force: true });
   });
-  return { root, stagingRoot, packageDir, wasmPath, jsPath, bin, canonical, sourceEnv: {},
+  return { root, stagingRoot, packageDir, wasmPath, jsPath, bin, canonical, packageId: "webgpu", sourceEnv: {},
     toolConfig: { bin, sha256: sha(fs.readFileSync(bin)) } };
 }
-function runner(bytes = EMPTY, onOptimize = null, optimizationArgs = ["-O2"]) {
+function runner(bytes = EMPTY, onOptimize = null, optimizationArgs = ["-O1"]) {
   return (bin, args, options) => {
     if (args.length === 1 && args[0] === "--version") return ok("wasm-opt version 131 (version_131)\n");
     assert.deepEqual(args.slice(1, -1), [...optimizationArgs, "--strip-debug", "-o"]);
@@ -103,7 +103,7 @@ test("renderer optimization uses only fixed conservative arguments and bounded h
   assert.equal(calls.length, 2);
   assert.equal(calls[0].bin, f.bin); assert.deepEqual(calls[0].args, ["--version"]);
   assert.equal(calls[1].bin, f.bin); assert.equal(calls[1].args[0], f.wasmPath);
-  assert.deepEqual(calls[1].args.slice(1, 4), ["-O2", "--strip-debug", "-o"]);
+  assert.deepEqual(calls[1].args.slice(1, 4), ["-O1", "--strip-debug", "-o"]);
   assert.equal(path.dirname(calls[1].args[4]), f.packageDir);
   for (const call of calls) {
     assert.equal(call.options.cwd, f.stagingRoot); assert.equal(call.options.shell, false);
@@ -500,7 +500,7 @@ test("Core and renderer wrappers cannot be broadened by caller profile or basena
   const core = coreFixture(t), renderer = fixture(t); let calls = 0;
   const run = () => { calls++; assert.fail("must not run"); };
   assert.throws(() => optimizeClientCoreReleaseWasm({ ...renderer, run }), /staged package pair/);
-  assert.throws(() => optimizeRendererReleaseWasm({ ...core, run }), /staged package pair/);
+  assert.throws(() => optimizeRendererReleaseWasm({ ...core, packageId: "webgpu", run }), /staged package pair/);
   assert.equal(calls, 0); coreUnchanged(core); unchanged(renderer);
   fs.writeFileSync(core.jsPath, Buffer.alloc(204801));
   assert.throws(() => optimizeClientCoreReleaseWasm({ ...core, profile: "renderer", limits: RENDERER_RELEASE_LIMITS, run: coreRunner() }), /jsBytes/);
@@ -560,8 +560,8 @@ test("Core cleanup rejects a retargeted staging ancestor and retains tool postpi
 
 test("actual Core sourceFingerprint includes optimizer and client-wire bytes and retains LF normalization sorted old recipe", () => {
   const source = fs.readFileSync(new URL("./build-client-core.mjs", import.meta.url), "utf8");
-  const start = source.indexOf("function sourceFingerprint() {"), end = source.indexOf("\nfunction run(", start);
-  assert(start >= 0 && end > start); const declaration = source.slice(start, end);
+  const declaration = source.match(/function sourceFingerprint\(\) \{[\s\S]*?\n\}/)?.[0];
+  assert.ok(declaration, "the actual complete top-level fingerprint function");
   assert.equal((declaration.match(/import\.meta\.url/g) ?? []).length, 3);
   // Only this complete function runs, against an exact virtual source tree.
   const executable = declaration.replaceAll("import.meta.url", "builderUrl");
@@ -605,4 +605,41 @@ test("actual Core sourceFingerprint includes optimizer and client-wire bytes and
     assert.equal(JSON.parse(hashInput).filter(row => row.name === relative).length, 1);
     data.set(filename, original); assert.equal(invoke(), baseline);
   }
+});
+
+test("renderer package selection keeps WebGPU and lean GL2 at O1 and shared GL2 at O2 without a caller pass channel", (t) => {
+  for (const [packageId, flag] of [["webgpu", "-O1"], ["webgl2", "-O1"], ["webgl2-shared", "-O2"]]) {
+    const f = fixture(t), calls = [], injected = runner(EMPTY, null, [flag]);
+    const result = optimizeRendererReleaseWasm({ ...f, packageId,
+      optimizationFlag: "-Oz", optimizationArgs: ["--untrusted-pass"], profile: "caller-profile",
+      run: (bin, args, options) => { calls.push(args); return injected(bin, args, options); } });
+    assert.equal(calls.length, 2);
+    assert.deepEqual(calls[1].slice(0, 4), [f.wasmPath, flag, "--strip-debug", "-o"]);
+    assert.equal(calls[1].length, 5);
+    assert.equal(result.metadataMatched, true);
+    assert.deepEqual(fs.readFileSync(f.wasmPath), EMPTY);
+    assert.equal(fs.readFileSync(f.canonical, "utf8"), "published pointer remains independent");
+  }
+});
+
+test("renderer rejects absent or unknown package identities before invoking any tool", (t) => {
+  for (const packageId of [undefined, null, "", "WebGPU", "webgl2-shared-custom", "__proto__", 1, {}]) {
+    const f = fixture(t); let calls = 0;
+    assert.throws(() => optimizeRendererReleaseWasm({ ...f, packageId,
+      run: () => { calls++; assert.fail("unknown package must never start a child"); } }), /known packageId/);
+    assert.equal(calls, 0); unchanged(f);
+  }
+});
+
+test("shared GL2 O2 retains metadata refusal and failure cleanup before any staged publication", (t) => {
+  for (const output of [IMPORTED, EXPORTED, NAMED]) {
+    const f = fixture(t);
+    assert.throws(() => optimizeRendererReleaseWasm({ ...f, packageId: "webgl2-shared",
+      run: runner(output, null, ["-O2"]) }), /import\/export metadata|name section/);
+    unchanged(f);
+  }
+  const f = fixture(t);
+  assert.throws(() => optimizeRendererReleaseWasm({ ...f, packageId: "webgl2-shared",
+    run: runner(EMPTY, () => ({ ...ok(), status: 2 }), ["-O2"]) }), /optimization failed/);
+  unchanged(f);
 });

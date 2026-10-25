@@ -230,6 +230,7 @@ function buildRuntimePackage(runtimePackage, stagedPkgParentDir) {
   );
   if (profile === "release" && questUiFeature) {
     const optimization = optimizeRendererReleaseWasm({
+      packageId: runtimePackage.id,
       wasmPath: path.join(packageDir, "mir2_bevy_runtime_bg.wasm"),
       jsPath: path.join(packageDir, "mir2_bevy_runtime.js"),
       stagingRoot: stagedPkgParentDir,

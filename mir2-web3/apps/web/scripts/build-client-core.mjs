@@ -45,8 +45,20 @@ export function sourceFingerprint() {
   return hash(JSON.stringify(entries));
 }
 
-function run(command, args) {
-  const result = spawnSync(command, args, { cwd: crateRoot, stdio: "inherit", shell: false });
+// Match Cargo's environment precedence while keeping each flag, including a
+// checkout path containing spaces, as one encoded compiler argument.
+export function clientCoreCargoEnvironment(projectRoot, sourceEnv = process.env) {
+  const encoded = sourceEnv.CARGO_ENCODED_RUSTFLAGS;
+  const flags = typeof encoded === "string"
+    ? (encoded === "" ? [] : encoded.split("\x1f"))
+    : (typeof sourceEnv.RUSTFLAGS === "string" ? sourceEnv.RUSTFLAGS.match(/\S+/gu) ?? [] : []);
+  return { ...sourceEnv, CARGO_ENCODED_RUSTFLAGS: [
+    ...flags, "--remap-path-prefix=" + path.resolve(projectRoot) + "=.",
+  ].join("\x1f") };
+}
+
+function run(command, args, env) {
+  const result = spawnSync(command, args, { cwd: crateRoot, stdio: "inherit", shell: false, env });
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`${command} exited ${result.status}`);
 }
@@ -71,7 +83,8 @@ function verify() {
 
 function buildBundle(label, features, toolConfig, bindgen) {
   run(process.env.CARGO_BIN || "cargo", ["+1.95.0", "build", "--locked", "--release",
-    "--target", "wasm32-unknown-unknown", "--target-dir", targetRoot, ...features]);
+    "--target", "wasm32-unknown-unknown", "--target-dir", targetRoot, ...features],
+    clientCoreCargoEnvironment(path.resolve(webRoot, "../..")));
   const temporaryRoot = path.resolve(os.tmpdir());
   const staging = fs.mkdtempSync(path.join(temporaryRoot, "mir2-client-core-"));
   let failure = null, bytes;
