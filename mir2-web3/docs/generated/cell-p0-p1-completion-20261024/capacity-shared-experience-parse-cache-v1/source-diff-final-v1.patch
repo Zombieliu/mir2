@@ -1,0 +1,508 @@
+diff --git a/mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs b/mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs
+index f64a2dba6..f172e7937 100644
+--- a/mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs
++++ b/mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs
+@@ -12,8 +12,8 @@ use super::zone::{
+ use crate::config_account_store_diagnostics::{Operation, Record, Stage};
+ use crate::{AccountStore, SimulationConfig, Stage5FriendIdentity, Stage5SystemsState};
+ use bevy_ecs::prelude::{Resource, World};
+-use std::collections::{BTreeMap, BTreeSet};
+-use std::sync::Mutex;
++use std::collections::{BTreeMap, BTreeSet, VecDeque};
++use std::sync::{Arc, Mutex};
+ use std::time::{SystemTime, UNIX_EPOCH};
+ 
+ #[derive(Resource, Debug)]
+@@ -309,21 +309,115 @@ pub(super) fn apply_current_personal_experience_rates(world: &World, amount: u32
+     )
+ }
+ 
++const SYSTEMS_PARSE_CACHE_IDENTITIES: usize = 256;
++const SYSTEMS_PARSE_CACHE_BLOB_BYTES: usize = 64 * 1024;
++// This bounds retained JSON, not the additional parsed-state heap or live Arcs.
++const SYSTEMS_PARSE_CACHE_JSON_BYTES: usize = 8 * 1024 * 1024;
++
++struct CachedSystemsParse {
++    identity: Stage5FriendIdentity,
++    json: Option<String>,
++    systems: Arc<Stage5SystemsState>,
++}
++
++struct SystemsParseCache {
++    entries: VecDeque<CachedSystemsParse>,
++    json_bytes: usize,
++}
++
++static SYSTEMS_PARSE_CACHE: Mutex<SystemsParseCache> = Mutex::new(SystemsParseCache {
++    entries: VecDeque::new(),
++    json_bytes: 0,
++});
++
++impl SystemsParseCache {
++    fn get(
++        &self,
++        identity: &Stage5FriendIdentity,
++        json: Option<&str>,
++    ) -> Option<Arc<Stage5SystemsState>> {
++        self.entries
++            .iter()
++            .find(|entry| &entry.identity == identity && entry.json.as_deref() == json)
++            .map(|entry| Arc::clone(&entry.systems))
++    }
++
++    fn insert(&mut self, entry: CachedSystemsParse, retired: &mut Vec<CachedSystemsParse>) {
++        if let Some(index) = self
++            .entries
++            .iter()
++            .position(|cached| cached.identity == entry.identity)
++        {
++            let previous = self.entries.remove(index).expect("selected cache entry");
++            self.json_bytes -= previous.json.as_ref().map_or(0, String::len);
++            retired.push(previous);
++        }
++        let bytes = entry.json.as_ref().map_or(0, String::len);
++        while self.entries.len() >= SYSTEMS_PARSE_CACHE_IDENTITIES
++            || self.json_bytes + bytes > SYSTEMS_PARSE_CACHE_JSON_BYTES
++        {
++            let previous = self.entries.pop_front().expect("bounded cache eviction");
++            self.json_bytes -= previous.json.as_ref().map_or(0, String::len);
++            retired.push(previous);
++        }
++        self.json_bytes += bytes;
++        self.entries.push_back(entry);
++    }
++}
++
+ fn systems_for(
+     store: &AccountStore,
+     identity: &Stage5FriendIdentity,
+-) -> Result<Stage5SystemsState, String> {
++) -> Result<Arc<Stage5SystemsState>, String> {
++    systems_for_with_cache(store, identity, &SYSTEMS_PARSE_CACHE)
++}
++
++fn systems_for_with_cache(
++    store: &AccountStore,
++    identity: &Stage5FriendIdentity,
++    cache: &Mutex<SystemsParseCache>,
++) -> Result<Arc<Stage5SystemsState>, String> {
++    // Always validate the current locked Store checkpoint, even on a warm hit.
+     let save = store
+         .accounts
+         .get(&identity.account_id)
+         .and_then(|account| account.saves.get(&identity.character_index))
+         .ok_or("experience profile character checkpoint missing")?;
+-    save.stage5_systems_json
+-        .as_deref()
++    let json = save.stage5_systems_json.as_deref();
++    let cacheable = json.map_or(0, str::len) <= SYSTEMS_PARSE_CACHE_BLOB_BYTES;
++    if cacheable {
++        if let Ok(cache) = cache.try_lock() {
++            if let Some(systems) = cache.get(identity, json) {
++                return Ok(systems);
++            }
++        }
++    }
++
++    // Full deserialization and its original error semantics stay inside the
++    // caller's Store guard, but never hold the optional cache mutex.
++    let systems = json
+         .map(serde_json::from_str)
+         .transpose()
+         .map(|systems| systems.unwrap_or_default())
+-        .map_err(|error| format!("invalid experience relationship authority: {error}"))
++        .map_err(|error| format!("invalid experience relationship authority: {error}"))?;
++    let systems = Arc::new(systems);
++    if cacheable {
++        let entry = CachedSystemsParse {
++            identity: identity.clone(),
++            json: json.map(str::to_owned),
++            systems: Arc::clone(&systems),
++        };
++        // Allocate source copies before locking and drop evicted full states
++        // after unlocking. Contention/poison only bypasses this pure memo.
++        let mut retired = Vec::new();
++        if let Ok(mut cache) = cache.try_lock() {
++            if let Some(systems) = cache.get(identity, json) {
++                return Ok(systems);
++            }
++            cache.insert(entry, &mut retired);
++        }
++    }
++    Ok(systems)
+ }
+ 
+ fn guild_projection_from_store(
+@@ -726,6 +820,372 @@ mod tests {
+     use crate::{AccountRecord, CharacterSaveRecord};
+     use mir2_protocol::{ClientPacket, MirGridType, ServerPacket, UserItemStat};
+ 
++    fn parse_cache_fixture() -> (AccountStore, Stage5FriendIdentity, Mutex<SystemsParseCache>) {
++        let config = SimulationConfig::default();
++        let identity = Stage5FriendIdentity {
++            account_id: "demo".into(),
++            character_index: config.default_character.index,
++        };
++        let store = config.account_store.lock().unwrap().clone();
++        let cache = Mutex::new(SystemsParseCache {
++            entries: VecDeque::new(),
++            json_bytes: 0,
++        });
++        (store, identity, cache)
++    }
++
++    fn set_parse_cache_json(
++        store: &mut AccountStore,
++        identity: &Stage5FriendIdentity,
++        json: Option<&str>,
++    ) {
++        store
++            .accounts
++            .get_mut(&identity.account_id)
++            .unwrap()
++            .saves
++            .get_mut(&identity.character_index)
++            .unwrap()
++            .stage5_systems_json = json.map(str::to_owned);
++    }
++
++    #[test]
++    fn authority_parse_cache_exact_bytes_reuse_and_full_decode_errors() {
++        fn assert_send_sync<T: Send + Sync>() {}
++        assert_send_sync::<Stage5SystemsState>();
++        let (mut store, actor, cache) = parse_cache_fixture();
++        set_parse_cache_json(&mut store, &actor, Some("{}"));
++        let first = systems_for_with_cache(&store, &actor, &cache).unwrap();
++        let hit = systems_for_with_cache(&store, &actor, &cache).unwrap();
++        assert!(Arc::ptr_eq(&first, &hit));
++
++        set_parse_cache_json(&mut store, &actor, Some(" {}\n"));
++        let changed = systems_for_with_cache(&store, &actor, &cache).unwrap();
++        assert_eq!(*first, *changed);
++        assert!(!Arc::ptr_eq(&first, &changed), "no JSON normalization");
++        assert_eq!(cache.lock().unwrap().entries.len(), 1);
++
++        // Invalid unrelated state must not be hidden by a relationship-only
++        // decoder or by the previously valid cached authority.
++        let invalid = r#"{"mail":false}"#;
++        set_parse_cache_json(&mut store, &actor, Some(invalid));
++        let original = serde_json::from_str::<Stage5SystemsState>(invalid).unwrap_err();
++        assert_eq!(
++            systems_for_with_cache(&store, &actor, &cache).unwrap_err(),
++            format!("invalid experience relationship authority: {original}")
++        );
++        assert_eq!(cache.lock().unwrap().entries.len(), 1);
++    }
++
++    #[test]
++    fn authority_parse_cache_rechecks_checkpoint_option_identity_and_other_store() {
++        let (mut store, actor, cache) = parse_cache_fixture();
++        set_parse_cache_json(&mut store, &actor, None);
++        let absent = systems_for_with_cache(&store, &actor, &cache).unwrap();
++        assert!(Arc::ptr_eq(
++            &absent,
++            &systems_for_with_cache(&store, &actor, &cache).unwrap()
++        ));
++        set_parse_cache_json(&mut store, &actor, Some("{}"));
++        let present = systems_for_with_cache(&store, &actor, &cache).unwrap();
++        assert_eq!(*absent, Stage5SystemsState::default());
++        assert_eq!(
++            *present,
++            serde_json::from_str::<Stage5SystemsState>("{}").unwrap()
++        );
++        assert_eq!(absent.summoned_intelligent_creature_type, Some(99));
++        assert_eq!(present.summoned_intelligent_creature_type, None);
++        assert!(!Arc::ptr_eq(&absent, &present));
++
++        let mut other = store.clone();
++        assert!(Arc::ptr_eq(
++            &present,
++            &systems_for_with_cache(&other, &actor, &cache).unwrap()
++        ));
++        set_parse_cache_json(
++            &mut other,
++            &actor,
++            Some(r#"{"relationship":{"authorityRevision":9}}"#),
++        );
++        let other_state = systems_for_with_cache(&other, &actor, &cache).unwrap();
++        assert_eq!(other_state.relationship.authority_revision, 9);
++        assert_eq!(present.relationship.authority_revision, 0);
++        assert!(!Arc::ptr_eq(&present, &other_state));
++
++        let peer = Stage5FriendIdentity {
++            account_id: "cache-peer".into(),
++            character_index: actor.character_index,
++        };
++        let account = store.accounts.get(&actor.account_id).unwrap().clone();
++        store.accounts.insert(peer.account_id.clone(), account);
++        let peer_state = systems_for_with_cache(&store, &peer, &cache).unwrap();
++        let own_state = systems_for_with_cache(&store, &actor, &cache).unwrap();
++        assert!(!Arc::ptr_eq(&peer_state, &own_state));
++
++        store
++            .accounts
++            .get_mut(&actor.account_id)
++            .unwrap()
++            .saves
++            .remove(&actor.character_index);
++        assert_eq!(
++            systems_for_with_cache(&store, &actor, &cache).unwrap_err(),
++            "experience profile character checkpoint missing"
++        );
++    }
++
++    #[test]
++    fn authority_parse_cache_bounds_identity_count_and_retained_json_bytes() {
++        let mut cache = SystemsParseCache {
++            entries: VecDeque::new(),
++            json_bytes: 0,
++        };
++        let systems = Arc::new(Stage5SystemsState::default());
++        let mut retired = Vec::new();
++        for index in 0..=SYSTEMS_PARSE_CACHE_IDENTITIES {
++            cache.insert(
++                CachedSystemsParse {
++                    identity: Stage5FriendIdentity {
++                        account_id: format!("cache-{index}"),
++                        character_index: 0,
++                    },
++                    json: None,
++                    systems: Arc::clone(&systems),
++                },
++                &mut retired,
++            );
++        }
++        assert_eq!(cache.entries.len(), 256);
++        assert_eq!(cache.json_bytes, 0);
++        assert_eq!(
++            cache.entries.front().unwrap().identity.account_id,
++            "cache-1"
++        );
++        assert_eq!(retired.len(), 1);
++
++        let blob = format!("{{}}{}", " ".repeat(SYSTEMS_PARSE_CACHE_BLOB_BYTES - 2));
++        for index in 0..=SYSTEMS_PARSE_CACHE_JSON_BYTES / blob.len() {
++            cache.insert(
++                CachedSystemsParse {
++                    identity: Stage5FriendIdentity {
++                        account_id: format!("large-{index}"),
++                        character_index: 0,
++                    },
++                    json: Some(blob.clone()),
++                    systems: Arc::clone(&systems),
++                },
++                &mut retired,
++            );
++            assert!(cache.entries.len() <= SYSTEMS_PARSE_CACHE_IDENTITIES);
++            assert!(cache.json_bytes <= SYSTEMS_PARSE_CACHE_JSON_BYTES);
++        }
++        assert_eq!(cache.json_bytes, 8 * 1024 * 1024);
++        assert_eq!(cache.entries.len(), 128);
++        assert_eq!(
++            cache.entries.front().unwrap().identity.account_id,
++            "large-1"
++        );
++    }
++
++    #[test]
++    fn authority_parse_cache_oversized_json_is_parsed_without_retention() {
++        let (mut store, actor, cache) = parse_cache_fixture();
++        let blob = format!("{{}}{}", " ".repeat(SYSTEMS_PARSE_CACHE_BLOB_BYTES - 2));
++        set_parse_cache_json(&mut store, &actor, Some(&blob));
++        let boundary = systems_for_with_cache(&store, &actor, &cache).unwrap();
++        assert!(Arc::ptr_eq(
++            &boundary,
++            &systems_for_with_cache(&store, &actor, &cache).unwrap()
++        ));
++        let oversized = format!("{blob} ");
++        set_parse_cache_json(&mut store, &actor, Some(&oversized));
++        let first = systems_for_with_cache(&store, &actor, &cache).unwrap();
++        let second = systems_for_with_cache(&store, &actor, &cache).unwrap();
++        assert_eq!(*first, *second);
++        assert!(!Arc::ptr_eq(&first, &second));
++        assert!(!Arc::ptr_eq(&boundary, &first));
++        assert_eq!(cache.lock().unwrap().json_bytes, 64 * 1024);
++    }
++
++    #[test]
++    fn authority_parse_cache_contention_and_cache_poison_bypass_only_the_cache() {
++        let (mut store, actor, cache) = parse_cache_fixture();
++        set_parse_cache_json(&mut store, &actor, Some("{}"));
++        let held = cache.lock().unwrap();
++        let first = systems_for_with_cache(&store, &actor, &cache).unwrap();
++        let second = systems_for_with_cache(&store, &actor, &cache).unwrap();
++        assert!(!Arc::ptr_eq(&first, &second));
++        assert!(held.entries.is_empty());
++        drop(held);
++
++        let cache = Arc::new(cache);
++        let poison = Arc::clone(&cache);
++        assert!(std::thread::spawn(move || {
++            let _held = poison.lock().unwrap();
++            panic!("test optional parse cache poison");
++        })
++        .join()
++        .is_err());
++        assert!(cache.is_poisoned());
++        assert_eq!(
++            *systems_for_with_cache(&store, &actor, &cache).unwrap(),
++            serde_json::from_str::<Stage5SystemsState>("{}").unwrap()
++        );
++        set_parse_cache_json(&mut store, &actor, Some(r#"{"mail":false}"#));
++        assert!(systems_for_with_cache(&store, &actor, &cache)
++            .unwrap_err()
++            .starts_with("invalid experience relationship authority:"));
++    }
++
++    #[test]
++    fn authority_parse_cache_warm_reads_still_refresh_partners_epochs_and_guilds() {
++        let session = session();
++        let config = session.shared_mentor_config().unwrap();
++        let mut profile = session.active_zone_experience_profile().unwrap().unwrap();
++        let actor = Stage5FriendIdentity {
++            account_id: profile.account_id.clone(),
++            character_index: profile.character_index,
++        };
++        config
++            .refresh_zone_experience_profile_authority(&mut profile)
++            .unwrap();
++        assert!(profile.lover_partner.is_some());
++        let teacher = profile.mentee_partner.as_ref().unwrap().identity.clone();
++        {
++            let mut store = config.account_store.lock().unwrap();
++            let mut own = (*systems_for(&store, &actor).unwrap()).clone();
++            own.relationship.partner_identity = None;
++            set_parse_cache_json(
++                &mut store,
++                &actor,
++                Some(&serde_json::to_string(&own).unwrap()),
++            );
++            let mut peer = (*systems_for(&store, &teacher).unwrap()).clone();
++            peer.mentor.ledger.relationship_epoch += 1;
++            set_parse_cache_json(
++                &mut store,
++                &teacher,
++                Some(&serde_json::to_string(&peer).unwrap()),
++            );
++            store.shared_guilds.insert(
++                "parse-cache-guild".into(),
++                crate::SharedGuildRecord {
++                    id: "parse-cache-guild".into(),
++                    name: "Parse Cache Guild".into(),
++                    revision: 1,
++                    level: 1,
++                    experience: 0,
++                    spare_points: 0,
++                    gold: 0,
++                    ranks: Vec::new(),
++                    members: vec![crate::SharedGuildMember {
++                        membership_epoch: 11,
++                        identity: actor.clone(),
++                        name: "Cache Member".into(),
++                        rank_index: 0,
++                    }],
++                    notice: Vec::new(),
++                    storage: BTreeMap::new(),
++                    buffs: BTreeMap::new(),
++                    last_buff_tick_ms: 0,
++                    experience_receipts: BTreeSet::new(),
++                    experience_receipt_payloads: BTreeMap::new(),
++                    active_wars: BTreeMap::new(),
++                },
++            );
++        }
++        config
++            .refresh_zone_experience_profile_authority(&mut profile)
++            .unwrap();
++        assert!(profile.lover_partner.is_none());
++        assert!(
++            profile.mentee_partner.is_none(),
++            "changed peer epoch is fresh"
++        );
++        assert_eq!(profile.guild.as_ref().unwrap().membership_epoch, 11);
++        {
++            let mut store = config.account_store.lock().unwrap();
++            store
++                .shared_guilds
++                .get_mut("parse-cache-guild")
++                .unwrap()
++                .members[0]
++                .membership_epoch = 12;
++        }
++        config
++            .refresh_zone_experience_profile_authority(&mut profile)
++            .unwrap();
++        assert_eq!(profile.guild.as_ref().unwrap().membership_epoch, 12);
++    }
++
++    #[test]
++    fn authority_parse_cache_warm_hit_does_not_bypass_store_poison() {
++        let config = SimulationConfig::default();
++        let actor = Stage5FriendIdentity {
++            account_id: "demo".into(),
++            character_index: config.default_character.index,
++        };
++        config
++            .with_shared_zone_experience_admission(|rebase| {
++                rebase(&actor, &mut None, &mut ZoneChatProfile::default())
++            })
++            .unwrap();
++        let store = Arc::clone(&config.account_store);
++        assert!(std::thread::spawn(move || {
++            let _held = store.lock().unwrap();
++            panic!("test actual authority Store poison");
++        })
++        .join()
++        .is_err());
++        let mut called = false;
++        let result = config.with_shared_zone_experience_admission(|_| {
++            called = true;
++            Ok(())
++        });
++        assert_eq!(
++            result.unwrap_err(),
++            "experience profile authority mutex poisoned"
++        );
++        assert!(!called);
++    }
++
++    #[test]
++    fn authority_parse_cache_warm_hit_does_not_bypass_frozen_file_authority() {
++        let directory = std::env::temp_dir().join(format!(
++            "mir2-experience-parse-cache-{}-{}",
++            std::process::id(),
++            SystemTime::now()
++                .duration_since(UNIX_EPOCH)
++                .unwrap()
++                .as_nanos()
++        ));
++        let config =
++            SimulationConfig::default().with_account_store_path(directory.join("accounts.json"));
++        config.save_account_store().unwrap();
++        let actor = Stage5FriendIdentity {
++            account_id: "demo".into(),
++            character_index: config.default_character.index,
++        };
++        config
++            .with_shared_zone_experience_admission(|rebase| {
++                rebase(&actor, &mut None, &mut ZoneChatProfile::default())
++            })
++            .unwrap();
++        config.inject_account_store_transaction_fault(
++            crate::AccountStoreTransactionFault::AfterFileRenameBeforeDirectorySync,
++        );
++        assert!(config.save_account_store().is_err());
++        let mut called = false;
++        let result = config.with_shared_zone_experience_admission(|_| {
++            called = true;
++            Ok(())
++        });
++        assert!(result.unwrap_err().contains("writes are frozen"));
++        assert!(!called);
++        drop(config);
++        std::fs::remove_dir_all(directory).unwrap();
++    }
++
+     fn session() -> SimulationSession {
+         let config = SimulationConfig::default();
+         let actor = Stage5FriendIdentity {

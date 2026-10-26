@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "mode": "single-stage-diagnostic",
+  "canonicalDriverCommit": "657b7528f03f3c8f824fcadcabcdcc64e73b4745",
+  "derivedExecutorSourcePins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\diagnostic-capacity.mjs",
+      "bytes": 159174,
+      "sha256": "58a12f1246cfa646d424e23d2cd9cead6fee06b39cb5e32db881887b30ad07f9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\diagnostic-connect.mjs",
+      "bytes": 2536,
+      "sha256": "2a8ed66172c47384f903c2f4586ac4fcf593fabf3ad88e4c6db1409702327490"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\diagnostic-policy.mjs",
+      "bytes": 5786,
+      "sha256": "3e25651096f4ac0d33843a946852203672d9b8e9963254ed54cc029aeb82058a"
+    }
+  ],
+  "formalAcceptanceEligible": false,
+  "networkGenerator": "multi-source-local-generator",
+  "sourceAddresses": [
+    "127.0.0.2",
+    "127.0.0.3"
+  ],
+  "wholeRunContinuityAccepted": false,
+  "bootstrapContinuousAcceptance": null,
+  "diagnosticSteadyOnline": null,
+  "measuredSloFailuresRecordOnly": true,
+  "quiescentOrdinaryAdmission": true,
+  "retainedActivityOnlyContinuityFailure": false,
+  "actors": 50,
+  "runId": "1793003885881-6d2fa527",
+  "wrapperError": null,
+  "stage": null,
+  "originalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\episode-50\\reports\\1793003885881-6d2fa527.report.json",
+    "ok": false,
+    "error": "Persistent AOI loss, ghost or duplicate during active load",
+    "highestMeasuredStage": null,
+    "highestPassedStage": null
+  },
+  "declaredButUnexecuted": {
+    "soakSeconds": 3600,
+    "resumeSamples": 1,
+    "saveSamples": 1
+  },
+  "successCallbackSentinel": false,
+  "originalFailedVerdictRetained": false,
+  "expectedFullyMeasuredGameFailure": false,
+  "classification": "partial-or-unsafe-error",
+  "cleanupComplete": true,
+  "eligibleForNextIndependentEpisode": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "productionAccepted": false,
+  "scope": "External derived executor; original L reference declarations retained as historical source basis. Quiescent ordinary admission; original native settle starts after the full roster. All measured game SLO verdicts, including timeouts, remain original false and record-only; actual safety stops remain fatal. Fresh measured assessor and online counts are separate; no whole-run continuity acceptance. No report rewrite. No automatic next episode. Root must independently check OS absence/ports and safety before launching100."
+}

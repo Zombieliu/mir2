@@ -1,0 +1,1085 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T09:06:11.657Z",
+  "scope": "Read-only comparison of exactly two ended monitor histories; one streaming read per file. No gameplay raw, slow-stage, Store-stage, private files or reports were read for this task. No tests, profiling, service or load was run.",
+  "sources": [
+    {
+      "name": "v3_100",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v3\\episode-100\\monitor-history.jsonl",
+      "bytes": 3442383,
+      "sha256": "6b90fae3919728a89f43a185f89c6dc415163d1b5bd5c47151037703bd1fe0a0",
+      "lineCount": 379,
+      "parsedRows": 379,
+      "invalidLineNumbers": []
+    },
+    {
+      "name": "v4_50",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\episode-50\\monitor-history.jsonl",
+      "bytes": 1061956,
+      "sha256": "5b65effa3fd26376a191aaa5fe11ba94f4e216d92a32d37cbb7b306857dd2871",
+      "lineCount": 118,
+      "parsedRows": 118,
+      "invalidLineNumbers": []
+    }
+  ],
+  "method": {
+    "inputRows": "Only type=monitor sample rows enter distributions; monitorStarted and monitorStopped are metadata/terminal and terminal is not double counted.",
+    "quantiles": "Unweighted sample nearest rank: sorted[ceil(p*n)-1], finite numeric values only. First CPU rate is absent because no prior counter sample exists.",
+    "bootstrapBoundaries": {
+      "v3_100": {
+        "start": 1793000172052,
+        "end": 1793000924411,
+        "providedBy": "Root supplied exact existing report/Part-analysis phase boundary; report was not read here."
+      },
+      "v4_50": {
+        "start": 1793003885918,
+        "end": 1793004128036,
+        "providedBy": "Root supplied exact existing report phaseWindow; report was not read here."
+      }
+    },
+    "tail120Rule": "sample.sampledAt within [exact bootstrap end - 120000, exact bootstrap end], inclusive; rate represents the monitor-reported preceding sample interval.",
+    "activeBandRule": "Filter exact bootstrap samples by health.currentActiveSessions into 1-9/10-24/25-49/50-74/75-99/100. Bands describe observed counts, not full constant-load stages.",
+    "settleProxyRule": "From first sampled occurrence of episode peak active sessions to exact bootstrap end. This does not prove all clients ready or a full settle duration.",
+    "units": {
+      "cpu": "Gateway process logical-core equivalents from process.rates.cpuCores, not percent of a fixed 4-core VM.",
+      "memory": "Bytes; MiB=1048576 and GiB=1073741824.",
+      "hostCpu": "Host-wide busiest/mean logical-core busyPercent, includes unrelated processes."
+    }
+  },
+  "episodes": {
+    "v3_100": {
+      "targetPlayers": 100,
+      "bootstrapCompleted": false,
+      "bootstrapIncludesAdmissionAndSettle": true,
+      "profile": {
+        "profileId": "formal-native-local-host-32g-24logical-7200s",
+        "resourceProfileSha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88",
+        "resourceLimitsEnforcedByMonitor": false,
+        "hostLogicalProcessors": 32,
+        "privateSoftStopBytes": 34359738368,
+        "workingSetSoftStopBytes": 42949672960,
+        "minimumHostFreeBytes": 8589934592,
+        "logicalCpuSoftStop": 24,
+        "environment": {
+          "cpuLimit": "SOFT stop=24 logical CPU equivalents (75% of32 logical CPUs; host has24 physical cores), with4 Tokio workers; no hard quota/affinity; OS anddriver reserve, not hardware maximum",
+          "memoryLimit": "SOFT private32GiB/working set40GiB stop; minOSfree8GiB; installed64GiB differs from actual OSusable68463349760bytes; no hard quota, not hardware maximum",
+          "storage": "Local Windows scratch File store; unthrottled disk; process IO includes file/device IO",
+          "database": "Dedicated fresh File backend; PostgreSQL not exercised",
+          "network": "Literal loopback; no external NIC throughput, PPS, retransmission or cloud bandwidth certificate",
+          "tls": "Plain WS/HTTP on loopback only; TLS not exercised",
+          "failureDomain": "One development host; no failover, N+1, power/disk failure scope"
+        }
+      },
+      "observedPeakActiveSessions": 79,
+      "fullMonitorObservationIncludingDrain": {
+        "sampleCount": 377,
+        "firstSampleAt": 1793000171888,
+        "lastSampleAt": 1793001035846,
+        "activeSessions": {
+          "count": 377,
+          "min": 0,
+          "p50": 63,
+          "p95": 78,
+          "p99": 79,
+          "max": 79
+        },
+        "gatewayCpuLogicalCoreEquivalents": {
+          "count": 376,
+          "min": 0.133393,
+          "p50": 1.398451,
+          "p95": 2.024291,
+          "p99": 2.290018,
+          "max": 2.963027
+        },
+        "gatewayMemoryBytes": {
+          "firstPrivate": 4853760,
+          "lastPrivate": 1973198848,
+          "peakPrivate": 1973198848,
+          "firstWorkingSet": 21172224,
+          "lastWorkingSet": 1994731520,
+          "peakWorkingSet": 1994731520
+        },
+        "hostFreeBytes": {
+          "count": 377,
+          "min": 39181443072,
+          "p50": 39667970048,
+          "p95": 40701329408,
+          "p99": 40831242240,
+          "max": 40841588736
+        },
+        "hostBusiestLogicalCoreBusyPercent": {
+          "count": 377,
+          "min": 50,
+          "p50": 88,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "hostMeanLogicalCoreBusyPercent": {
+          "count": 377,
+          "min": 5.9375,
+          "p50": 17.0625,
+          "p95": 27.6875,
+          "p99": 33.90625,
+          "max": 43.75
+        },
+        "processIoRates": {
+          "readBytesPerSecond": {
+            "count": 376,
+            "min": 0,
+            "p50": 0,
+            "p95": 2040.627886,
+            "p99": 2094.78673,
+            "max": 14871263.157895
+          },
+          "writeBytesPerSecond": {
+            "count": 376,
+            "min": 169.974116,
+            "p50": 534658.85534,
+            "p95": 1049730.751914,
+            "p99": 1904426.931567,
+            "max": 6850469.769465
+          },
+          "otherIoBytesPerSecond": {
+            "count": 376,
+            "min": 35.211268,
+            "p50": 897.890295,
+            "p95": 30213.830755,
+            "p99": 30950.7109,
+            "max": 32084.935181
+          },
+          "operationsPerSecond": {
+            "count": 376,
+            "min": 50.485927,
+            "p50": 1206.776716,
+            "p95": 2767.016903,
+            "p99": 3410.036166,
+            "max": 3648.512586
+          }
+        },
+        "hostNicBytesPerSecond": {
+          "count": 376,
+          "min": 4964.098074,
+          "p50": 19460.590048,
+          "p95": 582968.191721,
+          "p99": 807086.281277,
+          "max": 2142186.741768
+        },
+        "processNetworkRateAvailable": false
+      },
+      "bootstrap": {
+        "sampleCount": 327,
+        "firstSampleAt": 1793000174155,
+        "lastSampleAt": 1793000923198,
+        "activeSessions": {
+          "count": 327,
+          "min": 1,
+          "p50": 62,
+          "p95": 78,
+          "p99": 79,
+          "max": 79
+        },
+        "gatewayCpuLogicalCoreEquivalents": {
+          "count": 327,
+          "min": 0.133393,
+          "p50": 1.405063,
+          "p95": 2.024291,
+          "p99": 2.259009,
+          "max": 2.318512
+        },
+        "gatewayMemoryBytes": {
+          "firstPrivate": 34390016,
+          "lastPrivate": 1907077120,
+          "peakPrivate": 1907077120,
+          "firstWorkingSet": 58003456,
+          "lastWorkingSet": 1929342976,
+          "peakWorkingSet": 1929342976
+        },
+        "hostFreeBytes": {
+          "count": 327,
+          "min": 39181443072,
+          "p50": 39752380416,
+          "p95": 40711467008,
+          "p99": 40831242240,
+          "max": 40841588736
+        },
+        "hostBusiestLogicalCoreBusyPercent": {
+          "count": 327,
+          "min": 50,
+          "p50": 88,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "hostMeanLogicalCoreBusyPercent": {
+          "count": 327,
+          "min": 5.9375,
+          "p50": 17.0625,
+          "p95": 27.6875,
+          "p99": 33.90625,
+          "max": 43.75
+        },
+        "processIoRates": {
+          "readBytesPerSecond": {
+            "count": 327,
+            "min": 0,
+            "p50": 0,
+            "p95": 2042.513863,
+            "p99": 2094.78673,
+            "max": 14871263.157895
+          },
+          "writeBytesPerSecond": {
+            "count": 327,
+            "min": 169.974116,
+            "p50": 530857.267951,
+            "p95": 949470.400729,
+            "p99": 1101265.494912,
+            "max": 1321388.638413
+          },
+          "otherIoBytesPerSecond": {
+            "count": 327,
+            "min": 115.233522,
+            "p50": 934.397163,
+            "p95": 30332.55922,
+            "p99": 30950.7109,
+            "max": 32084.935181
+          },
+          "operationsPerSecond": {
+            "count": 327,
+            "min": 50.485927,
+            "p50": 1314.682373,
+            "p95": 2800.635786,
+            "p99": 3410.036166,
+            "max": 3648.512586
+          }
+        },
+        "hostNicBytesPerSecond": {
+          "count": 327,
+          "min": 4964.098074,
+          "p50": 19114.709852,
+          "p95": 581285.40305,
+          "p99": 807086.281277,
+          "max": 2142186.741768
+        },
+        "processNetworkRateAvailable": false
+      },
+      "bootstrapLast120Seconds": {
+        "sampleCount": 52,
+        "firstSampleAt": 1793000805610,
+        "lastSampleAt": 1793000923198,
+        "activeSessions": {
+          "count": 52,
+          "min": 75,
+          "p50": 77,
+          "p95": 79,
+          "p99": 79,
+          "max": 79
+        },
+        "gatewayCpuLogicalCoreEquivalents": {
+          "count": 52,
+          "min": 1.014379,
+          "p50": 1.305481,
+          "p95": 1.51847,
+          "p99": 1.586057,
+          "max": 1.586057
+        },
+        "gatewayMemoryBytes": {
+          "firstPrivate": 1703481344,
+          "lastPrivate": 1907077120,
+          "peakPrivate": 1907077120,
+          "firstWorkingSet": 1730203648,
+          "lastWorkingSet": 1929342976,
+          "peakWorkingSet": 1929342976
+        },
+        "hostFreeBytes": {
+          "count": 52,
+          "min": 39230595072,
+          "p50": 39410843648,
+          "p95": 39710908416,
+          "p99": 39722614784,
+          "max": 39722614784
+        },
+        "hostBusiestLogicalCoreBusyPercent": {
+          "count": 52,
+          "min": 68,
+          "p50": 93,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "hostMeanLogicalCoreBusyPercent": {
+          "count": 52,
+          "min": 11.1875,
+          "p50": 16.59375,
+          "p95": 22.8125,
+          "p99": 36.5,
+          "max": 36.5
+        },
+        "processIoRates": {
+          "readBytesPerSecond": {
+            "count": 52,
+            "min": 0,
+            "p50": 0,
+            "p95": 1924.24902,
+            "p99": 1942.003515,
+            "max": 1942.003515
+          },
+          "writeBytesPerSecond": {
+            "count": 52,
+            "min": 47504.139434,
+            "p50": 467523.52438,
+            "p95": 890399.301005,
+            "p99": 920847.958297,
+            "max": 920847.958297
+          },
+          "otherIoBytesPerSecond": {
+            "count": 52,
+            "min": 115.233522,
+            "p50": 566.752799,
+            "p95": 27739.660427,
+            "p99": 28686.29174,
+            "max": 28686.29174
+          },
+          "operationsPerSecond": {
+            "count": 52,
+            "min": 104.381443,
+            "p50": 936.682144,
+            "p95": 1687.900812,
+            "p99": 1911.111111,
+            "max": 1911.111111
+          }
+        },
+        "hostNicBytesPerSecond": {
+          "count": 52,
+          "min": 4964.098074,
+          "p50": 12626.302083,
+          "p95": 505639.458752,
+          "p99": 582968.191721,
+          "max": 582968.191721
+        },
+        "processNetworkRateAvailable": false
+      },
+      "firstPeakToBootstrapEndSettleProxy": {
+        "firstPeakSampleAt": 1793000904882,
+        "nominalWindowMs": 19529,
+        "sampleCount": 9,
+        "firstSampleAt": 1793000904882,
+        "lastSampleAt": 1793000923198,
+        "activeSessions": {
+          "count": 9,
+          "min": 79,
+          "p50": 79,
+          "p95": 79,
+          "p99": 79,
+          "max": 79
+        },
+        "gatewayCpuLogicalCoreEquivalents": {
+          "count": 9,
+          "min": 1.186047,
+          "p50": 1.305481,
+          "p95": 1.535794,
+          "p99": 1.535794,
+          "max": 1.535794
+        },
+        "gatewayMemoryBytes": {
+          "firstPrivate": 1873141760,
+          "lastPrivate": 1907077120,
+          "peakPrivate": 1907077120,
+          "firstWorkingSet": 1896071168,
+          "lastWorkingSet": 1929342976,
+          "peakWorkingSet": 1929342976
+        },
+        "hostFreeBytes": {
+          "count": 9,
+          "min": 39369003008,
+          "p50": 39385669632,
+          "p95": 39517630464,
+          "p99": 39517630464,
+          "max": 39517630464
+        },
+        "hostBusiestLogicalCoreBusyPercent": {
+          "count": 9,
+          "min": 75,
+          "p50": 93,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "hostMeanLogicalCoreBusyPercent": {
+          "count": 9,
+          "min": 11.6875,
+          "p50": 17.28125,
+          "p95": 25.34375,
+          "p99": 25.34375,
+          "max": 25.34375
+        },
+        "processIoRates": {
+          "readBytesPerSecond": {
+            "count": 9,
+            "min": 0,
+            "p50": 0,
+            "p95": 1942.003515,
+            "p99": 1942.003515,
+            "max": 1942.003515
+          },
+          "writeBytesPerSecond": {
+            "count": 9,
+            "min": 112601.600711,
+            "p50": 527060.292851,
+            "p95": 874416.63149,
+            "p99": 874416.63149,
+            "max": 874416.63149
+          },
+          "otherIoBytesPerSecond": {
+            "count": 9,
+            "min": 206.313917,
+            "p50": 566.752799,
+            "p95": 28686.29174,
+            "p99": 28686.29174,
+            "max": 28686.29174
+          },
+          "operationsPerSecond": {
+            "count": 9,
+            "min": 660.369069,
+            "p50": 920.315236,
+            "p95": 1909.490334,
+            "p99": 1909.490334,
+            "max": 1909.490334
+          }
+        },
+        "hostNicBytesPerSecond": {
+          "count": 9,
+          "min": 4964.098074,
+          "p50": 5974.21076,
+          "p95": 17147.122458,
+          "p99": 17147.122458,
+          "max": 17147.122458
+        },
+        "processNetworkRateAvailable": false
+      },
+      "activeBands": [
+        {
+          "minimum": 1,
+          "maximum": 9,
+          "samples": 18,
+          "firstSampleAt": 1793000174155,
+          "lastSampleAt": 1793000212438,
+          "cpuLogicalCoreEquivalents": {
+            "count": 18,
+            "min": 0.135439,
+            "p50": 0.274112,
+            "p95": 0.517226,
+            "p99": 0.517226,
+            "max": 0.517226
+          },
+          "peakPrivateBytes": 167391232,
+          "peakWorkingSetBytes": 219136000,
+          "minimumHostFreeBytes": 40532336640
+        },
+        {
+          "minimum": 10,
+          "maximum": 24,
+          "samples": 30,
+          "firstSampleAt": 1793000214684,
+          "lastSampleAt": 1793000283358,
+          "cpuLogicalCoreEquivalents": {
+            "count": 30,
+            "min": 0.133393,
+            "p50": 0.691821,
+            "p95": 1.249429,
+            "p99": 1.319335,
+            "max": 1.319335
+          },
+          "peakPrivateBytes": 375185408,
+          "peakWorkingSetBytes": 424411136,
+          "minimumHostFreeBytes": 40529412096
+        },
+        {
+          "minimum": 25,
+          "maximum": 49,
+          "samples": 55,
+          "firstSampleAt": 1793000285531,
+          "lastSampleAt": 1793000403608,
+          "cpuLogicalCoreEquivalents": {
+            "count": 55,
+            "min": 0.736599,
+            "p50": 1.702691,
+            "p95": 2.287393,
+            "p99": 2.318512,
+            "max": 2.318512
+          },
+          "peakPrivateBytes": 792698880,
+          "peakWorkingSetBytes": 835645440,
+          "minimumHostFreeBytes": 40034910208
+        },
+        {
+          "minimum": 50,
+          "maximum": 74,
+          "samples": 165,
+          "firstSampleAt": 1793000405917,
+          "lastSampleAt": 1793000786635,
+          "cpuLogicalCoreEquivalents": {
+            "count": 165,
+            "min": 1.067921,
+            "p50": 1.50708,
+            "p95": 1.988319,
+            "p99": 2.222873,
+            "max": 2.259009
+          },
+          "peakPrivateBytes": 1669185536,
+          "peakWorkingSetBytes": 1696509952,
+          "minimumHostFreeBytes": 39181443072
+        },
+        {
+          "minimum": 75,
+          "maximum": 99,
+          "samples": 59,
+          "firstSampleAt": 1793000789059,
+          "lastSampleAt": 1793000923198,
+          "cpuLogicalCoreEquivalents": {
+            "count": 59,
+            "min": 1.014379,
+            "p50": 1.311349,
+            "p95": 1.52385,
+            "p99": 1.586057,
+            "max": 1.586057
+          },
+          "peakPrivateBytes": 1907077120,
+          "peakWorkingSetBytes": 1929342976,
+          "minimumHostFreeBytes": 39230595072
+        }
+      ],
+      "actualSampleGapsMs": {
+        "count": 376,
+        "min": 2064,
+        "p50": 2295,
+        "p95": 2403,
+        "p99": 2443,
+        "max": 7923
+      },
+      "terminal": {
+        "sampledAt": 1793001036024,
+        "stop": true,
+        "reason": "Operator requested load drain",
+        "activeSessions": 0
+      }
+    },
+    "v4_50": {
+      "targetPlayers": 50,
+      "bootstrapCompleted": false,
+      "bootstrapIncludesAdmissionAndSettle": true,
+      "profile": {
+        "profileId": "formal-native-local-host-32g-24logical-7200s",
+        "resourceProfileSha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88",
+        "resourceLimitsEnforcedByMonitor": false,
+        "hostLogicalProcessors": 32,
+        "privateSoftStopBytes": 34359738368,
+        "workingSetSoftStopBytes": 42949672960,
+        "minimumHostFreeBytes": 8589934592,
+        "logicalCpuSoftStop": 24,
+        "environment": {
+          "cpuLimit": "SOFT stop=24 logical CPU equivalents (75% of32 logical CPUs; host has24 physical cores), with4 Tokio workers; no hard quota/affinity; OS anddriver reserve, not hardware maximum",
+          "memoryLimit": "SOFT private32GiB/working set40GiB stop; minOSfree8GiB; installed64GiB differs from actual OSusable68463349760bytes; no hard quota, not hardware maximum",
+          "storage": "Local Windows scratch File store; unthrottled disk; process IO includes file/device IO",
+          "database": "Dedicated fresh File backend; PostgreSQL not exercised",
+          "network": "Literal loopback; no external NIC throughput, PPS, retransmission or cloud bandwidth certificate",
+          "tls": "Plain WS/HTTP on loopback only; TLS not exercised",
+          "failureDomain": "One development host; no failover, N+1, power/disk failure scope"
+        }
+      },
+      "observedPeakActiveSessions": 50,
+      "fullMonitorObservationIncludingDrain": {
+        "sampleCount": 116,
+        "firstSampleAt": 1793003885766,
+        "lastSampleAt": 1793004138923,
+        "activeSessions": {
+          "count": 116,
+          "min": 0,
+          "p50": 28,
+          "p95": 50,
+          "p99": 50,
+          "max": 50
+        },
+        "gatewayCpuLogicalCoreEquivalents": {
+          "count": 115,
+          "min": 0.126349,
+          "p50": 1.137089,
+          "p95": 2.280258,
+          "p99": 2.626866,
+          "max": 3.312047
+        },
+        "gatewayMemoryBytes": {
+          "firstPrivate": 5009408,
+          "lastPrivate": 791023616,
+          "peakPrivate": 836354048,
+          "firstWorkingSet": 21090304,
+          "lastWorkingSet": 833204224,
+          "peakWorkingSet": 879366144
+        },
+        "hostFreeBytes": {
+          "count": 116,
+          "min": 39953899520,
+          "p50": 40455159808,
+          "p95": 40852647936,
+          "p99": 40881065984,
+          "max": 40961740800
+        },
+        "hostBusiestLogicalCoreBusyPercent": {
+          "count": 116,
+          "min": 69,
+          "p50": 88,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "hostMeanLogicalCoreBusyPercent": {
+          "count": 116,
+          "min": 7.875,
+          "p50": 18,
+          "p95": 27,
+          "p99": 30.5625,
+          "max": 34.78125
+        },
+        "processIoRates": {
+          "readBytesPerSecond": {
+            "count": 115,
+            "min": 0,
+            "p50": 0,
+            "p95": 2074.143595,
+            "p99": 2143.549952,
+            "max": 15327518.008004
+          },
+          "writeBytesPerSecond": {
+            "count": 115,
+            "min": 50854.157403,
+            "p50": 461670.923379,
+            "p95": 1135721.227621,
+            "p99": 2172630.816506,
+            "max": 5101198.369565
+          },
+          "otherIoBytesPerSecond": {
+            "count": 115,
+            "min": 752.920814,
+            "p50": 2123.772102,
+            "p95": 30601.30719,
+            "p99": 31579.049467,
+            "max": 31886.045389
+          },
+          "operationsPerSecond": {
+            "count": 115,
+            "min": 122.727273,
+            "p50": 792.945488,
+            "p95": 3194.385368,
+            "p99": 3327.846975,
+            "max": 3499.566349
+          }
+        },
+        "hostNicBytesPerSecond": {
+          "count": 115,
+          "min": 10259.009009,
+          "p50": 24620.689655,
+          "p95": 217227.608495,
+          "p99": 298275.035261,
+          "max": 378140.632158
+        },
+        "processNetworkRateAvailable": false
+      },
+      "bootstrap": {
+        "sampleCount": 110,
+        "firstSampleAt": 1793003887962,
+        "lastSampleAt": 1793004127563,
+        "activeSessions": {
+          "count": 110,
+          "min": 1,
+          "p50": 28,
+          "p95": 50,
+          "p99": 50,
+          "max": 50
+        },
+        "gatewayCpuLogicalCoreEquivalents": {
+          "count": 110,
+          "min": 0.126349,
+          "p50": 1.058906,
+          "p95": 2.21478,
+          "p99": 2.345695,
+          "max": 2.371162
+        },
+        "gatewayMemoryBytes": {
+          "firstPrivate": 34828288,
+          "lastPrivate": 824123392,
+          "peakPrivate": 824123392,
+          "firstWorkingSet": 58830848,
+          "lastWorkingSet": 866107392,
+          "peakWorkingSet": 866107392
+        },
+        "hostFreeBytes": {
+          "count": 110,
+          "min": 39953899520,
+          "p50": 40464658432,
+          "p95": 40848400384,
+          "p99": 40880300032,
+          "max": 40881065984
+        },
+        "hostBusiestLogicalCoreBusyPercent": {
+          "count": 110,
+          "min": 69,
+          "p50": 88,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "hostMeanLogicalCoreBusyPercent": {
+          "count": 110,
+          "min": 7.875,
+          "p50": 18,
+          "p95": 27,
+          "p99": 30.5625,
+          "max": 34.78125
+        },
+        "processIoRates": {
+          "readBytesPerSecond": {
+            "count": 110,
+            "min": 0,
+            "p50": 0,
+            "p95": 2074.143595,
+            "p99": 2143.549952,
+            "max": 15327518.008004
+          },
+          "writeBytesPerSecond": {
+            "count": 110,
+            "min": 50854.157403,
+            "p50": 431110.050023,
+            "p95": 892934.312878,
+            "p99": 1135721.227621,
+            "max": 1246118.591173
+          },
+          "otherIoBytesPerSecond": {
+            "count": 110,
+            "min": 752.920814,
+            "p50": 2097.105509,
+            "p95": 30601.30719,
+            "p99": 31579.049467,
+            "max": 31886.045389
+          },
+          "operationsPerSecond": {
+            "count": 110,
+            "min": 122.727273,
+            "p50": 787.893008,
+            "p95": 3193.277311,
+            "p99": 3327.846975,
+            "max": 3499.566349
+          }
+        },
+        "hostNicBytesPerSecond": {
+          "count": 110,
+          "min": 10259.009009,
+          "p50": 24635.023041,
+          "p95": 217227.608495,
+          "p99": 298275.035261,
+          "max": 378140.632158
+        },
+        "processNetworkRateAvailable": false
+      },
+      "bootstrapLast120Seconds": {
+        "sampleCount": 54,
+        "firstSampleAt": 1793004008514,
+        "lastSampleAt": 1793004127563,
+        "activeSessions": {
+          "count": 54,
+          "min": 29,
+          "p50": 42,
+          "p95": 50,
+          "p99": 50,
+          "max": 50
+        },
+        "gatewayCpuLogicalCoreEquivalents": {
+          "count": 54,
+          "min": 0.941149,
+          "p50": 1.780619,
+          "p95": 2.342769,
+          "p99": 2.371162,
+          "max": 2.371162
+        },
+        "gatewayMemoryBytes": {
+          "firstPrivate": 424599552,
+          "lastPrivate": 824123392,
+          "peakPrivate": 824123392,
+          "firstWorkingSet": 472969216,
+          "lastWorkingSet": 866107392,
+          "peakWorkingSet": 866107392
+        },
+        "hostFreeBytes": {
+          "count": 54,
+          "min": 39967571968,
+          "p50": 40246374400,
+          "p95": 40475889664,
+          "p99": 40508731392,
+          "max": 40508731392
+        },
+        "hostBusiestLogicalCoreBusyPercent": {
+          "count": 54,
+          "min": 75,
+          "p50": 88,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "hostMeanLogicalCoreBusyPercent": {
+          "count": 54,
+          "min": 11.6875,
+          "p50": 19.3125,
+          "p95": 27.09375,
+          "p99": 30.5625,
+          "max": 30.5625
+        },
+        "processIoRates": {
+          "readBytesPerSecond": {
+            "count": 54,
+            "min": 0,
+            "p50": 0,
+            "p95": 2062.529165,
+            "p99": 2134.234669,
+            "max": 2134.234669
+          },
+          "writeBytesPerSecond": {
+            "count": 54,
+            "min": 284570.999571,
+            "p50": 651101.7249,
+            "p95": 983640.056022,
+            "p99": 1246118.591173,
+            "max": 1246118.591173
+          },
+          "otherIoBytesPerSecond": {
+            "count": 54,
+            "min": 752.920814,
+            "p50": 1653.723161,
+            "p95": 30474.701012,
+            "p99": 31886.045389,
+            "max": 31886.045389
+          },
+          "operationsPerSecond": {
+            "count": 54,
+            "min": 194.574369,
+            "p50": 2122.385403,
+            "p95": 3317.4946,
+            "p99": 3499.566349,
+            "max": 3499.566349
+          }
+        },
+        "hostNicBytesPerSecond": {
+          "count": 54,
+          "min": 12571.161049,
+          "p50": 26672.464998,
+          "p95": 217227.608495,
+          "p99": 287607.843137,
+          "max": 287607.843137
+        },
+        "processNetworkRateAvailable": false
+      },
+      "firstPeakToBootstrapEndSettleProxy": {
+        "firstPeakSampleAt": 1793004115905,
+        "nominalWindowMs": 12131,
+        "sampleCount": 6,
+        "firstSampleAt": 1793004115905,
+        "lastSampleAt": 1793004127563,
+        "activeSessions": {
+          "count": 6,
+          "min": 50,
+          "p50": 50,
+          "p95": 50,
+          "p99": 50,
+          "max": 50
+        },
+        "gatewayCpuLogicalCoreEquivalents": {
+          "count": 6,
+          "min": 1.707097,
+          "p50": 1.766133,
+          "p95": 2.124467,
+          "p99": 2.124467,
+          "max": 2.124467
+        },
+        "gatewayMemoryBytes": {
+          "firstPrivate": 788209664,
+          "lastPrivate": 824123392,
+          "peakPrivate": 824123392,
+          "firstWorkingSet": 830758912,
+          "lastWorkingSet": 866107392,
+          "peakWorkingSet": 866107392
+        },
+        "hostFreeBytes": {
+          "count": 6,
+          "min": 39967571968,
+          "p50": 40153911296,
+          "p95": 40191447040,
+          "p99": 40191447040,
+          "max": 40191447040
+        },
+        "hostBusiestLogicalCoreBusyPercent": {
+          "count": 6,
+          "min": 75,
+          "p50": 87,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "hostMeanLogicalCoreBusyPercent": {
+          "count": 6,
+          "min": 11.90625,
+          "p50": 15.9375,
+          "p95": 23.90625,
+          "p99": 23.90625,
+          "max": 23.90625
+        },
+        "processIoRates": {
+          "readBytesPerSecond": {
+            "count": 6,
+            "min": 0,
+            "p50": 0,
+            "p95": 1909.287257,
+            "p99": 1909.287257,
+            "max": 1909.287257
+          },
+          "writeBytesPerSecond": {
+            "count": 6,
+            "min": 284570.999571,
+            "p50": 503876.457883,
+            "p95": 1135721.227621,
+            "p99": 1135721.227621,
+            "max": 1135721.227621
+          },
+          "otherIoBytesPerSecond": {
+            "count": 6,
+            "min": 999.569892,
+            "p50": 1548.167093,
+            "p95": 28041.468683,
+            "p99": 28041.468683,
+            "max": 28041.468683
+          },
+          "operationsPerSecond": {
+            "count": 6,
+            "min": 2046.451613,
+            "p50": 2665.084161,
+            "p95": 3317.4946,
+            "p99": 3317.4946,
+            "max": 3317.4946
+          }
+        },
+        "hostNicBytesPerSecond": {
+          "count": 6,
+          "min": 14647.311828,
+          "p50": 27982.410982,
+          "p95": 287607.843137,
+          "p99": 287607.843137,
+          "max": 287607.843137
+        },
+        "processNetworkRateAvailable": false
+      },
+      "activeBands": [
+        {
+          "minimum": 1,
+          "maximum": 9,
+          "samples": 18,
+          "firstSampleAt": 1793003887962,
+          "lastSampleAt": 1793003924995,
+          "cpuLogicalCoreEquivalents": {
+            "count": 18,
+            "min": 0.126349,
+            "p50": 0.234014,
+            "p95": 0.61516,
+            "p99": 0.61516,
+            "max": 0.61516
+          },
+          "peakPrivateBytes": 171323392,
+          "peakWorkingSetBytes": 222752768,
+          "minimumHostFreeBytes": 39953899520
+        },
+        {
+          "minimum": 10,
+          "maximum": 24,
+          "samples": 30,
+          "firstSampleAt": 1793003927059,
+          "lastSampleAt": 1793003989396,
+          "cpuLogicalCoreEquivalents": {
+            "count": 30,
+            "min": 0.196828,
+            "p50": 0.630221,
+            "p95": 1.295337,
+            "p99": 1.371615,
+            "max": 1.371615
+          },
+          "peakPrivateBytes": 359727104,
+          "peakWorkingSetBytes": 408809472,
+          "minimumHostFreeBytes": 40546754560
+        },
+        {
+          "minimum": 25,
+          "maximum": 49,
+          "samples": 56,
+          "firstSampleAt": 1793003991537,
+          "lastSampleAt": 1793004113590,
+          "cpuLogicalCoreEquivalents": {
+            "count": 56,
+            "min": 0.682299,
+            "p50": 1.695023,
+            "p95": 2.342769,
+            "p99": 2.371162,
+            "max": 2.371162
+          },
+          "peakPrivateBytes": 783458304,
+          "peakWorkingSetBytes": 825937920,
+          "minimumHostFreeBytes": 40121200640
+        },
+        {
+          "minimum": 50,
+          "maximum": 74,
+          "samples": 6,
+          "firstSampleAt": 1793004115905,
+          "lastSampleAt": 1793004127563,
+          "cpuLogicalCoreEquivalents": {
+            "count": 6,
+            "min": 1.707097,
+            "p50": 1.766133,
+            "p95": 2.124467,
+            "p99": 2.124467,
+            "max": 2.124467
+          },
+          "peakPrivateBytes": 824123392,
+          "peakWorkingSetBytes": 866107392,
+          "minimumHostFreeBytes": 39967571968
+        }
+      ],
+      "actualSampleGapsMs": {
+        "count": 115,
+        "min": 2012,
+        "p50": 2185,
+        "p95": 2351,
+        "p99": 2360,
+        "max": 2365
+      },
+      "terminal": {
+        "sampledAt": 1793004139929,
+        "stop": true,
+        "reason": "Operator requested load drain",
+        "activeSessions": 2
+      }
+    }
+  },
+  "limitations": {
+    "sampling": "Configured interval1000ms differs from actual wall sample gaps; distributions cannot exclude shorter spikes or unobserved intervals. Samples are not a continuous per-thread profile.",
+    "cpu": "Low aggregate gateway CPU does not exclude one saturated thread/core, lock serialization, blocking IO or scheduler delay. Host single-core100% is not attributed to this gateway and does not mean a 3-core hardware quota.",
+    "memory": "PrivatePageCount is committed private memory; working set is resident memory. Host free memory is OS-level and does not identify leaks, fragmentation, allocator behavior, paging latency or 2-hour stability.",
+    "store": "Monitor has no AccountStore lock wait/hold or File fsync latency field. No Store-stage file was reread and throughput cannot locate a Store holder.",
+    "io": "Windows process IO counters include file/device IO, not pure disk throughput or latency, queue depth, durability cost or an independent disk-capacity benchmark.",
+    "network": "Host NIC counters may omit loopback. processBytesPerSecond is null; driver WebSocket payload counters, PPS, retransmission, TLS and external/cloud link capacity are not established.",
+    "softProfile": "Both histories declare resourceLimitsEnforcedByMonitor=false and soft selected24 logical/32GiB private/40GiB working/minOSfree8GiB; no hard CPU quota, affinity or VM allocation is established.",
+    "cleanup": "Monitor terminal health is sampled during operator drain; it is not a replacement for later owned cleanup/OS proof.",
+    "causality": "Two different episodes and active-count ranges do not isolate a cause. Neither CPU/RAM exhaustion nor a shared-lock/single-thread cause is proven."
+  },
+  "verdict": {
+    "sampledWholeMachineCpuExhaustionDemonstrated": false,
+    "sampledHostRamExhaustionDemonstrated": false,
+    "singleCoreOrSingleThreadSaturationExcluded": false,
+    "sharedMutexOrStorageCauseProven": false,
+    "capacityAccepted": false
+  }
+}

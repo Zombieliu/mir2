@@ -1,0 +1,560 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793003885881-6d2fa527",
+  "analysisKind": "single-pair-authoritative-receive-timeline",
+  "pair": {
+    "observer": "L63fdbd1c",
+    "owner": "L63fdbd15"
+  },
+  "actualRawReadPasses": 1,
+  "raw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\episode-50\\reports\\1793003885881-6d2fa527.samples.jsonl",
+    "bytes": 7298790,
+    "rows": 9181,
+    "sha256": "b74bfef3d32cb7190f8fca6c30798f48b2c799d0eb8457eea087c86bb16fe75d"
+  },
+  "rawStatStable": true,
+  "selectedEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-aoi-v4-50-pair-analysis-v1\\selected-evidence-v1.json",
+    "bytes": 316282,
+    "sha256": "f64e647182de38054b5da77925e13c07021bebdfe8bc1d863d3b4fe4e652e6d8"
+  },
+  "selector": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-aoi-v4-50-pair-analysis-v1\\select-pair-v1.py",
+    "bytes": 3390,
+    "sha256": "5258103a1d60c7f9ca51d517b3de63d04918dd57298f4c7eebc1da95351154ce"
+  },
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\episode-50\\reports\\1793003885881-6d2fa527.report.json",
+    "bytes": 50844,
+    "sha256": "3288be4d64aa82c8329a847f6df6180754c79e5c2216a83ea58573651520ffab"
+  },
+  "originalOutcome": {
+    "safetyStopped": true,
+    "error": "Persistent AOI loss, ghost or duplicate during active load",
+    "phase": "settle",
+    "stage50Measured": false,
+    "peakServerActive": 50,
+    "peakControlledActors": 50,
+    "originalFailurePreserved": true
+  },
+  "conclusion": {
+    "reportedFailureWas": "ghost, not missing or duplicate, for observer L63fdbd1c retaining owner L63fdbd15 while the two latest authoritative self snapshots were outside radius 16",
+    "newHookFinding": "The one selected pair has no recorded qualifying interruption between its first out-of-range self state and the fatal poll. The new reconcileReceived clear-only hook therefore has no legitimate pre-fatal clear condition in the recorded state. This differs from the previous V3 transient in-range-between-polls case.",
+    "receiveSkewFinding": "Owner self ACK reached the harness at 1793004126525. Reverse-direction Remove of the observer reached that owner at 1793004126526. The observer received its Remove of this owner at 1793004128489, after the fatal decision. These are receive timestamps on different connections, not server-send timestamps or a measured network latency.",
+    "notProven": "No unique cause is established. This trace does not locate delay among server generation/publication, per-connection queues, transport, event-loop scheduling or decoding. It does not prove a permanently lost Remove or that the server world remained out of range continuously.",
+    "gameAcceptanceChanged": false,
+    "capacityAccepted": false,
+    "P0Accepted": false
+  },
+  "timeline": [
+    {
+      "rawLine": 6773,
+      "at": 1793004120970,
+      "utc": "2026-10-26T08:42:00.970000+00:00",
+      "note": "All 50 native participants activated. No stage50 measurement began.",
+      "selectedEvidence": {
+        "line": 6773,
+        "type": "diagnosticFullRosterActivated",
+        "at": 1793004120970,
+        "controlledActors": 50,
+        "nativeActivityStartedAtMs": 253484.8769
+      }
+    },
+    {
+      "rawLine": 7028,
+      "at": 1793004123385,
+      "utc": "2026-10-26T08:42:03.385000+00:00",
+      "note": "Observer self became (283,618), unchanged through the fatal decision.",
+      "selectedEvidence": {
+        "line": 7028,
+        "type": "selfTransform",
+        "actor": "L63fdbd1c",
+        "at": 1793004123385,
+        "connection": 49,
+        "sequence": 790,
+        "monotonicMs": 255899.616,
+        "phase": "settle",
+        "source": "UserLocation",
+        "mapFileName": "0",
+        "wire": {
+          "x": 283,
+          "y": 618,
+          "direction": "Down"
+        },
+        "before": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 283,
+            "y": 617
+          },
+          "direction": "Left"
+        },
+        "after": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 283,
+            "y": 618
+          },
+          "direction": "Down"
+        }
+      }
+    },
+    {
+      "rawLine": 7389,
+      "at": 1793004125754,
+      "utc": "2026-10-26T08:42:05.754000+00:00",
+      "note": "Owner self became (299,616): Chebyshev distance 16 from observer, still in range.",
+      "selectedEvidence": {
+        "line": 7389,
+        "type": "selfTransform",
+        "actor": "L63fdbd15",
+        "at": 1793004125754,
+        "connection": 42,
+        "sequence": 931,
+        "monotonicMs": 258268.958,
+        "phase": "settle",
+        "source": "UserLocation",
+        "mapFileName": "0",
+        "wire": {
+          "x": 299,
+          "y": 616,
+          "direction": "Right"
+        },
+        "before": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 297,
+            "y": 616
+          },
+          "direction": "Right"
+        },
+        "after": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 299,
+            "y": 616
+          },
+          "direction": "Right"
+        }
+      }
+    },
+    {
+      "rawLine": 7421,
+      "at": 1793004125814,
+      "utc": "2026-10-26T08:42:05.814000+00:00",
+      "note": "Last preceding coverage poll had no issue; recorded pair distance remained 16.",
+      "selectedEvidence": {
+        "line": 7421,
+        "type": "coverage",
+        "phase": "settle",
+        "at": 1793004125814,
+        "aoi": {
+          "expectedPairs": 2410,
+          "observedPairs": 2410,
+          "activeOwners": 50,
+          "issues": []
+        }
+      }
+    },
+    {
+      "rawLine": 7610,
+      "at": 1793004126525,
+      "utc": "2026-10-26T08:42:06.525000+00:00",
+      "note": "Owner UserLocation changed self to (301,614): pair distance 18, first recorded out-of-range state.",
+      "selectedEvidence": {
+        "line": 7610,
+        "type": "selfTransform",
+        "actor": "L63fdbd15",
+        "at": 1793004126525,
+        "connection": 42,
+        "sequence": 968,
+        "monotonicMs": 259040.1922,
+        "phase": "settle",
+        "source": "UserLocation",
+        "mapFileName": "0",
+        "wire": {
+          "x": 301,
+          "y": 614,
+          "direction": "UpRight"
+        },
+        "before": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 299,
+            "y": 616
+          },
+          "direction": "Right"
+        },
+        "after": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 301,
+            "y": 614
+          },
+          "direction": "UpRight"
+        }
+      }
+    },
+    {
+      "rawLine": 7614,
+      "at": 1793004126526,
+      "utc": "2026-10-26T08:42:06.526000+00:00",
+      "note": "Reverse direction: owner received ObjectRemove for observer object50048, with before-present true and after-present false.",
+      "selectedEvidence": {
+        "line": 7614,
+        "type": "playerLifecycle",
+        "actor": "L63fdbd15",
+        "at": 1793004126526,
+        "connection": 42,
+        "sequence": 989,
+        "monotonicMs": 259040.5565,
+        "phase": "settle",
+        "source": "ObjectRemove",
+        "peer": {
+          "objectId": 50048,
+          "name": "L63fdbd1c"
+        },
+        "beforePresent": true,
+        "afterPresent": false,
+        "identitySource": "projection-before",
+        "wire": {
+          "objectId": 50048
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L63fdbd15",
+            "x": 301,
+            "y": 614
+          },
+          "players": [
+            {
+              "objectId": 50048,
+              "name": "L63fdbd1c",
+              "x": 283,
+              "y": 618
+            }
+          ],
+          "count": 40,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L63fdbd15",
+            "x": 301,
+            "y": 614
+          },
+          "players": [],
+          "count": 39,
+          "truncated": false
+        },
+        "pairProjectionOnly": true
+      }
+    },
+    {
+      "rawLine": 7656,
+      "at": 1793004126816,
+      "utc": "2026-10-26T08:42:06.816000+00:00",
+      "note": "First subsequent coverage poll at 6816, no issue yet. Given the original sample rule, this is the inferred extraSince start for the selected pair.",
+      "selectedEvidence": {
+        "line": 7656,
+        "type": "coverage",
+        "phase": "settle",
+        "at": 1793004126816,
+        "aoi": {
+          "expectedPairs": 2368,
+          "observedPairs": 2367,
+          "activeOwners": 50,
+          "issues": []
+        }
+      }
+    },
+    {
+      "rawLine": 7831,
+      "at": 1793004127820,
+      "utc": "2026-10-26T08:42:07.820000+00:00",
+      "note": "Fatal coverage decision at 7820: this one ghost issue, 1004 wall-ms after the first out-of-range poll and 1295 wall-ms after owner self ACK.",
+      "selectedEvidence": {
+        "line": 7831,
+        "type": "continuousFailure",
+        "reason": "Persistent AOI loss, ghost or duplicate during active load",
+        "evidence": {
+          "phase": "settle",
+          "expectedPairs": 2374,
+          "observedPairs": 2374,
+          "activeOwners": 50,
+          "issues": [
+            {
+              "observer": "L63fdbd1c",
+              "owner": "L63fdbd15",
+              "reason": "ghost"
+            }
+          ]
+        },
+        "at": 1793004127820,
+        "diagnosticContinuityScope": "bootstrap"
+      }
+    },
+    {
+      "rawLine": 7871,
+      "at": 1793004128290,
+      "utc": "2026-10-26T08:42:08.290000+00:00",
+      "note": "After safety stop, during drain, another owner ACK advances farther to (302,613); this is not evidence about pre-fatal recovery.",
+      "selectedEvidence": {
+        "line": 7871,
+        "type": "selfTransform",
+        "actor": "L63fdbd15",
+        "at": 1793004128290,
+        "connection": 42,
+        "sequence": 1044,
+        "monotonicMs": 260804.5353,
+        "phase": "drain",
+        "source": "UserLocation",
+        "mapFileName": "0",
+        "wire": {
+          "x": 302,
+          "y": 613,
+          "direction": "UpRight"
+        },
+        "before": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 301,
+            "y": 614
+          },
+          "direction": "UpRight"
+        },
+        "after": {
+          "playerObjectId": 1000,
+          "position": {
+            "x": 302,
+            "y": 613
+          },
+          "direction": "UpRight"
+        }
+      }
+    },
+    {
+      "rawLine": 7897,
+      "at": 1793004128489,
+      "utc": "2026-10-26T08:42:08.489000+00:00",
+      "note": "Observer finally receives ObjectRemove for owner object50041; before entry was still (299,616), after absent. This occurs 669 wall-ms after fatal.",
+      "selectedEvidence": {
+        "line": 7897,
+        "type": "playerLifecycle",
+        "actor": "L63fdbd1c",
+        "at": 1793004128489,
+        "connection": 49,
+        "sequence": 922,
+        "monotonicMs": 261004.1838,
+        "phase": "drain",
+        "source": "ObjectRemove",
+        "peer": {
+          "objectId": 50041,
+          "name": "L63fdbd15"
+        },
+        "beforePresent": true,
+        "afterPresent": false,
+        "identitySource": "projection-before",
+        "wire": {
+          "objectId": 50041
+        },
+        "orphanMotion": false,
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L63fdbd1c",
+            "x": 283,
+            "y": 618
+          },
+          "players": [
+            {
+              "objectId": 50041,
+              "name": "L63fdbd15",
+              "x": 299,
+              "y": 616
+            }
+          ],
+          "count": 50,
+          "truncated": false
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L63fdbd1c",
+            "x": 283,
+            "y": 618
+          },
+          "players": [],
+          "count": 49,
+          "truncated": false
+        },
+        "pairProjectionOnly": true
+      }
+    }
+  ],
+  "measuredReceiveIntervalsMs": {
+    "lastInRangeOwnerAckToOutOfRangeOwnerAck": 771,
+    "outOfRangeOwnerAckToFirstOutOfRangePoll": 291,
+    "firstOutOfRangePollToFatalPoll": 1004,
+    "outOfRangeOwnerAckToFatalPoll": 1295,
+    "outOfRangeOwnerAckToObserverRemove": 1964,
+    "reverseRemoveToObserverRemove": 1963,
+    "fatalPollToObserverRemove": 669,
+    "outOfRangeOwnerAckToObserverRemoveMonotonicMs": 1963.9916,
+    "reverseRemoveToObserverRemoveMonotonicMs": 1963.6273
+  },
+  "reconcileAssessment": {
+    "actualTimerMutationLogExists": false,
+    "inferredExtraSincePollAt": 1793004126816,
+    "inferredTimerSurvivesUntilFatal": true,
+    "basis": "Original sample creates an extra timer only at a coverage poll. The preceding poll was in range. The next poll is outside and no issue; the following poll 1004ms later reports this exact pair. No recorded self or map event returns the pair within 16; no observer lifecycle removes the owner before fatal.",
+    "receiverEntryEvidence": "Observer Remove row7897 before projection contains exactly the relevant peer object50041 at (299,616), after absent. Prior relevant lifecycle was its ObjectPlayer row6329/worldSnapshot row6336; no intervening relevant Remove/Join or replacement snapshot is recorded before fatal.",
+    "receiverLocalPeerPositionAtRemove": {
+      "x": 299,
+      "y": 616
+    },
+    "receiverOwnSelfAtRemove": {
+      "x": 283,
+      "y": 618
+    },
+    "localViewDistanceAtRemove": 16,
+    "canonicalPredicateAtFatalUses": "receiver own self vs owner own self, across two independent connections; it does not use the stale peer position in the receiver view",
+    "recordedStateUpdatesWhileOutsideBeforeFatal": [
+      {
+        "line": 7610,
+        "at": 1793004126525,
+        "receivedBy": "L63fdbd15",
+        "source": "UserLocation",
+        "observerSelf": {
+          "x": 283,
+          "y": 618
+        },
+        "ownerSelf": {
+          "x": 301,
+          "y": 614
+        },
+        "distance": 18,
+        "sameMap": true
+      },
+      {
+        "line": 7611,
+        "at": 1793004126526,
+        "receivedBy": "L63fdbd15",
+        "source": "ObjectRemove",
+        "observerSelf": {
+          "x": 283,
+          "y": 618
+        },
+        "ownerSelf": {
+          "x": 301,
+          "y": 614
+        },
+        "distance": 18,
+        "sameMap": true
+      },
+      {
+        "line": 7612,
+        "at": 1793004126526,
+        "receivedBy": "L63fdbd15",
+        "source": "ObjectRemove",
+        "observerSelf": {
+          "x": 283,
+          "y": 618
+        },
+        "ownerSelf": {
+          "x": 301,
+          "y": 614
+        },
+        "distance": 18,
+        "sameMap": true
+      },
+      {
+        "line": 7613,
+        "at": 1793004126526,
+        "receivedBy": "L63fdbd15",
+        "source": "ObjectRemove",
+        "observerSelf": {
+          "x": 283,
+          "y": 618
+        },
+        "ownerSelf": {
+          "x": 301,
+          "y": 614
+        },
+        "distance": 18,
+        "sameMap": true
+      },
+      {
+        "line": 7614,
+        "at": 1793004126526,
+        "receivedBy": "L63fdbd15",
+        "source": "ObjectRemove",
+        "observerSelf": {
+          "x": 283,
+          "y": 618
+        },
+        "ownerSelf": {
+          "x": 301,
+          "y": 614
+        },
+        "distance": 18,
+        "sameMap": true
+      },
+      {
+        "line": 7615,
+        "at": 1793004126526,
+        "receivedBy": "L63fdbd15",
+        "source": "ObjectRemove",
+        "observerSelf": {
+          "x": 283,
+          "y": 618
+        },
+        "ownerSelf": {
+          "x": 301,
+          "y": 614
+        },
+        "distance": 18,
+        "sameMap": true
+      },
+      {
+        "line": 7627,
+        "at": 1793004126540,
+        "receivedBy": "L63fdbd15",
+        "source": "ObjectRemove",
+        "observerSelf": {
+          "x": 283,
+          "y": 618
+        },
+        "ownerSelf": {
+          "x": 301,
+          "y": 614
+        },
+        "distance": 18,
+        "sameMap": true
+      }
+    ],
+    "hookAfterRemove": "A zero peer count is a valid clear condition when that event is decoded; after safetyStop/drain the clients may already be paused and clocks may have cleared by the liveness condition. Raw does not log the actual map deletions, so neither deletion time nor deletion branch is claimed.",
+    "noThresholdChangeRecommendedFromThisTrace": true
+  },
+  "limitations": [
+    "Only one new raw pass was performed. The selected scalar evidence was written with exclusive creation before any postprocessing. All later work reads only that saved selection.",
+    "Raw lifecycle projections and owner self transformations do not capture every ordinary peer motion packet or every incoming frame. No packet-level server-send timestamp or queue duration is available.",
+    "The 1004ms poll interval uses recorded wall timestamps; the two cross-socket event skews also have monotonic timestamps shown above. No standalone per-packet 900ms replay or AOI matrix rescan was performed.",
+    "The clear-only hook does not create timers, visibility credit or new acceptance. No timer deletion was directly logged; its pre-fatal lack of a valid clear condition is inferred from recorded state transitions and the unchanged source rule.",
+    "Remove arrival proves eventual removal, not whether its server dispatch was timely. No CPU, Store or network root cause is assigned.",
+    "All50 admitted and peak50 do not constitute a measured 50-user stage. The run stopped during settle; all original failure and cleanup facts remain unchanged."
+  ],
+  "actionableNextStep": "If locating the delay is necessary, correlate this exact object50041 observer connection path with server ObjectRemove enqueue/send and receive/decode timestamps. Keep the radius16/grace1000 and original failure intact; the present evidence alone does not justify loosening either guard."
+}

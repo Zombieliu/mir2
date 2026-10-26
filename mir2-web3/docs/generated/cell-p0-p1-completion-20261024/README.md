@@ -265,3 +265,11 @@ V2 后端对应提交 `461f1d85eed6309a55a88bd79a0022f7b97febe4`、[39 项输入
 另行稳态诊断使用固定真实 loopback source IP 和各 source 原登录预算，并不替代正式阶梯。50 人实际全部入场后，在 settle 的 AOI 准备期因 ghost 检查停止，没有 50 人测量窗；单 pair 记录显示跨连接 ACK 时序差及两次采样间曾回到范围内，尚不能认定服务端丢 Leave。100 人诊断达到 server-active79、78 ready，角色 `L689dc626` 等待 StartGame 约 20,002.7ms 超时；原 `peakControlledActors=0` 保留，没有 100 人测量。其后才观察到 peer Join 和 owner 地图/快照记录，完整 StartGame 回执时刻未知，不能直接归因 CPU、Store 或认定容量上限。
 
 当前 AOI 候选只在已接收状态表明连续条件被打断时清除相关既有 missing/extra 时钟，不新增可见 credit 或统计样本；原 16 格、严格超过 1000ms、持续 missing/ghost 及 duplicate 检查保持。五项新增测试包含于 Root 同次四入口完整 **242/242 passed，零失败、取消、跳过或 todo**，九输入前后相同，旧测试 286,361 字节前缀保持；未把聚焦和完整测试相加。该客户端修复尚待新实际负载验证，不改历史失败，不宣称修复服务端或 StartGame 根因。P1 合同通过，P0 仍未完成，P2 未启动；本机协议诊断不替代 GUI、人类接受、生产容量或两小时长稳。
+
+## AOI 实际复测仍失败；纯解析缓存仅为已验证源码候选
+
+AOI 接收状态修复提交 `657b7528` 已推送，原完整 **242/242 Node** 回归结果保留。修复后的 V4 诊断实际全员 50 人入场，但仍在 settle 准备期因 AOI fatal 停止，没有 50 人测量窗：所核 pair 的 owner ACK 出距至 18 后，observer 约 **1.964 秒**才收到 Remove，连续 ghost 计时为 **1004ms**，期间未见 in-range 条件。此例存在真实连续条件不一致，不能套用先前 V3 的采样间回到范围内解释；具体服务端或发送时序根因仍未证明。bootstrap 窗包含入场与 settle，采样 CPU 峰约 **2.371 逻辑核等价**、网关 private 峰约 **0.768GiB**、主机空闲内存最低约 **37.21GiB**。这些数据不证明机器资源耗尽，也不排除单核、共享锁或采样间短暂饱和；不是云资源硬配额或容量上限。
+
+[纯解析缓存候选与实际验证](capacity-shared-experience-parse-cache-v1/README.md)只修改 simulation 的 `shared_experience_profile.rs`，用 identity 与精确原 JSON 匹配的有界缓存复用解析结果；原业务刷新、fresh Store/frozen/poison/authority 校验不变。Root 的 **26 项 Rust 检查及格式检查通过**，八项新增模块聚焦包含在本次检查内；它们与 242 项 Node 回归分别陈述，不累加。另两项旧 `guild_kill_source_` fixture 在候选和完整 **50 输入逐字节相同的 c743122a 控制基线**均失败，失败签名逐字相同。整合收据保留 **allSelectedTestsPassed=false**，没有将旧失败修成或改写为通过。
+
+缓存当前仅有源码变更资格，尚无新 Release、普通完整生命周期或实际负载结果，不宣称解决 AOI、StartGame 或正式 25 人失败。P1 合同通过，P0 仍未完成，P2 未启动；正式 50/100 人与两小时长稳未执行，本机协议诊断不构成生产容量、GUI 或人类接受。
