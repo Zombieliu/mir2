@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v1",
+  "mode": "fresh-ordinary-capacity-bank-preparation-only",
+  "preparationOnly": true,
+  "workerCount": 1,
+  "maxPrepared": 100,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\frozen-source-v1.json",
+    "bytes": 81500,
+    "sha256": "aad77d0aaa7e3d23100b7b9e96e354b8c3f0a92431357c72a9096769932448c9"
+  },
+  "driverSourceCommit": "5024c81236ed6cfccfd44126632d92ce6e0133c2",
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "backendExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\bin\\mir2-gateway.exe",
+    "bytes": 87455744,
+    "sha256": "4fb233a2e47ed19aadfce75a209d0e32a559a2dd402f26e109f1a7678e1fec04"
+  },
+  "backendSourcesExact": 55,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "rawOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\reports\\1793046276153-143c0f31.preparation-report.json",
+    "bytes": 10646,
+    "sha256": "956331eba322ac63e998170323b4a5d2b2972929097a17b0eb5e6ce88f56d3d4"
+  },
+  "rawOriginalSamples": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\reports\\1793046276153-143c0f31.preparation.jsonl",
+    "bytes": 2521088,
+    "sha256": "f4b1004265a6de4600331cd0e44d74d5044c026f58024ce8cc3d9cb672dc6263"
+  },
+  "rawOriginalVerdict": {
+    "attackResults": "v2",
+    "ok": false,
+    "error": "ordinary supplies: only live Deer may be hunted",
+    "preparedCount": 3,
+    "testExecution": false,
+    "ordinaryPreparationEvidenceEligible": false
+  },
+  "preparedIndexRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\prepared-index-v1.json",
+    "bytes": 1340,
+    "sha256": "197cc93778832b87b13a1c9de57d62152908f4c365439b9717e54d212a6baa7d"
+  },
+  "preparedIndexValid": false,
+  "progressCheckpoints": [],
+  "progressIsColdCheckpoint": false,
+  "productionPreparationEvidence": false,
+  "preparationComplete": false,
+  "executionError": null,
+  "cleanupComplete": true,
+  "cleanupRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\cleanup-v1.json",
+    "bytes": 1036,
+    "sha256": "7699c7e1b9fb994126f73b8ec5d7884f70a38731c3acd5717fd637d9cc6ca8c9"
+  },
+  "coldBankEligible": false,
+  "formalOrdinaryRelogin100Verified": false,
+  "measurementPerformed": false,
+  "gameplayEngineActivated": false,
+  "nativeResumeExercisePerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

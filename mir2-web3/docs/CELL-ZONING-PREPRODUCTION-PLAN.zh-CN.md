@@ -198,6 +198,19 @@ MMOKIT 的[固定 README](https://github.com/mmokit/mmokit/blob/5ef5523897477850
 
 Nex 样本的[源码许可头](https://github.com/KBEngineLab/KBEngine-Nex/blob/7439c7a5db34d74698398cfae3982f7e78dd8974/kbe/src/server/cellappmgr/cellappmgr.cpp)标明 LGPL-3.0-or-later，不能套用到其他仓库/版本。此处不以文档的 Cell/Ghost 术语证明动态空间拆合已生产成熟。
 
+### 500 CCU 路线的基础设施复用边界
+
+2026-10-27补查以下官方资料，仅用于接入边界判断；没有新增依赖、执行外部代码或据此宣称500 CCU容量。版本与许可证仍须在实际采用时固定。
+
+| 组件 | 许可证与官方依据 | 可复用职责及限制 |
+| --- | --- | --- |
+| Tokio | [MIT](https://github.com/tokio-rs/tokio/blob/master/LICENSE)；[runtime](https://docs.rs/tokio/latest/tokio/runtime/index.html)、[spawn_blocking](https://docs.rs/tokio/latest/tokio/task/fn.spawn_blocking.html) | 保留网络、定时器和异步调度；增加worker不会自动拆开串行Zone，CPU任务仍需限并发 |
+| Rayon | [MIT或Apache-2.0](https://github.com/rayon-rs/rayon#license)；[ThreadPoolBuilder](https://docs.rs/rayon/latest/rayon/struct.ThreadPoolBuilder.html) | 若现有task pool不足，可评估固定线程池处理独立或只读快照计算；单写权威及有序提交仍由本项目保证 |
+| Agones | [Apache-2.0](https://github.com/agones-dev/agones/blob/main/LICENSE)；[overview](https://agones.dev/site/docs/overview/) | 按需复用Kubernetes游戏服务器进程的分配、健康和扩缩容；不负责Cell边界战斗、AOI或玩家交接 |
+| OpenRaft | [MIT或Apache-2.0元数据](https://github.com/databendlabs/openraft/blob/main/Cargo.toml)；[官方接口](https://docs.rs/openraft/latest/openraft/) | 多机故障接管阶段评估Cell节点归属、epoch等控制元数据；应用仍需提供网络、存储、状态机，不将逐次攻击直接变为共识事务 |
+
+优先继续现有Rust/Bevy调度基础，先以串行参考验证固定Cell的单写权威，再开并行；进程编排与控制面共识按多机验收需求接入。上述组件均不能替代第5/6节的epoch/fencing、幂等、裁决顺序、在途效果、边界AOI与恢复合同。分散Cell人数相加只能证明对应部署的总容量；同一热点承载及跨机交接另行实测。
+
 ### SectorSync PoC 的晋级与退出条件
 
 对比原生实现与适配器，至少检查：实体 ID 双向映射、逻辑地图隔离、整数格坐标精度、逻辑时间与顺序、Ghost 只读、完整组件及在途效果交接、部分提交恢复、有界背压、CPU/内存/编码额外成本。

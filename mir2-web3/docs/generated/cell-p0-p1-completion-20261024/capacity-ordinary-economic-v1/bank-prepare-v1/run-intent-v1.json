@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\frozen-source-v1.json",
+    "bytes": 81500,
+    "sha256": "aad77d0aaa7e3d23100b7b9e96e354b8c3f0a92431357c72a9096769932448c9"
+  },
+  "options": {
+    "realm": "isolated",
+    "endpoint": "ws://127.0.0.1:17510/ws",
+    "maxPrepared": 100,
+    "finiteWallSeconds": 18000,
+    "targetHp": 12,
+    "attackResults": "v2",
+    "poolFile": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\private\\capacity-pool.json",
+    "monitor": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\monitor-current.json",
+    "output": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\reports",
+    "scenarioFile": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\scenario-preparation-v2.json",
+    "routeFile": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+    "mapRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack",
+    "loginNotBefore": "2026-10-26T20:24:33.686Z"
+  },
+  "scope": "New owned PID/creationTime/exact executable and audited fresh100account-only privateStore plus six-zero startup establish a newly initialized server auth limiter; explicit loginNotBefore is the actual healthBefore ISO. Six-zero alone is insufficient. Original25+5/901000ms ledger remains persistent; no existing ledger is overwritten.",
+  "formalAcceptanceEligible": false,
+  "capacityAccepted": false,
+  "preparationSupplyDurationClaim": false
+}
