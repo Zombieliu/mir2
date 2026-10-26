@@ -5316,6 +5316,8 @@ fn spawn_zone_outbound_sender_with_clock(
     diagnostics: SocketDiagnostics,
     now: impl Fn() -> Instant + Send + 'static,
 ) -> ZoneOutboundSenderTask {
+    use crate::routing::ZoneDeliveryTraceStage as TraceStage;
+
     let handle = tokio::spawn(async move {
         loop {
             let outbound = tokio::select! {
@@ -5335,6 +5337,12 @@ fn spawn_zone_outbound_sender_with_clock(
                     },
                 },
             };
+            let first_trace = outbound.delivery_trace();
+            let first_dequeued_at = first_trace.as_ref().map(|trace| {
+                let at = Instant::now();
+                trace.emit(TraceStage::Dequeue, Some(at), None);
+                at
+            });
             // A cadence may enqueue the first new-epoch ACK between registration
             // preparation and activation while bootstrap holds the write gate.
             // Judge the epoch only after bootstrap/activation has completed.
@@ -5342,32 +5350,58 @@ fn spawn_zone_outbound_sender_with_clock(
                 GatewaySlowStage::for_socket("serial_gate.zone_outbound_wait", &diagnostics);
             let _serial_execution = serial_execution_gate.read().await;
             let batch_started_at = now();
+            let first_gate_acquired_at = first_trace.as_ref().map(|trace| {
+                let at = Instant::now();
+                trace.emit(TraceStage::Gate, first_dequeued_at, Some(at));
+                at
+            });
             drop(serial_gate_wait);
             // Bootstrap wait is not batch work. Keep the in-hand first packet
             // in its original order, even if an owner ACK arrived while waiting.
-            let mut first_outbound = Some(outbound);
+            let mut first_outbound = Some((
+                outbound,
+                first_trace,
+                first_dequeued_at,
+                first_gate_acquired_at,
+            ));
             for batch_index in 0..ZONE_OUTBOUND_BATCH_MAX {
                 if batch_index > 0
                     && now().duration_since(batch_started_at) >= ZONE_OUTBOUND_BATCH_BUDGET
                 {
                     break;
                 }
-                let outbound = if let Some(outbound) = first_outbound.take() {
-                    outbound
-                } else {
-                    // Never await another packet while holding the read guard.
-                    // Recheck owner priority at every pop; normal remains FIFO.
-                    match owner_location_receiver
-                        .try_recv()
-                        .or_else(|_| receiver.try_recv())
-                    {
-                        Ok(outbound) => outbound,
-                        Err(_) => break,
+                let (outbound, trace, dequeued_at, gate_acquired_at) =
+                    if let Some(first) = first_outbound.take() {
+                        first
+                    } else {
+                        // Never await another packet while holding the read guard.
+                        // Recheck owner priority at every pop; normal remains FIFO.
+                        match owner_location_receiver
+                            .try_recv()
+                            .or_else(|_| receiver.try_recv())
+                        {
+                            Ok(outbound) => {
+                                let trace = outbound.delivery_trace();
+                                let at = trace.as_ref().map(|trace| {
+                                    let at = Instant::now();
+                                    trace.emit(TraceStage::Dequeue, Some(at), None);
+                                    trace.emit(TraceStage::Gate, Some(at), Some(at));
+                                    at
+                                });
+                                (outbound, trace, at, at)
+                            }
+                            Err(_) => break,
+                        }
+                    };
+                let trace_stage = |stage| {
+                    if let Some(trace) = &trace {
+                        trace.emit(stage, dequeued_at, gate_acquired_at);
                     }
                 };
                 // Stale and empty-health packets count toward both limits too.
                 let registration_id = outbound.registration_id();
                 if active_registration_id.load(Ordering::Acquire) != registration_id {
+                    trace_stage(TraceStage::Stale);
                     if outbound.is_owner_location() {
                         eprintln!(
                             "[gateway-zone-live] owner_location result=stale_after_gate registration_id={registration_id} active_registration_id={}",
@@ -5377,6 +5411,7 @@ fn spawn_zone_outbound_sender_with_clock(
                     continue;
                 }
                 if outbound.is_overloaded() {
+                    trace_stage(TraceStage::Overload);
                     failure_signal.send_replace(registration_id);
                     return;
                 }
@@ -5385,11 +5420,16 @@ fn spawn_zone_outbound_sender_with_clock(
                 let packet = if outbound.owner_health().is_some() {
                     match tokio::task::spawn_blocking(move || outbound.claim_for_send()).await {
                         Ok(Ok(Some(packet))) => packet,
-                        Ok(Ok(None)) => continue,
+                        Ok(Ok(None)) => {
+                            trace_stage(TraceStage::HealthEmpty);
+                            continue;
+                        }
                         _ => {
                             if active_registration_id.load(Ordering::Acquire) != registration_id {
+                                trace_stage(TraceStage::Stale);
                                 continue;
                             }
+                            trace_stage(TraceStage::HealthError);
                             failure_signal.send_replace(registration_id);
                             return;
                         }
@@ -5398,12 +5438,16 @@ fn spawn_zone_outbound_sender_with_clock(
                     outbound.into_packet()
                 };
                 if active_registration_id.load(Ordering::Acquire) != registration_id {
+                    trace_stage(TraceStage::Stale);
                     continue;
                 }
+                trace_stage(TraceStage::Send);
                 if send_server_packet(&sender, &packet).await.is_err() {
+                    trace_stage(TraceStage::SendError);
                     failure_signal.send_replace(registration_id);
                     return;
                 }
+                trace_stage(TraceStage::Sent);
             }
         }
     });

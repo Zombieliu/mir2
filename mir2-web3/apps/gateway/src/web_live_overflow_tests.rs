@@ -1188,3 +1188,256 @@ async fn zone_outbound_batch_health_completion_rechecks_epoch_before_send_or_fai
         assert_eq!(socket.active.load(Ordering::Acquire), 43);
     }
 }
+
+// Per-stamp capture avoids process-global environment changes in parallel tests.
+fn delivery_trace_packet() -> ServerPacket {
+    ServerPacket::UserLocation {
+        location: mir2_protocol::UserLocation {
+            position: Point { x: 25, y: 23 },
+            direction: MirDirection::Right,
+        },
+    }
+}
+
+fn delivery_trace_fields(line: &str) -> std::collections::BTreeMap<&str, &str> {
+    assert!(line.starts_with("[gateway-zone-delivery-trace] "));
+    line.split_whitespace()
+        .skip(1)
+        .map(|field| field.split_once('=').unwrap())
+        .collect()
+}
+
+fn delivery_trace_stages(events: &Arc<Mutex<Vec<String>>>) -> Vec<String> {
+    events
+        .lock()
+        .unwrap()
+        .iter()
+        .map(|line| delivery_trace_fields(line)["stage"].to_owned())
+        .collect()
+}
+
+#[test]
+fn zone_delivery_trace_disabled_and_nonplayer_remove_preserve_wire() {
+    let packet = delivery_trace_packet();
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let plain = SharedZoneLiveOutbound::new(42, packet.clone());
+    assert!(plain.delivery_trace().is_none());
+    let disabled = plain.with_test_delivery_trace(false, 50048, &packet, true, events.clone());
+    assert!(disabled.delivery_trace().is_none());
+    assert_eq!(
+        serde_json::to_value(disabled.into_packet()).unwrap(),
+        serde_json::to_value(&packet).unwrap()
+    );
+    let monster_remove = ServerPacket::ObjectRemove { object_id: 77 };
+    let excluded = SharedZoneLiveOutbound::new(42, monster_remove.clone())
+        .with_test_delivery_trace(true, 50048, &monster_remove, false, events.clone());
+    assert!(excluded.delivery_trace().is_none());
+    assert!(events.lock().unwrap().is_empty());
+}
+
+#[test]
+fn zone_delivery_trace_player_remove_keeps_distinct_recipient_and_target() {
+    let packet = ServerPacket::ObjectRemove { object_id: 50041 };
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let outbound = SharedZoneLiveOutbound::new(42, packet.clone()).with_test_delivery_trace(
+        true,
+        50048,
+        &packet,
+        true,
+        events.clone(),
+    );
+    outbound.delivery_trace().unwrap().emit(
+        crate::routing::ZoneDeliveryTraceStage::Dequeue,
+        Some(Instant::now()),
+        None,
+    );
+    let events = events.lock().unwrap();
+    let fields = delivery_trace_fields(&events[0]);
+    assert_eq!(fields["recipientZoneID"], "50048");
+    assert_eq!(fields["targetObjectID"], "50041");
+    assert_eq!(fields["kind"], "ObjectRemove");
+    assert_eq!(fields["hasPosition"], "0");
+    assert_eq!(
+        serde_json::to_value(outbound.into_packet()).unwrap(),
+        serde_json::to_value(packet).unwrap()
+    );
+}
+
+#[test]
+fn zone_delivery_trace_full_and_closed_are_not_enqueue_success() {
+    let (tx, rx) = mpsc::channel(1);
+    let sender = SharedZoneLiveOutboundSender::single(tx);
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let packet = delivery_trace_packet();
+    for _ in 0..2 {
+        let result = sender.try_send(
+            SharedZoneLiveOutbound::new(42, packet.clone()).with_test_delivery_trace(
+                true,
+                50048,
+                &packet,
+                true,
+                events.clone(),
+            ),
+        );
+        if events.lock().unwrap().len() == 1 {
+            assert!(result.is_ok());
+        } else {
+            assert!(matches!(result, Err(mpsc::error::TrySendError::Full(_))));
+        }
+    }
+    drop(rx);
+    assert!(matches!(
+        sender.try_send(
+            SharedZoneLiveOutbound::new(42, packet.clone()).with_test_delivery_trace(
+                true,
+                50048,
+                &packet,
+                true,
+                events.clone()
+            )
+        ),
+        Err(mpsc::error::TrySendError::Closed(_))
+    ));
+    assert_eq!(
+        delivery_trace_stages(&events),
+        ["enqueue", "full", "closed"]
+    );
+    let events = events.lock().unwrap();
+    let ids = events
+        .iter()
+        .map(|line| delivery_trace_fields(line)["serverTraceID"])
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(ids.len(), 3);
+}
+
+#[tokio::test]
+async fn zone_delivery_trace_same_packet_survives_queue_gate_and_send() {
+    let mut socket = OutboundBatchSocket::new().await;
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let packet = delivery_trace_packet();
+    let sender = SharedZoneLiveOutboundSender::new(
+        socket.normal.as_ref().unwrap().clone(),
+        socket.owner.as_ref().unwrap().clone(),
+    );
+    sender
+        .try_send(
+            SharedZoneLiveOutbound::new(42, packet.clone()).with_test_delivery_trace(
+                true,
+                50048,
+                &packet,
+                true,
+                events.clone(),
+            ),
+        )
+        .unwrap();
+    outbound_batch_wait_until(|| socket.owner.as_ref().unwrap().capacity() == 16).await;
+    assert!(!delivery_trace_stages(&events)
+        .iter()
+        .any(|stage| stage == "gate"));
+    drop(socket.bootstrap.take());
+    assert_eq!(socket.packet().await["packet"], "UserLocation");
+    outbound_batch_wait_until(|| {
+        delivery_trace_stages(&events)
+            .iter()
+            .any(|stage| stage == "sent")
+    })
+    .await;
+    let events = events.lock().unwrap();
+    assert_eq!(events.len(), 5);
+    let trace_id = delivery_trace_fields(&events[0])["serverTraceID"].to_owned();
+    for line in events.iter() {
+        let fields = delivery_trace_fields(line);
+        assert_eq!(fields["serverTraceID"], trace_id);
+        assert_eq!(fields["recipientZoneID"], "50048");
+        assert_eq!(fields["targetObjectID"], "50048");
+        assert_eq!(fields["kind"], "UserLocation");
+        for (key, value) in fields {
+            if key != "stage" && key != "kind" {
+                assert!(value.parse::<i128>().is_ok(), "non-numeric field: {key}");
+            }
+        }
+        for sensitive in [
+            "account",
+            "character",
+            "credential",
+            "private",
+            "payload",
+            "name",
+        ] {
+            assert!(!line.contains(sensitive));
+        }
+    }
+    let stages = events
+        .iter()
+        .map(|line| delivery_trace_fields(line)["stage"])
+        .filter(|stage| *stage != "enqueue")
+        .collect::<Vec<_>>();
+    assert_eq!(stages, ["dequeue", "gate", "send", "sent"]);
+}
+
+#[tokio::test]
+async fn zone_delivery_trace_terminal_results_preserve_sender_fences() {
+    for terminal in [
+        "stale",
+        "health-empty",
+        "health-error",
+        "overload",
+        "send-error",
+    ] {
+        let mut socket = OutboundBatchSocket::new().await;
+        let events = Arc::new(Mutex::new(Vec::new()));
+        let metadata_packet = delivery_trace_packet();
+        let mut outbound = if terminal.starts_with("health-") {
+            let decision = if terminal == "health-empty" { 0 } else { 2 };
+            outbound_batch_health(Arc::new(HealthValidationProbe(Arc::new(AtomicUsize::new(
+                decision,
+            )))))
+        } else {
+            SharedZoneLiveOutbound::new(42, metadata_packet.clone())
+        }
+        .with_test_delivery_trace(true, 50048, &metadata_packet, true, events.clone());
+        if terminal == "stale" {
+            socket.active.store(43, Ordering::Release);
+        } else if terminal == "overload" {
+            outbound.with_transport_failure_flag(Arc::new(AtomicBool::new(true)));
+        } else if terminal == "send-error" {
+            socket.terminal.end(transport::TransportEnd::WriteError);
+        }
+        socket
+            .normal
+            .as_ref()
+            .unwrap()
+            .send(outbound)
+            .await
+            .unwrap();
+        outbound_batch_wait_until(|| socket.normal.as_ref().unwrap().capacity() == 128).await;
+        // An untraced trailing packet proves skip cases still continue normally.
+        socket
+            .enqueue(if terminal == "stale" { 43 } else { 42 }, 123)
+            .await;
+        drop(socket.bootstrap.take());
+        if terminal == "stale" || terminal == "health-empty" {
+            assert_eq!(socket.packet().await["payload"]["time"], 123);
+            assert_eq!(*socket.failure.borrow(), 0);
+        } else {
+            outbound_batch_wait_until(|| socket.writer.handle.is_finished()).await;
+            assert_eq!(*socket.failure.borrow(), 42);
+            assert!(socket.gate.try_write().is_ok());
+            assert!(
+                tokio::time::timeout(Duration::from_millis(20), socket.client.next())
+                    .await
+                    .is_err()
+            );
+        }
+        let stages = delivery_trace_stages(&events);
+        assert_eq!(stages.last().map(String::as_str), Some(terminal));
+        assert!(!stages.iter().any(|stage| stage == "sent"));
+        assert_eq!(
+            stages
+                .iter()
+                .filter(|stage| stage.as_str() == "send")
+                .count(),
+            usize::from(terminal == "send-error")
+        );
+    }
+}

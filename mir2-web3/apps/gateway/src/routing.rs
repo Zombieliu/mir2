@@ -3091,6 +3091,161 @@ impl Ord for ZonePresenceKey {
     }
 }
 
+// Server-only, opt-in diagnostics. Never serialized into a ServerPacket.
+#[derive(Debug, Clone)]
+pub(crate) struct ZoneDeliveryTrace {
+    trace_id: u64,
+    registration_id: u64,
+    recipient_zone_object_id: u32,
+    kind: ZoneDeliveryTraceKind,
+    target_object_id: u32,
+    position: Option<(i32, i32)>,
+    enqueued_at: Instant,
+    producer_unix_ms: u128,
+    #[cfg(test)]
+    events: Option<Arc<Mutex<Vec<String>>>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+enum ZoneDeliveryTraceKind {
+    UserLocation,
+    ObjectPlayer,
+    ObjectRemove,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum ZoneDeliveryTraceStage {
+    Enqueue,
+    Full,
+    Closed,
+    Dequeue,
+    Gate,
+    Send,
+    Sent,
+    Stale,
+    HealthEmpty,
+    HealthError,
+    Overload,
+    SendError,
+}
+
+impl ZoneDeliveryTrace {
+    fn for_packet(
+        enabled: bool,
+        registration_id: u64,
+        recipient_zone_object_id: u32,
+        packet: &ServerPacket,
+        is_player_target: bool,
+    ) -> Option<Self> {
+        if !enabled {
+            return None;
+        }
+        let (kind, target_object_id, position) = match packet {
+            ServerPacket::UserLocation { location } => (
+                ZoneDeliveryTraceKind::UserLocation,
+                recipient_zone_object_id,
+                Some((location.position.x, location.position.y)),
+            ),
+            ServerPacket::ObjectPlayer { info } if is_player_target => (
+                ZoneDeliveryTraceKind::ObjectPlayer,
+                info.object_id,
+                Some((info.location.x, info.location.y)),
+            ),
+            ServerPacket::ObjectRemove { object_id } if is_player_target => {
+                (ZoneDeliveryTraceKind::ObjectRemove, *object_id, None)
+            }
+            _ => return None,
+        };
+        static NEXT_TRACE_ID: AtomicU64 = AtomicU64::new(1);
+        Some(Self {
+            trace_id: NEXT_TRACE_ID.fetch_add(1, Ordering::Relaxed),
+            registration_id,
+            recipient_zone_object_id,
+            kind,
+            target_object_id,
+            position,
+            enqueued_at: Instant::now(),
+            producer_unix_ms: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_millis(),
+            #[cfg(test)]
+            events: None,
+        })
+    }
+
+    pub(crate) fn emit(
+        &self,
+        stage: ZoneDeliveryTraceStage,
+        dequeued_at: Option<Instant>,
+        gate_acquired_at: Option<Instant>,
+    ) {
+        let stage = match stage {
+            ZoneDeliveryTraceStage::Enqueue => "enqueue",
+            ZoneDeliveryTraceStage::Full => "full",
+            ZoneDeliveryTraceStage::Closed => "closed",
+            ZoneDeliveryTraceStage::Dequeue => "dequeue",
+            ZoneDeliveryTraceStage::Gate => "gate",
+            ZoneDeliveryTraceStage::Send => "send",
+            ZoneDeliveryTraceStage::Sent => "sent",
+            ZoneDeliveryTraceStage::Stale => "stale",
+            ZoneDeliveryTraceStage::HealthEmpty => "health-empty",
+            ZoneDeliveryTraceStage::HealthError => "health-error",
+            ZoneDeliveryTraceStage::Overload => "overload",
+            ZoneDeliveryTraceStage::SendError => "send-error",
+        };
+        let kind = match self.kind {
+            ZoneDeliveryTraceKind::UserLocation => "UserLocation",
+            ZoneDeliveryTraceKind::ObjectPlayer => "ObjectPlayer",
+            ZoneDeliveryTraceKind::ObjectRemove => "ObjectRemove",
+        };
+        let (x, y) = self.position.unwrap_or_default();
+        let queue_age_us = dequeued_at
+            .map(|at| at.saturating_duration_since(self.enqueued_at).as_micros())
+            .unwrap_or_default();
+        let gate_wait_us = gate_acquired_at
+            .zip(dequeued_at)
+            .map(|(gate, dequeue)| gate.saturating_duration_since(dequeue).as_micros())
+            .unwrap_or_default();
+        let line = format!(
+            "[gateway-zone-delivery-trace] stage={stage} serverTraceID={} registration={} recipientZoneID={} kind={kind} targetObjectID={} hasPosition={} x={x} y={y} producerUnixMs={} elapsedUs={} queueAgeUs={queue_age_us} gateWaitUs={gate_wait_us}",
+            self.trace_id,
+            self.registration_id,
+            self.recipient_zone_object_id,
+            self.target_object_id,
+            u8::from(self.position.is_some()),
+            self.producer_unix_ms,
+            self.enqueued_at.elapsed().as_micros(),
+        );
+        #[cfg(test)]
+        if let Some(events) = &self.events {
+            events.lock().unwrap().push(line.clone());
+        }
+        eprintln!("{line}");
+    }
+}
+
+fn zone_delivery_trace_enabled_for(recipient_zone_object_id: u32) -> bool {
+    static CONFIG: std::sync::OnceLock<(bool, Option<BTreeSet<u32>>)> = std::sync::OnceLock::new();
+    let (enabled, recipients) = CONFIG.get_or_init(|| {
+        let enabled = std::env::var("MIR2_GATEWAY_ZONE_DELIVERY_TRACE").as_deref() == Ok("1");
+        let recipients = std::env::var("MIR2_GATEWAY_ZONE_DELIVERY_TRACE_RECIPIENTS")
+            .ok()
+            .filter(|value| !value.trim().is_empty())
+            .map(|value| {
+                value
+                    .split(',')
+                    .filter_map(|id| id.trim().parse().ok())
+                    .collect()
+            });
+        (enabled, recipients)
+    });
+    *enabled
+        && recipients
+            .as_ref()
+            .is_none_or(|ids| ids.contains(&recipient_zone_object_id))
+}
+
 #[doc(hidden)]
 #[derive(Debug)]
 pub struct SharedZoneLiveOutbound {
@@ -3098,6 +3253,7 @@ pub struct SharedZoneLiveOutbound {
     packet: ServerPacket,
     overloaded: Option<Arc<AtomicBool>>,
     owner_health: Option<OwnerHealthDelivery>,
+    delivery_trace: Option<ZoneDeliveryTrace>,
 }
 
 impl SharedZoneLiveOutbound {
@@ -3107,11 +3263,34 @@ impl SharedZoneLiveOutbound {
             packet,
             overloaded: None,
             owner_health: None,
+            delivery_trace: None,
         }
     }
 
     pub fn registration_id(&self) -> u64 {
         self.registration_id
+    }
+
+    pub(crate) fn delivery_trace(&self) -> Option<ZoneDeliveryTrace> {
+        self.delivery_trace.clone()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn with_test_delivery_trace(
+        mut self,
+        enabled: bool,
+        recipient: u32,
+        packet: &ServerPacket,
+        is_player_target: bool,
+        events: Arc<Mutex<Vec<String>>>,
+    ) -> Self {
+        self.delivery_trace = ZoneDeliveryTrace::for_packet(
+            enabled, self.registration_id, recipient, packet, is_player_target,
+        );
+        if let Some(trace) = &mut self.delivery_trace {
+            trace.events = Some(events);
+        }
+        self
     }
 
     pub fn into_packet(self) -> ServerPacket {
@@ -3203,6 +3382,7 @@ impl SharedZoneLiveOutboundSender {
             packet: ServerPacket::HealthChanged { hp: 0, mp: 0 },
             overloaded: Some(overloaded),
             owner_health: None,
+            delivery_trace: None,
         });
     }
 
@@ -3210,15 +3390,28 @@ impl SharedZoneLiveOutboundSender {
         Self::new(sender.clone(), sender)
     }
 
-    fn try_send(
+    pub(crate) fn try_send(
         &self,
         outbound: SharedZoneLiveOutbound,
     ) -> Result<(), TokioTrySendError<SharedZoneLiveOutbound>> {
-        if matches!(&outbound.packet, ServerPacket::UserLocation { .. }) {
+        let trace = outbound.delivery_trace();
+        let result = if matches!(&outbound.packet, ServerPacket::UserLocation { .. }) {
             self.owner_location.try_send(outbound)
         } else {
             self.normal.try_send(outbound)
+        };
+        if let Some(trace) = trace {
+            trace.emit(
+                match &result {
+                    Ok(()) => ZoneDeliveryTraceStage::Enqueue,
+                    Err(TokioTrySendError::Full(_)) => ZoneDeliveryTraceStage::Full,
+                    Err(TokioTrySendError::Closed(_)) => ZoneDeliveryTraceStage::Closed,
+                },
+                None,
+                None,
+            );
         }
+        result
     }
 
     pub(crate) fn blocking_send(
@@ -5112,6 +5305,19 @@ impl SharedInProcessZoneState {
         if overloaded.load(Ordering::Acquire) {
             return Err(packet);
         }
+        // Inspect only the already-held Zone state and the original global IDs.
+        // Recipient identity never comes from the packet's normalized local ID.
+        let delivery_trace = owner_wire_ids.and_then(|(recipient, _)| {
+            if !zone_delivery_trace_enabled_for(recipient) {
+                return None;
+            }
+            let is_player_target = ordered_zone_object_id(&packet).is_some_and(|id| {
+                self.players.values().any(|presence| presence.zone_object_id == id)
+                    || self.live_zone_player_ids.get(key).is_some_and(|ids| ids.contains(&id))
+                    || self.departed_live_zone_player_ids.contains(&id)
+            });
+            ZoneDeliveryTrace::for_packet(true, registration_id, recipient, &packet, is_player_target)
+        });
         // Wire-only clone: pending queues and Zone state retain their global
         // IDs even when this socket's bounded channel refuses the send.
         let mut wire_packet = packet.clone();
@@ -5123,6 +5329,7 @@ impl SharedInProcessZoneState {
             packet: wire_packet,
             overloaded: Some(overloaded),
             owner_health: None,
+            delivery_trace,
         };
         let created_player = match &outbound.packet {
             ServerPacket::ObjectPlayer { info } => Some(info.object_id),
