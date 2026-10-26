@@ -5282,7 +5282,31 @@ async fn try_handle_zone_movement_from_reader(
     Ok(true)
 }
 
+const ZONE_OUTBOUND_BATCH_MAX: usize = 32;
+const ZONE_OUTBOUND_BATCH_BUDGET: Duration = Duration::from_millis(2);
+
 fn spawn_zone_outbound_sender(
+    receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
+    owner_location_receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
+    sender: SharedWebSocketSender,
+    serial_execution_gate: SharedSerialExecutionGate,
+    active_registration_id: Arc<AtomicU64>,
+    failure_signal: tokio::sync::watch::Sender<u64>,
+    diagnostics: SocketDiagnostics,
+) -> ZoneOutboundSenderTask {
+    spawn_zone_outbound_sender_with_clock(
+        receiver,
+        owner_location_receiver,
+        sender,
+        serial_execution_gate,
+        active_registration_id,
+        failure_signal,
+        diagnostics,
+        Instant::now,
+    )
+}
+
+fn spawn_zone_outbound_sender_with_clock(
     mut receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
     mut owner_location_receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
     sender: SharedWebSocketSender,
@@ -5290,6 +5314,7 @@ fn spawn_zone_outbound_sender(
     active_registration_id: Arc<AtomicU64>,
     failure_signal: tokio::sync::watch::Sender<u64>,
     diagnostics: SocketDiagnostics,
+    now: impl Fn() -> Instant + Send + 'static,
 ) -> ZoneOutboundSenderTask {
     let handle = tokio::spawn(async move {
         loop {
@@ -5310,50 +5335,75 @@ fn spawn_zone_outbound_sender(
                     },
                 },
             };
-            let registration_id = outbound.registration_id();
             // A cadence may enqueue the first new-epoch ACK between registration
             // preparation and activation while bootstrap holds the write gate.
             // Judge the epoch only after bootstrap/activation has completed.
             let serial_gate_wait =
                 GatewaySlowStage::for_socket("serial_gate.zone_outbound_wait", &diagnostics);
             let _serial_execution = serial_execution_gate.read().await;
+            let batch_started_at = now();
             drop(serial_gate_wait);
-            if active_registration_id.load(Ordering::Acquire) != registration_id {
-                if outbound.is_owner_location() {
-                    eprintln!(
-                        "[gateway-zone-live] owner_location result=stale_after_gate registration_id={registration_id} active_registration_id={}",
-                        active_registration_id.load(Ordering::Acquire)
-                    );
+            // Bootstrap wait is not batch work. Keep the in-hand first packet
+            // in its original order, even if an owner ACK arrived while waiting.
+            let mut first_outbound = Some(outbound);
+            for batch_index in 0..ZONE_OUTBOUND_BATCH_MAX {
+                if batch_index > 0
+                    && now().duration_since(batch_started_at) >= ZONE_OUTBOUND_BATCH_BUDGET
+                {
+                    break;
                 }
-                continue;
-            }
-            if outbound.is_overloaded() {
-                failure_signal.send_replace(registration_id);
-                return;
-            }
-            // Health may have waited through a death/revival while this read
-            // gate was blocked. Validate its server-only stamp at final send.
-            let packet = if outbound.owner_health().is_some() {
-                match tokio::task::spawn_blocking(move || outbound.claim_for_send()).await {
-                    Ok(Ok(Some(packet))) => packet,
-                    Ok(Ok(None)) => continue,
-                    _ => {
-                        if active_registration_id.load(Ordering::Acquire) != registration_id {
-                            continue;
-                        }
-                        failure_signal.send_replace(registration_id);
-                        return;
+                let outbound = if let Some(outbound) = first_outbound.take() {
+                    outbound
+                } else {
+                    // Never await another packet while holding the read guard.
+                    // Recheck owner priority at every pop; normal remains FIFO.
+                    match owner_location_receiver
+                        .try_recv()
+                        .or_else(|_| receiver.try_recv())
+                    {
+                        Ok(outbound) => outbound,
+                        Err(_) => break,
                     }
+                };
+                // Stale and empty-health packets count toward both limits too.
+                let registration_id = outbound.registration_id();
+                if active_registration_id.load(Ordering::Acquire) != registration_id {
+                    if outbound.is_owner_location() {
+                        eprintln!(
+                            "[gateway-zone-live] owner_location result=stale_after_gate registration_id={registration_id} active_registration_id={}",
+                            active_registration_id.load(Ordering::Acquire)
+                        );
+                    }
+                    continue;
                 }
-            } else {
-                outbound.into_packet()
-            };
-            if active_registration_id.load(Ordering::Acquire) != registration_id {
-                continue;
-            }
-            if send_server_packet(&sender, &packet).await.is_err() {
-                failure_signal.send_replace(registration_id);
-                return;
+                if outbound.is_overloaded() {
+                    failure_signal.send_replace(registration_id);
+                    return;
+                }
+                // Health may have waited through a death/revival while this read
+                // gate was blocked. Validate its server-only stamp at final send.
+                let packet = if outbound.owner_health().is_some() {
+                    match tokio::task::spawn_blocking(move || outbound.claim_for_send()).await {
+                        Ok(Ok(Some(packet))) => packet,
+                        Ok(Ok(None)) => continue,
+                        _ => {
+                            if active_registration_id.load(Ordering::Acquire) != registration_id {
+                                continue;
+                            }
+                            failure_signal.send_replace(registration_id);
+                            return;
+                        }
+                    }
+                } else {
+                    outbound.into_packet()
+                };
+                if active_registration_id.load(Ordering::Acquire) != registration_id {
+                    continue;
+                }
+                if send_server_packet(&sender, &packet).await.is_err() {
+                    failure_signal.send_replace(registration_id);
+                    return;
+                }
             }
         }
     });

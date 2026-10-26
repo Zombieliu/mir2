@@ -15,10 +15,12 @@ fn award() -> ZoneMonsterKillAward {
 }
 
 #[test]
-fn guild_kill_source_known_failure_retains_envelope_and_new_service_replays_durable_receipt() {
+fn guild_kill_source_known_failure_retains_envelope_and_committed_duplicate_is_ignored() {
     let state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
     let mut runtime = shared_session_runtime(state.clone());
     start_new_runtime(&mut runtime, "guild-kill-source", "SourceKeeper");
+    let awards = super::cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, award());
+    let issued_award = awards[0].clone();
     let identity = runtime.inner.active_identity().unwrap();
     let key = super::super::ZonePresenceKey::from_identity(&identity);
     let config = runtime.inner.shared_mentor_config().unwrap();
@@ -26,15 +28,13 @@ fn guild_kill_source_known_failure_retains_envelope_and_new_service_replays_dura
     config.inject_account_store_transaction_fault(
         mir2_simulation::AccountStoreTransactionFault::BeforePersist,
     );
-    assert!(runtime
-        .apply_zone_monster_kill_awards(vec![award()])
-        .is_empty());
+    assert!(runtime.apply_zone_monster_kill_awards(awards).is_empty());
     assert_eq!(runtime.inner.world_snapshot().player_experience, before);
     let pending = state
         .lock()
         .unwrap()
         .take_pending_zone_monster_kill_awards(&key);
-    assert_eq!(pending, vec![award()]);
+    assert_eq!(pending, vec![issued_award.clone()]);
     let packets = runtime.apply_zone_monster_kill_awards(pending);
     assert!(packets
         .iter()
@@ -48,10 +48,16 @@ fn guild_kill_source_known_failure_retains_envelope_and_new_service_replays_dura
         .next()
         .unwrap()
         .clone();
-    let mut fixed_award = award();
+    assert!(!state
+        .lock()
+        .unwrap()
+        .owned_monster_kill_proof_is_current(&key, &issued_award));
+    let mut fixed_award = issued_award;
     fixed_award.source_receipt_key = Some(fixed_key);
     runtime.account_inventory_service = Arc::new(InProcessAccountInventoryService::new());
     runtime.inventory_zone_id = ZoneId::new("different-delivery-zone");
+    // The successful commit acknowledged the source proof. A later duplicate
+    // is ignored before reaching the replacement inventory service.
     assert!(runtime
         .apply_zone_monster_kill_awards(vec![fixed_award])
         .is_empty());
@@ -113,17 +119,17 @@ fn guild_kill_source_unknown_keeps_original_pending_reward_and_key_without_succe
     let mut runtime =
         shared_session_runtime_with_account_inventory_service(state.clone(), service.clone());
     start_new_runtime(&mut runtime, "guild-kill-unknown", "PendingKeeper");
+    let awards = super::cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, award());
+    let issued_award = awards[0].clone();
     let key =
         super::super::ZonePresenceKey::from_identity(&runtime.inner.active_identity().unwrap());
     let before = runtime.inner.world_snapshot().player_experience;
-    assert!(runtime
-        .apply_zone_monster_kill_awards(vec![award()])
-        .is_empty());
+    assert!(runtime.apply_zone_monster_kill_awards(awards).is_empty());
     let pending = state
         .lock()
         .unwrap()
         .take_pending_zone_monster_kill_awards(&key);
-    let mut expected = award();
+    let mut expected = issued_award;
     expected.source_receipt_key = Some(service.keys.lock().unwrap()[0].clone());
     assert_eq!(pending, vec![expected.clone()]);
     // Checkpoint/reconnect transport and a different delivery namespace cannot
