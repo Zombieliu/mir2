@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "kind": "INDEPENDENT_ROOT_OS_CLEANUP_RECHECK",
+  "packageId": "ordinary-bank-relogin-pilot-v1",
+  "checkedAtUtc": "2026-10-26T19:38:26.6894727Z",
+  "gatewayPid": 68696,
+  "gatewayPidAbsent": true,
+  "ports": [
+    17500,
+    17510
+  ],
+  "listeners": [],
+  "portsFree": true,
+  "cleanupComplete": true,
+  "scope": "Independent OS recheck after Root declared owned episode ended; no source, service or tests started."
+}

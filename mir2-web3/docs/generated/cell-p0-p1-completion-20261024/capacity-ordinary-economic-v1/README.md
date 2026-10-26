@@ -54,4 +54,18 @@
 
 [正常清理](pilot-v4/cleanup-v1.json)及[独立OS复核](pilot-v4/root-independent-cleanup-v1.json)确认PID69992消失、两端口释放。原输入、失败和提取更正见[第四轮清单](pilot-v4/copied-evidence-manifest.json)。后续以正常保存、原字节保留的普通角色池避免每次重建补给；复用角色必须通过普通重登和新鲜readiness，不能继承旧ready或冒充新0角色入场。本轮仍未完成25/50/100人数档、100人两小时及500目标。
 
-修复候选已实现于补给工具：prepare与assertReady共用最新实际worldSnapshot收据，不回退到较旧true；新快照即使因无效标量而被拒收，也会使较旧安全区证明失效。只有同owner/name/map/待命坐标、实际收件序号和单调时间有效的新鲜`inSafeZone===true`可声明普通怪物安全区保护；false/缺失/非布尔状态仍执行原8格hostile检查。现有公共Poisoned/ObjectPoisoned折入的u16中毒状态及owner Dazed已知为异常时拒绝。没有新增Rust/生产协议字段、命令、额外刷新、阈值或药品；新鲜Root完整资格与重登现场验收待执行。
+修复已实现于补给工具：prepare与assertReady共用最新实际worldSnapshot收据，不回退到较旧true；新快照即使因无效标量而被拒收，也会使较旧安全区证明失效。只有同owner/name/map/待命坐标、实际收件序号和单调时间有效的新鲜`inSafeZone===true`可声明普通怪物安全区保护；false/缺失/非布尔状态仍执行原8格hostile检查。现有公共Poisoned/ObjectPoisoned折入的u16中毒状态及owner Dazed已知为异常时拒绝。没有新增Rust/生产协议字段、命令、额外刷新、阈值或药品；新鲜Root完整资格与现场结果如下。
+
+## 普通角色库重登：库存与待命通过，短测战斗供给未通过
+
+`e73d04d25` 的新鲜[Root完整门禁](bank-relogin-v1/root-focused-receipt-v1.json)通过容量工具330/330、普通经济/导航相邻301/301，27输入前后相同、无失败或跳过；重复worker聚焦项不额外累加。30个本地静态输入及55个Rust输入再次冻结，复用既有V5，没有新Rust构建或新鲜Rust测试，见[执行冻结](bank-relogin-v1/frozen-source-v1.json)。
+
+这次独立私有目录原字节复制第三轮正常保存的完整账号Store、对应pool、原登录预算和4个密钥。旧recovery只有4个控制文件、无journal payload；原树完整保留，新活动recovery由正常Gateway建立绑定新路径的sentinel，没有修改旧sentinel或放宽校验。没有seeder、金币/物品注入、合并角色、手改pool或重置auth账本。[复制收据](bank-relogin-v1/bank-copy-receipt-v1.json)只有文件pin，私有文件内容不进仓库。
+
+[真实重登收据](bank-relogin-v1/pilot-receipt-v1.json)证明两人各以原name/characterIndex普通重登，before已持12药、HP24/24、Gold65/232；本轮purchased=0、soldVenison=0、funding明确为null。两人在不同安全区待命点收到同位置、同owner/name/map的新鲜`inSafeZone=true`，附近各3只hostile仍正常ready，随后一次屏障激活2人。它覆盖第四轮误拦修复及库存持久化复用；源第三轮1ready/1failed不继承，本轮也不虚称重新完成0金币筹款。
+
+[原报告](bank-relogin-v1/1793043370759-685834a8.report.json)保持`ok=false`：stage2实测30.005秒通过，战斗角色18次发起/18次正伤害、总伤害50；soak实测30.093秒时同角色40次计划均完成，但39次为移动、0攻击/0命中，判为`scenario-insufficient`。移动、聊天、AOI、fanout及连续性检查通过。见[匿名指标](bank-relogin-v1/public-failure-metrics-v1.json)；仅能据此说该窗口没有合格战斗攻击，尚不能归因为Deer耗尽、观察者不可用或服务器资源上限。30秒通过不能替代正式300秒档。
+
+本轮没有HP恢复日志，不能据此认定测量末药量不变或可持续7200秒。现压缩日志与终点存档不足以还原分钟HP/药耗；后续沿现有实际收件补充有界标量，不增加命令、不暂停或隐藏offered，并继续用原正式场景/目标见证约束验证。扩容准备需要独立普通角色库流程，现有probe最多10人，不能把单阶段25/50/100伪装成probe。
+
+[正常清理](bank-relogin-v1/cleanup-v1.json)及[独立OS复核](bank-relogin-v1/root-independent-cleanup-v1.json)确认PID68696消失、两端口释放。原判定、原样本、来源与复制摘要见[重登清单](bank-relogin-v1/copied-evidence-manifest.json)。当前仍为P1通过、P0未完成、P2未启动；尚无新25/50/100/500或两小时容量通过。
