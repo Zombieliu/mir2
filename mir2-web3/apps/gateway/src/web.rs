@@ -5282,6 +5282,162 @@ async fn try_handle_zone_movement_from_reader(
     Ok(true)
 }
 
+// Passive outbound block diagnostics: owned helper/sender region starts here.
+const ZONE_OUTBOUND_BLOCK_THRESHOLD: Duration = Duration::from_millis(50);
+
+fn zone_outbound_block_enabled_value(value: Option<&str>) -> bool {
+    value == Some("1")
+}
+
+fn zone_outbound_block_trace_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| {
+        zone_outbound_block_enabled_value(
+            std::env::var("MIR2_GATEWAY_ZONE_DELIVERY_TRACE")
+                .ok()
+                .as_deref(),
+        )
+    })
+}
+
+#[derive(Clone, Copy)]
+enum ZoneOutboundBlockKind {
+    OwnerHealth,
+    UserLocation,
+    ObjectPlayer,
+    ObjectRemove,
+    Other,
+}
+
+impl ZoneOutboundBlockKind {
+    fn for_packet(packet: &ServerPacket) -> Self {
+        match packet {
+            ServerPacket::UserLocation { .. } => Self::UserLocation,
+            ServerPacket::ObjectPlayer { .. } => Self::ObjectPlayer,
+            ServerPacket::ObjectRemove { .. } => Self::ObjectRemove,
+            _ => Self::Other,
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::OwnerHealth => "OwnerHealth",
+            Self::UserLocation => "UserLocation",
+            Self::ObjectPlayer => "ObjectPlayer",
+            Self::ObjectRemove => "ObjectRemove",
+            Self::Other => "Other",
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+enum ZoneOutboundBlockLane {
+    Owner,
+    Normal,
+}
+
+impl ZoneOutboundBlockLane {
+    fn label(self) -> &'static str {
+        match self {
+            Self::Owner => "owner",
+            Self::Normal => "normal",
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+enum ZoneOutboundBlockStage {
+    ReadGate,
+    HealthSchedule,
+    HealthRun,
+    HealthAwait,
+    Send,
+    CompletionToPop,
+}
+
+impl ZoneOutboundBlockStage {
+    fn label(self) -> &'static str {
+        match self {
+            Self::ReadGate => "read_gate",
+            Self::HealthSchedule => "health_schedule",
+            Self::HealthRun => "health_run",
+            Self::HealthAwait => "health_await",
+            Self::Send => "send",
+            Self::CompletionToPop => "completion_to_pop",
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+struct ZoneOutboundBlockContext {
+    registration: u64,
+    batch_id: u64,
+    batch_index: usize,
+    kind: ZoneOutboundBlockKind,
+    lane: ZoneOutboundBlockLane,
+    normal_depth: usize,
+    owner_depth: usize,
+}
+
+impl ZoneOutboundBlockContext {
+    fn line(
+        self,
+        stage: ZoneOutboundBlockStage,
+        elapsed: Duration,
+        recorded_unix_ms: u128,
+    ) -> Option<String> {
+        if elapsed < ZONE_OUTBOUND_BLOCK_THRESHOLD {
+            return None;
+        }
+        Some(format!(
+            "[gateway-zone-outbound-block] stage={} registration={} batchID={} batchIndex={} kind={} lane={} normalDepth={} ownerDepth={} elapsedUs={} recordedUnixMs={recorded_unix_ms}",
+            stage.label(), self.registration, self.batch_id, self.batch_index,
+            self.kind.label(), self.lane.label(), self.normal_depth, self.owner_depth,
+            elapsed.as_micros(),
+        ))
+    }
+
+    fn emit(self, stage: ZoneOutboundBlockStage, elapsed: Duration) {
+        if elapsed < ZONE_OUTBOUND_BLOCK_THRESHOLD {
+            return;
+        }
+        let recorded_unix_ms = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis();
+        if let Some(line) = self.line(stage, elapsed, recorded_unix_ms) {
+            eprintln!("{line}");
+        }
+    }
+}
+
+// Delaying these two completed spans until packet materialization lets the
+// context classify ObjectPlayer/ObjectRemove without inspecting private payloads.
+// Terminal packets that never materialize retain their pre-send classification.
+struct ZoneOutboundBlockPacketTrace<'a> {
+    context: ZoneOutboundBlockContext,
+    gate_wait: Option<Duration>,
+    completion_to_pop: Option<Duration>,
+    completed_at: &'a mut Option<Instant>,
+}
+
+impl Drop for ZoneOutboundBlockPacketTrace<'_> {
+    fn drop(&mut self) {
+        // Include diagnostic I/O in the next completion-to-pop interval.
+        *self.completed_at = Some(Instant::now());
+        if let Some(elapsed) = self.gate_wait {
+            self.context.emit(ZoneOutboundBlockStage::ReadGate, elapsed);
+        }
+        if let Some(elapsed) = self.completion_to_pop {
+            // This includes normal idle receive waits and diagnostic I/O, so
+            // it is not by itself evidence of backlog or network delay.
+            // A writer blocking the next read gate is measured separately.
+            self.context
+                .emit(ZoneOutboundBlockStage::CompletionToPop, elapsed);
+        }
+    }
+}
+
 const ZONE_OUTBOUND_BATCH_MAX: usize = 32;
 const ZONE_OUTBOUND_BATCH_BUDGET: Duration = Duration::from_millis(2);
 
@@ -5318,25 +5474,51 @@ fn spawn_zone_outbound_sender_with_clock(
 ) -> ZoneOutboundSenderTask {
     use crate::routing::ZoneDeliveryTraceStage as TraceStage;
 
+    let block_trace_enabled = zone_outbound_block_trace_enabled();
     let handle = tokio::spawn(async move {
+        let mut previous_completed_at: Option<Instant> = None;
+        let mut batch_id = 0_u64;
         loop {
-            let outbound = tokio::select! {
+            let (outbound, lane) = tokio::select! {
                 biased;
                 outbound = owner_location_receiver.recv() => match outbound {
-                    Some(outbound) => outbound,
+                    Some(outbound) => (outbound, ZoneOutboundBlockLane::Owner),
                     None => match receiver.recv().await {
-                        Some(outbound) => outbound,
+                        Some(outbound) => (outbound, ZoneOutboundBlockLane::Normal),
                         None => return,
                     },
                 },
                 outbound = receiver.recv() => match outbound {
-                    Some(outbound) => outbound,
+                    Some(outbound) => (outbound, ZoneOutboundBlockLane::Normal),
                     None => match owner_location_receiver.recv().await {
-                        Some(outbound) => outbound,
+                        Some(outbound) => (outbound, ZoneOutboundBlockLane::Owner),
                         None => return,
                     },
                 },
             };
+            let first_block_pop = block_trace_enabled.then(|| {
+                let popped_at = Instant::now();
+                batch_id = batch_id.wrapping_add(1);
+                let kind = if outbound.owner_health().is_some() {
+                    ZoneOutboundBlockKind::OwnerHealth
+                } else if outbound.is_owner_location() {
+                    ZoneOutboundBlockKind::UserLocation
+                } else {
+                    ZoneOutboundBlockKind::Other
+                };
+                (
+                    ZoneOutboundBlockContext {
+                        registration: outbound.registration_id(),
+                        batch_id,
+                        batch_index: 0,
+                        kind,
+                        lane,
+                        normal_depth: receiver.len(),
+                        owner_depth: owner_location_receiver.len(),
+                    },
+                    popped_at,
+                )
+            });
             let first_trace = outbound.delivery_trace();
             let first_dequeued_at = first_trace.as_ref().map(|trace| {
                 let at = Instant::now();
@@ -5348,8 +5530,10 @@ fn spawn_zone_outbound_sender_with_clock(
             // Judge the epoch only after bootstrap/activation has completed.
             let serial_gate_wait =
                 GatewaySlowStage::for_socket("serial_gate.zone_outbound_wait", &diagnostics);
+            let block_gate_started_at = block_trace_enabled.then(Instant::now);
             let _serial_execution = serial_execution_gate.read().await;
             let batch_started_at = now();
+            let first_block_gate_wait = block_gate_started_at.map(|at| at.elapsed());
             let first_gate_acquired_at = first_trace.as_ref().map(|trace| {
                 let at = Instant::now();
                 trace.emit(TraceStage::Gate, first_dequeued_at, Some(at));
@@ -5363,6 +5547,8 @@ fn spawn_zone_outbound_sender_with_clock(
                 first_trace,
                 first_dequeued_at,
                 first_gate_acquired_at,
+                first_block_pop
+                    .map(|(context, popped_at)| (context, popped_at, first_block_gate_wait)),
             ));
             for batch_index in 0..ZONE_OUTBOUND_BATCH_MAX {
                 if batch_index > 0
@@ -5370,7 +5556,7 @@ fn spawn_zone_outbound_sender_with_clock(
                 {
                     break;
                 }
-                let (outbound, trace, dequeued_at, gate_acquired_at) =
+                let (outbound, trace, dequeued_at, gate_acquired_at, block_pop) =
                     if let Some(first) = first_outbound.take() {
                         first
                     } else {
@@ -5378,9 +5564,36 @@ fn spawn_zone_outbound_sender_with_clock(
                         // Recheck owner priority at every pop; normal remains FIFO.
                         match owner_location_receiver
                             .try_recv()
-                            .or_else(|_| receiver.try_recv())
-                        {
-                            Ok(outbound) => {
+                            .map(|outbound| (outbound, ZoneOutboundBlockLane::Owner))
+                            .or_else(|_| {
+                                receiver
+                                    .try_recv()
+                                    .map(|outbound| (outbound, ZoneOutboundBlockLane::Normal))
+                            }) {
+                            Ok((outbound, lane)) => {
+                                let block_pop = block_trace_enabled.then(|| {
+                                    let popped_at = Instant::now();
+                                    let kind = if outbound.owner_health().is_some() {
+                                        ZoneOutboundBlockKind::OwnerHealth
+                                    } else if outbound.is_owner_location() {
+                                        ZoneOutboundBlockKind::UserLocation
+                                    } else {
+                                        ZoneOutboundBlockKind::Other
+                                    };
+                                    (
+                                        ZoneOutboundBlockContext {
+                                            registration: outbound.registration_id(),
+                                            batch_id,
+                                            batch_index,
+                                            kind,
+                                            lane,
+                                            normal_depth: receiver.len(),
+                                            owner_depth: owner_location_receiver.len(),
+                                        },
+                                        popped_at,
+                                        None,
+                                    )
+                                });
                                 let trace = outbound.delivery_trace();
                                 let at = trace.as_ref().map(|trace| {
                                     let at = Instant::now();
@@ -5388,11 +5601,21 @@ fn spawn_zone_outbound_sender_with_clock(
                                     trace.emit(TraceStage::Gate, Some(at), Some(at));
                                     at
                                 });
-                                (outbound, trace, at, at)
+                                (outbound, trace, at, at, block_pop)
                             }
                             Err(_) => break,
                         }
                     };
+                let mut block_trace = block_pop.map(|(context, popped_at, gate_wait)| {
+                    let completion_to_pop =
+                        previous_completed_at.map(|at| popped_at.saturating_duration_since(at));
+                    ZoneOutboundBlockPacketTrace {
+                        context,
+                        gate_wait,
+                        completion_to_pop,
+                        completed_at: &mut previous_completed_at,
+                    }
+                });
                 let trace_stage = |stage| {
                     if let Some(trace) = &trace {
                         trace.emit(stage, dequeued_at, gate_acquired_at);
@@ -5418,7 +5641,29 @@ fn spawn_zone_outbound_sender_with_clock(
                 // Health may have waited through a death/revival while this read
                 // gate was blocked. Validate its server-only stamp at final send.
                 let packet = if outbound.owner_health().is_some() {
-                    match tokio::task::spawn_blocking(move || outbound.claim_for_send()).await {
+                    let health_span = block_trace
+                        .as_ref()
+                        .map(|trace| (trace.context, Instant::now()));
+                    let health_result = tokio::task::spawn_blocking(move || {
+                        let health_run = health_span.map(|(context, submitted_at)| {
+                            let started_at = Instant::now();
+                            context.emit(
+                                ZoneOutboundBlockStage::HealthSchedule,
+                                started_at.saturating_duration_since(submitted_at),
+                            );
+                            (context, Instant::now())
+                        });
+                        let result = outbound.claim_for_send();
+                        if let Some((context, started_at)) = health_run {
+                            context.emit(ZoneOutboundBlockStage::HealthRun, started_at.elapsed());
+                        }
+                        result
+                    })
+                    .await;
+                    if let Some((context, submitted_at)) = health_span {
+                        context.emit(ZoneOutboundBlockStage::HealthAwait, submitted_at.elapsed());
+                    }
+                    match health_result {
                         Ok(Ok(Some(packet))) => packet,
                         Ok(Ok(None)) => {
                             trace_stage(TraceStage::HealthEmpty);
@@ -5437,12 +5682,24 @@ fn spawn_zone_outbound_sender_with_clock(
                 } else {
                     outbound.into_packet()
                 };
+                if let Some(trace) = block_trace.as_mut() {
+                    if !matches!(trace.context.kind, ZoneOutboundBlockKind::OwnerHealth) {
+                        trace.context.kind = ZoneOutboundBlockKind::for_packet(&packet);
+                    }
+                }
                 if active_registration_id.load(Ordering::Acquire) != registration_id {
                     trace_stage(TraceStage::Stale);
                     continue;
                 }
                 trace_stage(TraceStage::Send);
-                if send_server_packet(&sender, &packet).await.is_err() {
+                let send_span = block_trace
+                    .as_ref()
+                    .map(|trace| (trace.context, Instant::now()));
+                let send_result = send_server_packet(&sender, &packet).await;
+                if let Some((context, started_at)) = send_span {
+                    context.emit(ZoneOutboundBlockStage::Send, started_at.elapsed());
+                }
+                if send_result.is_err() {
                     trace_stage(TraceStage::SendError);
                     failure_signal.send_replace(registration_id);
                     return;

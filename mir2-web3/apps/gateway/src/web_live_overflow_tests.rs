@@ -1441,3 +1441,96 @@ async fn zone_delivery_trace_terminal_results_preserve_sender_fences() {
         );
     }
 }
+
+#[test]
+fn zone_outbound_block_flag_requires_exact_opt_in_without_env_mutation() {
+    assert!(!zone_outbound_block_enabled_value(None));
+    for value in ["", "0", "true", "01", " 1", "1 "] {
+        assert!(!zone_outbound_block_enabled_value(Some(value)));
+    }
+    assert!(zone_outbound_block_enabled_value(Some("1")));
+    assert!(matches!(
+        ZoneOutboundBlockKind::for_packet(&delivery_trace_packet()),
+        ZoneOutboundBlockKind::UserLocation
+    ));
+    assert!(matches!(
+        ZoneOutboundBlockKind::for_packet(&ServerPacket::ObjectRemove { object_id: 50041 }),
+        ZoneOutboundBlockKind::ObjectRemove
+    ));
+    assert!(matches!(
+        ZoneOutboundBlockKind::for_packet(&ServerPacket::KeepAlive { time: 123 }),
+        ZoneOutboundBlockKind::Other
+    ));
+}
+
+#[test]
+fn zone_outbound_block_threshold_and_schema_are_numeric_or_fixed_enums() {
+    for kind in [
+        ZoneOutboundBlockKind::OwnerHealth,
+        ZoneOutboundBlockKind::UserLocation,
+        ZoneOutboundBlockKind::ObjectPlayer,
+        ZoneOutboundBlockKind::ObjectRemove,
+        ZoneOutboundBlockKind::Other,
+    ] {
+        for lane in [ZoneOutboundBlockLane::Owner, ZoneOutboundBlockLane::Normal] {
+            for stage in [
+                ZoneOutboundBlockStage::ReadGate,
+                ZoneOutboundBlockStage::HealthSchedule,
+                ZoneOutboundBlockStage::HealthRun,
+                ZoneOutboundBlockStage::HealthAwait,
+                ZoneOutboundBlockStage::Send,
+                ZoneOutboundBlockStage::CompletionToPop,
+            ] {
+                let context = ZoneOutboundBlockContext {
+                    registration: 49,
+                    batch_id: 3,
+                    batch_index: 1,
+                    kind,
+                    lane,
+                    normal_depth: 7,
+                    owner_depth: 2,
+                };
+                assert!(context.line(stage, Duration::ZERO, 123).is_none());
+                assert!(context
+                    .line(stage, Duration::from_micros(49_999), 123)
+                    .is_none());
+                for elapsed_us in [50_000_u64, 50_001, 1_495_209] {
+                    let line = context
+                        .line(stage, Duration::from_micros(elapsed_us), 123)
+                        .unwrap();
+                    assert!(line.starts_with("[gateway-zone-outbound-block] "));
+                    let fields = line
+                        .split_whitespace()
+                        .skip(1)
+                        .map(|field| field.split_once('=').unwrap())
+                        .collect::<std::collections::BTreeMap<_, _>>();
+                    assert_eq!(fields.len(), 10);
+                    assert_eq!(fields["stage"], stage.label());
+                    assert_eq!(fields["kind"], kind.label());
+                    assert_eq!(fields["lane"], lane.label());
+                    for (key, expected) in [
+                        ("registration", 49_u128),
+                        ("batchID", 3),
+                        ("batchIndex", 1),
+                        ("normalDepth", 7),
+                        ("ownerDepth", 2),
+                        ("elapsedUs", u128::from(elapsed_us)),
+                        ("recordedUnixMs", 123),
+                    ] {
+                        assert_eq!(fields[key].parse::<u128>().unwrap(), expected);
+                    }
+                    for sensitive in [
+                        "account",
+                        "character",
+                        "credential",
+                        "payload",
+                        "name",
+                        "received",
+                    ] {
+                        assert!(!line.contains(sensitive));
+                    }
+                }
+            }
+        }
+    }
+}
