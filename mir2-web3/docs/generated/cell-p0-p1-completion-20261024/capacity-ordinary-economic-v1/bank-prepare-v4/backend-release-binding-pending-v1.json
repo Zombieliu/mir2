@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_ACTUAL_V6_RELEASE_AND_CURRENT_JS_BOUND",
+  "finalized": true,
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "executionSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "currentJsSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "release": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+    "bytes": 2257,
+    "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+  },
+  "immutableExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "newRootRustReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+    "bytes": 28585,
+    "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+  },
+  "newRootJsReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v4\\root-focused-receipt-v1.json",
+    "bytes": 15375,
+    "sha256": "41c5fcc6b5355f3347ab36a8a29791d739080f969db9d8c4caf1a7cdf4eababa"
+  },
+  "oldV5ExecutableIsNotV6": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

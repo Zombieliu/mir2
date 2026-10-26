@@ -20,6 +20,9 @@ class FundingTargetLoss extends Error {
 const objectId = value => typeof value === 'number' && Number.isSafeInteger(value) && value > 0 && value <= 0xffff_ffff ? value :
   typeof value === 'string' && /^[1-9]\d*$/.test(value) && Number.isSafeInteger(Number(value)) && Number(value) <= 0xffff_ffff ? Number(value) : null;
 const PATH_HAZARD = Symbol('ordinary-supply-path-hazard');
+// Mirrors createNavigator's default trail lifetime. Production uses its
+// Date.now clock; injected ordinary-navigation fixtures share options.now.
+const PLANNER_TRAIL_MS = 20_000, PLANNER_TRAIL_LIMIT = 2048, PLANNER_ID_LIMIT = 1024;
 const DIRECTIONS = Object.freeze({ Up:[0,-1], UpRight:[1,-1], Right:[1,0], DownRight:[1,1], Down:[0,1], DownLeft:[-1,1], Left:[-1,0], UpLeft:[-1,-1] });
 class SupplyPathHazard extends Error {
   constructor(hazard) { super('ordinary supplies: unsafe hostile approach'); this.hazard = hazard; }
@@ -88,6 +91,70 @@ export function createOrdinarySupplies(client, options = {}) {
   let fundingTargetRejectionCount = 0, pathHazardCount = 0;
   const pathHazards = [], movementOrigins = new WeakMap();
   let navigationPolicy = null;
+  const plannerNow = options.now ?? Date.now, plannerIdentities = new Map(), plannerTrail = new Map();
+  let plannerFallbackCount = 0, plannerFreshSequence = -1, plannerGlobalBlockedUntil = 0, plannerViewAllowed = null;
+  function prunePlannerMemory(at) {
+    for (const [key, row] of plannerTrail) if (row.expiresAt <= at) plannerTrail.delete(key);
+    const retainedIds = new Set([...plannerTrail.values()].map(row => row.objectId));
+    for (const [id, row] of plannerIdentities) if (row.trustedUntil <= at && row.blockedUntil <= at && !retainedIds.has(id)) plannerIdentities.delete(id);
+  }
+  function plannerIdentity(id, at) {
+    let row = plannerIdentities.get(id);
+    if (!row && plannerIdentities.size < PLANNER_ID_LIMIT) { row = { trustedUntil:0, blockedUntil:0 }; plannerIdentities.set(id,row); }
+    if (!row) {
+      // An untracked ID may already have an unknown shared trail. Even after
+      // slots free up, never exempt it (or another ID) until that trail ages out.
+      plannerGlobalBlockedUntil = Math.max(plannerGlobalBlockedUntil, at + PLANNER_TRAIL_MS); plannerFallbackCount++;
+    }
+    return row;
+  }
+  function revokePlannerIdentity(id, at, overflow = false) {
+    const row = plannerIdentity(id,at);
+    if (row) { row.trustedUntil = 0; row.blockedUntil = Math.max(row.blockedUntil, at + PLANNER_TRAIL_MS); }
+    for (const [key, point] of plannerTrail) if (point.objectId === id) plannerTrail.delete(key);
+    if (overflow) plannerFallbackCount++;
+  }
+  function plannerGroups(snapshot) {
+    const groups = new Map();
+    for (const entity of snapshot.entities ?? []) {
+      const id = Number(entity?.objectId);
+      if (!Number.isSafeInteger(id) || id <= 0 || id > 0xffff_ffff) continue;
+      const group = groups.get(id) ?? []; group.push(entity); groups.set(id,group);
+    }
+    return groups;
+  }
+  function trustedPlannerEntity(group) {
+    const entity = group.length === 1 ? group[0] : null;
+    return entity && objectId(entity.objectId) !== null && entity.class == null && entity.dead === false && Number.isFinite(entity.hp) && entity.hp > 0 &&
+      isOrdinaryAi0Threat(options.ordinaryProtection, client.snapshot.mapFileName, entity) ? entity : null;
+  }
+  function observePlannerTrust(snapshot, receipt) {
+    if (!ordinaryProtectionSummary(options.ordinaryProtection) || receipt.sequence <= plannerFreshSequence) return;
+    const at = plannerNow(); prunePlannerMemory(at); plannerFreshSequence = receipt.sequence; plannerViewAllowed = null;
+    for (const [id, group] of plannerGroups(snapshot)) {
+      if (!group.some(entity => String(entity.kind).toLowerCase() === 'monster') && !plannerIdentities.has(id)) continue;
+      const entity = trustedPlannerEntity(group);
+      if (!entity) { revokePlannerIdentity(id, at); continue; }
+      const row = plannerIdentity(id,at); if (row) row.trustedUntil = at + PLANNER_TRAIL_MS;
+    }
+  }
+  function syncPlannerMemory() {
+    guard(); const at = plannerNow(); prunePlannerMemory(at);
+    for (const [id, group] of plannerGroups(client.snapshot)) {
+      if (!group.some(entity => String(entity.kind).toLowerCase() === 'monster') && !plannerIdentities.has(id)) continue;
+      const entity = trustedPlannerEntity(group);
+      if (!entity) { revokePlannerIdentity(id,at); continue; }
+      const row = plannerIdentity(id,at); if (!row) continue; // ID cap: leave shared coarse memory authoritative.
+      const position = point(entity,'remembered planning hostile'), key = id + ':' + position.x + ',' + position.y;
+      if (!plannerTrail.has(key) && plannerTrail.size >= PLANNER_TRAIL_LIMIT) { revokePlannerIdentity(id,at,true); continue; }
+      // Shared navigation refreshes each current position at every planner
+      // read, not just at a raw receipt. Mirror that trail clock, but renew
+      // TRUST only in observePlannerTrust on a genuinely new raw snapshot.
+      plannerTrail.set(key, { objectId:id, entity:{ kind:entity.kind, name:entity.name, ai:entity.ai, disposition:entity.disposition, ownerName:entity.ownerName },
+        ...position, expiresAt:at + PLANNER_TRAIL_MS });
+    }
+    return { at, allowed:new Set([...plannerIdentities].filter(([,row]) => at >= plannerGlobalBlockedUntil && row.trustedUntil > at && row.blockedUntil <= at).map(([id]) => id)) };
+  }
   const counts = {};
   let state = enabled ? 'idle' : 'disabled', active = false, used = false, draining = false;
   let started = null, deadline = null, identity = null, identityName = null, before = null, after = null, failure = null;
@@ -135,6 +202,7 @@ export function createOrdinarySupplies(client, options = {}) {
     try {
       const value = scalar(message.payload);
       if (value.ownerId !== identity || value.ownerName !== identityName || value.map !== '0') observationFault = 'ordinary supplies: received owner/map changed';
+      if (!observationFault) observePlannerTrust(message.payload, receipt);
       rows.push({ sequence: receipt.sequence, monotonicMs: receipt.monotonicMs, ...value });
       if (rows.length > 64) rows.shift();
     } catch { /* Incomplete/invalid observations cannot satisfy a proof. guard still checks live state. */ }
@@ -183,11 +251,14 @@ export function createOrdinarySupplies(client, options = {}) {
     return null;
   }
   function protectedPlannerObstacles(policy) {
-    guard();
+    plannerViewAllowed = syncPlannerMemory().allowed;
     const from = point(owner(client.snapshot), 'planning owner'), obstacles = new Map();
-    for (const hostile of visibleHostiles()) {
-      if (!isOrdinaryAi0Threat(options.ordinaryProtection, client.snapshot.mapFileName, hostile)) continue;
-      const position = point(hostile, 'visible hostile'), beforeDistance = distance(from, position);
+    // Rebuild every retained normal trail even while its ID is quarantined
+    // or its raw qualification has expired. Shared coarse memory then adds
+    // conservative coverage. This also closes the forbidden-before-allowed
+    // clock boundary: granting an ID can never precede its outside halo.
+    for (const remembered of plannerTrail.values()) {
+      const hostile = remembered.entity, position = { x:remembered.x, y:remembered.y }, beforeDistance = distance(from, position);
       const named = policy.byName.get(String(hostile.name ?? '').replace(/[^a-z0-9]/gi,'').toLowerCase()) ?? 0;
       const clearance = Math.max(policy.radius, named);
       for (let y = Math.max(0, position.y-clearance); y <= Math.min(65535, position.y+clearance); y++) {
@@ -345,9 +416,12 @@ export function createOrdinarySupplies(client, options = {}) {
       // each planner read, with the then-current owner/AOI, never a stale start.
       const policy = navigationPolicy;
       Object.defineProperties(safeOptions, {
-        allowedHostileObjectIds: { enumerable:true, get:() => visibleHostiles()
-          .filter(entity => isOrdinaryAi0Threat(options.ordinaryProtection, client.snapshot.mapFileName, entity))
-          .map(entity => objectId(entity.objectId)).filter(id => id !== null) },
+        allowedHostileObjectIds: { enumerable:true, get:() => {
+          const current = syncPlannerMemory().allowed;
+          // The shared planner reads forbiddenPoints before allowed IDs. A
+          // later clock read may revoke this view, but cannot enlarge it.
+          return [...current].filter(id => plannerViewAllowed === null || plannerViewAllowed.has(id));
+        } },
         forbiddenPoints: { enumerable:true, get:() => [...(navOptions?.forbiddenPoints ?? []), ...protectedPlannerObstacles(policy)] },
       });
     }
@@ -414,6 +488,7 @@ export function createOrdinarySupplies(client, options = {}) {
       stagingSafetyScope: 'Fresh authoritative inSafeZone protects against normal monster targeting and impacts only. Existing poison and released effects may still damage; absent status fields do not prove their absence.',
       measurementCredit: false, sustainableDurationProven: false,
       protectionSummary: ordinaryProtectionSummary(options.ordinaryProtection),
+      plannerThreatMemory: { lifetimeMs:PLANNER_TRAIL_MS, positionLimit:PLANNER_TRAIL_LIMIT, identityLimit:PLANNER_ID_LIMIT, positions:plannerTrail.size, identities:plannerIdentities.size, coarseFallbackCount:plannerFallbackCount, exemptionGloballyQuarantined:plannerNow() < plannerGlobalBlockedUntil },
       fundingTargetRejections: fundingTargetRejections.map(row => ({ ...row })), fundingTargetRejectionCount,
       fundingTargetRejectionsTruncated: fundingTargetRejectionCount > fundingTargetRejections.length,
       pathHazards: pathHazards.map(row => ({ ...row, from:{...row.from}, physicalCells:row.physicalCells.map(cell=>({...cell})), blocker:row.blocker?{...row.blocker}:null })),

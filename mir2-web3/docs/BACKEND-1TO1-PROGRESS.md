@@ -1,5 +1,9 @@
 # Backend 1:1 Progress
 
+## 普通用药 Tick 唤醒（2026-10-27，北京时间）
+
+`ee06c05f3` 将正常 UID/槽位/key 用药接入原短 Tick 唤醒，实际32项 Rust 回归、828项工具检查及新 Release 构建通过。第四次普通准备中，第5人190.544ms内取得扣药1与精确HP12→18，随后正常购药12；回村寻路失败仍使本轮仅prepared4/100、无CCU测量。P0未通过、P2未启动，详见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/README.md)。
+
 ## Cell 共享快照发布回归（2026-10-27，北京时间）
 
 当前P1工程合同已通过、P0容量未通过、P2未启动。`7b43caa41`通过新鲜116项Rust测试/55输入及Release构建；V13全50准备完成，计量55.861秒因死亡保护停止，最终HP0/18、gold0、HP药耗尽。该短窗口服务端AOI生成至发送最大204.716ms，不能代替完整容量验收。原场景/门槛保留；普通准备与补给待证明，无新100资格或容量通过，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。

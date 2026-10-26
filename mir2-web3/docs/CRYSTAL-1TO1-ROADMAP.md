@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 普通用药 Tick 唤醒（2026-10-27，北京时间）
+
+普通用药短 Tick 唤醒已通过32项 Rust 回归、828项工具检查及新 Release 构建；真实准备取得190.544ms内扣药与精确HP恢复。第四次准备仍因回村寻路失败停在prepared4/100，无新容量通过；500CCU目标保留，P0未通过、P2未启动，详见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/README.md)。
+
 ## Cell 共享快照发布回归（2026-10-27，北京时间）
 
 当前P1工程合同已通过、P0容量未通过、P2未启动。`7b43caa41`通过新鲜116项Rust测试及Release构建；V13全50准备完成，计量55.861秒因死亡保护停止，最终HP0/18、gold0、HP药耗尽。普通准备与补给待证明；原场景/门槛保留，无新100资格或容量通过，不提高整体Candidate/Accepted，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createNavigator } from './quest-agent/protocol-play.mjs';
+import { loadProtocolCollisionMap, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
 import { createOrdinarySupplies, ORDINARY_SUPPLY_COMMANDS } from './capacity-ordinary-supplies.mjs';
 import { loadOrdinaryProtection } from './capacity-ordinary-protection.mjs';
 
@@ -834,4 +835,176 @@ test('protected planner obstacles are re-read using the live owner transform wit
       checked=true;
     }});
   await assert.rejects(f.supply.prepare(),/hostile near staging/);assert.equal(checked,true);
+});
+
+test('trusted Scarecrow AOI loss cannot restore a coarse halo over the protected289617 return target',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  let f,removed=false;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:304,y:613},stagingPoint:{x:289,y:617},
+    hostiles:[hostile(206641,287,616,{name:'Scarecrow'}),hostile(206632,286,623,{name:'Scarecrow'})],
+    ordinaryProtection:protection,navigate:actualNavigatorFor(()=>f),
+    onMove:({client,actor})=>{if(!removed){removed=true;client.snapshot.entities=client.snapshot.entities.filter(e=>![206641,206632].includes(e.objectId));}
+      client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
+  f.client.snapshot.inSafeZone=false;
+  const result=await f.supply.prepare();
+  assert.equal(result.status,'ready');assert.equal(removed,true);assert.equal(result.after.x,289);assert.equal(result.after.y,617);
+  assert.equal(result.pathHazardCount,0);assert.ok(result.commands<2048);assert.ok(result.elapsedMs<600000);
+});
+
+test('trusted AOI memory rebuilds every recent outside-zone trail and occupied cell, not just the final point',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let f,checked=false;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:290,y:600},stagingPoint:{x:290,y:600},
+    hostiles:[hostile(71,293,600,{name:'Scarecrow'})],ordinaryProtection:protection,
+    navigate:async({client,navOptions,snapshot})=>{
+      assert.ok(navOptions.allowedHostileObjectIds.includes(71));
+      assert.ok(navOptions.forbiddenPoints.some(p=>p.x===293&&p.y===600));
+      const crow=client.snapshot.entities.find(e=>e.objectId===71);crow.x=295;snapshot();
+      void navOptions.allowedHostileObjectIds;
+      client.snapshot.entities=client.snapshot.entities.filter(e=>e.objectId!==71);snapshot();
+      const trail=navOptions.forbiddenPoints;
+      assert.ok(navOptions.allowedHostileObjectIds.includes(71));
+      assert.ok(trail.some(p=>p.x===293&&p.y===600));assert.ok(trail.some(p=>p.x===295&&p.y===600));
+      assert.ok(trail.some(p=>p.x===291&&p.y===600),'old outside-zone closer cells remain blocked');
+      checked=true;
+    }});
+  assert.equal((await f.supply.prepare()).status,'ready');assert.equal(checked,true);
+});
+
+for(const [label,change] of [
+  ['unknown name',e=>{e.name='UnknownMonster';}],['unknown disposition',e=>{delete e.disposition;}],
+  ['owned',e=>{e.ownerName='someone';}],['empty owner',e=>{e.ownerName='';}],['non AI0',e=>{e.ai=1;}],
+  ['malformed AI',e=>{e.ai='0';}],['foreign kind',e=>{e.kind='npc';}],['foreign class',e=>{e.class='Warrior';}],['neutral',e=>{e.disposition='neutral';}],
+  ['dead',e=>{e.dead=true;e.hp=0;}],['unknown life',e=>{delete e.dead;}],
+  ['duplicate ID',(e,client)=>{client.snapshot.entities.push({...e});}],
+])test('trusted old ID is revoked immediately on '+label+' and cannot hide its old shared coarse memory',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let checked=false;
+  const f=fixture({items:[item(658,12,500)],ownerPosition:{x:290,y:607},stagingPoint:{x:290,y:607},
+    hostiles:[hostile(71,293,614,{name:'Scarecrow'})],ordinaryProtection:protection,
+    navigate:async({client,navOptions,snapshot})=>{
+      assert.ok(navOptions.allowedHostileObjectIds.includes(71));
+      const entity=client.snapshot.entities.find(e=>e.objectId===71);change(entity,client);
+      assert.equal(navOptions.allowedHostileObjectIds.includes(71),false,'live all-entity scan revokes without waiting for a raw snapshot');
+      client.snapshot.entities=client.snapshot.entities.filter(e=>e.objectId!==71);snapshot();
+      assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);checked=true;
+    }});
+  assert.equal((await f.supply.prepare()).status,'ready');assert.equal(checked,true);
+});
+
+test('unknown hostile memory remains a complete shared coarse barrier after the observed entity leaves AOI',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let f,warmed=false;
+  const go=actualNavigatorFor(()=>f);
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:304,y:613},stagingPoint:{x:289,y:617},
+    hostiles:[hostile(71,287,616,{name:'UnknownMonster',ai:undefined})],ordinaryProtection:protection,
+    navigate:async args=>{if(!warmed){await go({...args,target:{x:304,y:612},range:0});warmed=true;
+      args.client.snapshot.entities=args.client.snapshot.entities.filter(e=>e.objectId!==71);args.snapshot();}
+      assert.equal(args.navOptions.allowedHostileObjectIds.includes(71),false);return go(args);}});
+  await assert.rejects(f.supply.prepare(),/No walk path/);assert.equal(warmed,true);
+  assert.equal(f.supply.status().status,'failed');assert.equal(f.supply.status().actualStagingReached,false);
+});
+
+test('fresh raw receipts renew trust beyond20s but repeated getters alone never renew that qualification',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let f,checked=false;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:290,y:607},stagingPoint:{x:290,y:607},
+    hostiles:[hostile(71,293,614,{name:'Scarecrow'})],ordinaryProtection:protection,
+    navigate:async({navOptions,snapshot})=>{
+      assert.ok(navOptions.allowedHostileObjectIds.includes(71));
+      for(let i=0;i<21;i++){f.advance(1000);void navOptions.forbiddenPoints;void navOptions.allowedHostileObjectIds;}
+      assert.equal(navOptions.allowedHostileObjectIds.includes(71),false,'getter reads cannot authenticate an old snapshot forever');
+      snapshot();assert.ok(navOptions.allowedHostileObjectIds.includes(71),'new raw receipt renews qualification');
+      f.client.snapshot.entities=f.client.snapshot.entities.filter(e=>e.objectId!==71);snapshot();
+      f.advance(20001);assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);checked=true;
+    }});
+  assert.equal((await f.supply.prepare()).status,'ready');assert.equal(checked,true);
+});
+
+test('a quarantined ID cannot regain an exemption before old unknown shared trails have expired',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let f,checked=false;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:290,y:607},stagingPoint:{x:290,y:607},
+    hostiles:[hostile(71,293,614,{name:'Scarecrow'})],ordinaryProtection:protection,
+    navigate:async({client,navOptions,snapshot})=>{
+      assert.ok(navOptions.allowedHostileObjectIds.includes(71));const e=client.snapshot.entities.find(e=>e.objectId===71);
+      e.ownerName='someone';snapshot();assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);
+      e.ownerName=null;snapshot();assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);
+      f.advance(19998);assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);
+      f.advance(2);snapshot();assert.ok(navOptions.allowedHostileObjectIds.includes(71));client.snapshot.entities=client.snapshot.entities.filter(e=>e.objectId!==71);snapshot();checked=true;
+    }});
+  assert.equal((await f.supply.prepare()).status,'ready');assert.equal(checked,true);
+});
+
+test('normal moving navigation longer than20s keeps genuine receipt-qualified protection without resetting budgets',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let f;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:350,y:593},stagingPoint:{x:289,y:617},
+    hostiles:[hostile(71,287,616,{name:'Scarecrow'})],ordinaryProtection:protection,navigate:actualNavigatorFor(()=>f),
+    onMove:({client,actor})=>{client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
+  const result=await f.supply.prepare();assert.equal(result.status,'ready');assert.ok(result.elapsedMs>20000);
+  assert.ok(result.elapsedMs<600000);assert.ok(result.commands<2048);assert.equal(result.pathHazardCount,0);
+});
+
+test('trusted trail overflow revokes the corresponding allowed ID and falls back to shared coarse protection',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let f,checked=false;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:290,y:607},stagingPoint:{x:290,y:607},
+    hostiles:[hostile(71,1000,600,{name:'Scarecrow'})],ordinaryProtection:protection,
+    navigate:async({client,navOptions,snapshot})=>{
+      const entity=client.snapshot.entities.find(e=>e.objectId===71);
+      for(let i=0;i<2049;i++){entity.x=1000+i;snapshot();void navOptions.allowedHostileObjectIds;}
+      assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);
+      const memory=f.supply.status().plannerThreatMemory;assert.ok(memory.coarseFallbackCount>0);assert.ok(memory.positions<=memory.positionLimit);checked=true;
+    }});
+  assert.equal((await f.supply.prepare()).status,'ready');assert.equal(checked,true);
+});
+
+test('real canonical loader map and navigator return304613 to289617 after the two observed Crow IDs leave AOI',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0'),map=await loadProtocolCollisionMap('0');
+  assert.equal(protocolMapCellIsWalkable(map,{x:304,y:613}),true);assert.equal(protocolMapCellIsWalkable(map,{x:289,y:617}),true);
+  let f,navigator,removed=false;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:304,y:613},stagingPoint:{x:289,y:617},
+    hostiles:[hostile(206641,287,616,{name:'Scarecrow'}),hostile(206632,286,623,{name:'Scarecrow'}),hostile(206644,293,614,{name:'Scarecrow'}),
+      {objectId:4,kind:'npc',name:'CraftsLady_Jude',x:294,y:619,dead:false},{objectId:55,kind:'npc',name:'Blacksmith_Smith',x:296,y:613,dead:false},
+      {objectId:42,kind:'npc',name:'Merchant_Scott',x:291,y:610,dead:false}],ordinaryProtection:protection,
+    navigate:async({facade,target,range,stop,navOptions})=>{navigator??=createNavigator(facade,{loadCollisionMap:async()=>map,now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000});return navigator(target,range,stop,navOptions);},
+    onMove:({client,actor})=>{if(!removed){removed=true;client.snapshot.entities=client.snapshot.entities.filter(e=>![206641,206632].includes(e.objectId));}
+      client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
+  const result=await f.supply.prepare();assert.equal(result.status,'ready');assert.equal(removed,true);
+  assert.deepEqual({x:result.after.x,y:result.after.y},{x:289,y:617});assert.equal(result.pathHazardCount,0);
+  assert.equal(result.after.inSafeZone,true);assert.ok(result.commands<2048);assert.ok(result.elapsedMs<600000);
+});
+
+test('forbidden-before-allowed reads crossing quarantine expiry retain the complete outside-zone halo',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let f,checked=false;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:290,y:600},stagingPoint:{x:290,y:600},
+    hostiles:[hostile(71,293,600,{name:'Scarecrow'})],ordinaryProtection:protection,
+    navigate:async({client,navOptions,snapshot})=>{
+      assert.ok(navOptions.allowedHostileObjectIds.includes(71));const e=client.snapshot.entities.find(e=>e.objectId===71);
+      e.ownerName='someone';snapshot();const blockedAt=f.now();assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);
+      e.ownerName=null;snapshot();assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);
+      f.advance(blockedAt+19999-f.now());const forbidden=navOptions.forbiddenPoints;
+      assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);
+      f.advance(1);assert.equal(navOptions.allowedHostileObjectIds.includes(71),false,'a later getter cannot enlarge the earlier planning view');
+      void navOptions.forbiddenPoints;assert.ok(navOptions.allowedHostileObjectIds.includes(71),'a new coherent planner round may observe the expiry');
+      assert.ok(forbidden.some(p=>p.x===291&&p.y===600),'earlier forbidden view already contains outside halo');
+      assert.ok(forbidden.some(p=>p.x===293&&p.y===600),'remembered occupied cell is never omitted');
+      client.snapshot.entities=client.snapshot.entities.filter(e=>e.objectId!==71);snapshot();checked=true;
+    }});
+  assert.equal((await f.supply.prepare()).status,'ready');assert.equal(checked,true);
+});
+
+test('ID-cap overflow remains globally quarantined when slots free before an unknown shared trail expires',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let f,checked=false;
+  const ids=Array.from({length:1024},(_,i)=>hostile(5000+i,1000+i,600,{name:'Scarecrow'}));
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:290,y:607},stagingPoint:{x:290,y:607},hostiles:ids,ordinaryProtection:protection,
+    navigate:async({client,navOptions,snapshot})=>{
+      void navOptions.allowedHostileObjectIds;const base=f.now();
+      client.snapshot.entities=client.snapshot.entities.filter(e=>e.kind!=='monster');
+      client.snapshot.entities.push(hostile(9999,287,616,{name:'UnknownMonster',ai:undefined}));
+      f.advance(1000);snapshot();void navOptions.allowedHostileObjectIds;const overflowAt=f.now();
+      assert.equal(f.supply.status().plannerThreatMemory.exemptionGloballyQuarantined,true);
+      f.advance(base+20001-f.now());const target=client.snapshot.entities.find(e=>e.objectId===9999);target.name='Scarecrow';target.ai=0;snapshot();
+      assert.equal(navOptions.allowedHostileObjectIds.includes(9999),false,'free identity slots cannot erase the remaining unknown-trail horizon');
+      f.advance(overflowAt+19999-f.now());void navOptions.forbiddenPoints;
+      f.advance(1);assert.equal(navOptions.allowedHostileObjectIds.includes(9999),false,'expiry crossing cannot enlarge an earlier forbidden view');
+      void navOptions.forbiddenPoints;assert.ok(navOptions.allowedHostileObjectIds.includes(9999));
+      assert.ok(f.supply.status().plannerThreatMemory.identities<=1024);
+      client.snapshot.entities=client.snapshot.entities.filter(e=>e.objectId!==9999);snapshot();checked=true;
+    }});
+  assert.equal((await f.supply.prepare()).status,'ready');assert.equal(checked,true);
 });

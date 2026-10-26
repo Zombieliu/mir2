@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 4,
+  "packageId": "ordinary-capacity-bank-prepare-v4",
+  "state": "PENDING_ROOT_CURRENT_SOURCE_FREEZE_NOT_RUN",
+  "purpose": "ordinary-capacity-bank-preparation-only",
+  "actors": 100,
+  "maxPrepared": 100,
+  "preparationOnly": true,
+  "workerCount": 1,
+  "options": {
+    "realm": "isolated",
+    "endpoint": "ws://127.0.0.1:17510/ws",
+    "maxPrepared": 100,
+    "finiteWallSeconds": 18000,
+    "targetHp": 12,
+    "attackResults": "v2"
+  },
+  "scenarioSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\scenario-preparation-v2.json",
+    "bytes": 22813,
+    "sha256": "116fd663f0b49403975d9c48368f59b39daa2c74a66c4567e8ba2edccc2021fc"
+  },
+  "routeSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+    "bytes": 2661153,
+    "sha256": "ba415e68f7c3724d367542320809d4b43b122845a3e1b7a9e3b998b2cedbc975"
+  },
+  "resourceProfile": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\resource-profile-v1.json",
+    "bytes": 1630,
+    "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+  },
+  "fixedGateway": {
+    "tcp": "127.0.0.1:17500",
+    "web": "127.0.0.1:17510",
+    "tokioWorkers": 4,
+    "maxActiveSessions": 100,
+    "maxWsConnections": 128,
+    "maxReconnectLeases": 100,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "contentProfile": "platinum_176",
+    "zoneDeliveryTrace": true
+  },
+  "monitorWallSeconds": 18300,
+  "authOrigin": {
+    "mode": "copiedExistingLedgerNoOverride",
+    "existingLedgerOverrideAllowed": false,
+    "loginNotBeforeAllowed": false,
+    "loginBudgetWindowMs": 901000,
+    "ordinaryAdmissionLimit": 25,
+    "verificationLimit": 5,
+    "sourceAddressRotation": false,
+    "scope": "Game snapshot is exact V2 Store/pool/secrets/current-four-controls replay; the sole traffic artifact is the latest actual V3 capacity-auth-budget.json copied byte-exactly for the same100 account identities and endpoint. Preserve original25+5/901000ms accounting; no loginNotBefore override, reset or V2 traffic rollback.",
+    "ledgerSource": "Latest actual V3 traffic ledger, byte-exact copy, same100 identities and endpoint; never V2 traffic rollback"
+  },
+  "sourceQualification": {
+    "state": "PENDING_ACTUAL_NEW_COMMIT_V6_RELEASE_AND_ROOT_JS_RUST_QUALIFICATION",
+    "backendSourceCommit": null,
+    "driverSourceCommit": null,
+    "newRelease": null,
+    "newRootRustReceipt": null,
+    "newRootJsReceipt": null,
+    "oldV5ExecutableIsNotV6": true
+  },
+  "progress": {
+    "counts": [
+      25,
+      50,
+      100
+    ],
+    "coldCheckpoint": false,
+    "meaning": "Progress only after ordinary preparation and normal logout. Only final Gateway/monitor/driver normalcleanup allows a cold bank; formal ordinary100relogin remains later work."
+  },
+  "formalReference": {
+    "scenario": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    "stages": "2,10,25,50,100",
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "combatActors": 10,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "executed": false
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false,
+  "sustainableTwoHourStockProven": false,
+  "scope": "Isolated replay of the exact V2 game snapshot before V3 consumed the fifth actor's last HP potion. Entire V2 Store/pool, four secrets and then-active four recovery controls are raw copied; the sole exception is the exact latest V3 harness auth ledger, for the same100 account identities and endpoint. V2 health failure and V3 recovery-timeout failure remain false. Current V3 game Store is preserved in place, not continued or rewritten. All100 begin with zero newly prepared evidence; first4 require fresh inventory reuse proof.",
+  "staticProofSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\static-staging-proof-v2.json",
+    "bytes": 25000,
+    "sha256": "9fe1834dd3d7adac7cf1246e95952221b19b88c37de21ae8e5f7fbbf06bc3232"
+  },
+  "stagingSelection": {
+    "candidatePolicy": "fresh-unoccupied-distinct-saved-v1",
+    "staticCandidates": 335,
+    "preferredPoints": 100,
+    "actualPointsFrom": "Original production report.preparedIndex after final normal save",
+    "formalMustReuseActualSavedPoints": true
+  },
+  "reusedPartialOrdinaryBank": true,
+  "freshZeroCharacterPool": false,
+  "bankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\source-bank-plan-pending-v1.json",
+    "bytes": 12528,
+    "sha256": "f752a5d0ff09bf3068d4bae29379cb276e1228c08ac2860e1c8934b58c6478fb"
+  },
+  "sourcePartialBank": {
+    "controlledAccounts": 100,
+    "readyCharacters": 5,
+    "registeredAccounts": 95,
+    "preparedActors": 4,
+    "failedFifthNotPrepared": true,
+    "sourceEligibilityInherited": false,
+    "first4MustBeOrdinarilyReloggedAndReuseActualStock": true,
+    "first4ReuseScope": "Fresh before/after HP stock >=12, no hunting/harvest/pickup/sale/purchase; verify the actual raw ordinaryPreparation result.commandCounts, not absent summary fields."
+  },
+  "ordinaryRecovery": {
+    "performedBy": "Current production runPreparationBank before equip/preparation",
+    "wrapperSendsRecoveryCommands": false,
+    "configurationOverrides": false,
+    "qualificationPending": true,
+    "scope": "Current production held-item recovery plus actual new V6 UseItem bootstrap wake, qualified by fresh Root Rust and JS receipts. No wrapper recovery commands; old V3 last-dose failure remains false and its Store is retained unchanged."
+  },
+  "isolatedV2SnapshotReplay": true,
+  "currentV3InventoryContinuation": false
+}

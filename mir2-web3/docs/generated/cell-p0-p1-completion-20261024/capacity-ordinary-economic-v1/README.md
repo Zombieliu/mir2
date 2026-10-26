@@ -121,3 +121,18 @@
 源码定位出两个待集成验收的候选修复点：普通药先进入个人Tick恢复队列，StartGame默认15秒bootstrap grace期间，原UseItem未像Walk/Turn/Attack/Magic一样缩短Tick延后；普通药实际发self ObjectHealth百分比，而JS原先等待精确HealthChanged才触发fresh raw。候选分别为正常UseItem短Tick唤醒，以及仅把self ObjectHealth当作一次受预算约束的raw刷新cue；百分比不能作为精确HP证明。准备仍须在原2秒内取得ACK、完整库存恰减1、精确HP增加且至少70%，不追加剂量，不改变原native测量60%阈值、2秒证明窗或准备600秒/2048条预算。候选源码/聚焦检查不追认本次失败为通过。
 
 [正常清理](bank-prepare-v3/cleanup-v1.json)及[独立OS复核](bank-prepare-v3/root-independent-cleanup-v1.json)确认PID71364消失、17500/17510端口释放，原冻结来源复核通过；正常冷关闭不代表完整cold bank或100人持久库存重登已验收。29份公开工具、配置、计划、收据、原报告/样本、清理及旧518门禁证据共560,032字节，逐文件原字节复核见[复制清单](bank-prepare-v3/copied-evidence-manifest.json)和[归档器](bank-prepare-v3/archive-evidence-v3.mjs)。未复制Store、pool、ledger、秘密全文、原始Gateway日志或完整旁观录制。P0未完成、P2未启动，没有新25/50/100/500或两小时通过。
+
+
+## 第四次百人角色库准备：普通恢复通过，回村路径失败
+
+新ee06提交的[当前JS门禁](bank-prepare-v4/node-v4/root-focused-receipt-v1.json)实际527+301=828项通过；[Rust v2六检查](bank-prepare-v4/rust-v2/root-focused-receipt-v1.json)实际32项加format通过，完整55个Rust/Cargo输入绑定到[V6新构建](bank-prepare-v4/release-v6/release-v6.json)，immutable SHA以ad13d15a开头。旧[Rust v1](bank-prepare-v4/rust-v1-failed/root-focused-receipt-v1.json)三个gateway-bin过滤各0项、allSelectedTestsPassed=false的原收据和日志保留，不追认为通过。
+
+[第四轮原报告](bank-prepare-v4/1793052124616-e760d348.preparation-report.json)确认第5人原持有药在190.5442ms内取得ACK、完整raw库存减1和精确HP12/18→18/18；随后正常售2份Venison得495金币、花480购12药。回村304,613→289,617仍报No walk path，严格prepared保持4/100，未激活、无测量CCU；原失败及空after/readiness保留。末段[公开几何标量](bank-prepare-v4/public-return-path-geometry-v1.json)不能证明绕行walkable或唯一根因，不为通过放宽区外8格、70%生命及原动作预算。
+
+此次是V2游戏快照加最新V3原traffic账本的明确隔离重放，V3失败Store原地保留，不改存档或重置账本。前4人fresh库存复用重新证明；整体[正常清理](bank-prepare-v4/cleanup-v1.json)和[Root独立OS核对](bank-prepare-v4/root-independent-cleanup-v1.json)通过，PID66720消失、两端口释放。76份公开原件1,641,966字节，见[目录说明](bank-prepare-v4/README.md)与[复制清单](bank-prepare-v4/copied-evidence-manifest.json)；无Store/pool/ledger/秘密、Gateway原日志、完整录像或EXE全文。P0未完成、P2未启动，无新25/50/100/500或两小时验收通过。
+
+## 回村的避敌记忆修复候选
+
+原真实navigator已离线复现：两只旧Scarecrow（206641@287,616及206632@286,623）离开当前AOI后，shared planner的20秒位置记忆重新加整块halo，覆盖安全区内289,617目标。候选保留可信普通AI0的有界近期位置轨迹，逐格重建区外8格halo与占格；新权威raw才续可信资格，未知、owned、非AI0、类别变化、歧义ID及过期均保守回落shared记忆，不清除未知轨迹。
+
+1024身份/2048位置上限有溢出隔离；无法记录的身份触发全局20秒豁免隔离，提前腾槽不能隐藏旧未知位置。forbidden捕获的本轮视图限制后续allowed集合，时钟跨隔离边界不能扩大豁免。真实canonical loader、实际map0、原navigator回村及TTL/类型/容量边界等159项模块回归通过，独立只读审查通过；原600秒/2048命令、70%生命、8格及逐步发送守卫不变。新Root选定整合检查与第五次普通续跑仍待执行，离线回归不构成CCU或两小时供给验收。

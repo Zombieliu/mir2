@@ -1,0 +1,8 @@
+
+running 3 tests
+test web::tests::runtime_tick_defers_after_bootstrap_but_wakes_for_player_input ... ok
+test web::tests::runtime_tick_item_use_wakes_pending_personal_restoration_after_bootstrap ... ok
+test web::tests::runtime_tick_refresh_and_keep_alive_preserve_the_idle_bootstrap_wait ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1268 filtered out; finished in 0.00s
+

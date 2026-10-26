@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## 普通用药 Tick 唤醒（2026-10-27，北京时间）
+
+正常用药沿原鉴权触发短 Tick 唤醒；32项 Rust 回归、828项工具检查与新 Release 构建通过，真实准备验证扣药1及精确HP12→18。回村寻路仍失败，本轮prepared4/100且无CCU测量，不提高整体Candidate/Accepted；详见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/README.md)。
+
 ## Cell 共享快照发布回归（2026-10-27，北京时间）
 
 当前P1工程合同已通过、P0容量未通过、P2未启动。同值快照复用`7b43caa41`保留原准入、完整结算及owner清理，通过新鲜116项Rust测试与Release构建。V13全50准备完成，计量55.861秒因死亡保护停止，最终HP0/18、gold0、HP药耗尽；普通准备与补给待证明。原场景/门槛保留，不宣告100、容量或人类接受，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
