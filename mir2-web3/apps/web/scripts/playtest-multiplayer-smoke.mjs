@@ -17,7 +17,8 @@ const REPO_ROOT = path.resolve(import.meta.dirname, '../../../..');
 // Node's global WebSocket cannot portably set the required browser Origin.
 const WebSocketTransport = createRequire(import.meta.url)('next/dist/compiled/ws');
 const COMMANDS = new Set(['clientVersion', 'newAccount', 'login', 'newCharacter', 'startGame',
-  'keepAlive', 'walk', 'run', 'turn', 'chat', 'attack', 'equipItem', 'useItem', 'logOut', 'pickUp', 'townRevive', 'removeItem']);
+  'keepAlive', 'walk', 'run', 'turn', 'chat', 'attack', 'equipItem', 'useItem', 'logOut', 'pickUp', 'townRevive', 'removeItem',
+  'harvest', 'interact', 'selectNpcDialog', 'sellItem', 'buyItem']);
 const PRIVATE_KEY = /password|secret|token|authorization|cookie|assertion|private.?key/i;
 const REQUIRED_CHECKS = ['authGuards', 'twoAccounts', 'mutualVisibility', 'movement', 'turn', 'chat',
   'chatLatency', 'sharedCombat', 'mapRoundTrip', 'logout', 'reloginPersistence'];

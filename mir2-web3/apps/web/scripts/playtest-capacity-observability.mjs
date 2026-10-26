@@ -1,14 +1,20 @@
 // Public aggregate counts and wall-clock phase bounds only. This module does
 // not plan gameplay, inspect credentials, change load or decide acceptance.
+import { capacityActorLimit } from './playtest-capacity-soak-core.mjs';
+
 const fields = ['total', 'players', 'monsters', 'npcs', 'other', 'groundDropsReported'];
 const zero = () => Object.fromEntries(fields.map(field => [field, 0]));
 const maxima = (left, right) => Object.fromEntries(fields.map(field => [field, Math.max(left[field], right[field])]));
 const scope = 'Observed independent maxima at nominal 1000ms sampling cadence, not exhaustive peaks. total counts snapshot.entities; groundDropsReported counts snapshot.groundDrops separately and is not added to total. Maxima may come from different observers.';
 
 export class PublicDensity {
-  constructor() { this.sampleCount = 0; this.maps = new Map(); }
+  constructor(policy = {}) {
+    this.maximumControlledActors = capacityActorLimit(policy);
+    this.capacityMetadata = this.maximumControlledActors === 500 ? { capacityTargetActors: 500, maximumControlledActors: 500 } : {};
+    this.sampleCount = 0; this.maps = new Map();
+  }
   sample(clients) {
-    if (!Array.isArray(clients) || clients.length > 100) throw new Error('Density requires at most 100 controlled actors');
+    if (!Array.isArray(clients) || clients.length > this.maximumControlledActors) throw new Error('Density requires at most ' + this.maximumControlledActors + ' controlled actors');
     const maps = new Map(); let cohortActive = 0, cohortCombatActive = 0;
     for (const client of clients) {
       const snapshot = client.snapshot;
@@ -34,18 +40,19 @@ export class PublicDensity {
       prior.observerSamples += value.observerSamples; prior.maxVisible = maxima(prior.maxVisible, value.maxVisible); this.maps.set(key, prior);
     }
     this.sampleCount++;
-    return { samplingIntervalMs: 1000, scope, cohortActive, cohortCombatActive, maps: [...maps.values()].sort((a, b) => a.mapFileName.localeCompare(b.mapFileName)) };
+    return { samplingIntervalMs: 1000, scope, ...this.capacityMetadata, cohortActive, cohortCombatActive, maps: [...maps.values()].sort((a, b) => a.mapFileName.localeCompare(b.mapFileName)) };
   }
   summary() {
-    return { samplingIntervalMs: 1000, scope, sampleCount: this.sampleCount,
+    return { samplingIntervalMs: 1000, scope, ...this.capacityMetadata, sampleCount: this.sampleCount,
       maps: structuredClone([...this.maps.values()].sort((a, b) => a.mapFileName.localeCompare(b.mapFileName))) };
   }
 }
 
 export function beginCapacityPhase(context, name, kind, targetActors, at = Date.now()) {
+  const maximumControlledActors = capacityActorLimit(context.policy ?? {});
   if (!['bootstrap', 'measurement'].includes(kind) || typeof name !== 'string' || name.length > 80 ||
-      !Number.isInteger(targetActors) || targetActors < 1 || targetActors > 100 || !Number.isSafeInteger(at) || at < 0) throw new Error('Invalid bounded capacity phase');
-  const phase = { name, kind, targetActors, startedAtMs: at, endedAtMs: null, completed: false };
+      !Number.isInteger(targetActors) || targetActors < 1 || targetActors > maximumControlledActors || !Number.isSafeInteger(at) || at < 0) throw new Error('Invalid bounded capacity phase');
+  const phase = { name, kind, targetActors, ...(maximumControlledActors === 500 ? { capacityTargetActors: 500, maximumControlledActors } : {}), startedAtMs: at, endedAtMs: null, completed: false };
   (context.phaseWindows ??= []).push(phase);
   context.writer.add({ type: 'phaseStarted', at, ...phase });
   return phase;

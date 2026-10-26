@@ -14,9 +14,10 @@ import { CommandBudget, SafetyStop } from './playtest-load-smoke.mjs';
 import { loadProtocolCollisionMap, findProtocolWalkPath, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
 import { hasAuthoritativePlayerDeath, observedPlayerHp } from './quest-agent/protocol-observation.mjs';
 import { selfActionBlockMask } from './quest-agent/protocol-status.mjs';
-import { equipStarterGear } from './quest-agent/protocol-play.mjs';
+import { createNavigator, equipStarterGear } from './quest-agent/protocol-play.mjs';
 import { startEmergencyHpRecovery } from './quest-agent/protocol-loadout.mjs';
-import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Measurements, assessMeasurements, movementDiagnosticMayContinue,
+import { createOrdinarySupplies } from './capacity-ordinary-supplies.mjs';
+import { capacityPolicy, capacityActorLimit, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Measurements, assessMeasurements, movementDiagnosticMayContinue,
   AoiCoverage, ContinuousAcceptance, NativePlan, nativeCadence, verifiedCombatHit, BoundedEvidence, CapacityMonitor, memoryTrend, self, distance, sleep, sanitize, fingerprint } from './playtest-capacity-soak-core.mjs';
 
 const STEPS = [[0, -1, 'Up'], [1, -1, 'UpRight'], [1, 0, 'Right'], [1, 1, 'DownRight'],
@@ -222,7 +223,7 @@ export class CapacityClient extends NativeResumeClient {
     this.combatScout = null; this.combatScoutCursor = 0;
     this.evidencePending = new Set(); this.nativeRunPrimedUntil = 0;
     this.lifecycleConnection = context.nextLifecycleConnection = (context.nextLifecycleConnection ?? 0) + 1;
-    this.lifecycleNames = new Set([this.label, ...(context.pool?.accounts ?? []).slice(0, 100).map(item => item.name)].filter(name => typeof name === 'string'));
+    this.lifecycleNames = new Set([this.label, ...(context.pool?.accounts ?? []).slice(0, capacityActorLimit(context.policy)).map(item => item.name)].filter(name => typeof name === 'string'));
     this.lifecycleIdentities = new Map(); this.lifecycleMissing = new Set(); this.lifecycleOrphans = new Set();
     this.lifecycleRows = 0; this.lifecycleIdentityEvictions = 0; this.lifecycleUnchangedSnapshots = 0;
     this.navigationBlocked = false; this.navigationBlockedRows = 0;
@@ -260,6 +261,7 @@ export class CapacityClient extends NativeResumeClient {
     const ownerTransform = message.type === 'packet' && typeof message.packet === 'string';
     const beforeSelf = ownerTransform ? selfTransform(this.snapshot) : null;
     super.observe(message);
+    this.ordinarySupplies?.observe(message, this.events.at(-1));
     this.context.aoi?.reconcileReceived(this.context.clients ?? [], this.label);
     recordNativeHpRecoveryEvidence(this, message, this.events.at(-1));
     const navigationHint = this.navigationHint, navigationReceipt = this.events.at(-1);
@@ -479,11 +481,11 @@ export function chooseHomes(map, origin, count, layout, transfers = [], explicit
   });
 }
 
-export function validateNativeExplicitHomes(map, origin, count, anchors, patrolSpan = 2, transfers = [], stationaryObstacles = []) {
+export function validateNativeExplicitHomes(map, origin, count, anchors, patrolSpan = 2, transfers = [], stationaryObstacles = [], policy = {}) {
   const cells = map?.width * map?.height;
   if (!Number.isInteger(map?.width) || !Number.isInteger(map?.height) || map.width < 1 || map.height < 1 ||
       !Number.isInteger(cells) || cells < 1 || cells > 4_000_000 || map.blocked?.length !== cells ||
-      !Number.isInteger(count) || count < 1 || count > 100 || !Array.isArray(anchors) || anchors.length !== count || ![2, 4].includes(patrolSpan)) {
+      !Number.isInteger(count) || count < 1 || count > capacityActorLimit(policy) || !Array.isArray(anchors) || anchors.length !== count || ![2, 4].includes(patrolSpan)) {
     throw new Error('Native explicit scenario requires complete bounded anchors and patrolSpan 2 or 4');
   }
   const inMap = point => Number.isInteger(point?.x) && Number.isInteger(point?.y) && point.x >= 0 && point.y >= 0 && point.x < map.width && point.y < map.height;
@@ -572,8 +574,8 @@ export function activeCombatCoverage(client, context) {
   return { patrolSpan: cluster.patrolSpan, observerHomes: entries.map(entry => entry.home), entries };
 }
 
-export function spacingFourScenario(map, origin, center, count, mapFileName, transfers = [], stationaryObstacles = []) {
-  if (!Number.isInteger(count) || count < 1 || count > 100 || ![origin, center].every(point => Number.isInteger(point.x) && Number.isInteger(point.y))) throw new Error('Scenario requires integer coordinates and 1–100 actors');
+export function spacingFourScenario(map, origin, center, count, mapFileName, transfers = [], stationaryObstacles = [], policy = {}) {
+  if (!Number.isInteger(count) || count < 1 || count > capacityActorLimit(policy) || ![origin, center].every(point => Number.isInteger(point.x) && Number.isInteger(point.y))) throw new Error(`Scenario requires integer coordinates and 1–${capacityActorLimit(policy)} actors`);
   const width = Math.ceil(Math.sqrt(count));
   const requested = Array.from({ length: count }, (_, i) => ({ x: center.x + (i % width - (width - 1) / 2) * 4,
     y: center.y + (Math.floor(i / width) - (width - 1) / 2) * 4 }));
@@ -598,7 +600,7 @@ export async function generateCapacityScenario(options) {
   if (!metadata) throw new Error('Unknown authored scenario map');
   const transfers = metadata.movements.map(move => ({ bounds: { minX: move.source.x, maxX: move.source.x, minY: move.source.y, maxY: move.source.y } }));
   const stationaryObstacles = await loadStationaryNpcObstacles(options.scenarioMap);
-  const scenario = spacingFourScenario(map, origin, center, Number(options.scenarioCount ?? 50), String(options.scenarioMap), transfers, stationaryObstacles);
+  const scenario = spacingFourScenario(map, origin, center, Number(options.scenarioCount ?? 50), String(options.scenarioMap), transfers, stationaryObstacles, options);
   const file = outsideRepository(options.generateScenario); await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, JSON.stringify(scenario, null, 2) + '\n', { flag: 'wx' });
   return { file, ...scenario.generated };
@@ -678,7 +680,8 @@ export function navigationObstacles(client) {
   const occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead).concat(rejectedWalkObstacles(client));
   if (context?.policy?.activityMode !== 'native') return occupied;
   const clients = context?.clients ?? [];
-  if (clients.length > 100) throw new Error('Controlled navigation cohort exceeds the original100 actor ceiling');
+  if (clients.length > capacityActorLimit(context.policy)) throw new Error(capacityActorLimit(context.policy) === 100
+    ? 'Controlled navigation cohort exceeds the original100 actor ceiling' : 'Controlled navigation cohort exceeds the declared actor ceiling (500)');
   for (const other of clients) {
     if (other === client) continue; // Every receiver may independently own ID1000.
     const actual = activeGameplayOwner(other, mapFileName);
@@ -795,7 +798,7 @@ function recordNavigationBlocked(client, context, phase) {
   if (client.navigationBlocked) return;
   client.navigationBlocked = true;
   const owner = self(client), names = client.lifecycleNames ?? new Set([client.label,
-    ...(context.pool?.accounts ?? []).slice(0, 100).map(account => account.name)]);
+    ...(context.pool?.accounts ?? []).slice(0, capacityActorLimit(context.policy)).map(account => account.name)]);
   const occupants = []; let count = 0;
   for (const entity of client.snapshot.entities) {
     if (entity.objectId === owner.objectId || entity.dead || !lifecyclePoint(entity) ||
@@ -1008,7 +1011,7 @@ function preferUnsharedScoutWaypoints(client, context, hints, now, diagnostic) {
     sharedHintCount: null, unsharedHintCount: null, hintPreferenceReason: 'insufficient-hints' });
   if (hints.length < 2) return hints;
   const mapName = client.snapshot.mapFileName, otherWaypoints = new Set();
-  for (let index = 0; index < Math.min(context.clients.length, 100); index++) {
+  for (let index = 0; index < Math.min(context.clients.length, capacityActorLimit(context.policy)); index++) {
     const other = context.clients[index], scout = other.combatScout;
     if (other === client || other.role !== 'combat' || !activeGameplayOwner(other, mapName) || !scout ||
         scout.mapFileName !== mapName || !Number.isFinite(scout.startedAt) || scout.startedAt > now ||
@@ -1507,6 +1510,7 @@ export async function action(client, context, planned, preparedPlan) {
 }
 
 async function auxiliary(client, context) {
+  if (client.hpRecoveryPending || client.hpRecoveryEvidence) return;
   const phase = context.phase, refresh = Date.now() >= client.nextRefresh;
   if (client.budget.remainingWait()) return;
   const kind = refresh ? 'refresh' : 'rtt', cursor = client.sequence, at = performance.now(), time = Date.now();
@@ -1640,6 +1644,11 @@ export function offerNativeAction(client, context, now = performance.now()) {
     plannedIntervalMs: cadence.intervalMs, pacingKnown: cadence.pacingKnown, cadence };
   for (let n = 0; n < Math.min(planned.missed, 60); n++) context.add({ ...row, status: 'plan-gap' });
   if (planned.missed > 60) { context.guard.stop('Native driver stalled over 60 legal action opportunities'); return; }
+  if (client.hpRecoveryPending || client.hpRecoveryEvidence) {
+    // Take the opportunity first: maintenance must not hide offered gameplay
+    // or missed plans while its ordinary useItem evidence is unresolved.
+    context.add({ ...row, status: 'evidence-wait', maintenanceReason: 'hp-recovery' }); return;
+  }
   if (client.pending || client.evidencePending.size >= context.policy.maximumEvidenceInFlight) {
     // Damage has no request id. Keep a single unresolved attack so one late
     // strike cannot be credited to two requests. This observer/instrumentation
@@ -1651,14 +1660,35 @@ export function offerNativeAction(client, context, now = performance.now()) {
   }).finally(() => { client.pending = null; });
 }
 
+export function offerNativeClientWork(client, context, now = performance.now()) {
+  offerNativeHpRecovery(client, context);
+  offerNativeAction(client, context, now);
+  if (!client.pending && !client.auxPending && !client.hpRecoveryPending && !client.hpRecoveryEvidence &&
+      (Date.now() >= client.nextRtt || Date.now() >= client.nextRefresh)) {
+    client.auxPending = auxiliary(client, context).catch(error => context.guard.stop(`Auxiliary transport failed: ${error.message}`))
+      .finally(() => { client.auxPending = null; });
+  }
+}
+
+export function offerPreparationKeepAlive(client, context) {
+  if (context.policy.preparationProfile !== 'ordinary-economic-v1' || client.ready || !client.inGame ||
+      !client.ordinarySupplies || client.paused || client.draining || client.closed) return;
+  checkOwner(client, context);
+  if (client.ordinarySupplies.status().status !== 'ready' || client.auxPending ||
+      client.hpRecoveryPending || client.hpRecoveryEvidence || client.budget.remainingWait() || Date.now() < client.nextRtt) return;
+  client.auxPending = auxiliary(client, context).catch(error => context.guard.stop(`Preparation transport failed: ${error.message}`))
+    .finally(() => { client.auxPending = null; });
+}
+
 function startEngine(context) {
   context.engine = setInterval(() => {
     try {
       context.guard.assert();
       for (const client of context.clients) {
-        if (!client.ready || client.paused || client.draining) continue;
+        if (!client.ready) { offerPreparationKeepAlive(client, context); continue; }
+        if (client.paused || client.draining) continue;
         checkOwner(client, context);
-        if (context.policy.activityMode === 'native') offerNativeAction(client, context);
+        if (context.policy.activityMode === 'native') { offerNativeClientWork(client, context); continue; }
         else {
           const planned = client.plan.take(performance.now());
           if (planned) {
@@ -1670,7 +1700,6 @@ function startEngine(context) {
           }).finally(() => { client.pending = null; });
           }
         }
-        offerNativeHpRecovery(client, context);
         if (!client.pending && !client.auxPending && (Date.now() >= client.nextRtt || Date.now() >= client.nextRefresh)) {
           client.auxPending = auxiliary(client, context).catch(error => context.guard.stop(`Auxiliary transport failed: ${error.message}`))
             .finally(() => { client.auxPending = null; });
@@ -1832,6 +1861,73 @@ async function drain(client, context) {
   client.ready = false; return state ? { account: client.account, state } : null;
 }
 
+export function ordinaryPreparationConfiguration(policy, scenario) {
+  if ((policy.preparationProfile ?? 'held-only') === 'held-only') return null;
+  const preparation = scenario.preparation;
+  const points = preparation?.stagingPoints ?? [preparation?.stagingPoint];
+  if (!Array.isArray(points) || points.length !== (policy.stages?.at(-1) ?? 1) || points.some(staging =>
+      !Number.isSafeInteger(staging?.x) || !Number.isSafeInteger(staging?.y) || staging.x < 0 || staging.y < 0 || staging.x > 65535 || staging.y > 65535 ||
+      (staging.mapFileName != null && String(staging.mapFileName) !== '0')) ||
+      new Set(points.map(staging => `${staging.x},${staging.y}`)).size !== points.length ||
+      !Array.isArray(preparation?.route?.quests) || !preparation.route.quests.length ||
+      (scenario.mapFileName != null && String(scenario.mapFileName) !== '0')) {
+    throw new Error('ordinary-economic-v1 requires scenario.preparation with distinct explicit map-0 stagingPoints for every actor and an authoritative Deer route');
+  }
+  return { stagingPoints: points.map(({ x, y }) => ({ x, y })), route: preparation.route };
+}
+
+export async function prepareCapacityActor(client, context, configuration, { createSupplies = createOrdinarySupplies } = {}) {
+  if (client.ready || client.paused || client.draining || context.phase !== 'preparation') throw new Error('Ordinary preparation requires an inactive new actor');
+  if (String(client.snapshot?.mapFileName) !== '0' || !protocolMapCellIsWalkable(context.map, configuration.stagingPoint) ||
+      (client.snapshot.mapTransfers ?? []).some(transfer => inside(configuration.stagingPoint, transfer.bounds))) {
+    throw new Error('Ordinary preparation requires a walkable staging point on the current map without a transfer');
+  }
+  const navigators = new WeakMap();
+  client.ordinarySupplies = createSupplies(client, {
+    preparationProfile: 'ordinary-economic-v1', targetHp: context.policy.preparationHpTarget,
+    ...configuration, isPreparation: () => context.phase === 'preparation' && !client.ready && !client.draining,
+    navigate: (facade, target, range, stop, options) => {
+      if (!navigators.has(facade)) navigators.set(facade, createNavigator(facade, {
+        loadCollisionMap: async map => {
+          if (String(map) !== String(context.mapName)) throw new Error('Ordinary preparation cannot change maps');
+          return context.map;
+        }, movementResponseTimeoutMs: context.policy.actionTimeoutMs,
+      }));
+      return navigators.get(facade)(target, range, stop, options);
+    },
+  });
+  const result = await client.ordinarySupplies.prepare();
+  if (result.status !== 'ready') throw new Error('Ordinary preparation did not become ready');
+  context.writer.add({ type: 'ordinaryPreparation', actor: client.label, at: Date.now(), result });
+  return result;
+}
+
+export async function activatePreparedCohort(cohort, context) {
+  // Earlier actors may have waited while later actors earned supplies. Recheck
+  // every current live snapshot before opening the new cohort's offered load.
+  const cursors = new Map();
+  for (let offset = 0; offset < cohort.length; offset += 16) {
+    await Promise.all(cohort.slice(offset, offset + 16).map(async client => {
+      await client.auxPending;
+      client.auxPending = (async () => {
+        context.guard.assert(); await client.pace(); cursors.set(client, client.sequence); await client.refresh();
+      })();
+      try { await client.auxPending; } finally { client.auxPending = null; }
+    }));
+  }
+  for (const client of cohort) client.ordinarySupplies.assertReady({ afterSequence: cursors.get(client) });
+  const startedAt = performance.now();
+  for (const [index, client] of cohort.entries()) {
+    client.ready = true;
+    initializePlan(client, context, startedAt + 500 + (index % 10) * 40);
+    client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
+    client.activityStartedAtMs = startedAt; context.continuous.join(client.label, client.role, startedAt);
+  }
+  context.writer.add({ type: 'cohortActivated', profile: 'ordinary-economic-v1', at: Date.now(),
+    newActors: cohort.length, controlledActors: context.clients.length, activityStartedAtMs: startedAt,
+    existingActorsContinue: true });
+}
+
 export async function runCapacity(options) {
   if (options.realm !== 'isolated') throw new Error('--realm isolated is required');
   const endpoint = validateEndpoint(options.endpoint), policy = capacityPolicy(options), attackResults = attackResultsMode(options.attackResults);
@@ -1857,6 +1953,10 @@ export async function runCapacity(options) {
   });
   const report = { schemaVersion: 1, runId, endpoint, policy, startedAt: new Date().toISOString(), stages: [], nativeResume: [], savedVerification: [], phaseWindows: [],
     ordinaryAccountsOnly: true, visualAccepted: false, capacityUpperBound: null, acceptanceScope: 'One real egress, ordinary same-map movement/AOI and the explicitly declared combat subgroup' };
+  report.preparation = { profile: policy.preparationProfile ?? 'held-only', targetHpStock: policy.preparationHpTarget ?? 0,
+    activationRule: policy.preparationProfile === 'ordinary-economic-v1' ? 'New cohort remains inactive until every actor completes bounded ordinary preparation and passes a fresh staging/health/stock recheck; existing active actors continue unchanged.' :
+      'Original canonical per-actor activation after login and equipment; already-held supplies only.',
+    stageResupply: false, sustainableDurationProven: false };
   Object.defineProperty(report, 'measurementClock', { enumerable: true,
     value: Object.freeze({ scope: 'All measurement phases; seconds retains configured duration and measuredSeconds is actual elapsed wall time.',
       minimumCompleteWindowMs: 60000,
@@ -1872,10 +1972,10 @@ export async function runCapacity(options) {
       selectionRule: 'Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.',
       primingRule: 'Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain.' }) });
   if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeHpMaintenance', { enumerable: true,
-    value: Object.freeze({ scope: 'Already-held ordinary HP potions only; no MP, purchase, grants or revival.',
+    value: Object.freeze({ scope: 'Stage maintenance uses already-held ordinary HP potions only; no MP, purchase, grants or revival.',
       hpThreshold: .6, reuseDelayMs: NATIVE_HP_REUSE_MS, evidenceDeadlineMs: NATIVE_HP_EVIDENCE_MS,
       commandBudgetPerSecond: 3, rule: 'Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.',
-      activityRule: 'Independent auxiliary promise; native opportunities continue and HP maintenance never credits movement, attack or native completion.' }) });
+      activityRule: 'HP recovery is offered before gameplay and auxiliary work. Pending HP evidence records original offered native opportunities as evidence-wait with maintenanceReason; it never credits movement, attack or completion.' }) });
   if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeChasePreference', { enumerable: true,
     value: Object.freeze({ freshReceiptMs: RECENT_CHASE_PREFERENCE_MS,
       scope: 'Client-side preference within the original first4 candidates, not an exclusive claim or a capacity result.',
@@ -1892,7 +1992,7 @@ export async function runCapacity(options) {
   if (attackResults === 'v2') Object.defineProperty(report, 'attackResults', { enumerable: true,
     value: Object.freeze({ mode: 'v2', capability: ATTACK_OUTCOME_CAPABILITY,
       rule: 'No legacy fallback. Activity attacks count correlated launched outcomes only; hits still require the original dual-end damage/health evidence. Hunting attempts are offered requests, not launched attacks.' }) });
-  context.phaseWindows = report.phaseWindows; context.density = new PublicDensity();
+  context.phaseWindows = report.phaseWindows; context.density = new PublicDensity(policy);
   const lag = monitorEventLoopDelay({ resolution: 20 }); lag.enable();
   let timer, sampler, draining = false, driverLagFailures = 0, initialMemoryAt, finalStage, lockFile, lock;
   const onSignal = () => guard.stop('Operator requested normal load drain');
@@ -1903,7 +2003,7 @@ export async function runCapacity(options) {
     lockFile = path.join(path.dirname(context.accountFile), 'capacity-run.lock');
     lock = await fs.open(lockFile, 'wx', 0o600);
     await lock.writeFile(JSON.stringify({ runId, pid: process.pid, endpoint, startedAt: Date.now() }));
-    context.pool = validateCapacityPool(JSON.parse(await fs.readFile(context.accountFile, 'utf8')), endpoint);
+    context.pool = validateCapacityPool(JSON.parse(await fs.readFile(context.accountFile, 'utf8')), endpoint, policy);
     if (context.pool.accounts.length < policy.stages.at(-1)) throw new Error('Not enough separately provisioned ordinary accounts for declared stages');
     report.provisioning = [...new Set(context.pool.accounts.map(account => account.provisioning))];
     report.registrationLoadTested = false; report.simultaneousLoginBurstTested = false; report.mixedClassCombatTested = false;
@@ -1920,6 +2020,7 @@ export async function runCapacity(options) {
     report.initialLoginNotBefore = new Date(Math.max(Date.now(), notBefore)).toISOString();
     let scenario = {};
     if (options.scenarioFile) scenario = JSON.parse(await fs.readFile(options.scenarioFile, 'utf8'));
+    const preparationConfiguration = ordinaryPreparationConfiguration(policy, scenario);
     if ((scenario.patrolSpan != null || scenario.combatClusters != null) &&
         (policy.activityMode !== 'native' || !Array.isArray(scenario.anchors) || scenario.anchors.length !== policy.stages.at(-1))) {
       throw new Error('Patrol span and combat clusters require a complete explicit native scenario');
@@ -1950,8 +2051,10 @@ export async function runCapacity(options) {
     startEngine(context);
     const combatIndices = new Set(Array.from({ length: policy.combatActors }, (_, i) => Math.floor((i + .5) * policy.stages.at(-1) / policy.combatActors)));
     for (const count of policy.stages) {
-      context.phase = 'ramp';
+      context.phase = preparationConfiguration ? 'preparation' : 'ramp';
       const bootstrap = beginCapacityPhase(context, `bootstrap-${count}`, 'bootstrap', count);
+      const preparation = preparationConfiguration ? beginCapacityPhase(context, `preparation-${count}`, 'bootstrap', count) : null;
+      const newCohort = [];
       try {
       while (context.clients.length < count) {
         guard.assert(); const index = context.clients.length;
@@ -1966,7 +2069,7 @@ export async function runCapacity(options) {
             ...client.snapshot.entities.filter(entity => String(entity.kind).toLowerCase() === 'npc' && !entity.dead),
           ] : [];
           if (policy.activityMode === 'native' && scenario.anchors?.length) {
-            const proof = validateNativeExplicitHomes(context.map, self(client), policy.stages.at(-1), scenario.anchors, context.patrolSpan, client.snapshot.mapTransfers ?? [], stationaryObstacles);
+            const proof = validateNativeExplicitHomes(context.map, self(client), policy.stages.at(-1), scenario.anchors, context.patrolSpan, client.snapshot.mapTransfers ?? [], stationaryObstacles, policy);
             context.homes = proof.homes;
             report.scenario.explicitNativeHomes = { visitedCells: proof.visitedCells, mapCells: proof.mapCells, footprintCells: proof.footprintCells };
           } else context.homes = chooseHomes(context.map, self(client), policy.stages.at(-1), policy.layout, client.snapshot.mapTransfers ?? [], scenario.anchors ?? [], policy.activityMode === 'native' ? 3 : 1, stationaryObstacles);
@@ -1982,19 +2085,30 @@ export async function runCapacity(options) {
         }
         checkOwner(client, context);
         await equipStarterGear(client);
-        client.role = combatIndices.has(index) ? 'combat' : 'movement'; client.home = context.homes[index]; client.ready = true;
+        client.role = combatIndices.has(index) ? 'combat' : 'movement'; client.home = context.homes[index]; client.ready = !preparationConfiguration;
         client.combatCluster = context.combatClusters.find(cluster => cluster.combatActorIndices.includes(index));
-        initializePlan(client, context, performance.now() + 500 + (index % 10) * 40);
-        client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
         context.clients.push(client);
-        client.activityStartedAtMs = performance.now(); context.continuous.join(client.label, client.role, client.activityStartedAtMs);
+        if (preparationConfiguration) {
+          newCohort.push(client);
+          client.nextRtt = Date.now() + 10000; client.nextRefresh = Infinity;
+          await prepareCapacityActor(client, context, { route: preparationConfiguration.route,
+            stagingPoint: preparationConfiguration.stagingPoints[index] });
+        } else {
+          initializePlan(client, context, performance.now() + 500 + (index % 10) * 40);
+          client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
+          client.activityStartedAtMs = performance.now(); context.continuous.join(client.label, client.role, client.activityStartedAtMs);
+        }
         writer.add({ type: 'admitted', actor: client.label, role: client.role, characterIndex: client.account.characterIndex, at: Date.now(), controlledActors: context.clients.length });
         options.onProgress?.({ stage: 'admitted', controlledActors: context.clients.length, target: count });
         await guard.afterAdmission(Date.now());
       }
+      if (preparationConfiguration) {
+        await activatePreparedCohort(newCohort, context);
+        finishCapacityPhase(context, preparation, true);
+      }
       await settleClients(context);
       finishCapacityPhase(context, bootstrap, true);
-      } finally { finishCapacityPhase(context, bootstrap, false); }
+      } finally { if (preparation) finishCapacityPhase(context, preparation, false); finishCapacityPhase(context, bootstrap, false); }
       const stage = await measure(context, `stage-${count}`, policy.stageSeconds); report.stages.push(stage);
       options.onProgress?.({ stage: stage.name, passed: stage.passed });
       report.highestMeasuredStage = count;
@@ -2025,6 +2139,7 @@ export async function runCapacity(options) {
     const stoppedAt = performance.now();
     for (const client of context.clients) { client.paused = true; context.continuous.pause(client.label, stoppedAt); }
     await awaitPendingActions(context.clients);
+    for (const client of context.allClients) client.ordinarySupplies?.dispose();
     const saved = [];
     // Bounded drain concurrency avoids turning safety shutdown into a save storm.
     const live = context.allClients.filter(client => client.ws && !client.closed);
@@ -2067,7 +2182,9 @@ export async function runCapacity(options) {
       actionFanoutProbeRange: 6, chatFanoutProbeRange: 8, fullAoiMembershipRange: 16,
       evidenceWaitMeaning: 'Instrumentation wait stays in offered-load denominator; insufficient coverage does not establish server overload',
       ambiguousAttackRule: 'Unverified attacks permanently quarantine that actor/target pair for this run; more than 64 such targets stops the test',
-      continuousRunningRule: 'The Run ratio and cell-rate gates also apply throughout ramp, anchor travel and ordinary login-window waits',
+      continuousRunningRule: policy.preparationProfile === 'ordinary-economic-v1' ?
+        'The Run ratio and cell-rate gates begin at new-cohort activation and include anchor travel; existing active actors retain those gates throughout later-cohort preparation and login-window waits' :
+        'The Run ratio and cell-rate gates also apply throughout ramp, anchor travel and ordinary login-window waits',
       limitations: ['Warrior starter melee only', 'No caster AOE, summons or cross-map raid proof', 'No native GPU/render acceptance', 'No simultaneous auth burst or automatic revival'] };
     if (policy.activityMode === 'native') report.combatScenario = {
       rule: 'First reach the declared home by ordinary Walk/Run, then hunt; initial transit stays in continuous activity and stage measurement starts only after arrival',
@@ -2112,7 +2229,8 @@ export async function runCapacity(options) {
 export function parseArguments(args) {
   const result = {}, allowed = new Set(['realm', 'endpoint', 'accountsFile', 'monitor', 'output', 'profile', 'stages', 'stageSeconds', 'soakSeconds',
     'wallSeconds', 'layout', 'combatActors', 'resumeSamples', 'saveSamples', 'mapRoot', 'loginNotBefore', 'scenarioFile',
-    'activityMode', 'movementIntervalMs', 'generateScenario', 'scenarioMap', 'scenarioOrigin', 'scenarioCenter', 'scenarioCount', 'attackResults']);
+    'activityMode', 'movementIntervalMs', 'generateScenario', 'scenarioMap', 'scenarioOrigin', 'scenarioCenter', 'scenarioCount', 'attackResults',
+    'targetActors', 'preparationProfile', 'preparationHpTarget']);
   args = args.flatMap(value => value.startsWith('--attack-results=') ? ['--attack-results', value.slice('--attack-results='.length)] : [value]);
   for (let i = 0; i < args.length; i += 2) {
     if (!args[i].startsWith('--') || args[i + 1] == null) throw new Error('Arguments must use --name value');

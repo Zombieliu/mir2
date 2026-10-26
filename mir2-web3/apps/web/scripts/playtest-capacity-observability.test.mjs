@@ -67,3 +67,46 @@ test('an aborted bootstrap closes its real interval as incomplete and invalid cl
   assert.throws(() => finishCapacityPhase(context, invalid, true, 1700000004999), /clock/);
   assert.equal(invalid.endedAtMs, null);
 });
+
+
+test('500-actor density requires explicit target metadata and retains aggregate-only sampling and map-history bounds', () => {
+  const cohort = Array.from({ length: 500 }, (_, i) => client('0', i < 50 ? 'combat' : 'movement'));
+  assert.throws(() => new PublicDensity().sample(cohort), /at most 100/);
+  assert.throws(() => new PublicDensity({ targetActors: 250 }), /explicit capacity target/);
+  const density = new PublicDensity({ targetActors: 500 }), sample = density.sample(cohort);
+  assert.equal(sample.capacityTargetActors, 500);
+  assert.equal(sample.maximumControlledActors, 500);
+  assert.equal(sample.cohortActive, 500);
+  assert.equal(sample.cohortCombatActive, 50);
+  assert.equal(sample.maps[0].maxVisible.players, 1, 'target metadata cannot fabricate visible players');
+  assert.equal(density.summary().capacityTargetActors, 500);
+  assert.equal(density.summary().maps[0].maxCohortActive, 500);
+  assert.doesNotMatch(JSON.stringify(sample), /objectId|password|never-serialize/);
+  assert.throws(() => density.sample([...cohort, client('0')]), /at most 500/);
+  const boundedMaps = new PublicDensity({ targetActors: 500 });
+  boundedMaps.sample(Array.from({ length: 100 }, (_, i) => client(String(i))));
+  assert.throws(() => boundedMaps.sample([client('101')]), /map history/);
+  assert.equal(Object.hasOwn(new PublicDensity().summary(), 'capacityTargetActors'), false);
+});
+
+test('500-actor phase windows require the context opt-in while retaining real counts, clocks and incomplete preparation', () => {
+  const rows = [], context = { policy: { targetActors: 500 }, writer: { add: row => rows.push(row) } };
+  const phase = beginCapacityPhase(context, 'stage-500', 'measurement', 500, 1000);
+  assert.equal(phase.targetActors, 500);
+  assert.equal(phase.capacityTargetActors, 500);
+  assert.equal(phase.maximumControlledActors, 500);
+  finishCapacityPhase(context, phase, false, 2500);
+  assert.equal(rows.at(-1).completed, false);
+  assert.equal(rows.at(-1).endedAtMs - rows[0].startedAtMs, 1500);
+  const prep = beginCapacityPhase(context, 'preparation-25', 'bootstrap', 25, 2500);
+  assert.equal(prep.targetActors, 25, 'actual phase cohort stays separate from declared final target');
+  assert.equal(prep.capacityTargetActors, 500);
+  finishCapacityPhase(context, prep, false, 2600);
+  for (const [target, kind] of [[501, 'measurement'], [500, 'preparation']]) {
+    assert.throws(() => beginCapacityPhase(context, 'invalid', kind, target, 3000), /Invalid bounded capacity phase/);
+  }
+  const legacy = { writer: { add() {} } };
+  assert.throws(() => beginCapacityPhase(legacy, 'stage-500', 'measurement', 500, 1000), /Invalid bounded capacity phase/);
+  const original = beginCapacityPhase(legacy, 'stage-100', 'measurement', 100, 1000);
+  assert.equal(Object.hasOwn(original, 'capacityTargetActors'), false);
+});

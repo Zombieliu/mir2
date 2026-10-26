@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
   assessMeasurements, movementDiagnosticMayContinue, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
-import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, offerNativeHpRecovery, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
+import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, offerNativeHpRecovery, offerNativeClientWork, offerPreparationKeepAlive, ordinaryPreparationConfiguration, prepareCapacityActor, activatePreparedCohort, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 
@@ -245,7 +245,7 @@ test('native HP maintenance keeps unknown health, missing supplies and exhausted
   assert.equal(offerNativeHpRecovery(dead.client, dead.context), null); assert.equal(dead.commands.length, 0);
 });
 
-test('native HP pending evidence does not pause native movement and drain captures the existing dose', async () => {
+test('native HP pending evidence retains offered gameplay and drain captures the existing dose', async () => {
   const f = hpRecoveryFixture(), { client, peer, context, commands, rows } = f;
   peer.paused = true; client.role = 'movement'; client.plan = new NativePlan(performance.now());
   client.ws.send = data => { const command = JSON.parse(data); commands.push(command);
@@ -257,15 +257,178 @@ test('native HP pending evidence does not pause native movement and drain captur
   };
   const dose = offerNativeHpRecovery(client, context); assert.ok(dose); let drained = false;
   const drain = awaitPendingActions([client]).then(() => { drained = true; });
-  offerNativeAction(client, context); await client.pending;
-  assert.ok(f.actions.some(row => ['walk', 'run'].includes(row.kind) && row.status === 'success' && row.nativeOpportunity));
-  assert.equal(drained, false); assert.equal(commands.length, 2); assert.equal(client.budget.sent.length, 2);
+  offerNativeAction(client, context);
+  assert.equal(client.pending == null, true);
+  assert.equal(f.actions.length, 1); assert.equal(f.actions[0].status, 'evidence-wait');
+  assert.equal(f.actions[0].maintenanceReason, 'hp-recovery');
+  assert.equal(drained, false); assert.equal(commands.length, 1); assert.equal(client.budget.sent.length, 1);
   f.packet('UseItem', { uniqueId: 901, grid: 'Inventory', success: true }); f.inventory(1);
   await dose; await drain; assert.equal(drained, true); assert.equal(rows.filter(row => row.status === 'verified').length, 1);
   const measurements = new Measurements(); for (const row of f.actions) measurements.add({ ...row, at: 1 });
   const activity = measurements.actors.get(client.label);
-  assert.equal(activity.plans, 1); assert.equal(activity.nativeOpportunities, 1); assert.equal(activity.nativeCompleted, 1);
+  assert.equal(activity.plans, 1); assert.equal(activity.nativeOpportunities, 1); assert.equal(activity.nativeCompleted, 0);
   assert.equal(activity.attacks, 0); assert.equal(activity.hits, 0);
+  offerNativeAction(client, context, client.plan.nextAt); await client.pending;
+  assert.ok(f.actions.some(row => ['walk', 'run'].includes(row.kind) && row.status === 'success' && row.nativeOpportunity));
+  assert.equal(commands.length, 2); assert.equal(client.budget.sent.length, 2);
+});
+
+test('native engine offers HP before gameplay and auxiliary without hiding missed opportunities', async () => {
+  const f = hpRecoveryFixture(), { client, context, commands, actions } = f;
+  client.role = 'movement'; client.plan = new NativePlan(0); client.nextRtt = 0; client.nextRefresh = 0;
+  offerNativeClientWork(client, context, 2250);
+  assert.deepEqual(commands, [{ type: 'useItem', uniqueId: 901, grid: 'inventory' }]);
+  assert.equal(client.pending == null, true); assert.equal(client.auxPending == null, true);
+  assert.equal(actions.filter(row => row.status === 'plan-gap').length, 3);
+  assert.equal(actions.at(-1).status, 'evidence-wait'); assert.equal(actions.at(-1).maintenanceReason, 'hp-recovery');
+  const measurements = new Measurements(); for (const row of actions) measurements.add({ ...row, at: 1 });
+  assert.equal(measurements.actors.get(client.label).nativeOpportunities, 4);
+  assert.equal(measurements.actors.get(client.label).nativeCompleted, 0);
+  f.packet('UseItem', { uniqueId: 901, grid: 'Inventory', success: true }); f.inventory(1);
+  await client.hpRecoveryPending;
+});
+
+const preparationRoute = { quests: [{ objectives: { kill: [{ monsterName: 'Deer', spawnCandidates: [
+  { mapFileName: '0', position: { x: 12, y: 12 }, count: 1 },
+] }], item: [] } }] };
+
+test('ordinary preparation is opt-in and requires distinct explicit per-actor staging instead of hostile homes', () => {
+  assert.equal(ordinaryPreparationConfiguration(capacityPolicy({ profile: 'probe' }), {}), null);
+  const policy = capacityPolicy({ profile: 'probe', activityMode: 'native', preparationProfile: 'ordinary-economic-v1' });
+  const valid = { mapFileName: '0', preparation: { stagingPoints: [{ x: 5, y: 5 }, { x: 9, y: 5 }], route: preparationRoute } };
+  assert.deepEqual(ordinaryPreparationConfiguration(policy, valid), valid.preparation);
+  for (const preparation of [undefined, { stagingPoint: { x: 5, y: 5 }, route: preparationRoute },
+    { stagingPoints: [{ x: 5, y: 5 }, { x: 5, y: 5 }], route: preparationRoute },
+    { stagingPoints: [{ x: 5, y: 5 }, { x: 65536, y: 5 }], route: preparationRoute },
+    { stagingPoints: valid.preparation.stagingPoints, route: { quests: [] } }]) {
+    assert.throws(() => ordinaryPreparationConfiguration(policy, { ...valid, preparation }), /distinct explicit map-0 stagingPoints/);
+  }
+  assert.throws(() => ordinaryPreparationConfiguration(policy, { ...valid, mapFileName: '1' }), /map-0/);
+  assert.deepEqual(parseArguments(['--target-actors', '500', '--preparation-profile', 'ordinary-economic-v1', '--preparation-hp-target', '12']),
+    { targetActors: '500', preparationProfile: 'ordinary-economic-v1', preparationHpTarget: '12' });
+});
+
+function ordinaryPreparationFixture() {
+  const f = hpRecoveryFixture(), { client, context, owner, commands } = f, joins = [];
+  context.phase = 'preparation'; context.clients = [client];
+  context.policy = capacityPolicy({ profile: 'probe', activityMode: 'native', preparationProfile: 'ordinary-economic-v1' });
+  context.continuous = { join: (...args) => joins.push(args) };
+  client.ready = false; owner.hp = 24; client.snapshot.playerHp = 24; client.snapshot.gold = 0;
+  client.snapshot.inventoryItems = [{ uniqueId: 901, name: '(HP)DrugSmall', itemIndex: 658, quantity: 12, container: 'bag1', slot: 0 }];
+  client.ws.send = data => {
+    const command = JSON.parse(data); commands.push(command);
+    assert.equal(command.type, 'clientVersion');
+    client.observe({ type: 'worldSnapshot', payload: structuredClone(client.snapshot) });
+  };
+  return { ...f, joins, configuration: { stagingPoint: { x: 5, y: 5 }, route: preparationRoute } };
+}
+
+test('ordinary preparation consumes actual full snapshot receipts and joins only after a fresh cohort barrier', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, commands, joins, configuration } = f;
+  const result = await prepareCapacityActor(client, context, configuration);
+  assert.equal(result.status, 'ready'); assert.equal(result.after.hpStock, 12); assert.equal(result.actualStagingReached, true);
+  assert.equal(client.ready, false); assert.equal(client.plan, undefined); assert.deepEqual(joins, []);
+  assert.equal(client.events.findLast(event => event.type === 'worldSnapshot').payload.inventoryItems, undefined,
+    'the normal event history remains compact; supply proof observed the actual full message');
+  const preparedCursor = client.sequence;
+  await activatePreparedCohort([client], context);
+  assert.equal(client.ready, true); assert.ok(client.plan instanceof NativePlan);
+  assert.equal(joins.length, 1); assert.equal(joins[0][0], client.label);
+  assert.ok(client.sequence > preparedCursor); assert.equal(commands.length, 3); assert.equal(client.budget.sent.length, 3);
+  assert.equal(context.writer != null, true); assert.deepEqual(f.actions, [], 'preparation cannot credit measured gameplay');
+});
+
+test('ordinary preparation navigator sends its actual Walk through the bounded supply facade and shared budget', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, commands, configuration } = f;
+  configuration.stagingPoint = { x: 6, y: 5 };
+  client.ws.send = data => {
+    const command = JSON.parse(data); commands.push(command);
+    if (command.type === 'walk') {
+      assert.equal(command.direction, 'Right'); f.packet('UserLocation', { x: 6, y: 5, direction: 'Right' });
+    } else {
+      assert.equal(command.type, 'clientVersion'); client.observe({ type: 'worldSnapshot', payload: structuredClone(client.snapshot) });
+    }
+  };
+  const result = await prepareCapacityActor(client, context, configuration);
+  assert.equal(result.actualStagingReached, true); assert.equal(result.after.x, 6);
+  assert.deepEqual(commands.map(command => command.type), ['clientVersion', 'walk', 'clientVersion']);
+  assert.equal(result.commandCounts.walk, 1); assert.equal(result.movementCommands, 1);
+  assert.equal(client.budget.sent.length, 3); assert.equal(client.ready, false); assert.deepEqual(f.actions, []);
+});
+
+test('ordinary cohort activation fails without a fresh receipt and never partially activates a cohort', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, configuration, joins } = f;
+  await prepareCapacityActor(client, context, configuration);
+  client.refresh = async () => client.snapshot;
+  await assert.rejects(activatePreparedCohort([client], context), /fresh cohort readiness failed/);
+  assert.equal(client.ready, false); assert.deepEqual(joins, []);
+  let validated = false;
+  const first = { label: 'prepared', role: 'movement', sequence: 4, ready: false, pace: async () => {},
+    refresh: async () => {}, ordinarySupplies: { assertReady: ({ afterSequence }) => { assert.equal(afterSequence, 4); validated = true; } } };
+  const second = { ...first, label: 'lost-stock', ordinarySupplies: { assertReady: () => { throw new Error('stock lost'); } } };
+  await assert.rejects(activatePreparedCohort([first, second], context), /stock lost/);
+  assert.equal(validated, true); assert.equal(first.ready, false); assert.equal(second.ready, false); assert.deepEqual(joins, []);
+});
+
+test('ordinary preparation rejects active actors, blocked staging and transfer staging before sending', async () => {
+  for (const boundary of ['active', 'blocked', 'transfer']) {
+    const f = ordinaryPreparationFixture(), { client, context, configuration } = f;
+    if (boundary === 'active') client.ready = true;
+    if (boundary === 'blocked') context.map.blocked[5 * context.map.width + 5] = 1;
+    if (boundary === 'transfer') client.snapshot.mapTransfers = [{ bounds: { minX: 5, maxX: 5, minY: 5, maxY: 5 } }];
+    await assert.rejects(prepareCapacityActor(client, context, configuration));
+    assert.equal(f.commands.length, 0); assert.deepEqual(f.joins, []);
+  }
+});
+
+test('ordinary preparation keepAlive uses the original budget only after ready while funding and HP evidence retain control', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, commands } = f;
+  let state = 'funding'; client.ordinarySupplies = { status: () => ({ status: state }) };
+  client.nextRtt = 0; client.nextRefresh = Infinity;
+  client.ws.send = data => { const command = JSON.parse(data); commands.push(command);
+    f.packet('KeepAlive', { time: command.time }); };
+  offerPreparationKeepAlive(client, context); assert.equal(commands.length, 0);
+  state = 'ready'; client.hpRecoveryEvidence = {};
+  offerPreparationKeepAlive(client, context); assert.equal(commands.length, 0);
+  client.hpRecoveryEvidence = null;
+  offerPreparationKeepAlive(client, context); await client.auxPending;
+  assert.equal(commands.length, 1); assert.equal(commands[0].type, 'keepAlive'); assert.equal(client.budget.sent.length, 1);
+  assert.equal(client.ready, false); assert.deepEqual(f.joins, []);
+  assert.equal(f.actions.length, 1); assert.equal(f.actions[0].kind, 'rtt'); assert.equal(f.actions[0].nativeOpportunity, undefined);
+  client.nextRtt = 0; for (let n = 0; n < 2; n++) client.budget.reserve();
+  offerPreparationKeepAlive(client, context); assert.equal(commands.length, 1, 'maintenance cannot exceed the account budget');
+  client.snapshot.playerHp = 0; client.snapshot.entities[0].dead = true;
+  assert.throws(() => offerPreparationKeepAlive(client, context), /no automatic resurrection/);
+  assert.equal(commands.length, 1, 'inactive preparation retains the original owner death stop');
+});
+
+test('500 actor opt-in reaches explicit home and navigation validation while legacy callers keep their ceiling', () => {
+  const map = { width: 110, height: 90, blocked: new Uint8Array(9900) };
+  const anchors = Array.from({ length: 500 }, (_, index) => ({ x: 2 + index % 25 * 4, y: 2 + Math.floor(index / 25) * 4 }));
+  assert.throws(() => validateNativeExplicitHomes(map, { x: 1, y: 1 }, 500, anchors));
+  const policy = capacityPolicy({ targetActors: 500 });
+  const proof = validateNativeExplicitHomes(map, { x: 1, y: 1 }, 500, anchors, 2, [], [], policy);
+  assert.equal(proof.homes.length, 500); assert.equal(proof.footprintCells, 4500);
+  const f = huntFixture([]), { client, context } = f;
+  context.clients = [client, ...Array.from({ length: 499 }, () => ({ ready: false }))];
+  assert.throws(() => navigationObstacles(client), /100 actor ceiling/);
+  context.policy = policy;
+  assert.doesNotThrow(() => navigationObstacles(client));
+  context.clients.push({ ready: false });
+  assert.throws(() => navigationObstacles(client), /declared actor ceiling/);
+});
+
+test('ordinary supply commands reach the capacity wire with the original budget and no QA command admission', () => {
+  for (const command of [{ type: 'harvest', objectId: 123 }, { type: 'interact', objectId: 456 },
+    { type: 'selectNpcDialog', key: '@buysell' }, { type: 'sellItem', uniqueId: 7, count: 1 },
+    { type: 'buyItem', itemIndex: 658, count: 12, panelType: 0 }]) {
+    const f = hpRecoveryFixture(); f.client.send(command);
+    assert.deepEqual(f.commands, [command]); assert.equal(f.client.budget.sent.length, 1);
+  }
+  for (const type of ['qa.giveItem', 'event.spawn', 'qa.openStorage', 'moveTo', 'passkeyLogin']) {
+    const f = hpRecoveryFixture(); assert.throws(() => f.client.send({ type }), /Not an allowed/);
+    assert.deepEqual(f.commands, []);
+  }
 });
 
 function prepareHuntWitness(fixture, target) {

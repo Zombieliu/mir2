@@ -19,34 +19,60 @@ export function sanitize(value, secrets = []) {
   return value;
 }
 
+export const CAPACITY_TARGET_STAGES = Object.freeze([2, 10, 25, 50, 100, 250, 500]);
+
+// Higher actor counts require an explicit new target. Historical pools and
+// callers without this option retain their original hundred-actor ceiling.
+export function capacityActorLimit(options = {}) {
+  if (options.targetActors === undefined) return 100;
+  if (Number(options.targetActors) !== 500) throw new Error('The explicit capacity target must be 500 actors');
+  return 500;
+}
+
+export function capacityPreparationPolicy(options = {}) {
+  const preparationProfile = options.preparationProfile ?? 'held-only';
+  if (!['held-only', 'ordinary-economic-v1'].includes(preparationProfile)) throw new Error('Unknown capacity preparation profile');
+  const preparationHpTarget = Number(options.preparationHpTarget ?? (preparationProfile === 'ordinary-economic-v1' ? 12 : 0));
+  if (!Number.isInteger(preparationHpTarget) || (preparationProfile === 'held-only' ? preparationHpTarget !== 0 : preparationHpTarget < 1 || preparationHpTarget > 40)) {
+    throw new Error('Held-only preparation requires HP target 0; ordinary-economic-v1 requires an integer HP target from 1 to 40');
+  }
+  return Object.freeze({ preparationProfile, preparationHpTarget });
+}
+
 export function capacityPolicy(options = {}) {
+  const actorLimit = capacityActorLimit(options), target = options.targetActors !== undefined;
   const profile = options.profile ?? 'standard';
   if (!['standard', 'probe', 'movement'].includes(profile)) throw new Error('Profile must be standard, probe or movement');
-  const activityMode = options.activityMode ?? 'baseline';
+  const activityMode = options.activityMode ?? (target ? 'native' : 'baseline');
   if (!['baseline', 'native'].includes(activityMode)) throw new Error('Activity mode must be baseline or native');
   const native = activityMode === 'native';
-  const stages = String(options.stages ?? (profile === 'probe' ? '1,2' : '10,20,30,40,50')).split(',').map(Number);
+  if (target && (profile !== 'standard' || !native)) throw new Error('The 500-actor target requires the native standard workload');
+  const preparation = capacityPreparationPolicy(options);
+  const stages = String(options.stages ?? (target ? CAPACITY_TARGET_STAGES.join(',') : profile === 'probe' ? '1,2' : '10,20,30,40,50')).split(',').map(Number);
   if (!stages.length || stages.length > 15 || stages.some((n, i) => !Number.isInteger(n) || n < 1 ||
-      n > (profile === 'probe' ? 10 : 100) || (i && n <= stages[i - 1]))) throw new Error('Stages must increase, with an absolute maximum of 100 actors');
+      n > (profile === 'probe' ? 10 : actorLimit) || (i && n <= stages[i - 1]))) throw new Error('Stages must increase, with an absolute maximum of ' + actorLimit + ' actors');
   const stageSeconds = Number(options.stageSeconds ?? (profile === 'probe' ? 30 : 300));
-  const soakSeconds = Number(options.soakSeconds ?? (profile === 'probe' ? 30 : 3600));
-  const wallSeconds = Number(options.wallSeconds ?? (profile === 'probe' ? 1800 : 10800));
+  const soakSeconds = Number(options.soakSeconds ?? (target ? 7200 : profile === 'probe' ? 30 : 3600));
+  const wallSeconds = Number(options.wallSeconds ?? (target ? 21600 : profile === 'probe' ? 1800 : 10800));
   const combatActors = Number(options.combatActors ?? (native && profile === 'standard' ? Math.ceil(stages.at(-1) * .1) : 0)), resumeSamples = Number(options.resumeSamples ?? (profile === 'probe' ? 0 : 2));
   const saveSamples = Number(options.saveSamples ?? (profile === 'probe' ? 0 : 2));
   const layout = options.layout ?? 'dispersed';
   if (!['dispersed', 'hotspot'].includes(layout) || !Number.isInteger(stageSeconds) || stageSeconds < (profile === 'probe' ? 20 : 120) || stageSeconds > 600 ||
       !Number.isInteger(soakSeconds) || soakSeconds < (profile === 'probe' ? 20 : 3600) || soakSeconds > 14400 ||
       !Number.isInteger(wallSeconds) || wallSeconds < 60 || wallSeconds > 43200 ||
-      !Number.isInteger(combatActors) || combatActors < 0 || combatActors > Math.min(25, stages.at(-1)) ||
+      !Number.isInteger(combatActors) || combatActors < 0 || combatActors > Math.min(target ? 125 : 25, stages.at(-1)) ||
       !Number.isInteger(resumeSamples) || resumeSamples < 0 || resumeSamples > 5 ||
       !Number.isInteger(saveSamples) || saveSamples < 0 || saveSamples > 5) throw new Error('Invalid finite scenario or duration bounds');
+  if (target && (stageSeconds !== 300 || soakSeconds !== 7200)) throw new Error('The 500-actor target requires 300-second stages and a 7200-second final soak');
   if (profile !== 'probe' && (resumeSamples < 1 || saveSamples < 1)) throw new Error('Full-length workloads require native resume and save samples');
   if (profile === 'movement' && (!native || combatActors !== 0)) throw new Error('Movement diagnostics require native movement and zero combat actors');
   const movementIntervalMs = Number(options.movementIntervalMs ?? (native ? 750 : 1000));
   if (native ? ![650, 750].includes(movementIntervalMs) : movementIntervalMs !== 1000) throw new Error('Native movement interval must be 650 or 750ms; baseline stays 1000ms');
   if (native && profile === 'standard' && (combatActors < Math.ceil(stages.at(-1) * .1) || combatActors > Math.floor(stages.at(-1) * .25))) throw new Error('Native standard scenario requires 10–25 percent declared combat actors');
   if (resumeSamples > stages.at(-1) - combatActors || saveSamples > stages.at(-1)) throw new Error('Declared resume/save samples exceed the eligible actor cohort');
+  const preparationDeclared = target || options.preparationProfile !== undefined || options.preparationHpTarget !== undefined;
   return Object.freeze({ profile, activityMode, movementIntervalMs, stages, stageSeconds, soakSeconds, wallSeconds, layout, combatActors, resumeSamples, saveSamples,
+    ...(target ? { targetActors: 500 } : {}), ...(preparationDeclared ? preparation : {}),
     commandsPerSecond: 3, intentionIntervalMs: movementIntervalMs, variableActionCadence: native, maximumSendLatenessMs: 250,
     movementP95Ms: 750, chatP95Ms: 1000, actionTimeoutMs: 2000, timeoutExclusive: 0.01,
     maximumMissedPlanRatio: 0.05, maximumCorrectionRatio: 0.05, minimumMovesPerMinute: 30,
@@ -97,9 +123,10 @@ export class NativePlan {
   sent(at, cooldownMs) { this.legalAt = at + cooldownMs; }
 }
 
-export function validateCapacityPool(pool, endpoint) {
+export function validateCapacityPool(pool, endpoint, options = {}) {
+  const actorLimit = capacityActorLimit(options);
   if (pool?.schemaVersion !== 1 || pool.purpose !== 'isolated-load-actors' || pool.realm !== 'isolated' ||
-      validateEndpoint(pool.endpoint) !== endpoint || !Array.isArray(pool.accounts) || pool.accounts.length < 1 || pool.accounts.length > 100) throw new Error('Invalid isolated capacity account pool');
+      validateEndpoint(pool.endpoint) !== endpoint || !Array.isArray(pool.accounts) || pool.accounts.length < 1 || pool.accounts.length > actorLimit) throw new Error('Invalid isolated capacity account pool');
   const ids = new Set(), names = new Set();
   for (const account of pool.accounts) {
     if (!/^lt[a-z0-9]{8,16}$/.test(account.accountId ?? '') || !/^L[a-z0-9]{8}$/.test(account.name ?? '') ||
