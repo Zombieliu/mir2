@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T23:27:30.234Z",
+  "endedAt": "2026-10-25T23:27:38.091Z",
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "args": [
+    "C:/mir2-build/p01-completion-20261024/scout-anti-convergence-runtime-v1/readonly-source-guard-v1.mjs",
+    "--readonly-sourceguard",
+    "--repository",
+    "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3",
+    "--expected-head",
+    "4fb58ade4aa95b677bb795625d01da542a84a3f7"
+  ],
+  "exit": {
+    "code": 0,
+    "signal": null
+  },
+  "review": {
+    "file": "C:/mir2-build/p01-completion-20261024/scout-anti-convergence-runtime-independent-review-v1/final-binding-review-v1.json",
+    "bytes": 3197,
+    "sha256": "77e797fee794698a5a22d42febdbc7b50cd02e3c8483a58ddc3e0b3677b88034"
+  },
+  "sourceBefore": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/scout-anti-convergence-runtime-v1/source-lib-v1.mjs",
+      "bytes": 43452,
+      "sha256": "c8188c54c2bec952fb3877da5218d1ad91ef3efc4d40c53008939e8e8d987bca"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/scout-anti-convergence-runtime-v1/readonly-source-guard-v1.mjs",
+      "bytes": 724,
+      "sha256": "0969b4edc588e96c147fdaa86b6c8347636134b6ce27fa855eb029f99bff2490"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/scout-anti-convergence-runtime-v1/current-execution-binding-v1.json",
+      "bytes": 1402,
+      "sha256": "2a6cc9ae89a467ddeb19636b3f50b6126af968c1b5a29e6d303ca7f85bb7adea"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/scout-anti-convergence-runtime-v1/source-lib-v1.mjs",
+      "bytes": 43452,
+      "sha256": "c8188c54c2bec952fb3877da5218d1ad91ef3efc4d40c53008939e8e8d987bca"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/scout-anti-convergence-runtime-v1/readonly-source-guard-v1.mjs",
+      "bytes": 724,
+      "sha256": "0969b4edc588e96c147fdaa86b6c8347636134b6ce27fa855eb029f99bff2490"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/scout-anti-convergence-runtime-v1/current-execution-binding-v1.json",
+      "bytes": 1402,
+      "sha256": "2a6cc9ae89a467ddeb19636b3f50b6126af968c1b5a29e6d303ca7f85bb7adea"
+    }
+  ],
+  "sourcePinsUnchanged": true,
+  "stdout": {
+    "file": "C:/mir2-build/p01-completion-20261024/scout-anti-convergence-runtime-readonly-guard-stdout-v1.log",
+    "bytes": 513,
+    "sha256": "d8de777412955cb68dac020e84c8156bd792acc0fcb7bfe77cd74d884008a141"
+  },
+  "stderr": {
+    "file": "C:/mir2-build/p01-completion-20261024/scout-anti-convergence-runtime-readonly-guard-stderr-v1.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "capacityRunPerformed": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "observedAtUtc": "2026-10-26T00:47:13.1951220Z",
+  "runId": "1792974410829-a5288349",
+  "basis": "Root directly observed actual tool command terminals, not reconstructed execution receipts",
+  "commands": [
+    {
+      "command": "seal",
+      "actualExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-seal-stdout-v1.log",
+        "bytes": 345,
+        "sha256": "53f64a15c27235a3941fe4859feda00ea2f3ef612b38af679d63a680a42ff258"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-seal-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "guard",
+      "actualExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-guard-stdout-v1.log",
+        "bytes": 323,
+        "sha256": "4c07ef22c8633cf96c5d5ad1a0c2478fce5d8504c93f424b6479cb40137cfcd1"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-guard-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "prepare",
+      "actualExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-prepare-stdout-v1.log",
+        "bytes": 639,
+        "sha256": "4c6999d23397ffcc3ebea52a0ea381a85886474aab905a2f4c492fa189b0e01e"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-prepare-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "run",
+      "actualExitCode": 1,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-run-stdout-v1.log",
+        "bytes": 2887,
+        "sha256": "0a9bd7e714af239b56cce87d8922c9dad1d60df070847c1160810a7203815c01"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-run-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "base-collection",
+      "actualExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-base-collection-stdout-v1.log",
+        "bytes": 132864,
+        "sha256": "771d39ed7ceae3afa532ff8c349cd717472a65b65ee5662a6a6757e1960c486c"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "base-verification",
+      "actualExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-base-verification-stdout-v1.log",
+        "bytes": 5021,
+        "sha256": "2d14695283ed759c6df829d6754ccbbfa413cf0cf0251919f5795ee7a0841466"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "store-collection",
+      "actualExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-store-collection-stdout-v1.log",
+        "bytes": 396,
+        "sha256": "476a9d2f30c54f767d567d55d3e98c9693e8d43e7978f92a105a4cf99ce4caf0"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "command": "store-verification",
+      "actualExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-store-verification-stdout-v1.log",
+        "bytes": 1243,
+        "sha256": "32d4c4e635eec0406b512d14a251c69b537c57f61a371521bbaa9dbe1f7bea59"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "actualClosedToolSessions": {
+    "prepare": 31960,
+    "run": 89289,
+    "fourConsumers": 84255
+  },
+  "actualRunExitCode": 1,
+  "fourConsumersActualExitZero": true,
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "backendInputCount": 50,
+  "admittedSourceConfigSha256": "5c8be7bc19d26ecf69326c19224f6f657d469099f00f606bed042a3912b40b8a",
+  "admittedSourceFileCount": 372,
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\reports\\1792974410829-a5288349.report.json",
+    "bytes": 424421,
+    "sha256": "e938a814eed311b80281ffcd6cadf16e57d36c78f48a1f35ad4caf68d90355a3"
+  },
+  "realmCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\realm-cleanup.json",
+    "bytes": 6570,
+    "sha256": "5a02dc3081433fde61fbd756f84e98796e07e01fcc7e9fc3541d1c41f22eb1fa"
+  },
+  "sourceSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\launcher-source-frozen-v1.json",
+    "bytes": 52054,
+    "sha256": "9f2af38f22337788512700dce010f83a312b2cbdfc8877a57acdce7be46c3f65"
+  },
+  "rootOSProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-root-independent-cleanup-v1.json",
+    "bytes": 401,
+    "sha256": "2f560a2c82a6f3ee744f35d54e0cd79726e1c8a5a0df7499393dec7eaa5601de"
+  },
+  "prepared100OrdinaryAccountsZeroCharacters": true,
+  "stageSummary": [
+    {
+      "name": "stage-2",
+      "controlledActors": 2,
+      "measuredSeconds": 300.126,
+      "completed": true,
+      "passed": true,
+      "completeWindowVerdicts": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "stage-10",
+      "controlledActors": 10,
+      "measuredSeconds": 300.257,
+      "completed": true,
+      "passed": true,
+      "completeWindowVerdicts": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "stage-25",
+      "controlledActors": 25,
+      "measuredSeconds": 300.276,
+      "completed": true,
+      "passed": false,
+      "completeWindowVerdicts": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ]
+    }
+  ],
+  "failedReportPreserved": true,
+  "reportSafetyStopped": false,
+  "independentWindowAdjudicationPending": true,
+  "capacityAccepted": false,
+  "P0Accepted": false,
+  "P2Started": false,
+  "fiftyHundredAndTwoHourSoakExecuted": false,
+  "limitations": "Historical point-in-time Root terminal record. No independent raw-window replay, memory plateau, per-packet900ms or production/cloud capacity claim."
+}

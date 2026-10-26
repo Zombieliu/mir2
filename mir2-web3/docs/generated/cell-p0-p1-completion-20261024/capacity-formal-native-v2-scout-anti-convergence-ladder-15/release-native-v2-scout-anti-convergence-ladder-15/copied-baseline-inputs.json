@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "scope": "Source-only derivation baseline, not an execution/result copy.",
+  "baselineRoot": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14",
+  "validCollectorSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-public-current219-v2.mjs",
+    "bytes": 43255,
+    "sha256": "9a159c251035593be4293ea2e3f3c6bf58c118db075f8572cba5f6104a071713"
+  },
+  "oldObsoleteCollectorNotUsed": true,
+  "oldExecutionResultsCopied": false,
+  "policyScenarioResourceUnchanged": true
+}

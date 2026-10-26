@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-26T00:25:44.147Z",
+  "passed": true,
+  "runId": "1792971074413-d1b0416a",
+  "realmStamp": "1792971063764-c4c81284",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendInputCount": 50,
+  "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+  "binarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "slowStageThresholdMs": 50,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.audit-source.mjs",
+      "bytes": 9481,
+      "sha256": "3f0c0d23caa445a38fe322ee9440fbfe712ae6c96a19617dbabe8382d9b00ab5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.backend-source.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.independent-audit.json",
+      "bytes": 1904,
+      "sha256": "7ec58c2c91858dc9136018857cab96e6c024c00ea5341f45e0ed4bd52499c496"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.prepared-profile.json",
+      "bytes": 4777,
+      "sha256": "ee888450fe85cdb017a0575e74f43e13766594f7d994d0afed239a1f23105dd3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.realm-evidence.json",
+      "bytes": 35104,
+      "sha256": "19b458eb00cf407fbc4ed66c10d88e05f4a38bf1fa0def5d3952ce6be97f5106"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.release-input.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.runner-source.mjs",
+      "bytes": 14496,
+      "sha256": "150cd59619f1b964352f7da5cea1fe10984ae2653cb8c48aa6b769ac2f5f1366"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.source-manifest-verification.json",
+      "bytes": 725,
+      "sha256": "cc1f71934903c55c0e0fbb1d56e8e8c1126c9bbd190a94c65889e18847be9407"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.zone-metrics.json",
+      "bytes": 23591,
+      "sha256": "0cd4721452dc416d0904c1b804fe8ead28df5cb6b3b8f9bccda260bede988730"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-a.trace.jsonl",
+      "bytes": 977672,
+      "sha256": "4d98cd5eb04779f164ffc22f39fdaa216c3e7ae234229f6a80f4159bd8e523d6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-b.trace.jsonl",
+      "bytes": 902155,
+      "sha256": "33f325df131467214c8a3d273a9c097c04d7f1847127f525187fd2334741ba95"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-guard-newCharacter.trace.jsonl",
+      "bytes": 3486,
+      "sha256": "9f4b6e854ce7464f9b08a2deb9f02d2750a36a33a88170cbd675338eb649912c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-guard-startGame.trace.jsonl",
+      "bytes": 3450,
+      "sha256": "dcbd5e421984962390199673c3bf6435e120895c488be3f94860551b2558d78c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-relogin-0.trace.jsonl",
+      "bytes": 684278,
+      "sha256": "ac71379e99fe3dccbb73ce6965d4ccf26776800e729b3cf218deb4b70cfadc0f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a-relogin-1.trace.jsonl",
+      "bytes": 680216,
+      "sha256": "8fc06b841f72fda7a981ef1980d39e5de31351206a27e5e02a2aad9a20ff1f49"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971074413-d1b0416a.report.json",
+      "bytes": 109554,
+      "sha256": "8dad894a5dc664c2bea2167b0c7567e0653ac7f2acbe87e71196c64864ab30a6"
+    }
+  ],
+  "capacityAccepted": false
+}

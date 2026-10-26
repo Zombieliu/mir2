@@ -3473,3 +3473,101 @@ test('scout anti-convergence does not introduce distance sorting when no other s
   assert.equal(f.rows.at(-1).hintOrderChangedByActiveScoutPreference, false); assert.equal(f.rows.at(-1).pathSearches, 2);
   assert.equal(f.context.targetClaims.size, 0);
 });
+
+
+function scoutSelectionDiagnosticCounts(row) {
+  return Object.fromEntries(['hintCount', 'activeOtherWaypointCount', 'sharedHintCount', 'unsharedHintCount', 'hintPreferenceReason']
+    .map(key => [key, row[key]]));
+}
+
+test('scout selection diagnostics leave low-hint peer state unobserved and preserve single-hint and no-hint routes', () => {
+  const f = antiConvergenceScoutFixture(); f.thirdPeer.snapshot.entities.pop();
+  let peerScoutReads = 0;
+  Object.defineProperty(f.client, 'combatScout', { configurable: true, get() { peerScoutReads++; throw new Error('low-hint peer scout must not be scanned'); } });
+  const snapshot = JSON.stringify(f.other.snapshot), selected = selectNativeAction(f.other, f.context);
+  assert.equal(selected.scoutHomeIndex, 1); assert.ok(['walk', 'run'].includes(selected.command.type));
+  assert.equal(selected.command.objectId, undefined); assert.equal(peerScoutReads, 0);
+  assert.deepEqual(scoutSelectionDiagnosticCounts(f.rows.at(-1)), {
+    hintCount: 1, activeOtherWaypointCount: null, sharedHintCount: null, unsharedHintCount: null, hintPreferenceReason: 'insufficient-hints',
+  });
+  assert.equal(f.rows.at(-1).pathSearches, 2); assert.equal(f.rows.at(-1).hintOrderChangedByActiveScoutPreference, false);
+  assert.equal(JSON.stringify(f.other.snapshot), snapshot); assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+  const empty = antiConvergenceScoutFixture(); empty.secondPeer.snapshot.entities.pop(); empty.thirdPeer.snapshot.entities.pop();
+  Object.defineProperty(empty.client, 'combatScout', { get() { throw new Error('zero-hint peer scout must not be scanned'); } });
+  assert.equal(selectNativeAction(empty.other, empty.context).scoutHomeIndex, 0);
+  assert.equal(empty.rows.some(row => row.type === 'combatScoutSelection'), false, 'zero hints still produce no diagnostic row');
+});
+
+test('scout selection diagnostics distinguish no active other waypoint without changing the first reachable hint', () => {
+  const f = antiConvergenceScoutFixture(), snapshot = JSON.stringify(f.other.snapshot);
+  const plan = selectNativeAction(f.other, f.context);
+  assert.equal(plan.scoutHomeIndex, 1); assert.equal(plan.scouting, true); assert.equal(plan.command.objectId, undefined);
+  assert.deepEqual(scoutSelectionDiagnosticCounts(f.rows.at(-1)), {
+    hintCount: 2, activeOtherWaypointCount: 0, sharedHintCount: 0, unsharedHintCount: 2, hintPreferenceReason: 'no-active-other-waypoints',
+  });
+  assert.equal(f.rows.at(-1).pathSearches, 2); assert.equal(f.rows.at(-1).hintPathSearches, 1);
+  assert.equal(f.rows.at(-1).hintOrderChangedByActiveScoutPreference, false);
+  assert.equal(JSON.stringify(f.other.snapshot), snapshot); assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+});
+
+test('scout selection diagnostics count mixed alternatives and report the existing stable reordering', () => {
+  const f = antiConvergenceScoutFixture(); assert.equal(selectNativeAction(f.client, f.context).scoutHomeIndex, 1);
+  const priorScout = f.client.combatScout, priorGoal = { ...priorScout.goal }, selected = selectNativeAction(f.other, f.context);
+  assert.equal(selected.scoutHomeIndex, 2); assert.ok(['walk', 'run'].includes(selected.command.type));
+  assert.deepEqual(scoutSelectionDiagnosticCounts(f.rows.at(-1)), {
+    hintCount: 2, activeOtherWaypointCount: 1, sharedHintCount: 1, unsharedHintCount: 1, hintPreferenceReason: 'reordered',
+  });
+  assert.equal(f.rows.at(-1).hintOrderChangedByActiveScoutPreference, true); assert.equal(f.rows.at(-1).pathSearches, 2);
+  assert.equal(f.client.combatScout, priorScout); assert.deepEqual(priorScout.goal, priorGoal); assert.equal(priorScout.confirmedMoves, 0);
+  assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+});
+
+test('scout selection diagnostics distinguish all-unshared alternatives while preserving their cyclic order', () => {
+  const f = antiConvergenceScoutFixture(), a = f.secondPeer.snapshot.entities.pop(), b = f.thirdPeer.snapshot.entities.pop();
+  assert.equal(selectNativeAction(f.client, f.context).scoutHomeIndex, 0);
+  f.secondPeer.snapshot.entities.push(a); f.thirdPeer.snapshot.entities.push(b);
+  const prior = f.client.combatScout, plan = selectNativeAction(f.other, f.context);
+  assert.equal(plan.scoutHomeIndex, 1, 'all-unshared hints retain original order rather than distance sorting');
+  assert.deepEqual(scoutSelectionDiagnosticCounts(f.rows.at(-1)), {
+    hintCount: 2, activeOtherWaypointCount: 1, sharedHintCount: 0, unsharedHintCount: 2, hintPreferenceReason: 'all-hints-unshared',
+  });
+  assert.equal(f.rows.at(-1).hintOrderChangedByActiveScoutPreference, false); assert.equal(f.rows.at(-1).pathSearches, 2);
+  assert.equal(f.client.combatScout, prior); assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+});
+
+test('scout selection diagnostics distinguish all-shared alternatives without creating an exclusive claim', () => {
+  const f = antiConvergenceScoutFixture(); assert.equal(selectNativeAction(f.client, f.context).scoutHomeIndex, 1);
+  assert.equal(selectNativeAction(f.other, f.context).scoutHomeIndex, 2);
+  const third = new CapacityClient('ws://127.0.0.1:1/ws', actor(5), f.context);
+  Object.assign(third, { snapshot: { ...nativeSnapshot(), entities: [{ ...nativeSnapshot().entities[0], name: third.label, x: 5, y: 7 }] },
+    ready: true, inGame: true, role: 'combat', home: { x: 5, y: 7 }, combatArrival: { at: 1 }, combatCluster: f.client.combatCluster,
+    combatScoutCursor: 0, nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity });
+  f.context.clients.push(third);
+  const plan = selectNativeAction(third, f.context);
+  assert.equal(plan.scoutHomeIndex, 1); assert.equal(plan.command.objectId, undefined);
+  assert.deepEqual(scoutSelectionDiagnosticCounts(f.rows.at(-1)), {
+    hintCount: 2, activeOtherWaypointCount: 2, sharedHintCount: 2, unsharedHintCount: 0, hintPreferenceReason: 'all-hints-shared',
+  });
+  assert.equal(f.rows.at(-1).hintOrderChangedByActiveScoutPreference, false); assert.equal(f.rows.at(-1).pathSearches, 2);
+  assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+});
+
+test('scout selection diagnostics keep the original per-phase row cap and omit counts from its truncation sentinel', () => {
+  const f = antiConvergenceScoutFixture(), snapshot = JSON.stringify(f.other.snapshot);
+  for (let i = 0; i < 36; i++) {
+    f.other.combatScout = null; f.other.combatScoutCursor = 0;
+    const plan = selectNativeAction(f.other, f.context); assert.equal(plan.scoutHomeIndex, 1); assert.equal(plan.command.objectId, undefined);
+  }
+  const rows = f.rows.filter(row => row.type === 'combatScoutSelection'); assert.equal(rows.length, 32);
+  assert.ok(rows.slice(0, -1).every(row => row.hintCount === 2 && row.activeOtherWaypointCount === 0 &&
+    row.sharedHintCount === 0 && row.unsharedHintCount === 2 && row.hintPreferenceReason === 'no-active-other-waypoints' &&
+    row.pathSearches === 2 && row.hintPathSearches === 1 && row.truncated === false));
+  const sentinel = rows.at(-1); assert.equal(sentinel.truncated, true); assert.equal(sentinel.rowLimit, 32);
+  for (const key of ['hintCount', 'activeOtherWaypointCount', 'sharedHintCount', 'unsharedHintCount', 'hintPreferenceReason'])
+    assert.equal(Object.hasOwn(sentinel, key), false, 'the original cap sentinel shape is retained');
+  assert.equal(JSON.stringify(f.other.snapshot), snapshot); assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+  assert.equal(JSON.stringify(rows).includes('entities'), false); assert.equal(JSON.stringify(rows).includes('private-pass'), false);
+  f.context.phase = 'stage-10'; f.other.combatScout = null; f.other.combatScoutCursor = 0;
+  assert.equal(selectNativeAction(f.other, f.context).scoutHomeIndex, 1);
+  assert.equal(f.rows.filter(row => row.type === 'combatScoutSelection').length, 33);
+});

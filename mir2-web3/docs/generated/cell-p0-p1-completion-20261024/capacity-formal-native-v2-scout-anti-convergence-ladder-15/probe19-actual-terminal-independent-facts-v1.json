@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T00:16:41.003Z",
+  "state": "SEALED_ENDED19_REPLAY_ACTUAL_PASS_METADATA_CROSSCHECKED",
+  "scope": "Read-only metadata/source-closure cross-check of Root actual sealed verifier execution. This reviewer did not repeat raw/monitor/Store streams, per-packet checks, binary reads, tests, imports or game modes.",
+  "runId": "1792971941351-af013515",
+  "sources": {
+    "toolSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 2785,
+      "sha256": "419abe39e5b5ec71f47cbefd52a9c4e541eb9a92d86df5ea77f6504e6bd63c51"
+    },
+    "execution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "33dd7b9b83769800aab3a52fea3e4b884d4ceb194304c05684c6938f1f725d2d"
+    },
+    "executionLog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\actual-verification.log",
+      "bytes": 877,
+      "sha256": "a840bde4a087bac7c4dab68477320b5afd95d6c61d3c7fb3f9963cd4c7714063"
+    },
+    "finalVerification": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\final-verification.json",
+      "bytes": 455554,
+      "sha256": "7a8adbf0a67f312344acba4eedfce01d9c87eff26e5a348390e92a3beae16acc"
+    },
+    "rootTerminalAndConsumerFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 8316,
+      "sha256": "e2e9629496fbef2cdc5ae5bee8fede6a05fe9834a1866fc1aa6372e4bbaf47d5"
+    },
+    "rootIndependentCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-independent-cleanup-v1.json",
+      "bytes": 327,
+      "sha256": "fffd285c3a20d7596fd0cc365bc0aef55b9d145812387a539e4e9727144f913f"
+    }
+  },
+  "checkedSourceInputs": 14,
+  "sourceAggregate": "df67730c6eeac350eccc07c21a4a16ef35c9f1ea0dde578d6e2a099b2630fc2c",
+  "currentFourteenRawSourcePinsMatch": true,
+  "runnerReportsSourceBeforeAfterIdentical": true,
+  "actualRunnerExitCode": 0,
+  "actualRunnerSignal": null,
+  "rootEightCommandsObservedExitZero": true,
+  "rootCommandLogs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-seal-stdout-v1.log",
+      "bytes": 353,
+      "sha256": "f100d173191fcf10d899bacc9131ad781d2e82870cc074463813eab83f39b22e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-seal-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-guard-stdout-v1.log",
+      "bytes": 331,
+      "sha256": "81c42ccb6bd6b40ee7b11e113617486570103d4793c0df5b38c37b55cadb0661"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-guard-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-prepare-stdout-v1.log",
+      "bytes": 603,
+      "sha256": "ac4294bf894f489f78272dc91f4e7a3767571352b01013d092e9c1e71e8a5a38"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-prepare-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-run-stdout-v1.log",
+      "bytes": 1969,
+      "sha256": "eaa3580b91e155f289eba4e513a7d8a562d2816e58542d4d9efd6d86af025f6c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-run-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-base-collection-stdout-v1.log",
+      "bytes": 110685,
+      "sha256": "5c8a7e588c486049f44f43d75e89aee5770335319fcb42f9cba63f8ff1ddba51"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-base-collection-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-base-verification-stdout-v1.log",
+      "bytes": 5028,
+      "sha256": "f602c7c5f37c01d9ca031a49b7ccb3f1406b8b171943c9b1f5283067bb7e712b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-base-verification-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-store-collection-stdout-v1.log",
+      "bytes": 392,
+      "sha256": "354b8857993ac7ca6e813994592e87625d287ff0f3e7ad361e55ed68b65724ce"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-store-collection-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-store-verification-stdout-v1.log",
+      "bytes": 1241,
+      "sha256": "f72375905a1f04d9a05bd949377dbcc3edc12b49b9a80845c0dcc412504fbb46"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-store-verification-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "identities": {
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "backendInputs": 50,
+    "gatewaySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+    "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "coreCodeEvidenceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "driverSourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+    "scene10Sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+    "scene100Sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+    "sceneSourceSha256": "2981bd5f36e6abd382ca2ae5f20e2da10a0381b46f444e623b9a5f7de46508a9",
+    "sourceConfigSha256": "1225f83d8b2d5546c04dff9b152ba1c64acd71e35dffebb4b8642a5485d2d267"
+  },
+  "independentMetadataCrossCheckPassed": true,
+  "independentVerificationPassed": true,
+  "probePassed": true,
+  "capacityAccepted": false,
+  "rawVerifierAccepted": false,
+  "eligibleForFreshFormalPrerequisiteBinding": true,
+  "phaseChecks": [
+    {
+      "name": "stage-2",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.294,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    },
+    {
+      "name": "stage-10",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.22,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    },
+    {
+      "name": "soak",
+      "configuredSeconds": 360,
+      "measuredSeconds": 360.319,
+      "completed": true,
+      "completeWindowCount": 6,
+      "requiredCompleteWindows": 6,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    }
+  ],
+  "continuous": {
+    "rawWindows": 132,
+    "failed": 0,
+    "completeAtLeast60Seconds": 122,
+    "finalPartialUnder60Seconds": 10,
+    "all132Passed": true,
+    "scope": "Counts are derived from the sealed final-verification metadata.132 includes ten final partial windows; it is not132 complete minute windows."
+  },
+  "rawIdentity": {
+    "rows": 41130,
+    "bytes": 29130996,
+    "sha256": "692a855584060769b177681c141e392ade2716954d456bfb412d5d981efb1685",
+    "rawReopenedHere": false
+  },
+  "publicCopiesVerifiedByActualReplay": 205,
+  "hp": {
+    "observedStatuses": {},
+    "verifiedEventsChecked": 0,
+    "successProofChecked": false,
+    "noVerifiedDoseObserved": true,
+    "notContinuousHpCoverage": true
+  },
+  "wire": {
+    "present": true,
+    "sourceValid": true,
+    "countsMatch": true,
+    "uninstallSucceeded": true,
+    "complete": true,
+    "rows": 5372,
+    "contributesGameAcceptance": false
+  },
+  "store": {
+    "sourceValid": true,
+    "countsMatch": true,
+    "complete": true,
+    "rows": 13,
+    "contributesGameAcceptance": false,
+    "completedOnlyCannotProveMissingHolder": true
+  },
+  "cleanup": {
+    "allSevenTrue": true,
+    "gatewayExit0": true,
+    "monitorExit0": true,
+    "RootOSObservedAbsent": true
+  },
+  "historicalScope": "The earlier8316B Root facts are preserved with independentWindowAdjudicationPending=true as their original writing-time statement; this later fact record references actual execution/final receipts without editing them.",
+  "limitations": [
+    "The sealed verifier replay independently checks raw action counters, actual-duration5/5/6 windows, continuous counters, HP proof rows and hashes. It does not independently match every typed attack/dual-positive packet within900ms.",
+    "HP zero rows prove no real dose or continuous survival. Wire/Store data remain bounded diagnostic projections and do not grant gameplay credit or prove absence of a holder/object.",
+    "This small2/10 probe is only a prerequisite for a separate formal run.25 effects,50/100 tiers and two-hour soak have not been validated here. P0 and P2 remain unaccepted."
+  ],
+  "p0Passed": false,
+  "p2Started": false,
+  "productionAccepted": false
+}

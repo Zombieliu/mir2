@@ -1,0 +1,322 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-26T01:08:30.550Z",
+  "whitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-driver-binding-v1\\public-whitelist-v1.json",
+    "bytes": 8894,
+    "sha256": "71631ce78136f2644f6dfd9f32cad4a245f5cbbea43656cae0957bf8f0ae9d8c"
+  },
+  "copyTool": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-driver-binding-v1\\copy-public-v1.mjs",
+    "bytes": 5550,
+    "sha256": "d8eef7215394c28bb4f7e2360c58bcd4b772259404f548ff118096c40d0103c1"
+  },
+  "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1",
+  "copies": [
+    {
+      "source": {
+        "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+        "bytes": 156391,
+        "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\source\\playtest-capacity-soak.mjs",
+        "bytes": 156391,
+        "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+        "bytes": 278248,
+        "sha256": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\source\\playtest-capacity-soak.test.mjs",
+        "bytes": 278248,
+        "sha256": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/preimages/playtest-capacity-soak.mjs.txt",
+        "bytes": 155475,
+        "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+        "bytes": 155475,
+        "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/preimages/playtest-capacity-soak.test.mjs.txt",
+        "bytes": 270311,
+        "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+        "bytes": 270311,
+        "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/source-preservation-and-focused-receipt-v1.json",
+        "bytes": 6798,
+        "sha256": "37a687b66c9db85c0ceb0c2c567b54ed3394d362a0bd0244589ccfa6f1ab9fc5"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\source-preservation-and-focused-receipt-v1.json",
+        "bytes": 6798,
+        "sha256": "37a687b66c9db85c0ceb0c2c567b54ed3394d362a0bd0244589ccfa6f1ab9fc5"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/production-mutation-v1.json",
+        "bytes": 3246,
+        "sha256": "d520eeb564accde06d8353cd8e5be0ff066071b523c011dcc6288e1a3a0a511e"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\production-mutation-v1.json",
+        "bytes": 3246,
+        "sha256": "d520eeb564accde06d8353cd8e5be0ff066071b523c011dcc6288e1a3a0a511e"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/source-diff-v1.patch",
+        "bytes": 12554,
+        "sha256": "b1cf86b12bc6ffb271a9dc2c1e74316c6a92a490ee4545d6f4202dd4ced1b407"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\source-diff-v1.patch",
+        "bytes": 12554,
+        "sha256": "b1cf86b12bc6ffb271a9dc2c1e74316c6a92a490ee4545d6f4202dd4ced1b407"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/static-checks-v1.json",
+        "bytes": 938,
+        "sha256": "22fefa3c756653fbd26817ebe6271d89dd31f5cc71d0a8823b8810fe428a9f99"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\static-checks-v1.json",
+        "bytes": 938,
+        "sha256": "22fefa3c756653fbd26817ebe6271d89dd31f5cc71d0a8823b8810fe428a9f99"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/focused-red-execution-v1.json",
+        "bytes": 4660,
+        "sha256": "8b752fa6ea7f5f9581b4a6ea5a83089920ff163f9e281dd0707a305d447e684e"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\focused-red-execution-v1.json",
+        "bytes": 4660,
+        "sha256": "8b752fa6ea7f5f9581b4a6ea5a83089920ff163f9e281dd0707a305d447e684e"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/focused-red-v1.log",
+        "bytes": 10369,
+        "sha256": "6f8f90b45da83251d64e05be8315f57b7b4f758f8052c372684573c02c82901e"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\focused-red-v1.log",
+        "bytes": 10369,
+        "sha256": "6f8f90b45da83251d64e05be8315f57b7b4f758f8052c372684573c02c82901e"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/focused-red-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\focused-red-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/focused-green-execution-v1.json",
+        "bytes": 4755,
+        "sha256": "1c8e50cdcce7c48bfb3ed2d485d728061266e33f86419c5cde7b5c7fcb66bf08"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\focused-green-execution-v1.json",
+        "bytes": 4755,
+        "sha256": "1c8e50cdcce7c48bfb3ed2d485d728061266e33f86419c5cde7b5c7fcb66bf08"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/focused-green-v1.log",
+        "bytes": 6385,
+        "sha256": "89970121d4a315829ebc217150ffdb69ca85749a56cb124d1e4ebafd4b3413ee"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\focused-green-v1.log",
+        "bytes": 6385,
+        "sha256": "89970121d4a315829ebc217150ffdb69ca85749a56cb124d1e4ebafd4b3413ee"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-v1/focused-green-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\focused-green-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/root-scout-selection-diagnostics-validation-v1/run-full-driver-v1.mjs",
+        "bytes": 4670,
+        "sha256": "a2e32cefaa7aada730f3496cc5efbdb66f64b62983db441d17bc4f2ea2d70d28"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\run-full-driver-v1.mjs",
+        "bytes": 4670,
+        "sha256": "a2e32cefaa7aada730f3496cc5efbdb66f64b62983db441d17bc4f2ea2d70d28"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/root-scout-selection-diagnostics-validation-v1/root-full-driver-receipt-v1.json",
+        "bytes": 5162,
+        "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\root-full-driver-receipt-v1.json",
+        "bytes": 5162,
+        "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-v1.stdout.log",
+        "bytes": 62597,
+        "sha256": "95277742a021f3c8a59eebda46e33022cb221011c2017bd5278c6dff63bf1444"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\root-full-driver-v1.stdout.log",
+        "bytes": 62597,
+        "sha256": "95277742a021f3c8a59eebda46e33022cb221011c2017bd5278c6dff63bf1444"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\evidence\\root-full-driver-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-independent-review-v1.json",
+        "bytes": 4886,
+        "sha256": "6ceacd48f90475d750d3f2b43241d4c51593681a69a7bc633dd1f4193e99a8b0"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\reviews\\source-review-v1.json",
+        "bytes": 4886,
+        "sha256": "6ceacd48f90475d750d3f2b43241d4c51593681a69a7bc633dd1f4193e99a8b0"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-selection-decision-diagnostics-independent-review-v1/full-regression-addendum-v1.json",
+        "bytes": 3712,
+        "sha256": "4c6c4abcf14d20451e740439a417939384e06ee5db02941cd6e72812b1a517e2"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\reviews\\full-regression-addendum-v1.json",
+        "bytes": 3712,
+        "sha256": "4c6c4abcf14d20451e740439a417939384e06ee5db02941cd6e72812b1a517e2"
+      }
+    }
+  ],
+  "count": 20,
+  "totalBytes": 991157,
+  "readme": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-selection-diagnostics-driver-v1\\README.md",
+    "bytes": 2567,
+    "sha256": "aa2824d959c3b5abe127d54ce035d9edb777d332cfc1b46b25616ec62fe60cc6"
+  },
+  "links": [
+    {
+      "relative": "source/playtest-capacity-soak.mjs",
+      "exists": true
+    },
+    {
+      "relative": "source/playtest-capacity-soak.test.mjs",
+      "exists": true
+    },
+    {
+      "relative": "evidence/source-preservation-and-focused-receipt-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "evidence/production-mutation-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "evidence/focused-red-execution-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "evidence/focused-green-execution-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "evidence/root-full-driver-receipt-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "evidence/root-full-driver-v1.stdout.log",
+      "exists": true
+    },
+    {
+      "relative": "reviews/source-review-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "reviews/full-regression-addendum-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "preimages/playtest-capacity-soak.mjs.txt",
+      "exists": true
+    },
+    {
+      "relative": "preimages/playtest-capacity-soak.test.mjs.txt",
+      "exists": true
+    }
+  ],
+  "sourceAfterCopyRawExact": true,
+  "destinationReadbackRawExact": true,
+  "referenceOnlyNotCopied": true,
+  "privateRawTraceBinaryNotCopied": true,
+  "verifierRerun": false,
+  "testsRun": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -1002,7 +1002,9 @@ export function recordCombatScoutMovement(client, context, plan, origin, receipt
   if (reason) advanceCombatScout(client, context, reason, now);
 }
 
-function preferUnsharedScoutWaypoints(client, context, hints, now) {
+function preferUnsharedScoutWaypoints(client, context, hints, now, diagnostic) {
+  Object.assign(diagnostic, { hintCount: hints.length, activeOtherWaypointCount: null,
+    sharedHintCount: null, unsharedHintCount: null, hintPreferenceReason: 'insufficient-hints' });
   if (hints.length < 2) return hints;
   const mapName = client.snapshot.mapFileName, otherWaypoints = new Set();
   for (let index = 0; index < Math.min(context.clients.length, 100); index++) {
@@ -1015,12 +1017,20 @@ function preferUnsharedScoutWaypoints(client, context, hints, now) {
     const home = other.combatCluster?.observerHomes?.[scout.homeIndex];
     if (home && Number.isInteger(home.x) && Number.isInteger(home.y)) otherWaypoints.add(home.x + ',' + home.y);
   }
-  if (!otherWaypoints.size) return hints;
+  diagnostic.activeOtherWaypointCount = otherWaypoints.size;
+  if (!otherWaypoints.size) {
+    diagnostic.sharedHintCount = 0; diagnostic.unsharedHintCount = hints.length;
+    diagnostic.hintPreferenceReason = 'no-active-other-waypoints';
+    return hints;
+  }
   const unshared = [], shared = [];
   for (const hint of hints) {
     const home = client.combatCluster.observerHomes[hint.homeIndex];
     (otherWaypoints.has(home.x + ',' + home.y) ? shared : unshared).push(hint);
   }
+  diagnostic.sharedHintCount = shared.length; diagnostic.unsharedHintCount = unshared.length;
+  diagnostic.hintPreferenceReason = unshared.length && shared.length ? 'reordered' :
+    shared.length ? 'all-hints-shared' : 'all-hints-unshared';
   // A local home index is not a cross-cluster identity. These are same-map
   // declared waypoint coordinates, only a planning preference, never a claim.
   // Preserve original order when no usable distinction exists.
@@ -1111,7 +1121,7 @@ function scoutCombatCoverage(client, context, now = Date.now(), coverage = activ
     const fallbackSearches = searches;
     if (!client.combatScout && searches < 4) {
       hintScan = combatScoutHints(client, context, coverage, initialCursor, fallback.homeIndex, now, allowed, occupied);
-      const preferredHints = preferUnsharedScoutWaypoints(client, context, hintScan.hints, now);
+      const preferredHints = preferUnsharedScoutWaypoints(client, context, hintScan.hints, now, hintScan);
       hintScan.hintOrderChangedByActiveScoutPreference = preferredHints !== hintScan.hints;
       for (const candidate of preferredHints) {
         const preferred = findPlan(candidate.homeIndex, true);
@@ -1129,6 +1139,8 @@ function scoutCombatCoverage(client, context, now = Date.now(), coverage = activ
       reason: hint ? 'observer-target-waypoint' : 'cyclic-fallback', fallbackHomeIndex: fallback.homeIndex,
       selectedHomeIndex: homeIndex, pathSearches: searches, hintPathSearches: searches - fallbackSearches,
       hintScanTruncated: hintScan.truncated, hintOrderChangedByActiveScoutPreference: hintScan.hintOrderChangedByActiveScoutPreference,
+      hintCount: hintScan.hintCount, activeOtherWaypointCount: hintScan.activeOtherWaypointCount,
+      sharedHintCount: hintScan.sharedHintCount, unsharedHintCount: hintScan.unsharedHintCount, hintPreferenceReason: hintScan.hintPreferenceReason,
       ...(hint ? { hintTargetId: hint.objectId, hintTarget: hint.target, actualObserver: hint.observer,
         potentialAttackTile: hint.attackTile } : {}) }, now);
     return { ...plan, scouting: true, scoutHomeIndex: homeIndex };

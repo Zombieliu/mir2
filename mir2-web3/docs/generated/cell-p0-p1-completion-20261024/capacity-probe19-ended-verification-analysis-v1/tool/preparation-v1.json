@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_PREPARED_ENDED_ONLY_NOT_EXECUTED",
+  "preparedAt": "2026-10-26T00:07:51.619Z",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1",
+  "files": [
+    {
+      "path": "verify-ended-probe19-v1.mjs",
+      "bytes": 39544,
+      "sha256": "b0d40fcccb6ea67b5d29537c2b7d79ccb712ec3b14e171366bb3ec6d72c68768"
+    },
+    {
+      "path": "probe-contract-v1.mjs",
+      "bytes": 5860,
+      "sha256": "4248510a14558a606694faed7644485efb802cfc965e95ba545209893c8675cd"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "path": "run-ended-probe19-v1.mjs",
+      "bytes": 2257,
+      "sha256": "d9402bdd6e25accf2556f1a98291ded3564c5763bc34880e4e4f209762ef454f"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-final-v1.json",
+      "bytes": 7570,
+      "sha256": "9865fa03e12521db5ccd0d389d43102f8e54619bed4ef6261174e7d4dce72c4c"
+    },
+    {
+      "path": "derivation-draft-v1.json",
+      "bytes": 24262,
+      "sha256": "7bf664866e8fb724b3c8c97a2dab15b1b15580a1e444c150491312a99e4519b9"
+    },
+    {
+      "path": "verify-ended-probe19-draft-v1.mjs",
+      "bytes": 37467,
+      "sha256": "83f6d9d606645b6307ac88c0a092f4bd9114b13509785d2c37c6e3b15f923360"
+    },
+    {
+      "path": "preparation-pending-v1.json",
+      "bytes": 2027,
+      "sha256": "7271fdb70c0c16a659ca3e6b8d12c7ad5bb6c8e096a100cebd184b3e4039d112"
+    },
+    {
+      "path": "syntax-check-v1.log",
+      "bytes": 229,
+      "sha256": "1f3aa74fe9e6fe866038dd99217a9824f2b73fbf257bf16f78aeedbcff54ab62"
+    },
+    {
+      "path": "root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 8316,
+      "sha256": "e2e9629496fbef2cdc5ae5bee8fede6a05fe9834a1866fc1aa6372e4bbaf47d5"
+    }
+  ],
+  "sourceSha256": "262f9ef511f48452e29dfa44b8bb29e658fc8561641ba489de7cb55c56f0a28e",
+  "syntax": [
+    {
+      "file": "verify-ended-probe19-v1.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "probe-contract-v1.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "hp-proof-contract-v2.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "run-ended-probe19-v1.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "seal-tool-source-v1.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "syntaxLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\syntax-check-v1.log",
+    "bytes": 229,
+    "sha256": "1f3aa74fe9e6fe866038dd99217a9824f2b73fbf257bf16f78aeedbcff54ab62"
+  },
+  "pendingHistoryPreserved": true,
+  "runId": "1792971941351-af013515",
+  "ownedPids": [
+    67440,
+    62240
+  ],
+  "rootCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-independent-cleanup-v1.json",
+    "bytes": 327,
+    "sha256": "fffd285c3a20d7596fd0cc365bc0aef55b9d145812387a539e4e9727144f913f"
+  },
+  "consumerTerminals": [
+    {
+      "phase": "base-collection",
+      "exitCode": 0,
+      "stdout": {
+        "path": "probe19-root-base-collection-stdout-v1.log",
+        "bytes": 110685,
+        "sha256": "5c8a7e588c486049f44f43d75e89aee5770335319fcb42f9cba63f8ff1ddba51"
+      },
+      "stderr": {
+        "path": "probe19-root-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "phase": "base-verification",
+      "exitCode": 0,
+      "stdout": {
+        "path": "probe19-root-base-verification-stdout-v1.log",
+        "bytes": 5028,
+        "sha256": "f602c7c5f37c01d9ca031a49b7ccb3f1406b8b171943c9b1f5283067bb7e712b"
+      },
+      "stderr": {
+        "path": "probe19-root-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "phase": "store-collection",
+      "exitCode": 0,
+      "stdout": {
+        "path": "probe19-root-store-collection-stdout-v1.log",
+        "bytes": 392,
+        "sha256": "354b8857993ac7ca6e813994592e87625d287ff0f3e7ad361e55ed68b65724ce"
+      },
+      "stderr": {
+        "path": "probe19-root-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "phase": "store-verification",
+      "exitCode": 0,
+      "stdout": {
+        "path": "probe19-root-store-verification-stdout-v1.log",
+        "bytes": 1241,
+        "sha256": "f72375905a1f04d9a05bd949377dbcc3edc12b49b9a80845c0dcc412504fbb46"
+      },
+      "stderr": {
+        "path": "probe19-root-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "rootActualTerminalKnown": true,
+  "independentGameReplayExecuted": false,
+  "originalGameVerdictChanged": false,
+  "sourceModuleImported": false,
+  "productTestsExecuted": false,
+  "readlineScope": "Trusted frozen producer and SHA-bound original archives only. readline aggregates a line before the64MiB validation; no malicious-long-line strict memory claim.",
+  "sourceSealExpectedFiles": 14,
+  "rootOnlyNextActions": "Independent source review; Root seal-tool-source-v1.mjs; Root run-ended-probe19-v1.mjs once. This preparation does not replay the run or claim132 complete windows.",
+  "capacityAccepted": false,
+  "rootActualProducerFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-actual-terminal-and-consumer-facts-v1.json",
+    "bytes": 8316,
+    "sha256": "e2e9629496fbef2cdc5ae5bee8fede6a05fe9834a1866fc1aa6372e4bbaf47d5"
+  }
+}

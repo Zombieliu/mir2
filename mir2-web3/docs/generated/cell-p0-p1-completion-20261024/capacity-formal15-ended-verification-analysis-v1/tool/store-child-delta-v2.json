@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "kind": "formal-only Store child source correction before any import or execution",
+  "basis": {
+    "path": "verify-ended-formal15-draft-v1.mjs",
+    "bytes": 39279,
+    "sha256": "f39aa97e796fdbe9150bd9deacc4bddcac56d1392c71e51a2c38bf1fca4472b1"
+  },
+  "rule": {
+    "old": "const child=CHILD.replace(/-diagnostics$/,'-store-diagnostics'),dir=path.join(TOPIC,child);",
+    "next": "const child=CHILD+'-store-diagnostics',dir=path.join(TOPIC,child);"
+  },
+  "inverseRawExact": true,
+  "reason": "Probe19 base child ends in -diagnostics but formal15 base child does not. Actual frozen formal15 Store collector declares basechild+'-store-diagnostics'. Preserve original pending-v1; fix source path without changing any validation or game conjunction.",
+  "actualModeExecuted": false,
+  "oldPreparation": {
+    "path": "preparation-pending-v1.json",
+    "bytes": 4784,
+    "sha256": "50e13b1ffffc55db99408e687d3ab485cd6419742d2a52a01a72ac18e6240775"
+  },
+  "newSource": {
+    "path": "verify-ended-formal15-draft-v2.mjs",
+    "bytes": 39254,
+    "sha256": "84fe768ff4883b1ecdb64ef217878739974627d59361d30b66885790374a3677"
+  }
+}

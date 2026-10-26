@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T01:04:33.677658+00:00",
+  "scope": "Independent bounded metadata/source check of Root actual four-entry full Node232 execution. No tests, product imports, realm, protocol raw/monitor/trace or executable scan by reviewer.",
+  "actualReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-receipt-v1.json",
+    "bytes": 5162,
+    "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446"
+  },
+  "actualStdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-v1.stdout.log",
+    "bytes": 62597,
+    "sha256": "95277742a021f3c8a59eebda46e33022cb221011c2017bd5278c6dff63bf1444"
+  },
+  "actualStderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-v1.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "sourceReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-independent-review-v1.json",
+    "bytes": 4886,
+    "sha256": "6ceacd48f90475d750d3f2b43241d4c51593681a69a7bc633dd1f4193e99a8b0"
+  },
+  "sourcePreservationAndFocusedEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\source-preservation-and-focused-receipt-v1.json",
+    "bytes": 6798,
+    "sha256": "37a687b66c9db85c0ceb0c2c567b54ed3394d362a0bd0244589ccfa6f1ab9fc5"
+  },
+  "prior226Receipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\root-full-driver-receipt-v1.json",
+    "bytes": 5113,
+    "sha256": "e487f6a3ce26d1a87d3d052282e26a1b28fbf3e63f4948e7ee8d29d1003e958a"
+  },
+  "actualCounts": {
+    "tests": 232,
+    "passed": 232,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "actualExitCode": 0,
+  "actualSignal": null,
+  "actualFourEntryArguments": [
+    "--test",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "apps/web/scripts/playtest-capacity-observability.test.mjs",
+    "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+    "apps/web/scripts/playtest-capacity-telemetry.test.mjs"
+  ],
+  "currentNineSourceAggregate": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+  "checks": {
+    "receiptAndBothLogsRawPinsMatched": true,
+    "stdoutTap232ZeroFailureCancelSkipTodoMatched": true,
+    "allNineCurrentRawFilesMatchRootSourceBeforeAndAfter": true,
+    "sourceBeforeAfterIdentical": true,
+    "onlyMainAndTestChangedFromPrior226": true,
+    "originalTestPrefixBytes": 270311,
+    "originalTestPrefixSha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef",
+    "originalTestPrefixRawExactPrior226": true,
+    "sixNewDiagnosticTestNamesAppearInActualFullLog": true,
+    "newTestsIncludedIn232NotAdditive": true,
+    "focused22NotAddedTo232": true,
+    "sourceReviewOriginal4886BytesPreserved": true
+  },
+  "verdict": {
+    "fullRegressionPassed": true,
+    "currentNineSourceFullRegressionPassed": true,
+    "actualTests": 232,
+    "actualPassed": 232,
+    "actualFailed": 0,
+    "blockingFindingIds": []
+  },
+  "capacityAccepted": false,
+  "realCapacityRunPerformed": false,
+  "P0Accepted": false,
+  "P2Started": false,
+  "limitations": [
+    "The actual232 run validates the nine pinned Node inputs; it is not a capacity run or evidence that Formal15 supply improved.",
+    "Original C743 backend50/dae1 build and prior J ordinary full16/Probe19 remain separately identified historical executions; no new K commit or runtime is inferred here."
+  ]
+}
