@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createNavigator, NavigationStepGuarded } from './quest-agent/protocol-play.mjs';
+import { createNavigator, NavigationStepGuarded, isTerminalNavigationNoPath } from './quest-agent/protocol-play.mjs';
 import { applyProtocolObservation } from './quest-agent/protocol-observation.mjs';
 import { selectPreparationStagingPoint } from './playtest-capacity-prepare.mjs';
-import { loadProtocolCollisionMap, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
+import { loadProtocolCollisionMap, protocolMapCellIsWalkable, planProtocolNavigation } from './quest-agent/protocol-navigation.mjs';
 import { createOrdinarySupplies, ORDINARY_SUPPLY_COMMANDS } from './capacity-ordinary-supplies.mjs';
 import { loadOrdinaryProtection } from './capacity-ordinary-protection.mjs';
 
@@ -155,6 +155,7 @@ function fixture(config = {}) {
     client.events.push(receipt); hook(receipt, receipt); return receipt;
   }
   function snapshot(sequence) {
+    config.onSnapshot?.({client,actor,packet});
     const message = { type: 'worldSnapshot', payload: structuredClone(client.snapshot) };
     const receipt = { ...message, direction: 'received', sequence: sequence ?? ++client.sequence, monotonicMs: ++clock };
     client.events.push(receipt); hook(message, receipt);
@@ -162,7 +163,7 @@ function fixture(config = {}) {
   let preparation = true;
   const supply = createOrdinarySupplies(client, { preparationProfile: 'ordinary-economic-v1', targetHp: config.target ?? 12, route,
     stagingPoint: config.stagingPoint ?? { x: 290, y: 607 }, resolveStagingPoint: config.resolveStagingPoint, ordinaryProtection: config.ordinaryProtection, isPreparation: () => preparation, now: () => clock,
-    sleep: async ms => { clock += ms; }, maxHunts: config.maxHunts ?? 8, timeoutMs: config.timeoutMs ?? 600_000,
+    sleep: async ms => { config.onSleep?.({client,actor,ms,clock,packet}); clock += ms; }, maxHunts: config.maxHunts ?? 8, timeoutMs: config.timeoutMs ?? 600_000,
     maxCommands: config.maxCommands ?? 2048,
     navigate: async (facade, target, range, stop, navOptions) => {
       config.inspectNavigation?.({target,range,navOptions});
@@ -187,6 +188,268 @@ function fixture(config = {}) {
   hook = supply.observe;
   return { client, supply, snapshot, packet, now:()=>clock, advance: ms => { clock += ms; }, endPreparation: () => { preparation = false; } };
 }
+
+const w8Positions = [
+  [
+    206644,
+    "scarecrow",
+    293,
+    614
+  ],
+  [
+    206610,
+    "scarecrow",
+    300,
+    597
+  ],
+  [
+    206013,
+    "rakingcat",
+    301,
+    596
+  ],
+  [
+    206026,
+    "rakingcat",
+    320,
+    589
+  ],
+  [
+    206117,
+    "hookingcat",
+    321,
+    588
+  ],
+  [
+    206623,
+    "scarecrow",
+    321,
+    631
+  ],
+  [
+    206032,
+    "rakingcat",
+    322,
+    595
+  ],
+  [
+    206039,
+    "rakingcat",
+    325,
+    583
+  ],
+  [
+    206130,
+    "hookingcat",
+    327,
+    582
+  ],
+  [
+    206105,
+    "hookingcat",
+    315,
+    578
+  ],
+  [
+    206008,
+    "rakingcat",
+    327,
+    574
+  ],
+  [
+    206033,
+    "rakingcat",
+    333,
+    578
+  ],
+  [
+    206136,
+    "hookingcat",
+    337,
+    589
+  ],
+  [
+    206136,
+    "hookingcat",
+    338,
+    588
+  ],
+  [
+    206124,
+    "hookingcat",
+    340,
+    577
+  ],
+  [
+    206129,
+    "hookingcat",
+    342,
+    600
+  ],
+  [
+    206136,
+    "hookingcat",
+    339,
+    587
+  ]
+];
+const w8Occupancy = [{"x":320,"y":589,"objectId":206026,"kind":"monster"},{"x":321,"y":588,"objectId":206117,"kind":"monster"},{"x":321,"y":598,"objectId":214501,"kind":"monster"},{"x":322,"y":595,"objectId":206032,"kind":"monster"},{"x":322,"y":587,"objectId":206208,"kind":"monster"},{"x":325,"y":583,"objectId":206039,"kind":"monster"},{"x":325,"y":600,"objectId":206201,"kind":"monster"},{"x":326,"y":599,"objectId":206220,"kind":"monster"},{"x":327,"y":582,"objectId":206130,"kind":"monster"},{"x":315,"y":578,"objectId":206105,"kind":"monster"},{"x":330,"y":597,"objectId":206542,"kind":"monster"},{"x":331,"y":581,"objectId":206221,"kind":"monster"},{"x":327,"y":574,"objectId":206008,"kind":"monster"},{"x":333,"y":578,"objectId":206033,"kind":"monster"},{"x":337,"y":589,"objectId":206136,"kind":"monster"},{"x":340,"y":577,"objectId":206124,"kind":"monster"},{"x":340,"y":586,"objectId":206227,"kind":"monster"},{"x":342,"y":600,"objectId":206129,"kind":"monster"},{"x":342,"y":606,"objectId":206703,"kind":"monster"},{"x":342,"y":592,"objectId":206716,"kind":"monster"},{"x":343,"y":592,"objectId":206214,"kind":"monster"},{"x":343,"y":586,"objectId":206713,"kind":"monster"},{"x":344,"y":591,"objectId":210400,"kind":"monster"},{"x":345,"y":599,"objectId":206719,"kind":"monster"},{"x":345,"y":580,"objectId":214502,"kind":"monster"},{"x":347,"y":576,"objectId":206215,"kind":"monster"}];
+const w8Transfers = [{"mapFileName":"0","toMapFileName":"0122","bounds":{"maxX":347,"maxY":188,"minX":347,"minY":188}},{"mapFileName":"0","toMapFileName":"0102","bounds":{"maxX":308,"maxY":264,"minX":308,"minY":264}},{"mapFileName":"0","toMapFileName":"0108","bounds":{"maxX":326,"maxY":288,"minX":326,"minY":288}},{"mapFileName":"0","toMapFileName":"0104","bounds":{"maxX":322,"maxY":247,"minX":322,"minY":247}},{"mapFileName":"0","toMapFileName":"0107","bounds":{"maxX":354,"maxY":319,"minX":354,"minY":319}},{"mapFileName":"0","toMapFileName":"0125","bounds":{"maxX":295,"maxY":251,"minX":295,"minY":251}},{"mapFileName":"0","toMapFileName":"0125","bounds":{"maxX":295,"maxY":250,"minX":295,"minY":250}},{"mapFileName":"0","toMapFileName":"0103","bounds":{"maxX":335,"maxY":299,"minX":335,"minY":299}},{"mapFileName":"0","toMapFileName":"0103","bounds":{"maxX":335,"maxY":300,"minX":335,"minY":300}},{"mapFileName":"0","toMapFileName":"0103","bounds":{"maxX":344,"maxY":308,"minX":344,"minY":308}},{"mapFileName":"0","toMapFileName":"0103","bounds":{"maxX":345,"maxY":308,"minX":345,"minY":308}},{"mapFileName":"0","toMapFileName":"0105","bounds":{"maxX":295,"maxY":284,"minX":295,"minY":284}},{"mapFileName":"0","toMapFileName":"0105","bounds":{"maxX":295,"maxY":285,"minX":295,"minY":285}},{"mapFileName":"0","toMapFileName":"0105","bounds":{"maxX":305,"maxY":276,"minX":305,"minY":276}},{"mapFileName":"0","toMapFileName":"0106","bounds":{"maxX":307,"maxY":311,"minX":307,"minY":311}},{"mapFileName":"0","toMapFileName":"0106","bounds":{"maxX":307,"maxY":310,"minX":307,"minY":310}},{"mapFileName":"0","toMapFileName":"0106","bounds":{"maxX":317,"maxY":302,"minX":317,"minY":302}},{"mapFileName":"0","toMapFileName":"0106","bounds":{"maxX":317,"maxY":301,"minX":317,"minY":301}},{"mapFileName":"0","toMapFileName":"0101","bounds":{"maxX":289,"maxY":292,"minX":289,"minY":292}},{"mapFileName":"0","toMapFileName":"0101","bounds":{"maxX":286,"maxY":296,"minX":286,"minY":296}},{"mapFileName":"0","toMapFileName":"0128","bounds":{"maxX":278,"maxY":239,"minX":278,"minY":239}},{"mapFileName":"0","toMapFileName":"0129","bounds":{"maxX":284,"maxY":236,"minX":284,"minY":236}},{"mapFileName":"0","toMapFileName":"0123","bounds":{"maxX":271,"maxY":256,"minX":271,"minY":256}},{"mapFileName":"0","toMapFileName":"0124","bounds":{"maxX":283,"maxY":268,"minX":283,"minY":268}},{"mapFileName":"0","toMapFileName":"0110","bounds":{"maxX":396,"maxY":230,"minX":396,"minY":230}},{"mapFileName":"0","toMapFileName":"0110","bounds":{"maxX":396,"maxY":229,"minX":396,"minY":229}},{"mapFileName":"0","toMapFileName":"0111","bounds":{"maxX":400,"maxY":225,"minX":400,"minY":225}},{"mapFileName":"0","toMapFileName":"0111","bounds":{"maxX":399,"maxY":225,"minX":399,"minY":225}},{"mapFileName":"0","toMapFileName":"0112","bounds":{"maxX":404,"maxY":221,"minX":404,"minY":221}},{"mapFileName":"0","toMapFileName":"0112","bounds":{"maxX":403,"maxY":221,"minX":403,"minY":221}},{"mapFileName":"0","toMapFileName":"0137","bounds":{"maxX":414,"maxY":243,"minX":414,"minY":243}},{"mapFileName":"0","toMapFileName":"0137","bounds":{"maxX":415,"maxY":241,"minX":415,"minY":241}},{"mapFileName":"0","toMapFileName":"0137","bounds":{"maxX":416,"maxY":241,"minX":416,"minY":241}},{"mapFileName":"0","toMapFileName":"0121","bounds":{"maxX":315,"maxY":613,"minX":315,"minY":613}},{"mapFileName":"0","toMapFileName":"0130","bounds":{"maxX":266,"maxY":630,"minX":266,"minY":630}},{"mapFileName":"0","toMapFileName":"0131","bounds":{"maxX":271,"maxY":621,"minX":271,"minY":621}},{"mapFileName":"0","toMapFileName":"0136","bounds":{"maxX":295,"maxY":649,"minX":295,"minY":649}},{"mapFileName":"0","toMapFileName":"0132","bounds":{"maxX":283,"maxY":636,"minX":283,"minY":636}},{"mapFileName":"0","toMapFileName":"0132","bounds":{"maxX":282,"maxY":636,"minX":282,"minY":636}},{"mapFileName":"0","toMapFileName":"0132","bounds":{"maxX":282,"maxY":635,"minX":282,"minY":635}},{"mapFileName":"0","toMapFileName":"0138","bounds":{"maxX":274,"maxY":636,"minX":274,"minY":636}},{"mapFileName":"0","toMapFileName":"0141","bounds":{"maxX":302,"maxY":622,"minX":302,"minY":622}},{"mapFileName":"0","toMapFileName":"0141","bounds":{"maxX":311,"maxY":631,"minX":311,"minY":631}},{"mapFileName":"0","toMapFileName":"0140","bounds":{"maxX":307,"maxY":627,"minX":307,"minY":627}},{"mapFileName":"0","toMapFileName":"0115","bounds":{"maxX":314,"maxY":474,"minX":314,"minY":474}},{"mapFileName":"0","toMapFileName":"D011","bounds":{"maxX":43,"maxY":111,"minX":43,"minY":111}},{"mapFileName":"0","toMapFileName":"D401","bounds":{"maxX":664,"maxY":215,"minX":664,"minY":215}},{"mapFileName":"0","toMapFileName":"D401","bounds":{"maxX":663,"maxY":215,"minX":663,"minY":215}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":324,"maxY":41,"minX":324,"minY":41}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":325,"maxY":42,"minX":325,"minY":42}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":326,"maxY":43,"minX":326,"minY":43}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":326,"maxY":42,"minX":326,"minY":42}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":325,"maxY":41,"minX":325,"minY":41}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":325,"maxY":40,"minX":325,"minY":40}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":326,"maxY":40,"minX":326,"minY":40}},{"mapFileName":"0","toMapFileName":"2","bounds":{"maxX":666,"maxY":86,"minX":666,"minY":86}},{"mapFileName":"0","toMapFileName":"2","bounds":{"maxX":667,"maxY":87,"minX":667,"minY":87}},{"mapFileName":"0","toMapFileName":"2","bounds":{"maxX":667,"maxY":88,"minX":667,"minY":88}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":316,"maxY":649,"minX":316,"minY":649}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":315,"maxY":650,"minX":315,"minY":650}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":316,"maxY":650,"minX":316,"minY":650}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":315,"maxY":649,"minX":315,"minY":649}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":315,"maxY":648,"minX":315,"minY":648}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":314,"maxY":649,"minX":314,"minY":649}},{"mapFileName":"0","toMapFileName":"0127","bounds":{"maxX":310,"maxY":600,"minX":310,"minY":600}},{"mapFileName":"0","toMapFileName":"0101","bounds":{"maxX":286,"maxY":296,"minX":286,"minY":296}},{"mapFileName":"0","toMapFileName":"0122","bounds":{"maxX":347,"maxY":189,"minX":347,"minY":189}},{"mapFileName":"0","toMapFileName":"D001","bounds":{"maxX":147,"maxY":33,"minX":147,"minY":33}},{"mapFileName":"0","toMapFileName":"D001","bounds":{"maxX":148,"maxY":34,"minX":148,"minY":34}}];
+
+function w8Forbidden(positions,start={x:331,y:590}) {
+  const points=new Map();
+  for(const [objectId,name,x,y] of positions)for(let cy=y-8;cy<=y+8;cy++)for(let cx=x-8;cx<=x+8;cx++){
+    const d=Math.max(Math.abs(cx-x),Math.abs(cy-y)),before=Math.max(Math.abs(start.x-x),Math.abs(start.y-y));
+    if(d!==0&&cx>=278&&cx<=298&&cy>=606&&cy<=626)continue;
+    if(d===0||(before<=8?d<before:d<=8))points.set(cx+','+cy,{x:cx,y:cy});
+  }
+  return [...points.values()];
+}
+test('W8 exact17-point2140-cell history with26occupancy and69transfers has a path only after the necessary old halos expire',async()=>{
+  const map=await loadProtocolCollisionMap('0'),start={x:331,y:590},target={x:289,y:617};
+  const transfers=w8Transfers.flatMap(t=>{const p=[];for(let y=t.bounds.minY;y<=t.bounds.maxY;y++)for(let x=t.bounds.minX;x<=t.bounds.maxX;x++)p.push({x,y});return p;});
+  assert.equal(transfers.length,69);assert.equal(w8Occupancy.length,26);assert.equal(w8Positions.length,17);
+  const run=(removed=[],occupancy=w8Occupancy,doors=transfers)=>{
+    const forbidden=w8Forbidden(w8Positions.filter(p=>!removed.includes(p[0])));
+    return {count:forbidden.length,path:planProtocolNavigation({map,start,target,desiredDistance:0,dynamicObstacles:[...forbidden,...occupancy,...doors]})};
+  };
+  assert.equal(run().count,2140);assert.equal(run().path,null);
+  assert.equal(run([],[]).path,null);assert.equal(run([],w8Occupancy,[]).path,null);
+  assert.equal(run([206013]).path,null);assert.equal(run([206610]).path,null);
+  const both=run([206013,206610]);assert.equal(both.count,1818);assert.equal(both.path.steps.length,73);
+  const all=run([206013,206610,206644,206623]);assert.equal(all.count,1477);assert.equal(all.path.steps.length,56);
+});
+
+async function w8HistoryFixture(config={}) {
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0'),map=await loadProtocolCollisionMap('0');
+  const names={scarecrow:'Scarecrow',rakingcat:'RakingCat',hookingcat:'HookingCat'};
+  const closed=new Set([206013,206610,206644,206623]),unique=new Map(w8Positions.map(p=>[p[0],p]));
+  const current=w8Occupancy.map(p=>{
+    const threat=unique.get(p.objectId),prior=w6NearbyNeutral.find(e=>e.objectId===p.objectId);
+    return threat?hostile(p.objectId,p.x,p.y,{name:names[threat[1]],ownerName:null,class:null}):
+      {...prior,...p,dead:false,disposition:'neutral',ownerName:null,class:null};
+  });
+  const old=w8Positions.filter(p=>closed.has(p[0])).map(([id,name,x,y])=>hostile(id,x,y,{name:names[name],ownerName:null,class:null}));
+  // Replay source DTOs and real cache reads. The static selected observations
+  // are deliberately not claimed to be a second live run or simultaneous AOI.
+  let f,navigator,stage=0,expiry=0,movesBeforeWait=0,sleeps=0,firstTerminal,hazards=0;
+  f=fixture({ownerId:1000,ownerHp:18,ownerMaxHp:18,items:[item(658,12,2)],gold:15,
+    ownerPosition:{x:331,y:590},stagingPoint:{x:289,y:617},ordinaryProtection:protection,
+    hostiles:[...current,...old],applyPackets:true,noMovementSnapshots:true,
+    timeoutMs:config.timeoutMs??600000,maxCommands:config.maxCommands??2048,
+    onSleep:({ms,clock,client,actor,packet})=>{
+      if(stage===2){
+        sleeps++;assert.ok(ms<=250);assert.equal(client.sent.filter(c=>['walk','run'].includes(c.type)).length,movesBeforeWait);
+        assert.equal(actor.hp,18);assert.ok(clock<expiry);
+        assert.equal(f.supply.status().plannerThreatMemory.positions,17,'waiting never clears the retained trail');
+        config.duringWait?.({client,actor,packet,f,clock});
+      }
+    },
+    onMove:({client,actor})=>{client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;},
+    navigate:async args=>{
+      navigator??=createNavigator(args.facade,{loadCollisionMap:async()=>map,now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000});
+      // Do not spread accessors: preserve the actual forbidden-before-allowed
+      // read order and the real per-planning-read cache view.
+      const nav=()=>navigator(args.target,args.range,args.stop,new Proxy(args.navOptions,{get:(o,k)=>k==='maxNoPathRefreshes'?0:Reflect.get(o,k)}));
+      if(stage===0){
+        args.packet('ObjectMonster',{objectId:206136,name:'HookingCat',location:{x:339,y:587},ai:0,masterObjectId:0,dead:false});
+        args.packet('ObjectWalk',{objectId:206136,x:338,y:588,direction:7});
+        await assert.rejects(nav(),e=>isTerminalNavigationNoPath(e));
+        // Mirror the unequal W8 history ages: do not let a minimum-expiry
+        // implementation pass by giving all four points the same lifetime.
+        if(!config.liveClosed)args.packet('ObjectRemove',{objectId:206013});
+        for(const [delay,id] of [[32,206610],[2131,206644],[3776,206623]]){
+          f.advance(delay);await assert.rejects(nav(),isTerminalNavigationNoPath);
+          expiry=f.now()+20000;
+          if(!config.liveClosed)args.packet('ObjectRemove',{objectId:id});
+        }
+        f.advance(11500);
+        args.packet('ObjectWalk',{objectId:206136,x:337,y:589,direction:5});
+        args.client.snapshot.entities=args.client.snapshot.entities.map(e=>e.objectId===206136?
+          hostile(206136,337,589,{name:'HookingCat',ownerName:null,class:null}):e);
+        args.snapshot();stage=1;
+      }
+      if(stage===1&&hazards<(config.hazards??0)){
+        hazards++;
+        const hazard=args.navOptions.beforeMovement({movementType:'run',from:{x:331,y:590},physicalCells:[{x:331,y:589},{x:331,y:588}]});
+        assert.equal(hazard.reason,'hostile-clearance');throw new NavigationStepGuarded(hazard);
+      }
+      if(stage===1){
+        stage=2;movesBeforeWait=args.client.sent.filter(c=>['walk','run'].includes(c.type)).length;
+        try {await nav();assert.fail('old exact halos must still block');}catch(error){
+          firstTerminal=error;assert.equal(error.navigationDiagnostics.explicitForbiddenTotal,2140);
+          assert.equal(error.navigationDiagnostics.hostileMemoryTotal,16);
+          assert.equal(error.navigationDiagnostics.occupancyTotal,config.liveClosed?30:26);
+          assert.equal(f.supply.status().plannerThreatMemory.positions,17);
+          if(config.fake)throw Object.assign(new Error(error.message),{navigationDiagnostics:error.navigationDiagnostics});
+          throw error;
+        }
+      }
+      assert.ok(f.now()>=expiry,'no route retry before the original last closed expiry');
+      stage=3;return nav();
+    }});
+  f.client.snapshot.entities=f.client.snapshot.entities.filter(e=>e.kind!=='npc');f.client.snapshot.mapTransfers=structuredClone(w8Transfers);
+  return {f,metrics:()=>({sleeps,firstTerminal,expiry,stage})};
+}
+test('staging waits for original closed history expiry with real branded navigator, then freshraw and same exact target on canonical W8 map',async()=>{
+  const {f,metrics}=await w8HistoryFixture();const result=await f.supply.prepare();
+  assert.equal(result.status,'ready');assert.ok(metrics().sleeps>1);assert.equal(result.pathReplanCount,1);
+  assert.equal(result.pathReplans[0].reason,'closed-history-natural-expiry');assert.equal(result.pathReplans[0].historyPoints,4);
+  assert.ok(result.pathReplans[0].waitMs>8000&&result.pathReplans[0].waitMs<9000);
+  const waited=result.pathReplans[0];
+  assert.equal(waited.history.length,4);assert.equal(waited.waitMs,Math.max(...waited.history.map(p=>p.remainingMs)));
+  assert.ok(Math.min(...waited.history.map(p=>p.remainingMs))<3000,'original unequal history expiries remain inspectable');
+  assert.deepEqual(waited.history.map(p=>p.objectId).sort(),[206013,206610,206623,206644]);
+  assert.ok(waited.history.every(p=>Number.isInteger(p.x)&&Number.isInteger(p.y)&&p.remainingMs>0&&p.remainingMs<=20000));
+  assert.equal(waited.actualPassiveWaitMs,waited.waitMs);assert.equal(waited.waitCompleted,true);assert.equal(waited.naturalExpiryReached,true);
+  assert.ok(waited.freshSnapshotSequence>waited.snapshotSequence);assert.equal(waited.commandsAfterRefresh,waited.commands+1);
+  assert.ok(f.client.events.some(e=>e.type==='worldSnapshot'&&e.sequence===waited.freshSnapshotSequence));
+  const retainedHistory=structuredClone(waited.history);waited.history[0].remainingMs=0;waited.history.pop();
+  assert.deepEqual(f.supply.status().pathReplans[0].history,retainedHistory,'status never exposes mutable internal history evidence');
+  assert.deepEqual(result.pathReplans[0].target,{x:289,y:617});assert.equal(result.after.hp,18);
+  assert.equal(result.after.hpStock,12);assert.equal(result.after.gold,15);assert.equal(result.purchased,0);assert.equal(result.funding,null);
+  assert.ok(!f.client.sent.some(c=>['useItem','attack','attackV2','buyItem','sellItem'].includes(c.type)));
+  assert.equal(f.client.sent.filter(c=>c.type==='clientVersion').length,3,'initial, one post-expiry refresh, final readiness');
+  assert.ok(result.commands<2048&&result.elapsedMs<600000);
+});
+test('a copied NoPath diagnostic is never a recovery authorization',async()=>{
+  const {f,metrics}=await w8HistoryFixture({fake:true});await assert.rejects(f.supply.prepare(),/No walk path/);
+  assert.equal(metrics().sleeps,0);assert.equal(f.supply.status().pathReplanCount,0);
+  assert.equal(f.client.sent.filter(c=>['walk','run'].includes(c.type)).length,0);
+});
+test('expiry waiting and before-movement hazards share the same three per-actor replan credits',async t=>{
+  for(const hazards of [1,3])await t.test(String(hazards),async()=>{
+    const {f,metrics}=await w8HistoryFixture({hazards});
+    if(hazards===1){const result=await f.supply.prepare();assert.equal(result.pathReplanCount,2);assert.equal(result.pathHazardCount,1);}
+    else {await assert.rejects(f.supply.prepare(),isTerminalNavigationNoPath);assert.equal(f.supply.status().pathReplanCount,3);assert.equal(metrics().sleeps,0);}
+    assert.equal(f.client.sent.some(c=>c.type==='run'&&c.direction==='Up'),false,'the guarded physical step is never sent');
+  });
+});
+test('genuine terminal NoPath with only current live obstacles has no closed-history wait',async()=>{
+  const {f,metrics}=await w8HistoryFixture({liveClosed:true});
+  await assert.rejects(f.supply.prepare(),isTerminalNavigationNoPath);
+  assert.equal(metrics().sleeps,0);assert.equal(f.supply.status().pathReplanCount,0);
+  assert.equal(f.client.sent.length,1);
+});
+test('closed history waiting keeps wall, command, ownership, health and transport failures terminal',async t=>{
+  for(const failure of ['wall','commands','hp','map','closed','unknown-reuse'])await t.test(failure,async()=>{
+    const {f}=await w8HistoryFixture({timeoutMs:failure==='wall'?19000:600000,maxCommands:failure==='commands'?1:2048,
+      duringWait:({client,actor,packet})=>{
+        if(failure==='hp'){actor.hp=1;client.snapshot.playerHp=1;}
+        if(failure==='map')client.snapshot.mapFileName='2';
+        if(failure==='closed')client.closed=true;
+        if(failure==='unknown-reuse')packet('ObjectMonster',{objectId:206013,name:'UnknownMonster',location:{x:301,y:596},ai:99,masterObjectId:0,dead:false});
+      }});
+    await assert.rejects(f.supply.prepare(),failure==='wall'?/wall budget/:failure==='commands'?/command budget/:failure==='unknown-reuse'?/No walk path/:/owner\/map\/health changed|transport/);
+    assert.equal(f.supply.status().actualStagingReached,false);
+    const waited=f.supply.status().pathReplans[0];
+    assert.equal(waited.waitCompleted,false);assert.ok(waited.actualPassiveWaitMs>0);
+    assert.equal(waited.naturalExpiryReached,failure==='commands');
+    assert.equal(waited.freshSnapshotSequence,null);assert.equal(waited.commandsAfterRefresh,null);
+    if(failure!=='commands')assert.ok(waited.actualPassiveWaitMs<waited.waitMs);
+    assert.equal(f.client.sent.some(c=>['walk','run','useItem','buyItem'].includes(c.type)),false);
+  });
+});
 
 test('default is held-only noop and economic profile has explicit bounded inputs', async () => {
   const result = await createOrdinarySupplies({}).prepare();

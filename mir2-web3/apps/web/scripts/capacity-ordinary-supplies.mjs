@@ -1,7 +1,7 @@
 import { performance } from 'node:perf_hooks';
 import { collectSafeFundingVenison } from './quest-agent/protocol-funding.mjs';
 import { clearTravelBlockingMonster, harvestDirection } from './quest-agent/protocol-combat.mjs';
-import { NavigationStepGuarded } from './quest-agent/protocol-play.mjs';
+import { NavigationStepGuarded, isTerminalNavigationNoPath } from './quest-agent/protocol-play.mjs';
 import { hasAuthoritativePlayerDeath, observedPlayerHp } from './quest-agent/protocol-observation.mjs';
 import { certifyOrdinaryAi0Packet, isOrdinaryAi0Threat, isProtectedOrdinaryCell, isProtectedOrdinaryPacketCell, ordinaryProtectionSummary } from './capacity-ordinary-protection.mjs';
 
@@ -589,7 +589,10 @@ export function createOrdinarySupplies(client, options = {}) {
             if (String(error?.message??'').startsWith('No walk path on ')) captureNoPath(error,target,pickupTile?0:range);
           } catch { /* Even diagnostic error detection must preserve the original failure. */ }
           const ownHazard = error instanceof SupplyPathHazard || error instanceof NavigationStepGuarded && error.hazard?.[PATH_HAZARD] === true;
-          if (!ownHazard) throw error;
+          if (!ownHazard) {
+            if (await waitForClosedPlannerHistory(error,target,pickupTile?0:range,stop)) continue;
+            throw error;
+          }
           guard();
           // Funding retains its original finite target-loss/reselection path.
           if (state === 'funding') throw new Error('No walk path: ordinary supplies hostile clearance', { cause:error });
@@ -606,6 +609,64 @@ export function createOrdinarySupplies(client, options = {}) {
         }
       }
     } finally { navigationPolicy = null; }
+  }
+  async function waitForClosedPlannerHistory(error,target,range,stop) {
+    if (state !== 'staging' || !isTerminalNavigationNoPath(error) || queue.length !== 0 ||
+        pendingSaleId !== null || pathReplans.length >= PATH_REPLAN_LIMIT) return false;
+    const value=guard();
+    const at=plannerNow(), view=error.navigationDiagnostics;
+    if (at < plannerGlobalBlockedUntil || view?.source !== 'shared-navigator-exact-cache' || !Object.isFrozen(view)) return false;
+    if (view.mapFileName !== value.map || view.from?.x !== value.x || view.from?.y !== value.y ||
+        view.target?.x !== target.x || view.target?.y !== target.y || view.desiredDistance !== range) return false;
+    // An unknown/coarse barrier is not a certified natural-expiry case.
+    // Truncation also cannot establish the absence of such a barrier.
+    if (view.hostileMemoryTruncated || (view.hostileMemory ?? []).some(p=>p.allowed !== true)) return false;
+    const visible=plannerGroups(client.snapshot), matches=[];
+    for (const remembered of view.hostileMemory ?? []) {
+      if (remembered.currentlyVisible !== false || remembered.allowed !== true || visible.has(remembered.objectId)) continue;
+      const row=plannerIdentities.get(remembered.objectId), key=`${remembered.objectId}:${remembered.x},${remembered.y}`;
+      const trail=plannerTrail.get(key);
+      if (!row || row.live !== false || row.blockedUntil > at || !(row.rawIdentity || row.wireCertificate) ||
+          !trail || trail.expiresAt <= at || trail.expiresAt > row.closedHistoryUntil) continue;
+      matches.push({key,row,trail,expiresAt:trail.expiresAt});
+    }
+    if (!matches.length) return false;
+    // Only helper-owned original expiries authorize waiting. Diagnostic TTLs
+    // are relative to another read and never create, renew or clear memory.
+    const until=Math.max(...matches.map(p=>p.expiresAt));
+    if (until-at > PLANNER_TRAIL_MS) return false;
+    const replan={attempt:pathReplans.length+1,phase:'terminal-no-path',reason:'closed-history-natural-expiry',
+      snapshotSequence:client.sequence,observedSnapshotSequence:lastObserved,commands,movementCommands,
+      target:point(target,'replan target'),from:{x:value.x,y:value.y},waitMs:until-at,historyPoints:matches.length,
+      history:matches.slice(0,128).map(match=>({objectId:match.trail.objectId,x:match.trail.x,y:match.trail.y,remainingMs:match.expiresAt-at})),
+      actualPassiveWaitMs:0,waitCompleted:false,naturalExpiryReached:false,freshSnapshotSequence:null,commandsAfterRefresh:null};
+    pathReplans.push(replan);
+    const passiveStarted=now();
+    try {
+      while (plannerNow() < until) {
+        guard();
+        if (typeof stop === 'function' && stop()) throw error;
+        const currentAt=plannerNow();
+        if (currentAt < plannerGlobalBlockedUntil || queue.length !== 0 || pendingSaleId !== null) throw error;
+        for (const match of matches) {
+          if (currentAt >= match.expiresAt) continue;
+          const row=plannerIdentities.get(match.trail.objectId);
+          if (row !== match.row || row.live !== false || row.blockedUntil > currentAt ||
+              !(row.rawIdentity || row.wireCertificate) || row.closedHistoryUntil < match.expiresAt ||
+              plannerTrail.get(match.key) !== match.trail || match.trail.expiresAt !== match.expiresAt ||
+              plannerGroups(client.snapshot).has(match.trail.objectId)) throw error;
+        }
+        await pause(Math.min(250,until-currentAt));
+      }
+    } finally {
+      replan.actualPassiveWaitMs=Math.max(0,now()-passiveStarted);
+      replan.naturalExpiryReached=plannerNow()>=until;
+    }
+    guard();
+    if (typeof stop === 'function' && stop()) throw error;
+    const freshSnapshot=await refresh(); guard();
+    replan.freshSnapshotSequence=freshSnapshot.sequence;replan.commandsAfterRefresh=commands;replan.waitCompleted=true;
+    return true;
   }
   function captureNoPath(error,target,range) {
     try {
@@ -688,7 +749,7 @@ export function createOrdinarySupplies(client, options = {}) {
       pathHazards: pathHazards.map(row => ({ ...row, from:{...row.from}, physicalCells:row.physicalCells.map(cell=>({...cell})), blocker:row.blocker?{...row.blocker}:null })),
       pathHazardCount, pathHazardsTruncated: pathHazardCount > pathHazards.length,
       pathReplanLimit:PATH_REPLAN_LIMIT, pathReplanCount:pathReplans.length,
-      pathReplans:pathReplans.map(row=>({...row,target:{...row.target},from:{...row.from}})),
+      pathReplans:pathReplans.map(row=>({...row,target:{...row.target},from:{...row.from},...(row.history?{history:row.history.map(p=>({...p}))}:{})})),
       ...(options.resolveStagingPoint ? { resolvedStagingPoint: resolvedStagingPoint ? { ...resolvedStagingPoint } : null } : {}) };
   }
   function freshStagingReadiness({ afterSequence = -1, maxAgeMs = evidenceMs } = {}) {

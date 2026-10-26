@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createNavigator, NavigationStalled, NavigationStepGuarded, reviveInTown } from './protocol-play.mjs';
+import { createNavigator, NavigationStalled, NavigationStepGuarded, isTerminalNavigationNoPath, reviveInTown } from './protocol-play.mjs';
 import { applyProtocolObservation } from './protocol-observation.mjs';
 import { startEmergencyHpRecovery } from './protocol-loadout.mjs';
 import { loadProtocolCollisionMap } from './protocol-navigation.mjs';
@@ -80,6 +80,11 @@ test('terminal NoPath diagnostics are bounded immutable exact-cache scalars and 
   const navigate=createNavigator(client,{...dependencies,loadCollisionMap:async()=>map});
   await assert.rejects(navigate({x:6,y:1},0,()=>false,options),error=>{caught=error;return error.message==='No walk path on test from 1,1 to 6,1'&&error.successfulSteps===0&&error.attempts===1;});
   const d=caught.navigationDiagnostics;
+  assert.equal(isTerminalNavigationNoPath(caught),true);
+  assert.equal(isTerminalNavigationNoPath(new Error(caught.message)),false);
+  assert.equal(isTerminalNavigationNoPath({...caught}),false);
+  assert.equal(isTerminalNavigationNoPath(null),false);
+  assert.equal(isTerminalNavigationNoPath('No walk path'),false);
   assert.equal(d.source,'shared-navigator-exact-cache');assert.equal(d.hostileMemoryTotal,140);assert.equal(d.mapHostileMemoryTotal,140);
   assert.equal(d.hostileMemory.length,128);assert.equal(d.hostileMemoryTruncated,true);
   assert.equal(d.hostileMemory[0].objectId,100);assert.equal(d.hostileMemory[0].allowed,true);assert.equal(d.hostileMemory[0].currentlyVisible,true);
@@ -1170,7 +1175,7 @@ test('transfer dispatch no-path retains completed movement count on its original
 
   await assert.rejects(
     navigateNear({ x: 6, y: 1 }, 0, () => false, { maxNoPathRefreshes: 0 }),
-    error => /No walk path on test from 1,1 to 6,1/.test(error?.message ?? '') && error.successfulSteps === 0,
+    error => /No walk path on test from 1,1 to 6,1/.test(error?.message ?? '') && error.successfulSteps === 0 && isTerminalNavigationNoPath(error),
   );
   assert.deepEqual(client.sent, []);
 });

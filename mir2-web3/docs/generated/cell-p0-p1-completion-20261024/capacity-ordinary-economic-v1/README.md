@@ -172,3 +172,13 @@ ObjectRemove可能表示AOI离开或真实删除；候选关闭live续期，保�
 [第七轮报告](bank-prepare-v7/1793055214252-59fbbbbd.preparation-report.json)保持4prepared/100、未激活、零测量CCU。第5人fresh登录HP18/18、12药、15金币，接近步骤和动态resolver成功选中289,617；实际31指令/26移动/5刷新，约18.804秒后，305,612→289,617最终返村NoPath。pathHazard=0/replan=0，公开末帧HP18/alive；原after/readiness仍空。
 
 [wire/raw边界审查](bank-prepare-v7/public-wire-raw-boundary-review-v1.json)不支持把疑似strict wire检查或未公开per-ID隔离状态定为根因；本轮未证明合法替代路径。原failed summary normalLogout=false保留，尾部普通logout与[正常清理](bank-prepare-v7/cleanup-v1.json)、[独立OS](bank-prepare-v7/root-independent-cleanup-v1.json)通过，PID62876消失、端口释放。34份公共原件644,516字节见[说明](bank-prepare-v7/README.md)与[清单](bank-prepare-v7/copied-evidence-manifest.json)，无私有全文或重复V6大资料。P0未完成、P2未启动，无新25/50/100/500或两小时验收通过。
+
+## 第八次百人角色库准备：一次有界重规划后仍NoPath
+
+836a4054的[本次fresh选定门禁](bank-prepare-v8/node-v8/root-focused-receipt-v1.json)实际250+328=578项通过，32个named验证输入前后不变；runtime静态本地JS另32条，后端55源与ee06/V6/Rust32分别严格复用，未新建后端或重跑旧828整套。
+
+[第八轮报告](bank-prepare-v8/1793056344585-0defddbe.preparation-report.json)保持4prepared/100、未激活、零测量CCU；前4人fresh库存复用重新证明。第5人登录305,612、HP18/18、12药、15金币，0经济，实际27指令/23移动/4刷新、约17.489秒，1次危险Run拒发和1次重规划后，最终331,590→289,617 NoPath。诊断不等于根因证明，原after/readiness仍空。
+
+[v9实际Root绑定](bank-prepare-v8/root-final-binding-receipt-v1.json)与[v8未执行draft/v9引用历史](bank-prepare-v8/Rootfinalizer-reference-amendment-v1.json)分别保留；正常logout及[整体清理](bank-prepare-v8/cleanup-v1.json)、[Root独立OS](bank-prepare-v8/root-independent-cleanup-v1.json)通过，PID57648消失、端口释放。36份公共原件786,739字节见[说明](bank-prepare-v8/README.md)与[清单](bank-prepare-v8/copied-evidence-manifest.json)，完整实际W7冷bank/最新账本原字节续用，无私有全文或重复V6大资料。P0未完成、P2未启动，无新25/50/100/500或两小时验收通过。
+
+[W8离线exact2140反事实补充](bank-prepare-v8/public-exact-no-path-counterfactual-v1.json)及[独立清单](bank-prepare-v8/counterfactual-supplement-manifest-v1.json)保留17 mirror/2140 forbidden/26 occupancy/69 transfer的静态NoPath和原closed点自然过期后73步反事实；不覆盖原36清单，不代表W9 live修复或容量通过。

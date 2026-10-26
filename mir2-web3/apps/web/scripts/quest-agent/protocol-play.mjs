@@ -24,6 +24,11 @@ export class NavigationStalled extends Error {
 // cadence wait has supplied the latest AOI.  It deliberately carries no
 // recovery behaviour: the owning combat loop decides whether the returned
 // live blocker can be cleared or whether ordinary retreat is required.
+const terminalNoPathErrors = new WeakSet();
+export function isTerminalNavigationNoPath(error) {
+  return (typeof error === 'object' && error !== null) && terminalNoPathErrors.has(error);
+}
+
 export class NavigationStepGuarded extends Error {
   constructor(hazard) {
     super(`Navigation step guarded on ${String(hazard?.mapId ?? 'unknown')}`);
@@ -692,6 +697,7 @@ export function createNavigator(client, dependencies = {}) {
           const error = new Error(`No walk path on ${mapId} from ${self.x},${self.y} to ${target.x},${target.y}`);
           error.successfulSteps = successfulSteps;
           error.attempts = count + 1;
+          terminalNoPathErrors.add(error);
           attachNoPathDiagnostics(error,self,dynamicObstacles.length,rejected.length);
           throw error;
         }
@@ -762,6 +768,7 @@ export function createNavigator(client, dependencies = {}) {
           const error = new Error(`No walk path on ${mapId} from ${liveSelf.x},${liveSelf.y} to ${target.x},${target.y}`);
           error.successfulSteps = successfulSteps;
           error.attempts = count + 1;
+          terminalNoPathErrors.add(error);
           attachNoPathDiagnostics(error,liveSelf,dynamicObstacles.length,rejected.length);
           throw error;
         }

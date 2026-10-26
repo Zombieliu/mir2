@@ -1,0 +1,411 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual W8 continuation of complete W7 cold bank/latest W7 ledger. Original preparation failure retained. All description scalars are extracted from this actual report/module/Root receipt/public drain transform; no W7 values are reused as current facts.",
+  "driverSourceCommit": "836a405414d6d811c2370175a81ed6d50b9ee5cc",
+  "executionSourceCommit": "836a405414d6d811c2370175a81ed6d50b9ee5cc",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "freshPreparationAndProtectedNavigationTestsPassed": 250,
+  "freshOrdinaryDependencyTestsPassed": 328,
+  "actualRootFreshSelectedJsTestsPassed": 578,
+  "rootNamedValidationSourceCount": 32,
+  "runtimeStaticLocalJsSourceCount": 32,
+  "backendInputs": 55,
+  "completeCapacity828Reexecuted": false,
+  "reusedRustTestsPassed": 32,
+  "freshRustTestsPerformed": false,
+  "newRustBuildPerformed": false,
+  "immutableExecutableRecordOnly": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "immutableExecutableReadOrCopied": false,
+  "reusedBackendEvidenceReferences": [
+    "../bank-prepare-v4/release-v6/release-v6.json",
+    "../bank-prepare-v4/release-v6/backend-source-v6.json",
+    "../bank-prepare-v4/release-v6/build-receipt-v6.json",
+    "../bank-prepare-v4/rust-v2/root-focused-receipt-v1.json"
+  ],
+  "sourceFirst4InventoryReuse": true,
+  "preparedCount": 4,
+  "targetPrepared": 100,
+  "originalRunPassed": false,
+  "originalError": "No walk path on 0 from 331,590 to 289,617",
+  "fifthActor": {
+    "name": "L370e2a04",
+    "characterIndex": 5,
+    "freshBefore": {
+      "sequence": 630,
+      "monotonicMs": 16396.7644,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 305,
+      "y": 612,
+      "hp": 18,
+      "maxHp": 18,
+      "hpStock": 12,
+      "gold": 15,
+      "venison": 0,
+      "inSafeZone": false,
+      "nearbyHostileCount": 0,
+      "playerPoison": null,
+      "ownerPoison": null,
+      "dazed": false
+    },
+    "purchased": 0,
+    "soldVenison": 0,
+    "funding": null,
+    "commands": 27,
+    "movementCommands": 23,
+    "commandCounts": {
+      "clientVersion": 4,
+      "run": 21,
+      "walk": 2
+    },
+    "elapsedMs": 17488.589299999996,
+    "pathHazardCount": 1,
+    "pathHazards": [
+      {
+        "reason": "hostile-clearance",
+        "action": "run",
+        "phase": "before-movement",
+        "radius": 8,
+        "from": {
+          "x": 331,
+          "y": 590
+        },
+        "physicalCells": [
+          {
+            "x": 331,
+            "y": 589
+          },
+          {
+            "x": 331,
+            "y": 588
+          }
+        ],
+        "blocker": {
+          "objectId": 206039,
+          "name": "RakingCat",
+          "x": 325,
+          "y": 583,
+          "hp": null,
+          "ai": 0
+        },
+        "snapshotSequence": 731,
+        "observedSnapshotSequence": 630,
+        "ownerId": 1000,
+        "ownerName": "L370e2a04",
+        "map": "0"
+      }
+    ],
+    "pathReplanCount": 1,
+    "pathReplans": [
+      {
+        "attempt": 1,
+        "phase": "before-movement",
+        "reason": "hostile-clearance",
+        "snapshotSequence": 731,
+        "observedSnapshotSequence": 630,
+        "commands": 24,
+        "movementCommands": 23,
+        "target": {
+          "x": 289,
+          "y": 617
+        },
+        "from": {
+          "x": 331,
+          "y": 590
+        }
+      }
+    ],
+    "plannerThreatMemory": {
+      "lifetimeMs": 20000,
+      "positionLimit": 2048,
+      "identityLimit": 1024,
+      "positions": 17,
+      "identities": 37,
+      "coarseFallbackCount": 0,
+      "packetRenewals": 14,
+      "exemptionGloballyQuarantined": false
+    },
+    "resolvedStagingPoint": {
+      "x": 289,
+      "y": 617
+    },
+    "finalPublicTransform": {
+      "objectId": 1000,
+      "name": "L370e2a04",
+      "x": 331,
+      "y": 590
+    },
+    "finalExactHealthOrStockNotExtracted": true,
+    "ordinaryLogoutAction": {
+      "type": "preparationAction",
+      "phase": "preparation",
+      "at": 1793056378700,
+      "actor": "L370e2a04",
+      "kind": "logOut",
+      "status": "success",
+      "latencyMs": 311.7299000000057
+    },
+    "originalFailedSummaryNormalLogout": false,
+    "readiness": null
+  },
+  "finalizers": {
+    "unexecutedDraftV8": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\finalize-ordinary-bank-binding-v8.mjs",
+      "bytes": 3829,
+      "sha256": "bee09e88ced4b55b6ee201f7166fb88aad9b1e543551f804ee2c6c49c88c6d26"
+    },
+    "selectedActualV9": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\finalize-ordinary-bank-binding-v9.mjs",
+      "bytes": 4541,
+      "sha256": "94fa8e75a50c92c2fec95d62b2a6cdfd8bce6f19ba227c27464f384925a26500"
+    },
+    "referenceAmendment": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\Rootfinalizer-reference-amendment-v1.json",
+      "bytes": 3060,
+      "sha256": "2766e4c291e25d6427848fb35c18273ad20c1468493c9df8735e8a08c0e7a28a"
+    },
+    "actualRootBindingReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\root-final-binding-receipt-v1.json",
+      "bytes": 2345,
+      "sha256": "93a9c0436b02e299efcdf786f85da206b20658ee5f0ae6054565900db3872c13"
+    },
+    "executionAttribution": "Root reports v9 successfully produced the current root-final-binding receipt; v8 is an unexecuted draft. The amendment null execution field is retained as historical preexecution metadata."
+  },
+  "normalCleanupComplete": true,
+  "coldBankEligible": false,
+  "formalOrdinaryRelogin100Verified": false,
+  "measurementPerformed": false,
+  "measuredCcuAcceptancePerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "privacy": "Explicit public text allowlist only; no Store/pool/ledger/secrets contents, recovery payloads, raw Gateway logs, complete recordings or executable copied.",
+  "rawByteVerification": {
+    "destinationExact": true,
+    "sourcesUnchangedDuringCopy": true,
+    "actualRootRawLogPinsMatched": true
+  },
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\source-lib-v1.mjs",
+      "file": "source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\copy-source-bank-v1.mjs",
+      "file": "copy-source-bank-v1.mjs",
+      "bytes": 11107,
+      "sha256": "9e5b817d63c7869006a2f12ae653a12967989905f1dc46f90796d965a517dc6d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\freeze-prepare-v1.mjs",
+      "file": "freeze-prepare-v1.mjs",
+      "bytes": 8143,
+      "sha256": "9b8af842b00f84f3a34fd3c4f3e725cc764b9b369c3e4afe2d916d00e446a4fb"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\run-owned-prepare-v1.mjs",
+      "file": "run-owned-prepare-v1.mjs",
+      "bytes": 25123,
+      "sha256": "3b37bceecc8af397e1328976158c2b3a448cc4b88a8c10f397c186d0bf3e68a7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\owned-child-v1.mjs",
+      "file": "owned-child-v1.mjs",
+      "bytes": 2201,
+      "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\prepare-config-pending-v1.json",
+      "file": "prepare-config-pending-v1.json",
+      "bytes": 7201,
+      "sha256": "6e523b62cee8a6d94c80e7ac271f954c897b746f0efbf1577f36a3620f4cf650"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\source-bank-plan-pending-v1.json",
+      "file": "source-bank-plan-pending-v1.json",
+      "bytes": 11147,
+      "sha256": "df829625ae13ca87c392278911f6cb37bb98e697e1201c44510ba9966afb5272"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\backend-release-binding-pending-v1.json",
+      "file": "backend-release-binding-pending-v1.json",
+      "bytes": 1512,
+      "sha256": "6783cabd29ab014de3b35dd4d0c9e348817a67f3a3c848cf113d3f76dfdecc12"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\root-final-binding-receipt-v1.json",
+      "file": "root-final-binding-receipt-v1.json",
+      "bytes": 2345,
+      "sha256": "93a9c0436b02e299efcdf786f85da206b20658ee5f0ae6054565900db3872c13"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\frozen-source-v1.json",
+      "file": "frozen-source-v1.json",
+      "bytes": 94404,
+      "sha256": "cf7bf8b46aa13dc71c8c323d9b47b406b93b635ee7f2c49e69b5a91cfc04225b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\Rootfinalizer-reference-amendment-v1.json",
+      "file": "Rootfinalizer-reference-amendment-v1.json",
+      "bytes": 3060,
+      "sha256": "2766e4c291e25d6427848fb35c18273ad20c1468493c9df8735e8a08c0e7a28a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\derivation-v1.json",
+      "file": "derivation-v1.json",
+      "bytes": 39624,
+      "sha256": "b09356dc4a574633801054a76c35ffed730bffbc2b8170846ef85fc0a03e7db2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\syntax-checks-v1.json",
+      "file": "syntax-checks-v1.json",
+      "bytes": 3393,
+      "sha256": "8bac59096029d6f97b0fd12a2b8967261d59d37ca9ba884a89341c67ed44d4c8"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\preparation-v1.json",
+      "file": "preparation-v1.json",
+      "bytes": 6752,
+      "sha256": "a672a96b70e90cbf5bf0f2d340a1777c3fa55abff2107db1d97d19c5c3eccf1f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\prepare-config-before-root-final-v1.json",
+      "file": "prepare-config-before-root-final-v1.json",
+      "bytes": 6877,
+      "sha256": "f4ebe18ea3dcd894a2e1b3d55a551fb5e7e4cfeb831fbd9496747db4e05536bf"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\backend-release-binding-before-root-final-v1.json",
+      "file": "backend-release-binding-before-root-final-v1.json",
+      "bytes": 1216,
+      "sha256": "0e68b64abdf8d4b579c42295d956117099b41be7730fd3fdfedf0c9908e64ef7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\episode\\source-bank-copy-receipt-v1.json",
+      "file": "source-bank-copy-receipt-v1.json",
+      "bytes": 8690,
+      "sha256": "68d1faca4bc7ba4a621b8e1fcf35d2dea645a4e2f6ac9314108e39728c61909c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\episode\\preparation-episode-receipt-v1.json",
+      "file": "preparation-episode-receipt-v1.json",
+      "bytes": 5835,
+      "sha256": "3a52b34bff72fc0c6ebbd3eb1318b94b8a2cffd912cf9ec248b3499c99616871"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\episode\\prepared-index-v1.json",
+      "file": "prepared-index-v1.json",
+      "bytes": 1603,
+      "sha256": "cf849e3a836547a3193f0463365f7f4d54f40bbe7769fac8e319889e5b8d2c2f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\episode\\cleanup-v1.json",
+      "file": "cleanup-v1.json",
+      "bytes": 1036,
+      "sha256": "6f1c11445e06533cd9f1347c8da338ad1393339d8d58d22cd06e6b586c34e714"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\episode\\owned-process-v1.json",
+      "file": "owned-process-v1.json",
+      "bytes": 742,
+      "sha256": "90719c3a5330b86a9b32c8c3228e637e78190f19ad38bc382839af75eab1ecc3"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\episode\\health-before-v1.json",
+      "file": "health-before-v1.json",
+      "bytes": 1121,
+      "sha256": "c2e81a54a4015e925c18c2616602b070850a7aad0dd3c59b7f99b168d89588d8"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\episode\\health-after-v1.json",
+      "file": "health-after-v1.json",
+      "bytes": 476,
+      "sha256": "ace86e77e33b011364ae7b76f666b4b22973e330554aa4bf1e2d2a68137b33d2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\episode\\run-intent-v1.json",
+      "file": "run-intent-v1.json",
+      "bytes": 1963,
+      "sha256": "8a98b8c15064dda7d0d70f7a7a51b4cdf66ddf9014b7185e771627183c014d77"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\episode\\root-independent-cleanup-v1.json",
+      "file": "root-independent-cleanup-v1.json",
+      "bytes": 258,
+      "sha256": "580683addee81306f668b1057eb61c17e88854d50f1bc0ee1223b782c86470b5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\episode\\reports\\1793056344585-0defddbe.preparation-report.json",
+      "file": "1793056344585-0defddbe.preparation-report.json",
+      "bytes": 17301,
+      "sha256": "784f8ca52c05f68b5263cb8668990019d0c7395f64760c2db677c8befec140f6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\episode\\reports\\1793056344585-0defddbe.preparation.jsonl",
+      "file": "1793056344585-0defddbe.preparation.jsonl",
+      "bytes": 333957,
+      "sha256": "b3e9e5046f909f0c4a116d2058293593441dcc0154e8f35b5aea4e4a0809980b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v8\\root-focused-receipt-v1.json",
+      "file": "node-v8/root-focused-receipt-v1.json",
+      "bytes": 15785,
+      "sha256": "6013b938859cc1788961ee555d7825563fcbfda527a531cb68eaf668efc76831"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v8\\complete-preparation-and-protected-navigation.stdout.log",
+      "file": "node-v8/complete-preparation-and-protected-navigation.stdout.log",
+      "bytes": 49508,
+      "sha256": "f6b894e26733b718cd3a773174ad065eca467fb6902618551baeea561ea5927f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v8\\complete-preparation-and-protected-navigation.stderr.log",
+      "file": "node-v8/complete-preparation-and-protected-navigation.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v8\\ordinary-economy-and-navigation-dependencies.stdout.log",
+      "file": "node-v8/ordinary-economy-and-navigation-dependencies.stdout.log",
+      "bytes": 75535,
+      "sha256": "bd0d292b4dc646634088f1dfa78ebe7442b23c58b8ac6578e9aa9eedb8d46c71"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v8\\ordinary-economy-and-navigation-dependencies.stderr.log",
+      "file": "node-v8/ordinary-economy-and-navigation-dependencies.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-runner-v8.mjs",
+      "file": "node-v8/root-validation-runner-v8.mjs",
+      "bytes": 5531,
+      "sha256": "fe0dbf30d9faac2f8eef0c5b016371c74549d367dfa24fceed109e35342fb950"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\finalize-ordinary-bank-binding-v8.mjs",
+      "file": "root-finalizers/finalize-ordinary-bank-binding-v8.mjs",
+      "bytes": 3829,
+      "sha256": "bee09e88ced4b55b6ee201f7166fb88aad9b1e543551f804ee2c6c49c88c6d26"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\finalize-ordinary-bank-binding-v9.mjs",
+      "file": "root-finalizers/finalize-ordinary-bank-binding-v9.mjs",
+      "bytes": 4541,
+      "sha256": "94fa8e75a50c92c2fec95d62b2a6cdfd8bce6f19ba227c27464f384925a26500"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\archive-ordinary-capacity-bank-prepare-v8.mjs",
+      "file": "archive-evidence-v8.mjs",
+      "bytes": 16452,
+      "sha256": "b83406e72ad9fb6de074900a380b31ab2213a8384072623c1b76881679068fef"
+    }
+  ]
+}
