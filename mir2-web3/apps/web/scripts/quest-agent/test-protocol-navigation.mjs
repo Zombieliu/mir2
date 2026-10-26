@@ -214,3 +214,201 @@ test("type100 back-image index bit is not mistaken for the high-wall flag", () =
   const map = parseCrystalCollisionMap(bytes, "image-index");
   assert.equal(map.blocked[0], 0);
 });
+
+import { spawnSync } from "node:child_process";
+
+// Each child owns a fresh module/slot and restores its constructor hooks. The
+// production API stays unchanged, with no workspace/test-only exports.
+function runWorkspaceFixture(body) {
+  const source = `
+import assert from "node:assert/strict";
+const { findProtocolWalkPath } = await import(${JSON.stringify(new URL("./protocol-navigation.mjs", import.meta.url).href)});
+const native = { Float64Array, Int32Array, Uint8Array };
+const nativeFill = Object.fromEntries(Object.entries(native).map(([name, type]) => [name, type.prototype.fill]));
+const allocations = [], fills = [];
+function map(width, height, obstacles = []) {
+  const blocked = new native.Uint8Array(width * height);
+  for (const { x, y } of obstacles) blocked[y * width + x] = 1;
+  return { mapFileName: "workspace-fixture", type: 100, width, height, blocked };
+}
+function instrument(beforeAllocation = () => {}) {
+  for (const [name, type] of Object.entries(native)) {
+    globalThis[name] = new Proxy(type, { construct(target, args) {
+      beforeAllocation(name, args);
+      const array = Reflect.construct(target, args, target);
+      allocations.push({ name, array, length: array.length });
+      return array;
+    } });
+    type.prototype.fill = function (...args) {
+      fills.push({ name, length: this.length, value: args[0] });
+      return Reflect.apply(nativeFill[name], this, args);
+    };
+  }
+}
+try {
+${body}
+} finally {
+  for (const [name, type] of Object.entries(native)) {
+    globalThis[name] = type;
+    type.prototype.fill = nativeFill[name];
+  }
+}
+`;
+  const result = spawnSync(process.execPath, ["--input-type=module", "--eval", source], {
+    encoding: "utf8",
+    timeout: 30000,
+    windowsHide: true,
+  });
+  assert.equal(result.error, undefined, result.error?.message);
+  assert.equal(result.signal, null, result.stderr);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+}
+
+test("workspace reuses buffers without full fills across sizes, obstacles and expansion limits", () => {
+  runWorkspaceFixture(`
+    instrument();
+    const firstMap = map(30, 20);
+    const query = { map: firstMap, start: { x: 0, y: 0 }, target: { x: 4, y: 0 } };
+    const first = findProtocolWalkPath(query);
+    const expected = [0, 1, 2, 3, 4].map(x => ({ x, y: 0 }));
+    assert.deepEqual(first, expected);
+    assert.deepEqual(allocations.map(x => [x.name, x.length]), [
+      ["Float64Array", 600], ["Int32Array", 600], ["Uint8Array", 600], ["Int32Array", 600],
+    ]);
+    assert.equal(allocations.reduce((n, x) => n + x.array.byteLength, 0), 17 * 600);
+    assert.equal(fills.length, 2, "only the first score/predecessor initialization fills");
+    assert.ok(allocations[0].array.every(x => x === Infinity));
+    assert.ok(allocations[1].array.every(x => x === -2));
+    assert.ok(allocations[2].array.every(x => x === 0));
+
+    const detour = findProtocolWalkPath({ ...query, dynamicObstacles: [{ x: 2, y: 0 }] });
+    assert.ok(detour && !detour.some(p => p.x === 2 && p.y === 0));
+    assert.equal(findProtocolWalkPath({ ...query, maxExpanded: 1 }), null);
+    assert.equal(findProtocolWalkPath({
+      ...query, dynamicObstacles: Array.from({ length: 20 }, (_, y) => ({ x: 2, y })),
+    }), null);
+    assert.deepEqual(findProtocolWalkPath(query), expected);
+    assert.deepEqual(findProtocolWalkPath({ ...query, map: map(20, 30) }), expected);
+    assert.deepEqual(findProtocolWalkPath({ ...query, map: map(5, 3) }), expected);
+    assert.deepEqual(findProtocolWalkPath({ ...query, desiredDistance: 2 }), expected.slice(0, 3));
+    assert.equal(allocations.length, 4, "same or smaller capacity has no new arrays");
+    assert.equal(fills.length, 2, "repeated searches never refill the map-sized arrays");
+    assert.deepEqual(first, expected, "returned paths do not alias workspace state");
+    assert.ok(allocations[0].array.every(x => x === Infinity));
+    assert.ok(allocations[1].array.every(x => x === -2));
+    assert.ok(allocations[2].array.every(x => x === 0));
+
+    assert.deepEqual(findProtocolWalkPath({ ...query, map: map(40, 20) }), expected);
+    assert.equal(allocations.length, 8, "a larger query replaces only the single slot");
+    assert.equal(fills.length, 4);
+    assert.deepEqual(first, expected);
+  `);
+});
+
+test("workspace finally resets dirty cells and releases a lease after a search getter throws", () => {
+  runWorkspaceFixture(`
+    const faulty = map(10, 10), blocked = faulty.blocked;
+    let reads = 0;
+    Object.defineProperty(faulty, "blocked", { get() {
+      if (++reads === 3) throw Error("controlled search read failure");
+      return blocked;
+    } });
+    instrument();
+    const query = { map: faulty, start: { x: 0, y: 0 }, target: { x: 5, y: 0 } };
+    assert.throws(() => findProtocolWalkPath(query), /controlled search read failure/);
+    assert.equal(allocations.length, 4);
+    assert.ok(allocations[0].array.every(x => x === Infinity));
+    assert.ok(allocations[1].array.every(x => x === -2));
+    assert.ok(allocations[2].array.every(x => x === 0));
+    const expected = [0, 1, 2, 3, 4, 5].map(x => ({ x, y: 0 }));
+    assert.deepEqual(findProtocolWalkPath({ ...query, map: map(10, 10) }), expected);
+    assert.deepEqual(findProtocolWalkPath({ ...query, map: map(10, 10) }), expected);
+    assert.equal(allocations.length, 4, "an exception must not leave the lease busy");
+    assert.equal(fills.length, 2);
+  `);
+});
+
+test("workspace releases the reservation when its initial allocation throws", () => {
+  runWorkspaceFixture(`
+    let fail = true;
+    instrument(name => {
+      if (fail && name === "Float64Array") { fail = false; throw Error("controlled allocation failure"); }
+    });
+    const query = { map: map(8, 8), start: { x: 0, y: 0 }, target: { x: 3, y: 0 } };
+    assert.throws(() => findProtocolWalkPath(query), /controlled allocation failure/);
+    assert.equal(allocations.length, 0);
+    const expected = [0, 1, 2, 3].map(x => ({ x, y: 0 }));
+    assert.deepEqual(findProtocolWalkPath(query), expected);
+    assert.equal(allocations.length, 4);
+    assert.deepEqual(findProtocolWalkPath(query), expected);
+    assert.equal(allocations.length, 4, "allocation failure cannot force later fresh fallback");
+  `);
+});
+
+test("workspace synchronous reentry uses fresh arrays during allocation and during search", () => {
+  runWorkspaceFixture(`
+    let nested, once = true;
+    const innerMap = map(4, 4), outerMap = map(12, 12);
+    instrument(name => {
+      if (once && name === "Float64Array") {
+        once = false;
+        nested = findProtocolWalkPath({ map: innerMap, start: { x: 0, y: 0 }, target: { x: 3, y: 3 } });
+      }
+    });
+    const query = { map: outerMap, start: { x: 0, y: 0 }, target: { x: 11, y: 11 } };
+    const expected = Array.from({ length: 12 }, (_, x) => ({ x, y: x }));
+    assert.deepEqual(findProtocolWalkPath(query), expected);
+    assert.deepEqual(nested, Array.from({ length: 4 }, (_, x) => ({ x, y: x })));
+    assert.equal(allocations.filter(x => x.length === 16).length, 3, "nested fresh path has no dirty array");
+    assert.equal(allocations.filter(x => x.length === 144).length, 4);
+    assert.equal(allocations.length, 7);
+    assert.deepEqual(findProtocolWalkPath(query), expected);
+    assert.equal(allocations.length, 7, "nested allocation never replaces the outer slot");
+  `);
+  runWorkspaceFixture(`
+    const outerMap = map(12, 12), blocked = outerMap.blocked, innerMap = map(12, 12);
+    let reads = 0, nested;
+    Object.defineProperty(outerMap, "blocked", { get() {
+      if (++reads === 3) nested = findProtocolWalkPath({ map: innerMap, start: { x: 0, y: 0 }, target: { x: 11, y: 11 } });
+      return blocked;
+    } });
+    instrument();
+    const query = { map: outerMap, start: { x: 0, y: 11 }, target: { x: 11, y: 0 } };
+    const expected = Array.from({ length: 12 }, (_, x) => ({ x, y: 11 - x }));
+    assert.deepEqual(findProtocolWalkPath(query), expected);
+    assert.deepEqual(nested, Array.from({ length: 12 }, (_, x) => ({ x, y: x })));
+    assert.equal(allocations.length, 7);
+    const scores = allocations.filter(x => x.name === "Float64Array");
+    assert.notEqual(scores[0].array.buffer, scores[1].array.buffer);
+    assert.ok(scores[0].array.every(x => x === Infinity), "outer dirty cells reset after nested search");
+    assert.deepEqual(findProtocolWalkPath(query), expected);
+    assert.equal(allocations.length, 7);
+  `);
+});
+
+test("workspace retention stops at four million cells and oversized custom maps keep fresh behavior", () => {
+  runWorkspaceFixture(`
+    instrument();
+    const maxMap = map(2000, 2000);
+    const query = { start: { x: 0, y: 0 }, target: { x: 0, y: 0 }, maxExpanded: 1 };
+    assert.deepEqual(findProtocolWalkPath({ ...query, map: maxMap }), [{ x: 0, y: 0 }]);
+    assert.equal(allocations.length, 4);
+    assert.equal(allocations.reduce((n, x) => n + x.array.byteLength, 0), 68_000_000);
+    assert.equal(fills.length, 2);
+    assert.deepEqual(findProtocolWalkPath({ ...query, map: map(2, 2) }), [{ x: 0, y: 0 }]);
+    assert.equal(allocations.length, 4);
+    assert.equal(fills.length, 2);
+
+    // Public custom collision-map objects historically may exceed the parser's
+    // cap. They must not gain a new rejection or evict the bounded retained slot.
+    const oversized = map(4_000_001, 1);
+    assert.deepEqual(findProtocolWalkPath({ ...query, map: oversized }), [{ x: 0, y: 0 }]);
+    const fresh = allocations.filter(x => x.length === 4_000_001);
+    assert.deepEqual(fresh.map(x => x.name), ["Float64Array", "Int32Array", "Uint8Array"]);
+    assert.equal(allocations.length, 7);
+    assert.equal(fills.length, 4);
+    assert.deepEqual(findProtocolWalkPath({ ...query, map: map(2, 2) }), [{ x: 0, y: 0 }]);
+    assert.equal(allocations.length, 7, "oversized fallback does not replace the bounded slot");
+    assert.equal(fills.length, 4);
+  `);
+});

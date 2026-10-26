@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T12:05:59.738Z",
+  "reviewer": "Root with independent read-only agent audit",
+  "writeSet": [
+    "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+    "apps/web/scripts/quest-agent/test-protocol-navigation.mjs"
+  ],
+  "candidate": {
+    "bytes": 19998,
+    "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2"
+  },
+  "test": {
+    "bytes": 18156,
+    "sha256": "5f17e004728b180a2d260314f21f942d771e3bdf498c37155cd38a6287dd565b"
+  },
+  "blockingFindings": [],
+  "algorithmAndGateSemanticsPreserved": true,
+  "dirtyFirstTouchBeforeWrite": true,
+  "finallyResetAndReservationRelease": true,
+  "reentryAndOversizeFreshFallback": true,
+  "differentDimensionsUseCurrentMapIndexing": true,
+  "previousReturnedPathsIndependent": true,
+  "retainedSlotTypedArrayBytesPerCell": 17,
+  "maximumRetainedCells": 4000000,
+  "maximumRetainedTypedArrayBytes": 68000000,
+  "notProcessMemoryBound": true,
+  "focusedActualRootExecution": {
+    "command": [
+      "C:/Program Files/nodejs/node.exe",
+      "--test",
+      "apps/web/scripts/quest-agent/test-protocol-navigation.mjs"
+    ],
+    "exitCode": 0,
+    "tests": 19,
+    "pass": 19,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "durationMs": 1123.7097,
+    "stdoutLogCaptured": false,
+    "resultObservedInToolOutput": true
+  },
+  "liveLoadRunAfterChange": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

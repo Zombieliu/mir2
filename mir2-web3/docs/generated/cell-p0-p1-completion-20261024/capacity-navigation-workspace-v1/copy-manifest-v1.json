@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-26T12:08:13.481Z",
+  "files": [
+    {
+      "file": "implementation-receipt-v1.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\protocol-navigation-workspace-v1\\implementation-receipt-v1.json",
+      "bytes": 5920,
+      "sha256": "8bf66930558824de9a26ae53d8f0c6db96ce79cc803be8664fcfd206906d2471"
+    },
+    {
+      "file": "root-review-v1.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\protocol-navigation-workspace-v1\\root-review-v1.json",
+      "bytes": 1462,
+      "sha256": "520659f22c86dd20dc9fda4b6f344d1a50d37007bb9a0b391089e21003920431"
+    },
+    {
+      "file": "source-diff-v1.patch",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\protocol-navigation-workspace-v1\\source-diff-v1.patch",
+      "bytes": 17066,
+      "sha256": "d399dd5c350f8f173f662f05b92029a02d61fb11de31b8ad68a26704c682a607"
+    },
+    {
+      "file": "oracle-result-v1.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-navigation-workspace-oracle-v1\\result-v1.json",
+      "bytes": 1175,
+      "sha256": "216b5afc6147b0ca7226bdc8c76aff6096d5c0efa23a29c9f869670c993e333d"
+    },
+    {
+      "file": "oracle-runner-v1.mjs",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-navigation-workspace-oracle-runner-v1.mjs",
+      "bytes": 4300,
+      "sha256": "2372c3aacf267e621d2ab59c4dd73e8162911ba0eeba7fb2be2d40932c293c1a"
+    },
+    {
+      "file": "full-driver-receipt-v1.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-navigation-workspace-validation-v2\\full-driver-receipt-v1.json",
+      "bytes": 3129,
+      "sha256": "3f0a16dbf89a1435ad00541ba85d02d27dcd5d7e63e0ecfdfc270240831a6292"
+    },
+    {
+      "file": "full-driver-stdout-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-navigation-workspace-validation-v2\\full-driver-stdout-v1.log",
+      "bytes": 65264,
+      "sha256": "8f42f04210f9cac7d394d46b2d5fa1f3142a7609e8bf7f582d412e662202a037"
+    },
+    {
+      "file": "full-driver-stderr-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-navigation-workspace-validation-v2\\full-driver-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "preflight-wrong-test-paths-runner-v1.mjs",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-navigation-workspace-validation-runner-v1.mjs",
+      "bytes": 2307,
+      "sha256": "e01910ad58893dd715a5401b1b3d9e7a99723ea08a07f6f9a68869f668782b25"
+    },
+    {
+      "file": "full-driver-runner-v2.mjs",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-navigation-workspace-validation-runner-v2.mjs",
+      "bytes": 2292,
+      "sha256": "8d401f843a94cddc21e15709aabe28f6b64f02c74f8e62c1d470889ad66ba6af"
+    },
+    {
+      "file": "cpu-profile-analysis-v1.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-profile-v6-cpu-analysis-v1\\analysis-v1.json",
+      "bytes": 47111,
+      "sha256": "f3cd0be4a7f38913c1b4d0c942bebeefa08b6e9dac29a8c65f3908ad04008983"
+    },
+    {
+      "file": "v5-clock-findings-v2.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-parse-cache-v5-clock-analysis-v1\\findings-v2.json",
+      "bytes": 57447,
+      "sha256": "244d7367a3d47a230a47f3db67eeb59a6dbb9430ca3e401434b9fcd45c36916a"
+    },
+    {
+      "file": "v6-death-findings-v1.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-profile-v6-death-analysis-v1\\findings-v1.json",
+      "bytes": 30214,
+      "sha256": "05d4d38dc653fa94bbec79d2371a4a16c28557146a5cb6f4c49a392603b00aa9"
+    },
+    {
+      "file": "v5-original-report.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v5\\episode-50\\reports\\1793010784810-2c0311a2.report.json",
+      "bytes": 78513,
+      "sha256": "b73f3e1e4be67c7fde17462da3c2330d780e347c228fa91d5bd13504c5ca674c"
+    },
+    {
+      "file": "v5-original-cleanup.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v5\\episode-50\\realm-cleanup.json",
+      "bytes": 6593,
+      "sha256": "a22a6339bce7484d47acf1e35b86aaee84788ac5c766198cd03f88995ce0e516"
+    },
+    {
+      "file": "v6-original-report.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v6\\episode-50\\reports\\1793012683829-20203b04.report.json",
+      "bytes": 61863,
+      "sha256": "54e896f03eeca7b295573e2f791ebe4afb404a06a5e36d55e2826217a1816114"
+    },
+    {
+      "file": "v6-original-cleanup.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v6\\episode-50\\realm-cleanup.json",
+      "bytes": 6560,
+      "sha256": "ecc0781cfadbf7e3a47d1ddf7d929e6a5067b8bf44ba212403325c913b47b4b6"
+    },
+    {
+      "file": "backend-562-release-v1.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\shared-experience-parse-cache-release-v1\\release-v1.json",
+      "bytes": 15219,
+      "sha256": "05811798ac0f9e4cb326eccc20a761896d341c9c50c23c541b8b1cc0f80cff75"
+    }
+  ],
+  "rawArchived": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}
