@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-26T01:32:30.565428+00:00",
+  "scope": "Exactly one Store companion child literal per source changed from old19 to current20. Base game collector/verdict and Store-independent semantics unchanged. Old partial source bytes preserved.",
+  "rows": [
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\collect-store-public.mjs.before-store-child-v1.txt",
+        "bytes": 4715,
+        "sha256": "75246bed8e64d2c992e494a5b33450c8759829736ca950d39d1ebede94670c55"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\collect-store-public.mjs",
+        "bytes": 4720,
+        "sha256": "16705eaf138cfd29d652000e615e4d008a81c20c833c1e1cc1863547c96c9156"
+      },
+      "oldLiteral": "capacity-native10-v2-scout-anti-convergence-followup-19-store-diagnostics",
+      "newLiteral": "capacity-native10-v2-scout-selection-diagnostics-followup-20-store-diagnostics",
+      "occurrences": 1,
+      "inverseRawExact": true,
+      "syntax": {
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\verify-store-public.mjs.before-store-child-v1.txt",
+        "bytes": 4631,
+        "sha256": "44d24d03f820eee4f09219cd2183578df80de5f4a42fcc2f09c54b1198d00f35"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\verify-store-public.mjs",
+        "bytes": 4636,
+        "sha256": "57b019c74bb1d32acb98cf9cf4af25616e70bc5ec0b68c2347e8322c85645410"
+      },
+      "oldLiteral": "capacity-native10-v2-scout-anti-convergence-followup-19-store-diagnostics",
+      "newLiteral": "capacity-native10-v2-scout-selection-diagnostics-followup-20-store-diagnostics",
+      "occurrences": 1,
+      "inverseRawExact": true,
+      "syntax": {
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    }
+  ],
+  "moduleImported": false,
+  "modeExecuted": false,
+  "capacityAccepted": false
+}

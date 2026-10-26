@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ACTUAL_FRESH_PROBE20_INDEPENDENT_VALIDATION",
+  "finalized": false,
+  "backendInputCount": 50,
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+  "probe20": {
+    "runId": null,
+    "report": null,
+    "raw": null,
+    "collectedEvidence": null,
+    "independentVerification": null,
+    "independentVerifierSources": [],
+    "independentSourceClosureManifest": null,
+    "actualExecutionReceipt": null,
+    "independentVerifierRevision": null,
+    "preparedSourceConfigSha256": null,
+    "admittedSourceConfigSha256": null,
+    "completePhaseSeconds": null,
+    "completePhaseWindows": null,
+    "rootIndependentCleanup": null,
+    "expectedOwnedPorts": [
+      17500,
+      17510
+    ],
+    "capacityAccepted": false
+  },
+  "ordinaryFull16SourceNamespace": "Fresh K ordinary full16 uses17600/17610 and is separate from Probe20 cleanup on17500/17510.",
+  "moduleImported": false,
+  "modeExecuted": false,
+  "realmStarted": false,
+  "eligibleForSealNow": false,
+  "capacityAccepted": false
+}

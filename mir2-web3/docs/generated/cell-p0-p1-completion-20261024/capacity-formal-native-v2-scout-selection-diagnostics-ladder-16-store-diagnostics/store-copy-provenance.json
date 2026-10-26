@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "dataset": "account-store",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\store-stage-public-status.json",
+        "bytes": 2598,
+        "sha256": "90fbaff3cbbd094ba72aa22a1f18b70c67769685cb28559a6e4e5c44e570448d"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-scout-selection-diagnostics-ladder-16-store-diagnostics\\store-stage-public-status.json",
+        "bytes": 2598,
+        "sha256": "90fbaff3cbbd094ba72aa22a1f18b70c67769685cb28559a6e4e5c44e570448d"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\store-stage-public.jsonl",
+        "bytes": 23371,
+        "sha256": "f4312abf01cd24d69e45063d4d30bed7f57d7beb7d604019b96ea50da71f6fb4"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-scout-selection-diagnostics-ladder-16-store-diagnostics\\store-stage-public.jsonl",
+        "bytes": 23371,
+        "sha256": "f4312abf01cd24d69e45063d4d30bed7f57d7beb7d604019b96ea50da71f6fb4"
+      }
+    }
+  ],
+  "sourceIdentity": {
+    "schemaVersion": 1,
+    "dataset": "account-store",
+    "storeOnly": true,
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\source-freeze-v1.json",
+      "bytes": 4628,
+      "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+      "bytes": 6459,
+      "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+    },
+    "sourceSha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+    "helperSha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7",
+    "validatorSha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262",
+    "separateFromBaseThreeFourSeven": true,
+    "contributesToGameAcceptance": false
+  },
+  "originalGameDataModified": false
+}

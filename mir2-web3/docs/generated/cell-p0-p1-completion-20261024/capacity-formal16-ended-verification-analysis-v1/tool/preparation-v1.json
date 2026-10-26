@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_PREPARED_ENDED_ONLY_NOT_EXECUTED",
+  "preparedAt": "2026-10-26T03:22:16.030Z",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1",
+  "files": [
+    {
+      "path": "verify-ended-formal16-v1.mjs",
+      "bytes": 46382,
+      "sha256": "484aeeaea751f17fb291122fc64b6e19bd4de6826287183e18dc8064aeec5495"
+    },
+    {
+      "path": "formal-contract-v1.mjs",
+      "bytes": 6143,
+      "sha256": "8b1822bd4d097a06e68c17d383b4bb5fdfbefe0db1cda0043917cfe6e374d9f9"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-formal-policy-v1.json",
+      "bytes": 1038,
+      "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+    },
+    {
+      "path": "run-ended-formal16-v1.mjs",
+      "bytes": 2259,
+      "sha256": "b5f78bd14461764fb8f58efe81aadcb6f8afdac1b9b50b1e81f5b845eda1e2fd"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-v1.json",
+      "bytes": 28748,
+      "sha256": "a2e9374beeb3c92f7e6953e2126594ec59a1dfa4f29ccfe87718566b0531bf67"
+    },
+    {
+      "path": "root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 11336,
+      "sha256": "5eaea7bd0468160452944bb9293904fcdcef36de139f42960c7338f7f9d6f48d"
+    },
+    {
+      "path": "syntax-check-v1.log",
+      "bytes": 662,
+      "sha256": "2da587e4759a60ebd57e9cde13693bfca326dc86e12ff3dc3c581bb6b206806e"
+    }
+  ],
+  "sourceSha256": "ffb2f7c0f6f6ef6a88cd3202b8dc6519023f308db2559674b541ff4bbef3afdd",
+  "syntax": [
+    {
+      "file": "verify-ended-formal16-v1.mjs",
+      "kind": "node--check",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "file": "formal-contract-v1.mjs",
+      "kind": "node--check",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "file": "hp-proof-contract-v2.mjs",
+      "kind": "node--check",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "file": "run-ended-formal16-v1.mjs",
+      "kind": "node--check",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "file": "seal-tool-source-v1.mjs",
+      "kind": "node--check",
+      "exitCode": 0,
+      "signal": null,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    }
+  ],
+  "syntaxLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\syntax-check-v1.log",
+    "bytes": 662,
+    "sha256": "2da587e4759a60ebd57e9cde13693bfca326dc86e12ff3dc3c581bb6b206806e"
+  },
+  "runId": "1792981760951-0079fde7",
+  "ownedPids": [
+    65544,
+    61512
+  ],
+  "rootCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-independent-cleanup-v1.json",
+    "bytes": 451,
+    "sha256": "4f4badf50c3154f047949b699fcd3d86ab6eb90583c52993a06e17b484e86df5"
+  },
+  "consumerTerminals": [
+    {
+      "label": "base-collection",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Actual sequential Root unified exec session14840; each four native exit codes0 and enclosing shell exit0",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-base-collection-stdout-v1.log",
+        "bytes": 132833,
+        "sha256": "c2c050e43300a3088c0b1c628772afd17bff66d861a4f321d63b400aaf383976"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "base-verification",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Actual sequential Root unified exec session14840; each four native exit codes0 and enclosing shell exit0",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-base-verification-stdout-v1.log",
+        "bytes": 5026,
+        "sha256": "6bb47800fa7f59a012ea9eabcc20d36bb42f22a613cdd8a318ddbb4454a99c28"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "store-collection",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Actual sequential Root unified exec session14840; each four native exit codes0 and enclosing shell exit0",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-store-collection-stdout-v1.log",
+        "bytes": 402,
+        "sha256": "9e6d4ab692b25bda840b306ce038fb3a1dfe77905358f7ab11c014faf9d0c10b"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "store-verification",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Actual sequential Root unified exec session14840; each four native exit codes0 and enclosing shell exit0",
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-store-verification-stdout-v1.log",
+        "bytes": 1244,
+        "sha256": "7983d05dcac60561727d4d219c8b16522b12ec334a2a142948c5e236013e7856"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-root-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "rootActualProducerFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\root-actual-terminal-and-consumer-facts-v1.json",
+    "bytes": 11336,
+    "sha256": "5eaea7bd0468160452944bb9293904fcdcef36de139f42960c7338f7f9d6f48d"
+  },
+  "runtimeSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\launcher-source-frozen-v1.json",
+    "bytes": 52689,
+    "sha256": "c2b3f4f66a34c2c70eeff33bf9db13225c642278368a58d5d4debfe7b101f1c1"
+  },
+  "runtimeSealInputs": 128,
+  "sourceConfigs": {
+    "prepared": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\source-pins.json",
+      "bytes": 171979,
+      "sha256": "6a403ca26c37733867c87779ae8ed60644078b8d6c81e9ad3f2a45e81c645315",
+      "sourceConfigSha256": "2436c902e3b4f41ce78b53ac97006d9cc4ba5ffe79fc4c7feb197ae137a53168",
+      "inputCount": 371
+    },
+    "admitted": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\source-pins-admitted-v2.json",
+      "bytes": 171249,
+      "sha256": "513c4484f05e114d9ac2cc39fef2b5d07cf26b01b2c4a7033011c03f0fdbe43f",
+      "sourceConfigSha256": "d9e9664b68636264f46315a88e159a5b0bdbd3deb53ee6d4093a8a2193a38c00",
+      "inputCount": 376
+    },
+    "preparedCount371": true,
+    "admittedCount376": true,
+    "aggregatesMustRemainDistinct": true
+  },
+  "sourceNamespaces": {
+    "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+    "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+    "currentDriverTests": 232,
+    "historicalPriorJTests": 226,
+    "historicalPriorHTests": 219,
+    "historicalBuildDriverTests": 210,
+    "currentDriverSourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1"
+  },
+  "originalFormalRules": {
+    "phaseSeconds": [
+      300,
+      300,
+      300,
+      300,
+      300,
+      7200,
+      60
+    ],
+    "requiredCompleteWindows": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      120,
+      1
+    ],
+    "totalCompleteWindows146": true,
+    "actualMeasuredSecondsRequired": true,
+    "originalMemoryRetainedBuckets1201": true,
+    "originalMemoryBucketMs3000": true,
+    "minimumSlopeObservationSeconds1800": true,
+    "maximumMiBPerHour32": true,
+    "resume5Save5": true,
+    "failureAndPartialNeverPromoted": true,
+    "storeDiagnosticNotGameAnd": true,
+    "noIndependentPerPacket900Replay": true,
+    "originalCleanupCapacityAcceptedNullNotAdjudicatedPreserved": true
+  },
+  "pureDiagnosticAppendix": {
+    "resultField": "scoutSelectionDiagnostics",
+    "source": "probe20-independent-verification-v1/verify-ended-probe20-v1.mjs",
+    "helperAndObservationRawReused": true,
+    "singleExistingRawCallback": true,
+    "additionalRawScans": 0,
+    "maximumScalarTuples": 32,
+    "fields": [
+      "hintCount",
+      "activeOtherWaypointCount",
+      "sharedHintCount",
+      "unsharedHintCount",
+      "hintPreferenceReason"
+    ],
+    "truncationSentinelNotMissingFieldFailure": true,
+    "absentOrInvalidRowsReportedNotGameGate": true,
+    "noActionAckHitOrCapacityCredit": true
+  },
+  "rootActualTerminalKnown": true,
+  "rootReportOk": false,
+  "rootFailedAtStage25": true,
+  "laterStagesAnd2hSoakNotExecuted": true,
+  "independentGameReplayExecuted": false,
+  "originalGameVerdictChanged": false,
+  "sourceModuleImported": false,
+  "productTestsExecuted": false,
+  "readlineScope": "Trusted frozen SHA-bound producer rows only; readline assembles a line before existing64MiB validation, not a hostile unbounded-line memory guarantee.",
+  "sourceSealExpectedFiles": 11,
+  "rootOnlyNextActions": [
+    "Independent complete source review with preparation exact{file,bytes,sha256} and verdict toolSourceContractPassed/eligibleForRootSealing true, blockingFindingIds[].",
+    "Root seals source once using actual review SHA.",
+    "Root invokes run-ended-formal16-v1.mjs --seal-sha256=<actual> --verify-ended-formal16 --run=1792981760951-0079fde7 once. Independent consistency PASS must preserve actual report failure, not promote game/capacity acceptance."
+  ],
+  "capacityAccepted": false,
+  "p0AcceptanceAdjudicated": false,
+  "p2ImplementationPermitted": false
+}

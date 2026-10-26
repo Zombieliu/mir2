@@ -1,0 +1,14 @@
+{"phase":"owned-release-ready","pid":59644,"sha256":"dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc","reportPath":"C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.realm-evidence.json"}
+{"check":"authGuards","status":"passed"}
+{"check":"sharedCombat","status":"passed"}
+{"check":"sharedKill","status":"passed"}
+{"check":"sharedDrop","status":"failed"}
+{"check":"sharedKill","status":"passed"}
+{"check":"sharedDrop","status":"passed"}
+{"check":"uniquePickup","status":"passed"}
+{"check":"playerDeath","status":"passed"}
+{"check":"townRevive","status":"passed"}
+{"check":"mapRoundTrip","status":"passed"}
+{"check":"logout","status":"passed"}
+{"check":"reloginPersistence","status":"passed"}
+{"phase":"finished","ok":true,"reportPath":"C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.realm-evidence.json","playtest":{"reportPath":"C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977859487-2ff0ea0f.report.json","runId":"1792977859487-2ff0ea0f","ok":true,"status":"passed","registrationMode":"two-fresh-ordinary-registrations","requiredChecks":["authGuards","twoAccounts","mutualVisibility","movement","turn","chat","chatLatency","sharedCombat","mapRoundTrip","logout","reloginPersistence","sharedKill","sharedDrop","uniquePickup","playerDeath","townRevive"],"statuses":{"authGuards":"passed","twoAccounts":"passed","mutualVisibility":"passed","movement":"passed","turn":"passed","chat":"passed","chatLatency":"passed","sharedCombat":"passed","sharedKill":"passed","sharedDrop":"passed","uniquePickup":"passed","playerDeath":"passed","townRevive":"passed","mapRoundTrip":"passed","logout":"passed","reloginPersistence":"passed"}}}

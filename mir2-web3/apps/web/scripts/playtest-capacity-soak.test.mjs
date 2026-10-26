@@ -3170,7 +3170,7 @@ test('observer scout preference uses peer-only target geometry for ordinary move
   assert.equal(next.scouting, true); assert.notEqual(next.command.type, 'attack'); assert.equal(rows.length, 1);
 });
 
-test('observer scout preference preserves the exact cyclic fallback when hints exhaust only the remaining four-search budget', () => {
+test('observer scout preference preserves the exact cyclic fallback when its hint fails within the four-search budget', () => {
   const baseline = observerHintScoutFixture(), hinted = observerHintScoutFixture();
   baseline.secondPeer.snapshot.entities.pop();
   for (const fixture of [baseline, hinted]) for (let y = 0; y < fixture.context.map.height; y++) {
@@ -3179,9 +3179,9 @@ test('observer scout preference preserves the exact cyclic fallback when hints e
   const original = selectNativeAction(baseline.client, baseline.context), selected = selectNativeAction(hinted.client, hinted.context);
   assert.deepEqual(selected, original); assert.equal(selected.scoutHomeIndex, 0);
   assert.deepEqual(hinted.client.combatScout.goal, baseline.client.combatScout.goal);
-  assert.equal(hinted.client.navigationAttemptCount, 3); assert.equal(hinted.client.navigationAttempts.length, 3);
+  assert.equal(hinted.client.navigationAttemptCount, 1); assert.equal(hinted.client.navigationAttempts.length, 1);
   const selection = hinted.rows.find(row => row.type === 'combatScoutSelection');
-  assert.equal(selection.reason, 'cyclic-fallback'); assert.equal(selection.pathSearches, 4); assert.equal(selection.hintPathSearches, 3);
+  assert.equal(selection.reason, 'cyclic-fallback'); assert.equal(selection.pathSearches, 2); assert.equal(selection.hintPathSearches, 1);
   assert.equal(hinted.client.combatScout.confirmedMoves, 0); assert.equal(hinted.actions.length, 0);
 });
 
@@ -3313,10 +3313,10 @@ test('observer scout preference discarded paths reuse read-only obstacles withou
   client.rejectedWalkCells = new Map([['1,1', retained], ['2,1', { x: 2, y: 1, mapFileName: '0', expiresAt: 0 }]]);
   Object.defineProperty(hintTarget, 'hp', { get() { clock = 5000; return 20; } });
   const snapshot = JSON.stringify(client.snapshot), selected = selectNativeAction(client, context);
-  assert.equal(selected.scoutHomeIndex, 0); assert.equal(client.navigationAttemptCount, 3);
+  assert.equal(selected.scoutHomeIndex, 0); assert.equal(client.navigationAttemptCount, 1);
   assert.deepEqual([...client.rejectedWalkCells], [['1,1', retained]], 'only the original fallback cleanup removes its already-expired cell');
   assert.equal(client.rejectedWalkCells.get('1,1'), retained); assert.equal(JSON.stringify(client.snapshot), snapshot);
-  assert.equal(rows.find(row => row.type === 'combatScoutSelection').pathSearches, 4);
+  assert.equal(rows.find(row => row.type === 'combatScoutSelection').pathSearches, 2);
   assert.equal(context.targetClaims.size, 0); assert.equal(client.combatScout.confirmedMoves, 0);
 });
 
@@ -3444,7 +3444,7 @@ test('scout anti-convergence never resets current or other scout and pursuit sta
   assert.equal(f.context.policy.minimumCombatAttacksPerMinute, 18); assert.equal(f.context.policy.minimumCombatHitsPerMinute, 12);
 });
 
-test('scout anti-convergence failed preferred paths keep the exact cyclic fallback and four total searches', () => {
+test('scout anti-convergence failed preferred paths keep the exact cyclic fallback within four total searches', () => {
   const baseline = antiConvergenceScoutFixture(), ranked = antiConvergenceScoutFixture();
   for (const f of [baseline, ranked]) {
     selectNativeAction(f.client, f.context);
@@ -3455,8 +3455,8 @@ test('scout anti-convergence failed preferred paths keep the exact cyclic fallba
   const selected = selectNativeAction(ranked.other, ranked.context);
   assert.deepEqual(selected, original); assert.equal(selected.scoutHomeIndex, 0);
   assert.deepEqual(ranked.other.combatScout.goal, baseline.other.combatScout.goal);
-  assert.equal(ranked.rows.at(-1).reason, 'cyclic-fallback'); assert.equal(ranked.rows.at(-1).pathSearches, 4);
-  assert.equal(ranked.rows.at(-1).hintPathSearches, 3); assert.equal(ranked.other.navigationAttemptCount, 3);
+  assert.equal(ranked.rows.at(-1).reason, 'cyclic-fallback'); assert.equal(ranked.rows.at(-1).pathSearches, 3);
+  assert.equal(ranked.rows.at(-1).hintPathSearches, 2); assert.equal(ranked.other.navigationAttemptCount, 2);
   assert.equal(ranked.rows.at(-1).hintOrderChangedByActiveScoutPreference, true);
   assert.equal(ranked.client.combatScout, firstScout); assert.equal(firstScout.confirmedMoves, 0);
   assert.equal(ranked.context.targetClaims.size, 0); assert.equal(ranked.actions.length, 0);
@@ -3570,4 +3570,116 @@ test('scout selection diagnostics keep the original per-phase row cap and omit c
   f.context.phase = 'stage-10'; f.other.combatScout = null; f.other.combatScoutCursor = 0;
   assert.equal(selectNativeAction(f.other, f.context).scoutHomeIndex, 1);
   assert.equal(f.rows.filter(row => row.type === 'combatScoutSelection').length, 33);
+});
+
+
+function targetWaypointScoutFixture() {
+  const f = observerHintScoutFixture();
+  Object.assign(f.hintTarget, { x: 25, y: 10 });
+  f.client.nativeRunPrimedUntil = Infinity;
+  return f;
+}
+
+function applyTargetWaypointAck(f, plan, sequence, now = Date.now()) {
+  const origin = { ...f.owner };
+  Object.assign(f.owner, plan.target);
+  recordCombatScoutMovement(f.client, f.context, plan, origin,
+    { packet: 'UserLocation', sequence, payload: { ...f.owner } }, 'success', now);
+}
+
+test('scout target waypoint follows the validated attack tile across real movement ACK ticks without visibility or credit', t => {
+  t.mock.timers.enable({ apis: ['Date'], now: 100000 });
+  const f = targetWaypointScoutFixture(), beforePeer = JSON.stringify(f.secondPeer.snapshot);
+  let plan = selectNativeAction(f.client, f.context);
+  const selected = f.rows.find(row => row.type === 'combatScoutSelection'), goal = selected.potentialAttackTile;
+  const home = f.client.combatCluster.observerHomes[selected.selectedHomeIndex];
+  assert.ok(Math.max(Math.abs(goal.x - home.x), Math.abs(goal.y - home.y)) >= 5);
+  assert.deepEqual(plan.navigation.goal, goal);
+  assert.deepEqual(selected.selectedWaypoint, goal); assert.equal(selected.selectedWaypointSource, 'hint-attack-tile');
+  const scout = f.client.combatScout, visited = scout.visited, startedAt = scout.startedAt;
+  for (let tick = 0; tick < 3; tick++) {
+    assert.deepEqual(plan.navigation.goal, goal, `tick ${tick} must keep the target waypoint`);
+    assert.equal(plan.scouting, true); assert.equal(plan.scoutHomeIndex, selected.selectedHomeIndex);
+    assert.equal(plan.command.objectId, undefined); assert.equal(plan.targetEntity, undefined); assert.equal(plan.observer, undefined);
+    applyTargetWaypointAck(f, plan, tick + 1);
+    assert.equal(f.client.combatScout, scout); assert.equal(scout.startedAt, startedAt);
+    assert.equal(scout.visited, visited); assert.equal(scout.confirmedMoves, tick + 1);
+    t.mock.timers.tick(750);
+    plan = selectNativeAction(f.client, f.context);
+  }
+  assert.deepEqual(plan.navigation.goal, goal);
+  assert.equal(f.client.snapshot.entities.length, 1, 'peer-only target never becomes an owner AOI entity');
+  assert.equal(JSON.stringify(f.secondPeer.snapshot), beforePeer);
+  assert.equal(f.rows.filter(row => row.type === 'combatScoutSelection').length, 1);
+  assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+  assert.equal(f.context.policy.minimumCombatAttacksPerMinute, 18); assert.equal(f.context.policy.minimumCombatHitsPerMinute, 12);
+});
+
+test('scout target waypoint invalidation safely falls back without rebuilding the finite scout', () => {
+  for (const invalid of ['blocked', 'no-route', 'occupied', 'transfer', 'coverage']) {
+    const f = targetWaypointScoutFixture();
+    const first = selectNativeAction(f.client, f.context), goal = f.rows.at(-1).potentialAttackTile;
+    assert.deepEqual(first.navigation.goal, goal);
+    applyTargetWaypointAck(f, first, 1);
+    const scout = f.client.combatScout, visited = scout.visited, startedAt = scout.startedAt;
+    if (invalid === 'blocked') f.context.map.blocked[goal.y * f.context.map.width + goal.x] = 1;
+    else if (invalid === 'no-route') {
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (dx || dy)
+        f.context.map.blocked[(goal.y + dy) * f.context.map.width + goal.x + dx] = 1;
+    } else if (invalid === 'occupied') f.client.snapshot.entities.push({ objectId: 9900, kind: 'player', name: 'occupied', x: goal.x, y: goal.y });
+    else if (invalid === 'transfer') f.client.snapshot.mapTransfers = [{ bounds: { minX: goal.x, maxX: goal.x, minY: goal.y, maxY: goal.y } }];
+    else f.secondPeer.closed = true;
+    const plan = selectNativeAction(f.client, f.context);
+    if (plan) {
+      assert.notDeepEqual(plan.navigation?.goal, goal, invalid);
+      assert.ok(insideCombatCoverage(activeCombatCoverage(f.client, f.context), plan.target), invalid);
+      assert.notEqual(plan.command.type, 'attack', invalid);
+    }
+    assert.equal(f.client.combatScout, scout, invalid); assert.equal(scout.startedAt, startedAt, invalid);
+    assert.equal(scout.visited, visited, invalid); assert.equal(scout.confirmedMoves, 1, invalid);
+    assert.ok(f.client.navigationAttemptCount <= 4, invalid);
+    assert.equal(f.context.targetClaims.size, 0, invalid); assert.equal(f.actions.length, 0, invalid);
+  }
+});
+
+test('scout target waypoint unreachable new hint retains the exact original cyclic fallback within four searches', () => {
+  const baseline = targetWaypointScoutFixture(), hinted = targetWaypointScoutFixture();
+  baseline.secondPeer.snapshot.entities.pop();
+  for (const f of [baseline, hinted]) for (let y = 0; y < f.context.map.height; y++) f.context.map.blocked[y * f.context.map.width + 10] = 1;
+  const original = selectNativeAction(baseline.client, baseline.context), selected = selectNativeAction(hinted.client, hinted.context);
+  assert.deepEqual(selected, original); assert.deepEqual(hinted.client.combatScout.goal, baseline.client.combatScout.goal);
+  const row = hinted.rows.find(row => row.type === 'combatScoutSelection');
+  assert.equal(row.reason, 'cyclic-fallback'); assert.ok(row.pathSearches <= 4); assert.ok(row.hintPathSearches >= 1);
+  assert.deepEqual(row.selectedWaypoint, selected.navigation.goal); assert.equal(row.selectedWaypointSource, 'declared-home');
+  assert.equal(hinted.client.combatScout.confirmedMoves, 0); assert.equal(hinted.context.targetClaims.size, 0); assert.equal(hinted.actions.length, 0);
+});
+
+test('scout target waypoint does not redirect an ordinary established scout or reset its saved state', () => {
+  const f = targetWaypointScoutFixture(); f.secondPeer.snapshot.entities.pop();
+  const original = selectNativeAction(f.client, f.context), scout = f.client.combatScout, goal = { ...scout.goal }, visited = scout.visited;
+  scout.startedAt = Date.now() - 19000; scout.activeElapsedMs = 100; scout.confirmedMoves = 23; scout.lastReceiptSequence = 7;
+  visited.set('2,2', 2); f.secondPeer.snapshot.entities.push(f.hintTarget);
+  const plan = selectNativeAction(f.client, f.context);
+  assert.deepEqual(plan, original); assert.deepEqual(scout.goal, goal); assert.equal(f.client.combatScout, scout);
+  assert.equal(scout.startedAt <= Date.now() - 19000, true); assert.equal(scout.activeElapsedMs, 100);
+  assert.equal(scout.confirmedMoves, 23); assert.equal(scout.lastReceiptSequence, 7); assert.equal(scout.visited, visited); assert.equal(visited.get('2,2'), 2);
+  assert.equal(f.rows.filter(row => row.type === 'combatScoutSelection').length, 0);
+});
+
+test('scout target waypoint keeps corrected ACK exclusion and the existing time move and visit limits', t => {
+  t.mock.timers.enable({ apis: ['Date'], now: 200000 });
+  for (const reason of ['movement-budget', 'route-loop', 'time-budget']) {
+    const f = targetWaypointScoutFixture(), plan = selectNativeAction(f.client, f.context), goal = f.rows.at(-1).potentialAttackTile;
+    assert.deepEqual(plan.navigation.goal, goal);
+    const scout = f.client.combatScout, origin = { ...f.owner }, visited = scout.visited;
+    if (reason === 'movement-budget') scout.confirmedMoves = 23;
+    else if (reason === 'route-loop') scout.visited.set(`${plan.target.x},${plan.target.y}`, 2);
+    const count = scout.confirmedMoves, receipt = { packet: 'UserLocation', sequence: 1, payload: { ...plan.target } };
+    recordCombatScoutMovement(f.client, f.context, plan, origin, receipt, 'corrected', Date.now());
+    assert.equal(f.client.combatScout, scout); assert.equal(scout.confirmedMoves, count); assert.equal(scout.visited, visited);
+    Object.assign(f.owner, plan.target);
+    recordCombatScoutMovement(f.client, f.context, plan, origin, receipt, 'success', Date.now() + (reason === 'time-budget' ? 20000 : 0));
+    assert.equal(f.client.combatScout, null); assert.equal(f.rows.at(-1).reason, reason);
+    assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
+  }
 });

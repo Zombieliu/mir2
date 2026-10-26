@@ -1,0 +1,144 @@
+TAP version 13
+# (node:62132) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: observer scout preference keeps the original cyclic no-hint plan and emits no selection credit
+ok 1 - observer scout preference keeps the original cyclic no-hint plan and emits no selection credit
+  ---
+  duration_ms: 4.5275
+  type: 'test'
+  ...
+# Subtest: observer scout preference uses peer-only target geometry for ordinary movement without inventing owner visibility
+ok 2 - observer scout preference uses peer-only target geometry for ordinary movement without inventing owner visibility
+  ---
+  duration_ms: 1.2212
+  type: 'test'
+  ...
+# Subtest: observer scout preference preserves the exact cyclic fallback when hints exhaust only the remaining four-search budget
+ok 3 - observer scout preference preserves the exact cyclic fallback when hints exhaust only the remaining four-search budget
+  ---
+  duration_ms: 6.5241
+  type: 'test'
+  ...
+# Subtest: observer scout preference excludes ineligible targets, unavailable peers and geometry without changing fallback
+ok 4 - observer scout preference excludes ineligible targets, unavailable peers and geometry without changing fallback
+  ---
+  duration_ms: 5.3358
+  type: 'test'
+  ...
+# Subtest: observer scout preference allows expired exclusions and own claims using wall-clock eligibility
+ok 5 - observer scout preference allows expired exclusions and own claims using wall-clock eligibility
+  ---
+  duration_ms: 1.4104
+  type: 'test'
+  ...
+# Subtest: observer scout preference never resets an established scout clock, ACKs, visits or other finite pursuit budgets
+ok 6 - observer scout preference never resets an established scout clock, ACKs, visits or other finite pursuit budgets
+  ---
+  duration_ms: 1.2413
+  type: 'test'
+  ...
+# Subtest: observer scout preference keeps Run-first ACK separate from waypoint arrival and ignores duplicate or corrected receipts
+ok 7 - observer scout preference keeps Run-first ACK separate from waypoint arrival and ignores duplicate or corrected receipts
+  ---
+  duration_ms: 0.5763
+  type: 'test'
+  ...
+# Subtest: observer scout preference bounds snapshot hints and per-phase selection diagnostics without gameplay credit
+ok 8 - observer scout preference bounds snapshot hints and per-phase selection diagnostics without gameplay credit
+  ---
+  duration_ms: 15.2729
+  type: 'test'
+  ...
+# Subtest: observer scout preference discarded paths reuse read-only obstacles without an extra rejected-cell cleanup
+ok 9 - observer scout preference discarded paths reuse read-only obstacles without an extra rejected-cell cleanup
+  ---
+  duration_ms: 5.2988
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence prefers a distinct reachable hint after another fighter starts scouting
+ok 10 - scout anti-convergence prefers a distinct reachable hint after another fighter starts scouting
+  ---
+  duration_ms: 1.6021
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence ignores unavailable and expired other scouts at exact native budget boundaries
+ok 11 - scout anti-convergence ignores unavailable and expired other scouts at exact native budget boundaries
+  ---
+  duration_ms: 5.9974
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence compares declared coordinates across clusters rather than local home indices
+ok 12 - scout anti-convergence compares declared coordinates across clusters rather than local home indices
+  ---
+  duration_ms: 0.7897
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence retains original hint order when all hints are shared or only one remains
+ok 13 - scout anti-convergence retains original hint order when all hints are shared or only one remains
+  ---
+  duration_ms: 0.8134
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence never resets current or other scout and pursuit state or creates gameplay credit
+ok 14 - scout anti-convergence never resets current or other scout and pursuit state or creates gameplay credit
+  ---
+  duration_ms: 0.6875
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence failed preferred paths keep the exact cyclic fallback and four total searches
+ok 15 - scout anti-convergence failed preferred paths keep the exact cyclic fallback and four total searches
+  ---
+  duration_ms: 2.9559
+  type: 'test'
+  ...
+# Subtest: scout anti-convergence does not introduce distance sorting when no other scout shares a hint
+ok 16 - scout anti-convergence does not introduce distance sorting when no other scout shares a hint
+  ---
+  duration_ms: 0.358
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics leave low-hint peer state unobserved and preserve single-hint and no-hint routes
+ok 17 - scout selection diagnostics leave low-hint peer state unobserved and preserve single-hint and no-hint routes
+  ---
+  duration_ms: 0.4096
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics distinguish no active other waypoint without changing the first reachable hint
+ok 18 - scout selection diagnostics distinguish no active other waypoint without changing the first reachable hint
+  ---
+  duration_ms: 0.23
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics count mixed alternatives and report the existing stable reordering
+ok 19 - scout selection diagnostics count mixed alternatives and report the existing stable reordering
+  ---
+  duration_ms: 0.3985
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics distinguish all-unshared alternatives while preserving their cyclic order
+ok 20 - scout selection diagnostics distinguish all-unshared alternatives while preserving their cyclic order
+  ---
+  duration_ms: 0.2658
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics distinguish all-shared alternatives without creating an exclusive claim
+ok 21 - scout selection diagnostics distinguish all-shared alternatives without creating an exclusive claim
+  ---
+  duration_ms: 0.8599
+  type: 'test'
+  ...
+# Subtest: scout selection diagnostics keep the original per-phase row cap and omit counts from its truncation sentinel
+ok 22 - scout selection diagnostics keep the original per-phase row cap and omit counts from its truncation sentinel
+  ---
+  duration_ms: 3.963
+  type: 'test'
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 143.5873

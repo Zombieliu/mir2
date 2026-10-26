@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-26T03:15:21.7967336Z",
+  "runId": "1792981760951-0079fde7",
+  "ownedPids": [
+    65544,
+    61512
+  ],
+  "remainingOwnedProcesses": [],
+  "checkedPorts": [
+    17500,
+    17510
+  ],
+  "remainingOwnedPortListeners": [],
+  "scope": "Fresh Root OS checks after actual formal16 runner exit1; owned gateway and monitor absent, actual17500/17510 checked; game/capacity acceptance separate"
+}

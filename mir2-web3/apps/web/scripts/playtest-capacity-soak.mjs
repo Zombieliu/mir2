@@ -1090,24 +1090,29 @@ function scoutCombatCoverage(client, context, now = Date.now(), coverage = activ
   const allowed = point => insideCombatCoverage(coverage, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
   const initialCursor = client.combatScout?.homeIndex ?? client.combatScoutCursor ?? 0;
   let searches = 0;
-  const findPlan = (homeIndex, hinted = false) => {
+  const findPlan = (homeIndex, hinted = false, hintGoal = null) => {
     const binding = coverage.entries.find(entry => entry.homeIndex === homeIndex);
     if (!binding) return null;
     const home = binding.home;
     // A temporarily inactive declared waypoint must not reset a different
     // waypoint's existing finite clock, ACK count or position-loop budget.
     if (client.combatScout && client.combatScout.homeIndex !== homeIndex) return null;
-    const goals = STEPS.map(([dx, dy]) => ({ x: home.x + dx, y: home.y + dy }))
-      .filter(goal => distance(goal, owner) > 0 && protocolMapCellIsWalkable(context.map, goal) && allowed(goal) &&
-        !occupied.some(entity => entity.x === goal.x && entity.y === goal.y))
-      .sort((a, b) => distance(a, owner) - distance(b, owner));
-    if (client.combatScout?.homeIndex === homeIndex) goals.sort((a, b) => Number(distance(b, client.combatScout.goal) === 0) - Number(distance(a, client.combatScout.goal) === 0));
+    const usableGoal = goal => lifecyclePoint(goal) && Number.isInteger(goal.x) && Number.isInteger(goal.y) &&
+      distance(goal, owner) > 0 && protocolMapCellIsWalkable(context.map, goal) && allowed(goal) &&
+      !occupied.some(entity => entity.x === goal.x && entity.y === goal.y);
+    const retainedTarget = !hinted && client.combatScout?.targetWaypoint === true && usableGoal(client.combatScout.goal) ? client.combatScout.goal : null;
+    const goals = hinted ? [hintGoal].filter(usableGoal) : STEPS.map(([dx, dy]) => ({ x: home.x + dx, y: home.y + dy }))
+      .filter(usableGoal).sort((a, b) => distance(a, owner) - distance(b, owner));
+    if (!hinted && client.combatScout?.homeIndex === homeIndex) goals.sort((a, b) => Number(distance(b, client.combatScout.goal) === 0) - Number(distance(a, client.combatScout.goal) === 0));
+    // Keep a validated hint waypoint across ACK ticks; failed or invalid goals
+    // fall through to the existing home goals within the same search budget.
+    if (retainedTarget && !goals.some(goal => distance(goal, retainedTarget) === 0)) goals.unshift(retainedTarget);
     for (const goal of goals) {
       if (searches >= 4) return null;
       searches++;
       const plan = hinted ? movement(client, goal, context.map, allowed, occupied) : movement(client, goal, context.map, allowed);
       if (!plan) continue;
-      return { plan, homeIndex, goal };
+      return { plan, homeIndex, goal, targetWaypoint: hinted || Boolean(retainedTarget && distance(goal, retainedTarget) === 0) };
     }
     return null;
   };
@@ -1124,20 +1129,26 @@ function scoutCombatCoverage(client, context, now = Date.now(), coverage = activ
       const preferredHints = preferUnsharedScoutWaypoints(client, context, hintScan.hints, now, hintScan);
       hintScan.hintOrderChangedByActiveScoutPreference = preferredHints !== hintScan.hints;
       for (const candidate of preferredHints) {
-        const preferred = findPlan(candidate.homeIndex, true);
+        const preferred = findPlan(candidate.homeIndex, true, candidate.attackTile);
         if (preferred) { selected = preferred; hint = candidate; break; }
         if (searches >= 4) break;
       }
     }
-    const { plan, homeIndex, goal } = selected;
+    const { plan, homeIndex, goal, targetWaypoint } = selected;
     if (!client.combatScout) {
       client.combatScout = { mapFileName: String(client.snapshot.mapFileName), homeIndex, goal, startedAt: now,
-        activeElapsedMs: 0, confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map() };
-    } else client.combatScout.goal = goal;
+        activeElapsedMs: 0, confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map(),
+        ...(targetWaypoint ? { targetWaypoint: true } : {}) };
+    } else {
+      client.combatScout.goal = goal;
+      if (!targetWaypoint) delete client.combatScout.targetWaypoint;
+    }
     client.combatScoutCursor = homeIndex;
     if (hintScan?.hints.length) recordCombatScoutSelection(client, context, {
       reason: hint ? 'observer-target-waypoint' : 'cyclic-fallback', fallbackHomeIndex: fallback.homeIndex,
-      selectedHomeIndex: homeIndex, pathSearches: searches, hintPathSearches: searches - fallbackSearches,
+      selectedHomeIndex: homeIndex, selectedWaypoint: { x: goal.x, y: goal.y },
+      selectedWaypointSource: targetWaypoint ? 'hint-attack-tile' : 'declared-home',
+      pathSearches: searches, hintPathSearches: searches - fallbackSearches,
       hintScanTruncated: hintScan.truncated, hintOrderChangedByActiveScoutPreference: hintScan.hintOrderChangedByActiveScoutPreference,
       hintCount: hintScan.hintCount, activeOtherWaypointCount: hintScan.activeOtherWaypointCount,
       sharedHintCount: hintScan.sharedHintCount, unsharedHintCount: hintScan.unsharedHintCount, hintPreferenceReason: hintScan.hintPreferenceReason,

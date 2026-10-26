@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH_K_FULL16_AND_FINAL_SOURCE_REVIEW",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+  "driverFrozen": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-selection-diagnostics-driver-frozen-v1.json",
+    "bytes": 12423,
+    "sha256": "e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8"
+  },
+  "freshFull16": null,
+  "rootExecutionRequired": true,
+  "moduleImported": false,
+  "guardExecuted": false,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

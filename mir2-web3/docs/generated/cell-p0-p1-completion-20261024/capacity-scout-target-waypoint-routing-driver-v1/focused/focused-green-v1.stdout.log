@@ -1,0 +1,42 @@
+TAP version 13
+# (node:49600) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: scout target waypoint follows the validated attack tile across real movement ACK ticks without visibility or credit
+ok 1 - scout target waypoint follows the validated attack tile across real movement ACK ticks without visibility or credit
+  ---
+  duration_ms: 6.5532
+  type: 'test'
+  ...
+# Subtest: scout target waypoint invalidation safely falls back without rebuilding the finite scout
+ok 2 - scout target waypoint invalidation safely falls back without rebuilding the finite scout
+  ---
+  duration_ms: 3.3889
+  type: 'test'
+  ...
+# Subtest: scout target waypoint unreachable new hint retains the exact original cyclic fallback within four searches
+ok 3 - scout target waypoint unreachable new hint retains the exact original cyclic fallback within four searches
+  ---
+  duration_ms: 3.2202
+  type: 'test'
+  ...
+# Subtest: scout target waypoint does not redirect an ordinary established scout or reset its saved state
+ok 4 - scout target waypoint does not redirect an ordinary established scout or reset its saved state
+  ---
+  duration_ms: 0.3729
+  type: 'test'
+  ...
+# Subtest: scout target waypoint keeps corrected ACK exclusion and the existing time move and visit limits
+ok 5 - scout target waypoint keeps corrected ACK exclusion and the existing time move and visit limits
+  ---
+  duration_ms: 1.6949
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 100.6449
