@@ -152,7 +152,22 @@ export function createOrdinarySupplies(client, options = {}) {
   async function wait(predicate, label, ms = evidenceMs) {
     await drain(); guard();
     const stop = Math.min(deadline, now() + Math.min(ms, evidenceMs));
-    return client.wait(() => { guard(); if (now() > stop) throw new Error(`ordinary supplies: evidence expired (${label})`); return predicate(); }, label, Math.max(1, stop - now()));
+    const timeout = cause => {
+      const error = new Error(`Timeout waiting for ${label}`, cause ? { cause } : undefined);
+      error.code = 'CAPACITY_WAIT_TIMEOUT'; error.waitLabel = label; return error;
+    };
+    try {
+      return await client.wait(() => { guard(); if (now() > stop) throw timeout(); return predicate(); }, label, Math.max(1, stop - now()));
+    } catch (error) {
+      // Only a real deadline for this exact wait may use the older helper's
+      // retry convention. Identity, health, transport and global-budget errors
+      // must remain terminal even when their text contains "timed out".
+      guard();
+      if (error?.code === 'CAPACITY_WAIT_TIMEOUT' && error.waitLabel === label) {
+        throw error.message === `Timeout waiting for ${label}` ? error : timeout(error);
+      }
+      throw error;
+    }
   }
   async function transmit(command) {
     await drain(); guard(); enqueue(command); await drain(); return { ...lastSent };

@@ -1,0 +1,17 @@
+{
+  "gateway": {
+    "pid": 63968,
+    "exe": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\bin\\mir2-gateway.exe",
+    "creationTime": "2026-10-26T18:45:51.7988650Z"
+  },
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "driverSourceCommit": "55cd890d698c64991682449a0aa9f1433db0f886",
+  "immutableExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\bin\\mir2-gateway.exe",
+    "bytes": 87455744,
+    "sha256": "4fb233a2e47ed19aadfce75a209d0e32a559a2dd402f26e109f1a7678e1fec04"
+  },
+  "buildReused": true,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false
+}

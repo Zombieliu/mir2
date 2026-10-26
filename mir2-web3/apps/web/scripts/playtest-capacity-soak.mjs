@@ -389,7 +389,9 @@ export class CapacityClient extends NativeResumeClient {
       if (this.closed) throw new Error(`${this.label} transport closed during ${label}`);
       const result = deadlinePredicate(); if (result) return result;
     }
-    throw new Error(`${this.label} timed out waiting for ${label}`);
+    throw Object.assign(new Error(`${this.label} timed out waiting for ${label}`), {
+      code: 'CAPACITY_WAIT_TIMEOUT', waitLabel: label,
+    });
   }
   async request(command, name, timeoutMs = 15000) {
     await this.pace(); const started = performance.now();

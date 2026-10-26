@@ -8,6 +8,7 @@ import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, His
   assessMeasurements, movementDiagnosticMayContinue, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
 import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, offerNativeHpRecovery, offerNativeClientWork, offerPreparationKeepAlive, ordinaryPreparationConfiguration, prepareCapacityActor, activatePreparedCohort, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
+import { SafetyStop } from './playtest-load-smoke.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 
 const WebSocketServer = createRequire(import.meta.url)('next/dist/compiled/ws').Server;
@@ -3297,6 +3298,35 @@ for (const [boundary, ownerAt, observerAt, typedAt, requestId, expected] of [
     assert.equal(actual.ambiguousTargetQuarantined, true);
   }
 });
+
+test('capacity wait marks only its real elapsed deadline with a typed label and the original message', async () => {
+  const client = { label: 'deadline-actor', context: { guard: { assert() {} } } };
+  const started = Date.now(), label = 'funding harvest', timeoutMs = 5;
+  let reads = 0;
+  await assert.rejects(CapacityClient.prototype.wait.call(client, () => { reads++; return null; }, label, timeoutMs), error => {
+    assert.equal(error.code, 'CAPACITY_WAIT_TIMEOUT'); assert.equal(error.waitLabel, label);
+    assert.equal(error.message, 'deadline-actor timed out waiting for funding harvest');
+    assert.ok(Date.now() >= started + timeoutMs); assert.ok(reads >= 1);
+    return true;
+  });
+});
+
+for (const boundary of ['guard', 'predicate', 'transport', 'deadline-predicate', 'closed'])
+  test(`capacity wait preserves ${boundary} failure without a timeout marker`, async () => {
+    const error = boundary === 'guard' ? new SafetyStop('monitor requested stop') : new Error(`${boundary} failure`);
+    const client = { label: 'failure-actor', context: { guard: { assert() { if (boundary === 'guard') throw error; } } } };
+    if (boundary === 'transport') client.failure = error;
+    if (boundary === 'closed') client.closed = true;
+    const predicate = () => { if (boundary === 'predicate') throw error; return null; };
+    const finalPredicate = boundary === 'deadline-predicate' ? () => { throw error; } : null;
+    await assert.rejects(CapacityClient.prototype.wait.call(client, predicate, 'bounded receipt',
+      finalPredicate ? 0 : 100, finalPredicate), actual => {
+      if (boundary === 'closed') assert.equal(actual.message, 'failure-actor transport closed during bounded receipt');
+      else assert.equal(actual, error);
+      assert.equal(Object.hasOwn(actual, 'code'), false); assert.equal(Object.hasOwn(actual, 'waitLabel'), false);
+      return true;
+    });
+  });
 
 for (const boundary of ['ordinary wait', 'guard', 'failure', 'closed'])
   test(`V2 final evidence read preserves ${boundary} failure semantics`, async t => {

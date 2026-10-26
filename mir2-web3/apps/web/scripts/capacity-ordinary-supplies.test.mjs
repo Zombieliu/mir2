@@ -6,6 +6,7 @@ const route = { quests: [{ objectives: { item: [], kill: [{ monsterName: 'Deer',
 const item = (id, quantity, uniqueId, slot = 0) => ({ itemIndex: id, name: id === 658 ? '(HP)DrugSmall' : 'Venison', quantity, uniqueId, container: 'bag1', slot, sellValue: 250 });
 function fixture(config = {}) {
   let clock = 1, hook = () => {}, seq = 0, currentDeer = null;
+  const harvestPasses = new Map();
   const actor = { objectId: config.ownerId ?? 1, kind: 'selfPlayer', name: 'ordinary-owner', class: 'Warrior', x: 290, y: 607, hp: 100, maxHp: 100, dead: false };
   const client = {
     label: config.label ?? 'ordinary-owner', sequence: 0, events: [], sent: [], slots: [], attackResults: config.v2 ? 'v2' : 'legacy', attackV2Supported: config.v2 === true, closed: false,
@@ -73,6 +74,19 @@ function fixture(config = {}) {
       }
       if (command.type === 'harvest') {
         assert.equal(currentDeer?.dead, true);
+        const passes = (harvestPasses.get(currentDeer.objectId) ?? 0) + 1;
+        harvestPasses.set(currentDeer.objectId, passes);
+        if (config.multiPassHarvest) {
+          packet('ObjectHarvest', { objectId: actor.objectId });
+          if (config.harvestHealthDrop) { this.snapshot.playerHp = 8; actor.hp = 8; }
+          if (passes < 6) { snapshot(); return; }
+          assert.equal(passes, 6, 'ordinary Deer only transfers after five skin passes');
+          if (config.directHarvest) {
+            this.snapshot.inventoryItems.push(item(999, 1, 500 + currentDeer.objectId, this.snapshot.inventoryItems.length));
+            packet('GainedItem', { item: { uniqueId: 500 + currentDeer.objectId, itemIndex: 853, count: 1 } });
+            packet('ObjectHarvested', { objectId: currentDeer.objectId }); snapshot(); return;
+          }
+        }
         this.snapshot.groundDrops.push({ objectId: 100 + currentDeer.objectId, name: 'Venison', x: currentDeer.x, y: currentDeer.y, loot: { kind: 'inventoryItem', name: 'Venison' } });
         packet('ObjectHarvested', { objectId: currentDeer.objectId }); snapshot();
       }
@@ -88,8 +102,14 @@ function fixture(config = {}) {
     },
     async wait(predicate, label, timeout) {
       const end = clock + timeout;
-      while (clock <= end) { const value = predicate(); if (value) return value; clock += 100; }
-      throw new Error(`fixture timeout: ${label}`);
+      while (clock <= end) {
+        const value = predicate(); if (value) return value;
+        if (label.includes('funding harvest') && config.harvestWaitError) throw config.harvestWaitError;
+        if (label.includes('funding harvest') && config.closeOnHarvestWait) { this.closed = true; throw new Error('fixture transport closed'); }
+        clock += 100;
+      }
+      const error = new Error(`${this.label} timed out waiting for ${label}`);
+      error.code = 'CAPACITY_WAIT_TIMEOUT'; error.waitLabel = label; this.lastWaitTimeout = error; throw error;
     },
   };
   function packet(name, payload, sequence) {
@@ -260,4 +280,52 @@ test('closing a service dialog cannot excuse foreign dialog, changed NPC/owner/m
     assert.ok(f.client.events.some(event => event.packet === 'NPCSell'));
     assert.equal(f.client.sent.some(command => ['buyItem', 'sellItem'].includes(command.type)), false);
   });
+});
+
+test('real five-pass Deer skinning retries typed deadlines and the sixth transfer earns actual stock', async t => {
+  for (const directHarvest of [true, false]) await t.test(directHarvest ? 'direct inventory transfer' : 'same-tile public pickup', async () => {
+    const f = fixture({ deer: 3, v2: true, multiPassHarvest: true, directHarvest });
+    const result = await f.supply.prepare();
+    assert.equal(result.status, 'ready'); assert.equal(result.funding.hunts, 3); assert.equal(result.funding.collected, 3);
+    assert.equal(f.client.sent.filter(command => command.type === 'harvest').length, 18);
+    assert.equal(f.client.events.filter(event => event.packet === 'ObjectHarvest').length, 18);
+    assert.equal(f.client.events.filter(event => event.packet === 'ObjectHarvested').length, 3);
+    assert.equal(f.client.sent.filter(command => command.type === 'pickUp').length, directHarvest ? 0 : 3);
+    assert.equal(result.after.hpStock, 12); assert.equal(result.after.gold, 20); assert.equal(result.after.venison, 1);
+    assert.equal(result.soldVenison, 2); assert.equal(result.purchased, 12); assert.equal(result.proofs.length, 3);
+    assert.ok(result.elapsedMs >= 90_000 && result.elapsedMs < 600_000, 'virtual clock covers all fifteen six-second empty harvest waits');
+  });
+});
+
+test('timeout-looking non-deadline errors and mismatched typed labels retain their identity', async t => {
+  const lookalike = new Error('ordinary-owner timed out waiting for Deer corpse 20 funding harvest');
+  const safety = new Error('timed out guard'); safety.name = 'SafetyStop';
+  const wrongLabel = new Error('ordinary-owner timed out waiting for unrelated wait');
+  wrongLabel.code = 'CAPACITY_WAIT_TIMEOUT'; wrongLabel.waitLabel = 'unrelated wait';
+  for (const original of [lookalike, safety, wrongLabel]) await t.test(original.name + ':' + original.message, async () => {
+    const f = fixture({ deer: 3, multiPassHarvest: true, harvestWaitError: original });
+    await assert.rejects(f.supply.prepare(), error => error === original);
+    assert.equal(f.client.sent.filter(command => command.type === 'harvest').length, 1);
+    assert.equal(f.supply.status().status, 'failed'); assert.equal(f.supply.status().actualStagingReached, false);
+  });
+});
+
+test('global wall budget, health change and closed transport are never retried as empty skin passes', async t => {
+  for (const config of [{ timeoutMs: 7000 }, { harvestHealthDrop: true }, { closeOnHarvestWait: true }]) await t.test(JSON.stringify(config), async () => {
+    const f = fixture({ deer: 3, multiPassHarvest: true, ...config });
+    await assert.rejects(f.supply.prepare(), /wall budget|health changed|transport closed/);
+    assert.equal(f.client.sent.filter(command => command.type === 'harvest').length, 1);
+    assert.equal(f.client.sent.some(command => command.type === 'buyItem'), false);
+    assert.equal(f.supply.status().status, 'failed');
+  });
+});
+
+test('normalized deadline errors retain code, exact wait label and original cause', async () => {
+  const platform = fixture({ gold: 480, ackOnly: true });
+  await assert.rejects(platform.supply.prepare(), error => error.code === 'CAPACITY_WAIT_TIMEOUT' &&
+    error.waitLabel === 'fresh exact HP purchase' && error.message === 'Timeout waiting for fresh exact HP purchase' &&
+    error.cause === platform.client.lastWaitTimeout && error.cause.message.includes('timed out waiting for'));
+  const monotonic = fixture({ gold: 480, late: true });
+  await assert.rejects(monotonic.supply.prepare(), error => error.code === 'CAPACITY_WAIT_TIMEOUT' &&
+    error.waitLabel === 'fresh exact HP purchase' && error.message === 'Timeout waiting for fresh exact HP purchase');
 });
