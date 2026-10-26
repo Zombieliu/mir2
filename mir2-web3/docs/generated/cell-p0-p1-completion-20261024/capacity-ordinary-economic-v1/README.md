@@ -108,4 +108,16 @@
 
 独立普通恢复在Login后、装备与helper前运行，最多一次使用原持有的确切HP658。必须取得同owner/name/map的fresh raw完整bag+belt减量、成功UseItem收件、精确HP增加及最终至少70%，全部在原发送后2秒内；ACK或ObjectHealth百分比不能单独证明恢复。死亡、无药、歧义、拒绝或超时原样失败；不购买、复活或编辑存档。原native测量恢复60%阈值与既有规则保持。恢复、装备、helper和最终readiness共享同一600秒/2048条准备预算，正常drain先移除临时命令限制；认证排队仍按原登录账本处理。
 
-聚焦回归及独立源码审查通过，包括真实loader/helper/navigator组合与测试碰撞图完整外出筹资、买药和回村。实际V2 Scarecrow/HookingCat字段确认为ownerName=null、ai=0和canonical monster/hostile，可信predicate可以匹配。此处仍为候选：统一Root新完整门禁及第三次百人角色库续跑待执行，尚无新人数档验收。
+聚焦回归及独立源码审查通过，包括真实loader/helper/navigator组合与测试碰撞图完整外出筹资、买药和回村。实际V2 Scarecrow/HookingCat字段确认为ownerName=null、ai=0和canonical monster/hostile，可信predicate可以匹配。该版本随后完成下述518ef24b的Root完整工具门禁与第三次真实续跑；工具通过没有转化为百人准备或容量通过。
+
+## 第三次百人角色库准备：四人库存复用，第5人用药后等待回血超时
+
+本次实际执行源为 `518ef24b65f5322aef1c20683af7f084012050c7`。[Root资格收据](bank-prepare-v3/root-focused-receipt-v1.json)记录容量/准备工具519项、普通经济/导航相邻301项，共820项实际通过，31个named输入前后字节一致，0失败/取消/跳过。原始四份stdout/stderr与[实际门禁runner](bank-prepare-v3/root-validation-runner.mjs)同目录归档；这份旧518门禁不证明后续JS cue修复或新后端已获资格。
+
+第三次续跑完整复制正常冷关闭的V2部分角色库，沿用完整100账号pool和原登录账本，没有seed、授予、改血、修改Store或覆盖loginNotBefore。[执行收据](bank-prepare-v3/preparation-episode-receipt-v1.json)证明前四人普通重登后库存before/after均至少12，且无狩猎、harvest、拾取、出售、购买或funding，`sourceFirst4InventoryReuse=true`。本轮严格prepared仍只有4/100；没有激活cohort、人数档测量或CCU验收，不能把4个已准备角色写成4 CCU。
+
+[原报告](bank-prepare-v3/1793050659530-92aeff5e.preparation-report.json)及[原样本](bank-prepare-v3/1793050659530-92aeff5e.preparation.jsonl)保持失败：第5人恢复前精确HP12/18，inventory内唯一HP658 UID2、数量1；UseItem成功ACK在发送后10.9971ms到达，13.5205ms的完整raw库存收件已无该UID，数量证明为0，精确HP仍12/18。原2秒窗口内没有满足回血证明，错误仍为`timed out waiting for preparation HP acknowledgement and exact health cue`，失败摘要的normalLogout=false不改写成准备成功。消费与ACK均不等于实际治疗生效；未完成百人准备，原report.ok=false和全部capacity/P0判定保留。
+
+源码定位出两个待集成验收的候选修复点：普通药先进入个人Tick恢复队列，StartGame默认15秒bootstrap grace期间，原UseItem未像Walk/Turn/Attack/Magic一样缩短Tick延后；普通药实际发self ObjectHealth百分比，而JS原先等待精确HealthChanged才触发fresh raw。候选分别为正常UseItem短Tick唤醒，以及仅把self ObjectHealth当作一次受预算约束的raw刷新cue；百分比不能作为精确HP证明。准备仍须在原2秒内取得ACK、完整库存恰减1、精确HP增加且至少70%，不追加剂量，不改变原native测量60%阈值、2秒证明窗或准备600秒/2048条预算。候选源码/聚焦检查不追认本次失败为通过。
+
+[正常清理](bank-prepare-v3/cleanup-v1.json)及[独立OS复核](bank-prepare-v3/root-independent-cleanup-v1.json)确认PID71364消失、17500/17510端口释放，原冻结来源复核通过；正常冷关闭不代表完整cold bank或100人持久库存重登已验收。29份公开工具、配置、计划、收据、原报告/样本、清理及旧518门禁证据共560,032字节，逐文件原字节复核见[复制清单](bank-prepare-v3/copied-evidence-manifest.json)和[归档器](bank-prepare-v3/archive-evidence-v3.mjs)。未复制Store、pool、ledger、秘密全文、原始Gateway日志或完整旁观录制。P0未完成、P2未启动，没有新25/50/100/500或两小时通过。

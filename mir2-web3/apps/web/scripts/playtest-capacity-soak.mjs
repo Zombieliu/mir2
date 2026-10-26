@@ -1612,12 +1612,12 @@ function recordPreparationHpRecovery(client, message, receipt) {
       if (message.payload.success !== true) throw new Error('Preparation HP recovery UseItem rejected');
       pending.acknowledgement ??= { sequence: receipt.sequence, monotonicMs: receipt.monotonicMs };
     }
-    // Exact personal HealthChanged is only a cue to request a raw snapshot.
-    // It never substitutes for raw HP or complete-inventory recovery proof.
+    // Ordinary potions emit self ObjectHealth percentages, not exact personal
+    // HealthChanged. Either is only a cue for one raw refresh, never HP proof.
     if (pending.sentAtMs !== null && (message.packet === 'HealthChanged' ||
         (message.packet === 'ObjectHealth' && message.payload?.objectId === pending.ownerObjectId))) {
       pending.afterInvalidated = true;
-      pending.exactHpHint = message.packet === 'HealthChanged' && Number.isSafeInteger(message.payload?.hp) ? message.payload.hp : null;
+      pending.healthCue = { source: message.packet, sequence: receipt.sequence, monotonicMs: receipt.monotonicMs };
     }
   } catch (error) { pending.failure ??= error; }
 }
@@ -1682,10 +1682,11 @@ export async function recoverPreparationHeldHp(client, context, { actorDeadlineM
       return pending.acknowledgement && after && !pending.afterInvalidated && after.sequence > pending.cursor && after.monotonicMs >= pending.sentAtMs && after.monotonicMs <= pending.deadlineMs &&
         after.maximumHp === before.maximumHp && after.hp > before.hp && after.hp / after.maximumHp >= .7 && after.selectedQuantity === item.quantity - 1;
     };
-    await waitFor(() => complete() || (pending.acknowledgement && pending.exactHpHint > before.hp && pending.exactHpHint / before.maximumHp >= .7), 'preparation HP acknowledgement and exact health cue', pending.deadlineMs);
+    await waitFor(() => complete() || (pending.acknowledgement && pending.healthCue), 'preparation HP acknowledgement and health refresh cue', pending.deadlineMs);
     if (!complete()) {
       await client.pace(); check();
       if (performance.now() >= pending.deadlineMs) throw new Error('Preparation HP recovery2s evidence deadline exhausted');
+      row.rawRefreshCue = { ...pending.healthCue };
       client.send({ type: 'clientVersion' }); // At most one post-dose snapshot; the proof clock is never restarted.
       await waitFor(complete, 'preparation raw HP increase and exact held consumption', pending.deadlineMs);
     }

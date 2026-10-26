@@ -257,6 +257,62 @@ test('preparation held HP exact health cue may request one paced complete raw re
   assert.ok(result.after.monotonicMs <= result.sentAtMs + 2000);
 });
 
+test('preparation held HP real ObjectHealth cue requests exactly one raw frame and proves both exact HP and consumed UID', async () => {
+  const f = preparationRecoveryFixture('inventory', {
+    before: snapshot => { snapshot.inventoryItems[0].quantity = 1; },
+    dose: ({ ack, raw, f }) => { ack(); raw({ hp: 12, quantity: 0 });
+      f.packet('ObjectHealth', { objectId: 1000, percent: 100, expire: 0 }); },
+    postRefresh: ({ raw }) => raw({ hp: 15, quantity: 0 }),
+  });
+  const result = await recoverPreparationHeldHp(f.client, f.context);
+  assert.equal(result.status, 'verified'); assert.equal(result.after.hp, 15); assert.equal(result.after.maximumHp, 18);
+  assert.equal(result.after.selectedQuantity, 0); assert.equal(result.consumedQuantity, 1); assert.equal(result.observedExactHpIncrease, 3);
+  assert.equal(result.rawRefreshCue.source, 'ObjectHealth'); assert.equal(result.rawRefreshCue.percent, undefined);
+  assert.ok(result.rawRefreshCue.monotonicMs >= result.sentAtMs && result.after.monotonicMs <= result.sentAtMs + 2000);
+  assert.deepEqual(f.commands.map(c => c.type), ['clientVersion', 'useItem', 'clientVersion']);
+  assert.equal(f.client.events.some(e => e.packet === 'HealthChanged'), false);
+  assert.equal(result.measurementCredit, false); assert.equal(f.client.ready, false); assert.deepEqual(f.actions, []);
+});
+
+for (const reason of ['percent-only-no-raw', 'ack-consumed-raw-still12', 'foreign-object-health', 'late-object-health', 'late-raw', 'command-quota']) {
+  test('preparation held HP ObjectHealth ' + reason + ' cannot bypass exact proof or the original budgets', async () => {
+    const f = preparationRecoveryFixture('inventory', {
+      dose: ({ ack, raw, f }) => { ack(); raw({ hp: 12, quantity: 1 });
+        if (reason === 'late-object-health') {
+          const record = f.client.record.bind(f.client);
+          f.client.record = (direction, message) => { const event = record(direction, message);
+            if (direction === 'received') event.monotonicMs += 2001; return event; };
+        }
+        f.packet('ObjectHealth', { objectId: reason === 'foreign-object-health' ? 9999 : 1000, percent: 100, expire: 0 });
+      },
+      postRefresh: ({ raw, f }) => {
+        if (reason === 'percent-only-no-raw') return;
+        if (reason === 'late-raw') {
+          const record = f.client.record.bind(f.client);
+          f.client.record = (direction, message) => { const event = record(direction, message);
+            if (direction === 'received') event.monotonicMs += 2001; return event; };
+        }
+        raw({ hp: reason === 'ack-consumed-raw-still12' ? 12 : 15, quantity: 1 });
+      },
+    });
+    if (reason === 'command-quota') f.client.preparationCommandBudget = { maximum: 2048, sent: 2046 };
+    await assert.rejects(recoverPreparationHeldHp(f.client, f.context));
+    assert.equal(f.client.preparationHpRecoveryResult.status, 'failed');
+    assert.equal(f.commands.filter(c => c.type === 'useItem').length, 1);
+    assert.ok(f.commands.filter(c => c.type === 'clientVersion').length <= 2);
+    assert.equal(f.client.ready, false); assert.deepEqual(f.actions, []);
+    if (reason === 'foreign-object-health' || reason === 'late-object-health' || reason === 'command-quota') assert.equal(f.commands.length, 2);
+    else assert.equal(f.commands.length, 3);
+    assert.equal(f.client.preparationHpRecoveryObservation, null);
+  });
+}
+
+test('preparation held HP waits for the real health cue instead of spending its only refresh immediately on the early consumption raw', async () => {
+  const f = preparationRecoveryFixture('inventory', { dose: ({ ack, raw }) => { ack(); raw({ hp: 12, quantity: 1 }); } });
+  await assert.rejects(recoverPreparationHeldHp(f.client, f.context), /health refresh cue/);
+  assert.deepEqual(f.commands.map(c => c.type), ['clientVersion', 'useItem']);
+});
+
 for (const [reason, edit] of [
   ['missing-exact-hp', s => { delete s.playerHp; }],
   ['coarse-only-hp', s => { delete s.playerHp; s.entities[0].hp = 80; }],

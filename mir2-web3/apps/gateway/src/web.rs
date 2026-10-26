@@ -8053,21 +8053,23 @@ fn runtime_tick_defer_duration_for_action(action: &SessionAction) -> Option<Dura
         SessionAction::Packet(ClientPacket::StartGame { .. }) => {
             Some(gateway_runtime_tick_bootstrap_grace())
         }
-        // Active movement and combat must wake the runtime tick loop. Without
-        // this, a cast immediately after StartGame leaves its resolved Zone
-        // damage queued for the full bootstrap grace (or until LogOut), even
-        // though KeepAlive continues to acknowledge. Retain the small input
-        // batching window before draining the ordinary session path.
+        // Active movement, combat and item use must wake the runtime tick loop.
+        // Otherwise an action immediately after StartGame can leave resolved
+        // Zone damage or a consumed potion's personal restoration queued for
+        // the full bootstrap grace, even while KeepAlive acknowledges. Retain
+        // the small input batching window before the ordinary session drain.
         SessionAction::MoveTo { .. }
         | SessionAction::Attack { .. }
         | SessionAction::CastSkill { .. }
+        | SessionAction::UseItem { .. }
         | SessionAction::Packet(
             ClientPacket::Walk { .. }
             | ClientPacket::Run { .. }
             | ClientPacket::Turn { .. }
             | ClientPacket::Attack { .. }
             | ClientPacket::RangeAttack { .. }
-            | ClientPacket::Magic { .. },
+            | ClientPacket::Magic { .. }
+            | ClientPacket::UseItem { .. },
         ) => Some(gateway_runtime_tick_input_wake_grace()),
         _ => None,
     }
@@ -19733,6 +19735,49 @@ mod tests {
             ))
             .is_none()
         );
+    }
+
+    #[test]
+    fn runtime_tick_item_use_wakes_pending_personal_restoration_after_bootstrap() {
+        let bootstrap = SessionAction::Packet(ClientPacket::StartGame { character_index: 0 });
+        assert_eq!(
+            super::runtime_tick_defer_duration_for_action(&bootstrap),
+            Some(super::gateway_runtime_tick_bootstrap_grace())
+        );
+        // Both ordinary browser forms must wake the same loop that advances
+        // queued potion restoration; the item-use ACK does not heal by itself.
+        for value in [
+            json!({ "type": "useItem", "uniqueId": 1024, "grid": "inventory" }),
+            json!({ "type": "useItem", "key": "red-potion" }),
+        ] {
+            let command = serde_json::from_value::<BrowserCommand>(value)
+                .expect("ordinary item use must deserialize");
+            let action = super::browser_command_to_action(command)
+                .expect("ordinary item use must map to its existing session action");
+            assert_eq!(
+                super::runtime_tick_defer_duration_for_action(&action),
+                Some(super::gateway_runtime_tick_input_wake_grace()),
+                "item use must release the bootstrap wait: {action:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn runtime_tick_refresh_and_keep_alive_preserve_the_idle_bootstrap_wait() {
+        for value in [
+            json!({ "type": "clientVersion" }),
+            json!({ "type": "keepAlive", "time": 12345 }),
+        ] {
+            let command = serde_json::from_value::<BrowserCommand>(value)
+                .expect("ordinary observation command must deserialize");
+            let action = super::browser_command_to_action(command)
+                .expect("ordinary observation command must map");
+            assert_eq!(
+                super::runtime_tick_defer_duration_for_action(&action),
+                None,
+                "observation alone must not wake the runtime tick: {action:?}"
+            );
+        }
     }
 
     mod socket_diagnostics_tests {
