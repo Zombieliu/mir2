@@ -100,6 +100,37 @@ export function createOrdinarySupplies(client, options = {}) {
   const plannerNow = options.now ?? Date.now, plannerIdentities = new Map(), plannerTrail = new Map();
   let plannerFallbackCount = 0, plannerFreshSequence = -1, plannerGlobalBlockedUntil = 0, plannerViewAllowed = null;
   let plannerPacketRenewals = 0, lastReceiptSequence = -1, lastReceiptMono = -Infinity;
+  const qualificationEvents = [];
+  let qualificationEventCount = 0, qualificationRepeatedReads = 0, plannerDiagnosticSource = 'planner-read', plannerDiagnosticInput = null;
+  let navigationNoPath = null;
+  function plannerObservedScalar(e, permitName = true) {
+    if (!e || typeof e !== 'object') return null;
+    const p = e.location ?? e, finite = value => Number.isFinite(value) ? value : null;
+    return { ...(permitName && typeof e.name === 'string' ? {name:e.name.slice(0,80)} : {}),
+      kind:typeof e.kind==='string'?e.kind.slice(0,32):null,x:finite(p.x),y:finite(p.y),
+      ai:finite(e.ai),aiPresent:Object.hasOwn(e,'ai'),hp:finite(e.hp),hpPresent:Object.hasOwn(e,'hp'),
+      dead:typeof e.dead==='boolean'?e.dead:null,disposition:typeof e.disposition==='string'?e.disposition.slice(0,32):null,
+      ownerPresent:Object.hasOwn(e,'ownerName'),ownerIsNull:e.ownerName==null,classPresent:Object.hasOwn(e,'class'),classIsNull:e.class==null,
+      masterPresent:Object.hasOwn(e,'masterObjectId'),masterIsZero:e.masterObjectId===0 };
+  }
+  function recordQualification(id, reason, at, observed = null) {
+    try {
+      const row = plannerIdentities.get(id), source = plannerDiagnosticSource;
+      const input = source==='worldSnapshot' ? observed : source==='planner-read' ? null : plannerDiagnosticInput;
+      const observedScalar = plannerObservedScalar(observed,observed?.kind==='monster');
+      const inputScalar = plannerObservedScalar(input,source==='ObjectMonster'||(source==='worldSnapshot'&&observed?.kind==='monster'));
+      const key = JSON.stringify([reason,source,observedScalar,inputScalar]);
+      if (source==='planner-read' && row?.diagnosticKey===key) { qualificationRepeatedReads++; return; }
+      if (row) { row.diagnosticKey=key;row.diagnosticReason=reason;row.diagnosticSource=source;row.diagnosticSequence=lastReceiptSequence; }
+      qualificationEventCount++;
+      qualificationEvents.push({objectId:id,reason,source,sequence:lastReceiptSequence,monotonicMs:lastReceiptMono,
+        observedRawSequence:lastObserved,blockedRemainingMs:Math.max(0,(row?.blockedUntil??0)-at),
+        trustRemainingMs:Math.max(0,(row?.trustedUntil??0)-at),historyRemainingMs:Math.max(0,(row?.closedHistoryUntil??0)-at),
+        positionCount:[...plannerTrail.values()].filter(p=>p.objectId===id).length,identityCount:plannerIdentities.size,
+        observed:observedScalar,input:inputScalar});
+      if (qualificationEvents.length>32) qualificationEvents.shift();
+    } catch { /* Scalar diagnostics cannot alter production qualification. */ }
+  }
   function prunePlannerMemory(at) {
     for (const [key, row] of plannerTrail) if (row.expiresAt <= at) plannerTrail.delete(key);
     const retainedIds = new Set([...plannerTrail.values()].map(row => row.objectId));
@@ -112,14 +143,16 @@ export function createOrdinarySupplies(client, options = {}) {
       // An untracked ID may already have an unknown shared trail. Even after
       // slots free up, never exempt it (or another ID) until that trail ages out.
       plannerGlobalBlockedUntil = Math.max(plannerGlobalBlockedUntil, at + PLANNER_TRAIL_MS); plannerFallbackCount++;
+      recordQualification(id,'identity-cap-exhausted',at);
     }
     return row;
   }
-  function revokePlannerIdentity(id, at, overflow = false) {
+  function revokePlannerIdentity(id, at, overflow = false, reason = 'not-qualified', observed = null) {
     const row = plannerIdentity(id,at);
     if (row) { row.trustedUntil = 0; row.closedHistoryUntil = 0; row.rawIdentity = null; row.wireCertificate = null; row.live = false; row.departed = false; row.blockedUntil = Math.max(row.blockedUntil, at + PLANNER_TRAIL_MS); }
     for (const [key, point] of plannerTrail) if (point.objectId === id) plannerTrail.delete(key);
     if (overflow) plannerFallbackCount++;
+    recordQualification(id,reason,at,observed);
   }
   function plannerGroups(snapshot) {
     const groups = new Map();
@@ -161,7 +194,7 @@ export function createOrdinarySupplies(client, options = {}) {
   }
   function rememberPlannerPosition(id, entity, at) {
     const position = point(entity,'remembered planning hostile'), key = id + ':' + position.x + ',' + position.y;
-    if (!plannerTrail.has(key) && plannerTrail.size >= PLANNER_TRAIL_LIMIT) { revokePlannerIdentity(id,at,true); return false; }
+    if (!plannerTrail.has(key) && plannerTrail.size >= PLANNER_TRAIL_LIMIT) { revokePlannerIdentity(id,at,true,'trail-overflow',entity); return false; }
     plannerTrail.set(key, { objectId:id, entity:{ kind:entity.kind, name:entity.name, ai:entity.ai, disposition:entity.disposition, ownerName:entity.ownerName,
       wireCertificate:plannerIdentities.get(id)?.wireCertificate ?? null },
       ...position, expiresAt:at + PLANNER_TRAIL_MS });
@@ -176,6 +209,7 @@ export function createOrdinarySupplies(client, options = {}) {
         .filter(point=>point.objectId===id).map(point=>point.expiresAt)) : 0;
     }
     row.live = false; row.departed = true;
+    recordQualification(id,'live-closed-history-not-renewed',at);
   }
   function observePlannerTrust(snapshot, receipt) {
     if (!ordinaryProtectionSummary(options.ordinaryProtection) || receipt.sequence <= plannerFreshSequence) return;
@@ -185,11 +219,12 @@ export function createOrdinarySupplies(client, options = {}) {
     for (const [id, group] of groups) {
       if (!group.some(entity => String(entity.kind).toLowerCase() === 'monster') && !plannerIdentities.has(id)) continue;
       const entity = trustedPlannerEntity(group);
-      if (!entity) { revokePlannerIdentity(id, at); continue; }
+      if (!entity) { revokePlannerIdentity(id,at,false,'raw-not-qualified',group.length===1?group[0]:null); continue; }
       let row = plannerIdentity(id,at);
       if ((row?.rawIdentity && !samePlannerIdentity(entity,row.rawIdentity)) ||
-          (row?.wireCertificate && row.wireCertificate.name !== entity.name)) { revokePlannerIdentity(id,at); row = plannerIdentities.get(id); }
+          (row?.wireCertificate && row.wireCertificate.name !== entity.name)) { revokePlannerIdentity(id,at,false,'raw-identity-conflict',entity); row = plannerIdentities.get(id); }
       if (row) { row.rawIdentity = plannerSignature(entity); row.wireCertificate = null; row.live = true; row.departed = false; row.closedHistoryUntil = 0; row.trustedUntil = at + PLANNER_TRAIL_MS; }
+      if (row) recordQualification(id,'raw-qualified',at,entity);
     }
   }
   function observePlannerPacket(message, receipt) {
@@ -214,18 +249,20 @@ export function createOrdinarySupplies(client, options = {}) {
       const certificate = certifyOrdinaryAi0Packet(options.ordinaryProtection,value.map,message);
       const entity = wirePlannerEntity(group,certificate);
       let row = plannerIdentities.get(id);
-      if (!entity || entity.x !== certificate.x || entity.y !== certificate.y) { revokePlannerIdentity(id,at); return; }
+      if (!entity || entity.x !== certificate.x || entity.y !== certificate.y) { revokePlannerIdentity(id,at,false,'wire-not-qualified',group.length===1?group[0]:null); return; }
       if ((row?.rawIdentity && !samePlannerIdentity(entity,row.rawIdentity)) ||
-          (row?.wireCertificate && row.wireCertificate.name !== certificate.name)) revokePlannerIdentity(id,at);
+          (row?.wireCertificate && row.wireCertificate.name !== certificate.name)) revokePlannerIdentity(id,at,false,'wire-identity-conflict',entity);
       row = plannerIdentity(id,at); if (!row) return;
       row.rawIdentity = null; row.wireCertificate = certificate; row.live = true; row.departed = false; row.closedHistoryUntil = 0;
-      if (rememberPlannerPosition(id,entity,at)) { row.trustedUntil = at + PLANNER_TRAIL_MS; plannerPacketRenewals++; }
+      if (rememberPlannerPosition(id,entity,at)) { row.trustedUntil = at + PLANNER_TRAIL_MS; plannerPacketRenewals++;recordQualification(id,'wire-qualified',at,entity); }
       return;
     }
-    if (PLANNER_IDENTITY_PACKETS.has(packetName)) { revokePlannerIdentity(id,at); return; }
+    if (PLANNER_IDENTITY_PACKETS.has(packetName)) { revokePlannerIdentity(id,at,false,'explicit-lifecycle-or-type',group.length===1?group[0]:null); return; }
     const row = plannerIdentities.get(id);
-    if (row?.live === false) { revokePlannerIdentity(id,at); return; }
-    if ((!row?.rawIdentity && !row?.wireCertificate) || row.trustedUntil <= at || row.blockedUntil > at) return;
+    if (row?.live === false) { revokePlannerIdentity(id,at,false,'position-after-live-closed',group.length===1?group[0]:null); return; }
+    if ((!row?.rawIdentity && !row?.wireCertificate) || row.trustedUntil <= at || row.blockedUntil > at) {
+      recordQualification(id,'position-without-current-qualification',at,group.length===1?group[0]:null);return;
+    }
     const entity = plannerEntity(group,row), payload = message.payload;
     const location = payload.location ?? payload;
     const samePayload = ['name','ai','ownerName','class','kind','disposition','dead'].every(key =>
@@ -234,19 +271,19 @@ export function createOrdinarySupplies(client, options = {}) {
         (Object.hasOwn(payload,'masterObjectId') && payload.masterObjectId !== 0) ||
         !Number.isSafeInteger(location.x) || location.x < 0 || location.x > 65535 ||
         !Number.isSafeInteger(location.y) || location.y < 0 || location.y > 65535 ||
-        entity.x !== location.x || entity.y !== location.y) { revokePlannerIdentity(id,at); return; }
+        entity.x !== location.x || entity.y !== location.y) { revokePlannerIdentity(id,at,false,'position-identity-or-shape-conflict',entity); return; }
     // Only a new receipt for this locally lifecycle-bound live identity renews it.
     // The merged position was applied by the ordinary receiver before this hook.
-    if (rememberPlannerPosition(id,entity,at)) { row.trustedUntil = at + PLANNER_TRAIL_MS; plannerPacketRenewals++; }
+    if (rememberPlannerPosition(id,entity,at)) { row.trustedUntil = at + PLANNER_TRAIL_MS; plannerPacketRenewals++;recordQualification(id,'individual-position-qualified',at,entity); }
   }
   function syncPlannerMemory() {
     guard(); const at = plannerNow(); prunePlannerMemory(at);
     for (const [id, group] of plannerGroups(client.snapshot)) {
       if (!group.some(entity => String(entity.kind).toLowerCase() === 'monster') && !plannerIdentities.has(id)) continue;
       const entity = plannerEntity(group,plannerIdentities.get(id));
-      if (!entity) { revokePlannerIdentity(id,at); continue; }
+      if (!entity) { revokePlannerIdentity(id,at,false,'planner-current-not-qualified',group.length===1?group[0]:null); continue; }
       const row = plannerIdentity(id,at); if (!row) continue; // ID cap: leave shared coarse memory authoritative.
-      if (row.rawIdentity && !samePlannerIdentity(entity,row.rawIdentity)) { revokePlannerIdentity(id,at); continue; }
+      if (row.rawIdentity && !samePlannerIdentity(entity,row.rawIdentity)) { revokePlannerIdentity(id,at,false,'planner-current-identity-conflict',entity); continue; }
       // Shared navigation refreshes each current position at every planner
       // read, not just at a raw receipt. Mirror that trail clock, but renew
       // TRUST only on a new raw or exact raw-certified individual receipt.
@@ -299,11 +336,14 @@ export function createOrdinarySupplies(client, options = {}) {
     lastReceiptSequence = receipt.sequence; lastReceiptMono = receipt.monotonicMs;
     if (['MapChanged', 'MapInformation'].includes(message?.packet)) observationFault = 'ordinary supplies: map transition during preparation';
     if (message?.type !== 'worldSnapshot') {
+      plannerDiagnosticSource=typeof message?.packet==='string'?message.packet.slice(0,80):'non-packet';plannerDiagnosticInput=message?.payload;
       try { observePlannerPacket(message,receipt); } catch { /* Malformed packet metadata never certifies an identity. */ }
+      finally { plannerDiagnosticSource='planner-read';plannerDiagnosticInput=null; }
       return;
     }
     if (receipt.sequence <= lastObserved || receipt.monotonicMs < lastObservedMono) return;
     lastObserved = receipt.sequence; lastObservedMono = receipt.monotonicMs;
+    plannerDiagnosticSource='worldSnapshot';
     try {
       const value = scalar(message.payload);
       if (value.ownerId !== identity || value.ownerName !== identityName || value.map !== '0') observationFault = 'ordinary supplies: received owner/map changed';
@@ -311,6 +351,7 @@ export function createOrdinarySupplies(client, options = {}) {
       rows.push({ sequence: receipt.sequence, monotonicMs: receipt.monotonicMs, ...value });
       if (rows.length > 64) rows.shift();
     } catch { /* Incomplete/invalid observations cannot satisfy a proof. guard still checks live state. */ }
+    finally { plannerDiagnosticSource='planner-read';plannerDiagnosticInput=null; }
   }
   async function pause(ms) {
     await drain(); guard();
@@ -544,6 +585,9 @@ export function createOrdinarySupplies(client, options = {}) {
           await options.navigate(facade, target, pickupTile ? 0 : range, stop, safeOptions);
           await drain(); guard(); return;
         } catch (error) {
+          try {
+            if (String(error?.message??'').startsWith('No walk path on ')) captureNoPath(error,target,pickupTile?0:range);
+          } catch { /* Even diagnostic error detection must preserve the original failure. */ }
           const ownHazard = error instanceof SupplyPathHazard || error instanceof NavigationStepGuarded && error.hazard?.[PATH_HAZARD] === true;
           if (!ownHazard) throw error;
           guard();
@@ -562,6 +606,27 @@ export function createOrdinarySupplies(client, options = {}) {
         }
       }
     } finally { navigationPolicy = null; }
+  }
+  function captureNoPath(error,target,range) {
+    try {
+      const at=plannerNow(), groups=plannerGroups(client.snapshot), shared=error.navigationDiagnostics;
+      const exact=shared?.source==='shared-navigator-exact-cache'&&Object.isFrozen(shared)?shared:null;
+      const ids=[...new Set([...(exact?.hostileMemory??[]).map(p=>p.objectId),
+        ...[...groups].filter(([,g])=>g.some(e=>e.kind==='monster')).map(([id])=>id)])];
+      const states=ids.slice(0,128).map(id=>{
+        const row=plannerIdentities.get(id),group=groups.get(id)??[];
+        return Object.freeze({objectId:id,live:row?.live===true,qualification:row?.wireCertificate?'wire':row?.rawIdentity?'raw':'none',
+          blockedRemainingMs:Math.max(0,(row?.blockedUntil??0)-at),trustRemainingMs:Math.max(0,(row?.trustedUntil??0)-at),
+          historyRemainingMs:Math.max(0,(row?.closedHistoryUntil??0)-at),positionCount:[...plannerTrail.values()].filter(p=>p.objectId===id).length,
+          lastReason:row?.diagnosticReason??null,lastSource:row?.diagnosticSource??null,lastSourceSequence:row?.diagnosticSequence??null,
+          current:group.length===1?Object.freeze(plannerObservedScalar(group[0],group[0]?.kind==='monster')):null,duplicates:group.length});
+      });
+      navigationNoPath=Object.freeze({source:'ordinary-helper-terminal-navigation-failure',scope:'diagnostic-only-no-measurement-credit',
+        state,sequence:client.sequence,observedRawSequence:lastObserved,from:Object.freeze(point(owner(client.snapshot),'diagnostic owner')),
+        target:Object.freeze(point(target,'diagnostic target')),range,commands,movementCommands,attempts:error.attempts??null,
+        successfulSteps:error.successfulSteps??null,globalQuarantineRemainingMs:Math.max(0,plannerGlobalBlockedUntil-at),
+        shared:exact,qualificationTotal:ids.length,qualificationTruncated:ids.length>128,qualifications:Object.freeze(states)});
+    } catch { /* Evidence failure never replaces or recovers a navigation failure. */ }
   }
   function liveNpc(spec) {
     const actor = owner(client.snapshot);
@@ -615,6 +680,9 @@ export function createOrdinarySupplies(client, options = {}) {
       measurementCredit: false, sustainableDurationProven: false,
       protectionSummary: ordinaryProtectionSummary(options.ordinaryProtection),
       plannerThreatMemory: { lifetimeMs:PLANNER_TRAIL_MS, positionLimit:PLANNER_TRAIL_LIMIT, identityLimit:PLANNER_ID_LIMIT, positions:plannerTrail.size, identities:plannerIdentities.size, coarseFallbackCount:plannerFallbackCount, packetRenewals:plannerPacketRenewals, exemptionGloballyQuarantined:plannerNow() < plannerGlobalBlockedUntil },
+      qualificationEventCount,qualificationRepeatedReads,qualificationEventsTruncated:qualificationEventCount>qualificationEvents.length,
+      qualificationEvents:qualificationEvents.map(row=>({...row,input:row.input?{...row.input}:null,observed:row.observed?{...row.observed}:null})),
+      navigationNoPath,
       fundingTargetRejections: fundingTargetRejections.map(row => ({ ...row })), fundingTargetRejectionCount,
       fundingTargetRejectionsTruncated: fundingTargetRejectionCount > fundingTargetRejections.length,
       pathHazards: pathHazards.map(row => ({ ...row, from:{...row.from}, physicalCells:row.physicalCells.map(cell=>({...cell})), blocker:row.blocker?{...row.blocker}:null })),
@@ -708,7 +776,10 @@ export function createOrdinarySupplies(client, options = {}) {
       after = freshStagingReadiness({ afterSequence: after.sequence - 1 });
       actualStagingReached = true; state = 'ready'; return result();
     } catch (error) {
-      state = 'failed'; failure = String(error?.message ?? '').startsWith('ordinary supplies:') ? error.message : 'ordinary supplies: underlying ordinary operation failed'; throw error;
+      state = 'failed'; failure = 'ordinary supplies: underlying ordinary operation failed';
+      try { const message=String(error?.message??'');if(message.startsWith('ordinary supplies:'))failure=message; }
+      catch { /* Failure reporting cannot replace the original operation error. */ }
+      throw error;
     } finally { active = false; queue.length = 0; pendingSaleId = null; }
   }
   return Object.freeze({ prepare, observe, assertReady, status: result, dispose() { active = false; rows.length = 0; queue.length = 0; } });

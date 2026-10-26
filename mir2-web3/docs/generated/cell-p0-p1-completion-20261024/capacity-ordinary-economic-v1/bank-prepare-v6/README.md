@@ -11,3 +11,5 @@
 失败摘要原normalLogout=false保留；公共样本尾部另有同名普通logout成功，整体[正常清理](cleanup-v1.json)与[Root独立OS复核](root-independent-cleanup-v1.json)通过，PID64972消失、17500/17510释放，Gateway/monitor正常0退出。正常收尾不改写本轮准备false，监控末尾的Operator requested load drain是清理请求，不是原失败原因。
 
 33份显式公共原件共542,978字节，逐文件原字节及source前后复核见[复制清单](copied-evidence-manifest.json)和[归档器](archive-evidence-v6.mjs)。[Root实际绑定](root-final-binding-receipt-v1.json)及[后端复用绑定](backend-release-binding-pending-v1.json)与PENDING前像一并保留，不重复原V6大资料。无Store、pool、账本、秘密全文、Gateway原日志、完整录像或EXE入档。P0未完成、P2未启动，无新25/50/100/500或两小时验收通过。
+
+[归档描述更正](public-archive-description-correction-v1.json)：原复制清单的描述块误残留V5测试数、来源和第5人动作标量；实际W6为237+325=562、331590/序号667、1命令/0移动。原33件及原清单字节保持，真实报告与本页原结果不变。

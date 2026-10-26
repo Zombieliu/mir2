@@ -161,10 +161,13 @@ function hasRequestedHostileClearance(options) {
     [...namedHostileClearance(options).values()].some(radius => radius > 0);
 }
 
-function hostileClearanceObstacles(snapshot, options, memory, observedAt, memoryDurationMs) {
+function hostileClearanceObstacles(snapshot, options, memory, observedAt, memoryDurationMs, diagnosticView) {
   const defaultRadius = nonnegativeIntegerOption(options?.hostileAvoidanceRadius, 0);
   const namedClearance = namedHostileClearance(options);
   const allowed = new Set((options?.allowedHostileObjectIds ?? []).map(Number));
+  // Keep references to the values already used by this planning read. Never
+  // call an option getter again merely to diagnose a terminal failure.
+  diagnosticView.allowed = allowed; diagnosticView.observedAt = observedAt;
   const mapFileName = String(snapshot?.mapFileName ?? '');
   for (const [key, remembered] of memory) {
     if (remembered.expiresAt <= observedAt) memory.delete(key);
@@ -411,6 +414,7 @@ export function createNavigator(client, dependencies = {}) {
   );
   const maps = new Map();
   const hostileMemory = new Map();
+  const hostileDiagnosticView = { allowed:new Set(), observedAt:0 };
   let lastActiveOwner = null;
   const navigateNear = async function navigateNear(target, desiredDistance = 1, stopWhen = () => false, options = {}) {
     const mapId = client.snapshot.mapFileName;
@@ -418,6 +422,29 @@ export function createNavigator(client, dependencies = {}) {
     const maxSuccessfulSteps = positiveIntegerOption(options.maxSuccessfulSteps, 2500);
     const maxAttempts = positiveIntegerOption(options.maxAttempts, 2500);
     const maxNoPathRefreshes = nonnegativeIntegerOption(options.maxNoPathRefreshes, 3);
+    let lastForbidden = [], lastOccupancy = [];
+    function attachNoPathDiagnostics(error, start, obstacleCount, rejectedCount) {
+      try {
+        const limit = 128, referenceTime = hostileDiagnosticView.observedAt;
+        const nearTarget = (a,b) => distance(a,target) - distance(b,target) || Number(a.objectId ?? 0) - Number(b.objectId ?? 0) || a.x-b.x || a.y-b.y;
+        const memory = [...hostileMemory.values()].filter(row=>row.mapFileName===mapId).sort(nearTarget);
+        const visible = new Set(client.snapshot.entities.map(e=>Number(e.objectId)));
+        const allowed = [...hostileDiagnosticView.allowed].sort((a,b)=>a-b);
+        const points = rows => Object.freeze(rows.filter(p=>Number.isFinite(Number(p.x))&&Number.isFinite(Number(p.y)))
+          .map(p=>({x:Number(p.x),y:Number(p.y),...(Number.isSafeInteger(Number(p.objectId))?{objectId:Number(p.objectId)}:{}),
+            ...(typeof p.kind==='string'?{kind:p.kind.slice(0,32)}:{})})).sort(nearTarget).slice(0,limit).map(Object.freeze));
+        error.navigationDiagnostics = Object.freeze({ schemaVersion:1, source:'shared-navigator-exact-cache',
+          clockBasis:'last-hostile-planning-read', mapFileName:String(mapId), from:Object.freeze({x:Number(start.x),y:Number(start.y)}),
+          target:Object.freeze({x:Number(target.x),y:Number(target.y)}), desiredDistance, obstacleCount, rejectedCount,
+          allowedTotal:allowed.length, allowedTruncated:allowed.length>limit, allowedIds:Object.freeze(allowed.slice(0,limit)),
+          hostileMemoryTotal:hostileMemory.size, mapHostileMemoryTotal:memory.length, hostileMemoryTruncated:memory.length>limit,
+          hostileMemory:Object.freeze(memory.slice(0,limit).map(row=>Object.freeze({objectId:row.objectId,name:String(row.name).slice(0,80),
+            x:row.x,y:row.y,remainingMs:Math.max(0,row.expiresAt-referenceTime),allowed:hostileDiagnosticView.allowed.has(row.objectId),
+            currentlyVisible:visible.has(row.objectId)}))),
+          explicitForbiddenTotal:lastForbidden.length, explicitForbiddenTruncated:lastForbidden.length>limit, explicitForbidden:points(lastForbidden),
+          occupancyTotal:lastOccupancy.length, occupancyTruncated:lastOccupancy.length>limit, occupancy:points(lastOccupancy) });
+      } catch { /* Diagnostics must never replace the original navigation error. */ }
+    }
     const detectPositionCycles = options.detectPositionCycles === true;
     const maxNonImprovingSteps = options.maxNonImprovingSteps == null
       ? 0
@@ -633,7 +660,7 @@ export function createNavigator(client, dependencies = {}) {
       const dynamicObstacles = [
         ...rejected,
         ...liveTransferObstacles(client.snapshot, staticWalkableOverrides),
-        ...explicitForbiddenPoints(options),
+        ...(lastForbidden = explicitForbiddenPoints(options)),
         ...hostileClearanceObstacles(
           client.snapshot,
           options,
@@ -642,8 +669,9 @@ export function createNavigator(client, dependencies = {}) {
           !hasRequestedHostileClearance(options)
             ? exactHostileMemoryDurationMs
             : hostileMemoryDurationMs,
+          hostileDiagnosticView,
         ),
-        ...client.snapshot.entities.filter(e => e.objectId !== self.objectId && !e.dead),
+        ...(lastOccupancy = client.snapshot.entities.filter(e => e.objectId !== self.objectId && !e.dead)),
       ];
       const obstacleKeys = new Set(dynamicObstacles
         .filter(point => Number.isFinite(Number(point?.x)) && Number.isFinite(Number(point?.y)))
@@ -664,6 +692,7 @@ export function createNavigator(client, dependencies = {}) {
           const error = new Error(`No walk path on ${mapId} from ${self.x},${self.y} to ${target.x},${target.y}`);
           error.successfulSteps = successfulSteps;
           error.attempts = count + 1;
+          attachNoPathDiagnostics(error,self,dynamicObstacles.length,rejected.length);
           throw error;
         }
         client.record('diagnostic', { type: 'navigationReplan', mapId, mapSource: maps.get(mapId).sourcePath, width: maps.get(mapId).width, height: maps.get(mapId).height, desiredDistance, start: { x: self.x, y: self.y }, target, rejected: [...rejected], obstacleCount: dynamicObstacles.length });
@@ -733,6 +762,7 @@ export function createNavigator(client, dependencies = {}) {
           const error = new Error(`No walk path on ${mapId} from ${liveSelf.x},${liveSelf.y} to ${target.x},${target.y}`);
           error.successfulSteps = successfulSteps;
           error.attempts = count + 1;
+          attachNoPathDiagnostics(error,liveSelf,dynamicObstacles.length,rejected.length);
           throw error;
         }
         continue;

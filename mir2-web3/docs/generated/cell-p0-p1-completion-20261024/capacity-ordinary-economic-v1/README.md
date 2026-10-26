@@ -162,3 +162,13 @@ ObjectRemove可能表示AOI离开或真实删除；候选关闭live续期，保�
 原failed summary normalLogout=false及空after/readiness保留；尾部普通logout与整体[正常清理](bank-prepare-v6/cleanup-v1.json)、[Root独立OS检查](bank-prepare-v6/root-independent-cleanup-v1.json)通过，PID64972消失、端口释放。33份公共原件542,978字节见[说明](bank-prepare-v6/README.md)与[复制清单](bank-prepare-v6/copied-evidence-manifest.json)，V5冷bank及最新账本原字节续用，无私有全文或重复V6大资料。P0未完成、P2未启动，无新25/50/100/500或两小时验收通过。
 
 候选补齐远处冷登录的选点时序：仅在动态resolver存在且静态目录hint距离大于16时，先用原普通导航接近至16格，再发送原clientVersion取得新raw后执行原严格resolver，最后导航到所选实际点位并fresh验收。hint不认定安全、空闲或已保存，不提前占用savedPoints；时间、命令、限速与三次安全重规划预算保持。W6已观察的28怪物静态组合、真实map0/导航器及真实resolver回放可从331,590到另选290,615（原hint已被保存），33命令/30移动/19.501秒；只证明该静态输入组合，不预测动态AI结果。200项模块聚焦检查及独立只读审查通过，新Root选定整合检查和第七次普通百人准备待执行。
+
+[W6归档描述更正](bank-prepare-v6/public-archive-description-correction-v1.json)保留原清单误残留V5描述的事实，正确本次为237+325=562、1条clientVersion/0移动、331590；旧33原件与旧manifest字节不变。
+
+## 第七次百人角色库准备：接近和选点成功，最终返村仍NoPath
+
+39fdac91a的[本次fresh选定门禁](bank-prepare-v7/node-v7/root-focused-receipt-v1.json)实际244+325=569项通过，32个named输入前后不变；55后端源与ee06/V6/Rust32继续严格复用，无新Rust构建，旧828整套未重跑。
+
+[第七轮报告](bank-prepare-v7/1793055214252-59fbbbbd.preparation-report.json)保持4prepared/100、未激活、零测量CCU。第5人fresh登录HP18/18、12药、15金币，接近步骤和动态resolver成功选中289,617；实际31指令/26移动/5刷新，约18.804秒后，305,612→289,617最终返村NoPath。pathHazard=0/replan=0，公开末帧HP18/alive；原after/readiness仍空。
+
+[wire/raw边界审查](bank-prepare-v7/public-wire-raw-boundary-review-v1.json)不支持把疑似strict wire检查或未公开per-ID隔离状态定为根因；本轮未证明合法替代路径。原failed summary normalLogout=false保留，尾部普通logout与[正常清理](bank-prepare-v7/cleanup-v1.json)、[独立OS](bank-prepare-v7/root-independent-cleanup-v1.json)通过，PID62876消失、端口释放。34份公共原件644,516字节见[说明](bank-prepare-v7/README.md)与[清单](bank-prepare-v7/copied-evidence-manifest.json)，无私有全文或重复V6大资料。P0未完成、P2未启动，无新25/50/100/500或两小时验收通过。

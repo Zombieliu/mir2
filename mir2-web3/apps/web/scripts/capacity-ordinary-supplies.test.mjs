@@ -1362,3 +1362,87 @@ test('the approach cannot reset the actor wall or command budget or invoke the r
     assert.equal(f.supply.status().actualStagingReached,false);
   });
 });
+
+// WorldEntitySnapshot (simulation/config.rs): nullable owner/class/HP/AI,
+// and no wire-only masterObjectId. These are two distinct source DTO shapes.
+const rawNormalCrow=(objectId=206644,x=293,y=614)=>({objectId,kind:'monster',name:'Scarecrow',ownerName:null,ai:0,x,y,
+  direction:'Down',class:null,gender:null,level:null,hp:20,maxHp:20,light:0,nameColourArgb:-1,dead:false,disposition:'hostile'});
+test('a real wire normal certificate transitions to independent fullraw ownership and health without a wire master field',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let checked=false;
+  const f=fixture({items:[item(658,12,2)],applyPackets:true,ordinaryProtection:protection,
+    navigate:async({client,packet,navOptions,snapshot})=>{
+      packet('ObjectMonster',wireMonster(206644,{location:{x:293,y:614}}));
+      void navOptions.forbiddenPoints;assert.ok(navOptions.allowedHostileObjectIds.includes(206644));
+      const raw=rawNormalCrow();assert.equal(Object.hasOwn(raw,'masterObjectId'),false);
+      client.snapshot.entities=client.snapshot.entities.map(e=>e.objectId===206644?raw:e);snapshot();
+      void navOptions.forbiddenPoints;
+      assert.ok(navOptions.allowedHostileObjectIds.includes(206644),'a missing wire-only field is not a raw ownership conflict');
+      packet('ObjectTurn',{objectId:206644,location:{x:293,y:614},direction:0});
+      void navOptions.forbiddenPoints;assert.ok(navOptions.allowedHostileObjectIds.includes(206644));checked=true;
+    }});
+  f.client.snapshot.inSafeZone=true;assert.equal((await f.supply.prepare()).status,'ready');assert.equal(checked,true);
+});
+
+test('W7 final static raw NPC and monster positions admit a canonical map0 route from305612 to289617',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0'),map=await loadProtocolCollisionMap('0');
+  let f,navigator;
+  const npcs=[[4,'CraftsLady_Jude',294,619],[5,'Blacksmith_Smith',296,613],[6,'Merchant_John',292,603],
+    [7,'Merchant_Whitney',305,608],[42,'Merchant_Scott',291,610],[43,'MaterialDealer_Reece',295,605]]
+    .map(([objectId,name,x,y])=>({objectId,kind:'npc',name,x,y,dead:false,ownerName:null,class:null}));
+  const neutral=[[200325,'ArcherGuard',295,624,9999,57],[200716,'Guard',291,620,9999,6],[206324,'Deer',289,604,25,2],
+    [206524,'Deer',294,606,25,2],[206536,'Deer',291,600,25,2],[271801,'Hen',291,616,5,1],[271806,'Hen',292,613,5,1]]
+    .map(([objectId,name,x,y,hp,ai])=>({objectId,kind:'monster',name,x,y,hp,ai,dead:false,disposition:'neutral',ownerName:null,class:null}));
+  f=fixture({ownerId:1000,ownerHp:18,ownerMaxHp:18,items:[item(658,12,2)],gold:15,ownerPosition:{x:305,y:612},stagingPoint:{x:289,y:617},
+    ordinaryProtection:protection,applyPackets:true,noMovementSnapshots:true,
+    hostiles:[rawNormalCrow(),rawNormalCrow(206610,300,597),hostile(206013,301,596,{name:'RakingCat',hp:32,ownerName:null,class:null}),...neutral],
+    navigate:async({facade,target,range,stop,navOptions})=>{navigator??=createNavigator(facade,{loadCollisionMap:async()=>map,now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000});return navigator(target,range,stop,navOptions);},
+    onMove:({client,actor})=>{client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
+  f.client.snapshot.entities=f.client.snapshot.entities.filter(e=>e.kind!=='npc').concat(npcs);
+  const result=await f.supply.prepare();assert.equal(result.status,'ready');assert.equal(result.pathHazardCount,0);
+  t.diagnostic(JSON.stringify({scope:'W7 frame85 static local replay, excludes unrecorded client trail history',commands:result.commands,
+    movementCommands:result.movementCommands,elapsedMs:result.elapsedMs,finalPoint:{x:result.after.x,y:result.after.y}}));
+});
+
+test('failed ordinary status preserves bounded actual qualification receipts and the exact shared NoPath cache without changing commands',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let f,original;
+  const go=actualNavigatorFor(()=>f);
+  f=fixture({items:[item(658,12,2)],ownerPosition:{x:304,y:613},stagingPoint:{x:289,y:617},ordinaryProtection:protection,applyPackets:true,
+    hostiles:[hostile(71,287,616,{name:'UnknownMonster',ai:undefined})],
+    navigate:async args=>{
+      for(let i=0;i<40;i++)args.snapshot();
+      void args.navOptions.forbiddenPoints;
+      const before=f.supply.status().qualificationEventCount;
+      for(let i=0;i<40;i++){void args.navOptions.forbiddenPoints;void args.navOptions.allowedHostileObjectIds;}
+      assert.equal(f.supply.status().qualificationEventCount,before,'same planner-only revocation is deduplicated');
+      args.packet('ObjectTurn',{objectId:71,x:287,y:616,direction:'Down',credential:'fixture-do-not-retain'});
+      return go(args);
+    }});
+  await assert.rejects(f.supply.prepare(),error=>{original=error;return /No walk path/.test(error.message);});
+  const result=f.supply.status(),diagnostic=result.navigationNoPath;
+  assert.equal(result.status,'failed');assert.equal(result.actualStagingReached,false);
+  assert.ok(result.qualificationEventCount>32);assert.equal(result.qualificationEvents.length,32);assert.equal(result.qualificationEventsTruncated,true);
+  assert.ok(result.qualificationRepeatedReads>0);
+  const event=result.qualificationEvents.find(e=>e.source==='ObjectTurn');
+  assert.ok(event&&event.sequence>0&&event.monotonicMs>0);assert.equal(event.input.x,287);assert.equal(event.input.hpPresent,false);
+  assert.equal(diagnostic.shared,original.navigationDiagnostics);assert.equal(diagnostic.shared.source,'shared-navigator-exact-cache');
+  const memory=diagnostic.shared.hostileMemory.find(e=>e.objectId===71),state=diagnostic.qualifications.find(e=>e.objectId===71);
+  assert.equal(memory.allowed,false);assert.equal(memory.currentlyVisible,true);assert.equal(memory.x,287);assert.equal(memory.y,616);
+  assert.equal(state.qualification,'none');assert.ok(state.blockedRemainingMs>0);assert.equal(state.lastReason,'planner-current-not-qualified');
+  assert.equal(state.current.name,'UnknownMonster');assert.equal(state.current.aiPresent,true);assert.equal(state.current.ai,null);
+  assert.equal(result.movementCommands,0);assert.equal(result.commands,4);assert.equal(f.client.sent.filter(c=>c.type==='clientVersion').length,4);
+  assert.equal(JSON.stringify(result).includes('fixture-do-not-retain'),false);
+  assert.equal(Object.isFrozen(diagnostic),true);assert.equal(Object.isFrozen(state),true);
+});
+
+test('throwing error message getters and conversions cannot replace the original ordinary navigation error',async t=>{
+  for(const mode of ['getter','conversion'])await t.test(mode,async()=>{
+    const original=new Error('original fixture navigation error'),secondary=new Error('fixture message inspection failed');
+    if(mode==='getter')Object.defineProperty(original,'message',{get(){throw secondary;}});
+    else Object.defineProperty(original,'message',{value:{toString(){throw secondary;}}});
+    const f=fixture({items:[item(658,12,2)],navigate:async()=>{throw original;}});
+    await assert.rejects(f.supply.prepare(),error=>error===original);
+    const result=f.supply.status();assert.equal(result.status,'failed');assert.equal(result.navigationNoPath,null);
+    assert.equal(result.failure,'ordinary supplies: underlying ordinary operation failed');
+    assert.equal(result.commands,1);assert.equal(result.movementCommands,0);assert.equal(result.pathReplanCount,0);
+  });
+});
