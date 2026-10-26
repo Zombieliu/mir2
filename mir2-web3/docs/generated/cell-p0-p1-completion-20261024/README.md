@@ -2,7 +2,7 @@
 
 本记录接续 [前轮证据](../cell-preproduction-p0-p1-20261024/README.md)，保留前轮失败和 `14 passed / 2 not_run` 原始完整报告。本轮报告独立保存，不改写旧结论。
 
-当前P1通过，P0未通过、P2未启动。正式2/10通过，25战斗频率失败。`b24be2b82`的V12全50准备阶段完成，计量14.748秒死亡/presence保护停止，最终HP0/18、药耗尽，仍有7条AOI通知≥1秒。进一步同值快照复用候选新鲜116项Rust测试/55输入通过，待新Release/V13，原场景/门槛不变。无100或新容量通过，见[最新证据](capacity-online-presence-publication-v1/README.md)。
+当前P1通过，P0未通过、P2未启动。历史正式2/10通过，25完成300秒但战斗频率失败。`7b43caa41`新鲜116项Rust测试/55输入与Release构建通过；V13全50准备完成，计量55.861秒因死亡保护停止，最终HP0/18、gold0、HP药耗尽，未完成300秒。普通准备与补给待证明，原场景/门槛不变，无新100资格或容量通过，见[最新证据](capacity-online-presence-publication-v1/README.md)。
 
 ## 已有新鲜结果
 

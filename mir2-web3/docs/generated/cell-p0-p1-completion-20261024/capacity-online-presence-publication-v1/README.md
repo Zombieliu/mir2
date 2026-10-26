@@ -1,4 +1,4 @@
-# 在线快照发布开销与 V11 复测
+# 在线快照发布开销与 V11—V13 复测
 
 P1通过，P0未通过，P2未启动。正式2/10通过；25完成300秒但战斗频率失败。此前[动作坐标修复](../capacity-owner-action-pose-v1/README.md)已提交并推送`c6f46b633`；本轮使用独立Release实际复测50人，没有把旧失败追认通过。
 
@@ -22,12 +22,20 @@ V12[原报告](v12-original-report.json)全员50入场，bootstrap **367.437秒�
 
 [独立OS检查](v12-root-independent-cleanup.json)确认62296进程消失、两端口释放及正常清理。新运行没有启动100或取得任何容量/硬件上限/人类接受结论；原始失败不追认通过。大体积私密samples、stderr与指定最终Store各完整分析一次，匿名派生与输入摘要见[分析manifest](v12-analysis-manifest.json)。
 
-## 同值快照复用候选
+## 同值快照复用与 V13 实测
 
 进一步优化`refresh_online_presence`：先借用比较所有recipient的完整map与当前有效source players将生成的快照（全部14个presence字段及session键），并显式拒绝重复source、检查完整数量；完全相同才省去重新分配/深复制。相等路径仍按原Zone顺序设置managed标记、执行原monster EXP/poison/drop owner清理；任一差异走原完整快照路径。借用pet clock getter与旧owned getter共享同一owner gate；三个纯数据Eq derive不改变序列化。未引入跨命令缓存、版本猜测或跳过来源校验。
 
 Root新鲜[18项检查、116项Rust测试](reuse-validation-v1/root-focused-receipt-v1.json)通过，55个输入前后相同。Manager26项包含新增5项独立旧全量snapshot+clone+ingest参考差分：逐字段差异、含Some clock/threat/brown的live状态、pending FIFO、foreign owner清理/managed标记、两次stale恢复及extra/duplicate/filler来源；23项分区合同、经验权威、宠物/吸血怪、发送/关闭、保存与击杀入账同轮复测通过。独立审查修复了一处测试fixture的brown调用顺序，未修改生产规则来迁就断言。
 
-该候选尚待新Release及V13负载验证；V13继续原held-only/no purchase/no revive场景、人数及门槛，不将补给流程变化混入本次性能对比。普通NPC补给仅完成只读评估，未启用或注入金币/物品，不能宣称足以维持300秒或两小时。
+源码`7b43caa41`已提交推送。[Release V5实际构建](release-v5/build-receipt-v5.json)退出0、55个输入前后相同；[冻结二进制](release-v5/release-v5.json)87,455,744B、SHA256 `4fb233a2e47ed19aadfce75a209d0e32a559a2dd402f26e109f1a7678e1fec04`。V13保持原held-only/no purchase/no revive场景、人数、动作预算与门槛，未混入补给变化。
+
+V13[原报告](v13-original-report.json)全员50入场，bootstrap **343.454秒完整完成**；计量运行 **55.861秒**后因角色死亡/presence保护停止，`stages=[]`、[100晋级资格false](v13-original-episode-receipt.json)。55个计量在线样本均50、覆盖样本无issue，但未完成任何完整60秒或300秒窗口，不能标为容量通过。Root实际guard0、prepare50=0、run50=2，来源见[V13绑定](v13-source-pins.json)。
+
+[最终匿名分析](v13-findings-final.json)及[事件摘录](v13-selected-causal-chain.jsonl)显示：fatal角色为movement角色，最后一次用药前HP11/18，匹配UseItem及库存减到0，之后明确no-held-hp-item；用药消耗证明不等于已证明治疗生效。[cleanup后最终保存](v13-final-saved-actor-state.json)为HP0/18、MP14/14、level1、gold0、HP药658/660均0。该保存值不能定位致命伤害的时刻或来源。普通新角色源码同样明确gold0（`runtime/save.rs`的`crystal_new_character_save`），不能假设已有金币足够买药；普通任务/经济准备仍待证明，没有注入金币或物品。
+
+本次55.861秒内生成并完成服务端发送的6,502条AOI通知中，producer-to-sent≥1秒为0，最大 **204.716ms**。这里只统计服务端生成至send/flush返回，不能当成客户端收包延迟，也不能用短窗口证明已满足全部容量指标。原V12失败与原门槛保留。
+
+[独立OS检查](v13-root-independent-cleanup.json)确认受控进程73460消失、17500/17510端口释放、清理完成。新100及两小时soak均未执行；本轮不构成硬件上限、P0通过、P2启动或人类接受。私密原始samples、stderr和最终Store各完整分析一次，输入摘要及匿名派生产物见[V13分析manifest](v13-analysis-manifest.json)。下一步先证明普通角色可持续的准备与补给路径，再按原门槛复测。
 
 原始报告、执行记录、匿名摘录及复制摘要均保留在本目录；大体积派生流与原始输入按[v11 findings](v11-findings.json)、[审计来源](v11-execute-wait-provenance.json)记录的摘要保存在受控本机目录。

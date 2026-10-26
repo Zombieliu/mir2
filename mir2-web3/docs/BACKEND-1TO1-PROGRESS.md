@@ -2,7 +2,7 @@
 
 ## Cell 共享快照发布回归（2026-10-27，北京时间）
 
-当前P1工程合同已通过、P0容量未通过、P2未启动。b24的V12全50准备完成，计量14.748秒停止，最终HP0/18、药耗尽，仍有≥1秒AOI通知。进一步同值快照复用候选通过新鲜116项Rust测试/55输入，保留全部字段/owner清理及原负载，待新Release/V13。无100或容量通过，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
+当前P1工程合同已通过、P0容量未通过、P2未启动。`7b43caa41`通过新鲜116项Rust测试/55输入及Release构建；V13全50准备完成，计量55.861秒因死亡保护停止，最终HP0/18、gold0、HP药耗尽。该短窗口服务端AOI生成至发送最大204.716ms，不能代替完整容量验收。原场景/门槛保留；普通准备与补给待证明，无新100资格或容量通过，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
 
 ## Cell 上线前整合：P0 / P1 partial（2026-10-24，北京时间）
 
