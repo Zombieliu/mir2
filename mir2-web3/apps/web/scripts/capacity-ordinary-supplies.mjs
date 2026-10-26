@@ -59,6 +59,7 @@ export function createOrdinarySupplies(client, options = {}) {
   const targetHp = integer(options.targetHp ?? (enabled ? 12 : 0), 'targetHp', enabled ? 1 : 0, 40);
   if (options.preparationProfile != null && !['held-only', 'ordinary-economic-v1'].includes(options.preparationProfile)) throw new Error('ordinary supplies: unknown preparation profile');
   if (options.preparationProfile === 'held-only' && targetHp !== 0) throw new Error('ordinary supplies: held-only cannot purchase');
+  if (options.resolveStagingPoint != null && typeof options.resolveStagingPoint !== 'function') throw new Error('ordinary supplies: staging resolver must be synchronous function');
   const now = options.now ?? (() => performance.now());
   const sleep = options.sleep ?? sleepDefault;
   const timeoutMs = integer(options.timeoutMs ?? 600_000, 'timeoutMs', 1, 600_000);
@@ -73,6 +74,7 @@ export function createOrdinarySupplies(client, options = {}) {
   let started = null, deadline = null, identity = null, identityName = null, before = null, after = null, failure = null;
   let lastObserved = -1, lastObservedMono = -Infinity, commands = 0, movementCommands = 0, pendingSaleId = null, lastSent = null, observationFault = null;
   let funding = null, sold = 0, bought = 0, goldEarned = 0, goldSpent = 0, actualStagingReached = false;
+  let resolvedStagingPoint = null;
 
   function scalar(snapshot) {
     const actor = owner(snapshot);
@@ -252,11 +254,12 @@ export function createOrdinarySupplies(client, options = {}) {
       purchased: bought, soldVenison: sold, goldEarned, goldSpent, funding, proofs: [...proofs], elapsedMs: started == null ? 0 : Math.max(0, now() - started), failure,
       commandCountsScope: 'module-owned commands; external keepAlive shares the original client budget',
       stagingSafetyScope: 'Fresh authoritative inSafeZone protects against normal monster targeting and impacts only. Existing poison and released effects may still damage; absent status fields do not prove their absence.',
-      measurementCredit: false, sustainableDurationProven: false };
+      measurementCredit: false, sustainableDurationProven: false,
+      ...(options.resolveStagingPoint ? { resolvedStagingPoint: resolvedStagingPoint ? { ...resolvedStagingPoint } : null } : {}) };
   }
   function freshStagingReadiness({ afterSequence = -1, maxAgeMs = evidenceMs } = {}) {
     integer(afterSequence, 'fresh ready cursor', -1); integer(maxAgeMs, 'ready freshness', 1, evidenceMs);
-    const value = scalar(client.snapshot), staging = point(options.stagingPoint, 'explicit stagingPoint');
+    const value = scalar(client.snapshot), staging = point(resolvedStagingPoint ?? options.stagingPoint, 'explicit stagingPoint');
     // Never fall back to an older true membership after a newer snapshot.
     const receipt = rows.at(-1);
     if (!receipt || receipt.sequence !== lastObserved || receipt.monotonicMs !== lastObservedMono ||
@@ -283,7 +286,7 @@ export function createOrdinarySupplies(client, options = {}) {
     started = now(); deadline = started + timeoutMs; active = true; state = 'refreshing';
     try {
       if (typeof client?.pace !== 'function' || typeof client?.send !== 'function' || typeof client?.wait !== 'function' || typeof options.navigate !== 'function' || typeof options.isPreparation !== 'function') throw new Error('ordinary supplies: required client/navigation/preparation adapters missing');
-      const staging = point(options.stagingPoint, 'explicit stagingPoint');
+      let staging = point(options.stagingPoint, 'explicit stagingPoint');
       identity = integer(Number(client.snapshot?.playerObjectId), 'initial ownerId', 1);
       identityName = owner(client.snapshot)?.name;
       before = await refresh(); guard();
@@ -312,6 +315,19 @@ export function createOrdinarySupplies(client, options = {}) {
           proofs.push({ kind: 'purchase', sequence: proof.sequence, monotonicMs: proof.monotonicMs, quantity: count, gold: goods.price * count });
           bought += count; goldSpent += goods.price * count;
         }
+      }
+      if (options.resolveStagingPoint) {
+        let receipt = rows.at(-1);
+        const value = guard();
+        const reusable = receipt && receipt.sequence === client.sequence && receipt.sequence === lastObserved && receipt.monotonicMs === lastObservedMono &&
+          receipt.monotonicMs <= now() && receipt.monotonicMs >= now() - evidenceMs &&
+          ['ownerId', 'ownerName', 'map', 'x', 'y', 'hpStock', 'gold'].every(key => receipt[key] === value[key]);
+        if (!reusable) receipt = await refresh();
+        guard();
+        const selected = options.resolveStagingPoint({ snapshot: client.snapshot, receipt: { ...receipt }, defaultPoint: { ...staging } });
+        if (selected && typeof selected.then === 'function') throw new Error('ordinary supplies: staging resolver must be synchronous');
+        resolvedStagingPoint = point(selected, 'resolved stagingPoint');
+        staging = { ...resolvedStagingPoint }; guard();
       }
       state = 'staging'; await navigate(staging, 0); after = await refresh(); guard();
       after = freshStagingReadiness({ afterSequence: after.sequence - 1 });

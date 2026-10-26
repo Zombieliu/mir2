@@ -123,7 +123,7 @@ function fixture(config = {}) {
   }
   let preparation = true;
   const supply = createOrdinarySupplies(client, { preparationProfile: 'ordinary-economic-v1', targetHp: config.target ?? 12, route,
-    stagingPoint: { x: 290, y: 607 }, isPreparation: () => preparation, now: () => clock,
+    stagingPoint: { x: 290, y: 607 }, resolveStagingPoint: config.resolveStagingPoint, isPreparation: () => preparation, now: () => clock,
     sleep: async ms => { clock += ms; }, maxHunts: config.maxHunts ?? 8, timeoutMs: config.timeoutMs ?? 600_000,
     maxCommands: config.maxCommands ?? 2048,
     navigate: async (facade, target, range) => {
@@ -403,4 +403,51 @@ test('normalized deadline errors retain code, exact wait label and original caus
   const monotonic = fixture({ gold: 480, late: true });
   await assert.rejects(monotonic.supply.prepare(), error => error.code === 'CAPACITY_WAIT_TIMEOUT' &&
     error.waitLabel === 'fresh exact HP purchase' && error.message === 'Timeout waiting for fresh exact HP purchase');
+});
+
+
+test('late staging resolver runs once after purchase and freezes its copied point for fresh readiness', async () => {
+  let calls = 0, selected = { x: 291, y: 607 };
+  const f = fixture({ gold: 480, resolveStagingPoint: ({ snapshot, receipt, defaultPoint }) => {
+    calls++; assert.equal(snapshot.inventoryItems.filter(i => i.itemIndex === 658).reduce((n, i) => n + i.quantity, 0), 12);
+    assert.ok(receipt.sequence > 0 && receipt.monotonicMs > 0); assert.deepEqual(defaultPoint, { x: 290, y: 607 });
+    return selected;
+  } });
+  const result = await f.supply.prepare();
+  assert.equal(calls, 1); assert.deepEqual(result.resolvedStagingPoint, { x: 291, y: 607 });
+  selected.x = 400;
+  assert.equal(f.supply.assertReady().x, 291); assert.equal(result.targetHp, 12);
+  assert.equal(f.client.sent.filter(c => c.type === 'buyItem').length, 1);
+  await assert.rejects(f.supply.prepare(), /single-use/); assert.equal(calls, 1);
+});
+
+test('late staging resolver reuses current fresh snapshot without adding a refresh or economic command', async () => {
+  const held = [item(658, 12, 900)];
+  const base = fixture({ items: structuredClone(held) }); await base.supply.prepare();
+  let calls = 0;
+  const picked = fixture({ items: structuredClone(held), resolveStagingPoint: ({ defaultPoint }) => { calls++; return defaultPoint; } });
+  await picked.supply.prepare();
+  assert.equal(calls, 1);
+  assert.deepEqual(picked.client.sent.map(c => c.type), base.client.sent.map(c => c.type));
+  assert.equal(picked.supply.status().purchased, 0); assert.equal(picked.supply.status().funding, null);
+});
+
+test('no candidate or an asynchronous resolver fails closed without restarting preparation budgets', async () => {
+  let calls = 0;
+  const noPoint = fixture({ items: [item(658, 12, 900)], resolveStagingPoint: () => { calls++; return null; } });
+  await assert.rejects(noPoint.supply.prepare(), /resolved stagingPoint/);
+  assert.equal(calls, 1); assert.equal(noPoint.supply.status().actualStagingReached, false);
+  await assert.rejects(noPoint.supply.prepare(), /single-use/); assert.equal(calls, 1);
+  const asyncPoint = fixture({ items: [item(658, 12, 900)], resolveStagingPoint: () => Promise.resolve({ x: 291, y: 607 }) });
+  await assert.rejects(asyncPoint.supply.prepare(), /must be synchronous/);
+});
+
+test('late point choice cannot reset the global wall or bypass owner/map and final fresh safety', async () => {
+  let late;
+  late = fixture({ items: [item(658, 12, 900)], resolveStagingPoint: ({ defaultPoint }) => { late.advance(600001); return defaultPoint; } });
+  await assert.rejects(late.supply.prepare(), /wall budget exhausted/);
+  let changed;
+  changed = fixture({ items: [item(658, 12, 900)], resolveStagingPoint: ({ snapshot, defaultPoint }) => { snapshot.mapFileName = '2'; return defaultPoint; } });
+  await assert.rejects(changed.supply.prepare(), /owner\/map\/health changed/);
+  assert.equal(changed.supply.status().actualStagingReached, false);
 });

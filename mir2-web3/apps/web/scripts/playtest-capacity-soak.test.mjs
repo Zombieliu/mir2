@@ -9,6 +9,8 @@ import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, His
 import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, offerNativeHpRecovery, offerNativeClientWork, offerPreparationKeepAlive, ordinaryPreparationConfiguration, prepareCapacityActor, activatePreparedCohort, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { SafetyStop } from './playtest-load-smoke.mjs';
+import { SustainObservations } from './playtest-capacity-observability.mjs';
+import { drain } from './playtest-capacity-soak.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 
 const WebSocketServer = createRequire(import.meta.url)('next/dist/compiled/ws').Server;
@@ -168,14 +170,14 @@ function hpRecoveryFixture(grid = 'inventory') {
   const fixture = huntFixture([]), { client, owner, context } = fixture, commands = [], stops = [];
   Object.assign(owner, { hp: 3, maxHp: 24, dead: false });
   Object.assign(client.snapshot, { playerHp: 3, playerMaxHp: 24, beltItems: [], inventoryItems: [] });
-  client.snapshot[grid === 'belt' ? 'beltItems' : 'inventoryItems'].push({ uniqueId: 901, name: '(HP)DrugSmall', quantity: 2, container: grid });
+  client.snapshot[grid === 'belt' ? 'beltItems' : 'inventoryItems'].push({ uniqueId: 901, itemIndex: 658, name: '(HP)DrugSmall', quantity: 2, container: grid });
   context.guard.stop = reason => stops.push(reason);
   client.ws = { send: data => commands.push(JSON.parse(data)) };
   const packet = (name, payload) => client.observe({ type: 'packet', packet: name, payload });
   const inventory = (quantity, complete = true) => {
     const snapshot = structuredClone(client.snapshot);
     snapshot.beltItems = []; snapshot.inventoryItems = [];
-    if (quantity > 0) snapshot[grid === 'belt' ? 'beltItems' : 'inventoryItems'].push({ uniqueId: 901, name: '(HP)DrugSmall', quantity, container: grid });
+    if (quantity > 0) snapshot[grid === 'belt' ? 'beltItems' : 'inventoryItems'].push({ uniqueId: 901, itemIndex: 658, name: '(HP)DrugSmall', quantity, container: grid });
     if (!complete) delete snapshot.inventoryItems;
     client.observe({ type: 'worldSnapshot', payload: snapshot });
   };
@@ -194,6 +196,8 @@ for (const grid of ['inventory', 'belt']) test(`native HP maintenance verifies o
   const proof = rows.find(row => row.type === 'nativeHpRecovery' && row.status === 'verified');
   assert.equal(proof.consumed, true); assert.equal(proof.hpIncreaseObserved, false); assert.equal(proof.hpIncrease, null);
   assert.equal(proof.consumption.quantity, 1); assert.equal(client.snapshot.playerHp, 3); assert.deepEqual(f.actions, []);
+  assert.equal(proof.quantityBefore, 2); assert.equal(proof.afterQuantity, 1); assert.equal(proof.provenConsumedQuantity, 1);
+  assert.equal(proof.consumption.quantityBefore, 2); assert.equal(proof.consumption.provenDelta, 1);
   assert.equal(client.hpRecoveryPending, null); assert.equal(client.hpRecoveryEvidence, null);
   assert.equal(offerNativeHpRecovery(client, context), null); assert.equal(commands.length, 1, 'same held stack cannot bypass the six-second cooldown');
   const restored = new CapacityClient('ws://127.0.0.1:1/ws', client.account, context);
@@ -232,6 +236,76 @@ for (const failure of ['rejected', 'wrong-uid', 'wrong-grid', 'ack-only', 'effec
     assert.equal(rows.at(-1).status, failure === 'rejected' ? 'rejected' : 'timeout'); assert.deepEqual(f.actions, []);
   });
 }
+
+test('passive sustain observes raw full receipts and counts repeated HP proof packets once without sending or crediting extra work', async () => {
+  const f = hpRecoveryFixture(), { client, context, rows, commands, actions } = f;
+  context.sustain = new SustainObservations(context.policy, row => rows.push(row));
+  client.observe({ type: 'worldSnapshot', payload: structuredClone(client.snapshot) });
+  context.sustain.activate(client, context.phase);
+  client.ws.send = data => {
+    commands.push(JSON.parse(data));
+    f.packet('UseItem', { uniqueId: 901, grid: 'Inventory', success: true });
+    f.packet('UseItem', { uniqueId: 901, grid: 'Inventory', success: true });
+    f.inventory(1); f.inventory(1);
+    f.packet('HealthChanged', { hp: 8, maxHp: 24 }); f.packet('HealthChanged', { hp: 8, maxHp: 24 });
+  };
+  await offerNativeHpRecovery(client, context);
+  context.sustain.drain(client, 'drain');
+  const proof = rows.find(row => row.type === 'nativeHpRecovery' && row.status === 'verified');
+  assert.equal(proof.quantityBefore, 2); assert.equal(proof.afterQuantity, 1); assert.equal(proof.provenConsumedQuantity, 1);
+  assert.equal(proof.hpIncrease.exactHp, 8);
+  const sustain = rows.findLast(row => row.type === 'sustain');
+  assert.equal(sustain.latest.hpStock, 1); assert.equal(sustain.observations.observedNetHpStockChange, -1);
+  assert.equal(sustain.observations.hpRecoveryAcknowledgements, 1);
+  assert.equal(sustain.observations.hpRecoveryConsumptionProofs, 1);
+  assert.equal(sustain.observations.hpRecoveryProvenConsumedQuantity, 1);
+  assert.equal(sustain.observations.hpRecoveryHpIncreaseProofs, 1);
+  assert.equal(client.events.findLast(row => row.type === 'worldSnapshot').payload.inventoryItems, undefined);
+  assert.deepEqual(commands, [{ type: 'useItem', uniqueId: 901, grid: 'inventory' }]);
+  assert.equal(client.budget.sent.length, 1); assert.deepEqual(actions, []);
+  assert.deepEqual(rows.filter(row => row.type === 'sustain').map(row => row.boundary), ['activation', 'drain']);
+});
+
+test('passive sustain keeps an ACK-only failed recovery separate from consumption and HP increase', async () => {
+  const f = hpRecoveryFixture(), { client, context, rows, commands, actions } = f; f.immediateWait();
+  context.sustain = new SustainObservations(context.policy, row => rows.push(row));
+  client.observe({ type: 'worldSnapshot', payload: structuredClone(client.snapshot) }); context.sustain.activate(client, context.phase);
+  client.ws.send = data => { commands.push(JSON.parse(data)); f.packet('UseItem', { uniqueId: 901, grid: 'Inventory', success: true }); };
+  await offerNativeHpRecovery(client, context); context.sustain.drain(client, 'drain');
+  const failure = rows.find(row => row.type === 'nativeHpRecovery' && row.status === 'timeout');
+  assert.ok(failure.acknowledgement); assert.equal(failure.afterQuantity, null); assert.equal(failure.provenConsumedQuantity, null);
+  const counts = rows.findLast(row => row.type === 'sustain').observations;
+  assert.equal(counts.hpRecoveryAcknowledgements, 1); assert.equal(counts.hpRecoveryConsumptionProofs, 0);
+  assert.equal(counts.hpRecoveryProvenConsumedQuantity, 0); assert.equal(counts.hpRecoveryHpIncreaseProofs, 0);
+  assert.equal(f.stops.length, 1); assert.equal(commands.length, 1); assert.deepEqual(actions, []);
+});
+
+test('passive sustain drain uses only the original final refresh and cannot label an unsuccessful refresh as a new receipt', async () => {
+  for (const finalRefreshFails of [false, true]) {
+    const f = hpRecoveryFixture(), { client, context, rows } = f;
+    context.cleanupErrors = []; context.continuous = { pause() {} };
+    context.sustain = new SustainObservations(context.policy, row => rows.push(row));
+    client.observe({ type: 'worldSnapshot', payload: structuredClone(client.snapshot) });
+    context.sustain.activate(client, context.phase); context.sustain.stop(performance.now());
+    const originalSequence = client.sequence; let refreshes = 0, closes = 0;
+    client.refresh = async () => { refreshes++;
+      if (finalRefreshFails) throw new Error('original final refresh failed');
+      f.inventory(1); return client.snapshot;
+    };
+    client.close = async () => { closes++;
+      assert.equal(rows.filter(row => row.type === 'sustain' && row.boundary === 'drain').length, 1);
+      client.closed = true;
+    };
+    const saved = await drain(client, context);
+    const row = rows.findLast(row => row.type === 'sustain');
+    assert.equal(refreshes, 1); assert.equal(closes, 1); assert.equal(client.ready, false);
+    assert.equal(row.boundary, 'drain'); assert.equal(row.latest.hpStock, finalRefreshFails ? 2 : 1);
+    assert.equal(row.latest.sequence, finalRefreshFails ? originalSequence : originalSequence + 1);
+    assert.equal(row.observations.observedNetHpStockChange, finalRefreshFails ? null : -1);
+    assert.equal(context.cleanupErrors.length, finalRefreshFails ? 1 : 0); assert.equal(Boolean(saved), !finalRefreshFails);
+    assert.deepEqual(f.commands, []); assert.deepEqual(f.actions, []);
+  }
+});
 
 test('native HP maintenance keeps unknown health, missing supplies and exhausted command budget bounded and never sends MP', () => {
   for (const reason of ['unknown-exact-health', 'no-held-hp-item', 'command-budget']) {
@@ -351,6 +425,20 @@ test('ordinary preparation forwards actual safe-zone membership and nearby hosti
   const cursor = client.sequence; await activatePreparedCohort([client], context);
   assert.ok(client.sequence > cursor); assert.equal(client.ready, true); assert.equal(joins.length, 1);
   assert.equal(f.commands.length, 3); assert.deepEqual(f.actions, []);
+});
+
+test('passive sustain starts at the existing fresh preparation activation barrier without an additional refresh', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, configuration, rows, commands } = f;
+  context.sustain = new SustainObservations(context.policy, row => rows.push(row));
+  await prepareCapacityActor(client, context, configuration);
+  assert.equal(rows.some(row => row.type === 'sustain'), false, 'preparation does not open an active minute');
+  await activatePreparedCohort([client], context);
+  const sustain = rows.filter(row => row.type === 'sustain');
+  assert.equal(sustain.length, 1); assert.equal(sustain[0].boundary, 'activation');
+  assert.equal(sustain[0].latest.hpStock, 12); assert.equal(sustain[0].latest.hp, 24); assert.equal(sustain[0].latest.gold, 0);
+  assert.equal(sustain[0].latest.sequence, client.events.findLast(row => row.type === 'worldSnapshot').sequence);
+  assert.deepEqual(commands.map(command => command.type), ['clientVersion', 'clientVersion', 'clientVersion']);
+  assert.equal(client.budget.sent.length, 3); assert.deepEqual(f.actions, []);
 });
 
 test('ordinary preparation navigator sends its actual Walk through the bounded supply facade and shared budget', async () => {

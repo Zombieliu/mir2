@@ -1,4 +1,4 @@
-// Public aggregate counts and wall-clock phase bounds only. This module does
+// Public observations and wall-clock phase bounds only. This module does
 // not plan gameplay, inspect credentials, change load or decide acceptance.
 import { capacityActorLimit } from './playtest-capacity-soak-core.mjs';
 
@@ -65,4 +65,136 @@ export function finishCapacityPhase(context, phase, completed, at = Date.now()) 
   // completed means that the interval finished, never that its quality passed.
   context.writer.add({ type: 'phaseEnded', at, ...phase });
   return phase;
+}
+
+const sustainScope = 'Passive actual worldSnapshot scalars only; stock is HP item 658 across complete inventory and belt arrays. Stock changes are net observations, not proof of consumption. Matching native HP recovery ACKs, inventory consumption proofs and observed HP increases are counted separately; none proves potion healing. No boundary requests a packet or decides acceptance.';
+const exactNonnegative = value => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : null;
+const publicName = value => typeof value === 'string' && value.length > 0 && value.length <= 80 ? value : null;
+const itemTemplate = item => item?.itemIndex ?? item?.item_index ??
+  (item?.tooltipSource?.realInfo ?? item?.tooltipSource?.real_info ?? item?.tooltipSource?.info)?.item_index ??
+  (item?.tooltipSource?.realInfo ?? item?.tooltipSource?.real_info ?? item?.tooltipSource?.info)?.itemIndex;
+function hpStock(snapshot) {
+  if (!Array.isArray(snapshot.inventoryItems) || !Array.isArray(snapshot.beltItems)) return null;
+  const seen = new Set(); let stock = 0;
+  for (const items of [snapshot.inventoryItems, snapshot.beltItems]) for (const item of items) {
+    const id = item?.uniqueId, template = exactNonnegative(itemTemplate(item)), quantity = exactNonnegative(item?.quantity);
+    const key = typeof id === 'number' && Number.isSafeInteger(id) && id >= 0 ? String(id) :
+      typeof id === 'string' && /^(0|[1-9][0-9]*)$/.test(id) ? id : null;
+    if (key === null || seen.has(key) || template === null || quantity === null) return null;
+    seen.add(key);
+    if (template === 658) { stock += quantity; if (!Number.isSafeInteger(stock)) return null; }
+  }
+  return stock;
+}
+const sameSustainOwner = (a, b) => Boolean(a?.owner && b?.owner && a.connection === b.connection &&
+  a.owner.name === b.owner.name && a.owner.mapFileName === b.owner.mapFileName && a.owner.localId === b.owner.localId);
+function sustainAccumulator(at, latest) {
+  return { startedAtMonotonicMs: at, stockStart: latest?.complete.identity && latest.complete.hpStock ? {
+    connection: latest.connection, owner: { ...latest.owner }, hpStock: latest.hpStock,
+    sequence: latest.sequence, monotonicMs: latest.monotonicMs } : null,
+  worldSnapshots: 0, completeStockSnapshots: 0, unknownStockSnapshots: 0, identityChanges: 0,
+  minimumObservedHp: null, maximumObservedHp: null, hpRecoveryAcknowledgements: 0,
+  hpRecoveryConsumptionProofs: 0, hpRecoveryProvenConsumedQuantity: 0, hpRecoveryHpIncreaseProofs: 0 };
+}
+
+// One latest scalar and one current accumulator per actor. No packet, item list,
+// snapshot history or per-minute history is retained by this observer.
+export class SustainObservations {
+  constructor(policy = {}, emit = () => {}) {
+    this.maximumControlledActors = capacityActorLimit(policy); this.emit = emit; this.actors = new Map();
+  }
+  entry(client) {
+    const actor = publicName(client?.label);
+    if (actor === null || !Number.isSafeInteger(client.lifecycleConnection)) return null;
+    if (!this.actors.has(actor)) {
+      if (this.actors.size >= this.maximumControlledActors) return null;
+      this.actors.set(actor, { actor, latest: null, active: false, connection: null, accumulator: null });
+    }
+    return this.actors.get(actor);
+  }
+  observe(client, message, receipt, receivedAtMs = Date.now()) {
+    if (message?.type !== 'worldSnapshot' || receipt?.direction !== 'received' ||
+        !Number.isSafeInteger(receipt.sequence) || !Number.isFinite(receipt.monotonicMs) ||
+        !Number.isSafeInteger(receivedAtMs)) return;
+    const state = this.entry(client); if (!state) return;
+    if (state.latest?.connection === client.lifecycleConnection && receipt.sequence <= state.latest.sequence) return;
+    if (state.latest && receipt.monotonicMs < state.latest.monotonicMs) return;
+    const snapshot = message.payload ?? {}, localId = exactNonnegative(snapshot.playerObjectId);
+    const owner = Array.isArray(snapshot.entities) ? snapshot.entities.find(entity => entity?.objectId === localId) : null;
+    const name = publicName(owner?.name), mapFileName = publicName(snapshot.mapFileName);
+    const identity = localId !== null && localId > 0 && name === client.label && mapFileName !== null;
+    const hp = exactNonnegative(snapshot.playerHp), maximumHp = exactNonnegative(snapshot.playerMaxHp);
+    const stock = hpStock(snapshot), gold = exactNonnegative(snapshot.gold);
+    const scalar = { connection: client.lifecycleConnection, owner: identity ? { name, mapFileName, localId } : null,
+      sequence: receipt.sequence, monotonicMs: receipt.monotonicMs, receivedAtMs,
+      hp: identity ? hp : null, maximumHp: identity && maximumHp > 0 ? maximumHp : null,
+      hpStock: identity ? stock : null, gold: identity ? gold : null,
+      inSafeZone: identity && typeof snapshot.inSafeZone === 'boolean' ? snapshot.inSafeZone : null,
+      complete: { identity, hp: identity && hp !== null, maximumHp: identity && maximumHp !== null && maximumHp > 0,
+        hpStock: identity && stock !== null, gold: identity && gold !== null } };
+    const prior = state.latest; state.latest = scalar;
+    if (!state.active || state.connection !== client.lifecycleConnection) return;
+    const acc = state.accumulator; acc.worldSnapshots++;
+    if (scalar.complete.hpStock) acc.completeStockSnapshots++; else acc.unknownStockSnapshots++;
+    if (!sameSustainOwner(prior, scalar)) acc.identityChanges++;
+    if (scalar.complete.hp) {
+      acc.minimumObservedHp = acc.minimumObservedHp === null ? hp : Math.min(acc.minimumObservedHp, hp);
+      acc.maximumObservedHp = acc.maximumObservedHp === null ? hp : Math.max(acc.maximumObservedHp, hp);
+    }
+  }
+  activate(client, phase, atMonotonicMs = performance.now(), at = Date.now()) {
+    const state = this.entry(client); if (!state || state.active) return;
+    state.connection = client.lifecycleConnection; state.role = client.role; state.active = true;
+    const latest = state.latest?.connection === state.connection ? state.latest : null;
+    state.accumulator = sustainAccumulator(atMonotonicMs, latest); state.offeredEndedAtMonotonicMs = null;
+    this.publish(state, 'activation', phase, atMonotonicMs, at);
+  }
+  bindResumedConnection(client) {
+    const state = this.actors.get(client.label); if (!state?.active) return;
+    if (state.connection !== client.lifecycleConnection) state.accumulator.identityChanges++;
+    state.connection = client.lifecycleConnection;
+  }
+  recordHpRecovery(client, kind, quantity = 0, firstProof = true) {
+    const state = this.actors.get(client.label);
+    if (!state?.active || state.connection !== client.lifecycleConnection) return;
+    const acc = state.accumulator;
+    if (kind === 'ack') acc.hpRecoveryAcknowledgements++;
+    else if (kind === 'hp-increase') acc.hpRecoveryHpIncreaseProofs++;
+    else if (kind === 'consumption' && Number.isSafeInteger(quantity) && quantity > 0) {
+      if (firstProof) acc.hpRecoveryConsumptionProofs++;
+      acc.hpRecoveryProvenConsumedQuantity += quantity;
+    }
+  }
+  tick(phase, atMonotonicMs = performance.now(), at = Date.now()) {
+    for (const state of this.actors.values()) if (state.active && state.offeredEndedAtMonotonicMs === null &&
+        atMonotonicMs - state.accumulator.startedAtMonotonicMs >= 60000) {
+      this.publish(state, 'minute', phase, atMonotonicMs, at);
+      state.accumulator = sustainAccumulator(atMonotonicMs, state.latest?.connection === state.connection ? state.latest : null);
+    }
+  }
+  stop(atMonotonicMs) {
+    for (const state of this.actors.values()) if (state.active) state.offeredEndedAtMonotonicMs = atMonotonicMs;
+  }
+  drain(client, phase, atMonotonicMs = performance.now(), at = Date.now()) {
+    const state = this.actors.get(client.label);
+    if (!state?.active || state.connection !== client.lifecycleConnection) return;
+    this.publish(state, 'drain', phase, atMonotonicMs, at); state.active = false; state.accumulator = null;
+  }
+  publish(state, boundary, phase, end, at) {
+    const acc = state.accumulator, elapsedMs = end - acc.startedAtMonotonicMs;
+    const latest = state.latest?.connection === state.connection ? state.latest : null;
+    const ageMs = latest && end >= latest.monotonicMs ? end - latest.monotonicMs : null;
+    const comparable = acc.identityChanges === 0 && sameSustainOwner(acc.stockStart, latest) && latest.complete.hpStock &&
+      latest.sequence > acc.stockStart.sequence && latest.monotonicMs > acc.stockStart.monotonicMs;
+    const stockChange = comparable ? latest.hpStock - acc.stockStart.hpStock : null;
+    const { stockStart, ...counts } = acc;
+    this.emit({ type: 'sustain', boundary, actor: state.actor, role: state.role, phase, at, scope: sustainScope,
+      connection: state.connection, emittedAtMonotonicMs: end, offeredEndedAtMonotonicMs: state.offeredEndedAtMonotonicMs,
+      elapsedMs, completeMinute: boundary === 'minute' && elapsedMs >= 60000,
+      latest: latest ? { ...latest, owner: latest.owner ? { ...latest.owner } : null, complete: { ...latest.complete }, ageMs,
+        observedDuringInterval: latest.monotonicMs >= acc.startedAtMonotonicMs } : null,
+      observations: { ...counts, stockStart: stockStart ? { ...stockStart, owner: { ...stockStart.owner } } : null,
+        observedNetHpStockChange: stockChange,
+        hpRecoveryProvenConsumedPerMinute: elapsedMs > 0 ? acc.hpRecoveryProvenConsumedQuantity * 60000 / elapsedMs : null } });
+  }
 }

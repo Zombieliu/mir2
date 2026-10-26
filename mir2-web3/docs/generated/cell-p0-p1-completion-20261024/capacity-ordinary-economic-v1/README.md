@@ -69,3 +69,13 @@
 本轮没有HP恢复日志，不能据此认定测量末药量不变或可持续7200秒。现压缩日志与终点存档不足以还原分钟HP/药耗；后续沿现有实际收件补充有界标量，不增加命令、不暂停或隐藏offered，并继续用原正式场景/目标见证约束验证。扩容准备需要独立普通角色库流程，现有probe最多10人，不能把单阶段25/50/100伪装成probe。
 
 [正常清理](bank-relogin-v1/cleanup-v1.json)及[独立OS复核](bank-relogin-v1/root-independent-cleanup-v1.json)确认PID68696消失、两端口释放。原判定、原样本、来源与复制摘要见[重登清单](bank-relogin-v1/copied-evidence-manifest.json)。当前仍为P1通过、P0未完成、P2未启动；尚无新25/50/100/500或两小时容量通过。
+
+## 独立准备流水线与被动供给观测候选
+
+新增`apps/web/scripts/playtest-capacity-prepare.mjs`独立普通准备入口，单worker复用原CapacityClient、持久登录预算、ordinaryLogin、prepareCapacityActor及正常drain；不启动engine、激活cohort或测量CCU。完整100账号pool与未准备尾部保留，角色逐名真实补给后，末次正常退出快照的身份、地图和位置必须与新鲜readiness一致，才计入preparedIndex。准备固定V2攻击，不能默默退回legacy。25/50/100只记准备进度；整次正常关闭Gateway后才有冷保存资格，所有角色持久化重登仍须后续正式流程验证。
+
+准备场景声明安全区内335个静态可走、非NPC/传送/出生格候选，100个为优先点。补给完成后只选择一次当前新鲜快照可见、未被活实体占用、未被本轮已保存角色使用的点，再冻结到该helper的准备和readiness检查；实际点写入preparedIndex，不能改存档位置、强制占位或把335候选称为335 CCU。旧固定点调用行为保留；600秒、8次狩猎和命令预算不因选点重置。
+
+容量主流程新增被动sustain标量：只沿已收到的worldSnapshot记录精确HP/maxHP、完整bag+belt的HP658总量、金币、实际安全区布尔值及owner/name/map/连接/收件时间；缺失保持未知，不保留完整快照。仅激活、实际分钟、正常drain边界输出，净库存变化、成功用药ACK、已证明消费量与观察到的HP增加分开计数；不新增请求、暂停、完成量或SLO豁免。已有ordinaryLogin/drain仅导出供准备工具复用，原函数行为保持。
+
+以上为已实现候选；统一Root完整门禁及首次百人准备尚待执行，不能把作者聚焦测试当作真实准备、人数档或容量通过。

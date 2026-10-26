@@ -9,7 +9,7 @@ import { pathToFileURL } from 'node:url';
 import { PlaytestClient, outsideRepository, validateEndpoint, observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { NativeResumeClient, validateResumeControl, assertResumeEvidence, assertReplayRejected, resumeFingerprint } from './playtest-native-resume-smoke.mjs';
 import { CATALOG_GZIP_CAPABILITY } from './playtest-catalog-transport.mjs';
-import { PublicDensity, beginCapacityPhase, finishCapacityPhase } from './playtest-capacity-observability.mjs';
+import { PublicDensity, SustainObservations, beginCapacityPhase, finishCapacityPhase } from './playtest-capacity-observability.mjs';
 import { CommandBudget, SafetyStop } from './playtest-load-smoke.mjs';
 import { loadProtocolCollisionMap, findProtocolWalkPath, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
 import { hasAuthoritativePlayerDeath, observedPlayerHp } from './quest-agent/protocol-observation.mjs';
@@ -262,6 +262,7 @@ export class CapacityClient extends NativeResumeClient {
     const beforeSelf = ownerTransform ? selfTransform(this.snapshot) : null;
     super.observe(message);
     this.ordinarySupplies?.observe(message, this.events.at(-1));
+    this.context.sustain?.observe(this, message, this.events.at(-1), Date.now());
     this.context.aoi?.reconcileReceived(this.context.clients ?? [], this.label);
     recordNativeHpRecoveryEvidence(this, message, this.events.at(-1));
     const navigationHint = this.navigationHint, navigationReceipt = this.events.at(-1);
@@ -1567,18 +1568,39 @@ function recordNativeHpRecoveryEvidence(client, message, receipt) {
   if (message.packet === 'UseItem' && Number(message.payload?.uniqueId) === pending.uniqueId &&
       String(message.payload?.grid).toLowerCase() === pending.grid) {
     if (message.payload.success !== true) pending.failure = 'rejected';
-    else pending.ack = proof;
+    else {
+      if (!pending.ack) client.context.sustain?.recordHpRecovery(client, 'ack');
+      pending.ack = proof;
+    }
   }
   if (message.type === 'worldSnapshot' || message.packet === 'HealthChanged') {
     const hp = exactNativeHp(snapshot);
-    if (hp != null && hp > pending.hpBefore) pending.hpIncrease = { ...proof, hp };
+    if (hp != null && hp > pending.hpBefore) {
+      const exactHp = message.type === 'worldSnapshot' ? message.payload?.playerHp : message.payload?.hp;
+      if (!pending.sustainHpIncreaseObserved && Number.isFinite(exactHp) && exactHp > pending.hpBefore) {
+        pending.sustainHpIncreaseObserved = true; client.context.sustain?.recordHpRecovery(client, 'hp-increase');
+      }
+      pending.hpIncrease = { ...proof, hp, exactHp: Number.isFinite(exactHp) ? exactHp : null };
+    }
   }
   // Only a complete, freshly received inventory can prove removal. Missing
   // arrays and later snapshots outside the original deadline prove nothing.
   if (message.type === 'worldSnapshot' && Array.isArray(snapshot.beltItems) && Array.isArray(snapshot.inventoryItems)) {
     const item = [...snapshot.beltItems, ...snapshot.inventoryItems].find(item => Number(item.uniqueId) === pending.uniqueId);
     const quantity = item ? Number(item.quantity ?? 1) : 0;
-    if (Number.isSafeInteger(quantity) && quantity >= 0 && quantity < pending.quantityBefore) pending.consumption = { ...proof, quantity };
+    if (Number.isSafeInteger(quantity) && quantity >= 0 && quantity < pending.quantityBefore) {
+      const raw = message.payload, complete = Array.isArray(raw?.beltItems) && Array.isArray(raw?.inventoryItems);
+      const freshItems = complete ? [...raw.beltItems, ...raw.inventoryItems].filter(item => Number(item?.uniqueId) === pending.uniqueId) : [];
+      const freshQuantity = complete && freshItems.length <= 1 ? (freshItems.length ? freshItems[0].quantity : 0) : null;
+      const afterQuantity = Number.isSafeInteger(freshQuantity) && freshQuantity >= 0 ? freshQuantity : null;
+      const provenDelta = afterQuantity !== null && afterQuantity < pending.quantityBefore ? pending.quantityBefore - afterQuantity : null;
+      const previousDelta = pending.sustainProvenConsumptionDelta ?? 0;
+      if (provenDelta > previousDelta) {
+        pending.sustainProvenConsumptionDelta = provenDelta;
+        client.context.sustain?.recordHpRecovery(client, 'consumption', provenDelta - previousDelta, previousDelta === 0);
+      }
+      pending.consumption = { ...proof, quantity, quantityBefore: pending.quantityBefore, afterQuantity, provenDelta };
+    }
   }
 }
 
@@ -1601,7 +1623,7 @@ export function offerNativeHpRecovery(client, context) {
     cursor: client.sequence, sentAtMs, deadlineMs: sentAtMs + NATIVE_HP_EVIDENCE_MS };
   client.hpRecoveryEvidence = pending;
   const row = { type: 'nativeHpRecovery', actor: client.label, phase: context.phase, at: Date.now(),
-    uniqueId: item.uniqueId, grid: item.grid, hpBefore: hp, maximumHp: maximum };
+    uniqueId: item.uniqueId, grid: item.grid, quantityBefore: item.quantity, hpBefore: hp, maximumHp: maximum };
   try {
     const dose = startEmergencyHpRecovery(client, { hpThreshold: .6, restorativeReuseDelayMs: NATIVE_HP_REUSE_MS, now })[0];
     if (!dose) { client.hpRecoveryEvidence = null; nativeHpNotice(client, context, 'helper-declined'); return null; }
@@ -1618,10 +1640,13 @@ export function offerNativeHpRecovery(client, context) {
   }, 'ordinary HP acknowledgement and effect', NATIVE_HP_EVIDENCE_MS).then(proof => {
     context.writer?.add({ ...row, at: Date.now(), status: 'verified', acknowledgement: proof.ack,
       consumed: Boolean(proof.consumption), consumption: proof.consumption ?? null,
+      afterQuantity: proof.consumption?.afterQuantity ?? null, provenConsumedQuantity: proof.consumption?.provenDelta ?? null,
       hpIncreaseObserved: Boolean(proof.hpIncrease), hpIncrease: proof.hpIncrease ?? null });
   }).catch(error => {
     const status = error instanceof SafetyStop ? 'cancelled' : error.hpRecoveryFailure ?? 'timeout';
-    context.writer?.add({ ...row, at: Date.now(), status });
+    context.writer?.add({ ...row, at: Date.now(), status, acknowledgement: pending.ack ?? null,
+      consumption: pending.consumption ?? null, afterQuantity: pending.consumption?.afterQuantity ?? null,
+      provenConsumedQuantity: pending.consumption?.provenDelta ?? null, hpIncrease: pending.hpIncrease ?? null });
     if (!(error instanceof SafetyStop)) context.guard.stop(`Ordinary HP recovery ${status}`);
   }).finally(() => {
     if (client.hpRecoveryEvidence === pending) client.hpRecoveryEvidence = null;
@@ -1711,7 +1736,7 @@ function startEngine(context) {
   }, 25);
 }
 
-async function ordinaryLogin(client, context, purpose = 'admission') {
+export async function ordinaryLogin(client, context, purpose = 'admission') {
   let lastNotice = 0;
   while (context.loginBudget.delay(purpose)) {
     context.guard.assert();
@@ -1841,6 +1866,7 @@ async function resumeActor(original, context) {
     restored.activityStartedAtMs = original.activityStartedAtMs;
     initializePlan(restored, context, performance.now() + 1000); restored.nextRtt = Date.now() + 5000; restored.nextRefresh = Date.now() + 60000;
     context.clients[context.clients.indexOf(original)] = restored; original.ready = false;
+    context.sustain?.bindResumedConnection(restored);
     return { actor: original.label, status: 'passed', elapsedMs: performance.now() - started, characterIndex: original.account.characterIndex,
       before, restoredState, resumedOwnerTurnReceipt: liveAck.sequence, generation: restored.nativeTicket.generation, replayRejected: true, loginFallback: false };
   } catch (error) {
@@ -1851,13 +1877,14 @@ async function resumeActor(original, context) {
   }
 }
 
-async function drain(client, context) {
+export async function drain(client, context) {
   client.paused = true; context.continuous?.pause(client.label);
   await Promise.allSettled([client.pending, client.auxPending, client.hpRecoveryPending].filter(Boolean));
   client.draining = true;
   let state;
   try { if (client.inGame && !client.closed) { await client.refresh(); state = fingerprint(client); } }
   catch (error) { context.cleanupErrors.push({ actor: client.label, step: 'finalSnapshot', error: sanitize(error.message, client.secrets) }); }
+  context.sustain?.drain(client, context.phase);
   try { await client.close(); }
   catch (error) { context.cleanupErrors.push({ actor: client.label, step: 'normalLogout', error: sanitize(error.message, client.secrets) }); }
   client.ready = false; return state ? { account: client.account, state } : null;
@@ -1932,6 +1959,7 @@ export async function activatePreparedCohort(cohort, context) {
     initializePlan(client, context, startedAt + 500 + (index % 10) * 40);
     client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
     client.activityStartedAtMs = startedAt; context.continuous.join(client.label, client.role, startedAt);
+    context.sustain?.activate(client, context.phase, startedAt);
   }
   context.writer.add({ type: 'cohortActivated', profile: 'ordinary-economic-v1', at: Date.now(),
     newActors: cohort.length, controlledActors: context.clients.length, activityStartedAtMs: startedAt,
@@ -2003,6 +2031,7 @@ export async function runCapacity(options) {
     value: Object.freeze({ mode: 'v2', capability: ATTACK_OUTCOME_CAPABILITY,
       rule: 'No legacy fallback. Activity attacks count correlated launched outcomes only; hits still require the original dual-end damage/health evidence. Hunting attempts are offered requests, not launched attacks.' }) });
   context.phaseWindows = report.phaseWindows; context.density = new PublicDensity(policy);
+  context.sustain = new SustainObservations(policy, row => writer.add(row));
   const lag = monitorEventLoopDelay({ resolution: 20 }); lag.enable();
   let timer, sampler, draining = false, driverLagFailures = 0, initialMemoryAt, finalStage, lockFile, lock;
   const onSignal = () => guard.stop('Operator requested normal load drain');
@@ -2054,6 +2083,7 @@ export async function runCapacity(options) {
           active: client.ready && !client.paused && !client.closed && client.inGame && Boolean(self(client)) })));
         const aoi = context.aoi.sample(context.clients);
         context.continuous.observeAoi(aoi, context.phase);
+        context.sustain.tick(context.phase);
         writer.add({ type: 'coverage', phase: context.phase, at: Date.now(), aoi, driver, density: context.density.sample(context.clients) }); lag.reset();
         report.peakControlledActors = Math.max(report.peakControlledActors ?? 0, aoi.activeOwners);
       } catch (error) { if (!(error instanceof SafetyStop)) guard.stop(error.message); }
@@ -2107,6 +2137,7 @@ export async function runCapacity(options) {
           initializePlan(client, context, performance.now() + 500 + (index % 10) * 40);
           client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
           client.activityStartedAtMs = performance.now(); context.continuous.join(client.label, client.role, client.activityStartedAtMs);
+          context.sustain.activate(client, context.phase, client.activityStartedAtMs);
         }
         writer.add({ type: 'admitted', actor: client.label, role: client.role, characterIndex: client.account.characterIndex, at: Date.now(), controlledActors: context.clients.length });
         options.onProgress?.({ stage: 'admitted', controlledActors: context.clients.length, target: count });
@@ -2147,6 +2178,7 @@ export async function runCapacity(options) {
     // await their real outstanding receipts, but must not accrue idle time
     // while earlier batches save and close their sessions.
     const stoppedAt = performance.now();
+    context.sustain.stop(stoppedAt);
     for (const client of context.clients) { client.paused = true; context.continuous.pause(client.label, stoppedAt); }
     await awaitPendingActions(context.clients);
     for (const client of context.allClients) client.ordinarySupplies?.dispose();
@@ -2157,6 +2189,7 @@ export async function runCapacity(options) {
       const results = await Promise.all(live.slice(offset, offset + 4).map(client => drain(client, context)));
       saved.push(...results.filter(Boolean));
     }
+    for (const client of context.clients) context.sustain.drain(client, context.phase);
     context.continuous.finish();
     if (!report.error && !guard.stopped && !context.cleanupErrors.length) {
       context.phase = 'save-verification';
