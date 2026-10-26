@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "scope": "Owner action pose source-bound validation; named source inputs only, not all transitive modules, lifecycle or capacity acceptance",
+  "mode": "full-driver",
+  "startedAt": "2026-10-26T15:16:33.459Z",
+  "finishedAt": "2026-10-26T15:21:44.486Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--test",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "apps/web/scripts/playtest-capacity-observability.test.mjs",
+    "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+    "apps/web/scripts/playtest-capacity-telemetry.test.mjs"
+  ],
+  "cwd": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "before": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 39617,
+      "sha256": "c59977540640efe0a2a5f9b05e81d3ce6c526ecc3c498fbb077f886e35605ebf"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 157490,
+      "sha256": "fe5c255f45b1010e63f98d6670307b365cc60c9cfb948e1ae6b676604500ddb6"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 292873,
+      "sha256": "6365f8cb988d0b36a3a6b4964b4bb66603bf1e28b13d731b2d842f22d041b1cf"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 19998,
+      "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "bytes": 14738,
+      "sha256": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/test-protocol-navigation.mjs",
+      "bytes": 18156,
+      "sha256": "5f17e004728b180a2d260314f21f942d771e3bdf498c37155cd38a6287dd565b"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/test-protocol-observation.mjs",
+      "bytes": 22513,
+      "sha256": "4fe117f3ec511262f38cb63fcb392f4b889c71ae79036803809fed9f4aea41c6"
+    }
+  ],
+  "after": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 39617,
+      "sha256": "c59977540640efe0a2a5f9b05e81d3ce6c526ecc3c498fbb077f886e35605ebf"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 157490,
+      "sha256": "fe5c255f45b1010e63f98d6670307b365cc60c9cfb948e1ae6b676604500ddb6"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 292873,
+      "sha256": "6365f8cb988d0b36a3a6b4964b4bb66603bf1e28b13d731b2d842f22d041b1cf"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 19998,
+      "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "bytes": 14738,
+      "sha256": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/test-protocol-navigation.mjs",
+      "bytes": 18156,
+      "sha256": "5f17e004728b180a2d260314f21f942d771e3bdf498c37155cd38a6287dd565b"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/test-protocol-observation.mjs",
+      "bytes": 22513,
+      "sha256": "4fe117f3ec511262f38cb63fcb392f4b889c71ae79036803809fed9f4aea41c6"
+    }
+  ],
+  "sourceInputCount": 13,
+  "sourceUnchanged": true,
+  "summary": [
+    "# tests 242",
+    "# pass 242",
+    "# fail 0",
+    "# cancelled 0",
+    "# skipped 0",
+    "# todo 0",
+    "# duration_ms 310983.366"
+  ],
+  "stdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-stdout-v1.log",
+    "bytes": 65261,
+    "sha256": "bc642fdc2391da64ea29d5cc5bd10c38f07ece625b08d9a86ff24e5a5b28bb19"
+  },
+  "stderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-owner-action-pose-validation-v1\\full-driver-stderr-v1.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "passed": true,
+  "allSelectedTestsPassed": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

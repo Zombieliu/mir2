@@ -1,5 +1,9 @@
 # Frontend 1:1 Gaps
 
+## 本地动作位置确认回滚（2026-10-26）
+
+仅本人的攻击/远攻/施法改为保留最新移动位置，动画/方向/特效/弹道照常，远端及真实位移处理不变。生产helper与页面接线15项、driver24项、容量工具242项及Web typecheck通过；旧scene结构脚本的既有renderer锚点断言在原代码对照仍失败，未改断言。新网关/50复测及GUI/人类Accepted尚待，不能列为完整前端验收。见[可复核证据](generated/cell-p0-p1-completion-20261024/capacity-owner-action-pose-v1/README.md)。
+
 
 ## PR #255 收尾：当前源码的三包 WASM 与严格构建（2026-10-15，北京时间）
 

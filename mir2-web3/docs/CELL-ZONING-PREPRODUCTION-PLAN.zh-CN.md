@@ -337,3 +337,5 @@ P0 生产容量规格、完整普通生命周期尚未冻结或通过；P1 稳�
 V8全员50入场后仍在准备期因AOI停止，ACK出距至观察者Remove约2.095秒，无测量阶段/新100。默认关闭的发送链路计时候选通过新鲜55项Rust与局部格式检查，真实52输入稳定；新Release/trace负载待执行，P0仍未通过、P2未启动。见[最新诊断候选](generated/cell-p0-p1-completion-20261024/capacity-zone-delivery-trace-v1/README.md)。
 
 V9全员50入场后AOI停止，无测量/新100。已关联Remove在sender取包前等待1.495秒、发送17µs，尚不能断言唯一阻塞点。默认关闭的慢路径计时候选通过新鲜57项Rust及局部格式，52输入稳定；新Release/复测待执行，P0仍未通过、P2未启动。详见同一[诊断主题](generated/cell-p0-p1-completion-20261024/capacity-zone-delivery-trace-v1/README.md)。
+
+V10全员50准备期AOI缺失，已核实旧own ObjectAttack回滚新ACK坐标。真实Web/driver同修，Node242+直接39+typecheck新鲜通过；Rust52未改明确复用57项。新Release/50复测待执行，P0未过/P2未启，见[动作坐标修复](generated/cell-p0-p1-completion-20261024/capacity-owner-action-pose-v1/README.md)。

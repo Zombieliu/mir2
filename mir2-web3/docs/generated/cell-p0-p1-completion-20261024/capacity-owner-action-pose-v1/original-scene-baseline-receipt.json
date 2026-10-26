@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "scope": "Original preimage scene test/helper/page, relocated URLs and TypeScript import only; assertions byte-exact after inverse. Renderer sources stay current unchanged baseline; not a passing frontend suite.",
+  "original": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-web-v1\\apps\\web\\scripts\\test-scene-effect-runtime.mjs",
+    "bytes": 15887,
+    "sha256": "e80cb67ef33e57be3d261d6fb10bfb038a6d1d3fd12cfa4c49f8a0de567f7b1e"
+  },
+  "relocated": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-scene-baseline-control-v1\\original-script-relocated.mjs",
+    "bytes": 16558,
+    "sha256": "df4302791c06f860ecad7fb67f40441e91ad39dcc6578ed20515b22ccd3826ac"
+  },
+  "assertionsUnchangedAfterInverse": true,
+  "exitCode": 1,
+  "signal": null,
+  "error": null,
+  "stdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-scene-baseline-control-v1\\stdout-v1.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\owner-action-pose-scene-baseline-control-v1\\stderr-v1.log",
+    "bytes": 746,
+    "sha256": "2e875508f78af9916e6813924506c4e595556e92315fb1e4795967049a3c7c28"
+  },
+  "sameInitialFailure": true,
+  "capacityAccepted": false
+}
