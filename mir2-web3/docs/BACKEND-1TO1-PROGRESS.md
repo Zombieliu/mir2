@@ -2,7 +2,7 @@
 
 ## Cell 共享快照发布回归（2026-10-27，北京时间）
 
-当前P1工程合同已通过、P0容量未通过、P2未启动。身份条件成立时合并紧邻的在线快照刷新，失配沿用原路径，并减少完整快照深复制；原准入、handler及后置结算保持。新鲜111项Rust测试通过，55输入前后稳定；新构建/50复测待执行，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
+当前P1工程合同已通过、P0容量未通过、P2未启动。b24的V12全50准备完成，计量14.748秒停止，最终HP0/18、药耗尽，仍有≥1秒AOI通知。进一步同值快照复用候选通过新鲜116项Rust测试/55输入，保留全部字段/owner清理及原负载，待新Release/V13。无100或容量通过，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
 
 ## Cell 上线前整合：P0 / P1 partial（2026-10-24，北京时间）
 

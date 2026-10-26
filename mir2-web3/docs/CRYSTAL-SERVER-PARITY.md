@@ -2,7 +2,7 @@
 
 ## Cell 共享快照发布回归（2026-10-27，北京时间）
 
-当前P1工程合同已通过、P0容量未通过、P2未启动。在线快照发布优化保留原命令准入、宠物/吸血怪死亡、毒状态和owner health结算；新鲜111项Rust测试通过，含旧新路径的完整live状态/出包对照。V11全员50仍在准备期AOI停止，新构建/复测待执行；不宣告容量或人类接受，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
+当前P1工程合同已通过、P0容量未通过、P2未启动。b24的V12全50准备完成，计量14.748秒停止，最终HP0/18、药耗尽，仍有≥1秒AOI通知。进一步同值快照复用保留原准入、完整结算及owner清理，新鲜116项Rust测试通过，待新Release/V13。不宣告100、容量或人类接受，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
 
 ## Cell 上线前整合：P0 / P1 partial（2026-10-24，北京时间）
 

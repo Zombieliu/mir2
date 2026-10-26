@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\presence-publication-v12-stage50-root-independent-cleanup-v1.json",
+      "file": "v12-root-independent-cleanup.json",
+      "bytes": 1137,
+      "sha256": "4b430f80072562343a14119bebe9dd2005cd28b51e20931572babed32381a5cc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\episode-50\\reports\\1793032111555-953c3a1b.report.json",
+      "file": "v12-original-report.json",
+      "bytes": 77751,
+      "sha256": "824b290e05fe917d3d290a08c2951a9e4aa4ba0f6ac880bf38c33354172c67b4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\episode-50\\episode-receipt.json",
+      "file": "v12-original-episode-receipt.json",
+      "bytes": 48780,
+      "sha256": "5b645b90228919a1031b9f09a33b01f773130cb30a97bfe3e37adadbb94f6912"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\presence-publication-v12-root-guard-execution-v1.json",
+      "file": "v12-root-guard-execution.json",
+      "bytes": 2050,
+      "sha256": "858aaccce6544eecdfd0105f48c8bd28515b95e880a7387a4b696e66b2e198ce"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\presence-publication-v12-stage50-root-prepare-execution-v1.json",
+      "file": "v12-root-prepare-execution.json",
+      "bytes": 2091,
+      "sha256": "2745548ff1864fce1ced3accf3842af51f10f3ae9a843b2161bd01af27dfd0fd"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\presence-publication-v12-stage50-root-run-execution-v1.json",
+      "file": "v12-root-run-execution.json",
+      "bytes": 2096,
+      "sha256": "6c159075123075d68681a60765a07e3d0e8debe13f9ffc3de466bf0dd80c3f89"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\source-pins-v1.json",
+      "file": "v12-source-pins.json",
+      "bytes": 81680,
+      "sha256": "df8957e54db89aca08dde6d6b88677e1ee5fd47d09c4fa1d974332171dba026a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\source-lib-v4.mjs",
+      "file": "release-v4/source-lib-v4.mjs",
+      "bytes": 20263,
+      "sha256": "10e627b4915283573850e609ba4aa8fe1308326051fdb63555be1af27a67a748"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\build-release-v4.mjs",
+      "file": "release-v4/build-release-v4.mjs",
+      "bytes": 6852,
+      "sha256": "39055415cf433865290a47ee340e48e7d29c6c59c9ff3ce67cb0381e8ea25bcc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\root-final-config-v4.json",
+      "file": "release-v4/root-final-config-v4.json",
+      "bytes": 11987,
+      "sha256": "69005de80b12ab6458f13a160d97c5714ee750c0e5982fcf3462ea2c05c61572"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\backend-source-v4.json",
+      "file": "release-v4/backend-source-v4.json",
+      "bytes": 65936,
+      "sha256": "ba5cdb916e018c0ff9e12e67d4c8c3192ff8846ff564c96d63437daec4ce44f7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\release-v4.json",
+      "file": "release-v4/release-v4.json",
+      "bytes": 2297,
+      "sha256": "6783b843cd99fe5770723e0c191930fb18eef4abf97244903bcfea076507a7cc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\build-receipt-v4.json",
+      "file": "release-v4/build-receipt-v4.json",
+      "bytes": 2283,
+      "sha256": "830ab4553645c30e82f0ccc5e7ffb4649b430afa053d76a4c9614354a0244327"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\source-before-v4.json",
+      "file": "release-v4/source-before-v4.json",
+      "bytes": 39320,
+      "sha256": "4b41ff001c03181e6a2dc605eb9c14ae54468b58f1fb8e643384a70e6292e320"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\source-after-v4.json",
+      "file": "release-v4/source-after-v4.json",
+      "bytes": 39320,
+      "sha256": "4b41ff001c03181e6a2dc605eb9c14ae54468b58f1fb8e643384a70e6292e320"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\build-stdout-v4.log",
+      "file": "release-v4/build-stdout-v4.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\build-stderr-v4.log",
+      "file": "release-v4/build-stderr-v4.log",
+      "bytes": 56033,
+      "sha256": "31fb9ff2b02a9f4ebaf773217e4e0ba354d40007c4fbb73953d3636236531f26"
+    }
+  ]
+}

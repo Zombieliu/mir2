@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-presence-publication-v12-analysis-v1\\findings-final-v3.json",
+      "file": "v12-findings-final.json",
+      "bytes": 23255,
+      "sha256": "00d6e3cb312dbe662e11c1540bb8d39a5d6261b0701cfb9220089b0f30807ac5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-presence-publication-v12-analysis-v1\\selected-causal-chain-v2.jsonl",
+      "file": "v12-selected-causal-chain.jsonl",
+      "bytes": 13186,
+      "sha256": "e60b5c2b437f4884687cc96904f08a28fe6393d262ce5bbd2741ab07d7c40ba3"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-presence-publication-v12-analysis-v1\\manifest-final-v2.json",
+      "file": "v12-analysis-manifest.json",
+      "bytes": 3749,
+      "sha256": "a418d2ec50fbe07f69c4d317cdd7ac1180c27dbeef48ec8e43ab4426f486c167"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-presence-publication-v12-analysis-v1\\final-saved-actor-state-v1.json",
+      "file": "v12-final-saved-actor-state.json",
+      "bytes": 2474,
+      "sha256": "9d0304e439423a8e9c8c0a257f7fc89786aa669b4215c7e9697b3b5f3f6d486d"
+    }
+  ]
+}

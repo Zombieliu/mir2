@@ -338,4 +338,4 @@ V8全员50入场后仍在准备期因AOI停止，ACK出距至观察者Remove约2
 
 V9全员50入场后AOI停止，无测量/新100。已关联Remove在sender取包前等待1.495秒、发送17µs，尚不能断言唯一阻塞点。默认关闭的慢路径计时候选通过新鲜57项Rust及局部格式，52输入稳定；新Release/复测待执行，P0仍未通过、P2未启动。详见同一[诊断主题](generated/cell-p0-p1-completion-20261024/capacity-zone-delivery-trace-v1/README.md)。
 
-V10动作坐标回滚已修复推送。V11独立Release全员50入场，仍在准备期AOI缺失停止：及时创建的ObjectPlayer队列等待1.786秒，同接收者读锁等待1.836秒。已接入有身份条件的合并快照发布及减少深复制，新鲜111项Rust测试通过，55输入稳定；新构建/50复测待执行，未启动100，P0未过/P2未启，见[最新证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
+`b24be2b82`的V12全50准备阶段完成，计量仅14.748秒因死亡/presence保护停止，最终HP0/18、药耗尽，仍有7条AOI通知≥1秒。进一步精确同值快照复用候选通过新鲜116项Rust测试/55输入，待新Release/V13；原场景、准入/结算及门槛保留。原失败不追认，未启动100，P0未过/P2未启，见[最新证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。

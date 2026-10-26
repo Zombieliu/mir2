@@ -264,7 +264,7 @@ struct OwnedPetTarget {
     target: ZoneCombatEntityRef,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 struct OwnedPetThreatActor {
     entity: ZoneCombatEntityRef,
     online: Option<OnlineOwner>,
@@ -275,7 +275,7 @@ struct OwnedPetThreatActor {
 
 /// The actual positive HP mutation fixes the causal Human and optional pet.
 /// Old clocks without this evidence can still drive guard AI, never PK billing.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 struct OwnedPetPlayerDamageSource {
     owner: OwnedPetOwner,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -283,7 +283,7 @@ struct OwnedPetPlayerDamageSource {
 }
 
 /// Online map handoff state, never client-authored or a durable character mode.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct OwnedPetPlayerClock {
     online: OnlineOwner,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -5279,6 +5279,13 @@ impl ZoneRuntime {
         &self,
         session: &SessionId,
     ) -> Option<OwnedPetPlayerClock> {
+        self.player_owned_pet_clock_ref(session).cloned()
+    }
+
+    pub(crate) fn player_owned_pet_clock_ref(
+        &self,
+        session: &SessionId,
+    ) -> Option<&OwnedPetPlayerClock> {
         self.owned_pet_state()?
             .players
             .get(session)
@@ -5287,7 +5294,6 @@ impl ZoneRuntime {
                     .get(session)
                     .is_some_and(|p| p.owner == clock.online)
             })
-            .cloned()
     }
 
     pub(crate) fn restore_player_owned_pet_clock(

@@ -121,7 +121,66 @@ fn assert_live_state_equal(reference: &ZoneManager, candidate: &ZoneManager) {
             zone.retained_presence_publication_snapshot(),
             reference.zones[key].retained_presence_publication_snapshot()
         );
+        assert_eq!(
+            zone.presence_publication_is_managed(),
+            reference.zones[key].presence_publication_is_managed()
+        );
     }
+}
+
+// Independent pre-optimization reference: always construct and clone the full
+// snapshot, even when every retained projection already contains equal values.
+fn unconditional_reference_refresh(manager: &mut ZoneManager) {
+    let snapshot = manager.online_snapshot();
+    for zone in manager.zones.values_mut() {
+        zone.ingest_online_presence(snapshot.clone(), true);
+    }
+}
+
+fn compare_refresh(initial: &ZoneManager) -> (ZoneManager, Vec<ZoneOutbound>) {
+    let mut reference = initial.fork_for_deterministic_reference();
+    let mut candidate = initial.fork_for_deterministic_reference();
+    unconditional_reference_refresh(&mut reference);
+    candidate.refresh_online_presence();
+    assert_live_state_equal(&reference, &candidate);
+    assert!(candidate
+        .zones
+        .values()
+        .all(|zone| zone.presence_publication_is_managed()));
+    let next_chat = chat(&candidate);
+    let expected = reference.handle(ZoneCommand::UpdateChatProfile {
+        session_id: session(),
+        profile: next_chat.clone(),
+    });
+    let actual = candidate.handle(ZoneCommand::UpdateChatProfile {
+        session_id: session(),
+        profile: next_chat,
+    });
+    assert_eq!(actual, expected);
+    assert_live_state_equal(&reference, &candidate);
+    (candidate, actual)
+}
+
+fn populated_publication_fixture() -> ZoneManager {
+    let mut initial = fixture(0);
+    assert!(initial.update_experience_profile(&session(), Some(profile())));
+    initial
+        .zones
+        .get_mut(&key())
+        .unwrap()
+        .prepare_presence_publication_health_and_poison(&session());
+    initial
+        .zones
+        .get_mut(&key())
+        .unwrap()
+        .prepare_presence_publication_threat_clock(&session());
+    unconditional_reference_refresh(&mut initial);
+    assert!(initial.online_presence_is_current());
+    let retained = initial.zones[&key()].retained_presence_publication_snapshot();
+    assert!(retained["owner"]["owned_pet_clock"]["last_hitter"].is_object());
+    assert!(retained["owner"]["owned_pet_clock"]["last_hitter"]["player_source"].is_object());
+    assert!(retained["owner"]["brown_until_ms"].as_u64().unwrap() > 0);
+    initial
 }
 
 fn compare_projection(
@@ -392,5 +451,122 @@ fn absent_unadmitted_owners_and_last_zone_move_keep_original_projection() {
         }
         moved.refresh_online_presence();
         assert_live_state_equal(&cloned, &moved);
+    }
+}
+
+#[test]
+fn equal_borrowed_projection_matches_unconditional_reference_with_live_queues() {
+    let initial = populated_publication_fixture();
+    let (_, out) = compare_refresh(&initial);
+    let mp = out
+        .iter()
+        .filter_map(|outbound| match outbound {
+            ZoneOutbound::OwnerHealthChanged { change } => Some(change.mp),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(mp, vec![999, 998]);
+    assert!(packets(&out).any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectPoisoned {
+            object_id: 9001,
+            poison: 0
+        }
+    )));
+}
+
+#[test]
+fn every_retained_projection_field_uses_the_unconditional_fallback_when_changed() {
+    let initial = populated_publication_fixture();
+    for field in [
+        "session_key",
+        "owner",
+        "key",
+        "dead",
+        "owned_pet_clock",
+        "life_generation",
+        "guild_name",
+        "chat_profile",
+        "brown_until_ms",
+        "position",
+        "level",
+        "experience_profile",
+        "name",
+        "group_members",
+        "mentor_bank",
+    ] {
+        let mut changed = initial.fork_for_deterministic_reference();
+        changed
+            .zones
+            .get_mut(&ZoneKey::for_map("d024"))
+            .unwrap()
+            .change_retained_presence_publication_field(&session(), field);
+        assert!(!changed.online_presence_is_current(), "field {field}");
+        compare_refresh(&changed);
+    }
+}
+
+#[test]
+fn equal_projection_still_prunes_foreign_monster_poison_and_drop_owners_and_sets_managed() {
+    let mut initial = populated_publication_fixture();
+    initial
+        .zones
+        .get_mut(&key())
+        .unwrap()
+        .prepare_presence_publication_foreign_owners(&session());
+    for zone in initial.zones.values_mut() {
+        zone.set_presence_publication_managed(false);
+    }
+    assert!(initial.online_presence_is_current());
+    let (candidate, _) = compare_refresh(&initial);
+    candidate.zones[&key()].assert_presence_publication_foreign_owners_pruned();
+}
+
+#[test]
+fn stale_owner_two_refreshes_match_the_unconditional_reference() {
+    let mut initial = populated_publication_fixture();
+    let mut missing = initial.online_snapshot();
+    missing.remove(&session());
+    initial
+        .zones
+        .get_mut(&key())
+        .unwrap()
+        .ingest_online_presence(missing, true);
+    let mut reference = initial.fork_for_deterministic_reference();
+    let mut candidate = initial.fork_for_deterministic_reference();
+    for round in 0..2 {
+        assert!(!candidate.online_presence_is_current());
+        unconditional_reference_refresh(&mut reference);
+        candidate.refresh_online_presence();
+        assert_live_state_equal(&reference, &candidate);
+        let retained = candidate.zones[&key()].retained_presence_publication_snapshot();
+        assert_eq!(retained["owner"]["owned_pet_clock"].is_object(), round == 1);
+    }
+    assert!(candidate.online_presence_is_current());
+    compare_refresh(&candidate);
+}
+
+#[test]
+fn extra_and_duplicate_session_sources_fall_back_to_original_last_wins_snapshot() {
+    let initial = populated_publication_fixture();
+    for duplicate in [false, true] {
+        let mut changed = initial.fork_for_deterministic_reference();
+        if duplicate {
+            let source = changed.zones[&key()].fork_for_deterministic_reference();
+            changed
+                .zones
+                .get_mut(&ZoneKey::for_map("d024"))
+                .unwrap()
+                .duplicate_presence_publication_player(&source, &session());
+        }
+        // A stale filler must not mask the difference between duplicate source
+        // count and the original snapshot's last-wins map length.
+        let mut retained = changed.online_snapshot();
+        retained.insert(SessionId::new("extra"), retained[&session()].clone());
+        for zone in changed.zones.values_mut() {
+            zone.ingest_online_presence(retained.clone(), true);
+        }
+        assert!(!changed.online_presence_is_current());
+        compare_refresh(&changed);
     }
 }

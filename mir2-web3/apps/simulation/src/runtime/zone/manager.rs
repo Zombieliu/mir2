@@ -185,7 +185,45 @@ impl ZoneManager {
             .flat_map(|zone| zone.online_player_snapshot(&self.online_identities))
             .collect()
     }
+
+    fn online_presence_is_current(&self) -> bool {
+        // Count the exact source filter without allocating a dedupe map.
+        // A duplicate live session in two source Zones must use the reference
+        // last-wins snapshot path, including unusual trusted installations.
+        let mut source_count = 0usize;
+        for (session, owner) in self.online_identities.owners() {
+            let mut sources = self
+                .zones
+                .values()
+                .filter(|zone| zone.has_online_projection_player(session, owner));
+            if sources.next().is_some() {
+                if sources.next().is_some() {
+                    return false;
+                }
+                let Some(next) = source_count.checked_add(1) else {
+                    return false;
+                };
+                source_count = next;
+            }
+        }
+        self.zones.values().all(|recipient| {
+            recipient.online_presence_matches_sources(
+                self.zones.values(),
+                &self.online_identities,
+                source_count,
+            )
+        })
+    }
+
     fn refresh_online_presence(&mut self) {
+        // Complete every borrowed comparison before any Zone is mutated.
+        // Equal projections still run the original owner pruning in order.
+        if self.online_presence_is_current() {
+            for zone in self.zones.values_mut() {
+                zone.ingest_unchanged_online_presence(true);
+            }
+            return;
+        }
         let snapshot = self.online_snapshot();
         let mut zones = self.zones.values_mut().peekable();
         while let Some(zone) = zones.next() {
