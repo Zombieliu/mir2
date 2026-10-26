@@ -4,7 +4,7 @@ import { createNavigator, NavigationStepGuarded, isTerminalNavigationNoPath } fr
 import { applyProtocolObservation } from './quest-agent/protocol-observation.mjs';
 import { selectPreparationStagingPoint } from './playtest-capacity-prepare.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, planProtocolNavigation } from './quest-agent/protocol-navigation.mjs';
-import { createOrdinarySupplies, ORDINARY_SUPPLY_COMMANDS } from './capacity-ordinary-supplies.mjs';
+import { createOrdinarySupplies, ORDINARY_SUPPLY_COMMANDS, ordinaryPreparationClearanceGeometry } from './capacity-ordinary-supplies.mjs';
 import { loadOrdinaryProtection } from './capacity-ordinary-protection.mjs';
 
 const route = { quests: [{ objectives: { item: [], kill: [{ monsterName: 'Deer', spawnCandidates: [{ mapFileName: '0', position: { x: 290, y: 604 }, count: 4 }] }] } }] };
@@ -296,12 +296,14 @@ const w8Positions = [
 const w8Occupancy = [{"x":320,"y":589,"objectId":206026,"kind":"monster"},{"x":321,"y":588,"objectId":206117,"kind":"monster"},{"x":321,"y":598,"objectId":214501,"kind":"monster"},{"x":322,"y":595,"objectId":206032,"kind":"monster"},{"x":322,"y":587,"objectId":206208,"kind":"monster"},{"x":325,"y":583,"objectId":206039,"kind":"monster"},{"x":325,"y":600,"objectId":206201,"kind":"monster"},{"x":326,"y":599,"objectId":206220,"kind":"monster"},{"x":327,"y":582,"objectId":206130,"kind":"monster"},{"x":315,"y":578,"objectId":206105,"kind":"monster"},{"x":330,"y":597,"objectId":206542,"kind":"monster"},{"x":331,"y":581,"objectId":206221,"kind":"monster"},{"x":327,"y":574,"objectId":206008,"kind":"monster"},{"x":333,"y":578,"objectId":206033,"kind":"monster"},{"x":337,"y":589,"objectId":206136,"kind":"monster"},{"x":340,"y":577,"objectId":206124,"kind":"monster"},{"x":340,"y":586,"objectId":206227,"kind":"monster"},{"x":342,"y":600,"objectId":206129,"kind":"monster"},{"x":342,"y":606,"objectId":206703,"kind":"monster"},{"x":342,"y":592,"objectId":206716,"kind":"monster"},{"x":343,"y":592,"objectId":206214,"kind":"monster"},{"x":343,"y":586,"objectId":206713,"kind":"monster"},{"x":344,"y":591,"objectId":210400,"kind":"monster"},{"x":345,"y":599,"objectId":206719,"kind":"monster"},{"x":345,"y":580,"objectId":214502,"kind":"monster"},{"x":347,"y":576,"objectId":206215,"kind":"monster"}];
 const w8Transfers = [{"mapFileName":"0","toMapFileName":"0122","bounds":{"maxX":347,"maxY":188,"minX":347,"minY":188}},{"mapFileName":"0","toMapFileName":"0102","bounds":{"maxX":308,"maxY":264,"minX":308,"minY":264}},{"mapFileName":"0","toMapFileName":"0108","bounds":{"maxX":326,"maxY":288,"minX":326,"minY":288}},{"mapFileName":"0","toMapFileName":"0104","bounds":{"maxX":322,"maxY":247,"minX":322,"minY":247}},{"mapFileName":"0","toMapFileName":"0107","bounds":{"maxX":354,"maxY":319,"minX":354,"minY":319}},{"mapFileName":"0","toMapFileName":"0125","bounds":{"maxX":295,"maxY":251,"minX":295,"minY":251}},{"mapFileName":"0","toMapFileName":"0125","bounds":{"maxX":295,"maxY":250,"minX":295,"minY":250}},{"mapFileName":"0","toMapFileName":"0103","bounds":{"maxX":335,"maxY":299,"minX":335,"minY":299}},{"mapFileName":"0","toMapFileName":"0103","bounds":{"maxX":335,"maxY":300,"minX":335,"minY":300}},{"mapFileName":"0","toMapFileName":"0103","bounds":{"maxX":344,"maxY":308,"minX":344,"minY":308}},{"mapFileName":"0","toMapFileName":"0103","bounds":{"maxX":345,"maxY":308,"minX":345,"minY":308}},{"mapFileName":"0","toMapFileName":"0105","bounds":{"maxX":295,"maxY":284,"minX":295,"minY":284}},{"mapFileName":"0","toMapFileName":"0105","bounds":{"maxX":295,"maxY":285,"minX":295,"minY":285}},{"mapFileName":"0","toMapFileName":"0105","bounds":{"maxX":305,"maxY":276,"minX":305,"minY":276}},{"mapFileName":"0","toMapFileName":"0106","bounds":{"maxX":307,"maxY":311,"minX":307,"minY":311}},{"mapFileName":"0","toMapFileName":"0106","bounds":{"maxX":307,"maxY":310,"minX":307,"minY":310}},{"mapFileName":"0","toMapFileName":"0106","bounds":{"maxX":317,"maxY":302,"minX":317,"minY":302}},{"mapFileName":"0","toMapFileName":"0106","bounds":{"maxX":317,"maxY":301,"minX":317,"minY":301}},{"mapFileName":"0","toMapFileName":"0101","bounds":{"maxX":289,"maxY":292,"minX":289,"minY":292}},{"mapFileName":"0","toMapFileName":"0101","bounds":{"maxX":286,"maxY":296,"minX":286,"minY":296}},{"mapFileName":"0","toMapFileName":"0128","bounds":{"maxX":278,"maxY":239,"minX":278,"minY":239}},{"mapFileName":"0","toMapFileName":"0129","bounds":{"maxX":284,"maxY":236,"minX":284,"minY":236}},{"mapFileName":"0","toMapFileName":"0123","bounds":{"maxX":271,"maxY":256,"minX":271,"minY":256}},{"mapFileName":"0","toMapFileName":"0124","bounds":{"maxX":283,"maxY":268,"minX":283,"minY":268}},{"mapFileName":"0","toMapFileName":"0110","bounds":{"maxX":396,"maxY":230,"minX":396,"minY":230}},{"mapFileName":"0","toMapFileName":"0110","bounds":{"maxX":396,"maxY":229,"minX":396,"minY":229}},{"mapFileName":"0","toMapFileName":"0111","bounds":{"maxX":400,"maxY":225,"minX":400,"minY":225}},{"mapFileName":"0","toMapFileName":"0111","bounds":{"maxX":399,"maxY":225,"minX":399,"minY":225}},{"mapFileName":"0","toMapFileName":"0112","bounds":{"maxX":404,"maxY":221,"minX":404,"minY":221}},{"mapFileName":"0","toMapFileName":"0112","bounds":{"maxX":403,"maxY":221,"minX":403,"minY":221}},{"mapFileName":"0","toMapFileName":"0137","bounds":{"maxX":414,"maxY":243,"minX":414,"minY":243}},{"mapFileName":"0","toMapFileName":"0137","bounds":{"maxX":415,"maxY":241,"minX":415,"minY":241}},{"mapFileName":"0","toMapFileName":"0137","bounds":{"maxX":416,"maxY":241,"minX":416,"minY":241}},{"mapFileName":"0","toMapFileName":"0121","bounds":{"maxX":315,"maxY":613,"minX":315,"minY":613}},{"mapFileName":"0","toMapFileName":"0130","bounds":{"maxX":266,"maxY":630,"minX":266,"minY":630}},{"mapFileName":"0","toMapFileName":"0131","bounds":{"maxX":271,"maxY":621,"minX":271,"minY":621}},{"mapFileName":"0","toMapFileName":"0136","bounds":{"maxX":295,"maxY":649,"minX":295,"minY":649}},{"mapFileName":"0","toMapFileName":"0132","bounds":{"maxX":283,"maxY":636,"minX":283,"minY":636}},{"mapFileName":"0","toMapFileName":"0132","bounds":{"maxX":282,"maxY":636,"minX":282,"minY":636}},{"mapFileName":"0","toMapFileName":"0132","bounds":{"maxX":282,"maxY":635,"minX":282,"minY":635}},{"mapFileName":"0","toMapFileName":"0138","bounds":{"maxX":274,"maxY":636,"minX":274,"minY":636}},{"mapFileName":"0","toMapFileName":"0141","bounds":{"maxX":302,"maxY":622,"minX":302,"minY":622}},{"mapFileName":"0","toMapFileName":"0141","bounds":{"maxX":311,"maxY":631,"minX":311,"minY":631}},{"mapFileName":"0","toMapFileName":"0140","bounds":{"maxX":307,"maxY":627,"minX":307,"minY":627}},{"mapFileName":"0","toMapFileName":"0115","bounds":{"maxX":314,"maxY":474,"minX":314,"minY":474}},{"mapFileName":"0","toMapFileName":"D011","bounds":{"maxX":43,"maxY":111,"minX":43,"minY":111}},{"mapFileName":"0","toMapFileName":"D401","bounds":{"maxX":664,"maxY":215,"minX":664,"minY":215}},{"mapFileName":"0","toMapFileName":"D401","bounds":{"maxX":663,"maxY":215,"minX":663,"minY":215}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":324,"maxY":41,"minX":324,"minY":41}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":325,"maxY":42,"minX":325,"minY":42}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":326,"maxY":43,"minX":326,"minY":43}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":326,"maxY":42,"minX":326,"minY":42}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":325,"maxY":41,"minX":325,"minY":41}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":325,"maxY":40,"minX":325,"minY":40}},{"mapFileName":"0","toMapFileName":"1","bounds":{"maxX":326,"maxY":40,"minX":326,"minY":40}},{"mapFileName":"0","toMapFileName":"2","bounds":{"maxX":666,"maxY":86,"minX":666,"minY":86}},{"mapFileName":"0","toMapFileName":"2","bounds":{"maxX":667,"maxY":87,"minX":667,"minY":87}},{"mapFileName":"0","toMapFileName":"2","bounds":{"maxX":667,"maxY":88,"minX":667,"minY":88}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":316,"maxY":649,"minX":316,"minY":649}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":315,"maxY":650,"minX":315,"minY":650}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":316,"maxY":650,"minX":316,"minY":650}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":315,"maxY":649,"minX":315,"minY":649}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":315,"maxY":648,"minX":315,"minY":648}},{"mapFileName":"0","toMapFileName":"HELL00","bounds":{"maxX":314,"maxY":649,"minX":314,"minY":649}},{"mapFileName":"0","toMapFileName":"0127","bounds":{"maxX":310,"maxY":600,"minX":310,"minY":600}},{"mapFileName":"0","toMapFileName":"0101","bounds":{"maxX":286,"maxY":296,"minX":286,"minY":296}},{"mapFileName":"0","toMapFileName":"0122","bounds":{"maxX":347,"maxY":189,"minX":347,"minY":189}},{"mapFileName":"0","toMapFileName":"D001","bounds":{"maxX":147,"maxY":33,"minX":147,"minY":33}},{"mapFileName":"0","toMapFileName":"D001","bounds":{"maxX":148,"maxY":34,"minX":148,"minY":34}}];
 
-function w8Forbidden(positions,start={x:331,y:590}) {
+function w8Forbidden(positions,start={x:331,y:590},halfHeight=8) {
   const points=new Map();
   for(const [objectId,name,x,y] of positions)for(let cy=y-8;cy<=y+8;cy++)for(let cx=x-8;cx<=x+8;cx++){
     const d=Math.max(Math.abs(cx-x),Math.abs(cy-y)),before=Math.max(Math.abs(start.x-x),Math.abs(start.y-y));
     if(d!==0&&cx>=278&&cx<=298&&cy>=606&&cy<=626)continue;
-    if(d===0||(before<=8?d<before:d<=8))points.set(cx+','+cy,{x:cx,y:cy});
+    const oldMetric=Math.max(Math.abs(start.x-x)*halfHeight,Math.abs(start.y-y)*8);
+    const metric=Math.max(Math.abs(cx-x)*halfHeight,Math.abs(cy-y)*8),boundary=8*halfHeight;
+    if(d===0||(oldMetric<=boundary?metric<oldMetric||d<before:metric<=boundary))points.set(cx+','+cy,{x:cx,y:cy});
   }
   return [...points.values()];
 }
@@ -321,7 +323,12 @@ test('W8 exact17-point2140-cell history with26occupancy and69transfers has a pat
 });
 
 async function w8HistoryFixture(config={}) {
-  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0'),map=await loadProtocolCollisionMap('0');
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0'),sourceMap=await loadProtocolCollisionMap('0');
+  // Expiry remains independently testable after the source-backed rectangle
+  // removes W8's original artificial square wall. This explicitly synthetic
+  // single-entry barrier is NOT a claim about the canonical map's geometry.
+  const map={...sourceMap,blocked:sourceMap.blocked.slice()};
+  for(let y=0;y<map.height;y++)if(y!==615)map.blocked[y*map.width+299]=1;
   const names={scarecrow:'Scarecrow',rakingcat:'RakingCat',hookingcat:'HookingCat'};
   const closed=new Set([206013,206610,206644,206623]),unique=new Map(w8Positions.map(p=>[p[0],p]));
   const current=w8Occupancy.map(p=>{
@@ -377,7 +384,7 @@ async function w8HistoryFixture(config={}) {
       if(stage===1){
         stage=2;movesBeforeWait=args.client.sent.filter(c=>['walk','run'].includes(c.type)).length;
         try {await nav();assert.fail('old exact halos must still block');}catch(error){
-          firstTerminal=error;assert.equal(error.navigationDiagnostics.explicitForbiddenTotal,2140);
+          firstTerminal=error;assert.equal(error.navigationDiagnostics.explicitForbiddenTotal,w8Forbidden(w8Positions,{x:331,y:590},6).length);
           assert.equal(error.navigationDiagnostics.hostileMemoryTotal,16);
           assert.equal(error.navigationDiagnostics.occupancyTotal,config.liveClosed?30:26);
           assert.equal(f.supply.status().plannerThreatMemory.positions,17);
@@ -386,12 +393,13 @@ async function w8HistoryFixture(config={}) {
         }
       }
       assert.ok(f.now()>=expiry,'no route retry before the original last closed expiry');
+      if(config.repeatTerminal)throw firstTerminal;
       stage=3;return nav();
     }});
   f.client.snapshot.entities=f.client.snapshot.entities.filter(e=>e.kind!=='npc');f.client.snapshot.mapTransfers=structuredClone(w8Transfers);
   return {f,metrics:()=>({sleeps,firstTerminal,expiry,stage})};
 }
-test('staging waits for original closed history expiry with real branded navigator, then freshraw and same exact target on canonical W8 map',async()=>{
+test('staging waits for original unequal history expiry on an explicitly synthetic single-entry map, then freshraw and same target',async()=>{
   const {f,metrics}=await w8HistoryFixture();const result=await f.supply.prepare();
   assert.equal(result.status,'ready');assert.ok(metrics().sleeps>1);assert.equal(result.pathReplanCount,1);
   assert.equal(result.pathReplans[0].reason,'closed-history-natural-expiry');assert.equal(result.pathReplans[0].historyPoints,4);
@@ -431,6 +439,15 @@ test('genuine terminal NoPath with only current live obstacles has no closed-his
   assert.equal(metrics().sleeps,0);assert.equal(f.supply.status().pathReplanCount,0);
   assert.equal(f.client.sent.length,1);
 });
+test('a recurring terminal position is scalar diagnosis only and cannot reuse expired history for another wait',async()=>{
+  const {f}=await w8HistoryFixture({repeatTerminal:true});await assert.rejects(f.supply.prepare(),isTerminalNavigationNoPath);
+  const result=f.supply.status(),cycle=result.navigationCycleDiagnostics;
+  assert.equal(cycle.total,2);assert.equal(cycle.views.length,2);assert.equal(cycle.views[1].repeatedRetainedPosition,true);
+  assert.equal(result.pathReplanCount,1);assert.equal(result.pathReplans[0].waitCompleted,true);
+  cycle.views[0].from.x=0;cycle.views.pop();
+  assert.equal(f.supply.status().navigationCycleDiagnostics.views.length,2);
+  assert.equal(f.supply.status().navigationCycleDiagnostics.views[0].from.x,331);
+});
 test('closed history waiting keeps wall, command, ownership, health and transport failures terminal',async t=>{
   for(const failure of ['wall','commands','hp','map','closed','unknown-reuse'])await t.test(failure,async()=>{
     const {f}=await w8HistoryFixture({timeoutMs:failure==='wall'?19000:600000,maxCommands:failure==='commands'?1:2048,
@@ -449,6 +466,168 @@ test('closed history waiting keeps wall, command, ownership, health and transpor
     if(failure!=='commands')assert.ok(waited.actualPassiveWaitMs<waited.waitMs);
     assert.equal(f.client.sent.some(c=>['walk','run','useItem','buyItem'].includes(c.type)),false);
   });
+});
+
+// W9 public exact NoPath view: seven certified points, sixteen occupants.
+const w9Positions=[[206644,"scarecrow",293,614],[206610,"scarecrow",300,597],[206026,"rakingcat",320,589],[206623,"scarecrow",321,631],[206032,"rakingcat",322,595],[206136,"hookingcat",337,589],[206129,"hookingcat",342,600]];
+const w9Occupancy=[{"x":314,"y":589,"objectId":206705,"kind":"monster"},{"x":318,"y":595,"objectId":206220,"kind":"monster"},{"x":320,"y":589,"objectId":206026,"kind":"monster"},{"x":321,"y":597,"objectId":206201,"kind":"monster"},{"x":321,"y":598,"objectId":214501,"kind":"monster"},{"x":322,"y":595,"objectId":206032,"kind":"monster"},{"x":328,"y":604,"objectId":200341,"kind":"monster"},{"x":330,"y":614,"objectId":206509,"kind":"monster"},{"x":330,"y":597,"objectId":206542,"kind":"monster"},{"x":337,"y":589,"objectId":206136,"kind":"monster"},{"x":342,"y":600,"objectId":206129,"kind":"monster"},{"x":342,"y":606,"objectId":206703,"kind":"monster"},{"x":342,"y":592,"objectId":206716,"kind":"monster"},{"x":343,"y":592,"objectId":206214,"kind":"monster"},{"x":344,"y":591,"objectId":210400,"kind":"monster"},{"x":345,"y":599,"objectId":206719,"kind":"monster"}];
+// Static v2 preparation catalogue copied as scalar coordinates, no external runtime dependency.
+const w9Candidates=[[288,615],[287,616],[289,616],[288,617],[289,615],[287,617],[289,617],[288,614],[286,616],[290,616],[288,618],[287,614],[289,614],[286,615],[290,615],[286,617],[290,617],[287,618],[289,618],[290,614],[286,618],[290,618],[288,613],[285,616],[291,616],[288,619],[287,613],[289,613],[285,615],[291,615],[285,617],[291,617],[287,619],[289,619],[286,613],[290,613],[291,614],[285,618],[291,618],[286,619],[290,619],[291,613],[285,619],[291,619],[288,612],[284,616],[292,616],[288,620],[287,612],[289,612],[284,617],[292,617],[287,620],[289,620],[286,612],[290,612],[284,614],[292,614],[284,618],[292,618],[286,620],[290,620],[285,612],[291,612],[284,613],[292,613],[284,619],[292,619],[285,620],[291,620],[284,612],[292,612],[284,620],[292,620],[288,611],[283,616],[293,616],[288,621],[287,611],[289,611],[283,615],[283,617],[293,617],[287,621],[289,621],[286,611],[290,611],[283,614],[293,614],[283,618],[293,618],[286,621],[290,621],[285,611],[291,611],[283,613],[293,613],[283,619],[293,619],[285,621],[291,621],[284,611],[292,611],[283,612],[293,612],[283,620],[293,620],[284,621],[283,611],[293,611],[283,621],[288,610],[282,616],[294,616],[288,622],[287,610],[289,610],[282,615],[294,615],[282,617],[294,617],[287,622],[289,622],[286,610],[290,610],[282,614],[294,614],[282,618],[294,618],[286,622],[290,622],[285,610],[282,613],[294,613],[285,622],[291,622],[284,610],[292,610],[282,612],[294,612],[294,620],[284,622],[283,610],[293,610],[282,611],[294,611],[294,621],[283,622],[282,610],[294,610],[282,622],[294,622],[288,609],[281,616],[295,616],[288,623],[287,609],[281,615],[295,615],[281,617],[295,617],[287,623],[289,623],[286,609],[281,614],[295,614],[295,618],[286,623],[290,623],[285,609],[281,613],[295,613],[295,619],[285,623],[291,623],[284,609],[281,612],[295,612],[295,620],[292,623],[283,609],[281,611],[295,621],[293,623],[282,609],[294,609],[281,610],[295,610],[295,622],[282,623],[294,623],[281,609],[295,609],[281,623],[295,623],[280,616],[296,616],[288,624],[287,608],[280,615],[296,615],[296,617],[287,624],[289,624],[286,608],[280,614],[296,614],[296,618],[286,624],[290,624],[285,608],[280,613],[291,624],[284,608],[280,612],[296,620],[292,624],[283,608],[293,608],[280,611],[296,621],[293,624],[282,608],[294,608],[280,610],[296,622],[294,624],[295,608],[280,609],[296,609],[296,623],[281,624],[295,624],[280,608],[296,608],[280,624],[296,624],[297,616],[288,625],[287,607],[279,615],[297,615],[287,625],[289,625],[286,607],[279,614],[297,614],[290,625],[285,607],[279,613],[297,613],[297,619],[291,625],[284,607],[279,612],[297,612],[297,620],[284,625],[292,625],[283,607],[293,607],[279,611],[297,621],[283,625],[293,625],[282,607],[294,607],[297,622],[294,625],[281,607],[295,607],[279,609],[297,623],[295,625],[280,607],[296,607],[279,608],[297,608],[297,624],[280,625],[296,625],[279,607],[297,607],[279,625],[297,625],[288,606],[298,616],[288,626],[298,615],[289,626],[286,606],[278,614],[298,614],[290,626],[285,606],[278,613],[298,619],[285,626],[291,626],[292,606],[278,612],[298,620],[284,626],[292,626],[293,606],[278,611],[298,621],[283,626],[293,626],[294,606],[278,610],[298,622],[282,626],[294,626],[281,606],[295,606],[278,609],[298,623],[295,626],[280,606],[296,606],[278,624],[298,624],[296,626],[279,606],[297,606],[298,607],[278,625],[298,625],[279,626],[297,626],[278,606],[298,606],[278,626],[298,626]].map(([x,y])=>({x,y}));
+
+test('W9 full seven-point canonical geometry changes from1527-square-blocked to1223-rectangle43steps and334of335 candidates',async()=>{
+  const map=await loadProtocolCollisionMap('0'),start={x:330,y:605},target={x:289,y:617},doors=w8Transfers.map(t=>({x:t.bounds.minX,y:t.bounds.minY}));
+  const old=w8Forbidden(w9Positions,start),current=w8Forbidden(w9Positions,start,6);
+  assert.equal(old.length,1527);assert.equal(current.length,1223);assert.equal(w9Occupancy.length,16);assert.equal(doors.length,69);
+  assert.equal(planProtocolNavigation({map,start,target,desiredDistance:0,dynamicObstacles:[...old,...w9Occupancy,...doors]}),null);
+  const dynamicObstacles=[...current,...w9Occupancy,...doors],path=planProtocolNavigation({map,start,target,desiredDistance:0,dynamicObstacles});
+  assert.equal(path.steps.length,43);assert.equal(w9Candidates.length,335);
+  assert.equal(w9Candidates.filter(target=>planProtocolNavigation({map,start,target,desiredDistance:0,dynamicObstacles})).length,334);
+});
+test('ordinary AI0 rectangle boundary and inside retreat guards use both weighted and physical distance',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  const cases=[
+    ['outside-y7',[0,8],[0,7],false],['enter-y6',[0,7],[0,6],true],['enter-x8',[9,0],[8,0],true],
+    ['outside-x9-y7',[9,7],[8,7],false],['inside-y6',[0,6],[0,5],true],
+    ['inside-corner-physical-approach',[8,6],[7,6],true],['inside-corner-outside-but-closer',[8,6],[7,7],true],
+    ['inside-retreat',[8,6],[9,5],false],['inside-maintains-both',[2,4],[3,4],false],['occupancy',[1,0],[0,0],true],
+  ];
+  for(const [name,from,next,blocked] of cases)await t.test(name,async()=>{
+    let checked=false;const position={x:320,y:300};
+    const f=fixture({items:[item(658,12,2)],ownerPosition:{x:position.x+from[0],y:position.y+from[1]},
+      stagingPoint:{x:position.x+from[0],y:position.y+from[1]},ordinaryProtection:protection,
+      hostiles:[hostile(71,position.x,position.y,{name:'Scarecrow',ownerName:null,class:null})],
+      navigate:async({navOptions,actor})=>{
+        const cell={x:position.x+next[0],y:position.y+next[1]},hazard=navOptions.beforeMovement({movementType:'walk',from:{x:actor.x,y:actor.y},physicalCells:[cell]});
+        assert.equal(!!hazard,blocked);
+        const obstacles=navOptions.forbiddenPoints;
+        assert.equal(obstacles.some(p=>p.x===cell.x&&p.y===cell.y),blocked,'planner and beforeMovement agree');
+        checked=true;throw new Error('geometry fixture complete');
+      }});
+    await assert.rejects(f.supply.prepare(),/geometry fixture complete/);assert.equal(checked,true);assert.equal(f.client.sent.length,1);
+  });
+});
+test('unknown owned nonAI0 expired and current conflicts retain the original square',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  for(const fault of ['unknown','owned','nonAI0','expired','class','name-conflict','global-quarantine'])await t.test(fault,async()=>{
+    const extra=fault==='global-quarantine'?Array.from({length:1025},(_,i)=>hostile(10000+i,600,500,{ownerName:null,class:null})):[];
+    let checked=false;const f=fixture({items:[item(658,12,2)],ownerPosition:{x:320,y:308},stagingPoint:{x:320,y:308},ordinaryProtection:protection,
+      hostiles:[hostile(71,320,300,{name:fault==='unknown'?'UnknownMonster':'Scarecrow',ownerName:fault==='owned'?'foreign':null,
+        ai:fault==='nonAI0'?1:0,class:fault==='class'?'Warrior':null}),...extra],
+      navigate:async({client,actor,navOptions})=>{
+        if(fault==='expired')f.advance(20001);
+        if(fault==='name-conflict')client.snapshot.entities.find(e=>e.objectId===71).name='HookingCat';
+        assert.ok(navOptions.beforeMovement({movementType:'walk',from:{x:actor.x,y:actor.y},physicalCells:[{x:320,y:307}]}));
+        checked=true;throw new Error('square fallback verified');
+      }});
+    await assert.rejects(f.supply.prepare(),/square fallback verified/);assert.equal(checked,true);
+  });
+});
+test('explicit larger named or default clearance is never reduced to the ordinary rectangle',()=>{
+  assert.deepEqual(ordinaryPreparationClearanceGeometry({qualifiedNormalAi0:true}),{x:8,y:6,rectangle:true});
+  for(const request of [{radius:9},{namedRadius:10},{radius:12,namedRadius:9}])
+    assert.deepEqual(ordinaryPreparationClearanceGeometry({...request,qualifiedNormalAi0:true}),
+      {x:Math.max(request.radius??8,request.namedRadius??0),y:Math.max(request.radius??8,request.namedRadius??0),rectangle:false});
+  assert.deepEqual(ordinaryPreparationClearanceGeometry({qualifiedNormalAi0:false}),{x:8,y:8,rectangle:false});
+});
+test('strict same-identity wire reentry preserves the rectangle for its original authenticated position trail',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let checked=false;
+  const f=fixture({items:[item(658,12,2)],ownerPosition:{x:324,y:308},stagingPoint:{x:324,y:308},ordinaryProtection:protection,applyPackets:true,
+    navigate:async({packet,navOptions})=>{
+      packet('ObjectMonster',wireMonster(71,{location:{x:320,y:300}}));void navOptions.forbiddenPoints;
+      packet('ObjectRemove',{objectId:71});f.advance(13500);
+      packet('ObjectMonster',wireMonster(71,{location:{x:329,y:300}}));
+      const points=navOptions.forbiddenPoints;
+      assert.ok(navOptions.allowedHostileObjectIds.includes(71));assert.equal(f.supply.status().plannerThreatMemory.positions,2);
+      assert.equal(points.some(p=>p.x===320&&p.y===307),false,'a new certificate object for the same identity does not widen old y7 to a square');
+      assert.equal(points.some(p=>p.x===320&&p.y===306),true);checked=true;throw new Error('same normal trail checked');
+    }});
+  await assert.rejects(f.supply.prepare(),/same normal trail checked/);assert.equal(checked,true);
+});
+test('Run checks its intermediate cell at beforeMovement and send using the same rectangle',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  for(const phase of ['before-movement','send'])await t.test(phase,async()=>{
+    let saw=false;const f=fixture({items:[item(658,12,2)],ownerPosition:{x:320,y:308},stagingPoint:{x:320,y:308},
+      ordinaryProtection:protection,hostiles:[hostile(71,320,300,{name:'Scarecrow',ownerName:null,class:null})],
+      navigate:async({facade,actor,navOptions})=>{
+        if(phase==='before-movement'){
+          const h=navOptions.beforeMovement({movementType:'run',from:{x:actor.x,y:actor.y},physicalCells:[{x:320,y:307},{x:320,y:306}]});
+          assert.equal(h.physicalCells.length,2);saw=true;throw new NavigationStepGuarded(h);
+        }
+        saw=true;facade.send({type:'run',direction:'Up'});await facade.wait(()=>false,'Run landing enters y6');
+      }});
+    await assert.rejects(f.supply.prepare());assert.equal(saw,true);
+    assert.equal(f.client.sent.some(c=>c.type==='run'),false);
+    assert.ok(f.supply.status().pathHazards.every(h=>h.phase===phase));
+  });
+});
+test('the new-target rectangle never masks an actual released hit or known poison at readiness',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  await t.test('released-hit',async()=>{
+    let armed=false,damaged=false;
+    const f=fixture({items:[item(658,12,2)],ownerPosition:{x:320,y:308},stagingPoint:{x:320,y:307},ordinaryProtection:protection,
+      hostiles:[hostile(71,320,300,{name:'Scarecrow',ownerName:null,class:null})],
+      onPace:({client,actor,packet,snapshot})=>{if(armed&&!damaged){damaged=true;
+        packet('ObjectAttack',{objectId:71,location:{x:320,y:300},direction:4});
+        actor.hp=60;client.snapshot.playerHp=60;snapshot();}},
+      navigate:async({facade,actor,navOptions})=>{
+        assert.ok(!navOptions.beforeMovement({movementType:'walk',from:{x:actor.x,y:actor.y},physicalCells:[{x:320,y:307}]}));
+        armed=true;facade.send({type:'walk',direction:'Up'});await facade.wait(()=>false,'released damage before dispatch');
+      }});
+    await assert.rejects(f.supply.prepare(),/owner\/map\/health changed/);
+    assert.equal(damaged,true);assert.equal(f.client.sent.some(c=>c.type==='walk'),false);
+    assert.equal(f.supply.status().preparationThreatModel.damageImmunity,false);
+  });
+  await t.test('known-poison',async()=>{
+    const f=fixture({items:[item(658,12,2)],ordinaryProtection:protection});
+    f.client.snapshot.inSafeZone=true;f.client.snapshot.playerPoison=4;
+    await assert.rejects(f.supply.prepare(),/negative status at staging/);
+    assert.equal(f.supply.status().actualStagingReached,false);assert.equal(f.client.snapshot.playerPoison,4);
+  });
+});
+test('a real canonical return survives multiple AOI departures and reentries without repeating the W9 wall loop',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0'),map=await loadProtocolCollisionMap('0');
+  const names={scarecrow:'Scarecrow',rakingcat:'RakingCat',hookingcat:'HookingCat'},closed=new Set([206644,206610,206623]);
+  const threats=w9Positions.map(([id,name,x,y])=>hostile(id,x,y,{name:names[name],hp:name==='scarecrow'?20:name==='rakingcat'?32:30,ownerName:null,class:null}));
+  const neutrals=w9Occupancy.filter(p=>!threats.some(e=>e.objectId===p.objectId)).map(p=>({...p,name:'Deer',ai:2,hp:25,dead:false,disposition:'neutral',ownerName:null,class:null}));
+  let f,navigator,seeded=false,moves=0,departures=0,reentries=0,firstOptions,firstTarget;
+  const updateAoi=({client,actor,packet})=>{
+    moves++;
+    for(const entity of threats){
+      const visible=distanceForTest(actor,entity)<=16,exists=client.snapshot.entities.some(e=>e.objectId===entity.objectId);
+      if(!visible&&exists){packet('ObjectRemove',{objectId:entity.objectId});departures++;}
+      if(visible&&!exists){packet('ObjectMonster',{objectId:entity.objectId,name:entity.name,location:{x:entity.x,y:entity.y},ai:0,masterObjectId:0,dead:false});reentries++;}
+      if(visible&&moves%2===0)packet('ObjectTurn',{objectId:entity.objectId,x:entity.x,y:entity.y,direction:0});
+    }
+    client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;
+  };
+  f=fixture({ownerId:1000,ownerHp:18,ownerMaxHp:18,items:[item(658,12,2)],gold:15,
+    ownerPosition:{x:330,y:605},stagingPoint:{x:289,y:617},hostiles:[...threats,...neutrals],ordinaryProtection:protection,
+    applyPackets:true,noMovementSnapshots:true,onMove:updateAoi,
+    onSnapshot:({client})=>{client.snapshot.entities=client.snapshot.entities.map(e=>threats.find(t=>t.objectId===e.objectId)?{...threats.find(t=>t.objectId===e.objectId)}:e);},
+    navigate:async({facade,target,range,stop,navOptions,packet})=>{
+      navigator??=createNavigator(facade,{loadCollisionMap:async()=>map,now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000});
+      if(!seeded){
+        seeded=true;firstOptions=navOptions;firstTarget=target;
+        void navOptions.forbiddenPoints;
+        for(const id of closed)packet('ObjectRemove',{objectId:id});
+        assert.equal(navOptions.forbiddenPoints.length,1223);
+        // Ordinary real-map movements replay repeated AOI crossings, not
+        // teleport or manual owner transforms. All use the original facade.
+        for(let i=0;i<2;i++){await navigator({x:305,y:612},0,stop,navOptions);await navigator({x:330,y:605},0,stop,navOptions);}
+      }
+      assert.equal(navOptions,firstOptions);assert.equal(target,firstTarget);
+      return navigator(target,range,stop,navOptions);
+    }});
+  f.client.snapshot.entities=f.client.snapshot.entities.filter(e=>e.kind!=='npc');f.client.snapshot.mapTransfers=structuredClone(w8Transfers);
+  const result=await f.supply.prepare();assert.equal(result.status,'ready');
+  assert.equal(result.pathReplanCount,0);assert.equal(result.pathHazardCount,0);
+  assert.ok(departures>8&&reentries>8);assert.ok(result.elapsedMs>20000&&result.elapsedMs<600000);
+  assert.equal(result.commands,result.movementCommands+2);assert.equal(f.client.sent.filter(c=>c.type==='clientVersion').length,2);
+  assert.equal(result.after.hp,18);assert.equal(result.after.hpStock,12);assert.equal(result.after.gold,15);
+  assert.deepEqual({x:result.after.x,y:result.after.y},{x:289,y:617});
+  assert.equal(result.preparationThreatModel.damageImmunity,false);assert.equal(result.preparationThreatModel.newTargetAcquisitionOnly,true);
+  assert.equal(result.navigationCycleDiagnostics.total,0);
+  t.diagnostic(JSON.stringify({scope:'static W9 observed geometry with actual wire AOI lifecycle replay; not live acceptance',moves:result.movementCommands,departures,reentries,elapsedMs:result.elapsedMs}));
 });
 
 test('default is held-only noop and economic profile has explicit bounded inputs', async () => {

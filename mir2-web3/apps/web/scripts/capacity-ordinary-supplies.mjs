@@ -56,6 +56,12 @@ const venison = snapshot => (snapshot?.inventoryItems ?? []).filter(item => item
 const venisonStock = snapshot => venison(snapshot).reduce((sum, item) => sum + quantity(item), 0);
 const point = (value, label) => ({ x: integer(value?.x, `${label}.x`, 0, 65535), y: integer(value?.y, `${label}.y`, 0, 65535) });
 
+/** Pure geometry, not an identity certificate or a command authorization. */
+export function ordinaryPreparationClearanceGeometry({radius=8,namedRadius=0,qualifiedNormalAi0=false}={}) {
+  const clearance=Math.max(8,integer(radius,'geometry radius'),integer(namedRadius,'geometry named radius'));
+  return qualifiedNormalAi0===true&&clearance===8 ? {x:8,y:6,rectangle:true} : {x:clearance,y:clearance,rectangle:false};
+}
+
 function roomForHp(snapshot) {
   const capacity = Number(snapshot.maxBagSlots ?? Number(snapshot.inventoryCapacity) - 6);
   integer(capacity, 'authoritative bag capacity', 1, 80);
@@ -103,6 +109,7 @@ export function createOrdinarySupplies(client, options = {}) {
   const qualificationEvents = [];
   let qualificationEventCount = 0, qualificationRepeatedReads = 0, plannerDiagnosticSource = 'planner-read', plannerDiagnosticInput = null;
   let navigationNoPath = null;
+  const navigationFailures=[];let navigationFailureCount=0;
   function plannerObservedScalar(e, permitName = true) {
     if (!e || typeof e !== 'object') return null;
     const p = e.location ?? e, finite = value => Number.isFinite(value) ? value : null;
@@ -191,6 +198,29 @@ export function createOrdinarySupplies(client, options = {}) {
       isProtectedOrdinaryPacketCell(options.ordinaryProtection,client.snapshot.mapFileName,row.wireCertificate,cell) :
       trustedPlannerEntity([entity]) !== null && samePlannerIdentity(entity,row.rawIdentity) &&
       isProtectedOrdinaryCell(options.ordinaryProtection,client.snapshot.mapFileName,entity,cell);
+  }
+  function acquisitionGeometry(entity, clearance, historicalPoint = null) {
+    const id=historicalPoint?.objectId ?? objectId(entity.objectId),row=plannerIdentities.get(id),at=plannerNow();
+    const qualified=clearance===8 && at>=plannerGlobalBlockedUntil && row && row.blockedUntil<=at &&
+      (row.live?row.trustedUntil>at:row.closedHistoryUntil>at) &&
+      (historicalPoint===null || historicalPoint.expiresAt>at) &&
+      (historicalPoint!==null ? (row.rawIdentity?samePlannerIdentity(entity,row.rawIdentity):row.wireCertificate&&
+        samePlannerIdentity(entity,{kind:'monster',name:row.wireCertificate.name,ai:0,ownerName:null,class:null})) :
+        (row.live && plannerEntity(plannerGroups(client.snapshot).get(id),row)===entity &&
+          (row.rawIdentity?samePlannerIdentity(entity,row.rawIdentity):!!row.wireCertificate)));
+    // Current Rust ordinary AI0 NEW target acquisition: |dx|<=8, |dy|<=6
+    // (zone/runtime.rs209-210,13968-13969). This is neither disengagement nor
+    // damage immunity: forced/retained targets, poison and released hits remain.
+    return ordinaryPreparationClearanceGeometry({radius:clearance,qualifiedNormalAi0:!!qualified});
+  }
+  function entersThreatCell(from,cell,position,geometry) {
+    const physical=distance(cell,position);if(physical===0)return true;
+    const beforePhysical=distance(from,position);
+    const metric=p=>Math.max(Math.abs(p.x-position.x)*geometry.y,Math.abs(p.y-position.y)*geometry.x);
+    const boundary=geometry.x*geometry.y,before=metric(from),next=metric(cell);
+    // Retreat from an already entered rectangle must preserve BOTH metrics:
+    // (8,6)->(7,6) keeps weighted distance48 but approaches physically8->7.
+    return before<=boundary ? next<before || physical<beforePhysical : next<=boundary;
   }
   function rememberPlannerPosition(id, entity, at) {
     const position = point(entity,'remembered planning hostile'), key = id + ':' + position.x + ',' + position.y;
@@ -379,9 +409,10 @@ export function createOrdinarySupplies(client, options = {}) {
   function movementHazard(action, phase, from, physicalCells, policy = navigationPolicy) {
     guard(); const radius = policy?.radius ?? 8;
     for (const hostile of visibleHostiles()) {
-      const position = point(hostile, 'visible hostile'), beforeDistance = distance(from, position);
+      const position = point(hostile, 'visible hostile');
       const named = policy?.byName?.get(String(hostile.name ?? '').replace(/[^a-z0-9]/gi,'').toLowerCase()) ?? 0;
       const clearance = Math.max(radius, named);
+      const geometry=acquisitionGeometry(hostile,clearance);
       for (const cell of physicalCells) {
         const nextDistance = distance(cell, position);
         // Static, source-checked membership applies to this exact server cell
@@ -390,7 +421,7 @@ export function createOrdinarySupplies(client, options = {}) {
         if (nextDistance !== 0 && protectedCell(hostile,cell) === true) continue;
         // Entry barrier, never a cage: an already-close actor may keep or grow
         // its distance from every threat, but may not enter an occupied tile.
-        if (nextDistance === 0 || (beforeDistance <= clearance ? nextDistance < beforeDistance : nextDistance <= clearance))
+        if (entersThreatCell(from,cell,position,geometry))
           return recordPathHazard(action, phase, from, physicalCells, hostile, clearance, 'hostile-clearance');
       }
     }
@@ -404,14 +435,15 @@ export function createOrdinarySupplies(client, options = {}) {
     // conservative coverage. This also closes the forbidden-before-allowed
     // clock boundary: granting an ID can never precede its outside halo.
     for (const remembered of plannerTrail.values()) {
-      const hostile = remembered.entity, position = { x:remembered.x, y:remembered.y }, beforeDistance = distance(from, position);
+      const hostile = remembered.entity, position = { x:remembered.x, y:remembered.y };
       const named = policy.byName.get(String(hostile.name ?? '').replace(/[^a-z0-9]/gi,'').toLowerCase()) ?? 0;
       const clearance = Math.max(policy.radius, named);
+      const geometry=acquisitionGeometry(hostile,clearance,remembered);
       for (let y = Math.max(0, position.y-clearance); y <= Math.min(65535, position.y+clearance); y++) {
         for (let x = Math.max(0, position.x-clearance); x <= Math.min(65535, position.x+clearance); x++) {
           const cell = { x, y }, nextDistance = distance(cell, position);
           if (nextDistance !== 0 && protectedCell(hostile,cell,true)) continue;
-          if (nextDistance === 0 || (beforeDistance <= clearance ? nextDistance < beforeDistance : nextDistance <= clearance))
+          if (entersThreatCell(from,cell,position,geometry))
             obstacles.set(`${x},${y}`, cell);
         }
       }
@@ -687,6 +719,10 @@ export function createOrdinarySupplies(client, options = {}) {
         target:Object.freeze(point(target,'diagnostic target')),range,commands,movementCommands,attempts:error.attempts??null,
         successfulSteps:error.successfulSteps??null,globalQuarantineRemainingMs:Math.max(0,plannerGlobalBlockedUntil-at),
         shared:exact,qualificationTotal:ids.length,qualificationTruncated:ids.length>128,qualifications:Object.freeze(states)});
+      const from=point(owner(client.snapshot),'diagnostic owner'),goal=point(target,'diagnostic target');
+      const repeated=navigationFailures.some(p=>p.from.x===from.x&&p.from.y===from.y&&p.target.x===goal.x&&p.target.y===goal.y&&p.range===range);
+      navigationFailures.push({sequence:client.sequence,from,target:goal,range,repeatedRetainedPosition:repeated});
+      navigationFailureCount++;if(navigationFailures.length>32)navigationFailures.shift();
     } catch { /* Evidence failure never replaces or recovers a navigation failure. */ }
   }
   function liveNpc(spec) {
@@ -740,6 +776,11 @@ export function createOrdinarySupplies(client, options = {}) {
       stagingSafetyScope: 'Fresh authoritative inSafeZone protects against normal monster targeting and impacts only. Existing poison and released effects may still damage; absent status fields do not prove their absence.',
       measurementCredit: false, sustainableDurationProven: false,
       protectionSummary: ordinaryProtectionSummary(options.ordinaryProtection),
+      preparationThreatModel:{id:'ordinary-ai0-new-target-8x6-v1',newTargetAcquisitionOnly:true,
+        qualifiedNormalAi0:{x:8,y:6},unknownOrUnqualifiedMinimumSquare:8,explicitLargerRequestsPreserved:true,
+        retainedOrForcedTargetsMayExceedAcquisitionRange:true,damageImmunity:false},
+      navigationCycleDiagnostics:{scope:'terminal-position-recurrence-only-no-retry-credit',total:navigationFailureCount,
+        truncated:navigationFailureCount>navigationFailures.length,views:navigationFailures.map(p=>({...p,from:{...p.from},target:{...p.target}}))},
       plannerThreatMemory: { lifetimeMs:PLANNER_TRAIL_MS, positionLimit:PLANNER_TRAIL_LIMIT, identityLimit:PLANNER_ID_LIMIT, positions:plannerTrail.size, identities:plannerIdentities.size, coarseFallbackCount:plannerFallbackCount, packetRenewals:plannerPacketRenewals, exemptionGloballyQuarantined:plannerNow() < plannerGlobalBlockedUntil },
       qualificationEventCount,qualificationRepeatedReads,qualificationEventsTruncated:qualificationEventCount>qualificationEvents.length,
       qualificationEvents:qualificationEvents.map(row=>({...row,input:row.input?{...row.input}:null,observed:row.observed?{...row.observed}:null})),

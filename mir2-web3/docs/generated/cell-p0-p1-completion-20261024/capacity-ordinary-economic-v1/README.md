@@ -8,7 +8,7 @@
 
 最高目标阶梯为 2 / 10 / 25 / 50 / 100 / 250 / 500。先完成原 P0 的 100 人基线，再随 Cell、多核、多机推进 250/500；保持每档 300 秒和目标档至少 7200 秒长稳、恢复与保存验收。500 目标须显式选择，不静默扩大旧默认或放开资源保护。
 
-暂按 500 在线、50 名持续战斗者设计，最终战斗比例正向用户确认；在线、同图、同屏及持续战斗人数分开报告。分散与热点负载各自证明；地图足迹和普通目标供给不足时失败，不重复坐标、刷怪或减少声明的战斗者来制造通过。
+当前按 500 在线、50 名持续战斗者的工程口径推进；在线、同图、同屏及持续战斗人数分开报告。500 人同时战斗需要另行声明负载，不能沿用50名战斗者的结果。分散与热点负载各自证明；地图足迹和普通目标供给不足时失败，不重复坐标、刷怪或减少声明的战斗者来制造通过。
 
 更正范围：主源旧逐人激活路径与 V13 外部诊断执行器不同。V13 已在全员入场前 paused，并在激活后执行 settle；不能将其全部 343.454 秒准备时间归为早入场角色持续巡逻。V13 最终 HP0/18、金币0、HP 药0 是实证，致命攻击来源和 HP 调度饥饿尚未证明。
 
@@ -182,3 +182,23 @@ ObjectRemove可能表示AOI离开或真实删除；候选关闭live续期，保�
 [v9实际Root绑定](bank-prepare-v8/root-final-binding-receipt-v1.json)与[v8未执行draft/v9引用历史](bank-prepare-v8/Rootfinalizer-reference-amendment-v1.json)分别保留；正常logout及[整体清理](bank-prepare-v8/cleanup-v1.json)、[Root独立OS](bank-prepare-v8/root-independent-cleanup-v1.json)通过，PID57648消失、端口释放。36份公共原件786,739字节见[说明](bank-prepare-v8/README.md)与[清单](bank-prepare-v8/copied-evidence-manifest.json)，完整实际W7冷bank/最新账本原字节续用，无私有全文或重复V6大资料。P0未完成、P2未启动，无新25/50/100/500或两小时验收通过。
 
 [W8离线exact2140反事实补充](bank-prepare-v8/public-exact-no-path-counterfactual-v1.json)及[独立清单](bank-prepare-v8/counterfactual-supplement-manifest-v1.json)保留17 mirror/2140 forbidden/26 occupancy/69 transfer的静态NoPath和原closed点自然过期后73步反事实；不覆盖原36清单，不代表W9 live修复或容量通过。
+
+## 第九轮百人角色库准备：原TTL等待实触发，仍未到staging
+
+d9ec9d20的[本次fresh选定门禁](bank-prepare-v9/node-v9/root-focused-receipt-v1.json)实际264+328+55=647项通过，42个named验证输入前后不变；静态runtime JS另32条，后端55源/V6/Rust32严格复用。
+
+[第九轮报告](bank-prepare-v9/1793057828244-3f973815.preparation-report.json)保持4prepared/100、未激活、零测量CCU；actual W8冷bank和最新账本原字节续用，前4人fresh库存复用重证。第5人fresh登录331,590、HP18/18/12药/15金币、0经济，实际89指令/72移动/17刷新、约102.499秒、0hazard。三次closed-history等待均到原expiry并取得fresh snapshot，实际约16.361/14.361/16.985秒，同目标289,617最终仍从330,605 NoPath；不是live路径修复或容量通过。
+
+正常logout ACK、整体cleanup与[Root独立OS](bank-prepare-v9/root-independent-cleanup-v1.json)通过；PID70292消失、端口释放，原false保持。36份公共原件1,198,801字节见[说明](bank-prepare-v9/README.md)与[清单](bank-prepare-v9/copied-evidence-manifest.json)。P0未完成、P2未启动，没有新25/50/100/500或两小时验收通过。
+
+## 当前V6普通双客户端完整生命周期通过
+
+[当前V6实证](v6-full-lifecycle-v1/README.md)已在ee06后端、d9ec9d执行源码上通过两个新普通注册账号的16/16完整生命周期，原始收包轨迹独立复核通过，正常退出及Root独立PID/端口检查通过。首轮无掉落的实际尝试保留，没有用旧V5结果代替；完整输入、原报告及审计集中在该记录。
+
+这是当前构建的功能门禁；W9的4prepared/NoPath原失败及P0未完成、P2未启动状态保持，没有新增25/50/100/500或两小时容量通过。
+
+## W9阻塞后的准备寻路修正候选
+
+服务端普通AI0新索敌使用横向8格、纵向6格；准备工具原八格方形在W9实际七点布局上封死返村路径。候选仅对有效原始身份或严格wire证书及未过期位置使用8×6；未知、冲突、失效及更大调用半径保留原方形。规划、移动前及实际发送共用边界，已在范围内时同时禁止加权距离和Chebyshev距离减小，占格仍拒绝。保留生命、药品、命令、时间及三次重规划预算；周期诊断不增加重试。
+
+这只是新索敌边界，不证明脱战或免疫；继承/强制目标可超出该范围，既有伤害和负面状态保护继续生效。W9静态布局及AOI往返测试不能代替下一轮真实百人准备，也不改变W9失败记录或容量验收状态。

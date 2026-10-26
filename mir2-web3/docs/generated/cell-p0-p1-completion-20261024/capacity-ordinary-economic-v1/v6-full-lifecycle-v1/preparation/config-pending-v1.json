@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-v6-full-lifecycle-v1",
+  "state": "PENDING_FUTURE_HEAD_AND_ROOT_QUALIFICATION",
+  "finalized": false,
+  "repository": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "executionSourceCommit": null,
+  "currentJsSourceCommit": null,
+  "newRootJsReceipt": null,
+  "release": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+    "bytes": 2257,
+    "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+  },
+  "immutableExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "reusedRootRustReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+    "bytes": 28585,
+    "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+  },
+  "backendSourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\backend-source-v6.json",
+    "bytes": 50669,
+    "sha256": "c0f4465432f2effbb7de5a0e430a4b6049b42464bcf1824f879783f4a4441970"
+  },
+  "buildReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-receipt-v6.json",
+    "bytes": 2241,
+    "sha256": "c82d4812b8c4fe8a1b2fa887d6694cf59b29b281c404eeb88ddd771ad02c5b59"
+  },
+  "profile": {
+    "endpoint": "ws://127.0.0.1:17610/ws",
+    "tcpBind": "127.0.0.1:17600",
+    "webBind": "127.0.0.1:17610",
+    "profile": "full-lifecycle",
+    "durationSeconds": 900,
+    "ordinaryRegistrationCount": 2,
+    "fixtureSeederUsed": false,
+    "precreatedCharacters": 0,
+    "itemGrants": 0,
+    "storeEdits": false,
+    "qaAdminEnabled": false,
+    "normalPlayerGates": true,
+    "nativeAttackV2DriverUsed": false,
+    "nativeAttackV2ServerReleaseExpected": true,
+    "contentProfile": "platinum_176",
+    "routing": "single",
+    "accountBackend": "file",
+    "tokioWorkers": 4,
+    "socketDiagnosticsEnabled": true,
+    "slowStageThresholdMs": 50,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "formalAcceptanceEligible": false,
+    "humanFrontendAccepted": false,
+    "requiredChecks": [
+      "authGuards",
+      "twoAccounts",
+      "mutualVisibility",
+      "movement",
+      "turn",
+      "chat",
+      "chatLatency",
+      "sharedCombat",
+      "mapRoundTrip",
+      "logout",
+      "reloginPersistence",
+      "sharedKill",
+      "sharedDrop",
+      "uniquePickup",
+      "playerDeath",
+      "townRevive"
+    ]
+  },
+  "dataPins": [
+    {
+      "path": "mir2-web3/apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    }
+  ],
+  "sourcePreview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\candidate-driver-preview-v1.json",
+    "bytes": 10188,
+    "sha256": "bef9ac21b05c6f85d522205b8935a371752470e6f01d03e59f245f7b178cb28f"
+  },
+  "sourcePreviewIsFinal": false,
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "actualFull16Passed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}
