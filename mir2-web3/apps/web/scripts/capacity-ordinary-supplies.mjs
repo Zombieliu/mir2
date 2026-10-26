@@ -1,6 +1,6 @@
 import { performance } from 'node:perf_hooks';
 import { collectSafeFundingVenison } from './quest-agent/protocol-funding.mjs';
-import { harvestDirection } from './quest-agent/protocol-combat.mjs';
+import { clearTravelBlockingMonster, harvestDirection } from './quest-agent/protocol-combat.mjs';
 import { hasAuthoritativePlayerDeath, observedPlayerHp } from './quest-agent/protocol-observation.mjs';
 
 export const ORDINARY_SUPPLY_COMMANDS = Object.freeze(['harvest', 'interact', 'selectNpcDialog', 'sellItem', 'buyItem']);
@@ -8,6 +8,15 @@ const ALLOWED = new Set(['clientVersion', 'keepAlive', 'walk', 'run', 'turn', 'a
 const JOHN = Object.freeze({ name: 'Merchant_John', x: 292, y: 603 });
 const RUBEN = Object.freeze({ name: 'Merchant_Ruben', x: 288, y: 608 });
 const HP = '(HP)DrugSmall';
+class FundingTargetLoss extends Error {
+  constructor(objectId, reason) {
+    super(`ordinary supplies: only live Deer may be hunted (${objectId}: ${reason})`);
+    this.code = 'ORDINARY_SUPPLY_FUNDING_TARGET_LOSS';
+  }
+}
+// Only numeric protocol IDs and exact canonical decimal IDs can match.
+const objectId = value => typeof value === 'number' && Number.isSafeInteger(value) && value > 0 && value <= 0xffff_ffff ? value :
+  typeof value === 'string' && /^[1-9]\d*$/.test(value) && Number.isSafeInteger(Number(value)) && Number(value) <= 0xffff_ffff ? Number(value) : null;
 const sleepDefault = ms => new Promise(resolve => setTimeout(resolve, ms));
 const distance = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 const integer = (value, label, min = 0, max = Number.MAX_SAFE_INTEGER) => {
@@ -68,7 +77,8 @@ export function createOrdinarySupplies(client, options = {}) {
   const maxNavigationCommands = integer(options.maxNavigationCommands ?? 2048, 'maxNavigationCommands', 1, 4096);
   const maxHunts = integer(options.maxHunts ?? 8, 'maxHunts', 1, 8);
   const maxEmptySearchRefreshes = integer(options.maxEmptySearchRefreshes ?? 20, 'maxEmptySearchRefreshes', 1, 20);
-  const rows = [], proofs = [], commandRows = [], queue = [];
+  const rows = [], proofs = [], commandRows = [], queue = [], fundingTargetRejections = [];
+  let fundingTargetRejectionCount = 0;
   const counts = {};
   let state = enabled ? 'idle' : 'disabled', active = false, used = false, draining = false;
   let started = null, deadline = null, identity = null, identityName = null, before = null, after = null, failure = null;
@@ -125,13 +135,41 @@ export function createOrdinarySupplies(client, options = {}) {
     if (ms >= deadline - now()) throw new Error('ordinary supplies: preparation wall budget exhausted');
     await sleep(ms); guard();
   }
+  function assertFundingTarget(command, phase) {
+    const id = integer(command.objectId, 'attack objectId', 1, 0xffff_ffff);
+    const matches = (client.snapshot.entities ?? []).filter(entity => objectId(entity.objectId) === id);
+    const target = matches.length === 1 ? matches[0] : null;
+    const reason = !matches.length ? 'missing' : matches.length > 1 ? 'ambiguous-id' :
+      String(target.kind).toLowerCase() !== 'monster' || target.name !== 'Deer' ? 'not-deer' :
+      target.dead !== false || !Number.isFinite(target.hp) || !(target.hp > 0) ? 'not-confirmed-live' : null;
+    if (!reason) return;
+    const value = guard();
+    fundingTargetRejectionCount++;
+    if (fundingTargetRejections.length < 32) fundingTargetRejections.push({ action: command.type, targetId: id, phase, reason,
+      targetKind: typeof target?.kind === 'string' ? target.kind.slice(0, 32) : null,
+      targetName: typeof target?.name === 'string' ? target.name.slice(0, 80) : null,
+      targetDead: typeof target?.dead === 'boolean' ? target.dead : null,
+      targetHp: Number.isFinite(target?.hp) ? target.hp : null,
+      targetIdType: target ? typeof target.objectId : null, matches: matches.length,
+      snapshotSequence: client.sequence, observedSnapshotSequence: lastObserved, observedSnapshotMonotonicMs: lastObservedMono,
+      ownerId: value.ownerId, ownerName: value.ownerName, map: value.map });
+    throw new FundingTargetLoss(id, reason);
+  }
+  async function clearFundingMonster(fundingClient, target, navigateNear, settings) {
+    try { return await clearTravelBlockingMonster(fundingClient, target, navigateNear, settings); }
+    catch (error) {
+      if (!(error instanceof FundingTargetLoss)) throw error;
+      guard(); // Owner, transport and global budgets remain terminal.
+      // Use the helper's bounded target-loss path: consume this hunt attempt,
+      // exclude the original target, and award no death or harvest credit.
+      const lost = new Error(`target ${integer(Number(target.objectId), 'funding target objectId', 1, 0xffff_ffff)} left the authoritative snapshot before attack`, { cause: error });
+      lost.code = error.code; throw lost;
+    }
+  }
   function enqueue(command) {
     guard();
     if (!command || !ALLOWED.has(command.type)) throw new Error('ordinary supplies: forbidden command');
-    if (['attack', 'attackV2'].includes(command.type)) {
-      const target = (client.snapshot.entities ?? []).find(entity => entity.objectId === command.objectId);
-      if (String(target?.kind).toLowerCase() !== 'monster' || target.name !== 'Deer' || target.dead || !(target.hp > 0)) throw new Error('ordinary supplies: only live Deer may be hunted');
-    }
+    if (['attack', 'attackV2'].includes(command.type)) assertFundingTarget(command, 'enqueue');
     if (command.type === 'harvest' && !(client.snapshot.entities ?? []).some(entity => entity.name === 'Deer' && entity.dead === true && distance(owner(client.snapshot), entity) === 1 && harvestDirection(owner(client.snapshot), entity) === command.direction)) throw new Error('ordinary supplies: only adjacent Deer corpse may be harvested');
     if (command.type === 'pickUp' && !(client.snapshot.groundDrops ?? []).some(drop => drop.objectId === command.objectId && drop.name === 'Venison' && distance(owner(client.snapshot), drop) === 0)) throw new Error('ordinary supplies: only same-tile visible Venison may be picked up');
     if (queue.length >= 8) throw new Error('ordinary supplies: send queue limit');
@@ -145,6 +183,7 @@ export function createOrdinarySupplies(client, options = {}) {
         guard();
         await client.pace(); guard();
         let command = queue.shift();
+        if (['attack', 'attackV2'].includes(command.type)) assertFundingTarget(command, 'send');
         if (command.type === 'attack' && client.attackResults === 'v2') {
           if (typeof client.nextAttackV2 !== 'function') throw new Error('ordinary supplies: v2 physical attack unavailable');
           command = client.nextAttackV2(command.objectId);
@@ -255,6 +294,8 @@ export function createOrdinarySupplies(client, options = {}) {
       commandCountsScope: 'module-owned commands; external keepAlive shares the original client budget',
       stagingSafetyScope: 'Fresh authoritative inSafeZone protects against normal monster targeting and impacts only. Existing poison and released effects may still damage; absent status fields do not prove their absence.',
       measurementCredit: false, sustainableDurationProven: false,
+      fundingTargetRejections: fundingTargetRejections.map(row => ({ ...row })), fundingTargetRejectionCount,
+      fundingTargetRejectionsTruncated: fundingTargetRejectionCount > fundingTargetRejections.length,
       ...(options.resolveStagingPoint ? { resolvedStagingPoint: resolvedStagingPoint ? { ...resolvedStagingPoint } : null } : {}) };
   }
   function freshStagingReadiness({ afterSequence = -1, maxAgeMs = evidenceMs } = {}) {
@@ -302,7 +343,7 @@ export function createOrdinarySupplies(client, options = {}) {
           const wanted = venisonStock(client.snapshot) + Math.max(1, Math.ceil((requiredGold - guard().gold) / 200));
           funding = await collectSafeFundingVenison(facade, { route: options.route, requiredCount: wanted, maxHunts, maxEmptySearchRefreshes,
             travel: async map => { if (map !== '0') throw new Error('ordinary supplies: map travel forbidden'); guard(); },
-            navigate, sleep: pause, refreshWhileWaiting: refresh, sustain: async () => { await drain(); guard(); } });
+            navigate, clearMonster: clearFundingMonster, sleep: pause, refreshWhileWaiting: refresh, sustain: async () => { await drain(); guard(); } });
           await refresh(); await sellUntil(requiredGold);
         }
         goods = await shop(RUBEN); state = 'buying';

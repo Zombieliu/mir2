@@ -7,6 +7,7 @@ const item = (id, quantity, uniqueId, slot = 0) => ({ itemIndex: id, name: id ==
 function fixture(config = {}) {
   let clock = 1, hook = () => {}, seq = 0, currentDeer = null;
   const harvestPasses = new Map();
+  let attackPaceArmed = false, attackPaceChanged = false;
   const actor = { objectId: config.ownerId ?? 1, kind: 'selfPlayer', name: 'ordinary-owner', class: 'Warrior', x: 290, y: 607, hp: 100, maxHp: 100, dead: false };
   const client = {
     label: config.label ?? 'ordinary-owner', sequence: 0, events: [], sent: [], slots: [], attackResults: config.v2 ? 'v2' : 'legacy', attackV2Supported: config.v2 === true, closed: false,
@@ -14,8 +15,33 @@ function fixture(config = {}) {
       inventoryItems: config.items ?? [], beltItems: [], groundDrops: [], entities: [actor,
         { objectId: 6, kind: 'npc', name: 'Merchant_John', x: 292, y: 603 },
         { objectId: 5, kind: 'npc', name: 'Merchant_Ruben', x: 288, y: 608 },
+        ...(config.nonDeerBlocker ? [{ objectId: 99, kind: 'monster', name: 'Scarecrow', x: 289, y: 605, hp: 25, dead: false }] : []),
         ...Array.from({ length: config.deer ?? 0 }, (_, i) => ({ objectId: 20 + i, kind: 'monster', name: 'Deer', x: 290 + i, y: 604, hp: 1, dead: false }))] },
     async pace() {
+      if (attackPaceArmed && !attackPaceChanged) {
+        attackPaceChanged = true;
+        const target = this.snapshot.entities.find(entity => entity.objectId === 20);
+        const loss = config.targetLossAtPace;
+        if (loss === 'missing') this.snapshot.entities = this.snapshot.entities.filter(entity => entity !== target);
+        if (loss === 'dead') Object.assign(target, { dead: true, hp: 0 });
+        if (loss === 'dead-string') target.dead = 'true';
+        if (loss === 'dead-one') target.dead = 1;
+        if (loss === 'dead-zero') target.dead = 0;
+        if (loss === 'dead-null') target.dead = null;
+        if (loss === 'dead-missing') delete target.dead;
+        if (loss === 'dead-false-string') target.dead = 'false';
+        if (loss === 'zero-hp') target.hp = 0;
+        if (loss === 'unknown-hp') target.hp = null;
+        if (loss === 'renamed') target.name = 'Scarecrow';
+        if (loss === 'canonical-id') target.objectId = '20';
+        if (loss === 'malformed-id') target.objectId = '020';
+        if (loss === 'ambiguous-id') this.snapshot.entities.push({ ...target, objectId: '20' });
+        if (loss === 'owner-name') actor.name = 'foreign-owner';
+        if (loss === 'owner-map') this.snapshot.mapFileName = '2';
+        if (loss === 'owner-health') { actor.hp = 10; this.snapshot.playerHp = 10; }
+        if (loss === 'transport') this.closed = true;
+        snapshot();
+      }
       this.slots = this.slots.filter(t => clock - t < 1000);
       if (this.slots.length >= 3) clock = this.slots[0] + 1000;
     },
@@ -68,7 +94,7 @@ function fixture(config = {}) {
       }
       if (['attack', 'attackV2'].includes(command.type)) {
         if (config.v2) assert.equal(command.type, 'attackV2');
-        currentDeer = this.snapshot.entities.find(entity => entity.objectId === command.objectId);
+        currentDeer = this.snapshot.entities.find(entity => Number(entity.objectId) === command.objectId);
         Object.assign(currentDeer, { dead: true, hp: 0 });
         packet('ObjectDied', { objectId: command.objectId }); snapshot();
       }
@@ -82,12 +108,12 @@ function fixture(config = {}) {
           if (passes < 6) { snapshot(); return; }
           assert.equal(passes, 6, 'ordinary Deer only transfers after five skin passes');
           if (config.directHarvest) {
-            this.snapshot.inventoryItems.push(item(999, 1, 500 + currentDeer.objectId, this.snapshot.inventoryItems.length));
-            packet('GainedItem', { item: { uniqueId: 500 + currentDeer.objectId, itemIndex: 853, count: 1 } });
+            this.snapshot.inventoryItems.push(item(999, 1, 500 + Number(currentDeer.objectId), this.snapshot.inventoryItems.length));
+            packet('GainedItem', { item: { uniqueId: 500 + Number(currentDeer.objectId), itemIndex: 853, count: 1 } });
             packet('ObjectHarvested', { objectId: currentDeer.objectId }); snapshot(); return;
           }
         }
-        this.snapshot.groundDrops.push({ objectId: 100 + currentDeer.objectId, name: 'Venison', x: currentDeer.x, y: currentDeer.y, loot: { kind: 'inventoryItem', name: 'Venison' } });
+        this.snapshot.groundDrops.push({ objectId: 100 + Number(currentDeer.objectId), name: 'Venison', x: currentDeer.x, y: currentDeer.y, loot: { kind: 'inventoryItem', name: 'Venison' } });
         packet('ObjectHarvested', { objectId: currentDeer.objectId }); snapshot();
       }
       if (command.type === 'pickUp') {
@@ -127,11 +153,13 @@ function fixture(config = {}) {
     sleep: async ms => { clock += ms; }, maxHunts: config.maxHunts ?? 8, timeoutMs: config.timeoutMs ?? 600_000,
     maxCommands: config.maxCommands ?? 2048,
     navigate: async (facade, target, range) => {
+      if (config.nonDeerBlocker && target.objectId === 20) throw new Error('No walk path to this Deer');
       if (config.navigationFailure) throw new Error('fixture blocked ordinary route');
       if (config.failPhase) preparation = false;
       const destination = { x: target.x - (range > 0 ? 1 : 0), y: target.y };
       facade.send({ type: 'walk', direction: 'Right', destination });
       await facade.wait(() => actor.x === destination.x && actor.y === destination.y, 'ordinary navigation');
+      if (config.targetLossAtPace && target.objectId === 20) attackPaceArmed = true;
     } });
   hook = supply.observe;
   return { client, supply, snapshot, advance: ms => { clock += ms; }, endPreparation: () => { preparation = false; } };
@@ -450,4 +478,72 @@ test('late point choice cannot reset the global wall or bypass owner/map and fin
   changed = fixture({ items: [item(658, 12, 900)], resolveStagingPoint: ({ snapshot, defaultPoint }) => { snapshot.mapFileName = '2'; return defaultPoint; } });
   await assert.rejects(changed.supply.prepare(), /owner\/map\/health changed/);
   assert.equal(changed.supply.status().actualStagingReached, false);
+});
+
+// The public funding helper may reselect only after an exact, bounded target loss.
+test('a queued Deer lost during ordinary pacing is not attacked and consumes the original hunt budget', async t => {
+  for (const loss of ['missing', 'dead', 'zero-hp', 'unknown-hp', 'renamed']) await t.test(loss, async () => {
+    const f = fixture({ deer: 4, v2: true, targetLossAtPace: loss });
+    const result = await f.supply.prepare();
+    assert.equal(result.status, 'ready');
+    assert.equal(result.funding.collected, 3);
+    assert.equal(f.client.sent.some(command => command.type === 'attackV2' && command.objectId === 20), false);
+    assert.ok(result.fundingTargetRejections.length >= 1 && result.fundingTargetRejections.length <= 8);
+    assert.equal(result.fundingTargetRejections[0].targetId, 20);
+    assert.equal(result.fundingTargetRejections[0].phase, 'send');
+    assert.equal(result.fundingTargetRejections[0].reason, loss === 'missing' ? 'missing' : loss === 'renamed' ? 'not-deer' : 'not-confirmed-live');
+    assert.equal(result.fundingTargetRejections[0].ownerName, 'ordinary-owner');
+    assert.equal(result.fundingTargetRejections[0].map, '0');
+    assert.equal(result.measurementCredit, false);
+  });
+  const bounded = fixture({ deer: 4, v2: true, targetLossAtPace: 'dead', maxHunts: 3 });
+  await assert.rejects(bounded.supply.prepare(), /after \d+ hunts and 3 attempts/);
+  assert.equal(bounded.client.sent.filter(command => command.type === 'attackV2').length, 2);
+  assert.equal(bounded.client.sent.some(command => command.type === 'buyItem'), false);
+});
+
+test('a non-Deer approach blocker remains unattackable without aborting a bounded alternative Deer hunt', async () => {
+  const f = fixture({ deer: 4, v2: true, nonDeerBlocker: true });
+  const result = await f.supply.prepare();
+  assert.equal(result.status, 'ready'); assert.equal(result.funding.collected, 3);
+  assert.equal(f.client.sent.some(command => command.objectId === 99 && ['attack', 'attackV2'].includes(command.type)), false);
+  assert.equal(result.fundingTargetRejections[0].targetId, 99);
+  assert.equal(result.fundingTargetRejections[0].targetName, 'Scarecrow');
+  assert.equal(result.fundingTargetRejections[0].phase, 'enqueue');
+});
+
+test('target loss cannot disguise owner safety changes or transport failures during pacing', async t => {
+  for (const loss of ['owner-name', 'owner-map', 'owner-health', 'transport']) await t.test(loss, async () => {
+    const f = fixture({ deer: 4, v2: true, targetLossAtPace: loss });
+    await assert.rejects(f.supply.prepare(), /owner\/map\/health changed|transport closed|received owner\/map changed/);
+    assert.equal(f.client.sent.filter(command => command.type === 'attackV2').length, 0);
+    assert.equal(f.client.sent.some(command => command.type === 'buyItem'), false);
+  });
+});
+
+
+test('exact canonical IDs match without permitting ambiguous or malformed target identities', async t => {
+  const canonical = fixture({ deer: 3, v2: true, targetLossAtPace: 'canonical-id' });
+  assert.equal((await canonical.supply.prepare()).status, 'ready');
+  assert.ok(canonical.client.sent.some(command => command.type === 'attackV2' && command.objectId === 20));
+  assert.equal(canonical.supply.status().fundingTargetRejectionCount, 0);
+  for (const loss of ['malformed-id', 'ambiguous-id']) await t.test(loss, async () => {
+    const f = fixture({ deer: 4, v2: true, targetLossAtPace: loss });
+    assert.equal((await f.supply.prepare()).status, 'ready');
+    assert.equal(f.client.sent.some(command => command.type === 'attackV2' && command.objectId === 20), false);
+    assert.equal(f.supply.status().fundingTargetRejections[0].reason, loss === 'malformed-id' ? 'missing' : 'ambiguous-id');
+  });
+});
+
+
+test('only boolean dead false confirms a live target after pacing; malformed or absent state cannot be hunted', async t => {
+  for (const loss of ['dead-string', 'dead-one', 'dead-zero', 'dead-null', 'dead-missing', 'dead-false-string']) await t.test(loss, async () => {
+    const f = fixture({ deer: 4, v2: true, targetLossAtPace: loss });
+    assert.equal((await f.supply.prepare()).status, 'ready');
+    assert.equal(f.client.sent.some(command => command.type === 'attackV2' && command.objectId === 20), false);
+    const rejection = f.supply.status().fundingTargetRejections.find(row => row.targetId === 20 && row.phase === 'send');
+    assert.equal(rejection.reason, 'not-confirmed-live');
+    assert.equal(rejection.targetDead, null);
+    assert.equal(f.client.sent.some(command => command.type === 'attack'), false);
+  });
 });

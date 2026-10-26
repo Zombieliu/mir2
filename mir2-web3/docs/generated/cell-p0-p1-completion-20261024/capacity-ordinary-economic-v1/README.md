@@ -87,3 +87,5 @@
 第4名角色在90.561秒、77条命令后因`ordinary supplies: only live Deer may be hunted`停止；[原始报告](bank-prepare-v1/1793046276153-143c0f31.preparation-report.json)保持`ok=false`、`preparedCount=3`，完整100账号pool保留。仅此错误还不能判定为服务器容量、鹿被其他人击杀或过期快照；目标选择路径按原样本核查。没有25/50/100冷保存完成、普通100人持久化重登验证或任何人数档测量通过。
 
 [正常清理](bank-prepare-v1/cleanup-v1.json)和[Root独立OS检查](bank-prepare-v1/root-independent-cleanup-v1.json)确认PID72788消失、17500/17510端口释放、监控停止、六计数归零及冻结来源未变。27份公开证据原字节复制共2,906,567字节，见[清单](bank-prepare-v1/copied-evidence-manifest.json)；私有Store、完整pool、原登录账本、秘密内容和完整录像留在隔离环境，不提交。后续复用正常冷关闭的部分角色库，继续普通补给与保存，不清空原登录预算或重复赠送物品。
+
+随后补给适配器把本模块产生的精确目标失效映射到原funding有限重选路径；非Deer阻路怪仍禁止攻击，不计死亡或收获，不重置8次狩猎尝试、600秒及命令预算。攻击入队和实际限速等待后的发送点均检查相同目标ID、monster/Deer、明确`dead=false`和有限正HP；缺失、畸形或歧义身份拒发。owner/name/map/health/transport变化仍终止。最多32条拒发标量记录目标ID/资格、实际收件序号及owner，不保留完整快照。模块90项聚焦回归通过；统一Root新门禁和部分角色库续跑仍待执行，不能将候选修复追认为首次百人准备成功。
