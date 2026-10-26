@@ -135,4 +135,20 @@
 
 原真实navigator已离线复现：两只旧Scarecrow（206641@287,616及206632@286,623）离开当前AOI后，shared planner的20秒位置记忆重新加整块halo，覆盖安全区内289,617目标。候选保留可信普通AI0的有界近期位置轨迹，逐格重建区外8格halo与占格；新权威raw才续可信资格，未知、owned、非AI0、类别变化、歧义ID及过期均保守回落shared记忆，不清除未知轨迹。
 
-1024身份/2048位置上限有溢出隔离；无法记录的身份触发全局20秒豁免隔离，提前腾槽不能隐藏旧未知位置。forbidden捕获的本轮视图限制后续allowed集合，时钟跨隔离边界不能扩大豁免。真实canonical loader、实际map0、原navigator回村及TTL/类型/容量边界等159项模块回归通过，独立只读审查通过；原600秒/2048命令、70%生命、8格及逐步发送守卫不变。新Root选定整合检查与第五次普通续跑仍待执行，离线回归不构成CCU或两小时供给验收。
+1024身份/2048位置上限有溢出隔离；无法记录的身份触发全局20秒豁免隔离，提前腾槽不能隐藏旧未知位置。forbidden捕获的本轮视图限制后续allowed集合，时钟跨隔离边界不能扩大豁免。真实canonical loader、实际map0、原navigator回村及TTL/类型/容量边界等159项模块回归通过，独立只读审查通过；原600秒/2048命令、70%生命、8格及逐步发送守卫不变。随后95f版本完成下述Root选定501项门禁与第五次普通续跑；原离线回归不构成CCU或两小时供给验收。
+
+## 第五次百人角色库准备：普通库存保留，逐格守卫阻止危险Run
+
+95f13322f的[本次fresh门禁](bank-prepare-v5/node-v5/root-focused-receipt-v1.json)实际200项准备/保护导航加301项普通相邻，共501项通过；没有把旧828项记成本次fresh。后端55源仍逐raw/GitLF/object核对复用ee06的V6及原Rust32加format，没有新Release或Rust执行。
+
+[第五轮报告](bank-prepare-v5/1793053311312-f5756eff.preparation-report.json)保持prepared4/100、未激活、无测量CCU。前4人fresh库存复用重新证明；第5人普通重登HP18/18、12药、15金币，零经济操作，23次移动约15.145秒从304,613绕至331,590。下一步Run两格331,589/588因RakingCat@325,583的区外8格屏障被拒发；最近完整raw序号633与最新packet736不同，不单凭此判根因或放宽守卫。after/readiness仍空，未prepared。
+
+公共尾部另有普通logout成功，整体cleanup与[Root独立OS检查](bank-prepare-v5/root-independent-cleanup-v1.json)正常，PID69552消失、端口释放；原失败摘要normalLogout=false和本轮false不改。完整实际V4冷bank及最新V4账本原字节续用，无seed/改Store/账本重置。33份公共原件628,220字节见[说明](bank-prepare-v5/README.md)与[复制清单](bank-prepare-v5/copied-evidence-manifest.json)，不重复V6资料、不含私有全文。P0未完成、P2未启动，无新25/50/100/500或两小时验收通过。
+
+[增量AOI资格补充证据](bank-prepare-v5/public-incremental-aoi-qualification-v1.json)已按[独立补充清单](bank-prepare-v5/supplement-manifest-v1.json)追加，原33份清单及原件不变；本轮15.145秒短于20秒记忆TTL，不能认定TTL已过期。
+
+## 增量实体资格与有界重规划候选
+
+普通接收器先更新snapshot、记录真实received收据，再调用补给观察器。候选按逐实体的ObjectMonster或已认证个体Walk/Run/Turn维护planner专用资格；spec与证书由WeakSet/WeakMap约束，ObjectMonster须正ID、canonical已知名、明确AI0/dead=false/master0及完整坐标。该证书只支持普通AI0的静态安全区判断，不写入snapshot的HP/disposition，不作raw生命或库存证明；catalog的NewMonsterInfo ID0、未知/owned/类型和名称冲突均不取得资格。
+
+ObjectRemove可能表示AOI离开或真实删除；候选关闭live续期，保留已认证历史点原到期时间，处理真实raw-null与wire省略ownerName/class的无值等价。ObjectRevived及身份冲突撤销并隔离；没有把本地收据约束称为服务端incarnation。自身hostile-clearance守卫在危险动作未发、队列为空且无不确定副作用时，每角色最多三次原目标重规划；funding原重选保持，其余错误终止，不新增逐步刷新、不重置原预算。216项模块/保护聚焦检查与独立只读审查通过，新Root选定整合检查及第六次普通百人准备待执行，仍无新增CCU结论。

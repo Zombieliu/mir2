@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createNavigator } from './quest-agent/protocol-play.mjs';
+import { createNavigator, NavigationStepGuarded } from './quest-agent/protocol-play.mjs';
+import { applyProtocolObservation } from './quest-agent/protocol-observation.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
 import { createOrdinarySupplies, ORDINARY_SUPPLY_COMMANDS } from './capacity-ordinary-supplies.mjs';
 import { loadOrdinaryProtection } from './capacity-ordinary-protection.mjs';
@@ -21,7 +22,7 @@ function fixture(config = {}) {
         ...(config.nonDeerBlocker ? [{ objectId: 99, kind: 'monster', name: 'Scarecrow', x: 289, y: 605, hp: 25, dead: false }] : []),
         ...Array.from({ length: config.deer ?? 0 }, (_, i) => ({ objectId: 20 + i, kind: 'monster', name: 'Deer', x: config.deerPositions?.[i]?.x ?? (config.distantAlternatives && i>0 ? 310+i : 290+i), y: config.deerPositions?.[i]?.y ?? 604, hp: 1, dead: false, disposition: 'neutral' })), ...(config.hostiles ?? [])] },
     async pace() {
-      config.onPace?.({ client:this, actor, snapshot });
+      config.onPace?.({ client:this, actor, snapshot, packet });
       if (attackPaceArmed && !attackPaceChanged) {
         attackPaceChanged = true;
         const target = this.snapshot.entities.find(entity => entity.objectId === 20);
@@ -130,8 +131,9 @@ function fixture(config = {}) {
         const deltas = { Up:[0,-1], UpRight:[1,-1], Right:[1,0], DownRight:[1,1], Down:[0,1], DownLeft:[-1,1], Left:[-1,0], UpLeft:[-1,-1] };
         const delta = deltas[command.direction], stride = command.type === 'run' ? 2 : 1;
         Object.assign(actor, command.destination ?? { x:actor.x+delta[0]*stride, y:actor.y+delta[1]*stride });
-        config.onMove?.({ client:this, actor });
-        packet('UserLocation', { objectId: actor.objectId, x: actor.x, y: actor.y }); snapshot();
+        config.onMove?.({ client:this, actor, packet });
+        packet('UserLocation', { objectId: actor.objectId, x: actor.x, y: actor.y });
+        if (!config.noMovementSnapshots) snapshot();
       }
     },
     async wait(predicate, label, timeout) {
@@ -148,6 +150,7 @@ function fixture(config = {}) {
   };
   function packet(name, payload, sequence) {
     const receipt = { type: 'packet', packet: name, payload, direction: 'received', sequence: sequence ?? ++client.sequence, monotonicMs: ++clock };
+    if (config.applyPackets) client.snapshot = applyProtocolObservation(client.snapshot,receipt);
     client.events.push(receipt); hook(receipt, receipt); return receipt;
   }
   function snapshot(sequence) {
@@ -162,7 +165,7 @@ function fixture(config = {}) {
     maxCommands: config.maxCommands ?? 2048,
     navigate: async (facade, target, range, stop, navOptions) => {
       config.inspectNavigation?.({target,range,navOptions});
-      if (config.navigate) return config.navigate({ facade, client, actor, snapshot, target, range, stop, navOptions });
+      if (config.navigate) return config.navigate({ facade, client, actor, snapshot, packet, target, range, stop, navOptions });
       if (config.nonDeerBlocker && target.objectId === 20) throw new Error('No walk path to this Deer');
       if (config.navigationFailure) throw new Error('fixture blocked ordinary route');
       if (config.failPhase) preparation = false;
@@ -181,7 +184,7 @@ function fixture(config = {}) {
       if (config.targetLossAtPace && target.objectId === 20) attackPaceArmed = true;
     } });
   hook = supply.observe;
-  return { client, supply, snapshot, now:()=>clock, advance: ms => { clock += ms; }, endPreparation: () => { preparation = false; } };
+  return { client, supply, snapshot, packet, now:()=>clock, advance: ms => { clock += ms; }, endPreparation: () => { preparation = false; } };
 }
 
 test('default is held-only noop and economic profile has explicit bounded inputs', async () => {
@@ -1007,4 +1010,270 @@ test('ID-cap overflow remains globally quarantined when slots free before an unk
       client.snapshot.entities=client.snapshot.entities.filter(e=>e.objectId!==9999);snapshot();checked=true;
     }});
   assert.equal((await f.supply.prepare()).status,'ready');assert.equal(checked,true);
+});
+
+test('own hostile guards before movement and queued dispatch safely replan without replaying the unsafe command',async t=>{
+  for(const phase of ['before-movement','send'])await t.test(phase,async()=>{
+    let f,calls=0,armed=false,firstOptions,firstTarget,firstStop;
+    const threat=hostile(206039,325,583,{name:'RakingCat',hp:undefined,disposition:undefined});
+    const go=actualNavigatorFor(()=>f);
+    f=fixture({items:[item(658,12,500)],ownerPosition:{x:331,y:590},stagingPoint:{x:289,y:617},
+      noMovementSnapshots:true,applyPackets:true,
+      onPace:({client})=>{if(armed){armed=false;client.snapshot.entities.push(threat);}},
+      navigate:async context=>{
+        calls++;
+        if(calls===1){
+          firstOptions=context.navOptions;firstTarget=context.target;firstStop=context.stop;
+          if(phase==='send'){armed=true;context.facade.send({type:'run',direction:'Up'});await context.facade.wait(()=>false,'guarded queued run');}
+          else {
+            context.client.snapshot.entities.push(threat);
+            const hazard=context.navOptions.beforeMovement({movementType:'run',from:{x:331,y:590},physicalCells:[{x:331,y:589},{x:331,y:588}]});
+            assert.ok(hazard);throw new NavigationStepGuarded(hazard);
+          }
+        }
+        assert.equal(context.navOptions,firstOptions);assert.equal(context.target,firstTarget);assert.equal(context.stop,firstStop);
+        return go(context);
+      }});
+    f.client.snapshot.inSafeZone=true;
+    const result=await f.supply.prepare();
+    assert.equal(result.status,'ready');assert.equal(calls,2);assert.equal(result.pathReplanCount,1);
+    assert.equal(result.pathReplans[0].phase,phase);assert.equal(result.pathReplans[0].movementCommands,0);
+    assert.equal(result.pathHazardCount,1);assert.equal(f.client.sent.filter(c=>c.type==='clientVersion').length,2);
+    let from={x:331,y:590};const delta={Up:[0,-1],UpRight:[1,-1],Right:[1,0],DownRight:[1,1],Down:[0,1],DownLeft:[-1,1],Left:[-1,0],UpLeft:[-1,-1]};
+    for(const c of f.client.sent.filter(c=>['run','walk'].includes(c.type))){
+      const [dx,dy]=delta[c.direction],prior=distanceForTest(from,threat);
+      for(let i=1;i<=(c.type==='run'?2:1);i++){
+        const next={x:from.x+dx*i,y:from.y+dy*i},d=distanceForTest(next,threat);
+        assert.ok(d>0&&(prior<=8?d>=prior:d>8),'no guarded or newly unsafe physical cell was dispatched');
+      }
+      const n=c.type==='run'?2:1;from={x:from.x+dx*n,y:from.y+dy*n};
+    }
+    assert.deepEqual(from,{x:289,y:617});assert.ok(result.commands<2048&&result.elapsedMs<600000);
+  });
+});
+const distanceForTest=(a,b)=>Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));
+
+test('replans are at most three per actor and do not reset the wall or command budget',async t=>{
+  for(const limit of ['replans','wall','commands'])await t.test(limit,async()=>{
+    let f,calls=0;
+    f=fixture({items:[item(658,12,500)],stagingPoint:{x:292,y:607},hostiles:[hostile(71,300,607)],
+      timeoutMs:limit==='wall'?500:600000,maxCommands:limit==='commands'?1:2048,
+      navigate:async({facade,actor,navOptions})=>{
+        calls++;
+        if(limit==='wall')f.advance(300);
+        if(limit==='commands'&&calls===2){facade.send({type:'keepAlive'});await facade.wait(()=>true,'retry budget');}
+        const hazard=navOptions.beforeMovement({movementType:'run',from:{x:actor.x,y:actor.y},physicalCells:[{x:291,y:607},{x:292,y:607}]});
+        throw new NavigationStepGuarded(hazard);
+      }});
+    await assert.rejects(f.supply.prepare(),limit==='replans'?/Navigation step guarded/:limit==='wall'?/wall budget/:/command budget/);
+    assert.equal(f.supply.status().pathReplanCount,limit==='replans'?3:1);
+    assert.equal(calls,limit==='replans'?4:2);assert.equal(f.client.sent.length,1);
+    assert.equal(f.supply.status().actualStagingReached,false);
+  });
+});
+
+test('a queued side effect or changed HP map transport is never cleared to make a send guard retryable',async t=>{
+  for(const fault of ['queued','hp','map','transport'])await t.test(fault,async()=>{
+    let armed=false,calls=0;
+    const f=fixture({items:[item(658,12,500)],stagingPoint:{x:292,y:607},
+      onPace:({client,actor})=>{if(armed){armed=false;client.snapshot.entities.push(hostile(71,300,607));
+        if(fault==='hp'){actor.hp=10;client.snapshot.playerHp=10;}
+        if(fault==='map')client.snapshot.mapFileName='2';if(fault==='transport')client.closed=true;}},
+      navigate:async({facade})=>{calls++;armed=true;facade.send({type:'run',direction:'Right'});
+        if(fault==='queued')facade.send({type:'turn',direction:'Right'});
+        await facade.wait(()=>false,'unsafe queued move');}});
+    await assert.rejects(f.supply.prepare());assert.equal(calls,1);assert.equal(f.supply.status().pathReplanCount,0);
+    assert.equal(f.client.sent.some(c=>['run','turn'].includes(c.type)),false);
+  });
+});
+
+test('raw-certified individual position receipts renew only their own identity beyond20s without new raw snapshots',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let f;
+  f=fixture({items:[item(658,12,500)],stagingPoint:{x:290,y:607},applyPackets:true,ordinaryProtection:protection,
+    hostiles:[hostile(71,293,600,{name:'Scarecrow'}),hostile(72,1000,600,{name:'Scarecrow'})],
+    navigate:async({client,navOptions,packet})=>{
+      const rawCount=client.events.filter(e=>e.type==='worldSnapshot').length;
+      for(let i=0;i<25;i++){
+        f.advance(1000);packet(['ObjectWalk','ObjectRun','ObjectTurn'][i%3],{objectId:71,location:{x:293+i%2,y:600},direction:0});
+        void navOptions.forbiddenPoints;assert.ok(navOptions.allowedHostileObjectIds.includes(71));
+      }
+      assert.equal(navOptions.allowedHostileObjectIds.includes(72),false);
+      assert.equal(client.events.filter(e=>e.type==='worldSnapshot').length,rawCount);
+      assert.ok(navOptions.forbiddenPoints.some(p=>p.x===293&&p.y===600));
+      assert.ok(navOptions.forbiddenPoints.some(p=>p.x===294&&p.y===600));
+      assert.equal(f.supply.status().plannerThreatMemory.packetRenewals,25);
+    }});
+  f.client.snapshot.inSafeZone=true;assert.equal((await f.supply.prepare()).status,'ready');
+});
+
+const wireMonster=(id=71,extra={})=>({objectId:id,name:'Scarecrow',location:{x:287,y:616},ai:0,dead:false,masterObjectId:0,...extra});
+test('actual ObjectMonster shape withoutHP or disposition supports bounded individual receipts and cached AOI history',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');let f;
+  f=fixture({items:[item(658,12,500)],applyPackets:true,ordinaryProtection:protection,
+    navigate:async({client,navOptions,packet})=>{
+      packet('ObjectMonster',wireMonster(71,{location:{x:293,y:600}}));
+      const e=client.snapshot.entities.find(e=>e.objectId===71);
+      assert.equal(Object.hasOwn(e,'hp'),false);assert.equal(Object.hasOwn(e,'disposition'),false);
+      const rawCount=client.events.filter(e=>e.type==='worldSnapshot').length;
+      for(let i=0;i<25;i++){
+        f.advance(1000);packet('ObjectTurn',{objectId:71,location:{x:293+i%2,y:600},direction:0});
+        void navOptions.forbiddenPoints;assert.ok(navOptions.allowedHostileObjectIds.includes(71));
+      }
+      const count=f.supply.status().plannerThreatMemory.packetRenewals;
+      packet('ObjectRemove',{objectId:71});assert.equal(client.snapshot.entities.some(e=>e.objectId===71),false);
+      for(let i=0;i<19;i++){f.advance(1000);packet('UserLocation',{location:{x:290,y:607}});packet('UseItem',{success:true});void navOptions.forbiddenPoints;}
+      assert.ok(navOptions.allowedHostileObjectIds.includes(71));
+      assert.ok(navOptions.forbiddenPoints.some(p=>p.x===293&&p.y===600));
+      f.advance(1001);assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);
+      assert.equal(f.supply.status().plannerThreatMemory.packetRenewals,count);
+      assert.equal(client.events.filter(e=>e.type==='worldSnapshot').length,rawCount);
+    }});
+  f.client.snapshot.inSafeZone=true;assert.equal((await f.supply.prepare()).status,'ready');
+});
+
+test('real canonical map navigation handles real ObjectRemove AOI departure without recreating the protected target coarse barrier',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0'),map=await loadProtocolCollisionMap('0');
+  let f,navigator,removed=false;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:304,y:613},stagingPoint:{x:289,y:617},applyPackets:true,noMovementSnapshots:true,
+    hostiles:[hostile(206641,287,616,{name:'Scarecrow'}),hostile(206632,286,623,{name:'Scarecrow'})],ordinaryProtection:protection,
+    navigate:async({facade,target,range,stop,navOptions})=>{navigator??=createNavigator(facade,{loadCollisionMap:async()=>map,now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000});return navigator(target,range,stop,navOptions);},
+    onMove:({client,actor,packet})=>{if(!removed){removed=true;packet('ObjectRemove',{objectId:206641});packet('ObjectRemove',{objectId:206632});}
+      client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
+  const result=await f.supply.prepare();assert.equal(result.status,'ready');assert.equal(removed,true);
+  assert.deepEqual({x:result.after.x,y:result.after.y},{x:289,y:617});assert.equal(result.pathHazardCount,0);
+  assert.equal(f.client.sent.filter(c=>c.type==='clientVersion').length,2);
+});
+
+test('real incremental lifecycle and identity conflicts revoke normal history and quarantine sameID reuse',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  for(const [name,payload] of [
+    ['ObjectName',{objectId:71,name:'UnknownMonster'}],['ObjectPlayer',{objectId:71,name:'player',location:{x:287,y:616}}],
+    ['ObjectRevived',{objectId:71}],['ObjectDied',{objectId:71}],
+    ['ObjectMonster',wireMonster(71,{masterObjectId:987})],['ObjectMonster',wireMonster(71,{ai:1})],
+    ['ObjectMonster',wireMonster(71,{name:'UnknownMonster'})],['ObjectMonster',wireMonster(71,{class:'Warrior'})],
+    ['ObjectMonster',wireMonster(71,{disposition:'friendly'})],
+  ])await t.test(name+JSON.stringify(payload),async()=>{
+    let checked=false;
+    const f=fixture({items:[item(658,12,500)],applyPackets:true,ordinaryProtection:protection,
+      navigate:async({client,navOptions,packet})=>{
+        packet('ObjectMonster',wireMonster());void navOptions.forbiddenPoints;assert.ok(navOptions.allowedHostileObjectIds.includes(71));
+        packet('ObjectRemove',{objectId:71});packet(name,payload);
+        assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);
+        assert.equal(f.supply.status().plannerThreatMemory.positions,0);
+        packet('ObjectRemove',{objectId:71});packet('ObjectMonster',wireMonster());
+        assert.equal(navOptions.allowedHostileObjectIds.includes(71),false,'unknown old shared trails cannot be hidden by a new normal packet');
+        client.snapshot.entities=client.snapshot.entities.filter(e=>e.objectId!==71);checked=true;
+      }});
+    f.client.snapshot.inSafeZone=true;assert.equal((await f.supply.prepare()).status,'ready');assert.equal(checked,true);
+  });
+});
+
+test('self ACK duplicate receipts and getters do not renew a wire identity, and position packets cannot reopen an expired or removed live segment',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  for(const removed of [false,true])await t.test(String(removed),async()=>{
+    let f;
+    f=fixture({items:[item(658,12,500)],applyPackets:true,ordinaryProtection:protection,
+      navigate:async({client,navOptions,packet})=>{
+        packet('ObjectMonster',wireMonster());
+        const receipt=packet('ObjectTurn',{objectId:71,location:{x:287,y:616},direction:0});
+        const renewals=f.supply.status().plannerThreatMemory.packetRenewals;
+        if(removed)packet('ObjectRemove',{objectId:71});
+        for(let i=0;i<21;i++){
+          f.advance(1000);packet('UserLocation',{location:{x:290,y:607}});packet('UseItem',{success:true});
+          f.supply.observe(receipt,receipt);void navOptions.forbiddenPoints;
+        }
+        assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);
+        packet('ObjectTurn',{objectId:71,location:{x:287,y:616},direction:0});
+        assert.equal(navOptions.allowedHostileObjectIds.includes(71),false);
+        assert.equal(f.supply.status().plannerThreatMemory.packetRenewals,renewals);
+        client.snapshot.entities=client.snapshot.entities.filter(e=>e.objectId!==71);
+      }});
+    f.client.snapshot.inSafeZone=true;assert.equal((await f.supply.prepare()).status,'ready');
+  });
+});
+
+test('normal ObjectRemove reentry gains a new live segment without delaying matching normal proofs or dropping old outside trails',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  const f=fixture({items:[item(658,12,500)],applyPackets:true,ordinaryProtection:protection,
+    navigate:async({client,navOptions,packet,snapshot})=>{
+      packet('ObjectMonster',wireMonster(71,{location:{x:293,y:600}}));void navOptions.forbiddenPoints;
+      packet('ObjectRemove',{objectId:71});
+      packet('ObjectMonster',wireMonster(71,{location:{x:295,y:600}}));
+      const trail=navOptions.forbiddenPoints;
+      assert.ok(navOptions.allowedHostileObjectIds.includes(71));
+      assert.ok(trail.some(p=>p.x===293&&p.y===600));assert.ok(trail.some(p=>p.x===295&&p.y===600));
+      const e=client.snapshot.entities.find(e=>e.objectId===71);Object.assign(e,{hp:20,disposition:'hostile'});
+      packet('ObjectRemove',{objectId:71});client.snapshot.entities.push(e);snapshot();
+      void navOptions.forbiddenPoints;assert.ok(navOptions.allowedHostileObjectIds.includes(71),'matching complete raw proof can also reopen the live segment');
+    }});
+  f.client.snapshot.inSafeZone=true;assert.equal((await f.supply.prepare()).status,'ready');
+});
+
+test('normal real ObjectRemove then ObjectMonster reentry preserves the canonical return route without fresh-per-step snapshots',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0'),map=await loadProtocolCollisionMap('0');
+  let f,navigator,reentered=false;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:304,y:613},stagingPoint:{x:289,y:617},applyPackets:true,noMovementSnapshots:true,
+    hostiles:[hostile(206641,287,616,{name:'Scarecrow'}),hostile(206632,286,623,{name:'Scarecrow'})],ordinaryProtection:protection,
+    navigate:async({facade,target,range,stop,navOptions})=>{navigator??=createNavigator(facade,{loadCollisionMap:async()=>map,now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000});return navigator(target,range,stop,navOptions);},
+    onMove:({client,actor,packet})=>{if(!reentered){reentered=true;
+      packet('ObjectRemove',{objectId:206641});packet('ObjectRemove',{objectId:206632});
+      packet('ObjectMonster',wireMonster(206641));packet('ObjectMonster',wireMonster(206632,{location:{x:286,y:623}}));}
+      client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
+  const result=await f.supply.prepare();assert.equal(result.status,'ready');assert.equal(reentered,true);
+  assert.deepEqual({x:result.after.x,y:result.after.y},{x:289,y:617});assert.equal(result.pathHazardCount,0);
+  assert.equal(f.client.sent.filter(c=>c.type==='clientVersion').length,2);
+});
+
+test('quiet normal history retains only its original planner position lifetime across real AOI departure and still revokes unknown reuse',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0'),map=await loadProtocolCollisionMap('0');
+  for(const unknown of [false,true])await t.test(String(unknown),async()=>{
+    let f,navigator,warmed=false,departed=false,base;
+    f=fixture({items:[item(658,12,500)],ownerPosition:{x:304,y:613},stagingPoint:{x:289,y:617},applyPackets:true,noMovementSnapshots:true,
+      hostiles:[hostile(206641,287,616,{name:'Scarecrow'}),hostile(206632,286,623,{name:'Scarecrow'})],ordinaryProtection:protection,
+      navigate:async({facade,target,range,stop,navOptions,packet})=>{
+        navigator??=createNavigator(facade,{loadCollisionMap:async()=>map,now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000});
+        base=f.now();f.advance(15000);
+        await navigator({x:304,y:612},0,stop,navOptions);warmed=true;
+        assert.ok(f.now()>=base+21000&&f.now()<base+35000);
+        if(unknown)packet('ObjectMonster',wireMonster(206641,{name:'UnknownMonster'}));
+        void navOptions.forbiddenPoints;
+        assert.equal(navOptions.allowedHostileObjectIds.includes(206641),!unknown,
+          'closed normal history must cover shared positions after raw trust expires; unknown never receives that exemption');
+        return navigator(target,range,stop,navOptions);
+      },
+      onMove:({client,actor,packet})=>{if(!departed){departed=true;
+        packet('ObjectRemove',{objectId:206641});packet('ObjectRemove',{objectId:206632});
+        f.advance(base+21000-f.now());}
+        client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
+    if(unknown)await assert.rejects(f.supply.prepare(),/No walk path/);
+    else{
+      const result=await f.supply.prepare();assert.equal(result.status,'ready');
+      assert.deepEqual({x:result.after.x,y:result.after.y},{x:289,y:617});
+      assert.equal(f.client.sent.filter(c=>c.type==='clientVersion').length,2);
+    }
+    assert.equal(warmed,true);assert.equal(departed,true);
+  });
+});
+
+test('actual raw null owner and class followed by wire omission reopens normal AOI without extra quarantine',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0'),map=await loadProtocolCollisionMap('0');
+  let f,navigator,options,reentered=false;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:304,y:613},stagingPoint:{x:289,y:617},applyPackets:true,noMovementSnapshots:true,
+    hostiles:[hostile(206641,287,616,{name:'Scarecrow',ownerName:null,class:null}),hostile(206632,286,623,{name:'Scarecrow',ownerName:null,class:null})],
+    ordinaryProtection:protection,
+    navigate:async({facade,target,range,stop,navOptions})=>{options=navOptions;
+      navigator??=createNavigator(facade,{loadCollisionMap:async()=>map,now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000});
+      return navigator(target,range,stop,navOptions);},
+    onMove:({client,actor,packet})=>{if(!reentered){reentered=true;
+      packet('ObjectRemove',{objectId:206641});packet('ObjectRemove',{objectId:206632});
+      packet('ObjectMonster',wireMonster(206641));packet('ObjectMonster',wireMonster(206632,{location:{x:286,y:623}}));
+      for(const id of [206641,206632]){
+        const entity=client.snapshot.entities.find(e=>e.objectId===id);
+        assert.equal(Object.hasOwn(entity,'ownerName'),false);assert.equal(Object.hasOwn(entity,'class'),false);
+        assert.ok(options.allowedHostileObjectIds.includes(id),'wire omission and raw null denote the same absent optional value');
+      }}
+      client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
+  const result=await f.supply.prepare();assert.equal(result.status,'ready');assert.equal(reentered,true);
+  assert.deepEqual({x:result.after.x,y:result.after.y},{x:289,y:617});assert.equal(result.pathHazardCount,0);
+  assert.equal(f.client.sent.filter(c=>c.type==='clientVersion').length,2);
 });

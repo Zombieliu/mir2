@@ -11,6 +11,7 @@ const INPUTS = Object.freeze({
 const cachedSpecs = new Map();
 const trustedSpecs = new WeakSet();
 const summaries = new WeakMap();
+const wireCertificates = new WeakMap();
 const int32 = value => Number.isSafeInteger(value) && value >= -0x8000_0000 && value <= 0x7fff_ffff;
 const assert = (condition, message) => { if (!condition) throw new Error(`ordinary protection: ${message}`); };
 
@@ -84,6 +85,31 @@ export function isProtectedOrdinaryCell(spec, mapName, entity, cell) {
   if (!isOrdinaryAi0Threat(spec, mapName, entity) || !int32(cell?.x) || !int32(cell?.y)) return false;
   // Mirrors Rust runtime/map.rs and zone/runtime.rs: inclusive location +/- size.
   // This does not authorize occupying a monster's physical cell.
+  return spec.safeZones.some(zone => cell.x >= zone.location.x - zone.size && cell.x <= zone.location.x + zone.size &&
+    cell.y >= zone.location.y - zone.size && cell.y <= zone.location.y + zone.size);
+}
+
+/** Planner-only normal-AI0 identity, never an exact-health or raw-world proof. */
+export function certifyOrdinaryAi0Packet(spec, mapName, message) {
+  const p = message?.payload;
+  if (!trustedSpecs.has(spec) || mapName !== spec.mapFileName || message?.type !== 'packet' || message.packet !== 'ObjectMonster' ||
+      !Number.isSafeInteger(p?.objectId) || p.objectId <= 0 || p.objectId > 0xffff_ffff ||
+      p.ai !== 0 || p.masterObjectId !== 0 || p.dead !== false || !spec.ai0MonsterNames.includes(p.name) ||
+      !Number.isSafeInteger(p.location?.x) || p.location.x < 0 || p.location.x > 65535 ||
+      !Number.isSafeInteger(p.location?.y) || p.location.y < 0 || p.location.y > 65535 ||
+      p.class != null || p.ownerName != null || (p.kind != null && p.kind !== 'monster') ||
+      (p.hp != null && (!Number.isFinite(p.hp) || p.hp <= 0)) ||
+      (p.disposition != null && p.disposition !== 'hostile')) return null;
+  const certificate = Object.freeze({ mapFileName:mapName, objectId:p.objectId, name:p.name, ai:0,
+    x:p.location.x, y:p.location.y, source:'ObjectMonster', plannerOnly:true });
+  wireCertificates.set(certificate,spec);
+  return certificate;
+}
+
+/** Normal AI0 safe-zone targeting/impact checks do not require a disposition DTO. */
+export function isProtectedOrdinaryPacketCell(spec, mapName, certificate, cell) {
+  if (!trustedSpecs.has(spec) || wireCertificates.get(certificate) !== spec || mapName !== spec.mapFileName ||
+      certificate.mapFileName !== mapName || !int32(cell?.x) || !int32(cell?.y)) return false;
   return spec.safeZones.some(zone => cell.x >= zone.location.x - zone.size && cell.x <= zone.location.x + zone.size &&
     cell.y >= zone.location.y - zone.size && cell.y <= zone.location.y + zone.size);
 }

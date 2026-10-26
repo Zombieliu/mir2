@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { loadOrdinaryProtection, isOrdinaryAi0Threat, isProtectedOrdinaryCell, ordinaryProtectionSummary } from './capacity-ordinary-protection.mjs';
+import { certifyOrdinaryAi0Packet, isProtectedOrdinaryPacketCell, loadOrdinaryProtection, isOrdinaryAi0Threat, isProtectedOrdinaryCell, ordinaryProtectionSummary } from './capacity-ordinary-protection.mjs';
 
 const route = { source: { runtimeProfileId: 'platinum_176' } };
 const spec = await loadOrdinaryProtection(route);
@@ -116,4 +116,38 @@ test('ordinary AI0 classification authenticates all identity gates without grant
     { ownerName: 'owner' }, { ownerName: '' }, { ai: 1 }, { ai: '0' }]) assert.equal(isOrdinaryAi0Threat(spec, '0', { ...monster, ...changed }), false);
   assert.equal(isOrdinaryAi0Threat(spec, '0', null), false);
   assert.equal(isOrdinaryAi0Threat(spec, '0', { ...monster, ai: null }), true);
+});
+
+const wire = payload => ({type:'packet',packet:'ObjectMonster',payload:{objectId:206641,name:'Scarecrow',location:{x:287,y:616},ai:0,masterObjectId:0,dead:false,...payload}});
+test('actual normal unowned ObjectMonster carries a separate immutable planner certificate withoutinventing health or disposition',()=>{
+  const message=wire(),certificate=certifyOrdinaryAi0Packet(spec,'0',message);
+  assert.ok(certificate);assert.equal(Object.isFrozen(certificate),true);assert.equal(certificate.plannerOnly,true);
+  assert.equal(Object.hasOwn(certificate,'hp'),false);assert.equal(Object.hasOwn(certificate,'disposition'),false);
+  assert.equal(Object.hasOwn(message.payload,'hp'),false);assert.equal(Object.hasOwn(message.payload,'disposition'),false);
+  assert.equal(isProtectedOrdinaryPacketCell(spec,'0',certificate,inside),true);
+  assert.equal(isProtectedOrdinaryPacketCell(spec,'0',certificate,{x:299,y:616}),false);
+  assert.equal(isProtectedOrdinaryCell(spec,'0',message.payload,inside),false,'wire identity never masquerades as a raw entity');
+});
+test('wire certification rejects missing malformed owned neutral or ambiguous identities and catalog replies',()=>{
+  for(const change of [{objectId:0},{objectId:'1'},{objectId:-1},{objectId:0x1_0000_0000},{objectId:1.5},
+    {ai:undefined},{ai:null},{ai:'0'},{ai:6},{ai:58},{ai:113},{masterObjectId:undefined},{masterObjectId:'0'},
+    {masterObjectId:9},{dead:undefined},{dead:'false'},{dead:0},{dead:true},{name:'Deer'},{name:'UnknownMonster'},
+    {ownerName:''},{ownerName:'owner'},{class:'Warrior'},{kind:'npc'},{disposition:'neutral'},{disposition:'friendly'},
+    {location:undefined},{location:{x:'287',y:616}},{location:{x:287,y:Infinity}},{location:{x:287.5,y:616}},
+    {location:{x:-1,y:616}},{location:{x:287,y:65536}},{hp:0},{hp:'20'}])assert.equal(certifyOrdinaryAi0Packet(spec,'0',wire(change)),null,JSON.stringify(change));
+  for(const packet of ['NewMonsterInfo','ObjectPlayer','ObjectWalk'])assert.equal(certifyOrdinaryAi0Packet(spec,'0',{...wire(),packet}),null);
+  assert.equal(certifyOrdinaryAi0Packet(spec,'0',{...wire(),type:'worldSnapshot'}),null);
+  assert.equal(certifyOrdinaryAi0Packet(spec,'0',null),null);
+});
+test('wire certificates are bound to the exact loader spec and map and cannot be reconstructed',()=>{
+  const certificate=certifyOrdinaryAi0Packet(spec,'0',wire());
+  for(const fake of [null,{}, {...spec},ordinaryProtectionSummary(spec)]){
+    assert.equal(certifyOrdinaryAi0Packet(fake,'0',wire()),null);
+    assert.equal(isProtectedOrdinaryPacketCell(fake,'0',certificate,inside),false);
+  }
+  for(const fake of [null,{}, {...certificate},JSON.parse(JSON.stringify(certificate))])assert.equal(isProtectedOrdinaryPacketCell(spec,'0',fake,inside),false);
+  for(const map of ['1',0,null]){
+    assert.equal(certifyOrdinaryAi0Packet(spec,map,wire()),null);
+    assert.equal(isProtectedOrdinaryPacketCell(spec,map,certificate,inside),false);
+  }
 });
