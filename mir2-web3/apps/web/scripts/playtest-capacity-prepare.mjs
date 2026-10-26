@@ -5,8 +5,9 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
+import { performance } from 'node:perf_hooks';
 import { CapacityClient, ordinaryLogin, prepareCapacityActor, drain, awaitPendingActions,
-  ordinaryPreparationConfiguration, attackResultsMode } from './playtest-capacity-soak.mjs';
+  ordinaryPreparationConfiguration, attackResultsMode, recoverPreparationHeldHp } from './playtest-capacity-soak.mjs';
 import { capacityPreparationPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS,
   BoundedEvidence, CapacityMonitor, sanitize } from './playtest-capacity-soak-core.mjs';
 import { outsideRepository, validateEndpoint } from './playtest-multiplayer-smoke.mjs';
@@ -18,8 +19,8 @@ const defaultServices = Object.freeze({
   createClient: (endpoint, account, context) => new CapacityClient(endpoint, account, context),
   createMonitor: (file, writer) => new CapacityMonitor(file, writer),
   createWriter: file => new BoundedEvidence(file),
-  login: ordinaryLogin, prepare: prepareCapacityActor, drain, awaitPending: awaitPendingActions,
-  loadMap: loadProtocolCollisionMap, isWalkable: protocolMapCellIsWalkable, equip: equipStarterGear, now: Date.now,
+  login: ordinaryLogin, recover: recoverPreparationHeldHp, prepare: prepareCapacityActor, drain, awaitPending: awaitPendingActions,
+  loadMap: loadProtocolCollisionMap, isWalkable: protocolMapCellIsWalkable, equip: equipStarterGear, now: Date.now, monotonicNow: () => performance.now(),
 });
 
 async function regularJson(file) {
@@ -130,7 +131,7 @@ export async function runPreparationBank(options, testServices) {
     phase: 'preparation', clients: [], allClients: [], cleanupErrors: report.cleanupErrors,
     add(sample) { writer.add({ type: 'preparationAction', phase: 'preparation', at: Date.now(), ...sanitize(sample, this.pool?.accounts.map(a => a.password) ?? []) }); } };
   const savedPoints = new Set();
-  let lock, timer, current = null, poolIdentity, unpreparedTail, initialCount = 0;
+  let lock, timer, actorTimer, current = null, poolIdentity, unpreparedTail, initialCount = 0;
   const deadline = services.now() + finiteWallSeconds * 1000;
   const stop = reason => guard.stop(reason), onSignal = () => stop('Operator requested normal preparation drain');
   const onAbort = () => stop('Preparation AbortSignal requested normal drain');
@@ -140,7 +141,7 @@ export async function runPreparationBank(options, testServices) {
   async function closeCurrent() {
     if (!current) return null;
     const client = current, errorsBefore = context.cleanupErrors.length;
-    client.paused = true;
+    client.paused = true; client.preparationCommandBudget = null;
     await services.awaitPending([client]);
     client.ordinarySupplies?.dispose();
     const saved = await services.drain(client, context);
@@ -208,8 +209,18 @@ export async function runPreparationBank(options, testServices) {
       current.ready = false; context.clients.push(current); context.allClients.push(current);
       await services.login(current, context, 'admission'); check();
       assert(String(current.snapshot?.mapFileName) === '0', 'Ordinary character is not on preparation map0');
+      const actorStartedAtMs = services.monotonicNow(), actorDeadlineMs = actorStartedAtMs + 600000;
+      current.preparationCommandBudget = { maximum: 2048, sent: 0 };
+      actorTimer = setTimeout(() => stop('Preparation actor600s budget exhausted'), 600000);
+      const recovery = await services.recover(current, context, { actorDeadlineMs }); check();
+      assert(services.monotonicNow() < actorDeadlineMs, 'Preparation actor600s budget exhausted');
+      assert(['verified', 'not-needed'].includes(recovery?.status) && recovery.preparationOnly === true && recovery.measurementCredit === false, 'Ordinary held HP recovery evidence is incomplete');
       await services.equip(current); check();
-      const result = await services.prepare(current, context, { route: configuration.route, stagingPoint: configuration.stagingPoints[index],
+      const remainingActorMs = Math.floor(actorDeadlineMs - services.monotonicNow());
+      assert(remainingActorMs > 0, 'Preparation actor600s budget exhausted');
+      const preHelperCommands = current.preparationCommandBudget.sent, helperCommandBudget = 2048 - preHelperCommands - 1;
+      assert(helperCommandBudget > 0, 'Preparation shared2048 command budget exhausted');
+      const result = await services.prepare(current, context, { route: configuration.route, stagingPoint: configuration.stagingPoints[index], timeoutMs: remainingActorMs, maxCommands: helperCommandBudget,
         ...(candidates ? { resolveStagingPoint: input => selectPreparationStagingPoint({ ...input, candidates, savedPoints }) } : {}) });
       check();
       const cursor = current.sequence;
@@ -218,6 +229,11 @@ export async function runPreparationBank(options, testServices) {
       assert(result.status === 'ready' && current.ready === false && readiness.ownerName === current.label && readiness.map === '0' &&
         readiness.hpStock >= preparation.preparationHpTarget && result.after?.ownerName === current.label && (!candidates || (readiness.inSafeZone === true && result.resolvedStagingPoint?.x === readiness.x && result.resolvedStagingPoint?.y === readiness.y)), 'Fresh ordinary preparation evidence is incomplete');
       const evidence = actorEvidence(current, result, readiness);
+      evidence.preparationRecovery = recovery; evidence.actorBudgetMs = 600000; evidence.helperBudgetMs = remainingActorMs;
+      evidence.preHelperCommands = preHelperCommands; evidence.helperCommandBudget = helperCommandBudget;
+      evidence.totalPreparationCommandsBeforeDrain = current.preparationCommandBudget.sent;
+      assert(services.monotonicNow() < actorDeadlineMs, 'Preparation actor600s budget exhausted');
+      clearTimeout(actorTimer); actorTimer = null;
       const saved = await closeCurrent();
       assert(saved.account.name === evidence.name && saved.account.characterIndex === evidence.characterIndex, 'Normal saved identity changed');
       assert(saved.state.name === evidence.name && saved.state.name === readiness.ownerName && saved.state.mapFileName === '0' &&
@@ -243,10 +259,10 @@ export async function runPreparationBank(options, testServices) {
     report.error = errorText(error); stop('Ordinary preparation failed: ' + report.error);
     if (current) {
       let status; try { status = current.ordinarySupplies?.status(); } catch {}
-      report.failedActor = { ...actorEvidence(current, status, null), error: report.error };
+      report.failedActor = { ...actorEvidence(current, status, null), preparationRecovery: current.preparationHpRecoveryResult ?? null, error: report.error };
     }
   } finally {
-    clearTimeout(timer);
+    clearTimeout(timer); clearTimeout(actorTimer);
     context.phase = 'drain';
     if (current) {
       try { await closeCurrent(); } catch (error) { context.cleanupErrors.push({ step: 'normalActorDrain', error: errorText(error) }); }

@@ -56,6 +56,10 @@ async function fixture(t, { count = 100, maxPrepared = 2, ledger, prepareFailure
       client.snapshot = { mapFileName: '0' }; client.inGame = true; active++; maximumActive = Math.max(maximumActive, active);
     },
     async loadMap(name, options) { assert.equal(name, '0'); assert.equal(options.mapRoot, root); return { fixture: true }; },
+    async recover(client, context) {
+      events.push('recover:' + client.index); assert.equal(client.ready, false); assert.equal(context.phase, 'preparation');
+      return { status: 'not-needed', doses: 0, preparationOnly: true, measurementCredit: false };
+    },
     async equip(client) { events.push('equip:' + client.index); },
     async prepare(client, context, config) {
       events.push('prepare:' + client.index); assert.equal(client.ready, false); assert.equal(context.phase, 'preparation');
@@ -267,4 +271,72 @@ test('final normal drain position, map and name must match readiness before inde
     assert.match(report.error, /Final normal saved position or identity/);
     assert.deepEqual(f.events.filter(e => e.startsWith('login:')), ['login:0']);
   }
+});
+
+test('ordinary recovery runs once after login before equip and helper, without activation', async t => {
+  const f = await fixture(t, { maxPrepared: 2 });
+  const report = await runPreparationBank(f.options, f.services);
+  assert.equal(report.ok, true);
+  for (const i of [0, 1]) {
+    assert.ok(f.events.indexOf('login:' + i) < f.events.indexOf('recover:' + i));
+    assert.ok(f.events.indexOf('recover:' + i) < f.events.indexOf('equip:' + i));
+    assert.ok(f.events.indexOf('equip:' + i) < f.events.indexOf('prepare:' + i));
+  }
+  assert.deepEqual(f.events.filter(e => e.startsWith('recover:')), ['recover:0', 'recover:1']);
+  assert.ok(report.actorResults.every(r => r.preparationRecovery.measurementCredit === false && r.preparationRecovery.preparationOnly === true));
+  assert.equal(report.measurementPerformed, false); assert.equal(report.cohortActivated, false);
+});
+
+test('held recovery failure stops admission and normally drains without equipping or preparing', async t => {
+  const f = await fixture(t, { maxPrepared: 5 });
+  f.services.recover = async client => {
+    client.preparationHpRecoveryResult = { status: 'failed', preparationOnly: true, measurementCredit: false, failure: 'held dose unproven' };
+    throw new Error('held dose unproven');
+  };
+  const drain = f.services.drain;
+  f.services.drain = async (client, context) => { assert.equal(client.preparationCommandBudget, null); return drain(client, context); };
+  const report = await runPreparationBank(f.options, f.services);
+  assert.equal(report.ok, false); assert.equal(report.preparedCount, 0);
+  assert.deepEqual(f.events.filter(e => e.startsWith('login:')), ['login:0']);
+  assert.equal(f.events.some(e => /^(equip|prepare):/.test(e)), false); assert.ok(f.events.includes('drain:0'));
+  assert.equal(report.failedActor.preparationRecovery.status, 'failed'); assert.equal(f.remainingActive(), 0);
+});
+
+test('recovery and equip consume the same600s helper budget while auth waiting remains excluded', async t => {
+  const f = await fixture(t, { maxPrepared: 1 }); let clock = 10, received;
+  const login = f.services.login, prepare = f.services.prepare;
+  f.services.monotonicNow = () => clock;
+  f.services.login = async (...args) => { clock += 901000; return login(...args); };
+  f.services.recover = async (client, context, options) => {
+    assert.equal(options.actorDeadlineMs, 1501010); assert.equal(client.ready, false);
+    clock += 1000; return { status: 'verified', doses: 1, preparationOnly: true, measurementCredit: false };
+  };
+  f.services.equip = async () => { clock += 500; };
+  f.services.prepare = async (...args) => { received = args[2].timeoutMs; return prepare(...args); };
+  const report = await runPreparationBank(f.options, f.services);
+  assert.equal(report.ok, true); assert.equal(received, 598500);
+  assert.equal(report.actorResults[0].actorBudgetMs, 600000); assert.equal(report.actorResults[0].helperBudgetMs, 598500);
+});
+
+test('an exhausted recovery budget cannot be restarted for the helper or next actor', async t => {
+  const f = await fixture(t, { maxPrepared: 5 }); let clock = 0;
+  f.services.monotonicNow = () => clock;
+  f.services.recover = async () => { clock += 600001; return { status: 'not-needed', preparationOnly: true, measurementCredit: false }; };
+  const report = await runPreparationBank(f.options, f.services);
+  assert.equal(report.ok, false); assert.match(report.error, /actor600s budget exhausted/);
+  assert.equal(f.events.some(e => /^(equip|prepare):/.test(e)), false);
+  assert.deepEqual(f.events.filter(e => e.startsWith('login:')), ['login:0']); assert.ok(f.events.includes('drain:0'));
+});
+
+test('recovery and equip spend the existing2048 command allowance before the helper with one readiness refresh reserved', async t => {
+  const f = await fixture(t, { maxPrepared: 1 }); const prepare = f.services.prepare; let received;
+  f.services.recover = async client => { client.preparationCommandBudget.sent += 3;
+    return { status: 'verified', preparationOnly: true, measurementCredit: false }; };
+  f.services.equip = async client => { client.preparationCommandBudget.sent += 2; };
+  f.services.prepare = async (...args) => { received = args[2].maxCommands; return prepare(...args); };
+  const drain = f.services.drain;
+  f.services.drain = async (client, context) => { assert.equal(client.preparationCommandBudget, null); return drain(client, context); };
+  const report = await runPreparationBank(f.options, f.services);
+  assert.equal(report.ok, true); assert.equal(received, 2042); assert.equal(report.actorResults[0].preHelperCommands, 5);
+  assert.equal(report.actorResults[0].helperCommandBudget, 2042);
 });

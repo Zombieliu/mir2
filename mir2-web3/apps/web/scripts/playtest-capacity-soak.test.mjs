@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
   assessMeasurements, movementDiagnosticMayContinue, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
-import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, offerNativeHpRecovery, offerNativeClientWork, offerPreparationKeepAlive, ordinaryPreparationConfiguration, prepareCapacityActor, activatePreparedCohort, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
+import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, offerNativeHpRecovery, recoverPreparationHeldHp, offerNativeClientWork, offerPreparationKeepAlive, ordinaryPreparationConfiguration, prepareCapacityActor, activatePreparedCohort, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { SafetyStop } from './playtest-load-smoke.mjs';
 import { SustainObservations } from './playtest-capacity-observability.mjs';
@@ -188,6 +188,227 @@ function hpRecoveryFixture(grid = 'inventory') {
   return { ...fixture, commands, stops, packet, inventory, immediateWait };
 }
 
+function preparationRecoveryFixture(grid = 'inventory', options = {}) {
+  const f = hpRecoveryFixture(grid), { client, context, commands } = f;
+  context.phase = 'preparation'; client.ready = false;
+  client.snapshot.playerHp = 12; client.snapshot.playerMaxHp = 18;
+  Object.assign(f.owner, { hp: 12, maxHp: 18 });
+  client.snapshot[grid === 'belt' ? 'beltItems' : 'inventoryItems'][0].container = grid === 'belt' ? 'belt' : 'bag1';
+  client.snapshot[grid === 'belt' ? 'beltItems' : 'inventoryItems'][0].slot = 0;
+  client.pace = async () => {};
+  const raw = ({ hp = 15, quantity = 1, edit } = {}) => {
+    const snapshot = structuredClone(client.snapshot);
+    snapshot.playerHp = hp; snapshot.playerMaxHp = 18;
+    snapshot.entities.find(e => e.objectId === snapshot.playerObjectId).hp = hp;
+    snapshot.inventoryItems = []; snapshot.beltItems = [];
+    if (quantity > 0) snapshot[grid === 'belt' ? 'beltItems' : 'inventoryItems'].push({ uniqueId: 901, itemIndex: 658,
+      name: '(HP)DrugSmall', quantity, container: grid === 'belt' ? 'belt' : 'bag1', slot: 0 });
+    edit?.(snapshot); client.observe({ type: 'worldSnapshot', payload: snapshot });
+  };
+  const ack = (edit = {}) => f.packet('UseItem', { uniqueId: 901, grid, success: true, ...edit });
+  let versions = 0;
+  client.ws.send = data => {
+    const command = JSON.parse(data); commands.push(command);
+    if (command.type === 'clientVersion') {
+      versions++;
+      if (versions === 1) raw({ hp: 12, quantity: 2, edit: options.before });
+      else if (options.postRefresh) options.postRefresh({ raw, ack, f });
+    } else if (command.type === 'useItem') (options.dose ?? (() => { ack(); raw(); }))({ raw, ack, f });
+  };
+  client.wait = async (predicate, label, remaining) => {
+    assert.ok(remaining > 0 && remaining <= 2000, 'every proof wait uses the remaining original2s window');
+    const result = predicate(); if (!result) throw new Error('timed out waiting for ' + label); return result;
+  };
+  return { ...f, raw, ack };
+}
+
+for (const grid of ['inventory', 'belt']) test('preparation held HP verifies one exact ' + grid + ' UID with both consumption and exact healing before70%', async () => {
+  const f = preparationRecoveryFixture(grid), { client, context, commands } = f;
+  const budget = client.budget, cooldown = client.journeyRestorativeUseAt;
+  const result = await recoverPreparationHeldHp(client, context);
+  assert.equal(result.status, 'verified'); assert.equal(result.doses, 1); assert.equal(result.uniqueId, 901);
+  assert.equal(result.before.hp, 12); assert.equal(result.after.hp, 15); assert.equal(result.after.selectedQuantity, 1);
+  assert.equal(result.consumedQuantity, 1); assert.equal(result.observedExactHpIncrease, 3);
+  assert.equal(result.measurementCredit, false); assert.equal(result.preparationOnly, true);
+  assert.deepEqual(commands, [{ type: 'clientVersion' }, { type: 'useItem', uniqueId: 901, grid }]);
+  assert.equal(client.ready, false); assert.deepEqual(f.actions, []); assert.deepEqual(f.stops, []);
+  assert.equal(client.budget, budget); assert.equal(client.journeyRestorativeUseAt, cooldown);
+  assert.equal(client.preparationHpRecoveryObservation, null); assert.equal(client.hpRecoveryPending, undefined);
+  assert.equal(f.rows.some(row => row.type === 'nativeHpRecovery'), false);
+});
+
+test('preparation held HP healthy owner needs a fresh full raw receipt but sends no drug or measurement action', async () => {
+  const f = preparationRecoveryFixture('inventory', { before: s => { s.playerHp = 13; s.inventoryItems = []; } });
+  const result = await recoverPreparationHeldHp(f.client, f.context);
+  assert.equal(result.status, 'not-needed'); assert.equal(result.doses, 0); assert.equal(result.before.hp, 13);
+  assert.deepEqual(f.commands, [{ type: 'clientVersion' }]); assert.deepEqual(f.actions, []); assert.equal(f.client.ready, false);
+});
+
+test('preparation held HP exact health cue may request one paced complete raw receipt without replacing the proof', async () => {
+  const f = preparationRecoveryFixture('inventory', {
+    dose: ({ ack, f }) => { ack(); f.packet('HealthChanged', { hp: 15, maxHp: 18 }); },
+    postRefresh: ({ raw }) => raw(),
+  });
+  let paced = 0; f.client.pace = async () => { paced++; };
+  const result = await recoverPreparationHeldHp(f.client, f.context);
+  assert.equal(result.status, 'verified'); assert.equal(paced, 3);
+  assert.equal(f.commands.filter(c => c.type === 'useItem').length, 1);
+  assert.equal(f.commands.filter(c => c.type === 'clientVersion').length, 2);
+  assert.ok(result.after.monotonicMs <= result.sentAtMs + 2000);
+});
+
+for (const [reason, edit] of [
+  ['missing-exact-hp', s => { delete s.playerHp; }],
+  ['coarse-only-hp', s => { delete s.playerHp; s.entities[0].hp = 80; }],
+  ['missing-max-hp', s => { delete s.playerMaxHp; }],
+  ['incomplete-bag', s => { delete s.inventoryItems; }],
+  ['incomplete-belt', s => { delete s.beltItems; }],
+  ['dead', s => { s.entities[0].dead = true; }],
+  ['wrong-owner', s => { s.entities[0].name = 'other-owner'; }],
+  ['wrong-map', s => { s.mapFileName = '1'; }],
+  ['no-held-drug', s => { s.inventoryItems = []; }],
+  ['wrong-658-name', s => { s.inventoryItems[0].name = '(HP)DrugMedium'; }],
+  ['wrong-item-index', s => { s.inventoryItems[0].itemIndex = 659; }],
+  ['unknown-quantity', s => { delete s.inventoryItems[0].quantity; }],
+  ['ambiguous-selector', s => { s.beltItems = [{ ...s.inventoryItems[0], uniqueId: 902, container: 'belt' }]; }],
+]) test('preparation held HP ' + reason + ' fails before any dose and keeps owner inactive', async () => {
+  const f = preparationRecoveryFixture('inventory', { before: edit });
+  await assert.rejects(recoverPreparationHeldHp(f.client, f.context));
+  assert.equal(f.commands.some(c => c.type === 'useItem'), false); assert.equal(f.client.ready, false);
+  assert.equal(f.client.preparationHpRecoveryResult.status, 'failed'); assert.equal(f.stops.length, 1);
+  assert.equal(f.client.preparationHpRecoveryObservation, null); assert.deepEqual(f.actions, []);
+});
+
+for (const reason of ['ack-only', 'consumption-only', 'hp-only', 'rejected', 'wrong-uid', 'wrong-grid', 'missing-ack',
+  'incomplete-after', 'coarse-after', 'late-after', 'insufficient-hp', 'owner-after', 'map-after', 'death-after', 'wrong-decrement', 'late-health-drop']) {
+  test('preparation held HP ' + reason + ' cannot replace the conjunctive raw proof', async () => {
+    const f = preparationRecoveryFixture('inventory', { dose: ({ ack, raw, f }) => {
+      if (reason === 'late-after') {
+        const record = f.client.record.bind(f.client);
+        f.client.record = (direction, message) => { const event = record(direction, message);
+          if (direction === 'received') event.monotonicMs += 2001; return event; };
+      }
+      if (reason !== 'missing-ack') ack({ ...(reason === 'rejected' ? { success: false } : {}),
+        ...(reason === 'wrong-uid' ? { uniqueId: 902 } : {}), ...(reason === 'wrong-grid' ? { grid: 'belt' } : {}) });
+      if (reason !== 'ack-only') raw({ hp: reason === 'consumption-only' || reason === 'insufficient-hp' ? 12 : 15,
+        quantity: reason === 'hp-only' ? 2 : reason === 'wrong-decrement' ? 0 : 1, edit: snapshot => {
+          if (reason === 'incomplete-after') delete snapshot.beltItems;
+          if (reason === 'coarse-after') delete snapshot.playerHp;
+          if (reason === 'owner-after') snapshot.entities[0].name = 'other-owner';
+          if (reason === 'map-after') snapshot.mapFileName = '1';
+          if (reason === 'death-after') snapshot.entities[0].dead = true;
+        } });
+      if (reason === 'late-health-drop') f.packet('HealthChanged', { hp: 11, maxHp: 18 });
+    } });
+    await assert.rejects(recoverPreparationHeldHp(f.client, f.context));
+    assert.equal(f.commands.filter(c => c.type === 'useItem').length, 1); assert.equal(f.client.ready, false);
+    assert.equal(f.client.preparationHpRecoveryResult.status, 'failed'); assert.equal(f.stops.length, 1);
+    assert.equal(f.rows.some(row => row.status === 'verified'), false); assert.deepEqual(f.actions, []);
+    assert.equal(f.client.preparationHpRecoveryObservation, null);
+  });
+}
+
+test('preparation held HP validates the actual emergency selector input after pacing and never sends a changed UID', async () => {
+  const f = preparationRecoveryFixture(); let paces = 0;
+  f.client.pace = async () => { if (++paces === 2) f.client.snapshot.inventoryItems[0].uniqueId = 902; };
+  await assert.rejects(recoverPreparationHeldHp(f.client, f.context), /selector input changed/);
+  assert.equal(f.commands.some(c => c.type === 'useItem'), false);
+});
+
+test('preparation held HP cannot temporarily ready an owner or bypass the actor deadline', async () => {
+  const f = preparationRecoveryFixture(); f.client.ready = true;
+  await assert.rejects(recoverPreparationHeldHp(f.client, f.context), /inactive ordinary owner/);
+  assert.deepEqual(f.commands, []); f.client.ready = false;
+  await assert.rejects(recoverPreparationHeldHp(f.client, f.context, { actorDeadlineMs: 0 }), /budget exhausted/);
+  assert.deepEqual(f.commands, []);
+});
+
+test('preparation held HP accepts the actual tooltip-source template contract instead of requiring synthetic top-level itemIndex', async () => {
+  const f = preparationRecoveryFixture('inventory', { before: snapshot => {
+    const item = snapshot.inventoryItems[0]; delete item.itemIndex; item.tooltipSource = { info: { item_index: 658 }, realInfo: { item_index: 658 } };
+  }, dose: ({ ack, raw }) => { ack(); raw({ edit: snapshot => {
+    const item = snapshot.inventoryItems[0]; delete item.itemIndex; item.tooltipSource = { info: { item_index: 658 } };
+  } }); } });
+  assert.equal((await recoverPreparationHeldHp(f.client, f.context)).status, 'verified');
+});
+
+const preparationSpiritBlade = () => ({ uniqueId: 902, slot: 1, container: 'bag1', quantity: 1, name: 'SpiritBlade',
+  tooltipSource: { info: { item_index: 1 }, realInfo: { item_index: 3 } } });
+for (const needsDose of [false, true]) test('preparation held HP accepts actual non-HP class view info1 to realInfo3 with needsDose=' + needsDose, async () => {
+  const f = preparationRecoveryFixture('inventory', { before: snapshot => {
+    snapshot.inventoryItems.push(preparationSpiritBlade()); if (!needsDose) snapshot.playerHp = 13;
+  }, dose: ({ ack, raw }) => { ack(); raw({ edit: snapshot => snapshot.inventoryItems.push(preparationSpiritBlade()) }); } });
+  const result = await recoverPreparationHeldHp(f.client, f.context);
+  assert.equal(result.status, needsDose ? 'verified' : 'not-needed');
+  assert.equal(f.commands.filter(c => c.type === 'useItem').length, needsDose ? 1 : 0);
+  assert.deepEqual(f.stops, []); assert.equal(f.client.ready, false); assert.deepEqual(f.actions, []);
+});
+
+test('preparation held HP requires valid non-HP resolved indexes despite allowing a class view change', async () => {
+  const f = preparationRecoveryFixture('inventory', { before: snapshot => {
+    const item = preparationSpiritBlade(); item.tooltipSource.realInfo.item_index = 0; snapshot.inventoryItems.push(item);
+  } });
+  await assert.rejects(recoverPreparationHeldHp(f.client, f.context), /inventory template/);
+  assert.equal(f.commands.some(c => c.type === 'useItem'), false);
+});
+
+test('preparation held HP still rejects selected exact DrugSmall whose actual info658 resolves to conflicting659', async () => {
+  const f = preparationRecoveryFixture('inventory', { before: snapshot => {
+    const item = snapshot.inventoryItems[0]; delete item.itemIndex;
+    item.tooltipSource = { info: { item_index: 658 }, realInfo: { item_index: 659 } };
+  } });
+  await assert.rejects(recoverPreparationHeldHp(f.client, f.context), /HP658 identity conflicts/);
+  assert.equal(f.commands.some(c => c.type === 'useItem'), false);
+});
+
+test('preparation held HP naturally restored by a newer raw receipt during pacing needs no dose', async () => {
+  const f = preparationRecoveryFixture(); let paces = 0;
+  f.client.pace = async () => { if (++paces === 2) f.raw({ hp: 13, quantity: 2 }); };
+  const result = await recoverPreparationHeldHp(f.client, f.context);
+  assert.equal(result.status, 'not-needed'); assert.equal(result.naturalRecoveryObserved, true); assert.equal(result.before.hp, 13);
+  assert.deepEqual(f.commands, [{ type: 'clientVersion' }]);
+});
+
+for (const [reason, edit] of [
+  ['hp-above-maximum', s => { s.playerHp = 19; }],
+  ['string-dead', s => { s.entities[0].dead = 'true'; }],
+  ['numeric-dead', s => { s.entities[0].dead = 1; }],
+  ['missing-dead', s => { delete s.entities[0].dead; }],
+  ['null-non-hp-record', s => { s.inventoryItems.push(null); }],
+  ['malformed-non-hp-record', s => { s.inventoryItems.push({ uniqueId: 902, itemIndex: 853, quantity: 1, name: 'Venison', container: 'storage', slot: 1 }); }],
+  ['duplicate-non-hp-uid', s => { s.inventoryItems.push({ ...s.inventoryItems[0], name: 'Venison', itemIndex: 853, slot: 1 }); }],
+  ['unknown-non-hp-quantity', s => { s.inventoryItems.push({ uniqueId: 902, itemIndex: 853, name: 'Venison', container: 'bag1', slot: 1 }); }],
+  ['conflicting-template', s => { s.inventoryItems[0].tooltipSource = { info: { item_index: 659 } }; }],
+]) test('preparation held HP ' + reason + ' cannot be treated as complete raw inventory or health', async () => {
+  const f = preparationRecoveryFixture('inventory', { before: edit });
+  await assert.rejects(recoverPreparationHeldHp(f.client, f.context));
+  assert.equal(f.commands.some(c => c.type === 'useItem'), false); assert.equal(f.stops.length, 1);
+});
+
+for (const invalid of [null, { uniqueId: 902, name: 'Venison', itemIndex: 853, container: 'bag1', slot: 1 }]) {
+  test('preparation held HP missing consumed UID in malformed after inventory is never zero-consumption proof ' + String(invalid), async () => {
+    const f = preparationRecoveryFixture('inventory', { dose: ({ ack, raw }) => { ack(); raw({ quantity: 0, edit: s => s.inventoryItems.push(invalid) }); } });
+    await assert.rejects(recoverPreparationHeldHp(f.client, f.context));
+    assert.equal(f.client.preparationHpRecoveryResult.status, 'failed');
+  });
+}
+
+test('preparation held HP shares the same2048 dispatch quota and never sends past it', async () => {
+  const f = preparationRecoveryFixture();
+  f.client.preparationCommandBudget = { maximum: 2048, sent: 2047 };
+  await assert.rejects(recoverPreparationHeldHp(f.client, f.context), /shared2048 command budget/);
+  assert.equal(f.client.preparationCommandBudget.sent, 2048);
+  assert.deepEqual(f.commands, [{ type: 'clientVersion' }]); assert.equal(f.client.ready, false);
+});
+
+test('preparation held HP ignores a complete raw snapshot received before its own paced refresh', async () => {
+  const f = preparationRecoveryFixture();
+  f.client.pace = async () => { f.raw({ hp: 15, quantity: 2 }); };
+  f.client.ws.send = data => f.commands.push(JSON.parse(data));
+  await assert.rejects(recoverPreparationHeldHp(f.client, f.context), /timed out/);
+  assert.deepEqual(f.commands, [{ type: 'clientVersion' }]);
+});
+
 for (const grid of ['inventory', 'belt']) test(`native HP maintenance verifies ordinary ${grid} UID consumption without inventing healing or activity`, async () => {
   const f = hpRecoveryFixture(grid), { client, context, rows, commands, stops } = f;
   client.ws.send = data => { commands.push(JSON.parse(data)); f.packet('UseItem', { uniqueId: 901, grid, success: true }); f.inventory(1); };
@@ -363,7 +584,7 @@ test('native engine offers HP before gameplay and auxiliary without hiding misse
   await client.hpRecoveryPending;
 });
 
-const preparationRoute = { quests: [{ objectives: { kill: [{ monsterName: 'Deer', spawnCandidates: [
+const preparationRoute = { source: { runtimeProfileId: 'platinum_176', runtimeProfileVersion: 25 }, quests: [{ objectives: { kill: [{ monsterName: 'Deer', spawnCandidates: [
   { mapFileName: '0', position: { x: 12, y: 12 }, count: 1 },
 ] }], item: [] } }] };
 
@@ -386,6 +607,8 @@ test('ordinary preparation is opt-in and requires distinct explicit per-actor st
 function ordinaryPreparationFixture() {
   const f = hpRecoveryFixture(), { client, context, owner, commands } = f, joins = [];
   context.phase = 'preparation'; context.clients = [client];
+  context.map = { width: 640, height: 640, blocked: new Uint8Array(640 * 640) };
+  Object.assign(owner, { x: 286, y: 616 }); client.home = { x: 286, y: 616 };
   context.policy = capacityPolicy({ profile: 'probe', activityMode: 'native', preparationProfile: 'ordinary-economic-v1' });
   context.continuous = { join: (...args) => joins.push(args) };
   client.ready = false; owner.hp = 24; client.snapshot.playerHp = 24; client.snapshot.gold = 0;
@@ -395,8 +618,54 @@ function ordinaryPreparationFixture() {
     assert.equal(command.type, 'clientVersion');
     client.observe({ type: 'worldSnapshot', payload: structuredClone(client.snapshot) });
   };
-  return { ...f, joins, configuration: { stagingPoint: { x: 5, y: 5 }, route: preparationRoute } };
+  return { ...f, joins, configuration: { stagingPoint: { x: 286, y: 616 }, route: preparationRoute } };
 }
+
+test('ordinary preparation uses the canonical same-map protection spec and ignores an injected configuration replacement', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, configuration } = f;
+  const fake = { runtimeProfileId: 'platinum_176', mapFileName: '0', allDamageImmunity: true, safeZones: [] };
+  configuration.ordinaryProtection = fake; let actual;
+  await prepareCapacityActor(client, context, configuration, { createSupplies: (_client, options) => {
+    actual = options.ordinaryProtection; return { prepare: async () => ({ status: 'ready' }) };
+  } });
+  assert.notEqual(actual, fake); assert.equal(actual.runtimeProfileId, 'platinum_176'); assert.equal(actual.mapFileName, '0');
+  assert.equal(actual.selectedMapMatches, true); assert.equal(actual.normalAi0SafeZoneOnly, true); assert.equal(actual.allDamageImmunity, false);
+  assert.ok(Object.isFrozen(actual)); assert.ok(actual.safeZones.length > 0); assert.ok(actual.ai0MonsterNames.includes('Scarecrow'));
+  assert.ok(actual.sourceManifests.canonical.bytes > 0); assert.ok(actual.sourceManifests.web.bytes > 0);
+  assert.match(actual.sourceManifests.canonical.sha256, /^[a-f0-9]{64}$/); assert.match(actual.sourceManifests.web.sha256, /^[a-f0-9]{64}$/);
+  assert.deepEqual(f.commands, []); assert.equal(client.ready, false); assert.deepEqual(f.actions, []);
+});
+
+test('ordinary preparation rejects non-platinum route profiles even after the real map protection has been cached', async () => {
+  const warm = ordinaryPreparationFixture();
+  await prepareCapacityActor(warm.client, warm.context, warm.configuration, { createSupplies: () => ({ prepare: async () => ({ status: 'ready' }) }) });
+  for (const source of [undefined, { runtimeProfileId: 'demo' }, { runtimeProfileId: 'platinum176' }]) {
+    const f = ordinaryPreparationFixture(); f.configuration.route = { ...preparationRoute, source }; let created = false;
+    await assert.rejects(prepareCapacityActor(f.client, f.context, f.configuration, { createSupplies: () => { created = true; } }), /profile|platinum/i);
+    assert.equal(created, false); assert.deepEqual(f.commands, []); assert.equal(f.client.ready, false);
+  }
+});
+
+test('ordinary preparation rejects a context map mismatch before any supply facade or command', async () => {
+  const f = ordinaryPreparationFixture(); f.context.mapName = '1'; let created = false;
+  await assert.rejects(prepareCapacityActor(f.client, f.context, f.configuration, { createSupplies: () => { created = true; } }), /same map/);
+  assert.equal(created, false); assert.deepEqual(f.commands, []);
+});
+
+test('ordinary preparation deducts trusted protection setup time from the explicit remaining helper budget', async () => {
+  const f = ordinaryPreparationFixture(); f.configuration.timeoutMs = 1000; let received;
+  await prepareCapacityActor(f.client, f.context, f.configuration, { createSupplies: (_client, options) => {
+    received = options.timeoutMs; return { prepare: async () => ({ status: 'ready' }) };
+  } });
+  assert.ok(Number.isSafeInteger(received) && received > 0 && received < 1000);
+  assert.deepEqual(f.commands, []); assert.equal(f.client.ready, false);
+});
+
+test('ordinary preparation setup cannot clamp an exhausted explicit helper budget back to one millisecond', async () => {
+  const f = ordinaryPreparationFixture(); f.configuration.timeoutMs = 1; let created = false;
+  await assert.rejects(prepareCapacityActor(f.client, f.context, f.configuration, { createSupplies: () => { created = true; } }), /budget exhausted during protection setup/);
+  assert.equal(created, false); assert.deepEqual(f.commands, []);
+});
 
 test('ordinary preparation consumes actual full snapshot receipts and joins only after a fresh cohort barrier', async () => {
   const f = ordinaryPreparationFixture(), { client, context, commands, joins, configuration } = f;
@@ -417,7 +686,7 @@ test('ordinary preparation forwards actual safe-zone membership and nearby hosti
   const f = ordinaryPreparationFixture(), { client, context, configuration, joins } = f;
   client.snapshot.inSafeZone = true;
   client.snapshot.entities.push({ objectId: 700, kind: 'monster', name: 'Scarecrow', ai: 0,
-    disposition: 'hostile', hp: 20, dead: false, x: 6, y: 5 });
+    disposition: 'hostile', hp: 20, dead: false, x: 287, y: 616 });
   const result = await prepareCapacityActor(client, context, configuration);
   assert.equal(result.after.inSafeZone, true); assert.equal(result.after.nearbyHostileCount, 1);
   assert.equal(result.after.stagingProtection, 'authoritative-safe-zone-normal-monsters');
@@ -443,20 +712,42 @@ test('passive sustain starts at the existing fresh preparation activation barrie
 
 test('ordinary preparation navigator sends its actual Walk through the bounded supply facade and shared budget', async () => {
   const f = ordinaryPreparationFixture(), { client, context, commands, configuration } = f;
-  configuration.stagingPoint = { x: 6, y: 5 };
+  configuration.stagingPoint = { x: 287, y: 616 };
   client.ws.send = data => {
     const command = JSON.parse(data); commands.push(command);
     if (command.type === 'walk') {
-      assert.equal(command.direction, 'Right'); f.packet('UserLocation', { x: 6, y: 5, direction: 'Right' });
+      assert.equal(command.direction, 'Right'); f.packet('UserLocation', { x: 287, y: 616, direction: 'Right' });
     } else {
       assert.equal(command.type, 'clientVersion'); client.observe({ type: 'worldSnapshot', payload: structuredClone(client.snapshot) });
     }
   };
   const result = await prepareCapacityActor(client, context, configuration);
-  assert.equal(result.actualStagingReached, true); assert.equal(result.after.x, 6);
+  assert.equal(result.actualStagingReached, true); assert.equal(result.after.x, 287);
   assert.deepEqual(commands.map(command => command.type), ['clientVersion', 'walk', 'clientVersion']);
   assert.equal(result.commandCounts.walk, 1); assert.equal(result.movementCommands, 1);
   assert.equal(client.budget.sent.length, 3); assert.equal(client.ready, false); assert.deepEqual(f.actions, []);
+});
+
+test('ordinary preparation trusted same-map spec reaches the real helper and navigator for a protected cell beside a live normal monster', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, configuration, commands } = f;
+  client.snapshot.inSafeZone = true; configuration.stagingPoint = { x: 287, y: 616 };
+  client.snapshot.entities.push({ objectId: 700, kind: 'monster', name: 'Scarecrow', ai: 0,
+    disposition: 'hostile', ownerName: null, hp: 20, dead: false, x: 286, y: 614 });
+  client.ws.send = data => {
+    const command = JSON.parse(data); commands.push(command);
+    if (command.type === 'walk') {
+      assert.equal(command.direction, 'Right'); f.packet('UserLocation', { x: 287, y: 616, direction: 'Right' });
+    } else {
+      assert.equal(command.type, 'clientVersion'); client.observe({ type: 'worldSnapshot', payload: structuredClone(client.snapshot) });
+    }
+  };
+  const result = await prepareCapacityActor(client, context, configuration);
+  assert.equal(result.status, 'ready'); assert.equal(result.after.x, 287); assert.equal(result.after.y, 616);
+  assert.equal(result.after.nearbyHostileCount, 1); assert.equal(result.protectionSummary.selectedMapMatches, true);
+  assert.equal(result.protectionSummary.runtimeProfileId, 'platinum_176'); assert.equal(result.protectionSummary.allDamageImmunity, false);
+  assert.equal(result.protectionSummary.mapFileName, '0');
+  assert.deepEqual(commands.map(command => command.type), ['clientVersion', 'walk', 'clientVersion']);
+  assert.equal(client.ready, false); assert.deepEqual(f.actions, []); assert.deepEqual(f.joins, []);
 });
 
 test('ordinary preparation failure records sanitized module status and rethrows the same error without activation or credit', async () => {
@@ -503,8 +794,8 @@ test('ordinary preparation rejects active actors, blocked staging and transfer s
   for (const boundary of ['active', 'blocked', 'transfer']) {
     const f = ordinaryPreparationFixture(), { client, context, configuration } = f;
     if (boundary === 'active') client.ready = true;
-    if (boundary === 'blocked') context.map.blocked[5 * context.map.width + 5] = 1;
-    if (boundary === 'transfer') client.snapshot.mapTransfers = [{ bounds: { minX: 5, maxX: 5, minY: 5, maxY: 5 } }];
+    if (boundary === 'blocked') context.map.blocked[616 * context.map.width + 286] = 1;
+    if (boundary === 'transfer') client.snapshot.mapTransfers = [{ bounds: { minX: 286, maxX: 286, minY: 616, maxY: 616 } }];
     await assert.rejects(prepareCapacityActor(client, context, configuration));
     assert.equal(f.commands.length, 0); assert.deepEqual(f.joins, []);
   }

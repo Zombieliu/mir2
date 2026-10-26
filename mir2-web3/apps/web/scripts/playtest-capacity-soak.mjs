@@ -17,6 +17,7 @@ import { selfActionBlockMask } from './quest-agent/protocol-status.mjs';
 import { createNavigator, equipStarterGear } from './quest-agent/protocol-play.mjs';
 import { startEmergencyHpRecovery } from './quest-agent/protocol-loadout.mjs';
 import { createOrdinarySupplies } from './capacity-ordinary-supplies.mjs';
+import { loadOrdinaryProtection } from './capacity-ordinary-protection.mjs';
 import { capacityPolicy, capacityActorLimit, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Measurements, assessMeasurements, movementDiagnosticMayContinue,
   AoiCoverage, ContinuousAcceptance, NativePlan, nativeCadence, verifiedCombatHit, BoundedEvidence, CapacityMonitor, memoryTrend, self, distance, sleep, sanitize, fingerprint } from './playtest-capacity-soak-core.mjs';
 
@@ -235,6 +236,12 @@ export class CapacityClient extends NativeResumeClient {
     this.attackV2Supported = false; this.attackV2Sequence = 0n; this.lastSentAttackV2 = 0n;
   }
   record(direction, value) {
+    const preparationBudget = this.preparationCommandBudget;
+    if (direction === 'sent' && preparationBudget) {
+      if (!Number.isSafeInteger(preparationBudget.sent) || preparationBudget.sent < 0 || preparationBudget.maximum !== 2048 ||
+          preparationBudget.sent >= preparationBudget.maximum) throw new Error('Preparation shared2048 command budget exhausted');
+      preparationBudget.sent++;
+    }
     // Never retain worldSnapshot arrays in event history, nor an ever-growing
     // list of rotated tickets. The latest native ticket remains memory-only.
     const compact = value.type === 'worldSnapshot' ? { type: value.type, payload: { mapFileName: this.snapshot?.mapFileName,
@@ -265,6 +272,7 @@ export class CapacityClient extends NativeResumeClient {
     this.context.sustain?.observe(this, message, this.events.at(-1), Date.now());
     this.context.aoi?.reconcileReceived(this.context.clients ?? [], this.label);
     recordNativeHpRecoveryEvidence(this, message, this.events.at(-1));
+    recordPreparationHpRecovery(this, message, this.events.at(-1));
     const navigationHint = this.navigationHint, navigationReceipt = this.events.at(-1);
     if (navigationHint && ((message.packet === 'UserLocation' && navigationReceipt.sequence > navigationHint.sendCursor &&
         navigationReceipt.monotonicMs >= navigationHint.sentAtMs) || ['MapInformation', 'MapChanged'].includes(message.packet) ||
@@ -1535,6 +1543,163 @@ async function auxiliary(client, context) {
   }
 }
 
+// Temporary preparation-only observer: retain one latest raw scalar, never a
+// complete snapshot or packet history. Native maintenance keeps its own rules.
+function preparationItemTemplate(item) {
+  const source = item?.tooltipSource;
+  const ids = [item?.itemIndex, item?.item_index, source?.info?.itemIndex, source?.info?.item_index,
+    source?.realInfo?.itemIndex, source?.realInfo?.item_index, source?.real_info?.itemIndex, source?.real_info?.item_index].filter(value => value !== undefined);
+  if (!ids.length || ids.some(value => !Number.isSafeInteger(value) || value <= 0)) throw new Error('Preparation HP recovery inventory template is unknown');
+  // GetRealItem may legitimately select a different class/level row (e.g.
+  // SpiritBlade info1 -> realInfo3). Resolve it like the ordinary helper.
+  const resolved = source?.realInfo ?? source?.real_info ?? source?.info;
+  const effective = item?.itemIndex ?? item?.item_index ?? resolved?.item_index ?? resolved?.itemIndex;
+  if (!Number.isSafeInteger(effective) || effective <= 0 ||
+      (item.name === '(HP)DrugSmall' && ids.some(value => value !== 658))) throw new Error('Preparation HP recovery inventory template is unknown or HP658 identity conflicts');
+  return effective;
+}
+function preparationHpScalar(raw, expected, receipt, selected) {
+  if (!raw || raw.playerObjectId !== expected.ownerObjectId || raw.mapFileName !== expected.mapFileName) throw new Error('Preparation HP recovery owner or map changed');
+  const owner = raw.entities?.find(e => e.objectId === raw.playerObjectId);
+  if (!owner || owner.name !== expected.ownerName) throw new Error('Preparation HP recovery owner changed');
+  if (owner.dead !== false || raw.playerHp === 0) throw new Error('Preparation HP recovery owner is dead or life state is unknown');
+  if (!Number.isSafeInteger(raw.playerHp) || raw.playerHp <= 0 || !Number.isSafeInteger(raw.playerMaxHp) || raw.playerMaxHp <= 0 || raw.playerHp > raw.playerMaxHp ||
+      !Array.isArray(raw.inventoryItems) || !Array.isArray(raw.beltItems)) throw new Error('Preparation HP recovery needs exact raw HP and complete inventory plus belt');
+  const candidates = [], matching = [], ids = new Set(), slots = new Set();
+  for (const [grid, items] of [['belt', raw.beltItems], ['inventory', raw.inventoryItems]]) for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) throw new Error('Preparation HP recovery inventory record is malformed');
+    const uidValue = item.uniqueId;
+    const uid = typeof uidValue === 'number' ? uidValue : typeof uidValue === 'string' && /^(0|[1-9]\d*)$/.test(uidValue) ? Number(uidValue) : NaN;
+    const quantity = item.quantity, template = preparationItemTemplate(item);
+    if (!Number.isSafeInteger(uid) || uid < 0 || ids.has(uid) || !Number.isSafeInteger(quantity) || quantity <= 0 || quantity > 0xffff_ffff ||
+        typeof item.name !== 'string' || !item.name.length || !Number.isSafeInteger(item.slot) || item.slot < 0 || item.slot > 255 ||
+        !(grid === 'belt' ? item.container === 'belt' : ['bag1', 'bag2', 'quest'].includes(item.container))) throw new Error('Preparation HP recovery inventory UID quantity or container is malformed');
+    const slotKey = item.container + ':' + item.slot;
+    if (slots.has(slotKey)) throw new Error('Preparation HP recovery duplicate inventory slot');
+    ids.add(uid); slots.add(slotKey);
+    if (selected && uid === selected.uniqueId) matching.push({ ...item, template });
+    if (!/^\(hp\)drug/i.test(item.name)) continue;
+    if (item.container === 'quest') throw new Error('Preparation HP recovery HP item is not ordinarily usable');
+    candidates.push({ uniqueId: uid, quantity, grid, exact658: template === 658 && item.name === '(HP)DrugSmall' });
+  }
+  let selectedQuantity = null;
+  if (selected) {
+    const item = matching[0];
+    if (item && (item.template !== 658 || item.name !== '(HP)DrugSmall')) throw new Error('Preparation HP recovery held UID changed');
+    selectedQuantity = item ? item.quantity : 0;
+  }
+  return { ownerObjectId: raw.playerObjectId, ownerName: owner.name, map: raw.mapFileName,
+    hp: raw.playerHp, maximumHp: raw.playerMaxHp, sequence: receipt.sequence, monotonicMs: receipt.monotonicMs,
+    hpCandidateCount: candidates.length, candidate: candidates.length === 1 ? candidates[0] : null, selectedQuantity };
+}
+function recordPreparationHpRecovery(client, message, receipt) {
+  const pending = client.preparationHpRecoveryObservation;
+  if (!pending || receipt?.direction !== 'received' || receipt.sequence <= pending.cursor || receipt.monotonicMs < pending.startedAtMs) return;
+  if (receipt.monotonicMs > (pending.sentAtMs === null ? pending.beforeDeadlineMs : pending.deadlineMs)) return;
+  try {
+    const owner = self(client);
+    if (client.closed || !owner || owner.objectId !== pending.ownerObjectId || owner.name !== pending.ownerName ||
+        client.snapshot.mapFileName !== pending.mapFileName) throw new Error('Preparation HP recovery owner or transport changed');
+    if (hasAuthoritativePlayerDeath(client.snapshot)) throw new Error('Preparation HP recovery owner is dead');
+    if (message.type === 'error') throw new Error('Preparation HP recovery public error');
+    if (message.type === 'worldSnapshot') {
+      const scalar = preparationHpScalar(message.payload, pending, receipt, pending.selected);
+      if (pending.sentAtMs === null) pending.before = scalar;
+      else { pending.after = scalar; pending.afterInvalidated = false; }
+    }
+    if (pending.sentAtMs !== null && message.packet === 'UseItem' && Number(message.payload?.uniqueId) === pending.selected.uniqueId &&
+        String(message.payload?.grid).toLowerCase() === pending.selected.grid) {
+      if (message.payload.success !== true) throw new Error('Preparation HP recovery UseItem rejected');
+      pending.acknowledgement ??= { sequence: receipt.sequence, monotonicMs: receipt.monotonicMs };
+    }
+    // Exact personal HealthChanged is only a cue to request a raw snapshot.
+    // It never substitutes for raw HP or complete-inventory recovery proof.
+    if (pending.sentAtMs !== null && (message.packet === 'HealthChanged' ||
+        (message.packet === 'ObjectHealth' && message.payload?.objectId === pending.ownerObjectId))) {
+      pending.afterInvalidated = true;
+      pending.exactHpHint = message.packet === 'HealthChanged' && Number.isSafeInteger(message.payload?.hp) ? message.payload.hp : null;
+    }
+  } catch (error) { pending.failure ??= error; }
+}
+export async function recoverPreparationHeldHp(client, context, { actorDeadlineMs = performance.now() + 600000 } = {}) {
+  const began = performance.now(), row = { type: 'preparationHpRecovery', actor: client.label, phase: context.phase,
+    preparationOnly: true, measurementCredit: false, hpThreshold: .7, maximumDoses: 1, evidenceWindowMs: 2000 };
+  let pending = null;
+  const check = () => {
+    context.guard.assert();
+    if (context.phase !== 'preparation' || client.ready !== false || !client.inGame || client.closed || client.paused || client.draining) throw new Error('Preparation HP recovery requires an inactive ordinary owner');
+    if (!Number.isFinite(actorDeadlineMs) || performance.now() >= actorDeadlineMs || performance.now() - began >= 600000) throw new Error('Preparation actor600s budget exhausted');
+    if (pending?.failure) throw pending.failure;
+  };
+  const waitFor = async (predicate, label, deadline) => {
+    const read = () => { check(); return predicate(); };
+    const remaining = deadline - performance.now();
+    if (!(remaining > 0)) throw new Error('Preparation HP recovery2s evidence deadline exhausted');
+    return client.wait(read, label, remaining, read);
+  };
+  try {
+    check();
+    if (client.pending || client.auxPending || client.hpRecoveryPending || client.hpRecoveryEvidence || client.preparationHpRecoveryObservation) throw new Error('Preparation HP recovery cannot overlap another action');
+    const owner = self(client);
+    if (!owner || owner.name !== client.label || client.snapshot?.mapFileName !== '0' || hasAuthoritativePlayerDeath(client.snapshot)) throw new Error('Preparation HP recovery requires a live same-owner map0 snapshot');
+    pending = { ownerObjectId: owner.objectId, ownerName: owner.name, mapFileName: '0', cursor: client.sequence,
+      startedAtMs: performance.now(), sentAtMs: null, deadlineMs: null, before: null, after: null, selected: null, failure: null };
+    client.preparationHpRecoveryObservation = pending;
+    await client.pace(); check(); pending.before = null; pending.cursor = client.sequence; pending.startedAtMs = performance.now();
+    pending.beforeDeadlineMs = Math.min(actorDeadlineMs, pending.startedAtMs + 2000);
+    client.send({ type: 'clientVersion' });
+    await waitFor(() => pending.before, 'fresh raw preparation HP snapshot', pending.beforeDeadlineMs);
+    const before = pending.before; row.before = { ...before };
+    if (before.hp / before.maximumHp >= .7) {
+      const result = { ...row, at: Date.now(), status: 'not-needed', doses: 0, elapsedMs: performance.now() - began };
+      client.preparationHpRecoveryResult = result; context.writer?.add(result); return result;
+    }
+    if (before.hpCandidateCount !== 1 || !before.candidate?.exact658) throw new Error('Preparation HP recovery requires one unambiguous held HP658 DrugSmall UID');
+    await client.pace(); check();
+    const live = self(client), item = before.candidate;
+    if (!live || live.objectId !== pending.ownerObjectId || live.name !== pending.ownerName || client.snapshot.mapFileName !== '0' || hasAuthoritativePlayerDeath(client.snapshot)) throw new Error('Preparation HP recovery owner changed before dose');
+    // Re-evaluate the same raw observation after pacing; newer complete raw
+    // inventory must still identify the exact item selected before sending.
+    const current = pending.before;
+    if (performance.now() - current.monotonicMs <= 2000 && current.hp / current.maximumHp >= .7 && current.maximumHp === before.maximumHp) {
+      const result = { ...row, before: { ...current }, at: Date.now(), status: 'not-needed', doses: 0, naturalRecoveryObserved: true, elapsedMs: performance.now() - began };
+      client.preparationHpRecoveryResult = result; context.writer?.add(result); return result;
+    }
+    if (performance.now() - current.monotonicMs > 2000 || current.hpCandidateCount !== 1 || !current.candidate?.exact658 || current.candidate.uniqueId !== item.uniqueId || current.candidate.grid !== item.grid ||
+        current.candidate.quantity !== item.quantity || current.hp !== before.hp || current.maximumHp !== before.maximumHp) throw new Error('Preparation HP recovery state changed before dose');
+    // The generic emergency selector reads the cache. Check its full current
+    // input before sending, while keeping raw receipts as the only proof.
+    const cached = preparationHpScalar(client.snapshot, pending, { sequence: client.sequence, monotonicMs: performance.now() }, null);
+    if (cached.hpCandidateCount !== 1 || !cached.candidate?.exact658 || cached.candidate.uniqueId !== item.uniqueId || cached.candidate.grid !== item.grid ||
+        cached.candidate.quantity !== item.quantity || cached.hp !== before.hp || cached.maximumHp !== before.maximumHp) throw new Error('Preparation HP recovery selector input changed before dose');
+    pending.selected = item; pending.cursor = client.sequence; pending.sentAtMs = performance.now();
+    pending.deadlineMs = Math.min(actorDeadlineMs, pending.sentAtMs + 2000); row.sentAtMs = pending.sentAtMs;
+    const dose = startEmergencyHpRecovery(client, { hpThreshold: .7, restorativeReuseDelayMs: 6000, now: pending.sentAtMs })[0];
+    if (!dose || Number(dose.uniqueId) !== item.uniqueId || dose.command.grid !== item.grid) throw new Error('Preparation HP recovery held-item selector declined or changed');
+    row.uniqueId = item.uniqueId; row.grid = item.grid; row.quantityBefore = item.quantity;
+    const complete = () => {
+      const after = pending.after;
+      return pending.acknowledgement && after && !pending.afterInvalidated && after.sequence > pending.cursor && after.monotonicMs >= pending.sentAtMs && after.monotonicMs <= pending.deadlineMs &&
+        after.maximumHp === before.maximumHp && after.hp > before.hp && after.hp / after.maximumHp >= .7 && after.selectedQuantity === item.quantity - 1;
+    };
+    await waitFor(() => complete() || (pending.acknowledgement && pending.exactHpHint > before.hp && pending.exactHpHint / before.maximumHp >= .7), 'preparation HP acknowledgement and exact health cue', pending.deadlineMs);
+    if (!complete()) {
+      await client.pace(); check();
+      if (performance.now() >= pending.deadlineMs) throw new Error('Preparation HP recovery2s evidence deadline exhausted');
+      client.send({ type: 'clientVersion' }); // At most one post-dose snapshot; the proof clock is never restarted.
+      await waitFor(complete, 'preparation raw HP increase and exact held consumption', pending.deadlineMs);
+    }
+    const result = { ...row, at: Date.now(), status: 'verified', doses: 1, acknowledgement: pending.acknowledgement,
+      after: { ...pending.after }, consumedQuantity: 1, observedExactHpIncrease: pending.after.hp - before.hp,
+      proofMeaning: 'Both actual consumption and exact HP increase observed; no causal healing or measurement credit claimed.', elapsedMs: performance.now() - began };
+    client.preparationHpRecoveryResult = result; context.writer?.add(result); return result;
+  } catch (error) {
+    const result = { ...row, at: Date.now(), status: 'failed', failure: sanitize(error.message, client.secrets ?? []),
+      acknowledgement: pending?.acknowledgement ?? null, after: pending?.after ?? null, elapsedMs: performance.now() - began };
+    client.preparationHpRecoveryResult = result; context.writer?.add(result); context.guard.stop(result.failure); throw error;
+  } finally { if (client.preparationHpRecoveryObservation === pending) client.preparationHpRecoveryObservation = null; }
+}
+
 const NATIVE_HP_REUSE_MS = 6000, NATIVE_HP_EVIDENCE_MS = 2000;
 function exactNativeHp(snapshot) {
   const value = snapshot?.playerHp ?? snapshot?.entities?.find(entity => entity.objectId === snapshot.playerObjectId)?.hp;
@@ -1906,15 +2071,25 @@ export function ordinaryPreparationConfiguration(policy, scenario) {
 }
 
 export async function prepareCapacityActor(client, context, configuration, { createSupplies = createOrdinarySupplies } = {}) {
+  const setupStartedAtMs = performance.now();
   if (client.ready || client.paused || client.draining || context.phase !== 'preparation') throw new Error('Ordinary preparation requires an inactive new actor');
   if (String(client.snapshot?.mapFileName) !== '0' || !protocolMapCellIsWalkable(context.map, configuration.stagingPoint) ||
       (client.snapshot.mapTransfers ?? []).some(transfer => inside(configuration.stagingPoint, transfer.bounds))) {
     throw new Error('Ordinary preparation requires a walkable staging point on the current map without a transfer');
   }
+  if (String(context.mapName) !== String(client.snapshot.mapFileName)) throw new Error('Ordinary preparation protection requires the current same map');
+  const ordinaryProtection = await loadOrdinaryProtection(configuration.route, context.mapName);
+  context.guard.assert();
+  if (client.ready || client.paused || client.draining || context.phase !== 'preparation' ||
+      client.snapshot?.mapFileName !== ordinaryProtection.mapFileName || String(context.mapName) !== ordinaryProtection.mapFileName ||
+      configuration.route?.source?.runtimeProfileId !== ordinaryProtection.runtimeProfileId) throw new Error('Ordinary preparation protection map or profile changed while loading');
+  const remainingTimeoutMs = configuration.timeoutMs === undefined ? undefined : Math.floor(configuration.timeoutMs - (performance.now() - setupStartedAtMs));
+  if (remainingTimeoutMs !== undefined && (!Number.isSafeInteger(configuration.timeoutMs) || !(remainingTimeoutMs > 0))) throw new Error('Ordinary preparation actor600s budget exhausted during protection setup');
+  // A scenario cannot inject a replacement safety spec through configuration.
   const navigators = new WeakMap();
   client.ordinarySupplies = createSupplies(client, {
     preparationProfile: 'ordinary-economic-v1', targetHp: context.policy.preparationHpTarget,
-    ...configuration, isPreparation: () => context.phase === 'preparation' && !client.ready && !client.draining,
+    ...configuration, ...(remainingTimeoutMs === undefined ? {} : { timeoutMs: remainingTimeoutMs }), ordinaryProtection, isPreparation: () => context.phase === 'preparation' && !client.ready && !client.draining,
     navigate: (facade, target, range, stop, options) => {
       if (!navigators.has(facade)) navigators.set(facade, createNavigator(facade, {
         loadCollisionMap: async map => {

@@ -1,7 +1,9 @@
 import { performance } from 'node:perf_hooks';
 import { collectSafeFundingVenison } from './quest-agent/protocol-funding.mjs';
 import { clearTravelBlockingMonster, harvestDirection } from './quest-agent/protocol-combat.mjs';
+import { NavigationStepGuarded } from './quest-agent/protocol-play.mjs';
 import { hasAuthoritativePlayerDeath, observedPlayerHp } from './quest-agent/protocol-observation.mjs';
+import { isOrdinaryAi0Threat, isProtectedOrdinaryCell, ordinaryProtectionSummary } from './capacity-ordinary-protection.mjs';
 
 export const ORDINARY_SUPPLY_COMMANDS = Object.freeze(['harvest', 'interact', 'selectNpcDialog', 'sellItem', 'buyItem']);
 const ALLOWED = new Set(['clientVersion', 'keepAlive', 'walk', 'run', 'turn', 'attack', 'attackV2', 'harvest', 'pickUp', ...ORDINARY_SUPPLY_COMMANDS]);
@@ -17,6 +19,11 @@ class FundingTargetLoss extends Error {
 // Only numeric protocol IDs and exact canonical decimal IDs can match.
 const objectId = value => typeof value === 'number' && Number.isSafeInteger(value) && value > 0 && value <= 0xffff_ffff ? value :
   typeof value === 'string' && /^[1-9]\d*$/.test(value) && Number.isSafeInteger(Number(value)) && Number(value) <= 0xffff_ffff ? Number(value) : null;
+const PATH_HAZARD = Symbol('ordinary-supply-path-hazard');
+const DIRECTIONS = Object.freeze({ Up:[0,-1], UpRight:[1,-1], Right:[1,0], DownRight:[1,1], Down:[0,1], DownLeft:[-1,1], Left:[-1,0], UpLeft:[-1,-1] });
+class SupplyPathHazard extends Error {
+  constructor(hazard) { super('ordinary supplies: unsafe hostile approach'); this.hazard = hazard; }
+}
 const sleepDefault = ms => new Promise(resolve => setTimeout(resolve, ms));
 const distance = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 const integer = (value, label, min = 0, max = Number.MAX_SAFE_INTEGER) => {
@@ -78,7 +85,9 @@ export function createOrdinarySupplies(client, options = {}) {
   const maxHunts = integer(options.maxHunts ?? 8, 'maxHunts', 1, 8);
   const maxEmptySearchRefreshes = integer(options.maxEmptySearchRefreshes ?? 20, 'maxEmptySearchRefreshes', 1, 20);
   const rows = [], proofs = [], commandRows = [], queue = [], fundingTargetRejections = [];
-  let fundingTargetRejectionCount = 0;
+  let fundingTargetRejectionCount = 0, pathHazardCount = 0;
+  const pathHazards = [], movementOrigins = new WeakMap();
+  let navigationPolicy = null;
   const counts = {};
   let state = enabled ? 'idle' : 'disabled', active = false, used = false, draining = false;
   let started = null, deadline = null, identity = null, identityName = null, before = null, after = null, failure = null;
@@ -135,13 +144,84 @@ export function createOrdinarySupplies(client, options = {}) {
     if (ms >= deadline - now()) throw new Error('ordinary supplies: preparation wall budget exhausted');
     await sleep(ms); guard();
   }
+  function visibleHostiles() {
+    return (client.snapshot.entities ?? []).filter(entity => String(entity.kind).toLowerCase() === 'monster' &&
+      entity.dead !== true && !(Number.isFinite(entity.hp) && entity.hp <= 0) &&
+      entity.disposition !== 'neutral' && entity.disposition !== 'friendly');
+  }
+  function blockerScalar(entity) {
+    return { objectId: objectId(entity.objectId), name: typeof entity.name === 'string' ? entity.name.slice(0,80) : null,
+      ...point(entity, 'visible hostile'), hp: Number.isFinite(entity.hp) ? entity.hp : null,
+      ai: Number.isSafeInteger(entity.ai) ? entity.ai : null };
+  }
+  function recordPathHazard(action, phase, from, physicalCells, blocker, radius, reason) {
+    const value = guard(), hazard = { [PATH_HAZARD]: true, reason, action, phase, radius,
+      from: { ...from }, physicalCells: physicalCells.map(cell => ({ ...cell })), blocker: blocker ? blockerScalar(blocker) : null,
+      snapshotSequence: client.sequence, observedSnapshotSequence: lastObserved, ownerId: value.ownerId, ownerName: value.ownerName, map: value.map };
+    pathHazardCount++;
+    if (pathHazards.length < 32) { const { [PATH_HAZARD]: _, ...scalar } = hazard; pathHazards.push(scalar); }
+    return hazard;
+  }
+  function movementHazard(action, phase, from, physicalCells, policy = navigationPolicy) {
+    guard(); const radius = policy?.radius ?? 8;
+    for (const hostile of visibleHostiles()) {
+      const position = point(hostile, 'visible hostile'), beforeDistance = distance(from, position);
+      const named = policy?.byName?.get(String(hostile.name ?? '').replace(/[^a-z0-9]/gi,'').toLowerCase()) ?? 0;
+      const clearance = Math.max(radius, named);
+      for (const cell of physicalCells) {
+        const nextDistance = distance(cell, position);
+        // Static, source-checked membership applies to this exact server cell
+        // and this ordinary AI0 monster, never to an inferred future safe zone.
+        // Even a protected cell cannot bypass authoritative entity occupancy.
+        if (nextDistance !== 0 && isProtectedOrdinaryCell(options.ordinaryProtection, client.snapshot.mapFileName, hostile, cell) === true) continue;
+        // Entry barrier, never a cage: an already-close actor may keep or grow
+        // its distance from every threat, but may not enter an occupied tile.
+        if (nextDistance === 0 || (beforeDistance <= clearance ? nextDistance < beforeDistance : nextDistance <= clearance))
+          return recordPathHazard(action, phase, from, physicalCells, hostile, clearance, 'hostile-clearance');
+      }
+    }
+    return null;
+  }
+  function protectedPlannerObstacles(policy) {
+    guard();
+    const from = point(owner(client.snapshot), 'planning owner'), obstacles = new Map();
+    for (const hostile of visibleHostiles()) {
+      if (!isOrdinaryAi0Threat(options.ordinaryProtection, client.snapshot.mapFileName, hostile)) continue;
+      const position = point(hostile, 'visible hostile'), beforeDistance = distance(from, position);
+      const named = policy.byName.get(String(hostile.name ?? '').replace(/[^a-z0-9]/gi,'').toLowerCase()) ?? 0;
+      const clearance = Math.max(policy.radius, named);
+      for (let y = Math.max(0, position.y-clearance); y <= Math.min(65535, position.y+clearance); y++) {
+        for (let x = Math.max(0, position.x-clearance); x <= Math.min(65535, position.x+clearance); x++) {
+          const cell = { x, y }, nextDistance = distance(cell, position);
+          if (nextDistance !== 0 && isProtectedOrdinaryCell(options.ordinaryProtection, client.snapshot.mapFileName, hostile, cell)) continue;
+          if (nextDistance === 0 || (beforeDistance <= clearance ? nextDistance < beforeDistance : nextDistance <= clearance))
+            obstacles.set(`${x},${y}`, cell);
+        }
+      }
+    }
+    return [...obstacles.values()];
+  }
+  function assertMovement(command, origin) {
+    const from = point(owner(client.snapshot), 'movement owner');
+    if (!origin || from.x !== origin.from.x || from.y !== origin.from.y)
+      throw new SupplyPathHazard(recordPathHazard(command.type, 'send', from, [], null, origin?.policy?.radius ?? 8, 'owner-transform-changed'));
+    const delta = DIRECTIONS[command.direction];
+    if (!delta) throw new Error('ordinary supplies: invalid ordinary movement direction');
+    const cells = Array.from({ length: command.type === 'run' ? 2 : 1 }, (_, index) =>
+      point({ x:from.x+delta[0]*(index+1), y:from.y+delta[1]*(index+1) }, 'movement cell'));
+    const hazard = movementHazard(command.type, 'send', from, cells, origin.policy);
+    if (hazard) throw new SupplyPathHazard(hazard);
+  }
   function assertFundingTarget(command, phase) {
     const id = integer(command.objectId, 'attack objectId', 1, 0xffff_ffff);
     const matches = (client.snapshot.entities ?? []).filter(entity => objectId(entity.objectId) === id);
     const target = matches.length === 1 ? matches[0] : null;
+    const blocker = target && visibleHostiles().find(hostile => { const p = point(hostile, 'visible hostile'); return Math.abs(p.x-target.x)<=8 && Math.abs(p.y-target.y)<=6; });
     const reason = !matches.length ? 'missing' : matches.length > 1 ? 'ambiguous-id' :
       String(target.kind).toLowerCase() !== 'monster' || target.name !== 'Deer' ? 'not-deer' :
-      target.dead !== false || !Number.isFinite(target.hp) || !(target.hp > 0) ? 'not-confirmed-live' : null;
+      target.dead !== false || !Number.isFinite(target.hp) || !(target.hp > 0) ? 'not-confirmed-live' :
+      target.disposition !== 'neutral' || target.ownerName ? 'not-neutral-deer' :
+      blocker ? 'hostile-near-deer' : null;
     if (!reason) return;
     const value = guard();
     fundingTargetRejectionCount++;
@@ -151,12 +231,16 @@ export function createOrdinarySupplies(client, options = {}) {
       targetDead: typeof target?.dead === 'boolean' ? target.dead : null,
       targetHp: Number.isFinite(target?.hp) ? target.hp : null,
       targetIdType: target ? typeof target.objectId : null, matches: matches.length,
+      blocker: blocker ? blockerScalar(blocker) : null,
       snapshotSequence: client.sequence, observedSnapshotSequence: lastObserved, observedSnapshotMonotonicMs: lastObservedMono,
       ownerId: value.ownerId, ownerName: value.ownerName, map: value.map });
     throw new FundingTargetLoss(id, reason);
   }
   async function clearFundingMonster(fundingClient, target, navigateNear, settings) {
-    try { return await clearTravelBlockingMonster(fundingClient, target, navigateNear, settings); }
+    try {
+      assertFundingTarget({ type:'attack', objectId:Number(target.objectId) }, 'selection');
+      return await clearTravelBlockingMonster(fundingClient, target, navigateNear, settings);
+    }
     catch (error) {
       if (!(error instanceof FundingTargetLoss)) throw error;
       guard(); // Owner, transport and global budgets remain terminal.
@@ -173,7 +257,9 @@ export function createOrdinarySupplies(client, options = {}) {
     if (command.type === 'harvest' && !(client.snapshot.entities ?? []).some(entity => entity.name === 'Deer' && entity.dead === true && distance(owner(client.snapshot), entity) === 1 && harvestDirection(owner(client.snapshot), entity) === command.direction)) throw new Error('ordinary supplies: only adjacent Deer corpse may be harvested');
     if (command.type === 'pickUp' && !(client.snapshot.groundDrops ?? []).some(drop => drop.objectId === command.objectId && drop.name === 'Venison' && distance(owner(client.snapshot), drop) === 0)) throw new Error('ordinary supplies: only same-tile visible Venison may be picked up');
     if (queue.length >= 8) throw new Error('ordinary supplies: send queue limit');
-    queue.push({ ...command });
+    const queued = { ...command };
+    if (['walk', 'run'].includes(command.type)) movementOrigins.set(queued, { from: point(owner(client.snapshot), 'queued movement owner'), policy: navigationPolicy });
+    queue.push(queued);
   }
   async function drain() {
     if (draining) throw new Error('ordinary supplies: reentrant send drain');
@@ -183,6 +269,7 @@ export function createOrdinarySupplies(client, options = {}) {
         guard();
         await client.pace(); guard();
         let command = queue.shift();
+        if (['walk', 'run'].includes(command.type)) assertMovement(command, movementOrigins.get(command));
         if (['attack', 'attackV2'].includes(command.type)) assertFundingTarget(command, 'send');
         if (command.type === 'attack' && client.attackResults === 'v2') {
           if (typeof client.nextAttackV2 !== 'function') throw new Error('ordinary supplies: v2 physical attack unavailable');
@@ -241,8 +328,40 @@ export function createOrdinarySupplies(client, options = {}) {
   async function navigate(target, range, stop, navOptions) {
     await drain(); guard();
     const pickupTile = (client.snapshot.groundDrops ?? []).some(drop => drop.objectId === target?.objectId && drop.name === 'Venison');
-    await options.navigate(facade, target, pickupTile ? 0 : range, stop, navOptions);
-    await drain(); guard();
+    if (navigationPolicy) throw new Error('ordinary supplies: reentrant navigation');
+    const radius = Math.max(8, integer(navOptions?.hostileAvoidanceRadius ?? 0, 'navigation hostile radius'));
+    const byName = new Map(Object.entries(navOptions?.hostileAvoidanceByName ?? {}).map(([name,value]) =>
+      [name.replace(/[^a-z0-9]/gi,'').toLowerCase(), integer(value,'named hostile radius')]));
+    navigationPolicy = { radius, byName };
+    const safeOptions = { ...navOptions, hostileAvoidanceRadius: radius, allowedHostileObjectIds: [],
+      beforeMovement: context => {
+        const hazard = movementHazard(context.movementType, 'before-movement', context.from, context.physicalCells);
+        return hazard ?? navOptions?.beforeMovement?.(context);
+      } };
+    if (ordinaryProtectionSummary(options.ordinaryProtection)) {
+      // The shared planner's coarse squares would otherwise block protected
+      // village cells before beforeMovement can examine them. Rebuild only
+      // authenticated ordinary-AI0 squares at cell resolution. Getters run at
+      // each planner read, with the then-current owner/AOI, never a stale start.
+      const policy = navigationPolicy;
+      Object.defineProperties(safeOptions, {
+        allowedHostileObjectIds: { enumerable:true, get:() => visibleHostiles()
+          .filter(entity => isOrdinaryAi0Threat(options.ordinaryProtection, client.snapshot.mapFileName, entity))
+          .map(entity => objectId(entity.objectId)).filter(id => id !== null) },
+        forbiddenPoints: { enumerable:true, get:() => [...(navOptions?.forbiddenPoints ?? []), ...protectedPlannerObstacles(policy)] },
+      });
+    }
+    try {
+      await options.navigate(facade, target, pickupTile ? 0 : range, stop, safeOptions);
+      await drain(); guard();
+    } catch (error) {
+      const ownHazard = error instanceof SupplyPathHazard || error instanceof NavigationStepGuarded && error.hazard?.[PATH_HAZARD] === true;
+      if (!ownHazard || state !== 'funding') throw error;
+      guard();
+      // Existing bounded funding search/combat understands a failed safe path.
+      // Never re-enter navigation here or restart its budgets.
+      throw new Error('No walk path: ordinary supplies hostile clearance', { cause:error });
+    } finally { navigationPolicy = null; }
   }
   function liveNpc(spec) {
     const actor = owner(client.snapshot);
@@ -294,8 +413,11 @@ export function createOrdinarySupplies(client, options = {}) {
       commandCountsScope: 'module-owned commands; external keepAlive shares the original client budget',
       stagingSafetyScope: 'Fresh authoritative inSafeZone protects against normal monster targeting and impacts only. Existing poison and released effects may still damage; absent status fields do not prove their absence.',
       measurementCredit: false, sustainableDurationProven: false,
+      protectionSummary: ordinaryProtectionSummary(options.ordinaryProtection),
       fundingTargetRejections: fundingTargetRejections.map(row => ({ ...row })), fundingTargetRejectionCount,
       fundingTargetRejectionsTruncated: fundingTargetRejectionCount > fundingTargetRejections.length,
+      pathHazards: pathHazards.map(row => ({ ...row, from:{...row.from}, physicalCells:row.physicalCells.map(cell=>({...cell})), blocker:row.blocker?{...row.blocker}:null })),
+      pathHazardCount, pathHazardsTruncated: pathHazardCount > pathHazards.length,
       ...(options.resolveStagingPoint ? { resolvedStagingPoint: resolvedStagingPoint ? { ...resolvedStagingPoint } : null } : {}) };
   }
   function freshStagingReadiness({ afterSequence = -1, maxAgeMs = evidenceMs } = {}) {

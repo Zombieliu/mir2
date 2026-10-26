@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createNavigator } from './quest-agent/protocol-play.mjs';
 import { createOrdinarySupplies, ORDINARY_SUPPLY_COMMANDS } from './capacity-ordinary-supplies.mjs';
+import { loadOrdinaryProtection } from './capacity-ordinary-protection.mjs';
 
 const route = { quests: [{ objectives: { item: [], kill: [{ monsterName: 'Deer', spawnCandidates: [{ mapFileName: '0', position: { x: 290, y: 604 }, count: 4 }] }] } }] };
 const item = (id, quantity, uniqueId, slot = 0) => ({ itemIndex: id, name: id === 658 ? '(HP)DrugSmall' : 'Venison', quantity, uniqueId, container: 'bag1', slot, sellValue: 250 });
@@ -8,7 +10,7 @@ function fixture(config = {}) {
   let clock = 1, hook = () => {}, seq = 0, currentDeer = null;
   const harvestPasses = new Map();
   let attackPaceArmed = false, attackPaceChanged = false;
-  const actor = { objectId: config.ownerId ?? 1, kind: 'selfPlayer', name: 'ordinary-owner', class: 'Warrior', x: 290, y: 607, hp: 100, maxHp: 100, dead: false };
+  const actor = { objectId: config.ownerId ?? 1, kind: 'selfPlayer', name: 'ordinary-owner', class: 'Warrior', x: config.ownerPosition?.x ?? 290, y: config.ownerPosition?.y ?? 607, hp: 100, maxHp: 100, dead: false };
   const client = {
     label: config.label ?? 'ordinary-owner', sequence: 0, events: [], sent: [], slots: [], attackResults: config.v2 ? 'v2' : 'legacy', attackV2Supported: config.v2 === true, closed: false,
     snapshot: { playerObjectId: actor.objectId, mapFileName: '0', playerHp: 100, playerMaxHp: 100, gold: config.gold ?? 0, inventoryCapacity: 46,
@@ -16,8 +18,9 @@ function fixture(config = {}) {
         { objectId: 6, kind: 'npc', name: 'Merchant_John', x: 292, y: 603 },
         { objectId: 5, kind: 'npc', name: 'Merchant_Ruben', x: 288, y: 608 },
         ...(config.nonDeerBlocker ? [{ objectId: 99, kind: 'monster', name: 'Scarecrow', x: 289, y: 605, hp: 25, dead: false }] : []),
-        ...Array.from({ length: config.deer ?? 0 }, (_, i) => ({ objectId: 20 + i, kind: 'monster', name: 'Deer', x: 290 + i, y: 604, hp: 1, dead: false }))] },
+        ...Array.from({ length: config.deer ?? 0 }, (_, i) => ({ objectId: 20 + i, kind: 'monster', name: 'Deer', x: config.deerPositions?.[i]?.x ?? (config.distantAlternatives && i>0 ? 310+i : 290+i), y: config.deerPositions?.[i]?.y ?? 604, hp: 1, dead: false, disposition: 'neutral' })), ...(config.hostiles ?? [])] },
     async pace() {
+      config.onPace?.({ client:this, actor, snapshot });
       if (attackPaceArmed && !attackPaceChanged) {
         attackPaceChanged = true;
         const target = this.snapshot.entities.find(entity => entity.objectId === 20);
@@ -123,7 +126,11 @@ function fixture(config = {}) {
         this.snapshot.inventoryItems.push(item(999, 1, 500 + command.objectId, this.snapshot.inventoryItems.length)); snapshot();
       }
       if (['walk', 'run'].includes(command.type)) {
-        Object.assign(actor, command.destination); packet('UserLocation', { objectId: 1, x: actor.x, y: actor.y }); snapshot();
+        const deltas = { Up:[0,-1], UpRight:[1,-1], Right:[1,0], DownRight:[1,1], Down:[0,1], DownLeft:[-1,1], Left:[-1,0], UpLeft:[-1,-1] };
+        const delta = deltas[command.direction], stride = command.type === 'run' ? 2 : 1;
+        Object.assign(actor, command.destination ?? { x:actor.x+delta[0]*stride, y:actor.y+delta[1]*stride });
+        config.onMove?.({ client:this, actor });
+        packet('UserLocation', { objectId: actor.objectId, x: actor.x, y: actor.y }); snapshot();
       }
     },
     async wait(predicate, label, timeout) {
@@ -149,20 +156,31 @@ function fixture(config = {}) {
   }
   let preparation = true;
   const supply = createOrdinarySupplies(client, { preparationProfile: 'ordinary-economic-v1', targetHp: config.target ?? 12, route,
-    stagingPoint: { x: 290, y: 607 }, resolveStagingPoint: config.resolveStagingPoint, isPreparation: () => preparation, now: () => clock,
+    stagingPoint: config.stagingPoint ?? { x: 290, y: 607 }, resolveStagingPoint: config.resolveStagingPoint, ordinaryProtection: config.ordinaryProtection, isPreparation: () => preparation, now: () => clock,
     sleep: async ms => { clock += ms; }, maxHunts: config.maxHunts ?? 8, timeoutMs: config.timeoutMs ?? 600_000,
     maxCommands: config.maxCommands ?? 2048,
-    navigate: async (facade, target, range) => {
+    navigate: async (facade, target, range, stop, navOptions) => {
+      config.inspectNavigation?.({target,range,navOptions});
+      if (config.navigate) return config.navigate({ facade, client, actor, snapshot, target, range, stop, navOptions });
       if (config.nonDeerBlocker && target.objectId === 20) throw new Error('No walk path to this Deer');
       if (config.navigationFailure) throw new Error('fixture blocked ordinary route');
       if (config.failPhase) preparation = false;
-      const destination = { x: target.x - (range > 0 ? 1 : 0), y: target.y };
-      facade.send({ type: 'walk', direction: 'Right', destination });
-      await facade.wait(() => actor.x === destination.x && actor.y === destination.y, 'ordinary navigation');
+      const names = ['Up','UpRight','Right','DownRight','Down','DownLeft','Left','UpLeft'];
+      const offsets = [[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]];
+      while (Math.max(Math.abs(actor.x-target.x),Math.abs(actor.y-target.y)) > range) {
+        const dx = Math.sign(target.x-actor.x), dy = Math.sign(target.y-actor.y);
+        const direction = names[offsets.findIndex(pair => pair[0]===dx&&pair[1]===dy)];
+        const destination = { x:actor.x+dx, y:actor.y+dy };
+        await facade.pace();
+        const hazard = navOptions.beforeMovement({ from:{x:actor.x,y:actor.y}, physicalCells:[destination], movementType:'walk' });
+        if (hazard) throw new Error('fixture path unsafe');
+        facade.send({ type:'walk', direction });
+        await facade.wait(() => actor.x===destination.x&&actor.y===destination.y, 'ordinary navigation');
+      }
       if (config.targetLossAtPace && target.objectId === 20) attackPaceArmed = true;
     } });
   hook = supply.observe;
-  return { client, supply, snapshot, advance: ms => { clock += ms; }, endPreparation: () => { preparation = false; } };
+  return { client, supply, snapshot, now:()=>clock, advance: ms => { clock += ms; }, endPreparation: () => { preparation = false; } };
 }
 
 test('default is held-only noop and economic profile has explicit bounded inputs', async () => {
@@ -347,8 +365,8 @@ test('an empty authoritative Deer field exhausts its finite refresh budget', asy
   assert.equal(f.supply.status().status, 'failed');
   assert.equal(f.client.sent.some(c => c.type === 'buyItem'), false);
   assert.ok(f.supply.status().commands < 2048);
-  assert.equal(f.supply.status().commandRows.length, 32);
-  assert.equal(f.supply.status().commandRowsTruncated, true);
+  assert.ok(f.supply.status().commandRows.length <= 32);
+  assert.equal(f.supply.status().commandRowsTruncated, f.supply.status().commands > 32);
 });
 
 test('v2 physical hunting never silently falls back to legacy attack', async () => {
@@ -502,14 +520,15 @@ test('a queued Deer lost during ordinary pacing is not attacked and consumes the
   assert.equal(bounded.client.sent.some(command => command.type === 'buyItem'), false);
 });
 
-test('a non-Deer approach blocker remains unattackable without aborting a bounded alternative Deer hunt', async () => {
-  const f = fixture({ deer: 4, v2: true, nonDeerBlocker: true });
+test('a nearby non-Deer threat excludes the dangerous Deer before a bounded safe alternative hunt', async () => {
+  const f = fixture({ deer: 4, v2: true, nonDeerBlocker: true, distantAlternatives: true, stagingPoint:{x:310,y:607} });
   const result = await f.supply.prepare();
   assert.equal(result.status, 'ready'); assert.equal(result.funding.collected, 3);
   assert.equal(f.client.sent.some(command => command.objectId === 99 && ['attack', 'attackV2'].includes(command.type)), false);
-  assert.equal(result.fundingTargetRejections[0].targetId, 99);
-  assert.equal(result.fundingTargetRejections[0].targetName, 'Scarecrow');
-  assert.equal(result.fundingTargetRejections[0].phase, 'enqueue');
+  assert.equal(result.fundingTargetRejections[0].targetId, 20);
+  assert.equal(result.fundingTargetRejections[0].reason, 'hostile-near-deer');
+  assert.equal(result.fundingTargetRejections[0].blocker.name, 'Scarecrow');
+  assert.equal(result.fundingTargetRejections[0].phase, 'selection');
 });
 
 test('target loss cannot disguise owner safety changes or transport failures during pacing', async t => {
@@ -546,4 +565,273 @@ test('only boolean dead false confirms a live target after pacing; malformed or 
     assert.equal(rejection.targetDead, null);
     assert.equal(f.client.sent.some(command => command.type === 'attack'), false);
   });
+});
+
+
+const hostile = (objectId,x,y,extra={}) => ({objectId,kind:'monster',name:'HookingCat',x,y,hp:30,dead:false,disposition:'hostile',ai:0,...extra});
+function actualNavigatorFor(fixtureAccessor) {
+  let navigator;
+  return async ({facade,target,range,stop,navOptions}) => {
+    const f=fixtureAccessor();
+    navigator ??= createNavigator(facade,{ loadCollisionMap:async()=>({mapFileName:'0',width:360,height:660,blocked:new Uint8Array(360*660)}),
+      now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000 });
+    return navigator(target,range,stop,navOptions);
+  };
+}
+
+test('all preparation routes retain at least eight hostile cells even when funding requests zero clearance', async()=>{
+  const routes=[];
+  const f=fixture({deer:3,v2:true,inspectNavigation:row=>routes.push(row)});
+  assert.equal((await f.supply.prepare()).status,'ready');
+  assert.ok(routes.some(row=>row.target.name==='Deer'));
+  assert.ok(routes.some(row=>row.target.name==='Merchant_Ruben'));
+  assert.ok(routes.some(row=>row.target.name==='Merchant_John'));
+  assert.ok(routes.every(row=>row.navOptions.hostileAvoidanceRadius>=8&&row.navOptions.allowedHostileObjectIds.length===0));
+  assert.ok(routes.every(row=>typeof row.navOptions.beforeMovement==='function'));
+});
+
+test('real navigator can leave the three-Scarecrow birth halos without a safe-zone exemption or extra refreshes',async()=>{
+  const threats=[hostile(71,287,616,{name:'Scarecrow'}),hostile(72,293,614,{name:'Scarecrow'}),hostile(73,286,623,{name:'Scarecrow'})];
+  let f;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:288,y:616},stagingPoint:{x:288,y:600},hostiles:threats,navigate:actualNavigatorFor(()=>f)});
+  f.client.snapshot.inSafeZone=true;
+  assert.equal((await f.supply.prepare()).status,'ready');
+  assert.equal(f.client.sent.filter(command=>command.type==='clientVersion').length,2);
+  assert.ok(f.client.sent.some(command=>['walk','run'].includes(command.type)));
+  assert.equal(f.supply.status().pathHazardCount,0);
+});
+
+test('real navigator detours around the entire eight-cell halo, including unknown-AI hostile observations',async t=>{
+  for(const unknown of [false,true])await t.test(String(unknown),async()=>{
+    let f;
+    const threat=hostile(71,300,607,unknown?{disposition:undefined,ai:undefined}:{});
+    f=fixture({items:[item(658,12,500)],stagingPoint:{x:310,y:607},hostiles:[threat],navigate:actualNavigatorFor(()=>f)});
+    assert.equal((await f.supply.prepare()).status,'ready');
+    let position={x:290,y:607};
+    const offsets={Up:[0,-1],UpRight:[1,-1],Right:[1,0],DownRight:[1,1],Down:[0,1],DownLeft:[-1,1],Left:[-1,0],UpLeft:[-1,-1]};
+    for(const command of f.client.sent.filter(command=>['walk','run'].includes(command.type))){
+      const [dx,dy]=offsets[command.direction];
+      for(let step=0;step<(command.type==='run'?2:1);step++){
+        position={x:position.x+dx,y:position.y+dy};
+        assert.ok(Math.max(Math.abs(position.x-threat.x),Math.abs(position.y-threat.y))>8);
+      }
+    }
+    assert.deepEqual(position,{x:310,y:607});
+  });
+});
+
+test('a hostile arriving during queued Run pacing blocks its intermediate or landing cell before actual send',async t=>{
+  for(const intermediate of [true,false])await t.test(String(intermediate),async()=>{
+    let armed=false,changed=false;
+    const f=fixture({items:[item(658,12,500)],stagingPoint:{x:292,y:607},
+      onPace:({client,snapshot})=>{if(armed&&!changed){changed=true;client.snapshot.entities.push(hostile(71,intermediate?291:300,607));snapshot();}},
+      navigate:async({facade})=>{armed=true;facade.send({type:'run',direction:'Right'});await facade.wait(()=>false,'queued ordinary Run');}});
+    f.client.snapshot.inSafeZone=true;
+    await assert.rejects(f.supply.prepare(),/unsafe hostile approach/);
+    assert.equal(f.client.sent.some(command=>command.type==='run'),false);
+    const row=f.supply.status().pathHazards[0];
+    assert.equal(row.phase,'send');assert.equal(row.radius,8);assert.equal(row.physicalCells.length,2);
+    assert.deepEqual(row.physicalCells,[{x:291,y:607},{x:292,y:607}]);
+    assert.equal(row.blocker.objectId,71);
+    assert.equal(f.supply.status().actualStagingReached,false);
+  });
+});
+
+test('inside a halo ordinary movement may maintain or increase distance but cannot approach the threat',async t=>{
+  for(const away of [true,false])await t.test(String(away),async()=>{
+    const f=fixture({items:[item(658,12,500)],stagingPoint:{x:away?291:289,y:607},hostiles:[hostile(71,287,607)],
+      navigate:async({facade})=>{facade.send({type:'walk',direction:away?'Right':'Left'});await facade.wait(()=>true,'ordinary halo exit');}});
+    f.client.snapshot.inSafeZone=true;
+    if(away){assert.equal((await f.supply.prepare()).status,'ready');assert.equal(f.client.sent.filter(c=>c.type==='walk').length,1);}
+    else{await assert.rejects(f.supply.prepare(),/unsafe hostile approach/);assert.equal(f.client.sent.some(c=>c.type==='walk'),false);}
+  });
+});
+
+test('all dangerous Deer exhaust the original eight hunt attempts without any attack or fake funding credit',async()=>{
+  const f=fixture({deer:8,v2:true,hostiles:[hostile(71,295,604)]});
+  await assert.rejects(f.supply.prepare(),/after 0 hunts and 8 attempts/);
+  assert.equal(f.client.sent.some(c=>['attack','attackV2','harvest','buyItem'].includes(c.type)),false);
+  assert.equal(f.supply.status().fundingTargetRejectionCount,8);
+  assert.ok(f.supply.status().fundingTargetRejections.every(row=>row.reason==='hostile-near-deer'&&row.phase==='selection'));
+  assert.equal(f.supply.status().funding,null);
+  assert.ok(f.supply.status().commands<2048);
+});
+
+test('friendly, unclassified or owned Deer are not ordinary neutral funding targets',async t=>{
+  for(const kind of ['friendly','unknown','owned'])await t.test(kind,async()=>{
+    let f;f=fixture({deer:4,v2:true,distantAlternatives:true,stagingPoint:{x:310,y:607},navigate:actualNavigatorFor(()=>f)});const target=f.client.snapshot.entities.find(e=>e.objectId===20);
+    if(kind==='friendly')target.disposition='friendly';
+    if(kind==='unknown')delete target.disposition;
+    if(kind==='owned')target.ownerName='another-player';
+    assert.equal((await f.supply.prepare()).status,'ready');
+    assert.equal(f.client.sent.some(c=>c.type==='attackV2'&&c.objectId===20),false);
+    assert.equal(f.supply.status().fundingTargetRejections[0].reason,'not-neutral-deer');
+  });
+});
+
+test('an owner transform changed during movement pacing cannot retarget an already queued direction',async()=>{
+  let armed=false,changed=false;
+  const f=fixture({items:[item(658,12,500)],stagingPoint:{x:291,y:607},
+    onPace:({actor,snapshot})=>{if(armed&&!changed){changed=true;actor.y++;snapshot();}},
+    navigate:async({facade})=>{armed=true;facade.send({type:'walk',direction:'Right'});await facade.wait(()=>false,'queued move');}});
+  await assert.rejects(f.supply.prepare(),/unsafe hostile approach/);
+  assert.equal(f.client.sent.some(c=>c.type==='walk'),false);
+  assert.equal(f.supply.status().pathHazards[0].reason,'owner-transform-changed');
+});
+
+
+test('fresh danger during a real funding approach uses the existing finite target-loss path',async()=>{
+  let f,armed=false,changed=false;
+  const navigate=actualNavigatorFor(()=>f);
+  f=fixture({deer:4,v2:true,distantAlternatives:true,stagingPoint:{x:310,y:607},
+    onPace:({client,snapshot})=>{if(armed&&!changed){changed=true;client.snapshot.entities.push(hostile(71,290,606));snapshot();}},
+    navigate:async context=>{if(context.target.objectId===20)armed=true;return navigate(context);}});
+  assert.equal((await f.supply.prepare()).status,'ready');
+  assert.equal(f.client.sent.some(c=>c.type==='attackV2'&&c.objectId===20),false);
+  assert.ok(f.supply.status().pathHazardCount>=1);
+  assert.equal(f.supply.status().funding.collected,3);
+});
+
+test('path hazard history is bounded at 32 scalar rows and unrelated navigation errors stay terminal',async()=>{
+  const original=new Error('fixture no safe candidate');
+  const f=fixture({items:[item(658,12,500)],hostiles:[hostile(71,300,607)],
+    navigate:async({actor,navOptions})=>{for(let i=0;i<40;i++)assert.ok(navOptions.beforeMovement({
+      movementType:'run',from:{x:actor.x,y:actor.y},physicalCells:[{x:291,y:607},{x:292,y:607}]}));throw original;}});
+  await assert.rejects(f.supply.prepare(),error=>error===original);
+  const result=f.supply.status();
+  assert.equal(result.pathHazardCount,40);assert.equal(result.pathHazards.length,32);assert.equal(result.pathHazardsTruncated,true);
+  assert.equal(f.client.sent.some(c=>['walk','run'].includes(c.type)),false);
+  assert.equal(result.actualStagingReached,false);
+});
+
+
+test('nonempty unknown and malformed dispositions remain threats for Deer selection and queued Run dispatch',async t=>{
+  for(const disposition of ['Unknown','unsupported','Neutral',0,false,{},['neutral']])await t.test(JSON.stringify(disposition),async()=>{
+    const funding=fixture({deer:8,v2:true,hostiles:[hostile(71,295,604,{disposition})]});
+    await assert.rejects(funding.supply.prepare(),/after 0 hunts and 8 attempts/);
+    assert.equal(funding.client.sent.some(command=>['attack','attackV2','harvest'].includes(command.type)),false);
+    assert.equal(funding.supply.status().fundingTargetRejections[0].reason,'hostile-near-deer');
+    let armed=false,changed=false;
+    const moving=fixture({items:[item(658,12,500)],stagingPoint:{x:292,y:607},
+      onPace:({client,snapshot})=>{if(armed&&!changed){changed=true;client.snapshot.entities.push(hostile(71,300,607,{disposition}));snapshot();}},
+      navigate:async({facade})=>{armed=true;facade.send({type:'run',direction:'Right'});await facade.wait(()=>false,'queued unknown-threat Run');}});
+    await assert.rejects(moving.supply.prepare(),/unsafe hostile approach/);
+    assert.equal(moving.client.sent.some(command=>command.type==='run'),false);
+    assert.equal(moving.supply.status().pathHazards[0].phase,'send');
+  });
+});
+
+test('only canonical neutral and friendly dispositions are exempt from the preparation threat halo',async t=>{
+  for(const disposition of ['neutral','friendly'])await t.test(disposition,async()=>{
+    const f=fixture({items:[item(658,12,500)],stagingPoint:{x:292,y:607},hostiles:[hostile(71,300,607,{disposition})],
+      navigate:async({facade})=>{facade.send({type:'run',direction:'Right'});await facade.wait(()=>true,'ordinary nonhostile Run');}});
+    assert.equal((await f.supply.prepare()).status,'ready');
+    assert.equal(f.client.sent.filter(command=>command.type==='run').length,1);
+    assert.equal(f.supply.status().pathHazardCount,0);
+  });
+});
+
+
+test('canonical static protection admits a real three-Scarecrow return route without another refresh',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  const threats=[hostile(71,287,616,{name:'Scarecrow'}),hostile(72,293,614,{name:'Scarecrow'}),hostile(73,286,623,{name:'Scarecrow'})];
+  let f;
+  f=fixture({items:[item(658,12,500)],ownerPosition:{x:288,y:600},stagingPoint:{x:288,y:615},hostiles:threats,
+    ordinaryProtection:protection,navigate:actualNavigatorFor(()=>f),
+    onMove:({client,actor})=>{client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
+  f.client.snapshot.inSafeZone=false;
+  const result=await f.supply.prepare();
+  assert.equal(result.status,'ready');
+  assert.deepEqual({x:result.after.x,y:result.after.y},{x:288,y:615});
+  assert.equal(f.client.sent.filter(command=>command.type==='clientVersion').length,2);
+  assert.ok(f.client.sent.some(command=>['walk','run'].includes(command.type)));
+  assert.equal(result.pathHazardCount,0);
+  assert.equal(result.protectionSummary.selectedMapMatches,true);
+  assert.equal(result.protectionSummary.normalAi0SafeZoneOnly,true);
+  assert.equal(result.protectionSummary.allDamageImmunity,false);
+  assert.ok(Object.isFrozen(result.protectionSummary));
+});
+
+test('a protected Run landing never excuses an unprotected intermediate cell or the reverse',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  for(const entry of [true,false])await t.test(entry?'outside then inside':'inside then outside',async()=>{
+    const from=entry?{x:277,y:604}:{x:297,y:607};
+    const cells=entry?[{x:278,y:605},{x:279,y:606}]:[{x:298,y:606},{x:299,y:605}];
+    const blocker=entry?hostile(71,285,606,{name:'Scarecrow'}):hostile(71,303,606,{name:'Scarecrow'});
+    const f=fixture({items:[item(658,12,500)],ownerPosition:from,stagingPoint:cells[1],hostiles:[blocker],ordinaryProtection:protection,
+      navigate:async({facade})=>{facade.send({type:'run',direction:entry?'DownRight':'UpRight'});await facade.wait(()=>true,'mixed-protection Run');}});
+    f.client.snapshot.inSafeZone=true;
+    await assert.rejects(f.supply.prepare(),/unsafe hostile approach/);
+    assert.equal(f.client.sent.some(command=>command.type==='run'),false);
+    assert.equal(f.supply.status().pathHazards[0].phase,'send');
+    assert.deepEqual(f.supply.status().pathHazards[0].physicalCells,cells);
+  });
+});
+
+test('static ordinary protection never admits occupied cells, unknown AI or owned monsters',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  for(const [label,extra,occupied] of [
+    ['occupied',{name:'Scarecrow'},true],['unknown name',{name:'UnknownMonster'},false],
+    ['non AI0',{name:'Scarecrow',ai:1},false],['malformed AI',{name:'Scarecrow',ai:'0'},false],
+    ['owned',{name:'Scarecrow',ownerName:'someone'},false],['empty owner',{name:'Scarecrow',ownerName:''},false],
+    ['unknown disposition',{name:'Scarecrow',disposition:'Unknown'},false],
+  ])await t.test(label,async()=>{
+    const f=fixture({items:[item(658,12,500)],ownerPosition:{x:288,y:614},stagingPoint:{x:288,y:615},
+      hostiles:[hostile(71,288,occupied?615:616,extra)],ordinaryProtection:protection,
+      navigate:async({facade})=>{facade.send({type:'walk',direction:'Down'});await facade.wait(()=>true,'protected ordinary Walk');}});
+    f.client.snapshot.inSafeZone=true;
+    await assert.rejects(f.supply.prepare(),/unsafe hostile approach/);
+    assert.equal(f.client.sent.some(command=>command.type==='walk'),false);
+    assert.equal(f.supply.status().pathHazards[0].phase,'send');
+  });
+});
+
+test('missing or hand-made protection retains the original strict movement barrier',async t=>{
+  for(const ordinaryProtection of [undefined,{mapFileName:'0',safeZones:[{location:{x:288,y:616},size:10}],ai0MonsterNames:['Scarecrow']}])await t.test(ordinaryProtection?'hand-made spec':'no spec',async()=>{
+    const f=fixture({items:[item(658,12,500)],ownerPosition:{x:288,y:614},stagingPoint:{x:288,y:615},hostiles:[hostile(71,288,616,{name:'Scarecrow'})],ordinaryProtection,
+      navigate:async({facade})=>{facade.send({type:'walk',direction:'Down'});await facade.wait(()=>true,'untrusted-protection Walk');}});
+    f.client.snapshot.inSafeZone=true;
+    await assert.rejects(f.supply.prepare(),/unsafe hostile approach/);
+    assert.equal(f.client.sent.some(command=>command.type==='walk'),false);
+    assert.equal(f.supply.status().protectionSummary,null);
+  });
+});
+
+
+test('real ordinary navigation round-trips from village to Deer funding and back to merchants and staging',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  const threats=[hostile(71,287,616,{name:'Scarecrow'}),hostile(72,293,614,{name:'Scarecrow'}),hostile(73,286,623,{name:'Scarecrow'}),
+    hostile(74,330,594,{name:'UnclassifiedThreat',ai:undefined})];
+  let f;
+  f=fixture({deer:3,v2:true,deerPositions:[{x:310,y:594},{x:312,y:594},{x:314,y:594}],ownerPosition:{x:288,y:615},stagingPoint:{x:288,y:615},
+    hostiles:threats,ordinaryProtection:protection,navigate:actualNavigatorFor(()=>f),
+    onMove:({client,actor})=>{client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
+  f.client.snapshot.inSafeZone=true;
+  const result=await f.supply.prepare();
+  assert.equal(result.status,'ready');assert.equal(result.funding.hunts,3,JSON.stringify(result.funding));assert.equal(result.funding.collected,3);
+  assert.equal(result.purchased,12);assert.equal(result.soldVenison,2);assert.equal(result.goldEarned,500);assert.equal(result.after.venison,1);assert.equal(result.after.hpStock,12);
+  assert.deepEqual({x:result.after.x,y:result.after.y},{x:288,y:615});
+  assert.equal(f.client.sent.filter(c=>c.type==='attackV2').length,3);
+  assert.ok(f.client.sent.some(c=>c.type==='interact'&&c.objectId===6));
+  assert.ok(f.client.sent.some(c=>c.type==='interact'&&c.objectId===5));
+  assert.ok(result.movementCommands>30);assert.ok(result.commands<2048);assert.ok(result.elapsedMs<600000);
+  assert.equal(result.pathHazardCount,0);
+});
+
+test('protected planner obstacles are re-read using the live owner transform without bypassing final readiness',async()=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  let checked=false;
+  const f=fixture({items:[item(658,12,500)],ownerPosition:{x:290,y:600},stagingPoint:{x:289,y:600},
+    hostiles:[hostile(71,293,600,{name:'Scarecrow'})],ordinaryProtection:protection,
+    navigate:async({facade,navOptions})=>{
+      const before=navOptions.forbiddenPoints;
+      assert.ok(before.some(cell=>cell.x===291&&cell.y===600));
+      facade.send({type:'walk',direction:'Left'});await facade.wait(()=>true,'ordinary halo withdrawal');
+      const after=navOptions.forbiddenPoints;
+      assert.ok(after.some(cell=>cell.x===290&&cell.y===600),'a former origin becomes a closer forbidden cell after withdrawal');
+      assert.equal(before.some(cell=>cell.x===290&&cell.y===600),false);
+      assert.equal(after.some(cell=>cell.x===293&&cell.y===600),true,'occupied tile remains forbidden');
+      checked=true;
+    }});
+  await assert.rejects(f.supply.prepare(),/hostile near staging/);assert.equal(checked,true);
 });

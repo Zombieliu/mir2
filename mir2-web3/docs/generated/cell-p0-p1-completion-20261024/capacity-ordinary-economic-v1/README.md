@@ -99,3 +99,13 @@
 [公开生命与近域证据](bank-prepare-v2/public-health-guard-evidence-v1.json)及[原始录制标量提取器](bank-prepare-v2/extract-public-health-guard-evidence-v1.mjs)确认第5名owner1000/姓名/map0/level1/maxHP18未变；位置343,593附近精确HP18→16→15→12，最后下降约154ms后失败，12/18低于70%。近域两只HookingCat距1/2，正在接近/攻击的Deer在343,592；health事件没有attacker ID，不能认定是哪只造成伤害。旁观录制的空inventory不用于推导其真实持药量。原funding搜索启用避怪半径2，但Deer接近/回退传0、其他普通导航默认0，仅避占格，需把已有导航避敌能力接入完整准备路径。下一轮若复用该低血存档，必须通过普通恢复及fresh生命检查，不能跳过保护或改Store。
 
 [正常清理](bank-prepare-v2/cleanup-v1.json)及[独立OS检查](bank-prepare-v2/root-independent-cleanup-v1.json)确认PID61120消失、两端口释放及冻结来源未变。原判定与26份公开输入/结果/门禁日志（1,756,761字节）见[复制清单](bank-prepare-v2/copied-evidence-manifest.json)。继续定位普通狩猎路径的威胁暴露，原70%生命保护、600秒/8次/命令预算保持；P0未完成、P2未启动，尚无新25/50/100/500或两小时验收通过。
+
+## 完整避敌、可信安全区与普通低血恢复候选
+
+补给路径统一使用至少8格避敌，危险Deer按原8次尝试有界跳过；Walk/Run入队记录owner起点，在实际限速等待后的发送点重新核对起点及全部1/2路径格。仅明确neutral、未owned的活Deer可猎；未知或畸形disposition保守当威胁。正常AI0新索敌区域实际为横8纵6，8格屏障不等于消除16格既有追击或已发出的延迟伤害。
+
+新增`capacity-ordinary-protection.mjs`，只读取原server canonical及web两份已pin的respawn manifest；核对同map安全区/无歧义AI0怪名与platinum_176 route，生成只读可信spec。逐格使用Rust相同的location±size闭矩形，不能由scenario手造spec或把当前inSafeZone推广到未来格。仅已知、非owned、明确hostile普通AI0的受保护格豁免halo，实体占格、未知/非AI0及区外危险格仍拒绝。planner每轮动态补回区外8格障碍，beforeMovement与实际发送点继续逐格复核，支持普通外出后回村；不新增逐步刷新或免除毒/已释放效果风险。
+
+独立普通恢复在Login后、装备与helper前运行，最多一次使用原持有的确切HP658。必须取得同owner/name/map的fresh raw完整bag+belt减量、成功UseItem收件、精确HP增加及最终至少70%，全部在原发送后2秒内；ACK或ObjectHealth百分比不能单独证明恢复。死亡、无药、歧义、拒绝或超时原样失败；不购买、复活或编辑存档。原native测量恢复60%阈值与既有规则保持。恢复、装备、helper和最终readiness共享同一600秒/2048条准备预算，正常drain先移除临时命令限制；认证排队仍按原登录账本处理。
+
+聚焦回归及独立源码审查通过，包括真实loader/helper/navigator组合与测试碰撞图完整外出筹资、买药和回村。实际V2 Scarecrow/HookingCat字段确认为ownerName=null、ai=0和canonical monster/hostile，可信predicate可以匹配。此处仍为候选：统一Root新完整门禁及第三次百人角色库续跑待执行，尚无新人数档验收。
