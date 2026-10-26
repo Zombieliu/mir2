@@ -24,6 +24,8 @@ const PATH_HAZARD = Symbol('ordinary-supply-path-hazard');
 // Date.now clock; injected ordinary-navigation fixtures share options.now.
 const PLANNER_TRAIL_MS = 20_000, PLANNER_TRAIL_LIMIT = 2048, PLANNER_ID_LIMIT = 1024;
 const PATH_REPLAN_LIMIT = 3;
+// Same source-bound visible radius as selectPreparationStagingPoint.
+const PREPARATION_AOI_RADIUS = 16;
 const PLANNER_POSITION_PACKETS = new Set(['ObjectWalk', 'ObjectRun', 'ObjectTurn']);
 const PLANNER_IDENTITY_PACKETS = new Set(['ObjectMonster', 'NewMonsterInfo', 'ObjectPlayer', 'ObjectHero', 'ObjectNpc', 'NewNpcInfo',
   'ObjectName', 'ObjectDied', 'ObjectRevived', 'ObjectRemove', 'ObjectTeleportOut', 'Death']);
@@ -681,6 +683,15 @@ export function createOrdinarySupplies(client, options = {}) {
         }
       }
       if (options.resolveStagingPoint) {
+        state = 'staging';
+        if (distance(guard(),staging) > PREPARATION_AOI_RADIUS) {
+          // The declared point is only a region hint, possibly already saved
+          // by another actor. Do not choose or occupy an unseen final point.
+          await navigate(staging,PREPARATION_AOI_RADIUS);
+          // Position packets alone cannot establish current candidate occupancy.
+          // This ordinary refresh shares the same actor wall/command budgets.
+          await refresh(); guard();
+        }
         let receipt = rows.at(-1);
         const value = guard();
         const reusable = receipt && receipt.sequence === client.sequence && receipt.sequence === lastObserved && receipt.monotonicMs === lastObservedMono &&

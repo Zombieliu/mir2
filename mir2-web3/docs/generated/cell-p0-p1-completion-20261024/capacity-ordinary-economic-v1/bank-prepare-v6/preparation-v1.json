@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v6",
+  "state": "PENDING_NEW_HELPER_PROTECTION_COMMIT_AND_ROOT_JS_QUALIFICATION",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\copy-source-bank-v1.mjs",
+      "bytes": 11059,
+      "sha256": "380ca31ed8a79727ace5e719755eb4bc832338da8b6e398f9fb4c5910a41d6f5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\freeze-prepare-v1.mjs",
+      "bytes": 8143,
+      "sha256": "7733912d75c05a048e86afe6b985399fbb95f99e1adaafc6ee870a523fdbe303"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\run-owned-prepare-v1.mjs",
+      "bytes": 25117,
+      "sha256": "37bc19e8a77757490e837a8cc20776671230cc6fd091778904844a3cc1be3ba8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\owned-child-v1.mjs",
+      "bytes": 2201,
+      "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\prepare-config-pending-v1.json",
+      "bytes": 7097,
+      "sha256": "40761525604b45a98250abf016d53694ed129ae4563ff95898894e17f0cff6e8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\source-bank-plan-pending-v1.json",
+      "bytes": 11045,
+      "sha256": "b718121546daf4d791a4a50d59ff1602cbdfccf17a69328556b7601c53f97839"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\backend-release-binding-pending-v1.json",
+      "bytes": 1227,
+      "sha256": "6684cd3b64b7f659b83cce42d8bb823f6d235b3dbf38e4f0c8af3e08584a4595"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\derivation-v1.json",
+      "bytes": 40009,
+      "sha256": "590c3c4f1cf8d165cd04ba0de959fd20537954710f715512ecaa5a6b4364378d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\syntax-checks-v1.json",
+      "bytes": 3394,
+      "sha256": "089bd04b552557a0c845b5671c433315cc9764d939219a97266784f1ebdd7626"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\README-pending-v1.md",
+      "bytes": 3284,
+      "sha256": "40797c5821ca35e61673fac2ab8a0dab86c9663a943e65da3d1a1ef825e4a70f"
+    }
+  ],
+  "sourceSha256": "d76c41f6c4671ae7f9767120447f2ed99083a009740cfc3fcf1e0bc856c6aad4",
+  "sourceActualV5": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\episode\\reports\\1793053311312-f5756eff.preparation-report.json",
+      "bytes": 17249,
+      "sha256": "02a94872b9fc870bb204e4dd6852cbd059d0a7376ed4219f906cdee337842afa"
+    },
+    "cleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\episode\\cleanup-v1.json",
+      "bytes": 1036,
+      "sha256": "d462e1a0b0c58e43d12cd32780ed8991ccee3210aa9203c322bb54b06d181e2b"
+    },
+    "independentCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\root-independent-cleanup-v1.json",
+      "bytes": 225,
+      "sha256": "03fd84df2f848a89946e43445cd2691fbf46203a2473cdaef4ed4c6bdb5f19c0"
+    },
+    "sourceFiles": 11,
+    "totalBytes": 147516,
+    "sourceReadyCharacters": 5,
+    "sourcePreparedCount": 4,
+    "sourceOriginalFalseRetained": true,
+    "sourcePreparedEligibilityInherited": false,
+    "sourceFailedFifthNotPromoted": true,
+    "sourceColdFifthScalar": {
+      "source": "Whole normally closed V5 source accounts.json; no edits",
+      "name": "L370e2a04",
+      "characterIndex": 5,
+      "map": "0",
+      "x": 331,
+      "y": 590,
+      "hp": 18,
+      "maximumHp": 18,
+      "gold": 15,
+      "exact658Stock": 12
+    }
+  },
+  "backendReused": {
+    "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "backendBuildCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "release": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+      "bytes": 2257,
+      "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+    },
+    "reusedRootRustReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+      "bytes": 28585,
+      "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+    },
+    "reusedRustTestsPassed": 32,
+    "immutableExecutable": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+      "bytes": 87456256,
+      "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+    },
+    "backendReaderBodyRawExact": true,
+    "newBackendBuildPerformed": false,
+    "freshRustTestsPerformed": false
+  },
+  "pending": {
+    "currentDriverCommit": null,
+    "executionSourceCommit": null,
+    "currentRootJsReceipt": null,
+    "actualFreshNodeTestCount": null,
+    "plannedRootJsReceiptFile": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v6\\root-focused-receipt-v1.json",
+    "RootFinalApproval": null,
+    "actualFreeze": null,
+    "actualCopy": null,
+    "actualLoad": null
+  },
+  "actualChecks": {
+    "nodeSyntaxChecks": 5,
+    "nodeSyntaxPassed": 5,
+    "nodeSyntaxFailed": 0,
+    "modulesImported": false,
+    "guardExecuted": false,
+    "freezeExecuted": false,
+    "bankCopied": false,
+    "CargoOrTestsExecuted": false,
+    "loadStarted": false
+  },
+  "verdict": {
+    "preparedCandidateOnly": true,
+    "eligibleForSourceFreezeNow": false,
+    "eligibleForOwnedRunNow": false,
+    "blockingReasons": [
+      "Actual new helper/protection driver commit and actual Root qualification receipt remain unknown",
+      "Root final approval and freeze not performed"
+    ],
+    "capacityAccepted": false,
+    "p0Accepted": false
+  },
+  "scope": "External authoring only; source V5 and immutable backend V6 unchanged. Public V5 supplement is separate and does not rewrite original failure. No account credentials, raw Store/ledger/secrets contents or full recordings are emitted in this metadata."
+}

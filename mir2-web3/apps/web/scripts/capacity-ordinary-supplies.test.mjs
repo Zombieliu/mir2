@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createNavigator, NavigationStepGuarded } from './quest-agent/protocol-play.mjs';
 import { applyProtocolObservation } from './quest-agent/protocol-observation.mjs';
+import { selectPreparationStagingPoint } from './playtest-capacity-prepare.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
 import { createOrdinarySupplies, ORDINARY_SUPPLY_COMMANDS } from './capacity-ordinary-supplies.mjs';
 import { loadOrdinaryProtection } from './capacity-ordinary-protection.mjs';
@@ -12,10 +13,10 @@ function fixture(config = {}) {
   let clock = 1, hook = () => {}, seq = 0, currentDeer = null;
   const harvestPasses = new Map();
   let attackPaceArmed = false, attackPaceChanged = false;
-  const actor = { objectId: config.ownerId ?? 1, kind: 'selfPlayer', name: 'ordinary-owner', class: 'Warrior', x: config.ownerPosition?.x ?? 290, y: config.ownerPosition?.y ?? 607, hp: 100, maxHp: 100, dead: false };
+  const actor = { objectId: config.ownerId ?? 1, kind: 'selfPlayer', name: 'ordinary-owner', class: 'Warrior', x: config.ownerPosition?.x ?? 290, y: config.ownerPosition?.y ?? 607, hp: config.ownerHp ?? 100, maxHp: config.ownerMaxHp ?? 100, dead: false };
   const client = {
     label: config.label ?? 'ordinary-owner', sequence: 0, events: [], sent: [], slots: [], attackResults: config.v2 ? 'v2' : 'legacy', attackV2Supported: config.v2 === true, closed: false,
-    snapshot: { playerObjectId: actor.objectId, mapFileName: '0', playerHp: 100, playerMaxHp: 100, gold: config.gold ?? 0, inventoryCapacity: 46,
+    snapshot: { playerObjectId: actor.objectId, mapFileName: '0', playerHp: actor.hp, playerMaxHp: actor.maxHp, gold: config.gold ?? 0, inventoryCapacity: 46,
       inventoryItems: config.items ?? [], beltItems: [], groundDrops: [], entities: [actor,
         { objectId: 6, kind: 'npc', name: 'Merchant_John', x: 292, y: 603 },
         { objectId: 5, kind: 'npc', name: 'Merchant_Ruben', x: 288, y: 608 },
@@ -1276,4 +1277,88 @@ test('actual raw null owner and class followed by wire omission reopens normal A
   const result=await f.supply.prepare();assert.equal(result.status,'ready');assert.equal(reentered,true);
   assert.deepEqual({x:result.after.x,y:result.after.y},{x:289,y:617});assert.equal(result.pathHazardCount,0);
   assert.equal(f.client.sent.filter(c=>c.type==='clientVersion').length,2);
+});
+
+// Bounded public W6 recording frame21, capturedAtMs1793054598595: only
+// monster IDs/coordinates/state within16 of the failed actor's331590 start.
+// This is a static replay of that observation, not a prediction of live AI.
+const w6NearbyThreats = [
+  [206008,'RakingCat',327,574,32],[206026,'RakingCat',320,589,32],[206032,'RakingCat',322,595,32],
+  [206033,'RakingCat',333,578,32],[206039,'RakingCat',325,583,32],[206105,'HookingCat',315,578,30],
+  [206117,'HookingCat',321,588,30],[206124,'HookingCat',340,577,30],[206129,'HookingCat',342,600,30],
+  [206130,'HookingCat',327,582,30],[206136,'HookingCat',338,588,30],
+].map(([id,name,x,y,hp])=>hostile(id,x,y,{name,hp,ownerName:null,class:null}));
+const w6NearbyNeutral = [
+  [200341,'Royal_Guard',328,604,null,6],[206201,'Deer',325,600,25,2],[206208,'Deer',322,587,25,2],
+  [206214,'Deer',343,592,25,2],[206215,'Deer',347,576,25,2],[206220,'Deer',326,599,25,2],
+  [206221,'Deer',331,581,25,2],[206227,'Deer',340,586,25,2],[206542,'Deer',330,597,25,2],
+  [206703,'Deer',342,606,25,2],[206713,'Deer',343,586,25,2],[206716,'Deer',342,592,25,2],
+  [206719,'Deer',345,599,25,2],[210400,'ChestnutTree',344,591,10,3],[214501,'ChestnutTree2',321,598,10,3],
+  [214502,'ChestnutTree2',345,580,10,3],[229100,'LargeMushroom',317,577,null,3],
+].map(([objectId,name,x,y,hp,ai])=>({objectId,kind:'monster',name,x,y,hp,ai,dead:false,disposition:'neutral',ownerName:null,class:null}));
+
+test('W6 cold331590 static observed threats can approach the declared region on real map0 before the actual strict resolver selects a point',async t=>{
+  const protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0'),map=await loadProtocolCollisionMap('0');
+  const defaultPoint={x:289,y:615},selected={x:290,y:615},candidates=[defaultPoint,selected],savedPoints=new Set(['289,615']);
+  let f,navigator,resolverCalls=0;const routes=[];
+  f=fixture({ownerId:1000,ownerHp:18,ownerMaxHp:18,items:[item(658,12,2)],gold:15,
+    ownerPosition:{x:331,y:590},stagingPoint:defaultPoint,ordinaryProtection:protection,applyPackets:true,noMovementSnapshots:true,
+    hostiles:structuredClone([...w6NearbyThreats,...w6NearbyNeutral]),
+    resolveStagingPoint:input=>{
+      resolverCalls++;assert.equal(routes.length,1);assert.equal(f.supply.status().status,'staging');
+      assert.equal(f.supply.status().actualStagingReached,false);
+      assert.equal(f.client.events.filter(e=>e.type==='worldSnapshot').length,2,'approach must request new raw occupancy');
+      assert.equal(input.receipt.sequence,f.client.sequence);assert.equal(input.receipt.x,input.snapshot.entities[0].x);
+      assert.ok(distanceForTest(input.receipt,defaultPoint)<=16);assert.ok(distanceForTest(input.receipt,defaultPoint)>0);
+      return selectPreparationStagingPoint({...input,candidates,savedPoints});
+    },
+    navigate:async({facade,target,range,stop,navOptions})=>{
+      routes.push({target:{...target},range});
+      navigator??=createNavigator(facade,{loadCollisionMap:async()=>map,now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000});
+      return navigator(target,range,stop,navOptions);
+    },onMove:({client,actor})=>{client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
+  f.client.snapshot.inSafeZone=false;const owner=f.client.snapshot.entities[0];
+  assert.throws(()=>selectPreparationStagingPoint({snapshot:f.client.snapshot,receipt:{ownerId:1000,ownerName:owner.name,map:'0',x:331,y:590,sequence:1,monotonicMs:1},defaultPoint,candidates,savedPoints}),/No fresh visible/);
+  const result=await f.supply.prepare();assert.equal(result.status,'ready');assert.equal(resolverCalls,1);
+  assert.equal(result.before.nearbyHostileCount,3);assert.equal(result.before.hp,18);assert.equal(result.before.hpStock,12);assert.equal(result.before.gold,15);
+  assert.deepEqual(routes,[{target:defaultPoint,range:16},{target:selected,range:0}]);
+  assert.deepEqual(result.resolvedStagingPoint,selected);assert.equal(result.after.hp,18);assert.equal(result.after.hpStock,12);assert.equal(result.after.gold,15);
+  assert.equal(result.purchased,0);assert.equal(result.soldVenison,0);assert.equal(result.funding,null);
+  assert.ok(result.commands<2048&&result.elapsedMs<600000);assert.equal(f.client.sent.filter(c=>c.type==='clientVersion').length,3);
+  assert.ok(result.movementCommands>0);assert.equal(savedPoints.size,1,'helper never claims or saves a candidate');
+  t.diagnostic(JSON.stringify({scope:'W6 frame21 static nearby monster replay on canonical map0; not live AI prediction',
+    commands:result.commands,movementCommands:result.movementCommands,elapsedMs:result.elapsedMs,pathReplanCount:result.pathReplanCount,
+    resolverCalls,finalPoint:result.resolvedStagingPoint}));
+});
+
+test('nearby strict resolver rejection never approaches or retries, while an unsuccessful distant approach still requires fresh visible occupancy',async t=>{
+  for(const far of [false,true])await t.test(String(far),async()=>{
+    let f,calls=0;const routes=[],defaultPoint={x:289,y:615},savedPoints=new Set(far?[]:['289,615']);
+    f=fixture({items:[item(658,12,2)],ownerPosition:far?{x:331,y:590}:{x:290,y:615},stagingPoint:defaultPoint,
+      navigate:async({target,range})=>{routes.push({target,range});return {reached:false};},
+      resolveStagingPoint:input=>{calls++;if(far)assert.equal(f.client.events.filter(e=>e.type==='worldSnapshot').length,2);
+        return selectPreparationStagingPoint({...input,candidates:[defaultPoint],savedPoints});}});
+    await assert.rejects(f.supply.prepare(),/No fresh visible unoccupied distinct declared staging candidate/);
+    assert.equal(calls,1);assert.equal(routes.length,far?1:0);
+    if(far)assert.equal(routes[0].range,16);
+    assert.equal(f.supply.status().actualStagingReached,false);assert.equal(f.supply.status().resolvedStagingPoint,null);
+    assert.equal(f.client.sent.filter(c=>c.type==='clientVersion').length,far?2:1);
+    assert.equal(f.supply.status().movementCommands,0);
+  });
+});
+
+test('the approach cannot reset the actor wall or command budget or invoke the resolver after exhaustion',async t=>{
+  for(const exhausted of ['wall','commands'])await t.test(exhausted,async()=>{
+    let f,resolverCalls=0;
+    f=fixture({items:[item(658,12,2)],ownerPosition:{x:331,y:590},stagingPoint:{x:289,y:615},
+      timeoutMs:exhausted==='wall'?500:600000,maxCommands:exhausted==='commands'?1:2048,
+      navigate:async({facade,range})=>{
+        assert.equal(range,16);assert.equal(f.supply.status().status,'staging');
+        if(exhausted==='wall')f.advance(501);
+        facade.send({type:'walk',direction:'Down'});await facade.wait(()=>true,'approach budget');
+      },resolveStagingPoint:({defaultPoint})=>{resolverCalls++;return defaultPoint;}});
+    await assert.rejects(f.supply.prepare(),exhausted==='wall'?/wall budget exhausted/:/command budget exhausted/);
+    assert.equal(resolverCalls,0);assert.equal(f.client.sent.length,1);assert.equal(f.supply.status().movementCommands,0);
+    assert.equal(f.supply.status().actualStagingReached,false);
+  });
 });

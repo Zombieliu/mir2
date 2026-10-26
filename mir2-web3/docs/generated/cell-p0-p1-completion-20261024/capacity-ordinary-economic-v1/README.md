@@ -152,3 +152,13 @@
 普通接收器先更新snapshot、记录真实received收据，再调用补给观察器。候选按逐实体的ObjectMonster或已认证个体Walk/Run/Turn维护planner专用资格；spec与证书由WeakSet/WeakMap约束，ObjectMonster须正ID、canonical已知名、明确AI0/dead=false/master0及完整坐标。该证书只支持普通AI0的静态安全区判断，不写入snapshot的HP/disposition，不作raw生命或库存证明；catalog的NewMonsterInfo ID0、未知/owned/类型和名称冲突均不取得资格。
 
 ObjectRemove可能表示AOI离开或真实删除；候选关闭live续期，保留已认证历史点原到期时间，处理真实raw-null与wire省略ownerName/class的无值等价。ObjectRevived及身份冲突撤销并隔离；没有把本地收据约束称为服务端incarnation。自身hostile-clearance守卫在危险动作未发、队列为空且无不确定副作用时，每角色最多三次原目标重规划；funding原重选保持，其余错误终止，不新增逐步刷新、不重置原预算。216项模块/保护聚焦检查与独立只读审查通过，新Root选定整合检查及第六次普通百人准备待执行，仍无新增CCU结论。
+
+## 第六次百人角色库准备：返村前的动态选点失败
+
+8aa9a1234的[本次fresh门禁](bank-prepare-v6/node-v6/root-focused-receipt-v1.json)实际237项准备/保护导航及325项普通经济/观察相邻，共562项通过，32个named输入含新增protocol-observation测试；旧828项没有重跑。55源raw/GitLF/object/closure核对后继续复用ee06的immutable V6及原Rust32，没有新Rust构建。
+
+[第六轮报告](bank-prepare-v6/1793054581472-f2428092.preparation-report.json)保持prepared4/100、未激活、零测量CCU。前4人fresh库存复用重新证明；第5人冷登录331,590、HP18/18、12药、15金币，仅发clientVersion1条，0移动/0经济，约30.962毫秒即无可见动态停车候选。原335个村候选最东x298，与当前位置至少33格，全部超出16格选点范围，尚未开始回村移动；本轮不是危险Run守卫、AOI或战斗失败。
+
+原failed summary normalLogout=false及空after/readiness保留；尾部普通logout与整体[正常清理](bank-prepare-v6/cleanup-v1.json)、[Root独立OS检查](bank-prepare-v6/root-independent-cleanup-v1.json)通过，PID64972消失、端口释放。33份公共原件542,978字节见[说明](bank-prepare-v6/README.md)与[复制清单](bank-prepare-v6/copied-evidence-manifest.json)，V5冷bank及最新账本原字节续用，无私有全文或重复V6大资料。P0未完成、P2未启动，无新25/50/100/500或两小时验收通过。
+
+候选补齐远处冷登录的选点时序：仅在动态resolver存在且静态目录hint距离大于16时，先用原普通导航接近至16格，再发送原clientVersion取得新raw后执行原严格resolver，最后导航到所选实际点位并fresh验收。hint不认定安全、空闲或已保存，不提前占用savedPoints；时间、命令、限速与三次安全重规划预算保持。W6已观察的28怪物静态组合、真实map0/导航器及真实resolver回放可从331,590到另选290,615（原hint已被保存），33命令/30移动/19.501秒；只证明该静态输入组合，不预测动态AI结果。200项模块聚焦检查及独立只读审查通过，新Root选定整合检查和第七次普通百人准备待执行。
