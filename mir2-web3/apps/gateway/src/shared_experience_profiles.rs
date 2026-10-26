@@ -41,16 +41,12 @@ pub(super) fn rebase_locked_zone_experience_authority(
     }
     // Validate every source before changing any Zone projection.
     for (session, profile, chat) in projected {
-        if !state
+        let (updated, _) = state
             .zone_manager
-            .update_experience_profile(&session, profile)
-        {
+            .update_experience_and_chat_profile(&session, profile, chat);
+        if !updated {
             return Err("admission experience profile lost its registered character".into());
         }
-        state.zone_manager.handle(ZoneCommand::UpdateChatProfile {
-            session_id: session,
-            profile: chat,
-        });
     }
     Ok(())
 }

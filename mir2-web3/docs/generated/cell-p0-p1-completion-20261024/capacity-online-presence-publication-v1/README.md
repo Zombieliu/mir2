@@ -1,0 +1,19 @@
+# 在线快照发布开销与 V11 复测
+
+P1通过，P0未通过，P2未启动。正式2/10通过；25完成300秒但战斗频率失败。此前[动作坐标修复](../capacity-owner-action-pose-v1/README.md)已提交并推送`c6f46b633`；本轮使用独立Release实际复测50人，没有把旧失败追认通过。
+
+[V11原报告](v11-original-report.json)的50个客户端全部入场，仍在准备阶段因AOI missing停止，`stages=[]`，run退出2，未启动100人。峰值入场50不等于50人容量通过。运行已结束，[独立清理](v11-root-independent-cleanup.json)确认受控进程消失、17500/17510端口释放。
+
+[创建消息链](v11-exact-create-delay.json)：observer46最后确认位置(244,633)，owner41进入(232,618)，距离15。服务端于1793029005944生成ObjectPlayer，但sender取出时queue age为1,786,041µs，发送自身仅46µs；估算flush返回晚于AOI fatal约711ms。[同接收者gate记录](v11-gate-link.json)有1,836,063µs读锁等待。这里的sent只表示服务端flush返回；公共connection计数与registration不属同一命名空间。
+
+[执行等待审计](v11-execute-wait-audit.md)在fatal前后5秒看到548条已越50ms阈值的AccountStore mutex等待，累计51.114秒，来自并发、重叠调用，不能换算成CPU或单段墙钟时长。没有该窗已记录的长writable/frozen检查或已完成store持锁样本；不能据此把全部耗时归咎于某一次磁盘写入。私密stderr及samples已各流式分析一次；本轮仅复用白名单匿名派生产物，没有再次完整读取原始流。
+
+源码审查发现：全员经验权威rebase对每名在线角色依次进行experience publication和UpdateChatProfile，后者还会执行命令准入与宠物死亡、颜色、吸血怪死亡、毒状态、owner health后置结算。不能因为chat未变而跳过handler。
+
+现已接入combined publication：先证明每个Zone的全部local player旧presence owner与当前服务器身份一致，再保留原experience完整验证及刷新，省去紧邻chat之前的重复刷新。证明失败仍执行原三次刷新；chat路由、准入序号/receipt、完整handler及后置刷新照常。最后一个Zone接收移动的原snapshot，避免复制后再丢弃原值；其余Zone的复制及原处理顺序不变。单Zone常见路径的刷新次数由3降为2，这是源码操作数量，尚非实测吞吐改善。
+
+Root新鲜[18项检查、111项Rust测试](validation/root-focused-receipt-v1.json)全部通过，0 failed/ignored；55个已识别Rust/Cargo输入前后相同，含新gateway投影及两个测试源。覆盖完整checkpoint/live presence/outbounds/admission/下一次drain差分、非零pet clock/brown、失配fallback、两条健康FIFO、宠物mode0/2/1/3与目标清理、pending pet/vampire death及poison、无效profile与admission exhaustion；另复测分区合同23项、经验权威21项、网关发送/关闭、Store持久性及击杀入账。不是全workspace或新鲜普通生命周期验收。
+
+Web/driver未修改；已有242/39/typecheck仅在13/16输入字节严格一致时允许复用，不重复冒充新鲜执行。新Release构建及50人复测待执行，不能宣称容量通过或硬件上限。
+
+原始报告、执行记录、匿名摘录及复制摘要均保留在本目录；大体积派生流与原始输入按[v11 findings](v11-findings.json)、[审计来源](v11-execute-wait-provenance.json)记录的摘要保存在受控本机目录。

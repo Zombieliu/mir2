@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "source": "Existing all-strict-anonymous-stderr derived stream; original raw streams not reread",
+  "rows": [
+    {
+      "type": "gateway-zone-outbound-block",
+      "sourceLine": 240358,
+      "stage": "read_gate",
+      "registration": 46,
+      "batchID": 524,
+      "batchIndex": 0,
+      "kind": "Other",
+      "lane": "normal",
+      "normalDepth": 0,
+      "ownerDepth": 0,
+      "elapsedUs": 1836063,
+      "recordedUnixMs": 1793029007730
+    }
+  ],
+  "qualification": "Batch gate wait and trace20279 share registration and emit time. No cross-namespace public connection identity is inferred."
+}

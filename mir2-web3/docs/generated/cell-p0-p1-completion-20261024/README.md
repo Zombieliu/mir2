@@ -2,7 +2,7 @@
 
 本记录接续 [前轮证据](../cell-preproduction-p0-p1-20261024/README.md)，保留前轮失败和 `14 passed / 2 not_run` 原始完整报告。本轮报告独立保存，不改写旧结论。
 
-当前P1通过，P0未通过、P2未启动。正式2/10通过，25战斗频率失败。V10全员50准备期AOI缺失停止；核实为旧own攻击坐标覆盖新移动确认，真实Web和driver同步修复，Node242+直接39+Web typecheck新鲜通过，Rust52未改复用57项。新Release/50复测待执行，见[最新修复](capacity-owner-action-pose-v1/README.md)。
+当前P1通过，P0未通过、P2未启动。正式2/10通过，25战斗频率失败。动作坐标修复已推送；V11独立Release全员50入场，仍在准备期AOI缺失停止，消息及时创建但队列等待1.786秒。已接入有身份条件的合并快照发布并减少深复制，新鲜111项Rust测试通过、55输入稳定；待新构建/50复测，无新的50/100容量通过，见[最新证据](capacity-online-presence-publication-v1/README.md)。
 
 ## 已有新鲜结果
 

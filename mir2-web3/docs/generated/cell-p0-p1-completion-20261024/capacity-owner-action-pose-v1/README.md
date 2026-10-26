@@ -10,4 +10,4 @@ P1通过、P0未通过、P2未启动。正式2/10通过；25完整300秒战斗�
 
 初次合并focused为24/25：旧scene结构脚本先在未改renderer锚点断言失败；[原代码对照](original-scene-baseline-receipt.json)同失败。旧脚本已恢复，未放宽断言；新增独立生产helper tests15项与观察器24项合计39通过。此既有renderer结构检查仍未通过，不称整个前端测试全绿。
 
-[gate审计](v10-gate-holder-audit.json)另外确认read gate长等待，health慢项不普遍；fatal窗无checkpoint慢项，不能据此移除保存锁。reg16与publicconn16是独立计数器，只能按时间签名关联，不能当严格同一身份。该性能问题没有因客户端修复而宣告解决。新Release/50复测待执行，未证明硬件容量上限，也未完成GUI/人类Accepted。
+[gate审计](v10-gate-holder-audit.json)另外确认read gate长等待，health慢项不普遍；fatal窗无checkpoint慢项，不能据此移除保存锁。reg16与publicconn16是独立计数器，只能按时间签名关联，不能当严格同一身份。后续新Release已执行V11：全员50入场仍因AOI缺失停止，另确认消息队列等待1.786秒，见[最新V11证据](../capacity-online-presence-publication-v1/README.md)。未证明硬件容量上限，也未完成GUI/人类Accepted。

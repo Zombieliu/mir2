@@ -30,6 +30,10 @@ mod admission;
 pub use admission::ManagerAdmissionReceipt;
 use admission::ManagerMapRandomMaster;
 
+#[cfg(test)]
+#[path = "manager_presence_publication_tests.rs"]
+mod presence_publication_tests;
+
 // Not `Clone`/`Default`-derived: it holds `ZoneRuntime`s which own a
 // non-cloneable `bevy_ecs::World`, and nothing cloned/defaulted the manager.
 #[derive(Debug)]
@@ -41,6 +45,14 @@ pub struct ZoneManager {
     admission_sequence: u64,
     last_admission: Option<ManagerAdmissionReceipt>,
     map_random_master: ManagerMapRandomMaster,
+}
+
+/// A call-local proof for the immediately following chat projection only.
+/// No command admission or runtime handler work is skipped.
+#[derive(Clone, Copy)]
+enum ChatProjectionPresenceRefresh {
+    BeforeAndAfter,
+    ExperienceProfileAlreadyRefreshed,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -175,7 +187,12 @@ impl ZoneManager {
     }
     fn refresh_online_presence(&mut self) {
         let snapshot = self.online_snapshot();
-        for zone in self.zones.values_mut() {
+        let mut zones = self.zones.values_mut().peekable();
+        while let Some(zone) = zones.next() {
+            if zones.peek().is_none() {
+                zone.ingest_online_presence(snapshot, true);
+                break;
+            }
             zone.ingest_online_presence(snapshot.clone(), true);
         }
     }
@@ -591,6 +608,46 @@ impl ZoneManager {
             self.refresh_online_presence();
         }
         updated
+    }
+
+    /// Apply freshly validated source projections on one manager writer.
+    /// Returns the same update result and chat outbounds as the separate calls;
+    /// callers retain their existing delivery/discard policy for those outbounds.
+    pub fn update_experience_and_chat_profile(
+        &mut self,
+        session_id: &SessionId,
+        profile: Option<super::ZoneExperienceProfile>,
+        chat_profile: super::ZoneChatProfile,
+    ) -> (bool, Vec<ZoneOutbound>) {
+        // Snapshot pet clocks/brown state depend on the previous online owner.
+        // Certify all local players before the update: with unchanged owners,
+        // its full refresh is a fixed point until the following chat handler.
+        let refresh = if self
+            .zones
+            .values()
+            .all(|zone| zone.online_projection_owners_match(&self.online_identities))
+        {
+            ChatProjectionPresenceRefresh::ExperienceProfileAlreadyRefreshed
+        } else {
+            ChatProjectionPresenceRefresh::BeforeAndAfter
+        };
+        if !self.update_experience_profile(session_id, profile) {
+            return (false, Vec::new());
+        }
+        let Some(partition) = self.partition_for_session(session_id) else {
+            return (true, Vec::new());
+        };
+        let outbounds = self
+            .try_handle_single_partition_with_chat_presence_refresh(
+                partition,
+                ZoneCommand::UpdateChatProfile {
+                    session_id: session_id.clone(),
+                    profile: chat_profile,
+                },
+                refresh,
+            )
+            .unwrap_or_default();
+        (true, outbounds)
     }
 
     pub fn player_experience_profile(
@@ -1081,6 +1138,19 @@ impl ZoneManager {
         partition: PartitionKey,
         command: ZoneCommand,
     ) -> Result<Vec<ZoneOutbound>, String> {
+        self.try_handle_single_partition_with_chat_presence_refresh(
+            partition,
+            command,
+            ChatProjectionPresenceRefresh::BeforeAndAfter,
+        )
+    }
+
+    fn try_handle_single_partition_with_chat_presence_refresh(
+        &mut self,
+        partition: PartitionKey,
+        command: ZoneCommand,
+        refresh: ChatProjectionPresenceRefresh,
+    ) -> Result<Vec<ZoneOutbound>, String> {
         if !matches!(&command, ZoneCommand::Join(_) | ZoneCommand::Tick { .. }) {
             let session = command
                 .session_id()
@@ -1090,7 +1160,7 @@ impl ZoneManager {
             }
         }
         self.admit_command(&partition.zone, &command)?;
-        Ok(self.apply_single_partition(partition, command))
+        Ok(self.apply_single_partition_with_chat_presence_refresh(partition, command, refresh))
     }
 
     fn apply_single_partition(
@@ -1098,6 +1168,23 @@ impl ZoneManager {
         partition: PartitionKey,
         command: ZoneCommand,
     ) -> Vec<ZoneOutbound> {
+        self.apply_single_partition_with_chat_presence_refresh(
+            partition,
+            command,
+            ChatProjectionPresenceRefresh::BeforeAndAfter,
+        )
+    }
+
+    fn apply_single_partition_with_chat_presence_refresh(
+        &mut self,
+        partition: PartitionKey,
+        command: ZoneCommand,
+        refresh: ChatProjectionPresenceRefresh,
+    ) -> Vec<ZoneOutbound> {
+        debug_assert!(
+            matches!(refresh, ChatProjectionPresenceRefresh::BeforeAndAfter)
+                || matches!(&command, ZoneCommand::UpdateChatProfile { .. })
+        );
         let key = partition.zone;
         // All Join entry points share this transfer path. Carry the same online
         // player's receipt clock before removing its old Zone incarnation;
@@ -1239,7 +1326,9 @@ impl ZoneManager {
             _ => {}
         }
 
-        self.refresh_online_presence();
+        if matches!(refresh, ChatProjectionPresenceRefresh::BeforeAndAfter) {
+            self.refresh_online_presence();
+        }
 
         let master = &self.map_random_master;
         let zone = self.zones.entry(key.clone()).or_insert_with(|| {

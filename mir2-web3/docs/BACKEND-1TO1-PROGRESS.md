@@ -1,5 +1,9 @@
 # Backend 1:1 Progress
 
+## Cell 共享快照发布回归（2026-10-27，北京时间）
+
+当前P1工程合同已通过、P0容量未通过、P2未启动。身份条件成立时合并紧邻的在线快照刷新，失配沿用原路径，并减少完整快照深复制；原准入、handler及后置结算保持。新鲜111项Rust测试通过，55输入前后稳定；新构建/50复测待执行，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
+
 ## Cell 上线前整合：P0 / P1 partial（2026-10-24，北京时间）
 
 已接入每逻辑 Zone 的 Partition 0、64 格 Cell、版本化效果 owner 引用和派生目录；canonical checkpoint v3/v7 不变，跨执行域同分区歧义查询拒绝。schema 10 的三项新鲜迁移/旧字段拒绝测试通过。原普通双协议完整报告保持 14 passed / 2 not_run、fullLifecyclePassed=false；独立死亡/复活 focused 补测 7/7 passed。native protocol 断线恢复 9/9 passed，早先失败保留。

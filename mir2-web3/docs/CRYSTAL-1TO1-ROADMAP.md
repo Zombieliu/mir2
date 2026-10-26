@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## Cell 共享快照发布回归（2026-10-27，北京时间）
+
+当前P1工程合同已通过、P0容量未通过、P2未启动。V11全员50准备期AOI缺失，消息排队1.786秒；合并重复快照发布保留完整准入、战斗及生命值结算，新鲜111项Rust测试通过。新Release/容量复测待执行；不提高整体Candidate或Accepted。实际输入、失败和测试统一见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
+
 ## Cell 上线前架构：P0 / P1 partial（2026-10-24，北京时间）
 
 一地图单写兼容路径已引入 Partition 0、64 格 Cell、版本化效果 owner 引用及派生目录，checkpoint v3/v7 不变；跨执行域重复逻辑分区的歧义查询拒绝。schema 10 三项边界测试通过；原双协议完整报告仍为 14 passed / 2 not_run、fullLifecyclePassed=false，独立死亡/复活 focused 补测 7/7 passed；native protocol 断线恢复 9/9 passed，失败历史保留。

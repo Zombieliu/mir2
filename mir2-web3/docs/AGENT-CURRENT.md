@@ -1,6 +1,6 @@
 # Agent Current Context
 
-Short routing summary, updated 2026-10-26 (Asia/Shanghai).
+Short routing summary, updated 2026-10-27 (Asia/Shanghai).
 This indexes recorded decisions and open work; it does not revalidate today's
 working tree, services, release packages, source snapshots or parity percentages.
 
@@ -19,7 +19,7 @@ working tree, services, release packages, source snapshots or parity percentages
 | Topic | Recorded state and next scope | Detailed reference |
 | --- | --- | --- |
 | Overall parity | Candidate100 remains false in the latest summarized records; final human acceptance remains open. Do not invent an overall percentage. | [Roadmap](CRYSTAL-1TO1-ROADMAP.md), relevant topic section |
-| Cell preproduction P0 / P1 (2026-10-26) | P1 passed; P0 incomplete, P2 not started. Formal2/10 passed;25 combat frequency failed. V10 admitted50, AOI missing stopped preparation. Exact late own ObjectAttack rolled back newer owner ACK; Web/driver fix passed fresh Node242+focused39+Web typecheck,13/16 identified inputs stable. Rust52 unchanged;57 tests explicitly reused. New Release/50 rerun pending; no100/capacity/human acceptance. | [Latest pose fix and V10 evidence](generated/cell-p0-p1-completion-20261024/capacity-owner-action-pose-v1/README.md), [Plan](CELL-ZONING-PREPRODUCTION-PLAN.zh-CN.md) |
+| Cell preproduction P0 / P1 (2026-10-27) | P1 passed; P0 incomplete, P2 not started. Formal2/10 passed;25 combat frequency failed. Pose fix pushed c6f46b633. V11 admitted50, AOI stopped preparation; ObjectPlayer queued1.786s. Certified combined presence publication and final-Zone snapshot move passed fresh111 Rust tests/18 checks,55 inputs unchanged. New Release/50 pending; no100/capacity/human acceptance. | [Latest V11 and publication evidence](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md), [Plan](CELL-ZONING-PREPRODUCTION-PLAN.zh-CN.md) |
 | Level 100 / SLG (2026-10-19) | User direction is a level-100 cap with new SLG after max level. Resource audit/planning is recorded; runtime cap, level 71-100 content, balancing, ordinary acquisition and server entry gates still require implementation/verification. Keep custom rules separate from Crystal's original baseline. | [Growth rules](LEVEL100-SLG-PROGRESSION.zh-CN.md), [equipment audit](EQUIPMENT-LEVEL100-SLG-AUDIT-20261019.zh-CN.md), [queue](AGENT-TASK-QUEUE.md) topic heading |
 | Cross-chat integration (2026-10-14) | Code/push/validation scope was reconciled. Signed R26 paired release, event-site re-publication and player acceptance remained open in that record; confirm current status only for related tasks. | [Code progress](CODE-PROGRESS-20261014.zh-CN.md) |
 | Web delivery (2026-10-12) | Source78 records a verified empty Spells bootstrap/reentry branch. It does not establish nonempty skills, every panel, combat/quest, mobile or final acceptance. Do not rebuild/retest that historical package for unrelated tasks. | [Frontend gaps](FRONTEND-1TO1-GAPS.md), [Windows QA](NATIVE-WINDOWS-PLAYER-QA.md), queue Source78 section |

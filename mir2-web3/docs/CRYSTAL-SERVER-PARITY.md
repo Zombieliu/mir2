@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## Cell 共享快照发布回归（2026-10-27，北京时间）
+
+当前P1工程合同已通过、P0容量未通过、P2未启动。在线快照发布优化保留原命令准入、宠物/吸血怪死亡、毒状态和owner health结算；新鲜111项Rust测试通过，含旧新路径的完整live状态/出包对照。V11全员50仍在准备期AOI停止，新构建/复测待执行；不宣告容量或人类接受，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
+
 ## Cell 上线前整合：P0 / P1 partial（2026-10-24，北京时间）
 
 单分区兼容路径已接入 Partition 0、64 格 Cell、版本化效果 owner 引用及派生目录，保留 canonical checkpoint v3/v7；跨执行域相同逻辑分区查询遇歧义则拒绝。schema 10 三项迁移边界测试通过。原真实双协议完整报告仍为 14 passed / 2 not_run、fullLifecyclePassed=false；独立死亡/复活 focused 补测 7/7 passed。native protocol 断线恢复 9/9 passed，旧失败仍保留。

@@ -2,6 +2,10 @@
 use super::*;
 use crate::runtime::zone::types::ZoneExperienceOwner;
 
+#[cfg(test)]
+#[path = "presence_publication_fixtures.rs"]
+mod presence_publication_fixtures;
+
 const EXPERIENCE_OWNER_DELAY_MS: u64 = 5_000;
 const MASTER_CREDIT_RANGE: i32 = 16;
 
@@ -35,6 +39,20 @@ fn claimant(
 }
 
 impl ZoneRuntime {
+    /// Certifies the only old-presence dependencies of online_player_snapshot:
+    /// the local pet clock and brown timer both gate on this exact owner.
+    /// Absent book/presence owners compare equal for cold, unadmitted players.
+    pub(crate) fn online_projection_owners_match(&self, book: &OnlineIdentityBook) -> bool {
+        self.players.iter().all(|(session, player)| {
+            self.online_presence
+                .get(session)
+                .map(|presence| &presence.owner)
+                == book
+                    .owner(session)
+                    .filter(|owner| owner.matches_player(player))
+        })
+    }
+
     pub(crate) fn online_player_snapshot(
         &self,
         book: &OnlineIdentityBook,
