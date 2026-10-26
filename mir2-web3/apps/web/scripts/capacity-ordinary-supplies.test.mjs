@@ -6,10 +6,10 @@ const route = { quests: [{ objectives: { item: [], kill: [{ monsterName: 'Deer',
 const item = (id, quantity, uniqueId, slot = 0) => ({ itemIndex: id, name: id === 658 ? '(HP)DrugSmall' : 'Venison', quantity, uniqueId, container: 'bag1', slot, sellValue: 250 });
 function fixture(config = {}) {
   let clock = 1, hook = () => {}, seq = 0, currentDeer = null;
-  const actor = { objectId: 1, kind: 'selfPlayer', name: 'ordinary-owner', class: 'Warrior', x: 290, y: 607, hp: 100, maxHp: 100, dead: false };
+  const actor = { objectId: config.ownerId ?? 1, kind: 'selfPlayer', name: 'ordinary-owner', class: 'Warrior', x: 290, y: 607, hp: 100, maxHp: 100, dead: false };
   const client = {
-    sequence: 0, events: [], sent: [], slots: [], attackResults: config.v2 ? 'v2' : 'legacy', attackV2Supported: config.v2 === true, closed: false,
-    snapshot: { playerObjectId: 1, mapFileName: '0', playerHp: 100, playerMaxHp: 100, gold: config.gold ?? 0, inventoryCapacity: 46,
+    label: config.label ?? 'ordinary-owner', sequence: 0, events: [], sent: [], slots: [], attackResults: config.v2 ? 'v2' : 'legacy', attackV2Supported: config.v2 === true, closed: false,
+    snapshot: { playerObjectId: actor.objectId, mapFileName: '0', playerHp: 100, playerMaxHp: 100, gold: config.gold ?? 0, inventoryCapacity: 46,
       inventoryItems: config.items ?? [], beltItems: [], groundDrops: [], entities: [actor,
         { objectId: 6, kind: 'npc', name: 'Merchant_John', x: 292, y: 603 },
         { objectId: 5, kind: 'npc', name: 'Merchant_Ruben', x: 288, y: 608 },
@@ -32,8 +32,18 @@ function fixture(config = {}) {
       }
       if (command.type === 'selectNpcDialog') {
         const sale = command.target === '@Sell';
-        packet(sale ? 'NPCSell' : 'NPCGoods', sale ? {} : { panelType: config.panel ?? 0,
-          list: [{ id: 7658, itemIndex: config.wrongRow ? 659 : 658, name: '(HP)DrugSmall', price: config.price ?? 40 }] });
+        const foreignDialog = config.foreignServiceDialog === true || config.foreignServiceDialog === (sale ? 'sell' : 'buy');
+        if (!config.noServicePacket) packet(sale ? 'NPCSell' : 'NPCGoods', sale ? {} : { panelType: config.panel ?? 0,
+          list: [{ id: 7658, itemIndex: config.wrongRow ? 659 : 658, name: '(HP)DrugSmall', price: config.price ?? 40 }] },
+        config.staleServicePacket ? this.sequence - 1 : undefined);
+        if (config.closeServiceDialog || foreignDialog || config.serviceMapChange || config.serviceOwnerChange || config.replaceServiceNpc) {
+          const objectId = this.snapshot.activeNpcDialog?.npcObjectId;
+          this.snapshot.activeNpcDialog = foreignDialog ? { npcObjectId: 999, links: [] } : null;
+          if (config.serviceMapChange) this.snapshot.mapFileName = '2';
+          if (config.serviceOwnerChange) this.snapshot.playerObjectId = 2;
+          if (config.replaceServiceNpc) this.snapshot.entities.find(entity => entity.objectId === objectId).objectId = 999;
+          snapshot();
+        }
       }
       if (command.type === 'sellItem') {
         const index = this.snapshot.inventoryItems.findIndex(entry => entry.uniqueId === command.uniqueId), held = this.snapshot.inventoryItems[index];
@@ -45,6 +55,7 @@ function fixture(config = {}) {
         assert.equal(command.itemIndex, 7658, 'buy uses live row ID, not template ID');
         if (config.changeMap) this.snapshot.mapFileName = '2';
         if (config.changeOwner) this.snapshot.playerObjectId = 2;
+        if (config.changeOwnerName) actor.name = 'replacement-owner';
         if (config.late) clock += 12_001;
         if (!config.ackOnly) {
           this.snapshot.gold -= command.count * (config.price ?? 40) + (config.wrongDebit ? 1 : 0);
@@ -81,8 +92,8 @@ function fixture(config = {}) {
       throw new Error(`fixture timeout: ${label}`);
     },
   };
-  function packet(name, payload) {
-    const receipt = { type: 'packet', packet: name, payload, direction: 'received', sequence: ++client.sequence, monotonicMs: ++clock };
+  function packet(name, payload, sequence) {
+    const receipt = { type: 'packet', packet: name, payload, direction: 'received', sequence: sequence ?? ++client.sequence, monotonicMs: ++clock };
     client.events.push(receipt); hook(receipt, receipt); return receipt;
   }
   function snapshot(sequence) {
@@ -112,6 +123,21 @@ test('default is held-only noop and economic profile has explicit bounded inputs
   assert.throws(() => createOrdinarySupplies({}, { preparationProfile: 'held-only', targetHp: 12 }), /held-only/);
   assert.throws(() => createOrdinarySupplies({}, { targetHp: 41 }), /targetHp/);
   assert.deepEqual(ORDINARY_SUPPLY_COMMANDS, ['harvest', 'interact', 'selectNpcDialog', 'sellItem', 'buyItem']);
+});
+
+test('same local owner ID 1000 and map cannot conceal a changed character name', async () => {
+  const changed = fixture({ ownerId: 1000, gold: 480, changeOwnerName: true });
+  await assert.rejects(changed.supply.prepare(), /owner\/map\/health changed|received owner\/map changed/);
+  assert.equal(changed.client.snapshot.playerObjectId, 1000); assert.equal(changed.client.snapshot.mapFileName, '0');
+  assert.equal(changed.supply.status().status, 'failed'); assert.equal(changed.supply.status().actualStagingReached, false);
+  const ready = fixture({ ownerId: 1000, gold: 480 });
+  const result = await ready.supply.prepare();
+  assert.equal(result.before.ownerName, 'ordinary-owner'); assert.equal(result.after.ownerName, 'ordinary-owner');
+  ready.client.snapshot.entities.find(entity => entity.objectId === 1000).name = 'replacement-owner';
+  ready.snapshot(); assert.throws(() => ready.supply.assertReady(), /readiness unavailable/);
+  const wrongLabel = fixture({ gold: 480, label: 'wrong-label' });
+  await assert.rejects(wrongLabel.supply.prepare(), /owner\/map\/health changed/);
+  assert.equal(wrongLabel.client.sent.length, 0);
 });
 
 test('earned ordinary gold buys only live HP rows in bounded batches and proves exact stock/debit', async () => {
@@ -206,4 +232,32 @@ test('v2 physical hunting never silently falls back to legacy attack', async () 
   const f = fixture({ deer: 3, v2: true }); f.client.nextAttackV2 = undefined;
   await assert.rejects(f.supply.prepare(), /v2 physical attack unavailable/);
   assert.equal(f.client.sent.some(c => c.type === 'attack'), false);
+});
+
+test('fresh NPCGoods and NPCSell services may close their text dialog without losing merchant binding', async () => {
+  const f = fixture({ closeServiceDialog: true, items: [item(999, 2, 500)] });
+  const result = await f.supply.prepare();
+  assert.equal(result.status, 'ready'); assert.equal(result.after.hpStock, 12);
+  assert.equal(result.soldVenison, 2); assert.equal(result.purchased, 12);
+  assert.equal(f.client.snapshot.activeNpcDialog, null);
+  assert.ok(f.client.events.some(event => event.packet === 'NPCGoods'));
+  assert.ok(f.client.events.some(event => event.packet === 'NPCSell'));
+  assert.equal(result.proofs.filter(proof => proof.kind === 'sale').length, 1);
+  assert.equal(result.proofs.filter(proof => proof.kind === 'purchase').length, 1);
+});
+
+test('closing a service dialog cannot excuse foreign dialog, changed NPC/owner/map or stale service receipt', async t => {
+  for (const option of ['foreignServiceDialog', 'replaceServiceNpc', 'serviceOwnerChange', 'serviceMapChange', 'staleServicePacket', 'noServicePacket']) await t.test(option, async () => {
+    const f = fixture({ gold: 480, closeServiceDialog: true, [option]: true });
+    await assert.rejects(f.supply.prepare());
+    assert.equal(f.supply.status().status, 'failed');
+    assert.equal(f.client.sent.some(command => ['buyItem', 'sellItem'].includes(command.type)), false);
+    assert.equal(f.supply.status().actualStagingReached, false);
+  });
+  await t.test('foreign NPCSell dialog', async () => {
+    const f = fixture({ closeServiceDialog: true, foreignServiceDialog: 'sell', items: [item(999, 2, 500)] });
+    await assert.rejects(f.supply.prepare(), /merchant changed during service/);
+    assert.ok(f.client.events.some(event => event.packet === 'NPCSell'));
+    assert.equal(f.client.sent.some(command => ['buyItem', 'sellItem'].includes(command.type)), false);
+  });
 });

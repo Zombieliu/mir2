@@ -70,16 +70,17 @@ export function createOrdinarySupplies(client, options = {}) {
   const rows = [], proofs = [], commandRows = [], queue = [];
   const counts = {};
   let state = enabled ? 'idle' : 'disabled', active = false, used = false, draining = false;
-  let started = null, deadline = null, identity = null, before = null, after = null, failure = null;
+  let started = null, deadline = null, identity = null, identityName = null, before = null, after = null, failure = null;
   let lastObserved = -1, lastObservedMono = -Infinity, commands = 0, movementCommands = 0, pendingSaleId = null, lastSent = null, observationFault = null;
   let funding = null, sold = 0, bought = 0, goldEarned = 0, goldSpent = 0, actualStagingReached = false;
 
   function scalar(snapshot) {
     const actor = owner(snapshot);
     if (!actor) throw new Error('ordinary supplies: missing owner');
+    if (typeof actor.name !== 'string' || !actor.name.trim() || actor.name.length > 128) throw new Error('ordinary supplies: invalid owner name');
     const hp = observedPlayerHp(snapshot), maxHp = Number(snapshot.playerMaxHp ?? actor.maxHp);
     if (!Number.isFinite(hp) || hp <= 0 || !Number.isFinite(maxHp) || maxHp <= 0 || hp > maxHp || hasAuthoritativePlayerDeath(snapshot)) throw new Error('ordinary supplies: dead or invalid owner health');
-    return { ownerId: integer(Number(snapshot.playerObjectId), 'ownerId', 1), map: String(snapshot.mapFileName), ...point(actor, 'owner'), hp, maxHp,
+    return { ownerId: integer(Number(snapshot.playerObjectId), 'ownerId', 1), ownerName: actor.name, map: String(snapshot.mapFileName), ...point(actor, 'owner'), hp, maxHp,
       gold: integer(Number(snapshot.gold), 'gold'), hpStock: hpStock(snapshot), venison: venisonStock(snapshot),
       saleRemaining: pendingSaleId == null ? null : venison(snapshot).filter(item => Number(item.uniqueId) === pendingSaleId).reduce((sum, item) => sum + quantity(item), 0),
       npcId: Number(snapshot.activeNpcDialog?.npcObjectId) || null,
@@ -93,7 +94,8 @@ export function createOrdinarySupplies(client, options = {}) {
     if (client.closed) throw new Error('ordinary supplies: transport closed');
     if (observationFault) throw new Error(observationFault);
     const value = scalar(client.snapshot);
-    if (value.map !== '0' || value.ownerId !== identity || value.hp / value.maxHp < 0.7) throw new Error('ordinary supplies: owner/map/health changed');
+    if (value.map !== '0' || value.ownerId !== identity || value.ownerName !== identityName ||
+        (client.label != null && client.label !== identityName) || value.hp / value.maxHp < 0.7) throw new Error('ordinary supplies: owner/map/health changed');
     return value;
   }
   function observe(message, receipt) {
@@ -104,7 +106,7 @@ export function createOrdinarySupplies(client, options = {}) {
     lastObserved = receipt.sequence; lastObservedMono = receipt.monotonicMs;
     try {
       const value = scalar(message.payload);
-      if (value.ownerId !== identity || value.map !== '0') observationFault = 'ordinary supplies: received owner/map changed';
+      if (value.ownerId !== identity || value.ownerName !== identityName || value.map !== '0') observationFault = 'ordinary supplies: received owner/map changed';
       rows.push({ sequence: receipt.sequence, monotonicMs: receipt.monotonicMs, ...value });
       if (rows.length > 64) rows.shift();
     } catch { /* Incomplete/invalid observations cannot satisfy a proof. guard still checks live state. */ }
@@ -155,10 +157,10 @@ export function createOrdinarySupplies(client, options = {}) {
   async function transmit(command) {
     await drain(); guard(); enqueue(command); await drain(); return { ...lastSent };
   }
-  const fresh = (row, mark) => row.sequence > mark.cursor && row.monotonicMs >= mark.sentAtMs && row.monotonicMs <= mark.deadline && row.ownerId === identity && row.map === '0';
+  const fresh = (row, mark) => row.sequence > mark.cursor && row.monotonicMs >= mark.sentAtMs && row.monotonicMs <= mark.deadline && row.ownerId === identity && row.ownerName === identityName && row.map === '0';
   async function packet(command, packetName) {
     const mark = await transmit(command);
-    return wait(() => (client.events ?? []).find(event => event.direction === 'received' && event.packet === packetName && fresh({ ...event, ownerId: identity, map: '0' }, mark)), packetName);
+    return wait(() => (client.events ?? []).find(event => event.direction === 'received' && event.packet === packetName && fresh({ ...event, ownerId: identity, ownerName: identityName, map: '0' }, mark)), packetName);
   }
   async function refresh() {
     const mark = await transmit({ type: 'clientVersion' });
@@ -186,12 +188,19 @@ export function createOrdinarySupplies(client, options = {}) {
   async function shop(spec, sale = false) {
     await navigate(spec, 16); const npc = liveNpc(spec);
     if (!npc) throw new Error('ordinary supplies: exact live merchant unavailable');
-    const mark = await transmit({ type: 'interact', objectId: npc.objectId });
-    await wait(() => rows.find(row => fresh(row, mark) && row.npcId === npc.objectId && (sale ? row.sellLink : row.buyLink)), 'fresh merchant dialog');
+    const npcId = npc.objectId;
+    const mark = await transmit({ type: 'interact', objectId: npcId });
+    await wait(() => rows.find(row => fresh(row, mark) && row.npcId === npcId && (sale ? row.sellLink : row.buyLink)), 'fresh merchant dialog');
     const link = client.snapshot.activeNpcDialog?.links?.find(item => (sale ? ['@sell', '@buysell'] : ['@buysell']).includes(String(item.target).toLowerCase()) && item.disabled !== true && item.enabled !== false);
-    if (!link || !liveNpc(spec) || Number(client.snapshot.activeNpcDialog.npcObjectId) !== npc.objectId) throw new Error('ordinary supplies: merchant dialog changed');
+    if (!link || liveNpc(spec)?.objectId !== npcId || Number(client.snapshot.activeNpcDialog.npcObjectId) !== npcId) throw new Error('ordinary supplies: merchant dialog changed');
     const result = await packet({ type: 'selectNpcDialog', target: link.target }, sale ? 'NPCSell' : 'NPCGoods');
-    if (!liveNpc(spec) || Number(client.snapshot.activeNpcDialog.npcObjectId) !== npc.objectId) throw new Error('ordinary supplies: merchant changed during service');
+    // Opening a native service can dismiss only the text dialog. Service
+    // authority was established by this fresh matched packet following the
+    // exact live NPC's enabled link, not by keeping that text window open.
+    guard();
+    const remainingDialog = client.snapshot.activeNpcDialog;
+    if (liveNpc(spec)?.objectId !== npcId ||
+        (remainingDialog != null && Number(remainingDialog.npcObjectId) !== npcId)) throw new Error('ordinary supplies: merchant changed during service');
     if (sale) return null;
     if (Number(result.payload?.panelType) !== 0 || !Array.isArray(result.payload?.list)) throw new Error('ordinary supplies: invalid goods panel');
     const row = result.payload.list.find(item => template(item) === 658 && item.name === HP);
@@ -209,7 +218,7 @@ export function createOrdinarySupplies(client, options = {}) {
       const id = integer(Number(item.uniqueId), 'Venison uniqueId', 1), count = quantity(item), price = integer(Number(item.sellValue), 'live Venison sellValue', 1);
       pendingSaleId = id; const initial = guard();
       const mark = await transmit({ type: 'sellItem', uniqueId: id, count });
-      const ack = await wait(() => (client.events ?? []).find(event => event.direction === 'received' && event.packet === 'SellItem' && fresh({ ...event, ownerId: identity, map: '0' }, mark) && event.payload?.success === true && Number(event.payload.uniqueId) === id && Number(event.payload.count) === count), 'fresh exact Venison sale ACK');
+      const ack = await wait(() => (client.events ?? []).find(event => event.direction === 'received' && event.packet === 'SellItem' && fresh({ ...event, ownerId: identity, ownerName: identityName, map: '0' }, mark) && event.payload?.success === true && Number(event.payload.uniqueId) === id && Number(event.payload.count) === count), 'fresh exact Venison sale ACK');
       const proof = await wait(() => rows.find(row => fresh(row, mark) && row.gold === initial.gold + price * count && row.venison === initial.venison - count && row.saleRemaining === 0), 'fresh exact Venison sale');
       proofs.push({ kind: 'sale', sequence: proof.sequence, monotonicMs: proof.monotonicMs, ackSequence: ack.sequence, quantity: count, gold: price * count });
       sold += count; goldEarned += price * count; pendingSaleId = null;
@@ -226,8 +235,8 @@ export function createOrdinarySupplies(client, options = {}) {
     integer(afterSequence, 'fresh ready cursor', -1); integer(maxAgeMs, 'ready freshness', 1, evidenceMs);
     if (state !== 'ready' || !options.isPreparation?.() || observationFault) throw new Error('ordinary supplies: cohort readiness unavailable');
     const value = scalar(client.snapshot), staging = point(options.stagingPoint, 'explicit stagingPoint');
-    const receipt = rows.findLast(row => row.sequence > afterSequence && row.monotonicMs <= now() && row.monotonicMs >= now() - maxAgeMs && row.ownerId === identity && row.map === '0' && row.hpStock >= targetHp && row.x === staging.x && row.y === staging.y);
-    if (!receipt || value.ownerId !== identity || value.map !== '0' || value.x !== staging.x || value.y !== staging.y || value.hpStock < targetHp || value.hp / value.maxHp < 0.7 || client.closed || client.failure) throw new Error('ordinary supplies: fresh cohort readiness failed');
+    const receipt = rows.findLast(row => row.sequence > afterSequence && row.monotonicMs <= now() && row.monotonicMs >= now() - maxAgeMs && row.ownerId === identity && row.ownerName === identityName && row.map === '0' && row.hpStock >= targetHp && row.x === staging.x && row.y === staging.y);
+    if (!receipt || value.ownerId !== identity || value.ownerName !== identityName || (client.label != null && client.label !== identityName) || value.map !== '0' || value.x !== staging.x || value.y !== staging.y || value.hpStock < targetHp || value.hp / value.maxHp < 0.7 || client.closed || client.failure) throw new Error('ordinary supplies: fresh cohort readiness failed');
     if ((client.snapshot.entities ?? []).some(entity => String(entity.kind).toLowerCase() === 'monster' && String(entity.disposition).toLowerCase() === 'hostile' && !entity.dead && Number(entity.hp) > 0 && distance(staging, entity) <= 8)) throw new Error('ordinary supplies: hostile near staging');
     return { ...value, sequence: receipt.sequence, monotonicMs: receipt.monotonicMs, actualStagingReached: true };
   }
@@ -240,6 +249,7 @@ export function createOrdinarySupplies(client, options = {}) {
       if (typeof client?.pace !== 'function' || typeof client?.send !== 'function' || typeof client?.wait !== 'function' || typeof options.navigate !== 'function' || typeof options.isPreparation !== 'function') throw new Error('ordinary supplies: required client/navigation/preparation adapters missing');
       const staging = point(options.stagingPoint, 'explicit stagingPoint');
       identity = integer(Number(client.snapshot?.playerObjectId), 'initial ownerId', 1);
+      identityName = owner(client.snapshot)?.name;
       before = await refresh(); guard();
       if (before.hpStock < targetHp) {
         let goods = await shop(RUBEN), requiredGold = (targetHp - guard().hpStock) * goods.price;

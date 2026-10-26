@@ -1896,8 +1896,16 @@ export async function prepareCapacityActor(client, context, configuration, { cre
       return navigators.get(facade)(target, range, stop, options);
     },
   });
-  const result = await client.ordinarySupplies.prepare();
-  if (result.status !== 'ready') throw new Error('Ordinary preparation did not become ready');
+  let result;
+  try {
+    result = await client.ordinarySupplies.prepare();
+    if (result.status !== 'ready') throw new Error('Ordinary preparation did not become ready');
+  } catch (error) {
+    try {
+      context.writer.add({ type: 'ordinaryPreparation', actor: client.label, at: Date.now(), status: 'failed',
+        result: sanitize(client.ordinarySupplies.status(), client.secrets.concat(client.recentSecrets)) });
+    } finally { throw error; } // Diagnostics cannot replace the original preparation failure.
+  }
   context.writer.add({ type: 'ordinaryPreparation', actor: client.label, at: Date.now(), result });
   return result;
 }

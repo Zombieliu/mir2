@@ -356,6 +356,32 @@ test('ordinary preparation navigator sends its actual Walk through the bounded s
   assert.equal(client.budget.sent.length, 3); assert.equal(client.ready, false); assert.deepEqual(f.actions, []);
 });
 
+test('ordinary preparation failure records sanitized module status and rethrows the same error without activation or credit', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, configuration, rows, joins, actions } = f;
+  const credential = 'private-resume-credential'; client.recentSecrets.push(credential);
+  const error = new Error(`shop failed ${client.account.password} ${credential}`);
+  error.stack = 'private catch stack must never be recorded';
+  const status = { profile: 'ordinary-economic-v1', status: 'failed', targetHp: 12, commands: 3,
+    before: { hp: 24, hpStock: 0, gold: 0 }, after: null, actualStagingReached: false,
+    failure: error.message, measurementCredit: false, sustainableDurationProven: false };
+  let continued = false;
+  await assert.rejects(async () => {
+    await prepareCapacityActor(client, context, configuration, { createSupplies: () => ({
+      prepare: async () => { throw error; }, status: () => status,
+    }) });
+    continued = true; await activatePreparedCohort([client], context);
+  }, actual => actual === error);
+  const failures = rows.filter(row => row.type === 'ordinaryPreparation');
+  assert.equal(failures.length, 1); assert.equal(failures[0].status, 'failed');
+  assert.equal(failures[0].result.commands, 3); assert.deepEqual(failures[0].result.before, status.before);
+  assert.equal(failures[0].result.failure, 'shop failed [redacted] [redacted]');
+  assert.equal(status.failure, error.message, 'diagnostics do not mutate module state or the original exception');
+  const publicRows = JSON.stringify(rows);
+  for (const secret of [client.account.password, credential, error.stack]) assert.equal(publicRows.includes(secret), false);
+  assert.equal(continued, false); assert.equal(client.ready, false); assert.equal(client.plan, undefined);
+  assert.deepEqual(joins, []); assert.deepEqual(actions, []); assert.deepEqual(f.commands, []);
+});
+
 test('ordinary cohort activation fails without a fresh receipt and never partially activates a cohort', async () => {
   const f = ordinaryPreparationFixture(), { client, context, configuration, joins } = f;
   await prepareCapacityActor(client, context, configuration);
