@@ -370,6 +370,36 @@ export function fingerprint(client) {
 export class AoiCoverage {
   constructor() { this.missingSince = new Map(); this.extraSince = new Map(); this.reset(); }
   reset() { this.stats = { samples: 0, expectedPairs: 0, observedPairs: 0, persistentMissing: 0, ghosts: 0, duplicates: 0, minimumCoverage: 1, maximumExpectedPerObserver: 0 }; }
+  reconcileReceived(clients, changedActor) {
+    if (!this.missingSince.size && !this.extraSince.size) return;
+    const pending = [];
+    for (const clocks of [this.missingSince, this.extraSince]) {
+      for (const key of clocks.keys()) {
+        const [receiverName, ownerName] = key.split(':');
+        if (receiverName === changedActor || ownerName === changedActor) pending.push({ clocks, key, receiverName, ownerName });
+      }
+    }
+    if (!pending.length) return;
+    const cohort = new Map(clients.map(client => [client.label, client])), entriesByReceiver = new Map();
+    const live = client => client?.inGame && !client.closed && !client.paused && self(client);
+    for (const { clocks, key, receiverName, ownerName } of pending) {
+      const receiver = cohort.get(receiverName), owner = cohort.get(ownerName);
+      if (!live(receiver) || !live(owner)) { clocks.delete(key); continue; }
+      const shouldSee = receiver.snapshot.mapFileName === owner.snapshot.mapFileName && distance(self(receiver), self(owner)) <= 16;
+      const missing = clocks === this.missingSince;
+      if (missing ? !shouldSee : shouldSee) { clocks.delete(key); continue; }
+      let counts = entriesByReceiver.get(receiverName);
+      if (!counts) {
+        counts = new Map();
+        for (const entity of receiver.snapshot.entities) {
+          if (['player', 'remoteplayer', 'selfplayer'].includes(String(entity.kind).toLowerCase())) counts.set(entity.name, (counts.get(entity.name) ?? 0) + 1);
+        }
+        entriesByReceiver.set(receiverName, counts);
+      }
+      const count = counts.get(ownerName) ?? 0;
+      if (missing ? count === 1 : count === 0) clocks.delete(key);
+    }
+  }
   sample(clients, now = performance.now()) {
     const live = clients.filter(client => client.inGame && !client.closed && !client.paused && self(client));
     const liveNames = new Set(live.map(client => client.label)), knownNames = new Set(clients.map(client => client.label));

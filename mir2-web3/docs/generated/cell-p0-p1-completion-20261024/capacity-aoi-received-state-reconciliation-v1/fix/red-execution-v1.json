@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "kind": "red",
+  "args": [
+    "--test",
+    "--test-reporter=tap",
+    "--test-name-pattern=AOI received state",
+    "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs"
+  ],
+  "startedAt": "2026-10-26T08:01:59.202Z",
+  "endedAt": "2026-10-26T08:01:59.336Z",
+  "exitCode": 1,
+  "signal": null,
+  "counts": {
+    "tests": 5,
+    "pass": 0,
+    "fail": 5,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "stdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\red-stdout-v1.log",
+    "bytes": 6198,
+    "sha256": "7b503063c1bc72b5d31b69ae59869c012af1d554c2821dcd4b8aea8440131d79"
+  },
+  "stderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\red-stderr-v1.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "sourceBefore": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 157409,
+      "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+      "bytes": 292830,
+      "sha256": "c4ebf298199806d3d3fc48ffdabbd45472db3abca6d2f89e997c1f7f234b3a79"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 157409,
+      "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+      "bytes": 292830,
+      "sha256": "c4ebf298199806d3d3fc48ffdabbd45472db3abca6d2f89e997c1f7f234b3a79"
+    }
+  ],
+  "sourceBeforeAfterRawExact": true,
+  "networkOrRealmStarted": false
+}

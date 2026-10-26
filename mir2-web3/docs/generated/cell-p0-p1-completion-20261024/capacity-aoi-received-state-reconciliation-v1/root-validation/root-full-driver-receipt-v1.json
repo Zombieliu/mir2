@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-26T08:14:07.842Z",
+  "endedAt": "2026-10-26T08:19:19.030Z",
+  "durationMs": 311182.3549,
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--test",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "apps/web/scripts/playtest-capacity-observability.test.mjs",
+    "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+    "apps/web/scripts/playtest-capacity-telemetry.test.mjs"
+  ],
+  "cwd": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3",
+  "actualExitCode": 0,
+  "signal": null,
+  "totals": {
+    "tests": 242,
+    "suites": 0,
+    "pass": 242,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "duration_ms": 311134.6281
+  },
+  "sourcePinsUnchanged": true,
+  "baseline": {
+    "file": "C:/mir2-build/p01-completion-20261024/capacity-scout-target-waypoint-routing-driver-frozen-v1.json",
+    "bytes": 13577,
+    "sha256": "8c9f3dd42444909ba38a5660bf07b0d1e587cf3ecaec84392b5eab189ccca09b"
+  },
+  "logs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-aoi-received-state-validation-v1\\full-regression-stdout-v1.log",
+      "bytes": 65255,
+      "sha256": "d3c4d9b77966284913b1531223aeb75821092ab546b0344ab94deb3faf4aac91"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-aoi-received-state-validation-v1\\full-regression-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "sourceRecords": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-aoi-received-state-validation-v1\\source-before-v1.json",
+      "bytes": 1581,
+      "sha256": "4bd3ebaa5cff087ddd228fc09062f4b5e00998244f9879480589831d9b19137c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-aoi-received-state-validation-v1\\source-after-v1.json",
+      "bytes": 1581,
+      "sha256": "4bd3ebaa5cff087ddd228fc09062f4b5e00998244f9879480589831d9b19137c"
+    }
+  ],
+  "passed": true,
+  "capacityAcceptance": false
+}

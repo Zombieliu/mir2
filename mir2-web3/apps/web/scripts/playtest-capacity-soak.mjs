@@ -260,6 +260,7 @@ export class CapacityClient extends NativeResumeClient {
     const ownerTransform = message.type === 'packet' && typeof message.packet === 'string';
     const beforeSelf = ownerTransform ? selfTransform(this.snapshot) : null;
     super.observe(message);
+    this.context.aoi?.reconcileReceived(this.context.clients ?? [], this.label);
     recordNativeHpRecoveryEvidence(this, message, this.events.at(-1));
     const navigationHint = this.navigationHint, navigationReceipt = this.events.at(-1);
     if (navigationHint && ((message.packet === 'UserLocation' && navigationReceipt.sequence > navigationHint.sendCursor &&

@@ -257,3 +257,11 @@ V2 后端对应提交 `461f1d85eed6309a55a88bd79a0022f7b97febe4`、[39 项输入
 本轮新写出 factory v3 / manager v4 / runtime v8。旧程序不能读取这些新检查点；回退必须恢复升级前经过校验的备份及匹配程序，不能删除字段或降低版本号。
 
 旧 runtime v1—v7、manager v2/v3 先按原 schema 校验，再一次性建立新随机状态。升级后的共同 base 必须在其后增量重放前共享；未共享 base 的两个全新进程不宣称确定性。状态及 API 边界见 [所有权合同](../../CELL-PARTITION-STATE-OWNERS.zh-CN.md)。
+
+## 当前实测与 AOI 接收状态修复：242 项回归通过，负载待复测
+
+[本次诊断与修复证据](capacity-aoi-received-state-reconciliation-v1/README.md)保留 `9d720e7c / Node9 / 237` 与原 `c743122a / 50 输入 / dae1…` 后端的来源区分。L 的普通完整生命周期实际通过 16/16、354 条普通 sent；Probe21 的 2/10 人各 300 秒加 360 秒短测及独立重演通过，5/5/6 个完整测量窗通过，但容量接受仍为 false。正式 17 原判保留：2/10 人通过，25 人第四、第五个完整窗口失败；第四窗两名角色为 15/15、3/3 次发起/命中，第五窗为 19/19、15/15，原按实际时长计算的每分钟 18 次发起门槛不变。正式 50/100 人、两小时 soak 及其后验收未执行。
+
+另行稳态诊断使用固定真实 loopback source IP 和各 source 原登录预算，并不替代正式阶梯。50 人实际全部入场后，在 settle 的 AOI 准备期因 ghost 检查停止，没有 50 人测量窗；单 pair 记录显示跨连接 ACK 时序差及两次采样间曾回到范围内，尚不能认定服务端丢 Leave。100 人诊断达到 server-active79、78 ready，角色 `L689dc626` 等待 StartGame 约 20,002.7ms 超时；原 `peakControlledActors=0` 保留，没有 100 人测量。其后才观察到 peer Join 和 owner 地图/快照记录，完整 StartGame 回执时刻未知，不能直接归因 CPU、Store 或认定容量上限。
+
+当前 AOI 候选只在已接收状态表明连续条件被打断时清除相关既有 missing/extra 时钟，不新增可见 credit 或统计样本；原 16 格、严格超过 1000ms、持续 missing/ghost 及 duplicate 检查保持。五项新增测试包含于 Root 同次四入口完整 **242/242 passed，零失败、取消、跳过或 todo**，九输入前后相同，旧测试 286,361 字节前缀保持；未把聚焦和完整测试相加。该客户端修复尚待新实际负载验证，不改历史失败，不宣称修复服务端或 StartGame 根因。P1 合同通过，P0 仍未完成，P2 未启动；本机协议诊断不替代 GUI、人类接受、生产容量或两小时长稳。

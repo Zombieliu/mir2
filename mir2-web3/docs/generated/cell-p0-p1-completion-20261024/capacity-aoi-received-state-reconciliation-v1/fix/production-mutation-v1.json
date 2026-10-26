@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "rows": [
+    {
+      "file": "playtest-capacity-soak-core.mjs",
+      "before": "  sample(clients, now = performance.now()) {",
+      "after": "  reconcileReceived(clients, changedActor) {\n    if (!this.missingSince.size && !this.extraSince.size) return;\n    const pending = [];\n    for (const clocks of [this.missingSince, this.extraSince]) {\n      for (const key of clocks.keys()) {\n        const [receiverName, ownerName] = key.split(':');\n        if (receiverName === changedActor || ownerName === changedActor) pending.push({ clocks, key, receiverName, ownerName });\n      }\n    }\n    if (!pending.length) return;\n    const cohort = new Map(clients.map(client => [client.label, client])), entriesByReceiver = new Map();\n    const live = client => client?.inGame && !client.closed && !client.paused && self(client);\n    for (const { clocks, key, receiverName, ownerName } of pending) {\n      const receiver = cohort.get(receiverName), owner = cohort.get(ownerName);\n      if (!live(receiver) || !live(owner)) { clocks.delete(key); continue; }\n      const shouldSee = receiver.snapshot.mapFileName === owner.snapshot.mapFileName && distance(self(receiver), self(owner)) <= 16;\n      const missing = clocks === this.missingSince;\n      if (missing ? !shouldSee : shouldSee) { clocks.delete(key); continue; }\n      let counts = entriesByReceiver.get(receiverName);\n      if (!counts) {\n        counts = new Map();\n        for (const entity of receiver.snapshot.entities) {\n          if (['player', 'remoteplayer', 'selfplayer'].includes(String(entity.kind).toLowerCase())) counts.set(entity.name, (counts.get(entity.name) ?? 0) + 1);\n        }\n        entriesByReceiver.set(receiverName, counts);\n      }\n      const count = counts.get(ownerName) ?? 0;\n      if (missing ? count === 1 : count === 0) clocks.delete(key);\n    }\n  }\n  sample(clients, now = performance.now()) {",
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\preimages\\playtest-capacity-soak-core.mjs.txt",
+        "bytes": 37930,
+        "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+      },
+      "current": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs",
+        "bytes": 39617,
+        "sha256": "c59977540640efe0a2a5f9b05e81d3ce6c526ecc3c498fbb077f886e35605ebf"
+      },
+      "inverseRawExact": true
+    },
+    {
+      "file": "playtest-capacity-soak.mjs",
+      "before": "    super.observe(message);",
+      "after": "    super.observe(message);\n    this.context.aoi?.reconcileReceived(this.context.clients ?? [], this.label);",
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+        "bytes": 157409,
+        "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+      },
+      "current": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+        "bytes": 157490,
+        "sha256": "fe5c255f45b1010e63f98d6670307b365cc60c9cfb948e1ae6b676604500ddb6"
+      },
+      "inverseRawExact": true
+    }
+  ],
+  "onlyClearExistingClocks": true,
+  "range16Unchanged": true,
+  "grace1000AndStrictGreaterUnchanged": true,
+  "noStatsOrVisibilityCredit": true
+}

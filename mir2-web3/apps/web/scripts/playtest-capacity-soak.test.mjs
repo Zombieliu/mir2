@@ -3683,3 +3683,72 @@ test('scout target waypoint keeps corrected ACK exclusion and the existing time 
     assert.equal(f.context.targetClaims.size, 0); assert.equal(f.actions.length, 0);
   }
 });
+
+test('AOI received state clears a ghost clock during the actual in-range interval between polls', () => {
+  const a = observer('a', 280, [entity('b', 297, 50002)]), b = observer('b', 297, [entity('a', 280, 50001)]);
+  const clients = [a, b], coverage = new AoiCoverage();
+  assert.equal(coverage.sample(clients, 0).issues.length, 0); assert.equal(coverage.extraSince.get('a:b'), 0);
+  b.snapshot.entities[0].x = 295; // Real owner ACK at t288: distance15, no observer-side prediction.
+  coverage.reconcileReceived?.(clients, 'b'); assert.equal(coverage.extraSince.has('a:b'), false);
+  b.snapshot.entities[0].x = 297; // Real owner ACK at t956: distance17 again.
+  coverage.reconcileReceived?.(clients, 'b'); assert.equal(coverage.extraSince.has('a:b'), false);
+  assert.equal(coverage.sample(clients, 1080).issues.length, 0); assert.equal(coverage.stats.ghosts, 0);
+  assert.equal(coverage.extraSince.get('a:b'), 1080);
+  a.snapshot.entities[0].x = 281; // Real observer ACK at t1235: distance16.
+  coverage.reconcileReceived?.(clients, 'a'); assert.equal(coverage.extraSince.has('a:b'), false);
+  assert.equal(coverage.sample(clients, 2236).issues.length, 0); assert.equal(coverage.stats.ghosts, 0);
+});
+
+test('AOI received state retains strict continuous ghost grace and ignores unrelated actor notifications', () => {
+  const a = observer('a', 0, [entity('b', 17, 50002)]), b = observer('b', 17), c = observer('c', 100);
+  const clients = [a, b, c], coverage = new AoiCoverage(); coverage.sample(clients, 0);
+  coverage.reconcileReceived?.(clients, 'c'); assert.equal(coverage.extraSince.get('a:b'), 0);
+  assert.equal(coverage.sample(clients, 1000).issues.some(issue => issue.reason === 'ghost'), false);
+  assert.equal(coverage.sample(clients, 1001).issues.some(issue => issue.observer === 'a' && issue.owner === 'b' && issue.reason === 'ghost'), true);
+  const empty = new AoiCoverage(), untouched = new Proxy([], { get() { throw new Error('No cohort scan is needed without pending clocks'); } });
+  assert.equal(typeof empty.reconcileReceived, 'function'); empty.reconcileReceived(untouched, 'a');
+});
+
+test('AOI received state clears missing only for exactly one entry or no longer required visibility', () => {
+  const a = observer('a', 0), b = observer('b', 10, [entity('a', 0, 50001)]), clients = [a, b], coverage = new AoiCoverage();
+  coverage.sample(clients, 0); assert.equal(coverage.missingSince.get('a:b'), 0);
+  a.snapshot.entities.push(entity('b', 10, 50002), entity('b', 10, 59999));
+  coverage.reconcileReceived?.(clients, 'a'); assert.equal(coverage.missingSince.get('a:b'), 0);
+  assert.equal(coverage.sample(clients, 500).issues.some(issue => issue.reason === 'duplicate'), true);
+  a.snapshot.entities.pop(); coverage.reconcileReceived?.(clients, 'a'); assert.equal(coverage.missingSince.has('a:b'), false);
+  a.snapshot.entities.pop(); coverage.reconcileReceived?.(clients, 'a'); assert.equal(coverage.missingSince.has('a:b'), false); // The hook never starts a new timer.
+  coverage.sample(clients, 700); assert.equal(coverage.missingSince.get('a:b'), 700);
+  const priorStats = { ...coverage.stats };
+  b.snapshot.entities[0].x = 17; coverage.reconcileReceived?.(clients, 'b'); assert.equal(coverage.missingSince.has('a:b'), false);
+  assert.deepEqual(coverage.stats, priorStats); // Reconciliation gives no visibility credit or sample.
+});
+
+test('AOI received state clears changed receiver remove snapshot and map replacement without clearing another pair', () => {
+  const a = observer('a', 0, [entity('b', 17, 50002)]), b = observer('b', 17), c = observer('c', 100, [entity('d', 117, 50004)]), d = observer('d', 117);
+  const clients = [a, b, c, d], coverage = new AoiCoverage(); coverage.sample(clients, 0);
+  a.snapshot.entities.pop(); coverage.reconcileReceived?.(clients, 'a'); assert.equal(coverage.extraSince.has('a:b'), false);
+  assert.equal(coverage.extraSince.get('c:d'), 0);
+  b.snapshot.entities[0].x = 10; coverage.sample(clients, 100); assert.equal(coverage.missingSince.get('a:b'), 100);
+  a.snapshot = { ...a.snapshot, mapFileName: '1' }; coverage.reconcileReceived?.(clients, 'a'); assert.equal(coverage.missingSince.has('a:b'), false);
+  assert.equal(coverage.extraSince.get('c:d'), 0); assert.equal(coverage.stats.samples, 2);
+});
+
+test('AOI received state hook follows real decoded owner peer Join Leave snapshot and map state', () => {
+  const rows = [], { client, context, owner, peer, snapshot, packet } = lifecycleFixture({ add: row => rows.push(row) });
+  const other = observer(peer.name, 27, [entity(owner.name, 10, 50010)]); other.snapshot.entities[0].y = 10;
+  context.clients = [client, other]; context.aoi = new AoiCoverage();
+  client.observe(snapshot([{ ...owner, x: 10 }, { ...peer, x: 27 }]));
+  context.aoi.sample(context.clients, 0); const key = `${client.label}:${other.label}`; assert.equal(context.aoi.extraSince.get(key), 0);
+  client.observe(packet('UserLocation', { x: 12, y: 10, direction: 'Right' }));
+  assert.equal(client.snapshot.entities.find(item => item.objectId === owner.objectId).x, 12); assert.equal(context.aoi.extraSince.has(key), false);
+  client.observe(packet('ObjectRemove', { objectId: peer.objectId })); context.aoi.sample(context.clients, 100); assert.equal(context.aoi.missingSince.get(key), 100);
+  client.observe(packet('ObjectPlayer', { ...peer, x: 27 })); assert.equal(context.aoi.missingSince.has(key), false);
+  other.snapshot.entities[0].x = 40; context.aoi.sample(context.clients, 200); assert.equal(context.aoi.extraSince.get(key), 200);
+  client.observe(packet('ObjectWalk', { objectId: peer.objectId, location: { x: 39, y: 10 }, direction: 'Left' })); assert.equal(context.aoi.extraSince.get(key), 200);
+  client.observe(packet('ObjectRemove', { objectId: peer.objectId })); assert.equal(context.aoi.extraSince.has(key), false);
+  other.snapshot.entities[0].x = 20; context.aoi.sample(context.clients, 300); assert.equal(context.aoi.missingSince.get(key), 300);
+  client.observe(snapshot([{ ...owner, x: 12 }, { ...peer, x: 20 }])); assert.equal(context.aoi.missingSince.has(key), false);
+  client.observe(packet('ObjectRemove', { objectId: peer.objectId })); context.aoi.sample(context.clients, 400); assert.equal(context.aoi.missingSince.get(key), 400);
+  client.observe({ type: 'worldSnapshot', payload: { mapFileName: '1', playerObjectId: owner.objectId, entities: [{ ...owner, x: 12 }] } });
+  assert.equal(context.aoi.missingSince.has(key), false); assert.equal(context.aoi.stats.samples, 5);
+});
