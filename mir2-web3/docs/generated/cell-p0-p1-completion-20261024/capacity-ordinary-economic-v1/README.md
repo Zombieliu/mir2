@@ -89,3 +89,13 @@
 [正常清理](bank-prepare-v1/cleanup-v1.json)和[Root独立OS检查](bank-prepare-v1/root-independent-cleanup-v1.json)确认PID72788消失、17500/17510端口释放、监控停止、六计数归零及冻结来源未变。27份公开证据原字节复制共2,906,567字节，见[清单](bank-prepare-v1/copied-evidence-manifest.json)；私有Store、完整pool、原登录账本、秘密内容和完整录像留在隔离环境，不提交。后续复用正常冷关闭的部分角色库，继续普通补给与保存，不清空原登录预算或重复赠送物品。
 
 随后补给适配器把本模块产生的精确目标失效映射到原funding有限重选路径；非Deer阻路怪仍禁止攻击，不计死亡或收获，不重置8次狩猎尝试、600秒及命令预算。攻击入队和实际限速等待后的发送点均检查相同目标ID、monster/Deer、明确`dead=false`和有限正HP；缺失、畸形或歧义身份拒发。owner/name/map/health/transport变化仍终止。最多32条拒发标量记录目标ID/资格、实际收件序号及owner，不保留完整快照。模块90项聚焦回归通过；统一Root新门禁和部分角色库续跑仍待执行，不能将候选修复追认为首次百人准备成功。
+
+## 第二次百人角色库准备：旧库存复用通过，第5人生命保护停止
+
+`2444c9ba01978dcc3674a04859f5594ffaebac62` 的新Root门禁已实际通过387项容量/准备工具和301项相邻检查，0失败/取消/跳过，29个输入前后不变；见[新资格收据](bank-prepare-v2/root-focused-receipt-v1.json)及原始日志。本轮完整复制正常关闭的原Store、100账号pool、原登录账本和四个秘密；旧recovery控制文件仅原样归档，新活动目录由Gateway正常初始化，没有seed、清账本或覆盖loginNotBefore。完整Store101账号与受控pool100分别记录，不把额外账号计入负载。
+
+前三名角色本轮普通重登后的库存仍满足12，且无新狩猎/出售/购买，`sourceFirst3InventoryReuse=true`；第4名完成普通补给并正常保存，preparedCount达到4。新目标拒发计数在这五名角色上均为0，不能把本轮进展宣称为真实触发了失效重选分支。第5名169.274秒、125条命令后触发原`owner/map/health changed`保护；[原报告](bank-prepare-v2/1793047839765-82a5e52b.preparation-report.json)保持`ok=false`，没有人数档测量。
+
+[公开生命与近域证据](bank-prepare-v2/public-health-guard-evidence-v1.json)及[原始录制标量提取器](bank-prepare-v2/extract-public-health-guard-evidence-v1.mjs)确认第5名owner1000/姓名/map0/level1/maxHP18未变；位置343,593附近精确HP18→16→15→12，最后下降约154ms后失败，12/18低于70%。近域两只HookingCat距1/2，正在接近/攻击的Deer在343,592；health事件没有attacker ID，不能认定是哪只造成伤害。旁观录制的空inventory不用于推导其真实持药量。原funding搜索启用避怪半径2，但Deer接近/回退传0、其他普通导航默认0，仅避占格，需把已有导航避敌能力接入完整准备路径。下一轮若复用该低血存档，必须通过普通恢复及fresh生命检查，不能跳过保护或改Store。
+
+[正常清理](bank-prepare-v2/cleanup-v1.json)及[独立OS检查](bank-prepare-v2/root-independent-cleanup-v1.json)确认PID61120消失、两端口释放及冻结来源未变。原判定与26份公开输入/结果/门禁日志（1,756,761字节）见[复制清单](bank-prepare-v2/copied-evidence-manifest.json)。继续定位普通狩猎路径的威胁暴露，原70%生命保护、600秒/8次/命令预算保持；P0未完成、P2未启动，尚无新25/50/100/500或两小时验收通过。
