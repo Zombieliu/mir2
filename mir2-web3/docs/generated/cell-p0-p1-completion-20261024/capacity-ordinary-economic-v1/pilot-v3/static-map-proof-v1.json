@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "READ_ONLY_STATIC_MAP_PROOF_NOT_LIVE_ACCEPTANCE",
+  "anchors": [
+    {
+      "x": 285,
+      "y": 602
+    },
+    {
+      "x": 288,
+      "y": 602
+    }
+  ],
+  "stagingPoints": [
+    {
+      "x": 285,
+      "y": 602
+    },
+    {
+      "x": 288,
+      "y": 602
+    }
+  ],
+  "patrolSpan": 2,
+  "clearDisjointFootprintCells": 18,
+  "maximumMutualPatrolChebyshev": 5,
+  "interAnchorPathSteps": 3,
+  "noStaticNpcOrTransferOverlap": true,
+  "liveHostilesUnknown": true,
+  "freshSpawnReachabilityDeferredToOriginalDriver": true,
+  "dataPins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    }
+  ],
+  "scope": "Actual map0 read via current protocol-navigation;18 distinct 3x3 cells and three-step ordinary static path checked. These counts are not a service/load/test receipt and prove no live target or safe staging availability.",
+  "packageId": "ordinary-economic-preparation-pilot-v3",
+  "proofFreshness": "Previously established static geometry on these exact pinned data files; V3 freeze must revalidate geometry and data. No new live safety or load proof."
+}

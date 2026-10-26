@@ -80,7 +80,14 @@ export function createOrdinarySupplies(client, options = {}) {
     if (typeof actor.name !== 'string' || !actor.name.trim() || actor.name.length > 128) throw new Error('ordinary supplies: invalid owner name');
     const hp = observedPlayerHp(snapshot), maxHp = Number(snapshot.playerMaxHp ?? actor.maxHp);
     if (!Number.isFinite(hp) || hp <= 0 || !Number.isFinite(maxHp) || maxHp <= 0 || hp > maxHp || hasAuthoritativePlayerDeath(snapshot)) throw new Error('ordinary supplies: dead or invalid owner health');
+    // Poisoned/ObjectPoisoned carry u16; the normal observer retains these
+    // packet fields when a WorldSnapshot omits transient poison state.
+    const poison = value => value == null ? null : integer(value, 'observed poison', 0, 65535);
     return { ownerId: integer(Number(snapshot.playerObjectId), 'ownerId', 1), ownerName: actor.name, map: String(snapshot.mapFileName), ...point(actor, 'owner'), hp, maxHp,
+      inSafeZone: typeof snapshot.inSafeZone === 'boolean' ? snapshot.inSafeZone : null,
+      nearbyHostileCount: (snapshot.entities ?? []).filter(entity => String(entity.kind).toLowerCase() === 'monster' &&
+        String(entity.disposition).toLowerCase() === 'hostile' && !entity.dead && Number(entity.hp) > 0 && distance(actor, entity) <= 8).length,
+      playerPoison: poison(snapshot.playerPoison), ownerPoison: poison(actor.poison), dazed: typeof actor.dazed === 'boolean' ? actor.dazed : null,
       gold: integer(Number(snapshot.gold), 'gold'), hpStock: hpStock(snapshot), venison: venisonStock(snapshot),
       saleRemaining: pendingSaleId == null ? null : venison(snapshot).filter(item => Number(item.uniqueId) === pendingSaleId).reduce((sum, item) => sum + quantity(item), 0),
       npcId: Number(snapshot.activeNpcDialog?.npcObjectId) || null,
@@ -244,16 +251,30 @@ export function createOrdinarySupplies(client, options = {}) {
       commands, movementCommands, commandCounts: { ...counts }, commandRows: [...commandRows], commandRowsTruncated: commands > commandRows.length,
       purchased: bought, soldVenison: sold, goldEarned, goldSpent, funding, proofs: [...proofs], elapsedMs: started == null ? 0 : Math.max(0, now() - started), failure,
       commandCountsScope: 'module-owned commands; external keepAlive shares the original client budget',
+      stagingSafetyScope: 'Fresh authoritative inSafeZone protects against normal monster targeting and impacts only. Existing poison and released effects may still damage; absent status fields do not prove their absence.',
       measurementCredit: false, sustainableDurationProven: false };
   }
-  function assertReady({ afterSequence = -1, maxAgeMs = evidenceMs } = {}) {
+  function freshStagingReadiness({ afterSequence = -1, maxAgeMs = evidenceMs } = {}) {
     integer(afterSequence, 'fresh ready cursor', -1); integer(maxAgeMs, 'ready freshness', 1, evidenceMs);
-    if (state !== 'ready' || !options.isPreparation?.() || observationFault) throw new Error('ordinary supplies: cohort readiness unavailable');
     const value = scalar(client.snapshot), staging = point(options.stagingPoint, 'explicit stagingPoint');
-    const receipt = rows.findLast(row => row.sequence > afterSequence && row.monotonicMs <= now() && row.monotonicMs >= now() - maxAgeMs && row.ownerId === identity && row.ownerName === identityName && row.map === '0' && row.hpStock >= targetHp && row.x === staging.x && row.y === staging.y);
-    if (!receipt || value.ownerId !== identity || value.ownerName !== identityName || (client.label != null && client.label !== identityName) || value.map !== '0' || value.x !== staging.x || value.y !== staging.y || value.hpStock < targetHp || value.hp / value.maxHp < 0.7 || client.closed || client.failure) throw new Error('ordinary supplies: fresh cohort readiness failed');
-    if ((client.snapshot.entities ?? []).some(entity => String(entity.kind).toLowerCase() === 'monster' && String(entity.disposition).toLowerCase() === 'hostile' && !entity.dead && Number(entity.hp) > 0 && distance(staging, entity) <= 8)) throw new Error('ordinary supplies: hostile near staging');
-    return { ...value, sequence: receipt.sequence, monotonicMs: receipt.monotonicMs, actualStagingReached: true };
+    // Never fall back to an older true membership after a newer snapshot.
+    const receipt = rows.at(-1);
+    if (!receipt || receipt.sequence !== lastObserved || receipt.monotonicMs !== lastObservedMono ||
+        receipt.sequence <= afterSequence || receipt.monotonicMs > now() || receipt.monotonicMs < now() - maxAgeMs ||
+        receipt.ownerId !== identity || receipt.ownerName !== identityName || receipt.map !== '0' || receipt.hpStock < targetHp ||
+        receipt.x !== staging.x || receipt.y !== staging.y || receipt.hp / receipt.maxHp < 0.7 ||
+        value.ownerId !== identity || value.ownerName !== identityName || (client.label != null && client.label !== identityName) ||
+        value.map !== '0' || value.x !== staging.x || value.y !== staging.y || value.hpStock < targetHp || value.hp / value.maxHp < 0.7 ||
+        client.closed || client.failure) throw new Error('ordinary supplies: fresh cohort readiness failed');
+    if ([receipt, value].some(row => row.playerPoison > 0 || row.ownerPoison > 0 || row.dazed === true)) throw new Error('ordinary supplies: negative status at staging');
+    if (receipt.inSafeZone !== true && (receipt.nearbyHostileCount > 0 || value.nearbyHostileCount > 0)) throw new Error('ordinary supplies: hostile near staging');
+    return { ...value, inSafeZone: receipt.inSafeZone, nearbyHostileCount: receipt.nearbyHostileCount,
+      currentNearbyHostileCount: value.nearbyHostileCount, sequence: receipt.sequence, monotonicMs: receipt.monotonicMs, actualStagingReached: true,
+      stagingProtection: receipt.inSafeZone === true ? 'authoritative-safe-zone-normal-monsters' : 'no-observed-nearby-hostile' };
+  }
+  function assertReady(readinessOptions = {}) {
+    if (state !== 'ready' || !options.isPreparation?.() || observationFault) throw new Error('ordinary supplies: cohort readiness unavailable');
+    return freshStagingReadiness(readinessOptions);
   }
   async function prepare() {
     if (!enabled) return result();
@@ -293,8 +314,7 @@ export function createOrdinarySupplies(client, options = {}) {
         }
       }
       state = 'staging'; await navigate(staging, 0); after = await refresh(); guard();
-      if (after.x !== staging.x || after.y !== staging.y || after.hpStock < targetHp) throw new Error('ordinary supplies: staging/stock not ready');
-      if ((client.snapshot.entities ?? []).some(entity => String(entity.kind).toLowerCase() === 'monster' && String(entity.disposition).toLowerCase() === 'hostile' && !entity.dead && Number(entity.hp) > 0 && distance(staging, entity) <= 8)) throw new Error('ordinary supplies: hostile near staging');
+      after = freshStagingReadiness({ afterSequence: after.sequence - 1 });
       actualStagingReached = true; state = 'ready'; return result();
     } catch (error) {
       state = 'failed'; failure = String(error?.message ?? '').startsWith('ordinary supplies:') ? error.message : 'ordinary supplies: underlying ordinary operation failed'; throw error;

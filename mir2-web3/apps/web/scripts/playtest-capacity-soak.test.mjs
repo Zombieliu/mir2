@@ -339,6 +339,20 @@ test('ordinary preparation consumes actual full snapshot receipts and joins only
   assert.equal(context.writer != null, true); assert.deepEqual(f.actions, [], 'preparation cannot credit measured gameplay');
 });
 
+test('ordinary preparation forwards actual safe-zone membership and nearby hostile counts through the fresh activation barrier', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, configuration, joins } = f;
+  client.snapshot.inSafeZone = true;
+  client.snapshot.entities.push({ objectId: 700, kind: 'monster', name: 'Scarecrow', ai: 0,
+    disposition: 'hostile', hp: 20, dead: false, x: 6, y: 5 });
+  const result = await prepareCapacityActor(client, context, configuration);
+  assert.equal(result.after.inSafeZone, true); assert.equal(result.after.nearbyHostileCount, 1);
+  assert.equal(result.after.stagingProtection, 'authoritative-safe-zone-normal-monsters');
+  assert.equal(client.ready, false); assert.deepEqual(joins, []);
+  const cursor = client.sequence; await activatePreparedCohort([client], context);
+  assert.ok(client.sequence > cursor); assert.equal(client.ready, true); assert.equal(joins.length, 1);
+  assert.equal(f.commands.length, 3); assert.deepEqual(f.actions, []);
+});
+
 test('ordinary preparation navigator sends its actual Walk through the bounded supply facade and shared budget', async () => {
   const f = ordinaryPreparationFixture(), { client, context, commands, configuration } = f;
   configuration.stagingPoint = { x: 6, y: 5 };

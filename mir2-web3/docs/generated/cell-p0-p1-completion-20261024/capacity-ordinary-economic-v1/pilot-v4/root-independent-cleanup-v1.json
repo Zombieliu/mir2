@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "kind": "INDEPENDENT_ROOT_OS_CLEANUP_RECHECK",
+  "packageId": "ordinary-economic-preparation-pilot-v4",
+  "checkedAtUtc": "2026-10-26T19:20:20.1119861Z",
+  "gatewayPid": 69992,
+  "gatewayPidAbsent": true,
+  "ports": [
+    17500,
+    17510
+  ],
+  "listeners": [],
+  "portsFree": true,
+  "cleanupComplete": true,
+  "scope": "Independent OS read-only PID/listener recheck after Root declared episode ended; no service or test started."
+}

@@ -230,6 +230,81 @@ test('cohort readiness is revalidated after peers prepare and never trusts old r
   await assert.rejects(f.supply.prepare(), /single-use/);
 });
 
+function addStagingHostiles(client) {
+  client.snapshot.entities.push(...[[291, 607], [290, 614], [297, 607]].map(([x, y], index) => ({
+    objectId: 100 + index, kind: 'monster', name: 'Scarecrow', ai: 0, disposition: 'hostile', hp: 20, dead: false, x, y,
+  })));
+}
+
+test('fresh authoritative staging membership permits normal nearby hostiles and records the qualified protection', async () => {
+  const f = fixture({ items: [item(658, 12, 500)] });
+  f.client.snapshot.inSafeZone = true; addStagingHostiles(f.client);
+  const result = await f.supply.prepare();
+  assert.equal(result.status, 'ready'); assert.equal(result.after.inSafeZone, true);
+  assert.equal(result.after.nearbyHostileCount, 3); assert.equal(result.after.currentNearbyHostileCount, 3);
+  assert.equal(result.after.stagingProtection, 'authoritative-safe-zone-normal-monsters');
+  assert.match(result.stagingSafetyScope, /Existing poison and released effects may still damage/);
+  assert.equal(result.after.playerPoison, null); assert.equal(result.after.ownerPoison, null);
+  const cursor = f.client.sequence; f.snapshot();
+  const ready = f.supply.assertReady({ afterSequence: cursor });
+  assert.ok(ready.sequence > cursor); assert.equal(ready.inSafeZone, true); assert.equal(ready.nearbyHostileCount, 3);
+  assert.equal(f.client.sent.some(command => command.type === 'attack' || command.type === 'attackV2'), false);
+});
+
+test('false missing and nonboolean membership retain the original eight-cell hostile staging guard', async t => {
+  for (const membership of [false, undefined, 'true']) await t.test(String(membership), async () => {
+    const f = fixture({ items: [item(658, 12, 500)] });
+    f.client.snapshot.inSafeZone = membership; addStagingHostiles(f.client);
+    await assert.rejects(f.supply.prepare(), /hostile near staging/);
+    assert.equal(f.supply.status().actualStagingReached, false);
+    assert.equal(f.supply.status().after.inSafeZone, membership === false ? false : null);
+    assert.equal(f.supply.status().after.nearbyHostileCount, 3);
+  });
+});
+
+test('cohort membership never reuses an old true receipt after false missing stale or mismatched staging evidence', async t => {
+  for (const boundary of ['false', 'missing', 'old-sequence', 'expired', 'wrong-position']) await t.test(boundary, async () => {
+    const f = fixture({ items: [item(658, 12, 500)] });
+    f.client.snapshot.inSafeZone = true; addStagingHostiles(f.client); await f.supply.prepare();
+    const cursor = f.client.sequence;
+    if (boundary === 'false') f.client.snapshot.inSafeZone = false;
+    if (boundary === 'missing') delete f.client.snapshot.inSafeZone;
+    if (boundary === 'wrong-position') f.client.snapshot.entities[0].x++;
+    f.snapshot(boundary === 'old-sequence' ? cursor - 1 : undefined);
+    if (boundary === 'expired') f.advance(12_001);
+    // The live cache's boolean or coordinates are not a new authoritative receipt.
+    f.client.snapshot.inSafeZone = true; f.client.snapshot.entities[0].x = 290;
+    assert.throws(() => f.supply.assertReady({ afterSequence: cursor }),
+      boundary === 'false' || boundary === 'missing' ? /hostile near staging/ : /fresh cohort readiness/);
+  });
+});
+
+test('a newer invalid snapshot retires the older true staging receipt even after the live cache becomes legal again', async () => {
+  const f = fixture({ items: [item(658, 12, 500)] });
+  f.client.snapshot.inSafeZone = true; addStagingHostiles(f.client); await f.supply.prepare();
+  const cursor = f.client.sequence; f.snapshot();
+  assert.equal(f.supply.assertReady({ afterSequence: cursor }).inSafeZone, true);
+  f.client.snapshot.gold = -1; f.snapshot(); // Scalar validation rejects this actual newer receipt.
+  f.client.snapshot.gold = 0; // A valid live cache is not another WorldSnapshot.
+  assert.throws(() => f.supply.assertReady({ afterSequence: cursor }), /fresh cohort readiness/);
+  f.snapshot(); assert.equal(f.supply.assertReady({ afterSequence: cursor }).inSafeZone, true);
+});
+
+test('known poison or Dazed still rejects preparation and cohort readiness inside a fresh authoritative safe zone', async t => {
+  for (const field of ['playerPoison', 'ownerPoison', 'dazed']) await t.test(field, async () => {
+    for (const phase of ['prepare', 'cohort']) {
+      const f = fixture({ items: [item(658, 12, 500)] });
+      f.client.snapshot.inSafeZone = true; addStagingHostiles(f.client);
+      if (phase === 'cohort') await f.supply.prepare();
+      if (field === 'playerPoison') f.client.snapshot.playerPoison = 1;
+      if (field === 'ownerPoison') f.client.snapshot.entities[0].poison = 4;
+      if (field === 'dazed') f.client.snapshot.entities[0].dazed = true;
+      if (phase === 'prepare') await assert.rejects(f.supply.prepare(), /negative status at staging/);
+      else { const cursor = f.client.sequence; f.snapshot(); assert.throws(() => f.supply.assertReady({ afterSequence: cursor }), /negative status at staging/); }
+    }
+  });
+});
+
 test('existing held HP stacks reduce purchases and are counted only once across bag and belt', async () => {
   const f = fixture({ gold: 80, items: [item(658, 10, 500)] });
   const result = await f.supply.prepare();

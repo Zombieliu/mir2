@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "kind": "ANONYMIZED_BOUNDED_PUBLIC_STAGING_THREAT_OBSERVATION",
+  "packageId": "ordinary-economic-preparation-pilot-v4",
+  "stagingPoint": {
+    "x": 286,
+    "y": 616
+  },
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\episode\\recordings\\0-498067.jsonl",
+    "bytes": 20108594,
+    "sha256": "397c33b6521bf43c7c34a771948476a165a27e6064a415db26f80181d5c163d0",
+    "readMethod": "One streaming pass; only public whitelist retained",
+    "totalFrames": 526
+  },
+  "failedPreparation": {
+    "at": 1793042356623,
+    "status": "failed",
+    "elapsedMs": 138979.68449999997,
+    "failure": "ordinary supplies: hostile near staging",
+    "after": {
+      "x": 286,
+      "y": 616,
+      "hp": 24,
+      "maxHp": 24
+    },
+    "rowKeys": [
+      "type",
+      "actor",
+      "at",
+      "status",
+      "result"
+    ],
+    "resultKeys": [
+      "profile",
+      "status",
+      "targetHp",
+      "before",
+      "after",
+      "actualStagingReached",
+      "commands",
+      "movementCommands",
+      "commandCounts",
+      "commandRows",
+      "commandRowsTruncated",
+      "purchased",
+      "soldVenison",
+      "goldEarned",
+      "goldSpent",
+      "funding",
+      "proofs",
+      "elapsedMs",
+      "failure",
+      "commandCountsScope",
+      "measurementCredit",
+      "sustainableDurationProven"
+    ]
+  },
+  "window": {
+    "start": 1793042351623,
+    "end": 1793042358623,
+    "matchedFrames": 0
+  },
+  "nearestBefore": null,
+  "nearestAfter": null,
+  "hostilesInWindow": [],
+  "scope": "No player identities, owner fields, tokens, private stores or full recording copied. Actor positions are anonymous public projections, not a cohort count. Safezone flags retained only when an actual boolean field exists."
+}

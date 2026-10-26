@@ -34,4 +34,24 @@
 
 最小修复仅在工具层增加真正到期的类型化等待标记，并在准备facade按精确标记/label适配旧helper；身份、健康、安全停止、连接及全局600秒预算错误不变为可重试超时。新增真实六次采集形态测试，保留18次采集/三鹿、同格拾取和新鲜经济证明；不修改Rust、掉落或剥皮规则。
 
-[正常清理](pilot-v2/cleanup-v1.json)及[独立OS复核](pilot-v2/root-independent-cleanup-v1.json)确认PID63968消失、两端口释放。来源、原判定与复制摘要见[第二次清单](pilot-v2/copied-evidence-manifest.json)。修复后新门禁与第三次试运行待补；P0 未通过，500 CCU 和两小时可持续性未证明。
+[正常清理](pilot-v2/cleanup-v1.json)及[独立OS复核](pilot-v2/root-independent-cleanup-v1.json)确认PID63968消失、两端口释放。来源、原判定与复制摘要见[第二次清单](pilot-v2/copied-evidence-manifest.json)。后续结果如下；P0 未通过，500 CCU 和两小时可持续性未证明。
+
+## 第三次真实准备试运行：两人买足药，一人 ready
+
+`f1d4a00d5` 的新鲜[变更路径门禁](pilot-v3/root-focused-receipt-v1.json)为补给模块48/48、主驱动受影响等待与准备32/32、普通经济/导航相邻301/301，共381个本轮实际受检项，27输入前后相同、无失败或跳过；不把第二轮的完整295项追认为本次完整容量回归。
+
+[原样本](pilot-v3/1793041026401-c2a7a2b4.samples.jsonl)证明两名角色各正常狩猎3鹿、发送18次harvest，各买11瓶HP药，最终各持12瓶；本次实际走第六次harvest直接入包路径，未发送pickUp，不能把同格拾取fixture当作本次live覆盖。两人均从HP18/18、Gold0、药1开始，最终HP24/24，余额65/232；角色A准备141.117秒并ready，角色B准备147.525秒在`(288,602)`因`hostile near staging`失败。[原报告](pilot-v3/1793041026401-c2a7a2b4.report.json)与[执行收据](pilot-v3/pilot-receipt-v1.json)保持失败：严格ready仅1、激活0、无测量。
+
+[匿名现场记录](pilot-v3/public-staging-threat-observation-v1.json)指出失败前28ms的原录制帧1075包含存活、HP20、hostile的Scarecrow206604，位置`(280,602)`，距两待命点5/8格。原待命点在村庄安全区外，遂把下一轮待命点独立设为`(286,616)/(289,616)`，测量homes仍为`(285,602)/(288,602)`，通过原普通导航进入；没有传送、降低敌怪距离或改战斗门槛。[正常清理](pilot-v3/cleanup-v1.json)及[独立OS复核](pilot-v3/root-independent-cleanup-v1.json)确认PID57964消失、两端口释放；原证据与来源见[复制清单](pilot-v3/copied-evidence-manifest.json)。
+
+## 第四次真实准备试运行：权威安全区状态与旧待命判定冲突
+
+第四轮仍为2人、30秒阶段加30秒soak的功能探针，未达到正式300秒或两小时；源码仍为`f1d4a00d5`，30个本地静态输入与55个Rust输入重新逐字节核对，复用同HEAD的381项资格及既有V5二进制，没有新增Rust构建或新鲜Rust测试。
+
+[原报告](pilot-v4/1793042214886-d262ad8a.report.json)在第一名角色已正常买足12瓶后，于安全区内`(286,616)`再次报`hostile near staging`，0 ready/0 activation、无测量。[更正后的匿名现场提取](pilot-v4/public-staging-threat-observation-v2.json)保留失败前75ms的帧524：`world.inSafeZone=true`，同时存在3只活的、HP20、hostile的Scarecrow，距离为1/7/7。第一次提取误用时间字段而得到空窗口，其[无效v1输出](pilot-v4/public-staging-threat-observation-v1.json)保留；只使用改按`capturedAtMs`取得的v2作为现场证据。
+
+该结果不能再归因于待命点在安全区外，也不能通过换点或名字豁免来宣称解决。公开WorldSnapshot已有服务端Zone覆写的权威`inSafeZone`；旧补给标量没有采集它，仅按hostile及距离拒绝。下一候选须把同一新鲜worldSnapshot的owner/name/map/x/y、实际收件序号与单调时间绑定到安全区状态，在prepare和全cohort屏障同时验证；不能使用移动后的残留布尔值，也不能把普通怪物安全区保护描述为毒/已释放效果等全部伤害免疫。生命、死亡、身份与原测量门槛保持。
+
+[正常清理](pilot-v4/cleanup-v1.json)及[独立OS复核](pilot-v4/root-independent-cleanup-v1.json)确认PID69992消失、两端口释放。原输入、失败和提取更正见[第四轮清单](pilot-v4/copied-evidence-manifest.json)。后续以正常保存、原字节保留的普通角色池避免每次重建补给；复用角色必须通过普通重登和新鲜readiness，不能继承旧ready或冒充新0角色入场。本轮仍未完成25/50/100人数档、100人两小时及500目标。
+
+修复候选已实现于补给工具：prepare与assertReady共用最新实际worldSnapshot收据，不回退到较旧true；新快照即使因无效标量而被拒收，也会使较旧安全区证明失效。只有同owner/name/map/待命坐标、实际收件序号和单调时间有效的新鲜`inSafeZone===true`可声明普通怪物安全区保护；false/缺失/非布尔状态仍执行原8格hostile检查。现有公共Poisoned/ObjectPoisoned折入的u16中毒状态及owner Dazed已知为异常时拒绝。没有新增Rust/生产协议字段、命令、额外刷新、阈值或药品；新鲜Root完整资格与重登现场验收待执行。

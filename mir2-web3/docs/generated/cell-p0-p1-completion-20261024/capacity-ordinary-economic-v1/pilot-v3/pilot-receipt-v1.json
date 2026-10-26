@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-economic-preparation-pilot-v3",
+  "mode": "ordinary-economic-preparation-functional-pilot",
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\frozen-source-v1.json",
+    "bytes": 79435,
+    "sha256": "3b6c380eb06768857df2ad99a03f1148c316365b5e52a6dac395d0600f93804a"
+  },
+  "driverSourceCommit": "f1d4a00d5c73f6580e4e72b02d05b554a729aae8",
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "backendExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\bin\\mir2-gateway.exe",
+    "bytes": 87455744,
+    "sha256": "4fb233a2e47ed19aadfce75a209d0e32a559a2dd402f26e109f1a7678e1fec04"
+  },
+  "backendSourcesExact": 55,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "rawOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\reports\\1793041026401-c2a7a2b4.report.json",
+    "bytes": 15014,
+    "sha256": "f08f4c0d2afc9e00549ee23eb754387fa1d9b324424286d5255fea30c2cb33b5"
+  },
+  "rawOriginalVerdict": {
+    "ok": false,
+    "error": "ordinary supplies: hostile near staging",
+    "safetyStopped": false,
+    "highestPassedStage": null
+  },
+  "ordinaryPreparationEvidence": {
+    "originalSamples": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\reports\\1793041026401-c2a7a2b4.samples.jsonl",
+      "bytes": 1507133,
+      "sha256": "3f1520dceac6b1ee0f923679e3621488f7cb072460567c1069bd966e5c69f251"
+    },
+    "preparationRows": 2,
+    "preparedActors": 1,
+    "failedPreparationCount": 1,
+    "closedLoops": 1,
+    "cohortActivations": []
+  },
+  "executionError": null,
+  "cleanupComplete": true,
+  "cleanupRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\cleanup-v1.json",
+    "bytes": 1041,
+    "sha256": "91846c75685634c5e3bcf64e1e49dc257baed6a19f58e98b4e86d4103b5ddfd8"
+  },
+  "functionalPilotDurationOnly": true,
+  "sustainableTwoHourSupplyProven": false,
+  "formalFiveMinuteStagePerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}
