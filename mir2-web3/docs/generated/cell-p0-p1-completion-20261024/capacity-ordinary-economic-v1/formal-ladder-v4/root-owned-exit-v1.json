@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-27T14:02:52.5567255Z",
+  "endedAt": "2026-10-27T14:21:58.6359935Z",
+  "ownedRunnerExitCode": 1,
+  "supervisorError": null,
+  "manifestSha256": "a7d57151bd6e1dfe08bf2c07e6b18e65d85ecca53132b48f42b02a382f51f56b",
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-27T15:53:09.785Z",
+  "profile": "server-only-pvp-functional-v1",
+  "backend": {
+    "file": "C:/mir2-build/p01-completion-20261024/ordinary-hp-wake-release-v6/bin/mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "driver": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-pvp-probe.mjs",
+    "bytes": 22015,
+    "sha256": "59f38980c32d608f50d3c86475fde428b976d7b1dcc7818a17e9a4342cf18688"
+  },
+  "fixture": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-probe-v2\\fixture-v1.json",
+    "bytes": 924,
+    "sha256": "f765faea131e2c00f050447fc24f940e806fb5aa8bde1d8ec7a6d938161a74ea"
+  },
+  "normalPasswordLogin": true,
+  "authenticationBucket": "new isolated functional probe process; prior probe-v1 same-endpoint auth ledger copied unchanged; ordinary-run ledger and auth controls unchanged",
+  "normalCombatAndHealing": true,
+  "statsEquipmentPotionQuantitiesUnchanged": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}
