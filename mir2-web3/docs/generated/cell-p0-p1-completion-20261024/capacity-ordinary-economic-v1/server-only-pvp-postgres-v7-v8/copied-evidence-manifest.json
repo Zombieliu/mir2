@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "scope": "Public PostgreSQL comparison originals only; private DB/DSN/passwords/store/log bodies excluded",
+  "createdAt": "2026-10-27T21:21:33.292Z",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v7\\run-intent-v1.json",
+        "bytes": 1550,
+        "sha256": "8a567e2e411da84493b303c33f3c3cc1b25a23b0430ba1bb44d00e2ffe2f9bac"
+      },
+      "destination": "attempt-v7/run-intent-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v7\\cleanup-v1.json",
+        "bytes": 284,
+        "sha256": "b4519b9ddf36846795d595b07c19a07b54bb3498c7e38245dfa7fbdfc6f7b67e"
+      },
+      "destination": "attempt-v7/cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v7\\resource-profile-v1.json",
+        "bytes": 2170,
+        "sha256": "9a6675aacdd74f3967f460d099e6211be028c81a0aab18d74ca0dbd64af44401"
+      },
+      "destination": "attempt-v7/resource-profile-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v7\\owned-process-v1.json",
+        "bytes": 158,
+        "sha256": "6a620623839a52eae250b35e3f5d89989fb250a21e43b618ac8307bf18555d91"
+      },
+      "destination": "attempt-v7/owned-process-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v7\\fixture\\public\\fixture-manifest-v1.json",
+        "bytes": 135980,
+        "sha256": "45539895b112ae9ada6aefed4aa5d5de0765e1c6110e1ffe6a918e9cdfa4395e"
+      },
+      "destination": "attempt-v7/fixture/public/fixture-manifest-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\run-intent-v1.json",
+        "bytes": 1593,
+        "sha256": "906ffc67111f1617eb21265a691728447fd64fbc530202cef09075a32bbba109"
+      },
+      "destination": "attempt-v8/run-intent-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\cleanup-v1.json",
+        "bytes": 382,
+        "sha256": "62d202af386e0d22472309ad3028168f5ee714e870a05f9e4f06491d70b8c742"
+      },
+      "destination": "attempt-v8/cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\resource-profile-v1.json",
+        "bytes": 2170,
+        "sha256": "9a6675aacdd74f3967f460d099e6211be028c81a0aab18d74ca0dbd64af44401"
+      },
+      "destination": "attempt-v8/resource-profile-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\health-before-v1.json",
+        "bytes": 13509,
+        "sha256": "4eda53dbb2b9583b40d7fa9a24fb0fb03a59c049c29b34ae55be817e7633c018"
+      },
+      "destination": "attempt-v8/health-before-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\health-after-v1.json",
+        "bytes": 13669,
+        "sha256": "d94274d29ea8605135c798cf2b1a0c15d7c1a6eaa82466467e5ce9d13e6af772"
+      },
+      "destination": "attempt-v8/health-after-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\monitor-current.json",
+        "bytes": 9161,
+        "sha256": "cf7308df6f45264dec95217a2a7b07a5676f85129e580daf28d46fc566b9da50"
+      },
+      "destination": "attempt-v8/monitor-current.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\monitor-history.jsonl",
+        "bytes": 877989,
+        "sha256": "6a337ba1fe8551e8385b5bc85ac7f09cb4e57d045d94fd856904b1e41283bcaf"
+      },
+      "destination": "attempt-v8/monitor-history.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\owned-process-v1.json",
+        "bytes": 158,
+        "sha256": "3c86aaf9ccdeb54edd1dade4137f03b88df3e4763655dca3aae07124c28866bf"
+      },
+      "destination": "attempt-v8/owned-process-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\fixture\\public\\fixture-manifest-v1.json",
+        "bytes": 135980,
+        "sha256": "45539895b112ae9ada6aefed4aa5d5de0765e1c6110e1ffe6a918e9cdfa4395e"
+      },
+      "destination": "attempt-v8/fixture/public/fixture-manifest-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\reports\\1793135742536-77cf3cec.pvp-stress-report.json",
+        "bytes": 49498,
+        "sha256": "e49b258d8d5878f6fe6bb67fcc6ef5687b1343b1abffbcecaec08534bb41139e"
+      },
+      "destination": "attempt-v8/reports/1793135742536-77cf3cec.pvp-stress-report.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v8\\reports\\1793135742536-77cf3cec.pvp-stress-samples.jsonl",
+        "bytes": 929419,
+        "sha256": "dfd673c19a1c133c3b06237c7020b0fa60c37c92927a7e33e88bedf3109d969f"
+      },
+      "destination": "attempt-v8/reports/1793135742536-77cf3cec.pvp-stress-samples.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-postgres-v1\\import-validation-v1.json",
+        "bytes": 874,
+        "sha256": "89546097e8f903c8cfe67f8c610d5daa05bde9c49e64ecae2dbba1043a006f74"
+      },
+      "destination": "import-validation-v1.json"
+    }
+  ]
+}

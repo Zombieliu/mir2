@@ -656,6 +656,7 @@ mod tests {
         let state = web::WebState {
             config: Arc::new(mir2_simulation::SimulationConfig::default()),
             deploy_revision: None,
+            auth_rate_limit_policy: crate::web::AuthRateLimitPolicy::default(),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
             chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),

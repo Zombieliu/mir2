@@ -1,0 +1,20 @@
+{
+  "finishedAt": "2026-10-27T19:21:10.414Z",
+  "driverResult": {
+    "code": 1,
+    "signal": null
+  },
+  "gatewayResult": {
+    "code": 0,
+    "signal": null
+  },
+  "monitorResult": {
+    "code": 0,
+    "signal": null
+  },
+  "error": null,
+  "remainingListeners": [],
+  "closed": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

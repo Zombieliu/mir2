@@ -1,0 +1,337 @@
+{
+  "schemaVersion": 1,
+  "scope": "server-only-pvp-v6-selected-slow-observations",
+  "source": {
+    "path": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v6/fixture/private/gateway.stderr.log",
+    "bytes": 1426987,
+    "sha256": "70fec8afe1b1b85fd908a1d33b2ce1aab04b8bdfd5b0e54e2f1cce58247b5f3e",
+    "lines": 9634,
+    "bodyCopied": false,
+    "gatewayStdoutBytes": 0
+  },
+  "privacy": {
+    "rawPayloadCopied": false,
+    "credentialsCopied": false,
+    "actorNamesCopied": false,
+    "accountNamesCopied": false,
+    "privateTraceIdsCopied": false
+  },
+  "measurementBoundary": {
+    "rootReportedPhase": "admission-25",
+    "completedMeasurementStages": 0,
+    "rootReportedFirstFailureAt": "2026-10-27T20:46:50.536Z",
+    "rootReportedFailureActorIndex": 9,
+    "rootReportedFailureClass": "correlated-attack-outcome-timeout",
+    "actorTimeoutCausalLinkProved": false,
+    "capacityClaim": false,
+    "ordinaryP0Claim": false
+  },
+  "method": {
+    "slowThresholdMs": 50,
+    "quantilePopulation": "Only emitted slow-stage observations, not all requests or all stage executions.",
+    "durationMsRounding": "Gateway duration_ms values are integer milliseconds; account diagnostic max_start_us/max_end_us retain microsecond precision.",
+    "nestedDurationsMustNotBeAdded": true,
+    "concurrentConnectionTotalsAreNotWallTime": true,
+    "untimestampedSlowStagesNotAssignedToFailureWindow": true,
+    "deliveryEndTimeMethod": "recordedUnixMs directly, or producerUnixMs + elapsedUs/1000; the latter is an approximate wall-time reconstruction."
+  },
+  "slowStages": [
+    {
+      "stage": "socket_turn.input",
+      "loggedObservations": 543,
+      "maximumMs": 2322,
+      "p95OfLoggedObservationsMs": 1286,
+      "sumRoundedLoggedDurationsMs": 206034.0,
+      "atLeast2000Ms": 3
+    },
+    {
+      "stage": "session_action.execute",
+      "loggedObservations": 471,
+      "maximumMs": 1981,
+      "p95OfLoggedObservationsMs": 1059,
+      "sumRoundedLoggedDurationsMs": 100066.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "zone_owner.in_process.execute_request",
+      "loggedObservations": 294,
+      "maximumMs": 1913,
+      "p95OfLoggedObservationsMs": 1089,
+      "sumRoundedLoggedDurationsMs": 63856.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "shared_session.inner_execute",
+      "loggedObservations": 152,
+      "maximumMs": 1575,
+      "p95OfLoggedObservationsMs": 1070,
+      "sumRoundedLoggedDurationsMs": 40202.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "serial_gate.zone_outbound_wait",
+      "loggedObservations": 449,
+      "maximumMs": 1546,
+      "p95OfLoggedObservationsMs": 688,
+      "sumRoundedLoggedDurationsMs": 128809.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "session_action.flush",
+      "loggedObservations": 335,
+      "maximumMs": 1376,
+      "p95OfLoggedObservationsMs": 513,
+      "sumRoundedLoggedDurationsMs": 72248.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "flush.save",
+      "loggedObservations": 263,
+      "maximumMs": 1241,
+      "p95OfLoggedObservationsMs": 398,
+      "sumRoundedLoggedDurationsMs": 46601.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "shared_session.tail",
+      "loggedObservations": 55,
+      "maximumMs": 1161,
+      "p95OfLoggedObservationsMs": 204,
+      "sumRoundedLoggedDurationsMs": 5403.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "socket_turn.spectator",
+      "loggedObservations": 661,
+      "maximumMs": 1122,
+      "p95OfLoggedObservationsMs": 155,
+      "sumRoundedLoggedDurationsMs": 62566.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "shared_session.predrain",
+      "loggedObservations": 155,
+      "maximumMs": 1111,
+      "p95OfLoggedObservationsMs": 143,
+      "sumRoundedLoggedDurationsMs": 14116.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "snapshot.build_and_send",
+      "loggedObservations": 128,
+      "maximumMs": 1098,
+      "p95OfLoggedObservationsMs": 174,
+      "sumRoundedLoggedDurationsMs": 13308.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "runtime_tick.total",
+      "loggedObservations": 214,
+      "maximumMs": 1094,
+      "p95OfLoggedObservationsMs": 220,
+      "sumRoundedLoggedDurationsMs": 24963.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "runtime_tick.execute",
+      "loggedObservations": 214,
+      "maximumMs": 1094,
+      "p95OfLoggedObservationsMs": 220,
+      "sumRoundedLoggedDurationsMs": 24946.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "socket_input.queue_residence",
+      "loggedObservations": 93,
+      "maximumMs": 1067,
+      "p95OfLoggedObservationsMs": 822,
+      "sumRoundedLoggedDurationsMs": 17825.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "shared_session.reconcile",
+      "loggedObservations": 55,
+      "maximumMs": 994,
+      "p95OfLoggedObservationsMs": 167,
+      "sumRoundedLoggedDurationsMs": 4959.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "account_store.store_held",
+      "loggedObservations": 314,
+      "maximumMs": 993,
+      "p95OfLoggedObservationsMs": 62,
+      "sumRoundedLoggedDurationsMs": 18469.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "account_store.store_wait",
+      "loggedObservations": 176,
+      "maximumMs": 985,
+      "p95OfLoggedObservationsMs": 150,
+      "sumRoundedLoggedDurationsMs": 14167.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "zone_cadence.total",
+      "loggedObservations": 34,
+      "maximumMs": 954,
+      "p95OfLoggedObservationsMs": 246,
+      "sumRoundedLoggedDurationsMs": 3186.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "account_store.marker_begin_sync",
+      "loggedObservations": 2,
+      "maximumMs": 942,
+      "p95OfLoggedObservationsMs": 942,
+      "sumRoundedLoggedDurationsMs": 993.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "account_store.persist_wait",
+      "loggedObservations": 12,
+      "maximumMs": 119,
+      "p95OfLoggedObservationsMs": 119,
+      "sumRoundedLoggedDurationsMs": 811.0,
+      "atLeast2000Ms": 0
+    },
+    {
+      "stage": "flush.external_state",
+      "loggedObservations": 3,
+      "maximumMs": 52,
+      "p95OfLoggedObservationsMs": 52,
+      "sumRoundedLoggedDurationsMs": 154.0,
+      "atLeast2000Ms": 0
+    }
+  ],
+  "failureWindow": {
+    "startUnixMs": 1793134000536,
+    "endUnixMs": 1793134010536,
+    "timestampedLoggedObservations": 1538,
+    "stageMaxima": [
+      {
+        "stage": "account_store.marker_begin_sync",
+        "loggedObservations": 1,
+        "maximumMs": 942,
+        "maximumSourceLine": 8404,
+        "maximumEndUnixMs": 1793134009407.694
+      },
+      {
+        "stage": "account_store.persist_wait",
+        "loggedObservations": 5,
+        "maximumMs": 118,
+        "maximumSourceLine": 8645,
+        "maximumEndUnixMs": 1793134010355.03
+      },
+      {
+        "stage": "account_store.store_held",
+        "loggedObservations": 85,
+        "maximumMs": 993,
+        "maximumSourceLine": 8403,
+        "maximumEndUnixMs": 1793134009427.652
+      },
+      {
+        "stage": "account_store.store_wait",
+        "loggedObservations": 66,
+        "maximumMs": 985,
+        "maximumSourceLine": 8407,
+        "maximumEndUnixMs": 1793134009428.091
+      },
+      {
+        "stage": "completion_to_pop",
+        "loggedObservations": 716,
+        "maximumMs": 1396.67,
+        "maximumSourceLine": 8618,
+        "maximumEndUnixMs": 1793134010232.0
+      },
+      {
+        "stage": "dequeue",
+        "loggedObservations": 105,
+        "maximumMs": 1425.27,
+        "maximumSourceLine": 8504,
+        "maximumEndUnixMs": 1793134009611.27
+      },
+      {
+        "stage": "enqueue",
+        "loggedObservations": 115,
+        "maximumMs": 0.064,
+        "maximumSourceLine": 6494,
+        "maximumEndUnixMs": 1793134002893.064
+      },
+      {
+        "stage": "gate",
+        "loggedObservations": 106,
+        "maximumMs": 1425.275,
+        "maximumSourceLine": 8505,
+        "maximumEndUnixMs": 1793134009611.275
+      },
+      {
+        "stage": "read_gate",
+        "loggedObservations": 127,
+        "maximumMs": 1546.36,
+        "maximumSourceLine": 8503,
+        "maximumEndUnixMs": 1793134009612.0
+      },
+      {
+        "stage": "send",
+        "loggedObservations": 106,
+        "maximumMs": 1425.28,
+        "maximumSourceLine": 8506,
+        "maximumEndUnixMs": 1793134009611.28
+      },
+      {
+        "stage": "sent",
+        "loggedObservations": 106,
+        "maximumMs": 1425.305,
+        "maximumSourceLine": 8507,
+        "maximumEndUnixMs": 1793134009611.305
+      }
+    ]
+  },
+  "sameTransactionBlocking": {
+    "samePrivateTraceMatchedInternally": true,
+    "timeline": [
+      {
+        "sourceLine": 8403,
+        "stage": "account_store.store_held",
+        "startUnixMs": 1793134008434.412,
+        "endUnixMs": 1793134009427.652,
+        "durationMs": 993.24
+      },
+      {
+        "sourceLine": 8404,
+        "stage": "account_store.marker_begin_sync",
+        "startUnixMs": 1793134008465.429,
+        "endUnixMs": 1793134009407.694,
+        "durationMs": 942.265
+      }
+    ],
+    "markerInsideStoreHeld": true,
+    "markerCoversMostStoreHold": true,
+    "sourceCode": {
+      "storeHeldBegins": "apps/simulation/src/config.rs:5285",
+      "publicationBeginsBeforeStoreGuardDrops": "apps/simulation/src/config.rs:5453",
+      "markerWriteAndSync": "apps/simulation/src/config_file_authority.rs:263",
+      "markerOperation": "seek, write PENDING PUBLICATION marker, then sync_all"
+    },
+    "interpretation": "A 942.265ms File publication-marker write/sync interval occurred inside a 993.240ms shared Store hold. This establishes an actual shared persistence stall, not whole-snapshot serialization or disk-device saturation."
+  },
+  "adjacentAttackQueueEvidence": {
+    "population": "File-order slice lines8300..8900 around the timestamped marker event; these queue rows themselves have no absolute timestamp.",
+    "explicitAttackV2LoggedObservations": 14,
+    "maximumMs": 915.0,
+    "notExactActorTimeoutCorrelation": true
+  },
+  "conclusions": [
+    "There are three logged socket_turn.input durations at least2000ms. Individual session_action.execute max is1981ms; this does not prove one identified Attack execution exceeded2s.",
+    "Later repeated long execution observations occur on already-seen connections, so not all long observations can be dismissed as first initialization. The log does not label exact executed commands.",
+    "The timestamped failure window includes Store wait985ms and outbound read_gate1546.360ms, with producer-to-sent1425.305ms. They establish queue/gate stalls, but their nested and cross-connection times cannot be added to prove the actor9 request path.",
+    "Prioritize investigating File publication marker sync while holding shared Store authority. Do not remove markers, weaken durability, or infer an accepted capacity from this diagnostic."
+  ],
+  "actions": {
+    "sourceModified": false,
+    "servicesStarted": false,
+    "testsRun": false
+  }
+}

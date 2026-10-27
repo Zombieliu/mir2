@@ -54,6 +54,7 @@ async fn local_gateway() -> LocalGateway {
     let state = WebState {
         config: Arc::new(config),
         deploy_revision: None,
+        auth_rate_limit_policy: crate::web::AuthRateLimitPolicy::default(),
         // This constructor uses SharedInProcessZoneRuntimeFactory, including
         // its distinct shared-Zone personal Tick path, not a personal-only stub.
         zone_registry: Arc::new(crate::ZoneRegistry::in_process()),

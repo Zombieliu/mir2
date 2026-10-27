@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit public originals for three independent server-only preseeded PvP diagnostic continuation attempts; no capacity/ordinary/P0 qualification.",
+  "createdAt": "2026-10-27T20:07:30.958Z",
+  "files": [
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v2/reports/1793128541388-d6b9ab90.pvp-stress-report.json",
+        "bytes": 96297,
+        "sha256": "952a196f9ed4227bc2cdc2d0f1a47c2cd4bc10161b3ba3477a12e70083594057"
+      },
+      "destination": "attempt-v2/reports/1793128541388-d6b9ab90.pvp-stress-report.json",
+      "pinBasis": "actual canonical false report"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v2\\reports\\1793128541388-d6b9ab90.pvp-stress-samples.jsonl",
+        "bytes": 1525896,
+        "sha256": "a59660771982ca0ff0d8edd541078360a5896013d5139da97df7c0f8f04c13ed"
+      },
+      "destination": "attempt-v2/reports/1793128541388-d6b9ab90.pvp-stress-samples.jsonl",
+      "pinBasis": "actual public samples"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v2/health-before-v1.json",
+        "bytes": 13516,
+        "sha256": "c88077558418ec386dab0e9be22203e1a0f22fbd563b61e9f466ac7f3716210f"
+      },
+      "destination": "attempt-v2/health-before-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v2/health-after-v1.json",
+        "bytes": 13675,
+        "sha256": "0d6b313b69a71e095b5f37f1ef7ab51f81fe9b5a9cd7e02b9549e09c15150484"
+      },
+      "destination": "attempt-v2/health-after-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v2/cleanup-v1.json",
+        "bytes": 341,
+        "sha256": "8b37a7d696f450904b4e58413d4d4747e0a821d7c33e3ae941bb3b84fada5663"
+      },
+      "destination": "attempt-v2/cleanup-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v2/monitor-current.json",
+        "bytes": 9165,
+        "sha256": "a0f765728a016678dd46e91d8b21e0ca1195d552f95a500be42cfd6d2157e7be"
+      },
+      "destination": "attempt-v2/monitor-current.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v2/resource-profile-v1.json",
+        "bytes": 1938,
+        "sha256": "586e76aa4de9c884b3a1bf9be08c0e27fafc19245e8b808945c1e74d42983798"
+      },
+      "destination": "attempt-v2/resource-profile-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v2/run-intent-v1.json",
+        "bytes": 1278,
+        "sha256": "b687f5815322245c4de0112d788a98b9a141f6d4c001e80a586c930854fb5880"
+      },
+      "destination": "attempt-v2/run-intent-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v2\\fixture\\public\\fixture-manifest-v1.json",
+        "bytes": 135980,
+        "sha256": "ec8d3fb2d08db857c5598ef76e6a9f613e42e76accc655a36040c55d9f946dd0"
+      },
+      "destination": "attempt-v2/fixture/fixture-manifest-v1.json",
+      "pinBasis": "actual run intent public fixture pin"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v3/reports/1793129235637-60e146d6.pvp-stress-report.json",
+        "bytes": 15639,
+        "sha256": "e3713e9c108b564532131be3fc6f5ce79029f932ae13825991d4429c7106b5b7"
+      },
+      "destination": "attempt-v3/reports/1793129235637-60e146d6.pvp-stress-report.json",
+      "pinBasis": "actual canonical false report"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v3\\reports\\1793129235637-60e146d6.pvp-stress-samples.jsonl",
+        "bytes": 166943,
+        "sha256": "682ce0a61245dc072d8947e452f4ee26f56ad2a6b61e559af97f2a9f73fba90b"
+      },
+      "destination": "attempt-v3/reports/1793129235637-60e146d6.pvp-stress-samples.jsonl",
+      "pinBasis": "actual public samples"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v3/health-before-v1.json",
+        "bytes": 13516,
+        "sha256": "157c9ffddb638163baaf479160845ab2ed37ddc4382e1f6c459eb5038e05ad76"
+      },
+      "destination": "attempt-v3/health-before-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v3/health-after-v1.json",
+        "bytes": 13628,
+        "sha256": "fe9e5349dd473a2bcad8e65ce9bc2b8341a752a565bae8ea06e2a2228278dec3"
+      },
+      "destination": "attempt-v3/health-after-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v3/cleanup-v1.json",
+        "bytes": 341,
+        "sha256": "647e61195047bf59bd5429ca53990de2a487498e661d26346f66626c402b3310"
+      },
+      "destination": "attempt-v3/cleanup-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v3/monitor-current.json",
+        "bytes": 9129,
+        "sha256": "cc6b1947728bbcd61229dc781d134380840dc4cc9f07ffca8d16f58e145a25d7"
+      },
+      "destination": "attempt-v3/monitor-current.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v3/resource-profile-v1.json",
+        "bytes": 1938,
+        "sha256": "586e76aa4de9c884b3a1bf9be08c0e27fafc19245e8b808945c1e74d42983798"
+      },
+      "destination": "attempt-v3/resource-profile-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v3/run-intent-v1.json",
+        "bytes": 1278,
+        "sha256": "2de36e4b1b9e8a405ff40fd3ee305a2beb37797230f2c26af59fb7387aca1334"
+      },
+      "destination": "attempt-v3/run-intent-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v3\\fixture\\public\\fixture-manifest-v1.json",
+        "bytes": 135980,
+        "sha256": "a729ea4195f0f25aae4a0bda28d308b9a649b7cd95bc2044f28c8a37cd1aed16"
+      },
+      "destination": "attempt-v3/fixture/fixture-manifest-v1.json",
+      "pinBasis": "actual run intent public fixture pin"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v4/reports/1793130492719-0687c913.pvp-stress-report.json",
+        "bytes": 45713,
+        "sha256": "fe336f74bce2a43992b8be4bb497d0955bb8c3c103e95b33308d6b823fa5d2a1"
+      },
+      "destination": "attempt-v4/reports/1793130492719-0687c913.pvp-stress-report.json",
+      "pinBasis": "actual canonical false report"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v4\\reports\\1793130492719-0687c913.pvp-stress-samples.jsonl",
+        "bytes": 360542,
+        "sha256": "257bbeaec7c2a0840d2a361b06971931c801fda9a843587623c1d906f8ddedc8"
+      },
+      "destination": "attempt-v4/reports/1793130492719-0687c913.pvp-stress-samples.jsonl",
+      "pinBasis": "actual public samples"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v4/health-before-v1.json",
+        "bytes": 13516,
+        "sha256": "2e22350a09eb88838c5fce951bdd1c6227aea148fd04c43d7ad1e69522f459e0"
+      },
+      "destination": "attempt-v4/health-before-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v4/health-after-v1.json",
+        "bytes": 13661,
+        "sha256": "44af70cd7b806cab3f063662769ee0a8fb2224be03cfe3f6807108cd7ea85caa"
+      },
+      "destination": "attempt-v4/health-after-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v4/cleanup-v1.json",
+        "bytes": 341,
+        "sha256": "e6e3c877c83781a371ee685169487adcb981361a96bd6c27afddda3a771abee0"
+      },
+      "destination": "attempt-v4/cleanup-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v4/monitor-current.json",
+        "bytes": 9149,
+        "sha256": "3ee10cd59739043f9493f6432ebf263418a937f27126596d040307b7a4d9d077"
+      },
+      "destination": "attempt-v4/monitor-current.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v4/resource-profile-v1.json",
+        "bytes": 1938,
+        "sha256": "586e76aa4de9c884b3a1bf9be08c0e27fafc19245e8b808945c1e74d42983798"
+      },
+      "destination": "attempt-v4/resource-profile-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-capacity-v4/run-intent-v1.json",
+        "bytes": 1278,
+        "sha256": "ac27fcf98fe1eb6625760d4092a1e6278c3a18dc117e18fc399f44228d26eaae"
+      },
+      "destination": "attempt-v4/run-intent-v1.json",
+      "pinBasis": "actual ended public original"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v4\\fixture\\public\\fixture-manifest-v1.json",
+        "bytes": 135980,
+        "sha256": "14a7752fc48336f00c52bb4f3b3730cd7321e3e018d9a1451dd8543d7b53c885"
+      },
+      "destination": "attempt-v4/fixture/fixture-manifest-v1.json",
+      "pinBasis": "actual run intent public fixture pin"
+    }
+  ],
+  "totalOriginalFiles": 27,
+  "totalOriginalBytes": 2738596,
+  "allCopiesRawExact": true,
+  "attempts": [
+    {
+      "attempt": 2,
+      "runId": "1793128541388-d6b9ab90",
+      "originalOk": false,
+      "originalError": "Underlying PvP transport, monitor or operation failed",
+      "originalDriverCleanupComplete": true,
+      "actualCompletedStages": [
+        {
+          "name": "stage-10",
+          "controlledActors": 10,
+          "measuredSeconds": 300.092,
+          "completed": true,
+          "passed": false,
+          "completeWindowCount": 5,
+          "failedWindows": [
+            2
+          ]
+        }
+      ],
+      "admissions": [
+        {
+          "target": 10,
+          "newActors": 10,
+          "elapsedMs": 8032
+        }
+      ],
+      "placementCount": 0,
+      "outerCleanup": {
+        "finishedAt": "2026-10-27T19:21:10.414Z",
+        "driverResult": {
+          "code": 1,
+          "signal": null
+        },
+        "gatewayResult": {
+          "code": 0,
+          "signal": null
+        },
+        "monitorResult": {
+          "code": 0,
+          "signal": null
+        },
+        "error": null,
+        "remainingListeners": [],
+        "closed": true,
+        "capacityAccepted": false,
+        "p0Accepted": false
+      },
+      "capacityAccepted": false,
+      "p0Accepted": false,
+      "originalDriverCleanupErrorCount": 0
+    },
+    {
+      "attempt": 3,
+      "runId": "1793129235637-60e146d6",
+      "originalOk": false,
+      "originalError": "Fresh fixture position/health/held inventory differs",
+      "originalDriverCleanupComplete": false,
+      "actualCompletedStages": [],
+      "admissions": null,
+      "placementCount": 0,
+      "outerCleanup": {
+        "finishedAt": "2026-10-27T19:27:53.655Z",
+        "driverResult": {
+          "code": 1,
+          "signal": null
+        },
+        "gatewayResult": {
+          "code": 0,
+          "signal": null
+        },
+        "monitorResult": {
+          "code": 0,
+          "signal": null
+        },
+        "error": null,
+        "remainingListeners": [],
+        "closed": true,
+        "capacityAccepted": false,
+        "p0Accepted": false
+      },
+      "capacityAccepted": false,
+      "p0Accepted": false,
+      "originalDriverCleanupErrorCount": 18
+    },
+    {
+      "attempt": 4,
+      "runId": "1793130492719-0687c913",
+      "originalOk": false,
+      "originalError": "Underlying PvP transport, monitor or operation failed",
+      "originalDriverCleanupComplete": true,
+      "actualCompletedStages": [],
+      "admissions": [
+        {
+          "target": 25,
+          "newActors": 25,
+          "elapsedMs": 71199
+        }
+      ],
+      "placementCount": 12,
+      "outerCleanup": {
+        "finishedAt": "2026-10-27T19:49:33.948Z",
+        "driverResult": {
+          "code": 1,
+          "signal": null
+        },
+        "gatewayResult": {
+          "code": 0,
+          "signal": null
+        },
+        "monitorResult": {
+          "code": 0,
+          "signal": null
+        },
+        "error": null,
+        "remainingListeners": [],
+        "closed": true,
+        "capacityAccepted": false,
+        "p0Accepted": false
+      },
+      "capacityAccepted": false,
+      "p0Accepted": false,
+      "originalDriverCleanupErrorCount": 0
+    }
+  ],
+  "rootObservedFailureDetails": {
+    "v2": "Stage10 completed300.092s false; continuation toward25 hard-stopped on V2 timeout at21 actual entrants; no completed25 stage.",
+    "v3": "Actor13 ordinary spawn differed from intended105,80 to104,79; preparation failed before measurement. Driver cleanup=false retained; Gateway exit0 and portsfree are separate outer cleanup facts.",
+    "v4": "All25 admitted and12groups placed in71.199s; underlying error within9s thereafter; no full window/stage. Driver cleanup=true and Gateway exit0/portsfree."
+  },
+  "limits": [
+    "Monitor active8/14 during drain is not a peak or capacity measurement.",
+    "V4 had25 admitted; it did not complete a25-person measurement window.",
+    "50/100/250/500 and two-hour stability remain unmeasured.",
+    "Underlying-error cause remains unresolved; private traces and forthcoming firstError diagnostics are not copied or preclaimed."
+  ],
+  "excluded": [
+    "Store",
+    "pool",
+    "auth ledger",
+    "keys/tokens/credentials",
+    "private Gateway logs/traces",
+    "recordings",
+    "EXE",
+    "monitor-history not requested"
+  ],
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "ordinaryEvidence": false
+}

@@ -400,3 +400,9 @@ b06b6c183补入只读取原实际决策中间值的有界目标诊断，Root当�
 ### 2026-10-28：独立全员PvP压力场景准备
 
 [两客户端正常协议功能原件](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/server-only-pvp-functional-v1/README.md)已通过：总16.235秒、功能操作5.817秒，真实伤害、单剂消费回血及普通退出重登保存均有证据；30秒只是最大预算，并非持续战斗时长。19项定向测试通过。下一步独立预置合法角色/装备/药品的server-only全员PvP压力profile，用于测量服务器战斗处理能力；原ordinary场景与失败原件继续保留，预置资源不计普通成长/经济/补给通过，亦不自动获得P0、500最终验收或固定Cell开工资格。当前没有50/100/500及两小时容量结果。
+
+### 2026-10-28：独立PvP首轮结果与采样限制
+
+[独立预置PvP v1](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/server-only-pvp-stress-v1/README.md)完成2名fighter×300.096秒通过、10名fighter×300.102秒未通过：唯一失败为actor5第3分钟的复合正伤害见证P95=1683ms，ACK P95=422ms；10人实际2216次launched/1404次positive，不能据此断言硬件只支持2人。该profile使用合法预置L40/普通装备和药品、loopback/File及仅本地development显式600登录预算，生产默认限流30/900s未变。新配置7项及相邻auth12项测试、新release构建通过。
+
+[续测v2-v4](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/server-only-pvp-stress-continuation-v2-v4/README.md)保留原失败；v4确有25名入场但没有有效测量窗。[v5-v6原件](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/server-only-pvp-stress-v5-v6/README.md)显示旧治疗采样失败及修正后admission-25的2秒攻击确认超时，仍没有完整25人测量。工具已恢复native的ACK且消费或精确HP增长、移除1.5秒全量轮询，并按实际收件时间完成截止读取；Root32项聚焦回归通过，历史false不改写。V6服务端记录到marker同步942ms持有共享Store锁、同期985ms等锁与超过2秒的完整输入处理，但不能精确归因actor9的超时。[PostgreSQL SourceOfTruth隔离对照](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/server-only-pvp-postgres-v7-v8/README.md)已完成：500账号完整导入回读及3项拒绝检查通过；V7无负载启动失败保留，V8用65.776秒进场25人，战斗约2分钟后actor6的新request123在2秒截止前未收到确认，匿名收件摘要只到122。首分钟全25频次合格但两人positive-proof P95=1481/1012ms未过；没有完整300秒25人结果。全局串行和复制成本仍存在，PG替换不构成性能修复或容量通过。50人以上及两小时仍无数据，P0与最终500验收未完成，P2未启动。

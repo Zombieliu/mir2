@@ -585,6 +585,7 @@ struct WebState {
     capacity: Arc<GatewayCapacityState>,
     gameplay_event_sink: Option<SharedGameplayEventSink>,
     identity: Arc<IdentityService>,
+    auth_rate_limit_policy: AuthRateLimitPolicy,
     /// On-chain command injection registry (M4, WF-5) — routes Relayer commands to live sessions.
     injector: crate::inject::LiveSessionInjector,
     spectator: SpectatorHub,
@@ -2771,6 +2772,8 @@ struct HealthResponse {
     channel_identity: ChannelIdentityRegistryStatus,
     identity_backend: &'static str,
     zone_metrics: crate::zone_metrics::ZoneMetricsSnapshot,
+    #[serde(rename = "loadTestLogin", skip_serializing_if = "Option::is_none")]
+    load_test_login: Option<LoadTestLoginHealth>,
 }
 
 #[derive(Debug, Serialize)]
@@ -3012,6 +3015,8 @@ pub async fn serve_web_gateway_with_zone_registry(
     chat_hub: ChatBroadcastHub,
     zone_registry: Arc<ZoneRegistry>,
 ) -> io::Result<()> {
+    let auth_rate_limit_policy = AuthRateLimitPolicy::from_environment(listener.local_addr()?)
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     // Activated Crystal world: host every map full-size in the shared zone so
     // players roam all of Bichon (and reach every transfer), not just the
     // starter slice. Empty maps stay dormant regardless.
@@ -3058,6 +3063,7 @@ pub async fn serve_web_gateway_with_zone_registry(
         capacity: Arc::new(GatewayCapacityState::from_env()),
         gameplay_event_sink: default_gameplay_event_sink_from_env(),
         identity: Arc::new(identity),
+        auth_rate_limit_policy,
         injector: crate::inject::LiveSessionInjector::default(),
         spectator,
         ai_live,
@@ -3213,6 +3219,7 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         channel_identity: channel_identity_status,
         identity_backend: state.identity.backend_label(),
         zone_metrics: crate::zone_metrics::snapshot(),
+        load_test_login: state.auth_rate_limit_policy.test_only_health(),
     })
 }
 
@@ -3887,12 +3894,13 @@ async fn identity_recover_account(
         account_id: request.account_id.clone(),
         action: AuthSecurityAction::Recovery,
     };
-    enforce_auth_rate_limits(
+    enforce_auth_rate_limits_with_policy(
         state.session_cache.as_ref(),
         &state.identity,
         &peer_address,
         &user_agent,
         &context,
+        state.auth_rate_limit_policy,
     )
     .map_err(|_| identity_unauthorized("account recovery could not be completed"))?;
     mir2_simulation::validate_commercial_identity_credentials(
@@ -4999,6 +5007,7 @@ async fn handle_socket(
             Arc::clone(&state.reconnect_sessions),
             Arc::clone(&state.capacity),
             Arc::clone(&state.identity),
+            state.auth_rate_limit_policy,
             &mut active_session_permit,
             &mut save_queue,
             &mut route_refresh,
@@ -6091,6 +6100,7 @@ async fn handle_socket_inner(
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
     identity: Arc<IdentityService>,
+    auth_rate_limit_policy: AuthRateLimitPolicy,
     active_session_permit: &mut Option<GatewayCapacityPermit>,
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
@@ -6117,6 +6127,7 @@ async fn handle_socket_inner(
         reconnect_sessions,
         capacity,
         identity,
+        auth_rate_limit_policy,
         active_session_permit,
         save_queue,
         route_refresh,
@@ -6209,6 +6220,7 @@ async fn handle_socket_work(
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
     identity: Arc<IdentityService>,
+    auth_rate_limit_policy: AuthRateLimitPolicy,
     active_session_permit: &mut Option<GatewayCapacityPermit>,
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
@@ -6761,12 +6773,13 @@ async fn handle_socket_work(
                 let mut login_account_id = login_account_id_for_action(&action).map(str::to_string);
                 let mut login_identity_context = login_identity_context_for_action(&action);
                 if let Some(context) = auth_security_context_for_action(&action) {
-                    if let Err(error) = enforce_auth_rate_limits(
+                    if let Err(error) = enforce_auth_rate_limits_with_policy(
                         session_cache.as_ref(),
                         &identity,
                         &peer_address,
                         &user_agent,
                         &context,
+                        auth_rate_limit_policy,
                     ) {
                         let _ = send_error_message(&sender, &error).await;
                         continue;
@@ -8161,12 +8174,126 @@ fn auth_security_context_for_action(action: &SessionAction) -> Option<AuthSecuri
     }
 }
 
+// An explicit, immutable startup policy for isolated loopback load experiments.
+// Normal authentication, all other buckets and successful-login clearing stay unchanged.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+struct AuthRateLimitPolicy {
+    load_test_login_peer_limit: Option<u64>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LoadTestLoginHealth {
+    test_only: bool,
+    login_peer_limit: u64,
+    login_device_limit: u64,
+    window_seconds: u64,
+}
+
+impl AuthRateLimitPolicy {
+    fn from_environment(actual_web_addr: SocketAddr) -> Result<Self, String> {
+        let raw = match env::var("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT") {
+            Ok(raw) => raw,
+            Err(env::VarError::NotPresent) => return Ok(Self::default()),
+            Err(env::VarError::NotUnicode(_)) => {
+                return Err(
+                    "MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT must be an integer in 30..=1024"
+                        .into(),
+                );
+            }
+        };
+        Self::from_values(
+            Some(&raw),
+            env::var("MIR2_RUNTIME_ENV").ok().as_deref(),
+            env::var("MIR2_GATEWAY_WEB_ADDR").ok().as_deref(),
+            env::var("MIR2_GATEWAY_TCP_ADDR").ok().as_deref(),
+            actual_web_addr,
+            gateway_prod_like_env(),
+        )
+    }
+
+    fn from_values(
+        raw_limit: Option<&str>,
+        runtime_env: Option<&str>,
+        web_addr: Option<&str>,
+        tcp_addr: Option<&str>,
+        actual_web_addr: SocketAddr,
+        prod_like: bool,
+    ) -> Result<Self, String> {
+        let Some(raw) = raw_limit else {
+            return Ok(Self::default());
+        };
+        let limit = raw
+            .parse::<u64>()
+            .ok()
+            .filter(|limit| {
+                !raw.is_empty()
+                    && raw.bytes().all(|byte| byte.is_ascii_digit())
+                    && (30..=1024).contains(limit)
+            })
+            .ok_or("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT must be an integer in 30..=1024")?;
+        if runtime_env != Some("development") || prod_like {
+            return Err("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT requires MIR2_RUNTIME_ENV=development without production/staging environment aliases".into());
+        }
+        let parse_loopback = |raw: Option<&str>| {
+            raw.and_then(|value| value.parse::<SocketAddr>().ok())
+                .filter(|addr| addr.ip().is_loopback())
+                .ok_or("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT requires explicit IP loopback MIR2_GATEWAY_WEB_ADDR and MIR2_GATEWAY_TCP_ADDR")
+        };
+        let configured_web = parse_loopback(web_addr)?;
+        parse_loopback(tcp_addr)?;
+        if !actual_web_addr.ip().is_loopback()
+            || configured_web.ip() != actual_web_addr.ip()
+            || (configured_web.port() != 0 && configured_web.port() != actual_web_addr.port())
+        {
+            return Err("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT requires the actual Web listener to match its configured loopback address".into());
+        }
+        Ok(Self {
+            load_test_login_peer_limit: Some(limit),
+        })
+    }
+
+    fn login_peer_limit(self) -> u64 {
+        self.load_test_login_peer_limit.unwrap_or(30)
+    }
+
+    fn test_only_health(self) -> Option<LoadTestLoginHealth> {
+        self.load_test_login_peer_limit
+            .map(|limit| LoadTestLoginHealth {
+                test_only: true,
+                login_peer_limit: limit,
+                login_device_limit: limit,
+                window_seconds: 900,
+            })
+    }
+}
+
+// Keep existing default-policy auth tests on their original five-argument API.
+#[cfg(test)]
 fn enforce_auth_rate_limits(
     cache: &dyn crate::cache::GatewaySessionCache,
     identity: &IdentityService,
     peer_address: &str,
     user_agent: &str,
     context: &AuthSecurityContext,
+) -> Result<(), String> {
+    enforce_auth_rate_limits_with_policy(
+        cache,
+        identity,
+        peer_address,
+        user_agent,
+        context,
+        AuthRateLimitPolicy::default(),
+    )
+}
+
+fn enforce_auth_rate_limits_with_policy(
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    peer_address: &str,
+    user_agent: &str,
+    context: &AuthSecurityContext,
+    policy: AuthRateLimitPolicy,
 ) -> Result<(), String> {
     let peer = identity.peer_fingerprint(peer_address)?;
     // User-Agent is caller supplied, not a device identity. Scope this
@@ -8181,8 +8308,16 @@ fn enforce_auth_rate_limits(
     let policies: Vec<(String, u64, u64)> = match context.action {
         AuthSecurityAction::Login => vec![
             (format!("login:pair:{peer}:{account}"), 8, 15 * 60),
-            (format!("login:peer:{peer}"), 30, 15 * 60),
-            (format!("login:device:{device}"), 30, 15 * 60),
+            (
+                format!("login:peer:{peer}"),
+                policy.login_peer_limit(),
+                15 * 60,
+            ),
+            (
+                format!("login:device:{device}"),
+                policy.login_peer_limit(),
+                15 * 60,
+            ),
             (format!("login:account:{account}"), 50, 15 * 60),
         ],
         AuthSecurityAction::Registration => vec![
@@ -15077,6 +15212,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -15139,6 +15275,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: Some(shared_event_sink),
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -15230,6 +15367,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -17350,6 +17488,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -17686,6 +17825,7 @@ mod tests {
             capacity: Arc::clone(&capacity),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -22943,5 +23083,298 @@ mod tests {
         ];
 
         assert!(responses_require_world_snapshot(&responses));
+    }
+}
+
+#[cfg(test)]
+mod load_test_login_policy_tests {
+    use super::{AuthRateLimitPolicy, AuthSecurityAction, AuthSecurityContext};
+    use crate::cache::{GatewaySessionCache, InMemoryGatewaySessionCache};
+    use crate::identity::IdentityService;
+    use std::net::SocketAddr;
+
+    fn parse(raw: Option<&str>) -> Result<AuthRateLimitPolicy, String> {
+        AuthRateLimitPolicy::from_values(
+            raw,
+            Some("development"),
+            Some("127.0.0.1:17510"),
+            Some("127.0.0.1:17500"),
+            "127.0.0.1:17510".parse().unwrap(),
+            false,
+        )
+    }
+
+    #[test]
+    fn default_login_policy_preserves_thirty_and_omits_test_health() {
+        let policy = AuthRateLimitPolicy::from_values(
+            None,
+            Some("production"),
+            Some("0.0.0.0:7010"),
+            None,
+            "0.0.0.0:7010".parse().unwrap(),
+            true,
+        )
+        .unwrap();
+        assert_eq!(policy, AuthRateLimitPolicy::default());
+        assert_eq!(policy.login_peer_limit(), 30);
+        assert!(policy.test_only_health().is_none());
+    }
+
+    #[test]
+    fn explicit_login_limit_has_exact_bounds_and_integer_syntax() {
+        for limit in [30, 500, 1024] {
+            assert_eq!(
+                parse(Some(&limit.to_string())).unwrap().login_peer_limit(),
+                limit
+            );
+        }
+        for raw in [
+            "",
+            "0",
+            "29",
+            "1025",
+            "-1",
+            "+500",
+            "500.0",
+            "NaN",
+            " 500",
+            "500 ",
+            "18446744073709551616",
+        ] {
+            assert!(parse(Some(raw)).is_err(), "must reject {raw:?}");
+        }
+        let health =
+            serde_json::to_value(parse(Some("500")).unwrap().test_only_health().unwrap()).unwrap();
+        assert_eq!(
+            health,
+            serde_json::json!({
+                "testOnly": true, "loginPeerLimit": 500, "loginDeviceLimit": 500, "windowSeconds": 900
+            })
+        );
+    }
+
+    #[test]
+    fn explicit_login_limit_rejects_non_development_and_conflicting_aliases() {
+        for runtime in [
+            None,
+            Some("production"),
+            Some("staging"),
+            Some("test"),
+            Some("Development"),
+        ] {
+            assert!(AuthRateLimitPolicy::from_values(
+                Some("500"),
+                runtime,
+                Some("127.0.0.1:17510"),
+                Some("127.0.0.1:17500"),
+                "127.0.0.1:17510".parse().unwrap(),
+                false,
+            )
+            .is_err());
+        }
+        assert!(AuthRateLimitPolicy::from_values(
+            Some("500"),
+            Some("development"),
+            Some("127.0.0.1:17510"),
+            Some("127.0.0.1:17500"),
+            "127.0.0.1:17510".parse().unwrap(),
+            true,
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn explicit_login_limit_requires_both_literal_loopback_addresses_and_actual_web_match() {
+        for address in [
+            None,
+            Some("0.0.0.0:17510"),
+            Some("[::]:17510"),
+            Some("192.0.2.1:17510"),
+            Some("localhost:17510"),
+            Some("not-an-address"),
+        ] {
+            for (web, tcp) in [
+                (address, Some("127.0.0.1:17500")),
+                (Some("127.0.0.1:17510"), address),
+            ] {
+                assert!(AuthRateLimitPolicy::from_values(
+                    Some("500"),
+                    Some("development"),
+                    web,
+                    tcp,
+                    "127.0.0.1:17510".parse().unwrap(),
+                    false,
+                )
+                .is_err());
+            }
+        }
+        for actual in ["0.0.0.0:17510", "127.0.0.1:17511", "[::1]:17510"] {
+            assert!(AuthRateLimitPolicy::from_values(
+                Some("500"),
+                Some("development"),
+                Some("127.0.0.1:17510"),
+                Some("127.0.0.1:17500"),
+                actual.parse().unwrap(),
+                false,
+            )
+            .is_err());
+        }
+        for (configured, actual) in [
+            ("[::1]:17510", "[::1]:17510"),
+            ("127.0.0.1:0", "127.0.0.1:17510"),
+        ] {
+            assert!(AuthRateLimitPolicy::from_values(
+                Some("500"),
+                Some("development"),
+                Some(configured),
+                Some("[::1]:17500"),
+                actual.parse::<SocketAddr>().unwrap(),
+                false,
+            )
+            .is_ok());
+        }
+    }
+
+    fn enforce(
+        cache: &InMemoryGatewaySessionCache,
+        identity: &IdentityService,
+        policy: AuthRateLimitPolicy,
+        action: AuthSecurityAction,
+        peer: &str,
+        account: &str,
+    ) -> Result<(), String> {
+        super::enforce_auth_rate_limits_with_policy(
+            cache,
+            identity,
+            peer,
+            "shared-test-agent",
+            &AuthSecurityContext {
+                account_id: account.to_owned(),
+                action,
+            },
+            policy,
+        )
+    }
+
+    #[test]
+    fn real_enforcement_uses_only_the_explicit_login_peer_and_device_limit() {
+        let identity = IdentityService::local_for_tests();
+        for (policy, allowed) in [
+            (AuthRateLimitPolicy::default(), 30),
+            (parse(Some("500")).unwrap(), 500),
+        ] {
+            let cache = InMemoryGatewaySessionCache::default();
+            for index in 0..=allowed {
+                let result = enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    "127.0.0.1",
+                    &format!("load-player-{index}"),
+                );
+                assert_eq!(
+                    result.is_ok(),
+                    index < allowed,
+                    "peer attempt {} of {allowed}",
+                    index + 1
+                );
+            }
+        }
+        // Seed only the independent device bucket so the peer bucket cannot
+        // hide an accidental unchanged device limit or an omitted device gate.
+        let peer = identity.peer_fingerprint("127.0.0.1").unwrap();
+        let device = identity
+            .peer_fingerprint(&format!("device:{peer}:shared-test-agent"))
+            .unwrap();
+        for (policy, prior_attempts, expected) in [
+            (AuthRateLimitPolicy::default(), 30, false),
+            (parse(Some("500")).unwrap(), 30, true),
+            (parse(Some("500")).unwrap(), 500, false),
+        ] {
+            let cache = InMemoryGatewaySessionCache::default();
+            for _ in 0..prior_attempts {
+                cache
+                    .record_auth_attempt(&format!("login:device:{device}"), 900)
+                    .unwrap();
+            }
+            assert_eq!(
+                enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    "127.0.0.1",
+                    "device-only-test"
+                )
+                .is_ok(),
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn real_enforcement_retains_login_pair_eight_and_account_fifty() {
+        let identity = IdentityService::local_for_tests();
+        let policy = parse(Some("1024")).unwrap();
+        let cache = InMemoryGatewaySessionCache::default();
+        for index in 0..9 {
+            assert_eq!(
+                enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    "127.0.0.1",
+                    "same-account"
+                )
+                .is_ok(),
+                index < 8
+            );
+        }
+        let cache = InMemoryGatewaySessionCache::default();
+        for index in 0..51 {
+            assert_eq!(
+                enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    &format!("127.0.1.{}", index + 1),
+                    "same-account"
+                )
+                .is_ok(),
+                index < 50
+            );
+        }
+    }
+
+    #[test]
+    fn real_enforcement_does_not_relax_registration_recovery_or_password_change() {
+        let identity = IdentityService::local_for_tests();
+        for (action, allowed) in [
+            (AuthSecurityAction::Registration, 5),
+            (AuthSecurityAction::PasswordChange, 10),
+            (AuthSecurityAction::Recovery, 10),
+        ] {
+            for policy in [AuthRateLimitPolicy::default(), parse(Some("1024")).unwrap()] {
+                let cache = InMemoryGatewaySessionCache::default();
+                for index in 0..=allowed {
+                    assert_eq!(
+                        enforce(
+                            &cache,
+                            &identity,
+                            policy,
+                            action,
+                            "127.0.0.1",
+                            &format!("account-{index}")
+                        )
+                        .is_ok(),
+                        index < allowed,
+                        "{action:?}"
+                    );
+                }
+            }
+        }
     }
 }
