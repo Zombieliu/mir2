@@ -1,0 +1,40 @@
+// Authoring and node --check only; never invokes finalize, freeze, verification or an owned mode.
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+const BASE=path.dirname(fileURLToPath(import.meta.url)),parent=path.join(BASE,'ordinary-v6-full-lifecycle-v1'),directory=path.join(BASE,'ordinary-v6-full-lifecycle-v2');
+const assert=(v,m)=>{if(!v)throw Error(m);},sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+const pin=file=>{const b=fs.readFileSync(file);return{file:path.resolve(file),bytes:b.length,sha256:sha(b)};};
+const json=(name,value)=>fs.writeFileSync(path.join(directory,name),JSON.stringify(value,null,2)+'\n',{flag:'wx'});
+const prior=JSON.parse(fs.readFileSync(path.join(parent,'authoring-receipt-v1.json'),'utf8'));
+assert(prior.packageId==='ordinary-v6-full-lifecycle-v1'&&prior.toolPins.length===10,'Reviewed parent pending source contract differs');
+for(const p of prior.toolPins){const a=pin(p.file);assert(a.bytes===p.bytes&&a.sha256===p.sha256,'Original parent source differs');}
+assert(!fs.existsSync(directory),'Exclusive new v2 directory required');
+const original=fs.readFileSync(path.join(parent,'author-pending-v1.mjs')),text=original.toString('utf8'),from='ordinary-v6-full-lifecycle-v1',to='ordinary-v6-full-lifecycle-v2';
+assert(text.split(from).length-1===2,'Expected exactly the fixed-directory and README package literals');
+const updated=Buffer.from(text.split(from).join(to));
+assert(Buffer.from(updated.toString('utf8').split(to).join(from)).equals(original),'Author directory-only inverse differs');
+fs.mkdirSync(directory);
+for(const name of ['source-lib-v1.mjs','verify-inputs.mjs','finalize-inputs-v1.mjs','freeze-inputs-v1.mjs'])fs.copyFileSync(path.join(parent,name),path.join(directory,name),fs.constants.COPYFILE_EXCL);
+fs.writeFileSync(path.join(directory,'author-pending-v1.mjs'),updated,{flag:'wx'});
+const authored=spawnSync(process.execPath,[path.join(directory,'author-pending-v1.mjs')],{encoding:'utf8',windowsHide:true,maxBuffer:1024*1024});
+fs.writeFileSync(path.join(directory,'author-execution.stdout.log'),authored.stdout??'',{flag:'wx'});
+fs.writeFileSync(path.join(directory,'author-execution.stderr.log'),authored.stderr??'',{flag:'wx'});
+assert(authored.status===0&&authored.signal===null&&!authored.error,'Pending author mechanism failed');
+const toolNames=prior.toolPins.map(p=>path.basename(p.file)),copies=[];
+for(const name of toolNames){const a=pin(path.join(parent,name)),b=pin(path.join(directory,name));if(name!=='author-pending-v1.mjs')assert(a.bytes===b.bytes&&a.sha256===b.sha256&&fs.readFileSync(a.file).equals(fs.readFileSync(b.file)),'Generated/copied tool must remain raw exact to v1: '+name);copies.push({name,parent:a,current:b,rawExactExceptDeclaredAuthorLiterals:name!=='author-pending-v1.mjs'});}
+const checks=[];
+for(const name of toolNames.filter(n=>n.endsWith('.mjs'))){const file=path.join(directory,name),command=[process.execPath,'--check',file],result=spawnSync(command[0],command.slice(1),{encoding:'utf8',windowsHide:true,maxBuffer:1024*1024}),log=path.join(directory,'syntax-'+name+'.log');fs.writeFileSync(log,(result.stdout??'')+(result.stderr??''),{flag:'wx'});checks.push({file:pin(file),command,exitCode:result.status,signal:result.signal,error:result.error?String(result.error):null,combinedOutput:pin(log)});assert(result.status===0&&result.signal===null&&!result.error,'Tool syntax check failed');}
+json('syntax-checks-v1.json',{schemaVersion:1,syntaxOnly:true,executionPerformed:false,checks});
+const config=JSON.parse(fs.readFileSync(path.join(directory,'config-pending-v1.json'),'utf8')),preview=JSON.parse(fs.readFileSync(path.join(directory,'candidate-driver-preview-v1.json'),'utf8'));
+assert(config.packageId==='ordinary-v6-full-lifecycle-v2'&&config.finalized===false&&config.executionSourceCommit===null&&config.currentJsSourceCommit===null&&config.newRootJsReceipt===null,'v2 must retain pending current identity');
+assert(config.profile.profile==='full-lifecycle'&&config.profile.durationSeconds===900&&config.profile.ordinaryRegistrationCount===2&&config.profile.fixtureSeederUsed===false&&config.profile.precreatedCharacters===0&&config.profile.itemGrants===0&&config.profile.storeEdits===false&&config.profile.tcpBind==='127.0.0.1:17600'&&config.profile.webBind==='127.0.0.1:17610'&&config.profile.requiredChecks.length===16,'Original ordinary profile changed');
+assert(preview.driverSourceCommit===null&&preview.state==='PENDING_RAW_SOURCE_PREVIEW_NOT_A_COMMITTED_FREEZE'&&preview.entryRoots.length===6&&preview.dynamicUnexpanded.length===0,'Complete raw source preview contract differs');
+for(const name of ['backend-release-binding-v1.json','final-current-driver-v1.json','final-input-binding-v1.json','frozen-inputs-v1.json','private','public'])assert(!fs.existsSync(path.join(directory,name)),'Authoring created a final/runtime artifact');
+const version={schemaVersion:1,state:'PENDING_AUTHORING_ONLY',parentAuthoringReceipt:pin(path.join(parent,'authoring-receipt-v1.json')),authoringTool:pin(fileURLToPath(import.meta.url)),literalRules:[{from,to,actualOccurrences:2,sites:['fixed new external directory basename','README independent review packageId']}],inverseRestoresOriginalAuthorRaw:true,parentAuthor:pin(path.join(parent,'author-pending-v1.mjs')),currentAuthor:pin(path.join(directory,'author-pending-v1.mjs')),allOtherNineToolsRawExactToParent:true,tools:copies,authorExecution:{command:[process.execPath,path.join(directory,'author-pending-v1.mjs')],exitCode:authored.status,signal:authored.signal,error:null,stdout:pin(path.join(directory,'author-execution.stdout.log')),stderr:pin(path.join(directory,'author-execution.stderr.log'))},sourcePreviewIsNotFrozen:true,sourcePreviewLocalFiles:preview.files.length,entryRoots:6,nodeParserTransportAndPackageMetadataCaptured:true,dataPins:config.dataPins,backendOriginalV6Ee06Reused:true,backendInputs:55,historicalRustTests:32,newRustBuildPerformed:false,freshRustTestsPerformed:false,fullLifecycleRerunRequiredAfterNavigationChange:true,actualFull16Passed:false,finalizePerformed:false,freezePerformed:false,realmStarted:false,accountsCreated:0,capacityAccepted:false,p0Accepted:false};
+json('version-derivation-v2.json',version);
+json('authoring-receipt-v1.json',{schemaVersion:1,packageId:'ordinary-v6-full-lifecycle-v2',state:'PENDING_AUTHORING_ONLY',executionSourceCommit:null,newRootReceipt:null,toolPins:toolNames.map(n=>pin(path.join(directory,n))),config:pin(path.join(directory,'config-pending-v1.json')),pendingBackendBinding:pin(path.join(directory,'backend-release-binding-pending-v1.json')),candidateDriver:pin(path.join(directory,'candidate-driver-preview-v1.json')),derivation:pin(path.join(directory,'derivation-v1.json')),versionDerivation:pin(path.join(directory,'version-derivation-v2.json')),syntax:pin(path.join(directory,'syntax-checks-v1.json')),readme:pin(path.join(directory,'README-PENDING.md')),backendSourceCommit:config.backendSourceCommit,backendInputs:55,historicalExecutedRustTests:32,newRustTestsExecuted:0,syntaxMjsChecks:checks.length,ordinaryRegistrationsPerformed:0,realmStarted:false,accountsCreated:0,freezePerformed:false,currentRootQualificationPerformed:false,actualFull16Passed:false,capacityAccepted:false,p0Accepted:false,formalAcceptanceEligible:false});
+for(const p of prior.toolPins){const a=pin(p.file);assert(a.bytes===p.bytes&&a.sha256===p.sha256,'Original v1 source changed during authoring');}
+console.log(JSON.stringify({directory,toolCount:toolNames.length,rawExactParentTools:9,authorLiteralChanges:2,inverseExact:true,syntaxChecks:checks.length,syntaxAllPassed:true,previewLocalSources:preview.files.length,previewIsQualification:false,authoringReceipt:pin(path.join(directory,'authoring-receipt-v1.json')),versionDerivation:pin(path.join(directory,'version-derivation-v2.json')),authoringScript:pin(fileURLToPath(import.meta.url)),finalized:false,frozen:false,realmStarted:false},null,2));
