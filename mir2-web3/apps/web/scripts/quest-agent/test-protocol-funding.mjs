@@ -923,3 +923,69 @@ test('discovery NAV classification cannot replace an original error whose messag
   f.options.refreshWhileWaiting=async()=>{refreshed++;};
   await assert.rejects(f.run(),error=>error===original);assert.equal(refreshed,0);assert.equal(f.attacks(),0);
 });
+
+test('qualified-only all-unsafe candidates enter the original bounded search without selected attempts',async()=>{
+  const f=capitalFundingFixture();f.options.qualifiedOnlyCandidates=true;f.options.preferCandidate=()=>false;
+  f.options.route.quests[0].objectives.kill[0].spawnCandidates[0].position={x:288,y:608};
+  f.options.maxEmptySearchRefreshes=1;let nav=0,refreshes=0;
+  f.options.navigate=async(_point,range,stop)=>{if(range!==8)return;nav++;assert.equal(stop(),false);};
+  f.options.refreshWhileWaiting=async()=>{refreshes++;};
+  await assert.rejects(f.run(),/after 1 bounded refreshes/);assert.equal(f.attacks(),0);assert.equal(nav,2);assert.equal(refreshes,1);
+  assert.equal(f.owner.snapshot.entities.filter(e=>e.name==='Deer').length,8);
+});
+test('qualified-only NAV ignores known unsafe live Deer then stops for a cue whose fresh raw becomes eligible',async()=>{
+  const f=fundingDiscoveryFixture();f.inject(20);f.raw(p=>p.entities.find(e=>e.objectId===20).hp=25);
+  f.options.qualifiedOnlyCandidates=true;f.options.preferCandidate=candidate=>candidate.objectId===21;
+  let nav=0,refreshes=0;const selected=[];const clear=f.options.clearMonster;
+  f.options.clearMonster=async(...args)=>{selected.push(args[1].objectId);return clear(...args);};
+  f.options.navigate=async(_target,range,stop)=>{if(range!==8)return;nav++;assert.equal(stop(),false);f.inject(21);assert.equal(stop(),true);};
+  f.options.refreshWhileWaiting=async(_owner,cue)=>{refreshes++;assert.equal(cue.objectId,21);f.raw(p=>p.entities.find(e=>e.objectId===21).hp=25);};
+  const result=await f.run();assert.equal(result.huntAttempts,1);assert.deepEqual(selected,[21]);assert.equal(nav,1);assert.equal(refreshes,1);
+  assert.equal(f.owner.snapshot.entities.find(e=>e.objectId===20).dead,false,'declined candidates were never selected or excluded');
+});
+test('qualified-only option is strict and default preferred-all-false NAV still has its old presence behavior',async()=>{
+  for(const value of [1,0,null,'true',{}]){const f=capitalFundingFixture();f.options.qualifiedOnlyCandidates=value;await assert.rejects(f.run(),/literal boolean/);}
+  const missing=capitalFundingFixture();missing.options.qualifiedOnlyCandidates=true;await assert.rejects(missing.run(),/requires preferCandidate/);
+  const f=fundingDiscoveryFixture(1);f.options.refreshUnqualifiedCandidates=false;f.options.preferCandidate=()=>false;let checked=false;
+  f.options.navigate=async(_target,range,stop)=>{if(range!==8)return;f.inject();f.raw(p=>p.entities.find(e=>e.objectId===20).hp=25);assert.equal(stop(),true);checked=true;};
+  f.options.refreshWhileWaiting=async()=>{};
+  assert.equal((await f.run()).hunts,1);assert.equal(checked,true);
+});
+test('qualified-only NAV callback faults stay fatal including forged NoPath text and throwing message getters',async()=>{
+  for(const fault of ['NoPath','getter','number','promise']){
+    const f=capitalFundingFixture();f.options.qualifiedOnlyCandidates=true;let inNav=false,nav=0;
+    const original=new Error('No walk path callback guard failure');if(fault==='getter')Object.defineProperty(original,'message',{get(){throw new Error('getter failed');}});
+    f.options.preferCandidate=()=>{if(!inNav)return false;if(fault==='number')return 1;if(fault==='promise')return Promise.resolve(true);throw original;};
+    f.options.route.quests[0].objectives.kill[0].spawnCandidates[0].position={x:288,y:608};
+    f.options.navigate=async(_target,range,stop)=>{if(range!==8)return;inNav=true;nav++;stop();};
+    await assert.rejects(f.run(),error=>['number','promise'].includes(fault)?error instanceof TypeError:error===original);
+    assert.equal(nav,1);assert.equal(f.attacks(),0);
+  }
+});
+test('qualified-only selected races still consume all eight attempts and never restore an excluded ID',async()=>{
+  const f=capitalFundingFixture();f.options.qualifiedOnlyCandidates=true;f.options.preferCandidate=()=>true;const selected=[];
+  f.options.clearMonster=async(_owner,target)=>{selected.push(target.objectId);throw new Error(`target ${target.objectId} left the authoritative snapshot before attack`);};
+  await assert.rejects(f.run(),/0 hunts and 8 attempts/);assert.deepEqual(selected,[20,21,22,23,24,25,26,27]);assert.equal(f.calls(),9);
+});
+test('selected target error classification cannot replace an error whose message getter throws',async()=>{
+  const f=capitalFundingFixture();const original=new Error();Object.defineProperty(original,'message',{get(){throw new Error('getter failed');}});
+  f.options.clearMonster=async()=>{throw original;};await assert.rejects(f.run(),error=>error===original);assert.equal(f.calls(),1);
+});
+
+
+test('qualified-only callback failure survives a NAV adapter wrapping it as NoPath or swallowing it',async(t)=>{
+  for(const adapter of ['wrap-NoPath','fulfilled'])await t.test(adapter,async()=>{
+    const f=capitalFundingFixture();f.options.qualifiedOnlyCandidates=true;
+    const original=new Error('private qualification callback fault');let inNav=false,nav=0,refreshes=0,clears=0;
+    f.options.preferCandidate=()=>{if(!inNav)return false;throw original;};
+    f.options.route.quests[0].objectives.kill[0].spawnCandidates[0].position={x:288,y:608};
+    f.options.navigate=async(_target,range,stop)=>{
+      if(range!==8)return;inNav=true;nav++;
+      try{stop();}catch(error){assert.equal(error,original);if(adapter==='wrap-NoPath')throw new Error('No walk path adapter wrapper',{cause:error});}
+    };
+    f.options.refreshWhileWaiting=async()=>{refreshes++;};
+    f.options.clearMonster=async()=>{clears++;};
+    await assert.rejects(f.run(),error=>error===original);
+    assert.equal(nav,1,'no next waypoint');assert.equal(refreshes,0);assert.equal(clears,0);assert.equal(f.attacks(),0);
+  });
+});

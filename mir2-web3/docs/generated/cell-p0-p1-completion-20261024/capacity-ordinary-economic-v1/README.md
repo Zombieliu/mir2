@@ -250,3 +250,15 @@ ad80376b4的[新鲜719项选定门禁](bank-prepare-v12/node-v12/root-focused-re
 后续修正限定于普通筹款显式启用的搜索观测：发现未排除、未证明精确HP的Deer时正常停止该段导航，使用原paced刷新获得完整快照，再按原候选顺序、安全守卫与实际尝试预算处理。每ID最多触发一次，刷新计入原搜索额度；不伪造HP、不捕获或重置导航预算错误、不增加原600秒/2048命令/8次狩猎上限。实际改善须下一轮原门槛实测。
 
 正常logout、六项计数归零、整体清理及[Root独立OS](bank-prepare-v13/root-independent-cleanup-v1.json)通过，PID62924消失、端口释放。41份新公共原件8,245,528字节已由Root逐件复核源/副本原字节，见[说明](bank-prepare-v13/README.md)与[清单](bank-prepare-v13/copied-evidence-manifest.json)。P0未完成、P2未启动，没有新25/50/100/500或两小时容量通过；最终500目标为500名持续战斗者。
+
+## 第十四轮：41人准备完成，42号七次危险选择与一次真实追击耗尽预算
+
+ca426258a的[新鲜1080项选定门禁](bank-prepare-v14/node-v14/root-focused-receipt-v1.json)实际348+362+55+315通过，包含完整容量执行/策略回归，42个named输入前后不变。[完整14依赖相等证明](bank-prepare-v14/full16-reuse/ordinary-full16-reuse-proof-v14.json)严格复用d9ec实际full16、V6/55输入/Rust32/build；没有新跑Rust或功能全生命周期。显式500执行在资源/认证操作前失败关闭，旧policy/历史报告解析和原100路径保持；目标已是500名全部持续战斗者，而非原500/50。
+
+[原W14报告](bank-prepare-v14/1793080430694-6ddf2efd.preparation-report.json)保持41prepared/100、零测量。第30人完成2次狩猎并购药保存，但没有触发discovery，不能以越过30本身证明新cue生效。第31人的真实cue206546在seq1193触发，原paced刷新至1199，随后同ID接近完成；最终两肉实售256+219、买11药花440、fresh库存12并正常保存，形成该路径的真实闭环，不作旧版必然失败的反事实推断。全42人的样本仅31、42各触发一次cue。
+
+第42人40命令/23移动、约28.204秒：11次刷新、1次interact、1次selectNpcDialog、12Walk、11Run、4attackV2。8次尝试中7次为selection/hostile-near-deer拒绝，另一次206524在cue724→fresh728后实际追击约22.918秒、4次导航、4次攻击，零已完成狩猎/采集/鹿肉/售卖/购药，末fresh资本0/440，after/readiness仍null。公开轨迹中该鹿持续移动、精确HP25未变化；原sanitized终止reason只保留ordinary-operation-failed，精确异常类别不可恢复，不得反推为某个特定target-loss或“8次全部空拒”。
+
+后续普通显式资格模式仅在当前无合格候选时继续原有界搜索，并使NAV停止条件使用同一资格事实；默认优选排序及all-false回退保持。已实际选择的竞态失败和旧ID排除照扣原8次，不退款上述真实尝试；原600秒、2048命令、连续空搜20与cue终身20、每ID一次和三次replan均保持。新白名单终止类别只用于未来诊断，不追认历史42原因；实际改善待后续原门槛实测。
+
+正常保存、六项计数归零、整体清理及[Root独立OS](bank-prepare-v14/root-independent-cleanup-v1.json)通过，PID57320消失、端口释放；原failed summary的normalLogout=false保留，后续正常logout ACK不授准备资格。44份新公共原件12,001,756字节已由Root逐件复核源/副本原字节，见[说明](bank-prepare-v14/README.md)及[清单](bank-prepare-v14/copied-evidence-manifest.json)。P0未完成、P2未启动，没有新25/50/100/500或两小时容量通过。

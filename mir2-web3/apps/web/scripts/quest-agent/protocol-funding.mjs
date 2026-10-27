@@ -155,6 +155,7 @@ export async function collectSafeFundingVenison(owner, {
   requiredCount = 2,
   hasRequiredBudget,
   preferCandidate,
+  qualifiedOnlyCandidates = false,
   refreshUnqualifiedCandidates = false,
   maxHunts = 8,
   maxEmptySearchRefreshes = 20,
@@ -171,6 +172,8 @@ export async function collectSafeFundingVenison(owner, {
 
   if (hasRequiredBudget !== undefined && typeof hasRequiredBudget !== 'function') throw new TypeError('hasRequiredBudget must be a function');
   if (preferCandidate !== undefined && typeof preferCandidate !== 'function') throw new TypeError('preferCandidate must be a function');
+  if (typeof qualifiedOnlyCandidates !== 'boolean') throw new TypeError('qualifiedOnlyCandidates must be a literal boolean');
+  if (qualifiedOnlyCandidates && typeof preferCandidate !== 'function') throw new TypeError('qualifiedOnlyCandidates requires preferCandidate');
   if (typeof refreshUnqualifiedCandidates !== 'boolean') throw new TypeError('refreshUnqualifiedCandidates must be a literal boolean');
   if (refreshUnqualifiedCandidates && typeof refreshWhileWaiting !== 'function') throw new TypeError('candidate discovery requires refreshWhileWaiting');
   const capitalMode = hasRequiredBudget !== undefined;
@@ -206,7 +209,7 @@ export async function collectSafeFundingVenison(owner, {
   // Check after the last allowed attempt too; the predicate never refunds or
   // skips a selection attempt, and errors remain terminal.
   while (!(goalSatisfied = await requiredBudgetSatisfied()) && huntAttempts < huntLimit) {
-    let target = liveFundingDeer(owner.snapshot, contestedDeerIds, preferCandidate);
+    let target = liveFundingDeer(owner.snapshot, contestedDeerIds, preferCandidate, qualifiedOnlyCandidates);
     if (!target) {
       const actor = selfPlayer(owner);
       const ordered = [...fundingSearchPoints].sort((left, right) =>
@@ -218,19 +221,22 @@ export async function collectSafeFundingVenison(owner, {
           2_048,
           Math.max(96, travelDistance * 2 + 192),
         );
-        let cue = null;
+        let cue = null, stopFailed = false, stopFailure;
         try {
           await navigate(candidate.position, 8, () => {
-            if (cue) return true;
-            if (liveFundingDeer(owner.snapshot, contestedDeerIds)) return true;
-            if (refreshUnqualifiedCandidates && cueRefreshCount < emptySearchLimit) {
-              const unknown = unqualifiedFundingDeer(owner.snapshot, contestedDeerIds, refreshedCueIds);
-              if (unknown) {
-                cue = { objectId: fundingCueId(unknown.objectId), sequence: Number.isSafeInteger(owner.sequence) && owner.sequence >= 0 ? owner.sequence : null };
-                return true;
+            try {
+              if (cue) return true;
+              if (liveFundingDeer(owner.snapshot, contestedDeerIds,
+                qualifiedOnlyCandidates ? preferCandidate : undefined, qualifiedOnlyCandidates)) return true;
+              if (refreshUnqualifiedCandidates && cueRefreshCount < emptySearchLimit) {
+                const unknown = unqualifiedFundingDeer(owner.snapshot, contestedDeerIds, refreshedCueIds);
+                if (unknown) {
+                  cue = { objectId: fundingCueId(unknown.objectId), sequence: Number.isSafeInteger(owner.sequence) && owner.sequence >= 0 ? owner.sequence : null };
+                  return true;
+                }
               }
-            }
-            return false;
+              return false;
+            } catch (error) { if (!stopFailed) { stopFailed = true; stopFailure = error; } throw stopFailure; }
           }, {
             hostileAvoidanceRadius: 2,
             // Map 0 has entrances hundreds of cells from the beginner fields.
@@ -246,7 +252,11 @@ export async function collectSafeFundingVenison(owner, {
             maxSuccessfulSteps: successfulStepBudget,
             maxAttempts: 2_048,
           });
+          if (stopFailed) throw stopFailure;
         } catch (error) {
+          // A qualification/guard failure is not a route-planning failure,
+          // regardless of its text or the shape of its message property.
+          if (stopFailed) throw stopFailure;
           let noPath = false;
           try { noPath = String(error?.message ?? '').startsWith('No walk path'); } catch { /* Classification must not replace the original NAV error. */ }
           if (!noPath) throw error;
@@ -268,7 +278,7 @@ export async function collectSafeFundingVenison(owner, {
             triggerSequence:cue.sequence, searchPoint:{x:Number(candidate.position.x),y:Number(candidate.position.y)},
             refresh:emptySearchRefreshes, cueRefresh:cueRefreshCount, limit:emptySearchLimit });
         }
-        target = liveFundingDeer(owner.snapshot, contestedDeerIds, preferCandidate);
+        target = liveFundingDeer(owner.snapshot, contestedDeerIds, preferCandidate, qualifiedOnlyCandidates);
         if (target) break;
       }
     }
@@ -389,7 +399,8 @@ async function physicalFundingAttack(client, target) {
 }
 
 function recoverableFundingTargetLoss(error) {
-  const message = String(error?.message ?? '');
+  let message;
+  try { message = String(error?.message ?? ''); } catch { return false; }
   return /^target \d+ left the authoritative snapshot before (?:attack|death was confirmed)$/i.test(message) ||
     /^target \d+ has no walk path from the current map region$/i.test(message) ||
     /^target \d+ made no authoritative combat progress after \d+ attacks$/i.test(message);
@@ -412,7 +423,7 @@ function unqualifiedFundingDeer(snapshot, contested, refreshed) {
   }).sort((a,b)=>pointDistance(actor,a)-pointDistance(actor,b)||fundingCueId(a.objectId)-fundingCueId(b.objectId))[0] ?? null;
 }
 
-function liveFundingDeer(snapshot, ignoredObjectIds, preferCandidate) {
+function liveFundingDeer(snapshot, ignoredObjectIds, preferCandidate, qualifiedOnly = false) {
   const actor = selfPlayer({ snapshot });
   const candidates = (snapshot?.entities ?? [])
     .filter(entity => normalized(entity?.kind) === 'monster' &&
@@ -429,6 +440,7 @@ function liveFundingDeer(snapshot, ignoredObjectIds, preferCandidate) {
     return result;
   });
   const first = preferred.indexOf(true);
+  if (qualifiedOnly && first < 0) return null;
   return candidates[first < 0 ? 0 : first] ?? null;
 }
 

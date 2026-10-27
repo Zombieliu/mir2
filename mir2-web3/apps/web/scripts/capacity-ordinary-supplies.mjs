@@ -539,6 +539,17 @@ export function createOrdinarySupplies(client, options = {}) {
       record.status = 'terminal'; record.reason = 'ordinary-operation-failed';
       if (error instanceof FundingTargetLoss && ['missing','ambiguous-id','not-deer','not-confirmed-live','not-neutral-deer','hostile-near-deer'].includes(error.reason)) record.reason = error.reason;
       else if (error instanceof NavigationStalled) record.reason = 'navigation-stalled';
+      else {
+        try {
+          const message = error?.message;
+          if (typeof message === 'string') {
+            if (message === `target ${selectedId} left the authoritative snapshot before attack` ||
+                message === `target ${selectedId} left the authoritative snapshot before death was confirmed`) record.reason = 'raw-target-loss';
+            else if (message === `target ${selectedId} has no walk path from the current map region`) record.reason = 'no-walk-path';
+            else if (new RegExp(`^target ${selectedId} made no authoritative combat progress after [1-9]\\d* attacks$`).test(message)) record.reason = 'no-authoritative-progress';
+          }
+        } catch { /* A diagnostic classifier cannot replace the original error. */ }
+      }
       if (!(error instanceof FundingTargetLoss)) throw error;
       guard(); // Owner, transport and global budgets remain terminal.
       if (commands >= maxCommands || movementCommands >= maxNavigationCommands) throw new Error('ordinary supplies: command budget exhausted');
@@ -954,7 +965,7 @@ export function createOrdinarySupplies(client, options = {}) {
           const wanted = venisonStock(client.snapshot) + Math.max(1, Math.ceil((requiredGold - guard().gold) / 200));
           const initialGoods = { ...goods };
           funding = await collectSafeFundingVenison(facade, { route: options.route, requiredCount: wanted, maxHunts, maxEmptySearchRefreshes,
-            hasRequiredBudget: () => hasRequiredFundingBudget(initialGoods), preferCandidate: preferFundingCandidate, refreshUnqualifiedCandidates:true,
+            hasRequiredBudget: () => hasRequiredFundingBudget(initialGoods), preferCandidate: preferFundingCandidate, qualifiedOnlyCandidates:true, refreshUnqualifiedCandidates:true,
             travel: async map => { if (map !== '0') throw new Error('ordinary supplies: map travel forbidden'); guard(); },
             navigate, clearMonster: clearFundingMonster, sleep: pause, refreshWhileWaiting: refreshFundingSearch, sustain: async () => { await drain(); guard(); } });
           await refresh(); await sellUntil(requiredGold);

@@ -1093,16 +1093,14 @@ test('inside a halo ordinary movement may maintain or increase distance but cann
   });
 });
 
-test('all dangerous Deer exhaust the original eight hunt attempts without any attack or fake funding credit',async()=>{
+test('ordinary qualified-only dangerous Deer use the original bounded search without being selected or credited',async()=>{
   const f=fixture({deer:8,v2:true,hostiles:[hostile(71,295,604)]});
-  await assert.rejects(f.supply.prepare(),/after 0 hunts and 8 attempts/);
+  await assert.rejects(f.supply.prepare(),/after 20 bounded refreshes/);
   assert.equal(f.client.sent.some(c=>['attack','attackV2','harvest','buyItem'].includes(c.type)),false);
-  assert.equal(f.supply.status().fundingTargetRejectionCount,8);
-  assert.ok(f.supply.status().fundingTargetRejections.every(row=>row.reason==='hostile-near-deer'&&row.phase==='selection'));
+  assert.equal(f.supply.status().fundingTargetRejectionCount,0);
   assert.equal(f.supply.status().funding,null);
   assert.ok(f.supply.status().commands<2048);
-  assert.equal(f.supply.status().fundingApproaches.length,8);
-  assert.ok(f.supply.status().fundingApproaches.every(row=>row.status==='target-lost'));
+  assert.equal(f.supply.status().fundingApproaches.length,0);
 });
 
 test('friendly, unclassified or owned Deer are not ordinary neutral funding targets',async t=>{
@@ -1115,11 +1113,11 @@ test('friendly, unclassified or owned Deer are not ordinary neutral funding targ
     assert.equal(f.client.sent.some(c=>c.type==='attackV2'&&c.objectId===20),false);
     assert.equal(f.supply.status().fundingTargetRejectionCount,0);
     assert.equal(f.supply.status().funding.huntAttempts,2);
-    const fallback=fixture({deer:1,v2:true,maxHunts:1});const only=fallback.client.snapshot.entities.find(e=>e.objectId===20);
+    const fallback=fixture({deer:1,v2:true,maxHunts:1,maxEmptySearchRefreshes:1});const only=fallback.client.snapshot.entities.find(e=>e.objectId===20);
     if(kind==='friendly')only.disposition='friendly';if(kind==='unknown')delete only.disposition;if(kind==='owned')only.ownerName='another-player';
-    await assert.rejects(fallback.supply.prepare(),/0 hunts and 1 attempts/);
-    assert.equal(fallback.supply.status().fundingTargetRejections[0].reason,'not-neutral-deer');
-    assert.equal(fallback.supply.status().fundingApproaches.length,1);
+    await assert.rejects(fallback.supply.prepare(),/after 1 bounded refreshes/);
+    assert.equal(fallback.supply.status().fundingTargetRejectionCount,0);
+    assert.equal(fallback.supply.status().fundingApproaches.length,0);
   });
 });
 
@@ -1162,9 +1160,9 @@ test('path hazard history is bounded at 32 scalar rows and unrelated navigation 
 test('nonempty unknown and malformed dispositions remain threats for Deer selection and queued Run dispatch',async t=>{
   for(const disposition of ['Unknown','unsupported','Neutral',0,false,{},['neutral']])await t.test(JSON.stringify(disposition),async()=>{
     const funding=fixture({deer:8,v2:true,hostiles:[hostile(71,295,604,{disposition})]});
-    await assert.rejects(funding.supply.prepare(),/after 0 hunts and 8 attempts/);
+    await assert.rejects(funding.supply.prepare(),/after 20 bounded refreshes/);
     assert.equal(funding.client.sent.some(command=>['attack','attackV2','harvest'].includes(command.type)),false);
-    assert.equal(funding.supply.status().fundingTargetRejections[0].reason,'hostile-near-deer');
+    assert.equal(funding.supply.status().fundingTargetRejectionCount,0);assert.equal(funding.supply.status().fundingApproaches.length,0);
     let armed=false,changed=false;
     const moving=fixture({items:[item(658,12,500)],stagingPoint:{x:292,y:607},
       onPace:({client,snapshot})=>{if(armed&&!changed){changed=true;client.snapshot.entities.push(hostile(71,300,607,{disposition}));snapshot();}},
@@ -2144,7 +2142,8 @@ test('fresh owned unsafe invalid dead and still unknown candidates never gain at
     await assert.rejects(f.supply.prepare());const result=f.supply.status();
     assert.equal(result.fundingDiscoveries.length,1);assert.equal(result.fundingDiscoveries[0].status,'refreshed');
     assert.equal(result.actualStagingReached,false);assert.equal(f.client.sent.some(c=>['attackV2','harvest','buyItem'].includes(c.type)),false);
-    if(['owned','unsafe','invalid'].includes(fault))assert.equal(result.fundingTargetRejectionCount,1,'original selected attempt and strict guard still apply');
+    assert.equal(result.fundingTargetRejectionCount,0,'fresh ineligible candidates are not selected in qualified-only mode');
+    assert.equal(result.fundingApproaches.length,0);
   });
 });
 test('discovery raw refresh keeps exact external failures and original ownership wall and command guards terminal',async t=>{
@@ -2175,4 +2174,30 @@ test('a discovery cue cannot bypass pending navigation queue drain or turn its e
   await assert.rejects(f.supply.prepare(),error=>error===original);
   assert.equal(f.supply.status().fundingDiscoveries.length,0);assert.equal(f.supply.status().actualStagingReached,false);
   assert.equal(f.client.sent.some(c=>['turn','keepAlive','walk','run','attackV2'].includes(c.type)),false);
+});
+
+test('selected-target public terminal enums recognize only complete messages for the exact bound ID',async t=>{
+  const messages={
+    'no-authoritative-progress':'target 20 made no authoritative combat progress after 4 attacks',
+    'no-walk-path':'target 20 has no walk path from the current map region',
+    'raw-target-loss':'target 20 left the authoritative snapshot before attack',
+    'ordinary-operation-failed':'target 21 left the authoritative snapshot before attack',
+  };
+  for(const [reason,message] of Object.entries(messages))await t.test(reason,async()=>{
+    const f=fixture({deer:1,v2:true,maxHunts:1,navigate:async({target})=>{if(target.name==='Deer')throw new Error(message);}});
+    await assert.rejects(f.supply.prepare(),/0 hunts and 1 attempts/);const row=f.supply.status().fundingApproaches[0];
+    assert.equal(row.reason,reason);assert.equal(row.status,'terminal');assert.equal(JSON.stringify(row).includes(message),false);
+    assert.equal(f.client.sent.some(c=>c.type==='attackV2'),false);
+  });
+});
+
+test('ordinary qualified-only selection races still consume eight actual attempts and exclude every old ID',async()=>{
+  const f=fixture({deer:8,v2:true,navigate:async({target,stop})=>{
+    if(target.name!=='Deer')return;target.ownerName='another-owner';stop();
+  }});
+  await assert.rejects(f.supply.prepare(),/0 hunts and 8 attempts/);const result=f.supply.status();
+  assert.deepEqual(result.fundingApproaches.map(row=>row.objectId),[20,21,22,23,24,25,26,27]);
+  assert.equal(result.fundingTargetRejectionCount,8);assert.ok(result.fundingApproaches.every(row=>row.status==='target-lost'));
+  assert.ok(result.fundingTargetRejections.every(row=>row.reason==='not-neutral-deer'&&row.phase==='approach-stop'));
+  assert.equal(f.client.sent.some(c=>['attackV2','harvest','buyItem'].includes(c.type)),false);
 });
