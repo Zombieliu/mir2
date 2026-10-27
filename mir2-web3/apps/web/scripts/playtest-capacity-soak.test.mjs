@@ -10,6 +10,7 @@ import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, va
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { SafetyStop } from './playtest-load-smoke.mjs';
 import { SustainObservations } from './playtest-capacity-observability.mjs';
+import { createOrdinarySupplies } from './capacity-ordinary-supplies.mjs';
 import { drain } from './playtest-capacity-soak.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 
@@ -676,6 +677,110 @@ function ordinaryPreparationFixture() {
   };
   return { ...f, joins, configuration: { stagingPoint: { x: 286, y: 616 }, route: preparationRoute } };
 }
+
+function formalStagingCatalogue(preferred, actual) {
+  const points = [preferred, actual, ...Array.from({ length: 441 }, (_, i) => ({ x: 278 + i % 21, y: 606 + Math.floor(i / 21) }))];
+  return [...new Map(points.map(p => [`${p.x},${p.y}`, p])).values()].slice(0, 335);
+}
+
+test('ordinary formal configuration retains the explicit335 catalogue and rejects incomplete policy pairs', () => {
+  const policy = capacityPolicy({ profile: 'probe', activityMode: 'native', preparationProfile: 'ordinary-economic-v1' });
+  const preparation = { stagingPoints: [{ x: 287, y: 614 }, { x: 288, y: 614 }], route: preparationRoute,
+    candidatePolicy: 'fresh-unoccupied-distinct-saved-v1', stagingCandidates: formalStagingCatalogue({ x: 287, y: 614 }, { x: 288, y: 614 }) };
+  const configuration = ordinaryPreparationConfiguration(policy, { mapFileName: '0', preparation });
+  assert.equal(configuration.candidatePolicy, preparation.candidatePolicy); assert.equal(configuration.stagingCandidates.length, 335);
+  for (const bad of [{ ...preparation, candidatePolicy: undefined }, { ...preparation, stagingCandidates: undefined },
+    { ...preparation, candidatePolicy: 'unsupported' }]) {
+    assert.throws(() => ordinaryPreparationConfiguration(policy, { preparation: bad }), /frozen335/);
+  }
+});
+
+test('ordinary formal preparation resolves the actual displaced login around a live Deer without changing its measurement home', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, owner, configuration, commands } = f;
+  Object.assign(owner, { x: 286, y: 613 }); client.snapshot.inSafeZone = true;
+  client.snapshot.entities.push({ objectId: 206515, kind: 'monster', name: 'Deer', ai: 2,
+    disposition: 'neutral', hp: 25, dead: false, x: 287, y: 614 });
+  configuration.stagingPoint = { x: 287, y: 614 };
+  configuration.candidatePolicy = 'fresh-unoccupied-distinct-saved-v1';
+  configuration.stagingCandidates = formalStagingCatalogue(configuration.stagingPoint, { x: 286, y: 613 });
+  const home = client.home;
+  const result = await prepareCapacityActor(client, context, configuration);
+  assert.deepEqual(result.resolvedStagingPoint, { x: 286, y: 613 }); assert.equal(result.after.x, 286); assert.equal(result.after.y, 613);
+  assert.equal(result.after.inSafeZone, true); assert.equal(result.movementCommands, 0); assert.equal(client.home, home);
+  assert.equal(client.ready, false); assert.deepEqual([...context.preparationStagingAssignments], ['286,613']);
+  assert.deepEqual(commands.map(c => c.type), ['clientVersion', 'clientVersion']);
+  assert.deepEqual(f.joins, []); assert.deepEqual(f.actions, []);
+  await activatePreparedCohort([client], context);
+  assert.equal(client.ready, true); assert.equal(client.home, home); assert.equal(f.joins.length, 1);
+});
+
+test('ordinary formal preparation rejects nonwalkable catalogue before creating supplies', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, configuration } = f;
+  configuration.candidatePolicy = 'fresh-unoccupied-distinct-saved-v1';
+  configuration.stagingCandidates = formalStagingCatalogue(configuration.stagingPoint, { x: 287, y: 616 });
+  const other = configuration.stagingCandidates[5]; context.map.blocked[other.y * context.map.width + other.x] = 1;
+  let created = false;
+  await assert.rejects(prepareCapacityActor(client, context, configuration, { createSupplies: () => { created = true; } }), /walkable/);
+  assert.equal(created, false); assert.equal(context.preparationStagingAssignments, undefined);
+});
+
+test('ordinary formal failed preparation does not reserve its selected candidate or activate the actor', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, configuration } = f;
+  configuration.candidatePolicy = 'fresh-unoccupied-distinct-saved-v1';
+  configuration.stagingCandidates = formalStagingCatalogue(configuration.stagingPoint, { x: 287, y: 616 });
+  const original = new Error('actual preparation failed');
+  await assert.rejects(prepareCapacityActor(client, context, configuration, { createSupplies: () => ({
+    prepare: async () => { throw original; }, status: () => ({ status: 'failed' }),
+  }) }), error => error === original);
+  assert.equal(context.preparationStagingAssignments.size, 0); assert.equal(client.ready, false); assert.deepEqual(f.joins, []);
+});
+
+test('ordinary formal fresh readiness failure after a real completed preparation never reserves its resolved point', async () => {
+  const f = ordinaryPreparationFixture(), { client, context, configuration } = f;
+  client.snapshot.inSafeZone = true;
+  configuration.candidatePolicy = 'fresh-unoccupied-distinct-saved-v1';
+  configuration.stagingCandidates = formalStagingCatalogue(configuration.stagingPoint, { x: 287, y: 616 });
+  const original = new Error('fresh readiness changed'); let completed = false;
+  await assert.rejects(prepareCapacityActor(client, context, configuration, { createSupplies: (owner, options) => {
+    const supplies = createOrdinarySupplies(owner, options);
+    return { ...supplies, prepare: async () => { const result = await supplies.prepare(); completed = result.status === 'ready'; return result; },
+      assertReady: () => { throw original; } };
+  } }), error => error === original);
+  assert.equal(completed, true); assert.equal(context.preparationStagingAssignments.size, 0);
+  assert.equal(client.ready, false); assert.deepEqual(f.joins, []);
+});
+
+test('ordinary formal successful assignments stay reserved for later preparation while measurement homes stay independent', async () => {
+  const first = ordinaryPreparationFixture(); first.client.snapshot.inSafeZone = true;
+  const preferred = first.configuration.stagingPoint;
+  Object.assign(first.configuration, { candidatePolicy: 'fresh-unoccupied-distinct-saved-v1',
+    stagingCandidates: formalStagingCatalogue(preferred, { x: 287, y: 616 }) });
+  await prepareCapacityActor(first.client, first.context, first.configuration);
+  const second = ordinaryPreparationFixture(); second.client.snapshot.inSafeZone = true;
+  second.client.label = 'later-ordinary-owner'; second.owner.name = second.client.label;
+  second.context.preparationStagingAssignments = first.context.preparationStagingAssignments;
+  Object.assign(second.configuration, { candidatePolicy: first.configuration.candidatePolicy, stagingCandidates: first.configuration.stagingCandidates });
+  second.client.ws.send = data => { const command = JSON.parse(data); second.commands.push(command);
+    if (command.type === 'walk') { assert.equal(command.direction, 'Right'); second.packet('UserLocation', { x: 287, y: 616, direction: 'Right' }); }
+    else { assert.equal(command.type, 'clientVersion'); second.client.observe({ type: 'worldSnapshot', payload: structuredClone(second.client.snapshot) }); } };
+  const home = second.client.home, result = await prepareCapacityActor(second.client, second.context, second.configuration);
+  assert.deepEqual(result.resolvedStagingPoint, { x: 287, y: 616 }); assert.equal(result.movementCommands, 1);
+  assert.deepEqual([...first.context.preparationStagingAssignments], ['286,616', '287,616']);
+  assert.equal(second.client.home, home); assert.equal(first.client.ready, false); assert.equal(second.client.ready, false);
+});
+
+test('ordinary later-cohort preparation keeps existing active native work and its offered evidence', async () => {
+  const f = hpRecoveryFixture(), { client, context, commands, actions } = f;
+  context.phase = 'preparation'; context.policy = capacityPolicy({ profile: 'probe', activityMode: 'native', preparationProfile: 'ordinary-economic-v1' });
+  client.role = 'movement'; client.plan = new NativePlan(0); client.nextRtt = 0; client.nextRefresh = 0;
+  client.ws.send = data => { const command = JSON.parse(data); commands.push(command);
+    f.packet('UseItem', { uniqueId: 901, grid: 'Inventory', success: true }); f.inventory(1); };
+  offerNativeClientWork(client, context, 2250);
+  await client.hpRecoveryPending;
+  assert.equal(client.ready, true); assert.notEqual(client.paused, true); assert.equal(commands[0].type, 'useItem');
+  assert.equal(actions.filter(row => row.status === 'plan-gap').length, 3);
+  assert.ok(actions.some(row => row.status === 'evidence-wait' && row.maintenanceReason === 'hp-recovery'));
+});
 
 test('ordinary preparation uses the canonical same-map protection spec and ignores an injected configuration replacement', async () => {
   const f = ordinaryPreparationFixture(), { client, context, configuration } = f;

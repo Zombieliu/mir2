@@ -412,3 +412,46 @@ test("workspace retention stops at four million cells and oversized custom maps 
     assert.equal(fills.length, 4);
   `);
 });
+
+
+test("exact blocked destinations return null before allocating a search workspace", () => {
+  runWorkspaceFixture(`
+    const open = map(24, 24), blocked = map(24, 24, [{ x: 22, y: 22 }]);
+    const start = { x: 1, y: 1 }, target = { x: 22, y: 22 };
+    instrument();
+    assert.equal(findProtocolWalkPath({ map: open, start, target, dynamicObstacles: [target] }), null);
+    assert.equal(findProtocolWalkPath({ map: blocked, start, target }), null);
+    assert.equal(findProtocolWalkPath({ map: blocked, start, target, staticWalkableOverrides: [target], dynamicObstacles: [target] }), null);
+    assert.equal(allocations.length, 0, "an impossible exact goal must not explore or allocate a whole-map search");
+    assert.equal(fills.length, 0);
+  `);
+});
+
+test("exact goal guard preserves range, current origin and authoritative overrides", () => {
+  const start = { x: 0, y: 0 }, target = { x: 2, y: 0 }, open = collisionMap(4, 3);
+  const near = findProtocolWalkPath({ map: open, start, target, desiredDistance: 1, dynamicObstacles: [target] });
+  assert.deepEqual(near, [start, { x: 1, y: 0 }], "a blocked target still permits an in-range neighbour");
+  const blocked = collisionMap(4, 3, [start, target]);
+  assert.deepEqual(findProtocolWalkPath({ map: blocked, start, target: start, dynamicObstacles: [start] }), [start]);
+  assert.equal(findProtocolWalkPath({ map: blocked, start, target }), null);
+  assert.deepEqual(findProtocolWalkPath({ map: blocked, start, target, staticWalkableOverrides: [target] }), [start, { x: 1, y: 0 }, target]);
+  assert.equal(findProtocolWalkPath({ map: blocked, start, target, staticWalkableOverrides: [target], dynamicObstacles: [target] }), null);
+  assert.equal(findProtocolWalkPath({ map: open, start, target, maxExpanded: 1 }), null);
+  assert.deepEqual(findProtocolWalkPath({ map: open, start, target }), [start, { x: 1, y: 0 }, target]);
+});
+
+test("exact goal guard preserves input conversion and accessor-map failures", () => {
+  const start = { x: 0, y: 0 }, target = { x: 3, y: 3 }, map = collisionMap(6, 6);
+  const boom = new Error("original expansion-limit conversion");
+  let reads = 0;
+  assert.throws(() => findProtocolWalkPath({ map, start, target, dynamicObstacles: [target],
+    get maxExpanded() { reads++; return { valueOf() { throw boom; } }; } }), error => error === boom);
+  assert.equal(reads, 1);
+  assert.throws(() => findProtocolWalkPath({ map, start, target, dynamicObstacles: [target], staticWalkableOverrides: [{ x: "invalid", y: 0 }] }), TypeError);
+  assert.throws(() => findProtocolWalkPath({ map, start: { x: 0.5, y: 0 }, target, dynamicObstacles: [target] }), TypeError);
+  const cells = map.blocked;
+  let blockedReads = 0;
+  Object.defineProperty(map, "blocked", { get() { if (++blockedReads === 3) throw boom; return cells; } });
+  assert.throws(() => findProtocolWalkPath({ map, start, target, dynamicObstacles: [target] }), error => error === boom);
+  assert.equal(blockedReads, 3, "accessor maps keep the original validated-search read order");
+});

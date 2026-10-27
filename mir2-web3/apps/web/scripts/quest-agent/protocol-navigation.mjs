@@ -225,6 +225,13 @@ export function findProtocolWalkPath({
   const cellCount = map.width * map.height;
   const limit = Math.max(1, Math.min(cellCount, Math.trunc(Number(maxExpanded) || cellCount)));
   const startIndex = cellIndex(map, origin.x, origin.y);
+  // An exact destination that cannot be entered has no route. Keep all input
+  // normalization and expansion-limit conversion above this check. Accessor
+  // maps retain the original search/read ordering rather than gain extra reads.
+  if (radius === 0 && (origin.x !== destination.x || origin.y !== destination.y) &&
+      ["width", "height", "blocked"].every(key =>
+        Object.hasOwn(Object.getOwnPropertyDescriptor(map, key) ?? {}, "value")) &&
+      !walkableAt(map, destination.x, destination.y, occupied, staticallyAllowed)) return null;
   // Reserve before any allocation: getters or instrumented constructors may
   // synchronously reenter. A nested/oversized query keeps the old fresh path.
   const retained = !pathWorkspaceInUse && cellCount <= MAX_MAP_CELLS;

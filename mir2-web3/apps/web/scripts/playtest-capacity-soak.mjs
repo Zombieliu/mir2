@@ -18,6 +18,7 @@ import { createNavigator, equipStarterGear } from './quest-agent/protocol-play.m
 import { startEmergencyHpRecovery } from './quest-agent/protocol-loadout.mjs';
 import { createOrdinarySupplies } from './capacity-ordinary-supplies.mjs';
 import { loadOrdinaryProtection } from './capacity-ordinary-protection.mjs';
+import { preparationStagingCatalogue, selectPreparationStagingPoint } from './capacity-ordinary-staging.mjs';
 import { capacityPolicy, capacityActorLimit, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Measurements, assessMeasurements, movementDiagnosticMayContinue,
   AoiCoverage, ContinuousAcceptance, NativePlan, nativeCadence, verifiedCombatHit, BoundedEvidence, CapacityMonitor, memoryTrend, self, distance, sleep, sanitize, fingerprint } from './playtest-capacity-soak-core.mjs';
 
@@ -2068,7 +2069,9 @@ export function ordinaryPreparationConfiguration(policy, scenario) {
       (scenario.mapFileName != null && String(scenario.mapFileName) !== '0')) {
     throw new Error('ordinary-economic-v1 requires scenario.preparation with distinct explicit map-0 stagingPoints for every actor and an authoritative Deer route');
   }
-  return { stagingPoints: points.map(({ x, y }) => ({ x, y })), route: preparation.route };
+  const candidates = preparationStagingCatalogue(preparation, points);
+  return { stagingPoints: points.map(({ x, y }) => ({ x, y })), route: preparation.route,
+    ...(candidates ? { candidatePolicy: preparation.candidatePolicy, stagingCandidates: candidates } : {}) };
 }
 
 export async function prepareCapacityActor(client, context, configuration, { createSupplies = createOrdinarySupplies } = {}) {
@@ -2079,6 +2082,8 @@ export async function prepareCapacityActor(client, context, configuration, { cre
     throw new Error('Ordinary preparation requires a walkable staging point on the current map without a transfer');
   }
   if (String(context.mapName) !== String(client.snapshot.mapFileName)) throw new Error('Ordinary preparation protection requires the current same map');
+  const candidates = preparationStagingCatalogue(configuration, [configuration.stagingPoint], context.map, client.snapshot.mapTransfers ?? []);
+  const assignments = candidates ? (context.preparationStagingAssignments ??= new Set()) : null;
   const ordinaryProtection = await loadOrdinaryProtection(configuration.route, context.mapName);
   context.guard.assert();
   if (client.ready || client.paused || client.draining || context.phase !== 'preparation' ||
@@ -2091,6 +2096,7 @@ export async function prepareCapacityActor(client, context, configuration, { cre
   client.ordinarySupplies = createSupplies(client, {
     preparationProfile: 'ordinary-economic-v1', targetHp: context.policy.preparationHpTarget,
     ...configuration, ...(remainingTimeoutMs === undefined ? {} : { timeoutMs: remainingTimeoutMs }), ordinaryProtection, fundingNavigationMap:context.map, isPreparation: () => context.phase === 'preparation' && !client.ready && !client.draining,
+    ...(candidates ? { resolveStagingPoint: input => selectPreparationStagingPoint({ ...input, candidates, savedPoints: assignments }) } : {}),
     navigate: (facade, target, range, stop, options) => {
       if (!navigators.has(facade)) navigators.set(facade, createNavigator(facade, {
         loadCollisionMap: async map => {
@@ -2105,6 +2111,15 @@ export async function prepareCapacityActor(client, context, configuration, { cre
   try {
     result = await client.ordinarySupplies.prepare();
     if (result.status !== 'ready') throw new Error('Ordinary preparation did not become ready');
+    if (candidates) {
+      const readiness = client.ordinarySupplies.assertReady({ afterSequence: result.after?.sequence - 1 });
+      const point = result.resolvedStagingPoint;
+      if (!point || result.actualStagingReached !== true || result.after?.ownerName !== client.label ||
+          readiness.ownerName !== client.label || readiness.map !== '0' || readiness.inSafeZone !== true ||
+          !candidates.some(candidate => candidate.x === point.x && candidate.y === point.y) ||
+          point.x !== readiness.x || point.y !== readiness.y || result.after.x !== point.x || result.after.y !== point.y ||
+          assignments.has(`${point.x},${point.y}`)) throw new Error('Ordinary resolved staging assignment did not pass fresh readiness');
+    }
   } catch (error) {
     try {
       context.writer.add({ type: 'ordinaryPreparation', actor: client.label, at: Date.now(), status: 'failed',
@@ -2112,6 +2127,7 @@ export async function prepareCapacityActor(client, context, configuration, { cre
     } finally { throw error; } // Diagnostics cannot replace the original preparation failure.
   }
   context.writer.add({ type: 'ordinaryPreparation', actor: client.label, at: Date.now(), result });
+  if (candidates) assignments.add(`${result.resolvedStagingPoint.x},${result.resolvedStagingPoint.y}`);
   return result;
 }
 
@@ -2313,7 +2329,9 @@ export async function runCapacity(options) {
           newCohort.push(client);
           client.nextRtt = Date.now() + 10000; client.nextRefresh = Infinity;
           await prepareCapacityActor(client, context, { route: preparationConfiguration.route,
-            stagingPoint: preparationConfiguration.stagingPoints[index] });
+            stagingPoint: preparationConfiguration.stagingPoints[index],
+            ...(preparationConfiguration.stagingCandidates ? { candidatePolicy: preparationConfiguration.candidatePolicy,
+              stagingCandidates: preparationConfiguration.stagingCandidates } : {}) });
         } else {
           initializePlan(client, context, performance.now() + 500 + (index % 10) * 40);
           client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
