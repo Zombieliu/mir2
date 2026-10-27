@@ -105,7 +105,7 @@ export function createOrdinarySupplies(client, options = {}) {
   let fundingTargetRejectionCount = 0, pathHazardCount = 0;
   const pathHazards = [], pathReplans = [], movementOrigins = new WeakMap(), unsentPathErrors = new WeakSet();
   let navigationPolicy = null, fundingApproachId = null;
-  const fundingApproaches = [];
+  const fundingApproaches = [], fundingDiscoveries = [];
   const plannerNow = options.now ?? Date.now, plannerIdentities = new Map(), plannerTrail = new Map();
   let plannerFallbackCount = 0, plannerFreshSequence = -1, plannerGlobalBlockedUntil = 0, plannerViewAllowed = null;
   let plannerPacketRenewals = 0, lastReceiptSequence = -1, lastReceiptMono = -Infinity;
@@ -626,6 +626,19 @@ export function createOrdinarySupplies(client, options = {}) {
     const mark = await transmit({ type: 'clientVersion' });
     return wait(() => rows.find(row => fresh(row, mark)), 'fresh ordinary supply snapshot');
   }
+  async function refreshFundingSearch(_owner, discovery) {
+    if (discovery?.type !== 'fundingCandidateDiscovery') return refresh();
+    const record = { objectId:discovery.objectId, triggerSequence:discovery.triggerSequence,
+      beforeRefreshSequence:client.sequence, searchPoint:{...discovery.searchPoint},
+      refresh:discovery.refresh, cueRefresh:discovery.cueRefresh, limit:discovery.limit,
+      status:'refreshing', discoveryOnly:true, liveQualification:false };
+    if (fundingDiscoveries.length < maxEmptySearchRefreshes) fundingDiscoveries.push(record);
+    try {
+      const row = await refresh(); guard();
+      record.status = 'refreshed'; record.freshSnapshotSequence = row.sequence; record.monotonicMs = row.monotonicMs;
+      return row;
+    } catch (error) { record.status = 'terminal'; record.reason = 'ordinary-refresh-failed'; throw error; }
+  }
   const facade = new Proxy(client, { get(target, key) {
     if (key === 'send') return enqueue;
     if (key === 'wait') return wait;
@@ -884,6 +897,7 @@ export function createOrdinarySupplies(client, options = {}) {
       qualificationEventCount,qualificationRepeatedReads,qualificationEventsTruncated:qualificationEventCount>qualificationEvents.length,
       qualificationEvents:qualificationEvents.map(row=>({...row,input:row.input?{...row.input}:null,observed:row.observed?{...row.observed}:null})),
       navigationNoPath,
+      fundingDiscoveries: fundingDiscoveries.map(row=>({...row,searchPoint:{...row.searchPoint}})),
       fundingApproaches: fundingApproaches.map(row => ({ ...row, from:{...row.from}, target:{...row.target} })),
       fundingTargetRejections: fundingTargetRejections.map(row => ({ ...row })), fundingTargetRejectionCount,
       fundingCapitalProofs: fundingCapitalProofs.map(row => ({ ...row, items: row.items.map(item => ({ ...item })), initialHpQuote: { ...row.initialHpQuote } })),
@@ -940,9 +954,9 @@ export function createOrdinarySupplies(client, options = {}) {
           const wanted = venisonStock(client.snapshot) + Math.max(1, Math.ceil((requiredGold - guard().gold) / 200));
           const initialGoods = { ...goods };
           funding = await collectSafeFundingVenison(facade, { route: options.route, requiredCount: wanted, maxHunts, maxEmptySearchRefreshes,
-            hasRequiredBudget: () => hasRequiredFundingBudget(initialGoods), preferCandidate: preferFundingCandidate,
+            hasRequiredBudget: () => hasRequiredFundingBudget(initialGoods), preferCandidate: preferFundingCandidate, refreshUnqualifiedCandidates:true,
             travel: async map => { if (map !== '0') throw new Error('ordinary supplies: map travel forbidden'); guard(); },
-            navigate, clearMonster: clearFundingMonster, sleep: pause, refreshWhileWaiting: refresh, sustain: async () => { await drain(); guard(); } });
+            navigate, clearMonster: clearFundingMonster, sleep: pause, refreshWhileWaiting: refreshFundingSearch, sustain: async () => { await drain(); guard(); } });
           await refresh(); await sellUntil(requiredGold);
         }
         goods = await shop(RUBEN); state = 'buying';

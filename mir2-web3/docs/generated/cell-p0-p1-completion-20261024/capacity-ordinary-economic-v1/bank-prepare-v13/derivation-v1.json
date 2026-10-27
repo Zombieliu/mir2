@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_NEW_HELPER_JS_COMMIT_AND_ROOT_QUALIFICATION",
+  "scope": "Bounded W12 to W13 external authoring only. Actual sourcefalse21prepared/22ready78registered is history, not inherited eligibility.",
+  "sourceDerivation": [
+    {
+      "file": "source-lib-v1.mjs",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\source-lib-v1.mjs",
+        "bytes": 18471,
+        "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\source-lib-v1.mjs",
+        "bytes": 18471,
+        "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+      },
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "file": "copy-source-bank-v1.mjs",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\copy-source-bank-v1.mjs",
+        "bytes": 11144,
+        "sha256": "4760d355b3040f5b0107afb6e03d4d0fb74cc20e5c6dd2d43cbd5e6d8ebce3f9"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\copy-source-bank-v1.mjs",
+        "bytes": 11186,
+        "sha256": "2d916bdf2c38cadab2e97ca11c3bad49fa25240c4106c46bf3cf9de0b4c9561b"
+      },
+      "hunks": [
+        {
+          "oldOffsetUtf16": 127,
+          "newOffsetUtf16": 127,
+          "before": "const DIRECTORY=path.dirname(fileURLToPath(import.meta.url)),BASE=path.dirname(DIRECTORY),SOURCE=path.join(BASE,'ordinary-capacity-bank-prepare-v11','episode','private');const assert=(v,m)=>{if(!v)throw Error(m)},same=(a,b)=>path.resolve(a).toLowerCase()===path.resolve(b).toLowerCase(),sha=b=>crypto.createHash('sha256').update(b).digest('hex');\n",
+          "after": "const DIRECTORY=path.dirname(fileURLToPath(import.meta.url)),BASE=path.dirname(DIRECTORY),SOURCE=path.join(BASE,'ordinary-capacity-bank-prepare-v12','episode','private');const assert=(v,m)=>{if(!v)throw Error(m)},same=(a,b)=>path.resolve(a).toLowerCase()===path.resolve(b).toLowerCase(),sha=b=>crypto.createHash('sha256').update(b).digest('hex');\n"
+        },
+        {
+          "oldOffsetUtf16": 1928,
+          "newOffsetUtf16": 1928,
+          "before": "export function validateSourceBank(planPin){const plan=JSON.parse(checked(planPin));assert(plan.schemaVersion===1&&plan.packageId===path.basename(DIRECTORY)&&plan.state==='SOURCE_PARTIAL_BANK_IDENTIFIED_NEW_RUNTIME_QUALIFICATION_PENDING'&&same(plan.sourcePrivate,SOURCE),'ActualW11 partial source bank required');safe(SOURCE,true);const receipt=JSON.parse(checked(plan.sourceReceipt)),report=JSON.parse(checked(plan.sourceReport)),cleanup=JSON.parse(checked(plan.sourceCleanup)),index=JSON.parse(checked(plan.sourcePreparedIndex));checked(plan.sourceOwnedProcess);checked(plan.sourceFrozenManifest);const independent=JSON.parse(checked(plan.sourceIndependentCleanup));assert(independent.gatewayPid===69424&&independent.gatewayPidAbsent===true&&independent.portsFree===true&&independent.listeners.length===0,'Actual W11 independent cleanup differs');\nassert(receipt.packageId==='ordinary-capacity-bank-prepare-v11'&&receipt.sourceFirst4InventoryReuse===true&&receipt.sourceOriginalFailedVerdictRetained===true&&receipt.cleanupComplete===true&&receipt.preparationComplete===false&&receipt.coldBankEligible===false&&cleanup.checks?.normalOwnedShutdown===true&&cleanup.checks?.sixCountersZero===true&&cleanup.checks?.gatewayProcessAbsent===true&&cleanup.checks?.driverProcessAbsent===true&&cleanup.checks?.monitorProcessAbsent===true&&cleanup.checks?.portsFree===true&&cleanup.checks?.postSourceUnchanged===true,'Source partial realm was not normally closed');assert(receipt.rawOriginalReport.sha256===plan.sourceReport.sha256&&receipt.rawOriginalReport.bytes===plan.sourceReport.bytes,'Original source report binding differs');\nassert(report.preparationOnly===true&&report.attackResults==='v2'&&report.testExecution===false&&report.ok===false&&report.error===\"ordinary supplies: preparation wall budget exhausted\"&&report.preparedCount===11&&report.actorResults.length===11&&report.preparedIndex.length===11&&report.completePoolAccountCount===100&&report.completePoolPreserved===true&&report.ordinaryPreparationEvidenceEligible===false,'Historical source failure must remain originalfalse');assert(JSON.stringify(index.records)===JSON.stringify(report.preparedIndex)&&JSON.stringify(plan.sourcePreparedCharacters)===JSON.stringify(report.preparedIndex.map(r=>({name:r.name,characterIndex:r.characterIndex,map:r.map,x:r.x,y:r.y,normalLogout:r.normalLogout})))&&report.actorResults.every(r=>r.normalLogout===true&&r.after?.hpStock>=12),'Original11 prepared actors or saved index differ');assert(plan.sourceFailedCharacter.name===report.failedActor.name&&plan.sourceFailedCharacter.characterIndex===report.failedActor.characterIndex&&plan.sourceFailedCharacter.notPrepared===true&&!plan.sourcePreparedCharacters.some(r=>r.name===report.failedActor.name)&&plan.sourcePreparedEligibilityInherited===false,'Failed twelfth actor cannot become prepared evidence');assert(report.failedActor.before?.hp===18&&report.failedActor.before.maxHp===18&&report.failedActor.before.hpStock===1&&report.failedActor.before.gold===0&&report.failedActor.purchased===0&&report.failedActor.soldVenison===0&&report.failedActor.funding===null&&report.failedActor.commands===870&&report.failedActor.movementCommands===845&&report.failedActor.actualStagingReached===false,'Original W11 initial-stock/wall-budget failure scope differs');\n",
+          "after": "export function validateSourceBank(planPin){const plan=JSON.parse(checked(planPin));assert(plan.schemaVersion===1&&plan.packageId===path.basename(DIRECTORY)&&plan.state==='SOURCE_PARTIAL_BANK_IDENTIFIED_NEW_RUNTIME_QUALIFICATION_PENDING'&&same(plan.sourcePrivate,SOURCE),'ActualW12 partial source bank required');safe(SOURCE,true);const receipt=JSON.parse(checked(plan.sourceReceipt)),report=JSON.parse(checked(plan.sourceReport)),cleanup=JSON.parse(checked(plan.sourceCleanup)),index=JSON.parse(checked(plan.sourcePreparedIndex));checked(plan.sourceOwnedProcess);checked(plan.sourceFrozenManifest);const independent=JSON.parse(checked(plan.sourceIndependentCleanup));assert(independent.gatewayPid===59580&&independent.gatewayPidAbsent===true&&independent.portsFree===true&&independent.listeners.length===0,'Actual W12 independent cleanup differs');\nassert(receipt.packageId==='ordinary-capacity-bank-prepare-v12'&&receipt.sourceFirst4InventoryReuse===true&&receipt.sourceOriginalFailedVerdictRetained===true&&receipt.cleanupComplete===true&&receipt.preparationComplete===false&&receipt.coldBankEligible===false&&cleanup.checks?.normalOwnedShutdown===true&&cleanup.checks?.sixCountersZero===true&&cleanup.checks?.gatewayProcessAbsent===true&&cleanup.checks?.driverProcessAbsent===true&&cleanup.checks?.monitorProcessAbsent===true&&cleanup.checks?.portsFree===true&&cleanup.checks?.postSourceUnchanged===true,'Source partial realm was not normally closed');assert(receipt.rawOriginalReport.sha256===plan.sourceReport.sha256&&receipt.rawOriginalReport.bytes===plan.sourceReport.bytes,'Original source report binding differs');\nassert(report.preparationOnly===true&&report.attackResults==='v2'&&report.testExecution===false&&report.ok===false&&report.error===\"safe Deer funding capital insufficient with 1 Venison after 1 hunts and 8 attempts\"&&report.preparedCount===21&&report.actorResults.length===21&&report.preparedIndex.length===21&&report.completePoolAccountCount===100&&report.completePoolPreserved===true&&report.ordinaryPreparationEvidenceEligible===false,'Historical source failure must remain originalfalse');assert(JSON.stringify(index.records)===JSON.stringify(report.preparedIndex)&&JSON.stringify(plan.sourcePreparedCharacters)===JSON.stringify(report.preparedIndex.map(r=>({name:r.name,characterIndex:r.characterIndex,map:r.map,x:r.x,y:r.y,normalLogout:r.normalLogout})))&&report.actorResults.every(r=>r.normalLogout===true&&r.after?.hpStock>=12),'Original21 prepared actors or saved index differ');assert(plan.sourceFailedCharacter.name===report.failedActor.name&&plan.sourceFailedCharacter.characterIndex===report.failedActor.characterIndex&&plan.sourceFailedCharacter.notPrepared===true&&!plan.sourcePreparedCharacters.some(r=>r.name===report.failedActor.name)&&plan.sourcePreparedEligibilityInherited===false,'Failed twenty-second actor cannot become prepared evidence');assert(report.failedActor.before?.hp===18&&report.failedActor.before.maxHp===18&&report.failedActor.before.hpStock===1&&report.failedActor.before.gold===0&&report.failedActor.purchased===0&&report.failedActor.soldVenison===0&&report.failedActor.funding===null&&report.failedActor.commands===36&&report.failedActor.movementCommands===8&&report.failedActor.actualStagingReached===false,'Original W12 initial-stock/funding-capital failure scope differs');\n"
+        },
+        {
+          "oldOffsetUtf16": 6392,
+          "newOffsetUtf16": 6429,
+          "before": "const prior=plan.priorRecoveryArchive;assert(prior&&same(prior.directory,path.join(SOURCE,'source-save-recovery-preserved'))&&prior.retainInPlace===true&&prior.copiedToNewActive===false&&prior.files.length===4,'Old W11 archive must remain in place');const priorTree=recoveryTree(prior.directory);assert(JSON.stringify(priorTree.files)===JSON.stringify(controls.sort())&&JSON.stringify(priorTree.directories)===JSON.stringify(['quarantine'])&&JSON.stringify(prior.files.map(p=>p.relative).sort())===JSON.stringify(controls.sort()),'Old archive controls changed');for(const p of prior.files){assert(same(p.file,path.join(prior.directory,p.relative)),'Prior archive path differs');checked(p)}const get=n=>JSON.parse(checked(plan.files.find(p=>p.relative===n))),pool=get('capacity-pool.json'),store=get('accounts.json'),ledger=get('capacity-auth-budget.json');assert(plan.sourceReadyCharacters===pool.accounts.filter(a=>a.state===\"ready\").length&&plan.sourceRegisteredAccounts===pool.accounts.filter(a=>a.state===\"registered\").length,\"Plan pool state metadata differs from actual pinned pool\");assert(pool.schemaVersion===1&&pool.purpose==='isolated-load-actors'&&pool.realm==='isolated'&&pool.endpoint==='ws://127.0.0.1:17510/ws'&&pool.accounts.length===100&&pool.accounts.filter(a=>a.state==='ready').length===12&&pool.accounts.filter(a=>a.state==='registered').length===88,'All100 original pool entries including failed actor must remain intact');assert(Object.keys(store.accounts??{}).length===plan.sourceStoreTotalAccounts&&plan.sourceStoreTotalAccounts===101,'Entire source Store including noncontrolled account must be preserved');for(const a of pool.accounts){const saved=store.accounts?.[a.accountId];assert(saved,'Controlled account missing from completeStore');if(a.state==='ready')assert(saved.characters?.some(c=>c.index===a.characterIndex&&c.name===a.name),'Ready identity differs from normally saved Store');else assert((saved.characters??[]).length===0,'Registered source account unexpectedly has a character')}assert(ledger.schemaVersion===1&&ledger.purpose==='capacity-auth-budget'&&ledger.endpoint===pool.endpoint&&Array.isArray(ledger.attempts),'Existing actual ledger required');assert(plan.copyPolicy.authLedgerCopiedUnchanged===true&&plan.copyPolicy.loginNotBeforeOverrideAllowed===false&&plan.copyPolicy.seederInvoked===false,'Partial continuation cannot reset ledger or seed');return{plan,pool};}\nexport function copySourceBankExclusively(planPin,destination){const{plan,pool}=validateSourceBank(planPin);assert(same(destination,path.join(DIRECTORY,'episode','private')),'Only the new owned private directory is allowed');safe(destination,true);const mapped=plan.files.map(p=>({source:p,target:path.join(destination,p.relative.startsWith('save-recovery/')?'source-save-recovery-preserved/'+p.relative.slice('save-recovery/'.length):p.relative)}));for(const{target}of mapped){contained(destination,target);assert(!fs.existsSync(target),'Never overwrite a bank destination')}const preserved=path.join(destination,'source-save-recovery-preserved'),active=path.join(destination,'save-recovery');assert(!fs.existsSync(preserved)&&!fs.existsSync(active),'New recovery directories must be absent');fs.mkdirSync(preserved);fs.mkdirSync(path.join(preserved,'quarantine'));fs.mkdirSync(active);const copies=[];for(const{source,target}of mapped){fs.copyFileSync(source.file,target,fs.constants.COPYFILE_EXCL);safe(target);const actual=pin(target);assert(actual.bytes===source.bytes&&actual.sha256===source.sha256,'Copied source bytes differ');copies.push({source,target:actual})}validateSourceBank(planPin);assert(fs.readdirSync(active).length===0,'Active recovery must be empty for normal Gateway initialization');return{schemaVersion:1,sourcePlan:planPin,sourceFiles:11,totalBytes:plan.totalBytes,copies,sourceUnchangedAfterCopy:true,sourcePoolAccounts:100,sourceReadyCharacters:12,sourcePreparedCount:11,sourcePreparedCharacters:plan.sourcePreparedCharacters,sourceFailedTwelfthPromoted:false,sourcePreparedEligibilityInherited:false,sourceOriginalFailureRetained:true,actualV11PartialBankContinuation:true,trafficLedgerSource:'ordinary-capacity-bank-prepare-v11',sourceRecoveryPreserved:true,sourcePriorRecoveryArchiveRetainedInPlace:true,priorRecoveryArchiveCopiedToActive:false,activeRecoveryInitiallyEmpty:true,recoveryJournalPayloads:0,authLedgerCopiedUnchanged:true,loginNotBeforeOverridden:false,accountStoreRewritePerformed:false,poolRewritePerformed:false,stockOrPositionEditPerformed:false,seederInvoked:false,capacityAccepted:false,p0Accepted:false};}\n",
+          "after": "const prior=plan.priorRecoveryArchive;assert(prior&&same(prior.directory,path.join(SOURCE,'source-save-recovery-preserved'))&&prior.retainInPlace===true&&prior.copiedToNewActive===false&&prior.files.length===4,'Old W12 archive must remain in place');const priorTree=recoveryTree(prior.directory);assert(JSON.stringify(priorTree.files)===JSON.stringify(controls.sort())&&JSON.stringify(priorTree.directories)===JSON.stringify(['quarantine'])&&JSON.stringify(prior.files.map(p=>p.relative).sort())===JSON.stringify(controls.sort()),'Old archive controls changed');for(const p of prior.files){assert(same(p.file,path.join(prior.directory,p.relative)),'Prior archive path differs');checked(p)}const get=n=>JSON.parse(checked(plan.files.find(p=>p.relative===n))),pool=get('capacity-pool.json'),store=get('accounts.json'),ledger=get('capacity-auth-budget.json');assert(plan.sourceReadyCharacters===pool.accounts.filter(a=>a.state===\"ready\").length&&plan.sourceRegisteredAccounts===pool.accounts.filter(a=>a.state===\"registered\").length,\"Plan pool state metadata differs from actual pinned pool\");assert(pool.schemaVersion===1&&pool.purpose==='isolated-load-actors'&&pool.realm==='isolated'&&pool.endpoint==='ws://127.0.0.1:17510/ws'&&pool.accounts.length===100&&pool.accounts.filter(a=>a.state==='ready').length===22&&pool.accounts.filter(a=>a.state==='registered').length===78,'All100 original pool entries including failed actor must remain intact');assert(Object.keys(store.accounts??{}).length===plan.sourceStoreTotalAccounts&&plan.sourceStoreTotalAccounts===101,'Entire source Store including noncontrolled account must be preserved');for(const a of pool.accounts){const saved=store.accounts?.[a.accountId];assert(saved,'Controlled account missing from completeStore');if(a.state==='ready')assert(saved.characters?.some(c=>c.index===a.characterIndex&&c.name===a.name),'Ready identity differs from normally saved Store');else assert((saved.characters??[]).length===0,'Registered source account unexpectedly has a character')}assert(ledger.schemaVersion===1&&ledger.purpose==='capacity-auth-budget'&&ledger.endpoint===pool.endpoint&&Array.isArray(ledger.attempts),'Existing actual ledger required');assert(plan.copyPolicy.authLedgerCopiedUnchanged===true&&plan.copyPolicy.loginNotBeforeOverrideAllowed===false&&plan.copyPolicy.seederInvoked===false,'Partial continuation cannot reset ledger or seed');return{plan,pool};}\nexport function copySourceBankExclusively(planPin,destination){const{plan,pool}=validateSourceBank(planPin);assert(same(destination,path.join(DIRECTORY,'episode','private')),'Only the new owned private directory is allowed');safe(destination,true);const mapped=plan.files.map(p=>({source:p,target:path.join(destination,p.relative.startsWith('save-recovery/')?'source-save-recovery-preserved/'+p.relative.slice('save-recovery/'.length):p.relative)}));for(const{target}of mapped){contained(destination,target);assert(!fs.existsSync(target),'Never overwrite a bank destination')}const preserved=path.join(destination,'source-save-recovery-preserved'),active=path.join(destination,'save-recovery');assert(!fs.existsSync(preserved)&&!fs.existsSync(active),'New recovery directories must be absent');fs.mkdirSync(preserved);fs.mkdirSync(path.join(preserved,'quarantine'));fs.mkdirSync(active);const copies=[];for(const{source,target}of mapped){fs.copyFileSync(source.file,target,fs.constants.COPYFILE_EXCL);safe(target);const actual=pin(target);assert(actual.bytes===source.bytes&&actual.sha256===source.sha256,'Copied source bytes differ');copies.push({source,target:actual})}validateSourceBank(planPin);assert(fs.readdirSync(active).length===0,'Active recovery must be empty for normal Gateway initialization');return{schemaVersion:1,sourcePlan:planPin,sourceFiles:11,totalBytes:plan.totalBytes,copies,sourceUnchangedAfterCopy:true,sourcePoolAccounts:100,sourceReadyCharacters:22,sourcePreparedCount:21,sourcePreparedCharacters:plan.sourcePreparedCharacters,sourceFailedTwentySecondPromoted:false,sourcePreparedEligibilityInherited:false,sourceOriginalFailureRetained:true,actualV12PartialBankContinuation:true,trafficLedgerSource:'ordinary-capacity-bank-prepare-v12',sourceRecoveryPreserved:true,sourcePriorRecoveryArchiveRetainedInPlace:true,priorRecoveryArchiveCopiedToActive:false,activeRecoveryInitiallyEmpty:true,recoveryJournalPayloads:0,authLedgerCopiedUnchanged:true,loginNotBeforeOverridden:false,accountStoreRewritePerformed:false,poolRewritePerformed:false,stockOrPositionEditPerformed:false,seederInvoked:false,capacityAccepted:false,p0Accepted:false};}\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "file": "freeze-prepare-v1.mjs",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\freeze-prepare-v1.mjs",
+        "bytes": 8149,
+        "sha256": "71463cb33bfeed691a9cdbe4351522e3b158c788d696bd023c9f678442e19973"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\freeze-prepare-v1.mjs",
+        "bytes": 8149,
+        "sha256": "7b03fa2f9c921297ddc5d5a5f03ca26e59bc6bf298e2abea5baa33a5d2d33812"
+      },
+      "hunks": [
+        {
+          "oldOffsetUtf16": 1438,
+          "newOffsetUtf16": 1438,
+          "before": "assert(c.schemaVersion===12&&c.packageId===PACKAGE_ID&&c.state==='PENDING_ROOT_CURRENT_SOURCE_FREEZE_NOT_RUN'&&c.preparationOnly===true&&c.reusedPartialOrdinaryBank===true&&c.actualV11PartialBankContinuation===true&&c.freshZeroCharacterPool===false&&!Object.hasOwn(c.options,'loginNotBefore')&&c.actors===100&&c.maxPrepared===100&&c.workerCount===1&&c.options.realm==='isolated'&&c.options.endpoint==='ws://127.0.0.1:17510/ws'&&c.options.maxPrepared===100&&c.options.finiteWallSeconds===18000&&c.options.targetHp===12&&c.options.attackResults==='v2'&&c.capacityAccepted===false&&c.p0Accepted===false&&c.formalAcceptanceEligible===false,'Only the reviewed100account sequential preparation is permitted');\n",
+          "after": "assert(c.schemaVersion===13&&c.packageId===PACKAGE_ID&&c.state==='PENDING_ROOT_CURRENT_SOURCE_FREEZE_NOT_RUN'&&c.preparationOnly===true&&c.reusedPartialOrdinaryBank===true&&c.actualV12PartialBankContinuation===true&&c.freshZeroCharacterPool===false&&!Object.hasOwn(c.options,'loginNotBefore')&&c.actors===100&&c.maxPrepared===100&&c.workerCount===1&&c.options.realm==='isolated'&&c.options.endpoint==='ws://127.0.0.1:17510/ws'&&c.options.maxPrepared===100&&c.options.finiteWallSeconds===18000&&c.options.targetHp===12&&c.options.attackResults==='v2'&&c.capacityAccepted===false&&c.p0Accepted===false&&c.formalAcceptanceEligible===false,'Only the reviewed100account sequential preparation is permitted');\n"
+        },
+        {
+          "oldOffsetUtf16": 6394,
+          "newOffsetUtf16": 6394,
+          "before": "const toolPins=TOOL_NAMES.map(n=>pin(path.join(DIRECTORY,n))),resourceProfilePin=c.resourceProfile;checked(resourceProfilePin);const manifestPin=writeNew('frozen-source-v1.json',{schemaVersion:1,packageId:PACKAGE_ID,state:'FROZEN_ORDINARY_PREPARATION_NOT_RUN',preparationOnly:true,maxPrepared:100,workerCount:1,candidatePolicy:scenario.preparation.candidatePolicy,staticCandidateCount:335,frozenAt:new Date().toISOString(),repository:repo,project,driver,backend,focused,toolPins,dataPins,configPin,scenarioPin,routePin,resourceProfilePin,staticMapProof:proofPin,bankSourcePlanPin,bankSourceSummary:{controlledAccounts:100,readyCharacters:12,sourcePreparedCount:11,sourceOriginalFailure:sourceBankPlan.sourceOriginalVerdict,actualV11PartialBankContinuation:true,latestTrafficLedgerSource:'ordinary-capacity-bank-prepare-v11',sourcePreparedEligibilityInherited:false,sourcePreparedCharacters:sourceBankPlan.sourcePreparedCharacters,seederInvoked:false,authLedgerCopiedUnchanged:true},staticGeometry:{distinctVillageStagingPoints:100,excludedSpawnPoint:origin,maxOrdinaryPathSteps:Math.max(...paths),staticCandidates:335,actualSavedPointsMustBeRecorded:true,liveSafetyUnknown:true},progressIsColdCheckpoint:false,capacityAccepted:false,p0Accepted:false,formalAcceptanceEligible:false,newRustBuildPerformed:false,freshRustTestsPerformed:false,quiescentWorkspaceRequiredDuringActualEpisode:true});verifyFrozen(manifestPin.sha256);console.log(JSON.stringify({manifestPin,driverSourceCommit:driver.driverSourceCommit,backendSourceCommit:backend.backendSourceCommit,focusedTestsPassed:focused.actualTestsPassed,localStaticSources:driver.files.length,backendSourcesExact:55,preparationOnly:true,loadStarted:false,capacityAccepted:false,p0Accepted:false},null,2));\n",
+          "after": "const toolPins=TOOL_NAMES.map(n=>pin(path.join(DIRECTORY,n))),resourceProfilePin=c.resourceProfile;checked(resourceProfilePin);const manifestPin=writeNew('frozen-source-v1.json',{schemaVersion:1,packageId:PACKAGE_ID,state:'FROZEN_ORDINARY_PREPARATION_NOT_RUN',preparationOnly:true,maxPrepared:100,workerCount:1,candidatePolicy:scenario.preparation.candidatePolicy,staticCandidateCount:335,frozenAt:new Date().toISOString(),repository:repo,project,driver,backend,focused,toolPins,dataPins,configPin,scenarioPin,routePin,resourceProfilePin,staticMapProof:proofPin,bankSourcePlanPin,bankSourceSummary:{controlledAccounts:100,readyCharacters:22,sourcePreparedCount:21,sourceOriginalFailure:sourceBankPlan.sourceOriginalVerdict,actualV12PartialBankContinuation:true,latestTrafficLedgerSource:'ordinary-capacity-bank-prepare-v12',sourcePreparedEligibilityInherited:false,sourcePreparedCharacters:sourceBankPlan.sourcePreparedCharacters,seederInvoked:false,authLedgerCopiedUnchanged:true},staticGeometry:{distinctVillageStagingPoints:100,excludedSpawnPoint:origin,maxOrdinaryPathSteps:Math.max(...paths),staticCandidates:335,actualSavedPointsMustBeRecorded:true,liveSafetyUnknown:true},progressIsColdCheckpoint:false,capacityAccepted:false,p0Accepted:false,formalAcceptanceEligible:false,newRustBuildPerformed:false,freshRustTestsPerformed:false,quiescentWorkspaceRequiredDuringActualEpisode:true});verifyFrozen(manifestPin.sha256);console.log(JSON.stringify({manifestPin,driverSourceCommit:driver.driverSourceCommit,backendSourceCommit:backend.backendSourceCommit,focusedTestsPassed:focused.actualTestsPassed,localStaticSources:driver.files.length,backendSourcesExact:55,preparationOnly:true,loadStarted:false,capacityAccepted:false,p0Accepted:false},null,2));\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "file": "run-owned-prepare-v1.mjs",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\run-owned-prepare-v1.mjs",
+        "bytes": 25137,
+        "sha256": "b8935f63ff92bf867673372a4429bee3840d6b05e865ccce8e83d3ba4e309993"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\run-owned-prepare-v1.mjs",
+        "bytes": 25150,
+        "sha256": "e4c993319608189858cd50bb90a59583f2b7905da004d8c53c6433129007fa93"
+      },
+      "hunks": [
+        {
+          "oldOffsetUtf16": 1119,
+          "newOffsetUtf16": 1119,
+          "before": "assert(config.preparationOnly===true&&config.actors===100&&config.workerCount===1&&config.maxPrepared===100&&config.options.maxPrepared===100&&config.options.finiteWallSeconds===18000&&config.options.targetHp===12&&config.options.attackResults==='v2'&&config.reusedPartialOrdinaryBank===true&&config.actualV11PartialBankContinuation===true&&config.freshZeroCharacterPool===false&&!Object.hasOwn(config.options,'loginNotBefore')&&config.authOrigin.mode==='copiedExistingLedgerNoOverride'&&config.authOrigin.existingLedgerOverrideAllowed===false&&config.capacityAccepted===false&&config.p0Accepted===false,'Only the reviewed continued100 single-worker preparation is allowed');\n",
+          "after": "assert(config.preparationOnly===true&&config.actors===100&&config.workerCount===1&&config.maxPrepared===100&&config.options.maxPrepared===100&&config.options.finiteWallSeconds===18000&&config.options.targetHp===12&&config.options.attackResults==='v2'&&config.reusedPartialOrdinaryBank===true&&config.actualV12PartialBankContinuation===true&&config.freshZeroCharacterPool===false&&!Object.hasOwn(config.options,'loginNotBefore')&&config.authOrigin.mode==='copiedExistingLedgerNoOverride'&&config.authOrigin.existingLedgerOverrideAllowed===false&&config.capacityAccepted===false&&config.p0Accepted===false,'Only the reviewed continued100 single-worker preparation is allowed');\n"
+        },
+        {
+          "oldOffsetUtf16": 6748,
+          "newOffsetUtf16": 6748,
+          "before": "const bankCopyReceipt=copySourceBankExclusively(m.bankSourcePlanPin,privateRoot);await write(path.join(root,'source-bank-copy-receipt-v1.json'),bankCopyReceipt);assert(bankCopyReceipt.actualV11PartialBankContinuation===true&&bankCopyReceipt.trafficLedgerSource==='ordinary-capacity-bank-prepare-v11'&&bankCopyReceipt.authLedgerCopiedUnchanged===true&&bankCopyReceipt.loginNotBeforeOverridden===false&&bankCopyReceipt.seederInvoked===false,'Actual complete partialbank and original ledger copy required');\n",
+          "after": "const bankCopyReceipt=copySourceBankExclusively(m.bankSourcePlanPin,privateRoot);await write(path.join(root,'source-bank-copy-receipt-v1.json'),bankCopyReceipt);assert(bankCopyReceipt.actualV12PartialBankContinuation===true&&bankCopyReceipt.trafficLedgerSource==='ordinary-capacity-bank-prepare-v12'&&bankCopyReceipt.authLedgerCopiedUnchanged===true&&bankCopyReceipt.loginNotBeforeOverridden===false&&bankCopyReceipt.seederInvoked===false,'Actual complete partialbank and original ledger copy required');\n"
+        },
+        {
+          "oldOffsetUtf16": 12214,
+          "newOffsetUtf16": 12214,
+          "before": " const options={...config.options,poolFile,monitor:path.join(root,'monitor-current.json'),output:path.join(root,'reports'),scenarioFile:m.scenarioPin.file,routeFile:m.routePin.file,mapRoot:path.join(m.project,'apps/web/lib/generated/crystal-map-pack')},driverFile=path.join(privateRoot,'driver-options.json');await write(driverFile,{project:m.project,options});await write(path.join(root,'run-intent-v1.json'),{schemaVersion:1,manifestPin,options,scope:'New owned Gateway strictly reuses the actual V6 ee06 backend and continues the complete cold W11 game Store, pool, four secrets, active control-only recovery files and latest W11 client traffic ledger by exclusive byte copying. The W11 twelfth wall-budget failure remains false. All100 start with zero newly prepared evidence; first4 need fresh stock/no-economic-command proof. Only current production ordinary recovery/preparation may act. No seed, account state/stock/position edits, loginNotBefore override or inherited prepared acceptance.',formalAcceptanceEligible:false,capacityAccepted:false,preparationSupplyDurationClaim:false});\n",
+          "after": " const options={...config.options,poolFile,monitor:path.join(root,'monitor-current.json'),output:path.join(root,'reports'),scenarioFile:m.scenarioPin.file,routeFile:m.routePin.file,mapRoot:path.join(m.project,'apps/web/lib/generated/crystal-map-pack')},driverFile=path.join(privateRoot,'driver-options.json');await write(driverFile,{project:m.project,options});await write(path.join(root,'run-intent-v1.json'),{schemaVersion:1,manifestPin,options,scope:'New owned Gateway strictly reuses the actual V6 ee06 backend and continues the complete cold W12 game Store, pool, four secrets, active control-only recovery files and latest W12 client traffic ledger by exclusive byte copying. The W12 twenty-second funding-capital failure remains false. All100 start with zero newly prepared evidence; first4 need fresh stock/no-economic-command proof. Only current production ordinary recovery/preparation may act. No seed, account state/stock/position edits, loginNotBefore override or inherited prepared acceptance.',formalAcceptanceEligible:false,capacityAccepted:false,preparationSupplyDurationClaim:false});\n"
+        },
+        {
+          "oldOffsetUtf16": 23157,
+          "newOffsetUtf16": 23167,
+          "before": "const receipt={schemaVersion:1,packageId:PACKAGE_ID,mode:'continued-actual-v11-ordinary-bank-preparation-only',actualV11PartialBankContinuation:true,sourceW11WallFailureRetained:true,sourceBankPlan:m.bankSourcePlanPin,sourceBankCopyReceipt:pin(path.join(root,'source-bank-copy-receipt-v1.json')),sourceOriginalFailedVerdictRetained:true,sourcePreparedEligibilityInherited:false,sourceFirst4InventoryReuse,sourceFirst4InventoryReuseEvidence,seederInvoked:false,loginNotBeforeOverridden:false,preparationOnly:true,workerCount:1,maxPrepared:100,manifestPin,driverSourceCommit:m.driver.driverSourceCommit,executionSourceCommit:m.driver.driverSourceCommit,backendSourceCommit:m.backend.backendSourceCommit,backendExecutable:m.backend.immutableExecutable,backendSourcesExact:55,newRustBuildPerformed:false,freshRustTestsPerformed:false,rawOriginalReport:report?.reportPath?pin(report.reportPath):null,rawOriginalSamples:report?.samplesPath?pin(report.samplesPath):null,rawOriginalVerdict:{attackResults:report?.attackResults??null,ok:report?.ok??null,error:report?.error??null,preparedCount:report?.preparedCount??null,testExecution:report?.testExecution??null,ordinaryPreparationEvidenceEligible:report?.ordinaryPreparationEvidenceEligible??null},preparedIndexRecord:preparedIndexPin,preparedIndexValid,progressCheckpoints:report?.checkpoints??[],progressIsColdCheckpoint:false,productionPreparationEvidence,preparationComplete,executionError,cleanupComplete,cleanupRecord:pin(path.join(root,'cleanup-v1.json')),coldBankEligible:cleanupComplete&&preparationComplete,formalOrdinaryRelogin100Verified:false,measurementPerformed:false,gameplayEngineActivated:false,nativeResumeExercisePerformed:false,sustainableTwoHourSupplyProven:false,capacityAccepted:false,p0Accepted:false,formalAcceptanceEligible:false};await write(path.join(root,'preparation-episode-receipt-v1.json'),receipt);console.log(JSON.stringify(receipt,null,2));process.exitCode=cleanupComplete&&preparationComplete?0:1;\n",
+          "after": "const receipt={schemaVersion:1,packageId:PACKAGE_ID,mode:'continued-actual-v12-ordinary-bank-preparation-only',actualV12PartialBankContinuation:true,sourceW12FundingFailureRetained:true,sourceBankPlan:m.bankSourcePlanPin,sourceBankCopyReceipt:pin(path.join(root,'source-bank-copy-receipt-v1.json')),sourceOriginalFailedVerdictRetained:true,sourcePreparedEligibilityInherited:false,sourceFirst4InventoryReuse,sourceFirst4InventoryReuseEvidence,seederInvoked:false,loginNotBeforeOverridden:false,preparationOnly:true,workerCount:1,maxPrepared:100,manifestPin,driverSourceCommit:m.driver.driverSourceCommit,executionSourceCommit:m.driver.driverSourceCommit,backendSourceCommit:m.backend.backendSourceCommit,backendExecutable:m.backend.immutableExecutable,backendSourcesExact:55,newRustBuildPerformed:false,freshRustTestsPerformed:false,rawOriginalReport:report?.reportPath?pin(report.reportPath):null,rawOriginalSamples:report?.samplesPath?pin(report.samplesPath):null,rawOriginalVerdict:{attackResults:report?.attackResults??null,ok:report?.ok??null,error:report?.error??null,preparedCount:report?.preparedCount??null,testExecution:report?.testExecution??null,ordinaryPreparationEvidenceEligible:report?.ordinaryPreparationEvidenceEligible??null},preparedIndexRecord:preparedIndexPin,preparedIndexValid,progressCheckpoints:report?.checkpoints??[],progressIsColdCheckpoint:false,productionPreparationEvidence,preparationComplete,executionError,cleanupComplete,cleanupRecord:pin(path.join(root,'cleanup-v1.json')),coldBankEligible:cleanupComplete&&preparationComplete,formalOrdinaryRelogin100Verified:false,measurementPerformed:false,gameplayEngineActivated:false,nativeResumeExercisePerformed:false,sustainableTwoHourSupplyProven:false,capacityAccepted:false,p0Accepted:false,formalAcceptanceEligible:false};await write(path.join(root,'preparation-episode-receipt-v1.json'),receipt);console.log(JSON.stringify(receipt,null,2));process.exitCode=cleanupComplete&&preparationComplete?0:1;\n"
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "file": "owned-child-v1.mjs",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\owned-child-v1.mjs",
+        "bytes": 2201,
+        "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\owned-child-v1.mjs",
+        "bytes": 2201,
+        "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+      },
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    }
+  ],
+  "generationRules": [
+    "source-lib and owned-child fullrawexact W12",
+    "copy-source-bank only actualW12 source/provenance,OSPID59580,strict21prepared22ready78registered/fundingcapitalerror36cmd8move/failed22 identity and no-promotion labels",
+    "freeze schema13/sourcecounts/provenance only; all100/worker1/18000wall/600sactor/target12/3cmd/resource/cleanup/protocol/SLO unchanged",
+    "runner provenance sourceW12 and funding-failure labels only; originalfirst4.slice and dedicatedproof rawunchanged; source21records retained and futurefresh100 required",
+    "source11 fullcoldfilepins including latestW12ledger, same17510/no time reset, current/prior4controls0journal; no copy or Store/ledger edits"
+  ],
+  "configuration": {
+    "beforePendingConfig": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\prepare-config-before-root-final-v1.json",
+      "bytes": 6726,
+      "sha256": "781415ed198ba2a47ef7b78fceb2360c71695abb47701036abe4cd4aa02738f4"
+    },
+    "after": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\prepare-config-pending-v1.json",
+      "bytes": 6805,
+      "sha256": "96216e9690b19aa9c8829e1f67d6fca4bc0318e1b845e0b500b190069a9b2bbf"
+    },
+    "policyUnchanged": {
+      "actors": 100,
+      "workerCount": 1,
+      "finiteWallSeconds": 18000,
+      "actorBudgetMs": 600000,
+      "targetHp": 12,
+      "commandsPerSecond": 3,
+      "endpoint": "ws://127.0.0.1:17510/ws",
+      "tcp": "127.0.0.1:17500",
+      "ordinaryAdmissionLimit": 25,
+      "verificationLimit": 5,
+      "windowMs": 901000,
+      "originOrTimeOverride": false
+    }
+  },
+  "bankSource": {
+    "plan": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\source-bank-plan-pending-v1.json",
+      "bytes": 15000,
+      "sha256": "4f2954a95869fdc7d6f727f39a8457839a2b85f303928de2b7fd87fbfb498dd5"
+    },
+    "sourceFiles": 11,
+    "totalBytes": 349840,
+    "ledger": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 717,
+      "sha256": "d53a048ebafa692ab839d225c48fb5f1fe4a90d7a1f81b42894efab50e7d92d6",
+      "relative": "capacity-auth-budget.json"
+    },
+    "readyCharacters": 22,
+    "registeredAccounts": 78,
+    "preparedCount": 21,
+    "sourceFalseRetained": true,
+    "sourceEligibilityInherited": false,
+    "failedTwentySecondPromoted": false,
+    "first4DedicatedProofOnly": true,
+    "sourcePinsUnchangedDuringAuthoring": true,
+    "currentRecovery4Controls0Journal": true,
+    "prior4ControlsRetained": true
+  },
+  "backendReuse": {
+    "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+    "sourceCount": 55,
+    "reusedRustTests": 32,
+    "sourceLibWholeRawExact": true,
+    "newRustBuildPerformed": false,
+    "freshRustTestsPerformed": false
+  },
+  "pending": {
+    "actualDriverCommit": null,
+    "executionSourceCommit": null,
+    "actualRootJsReceipt": null,
+    "actualFreshNodeTestCount": null,
+    "plannedRootJsReceiptFile": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v13\\root-focused-receipt-v1.json",
+    "RootFinalApproval": null,
+    "actualFreeze": null,
+    "actualBankCopy": null,
+    "actualLoad": null
+  },
+  "RootFinalizerReference": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\finalize-ordinary-bank-binding-v9.mjs",
+    "bytes": 4541,
+    "sha256": "94fa8e75a50c92c2fec95d62b2a6cdfd8bce6f19ba227c27464f384925a26500"
+  },
+  "RootFinalizerExecutedForW13": false,
+  "syntax": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\syntax-checks-v1.json",
+    "bytes": 2737,
+    "sha256": "1513e93c7b61ca6d6b278364a16deabfae779c52afcb6caf08a1f573737a46ee"
+  },
+  "oldW12FiveSourcesUnchanged": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

@@ -4420,3 +4420,71 @@ test('AOI received state hook follows real decoded owner peer Join Leave snapsho
   client.observe({ type: 'worldSnapshot', payload: { mapFileName: '1', playerObjectId: owner.objectId, entities: [{ ...owner, x: 12 }] } });
   assert.equal(context.aoi.missingSince.has(key), false); assert.equal(context.aoi.stats.samples, 5);
 });
+
+
+test('runCapacity execution gate blocks number and string 500 before endpoint, path, monitor or auth option reads', async () => {
+  const message = 'The 500 online / 500 continuously fighting contract is not implemented; targetActors=500 execution is blocked, including the historical 50-fighter workload.';
+  for (const targetActors of [500, '500']) for (const combatActors of [undefined, 50, 125, 500]) {
+    const reads = [], options = { targetActors, ...(combatActors === undefined ? {} : { combatActors }) };
+    for (const key of ['realm', 'endpoint', 'accountsFile', 'poolFile', 'poolPath', 'monitor', 'monitorPath', 'output',
+      'scenarioFile', 'mapRoot', 'loginNotBefore', 'attackResults', 'onProgress']) {
+      Object.defineProperty(options, key, { get() { reads.push(key); throw new Error('Unexpected side-effect option read: ' + key); } });
+    }
+    await assert.rejects(runCapacity(options), { name: 'Error', message });
+    assert.deepEqual(reads, [], 'the executable target guard precedes all resource and authentication setup');
+  }
+});
+
+test('runCapacity execution gate ignores fake workload profiles and cannot be bypassed through other option getters', async () => {
+  const message = 'The 500 online / 500 continuously fighting contract is not implemented; targetActors=500 execution is blocked, including the historical 50-fighter workload.';
+  for (const profile of ['standard', 'probe', 'movement', '500-all-combat', 'all-fighters-implemented']) {
+    await assert.rejects(runCapacity({ targetActors: 500, combatActors: 500, profile, activityMode: 'native',
+      preparationProfile: 'ordinary-economic-v1', fullCombatContractImplemented: true, allow500: true,
+      skipCapacityGuard: true }), { name: 'Error', message });
+  }
+  const reads = [], options = { targetActors: '500' };
+  for (const key of ['combatActors', 'profile', 'activityMode', 'preparationProfile', 'fullCombatContractImplemented']) {
+    Object.defineProperty(options, key, { get() { reads.push(key); throw new Error('Unexpected profile read: ' + key); } });
+  }
+  await assert.rejects(runCapacity(options), { name: 'Error', message });
+  assert.deepEqual(reads, []);
+});
+
+test('runCapacity execution gate preserves invalid target errors and original no-target input validation', async () => {
+  for (const targetActors of [0, 100, 499, 501, -500, '500actors', '', null, Infinity, NaN]) {
+    await assert.rejects(runCapacity({ targetActors, realm: 'isolated', endpoint: 'ws://127.0.0.1:1/ws' }),
+      { name: 'Error', message: 'The explicit capacity target must be 500 actors' });
+  }
+  let endpointReads = 0;
+  await assert.rejects(runCapacity({ get endpoint() { endpointReads++; throw new Error('Unexpected endpoint read'); } }),
+    { name: 'Error', message: '--realm isolated is required' });
+  assert.equal(endpointReads, 0);
+  await assert.rejects(runCapacity({ realm: 'isolated', endpoint: 'ws://example.invalid/ws' }),
+    { name: 'Error', message: 'Remote gateways require WSS; plain WS is permitted only on loopback' });
+  await assert.rejects(runCapacity({ realm: 'isolated', endpoint: 'ws://127.0.0.1:1/ws' }),
+    { name: 'Error', message: '--accounts-file, --monitor and --output are required' });
+});
+
+
+test('runCapacity execution gate captures a changing target getter once and pins the policy declaration', async () => {
+  const blocked = 'The 500 online / 500 continuously fighting contract is not implemented; targetActors=500 execution is blocked, including the historical 50-fighter workload.';
+  let reads = 0;
+  const targetFirst500 = { get targetActors() { return [500, undefined][reads++]; },
+    get realm() { throw new Error('A declared 500 target must stop before realm validation'); } };
+  await assert.rejects(runCapacity(targetFirst500), { name: 'Error', message: blocked });
+  assert.equal(reads, 1, 'the gate validates the single captured declaration');
+
+  reads = 0;
+  const targetInitiallyAbsent = { realm: 'isolated', endpoint: 'ws://127.0.0.1:1/ws',
+    get targetActors() { return [undefined, 500][reads++]; } };
+  await assert.rejects(runCapacity(targetInitiallyAbsent),
+    { name: 'Error', message: '--accounts-file, --monitor and --output are required' });
+  assert.equal(reads, 1, 'an absent declaration cannot become a 500 policy through a later read');
+
+  reads = 0;
+  const targetInitiallyInvalid = { realm: 'isolated', endpoint: 'ws://127.0.0.1:1/ws',
+    get targetActors() { return [499, 500][reads++]; } };
+  await assert.rejects(runCapacity(targetInitiallyInvalid),
+    { name: 'Error', message: 'The explicit capacity target must be 500 actors' });
+  assert.equal(reads, 1, 'a later getter value cannot replace an invalid initial declaration');
+});

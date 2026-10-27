@@ -2143,8 +2143,13 @@ export async function activatePreparedCohort(cohort, context) {
 }
 
 export async function runCapacity(options) {
+  const declaredTarget = options.targetActors;
+  if (declaredTarget !== undefined && capacityActorLimit({ targetActors: declaredTarget }) === 500) {
+    throw new Error('The 500 online / 500 continuously fighting contract is not implemented; targetActors=500 execution is blocked, including the historical 50-fighter workload.');
+  }
   if (options.realm !== 'isolated') throw new Error('--realm isolated is required');
-  const endpoint = validateEndpoint(options.endpoint), policy = capacityPolicy(options), attackResults = attackResultsMode(options.attackResults);
+  const endpoint = validateEndpoint(options.endpoint), policy = capacityPolicy(Object.create(options,
+    { targetActors: { value: declaredTarget } })), attackResults = attackResultsMode(options.attackResults);
   if (!options.accountsFile || !options.monitor || !options.output) throw new Error('--accounts-file, --monitor and --output are required');
   const output = outsideRepository(options.output); await fs.mkdir(output, { recursive: true });
   const runId = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`, writer = new BoundedEvidence(path.join(output, `${runId}.samples.jsonl`));

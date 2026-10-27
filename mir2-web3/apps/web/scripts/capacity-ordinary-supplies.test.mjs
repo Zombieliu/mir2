@@ -163,7 +163,7 @@ function fixture(config = {}) {
   let preparation = true;
   const supply = createOrdinarySupplies(client, { preparationProfile: 'ordinary-economic-v1', targetHp: config.target ?? 12, route,
     stagingPoint: config.stagingPoint ?? { x: 290, y: 607 }, resolveStagingPoint: config.resolveStagingPoint, ordinaryProtection: config.ordinaryProtection, isPreparation: () => preparation, now: () => clock,
-    sleep: async ms => { config.onSleep?.({client,actor,ms,clock,packet}); clock += ms; }, maxHunts: config.maxHunts ?? 8, timeoutMs: config.timeoutMs ?? 600_000,
+    sleep: async ms => { config.onSleep?.({client,actor,ms,clock,packet}); clock += ms; }, maxHunts: config.maxHunts ?? 8, maxEmptySearchRefreshes:config.maxEmptySearchRefreshes ?? 20, timeoutMs: config.timeoutMs ?? 600_000,
     maxCommands: config.maxCommands ?? 2048,
     navigate: async (facade, target, range, stop, navOptions) => {
       config.inspectNavigation?.({target,range,navOptions});
@@ -2100,4 +2100,79 @@ test('ordinary known-safe priority selects farther eligible Deer without chargin
   assert.equal(result.funding.hunts,2);assert.equal(result.purchased,12);assert.equal(result.after.hpStock,12);
   assert.equal(f.client.sent.some(c=>c.type==='attackV2'&&c.objectId<27),false);
   assert.ok(f.client.snapshot.entities.filter(e=>e.name==='Deer'&&!e.dead).length>=7,'nonpreferred candidates were not removed or declared attempted');
+});
+
+function ordinaryDiscoveryFixture(extra={}) {
+  let f,introduced=false,rawSupplied=false;const real=actualNavigatorFor(()=>f);
+  f=fixture({deer:0,v2:true,target:6,maxHunts:1,maxEmptySearchRefreshes:1,applyPackets:true,
+    maxCommands:extra.maxCommands??2048,
+    onSnapshot:context=>{
+      if(introduced&&!rawSupplied&&context.client.sent.at(-1)?.type==='clientVersion'){
+        rawSupplied=true;Object.assign(context.client.snapshot.entities.find(e=>e.objectId===20),{hp:1,dead:false});
+        extra.fresh?.(context);
+      }
+    },
+    onPace:context=>{if(introduced)extra.pace?.(context,f);},
+    navigate:async context=>{
+      if(context.range===8&&context.target.objectId==null&&!introduced){
+        introduced=true;context.packet('ObjectMonster',{objectId:20,name:'Deer',location:{x:291,y:607},ai:2,masterObjectId:0,dead:false});
+      }
+      return real(context);
+    }});
+  return f;
+}
+test('ordinary actual ObjectMonster discovery ends real NAV then one paced raw proves HP before hunting',async()=>{
+  const f=ordinaryDiscoveryFixture();const result=await f.supply.prepare();
+  assert.equal(result.status,'ready');assert.equal(result.funding.hunts,1);assert.equal(result.funding.huntAttempts,1);
+  assert.equal(result.after.hpStock,6);assert.equal(result.fundingDiscoveries.length,1);
+  const proof=result.fundingDiscoveries[0];assert.equal(proof.objectId,20);assert.equal(proof.status,'refreshed');
+  assert.equal(proof.discoveryOnly,true);assert.equal(proof.liveQualification,false);assert.equal(proof.refresh,1);assert.equal(proof.cueRefresh,1);
+  assert.ok(proof.freshSnapshotSequence>proof.beforeRefreshSequence);assert.ok(proof.triggerSequence<=proof.beforeRefreshSequence);
+  const wire=f.client.events.find(e=>e.sequence===proof.triggerSequence);assert.equal(wire.packet,'ObjectMonster');assert.equal(wire.payload.hp,undefined);
+  assert.equal(f.client.events.find(e=>e.sequence===proof.freshSnapshotSequence).type,'worldSnapshot');
+  const attack=f.client.sent.find(c=>c.type==='attackV2');assert.ok(attack.at>=proof.monotonicMs);
+  proof.searchPoint.x=0;assert.notEqual(f.supply.status().fundingDiscoveries[0].searchPoint.x,0);
+});
+test('fresh owned unsafe invalid dead and still unknown candidates never gain attack permission from a discovery cue',async t=>{
+  for(const fault of ['owned','unsafe','invalid','dead','unknown'])await t.test(fault,async()=>{
+    const f=ordinaryDiscoveryFixture({fresh:({client})=>{
+      const e=client.snapshot.entities.find(e=>e.objectId===20);
+      if(fault==='owned')e.ownerName='another-player';if(fault==='invalid')e.hp='1';
+      if(fault==='dead')Object.assign(e,{hp:0,dead:true});if(fault==='unknown')e.hp=null;
+      if(fault==='unsafe')client.snapshot.entities.push(hostile(71,291,608));
+    }});
+    await assert.rejects(f.supply.prepare());const result=f.supply.status();
+    assert.equal(result.fundingDiscoveries.length,1);assert.equal(result.fundingDiscoveries[0].status,'refreshed');
+    assert.equal(result.actualStagingReached,false);assert.equal(f.client.sent.some(c=>['attackV2','harvest','buyItem'].includes(c.type)),false);
+    if(['owned','unsafe','invalid'].includes(fault))assert.equal(result.fundingTargetRejectionCount,1,'original selected attempt and strict guard still apply');
+  });
+});
+test('discovery raw refresh keeps exact external failures and original ownership wall and command guards terminal',async t=>{
+  for(const fault of ['external','hp','map','name','closed','wall','commands'])await t.test(fault,async()=>{
+    const original=new Error('private external refresh failure');let armed=true;
+    const f=ordinaryDiscoveryFixture({maxCommands:fault==='commands'?4:2048,pace:({client,actor},fixture)=>{
+      if(!armed)return;armed=false;
+      if(fault==='external')client.failure=original;
+      if(fault==='hp'){actor.hp=10;client.snapshot.playerHp=10;}if(fault==='map')client.snapshot.mapFileName='2';
+      if(fault==='name')actor.name='another-owner';if(fault==='closed')client.closed=true;if(fault==='wall')fixture.advance(600001);
+    }});
+    await assert.rejects(f.supply.prepare(),error=>fault==='external'?error===original:/ordinary supplies:/.test(error.message));
+    const result=f.supply.status();assert.equal(result.fundingDiscoveries.length,1);assert.equal(result.fundingDiscoveries[0].status,'terminal');
+    assert.equal(result.fundingDiscoveries[0].freshSnapshotSequence,undefined);assert.equal(result.fundingDiscoveries[0].reason,'ordinary-refresh-failed');
+    assert.equal(result.actualStagingReached,false);assert.equal(f.client.sent.some(c=>['walk','run','attackV2','harvest','buyItem'].includes(c.type)),false);
+  });
+});
+
+test('a discovery cue cannot bypass pending navigation queue drain or turn its error into a raw refresh',async()=>{
+  const original=new Error('queued navigation transport failure');let armed=false;
+  const f=fixture({deer:0,v2:true,target:6,applyPackets:true,
+    onPace:({client})=>{if(armed)client.failure=original;},
+    navigate:async({facade,target,range,stop,packet})=>{
+      if(range!==8||target.objectId!=null)return;
+      packet('ObjectMonster',{objectId:20,name:'Deer',location:{x:291,y:607},ai:2,masterObjectId:0,dead:false});
+      assert.equal(stop(),true);facade.send({type:'turn',direction:'Right'});facade.send({type:'keepAlive'});armed=true;
+    }});
+  await assert.rejects(f.supply.prepare(),error=>error===original);
+  assert.equal(f.supply.status().fundingDiscoveries.length,0);assert.equal(f.supply.status().actualStagingReached,false);
+  assert.equal(f.client.sent.some(c=>['turn','keepAlive','walk','run','attackV2'].includes(c.type)),false);
 });
