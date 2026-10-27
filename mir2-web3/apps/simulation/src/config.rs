@@ -5283,9 +5283,9 @@ impl SimulationConfig {
             .map_err(|_| "account store mutex poisoned".to_string())?;
         drop(store_wait);
         let _store_held = diagnostics.span(DiagnosticStage::StoreHeld);
-        let original_store = live_store.clone();
+        let original_store = &*live_store;
         crate::billing::validate_complete_store(&original_store)?;
-        let mut staged_store = original_store.clone();
+        let mut staged_store = AccountStore::clone(original_store);
         let result = transaction(&mut staged_store)?;
         if matches!(scope, AccountStoreMutationScope::FullRestore) {
             staged_store = staged_store.migrate_to_current_schema();
@@ -5423,11 +5423,17 @@ impl SimulationConfig {
         }
 
         crate::billing::validate_complete_store(&staged_store)?;
-        // Fail serialization before touching either repository.  The file
-        // backend repeats this encoding for its pretty snapshot, while this
-        // preflight also protects PostgreSQL mirror-first ordering.
-        serde_json::to_vec(&staged_store)
-            .map_err(|error| format!("failed to encode account-store transaction: {error}"))?;
+        // Retain preflight encoding for File and mirror-first ordering. A pure
+        // PostgreSQL source encodes its scoped mutations inside one SQL
+        // transaction, so a discarded complete-file encoding adds no protection.
+        let postgres_source_only = self.account_store_database_mode
+            == AccountStoreDatabaseMode::SourceOfTruth
+            && self.account_store_path.is_none()
+            && self.account_store_database_url.is_some();
+        if !postgres_source_only {
+            serde_json::to_vec(&staged_store)
+                .map_err(|error| format!("failed to encode account-store transaction: {error}"))?;
+        }
 
         #[cfg(any(test, feature = "test-support"))]
         if self.take_account_store_transaction_fault(AccountStoreTransactionFault::Persist) {
@@ -5528,7 +5534,7 @@ impl SimulationConfig {
                         )
                         .map_err(|error| self.freeze_account_store_writes(error))?
                     } else {
-                        (original_store.clone(), rollback_plan.clone())
+                        (AccountStore::clone(original_store), rollback_plan.clone())
                     };
                     if matches!(scope, AccountStoreMutationScope::FullRestore)
                         && !mutation_plan.conquests.is_empty()
@@ -5573,7 +5579,7 @@ impl SimulationConfig {
                                 *live_store=hero_restored;
                             } else if mutation_plan.clock.is_some(){
                                 let Some(clock)=compensated.clock else{return Err(self.freeze_account_store_writes("clock restore compensation omitted its durable receipt".into()));};
-                                let mut restored=original_store.clone();restored.guild_clock=Some(clock.record);restored.source_guild_clock_version=Some(clock.version);
+                                let mut restored=AccountStore::clone(original_store);restored.guild_clock=Some(clock.record);restored.source_guild_clock_version=Some(clock.version);
                                 if let Err(error)=self.save_file_account_store_with_diagnostics(path,&restored,Some(&diagnostics)){return Err(self.freeze_account_store_writes(format!("clock restore business rollback succeeded in PostgreSQL, but fenced File compensation failed: {error}")));}
                                 *live_store=restored;
                             }

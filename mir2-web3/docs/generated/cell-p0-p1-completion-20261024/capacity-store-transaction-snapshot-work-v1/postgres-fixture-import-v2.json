@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-27T21:44:47.284Z",
+  "backend": "PostgreSQL16.15 SourceOfTruth",
+  "newCluster": true,
+  "importedAndExactlyReadbackAccounts": 500,
+  "importExitCode": 0,
+  "importer": {
+    "file": "C:/mir2-build/cell-preproduction-p0-p1-20261024/target/release/examples/capacity_pvp_fixture_import.exe",
+    "bytes": 7460352,
+    "sha256": "075a473ddca78a5703332575d5152d4c2503e98c07c967bfb99636897cec6308"
+  },
+  "unchangedImporterSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\examples\\capacity_pvp_fixture_import.rs",
+    "bytes": 5814,
+    "sha256": "a7a998990850d242efd720125c989960960fecc78402bde7c489d8b4b964e528"
+  },
+  "fixture": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\fixture\\private\\accounts.json",
+    "bytes": 8644278,
+    "sha256": "8298ac1c40f7da3b907aff69fbe40fd177c7e9732595571503313a9cc3b614e7"
+  },
+  "importerReuse": "Same previously-built offline importer; repository API unchanged. Gateway performance candidate is separately built and validated.",
+  "previousImporterGuardChecks": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-postgres-v1\\import-validation-v1.json",
+    "bytes": 874,
+    "sha256": "89546097e8f903c8cfe67f8c610d5daa05bde9c49e64ecae2dbba1043a006f74"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}
