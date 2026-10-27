@@ -99,7 +99,8 @@ export function createOrdinarySupplies(client, options = {}) {
   const maxNavigationCommands = integer(options.maxNavigationCommands ?? 2048, 'maxNavigationCommands', 1, 4096);
   const maxHunts = integer(options.maxHunts ?? 8, 'maxHunts', 1, 8);
   const maxEmptySearchRefreshes = integer(options.maxEmptySearchRefreshes ?? 20, 'maxEmptySearchRefreshes', 1, 20);
-  const rows = [], proofs = [], commandRows = [], queue = [], fundingTargetRejections = [];
+  const rows = [], proofs = [], commandRows = [], queue = [], fundingTargetRejections = [], fundingCapitalProofs = [];
+  let capitalQuoteRequested = false, fundingCapitalProofCount = 0;
   let fundingTargetRejectionCount = 0, pathHazardCount = 0;
   const pathHazards = [], pathReplans = [], movementOrigins = new WeakMap(), unsentPathErrors = new WeakSet();
   let navigationPolicy = null;
@@ -378,7 +379,16 @@ export function createOrdinarySupplies(client, options = {}) {
       const value = scalar(message.payload);
       if (value.ownerId !== identity || value.ownerName !== identityName || value.map !== '0') observationFault = 'ordinary supplies: received owner/map changed';
       if (!observationFault) observePlannerTrust(message.payload, receipt);
-      rows.push({ sequence: receipt.sequence, monotonicMs: receipt.monotonicMs, ...value });
+      // Capture both wallet and item quotes from this single raw receipt,
+      // never from a later mutable client.snapshot. Invalid quotes are terminal
+      // for the opt-in capital check, not silently treated as zero capital.
+      let capitalQuote, capitalQuoteError;
+      if (capitalQuoteRequested) {
+        try { capitalQuote = fundingCapitalQuote(message.payload, value.hpStock); }
+        catch (error) { capitalQuoteError = error; }
+      }
+      rows.push({ sequence: receipt.sequence, monotonicMs: receipt.monotonicMs, ...value,
+        ...(capitalQuoteRequested ? { capitalQuote, capitalQuoteError } : {}) });
       if (rows.length > 64) rows.shift();
     } catch { /* Incomplete/invalid observations cannot satisfy a proof. guard still checks live state. */ }
     finally { plannerDiagnosticSource='planner-read';plannerDiagnosticInput=null; }
@@ -751,7 +761,52 @@ export function createOrdinarySupplies(client, options = {}) {
     if (!row) throw new Error('ordinary supplies: missing exact HP goods row');
     const id = row.id ?? row.uniqueId ?? row.unique_id;
     if (!((typeof id === 'number' && Number.isSafeInteger(id) && id >= 0) || (typeof id === 'string' && /^(0|[1-9]\d*)$/.test(id) && BigInt(id) <= 18446744073709551615n))) throw new Error('ordinary supplies: invalid live shop row id');
-    return { id, price: integer(Number(row.price), 'live HP price', 1) };
+    return { id, price: integer(Number(row.price), 'live HP price', 1), quoteSequence: result.sequence, quoteMonotonicMs: result.monotonicMs };
+  }
+  function fundingCapitalQuote(snapshot, stock) {
+    if (!Array.isArray(snapshot.inventoryItems) || !Array.isArray(snapshot.beltItems)) throw new Error('ordinary supplies: incomplete capital inventory');
+    const ids = new Set(), items = [];
+    const gold = integer(snapshot.gold, 'capital gold');
+    let capital = gold, venisonItemCount = 0;
+    for (const [entries, inventory] of [[snapshot.inventoryItems, true], [snapshot.beltItems, false]]) {
+      for (const entry of entries) {
+        if (!entry || typeof entry !== 'object' || Array.isArray(entry)) throw new Error('ordinary supplies: invalid capital inventory record');
+        const uniqueId = integer(entry.uniqueId, 'capital uniqueId');
+        if (ids.has(uniqueId)) throw new Error('ordinary supplies: duplicate capital inventory UID');
+        ids.add(uniqueId);
+        if (inventory && entry.name === 'Venison') {
+          integer(uniqueId, 'capital Venison uniqueId', 1);
+          const count = integer(entry.quantity, 'capital Venison quantity', 1);
+          const sellValue = integer(entry.sellValue, 'capital Venison sellValue', 1);
+          const value = integer(count * sellValue, 'capital Venison value', 1);
+          capital = integer(capital + value, 'capital total');
+          venisonItemCount++;
+          if (items.length < 128) items.push({ uniqueId, quantity: count, sellValue, value });
+        }
+      }
+    }
+    return { gold, hpStock: stock, items, venisonItemCount, itemsTruncated: venisonItemCount > items.length, capital };
+  }
+  async function hasRequiredFundingBudget(initialGoods) {
+    capitalQuoteRequested = true;
+    try {
+      const row = await refresh(); guard();
+      if (row.capitalQuoteError) throw row.capitalQuoteError;
+      const quote = row.capitalQuote;
+      if (!quote) throw new Error('ordinary supplies: fresh capital quote missing');
+      const initialHpPrice = initialGoods.price;
+      const initialHpQuote = { sequence: integer(initialGoods.quoteSequence, 'initial HP quote sequence'),
+        monotonicMs: initialGoods.quoteMonotonicMs, price: initialHpPrice };
+      const quoteAgeMs = row.monotonicMs - initialHpQuote.monotonicMs;
+      if (!Number.isFinite(initialHpQuote.monotonicMs) || !Number.isFinite(quoteAgeMs) || quoteAgeMs < 0) throw new Error('ordinary supplies: invalid initial HP quote receipt');
+      const requiredGold = integer(Math.max(0, targetHp - quote.hpStock) * initialHpPrice, 'capital required gold');
+      const satisfied = quote.capital >= requiredGold;
+      fundingCapitalProofCount++;
+      if (fundingCapitalProofs.length === 32) fundingCapitalProofs.shift();
+      fundingCapitalProofs.push({ sequence: row.sequence, monotonicMs: row.monotonicMs, ...quote,
+        initialHpPrice, initialHpQuote, quoteAgeMs, requiredGold, satisfied, planningOnly: true, preparationOnly: true, measurementCredit: false });
+      return satisfied;
+    } finally { capitalQuoteRequested = false; }
   }
   async function sellUntil(requiredGold) {
     if (guard().gold >= requiredGold || !venison(client.snapshot).length) return;
@@ -786,6 +841,8 @@ export function createOrdinarySupplies(client, options = {}) {
       qualificationEvents:qualificationEvents.map(row=>({...row,input:row.input?{...row.input}:null,observed:row.observed?{...row.observed}:null})),
       navigationNoPath,
       fundingTargetRejections: fundingTargetRejections.map(row => ({ ...row })), fundingTargetRejectionCount,
+      fundingCapitalProofs: fundingCapitalProofs.map(row => ({ ...row, items: row.items.map(item => ({ ...item })), initialHpQuote: { ...row.initialHpQuote } })),
+      fundingCapitalProofCount, fundingCapitalProofsTruncated: fundingCapitalProofCount > fundingCapitalProofs.length,
       fundingTargetRejectionsTruncated: fundingTargetRejectionCount > fundingTargetRejections.length,
       pathHazards: pathHazards.map(row => ({ ...row, from:{...row.from}, physicalCells:row.physicalCells.map(cell=>({...cell})), blocker:row.blocker?{...row.blocker}:null })),
       pathHazardCount, pathHazardsTruncated: pathHazardCount > pathHazards.length,
@@ -836,7 +893,9 @@ export function createOrdinarySupplies(client, options = {}) {
           // 200 is only a bounded hunt-count estimate. Actual sale values and
           // live shop prices decide readiness; insufficient proceeds fail.
           const wanted = venisonStock(client.snapshot) + Math.max(1, Math.ceil((requiredGold - guard().gold) / 200));
+          const initialGoods = { ...goods };
           funding = await collectSafeFundingVenison(facade, { route: options.route, requiredCount: wanted, maxHunts, maxEmptySearchRefreshes,
+            hasRequiredBudget: () => hasRequiredFundingBudget(initialGoods),
             travel: async map => { if (map !== '0') throw new Error('ordinary supplies: map travel forbidden'); guard(); },
             navigate, clearMonster: clearFundingMonster, sleep: pause, refreshWhileWaiting: refresh, sustain: async () => { await drain(); guard(); } });
           await refresh(); await sellUntil(requiredGold);

@@ -202,3 +202,15 @@ d9ec9d20的[本次fresh选定门禁](bank-prepare-v9/node-v9/root-focused-receip
 服务端普通AI0新索敌使用横向8格、纵向6格；准备工具原八格方形在W9实际七点布局上封死返村路径。候选仅对有效原始身份或严格wire证书及未过期位置使用8×6；未知、冲突、失效及更大调用半径保留原方形。规划、移动前及实际发送共用边界，已在范围内时同时禁止加权距离和Chebyshev距离减小，占格仍拒绝。保留生命、药品、命令、时间及三次重规划预算；周期诊断不增加重试。
 
 这只是新索敌边界，不证明脱战或免疫；继承/强制目标可超出该范围，既有伤害和负面状态保护继续生效。W9静态布局及AOI往返测试不能代替下一轮真实百人准备，也不改变W9失败记录或容量验收状态。
+
+## 第十轮：返村通过，普通筹资仍失败
+
+238b647e1的[新鲜677项选定Node门禁](bank-prepare-v10/node-v10/root-focused-receipt-v1.json)在42个named输入上通过；[完整14依赖相等复用证明](bank-prepare-v10/full16-reuse/ordinary-full16-reuse-proof-v10.json)复用d9ec实际V6 full16，未冒称新跑功能全生命周期。第5人真实35命令/32移动从330,605抵达289,617，0hazard/0replan；第6/7人各普通猎3肉、卖2肉、买11药达到库存12并正常保存。
+
+[原W10报告](bank-prepare-v10/1793059295383-3bd423ad.preparation-report.json)为7prepared/100、零测量；第8人45命令/11移动、2次成功狩猎及6次未发攻击的危险目标选择拒绝，耗完原8次预算后保持2/3鹿肉失败。固定200金币/块估计迫使前两人多猎第三块：他们实际卖两块收入515/495、买药花440；这不能替第8人证明两块的实际价格，失败after/readiness仍为null。
+
+普通logout ACK、整体cleanup与[Root独立OS](bank-prepare-v10/root-independent-cleanup-v1.json)通过，PID72776消失、端口释放。44份公共原件2,892,398字节见[说明](bank-prepare-v10/README.md)与[清单](bank-prepare-v10/copied-evidence-manifest.json)。P0未完成、P2未启动，没有新25/50/100/500或两小时容量通过。
+
+停机后补充的[冷存档白名单投影](bank-prepare-v10/cold-economy/cold-economy-projection-v1.json)及[Root独立核对](bank-prepare-v10/cold-economy/root-cold-economy-projection-check-v1.json)表明：第8人保存的两块Venison按实际Rust f32耐久计价分别值258/263，共521，超过原40金币药价的440缺口。这是冷存档派生，原失败没有fresh报价或就绪资格；原44件清单保持不变，另见[补充清单](bank-prepare-v10/cold-economy-supplement-manifest-v1.json)。
+
+后续准备修正仅显式启用真实资本目标：同一次fresh raw内核对金币、HP库存和逐UID鹿肉数量/售价，记录原Ruben报价及时间；重复UID、非法值、溢出及身份/生命变化均失败。资本达到所缺药品的报价后停止继续狩猎，200金币/块仅作数量估计；通用采猎默认数量模式保留，危险选择仍消耗原8次尝试，不重置600秒、2048命令或其他预算。资金估值仅用于规划，实际逐UID售卖回执、fresh金币、返店重取价格、购药及12药库存/集结保存证明仍决定准备成功。

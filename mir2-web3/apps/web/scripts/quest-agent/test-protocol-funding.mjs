@@ -737,3 +737,58 @@ test('safe funding reuses already-held Venison without repeating the hunt', asyn
     method: 'DeerVenison', collected: 0, hunts: 0, beforeCount: 2, afterCount: 2,
   });
 });
+
+function capitalFundingFixture({ count = 8, value = 250, goal = 480, requiredCount = 3, callback } = {}) {
+  let corpse;
+  const owner = { sequence: 0, events: [], snapshot: { mapFileName: '0', playerObjectId: 1,
+    inventoryItems: [], beltItems: [], groundDrops: [], entities: [
+      {objectId:1,kind:'selfPlayer',x:5,y:5,hp:60,dead:false},
+      ...Array.from({length:count},(_,i)=>({objectId:20+i,kind:'monster',name:'Deer',x:6,y:5,hp:25,dead:false}))] },
+    send(command) {
+      this.sequence++;
+      if(command.type==='harvest') { this.snapshot.groundDrops.push({objectId:100+corpse,name:'Venison',x:6,y:5,loot:{kind:'inventoryItem',name:'Venison'}});
+        this.events.push({sequence:this.sequence,direction:'received',packet:'ObjectHarvested'}); }
+      if(command.type==='pickUp') { this.snapshot.groundDrops=[]; this.snapshot.inventoryItems.push({name:'Venison',quantity:1,sellValue:value}); }
+    },
+    async wait(predicate,label) { const result=predicate();if(!result)throw new Error(`fixture did not satisfy ${label}`);return result; }
+  };
+  let attacks=0,calls=0;
+  const options={route:{quests:[{objectives:{item:[],kill:[{monsterName:'Deer',spawnCandidates:[{mapFileName:'0',position:{x:6,y:5},count}]}]}}]},
+    travel:async()=>{},navigate:async()=>{},sleep:async()=>{},requiredCount,maxHunts:8,
+    clearMonster:async(_owner,target)=>{attacks++;corpse=target.objectId;Object.assign(target,{dead:true,hp:0});owner.events.push({sequence:++owner.sequence,direction:'received',packet:'ObjectDied',payload:{objectId:corpse}});},
+    hasRequiredBudget:async()=>{calls++;return callback?callback(owner,calls):owner.snapshot.inventoryItems.reduce((sum,i)=>sum+i.sellValue*i.quantity,0)>=goal;}};
+  return {owner,options,run:()=>collectSafeFundingVenison(owner,options),attacks:()=>attacks,calls:()=>calls};
+}
+test('opt-in actual capital stops after two valuable meats without claiming the estimated third',async()=>{
+  const f=capitalFundingFixture();const result=await f.run();
+  assert.equal(f.attacks(),2);assert.equal(result.collected,2);assert.equal(result.estimatedRequiredCount,3);
+  assert.equal(result.huntAttempts,2);assert.equal(result.completionMode,'actual-capital');assert.equal(result.budgetSatisfied,true);
+});
+test('capital goal ignores insufficient count but never exceeds eight charged attempts',async()=>{
+  const f=capitalFundingFixture({value:1});await assert.rejects(f.run(),/capital insufficient.*8 hunts and 8 attempts/);
+  assert.equal(f.attacks(),8);assert.equal(f.calls(),9);
+  const eighth=capitalFundingFixture({value:60});assert.equal((await eighth.run()).huntAttempts,8);
+});
+test('capital callback requires literal booleans and preserves fatal callback errors',async()=>{
+  for(const result of [1,0,null,undefined,'true',{}]) {
+    const f=capitalFundingFixture({callback:()=>result});await assert.rejects(f.run(),/literal boolean/);assert.equal(f.attacks(),0);
+  }
+  const original=new Error('fresh owner changed');const f=capitalFundingFixture({callback:()=>{throw original;}});
+  await assert.rejects(f.run(),error=>error===original);assert.equal(f.attacks(),0);
+});
+test('capital selection losses still consume the unchanged eight-attempt cap',async()=>{
+  const f=capitalFundingFixture();let rejected=0;
+  f.options.clearMonster=async()=>{rejected++;throw new Error('target 20 left the authoritative snapshot before attack');};
+  await assert.rejects(f.run(),/0 hunts and 8 attempts/);assert.equal(rejected,8);assert.equal(f.calls(),9);
+});
+
+test('default count rechecks actual inventory after the asynchronous completion boundary',async()=>{
+  const f=capitalFundingFixture({requiredCount:2});delete f.options.hasRequiredBudget;
+  const actualInventory=[{name:'Venison',quantity:2}];let reads=0,removed=false;
+  Object.defineProperty(f.owner.snapshot,'inventoryItems',{get(){
+    if(++reads===2)queueMicrotask(()=>{actualInventory.splice(0);removed=true;});
+    return actualInventory;
+  }});
+  await assert.rejects(f.run(),/holds 0\/2 Venison after 0 hunts and 0 attempts/);
+  assert.equal(removed,true);assert.equal(f.attacks(),0);assert.equal(f.calls(),0);
+});

@@ -677,11 +677,11 @@ test('held Venison alone funds purchases without selling any starter gear', asyn
 test('zero-wallet preparation uses actual Deer combat, harvest, same-tile pickup and ordinary sale', async () => {
   const f = fixture({ deer: 3, v2: true });
   const result = await f.supply.prepare();
-  assert.equal(result.status, 'ready'); assert.equal(result.funding.collected, 3); assert.equal(result.funding.hunts, 3);
+  assert.equal(result.status, 'ready'); assert.equal(result.funding.collected, 2); assert.equal(result.funding.hunts, 2);
   for (const type of ['attackV2', 'harvest', 'pickUp', 'sellItem', 'buyItem']) assert.ok(f.client.sent.some(command => command.type === type), type);
   assert.equal(f.client.sent.some(c => ['attack', 'townRevive', 'teleport', 'qa.giveItem'].includes(c.type)), false);
   assert.equal(result.after.hpStock, 12); assert.equal(result.after.gold, 20);
-  assert.equal(result.after.venison, 1, 'sell only the meat needed for this purchase');
+  assert.equal(result.after.venison, 0, 'capital completion does not hunt an unneeded third meat');
 });
 
 test('stale, late, ACK-only and non-exact debit cannot prove a purchase', async t => {
@@ -854,14 +854,14 @@ test('real five-pass Deer skinning retries typed deadlines and the sixth transfe
   for (const directHarvest of [true, false]) await t.test(directHarvest ? 'direct inventory transfer' : 'same-tile public pickup', async () => {
     const f = fixture({ deer: 3, v2: true, multiPassHarvest: true, directHarvest });
     const result = await f.supply.prepare();
-    assert.equal(result.status, 'ready'); assert.equal(result.funding.hunts, 3); assert.equal(result.funding.collected, 3);
-    assert.equal(f.client.sent.filter(command => command.type === 'harvest').length, 18);
-    assert.equal(f.client.events.filter(event => event.packet === 'ObjectHarvest').length, 18);
-    assert.equal(f.client.events.filter(event => event.packet === 'ObjectHarvested').length, 3);
-    assert.equal(f.client.sent.filter(command => command.type === 'pickUp').length, directHarvest ? 0 : 3);
-    assert.equal(result.after.hpStock, 12); assert.equal(result.after.gold, 20); assert.equal(result.after.venison, 1);
+    assert.equal(result.status, 'ready'); assert.equal(result.funding.hunts, 2); assert.equal(result.funding.collected, 2);
+    assert.equal(f.client.sent.filter(command => command.type === 'harvest').length, 12);
+    assert.equal(f.client.events.filter(event => event.packet === 'ObjectHarvest').length, 12);
+    assert.equal(f.client.events.filter(event => event.packet === 'ObjectHarvested').length, 2);
+    assert.equal(f.client.sent.filter(command => command.type === 'pickUp').length, directHarvest ? 0 : 2);
+    assert.equal(result.after.hpStock, 12); assert.equal(result.after.gold, 20); assert.equal(result.after.venison, 0);
     assert.equal(result.soldVenison, 2); assert.equal(result.purchased, 12); assert.equal(result.proofs.length, 3);
-    assert.ok(result.elapsedMs >= 90_000 && result.elapsedMs < 600_000, 'virtual clock covers all fifteen six-second empty harvest waits');
+    assert.ok(result.elapsedMs >= 60_000 && result.elapsedMs < 600_000, 'virtual clock covers both genuine six-pass harvests');
   });
 });
 
@@ -948,7 +948,7 @@ test('late point choice cannot reset the global wall or bypass owner/map and fin
 // The public funding helper may reselect only after an exact, bounded target loss.
 test('a queued Deer lost during ordinary pacing is not attacked and consumes the original hunt budget', async t => {
   for (const loss of ['missing', 'dead', 'zero-hp', 'unknown-hp', 'renamed']) await t.test(loss, async () => {
-    const f = fixture({ deer: 4, v2: true, targetLossAtPace: loss });
+    const f = fixture({ deer: 4, v2: true, target:16, targetLossAtPace: loss });
     const result = await f.supply.prepare();
     assert.equal(result.status, 'ready');
     assert.equal(result.funding.collected, 3);
@@ -961,14 +961,14 @@ test('a queued Deer lost during ordinary pacing is not attacked and consumes the
     assert.equal(result.fundingTargetRejections[0].map, '0');
     assert.equal(result.measurementCredit, false);
   });
-  const bounded = fixture({ deer: 4, v2: true, targetLossAtPace: 'dead', maxHunts: 3 });
+  const bounded = fixture({ deer: 4, v2: true, target:16, targetLossAtPace: 'dead', maxHunts: 3 });
   await assert.rejects(bounded.supply.prepare(), /after \d+ hunts and 3 attempts/);
   assert.equal(bounded.client.sent.filter(command => command.type === 'attackV2').length, 2);
   assert.equal(bounded.client.sent.some(command => command.type === 'buyItem'), false);
 });
 
 test('a nearby non-Deer threat excludes the dangerous Deer before a bounded safe alternative hunt', async () => {
-  const f = fixture({ deer: 4, v2: true, nonDeerBlocker: true, distantAlternatives: true, stagingPoint:{x:310,y:607} });
+  const f = fixture({ deer: 4, v2: true, target:16, nonDeerBlocker: true, distantAlternatives: true, stagingPoint:{x:310,y:607} });
   const result = await f.supply.prepare();
   assert.equal(result.status, 'ready'); assert.equal(result.funding.collected, 3);
   assert.equal(f.client.sent.some(command => command.objectId === 99 && ['attack', 'attackV2'].includes(command.type)), false);
@@ -1130,7 +1130,7 @@ test('an owner transform changed during movement pacing cannot retarget an alrea
 test('fresh danger during a real funding approach uses the existing finite target-loss path',async()=>{
   let f,armed=false,changed=false;
   const navigate=actualNavigatorFor(()=>f);
-  f=fixture({deer:4,v2:true,distantAlternatives:true,stagingPoint:{x:310,y:607},
+  f=fixture({deer:4,v2:true,target:16,distantAlternatives:true,stagingPoint:{x:310,y:607},
     onPace:({client,snapshot})=>{if(armed&&!changed){changed=true;client.snapshot.entities.push(hostile(71,290,606));snapshot();}},
     navigate:async context=>{if(context.target.objectId===20)armed=true;return navigate(context);}});
   assert.equal((await f.supply.prepare()).status,'ready');
@@ -1250,13 +1250,13 @@ test('real ordinary navigation round-trips from village to Deer funding and back
   const threats=[hostile(71,287,616,{name:'Scarecrow'}),hostile(72,293,614,{name:'Scarecrow'}),hostile(73,286,623,{name:'Scarecrow'}),
     hostile(74,330,594,{name:'UnclassifiedThreat',ai:undefined})];
   let f;
-  f=fixture({deer:3,v2:true,deerPositions:[{x:310,y:594},{x:312,y:594},{x:314,y:594}],ownerPosition:{x:288,y:615},stagingPoint:{x:288,y:615},
+  f=fixture({deer:3,v2:true,target:16,deerPositions:[{x:310,y:594},{x:312,y:594},{x:314,y:594}],ownerPosition:{x:288,y:615},stagingPoint:{x:288,y:615},
     hostiles:threats,ordinaryProtection:protection,navigate:actualNavigatorFor(()=>f),
     onMove:({client,actor})=>{client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;}});
   f.client.snapshot.inSafeZone=true;
   const result=await f.supply.prepare();
   assert.equal(result.status,'ready');assert.equal(result.funding.hunts,3,JSON.stringify(result.funding));assert.equal(result.funding.collected,3);
-  assert.equal(result.purchased,12);assert.equal(result.soldVenison,2);assert.equal(result.goldEarned,500);assert.equal(result.after.venison,1);assert.equal(result.after.hpStock,12);
+  assert.equal(result.purchased,16);assert.equal(result.soldVenison,3);assert.equal(result.goldEarned,750);assert.equal(result.after.venison,0);assert.equal(result.after.hpStock,16);
   assert.deepEqual({x:result.after.x,y:result.after.y},{x:288,y:615});
   assert.equal(f.client.sent.filter(c=>c.type==='attackV2').length,3);
   assert.ok(f.client.sent.some(c=>c.type==='interact'&&c.objectId===6));
@@ -1887,4 +1887,99 @@ test('throwing error message getters and conversions cannot replace the original
     assert.equal(result.failure,'ordinary supplies: underlying ordinary operation failed');
     assert.equal(result.commands,1);assert.equal(result.movementCommands,0);assert.equal(result.pathReplanCount,0);
   });
+});
+
+test('ordinary capital quote proves two actual sale prices instead of hunting the estimated third',async()=>{
+  const f=fixture({deer:3,v2:true,items:[item(658,1,2)]});
+  const result=await f.supply.prepare();
+  assert.equal(result.funding.collected,2);assert.equal(result.funding.estimatedRequiredCount,3);
+  assert.equal(result.funding.huntAttempts,2);assert.equal(result.soldVenison,2);assert.equal(result.purchased,11);
+  assert.equal(result.after.hpStock,12);assert.equal(result.actualStagingReached,true);
+  const proof=result.fundingCapitalProofs.at(-1);
+  assert.equal(proof.capital,500);assert.equal(proof.requiredGold,440);assert.equal(proof.initialHpPrice,40);
+  assert.equal(proof.initialHpQuote.price,40);assert.ok(proof.initialHpQuote.sequence<proof.sequence);
+  assert.equal(proof.quoteAgeMs,proof.monotonicMs-proof.initialHpQuote.monotonicMs);assert.ok(proof.quoteAgeMs>=0);
+  const quoteEvent=f.client.events.find(e=>e.sequence===proof.initialHpQuote.sequence);
+  assert.equal(quoteEvent.packet,'NPCGoods');assert.equal(quoteEvent.monotonicMs,proof.initialHpQuote.monotonicMs);
+  assert.equal(proof.gold,0);assert.equal(proof.items.length,2);assert.equal(proof.planningOnly,true);assert.equal(proof.measurementCredit,false);
+  proof.initialHpQuote.price=1;assert.equal(f.supply.status().fundingCapitalProofs.at(-1).initialHpQuote.price,40);
+  proof.items[0].sellValue=1;assert.equal(f.supply.status().fundingCapitalProofs.at(-1).items[0].sellValue,250);
+});
+test('capital uses atomic fresh raw wallet and quotes even if live snapshot changes after receipt',async()=>{
+  let versions=0;
+  const f=fixture({deer:3,v2:true,onSnapshot:({client})=>{
+    if(client.sent.at(-1)?.type==='clientVersion')versions++;
+  }});
+  const originalWait=f.client.wait;
+  f.client.wait=async function(predicate,label,timeout) {
+    const row=await originalWait.call(this,predicate,label,timeout);
+    if(label.includes('fresh')&&row?.capitalQuote&&row.capitalQuote.items.length===2) this.snapshot.gold=1;
+    return row;
+  };
+  const result=await f.supply.prepare();const proof=result.fundingCapitalProofs.at(-1);
+  assert.equal(proof.gold,0);assert.equal(proof.capital,500);assert.ok(versions>=3);
+});
+test('ordinary capital quote rejects malformed, missing, duplicate and overflowing live values',async t=>{
+  const corruptions={
+    missing:i=>{delete i.sellValue;},zero:i=>{i.sellValue=0;},negative:i=>{i.sellValue=-1;},nan:i=>{i.sellValue=NaN;},
+    infinite:i=>{i.sellValue=Infinity;},string:i=>{i.sellValue='250';},
+    overflow:i=>{i.sellValue=Number.MAX_SAFE_INTEGER;i.quantity=2;},
+    duplicate:(i,client)=>{client.snapshot.inventoryItems.push({...item(658,1,i.uniqueId),slot:10});},
+    duplicateOther:(i,client)=>{client.snapshot.inventoryItems.push({...i,name:'Wood',slot:10});},
+    malformed:(i,client)=>{client.snapshot.inventoryItems.push(null);}
+  };
+  for(const [name,corrupt] of Object.entries(corruptions))await t.test(name,async()=>{
+    let changed=false;
+    const f=fixture({deer:3,v2:true,onSnapshot:({client})=>{
+      if(!changed&&client.sent.at(-1)?.type==='clientVersion'){
+        const i=client.snapshot.inventoryItems.find(i=>i?.name==='Venison');
+        if(i){changed=true;corrupt(i,client);}
+      }
+    }});
+    await assert.rejects(f.supply.prepare());assert.equal(f.supply.status().status,'failed');
+    assert.equal(f.client.sent.some(c=>c.type==='buyItem'),false);assert.equal(f.supply.status().actualStagingReached,false);
+  });
+});
+test('capital refresh health and identity changes are terminal without spending another hunt',async t=>{
+  for(const fault of ['health','name','map'])await t.test(fault,async()=>{
+    let changed=false;
+    const f=fixture({deer:3,v2:true,onSnapshot:({client,actor})=>{
+      if(!changed&&client.sent.at(-1)?.type==='clientVersion'&&client.snapshot.inventoryItems.some(i=>i.name==='Venison')){
+        changed=true;if(fault==='health'){actor.hp=10;client.snapshot.playerHp=10;}
+        if(fault==='name')actor.name='other';if(fault==='map')client.snapshot.mapFileName='2';
+      }
+    }});
+    await assert.rejects(f.supply.prepare());assert.equal(f.client.sent.filter(c=>c.type==='attackV2').length,1);
+    assert.equal(f.client.sent.some(c=>c.type==='buyItem'),false);
+  });
+});
+
+test('ordinary low-value quotes continue after the estimate but stop at eight attempts',async()=>{
+  const f=fixture({deer:8,v2:true,onSnapshot:({client})=>{
+    for(const i of client.snapshot.inventoryItems)if(i.name==='Venison')i.sellValue=1;
+  }});
+  await assert.rejects(f.supply.prepare(),/capital insufficient.*8 hunts and 8 attempts/);
+  assert.equal(f.client.sent.filter(c=>c.type==='attackV2').length,8);
+  assert.equal(f.supply.status().fundingCapitalProofs.at(-1).capital,8);
+  assert.equal(f.client.sent.some(c=>c.type==='buyItem'),false);
+});
+test('capital is only planning credit and a higher returning Ruben price still fails',async()=>{
+  let returning=false;
+  const config={deer:3,v2:true,price:40,onSnapshot:({client})=>{
+    if(client.sent.some(c=>c.type==='sellItem'))returning=true;
+    if(returning)config.price=100;
+  }};
+  const f=fixture(config);await assert.rejects(f.supply.prepare(),/insufficient earned gold/);
+  assert.equal(f.supply.status().fundingCapitalProofs.at(-1).satisfied,true);
+  assert.equal(f.supply.status().purchased,0);assert.equal(f.supply.status().actualStagingReached,false);
+});
+
+test('non-Venison material never provides capital and belt UIDs still participate in uniqueness',async()=>{
+  const wood={...item(221,1,50),name:'WoodenSword',sellValue:Number.MAX_SAFE_INTEGER};
+  const f=fixture({deer:3,v2:true,items:[wood]});const result=await f.supply.prepare();
+  assert.equal(result.funding.hunts,2);assert.equal(result.fundingCapitalProofs.at(-1).capital,500);
+  assert.equal(f.client.snapshot.inventoryItems.some(i=>i.uniqueId===50),true);
+  const duplicate=fixture({deer:3,v2:true,items:[wood]});duplicate.client.snapshot.beltItems=[item(658,1,50)];
+  await assert.rejects(duplicate.supply.prepare(),/duplicate capital inventory UID/);
+  assert.equal(duplicate.client.sent.some(c=>c.type==='attackV2'),false);
 });

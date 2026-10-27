@@ -153,6 +153,7 @@ export async function collectSafeFundingVenison(owner, {
   sustain,
   refreshWhileWaiting,
   requiredCount = 2,
+  hasRequiredBudget,
   maxHunts = 8,
   maxEmptySearchRefreshes = 20,
   clearMonster = clearTravelBlockingMonster,
@@ -166,7 +167,15 @@ export async function collectSafeFundingVenison(owner, {
   if (typeof navigate !== 'function') throw new TypeError('navigate must be a function');
   if (typeof clearMonster !== 'function') throw new TypeError('clearMonster must be a function');
 
+  if (hasRequiredBudget !== undefined && typeof hasRequiredBudget !== 'function') throw new TypeError('hasRequiredBudget must be a function');
+  const capitalMode = hasRequiredBudget !== undefined;
   const targetCount = positiveInteger(requiredCount, 'requiredCount');
+  async function requiredBudgetSatisfied() {
+    if (!capitalMode) return inventoryQuantity(owner.snapshot, 'Venison') >= targetCount;
+    const satisfied = await hasRequiredBudget(owner);
+    if (typeof satisfied !== 'boolean') throw new TypeError('hasRequiredBudget must return a literal boolean');
+    return satisfied;
+  }
   const huntLimit = positiveInteger(maxHunts, 'maxHunts');
   const emptySearchLimit = positiveInteger(maxEmptySearchRefreshes, 'maxEmptySearchRefreshes');
   const beforeCount = inventoryQuantity(owner.snapshot, 'Venison');
@@ -183,7 +192,10 @@ export async function collectSafeFundingVenison(owner, {
   let huntAttempts = 0;
   let emptySearchRefreshes = 0;
   const contestedDeerIds = new Set();
-  while (inventoryQuantity(owner.snapshot, 'Venison') < targetCount && huntAttempts < huntLimit) {
+  let goalSatisfied = false;
+  // Check after the last allowed attempt too; the predicate never refunds or
+  // skips a selection attempt, and errors remain terminal.
+  while (!(goalSatisfied = await requiredBudgetSatisfied()) && huntAttempts < huntLimit) {
     let target = liveFundingDeer(owner.snapshot, contestedDeerIds);
     if (!target) {
       const actor = selfPlayer(owner);
@@ -320,7 +332,8 @@ export async function collectSafeFundingVenison(owner, {
 
   const afterCount = inventoryQuantity(owner.snapshot, 'Venison');
   const collected = afterCount - beforeCount;
-  if (afterCount < targetCount) {
+  if (capitalMode ? !goalSatisfied : afterCount < targetCount) {
+    if (capitalMode) throw new Error(`safe Deer funding capital insufficient with ${afterCount} Venison after ${hunts} hunts and ${huntAttempts} attempts`);
     throw new Error(`safe Deer funding holds ${afterCount}/${targetCount} Venison after ${hunts} hunts and ${huntAttempts} attempts`);
   }
   if (typeof owner.record === 'function') {
@@ -332,7 +345,9 @@ export async function collectSafeFundingVenison(owner, {
       mapFileName: String(owner.snapshot?.mapFileName ?? ''),
     });
   }
-  return { method: 'DeerVenison', collected, hunts, beforeCount, afterCount };
+  const result = { method: 'DeerVenison', collected, hunts, beforeCount, afterCount };
+  return capitalMode ? { ...result, completionMode: 'actual-capital', estimatedRequiredCount: targetCount,
+    huntAttempts, budgetSatisfied: true } : result;
 }
 
 async function physicalFundingAttack(client, target) {

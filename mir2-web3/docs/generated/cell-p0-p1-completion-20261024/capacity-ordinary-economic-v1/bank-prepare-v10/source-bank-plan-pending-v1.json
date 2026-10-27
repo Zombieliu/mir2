@@ -1,0 +1,463 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v10",
+  "state": "SOURCE_PARTIAL_BANK_IDENTIFIED_NEW_RUNTIME_QUALIFICATION_PENDING",
+  "sourcePrivate": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private",
+  "sourceReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\preparation-episode-receipt-v1.json",
+    "bytes": 5835,
+    "sha256": "356785435ef53815fc080138faa624046586d551182fc627c58f1f061a653b65"
+  },
+  "sourceReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\reports\\1793057828244-3f973815.preparation-report.json",
+    "bytes": 17291,
+    "sha256": "5ef11054cc27562ff7b5bcd13ea81d6c0123725f1a8d1ec1b273147b52393c8b"
+  },
+  "sourceCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\cleanup-v1.json",
+    "bytes": 1036,
+    "sha256": "1500416dc533b464358456c5525eec542184ea6d52937b020c0b1ce57f1d28c9"
+  },
+  "sourcePreparedIndex": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\prepared-index-v1.json",
+    "bytes": 1603,
+    "sha256": "e4d22f8b4293ced94f7fef4aa27a44af5a95905e3532a58f151bf5b4f3b40aa9"
+  },
+  "sourceOwnedProcess": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\owned-process-v1.json",
+    "bytes": 742,
+    "sha256": "326651260aafc3d95963d8c65b43f7633aacfb5c94c5af4edf31d7a619af4b15"
+  },
+  "sourceFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\frozen-source-v1.json",
+    "bytes": 97582,
+    "sha256": "5fe236e45809386af26d91cfe2cec57591870f1d8289cddd35a2e185e3fe90c3"
+  },
+  "sourceOriginalVerdict": {
+    "ok": false,
+    "error": "No walk path on 0 from 330,605 to 289,617",
+    "preparedCount": 4,
+    "ordinaryPreparationEvidenceEligible": false
+  },
+  "sourceControlledPoolAccounts": 100,
+  "sourceReadyCharacters": 5,
+  "sourceRegisteredAccounts": 95,
+  "sourceStoreTotalAccounts": 101,
+  "sourcePreparedCharacters": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "map": "0",
+      "x": 288,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "map": "0",
+      "x": 289,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "map": "0",
+      "x": 289,
+      "y": 615,
+      "normalLogout": true
+    }
+  ],
+  "sourceFailedCharacter": {
+    "name": "L370e2a04",
+    "characterIndex": 5,
+    "notPrepared": true,
+    "catchTimeNormalLogoutFlag": false,
+    "originalFailure": "No walk path on 0 from 330,605 to 289,617",
+    "lastPublicPreparation": {
+      "initialFreshHp": 18,
+      "initialMaximumHp": 18,
+      "initialHpStock": 12,
+      "initialGold": 15,
+      "initialPosition": {
+        "x": 331,
+        "y": 590
+      },
+      "commands": 89,
+      "movementCommands": 72,
+      "refreshCommands": 17,
+      "elapsedMs": 102498.62389999999,
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "pathHazardCount": 0,
+      "pathReplanCount": 3,
+      "pathReplans": [
+        {
+          "attempt": 1,
+          "phase": "terminal-no-path",
+          "reason": "closed-history-natural-expiry",
+          "snapshotSequence": 821,
+          "observedSnapshotSequence": 821,
+          "commands": 32,
+          "movementCommands": 27,
+          "target": {
+            "x": 289,
+            "y": 617
+          },
+          "from": {
+            "x": 305,
+            "y": 612
+          },
+          "waitMs": 16358,
+          "historyPoints": 13,
+          "history": [
+            {
+              "objectId": 206026,
+              "x": 320,
+              "y": 589,
+              "remainingMs": 6413
+            },
+            {
+              "objectId": 206117,
+              "x": 321,
+              "y": 588,
+              "remainingMs": 4824
+            },
+            {
+              "objectId": 206623,
+              "x": 321,
+              "y": 631,
+              "remainingMs": 16358
+            },
+            {
+              "objectId": 206032,
+              "x": 322,
+              "y": 595,
+              "remainingMs": 10093
+            },
+            {
+              "objectId": 206039,
+              "x": 325,
+              "y": 583,
+              "remainingMs": 2985
+            },
+            {
+              "objectId": 206130,
+              "x": 327,
+              "y": 582,
+              "remainingMs": 2392
+            },
+            {
+              "objectId": 206105,
+              "x": 315,
+              "y": 578,
+              "remainingMs": 1173
+            },
+            {
+              "objectId": 206008,
+              "x": 327,
+              "y": 574,
+              "remainingMs": 190
+            },
+            {
+              "objectId": 206033,
+              "x": 333,
+              "y": 578,
+              "remainingMs": 1173
+            },
+            {
+              "objectId": 206136,
+              "x": 337,
+              "y": 589,
+              "remainingMs": 6413
+            },
+            {
+              "objectId": 206136,
+              "x": 338,
+              "y": 588,
+              "remainingMs": 1173
+            },
+            {
+              "objectId": 206124,
+              "x": 340,
+              "y": 577,
+              "remainingMs": 1173
+            },
+            {
+              "objectId": 206129,
+              "x": 342,
+              "y": 600,
+              "remainingMs": 7651
+            }
+          ],
+          "actualPassiveWaitMs": 16361.379399999998,
+          "waitCompleted": true,
+          "naturalExpiryReached": true,
+          "freshSnapshotSequence": 826,
+          "commandsAfterRefresh": 33
+        },
+        {
+          "attempt": 2,
+          "phase": "terminal-no-path",
+          "reason": "closed-history-natural-expiry",
+          "snapshotSequence": 922,
+          "observedSnapshotSequence": 922,
+          "commands": 51,
+          "movementCommands": 42,
+          "target": {
+            "x": 289,
+            "y": 617
+          },
+          "from": {
+            "x": 330,
+            "y": 605
+          },
+          "waitMs": 14355,
+          "historyPoints": 4,
+          "history": [
+            {
+              "objectId": 206644,
+              "x": 293,
+              "y": 614,
+              "remainingMs": 10421
+            },
+            {
+              "objectId": 206610,
+              "x": 300,
+              "y": 597,
+              "remainingMs": 8437
+            },
+            {
+              "objectId": 206013,
+              "x": 301,
+              "y": 596,
+              "remainingMs": 8391
+            },
+            {
+              "objectId": 206623,
+              "x": 321,
+              "y": 631,
+              "remainingMs": 14355
+            }
+          ],
+          "actualPassiveWaitMs": 14361.3917,
+          "waitCompleted": true,
+          "naturalExpiryReached": true,
+          "freshSnapshotSequence": 926,
+          "commandsAfterRefresh": 52
+        },
+        {
+          "attempt": 3,
+          "phase": "terminal-no-path",
+          "reason": "closed-history-natural-expiry",
+          "snapshotSequence": 1016,
+          "observedSnapshotSequence": 1016,
+          "commands": 70,
+          "movementCommands": 57,
+          "target": {
+            "x": 289,
+            "y": 617
+          },
+          "from": {
+            "x": 306,
+            "y": 613
+          },
+          "waitMs": 16972,
+          "historyPoints": 5,
+          "history": [
+            {
+              "objectId": 206026,
+              "x": 320,
+              "y": 589,
+              "remainingMs": 8398
+            },
+            {
+              "objectId": 206623,
+              "x": 321,
+              "y": 631,
+              "remainingMs": 16972
+            },
+            {
+              "objectId": 206032,
+              "x": 322,
+              "y": 595,
+              "remainingMs": 11730
+            },
+            {
+              "objectId": 206136,
+              "x": 337,
+              "y": 589,
+              "remainingMs": 8398
+            },
+            {
+              "objectId": 206129,
+              "x": 342,
+              "y": 600,
+              "remainingMs": 9105
+            }
+          ],
+          "actualPassiveWaitMs": 16985.07819999999,
+          "waitCompleted": true,
+          "naturalExpiryReached": true,
+          "freshSnapshotSequence": 1020,
+          "commandsAfterRefresh": 71
+        }
+      ],
+      "finalPublicTransform": {
+        "x": 330,
+        "y": 605
+      },
+      "actualStagingReached": false
+    },
+    "finalExactHp": null,
+    "finalHpStock": null,
+    "coldStoreHpStockReadbackPerformed": false,
+    "scope": "W9 initial live HP/stock does not prove final exact HP/stock; no cold health/inventory readback performed during authoring. Whole W9 cold Store is pinned without edits; future ordinary login must prove current identity/health/stock. Failed fifth is not skipped or promoted."
+  },
+  "sourcePreparedEligibilityInherited": false,
+  "newCurrentSourceQualification": null,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\accounts.json",
+      "bytes": 125582,
+      "sha256": "4eb76d91800ebd4a6d6c9169df86f73ea27b0225bb23d6146b7a536fd61a88ad",
+      "relative": "accounts.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\capacity-pool.json",
+      "bytes": 20677,
+      "sha256": "66ba44b172325fd429398362401af211bd3b3f7de76d8d553f0fbce6a37a4325",
+      "relative": "capacity-pool.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 453,
+      "sha256": "5fa4faa9ec9e28d2ccb6271dacf7d8e3e553805cbe87eb76d7e832e2c6f17490",
+      "relative": "capacity-auth-budget.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\recovery-mac-key.txt",
+      "bytes": 64,
+      "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a",
+      "relative": "recovery-mac-key.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\identity-session-secret.txt",
+      "bytes": 64,
+      "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024",
+      "relative": "identity-session-secret.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\identity-recovery-pepper.txt",
+      "bytes": 64,
+      "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e",
+      "relative": "identity-recovery-pepper.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\passkey-auth-secret.txt",
+      "bytes": 64,
+      "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72",
+      "relative": "passkey-auth-secret.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\save-recovery\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "relative": "save-recovery/.mir2-directory-durability"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\save-recovery\\.mir2-recovery-exclusive.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "relative": "save-recovery/.mir2-recovery-exclusive.lock"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\save-recovery\\.mir2-recovery-owner-v1.json",
+      "bytes": 340,
+      "sha256": "052c786473656e0a0ff27996259c3d663b5f87f0488a2875db4267e478de7975",
+      "relative": "save-recovery/.mir2-recovery-owner-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\save-recovery\\quarantine\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "relative": "save-recovery/quarantine/.mir2-directory-durability"
+    }
+  ],
+  "fileCount": 11,
+  "totalBytes": 147366,
+  "recovery": {
+    "expectedControlFiles": [
+      ".mir2-directory-durability",
+      ".mir2-recovery-exclusive.lock",
+      ".mir2-recovery-owner-v1.json",
+      "quarantine/.mir2-directory-durability"
+    ],
+    "journalPayloadsMustEqualZero": true,
+    "preservedDestination": "source-save-recovery-preserved",
+    "activeDestination": "save-recovery",
+    "activeInitialization": "Empty new directory; normal Gateway creates a new path-bound ownership sentinel. Original control files remain unchanged only in preserved archive."
+  },
+  "copyPolicy": {
+    "copyExclusively": true,
+    "sourcePinsBeforeAndAfter": true,
+    "fullStoreAndPoolRawBytes": true,
+    "accountStoreRewritePerformed": false,
+    "poolRewritePerformed": false,
+    "stockOrPositionEditPerformed": false,
+    "authLedgerCopiedUnchanged": true,
+    "loginNotBeforeOverrideAllowed": false,
+    "seederInvoked": false,
+    "secretsValuesReported": false,
+    "latestLedgerSource": "Exact latest actual W9 capacity-auth-budget.json; never reset or rolled back"
+  },
+  "scope": "Continue actual W9 complete normally closed cold bank/latest W9 ledger by EXCL bytes without seed/grant/Store/pool/traffic edits or origin override. Original4preparedfalse/89commands72moves17refreshes/3completedTTLwaits/initial331590 to final330605 NoPath retained. Initial HP18/12HP/gold15 does not establish final HP/stock. First4 repeat fresh stock/no-economic proof, fifth remains unprepared. Same ee06 immutableV6/55backend/Rust32 reused; new helper HEAD/actualRootJSreceipt remain null.",
+  "priorRecoveryArchive": {
+    "directory": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\source-save-recovery-preserved",
+    "retainInPlace": true,
+    "copiedToNewActive": false,
+    "files": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\source-save-recovery-preserved\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": ".mir2-directory-durability"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "relative": ".mir2-recovery-exclusive.lock"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "a74608e178717c41b6e14474874d1dd9406acc4b4f6c2f5cf8f69d05a016646b",
+        "relative": ".mir2-recovery-owner-v1.json"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\private\\source-save-recovery-preserved\\quarantine\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": "quarantine/.mir2-directory-durability"
+      }
+    ],
+    "scope": "W9 source-preserved controls remain unchanged in place; only current W9 active controls are preserved in this new package, never used as active ownership."
+  },
+  "sourceIndependentCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v9\\episode\\root-independent-cleanup-v1.json",
+    "bytes": 258,
+    "sha256": "50bdde017bd523ba7f3c5a25b5541240c20ece21c460e015e395d6e5dd93c167"
+  },
+  "sourceFirst4InventoryReuse": true
+}
