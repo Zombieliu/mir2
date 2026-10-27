@@ -1517,7 +1517,14 @@ function checkOwner(client, context) {
 }
 export function selectNativeAction(client, context, now = performance.now()) {
   client.navigationAttempts = context.policy?.activityMode === 'native' ? [] : null; client.navigationAttemptCount = 0;
-  if (now >= client.nextNativeChatAt) return { command: { type: 'chat', message: `capacity ${context.runId} ${client.label} ${client.plan.index + 1}` } };
+  if (now >= client.nextNativeChatAt) {
+    const peers = nearbyObservers(client, context, Infinity);
+    // A self echo must not consume a multiplayer peer-chat opportunity.
+    // Keep the due time while ordinary movement naturally brings a peer near.
+    if (!peers.length || peers.some(peer => distance(self(peer), self(client)) <= stableFanoutRange('chat', context.policy))) {
+      return { command: { type: 'chat', message: `capacity ${context.runId} ${client.label} ${client.plan.index + 1}` } };
+    }
+  }
   if (now >= client.nextNativeTurnAt && client.role !== 'combat') return { command: { type: 'turn', direction: self(client).direction === 'Up' ? 'Right' : 'Up' } };
   return client.role === 'combat' ? combatPlan(client, context, now) : patrol(client, context);
 }

@@ -4763,3 +4763,60 @@ test('target supply diagnostics never compare stale or cross-map hints as a curr
   row = supplyRows(f).at(-1); assert.equal(row.lastHint.sameMap, false); assert.equal(row.lastHint.currentAuthority, false);
   assert.equal(row.hintDiffersFromActualTarget, null);
 });
+
+
+test('native chat retains overdue multiplayer chat outside range8 and continues the original turn or patrol', () => {
+  const f = huntFixture([]); f.client.role = 'movement'; f.client.plan = new NativePlan(1000); f.client.nextNativeChatAt = 1000;
+  Object.assign(f.peer.snapshot.entities[0], { x: 14, y: 5 });
+  f.client.nextNativeTurnAt = 0;
+  assert.equal(selectNativeAction(f.client, f.context, 1000).command.type, 'turn');
+  assert.equal(f.client.nextNativeChatAt, 1000); assert.equal(f.actions.length, 0);
+  f.client.nextNativeTurnAt = Infinity;
+  const deferred = selectNativeAction(f.client, f.context, 1000);
+  f.client.nextNativeChatAt = Infinity;
+  const ordinary = selectNativeAction(f.client, f.context, 1000);
+  assert.deepEqual(deferred, ordinary); assert.ok(['walk', 'run'].includes(deferred.command.type));
+  f.client.nextNativeChatAt = 1000;
+  Object.assign(f.peer.snapshot.entities[0], { x: 13, y: 5 });
+  assert.equal(selectNativeAction(f.client, f.context, 1000).command.type, 'chat', 'exactly8 remains in the original probe range');
+  f.peer.snapshot.entities[0].x = 14;
+  assert.notEqual(selectNativeAction(f.client, f.context, 1000).command.type, 'chat', 'nine cannot substitute selfChat');
+  assert.equal(f.client.nextNativeChatAt, 1000); assert.equal(f.client.budget.sent.length, 0);
+});
+
+test('native chat preserves true single-session selfChat and ignores the original paused closed or cross-map peers', () => {
+  for (const unavailable of ['none', 'paused', 'closed', 'cross-map', 'not-in-game']) {
+    const f = huntFixture([]); f.client.plan = new NativePlan(1000); f.client.nextNativeChatAt = 1000;
+    if (unavailable === 'none') f.context.clients = [f.client];
+    if (unavailable === 'paused') f.peer.paused = true;
+    if (unavailable === 'closed') f.peer.closed = true;
+    if (unavailable === 'cross-map') f.peer.snapshot.mapFileName = 'other';
+    if (unavailable === 'not-in-game') f.peer.inGame = false;
+    assert.equal(selectNativeAction(f.client, f.context, 1000).command.type, 'chat', unavailable);
+    assert.equal(f.client.nextNativeChatAt, 1000); assert.equal(f.actions.length, 0);
+  }
+});
+
+test('native chat waits for a naturally nearby peer then keeps the real receipt budget and original30s send interval', async t => {
+  t.mock.method(performance, 'now', () => 1000);
+  const f = huntFixture([]); f.context.runId = 'chat-fixture'; f.client.role = 'movement';
+  f.client.plan = new NativePlan(1000); f.client.nextNativeChatAt = 1000;
+  Object.assign(f.peer.snapshot.entities[0], { x: 14, y: 5 });
+  assert.notEqual(selectNativeAction(f.client, f.context, 1000).command.type, 'chat');
+  assert.equal(f.client.nextNativeChatAt, 1000); assert.equal(f.client.budget.sent.length, 0);
+  Object.assign(f.peer.snapshot.entities[0], { x: 12, y: 5 });
+  f.peer.sequence = 0; f.peer.events = []; const sent = [];
+  f.client.ws = { send(raw) { const command = JSON.parse(raw); sent.push(command);
+    f.peer.events.push({ type: 'packet', packet: 'ObjectChat', payload: { objectId: 50001, text: command.message },
+      direction: 'received', sequence: ++f.peer.sequence, monotonicMs: performance.now() }); } };
+  const plan = selectNativeAction(f.client, f.context, 1000); assert.equal(plan.command.type, 'chat');
+  await action(f.client, f.context, { due: 1000, cadence: { cooldownMs: 0 } }, plan);
+  await awaitPendingActions([f.client]);
+  assert.equal(sent.length, 1); assert.equal(sent[0].type, 'chat'); assert.equal(f.client.budget.sent.length, 1);
+  assert.equal(f.actions.filter(row => row.kind === 'peerChat' && row.status === 'success').length, 1);
+  assert.equal(f.actions.some(row => row.kind === 'selfChat'), false);
+  assert.equal(f.client.nextNativeChatAt, 31000); assert.equal(f.context.policy.nativeChatIntervalMs, 30000);
+  assert.notEqual(selectNativeAction(f.client, f.context, 30999).command.type, 'chat');
+  assert.equal(selectNativeAction(f.client, f.context, 31000).command.type, 'chat');
+  assert.equal(f.context.policy.actionTimeoutMs, 2000); assert.equal(stableFanoutRange('chat', f.context.policy), 8);
+});

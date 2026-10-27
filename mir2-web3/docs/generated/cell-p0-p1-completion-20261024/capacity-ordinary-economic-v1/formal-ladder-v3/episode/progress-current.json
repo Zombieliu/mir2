@@ -1,0 +1,1 @@
+{"schemaVersion":1,"sequence":3,"source":"actual-runCapacity.onProgress","at":"2026-10-27T13:46:24.241Z","stage":"stage-2","controlledActors":2,"target":2,"measuredStages":[{"stage":"stage-2","passed":false}],"sourceSavedBankCount":100,"sourceBankFreshAtStart":false,"preloginAll100Performed":false,"capacityAccepted":false,"p0Accepted":false}
