@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-27T11:27:06.354Z",
+  "scope": "Root independent pending formal original100 package review: actual raw pins,14 exact runner changes,5 unchanged helper copies, original scene/route and read-only real100 saved bank preflight. No authentication, bank copying, freeze, owned process, gameplay or capacity acceptance.",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\preparation-v2.json",
+    "bytes": 13695,
+    "sha256": "8e0dc80b1e46edb879d9250c8b85f6cbb26f1e3ad8ca30a90079dfaa48b67437"
+  },
+  "configuration": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\prepare-config-pending-v1.json",
+    "bytes": 8075,
+    "sha256": "97e2431360f8780b4ee643cd51671bf0ea21553a9b99b9b2dbe72baf7e6031bf"
+  },
+  "sourceBankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\source-bank-plan-pending-v1.json",
+    "bytes": 26547,
+    "sha256": "ad07ed68104a3c1d75da544317692fa700adbf2b0350edeec12dd8e190fa87bd"
+  },
+  "pinsChecked": 57,
+  "runnerRules": 14,
+  "runnerForwardAndInverseRawExact": true,
+  "rawCopies": 5,
+  "source11Files": 11,
+  "source11Bytes": 1278985,
+  "priorControlFiles": 4,
+  "sourcePoolAccounts": 100,
+  "savedRecordCount": 100,
+  "freshAtFormalStart": false,
+  "all100FormalReloginRequired": true,
+  "sourceSavedCellsDistinct": true,
+  "negative": {
+    "badPinRejected": true,
+    "badEndpointRejected": true
+  },
+  "rootPendingReviewPassed": true,
+  "currentQualificationStillPending": true,
+  "modulesImported": [
+    "copy-source-bank-v1.mjs (exports only)"
+  ],
+  "bankCopied": false,
+  "authPerformed": false,
+  "freezePerformed": false,
+  "ownedExecuted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

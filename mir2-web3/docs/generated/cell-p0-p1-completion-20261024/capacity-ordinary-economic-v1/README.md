@@ -290,3 +290,7 @@ ca426258a的[新鲜1080项选定门禁](bank-prepare-v14/node-v14/root-focused-r
 正式阶段仍须全100逐cohort普通重登并核当前库存、血量与位置，按原2/10/25/50/100各300秒、100人7200秒和原resume/save/活动门槛测量，已有active角色在后续准入和等待期间持续活动。新外部正式包只复用完整冷库及原账本/密钥，不seed、不重置登录起点、不开提前100会话；原500/500最终目标、P0未完成及P2未启动保持。
 
 正常保存、六项计数归零、整体清理及[Root独立OS](bank-prepare-v15/root-independent-cleanup-v1.json)通过，PID77056消失、端口释放；原failed normalLogout=false与后续308.959ms正常logout ACK分开，不据此授就绪。40份新公共原件6,972,033字节由Root逐件复核源/副本原字节，见[说明](bank-prepare-v15/README.md)及[清单](bank-prepare-v15/copied-evidence-manifest.json)，几何补充单列清单不改原40件。P0未完成、P2未启动，没有新25/50/100/500或两小时容量通过。
+
+### 正式阶梯 v1：2/10通过，压测端延迟中止后续准备
+
+[原报告、样本及清理证据](formal-ladder-v1/README.md)已归档。cc1f4当前1179项Node检查通过后实跑，2人与10人分别完成300.226/300.311秒测量、各5/5滚动窗口通过；10人含原固定1名fighter，168攻击/168命中。后续只进入bootstrap/preparation-25，峰值11角色且第11未激活；332.661/319.291/316.670ms连续压测端lag触发原保护，原ok=false、容量/P0资格false。原wrapper样本pin为null的缺陷保留，实际12,588,593B同runId样本由manifest单独固定。正常清理及Root OS检查通过，不追认25/50/100/500或两小时。下一步排查精确目标被活鹿占据时的同步寻路成本，修复后重新测量。
