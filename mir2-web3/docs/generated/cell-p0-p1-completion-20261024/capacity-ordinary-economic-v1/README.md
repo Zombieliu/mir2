@@ -283,4 +283,10 @@ ca426258a的[新鲜1080项选定门禁](bank-prepare-v14/node-v14/root-focused-r
 
 下一轮须以W15原42及W16新增16两组独立四pin历史，仅补原59～100共42人。离线诊断确认原闭合记录形成暂时路障，计划只在该售后药商导航复用原自然TTL等待与有界重算；固定安全距离、占格、传送点、队列、交易及命令/时间上限保持。实际续跑结果仍待验证，P0未完成、P2未启动，500全战斗未实施验收。
 
+## 第十七轮：原59～100号全部补齐，100人冷角色库就绪
+
+11fc9的售后药商私有导航等待修复通过864项新鲜选定Node检查（438+371+55，42命名输入前后不变）；原05dad的315项main/policy检查保持历史属性，不重复累加。[W17实跑与原件](bank-prepare-v17/README.md)新增42/42成功，与历史58组合为100条正常保存记录。组合索引、完整pool身份、保存点互异及清理全部通过，PID66892消失、端口释放。coldContinuationBankEligible=true；原coldBankEligible/preparationComplete=false保持其原字段语义，不改成全100本轮fresh或容量通过。
+
+正式阶段仍须全100逐cohort普通重登并核当前库存、血量与位置，按原2/10/25/50/100各300秒、100人7200秒和原resume/save/活动门槛测量，已有active角色在后续准入和等待期间持续活动。新外部正式包只复用完整冷库及原账本/密钥，不seed、不重置登录起点、不开提前100会话；原500/500最终目标、P0未完成及P2未启动保持。
+
 正常保存、六项计数归零、整体清理及[Root独立OS](bank-prepare-v15/root-independent-cleanup-v1.json)通过，PID77056消失、端口释放；原failed normalLogout=false与后续308.959ms正常logout ACK分开，不据此授就绪。40份新公共原件6,972,033字节由Root逐件复核源/副本原字节，见[说明](bank-prepare-v15/README.md)及[清单](bank-prepare-v15/copied-evidence-manifest.json)，几何补充单列清单不改原40件。P0未完成、P2未启动，没有新25/50/100/500或两小时容量通过。

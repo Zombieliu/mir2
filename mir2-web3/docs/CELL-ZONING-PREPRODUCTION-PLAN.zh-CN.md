@@ -374,3 +374,5 @@ ca426的有界候选刷新和500执行入口保护通过1080项新鲜选定Node�
 46274的严格资格模式通过780项新鲜选定Node检查；W15第42人普通售肉471、购11药440、库存12及保存通过，累计准备42/100。第43人仅有257/440资本，8次实际选择含1次完成、1次移动后危险、4次离开AOI及2次NoPath，原失败保留，见[W15证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v15/README.md)。后续准备工具增加AOI16局部可达候选及历史禁区检查，并采用独立continuation-only合同补剩余角色；历史成功不得冒充本轮fresh，原正式阶梯仍须全100逐个普通重登和当前就绪。P0未完成、P2未启动，500全战斗仍待实施与实测。
 
 05dad的AOI内可达候选与显式续跑通过1158项新鲜选定Node检查。[W16实跑](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v16/README.md)仅补原43～100号，新增16人正常保存，与历史42人合计58条保存记录；第59人完成售肉521金币后前往药商失败，未买药、未授准备资格。后续仅为该售后导航补原闭合历史自然到期后的有界重算；不清缓存、改变安全距离或预算。剩余42人仍须正常准备，全100后续普通重登与正式容量阶梯均未完成。
+
+11fc9的售后药商导航修复通过864项新鲜选定Node检查。[W17实跑](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v17/README.md)补齐原59～100号42人，正常保存与组合100条索引、完整身份和不同保存点校验通过；coldContinuationBankEligible=true，全100本轮fresh、正式重登、容量与两小时稳定性资格仍false。下一步复用完整冷角色库及原账本，按原2/10/25/50/100逐cohort普通重登和当前就绪门禁测量，不预登录100、不暂停已有active cohort、不沿用旧Probe21容量资格。P0未完成，固定Cell尚未启动。
