@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v15",
+  "checks": [
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\source-lib-v1.mjs",
+        "bytes": 18471,
+        "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+      },
+      "command": [
+        "node",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\source-lib-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": "",
+      "moduleImported": false
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\copy-source-bank-v1.mjs",
+        "bytes": 11185,
+        "sha256": "5a5847c857f94b9dab9a68fca3d030a3abbf5775d1df3b4ce4a2a4e33480c2c3"
+      },
+      "command": [
+        "node",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\copy-source-bank-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": "",
+      "moduleImported": false
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\freeze-prepare-v1.mjs",
+        "bytes": 8149,
+        "sha256": "9dbcd280af0deff90fb570e6cd91292da8ec68b42ada5d485831539d4918b944"
+      },
+      "command": [
+        "node",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\freeze-prepare-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": "",
+      "moduleImported": false
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\run-owned-prepare-v1.mjs",
+        "bytes": 25149,
+        "sha256": "57c6700021343be91daaad1d49e5d53692e692dd8186cb02babe3442bafe53f1"
+      },
+      "command": [
+        "node",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\run-owned-prepare-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": "",
+      "moduleImported": false
+    },
+    {
+      "file": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\owned-child-v1.mjs",
+        "bytes": 2201,
+        "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+      },
+      "command": [
+        "node",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\owned-child-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": "",
+      "moduleImported": false
+    }
+  ],
+  "passed": 5,
+  "failed": 0,
+  "scope": "Syntax only; no import, owned mode, backend guard, freeze, finalizer, bank copy, tests, build, Git or load."
+}

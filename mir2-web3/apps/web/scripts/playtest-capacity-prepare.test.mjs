@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { CapacityClient } from './playtest-capacity-soak.mjs';
-import { runPreparationBank, selectPreparationStagingPoint } from './playtest-capacity-prepare.mjs';
+import { runPreparationBank, selectPreparationStagingPoint, validatePreparationContinuation, sameContinuationEvidencePath } from './playtest-capacity-prepare.mjs';
 
 async function fixture(t, { count = 100, maxPrepared = 2, ledger, prepareFailure = -1, drainFailure = -1,
   staleReadiness = false, progress, initialReady = false, login } = {}) {
@@ -339,4 +340,242 @@ test('recovery and equip spend the existing2048 command allowance before the hel
   const report = await runPreparationBank(f.options, f.services);
   assert.equal(report.ok, true); assert.equal(received, 2042); assert.equal(report.actorResults[0].preHelperCommands, 5);
   assert.equal(report.actorResults[0].helperCommandBudget, 2042);
+});
+
+
+// These are schema fixtures, not runtime qualification. Every run below uses
+// the explicit test-services seam and remains production-ineligible.
+async function continuationFixture(t, options = {}) {
+  const f = await fixture(t, { maxPrepared: 100, ledger: [], ...options });
+  for (let i = 0; i < 43; i++) Object.assign(f.pool.accounts[i], { state: 'ready', characterIndex: i + 1 });
+  await fs.writeFile(f.poolFile, JSON.stringify(f.pool));
+  const scenario = JSON.parse(await fs.readFile(f.scenarioFile, 'utf8'));
+  Object.assign(scenario.preparation, { candidatePolicy: 'fresh-unoccupied-distinct-saved-v1',
+    stagingCandidates: Array.from({ length: 335 }, (_, i) => ({ x: 100 + i, y: 200 })) });
+  await fs.writeFile(f.scenarioFile, JSON.stringify(scenario));
+  f.services.isWalkable = () => true;
+  const originalPrepare = f.services.prepare;
+  f.services.prepare = async (...args) => {
+    const result = await originalPrepare(...args);
+    result.resolvedStagingPoint = { x: 100 + args[0].index, y: 200 };
+    return result;
+  };
+  // Preserve the real LoginBudget semantics while advancing only its unit clock
+  // across full admission windows; do not reset attempts or bypass reserve().
+  const originalLogin = f.services.login; let budgetClock = Date.now();
+  f.services.login = async (client, context, purpose) => {
+    context.loginBudget.clock = () => budgetClock;
+    budgetClock += context.loginBudget.delay(purpose);
+    return originalLogin(client, context, purpose);
+  };
+  f.groups = [];
+  f.writeGroup = async (start = 0, count = 42, mutate = () => {}) => {
+    const directory = path.join(f.root, 'history-' + f.groups.length); await fs.mkdir(directory);
+    const files = Object.fromEntries(['report', 'preparedIndex', 'cleanup', 'receipt'].map(k => [k,
+      path.join(directory, k === 'report' ? 'fixture.preparation-report.json' : k + '.json')]));
+    const records = Array.from({ length: count }, (_, j) => {
+      const i = start + j;
+      return { name: f.pool.accounts[i].name, characterIndex: i + 1, map: '0', x: 100 + i, y: 200,
+        sequence: 23, monotonicMs: 460, inSafeZone: true, normalLogout: true, durableReloginReadbackPending: true };
+    });
+    const actors = records.map(row => {
+      const proof = { ownerId: 1000, ownerName: row.name, map: row.map, x: row.x, y: row.y,
+        hp: 18, maxHp: 18, hpStock: 12, inSafeZone: true, actualStagingReached: true };
+      return { name: row.name, characterIndex: row.characterIndex,
+        before: { ...proof, hpStock: 1, sequence: 10, monotonicMs: 200 },
+        after: { ...proof, sequence: 20, monotonicMs: 400 },
+        freshReadiness: { ...proof, sequence: 23, monotonicMs: 460 }, targetHp: 12,
+        normalLogout: true, finalNormalDrainPositionMatched: true, actualStagingReached: true };
+    });
+    const report = { schemaVersion: 1, mode: 'ordinary-economic-preparation-only', preparationOnly: true, testExecution: false, attackResults: 'v2',
+      reportPath: files.report, workerConcurrency: 1, maxPrepared: 100, completePoolAccountCount: 100,
+      completePoolPreserved: true, measurementPerformed: false, cohortActivated: false, capacityAccepted: false, p0Accepted: false,
+      cleanupErrors: [], ok: false, error: 'original partial failure retained', ordinaryPreparationEvidenceEligible: false,
+      preparedCount: count, preparedIndex: records, actorResults: actors,
+      failedActor: { name: f.pool.accounts[start + count]?.name ?? 'no-failed-actor' } };
+    const cleanup = { schemaVersion: 1, packageId: 'fixture-history-' + f.groups.length,
+      checks: Object.fromEntries(['sixCountersZero', 'monitorStoppedBeforeGateway', 'monitorExitZero', 'monitorTerminalPreserved',
+        'monitorSamplerAbsent', 'normalOwnedShutdown', 'gatewayProcessAbsent', 'driverProcessAbsent', 'monitorProcessAbsent', 'portsFree',
+        'postSourceUnchanged'].map(k => [k, true])), driverExit: { exitCode: 1, signal: null, error: null },
+      gatewayExit: { exitCode: 0, signal: null, error: null }, monitorExit: { exitCode: 0, signal: null, error: null },
+      remainingListeners: [], remainingMonitorChildren: [], logErrors: [] };
+    const index = { schemaVersion: 1, packageId: cleanup.packageId, records };
+    const receipt = { schemaVersion: 1, packageId: cleanup.packageId, preparationOnly: true, workerCount: 1, maxPrepared: 100,
+      cleanupComplete: true, measurementPerformed: false, gameplayEngineActivated: false, capacityAccepted: false, p0Accepted: false,
+      productionPreparationEvidence: false, preparedIndexValid: false, preparationComplete: false, coldBankEligible: false };
+    mutate({ report, cleanup, index, receipt });
+    const pin = async file => { const bytes = await fs.readFile(file); return { file, bytes: bytes.length,
+      sha256: crypto.createHash('sha256').update(bytes).digest('hex') }; };
+    await fs.writeFile(files.report, JSON.stringify(report)); const reportPin = await pin(files.report);
+    index.sourceOriginalReport = reportPin;
+    await fs.writeFile(files.preparedIndex, JSON.stringify(index)); await fs.writeFile(files.cleanup, JSON.stringify(cleanup));
+    Object.assign(receipt, { rawOriginalReport: reportPin, preparedIndexRecord: await pin(files.preparedIndex),
+      cleanupRecord: await pin(files.cleanup), rawOriginalVerdict: { attackResults: 'v2', ok: report.ok, error: report.error,
+        preparedCount: report.preparedCount, testExecution: false, ordinaryPreparationEvidenceEligible: false } });
+    await fs.writeFile(files.receipt, JSON.stringify(receipt));
+    const group = Object.fromEntries(await Promise.all(Object.entries(files).map(async ([k, file]) => [k, await pin(file)])));
+    f.groups.push(group); f.options.continuation = { mode: 'historical-prepared-index-v1', evidence: f.groups };
+    return { group, files, report, index, cleanup, receipt };
+  };
+  f.preflight = () => validatePreparationContinuation(f.options.continuation, { pool: f.pool, endpoint: f.options.endpoint,
+    maxPrepared: 100, targetHp: 12, stagingPoints: scenario.preparation.stagingPoints,
+    stagingCandidates: scenario.preparation.stagingCandidates, map: { fixture: true }, isWalkable: f.services.isWalkable });
+  return f;
+}
+
+test('continuation selects actual original43..100 only, preserves historical reservations and separates58 fresh from42 notFresh', async t => {
+  const f = await continuationFixture(t); await f.writeGroup();
+  const originalPrefix = JSON.stringify(f.pool.accounts.slice(0, 42));
+  const canary = path.join(f.root, 'untouched-store-canary'); await fs.writeFile(canary, 'not a Store API');
+  let reservationsChecked = false;
+  const prepare = f.services.prepare;
+  f.services.prepare = async (client, context, config) => {
+    if (client.index === 42) {
+      const owner = { objectId: 1000, name: client.label, kind: 'selfPlayer', x: 141, y: 200 };
+      const selected = config.resolveStagingPoint({ snapshot: { playerObjectId: 1000, mapFileName: '0', entities: [owner] },
+        receipt: { ownerId: 1000, ownerName: client.label, map: '0', x: 141, y: 200, sequence: 9, monotonicMs: 180 },
+        defaultPoint: { x: 141, y: 200 } });
+      assert.deepEqual(selected, { x: 142, y: 200 }); reservationsChecked = true;
+    }
+    return prepare(client, context, config);
+  };
+  const report = await runPreparationBank(f.options, f.services);
+  assert.equal(report.ok, true); assert.equal(report.preparedCount, 58); assert.equal(report.newPreparedCount, 58);
+  assert.equal(report.expectedThisRun, 58); assert.equal(report.historicalPreparedCount, 42); assert.equal(report.combinedSavedCount, 100);
+  assert.equal(report.historicalNotFresh, true); assert.equal(reservationsChecked, true);
+  assert.deepEqual(f.clients.map(c => c.index), Array.from({ length: 58 }, (_, i) => i + 42));
+  assert.equal(f.clients[0].account.state, 'ready'); // failed43 was ready but is still prepared normally
+  assert.ok(f.events.includes('login:42')); assert.ok(!f.events.includes('login:41'));
+  assert.equal(report.actorResults.length, 58); assert.equal(report.preparedIndex.length, 58);
+  assert.equal(report.preparedIndex[0].originalPoolIndex, 42); assert.equal(report.preparedIndex[57].originalPoolIndex, 99);
+  assert.ok(report.historicalPreparedIndex.every(p => p.freshThisRun === false && p.origin === 'historical'));
+  assert.ok(report.preparedIndex.every(p => p.freshThisRun === true && p.origin === 'current-run'));
+  assert.equal(report.sourceOriginalVerdicts[0].ok, false); assert.match(report.sourceOriginalVerdicts[0].error, /partial failure/);
+  for (const key of ['ordinaryPreparationEvidenceEligible', 'continuationPreparationEvidenceEligible', 'all100FreshPreparedThisRun',
+    'fullDurableReadinessVerified', 'durableReloginVerificationPerformed', 'first4FreshReusePerformedThisRun', 'measurementPerformed',
+    'cohortActivated', 'capacityAccepted', 'p0Accepted']) assert.equal(report[key], false, key);
+  assert.equal(report.testExecution, true); assert.equal(f.maximumActive(), 1); assert.equal(f.remainingActive(), 0);
+  assert.equal(JSON.stringify(JSON.parse(await fs.readFile(f.poolFile)).accounts.slice(0, 42)), originalPrefix);
+  assert.equal(await fs.readFile(canary, 'utf8'), 'not a Store API');
+});
+
+test('continuation failure does not promote failed ready43 or admit later actors', async t => {
+  const f = await continuationFixture(t, { prepareFailure: 42 }); await f.writeGroup();
+  const report = await runPreparationBank(f.options, f.services);
+  assert.equal(report.ok, false); assert.equal(report.preparedCount, 0); assert.equal(report.newPreparedCount, 0);
+  assert.equal(report.historicalPreparedCount, 42); assert.equal(report.combinedSavedCount, 42);
+  assert.equal(report.preparedIndex.length, 0); assert.equal(report.failedActor.name, f.pool.accounts[42].name);
+  assert.deepEqual(f.clients.map(c => c.index), [42]); assert.ok(f.events.includes('drain:42'));
+  assert.equal(report.continuationPreparationEvidenceEligible, false);
+});
+
+test('continuation pure preflight crossbinds old false reports and exact copies without auth or client creation', async t => {
+  const f = await continuationFixture(t); const h = await f.writeGroup();
+  const ledger = await fs.readFile(f.ledgerFile), pool = await fs.readFile(f.poolFile);
+  const plan = await f.preflight();
+  assert.equal(plan.scope, 'public-history-not-fresh; no current Store or auth provenance attested');
+  assert.equal(plan.sourceOriginalVerdicts[0].ok, false); assert.equal(plan.expectedThisRun, 58);
+  assert.ok(Object.isFrozen(plan.historicalPreparedIndex[0].sourceReportPin));
+  assert.equal(f.clients.length, 0); assert.equal(f.events.length, 0);
+  assert.deepEqual(await fs.readFile(f.ledgerFile), ledger); assert.deepEqual(await fs.readFile(f.poolFile), pool);
+  const copyDir = path.join(f.root, 'archive'); await fs.mkdir(copyDir);
+  for (const pin of Object.values(h.group)) { const destination = path.join(copyDir, path.basename(pin.file));
+    await fs.copyFile(pin.file, destination, fs.constants.COPYFILE_EXCL); pin.file = destination; }
+  assert.equal((await f.preflight()).historicalPreparedCount, 42);
+});
+
+test('continuation rejects malformed or conflicting public history before zero admissions and without ledger reset', async t => {
+  const cases = [
+    ['reordered', ({ report }) => { report.preparedIndex.reverse(); report.actorResults.reverse(); }],
+    ['duplicate point', ({ report }) => { report.preparedIndex[1].x = report.preparedIndex[0].x; }],
+    ['wrong identity', ({ report }) => { report.actorResults[0].after.ownerName = 'foreign'; }],
+    ['duplicate character', ({ report }) => { report.preparedIndex[1].characterIndex = report.preparedIndex[0].characterIndex; }],
+    ['stale receipt', ({ report }) => { report.actorResults[0].freshReadiness.sequence = report.actorResults[0].after.sequence; }],
+    ['outside catalogue', ({ report }) => { report.preparedIndex[0].x = 9999; }],
+    ['missing save', ({ report }) => { report.actorResults[0].finalNormalDrainPositionMatched = false; }],
+    ['low stock', ({ report }) => { report.actorResults[0].freshReadiness.hpStock = 11; }],
+    ['failed included', ({ report }) => { report.failedActor.name = report.actorResults[0].name; }],
+    ['cleanup false', ({ cleanup }) => { cleanup.checks.sixCountersZero = false; }],
+    ['monitor exit1', ({ cleanup }) => { cleanup.monitorExit.exitCode = 1; }],
+    ['source seam', ({ report }) => { report.testExecution = true; }],
+    ['not original100', ({ report }) => { report.completePoolAccountCount = 42; }],
+    ['map mismatch', ({ report }) => { report.actorResults[0].after.map = '1'; }],
+  ];
+  for (const [name, mutate] of cases) {
+    await t.test(name, async t => {
+      const f = await continuationFixture(t); await f.writeGroup(0, 42, mutate);
+      const before = await fs.readFile(f.ledgerFile); const report = await runPreparationBank(f.options, f.services);
+      assert.equal(report.ok, false); assert.equal(f.clients.length, 0); assert.equal(report.preparedCount, 0);
+      assert.deepEqual(await fs.readFile(f.ledgerFile), before); assert.equal(report.ordinaryPreparationEvidenceEligible, false);
+    });
+  }
+});
+
+test('continuation pins are raw checked and internally bound, including hash, index and cleanup substitutions', async t => {
+  for (const kind of ['hash', 'receipt-binding', 'index-binding', 'duplicate-group', 'directory']) {
+    await t.test(kind, async t => {
+      const f = await continuationFixture(t); const h = await f.writeGroup();
+      if (kind === 'hash') h.group.report.sha256 = '0'.repeat(64);
+      if (kind === 'directory') h.group.report.file = path.dirname(h.group.report.file);
+      if (kind === 'duplicate-group') f.groups.push(h.group);
+      if (kind === 'receipt-binding' || kind === 'index-binding') {
+        const key = kind === 'receipt-binding' ? 'receipt' : 'preparedIndex';
+        const value = JSON.parse(await fs.readFile(h.files[key]));
+        (key === 'receipt' ? value.cleanupRecord : value.sourceOriginalReport).sha256 = '0'.repeat(64);
+        const raw = Buffer.from(JSON.stringify(value)); await fs.writeFile(h.files[key], raw);
+        h.group[key] = { file: h.files[key], bytes: raw.length, sha256: crypto.createHash('sha256').update(raw).digest('hex') };
+      }
+      const report = await runPreparationBank(f.options, f.services);
+      assert.equal(report.ok, false); assert.equal(f.clients.length, 0);
+    });
+  }
+});
+
+test('continuation accepts disjoint ordered fresh-success groups but rejects group reordering and empty complements', async t => {
+  const f = await continuationFixture(t); await f.writeGroup(0, 20); await f.writeGroup(20, 22);
+  assert.equal((await f.preflight()).historicalPreparedCount, 42);
+  f.groups.reverse(); await assert.rejects(f.preflight(), /original pool prefix/);
+  const all = await continuationFixture(t); for (let i = 0; i < 100; i++) Object.assign(all.pool.accounts[i], { state: 'ready', characterIndex: i + 1 });
+  await all.writeGroup(0, 100); await assert.rejects(all.preflight(), /empty complement/);
+});
+
+test('continuation requires original ledger, forbids origin overrides and rejects unknown or short pool modes before admission', async t => {
+  for (const kind of ['missing ledger', 'origin override', 'short target', 'unknown mode']) {
+    await t.test(kind, async t => {
+      const f = await continuationFixture(t); await f.writeGroup();
+      if (kind === 'missing ledger') await fs.unlink(f.ledgerFile);
+      if (kind === 'origin override') f.options.loginNotBefore = new Date().toISOString();
+      if (kind === 'short target') f.options.maxPrepared = 58;
+      if (kind === 'unknown mode') f.options.continuation.mode = 'skip-ready';
+      const report = await runPreparationBank(f.options, f.services);
+      assert.equal(report.ok, false); assert.equal(f.clients.length, 0); assert.equal(report.preparedCount, 0);
+    });
+  }
+});
+
+
+test('continuation partial current successes remain separate and later failure does not promote the complement', async t => {
+  const f = await continuationFixture(t, { prepareFailure: 44 }); await f.writeGroup();
+  const report = await runPreparationBank(f.options, f.services);
+  assert.equal(report.ok, false); assert.equal(report.preparedCount, 2); assert.equal(report.newPreparedCount, 2);
+  assert.equal(report.expectedThisRun, 58); assert.equal(report.historicalPreparedCount, 42); assert.equal(report.combinedSavedCount, 44);
+  assert.deepEqual(f.clients.map(c => c.index), [42, 43, 44]);
+  assert.deepEqual(report.preparedIndex.map(p => p.originalPoolIndex), [42, 43]);
+  assert.equal(report.failedActor.name, f.pool.accounts[44].name);
+  assert.equal(report.continuationPreparationEvidenceEligible, false);
+});
+
+
+test('continuation path identity casefolds Windows only and never authorizes a parent symlink', async t => {
+  const lower = path.resolve('case-distinct-parent', 'report.json');
+  const upper = path.resolve('CASE-DISTINCT-PARENT', 'report.json');
+  assert.equal(sameContinuationEvidencePath(lower, upper, 'win32'), true);
+  assert.equal(sameContinuationEvidencePath(lower, upper, 'linux'), false);
+  assert.equal(sameContinuationEvidencePath(lower, upper, 'darwin'), false);
+  const f = await continuationFixture(t); const h = await f.writeGroup();
+  const parentLink = path.join(f.root, 'history-parent-link');
+  await fs.symlink(path.dirname(h.group.report.file), parentLink, process.platform === 'win32' ? 'junction' : 'dir');
+  h.group.report.file = path.join(parentLink, path.basename(h.group.report.file));
+  await assert.rejects(f.preflight(), /symlink ancestors/);
+  assert.equal(f.clients.length, 0);
 });

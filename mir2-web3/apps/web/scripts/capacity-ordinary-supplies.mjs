@@ -1,4 +1,5 @@
 import { performance } from 'node:perf_hooks';
+import { findProtocolWalkPath, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
 import { collectSafeFundingVenison } from './quest-agent/protocol-funding.mjs';
 import { clearTravelBlockingMonster, harvestDirection } from './quest-agent/protocol-combat.mjs';
 import { NavigationStepGuarded, NavigationStalled, isTerminalNavigationNoPath } from './quest-agent/protocol-play.mjs';
@@ -92,6 +93,13 @@ export function createOrdinarySupplies(client, options = {}) {
   if (options.preparationProfile != null && !['held-only', 'ordinary-economic-v1'].includes(options.preparationProfile)) throw new Error('ordinary supplies: unknown preparation profile');
   if (options.preparationProfile === 'held-only' && targetHp !== 0) throw new Error('ordinary supplies: held-only cannot purchase');
   if (options.resolveStagingPoint != null && typeof options.resolveStagingPoint !== 'function') throw new Error('ordinary supplies: staging resolver must be synchronous function');
+  const fundingMap = options.fundingNavigationMap;
+  if (fundingMap !== undefined && (!fundingMap || fundingMap.mapFileName !== '0' ||
+      !Number.isSafeInteger(fundingMap.width) || !Number.isSafeInteger(fundingMap.height) ||
+      fundingMap.width < 1 || fundingMap.height < 1 || fundingMap.width * fundingMap.height > 4_000_000 ||
+      !(fundingMap.blocked instanceof Uint8Array) || fundingMap.blocked.length !== fundingMap.width * fundingMap.height)) {
+    throw new TypeError('ordinary supplies: fundingNavigationMap must be the current map0 collision bitmap');
+  }
   const now = options.now ?? (() => performance.now());
   const sleep = options.sleep ?? sleepDefault;
   const timeoutMs = integer(options.timeoutMs ?? 600_000, 'timeoutMs', 1, 600_000);
@@ -105,7 +113,8 @@ export function createOrdinarySupplies(client, options = {}) {
   let fundingTargetRejectionCount = 0, pathHazardCount = 0;
   const pathHazards = [], pathReplans = [], movementOrigins = new WeakMap(), unsentPathErrors = new WeakSet();
   let navigationPolicy = null, fundingApproachId = null;
-  const fundingApproaches = [], fundingDiscoveries = [];
+  const fundingApproaches = [], fundingDiscoveries = [], fundingCandidateQueries = [];
+  let fundingCandidateQueryCount = 0;
   const plannerNow = options.now ?? Date.now, plannerIdentities = new Map(), plannerTrail = new Map();
   let plannerFallbackCount = 0, plannerFreshSequence = -1, plannerGlobalBlockedUntil = 0, plannerViewAllowed = null;
   let plannerPacketRenewals = 0, lastReceiptSequence = -1, lastReceiptMono = -Infinity;
@@ -484,10 +493,71 @@ export function createOrdinarySupplies(client, options = {}) {
       blocker ? 'hostile-near-deer' : null;
     return { matches, target, blocker, reason };
   }
+  function fundingTransferBounds() {
+    const transfers = client.snapshot.mapTransfers;
+    if (!Array.isArray(transfers)) throw new Error('ordinary supplies: complete funding map transfers required');
+    return transfers.map(transfer => {
+      const b = transfer?.bounds;
+      if (!b || !['minX','maxX','minY','maxY'].every(k => Number.isSafeInteger(b[k]) && b[k] >= 0 && b[k] <= 65535) ||
+          b.minX > b.maxX || b.minY > b.maxY || (transfer.mapFileName != null && transfer.mapFileName !== '0')) {
+        throw new Error('ordinary supplies: invalid funding map transfer');
+      }
+      return b;
+    });
+  }
+  const inFundingTransfer = (cell,bounds) => bounds.some(b => cell.x >= b.minX && cell.x <= b.maxX && cell.y >= b.minY && cell.y <= b.maxY);
+  function fundingStaticRouteExists(from,target,bounds) {
+    const left=Math.max(0,target.x-16),top=Math.max(0,target.y-16);
+    const right=Math.min(fundingMap.width-1,target.x+16),bottom=Math.min(fundingMap.height-1,target.y+16);
+    if (from.x<left || from.x>right || from.y<top || from.y>bottom || target.x<left || target.x>right || target.y<top || target.y>bottom) return false;
+    const width=right-left+1,height=bottom-top+1,blocked=new Uint8Array(width*height);
+    for(let y=top;y<=bottom;y++)for(let x=left;x<=right;x++)blocked[(y-top)*width+x-left]=
+      fundingMap.blocked[y*fundingMap.width+x] || Number(inFundingTransfer({x,y},bounds));
+    return findProtocolWalkPath({map:{width,height,blocked},start:{x:from.x-left,y:from.y-top},target:{x:target.x-left,y:target.y-top},desiredDistance:1})!==null;
+  }
+  function fundingHistoryBlocksGoals(from,target,bounds) {
+    const at=plannerNow(),goals=[];
+    for(let y=Math.max(0,target.y-1);y<=target.y+1;y++)for(let x=Math.max(0,target.x-1);x<=target.x+1;x++){
+      const c={x,y};
+      if(protocolMapCellIsWalkable(fundingMap,c) && !inFundingTransfer(c,bounds))goals.push(c);
+    }
+    if (!goals.length) return false; // Static query already excludes an empty goal set.
+    const trails=[...plannerTrail.values()].filter(t => t.expiresAt>at && acquisitionGeometry(t.entity,8,t).rectangle===true);
+    return goals.every(cell=>trails.some(t =>
+      !(distance(cell,t)!==0 && protectedCell(t.entity,cell,true)) && entersThreatCell(from,cell,t,{x:8,y:6,rectangle:true})));
+  }
+  function recordFundingCandidateQuery(id,from,target,reason) {
+    fundingCandidateQueryCount++;
+    const last=fundingCandidateQueries.at(-1);
+    if(last && last.objectId===id && last.reason===reason && last.sequence===client.sequence &&
+      distance(last.from,from)===0 && distance(last.target,target)===0)return;
+    if(fundingCandidateQueries.length<32)fundingCandidateQueries.push({objectId:id,sequence:client.sequence,
+      observedSnapshotSequence:lastObserved,from:{x:from.x,y:from.y},target:{...target},reason,
+      staticAoiRadius:16,range:1,queryOnly:true,attemptCharged:false,qualificationGranted:false});
+  }
   function preferFundingCandidate(candidate) {
-    guard();
-    const id = objectId(candidate?.objectId);
-    return id !== null && fundingTargetFacts(id).reason === null;
+    const from=guard(),id=objectId(candidate?.objectId);
+    if(id===null || fundingTargetFacts(id).reason!==null)return false;
+    if(fundingMap===undefined)return true;
+    const target=point(candidate,'funding candidate'),bounds=fundingTransferBounds();
+    const reason=!fundingStaticRouteExists(from,target,bounds)?'static-aoi-unreachable':
+      fundingHistoryBlocksGoals(from,target,bounds)?'certified-goal-blocked':null;
+    guard(); // Synchronous planning time belongs to the same actor/global budget.
+    if(reason)recordFundingCandidateQuery(id,from,target,reason);
+    return reason===null;
+  }
+  function fundingAoiBoundary() {
+    if(fundingMap===undefined || fundingApproachId===null)return [];
+    assertFundingApproach('approach-planning');
+    const target=point(fundingTargetFacts(fundingApproachId).target,'funding approach target'),cells=[];
+    for(let y=Math.max(0,target.y-17);y<=Math.min(65535,target.y+17);y++)for(let x=Math.max(0,target.x-17);x<=Math.min(65535,target.x+17);x++)
+      if(distance({x,y},target)===17)cells.push({x,y});
+    return cells;
+  }
+  function assertFundingAoiCells(cells) {
+    if(fundingMap===undefined || fundingApproachId===null)return;
+    const target=fundingTargetFacts(fundingApproachId).target;
+    if(cells.some(cell=>distance(cell,target)>16))throw new FundingTargetLoss(fundingApproachId,'approach-leaves-aoi');
   }
   function assertFundingTarget(command, phase) {
     const id = integer(command.objectId, 'attack objectId', 1, 0xffff_ffff);
@@ -537,7 +607,7 @@ export function createOrdinarySupplies(client, options = {}) {
       record.status = 'completed'; return cleared;
     } catch (error) {
       record.status = 'terminal'; record.reason = 'ordinary-operation-failed';
-      if (error instanceof FundingTargetLoss && ['missing','ambiguous-id','not-deer','not-confirmed-live','not-neutral-deer','hostile-near-deer'].includes(error.reason)) record.reason = error.reason;
+      if (error instanceof FundingTargetLoss && ['missing','ambiguous-id','not-deer','not-confirmed-live','not-neutral-deer','hostile-near-deer','approach-leaves-aoi'].includes(error.reason)) record.reason = error.reason;
       else if (error instanceof NavigationStalled) record.reason = 'navigation-stalled';
       else {
         try {
@@ -583,7 +653,12 @@ export function createOrdinarySupplies(client, options = {}) {
         await client.pace(); guard();
         let command = queue.shift();
         if (['walk', 'run'].includes(command.type)) {
-          try { assertFundingApproach('approach-send'); assertMovement(command, movementOrigins.get(command)); }
+          try {
+            assertFundingApproach('approach-send');
+            const origin=movementOrigins.get(command),delta=DIRECTIONS[command.direction];
+            if(origin&&delta)assertFundingAoiCells(Array.from({length:command.type==='run'?2:1},(_,i)=>({x:origin.from.x+delta[0]*(i+1),y:origin.from.y+delta[1]*(i+1)})));
+            assertMovement(command, origin);
+          }
           catch (error) {
             // This precise movement was dequeued but never dispatched. A
             // retry is possible only with no other queued side effects.
@@ -670,6 +745,7 @@ export function createOrdinarySupplies(client, options = {}) {
     const safeOptions = { ...navOptions, hostileAvoidanceRadius: radius, allowedHostileObjectIds: [],
       beforeMovement: context => {
         assertFundingApproach('approach-before-movement');
+        assertFundingAoiCells(context.physicalCells);
         const hazard = movementHazard(context.movementType, 'before-movement', context.from, context.physicalCells);
         return hazard ?? navOptions?.beforeMovement?.(context);
       } };
@@ -686,8 +762,10 @@ export function createOrdinarySupplies(client, options = {}) {
           // later clock read may revoke this view, but cannot enlarge it.
           return [...current].filter(id => plannerViewAllowed === null || plannerViewAllowed.has(id));
         } },
-        forbiddenPoints: { enumerable:true, get:() => [...(navOptions?.forbiddenPoints ?? []), ...protectedPlannerObstacles(policy)] },
+        forbiddenPoints: { enumerable:true, get:() => [...(navOptions?.forbiddenPoints ?? []), ...protectedPlannerObstacles(policy), ...fundingAoiBoundary()] },
       });
+    } else if (fundingMap!==undefined && fundingApproachId!==null) {
+      Object.defineProperty(safeOptions,'forbiddenPoints',{enumerable:true,get:()=>[...(navOptions?.forbiddenPoints??[]),...fundingAoiBoundary()]});
     }
     try {
       for (;;) {
@@ -908,6 +986,8 @@ export function createOrdinarySupplies(client, options = {}) {
       qualificationEventCount,qualificationRepeatedReads,qualificationEventsTruncated:qualificationEventCount>qualificationEvents.length,
       qualificationEvents:qualificationEvents.map(row=>({...row,input:row.input?{...row.input}:null,observed:row.observed?{...row.observed}:null})),
       navigationNoPath,
+      fundingCandidateQueryCount, fundingCandidateQueriesTruncated:fundingCandidateQueryCount>fundingCandidateQueries.length,
+      fundingCandidateQueries:fundingCandidateQueries.map(row=>({...row,from:{...row.from},target:{...row.target}})),
       fundingDiscoveries: fundingDiscoveries.map(row=>({...row,searchPoint:{...row.searchPoint}})),
       fundingApproaches: fundingApproaches.map(row => ({ ...row, from:{...row.from}, target:{...row.target} })),
       fundingTargetRejections: fundingTargetRejections.map(row => ({ ...row })), fundingTargetRejectionCount,

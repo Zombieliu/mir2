@@ -16,7 +16,7 @@ function fixture(config = {}) {
   const actor = { objectId: config.ownerId ?? 1, kind: 'selfPlayer', name: 'ordinary-owner', class: 'Warrior', x: config.ownerPosition?.x ?? 290, y: config.ownerPosition?.y ?? 607, hp: config.ownerHp ?? 100, maxHp: config.ownerMaxHp ?? 100, dead: false };
   const client = {
     label: config.label ?? 'ordinary-owner', sequence: 0, events: [], sent: [], slots: [], attackResults: config.v2 ? 'v2' : 'legacy', attackV2Supported: config.v2 === true, closed: false,
-    snapshot: { playerObjectId: actor.objectId, mapFileName: '0', playerHp: actor.hp, playerMaxHp: actor.maxHp, gold: config.gold ?? 0, inventoryCapacity: 46,
+    snapshot: { playerObjectId: actor.objectId, mapFileName: '0', playerHp: actor.hp, playerMaxHp: actor.maxHp, gold: config.gold ?? 0, inventoryCapacity: 46, mapTransfers:config.mapTransfers??[],
       inventoryItems: config.items ?? [], beltItems: [], groundDrops: [], entities: [actor,
         { objectId: 6, kind: 'npc', name: 'Merchant_John', x: 292, y: 603 },
         { objectId: 5, kind: 'npc', name: 'Merchant_Ruben', x: 288, y: 608 },
@@ -162,7 +162,7 @@ function fixture(config = {}) {
   }
   let preparation = true;
   const supply = createOrdinarySupplies(client, { preparationProfile: 'ordinary-economic-v1', targetHp: config.target ?? 12, route,
-    stagingPoint: config.stagingPoint ?? { x: 290, y: 607 }, resolveStagingPoint: config.resolveStagingPoint, ordinaryProtection: config.ordinaryProtection, isPreparation: () => preparation, now: () => clock,
+    stagingPoint: config.stagingPoint ?? { x: 290, y: 607 }, ...(config.fundingNavigationMap===undefined?{}:{fundingNavigationMap:config.fundingNavigationMap}), resolveStagingPoint: config.resolveStagingPoint, ordinaryProtection: config.ordinaryProtection, isPreparation: () => preparation, now: () => clock,
     sleep: async ms => { config.onSleep?.({client,actor,ms,clock,packet}); clock += ms; }, maxHunts: config.maxHunts ?? 8, maxEmptySearchRefreshes:config.maxEmptySearchRefreshes ?? 20, timeoutMs: config.timeoutMs ?? 600_000,
     maxCommands: config.maxCommands ?? 2048,
     navigate: async (facade, target, range, stop, navOptions) => {
@@ -2200,4 +2200,146 @@ test('ordinary qualified-only selection races still consume eight actual attempt
   assert.equal(result.fundingTargetRejectionCount,8);assert.ok(result.fundingApproaches.every(row=>row.status==='target-lost'));
   assert.ok(result.fundingTargetRejections.every(row=>row.reason==='not-neutral-deer'&&row.phase==='approach-stop'));
   assert.equal(f.client.sent.some(c=>['attackV2','harvest','buyItem'].includes(c.type)),false);
+});
+
+
+const fundingOpenMap=(width=640,height=640)=>({mapFileName:'0',width,height,blocked:new Uint8Array(width*height)});
+test('fundingNavigationMap is explicit and validates map0 bitmap shape without changing legacy helpers',()=>{
+  for(const map of [null,{},fundingOpenMap(0,1),{...fundingOpenMap(),mapFileName:'1'},{...fundingOpenMap(),blocked:[]},
+    {...fundingOpenMap(),blocked:new Uint8Array(1)},{...fundingOpenMap(),width:1.5},fundingOpenMap(2001,2000)]){
+    assert.throws(()=>fixture({fundingNavigationMap:map}),/fundingNavigationMap/);
+  }
+  assert.doesNotThrow(()=>fixture({fundingNavigationMap:fundingOpenMap()}));assert.doesNotThrow(()=>fixture());
+});
+
+test('W15 four actual selected positions have no static AOI16 route and remain unselected with the pinned real map',async(t)=>{
+  const map=await loadProtocolCollisionMap('0');
+  for(const [id,start,target] of [[206500,{x:270,y:635},{x:256,y:621}],[206521,{x:273,y:614},{x:261,y:608}],
+    [206708,{x:275,y:612},{x:259,y:596}],[206706,{x:271,y:616},{x:255,y:609}]])await t.test(String(id),async()=>{
+    let armed=false;const f=fixture({deer:1,v2:true,fundingNavigationMap:map,maxEmptySearchRefreshes:1,
+      deerPositions:[target],onSnapshot:({client,actor})=>{if(client.events.some(e=>e.packet==='NPCGoods'))Object.assign(actor,start);},
+      navigate:async({target:goal,stop})=>{if(goal.name==='Deer')armed=true;else if(stop)assert.equal(stop(),false);}});
+    f.client.snapshot.entities.find(e=>e.name==='Deer').objectId=id;
+    await assert.rejects(f.supply.prepare(),/after 1 bounded refreshes/);
+    const status=f.supply.status();assert.equal(armed,false);assert.equal(status.fundingApproaches.length,0);
+    assert.ok(status.fundingCandidateQueries.some(q=>q.objectId===id&&q.reason==='static-aoi-unreachable'));
+    assert.equal(f.client.sent.some(c=>['attackV2','walk','run'].includes(c.type)),false);
+  });
+});
+
+test('funding local crop respects map edges, diagonal corner collision and every transfer without a global detour',async(t)=>{
+  const sentinel=new Error('fixture local candidate reached');
+  for(const mode of ['open-edge','diagonal-corner','transfer','outside-crop-wall'])await t.test(mode,async()=>{
+    const map=fundingOpenMap(32,32),start={x:2,y:2},target={x:0,y:0};let selected=false;
+    if(mode==='diagonal-corner'){map.blocked[1*32+2]=1;map.blocked[2*32+1]=1;map.blocked[3*32+2]=1;map.blocked[2*32+3]=1;}
+    const mapTransfers=mode==='transfer'?[{mapFileName:'0',bounds:{minX:0,maxX:1,minY:0,maxY:1}}]:[];
+    if(mode==='outside-crop-wall')for(let y=0;y<18;y++)map.blocked[y*32+1]=1;
+    const f=fixture({deer:1,v2:true,fundingNavigationMap:map,mapTransfers,maxEmptySearchRefreshes:1,deerPositions:[target],
+      onSnapshot:({client,actor})=>{if(client.events.some(e=>e.packet==='NPCGoods'))Object.assign(actor,start);},
+      navigate:async({target:goal})=>{if(goal.name==='Deer'){selected=true;throw sentinel;}}});
+    await assert.rejects(f.supply.prepare(),error=>mode==='open-edge'?error===sentinel:/bounded refreshes/.test(error.message));
+    assert.equal(selected,mode==='open-edge');assert.equal(f.client.sent.some(c=>c.type==='attackV2'),false);
+  });
+});
+
+async function fundingHistoryQueryFixture({target={x:281,y:596},expire=false,unknown=false}={}){
+  const map=await loadProtocolCollisionMap('0'),protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  const sentinel=new Error('fixture eligible after history query');let f,remembered=false,selected=false,waited=false;
+  f=fixture({ownerPosition:{x:293,y:612},deer:1,deerPositions:[target],v2:true,fundingNavigationMap:map,ordinaryProtection:protection,applyPackets:true,
+    maxEmptySearchRefreshes:1,hostiles:[hostile(206604,275,600,{name:'Scarecrow',...(unknown?{ai:undefined}: {})})],
+    navigate:async({target:goal,navOptions,packet,stop})=>{
+      if(goal.name==='Merchant_Ruben'&&!remembered){void navOptions.forbiddenPoints;remembered=true;packet('ObjectRemove',{objectId:206604});}
+      else if(goal.name==='Deer'){selected=true;if(unknown)assert.equal(navOptions.allowedHostileObjectIds.includes(206604),false);throw sentinel;}
+      else if(expire&&!waited){waited=true;f.advance(20_001);if(stop)stop();}
+    }});
+  // Unknown AI remains a genuine unknown DTO, not the source-backed omitted-AI case.
+  if(unknown)f.client.snapshot.entities.find(e=>e.objectId===206604).name='UnknownHostile';
+  try{await f.supply.prepare();assert.fail('fixture must terminate');}catch(error){
+    if(expire||unknown||target.y>=606)assert.equal(error,sentinel);else assert.match(error.message,/bounded refreshes/);
+  }
+  return {f,selected};
+}
+test('only certified unexpired retained goals reject; natural expiry and protected safe-zone cells stay distinct',async(t)=>{
+  await t.test('actual W15 last goal fully covered by closed normal history',async()=>{
+    const {f,selected}=await fundingHistoryQueryFixture();assert.equal(selected,false);
+    assert.ok(f.supply.status().fundingCandidateQueries.some(q=>q.reason==='certified-goal-blocked'));
+    assert.equal(f.supply.status().plannerThreatMemory.packetRenewals,0);
+  });
+  await t.test('original expiry naturally removes this query rejection without renewing any history',async()=>{
+    const {f,selected}=await fundingHistoryQueryFixture({expire:true});assert.equal(selected,true);
+    assert.equal(f.supply.status().fundingApproaches.length,1);assert.equal(f.supply.status().plannerThreatMemory.packetRenewals,0);
+  });
+  await t.test('current authored safe cells do not become historical AI0 forbidden goals',async()=>{
+    const {f,selected}=await fundingHistoryQueryFixture({target:{x:289,y:617}});assert.equal(selected,true);
+    assert.equal(f.supply.status().fundingCandidateQueries.some(q=>q.reason==='certified-goal-blocked'),false);
+  });
+  await t.test('unknown has no certified-query exemption or allowed ID',async()=>{
+    const {f,selected}=await fundingHistoryQueryFixture({unknown:true});assert.equal(selected,true);
+    assert.equal(f.supply.status().fundingCandidateQueries.some(q=>q.reason==='certified-goal-blocked'),false);
+    assert.equal(f.client.sent.some(c=>c.type==='attackV2'),false);
+  });
+});
+
+test('exact selected approach AOI ring and beforeMovement cover Walk1 and both Run2 cells without sending out-of-view steps',async(t)=>{
+  for(const type of ['walk','run'])await t.test(type,async()=>{
+    let checked=false;const origin={x:type==='walk'?290:289,y:607},goal={x:274,y:607};
+    const f=fixture({ownerPosition:origin,deer:1,deerPositions:[goal],v2:true,fundingNavigationMap:fundingOpenMap(),maxEmptySearchRefreshes:1,
+      navigate:async({target,navOptions,actor})=>{if(target.name!=='Deer')return;checked=true;
+        assert.ok(navOptions.forbiddenPoints.some(p=>p.x===291&&p.y===607));
+        navOptions.beforeMovement({from:{x:actor.x,y:actor.y},physicalCells:Array.from({length:type==='run'?2:1},(_,i)=>({x:actor.x+i+1,y:actor.y})),movementType:type});}});
+    await assert.rejects(f.supply.prepare(),/bounded refreshes/);const row=f.supply.status().fundingApproaches[0];
+    assert.equal(checked,true);assert.equal(row.status,'target-lost');assert.equal(row.reason,'approach-leaves-aoi');
+    assert.equal(f.client.sent.some(c=>['walk','run','attackV2'].includes(c.type)),false);
+  });
+});
+test('pace-updated selected target drives the send AOI gate and stale queued metadata cannot replay',async(t)=>{
+  for(const queued of [false,true])await t.test(queued?'pending-command-fatal':'single-unsent-target-loss',async()=>{
+    let armed=false,changed=false;
+    const f=fixture({ownerPosition:{x:289,y:607},deer:1,deerPositions:[{x:274,y:607}],v2:true,fundingNavigationMap:fundingOpenMap(),maxEmptySearchRefreshes:1,
+      onPace:({client})=>{if(armed&&!changed){changed=true;client.snapshot.entities.find(e=>e.name==='Deer').x=273;}},
+      navigate:async({target,facade,navOptions,actor})=>{if(target.name!=='Deer')return;
+        assert.equal(navOptions.beforeMovement({from:{x:actor.x,y:actor.y},physicalCells:[{x:290,y:607}],movementType:'walk'}),undefined);
+        armed=true;facade.send({type:'walk',direction:'Right'});if(queued)facade.send({type:'turn',direction:'Right'});await facade.wait(()=>false,'funding boundary wait');}});
+    await assert.rejects(f.supply.prepare(),queued?/target loss with pending commands/:/bounded refreshes/);
+    assert.equal(changed,true);assert.equal(f.client.sent.some(c=>['walk','run','turn','attackV2'].includes(c.type)),false);
+    assert.equal(f.supply.status().fundingApproaches[0].reason,'approach-leaves-aoi');
+  });
+});
+
+
+test('funding AOI ring follows the same selected ID latest position rather than retaining a stale target cell',async()=>{
+  const sentinel=new Error('fixture dynamic ring checked');let checked=false;
+  const f=fixture({ownerPosition:{x:289,y:607},deer:1,deerPositions:[{x:274,y:607}],v2:true,fundingNavigationMap:fundingOpenMap(),
+    navigate:async({target,navOptions,client})=>{if(target.name!=='Deer')return;
+      assert.ok(navOptions.forbiddenPoints.some(p=>p.x===291&&p.y===607));
+      client.snapshot.entities.find(e=>e.objectId===target.objectId).x=275;
+      const updated=navOptions.forbiddenPoints;assert.ok(updated.some(p=>p.x===292&&p.y===607));
+      assert.equal(updated.some(p=>p.x===291&&p.y===607),false);checked=true;throw sentinel;}});
+  await assert.rejects(f.supply.prepare(),error=>error===sentinel);assert.equal(checked,true);assert.equal(f.client.sent.some(c=>c.type==='attackV2'),false);
+});
+test('funding map query rejects malformed or non-current transfer metadata instead of granting a path',async()=>{
+  for(const transfers of [null,[{bounds:{minX:1,maxX:0,minY:0,maxY:0}}],[{mapFileName:'2',bounds:{minX:1,maxX:1,minY:0,maxY:0}}],
+    [{bounds:{minX:1.5,maxX:2,minY:0,maxY:0}}]]){
+    const f=fixture({deer:1,v2:true,fundingNavigationMap:fundingOpenMap()});f.client.snapshot.mapTransfers=transfers;
+    await assert.rejects(f.supply.prepare(),/funding map transfer/);assert.equal(f.supply.status().fundingApproaches.length,0);
+    assert.equal(f.client.sent.some(c=>c.type==='attackV2'),false);
+  }
+});
+test('funding static query and AOI checks never replace the original command health identity transport or wall guards',async(t)=>{
+  await t.test('shared command budget',async()=>{
+    const f=fixture({deer:1,v2:true,fundingNavigationMap:fundingOpenMap(),maxCommands:4});
+    await assert.rejects(f.supply.prepare(),/command budget exhausted/);assert.equal(f.client.sent.length,4);
+    assert.equal(f.client.sent.some(c=>c.type==='attackV2'),false);
+  });
+  for(const fault of ['hp','name','map','closed','wall'])await t.test(fault,async()=>{
+    let armed=false,f;
+    f=fixture({ownerPosition:{x:289,y:607},deer:1,deerPositions:[{x:274,y:607}],v2:true,fundingNavigationMap:fundingOpenMap(),
+      onPace:({client,actor})=>{if(!armed)return;if(fault==='hp'){client.snapshot.playerHp=10;actor.hp=10;}
+        if(fault==='name')actor.name='foreign-owner';if(fault==='map')client.snapshot.mapFileName='2';
+        if(fault==='closed')client.closed=true;if(fault==='wall')f.advance(600_001);},
+      navigate:async({target,facade})=>{if(target.name!=='Deer')return;armed=true;facade.send({type:'walk',direction:'Right'});await facade.wait(()=>false,'funding original guard');}});
+    await assert.rejects(f.supply.prepare(),fault==='closed'?/transport closed/:fault==='wall'?/wall budget exhausted/:/owner.map.health changed/);
+    assert.equal(f.client.sent.some(c=>['walk','attackV2'].includes(c.type)),false);
+    assert.notEqual(f.supply.status().fundingApproaches[0].reason,'approach-leaves-aoi');
+  });
 });

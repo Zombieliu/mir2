@@ -2090,7 +2090,7 @@ export async function prepareCapacityActor(client, context, configuration, { cre
   const navigators = new WeakMap();
   client.ordinarySupplies = createSupplies(client, {
     preparationProfile: 'ordinary-economic-v1', targetHp: context.policy.preparationHpTarget,
-    ...configuration, ...(remainingTimeoutMs === undefined ? {} : { timeoutMs: remainingTimeoutMs }), ordinaryProtection, isPreparation: () => context.phase === 'preparation' && !client.ready && !client.draining,
+    ...configuration, ...(remainingTimeoutMs === undefined ? {} : { timeoutMs: remainingTimeoutMs }), ordinaryProtection, fundingNavigationMap:context.map, isPreparation: () => context.phase === 'preparation' && !client.ready && !client.draining,
     navigate: (facade, target, range, stop, options) => {
       if (!navigators.has(facade)) navigators.set(facade, createNavigator(facade, {
         loadCollisionMap: async map => {

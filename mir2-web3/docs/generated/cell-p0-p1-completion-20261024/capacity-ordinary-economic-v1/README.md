@@ -262,3 +262,19 @@ ca426258a的[新鲜1080项选定门禁](bank-prepare-v14/node-v14/root-focused-r
 后续普通显式资格模式仅在当前无合格候选时继续原有界搜索，并使NAV停止条件使用同一资格事实；默认优选排序及all-false回退保持。已实际选择的竞态失败和旧ID排除照扣原8次，不退款上述真实尝试；原600秒、2048命令、连续空搜20与cue终身20、每ID一次和三次replan均保持。新白名单终止类别只用于未来诊断，不追认历史42原因；实际改善待后续原门槛实测。
 
 正常保存、六项计数归零、整体清理及[Root独立OS](bank-prepare-v14/root-independent-cleanup-v1.json)通过，PID57320消失、端口释放；原failed summary的normalLogout=false保留，后续正常logout ACK不授准备资格。44份新公共原件12,001,756字节已由Root逐件复核源/副本原字节，见[说明](bank-prepare-v14/README.md)及[清单](bank-prepare-v14/copied-evidence-manifest.json)。P0未完成、P2未启动，没有新25/50/100/500或两小时容量通过。
+
+## 第十五轮：42人准备完成，43号真实绕路丢失目标及不可达选择
+
+46274c1d4的[新鲜780项选定门禁](bank-prepare-v15/node-v15/root-focused-receipt-v1.json)实际354+371+55通过，42个named输入前后不变。ca426的315项容量执行/策略回归为来源未变的历史检查，不与780累加或称新鲜重跑；[完整14依赖相等证明](bank-prepare-v15/full16-reuse/ordinary-full16-reuse-proof-v15.json)严格复用d9ec实际full16、V6/55输入/Rust32/build，没有新Rust构建。
+
+[原W15报告](bank-prepare-v15/1793084170216-93e9fe64.preparation-report.json)为42prepared/100、零测量。25人检查点后的单出口准入等待正常结束，自动推进；第42人以2次狩猎/4次尝试实售250+221=471、买11药花440、fresh库存12、余31并正常保存，不追认W14失败。
+
+第43人142命令/91移动、约127.581秒，8次实际选择：206714完成一次；206530移动至新Scarecrow危区后被守卫拒；206500/206521/206708/206706在接近中missing；206711/206320明确no-walk-path。没有selection阶段拒绝，也没有no-authoritative-progress；严格资格避免已知危险选择，并不承诺路线可达。5次cue均完成fresh raw。最后同一fresh资本为UID4、数量1、卖价257，加gold0，合计257/440；未售卖、购药，after/readiness仍null，不能退款任何已选尝试。
+
+窄世界录制中四个missing目标仍活着，角色绕路后与目标距离达到17～18格，与AOI16离开一致；不能把旁观采样冒充逐客户端ObjectRemove证据。后续[离线几何补充](bank-prepare-v15/geometry-supplement-v1/README.md)使用真实map0碰撞与transfer证明：四个目标的最小静态路线半径分别23/18/20/24，均超出16；只加边界环会提前失败。末次目标的全部range1格又被仍有效的历史Scarecrow禁区覆盖。早期动态投影明确不是完整client planner历史重放。
+
+准备候选后续增加只拒绝查询：主入口强制传当前碰撞图，目标AOI16内静态无路或有效历史禁区覆盖全部合法近战格时不选；已选接近维持动态目标视野边界，Walk/Run每一实际格在移动前及pace后重核，越界独立记approach-leaves-aoi。原默认采猎、600秒/2048命令/8次已选尝试、连续空搜/有限cue及全部生命/队列守卫保持；静态和单元检查不能替代后续真实准备。
+
+续跑另建显式continuation-only合同：完整100 pool、Store、原ledger、四密钥及控制文件原字节复制；历史42仅historical/notFresh，原索引43～100仍逐个普通登录、补给和保存，pool.state=ready不代表成功。历史保存点只作选址排除，不冒充当前Zone占格；本轮preparedCount只计新成功，与历史数分开。组合角色库完整仍不授全100本轮fresh、完整持久重登、容量或P0资格；原正式2/10/25/50/100阶梯仍全100逐个重登并验证当前就绪，既有active cohort不暂停。
+
+正常保存、六项计数归零、整体清理及[Root独立OS](bank-prepare-v15/root-independent-cleanup-v1.json)通过，PID77056消失、端口释放；原failed normalLogout=false与后续308.959ms正常logout ACK分开，不据此授就绪。40份新公共原件6,972,033字节由Root逐件复核源/副本原字节，见[说明](bank-prepare-v15/README.md)及[清单](bank-prepare-v15/copied-evidence-manifest.json)，几何补充单列清单不改原40件。P0未完成、P2未启动，没有新25/50/100/500或两小时容量通过。

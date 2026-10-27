@@ -663,7 +663,7 @@ test('ordinary preparation is opt-in and requires distinct explicit per-actor st
 function ordinaryPreparationFixture() {
   const f = hpRecoveryFixture(), { client, context, owner, commands } = f, joins = [];
   context.phase = 'preparation'; context.clients = [client];
-  context.map = { width: 640, height: 640, blocked: new Uint8Array(640 * 640) };
+  context.map = { mapFileName:'0', width: 640, height: 640, blocked: new Uint8Array(640 * 640) };
   Object.assign(owner, { x: 286, y: 616 }); client.home = { x: 286, y: 616 };
   context.policy = capacityPolicy({ profile: 'probe', activityMode: 'native', preparationProfile: 'ordinary-economic-v1' });
   context.continuous = { join: (...args) => joins.push(args) };
@@ -680,10 +680,11 @@ function ordinaryPreparationFixture() {
 test('ordinary preparation uses the canonical same-map protection spec and ignores an injected configuration replacement', async () => {
   const f = ordinaryPreparationFixture(), { client, context, configuration } = f;
   const fake = { runtimeProfileId: 'platinum_176', mapFileName: '0', allDamageImmunity: true, safeZones: [] };
-  configuration.ordinaryProtection = fake; let actual;
+  configuration.ordinaryProtection = fake; configuration.fundingNavigationMap={mapFileName:'0',width:1,height:1,blocked:new Uint8Array(1)}; let actual, actualMap;
   await prepareCapacityActor(client, context, configuration, { createSupplies: (_client, options) => {
-    actual = options.ordinaryProtection; return { prepare: async () => ({ status: 'ready' }) };
+    actual = options.ordinaryProtection; actualMap=options.fundingNavigationMap; return { prepare: async () => ({ status: 'ready' }) };
   } });
+  assert.equal(actualMap,context.map);assert.notEqual(actualMap,configuration.fundingNavigationMap);
   assert.notEqual(actual, fake); assert.equal(actual.runtimeProfileId, 'platinum_176'); assert.equal(actual.mapFileName, '0');
   assert.equal(actual.selectedMapMatches, true); assert.equal(actual.normalAi0SafeZoneOnly, true); assert.equal(actual.allDamageImmunity, false);
   assert.ok(Object.isFrozen(actual)); assert.ok(actual.safeZones.length > 0); assert.ok(actual.ai0MonsterNames.includes('Scarecrow'));
