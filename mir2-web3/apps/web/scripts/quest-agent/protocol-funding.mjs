@@ -154,6 +154,7 @@ export async function collectSafeFundingVenison(owner, {
   refreshWhileWaiting,
   requiredCount = 2,
   hasRequiredBudget,
+  preferCandidate,
   maxHunts = 8,
   maxEmptySearchRefreshes = 20,
   clearMonster = clearTravelBlockingMonster,
@@ -168,6 +169,7 @@ export async function collectSafeFundingVenison(owner, {
   if (typeof clearMonster !== 'function') throw new TypeError('clearMonster must be a function');
 
   if (hasRequiredBudget !== undefined && typeof hasRequiredBudget !== 'function') throw new TypeError('hasRequiredBudget must be a function');
+  if (preferCandidate !== undefined && typeof preferCandidate !== 'function') throw new TypeError('preferCandidate must be a function');
   const capitalMode = hasRequiredBudget !== undefined;
   const targetCount = positiveInteger(requiredCount, 'requiredCount');
   async function requiredBudgetSatisfied() {
@@ -196,7 +198,7 @@ export async function collectSafeFundingVenison(owner, {
   // Check after the last allowed attempt too; the predicate never refunds or
   // skips a selection attempt, and errors remain terminal.
   while (!(goalSatisfied = await requiredBudgetSatisfied()) && huntAttempts < huntLimit) {
-    let target = liveFundingDeer(owner.snapshot, contestedDeerIds);
+    let target = liveFundingDeer(owner.snapshot, contestedDeerIds, preferCandidate);
     if (!target) {
       const actor = selfPlayer(owner);
       const ordered = [...fundingSearchPoints].sort((left, right) =>
@@ -235,7 +237,7 @@ export async function collectSafeFundingVenison(owner, {
           }
           continue;
         }
-        target = liveFundingDeer(owner.snapshot, contestedDeerIds);
+        target = liveFundingDeer(owner.snapshot, contestedDeerIds, preferCandidate);
         if (target) break;
       }
     }
@@ -367,14 +369,24 @@ function recoverableFundingTargetLoss(error) {
     /^target \d+ made no authoritative combat progress after \d+ attacks$/i.test(message);
 }
 
-function liveFundingDeer(snapshot, ignoredObjectIds) {
+function liveFundingDeer(snapshot, ignoredObjectIds, preferCandidate) {
   const actor = selfPlayer({ snapshot });
-  return (snapshot?.entities ?? [])
+  const candidates = (snapshot?.entities ?? [])
     .filter(entity => normalized(entity?.kind) === 'monster' &&
       normalized(entity?.name) === 'deer' && entity?.dead !== true && Number(entity?.hp) > 0 &&
       !ignoredObjectIds.has(Number(entity?.objectId)))
     .sort((left, right) => pointDistance(actor, left) - pointDistance(actor, right) ||
-      Number(left.objectId) - Number(right.objectId))[0] ?? null;
+      Number(left.objectId) - Number(right.objectId));
+  if (preferCandidate === undefined) return candidates[0] ?? null;
+  // Priority never removes a candidate or charges an attempt. Evaluate every
+  // current candidate so callback failures cannot be hidden by an early match.
+  const preferred = candidates.map(candidate => {
+    const result = preferCandidate(candidate);
+    if (typeof result !== 'boolean') throw new TypeError('preferCandidate must return a literal boolean');
+    return result;
+  });
+  const first = preferred.indexOf(true);
+  return candidates[first < 0 ? 0 : first] ?? null;
 }
 
 async function harvestFundingCorpse(owner, initialCorpse, navigate, targetInventoryCount, sleep) {

@@ -473,8 +473,7 @@ export function createOrdinarySupplies(client, options = {}) {
     const hazard = movementHazard(command.type, 'send', from, cells, origin.policy);
     if (hazard) throw new SupplyPathHazard(hazard);
   }
-  function assertFundingTarget(command, phase) {
-    const id = integer(command.objectId, 'attack objectId', 1, 0xffff_ffff);
+  function fundingTargetFacts(id) {
     const matches = (client.snapshot.entities ?? []).filter(entity => objectId(entity.objectId) === id);
     const target = matches.length === 1 ? matches[0] : null;
     const blocker = target && visibleHostiles().find(hostile => { const p = point(hostile, 'visible hostile'); return Math.abs(p.x-target.x)<=8 && Math.abs(p.y-target.y)<=6; });
@@ -483,6 +482,16 @@ export function createOrdinarySupplies(client, options = {}) {
       target.dead !== false || !Number.isFinite(target.hp) || !(target.hp > 0) ? 'not-confirmed-live' :
       target.disposition !== 'neutral' || target.ownerName ? 'not-neutral-deer' :
       blocker ? 'hostile-near-deer' : null;
+    return { matches, target, blocker, reason };
+  }
+  function preferFundingCandidate(candidate) {
+    guard();
+    const id = objectId(candidate?.objectId);
+    return id !== null && fundingTargetFacts(id).reason === null;
+  }
+  function assertFundingTarget(command, phase) {
+    const id = integer(command.objectId, 'attack objectId', 1, 0xffff_ffff);
+    const { matches, target, blocker, reason } = fundingTargetFacts(id);
     if (!reason) return;
     const value = guard();
     fundingTargetRejectionCount++;
@@ -931,7 +940,7 @@ export function createOrdinarySupplies(client, options = {}) {
           const wanted = venisonStock(client.snapshot) + Math.max(1, Math.ceil((requiredGold - guard().gold) / 200));
           const initialGoods = { ...goods };
           funding = await collectSafeFundingVenison(facade, { route: options.route, requiredCount: wanted, maxHunts, maxEmptySearchRefreshes,
-            hasRequiredBudget: () => hasRequiredFundingBudget(initialGoods),
+            hasRequiredBudget: () => hasRequiredFundingBudget(initialGoods), preferCandidate: preferFundingCandidate,
             travel: async map => { if (map !== '0') throw new Error('ordinary supplies: map travel forbidden'); guard(); },
             navigate, clearMonster: clearFundingMonster, sleep: pause, refreshWhileWaiting: refresh, sustain: async () => { await drain(); guard(); } });
           await refresh(); await sellUntil(requiredGold);

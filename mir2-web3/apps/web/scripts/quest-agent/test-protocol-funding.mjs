@@ -792,3 +792,33 @@ test('default count rechecks actual inventory after the asynchronous completion 
   await assert.rejects(f.run(),/holds 0\/2 Venison after 0 hunts and 0 attempts/);
   assert.equal(removed,true);assert.equal(f.attacks(),0);assert.equal(f.calls(),0);
 });
+
+test('opt-in candidate priority preserves distance and ID ties without filtering the remaining Deer',async()=>{
+  const f=capitalFundingFixture();const selected=[],evaluated=[];
+  f.owner.snapshot.entities.find(e=>e.objectId===21).x=8;
+  f.owner.snapshot.entities.find(e=>e.objectId===23).x=8;
+  f.options.preferCandidate=candidate=>{evaluated.push(candidate.objectId);return [21,23].includes(candidate.objectId);};
+  const clear=f.options.clearMonster;f.options.clearMonster=async(...args)=>{selected.push(args[1].objectId);
+    Object.assign(f.owner.snapshot.entities[0],{x:args[1].x-1,y:args[1].y});return clear(...args);};
+  const result=await f.run();assert.deepEqual(selected,[21,23]);assert.equal(result.huntAttempts,2);assert.equal(result.collected,2);
+  assert.equal(evaluated.length,15);assert.ok(evaluated.includes(20));assert.ok(evaluated.includes(27));
+});
+test('no preferred candidate falls back to the old nearest order and rejected selections still exhaust the cap',async()=>{
+  const f=capitalFundingFixture();const selected=[];f.options.preferCandidate=()=>false;
+  f.options.clearMonster=async(_owner,target)=>{selected.push(target.objectId);throw new Error(`target ${target.objectId} left the authoritative snapshot before attack`);};
+  await assert.rejects(f.run(),/0 hunts and 8 attempts/);assert.deepEqual(selected,[20,21,22,23,24,25,26,27]);assert.equal(f.calls(),9);
+});
+test('a selected preferred Deer lost in a race still charges its attempt and remains excluded',async()=>{
+  const f=capitalFundingFixture();const selected=[];f.options.preferCandidate=()=>true;
+  const clear=f.options.clearMonster;f.options.clearMonster=async(...args)=>{const id=args[1].objectId;selected.push(id);
+    if(id===20)throw new Error('target 20 left the authoritative snapshot before attack');return clear(...args);};
+  const result=await f.run();assert.deepEqual(selected,[20,21,22]);assert.equal(result.huntAttempts,3);assert.equal(result.hunts,2);
+});
+test('candidate priority requires synchronous literal booleans and preserves callback failures before selection',async()=>{
+  for(const value of [1,0,null,undefined,'true',{},Promise.resolve(true)]){
+    const f=capitalFundingFixture();f.options.preferCandidate=()=>value;await assert.rejects(f.run(),/literal boolean/);assert.equal(f.attacks(),0);
+  }
+  const original=new Error('candidate guard failed');const f=capitalFundingFixture();
+  f.options.preferCandidate=candidate=>{if(candidate.objectId===21)throw original;return true;};
+  await assert.rejects(f.run(),error=>error===original);assert.equal(f.attacks(),0);
+});

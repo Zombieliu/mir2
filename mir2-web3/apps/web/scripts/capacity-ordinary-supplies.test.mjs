@@ -972,10 +972,9 @@ test('a nearby non-Deer threat excludes the dangerous Deer before a bounded safe
   const result = await f.supply.prepare();
   assert.equal(result.status, 'ready'); assert.equal(result.funding.collected, 3);
   assert.equal(f.client.sent.some(command => command.objectId === 99 && ['attack', 'attackV2'].includes(command.type)), false);
-  assert.equal(result.fundingTargetRejections[0].targetId, 20);
-  assert.equal(result.fundingTargetRejections[0].reason, 'hostile-near-deer');
-  assert.equal(result.fundingTargetRejections[0].blocker.name, 'Scarecrow');
-  assert.equal(result.fundingTargetRejections[0].phase, 'selection');
+  assert.equal(result.fundingTargetRejectionCount,0,'unselected nonpreferred Deer is not a failed attempt');
+  assert.deepEqual(result.fundingApproaches.map(row=>row.objectId),[21,22,23]);
+  assert.equal(result.funding.huntAttempts,3);
 });
 
 test('target loss cannot disguise owner safety changes or transport failures during pacing', async t => {
@@ -1114,7 +1113,13 @@ test('friendly, unclassified or owned Deer are not ordinary neutral funding targ
     if(kind==='owned')target.ownerName='another-player';
     assert.equal((await f.supply.prepare()).status,'ready');
     assert.equal(f.client.sent.some(c=>c.type==='attackV2'&&c.objectId===20),false);
-    assert.equal(f.supply.status().fundingTargetRejections[0].reason,'not-neutral-deer');
+    assert.equal(f.supply.status().fundingTargetRejectionCount,0);
+    assert.equal(f.supply.status().funding.huntAttempts,2);
+    const fallback=fixture({deer:1,v2:true,maxHunts:1});const only=fallback.client.snapshot.entities.find(e=>e.objectId===20);
+    if(kind==='friendly')only.disposition='friendly';if(kind==='unknown')delete only.disposition;if(kind==='owned')only.ownerName='another-player';
+    await assert.rejects(fallback.supply.prepare(),/0 hunts and 1 attempts/);
+    assert.equal(fallback.supply.status().fundingTargetRejections[0].reason,'not-neutral-deer');
+    assert.equal(fallback.supply.status().fundingApproaches.length,1);
   });
 });
 
@@ -2085,4 +2090,14 @@ test('funding approach external failure text stays private and the exact origina
     assert.equal(JSON.stringify(result).includes(secret),false);assert.equal(result.fundingCapitalProofCount,1);
     assert.equal(f.client.sent.some(c=>['walk','run','attackV2'].includes(c.type)),false);
   });
+});
+
+test('ordinary known-safe priority selects farther eligible Deer without charging the seven unselected unsafe candidates',async()=>{
+  const f=fixture({deer:9,v2:true,nonDeerBlocker:true,stagingPoint:{x:310,y:607},
+    deerPositions:[...Array.from({length:7},(_,i)=>({x:283+i,y:604})),{x:300,y:604},{x:302,y:604}]});
+  const result=await f.supply.prepare();assert.equal(result.status,'ready');assert.equal(result.funding.huntAttempts,2);
+  assert.deepEqual(result.fundingApproaches.map(row=>row.objectId),[27,28]);assert.equal(result.fundingTargetRejectionCount,0);
+  assert.equal(result.funding.hunts,2);assert.equal(result.purchased,12);assert.equal(result.after.hpStock,12);
+  assert.equal(f.client.sent.some(c=>c.type==='attackV2'&&c.objectId<27),false);
+  assert.ok(f.client.snapshot.entities.filter(e=>e.name==='Deer'&&!e.dead).length>=7,'nonpreferred candidates were not removed or declared attempted');
 });

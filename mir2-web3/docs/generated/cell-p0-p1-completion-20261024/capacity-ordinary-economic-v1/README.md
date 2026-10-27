@@ -226,3 +226,13 @@ a45e4d1ff的[新鲜702项选定门禁](bank-prepare-v11/node-v11/root-focused-re
 普通logout ACK、整体清理及[Root独立OS](bank-prepare-v11/root-independent-cleanup-v1.json)通过，PID69424消失、端口释放。40份新公共原件5,736,893字节见[说明](bank-prepare-v11/README.md)及[清单](bank-prepare-v11/copied-evidence-manifest.json)，旧full16工具历史仅链接W10。P0未完成、P2未启动，没有新25/50/100/500或两小时容量通过。
 
 后续仅对普通筹款的已选目标绑定接近范围：停止条件、移动前及实际Walk/Run发送前重新核对exact ID；目标缺失或失效沿原有、已扣次数的目标丢失路径排除。全局生命/身份/时间错误及遗留队列仍终止，不重放命令；原cycle错误保持终止，不增加重试类别。新增最多8条接近目标的直接标量记录，避免仅靠旧坐标推断目标；共享战斗与默认采猎不变，仍须下一轮真实验证。
+
+## 第十二轮：21人准备完成，22号已知危险候选耗尽预算
+
+ad80376b4的[新鲜719项选定门禁](bank-prepare-v12/node-v12/root-focused-receipt-v1.json)实际331+333+55通过，42个named输入前后不变；[完整14依赖相等证明](bank-prepare-v12/full16-reuse/ordinary-full16-reuse-proof-v12.json)继续严格复用d9ec实际full16、V6/55/Rust32/build，没有新跑功能全生命周期。
+
+[原W12报告](bank-prepare-v12/1793062645989-7e52f772.preparation-report.json)为21prepared/100、零测量。第12～21人均真实售卖、购11药花440、fresh库存12并正常保存；第21人的直接fundingApproaches记录206521在导航中missing、约1568.03ms退出，随后仍在原8次尝试内完成准备。其他selection拒绝不能一律算作该修复的实触发。
+
+第22人36命令/8移动、约50.716秒，1次狩猎与7次selection/hostile-near-deer拒绝耗完原8次上限，最后fresh资本207/440不足，保持失败after/readiness为null；0hazard/0replan，没有测量或人数验收通过。原候选按距离排序，选择后才由安全守卫拒绝；后续修正仅优先选择当前检查合格者，全部候选仍保留，无合格优先者时回原最近者，实际已选尝试照常扣除、竞态守卫及原预算保留。
+
+正常logout、整体清理及[Root独立OS](bank-prepare-v12/root-independent-cleanup-v1.json)通过，PID59580消失、端口释放。40份新公共原件6,056,861字节见[说明](bank-prepare-v12/README.md)及[清单](bank-prepare-v12/copied-evidence-manifest.json)。P0未完成、P2未启动，没有新25/50/100/500或两小时容量通过。

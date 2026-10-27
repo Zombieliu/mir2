@@ -362,3 +362,5 @@ V9全员50入场后AOI停止，无测量/新100。已关联Remove在sender取包
 当前ee06 V6后端在d9ec9d执行来源上通过新普通双客户端16/16完整生命周期和原始轨迹独审，详见[当前V6功能证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/v6-full-lifecycle-v1/README.md)。238b的准备寻路修正已通过677项选定Node检查，完整14依赖相等后复用该功能门禁。W10真实准备越过原返村阻塞，完成7/100，第8人以2/3鹿肉、2次狩猎及8次尝试失败，尚未计量人数；正常清理及独立PID/端口检查完成，详见[W10记录](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v10/README.md)。P1合同通过，P0容量基线未完成、P2未启动，500仍为后续最高目标。
 
 a45e的真实资本目标修正通过702项新鲜选定Node检查；W11第8～11人普通售卖/购药/库存12及保存通过，完成11/100。第12人取得一肉270后在接近目标期间反复移动，原600秒超时退出，未进入人数计量；详见[W11证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v11/README.md)。原失败及P0未完成、P2未启动状态保持。
+
+ad803的普通筹款目标失效复核通过719项新鲜选定Node检查。W12推进到21/100；第21人真实206521目标失效在约1.568秒退出该次接近后完成补给保存，第22人则因7次危险选择拒绝、1次狩猎耗完原8次上限失败，未计量容量。原始数据、正常清理与独立PID/端口检查见[W12证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v12/README.md)。
