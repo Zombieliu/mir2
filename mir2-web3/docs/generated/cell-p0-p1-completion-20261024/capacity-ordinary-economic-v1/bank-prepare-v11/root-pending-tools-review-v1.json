@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v11",
+  "pendingToolsReviewed": true,
+  "approved": true,
+  "tools": [
+    {
+      "file": "source-lib-v1.mjs",
+      "exactForwardAndReverse": true,
+      "hunks": 0
+    },
+    {
+      "file": "copy-source-bank-v1.mjs",
+      "exactForwardAndReverse": true,
+      "hunks": 3
+    },
+    {
+      "file": "freeze-prepare-v1.mjs",
+      "exactForwardAndReverse": true,
+      "hunks": 2
+    },
+    {
+      "file": "run-owned-prepare-v1.mjs",
+      "exactForwardAndReverse": true,
+      "hunks": 5
+    },
+    {
+      "file": "owned-child-v1.mjs",
+      "exactForwardAndReverse": true,
+      "hunks": 0
+    }
+  ],
+  "source": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\copy-source-bank-v1.mjs",
+      "bytes": 11141,
+      "sha256": "6376f4f0fb27f8a0854a0f4557292bb3bd3d84595a988f4f5597edc6e2450a8e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\freeze-prepare-v1.mjs",
+      "bytes": 8147,
+      "sha256": "92abf65c67f73b10038c9664d797bbb04766fd47fbcb1a1cfe37a8ce07547fa9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\run-owned-prepare-v1.mjs",
+      "bytes": 25135,
+      "sha256": "cf6c34d8244d5000e657d138e73702371c3e1a7ebe340c7963d7e6701b0a4482"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\owned-child-v1.mjs",
+      "bytes": 2201,
+      "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\prepare-config-pending-v1.json",
+      "bytes": 6875,
+      "sha256": "fb9231844b23e9555ebcca0e3e96598881d7c42d51bf0c965f17f472db06734c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\source-bank-plan-pending-v1.json",
+      "bytes": 12244,
+      "sha256": "ad83e8ae48908827fb406ee552ece50ba8895dfa51c83d63d0310ea72fed0032"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\backend-release-binding-pending-v1.json",
+      "bytes": 1216,
+      "sha256": "0e68b64abdf8d4b579c42295d956117099b41be7730fd3fdfedf0c9908e64ef7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\derivation-v1.json",
+      "bytes": 39743,
+      "sha256": "637c99adbc7dda6de5ee2a465a6a83bb86ba5ade912126a76684eeae4b378ce5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\syntax-checks-v1.json",
+      "bytes": 2723,
+      "sha256": "d4666bc834c8ba32a79c6716c8d7c79317ec213d3b65fb63f8ba05164693badc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v11\\README-pending-v1.md",
+      "bytes": 905,
+      "sha256": "2f77d819f5a4d6849c7a32cec51c0c14e4f92efc07dd428267522fbf80065859"
+    }
+  ],
+  "scope": "Actual W10 partial-bank source paths and exact failed-eighth/seven-prepared metadata. First4 dedicated reuse check explicitly takes first4 of seven source rows and retains original meaning; all100 still require fresh preparation. Source-lib/owned-child remain raw exact. Pending source qualification must still be finalized separately.",
+  "currentSourceQualificationPending": true,
+  "sourceBankCopied": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

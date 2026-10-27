@@ -1,7 +1,7 @@
 import { performance } from 'node:perf_hooks';
 import { collectSafeFundingVenison } from './quest-agent/protocol-funding.mjs';
 import { clearTravelBlockingMonster, harvestDirection } from './quest-agent/protocol-combat.mjs';
-import { NavigationStepGuarded, isTerminalNavigationNoPath } from './quest-agent/protocol-play.mjs';
+import { NavigationStepGuarded, NavigationStalled, isTerminalNavigationNoPath } from './quest-agent/protocol-play.mjs';
 import { hasAuthoritativePlayerDeath, observedPlayerHp } from './quest-agent/protocol-observation.mjs';
 import { certifyOrdinaryAi0Packet, isOrdinaryAi0Threat, isProtectedOrdinaryCell, isProtectedOrdinaryPacketCell, ordinaryProtectionSummary } from './capacity-ordinary-protection.mjs';
 
@@ -14,6 +14,7 @@ class FundingTargetLoss extends Error {
   constructor(objectId, reason) {
     super(`ordinary supplies: only live Deer may be hunted (${objectId}: ${reason})`);
     this.code = 'ORDINARY_SUPPLY_FUNDING_TARGET_LOSS';
+    this.reason = reason;
   }
 }
 // Only numeric protocol IDs and exact canonical decimal IDs can match.
@@ -103,7 +104,8 @@ export function createOrdinarySupplies(client, options = {}) {
   let capitalQuoteRequested = false, fundingCapitalProofCount = 0;
   let fundingTargetRejectionCount = 0, pathHazardCount = 0;
   const pathHazards = [], pathReplans = [], movementOrigins = new WeakMap(), unsentPathErrors = new WeakSet();
-  let navigationPolicy = null;
+  let navigationPolicy = null, fundingApproachId = null;
+  const fundingApproaches = [];
   const plannerNow = options.now ?? Date.now, plannerIdentities = new Map(), plannerTrail = new Map();
   let plannerFallbackCount = 0, plannerFreshSequence = -1, plannerGlobalBlockedUntil = 0, plannerViewAllowed = null;
   let plannerPacketRenewals = 0, lastReceiptSequence = -1, lastReceiptMono = -Infinity;
@@ -495,18 +497,50 @@ export function createOrdinarySupplies(client, options = {}) {
       ownerId: value.ownerId, ownerName: value.ownerName, map: value.map });
     throw new FundingTargetLoss(id, reason);
   }
+  function assertFundingApproach(phase) {
+    if (fundingApproachId === null) return;
+    guard(); // Safety and actor/global budgets take priority over target loss.
+    if (commands >= maxCommands || movementCommands >= maxNavigationCommands) throw new Error('ordinary supplies: command budget exhausted');
+    assertFundingTarget({ type:'attack', objectId:fundingApproachId }, phase);
+  }
   async function clearFundingMonster(fundingClient, target, navigateNear, settings) {
+    const selectedId = integer(Number(target.objectId), 'funding target objectId', 1, 0xffff_ffff);
+    const value = guard();
+    const record = { objectId:selectedId, sequence:client.sequence, observedSnapshotSequence:lastObserved,
+      monotonicMs:now(), from:{x:value.x,y:value.y}, target:point(target,'funding target'),
+      ownerId:value.ownerId, ownerName:value.ownerName, map:value.map, navigationCalls:0, status:'selection', reason:null };
+    if (fundingApproaches.length < 8) fundingApproaches.push(record);
+    const approach = async (destination, range, stop, navOptions) => {
+      guard();
+      assertFundingTarget({ type:'attack', objectId:selectedId }, 'approach-entry');
+      if (fundingApproachId !== null || objectId(destination?.objectId) !== selectedId) throw new Error('ordinary supplies: unexpected funding approach target');
+      fundingApproachId = selectedId; record.navigationCalls++; record.status = 'approaching';
+      try {
+        await navigateNear(destination, range, () => {
+          assertFundingApproach('approach-stop');
+          return typeof stop === 'function' && stop();
+        }, { ...navOptions, detectPositionCycles:true });
+      } finally { fundingApproachId = null; }
+    };
     try {
-      assertFundingTarget({ type:'attack', objectId:Number(target.objectId) }, 'selection');
-      return await clearTravelBlockingMonster(fundingClient, target, navigateNear, settings);
-    }
-    catch (error) {
+      assertFundingTarget({ type:'attack', objectId:selectedId }, 'selection');
+      const cleared = await clearTravelBlockingMonster(fundingClient, target, approach, settings);
+      record.status = 'completed'; return cleared;
+    } catch (error) {
+      record.status = 'terminal'; record.reason = 'ordinary-operation-failed';
+      if (error instanceof FundingTargetLoss && ['missing','ambiguous-id','not-deer','not-confirmed-live','not-neutral-deer','hostile-near-deer'].includes(error.reason)) record.reason = error.reason;
+      else if (error instanceof NavigationStalled) record.reason = 'navigation-stalled';
       if (!(error instanceof FundingTargetLoss)) throw error;
       guard(); // Owner, transport and global budgets remain terminal.
-      // Use the helper's bounded target-loss path: consume this hunt attempt,
-      // exclude the original target, and award no death or harvest credit.
-      const lost = new Error(`target ${integer(Number(target.objectId), 'funding target objectId', 1, 0xffff_ffff)} left the authoritative snapshot before attack`, { cause: error });
+      if (commands >= maxCommands || movementCommands >= maxNavigationCommands) throw new Error('ordinary supplies: command budget exhausted');
+      if (queue.length !== 0 || pendingSaleId !== null) throw new Error('ordinary supplies: target loss with pending commands', { cause:error });
+      record.status = 'target-lost';
+      // The original attempt was already charged. Only a confirmed empty
+      // queue can use the existing bounded exclusion path; never replay it.
+      const lost = new Error(`target ${selectedId} left the authoritative snapshot before attack`, { cause:error });
       lost.code = error.code; throw lost;
+    } finally {
+      record.endedSequence = client.sequence; record.elapsedMs = Math.max(0,now()-record.monotonicMs);
     }
   }
   function enqueue(command) {
@@ -529,7 +563,7 @@ export function createOrdinarySupplies(client, options = {}) {
         await client.pace(); guard();
         let command = queue.shift();
         if (['walk', 'run'].includes(command.type)) {
-          try { assertMovement(command, movementOrigins.get(command)); }
+          try { assertFundingApproach('approach-send'); assertMovement(command, movementOrigins.get(command)); }
           catch (error) {
             // This precise movement was dequeued but never dispatched. A
             // retry is possible only with no other queued side effects.
@@ -602,6 +636,7 @@ export function createOrdinarySupplies(client, options = {}) {
     navigationPolicy = { radius, byName };
     const safeOptions = { ...navOptions, hostileAvoidanceRadius: radius, allowedHostileObjectIds: [],
       beforeMovement: context => {
+        assertFundingApproach('approach-before-movement');
         const hazard = movementHazard(context.movementType, 'before-movement', context.from, context.physicalCells);
         return hazard ?? navOptions?.beforeMovement?.(context);
       } };
@@ -840,6 +875,7 @@ export function createOrdinarySupplies(client, options = {}) {
       qualificationEventCount,qualificationRepeatedReads,qualificationEventsTruncated:qualificationEventCount>qualificationEvents.length,
       qualificationEvents:qualificationEvents.map(row=>({...row,input:row.input?{...row.input}:null,observed:row.observed?{...row.observed}:null})),
       navigationNoPath,
+      fundingApproaches: fundingApproaches.map(row => ({ ...row, from:{...row.from}, target:{...row.target} })),
       fundingTargetRejections: fundingTargetRejections.map(row => ({ ...row })), fundingTargetRejectionCount,
       fundingCapitalProofs: fundingCapitalProofs.map(row => ({ ...row, items: row.items.map(item => ({ ...item })), initialHpQuote: { ...row.initialHpQuote } })),
       fundingCapitalProofCount, fundingCapitalProofsTruncated: fundingCapitalProofCount > fundingCapitalProofs.length,

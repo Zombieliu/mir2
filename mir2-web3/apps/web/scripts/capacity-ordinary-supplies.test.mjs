@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createNavigator, NavigationStepGuarded, isTerminalNavigationNoPath } from './quest-agent/protocol-play.mjs';
+import { createNavigator, NavigationStepGuarded, NavigationStalled, isTerminalNavigationNoPath } from './quest-agent/protocol-play.mjs';
 import { applyProtocolObservation } from './quest-agent/protocol-observation.mjs';
 import { selectPreparationStagingPoint } from './playtest-capacity-prepare.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, planProtocolNavigation } from './quest-agent/protocol-navigation.mjs';
@@ -1102,6 +1102,8 @@ test('all dangerous Deer exhaust the original eight hunt attempts without any at
   assert.ok(f.supply.status().fundingTargetRejections.every(row=>row.reason==='hostile-near-deer'&&row.phase==='selection'));
   assert.equal(f.supply.status().funding,null);
   assert.ok(f.supply.status().commands<2048);
+  assert.equal(f.supply.status().fundingApproaches.length,8);
+  assert.ok(f.supply.status().fundingApproaches.every(row=>row.status==='target-lost'));
 });
 
 test('friendly, unclassified or owned Deer are not ordinary neutral funding targets',async t=>{
@@ -1135,7 +1137,7 @@ test('fresh danger during a real funding approach uses the existing finite targe
     navigate:async context=>{if(context.target.objectId===20)armed=true;return navigate(context);}});
   assert.equal((await f.supply.prepare()).status,'ready');
   assert.equal(f.client.sent.some(c=>c.type==='attackV2'&&c.objectId===20),false);
-  assert.ok(f.supply.status().pathHazardCount>=1);
+  assert.ok(f.supply.status().fundingTargetRejections.some(row=>row.reason==='hostile-near-deer'&&row.phase.startsWith('approach-')));
   assert.equal(f.supply.status().funding.collected,3);
 });
 
@@ -1982,4 +1984,105 @@ test('non-Venison material never provides capital and belt UIDs still participat
   const duplicate=fixture({deer:3,v2:true,items:[wood]});duplicate.client.snapshot.beltItems=[item(658,1,50)];
   await assert.rejects(duplicate.supply.prepare(),/duplicate capital inventory UID/);
   assert.equal(duplicate.client.sent.some(c=>c.type==='attackV2'),false);
+});
+
+test('real ordinary funding navigator stops on actual AOI Remove without another movement or attack',async()=>{
+  let f,removed=false,movesAtRemoval=0,navigator;
+  const start={x:290,y:607};
+  f=fixture({deer:1,v2:true,maxHunts:1,deerPositions:[{x:276,y:607}],applyPackets:true,noMovementSnapshots:true,
+    onMove:({client,actor,packet})=>{
+      if(!removed&&Math.max(Math.abs(actor.x-276),Math.abs(actor.y-607))>16){
+        removed=true;movesAtRemoval=client.sent.filter(c=>['walk','run'].includes(c.type)).length;
+        packet('ObjectRemove',{objectId:20});
+      }
+    },
+    navigate:async({facade,target,range,stop,navOptions})=>{
+      if(target.name==='Deer')assert.equal(navOptions.detectPositionCycles,true);
+      else assert.equal(navOptions.detectPositionCycles,undefined);
+      navigator??=createNavigator(facade,{loadCollisionMap:async()=>{
+        const blocked=new Uint8Array(360*660);for(let y=590;y<=624;y++)blocked[y*360+282]=1;
+        return {mapFileName:'0',width:360,height:660,blocked};},now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000});
+      return navigator(target,range,stop,navOptions);
+    }});
+  await assert.rejects(f.supply.prepare(),/capital insufficient.*0 hunts and 1 attempts/);
+  assert.equal(removed,true);assert.ok(movesAtRemoval>0);
+  assert.equal(f.client.sent.filter(c=>['walk','run'].includes(c.type)).length,movesAtRemoval);
+  assert.equal(f.client.sent.some(c=>c.type==='attackV2'),false);
+  const row=f.supply.status().fundingApproaches[0];
+  assert.equal(row.objectId,20);assert.equal(row.status,'target-lost');assert.equal(row.navigationCalls,1);
+  assert.deepEqual(row.from,start);assert.deepEqual(row.target,{x:276,y:607});assert.equal(row.ownerName,'ordinary-owner');
+  assert.ok(row.endedSequence>row.sequence);assert.ok(row.elapsedMs>0);
+  row.target.x=0;assert.equal(f.supply.status().fundingApproaches[0].target.x,276);
+});
+test('approach target loss consumes its attempt and never reselects or attacks the old ID',async()=>{
+  let f,removed=false,atRemoval=0;
+  const real=actualNavigatorFor(()=>f);
+  f=fixture({deer:3,v2:true,applyPackets:true,deerPositions:[{x:300,y:604},{x:302,y:604},{x:304,y:604}],
+    onMove:({client,packet})=>{if(!removed){removed=true;atRemoval=client.sent.length;packet('ObjectRemove',{objectId:20});}},navigate:real});
+  const result=await f.supply.prepare();
+  assert.equal(result.funding.huntAttempts,3);assert.equal(result.funding.hunts,2);assert.equal(result.funding.collected,2);
+  assert.equal(f.client.sent.some(c=>c.type==='attackV2'&&c.objectId===20),false);
+  assert.deepEqual(result.fundingApproaches.map(r=>r.objectId),[20,21,22]);assert.equal(result.fundingApproaches[0].status,'target-lost');
+  assert.equal(f.client.sent[atRemoval].type,'clientVersion','reselection starts with the original fresh capital refresh, not a stale movement');
+  assert.equal(result.after.hpStock,12);assert.equal(result.pathReplanCount,0);
+});
+test('beforeMovement and paced actual dispatch both recheck the bound selected Deer',async t=>{
+  for(const phase of ['before-movement','send'])await t.test(phase,async()=>{
+    let armed=false;
+    const f=fixture({deer:1,v2:true,maxHunts:1,applyPackets:true,
+      onPace:({packet})=>{if(armed){armed=false;packet('ObjectRemove',{objectId:20});}},
+      navigate:async({facade,target,actor,packet,navOptions})=>{
+        if(target.name!=='Deer')return;
+        if(phase==='before-movement'){
+          packet('ObjectRemove',{objectId:20});
+          navOptions.beforeMovement({from:{x:actor.x,y:actor.y},physicalCells:[{x:actor.x+1,y:actor.y}],movementType:'walk'});
+        }else{armed=true;facade.send({type:'walk',direction:'Right'});await facade.wait(()=>false,'bound funding queued move');}
+      }});
+    await assert.rejects(f.supply.prepare(),/capital insufficient.*1 attempts/);
+    assert.equal(f.client.sent.some(c=>['walk','run','attackV2'].includes(c.type)),false);
+    const result=f.supply.status();assert.equal(result.fundingApproaches[0].status,'target-lost');
+    assert.equal(result.fundingTargetRejections.at(-1).phase,phase==='send'?'approach-send':'approach-before-movement');
+  });
+});
+test('pending commands and original owner wall or command guards remain terminal during approach target loss',async t=>{
+  for(const fault of ['queued','hp','map','name','closed','wall','commands'])await t.test(fault,async()=>{
+    let armed=false,f;
+    f=fixture({deer:2,v2:true,applyPackets:true,maxCommands:fault==='commands'?4:2048,
+      onPace:({client,actor,packet})=>{if(armed){armed=false;packet('ObjectRemove',{objectId:20});
+        if(fault==='hp'){actor.hp=10;client.snapshot.playerHp=10;}if(fault==='map')client.snapshot.mapFileName='2';
+        if(fault==='name')actor.name='other';if(fault==='closed')client.closed=true;if(fault==='wall')f.advance(600001);}},
+      navigate:async({facade,target})=>{if(target.name!=='Deer')return;armed=true;facade.send({type:'walk',direction:'Right'});
+        if(fault==='queued')facade.send({type:'turn',direction:'Right'});
+        await facade.wait(()=>false,'bound funding pending commands');}});
+    await assert.rejects(f.supply.prepare(),fault==='queued'?/target loss with pending commands/:fault==='commands'?/command budget/:fault==='wall'?/wall budget/:fault==='closed'?/transport closed/:/owner\/map\/health changed/);
+    assert.equal(f.client.sent.some(c=>['walk','run','turn','attackV2'].includes(c.type)),false);
+    assert.equal(f.supply.status().fundingApproaches.length,1);assert.equal(f.supply.status().fundingApproaches[0].status,'terminal');
+    assert.equal(f.supply.status().fundingCapitalProofCount,1);assert.equal(f.supply.status().pathReplanCount,0);
+  });
+});
+test('actual navigator position cycle in a bound funding approach stays terminal without target-loss retry',async()=>{
+  let f,moves=0;const real=actualNavigatorFor(()=>f);
+  f=fixture({deer:3,v2:true,deerPositions:[{x:300,y:607},{x:301,y:607},{x:302,y:607}],
+    onMove:({actor})=>{actor.x=++moves%2?291:290;actor.y=607;},navigate:real});
+  let original;
+  await assert.rejects(f.supply.prepare(),error=>{original=error;return error instanceof NavigationStalled;});
+  assert.equal(original.reason,'position-cycle');assert.equal(f.supply.status().fundingApproaches.length,1);
+  assert.equal(f.supply.status().fundingApproaches[0].status,'terminal');assert.equal(f.supply.status().fundingTargetRejectionCount,0);
+  assert.equal(f.client.sent.some(c=>c.type==='attackV2'),false);assert.equal(f.supply.status().fundingCapitalProofCount,1);
+});
+
+test('funding approach external failure text stays private and the exact original error remains terminal',async t=>{
+  for(const source of ['client.failure','transport'])await t.test(source,async()=>{
+    const secret='Bearer-private-token-should-never-be-retained';const original=new Error(`${source}: ${secret}`);
+    const f=fixture({deer:2,v2:true,navigate:async({client,target})=>{
+      if(target.name!=='Deer')return;
+      if(source==='client.failure')client.failure=original;
+      throw original;
+    }});
+    await assert.rejects(f.supply.prepare(),error=>error===original);
+    const result=f.supply.status();assert.equal(result.fundingApproaches.length,1);
+    assert.equal(result.fundingApproaches[0].status,'terminal');assert.equal(result.fundingApproaches[0].reason,'ordinary-operation-failed');
+    assert.equal(JSON.stringify(result).includes(secret),false);assert.equal(result.fundingCapitalProofCount,1);
+    assert.equal(f.client.sent.some(c=>['walk','run','attackV2'].includes(c.type)),false);
+  });
 });
