@@ -112,7 +112,7 @@ export function createOrdinarySupplies(client, options = {}) {
   let capitalQuoteRequested = false, fundingCapitalProofCount = 0;
   let fundingTargetRejectionCount = 0, pathHazardCount = 0;
   const pathHazards = [], pathReplans = [], movementOrigins = new WeakMap(), unsentPathErrors = new WeakSet();
-  let navigationPolicy = null, fundingApproachId = null;
+  let navigationPolicy = null, fundingApproachId = null, merchantReturnTarget = null;
   const fundingApproaches = [], fundingDiscoveries = [], fundingCandidateQueries = [];
   let fundingCandidateQueryCount = 0;
   const plannerNow = options.now ?? Date.now, plannerIdentities = new Map(), plannerTrail = new Map();
@@ -799,7 +799,10 @@ export function createOrdinarySupplies(client, options = {}) {
     } finally { navigationPolicy = null; }
   }
   async function waitForClosedPlannerHistory(error,target,range,stop) {
-    if (state !== 'staging' || !isTerminalNavigationNoPath(error) || queue.length !== 0 ||
+    // This private scope exists only around the post-sale final Ruben NAV.
+    // Selling/funding/transaction state alone never authorizes another plan.
+    const merchantReturn = merchantReturnTarget === RUBEN && target === RUBEN && range === 16 && state === 'selling';
+    if ((state !== 'staging' && !merchantReturn) || fundingApproachId !== null || !isTerminalNavigationNoPath(error) || queue.length !== 0 ||
         pendingSaleId !== null || pathReplans.length >= PATH_REPLAN_LIMIT) return false;
     const value=guard();
     const at=plannerNow(), view=error.navigationDiagnostics;
@@ -824,6 +827,7 @@ export function createOrdinarySupplies(client, options = {}) {
     const until=Math.max(...matches.map(p=>p.expiresAt));
     if (until-at > PLANNER_TRAIL_MS) return false;
     const replan={attempt:pathReplans.length+1,phase:'terminal-no-path',reason:'closed-history-natural-expiry',
+      navigationPurpose:merchantReturn?'post-sale-ruben-return':'staging',
       snapshotSequence:client.sequence,observedSnapshotSequence:lastObserved,commands,movementCommands,
       target:point(target,'replan target'),from:{x:value.x,y:value.y},waitMs:until-at,historyPoints:matches.length,
       history:matches.slice(0,128).map(match=>({objectId:match.trail.objectId,x:match.trail.x,y:match.trail.y,remainingMs:match.expiresAt-at})),
@@ -871,7 +875,7 @@ export function createOrdinarySupplies(client, options = {}) {
           current:group.length===1?Object.freeze(plannerObservedScalar(group[0],group[0]?.kind==='monster')):null,duplicates:group.length});
       });
       navigationNoPath=Object.freeze({source:'ordinary-helper-terminal-navigation-failure',scope:'diagnostic-only-no-measurement-credit',
-        state,sequence:client.sequence,observedRawSequence:lastObserved,from:Object.freeze(point(owner(client.snapshot),'diagnostic owner')),
+        state,navigationPurpose:merchantReturnTarget===RUBEN?'post-sale-ruben-return':null,sequence:client.sequence,observedRawSequence:lastObserved,from:Object.freeze(point(owner(client.snapshot),'diagnostic owner')),
         target:Object.freeze(point(target,'diagnostic target')),range,commands,movementCommands,attempts:error.attempts??null,
         successfulSteps:error.successfulSteps??null,globalQuarantineRemainingMs:Math.max(0,plannerGlobalBlockedUntil-at),
         shared:exact,qualificationTotal:ids.length,qualificationTruncated:ids.length>128,qualifications:Object.freeze(states)});
@@ -885,8 +889,13 @@ export function createOrdinarySupplies(client, options = {}) {
     const actor = owner(client.snapshot);
     return (client.snapshot.entities ?? []).find(entity => String(entity.kind).toLowerCase() === 'npc' && entity.name === spec.name && entity.x === spec.x && entity.y === spec.y && Number.isSafeInteger(entity.objectId) && entity.objectId > 0 && distance(actor, entity) <= 16);
   }
-  async function shop(spec, sale = false) {
-    await navigate(spec, 16); const npc = liveNpc(spec);
+  async function shop(spec, sale = false, returnAfterSale = false) {
+    const previousMerchantReturnTarget = merchantReturnTarget;
+    merchantReturnTarget = returnAfterSale && spec === RUBEN && !sale && state === 'selling' && sold > 0 ? RUBEN : null;
+    try { await navigate(spec, 16); }
+    finally { merchantReturnTarget = previousMerchantReturnTarget; }
+    // The private NAV scope is already closed before any service command/ACK.
+    const npc = liveNpc(spec);
     if (!npc) throw new Error('ordinary supplies: exact live merchant unavailable');
     const npcId = npc.objectId;
     const mark = await transmit({ type: 'interact', objectId: npcId });
@@ -1050,7 +1059,7 @@ export function createOrdinarySupplies(client, options = {}) {
             navigate, clearMonster: clearFundingMonster, sleep: pause, refreshWhileWaiting: refreshFundingSearch, sustain: async () => { await drain(); guard(); } });
           await refresh(); await sellUntil(requiredGold);
         }
-        goods = await shop(RUBEN); state = 'buying';
+        goods = await shop(RUBEN, false, true); state = 'buying';
         while (guard().hpStock < targetHp) {
           const initial = guard(), count = Math.min(20, targetHp - initial.hpStock);
           if (roomForHp(client.snapshot) < count) throw new Error('ordinary supplies: inventory full');

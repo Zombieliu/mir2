@@ -277,4 +277,10 @@ ca426258a的[新鲜1080项选定门禁](bank-prepare-v14/node-v14/root-focused-r
 
 续跑另建显式continuation-only合同：完整100 pool、Store、原ledger、四密钥及控制文件原字节复制；历史42仅historical/notFresh，原索引43～100仍逐个普通登录、补给和保存，pool.state=ready不代表成功。历史保存点只作选址排除，不冒充当前Zone占格；本轮preparedCount只计新成功，与历史数分开。组合角色库完整仍不授全100本轮fresh、完整持久重登、容量或P0资格；原正式2/10/25/50/100阶梯仍全100逐个重登并验证当前就绪，既有active cohort不暂停。
 
+## 第十六轮：续跑新增16人保存，原59号售后返药商失败
+
+05dad的[1158项当前选定检查](bank-prepare-v16/node-v16/root-focused-receipt-v1.json)实际417+371+55+315通过。[W16原始实跑](bank-prepare-v16/README.md)只补原43～100号，新增16人正常保存，历史42与新增16分开，共58条保存记录；没有容量计量或全100当前重登资格。第59人完成2次狩猎、售出521金币后，从330,603前往药商288,608无路，原false、after/readiness=null与未购药保留。正常清理、Root独立PID56588/端口检查通过，46份公共原件及原字节清单已归档。
+
+下一轮须以W15原42及W16新增16两组独立四pin历史，仅补原59～100共42人。离线诊断确认原闭合记录形成暂时路障，计划只在该售后药商导航复用原自然TTL等待与有界重算；固定安全距离、占格、传送点、队列、交易及命令/时间上限保持。实际续跑结果仍待验证，P0未完成、P2未启动，500全战斗未实施验收。
+
 正常保存、六项计数归零、整体清理及[Root独立OS](bank-prepare-v15/root-independent-cleanup-v1.json)通过，PID77056消失、端口释放；原failed normalLogout=false与后续308.959ms正常logout ACK分开，不据此授就绪。40份新公共原件6,972,033字节由Root逐件复核源/副本原字节，见[说明](bank-prepare-v15/README.md)及[清单](bank-prepare-v15/copied-evidence-manifest.json)，几何补充单列清单不改原40件。P0未完成、P2未启动，没有新25/50/100/500或两小时容量通过。

@@ -2343,3 +2343,145 @@ test('funding static query and AOI checks never replace the original command hea
     assert.notEqual(f.supply.status().fundingApproaches[0].reason,'approach-leaves-aoi');
   });
 });
+
+
+const w16MerchantMemory=[
+  [206610,'Scarecrow',300,597],[206013,'RakingCat',301,596],[206644,'Scarecrow',301,613],
+  [206007,'RakingCat',299,590],[206628,'Scarecrow',305,589],[206026,'RakingCat',320,589],
+  [206117,'HookingCat',321,588],[206623,'Scarecrow',321,631],[206032,'RakingCat',322,595],
+  [206136,'HookingCat',339,587],[206129,'HookingCat',342,600],
+].map(([objectId,name,x,y])=>hostile(objectId,x,y,{name,ownerName:null,class:null}));
+const w16MerchantOccupancy=[
+  [206705,314,589],[206026,320,589],[206117,321,588],[214501,321,598],[206032,322,595],
+  [206208,322,587],[206201,325,600],[206220,326,599],[206542,328,589],[206136,339,587],
+  [206129,342,600],[206703,342,606],[206716,342,592],[206214,343,592],[210400,344,591],[206719,345,599],
+].map(([objectId,x,y])=>({objectId,kind:'monster',name:'Deer',x,y,hp:25,dead:false,disposition:'neutral',ai:2}));
+async function w16MerchantHistoryFixture(config={}){
+  const sourceMap=await loadProtocolCollisionMap('0'),protection=await loadOrdinaryProtection({source:{runtimeProfileId:'platinum_176'}},'0');
+  const map=config.phase==='john-sale'?{...sourceMap,blocked:sourceMap.blocked.slice()}:sourceMap;
+  // John has a different range16 goal region. Its scope-negative case uses
+  // an explicit synthetic static cage, not a claim of W16 John geometry.
+  if(config.phase==='john-sale')for(let y=602;y<=604;y++)for(let x=329;x<=331;x++)if(x!==330||y!==603)map.blocked[y*map.width+x]=1;
+  const closedIds=[206007,206610,206013,206644,206628,206623],memoryIds=new Set(w16MerchantMemory.map(e=>e.objectId));
+  let f,navigator,setup=false,waiting=false,afterWait=false,expiry=0,firstTerminal,sleeps=0,movesBeforeWait=0,rubenCalls=0,navCalls=0,hazards=0;
+  const wanted=config.phase??'post-sale-ruben';
+  f=fixture({ownerId:1000,ownerHp:18,ownerMaxHp:18,ownerPosition:{x:288,y:616},stagingPoint:{x:289,y:617},
+    ordinaryProtection:protection,applyPackets:true,noMovementSnapshots:true,
+    items:[item(658,1,2),{...item(853,1,4,1),sellValue:273},{...item(853,1,5,2),sellValue:248}],
+    maxCommands:config.failure==='commands'?7:2048,
+    onSleep:({client,actor,ms,clock})=>{
+      if(!waiting||afterWait)return;sleeps++;assert.ok(ms<=250);assert.ok(clock<expiry);
+      assert.equal(client.sent.filter(c=>['walk','run'].includes(c.type)).length,movesBeforeWait);
+      assert.equal(f.supply.status().plannerThreatMemory.positions,11,'no early deletion of the retained trail');
+      if(config.failure==='hp'){actor.hp=1;client.snapshot.playerHp=1;}
+      if(config.failure==='map')client.snapshot.mapFileName='2';
+      if(config.failure==='closed')client.closed=true;
+      if(config.failure==='wall')f.advance(600_001);
+    },
+    onMove:({client,actor})=>{
+      client.snapshot.inSafeZone=actor.x>=278&&actor.x<=298&&actor.y>=606&&actor.y<=626;
+      for(const npc of [{objectId:5,kind:'npc',name:'Merchant_Ruben',x:288,y:608},{objectId:6,kind:'npc',name:'Merchant_John',x:292,y:603}])
+        if(Math.max(Math.abs(actor.x-npc.x),Math.abs(actor.y-npc.y))<=16&&!client.snapshot.entities.some(e=>e.objectId===npc.objectId))client.snapshot.entities.push(npc);
+    },
+    navigate:async args=>{
+      navCalls++;if(args.target.name==='Merchant_Ruben')rubenCalls++;
+      const intercept=wanted==='initial-ruben'?args.target.name==='Merchant_Ruben'&&rubenCalls===1:
+        wanted==='john-sale'?args.target.name==='Merchant_John':args.target.name==='Merchant_Ruben'&&rubenCalls===2;
+      if(!setup&&!intercept)return;
+      navigator??=createNavigator(args.facade,{loadCollisionMap:async()=>map,now:f.now,delay:async ms=>f.advance(ms),movementResponseTimeoutMs:2000});
+      const nav=()=>navigator(args.target,args.range,args.stop,new Proxy(args.navOptions,{get:(o,k)=>k==='maxNoPathRefreshes'?0:Reflect.get(o,k)}));
+      if(!setup){
+        setup=true;Object.assign(args.actor,{x:330,y:603});args.client.snapshot.inSafeZone=false;
+        args.client.snapshot.entities=[args.actor,...structuredClone(w16MerchantMemory),...w16MerchantOccupancy.filter(e=>!memoryIds.has(e.objectId))];
+        if(config.unknown)args.client.snapshot.entities.push(hostile(999999,325,603,{name:'UnknownMonster',ai:99,ownerName:null,class:null}));
+        args.snapshot();
+        // Actual immutable map and source DTOs; this temporal fixture seeds
+        // exact cache entries but is not a claim of simultaneous live AOI.
+        for(const [delay,ids] of [[0,[206007]],[593,[206610]],[621,[206013,206644]],[588,[206628]],[4570,[206623]]]){
+          f.advance(delay);await assert.rejects(nav(),isTerminalNavigationNoPath);expiry=f.now()+20000;
+          if(!config.liveClosed)for(const id of ids)args.packet('ObjectRemove',{objectId:id});
+        }
+        f.advance(6304);args.snapshot();waiting=true;movesBeforeWait=args.client.sent.filter(c=>['walk','run'].includes(c.type)).length;
+      }else if(waiting&&f.supply.status().pathReplans.some(r=>r.reason==='closed-history-natural-expiry'&&r.waitCompleted)){
+        assert.ok(f.now()>=expiry,'no retry before the original last closed expiry');afterWait=true;
+      }
+      if(hazards<(config.hazards??0)){
+        hazards++;const hazard=args.navOptions.beforeMovement({movementType:'run',from:{x:330,y:603},physicalCells:[{x:330,y:602},{x:330,y:601}]});
+        assert.equal(hazard.reason,'hostile-clearance');throw new NavigationStepGuarded(hazard);
+      }
+      try{return await nav();}catch(error){
+        firstTerminal??=error;
+        if(config.truncated)error.navigationDiagnostics=Object.freeze({...error.navigationDiagnostics,hostileMemoryTruncated:true});
+        if(config.queue)args.facade.send({type:'turn',direction:'Right'});
+        if(config.fake)throw Object.assign(new Error(error.message),{navigationDiagnostics:error.navigationDiagnostics});
+        throw error;
+      }
+    }});
+  f.client.snapshot.mapTransfers=structuredClone(w8Transfers);
+  if(config.ack){const wait=f.client.wait.bind(f.client);let goods=0;f.client.wait=async(predicate,label,timeout)=>{
+    if(label==='NPCGoods'&&++goods===2)throw firstTerminal;return wait(predicate,label,timeout);};}
+  return {f,metrics:()=>({sleeps,expiry,firstTerminal,movesBeforeWait,rubenCalls,navCalls,afterWait})};
+}
+
+test('W16 post-sale Ruben NAV waits for original closed TTLs on canonical map then refreshes same target and buys normally',async()=>{
+  const {f,metrics}=await w16MerchantHistoryFixture();const result=await f.supply.prepare();
+  assert.equal(result.status,'ready');assert.equal(result.soldVenison,2);assert.equal(result.goldEarned,521);
+  assert.equal(result.purchased,11);assert.equal(result.goldSpent,440);assert.equal(result.after.hpStock,12);assert.equal(result.after.gold,81);
+  assert.equal(result.pathReplanCount,1);const wait=result.pathReplans[0];
+  assert.equal(wait.navigationPurpose,'post-sale-ruben-return');assert.deepEqual(wait.target,{x:288,y:608});
+  assert.equal(wait.historyPoints,6);assert.ok(wait.waitMs>13000&&wait.waitMs<14000);
+  assert.equal(wait.waitMs,Math.max(...wait.history.map(p=>p.remainingMs)));assert.ok(Math.min(...wait.history.map(p=>p.remainingMs))<8000);
+  assert.equal(wait.actualPassiveWaitMs,wait.waitMs);assert.equal(wait.waitCompleted,true);assert.equal(wait.naturalExpiryReached,true);
+  assert.ok(wait.freshSnapshotSequence>wait.snapshotSequence);assert.equal(wait.commandsAfterRefresh,wait.commands+1);
+  assert.ok(metrics().sleeps>1);assert.equal(metrics().afterWait,true);assert.equal(result.funding,null);
+  assert.ok(result.commands<2048&&result.elapsedMs<600000);assert.equal(f.client.sent.some(c=>['useItem','attack','attackV2','harvest'].includes(c.type)),false);
+});
+test('merchant history scope never authorizes initial Ruben or John sale NAV',async(t)=>{
+  for(const phase of ['initial-ruben','john-sale'])await t.test(phase,async()=>{
+    const {f,metrics}=await w16MerchantHistoryFixture({phase});await assert.rejects(f.supply.prepare(),isTerminalNavigationNoPath);
+    assert.equal(metrics().sleeps,0);assert.equal(f.supply.status().pathReplanCount,0);assert.equal(f.supply.status().purchased,0);
+    assert.equal(f.client.sent.some(c=>c.type==='sellItem'),false);
+  });
+});
+test('merchant history scope remains failclosed for live unknown truncated unbranded or pending queue views',async(t)=>{
+  for(const mode of ['liveClosed','unknown','truncated','fake','queue'])await t.test(mode,async()=>{
+    const {f,metrics}=await w16MerchantHistoryFixture({[mode]:true});await assert.rejects(f.supply.prepare(),/No walk path/);
+    assert.equal(metrics().sleeps,0);assert.equal(f.supply.status().pathReplanCount,0);
+    assert.equal(f.supply.status().soldVenison,2);assert.equal(f.supply.status().purchased,0);
+    assert.equal(f.client.sent.some(c=>c.type==='turn'),false,'pending metadata is not replayed');
+  });
+});
+test('merchant passive waiting keeps original wall commands health map and transport gates terminal',async(t)=>{
+  for(const failure of ['wall','commands','hp','map','closed'])await t.test(failure,async()=>{
+    const {f}=await w16MerchantHistoryFixture({failure});
+    await assert.rejects(f.supply.prepare(),failure==='commands'?/command budget/:failure==='wall'?/wall budget/:/owner.map.health changed|transport/);
+    const wait=f.supply.status().pathReplans[0];assert.equal(wait.waitCompleted,false);assert.equal(wait.freshSnapshotSequence,null);
+    assert.ok(wait.actualPassiveWaitMs>0);assert.equal(f.supply.status().purchased,0);
+  });
+});
+test('post-sale merchant NAV scope closes before NPCGoods ACK waits, preserving the original error with no second wait',async()=>{
+  const {f,metrics}=await w16MerchantHistoryFixture({ack:true});
+  await assert.rejects(f.supply.prepare(),error=>error===metrics().firstTerminal);
+  const status=f.supply.status();assert.equal(status.pathReplanCount,1);assert.equal(status.pathReplans[0].waitCompleted,true);
+  assert.equal(status.purchased,0);assert.equal(status.soldVenison,2);
+});
+
+
+test('merchant natural expiry consumes the original shared three credits alongside its own beforeMovement hazards',async(t)=>{
+  for(const hazards of [1,3])await t.test(String(hazards),async()=>{
+    const {f,metrics}=await w16MerchantHistoryFixture({hazards});
+    if(hazards===1){const result=await f.supply.prepare();assert.equal(result.pathReplanCount,2);assert.equal(result.pathHazardCount,1);}
+    else{await assert.rejects(f.supply.prepare(),isTerminalNavigationNoPath);assert.equal(f.supply.status().pathReplanCount,3);assert.equal(metrics().sleeps,0);}
+    assert.equal(f.client.sent.some(c=>c.type==='run'&&c.direction==='Up'),false);
+  });
+});
+test('a branded NoPath raised while a sale ACK is pending is never upgraded to a merchant NAV retry',async()=>{
+  const source=await w16MerchantHistoryFixture({phase:'initial-ruben'});
+  await assert.rejects(source.f.supply.prepare(),isTerminalNavigationNoPath);const original=source.metrics().firstTerminal;
+  const f=fixture({ownerPosition:{x:288,y:616},items:[item(658,1,2),{...item(853,1,4,1),sellValue:273},{...item(853,1,5,2),sellValue:248}],navigate:async()=>{}});
+  const wait=f.client.wait.bind(f.client);f.client.wait=async(predicate,label,timeout)=>{
+    if(label==='fresh exact Venison sale ACK')throw original;return wait(predicate,label,timeout);};
+  await assert.rejects(f.supply.prepare(),error=>error===original);
+  assert.equal(f.client.sent.filter(c=>c.type==='sellItem').length,1);assert.equal(f.supply.status().pathReplanCount,0);
+  assert.equal(f.client.sent.some(c=>c.type==='buyItem'),false);
+});

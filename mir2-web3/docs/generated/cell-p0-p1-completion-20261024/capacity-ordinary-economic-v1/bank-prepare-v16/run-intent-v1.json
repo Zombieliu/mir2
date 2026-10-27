@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\frozen-source-v1.json",
+    "bytes": 134360,
+    "sha256": "4252ff13f253c9f5e98f41cc11f5eee560ef5652d9ee65ada7f62bf9375ce31c"
+  },
+  "options": {
+    "realm": "isolated",
+    "endpoint": "ws://127.0.0.1:17510/ws",
+    "maxPrepared": 100,
+    "finiteWallSeconds": 18000,
+    "targetHp": 12,
+    "attackResults": "v2",
+    "continuation": {
+      "mode": "historical-prepared-index-v1",
+      "evidence": [
+        {
+          "report": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+            "bytes": 145422,
+            "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+          },
+          "preparedIndex": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\prepared-index-v1.json",
+            "bytes": 11953,
+            "sha256": "922fd2339adea01799c35e0ef99fa511266666ad1168eb332aeab06392cb3bab"
+          },
+          "cleanup": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\cleanup-v1.json",
+            "bytes": 1037,
+            "sha256": "19ad8a7a3f017563c283cccfa152828cff4afb847ae5da996d480fa41eff2970"
+          },
+          "receipt": {
+            "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\preparation-episode-receipt-v1.json",
+            "bytes": 6144,
+            "sha256": "6e9505f8812fc3eb53fdd69fa2bacb4b780ba7684680be0d99d9f937142d1b67"
+          }
+        }
+      ]
+    },
+    "poolFile": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\private\\capacity-pool.json",
+    "monitor": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\monitor-current.json",
+    "output": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports",
+    "scenarioFile": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\scenario-preparation-v2.json",
+    "routeFile": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+    "mapRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack"
+  },
+  "scope": "Explicit continuation-only preparation over actualW15 complete cold Store/pool/four secrets/latest ledger/control bytes. Historical42 normal saves reserve their original saved points but are not freshly logged in or active. Only original pool indices43..100 (expected58) undergo current ordinary login/recovery/preparation/drain. Failed43 is not skipped for poolready. Original W15 false remains. No seed, stock/position edits, loginNotBefore/origin reset, inherited fresh readiness or measurement.",
+  "historicalPreparedCount": 42,
+  "expectedThisRun": 58,
+  "historicalNotFresh": true,
+  "first4FreshReusePerformedThisRun": false,
+  "formalAcceptanceEligible": false,
+  "capacityAccepted": false,
+  "preparationSupplyDurationClaim": false
+}
