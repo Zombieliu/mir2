@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
   assessMeasurements, movementDiagnosticMayContinue, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
-import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, offerNativeHpRecovery, recoverPreparationHeldHp, offerNativeClientWork, offerPreparationKeepAlive, ordinaryPreparationConfiguration, prepareCapacityActor, activatePreparedCohort, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS } from './playtest-capacity-soak.mjs';
+import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, activeCombatCoverage, beginPendingAttackEvidence, recordPendingAttackPacket, finishPendingAttackEvidence, PENDING_ATTACK_PACKET_LIMIT, attackResultsMode, matchAttackResultV2, ATTACK_OUTCOME_CAPABILITY, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, offerNativeHpRecovery, recoverPreparationHeldHp, offerNativeClientWork, offerPreparationKeepAlive, ordinaryPreparationConfiguration, prepareCapacityActor, activatePreparedCohort, combatCandidates, recordCombatPursuitMovement, recordCombatScoutMovement, restoreCombatPursuit, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, measure, runCapacity, parseArguments, patrol, action, navigationObstacles, navigationPlanIsClear, movementHintCells, claimNavigationHint, releaseNavigationHint, NAVIGATION_HINT_MAX_CELLS, targetSupplyDiagnosticSummary } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { SafetyStop } from './playtest-load-smoke.mjs';
 import { SustainObservations } from './playtest-capacity-observability.mjs';
@@ -4593,4 +4593,173 @@ test('runCapacity execution gate captures a changing target getter once and pins
   await assert.rejects(runCapacity(targetInitiallyInvalid),
     { name: 'Error', message: 'The explicit capacity target must be 500 actors' });
   assert.equal(reads, 1, 'a later getter value cannot replace an invalid initial declaration');
+});
+
+
+function enableTargetSupply(fixture) {
+  fixture.context.targetSupplyDiagnostics = true;
+  return fixture;
+}
+function supplyRows(fixture) { return fixture.rows.filter(row => row.type === 'combatTargetSupply'); }
+
+test('target supply diagnostics bind real owner receipt scalars and count existing candidate filters', () => {
+  const valid = huntMonster(900, 'Deer', 6), hidden = huntMonster(901, 'Deer', 7);
+  const rejected = [
+    { ...huntMonster(902, 'Deer', 7), dead: true }, { ...huntMonster(903, 'Deer', 7), hp: 0 },
+    { ...huntMonster(904, 'Deer', 7), ownerName: 'ordinary-owner' },
+    { ...huntMonster(905, 'Deer', 7), disposition: 'friendly' }, huntMonster(906, 'Oma', 7),
+    huntMonster(907, 'Deer', 30), huntMonster(908, 'Deer', 7), huntMonster(909, 'Deer', 7), huntMonster(910, 'Deer', 7),
+  ];
+  const f = enableTargetSupply(huntFixture([valid, hidden, ...rejected], [valid])); f.client.sequence = 77;
+  f.client.failedTargets.set(908, { until: Infinity });
+  f.client.chaseDeferrals.set(909, { mapFileName: '0', until: Infinity }); f.context.targetClaims.set(910, 'another-fighter');
+  const plan = selectNativeAction(f.client, f.context, 1000), row = supplyRows(f)[0];
+  assert.equal(plan.command.type, 'attack'); assert.equal(plan.command.objectId, 900);
+  assert.deepEqual(row.owner, { id: 1000, name: f.client.label, x: 5, y: 5 });
+  assert.equal(row.sequence, 77); assert.equal(row.mapFileName, '0'); assert.equal(row.monotonicMs, 1000);
+  for (const key of ['dead', 'nonpositiveHp', 'friendly', 'owned', 'notWeak', 'outOfRange', 'failedTarget', 'chaseDeferred', 'claimed']) assert.equal(row.counts[key], 1, key);
+  assert.equal(row.counts.approachNoWitness, 1); assert.ok(row.counts.witnessTargetMissing > 0);
+  assert.equal(row.selected.id, 900); assert.equal(row.witness, f.peer.label);
+  assert.ok(row.witnessRejected.length > 0 && row.witnessRejected.length <= 4);
+  assert.ok(row.witnessRejected.every(example => typeof example.attackerPresent === 'boolean' && typeof example.targetPresent === 'boolean'));
+  assert.ok(Buffer.byteLength(JSON.stringify(row)) < 8192);
+  assert.deepEqual(row.approachRejected.map(target => target.id), [901]); assert.ok(row.first4.length <= 4);
+  valid.x = 40; f.owner.x = 40; assert.equal(row.selected.x, 6); assert.equal(row.owner.x, 5);
+  assert.equal(f.actions.length, 0); assert.equal(f.context.targetClaims.size, 1);
+  const encoded = JSON.stringify(row); for (const forbidden of ['password', 'snapshot', 'entities', 'private-pass', 'accountId']) assert.equal(encoded.includes(forbidden), false);
+});
+
+test('target supply diagnostics preserve complete first4 path failure decisions without extra snapshot or map queries', () => {
+  function fixture(enabled) {
+    const monsters = [2, 4, 6, 8].map((y, i) => huntMonster(900 + i, 'Deer', 10, y));
+    const f = huntFixture([...monsters, huntMonster(905, 'Scarecrow', 11)]); Object.assign(f.peer.snapshot.entities[0], { x: 9, y: 5 });
+    for (const monster of monsters) for (let y = monster.y - 1; y <= monster.y + 1; y++) for (let x = 9; x <= 11; x++) f.context.map.blocked[y * 80 + x] = 1;
+    const reads = { ownerEntities: 0, peerEntities: 0, blocked: 0 }, ownerEntities = f.client.snapshot.entities, peerEntities = f.peer.snapshot.entities, blocked = f.context.map.blocked;
+    Object.defineProperty(f.client.snapshot, 'entities', { get() { reads.ownerEntities++; return ownerEntities; } });
+    Object.defineProperty(f.peer.snapshot, 'entities', { get() { reads.peerEntities++; return peerEntities; } });
+    Object.defineProperty(f.context.map, 'blocked', { get() { reads.blocked++; return blocked; } });
+    f.context.targetSupplyDiagnostics = enabled; return { ...f, reads };
+  }
+  const baseline = fixture(false), diagnosed = fixture(true);
+  const beforePlan = selectNativeAction(baseline.client, baseline.context, 1000), afterPlan = selectNativeAction(diagnosed.client, diagnosed.context, 1000);
+  assert.deepEqual(afterPlan, beforePlan); assert.deepEqual(diagnosed.reads, baseline.reads);
+  assert.deepEqual(diagnosed.client.navigationAttempts, baseline.client.navigationAttempts);
+  assert.equal(diagnosed.client.navigationAttemptCount, baseline.client.navigationAttemptCount);
+  const row = supplyRows(diagnosed)[0]; assert.equal(row.first4.length, 4);
+  assert.equal(row.counts.pathSearch, 32); assert.equal(row.counts.pathNull, 32);
+  assert.ok(row.first4.every(candidate => candidate.pathSearches === 8 && candidate.pathNull === 8));
+  assert.equal(row.first4.some(candidate => candidate.id === 905), false);
+  assert.deepEqual(diagnosed.actions, baseline.actions); assert.equal(baseline.rows.length, 0);
+});
+
+test('target supply diagnostics distinguish retained scout hints from a later actual target without replaying hints', () => {
+  const f = enableTargetSupply(observerHintScoutFixture());
+  const first = selectNativeAction(f.client, f.context, 1000), scout = f.client.combatScout;
+  assert.equal(first.scouting, true); assert.equal(supplyRows(f)[0].lastHint.id, 9100);
+  const retained = selectNativeAction(f.client, f.context, 11000);
+  assert.deepEqual(retained, first); assert.equal(f.client.combatScout, scout);
+  assert.equal(supplyRows(f).at(-1).scout.existing, true); assert.equal(supplyRows(f).at(-1).scout.hintScan, null);
+  const adjacent = huntMonster(900, 'Scarecrow', 6); f.owner.direction = 'Right';
+  f.client.snapshot.entities.push(adjacent); f.peer.snapshot.entities.push(adjacent);
+  const actual = selectNativeAction(f.client, f.context, 12000), row = supplyRows(f).at(-1);
+  assert.equal(actual.command.type, 'attack'); assert.equal(actual.command.objectId, 900);
+  assert.equal(row.lastHint.id, 9100); assert.equal(row.selected.id, 900); assert.equal(row.hintDiffersFromActualTarget, true);
+  assert.equal(row.lastHint.sequence, f.client.sequence); assert.equal(row.lastHint.monotonicMs, 1000);
+  assert.equal(f.client.combatScout, scout); assert.equal(f.actions.length, 0);
+});
+
+test('target supply diagnostics report unused hint path and original scout fallback', () => {
+  const f = enableTargetSupply(observerHintScoutFixture());
+  for (let y = 0; y < f.context.map.height; y++) f.context.map.blocked[y * 80 + 10] = 1;
+  const plan = selectNativeAction(f.client, f.context, 1000), row = supplyRows(f)[0];
+  assert.equal(plan.scoutHomeIndex, 0); assert.equal(row.reason, 'scout');
+  assert.equal(row.scout.hintScan.count, 1); assert.equal(row.scout.hintScan.selectedTargetId, null);
+  assert.equal(row.counts.scoutHintUnused, 1); assert.equal(row.counts.scoutPathNull, 1);
+  assert.equal(row.scout.pathSearches, 2); assert.equal(row.lastHint, null);
+  assert.equal(f.client.combatScout.confirmedMoves, 0); assert.equal(f.actions.length, 0);
+});
+
+test('target supply diagnostics reserve later fixed-minute slots and never replenish on clock regression', () => {
+  const target = huntMonster(900, 'Deer', 6), f = enableTargetSupply(huntFixture([target]));
+  for (let slot = 0; slot < 6; slot++) for (let i = 0; i < 90; i++) {
+    target.objectId = 900 + i; selectNativeAction(f.client, f.context, slot * 10000 + i * 100);
+  }
+  let rows = supplyRows(f); assert.equal(rows.length, 12); assert.ok(rows.every(row => row.fixedMonotonicMinute === 0));
+  assert.deepEqual([...new Set(rows.map(row => row.slot))], [0, 1, 2, 3, 4, 5]);
+  target.objectId = 1200; selectNativeAction(f.client, f.context, 60000); assert.equal(supplyRows(f).length, 13);
+  target.objectId = 1201; selectNativeAction(f.client, f.context, 61000); assert.equal(supplyRows(f).length, 14);
+  for (let i = 0; i < 90; i++) { target.objectId = 1300 + i; selectNativeAction(f.client, f.context, 1000 + i); }
+  assert.equal(supplyRows(f).length, 14);
+  selectNativeAction(f.client, f.context, 70000); assert.equal(supplyRows(f).length, 15);
+  const summary = targetSupplyDiagnosticSummary(f.context), state = summary.actors[0];
+  assert.equal(summary.maximumRowsPerFixedMonotonicMinute, 12); assert.equal(summary.maximumRowsPerSlot, 2);
+  assert.ok(state.sampledOut > 500); assert.equal(state.clockRegressions, 90); assert.equal(state.counters.decisions, 633);
+  state.counters.decisions = -1; assert.equal(targetSupplyDiagnosticSummary(f.context).actors[0].counters.decisions, 633);
+  assert.equal(f.actions.length, 0); assert.equal(f.context.targetClaims.size, 0);
+});
+
+test('target supply diagnostics cannot replace a plan or original strategy exception when its writer fails', () => {
+  const f = enableTargetSupply(huntFixture([huntMonster(900, 'Deer', 6)]));
+  f.context.writer.add = () => { throw new Error('diagnostic writer unavailable'); };
+  assert.equal(selectNativeAction(f.client, f.context, 1000).command.type, 'attack');
+  assert.equal(targetSupplyDiagnosticSummary(f.context).actors[0].writerLost, 1);
+  const original = new Error('original policy read failure');
+  Object.defineProperty(f.client.failedTargets, 'get', { value() { throw original; } });
+  assert.throws(() => selectNativeAction(f.client, f.context, 11000), error => error === original);
+  assert.equal(targetSupplyDiagnosticSummary(f.context).actors[0].writerLost, 2);
+  assert.equal(targetSupplyDiagnosticSummary(f.context).actors[0].counters.strategyException, 1);
+  assert.equal(f.actions.length, 0);
+  const silent = huntFixture([huntMonster(900, 'Deer', 6)]); silent.context.writer.add = () => { throw new Error('must not write disabled diagnostics'); };
+  assert.equal(selectNativeAction(silent.client, silent.context, 1000).command.type, 'attack');
+  assert.deepEqual(targetSupplyDiagnosticSummary(silent.context).actors, []);
+});
+
+test('target supply diagnostics leave real native offered accounting cadence budgets and no-send waits unchanged', () => {
+  function fixture(enabled) {
+    const f = huntFixture([huntMonster(900, 'Deer', 6)]); f.context.targetSupplyDiagnostics = enabled;
+    f.client.plan = new NativePlan(0); f.client.pending = Promise.resolve(); return f;
+  }
+  const baseline = fixture(false), diagnosed = fixture(true);
+  offerNativeAction(baseline.client, baseline.context, 1000); offerNativeAction(diagnosed.client, diagnosed.context, 1000);
+  assert.deepEqual(diagnosed.actions, baseline.actions); assert.equal(diagnosed.actions.length, 1);
+  assert.equal(diagnosed.actions[0].nativeOpportunity, true); assert.equal(diagnosed.actions[0].status, 'owner-ack-wait');
+  assert.deepEqual(diagnosed.client.budget.sent, baseline.client.budget.sent);
+  assert.deepEqual(diagnosed.client.plan, baseline.client.plan);
+  assert.equal(diagnosed.context.policy.minimumCombatAttacksPerMinute, 18); assert.equal(diagnosed.context.policy.minimumCombatHitsPerMinute, 12);
+  assert.equal(diagnosed.context.policy.actionTimeoutMs, 2000); assert.equal(diagnosed.context.policy.maximumDriverLagP99Ms, 250);
+  assert.equal(supplyRows(diagnosed).length, 1); assert.equal(baseline.rows.length, 0);
+});
+
+
+test('target supply diagnostics isolate collector reads and report writer loss saturation and bounded actor state', () => {
+  const f = enableTargetSupply(huntFixture([huntMonster(900, 'Deer', 6)]));
+  Object.defineProperty(f.owner, 'name', { get() { throw new Error('diagnostic owner name unavailable'); } });
+  assert.equal(selectNativeAction(f.client, f.context, 1000).command.type, 'attack');
+  assert.equal(targetSupplyDiagnosticSummary(f.context).actors[0].collectorErrors, 1); assert.equal(supplyRows(f).length, 0);
+  const unavailableWriter = enableTargetSupply(huntFixture([huntMonster(900, 'Deer', 6)]));
+  Object.defineProperty(unavailableWriter.context, 'writer', { get() { throw new Error('diagnostic writer getter unavailable'); } });
+  assert.equal(selectNativeAction(unavailableWriter.client, unavailableWriter.context, 1000).command.type, 'attack');
+  assert.equal(targetSupplyDiagnosticSummary(unavailableWriter.context).actors[0].collectorErrors, 1);
+  assert.equal(unavailableWriter.actions.length, 0);
+  const g = enableTargetSupply(huntFixture([huntMonster(900, 'Deer', 6)])); g.context.writer.failure = new Error('writer already failed');
+  assert.equal(selectNativeAction(g.client, g.context, 1000).command.type, 'attack');
+  assert.equal(targetSupplyDiagnosticSummary(g.context).actors[0].writerLost, 1); assert.equal(supplyRows(g).length, 0);
+  const state = g.context.targetSupplyDiagnosticState.actors.get(g.client.label); state.counters.decisions = Number.MAX_SAFE_INTEGER;
+  selectNativeAction(g.client, g.context, 11000); assert.equal(state.counters.decisions, Number.MAX_SAFE_INTEGER);
+  const h = enableTargetSupply(huntFixture([huntMonster(900, 'Deer', 6)]));
+  h.context.targetSupplyDiagnosticState = { actors: new Map(Array.from({ length: 500 }, (_, i) => ['other-' + i, {}])), actorLimitDrops: 0 };
+  assert.equal(selectNativeAction(h.client, h.context, 1000).command.type, 'attack');
+  assert.equal(h.context.targetSupplyDiagnosticState.actors.size, 500); assert.equal(h.context.targetSupplyDiagnosticState.actorLimitDrops, 1);
+});
+
+test('target supply diagnostics never compare stale or cross-map hints as a current target choice', () => {
+  const f = enableTargetSupply(observerHintScoutFixture()); selectNativeAction(f.client, f.context, 1000);
+  const target = huntMonster(900, 'Scarecrow', 6); f.owner.direction = 'Right';
+  f.client.snapshot.entities.push(target); f.peer.snapshot.entities.push(target);
+  assert.equal(selectNativeAction(f.client, f.context, 25000).command.type, 'attack');
+  let row = supplyRows(f).at(-1); assert.equal(row.lastHint.ageAtDecisionMs, 24000); assert.equal(row.hintDiffersFromActualTarget, null);
+  const state = f.context.targetSupplyDiagnosticState.actors.get(f.client.label); state.lastHint.mapFileName = 'other'; state.lastHint.monotonicMs = 30000;
+  assert.equal(selectNativeAction(f.client, f.context, 35000).command.type, 'attack');
+  row = supplyRows(f).at(-1); assert.equal(row.lastHint.sameMap, false); assert.equal(row.lastHint.currentAuthority, false);
+  assert.equal(row.hintDiffersFromActualTarget, null);
 });

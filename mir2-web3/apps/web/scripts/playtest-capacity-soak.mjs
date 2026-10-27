@@ -837,31 +837,147 @@ function nearbyObservers(client, context, margin = 16) {
   return context.clients.filter(other => other !== client && other.inGame && !other.closed && !other.paused &&
     other.snapshot?.mapFileName === client.snapshot.mapFileName && self(other) && distance(self(other), self(client)) <= margin);
 }
+
+const TARGET_SUPPLY_COUNTERS = new Set(['decisions', 'visible', 'legalWeak', 'notMonster', 'dead', 'nonpositiveHp', 'friendly', 'owned', 'notWeak', 'notScenario', 'outOfRange', 'failedTarget', 'chaseDeferred', 'claimed', 'outsideCoverage', 'approachNoWitness', 'witnessCalls', 'witnessInactive', 'witnessAttackerMissing', 'witnessTargetMissing', 'witnessRange', 'witnessAvailable', 'pathSearch', 'pathNull', 'pathOutside', 'scoutPathSearch', 'scoutPathNull', 'scoutBindingMissing', 'scoutRetainedElsewhere', 'scoutSearchLimit', 'scoutUnavailable', 'scoutNoPath', 'scoutHintUnused', 'attack', 'turn', 'chase', 'scout', 'return', 'blocked', 'initialTransit', 'strategyException']);
+const TARGET_SUPPLY_SLOT_MS = 10000, TARGET_SUPPLY_ROWS_PER_SLOT = 2, TARGET_SUPPLY_ACTOR_LIMIT = 500;
+function supplyIncrement(counts, key, amount = 1) {
+  counts[key] = Math.min(Number.MAX_SAFE_INTEGER, (counts[key] ?? 0) + amount);
+}
+function supplyCount(diagnostic, key, amount = 1) {
+  if (!diagnostic || !TARGET_SUPPLY_COUNTERS.has(key)) return;
+  supplyIncrement(diagnostic.counts, key, amount); supplyIncrement(diagnostic.state.counters, key, amount);
+}
+function supplyCapture(diagnostic, capture) {
+  if (!diagnostic) return;
+  try { capture(); } catch { supplyIncrement(diagnostic.state, 'collectorErrors'); }
+}
+function supplyTarget(target) {
+  return { id: target.objectId, name: target.name, x: target.x, y: target.y };
+}
+function beginTargetSupply(client, context, owner, monotonicMs) {
+  let state;
+  try {
+    if (context.targetSupplyDiagnostics !== true || !Number.isFinite(monotonicMs) || monotonicMs < 0) return null;
+    const store = context.targetSupplyDiagnosticState ??= { actors: new Map(), actorLimitDrops: 0 };
+    state = store.actors.get(client.label);
+    if (!state) {
+      if (store.actors.size >= TARGET_SUPPLY_ACTOR_LIMIT) { supplyIncrement(store, 'actorLimitDrops'); return null; }
+      state = { counters: {}, lastMono: monotonicMs, slot: -1, slotRows: 0, signature: null, emitted: 0, sampledOut: 0, writerLost: 0, collectorErrors: 0, clockRegressions: 0, lastHint: null };
+      store.actors.set(client.label, state);
+    }
+    if (!context.writer) return null;
+    if (monotonicMs < state.lastMono) supplyIncrement(state, 'clockRegressions');
+    state.lastMono = Math.max(state.lastMono, monotonicMs);
+    const diagnostic = { state, counts: {}, actor: client.label, phase: context.phase, monotonicMs,
+      sequence: client.sequence, mapFileName: String(client.snapshot.mapFileName),
+      owner: { id: owner.objectId, name: owner.name, x: owner.x, y: owner.y },
+      reason: 'strategyException', selected: null, first4: [], approachRejected: [], witnessRejected: [], witness: null, pursuit: null, pursuitEvaluated: false, scout: null };
+    supplyCount(diagnostic, 'decisions'); return diagnostic;
+  } catch { if (state) supplyIncrement(state, 'collectorErrors'); return null; }
+}
+function completeTargetSupply(diagnostic, reason, plan, selected = null, observer = null) {
+  try { if (diagnostic) {
+    diagnostic.reason = reason; supplyCount(diagnostic, reason);
+    diagnostic.selected = selected ? supplyTarget(selected) : null;
+    diagnostic.witness = observer ? observer.label : null;
+    diagnostic.plan = plan ? { kind: plan.command.type, x: plan.target?.x ?? null, y: plan.target?.y ?? null,
+      chaseTargetId: plan.chaseTargetId ?? null, scoutHomeIndex: plan.scoutHomeIndex ?? null } : null;
+  }
+  } catch { supplyIncrement(diagnostic.state, 'collectorErrors'); }
+  return plan;
+}
+function emitTargetSupply(context, diagnostic) {
+  if (!diagnostic) return;
+  const state = diagnostic.state;
+  try {
+    if (diagnostic.reason === 'strategyException') supplyCount(diagnostic, 'strategyException');
+    const slot = Math.floor(state.lastMono / TARGET_SUPPLY_SLOT_MS);
+    if (slot > state.slot) { state.slot = slot; state.slotRows = 0; state.signature = null; }
+    const signature = diagnostic.reason + ':' + (diagnostic.selected?.id ?? diagnostic.plan?.chaseTargetId ?? diagnostic.scout?.hintScan?.selectedTargetId ?? diagnostic.plan?.scoutHomeIndex ?? 'none');
+    if (state.slotRows >= TARGET_SUPPLY_ROWS_PER_SLOT || (state.slotRows && state.signature === signature)) { supplyIncrement(state, 'sampledOut'); return; }
+    state.slotRows++; state.signature = signature;
+    const hintAge = state.lastHint && diagnostic.monotonicMs >= state.lastHint.monotonicMs ? diagnostic.monotonicMs - state.lastHint.monotonicMs : null;
+    const hint = state.lastHint ? { ...state.lastHint, ageAtDecisionMs: hintAge,
+      sameMap: state.lastHint.mapFileName === diagnostic.mapFileName, currentAuthority: false } : null;
+    const comparableHint = hint?.sameMap && hintAge !== null && hintAge <= 20000;
+    const row = { type: 'combatTargetSupply', at: Date.now(), actor: diagnostic.actor, phase: diagnostic.phase,
+      monotonicMs: diagnostic.monotonicMs, sequence: diagnostic.sequence, mapFileName: diagnostic.mapFileName,
+      owner: diagnostic.owner, reason: diagnostic.reason, selected: diagnostic.selected, witness: diagnostic.witness,
+      plan: diagnostic.plan ?? null, counts: { ...diagnostic.counts }, cumulative: { ...state.counters },
+      first4: diagnostic.first4, approachRejected: diagnostic.approachRejected,
+      approachRejectedTruncated: (diagnostic.counts.approachNoWitness ?? 0) > diagnostic.approachRejected.length,
+      witnessRejected: diagnostic.witnessRejected,
+      witnessRejectedExamplesTruncated: ['witnessInactive', 'witnessAttackerMissing', 'witnessTargetMissing', 'witnessRange'].reduce((sum, key) => sum + (diagnostic.counts[key] ?? 0), 0) > diagnostic.witnessRejected.length,
+      pursuitEvaluated: diagnostic.pursuitEvaluated, pursuit: diagnostic.pursuit, scout: diagnostic.scout, lastHint: hint,
+      hintDiffersFromActualTarget: comparableHint && diagnostic.selected ? hint.id !== diagnostic.selected.id : null,
+      fixedMonotonicMinute: Math.floor(state.lastMono / 60000), slot, slotRow: state.slotRows,
+      writerLost: state.writerLost, collectorErrors: state.collectorErrors, clockRegressions: state.clockRegressions };
+    if (context.writer.failure) { supplyIncrement(state, 'writerLost'); return; }
+    try {
+      context.writer.add(row);
+      if (context.writer.failure) supplyIncrement(state, 'writerLost'); else supplyIncrement(state, 'emitted');
+    } catch { supplyIncrement(state, 'writerLost'); }
+  } catch { supplyIncrement(state, 'collectorErrors'); }
+}
+export function targetSupplyDiagnosticSummary(context) {
+  const store = context.targetSupplyDiagnosticState;
+  return { enabled: context.targetSupplyDiagnostics === true, diagnosticOnly: true,
+    maximumRowsPerFixedMonotonicMinute: 12, slotMs: TARGET_SUPPLY_SLOT_MS, maximumRowsPerSlot: TARGET_SUPPLY_ROWS_PER_SLOT,
+    windowRule: 'Fixed floor(monotonicMs / 60000) minutes, not arbitrary rolling sixty seconds; clock regression never replenishes the quota.',
+    scope: 'Existing client decision intermediates only, not a spectator snapshot, replay certificate, live target guarantee or game gate.',
+    counterRule: 'Fixed reason keys saturate at Number.MAX_SAFE_INTEGER; counts are original predicate/path/witness evaluations, not unique monsters or a replay of rejected opportunities.',
+    candidateRule: 'legalWeak is before distance/deferral/claim/coverage filters; first4 is the original post-approach/priority window; evaluated=false means the earlier selected candidate returned before this candidate was tried.',
+    receiptRule: 'sequence/owner/map are from this client at the synchronous decision; monotonicMs is its original decision clock. Hints are historical routing suggestions, never live target or witness authority. hintDiffersFromActualTarget compares only same-map suggestions aged at most20000ms; older/cross-map/regressed-clock comparisons are null.',
+    maximumActors: TARGET_SUPPLY_ACTOR_LIMIT, actorLimitDrops: store?.actorLimitDrops ?? 0,
+    actors: [...(store?.actors ?? [])].map(([actor, state]) => ({ actor, counters: { ...state.counters }, emitted: state.emitted,
+      sampledOut: state.sampledOut, writerLost: state.writerLost, collectorErrors: state.collectorErrors, clockRegressions: state.clockRegressions })) };
+}
+
 function combatObservers(client, context) {
   const coverage = activeCombatCoverage(client, context);
   return nearbyObservers(client, context).filter(other => !coverage || coverage.entries.some(entry => entry.observer === other));
 }
-function ordinaryCombatMonster(entity, context) {
-  return entity?.kind === 'monster' && !entity.dead && Number(entity.hp ?? 1) > 0 &&
+function ordinaryCombatMonster(entity, context, diagnostic) {
+  if (!diagnostic) return entity?.kind === 'monster' && !entity.dead && Number(entity.hp ?? 1) > 0 &&
     String(entity.disposition ?? '').trim().toLowerCase() !== 'friendly' && !String(entity.ownerName ?? '').trim() &&
     WEAK_MONSTERS.includes(entity.name) && context.monsterNames.includes(entity.name);
+  const reject = reason => { supplyCount(diagnostic, reason); return false; };
+  if (entity?.kind !== 'monster') return reject('notMonster');
+  if (entity.dead) return reject('dead');
+  if (!(Number(entity.hp ?? 1) > 0)) return reject('nonpositiveHp');
+  if (String(entity.disposition ?? '').trim().toLowerCase() === 'friendly') return reject('friendly');
+  if (String(entity.ownerName ?? '').trim()) return reject('owned');
+  if (!WEAK_MONSTERS.includes(entity.name)) return reject('notWeak');
+  if (!context.monsterNames.includes(entity.name)) return reject('notScenario');
+  supplyCount(diagnostic, 'legalWeak'); return true;
 }
-function availableCombatTarget(client, context, entity, now) {
-  return ordinaryCombatMonster(entity, context) && distance(entity, self(client)) <= 16 &&
+function availableCombatTarget(client, context, entity, now, diagnostic) {
+  if (!diagnostic) return ordinaryCombatMonster(entity, context) && distance(entity, self(client)) <= 16 &&
     (client.failedTargets.get(entity.objectId)?.until ?? 0) <= now &&
     (context.policy?.activityMode !== 'native' || client.chaseDeferrals?.get(entity.objectId)?.mapFileName !== String(client.snapshot.mapFileName) ||
       client.chaseDeferrals.get(entity.objectId).until <= now) &&
     (!context.targetClaims.has(entity.objectId) || context.targetClaims.get(entity.objectId) === client.label);
+  if (!ordinaryCombatMonster(entity, context, diagnostic)) return false;
+  if (!(distance(entity, self(client)) <= 16)) { supplyCount(diagnostic, 'outOfRange'); return false; }
+  if (!((client.failedTargets.get(entity.objectId)?.until ?? 0) <= now)) { supplyCount(diagnostic, 'failedTarget'); return false; }
+  if (!(context.policy?.activityMode !== 'native' || client.chaseDeferrals?.get(entity.objectId)?.mapFileName !== String(client.snapshot.mapFileName) ||
+      client.chaseDeferrals.get(entity.objectId).until <= now)) { supplyCount(diagnostic, 'chaseDeferred'); return false; }
+  if (!(!context.targetClaims.has(entity.objectId) || context.targetClaims.get(entity.objectId) === client.label)) { supplyCount(diagnostic, 'claimed'); return false; }
+  return true;
 }
 function livePursuitTarget(client, context, pursuit = client.combatPursuit, now = Date.now()) {
   return pursuit?.mapFileName === String(client.snapshot.mapFileName) ? client.snapshot.entities.find(entity =>
     entity.objectId === pursuit.objectId && entity.name === pursuit.name && availableCombatTarget(client, context, entity, now)) : null;
 }
-export function combatCandidates(client, context, now = Date.now()) {
+export function combatCandidates(client, context, now = Date.now(), diagnostic) {
   const owner = self(client);
   const coverage = activeCombatCoverage(client, context);
   const observed = client.combatCluster ? new Set(combatObservers(client, context).flatMap(other => other.snapshot.entities.map(entity => entity.objectId))) : null;
-  return client.snapshot.entities.filter(entity => availableCombatTarget(client, context, entity, now) && insideCombatCoverage(coverage, entity))
+  return client.snapshot.entities.filter(entity => {
+    supplyCount(diagnostic, 'visible');
+    if (!availableCombatTarget(client, context, entity, now, diagnostic)) return false;
+    const covered = insideCombatCoverage(coverage, entity); if (!covered) supplyCount(diagnostic, 'outsideCoverage'); return covered;
+  })
     .sort((a, b) => (observed ? Number(observed.has(b.objectId)) - Number(observed.has(a.objectId)) : 0) || distance(a, owner) - distance(b, owner));
 }
 
@@ -1097,22 +1213,35 @@ function recordCombatScoutSelection(client, context, selection, now) {
       { ...selection, truncated: false }) });
 }
 
-function scoutCombatCoverage(client, context, now = Date.now(), coverage = activeCombatCoverage(client, context)) {
+function scoutCombatCoverage(client, context, now = Date.now(), coverage = activeCombatCoverage(client, context), diagnostic) {
   const cluster = client.combatCluster, owner = self(client);
-  if (!cluster?.observerHomes?.length || !coverage.entries.length || client.pending || !insideCombatCoverage(coverage, owner)) return null;
+  const unavailable = reason => { if (diagnostic) diagnostic.scout = { blockedReason: reason }; supplyCount(diagnostic, 'scoutUnavailable'); return null; };
+  if (!cluster?.observerHomes?.length) return unavailable('no-declared-observers');
+  if (!coverage.entries.length) return unavailable('no-active-observers');
+  if (client.pending) return unavailable('owner-pending');
+  if (!insideCombatCoverage(coverage, owner)) return unavailable('owner-outside-coverage');
   if (client.combatScout?.mapFileName !== String(client.snapshot.mapFileName)) client.combatScout = null;
   if (client.combatScout && (client.combatScout.activeElapsedMs ?? 0) + now - client.combatScout.startedAt >= 20000) advanceCombatScout(client, context, 'time-budget', now);
   const occupied = navigationObstacles(client);
   const allowed = point => insideCombatCoverage(coverage, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
   const initialCursor = client.combatScout?.homeIndex ?? client.combatScoutCursor ?? 0;
+  if (diagnostic) diagnostic.scout = {};
+  supplyCapture(diagnostic, () => {
+    const current = client.combatScout;
+    diagnostic.scout = { existing: Boolean(current), homeIndex: current?.homeIndex ?? null,
+      goal: current ? { x: current.goal.x, y: current.goal.y } : null,
+      startedAt: current?.startedAt ?? null, activeElapsedMs: current?.activeElapsedMs ?? null,
+      confirmedMoves: current?.confirmedMoves ?? null, targetWaypoint: current?.targetWaypoint === true,
+      hintScan: null, selectedHomeIndex: null };
+  });
   let searches = 0;
   const findPlan = (homeIndex, hinted = false, hintGoal = null) => {
     const binding = coverage.entries.find(entry => entry.homeIndex === homeIndex);
-    if (!binding) return null;
+    if (!binding) { supplyCount(diagnostic, 'scoutBindingMissing'); return null; }
     const home = binding.home;
     // A temporarily inactive declared waypoint must not reset a different
     // waypoint's existing finite clock, ACK count or position-loop budget.
-    if (client.combatScout && client.combatScout.homeIndex !== homeIndex) return null;
+    if (client.combatScout && client.combatScout.homeIndex !== homeIndex) { supplyCount(diagnostic, 'scoutRetainedElsewhere'); return null; }
     const usableGoal = goal => lifecyclePoint(goal) && Number.isInteger(goal.x) && Number.isInteger(goal.y) &&
       distance(goal, owner) > 0 && protocolMapCellIsWalkable(context.map, goal) && allowed(goal) &&
       !occupied.some(entity => entity.x === goal.x && entity.y === goal.y);
@@ -1124,10 +1253,10 @@ function scoutCombatCoverage(client, context, now = Date.now(), coverage = activ
     // fall through to the existing home goals within the same search budget.
     if (retainedTarget && !goals.some(goal => distance(goal, retainedTarget) === 0)) goals.unshift(retainedTarget);
     for (const goal of goals) {
-      if (searches >= 4) return null;
-      searches++;
+      if (searches >= 4) { supplyCount(diagnostic, 'scoutSearchLimit'); return null; }
+      searches++; supplyCount(diagnostic, 'scoutPathSearch');
       const plan = hinted ? movement(client, goal, context.map, allowed, occupied) : movement(client, goal, context.map, allowed);
-      if (!plan) continue;
+      if (!plan) { supplyCount(diagnostic, 'scoutPathNull'); continue; }
       return { plan, homeIndex, goal, targetWaypoint: hinted || Boolean(retainedTarget && distance(goal, retainedTarget) === 0) };
     }
     return null;
@@ -1151,6 +1280,17 @@ function scoutCombatCoverage(client, context, now = Date.now(), coverage = activ
       }
     }
     const { plan, homeIndex, goal, targetWaypoint } = selected;
+    supplyCapture(diagnostic, () => {
+      diagnostic.scout.selectedHomeIndex = homeIndex;
+      diagnostic.scout.selectedGoal = { x: goal.x, y: goal.y };
+      diagnostic.scout.pathSearches = searches;
+      diagnostic.scout.hintScan = hintScan ? { count: hintScan.hintCount, truncated: hintScan.truncated,
+        preference: hintScan.hintPreferenceReason, selectedTargetId: hint?.objectId ?? null,
+        selectedTargetPoint: hint ? { x: hint.target.x, y: hint.target.y } : null } : null;
+      if (hintScan?.hints.length && !hint) supplyCount(diagnostic, 'scoutHintUnused');
+      if (hint) diagnostic.state.lastHint = { id: hint.objectId, x: hint.target.x, y: hint.target.y,
+        sequence: diagnostic.sequence, monotonicMs: diagnostic.monotonicMs, mapFileName: diagnostic.mapFileName, phase: diagnostic.phase, homeIndex };
+    });
     if (!client.combatScout) {
       client.combatScout = { mapFileName: String(client.snapshot.mapFileName), homeIndex, goal, startedAt: now,
         activeElapsedMs: 0, confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map(),
@@ -1176,7 +1316,8 @@ function scoutCombatCoverage(client, context, now = Date.now(), coverage = activ
   // can consider another finite observer waypoint while normal fallback keeps
   // its original blocked/latency/offered-load accounting.
   client.combatScoutCursor = (initialCursor + 1) % cluster.observerHomes.length;
-  return null;
+  if (diagnostic) diagnostic.scout.blockedReason = searches >= 4 ? 'search-budget-no-plan' : 'no-usable-goal-or-path';
+  supplyCount(diagnostic, 'scoutNoPath'); return null;
 }
 
 export function stableFanoutRange(kind, policy) {
@@ -1189,8 +1330,9 @@ export function stableFanoutRange(kind, policy) {
   if (policy?.activityMode === 'native') return kind === 'chat' ? 8 : 6;
   return kind === 'chat' ? 14 : 12;
 }
-function nativeAttackWitness(client, context, target, owner = self(client)) {
+function nativeAttackWitness(client, context, target, owner = self(client), diagnostic) {
   const range = stableFanoutRange('attack', context.policy);
+  supplyCount(diagnostic, 'witnessCalls');
   return combatObservers(client, context).map(observer => {
     const peer = activeGameplayOwner(observer, client.snapshot.mapFileName);
     const attackerId = observedPlayerId(observer, client.label);
@@ -1198,8 +1340,18 @@ function nativeAttackWitness(client, context, target, owner = self(client)) {
     const observedTarget = observer.snapshot.entities.find(entity => entity.objectId === target.objectId &&
       entity.name === target.name && ordinaryCombatMonster(entity, context));
     const separation = peer ? Math.max(distance(peer, owner), distance(peer, target)) : Infinity;
-    return peer && attacker && observedTarget && Number.isInteger(attackerId) && separation <= range
-      ? { observer, separation } : null;
+    const usable = peer && attacker && observedTarget && Number.isInteger(attackerId) && separation <= range;
+    if (diagnostic) {
+      const reason = !peer ? 'witnessInactive' : !attacker || !Number.isInteger(attackerId) ?
+        'witnessAttackerMissing' : !observedTarget ? 'witnessTargetMissing' : separation > range ? 'witnessRange' : 'witnessAvailable';
+      supplyCount(diagnostic, reason);
+      if (!usable && diagnostic.witnessRejected.length < 4) supplyCapture(diagnostic, () => {
+        diagnostic.witnessRejected.push({ targetId: target.objectId, observer: observer.label,
+          testedOwnerPoint: { x: owner.x, y: owner.y }, peerPoint: peer ? { x: peer.x, y: peer.y } : null,
+          attackerPresent: Boolean(attacker), targetPresent: Boolean(observedTarget), separation: Number.isFinite(separation) ? separation : null, reason });
+      });
+    }
+    return usable ? { observer, separation } : null;
   }).filter(Boolean).sort((a, b) => a.separation - b.separation)[0]?.observer ?? null;
 }
 function recentNativePursuitLeaders(context, mapFileName, nowMonoMs) {
@@ -1224,19 +1376,21 @@ function recentNativePursuitLeaders(context, mapFileName, nowMonoMs) {
 
 function combatPlan(client, context, nowMonoMs = performance.now()) {
   const owner = self(client), native = context.policy?.activityMode === 'native';
+  const diagnostic = native ? beginTargetSupply(client, context, owner, nowMonoMs) : null;
+  try {
   if (context.policy?.activityMode === 'native' && !client.combatArrival) {
     if (distance(owner, client.home) !== 0) {
       const plan = movement(client, client.home, context.map);
-      return plan ? { ...plan, initialCombatTransit: true } : null;
+      return completeTargetSupply(diagnostic, 'initialTransit', plan ? { ...plan, initialCombatTransit: true } : null);
     }
     recordCombatArrival(client, context);
   }
   const coverage = activeCombatCoverage(client, context);
-  if (!insideCombatCoverage(coverage, owner)) return returnToCombatCoverage(client, context, coverage);
+  if (!insideCombatCoverage(coverage, owner)) return completeTargetSupply(diagnostic, 'return', returnToCombatCoverage(client, context, coverage));
   for (const [id, failure] of client.failedTargets) if (failure.until < Date.now() - 30000) client.failedTargets.delete(id);
-  let candidates = combatCandidates(client, context);
+  let candidates = combatCandidates(client, context, undefined, diagnostic);
   const observers = combatObservers(client, context);
-  const witness = target => native ? nativeAttackWitness(client, context, target) :
+  const witness = target => native ? nativeAttackWitness(client, context, target, undefined, diagnostic) :
     observers.find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId));
   const approaches = native ? new Map() : null;
   if (native) {
@@ -1245,14 +1399,27 @@ function combatPlan(client, context, nowMonoMs = performance.now()) {
     // These eight cheap geometry/membership checks do not expand path budgets.
     candidates = candidates.filter(target => {
       const destinations = STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy }))
-        .filter(destination => insideCombatCoverage(coverage, destination) && nativeAttackWitness(client, context, target, destination));
+        .filter(destination => insideCombatCoverage(coverage, destination) && nativeAttackWitness(client, context, target, destination, diagnostic));
       approaches.set(target.objectId, destinations);
+      if (!destinations.length) {
+        supplyCount(diagnostic, 'approachNoWitness');
+        if (diagnostic && diagnostic.approachRejected.length < 4) supplyCapture(diagnostic, () => diagnostic.approachRejected.push(supplyTarget(target)));
+      }
       return destinations.length > 0;
     });
     const pursuit = client.combatPursuit;
+    supplyCapture(diagnostic, () => { diagnostic.pursuitEvaluated = true;
+      if (pursuit) diagnostic.pursuit = { id: pursuit.objectId, name: pursuit.name, mapFileName: pursuit.mapFileName,
+        confirmedMoves: pursuit.confirmedMoves, attackSent: pursuit.attackSent, startedAt: pursuit.startedAt, activeElapsedMs: pursuit.activeElapsedMs }; });
     const selected = pursuit?.mapFileName === String(client.snapshot.mapFileName)
       ? candidates.find(target => target.objectId === pursuit.objectId && target.name === pursuit.name) : null;
-    if (!selected && !livePursuitTarget(client, context, pursuit)) client.combatPursuit = null;
+    if (!selected) {
+      const live = livePursuitTarget(client, context, pursuit);
+      supplyCapture(diagnostic, () => { if (diagnostic.pursuit) Object.assign(diagnostic.pursuit,
+        { selectedInApproach: false, liveCheckPerformed: true, liveCheckPassed: Boolean(live), cleared: !live }); });
+      if (!live) client.combatPursuit = null;
+    } else supplyCapture(diagnostic, () => { if (diagnostic.pursuit) Object.assign(diagnostic.pursuit,
+      { selectedInApproach: true, liveCheckPerformed: false, liveCheckPassed: null, cleared: false }); });
     const adjacent = candidates.filter(target => distance(owner, target) === 1 && witness(target));
     candidates = [...new Set([...(selected && adjacent.includes(selected) ? [selected] : []), ...adjacent,
       ...(selected ? [selected] : []), ...candidates])];
@@ -1265,25 +1432,34 @@ function combatPlan(client, context, nowMonoMs = performance.now()) {
       leaders.has(target.objectId) && leaders.get(target.objectId).label !== client.label ? 2 : 1;
     candidates = candidates.slice(0, 4).sort((a, b) => priority(a) - priority(b));
   }
-  for (const target of candidates.slice(0, 4)) {
+  const first4 = candidates.slice(0, 4);
+  supplyCapture(diagnostic, () => { diagnostic.first4 = first4.map(target => ({ ...supplyTarget(target), approachGoals: approaches?.get(target.objectId)?.length ?? null,
+    evaluated: false, witness: null, pathSearches: 0, pathNull: 0 })); });
+  let diagnosticIndex = 0;
+  for (const target of first4) {
+    const candidateDiagnostic = diagnostic?.first4[diagnosticIndex++];
     const observer = witness(target);
+    if (candidateDiagnostic) supplyCapture(diagnostic, () => { candidateDiagnostic.evaluated = true; candidateDiagnostic.witness = observer?.label ?? null; });
     if (distance(owner, target) === 1 && observer) {
       if (native && !client.pending) rememberCombatTarget(client, target);
       const facing = directionOf(owner, target);
-      if (owner.direction !== facing) return { command: { type: 'turn', direction: facing }, hunting: target.name };
-      return { command: { type: 'attack', objectId: target.objectId }, targetEntity: target, observer, hunting: target.name,
-        peerAttackerId: observedPlayerId(observer, client.label) };
+      if (owner.direction !== facing) return completeTargetSupply(diagnostic, 'turn', { command: { type: 'turn', direction: facing }, hunting: target.name }, target, observer);
+      return completeTargetSupply(diagnostic, 'attack', { command: { type: 'attack', objectId: target.objectId }, targetEntity: target, observer, hunting: target.name,
+        peerAttackerId: observedPlayerId(observer, client.label) }, target, observer);
     }
     const adjacent = (native ? approaches.get(target.objectId) : STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy })))
       .sort((a, b) => distance(a, owner) - distance(b, owner));
     for (const destination of adjacent) {
       if (!insideCombatCoverage(coverage, destination)) continue;
+      supplyCount(diagnostic, 'pathSearch'); if (candidateDiagnostic) candidateDiagnostic.pathSearches++;
       const plan = movement(client, destination, context.map, point => insideCombatCoverage(coverage, point) &&
         !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds)));
+      if (!plan) { supplyCount(diagnostic, 'pathNull'); if (candidateDiagnostic) candidateDiagnostic.pathNull++; }
       if (plan && insideCombatCoverage(coverage, plan.first) && insideCombatCoverage(coverage, plan.target)) {
         if (native && !client.pending) rememberCombatTarget(client, target);
-        return { ...plan, hunting: target.name, ...(native ? { chaseTargetId: target.objectId, chaseTargetPoint: lifecyclePoint(target) } : {}) };
+        return completeTargetSupply(diagnostic, 'chase', { ...plan, hunting: target.name, ...(native ? { chaseTargetId: target.objectId, chaseTargetPoint: lifecyclePoint(target) } : {}) }, target, observer);
       }
+      if (plan) supplyCount(diagnostic, 'pathOutside');
     }
     // A temporarily unavailable path must not erase real chase ACKs. Otherwise
     // chase / fallback-patrol / chase can revisit one cell forever while each
@@ -1291,7 +1467,9 @@ function combatPlan(client, context, nowMonoMs = performance.now()) {
     if (native && !client.pending && client.combatPursuit?.objectId === target.objectId &&
         client.combatPursuit.confirmedMoves === 0) client.combatPursuit = null;
   }
-  return (native ? scoutCombatCoverage(client, context, Date.now(), coverage) : null) ?? returnToCombatCoverage(client, context, coverage);
+  const fallback = (native ? scoutCombatCoverage(client, context, Date.now(), coverage, diagnostic) : null) ?? returnToCombatCoverage(client, context, coverage);
+  return completeTargetSupply(diagnostic, fallback?.scouting ? 'scout' : fallback ? 'return' : 'blocked', fallback);
+  } finally { emitTargetSupply(context, diagnostic); }
 }
 
 function recordCombatArrival(client, context) {
@@ -2171,6 +2349,7 @@ export async function runCapacity(options) {
   const runId = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`, writer = new BoundedEvidence(path.join(output, `${runId}.samples.jsonl`));
   const guard = new CapacityMonitor(options.monitor, writer), aggregate = new Measurements();
   const context = { endpoint, policy, attackResults, runId, writer, guard, aggregate, clients: [], allClients: [], targetClaims: new Map(),
+    targetSupplyDiagnostics: policy.activityMode === 'native',
     aoi: new AoiCoverage(), phase: 'preflight', cleanupErrors: [], monsterNames: WEAK_MONSTERS,
     add(sample) {
       const row = { at: Date.now(), phase: this.phase, ...sample };
@@ -2411,6 +2590,7 @@ export async function runCapacity(options) {
     report.finishedAt = new Date().toISOString(); report.safetyStopped = guard.stopped; report.safetyReason = guard.reason;
     report.cleanupErrors = context.cleanupErrors; report.metrics = aggregate.summary(); report.samples = aggregate.samples;
     report.continuousAcceptance = context.continuous.summary();
+    if (policy.activityMode === 'native') report.targetSupplyDiagnostics = targetSupplyDiagnosticSummary(context);
     report.density = context.density.summary();
     report.peakServerActive = guard.peakServerActive; report.bytes = context.allClients.reduce((sum, client) => ({ sent: sum.sent + client.bytes.sent, received: sum.received + client.bytes.received }), { sent: 0, received: 0 });
     report.bytesDefinition = 'Physical WebSocket payload bytes, including catalog batch/gzip headers and excluding WebSocket/TLS framing';
