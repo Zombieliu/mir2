@@ -12,18 +12,26 @@ on:
         required: false
         default: false
         type: boolean
+      playtest_wallet_no_docker:
+        description: Build isolated playtest Gateway and wallet login packages without Docker or R2 publishing
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
 
 jobs:
   activities-acceptance:
+    if: ${{ !inputs.playtest_wallet_no_docker }}
     uses: ./.github/workflows/activities-acceptance.yml
 
   siege-acceptance:
+    if: ${{ !inputs.playtest_wallet_no_docker }}
     uses: ./.github/workflows/sabuk-acceptance.yml
 
   build-linux-x64:
+    if: ${{ !inputs.playtest_wallet_no_docker }}
     runs-on: ubuntu-latest
     timeout-minutes: 105
     steps:
@@ -229,7 +237,7 @@ jobs:
           bash scripts/package-gateway-release.sh
 
       - name: Publish Gateway package to R2
-        if: ${{ inputs.publish_r2 }}
+        if: ${{ inputs.publish_r2 && !inputs.playtest_wallet_no_docker }}
         working-directory: mir2-web3
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -260,4 +268,183 @@ jobs:
             mir2-web3/dist/gateway-releases/*.tar.gz
             mir2-web3/dist/gateway-releases/*.sha256
             mir2-web3/dist/gateway-releases/latest-mir2-gateway-release.json
+          if-no-files-found: error
+
+  build-playtest-wallet-gateway:
+    if: ${{ inputs.playtest_wallet_no_docker }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CARGO_BUILD_JOBS: "2"
+      RUSTUP_TOOLCHAIN: "1.95.0"
+    defaults:
+      run:
+        working-directory: mir2-web3
+        shell: bash
+    steps:
+      - name: Checkout exact playtest candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Install Rust 1.95
+        run: rustup toolchain install 1.95.0 --profile minimal
+
+      - name: Reuse native Rust dependencies and build outputs
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            mir2-web3/target
+          key: playtest-wallet-linux-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            playtest-wallet-linux-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-
+            activities-linux-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-
+            Linux-cargo-${{ hashFiles('mir2-web3/Cargo.lock') }}
+
+      - name: Locate native PostgreSQL tools
+        run: |
+          set -euo pipefail
+          if ! compgen -G '/usr/lib/postgresql/*/bin/initdb' >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install --no-install-recommends -y postgresql postgresql-client
+          fi
+
+      - name: Verify isolated persistence and package Gateway with matching maps
+        env:
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/playtest-wallet-release/evidence
+          bash scripts/build-playtest-wallet-release.sh 2>&1 | tee dist/playtest-wallet-release/evidence/build.log
+
+      - name: Upload verified playtest Gateway and maps
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mir2-playtest-wallet-gateway-linux-x64-${{ github.sha }}
+          path: |
+            mir2-web3/dist/gateway-releases/*.tar.gz
+            mir2-web3/dist/gateway-releases/*.sha256
+            mir2-web3/dist/gateway-releases/latest-mir2-gateway-release.json
+            mir2-web3/dist/playtest-wallet-release/*.tar.gz
+            mir2-web3/dist/playtest-wallet-release/*.sha256
+            mir2-web3/dist/playtest-wallet-release/*.json
+          if-no-files-found: error
+
+      - name: Upload playtest verification evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mir2-playtest-wallet-build-evidence-${{ github.sha }}
+          path: mir2-web3/dist/playtest-wallet-release/evidence/
+          if-no-files-found: warn
+
+  build-playtest-wallet-login:
+    if: ${{ inputs.playtest_wallet_no_docker }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: mir2-web3
+        shell: bash
+    steps:
+      - name: Checkout exact wallet login candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mir2-web3/apps/wallet-login/package-lock.json
+
+      - name: Install locked wallet login dependencies
+        working-directory: mir2-web3/apps/wallet-login
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify wallet login isolation and request boundaries
+        working-directory: mir2-web3/apps/wallet-login
+        run: npm test
+
+      - name: Package wallet login from the same source revision
+        run: node scripts/package-wallet-login-release.mjs --revision "$GITHUB_SHA"
+
+      - name: Verify the built standalone HTTP service
+        working-directory: mir2-web3/apps/wallet-login
+        env:
+          MIR2_WALLET_LOGIN_SMOKE_STANDALONE: "1"
+        run: npm test
+
+      - name: Package the exact Node 22 Linux runtime
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import stat
+          import subprocess
+          import tarfile
+
+          revision = os.environ['GITHUB_SHA']
+          checked_out = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          if revision != checked_out or len(revision) != 40:
+              raise SystemExit('Node runtime source revision does not match the checkout')
+          node = json.loads(subprocess.check_output(['node', '-p', 'JSON.stringify({path:process.execPath,version:process.version,platform:process.platform,arch:process.arch})'], text=True))
+          if node['platform'] != 'linux' or node['arch'] != 'x64' or not node['version'].startswith('v22.'):
+              raise SystemExit('Node runtime must be the selected Linux x64 Node 22 binary')
+          binary = pathlib.Path(node['path']).resolve(strict=True)
+          output = pathlib.Path('dist/wallet-login-releases')
+          output.mkdir(parents=True, exist_ok=True)
+          archive = output / f'node-runtime-{revision}.tar.gz'
+          with binary.open('rb') as source:
+              details = os.fstat(source.fileno())
+              if not stat.S_ISREG(details.st_mode) or details.st_size <= 0 or details.st_size > 268435456:
+                  raise SystemExit('Node runtime is not a bounded regular executable')
+              node_hash = hashlib.file_digest(source, 'sha256').hexdigest()
+              source.seek(0)
+              with tarfile.open(archive, 'w:gz', format=tarfile.USTAR_FORMAT) as bundle:
+                  entry = tarfile.TarInfo('runtime/node')
+                  entry.mode = 0o755
+                  entry.size = details.st_size
+                  bundle.addfile(entry, source)
+          with tarfile.open(archive, 'r:gz') as bundle:
+              members = bundle.getmembers()
+              if len(members) != 1 or members[0].name != 'runtime/node' or not members[0].isfile():
+                  raise SystemExit('Node runtime archive must have exactly one regular member')
+              if hashlib.file_digest(bundle.extractfile(members[0]), 'sha256').hexdigest() != node_hash:
+                  raise SystemExit('Node runtime archive does not match the selected binary')
+          with archive.open('rb') as packaged:
+              archive_hash = hashlib.file_digest(packaged, 'sha256').hexdigest()
+          archive.with_name(archive.name + '.sha256').write_text(f'{archive_hash}  {archive.name}\n', encoding='utf-8')
+          manifest = {
+              'sourceRevision': revision,
+              'nodeVersion': node['version'],
+              'platform': node['platform'],
+              'architecture': node['arch'],
+              'nodeSha256': node_hash,
+              'nodeBytes': details.st_size,
+              'archive': archive.name,
+              'archiveSha256': archive_hash,
+              'archiveBytes': archive.stat().st_size,
+              'files': [{'path': 'runtime/node', 'bytes': details.st_size, 'sha256': node_hash}],
+          }
+          (output / f'node-runtime-{revision}.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+          print(f'PASS: packaged {node["version"]} Linux x64 runtime with one regular member')
+          PY
+
+      - name: Upload playtest wallet login service
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mir2-playtest-wallet-login-${{ github.sha }}
+          path: |
+            mir2-web3/dist/wallet-login-releases/*.tar.gz
+            mir2-web3/dist/wallet-login-releases/*.sha256
+            mir2-web3/dist/wallet-login-releases/latest-wallet-login-release.json
+            mir2-web3/dist/wallet-login-releases/node-runtime-*.json
           if-no-files-found: error
