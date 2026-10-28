@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{AccountRecord, AccountStore, CharacterSaveRecord, SimulationConfig};
 
-pub const BILLING_SCHEMA_VERSION: u16 = 10;
+pub const BILLING_SCHEMA_VERSION: u16 = crate::procurement::SCHEMA_VERSION;
 const MAX_ORDERS_PER_ACCOUNT: usize = 4_096;
 const MAX_REVIEW_EVENTS_PER_ORDER: usize = 128;
 pub(crate) const BILLING_COMMIT_OUTCOME_UNKNOWN: &str = "BILLING_COMMIT_OUTCOME_UNKNOWN";
@@ -232,6 +232,7 @@ impl BillingLedger {
 }
 
 pub(crate) fn validate_account_record(account: &AccountRecord) -> Result<(), String> {
+    crate::procurement::validate_account(account)?;
     if let Some(ledger) = &account.activities {
         ledger.validate()?;
     }
@@ -257,6 +258,7 @@ pub(crate) fn ensure_character_billing_deletable(
     account: &AccountRecord,
     character_index: i32,
 ) -> Result<(), String> {
+    crate::procurement::ensure_deletable(account, character_index)?;
     validate_account_record(account)?;
     if let Some(ledger) = &account.billing {
         if ledger.orders.values().any(|order| {
@@ -293,11 +295,15 @@ pub(crate) fn ensure_character_billing_deletable(
 /// In-process uniqueness is checked over the complete store. Cross-process
 /// payment uniqueness also requires the gateway/schema leader's database fence.
 pub(crate) fn validate_complete_store(store: &AccountStore) -> Result<(), String> {
+    crate::procurement::validate_store(store)?;
     let mut ids = BTreeSet::new();
     let mut sessions = BTreeSet::new();
     let mut payments = BTreeSet::new();
     for account in store.accounts.values() {
         validate_account_record(account)?;
+        if account.procurement.is_some() && store.schema_version != BILLING_SCHEMA_VERSION {
+            return Err("procurementSchemaInvalid".into());
+        }
         if account.activities.is_some() && store.schema_version != BILLING_SCHEMA_VERSION {
             return Err("activitiesSchemaInvalid".into());
         }

@@ -4731,6 +4731,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "mir2-client-core"
+version = "0.1.0"
+
+[[package]]
+name = "mir2-client-wire"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "mir2-game-data"
 version = "0.1.0"
 dependencies = [
@@ -4789,18 +4801,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mir2-client-core"
-version = "0.1.0"
-
-[[package]]
-name = "mir2-client-wire"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "mir2-production"
 version = "0.1.0"
 dependencies = [
@@ -4826,6 +4826,7 @@ dependencies = [
  "bevy_app 0.17.3",
  "bevy_ecs 0.17.3",
  "bevy_tasks 0.17.3",
+ "ed25519-consensus",
  "flate2",
  "hmac 0.13.0",
  "libc",

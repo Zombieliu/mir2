@@ -1,0 +1,140 @@
+
+> @mir2/procurement-chain@0.1.0 test
+> node --test test/*.test.mjs
+
+TAP version 13
+# Subtest: frozen BCS and both Ed25519 attestations match the cross-language vector
+ok 1 - frozen BCS and both Ed25519 attestations match the cross-language vector
+  ---
+  duration_ms: 4.2821
+  type: 'test'
+  ...
+# Subtest: signed price/identity/order/conditions cannot be substituted
+ok 2 - signed price/identity/order/conditions cannot be substituted
+  ---
+  duration_ms: 0.8248
+  type: 'test'
+  ...
+# Subtest: cross-network replay, expired proof and forged Oracle are rejected
+ok 3 - cross-network replay, expired proof and forged Oracle are rejected
+  ---
+  duration_ms: 1.0566
+  type: 'test'
+  ...
+# Subtest: canonical serializer rejects overflow, alternate numbers and unknown signed fields
+ok 4 - canonical serializer rejects overflow, alternate numbers and unknown signed fields
+  ---
+  duration_ms: 0.2484
+  type: 'test'
+  ...
+# Subtest: disabled/default/mainnet configuration fails before SDK construction or network
+ok 5 - disabled/default/mainnet configuration fails before SDK construction or network
+  ---
+  duration_ms: 1.5688
+  type: 'test'
+  ...
+# Subtest: sponsorship accepts one bounded procurement call and rejects arbitrary transfer/package/budget
+ok 6 - sponsorship accepts one bounded procurement call and rejects arbitrary transfer/package/budget
+  ---
+  duration_ms: 0.5798
+  type: 'test'
+  ...
+# Subtest: missing transaction effects are unknown and cannot become a refund decision
+ok 7 - missing transaction effects are unknown and cannot become a refund decision
+  ---
+  duration_ms: 0.3238
+  type: 'test'
+  ...
+# Subtest: real Dubhe SDK creates and signs the allowed PTB without auto keys or RPC
+ok 8 - real Dubhe SDK creates and signs the allowed PTB without auto keys or RPC
+  ---
+  duration_ms: 367.1145
+  type: 'test'
+  ...
+# Subtest: safe created-order observation samples confirmed Clock before a stable complete object
+ok 9 - safe created-order observation samples confirmed Clock before a stable complete object
+  ---
+  duration_ms: 1.2407
+  type: 'test'
+  ...
+# Subtest: created-to-active race is rejected rather than combining old status with a later Clock
+ok 10 - created-to-active race is rejected rather than combining old status with a later Clock
+  ---
+  duration_ms: 0.4444
+  type: 'test'
+  ...
+# Subtest: registry absence is Clock-first and rejected if a concurrent create changes the registry
+ok 11 - registry absence is Clock-first and rejected if a concurrent create changes the registry
+  ---
+  duration_ms: 0.3993
+  type: 'test'
+  ...
+# Subtest: durable gas reservations deduplicate exact digests, enforce a daily cap and fail closed on stale locks
+ok 12 - durable gas reservations deduplicate exact digests, enforce a daily cap and fail closed on stale locks
+  ---
+  duration_ms: 11.6599
+  type: 'test'
+  ...
+# Subtest: open-order observation binds recoverable condition bytes to the authorized on-chain hash
+ok 13 - open-order observation binds recoverable condition bytes to the authorized on-chain hash
+  ---
+  duration_ms: 1.0572
+  type: 'test'
+  ...
+# Subtest: faucet v3 Argon2d matches the official published conformance vector
+ok 14 - faucet v3 Argon2d matches the official published conformance vector
+  ---
+  duration_ms: 160.2608
+  type: 'test'
+  ...
+# Subtest: filtered GraphQL binds the module/start and persists opaque edge cursors across mid-page restart
+ok 15 - filtered GraphQL binds the module/start and persists opaque edge cursors across mid-page restart
+  ---
+  duration_ms: 2.0066
+  type: 'test'
+  ...
+# Subtest: empty GraphQL polls retain the last cursor and legacy checkpoint cursors replay from deployment
+ok 16 - empty GraphQL polls retain the last cursor and legacy checkpoint cursors replay from deployment
+  ---
+  duration_ms: 0.2635
+  type: 'test'
+  ...
+# Subtest: indexer errors, malformed cursors and wrong network endpoints fail without a receipt
+ok 17 - indexer errors, malformed cursors and wrong network endpoints fail without a receipt
+  ---
+  duration_ms: 0.7031
+  type: 'test'
+  ...
+# Subtest: GraphQL page watermark can advance beyond the final matching edge
+ok 18 - GraphQL page watermark can advance beyond the final matching edge
+  ---
+  duration_ms: 0.6893
+  type: 'test'
+  ...
+# Subtest: each event carries its exact next checkpoint cursor for restart within a page
+ok 19 - each event carries its exact next checkpoint cursor for restart within a page
+  ---
+  duration_ms: 1.5452
+  type: 'test'
+  ...
+# Subtest: explicit checkpoint fallback advances 32 empty checkpoints using at most eight concurrent reads
+ok 20 - explicit checkpoint fallback advances 32 empty checkpoints using at most eight concurrent reads
+  ---
+  duration_ms: 67.0201
+  type: 'test'
+  ...
+# Subtest: concurrent prefetch is emitted in checkpoint order and errors never advance persisted state
+ok 21 - concurrent prefetch is emitted in checkpoint order and errors never advance persisted state
+  ---
+  duration_ms: 15.8281
+  type: 'test'
+  ...
+1..21
+# tests 21
+# suites 0
+# pass 21
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 455.0507

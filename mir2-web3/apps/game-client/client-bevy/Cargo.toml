@@ -55,6 +55,9 @@ mir2-ui-core = { path = "../ui-core" }
 mir2-crystal-gdi-text = { path = "../crystal-gdi-text", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+ed25519-consensus = "2.1"
+rand_core = { version = "0.6", features = ["getrandom"] }
+sha2 = "0.10"
 unicode-width = "0.2"
 unicode-segmentation = "1"
 web-time = "1.1.0"

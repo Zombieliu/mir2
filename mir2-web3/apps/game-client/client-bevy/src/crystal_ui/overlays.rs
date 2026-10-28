@@ -781,6 +781,8 @@ pub struct NativePlayerUiState {
     pub game_shop_dialog: game_shop_dialog::GameShopDialogUi,
     pub billing_open: bool,
     pub billing_input_consumed: bool,
+    pub procurement_open: bool,
+    pub procurement_input_consumed: bool,
     pub split_count: u16,
     pub inventory_operation: Option<InventoryOperationDraft>,
     pub(crate) inventory_item_drag: Option<InventoryItemDrag>,
@@ -1412,6 +1414,8 @@ impl Default for NativePlayerUiState {
             game_shop_dialog: Default::default(),
             billing_open: false,
             billing_input_consumed: false,
+            procurement_open: false,
+            procurement_input_consumed: false,
             split_count: 1,
             inventory_operation: None,
             inventory_item_drag: None,
@@ -1771,7 +1775,7 @@ impl NativePlayerUiState {
         self.hero.modal() || self.hero.input_consumed || self.blocks_gameplay_keys_except_hero()
     }
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
-        self.billing_open
+        self.procurement_open || self.procurement_input_consumed || self.billing_open
             || self.billing_input_consumed
             || self.refine.open
             || self.refine.pending()
@@ -1939,7 +1943,7 @@ impl NativePlayerUiState {
         panel_blocks: bool,
         hover_blocks: bool,
     ) -> bool {
-        self.billing_open
+        self.procurement_open || self.procurement_input_consumed || self.billing_open
             || self.billing_input_consumed
             || self.refine.open
             || self.refine.pending()
@@ -2088,7 +2092,7 @@ impl NativePlayerUiState {
         self.hero.modal() || self.non_friend_amount_modal_open_except_hero()
     }
     fn non_friend_amount_modal_open_except_hero(&self) -> bool {
-        self.billing_open
+        self.procurement_open || self.procurement_input_consumed || self.billing_open
             || self.billing_input_consumed
             || self.guild_panel.blocks()
             || self.guild_panel.consumed
@@ -4638,7 +4642,7 @@ pub fn native_mail_parcel_quote_state(world: &World) -> Option<NativeMailParcelQ
 
 impl Plugin for Mir2CrystalOverlayPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins((Mir2NativeMailParcelServicePlugin, super::guild_pixel_text_view::GuildPixelTextPlugin))
+        app.add_plugins((Mir2NativeMailParcelServicePlugin, super::guild_pixel_text_view::GuildPixelTextPlugin, crate::native_procurement::NativeProcurementPlugin))
             .configure_sets(
                 Update,
                 NativeMailParcelServiceSet
@@ -7978,7 +7982,7 @@ pub(crate) fn process_overlay_keyboard(
         typed.clear();
         return;
     }
-    if shell.billing.open || state.billing_input_consumed {
+    if shell.billing.open || state.billing_input_consumed || state.procurement_open || state.procurement_input_consumed {
         typed.clear();
         return;
     }
@@ -9168,7 +9172,7 @@ fn process_overlay_buttons(
     if shell.screen != NativeShellScreen::InGame {
         return;
     }
-    if shell.billing.open || state.billing_input_consumed {
+    if shell.billing.open || state.billing_input_consumed || state.procurement_open || state.procurement_input_consumed {
         return;
     }
     state.bind_npc_gold_buy_gate(intents.npc_gold_buy_gate());

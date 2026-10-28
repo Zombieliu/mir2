@@ -391,6 +391,16 @@ impl AccountStore {
     }
 
     fn migrate_to_current_schema(mut self) -> Self {
+        let impossible_procurement =
+            self.schema_version < 11 && self.accounts.values().any(|a| a.procurement.is_some());
+        let impossible_procurement_quota = self.schema_version < 12
+            && self.accounts.values().any(|a| {
+                a.procurement.as_ref().is_some_and(|p| {
+                    !p.quota_quotes.is_empty()
+                        || !p.quota_purchases.is_empty()
+                        || p.quotes.values().any(|q| q.rule.is_some())
+                })
+            });
         // Never promote authority fields which did not exist in the tagged
         // schema. Version 3 guild records otherwise survive the clock upgrade.
         let impossible_stones = self.schema_version < 10
@@ -427,6 +437,8 @@ impl AccountStore {
             && !impossible_billing
             && !impossible_stones
             && !impossible_activities
+            && !impossible_procurement
+            && !impossible_procurement_quota
         {
             self.schema_version = ACCOUNT_STORE_SCHEMA_VERSION;
         }
@@ -766,11 +778,19 @@ impl AccountStoreMutationPlan {
             mutation
                 .original_account
                 .as_ref()
-                .and_then(|account| account.billing.as_ref())
+                .and_then(|a| a.procurement.as_ref())
                 != mutation
                     .desired_account
                     .as_ref()
+                    .and_then(|a| a.procurement.as_ref())
+                || mutation
+                    .original_account
+                    .as_ref()
                     .and_then(|account| account.billing.as_ref())
+                    != mutation
+                        .desired_account
+                        .as_ref()
+                        .and_then(|account| account.billing.as_ref())
                 || mutation
                     .original_account
                     .as_ref()
@@ -1842,6 +1862,8 @@ fn replace_file_atomically(
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountRecord {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub procurement: Option<crate::procurement::ProcurementLedger>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub activities: Option<crate::activities::ActivityLedger>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub billing: Option<crate::billing::BillingLedger>,
@@ -1903,6 +1925,7 @@ impl AccountRecord {
         );
         Self {
             password: default_account_password(),
+            procurement: None,
             activities: None,
             monthly_card: None,
             billing: None,
@@ -1925,6 +1948,7 @@ impl AccountRecord {
     pub fn empty() -> Self {
         Self {
             password: default_account_password(),
+            procurement: None,
             activities: None,
             monthly_card: None,
             billing: None,
@@ -4068,6 +4092,7 @@ pub struct SimulationConfig {
     pub activity_policy: crate::activities::ActivityPolicy,
     /// Disabled unless explicitly configured; paid Credits use the existing wallet.
     pub billing_monthly_card_credit_price: Option<u32>,
+    pub procurement_config: crate::procurement::ProcurementConfig,
     pub map: MapInformation,
     pub spawn: Point,
     pub scene_view: SceneView,
@@ -4349,6 +4374,8 @@ impl SimulationConfig {
             monthly_card_policy: crate::monthly_card::MonthlyCardPolicy::default(),
             activity_policy: crate::activities::ActivityPolicy::default(),
             billing_monthly_card_credit_price: None,
+            procurement_config: crate::procurement::ProcurementConfig::from_env()
+                .unwrap_or_default(),
             item_uid_issuance: Default::default(),
             account_store_path: None,
             account_store_database_url: None,

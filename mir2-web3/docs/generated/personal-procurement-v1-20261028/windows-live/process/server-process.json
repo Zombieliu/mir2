@@ -1,0 +1,8 @@
+{
+  "pid": 61784,
+  "exe": "C:/mir2-build/personal-procurement-v1-20261028/bin-final-v5/mir2-gateway.exe",
+  "sha256": "4b5bc8a10793583e0631ab9145862d86ad209c8a58f1481f1875f6892569060c",
+  "endpoint": "ws://127.0.0.1:17830/ws",
+  "startedAt": "2026-10-28T15:53:34.144Z",
+  "testOnly": true
+}

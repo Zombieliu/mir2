@@ -311,6 +311,7 @@ pub(crate) fn native_command_scope(command: &GatewayCommand) -> NativeCommandSco
         GatewayCommand::Shutdown => S::Shutdown,
         GatewayCommand::Player(_) => S::World,
         GatewayCommand::Wire(wire) => match wire {
+            C::Procurement { .. } => S::World,
             C::BillingStatus { .. }
             | C::BillingCheckout { .. }
             | C::BillingBuyMonthlyCard { .. }
@@ -8056,6 +8057,7 @@ fn dispatch_shell_event(
             Some(ShellGatewayEvent::MonthlyCardReply(reply.clone()))
         }
         InboundEvent::Billing(reply) => Some(ShellGatewayEvent::BillingReply(reply.clone())),
+        InboundEvent::Procurement(reply) => Some(ShellGatewayEvent::ProcurementReply(reply.clone())),
         InboundEvent::Error(error) => Some(ShellGatewayEvent::OperationFailure {
             message: account_feedback::gateway_error_message(error),
         }),

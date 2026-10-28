@@ -5,8 +5,8 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use mir2_production::{
-    StoneBinding, StoneCatalog, StoneGrade, StoneMintPreparation, StoneMintRequest,
-    StoneOwner, StoneRegistry, StoneSource, StoneSourceKind,
+    StoneBinding, StoneCatalog, StoneGrade, StoneMintPreparation, StoneMintRequest, StoneOwner,
+    StoneRegistry, StoneSource, StoneSourceKind,
 };
 
 use super::{AccountStoreRepository, FileAccountStoreRepository, SimulationConfig};
@@ -65,45 +65,55 @@ fn existing_authorities() -> SimulationConfig {
         save.gold = 321;
         save.credit = 87;
     }
-    let order = config.prepare_recharge_order(
-        "demo",
-        character_index,
-        "schema-integration-recharge",
-        &RechargeOffer {
-            id: "schema-usd-1000".into(),
-            label: "Schema fixture USD10".into(),
-            currency: "usd".into(),
-            amount_minor: 1000,
-            credits: 1000,
-        },
-        NOW,
-        false,
-    ).unwrap();
-    config.confirm_recharge_payment(
-        "demo",
-        &order.id,
-        &VerifiedRechargePayment {
-            session_id: "cs_schema_integration".into(),
-            payment_intent_id: "pi_schema_integration".into(),
-            amount_minor: 1000,
-            currency: "usd".into(),
-            livemode: false,
-        },
-        NOW + 1,
-    ).unwrap();
-    let issued = config.issue_monthly_card("demo", "schema-monthly", NOW + 2).unwrap();
-    config.redeem_monthly_card("demo", &issued.code, NOW + 3).unwrap();
-    config.activity_claim(
-        "demo",
-        character_index,
-        "closed-v1-lv40",
-        &ActivityPolicy {
-            phase: ActivityPhase::Closed,
-            phase_start_ms: NOW - 100,
-            phase_end_ms: None,
-        },
-        NOW + 4,
-    ).unwrap();
+    let order = config
+        .prepare_recharge_order(
+            "demo",
+            character_index,
+            "schema-integration-recharge",
+            &RechargeOffer {
+                id: "schema-usd-1000".into(),
+                label: "Schema fixture USD10".into(),
+                currency: "usd".into(),
+                amount_minor: 1000,
+                credits: 1000,
+            },
+            NOW,
+            false,
+        )
+        .unwrap();
+    config
+        .confirm_recharge_payment(
+            "demo",
+            &order.id,
+            &VerifiedRechargePayment {
+                session_id: "cs_schema_integration".into(),
+                payment_intent_id: "pi_schema_integration".into(),
+                amount_minor: 1000,
+                currency: "usd".into(),
+                livemode: false,
+            },
+            NOW + 1,
+        )
+        .unwrap();
+    let issued = config
+        .issue_monthly_card("demo", "schema-monthly", NOW + 2)
+        .unwrap();
+    config
+        .redeem_monthly_card("demo", &issued.code, NOW + 3)
+        .unwrap();
+    config
+        .activity_claim(
+            "demo",
+            character_index,
+            "closed-v1-lv40",
+            &ActivityPolicy {
+                phase: ActivityPhase::Closed,
+                phase_start_ms: NOW - 100,
+                phase_end_ms: None,
+            },
+            NOW + 4,
+        )
+        .unwrap();
     config
 }
 
@@ -128,7 +138,8 @@ fn valid_sealed_stones() -> StoneRegistry {
         },
     };
     let StoneMintPreparation::Change(prepared) = StoneRegistry::default()
-        .prepare_mint(&StoneCatalog::v1(), &request, 9999).unwrap()
+        .prepare_mint(&StoneCatalog::v1(), &request, 9999)
+        .unwrap()
     else {
         panic!("fresh fixture mint must prepare a change");
     };
@@ -157,12 +168,20 @@ fn schema9_migration_preserves_existing_billing_activities_and_monthly_card() {
     let file = StoreFile::new("schema9", &bytes);
 
     let loaded = FileAccountStoreRepository::new(&file.path)
-        .load(config.default_character.clone()).unwrap();
+        .load(config.default_character.clone())
+        .unwrap();
 
     assert_eq!(loaded.schema_version, BILLING_SCHEMA_VERSION);
-    assert_eq!(serde_json::to_value(&loaded.accounts).unwrap(), before_accounts);
+    assert_eq!(
+        serde_json::to_value(&loaded.accounts).unwrap(),
+        before_accounts
+    );
     assert_eq!(loaded.sealed_stones, StoneRegistry::default());
-    assert_eq!(fs::read(&file.path).unwrap(), bytes, "a read must not rewrite the source");
+    assert_eq!(
+        fs::read(&file.path).unwrap(),
+        bytes,
+        "a read must not rewrite the source"
+    );
 }
 
 #[test]
@@ -175,21 +194,36 @@ fn schema9_sealed_stone_authority_is_rejected_on_load_and_restore() {
     let file = StoreFile::new("stone-tag", &valid_bytes);
     let repository = FileAccountStoreRepository::new(&file.path);
     let valid = repository.load(config.default_character.clone()).unwrap();
-    assert_eq!(valid.sealed_stones, tagged.sealed_stones,
-        "the same nonempty registry must be valid under the current schema");
+    assert_eq!(
+        valid.sealed_stones, tagged.sealed_stones,
+        "the same nonempty registry must be valid under the current schema"
+    );
 
     tagged.schema_version = 9;
     let migrated = tagged.clone().migrate_to_current_schema();
-    assert_eq!(migrated.schema_version, 9,
-        "an authority field cannot silently acquire a newer schema tag");
+    assert_eq!(
+        migrated.schema_version, 9,
+        "an authority field cannot silently acquire a newer schema tag"
+    );
     assert_eq!(migrated.sealed_stones, tagged.sealed_stones);
     let rejected_bytes = serde_json::to_vec(&tagged).unwrap();
     fs::write(&file.path, &rejected_bytes).unwrap();
-    assert_eq!(repository.load(config.default_character.clone()).unwrap_err(),
-        "stone authority present in an older schema");
-    assert_eq!(config.restore_account_store_from_backup(&file.path).unwrap_err(),
-        "stone authority present in an older schema");
-    assert_eq!(serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap(), before);
+    assert_eq!(
+        repository
+            .load(config.default_character.clone())
+            .unwrap_err(),
+        "stone authority present in an older schema"
+    );
+    assert_eq!(
+        config
+            .restore_account_store_from_backup(&file.path)
+            .unwrap_err(),
+        "stone authority present in an older schema"
+    );
+    assert_eq!(
+        serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap(),
+        before
+    );
     assert_eq!(fs::read(&file.path).unwrap(), rejected_bytes);
 }
 
@@ -205,10 +239,14 @@ fn legacy_store_without_schema_or_stone_fields_still_loads_without_account_loss(
     let file = StoreFile::new("legacy", &bytes);
 
     let loaded = FileAccountStoreRepository::new(&file.path)
-        .load(config.default_character.clone()).unwrap();
+        .load(config.default_character.clone())
+        .unwrap();
 
     assert_eq!(loaded.schema_version, BILLING_SCHEMA_VERSION);
-    assert_eq!(serde_json::to_value(&loaded.accounts).unwrap(), expected_accounts);
+    assert_eq!(
+        serde_json::to_value(&loaded.accounts).unwrap(),
+        expected_accounts
+    );
     assert_eq!(loaded.sealed_stones, StoneRegistry::default());
     assert_eq!(fs::read(&file.path).unwrap(), bytes);
 }

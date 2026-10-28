@@ -1,5 +1,13 @@
 # Frontend 1:1 Gaps
 
+## 新增个人智能求购 V1：限定原生实连结果（2026-10-29）
+
+Windows v3 / Gateway v5 已完成 NPC 免费 Test 套餐确认、500,000 金币求购发布至链上 Open、另一账号交付原始 UID `1028024501`、买家离线待领取及双方领取；普通背包和装备提示有实机截图，原始装备 JSON 一致性另有独立核验。取消订单及退款领取也已通过。120 秒测试到期单已进入链上 `Expired`，自动 watch 提交第三笔交易，500,000 金币退款已从 Windows 领取；该订单不是发布失败补偿。成交、取消、到期三张订单各 3 笔，合计 9 笔测试网交易。本次不包含人类 Accepted、生产收费或原生 PostgreSQL 验收。
+
+最终双方 Windows 重登通过（实机截图 25/26）：买家 Bag1 保留原 UID `1028024501`，金币 1,500,000；卖家 Bag1 为空，金币 510,000。总金币 2,011,280，托管及待领均为 0，三单全部领取，Test 额度累计消费 3 单位；未验证多机部署。
+
+此项属于自定义新增功能，不改变 Crystal 原版 1:1 差异清单、百分比或整体验收结论；人类 Accepted 仍开放。电脑控制保存的原生窗口 JPEG 与离线 GPU 夹具分别记录，未用 Web 截图代替 Windows 实测。[统一验收证据](generated/personal-procurement-v1-20261028/README.md)保留截图、链与资产核验及版本边界；[主题文档](PERSONAL-PROCUREMENT-V1.zh-CN.md)列规则和未验证范围。
+
 ## 本地动作位置确认回滚（2026-10-26）
 
 仅本人的攻击/远攻/施法改为保留最新移动位置，动画/方向/特效/弹道照常，远端及真实位移处理不变。生产helper与页面接线15项、driver24项、容量工具242项及Web typecheck通过；旧scene结构脚本的既有renderer锚点断言在原代码对照仍失败，未改断言。新网关/50复测及GUI/人类Accepted尚待，不能列为完整前端验收。见[可复核证据](generated/cell-p0-p1-completion-20261024/capacity-owner-action-pose-v1/README.md)。

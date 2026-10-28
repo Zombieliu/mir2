@@ -794,6 +794,8 @@ impl fmt::Debug for NativeUiIntent {
 /// Gateway callbacks for shell transitions.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NativeGatewayEvent {
+    #[cfg(feature = "native-ui")]
+    ProcurementReply(mir2_protocol::procurement::ProcurementReply),
     BillingReply(crate::native_billing::BillingReply),
     MonthlyCardReply(crate::native_monthly_card::MonthlyCardReply),
     Connected,

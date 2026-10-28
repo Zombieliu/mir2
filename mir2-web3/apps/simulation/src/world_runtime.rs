@@ -399,6 +399,9 @@ impl std::fmt::Display for NativeAttackError {
 impl std::error::Error for NativeAttackError {}
 
 pub trait WorldRuntime: Send + Sync {
+    fn execute_procurement_owner(&mut self, _authenticated: bool, _request: &mir2_protocol::procurement::ProcurementRequest, _now_ms: u64) -> Result<crate::procurement::ProcurementExecution,String> {
+        Err("procurementOwnerUnsupported".into())
+    }
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
 
@@ -1408,6 +1411,9 @@ impl InProcessWorldRuntime {
 }
 
 impl WorldRuntime for InProcessWorldRuntime {
+    fn execute_procurement_owner(&mut self, authenticated: bool, request: &mir2_protocol::procurement::ProcurementRequest, now_ms: u64) -> Result<crate::procurement::ProcurementExecution,String> {
+        self.session.execute_procurement_owner(authenticated,request,now_ms)
+    }
     fn supports_magic_key_assignment(
         &self,
         spell: mir2_protocol::Spell,
@@ -1484,6 +1490,7 @@ impl WorldRuntime for InProcessWorldRuntime {
                     .session
                     .poll_pending_recharge_credits(crate::monthly_card::monthly_card_now_ms())?;
                 packets.extend(self.session.game_shop_gift_mail_notifications());
+                packets.extend(self.session.consume_pending_procurement()?);
                 packets
             }
             WorldCommand::NativeGameShopPurchase(_)

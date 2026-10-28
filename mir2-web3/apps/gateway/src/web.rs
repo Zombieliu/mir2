@@ -90,6 +90,8 @@ mod activities;
 mod billing;
 #[path = "web_monthly_card.rs"]
 mod monthly_card;
+#[path = "web_procurement.rs"]
+mod procurement;
 #[path = "web_packet_batch.rs"]
 mod packet_batch;
 #[path = "web_transport.rs"]
@@ -1902,6 +1904,7 @@ impl ReconnectSessionStore {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum BrowserCommand {
+    Procurement(mir2_protocol::procurement::ProcurementRequest),
     BillingStatus(billing::StatusRequest),
     BillingCheckout(billing::CheckoutRequest),
     BillingBuyMonthlyCard(billing::BuyRequest),
@@ -2611,6 +2614,7 @@ enum QaControlAction {
 
 #[derive(Debug, Clone)]
 enum SessionAction {
+    Procurement(mir2_protocol::procurement::ProcurementRequest),
     Billing(billing::Request),
     MonthlyCardStatus,
     RedeemMonthlyCard {
@@ -6673,6 +6677,13 @@ async fn handle_socket_work(
                 if matches!(&action, SessionAction::Packet(ClientPacket::Login { .. } | ClientPacket::LogOut | ClientPacket::Disconnect) | SessionAction::PasskeyLogin { .. }) {
                     billing_generation.fetch_add(1, Ordering::AcqRel);
                 }
+                if let SessionAction::Procurement(request) = &action {
+                    if procurement::socket_action(session, &identity,
+                        active_identity_session.as_ref(), authenticated,
+                        authenticated_account_id.as_deref(), request,
+                        &sender, &session_cache).await.is_err() { return; }
+                    continue;
+                }
                 if let SessionAction::Billing(request) = &action {
                     if let Err(error) = billing::socket_action(session, Arc::clone(&identity),
                         active_identity_session.as_ref(), authenticated, authenticated_account_id.as_deref(),
@@ -8720,7 +8731,8 @@ fn execute_session_action(
         SessionAction::QaControl { token, action } => {
             execute_qa_control_action(session, &token, action)
         }
-        SessionAction::Billing(_)
+        SessionAction::Procurement(_)
+        | SessionAction::Billing(_)
         | SessionAction::MonthlyCardStatus
         | SessionAction::RedeemMonthlyCard { .. } => {
             Err("account purchases require the authenticated socket seam".into())
@@ -8859,7 +8871,8 @@ fn execute_production_session_action(
         SessionAction::QaControl { .. } => {
             return Err("QA control is not allowed on the production player path".to_string());
         }
-        SessionAction::Billing(_)
+        SessionAction::Procurement(_)
+        | SessionAction::Billing(_)
         | SessionAction::MonthlyCardStatus
         | SessionAction::RedeemMonthlyCard { .. } => {
             return Err("account purchases require the authenticated socket seam".into())
@@ -9955,6 +9968,7 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::QaControl { token, action } => {
             Ok(SessionAction::QaControl { token, action })
         }
+        BrowserCommand::Procurement(request) => Ok(SessionAction::Procurement(request)),
         BrowserCommand::BillingStatus(request) => {
             Ok(SessionAction::Billing(billing::Request::Status(request)))
         }

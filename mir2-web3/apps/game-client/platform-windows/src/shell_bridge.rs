@@ -91,6 +91,7 @@ pub fn initial_shell_model(auto_login: Option<&NativeAutoLogin>) -> NativeShellM
 /// that mutates shell state from network input.
 pub fn drain_gateway_events(
     mut shell: ResMut<NativeShellModel>,
+    mut procurement: Option<ResMut<mir2_client_bevy::native_procurement::ProcurementModel>>,
     inbox: Res<GatewayEventInbox>,
     commands: Res<GatewayCommands>,
     mut auto_login: ResMut<NativeAutoLoginFlow>,
@@ -104,6 +105,13 @@ pub fn drain_gateway_events(
             continue;
         }
         let event = envelope.event;
+        if let NativeGatewayEvent::ProcurementReply(reply) = event {
+            if let Some(model) = procurement.as_deref_mut() {
+                model.accept(reply, shell.last_account.as_deref().unwrap_or_default(),
+                    shell.billing_character_index(), mir2_client_bevy::native_procurement::now_ms());
+            }
+            continue;
+        }
         if let NativeGatewayEvent::BillingReply(reply) = event {
             if shell.apply_gateway_event(NativeGatewayEvent::BillingReply(reply)) {
                 if let Some(url) = shell.billing.take_checkout_url() {
@@ -248,6 +256,7 @@ fn send_shell_command(
 /// navigation/selection intents are intentionally ignored here.
 pub fn forward_native_ui_intents(
     mut shell: ResMut<NativeShellModel>,
+    mut procurement: Option<ResMut<mir2_client_bevy::native_procurement::ProcurementModel>>,
     mut intents: ResMut<NativeUiIntentQueue>,
     commands: Res<GatewayCommands>,
     mut billing_forwarded: Local<Option<u64>>,
@@ -392,6 +401,17 @@ pub fn forward_native_ui_intents(
         }
     }
     forward_billing_request(&mut shell, &commands, &mut billing_forwarded);
+    if let Some(model) = procurement.as_deref_mut() {
+        if shell.screen == NativeShellScreen::InGame && model.scope_matches(
+            shell.last_account.as_deref().unwrap_or_default(), shell.billing_character_index()) {
+            if let Some(request) = model.unsent_request().cloned() {
+                let id = request.request_id.clone();
+                if commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::Procurement {request})) {
+                    model.mark_sent(&id);
+                }
+            }
+        }
+    }
 }
 
 fn forward_billing_request(
@@ -469,6 +489,23 @@ fn forward_billing_request(
 mod tests {
     use super::*;
     use std::sync::mpsc;
+    #[test]
+    fn procurement_bridge_sends_one_stable_request_and_never_crosses_account_scope() {
+        use mir2_client_bevy::native_procurement::ProcurementModel;
+        let (sender,receiver)=mpsc::channel();
+        let mut model=ProcurementModel::default();model.open_for("alice",0,12,1000);
+        let request=model.unsent_request().unwrap().clone();
+        let mut app=bevy::prelude::App::new();
+        app.insert_resource(NativeShellModel{screen:NativeShellScreen::InGame,last_account:Some("alice".into()),
+            active_character:Some(mir2_client_bevy::native_shell::CharacterSummary::new(0,"Buyer",22,"Warrior","Male")),..Default::default()})
+            .insert_resource(model).init_resource::<NativeUiIntentQueue>().insert_resource(GatewayCommands::new(sender))
+            .add_systems(bevy::prelude::Update,forward_native_ui_intents);
+        app.update();app.update();
+        let GatewayCommand::Wire(NativeOutboundCommand::Procurement{request:sent})=receiver.try_recv().unwrap() else{panic!("typed procurement request");};
+        assert_eq!(sent,request);assert!(receiver.try_recv().is_err());
+        app.world_mut().resource_mut::<NativeShellModel>().last_account=Some("bob".into());
+        app.update();assert!(receiver.try_recv().is_err());
+    }
 
     #[test]
     fn billing_scope_stays_local_and_closing_cancels_the_exact_request() {

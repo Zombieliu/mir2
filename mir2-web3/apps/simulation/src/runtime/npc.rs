@@ -106,6 +106,7 @@ pub(super) fn dismiss_dialog(world: &mut World) {
 }
 
 pub(super) fn set_dialog(world: &mut World, mut dialog: ActiveNpcDialogState) {
+    super::procurement::decorate_dialog(world, &mut dialog);
     super::stone_npc::decorate_dialog(world, &mut dialog);
     super::npc_input::record_display(world, &dialog);
     let mut resources = world.resource_mut::<NpcStateResource>();

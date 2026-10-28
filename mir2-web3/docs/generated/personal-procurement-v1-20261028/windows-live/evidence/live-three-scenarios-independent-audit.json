@@ -1,0 +1,631 @@
+{
+  "readOnly": true,
+  "auditedAt": "2026-10-28T17:15:01.105Z",
+  "network": "testnet",
+  "realGameDatabaseAuthority": "File",
+  "custodyFixtureOnly": false,
+  "allSnapshotGoldConserved": true,
+  "allSnapshotEffectiveUidUnique": true,
+  "allSnapshotEquipmentFieldsPreserved": true,
+  "snapshots": [
+    {
+      "file": "baseline-before-final-start.json",
+      "at": "2026-10-28T15:05:55.337Z",
+      "gold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "test-quota-confirmed.json",
+      "at": "2026-10-28T15:09:44.124Z",
+      "gold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "publish-quote-rejected-no-custody.json",
+      "at": "2026-10-28T15:12:15.496Z",
+      "gold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "fill-order-publishing.json",
+      "at": "2026-10-28T15:23:49.582Z",
+      "gold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "fill-order-open.json",
+      "at": "2026-10-28T15:26:59.991Z",
+      "gold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "open-before-server-restart.json",
+      "at": "2026-10-28T15:33:40.510Z",
+      "gold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "open-after-server-restart.json",
+      "at": "2026-10-28T15:35:23.076Z",
+      "gold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "seller-original-item-locked.json",
+      "at": "2026-10-28T15:40:17.461Z",
+      "gold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "sellqa1028",
+          "location": "locked"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "filled-buyer-offline-pending.json",
+      "at": "2026-10-28T15:43:20.013Z",
+      "gold": {
+        "wallet": 1511280,
+        "escrow": 0,
+        "pending": 500000,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "buyqa1028",
+          "location": "pending"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "seller-paid-before-projection-restart.json",
+      "at": "2026-10-28T15:52:07.820Z",
+      "gold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "buyqa1028",
+          "location": "pending"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "buyer-original-equipment-claimed.json",
+      "at": "2026-10-28T15:57:00.959Z",
+      "gold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "buyqa1028",
+          "character": "0",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "cancel-order-publishing.json",
+      "at": "2026-10-28T15:58:38.483Z",
+      "gold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "buyqa1028",
+          "character": "0",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "cancel-submitted-custody-retained.json",
+      "at": "2026-10-28T16:09:07.750Z",
+      "gold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "buyqa1028",
+          "character": "0",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "cancel-finalized-refund-pending.json",
+      "at": "2026-10-28T16:12:24.355Z",
+      "gold": {
+        "wallet": 1511280,
+        "escrow": 0,
+        "pending": 500000,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "buyqa1028",
+          "character": "0",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "cancel-refund-claimed.json",
+      "at": "2026-10-28T16:14:03.729Z",
+      "gold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "buyqa1028",
+          "character": "0",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "expire-order-publishing.json",
+      "at": "2026-10-28T16:17:34.640Z",
+      "gold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "buyqa1028",
+          "character": "0",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "expiry-refund-claimed-final.json",
+      "at": "2026-10-28T16:34:48.958Z",
+      "gold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "buyqa1028",
+          "character": "0",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    },
+    {
+      "file": "final-after-both-relogin.json",
+      "at": "2026-10-28T17:11:29.443Z",
+      "gold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "uidActiveCount": 1,
+      "uidOwners": [
+        {
+          "account": "buyqa1028",
+          "character": "0",
+          "location": "inventory_items_json"
+        }
+      ],
+      "allItemFieldsPreserved": true,
+      "goldConserved": true
+    }
+  ],
+  "currentAuthority": {
+    "walletGold": 2011280,
+    "escrowGold": 0,
+    "pendingGold": 0,
+    "totalGold": 2011280,
+    "goldConserved": true,
+    "buyerGold": 1500000,
+    "sellerGold": 510000,
+    "effectiveUid": 1028024501,
+    "effectiveUidCount": 1,
+    "effectiveUidOwners": [
+      {
+        "account": "buyqa1028",
+        "character": "0",
+        "location": "inventory_items_json"
+      }
+    ],
+    "allOriginalEquipmentFieldsPreserved": true,
+    "originalEquipmentCanonicalSha256": "9132a6c0cf9e76df2653996d435ae2cd8765f60460d04a76de29a686e1365b3d",
+    "durability": [
+      31400,
+      34000
+    ],
+    "refinedValue": 1,
+    "refineAdded": 2,
+    "addedStats": [
+      {
+        "stat": 4,
+        "value": 2
+      },
+      {
+        "stat": 5,
+        "value": 3
+      }
+    ]
+  },
+  "serviceQuota": {
+    "source": "Test",
+    "consumed": 3,
+    "reserved": 0,
+    "onePerSuccessfullyPublishedOrder": true,
+    "productionChargingEnabled": false
+  },
+  "scenarios": [
+    {
+      "path": "fill",
+      "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+      "databaseStatus": "Filled",
+      "expectedStatus": "Filled",
+      "chainTerminalStatus": 2,
+      "publishSucceeded": true,
+      "feeUnits": 1,
+      "feeConsumed": true,
+      "feeRefunded": false,
+      "feeBatch": "explicit-isolated-acceptance-test",
+      "quotaSource": "Test",
+      "escrowGold": 0,
+      "expiresAtMs": 1793287367684,
+      "deliveries": [
+        {
+          "id": "item:70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+          "gold": 0,
+          "itemUid": 1028024501,
+          "claimed": true,
+          "claimRevision": 24
+        },
+        {
+          "id": "proceeds:f66eb53a0e103243ac907137ac0451b622e519bac38bda40aa9aa2484f729504",
+          "gold": 500000,
+          "itemUid": null,
+          "claimed": true,
+          "claimRevision": 15
+        }
+      ],
+      "allDeliveriesClaimed": true,
+      "transactionCount": 3,
+      "allFinalizedAndOrderBound": true,
+      "netMist": "34100931",
+      "transactions": [
+        {
+          "phase": "create",
+          "digest": "HLXrxYBPxWicch7jh4VeQANZMs1v9tGLbh1ib4pqvYyc",
+          "checkpoint": "400198288",
+          "netMist": "6442063",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "10070000",
+            "storageRebate": "4627937",
+            "nonRefundableStorageFee": "463"
+          }
+        },
+        {
+          "phase": "activate",
+          "digest": "H1Gg1DiHTgMFv8ZBtaPydsUHDPtvwW3n16iZrihdmqQd",
+          "checkpoint": "400198643",
+          "netMist": "26657907",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "28728000",
+            "storageRebate": "3070093",
+            "nonRefundableStorageFee": "307"
+          }
+        },
+        {
+          "phase": "fill",
+          "digest": "5Mb7wW8P8mb5mHH5Use1gwvBvUD5r52PXMdXwvXcHGE",
+          "checkpoint": "400202363",
+          "netMist": "1000961",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "9614000",
+            "storageRebate": "9613039",
+            "nonRefundableStorageFee": "961"
+          }
+        }
+      ]
+    },
+    {
+      "path": "cancel",
+      "orderId": "0x243e18275fd667bc4d29082c906bfe963b021f9b942a47bde3a402b427452d11",
+      "databaseStatus": "Cancelled",
+      "expectedStatus": "Cancelled",
+      "chainTerminalStatus": 3,
+      "publishSucceeded": true,
+      "feeUnits": 1,
+      "feeConsumed": true,
+      "feeRefunded": false,
+      "feeBatch": "explicit-isolated-acceptance-test",
+      "quotaSource": "Test",
+      "escrowGold": 0,
+      "expiresAtMs": 1793289499977,
+      "deliveries": [
+        {
+          "id": "refund:243e18275fd667bc4d29082c906bfe963b021f9b942a47bde3a402b427452d11",
+          "gold": 500000,
+          "itemUid": null,
+          "claimed": true,
+          "claimRevision": 28
+        }
+      ],
+      "allDeliveriesClaimed": true,
+      "transactionCount": 3,
+      "allFinalizedAndOrderBound": true,
+      "netMist": "34100418",
+      "transactions": [
+        {
+          "phase": "create",
+          "digest": "CG3Svjmga1pHUkjDNNp4irVN8naqnmAaiFvAnPpN7Ukb",
+          "checkpoint": "400206777",
+          "netMist": "6442063",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "10070000",
+            "storageRebate": "4627937",
+            "nonRefundableStorageFee": "463"
+          }
+        },
+        {
+          "phase": "activate",
+          "digest": "4ohctbG1MCeU3VSB45Q7es5kdx1dHhyyCcGhG8RK2ycW",
+          "checkpoint": "400207115",
+          "netMist": "26657907",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "28728000",
+            "storageRebate": "3070093",
+            "nonRefundableStorageFee": "307"
+          }
+        },
+        {
+          "phase": "cancel",
+          "digest": "4zPcBhaMz3uAJapySJNmvKNMuqyRfqYkLVNwrY6L6T2A",
+          "checkpoint": "400209489",
+          "netMist": "1000448",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "4484000",
+            "storageRebate": "4483552",
+            "nonRefundableStorageFee": "448"
+          }
+        }
+      ]
+    },
+    {
+      "path": "expire",
+      "orderId": "0xcbe276110159616beafbe56a648b2e117518e04bc7c6ead04ec5aa440421de49",
+      "databaseStatus": "Expired",
+      "expectedStatus": "Expired",
+      "chainTerminalStatus": 4,
+      "publishSucceeded": true,
+      "feeUnits": 1,
+      "feeConsumed": true,
+      "feeRefunded": false,
+      "feeBatch": "explicit-isolated-acceptance-test",
+      "quotaSource": "Test",
+      "escrowGold": 0,
+      "expiresAtMs": 1793204357082,
+      "deliveries": [
+        {
+          "id": "refund:cbe276110159616beafbe56a648b2e117518e04bc7c6ead04ec5aa440421de49",
+          "gold": 500000,
+          "itemUid": null,
+          "claimed": true,
+          "claimRevision": 30
+        }
+      ],
+      "allDeliveriesClaimed": true,
+      "transactionCount": 3,
+      "allFinalizedAndOrderBound": true,
+      "netMist": "34100418",
+      "transactions": [
+        {
+          "phase": "create",
+          "digest": "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m",
+          "checkpoint": "400211605",
+          "netMist": "6442063",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "10070000",
+            "storageRebate": "4627937",
+            "nonRefundableStorageFee": "463"
+          }
+        },
+        {
+          "phase": "activate",
+          "digest": "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt",
+          "checkpoint": "400211786",
+          "netMist": "26657907",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "28728000",
+            "storageRebate": "3070093",
+            "nonRefundableStorageFee": "307"
+          }
+        },
+        {
+          "phase": "expire",
+          "digest": "5QSMiePkqR5REuRcjW1FKNWH3UbuUdLqZcop1sC3MqkH",
+          "checkpoint": "400212115",
+          "netMist": "1000448",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "4484000",
+            "storageRebate": "4483552",
+            "nonRefundableStorageFee": "448"
+          }
+        }
+      ]
+    }
+  ],
+  "totalLiveTransactionCount": 9,
+  "totalLiveNetMist": "102301767",
+  "allTerminalStatusesMatch": true,
+  "allFinalityVerified": true,
+  "allDeliveriesClaimed": true,
+  "limits": [
+    "Actual Windows interaction evidence is maintained by the coordinator; this independent audit reads saved snapshots, live File authority and actual finalized testnet receipts.",
+    "Historical released locks and claimed deliveries may retain the original JSON; effective ownership excludes those archives.",
+    "Gas measurements exclude one-time setup, prior custody-fixture scenarios and non-Gas server/RPC/index costs. No USD profitability is claimed.",
+    "No production keys, mainnet transactions or real service charges were used."
+  ],
+  "passed": true
+}

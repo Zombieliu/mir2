@@ -72,6 +72,8 @@ pub mod native_display;
 pub mod native_i18n;
 #[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod native_monthly_card;
+#[cfg(feature = "native-ui")]
+pub mod native_procurement;
 #[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod native_shell;
 #[cfg(feature = "native-ui")]

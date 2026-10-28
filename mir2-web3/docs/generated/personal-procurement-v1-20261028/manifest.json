@@ -1,0 +1,1023 @@
+{
+  "formatVersion": 1,
+  "generatedAtUtc": "2026-10-28T17:22:14.479Z",
+  "scope": "Curated public procurement V1 evidence; fixtures, embedded SQL, standalone testnet and Windows live remain separate scopes",
+  "pathConvention": "files relative to this manifest; sourceSnapshot files relative to repository; copied raw evidence may retain historical local execution paths",
+  "hashAlgorithm": "SHA256; files use raw artifact bytes preserved by .gitattributes; sourceSnapshot uses its explicitly declared text normalization",
+  "excluded": [
+    "manifest.json self-reference",
+    "private stores and signing keys",
+    "credentials and environment files",
+    "node_modules and package archives",
+    "executable binaries"
+  ],
+  "sourceSnapshot": {
+    "kind": "Evidence assembly checkout snapshot; does not retroactively pin historical test executions",
+    "normalization": "UTF-8 text with CRLF replaced by LF before byte count and SHA256; no other text or BOM rewriting",
+    "files": [
+      {
+        "path": "apps/simulation/src/procurement.rs",
+        "bytes": 80099,
+        "sha256": "9489a05fdcfac28645cc446f2d96babe2d1daa8241825ea60b0447bbeda03368"
+      },
+      {
+        "path": "apps/simulation/src/procurement/tests.rs",
+        "bytes": 55703,
+        "sha256": "bc0d9cb40cd1b0222bddda59780c5c2afba4fdc58264aece8f5cc9b5c3be88dc"
+      },
+      {
+        "path": "apps/simulation/src/procurement/README.md",
+        "bytes": 8846,
+        "sha256": "b6852c883be1585963c97dc00a89e7da171af3392278bfd41ffdcdfacd0e094d"
+      },
+      {
+        "path": "apps/simulation/src/runtime/procurement.rs",
+        "bytes": 72144,
+        "sha256": "e6d310661bbf2f17829320b8c64a6fbc72050d810c81ba938ddf5c0b2308bd1c"
+      },
+      {
+        "path": "apps/simulation/src/config.rs",
+        "bytes": 339903,
+        "sha256": "7818569b375926c5a9251a06f8ac29156a92a872ca50496f830a88a6be3904d3"
+      },
+      {
+        "path": "apps/simulation/src/billing.rs",
+        "bytes": 31766,
+        "sha256": "d918e1a8bca8efa4fe9dda40825c0c5b23dbe069ba6d3f1e1c9bd82558eafe73"
+      },
+      {
+        "path": "apps/simulation/src/db_projection.rs",
+        "bytes": 32583,
+        "sha256": "79253e5f7631d8c883c1443250bc504ed73b1e119c43bd7ab3ad7a8e5379f9fe"
+      },
+      {
+        "path": "infra/postgres/migrations/0018_procurement_authority_guard.sql",
+        "bytes": 2161,
+        "sha256": "53b63e26318a345c9fc7dc571e6f6a50c9b4534829130a2ea4519446a7f03ac4"
+      },
+      {
+        "path": "apps/gateway/src/procurement_worker.rs",
+        "bytes": 28871,
+        "sha256": "76fb7479a08b3b40d8e9189c63ba3a0e1393a5ecba1e335a9a802476e42109b1"
+      },
+      {
+        "path": "apps/gateway/src/procurement_worker_tests.rs",
+        "bytes": 26289,
+        "sha256": "627a312c8f7a027542d9eecf3ccebf6200c647f00927087afd75a0eecc79b2a7"
+      },
+      {
+        "path": "apps/gateway/src/web_procurement.rs",
+        "bytes": 6684,
+        "sha256": "377f6e15c3bff9ce7e46b1104d7e9839fd8b64a5fa8d6c29e4c00fcc80671740"
+      },
+      {
+        "path": "apps/gateway/src/routing/procurement_owner.rs",
+        "bytes": 3810,
+        "sha256": "5523bff34dec0f2aedeeadf7d0f22f1cb713317ca5a90b9c79cf2dfbe9d96449"
+      },
+      {
+        "path": "packages/protocol/src/procurement.rs",
+        "bytes": 11040,
+        "sha256": "685cd01dae73439069cf54e0ebd7df7059ceb97a9106872b001a8ce727ce1e08"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/native_procurement.rs",
+        "bytes": 77918,
+        "sha256": "da7f74d62ba2076f4de4dd89d8ec6246972ea664b65b90a6d4b713af7456e63c"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+        "bytes": 599616,
+        "sha256": "64c4bfde6f4a662f377f8c8059c8ecb16979c8303b21cff1698517b1c90b35b0"
+      },
+      {
+        "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+        "bytes": 94612,
+        "sha256": "a913fc59cefe456fe277068eb5ff2172a16445563c25726ff9a906aaf5b493d3"
+      },
+      {
+        "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+        "bytes": 416802,
+        "sha256": "e82808b5fd6ef2a582ff5bef483ffe7baba704d5106680c8aaa2084ba3711d7d"
+      },
+      {
+        "path": "onchain/procurement/service/driver.mjs",
+        "bytes": 24520,
+        "sha256": "aa622628b23bfacda15fcbb2febc13f35f46b7248966859f59edaa0de7d243d3"
+      },
+      {
+        "path": "onchain/procurement/service/grpc.mjs",
+        "bytes": 15242,
+        "sha256": "0e6ab7cb4062fa2686325754f85b67e082f1498514af96a466b920f294d37b0c"
+      },
+      {
+        "path": "onchain/procurement/service/canonical.mjs",
+        "bytes": 4978,
+        "sha256": "630b96f7a69ebdce0fa869549c9c6ef9a27b8b036fc5e5d004c118f5eb88deb1"
+      },
+      {
+        "path": "onchain/procurement/package-lock.json",
+        "bytes": 96306,
+        "sha256": "82f8387732b94714df61b79fc6a90a14c516feadf49a28428fe517b9bbe9f3d6"
+      },
+      {
+        "path": "docs/PERSONAL-PROCUREMENT-V1.zh-CN.md",
+        "bytes": 35221,
+        "sha256": "bfe3b3ff0db6bd80ff8f3ac455f7ab227179181b8ef08ee3bcf73e1a8ef2c70e"
+      },
+      {
+        "path": "docs/AGENT-CURRENT.md",
+        "bytes": 6050,
+        "sha256": "24ef4141f67757ea7250fd1e3be9a451d68128c1b5417c3fe3a2479601d45a8a"
+      },
+      {
+        "path": "docs/NATIVE-WINDOWS-PLAYER-QA.md",
+        "bytes": 129599,
+        "sha256": "9ef7ae07d0123553f075fb129a10f1c595379727fbf21ee4fb2f1189ca9f7fc8"
+      },
+      {
+        "path": "docs/FRONTEND-1TO1-GAPS.md",
+        "bytes": 764569,
+        "sha256": "b5d3941b1a42b58a87ee080cd6010849cf5de8e810e0381d3aeb150587d1c93c"
+      }
+    ]
+  },
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 20,
+      "sha256": "e97602ab9cac70102245345c5ab0fc9830df8b17f1072b188265a662a3a547ae",
+      "group": "bundle"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 95,
+      "sha256": "5f20ec77547aa9a59da2fb4a8e147d4b446ed57c97556e24def985878daaa10f",
+      "group": "bundle"
+    },
+    {
+      "path": "README.md",
+      "bytes": 8465,
+      "sha256": "289dbbea262be9d37c8e89c71aef1c9b6c9ad1f8bc23e7c5286b5cc52bf69f29",
+      "group": "bundle"
+    },
+    {
+      "path": "client/final-fixture/gpu-short-expiry/procurement-native-gpu.json",
+      "bytes": 26919,
+      "sha256": "0bcb02ea6a375150b6d3ff538791a17b33b22c233e2663c37e19ca05e1e2684d",
+      "group": "client"
+    },
+    {
+      "path": "client/final-fixture/gpu-short-expiry/procurement-publish-1024x768.png",
+      "bytes": 176086,
+      "sha256": "9bbea702e89965a08734f2703aca302b89614c495ccd1916ce5be06815d979d7",
+      "group": "client"
+    },
+    {
+      "path": "client/final-fixture/gpu-short-expiry/procurement-publish-confirm-1024x768.png",
+      "bytes": 254187,
+      "sha256": "92e5c1aec79c4007a58d5bebde09924f30525ad7d33373090d0edc24e6b915c5",
+      "group": "client"
+    },
+    {
+      "path": "client/final-fixture/native-focused-exit.json",
+      "bytes": 377,
+      "sha256": "7fd17fa7451c9701075a4030b3ac1a9f33f1207947f8886e1e8fc7d47f7dc0e4",
+      "group": "client"
+    },
+    {
+      "path": "client/final-fixture/native-focused.log",
+      "bytes": 29508,
+      "sha256": "0b1ea11fb2e41fe98b73c90dd4591eb41278f8f581b0066774a45d1c5e00176f",
+      "group": "client"
+    },
+    {
+      "path": "client/final-fixture/native-gpu-short-expiry-exit.json",
+      "bytes": 354,
+      "sha256": "801f89e6034977ccc0b629482e2acc9c9666111049d2ebfc330af0c7c77f951d",
+      "group": "client"
+    },
+    {
+      "path": "client/final-fixture/native-gpu-short-expiry.log",
+      "bytes": 41937,
+      "sha256": "fcf480a834fb12e28456cf65be5c537d611342991db4507d4f8c9bea42265a90",
+      "group": "client"
+    },
+    {
+      "path": "client/final-fixture/windows-build-exit.json",
+      "bytes": 563,
+      "sha256": "908708254441f54361bed323713e48a3def2c70af38f96221195c5c2eb1c1bc9",
+      "group": "client"
+    },
+    {
+      "path": "client/final-fixture/windows-build.log",
+      "bytes": 60147,
+      "sha256": "83aae63ac40976fc48d4c0201e813a15953dc2c233831c83130258f2c0a59ec0",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/gpu-final/procurement-claims-1024x768.png",
+      "bytes": 133324,
+      "sha256": "dcdafa3d12a4d3839f829dae4772f40e13da7f761ed5ff6fb9d7e0d4a5c76fc8",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/gpu-final/procurement-delivery-confirm-1024x768.png",
+      "bytes": 257914,
+      "sha256": "99389cf833c9e8b9c14e5659977df6fd2f76dc44614e996a346eebb5036d6bb7",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/gpu-final/procurement-mine-1024x768.png",
+      "bytes": 120961,
+      "sha256": "8304c7422869a59e748ef189c02b8db682ba7963c7c5df10d29f11ae4e43ed64",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/gpu-final/procurement-native-gpu.json",
+      "bytes": 78988,
+      "sha256": "60602e3385fe2843a153323440c44d41f026560c4a885a61dcb9526b3b8f8df2",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/gpu-final/procurement-public-1024x768.png",
+      "bytes": 145270,
+      "sha256": "cba355fa94aacfeca82ad22cd004c2cf32db2950842c31b9cdff242864d686de",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/gpu-final/procurement-publish-1024x768.png",
+      "bytes": 173617,
+      "sha256": "5c3fe2f7bfb8f65e19b4a26fa3f700412a2482c81b4d504c588d5f251bcdd208",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/gpu-final/procurement-publish-confirm-1024x768.png",
+      "bytes": 244984,
+      "sha256": "bb202209adf537d6bd95f0e723057e13c07dd4cba5d74684b236a0d39c6e4c14",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/gpu-final/procurement-service-1024x768.png",
+      "bytes": 167675,
+      "sha256": "e14ca0227ee84a50cfca116ea8e1a0ee6925201c740942e2ad9fabaf5d59f45a",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/gpu-v1/procurement-native-gpu.json",
+      "bytes": 894,
+      "sha256": "811a83c3b45d8653726a1959006a3690519f1362aad8af27cbb6a90130bcf9a5",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/manifest.json",
+      "bytes": 6796,
+      "sha256": "e46268cad8e785edd2fec889e26ec27e3ce0b238a689a2f2b7cdf2a806708162",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/native-procurement-final-position-tests-exit.json",
+      "bytes": 500,
+      "sha256": "1a02f19d0942ebf68391e92d0b43a5206a886f0fae67861b565523fec34ee68c",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/native-procurement-final-position-tests.log",
+      "bytes": 69905,
+      "sha256": "d0e26249837d02767e8d2cd995ac2479383b547ca28a6fccfccd713a2f3612fe",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/protocol-procurement-tests-exit.json",
+      "bytes": 307,
+      "sha256": "2c0c56b40ba650860e3806c5304dcf8764ae35752ccb9dfc548b21ae368cf146",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/protocol-procurement-tests.log",
+      "bytes": 1000,
+      "sha256": "5628f55e4ed617f407a2ca7855f9db83bbd61698eef6a011493358e6c62165a7",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/windows-procurement-build-exit.json",
+      "bytes": 557,
+      "sha256": "f8fc5f3fd5dc9ac95261c1097c52635fee0854bf80c46e3be54cf91850498bec",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/windows-procurement-build.log",
+      "bytes": 59822,
+      "sha256": "9efc3fd85d4ab52ffcd887734479cf1a7db8cc4faa05d96da093357d78a19bc4",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/windows-procurement-tests-exit.json",
+      "bytes": 383,
+      "sha256": "3a20f0c91caf9a5f7180ddce8c87d9d307c26ce91ca4505c0c919ae1159e2425",
+      "group": "client"
+    },
+    {
+      "path": "client/initial-fixture/windows-procurement-tests.log",
+      "bytes": 55109,
+      "sha256": "ff132b99ecd3bd285cc0abc8bb200f84f01d858993fcdfb56caf35e93c9b101f",
+      "group": "client"
+    },
+    {
+      "path": "client/v3-fixture/native-focused-exit.json",
+      "bytes": 377,
+      "sha256": "b1024c2e62c15ca9ca13058aedde5f1401b04ffcbc53f11aefe1edc7a637ba0e",
+      "group": "client"
+    },
+    {
+      "path": "client/v3-fixture/native-focused.log",
+      "bytes": 29733,
+      "sha256": "37512b406c000cf3d5e8f9ea95a389c03d712b36afdfbadc4c17cfc372c0189f",
+      "group": "client"
+    },
+    {
+      "path": "client/v3-fixture/windows-build-exit.json",
+      "bytes": 566,
+      "sha256": "8ffc2b52f105e3d797f1634e61a565ee38921b2003a0333ab69e37539c4b24e2",
+      "group": "client"
+    },
+    {
+      "path": "client/v3-fixture/windows-build.log",
+      "bytes": 60147,
+      "sha256": "28c68d16fdd894509c3c1a9893c61a78f394e5dd4ceea815bb8ff96bb4d283d7",
+      "group": "client"
+    },
+    {
+      "path": "evidence-index.json",
+      "bytes": 6890,
+      "sha256": "e7a0385b1059f42317e2db1c3c50369567112383980ab1aebceffa0cd283323c",
+      "group": "bundle"
+    },
+    {
+      "path": "gateway/gateway-build-v2-final.log",
+      "bytes": 57731,
+      "sha256": "bf39560e6c71b3745ecede4de50171de2df065b612b9e88a58726664406fb52d",
+      "group": "gateway"
+    },
+    {
+      "path": "gateway/gateway-build-v3-fee-source.log",
+      "bytes": 57731,
+      "sha256": "a31bfcae6ea120c71e45ab8ea18747f8d6e7b37915796ee786e40bdb6769e88c",
+      "group": "gateway"
+    },
+    {
+      "path": "gateway/gateway-build-v4-wire-state.log",
+      "bytes": 57731,
+      "sha256": "713c4727f3e67bff9e445e26613b5fdead10f8b52998bd2e52047181f9e6ea67",
+      "group": "gateway"
+    },
+    {
+      "path": "gateway/gateway-build-v5-asset-projection.log",
+      "bytes": 57581,
+      "sha256": "e535015c0be984f8284caa50a5c0af9a54c613079623e12e07ebabae89562685",
+      "group": "gateway"
+    },
+    {
+      "path": "gateway/gateway-tests-v4.log",
+      "bytes": 67154,
+      "sha256": "e687cee9d410aac077e3efe73891fcd7a9b812737d681b735f7263c4e94f1f22",
+      "group": "gateway"
+    },
+    {
+      "path": "gateway/gateway-tests-v5-final.log",
+      "bytes": 56909,
+      "sha256": "4c332b6240c0890a82c487ea3f6ef62c5dc7821bdb3cd8b4b2e475b7f2ecb5c4",
+      "group": "gateway"
+    },
+    {
+      "path": "gateway/gateway-tests-v6-asset-projection.log",
+      "bytes": 56909,
+      "sha256": "f6c8590a4aa156d37a8b5ed8b58cce5b763149d1bd26f29ac6029e612d05d623",
+      "group": "gateway"
+    },
+    {
+      "path": "generate-manifest.mjs",
+      "bytes": 6206,
+      "sha256": "949b049083d7efb641febb3a8837b97c6ad178da0fb3ec649e6a1ce6df248f0c",
+      "group": "bundle"
+    },
+    {
+      "path": "rust/procurement-schema-regression-v3.log",
+      "bytes": 44927,
+      "sha256": "e966201467a3b59c61e72541d7b1e3b18b2b47535b6dd48b0b8f53678e60d85b",
+      "group": "rust"
+    },
+    {
+      "path": "rust/procurement-tests-v14-equipment-description-lease.log",
+      "bytes": 50231,
+      "sha256": "35f869281bae45cf6ec9587bfad15c40a8a44efcdf155536b145d6d3f26d5d12",
+      "group": "rust"
+    },
+    {
+      "path": "rust/procurement-tests-v15-machine-fee-source.log",
+      "bytes": 5330,
+      "sha256": "7f68c5f09b6cafad00dca29de460ce7e00557490b1eac259420cff05388aadca",
+      "group": "rust"
+    },
+    {
+      "path": "rust/procurement-tests-v16-machine-fee-source.log",
+      "bytes": 50231,
+      "sha256": "9935c349a9e91809bf0096ad41b74abfc0565c60b916ea2452a4fd7a87e37572",
+      "group": "rust"
+    },
+    {
+      "path": "rust/procurement-tests-v17-stable-wire-states.log",
+      "bytes": 50231,
+      "sha256": "5819385281d7f7d409571a4c88f0705be45309342df8300c85f0627a5896f983",
+      "group": "rust"
+    },
+    {
+      "path": "sql/0018-migration-tested.sql",
+      "bytes": 2161,
+      "sha256": "53b63e26318a345c9fc7dc571e6f6a50c9b4534829130a2ea4519446a7f03ac4",
+      "group": "sql"
+    },
+    {
+      "path": "sql/README.md",
+      "bytes": 2774,
+      "sha256": "51e4fef52ae751ec65283570ebcd77379bc32a257cfcdbd7e4dbb106ee406f11",
+      "group": "sql"
+    },
+    {
+      "path": "sql/download-integrity.json",
+      "bytes": 261,
+      "sha256": "c66e9a5088d22a9da05327fbb3f4d30d2ec47b25dbf2471fc123f78b3e046c58",
+      "group": "sql"
+    },
+    {
+      "path": "sql/download-package.mjs",
+      "bytes": 2857,
+      "sha256": "2dc08354fd5b5e0f1b460b40d47bbc5628b6af8ef59e5c95d73a2705090656d7",
+      "group": "sql"
+    },
+    {
+      "path": "sql/local-postgres-check.json",
+      "bytes": 532,
+      "sha256": "74338ad03c364802cbb420994ebc9b07ba72f6bc9b309b44e07420c75d261acc",
+      "group": "sql"
+    },
+    {
+      "path": "sql/npm-install-offline.log",
+      "bytes": 30,
+      "sha256": "64df03f740f0dedb7498fe9cd2eec6aaa56c1994e58e0b5af9338f8e71ae0f16",
+      "group": "sql"
+    },
+    {
+      "path": "sql/package-lock.json",
+      "bytes": 639,
+      "sha256": "03338fcbccf9b822dc042b8e62bd946373afda49ddfad43da5b01c331c6c1df2",
+      "group": "sql"
+    },
+    {
+      "path": "sql/package.json",
+      "bytes": 200,
+      "sha256": "b20abb29801310b1a9a7a69f8e882c18e5b305a7bc41f5f127eab10de84d58fa",
+      "group": "sql"
+    },
+    {
+      "path": "sql/results.json",
+      "bytes": 6776,
+      "sha256": "9237b5dcd0a63da83e08372405cba9cb212e16aeb59228aef067b93b5f2e97ac",
+      "group": "sql"
+    },
+    {
+      "path": "sql/sql-test-schema12.log",
+      "bytes": 2880,
+      "sha256": "0236331a87550faedfe13d3f0cb492a321f74ce9042f0ce03c1cdf396200a295",
+      "group": "sql"
+    },
+    {
+      "path": "sql/sql-test.log",
+      "bytes": 2437,
+      "sha256": "83da184ea5157d809fe27552df17ae24cd937a3a61e1f66e923f78033530b173",
+      "group": "sql"
+    },
+    {
+      "path": "sql/test-migration.mjs",
+      "bytes": 10311,
+      "sha256": "81e98be48455053d060831da943d3fbf6e049cdc7286a4240e8ac2d92b0951df",
+      "group": "sql"
+    },
+    {
+      "path": "windows-live/README.md",
+      "bytes": 6573,
+      "sha256": "140c3340aa47c720508ae39f102e3d3e5c61fa486e546950f96d8901cdd4e917",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/baseline-before-final-start.json",
+      "bytes": 5399,
+      "sha256": "7a4305ad1d4d72c25fc4763fb5d1079101017800c2db00be6aebce86e667aa18",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/buyer-original-equipment-claimed.json",
+      "bytes": 297766,
+      "sha256": "4624e2649073d96f4bd9ecb657732b62bf9170193c8636c66d4dfec30f384442",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/cancel-finalized-refund-pending.json",
+      "bytes": 548726,
+      "sha256": "56a2d58312934e2d89ee8359c9367821742dee6be0be1ea2e97f1acfe08d88bf",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/cancel-order-publishing.json",
+      "bytes": 320593,
+      "sha256": "1971ed871050ccb8ea3063bd499653e46ee9be099886e02753e5842a46eace26",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/cancel-refund-claimed.json",
+      "bytes": 548708,
+      "sha256": "b7b1fa2def1d583ee26581e229a01aabeb9ee7fddd50fd5d11046eea50c63524",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/cancel-submitted-custody-retained.json",
+      "bytes": 480000,
+      "sha256": "6c1648304f9f401921e1739befbd46b8c2b996585eb5a908fc9813a43a463feb",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/chain-cancel-three-transactions.json",
+      "bytes": 31416,
+      "sha256": "9d7b401109938564e1574db1c75bddb03a1d562960fa2f140659af336030a427",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/chain-expire-three-transactions.json",
+      "bytes": 31437,
+      "sha256": "5d1ff46abfa94559b858d81790dff009ba99047e873b7b3a73a7a8c913ea6319",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/chain-fill-three-transactions.json",
+      "bytes": 34284,
+      "sha256": "dafa05a2cfbe06102910a41f626ad60dfb81524f0e63bd270f92608c169194f5",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/chain-initial-read-retry.json",
+      "bytes": 21311,
+      "sha256": "763d22859b343fbfa75d4eaea98dceb73c056b5a7c4687157ba899173d36ad5b",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/chain-initial-read.json",
+      "bytes": 4114,
+      "sha256": "36877a3cbf08a22fe2571c0f6062c7ba311f6e7b8ec1688aeba5b8a04677426b",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/expire-order-publishing.json",
+      "bytes": 571547,
+      "sha256": "bf029bbd48647d3b7f95eaa666b97d8e8978d89bc1b291151284dbf4f06f5801",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/expiry-local-watch.json",
+      "bytes": 10287,
+      "sha256": "d693f23d980c963e5ffbe06b9529b7bf5c2401cc82e32c127b78ac9899860c91",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/expiry-refund-claimed-final.json",
+      "bytes": 749517,
+      "sha256": "5930939fe438d80cb4057053844d0fac3124cb7f8dfd8a02e0192e832d6cd12f",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/fill-order-open.json",
+      "bytes": 190245,
+      "sha256": "fc39b8e74b5b69cf5fbeb24a310f3c24b89c420c1f44c85f38d8ffda70a66b8b",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/fill-order-publishing.json",
+      "bytes": 43064,
+      "sha256": "aa7fb07b53d302d90289971f9a8ff1180e7b1746b496282e3e8de29cc5b91411",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/filled-buyer-offline-pending.json",
+      "bytes": 295599,
+      "sha256": "ddc11ae008cf92c7761351e3132eac808e6e240e616e74526cdff611635242ff",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/final-after-both-relogin.json",
+      "bytes": 749514,
+      "sha256": "13f8f86f4cdd7d74a3e9e172b5f79ba6a361c08323147d9059ca1a8e2ae57f8f",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/live-fill-independent-audit.json",
+      "bytes": 12277,
+      "sha256": "3c199a615e8aa70f5605b12d26b9d11159c63b0bfc890ac18225f449911e7d86",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/live-three-scenarios-independent-audit.json",
+      "bytes": 16888,
+      "sha256": "2a657df1eff61cd34efabb0d7304df4eedd9a3d961b80d43380a77281bad0d30",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/open-after-server-restart.json",
+      "bytes": 190256,
+      "sha256": "9563b6a4c4850f68235e82123f24e98783393128129c6d377f8c041c5499ffbb",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/open-before-server-restart.json",
+      "bytes": 190242,
+      "sha256": "5fa97823a4f6d657876c2e6caeaabe4210c71cd2b37c454ccad66bb047984a32",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/publish-quote-rejected-no-custody.json",
+      "bytes": 20257,
+      "sha256": "145ea47a84f2de1318bd81a87f3255f679fefa07d08b8e915f6dead2bd423ebf",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/seller-original-item-locked.json",
+      "bytes": 224766,
+      "sha256": "e9112d9036acacb5b5fa7a49ac23102f6d215db6b59a1211202b138b268f0804",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/seller-paid-before-projection-restart.json",
+      "bytes": 295601,
+      "sha256": "88fa5344755aa65eed897cc2189696708efa07bdca901a9195ef3c8f74d858bb",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/evidence/test-quota-confirmed.json",
+      "bytes": 8450,
+      "sha256": "7bb25ff1aea24847d25e8f7cac7a6277a5501c71d0a7eab4c92be7fde105f1b7",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/process/before-final-relogin/client-final-seller-process.json",
+      "bytes": 349,
+      "sha256": "586c8cbe1ede2955bd0a7e89f90b8c431991a7f690eee1d4d9074b6753d731c2",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/process/client-final-buyer-process.json",
+      "bytes": 347,
+      "sha256": "8c393dc2fab1ed86369643ca52bb89818b6a4a4f0f3305bee2e2f6a17fe586ec",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/process/client-final-seller-process.json",
+      "bytes": 349,
+      "sha256": "7a3d02d831b6067f6518745f213d5cab385390402a7644c348c18f4597ec83d0",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/process/server-process.json",
+      "bytes": 291,
+      "sha256": "5ff479b944c313ae2173f463c4c80049d19e9705d2ad474e0ca6347ac523b203",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/01-publish-quote-rejected.jpg",
+      "bytes": 124963,
+      "sha256": "9255d39a713a71e83dd25b242c89b34e4c959cb6b7168cfcdfcea376fbb4bb28",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/01-publish-quote-rejected.jpg.json",
+      "bytes": 441,
+      "sha256": "e9a787db9560b5857133810d703d5f29a39e954cc153ad8937be23532f4a2b61",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/02-final-npc-entry.jpg",
+      "bytes": 232900,
+      "sha256": "e5405f74a118a88e20c2d7c30a1e5efa7bd0f26d0b9bf876e97c11b5c5fef5dc",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/02-final-npc-entry.jpg.json",
+      "bytes": 438,
+      "sha256": "a7df341c47da3434621ab0275a8f23c1af418b3bb73d9a8d7f1171df6e7a9c11",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/03-final-publish-confirm.jpg",
+      "bytes": 148079,
+      "sha256": "366e04c74cd51fb6feaa3f02e679349fdd747eb6c83d3ce30220f3c750754620",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/03-final-publish-confirm.jpg.json",
+      "bytes": 444,
+      "sha256": "552e9f27228ceb41284bbf4cd9f198525e4e1b4363cfa468a3395645f24bd413",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/04-final-publish-custody.jpg",
+      "bytes": 147277,
+      "sha256": "1a62d1c18c5d4717cea2661a44a10b20bdf8c017947383b2bbb257dbd7836c5f",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/04-final-publish-custody.jpg.json",
+      "bytes": 444,
+      "sha256": "21cb0f27549112a23602f6c5730c2d882597005723bb1affdc0488bf30b3a86b",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/05-seller-public-list.jpg",
+      "bytes": 116498,
+      "sha256": "442785b56883f45141e372888a098a2f3a266f4f64aed99649f58cad48040874",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/05-seller-public-list.jpg.json",
+      "bytes": 440,
+      "sha256": "115fc52f553341d3955b142f890b3719b448bf8986e66bcd25a0d10805934b23",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/06-seller-delivery-confirm.jpg",
+      "bytes": 116656,
+      "sha256": "a156fd786f7f6ef3d7c76be89ce463634706da6e970b5be5db5eabf504652026",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/06-seller-delivery-confirm.jpg.json",
+      "bytes": 445,
+      "sha256": "9a312c36b7a3673db900fe0c718d31db23f02183125d0432620fbbf608ebcb67",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/07-server-restart-open-order.jpg",
+      "bytes": 116648,
+      "sha256": "ec18c44707d6491b57fbda96e929caaa323851da1a85efcc7e438c17fe78757e",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/07-server-restart-open-order.jpg.json",
+      "bytes": 447,
+      "sha256": "cc0b7a164cbd95262e7254b267b40d90b001956160c37fda06c587c977c1962d",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/08-restart-requires-login.jpg",
+      "bytes": 313254,
+      "sha256": "028cc3dbea4f33879534ca18efdb3d95d6e322b7728bd9bd90254c073a812028",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/08-restart-requires-login.jpg.json",
+      "bytes": 444,
+      "sha256": "4c195b7fb27049635b0c78a355195239139b2fbeca58a40a7a5e50c333c4b30e",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/09-restored-open-delivery-enabled.jpg",
+      "bytes": 117013,
+      "sha256": "1dc8f2072c0c9aa4b8d8d5baac65098233dc79ca70d8f1da1757d4dc7a32f0ff",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/09-restored-open-delivery-enabled.jpg.json",
+      "bytes": 453,
+      "sha256": "ce0a22ae4bdb1904429fbf7832d13073bb8b760094bc869163d251691b6de779",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/10-real-equipment-delivery-quote.jpg",
+      "bytes": 154082,
+      "sha256": "07400b10f319f9833501a6a0956eec6bdbf8487839993768c2fa6307efc8babc",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/10-real-equipment-delivery-quote.jpg.json",
+      "bytes": 452,
+      "sha256": "6ec0b413af62776e32093111a371cbef5befe43df3f93ff606548fb2ac207ec8",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/11-seller-original-item-locked.jpg",
+      "bytes": 117485,
+      "sha256": "61adcf9ce81193d17369076046e9d1917d6ecf4412f5f5e724292e84f47321bd",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/11-seller-original-item-locked.jpg.json",
+      "bytes": 450,
+      "sha256": "a604ad53b32f0e1b338cc7820753a9c9e50e58b5dce11dfd8b64053342fa161c",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/12-seller-proceeds-pending.jpg",
+      "bytes": 107599,
+      "sha256": "7b72589b39417bb3e6cea564693cdee802fbba157ae5528cbeeab1cb6bc13f2d",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/12-seller-proceeds-pending.jpg.json",
+      "bytes": 446,
+      "sha256": "acf645eadeeaa0f7054073399ae74aaa49deae56d6af8b2426cc27a0b486633e",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/13-buyer-chain-filled-game-pending.jpg",
+      "bytes": 105732,
+      "sha256": "7be2092f07ad522502c164768bc979d34da1983245a5c9401556e2fbffcee64b",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/13-buyer-chain-filled-game-pending.jpg.json",
+      "bytes": 454,
+      "sha256": "bc825c2b20d03efa1e169e75d7382d5366b65c4b6f865d3fd22fc49978a09115",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/14-buyer-original-uid-pending.jpg",
+      "bytes": 109050,
+      "sha256": "4c8fd584cdda2fba67b0a2fa33ea155b597e9e0d07abd287bc9329befe7f8649",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/14-buyer-original-uid-pending.jpg.json",
+      "bytes": 449,
+      "sha256": "801dcdc535513d4558644183c217b05f2c8465f5ce9696a7323ca7d672d45b2b",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/15-buyer-original-uid-delivered.jpg",
+      "bytes": 109188,
+      "sha256": "b8c5afe15e2bf081b76b19f667eb1589bc316c537b77c3e06a229c0256a4035e",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/15-buyer-original-uid-delivered.jpg.json",
+      "bytes": 451,
+      "sha256": "8548cdd87688e92ca0ee3c14a23fbe8b486d6da9ab3acd900f1a0c6340fdc2fb",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/16-buyer-normal-inventory.jpg",
+      "bytes": 224424,
+      "sha256": "c30cbd39635078690f81735b8c1243f6e33b997f0152cd9a310606bfd8690c30",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/16-buyer-normal-inventory.jpg.json",
+      "bytes": 445,
+      "sha256": "8cfdc0a336ead70402658d371906a24331078d63b4834e83c814ca6dd1d600b7",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/17-buyer-original-equipment-tooltip.jpg",
+      "bytes": 230346,
+      "sha256": "369e9ca57d97f2f0124687e9d07e1dd2dded3c4ffe7e051bc54cdfdf32413ffc",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/17-buyer-original-equipment-tooltip.jpg.json",
+      "bytes": 455,
+      "sha256": "23a921feb98a1179ca0a432ab61557e466804d45b5a9922102d0d81cd18506cf",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/18-cancel-open-order.jpg",
+      "bytes": 111958,
+      "sha256": "23494836ec413a08b442da120c9edf52f5f2722a1ad071c31b6ea1a357e8a907",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/18-cancel-open-order.jpg.json",
+      "bytes": 440,
+      "sha256": "90663a1eb7e9439cd958b52f9aa675dd28cd21d2c18c65057e360d182f2948b7",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/19-cancel-explicit-confirm.jpg",
+      "bytes": 148589,
+      "sha256": "c1a75eca2819aa208d854b041b7f0b18467bb5ee660f47493f0cbf0d50fa7eb9",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/19-cancel-explicit-confirm.jpg.json",
+      "bytes": 446,
+      "sha256": "152e848e9b2ce35962dc1cf47df94858e5039c316e0e5da319fc7493ab0a0d9d",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/20-cancel-finalized-game-refund-pending.jpg",
+      "bytes": 111364,
+      "sha256": "659dbdad1b7e66d2c0a373a23f18fd5b264fee7df29524ae4dfea4c77a2bb305",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/20-cancel-finalized-game-refund-pending.jpg.json",
+      "bytes": 459,
+      "sha256": "d899f90249bc2b05cf245435defbac4f46d70da17543be35ebd301760f8cdc8e",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/21-cancel-refund-claimed.jpg",
+      "bytes": 111542,
+      "sha256": "97b692f6b2312385c7b49a79deb2c5b81151fb1859fa0415b999bd747b06054d",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/21-cancel-refund-claimed.jpg.json",
+      "bytes": 444,
+      "sha256": "23dc219168c6b663a2efbde3c0b9a05e61c77f3a6a2be0668e9db79a0921d777",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/21b-cancel-refund-visible.jpg",
+      "bytes": 112265,
+      "sha256": "c660fc5fa4d21a9c104d947aa5656f752533b2c59c103ed4298103ad490482b6",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/21b-cancel-refund-visible.jpg.json",
+      "bytes": 445,
+      "sha256": "b2453a8bf277c4db9fca6907bc31f7453d5dc15f251329375001b291defa7a35",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/22-expiry-120s-explicit-quote.jpg",
+      "bytes": 151348,
+      "sha256": "4cead7ddef6e26a09ef8c1725dabd9b0fc38f4f010cabaa9ebebd6d325d9fd2c",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/22-expiry-120s-explicit-quote.jpg.json",
+      "bytes": 449,
+      "sha256": "121c4f28d46bcc0e8b884ebd9a04f2e30be93ced84dae4e8c3841ab6e50cc8d2",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/23-three-chain-terminal-states.jpg",
+      "bytes": 117015,
+      "sha256": "dfb86ded31c413165f8627594c3525f8e774df96c80ff24929f8b8c4bdd59157",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/23-three-chain-terminal-states.jpg.json",
+      "bytes": 450,
+      "sha256": "296d3577cf8a813a9bead39657668778cb9dfa297fd9c575156c343b790d92f8",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/24-all-deliveries-and-refunds-received.jpg",
+      "bytes": 115339,
+      "sha256": "b1aec1719d6db809d3b588ae91fbd28e62bc8c7013a38a9785d99d4ac6566996",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/24-all-deliveries-and-refunds-received.jpg.json",
+      "bytes": 458,
+      "sha256": "def6698fc5bf3b49f98758c4cba490a67713d3ee22f4e305d5ba52938c5a5c64",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/25-final-buyer-relogin-inventory.jpg",
+      "bytes": 230451,
+      "sha256": "2b9b965946b23d61fbbac3fbbaabd1f02ef15ba7561d11a1bacbbebb42df62f3",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/25-final-buyer-relogin-inventory.jpg.json",
+      "bytes": 451,
+      "sha256": "f7dde59ecf174950c00f1a1848c96b5bcc7f027027a71cd2cfb6336f6782c073",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/26-final-seller-relogin-inventory.jpg",
+      "bytes": 234429,
+      "sha256": "33f7a0ecc44c0eef31a6b0c3b39e81d5419301ae3f7e2d5cace5d1b21d9a6246",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/26-final-seller-relogin-inventory.jpg.json",
+      "bytes": 452,
+      "sha256": "574b41092bb6e535b8d4b8a6082d7d072dc6658ce02560398a576a5bda606e6a",
+      "group": "windows-live"
+    },
+    {
+      "path": "windows-live/screenshots/snapshot-associations.json",
+      "bytes": 25008,
+      "sha256": "81b0cd3a9c6082a3ed90eb5167e6209e2981e8aaa3d4b9eed94b9557996e79f6",
+      "group": "windows-live"
+    }
+  ]
+}

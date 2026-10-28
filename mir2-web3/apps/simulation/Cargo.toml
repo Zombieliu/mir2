@@ -17,6 +17,7 @@ test-support = []
 argon2 = "0.5.3"
 base64 = "0.22"
 hmac = "0.13"
+ed25519-consensus = "2.1"
 bevy_app = "0.17"
 bevy_ecs = "0.17"
 bevy_tasks = { version = "0.17", features = ["multi_threaded"] }

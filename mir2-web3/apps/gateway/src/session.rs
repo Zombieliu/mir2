@@ -221,6 +221,24 @@ impl fmt::Debug for GatewaySession {
 }
 
 impl GatewaySession {
+    pub(crate) fn execute_procurement_owner(
+        &mut self,
+        authenticated: bool,
+        request: &mir2_protocol::procurement::ProcurementRequest,
+        now_ms: u64,
+    ) -> Result<mir2_simulation::procurement::ProcurementExecution, String> {
+        if !authenticated { return Err("procurementAuthenticationRequired".into()); }
+        let lease=self.zone_owner_lease.clone();
+        self.validate_zone_owner_lease(&lease)?;
+        let outcome=catch_gateway_panic("procurement gateway owner", || {
+            self.zone_owner_command_client.execute_procurement_owner(
+                &mut self.runtime,&lease,authenticated,request,now_ms,
+            )
+        }).map_err(|_| "procurementOwnerPublicationOutcomeUnknown")??;
+        self.validate_zone_owner_lease(&lease)
+            .map_err(|_| "procurementOwnerPublicationOutcomeUnknown")?;
+        Ok(outcome)
+    }
     pub(crate) fn has_pending_shared_personal_work(&self) -> bool {
         crate::routing::runtime_has_pending_shared_personal_work(self.runtime.as_ref())
     }

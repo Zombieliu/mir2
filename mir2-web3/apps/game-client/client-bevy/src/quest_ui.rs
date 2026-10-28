@@ -2690,6 +2690,12 @@ pub(crate) fn process_quest_ui_input(
         return;
     }
 
+    // The independent procurement confirmation owns its keys. In particular,
+    // editing a gold price with Backspace must not navigate the underlying NPC.
+    if player_ui.procurement_open || player_ui.procurement_input_consumed {
+        return;
+    }
+
     // A browser resize/fallback hides the surface without leaving the game.
     // Consume this frame's interaction changes without resetting the view or
     // allowing a hidden button/key to emit an intent.
@@ -12747,6 +12753,34 @@ mod tests {
                 target: "@Exit".to_owned(),
             }]
         );
+    }
+
+    #[cfg(feature = "native-ui")]
+    #[test]
+    fn procurement_modal_and_close_frame_preserve_underlying_npc_on_escape_or_backspace() {
+        for key in [KeyCode::Escape, KeyCode::Backspace] {
+            for consumed in [false, true] {
+                let mut app = App::new();
+                app.init_resource::<QuestPresentationLocale>();
+                app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+                let mut player = NativePlayerUiState::default();
+                player.procurement_open = !consumed;
+                player.procurement_input_consumed = consumed;
+                app.insert_resource(player);
+                app.insert_resource(QuestTracker::default());
+                app.insert_resource(NpcDialogModel { is_open: true, npc_object_id: Some(12), ..default() });
+                app.init_resource::<NpcDialogNav>().init_resource::<QuestUiState>()
+                    .init_resource::<QuestUiIntentQueue>().init_resource::<PendingOperations>()
+                    .init_resource::<NearbyNpcModel>().init_resource::<CombatTargetModel>()
+                    .init_resource::<GroundPickupModel>();
+                let mut keys = ButtonInput::<KeyCode>::default();
+                keys.press(key);
+                app.insert_resource(keys).add_systems(Update, process_quest_ui_input);
+                app.update();
+                assert!(app.world().resource::<NpcDialogModel>().is_open);
+                assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+            }
+        }
     }
 
     #[test]

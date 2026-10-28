@@ -1,0 +1,435 @@
+{
+  "readOnly": true,
+  "auditedAt": "2026-10-28T16:01:30.644Z",
+  "network": "testnet",
+  "custodyFixtureOnly": false,
+  "authority": "real File-backed game account store snapshots; Windows interaction captured separately",
+  "orderId": "0x70cdaa52f85d1e1e787fa40749cf5f3ad72245a6399fdfdc24caa8a30807a14f",
+  "itemUid": 1028024501,
+  "templateId": 245,
+  "snapshotCount": 12,
+  "allSnapshotChecksPassed": true,
+  "snapshots": [
+    {
+      "file": "baseline-before-final-start.json",
+      "at": "2026-10-28T15:05:55.337Z",
+      "storeSha256": "e3f6b099716311be30b285191da8c929446f9354a0d8aa4188eea5355a22ef96",
+      "globalGold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 2010000,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    },
+    {
+      "file": "test-quota-confirmed.json",
+      "at": "2026-10-28T15:09:44.124Z",
+      "storeSha256": "9f92679bd189cc81219eea0e8831aca6243bbd5279483616fb0090d1ce5cf432",
+      "globalGold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 2010000,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    },
+    {
+      "file": "publish-quote-rejected-no-custody.json",
+      "at": "2026-10-28T15:12:15.496Z",
+      "storeSha256": "3c0c994e71919b021702d2b4da27316616673807a35aa69ae4655f1162f7e37a",
+      "globalGold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 2010000,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    },
+    {
+      "file": "fill-order-publishing.json",
+      "at": "2026-10-28T15:23:49.582Z",
+      "storeSha256": "3c5641194f99fe9e2d3d5385c73a5be7d24577ca88b1be31a795b3c8273ec403",
+      "globalGold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 1510000,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    },
+    {
+      "file": "fill-order-open.json",
+      "at": "2026-10-28T15:26:59.991Z",
+      "storeSha256": "d73b6edf95bfb829bb234364421f9625b255760ec6e5c260a61f12b2dfd60506",
+      "globalGold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 1510000,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    },
+    {
+      "file": "open-before-server-restart.json",
+      "at": "2026-10-28T15:33:40.510Z",
+      "storeSha256": "c4c9cda34b0ba8df31002568d52cf378b54da0466648bcb775659e30a4d363ae",
+      "globalGold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 1510000,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    },
+    {
+      "file": "open-after-server-restart.json",
+      "at": "2026-10-28T15:35:23.076Z",
+      "storeSha256": "f234d9b61097416a3321dadee70efdc5e11ec7cbe076f9f39348f179aa0386ea",
+      "globalGold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 1510000,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "sellqa1028",
+          "character": "1",
+          "location": "inventory"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    },
+    {
+      "file": "seller-original-item-locked.json",
+      "at": "2026-10-28T15:40:17.461Z",
+      "storeSha256": "97a7e5a437e4f9b3cab80734249d921bc83b854b9ed3aac5a0c9b10b7ce908ff",
+      "globalGold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 1510000,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "sellqa1028",
+          "location": "locked"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    },
+    {
+      "file": "filled-buyer-offline-pending.json",
+      "at": "2026-10-28T15:43:20.013Z",
+      "storeSha256": "e76f1e0c1b6862d4e676e2d4c4cbff95a8b15615dc7c9dc6b863d55974dc0768",
+      "globalGold": {
+        "wallet": 1511280,
+        "escrow": 0,
+        "pending": 500000,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 1510000,
+        "escrow": 0,
+        "pending": 500000,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "buyqa1028",
+          "location": "pending"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    },
+    {
+      "file": "seller-paid-before-projection-restart.json",
+      "at": "2026-10-28T15:52:07.820Z",
+      "storeSha256": "c02eaaf3cc1db199dbab75bdf1870de0a0e2a32fdd547ff38cd7539ccdc60b7a",
+      "globalGold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 2010000,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "buyqa1028",
+          "location": "pending"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    },
+    {
+      "file": "buyer-original-equipment-claimed.json",
+      "at": "2026-10-28T15:57:00.959Z",
+      "storeSha256": "9ba0f250ab87436d0436416e81372cac43a02b3aba26e1d5b5df0dce26b63ef0",
+      "globalGold": {
+        "wallet": 2011280,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 2010000,
+        "escrow": 0,
+        "pending": 0,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "buyqa1028",
+          "character": "0",
+          "location": "inventory"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    },
+    {
+      "file": "cancel-order-publishing.json",
+      "at": "2026-10-28T15:58:38.483Z",
+      "storeSha256": "3994b85a0d9eaebc174ffcfec3c67d572c123a20358e0bac3d5e29e74ba65902",
+      "globalGold": {
+        "wallet": 1511280,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2011280
+      },
+      "actorGold": {
+        "wallet": 1510000,
+        "escrow": 500000,
+        "pending": 0,
+        "total": 2010000
+      },
+      "otherGlobalWalletGold": 1280,
+      "activeUidCount": 1,
+      "summaryUidCount": 1,
+      "activeOwner": [
+        {
+          "account": "buyqa1028",
+          "character": "0",
+          "location": "inventory"
+        }
+      ],
+      "allEquipmentFieldsSemanticallyEqualToOriginal": true,
+      "passed": true
+    }
+  ],
+  "equipment": {
+    "canonicalOriginalSha256": "9132a6c0cf9e76df2653996d435ae2cd8765f60460d04a76de29a686e1365b3d",
+    "fullInstanceHash": "7bfb7db030cfac6479a8fda3e18d8bc6bd2452a2b060d7d1d64aec5b01c63579",
+    "fullInstanceHashMatchesDatabaseLockAndFinalChainEvent": true,
+    "durabilityCurrent": 31400,
+    "durabilityMax": 34000,
+    "refinedValue": 1,
+    "refineAdded": 2,
+    "addedStats": {
+      "MinDC": 2,
+      "MaxDC": 3
+    },
+    "allRecordedFieldsEqualAfterClaim": true
+  },
+  "fillClaimSnapshot": {
+    "file": "buyer-original-equipment-claimed.json",
+    "buyerGold": 1500000,
+    "sellerGold": 510000,
+    "orderStatus": "Filled",
+    "itemDeliveryClaimed": true,
+    "sellerGoldDeliveryClaimed": true,
+    "releasedHistoricalSellerLock": true,
+    "pendingGold": 0,
+    "escrowGold": 0,
+    "itemActiveOwner": "buyer bag; original UID retained"
+  },
+  "chain": {
+    "transactionCount": 3,
+    "allFinalizedAndOrderBound": true,
+    "totalNetMist": "34100931",
+    "transactions": [
+      {
+        "phase": "create",
+        "digest": "HLXrxYBPxWicch7jh4VeQANZMs1v9tGLbh1ib4pqvYyc",
+        "checkpoint": "400198288",
+        "gasUsed": {
+          "computationCost": "1000000",
+          "storageCost": "10070000",
+          "storageRebate": "4627937",
+          "nonRefundableStorageFee": "463"
+        },
+        "netMist": "6442063"
+      },
+      {
+        "phase": "activate",
+        "digest": "H1Gg1DiHTgMFv8ZBtaPydsUHDPtvwW3n16iZrihdmqQd",
+        "checkpoint": "400198643",
+        "gasUsed": {
+          "computationCost": "1000000",
+          "storageCost": "28728000",
+          "storageRebate": "3070093",
+          "nonRefundableStorageFee": "307"
+        },
+        "netMist": "26657907"
+      },
+      {
+        "phase": "fill",
+        "digest": "5Mb7wW8P8mb5mHH5Use1gwvBvUD5r52PXMdXwvXcHGE",
+        "checkpoint": "400202363",
+        "gasUsed": {
+          "computationCost": "1000000",
+          "storageCost": "9614000",
+          "storageRebate": "9613039",
+          "nonRefundableStorageFee": "961"
+        },
+        "netMist": "1000961"
+      }
+    ]
+  },
+  "limits": [
+    "Released locks and claimed delivery records retain historical item JSON; they are excluded from effective ownership counts.",
+    "Both buyer equipment and seller proceeds were claimed. Saved snapshots alone do not prove an additional repeated-claim-request test.",
+    "The 1280 difference between global and the two inspected actor totals is unchanged other-account wallet gold.",
+    "Cancel/expiry paths still in progress at this audit; later orders have separate evidence. Production charging and USD profitability are not verified."
+  ],
+  "passed": true
+}

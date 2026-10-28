@@ -2,6 +2,8 @@
 mod five_class;
 #[path = "routing/owner_health.rs"]
 mod owner_health;
+#[path = "routing/procurement_owner.rs"]
+mod procurement_owner;
 #[path = "owner_wire_ids.rs"]
 mod owner_wire_ids;
 #[path = "routing/shared_conquest.rs"]
@@ -340,6 +342,18 @@ pub trait ZoneOwnerLeaseAuthority: Send + Sync {
 pub type SharedZoneOwnerLeaseAuthority = Arc<dyn ZoneOwnerLeaseAuthority>;
 
 pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
+    /// Procurement requires an explicitly fenced owner path. RPC routes that
+    /// have not negotiated this operation cannot fall back to a local mirror.
+    fn execute_procurement_owner(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        _lease: &ZoneOwnerLease,
+        _authenticated: bool,
+        _request: &mir2_protocol::procurement::ProcurementRequest,
+        _now_ms: u64,
+    ) -> Result<mir2_simulation::procurement::ProcurementExecution, String> {
+        Err("procurementOwnerRouteUnavailable".into())
+    }
     fn execute_production_attack_requiring_typed_outcome(
         &self,
         _runtime: &mut ZoneRuntimeHandle,
@@ -1041,6 +1055,19 @@ fn execute_typed_native_attack_runtime(
 }
 
 impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
+    fn execute_procurement_owner(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        lease: &ZoneOwnerLease,
+        authenticated: bool,
+        request: &mir2_protocol::procurement::ProcurementRequest,
+        now_ms: u64,
+    ) -> Result<mir2_simulation::procurement::ProcurementExecution, String> {
+        procurement_owner::execute_fenced(
+            self.owner_lease_authority.as_ref(), runtime, lease,
+            authenticated, request, now_ms,
+        )
+    }
     fn execute_production_attack_requiring_typed_outcome(
         &self,
         runtime: &mut ZoneRuntimeHandle,
@@ -18446,6 +18473,14 @@ impl SharedInProcessZoneSessionRuntime {
 }
 
 impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+    fn execute_procurement_owner(
+        &mut self,
+        authenticated: bool,
+        request: &mir2_protocol::procurement::ProcurementRequest,
+        now_ms: u64,
+    ) -> Result<mir2_simulation::procurement::ProcurementExecution, String> {
+        procurement_owner::execute_shared(self, authenticated, request, now_ms)
+    }
     fn restore_replica_session_checkpoint(
         &mut self,
         identity: &ActiveSessionIdentity,

@@ -1,0 +1,126 @@
+{
+  "passed": true,
+  "network": "testnet",
+  "custodyFixtureOnly": true,
+  "realDatabaseDelivery": false,
+  "scenarios": [
+    {
+      "ending": "fill",
+      "orderId": "0x17819744548a1d4e6c52fa9d9b3001dc54b0b3a87938118250bae300867a06a0",
+      "orderObjectId": "0x7cd6befd451b1cf0abf6e931d019527618ee1f9503904a275584f7ee15a40646",
+      "transactions": [
+        "HeQb5BGTZ8Em5wXrQzMq4wiXFrsz688FK2gqYcUMRYPq",
+        "D3maMPEUYLs8qnbHbbYqXu6SXsRZYjY8CL5AgcnECAA6",
+        "CvQg7oUNZ2nBCM3GaKCau2sZHtnTgbm6xqTU6fEhWaAy"
+      ],
+      "transactionCount": 3,
+      "gasUsed": [
+        {
+          "computationCost": "1000000",
+          "storageCost": "10070000",
+          "storageRebate": "4627937",
+          "nonRefundableStorageFee": "463"
+        },
+        {
+          "computationCost": "1000000",
+          "storageCost": "28728000",
+          "storageRebate": "3070093",
+          "nonRefundableStorageFee": "307"
+        },
+        {
+          "computationCost": "1000000",
+          "storageCost": "9614000",
+          "storageRebate": "9613039",
+          "nonRefundableStorageFee": "961"
+        }
+      ],
+      "status": 2
+    },
+    {
+      "ending": "cancel",
+      "orderId": "0x6752665226c6b34a5434a438d06b0bbec1d5e2d6453cef3672df37ad5b6a1193",
+      "orderObjectId": "0x14026ba9aaab58c6d75c8247a04b92c10e3b06e6a4d09760bc3f1055d8ad56c1",
+      "transactions": [
+        "Csxh7vT2JUHPN2EQ7xgEmWCRBA26yqsVc4C55wmE5RGR",
+        "EXFfs9epDQEJDoPsvHqTa7iD4HdaLDZG9nG7NJn4pj75",
+        "A93Gi2VrHE1WNaZ2nAuX8pzVkaqjhYK17V74fQdH2k51"
+      ],
+      "transactionCount": 3,
+      "gasUsed": [
+        {
+          "computationCost": "1000000",
+          "storageCost": "10070000",
+          "storageRebate": "4627937",
+          "nonRefundableStorageFee": "463"
+        },
+        {
+          "computationCost": "1000000",
+          "storageCost": "28728000",
+          "storageRebate": "3070093",
+          "nonRefundableStorageFee": "307"
+        },
+        {
+          "computationCost": "1000000",
+          "storageCost": "4484000",
+          "storageRebate": "4483552",
+          "nonRefundableStorageFee": "448"
+        }
+      ],
+      "status": 3
+    },
+    {
+      "ending": "expire",
+      "orderId": "0xea8e613f85606455711a1d593ee43ded948e3e064e063df64b6888f859e1bda2",
+      "orderObjectId": "0xff22aa03814df80b035ff9a451e22af569054d44a757201c015590ad3a23b910",
+      "transactions": [
+        "FDbQxhkoQ5wN51WdP8oj8ZwLRWJk69NGs1CSus4EkmLZ",
+        "9xuDmWffqvuoiXsZ9NSqRm9FMo6ZsD92kBLyULy5sagS",
+        "9Q42MQwCSkcUypuqLLTN1qpUbLKaGeRTZiqgpcnnopQ2"
+      ],
+      "transactionCount": 3,
+      "gasUsed": [
+        {
+          "computationCost": "1000000",
+          "storageCost": "10070000",
+          "storageRebate": "4627937",
+          "nonRefundableStorageFee": "463"
+        },
+        {
+          "computationCost": "1000000",
+          "storageCost": "28728000",
+          "storageRebate": "3070093",
+          "nonRefundableStorageFee": "307"
+        },
+        {
+          "computationCost": "1000000",
+          "storageCost": "4484000",
+          "storageRebate": "4483552",
+          "nonRefundableStorageFee": "448"
+        }
+      ],
+      "status": 4
+    }
+  ],
+  "publicationTransactionCount": 2,
+  "initializationCostsSeparate": true,
+  "serviceFeeUsdProfitabilityVerified": false,
+  "config": {
+    "enabled": true,
+    "network": "testnet",
+    "environmentTag": "isolated-test",
+    "fullnodeUrl": "https://fullnode.testnet.sui.io:443",
+    "chainIdentifier": "4c78adac",
+    "genesisDigest": "69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD",
+    "networkHash": "0xb55d4afda0318ec0a264cc5f46c4e61c96da8000e9ea1bdf04878266867c6246",
+    "frameworkPackageId": "0xae33be6675639d6f1a5c468ae6bbc457ae4e22e57cd7526741d6143ce219d995",
+    "oraclePublicKey": "0xb11554329aaaffb0d2a7af5c9d088ee67ab23ff475160a49c2591be537eeb9d1",
+    "oracleKeyId": "1",
+    "gasBudgetMist": "50000000",
+    "maxGasBudgetMist": "50000000",
+    "dailyGasBudgetMist": "980000000",
+    "packageId": "0xf279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880",
+    "configId": "0xbfbcb135da63537ab67e537ab92f65b30b59df97bcd3138a7a37dc581e2615ea",
+    "dappStorageId": "0x712f0a2decbbe2e7c8ce4294bc478da9346d35b6ce22f274ad054a03638be0c9",
+    "startCheckpoint": "400174093"
+  }
+}

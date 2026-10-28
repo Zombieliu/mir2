@@ -58,6 +58,7 @@ mod npc_purchase_outcome;
 mod npc_purchase_snapshot;
 mod npc_purchase_transaction;
 mod production;
+pub(crate) mod procurement;
 mod stones;
 mod stone_npc;
 pub use stone_npc::StoneWorkshopError;

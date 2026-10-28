@@ -1,0 +1,188 @@
+{
+  "scope": "Windows personal procurement client and shared JSON protocol V1",
+  "sourceFiles": [
+    {
+      "sha256": "685cd01dae73439069cf54e0ebd7df7059ceb97a9106872b001a8ce727ce1e08",
+      "bytes": 11040,
+      "path": "packages/protocol/src/procurement.rs"
+    },
+    {
+      "sha256": "4aff98f8f201cf6117d7e46d6b192b8da898958a389d955905e3c37673b3ef0d",
+      "bytes": 1990,
+      "path": "packages/protocol/src/lib.rs"
+    },
+    {
+      "sha256": "377510326b9fa3ca356f1c1cb57f44b061179cdda6807934bad5ec645cd3596c",
+      "bytes": 1725,
+      "path": "apps/game-client/client-bevy/Cargo.toml"
+    },
+    {
+      "sha256": "d2054e187c8af34028a88c4650b4da646451931a15a01e83ea405b3204ed88a8",
+      "bytes": 127952,
+      "path": "apps/game-client/client-bevy/Cargo.lock"
+    },
+    {
+      "sha256": "d140d25426d427feb20b9221ea40b5242f2fecd5003f218fcb1082c76733977d",
+      "bytes": 5495,
+      "path": "apps/game-client/client-bevy/src/lib.rs"
+    },
+    {
+      "sha256": "f50e569891443913654ab28607e715d88fdcd0f7960f474b0c28be33187c29a0",
+      "bytes": 67707,
+      "path": "apps/game-client/client-bevy/src/native_procurement.rs"
+    },
+    {
+      "sha256": "29e53b8bca747e9af53a146d5ef040ea59b13ec1edd2940e892ce50f5ef09ae8",
+      "bytes": 91185,
+      "path": "apps/game-client/client-bevy/src/native_shell.rs"
+    },
+    {
+      "sha256": "a729be318799ded8ae4c08e222a77b350a15ed444ae1d46ebf36fea9a1064e25",
+      "bytes": 941812,
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs"
+    },
+    {
+      "sha256": "64c4bfde6f4a662f377f8c8059c8ecb16979c8303b21cff1698517b1c90b35b0",
+      "bytes": 599616,
+      "path": "apps/game-client/client-bevy/src/quest_ui.rs"
+    },
+    {
+      "sha256": "a7c7b2b2029be2242073cc24193cd7fc47bc480700a868710901a94a379166dd",
+      "bytes": 151310,
+      "path": "apps/game-client/platform-windows/Cargo.lock"
+    },
+    {
+      "sha256": "a913fc59cefe456fe277068eb5ff2172a16445563c25726ff9a906aaf5b493d3",
+      "bytes": 94612,
+      "path": "apps/game-client/platform-windows/src/native_protocol.rs"
+    },
+    {
+      "sha256": "280136f6187d67def137dcbb7025e7f862e51c1e93257f7b8866628a18d0c660",
+      "bytes": 791769,
+      "path": "apps/game-client/platform-windows/src/gateway.rs"
+    },
+    {
+      "sha256": "e82808b5fd6ef2a582ff5bef483ffe7baba704d5106680c8aaa2084ba3711d7d",
+      "bytes": 416802,
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs"
+    },
+    {
+      "sha256": "6fbdf87c940b02c4cba261d343a5ae88c94c8e15155a2f1f5909f769be7cd173",
+      "bytes": 39623,
+      "path": "apps/game-client/platform-windows/src/shell_bridge.rs"
+    }
+  ],
+  "counterevidence": {
+    "reason": "First GPU render executed but visual review found missing Simplified CJK glyphs and wrong unbound sentinel. Fixed before final evidence.",
+    "gpuV1": "gpu-v1/procurement-native-gpu.json"
+  },
+  "createdAtUtc": "2026-10-28T12:58:59.4070043Z",
+  "limits": {
+    "mainnetDeployed": false,
+    "realClientToGatewaySmokePerformed": false,
+    "realTestnetTransactions": 0,
+    "otherLocalesAndDpiVerified": false,
+    "productionChargingEnabled": false,
+    "dockerTouched": false,
+    "humanAccepted": false,
+    "existingGuildClientReplaced": false
+  },
+  "files": [
+    {
+      "sha256": "d0e26249837d02767e8d2cd995ac2479383b547ca28a6fccfccd713a2f3612fe",
+      "bytes": 69905,
+      "path": "native-procurement-final-position-tests.log"
+    },
+    {
+      "sha256": "1a02f19d0942ebf68391e92d0b43a5206a886f0fae67861b565523fec34ee68c",
+      "bytes": 500,
+      "path": "native-procurement-final-position-tests-exit.json"
+    },
+    {
+      "sha256": "ff132b99ecd3bd285cc0abc8bb200f84f01d858993fcdfb56caf35e93c9b101f",
+      "bytes": 55109,
+      "path": "windows-procurement-tests.log"
+    },
+    {
+      "sha256": "3a20f0c91caf9a5f7180ddce8c87d9d307c26ce91ca4505c0c919ae1159e2425",
+      "bytes": 383,
+      "path": "windows-procurement-tests-exit.json"
+    },
+    {
+      "sha256": "5628f55e4ed617f407a2ca7855f9db83bbd61698eef6a011493358e6c62165a7",
+      "bytes": 1000,
+      "path": "protocol-procurement-tests.log"
+    },
+    {
+      "sha256": "2c0c56b40ba650860e3806c5304dcf8764ae35752ccb9dfc548b21ae368cf146",
+      "bytes": 307,
+      "path": "protocol-procurement-tests-exit.json"
+    },
+    {
+      "sha256": "9efc3fd85d4ab52ffcd887734479cf1a7db8cc4faa05d96da093357d78a19bc4",
+      "bytes": 59822,
+      "path": "windows-procurement-build.log"
+    },
+    {
+      "sha256": "f8fc5f3fd5dc9ac95261c1097c52635fee0854bf80c46e3be54cf91850498bec",
+      "bytes": 557,
+      "path": "windows-procurement-build-exit.json"
+    },
+    {
+      "sha256": "60602e3385fe2843a153323440c44d41f026560c4a885a61dcb9526b3b8f8df2",
+      "bytes": 78988,
+      "path": "gpu-final/procurement-native-gpu.json"
+    },
+    {
+      "sha256": "dcdafa3d12a4d3839f829dae4772f40e13da7f761ed5ff6fb9d7e0d4a5c76fc8",
+      "bytes": 133324,
+      "path": "gpu-final/procurement-claims-1024x768.png"
+    },
+    {
+      "sha256": "99389cf833c9e8b9c14e5659977df6fd2f76dc44614e996a346eebb5036d6bb7",
+      "bytes": 257914,
+      "path": "gpu-final/procurement-delivery-confirm-1024x768.png"
+    },
+    {
+      "sha256": "8304c7422869a59e748ef189c02b8db682ba7963c7c5df10d29f11ae4e43ed64",
+      "bytes": 120961,
+      "path": "gpu-final/procurement-mine-1024x768.png"
+    },
+    {
+      "sha256": "cba355fa94aacfeca82ad22cd004c2cf32db2950842c31b9cdff242864d686de",
+      "bytes": 145270,
+      "path": "gpu-final/procurement-public-1024x768.png"
+    },
+    {
+      "sha256": "5c3fe2f7bfb8f65e19b4a26fa3f700412a2482c81b4d504c588d5f251bcdd208",
+      "bytes": 173617,
+      "path": "gpu-final/procurement-publish-1024x768.png"
+    },
+    {
+      "sha256": "bb202209adf537d6bd95f0e723057e13c07dd4cba5d74684b236a0d39c6e4c14",
+      "bytes": 244984,
+      "path": "gpu-final/procurement-publish-confirm-1024x768.png"
+    },
+    {
+      "sha256": "e14ca0227ee84a50cfca116ea8e1a0ee6925201c740942e2ad9fabaf5d59f45a",
+      "bytes": 167675,
+      "path": "gpu-final/procurement-service-1024x768.png"
+    }
+  ],
+  "checks": {
+    "windowsHostPassed": 3,
+    "offlineNativeGpuPassed": 1,
+    "gpuScreenshots": 7,
+    "sharedCanonicalProtocolPassed": 1,
+    "gpuOutsideViewportNodes": 0,
+    "gpuMissingGlyphs": 0,
+    "gpuOverflowingTextNodes": 0,
+    "clientLogicPassed": 8
+  },
+  "binary": {
+    "sha256": "e4d5ebcdc774bb805d29c4e6de533c26a7c632d1e74a9ec1a972326396adda8a",
+    "bytes": 132219392,
+    "path": "C:\\mir2-build\\personal-procurement-v1-20261028\\bin\\mir2-platform-windows.exe"
+  },
+  "baseCommit": "2a1c54c29b9a12a6e0f381be1c13168ecbc49f8f"
+}
