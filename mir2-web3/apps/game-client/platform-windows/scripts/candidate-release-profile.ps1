@@ -33,12 +33,22 @@ function Resolve-CandidateGatewayWsUrl {
     return $uri.AbsoluteUri
 }
 
+function Resolve-CandidateAuthHttpUrl {
+    param([string]$Value)
+    if ($Value -cnotmatch '\Ahttps://(?:[A-Za-z0-9.-]+|\[[0-9A-Fa-f:]+\])(?::[0-9]{1,5})?/?\z') {
+        throw 'AuthHttpUrl must be an explicit remote HTTPS origin without credentials, path, query, fragment or escapes'
+    }
+    Resolve-CandidateGatewayWsUrl -Value (($Value.TrimEnd('/') -creplace '^https:', 'wss:') + '/') | Out-Null
+    return ([Uri]$Value).GetLeftPart([UriPartial]::Authority)
+}
+
 function New-CandidateClientConfiguration {
-    param([string]$GatewayWsUrl, [string]$QuestGuidance = 'newcomer-v2', [bool]$ForceDaylight = $true)
+    param([string]$GatewayWsUrl, [string]$AuthHttpUrl = '', [string]$QuestGuidance = 'newcomer-v2', [bool]$ForceDaylight = $true)
     $endpoint = Resolve-CandidateGatewayWsUrl -Value $GatewayWsUrl
     if (@('crystal', 'newcomer-v1', 'newcomer-v2') -cnotcontains $QuestGuidance) { throw 'unsupported Candidate quest guidance profile' }
     $daylight = if ($ForceDaylight) { 'true' } else { 'false' }
-    return "# Candidate client configuration; credentials are forbidden.`n[server]`ngateway_ws_url = `"$endpoint`"`n[display]`nwidth = 1024`nheight = 768`nforce_daylight = $daylight`n[gameplay]`nquest_guidance = `"$QuestGuidance`"`n"
+    $auth = if ([string]::IsNullOrWhiteSpace($AuthHttpUrl)) { '' } else { 'auth_http_url = "' + (Resolve-CandidateAuthHttpUrl -Value $AuthHttpUrl) + "`"`n" }
+    return "# Candidate client configuration; credentials are forbidden.`n[server]`ngateway_ws_url = `"$endpoint`"`n${auth}[display]`nwidth = 1024`nheight = 768`nforce_daylight = $daylight`n[gameplay]`nquest_guidance = `"$QuestGuidance`"`n"
 }
 
 function Assert-CandidateClientConfiguration {
@@ -55,16 +65,22 @@ function Assert-CandidateClientConfiguration {
         $values[$key] = $Matches[2]
     }
     $expected = @('server.gateway_ws_url', 'display.width', 'display.height', 'display.force_daylight', 'gameplay.quest_guidance')
+    if ($values.ContainsKey('server.auth_http_url')) { $expected += 'server.auth_http_url' }
     if ($values.Count -ne $expected.Count) { throw 'Candidate client configuration contains missing or unexpected keys' }
     foreach ($key in $expected) { if (-not $values.ContainsKey($key)) { throw "Candidate client configuration missing $key" } }
     if ($values['server.gateway_ws_url'] -cnotmatch '^"([^"]+)"$') { throw 'Candidate gateway must be a quoted WSS address' }
     $endpoint = Resolve-CandidateGatewayWsUrl -Value $Matches[1]
+    $authHttpUrl = $null
+    if ($values.ContainsKey('server.auth_http_url')) {
+        if ($values['server.auth_http_url'] -cnotmatch '^"([^"]+)"$') { throw 'Candidate auth must be a quoted HTTPS origin' }
+        $authHttpUrl = Resolve-CandidateAuthHttpUrl -Value $Matches[1]
+    }
     if ($values['gameplay.quest_guidance'] -cnotmatch '^"(crystal|newcomer-v1|newcomer-v2)"$') { throw 'unsupported Candidate gameplay profile' }
     $profile = $Matches[1]
     if ($values['display.width'] -cne '1024' -or $values['display.height'] -cne '768' -or $values['display.force_daylight'] -cnotmatch '^(true|false)$') {
         throw 'Candidate display configuration must use 1024x768 and an explicit daylight boolean'
     }
-    return [pscustomobject]@{ gatewayWsUrl = $endpoint; questGuidance = $profile; forceDaylight = ($values['display.force_daylight'] -ceq 'true') }
+    return [pscustomobject]@{ gatewayWsUrl = $endpoint; authHttpUrl = $authHttpUrl; questGuidance = $profile; forceDaylight = ($values['display.force_daylight'] -ceq 'true') }
 }
 
 function Get-CandidateRequiredMapNames {
@@ -389,6 +405,20 @@ function Test-CandidateReleaseConfiguration {
         }
     }
     $good = New-CandidateClientConfiguration -GatewayWsUrl $endpoint
+    $authEndpoint = 'https://auth-playtest.165.154.65.136.sslip.io'
+    $walletConfiguration = New-CandidateClientConfiguration -GatewayWsUrl $endpoint -AuthHttpUrl ($authEndpoint + '/')
+    $walletParsed = Assert-CandidateClientConfiguration -Text $walletConfiguration
+    if ($walletParsed.authHttpUrl -cne $authEndpoint -or $walletParsed.gatewayWsUrl -cne $endpoint) { throw 'Candidate wallet configuration roundtrip failed' }
+    foreach ($badAuth in @('', 'http://auth-playtest.165.154.65.136.sslip.io', 'https://127.0.0.1', 'https://localhost', 'https://[::1]', 'https://example.com', 'https://login.example', 'https://user:secret@auth-playtest.165.154.65.136.sslip.io', ($authEndpoint + '/api'), ($authEndpoint + '?token=secret'), ($authEndpoint + '#secret'), ($authEndpoint + '"'), ($authEndpoint + "`n[credentials]"), ($authEndpoint + ':99999'))) {
+        $rejected = $false
+        try { Resolve-CandidateAuthHttpUrl -Value $badAuth | Out-Null } catch { $rejected = $true }
+        if (-not $rejected) { throw 'Candidate accepted a forbidden wallet auth origin test vector' }
+    }
+    foreach ($badWallet in @($walletConfiguration.Replace($authEndpoint, 'http://auth-playtest.165.154.65.136.sslip.io'), $walletConfiguration.Replace('[display]', ('auth_http_url = "' + $authEndpoint + "`"`n[display]")))) {
+        $rejected = $false
+        try { Assert-CandidateClientConfiguration -Text $badWallet | Out-Null } catch { $rejected = $true }
+        if (-not $rejected) { throw 'Candidate accepted invalid or duplicate wallet auth configuration' }
+    }
     foreach ($badText in @(($good + "password = `"bad`"`n"), ($good + "quest_guidance = `"crystal`"`n"), $good.Replace('newcomer-v2', 'typo'), $good.Replace($endpoint, 'wss://candidate-gateway.example/ws'), $good.Replace('force_daylight = true', 'force_daylight = "true"'))) {
         $rejected = $false
         try { Assert-CandidateClientConfiguration -Text $badText | Out-Null } catch { $rejected = $true }
