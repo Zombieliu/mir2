@@ -1,0 +1,278 @@
+{
+  "schema": "mir2.playtest-wallet-rollout.v1",
+  "timeUtc": "2026-10-28T15:03:29.816779+00:00",
+  "sourceRevision": "00ca0f93f0c7e367afec495711e0e04334f4deb8",
+  "branch": "codex/windows-player-journey",
+  "ci": {
+    "runUrl": "https://github.com/Zombieliu/mir2/actions/runs/40703807272",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "build-playtest-wallet-login",
+        "conclusion": "success"
+      },
+      {
+        "name": "build-playtest-wallet-gateway",
+        "conclusion": "success"
+      },
+      {
+        "name": "build-linux-x64",
+        "conclusion": "skipped"
+      },
+      {
+        "name": "siege-acceptance",
+        "conclusion": "skipped"
+      },
+      {
+        "name": "activities-acceptance",
+        "conclusion": "skipped"
+      }
+    ]
+  },
+  "artifactIntegrity": {
+    "authority": "authenticated GitHub Actions artifact metadata; repository and run head SHA checked before download; ZIP SHA256 checked before per-payload pins and per-file validation",
+    "gatewayArtifactId": 12824890382,
+    "gatewayArtifactZipSha256": "fbacb121e6bf2ba476c0d821d72132cd3220fdab0ca55d82bb888b942d2f32a0",
+    "loginArtifactId": 12823196279,
+    "loginArtifactZipSha256": "9ef1d058d6a49ecab198f400e34bfc4c9aa7fb4f67098851865088078c30949a",
+    "gatewayBinarySha256": "0eeec1db650f5180d3f38cb3ffb95c3734f826df2e275c46e3e1f2ad3bc66bb5",
+    "installed": {
+      "databaseChanged": false,
+      "gatewayFiles": 4,
+      "gatewayRelease": "/opt/mir2-playtest/releases/00ca0f93f0c7e367afec495711e0e04334f4deb8",
+      "installed": true,
+      "loginFiles": 2089,
+      "mapFiles": 1620,
+      "nodeVersion": "v22.23.4",
+      "servicesChanged": false,
+      "sourceRevision": "00ca0f93f0c7e367afec495711e0e04334f4deb8",
+      "walletRelease": "/opt/mir2-playtest-wallet/releases/00ca0f93f0c7e367afec495711e0e04334f4deb8"
+    }
+  },
+  "dataRetention": {
+    "accounts": 119,
+    "characters": 35,
+    "characterSaves": 35,
+    "characterItems": 210,
+    "characterMail": 8,
+    "originalTablesChecked": 43,
+    "originalTableDigestsPreserved": true,
+    "canonicalDigestTimezone": "UTC",
+    "initialServerTimezone": "Asia/Hong_Kong",
+    "initialDigestFilePreserved": true,
+    "originalRowsVerifiedUnchangedBeforeNormalization": true,
+    "stableEnvironmentPreserved": {
+      "MIR2_PASSKEY_AUTH_SECRET": true,
+      "MIR2_SAVE_RECOVERY_MAC_KEY": true,
+      "MIR2_IDENTITY_SESSION_SECRET": true,
+      "MIR2_IDENTITY_RECOVERY_PEPPER": true,
+      "MIR2_ACCOUNT_STORE_DATABASE_URL": true,
+      "MIR2_CHANNEL_IDENTITY_DATABASE_URL": true
+    },
+    "otherMir2ConfigurationPreserved": true,
+    "pendingRecoveryJournals": 0
+  },
+  "backups": {
+    "onlineDirectory": "/var/backups/mir2-playtest-wallet-20261028-2100",
+    "offline": {
+      "directory": "/var/backups/mir2-playtest-wallet-20261028-2100/offline-before-cutover",
+      "dumpSha256": "720b5bb47091a18435309ae4c8b68056b2bf2a126095dc05bcf33c58458e0870",
+      "dumpBytes": 413734,
+      "pgRestoreListVerified": true
+    },
+    "actualRestoreIntoIsolatedCloneVerified": true
+  },
+  "migration": {
+    "count": 16,
+    "added": "0015_sealed_stone_authority",
+    "unregisteredCandidateItemIdentityMigrationApplied": false
+  },
+  "cloneCanary": {
+    "ok": true,
+    "onlyOrdinaryCommands": true,
+    "movement": {
+      "before": {
+        "mapFileName": "0",
+        "x": 288,
+        "y": 616
+      },
+      "after": {
+        "mapFileName": "0",
+        "x": 289,
+        "y": 616
+      }
+    },
+    "firstSavedTransform": {
+      "save": {
+        "mapFileName": "0",
+        "x": 289,
+        "y": 616
+      },
+      "projection": {
+        "mapFileName": "0",
+        "x": 289,
+        "y": 616
+      },
+      "snapshot": {
+        "mapFileName": "0",
+        "x": 289,
+        "y": 616
+      },
+      "saveVersion": 4,
+      "projectionVersion": 4
+    },
+    "restoredTransform": {
+      "mapFileName": "0",
+      "x": 289,
+      "y": 616
+    },
+    "secondSavedTransform": {
+      "save": {
+        "mapFileName": "0",
+        "x": 289,
+        "y": 616
+      },
+      "projection": {
+        "mapFileName": "0",
+        "x": 289,
+        "y": 616
+      },
+      "snapshot": {
+        "mapFileName": "0",
+        "x": 289,
+        "y": 616
+      },
+      "saveVersion": 7,
+      "projectionVersion": 7
+    },
+    "sentCommandCounts": {
+      "clientVersion": 3,
+      "keepAlive": 4,
+      "logOut": 2,
+      "login": 2,
+      "newAccount": 1,
+      "newCharacter": 1,
+      "startGame": 2,
+      "walk": 1
+    },
+    "originalLiveAccounts": 119,
+    "originalLiveCharacters": 35,
+    "cloneAccounts": 120,
+    "cloneCharacters": 36,
+    "originalRowDigestsPreserved": true,
+    "gatewayStop": {
+      "ActiveState": "active",
+      "SubState": "exited",
+      "MainPID": "0",
+      "Result": "success",
+      "ExecMainCode": "1",
+      "ExecMainStatus": "0",
+      "finalActiveState": "inactive"
+    },
+    "redisStop": {
+      "ActiveState": "active",
+      "SubState": "exited",
+      "MainPID": "0",
+      "Result": "success",
+      "ExecMainCode": "1",
+      "ExecMainStatus": "0",
+      "finalActiveState": "inactive"
+    }
+  },
+  "activation": {
+    "oldRevision": "bad3737f265b0547d838382c2bb3592caa5dcb31",
+    "newRevision": "00ca0f93f0c7e367afec495711e0e04334f4deb8",
+    "originalStop": {
+      "mainPid": 0,
+      "result": "success",
+      "exitStatus": 0,
+      "forceKillEnabled": false
+    },
+    "productionGatewayProcessUnchanged": true,
+    "productionGatewayPid": "3855184",
+    "qaServicesStopped": true,
+    "existingCaddyRoutesByteForBytePreserved": true,
+    "health": {
+      "ok": true,
+      "revision": "00ca0f93f0c7e367afec495711e0e04334f4deb8",
+      "capacity": {
+        "maxWsConnections": 66,
+        "maxActiveSessions": 51,
+        "maxReconnectLeases": 51,
+        "maxLoginInFlight": 2,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      "postgresIdentityDurable": true,
+      "redisHealthy": true
+    },
+    "walletLogin": {
+      "ready": true,
+      "revision": "00ca0f93f0c7e367afec495711e0e04334f4deb8",
+      "passkeySecretMatchesTestGateway": true,
+      "proxyTargetsOnlyTestGateway": true
+    },
+    "services": {
+      "mir2-playtest.service": {
+        "pid": "788697",
+        "state": "active",
+        "memoryBytes": "17862656",
+        "memoryLimitBytes": "1677721600"
+      },
+      "mir2-playtest-wallet-login.service": {
+        "pid": "788007",
+        "state": "active",
+        "memoryBytes": "108130304",
+        "memoryLimitBytes": "314572800"
+      },
+      "mir2-gateway.service": {
+        "pid": "3855184",
+        "state": "active",
+        "memoryBytes": "1524203520",
+        "memoryLimitBytes": "infinity"
+      },
+      "caddy.service": {
+        "pid": "2107428",
+        "state": "active",
+        "memoryBytes": "31055872",
+        "memoryLimitBytes": "infinity"
+      }
+    }
+  },
+  "publicHttpSmoke": {
+    "ok": true,
+    "revision": "00ca0f93f0c7e367afec495711e0e04334f4deb8",
+    "origin": "https://auth-playtest.165.154.65.136.sslip.io",
+    "checks": {
+      "health": 200,
+      "untrustedOrigin": 403,
+      "clientSelectedNetwork": 400,
+      "realRelayCreate": 200,
+      "realRelayPending": 200,
+      "invalidIntent": 401,
+      "invalidGatewayProof": 401,
+      "unknownPath": 404,
+      "privateEnvPath": 404
+    },
+    "phoneSignatureTested": false,
+    "intentOrProofPersisted": false
+  },
+  "windowsConnection": {
+    "launcherCheckOnlyPassed": true,
+    "publicWssHandshakePassed": true,
+    "nativeWebSocketOriginAccepted": true,
+    "gatewayWsUrl": "wss://165.154.65.136.sslip.io/playtest/ws",
+    "authHttpUrl": "https://auth-playtest.165.154.65.136.sslip.io",
+    "phoneSignatureTested": false
+  },
+  "dockerStarted": false,
+  "signedWindowsUpdateFeedChanged": false,
+  "privateCredentialsOrWalletIntentsIncluded": false
+}

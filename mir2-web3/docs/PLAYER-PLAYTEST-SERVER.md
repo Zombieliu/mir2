@@ -1,5 +1,10 @@
 # 独立玩家内测服部署
 
+2026-10-28 已更新到 `00ca0f93f0c7e367afec495711e0e04334f4deb8`，增加独立 Dubhe Wallet
+登录服务，保留原 119 个账号、35 个角色与存档，未启动 Docker。
+当前地址、备份、验证及 Windows 启动命令见
+[本次更新记录](DUBHE-WALLET-PLAYTEST-ROLLOUT-20261028.zh-CN.md)。下面保留首次部署的历史边界。
+
 2026-09-29 已完成隔离部署与普通双账号公网验证。实际 Gateway 源码为
 `20aeb345f8bf584582acddef5c4ac3f4874458a1`，配套 Windows 客户端源码为
 `d33708e1f5d19be5881b8d658a6cdfa3d23d8a15`。后续提交只补测试和交付记录，

@@ -69,6 +69,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\mir2-web3\scripts\start-na
 
 ## 客户端与服务部署配置
 
+2026-10-28 远程测试服及独立钱包登录服务已更新；实际连接地址、数据保留核验和
+Windows 启动脚本见[测试服更新记录](DUBHE-WALLET-PLAYTEST-ROLLOUT-20261028.zh-CN.md)。
+手机钱包实际签名与进入游戏仍需人工验收。
+
 Windows 客户端必须明确配置自己的第一方登录服务 origin，不从网关地址猜测登录网站。
 使用环境变量 `MIR2_NATIVE_AUTH_HTTP_URL`，或在 `mir2-client.toml` 中配置：
 
