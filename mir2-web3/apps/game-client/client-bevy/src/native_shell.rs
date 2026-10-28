@@ -757,6 +757,25 @@ impl NativeUiIntentQueue {
 }
 
 impl NativeShellModel {
+    /// Start an identity login after the host has verified the wallet proof.
+    /// The token remains in the host transport and never enters this UI model.
+    pub fn begin_verified_identity_login(&mut self, account_id: &str) -> bool {
+        if self.screen != NativeShellScreen::Login || self.login_request_in_flight {
+            return false;
+        }
+        let account_id = account_id.trim();
+        if account_id.is_empty() {
+            self.set_error("verified account is required");
+            return false;
+        }
+        self.login.account = account_id.to_owned();
+        self.login.clear_password();
+        self.screen = NativeShellScreen::Authenticating;
+        self.login_request_in_flight = true;
+        self.notice = None;
+        true
+    }
+
     fn begin_login(&mut self) -> bool {
         if self.login_request_in_flight {
             self.set_error("login request is still pending");
@@ -1806,6 +1825,42 @@ mod tests {
         assert_eq!(model.characters.len(), 0);
         assert_eq!(model.selected_character_index, None);
         assert_eq!(model.active_character, None);
+    }
+
+    #[test]
+    fn verified_identity_login_uses_normal_roster_transition_without_a_password() {
+        let mut model = model_with_valid_login();
+        let account = "obl_00112233445566778899aabbccddeeff";
+        assert!(model.begin_verified_identity_login(&format!(" {account} ")));
+        assert_eq!(model.login.account, account);
+        assert!(model.login.password.is_empty());
+        assert_eq!(model.screen, NativeShellScreen::Authenticating);
+        assert!(model.login_request_in_flight);
+        assert!(!model.begin_verified_identity_login(account));
+        let roster = starter_characters();
+        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+            account: account.into(), characters: roster.clone(),
+        }));
+        assert_eq!(model.screen, NativeShellScreen::OpeningLogin);
+        model.advance_login_opening(Duration::from_millis(1800));
+        assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+        assert_eq!(model.characters, roster);
+        assert_eq!(model.last_account.as_deref(), Some(account));
+        assert!(!model.login_request_in_flight);
+        assert!(!model.start_game_request_in_flight);
+    }
+
+    #[test]
+    fn verified_identity_login_rejects_empty_accounts_and_other_screens() {
+        let mut model = model_with_valid_login();
+        assert!(!model.begin_verified_identity_login(" \t "));
+        assert_eq!(model.screen, NativeShellScreen::Login);
+        assert!(!model.login_request_in_flight);
+        for screen in [NativeShellScreen::Connecting, NativeShellScreen::CharacterSelect, NativeShellScreen::InGame, NativeShellScreen::ConnectionLost] {
+            model.screen = screen;
+            assert!(!model.begin_verified_identity_login("obl_00112233445566778899aabbccddeeff"));
+            assert_eq!(model.screen, screen);
+        }
     }
 
     #[test]

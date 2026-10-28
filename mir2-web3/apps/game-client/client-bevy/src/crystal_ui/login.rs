@@ -3,6 +3,7 @@
 use bevy::prelude::*;
 use bevy::ui::{AlignItems, BackgroundColor, JustifyContent, Node, PositionType, UiRect, Val};
 
+use crate::native_login_locale::{NativeLoginCaption, NativeUiLocale};
 use crate::native_shell::{LoginFocus, NativeShellModel};
 
 use super::assets::login_assets;
@@ -14,6 +15,7 @@ const FIELD_TEXT: Color = Color::srgb(0.96, 0.94, 0.90);
 const NOTICE_INFO: Color = Color::srgb(0.94, 0.88, 0.72);
 const NOTICE_ERROR: Color = Color::srgb(0.93, 0.47, 0.43);
 const CARET_BLINK_SECONDS: f32 = 0.5;
+const WALLET_LOGIN_BUTTON_RECT: CrystalRect = CrystalRect::new(378.0, 550.0, 268.0, 34.0);
 
 #[derive(Component)]
 pub struct CrystalLoginCaret {
@@ -36,6 +38,7 @@ pub enum CrystalLoginAction {
     RegisterAccount,
     ChangePassword,
     SafeKey,
+    DubheWallet,
     Cancel,
 }
 
@@ -117,6 +120,7 @@ pub fn spawn_login_screen(
     asset_server: &AssetServer,
     model: &NativeShellModel,
     masked_password: &str,
+    locale: NativeUiLocale,
 ) {
     let assets = login_assets();
     spawn_stage_frame(parent, asset_server, spec::login::PANEL);
@@ -185,6 +189,80 @@ pub fn spawn_login_screen(
         true,
     );
 
+    parent
+        .spawn((
+            Button,
+            CrystalLoginAction::DubheWallet,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(WALLET_LOGIN_BUTTON_RECT.left),
+                top: Val::Px(WALLET_LOGIN_BUTTON_RECT.top),
+                width: Val::Px(WALLET_LOGIN_BUTTON_RECT.width),
+                height: Val::Px(WALLET_LOGIN_BUTTON_RECT.height),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                border: UiRect::all(Val::Px(1.0)),
+                ..default()
+            },
+            BorderColor::all(Color::srgb(0.67, 0.51, 0.24)),
+            BackgroundColor(Color::srgba(0.12, 0.10, 0.07, 0.96)),
+        ))
+        .with_children(|button| {
+            button.spawn((
+                Text::new(locale.wallet_entry()),
+                TextFont {
+                    font_size: FontSize::Px(14.0),
+                    ..default()
+                },
+                TextColor(NOTICE_INFO),
+            ));
+        });
+
+    // Original bitmap labels contain baked-in text. Cover only their caption
+    // areas, leaving every existing button and field hit rectangle unchanged.
+    for (rect, caption, size) in [
+        (
+            CrystalRect::new(368.0, 286.0, 288.0, 28.0),
+            NativeLoginCaption::Title,
+            16.0,
+        ),
+        (
+            CrystalRect::new(352.0, 355.0, 77.0, 21.0),
+            NativeLoginCaption::Account,
+            10.0,
+        ),
+        (
+            CrystalRect::new(352.0, 378.0, 77.0, 21.0),
+            NativeLoginCaption::Password,
+            10.0,
+        ),
+        (spec::login::OK.rect, NativeLoginCaption::Login, 11.0),
+        (
+            spec::login::NEW_ACCOUNT.rect,
+            NativeLoginCaption::NewAccount,
+            10.0,
+        ),
+        (
+            spec::login::CHANGE_PASSWORD.rect,
+            NativeLoginCaption::ChangePassword,
+            10.0,
+        ),
+        (
+            spec::login::SAFE_KEY.rect,
+            NativeLoginCaption::SafeKey,
+            10.0,
+        ),
+        (spec::login::CANCEL.rect, NativeLoginCaption::Cancel, 10.0),
+    ] {
+        spawn_localized_caption(
+            parent,
+            rect,
+            &locale.login_caption(caption),
+            size,
+            caption != NativeLoginCaption::Login || model.login.is_ready(),
+        );
+    }
+
     if let Some(notice) = &model.notice {
         spawn_notice(
             parent,
@@ -192,6 +270,46 @@ pub fn spawn_login_screen(
             matches!(notice.kind, crate::native_shell::ShellNoticeKind::Error),
         );
     }
+}
+
+fn spawn_localized_caption(
+    parent: &mut ChildSpawnerCommands,
+    rect: CrystalRect,
+    caption: &str,
+    font_size: f32,
+    enabled: bool,
+) {
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(rect.left + 1.0),
+                top: Val::Px(rect.top + 1.0),
+                width: Val::Px(rect.width - 2.0),
+                height: Val::Px(rect.height - 2.0),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            BackgroundColor(Color::srgb(0.09, 0.07, 0.05)),
+            bevy::ui::FocusPolicy::Pass,
+            ZIndex(1),
+        ))
+        .with_children(|label| {
+            label.spawn((
+                Text::new(caption),
+                TextFont {
+                    font_size: FontSize::Px(font_size),
+                    ..default()
+                },
+                TextColor(if enabled {
+                    NOTICE_INFO
+                } else {
+                    Color::srgba(0.94, 0.88, 0.72, 0.45)
+                }),
+                bevy::ui::FocusPolicy::Pass,
+            ));
+        });
 }
 
 fn spawn_stage_frame(
@@ -329,6 +447,30 @@ mod tests {
         assert_eq!(buttons[0].rect, CrystalRect::new(575.0, 355.0, 42.0, 42.0));
         assert_eq!(buttons[1].rect.top, 437.0);
         assert_eq!(buttons[4].rect.left, 514.0);
+    }
+
+    #[test]
+    fn wallet_entry_does_not_overlap_classic_login_controls_or_notice() {
+        for element in LOGIN_ELEMENT_SPECS.iter().filter(|element| {
+            matches!(
+                element.kind,
+                LoginElementKind::AccountField
+                    | LoginElementKind::PasswordField
+                    | LoginElementKind::OkButton
+                    | LoginElementKind::NewAccountButton
+                    | LoginElementKind::ChangePasswordButton
+                    | LoginElementKind::SafeKeyButton
+                    | LoginElementKind::CancelButton
+            )
+        }) {
+            assert!(
+                WALLET_LOGIN_BUTTON_RECT.top >= element.rect.top + element.rect.height,
+                "wallet button overlaps {:?}",
+                element.kind
+            );
+        }
+        assert!(WALLET_LOGIN_BUTTON_RECT.top >= 540.0);
+        assert!(WALLET_LOGIN_BUTTON_RECT.top + WALLET_LOGIN_BUTTON_RECT.height <= 768.0);
     }
 
     #[test]

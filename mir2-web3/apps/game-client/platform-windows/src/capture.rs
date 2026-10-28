@@ -22,6 +22,7 @@ use mir2_client_bevy::inventory::InventoryModel;
 #[cfg(test)]
 use mir2_client_bevy::inventory::ItemModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
+use mir2_client_bevy::native_wallet_login::{NativeWalletLogin, NativeWalletLoginStage};
 use mir2_client_bevy::quest_model::{CombatTargetModel, QuestStatus, QuestTracker};
 use mir2_client_bevy::quest_ui::QuestUiState;
 use mir2_client_bevy::read_model::UiReadModel;
@@ -60,6 +61,7 @@ pub struct NativeCaptureConfig {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum NativeCaptureTarget {
     Screen(NativeShellScreen),
+    WalletLogin,
     CharacterOpen,
     InventoryOpen,
     InventoryQuestOpen,
@@ -378,6 +380,7 @@ fn auto_capture_system(
     quest_ui: Option<Res<QuestUiState>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     rendered: Option<Res<RenderedCaptureContext>>,
+    wallet: Option<Res<NativeWalletLogin>>,
 ) {
     let Some(shell) = shell.as_deref() else {
         return;
@@ -414,7 +417,9 @@ fn auto_capture_system(
             entities.as_deref(),
             player_ui.as_deref(),
             config.quest_index,
-        ) && auto.observe_rendered_identity(rendered.as_deref());
+        ) && (auto.target != NativeCaptureTarget::WalletLogin
+            || wallet_login_capture_ready(shell, wallet.as_deref()))
+            && auto.observe_rendered_identity(rendered.as_deref());
         if env::var_os("MIR2_NATIVE_TRACE_CAPTURE").is_some()
             && CAPTURE_TRACE_FRAME.fetch_add(1, Ordering::Relaxed) % 60 == 0
         {
@@ -725,6 +730,7 @@ fn capture_acceptance_blockers(
     if !matches!(
         request.scene.as_str(),
         "login"
+            | "wallet-login"
             | "character-select"
             | "in-game"
             | "character"
@@ -848,6 +854,18 @@ fn temporary_capture_path(path: &Path) -> PathBuf {
     path.with_file_name(format!(".{name}.{index}.tmp"))
 }
 
+fn wallet_login_capture_ready(
+    shell: &NativeShellModel,
+    wallet: Option<&NativeWalletLogin>,
+) -> bool {
+    shell.screen == NativeShellScreen::Login
+        && wallet.is_some_and(|wallet| {
+            wallet.visible
+                && wallet.stage == NativeWalletLoginStage::Pending
+                && wallet.qr_image.is_some()
+        })
+}
+
 fn capture_target_matches(
     target: NativeCaptureTarget,
     shell: &NativeShellModel,
@@ -861,6 +879,7 @@ fn capture_target_matches(
 ) -> bool {
     match target {
         NativeCaptureTarget::Screen(screen) => shell.screen == screen,
+        NativeCaptureTarget::WalletLogin => shell.screen == NativeShellScreen::Login,
         NativeCaptureTarget::CharacterOpen => {
             shell.screen == NativeShellScreen::InGame
                 && player_ui.is_some_and(|state| {
@@ -1014,6 +1033,7 @@ fn prepare_auto_capture_target(
             }
         }
         NativeCaptureTarget::Screen(_)
+        | NativeCaptureTarget::WalletLogin
         | NativeCaptureTarget::NoticeOpen
         | NativeCaptureTarget::QuestAccepted
         | NativeCaptureTarget::Combat
@@ -1024,6 +1044,7 @@ fn prepare_auto_capture_target(
 fn capture_target_slug(target: NativeCaptureTarget) -> &'static str {
     match target {
         NativeCaptureTarget::Screen(screen) => native_shell_screen_slug(screen),
+        NativeCaptureTarget::WalletLogin => "wallet-login",
         NativeCaptureTarget::CharacterOpen => "character",
         NativeCaptureTarget::InventoryOpen | NativeCaptureTarget::InventoryQuestOpen => "inventory",
         NativeCaptureTarget::InventoryDeleteOpen => "inventory-delete",
@@ -1077,6 +1098,7 @@ fn parse_shell_screen_slug(raw: &str) -> Option<NativeShellScreen> {
 fn parse_capture_target_slug(raw: &str) -> Option<NativeCaptureTarget> {
     let normalized = sanitize_capture_label(&raw.to_ascii_lowercase().replace('_', "-"));
     match normalized.as_str() {
+        "wallet-login" => Some(NativeCaptureTarget::WalletLogin),
         "character" | "character-open" | "character-dialog" => {
             Some(NativeCaptureTarget::CharacterOpen)
         }
@@ -1288,6 +1310,80 @@ fn sha256_hex(bytes: &[u8]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn wallet_capture_target_has_its_own_non_world_scene_slug() {
+        assert_eq!(
+            parse_capture_target_slug("wallet-login"),
+            Some(NativeCaptureTarget::WalletLogin)
+        );
+        assert_eq!(
+            parse_capture_target_slug("wallet_login"),
+            Some(NativeCaptureTarget::WalletLogin)
+        );
+        assert_eq!(capture_target_slug(NativeCaptureTarget::WalletLogin), "wallet-login");
+        assert!(!is_world_scene("wallet-login"));
+        assert_eq!(parse_shell_screen_slug("wallet-login"), None);
+    }
+
+    #[test]
+    fn wallet_capture_countdown_starts_only_after_a_visible_pending_qr_exists() {
+        let mut app = App::new();
+        app.insert_resource(
+            NativeCaptureConfig::from_values(
+                Some("unused-wallet-capture-test"),
+                None,
+                Some("wallet-login"),
+                None,
+            )
+            .unwrap(),
+        );
+        app.insert_resource(NativeCaptureRuntime {
+            capture_index: 0,
+            auto: Some(NativeAutoCaptureState {
+                target: NativeCaptureTarget::WalletLogin,
+                identity: None,
+                countdown: None,
+                done: false,
+            }),
+        });
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::Login,
+            ..Default::default()
+        });
+        app.insert_resource(NativeWalletLogin {
+            visible: true,
+            ..Default::default()
+        });
+        app.add_systems(PostUpdate, auto_capture_system);
+        let countdown = |app: &App| {
+            app.world().resource::<NativeCaptureRuntime>().auto.as_ref().unwrap().countdown
+        };
+        app.update();
+        assert_eq!(countdown(&app), None);
+        app.world_mut().resource_mut::<NativeWalletLogin>().stage = NativeWalletLoginStage::Pending;
+        app.update();
+        assert_eq!(countdown(&app), None);
+        app.world_mut().resource_mut::<NativeWalletLogin>().qr_image =
+            Some(bevy::prelude::Handle::default());
+        app.update();
+        assert_eq!(countdown(&app), Some(AUTO_CAPTURE_WAIT_FRAMES));
+        app.update();
+        assert_eq!(countdown(&app), Some(AUTO_CAPTURE_WAIT_FRAMES - 1));
+        app.world_mut().resource_mut::<NativeWalletLogin>().visible = false;
+        app.update();
+        assert_eq!(countdown(&app), None);
+        app.world_mut().resource_mut::<NativeWalletLogin>().visible = true;
+        app.update();
+        assert_eq!(countdown(&app), Some(AUTO_CAPTURE_WAIT_FRAMES));
+        app.world_mut().resource_mut::<NativeWalletLogin>().stage = NativeWalletLoginStage::Expired;
+        app.update();
+        assert_eq!(countdown(&app), None);
+        app.world_mut().resource_mut::<NativeWalletLogin>().stage = NativeWalletLoginStage::Pending;
+        app.world_mut().resource_mut::<NativeShellModel>().screen = NativeShellScreen::CharacterSelect;
+        app.update();
+        assert_eq!(countdown(&app), None);
+    }
 
     #[test]
     fn completed_auto_capture_releases_panel_and_notice_control() {

@@ -1,0 +1,5467 @@
+{
+  "entries": [
+    {
+      "key": "npc.menu.000b821603b66426",
+      "en": "Crafting",
+      "zh-TW": "製作",
+      "pt-BR": "Fabricação",
+      "aliases": [
+        "Crafting"
+      ]
+    },
+    {
+      "key": "npc.menu.003e0c410c2e041c",
+      "en": "Open Gate",
+      "zh-TW": "開啟城門",
+      "pt-BR": "Abrir portão",
+      "aliases": [
+        "Open Gate"
+      ]
+    },
+    {
+      "key": "npc.menu.0055ce2e8e639334",
+      "en": "Apply for Sabuk conquest",
+      "zh-TW": "申請沙巴克攻城",
+      "pt-BR": "Inscrever-se na conquista de Sabuk",
+      "aliases": [
+        "Apply for Sabuk conquest"
+      ]
+    },
+    {
+      "key": "npc.menu.00cdfff6d2e1e95b",
+      "en": "Delete Main Rebirth Flag",
+      "zh-TW": "刪除主角色重生標記",
+      "pt-BR": "Remover marca de renascimento principal",
+      "aliases": [
+        "Delete Main Rebirth Flag"
+      ]
+    },
+    {
+      "key": "npc.menu.016fba3eb97f9156",
+      "en": "MassHiding 21",
+      "zh-TW": "群體隱身術 21",
+      "pt-BR": "Ocultação em Área 21",
+      "aliases": [
+        "MassHiding 21"
+      ]
+    },
+    {
+      "key": "npc.menu.01fe7dcd8e847139",
+      "en": "IceHellTemple(N)",
+      "zh-TW": "冰獄神殿（北）",
+      "pt-BR": "Templo do inferno gelado (norte)",
+      "aliases": [
+        "IceHellTemple(N)"
+      ]
+    },
+    {
+      "key": "npc.menu.020776b99f07f51d",
+      "en": "OneWithNature 50",
+      "zh-TW": "天人合一 50",
+      "pt-BR": "Um com a Natureza 50",
+      "aliases": [
+        "OneWithNature 50"
+      ]
+    },
+    {
+      "key": "npc.menu.021abd98b4a0feef",
+      "en": "Assassin skills",
+      "zh-TW": "刺客技能",
+      "pt-BR": "Habilidades de assassino",
+      "aliases": [
+        "Assassin skills"
+      ]
+    },
+    {
+      "key": "npc.menu.02317ed81d8c9e55",
+      "en": "WoomaTemple",
+      "zh-TW": "沃瑪寺廟",
+      "pt-BR": "Templo de Wooma",
+      "aliases": [
+        "WoomaTemple"
+      ]
+    },
+    {
+      "key": "npc.menu.02e6b0ce8d782aae",
+      "en": "I see, I wont depend on it",
+      "zh-TW": "明白了，我不會依賴它",
+      "pt-BR": "Entendi, não vou depender disso",
+      "aliases": [
+        "I see, I wont depend on it"
+      ]
+    },
+    {
+      "key": "npc.menu.037df03efbef15d0",
+      "en": "Sabuk Taxes",
+      "zh-TW": "沙巴克稅率",
+      "pt-BR": "Impostos de Sabuk",
+      "aliases": [
+        "Sabuk Taxes"
+      ]
+    },
+    {
+      "key": "npc.menu.03b25bed61dad2fc",
+      "en": "Okay.",
+      "zh-TW": "好的。",
+      "pt-BR": "Certo.",
+      "aliases": [
+        "Okay."
+      ]
+    },
+    {
+      "key": "npc.menu.03d0b71e825720e6",
+      "en": "Request Guild creation",
+      "zh-TW": "申請建立公會",
+      "pt-BR": "Solicitar criação de guilda",
+      "aliases": [
+        "Request Guild creation"
+      ]
+    },
+    {
+      "key": "npc.menu.0410aab66e3f48e5",
+      "en": "Swamp",
+      "zh-TW": "沼澤",
+      "pt-BR": "Pântano",
+      "aliases": [
+        "Swamp"
+      ]
+    },
+    {
+      "key": "npc.menu.04282ca2071f8c89",
+      "en": "Apply Main Rebirth Flag",
+      "zh-TW": "啟用主角色重生標記",
+      "pt-BR": "Ativar marca de renascimento principal",
+      "aliases": [
+        "Apply Main Rebirth Flag"
+      ]
+    },
+    {
+      "key": "npc.menu.044683b92e8cd2dc",
+      "en": "Guild Territory 10",
+      "zh-TW": "公會領地 10",
+      "pt-BR": "Território da guilda 10",
+      "aliases": [
+        "Guild Territory 10"
+      ]
+    },
+    {
+      "key": "npc.menu.04c662603c2ac8d1",
+      "en": "Go to Main",
+      "zh-TW": "返回主選單",
+      "pt-BR": "Ir ao menu principal",
+      "aliases": [
+        "Go to Main"
+      ]
+    },
+    {
+      "key": "npc.menu.04e54096cd3930fd",
+      "en": "Rehire Archers",
+      "zh-TW": "重新僱用弓箭手",
+      "pt-BR": "Recontratar arqueiros",
+      "aliases": [
+        "Rehire Archers"
+      ]
+    },
+    {
+      "key": "npc.menu.057ce5dc924ece9d",
+      "en": "Great_TaoTomb",
+      "zh-TW": "大道士陵墓",
+      "pt-BR": "Tumba do grande taoísta",
+      "aliases": [
+        "Great_TaoTomb"
+      ]
+    },
+    {
+      "key": "npc.menu.060c8fc1c7dfb32c",
+      "en": "Special shop",
+      "zh-TW": "特殊商店",
+      "pt-BR": "Loja especial",
+      "aliases": [
+        "Special shop"
+      ]
+    },
+    {
+      "key": "npc.menu.067b41bf3f0ebdca",
+      "en": "before?",
+      "zh-TW": "之前？",
+      "pt-BR": "antes?",
+      "aliases": [
+        "before?"
+      ]
+    },
+    {
+      "key": "npc.menu.06c02f19eb9f1014",
+      "en": "Hallucination 31",
+      "zh-TW": "迷魂術 31",
+      "pt-BR": "Alucinação 31",
+      "aliases": [
+        "Hallucination 31"
+      ]
+    },
+    {
+      "key": "npc.menu.077886136c55e335",
+      "en": "SoulFireBall 18",
+      "zh-TW": "靈魂火符 18",
+      "pt-BR": "Talismã de Fogo 18",
+      "aliases": [
+        "SoulFireBall 18"
+      ]
+    },
+    {
+      "key": "npc.menu.078963771fcd3e23",
+      "en": "IceStorm 35",
+      "zh-TW": "冰咆哮 35",
+      "pt-BR": "Tempestade de Gelo 35",
+      "aliases": [
+        "IceStorm 35"
+      ]
+    },
+    {
+      "key": "npc.menu.07fa9622dbadcc19",
+      "en": "Village Chief House",
+      "zh-TW": "村長之家",
+      "pt-BR": "Casa do chefe da vila",
+      "aliases": [
+        "Village Chief House"
+      ]
+    },
+    {
+      "key": "npc.menu.0874fb0527eca574",
+      "en": "B3_AngledStoneTomb",
+      "zh-TW": "石墓地下三層",
+      "pt-BR": "Tumba de pedra · 3º subsolo",
+      "aliases": [
+        "B3_AngledStoneTomb"
+      ]
+    },
+    {
+      "key": "npc.menu.089c53be22497230",
+      "en": "PurgatoryHall",
+      "zh-TW": "煉獄大廳",
+      "pt-BR": "Salão do purgatório",
+      "aliases": [
+        "PurgatoryHall"
+      ]
+    },
+    {
+      "key": "npc.menu.08a0c33f913a1237",
+      "en": "Collect",
+      "zh-TW": "收集",
+      "pt-BR": "Coletar",
+      "aliases": [
+        "Collect"
+      ]
+    },
+    {
+      "key": "npc.menu.0912172aa64c2de2",
+      "en": "Long Red Hair",
+      "zh-TW": "紅色長髮",
+      "pt-BR": "Cabelo longo ruivo",
+      "aliases": [
+        "Long Red Hair"
+      ]
+    },
+    {
+      "key": "npc.menu.09694482bb5319f6",
+      "en": "ZumaTemple_3F",
+      "zh-TW": "祖瑪神殿 3層",
+      "pt-BR": "Templo de Zuma · 3º andar",
+      "aliases": [
+        "ZumaTemple_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.09aa9e2c3ec7fff5",
+      "en": "Hiding 20",
+      "zh-TW": "隱身術 20",
+      "pt-BR": "Ocultar-se 20",
+      "aliases": [
+        "Hiding 20"
+      ]
+    },
+    {
+      "key": "npc.menu.09c154513677c6c4",
+      "en": "HellFire_2F",
+      "zh-TW": "地獄火 2層",
+      "pt-BR": "Fogo Infernal · 2º andar",
+      "aliases": [
+        "HellFire_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.0b0bb63d32831d9c",
+      "en": "Cancel sale of Guild territory",
+      "zh-TW": "取消出售公會領地",
+      "pt-BR": "Cancelar venda do território da guilda",
+      "aliases": [
+        "Cancel sale of Guild territory"
+      ]
+    },
+    {
+      "key": "npc.menu.0b33973732157134",
+      "en": "Request Guild war",
+      "zh-TW": "申請公會戰",
+      "pt-BR": "Solicitar guerra de guildas",
+      "aliases": [
+        "Request Guild war"
+      ]
+    },
+    {
+      "key": "npc.menu.0b558c1cd368c2ce",
+      "en": "WoomyonCamp",
+      "zh-TW": "沃瑪營地",
+      "pt-BR": "Acampamento de Woomyon",
+      "aliases": [
+        "WoomyonCamp"
+      ]
+    },
+    {
+      "key": "npc.menu.0be1c244e70fe9a2",
+      "en": "I'm still not ready",
+      "zh-TW": "我還沒準備好",
+      "pt-BR": "Ainda não estou pronto",
+      "aliases": [
+        "I'm still not ready"
+      ]
+    },
+    {
+      "key": "npc.menu.0c182e20fcc04171",
+      "en": "Guild Territory 8",
+      "zh-TW": "公會領地 8",
+      "pt-BR": "Território da guilda 8",
+      "aliases": [
+        "Guild Territory 8"
+      ]
+    },
+    {
+      "key": "npc.menu.0cf57c63eb976556",
+      "en": "Offer",
+      "zh-TW": "提供",
+      "pt-BR": "Oferecer",
+      "aliases": [
+        "Offer"
+      ]
+    },
+    {
+      "key": "npc.menu.0d34a4f4b3036306",
+      "en": "DoubleSlash 15",
+      "zh-TW": "雙重斬擊 15",
+      "pt-BR": "Corte Duplo 15",
+      "aliases": [
+        "DoubleSlash 15"
+      ]
+    },
+    {
+      "key": "npc.menu.0d3eff0cffd33303",
+      "en": "Reincarnation 37",
+      "zh-TW": "復活術 37",
+      "pt-BR": "Reencarnação 37",
+      "aliases": [
+        "Reincarnation 37"
+      ]
+    },
+    {
+      "key": "npc.menu.0d7f64a6affe70ed",
+      "en": "VampireShot 26",
+      "zh-TW": "吸血箭 26",
+      "pt-BR": "Tiro Vampírico 26",
+      "aliases": [
+        "VampireShot 26"
+      ]
+    },
+    {
+      "key": "npc.menu.0da3929434e24590",
+      "en": "B4_AngledStoneTomb",
+      "zh-TW": "石墓地下四層",
+      "pt-BR": "Tumba de pedra · 4º subsolo",
+      "aliases": [
+        "B4_AngledStoneTomb"
+      ]
+    },
+    {
+      "key": "npc.menu.0da7e16d5d1ae355",
+      "en": "To White Valley",
+      "zh-TW": "前往白色山谷",
+      "pt-BR": "Para o Vale Branco",
+      "aliases": [
+        "To White Valley"
+      ]
+    },
+    {
+      "key": "npc.menu.0de3fc89321b4293",
+      "en": "SealHero",
+      "zh-TW": "封印英雄",
+      "pt-BR": "Selar herói",
+      "aliases": [
+        "SealHero"
+      ]
+    },
+    {
+      "key": "npc.menu.0e9fd1596c4b1dfc",
+      "en": "rent",
+      "zh-TW": "租用",
+      "pt-BR": "alugar",
+      "aliases": [
+        "rent"
+      ]
+    },
+    {
+      "key": "npc.menu.0f442cdee2efeda4",
+      "en": "TurnUndead 32",
+      "zh-TW": "聖言術 32",
+      "pt-BR": "Afastar Mortos-Vivos 32",
+      "aliases": [
+        "TurnUndead 32"
+      ]
+    },
+    {
+      "key": "npc.menu.1114329830b0e7a5",
+      "en": "InsectCave_4F",
+      "zh-TW": "蟲洞 4層",
+      "pt-BR": "Caverna dos insetos · 4º andar",
+      "aliases": [
+        "InsectCave_4F"
+      ]
+    },
+    {
+      "key": "npc.menu.116ab11dfeb68072",
+      "en": "move outside",
+      "zh-TW": "移動到外面",
+      "pt-BR": "ir para fora",
+      "aliases": [
+        "move outside"
+      ]
+    },
+    {
+      "key": "npc.menu.1196b6c538ecc61a",
+      "en": "Repair",
+      "zh-TW": "修理",
+      "pt-BR": "Reparar",
+      "aliases": [
+        "Repair"
+      ]
+    },
+    {
+      "key": "npc.menu.11b61c73f90af711",
+      "en": "Then, is the sword an actual thing?",
+      "zh-TW": "那麼，這把劍真的存在嗎？",
+      "pt-BR": "Então essa espada existe de verdade?",
+      "aliases": [
+        "Then, is the sword an actual thing?"
+      ]
+    },
+    {
+      "key": "npc.menu.11e87ae4298624d0",
+      "en": "Prajna Stone Cave",
+      "zh-TW": "般若石窟",
+      "pt-BR": "Caverna de pedra de Prajna",
+      "aliases": [
+        "Prajna Stone Cave"
+      ]
+    },
+    {
+      "key": "npc.menu.120c206dcd63a5c3",
+      "en": "AncientZuma_2F",
+      "zh-TW": "遠古祖瑪 2層",
+      "pt-BR": "Zuma ancestral · 2º andar",
+      "aliases": [
+        "AncientZuma_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.122825757b95f112",
+      "en": "SabukWall",
+      "zh-TW": "沙巴克城",
+      "pt-BR": "Muralha de Sabuk",
+      "aliases": [
+        "SabukWall"
+      ]
+    },
+    {
+      "key": "npc.menu.12f81711444f4577",
+      "en": "MentalState 11",
+      "zh-TW": "精神集中 11",
+      "pt-BR": "Estado Mental 11",
+      "aliases": [
+        "MentalState 11"
+      ]
+    },
+    {
+      "key": "npc.menu.12fdf84c83634b40",
+      "en": "White Dragon Passage",
+      "zh-TW": "白龍通道",
+      "pt-BR": "Passagem do dragão branco",
+      "aliases": [
+        "White Dragon Passage"
+      ]
+    },
+    {
+      "key": "npc.menu.131455fe58ea0d71",
+      "en": "Emperor Far",
+      "zh-TW": "皇帝 Far",
+      "pt-BR": "Imperador Far",
+      "aliases": [
+        "Emperor Far"
+      ]
+    },
+    {
+      "key": "npc.menu.13c0b383790b9e7f",
+      "en": "PrajnaStoneCave_4F",
+      "zh-TW": "般若石窟 4層",
+      "pt-BR": "Caverna de pedra de Prajna · 4º andar",
+      "aliases": [
+        "PrajnaStoneCave_4F"
+      ]
+    },
+    {
+      "key": "npc.menu.1404bb68edb0b60c",
+      "en": "S_1FofDungeon",
+      "zh-TW": "地牢一層南部",
+      "pt-BR": "Calabouço · 1º andar sul",
+      "aliases": [
+        "S_1FofDungeon"
+      ]
+    },
+    {
+      "key": "npc.menu.1516ec95e5b45bc0",
+      "en": "creepy",
+      "zh-TW": "詭異",
+      "pt-BR": "assustador",
+      "aliases": [
+        "creepy"
+      ]
+    },
+    {
+      "key": "npc.menu.160d7997bedeb294",
+      "en": "BladeAvalanche 38",
+      "zh-TW": "空破閃 38",
+      "pt-BR": "Avalanche de Lâminas 38",
+      "aliases": [
+        "BladeAvalanche 38"
+      ]
+    },
+    {
+      "key": "npc.menu.16584052fd337f09",
+      "en": "Okay",
+      "zh-TW": "好的",
+      "pt-BR": "Certo",
+      "aliases": [
+        "Okay"
+      ]
+    },
+    {
+      "key": "npc.menu.175581825679aa37",
+      "en": "Weapon Refine",
+      "zh-TW": "武器精煉",
+      "pt-BR": "Refinar arma",
+      "aliases": [
+        "Weapon Refine"
+      ]
+    },
+    {
+      "key": "npc.menu.17e04708fa63950f",
+      "en": "Fireball 7",
+      "zh-TW": "火球術 7",
+      "pt-BR": "Bola de Fogo 7",
+      "aliases": [
+        "Fireball 7"
+      ]
+    },
+    {
+      "key": "npc.menu.18679f10e5067880",
+      "en": "fool",
+      "zh-TW": "笨蛋",
+      "pt-BR": "tolo",
+      "aliases": [
+        "fool"
+      ]
+    },
+    {
+      "key": "npc.menu.186ffb752316581e",
+      "en": "RandomTeleports",
+      "zh-TW": "隨機傳送卷",
+      "pt-BR": "Pergaminhos de teleporte aleatório",
+      "aliases": [
+        "RandomTeleports"
+      ]
+    },
+    {
+      "key": "npc.menu.18730b9e331e128c",
+      "en": "level 11~21",
+      "zh-TW": "等級 11–21",
+      "pt-BR": "Níveis 11–21",
+      "aliases": [
+        "level 11~21"
+      ]
+    },
+    {
+      "key": "npc.menu.191211a674c02cab",
+      "en": "TownTeleport",
+      "zh-TW": "回城卷",
+      "pt-BR": "Pergaminho de retorno",
+      "aliases": [
+        "TownTeleport"
+      ]
+    },
+    {
+      "key": "npc.menu.195d5a3430dc65b5",
+      "en": "Bichon Inner Wall",
+      "zh-TW": "比奇內城",
+      "pt-BR": "Muralha interna de Bichon",
+      "aliases": [
+        "Bichon Inner Wall"
+      ]
+    },
+    {
+      "key": "npc.menu.19766ed6ccb2f4a3",
+      "en": "Cancel",
+      "zh-TW": "取消",
+      "pt-BR": "Cancelar",
+      "aliases": [
+        "Cancel"
+      ]
+    },
+    {
+      "key": "npc.menu.19b33cb7ddfe30fa",
+      "en": "PrajnaTemple",
+      "zh-TW": "般若神殿",
+      "pt-BR": "Templo de Prajna",
+      "aliases": [
+        "PrajnaTemple"
+      ]
+    },
+    {
+      "key": "npc.menu.19c377234356e77c",
+      "en": "Seokcho Valley",
+      "zh-TW": "石草山谷",
+      "pt-BR": "Vale de Seokcho",
+      "aliases": [
+        "Seokcho Valley"
+      ]
+    },
+    {
+      "key": "npc.menu.1a87eaa25f7bbe0e",
+      "en": "Sure, Bring it on!",
+      "zh-TW": "當然，來吧！",
+      "pt-BR": "Claro, pode vir!",
+      "aliases": [
+        "Sure, Bring it on!"
+      ]
+    },
+    {
+      "key": "npc.menu.1aae53a5e5f1d4ad",
+      "en": "WhiteDragonPassage 5F",
+      "zh-TW": "白龍通道 5層",
+      "pt-BR": "Passagem do dragão branco · 5º andar",
+      "aliases": [
+        "WhiteDragonPassage 5F"
+      ]
+    },
+    {
+      "key": "npc.menu.1b4d330ac8554269",
+      "en": "No thankyou",
+      "zh-TW": "不了，謝謝",
+      "pt-BR": "Não, obrigado",
+      "aliases": [
+        "No thankyou"
+      ]
+    },
+    {
+      "key": "npc.menu.1b81a0db32eb46fa",
+      "en": "UltimateEnhancer 33",
+      "zh-TW": "無極真氣 33",
+      "pt-BR": "Aprimoramento Supremo 33",
+      "aliases": [
+        "UltimateEnhancer 33"
+      ]
+    },
+    {
+      "key": "npc.menu.1bdd5b11e0d7d2fc",
+      "en": "level 31~40",
+      "zh-TW": "等級 31–40",
+      "pt-BR": "Níveis 31–40",
+      "aliases": [
+        "level 31~40"
+      ]
+    },
+    {
+      "key": "npc.menu.1c8400dbf89dee1b",
+      "en": "LostMiddleCave",
+      "zh-TW": "迷失洞穴中部",
+      "pt-BR": "Caverna perdida central",
+      "aliases": [
+        "LostMiddleCave"
+      ]
+    },
+    {
+      "key": "npc.menu.1c9ccdea0b0b9bfd",
+      "en": "Go to Next",
+      "zh-TW": "下一頁",
+      "pt-BR": "Ir à próxima página",
+      "aliases": [
+        "Go to Next"
+      ]
+    },
+    {
+      "key": "npc.menu.1cb0ba125f84c982",
+      "en": "Information",
+      "zh-TW": "資訊",
+      "pt-BR": "Informações",
+      "aliases": [
+        "Information"
+      ]
+    },
+    {
+      "key": "npc.menu.1d9283d848ea941a",
+      "en": "later",
+      "zh-TW": "稍後",
+      "pt-BR": "depois",
+      "aliases": [
+        "later"
+      ]
+    },
+    {
+      "key": "npc.menu.1d9792dd0abe8810",
+      "en": "SouthofDeadMine",
+      "zh-TW": "死亡礦區南部",
+      "pt-BR": "Sul da Mina Morta",
+      "aliases": [
+        "SouthofDeadMine"
+      ]
+    },
+    {
+      "key": "npc.menu.1e19eb280d6a6f35",
+      "en": "To Prajna Island",
+      "zh-TW": "前往般若島",
+      "pt-BR": "Para a Ilha de Prajna",
+      "aliases": [
+        "To Prajna Island"
+      ]
+    },
+    {
+      "key": "npc.menu.1e8451055bef5682",
+      "en": "Enter the Dragons Lair.",
+      "zh-TW": "進入龍穴",
+      "pt-BR": "Entrar no covil do dragão",
+      "aliases": [
+        "Enter the Dragons Lair."
+      ]
+    },
+    {
+      "key": "npc.menu.1ea442a134b2a184",
+      "en": "No",
+      "zh-TW": "否",
+      "pt-BR": "Não",
+      "aliases": [
+        "No"
+      ]
+    },
+    {
+      "key": "npc.menu.1f295517662132fb",
+      "en": "EastofDeadMine",
+      "zh-TW": "死亡礦區東部",
+      "pt-BR": "Leste da Mina Morta",
+      "aliases": [
+        "EastofDeadMine"
+      ]
+    },
+    {
+      "key": "npc.menu.1f4a863ce454cd4a",
+      "en": "SealedMaze",
+      "zh-TW": "封印迷宮",
+      "pt-BR": "Labirinto selado",
+      "aliases": [
+        "SealedMaze"
+      ]
+    },
+    {
+      "key": "npc.menu.1f73f888abe33330",
+      "en": "B2ofDeadMine",
+      "zh-TW": "死亡礦區地下二層",
+      "pt-BR": "Mina Morta · 2º subsolo",
+      "aliases": [
+        "B2ofDeadMine"
+      ]
+    },
+    {
+      "key": "npc.menu.1f9b213407b257e3",
+      "en": "hear it again.",
+      "zh-TW": "再聽一次。",
+      "pt-BR": "ouvir novamente.",
+      "aliases": [
+        "hear it again."
+      ]
+    },
+    {
+      "key": "npc.menu.1fb7e109fdaa71e6",
+      "en": "Ancient Wooma Temple",
+      "zh-TW": "遠古沃瑪寺廟",
+      "pt-BR": "Templo ancestral de Wooma",
+      "aliases": [
+        "Ancient Wooma Temple"
+      ]
+    },
+    {
+      "key": "npc.menu.1ff57a29d7c9d11b",
+      "en": "Next",
+      "zh-TW": "下一頁",
+      "pt-BR": "Próxima",
+      "aliases": [
+        "Next"
+      ]
+    },
+    {
+      "key": "npc.menu.2034ce6155036f8a",
+      "en": "Thank You",
+      "zh-TW": "謝謝",
+      "pt-BR": "Obrigado",
+      "aliases": [
+        "Thank You"
+      ]
+    },
+    {
+      "key": "npc.menu.20a1cc639be40232",
+      "en": "CastleGi-Ryoong",
+      "zh-TW": "吉龍城",
+      "pt-BR": "Castelo Gi-Ryoong",
+      "aliases": [
+        "CastleGi-Ryoong"
+      ]
+    },
+    {
+      "key": "npc.menu.21a43180a6b26b1c",
+      "en": "GoldChest",
+      "zh-TW": "金寶箱",
+      "pt-BR": "Baú de Ouro",
+      "aliases": [
+        "GoldChest"
+      ]
+    },
+    {
+      "key": "npc.menu.220dc022465d288c",
+      "en": "SummonShinsu 35",
+      "zh-TW": "召喚神獸 35",
+      "pt-BR": "Invocar Shinsu 35",
+      "aliases": [
+        "SummonShinsu 35"
+      ]
+    },
+    {
+      "key": "npc.menu.238c051dea59298a",
+      "en": "Use.",
+      "zh-TW": "使用。",
+      "pt-BR": "Usar.",
+      "aliases": [
+        "Use."
+      ]
+    },
+    {
+      "key": "npc.menu.23cc54b863f5f5e9",
+      "en": "Revelation 23",
+      "zh-TW": "心靈啟示 23",
+      "pt-BR": "Revelação 23",
+      "aliases": [
+        "Revelation 23"
+      ]
+    },
+    {
+      "key": "npc.menu.24315ec1dafd06dd",
+      "en": "Collection (slice meat, mining etc)",
+      "zh-TW": "採集（割肉、採礦等）",
+      "pt-BR": "Coleta (retirar carne, minerar etc.)",
+      "aliases": [
+        "Collection (slice meat, mining etc)"
+      ]
+    },
+    {
+      "key": "npc.menu.245a1109a83902ae",
+      "en": "within.",
+      "zh-TW": "裡面。",
+      "pt-BR": "dentro.",
+      "aliases": [
+        "within."
+      ]
+    },
+    {
+      "key": "npc.menu.24901b12386980d3",
+      "en": "Look at Quest Items",
+      "zh-TW": "查看任務物品",
+      "pt-BR": "Ver itens de missão",
+      "aliases": [
+        "Look at Quest Items"
+      ]
+    },
+    {
+      "key": "npc.menu.249c072e46e90218",
+      "en": "InsectCave_1F",
+      "zh-TW": "蟲洞 1層",
+      "pt-BR": "Caverna dos insetos · 1º andar",
+      "aliases": [
+        "InsectCave_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.24b0c1284c7410d7",
+      "en": "Fox Cave",
+      "zh-TW": "狐狸洞穴",
+      "pt-BR": "Caverna das raposas",
+      "aliases": [
+        "Fox Cave"
+      ]
+    },
+    {
+      "key": "npc.menu.255a70fd8ebfcbcf",
+      "en": "Tavern",
+      "zh-TW": "酒館",
+      "pt-BR": "Taverna",
+      "aliases": [
+        "Tavern"
+      ]
+    },
+    {
+      "key": "npc.menu.25cff2017627deda",
+      "en": "NapalmShot 48",
+      "zh-TW": "燃燒箭 48",
+      "pt-BR": "Tiro de Napalm 48",
+      "aliases": [
+        "NapalmShot 48"
+      ]
+    },
+    {
+      "key": "npc.menu.25fe25742d327463",
+      "en": "Waste Lands",
+      "zh-TW": "荒原",
+      "pt-BR": "Terras devastadas",
+      "aliases": [
+        "Waste Lands"
+      ]
+    },
+    {
+      "key": "npc.menu.26c184ca8523da53",
+      "en": "Shop & NPC function",
+      "zh-TW": "商店與 NPC 功能",
+      "pt-BR": "Funções de lojas e NPCs",
+      "aliases": [
+        "Shop & NPC function"
+      ]
+    },
+    {
+      "key": "npc.menu.26c3612edc7f9f04",
+      "en": "AncientZuma_3F",
+      "zh-TW": "遠古祖瑪 3層",
+      "pt-BR": "Zuma ancestral · 3º andar",
+      "aliases": [
+        "AncientZuma_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.26da6ce1117ac2db",
+      "en": "Teleport 19",
+      "zh-TW": "瞬息移動 19",
+      "pt-BR": "Teleporte 19",
+      "aliases": [
+        "Teleport 19"
+      ]
+    },
+    {
+      "key": "npc.menu.26dc5e5265eddbbc",
+      "en": "Where is it?",
+      "zh-TW": "它在哪裡？",
+      "pt-BR": "Onde está?",
+      "aliases": [
+        "Where is it?"
+      ]
+    },
+    {
+      "key": "npc.menu.26e48bc5f03e30a1",
+      "en": "Apply or Cancel",
+      "zh-TW": "申請或取消",
+      "pt-BR": "Inscrever-se ou cancelar",
+      "aliases": [
+        "Apply or Cancel"
+      ]
+    },
+    {
+      "key": "npc.menu.2703f2397ebd30fb",
+      "en": "DarkBody 46",
+      "zh-TW": "暗影替身 46",
+      "pt-BR": "Corpo Sombrio 46",
+      "aliases": [
+        "DarkBody 46"
+      ]
+    },
+    {
+      "key": "npc.menu.276446ba01e3aa38",
+      "en": "trade",
+      "zh-TW": "交易",
+      "pt-BR": "trocar",
+      "aliases": [
+        "trade"
+      ]
+    },
+    {
+      "key": "npc.menu.2844b7dfd9c2a15b",
+      "en": "FatalSword 7",
+      "zh-TW": "致命劍術 7",
+      "pt-BR": "Espada Fatal 7",
+      "aliases": [
+        "FatalSword 7"
+      ]
+    },
+    {
+      "key": "npc.menu.28d03596d24eeb4e",
+      "en": "Skip",
+      "zh-TW": "略過",
+      "pt-BR": "Pular",
+      "aliases": [
+        "Skip"
+      ]
+    },
+    {
+      "key": "npc.menu.29658f3a6a2fc9fe",
+      "en": "Thrusting 22",
+      "zh-TW": "刺殺劍術 22",
+      "pt-BR": "Estocada 22",
+      "aliases": [
+        "Thrusting 22"
+      ]
+    },
+    {
+      "key": "npc.menu.298ffc494f6348d8",
+      "en": "Guild",
+      "zh-TW": "公會",
+      "pt-BR": "Guilda",
+      "aliases": [
+        "Guild"
+      ]
+    },
+    {
+      "key": "npc.menu.2b35b9eed5ca46de",
+      "en": "StrangeRocksPath",
+      "zh-TW": "怪石通道",
+      "pt-BR": "Passagem das rochas estranhas",
+      "aliases": [
+        "StrangeRocksPath"
+      ]
+    },
+    {
+      "key": "npc.menu.2b85ef272ea4833b",
+      "en": "Repair Castle",
+      "zh-TW": "修理城堡",
+      "pt-BR": "Reparar castelo",
+      "aliases": [
+        "Repair Castle"
+      ]
+    },
+    {
+      "key": "npc.menu.2b970fc6ffb855ba",
+      "en": "Guild Territory 6",
+      "zh-TW": "公會領地 6",
+      "pt-BR": "Território da guilda 6",
+      "aliases": [
+        "Guild Territory 6"
+      ]
+    },
+    {
+      "key": "npc.menu.2c0b27c1392ef6d8",
+      "en": "Then how can I killed the RedMoonEvil",
+      "zh-TW": "那我要如何殺死赤月惡魔？",
+      "pt-BR": "Então como posso matar o demônio da Lua Vermelha?",
+      "aliases": [
+        "Then how can I killed the RedMoonEvil"
+      ]
+    },
+    {
+      "key": "npc.menu.2d779ca623ceb009",
+      "en": "Extend rental period",
+      "zh-TW": "延長租期",
+      "pt-BR": "Prorrogar aluguel",
+      "aliases": [
+        "Extend rental period"
+      ]
+    },
+    {
+      "key": "npc.menu.2da24e00f39ec7c0",
+      "en": "Red Afro",
+      "zh-TW": "紅色捲髮",
+      "pt-BR": "Cabelo afro ruivo",
+      "aliases": [
+        "Red Afro"
+      ]
+    },
+    {
+      "key": "npc.menu.2dc45f6debbf2d95",
+      "en": "Rebirth 3",
+      "zh-TW": "重生 3",
+      "pt-BR": "Renascimento 3",
+      "aliases": [
+        "Rebirth 3"
+      ]
+    },
+    {
+      "key": "npc.menu.2e55123541d0e0c7",
+      "en": "LV 14~17",
+      "zh-TW": "等級 14–17",
+      "pt-BR": "Níveis 14–17",
+      "aliases": [
+        "LV 14~17"
+      ]
+    },
+    {
+      "key": "npc.menu.2e6ee312ab3cec7d",
+      "en": "level 41+",
+      "zh-TW": "等級 41 以上",
+      "pt-BR": "Nível 41 ou superior",
+      "aliases": [
+        "level 41+"
+      ]
+    },
+    {
+      "key": "npc.menu.2e7c3077b34b4b98",
+      "en": "SnowCavern_1F",
+      "zh-TW": "雪洞 1層",
+      "pt-BR": "Caverna de neve · 1º andar",
+      "aliases": [
+        "SnowCavern_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.2ea30df0a19b4dbf",
+      "en": "Archer skills",
+      "zh-TW": "弓箭手技能",
+      "pt-BR": "Habilidades de arqueiro",
+      "aliases": [
+        "Archer skills"
+      ]
+    },
+    {
+      "key": "npc.menu.2ebd3e94998ead64",
+      "en": "MineralMine_4F",
+      "zh-TW": "礦洞 4層",
+      "pt-BR": "Mina de minerais · 4º andar",
+      "aliases": [
+        "MineralMine_4F"
+      ]
+    },
+    {
+      "key": "npc.menu.2ec1e28159466f2a",
+      "en": "Sell",
+      "zh-TW": "出售",
+      "pt-BR": "Vender",
+      "aliases": [
+        "Sell"
+      ]
+    },
+    {
+      "key": "npc.menu.2f187df716be093a",
+      "en": "PrajnaTemple_1F",
+      "zh-TW": "般若神殿 1層",
+      "pt-BR": "Templo de Prajna · 1º andar",
+      "aliases": [
+        "PrajnaTemple_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.2f2fc7f2e9ce13b0",
+      "en": "ask",
+      "zh-TW": "詢問",
+      "pt-BR": "perguntar",
+      "aliases": [
+        "ask"
+      ]
+    },
+    {
+      "key": "npc.menu.3065ebafbf70d974",
+      "en": "AncientZuma_1F",
+      "zh-TW": "遠古祖瑪 1層",
+      "pt-BR": "Zuma ancestral · 1º andar",
+      "aliases": [
+        "AncientZuma_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.306c861a1fb4409d",
+      "en": "I will",
+      "zh-TW": "我會的",
+      "pt-BR": "Eu vou",
+      "aliases": [
+        "I will"
+      ]
+    },
+    {
+      "key": "npc.menu.310ff200149b44a3",
+      "en": "close",
+      "zh-TW": "關閉",
+      "pt-BR": "fechar",
+      "aliases": [
+        "close"
+      ]
+    },
+    {
+      "key": "npc.menu.3149ad59b53f20a1",
+      "en": "MPEater 38",
+      "zh-TW": "吸氣 38",
+      "pt-BR": "Devorador de Mana 38",
+      "aliases": [
+        "MPEater 38"
+      ]
+    },
+    {
+      "key": "npc.menu.31928208ce519bf0",
+      "en": "Prison",
+      "zh-TW": "監獄",
+      "pt-BR": "Prisão",
+      "aliases": [
+        "Prison"
+      ]
+    },
+    {
+      "key": "npc.menu.319b17eb3276068b",
+      "en": "PrisonHall",
+      "zh-TW": "監獄大廳",
+      "pt-BR": "Salão da prisão",
+      "aliases": [
+        "PrisonHall"
+      ]
+    },
+    {
+      "key": "npc.menu.321adfa80b2c6b6c",
+      "en": "Guild Territory 4",
+      "zh-TW": "公會領地 4",
+      "pt-BR": "Território da guilda 4",
+      "aliases": [
+        "Guild Territory 4"
+      ]
+    },
+    {
+      "key": "npc.menu.32a84e7b3ad5d0be",
+      "en": "ReviveHero",
+      "zh-TW": "復活英雄",
+      "pt-BR": "Reviver herói",
+      "aliases": [
+        "ReviveHero"
+      ]
+    },
+    {
+      "key": "npc.menu.33b93476cf597a33",
+      "en": "Time",
+      "zh-TW": "時間",
+      "pt-BR": "Tempo",
+      "aliases": [
+        "Time"
+      ]
+    },
+    {
+      "key": "npc.menu.3458bd7c69e04060",
+      "en": "DeadMineEntrance",
+      "zh-TW": "死亡礦區入口",
+      "pt-BR": "Entrada da Mina Morta",
+      "aliases": [
+        "DeadMineEntrance"
+      ]
+    },
+    {
+      "key": "npc.menu.3473523f162e8746",
+      "en": "General Store",
+      "zh-TW": "雜貨店",
+      "pt-BR": "Loja de artigos gerais",
+      "aliases": [
+        "General Store"
+      ]
+    },
+    {
+      "key": "npc.menu.34ca0e76608842ff",
+      "en": "Group",
+      "zh-TW": "隊伍",
+      "pt-BR": "Grupo",
+      "aliases": [
+        "Group"
+      ]
+    },
+    {
+      "key": "npc.menu.34d7323fa9c9eead",
+      "en": "Withdraw fund",
+      "zh-TW": "提取資金",
+      "pt-BR": "Retirar fundos",
+      "aliases": [
+        "Withdraw fund"
+      ]
+    },
+    {
+      "key": "npc.menu.3516f67acbf31253",
+      "en": "Awaken",
+      "zh-TW": "覺醒",
+      "pt-BR": "Despertar",
+      "aliases": [
+        "Awaken"
+      ]
+    },
+    {
+      "key": "npc.menu.35e3ac3767e51525",
+      "en": "Oma Cave",
+      "zh-TW": "半獸人洞穴",
+      "pt-BR": "Caverna dos Omas",
+      "aliases": [
+        "Oma Cave"
+      ]
+    },
+    {
+      "key": "npc.menu.35e856ab6e26ecd8",
+      "en": "Hear",
+      "zh-TW": "聆聽",
+      "pt-BR": "Ouvir",
+      "aliases": [
+        "Hear"
+      ]
+    },
+    {
+      "key": "npc.menu.35f9896e9461c34e",
+      "en": "Main Menu",
+      "zh-TW": "主選單",
+      "pt-BR": "Menu principal",
+      "aliases": [
+        "Main Menu"
+      ]
+    },
+    {
+      "key": "npc.menu.36869315e62d02c8",
+      "en": "RedValley_6F",
+      "zh-TW": "赤色山谷 6層",
+      "pt-BR": "Vale vermelho · 6º andar",
+      "aliases": [
+        "RedValley_6F"
+      ]
+    },
+    {
+      "key": "npc.menu.36cbe605bdb4effa",
+      "en": "Tax to 10%",
+      "zh-TW": "稅率設為 10%",
+      "pt-BR": "Definir imposto em 10%",
+      "aliases": [
+        "Tax to 10%"
+      ]
+    },
+    {
+      "key": "npc.menu.36eb3a2d2de97172",
+      "en": "SoleSpiritHall",
+      "zh-TW": "孤魂殿",
+      "pt-BR": "Salão da alma solitária",
+      "aliases": [
+        "SoleSpiritHall"
+      ]
+    },
+    {
+      "key": "npc.menu.38c0369e7c9dcb8a",
+      "en": "RedValley_1F",
+      "zh-TW": "赤色山谷 1層",
+      "pt-BR": "Vale vermelho · 1º andar",
+      "aliases": [
+        "RedValley_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.38cb266f90ba676a",
+      "en": "AncientPrajna_2F",
+      "zh-TW": "遠古般若 2層",
+      "pt-BR": "Prajna ancestral · 2º andar",
+      "aliases": [
+        "AncientPrajna_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.392cde1f9a6571ff",
+      "en": "MineralMine_2F",
+      "zh-TW": "礦洞 2層",
+      "pt-BR": "Mina de minerais · 2º andar",
+      "aliases": [
+        "MineralMine_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.3b9a6ae3665105da",
+      "en": "FrostCrunch 28",
+      "zh-TW": "寒冰掌 28",
+      "pt-BR": "Mordida Gélida 28",
+      "aliases": [
+        "FrostCrunch 28"
+      ]
+    },
+    {
+      "key": "npc.menu.3bec3f4853eb4c33",
+      "en": "AncientTemple_2F",
+      "zh-TW": "遠古神廟 2層",
+      "pt-BR": "Templo ancestral · 2º andar",
+      "aliases": [
+        "AncientTemple_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.3bff57eaf3b26129",
+      "en": "Mirroring 41",
+      "zh-TW": "分身術 41",
+      "pt-BR": "Espelhamento 41",
+      "aliases": [
+        "Mirroring 41"
+      ]
+    },
+    {
+      "key": "npc.menu.3c688ba5a5649bff",
+      "en": "Prajna Temple",
+      "zh-TW": "般若神殿",
+      "pt-BR": "Templo de Prajna",
+      "aliases": [
+        "Prajna Temple"
+      ]
+    },
+    {
+      "key": "npc.menu.3c92ab7863ed2810",
+      "en": "Dungeon Boss",
+      "zh-TW": "地下城首領",
+      "pt-BR": "Chefe da masmorra",
+      "aliases": [
+        "Dungeon Boss"
+      ]
+    },
+    {
+      "key": "npc.menu.3d1bfe1393e6bb25",
+      "en": "LV 11~14",
+      "zh-TW": "等級 11–14",
+      "pt-BR": "Níveis 11–14",
+      "aliases": [
+        "LV 11~14"
+      ]
+    },
+    {
+      "key": "npc.menu.3e41ae9f2054d992",
+      "en": "Armour shop",
+      "zh-TW": "防具店",
+      "pt-BR": "Loja de armaduras",
+      "aliases": [
+        "Armour shop"
+      ]
+    },
+    {
+      "key": "npc.menu.3fcde664275ab41a",
+      "en": "Guild Territory 5",
+      "zh-TW": "公會領地 5",
+      "pt-BR": "Território da guilda 5",
+      "aliases": [
+        "Guild Territory 5"
+      ]
+    },
+    {
+      "key": "npc.menu.401f143cfad99e04",
+      "en": "Reset Quest Flags",
+      "zh-TW": "重設任務標記",
+      "pt-BR": "Redefinir marcas de missão",
+      "aliases": [
+        "Reset Quest Flags"
+      ]
+    },
+    {
+      "key": "npc.menu.40430eed33f7a96f",
+      "en": "RedCavern_12F",
+      "zh-TW": "紅色洞穴 12層",
+      "pt-BR": "Caverna vermelha · 12º andar",
+      "aliases": [
+        "RedCavern_12F"
+      ]
+    },
+    {
+      "key": "npc.menu.40659c503635b554",
+      "en": "Woomyon Woods",
+      "zh-TW": "沃瑪森林",
+      "pt-BR": "Floresta de Woomyon",
+      "aliases": [
+        "Woomyon Woods"
+      ]
+    },
+    {
+      "key": "npc.menu.408ea991e55aee00",
+      "en": "Natural Cave",
+      "zh-TW": "天然洞穴",
+      "pt-BR": "Caverna natural",
+      "aliases": [
+        "Natural Cave"
+      ]
+    },
+    {
+      "key": "npc.menu.413ae1569ffbd89b",
+      "en": "Lunar_4F",
+      "zh-TW": "月宮 4層",
+      "pt-BR": "Palácio lunar · 4º andar",
+      "aliases": [
+        "Lunar_4F"
+      ]
+    },
+    {
+      "key": "npc.menu.4172d58af1d23fdf",
+      "en": "DarkSwamp",
+      "zh-TW": "黑暗沼澤",
+      "pt-BR": "Pântano sombrio",
+      "aliases": [
+        "DarkSwamp"
+      ]
+    },
+    {
+      "key": "npc.menu.41ae4093327a9e48",
+      "en": "AncientNaturalCave 2F",
+      "zh-TW": "遠古天然洞穴 2層",
+      "pt-BR": "Caverna natural ancestral · 2º andar",
+      "aliases": [
+        "AncientNaturalCave 2F"
+      ]
+    },
+    {
+      "key": "npc.menu.428502f3697378b3",
+      "en": "RedCavern_KR",
+      "zh-TW": "紅色洞穴王室",
+      "pt-BR": "Caverna vermelha · sala do rei",
+      "aliases": [
+        "RedCavern_KR"
+      ]
+    },
+    {
+      "key": "npc.menu.429328aaf3cc04e8",
+      "en": "Special Repair",
+      "zh-TW": "特殊修理",
+      "pt-BR": "Reparo especial",
+      "aliases": [
+        "Special Repair"
+      ]
+    },
+    {
+      "key": "npc.menu.42a10279e80a74f4",
+      "en": "Serpent Dead Mine",
+      "zh-TW": "毒蛇死亡礦區",
+      "pt-BR": "Mina Morta das Serpentes",
+      "aliases": [
+        "Serpent Dead Mine"
+      ]
+    },
+    {
+      "key": "npc.menu.42e4205504b8008c",
+      "en": "ElecShock 13",
+      "zh-TW": "誘惑之光 13",
+      "pt-BR": "Choque Elétrico 13",
+      "aliases": [
+        "ElecShock 13"
+      ]
+    },
+    {
+      "key": "npc.menu.436e61016e26fcb7",
+      "en": "Play",
+      "zh-TW": "遊玩",
+      "pt-BR": "Jogar",
+      "aliases": [
+        "Play"
+      ]
+    },
+    {
+      "key": "npc.menu.43e8c57c72bb67f7",
+      "en": "FlamingSword 35",
+      "zh-TW": "烈火劍法 35",
+      "pt-BR": "Espada Flamejante 35",
+      "aliases": [
+        "FlamingSword 35"
+      ]
+    },
+    {
+      "key": "npc.menu.43f0b4d01733e6a2",
+      "en": "Production(Craft&upgrade)",
+      "zh-TW": "製作與升級",
+      "pt-BR": "Produção (fabricação e melhoria)",
+      "aliases": [
+        "Production(Craft&upgrade)"
+      ]
+    },
+    {
+      "key": "npc.menu.449f5a775762cdc5",
+      "en": "Talk",
+      "zh-TW": "交談",
+      "pt-BR": "Conversar",
+      "aliases": [
+        "Talk"
+      ]
+    },
+    {
+      "key": "npc.menu.45113a2e010fd36b",
+      "en": "AncientSTomb_1F",
+      "zh-TW": "遠古石墓 1層",
+      "pt-BR": "Tumba de pedra ancestral · 1º andar",
+      "aliases": [
+        "AncientSTomb_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.45f2ca02479e9bdd",
+      "en": "Hellfire 16",
+      "zh-TW": "地獄火 16",
+      "pt-BR": "Fogo Infernal 16",
+      "aliases": [
+        "Hellfire 16"
+      ]
+    },
+    {
+      "key": "npc.menu.460b3a7da007b7af",
+      "en": "Chat",
+      "zh-TW": "聊天",
+      "pt-BR": "Conversar",
+      "aliases": [
+        "Chat"
+      ]
+    },
+    {
+      "key": "npc.menu.466ed42691977c60",
+      "en": "level 1~11",
+      "zh-TW": "等級 1–11",
+      "pt-BR": "Níveis 1–11",
+      "aliases": [
+        "level 1~11"
+      ]
+    },
+    {
+      "key": "npc.menu.469b9ecb7c6e4ef3",
+      "en": "Purification 30",
+      "zh-TW": "淨化術 30",
+      "pt-BR": "Purificação 30",
+      "aliases": [
+        "Purification 30"
+      ]
+    },
+    {
+      "key": "npc.menu.485f94c20e60cb9d",
+      "en": "I see and appreciate your answer",
+      "zh-TW": "明白了，謝謝你的回答",
+      "pt-BR": "Entendi, agradeço pela resposta",
+      "aliases": [
+        "I see and appreciate your answer"
+      ]
+    },
+    {
+      "key": "npc.menu.48a456543f8d24f0",
+      "en": "WoomaTemple (KR)",
+      "zh-TW": "沃瑪寺廟（王室）",
+      "pt-BR": "Templo de Wooma (sala do rei)",
+      "aliases": [
+        "WoomaTemple (KR)"
+      ]
+    },
+    {
+      "key": "npc.menu.496a37e3a10b9755",
+      "en": "Extend",
+      "zh-TW": "延長",
+      "pt-BR": "Prorrogar",
+      "aliases": [
+        "Extend"
+      ]
+    },
+    {
+      "key": "npc.menu.49c266baaaa70981",
+      "en": "Search",
+      "zh-TW": "搜尋",
+      "pt-BR": "Buscar",
+      "aliases": [
+        "Search"
+      ]
+    },
+    {
+      "key": "npc.menu.49f711b897eab83b",
+      "en": "NobleHogPalace",
+      "zh-TW": "野豬王宮",
+      "pt-BR": "Palácio do javali nobre",
+      "aliases": [
+        "NobleHogPalace"
+      ]
+    },
+    {
+      "key": "npc.menu.4a3b229640c14b91",
+      "en": "PrajnaStoneCave_2F",
+      "zh-TW": "般若石窟 2層",
+      "pt-BR": "Caverna de pedra de Prajna · 2º andar",
+      "aliases": [
+        "PrajnaStoneCave_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.4a565780b0fca136",
+      "en": "Can you tell me What HolySword is?",
+      "zh-TW": "可以告訴我聖劍是什麼嗎？",
+      "pt-BR": "Pode me dizer o que é a Espada Sagrada?",
+      "aliases": [
+        "Can you tell me What HolySword is?"
+      ]
+    },
+    {
+      "key": "npc.menu.4aebf4f3175c3d85",
+      "en": "Taoist skills",
+      "zh-TW": "道士技能",
+      "pt-BR": "Habilidades de taoísta",
+      "aliases": [
+        "Taoist skills"
+      ]
+    },
+    {
+      "key": "npc.menu.4af537bbc62b8ee8",
+      "en": "B1_AngledStoneTomb",
+      "zh-TW": "石墓地下一層",
+      "pt-BR": "Tumba de pedra · 1º subsolo",
+      "aliases": [
+        "B1_AngledStoneTomb"
+      ]
+    },
+    {
+      "key": "npc.menu.4b6c6a72736fe552",
+      "en": "Thunderbolt 17",
+      "zh-TW": "雷電術 17",
+      "pt-BR": "Raio 17",
+      "aliases": [
+        "Thunderbolt 17"
+      ]
+    },
+    {
+      "key": "npc.menu.4ba6f9f3e1d6bd83",
+      "en": "RepairOil",
+      "zh-TW": "修理油",
+      "pt-BR": "Óleo de Reparo",
+      "aliases": [
+        "RepairOil"
+      ]
+    },
+    {
+      "key": "npc.menu.4c39a2908bbeff31",
+      "en": "Rehire",
+      "zh-TW": "重新僱用",
+      "pt-BR": "Recontratar",
+      "aliases": [
+        "Rehire"
+      ]
+    },
+    {
+      "key": "npc.menu.4cb24767b51f8623",
+      "en": "Do not pass",
+      "zh-TW": "不通過",
+      "pt-BR": "Não atravessar",
+      "aliases": [
+        "Do not pass"
+      ]
+    },
+    {
+      "key": "npc.menu.4cd0e21a9a0795a1",
+      "en": "go",
+      "zh-TW": "前往",
+      "pt-BR": "ir",
+      "aliases": [
+        "go"
+      ]
+    },
+    {
+      "key": "npc.menu.4d1e38633028dda6",
+      "en": "PrajnaStoneCave_5F",
+      "zh-TW": "般若石窟 5層",
+      "pt-BR": "Caverna de pedra de Prajna · 5º andar",
+      "aliases": [
+        "PrajnaStoneCave_5F"
+      ]
+    },
+    {
+      "key": "npc.menu.4d9d38421f574eae",
+      "en": "OreStoragePlace",
+      "zh-TW": "礦石倉庫",
+      "pt-BR": "Depósito de minério",
+      "aliases": [
+        "OreStoragePlace"
+      ]
+    },
+    {
+      "key": "npc.menu.4e592ae2e644e391",
+      "en": "Entrapment 32",
+      "zh-TW": "捕蠅劍 32",
+      "pt-BR": "Aprisionamento 32",
+      "aliases": [
+        "Entrapment 32"
+      ]
+    },
+    {
+      "key": "npc.menu.4eddfa72faaaa12f",
+      "en": "LobbyofZumaTemple",
+      "zh-TW": "祖瑪神殿大廳",
+      "pt-BR": "Saguão do templo de Zuma",
+      "aliases": [
+        "LobbyofZumaTemple"
+      ]
+    },
+    {
+      "key": "npc.menu.4fc7dd96d2ec9e0d",
+      "en": "Bribe",
+      "zh-TW": "賄賂",
+      "pt-BR": "Subornar",
+      "aliases": [
+        "Bribe"
+      ]
+    },
+    {
+      "key": "npc.menu.51dbc83386f40e85",
+      "en": "SwampCavern_1F",
+      "zh-TW": "沼澤洞穴 1層",
+      "pt-BR": "Caverna do pântano · 1º andar",
+      "aliases": [
+        "SwampCavern_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.5221142c1d33d2ea",
+      "en": "DarkDevilPalace",
+      "zh-TW": "暗黑魔王宮",
+      "pt-BR": "Palácio do demônio das trevas",
+      "aliases": [
+        "DarkDevilPalace"
+      ]
+    },
+    {
+      "key": "npc.menu.54dd1a593ff08b66",
+      "en": "WhiteDragonPassage 2F",
+      "zh-TW": "白龍通道 2層",
+      "pt-BR": "Passagem do dragão branco · 2º andar",
+      "aliases": [
+        "WhiteDragonPassage 2F"
+      ]
+    },
+    {
+      "key": "npc.menu.558d3d40232320a7",
+      "en": "Safezone",
+      "zh-TW": "安全區",
+      "pt-BR": "Zona segura",
+      "aliases": [
+        "Safezone"
+      ]
+    },
+    {
+      "key": "npc.menu.55cbbb17fc880390",
+      "en": "Taoist",
+      "zh-TW": "道士",
+      "pt-BR": "Taoísta",
+      "aliases": [
+        "Taoist"
+      ]
+    },
+    {
+      "key": "npc.menu.565b8d95898c82f4",
+      "en": "Prajna Island",
+      "zh-TW": "般若島",
+      "pt-BR": "Ilha de Prajna",
+      "aliases": [
+        "Prajna Island"
+      ]
+    },
+    {
+      "key": "npc.menu.5715d1fda697cec5",
+      "en": "Check Weapon",
+      "zh-TW": "查看武器",
+      "pt-BR": "Examinar arma",
+      "aliases": [
+        "Check Weapon"
+      ]
+    },
+    {
+      "key": "npc.menu.5746b88179313401",
+      "en": "Accessory shop",
+      "zh-TW": "飾品店",
+      "pt-BR": "Loja de acessórios",
+      "aliases": [
+        "Accessory shop"
+      ]
+    },
+    {
+      "key": "npc.menu.57f64bf9715866ab",
+      "en": "Craft",
+      "zh-TW": "製作",
+      "pt-BR": "Fabricar",
+      "aliases": [
+        "Craft"
+      ]
+    },
+    {
+      "key": "npc.menu.580ce9e8774306d7",
+      "en": "HwanMaJin2",
+      "zh-TW": "幻魔陣 2",
+      "pt-BR": "HwanMaJin 2",
+      "aliases": [
+        "HwanMaJin2"
+      ]
+    },
+    {
+      "key": "npc.menu.5896126220141967",
+      "en": "Guard Check",
+      "zh-TW": "檢查守衛",
+      "pt-BR": "Examinar guardas",
+      "aliases": [
+        "Guard Check"
+      ]
+    },
+    {
+      "key": "npc.menu.589b6580bf469ab9",
+      "en": "SnowCavern_2F",
+      "zh-TW": "雪洞 2層",
+      "pt-BR": "Caverna de neve · 2º andar",
+      "aliases": [
+        "SnowCavern_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.594d03f4f3fc346a",
+      "en": "StoneCarvedStream",
+      "zh-TW": "石刻溪流",
+      "pt-BR": "Riacho esculpido em pedra",
+      "aliases": [
+        "StoneCarvedStream"
+      ]
+    },
+    {
+      "key": "npc.menu.596eba776abd6853",
+      "en": "ZumaTemple_1F",
+      "zh-TW": "祖瑪神殿 1層",
+      "pt-BR": "Templo de Zuma · 1º andar",
+      "aliases": [
+        "ZumaTemple_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.59d6d61431fce7d9",
+      "en": "meat",
+      "zh-TW": "肉",
+      "pt-BR": "carne",
+      "aliases": [
+        "meat"
+      ]
+    },
+    {
+      "key": "npc.menu.5a9307f8e7923872",
+      "en": "Rebirth",
+      "zh-TW": "重生",
+      "pt-BR": "Renascimento",
+      "aliases": [
+        "Rebirth"
+      ]
+    },
+    {
+      "key": "npc.menu.5b23dd17a1c52b56",
+      "en": "ElementalBarrier 33",
+      "zh-TW": "元素屏障 33",
+      "pt-BR": "Barreira Elemental 33",
+      "aliases": [
+        "ElementalBarrier 33"
+      ]
+    },
+    {
+      "key": "npc.menu.5b5e9c65b400565c",
+      "en": "Purchase",
+      "zh-TW": "購買",
+      "pt-BR": "Comprar",
+      "aliases": [
+        "Purchase"
+      ]
+    },
+    {
+      "key": "npc.menu.5c9800a523162c5b",
+      "en": "HellFire_KingsRoom",
+      "zh-TW": "地獄火王室",
+      "pt-BR": "Fogo infernal · sala do rei",
+      "aliases": [
+        "HellFire_KingsRoom"
+      ]
+    },
+    {
+      "key": "npc.menu.5cb8d152b94bea29",
+      "en": "ZumaTemple",
+      "zh-TW": "祖瑪神殿",
+      "pt-BR": "Templo de Zuma",
+      "aliases": [
+        "ZumaTemple"
+      ]
+    },
+    {
+      "key": "npc.menu.5d995bd14d3ca811",
+      "en": "DoubleShot 14",
+      "zh-TW": "連射 14",
+      "pt-BR": "Tiro Duplo 14",
+      "aliases": [
+        "DoubleShot 14"
+      ]
+    },
+    {
+      "key": "npc.menu.5dcb57d1c082a75e",
+      "en": "FatallyPoisonousCave",
+      "zh-TW": "劇毒洞穴",
+      "pt-BR": "Caverna do veneno mortal",
+      "aliases": [
+        "FatallyPoisonousCave"
+      ]
+    },
+    {
+      "key": "npc.menu.5e0d6e4e2f74969a",
+      "en": "Page One",
+      "zh-TW": "第一頁",
+      "pt-BR": "Página um",
+      "aliases": [
+        "Page One"
+      ]
+    },
+    {
+      "key": "npc.menu.5ee92a26abfebca3",
+      "en": "Focus 7",
+      "zh-TW": "聚焦 7",
+      "pt-BR": "Focar 7",
+      "aliases": [
+        "Focus 7"
+      ]
+    },
+    {
+      "key": "npc.menu.5ef30d27f8bc261c",
+      "en": "Play again",
+      "zh-TW": "再玩一次",
+      "pt-BR": "Jogar novamente",
+      "aliases": [
+        "Play again"
+      ]
+    },
+    {
+      "key": "npc.menu.606841c1a1d6969f",
+      "en": "FireBang 22",
+      "zh-TW": "爆裂火焰 22",
+      "pt-BR": "Explosão de Fogo 22",
+      "aliases": [
+        "FireBang 22"
+      ]
+    },
+    {
+      "key": "npc.menu.61852358550e30a1",
+      "en": "Item shop",
+      "zh-TW": "物品店",
+      "pt-BR": "Loja de itens",
+      "aliases": [
+        "Item shop"
+      ]
+    },
+    {
+      "key": "npc.menu.6190c3c520cd8295",
+      "en": "and challenge.",
+      "zh-TW": "並接受挑戰。",
+      "pt-BR": "e enfrentar o desafio.",
+      "aliases": [
+        "and challenge."
+      ]
+    },
+    {
+      "key": "npc.menu.61b35e7e70195791",
+      "en": "ProtectionField 39",
+      "zh-TW": "護身氣幕 39",
+      "pt-BR": "Campo de Proteção 39",
+      "aliases": [
+        "ProtectionField 39"
+      ]
+    },
+    {
+      "key": "npc.menu.61e58a666a9a2484",
+      "en": "WoomaTemple_2F",
+      "zh-TW": "沃瑪寺廟 2層",
+      "pt-BR": "Templo de Wooma · 2º andar",
+      "aliases": [
+        "WoomaTemple_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.61f07e6e6c1a2bf4",
+      "en": "ZumaPalace",
+      "zh-TW": "祖瑪宮殿",
+      "pt-BR": "Palácio de Zuma",
+      "aliases": [
+        "ZumaPalace"
+      ]
+    },
+    {
+      "key": "npc.menu.61f2fe6ae0fe7e2c",
+      "en": "Contest Room",
+      "zh-TW": "競技室",
+      "pt-BR": "Sala de competição",
+      "aliases": [
+        "Contest Room"
+      ]
+    },
+    {
+      "key": "npc.menu.62b6f23702417d3a",
+      "en": "MagicShield 31",
+      "zh-TW": "魔法護盾 31",
+      "pt-BR": "Escudo Mágico 31",
+      "aliases": [
+        "MagicShield 31"
+      ]
+    },
+    {
+      "key": "npc.menu.62d688ede2b28de8",
+      "en": "Poisoning 14",
+      "zh-TW": "施毒術 14",
+      "pt-BR": "Envenenamento 14",
+      "aliases": [
+        "Poisoning 14"
+      ]
+    },
+    {
+      "key": "npc.menu.62e52bc7d2f8ad43",
+      "en": "Special NPC",
+      "zh-TW": "特殊 NPC",
+      "pt-BR": "NPC especial",
+      "aliases": [
+        "Special NPC"
+      ]
+    },
+    {
+      "key": "npc.menu.6309ee7aec1d911b",
+      "en": "BlackDragonDungeon",
+      "zh-TW": "黑龍地牢",
+      "pt-BR": "Calabouço do dragão negro",
+      "aliases": [
+        "BlackDragonDungeon"
+      ]
+    },
+    {
+      "key": "npc.menu.63ea9cfdbbc259cd",
+      "en": "Retrieve Weapon",
+      "zh-TW": "取回武器",
+      "pt-BR": "Retirar arma",
+      "aliases": [
+        "Retrieve Weapon"
+      ]
+    },
+    {
+      "key": "npc.menu.6402e74e14e3c756",
+      "en": "Candles",
+      "zh-TW": "蠟燭",
+      "pt-BR": "Velas",
+      "aliases": [
+        "Candles"
+      ]
+    },
+    {
+      "key": "npc.menu.64074fb4412f597d",
+      "en": "Apply for sale of Guild territory",
+      "zh-TW": "申請出售公會領地",
+      "pt-BR": "Solicitar venda do território da guilda",
+      "aliases": [
+        "Apply for sale of Guild territory"
+      ]
+    },
+    {
+      "key": "npc.menu.64a476d636254472",
+      "en": "NaturalCave_2",
+      "zh-TW": "天然洞穴 2層",
+      "pt-BR": "Caverna natural · 2º andar",
+      "aliases": [
+        "NaturalCave_2"
+      ]
+    },
+    {
+      "key": "npc.menu.64a5d04e4dac4a8f",
+      "en": "Mineral Mines",
+      "zh-TW": "礦坑",
+      "pt-BR": "Minas de minério",
+      "aliases": [
+        "Mineral Mines"
+      ]
+    },
+    {
+      "key": "npc.menu.64e3cb0e4960ba69",
+      "en": "Buy",
+      "zh-TW": "購買",
+      "pt-BR": "Comprar",
+      "aliases": [
+        "Buy"
+      ]
+    },
+    {
+      "key": "npc.menu.64ee3a116dd1a2e1",
+      "en": "Tax to 20%",
+      "zh-TW": "稅率設為 20%",
+      "pt-BR": "Definir imposto em 20%",
+      "aliases": [
+        "Tax to 20%"
+      ]
+    },
+    {
+      "key": "npc.menu.6503f62c13f0442f",
+      "en": "B5_AngledStoneTomb",
+      "zh-TW": "石墓地下五層",
+      "pt-BR": "Tumba de pedra · 5º subsolo",
+      "aliases": [
+        "B5_AngledStoneTomb"
+      ]
+    },
+    {
+      "key": "npc.menu.65f220f2ebbb39e6",
+      "en": "I've had enough. Let me go.",
+      "zh-TW": "夠了，讓我離開吧",
+      "pt-BR": "Já chega. Deixe-me sair.",
+      "aliases": [
+        "I've had enough. Let me go."
+      ]
+    },
+    {
+      "key": "npc.menu.66d4c59e9e7c35ae",
+      "en": "Taoist skill",
+      "zh-TW": "道士技能",
+      "pt-BR": "Habilidade de taoísta",
+      "aliases": [
+        "Taoist skill"
+      ]
+    },
+    {
+      "key": "npc.menu.670f605f5dacc297",
+      "en": "Repair All",
+      "zh-TW": "全部修理",
+      "pt-BR": "Reparar tudo",
+      "aliases": [
+        "Repair All"
+      ]
+    },
+    {
+      "key": "npc.menu.6767be9944635bd2",
+      "en": "B1ofMine",
+      "zh-TW": "礦區地下一層",
+      "pt-BR": "Mina · 1º subsolo",
+      "aliases": [
+        "B1ofMine"
+      ]
+    },
+    {
+      "key": "npc.menu.6782c87c749f987e",
+      "en": "PrajnaStoneCave(E)_3F",
+      "zh-TW": "般若石窟（東） 3層",
+      "pt-BR": "Caverna de pedra de Prajna (leste) · 3º andar",
+      "aliases": [
+        "PrajnaStoneCave(E)_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.68bf02747e974c98",
+      "en": "AncientPrajna_1F",
+      "zh-TW": "遠古般若 1層",
+      "pt-BR": "Prajna ancestral · 1º andar",
+      "aliases": [
+        "AncientPrajna_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.694edddab68836cc",
+      "en": "SummonToad 37",
+      "zh-TW": "召喚蟾蜍 37",
+      "pt-BR": "Invocar Sapo 37",
+      "aliases": [
+        "SummonToad 37"
+      ]
+    },
+    {
+      "key": "npc.menu.69752f2313b2f017",
+      "en": "News",
+      "zh-TW": "消息",
+      "pt-BR": "Notícias",
+      "aliases": [
+        "News"
+      ]
+    },
+    {
+      "key": "npc.menu.69ddeb28a2dd0623",
+      "en": "HiddenRoom",
+      "zh-TW": "隱藏房間",
+      "pt-BR": "Sala oculta",
+      "aliases": [
+        "HiddenRoom"
+      ]
+    },
+    {
+      "key": "npc.menu.6b0143d03864993f",
+      "en": "Return",
+      "zh-TW": "返回",
+      "pt-BR": "Voltar",
+      "aliases": [
+        "Return"
+      ]
+    },
+    {
+      "key": "npc.menu.6ba64f4e067365f0",
+      "en": "BlackSnakePalace",
+      "zh-TW": "黑蛇宮",
+      "pt-BR": "Palácio da serpente negra",
+      "aliases": [
+        "BlackSnakePalace"
+      ]
+    },
+    {
+      "key": "npc.menu.6c092c9ca023247a",
+      "en": "Basic information",
+      "zh-TW": "基本資訊",
+      "pt-BR": "Informações básicas",
+      "aliases": [
+        "Basic information"
+      ]
+    },
+    {
+      "key": "npc.menu.6c8eeffb832087dd",
+      "en": "Let me think some more",
+      "zh-TW": "讓我再想想",
+      "pt-BR": "Deixe-me pensar mais um pouco",
+      "aliases": [
+        "Let me think some more"
+      ]
+    },
+    {
+      "key": "npc.menu.6d60cbbf4d993340",
+      "en": "N_2FofDungeon",
+      "zh-TW": "地牢二層北部",
+      "pt-BR": "Calabouço · 2º andar norte",
+      "aliases": [
+        "N_2FofDungeon"
+      ]
+    },
+    {
+      "key": "npc.menu.6ec5390e987d9cb2",
+      "en": "KingsTomb",
+      "zh-TW": "國王陵墓",
+      "pt-BR": "Tumba do rei",
+      "aliases": [
+        "KingsTomb"
+      ]
+    },
+    {
+      "key": "npc.menu.6ecc3df6bffdd06c",
+      "en": "Move",
+      "zh-TW": "移動",
+      "pt-BR": "Mover",
+      "aliases": [
+        "Move"
+      ]
+    },
+    {
+      "key": "npc.menu.6ed810191f7e1ea4",
+      "en": "Request Sabuk conquest war",
+      "zh-TW": "申請沙巴克攻城戰",
+      "pt-BR": "Solicitar guerra pela conquista de Sabuk",
+      "aliases": [
+        "Request Sabuk conquest war"
+      ]
+    },
+    {
+      "key": "npc.menu.6ef857c4e8cdbfa7",
+      "en": "LV1~3",
+      "zh-TW": "等級 1–3",
+      "pt-BR": "Níveis 1–3",
+      "aliases": [
+        "LV1~3"
+      ]
+    },
+    {
+      "key": "npc.menu.6f1ea6878e252bf4",
+      "en": "AncientNaturalCave 3F",
+      "zh-TW": "遠古天然洞穴 3層",
+      "pt-BR": "Caverna natural ancestral · 3º andar",
+      "aliases": [
+        "AncientNaturalCave 3F"
+      ]
+    },
+    {
+      "key": "npc.menu.6f202f54a7b2d8fe",
+      "en": "List",
+      "zh-TW": "清單",
+      "pt-BR": "Lista",
+      "aliases": [
+        "List"
+      ]
+    },
+    {
+      "key": "npc.menu.6f8860eb5103a16b",
+      "en": "listen",
+      "zh-TW": "聆聽",
+      "pt-BR": "ouvir",
+      "aliases": [
+        "listen"
+      ]
+    },
+    {
+      "key": "npc.menu.6fd75cb6eb38fddf",
+      "en": "Repair All Walls",
+      "zh-TW": "修理所有城牆",
+      "pt-BR": "Reparar todas as muralhas",
+      "aliases": [
+        "Repair All Walls"
+      ]
+    },
+    {
+      "key": "npc.menu.7008e21467dccc1e",
+      "en": "Proceed.",
+      "zh-TW": "繼續。",
+      "pt-BR": "Prosseguir.",
+      "aliases": [
+        "Proceed."
+      ]
+    },
+    {
+      "key": "npc.menu.70fe163fba6b6650",
+      "en": "RedValley_3F",
+      "zh-TW": "赤色山谷 3層",
+      "pt-BR": "Vale vermelho · 3º andar",
+      "aliases": [
+        "RedValley_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.71f2149b5982e467",
+      "en": "Archer",
+      "zh-TW": "弓箭手",
+      "pt-BR": "Arqueiro",
+      "aliases": [
+        "Archer"
+      ]
+    },
+    {
+      "key": "npc.menu.721ccb21b1636244",
+      "en": "Dungeonescape",
+      "zh-TW": "地牢逃脫卷",
+      "pt-BR": "Pergaminho de fuga da masmorra",
+      "aliases": [
+        "Dungeonescape"
+      ]
+    },
+    {
+      "key": "npc.menu.7346b4c67b34aedf",
+      "en": "Tax to 25%",
+      "zh-TW": "稅率設為 25%",
+      "pt-BR": "Definir imposto em 25%",
+      "aliases": [
+        "Tax to 25%"
+      ]
+    },
+    {
+      "key": "npc.menu.735bdeed6b46b4b6",
+      "en": "PrajnaTemple_4F",
+      "zh-TW": "般若神殿 4層",
+      "pt-BR": "Templo de Prajna · 4º andar",
+      "aliases": [
+        "PrajnaTemple_4F"
+      ]
+    },
+    {
+      "key": "npc.menu.73afe809dabc6950",
+      "en": "Page Two",
+      "zh-TW": "第二頁",
+      "pt-BR": "Página dois",
+      "aliases": [
+        "Page Two"
+      ]
+    },
+    {
+      "key": "npc.menu.73aff681180f8fab",
+      "en": "Haste 20",
+      "zh-TW": "疾速 20",
+      "pt-BR": "Aceleração 20",
+      "aliases": [
+        "Haste 20"
+      ]
+    },
+    {
+      "key": "npc.menu.73c12aafc1c03363",
+      "en": "PrajnaTemple_6F",
+      "zh-TW": "般若神殿 6層",
+      "pt-BR": "Templo de Prajna · 6º andar",
+      "aliases": [
+        "PrajnaTemple_6F"
+      ]
+    },
+    {
+      "key": "npc.menu.73cafb1f27364889",
+      "en": "Create Hero",
+      "zh-TW": "建立英雄",
+      "pt-BR": "Criar herói",
+      "aliases": [
+        "Create Hero"
+      ]
+    },
+    {
+      "key": "npc.menu.74446c234c9e1cc9",
+      "en": "CrossHalfmoon 38",
+      "zh-TW": "狂風斬 38",
+      "pt-BR": "Meia-Lua Cruzada 38",
+      "aliases": [
+        "CrossHalfmoon 38"
+      ]
+    },
+    {
+      "key": "npc.menu.746edddc7200f614",
+      "en": "I Will Challenge",
+      "zh-TW": "我要挑戰",
+      "pt-BR": "Vou enfrentar o desafio",
+      "aliases": [
+        "I Will Challenge"
+      ]
+    },
+    {
+      "key": "npc.menu.749e86532f6d440d",
+      "en": "Level 7>11",
+      "zh-TW": "等級 7–11",
+      "pt-BR": "Níveis 7–11",
+      "aliases": [
+        "Level 7>11"
+      ]
+    },
+    {
+      "key": "npc.menu.74bc4566ed81001d",
+      "en": "Townteleport",
+      "zh-TW": "回城卷",
+      "pt-BR": "Pergaminho de retorno",
+      "aliases": [
+        "Townteleport"
+      ]
+    },
+    {
+      "key": "npc.menu.75656ad6e09976f2",
+      "en": "Candle",
+      "zh-TW": "蠟燭",
+      "pt-BR": "Vela",
+      "aliases": [
+        "Candle"
+      ]
+    },
+    {
+      "key": "npc.menu.758452207507306c",
+      "en": "Level 80+",
+      "zh-TW": "等級 80 以上",
+      "pt-BR": "Nível 80 ou superior",
+      "aliases": [
+        "Level 80+"
+      ]
+    },
+    {
+      "key": "npc.menu.759c226246309ebb",
+      "en": "Summon",
+      "zh-TW": "召喚",
+      "pt-BR": "Invocar",
+      "aliases": [
+        "Summon"
+      ]
+    },
+    {
+      "key": "npc.menu.76853f94b8b07ede",
+      "en": "GoldBarBundle",
+      "zh-TW": "金條包",
+      "pt-BR": "Pacote de barras de ouro",
+      "aliases": [
+        "GoldBarBundle"
+      ]
+    },
+    {
+      "key": "npc.menu.76900f1bfd16c8d4",
+      "en": "Back",
+      "zh-TW": "返回",
+      "pt-BR": "Voltar",
+      "aliases": [
+        "Back"
+      ]
+    },
+    {
+      "key": "npc.menu.77029e2145378527",
+      "en": "Dark Forest",
+      "zh-TW": "黑暗森林",
+      "pt-BR": "Floresta sombria",
+      "aliases": [
+        "Dark Forest"
+      ]
+    },
+    {
+      "key": "npc.menu.78b44180b6559400",
+      "en": "Halfmoon 26",
+      "zh-TW": "半月彎刀 26",
+      "pt-BR": "Meia-Lua 26",
+      "aliases": [
+        "Halfmoon 26"
+      ]
+    },
+    {
+      "key": "npc.menu.78e2c73a966509fe",
+      "en": "MoonLight 36",
+      "zh-TW": "月光 36",
+      "pt-BR": "Luar 36",
+      "aliases": [
+        "MoonLight 36"
+      ]
+    },
+    {
+      "key": "npc.menu.79823b641d4c7903",
+      "en": "PrajnaTemple_3F",
+      "zh-TW": "般若神殿 3層",
+      "pt-BR": "Templo de Prajna · 3º andar",
+      "aliases": [
+        "PrajnaTemple_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.79976f991c429767",
+      "en": "Disassemble",
+      "zh-TW": "分解",
+      "pt-BR": "Desmontar",
+      "aliases": [
+        "Disassemble"
+      ]
+    },
+    {
+      "key": "npc.menu.79c633ed15cd94ed",
+      "en": "Skill List",
+      "zh-TW": "技能清單",
+      "pt-BR": "Lista de habilidades",
+      "aliases": [
+        "Skill List"
+      ]
+    },
+    {
+      "key": "npc.menu.7a51eaccfe3ec644",
+      "en": "Reagent store",
+      "zh-TW": "施法材料店",
+      "pt-BR": "Loja de reagentes",
+      "aliases": [
+        "Reagent store"
+      ]
+    },
+    {
+      "key": "npc.menu.7a5766ce74e5c2e0",
+      "en": "Start War/End War",
+      "zh-TW": "開始／結束戰爭",
+      "pt-BR": "Iniciar/encerrar guerra",
+      "aliases": [
+        "Start War/End War"
+      ]
+    },
+    {
+      "key": "npc.menu.7b8105d363f0b881",
+      "en": "SpiritSword 9",
+      "zh-TW": "精神力戰法 9",
+      "pt-BR": "Técnica Espiritual da Espada 9",
+      "aliases": [
+        "SpiritSword 9"
+      ]
+    },
+    {
+      "key": "npc.menu.7ba46e18a13fc679",
+      "en": "SouthernLostCave",
+      "zh-TW": "迷失洞穴南部",
+      "pt-BR": "Caverna perdida sul",
+      "aliases": [
+        "SouthernLostCave"
+      ]
+    },
+    {
+      "key": "npc.menu.7bef0d429e93bdc6",
+      "en": "RedCavern_7F",
+      "zh-TW": "紅色洞穴 7層",
+      "pt-BR": "Caverna vermelha · 7º andar",
+      "aliases": [
+        "RedCavern_7F"
+      ]
+    },
+    {
+      "key": "npc.menu.7c17daef60eca1f2",
+      "en": "OverPass",
+      "zh-TW": "天橋",
+      "pt-BR": "Passarela",
+      "aliases": [
+        "OverPass"
+      ]
+    },
+    {
+      "key": "npc.menu.7c3586b8fe1992ec",
+      "en": "Combat & Skill info",
+      "zh-TW": "戰鬥與技能說明",
+      "pt-BR": "Informações de combate e habilidades",
+      "aliases": [
+        "Combat & Skill info"
+      ]
+    },
+    {
+      "key": "npc.menu.7cda2ddd162fc9ec",
+      "en": "Level 1>3",
+      "zh-TW": "等級 1–3",
+      "pt-BR": "Níveis 1–3",
+      "aliases": [
+        "Level 1>3"
+      ]
+    },
+    {
+      "key": "npc.menu.7ceeab81fc1ec282",
+      "en": "Snow Cavern",
+      "zh-TW": "雪洞",
+      "pt-BR": "Caverna de neve",
+      "aliases": [
+        "Snow Cavern"
+      ]
+    },
+    {
+      "key": "npc.menu.7d13be8d07e0fe62",
+      "en": "RedValley_11F",
+      "zh-TW": "赤色山谷 11層",
+      "pt-BR": "Vale vermelho · 11º andar",
+      "aliases": [
+        "RedValley_11F"
+      ]
+    },
+    {
+      "key": "npc.menu.7d36aeb0fe8be3be",
+      "en": "Hemorrhage 47",
+      "zh-TW": "血鳳擊 47",
+      "pt-BR": "Hemorragia 47",
+      "aliases": [
+        "Hemorrhage 47"
+      ]
+    },
+    {
+      "key": "npc.menu.7d642850d92d18f7",
+      "en": "Guild Application",
+      "zh-TW": "公會申請",
+      "pt-BR": "Solicitação de guilda",
+      "aliases": [
+        "Guild Application"
+      ]
+    },
+    {
+      "key": "npc.menu.7d9eb7acb13e2462",
+      "en": "Close",
+      "zh-TW": "關閉",
+      "pt-BR": "Fechar",
+      "aliases": [
+        "Close"
+      ]
+    },
+    {
+      "key": "npc.menu.7e53d49ace8e94bb",
+      "en": "Lunar_3F",
+      "zh-TW": "月宮 3層",
+      "pt-BR": "Palácio lunar · 3º andar",
+      "aliases": [
+        "Lunar_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.7e8ed5b81833f2f8",
+      "en": "AncientSTomb_2F",
+      "zh-TW": "遠古石墓 2層",
+      "pt-BR": "Tumba de pedra ancestral · 2º andar",
+      "aliases": [
+        "AncientSTomb_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.816b1888253d55a3",
+      "en": "RedCavern_9F",
+      "zh-TW": "紅色洞穴 9層",
+      "pt-BR": "Caverna vermelha · 9º andar",
+      "aliases": [
+        "RedCavern_9F"
+      ]
+    },
+    {
+      "key": "npc.menu.8191b8548fd91b9c",
+      "en": "B2_AngledStoneTomb",
+      "zh-TW": "石墓地下二層",
+      "pt-BR": "Tumba de pedra · 2º subsolo",
+      "aliases": [
+        "B2_AngledStoneTomb"
+      ]
+    },
+    {
+      "key": "npc.menu.819b22693cc9981c",
+      "en": "Wizard skills",
+      "zh-TW": "法師技能",
+      "pt-BR": "Habilidades de mago",
+      "aliases": [
+        "Wizard skills"
+      ]
+    },
+    {
+      "key": "npc.menu.82e45142682ac8d8",
+      "en": "RedValley_8F",
+      "zh-TW": "赤色山谷 8層",
+      "pt-BR": "Vale vermelho · 8º andar",
+      "aliases": [
+        "RedValley_8F"
+      ]
+    },
+    {
+      "key": "npc.menu.843ac01149cced78",
+      "en": "Ok",
+      "zh-TW": "確定",
+      "pt-BR": "OK",
+      "aliases": [
+        "Ok"
+      ]
+    },
+    {
+      "key": "npc.menu.84bf5a54bfabc758",
+      "en": "LifeDeathCoffin",
+      "zh-TW": "生死棺",
+      "pt-BR": "Caixão da vida e da morte",
+      "aliases": [
+        "LifeDeathCoffin"
+      ]
+    },
+    {
+      "key": "npc.menu.84d73c7bb005cc2d",
+      "en": "RedCavern_11F",
+      "zh-TW": "紅色洞穴 11層",
+      "pt-BR": "Caverna vermelha · 11º andar",
+      "aliases": [
+        "RedCavern_11F"
+      ]
+    },
+    {
+      "key": "npc.menu.8569efc4ed5a6273",
+      "en": "Thank you.",
+      "zh-TW": "謝謝。",
+      "pt-BR": "Obrigado.",
+      "aliases": [
+        "Thank you."
+      ]
+    },
+    {
+      "key": "npc.menu.85a39ab345d672ff",
+      "en": "Yes",
+      "zh-TW": "是",
+      "pt-BR": "Sim",
+      "aliases": [
+        "Yes"
+      ]
+    },
+    {
+      "key": "npc.menu.85a5ae8108ac7a27",
+      "en": "HellCavern_2F",
+      "zh-TW": "地獄洞穴 2層",
+      "pt-BR": "Caverna do inferno · 2º andar",
+      "aliases": [
+        "HellCavern_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.85cda3d49bd0b566",
+      "en": "Wizard skill",
+      "zh-TW": "法師技能",
+      "pt-BR": "Habilidade de mago",
+      "aliases": [
+        "Wizard skill"
+      ]
+    },
+    {
+      "key": "npc.menu.85f6f59f5ddbc1e1",
+      "en": "ZumaTemple_7F",
+      "zh-TW": "祖瑪神殿 7層",
+      "pt-BR": "Templo de Zuma · 7º andar",
+      "aliases": [
+        "ZumaTemple_7F"
+      ]
+    },
+    {
+      "key": "npc.menu.860296446ec43c52",
+      "en": "I understand",
+      "zh-TW": "我明白了",
+      "pt-BR": "Entendi",
+      "aliases": [
+        "I understand"
+      ]
+    },
+    {
+      "key": "npc.menu.86eb21dd9debbbde",
+      "en": "Lunar_1F",
+      "zh-TW": "月宮 1層",
+      "pt-BR": "Palácio lunar · 1º andar",
+      "aliases": [
+        "Lunar_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.877ecbee7df0df57",
+      "en": "MassHealing 31",
+      "zh-TW": "群體治療術 31",
+      "pt-BR": "Cura em Área 31",
+      "aliases": [
+        "MassHealing 31"
+      ]
+    },
+    {
+      "key": "npc.menu.8810b114e0e6a77b",
+      "en": "RedCavern_4F",
+      "zh-TW": "紅色洞穴 4層",
+      "pt-BR": "Caverna vermelha · 4º andar",
+      "aliases": [
+        "RedCavern_4F"
+      ]
+    },
+    {
+      "key": "npc.menu.881121ff31589b92",
+      "en": "HellFire_1F",
+      "zh-TW": "地獄火 1層",
+      "pt-BR": "Fogo Infernal · 1º andar",
+      "aliases": [
+        "HellFire_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.8816c52bc5877a2b",
+      "en": "Wizard",
+      "zh-TW": "法師",
+      "pt-BR": "Mago",
+      "aliases": [
+        "Wizard"
+      ]
+    },
+    {
+      "key": "npc.menu.882e1d39b78501ef",
+      "en": "CrippleShot 43",
+      "zh-TW": "致殘射擊 43",
+      "pt-BR": "Tiro Aleijante 43",
+      "aliases": [
+        "CrippleShot 43"
+      ]
+    },
+    {
+      "key": "npc.menu.886c4eba8c8b2ff1",
+      "en": "Brown Hair",
+      "zh-TW": "棕髮",
+      "pt-BR": "Cabelo castanho",
+      "aliases": [
+        "Brown Hair"
+      ]
+    },
+    {
+      "key": "npc.menu.88745b9cd86a6180",
+      "en": "SummonHolyDeva 38",
+      "zh-TW": "召喚聖靈 38",
+      "pt-BR": "Invocar Deva Sagrado 38",
+      "aliases": [
+        "SummonHolyDeva 38"
+      ]
+    },
+    {
+      "key": "npc.menu.88d566c4d7ec2801",
+      "en": "Reagent Store",
+      "zh-TW": "施法材料店",
+      "pt-BR": "Loja de reagentes",
+      "aliases": [
+        "Reagent Store"
+      ]
+    },
+    {
+      "key": "npc.menu.8910728a11bdaff3",
+      "en": "PoisonShot 40",
+      "zh-TW": "毒箭 40",
+      "pt-BR": "Tiro Venenoso 40",
+      "aliases": [
+        "PoisonShot 40"
+      ]
+    },
+    {
+      "key": "npc.menu.89e2dbeda2c07345",
+      "en": "MeteorStrike 49",
+      "zh-TW": "流星打擊 49",
+      "pt-BR": "Chuva de Meteoros 49",
+      "aliases": [
+        "MeteorStrike 49"
+      ]
+    },
+    {
+      "key": "npc.menu.8c13fa781aeef6ad",
+      "en": "GoldBar",
+      "zh-TW": "金條",
+      "pt-BR": "Barra de ouro",
+      "aliases": [
+        "GoldBar"
+      ]
+    },
+    {
+      "key": "npc.menu.8d2aad9da30c7271",
+      "en": "BlackDragonDungeon_2F",
+      "zh-TW": "黑龍地牢 2層",
+      "pt-BR": "Calabouço do dragão negro · 2º andar",
+      "aliases": [
+        "BlackDragonDungeon_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.8d3531bffa5a6ddb",
+      "en": "PoisonSword 34",
+      "zh-TW": "猛毒劍氣 34",
+      "pt-BR": "Espada Venenosa 34",
+      "aliases": [
+        "PoisonSword 34"
+      ]
+    },
+    {
+      "key": "npc.menu.8dc44951a6688e9b",
+      "en": "Level 14>17",
+      "zh-TW": "等級 14–17",
+      "pt-BR": "Níveis 14–17",
+      "aliases": [
+        "Level 14>17"
+      ]
+    },
+    {
+      "key": "npc.menu.8e0dc4ee1d69a199",
+      "en": "What is the",
+      "zh-TW": "什麼是",
+      "pt-BR": "O que é",
+      "aliases": [
+        "What is the"
+      ]
+    },
+    {
+      "key": "npc.menu.8e385adb81fc152d",
+      "en": "Ask about Guild war",
+      "zh-TW": "詢問公會戰",
+      "pt-BR": "Perguntar sobre guerras de guilda",
+      "aliases": [
+        "Ask about Guild war"
+      ]
+    },
+    {
+      "key": "npc.menu.8ea1661be5c4e95a",
+      "en": "Will get next time",
+      "zh-TW": "下次再拿",
+      "pt-BR": "Pegarei da próxima vez",
+      "aliases": [
+        "Will get next time"
+      ]
+    },
+    {
+      "key": "npc.menu.8ec5cf54c9fa9016",
+      "en": "PrajnaTemple(W)_5F",
+      "zh-TW": "般若神殿（西） 5層",
+      "pt-BR": "Templo de Prajna (oeste) · 5º andar",
+      "aliases": [
+        "PrajnaTemple(W)_5F"
+      ]
+    },
+    {
+      "key": "npc.menu.8ec6722468364d5a",
+      "en": "LightBody 27",
+      "zh-TW": "輕身術 27",
+      "pt-BR": "Corpo Leve 27",
+      "aliases": [
+        "LightBody 27"
+      ]
+    },
+    {
+      "key": "npc.menu.8f4bf96363eaedfc",
+      "en": "Rebirth 1",
+      "zh-TW": "重生 1",
+      "pt-BR": "Renascimento 1",
+      "aliases": [
+        "Rebirth 1"
+      ]
+    },
+    {
+      "key": "npc.menu.8ff61b95d1a38abe",
+      "en": "Meditation 19",
+      "zh-TW": "冥想 19",
+      "pt-BR": "Meditação 19",
+      "aliases": [
+        "Meditation 19"
+      ]
+    },
+    {
+      "key": "npc.menu.8ff92bcecee0c239",
+      "en": "HeavenlySword 30",
+      "zh-TW": "天劍 30",
+      "pt-BR": "Espada Celestial 30",
+      "aliases": [
+        "HeavenlySword 30"
+      ]
+    },
+    {
+      "key": "npc.menu.90053b9ef2f4560d",
+      "en": "Level 70-79",
+      "zh-TW": "等級 70–79",
+      "pt-BR": "Níveis 70–79",
+      "aliases": [
+        "Level 70-79"
+      ]
+    },
+    {
+      "key": "npc.menu.904342f0b1198eea",
+      "en": "RedValley_4F",
+      "zh-TW": "赤色山谷 4層",
+      "pt-BR": "Vale vermelho · 4º andar",
+      "aliases": [
+        "RedValley_4F"
+      ]
+    },
+    {
+      "key": "npc.menu.910da604d17e00f6",
+      "en": "RedCavern_3F",
+      "zh-TW": "紅色洞穴 3層",
+      "pt-BR": "Caverna vermelha · 3º andar",
+      "aliases": [
+        "RedCavern_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.91949d66303b5e0f",
+      "en": "Butcher's shop",
+      "zh-TW": "肉店",
+      "pt-BR": "Açougue",
+      "aliases": [
+        "Butcher's shop"
+      ]
+    },
+    {
+      "key": "npc.menu.92039a3f6fe519a5",
+      "en": "Mongchon Province",
+      "zh-TW": "盟重省",
+      "pt-BR": "Província de Mongchon",
+      "aliases": [
+        "Mongchon Province"
+      ]
+    },
+    {
+      "key": "npc.menu.9206c93651fdd892",
+      "en": "Weapon shop",
+      "zh-TW": "武器店",
+      "pt-BR": "Loja de armas",
+      "aliases": [
+        "Weapon shop"
+      ]
+    },
+    {
+      "key": "npc.menu.922cbd1e13919b00",
+      "en": "Combat & Skill",
+      "zh-TW": "戰鬥與技能",
+      "pt-BR": "Combate e habilidades",
+      "aliases": [
+        "Combat & Skill"
+      ]
+    },
+    {
+      "key": "npc.menu.947ab88db8b7ff36",
+      "en": "To Bichon Province",
+      "zh-TW": "前往比奇省",
+      "pt-BR": "Para a Província de Bichon",
+      "aliases": [
+        "To Bichon Province"
+      ]
+    },
+    {
+      "key": "npc.menu.948712a8659ec125",
+      "en": "I'll follow your orders with pleasure",
+      "zh-TW": "我樂意遵從你的指示",
+      "pt-BR": "Seguirei suas ordens com prazer",
+      "aliases": [
+        "I'll follow your orders with pleasure"
+      ]
+    },
+    {
+      "key": "npc.menu.94d350e3ff114372",
+      "en": "Guild Territory 1",
+      "zh-TW": "公會領地 1",
+      "pt-BR": "Território da guilda 1",
+      "aliases": [
+        "Guild Territory 1"
+      ]
+    },
+    {
+      "key": "npc.menu.950002c26b9c1e0e",
+      "en": "MoonMist 60",
+      "zh-TW": "月影迷霧 60",
+      "pt-BR": "Névoa Lunar 60",
+      "aliases": [
+        "MoonMist 60"
+      ]
+    },
+    {
+      "key": "npc.menu.9528b72d554c701f",
+      "en": "SacredFoxTemple",
+      "zh-TW": "聖狐神殿",
+      "pt-BR": "Templo da raposa sagrada",
+      "aliases": [
+        "SacredFoxTemple"
+      ]
+    },
+    {
+      "key": "npc.menu.9605b14584c2e7b2",
+      "en": "Trap 33",
+      "zh-TW": "捕縛術 33",
+      "pt-BR": "Armadilha 33",
+      "aliases": [
+        "Trap 33"
+      ]
+    },
+    {
+      "key": "npc.menu.962f67452e602d8a",
+      "en": "Ask how to create a Guild",
+      "zh-TW": "詢問如何建立公會",
+      "pt-BR": "Perguntar como criar uma guilda",
+      "aliases": [
+        "Ask how to create a Guild"
+      ]
+    },
+    {
+      "key": "npc.menu.9638460bf0e89e76",
+      "en": "No. too expensive",
+      "zh-TW": "不了，太貴了",
+      "pt-BR": "Não, é muito caro",
+      "aliases": [
+        "No. too expensive"
+      ]
+    },
+    {
+      "key": "npc.menu.9693efb2350cf8f5",
+      "en": "Hero Management",
+      "zh-TW": "英雄管理",
+      "pt-BR": "Gerenciar heróis",
+      "aliases": [
+        "Hero Management"
+      ]
+    },
+    {
+      "key": "npc.menu.9709653fc80ceb83",
+      "en": "Trade",
+      "zh-TW": "交易",
+      "pt-BR": "Troca",
+      "aliases": [
+        "Trade"
+      ]
+    },
+    {
+      "key": "npc.menu.976d9c6c4e79a60d",
+      "en": "RedValley_7F",
+      "zh-TW": "赤色山谷 7層",
+      "pt-BR": "Vale vermelho · 7º andar",
+      "aliases": [
+        "RedValley_7F"
+      ]
+    },
+    {
+      "key": "npc.menu.97e12692f9dcb892",
+      "en": "Dungeons",
+      "zh-TW": "地下城",
+      "pt-BR": "Masmorras",
+      "aliases": [
+        "Dungeons"
+      ]
+    },
+    {
+      "key": "npc.menu.97f9f78b2d37eec9",
+      "en": "DelayedExplosion 31",
+      "zh-TW": "延爆箭 31",
+      "pt-BR": "Explosão Retardada 31",
+      "aliases": [
+        "DelayedExplosion 31"
+      ]
+    },
+    {
+      "key": "npc.menu.98bda5b3a58f388d",
+      "en": "W_2FofDungeon",
+      "zh-TW": "地牢二層西部",
+      "pt-BR": "Calabouço · 2º andar oeste",
+      "aliases": [
+        "W_2FofDungeon"
+      ]
+    },
+    {
+      "key": "npc.menu.997c544f1be0a2dd",
+      "en": "Special",
+      "zh-TW": "特殊",
+      "pt-BR": "Especial",
+      "aliases": [
+        "Special"
+      ]
+    },
+    {
+      "key": "npc.menu.99bdc1ca939b0dc1",
+      "en": "B7_AngledStoneTomb",
+      "zh-TW": "石墓地下七層",
+      "pt-BR": "Tumba de pedra · 7º subsolo",
+      "aliases": [
+        "B7_AngledStoneTomb"
+      ]
+    },
+    {
+      "key": "npc.menu.9a6dbf43fc9b13c5",
+      "en": "Ancient Zuma Temple",
+      "zh-TW": "遠古祖瑪寺廟",
+      "pt-BR": "Templo ancestral de Zuma",
+      "aliases": [
+        "Ancient Zuma Temple"
+      ]
+    },
+    {
+      "key": "npc.menu.9ae589c0d925fb4b",
+      "en": "Guild Territory",
+      "zh-TW": "公會領地",
+      "pt-BR": "Território da guilda",
+      "aliases": [
+        "Guild Territory"
+      ]
+    },
+    {
+      "key": "npc.menu.9af7c2944917b91f",
+      "en": "DungeonEscapes",
+      "zh-TW": "地牢逃脫卷",
+      "pt-BR": "Pergaminhos de fuga da masmorra",
+      "aliases": [
+        "DungeonEscapes"
+      ]
+    },
+    {
+      "key": "npc.menu.9b9a8d05a7ec353b",
+      "en": "Read",
+      "zh-TW": "閱讀",
+      "pt-BR": "Ler",
+      "aliases": [
+        "Read"
+      ]
+    },
+    {
+      "key": "npc.menu.9bb725005055412c",
+      "en": "Before",
+      "zh-TW": "上一頁",
+      "pt-BR": "Anterior",
+      "aliases": [
+        "Before"
+      ]
+    },
+    {
+      "key": "npc.menu.9be56b5170d453f0",
+      "en": "PrajnaTemple_7F",
+      "zh-TW": "般若神殿 7層",
+      "pt-BR": "Templo de Prajna · 7º andar",
+      "aliases": [
+        "PrajnaTemple_7F"
+      ]
+    },
+    {
+      "key": "npc.menu.9bfe8a4ab3a2b0e2",
+      "en": "PrajnaStoneCave_1F",
+      "zh-TW": "般若石窟 1層",
+      "pt-BR": "Caverna de pedra de Prajna · 1º andar",
+      "aliases": [
+        "PrajnaStoneCave_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.9c1afddd4364769b",
+      "en": "RedValley_2F",
+      "zh-TW": "赤色山谷 2層",
+      "pt-BR": "Vale vermelho · 2º andar",
+      "aliases": [
+        "RedValley_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.9c21ad80ba637ec8",
+      "en": "WoomaTemple_1F",
+      "zh-TW": "沃瑪寺廟 1層",
+      "pt-BR": "Templo de Wooma · 1º andar",
+      "aliases": [
+        "WoomaTemple_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.9cbbb6dfd3c2fb51",
+      "en": "I can cover any problem by myself",
+      "zh-TW": "我能自己解決問題",
+      "pt-BR": "Posso resolver qualquer problema sozinho",
+      "aliases": [
+        "I can cover any problem by myself"
+      ]
+    },
+    {
+      "key": "npc.menu.9ce8f561b8926598",
+      "en": "AncientTempleEntrance",
+      "zh-TW": "遠古神廟入口",
+      "pt-BR": "Entrada do templo ancestral",
+      "aliases": [
+        "AncientTempleEntrance"
+      ]
+    },
+    {
+      "key": "npc.menu.9d025cf4ce1f4b95",
+      "en": "WoomaPalace",
+      "zh-TW": "沃瑪宮殿",
+      "pt-BR": "Palácio de Wooma",
+      "aliases": [
+        "WoomaPalace"
+      ]
+    },
+    {
+      "key": "npc.menu.9d65ac4bb33012da",
+      "en": "OmaCave_2",
+      "zh-TW": "半獸人洞穴 2層",
+      "pt-BR": "Caverna dos Omas · 2º andar",
+      "aliases": [
+        "OmaCave_2"
+      ]
+    },
+    {
+      "key": "npc.menu.9d962e3352de9c22",
+      "en": "OmaCave_3F",
+      "zh-TW": "半獸人洞穴 3層",
+      "pt-BR": "Caverna dos Omas · 3º andar",
+      "aliases": [
+        "OmaCave_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.9dc99e4ececf6376",
+      "en": "Special structure",
+      "zh-TW": "特殊建築",
+      "pt-BR": "Estrutura especial",
+      "aliases": [
+        "Special structure"
+      ]
+    },
+    {
+      "key": "npc.menu.9e6bda81c15a2002",
+      "en": "Curse 40",
+      "zh-TW": "詛咒術 40",
+      "pt-BR": "Maldição 40",
+      "aliases": [
+        "Curse 40"
+      ]
+    },
+    {
+      "key": "npc.menu.9ea74ae2be17604b",
+      "en": "Rage 44",
+      "zh-TW": "狂暴 44",
+      "pt-BR": "Fúria 44",
+      "aliases": [
+        "Rage 44"
+      ]
+    },
+    {
+      "key": "npc.menu.9eb4f47b480a546e",
+      "en": "Hunting info by each level",
+      "zh-TW": "各等級狩獵資訊",
+      "pt-BR": "Informações de caça por nível",
+      "aliases": [
+        "Hunting info by each level"
+      ]
+    },
+    {
+      "key": "npc.menu.9fcd303caecfef7f",
+      "en": "AngledStoneTombEntrance",
+      "zh-TW": "石墓入口",
+      "pt-BR": "Entrada da tumba de pedra",
+      "aliases": [
+        "AngledStoneTombEntrance"
+      ]
+    },
+    {
+      "key": "npc.menu.a0439e20ff71d0ad",
+      "en": "ZumaTemple_5F",
+      "zh-TW": "祖瑪神殿 5層",
+      "pt-BR": "Templo de Zuma · 5º andar",
+      "aliases": [
+        "ZumaTemple_5F"
+      ]
+    },
+    {
+      "key": "npc.menu.a104dc5ab2025fcd",
+      "en": "Hairdresser",
+      "zh-TW": "理髮師",
+      "pt-BR": "Cabeleireiro",
+      "aliases": [
+        "Hairdresser"
+      ]
+    },
+    {
+      "key": "npc.menu.a1051172943bb085",
+      "en": "SummonSkeleton 19",
+      "zh-TW": "召喚骷髏 19",
+      "pt-BR": "Invocar Esqueleto 19",
+      "aliases": [
+        "SummonSkeleton 19"
+      ]
+    },
+    {
+      "key": "npc.menu.a10e6a4ad3d1107b",
+      "en": "N_1FofDungeon",
+      "zh-TW": "地牢一層北部",
+      "pt-BR": "Calabouço · 1º andar norte",
+      "aliases": [
+        "N_1FofDungeon"
+      ]
+    },
+    {
+      "key": "npc.menu.a1d95ed029552048",
+      "en": "Ancient Stone Temple",
+      "zh-TW": "遠古石墓",
+      "pt-BR": "Templo de pedra ancestral",
+      "aliases": [
+        "Ancient Stone Temple"
+      ]
+    },
+    {
+      "key": "npc.menu.a2cc780651e547e5",
+      "en": "IceHellCavern",
+      "zh-TW": "冰獄洞穴",
+      "pt-BR": "Caverna do inferno gelado",
+      "aliases": [
+        "IceHellCavern"
+      ]
+    },
+    {
+      "key": "npc.menu.a2f8c9702f579f93",
+      "en": "Guild Territory 3",
+      "zh-TW": "公會領地 3",
+      "pt-BR": "Território da guilda 3",
+      "aliases": [
+        "Guild Territory 3"
+      ]
+    },
+    {
+      "key": "npc.menu.a330395cc0a53ad1",
+      "en": "list",
+      "zh-TW": "清單",
+      "pt-BR": "lista",
+      "aliases": [
+        "list"
+      ]
+    },
+    {
+      "key": "npc.menu.a362d988c92c0ddf",
+      "en": "RedValley_5F",
+      "zh-TW": "赤色山谷 5層",
+      "pt-BR": "Vale vermelho · 5º andar",
+      "aliases": [
+        "RedValley_5F"
+      ]
+    },
+    {
+      "key": "npc.menu.a36a6901a80e2f35",
+      "en": "Ancient Prajna Cave",
+      "zh-TW": "遠古般若洞穴",
+      "pt-BR": "Caverna ancestral de Prajna",
+      "aliases": [
+        "Ancient Prajna Cave"
+      ]
+    },
+    {
+      "key": "npc.menu.a3f452e706b7f7ef",
+      "en": "Guild war",
+      "zh-TW": "公會戰",
+      "pt-BR": "Guerra de guildas",
+      "aliases": [
+        "Guild war"
+      ]
+    },
+    {
+      "key": "npc.menu.a45a5c9e5297ccc2",
+      "en": "Guild Territory 7",
+      "zh-TW": "公會領地 7",
+      "pt-BR": "Território da guilda 7",
+      "aliases": [
+        "Guild Territory 7"
+      ]
+    },
+    {
+      "key": "npc.menu.a476893fd80fac02",
+      "en": "Rebirth Panel",
+      "zh-TW": "重生面板",
+      "pt-BR": "Painel de renascimento",
+      "aliases": [
+        "Rebirth Panel"
+      ]
+    },
+    {
+      "key": "npc.menu.a4fe65264ef7dbb3",
+      "en": "Language",
+      "zh-TW": "語言",
+      "pt-BR": "Idioma",
+      "aliases": [
+        "Language"
+      ]
+    },
+    {
+      "key": "npc.menu.a52ace420f2175d0",
+      "en": "All",
+      "zh-TW": "全部",
+      "pt-BR": "Todas",
+      "aliases": [
+        "All"
+      ]
+    },
+    {
+      "key": "npc.menu.a5adbfd8728000e6",
+      "en": "PrajnaTemple(E)_5F",
+      "zh-TW": "般若神殿（東） 5層",
+      "pt-BR": "Templo de Prajna (leste) · 5º andar",
+      "aliases": [
+        "PrajnaTemple(E)_5F"
+      ]
+    },
+    {
+      "key": "npc.menu.a623ef2277e68ba2",
+      "en": "BlackDragonDungeon_1F",
+      "zh-TW": "黑龍地牢 1層",
+      "pt-BR": "Calabouço do dragão negro · 1º andar",
+      "aliases": [
+        "BlackDragonDungeon_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.a656107e99c71dea",
+      "en": "Statistics",
+      "zh-TW": "統計",
+      "pt-BR": "Estatísticas",
+      "aliases": [
+        "Statistics"
+      ]
+    },
+    {
+      "key": "npc.menu.a69ab0d5d752b85d",
+      "en": "Rebirth 2",
+      "zh-TW": "重生 2",
+      "pt-BR": "Renascimento 2",
+      "aliases": [
+        "Rebirth 2"
+      ]
+    },
+    {
+      "key": "npc.menu.a69c4dece144a46e",
+      "en": "Storage",
+      "zh-TW": "倉庫",
+      "pt-BR": "Armazém",
+      "aliases": [
+        "Storage"
+      ]
+    },
+    {
+      "key": "npc.menu.a6a10cfd31c54dc1",
+      "en": "Brown Afro",
+      "zh-TW": "棕色捲髮",
+      "pt-BR": "Cabelo afro castanho",
+      "aliases": [
+        "Brown Afro"
+      ]
+    },
+    {
+      "key": "npc.menu.a708df92c9e46229",
+      "en": "legal",
+      "zh-TW": "合法",
+      "pt-BR": "legal",
+      "aliases": [
+        "legal"
+      ]
+    },
+    {
+      "key": "npc.menu.a7149255cf7dad7b",
+      "en": "Bug Cave",
+      "zh-TW": "蟲洞",
+      "pt-BR": "Caverna dos insetos",
+      "aliases": [
+        "Bug Cave"
+      ]
+    },
+    {
+      "key": "npc.menu.a7203689e4cfc6fe",
+      "en": "FlashDash 25",
+      "zh-TW": "拔刀術 25",
+      "pt-BR": "Investida Veloz 25",
+      "aliases": [
+        "FlashDash 25"
+      ]
+    },
+    {
+      "key": "npc.menu.a7306a7e92e6b5a9",
+      "en": "level 21~30",
+      "zh-TW": "等級 21–30",
+      "pt-BR": "Níveis 21–30",
+      "aliases": [
+        "level 21~30"
+      ]
+    },
+    {
+      "key": "npc.menu.a765af77a8a71f6f",
+      "en": "Mind",
+      "zh-TW": "心智",
+      "pt-BR": "Mente",
+      "aliases": [
+        "Mind"
+      ]
+    },
+    {
+      "key": "npc.menu.a85eda1c93b5861c",
+      "en": "Take me in",
+      "zh-TW": "帶我進去",
+      "pt-BR": "Leve-me para dentro",
+      "aliases": [
+        "Take me in"
+      ]
+    },
+    {
+      "key": "npc.menu.a8ab2a012bf1bfb0",
+      "en": "RedCavern_10F",
+      "zh-TW": "紅色洞穴 10層",
+      "pt-BR": "Caverna vermelha · 10º andar",
+      "aliases": [
+        "RedCavern_10F"
+      ]
+    },
+    {
+      "key": "npc.menu.a8e306f7e21e07b7",
+      "en": "Combat Technic",
+      "zh-TW": "戰鬥技巧",
+      "pt-BR": "Técnicas de combate",
+      "aliases": [
+        "Combat Technic"
+      ]
+    },
+    {
+      "key": "npc.menu.a95eb9ee397de539",
+      "en": "StoneTrap 40",
+      "zh-TW": "石之陷阱 40",
+      "pt-BR": "Armadilha de pedra 40",
+      "aliases": [
+        "StoneTrap 40"
+      ]
+    },
+    {
+      "key": "npc.menu.a9d00e107ae557e2",
+      "en": "Tax to 15%",
+      "zh-TW": "稅率設為 15%",
+      "pt-BR": "Definir imposto em 15%",
+      "aliases": [
+        "Tax to 15%"
+      ]
+    },
+    {
+      "key": "npc.menu.aa1bc9e3c1d67821",
+      "en": "RedValley_9F",
+      "zh-TW": "赤色山谷 9層",
+      "pt-BR": "Vale vermelho · 9º andar",
+      "aliases": [
+        "RedValley_9F"
+      ]
+    },
+    {
+      "key": "npc.menu.aa3522c09a617c14",
+      "en": "AncientSTomb_3F",
+      "zh-TW": "遠古石墓 3層",
+      "pt-BR": "Tumba de pedra ancestral · 3º andar",
+      "aliases": [
+        "AncientSTomb_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.aa5f7a4f5196b779",
+      "en": "AncientTemple",
+      "zh-TW": "遠古神廟",
+      "pt-BR": "Templo ancestral",
+      "aliases": [
+        "AncientTemple"
+      ]
+    },
+    {
+      "key": "npc.menu.aa9e9b5c907d50fe",
+      "en": "see",
+      "zh-TW": "查看",
+      "pt-BR": "ver",
+      "aliases": [
+        "see"
+      ]
+    },
+    {
+      "key": "npc.menu.aadac735dc8b93e5",
+      "en": "Level 3>7",
+      "zh-TW": "等級 3–7",
+      "pt-BR": "Níveis 3–7",
+      "aliases": [
+        "Level 3>7"
+      ]
+    },
+    {
+      "key": "npc.menu.aae7e0c879c83ed8",
+      "en": "TwinDrakeBlade 32",
+      "zh-TW": "雙龍斬 32",
+      "pt-BR": "Lâmina do Dragão Gêmeo 32",
+      "aliases": [
+        "TwinDrakeBlade 32"
+      ]
+    },
+    {
+      "key": "npc.menu.ab5a8b1633bd2fec",
+      "en": "WoomaTempleEntrance",
+      "zh-TW": "沃瑪寺廟入口",
+      "pt-BR": "Entrada do Templo de Wooma",
+      "aliases": [
+        "WoomaTempleEntrance"
+      ]
+    },
+    {
+      "key": "npc.menu.abc8d5e2b486490e",
+      "en": "Guild Territory 9",
+      "zh-TW": "公會領地 9",
+      "pt-BR": "Território da guilda 9",
+      "aliases": [
+        "Guild Territory 9"
+      ]
+    },
+    {
+      "key": "npc.menu.ad35d3dca63057ee",
+      "en": "AmethystRoom",
+      "zh-TW": "紫晶室",
+      "pt-BR": "Sala de ametista",
+      "aliases": [
+        "AmethystRoom"
+      ]
+    },
+    {
+      "key": "npc.menu.ad4a47d4d304c6be",
+      "en": "Concentration 23",
+      "zh-TW": "專注 23",
+      "pt-BR": "Concentração 23",
+      "aliases": [
+        "Concentration 23"
+      ]
+    },
+    {
+      "key": "npc.menu.adb14a8547631572",
+      "en": "FireWall 24",
+      "zh-TW": "火牆 24",
+      "pt-BR": "Muralha de Fogo 24",
+      "aliases": [
+        "FireWall 24"
+      ]
+    },
+    {
+      "key": "npc.menu.ae2cd9d1ed4e7bfa",
+      "en": "ExplosiveTrap 22",
+      "zh-TW": "爆炸陷阱 22",
+      "pt-BR": "Armadilha Explosiva 22",
+      "aliases": [
+        "ExplosiveTrap 22"
+      ]
+    },
+    {
+      "key": "npc.menu.ae64effd5ad11356",
+      "en": "Vampirism 33",
+      "zh-TW": "噬血術 33",
+      "pt-BR": "Vampirismo 33",
+      "aliases": [
+        "Vampirism 33"
+      ]
+    },
+    {
+      "key": "npc.menu.af33e42530dc7ff6",
+      "en": "Dungeon of the Ancient Ones",
+      "zh-TW": "遠古者地下城",
+      "pt-BR": "Masmorra dos ancestrais",
+      "aliases": [
+        "Dungeon of the Ancient Ones"
+      ]
+    },
+    {
+      "key": "npc.menu.afba5c1c071cb7ec",
+      "en": "InsectCave_3F",
+      "zh-TW": "蟲洞 3層",
+      "pt-BR": "Caverna dos insetos · 3º andar",
+      "aliases": [
+        "InsectCave_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.b03a310c26efa438",
+      "en": "LostCave(MainCave)",
+      "zh-TW": "迷失洞穴主洞",
+      "pt-BR": "Caverna perdida · câmara principal",
+      "aliases": [
+        "LostCave(MainCave)"
+      ]
+    },
+    {
+      "key": "npc.menu.b1031143354d2842",
+      "en": "PrajnaTemple_2F",
+      "zh-TW": "般若神殿 2層",
+      "pt-BR": "Templo de Prajna · 2º andar",
+      "aliases": [
+        "PrajnaTemple_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.b123be3ad7d31577",
+      "en": "PrajnaStoneCave(W)_3F",
+      "zh-TW": "般若石窟（西） 3層",
+      "pt-BR": "Caverna de pedra de Prajna (oeste) · 3º andar",
+      "aliases": [
+        "PrajnaStoneCave(W)_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.b1459623887c4222",
+      "en": "OmaCave_1F",
+      "zh-TW": "半獸人洞穴 1層",
+      "pt-BR": "Caverna dos Omas · 1º andar",
+      "aliases": [
+        "OmaCave_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.b1730b6116c8a31b",
+      "en": "Open my Storage",
+      "zh-TW": "開啟我的倉庫",
+      "pt-BR": "Abrir meu armazém",
+      "aliases": [
+        "Open my Storage"
+      ]
+    },
+    {
+      "key": "npc.menu.b1be55a3f79a2b55",
+      "en": "SwampCavern_2F",
+      "zh-TW": "沼澤洞穴 2層",
+      "pt-BR": "Caverna do pântano · 2º andar",
+      "aliases": [
+        "SwampCavern_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.b1c0eb4a8ac2e22a",
+      "en": "Close Gate",
+      "zh-TW": "關閉城門",
+      "pt-BR": "Fechar portão",
+      "aliases": [
+        "Close Gate"
+      ]
+    },
+    {
+      "key": "npc.menu.b3907242c93291f8",
+      "en": "Book store",
+      "zh-TW": "書店",
+      "pt-BR": "Livraria",
+      "aliases": [
+        "Book store"
+      ]
+    },
+    {
+      "key": "npc.menu.b433ee3777a29379",
+      "en": "Towns",
+      "zh-TW": "城鎮",
+      "pt-BR": "Cidades",
+      "aliases": [
+        "Towns"
+      ]
+    },
+    {
+      "key": "npc.menu.b4ea8c0495ac4491",
+      "en": "DeleteHero",
+      "zh-TW": "刪除英雄",
+      "pt-BR": "Excluir herói",
+      "aliases": [
+        "DeleteHero"
+      ]
+    },
+    {
+      "key": "npc.menu.b5f3c6a0ff103f90",
+      "en": "Newbie Guild Recruitment",
+      "zh-TW": "新手公會招募",
+      "pt-BR": "Recrutamento da guilda de iniciantes",
+      "aliases": [
+        "Newbie Guild Recruitment"
+      ]
+    },
+    {
+      "key": "npc.menu.b636e0260d2ae1e5",
+      "en": "Command(part, guild, chat and etc)",
+      "zh-TW": "指令（隊伍、公會、聊天等）",
+      "pt-BR": "Comandos (grupo, guilda, conversa etc.)",
+      "aliases": [
+        "Command(part, guild, chat and etc)"
+      ]
+    },
+    {
+      "key": "npc.menu.b6c33f2c1ee43f1d",
+      "en": "SwiftFeet 40",
+      "zh-TW": "迅雷疾足 40",
+      "pt-BR": "Pés Velozes 40",
+      "aliases": [
+        "SwiftFeet 40"
+      ]
+    },
+    {
+      "key": "npc.menu.b7401cb907eeab5f",
+      "en": "Warrior skills",
+      "zh-TW": "戰士技能",
+      "pt-BR": "Habilidades de guerreiro",
+      "aliases": [
+        "Warrior skills"
+      ]
+    },
+    {
+      "key": "npc.menu.b755fa9b0fbb0ede",
+      "en": "IceHellPass",
+      "zh-TW": "冰獄隘口",
+      "pt-BR": "Passagem do inferno gelado",
+      "aliases": [
+        "IceHellPass"
+      ]
+    },
+    {
+      "key": "npc.menu.b79a4838b307471a",
+      "en": "BichonWall",
+      "zh-TW": "比奇城牆",
+      "pt-BR": "Muralha de Bichon",
+      "aliases": [
+        "BichonWall"
+      ]
+    },
+    {
+      "key": "npc.menu.b79cac926e0b2e34",
+      "en": "Help",
+      "zh-TW": "說明",
+      "pt-BR": "Ajuda",
+      "aliases": [
+        "Help"
+      ]
+    },
+    {
+      "key": "npc.menu.b8c209cdead61a09",
+      "en": "Ask",
+      "zh-TW": "詢問",
+      "pt-BR": "Perguntar",
+      "aliases": [
+        "Ask"
+      ]
+    },
+    {
+      "key": "npc.menu.b9110bfff3d78448",
+      "en": "I should try it out.",
+      "zh-TW": "我應該試試。",
+      "pt-BR": "Devo experimentar.",
+      "aliases": [
+        "I should try it out."
+      ]
+    },
+    {
+      "key": "npc.menu.b919e17acb83badd",
+      "en": "Blacksmith",
+      "zh-TW": "鐵匠",
+      "pt-BR": "Ferreiro",
+      "aliases": [
+        "Blacksmith"
+      ]
+    },
+    {
+      "key": "npc.menu.ba2e51d6a86fb4fc",
+      "en": "RandomTeleport",
+      "zh-TW": "隨機傳送卷",
+      "pt-BR": "Pergaminho de teleporte aleatório",
+      "aliases": [
+        "RandomTeleport"
+      ]
+    },
+    {
+      "key": "npc.menu.bb8798f7bd9dc865",
+      "en": "ZumaTemple_4F",
+      "zh-TW": "祖瑪神殿 4層",
+      "pt-BR": "Templo de Zuma · 4º andar",
+      "aliases": [
+        "ZumaTemple_4F"
+      ]
+    },
+    {
+      "key": "npc.menu.bb98cff0be3985b2",
+      "en": "TheSnowLair",
+      "zh-TW": "雪原巢穴",
+      "pt-BR": "Covil da neve",
+      "aliases": [
+        "TheSnowLair"
+      ]
+    },
+    {
+      "key": "npc.menu.bbee24b8bd54d952",
+      "en": "WhiteDragonHillSide",
+      "zh-TW": "白龍山坡",
+      "pt-BR": "Encosta do dragão branco",
+      "aliases": [
+        "WhiteDragonHillSide"
+      ]
+    },
+    {
+      "key": "npc.menu.bc1d3b856e0331de",
+      "en": "Lunar_2F",
+      "zh-TW": "月宮 2層",
+      "pt-BR": "Palácio lunar · 2º andar",
+      "aliases": [
+        "Lunar_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.bc4f91fa3c1e04ac",
+      "en": "ZumaTemple_2F",
+      "zh-TW": "祖瑪神殿 2層",
+      "pt-BR": "Templo de Zuma · 2º andar",
+      "aliases": [
+        "ZumaTemple_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.bc6b12903ed41790",
+      "en": "White Valley",
+      "zh-TW": "白色山谷",
+      "pt-BR": "Vale branco",
+      "aliases": [
+        "White Valley"
+      ]
+    },
+    {
+      "key": "npc.menu.bd8349be6df7fdb0",
+      "en": "Emperor",
+      "zh-TW": "皇帝",
+      "pt-BR": "Imperador",
+      "aliases": [
+        "Emperor"
+      ]
+    },
+    {
+      "key": "npc.menu.bede5597f0bc40b1",
+      "en": "Ancient Oma Cave",
+      "zh-TW": "遠古半獸人洞穴",
+      "pt-BR": "Caverna ancestral dos Omas",
+      "aliases": [
+        "Ancient Oma Cave"
+      ]
+    },
+    {
+      "key": "npc.menu.bf05c2b6c2a65c3b",
+      "en": "RedCavern_6F",
+      "zh-TW": "紅色洞穴 6層",
+      "pt-BR": "Caverna vermelha · 6º andar",
+      "aliases": [
+        "RedCavern_6F"
+      ]
+    },
+    {
+      "key": "npc.menu.bf80f9f5f834fd51",
+      "en": "MineralMine_1F",
+      "zh-TW": "礦洞 1層",
+      "pt-BR": "Mina de minerais · 1º andar",
+      "aliases": [
+        "MineralMine_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.bfae65e47d1c4ff6",
+      "en": "GreatFireBall 15",
+      "zh-TW": "大火球 15",
+      "pt-BR": "Grande Bola de Fogo 15",
+      "aliases": [
+        "GreatFireBall 15"
+      ]
+    },
+    {
+      "key": "npc.menu.bfb3f27c8a7198d1",
+      "en": "Look at Awakening Items",
+      "zh-TW": "查看覺醒物品",
+      "pt-BR": "Ver itens de despertar",
+      "aliases": [
+        "Look at Awakening Items"
+      ]
+    },
+    {
+      "key": "npc.menu.c08fd6039b39b073",
+      "en": "Revive All",
+      "zh-TW": "全部復活",
+      "pt-BR": "Reviver todos",
+      "aliases": [
+        "Revive All"
+      ]
+    },
+    {
+      "key": "npc.menu.c10e3a25c999070a",
+      "en": "Ask about Bichon Token",
+      "zh-TW": "詢問比奇令牌",
+      "pt-BR": "Perguntar sobre a ficha de Bichon",
+      "aliases": [
+        "Ask about Bichon Token"
+      ]
+    },
+    {
+      "key": "npc.menu.c124c4ccbd427dd2",
+      "en": "RedCavern_8F",
+      "zh-TW": "紅色洞穴 8層",
+      "pt-BR": "Caverna vermelha · 8º andar",
+      "aliases": [
+        "RedCavern_8F"
+      ]
+    },
+    {
+      "key": "npc.menu.c1aa83e2742efa18",
+      "en": "Kill my Pets",
+      "zh-TW": "消滅我的寵物",
+      "pt-BR": "Eliminar meus mascotes",
+      "aliases": [
+        "Kill my Pets"
+      ]
+    },
+    {
+      "key": "npc.menu.c2d31bc82e366f1f",
+      "en": "Assassin",
+      "zh-TW": "刺客",
+      "pt-BR": "Assassino",
+      "aliases": [
+        "Assassin"
+      ]
+    },
+    {
+      "key": "npc.menu.c4343ad807fb39e9",
+      "en": "WhiteDragonPassage 1F",
+      "zh-TW": "白龍通道 1層",
+      "pt-BR": "Passagem do dragão branco · 1º andar",
+      "aliases": [
+        "WhiteDragonPassage 1F"
+      ]
+    },
+    {
+      "key": "npc.menu.c45f7218a4f14ac1",
+      "en": "Tao School",
+      "zh-TW": "道士學院",
+      "pt-BR": "Escola taoísta",
+      "aliases": [
+        "Tao School"
+      ]
+    },
+    {
+      "key": "npc.menu.c4ccc0d0bacd4cce",
+      "en": "We intend to protect the seal as well..",
+      "zh-TW": "我們也打算守護封印。",
+      "pt-BR": "Também pretendemos proteger o selo.",
+      "aliases": [
+        "We intend to protect the seal as well.."
+      ]
+    },
+    {
+      "key": "npc.menu.c4ecacedea838be2",
+      "en": "Red Valley",
+      "zh-TW": "赤色山谷",
+      "pt-BR": "Vale vermelho",
+      "aliases": [
+        "Red Valley"
+      ]
+    },
+    {
+      "key": "npc.menu.c531c3450317d264",
+      "en": "RedCavern_1F",
+      "zh-TW": "紅色洞穴 1層",
+      "pt-BR": "Caverna vermelha · 1º andar",
+      "aliases": [
+        "RedCavern_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.c53b45b2d2916331",
+      "en": "Inn",
+      "zh-TW": "客棧",
+      "pt-BR": "Estalagem",
+      "aliases": [
+        "Inn"
+      ]
+    },
+    {
+      "key": "npc.menu.c5e78716ff687eec",
+      "en": "Lunar",
+      "zh-TW": "月宮",
+      "pt-BR": "Palácio lunar",
+      "aliases": [
+        "Lunar"
+      ]
+    },
+    {
+      "key": "npc.menu.c62f1f3d8c48af95",
+      "en": "Ancient Dungeons",
+      "zh-TW": "遠古地下城",
+      "pt-BR": "Masmorras ancestrais",
+      "aliases": [
+        "Ancient Dungeons"
+      ]
+    },
+    {
+      "key": "npc.menu.c6634a07540c1094",
+      "en": "1FofDeadMine",
+      "zh-TW": "死亡礦區一層",
+      "pt-BR": "Mina Morta · 1º andar",
+      "aliases": [
+        "1FofDeadMine"
+      ]
+    },
+    {
+      "key": "npc.menu.c6a91ee7f93b091b",
+      "en": "requested",
+      "zh-TW": "要求",
+      "pt-BR": "solicitado",
+      "aliases": [
+        "requested"
+      ]
+    },
+    {
+      "key": "npc.menu.c7c794a8e0d50990",
+      "en": "CresentSlash 50",
+      "zh-TW": "新月斬 50",
+      "pt-BR": "Corte Crescente 50",
+      "aliases": [
+        "CresentSlash 50"
+      ]
+    },
+    {
+      "key": "npc.menu.c7e312bd35a3a8e1",
+      "en": "Lightning 26",
+      "zh-TW": "疾光電影 26",
+      "pt-BR": "Relâmpago 26",
+      "aliases": [
+        "Lightning 26"
+      ]
+    },
+    {
+      "key": "npc.menu.c84070d35c46f0aa",
+      "en": "Check other user info.",
+      "zh-TW": "查看其他玩家資訊",
+      "pt-BR": "Ver informações de outro jogador",
+      "aliases": [
+        "Check other user info."
+      ]
+    },
+    {
+      "key": "npc.menu.c854832b28b9ae59",
+      "en": "MudWall",
+      "zh-TW": "土城",
+      "pt-BR": "Muralha de Barro",
+      "aliases": [
+        "MudWall"
+      ]
+    },
+    {
+      "key": "npc.menu.c868483a415f3b10",
+      "en": "IceHellTemple(S",
+      "zh-TW": "冰獄寺廟（南）",
+      "pt-BR": "Templo do inferno gelado (sul)",
+      "aliases": [
+        "IceHellTemple(S"
+      ]
+    },
+    {
+      "key": "npc.menu.c9d4937d1ceb9033",
+      "en": "BuyBack",
+      "zh-TW": "買回",
+      "pt-BR": "Recomprar",
+      "aliases": [
+        "BuyBack"
+      ]
+    },
+    {
+      "key": "npc.menu.cb351105e097d382",
+      "en": "Long Blue Hair",
+      "zh-TW": "藍色長髮",
+      "pt-BR": "Cabelo longo azul",
+      "aliases": [
+        "Long Blue Hair"
+      ]
+    },
+    {
+      "key": "npc.menu.cc6b15fa2a12686f",
+      "en": "Backstep 30",
+      "zh-TW": "後撤步 30",
+      "pt-BR": "Passo para Trás 30",
+      "aliases": [
+        "Backstep 30"
+      ]
+    },
+    {
+      "key": "npc.menu.ccccf9144526a032",
+      "en": "SummonSnakes 46",
+      "zh-TW": "召喚毒蛇 46",
+      "pt-BR": "Invocar Serpentes 46",
+      "aliases": [
+        "SummonSnakes 46"
+      ]
+    },
+    {
+      "key": "npc.menu.cd463b9ef129458f",
+      "en": "Challenge!",
+      "zh-TW": "挑戰！",
+      "pt-BR": "Desafiar!",
+      "aliases": [
+        "Challenge!"
+      ]
+    },
+    {
+      "key": "npc.menu.cd6dbe946f04012d",
+      "en": "SoulShield 22",
+      "zh-TW": "靈魂護盾 22",
+      "pt-BR": "Escudo da Alma 22",
+      "aliases": [
+        "SoulShield 22"
+      ]
+    },
+    {
+      "key": "npc.menu.cd6ee3a6afa5419d",
+      "en": "FireBurst 33",
+      "zh-TW": "烈風擊 33",
+      "pt-BR": "Rajada de Fogo 33",
+      "aliases": [
+        "FireBurst 33"
+      ]
+    },
+    {
+      "key": "npc.menu.ce2b9f922dc54311",
+      "en": "TaoistSchool",
+      "zh-TW": "道士學院",
+      "pt-BR": "Escola taoísta",
+      "aliases": [
+        "TaoistSchool"
+      ]
+    },
+    {
+      "key": "npc.menu.cf236b2ba8402220",
+      "en": "DangerousCavern",
+      "zh-TW": "險惡洞穴",
+      "pt-BR": "Caverna perigosa",
+      "aliases": [
+        "DangerousCavern"
+      ]
+    },
+    {
+      "key": "npc.menu.cf61257873ef637a",
+      "en": "StrangeRocksRoom",
+      "zh-TW": "怪石室",
+      "pt-BR": "Sala das rochas estranhas",
+      "aliases": [
+        "StrangeRocksRoom"
+      ]
+    },
+    {
+      "key": "npc.menu.cf8c061dad7800ff",
+      "en": "EasternLostCave",
+      "zh-TW": "迷失洞穴東部",
+      "pt-BR": "Caverna perdida leste",
+      "aliases": [
+        "EasternLostCave"
+      ]
+    },
+    {
+      "key": "npc.menu.d05a29a1b091e170",
+      "en": "AncientSTombEntrance",
+      "zh-TW": "遠古石墓入口",
+      "pt-BR": "Entrada da tumba de pedra ancestral",
+      "aliases": [
+        "AncientSTombEntrance"
+      ]
+    },
+    {
+      "key": "npc.menu.d089a7b3ba216c33",
+      "en": "Can you tell me where the HolySword is?",
+      "zh-TW": "可以告訴我聖劍在哪裡嗎？",
+      "pt-BR": "Pode me dizer onde está a Espada Sagrada?",
+      "aliases": [
+        "Can you tell me where the HolySword is?"
+      ]
+    },
+    {
+      "key": "npc.menu.d094b334d8099b1e",
+      "en": "Basic Information",
+      "zh-TW": "基本資訊",
+      "pt-BR": "Informações básicas",
+      "aliases": [
+        "Basic Information"
+      ]
+    },
+    {
+      "key": "npc.menu.d0bca8749c81cffe",
+      "en": "IceHellTemple_KR",
+      "zh-TW": "冰獄神殿王室",
+      "pt-BR": "Templo do inferno gelado · sala do rei",
+      "aliases": [
+        "IceHellTemple_KR"
+      ]
+    },
+    {
+      "key": "npc.menu.d179bb77a0f6f16d",
+      "en": "HwanMaJin",
+      "zh-TW": "幻魔陣",
+      "pt-BR": "HwanMaJin",
+      "aliases": [
+        "HwanMaJin"
+      ]
+    },
+    {
+      "key": "npc.menu.d17d84a604994b72",
+      "en": "Exit",
+      "zh-TW": "離開",
+      "pt-BR": "Sair",
+      "aliases": [
+        "Exit"
+      ]
+    },
+    {
+      "key": "npc.menu.d235036d5e1639eb",
+      "en": "RedCavern_5F",
+      "zh-TW": "紅色洞穴 5層",
+      "pt-BR": "Caverna vermelha · 5º andar",
+      "aliases": [
+        "RedCavern_5F"
+      ]
+    },
+    {
+      "key": "npc.menu.d240fa4c3a64ed2c",
+      "en": "Serpent Valley",
+      "zh-TW": "毒蛇山谷",
+      "pt-BR": "Vale das Serpentes",
+      "aliases": [
+        "Serpent Valley"
+      ]
+    },
+    {
+      "key": "npc.menu.d30cb3b2aa1ee2ed",
+      "en": "LV 17~22",
+      "zh-TW": "等級 17–22",
+      "pt-BR": "Níveis 17–22",
+      "aliases": [
+        "LV 17~22"
+      ]
+    },
+    {
+      "key": "npc.menu.d30d1f3a57a8955d",
+      "en": "LionsRoar 36",
+      "zh-TW": "獅子吼 36",
+      "pt-BR": "Rugido do Leão 36",
+      "aliases": [
+        "LionsRoar 36"
+      ]
+    },
+    {
+      "key": "npc.menu.d337baa1698f73a9",
+      "en": "HellCavern_1F",
+      "zh-TW": "地獄洞穴 1層",
+      "pt-BR": "Caverna do inferno · 1º andar",
+      "aliases": [
+        "HellCavern_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.d4788c889be1084a",
+      "en": "Total summon",
+      "zh-TW": "全體召喚",
+      "pt-BR": "Invocar todos",
+      "aliases": [
+        "Total summon"
+      ]
+    },
+    {
+      "key": "npc.menu.d47d7cb0e4f8fd2b",
+      "en": "More",
+      "zh-TW": "更多",
+      "pt-BR": "Mais",
+      "aliases": [
+        "More"
+      ]
+    },
+    {
+      "key": "npc.menu.d545671ad6448496",
+      "en": "Individual summon",
+      "zh-TW": "單人召喚",
+      "pt-BR": "Invocação individual",
+      "aliases": [
+        "Individual summon"
+      ]
+    },
+    {
+      "key": "npc.menu.d5b0500ea0e6dcaf",
+      "en": "I'm ready",
+      "zh-TW": "我準備好了",
+      "pt-BR": "Estou pronto",
+      "aliases": [
+        "I'm ready"
+      ]
+    },
+    {
+      "key": "npc.menu.d5c0521bcf38e48b",
+      "en": "LunarRoom",
+      "zh-TW": "月宮密室",
+      "pt-BR": "Câmara lunar",
+      "aliases": [
+        "LunarRoom"
+      ]
+    },
+    {
+      "key": "npc.menu.d5ca4c476ba29734",
+      "en": "Bichon Wall",
+      "zh-TW": "比奇城",
+      "pt-BR": "Muralha de Bichon",
+      "aliases": [
+        "Bichon Wall"
+      ]
+    },
+    {
+      "key": "npc.menu.d5d5a39cff6b949a",
+      "en": "RedValley_10F",
+      "zh-TW": "赤色山谷 10層",
+      "pt-BR": "Vale vermelho · 10º andar",
+      "aliases": [
+        "RedValley_10F"
+      ]
+    },
+    {
+      "key": "npc.menu.d5faf3aa2f80ce71",
+      "en": "HellOverpass",
+      "zh-TW": "地獄天橋",
+      "pt-BR": "Passarela do inferno",
+      "aliases": [
+        "HellOverpass"
+      ]
+    },
+    {
+      "key": "npc.menu.d60a318dd8a0cdc8",
+      "en": "Exchange",
+      "zh-TW": "交換",
+      "pt-BR": "Trocar",
+      "aliases": [
+        "Exchange"
+      ]
+    },
+    {
+      "key": "npc.menu.d653d86ba89c798f",
+      "en": "Blue Afro",
+      "zh-TW": "藍色捲髮",
+      "pt-BR": "Cabelo afro azul",
+      "aliases": [
+        "Blue Afro"
+      ]
+    },
+    {
+      "key": "npc.menu.d677190e0a9990e7",
+      "en": "Service",
+      "zh-TW": "服務",
+      "pt-BR": "Serviço",
+      "aliases": [
+        "Service"
+      ]
+    },
+    {
+      "key": "npc.menu.d7393058987bdf82",
+      "en": "FlameField 42",
+      "zh-TW": "火龍氣焰 42",
+      "pt-BR": "Campo de Chamas 42",
+      "aliases": [
+        "FlameField 42"
+      ]
+    },
+    {
+      "key": "npc.menu.d73e24103c5e31c1",
+      "en": "Skill learning & method",
+      "zh-TW": "技能學習與方法",
+      "pt-BR": "Aprendizado e uso de habilidades",
+      "aliases": [
+        "Skill learning & method"
+      ]
+    },
+    {
+      "key": "npc.menu.d74c48dd8e809722",
+      "en": "RedCavern_2F",
+      "zh-TW": "紅色洞穴 2層",
+      "pt-BR": "Caverna vermelha · 2º andar",
+      "aliases": [
+        "RedCavern_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.d8014bbbbbc544a4",
+      "en": "Give me an order, Please.",
+      "zh-TW": "請給我指示。",
+      "pt-BR": "Dê-me uma ordem, por favor.",
+      "aliases": [
+        "Give me an order, Please."
+      ]
+    },
+    {
+      "key": "npc.menu.d955b7e8fdb14a07",
+      "en": "Downgrade",
+      "zh-TW": "降級",
+      "pt-BR": "Rebaixar",
+      "aliases": [
+        "Downgrade"
+      ]
+    },
+    {
+      "key": "npc.menu.d96407b51ab2c254",
+      "en": "AncientNaturalCave",
+      "zh-TW": "遠古天然洞穴",
+      "pt-BR": "Caverna natural ancestral",
+      "aliases": [
+        "AncientNaturalCave"
+      ]
+    },
+    {
+      "key": "npc.menu.daec6c20587cc32c",
+      "en": "Get in",
+      "zh-TW": "進入",
+      "pt-BR": "Entrar",
+      "aliases": [
+        "Get in"
+      ]
+    },
+    {
+      "key": "npc.menu.daee7606b339f3c3",
+      "en": "Reset",
+      "zh-TW": "重設",
+      "pt-BR": "Redefinir",
+      "aliases": [
+        "Reset"
+      ]
+    },
+    {
+      "key": "npc.menu.dc8659db6d416dc3",
+      "en": "Enter",
+      "zh-TW": "進入",
+      "pt-BR": "Entrar",
+      "aliases": [
+        "Enter"
+      ]
+    },
+    {
+      "key": "npc.menu.dcaaf501d816d7a9",
+      "en": "Basic control(rooting etc)",
+      "zh-TW": "基本操作（拾取等）",
+      "pt-BR": "Controles básicos (saque etc.)",
+      "aliases": [
+        "Basic control(rooting etc)"
+      ]
+    },
+    {
+      "key": "npc.menu.dcc28a906d1c1251",
+      "en": "Buy Back",
+      "zh-TW": "買回",
+      "pt-BR": "Recomprar",
+      "aliases": [
+        "Buy Back"
+      ]
+    },
+    {
+      "key": "npc.menu.dcc839a4015c4b7d",
+      "en": "View",
+      "zh-TW": "查看",
+      "pt-BR": "Ver",
+      "aliases": [
+        "View"
+      ]
+    },
+    {
+      "key": "npc.menu.dd312c8db67ee86a",
+      "en": "That's why you need the HolySword.",
+      "zh-TW": "所以你才需要聖劍。",
+      "pt-BR": "É por isso que você precisa da Espada Sagrada.",
+      "aliases": [
+        "That's why you need the HolySword."
+      ]
+    },
+    {
+      "key": "npc.menu.de751667e2d70a26",
+      "en": "Past Bichon",
+      "zh-TW": "昔日比奇",
+      "pt-BR": "Bichon do passado",
+      "aliases": [
+        "Past Bichon"
+      ]
+    },
+    {
+      "key": "npc.menu.de9bfa47e16b6e17",
+      "en": "TrapHexagon 28",
+      "zh-TW": "困魔咒 28",
+      "pt-BR": "Hexágono Armadilha 28",
+      "aliases": [
+        "TrapHexagon 28"
+      ]
+    },
+    {
+      "key": "npc.menu.e0139115a351a2d4",
+      "en": "ElementalShot 20",
+      "zh-TW": "元素射擊 20",
+      "pt-BR": "Tiro Elemental 20",
+      "aliases": [
+        "ElementalShot 20"
+      ]
+    },
+    {
+      "key": "npc.menu.e0335652558a5b98",
+      "en": "What is",
+      "zh-TW": "什麼是",
+      "pt-BR": "O que é",
+      "aliases": [
+        "What is"
+      ]
+    },
+    {
+      "key": "npc.menu.e0ae030e0233624d",
+      "en": "Blizzard 44",
+      "zh-TW": "天霜冰環 44",
+      "pt-BR": "Nevasca 44",
+      "aliases": [
+        "Blizzard 44"
+      ]
+    },
+    {
+      "key": "npc.menu.e1436f6c3c052d37",
+      "en": "ZumaTempleLobby_7F",
+      "zh-TW": "祖瑪神殿大廳 7層",
+      "pt-BR": "Saguão do templo de Zuma · 7º andar",
+      "aliases": [
+        "ZumaTempleLobby_7F"
+      ]
+    },
+    {
+      "key": "npc.menu.e146330fcf0786d8",
+      "en": "Dead Mines",
+      "zh-TW": "死亡礦區",
+      "pt-BR": "Mina Morta",
+      "aliases": [
+        "Dead Mines"
+      ]
+    },
+    {
+      "key": "npc.menu.e3659d6f2fc6786a",
+      "en": "SacredFoxHill",
+      "zh-TW": "聖狐山",
+      "pt-BR": "Colina da raposa sagrada",
+      "aliases": [
+        "SacredFoxHill"
+      ]
+    },
+    {
+      "key": "npc.menu.e419a83638c2da3b",
+      "en": "SerpentValley",
+      "zh-TW": "毒蛇山谷",
+      "pt-BR": "Vale das Serpentes",
+      "aliases": [
+        "SerpentValley"
+      ]
+    },
+    {
+      "key": "npc.menu.e43fa23cc4621d2b",
+      "en": "Look at",
+      "zh-TW": "查看",
+      "pt-BR": "Examinar",
+      "aliases": [
+        "Look at"
+      ]
+    },
+    {
+      "key": "npc.menu.e4a5ce9b8ae80d21",
+      "en": "BlessedArmour 25",
+      "zh-TW": "祝福鎧甲 25",
+      "pt-BR": "Armadura Abençoada 25",
+      "aliases": [
+        "BlessedArmour 25"
+      ]
+    },
+    {
+      "key": "npc.menu.e5fcc9e4ecd1186c",
+      "en": "long.",
+      "zh-TW": "很久。",
+      "pt-BR": "muito tempo.",
+      "aliases": [
+        "long."
+      ]
+    },
+    {
+      "key": "npc.menu.e70e9011ed4adb3e",
+      "en": "WesternLostCave",
+      "zh-TW": "迷失洞穴西部",
+      "pt-BR": "Caverna perdida oeste",
+      "aliases": [
+        "WesternLostCave"
+      ]
+    },
+    {
+      "key": "npc.menu.e895cf62d0241a45",
+      "en": "View Market",
+      "zh-TW": "查看市場",
+      "pt-BR": "Ver mercado",
+      "aliases": [
+        "View Market"
+      ]
+    },
+    {
+      "key": "npc.menu.e8af2fd416c53aa5",
+      "en": "Maybe next time",
+      "zh-TW": "下次再說",
+      "pt-BR": "Talvez na próxima vez",
+      "aliases": [
+        "Maybe next time"
+      ]
+    },
+    {
+      "key": "npc.menu.e8ff076f6c2259ae",
+      "en": "Healing 7",
+      "zh-TW": "治癒術 7",
+      "pt-BR": "Cura 7",
+      "aliases": [
+        "Healing 7"
+      ]
+    },
+    {
+      "key": "npc.menu.e96d0b55f3162241",
+      "en": "Return to",
+      "zh-TW": "返回",
+      "pt-BR": "Voltar para",
+      "aliases": [
+        "Return to"
+      ]
+    },
+    {
+      "key": "npc.menu.e9b015378167bed9",
+      "en": "BindingShot 35",
+      "zh-TW": "束縛射擊 35",
+      "pt-BR": "Disparo Aprisionador 35",
+      "aliases": [
+        "BindingShot 35"
+      ]
+    },
+    {
+      "key": "npc.menu.e9d2c782dd77fdba",
+      "en": "BorderVillage",
+      "zh-TW": "邊境村",
+      "pt-BR": "Vila da Fronteira",
+      "aliases": [
+        "BorderVillage"
+      ]
+    },
+    {
+      "key": "npc.menu.eab327a9d6b5993c",
+      "en": "I'd like to hear about the HolySword",
+      "zh-TW": "我想聽聽聖劍的事",
+      "pt-BR": "Quero saber mais sobre a Espada Sagrada",
+      "aliases": [
+        "I'd like to hear about the HolySword"
+      ]
+    },
+    {
+      "key": "npc.menu.eaf0fe0a362b5849",
+      "en": "Warrior",
+      "zh-TW": "戰士",
+      "pt-BR": "Guerreiro",
+      "aliases": [
+        "Warrior"
+      ]
+    },
+    {
+      "key": "npc.menu.eb0d8ba42029e882",
+      "en": "RedMoonRoom",
+      "zh-TW": "赤月密室",
+      "pt-BR": "Câmara da lua vermelha",
+      "aliases": [
+        "RedMoonRoom"
+      ]
+    },
+    {
+      "key": "npc.menu.eb814be3ca3b78c0",
+      "en": "Main",
+      "zh-TW": "主選單",
+      "pt-BR": "Principal",
+      "aliases": [
+        "Main"
+      ]
+    },
+    {
+      "key": "npc.menu.eb84ba3951d6df05",
+      "en": "Level 17>22",
+      "zh-TW": "等級 17–22",
+      "pt-BR": "Níveis 17–22",
+      "aliases": [
+        "Level 17>22"
+      ]
+    },
+    {
+      "key": "npc.menu.eb907b9bc3a769b6",
+      "en": "Hunting",
+      "zh-TW": "狩獵",
+      "pt-BR": "Caça",
+      "aliases": [
+        "Hunting"
+      ]
+    },
+    {
+      "key": "npc.menu.ebdf8cc00bc4d9ce",
+      "en": "Pass",
+      "zh-TW": "通過",
+      "pt-BR": "Atravessar",
+      "aliases": [
+        "Pass"
+      ]
+    },
+    {
+      "key": "npc.menu.ec5ba0abb717da87",
+      "en": "Access",
+      "zh-TW": "進入",
+      "pt-BR": "Acessar",
+      "aliases": [
+        "Access"
+      ]
+    },
+    {
+      "key": "npc.menu.ecf10205af4d4f4e",
+      "en": "EnergyRepulsor 27",
+      "zh-TW": "氣功波 27",
+      "pt-BR": "Repulsor de Energia 27",
+      "aliases": [
+        "EnergyRepulsor 27"
+      ]
+    },
+    {
+      "key": "npc.menu.ed1940e4209d1cbc",
+      "en": "I have heard the tails",
+      "zh-TW": "我聽過這些傳聞",
+      "pt-BR": "Já ouvi as histórias",
+      "aliases": [
+        "I have heard the tails"
+      ]
+    },
+    {
+      "key": "npc.menu.ed78af89900a6b4b",
+      "en": "I'm ready.",
+      "zh-TW": "我準備好了。",
+      "pt-BR": "Estou pronto.",
+      "aliases": [
+        "I'm ready."
+      ]
+    },
+    {
+      "key": "npc.menu.ee58428b0c185eb3",
+      "en": "Place Ancient Post Piece on the pillar",
+      "zh-TW": "將遠古石柱碎片放到柱子上",
+      "pt-BR": "Colocar o fragmento de pilar ancestral no pilar",
+      "aliases": [
+        "Place Ancient Post Piece on the pillar"
+      ]
+    },
+    {
+      "key": "npc.menu.eef112f7a0cc6820",
+      "en": "HellFire_3F",
+      "zh-TW": "地獄火 3層",
+      "pt-BR": "Fogo Infernal · 3º andar",
+      "aliases": [
+        "HellFire_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.f0110819424ff278",
+      "en": "FlameDisruptor 38",
+      "zh-TW": "滅天火 38",
+      "pt-BR": "Devastador de Chamas 38",
+      "aliases": [
+        "FlameDisruptor 38"
+      ]
+    },
+    {
+      "key": "npc.menu.f0268cb9100a0181",
+      "en": "Rent",
+      "zh-TW": "租用",
+      "pt-BR": "Alugar",
+      "aliases": [
+        "Rent"
+      ]
+    },
+    {
+      "key": "npc.menu.f02790c2bdc1c1af",
+      "en": "AncientZumaLobby",
+      "zh-TW": "遠古祖瑪大廳",
+      "pt-BR": "Saguão ancestral de Zuma",
+      "aliases": [
+        "AncientZumaLobby"
+      ]
+    },
+    {
+      "key": "npc.menu.f0f813a5430757bf",
+      "en": "WhiteDragonPassage 4F",
+      "zh-TW": "白龍通道 4層",
+      "pt-BR": "Passagem do dragão branco · 4º andar",
+      "aliases": [
+        "WhiteDragonPassage 4F"
+      ]
+    },
+    {
+      "key": "npc.menu.f106376011688eda",
+      "en": "within",
+      "zh-TW": "裡面",
+      "pt-BR": "dentro",
+      "aliases": [
+        "within"
+      ]
+    },
+    {
+      "key": "npc.menu.f1907169dc693a72",
+      "en": "SummonVampire 28",
+      "zh-TW": "召喚吸血蜘蛛 28",
+      "pt-BR": "Invocar Vampiro 28",
+      "aliases": [
+        "SummonVampire 28"
+      ]
+    },
+    {
+      "key": "npc.menu.f20e5fc701b67dfc",
+      "en": "Warrior skill",
+      "zh-TW": "戰士技能",
+      "pt-BR": "Habilidade de guerreiro",
+      "aliases": [
+        "Warrior skill"
+      ]
+    },
+    {
+      "key": "npc.menu.f2438a74b6976131",
+      "en": "MineralMine_3F",
+      "zh-TW": "礦洞 3層",
+      "pt-BR": "Mina de minerais · 3º andar",
+      "aliases": [
+        "MineralMine_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.f271e7ec5090bd39",
+      "en": "Thunderstorm 30",
+      "zh-TW": "地獄雷光 30",
+      "pt-BR": "Tempestade de Raios 30",
+      "aliases": [
+        "Thunderstorm 30"
+      ]
+    },
+    {
+      "key": "npc.menu.f27c107d97d3643d",
+      "en": "StraightShot 9",
+      "zh-TW": "直射 9",
+      "pt-BR": "Tiro Reto 9",
+      "aliases": [
+        "StraightShot 9"
+      ]
+    },
+    {
+      "key": "npc.menu.f2a6612c5768fac5",
+      "en": "ShoulderDash 30",
+      "zh-TW": "野蠻衝撞 30",
+      "pt-BR": "Investida de Ombro 30",
+      "aliases": [
+        "ShoulderDash 30"
+      ]
+    },
+    {
+      "key": "npc.menu.f2eaa65045da5600",
+      "en": "NorthernLostCave",
+      "zh-TW": "迷失洞穴北部",
+      "pt-BR": "Caverna perdida norte",
+      "aliases": [
+        "NorthernLostCave"
+      ]
+    },
+    {
+      "key": "npc.menu.f35612f2cee33a86",
+      "en": "Buy Bichon Token",
+      "zh-TW": "購買比奇令牌",
+      "pt-BR": "Comprar ficha de Bichon",
+      "aliases": [
+        "Buy Bichon Token"
+      ]
+    },
+    {
+      "key": "npc.menu.f3f20c7575b6545f",
+      "en": "Yes, I want to enter.",
+      "zh-TW": "是的，我要進去。",
+      "pt-BR": "Sim, quero entrar.",
+      "aliases": [
+        "Yes, I want to enter."
+      ]
+    },
+    {
+      "key": "npc.menu.f425976c6e052285",
+      "en": "Guild Territory 2",
+      "zh-TW": "公會領地 2",
+      "pt-BR": "Território da guilda 2",
+      "aliases": [
+        "Guild Territory 2"
+      ]
+    },
+    {
+      "key": "npc.menu.f492a8add73c312e",
+      "en": "Show Relic",
+      "zh-TW": "展示遺物",
+      "pt-BR": "Mostrar relíquia",
+      "aliases": [
+        "Show Relic"
+      ]
+    },
+    {
+      "key": "npc.menu.f4bca7a5285969a9",
+      "en": "PoisonCloud 43",
+      "zh-TW": "毒霧 43",
+      "pt-BR": "Nuvem Venenosa 43",
+      "aliases": [
+        "PoisonCloud 43"
+      ]
+    },
+    {
+      "key": "npc.menu.f4f14dcf25fa4db2",
+      "en": "StoneLanternRoom",
+      "zh-TW": "石燈室",
+      "pt-BR": "Sala da lanterna de pedra",
+      "aliases": [
+        "StoneLanternRoom"
+      ]
+    },
+    {
+      "key": "npc.menu.f513d67188206880",
+      "en": "Event Management Page",
+      "zh-TW": "活動管理頁",
+      "pt-BR": "Página de gerenciamento de eventos",
+      "aliases": [
+        "Event Management Page"
+      ]
+    },
+    {
+      "key": "npc.menu.f5928b6aaffbf2dc",
+      "en": "Level 11>14",
+      "zh-TW": "等級 11–14",
+      "pt-BR": "Níveis 11–14",
+      "aliases": [
+        "Level 11>14"
+      ]
+    },
+    {
+      "key": "npc.menu.f5a0154dfb9834a4",
+      "en": "Fencing 7",
+      "zh-TW": "基本劍術 7",
+      "pt-BR": "Esgrima 7",
+      "aliases": [
+        "Fencing 7"
+      ]
+    },
+    {
+      "key": "npc.menu.f5c9b52fd5151799",
+      "en": "Check Main Rebirth Flag",
+      "zh-TW": "查看主角色重生標記",
+      "pt-BR": "Consultar marca de renascimento principal",
+      "aliases": [
+        "Check Main Rebirth Flag"
+      ]
+    },
+    {
+      "key": "npc.menu.f66c72f555f92f54",
+      "en": "AncientPrajna_3F",
+      "zh-TW": "遠古般若 3層",
+      "pt-BR": "Prajna ancestral · 3º andar",
+      "aliases": [
+        "AncientPrajna_3F"
+      ]
+    },
+    {
+      "key": "npc.menu.f6714d5023176a69",
+      "en": "Slaying 15",
+      "zh-TW": "攻殺劍術 15",
+      "pt-BR": "Golpe Mortal 15",
+      "aliases": [
+        "Slaying 15"
+      ]
+    },
+    {
+      "key": "npc.menu.f6f4688ff23d50c6",
+      "en": "Send",
+      "zh-TW": "寄送",
+      "pt-BR": "Enviar",
+      "aliases": [
+        "Send"
+      ]
+    },
+    {
+      "key": "npc.menu.f7146fafe94517fb",
+      "en": "W_1FofDungeon",
+      "zh-TW": "地牢一層西部",
+      "pt-BR": "Calabouço · 1º andar oeste",
+      "aliases": [
+        "W_1FofDungeon"
+      ]
+    },
+    {
+      "key": "npc.menu.f76da60c8830d169",
+      "en": "Repulsion 12",
+      "zh-TW": "抗拒火環 12",
+      "pt-BR": "Repulsão 12",
+      "aliases": [
+        "Repulsion 12"
+      ]
+    },
+    {
+      "key": "npc.menu.f78fcae67d4aa998",
+      "en": "explanation",
+      "zh-TW": "說明",
+      "pt-BR": "explicação",
+      "aliases": [
+        "explanation"
+      ]
+    },
+    {
+      "key": "npc.menu.f88bfb2f4351a95d",
+      "en": "Level 60-69",
+      "zh-TW": "等級 60–69",
+      "pt-BR": "Níveis 60–69",
+      "aliases": [
+        "Level 60-69"
+      ]
+    },
+    {
+      "key": "npc.menu.f8a500e80dfc5a4e",
+      "en": "NaturalCave_1F",
+      "zh-TW": "天然洞穴 1層",
+      "pt-BR": "Caverna natural · 1º andar",
+      "aliases": [
+        "NaturalCave_1F"
+      ]
+    },
+    {
+      "key": "npc.menu.f8cf83a76a98df2d",
+      "en": "What",
+      "zh-TW": "什麼",
+      "pt-BR": "O quê",
+      "aliases": [
+        "What"
+      ]
+    },
+    {
+      "key": "npc.menu.f96d99ed543ca38f",
+      "en": "Insect Cave",
+      "zh-TW": "蟲洞",
+      "pt-BR": "Caverna dos insetos",
+      "aliases": [
+        "Insect Cave"
+      ]
+    },
+    {
+      "key": "npc.menu.fa4123b15a4e6dee",
+      "en": "Zuma Temple",
+      "zh-TW": "祖瑪神殿",
+      "pt-BR": "Templo de Zuma",
+      "aliases": [
+        "Zuma Temple"
+      ]
+    },
+    {
+      "key": "npc.menu.fa7160c2c46472cf",
+      "en": "LV7~11",
+      "zh-TW": "等級 7–11",
+      "pt-BR": "Níveis 7–11",
+      "aliases": [
+        "LV7~11"
+      ]
+    },
+    {
+      "key": "npc.menu.faca4d411563b1d8",
+      "en": "LV3~7",
+      "zh-TW": "等級 3–7",
+      "pt-BR": "Níveis 3–7",
+      "aliases": [
+        "LV3~7"
+      ]
+    },
+    {
+      "key": "npc.menu.facbbc3b064c233c",
+      "en": "Stone Temple",
+      "zh-TW": "石墓",
+      "pt-BR": "Templo de pedra",
+      "aliases": [
+        "Stone Temple"
+      ]
+    },
+    {
+      "key": "npc.menu.fad4de89cbc0d678",
+      "en": "Gate/Wall Check",
+      "zh-TW": "檢查城門與城牆",
+      "pt-BR": "Examinar portões e muralhas",
+      "aliases": [
+        "Gate/Wall Check"
+      ]
+    },
+    {
+      "key": "npc.menu.fb3757911e84c5a4",
+      "en": "PrajnaStoneCave_6F",
+      "zh-TW": "般若石窟 6層",
+      "pt-BR": "Caverna de pedra de Prajna · 6º andar",
+      "aliases": [
+        "PrajnaStoneCave_6F"
+      ]
+    },
+    {
+      "key": "npc.menu.fbc774e2a1b8d478",
+      "en": "B6_AngledStoneTomb",
+      "zh-TW": "石墓地下六層",
+      "pt-BR": "Tumba de pedra · 6º subsolo",
+      "aliases": [
+        "B6_AngledStoneTomb"
+      ]
+    },
+    {
+      "key": "npc.menu.fbfd482df30e7a3a",
+      "en": "Can you tell me who is the villain who stole the HolySword?",
+      "zh-TW": "是誰偷走了聖劍？",
+      "pt-BR": "Quem é o vilão que roubou a Espada Sagrada?",
+      "aliases": [
+        "Can you tell me who is the villain who stole the HolySword?"
+      ]
+    },
+    {
+      "key": "npc.menu.fca6ce93707e6a31",
+      "en": "InsectCave_2F",
+      "zh-TW": "蟲洞 2層",
+      "pt-BR": "Caverna dos insetos · 2º andar",
+      "aliases": [
+        "InsectCave_2F"
+      ]
+    },
+    {
+      "key": "npc.menu.fd59011e7cf0a9a3",
+      "en": "Teleport to InnerWall",
+      "zh-TW": "傳送至內城",
+      "pt-BR": "Teleportar para a muralha interna",
+      "aliases": [
+        "Teleport to InnerWall"
+      ]
+    },
+    {
+      "key": "npc.menu.fe27b7d26ead247e",
+      "en": "Grocery store",
+      "zh-TW": "雜貨店",
+      "pt-BR": "Mercearia",
+      "aliases": [
+        "Grocery store"
+      ]
+    },
+    {
+      "key": "npc.menu.fe822bf52411c24d",
+      "en": "Haircut",
+      "zh-TW": "更換髮型",
+      "pt-BR": "Cortar cabelo",
+      "aliases": [
+        "Haircut"
+      ]
+    },
+    {
+      "key": "npc.menu.feef8b39b5dd3fd2",
+      "en": "PrajnaTempleLobby",
+      "zh-TW": "般若神殿大廳",
+      "pt-BR": "Saguão do templo de Prajna",
+      "aliases": [
+        "PrajnaTempleLobby"
+      ]
+    },
+    {
+      "key": "npc.menu.ffd0d50cd91857fa",
+      "en": "AncientTemple_1F",
+      "zh-TW": "遠古神廟 1層",
+      "pt-BR": "Templo ancestral · 1º andar",
+      "aliases": [
+        "AncientTemple_1F"
+      ]
+    }
+  ]
+}

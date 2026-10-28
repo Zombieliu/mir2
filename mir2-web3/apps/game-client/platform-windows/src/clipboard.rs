@@ -261,12 +261,20 @@ pub fn paste_system(
     windows: Query<&Window, With<PrimaryWindow>>,
     mut clipboard: Option<ResMut<bevy::clipboard::Clipboard>>,
     mut shell: Option<ResMut<NativeShellModel>>,
+    wallet_login: Option<Res<mir2_client_bevy::native_wallet_login::NativeWalletLogin>>,
     mut ui: Option<ResMut<mir2_client_bevy::crystal_ui::NativePlayerUiState>>,
     compose: Option<Res<MailComposeUi>>,
     mut mail_editor: Option<ResMut<MailLetterEditor>>,
     pending_operations: Option<Res<PendingOperations>>,
     reset: Option<Res<SessionResetRevision>>,
 ) {
+    if wallet_login.as_deref().is_some_and(|wallet| wallet.visible) {
+        *shortcut = ClipboardShortcutState::default();
+        pending.0 = None;
+        mail_pending.0 = None;
+        keyboard_inputs.read().for_each(drop);
+        return;
+    }
     if !windows.iter().any(|window| window.focused) {
         *shortcut = ClipboardShortcutState::default();
         pending.0 = None;

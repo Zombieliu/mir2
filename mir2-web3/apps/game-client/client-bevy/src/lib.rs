@@ -55,6 +55,12 @@ pub mod native_shell;
 #[cfg(feature = "native-ui")]
 pub mod native_shell_ui;
 #[cfg(feature = "native-ui")]
+pub mod native_wallet_login;
+#[cfg(feature = "native-ui")]
+pub mod native_login_locale;
+#[cfg(feature = "native-ui")]
+pub mod native_i18n;
+#[cfg(feature = "native-ui")]
 pub mod options_effects;
 pub mod pending_operations;
 #[cfg(any(feature = "native-ui", feature = "portable-quest-ui", feature = "item-tooltip"))]

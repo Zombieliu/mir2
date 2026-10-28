@@ -4,10 +4,13 @@ use std::{fmt, fs, net::IpAddr, path::PathBuf, time::Duration};
 
 use tokio_tungstenite::tungstenite::http::Uri;
 
+use crate::wallet_login_http::NativeWalletAuthConfig;
+
 pub const ACCOUNT_ENV: &str = "MIR2_NATIVE_ACCOUNT";
 pub const PASSWORD_ENV: &str = "MIR2_NATIVE_PASSWORD";
 pub const CHARACTER_INDEX_ENV: &str = "MIR2_NATIVE_CHARACTER_INDEX";
 pub const GATEWAY_URL_ENV: &str = "MIR2_GATEWAY_WS_URL";
+pub const AUTH_HTTP_URL_ENV: &str = "MIR2_NATIVE_AUTH_HTTP_URL";
 pub const CONFIG_FILE_NAME: &str = "mir2-client.toml";
 pub const DEFAULT_WINDOW_WIDTH: u32 = 1024;
 pub const DEFAULT_WINDOW_HEIGHT: u32 = 768;
@@ -125,6 +128,8 @@ impl fmt::Debug for NativeAutoLogin {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NativeSessionConfig {
     pub gateway_url: String,
+    /// Explicit web authentication origin. No gateway/website guessing is allowed.
+    pub wallet_auth: Option<NativeWalletAuthConfig>,
     pub quest_guidance: Option<String>,
     /// Explicit development convenience only. Normal players enter credentials
     /// in the visible native login screen, so missing environment credentials
@@ -140,6 +145,7 @@ pub struct NativeSessionConfig {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 struct ClientFileConfig {
     gateway_ws_url: Option<String>,
+    auth_http_url: Option<String>,
     quest_guidance: Option<String>,
     window_width: Option<u32>,
     window_height: Option<u32>,
@@ -159,6 +165,10 @@ impl NativeSessionConfig {
             std::env::var(CHARACTER_INDEX_ENV).ok(),
             env_gateway.or(file_gateway),
             default_gateway_url,
+        )?;
+        config.wallet_auth = select_wallet_auth(
+            std::env::var(AUTH_HTTP_URL_ENV).ok(),
+            file.as_ref().and_then(|config| config.auth_http_url.clone()),
         )?;
         config.reconnect = NativeReconnectConfig::from_env()?;
         if let Some(file) = file {
@@ -233,6 +243,7 @@ impl NativeSessionConfig {
 
         Ok(Self {
             gateway_url,
+            wallet_auth: None,
             quest_guidance: None,
             auto_login,
             window_width: DEFAULT_WINDOW_WIDTH,
@@ -295,6 +306,11 @@ fn parse_client_toml(text: &str) -> Result<ClientFileConfig, String> {
                             config.gateway_ws_url =
                                 Some(parse_toml_string(server_value, "server.gateway_ws_url")?);
                         }
+                        "auth_http_url" => {
+                            let origin = parse_toml_string(server_value, "server.auth_http_url")?;
+                            NativeWalletAuthConfig::from_origin(&origin)?;
+                            config.auth_http_url = Some(origin);
+                        }
                         other => {
                             return Err(format!("{CONFIG_FILE_NAME} unknown key server.{other}"));
                         }
@@ -356,6 +372,16 @@ fn parse_client_toml(text: &str) -> Result<ClientFileConfig, String> {
         ));
     }
     Ok(config)
+}
+
+fn select_wallet_auth(
+    environment: Option<String>,
+    file: Option<String>,
+) -> Result<Option<NativeWalletAuthConfig>, String> {
+    optional_non_empty(environment, AUTH_HTTP_URL_ENV)?
+        .or(file)
+        .map(|origin| NativeWalletAuthConfig::from_origin(&origin))
+        .transpose()
 }
 
 fn reject_forbidden_keys(
@@ -479,6 +505,7 @@ mod tests {
 
         assert_eq!(config.gateway_url, "ws://127.0.0.1:7110/ws");
         assert_eq!(config.auto_login, None);
+        assert_eq!(config.wallet_auth, None);
         assert_eq!(config.window_width, 1024);
         assert_eq!(config.window_height, 768);
         assert!(config.force_daylight, "development launches default to daylight");
@@ -666,5 +693,25 @@ id = "player"
         )
         .expect_err("account section must be rejected");
         assert!(unknown.contains("credentials") || unknown.contains("unknown"));
+    }
+
+    #[test]
+    fn wallet_auth_uses_only_an_explicit_secure_origin_with_environment_precedence() {
+        assert_eq!(select_wallet_auth(None, None).unwrap(), None);
+        let parsed = parse_client_toml("[server]\nauth_http_url = 'https://login.example.com'")
+            .expect("authentication origin is public configuration, not a persisted credential");
+        let config = select_wallet_auth(None, parsed.auth_http_url.clone()).unwrap().unwrap();
+        assert_eq!(config.origin, "https://login.example.com");
+        let overridden = select_wallet_auth(Some("http://127.0.0.1:3000".into()), parsed.auth_http_url)
+            .unwrap().unwrap();
+        assert_eq!(overridden.origin, "http://127.0.0.1:3000");
+        assert!(select_wallet_auth(Some(" ".into()), None).is_err());
+        assert!(parse_client_toml("[server]\nauth_http_url = 'http://public.example.com'").is_err());
+        assert!(parse_client_toml("[server]\nauth_http_url = 'https://login.example.com/api'").is_err());
+        for secret in ["intent_token", "session_token", "wallet_credential"] {
+            let error = parse_client_toml(&format!("[server]\n{secret} = 'do-not-store'"))
+                .expect_err("wallet login secrets must remain memory-only");
+            assert!(error.contains("credentials"));
+        }
     }
 }

@@ -24,10 +24,16 @@ use crate::crystal_ui::widget::{
     spawn_crystal_image_button, sync_crystal_image_buttons, CrystalImageButton,
     CrystalImageButtonSprite,
 };
+use crate::native_i18n;
+use crate::native_login_locale::NativeUiLocale;
 use crate::native_shell::{
     parse_registration_birth_date, valid_registration_email, validate_registration_fields,
     ChangePasswordFocus, CharacterCreateFocus, LoginFocus, NativeShellModel, NativeShellScreen,
     NativeUiIntent, NativeUiIntentQueue, RegistrationFocus,
+};
+use crate::native_wallet_login::{
+    NativeWalletLogin, NativeWalletLoginAction, NativeWalletLoginActionQueue,
+    NativeWalletLoginMessage, NativeWalletLoginStage,
 };
 
 const ROOT_BG: Color = Color::srgba(0.06, 0.05, 0.03, 0.82);
@@ -69,14 +75,38 @@ const NEW_CHARACTER_CREATE: spec::CrystalRect = spec::CrystalRect::new(378.0, 57
 const NEW_CHARACTER_CANCEL: spec::CrystalRect = spec::CrystalRect::new(643.0, 579.0, 100.0, 25.0);
 const NEW_ACCOUNT_FRAME: spec::CrystalRect = spec::CrystalRect::new(218.0, 154.0, 588.0, 460.0);
 const NEW_ACCOUNT_FIELDS: [(RegistrationFocus, spec::CrystalRect); 8] = [
-    (RegistrationFocus::AccountId, spec::CrystalRect::new(444.0, 257.0, 136.0, 18.0)),
-    (RegistrationFocus::Password, spec::CrystalRect::new(444.0, 283.0, 136.0, 18.0)),
-    (RegistrationFocus::ConfirmPassword, spec::CrystalRect::new(444.0, 309.0, 136.0, 18.0)),
-    (RegistrationFocus::UserName, spec::CrystalRect::new(444.0, 343.0, 136.0, 18.0)),
-    (RegistrationFocus::BirthDate, spec::CrystalRect::new(444.0, 369.0, 136.0, 18.0)),
-    (RegistrationFocus::SecretQuestion, spec::CrystalRect::new(444.0, 404.0, 190.0, 18.0)),
-    (RegistrationFocus::SecretAnswer, spec::CrystalRect::new(444.0, 430.0, 190.0, 18.0)),
-    (RegistrationFocus::EmailAddress, spec::CrystalRect::new(444.0, 465.0, 136.0, 18.0)),
+    (
+        RegistrationFocus::AccountId,
+        spec::CrystalRect::new(444.0, 257.0, 136.0, 18.0),
+    ),
+    (
+        RegistrationFocus::Password,
+        spec::CrystalRect::new(444.0, 283.0, 136.0, 18.0),
+    ),
+    (
+        RegistrationFocus::ConfirmPassword,
+        spec::CrystalRect::new(444.0, 309.0, 136.0, 18.0),
+    ),
+    (
+        RegistrationFocus::UserName,
+        spec::CrystalRect::new(444.0, 343.0, 136.0, 18.0),
+    ),
+    (
+        RegistrationFocus::BirthDate,
+        spec::CrystalRect::new(444.0, 369.0, 136.0, 18.0),
+    ),
+    (
+        RegistrationFocus::SecretQuestion,
+        spec::CrystalRect::new(444.0, 404.0, 190.0, 18.0),
+    ),
+    (
+        RegistrationFocus::SecretAnswer,
+        spec::CrystalRect::new(444.0, 430.0, 190.0, 18.0),
+    ),
+    (
+        RegistrationFocus::EmailAddress,
+        spec::CrystalRect::new(444.0, 465.0, 136.0, 18.0),
+    ),
 ];
 const NEW_ACCOUNT_DESCRIPTION: spec::CrystalRect =
     spec::CrystalRect::new(233.0, 494.0, 300.0, 70.0);
@@ -408,6 +438,8 @@ impl Plugin for Mir2NativeShellUiPlugin {
         app.init_resource::<NativeUiIntentQueue>()
             .init_resource::<NativeShellAuxFocus>()
             .init_resource::<NativeShellTextModifiers>()
+            .init_resource::<NativeWalletLogin>()
+            .init_resource::<NativeWalletLoginActionQueue>()
             .add_systems(Startup, spawn_shell_ui)
             .add_systems(
                 Update,
@@ -524,9 +556,15 @@ fn shell_pointer_input(
         (&Interaction, &NativeShellField),
         (Changed<Interaction>, With<Button>),
     >,
+    wallet_interactions: Query<
+        (&Interaction, &NativeWalletLoginAction),
+        (Changed<Interaction>, With<Button>),
+    >,
     shell: Option<ResMut<NativeShellModel>>,
     queue: Option<ResMut<NativeUiIntentQueue>>,
     aux_focus: Option<ResMut<NativeShellAuxFocus>>,
+    mut wallet: Option<ResMut<NativeWalletLogin>>,
+    mut wallet_queue: Option<ResMut<NativeWalletLoginActionQueue>>,
     mut app_exit: MessageWriter<AppExit>,
 ) {
     let (Some(mut shell), Some(mut queue), Some(mut aux_focus)) = (shell, queue, aux_focus) else {
@@ -534,6 +572,20 @@ fn shell_pointer_input(
     };
 
     if shell.screen == NativeShellScreen::InGame {
+        return;
+    }
+
+    if wallet.as_deref().is_some_and(|wallet| wallet.visible) {
+        if let (Some(wallet), Some(wallet_queue)) =
+            (wallet.as_deref_mut(), wallet_queue.as_deref_mut())
+        {
+            for (interaction, action) in &wallet_interactions {
+                if *interaction == Interaction::Pressed {
+                    request_wallet_action(wallet, wallet_queue, *action);
+                    break;
+                }
+            }
+        }
         return;
     }
 
@@ -575,6 +627,14 @@ fn shell_pointer_input(
             }
             CrystalLoginAction::SafeKey => {
                 let _ = shell.apply_ui_intent(NativeUiIntent::OpenSafeKey);
+            }
+            CrystalLoginAction::DubheWallet => {
+                if let (Some(wallet), Some(wallet_queue)) =
+                    (wallet.as_deref_mut(), wallet_queue.as_deref_mut())
+                {
+                    request_wallet_action(wallet, wallet_queue, NativeWalletLoginAction::Begin);
+                    return;
+                }
             }
             CrystalLoginAction::Cancel => {
                 eprintln!("[native-lifecycle] exit_source=login_cancel");
@@ -754,6 +814,8 @@ fn shell_keyboard_input(
     queue: Option<ResMut<NativeUiIntentQueue>>,
     aux_focus: Option<ResMut<NativeShellAuxFocus>>,
     modifiers: Option<ResMut<NativeShellTextModifiers>>,
+    mut wallet: Option<ResMut<NativeWalletLogin>>,
+    mut wallet_queue: Option<ResMut<NativeWalletLoginActionQueue>>,
 ) {
     let (Some(mut shell), Some(mut queue), Some(mut aux_focus), Some(mut modifiers)) =
         (shell, queue, aux_focus, modifiers)
@@ -777,6 +839,26 @@ fn shell_keyboard_input(
     modifiers.super_key = keys.pressed(KeyCode::SuperLeft) || keys.pressed(KeyCode::SuperRight);
 
     if shell.screen == NativeShellScreen::InGame {
+        return;
+    }
+    if wallet.as_deref().is_some_and(|wallet| wallet.visible) {
+        if let (Some(wallet), Some(wallet_queue)) =
+            (wallet.as_deref_mut(), wallet_queue.as_deref_mut())
+        {
+            if keys.just_pressed(KeyCode::Escape) {
+                request_wallet_action(wallet, wallet_queue, NativeWalletLoginAction::Cancel);
+            } else if keys.just_pressed(KeyCode::Enter) && wallet.stage.can_refresh() {
+                request_wallet_action(wallet, wallet_queue, NativeWalletLoginAction::Refresh);
+            }
+        }
+        return;
+    }
+    if shell.screen == NativeShellScreen::Login && keys.just_pressed(KeyCode::F8) {
+        if let (Some(wallet), Some(wallet_queue)) =
+            (wallet.as_deref_mut(), wallet_queue.as_deref_mut())
+        {
+            request_wallet_action(wallet, wallet_queue, NativeWalletLoginAction::Begin);
+        }
         return;
     }
     let shifted = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
@@ -906,9 +988,9 @@ fn shell_keyboard_input(
                         Ok(intent) => {
                             apply_and_queue(&mut shell, &mut queue, intent);
                         }
-                        Err(message) => shell.notice = Some(
-                            crate::native_shell::ShellNotice::error(message),
-                        ),
+                        Err(message) => {
+                            shell.notice = Some(crate::native_shell::ShellNotice::error(message))
+                        }
                     },
                     RegistrationFocus::CancelButton => {
                         let _ = shell.apply_ui_intent(NativeUiIntent::CancelRegistration);
@@ -927,24 +1009,21 @@ fn shell_keyboard_input(
                 RegistrationFocus::Password => {
                     pop_editable_tail(&mut shell.registration.password, edit_delete_count)
                 }
-                RegistrationFocus::ConfirmPassword => pop_editable_tail(
-                    &mut shell.registration.confirm_password,
-                    edit_delete_count,
-                ),
+                RegistrationFocus::ConfirmPassword => {
+                    pop_editable_tail(&mut shell.registration.confirm_password, edit_delete_count)
+                }
                 RegistrationFocus::UserName => {
                     pop_editable_tail(&mut shell.registration.user_name, edit_delete_count)
                 }
                 RegistrationFocus::BirthDate => {
                     pop_editable_tail(&mut shell.registration.birth_date, edit_delete_count)
                 }
-                RegistrationFocus::SecretQuestion => pop_editable_tail(
-                    &mut shell.registration.secret_question,
-                    edit_delete_count,
-                ),
-                RegistrationFocus::SecretAnswer => pop_editable_tail(
-                    &mut shell.registration.secret_answer,
-                    edit_delete_count,
-                ),
+                RegistrationFocus::SecretQuestion => {
+                    pop_editable_tail(&mut shell.registration.secret_question, edit_delete_count)
+                }
+                RegistrationFocus::SecretAnswer => {
+                    pop_editable_tail(&mut shell.registration.secret_answer, edit_delete_count)
+                }
                 RegistrationFocus::EmailAddress => {
                     pop_editable_tail(&mut shell.registration.email_address, edit_delete_count)
                 }
@@ -1172,14 +1251,184 @@ fn append_alphanumeric_field(text: &mut String, c: char, max: usize) {
     append_editable_field(text, c, max);
 }
 
+fn request_wallet_action(
+    wallet: &mut NativeWalletLogin,
+    queue: &mut NativeWalletLoginActionQueue,
+    action: NativeWalletLoginAction,
+) {
+    match action {
+        NativeWalletLoginAction::Begin if !wallet.visible => {}
+        NativeWalletLoginAction::Refresh if wallet.visible && wallet.stage.can_refresh() => {}
+        NativeWalletLoginAction::Cancel if wallet.visible => {
+            wallet.visible = false;
+            queue.push(action);
+            return;
+        }
+        _ => return,
+    }
+    *wallet = NativeWalletLogin {
+        visible: true,
+        message: NativeWalletLoginMessage::Creating,
+        ..default()
+    };
+    queue.push(action);
+}
+
+fn render_wallet_login(
+    parent: &mut ChildSpawnerCommands,
+    wallet: &NativeWalletLogin,
+    locale: NativeUiLocale,
+) {
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.015, 0.012, 0.01, 0.88)),
+            bevy::ui::FocusPolicy::Block,
+            ZIndex(20),
+        ))
+        .with_children(|backdrop| {
+            backdrop
+                .spawn((
+                    Node {
+                        width: Val::Px(400.0),
+                        min_height: Val::Px(520.0),
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        padding: UiRect::all(Val::Px(24.0)),
+                        row_gap: Val::Px(14.0),
+                        border: UiRect::all(Val::Px(1.0)),
+                        ..default()
+                    },
+                    BackgroundColor(PANEL_BG),
+                    BorderColor::all(Color::srgb(0.67, 0.51, 0.24)),
+                ))
+                .with_children(|panel| {
+                    wallet_text(panel, &locale.wallet_title(), 22.0, GOLD);
+                    wallet_text(panel, &locale.wallet_instructions(), 14.0, CREAM);
+                    panel
+                        .spawn((
+                            Node {
+                                width: Val::Px(240.0),
+                                height: Val::Px(240.0),
+                                flex_shrink: 0.0,
+                                justify_content: JustifyContent::Center,
+                                align_items: AlignItems::Center,
+                                ..default()
+                            },
+                            BackgroundColor(Color::WHITE),
+                        ))
+                        .with_children(|qr| {
+                            if wallet.stage == NativeWalletLoginStage::Pending {
+                                if let Some(image) = &wallet.qr_image {
+                                    qr.spawn((
+                                        Node {
+                                            width: Val::Px(240.0),
+                                            height: Val::Px(240.0),
+                                            ..default()
+                                        },
+                                        ImageNode {
+                                            image: image.clone(),
+                                            image_mode: NodeImageMode::Stretch,
+                                            ..default()
+                                        },
+                                    ));
+                                    return;
+                                }
+                            }
+                            wallet_text(
+                                qr,
+                                &locale.wallet_stage(wallet.stage),
+                                16.0,
+                                Color::srgb(0.20, 0.17, 0.12),
+                            );
+                        });
+                    wallet_text(panel, &locale.wallet_stage(wallet.stage), 16.0, GOLD);
+                    if wallet.stage == NativeWalletLoginStage::Pending {
+                        wallet_text(
+                            panel,
+                            &locale.wallet_countdown(wallet.remaining_seconds),
+                            14.0,
+                            CREAM,
+                        );
+                    }
+                    if wallet.message != NativeWalletLoginMessage::None {
+                        wallet_text(panel, &locale.message(wallet.message), 13.0, CREAM);
+                    }
+                    panel
+                        .spawn(Node {
+                            width: Val::Percent(100.0),
+                            justify_content: JustifyContent::Center,
+                            column_gap: Val::Px(12.0),
+                            ..default()
+                        })
+                        .with_children(|buttons| {
+                            if wallet.stage.can_refresh() {
+                                wallet_button(
+                                    buttons,
+                                    &locale.wallet_refresh(),
+                                    NativeWalletLoginAction::Refresh,
+                                );
+                            }
+                            wallet_button(
+                                buttons,
+                                &locale.wallet_cancel(),
+                                NativeWalletLoginAction::Cancel,
+                            );
+                        });
+                });
+        });
+}
+
+fn wallet_text(parent: &mut ChildSpawnerCommands, text: &str, size: f32, color: Color) {
+    parent.spawn((
+        Text::new(text),
+        body_font(size),
+        TextColor(color),
+        TextLayout::justify(Justify::Center),
+        Node {
+            max_width: Val::Percent(100.0),
+            flex_shrink: 0.0,
+            ..default()
+        },
+    ));
+}
+
+fn wallet_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeWalletLoginAction) {
+    parent
+        .spawn((
+            Button,
+            action,
+            Node {
+                min_width: Val::Px(140.0),
+                height: Val::Px(38.0),
+                padding: UiRect::horizontal(Val::Px(8.0)),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            BackgroundColor(BUTTON_BG),
+        ))
+        .with_children(|button| wallet_text(button, label, 14.0, CREAM));
+}
+
 fn render_shell_ui(
     mut commands: Commands,
     model: Option<Res<NativeShellModel>>,
     asset_server: Res<AssetServer>,
     aux_focus: Option<Res<NativeShellAuxFocus>>,
+    wallet: Option<Res<NativeWalletLogin>>,
     content_nodes: Query<Entity, With<NativeShellContent>>,
     mut last_rendered_model: Local<Option<NativeShellModel>>,
     mut last_rendered_aux_focus: Local<Option<NativeShellAuxFocus>>,
+    mut last_rendered_wallet: Local<Option<NativeWalletLogin>>,
+    mut last_rendered_locale: Local<Option<(NativeUiLocale, u64)>>,
 ) {
     let Some(model) = model else {
         return;
@@ -1190,14 +1439,21 @@ fn render_shell_ui(
     }
 
     let current_aux_focus = aux_focus.as_deref().copied().unwrap_or_default();
+    let current_wallet = wallet.as_deref().cloned().unwrap_or_default();
+    let current_locale = NativeUiLocale::default();
+    let current_locale_stamp = (current_locale, native_i18n::revision());
 
     if last_rendered_model.as_ref() == Some(model.as_ref())
         && last_rendered_aux_focus.as_ref() == Some(&current_aux_focus)
+        && last_rendered_wallet.as_ref() == Some(&current_wallet)
+        && *last_rendered_locale == Some(current_locale_stamp)
     {
         return;
     }
     *last_rendered_model = Some(model.clone());
     *last_rendered_aux_focus = Some(current_aux_focus);
+    *last_rendered_wallet = Some(current_wallet.clone());
+    *last_rendered_locale = Some(current_locale_stamp);
 
     let Ok(content) = content_nodes.single() else {
         return;
@@ -1233,7 +1489,11 @@ fn render_shell_ui(
                     &asset_server,
                     &model,
                     &password_mask(&model.login.password),
+                    current_locale,
                 );
+                if current_wallet.visible {
+                    render_wallet_login(screen, &current_wallet, current_locale);
+                }
             }
             NativeShellScreen::CharacterSelect => {
                 spawn_character_select_screen(screen, &asset_server, &model);
@@ -1253,6 +1513,7 @@ fn render_shell_ui(
                     &asset_server,
                     &model,
                     &password_mask(&model.login.password),
+                    current_locale,
                 );
                 render_safe_key(screen, &asset_server, &model);
             }
@@ -1436,7 +1697,12 @@ fn render_registration(
     // Crystal's LoginScene.NewAccountDialog uses Prguse frame 63 at the centre
     // of the 1024x768 stage.  Its labels are part of the exported source art;
     // only its text boxes, description, and Title buttons are live controls.
-    spawn_native_image(parent, asset_server, "original-ui/Prguse/63.png", NEW_ACCOUNT_FRAME);
+    spawn_native_image(
+        parent,
+        asset_server,
+        "original-ui/Prguse/63.png",
+        NEW_ACCOUNT_FRAME,
+    );
 
     let form = &model.registration;
     let password = password_mask(&form.password);
@@ -1543,7 +1809,10 @@ fn registration_field_border_color(
     let invalid = Color::srgb(0.75, 0.0, 0.0);
     let alphanumeric = |value: &str, min, max| {
         let length = value.chars().count();
-        (min..=max).contains(&length) && value.chars().all(|character| character.is_ascii_alphanumeric())
+        (min..=max).contains(&length)
+            && value
+                .chars()
+                .all(|character| character.is_ascii_alphanumeric())
     };
     match focus {
         RegistrationFocus::AccountId => {
@@ -1575,7 +1844,9 @@ fn registration_field_border_color(
                 invalid
             }
         }
-        RegistrationFocus::UserName => optional_field_color(&form.user_name, 20, neutral, valid, invalid),
+        RegistrationFocus::UserName => {
+            optional_field_color(&form.user_name, 20, neutral, valid, invalid)
+        }
         RegistrationFocus::BirthDate => {
             if form.birth_date.is_empty() {
                 neutral
@@ -2353,6 +2624,369 @@ mod tests {
             repeat: false,
             window: Entity::PLACEHOLDER,
         }
+    }
+
+    fn wallet_keyboard_app(wallet: NativeWalletLogin) -> App {
+        let mut shell = NativeShellModel {
+            screen: NativeShellScreen::Login,
+            ..default()
+        };
+        shell.login.account = "original-account".to_owned();
+        shell.login.password = "secret".to_owned();
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default())
+            .insert_resource(shell)
+            .insert_resource(wallet)
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<NativeWalletLoginActionQueue>()
+            .init_resource::<NativeShellAuxFocus>()
+            .init_resource::<NativeShellTextModifiers>()
+            .add_message::<KeyboardInput>()
+            .add_systems(Update, shell_keyboard_input);
+        app
+    }
+
+    #[test]
+    fn wallet_modal_blocks_login_edits_and_password_submission() {
+        let mut app = wallet_keyboard_app(NativeWalletLogin {
+            visible: true,
+            stage: NativeWalletLoginStage::Pending,
+            ..default()
+        });
+        app.world_mut()
+            .resource_mut::<NativeShellModel>()
+            .login
+            .focus = LoginFocus::LoginButton;
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Enter);
+        app.world_mut().write_message(keyboard_event(
+            KeyCode::KeyX,
+            Key::Character("x".into()),
+            ButtonState::Pressed,
+            Some("x"),
+        ));
+        app.update();
+        let shell = app.world().resource::<NativeShellModel>();
+        assert_eq!(shell.screen, NativeShellScreen::Login);
+        assert!(!shell.login_request_in_flight);
+        assert_eq!(shell.login.account, "original-account");
+        assert_eq!(shell.login.password, "secret");
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativeUiIntentQueue>()
+            .drain()
+            .next()
+            .is_none());
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativeWalletLoginActionQueue>()
+            .drain()
+            .next()
+            .is_none());
+    }
+
+    #[test]
+    fn wallet_shortcut_opens_without_password_and_escape_cancels() {
+        let mut app = wallet_keyboard_app(NativeWalletLogin::default());
+        app.world_mut()
+            .resource_mut::<NativeShellModel>()
+            .login
+            .password
+            .clear();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F8);
+        app.update();
+        assert!(app.world().resource::<NativeWalletLogin>().visible);
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativeWalletLoginActionQueue>()
+                .drain()
+                .collect::<Vec<_>>(),
+            [NativeWalletLoginAction::Begin]
+        );
+        {
+            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+            keys.clear();
+            keys.press(KeyCode::Escape);
+        }
+        app.update();
+        assert!(!app.world().resource::<NativeWalletLogin>().visible);
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativeWalletLoginActionQueue>()
+                .drain()
+                .collect::<Vec<_>>(),
+            [NativeWalletLoginAction::Cancel]
+        );
+    }
+
+    #[test]
+    fn wallet_modal_blocks_underlying_registration_and_exit_buttons() {
+        let mut app = wallet_keyboard_app(NativeWalletLogin {
+            visible: true,
+            stage: NativeWalletLoginStage::Pending,
+            ..default()
+        });
+        app.add_message::<AppExit>()
+            .add_systems(Update, shell_pointer_input);
+        app.world_mut().spawn((
+            Button,
+            Interaction::Pressed,
+            CrystalLoginAction::RegisterAccount,
+        ));
+        app.world_mut()
+            .spawn((Button, Interaction::Pressed, CrystalLoginAction::Cancel));
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            NativeShellScreen::Login
+        );
+        assert!(app.world().resource::<Messages<AppExit>>().is_empty());
+        assert!(app.world().resource::<NativeWalletLogin>().visible);
+    }
+
+    #[test]
+    fn wallet_terminal_enter_refreshes_once_and_clears_old_image() {
+        let mut app = wallet_keyboard_app(NativeWalletLogin {
+            visible: true,
+            stage: NativeWalletLoginStage::Expired,
+            qr_image: Some(Handle::default()),
+            remaining_seconds: 0,
+            message: NativeWalletLoginMessage::Expired,
+        });
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Enter);
+        app.update();
+        let wallet = app.world().resource::<NativeWalletLogin>();
+        assert!(wallet.visible);
+        assert_eq!(wallet.stage, NativeWalletLoginStage::Creating);
+        assert!(wallet.qr_image.is_none());
+        // A repeated Enter in the creating state cannot create another challenge.
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativeWalletLoginActionQueue>()
+                .drain()
+                .collect::<Vec<_>>(),
+            [NativeWalletLoginAction::Refresh]
+        );
+    }
+
+    fn wallet_render_app() -> App {
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()))
+            .init_asset::<Image>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::Login,
+                ..default()
+            })
+            .init_resource::<NativeWalletLoginActionQueue>()
+            .add_systems(Update, render_shell_ui);
+        // with_locale is deliberately thread-local. Execute this render fixture
+        // on its calling thread so the scoped locale reaches the real system.
+        app.edit_schedule(Update, |schedule| {
+            schedule.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::new());
+        });
+        let qr = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.insert_resource(NativeWalletLogin {
+            visible: true,
+            stage: NativeWalletLoginStage::Pending,
+            qr_image: Some(qr),
+            remaining_seconds: 42,
+            message: NativeWalletLoginMessage::ConfirmOnPhone,
+        });
+        app.world_mut().spawn((NativeShellContent, Node::default()));
+        app
+    }
+
+    #[test]
+    fn wallet_countdown_rerenders_without_shell_state_changes() {
+        native_i18n::with_locale(native_i18n::Locale::TraditionalChinese, || {
+            let mut app = wallet_render_app();
+            app.update();
+            assert!(app
+                .world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0 == "二維碼有效期：42 秒"));
+            app.world_mut()
+                .resource_mut::<NativeWalletLogin>()
+                .remaining_seconds = 41;
+            app.update();
+            let world = app.world_mut();
+            let texts = world
+                .query::<&Text>()
+                .iter(world)
+                .map(|text| text.0.clone())
+                .collect::<Vec<_>>();
+            assert!(texts.iter().any(|text| text == "二維碼有效期：41 秒"));
+            assert!(!texts.iter().any(|text| text == "二維碼有效期：42 秒"));
+            assert_eq!(
+                world
+                    .query::<&NativeWalletLoginAction>()
+                    .iter(world)
+                    .copied()
+                    .collect::<Vec<_>>(),
+                [NativeWalletLoginAction::Cancel]
+            );
+            world.resource_mut::<NativeWalletLogin>().stage = NativeWalletLoginStage::Expired;
+            app.update();
+            let world = app.world_mut();
+            assert!(world
+                .query::<&NativeWalletLoginAction>()
+                .iter(world)
+                .any(|action| *action == NativeWalletLoginAction::Refresh));
+        });
+    }
+
+    #[test]
+    fn wallet_locale_only_redraws_real_text_and_preserves_active_challenge() {
+        use native_i18n::Locale::*;
+        let mut app = wallet_render_app();
+        let wallet = app.world().resource::<NativeWalletLogin>().clone();
+        let qr = wallet.qr_image.clone().unwrap();
+        for (language, title, stage, countdown, message, cancel) in [
+            (
+                English,
+                "Dubhe Wallet QR login",
+                "Waiting for phone approval",
+                "Expires in 42s",
+                "Confirm your login in the wallet on your phone.",
+                "Cancel [Esc]",
+            ),
+            (
+                TraditionalChinese,
+                "Dubhe Wallet 掃碼登入",
+                "等待手機掃碼確認",
+                "二維碼有效期：42 秒",
+                "請在手機錢包中確認登入。",
+                "取消 [Esc]",
+            ),
+            (
+                BrazilianPortuguese,
+                "Entrar com Dubhe Wallet",
+                "Aguardando confirmação no celular",
+                "Expira em 42s",
+                "Confirme o acesso na carteira do celular.",
+                "Cancelar [Esc]",
+            ),
+            (
+                Russian,
+                "Вход через Dubhe Wallet",
+                "Ожидание подтверждения на телефоне",
+                "Истекает через 42 с",
+                "Подтвердите вход в кошельке на телефоне.",
+                "Отмена [Esc]",
+            ),
+            (
+                Hindi,
+                "Dubhe Wallet से लॉगिन",
+                "फ़ोन पर पुष्टि की प्रतीक्षा है",
+                "42 सेकंड में समाप्त होगा",
+                "फ़ोन के वॉलेट में लॉगिन की पुष्टि करें।",
+                "रद्द करें [Esc]",
+            ),
+            (
+                Indonesian,
+                "Masuk dengan Dubhe Wallet",
+                "Menunggu persetujuan di ponsel",
+                "Kedaluwarsa dalam 42 detik",
+                "Konfirmasi masuk di dompet pada ponsel Anda.",
+                "Batal [Esc]",
+            ),
+            (
+                Vietnamese,
+                "Đăng nhập bằng Dubhe Wallet",
+                "Đang chờ xác nhận trên điện thoại",
+                "Hết hạn sau 42 giây",
+                "Xác nhận đăng nhập trong ví trên điện thoại.",
+                "Hủy [Esc]",
+            ),
+            (
+                Thai,
+                "เข้าสู่ระบบด้วย Dubhe Wallet",
+                "รอการยืนยันบนโทรศัพท์",
+                "หมดอายุใน 42 วินาที",
+                "โปรดยืนยันการเข้าสู่ระบบในกระเป๋าบนโทรศัพท์",
+                "ยกเลิก [Esc]",
+            ),
+            (
+                Arabic,
+                "الدخول عبر Dubhe Wallet",
+                "بانتظار التأكيد على الهاتف",
+                "تنتهي الصلاحية خلال 42 ثانية",
+                "أكّد الدخول في المحفظة على هاتفك.",
+                "إلغاء [Esc]",
+            ),
+            (
+                English,
+                "Dubhe Wallet QR login",
+                "Waiting for phone approval",
+                "Expires in 42s",
+                "Confirm your login in the wallet on your phone.",
+                "Cancel [Esc]",
+            ),
+        ] {
+            native_i18n::with_locale(language, || {
+                app.update();
+                let world = app.world_mut();
+                let texts = world
+                    .query::<&Text>()
+                    .iter(world)
+                    .map(|text| text.0.clone())
+                    .collect::<Vec<_>>();
+                for expected in [title, stage, countdown, message, cancel] {
+                    assert!(
+                        texts.iter().any(|text| text == expected),
+                        "missing {language:?}: {expected}"
+                    );
+                }
+                assert!(texts.contains(&format!("{title}  [F8]")));
+                let classic = NativeUiLocale(language);
+                for caption in [
+                    crate::native_login_locale::NativeLoginCaption::Title,
+                    crate::native_login_locale::NativeLoginCaption::Password,
+                    crate::native_login_locale::NativeLoginCaption::NewAccount,
+                    crate::native_login_locale::NativeLoginCaption::ChangePassword,
+                ] {
+                    assert!(texts.contains(&classic.login_caption(caption)));
+                }
+                assert!(*world.resource::<NativeWalletLogin>() == wallet);
+                assert_eq!(world.resource::<Assets<Image>>().len(), 1);
+                assert!(world
+                    .query::<&ImageNode>()
+                    .iter(world)
+                    .any(|image| image.image == qr));
+                assert!(world
+                    .resource_mut::<NativeWalletLoginActionQueue>()
+                    .drain()
+                    .next()
+                    .is_none());
+            });
+        }
+        app.world_mut().resource_mut::<NativeWalletLogin>().stage = NativeWalletLoginStage::Error;
+        app.world_mut().resource_mut::<NativeWalletLogin>().message =
+            NativeWalletLoginMessage::Retry;
+        native_i18n::with_locale(TraditionalChinese, || {
+            app.update();
+            let world = app.world_mut();
+            let texts = world
+                .query::<&Text>()
+                .iter(world)
+                .map(|text| text.0.clone())
+                .collect::<Vec<_>>();
+            assert!(texts.iter().any(|text| text == "掃碼登入暫時無法使用"));
+            assert!(texts.iter().any(|text| text == "重新整理 [Enter]"));
+            assert!(texts
+                .iter()
+                .any(|text| text == "錢包登入暫時無法使用，請重新整理後再試。"));
+        });
     }
 
     #[test]

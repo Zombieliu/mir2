@@ -17,6 +17,7 @@ import type { SkillBarsProps, SkillBarLease } from "./original-client-skill-bars
 import type { CombatModeControls } from "./original-client-combat-mode-controls";
 import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
 import type { SuiWalletSummary, LoginAuthControls } from "../../lib/client-login-runtime";
+import type { DubheQrLoginState } from "../../lib/dubhe-wallet-login";
 import type { Mir2InputProfile } from "./original-client-device-profile";
 import type { Mir2GamepadFamily } from "./original-client-gamepad-input";
 import type { MapStandaloneTileDraw, MapTileDraw } from "./webgl2-map-atlas-layer";
@@ -278,6 +279,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   loginAuth: LoginAuthControls;
   suiWallets: SuiWalletSummary[];
   walletPickerOpen: boolean;
+  dubheQr: DubheQrLoginState | null;
   dubheWalletUrl: string;
   identityProvider: string | null;
   identityLinkBusy: boolean;
@@ -308,6 +310,8 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   onSubmitLogin: () => void;
   onPasskeyLogin: () => void;
   onWalletPickerToggle: () => void;
+  onDubheQrLogin: () => void;
+  onDubheQrCancel: () => void;
   onWalletLogin: (walletId: string) => void;
   onIdentityLinkPasskey: () => void;
   onIdentityLinkWallet: (walletId?: string) => void;

@@ -30,6 +30,7 @@ mod lifecycle;
 mod map_parser;
 mod movement_trace;
 mod native_fonts;
+mod native_locale;
 mod native_protocol;
 mod npc_purchase_client;
 mod npc_purchase_projection;
@@ -37,6 +38,10 @@ mod session_config;
 mod shell_bridge;
 mod social_bond_wire;
 mod timing;
+mod wallet_login;
+mod wallet_login_http;
+#[cfg(test)]
+mod native_wallet_visual_tests;
 
 /// Whether an effect frame PNG (a web path like /original-effects/Magic/0.png)
 /// exists under the native asset root. Used by effects.rs so a missing asset
@@ -115,6 +120,7 @@ fn report_r2_progress_via_chat(
 }
 
 fn main() -> bevy::app::AppExit {
+    native_locale::initialize();
     timing::initialize();
     let config_started = std::time::Instant::now();
     console_error_panic_hook::set_once();
@@ -253,6 +259,8 @@ fn main() -> bevy::app::AppExit {
         }),
     ));
     app.add_plugins(mir2_client_bevy::native_shell_ui::Mir2NativeShellUiPlugin);
+    native_locale::install(&mut app);
+    app.add_plugins(mir2_client_bevy::native_i18n::NativeI18nPlugin);
     // Native-only Crystal presentation consumes the existing authoritative
     // read models. It is registered only by this Windows host; Web/WASM keeps
     // its own renderer and shared runtime behavior remains unchanged.
@@ -289,6 +297,9 @@ fn main() -> bevy::app::AppExit {
         session.auto_login.as_ref(),
     ));
     app.insert_resource(input::GatewayCommands::new(command_tx.clone()));
+    app.add_plugins(wallet_login::NativeWalletLoginPlugin {
+        config: session.wallet_auth.clone(),
+    });
     app.add_systems(bevy::app::Startup, cursor::load_native_crystal_cursors);
     app.init_resource::<gameplay_bridge::NativeWorldProducerStamp>();
     app.add_systems(bevy::app::Update,(gameplay_bridge::settle_native_command_terminals,gameplay_bridge::activate_native_command_provenance).chain()

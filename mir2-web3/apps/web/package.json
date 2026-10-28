@@ -8,6 +8,7 @@
     "check:scene-sprite-library-keys": "node ./scripts/generate-original-scene-sprite-key-index.mjs --check",
     "audit:native-ui-assets": "node ./scripts/audit-native-ui-assets.mjs",
     "test:storage-transfers": "node --no-global-search-paths --test ./scripts/test-storage-gateway-adapter.mjs ./scripts/test-storage-page-gate.mjs",
+    "test:dubhe-wallet": "node --test ./scripts/test-dubhe-connect-auth.mjs ./scripts/test-dubhe-wallet-login.mjs",
     "test:storage-ui": "node --no-global-search-paths --test ./scripts/test-bevy-storage-ui.mjs ./scripts/test-storage-surface-integration.mjs",
     "export:crystal-sounds": "node ./scripts/export-crystal-sounds.mjs",
     "export:crystal-magic-effects": "node ./scripts/export-crystal-magic-effects.mjs",
@@ -219,12 +220,14 @@
     "@mysten/wallet-standard": "^0.20.3",
     "next": "16.2.11",
     "nipplejs": "^1.0.3",
+    "qrcode": "1.5.4",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.1055.0",
     "@types/node": "25.0.3",
+    "@types/qrcode": "1.5.6",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "sharp": "0.35.3",

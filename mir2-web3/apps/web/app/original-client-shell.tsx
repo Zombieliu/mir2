@@ -608,6 +608,7 @@ export function OriginalClientShell({
   loginAuth,
   suiWallets,
   walletPickerOpen,
+  dubheQr,
   dubheWalletUrl,
   identityProvider,
   identityLinkBusy,
@@ -635,6 +636,8 @@ export function OriginalClientShell({
   onSubmitLogin,
   onPasskeyLogin,
   onWalletPickerToggle,
+  onDubheQrLogin,
+  onDubheQrCancel,
   onWalletLogin,
   onIdentityLinkPasskey,
   onIdentityLinkWallet,
@@ -5264,6 +5267,7 @@ export function OriginalClientShell({
               loginAuth={loginAuth}
               suiWallets={suiWallets}
               walletPickerOpen={walletPickerOpen}
+              dubheQr={dubheQr}
               dubheWalletUrl={dubheWalletUrl}
               onLanguageChange={onLanguageChange}
               onAccountIdChange={onAccountIdChange}
@@ -5273,6 +5277,8 @@ export function OriginalClientShell({
               onPasskeyLogin={onPasskeyLogin}
               onWalletPickerToggle={onWalletPickerToggle}
               onWalletLogin={onWalletLogin}
+              onDubheQrLogin={onDubheQrLogin}
+              onDubheQrCancel={onDubheQrCancel}
               onQuickEnter={onQuickEnter}
               onResetClient={onResetClient}
             />

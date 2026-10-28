@@ -53,6 +53,158 @@ struct NativePinnedFonts {
     handles: Vec<Handle<Font>>,
 }
 
+/// One immutable, licensed Traditional Chinese face, independent of optional
+/// Windows language packs. Keep its handle alive across every locale switch.
+#[derive(Resource)]
+struct NativeTraditionalFont {
+    _handle: Handle<Font>,
+}
+
+const TRADITIONAL_FONT: &[u8] = include_bytes!("../assets/fonts/NotoSansTC.ttf");
+
+/// Static regular/bold faces, licensed and pinned in MULTILINGUAL-SOURCES.json.
+/// No font file is discovered or reloaded when the language changes.
+const BUNDLED_FONTS: [(&str, &[u8]); 8] = [
+    (
+        "Noto Sans",
+        include_bytes!("../assets/fonts/NotoSans-Regular.ttf"),
+    ),
+    (
+        "Noto Sans",
+        include_bytes!("../assets/fonts/NotoSans-Bold.ttf"),
+    ),
+    (
+        "Noto Sans Devanagari",
+        include_bytes!("../assets/fonts/NotoSansDevanagari-Regular.ttf"),
+    ),
+    (
+        "Noto Sans Devanagari",
+        include_bytes!("../assets/fonts/NotoSansDevanagari-Bold.ttf"),
+    ),
+    (
+        "Noto Sans Thai",
+        include_bytes!("../assets/fonts/NotoSansThai-Regular.ttf"),
+    ),
+    (
+        "Noto Sans Thai",
+        include_bytes!("../assets/fonts/NotoSansThai-Bold.ttf"),
+    ),
+    (
+        "Noto Sans Arabic",
+        include_bytes!("../assets/fonts/NotoSansArabic-Regular.ttf"),
+    ),
+    (
+        "Noto Sans Arabic",
+        include_bytes!("../assets/fonts/NotoSansArabic-Bold.ttf"),
+    ),
+];
+
+#[derive(Resource, Default)]
+struct NativeBundledFonts {
+    handles: Vec<Handle<Font>>,
+}
+
+const SCRIPT_FALLBACKS: [([u8; 4], &str); 6] = [
+    (*b"Latn", "Noto Sans"),
+    (*b"Cyrl", "Noto Sans"),
+    (*b"Deva", "Noto Sans Devanagari"),
+    (*b"Thai", "Noto Sans Thai"),
+    (*b"Arab", "Noto Sans Arabic"),
+    (*b"Hani", "Noto Sans TC"),
+];
+
+fn install_bundled_fonts(app: &mut App) {
+    if app.world().contains_resource::<NativeBundledFonts>() {
+        return;
+    }
+    let Some(mut fonts) = app.world_mut().get_resource_mut::<Assets<Font>>() else {
+        return;
+    };
+    let traditional = fonts.add(Font::from_bytes(TRADITIONAL_FONT.to_vec()));
+    let handles = BUNDLED_FONTS
+        .iter()
+        .map(|(_, bytes)| fonts.add(Font::from_bytes(bytes.to_vec())))
+        .collect();
+    app.insert_resource(NativeTraditionalFont {
+        _handle: traditional,
+    });
+    app.insert_resource(NativeBundledFonts { handles });
+}
+
+/// Fallback is script-based, so a player's opaque name can contain any of the
+/// supported scripts even when the surrounding interface is a different locale.
+/// Bevy clears its collection when any Font asset is removed. Check the six
+/// small mappings after font registration every frame instead of caching a
+/// once-only flag that would silently reintroduce optional OS language packs.
+fn configure_bundled_fallbacks(cx: &mut FontCx) -> bool {
+    for (tag, name) in SCRIPT_FALLBACKS {
+        let Some(family) = cx.collection.family_id(name) else {
+            return false; // Assets have not been registered yet.
+        };
+        let script = fontique::Script::from_bytes(tag);
+        if cx.collection.fallback_families(script).next() != Some(family) {
+            cx.collection.set_fallbacks(script, std::iter::once(family));
+        }
+        if tag == *b"Hani" {
+            // Fontique keeps locale-specific Han mappings independently.
+            for language in ["zh-TW", "zh-HK", "zh-CN", "ja", "ko"] {
+                let key = (script, language);
+                if cx.collection.fallback_families(key).next() != Some(family) {
+                    cx.collection.set_fallbacks(key, std::iter::once(family));
+                }
+            }
+        }
+    }
+    if cx.get_family(&bevy::text::FontSource::SansSerif) != Some("Noto Sans") {
+        let _ = cx.set_sans_serif_family("Noto Sans");
+    }
+    if cx.get_family(&bevy::text::FontSource::SystemUi) != Some("Noto Sans") {
+        let _ = cx.set_system_ui_family("Noto Sans");
+    }
+    true
+}
+
+fn restore_bundled_fallbacks(mut cx: ResMut<FontCx>) {
+    configure_bundled_fallbacks(&mut cx);
+}
+
+#[cfg(test)]
+const NINE_LANGUAGE_SAMPLES: [(&str, &str, &str); 9] = [
+    (
+        "en",
+        "Noto Sans",
+        "Create character · Quest complete · Gold 123",
+    ),
+    ("zh-TW", "Noto Sans TC", "建立角色 · 任務完成 · Gold 123"),
+    (
+        "pt-BR",
+        "Noto Sans",
+        "Criar personagem · Missão concluída · Gold 123",
+    ),
+    (
+        "ru",
+        "Noto Sans",
+        "Создать персонажа · Задание выполнено · Gold 123",
+    ),
+    (
+        "hi",
+        "Noto Sans Devanagari",
+        "पात्र बनाएँ · कार्य पूरा हुआ · Gold 123",
+    ),
+    ("id", "Noto Sans", "Buat karakter · Misi selesai · Gold 123"),
+    (
+        "vi",
+        "Noto Sans",
+        "Tạo nhân vật · Nhiệm vụ hoàn thành · Gold 123",
+    ),
+    ("th", "Noto Sans Thai", "สร้างตัวละคร · ภารกิจสำเร็จ · Gold 123"),
+    (
+        "ar",
+        "Noto Sans Arabic",
+        "إنشاء شخصية · اكتملت المهمة · Gold 123",
+    ),
+];
+
 /// The atlas key includes the font Blob's identity, not its file path. Keep
 /// each used source alive for the same lifetime as Bevy's retained atlases.
 /// These are shared byte references, not newly registered font assets: system
@@ -113,18 +265,30 @@ pub fn install(app: &mut App) {
     // This also protects fallback-only installations where any of the named
     // font files below are absent. Install before the first text is measured.
     install_source_identity_retention(app);
+    install_bundled_fonts(app);
+    app.add_systems(
+        PostUpdate,
+        restore_bundled_fallbacks
+            .after(bevy::text::load_font_assets_into_font_collection)
+            .before(bevy::ui::UiSystems::Content)
+            .before(bevy::sprite::update_text2d_layout),
+    );
     install_named_fonts(app);
 }
 
 fn install_named_fonts(app: &mut App) {
     let mut pinned = NativePinnedFonts::default();
     let Some(fonts_dir) = system_fonts_dir() else {
-        eprintln!("[native-fonts] unavailable: WINDIR\\Fonts is not available; keeping system family sources");
+        eprintln!(
+            "[native-fonts] unavailable: WINDIR\\Fonts is not available; keeping system family sources"
+        );
         app.insert_resource(pinned);
         return;
     };
     let Some(mut fonts) = app.world_mut().get_resource_mut::<Assets<Font>>() else {
-        eprintln!("[native-fonts] unavailable: Bevy Assets<Font> is not initialized; keeping system family sources");
+        eprintln!(
+            "[native-fonts] unavailable: Bevy Assets<Font> is not initialized; keeping system family sources"
+        );
         app.insert_resource(pinned);
         return;
     };
@@ -134,9 +298,17 @@ fn install_named_fonts(app: &mut App) {
         match std::fs::read(&path) {
             Ok(bytes) => {
                 if pin_font_bytes(&mut fonts, &mut pinned, bytes) {
-                    eprintln!("[native-fonts] pinned {} from {}", spec.family, path.display());
+                    eprintln!(
+                        "[native-fonts] pinned {} from {}",
+                        spec.family,
+                        path.display()
+                    );
                 } else {
-                    eprintln!("[native-fonts] unavailable: {} at {} is empty; keeping its system family source", spec.family, path.display());
+                    eprintln!(
+                        "[native-fonts] unavailable: {} at {} is empty; keeping its system family source",
+                        spec.family,
+                        path.display()
+                    );
                 }
             }
             Err(error) => eprintln!(
@@ -174,6 +346,91 @@ fn pin_font_bytes(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn bundled_multilingual_fonts_are_static_licensed_and_match_pinned_hashes() {
+        use sha2::{Digest, Sha256};
+        let metadata: serde_json::Value =
+            serde_json::from_str(include_str!("../assets/fonts/MULTILINGUAL-SOURCES.json"))
+                .unwrap();
+        for ((family, bytes), entry) in BUNDLED_FONTS
+            .iter()
+            .zip(metadata["fonts"].as_array().unwrap())
+        {
+            assert_eq!(entry["family"], *family);
+            assert_eq!(entry["bytes"].as_u64(), Some(bytes.len() as u64));
+            assert_eq!(entry["sha256"], format!("{:x}", Sha256::digest(bytes)));
+            let count = u16::from_be_bytes([bytes[4], bytes[5]]) as usize;
+            let tags: Vec<_> = (0..count)
+                .map(|index| &bytes[12 + index * 16..16 + index * 16])
+                .collect();
+            assert!(!tags.contains(&b"fvar".as_slice()) && !tags.contains(&b"gvar".as_slice()));
+            assert!(
+                tags.contains(&b"GSUB".as_slice()),
+                "{family} must preserve real shaping tables"
+            );
+        }
+        for license in [
+            include_str!("../assets/fonts/OFL-NotoSans.txt"),
+            include_str!("../assets/fonts/OFL-NotoSansDevanagari.txt"),
+            include_str!("../assets/fonts/OFL-NotoSansThai.txt"),
+            include_str!("../assets/fonts/OFL-NotoSansArabic.txt"),
+        ] {
+            assert!(license.contains("SIL OPEN FONT LICENSE"));
+        }
+    }
+
+    #[test]
+    fn bundled_script_fallbacks_recover_after_bevy_collection_rebuild_without_system_fonts() {
+        use bevy::text::load_font_assets_into_font_collection;
+        let mut app = App::new();
+        app.init_resource::<Assets<Font>>()
+            .init_resource::<FontCx>()
+            .add_systems(
+                bevy::app::Update,
+                (
+                    load_font_assets_into_font_collection,
+                    restore_bundled_fallbacks,
+                )
+                    .chain(),
+            );
+        app.world_mut().resource_mut::<FontCx>().collection =
+            fontique::Collection::new(fontique::CollectionOptions {
+                system_fonts: false,
+                ..Default::default()
+            });
+        install_bundled_fonts(&mut app);
+        install_bundled_fonts(&mut app); // Idempotent, including handle ownership.
+        assert_eq!(
+            app.world().resource::<NativeBundledFonts>().handles.len(),
+            8
+        );
+        assert_eq!(app.world().resource::<Assets<Font>>().len(), 9);
+        let temporary = app
+            .world_mut()
+            .resource_mut::<Assets<Font>>()
+            .add(Font::from_bytes(bevy::text::DEFAULT_FONT_DATA.to_vec()));
+        app.update();
+        app.world_mut()
+            .resource_mut::<Assets<Font>>()
+            .remove(temporary.id());
+        app.update(); // Bevy clears and rebuilds the entire collection here.
+        let mut cx = app.world_mut().resource_mut::<FontCx>();
+        for (tag, name) in SCRIPT_FALLBACKS {
+            let family = cx
+                .collection
+                .family_by_name(name)
+                .expect("bundled family restored");
+            let id = cx.collection.family_id(name).unwrap();
+            assert_eq!(
+                cx.collection
+                    .fallback_families(fontique::Script::from_bytes(tag))
+                    .next(),
+                Some(id)
+            );
+            assert!(family.fonts().len() >= if name == "Noto Sans TC" { 1 } else { 2 });
+        }
+    }
 
     #[test]
     fn installed_faces_register_under_original_names_and_survive_source_pruning() {
@@ -228,6 +485,38 @@ mod tests {
         assert!(!pin_font_bytes(&mut fonts, &mut pinned, Vec::new()));
         assert!(pinned.handles.is_empty());
         assert!(fonts.is_empty());
+    }
+
+    #[test]
+    fn bundled_traditional_face_is_registered_and_retained_without_a_language_pack() {
+        use bevy::text::load_font_assets_into_font_collection;
+        let mut app = App::new();
+        app.init_resource::<Assets<Font>>()
+            .init_resource::<FontCx>()
+            .add_systems(bevy::app::Update, load_font_assets_into_font_collection);
+        let handle = app
+            .world_mut()
+            .resource_mut::<Assets<Font>>()
+            .add(Font::from_bytes(TRADITIONAL_FONT.to_vec()));
+        app.insert_resource(NativeTraditionalFont {
+            _handle: handle.clone(),
+        });
+        app.update();
+        assert!(app.world().resource::<Assets<Font>>().contains(handle.id()));
+        let mut cx = app.world_mut().resource_mut::<FontCx>();
+        let family = cx
+            .collection
+            .family_by_name("Noto Sans TC")
+            .expect("bundled TC family");
+        assert!(!family.fonts().is_empty());
+        for face in family.fonts() {
+            let identity = cx.source_cache.get(face.source()).unwrap().id();
+            for _ in 0..3 {
+                cx.source_cache.prune(2, false);
+            }
+            assert_eq!(cx.source_cache.get(face.source()).unwrap().id(), identity);
+        }
+        assert!(include_str!("../assets/fonts/OFL.txt").contains("SIL OPEN FONT LICENSE"));
     }
 }
 

@@ -285,7 +285,7 @@ pub(crate) fn native_command_scope(command: &GatewayCommand) -> NativeCommandSco
         GatewayCommand::Player(_) => S::World,
         GatewayCommand::Wire(wire) => match wire {
             C::ClientVersion | C::ClientCapabilities { .. } | C::ResumeSession { .. }
-            | C::Login { .. } | C::ChangePassword { .. } | C::NewAccount { .. }
+            | C::Login { .. } | C::PasskeyLogin { .. } | C::ChangePassword { .. } | C::NewAccount { .. }
             | C::NewCharacter { .. } | C::DeleteCharacter { .. } | C::StartGame { .. } => S::Procedure,
             C::LogOut | C::Disconnect => S::Leave,
             C::Walk { .. } | C::Run { .. } | C::Turn { .. } | C::Attack { .. }
@@ -452,7 +452,7 @@ impl GatewayCommand {
 pub(crate) fn native_transport_key(command:&NativeOutboundCommand)->Option<String> {
     use NativeOutboundCommand as C;
     match command {
-        C::Login {..}=>Some("control:login".into()),C::StartGame {..}=>Some("control:start_game".into()),
+        C::Login {..}|C::PasskeyLogin {..}=>Some("control:login".into()),C::StartGame {..}=>Some("control:start_game".into()),
         C::NewAccount {..}=>Some("control:new_account".into()),C::ChangePassword {..}=>Some("control:change_password".into()),
         C::NewCharacter {..}=>Some("control:new_character".into()),C::DeleteCharacter {..}=>Some("control:delete_character".into()),
         C::GameShopBuy {request_id,..}=>Some(format!("shop:{request_id}")),
@@ -756,7 +756,7 @@ impl NativeCommandFence {
         } else { Self::matches(&state,stamp,scope) };
         if !valid { return Err(()); }
 
-        if matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::Login {..}
+        if matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::Login {..} | NativeOutboundCommand::PasskeyLogin {..}
             | NativeOutboundCommand::NewAccount {..} | NativeOutboundCommand::StartGame {..})) {
             state.retire_npc_economy();
             state.npc_entry_pending=true;
@@ -4261,7 +4261,7 @@ where
                         }
                         continue;
                     }
-                    if matches!(&command, GatewayCommand::Wire(NativeOutboundCommand::Login {..}
+                    if matches!(&command, GatewayCommand::Wire(NativeOutboundCommand::Login {..} | NativeOutboundCommand::PasskeyLogin {..}
                         | NativeOutboundCommand::NewAccount {..} | NativeOutboundCommand::StartGame {..}
                         | NativeOutboundCommand::LogOut | NativeOutboundCommand::Disconnect)) {
                         npc_purchases.leave_or_select();
@@ -4305,7 +4305,7 @@ where
                         continue;
                     }
                     let timed_request = match &command {
-                        GatewayCommand::Wire(NativeOutboundCommand::Login { .. }) => Some("login"),
+                        GatewayCommand::Wire(NativeOutboundCommand::Login { .. } | NativeOutboundCommand::PasskeyLogin { .. }) => Some("login"),
                         GatewayCommand::Wire(NativeOutboundCommand::StartGame { .. }) => Some("start_game"),
                         _ => None,
                     };
@@ -4463,6 +4463,7 @@ where
 fn update_session_context(context: &mut GatewaySessionContext, command: &NativeOutboundCommand) {
     match command {
         NativeOutboundCommand::Login { account_id, .. }
+        | NativeOutboundCommand::PasskeyLogin { account_id, .. }
         | NativeOutboundCommand::NewAccount { account_id, .. } => {
             context.account_id = Some(account_id.clone());
             context.character_index = None;

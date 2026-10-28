@@ -167,7 +167,7 @@ pub fn drain_gateway_events(
 pub(crate) fn apply_local_control_not_sent(shell:&mut NativeShellModel,command:&NativeOutboundCommand){
     use NativeOutboundCommand as C;
     let relevant=match command {
-        C::Login {..}=>shell.login_request_in_flight,
+        C::Login {..}|C::PasskeyLogin {..}=>shell.login_request_in_flight,
         C::StartGame {..}=>shell.start_game_request_in_flight,
         C::NewAccount {..}=>shell.register_request_in_flight,
         C::NewCharacter {..}=>shell.create_character_request_in_flight,
@@ -180,6 +180,33 @@ pub(crate) fn apply_local_control_not_sent(shell:&mut NativeShellModel,command:&
 }
 fn send_shell_command(commands:&GatewayCommands,shell:&mut NativeShellModel,command:NativeOutboundCommand)->bool{
     if commands.send_command(GatewayCommand::Wire(command.clone())){true}else{apply_local_control_not_sent(shell,&command);false}
+}
+
+/// Submit the canonical account and signed gateway token from a verified wallet
+/// attempt. The caller owns attempt/connection freshness; no secret enters the UI.
+pub fn send_verified_identity_login(
+    commands: &GatewayCommands,
+    shell: &mut NativeShellModel,
+    account_id: String,
+    token: String,
+) -> bool {
+    if !shell.begin_verified_identity_login(&account_id) {
+        return false;
+    }
+    if token.trim().is_empty() {
+        shell.apply_gateway_event(NativeGatewayEvent::LoginFailure {
+            message: "verified login token is required".into(),
+        });
+        return false;
+    }
+    if !commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::ClientVersion)) {
+        shell.apply_gateway_event(NativeGatewayEvent::LoginFailure {
+            message: "local command definitely not sent".into(),
+        });
+        return false;
+    }
+    let account_id = shell.login.account.clone();
+    send_shell_command(commands, shell, NativeOutboundCommand::PasskeyLogin { account_id, token })
 }
 
 /// Forward already-validated widget intents to the Gateway owner. Local-only
@@ -199,7 +226,7 @@ pub fn forward_native_ui_intents(
     for intent in pending {
         let command = match intent {
             NativeUiIntent::Login | NativeUiIntent::SafeKeyEnter
-                if shell.login_request_in_flight && !login_command_sent =>
+                if shell.login_request_in_flight && shell.login.is_ready() && !login_command_sent =>
             {
                 login_command_sent = true;
                 commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::ClientVersion));
@@ -322,6 +349,65 @@ mod tests {
     use std::sync::mpsc;
 
     use mir2_client_bevy::native_shell::CharacterSummary;
+
+    #[test]
+    fn verified_identity_login_sends_only_version_and_signed_login() {
+        let (sender, receiver) = mpsc::channel();
+        let commands = GatewayCommands::new(sender);
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::Login;
+        shell.login.password = "old-password".into();
+        assert!(send_verified_identity_login(
+            &commands, &mut shell,
+            " obl_00112233445566778899aabbccddeeff ".into(), "signed-proof".into(),
+        ));
+        let sent = receiver.try_iter().collect::<Vec<_>>();
+        assert_eq!(sent.len(), 2);
+        assert!(matches!(&sent[0], GatewayCommand::Wire(NativeOutboundCommand::ClientVersion)));
+        assert!(matches!(&sent[1], GatewayCommand::Wire(NativeOutboundCommand::PasskeyLogin {
+            account_id, token,
+        }) if account_id == "obl_00112233445566778899aabbccddeeff" && token == "signed-proof"));
+        assert_eq!(shell.screen, NativeShellScreen::Authenticating);
+        assert!(shell.login.password.is_empty());
+        let (late_commands, _) = forward(shell, [NativeUiIntent::Login, NativeUiIntent::SafeKeyEnter]);
+        assert!(late_commands.is_empty(), "stale password intents cannot become a fallback login");
+    }
+
+    #[test]
+    fn verified_identity_login_rejects_empty_proof_and_failed_transport_without_fallback() {
+        let (sender, receiver) = mpsc::channel();
+        let commands = GatewayCommands::new(sender);
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::Login;
+        shell.login.password = "old-password".into();
+        assert!(!send_verified_identity_login(
+            &commands, &mut shell, "obl_00112233445566778899aabbccddeeff".into(), " ".into(),
+        ));
+        assert!(receiver.try_recv().is_err());
+        assert_eq!(shell.screen, NativeShellScreen::Login);
+        assert!(!shell.login_request_in_flight);
+        assert!(shell.login.password.is_empty());
+        drop(receiver);
+        assert!(!send_verified_identity_login(
+            &commands, &mut shell, "obl_00112233445566778899aabbccddeeff".into(), "signed-proof".into(),
+        ));
+        assert_eq!(shell.screen, NativeShellScreen::Login);
+        assert!(!shell.login_request_in_flight);
+        assert!(shell.login.password.is_empty());
+    }
+
+    #[test]
+    fn verified_identity_login_local_command_failure_completes_pending_login() {
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::Login;
+        assert!(shell.begin_verified_identity_login("obl_00112233445566778899aabbccddeeff"));
+        apply_local_control_not_sent(&mut shell, &NativeOutboundCommand::PasskeyLogin {
+            account_id: "obl_00112233445566778899aabbccddeeff".into(), token: "signed-proof".into(),
+        });
+        assert_eq!(shell.screen, NativeShellScreen::Login);
+        assert!(!shell.login_request_in_flight);
+        assert_eq!(shell.notice.as_ref().map(|notice| notice.message.as_str()), Some("local command definitely not sent"));
+    }
 
     fn forward(
         shell: NativeShellModel,
@@ -688,7 +774,9 @@ mod ownership_control_tests {
     use super::*;
     #[test]
     fn not_connected_bounded_login_completes_local_busy_without_server_rejection(){
-        let (sender,_receiver)=crate::gateway::command_channel(8);let mut shell=NativeShellModel::default();shell.screen=NativeShellScreen::Authenticating;shell.login_request_in_flight=true;
+        let (sender,_receiver)=crate::gateway::command_channel(8);let mut shell=NativeShellModel::default();
+        shell.screen=NativeShellScreen::Login;shell.login.account="existing".into();shell.login.password="password".into();
+        assert!(shell.apply_ui_intent(NativeUiIntent::Login));
         let mut intents=NativeUiIntentQueue::default();intents.push(NativeUiIntent::Login);
         let mut app=bevy::prelude::App::new();app.insert_resource(shell);app.insert_resource(intents);app.insert_resource(GatewayCommands::new(sender));app.add_systems(bevy::app::Update,forward_native_ui_intents);app.update();
         let shell=app.world().resource::<NativeShellModel>();assert_eq!(shell.screen,NativeShellScreen::Login);assert!(!shell.login_request_in_flight);

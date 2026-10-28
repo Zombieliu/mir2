@@ -1,0 +1,3 @@
+# Bundled font data and upstream license bytes are immutable source artifacts.
+*.ttf binary
+OFL-NotoSans*.txt -text -whitespace

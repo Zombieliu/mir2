@@ -284,6 +284,7 @@ import {
   type RegistrationDraft,
   type ChangePasswordDraft,
 } from "../lib/client-login-runtime";
+import { requestDubheWalletLoginToken, type DubheQrLoginState } from "../lib/dubhe-wallet-login";
 import {
   channelGameplayStart,
   channelGameplayStop,
@@ -2657,6 +2658,15 @@ export default function HomePage() {
   const [loginErrorKey, setLoginErrorKey] = useState<string | null>(null);
   const [suiWallets, setSuiWallets] = useState<SuiWalletSummary[]>([]);
   const [walletPickerOpen, setWalletPickerOpen] = useState(false);
+  const [dubheQr, setDubheQr] = useState<DubheQrLoginState | null>(null);
+  const dubheQrAbortRef = useRef<AbortController | null>(null);
+  useEffect(() => {
+    setDubheQr(null);
+    return () => {
+      dubheQrAbortRef.current?.abort();
+      dubheQrAbortRef.current = null;
+    };
+  }, [screen, loginAuthState.epoch]);
   const [identityProvider, setIdentityProvider] = useState<string | null>(null);
   const [identityLinkBusy, setIdentityLinkBusyState] = useState(false);
   const identityLinkBusyRef = useRef(false);
@@ -7722,6 +7732,55 @@ export default function HomePage() {
       if (intent !== oauthIntentRef.current || !identityIntentCurrent(lease) || !authSurfaceCurrent(epoch, "login")) return;
       setLoginBusy(false);
       setLoginErrorKey((kind === "passkey" ? "Passkey" : "Wallet") + " login failed. Please try again.");
+    }
+  }
+
+  function cancelDubheQrLogin() {
+    const operation = dubheQrAbortRef.current;
+    if (operation) {
+      dubheQrAbortRef.current = null;
+      operation.abort();
+      oauthIntentRef.current += 1;
+      setLoginBusy(false);
+    }
+    setDubheQr(null);
+  }
+
+  async function submitDubheQrLogin() {
+    const epoch = loginAuthRef.current.epoch;
+    if (!authSurfaceCurrent(epoch, "login") || (loginBusyRef.current && !dubheQrAbortRef.current)) return;
+    dubheQrAbortRef.current?.abort();
+    const operation = new AbortController();
+    dubheQrAbortRef.current = operation;
+    oauthIntentRef.current += 1;
+    const lease = captureIdentityIntent();
+    const current = () => dubheQrAbortRef.current === operation && !operation.signal.aborted
+      && identityIntentCurrent(lease) && loginAuthRef.current.surface === "login";
+    resetGatewayReconnectState();
+    setWalletPickerOpen(false);
+    setLoginBusy(true);
+    setLoginErrorKey(null);
+    setDubheQr({ status: "creating" });
+    try {
+      const login = await requestDubheWalletLoginToken({ signal: operation.signal, isCurrent: current,
+        onState: state => { if (current()) setDubheQr(state); } });
+      if (!current()) return;
+      dubheQrAbortRef.current = null;
+      setLoginBusy(false);
+      if (login && authSurfaceCurrent(epoch, "login")) {
+        setDubheQr(null);
+        submitIdentitySession(login, "wallet");
+      }
+    } catch {
+      if (!current()) return;
+      setDubheQr({ status: "error" });
+    } finally {
+      // A retired request cannot clear a newer attempt's busy flag or QR panel.
+      if (dubheQrAbortRef.current === operation) {
+        if (!current()) setDubheQr(null);
+        dubheQrAbortRef.current = null;
+        setLoginBusy(false);
+      }
     }
   }
 
@@ -20269,6 +20328,7 @@ export default function HomePage() {
       loginError={loginErrorKey ? t(loginErrorKey) : null}
       suiWallets={suiWallets}
       walletPickerOpen={walletPickerOpen}
+      dubheQr={dubheQr}
       dubheWalletUrl={DUBHE_WALLET_URL}
       identityProvider={identityProvider}
       identityLinkBusy={identityLinkBusy}
@@ -20300,6 +20360,8 @@ export default function HomePage() {
       onPasskeyLogin={submitPasskeyLogin}
       onWalletPickerToggle={toggleWalletPicker}
       onWalletLogin={submitWalletLogin}
+      onDubheQrLogin={() => void submitDubheQrLogin()}
+      onDubheQrCancel={cancelDubheQrLogin}
       onIdentityLinkPasskey={() => void linkCurrentSuiIdentity("passkey")}
       onIdentityLinkWallet={(walletId) => void linkCurrentSuiIdentity("wallet", walletId)}
       onQuickEnter={quickEnterWorld}

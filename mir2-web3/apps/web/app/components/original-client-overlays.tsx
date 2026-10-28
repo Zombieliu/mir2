@@ -26,6 +26,7 @@ import { playOriginalSoundId } from "../../lib/original-audio";
 import { ORIGINAL_SOUND_IDS } from "../../lib/original-sound-events";
 import { OriginalAudioSettingsControls } from "./original-client-audio-settings";
 import { CrystalGdiTextImage, findCrystalGdiTextAsset } from "./crystal-gdi-text";
+import { DubheWalletQrLogin, type DubheQrLoginState } from "./dubhe-wallet-qr-login";
 import {
   handleSceneAssetImageError,
   handleSceneAssetImageLoad,
@@ -169,6 +170,7 @@ export type LoginOverlayProps = {
   suiWallets: SuiWalletSummary[];
   walletPickerOpen: boolean;
   dubheWalletUrl: string;
+  dubheQr: DubheQrLoginState | null;
   onLanguageChange: (language: Mir2Language) => void;
   onAccountIdChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
@@ -177,6 +179,8 @@ export type LoginOverlayProps = {
   onPasskeyLogin: () => void;
   onWalletPickerToggle: () => void;
   onWalletLogin: (walletId: string) => void;
+  onDubheQrLogin: () => void;
+  onDubheQrCancel: () => void;
   onQuickEnter: () => void;
   onResetClient: () => void;
 };
@@ -195,6 +199,7 @@ export function LoginOverlay({
   suiWallets,
   walletPickerOpen,
   dubheWalletUrl,
+  dubheQr,
   onLanguageChange,
   onAccountIdChange,
   onPasswordChange,
@@ -202,6 +207,8 @@ export function LoginOverlay({
   onPasskeyLogin,
   onWalletPickerToggle,
   onWalletLogin,
+  onDubheQrLogin,
+  onDubheQrCancel,
   onQuickEnter,
   onResetClient,
 }: LoginOverlayProps) {
@@ -320,6 +327,7 @@ export function LoginOverlay({
             disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"}
             aria-expanded={walletPickerOpen}
             aria-controls="login-wallet-picker"
+            data-dubhe-qr-return="true"
           >
             {t("ui.walletLogin", [], "Wallet")}
           </button>
@@ -327,6 +335,15 @@ export function LoginOverlay({
         {walletPickerOpen ? (
           <div id="login-wallet-picker" className="login-wallet-picker" role="dialog" aria-label="Sui wallet">
             <div className="login-wallet-picker-title">Sui Wallet</div>
+            <button
+              type="button"
+              className="login-wallet-option dubhe login-wallet-qr-option"
+              onClick={onDubheQrLogin}
+              disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"}
+            >
+              <span className="login-wallet-fallback-icon" aria-hidden="true">D</span>
+              <span>{/^zh/iu.test(language) ? "Dubhe Wallet 扫码登录" : "Dubhe Wallet QR login"}</span>
+            </button>
             {suiWallets.length > 0 ? (
               <div className="login-wallet-list">
                 {suiWallets.map((wallet) => (
@@ -362,6 +379,7 @@ export function LoginOverlay({
           </div>
         ) : null}
       </form>
+      {dubheQr ? <DubheWalletQrLogin language={language} state={dubheQr} onRetry={onDubheQrLogin} onCancel={onDubheQrCancel} /> : null}
       <div className="login-utility-actions">
         <button type="button" disabled={loginBusy || loginAuth.pending || loginAuth.state.surface !== "login"}
           onClick={() => setShowAccountPanel(current => !current)} aria-expanded={showAccountPanel}>

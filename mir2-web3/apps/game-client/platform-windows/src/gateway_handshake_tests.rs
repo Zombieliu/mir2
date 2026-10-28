@@ -14,6 +14,29 @@ use tokio_tungstenite::tungstenite::{
 };
 
 #[test]
+fn verified_identity_login_routes_as_login_and_keeps_the_server_roster_flow() {
+    use super::{native_command_scope, native_transport_key, update_session_context, dispatch_shell_event,
+        GatewaySessionContext, NativeCommandScope, NativeOutboundCommand, ShellGatewayEvent};
+    let account = "obl_00112233445566778899aabbccddeeff";
+    let wire = NativeOutboundCommand::PasskeyLogin { account_id: account.into(), token: "signed-private-proof".into() };
+    assert_eq!(native_command_scope(&GatewayCommand::Wire(wire.clone())), NativeCommandScope::Procedure);
+    assert_eq!(native_transport_key(&wire).as_deref(), Some("control:login"));
+    assert!(!format!("{:?}", GatewayCommand::Wire(wire.clone())).contains("signed-private-proof"));
+    let mut context = GatewaySessionContext { character_index: Some(3), ..Default::default() };
+    update_session_context(&mut context, &wire);
+    assert_eq!(context.account_id.as_deref(), Some(account));
+    assert_eq!(context.character_index, None);
+    let event = crate::native_protocol::parse_inbound_event(
+        r#"{"type":"packet","packet":"LoginSuccess","payload":{"characters":[{"index":3,"name":"WalletHero","level":1,"class":"Warrior","gender":"Male"}]}}"#,
+    ).unwrap();
+    let (sender, receiver) = std::sync::mpsc::channel();
+    dispatch_shell_event(&event, &context, &sender);
+    assert!(matches!(receiver.try_recv().unwrap(), ShellGatewayEvent::LoginSuccess {
+        account: actual, characters,
+    } if actual == account && characters.len() == 1 && characters[0].name == "WalletHero"));
+}
+
+#[test]
 fn native_gateway_origin_uses_only_http_scheme_host_and_non_default_port() {
     for (url, expected_origin) in [
         (

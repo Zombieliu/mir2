@@ -142,6 +142,11 @@ pub enum NativeOutboundCommand {
         account_id: String,
         password: String,
     },
+    PasskeyLogin {
+        #[serde(rename = "accountId")]
+        account_id: String,
+        token: String,
+    },
     ChangePassword {
         #[serde(rename = "accountId")]
         account_id: String,
@@ -557,6 +562,11 @@ pub enum NativeOutboundCommand {
 impl std::fmt::Debug for NativeOutboundCommand {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::PasskeyLogin { account_id, .. } => formatter
+                .debug_struct(self.command_type())
+                .field("account_id", account_id)
+                .field("token", &"<redacted>")
+                .finish(),
             Self::Login { account_id, .. } | Self::NewAccount { account_id, .. } => formatter
                 .debug_struct(self.command_type())
                 .field("account_id", account_id)
@@ -636,6 +646,7 @@ impl NativeOutboundCommand {
             Self::ClientCapabilities { .. } => "clientCapabilities",
             Self::ResumeSession { .. } => "resumeSession",
             Self::Login { .. } => "login",
+            Self::PasskeyLogin { .. } => "passkeyLogin",
             Self::ChangePassword { .. } => "changePassword",
             Self::NewAccount { .. } => "newAccount",
             Self::NewCharacter { .. } => "newCharacter",
@@ -2108,6 +2119,26 @@ mod tests {
                 code: Some(_),
             }))
         ));
+    }
+
+    #[test]
+    fn verified_identity_login_wire_requires_token_and_redacts_it() {
+        let command = NativeOutboundCommand::PasskeyLogin {
+            account_id: "obl_00112233445566778899aabbccddeeff".into(),
+            token: "signed-private-proof".into(),
+        };
+        assert_eq!(command.command_type(), "passkeyLogin");
+        assert_eq!(command.to_wire_json(), json!({
+            "type": "passkeyLogin",
+            "accountId": "obl_00112233445566778899aabbccddeeff",
+            "token": "signed-private-proof",
+        }));
+        let debug = format!("{command:?}");
+        assert!(debug.contains("<redacted>"));
+        assert!(!debug.contains("signed-private-proof"));
+        assert!(serde_json::from_value::<NativeOutboundCommand>(json!({
+            "type": "passkeyLogin", "accountId": "obl_00112233445566778899aabbccddeeff",
+        })).is_err(), "raw account-only passkey login must not be serializable");
     }
 
     #[test]
