@@ -95,6 +95,7 @@ pub fn drain_gateway_events(
     inbox: Res<GatewayEventInbox>,
     commands: Res<GatewayCommands>,
     mut auto_login: ResMut<NativeAutoLoginFlow>,
+    checkout_origin: Option<Res<crate::billing_browser::SuiCheckoutOrigin>>,
 ) {
     for envelope in inbox.drain() {
         if let Some(stamp) = envelope.stamp {
@@ -113,9 +114,11 @@ pub fn drain_gateway_events(
             continue;
         }
         if let NativeGatewayEvent::BillingReply(reply) = event {
+            shell.billing.set_sui_checkout_origin(checkout_origin.as_ref().and_then(|o| o.0.clone()));
             if shell.apply_gateway_event(NativeGatewayEvent::BillingReply(reply)) {
                 if let Some(url) = shell.billing.take_checkout_url() {
-                    if crate::billing_browser::open_checkout_url(&url).is_err() {
+                    if crate::billing_browser::open_checkout_url(&url,
+                        checkout_origin.as_ref().and_then(|o| o.0.as_deref())).is_err() {
                         shell.billing.browser_failed();
                     }
                 }
@@ -460,6 +463,9 @@ fn forward_billing_request(
             offer_id,
             order_request_id,
             request_id,
+        },
+        Some(BillingPurchase::UsdcCheckout { offer_id, order_request_id }) => NativeOutboundCommand::BillingUsdcCheckout {
+            character_index, offer_id, order_request_id, request_id,
         },
         Some(BillingPurchase::BuyMonthlyCard { order_request_id }) => {
             NativeOutboundCommand::BillingBuyMonthlyCard {

@@ -101,6 +101,8 @@ async fn async_main() -> std::io::Result<()> {
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let _procurement_worker = mir2_gateway::procurement_worker::ProcurementWorker::start(config.clone())
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let _usdc_worker = mir2_gateway::sui_usdc_billing::SuiUsdcWorker::start(config.clone())
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let _guild_clock = mir2_gateway::guild_clock::GuildClockService::start(config.clone())?;
     let topology = mir2_gateway::ZoneTopology::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;

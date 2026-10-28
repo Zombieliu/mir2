@@ -94,6 +94,8 @@ pub struct VerifiedRechargePayment {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BillingLedger {
     pub orders: BTreeMap<String, RechargeOrder>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub sui_usdc_orders: BTreeMap<String, crate::sui_usdc_billing::UsdcRechargeOrder>,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -147,6 +149,7 @@ fn new_order_id() -> Result<String, String> {
 
 impl BillingLedger {
     pub fn validate(&self) -> Result<(), String> {
+        crate::sui_usdc_billing::validate_ledger(self)?;
         if self.orders.len() > MAX_ORDERS_PER_ACCOUNT {
             return Err("billingLedgerFull".into());
         }
@@ -242,7 +245,7 @@ pub(crate) fn validate_account_record(account: &AccountRecord) -> Result<(), Str
     Ok(())
 }
 
-fn reserves_credit_capacity(order: &RechargeOrder) -> bool {
+pub(crate) fn reserves_credit_capacity(order: &RechargeOrder) -> bool {
     order.applied.is_none()
         && matches!(
             order.state,
@@ -259,6 +262,7 @@ pub(crate) fn ensure_character_billing_deletable(
     character_index: i32,
 ) -> Result<(), String> {
     crate::procurement::ensure_deletable(account, character_index)?;
+    crate::sui_usdc_billing::ensure_deletable(account, character_index)?;
     validate_account_record(account)?;
     if let Some(ledger) = &account.billing {
         if ledger.orders.values().any(|order| {
@@ -296,6 +300,7 @@ pub(crate) fn ensure_character_billing_deletable(
 /// payment uniqueness also requires the gateway/schema leader's database fence.
 pub(crate) fn validate_complete_store(store: &AccountStore) -> Result<(), String> {
     crate::procurement::validate_store(store)?;
+    crate::sui_usdc_billing::validate_store(store)?;
     let mut ids = BTreeSet::new();
     let mut sessions = BTreeSet::new();
     let mut payments = BTreeSet::new();
@@ -367,6 +372,9 @@ pub(crate) fn has_pending(account: &AccountRecord, character_index: i32) -> bool
         ledger.orders.values().any(|order| {
             order.character_index == character_index
                 && order.state == RechargeOrderState::PaidPending
+        }) || ledger.sui_usdc_orders.values().any(|order| {
+            order.character_index == character_index
+                && order.state == crate::sui_usdc_billing::UsdcOrderState::PaidPending
         })
     })
 }
@@ -392,6 +400,17 @@ pub(crate) fn apply_pending_to_save(
         })
         .unwrap_or_default();
     pending.sort();
+    pending.extend(
+        account
+            .billing
+            .iter()
+            .flat_map(|l| l.sui_usdc_orders.values())
+            .filter(|o| {
+                o.character_index == save.character.index
+                    && o.state == crate::sui_usdc_billing::UsdcOrderState::PaidPending
+            })
+            .map(|o| o.id.clone()),
+    );
     if pending.is_empty() {
         return Ok(RechargeCreditApplication {
             credit: save.credit,
@@ -411,13 +430,28 @@ pub(crate) fn apply_pending_to_save(
     // payment that fits, retaining the others so spending can make room later.
     // Finish all fallible checks before changing any receipt or balance.
     for id in &pending {
-        let order = &ledger.orders[id];
-        if now_ms < order.paid_at_ms.ok_or("billingPaymentReceiptInvalid")? {
+        let (credits, paid_at) = if let Some(order) = ledger.orders.get(id) {
+            (
+                order.offer.credits,
+                order.paid_at_ms.ok_or("billingPaymentReceiptInvalid")?,
+            )
+        } else {
+            let order = &ledger.sui_usdc_orders[id];
+            (
+                order.offer.credits,
+                order
+                    .receipt
+                    .as_ref()
+                    .ok_or("usdcReceiptMissing")?
+                    .confirmed_at_ms,
+            )
+        };
+        if now_ms < paid_at {
             return Err("billingClockBeforePayment".into());
         }
-        if let Some(next_credit) = credit.checked_add(order.offer.credits) {
+        if let Some(next_credit) = credit.checked_add(credits) {
             granted = granted
-                .checked_add(order.offer.credits)
+                .checked_add(credits)
                 .ok_or("billingCreditOverflow")?;
             credit = next_credit;
             applicable.push(id.clone());
@@ -441,19 +475,33 @@ pub(crate) fn apply_pending_to_save(
         .expect("pending entries require a ledger");
     let mut before = save.credit;
     for id in &applicable {
-        let order = ledger.orders.get_mut(id).expect("pending entry exists");
+        let credits = ledger
+            .orders
+            .get(id)
+            .map(|o| o.offer.credits)
+            .unwrap_or_else(|| ledger.sui_usdc_orders[id].offer.credits);
         let after = before
-            .checked_add(order.offer.credits)
+            .checked_add(credits)
             .expect("preflight checked the batch");
-        order.applied = Some(RechargeAppliedReceipt {
+        let receipt = RechargeAppliedReceipt {
             character_index: save.character.index,
-            credits: order.offer.credits,
+            credits,
             credit_before: before,
             credit_after: after,
             revision,
             at_ms: now_ms,
-        });
-        order.state = RechargeOrderState::Applied;
+        };
+        if let Some(order) = ledger.orders.get_mut(id) {
+            order.applied = Some(receipt);
+            order.state = RechargeOrderState::Applied;
+        } else {
+            let order = ledger
+                .sui_usdc_orders
+                .get_mut(id)
+                .expect("pending USDC entry exists");
+            order.applied = Some(receipt);
+            order.state = crate::sui_usdc_billing::UsdcOrderState::Applied;
+        }
         before = after;
     }
     save.credit = credit;
@@ -531,7 +579,7 @@ impl SimulationConfig {
                 }
                 return Ok(existing.clone());
             }
-            if ledger.orders.len() >= MAX_ORDERS_PER_ACCOUNT {
+            if ledger.orders.len() + ledger.sui_usdc_orders.len() >= MAX_ORDERS_PER_ACCOUNT {
                 return Err("billingLedgerFull".into());
             }
             ledger
@@ -540,9 +588,20 @@ impl SimulationConfig {
                 .filter(|order| {
                     order.character_index == character_index && reserves_credit_capacity(order)
                 })
-                .try_fold(durable_credit, |credit, order| {
+                .map(|o| o.offer.credits)
+                .chain(
+                    ledger
+                        .sui_usdc_orders
+                        .values()
+                        .filter(|o| {
+                            o.character_index == character_index
+                                && crate::sui_usdc_billing::reserves_capacity(o)
+                        })
+                        .map(|o| o.offer.credits),
+                )
+                .try_fold(durable_credit, |credit, credits| {
                     credit
-                        .checked_add(order.offer.credits)
+                        .checked_add(credits)
                         .ok_or("billingCreditCapacityExceeded")
                 })?
                 .checked_add(offer.credits)
@@ -802,6 +861,18 @@ impl SimulationConfig {
             })
             .transpose()?
             .unwrap_or_default();
+        let pending = account
+            .billing
+            .iter()
+            .flat_map(|l| l.sui_usdc_orders.values())
+            .filter(|o| {
+                o.character_index == character_index
+                    && o.state == crate::sui_usdc_billing::UsdcOrderState::PaidPending
+            })
+            .try_fold(pending, |sum, o| {
+                sum.checked_add(o.offer.credits)
+                    .ok_or("billingCreditOverflow")
+            })?;
         Ok((save.credit, pending))
     }
     /// Only the gateway's inactive/character-select authority may call this.

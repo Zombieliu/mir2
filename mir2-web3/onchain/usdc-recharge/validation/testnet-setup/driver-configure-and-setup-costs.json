@@ -1,0 +1,54 @@
+{
+  "observedAt": "2026-10-28T19:13:55.506Z",
+  "network": "testnet",
+  "result": {
+    "validated": true,
+    "network": "testnet",
+    "networkHash": "0xb55d4afda0318ec0a264cc5f46c4e61c96da8000e9ea1bdf04878266867c6246",
+    "publishingEnabled": true
+  },
+  "contractSetup": [
+    {
+      "step": "publish",
+      "digest": "FtKCEtQ1svaVnhwBnHDxUycUeKvE24tBnoRSQzQLWbc",
+      "checkpoint": "400259771",
+      "success": true,
+      "gasUsed": {
+        "computationCost": "1000000",
+        "storageCost": "24677200",
+        "storageRebate": "0",
+        "nonRefundableStorageFee": "0"
+      },
+      "gasMist": "25677200"
+    },
+    {
+      "step": "config",
+      "digest": "H6FpxHS28e5hVG1yn3sp3JpWuSep3euBpsvSGCp6rUBA",
+      "checkpoint": "400260117",
+      "success": true,
+      "gasUsed": {
+        "computationCost": "1000000",
+        "storageCost": "4430800",
+        "storageRebate": "1557844",
+        "nonRefundableStorageFee": "156"
+      },
+      "gasMist": "3872956"
+    },
+    {
+      "step": "enable",
+      "digest": "ACnGsVdEaUjuz6cBSEQJYLrDsHywiCiVgT3CmWZwXHz9",
+      "checkpoint": "400260237",
+      "success": true,
+      "gasUsed": {
+        "computationCost": "1000000",
+        "storageCost": "4430800",
+        "storageRebate": "4430357",
+        "nonRefundableStorageFee": "443"
+      },
+      "gasMist": "1000443"
+    }
+  ],
+  "setupGasMist": "30550599",
+  "invoiceTransactions": 0,
+  "usdcPayments": 0
+}

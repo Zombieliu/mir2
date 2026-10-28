@@ -1,5 +1,20 @@
 # Frontend 1:1 Gaps
 
+## 新增 Sui 原生 USDC 充值：自定义功能的限定验收（2026-10-29）
+
+已实现保留 Stripe 的独立 USDC 套餐、订单状态、同源浏览器钱包交接和原订单重登
+恢复；不新增 SUI 币充值。原生逻辑 14、离线 GPU 1/10 图、host 7 和浏览器 Mock 18
+项通过。新增通道仍限 Testnet/Test 来源，主网与生产收费关闭；测试用 1 USDC/100
+点券不构成正式价格批准。充值使用独立 Sui Move 模块，不能混称 Dubhe 求购验收。
+
+<!-- SUI_USDC_LIVE_STATUS_BEGIN -->
+**真实闭环状态（实测通过）：** 实际 Windows、普通已注册 Chrome 和明确标记的隔离 QA Wallet 已完成真实 Testnet 1 USDC 付款及 100 Test 点券到账。原生截图 06–10 显示已交付、待入账 0、商城点券 100/金币 10,000；最终 Gateway v4 重启、关闭新充值和 Windows 重登后保持一致，两张旧单正确显示已到期。同一 digest 再次重复通知与状态查询均为 200/Applied，原到账回执未变、只有一次入账。成功单两笔交易合计 7,138,270 MIST；浏览器成功截图仅工具内联展示，不能称为已归档 PNG，也不代表第三方钱包扩展或人类 Accepted。前两次未付到期与助手签前拒付保留为历史失败。
+<!-- SUI_USDC_LIVE_STATUS_END -->
+
+本项不改变 Crystal 原版差异项、百分比或整体 Accepted；原生 PostgreSQL、多机与
+生产发布另行验收。[专题规则](SUI-USDC-RECHARGE-V1.zh-CN.md)和
+[独立验收包](generated/sui-usdc-recharge-v1-20261029/README.md)集中保存范围与证据。
+
 ## 新增个人智能求购 V1：限定原生实连结果（2026-10-29）
 
 Windows v3 / Gateway v5 已完成 NPC 免费 Test 套餐确认、500,000 金币求购发布至链上 Open、另一账号交付原始 UID `1028024501`、买家离线待领取及双方领取；普通背包和装备提示有实机截图，原始装备 JSON 一致性另有独立核验。取消订单及退款领取也已通过。120 秒测试到期单已进入链上 `Expired`，自动 watch 提交第三笔交易，500,000 金币退款已从 Windows 领取；该订单不是发布失败补偿。成交、取消、到期三张订单各 3 笔，合计 9 笔测试网交易。本次不包含人类 Accepted、生产收费或原生 PostgreSQL 验收。

@@ -23,6 +23,7 @@ pub fn now_ms() -> u64 {
 pub enum BillingOperation {
     Status,
     Checkout,
+    UsdcCheckout,
     BuyMonthlyCard,
     ActivateMonthlyCard,
 }
@@ -54,6 +55,85 @@ pub struct BillingOrder {
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SuiUsdcOffer {
+    pub id: String,
+    pub label: String,
+    pub amount_micros: String,
+    pub credits: u32,
+    pub network: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum SuiUsdcOrderState {
+    Prepared,
+    InvoicePending,
+    AwaitingPayment,
+    PaymentSubmitted,
+    PaidPending,
+    Applied,
+    Expired,
+    Review,
+}
+
+impl SuiUsdcOrderState {
+    fn label(self) -> &'static str {
+        match self {
+            Self::Prepared | Self::InvoicePending => "billing.usdcPreparing",
+            Self::AwaitingPayment => "billing.usdcAwaiting",
+            Self::PaymentSubmitted => "billing.usdcSubmitted",
+            Self::PaidPending => "billing.usdcPaidPending",
+            Self::Applied => "billing.usdcApplied",
+            Self::Expired => "billing.usdcExpired",
+            Self::Review => "billing.usdcReview",
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SuiUsdcOrder {
+    pub id: String,
+    pub order_request_id: String,
+    pub offer_id: String,
+    pub credits: u32,
+    pub amount_micros: String,
+    pub network: String,
+    pub state: SuiUsdcOrderState,
+    pub created_at_ms: u64,
+    pub expires_at_ms: u64,
+    pub transaction_digest: Option<String>,
+}
+
+fn valid_billing_id(id: &str) -> bool {
+    !id.is_empty()
+        && id.len() <= 128
+        && id
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"-_.:".contains(&b))
+}
+
+fn valid_micros(value: &str) -> bool {
+    value
+        .parse::<u64>()
+        .is_ok_and(|n| n > 0 && n.to_string() == value)
+}
+
+pub fn usdc_amount_label(value: &str) -> String {
+    let Ok(micros) = value.parse::<u64>() else {
+        return "? USDC".into();
+    };
+    let fraction = format!("{:06}", micros % 1_000_000);
+    let fraction = fraction.trim_end_matches('0');
+    if fraction.is_empty() {
+        format!("{} USDC", micros / 1_000_000)
+    } else {
+        format!("{}.{} USDC", micros / 1_000_000, fraction)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BillingStatus {
     pub enabled: bool,
     pub checkout_enabled: bool,
@@ -64,6 +144,14 @@ pub struct BillingStatus {
     pub owned_monthly_cards: Vec<OwnedMonthlyCard>,
     pub monthly_card: MonthlyCardStatus,
     pub orders: Vec<BillingOrder>,
+    #[serde(default)]
+    pub sui_usdc_enabled: bool,
+    #[serde(default)]
+    pub sui_usdc_checkout_origin: Option<String>,
+    #[serde(default)]
+    pub sui_usdc_offers: Vec<SuiUsdcOffer>,
+    #[serde(default)]
+    pub sui_usdc_orders: Vec<SuiUsdcOrder>,
 }
 
 impl BillingStatus {
@@ -71,6 +159,33 @@ impl BillingStatus {
         self.offers.len() <= 64
             && self.owned_monthly_cards.len() <= 256
             && self.orders.len() <= 256
+            && self.sui_usdc_offers.len() <= 64
+            && self.sui_usdc_orders.len() <= 256
+            && self
+                .sui_usdc_checkout_origin
+                .as_ref()
+                .is_none_or(|o| o.len() <= 2048 && o.is_ascii())
+            && self.sui_usdc_offers.iter().all(|o| {
+                valid_billing_id(&o.id)
+                    && o.label.len() <= 256
+                    && o.credits > 0
+                    && valid_micros(&o.amount_micros)
+                    && o.network == "testnet"
+            })
+            && self.sui_usdc_orders.iter().all(|o| {
+                valid_billing_id(&o.id)
+                    && valid_billing_id(&o.order_request_id)
+                    && valid_billing_id(&o.offer_id)
+                    && o.credits > 0
+                    && valid_micros(&o.amount_micros)
+                    && o.network == "testnet"
+                    && o.created_at_ms < o.expires_at_ms
+                    && o.transaction_digest.as_ref().is_none_or(|d| {
+                        d.len() >= 32
+                            && d.len() <= 64
+                            && d.bytes().all(|b| b.is_ascii_alphanumeric())
+                    })
+            })
             && self.offers.iter().all(|o| {
                 !o.id.is_empty()
                     && o.id.len() <= 96
@@ -131,6 +246,10 @@ pub enum BillingPurchase {
         offer_id: String,
         order_request_id: String,
     },
+    UsdcCheckout {
+        offer_id: String,
+        order_request_id: String,
+    },
     BuyMonthlyCard {
         order_request_id: String,
     },
@@ -163,6 +282,11 @@ impl BillingRequest {
 pub enum BillingAction {
     Refresh,
     Checkout(String),
+    UsdcCheckout(String),
+    UsdcReopen(String),
+    UsdcPage,
+    UsdcOffersPage(bool),
+    UsdcOrdersPage(bool),
     BuyMonthlyCard,
     Activate(String),
     Retry,
@@ -180,12 +304,17 @@ pub struct BillingPanel {
     pub focus: usize,
     pub offer_page: usize,
     pub card_page: usize,
+    pub usdc_page: bool,
+    pub usdc_offer_page: usize,
+    pub usdc_order_page: usize,
     account: String,
     character_index: Option<i32>,
     last_purchase: Option<BillingPurchase>,
     retry_required: bool,
     checkout_to_open: Option<String>,
     input_ready: bool,
+    trusted_sui_checkout_origin: Option<String>,
+    last_status_at_ms: u64,
 }
 
 impl std::fmt::Debug for BillingPanel {
@@ -200,6 +329,48 @@ impl std::fmt::Debug for BillingPanel {
 }
 
 impl BillingPanel {
+    /// Derived by the host from its configured Gateway endpoint, never from a reply.
+    pub fn set_sui_checkout_origin(&mut self, origin: Option<String>) {
+        self.trusted_sui_checkout_origin = origin;
+    }
+
+    pub fn refresh_pending_usdc(&mut self, now: u64) {
+        if self.open
+            && self.usdc_page
+            && self.pending.is_none()
+            && now.saturating_sub(self.last_status_at_ms) >= 5_000
+            && self.status.as_ref().is_some_and(|s| {
+                s.sui_usdc_orders.iter().any(|o| {
+                    !matches!(
+                        o.state,
+                        SuiUsdcOrderState::Applied
+                            | SuiUsdcOrderState::Expired
+                            | SuiUsdcOrderState::Review
+                    )
+                })
+            })
+        {
+            self.begin(None, now);
+        }
+    }
+
+    fn usdc_available(&self) -> bool {
+        self.status
+            .as_ref()
+            .is_some_and(|s| s.sui_usdc_enabled && self.usdc_origin_matches())
+    }
+
+    fn usdc_origin_matches(&self) -> bool {
+        self.trusted_sui_checkout_origin.is_some()
+            && self
+                .status
+                .as_ref()
+                .is_some_and(|s| s.sui_usdc_checkout_origin == self.trusted_sui_checkout_origin)
+    }
+
+    fn can_reopen_usdc(&self) -> bool {
+        self.pending.is_none() && !self.retry_required && self.usdc_origin_matches()
+    }
     pub fn open_for(&mut self, account: &str, character: i32, now: u64) {
         if self.account != account || self.character_index != Some(character) {
             *self = Self::default();
@@ -225,6 +396,7 @@ impl BillingPanel {
         let operation = match &purchase {
             None => BillingOperation::Status,
             Some(BillingPurchase::Checkout { .. }) => BillingOperation::Checkout,
+            Some(BillingPurchase::UsdcCheckout { .. }) => BillingOperation::UsdcCheckout,
             Some(BillingPurchase::BuyMonthlyCard { .. }) => BillingOperation::BuyMonthlyCard,
             Some(BillingPurchase::ActivateMonthlyCard { .. }) => {
                 BillingOperation::ActivateMonthlyCard
@@ -300,7 +472,10 @@ impl BillingPanel {
         // URLs are allowed only on a successful, current Checkout result.
         if reply.checkout_url.as_ref().is_some_and(|url| {
             url.len() > 4096
-                || reply.operation != BillingOperation::Checkout
+                || !matches!(
+                    reply.operation,
+                    BillingOperation::Checkout | BillingOperation::UsdcCheckout
+                )
                 || reply.error.is_some()
         }) {
             return false;
@@ -308,6 +483,7 @@ impl BillingPanel {
         self.pending = None;
         let has_status = reply.status.is_some();
         if let Some(status) = reply.status {
+            self.last_status_at_ms = now;
             self.offer_page = self
                 .offer_page
                 .min(status.offers.len().saturating_sub(1) / PAGE_SIZE);
@@ -315,6 +491,14 @@ impl BillingPanel {
                 .card_page
                 .min(status.owned_monthly_cards.len().saturating_sub(1) / PAGE_SIZE);
             self.status = Some(status);
+            if let Some(status) = &self.status {
+                self.usdc_offer_page = self
+                    .usdc_offer_page
+                    .min(status.sui_usdc_offers.len().saturating_sub(1) / PAGE_SIZE);
+                self.usdc_order_page = self
+                    .usdc_order_page
+                    .min(status.sui_usdc_orders.len().saturating_sub(1) / PAGE_SIZE);
+            }
         }
         if reply.error.is_some() {
             let unconfirmed = matches!(
@@ -354,7 +538,7 @@ impl BillingPanel {
             return true;
         }
         match reply.operation {
-            BillingOperation::Checkout => {
+            BillingOperation::Checkout | BillingOperation::UsdcCheckout => {
                 if let Some(url) = reply.checkout_url {
                     self.checkout_to_open = Some(url);
                     self.retry_required = false;
@@ -396,6 +580,26 @@ impl BillingPanel {
             BillingAction::Refresh => {
                 self.begin(None, now);
             }
+            BillingAction::UsdcPage if self.pending.is_none() => {
+                self.usdc_page = !self.usdc_page;
+                self.focus = 0;
+            }
+            BillingAction::UsdcOffersPage(next) => {
+                self.usdc_offer_page = page(
+                    self.usdc_offer_page,
+                    next,
+                    self.status.as_ref().map_or(0, |s| s.sui_usdc_offers.len()),
+                );
+                self.focus = 0;
+            }
+            BillingAction::UsdcOrdersPage(next) => {
+                self.usdc_order_page = page(
+                    self.usdc_order_page,
+                    next,
+                    self.status.as_ref().map_or(0, |s| s.sui_usdc_orders.len()),
+                );
+                self.focus = 0;
+            }
             BillingAction::Retry if self.retry_required => {
                 self.begin(self.last_purchase.clone(), now);
             }
@@ -430,6 +634,43 @@ impl BillingPanel {
                     }),
                     now,
                 );
+            }
+            BillingAction::UsdcCheckout(id)
+                if self.can_purchase()
+                    && self.usdc_available()
+                    && self
+                        .status
+                        .as_ref()
+                        .is_some_and(|s| s.sui_usdc_offers.iter().any(|o| o.id == id)) =>
+            {
+                self.begin(
+                    Some(BillingPurchase::UsdcCheckout {
+                        offer_id: id,
+                        order_request_id: new_order_id(now),
+                    }),
+                    now,
+                );
+            }
+            BillingAction::UsdcReopen(id) if self.can_reopen_usdc() => {
+                if let Some(order) = self.status.as_ref().and_then(|s| {
+                    s.sui_usdc_orders.iter().find(|o| {
+                        o.id == id
+                            && !matches!(
+                                o.state,
+                                SuiUsdcOrderState::Applied
+                                    | SuiUsdcOrderState::Expired
+                                    | SuiUsdcOrderState::Review
+                            )
+                    })
+                }) {
+                    self.begin(
+                        Some(BillingPurchase::UsdcCheckout {
+                            offer_id: order.offer_id.clone(),
+                            order_request_id: order.order_request_id.clone(),
+                        }),
+                        now,
+                    );
+                }
             }
             BillingAction::BuyMonthlyCard
                 if self.can_purchase()
@@ -466,10 +707,57 @@ impl BillingPanel {
     }
     fn actions(&self) -> Vec<BillingAction> {
         let mut actions = vec![BillingAction::Refresh, BillingAction::Close];
+        actions.push(BillingAction::UsdcPage);
         if self.retry_required && self.last_purchase.is_some() {
             actions.push(BillingAction::Retry);
         }
         if let Some(status) = &self.status {
+            if self.usdc_page {
+                if self.can_purchase() && self.usdc_available() {
+                    actions.extend(
+                        status
+                            .sui_usdc_offers
+                            .iter()
+                            .skip(self.usdc_offer_page * PAGE_SIZE)
+                            .take(PAGE_SIZE)
+                            .map(|o| BillingAction::UsdcCheckout(o.id.clone())),
+                    );
+                }
+                if self.can_reopen_usdc() {
+                    actions.extend(
+                        status
+                            .sui_usdc_orders
+                            .iter()
+                            .skip(self.usdc_order_page * PAGE_SIZE)
+                            .take(PAGE_SIZE)
+                            .filter(|o| {
+                                !matches!(
+                                    o.state,
+                                    SuiUsdcOrderState::Applied
+                                        | SuiUsdcOrderState::Expired
+                                        | SuiUsdcOrderState::Review
+                                )
+                            })
+                            .map(|o| BillingAction::UsdcReopen(o.id.clone())),
+                    );
+                }
+                if status.sui_usdc_offers.len() > PAGE_SIZE {
+                    actions.extend([
+                        BillingAction::UsdcOffersPage(false),
+                        BillingAction::UsdcOffersPage(true),
+                    ]);
+                }
+                if status.sui_usdc_orders.len() > PAGE_SIZE {
+                    actions.extend([
+                        BillingAction::UsdcOrdersPage(false),
+                        BillingAction::UsdcOrdersPage(true),
+                    ]);
+                }
+                if self.pending.is_some() {
+                    actions.retain(|a| matches!(a, BillingAction::Close));
+                }
+                return actions;
+            }
             if self.can_purchase() {
                 if status.checkout_enabled {
                     actions.extend(
@@ -559,6 +847,7 @@ mod ui {
             shell.billing = Default::default();
         }
         shell.billing.expire_request(now_ms());
+        shell.billing.refresh_pending_usdc(now_ms());
         let was_open = shell.billing.open;
         let input_ready = shell.billing.input_ready;
         shell.billing.input_ready = shell.billing.open;
@@ -691,8 +980,33 @@ mod ui {
                         BorderColor::all(Color::srgb(0.65, 0.49, 0.20)),
                     ))
                     .with_children(|p| {
-                        text(p, tr("billing.title"), 20.0, 14.0, 700.0, 30.0, 23.0);
-                        text(p, tr("billing.instructions"), 20.0, 48.0, 700.0, 42.0, 13.0);
+                        text(p, tr("billing.title"), 20.0, 14.0, 470.0, 30.0, 23.0);
+                        button(
+                            p,
+                            panel,
+                            BillingAction::UsdcPage,
+                            if panel.usdc_page {
+                                "billing.usdcBack"
+                            } else {
+                                "billing.usdcTab"
+                            },
+                            500.0,
+                            14.0,
+                            210.0,
+                        );
+                        text(
+                            p,
+                            tr(if panel.usdc_page {
+                                "billing.usdcInstructions"
+                            } else {
+                                "billing.instructions"
+                            }),
+                            20.0,
+                            48.0,
+                            700.0,
+                            42.0,
+                            13.0,
+                        );
                         if let Some(s) = &panel.status {
                             text(
                                 p,
@@ -727,15 +1041,159 @@ mod ui {
                                 .unwrap_or_default();
                             text(
                                 p,
-                                format!("{}{}", tr(access), expiry),
+                                if panel.usdc_page {
+                                    tr("billing.usdcGas")
+                                } else {
+                                    format!("{}{}", tr(access), expiry)
+                                },
                                 20.0,
                                 132.0,
                                 700.0,
                                 50.0,
                                 13.0,
                             );
-                            if !s.enabled {
+                            if !s.enabled && !panel.usdc_page {
                                 text(p, tr("billing.unavailable"), 20.0, 190.0, 700.0, 42.0, 15.0);
+                            } else if panel.usdc_page {
+                                text(
+                                    p,
+                                    tr(if panel.usdc_available() {
+                                        "billing.usdcOffers"
+                                    } else {
+                                        "billing.usdcUnavailable"
+                                    }),
+                                    20.0,
+                                    190.0,
+                                    500.0,
+                                    35.0,
+                                    14.0,
+                                );
+                                if s.sui_usdc_offers.len() > PAGE_SIZE {
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::UsdcOffersPage(false),
+                                        "billing.previous",
+                                        524.0,
+                                        185.0,
+                                        88.0,
+                                    );
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::UsdcOffersPage(true),
+                                        "billing.next",
+                                        622.0,
+                                        185.0,
+                                        88.0,
+                                    );
+                                }
+                                for (i, offer) in s
+                                    .sui_usdc_offers
+                                    .iter()
+                                    .skip(panel.usdc_offer_page * PAGE_SIZE)
+                                    .take(PAGE_SIZE)
+                                    .enumerate()
+                                {
+                                    let y = 225.0 + i as f32 * 48.0;
+                                    text(
+                                        p,
+                                        format!(
+                                            "{} · {} · {}",
+                                            offer.label,
+                                            usdc_amount_label(&offer.amount_micros),
+                                            tr("billing.points")
+                                                .replace("{0}", &offer.credits.to_string())
+                                        ),
+                                        20.0,
+                                        y,
+                                        510.0,
+                                        42.0,
+                                        13.0,
+                                    );
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::UsdcCheckout(offer.id.clone()),
+                                        "billing.usdcPay",
+                                        550.0,
+                                        y + 4.0,
+                                        160.0,
+                                    );
+                                }
+                                text(p, tr("billing.usdcOrders"), 20.0, 392.0, 500.0, 30.0, 14.0);
+                                if s.sui_usdc_orders.len() > PAGE_SIZE {
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::UsdcOrdersPage(false),
+                                        "billing.previous",
+                                        524.0,
+                                        387.0,
+                                        88.0,
+                                    );
+                                    button(
+                                        p,
+                                        panel,
+                                        BillingAction::UsdcOrdersPage(true),
+                                        "billing.next",
+                                        622.0,
+                                        387.0,
+                                        88.0,
+                                    );
+                                }
+                                if s.sui_usdc_orders.is_empty() {
+                                    text(
+                                        p,
+                                        tr("billing.usdcNoOrders"),
+                                        20.0,
+                                        430.0,
+                                        700.0,
+                                        32.0,
+                                        13.0,
+                                    );
+                                }
+                                for (i, order) in s
+                                    .sui_usdc_orders
+                                    .iter()
+                                    .skip(panel.usdc_order_page * PAGE_SIZE)
+                                    .take(PAGE_SIZE)
+                                    .enumerate()
+                                {
+                                    let short_id: String = order.id.chars().take(18).collect();
+                                    text(
+                                        p,
+                                        format!(
+                                            "{} · {} · {}\n{}",
+                                            short_id,
+                                            usdc_amount_label(&order.amount_micros),
+                                            tr("billing.points")
+                                                .replace("{0}", &order.credits.to_string()),
+                                            tr(order.state.label())
+                                        ),
+                                        20.0,
+                                        430.0 + i as f32 * 46.0,
+                                        510.0,
+                                        44.0,
+                                        13.0,
+                                    );
+                                    if !matches!(
+                                        order.state,
+                                        SuiUsdcOrderState::Applied
+                                            | SuiUsdcOrderState::Expired
+                                            | SuiUsdcOrderState::Review
+                                    ) {
+                                        button(
+                                            p,
+                                            panel,
+                                            BillingAction::UsdcReopen(order.id.clone()),
+                                            "billing.usdcReopen",
+                                            550.0,
+                                            434.0 + i as f32 * 46.0,
+                                            160.0,
+                                        );
+                                    }
+                                }
                             } else {
                                 text(
                                     p,
@@ -963,6 +1421,10 @@ mod ui {
                     can_enter_game: false,
                 },
                 orders: vec![],
+                sui_usdc_enabled: false,
+                sui_usdc_checkout_origin: None,
+                sui_usdc_offers: vec![],
+                sui_usdc_orders: vec![],
             }
         }
         fn reply(request: &BillingRequest) -> BillingReply {
@@ -975,6 +1437,333 @@ mod ui {
                 error: None,
                 replayed: None,
             }
+        }
+        fn usdc_status() -> BillingStatus {
+            let mut s = status(true);
+            s.sui_usdc_enabled = true;
+            s.sui_usdc_checkout_origin = Some("http://127.0.0.1:17830".into());
+            s.sui_usdc_offers = vec![SuiUsdcOffer {
+                id: "usdc-small".into(),
+                label: "Test package".into(),
+                amount_micros: "1000000".into(),
+                credits: 100,
+                network: "testnet".into(),
+            }];
+            s
+        }
+
+        #[test]
+        fn usdc_wire_requires_canonical_amounts_testnet_and_known_states() {
+            for state in [
+                "prepared",
+                "invoicePending",
+                "awaitingPayment",
+                "paymentSubmitted",
+                "paidPending",
+                "applied",
+                "expired",
+                "review",
+            ] {
+                let payload = serde_json::json!({"id":"usdc_order", "orderRequestId":"native-original-usdc", "offerId":"usdc-small", "credits":100,
+                    "amountMicros":"1000000", "network":"testnet", "state":state, "createdAtMs":1,
+                    "expiresAtMs":100, "transactionDigest":null});
+                let order: SuiUsdcOrder = serde_json::from_value(payload.clone()).unwrap();
+                let mut s = usdc_status();
+                s.sui_usdc_orders = vec![order];
+                assert!(s.is_valid());
+                let mut unknown = payload.clone();
+                unknown["state"] = serde_json::json!("success");
+                assert!(serde_json::from_value::<SuiUsdcOrder>(unknown).is_err());
+                let mut extra = payload;
+                extra["payerSecret"] = serde_json::json!("forbidden");
+                assert!(serde_json::from_value::<SuiUsdcOrder>(extra).is_err());
+            }
+            for amount in ["0", "01", "1.0", "-1", "18446744073709551616"] {
+                let mut s = usdc_status();
+                s.sui_usdc_offers[0].amount_micros = amount.into();
+                assert!(!s.is_valid());
+            }
+            let mut s = usdc_status();
+            s.sui_usdc_offers[0].network = "mainnet".into();
+            assert!(!s.is_valid());
+            assert_eq!(usdc_amount_label("1"), "0.000001 USDC");
+            assert_eq!(usdc_amount_label("1000000"), "1 USDC");
+            assert_eq!(usdc_amount_label("1234500"), "1.2345 USDC");
+            assert_eq!(
+                usdc_amount_label("18446744073709551615"),
+                "18446744073709.551615 USDC"
+            );
+        }
+
+        #[test]
+        fn usdc_status_is_optional_for_existing_stripe_servers() {
+            let status: BillingStatus = serde_json::from_value(serde_json::json!({
+                "enabled":true,"checkoutEnabled":true,"credit":0,"pendingCredit":0,"offers":[],
+                "monthlyCardCreditPrice":null,"ownedMonthlyCards":[],"orders":[],
+                "monthlyCard":{"required":false,"active":false,"expiresAtMs":null,"serverNowMs":1,"remainingMs":0,"canEnterGame":true}
+            })).unwrap();
+            assert!(status.is_valid());
+            assert!(!status.sui_usdc_enabled);
+            assert!(status.sui_usdc_offers.is_empty());
+        }
+
+        #[test]
+        fn usdc_checkout_requires_local_origin_and_retries_the_same_order() {
+            let mut panel = BillingPanel::default();
+            panel.open_for("alice", 7, 1);
+            panel.pending = None;
+            panel.status = Some(usdc_status());
+            panel.usdc_page = true;
+            panel.action(BillingAction::UsdcCheckout("usdc-small".into()), 2);
+            assert!(panel.pending.is_none(), "reply origin is not an allowlist");
+            panel.set_sui_checkout_origin(Some("http://127.0.0.1:17830".into()));
+            panel.action(BillingAction::UsdcCheckout("usdc-small".into()), 3);
+            let first = panel.pending.clone().unwrap();
+            assert_eq!(first.operation, BillingOperation::UsdcCheckout);
+            panel.mark_sent(first.request_id);
+            panel.expire_request(15_003);
+            panel.action(BillingAction::Retry, 15_004);
+            let retry = panel.pending.clone().unwrap();
+            assert_eq!(first.purchase, retry.purchase);
+            assert_ne!(first.request_id, retry.request_id);
+            panel.mark_sent(retry.request_id);
+            let mut result = reply(&retry);
+            result.checkout_url = Some(format!(
+                "http://127.0.0.1:17830/v1/billing/sui-usdc/pay#usdc_{}.{}",
+                "a".repeat(64),
+                "A".repeat(43)
+            ));
+            assert!(!panel.accept(result.clone(), "bob", Some(7), 15_005));
+            assert!(!panel.accept(reply(&first), "alice", Some(7), 15_005));
+            assert!(panel.accept(result, "alice", Some(7), 15_005));
+            assert!(panel.take_checkout_url().is_some());
+            assert!(panel.take_checkout_url().is_none());
+            assert_eq!(
+                panel.status.unwrap().credit,
+                900,
+                "opening wallet never grants credits"
+            );
+        }
+
+        #[test]
+        fn usdc_refresh_only_reads_pending_order_status() {
+            let mut panel = BillingPanel::default();
+            panel.open_for("alice", 7, 1);
+            panel.pending = None;
+            panel.status = Some(usdc_status());
+            panel.usdc_page = true;
+            panel.status.as_mut().unwrap().sui_usdc_orders = vec![SuiUsdcOrder {
+                id: "usdc_order".into(),
+                order_request_id: "native-original-usdc".into(),
+                offer_id: "usdc-small".into(),
+                credits: 100,
+                amount_micros: "1000000".into(),
+                network: "testnet".into(),
+                state: SuiUsdcOrderState::PaidPending,
+                created_at_ms: 1,
+                expires_at_ms: 10000,
+                transaction_digest: None,
+            }];
+            panel.refresh_pending_usdc(5000);
+            assert_eq!(
+                panel.pending.as_ref().unwrap().operation,
+                BillingOperation::Status
+            );
+            assert!(panel.pending.as_ref().unwrap().purchase.is_none());
+            panel.pending = None;
+            panel.status.as_mut().unwrap().sui_usdc_orders[0].state = SuiUsdcOrderState::Applied;
+            panel.refresh_pending_usdc(10000);
+            assert!(panel.pending.is_none());
+            assert_eq!(panel.status.as_ref().unwrap().credit, 900);
+        }
+
+        #[test]
+        fn usdc_relogin_reopens_frozen_order_when_new_sales_are_disabled() {
+            let mut panel = BillingPanel::default();
+            panel.open_for("alice", 7, 1);
+            panel.pending = None;
+            panel.set_sui_checkout_origin(Some("http://127.0.0.1:17830".into()));
+            let mut s = usdc_status();
+            s.enabled = false;
+            s.sui_usdc_enabled = false;
+            s.sui_usdc_offers.clear();
+            s.sui_usdc_orders = vec![SuiUsdcOrder {
+                id: "usdc_order".into(),
+                order_request_id: "native-original-usdc".into(),
+                offer_id: "removed-offer".into(),
+                credits: 100,
+                amount_micros: "1000000".into(),
+                network: "testnet".into(),
+                state: SuiUsdcOrderState::AwaitingPayment,
+                created_at_ms: 1,
+                expires_at_ms: 10000,
+                transaction_digest: None,
+            }];
+            panel.status = Some(s);
+            panel.usdc_page = true;
+            panel.action(BillingAction::UsdcCheckout("removed-offer".into()), 2);
+            assert!(panel.pending.is_none());
+            panel.action(BillingAction::UsdcReopen("usdc_order".into()), 3);
+            assert_eq!(
+                panel.pending.as_ref().unwrap().purchase,
+                Some(BillingPurchase::UsdcCheckout {
+                    offer_id: "removed-offer".into(),
+                    order_request_id: "native-original-usdc".into(),
+                })
+            );
+            panel.pending = None;
+            for state in [
+                SuiUsdcOrderState::Applied,
+                SuiUsdcOrderState::Expired,
+                SuiUsdcOrderState::Review,
+            ] {
+                panel.status.as_mut().unwrap().sui_usdc_orders[0].state = state;
+                panel.action(BillingAction::UsdcReopen("usdc_order".into()), 4);
+                assert!(panel.pending.is_none());
+            }
+            panel.status.as_mut().unwrap().sui_usdc_orders[0].state =
+                SuiUsdcOrderState::AwaitingPayment;
+            panel.set_sui_checkout_origin(Some("https://different.invalid".into()));
+            panel.action(BillingAction::UsdcReopen("usdc_order".into()), 5);
+            assert!(panel.pending.is_none());
+        }
+
+        #[test]
+        #[ignore = "explicit offline Windows GPU evidence; no server, wallet signing or chain payment"]
+        fn usdc_windows_gpu_channels_and_payment_states() {
+            use crate::native_i18n::{self, Locale};
+            use crate::native_shell_ui::i18n_visual_tests::{
+                capture_i18n, i18n_offscreen_app_configured, i18n_text_layouts, warm_i18n_images,
+            };
+            use std::{fs, path::PathBuf};
+            let assets = PathBuf::from(
+                std::env::var_os("MIR2_I18N_VISUAL_ASSET_ROOT").expect("real native assets"),
+            )
+            .canonicalize()
+            .unwrap();
+            let output = PathBuf::from(
+                std::env::var_os("MIR2_USDC_VISUAL_OUTPUT").expect("fresh evidence directory"),
+            );
+            assert!(output.is_absolute() && !output.starts_with(&assets));
+            fs::create_dir_all(&output).unwrap();
+            let report = output.join("usdc-native-gpu.json");
+            fs::OpenOptions::new()
+                .create_new(true)
+                .write(true)
+                .open(&report)
+                .unwrap();
+            fs::write(
+                &report,
+                br#"{"passed":false,"evidenceKind":"offline-native-production-renderer"}"#,
+            )
+            .unwrap();
+            struct RestoreLocale(Locale);
+            impl Drop for RestoreLocale {
+                fn drop(&mut self) {
+                    native_i18n::activate(self.0);
+                }
+            }
+            let _restore = RestoreLocale(native_i18n::locale());
+            let mut panel = BillingPanel::default();
+            panel.open_for("alice", 7, now_ms());
+            panel.pending = None;
+            panel.set_sui_checkout_origin(Some("http://127.0.0.1:17830".into()));
+            let mut s = usdc_status();
+            for (i, state) in [
+                SuiUsdcOrderState::Prepared,
+                SuiUsdcOrderState::InvoicePending,
+                SuiUsdcOrderState::AwaitingPayment,
+                SuiUsdcOrderState::PaymentSubmitted,
+                SuiUsdcOrderState::PaidPending,
+                SuiUsdcOrderState::Applied,
+                SuiUsdcOrderState::Expired,
+                SuiUsdcOrderState::Review,
+            ]
+            .into_iter()
+            .enumerate()
+            {
+                s.sui_usdc_orders.push(SuiUsdcOrder {
+                    id: format!("usdc_{}", format!("{i:x}").repeat(64)),
+                    order_request_id: format!("native-original-usdc-{i}"),
+                    offer_id: "usdc-small".into(),
+                    credits: 100,
+                    amount_micros: "1000000".into(),
+                    network: "testnet".into(),
+                    state,
+                    created_at_ms: 1,
+                    expires_at_ms: 10000,
+                    transaction_digest: None,
+                });
+            }
+            panel.status = Some(s);
+            panel.last_status_at_ms = now_ms();
+            let (mut app, target, _) = i18n_offscreen_app_configured(&assets, true, |app| {
+                app.insert_resource(NativeShellModel {
+                    screen: NativeShellScreen::CharacterSelect,
+                    last_account: Some("alice".into()),
+                    selected_character_index: Some(7),
+                    characters: vec![crate::native_shell::CharacterSummary::new(
+                        7,
+                        "UsdcFixture",
+                        22,
+                        "Warrior",
+                        "Male",
+                    )],
+                    billing: panel,
+                    ..Default::default()
+                });
+            });
+            let mut screenshots = Vec::new();
+            let mut checks = Vec::new();
+            for locale in [Locale::English, Locale::TraditionalChinese] {
+                native_i18n::activate(locale);
+                for (label, usdc, page) in [
+                    ("stripe", false, 0),
+                    ("usdc-preparing", true, 0),
+                    ("usdc-confirmation", true, 1),
+                    ("usdc-expired-review", true, 2),
+                    ("usdc-sales-disabled", true, 0),
+                ] {
+                    let mut model = app.world_mut().resource_mut::<NativeShellModel>();
+                    model.billing.usdc_page = usdc;
+                    model.billing.usdc_order_page = page;
+                    let status = model.billing.status.as_mut().unwrap();
+                    status.enabled = label != "usdc-sales-disabled";
+                    status.sui_usdc_enabled = label != "usdc-sales-disabled";
+                    status.sui_usdc_offers = if label == "usdc-sales-disabled" {
+                        vec![]
+                    } else {
+                        usdc_status().sui_usdc_offers
+                    };
+                    model.billing.pending = None;
+                    model.billing.last_status_at_ms = now_ms();
+                    drop(model);
+                    warm_i18n_images(&mut app);
+                    let path = output.join(format!("{}-{label}-1024x768.png", locale.code()));
+                    capture_i18n(&mut app, &target, &path);
+                    let layouts = i18n_text_layouts(&mut app);
+                    let failures: Vec<_> = layouts
+                        .iter()
+                        .filter(|row| {
+                            row["missingGlyphs"] != 0
+                                || row["layoutExceedsNode"] == true
+                                || row["nodeOutsideViewport"] == true
+                        })
+                        .collect();
+                    assert!(
+                        failures.is_empty(),
+                        "{locale:?}/{label} layout failures: {failures:?}"
+                    );
+                    assert!(layouts
+                        .iter()
+                        .any(|row| row["text"].as_str().is_some_and(|t| t.contains("USDC"))));
+                    screenshots.push(path.file_name().unwrap().to_string_lossy().to_string());
+                    checks.push(serde_json::json!({"locale":locale.code(), "page":label, "layouts":layouts}));
+                }
+            }
+            fs::write(&report, serde_json::to_vec_pretty(&serde_json::json!({"passed":true,
+                "evidenceKind":"offline-native-production-renderer", "width":1024,"height":768,
+                "screenshots":screenshots,"checks":checks,"missingGlyphs":0,"overflowingTextNodes":0,"outsideViewportNodes":0})).unwrap()).unwrap();
         }
         #[test]
         fn checkout_is_bound_to_current_account_character_and_request() {

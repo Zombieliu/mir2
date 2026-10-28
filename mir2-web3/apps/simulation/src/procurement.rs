@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, BTreeSet};
 
-pub const SCHEMA_VERSION: u16 = 12;
+pub const SCHEMA_VERSION: u16 = crate::sui_usdc_billing::SCHEMA_VERSION;
 pub const COMMIT_UNKNOWN: &str = "PROCUREMENT_COMMIT_OUTCOME_UNKNOWN";
 pub const DRAGON_SWORD_TEMPLATE: u32 = 245;
 // One serial task may make four bounded 20-second fullnode calls. Claiming a

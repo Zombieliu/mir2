@@ -1,0 +1,26 @@
+
+running 21 tests
+test web::billing::tests::authenticated_http_status_and_checkout_fail_closed_without_durable_store ... ok
+test web::billing::tests::dropping_socket_fence_invalidates_delayed_generation_even_after_reauthentication ... ok
+test web::billing::tests::error_replies_keep_operation_character_and_exact_request_correlation ... ok
+test web::billing::tests::http_and_socket_helper_share_the_same_account_operation_rate_bucket ... ok
+test web::billing::tests::http_identity_verifies_real_bearer_and_rechecks_revocation ... ok
+test web::billing::tests::http_router_rejects_body_query_injection_and_duplicate_fields_before_execution ... ok
+test web::billing::tests::http_router_rejects_unauthenticated_and_revoked_identity_with_no_store ... ok
+test web::billing::tests::inactive_lease_blocks_other_writers_and_releases_only_confirmed_results ... ok
+test web::billing::tests::inactive_lease_rejects_existing_online_character_without_removing_it ... ok
+test web::billing::tests::inactive_lease_retains_route_fence_when_source_commit_outcome_is_unknown ... ok
+test web::billing::tests::ordinary_websocket_billing_recovers_expired_entry_and_replays_offline_and_online ... ok
+test web::billing::tests::public_errors_preserve_definitive_codes_and_hide_unknown_outcomes ... ok
+test web::billing::tests::return_page_csp_pins_only_its_trusted_script ... ok
+test web::billing::tests::shared_rate_helper_has_exact_per_account_operation_budget ... ok
+test web::billing::tests::strict_checkout_rejects_duplicate_correlation_and_offer_fields ... ok
+test web::billing::tests::strict_requests_accept_server_catalogue_identifiers_and_exact_u64_ids ... ok
+test web::billing::tests::strict_requests_reject_client_account_and_financial_authority ... ok
+test web::billing::tests::strict_requests_require_all_fields_and_reject_numeric_item_ids ... ok
+test web::billing::tests::unsigned_webhook_and_cosmetic_return_never_grant_credit_or_change_accounts ... ok
+test web::billing::tests::verified_account_rejects_expired_cached_snapshot_and_real_revocation ... ok
+test web::billing::tests::verified_account_requires_current_authenticated_matching_real_identity ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 1288 filtered out; finished in 1.33s
+

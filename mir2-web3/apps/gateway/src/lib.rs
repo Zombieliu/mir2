@@ -48,6 +48,7 @@ pub mod npc_gold_buy_route;
 pub mod npc_purchase_browser;
 pub mod npc_purchase_owner_route;
 pub mod procurement_worker;
+pub mod sui_usdc_billing;
 pub mod operator;
 pub mod regional;
 mod resume;

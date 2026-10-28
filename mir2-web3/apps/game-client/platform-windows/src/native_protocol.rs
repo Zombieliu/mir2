@@ -168,6 +168,16 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "requestId")]
         request_id: u64,
     },
+    BillingUsdcCheckout {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "offerId")]
+        offer_id: String,
+        #[serde(rename = "orderRequestId")]
+        order_request_id: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
     BillingBuyMonthlyCard {
         #[serde(rename = "characterIndex")]
         character_index: i32,
@@ -714,6 +724,7 @@ impl NativeOutboundCommand {
             Self::ClientVersion => "clientVersion",
             Self::BillingStatus { .. } => "billingStatus",
             Self::BillingCheckout { .. } => "billingCheckout",
+            Self::BillingUsdcCheckout { .. } => "billingUsdcCheckout",
             Self::BillingBuyMonthlyCard { .. } => "billingBuyMonthlyCard",
             Self::BillingActivateMonthlyCard { .. } => "billingActivateMonthlyCard",
             Self::MonthlyCardStatus => "monthlyCardStatus",
@@ -1610,6 +1621,11 @@ mod tests {
 
     #[test]
     fn billing_commands_use_only_server_owned_account_and_offer_identity() {
+        assert_serialized(
+            NativeOutboundCommand::BillingUsdcCheckout { character_index:7, offer_id:"usdc-small".into(),
+                order_request_id:"native-stable-usdc-order".into(), request_id:15 },
+            serde_json::json!({"type":"billingUsdcCheckout","characterIndex":7,"offerId":"usdc-small","orderRequestId":"native-stable-usdc-order","requestId":15}),
+        );
         assert_serialized(
             NativeOutboundCommand::BillingStatus {
                 character_index: 7,

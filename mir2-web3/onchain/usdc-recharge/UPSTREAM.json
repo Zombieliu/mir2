@@ -1,0 +1,41 @@
+{
+  "reviewedDateAsiaShanghai": "2026-10-29",
+  "suiFramework": {
+    "repository": "https://github.com/MystenLabs/sui",
+    "revision": "3c0f387ebb40b8be292d3b7bd3f5bee8ad226d33",
+    "subdirectory": "crates/sui-framework/packages/sui-framework",
+    "compilerVersion": "sui 1.68.1-3c0f387ebb40-dirty",
+    "compilerSha256": "62e27004b8414e829c650ca35b239c24a5d2a9e770d2dc6b611915c1d4fdc2d3"
+  },
+  "sdk": { "package": "@mysten/sui", "version": "2.16.2", "transport": "gRPC sui.rpc.v2", "lockfile": "package-lock.json" },
+  "nativeUsdc": {
+    "issuer": "Circle",
+    "decimals": 6,
+    "testnetCoinType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+    "mainnetCoinTypeReferenceOnlyDisabled": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+    "addressSource": "https://developers.circle.com/stablecoins/usdc-contract-addresses",
+    "decimalsSource": "https://github.com/circlefin/stablecoin-sui/blob/master/packages/usdc/sources/usdc.move",
+    "faucet": "https://faucet.circle.com/"
+  },
+  "network": {
+    "name": "testnet",
+    "chainIdentifier": "4c78adac",
+    "genesisDigest": "69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD",
+    "networkHash": "0xb55d4afda0318ec0a264cc5f46c4e61c96da8000e9ea1bdf04878266867c6246",
+    "fullnodeUrl": "https://fullnode.testnet.sui.io:443",
+    "realRpcValidation": "2026-10-29 Asia/Shanghai: full genesis, deployed package/config/AdminCap and publication enabled validated through official gRPC. Three setup transactions confirmed; no recharge invoice or USDC payment in this recorded stage.",
+    "packageId": "0xa7910040a275375a94796426a2a931f436b6615f2a92f53885438ff077cd403f",
+    "configId": "0xa7e85bf804e45c4fe5f1ee928e0d6faff9e853f9742b303660ec8b342862f1aa",
+    "adminCapId": "0xa95c14a85e2ad48df271e1f73250718d862307283b7029a5e49c8e952654c6a1",
+    "issuerAndMerchant": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1"
+  },
+  "primaryDocumentation": [
+    "https://docs.sui.io/develop/accessing-data/grpc/using-grpc",
+    "https://docs.sui.io/onchain-finance/choose-payments-model",
+    "https://docs.sui.io/develop/transaction-payment/gasless-stablecoin-transfers",
+    "https://docs.sui.io/onchain-finance/payment-kit",
+    "https://faucet.sui.io/pow-spec/"
+  ],
+  "frameworkDecision": "A separate native Sui invoice module for USDC topups. Existing procurement remains the Dubhe-backed offchain-gold system; no claim that this payment module is Dubhe integration.",
+  "excluded": ["mainnet", "real funds", "production keys", "USDC equipment payment", "SUI coin recharge", "CCTP bridge", "arbitrary sponsored transactions"]
+}

@@ -1,13 +1,14 @@
 pub mod activities;
 pub mod billing;
-pub mod procurement;
-pub mod procurement_fees;
 mod config;
 mod config_account_store_diagnostics;
 pub mod conquest;
 pub mod crystal_health;
 pub mod db_projection;
 pub mod monthly_card;
+pub mod procurement;
+pub mod procurement_fees;
+pub mod sui_usdc_billing;
 pub use mir2_production as production;
 pub mod npc_purchase_journal;
 pub mod npc_purchase_owner;

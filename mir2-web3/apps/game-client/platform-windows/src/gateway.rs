@@ -314,6 +314,7 @@ pub(crate) fn native_command_scope(command: &GatewayCommand) -> NativeCommandSco
             C::Procurement { .. } => S::World,
             C::BillingStatus { .. }
             | C::BillingCheckout { .. }
+            | C::BillingUsdcCheckout { .. }
             | C::BillingBuyMonthlyCard { .. }
             | C::BillingActivateMonthlyCard { .. }
             | C::MonthlyCardStatus
@@ -6024,6 +6025,9 @@ fn billing_command_matches(
             request_id,
             ..
         } => (BillingOperation::Checkout, *character_index, *request_id),
+        NativeOutboundCommand::BillingUsdcCheckout {
+            character_index, request_id, ..
+        } => (BillingOperation::UsdcCheckout, *character_index, *request_id),
         NativeOutboundCommand::BillingBuyMonthlyCard {
             character_index,
             request_id,
@@ -6075,7 +6079,8 @@ fn synchronize_billing_credit(
         || reply.status.as_ref().is_some_and(|s| !s.is_valid())
         || reply.checkout_url.as_ref().is_some_and(|url| {
             url.len() > 4096
-                || reply.operation != mir2_client_bevy::native_billing::BillingOperation::Checkout
+                || !matches!(reply.operation, mir2_client_bevy::native_billing::BillingOperation::Checkout
+                    | mir2_client_bevy::native_billing::BillingOperation::UsdcCheckout)
                 || reply.error.is_some()
         })
     {

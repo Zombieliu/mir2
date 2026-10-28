@@ -1,0 +1,10 @@
+{
+  "kind": "actual-native-window-computer-use-jpeg",
+  "observedAt": "2026-10-28T21:15:37.738Z",
+  "window": {
+    "app": "process:C:\\mir2-build\\sui-usdc-recharge-20261029\\native-client\\bin-v2\\mir2-platform-windows.exe",
+    "id": 13305850,
+    "title": "numeron-legend of rebirth"
+  },
+  "purpose": "Sui USDC isolated Testnet recharge acceptance; not a Web or offline fixture screenshot"
+}

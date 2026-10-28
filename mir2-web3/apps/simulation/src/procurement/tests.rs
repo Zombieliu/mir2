@@ -1098,7 +1098,7 @@ fn procurement_open_watch_survives_offline_until_terminal() {
 #[test]
 fn procurement_old_schema10_and11_billing_fence_predicate_rejects_new_store() {
     let (s, _, _) = fixture();
-    assert_eq!(s.schema_version, 12);
+    assert_eq!(s.schema_version, crate::billing::BILLING_SCHEMA_VERSION);
     assert!(s.accounts.values().any(|a| a.billing.is_some()));
     for a in s.accounts.values() {
         if a.billing.is_some() {
@@ -1646,7 +1646,10 @@ fn procurement_schema11_without_new_quota_authority_migrates_and_legacy_quotes_r
     ));
     std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
     let loaded = AccountStore::load_or_new(&path, character(90, "migration-test"));
-    assert_eq!(loaded.schema_version, 12);
+    assert_eq!(
+        loaded.schema_version,
+        crate::billing::BILLING_SCHEMA_VERSION
+    );
     crate::billing::validate_complete_store(&loaded).unwrap();
     assert!(loaded.accounts["buyer"]
         .procurement

@@ -1907,6 +1907,7 @@ enum BrowserCommand {
     Procurement(mir2_protocol::procurement::ProcurementRequest),
     BillingStatus(billing::StatusRequest),
     BillingCheckout(billing::CheckoutRequest),
+    BillingUsdcCheckout(billing::CheckoutRequest),
     BillingBuyMonthlyCard(billing::BuyRequest),
     BillingActivateMonthlyCard(billing::ActivateRequest),
     MonthlyCardStatus,
@@ -9974,6 +9975,9 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         }
         BrowserCommand::BillingCheckout(request) => {
             Ok(SessionAction::Billing(billing::Request::Checkout(request)))
+        }
+        BrowserCommand::BillingUsdcCheckout(request) => {
+            Ok(SessionAction::Billing(billing::Request::UsdcCheckout(request)))
         }
         BrowserCommand::BillingBuyMonthlyCard(request) => {
             Ok(SessionAction::Billing(billing::Request::Buy(request)))

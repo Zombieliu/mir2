@@ -95,6 +95,10 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0018_procurement_authority_guard",
         include_str!("../../../infra/postgres/migrations/0018_procurement_authority_guard.sql"),
     ),
+    (
+        "0019_sui_usdc_billing_authority",
+        include_str!("../../../infra/postgres/migrations/0019_sui_usdc_billing_authority.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.
