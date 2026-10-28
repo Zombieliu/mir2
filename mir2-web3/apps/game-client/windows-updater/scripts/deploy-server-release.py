@@ -68,6 +68,11 @@ BLOCK = b'''
     # END MIR2 NATIVE CLIENT UPDATES V1
 '''
 LEGACY_BLOCK = BLOCK
+# The deployed CDN publisher extended only the immutable payload matcher. Keep
+# accepting that exact reviewed generation without rewriting unrelated routes.
+LEGACY_CDN_BLOCK = LEGACY_BLOCK.replace(
+    b'@mir2_native_payload path /client-updates/releases/*',
+    b'@mir2_native_payload path /client-updates/releases/* /client-updates/feeds/* /client-updates/installers/*')
 FIVE_CLASS_ROUTES = b'''
                     @mir2_five_class_discovery path /client-updates/five-class/latest.json /client-updates/five-class/latest.p7s
                     handle @mir2_five_class_discovery {
@@ -77,7 +82,7 @@ FIVE_CLASS_ROUTES = b'''
                         header X-Content-Type-Options "nosniff"
                         file_server
                     }
-                    @mir2_five_class_payload path /client-updates/five-class/releases/*
+                    @mir2_five_class_payload path /client-updates/five-class/releases/* /client-updates/five-class/feeds/* /client-updates/five-class/installers/*
                     handle @mir2_five_class_payload {
                         uri strip_prefix /client-updates/five-class
                         root * /srv/mir2-client-updates/five-class
@@ -86,7 +91,7 @@ FIVE_CLASS_ROUTES = b'''
                         file_server
                     }
 '''
-BLOCK = LEGACY_BLOCK.replace(b'MIR2 NATIVE CLIENT UPDATES V1', b'MIR2 NATIVE CLIENT UPDATES V2').replace(
+BLOCK = LEGACY_CDN_BLOCK.replace(b'MIR2 NATIVE CLIENT UPDATES V1', b'MIR2 NATIVE CLIENT UPDATES V2').replace(
     b'                    @mir2_native_discovery', FIVE_CLASS_ROUTES + b'                    @mir2_native_discovery', 1)
 
 
@@ -162,9 +167,10 @@ def inject_route(old):
              and b'# BEGIN MIR2 NATIVE CLIENT UPDATES V1' not in old, 'existing update route differs from reviewed fragment')
         return old
     if b'# BEGIN MIR2 NATIVE CLIENT UPDATES V1' in old:
-        need(old.count(LEGACY_BLOCK) == 1 and old.count(b'# BEGIN MIR2 NATIVE CLIENT UPDATES V1') == 1,
+        matching = [block for block in (LEGACY_BLOCK, LEGACY_CDN_BLOCK) if old.count(block) == 1]
+        need(len(matching) == 1 and old.count(b'# BEGIN MIR2 NATIVE CLIENT UPDATES V1') == 1,
              'existing update route differs from reviewed fragment')
-        return old.replace(LEGACY_BLOCK, BLOCK, 1)
+        return old.replace(matching[0], BLOCK, 1)
     need(old.count(ANCHOR) == 1 and b'/client-updates' not in old, 'unexpected Caddy site/route; manual review required')
     position = old.index(ANCHOR) + len(ANCHOR)
     new = old[:position] + BLOCK + old[position:]

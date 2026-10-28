@@ -147,6 +147,20 @@ class DeployTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             server.inject_route(original.replace(b'root * /srv/mir2-client-updates/feed-current', b'root * /unreviewed', 1))
 
+    def test_deployed_cdn_route_preserves_immutable_discovery_and_surrounding_sites(self):
+        suffix = b'\n handle_path /playtest/* { reverse_proxy 127.0.0.1:7210 }\n}\nimport /etc/caddy/mir2-wallet-login.caddy\n'
+        original = server.ANCHOR + server.LEGACY_CDN_BLOCK + suffix
+        upgraded = server.inject_route(original)
+        self.assertEqual(upgraded.replace(server.BLOCK, server.LEGACY_CDN_BLOCK, 1), original)
+        for scope in ('', 'five-class/'):
+            for group in ('releases', 'feeds', 'installers'):
+                self.assertIn(('/client-updates/' + scope + group + '/*').encode(), upgraded)
+        self.assertEqual(server.inject_route(upgraded), upgraded)
+        for before, after in [(b'method GET HEAD', b'method GET HEAD POST'),
+                              (b'/client-updates/installers/*', b'/client-updates/private/*')]:
+            with self.subTest(mutation=before), self.assertRaisesRegex(ValueError, 'reviewed fragment'):
+                server.inject_route(original.replace(before, after, 1))
+
     def test_fixed_scope_extraction_and_release_promotion_preserve_legacy_tree(self):
         files = server.extract_checked(self.archive, self.receipt, self.feed, self.stage, helper, 'five-class')
         release_root = self.root / 'published'
