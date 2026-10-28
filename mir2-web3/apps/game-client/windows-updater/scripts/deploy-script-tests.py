@@ -183,6 +183,45 @@ class DeployTests(unittest.TestCase):
                              (self.candidate / 'PACKAGE-MANIFEST.json').read_bytes())
             self.assertEqual(server.promote_immutable(self.stage, 'releases/game-r6', files['releases/game-r6'], helper, modern), 'verified-existing')
 
+    def test_only_exact_published_legacy_delivery_extras_are_preserved(self):
+        files = self.extract()
+        release_root = self.root / 'published'
+        component = 'releases/game-r6'
+        target = release_root / component
+        target.parent.mkdir(parents=True)
+        extra_path, extra_bytes = 'delivery/pinned.m2b.gz', b'previously verified CDN payload'
+        extras = {extra_path: (len(extra_bytes), helper.sha256(extra_bytes))}
+        with mock.patch.object(server, 'ROOT', release_root), \
+             mock.patch.object(server, 'LEGACY_DELIVERY_COMPONENT', component), \
+             mock.patch.object(server, 'LEGACY_DELIVERY_EXTRAS', extras):
+            self.assertEqual(server.promote_immutable(self.stage, component, files[component], helper, release_root), 'promoted')
+            extra = target / extra_path
+            extra.parent.mkdir()
+            extra.write_bytes(extra_bytes)
+            original = {p.relative_to(target).as_posix(): p.read_bytes() for p in target.rglob('*') if p.is_file()}
+            self.assertEqual(server.promote_immutable(self.stage, component, files[component], helper, release_root), 'verified-existing')
+            self.assertEqual(original, {p.relative_to(target).as_posix(): p.read_bytes() for p in target.rglob('*') if p.is_file()})
+            for mutation in ('modified', 'unexpected', 'partial'):
+                extra.write_bytes(extra_bytes)
+                unknown = target / 'unlisted.txt'
+                if mutation == 'modified':
+                    extra.write_bytes(b'X' * len(extra_bytes))
+                elif mutation == 'unexpected':
+                    unknown.write_bytes(b'not admitted')
+                else:
+                    (target / 'DELIVERY.json').write_bytes(b'partial delivery closure')
+                with self.subTest(mutation=mutation), self.assertRaisesRegex(ValueError, 'refusing overwrite'):
+                    server.promote_immutable(self.stage, component, files[component], helper, release_root)
+                if unknown.exists():
+                    unknown.unlink()
+                if (target / 'DELIVERY.json').exists():
+                    (target / 'DELIVERY.json').unlink()
+            extra.write_bytes(extra_bytes)
+            with mock.patch.object(server, 'LEGACY_DELIVERY_COMPONENT', 'releases/other'), self.assertRaisesRegex(ValueError, 'refusing overwrite'):
+                server.promote_immutable(self.stage, component, files[component], helper, release_root)
+            with mock.patch.object(server, 'ROOT', self.root / 'other-root'), self.assertRaisesRegex(ValueError, 'unsupported fixed release root'):
+                server.promote_immutable(self.stage, component, files[component], helper, release_root)
+
     def test_modern_origin_readback_never_uses_legacy_alias_or_hidden_directory(self):
         base = '/client-updates/five-class/'
         feed_bytes, signature = b'new signed fixture feed', b'fixture signature'
