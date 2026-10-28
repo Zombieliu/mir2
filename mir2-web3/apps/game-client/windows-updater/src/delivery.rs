@@ -360,7 +360,7 @@ impl<S: super::Source, T: super::Status> Acceleration<'_, S, T> {
                     match result {
                         Ok(()) => {
                             stats.patches += 1;
-                            needed.remove("mir2-platform-windows.exe");
+                            needed.retain(|_, entry| entry.sha256 != target.sha256);
                             super::log(
                                 root,
                                 "delivery-delta",

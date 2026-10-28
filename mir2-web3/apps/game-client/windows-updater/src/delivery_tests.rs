@@ -854,6 +854,8 @@ fn matching_delta_is_removed_before_bulk_bundle_budget_and_request_count_are_bui
     let target_bytes = vec![b'b'; 4096];
     let base = entry("mir2-platform-windows.exe", &base_bytes);
     let target = entry("mir2-platform-windows.exe", &target_bytes);
+    let mut alias = target.clone();
+    alias.path = "mir2-assets/post-delta/exe-content-alias.png".into();
     safe::write_new(&root.path().join("game").join(&base.path), &base_bytes).unwrap();
     let data = (0..256)
         .map(|index| {
@@ -888,13 +890,14 @@ fn matching_delta_is_removed_before_bulk_bundle_budget_and_request_count_are_bui
     });
     let mut files = vec![
         target.clone(),
+        alias.clone(),
         entry("BUILD-ATTESTATION.json", b"attestation"),
     ];
     files.extend(assets.iter().cloned());
     let manifest = manifest(&files);
-    let mut pending = vec![target.clone()];
+    let mut pending = vec![target.clone(), alias.clone()];
     pending.extend(assets[..255].iter().cloned());
-    assert_eq!(pending.len(), 256);
+    assert_eq!(pending.len(), 257); // 256 unique hashes before delta, 255 after it.
     let source = MemorySource::new(BTreeMap::from([
         (
             format!("{}/{}", component().directory, patch.path),
@@ -924,6 +927,7 @@ fn matching_delta_is_removed_before_bulk_bundle_budget_and_request_count_are_bui
         &[format!("{}/{}", component().directory, patch.path)]
     );
     assert!(safe::matches(&payload_cache(root.path(), &target).unwrap(), &target).unwrap());
+    assert!(safe::matches(&payload_cache(root.path(), &alias).unwrap(), &alias).unwrap());
     assert!(!payload_cache(root.path(), &assets[0]).unwrap().exists());
     assert_eq!(
         fs::read(root.path().join("game").join(&base.path)).unwrap(),
@@ -1085,7 +1089,7 @@ fn real_signed_r25_to_candidate28_planner_forecast_without_download_or_cache_pop
                 && delta.patch.size < exe.size
         })
         .unwrap();
-    pending.remove("mir2-platform-windows.exe");
+    pending.retain(|_, file| file.sha256 != exe.sha256);
     let mut previous = pending.clone();
     let mut previous_bundles = 0;
     for bundle in &delivery.bundles {
