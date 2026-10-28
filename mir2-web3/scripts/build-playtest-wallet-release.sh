@@ -98,11 +98,17 @@ done
 MIR2_REQUIRE_LINUX_SECURITY_GATE=1 bash scripts/selftest-gateway-save-recovery.sh 2>&1 | tee "$task_evidence/linux-release-security.log"
 grep -q '^PASS:' "$task_evidence/linux-release-security.log" || fail 'Linux security gate did not attest success'
 
-MIR2_RELEASE_PUBLISHER_UID="$(id -u)" \
-MIR2_RUST_TOOLCHAIN="$task_toolchain" \
-MIR2_RELEASE_REQUIRE_CLEAN=1 \
-MIR2_RELEASE_TAG="$task_release_tag" \
-bash scripts/package-gateway-release.sh 2>&1 | tee "$task_evidence/gateway-package.log"
+(
+  # The secure packager requires its staged README.txt to be exactly 0644.
+  # Its private stage stays 0700; keep PostgreSQL/evidence creation at 0077 in
+  # the parent while giving only the packager its expected creation mask.
+  umask 022
+  MIR2_RELEASE_PUBLISHER_UID="$(id -u)" \
+  MIR2_RUST_TOOLCHAIN="$task_toolchain" \
+  MIR2_RELEASE_REQUIRE_CLEAN=1 \
+  MIR2_RELEASE_TAG="$task_release_tag" \
+  bash scripts/package-gateway-release.sh
+) 2>&1 | tee "$task_evidence/gateway-package.log"
 
 # Archive exactly the authenticated Git tree, rather than an untracked local
 # map directory. No archive member is extracted or executed here.
